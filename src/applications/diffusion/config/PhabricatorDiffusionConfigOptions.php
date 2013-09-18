@@ -79,6 +79,7 @@ final class PhabricatorDiffusionConfigOptions
           array('/[Ii]ssues?:?(\s*,?\s*#\d+)+/', '/(\d+)/'),
           pht('Issue #123, #456'))
         ->addExample(array('/(?<!#)\b(T[1-9]\d*)\b/'), pht('Task T123'))
+        ->addExample('/[A-Z]{2,}-\d+/', pht('JIRA-1234'))
         ->setDescription(pht(
           'Regular expression to link external bug tracker. See '.
             'http://tortoisesvn.net/docs/release/TortoiseSVN_en/'.

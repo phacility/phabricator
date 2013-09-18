@@ -106,7 +106,7 @@ final class DiffusionCommitController extends DiffusionController {
       $message = $commit_data->getCommitMessage();
 
       $revision = $commit->getCommitIdentifier();
-      $message = $repository->linkBugtraq($message, $revision);
+      $message = $this->linkBugtraq($message);
 
       $message = $engine->markupText($message);
 
@@ -997,6 +997,29 @@ final class DiffusionCommitController extends DiffusionController {
     }
 
     return $view;
+  }
+
+  private function linkBugtraq($corpus) {
+    $url = PhabricatorEnv::getEnvConfig('bugtraq.url');
+    if (!strlen($url)) {
+      return $corpus;
+    }
+
+    $regexes = PhabricatorEnv::getEnvConfig('bugtraq.logregex');
+    if (!$regexes) {
+      return $corpus;
+    }
+
+    $parser = id(new PhutilBugtraqParser())
+      ->setBugtraqPattern("[[ {$url} | %BUGID% ]]")
+      ->setBugtraqCaptureExpression(array_shift($regexes));
+
+    $select = array_shift($regexes);
+    if ($select) {
+      $parser->setBugtraqSelectExpression($select);
+    }
+
+    return $parser->processCorpus($corpus);
   }
 
 }

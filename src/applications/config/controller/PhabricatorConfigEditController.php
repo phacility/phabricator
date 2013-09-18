@@ -486,7 +486,6 @@ final class PhabricatorConfigEditController
         if (is_array($value)) {
           $value = implode("\n", $value);
         }
-        $value = phutil_escape_html_newlines($value);
       }
 
       $table[] = hsprintf(
