@@ -19,9 +19,7 @@ final class DifferentialDiffViewPolicyFieldSpecification
       $user,
       $diff);
 
-    // TODO: Clean this up with new policy UI.
-    $policy = idx($descriptions, PhabricatorPolicyCapability::CAN_VIEW);
-    return $policy[1];
+    return idx($descriptions, PhabricatorPolicyCapability::CAN_VIEW);
   }
 
 }

@@ -161,7 +161,11 @@ final class PhabricatorPolicy {
           $this->getName(),
         ));
     } else {
-      $desc = array($img, $this->getName());
+      if ($img) {
+        $desc = array($img, $this->getName());
+      } else {
+        $desc = $this->getName();
+      }
     }
 
     switch ($this->getType()) {
