@@ -33,7 +33,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setViewer($request->getUser())
       ->withRevisionIDs(array($this->revisionID))
       ->execute();
-    $diffs = array_reverse($diffs);
+    $diffs = array_reverse($diffs, $preserve_keys = true);
 
     if (!$diffs) {
       throw new Exception(
