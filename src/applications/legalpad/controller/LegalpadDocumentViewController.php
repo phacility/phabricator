@@ -61,8 +61,15 @@ final class LegalpadDocumentViewController extends LegalpadController {
 
     $title = $document_body->getTitle();
 
+    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
+      $user,
+      $document,
+      true);
+
     $header = id(new PHUIHeaderView())
-      ->setHeader($title);
+      ->setHeader($title)
+      ->addProperty(PHUIHeaderView::PROPERTY_POLICY,
+        $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
 
     $actions = $this->buildActionView($document);
     $properties = $this->buildPropertyView($document, $engine);
@@ -173,14 +180,6 @@ final class LegalpadDocumentViewController extends LegalpadController {
     $properties->addProperty(
       pht('Contributors'),
       $contributor_view);
-
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $user,
-      $document);
-
-    $properties->addProperty(
-      pht('Visible To'),
-      $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
 
     $properties->invokeWillRenderEvent();
 
