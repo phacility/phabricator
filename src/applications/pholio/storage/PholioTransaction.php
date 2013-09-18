@@ -180,7 +180,7 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
     return parent::getTitle();
   }
 
-  public function getTitleForFeed() {
+  public function getTitleForFeed(PhabricatorFeedStory $story) {
     $author_phid = $this->getAuthorPHID();
     $object_phid = $this->getObjectPHID();
 
@@ -243,7 +243,7 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
         break;
     }
 
-    return parent::getTitleForFeed();
+    return parent::getTitleForFeed($story);
   }
 
   public function getBodyForFeed(PhabricatorFeedStory $story) {

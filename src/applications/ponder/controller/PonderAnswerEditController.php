@@ -31,9 +31,8 @@ final class PonderAnswerEditController extends PonderController {
 
     $question = $answer->getQuestion();
     $qid = $question->getID();
-    $aid = $answer->getID();
 
-    $question_uri = "/Q{$qid}#A{$aid}";
+    $answer_uri = $answer->getURI();
 
     $errors = array();
     if ($request->isFormPost()) {
@@ -58,7 +57,7 @@ final class PonderAnswerEditController extends PonderController {
         $editor->applyTransactions($answer, $xactions);
 
         return id(new AphrontRedirectResponse())
-          ->setURI($question_uri);
+          ->setURI($answer_uri);
       }
     }
 
@@ -84,13 +83,13 @@ final class PonderAnswerEditController extends PonderController {
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Update Answer'))
-          ->addCancelButton($question_uri));
+          ->addCancelButton($answer_uri));
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName("Q{$qid}")
-        ->setHref($question_uri));
+        ->setHref($answer_uri));
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName(pht('Edit Answer')));

@@ -92,7 +92,7 @@ final class PhabricatorMacroTransaction
     return parent::getTitle();
   }
 
-  public function getTitleForFeed() {
+  public function getTitleForFeed(PhabricatorFeedStory $story) {
     $author_phid = $this->getAuthorPHID();
     $object_phid = $this->getObjectPHID();
 
@@ -133,7 +133,7 @@ final class PhabricatorMacroTransaction
         }
     }
 
-    return parent::getTitleForFeed();
+    return parent::getTitleForFeed($story);
   }
 
   public function getActionName() {

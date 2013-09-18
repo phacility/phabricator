@@ -23,11 +23,6 @@ final class PonderAnswer extends PonderDAO
 
   private $userVotes = array();
 
-  // TODO: Get rid of this method.
-  public function setQuestion($question) {
-    return $this->attachQuestion($question);
-  }
-
   public function attachQuestion(PonderQuestion $question = null) {
     $this->question = $question;
     return $this;
@@ -35,6 +30,10 @@ final class PonderAnswer extends PonderDAO
 
   public function getQuestion() {
     return $this->assertAttached($this->question);
+  }
+
+  public function getURI() {
+    return '/Q'.$this->getQuestionID().'#A'.$this->getID();
   }
 
   public function setUserVote($vote) {

@@ -43,7 +43,7 @@ class PhabricatorApplicationTransactionFeedStory
     $xaction = $this->getObject(head($xaction_phids));
 
     $xaction->setHandles($this->getHandles());
-    $view->setTitle($xaction->getTitleForFeed());
+    $view->setTitle($xaction->getTitleForFeed($this));
     $body = $xaction->getBodyForFeed($this);
     if (nonempty($body)) {
       $view->appendChild($body);

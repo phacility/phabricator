@@ -251,6 +251,8 @@ final class PonderQuestionViewController extends PonderController {
 
       $out[] = phutil_tag('br');
       $out[] = phutil_tag('br');
+      $out[] = id(new PhabricatorAnchorView())
+        ->setAnchorName("A$id");
       $out[] = id(new PHUIHeaderView())
         ->setHeader($this->getHandle($author_phid)->getFullName())
         ->setImage($this->getHandle($author_phid)->getImageURI());
