@@ -13,7 +13,7 @@ final class ConduitAPI_differential_querydiffs_Method
   public function defineParamTypes() {
     return array(
       'ids' => 'optional list<uint>',
-      'revison_ids' => 'optional list<uint>',
+      'revisonIDs' => 'optional list<uint>',
     );
   }
 
@@ -27,7 +27,7 @@ final class ConduitAPI_differential_querydiffs_Method
 
   protected function execute(ConduitAPIRequest $request) {
     $ids = $request->getValue('ids', array());
-    $revision_ids = $request->getValue('revision_ids', array());
+    $revision_ids = $request->getValue('revisionIDs', array());
     $diffs = array();
     $diff_dicts = array();
     if ($ids || $revision_ids) {

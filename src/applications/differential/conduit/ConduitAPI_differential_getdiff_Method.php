@@ -43,23 +43,28 @@ final class ConduitAPI_differential_getdiff_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $diff = null;
-    $revision_ids = array();
-    $diff_ids = array();
+    $diff_id = $request->getValue('diff_id');
 
+    // If we have a revision ID, we need the most recent diff. Figure that out
+    // without loading all the attached data.
     $revision_id = $request->getValue('revision_id');
     if ($revision_id) {
-      $revision_ids = array($revision_id);
+      $diffs = id(new DifferentialDiffQuery())
+        ->setViewer($request->getUser())
+        ->withRevisionIDs(array($revision_id))
+        ->execute();
+      if ($diffs) {
+        $diff_id = head($diffs)->getID();
+      } else {
+        throw new ConduitException('ERR_BAD_DIFF');
+      }
     }
-    $diff_id = $request->getValue('diff_id');
+
+    $diff = null;
     if ($diff_id) {
-      $diff_ids = array($diff_id);
-    }
-    if ($diff_ids || $revision_ids) {
       $diff = id(new DifferentialDiffQuery())
         ->setViewer($request->getUser())
-        ->withIDs($diff_ids)
-        ->withRevisionIDs($revision_ids)
+        ->withIDs(array($diff_id))
         ->needChangesets(true)
         ->needArcanistProjects(true)
         ->executeOne();
