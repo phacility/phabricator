@@ -34,6 +34,11 @@ final class PhamePostViewController extends PhameController {
     $actions = $this->renderActions($post, $user);
     $properties = $this->renderProperties($post, $user);
 
+    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
+      $user,
+      $post,
+      true);
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
     $crumbs->addCrumb(
@@ -44,7 +49,9 @@ final class PhamePostViewController extends PhameController {
     $nav->appendChild($crumbs);
     $nav->appendChild(
       id(new PHUIHeaderView())
-        ->setHeader($post->getTitle()));
+        ->setHeader($post->getTitle())
+        ->addProperty(PHUIHeaderView::PROPERTY_POLICY,
+          $descriptions[PhabricatorPolicyCapability::CAN_VIEW]));
 
     if ($post->isDraft()) {
       $nav->appendChild(
@@ -167,10 +174,6 @@ final class PhamePostViewController extends PhameController {
       ->setUser($user)
       ->setObject($post);
 
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $user,
-      $post);
-
     $properties->addProperty(
       pht('Blog'),
       $post->getBlogPHID()
@@ -180,10 +183,6 @@ final class PhamePostViewController extends PhameController {
     $properties->addProperty(
       pht('Blogger'),
       $this->getHandle($post->getBloggerPHID())->renderLink());
-
-    $properties->addProperty(
-      pht('Visible To'),
-      $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
 
     $properties->addProperty(
       pht('Published'),

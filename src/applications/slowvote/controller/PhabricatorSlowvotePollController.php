@@ -41,8 +41,15 @@ final class PhabricatorSlowvotePollController
           ));
     }
 
+    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
+      $user,
+      $poll,
+      true);
+
     $header = id(new PHUIHeaderView())
-      ->setHeader($poll->getQuestion());
+      ->setHeader($poll->getQuestion())
+      ->addProperty(PHUIHeaderView::PROPERTY_POLICY,
+        $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
 
     $xaction_header = id(new PHUIHeaderView())
       ->setHeader(pht('Ongoing Deliberations'));
@@ -110,14 +117,6 @@ final class PhabricatorSlowvotePollController
     $view = id(new PhabricatorPropertyListView())
       ->setUser($viewer)
       ->setObject($poll);
-
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $viewer,
-      $poll);
-
-    $view->addProperty(
-      pht('Visible To'),
-      $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
 
     $view->invokeWillRenderEvent();
 
