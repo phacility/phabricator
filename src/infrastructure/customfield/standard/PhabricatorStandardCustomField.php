@@ -12,6 +12,8 @@ abstract class PhabricatorStandardCustomField
   private $strings;
   private $caption;
   private $fieldError;
+  private $required;
+  private $default;
 
   abstract public function getFieldType();
 
@@ -102,6 +104,10 @@ abstract class PhabricatorStandardCustomField
         case 'caption':
           $this->setCaption($value);
           break;
+        case 'required':
+          $this->setRequired($value);
+          $this->setFieldError(true);
+          break;
         case 'type':
           // We set this earlier on.
           break;
@@ -122,6 +128,15 @@ abstract class PhabricatorStandardCustomField
 
   public function getFieldError() {
     return $this->fieldError;
+  }
+
+  public function setRequired($required) {
+    $this->required = $required;
+    return $this;
+  }
+
+  public function getRequired() {
+    return $this->required;
   }
 
 
@@ -252,7 +267,34 @@ abstract class PhabricatorStandardCustomField
       $type,
       $xactions);
 
+    if ($this->getRequired()) {
+      $value = null;
+      $transaction = null;
+      foreach ($xactions as $xaction) {
+        $value = $xaction->getNewValue();
+        if (!$this->isValueEmpty($value)) {
+          $transaction = $xaction;
+          break;
+        }
+      }
+      if ($this->isValueEmpty($value)) {
+        $errors[] = new PhabricatorApplicationTransactionValidationError(
+          $type,
+          pht('Required'),
+          pht('%s is required.', $this->getFieldName()),
+          $transaction);
+        $this->setFieldError(pht('Required'));
+      }
+    }
+
     return $errors;
+  }
+
+  protected function isValueEmpty($value) {
+    if (is_array($value)) {
+      return empty($value);
+    }
+    return !strlen($value);
   }
 
 }
