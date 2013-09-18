@@ -11,6 +11,7 @@ final class PhabricatorStandardCustomFieldRemarkup
     return id(new PhabricatorRemarkupControl())
       ->setLabel($this->getFieldName())
       ->setName($this->getFieldKey())
+      ->setCaption($this->getCaption())
       ->setValue($this->getFieldValue());
   }
 

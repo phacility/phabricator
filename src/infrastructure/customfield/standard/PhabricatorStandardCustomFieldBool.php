@@ -75,6 +75,7 @@ final class PhabricatorStandardCustomFieldBool
   public function renderEditControl() {
     return id(new AphrontFormCheckboxControl())
       ->setLabel($this->getFieldName())
+      ->setCaption($this->getCaption())
       ->addCheckbox(
         $this->getFieldKey(),
         1,

@@ -62,6 +62,7 @@ final class PhabricatorStandardCustomFieldDate
       ->setLabel($this->getFieldName())
       ->setName($this->getFieldKey())
       ->setUser($this->getViewer())
+      ->setCaption($this->getCaption())
       ->setAllowNull(true);
 
     $control->setValue($this->getFieldValue());

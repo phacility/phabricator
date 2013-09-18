@@ -10,6 +10,7 @@ abstract class PhabricatorStandardCustomField
   private $fieldConfig;
   private $applicationField;
   private $strings;
+  private $caption;
 
   abstract public function getFieldType();
 
@@ -71,6 +72,15 @@ abstract class PhabricatorStandardCustomField
     return $this;
   }
 
+  public function setCaption($caption) {
+    $this->caption = $caption;
+    return $this;
+  }
+
+  public function getCaption() {
+    return $this->caption;
+  }
+
   public function setFieldDescription($description) {
     $this->fieldDescription = $description;
     return $this;
@@ -87,6 +97,9 @@ abstract class PhabricatorStandardCustomField
           break;
         case 'strings':
           $this->setStrings($value);
+          break;
+        case 'caption':
+          $this->setCaption($value);
           break;
         case 'type':
           // We set this earlier on.
@@ -163,6 +176,7 @@ abstract class PhabricatorStandardCustomField
   public function renderEditControl() {
     return id(new AphrontFormTextControl())
       ->setName($this->getFieldKey())
+      ->setCaption($this->getCaption())
       ->setValue($this->getFieldValue())
       ->setLabel($this->getFieldName());
   }

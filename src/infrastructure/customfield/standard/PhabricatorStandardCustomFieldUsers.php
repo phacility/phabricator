@@ -24,6 +24,7 @@ final class PhabricatorStandardCustomFieldUsers
       ->setLabel($this->getFieldName())
       ->setName($this->getFieldKey())
       ->setDatasource('/typeahead/common/accounts/')
+      ->setCaption($this->getCaption())
       ->setValue($handles);
 
     $limit = $this->getFieldConfigValue('limit');

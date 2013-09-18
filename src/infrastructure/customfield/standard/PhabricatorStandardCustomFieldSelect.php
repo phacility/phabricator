@@ -67,6 +67,7 @@ final class PhabricatorStandardCustomFieldSelect
   public function renderEditControl() {
     return id(new AphrontFormSelectControl())
       ->setLabel($this->getFieldName())
+      ->setCaption($this->getCaption())
       ->setName($this->getFieldKey())
       ->setOptions($this->getOptions());
   }
