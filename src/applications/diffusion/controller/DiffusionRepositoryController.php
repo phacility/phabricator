@@ -137,7 +137,11 @@ final class DiffusionRepositoryController extends DiffusionController {
     $user = $this->getRequest()->getUser();
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($repository->getName());
+      ->setHeader($repository->getName())
+      ->setUser($user)
+      ->setPolicyObject($repository);
+
+    $actions = $this->buildActionList($repository);
 
     $view = id(new PhabricatorPropertyListView())
       ->setUser($user);
@@ -166,7 +170,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       $view->addTextContent($description);
     }
 
-    return array($header, $view);
+    return array($header, $actions, $view);
   }
 
   private function buildBranchListTable(DiffusionRequest $drequest) {
@@ -286,6 +290,33 @@ final class DiffusionRepositoryController extends DiffusionController {
     $panel->appendChild($view);
 
     return $panel;
+  }
+
+  private function buildActionList(PhabricatorRepository $repository) {
+    $viewer = $this->getRequest()->getUser();
+
+    $view_uri = $this->getApplicationURI($repository->getCallsign().'/');
+    $edit_uri = $this->getApplicationURI($repository->getCallsign().'/edit/');
+
+    $view = id(new PhabricatorActionListView())
+      ->setUser($viewer)
+      ->setObject($repository)
+      ->setObjectURI($view_uri);
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $repository,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Repository'))
+        ->setIcon('edit')
+        ->setHref($edit_uri)
+        ->setWorkflow(!$can_edit)
+        ->setDisabled(!$can_edit));
+
+    return $view;
   }
 
 }
