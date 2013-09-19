@@ -30,7 +30,7 @@ final class DiffusionBrowseController extends DiffusionController {
     $content = array();
 
     $content[] = $this->buildHeaderView($drequest);
-    $content[] = $this->buildActionView($drequest);
+    $content[] = $this->buildBrowseActionView($drequest);
     $content[] = $this->buildPropertyView($drequest);
 
     $content[] = $this->renderSearchForm();
@@ -278,55 +278,6 @@ final class DiffusionBrowseController extends DiffusionController {
     return $header;
   }
 
-  private function buildActionView(DiffusionRequest $drequest) {
-    $viewer = $this->getRequest()->getUser();
-
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer);
-
-    $history_uri = $drequest->generateURI(
-      array(
-        'action' => 'history',
-      ));
-
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('View History'))
-        ->setHref($history_uri)
-        ->setIcon('perflab'));
-
-    $behind_head = $drequest->getRawCommit();
-    $head_uri = $drequest->generateURI(
-      array(
-        'commit' => '',
-        'action' => 'browse',
-      ));
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Jump to HEAD'))
-        ->setHref($head_uri)
-        ->setIcon('home')
-        ->setDisabled(!$behind_head));
-
-    // TODO: Ideally, this should live in Owners and be event-triggered, but
-    // there's no reasonable object for it to react to right now.
-
-    $owners_uri = id(new PhutilURI('/owners/view/search/'))
-      ->setQueryParams(
-        array(
-          'repository' => $drequest->getCallsign(),
-          'path' => '/'.$drequest->getPath(),
-        ));
-
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Find Owners'))
-        ->setHref((string)$owners_uri)
-        ->setIcon('preview'));
-
-    return $view;
-  }
-
   private function buildPropertyView(DiffusionRequest $drequest) {
     $viewer = $this->getRequest()->getUser();
 
@@ -359,49 +310,6 @@ final class DiffusionBrowseController extends DiffusionController {
     }
 
     return $view;
-  }
-
-  private function renderPathLinks(DiffusionRequest $drequest) {
-    $path = $drequest->getPath();
-    $path_parts = array_filter(explode('/', trim($path, '/')));
-
-    $links = array();
-    if ($path_parts) {
-      $links[] = phutil_tag(
-        'a',
-        array(
-          'href' => $drequest->generateURI(
-            array(
-              'action' => 'browse',
-              'path' => '',
-            )),
-        ),
-        'r'.$drequest->getRepository()->getCallsign().'/');
-      $accum = '';
-      $last_key = last_key($path_parts);
-      foreach ($path_parts as $key => $part) {
-        $links[] = ' ';
-        $accum .= '/'.$part;
-        if ($key === $last_key) {
-          $links[] = $part;
-        } else {
-          $links[] = phutil_tag(
-            'a',
-            array(
-              'href' => $drequest->generateURI(
-                array(
-                  'action' => 'browse',
-                  'path' => $accum,
-                )),
-            ),
-            $part.'/');
-        }
-      }
-    } else {
-      $links[] = 'r'.$drequest->getRepository()->getCallsign().'/';
-    }
-
-    return $links;
   }
 
 }

@@ -71,14 +71,13 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
     require_celerity_resource('diffusion-source-css');
 
-    if ($this->corpusType == 'text') {
-      $view_select_panel = $this->renderViewSelectPanel($selected);
-    } else {
-      $view_select_panel = null;
-    }
-
     // Render the page.
     $content = array();
+
+    $content[] = $this->buildHeaderView($drequest);
+    $view = $this->buildBrowseActionView($drequest);
+    $content[] = $this->enrichActionView($view, $drequest, $selected);
+    $content[] = $this->buildPropertyView($drequest);
 
     $follow  = $request->getStr('follow');
     if ($follow) {
@@ -111,24 +110,23 @@ final class DiffusionBrowseFileController extends DiffusionController {
       $content[] = $notice;
     }
 
-    $content[] = $view_select_panel;
     $content[] = $corpus;
     $content[] = $this->buildOpenRevisions();
 
-    $nav = $this->buildSideNav('browse', true);
-    $nav->appendChild($content);
     $crumbs = $this->buildCrumbs(
       array(
         'branch' => true,
         'path'   => true,
         'view'   => 'browse',
       ));
-    $nav->setCrumbs($crumbs);
 
     $basename = basename($this->getDiffusionRequest()->getPath());
 
     return $this->buildApplicationPage(
-      $nav,
+      array(
+        $crumbs,
+        $content,
+      ),
       array(
         'title' => $basename,
       ));
@@ -296,7 +294,14 @@ final class DiffusionBrowseFileController extends DiffusionController {
     return $corpus;
   }
 
-  private function renderViewSelectPanel($selected) {
+  private function enrichActionView(
+    PhabricatorActionListView $view,
+    DiffusionRequest $drequest,
+    $selected) {
+
+    $viewer = $this->getRequest()->getUser();
+    $base_uri = $this->getRequest()->getRequestURI();
+
     $toggle_blame = array(
       'highlighted'   => 'blame',
       'blame'         => 'highlighted',
@@ -304,6 +309,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
       'plainblame'    => 'plain',
       'raw'           => 'raw',  // not a real case.
     );
+
     $toggle_highlight = array(
       'highlighted'   => 'plain',
       'blame'         => 'plainblame',
@@ -312,32 +318,40 @@ final class DiffusionBrowseFileController extends DiffusionController {
       'raw'           => 'raw',  // not a real case.
     );
 
-    $user = $this->getRequest()->getUser();
-    $base_uri = $this->getRequest()->getRequestURI();
-
     $blame_on = ($selected == 'blame' || $selected == 'plainblame');
     if ($blame_on) {
       $blame_text = pht('Disable Blame');
+      $blame_icon = 'blame-grey';
     } else {
       $blame_text = pht('Enable Blame');
+      $blame_icon = 'blame';
     }
 
-    $blame_button = $this->createViewAction(
-      $blame_text,
-      $base_uri->alter('view', $toggle_blame[$selected]),
-      $user);
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName($blame_text)
+        ->setHref($base_uri->alter('view', $toggle_blame[$selected]))
+        ->setIcon($blame_icon)
+        ->setUser($viewer)
+        ->setRenderAsForm(true));
 
 
     $highlight_on = ($selected == 'blame' || $selected == 'highlighted');
     if ($highlight_on) {
       $highlight_text = pht('Disable Highlighting');
+      $highlight_icon = 'highlight-grey';
     } else {
       $highlight_text = pht('Enable Highlighting');
+      $highlight_icon = 'highlight';
     }
-    $highlight_button = $this->createViewAction(
-      $highlight_text,
-      $base_uri->alter('view', $toggle_highlight[$selected]),
-      $user);
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName($highlight_text)
+        ->setHref($base_uri->alter('view', $toggle_highlight[$selected]))
+        ->setIcon($highlight_icon)
+        ->setUser($viewer)
+        ->setRenderAsForm(true));
 
 
     $href = null;
@@ -347,7 +361,6 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
     } else if ($this->lintCommit === null) {
       $lint_text = pht('Lint not Available');
-
     } else {
       $lint_text = pht(
         'Show %d Lint Message(s)',
@@ -358,46 +371,22 @@ final class DiffusionBrowseFileController extends DiffusionController {
       ))->alter('lint', '');
     }
 
-    $lint_button = $this->createViewAction(
-      $lint_text,
-      $href,
-      $user);
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName($lint_text)
+        ->setHref($href)
+        ->setIcon('warning')
+        ->setDisabled(!$href));
 
-    if (!$href) {
-      $lint_button->setDisabled(true);
-    }
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('View Raw File'))
+        ->setHref($base_uri->alter('view', 'raw'))
+        ->setIcon('file'));
 
+    $view->addAction($this->createEditAction());
 
-    $raw_button = $this->createViewAction(
-      pht('View Raw File'),
-      $base_uri->alter('view', 'raw'),
-      $user,
-      'file');
-
-    $edit_button = $this->createEditAction();
-
-    return id(new PhabricatorActionListView())
-      ->setUser($user)
-      ->setObjectURI($this->getRequest()->getRequestURI())
-      ->addAction($blame_button)
-      ->addAction($highlight_button)
-      ->addAction($lint_button)
-      ->addAction($raw_button)
-      ->addAction($edit_button);
-  }
-
-  private function createViewAction(
-    $localized_text,
-    $href,
-    $user,
-    $icon = null) {
-
-    return id(new PhabricatorActionView())
-          ->setName($localized_text)
-          ->setIcon($icon)
-          ->setUser($user)
-          ->setRenderAsForm(true)
-          ->setHref($href);
+    return $view;
   }
 
   private function createEditAction() {
@@ -977,6 +966,42 @@ final class DiffusionBrowseFileController extends DiffusionController {
         'commit' => $commit));
 
     return head($parents);
+  }
+
+  private function buildHeaderView(DiffusionRequest $drequest) {
+    $viewer = $this->getRequest()->getUser();
+
+    $header = id(new PHUIHeaderView())
+      ->setUser($viewer)
+      ->setHeader($this->renderPathLinks($drequest))
+      ->setPolicyObject($drequest->getRepository());
+
+    return $header;
+  }
+
+  private function buildPropertyView(DiffusionRequest $drequest) {
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PhabricatorPropertyListView())
+      ->setUser($viewer);
+
+    $stable_commit = $drequest->getStableCommitName();
+    $callsign = $drequest->getRepository()->getCallsign();
+
+    $view->addProperty(
+      pht('Commit'),
+      phutil_tag(
+        'a',
+        array(
+          'href' => $drequest->generateURI(
+            array(
+              'action' => 'commit',
+              'commit' => $stable_commit,
+            )),
+        ),
+        $drequest->getRepository()->formatCommitName($stable_commit)));
+
+    return $view;
   }
 
 }
