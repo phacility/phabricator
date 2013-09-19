@@ -259,42 +259,43 @@ abstract class DiffusionController extends PhabricatorController {
 
     $crumb = id(new PhabricatorCrumbView())
       ->setName($view_name);
-    if (!strlen($path)) {
+
+    if ($view == 'browse') {
       $crumb_list[] = $crumb;
-    } else {
-
-      $crumb->setHref($drequest->generateURI(
-        array(
-          'path' => '',
-        ) + $uri_params));
-      $crumb_list[] = $crumb;
-
-      $path_parts = explode('/', $path);
-      do {
-        $last = array_pop($path_parts);
-      } while ($last == '');
-
-      $path_sections = array();
-      $thus_far = '';
-      foreach ($path_parts as $path_part) {
-        $thus_far .= $path_part.'/';
-        $path_sections[] = '/';
-        $path_sections[] = phutil_tag(
-          'a',
-          array(
-            'href' => $drequest->generateURI(
-              array(
-                'path' => $thus_far,
-              ) + $uri_params),
-          ),
-          $path_part);
-      }
-
-      $path_sections[] = '/'.$last;
-
-      $crumb_list[] = id(new PhabricatorCrumbView())
-        ->setName($path_sections);
+      return $crumb_list;
     }
+
+    $crumb->setHref($drequest->generateURI(
+      array(
+        'path' => '',
+      ) + $uri_params));
+    $crumb_list[] = $crumb;
+
+    $path_parts = explode('/', $path);
+    do {
+      $last = array_pop($path_parts);
+    } while (count($path_parts) && $last == '');
+
+    $path_sections = array();
+    $thus_far = '';
+    foreach ($path_parts as $path_part) {
+      $thus_far .= $path_part.'/';
+      $path_sections[] = '/';
+      $path_sections[] = phutil_tag(
+        'a',
+        array(
+          'href' => $drequest->generateURI(
+            array(
+              'path' => $thus_far,
+            ) + $uri_params),
+        ),
+        $path_part);
+    }
+
+    $path_sections[] = '/'.$last;
+
+    $crumb_list[] = id(new PhabricatorCrumbView())
+      ->setName($path_sections);
 
     $last_crumb = array_pop($crumb_list);
 

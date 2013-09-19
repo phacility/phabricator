@@ -29,22 +29,14 @@ final class DiffusionBrowseController extends DiffusionController {
 
     $content = array();
 
-    if ($drequest->getTagContent()) {
-      $title = pht('Tag: %s', $drequest->getSymbolicCommit());
-
-      $tag_view = new AphrontPanelView();
-      $tag_view->setHeader($title);
-      $tag_view->appendChild(
-        $this->markupText($drequest->getTagContent()));
-
-      $content[] = $tag_view;
-    }
+    $content[] = $this->buildHeaderView($drequest);
+    $content[] = $this->buildActionView($drequest);
+    $content[] = $this->buildPropertyView($drequest);
 
     $content[] = $this->renderSearchForm();
 
     if ($this->getRequest()->getStr('grep') != '') {
       $content[] = $this->renderSearchResults();
-
     } else {
       if (!$results->isValidResults()) {
         $empty_result = new DiffusionEmptyResultView();
@@ -52,9 +44,7 @@ final class DiffusionBrowseController extends DiffusionController {
         $empty_result->setDiffusionBrowseResultSet($results);
         $empty_result->setView($this->getRequest()->getStr('view'));
         $content[] = $empty_result;
-
       } else {
-
         $phids = array();
         foreach ($results->getPaths() as $result) {
           $data = $result->getLastCommitData();
@@ -103,11 +93,7 @@ final class DiffusionBrowseController extends DiffusionController {
           $box,
         );
       }
-
     }
-
-    $nav = $this->buildSideNav('browse', false);
-    $nav->appendChild($content);
 
     $crumbs = $this->buildCrumbs(
       array(
@@ -115,9 +101,12 @@ final class DiffusionBrowseController extends DiffusionController {
         'path'   => true,
         'view'   => 'browse',
       ));
-    $nav->setCrumbs($crumbs);
+
     return $this->buildApplicationPage(
-      $nav,
+      array(
+        $crumbs,
+        $content,
+      ),
       array(
         'device' => true,
         'title' => array(
@@ -146,15 +135,23 @@ final class DiffusionBrowseController extends DiffusionController {
               ->setLabel(pht('Search Here'))
               ->setName('grep')
               ->setValue($this->getRequest()->getStr('grep'))
-              ->setCaption(pht('Regular expression')))
+              ->setCaption(pht('Enter a regular expression.')))
           ->appendChild(
             id(new AphrontFormSubmitControl())
-              ->setValue(pht('Grep')));
+              ->setValue(pht('Search File Content')));
         break;
     }
 
     $filter = new AphrontListFilterView();
     $filter->appendChild($form);
+
+    if (!strlen($this->getRequest()->getStr('grep'))) {
+      $filter->setCollapsed(
+        pht('Show Search'),
+        pht('Hide Search'),
+        pht('Search for file content in this directory.'),
+        '#');
+    }
 
     return $filter;
   }
@@ -249,7 +246,7 @@ final class DiffusionBrowseController extends DiffusionController {
       ->setNoDataString($no_data);
 
     return id(new AphrontPanelView())
-      ->setHeader(pht('Search Results'))
+      ->setNoBackground(true)
       ->appendChild($table)
       ->appendChild($pager);
   }
@@ -268,6 +265,143 @@ final class DiffusionBrowseController extends DiffusionController {
       $text);
 
     return $text;
+  }
+
+  private function buildHeaderView(DiffusionRequest $drequest) {
+    $viewer = $this->getRequest()->getUser();
+
+    $header = id(new PHUIHeaderView())
+      ->setUser($viewer)
+      ->setHeader($this->renderPathLinks($drequest))
+      ->setPolicyObject($drequest->getRepository());
+
+    return $header;
+  }
+
+  private function buildActionView(DiffusionRequest $drequest) {
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PhabricatorActionListView())
+      ->setUser($viewer);
+
+    $history_uri = $drequest->generateURI(
+      array(
+        'action' => 'history',
+      ));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('View History'))
+        ->setHref($history_uri)
+        ->setIcon('perflab'));
+
+    $behind_head = $drequest->getRawCommit();
+    $head_uri = $drequest->generateURI(
+      array(
+        'commit' => '',
+        'action' => 'browse',
+      ));
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Jump to HEAD'))
+        ->setHref($head_uri)
+        ->setIcon('home')
+        ->setDisabled(!$behind_head));
+
+    // TODO: Ideally, this should live in Owners and be event-triggered, but
+    // there's no reasonable object for it to react to right now.
+
+    $owners_uri = id(new PhutilURI('/owners/view/search/'))
+      ->setQueryParams(
+        array(
+          'repository' => $drequest->getCallsign(),
+          'path' => '/'.$drequest->getPath(),
+        ));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Find Owners'))
+        ->setHref((string)$owners_uri)
+        ->setIcon('preview'));
+
+    return $view;
+  }
+
+  private function buildPropertyView(DiffusionRequest $drequest) {
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PhabricatorPropertyListView())
+      ->setUser($viewer);
+
+    $stable_commit = $drequest->getStableCommitName();
+    $callsign = $drequest->getRepository()->getCallsign();
+
+    $view->addProperty(
+      pht('Commit'),
+      phutil_tag(
+        'a',
+        array(
+          'href' => $drequest->generateURI(
+            array(
+              'action' => 'commit',
+              'commit' => $stable_commit,
+            )),
+        ),
+        $drequest->getRepository()->formatCommitName($stable_commit)));
+
+    if ($drequest->getTagContent()) {
+      $view->addProperty(
+        pht('Tag'),
+        $drequest->getSymbolicCommit());
+
+      $view->addSectionHeader(pht('Tag Content'));
+      $view->addTextContent($this->markupText($drequest->getTagContent()));
+    }
+
+    return $view;
+  }
+
+  private function renderPathLinks(DiffusionRequest $drequest) {
+    $path = $drequest->getPath();
+    $path_parts = array_filter(explode('/', trim($path, '/')));
+
+    $links = array();
+    if ($path_parts) {
+      $links[] = phutil_tag(
+        'a',
+        array(
+          'href' => $drequest->generateURI(
+            array(
+              'action' => 'browse',
+              'path' => '',
+            )),
+        ),
+        'r'.$drequest->getRepository()->getCallsign().'/');
+      $accum = '';
+      $last_key = last_key($path_parts);
+      foreach ($path_parts as $key => $part) {
+        $links[] = ' ';
+        $accum .= '/'.$part;
+        if ($key === $last_key) {
+          $links[] = $part;
+        } else {
+          $links[] = phutil_tag(
+            'a',
+            array(
+              'href' => $drequest->generateURI(
+                array(
+                  'action' => 'browse',
+                  'path' => $accum,
+                )),
+            ),
+            $part.'/');
+        }
+      }
+    } else {
+      $links[] = 'r'.$drequest->getRepository()->getCallsign().'/';
+    }
+
+    return $links;
   }
 
 }

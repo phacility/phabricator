@@ -26,7 +26,8 @@ final class ConduitAPI_diffusion_tagsquery_Method
   protected function getGitResult(ConduitAPIRequest $request) {
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
-    $commit = $drequest->getCommit();
+    $commit = $drequest->getRawCommit();
+
     $offset = $request->getValue('offset');
     $limit = $request->getValue('limit');
 

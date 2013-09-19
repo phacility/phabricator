@@ -238,7 +238,11 @@ final class DiffusionRepositoryController extends DiffusionController {
       $tags = DiffusionRepositoryTag::newFromConduit(
         $this->callConduitWithDiffusionRequest(
           'diffusion.tagsquery',
-          array('limit' => $tag_limit + 1)));
+          array(
+            // On the home page, we want to find tags on any branch.
+            'commit' => null,
+            'limit' => $tag_limit + 1,
+          )));
     } catch (ConduitException $e) {
       if ($e->getMessage() != 'ERR-UNSUPPORTED-VCS') {
         throw $e;
@@ -271,6 +275,7 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $panel = new AphrontPanelView();
     $panel->setHeader(pht('Tags'));
+    $panel->setNoBackground(true);
 
     if ($more_tags) {
       $panel->setCaption(pht('Showing the %d most recent tags.', $tag_limit));
