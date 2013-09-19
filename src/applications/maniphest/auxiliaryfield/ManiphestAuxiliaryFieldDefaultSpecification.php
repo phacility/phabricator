@@ -108,7 +108,7 @@ class ManiphestAuxiliaryFieldDefaultSpecification
     return $this->checkboxValue;
   }
 
-  public function renderControl() {
+  public function renderEditControl() {
     $control = null;
 
     $type = $this->getFieldType();
@@ -223,7 +223,7 @@ class ManiphestAuxiliaryFieldDefaultSpecification
     $type = $this->getFieldType();
     switch ($type) {
       case self::TYPE_DATE:
-        $control = $this->renderControl();
+        $control = $this->renderEditControl();
         $value = $control->readValueFromRequest($request);
         break;
       case self::TYPE_USER:

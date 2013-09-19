@@ -496,7 +496,7 @@ final class ManiphestTaskEditController extends ManiphestController {
         $aux_field->setError(true);
       }
 
-      $aux_control = $aux_field->renderControl();
+      $aux_control = $aux_field->renderEditControl();
       $form->appendChild($aux_control);
     }
 

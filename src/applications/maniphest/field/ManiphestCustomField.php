@@ -40,10 +40,6 @@ abstract class ManiphestCustomField
     return false;
   }
 
-  public function renderControl() {
-    return $this->renderEditControl();
-  }
-
   public function validate() {
     return true;
   }

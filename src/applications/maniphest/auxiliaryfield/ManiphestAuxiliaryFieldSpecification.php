@@ -80,10 +80,6 @@ abstract class ManiphestAuxiliaryFieldSpecification
     return $this->type;
   }
 
-  public function renderControl() {
-    return null;
-  }
-
   public function renderForDetailView() {
     return $this->getValue();
   }
