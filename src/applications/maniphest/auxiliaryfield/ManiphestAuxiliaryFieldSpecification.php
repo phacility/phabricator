@@ -63,10 +63,6 @@ abstract class ManiphestAuxiliaryFieldSpecification
     return $this->value;
   }
 
-  public function validate() {
-    return true;
-  }
-
   public function isRequired() {
     return false;
   }
@@ -173,7 +169,11 @@ abstract class ManiphestAuxiliaryFieldSpecification
   }
 
   public function renderPropertyViewValue() {
-    return $this->renderForDetailView();
+    $value = $this->renderForDetailView();
+    if (!strlen($value)) {
+      return null;
+    }
+    return $value;
   }
 
   public function renderPropertyViewLabel() {

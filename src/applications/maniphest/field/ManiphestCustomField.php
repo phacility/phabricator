@@ -36,14 +36,6 @@ abstract class ManiphestCustomField
   public function setHandles(array $handles) {
   }
 
-  public function isRequired() {
-    return false;
-  }
-
-  public function validate() {
-    return true;
-  }
-
   /**
    * Render a verb to appear in email titles when a transaction involving this
    * field occurs. Specifically, Maniphest emails are formatted like this:

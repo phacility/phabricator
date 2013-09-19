@@ -142,22 +142,24 @@ final class ManiphestTaskEditController extends ManiphestController {
         $aux_field->readValueFromRequest($request);
         $aux_new_value = $aux_field->getNewValueForApplicationTransactions();
 
-        // TODO: What's going on here?
-        if ((int)$aux_old_value === $aux_new_value) {
-          unset($aux_fields[$aux_arr_key]);
-          continue;
-        }
+        // TODO: We're faking a call to the ApplicaitonTransaction validation
+        // logic here. We need valid objects to pass, but they aren't used
+        // in a meaningful way. For now, build User objects. Once the Maniphest
+        // objects exist, this will switch over automatically. This is a big
+        // hack but shouldn't be long for this world.
+        $placeholder_editor = new PhabricatorUserProfileEditor();
 
-        if ($aux_field->isRequired() && !$aux_field->getValue()) {
-          $errors[] = pht('%s is required.', $aux_field->getLabel());
-          $aux_field->setError(pht('Required'));
-        }
+        $field_errors = $aux_field->validateApplicationTransactions(
+          $placeholder_editor,
+          PhabricatorTransactions::TYPE_CUSTOMFIELD,
+          array(
+            id(new PhabricatorUserTransaction())
+              ->setOldValue($aux_old_value)
+              ->setNewValue($aux_new_value),
+          ));
 
-        try {
-          $aux_field->validate();
-        } catch (Exception $e) {
-          $errors[] = $e->getMessage();
-          $aux_field->setError(pht('Invalid'));
+        foreach ($field_errors as $error) {
+          $errors[] = $error->getMessage();
         }
 
         $old_values[$aux_field->getFieldKey()] = $aux_old_value;
@@ -490,12 +492,6 @@ final class ManiphestTaskEditController extends ManiphestController {
           ->setDatasource('/typeahead/common/projects/'));
 
     foreach ($aux_fields as $aux_field) {
-      if ($aux_field->isRequired() &&
-          !$aux_field->getError() &&
-          !$aux_field->getValue()) {
-        $aux_field->setError(true);
-      }
-
       $aux_control = $aux_field->renderEditControl();
       $form->appendChild($aux_control);
     }

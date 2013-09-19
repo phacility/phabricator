@@ -273,40 +273,60 @@ class ManiphestAuxiliaryFieldDefaultSpecification
     return $this->setValue($value);
   }
 
-  public function validate() {
-    switch ($this->getFieldType()) {
-      case self::TYPE_INT:
-        if ($this->getValue() && !is_numeric($this->getValue())) {
-          throw new PhabricatorCustomFieldValidationException(
-            pht(
-              '%s must be an integer value.',
-              $this->getLabel()));
-        }
-        break;
-      case self::TYPE_BOOL:
-        return true;
-      case self::TYPE_STRING:
-        return true;
-      case self::TYPE_SELECT:
-        return true;
-      case self::TYPE_DATE:
-        if ((int)$this->getValue() <= 0 && $this->isRequired()) {
-          throw new PhabricatorCustomFieldValidationException(
-            pht(
-              '%s must be a valid date.',
-              $this->getLabel()));
-        }
-        break;
-      case self::TYPE_USER:
-      case self::TYPE_USERS:
-        if (!is_array($this->getValue())) {
-          throw new PhabricatorCustomFieldValidationException(
-            pht(
-              '%s is not a valid list of user PHIDs.',
-              $this->getLabel()));
-        }
-        break;
+  public function validateApplicationTransactions(
+    PhabricatorApplicationTransactionEditor $editor,
+    $type,
+    array $xactions) {
+
+    $errors = parent::validateApplicationTransactions(
+      $editor,
+      $type,
+      $xactions);
+
+    $has_value = false;
+    $value = null;
+    foreach ($xactions as $xaction) {
+      $has_value = true;
+      $value = $xaction->getNewValue();
+      switch ($this->getFieldType()) {
+        case self::TYPE_INT:
+          if ($value && !is_numeric($value)) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht('%s must be an integer value.', $this->getLabel()),
+              $xaction);
+            $this->setError(pht('Invalid'));
+          }
+          break;
+        case self::TYPE_DATE:
+          if ((int)$value <= 0 && $this->isRequired()) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht('%s must be a valid date.', $this->getLabel()),
+              $xaction);
+            $this->setError(pht('Invalid'));
+          }
+          break;
+      }
     }
+
+    if ($this->isRequired()) {
+      if (!$has_value) {
+        $value = $this->getOldValueForApplicationTransactions();
+      }
+      if (!$value) {
+        $errors[] = new PhabricatorApplicationTransactionValidationError(
+          $type,
+          pht('Required'),
+          pht('%s is required.', $this->getLabel()),
+          null);
+        $this->setError(pht('Required'));
+      }
+    }
+
+    return $errors;
   }
 
   public function setDefaultValue($value) {
