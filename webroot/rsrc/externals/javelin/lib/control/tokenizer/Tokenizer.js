@@ -93,6 +93,15 @@ JX.install('Tokenizer', {
         null,
         JX.bind(this, this.handleEvent));
 
+      // NOTE: Safari on the iPhone does not normally delegate click events on
+      // <div /> tags. This causes the event to fire. We want a click (in this
+      // case, a touch) anywhere in the div to trigger this event so that we
+      // can focus the input. Without this, you must tap an arbitrary area on
+      // the left side of the input to focus it.
+      //
+      // http://www.quirksmode.org/blog/archives/2010/09/click_event_del.html
+      input_container.onclick = JX.bag;
+
       JX.DOM.listen(
         input_container,
         'click',
@@ -193,7 +202,6 @@ JX.install('Tokenizer', {
     },
 
     handleEvent : function(e) {
-
       this._typeahead.handleEvent(e);
       if (e.getPrevented()) {
         return;
@@ -392,7 +400,15 @@ JX.install('Tokenizer', {
     focus : function() {
       var focus = this._focus;
       JX.DOM.show(focus);
-      setTimeout(function() { JX.DOM.focus(focus); }, 0);
+
+      // NOTE: We must fire this focus event immediately (during event
+      // handling) for the iPhone to bring up the keyboard. Previously this
+      // focus was wrapped in setTimeout(), but it's unclear why that was
+      // necessary. If this is adjusted later, make sure tapping the inactive
+      // area of the tokenizer to focus it on the iPhone still brings up the
+      // keyboard.
+
+      JX.DOM.focus(focus);
     },
 
     _didfocus : function() {
