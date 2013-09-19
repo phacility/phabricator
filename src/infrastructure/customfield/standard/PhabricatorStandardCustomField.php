@@ -108,6 +108,9 @@ abstract class PhabricatorStandardCustomField
           $this->setRequired($value);
           $this->setFieldError(true);
           break;
+        case 'default':
+          $this->setFieldValue($value);
+          break;
         case 'type':
           // We set this earlier on.
           break;
