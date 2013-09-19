@@ -168,6 +168,7 @@ final class DiffusionPathChange {
       'commit' => $commit_dict,
       'commitData' => $commit_data_dict,
       'fileType' => $this->getFileType(),
+      'changeType' => $this->getChangeType(),
       'targetPath' =>  $this->getTargetPath(),
       'targetCommitIdentifier' => $this->getTargetCommitIdentifier(),
       'awayPaths' => $this->getAwayPaths());
@@ -186,6 +187,7 @@ final class DiffusionPathChange {
         ->setCommit($commit)
         ->setCommitData($commit_data)
         ->setFileType($dict['fileType'])
+        ->setChangeType($dict['changeType'])
         ->setTargetPath($dict['targetPath'])
         ->setTargetCommitIdentifier($dict['targetCommitIdentifier'])
         ->setAwayPaths($dict['awayPaths']);
