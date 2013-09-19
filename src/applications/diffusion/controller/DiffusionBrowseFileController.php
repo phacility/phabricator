@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionBrowseFileController extends DiffusionController {
+final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
   private $corpusType = 'text';
 
@@ -8,7 +8,6 @@ final class DiffusionBrowseFileController extends DiffusionController {
   private $lintMessages;
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $drequest = $this->getDiffusionRequest();
 
@@ -75,7 +74,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
     $content = array();
 
     $content[] = $this->buildHeaderView($drequest);
-    $view = $this->buildBrowseActionView($drequest);
+    $view = $this->buildActionView($drequest);
     $content[] = $this->enrichActionView($view, $drequest, $selected);
     $content[] = $this->buildPropertyView($drequest);
 
@@ -966,42 +965,6 @@ final class DiffusionBrowseFileController extends DiffusionController {
         'commit' => $commit));
 
     return head($parents);
-  }
-
-  private function buildHeaderView(DiffusionRequest $drequest) {
-    $viewer = $this->getRequest()->getUser();
-
-    $header = id(new PHUIHeaderView())
-      ->setUser($viewer)
-      ->setHeader($this->renderPathLinks($drequest))
-      ->setPolicyObject($drequest->getRepository());
-
-    return $header;
-  }
-
-  private function buildPropertyView(DiffusionRequest $drequest) {
-    $viewer = $this->getRequest()->getUser();
-
-    $view = id(new PhabricatorPropertyListView())
-      ->setUser($viewer);
-
-    $stable_commit = $drequest->getStableCommitName();
-    $callsign = $drequest->getRepository()->getCallsign();
-
-    $view->addProperty(
-      pht('Commit'),
-      phutil_tag(
-        'a',
-        array(
-          'href' => $drequest->generateURI(
-            array(
-              'action' => 'commit',
-              'commit' => $stable_commit,
-            )),
-        ),
-        $drequest->getRepository()->formatCommitName($stable_commit)));
-
-    return $view;
   }
 
 }

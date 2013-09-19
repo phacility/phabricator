@@ -97,51 +97,6 @@ abstract class DiffusionController extends PhabricatorController {
     return $crumbs;
   }
 
-  protected function buildOpenRevisions() {
-    $user = $this->getRequest()->getUser();
-
-    $drequest = $this->getDiffusionRequest();
-    $repository = $drequest->getRepository();
-    $path = $drequest->getPath();
-
-    $path_map = id(new DiffusionPathIDQuery(array($path)))->loadPathIDs();
-    $path_id = idx($path_map, $path);
-    if (!$path_id) {
-      return null;
-    }
-
-    $revisions = id(new DifferentialRevisionQuery())
-      ->setViewer($user)
-      ->withPath($repository->getID(), $path_id)
-      ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
-      ->setOrder(DifferentialRevisionQuery::ORDER_PATH_MODIFIED)
-      ->setLimit(10)
-      ->needRelationships(true)
-      ->execute();
-
-    if (!$revisions) {
-      return null;
-    }
-
-    $view = id(new DifferentialRevisionListView())
-      ->setRevisions($revisions)
-      ->setFields(DifferentialRevisionListView::getDefaultFields($user))
-      ->setUser($user)
-      ->loadAssets();
-
-    $phids = $view->getRequiredHandlePHIDs();
-    $handles = $this->loadViewerHandles($phids);
-    $view->setHandles($handles);
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Pending Differential Revisions'));
-
-    return array(
-      $header,
-      $view,
-    );
-  }
-
   private function buildCrumbList(array $spec = array()) {
 
     $spec = $spec + array(
@@ -342,56 +297,6 @@ abstract class DiffusionController extends PhabricatorController {
     PhabricatorRepository $repository,
     $path) {
     return $this->getApplicationURI($repository->getCallsign().'/'.$path);
-  }
-
-
-  protected function buildBrowseActionView(DiffusionRequest $drequest) {
-    $viewer = $this->getRequest()->getUser();
-
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer);
-
-    $history_uri = $drequest->generateURI(
-      array(
-        'action' => 'history',
-      ));
-
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('View History'))
-        ->setHref($history_uri)
-        ->setIcon('perflab'));
-
-    $behind_head = $drequest->getRawCommit();
-    $head_uri = $drequest->generateURI(
-      array(
-        'commit' => '',
-        'action' => 'browse',
-      ));
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Jump to HEAD'))
-        ->setHref($head_uri)
-        ->setIcon('home')
-        ->setDisabled(!$behind_head));
-
-    // TODO: Ideally, this should live in Owners and be event-triggered, but
-    // there's no reasonable object for it to react to right now.
-
-    $owners_uri = id(new PhutilURI('/owners/view/search/'))
-      ->setQueryParams(
-        array(
-          'repository' => $drequest->getCallsign(),
-          'path' => '/'.$drequest->getPath(),
-        ));
-
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Find Owners'))
-        ->setHref((string)$owners_uri)
-        ->setIcon('preview'));
-
-    return $view;
   }
 
   protected function renderPathLinks(DiffusionRequest $drequest) {
