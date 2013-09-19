@@ -34,11 +34,6 @@ final class PhamePostViewController extends PhameController {
     $actions = $this->renderActions($post, $user);
     $properties = $this->renderProperties($post, $user);
 
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $user,
-      $post,
-      true);
-
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
     $crumbs->addCrumb(
@@ -50,8 +45,8 @@ final class PhamePostViewController extends PhameController {
     $nav->appendChild(
       id(new PHUIHeaderView())
         ->setHeader($post->getTitle())
-        ->addProperty(PHUIHeaderView::PROPERTY_POLICY,
-          $descriptions[PhabricatorPolicyCapability::CAN_VIEW]));
+        ->setUser($user)
+        ->setPolicyObject($post));
 
     if ($post->isDraft()) {
       $nav->appendChild(

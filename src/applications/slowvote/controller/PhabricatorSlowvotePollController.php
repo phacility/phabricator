@@ -41,15 +41,10 @@ final class PhabricatorSlowvotePollController
           ));
     }
 
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $user,
-      $poll,
-      true);
-
     $header = id(new PHUIHeaderView())
       ->setHeader($poll->getQuestion())
-      ->addProperty(PHUIHeaderView::PROPERTY_POLICY,
-        $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
+      ->setUser($user)
+      ->setPolicyObject($poll);
 
     $xaction_header = id(new PHUIHeaderView())
       ->setHeader(pht('Ongoing Deliberations'));

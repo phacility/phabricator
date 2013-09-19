@@ -33,15 +33,10 @@ final class PhameBlogViewController extends PhameController {
 
     $nav = $this->renderSideNavFilterView(null);
 
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $user,
-      $blog,
-      true);
-
     $header = id(new PHUIHeaderView())
       ->setHeader($blog->getName())
-      ->addProperty(PHUIHeaderView::PROPERTY_POLICY,
-        $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
+      ->setUser($user)
+      ->setPolicyObject($blog);
 
     $handle_phids = array_merge(
       mpull($posts, 'getBloggerPHID'),

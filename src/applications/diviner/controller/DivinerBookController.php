@@ -32,15 +32,10 @@ final class DivinerBookController extends DivinerController {
         ->setName($book->getShortTitle())
         ->setHref('/book/'.$book->getName().'/'));
 
-    $policies = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $viewer,
-      $book,
-      true);
-
     $header = id(new PHUIHeaderView())
       ->setHeader($book->getTitle())
-      ->addProperty(PHUIHeaderView::PROPERTY_POLICY,
-        $policies[PhabricatorPolicyCapability::CAN_VIEW]);
+      ->setUser($viewer)
+      ->setPolicyObject($book);
 
     $document = new PHUIDocumentView();
     $document->setHeader($header);

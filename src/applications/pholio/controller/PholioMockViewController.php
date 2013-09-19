@@ -67,15 +67,10 @@ final class PholioMockViewController extends PholioController {
 
     $title = $mock->getName();
 
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $user,
-      $mock,
-      $icon = true);
-
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
-      ->addProperty(PHUIHeaderView::PROPERTY_POLICY,
-        $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
+      ->setUser($user)
+      ->setPolicyObject($mock);
 
     $actions = $this->buildActionView($mock);
     $properties = $this->buildPropertyView($mock, $engine);
