@@ -18,26 +18,42 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     $path = $drequest->getPath();
 
-    $selected = $request->getStr('view');
     $preferences = $request->getUser()->loadPreferences();
-    if (!$selected) {
-      $selected = $preferences->getPreference(
-        PhabricatorUserPreferences::PREFERENCE_DIFFUSION_VIEW,
-        'highlighted');
-    } else if ($request->isFormPost() && $selected != 'raw') {
+
+    $show_blame = $request->getBool(
+      'blame',
+      $preferences->getPreference(
+        PhabricatorUserPreferences::PREFERENCE_DIFFUSION_BLAME,
+        false));
+    $show_color = $request->getBool(
+      'color',
+      $preferences->getPreference(
+        PhabricatorUserPreferences::PREFERENCE_DIFFUSION_COLOR,
+        true));
+
+    $view = $request->getStr('view');
+    if ($request->isFormPost() && $view != 'raw') {
       $preferences->setPreference(
-        PhabricatorUserPreferences::PREFERENCE_DIFFUSION_VIEW,
-        $selected);
+        PhabricatorUserPreferences::PREFERENCE_DIFFUSION_BLAME,
+        $show_blame);
+      $preferences->setPreference(
+        PhabricatorUserPreferences::PREFERENCE_DIFFUSION_COLOR,
+        $show_color);
       $preferences->save();
 
-      return id(new AphrontRedirectResponse())
-        ->setURI($request->getRequestURI()->alter('view', $selected));
+      $uri = $request->getRequestURI()
+        ->alter('blame', null)
+        ->alter('color', null);
+
+      return id(new AphrontRedirectResponse())->setURI($uri);
     }
 
-    $needs_blame = ($selected == 'plainblame');
-    if ($selected == 'blame' && $request->isAjax()) {
-      $needs_blame = true;
-    }
+    // We need the blame information if blame is on and we're building plain
+    // text, or blame is on and this is an Ajax request. If blame is on and
+    // this is a colorized request, we don't show blame at first (we ajax it
+    // in afterward) so we don't need to query for it.
+    $needs_blame = ($show_blame && !$show_color) ||
+                   ($show_blame && $request->isAjax());
 
     $file_content = DiffusionFileContent::newFromConduit(
       $this->callConduitWithDiffusionRequest(
@@ -49,7 +65,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
         )));
     $data = $file_content->getCorpus();
 
-    if ($selected === 'raw') {
+    if ($view === 'raw') {
       return $this->buildRawResponse($path, $data);
     }
 
@@ -57,7 +73,8 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     // Build the content of the file.
     $corpus = $this->buildCorpus(
-      $selected,
+      $show_blame,
+      $show_color,
       $file_content,
       $needs_blame,
       $drequest,
@@ -75,7 +92,11 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     $content[] = $this->buildHeaderView($drequest);
     $view = $this->buildActionView($drequest);
-    $content[] = $this->enrichActionView($view, $drequest, $selected);
+    $content[] = $this->enrichActionView(
+      $view,
+      $drequest,
+      $show_blame,
+      $show_color);
     $content[] = $this->buildPropertyView($drequest);
 
     $follow  = $request->getStr('follow');
@@ -161,7 +182,8 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
   }
 
   private function buildCorpus(
-    $selected,
+    $show_blame,
+    $show_color,
     DiffusionFileContent $file_content,
     $needs_blame,
     DiffusionRequest $drequest,
@@ -181,22 +203,17 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       }
     }
 
-    switch ($selected) {
-      case 'plain':
-        $style =
-          "margin: 1em 2em; width: 90%; height: 80em; font-family: monospace";
+    if (!$show_color) {
+      $style =
+        "margin: 1em 2em; width: 90%; height: 80em; font-family: monospace";
+      if (!$show_blame) {
         $corpus = phutil_tag(
           'textarea',
           array(
             'style' => $style,
           ),
           $file_content->getCorpus());
-
-          break;
-
-      case 'plainblame':
-        $style =
-          "margin: 1em 2em; width: 90%; height: 80em; font-family: monospace";
+      } else {
         $text_list = $file_content->getTextList();
         $rev_list = $file_content->getRevList();
         $blame_dict = $file_content->getBlameDict();
@@ -215,79 +232,74 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
             'style' => $style,
           ),
           implode("\n", $rows));
-        break;
+      }
+    } else {
+      require_celerity_resource('syntax-highlighting-css');
+      $text_list = $file_content->getTextList();
+      $rev_list = $file_content->getRevList();
+      $blame_dict = $file_content->getBlameDict();
 
-      case 'highlighted':
-      case 'blame':
-      default:
-        require_celerity_resource('syntax-highlighting-css');
-        $text_list = $file_content->getTextList();
-        $rev_list = $file_content->getRevList();
-        $blame_dict = $file_content->getBlameDict();
+      $text_list = implode("\n", $text_list);
+      $text_list = PhabricatorSyntaxHighlighter::highlightWithFilename(
+        $path,
+        $text_list);
+      $text_list = explode("\n", $text_list);
 
-        $text_list = implode("\n", $text_list);
-        $text_list = PhabricatorSyntaxHighlighter::highlightWithFilename(
-          $path,
-          $text_list);
-        $text_list = explode("\n", $text_list);
+      $rows = $this->buildDisplayRows($text_list, $rev_list, $blame_dict,
+        $needs_blame, $drequest, $show_blame, $show_color);
 
-        $rows = $this->buildDisplayRows($text_list, $rev_list, $blame_dict,
-          $needs_blame, $drequest, $selected);
+      $corpus_table = javelin_tag(
+        'table',
+        array(
+          'class' => "diffusion-source remarkup-code PhabricatorMonospaced",
+          'sigil' => 'phabricator-source',
+        ),
+        $rows);
 
-        $corpus_table = javelin_tag(
-          'table',
-          array(
-            'class' => "diffusion-source remarkup-code PhabricatorMonospaced",
-            'sigil' => 'phabricator-source',
-          ),
-          $rows);
+      if ($this->getRequest()->isAjax()) {
+        return $corpus_table;
+      }
 
-        if ($this->getRequest()->isAjax()) {
-          return $corpus_table;
+      $id = celerity_generate_unique_node_id();
+
+      $projects = $drequest->loadArcanistProjects();
+      $langs = array();
+      foreach ($projects as $project) {
+        $ls = $project->getSymbolIndexLanguages();
+        if (!$ls) {
+          continue;
         }
-
-        $id = celerity_generate_unique_node_id();
-
-        $projects = $drequest->loadArcanistProjects();
-        $langs = array();
-        foreach ($projects as $project) {
-          $ls = $project->getSymbolIndexLanguages();
-          if (!$ls) {
-            continue;
+        $dep_projects = $project->getSymbolIndexProjects();
+        $dep_projects[] = $project->getPHID();
+        foreach ($ls as $lang) {
+          if (!isset($langs[$lang])) {
+            $langs[$lang] = array();
           }
-          $dep_projects = $project->getSymbolIndexProjects();
-          $dep_projects[] = $project->getPHID();
-          foreach ($ls as $lang) {
-            if (!isset($langs[$lang])) {
-              $langs[$lang] = array();
-            }
-            $langs[$lang] += $dep_projects + array($project);
-          }
+          $langs[$lang] += $dep_projects + array($project);
         }
+      }
 
-        $lang = last(explode('.', $drequest->getPath()));
+      $lang = last(explode('.', $drequest->getPath()));
 
-        if (isset($langs[$lang])) {
-          Javelin::initBehavior(
-            'repository-crossreference',
-            array(
-              'container' => $id,
-              'lang' => $lang,
-              'projects' => $langs[$lang],
-            ));
-        }
-
-        $corpus = phutil_tag(
-          'div',
+      if (isset($langs[$lang])) {
+        Javelin::initBehavior(
+          'repository-crossreference',
           array(
-            'style' => 'padding: 0 2em;',
-            'id' => $id,
-          ),
-          $corpus_table);
+            'container' => $id,
+            'lang' => $lang,
+            'projects' => $langs[$lang],
+          ));
+      }
 
-        Javelin::initBehavior('load-blame', array('id' => $id));
+      $corpus = phutil_tag(
+        'div',
+        array(
+          'style' => 'padding: 0 2em;',
+          'id' => $id,
+        ),
+        $corpus_table);
 
-        break;
+      Javelin::initBehavior('load-blame', array('id' => $id));
     }
 
     return $corpus;
@@ -296,58 +308,55 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
   private function enrichActionView(
     PhabricatorActionListView $view,
     DiffusionRequest $drequest,
-    $selected) {
+    $show_blame,
+    $show_color) {
 
     $viewer = $this->getRequest()->getUser();
     $base_uri = $this->getRequest()->getRequestURI();
 
-    $toggle_blame = array(
-      'highlighted'   => 'blame',
-      'blame'         => 'highlighted',
-      'plain'         => 'plainblame',
-      'plainblame'    => 'plain',
-      'raw'           => 'raw',  // not a real case.
-    );
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Show Last Change'))
+        ->setHref(
+          $drequest->generateURI(
+            array(
+              'action' => 'change',
+            )))
+        ->setIcon('new'));
 
-    $toggle_highlight = array(
-      'highlighted'   => 'plain',
-      'blame'         => 'plainblame',
-      'plain'         => 'highlighted',
-      'plainblame'    => 'blame',
-      'raw'           => 'raw',  // not a real case.
-    );
-
-    $blame_on = ($selected == 'blame' || $selected == 'plainblame');
-    if ($blame_on) {
+    if ($show_blame) {
       $blame_text = pht('Disable Blame');
       $blame_icon = 'blame-grey';
+      $blame_value = 0;
     } else {
       $blame_text = pht('Enable Blame');
       $blame_icon = 'blame';
+      $blame_value = 1;
     }
 
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName($blame_text)
-        ->setHref($base_uri->alter('view', $toggle_blame[$selected]))
+        ->setHref($base_uri->alter('blame', $blame_value))
         ->setIcon($blame_icon)
         ->setUser($viewer)
         ->setRenderAsForm(true));
 
 
-    $highlight_on = ($selected == 'blame' || $selected == 'highlighted');
-    if ($highlight_on) {
+    if ($show_color) {
       $highlight_text = pht('Disable Highlighting');
       $highlight_icon = 'highlight-grey';
+      $highlight_value = 0;
     } else {
       $highlight_text = pht('Enable Highlighting');
       $highlight_icon = 'highlight';
+      $highlight_value = 1;
     }
 
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName($highlight_text)
-        ->setHref($base_uri->alter('view', $toggle_highlight[$selected]))
+        ->setHref($base_uri->alter('color', $highlight_value))
         ->setIcon($highlight_icon)
         ->setUser($viewer)
         ->setRenderAsForm(true));
@@ -417,7 +426,8 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
     array $blame_dict,
     $needs_blame,
     DiffusionRequest $drequest,
-    $selected) {
+    $show_blame,
+    $show_color) {
 
     $handles = array();
     if ($blame_dict) {
@@ -464,7 +474,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
         'data'        => $line,
       );
 
-      if ($selected == 'blame') {
+      if ($show_blame) {
         // If the line's rev is same as the line above, show empty content
         // with same color; otherwise generate blame info. The newer a change
         // is, the more saturated the color.
@@ -574,7 +584,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     $rows = $this->renderInlines(
       idx($inlines, 0, array()),
-      ($selected == 'blame'),
+      ($show_blame),
       $engine);
 
     foreach ($display as $line) {
@@ -764,7 +774,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
       $rows = array_merge($rows, $this->renderInlines(
         idx($inlines, $line['line'], array()),
-        ($selected == 'blame'),
+        ($show_blame),
         $engine));
     }
 

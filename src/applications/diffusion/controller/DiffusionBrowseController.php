@@ -82,7 +82,7 @@ abstract class DiffusionBrowseController extends DiffusionController {
       id(new PhabricatorActionView())
         ->setName(pht('View History'))
         ->setHref($history_uri)
-        ->setIcon('perflab'));
+        ->setIcon('history'));
 
     $behind_head = $drequest->getRawCommit();
     $head_uri = $drequest->generateURI(
