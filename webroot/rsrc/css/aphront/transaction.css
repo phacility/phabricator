@@ -46,17 +46,16 @@
 }
 
 .phabricator-transaction-content {
-  background:     #fcfcfc;
-  line-height:    1.4em;
-  padding:        .3em 1em;
-  overflow:       auto;
+  background: #fff;
+  padding: 8px;
+  overflow: auto;
 }
 
 .phabricator-transaction-subheader {
   color: {$lightgreytext};
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid {$thinblueborder};
   padding-bottom: 4px;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 div.phabricator-remarkup + .phabricator-transaction-subheader {
