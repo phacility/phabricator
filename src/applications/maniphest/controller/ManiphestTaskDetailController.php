@@ -98,16 +98,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $phids = array_keys($phids);
 
-    $phids = array_merge(
-      $phids,
-      array_mergev(mpull($aux_fields, 'getRequiredHandlePHIDs')));
-
     $this->loadHandles($phids);
 
     $handles = $this->getLoadedHandles();
-    foreach ($aux_fields as $aux_field) {
-      $aux_field->setHandles($handles);
-    }
 
     $context_bar = null;
 
@@ -149,13 +142,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     foreach ($transactions as $xaction) {
       if ($xaction->hasComments()) {
         $engine->addObject($xaction, ManiphestTransaction::MARKUP_FIELD_BODY);
-      }
-    }
-
-    foreach ($aux_fields as $aux_field) {
-      foreach ($aux_field->getMarkupFields() as $markup_field) {
-        $engine->addObject($aux_field, $markup_field);
-        $aux_field->setMarkupEngine($engine);
       }
     }
 

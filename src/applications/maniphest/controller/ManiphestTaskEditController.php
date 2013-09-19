@@ -354,8 +354,7 @@ final class ManiphestTaskEditController extends ManiphestController {
     $phids = array_merge(
       array($task->getOwnerPHID()),
       $task->getCCPHIDs(),
-      $task->getProjectPHIDs(),
-      array_mergev(mpull($aux_fields, 'getRequiredHandlePHIDs')));
+      $task->getProjectPHIDs());
 
     if ($parent_task) {
       $phids[] = $parent_task->getPHID();
@@ -365,10 +364,6 @@ final class ManiphestTaskEditController extends ManiphestController {
     $phids = array_unique($phids);
 
     $handles = $this->loadViewerHandles($phids);
-
-    foreach ($aux_fields as $aux_field) {
-      $aux_field->setHandles($handles);
-    }
 
     $tvalues = mpull($handles, 'getFullName', 'getPHID');
 

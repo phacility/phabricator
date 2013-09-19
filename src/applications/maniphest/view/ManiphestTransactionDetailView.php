@@ -541,18 +541,10 @@ final class ManiphestTransactionDetailView extends ManiphestView {
 
         $desc = null;
         if ($aux_field) {
-          $use_field = $aux_field;
+          $desc = $aux_field->renderTransactionDescription($transaction);
         } else {
-          $use_field = id(new ManiphestAuxiliaryFieldDefaultSpecification())
-            ->setFieldType(
-              ManiphestAuxiliaryFieldDefaultSpecification::TYPE_STRING);
+          $desc = 'updated a field';
         }
-
-        $desc = $use_field->renderTransactionDescription(
-          $transaction,
-          $this->forEmail
-            ? ManiphestAuxiliaryFieldSpecification::RENDER_TARGET_TEXT
-            : ManiphestAuxiliaryFieldSpecification::RENDER_TARGET_HTML);
 
         break;
       default:

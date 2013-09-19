@@ -685,7 +685,6 @@ phutil_register_library_map(array(
     'LiskMigrationIterator' => 'infrastructure/storage/lisk/LiskMigrationIterator.php',
     'LiskRawMigrationIterator' => 'infrastructure/storage/lisk/LiskRawMigrationIterator.php',
     'ManiphestAction' => 'applications/maniphest/constants/ManiphestAction.php',
-    'ManiphestAuxiliaryFieldDefaultSpecification' => 'applications/maniphest/auxiliaryfield/ManiphestAuxiliaryFieldDefaultSpecification.php',
     'ManiphestAuxiliaryFieldSpecification' => 'applications/maniphest/auxiliaryfield/ManiphestAuxiliaryFieldSpecification.php',
     'ManiphestBatchEditController' => 'applications/maniphest/controller/ManiphestBatchEditController.php',
     'ManiphestConfiguredCustomField' => 'applications/maniphest/field/ManiphestConfiguredCustomField.php',
@@ -2759,12 +2758,6 @@ phutil_register_library_map(array(
     'LiskMigrationIterator' => 'PhutilBufferedIterator',
     'LiskRawMigrationIterator' => 'PhutilBufferedIterator',
     'ManiphestAction' => 'ManiphestConstants',
-    'ManiphestAuxiliaryFieldDefaultSpecification' => 'ManiphestAuxiliaryFieldSpecification',
-    'ManiphestAuxiliaryFieldSpecification' =>
-    array(
-      0 => 'ManiphestCustomField',
-      1 => 'PhabricatorMarkupInterface',
-    ),
     'ManiphestBatchEditController' => 'ManiphestController',
     'ManiphestConfiguredCustomField' =>
     array(
