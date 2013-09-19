@@ -150,6 +150,11 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
         pht(
           'Maniphest fields are now loaded automatically. You can configure '.
           'them with `maniphest.fields`.'),
+      'maniphest.custom-fields' =>
+        pht(
+          'Maniphest fields are now defined in '.
+          '`maniphest.custom-field-definitions`. Existing definitions have '.
+          'been migrated.'),
     );
 
     return $ancient_config;

@@ -688,6 +688,7 @@ phutil_register_library_map(array(
     'ManiphestAuxiliaryFieldDefaultSpecification' => 'applications/maniphest/auxiliaryfield/ManiphestAuxiliaryFieldDefaultSpecification.php',
     'ManiphestAuxiliaryFieldSpecification' => 'applications/maniphest/auxiliaryfield/ManiphestAuxiliaryFieldSpecification.php',
     'ManiphestBatchEditController' => 'applications/maniphest/controller/ManiphestBatchEditController.php',
+    'ManiphestConfiguredCustomField' => 'applications/maniphest/field/ManiphestConfiguredCustomField.php',
     'ManiphestConstants' => 'applications/maniphest/constants/ManiphestConstants.php',
     'ManiphestController' => 'applications/maniphest/controller/ManiphestController.php',
     'ManiphestCreateMailReceiver' => 'applications/maniphest/mail/ManiphestCreateMailReceiver.php',
@@ -2765,6 +2766,11 @@ phutil_register_library_map(array(
       1 => 'PhabricatorMarkupInterface',
     ),
     'ManiphestBatchEditController' => 'ManiphestController',
+    'ManiphestConfiguredCustomField' =>
+    array(
+      0 => 'ManiphestCustomField',
+      1 => 'PhabricatorStandardCustomFieldInterface',
+    ),
     'ManiphestController' => 'PhabricatorController',
     'ManiphestCreateMailReceiver' => 'PhabricatorMailReceiver',
     'ManiphestCustomField' => 'PhabricatorCustomField',

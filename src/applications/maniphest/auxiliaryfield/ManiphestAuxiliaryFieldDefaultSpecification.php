@@ -26,32 +26,7 @@ class ManiphestAuxiliaryFieldDefaultSpecification
   const TYPE_HEADER   = 'header';
 
   public function createFields() {
-    $fields = PhabricatorEnv::getEnvConfig('maniphest.custom-fields');
-    $specs = array();
-    foreach ($fields as $aux => $info) {
-      $spec = new ManiphestAuxiliaryFieldDefaultSpecification();
-      $spec->setAuxiliaryKey($aux);
-      $spec->setLabel(idx($info, 'label'));
-      $spec->setCaption(idx($info, 'caption'));
-      $spec->setFieldType(idx($info, 'type'));
-      $spec->setRequired(idx($info, 'required'));
-
-      $spec->setCheckboxLabel(idx($info, 'checkbox-label'));
-      $spec->setCheckboxValue(idx($info, 'checkbox-value', 1));
-
-      if ($spec->getFieldType() ==
-        ManiphestAuxiliaryFieldDefaultSpecification::TYPE_SELECT) {
-        $spec->setSelectOptions(idx($info, 'options'));
-      }
-
-      $spec->setShouldCopyWhenCreatingSimilarTask(idx($info, 'copy'));
-
-      $spec->setDefaultValue(idx($info, 'default'));
-
-      $specs[] = $spec;
-    }
-
-    return $specs;
+    return array();
   }
 
   public function getFieldType() {

@@ -229,9 +229,21 @@ final class ManiphestTaskEditController extends ManiphestController {
               ManiphestTransactionType::TYPE_AUXILIARY);
             $aux_key = $aux_field->getFieldKey();
             $transaction->setMetadataValue('aux:key', $aux_key);
-            $transaction->setOldValue(idx($old_values, $aux_key));
-            $transaction->setNewValue(
-              $aux_field->getNewValueForApplicationTransactions());
+            $old = idx($old_values, $aux_key);
+            $new = $aux_field->getNewValueForApplicationTransactions();
+
+            // TODO: This is a ghetto check for transactions with no effect.
+            if (!is_array($old) && !is_array($new)) {
+              if ((string)$old === (string)$new) {
+                continue;
+              }
+            } else if ($old == $new) {
+              continue;
+            }
+
+            $transaction->setOldValue($old);
+            $transaction->setNewValue($new);
+
             $transactions[] = $transaction;
           }
         }

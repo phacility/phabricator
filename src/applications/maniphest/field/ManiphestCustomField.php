@@ -81,12 +81,17 @@ abstract class ManiphestCustomField
   public function renderTransactionDescription(
     ManiphestTransaction $transaction,
     $target) {
-    return 'updated a custom field';
+    $old = $transaction->getOldValue();
+    $new = $transaction->getNewValue();
+    return pht(
+      'updated field %s from %s to %s',
+      $this->getFieldName(),
+      $old,
+      $new);
   }
 
   public function getMarkupFields() {
     return array();
   }
-
 
 }
