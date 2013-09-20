@@ -69,6 +69,7 @@ final class PhabricatorStandardCustomFieldSelect
       ->setLabel($this->getFieldName())
       ->setCaption($this->getCaption())
       ->setName($this->getFieldKey())
+      ->setValue($this->getFieldValue())
       ->setOptions($this->getOptions());
   }
 
