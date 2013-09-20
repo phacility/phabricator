@@ -2,8 +2,6 @@
 
 final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
-  private $corpusType = 'text';
-
   private $lintCommit;
   private $lintMessages;
 
@@ -71,15 +69,28 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     $this->loadLintMessages();
 
-    // Build the content of the file.
-    $corpus = $this->buildCorpus(
-      $show_blame,
-      $show_color,
-      $file_content,
-      $needs_blame,
-      $drequest,
-      $path,
-      $data);
+    $binary_uri = null;
+    if (ArcanistDiffUtils::isHeuristicBinaryFile($data)) {
+      $file = $this->loadFileForData($path, $data);
+      $file_uri = $file->getBestURI();
+
+      if ($file->isViewableImage()) {
+        $corpus = $this->buildImageCorpus($file_uri);
+      } else {
+        $corpus = $this->buildBinaryCorpus($file_uri, $data);
+        $binary_uri = $file_uri;
+      }
+    } else {
+      // Build the content of the file.
+      $corpus = $this->buildCorpus(
+        $show_blame,
+        $show_color,
+        $file_content,
+        $needs_blame,
+        $drequest,
+        $path,
+        $data);
+    }
 
     if ($request->isAjax()) {
       return id(new AphrontAjaxResponse())->setContent($corpus);
@@ -96,7 +107,8 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       $view,
       $drequest,
       $show_blame,
-      $show_color);
+      $show_color,
+      $binary_uri);
     $content[] = $this->buildPropertyView($drequest);
 
     $follow  = $request->getStr('follow');
@@ -189,19 +201,6 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
     DiffusionRequest $drequest,
     $path,
     $data) {
-
-    if (ArcanistDiffUtils::isHeuristicBinaryFile($data)) {
-      $file = $this->loadFileForData($path, $data);
-      $file_uri = $file->getBestURI();
-
-      if ($file->isViewableImage()) {
-        $this->corpusType = 'image';
-        return $this->buildImageCorpus($file_uri);
-      } else {
-        $this->corpusType = 'binary';
-        return $this->buildBinaryCorpus($file_uri, $data);
-      }
-    }
 
     if (!$show_color) {
       $style =
@@ -309,7 +308,8 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
     PhabricatorActionListView $view,
     DiffusionRequest $drequest,
     $show_blame,
-    $show_color) {
+    $show_color,
+    $binary_uri) {
 
     $viewer = $this->getRequest()->getUser();
     $base_uri = $this->getRequest()->getRequestURI();
@@ -361,7 +361,6 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
         ->setUser($viewer)
         ->setRenderAsForm(true));
 
-
     $href = null;
     if ($this->getRequest()->getStr('lint') !== null) {
       $lint_text = pht('Hide %d Lint Message(s)', count($this->lintMessages));
@@ -386,11 +385,19 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
         ->setIcon('warning')
         ->setDisabled(!$href));
 
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('View Raw File'))
-        ->setHref($base_uri->alter('view', 'raw'))
-        ->setIcon('file'));
+    if ($binary_uri) {
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Download Raw File'))
+          ->setHref($binary_uri)
+          ->setIcon('download'));
+    } else {
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('View Raw File'))
+          ->setHref($base_uri->alter('view', 'raw'))
+          ->setIcon('file'));
+    }
 
     $view->addAction($this->createEditAction());
 
@@ -820,12 +827,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
           'src' => $file_uri,
         )));
 
-    $actions = id(new PhabricatorActionListView())
-      ->setUser($this->getRequest()->getUser())
-      ->setObjectURI($this->getRequest()->getRequestURI())
-      ->addAction($this->createEditAction());
-
-    return array($actions, $properties);
+    return $properties;
   }
 
   private function buildBinaryCorpus($file_uri, $data) {
@@ -837,18 +839,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
         'This is a binary file. It is %s byte(s) in length.',
         new PhutilNumber($size)));
 
-    $actions = id(new PhabricatorActionListView())
-      ->setUser($this->getRequest()->getUser())
-      ->setObjectURI($this->getRequest()->getRequestURI())
-      ->addAction($this->createEditAction())
-      ->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Download Binary File...'))
-          ->setIcon('download')
-          ->setHref($file_uri));
-
-    return array($actions, $properties);
-
+    return $properties;
   }
 
   private function buildBeforeResponse($before) {
