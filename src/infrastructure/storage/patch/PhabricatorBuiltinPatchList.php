@@ -1608,6 +1608,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'php',
         'name' => $this->getPatchPath('20130919.mfieldconf.php'),
       ),
+      '20130920.repokeyspolicy.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130920.repokeyspolicy.sql'),
+      ),
     );
   }
 }

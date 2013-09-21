@@ -29,6 +29,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   protected $name;
   protected $callsign;
   protected $uuid;
+  protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
+  protected $editPolicy = PhabricatorPolicies::POLICY_ADMIN;
 
   protected $versionControlSystem;
   protected $details = array();

@@ -147,9 +147,6 @@ final class PhabricatorRepositoryQuery
 
   protected function getPagingColumn() {
 
-    // TODO: Add a key for ORDER_NAME.
-    // TODO: Add a key for ORDER_COMMITTED.
-
     $order = $this->order;
     switch ($order) {
       case self::ORDER_CREATED:
@@ -290,7 +287,6 @@ final class PhabricatorRepositoryQuery
         $this->callsigns);
     }
 
-    // TODO: Add a key for this.
     if ($this->types) {
       $where[] = qsprintf(
         $conn_r,
