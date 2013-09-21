@@ -37,4 +37,17 @@ final class PhabricatorStandardCustomFieldRemarkup
       $viewer);
   }
 
+  public function getApplicationTransactionTitle(
+    PhabricatorApplicationTransaction $xaction) {
+    $author_phid = $xaction->getAuthorPHID();
+
+    // TODO: Expose fancy transactions.
+
+    return pht(
+      '%s edited %s.',
+      $xaction->renderHandleLink($author_phid),
+      $this->getFieldName());
+  }
+
+
 }

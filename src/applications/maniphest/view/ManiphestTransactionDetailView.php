@@ -92,14 +92,22 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     $descs = array();
     $comments = null;
     foreach ($this->transactions as $transaction) {
-      list($verb, $desc, $classes) = $this->describeAction($transaction);
-      if ($desc === null) {
-        continue;
+      list($verb, $desc, $classes, $full) = $this->describeAction($transaction);
+
+      if ($full) {
+        $desc = $full;
+      } else {
+        if ($desc === null) {
+          continue;
+        } else {
+          $desc = $author.' '.$desc.'.';
+        }
       }
+
       if ($action === null) {
         $action = $verb;
       }
-      $desc = $author.' '.$desc.'.';
+
       if ($with_date) {
         // NOTE: This is going into a (potentially multi-recipient) email so
         // we can't use a single user's timezone preferences. Use the server's
@@ -155,7 +163,17 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     $more_classes = array();
     $descs = array();
     foreach ($transactions as $transaction) {
-      list($verb, $desc, $classes) = $this->describeAction($transaction);
+      list($verb, $desc, $classes, $full) = $this->describeAction($transaction);
+      if ($full) {
+        $descs[] = javelin_tag(
+          'div',
+          array(
+            'sigil' => 'maniphest-transaction-description',
+          ),
+          $full);
+        continue;
+      }
+
       if ($desc === null) {
         continue;
       }
@@ -301,6 +319,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
   private function describeAction($transaction) {
     $verb = null;
     $desc = null;
+    $full = null;
     $classes = array();
 
     $handles = $this->handles;
@@ -525,23 +544,24 @@ final class ManiphestTransactionDetailView extends ManiphestView {
           $aux_field = $this->getAuxiliaryField('std:maniphest:'.$aux_key);
         }
 
-        $verb = null;
-        if ($aux_field) {
-          $verb = $aux_field->renderTransactionEmailVerb($transaction);
-        }
-        if ($verb === null) {
-          if ($old === null) {
-            $verb = "Set Field";
-          } else if ($new === null) {
-            $verb = "Removed Field";
-          } else {
-            $verb = "Updated Field";
-          }
+        if ($old === null) {
+          $verb = "Set Field";
+        } else if ($new === null) {
+          $verb = "Removed Field";
+        } else {
+          $verb = "Updated Field";
         }
 
         $desc = null;
         if ($aux_field) {
-          $desc = $aux_field->renderTransactionDescription($transaction);
+          $proxy_transaction = new ManiphestTransactionPro();
+          $proxy_transaction->setOldValue($transaction->getOldValue());
+          $proxy_transaction->setNewValue($transaction->getNewValue());
+          $proxy_transaction->setAuthorPHID($transaction->getAuthorPHID());
+          $proxy_transaction->setHandles($this->handles);
+
+          $full = $aux_field->getApplicationTransactionTitle(
+            $proxy_transaction);
         } else {
           $desc = 'updated a field';
         }
@@ -556,7 +576,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     // correctly right now.
     $desc = phutil_safe_html($desc);
 
-    return array($verb, $desc, $classes);
+    return array($verb, $desc, $classes, $full);
   }
 
   private function renderFullSummary($transaction) {

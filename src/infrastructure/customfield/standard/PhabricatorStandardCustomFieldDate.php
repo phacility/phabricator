@@ -74,4 +74,43 @@ final class PhabricatorStandardCustomFieldDate
   // but don't provide a UI for searching. To do so, we need a reasonable date
   // range control and the ability to add a range constraint.
 
+  public function getApplicationTransactionTitle(
+    PhabricatorApplicationTransaction $xaction) {
+    $author_phid = $xaction->getAuthorPHID();
+    $old = $xaction->getOldValue();
+    $new = $xaction->getNewValue();
+
+    $viewer = $this->getViewer();
+
+    $old_date = null;
+    if ($old) {
+      $old_date = phabricator_datetime($old, $viewer);
+    }
+
+    $new_date = null;
+    if ($new) {
+      $new_date = phabricator_datetime($new, $viewer);
+    }
+
+    if (!$old) {
+      return pht(
+        '%s set %s to %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName(),
+        $new_date);
+    } else if (!$new) {
+      return pht(
+        '%s removed %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName());
+    } else {
+      return pht(
+        '%s changed %s from %s to %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName(),
+        $old_date,
+        $new_date);
+    }
+  }
+
 }

@@ -153,7 +153,7 @@ final class ManiphestTaskEditController extends ManiphestController {
           $placeholder_editor,
           PhabricatorTransactions::TYPE_CUSTOMFIELD,
           array(
-            id(new PhabricatorUserTransaction())
+            id(new ManiphestTransactionPro())
               ->setOldValue($aux_old_value)
               ->setNewValue($aux_new_value),
           ));

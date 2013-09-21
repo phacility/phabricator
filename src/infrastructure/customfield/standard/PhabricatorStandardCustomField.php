@@ -300,4 +300,32 @@ abstract class PhabricatorStandardCustomField
     return !strlen($value);
   }
 
+  public function getApplicationTransactionTitle(
+    PhabricatorApplicationTransaction $xaction) {
+    $author_phid = $xaction->getAuthorPHID();
+    $old = $xaction->getOldValue();
+    $new = $xaction->getNewValue();
+
+    if (!$old) {
+      return pht(
+        '%s set %s to %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName(),
+        $new);
+    } else if (!$new) {
+      return pht(
+        '%s removed %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName());
+    } else {
+      return pht(
+        '%s changed %s from %s to %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName(),
+        $old,
+        $new);
+    }
+  }
+
+
 }

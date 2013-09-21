@@ -873,6 +873,19 @@ abstract class PhabricatorCustomField {
     return array();
   }
 
+  public function getApplicationTransactionTitle(
+    PhabricatorApplicationTransaction $xaction) {
+    if ($this->proxy) {
+      return $this->proxy->getApplicationTransactionTitle(
+        $xaction);
+    }
+
+    $author_phid = $xaction->getAuthorPHID();
+    return pht(
+      '%s updated this object.',
+      $xaction->renderHandleLink($author_phid));
+  }
+
 
 /* -(  Edit View  )---------------------------------------------------------- */
 

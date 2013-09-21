@@ -28,23 +28,4 @@ abstract class ManiphestCustomField
     return false;
   }
 
-
-  // TODO: All of this is legacy junk.
-
-  public function renderTransactionEmailVerb(
-    ManiphestTransaction $transaction) {
-    return null;
-  }
-
-  public function renderTransactionDescription(
-    ManiphestTransaction $transaction) {
-    $old = $transaction->getOldValue();
-    $new = $transaction->getNewValue();
-    return pht(
-      'updated field %s from %s to %s',
-      $this->getFieldName(),
-      hsprintf('%s', $old),
-      hsprintf('%s', $new));
-  }
-
 }

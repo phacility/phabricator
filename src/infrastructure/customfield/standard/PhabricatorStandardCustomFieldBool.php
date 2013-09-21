@@ -92,5 +92,24 @@ final class PhabricatorStandardCustomFieldBool
     }
   }
 
+  public function getApplicationTransactionTitle(
+    PhabricatorApplicationTransaction $xaction) {
+    $author_phid = $xaction->getAuthorPHID();
+    $old = $xaction->getOldValue();
+    $new = $xaction->getNewValue();
+
+    if ($new) {
+      return pht(
+        '%s checked %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName());
+    } else {
+      return pht(
+        '%s unchecked %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName());
+    }
+  }
+
 
 }
