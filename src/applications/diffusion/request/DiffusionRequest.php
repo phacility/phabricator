@@ -46,6 +46,7 @@ abstract class DiffusionRequest {
    * Parameters are:
    *
    *   - `callsign` Repository callsign. Provide this or `repository`.
+   *   - `user` Viewing user. Required if `callsign` is provided.
    *   - `repository` Repository object. Provide this or `callsign`.
    *   - `branch` Optional, branch name.
    *   - `path` Optional, file path.
@@ -63,14 +64,19 @@ abstract class DiffusionRequest {
     } else if (!isset($data['repository']) && !isset($data['callsign'])) {
       throw new Exception(
         "One of 'repository' and 'callsign' is required.");
+    } else if (isset($data['callsign']) && empty($data['user'])) {
+      throw new Exception(
+        "Parameter 'user' is required if 'callsign' is provided.");
     }
 
     if (isset($data['repository'])) {
       $object = self::newFromRepository($data['repository']);
     } else {
-      $object = self::newFromCallsign($data['callsign']);
+      $object = self::newFromCallsign($data['callsign'], $data['user']);
     }
+
     $object->initializeFromDictionary($data);
+
     return $object;
   }
 
@@ -89,7 +95,7 @@ abstract class DiffusionRequest {
     AphrontRequest $request) {
 
     $callsign = phutil_unescape_uri_path_component(idx($data, 'callsign'));
-    $object = self::newFromCallsign($callsign);
+    $object = self::newFromCallsign($callsign, $request->getUser());
 
     $use_branches = $object->getSupportsBranches();
     $parsed = self::parseRequestBlob(idx($data, 'dblob'), $use_branches);
@@ -115,14 +121,18 @@ abstract class DiffusionRequest {
    * Internal. Use @{method:newFromDictionary}, not this method.
    *
    * @param   string              Repository callsign.
+   * @param   PhabricatorUser     Viewing user.
    * @return  DiffusionRequest    New request object.
    * @task new
    */
-  final private static function newFromCallsign($callsign) {
-    $repository = id(new PhabricatorRepository())->loadOneWhere(
-      'callsign = %s',
-      $callsign);
+  final private static function newFromCallsign(
+    $callsign,
+    PhabricatorUser $viewer) {
 
+    $repository = id(new PhabricatorRepositoryQuery())
+      ->setViewer($viewer)
+      ->withCallsigns(array($callsign))
+      ->executeOne();
     if (!$repository) {
       throw new Exception("No such repository '{$callsign}'.");
     }
