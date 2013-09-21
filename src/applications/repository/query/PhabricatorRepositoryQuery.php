@@ -164,7 +164,7 @@ final class PhabricatorRepositoryQuery
 
   private function loadCursorObject($id) {
     $results = id(new PhabricatorRepositoryQuery())
-      ->setViewer($this->getViewer())
+      ->setViewer($this->getPagingViewer())
       ->withIDs(array((int)$id))
       ->execute();
     return head($results);
