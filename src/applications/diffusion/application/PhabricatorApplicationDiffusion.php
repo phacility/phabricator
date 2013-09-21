@@ -67,6 +67,7 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
             '' => 'DiffusionRepositoryEditController',
             'basic/' => 'DiffusionRepositoryEditBasicController',
             'encoding/' => 'DiffusionRepositoryEditEncodingController',
+            'activate/' => 'DiffusionRepositoryEditActivateController',
           ),
         ),
         'inline/' => array(

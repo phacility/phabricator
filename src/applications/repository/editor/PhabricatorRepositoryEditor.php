@@ -6,6 +6,7 @@ final class PhabricatorRepositoryEditor
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
+    $types[] = PhabricatorRepositoryTransaction::TYPE_ACTIVATE;
     $types[] = PhabricatorRepositoryTransaction::TYPE_NAME;
     $types[] = PhabricatorRepositoryTransaction::TYPE_DESCRIPTION;
     $types[] = PhabricatorRepositoryTransaction::TYPE_ENCODING;
@@ -18,6 +19,8 @@ final class PhabricatorRepositoryEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorRepositoryTransaction::TYPE_ACTIVATE:
+        return $object->isTracked();
       case PhabricatorRepositoryTransaction::TYPE_NAME:
         return $object->getName();
       case PhabricatorRepositoryTransaction::TYPE_DESCRIPTION:
@@ -32,6 +35,7 @@ final class PhabricatorRepositoryEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorRepositoryTransaction::TYPE_ACTIVATE:
       case PhabricatorRepositoryTransaction::TYPE_NAME:
       case PhabricatorRepositoryTransaction::TYPE_DESCRIPTION:
       case PhabricatorRepositoryTransaction::TYPE_ENCODING:
@@ -44,6 +48,9 @@ final class PhabricatorRepositoryEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorRepositoryTransaction::TYPE_ACTIVATE:
+        $object->setDetail('tracking-enabled', $xaction->getNewValue());
+        break;
       case PhabricatorRepositoryTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
         break;

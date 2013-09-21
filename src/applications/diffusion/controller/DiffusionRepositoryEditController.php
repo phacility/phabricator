@@ -18,8 +18,17 @@ final class DiffusionRepositoryEditController extends DiffusionController {
 
     $title = pht('Edit %s', $repository->getName());
 
-    $content[] = id(new PHUIHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($title);
+    if (!$repository->isTracked()) {
+      $header->addTag(
+        id(new PhabricatorTagView())
+          ->setType(PhabricatorTagView::TYPE_STATE)
+          ->setName(pht('Inactive'))
+          ->setBackgroundColor(PhabricatorTagView::COLOR_BLACK));
+    }
+
+    $content[] = $header;
 
     $content[] = $this->buildBasicActions($repository);
     $content[] = $this->buildBasicProperties($repository);
@@ -82,8 +91,27 @@ final class DiffusionRepositoryEditController extends DiffusionController {
       ->setIcon('edit')
       ->setName(pht('Edit Basic Information'))
       ->setHref($this->getRepositoryControllerURI($repository, 'edit/basic/'))
-      ->setDisabled(!$can_edit);
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(!$can_edit);
     $view->addAction($edit);
+
+    $activate = id(new PhabricatorActionView())
+      ->setHref(
+        $this->getRepositoryControllerURI($repository, 'edit/activate/'))
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(true);
+
+    if ($repository->isTracked()) {
+      $activate
+        ->setIcon('disable')
+        ->setName(pht('Deactivate Repository'));
+    } else {
+      $activate
+        ->setIcon('enable')
+        ->setName(pht('Activate Repository'));
+    }
+
+    $view->addAction($activate);
 
     return $view;
   }
