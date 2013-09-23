@@ -306,12 +306,18 @@ abstract class PhabricatorApplicationTransaction
             $this->renderHandleLink($author_phid),
             count($add),
             $this->renderHandleList($add));
-        } else {
+        } else if ($rem) {
           return pht(
             '%s removed %d subscriber(s): %s.',
             $this->renderHandleLink($author_phid),
             count($rem),
             $this->renderHandleList($rem));
+        } else {
+          // This is used when rendering previews, before the user actually
+          // selects any CCs.
+          return pht(
+            '%s updated subscribers...',
+            $this->renderHandleLink($author_phid));
         }
         break;
       case PhabricatorTransactions::TYPE_EDGE:
