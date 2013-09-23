@@ -38,7 +38,7 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
       $value_is_phid_set = false;
 
       switch ($type) {
-        case ManiphestTransactionType::TYPE_NONE:
+        case PhabricatorTransactions::TYPE_COMMENT:
           $old = null;
           break;
         case ManiphestTransactionType::TYPE_STATUS:
@@ -70,11 +70,12 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
           $old = $task->getProjectPHIDs();
           $value_is_phid_set = true;
           break;
-        case ManiphestTransactionType::TYPE_AUXILIARY:
-          $aux_key = $transaction->getMetadataValue('aux:key');
+        case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+          $aux_key = $transaction->getMetadataValue('customfield:key');
           if (!$aux_key) {
             throw new Exception(
-              "Expected 'aux:key' metadata on TYPE_AUXILIARY transaction.");
+              "Expected 'customfield:key' metadata on TYPE_CUSTOMFIELD ".
+              "transaction.");
           }
           // This has already been populated.
           $old = $transaction->getOldValue();
@@ -120,11 +121,12 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
         } else {
           $transaction->setOldValue(null);
           $transaction->setNewValue(null);
-          $transaction->setTransactionType(ManiphestTransactionType::TYPE_NONE);
+          $transaction->setTransactionType(
+            PhabricatorTransactions::TYPE_COMMENT);
         }
       } else {
         switch ($type) {
-          case ManiphestTransactionType::TYPE_NONE:
+          case PhabricatorTransactions::TYPE_COMMENT:
             break;
           case ManiphestTransactionType::TYPE_STATUS:
             $task->setStatus($new);
@@ -160,8 +162,8 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
           case ManiphestTransactionType::TYPE_PROJECTS:
             $task->setProjectPHIDs($new);
             break;
-          case ManiphestTransactionType::TYPE_AUXILIARY:
-            $aux_key = $transaction->getMetadataValue('aux:key');
+          case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+            $aux_key = $transaction->getMetadataValue('customfield:key');
             $aux_writes[$aux_key] = $new;
             break;
           case ManiphestTransactionType::TYPE_EDGE:
@@ -417,7 +419,7 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
         case ManiphestTransactionType::TYPE_PRIORITY:
           $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_PRIORITY;
           break;
-        case ManiphestTransactionType::TYPE_NONE:
+        case PhabricatorTransactions::TYPE_COMMENT:
           // this is a comment which we will check separately below for
           // content
           break;

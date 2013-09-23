@@ -65,7 +65,6 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         ->setTransactionType(ManiphestTransactionType::TYPE_ATTACH);
       $transaction->setNewValue($new);
       $transactions[] = $transaction;
-      $file_transaction = $transaction;
     }
 
     // Compute new CCs added by @mentions. Several things can cause CCs to
@@ -87,7 +86,6 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     $transaction = new ManiphestTransaction();
     $transaction
       ->setAuthorPHID($user->getPHID())
-      ->setComments($request->getStr('comments'))
       ->setTransactionType($action);
 
     switch ($action) {
@@ -124,14 +122,13 @@ final class ManiphestTransactionSaveController extends ManiphestController {
       case ManiphestTransactionType::TYPE_PRIORITY:
         $transaction->setNewValue($request->getInt('priority'));
         break;
-      case ManiphestTransactionType::TYPE_NONE:
       case ManiphestTransactionType::TYPE_ATTACH:
-        // If we have a file transaction, just get rid of this secondary
-        // transaction and put the comments on it instead.
-        if ($file_transaction) {
-          $file_transaction->setComments($transaction->getComments());
-          $transaction = null;
-        }
+        // Nuke this, we created it above.
+        $transaction = null;
+        break;
+      case PhabricatorTransactions::TYPE_COMMENT:
+        // Nuke this, we're going to create it below.
+        $transaction = null;
         break;
       default:
         throw new Exception('unknown action');
@@ -139,6 +136,13 @@ final class ManiphestTransactionSaveController extends ManiphestController {
 
     if ($transaction) {
       $transactions[] = $transaction;
+    }
+
+    if ($request->getStr('comments')) {
+      $transactions[] = id(new ManiphestTransaction())
+        ->setAuthorPHID($user->getPHID())
+        ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+        ->setComments($request->getStr('comments'));
     }
 
     // When you interact with a task, we add you to the CC list so you get

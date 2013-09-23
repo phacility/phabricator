@@ -37,16 +37,20 @@ final class ConduitAPI_maniphest_gettasktransactions_Method
       ->setViewer($request->getUser())
       ->withIDs($task_ids)
       ->execute();
+    $tasks = mpull($tasks, null, 'getPHID');
 
     $transactions = ManiphestLegacyTransactionQuery::loadByTasks(
       $request->getUser(),
       $tasks);
 
     foreach ($transactions as $transaction) {
-      $task_id = $transaction->getTaskID();
-      if (!array_key_exists($task_id, $results)) {
-        $results[$task_id] = array();
+      $task_phid = $transaction->getTaskPHID();
+      if (empty($tasks[$task_phid])) {
+        continue;
       }
+
+      $task_id = $tasks[$task_phid]->getID();
+
       $results[$task_id][] = array(
         'taskID'  => $task_id,
         'transactionType'  => $transaction->getTransactionType(),

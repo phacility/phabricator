@@ -88,7 +88,7 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
         $command = $matches[1];
       }
 
-      $ttype = ManiphestTransactionType::TYPE_NONE;
+      $ttype = PhabricatorTransactions::TYPE_COMMENT;
       $new_value = null;
       switch ($command) {
         case 'close':

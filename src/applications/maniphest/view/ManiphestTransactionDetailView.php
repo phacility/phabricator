@@ -231,7 +231,6 @@ final class ManiphestTransactionDetailView extends ManiphestView {
       if ($this->commentNumber) {
         $anchor_name = 'comment-'.$this->commentNumber;
         $anchor_text =
-          'T'.$any_transaction->getTaskID().
           '#'.$this->commentNumber;
 
         $xaction_view->setAnchor($anchor_name, $anchor_text);
@@ -343,7 +342,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
                   $this->renderExpandLink($transaction);
         }
         break;
-      case ManiphestTransactionType::TYPE_NONE:
+      case PhabricatorTransactions::TYPE_COMMENT:
         $verb = 'Commented On';
         $desc = 'added a comment';
         break;
@@ -535,14 +534,9 @@ final class ManiphestTransactionDetailView extends ManiphestView {
             'removed: '.$rem_desc;
         }
         break;
-      case ManiphestTransactionType::TYPE_AUXILIARY:
-        $aux_key = $transaction->getMetadataValue('aux:key');
-
-        // TODO: Migrate all legacy data when everything migrates for T2217.
-        $aux_field = $this->getAuxiliaryField($aux_key);
-        if (!$aux_field) {
-          $aux_field = $this->getAuxiliaryField('std:maniphest:'.$aux_key);
-        }
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $aux_key = $transaction->getMetadataValue('customfield:key');
+        $aux_field = idx($this->auxiliaryFields, $aux_key);
 
         if ($old === null) {
           $verb = "Set Field";
@@ -568,7 +562,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
 
         break;
       default:
-        return array($type, ' brazenly '.$type."'d", $classes);
+        return array($type, ' brazenly '.$type."'d", $classes, null);
     }
 
     // TODO: [HTML] This code will all be rewritten when we switch to using

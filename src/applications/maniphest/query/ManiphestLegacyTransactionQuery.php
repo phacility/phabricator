@@ -6,9 +6,18 @@ final class ManiphestLegacyTransactionQuery {
     PhabricatorUser $viewer,
     array $tasks) {
 
-    return id(new ManiphestTransaction())->loadAllWhere(
-      'taskID IN (%Ld) ORDER BY id ASC',
-      mpull($tasks, 'getID'));
+    $xactions = id(new ManiphestTransactionQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(mpull($tasks, 'getPHID'))
+      ->needComments(true)
+      ->execute();
+
+    foreach ($xactions as $key => $xaction) {
+      $xactions[$key] = ManiphestTransaction::newFromModernTransaction(
+        $xaction);
+    }
+
+    return $xactions;
   }
 
   public static function loadByTask(
@@ -22,7 +31,22 @@ final class ManiphestLegacyTransactionQuery {
     PhabricatorUser $viewer,
     $xaction_id) {
 
-    return id(new ManiphestTransaction())->load($xaction_id);
+    $xaction = id(new ManiphestTransactionPro())->load($xaction_id);
+    if (!$xaction) {
+      return null;
+    }
+
+    $xaction = id(new ManiphestTransactionQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($xaction->getPHID()))
+      ->needComments(true)
+      ->executeOne();
+
+    if ($xaction) {
+      $xaction = ManiphestTransaction::newFromModernTransaction($xaction);
+    }
+
+    return $xaction;
   }
 
 

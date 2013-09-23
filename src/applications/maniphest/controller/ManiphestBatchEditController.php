@@ -33,7 +33,7 @@ final class ManiphestBatchEditController extends ManiphestController {
       $task_ids = implode(',', mpull($tasks, 'getID'));
 
       return id(new AphrontRedirectResponse())
-        ->setURI('/maniphest/query/?ids='.$task_ids);
+        ->setURI('/maniphest/?ids='.$task_ids);
     }
 
     $handle_phids = mpull($tasks, 'getOwnerPHID');
@@ -147,7 +147,7 @@ final class ManiphestBatchEditController extends ManiphestController {
   private function buildTransactions($actions, ManiphestTask $task) {
     $value_map = array();
     $type_map = array(
-      'add_comment'     => ManiphestTransactionType::TYPE_NONE,
+      'add_comment'     => PhabricatorTransactions::TYPE_COMMENT,
       'assign'          => ManiphestTransactionType::TYPE_OWNER,
       'status'          => ManiphestTransactionType::TYPE_STATUS,
       'priority'        => ManiphestTransactionType::TYPE_PRIORITY,
@@ -182,7 +182,7 @@ final class ManiphestBatchEditController extends ManiphestController {
         $current = $value_map[$type];
       } else {
         switch ($type) {
-          case ManiphestTransactionType::TYPE_NONE:
+          case PhabricatorTransactions::TYPE_COMMENT:
             $current = null;
             break;
           case ManiphestTransactionType::TYPE_OWNER:
@@ -209,7 +209,7 @@ final class ManiphestBatchEditController extends ManiphestController {
 
       $value = $action['value'];
       switch ($type) {
-        case ManiphestTransactionType::TYPE_NONE:
+        case PhabricatorTransactions::TYPE_COMMENT:
           if (!strlen($value)) {
             continue 2;
           }
@@ -250,7 +250,7 @@ final class ManiphestBatchEditController extends ManiphestController {
       // some need to merge the current and edited values (add/remove project).
 
       switch ($type) {
-        case ManiphestTransactionType::TYPE_NONE:
+        case PhabricatorTransactions::TYPE_COMMENT:
           if (strlen($current)) {
             $value = $current."\n\n".$value;
           }
@@ -301,12 +301,15 @@ final class ManiphestBatchEditController extends ManiphestController {
 
     // TODO: Set content source to "batch edit".
 
+    $template->setContentSource(
+      PhabricatorContentSource::newFromRequest($this->getRequest()));
+
     foreach ($value_map as $type => $value) {
       $xaction = clone $template;
       $xaction->setTransactionType($type);
 
       switch ($type) {
-        case ManiphestTransactionType::TYPE_NONE:
+        case PhabricatorTransactions::TYPE_COMMENT:
           $xaction->setComments($value);
           break;
         default:

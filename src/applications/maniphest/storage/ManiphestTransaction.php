@@ -1,36 +1,156 @@
 <?php
 
-/**
- * @task markup Markup Interface
- * @group maniphest
- */
-final class ManiphestTransaction extends ManiphestDAO
+final class ManiphestTransaction
   implements PhabricatorMarkupInterface {
 
   const MARKUP_FIELD_BODY = 'markup:body';
 
-  protected $taskID;
-  protected $authorPHID;
-  protected $transactionType;
-  protected $oldValue;
-  protected $newValue;
-  protected $comments;
-  protected $metadata = array();
-  protected $contentSource;
+  private $proxy;
+  private $pendingComment;
 
-  public function setTransactionTask(ManiphestTask $task) {
-    $this->setTaskID($task->getID());
+  public function __construct() {
+    $this->proxy = new ManiphestTransactionPro();
+  }
+
+  public function __clone() {
+    $this->proxy = clone $this->proxy;
+  }
+
+  public static function newFromModernTransaction(
+    ManiphestTransactionPro $pro) {
+
+    $obj = new ManiphestTransaction();
+    $obj->proxy = $pro;
+
+    return $obj;
+  }
+
+  public function save() {
+    $this->proxy->openTransaction();
+      $this->proxy
+        ->setViewPolicy('public')
+        ->setEditPolicy($this->getAuthorPHID())
+        ->save();
+      if ($this->pendingComment) {
+        $comment = id(new ManiphestTransactionComment())
+          ->setTransactionPHID($this->proxy->getPHID())
+          ->setCommentVersion(1)
+          ->setAuthorPHID($this->getAuthorPHID())
+          ->setViewPolicy('public')
+          ->setEditPolicy($this->getAuthorPHID())
+          ->setContent($this->pendingComment)
+          ->setContentSource($this->getContentSource())
+          ->setIsDeleted(0)
+          ->save();
+
+        $this->proxy
+          ->setCommentVersion(1)
+          ->setCommentPHID($comment->getPHID())
+          ->save();
+
+        $this->pendingComment = null;
+      }
+    $this->proxy->saveTransaction();
+
     return $this;
   }
 
-  public function getConfiguration() {
-    return array(
-      self::CONFIG_SERIALIZATION => array(
-        'oldValue' => self::SERIALIZATION_JSON,
-        'newValue' => self::SERIALIZATION_JSON,
-        'metadata' => self::SERIALIZATION_JSON,
-      ),
-    ) + parent::getConfiguration();
+  public function setTransactionTask(ManiphestTask $task) {
+    $this->proxy->setObjectPHID($task->getPHID());
+    return $this;
+  }
+
+  public function getTaskPHID() {
+    return $this->proxy->getObjectPHID();
+  }
+
+  public function getID() {
+    return $this->proxy->getID();
+  }
+
+  public function setTaskID() {
+    throw new Exception("No longer supported!");
+  }
+
+  public function getTaskID() {
+    throw new Exception("No longer supported!");
+  }
+
+  public function getAuthorPHID() {
+    return $this->proxy->getAuthorPHID();
+  }
+
+  public function setAuthorPHID($phid) {
+    $this->proxy->setAuthorPHID($phid);
+    return $this;
+  }
+
+  public function getOldValue() {
+    return $this->proxy->getOldValue();
+  }
+
+  public function setOldValue($value) {
+    $this->proxy->setOldValue($value);
+    return $this;
+  }
+
+  public function getNewValue() {
+    return $this->proxy->getNewValue();
+  }
+
+  public function setNewValue($value) {
+    $this->proxy->setNewValue($value);
+    return $this;
+  }
+
+  public function getTransactionType() {
+    return $this->proxy->getTransactionType();
+  }
+
+  public function setTransactionType($value) {
+    $this->proxy->setTransactionType($value);
+    return $this;
+  }
+
+  public function setContentSource(PhabricatorContentSource $content_source) {
+    $this->proxy->setContentSource($content_source);
+    return $this;
+  }
+
+  public function getContentSource() {
+    return $this->proxy->getContentSource();
+  }
+
+  public function getMetadataValue($key, $default = null) {
+    return $this->proxy->getMetadataValue($key, $default);
+  }
+
+  public function setMetadataValue($key, $value) {
+    $this->proxy->setMetadataValue($key, $value);
+    return $this;
+  }
+
+  public function getComments() {
+    if ($this->pendingComment) {
+      return $this->pendingComment;
+    }
+    if ($this->proxy->getComment()) {
+      return $this->proxy->getComment()->getContent();
+    }
+    return null;
+  }
+
+  public function setComments($comment) {
+    $this->pendingComment = $comment;
+    return $this;
+  }
+
+  public function getDateCreated() {
+    return $this->proxy->getDateCreated();
+  }
+
+  public function getDateModified() {
+    return $this->proxy->getDateModified();
   }
 
   public function extractPHIDs() {
@@ -78,21 +198,6 @@ final class ManiphestTransaction extends ManiphestDAO
     return $phids;
   }
 
-  public function getMetadataValue($key, $default = null) {
-    if (!is_array($this->metadata)) {
-      return $default;
-    }
-    return idx($this->metadata, $key, $default);
-  }
-
-  public function setMetadataValue($key, $value) {
-    if (!is_array($this->metadata)) {
-      $this->metadata = array();
-    }
-    $this->metadata[$key] = $value;
-    return $this;
-  }
-
   public function canGroupWith($target) {
     if ($target->getAuthorPHID() != $this->getAuthorPHID()) {
       return false;
@@ -107,10 +212,10 @@ final class ManiphestTransaction extends ManiphestDAO
     }
 
     if ($target->getTransactionType() == $this->getTransactionType()) {
-      $aux_type = ManiphestTransactionType::TYPE_AUXILIARY;
+      $aux_type = PhabricatorTransactions::TYPE_CUSTOMFIELD;
       if ($this->getTransactionType() == $aux_type) {
-        $that_key = $target->getMetadataValue('aux:key');
-        $this_key = $this->getMetadataValue('aux:key');
+        $that_key = $target->getMetadataValue('customfield:key');
+        $this_key = $this->getMetadataValue('customfield:key');
         if ($that_key == $this_key) {
           return false;
         }
@@ -124,15 +229,6 @@ final class ManiphestTransaction extends ManiphestDAO
 
   public function hasComments() {
     return (bool)strlen(trim($this->getComments()));
-  }
-
-  public function setContentSource(PhabricatorContentSource $content_source) {
-    $this->contentSource = $content_source->serialize();
-    return $this;
-  }
-
-  public function getContentSource() {
-    return PhabricatorContentSource::newFromSerialized($this->contentSource);
   }
 
 

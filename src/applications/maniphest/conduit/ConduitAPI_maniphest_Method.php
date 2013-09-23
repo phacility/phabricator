@@ -68,7 +68,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
 
       $comments = $request->getValue('comments');
       if (!$is_new && $comments !== null) {
-        $changes[ManiphestTransactionType::TYPE_NONE] = null;
+        $changes[PhabricatorTransactions::TYPE_COMMENT] = null;
       }
 
       $title = $request->getValue('title');
@@ -151,7 +151,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
       $transaction = clone $template;
       $transaction->setTransactionType($type);
       $transaction->setNewValue($value);
-      if ($type == ManiphestTransactionType::TYPE_NONE) {
+      if ($type == PhabricatorTransactions::TYPE_COMMENT) {
         $transaction->setComments($comments);
       }
       $transactions[] = $transaction;
@@ -169,8 +169,8 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
         }
         $transaction = clone $template;
         $transaction->setTransactionType(
-          ManiphestTransactionType::TYPE_AUXILIARY);
-        $transaction->setMetadataValue('aux:key', $key);
+          PhabricatorTransactions::TYPE_CUSTOMFIELD);
+        $transaction->setMetadataValue('customfield:key', $key);
         $transaction->setOldValue(
           $field->getOldValueForApplicationTransactions());
         $transaction->setNewValue($auxiliary[$key]);

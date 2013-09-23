@@ -226,9 +226,9 @@ final class ManiphestTaskEditController extends ManiphestController {
           foreach ($aux_fields as $aux_field) {
             $transaction = clone $template;
             $transaction->setTransactionType(
-              ManiphestTransactionType::TYPE_AUXILIARY);
+              PhabricatorTransactions::TYPE_CUSTOMFIELD);
             $aux_key = $aux_field->getFieldKey();
-            $transaction->setMetadataValue('aux:key', $aux_key);
+            $transaction->setMetadataValue('customfield:key', $aux_key);
             $old = idx($old_values, $aux_key);
             $new = $aux_field->getNewValueForApplicationTransactions();
 
