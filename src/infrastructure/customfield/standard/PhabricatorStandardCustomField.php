@@ -282,11 +282,13 @@ abstract class PhabricatorStandardCustomField
         }
       }
       if ($this->isValueEmpty($value)) {
-        $errors[] = new PhabricatorApplicationTransactionValidationError(
+        $error = new PhabricatorApplicationTransactionValidationError(
           $type,
           pht('Required'),
           pht('%s is required.', $this->getFieldName()),
           $transaction);
+        $error->setIsMissingFieldError(true);
+        $errors[] = $error;
         $this->setFieldError(pht('Required'));
       }
     }

@@ -35,6 +35,7 @@ final class ManiphestBatchEditController extends ManiphestController {
             ->setActor($user)
             ->setContentSourceFromRequest($request)
             ->setContinueOnNoEffect(true)
+            ->setContinueOnMissingFields(true)
             ->applyTransactions($task, $xactions);
         }
       }

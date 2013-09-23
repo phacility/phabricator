@@ -15,6 +15,7 @@ abstract class PhabricatorApplicationTransactionEditor
   private $isNewObject;
   private $mentionedPHIDs;
   private $continueOnNoEffect;
+  private $continueOnMissingFields;
   private $parentMessageID;
   private $heraldAdapter;
   private $heraldTranscript;
@@ -43,6 +44,36 @@ abstract class PhabricatorApplicationTransactionEditor
   public function getContinueOnNoEffect() {
     return $this->continueOnNoEffect;
   }
+
+
+  /**
+   * When the editor tries to apply transactions which don't populate all of
+   * an object's required fields, should it raise an exception (default) or
+   * drop them and continue?
+   *
+   * For example, if a user adds a new required custom field (like "Severity")
+   * to a task, all existing tasks won't have it populated. When users
+   * manually edit existing tasks, it's usually desirable to have them provide
+   * a severity. However, other operations (like batch editing just the
+   * owner of a task) will fail by default.
+   *
+   * By setting this flag for edit operations which apply to specific fields
+   * (like the priority, batch, and merge editors in Maniphest), these
+   * operations can continue to function even if an object is outdated.
+   *
+   * @param bool  True to continue when transactions don't completely satisfy
+   *              all required fields.
+   * @return this
+   */
+  public function setContinueOnMissingFields($continue_on_missing_fields) {
+    $this->continueOnMissingFields = $continue_on_missing_fields;
+    return $this;
+  }
+
+  public function getContinueOnMissingFields() {
+    return $this->continueOnMissingFields;
+  }
+
 
   /**
    * Not strictly necessary, but reply handlers ideally set this value to
@@ -363,6 +394,14 @@ abstract class PhabricatorApplicationTransactionEditor
       }
 
       $errors = array_mergev($errors);
+
+      $continue_on_missing = $this->getContinueOnMissingFields();
+      foreach ($errors as $key => $error) {
+        if ($continue_on_missing && $error->getIsMissingFieldError()) {
+          unset($errors[$key]);
+        }
+      }
+
       if ($errors) {
         throw new PhabricatorApplicationTransactionValidationException($errors);
       }

@@ -204,6 +204,10 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
       ->setContentSource($content_source)
       ->setContinueOnNoEffect(true);
 
+    if (!$is_new) {
+      $editor->setContinueOnMissingFields(true);
+    }
+
     $editor->applyTransactions($task, $transactions);
 
     $event = new PhabricatorEvent(

@@ -7,6 +7,7 @@ final class PhabricatorApplicationTransactionValidationError
   private $transaction;
   private $shortMessage;
   private $message;
+  private $isMissingFieldError;
 
   public function __construct(
     $type,
@@ -34,6 +35,15 @@ final class PhabricatorApplicationTransactionValidationError
 
   public function getMessage() {
     return $this->message;
+  }
+
+  public function setIsMissingFieldError($is_missing_field_error) {
+    $this->isMissingFieldError = $is_missing_field_error;
+    return $this;
+  }
+
+  public function getIsMissingFieldError() {
+    return $this->isMissingFieldError;
   }
 
 }

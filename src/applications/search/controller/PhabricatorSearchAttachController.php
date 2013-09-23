@@ -157,8 +157,11 @@ final class PhabricatorSearchAttachController
       return $response;
     }
 
-    $editor = new ManiphestTransactionEditor();
-    $editor->setActor($user);
+    $editor = id(new ManiphestTransactionEditorPro())
+      ->setActor($user)
+      ->setContentSourceFromRequest($this->getRequest())
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true);
 
     $task_names = array();
 
@@ -172,13 +175,22 @@ final class PhabricatorSearchAttachController
         $target->getAuthorPHID(),
         $target->getOwnerPHID());
 
-      $close_task = id(new ManiphestTransaction())
-        ->setAuthorPHID($user->getPHID())
+      $close_task = id(new ManiphestTransactionPro())
         ->setTransactionType(ManiphestTransactionType::TYPE_STATUS)
-        ->setNewValue(ManiphestTaskStatus::STATUS_CLOSED_DUPLICATE)
-        ->setComments("\xE2\x9C\x98 Merged into {$merge_into_name}.");
+        ->setNewValue(ManiphestTaskStatus::STATUS_CLOSED_DUPLICATE);
 
-      $editor->applyTransactions($target, array($close_task));
+      $merge_comment = id(new ManiphestTransactionPro())
+        ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+        ->attachComment(
+          id(new ManiphestTransactionComment())
+            ->setContent("\xE2\x9C\x98 Merged into {$merge_into_name}."));
+
+      $editor->applyTransactions(
+        $target,
+        array(
+          $close_task,
+          $merge_comment,
+        ));
 
       $task_names[] = 'T'.$target->getID();
     }
@@ -188,12 +200,17 @@ final class PhabricatorSearchAttachController
 
     $task_names = implode(', ', $task_names);
 
-    $add_ccs = id(new ManiphestTransaction())
-      ->setAuthorPHID($user->getPHID())
+    $add_ccs = id(new ManiphestTransactionPro())
       ->setTransactionType(ManiphestTransactionType::TYPE_CCS)
-      ->setNewValue($all_ccs)
-      ->setComments("\xE2\x97\x80 Merged tasks: {$task_names}.");
-    $editor->applyTransactions($task, array($add_ccs));
+      ->setNewValue($all_ccs);
+
+    $merged_comment = id(new ManiphestTransactionPro())
+      ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+      ->attachComment(
+        id(new ManiphestTransactionComment())
+          ->setContent("\xE2\x97\x80 Merged tasks: {$task_names}."));
+
+    $editor->applyTransactions($task, array($add_ccs, $merged_comment));
 
     return $response;
   }

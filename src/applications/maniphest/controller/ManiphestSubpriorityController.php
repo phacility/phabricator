@@ -44,7 +44,8 @@ final class ManiphestSubpriorityController extends ManiphestController {
 
       $editor = id(new ManiphestTransactionEditorPro())
         ->setActor($user)
-        ->setContinueOnNoEffect($request->isContinueRequest())
+        ->setContinueOnMissingFields(true)
+        ->setContinueOnNoEffect(true)
         ->setContentSourceFromRequest($request);
 
       $editor->applyTransactions($task, $xactions);
