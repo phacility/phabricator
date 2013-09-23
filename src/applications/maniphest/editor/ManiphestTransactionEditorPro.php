@@ -8,6 +8,13 @@ final class ManiphestTransactionEditorPro
 
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = ManiphestTransactionPro::TYPE_PRIORITY;
+    $types[] = ManiphestTransactionPro::TYPE_STATUS;
+    $types[] = ManiphestTransactionPro::TYPE_TITLE;
+    $types[] = ManiphestTransactionPro::TYPE_DESCRIPTION;
+    $types[] = ManiphestTransactionPro::TYPE_OWNER;
+    $types[] = ManiphestTransactionPro::TYPE_CCS;
+    $types[] = ManiphestTransactionPro::TYPE_PROJECTS;
+    $types[] = ManiphestTransactionPro::TYPE_ATTACH;
 
     return $types;
   }
@@ -18,7 +25,21 @@ final class ManiphestTransactionEditorPro
 
     switch ($xaction->getTransactionType()) {
       case ManiphestTransactionPro::TYPE_PRIORITY:
-        return $object->getPriority();
+        return (int)$object->getPriority();
+      case ManiphestTransactionPro::TYPE_STATUS:
+        return (int)$object->getStatus();
+      case ManiphestTransactionPro::TYPE_TITLE:
+        return $object->getTitle();
+      case ManiphestTransactionPro::TYPE_DESCRIPTION:
+        return $object->getDescription();
+      case ManiphestTransactionPro::TYPE_OWNER:
+        return $object->getOwnerPHID();
+      case ManiphestTransactionPro::TYPE_CCS:
+        return $object->getCCPHIDs();
+      case ManiphestTransactionPro::TYPE_PROJECTS:
+        return $object->getProjectPHIDs();
+      case ManiphestTransactionPro::TYPE_ATTACH:
+        return $object->getAttached();
     }
 
   }
@@ -29,6 +50,14 @@ final class ManiphestTransactionEditorPro
 
     switch ($xaction->getTransactionType()) {
       case ManiphestTransactionPro::TYPE_PRIORITY:
+      case ManiphestTransactionPro::TYPE_STATUS:
+        return (int)$xaction->getNewValue();
+      case ManiphestTransactionPro::TYPE_TITLE:
+      case ManiphestTransactionPro::TYPE_DESCRIPTION:
+      case ManiphestTransactionPro::TYPE_OWNER:
+      case ManiphestTransactionPro::TYPE_CCS:
+      case ManiphestTransactionPro::TYPE_PROJECTS:
+      case ManiphestTransactionPro::TYPE_ATTACH:
         return $xaction->getNewValue();
     }
 
@@ -41,6 +70,20 @@ final class ManiphestTransactionEditorPro
     switch ($xaction->getTransactionType()) {
       case ManiphestTransactionPro::TYPE_PRIORITY:
         return $object->setPriority($xaction->getNewValue());
+      case ManiphestTransactionPro::TYPE_STATUS:
+        return $object->setStatus($xaction->getNewValue());
+      case ManiphestTransactionPro::TYPE_TITLE:
+        return $object->setTitle($xaction->getNewValue());
+      case ManiphestTransactionPro::TYPE_DESCRIPTION:
+        return $object->setDescription($xaction->getNewValue());
+      case ManiphestTransactionPro::TYPE_OWNER:
+        return $object->setOwnerPHID($xaction->getNewValue());
+      case ManiphestTransactionPro::TYPE_CCS:
+        return $object->setCCPHIDs($xaction->getNewValue());
+      case ManiphestTransactionPro::TYPE_PROJECTS:
+        return $object->setProjectPHIDs($xaction->getNewValue());
+      case ManiphestTransactionPro::TYPE_ATTACH:
+        return $object->setAttached($xaction->getNewValue());
     }
 
   }

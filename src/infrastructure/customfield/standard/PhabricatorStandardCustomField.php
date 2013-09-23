@@ -272,6 +272,7 @@ abstract class PhabricatorStandardCustomField
 
     if ($this->getRequired()) {
       $value = $this->getOldValueForApplicationTransactions();
+
       $transaction = null;
       foreach ($xactions as $xaction) {
         $value = $xaction->getNewValue();
