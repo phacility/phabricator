@@ -707,9 +707,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   public function getPolicy($capability) {
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
-        return PhabricatorPolicies::POLICY_USER;
+        return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
-        return PhabricatorPolicies::POLICY_ADMIN;
+        return $this->getEditPolicy();
     }
   }
 

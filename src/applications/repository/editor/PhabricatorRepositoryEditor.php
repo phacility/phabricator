@@ -10,6 +10,8 @@ final class PhabricatorRepositoryEditor
     $types[] = PhabricatorRepositoryTransaction::TYPE_NAME;
     $types[] = PhabricatorRepositoryTransaction::TYPE_DESCRIPTION;
     $types[] = PhabricatorRepositoryTransaction::TYPE_ENCODING;
+    $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
+    $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
     return $types;
   }

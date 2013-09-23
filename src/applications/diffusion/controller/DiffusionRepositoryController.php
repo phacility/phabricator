@@ -2,6 +2,10 @@
 
 final class DiffusionRepositoryController extends DiffusionController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function processRequest() {
     $drequest = $this->diffusionRequest;
 

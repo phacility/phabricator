@@ -2,6 +2,10 @@
 
 abstract class DiffusionBrowseController extends DiffusionController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   protected function renderSearchForm($collapsed) {
     $drequest = $this->getDiffusionRequest();
     $form = id(new AphrontFormView())
