@@ -78,17 +78,19 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
       case ManiphestTransactionType::TYPE_PROJECTS:
         if ($value) {
           $value = json_decode($value);
-          $phids = $value;
-          foreach ($task->getProjectPHIDs() as $project_phid) {
-            $phids[] = $project_phid;
-            $value[] = $project_phid;
-          }
-          $transaction->setNewValue($value);
-        } else {
-          $phids = array();
-          $transaction->setNewValue(array());
         }
+        if (!$value) {
+          $value = array();
+        }
+
+        $phids = $value;
+        foreach ($task->getProjectPHIDs() as $project_phid) {
+          $phids[] = $project_phid;
+          $value[] = $project_phid;
+        }
+
         $transaction->setOldValue($task->getProjectPHIDs());
+        $transaction->setNewValue($value);
         break;
       default:
         $phids = array();

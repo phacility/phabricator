@@ -59,9 +59,8 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         }
         $new[PhabricatorFilePHIDTypeFile::TYPECONST][$phid] = array();
       }
-      $transaction = new ManiphestTransaction();
+      $transaction = new ManiphestTransactionPro();
       $transaction
-        ->setAuthorPHID($user->getPHID())
         ->setTransactionType(ManiphestTransactionType::TYPE_ATTACH);
       $transaction->setNewValue($new);
       $transactions[] = $transaction;
@@ -77,15 +76,13 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         $request->getStr('comments'),
       ));
 
-    $cc_transaction = new ManiphestTransaction();
+    $cc_transaction = new ManiphestTransactionPro();
     $cc_transaction
-      ->setAuthorPHID($user->getPHID())
       ->setTransactionType(ManiphestTransactionType::TYPE_CCS);
     $force_cc_transaction = false;
 
-    $transaction = new ManiphestTransaction();
+    $transaction = new ManiphestTransactionPro();
     $transaction
-      ->setAuthorPHID($user->getPHID())
       ->setTransactionType($action);
 
     switch ($action) {
@@ -139,10 +136,11 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     }
 
     if ($request->getStr('comments')) {
-      $transactions[] = id(new ManiphestTransaction())
-        ->setAuthorPHID($user->getPHID())
+      $transactions[] = id(new ManiphestTransactionPro())
         ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
-        ->setComments($request->getStr('comments'));
+        ->attachComment(
+          id(new ManiphestTransactionComment())
+            ->setContent($request->getStr('comments')));
     }
 
     // When you interact with a task, we add you to the CC list so you get
@@ -168,7 +166,6 @@ final class ManiphestTransactionSaveController extends ManiphestController {
           // Closing an unassigned task. Assign the user as the owner of
           // this task.
           $assign = new ManiphestTransaction();
-          $assign->setAuthorPHID($user->getPHID());
           $assign->setTransactionType(ManiphestTransactionType::TYPE_OWNER);
           $assign->setNewValue($user->getPHID());
           $transactions[] = $assign;
@@ -194,8 +191,10 @@ final class ManiphestTransactionSaveController extends ManiphestController {
 
     if (!$user_owns_task) {
       // If we aren't making the user the new task owner and they aren't the
-      // existing task owner, add them to CC.
-      $added_ccs[] = $user->getPHID();
+      // existing task owner, add them to CC unless they're aleady CC'd.
+      if (!in_array($user->getPHID(), $task->getCCPHIDs())) {
+        $added_ccs[] = $user->getPHID();
+      }
     }
 
     if ($added_ccs || $force_cc_transaction) {
@@ -205,16 +204,6 @@ final class ManiphestTransactionSaveController extends ManiphestController {
       $all_ccs = array_merge($task->getCCPHIDs(), $added_ccs);
       $cc_transaction->setNewValue($all_ccs);
       $transactions[] = $cc_transaction;
-    }
-
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_WEB,
-      array(
-        'ip' => $request->getRemoteAddr(),
-      ));
-
-    foreach ($transactions as $transaction) {
-      $transaction->setContentSource($content_source);
     }
 
     $event = new PhabricatorEvent(
@@ -231,9 +220,11 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     $task = $event->getValue('task');
     $transactions = $event->getValue('transactions');
 
-    $editor = new ManiphestTransactionEditor();
-    $editor->setActor($user);
-    $editor->applyTransactions($task, $transactions);
+    $editor = id(new ManiphestTransactionEditorPro())
+      ->setActor($user)
+      ->setContentSourceFromRequest($request)
+      ->setContinueOnMissingFields(true)
+      ->applyTransactions($task, $transactions);
 
     $draft = id(new PhabricatorDraft())->loadOneWhere(
       'authorPHID = %s AND draftKey = %s',

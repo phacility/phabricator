@@ -306,7 +306,7 @@ final class ManiphestTransactionPro
             $this->renderHandleLink($author_phid),
             count($removed),
             $this->renderHandleList($removed));
-        } else {
+        } else if ($removed && $added) {
           return pht(
             '%s changed projects, added %d: %s; removed %d: %s',
             $this->renderHandleLink($author_phid),
@@ -314,6 +314,11 @@ final class ManiphestTransactionPro
             $this->renderHandleList($added),
             count($removed),
             $this->renderHandleList($removed));
+        } else {
+          // This is hit when rendering previews.
+          return pht(
+            '%s changed projects...',
+            $this->renderHandleLink($author_phid));
         }
 
       case self::TYPE_PRIORITY:

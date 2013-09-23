@@ -36,7 +36,7 @@ final class ManiphestTransactionEditorPro
       case ManiphestTransactionPro::TYPE_OWNER:
         return $object->getOwnerPHID();
       case ManiphestTransactionPro::TYPE_CCS:
-        return $object->getCCPHIDs();
+        return array_values(array_unique($object->getCCPHIDs()));
       case ManiphestTransactionPro::TYPE_PROJECTS:
         return $object->getProjectPHIDs();
       case ManiphestTransactionPro::TYPE_ATTACH:
@@ -56,10 +56,11 @@ final class ManiphestTransactionEditorPro
       case ManiphestTransactionPro::TYPE_PRIORITY:
       case ManiphestTransactionPro::TYPE_STATUS:
         return (int)$xaction->getNewValue();
+      case ManiphestTransactionPro::TYPE_CCS:
+        return array_values(array_unique($xaction->getNewValue()));
       case ManiphestTransactionPro::TYPE_TITLE:
       case ManiphestTransactionPro::TYPE_DESCRIPTION:
       case ManiphestTransactionPro::TYPE_OWNER:
-      case ManiphestTransactionPro::TYPE_CCS:
       case ManiphestTransactionPro::TYPE_PROJECTS:
       case ManiphestTransactionPro::TYPE_ATTACH:
       case ManiphestTransactionPro::TYPE_EDGE:
