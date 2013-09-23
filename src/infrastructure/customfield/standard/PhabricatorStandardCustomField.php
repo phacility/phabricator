@@ -9,7 +9,7 @@ abstract class PhabricatorStandardCustomField
   private $fieldDescription;
   private $fieldConfig;
   private $applicationField;
-  private $strings;
+  private $strings = array();
   private $caption;
   private $fieldError;
   private $required;
