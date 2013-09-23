@@ -1176,7 +1176,7 @@ abstract class PhabricatorApplicationTransactionEditor
       ->setFrom($this->requireActor()->getPHID())
       ->setSubjectPrefix($this->getMailSubjectPrefix())
       ->setVarySubjectPrefix('['.$action.']')
-      ->setThreadID($object->getPHID(), $this->getIsNewObject())
+      ->setThreadID($this->getMailThreadID($object), $this->getIsNewObject())
       ->setRelatedPHID($object->getPHID())
       ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
       ->setMailTags($mail_tags)
@@ -1202,6 +1202,10 @@ abstract class PhabricatorApplicationTransactionEditor
     $template->addCCs($email_cc);
 
     return $template;
+  }
+
+  protected function getMailThreadID(PhabricatorLiskDAO $object) {
+    return $object->getPHID();
   }
 
 
