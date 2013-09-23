@@ -74,6 +74,149 @@ final class ManiphestTransactionPro
     return $phids;
   }
 
+
+  public function getColor() {
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_STATUS:
+        if ($new == ManiphestTaskStatus::STATUS_OPEN) {
+          if ($old) {
+            return 'violet';
+          } else {
+            return 'green';
+          }
+        } else {
+          return 'black';
+        }
+
+      case self::TYPE_PRIORITY:
+        if ($old == ManiphestTaskPriority::getDefaultPriority()) {
+          return 'green';
+        } else if ($old > $new) {
+          return 'grey';
+        } else {
+          return 'yellow';
+        }
+
+    }
+
+    return parent::getColor();
+  }
+
+  public function getActionName() {
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_TITLE:
+        return pht('Retitled');
+
+      case self::TYPE_STATUS:
+        if ($new == ManiphestTaskStatus::STATUS_OPEN) {
+          if ($old) {
+            return pht('Reopened');
+          } else {
+            return pht('Created');
+          }
+        } else {
+          switch ($new) {
+            case ManiphestTaskStatus::STATUS_CLOSED_SPITE:
+              return pht('Spited');
+            case ManiphestTaskStatus::STATUS_CLOSED_DUPLICATE:
+              return pht('Merged');
+            default:
+              return pht('Closed');
+          }
+        }
+
+      case self::TYPE_DESCRIPTION:
+        return pht('Edited');
+
+      case self::TYPE_OWNER:
+        if ($this->getAuthorPHID() == $new) {
+          return pht('Claimed');
+        } else if (!$new) {
+          return pht('Up For Grabs');
+        } else if (!$old) {
+          return pht('Assigned');
+        } else {
+          return pht('Reassigned');
+        }
+
+      case self::TYPE_CCS:
+        return pht('Changed CC');
+
+      case self::TYPE_PROJECTS:
+        return pht('Changed Projects');
+
+      case self::TYPE_PRIORITY:
+        if ($old == ManiphestTaskPriority::getDefaultPriority()) {
+          return pht('Triaged');
+        } else if ($old > $new) {
+          return pht('Lowered Priority');
+        } else {
+          return pht('Raised Priority');
+        }
+
+      case self::TYPE_EDGE:
+      case self::TYPE_ATTACH:
+        return pht('Attached');
+    }
+
+    return parent::getActionName();
+  }
+
+  public function getIcon() {
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_TITLE:
+        return 'edit';
+
+      case self::TYPE_STATUS:
+        if ($new == ManiphestTaskStatus::STATUS_OPEN) {
+          return 'create';
+        } else {
+          switch ($new) {
+            case ManiphestTaskStatus::STATUS_CLOSED_SPITE:
+              return 'dislike';
+            case ManiphestTaskStatus::STATUS_CLOSED_DUPLICATE:
+              return 'delete';
+            default:
+              return 'check';
+          }
+        }
+
+      case self::TYPE_DESCRIPTION:
+        return 'edit';
+
+      case self::TYPE_PROJECTS:
+        return 'tag';
+
+      case self::TYPE_PRIORITY:
+        if ($old == ManiphestTaskPriority::getDefaultPriority()) {
+          return 'start-sandcastle';
+          return pht('Triaged');
+        } else if ($old > $new) {
+          return 'download-alt';
+        } else {
+          return 'upload';
+        }
+
+      case self::TYPE_EDGE:
+      case self::TYPE_ATTACH:
+        return 'attach';
+
+    }
+
+    return parent::getIcon();
+  }
+
+
+
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
 
