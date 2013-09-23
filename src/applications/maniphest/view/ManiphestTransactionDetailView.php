@@ -11,10 +11,6 @@ final class ManiphestTransactionDetailView extends ManiphestView {
   private $forEmail;
   private $preview;
   private $commentNumber;
-  private $rangeSpecification;
-
-  private $renderSummaryOnly;
-  private $renderFullSummary;
 
   private $auxiliaryFields;
 
@@ -50,36 +46,9 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     return $this;
   }
 
-  public function setRenderSummaryOnly($render_summary_only) {
-    $this->renderSummaryOnly = $render_summary_only;
-    return $this;
-  }
-
-  public function getRenderSummaryOnly() {
-    return $this->renderSummaryOnly;
-  }
-
-  public function setRenderFullSummary($render_full_summary) {
-    $this->renderFullSummary = $render_full_summary;
-    return $this;
-  }
-
-  public function getRenderFullSummary() {
-    return $this->renderFullSummary;
-  }
-
   public function setCommentNumber($comment_number) {
     $this->commentNumber = $comment_number;
     return $this;
-  }
-
-  public function setRangeSpecification($range) {
-    $this->rangeSpecification = $range;
-    return $this;
-  }
-
-  public function getRangeSpecification() {
-    return $this->rangeSpecification;
   }
 
   public function renderForEmail($with_date) {
@@ -179,9 +148,6 @@ final class ManiphestTransactionDetailView extends ManiphestView {
       }
       $more_classes = array_merge($more_classes, $classes);
       $full_summary = null;
-      if ($this->getRenderFullSummary()) {
-        $full_summary = $this->renderFullSummary($transaction);
-      }
       $descs[] = javelin_tag(
         'div',
         array(
@@ -194,10 +160,6 @@ final class ManiphestTransactionDetailView extends ManiphestView {
           '.',
           $full_summary,
         ));
-    }
-
-    if ($this->getRenderSummaryOnly()) {
-      return phutil_implode_html("\n", $descs);
     }
 
     if ($comment_transaction && $comment_transaction->hasComments()) {
@@ -335,12 +297,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         break;
       case ManiphestTransactionType::TYPE_DESCRIPTION:
         $verb = 'Edited';
-        if ($this->forEmail || $this->getRenderFullSummary()) {
-          $desc = 'updated the task description';
-        } else {
-          $desc = 'updated the task description; '.
-                  $this->renderExpandLink($transaction);
-        }
+        $desc = 'updated the task description';
         break;
       case PhabricatorTransactions::TYPE_COMMENT:
         $verb = 'Commented On';
@@ -571,39 +528,6 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     $desc = phutil_safe_html($desc);
 
     return array($verb, $desc, $classes, $full);
-  }
-
-  private function renderFullSummary($transaction) {
-    switch ($transaction->getTransactionType()) {
-      case ManiphestTransactionType::TYPE_DESCRIPTION:
-        $id = $transaction->getID();
-
-        $old_text = phutil_utf8_hard_wrap($transaction->getOldValue(), 80);
-        $old_text = implode("\n", $old_text);
-        $new_text = phutil_utf8_hard_wrap($transaction->getNewValue(), 80);
-        $new_text = implode("\n", $new_text);
-
-        $engine = new PhabricatorDifferenceEngine();
-        $changeset = $engine->generateChangesetFromFileContent($old_text,
-                                                               $new_text);
-
-        $whitespace_mode = DifferentialChangesetParser::WHITESPACE_SHOW_ALL;
-
-        $parser = new DifferentialChangesetParser();
-        $parser->setChangeset($changeset);
-        $parser->setRenderingReference($id);
-        $parser->setMarkupEngine($this->markupEngine);
-        $parser->setWhitespaceMode($whitespace_mode);
-
-        $spec = $this->getRangeSpecification();
-        list($range_s, $range_e, $mask) =
-          DifferentialChangesetParser::parseRangeSpecification($spec);
-        $output = $parser->render($range_s, $range_e, $mask);
-
-        return $output;
-    }
-
-    return null;
   }
 
   private function renderExpandLink($transaction) {

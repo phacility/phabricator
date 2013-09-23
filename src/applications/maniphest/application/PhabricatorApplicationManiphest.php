@@ -56,8 +56,6 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
         'task/' => array(
           'create/' => 'ManiphestTaskEditController',
           'edit/(?P<id>[1-9]\d*)/' => 'ManiphestTaskEditController',
-          'descriptionchange/(?:(?P<id>[1-9]\d*)/)?' =>
-            'ManiphestTaskDescriptionChangeController',
           'descriptionpreview/' =>
             'PhabricatorMarkupPreviewController',
         ),
