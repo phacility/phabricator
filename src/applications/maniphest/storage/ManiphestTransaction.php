@@ -25,6 +25,10 @@ final class ManiphestTransaction
     return $obj;
   }
 
+  public function getModernTransaction() {
+    return $this->proxy;
+  }
+
   public function save() {
     $this->proxy->openTransaction();
       $this->proxy

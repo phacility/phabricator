@@ -79,6 +79,10 @@ final class ManiphestEdgeEventListener extends PhutilEventListener {
           ->setOldValue($old_type)
           ->setNewValue($new_type)
           ->setMetadataValue('edge:type', $type)
+          ->setContentSource(
+            PhabricatorContentSource::newForSource(
+              PhabricatorContentSource::SOURCE_LEGACY,
+              array()))
           ->setAuthorPHID($event->getUser()->getPHID());
       }
 

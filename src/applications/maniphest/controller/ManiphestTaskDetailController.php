@@ -69,11 +69,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $edges = idx($query->execute(), $phid);
     $phids = array_fill_keys($query->getDestinationPHIDs(), true);
 
-    foreach ($transactions as $transaction) {
-      foreach ($transaction->extractPHIDs() as $phid) {
-        $phids[$phid] = true;
-      }
-    }
     foreach ($task->getCCPHIDs() as $phid) {
       $phids[$phid] = true;
     }
@@ -140,8 +135,11 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $engine->setViewer($user);
     $engine->addObject($task, ManiphestTask::MARKUP_FIELD_DESCRIPTION);
     foreach ($transactions as $xaction) {
-      if ($xaction->hasComments()) {
-        $engine->addObject($xaction, ManiphestTransaction::MARKUP_FIELD_BODY);
+      $modern_xaction = $xaction->getModernTransaction();
+      if ($modern_xaction->getComment()) {
+        $engine->addObject(
+          $modern_xaction->getComment(),
+          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
       }
     }
 
@@ -318,12 +316,11 @@ final class ManiphestTaskDetailController extends ManiphestController {
       </div>',
       pht('Loading preview...'));
 
-    $transaction_view = new ManiphestTransactionListView();
-    $transaction_view->setTransactions($transactions);
-    $transaction_view->setHandles($this->getLoadedHandles());
-    $transaction_view->setUser($user);
-    $transaction_view->setAuxiliaryFields($aux_fields);
-    $transaction_view->setMarkupEngine($engine);
+    $timeline = id(new PhabricatorApplicationTransactionView())
+      ->setUser($user)
+      ->setObjectPHID($task->getPHID())
+      ->setTransactions(mpull($transactions, 'getModernTransaction'))
+      ->setMarkupEngine($engine);
 
     $object_name = 'T'.$task->getID();
     $actions = $this->buildActionView($task);
@@ -345,7 +342,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
         $header,
         $actions,
         $properties,
-        $transaction_view,
+        $timeline,
         $comment_header,
         $comment_form,
         $preview_panel,

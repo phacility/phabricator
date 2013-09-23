@@ -347,6 +347,23 @@ abstract class PhabricatorApplicationTransaction
             $this->renderHandleList($rem));
         }
 
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $key = $this->getMetadataValue('customfield:key');
+        $field = PhabricatorCustomField::getObjectField(
+          // TODO: This is a giant hack, but we currently don't have a way to
+          // get the contextual object and this pathway is only hit by
+          // Maniphest. We should provide a way to get the actual object here.
+          new ManiphestTask(),
+          PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS,
+          $key);
+        if ($field) {
+          return $field->getApplicationTransactionTitle($this);
+        } else {
+          return pht(
+            '%s edited a custom field.',
+            $this->renderHandleLink($author_phid));
+        }
+
       default:
         return pht(
           '%s edited this %s.',
