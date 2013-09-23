@@ -1,7 +1,6 @@
 <?php
 
-final class ManiphestTransaction
-  implements PhabricatorMarkupInterface {
+final class ManiphestTransaction {
 
   const MARKUP_FIELD_BODY = 'markup:body';
 
@@ -14,15 +13,6 @@ final class ManiphestTransaction
 
   public function __clone() {
     $this->proxy = clone $this->proxy;
-  }
-
-  public static function newFromModernTransaction(
-    ManiphestTransactionPro $pro) {
-
-    $obj = new ManiphestTransaction();
-    $obj->proxy = $pro;
-
-    return $obj;
   }
 
   public function getModernTransaction() {
@@ -204,88 +194,8 @@ final class ManiphestTransaction
     return $phids;
   }
 
-  public function canGroupWith($target) {
-    if ($target->getAuthorPHID() != $this->getAuthorPHID()) {
-      return false;
-    }
-    if ($target->hasComments() && $this->hasComments()) {
-      return false;
-    }
-    $ttime = $target->getDateCreated();
-    $stime = $this->getDateCreated();
-    if (abs($stime - $ttime) > 60) {
-      return false;
-    }
-
-    if ($target->getTransactionType() == $this->getTransactionType()) {
-      $aux_type = PhabricatorTransactions::TYPE_CUSTOMFIELD;
-      if ($this->getTransactionType() == $aux_type) {
-        $that_key = $target->getMetadataValue('customfield:key');
-        $this_key = $this->getMetadataValue('customfield:key');
-        if ($that_key == $this_key) {
-          return false;
-        }
-      } else {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
   public function hasComments() {
     return (bool)strlen(trim($this->getComments()));
-  }
-
-
-/* -(  Markup Interface  )--------------------------------------------------- */
-
-
-  /**
-   * @task markup
-   */
-  public function getMarkupFieldKey($field) {
-    if ($this->shouldUseMarkupCache($field)) {
-      $id = $this->getID();
-    } else {
-      $id = PhabricatorHash::digest($this->getMarkupText($field));
-    }
-    return "maniphest:x:{$field}:{$id}";
-  }
-
-
-  /**
-   * @task markup
-   */
-  public function getMarkupText($field) {
-    return $this->getComments();
-  }
-
-
-  /**
-   * @task markup
-   */
-  public function newMarkupEngine($field) {
-    return PhabricatorMarkupEngine::newManiphestMarkupEngine();
-  }
-
-
-  /**
-   * @task markup
-   */
-  public function didMarkupText(
-    $field,
-    $output,
-    PhutilMarkupEngine $engine) {
-    return $output;
-  }
-
-
-  /**
-   * @task markup
-   */
-  public function shouldUseMarkupCache($field) {
-    return (bool)$this->getID();
   }
 
 }
