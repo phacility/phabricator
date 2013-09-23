@@ -2924,15 +2924,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/maniphest/task-summary.css',
   ),
-  'maniphest-transaction-detail-css' =>
-  array(
-    'uri' => '/res/f2c9582c/rsrc/css/application/maniphest/transaction-detail.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/application/maniphest/transaction-detail.css',
-  ),
   'multirow-row-manager' =>
   array(
     'uri' => '/res/408fae4f/rsrc/js/core/MultirowRowManager.js',
@@ -4380,16 +4371,15 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/9564fa17/javelin.pkg.js',
       'type' => 'js',
     ),
-    '36d5d071' =>
+    49898640 =>
     array(
       'name' => 'maniphest.pkg.css',
       'symbols' =>
       array(
         0 => 'maniphest-task-summary-css',
-        1 => 'maniphest-transaction-detail-css',
-        2 => 'phabricator-project-tag-css',
+        1 => 'phabricator-project-tag-css',
       ),
-      'uri' => '/res/pkg/36d5d071/maniphest.pkg.css',
+      'uri' => '/res/pkg/49898640/maniphest.pkg.css',
       'type' => 'css',
     ),
     '83a3853e' =>
@@ -4505,8 +4495,7 @@ celerity_register_resource_map(array(
     'javelin-vector' => '9564fa17',
     'javelin-workflow' => '9564fa17',
     'lightbox-attachment-css' => 'b1d5e69b',
-    'maniphest-task-summary-css' => '36d5d071',
-    'maniphest-transaction-detail-css' => '36d5d071',
+    'maniphest-task-summary-css' => '49898640',
     'phabricator-action-list-view-css' => 'b1d5e69b',
     'phabricator-application-launch-view-css' => 'b1d5e69b',
     'phabricator-busy' => '8977e356',
@@ -4531,7 +4520,7 @@ celerity_register_resource_map(array(
     'phabricator-object-selector-css' => '44bfe40c',
     'phabricator-phtize' => '8977e356',
     'phabricator-prefab' => '8977e356',
-    'phabricator-project-tag-css' => '36d5d071',
+    'phabricator-project-tag-css' => '49898640',
     'phabricator-property-list-view-css' => 'b1d5e69b',
     'phabricator-remarkup-css' => 'b1d5e69b',
     'phabricator-shaped-request' => '5e9e5c4e',

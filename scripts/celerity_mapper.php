@@ -161,7 +161,6 @@ $package_spec = array(
   ),
   'maniphest.pkg.css' => array(
     'maniphest-task-summary-css',
-    'maniphest-transaction-detail-css',
     'phabricator-project-tag-css',
   ),
   'maniphest.pkg.js' => array(
