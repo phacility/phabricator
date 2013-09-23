@@ -68,35 +68,23 @@ final class DiffusionLintDetailsController extends DiffusionController {
       ->setHasMorePages(count($messages) >= $limit)
       ->setURI($this->getRequest()->getRequestURI(), 'offset');
 
-    $lint = $drequest->getLint();
-    $link = hsprintf(
-      '<a href="%s">%s</a>',
-      $drequest->generateURI(array(
-        'action' => 'lint',
-        'lint' => null,
-      )),
-      pht('Switch to Grouped View'));
-
     $content[] = id(new AphrontPanelView())
-      ->setHeader(
-        ($lint != '' ? $lint." \xC2\xB7 " : '').
-        pht('%d Lint Message(s)', count($messages)))
-      ->setCaption($link)
+      ->setNoBackground(true)
       ->appendChild($table)
       ->appendChild($pager);
 
-    $nav = $this->buildSideNav('lint', false);
-    $nav->appendChild($content);
     $crumbs = $this->buildCrumbs(
       array(
         'branch' => true,
         'path'   => true,
         'view'   => 'lint',
       ));
-    $nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(
-      $nav,
+      array(
+        $crumbs,
+        $content,
+      ),
       array(
         'device' => true,
         'title' =>

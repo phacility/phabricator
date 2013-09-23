@@ -2,6 +2,10 @@
 
 final class DiffusionLintController extends DiffusionController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
     $user = $this->getRequest()->getUser();
@@ -17,7 +21,9 @@ final class DiffusionLintController extends DiffusionController {
     $owners = array();
     if (!$drequest) {
       if (!$request->getArr('owner')) {
-        $owners[$user->getPHID()] = $user->getFullName();
+        if ($user->isLoggedIn()) {
+          $owners[$user->getPHID()] = $user->getFullName();
+        }
       } else {
         $phids = $request->getArr('owner');
         $phid = reset($phids);
@@ -29,16 +35,23 @@ final class DiffusionLintController extends DiffusionController {
     $codes = $this->loadLintCodes(array_keys($owners));
 
     if ($codes && !$drequest) {
+      // TODO: Build some real Query classes for this stuff.
+
       $branches = id(new PhabricatorRepositoryBranch())->loadAllWhere(
         'id IN (%Ld)',
         array_unique(ipull($codes, 'branchID')));
 
-      $repositories = id(new PhabricatorRepository())->loadAllWhere(
-        'id IN (%Ld)',
-        array_unique(mpull($branches, 'getRepositoryID')));
+      $repositories = id(new PhabricatorRepositoryQuery())
+        ->setViewer($user)
+        ->withIDs(mpull($branches, 'getRepositoryID'))
+        ->execute();
 
       $drequests = array();
       foreach ($branches as $id => $branch) {
+        if (empty($repositories[$branch->getRepositoryID()])) {
+          continue;
+        }
+
         $drequests[$id] = DiffusionRequest::newFromDictionary(array(
           'user' => $user,
           'repository' => $repositories[$branch->getRepositoryID()],
@@ -48,10 +61,17 @@ final class DiffusionLintController extends DiffusionController {
     }
 
     $rows = array();
+    $total = 0;
     foreach ($codes as $code) {
       if (!$this->diffusionRequest) {
-        $drequest = $drequests[$code['branchID']];
+        $drequest = idx($drequests, $code['branchID']);
       }
+
+      if (!$drequest) {
+        continue;
+      }
+
+      $total += $code['n'];
 
       $rows[] = array(
         hsprintf(
@@ -95,16 +115,7 @@ final class DiffusionLintController extends DiffusionController {
     $content = array();
 
     $link = null;
-    if ($this->diffusionRequest) {
-      $link = hsprintf(
-        '<a href="%s">%s</a>',
-        $drequest->generateURI(array(
-          'action' => 'lint',
-          'lint' => '',
-        )),
-        pht('Switch to List View'));
-
-    } else {
+    if (!$this->diffusionRequest) {
       $form = id(new AphrontFormView())
         ->setUser($user)
         ->setMethod('GET')
@@ -122,7 +133,7 @@ final class DiffusionLintController extends DiffusionController {
     }
 
     $content[] = id(new AphrontPanelView())
-      ->setHeader(pht('%d Lint Message(s)', array_sum(ipull($codes, 'n'))))
+      ->setNoBackground(true)
       ->setCaption($link)
       ->appendChild($table);
 
@@ -133,21 +144,45 @@ final class DiffusionLintController extends DiffusionController {
         'path'   => true,
         'view'   => 'lint',
       ));
+
     if ($this->diffusionRequest) {
       $title[] = $drequest->getCallsign();
-      $content = $this->buildSideNav('lint', false)
-        ->setCrumbs($crumbs)
-        ->appendChild($content);
     } else {
-      array_unshift($content, $crumbs);
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('All Lint')));
     }
 
+    if ($this->diffusionRequest) {
+      $branch = $drequest->loadBranch();
+
+      $header = id(new PHUIHeaderView())
+        ->setHeader($this->renderPathLinks($drequest, 'lint'))
+        ->setUser($user)
+        ->setPolicyObject($drequest->getRepository());
+      $actions = $this->buildActionView($drequest);
+      $properties = $this->buildPropertyView(
+        $drequest,
+        $branch,
+        $total);
+    } else {
+      $header = null;
+      $actions = null;
+      $properties = null;
+    }
+
+
     return $this->buildApplicationPage(
-      $content,
+      array(
+        $crumbs,
+        $header,
+        $actions,
+        $properties,
+        $content,
+      ),
       array(
         'title' => $title,
-        'device' => true,
-        ));
+      ));
   }
 
   private function loadLintCodes(array $owner_phids) {
@@ -232,5 +267,82 @@ final class DiffusionLintController extends DiffusionController {
       PhabricatorRepository::TABLE_LINTMESSAGE,
       implode(' AND ', $where));
   }
+
+  protected function buildActionView(DiffusionRequest $drequest) {
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PhabricatorActionListView())
+      ->setUser($viewer);
+
+    $list_uri = $drequest->generateURI(
+      array(
+        'action' => 'lint',
+        'lint' => '',
+      ));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('View As List'))
+        ->setHref($list_uri)
+        ->setIcon('transcript'));
+
+    $history_uri = $drequest->generateURI(
+      array(
+        'action' => 'history',
+      ));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('View History'))
+        ->setHref($history_uri)
+        ->setIcon('history'));
+
+    $browse_uri = $drequest->generateURI(
+      array(
+        'action' => 'browse',
+      ));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Browse Content'))
+        ->setHref($browse_uri)
+        ->setIcon('file'));
+
+    return $view;
+  }
+
+  protected function buildPropertyView(
+    DiffusionRequest $drequest,
+    PhabricatorRepositoryBranch $branch,
+    $total) {
+
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PhabricatorPropertyListView())
+      ->setUser($viewer);
+
+    $callsign = $drequest->getRepository()->getCallsign();
+    $lint_commit = $branch->getLintCommit();
+
+    $view->addProperty(
+      pht('Lint Commit'),
+      phutil_tag(
+        'a',
+        array(
+          'href' => $drequest->generateURI(
+            array(
+              'action' => 'commit',
+              'commit' => $lint_commit,
+            )),
+        ),
+        $drequest->getRepository()->formatCommitName($lint_commit)));
+
+    $view->addProperty(
+      pht('Total Messages'),
+      pht('%s', new PhutilNumber($total)));
+
+    return $view;
+  }
+
 
 }
