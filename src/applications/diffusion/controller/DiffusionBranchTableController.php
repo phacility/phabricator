@@ -2,6 +2,10 @@
 
 final class DiffusionBranchTableController extends DiffusionController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function processRequest() {
     $drequest = $this->getDiffusionRequest();
     $request = $this->getRequest();
@@ -44,19 +48,21 @@ final class DiffusionBranchTableController extends DiffusionController {
         ->setDiffusionRequest($drequest);
 
       $panel = id(new AphrontPanelView())
-        ->setHeader(pht('Branches'))
+        ->setNoBackground(true)
         ->appendChild($view)
         ->appendChild($pager);
 
       $content = $panel;
     }
 
-    return $this->buildStandardPageResponse(
+    $crumbs = $this->buildCrumbs(
       array(
-        $this->buildCrumbs(
-          array(
-            'branches'    => true,
-          )),
+        'branches'    => true,
+      ));
+
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
         $content,
       ),
       array(

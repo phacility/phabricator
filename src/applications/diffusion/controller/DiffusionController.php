@@ -25,22 +25,6 @@ abstract class DiffusionController extends PhabricatorController {
     return $this->diffusionRequest;
   }
 
-  public function buildStandardPageResponse($view, array $data) {
-
-    $page = $this->buildStandardPageView();
-
-    $page->setApplicationName(pht('Diffusion'));
-    $page->setBaseURI('/diffusion/');
-    $page->setTitle(idx($data, 'title'));
-    $page->setGlyph("\xE2\x89\x88");
-    $page->setSearchDefaultScope(PhabricatorSearchScope::SCOPE_COMMITS);
-
-    $page->appendChild($view);
-
-    $response = new AphrontWebpageResponse();
-    return $response->setContent($page->render());
-  }
-
   final protected function buildSideNav($selected, $has_change_view) {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI(''));
