@@ -15,6 +15,7 @@ final class ManiphestTransactionEditorPro
     $types[] = ManiphestTransactionPro::TYPE_CCS;
     $types[] = ManiphestTransactionPro::TYPE_PROJECTS;
     $types[] = ManiphestTransactionPro::TYPE_ATTACH;
+    $types[] = ManiphestTransactionPro::TYPE_EDGE;
 
     return $types;
   }
@@ -40,6 +41,9 @@ final class ManiphestTransactionEditorPro
         return $object->getProjectPHIDs();
       case ManiphestTransactionPro::TYPE_ATTACH:
         return $object->getAttached();
+      case ManiphestTransactionPro::TYPE_EDGE:
+        // These are pre-populated.
+        return $xaction->getOldValue();
     }
 
   }
@@ -58,6 +62,7 @@ final class ManiphestTransactionEditorPro
       case ManiphestTransactionPro::TYPE_CCS:
       case ManiphestTransactionPro::TYPE_PROJECTS:
       case ManiphestTransactionPro::TYPE_ATTACH:
+      case ManiphestTransactionPro::TYPE_EDGE:
         return $xaction->getNewValue();
     }
 
@@ -84,6 +89,10 @@ final class ManiphestTransactionEditorPro
         return $object->setProjectPHIDs($xaction->getNewValue());
       case ManiphestTransactionPro::TYPE_ATTACH:
         return $object->setAttached($xaction->getNewValue());
+      case ManiphestTransactionPro::TYPE_EDGE:
+        // These are a weird, funky mess and are already being applied by the
+        // time we reach this.
+        return;
     }
 
   }

@@ -657,8 +657,17 @@ abstract class PhabricatorApplicationTransactionEditor
           "You can not apply transactions which already have commentVersions!");
       }
 
-      $custom_field_type = PhabricatorTransactions::TYPE_CUSTOMFIELD;
-      if ($xaction->getTransactionType() != $custom_field_type) {
+      $exempt_types = array(
+        // CustomField logic currently prefills these before we enter the
+        // transaction editor.
+        PhabricatorTransactions::TYPE_CUSTOMFIELD => true,
+
+        // TODO: Remove this, this edge type is encumbered with a bunch of
+        // legacy nonsense.
+        ManiphestTransactionPro::TYPE_EDGE => true,
+      );
+
+      if (empty($exempt_types[$xaction->getTransactionType()])) {
         if ($xaction->getOldValue() !== null) {
           throw new Exception(
             "You can not apply transactions which already have oldValue!");
