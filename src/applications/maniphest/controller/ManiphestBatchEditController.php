@@ -22,11 +22,20 @@ final class ManiphestBatchEditController extends ManiphestController {
 
     if ($request->isFormPost() && is_array($actions)) {
       foreach ($tasks as $task) {
+        $field_list = PhabricatorCustomField::getObjectFields(
+          $task,
+          PhabricatorCustomField::ROLE_EDIT);
+        $field_list->readFieldsFromStorage($task);
+
         $xactions = $this->buildTransactions($actions, $task);
         if ($xactions) {
-          $editor = new ManiphestTransactionEditor();
-          $editor->setActor($user);
-          $editor->applyTransactions($task, $xactions);
+          // TODO: Set content source to "batch edit".
+
+          $editor = id(new ManiphestTransactionEditorPro())
+            ->setActor($user)
+            ->setContentSourceFromRequest($request)
+            ->setContinueOnNoEffect(true)
+            ->applyTransactions($task, $xactions);
         }
       }
 
@@ -296,13 +305,7 @@ final class ManiphestBatchEditController extends ManiphestController {
       $value_map[$type] = $value;
     }
 
-    $template = new ManiphestTransaction();
-    $template->setAuthorPHID($this->getRequest()->getUser()->getPHID());
-
-    // TODO: Set content source to "batch edit".
-
-    $template->setContentSource(
-      PhabricatorContentSource::newFromRequest($this->getRequest()));
+    $template = new ManiphestTransactionPro();
 
     foreach ($value_map as $type => $value) {
       $xaction = clone $template;
@@ -310,7 +313,9 @@ final class ManiphestBatchEditController extends ManiphestController {
 
       switch ($type) {
         case PhabricatorTransactions::TYPE_COMMENT:
-          $xaction->setComments($value);
+          $xaction->attachComment(
+            id(new ManiphestTransactionComment())
+              ->setContent($value));
           break;
         default:
           $xaction->setNewValue($value);

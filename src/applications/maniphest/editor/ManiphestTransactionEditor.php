@@ -253,6 +253,7 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
     $main_body = array();
     foreach ($transactions as $transaction) {
       $main_body[] = id(clone $transaction->getModernTransaction())
+        ->attachViewer($this->getActor())
         ->setHandles($handles)
         ->setRenderingTarget('text')
         ->getTitle();

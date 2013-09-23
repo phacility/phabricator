@@ -28,6 +28,7 @@ abstract class PhabricatorApplicationTransaction
   private $handles;
   private $renderingTarget = self::TARGET_HTML;
   private $transactionGroup = array();
+  private $viewer = self::ATTACHABLE;
 
   abstract public function getApplicationTransactionType();
 
@@ -118,6 +119,15 @@ abstract class PhabricatorApplicationTransaction
 
   public function getRenderingTarget() {
     return $this->renderingTarget;
+  }
+
+  public function attachViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+  public function getViewer() {
+    return $this->assertAttached($this->viewer);
   }
 
   public function getRequiredHandlePHIDs() {
@@ -363,6 +373,7 @@ abstract class PhabricatorApplicationTransaction
           PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS,
           $key);
         if ($field) {
+          $field->setViewer($this->getViewer());
           return $field->getApplicationTransactionTitle($this);
         } else {
           return pht(
