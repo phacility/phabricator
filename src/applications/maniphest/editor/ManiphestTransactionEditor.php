@@ -250,11 +250,24 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
       ->withPHIDs($phids)
       ->execute();
 
-    $view = new ManiphestTransactionDetailView();
-    $view->setTransactionGroup($transactions);
-    $view->setHandles($handles);
-    $view->setAuxiliaryFields($this->auxiliaryFields);
-    list($action, $main_body) = $view->renderForEmail($with_date = false);
+    $main_body = array();
+    foreach ($transactions as $transaction) {
+      $main_body[] = id(clone $transaction->getModernTransaction())
+        ->setHandles($handles)
+        ->setRenderingTarget('text')
+        ->getTitle();
+    }
+
+    foreach ($transactions as $transaction) {
+      if ($transaction->getComments()) {
+        $main_body[] = null;
+        $main_body[] = $transaction->getComments();
+      }
+    }
+
+    $main_body = implode("\n", $main_body);
+
+    $action = head($transactions)->getModernTransaction()->getActionName();
 
     $is_create = $this->isCreate($transactions);
 

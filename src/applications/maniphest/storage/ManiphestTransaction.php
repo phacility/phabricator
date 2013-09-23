@@ -52,6 +52,8 @@ final class ManiphestTransaction
           ->setCommentPHID($comment->getPHID())
           ->save();
 
+        $this->proxy->attachComment($comment);
+
         $this->pendingComment = null;
       }
     $this->proxy->saveTransaction();
