@@ -31,9 +31,11 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $parent_task = id(new ManiphestTask())->load($workflow);
     }
 
-    $transactions = ManiphestLegacyTransactionQuery::loadByTask(
-      $user,
-      $task);
+    $transactions = id(new ManiphestTransactionQuery())
+      ->setViewer($user)
+      ->withObjectPHIDs(array($task->getPHID()))
+      ->needComments(true)
+      ->execute();
 
     $field_list = PhabricatorCustomField::getObjectFields(
       $task,
@@ -134,8 +136,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $engine = new PhabricatorMarkupEngine();
     $engine->setViewer($user);
     $engine->addObject($task, ManiphestTask::MARKUP_FIELD_DESCRIPTION);
-    foreach ($transactions as $xaction) {
-      $modern_xaction = $xaction->getModernTransaction();
+    foreach ($transactions as $modern_xaction) {
       if ($modern_xaction->getComment()) {
         $engine->addObject(
           $modern_xaction->getComment(),
@@ -319,7 +320,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $timeline = id(new PhabricatorApplicationTransactionView())
       ->setUser($user)
       ->setObjectPHID($task->getPHID())
-      ->setTransactions(mpull($transactions, 'getModernTransaction'))
+      ->setTransactions($transactions)
       ->setMarkupEngine($engine);
 
     $object_name = 'T'.$task->getID();
