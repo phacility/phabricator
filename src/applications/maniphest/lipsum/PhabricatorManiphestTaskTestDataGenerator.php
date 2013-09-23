@@ -10,13 +10,14 @@ final class PhabricatorManiphestTaskTestDataGenerator
     $task = id(new ManiphestTask())
       ->setSubPriority($this->generateTaskSubPriority())
       ->setAuthorPHID($authorPHID)
-      ->setTitle($this->generateTitle());
+      ->setTitle($this->generateTitle())
+      ->setStatus(ManiphestTaskStatus::STATUS_OPEN);
+
     $content_source = PhabricatorContentSource::newForSource(
       PhabricatorContentSource::SOURCE_UNKNOWN,
       array());
-    $template = id(new ManiphestTransaction())
-      ->setAuthorPHID($authorPHID)
-      ->setContentSource($content_source);
+
+    $template = new ManiphestTransactionPro();
     // Accumulate Transactions
     $changes = array();
     $changes[ManiphestTransactionType::TYPE_TITLE] =
@@ -42,8 +43,11 @@ final class PhabricatorManiphestTaskTestDataGenerator
     }
 
     // Apply Transactions
-    $editor = id(new ManiphestTransactionEditor())
+    $editor = id(new ManiphestTransactionEditorPro())
       ->setActor($author)
+      ->setContentSource($content_source)
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true)
       ->applyTransactions($task, $transactions);
     return $task->save();
   }
