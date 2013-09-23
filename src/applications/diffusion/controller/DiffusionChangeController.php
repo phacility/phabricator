@@ -73,7 +73,7 @@ final class DiffusionChangeController extends DiffusionController {
         'view'   => 'change',
       ));
 
-    $links = $this->renderPathLinks($drequest);
+    $links = $this->renderPathLinks($drequest, $mode = 'browse');
 
     $header = id(new PHUIHeaderView())
       ->setHeader($links)
@@ -106,18 +106,13 @@ final class DiffusionChangeController extends DiffusionController {
         'action' => 'history',
       ));
 
-    $browse_uri = $drequest->generateURI(
-      array(
-        'action' => 'browse',
-      ));
-
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('View History'))
         ->setHref($history_uri)
         ->setIcon('history'));
 
-    $history_uri = $drequest->generateURI(
+    $browse_uri = $drequest->generateURI(
       array(
         'action' => 'browse',
       ));

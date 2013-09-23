@@ -202,7 +202,7 @@ abstract class DiffusionController extends PhabricatorController {
     $crumb = id(new PhabricatorCrumbView())
       ->setName($view_name);
 
-    if ($view == 'browse' || $view == 'change') {
+    if ($view == 'browse' || $view == 'change' || $view == 'history') {
       $crumb_list[] = $crumb;
       return $crumb_list;
     }
@@ -286,7 +286,7 @@ abstract class DiffusionController extends PhabricatorController {
     return $this->getApplicationURI($repository->getCallsign().'/'.$path);
   }
 
-  protected function renderPathLinks(DiffusionRequest $drequest) {
+  protected function renderPathLinks(DiffusionRequest $drequest, $action) {
     $path = $drequest->getPath();
     $path_parts = array_filter(explode('/', trim($path, '/')));
 
@@ -297,7 +297,7 @@ abstract class DiffusionController extends PhabricatorController {
         array(
           'href' => $drequest->generateURI(
             array(
-              'action' => 'browse',
+              'action' => $action,
               'path' => '',
             )),
         ),
@@ -315,7 +315,7 @@ abstract class DiffusionController extends PhabricatorController {
             array(
               'href' => $drequest->generateURI(
                 array(
-                  'action' => 'browse',
+                  'action' => $action,
                   'path' => $accum,
                 )),
             ),

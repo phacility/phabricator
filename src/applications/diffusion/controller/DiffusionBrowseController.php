@@ -65,7 +65,7 @@ abstract class DiffusionBrowseController extends DiffusionController {
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
-      ->setHeader($this->renderPathLinks($drequest, 'browse'))
+      ->setHeader($this->renderPathLinks($drequest, $mode = 'browse'))
       ->setPolicyObject($drequest->getRepository());
 
     return $header;
