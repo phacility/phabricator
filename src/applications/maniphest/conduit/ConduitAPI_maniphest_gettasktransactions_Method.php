@@ -39,24 +39,34 @@ final class ConduitAPI_maniphest_gettasktransactions_Method
       ->execute();
     $tasks = mpull($tasks, null, 'getPHID');
 
-    $transactions = ManiphestLegacyTransactionQuery::loadByTasks(
-      $request->getUser(),
-      $tasks);
+    $transactions = array();
+    if ($tasks) {
+      $transactions = id(new ManiphestTransactionQuery())
+        ->setViewer($request->getUser())
+        ->withObjectPHIDs(mpull($tasks, 'getPHID'))
+        ->needComments(true)
+        ->execute();
+    }
 
     foreach ($transactions as $transaction) {
-      $task_phid = $transaction->getTaskPHID();
+      $task_phid = $transaction->getObjectPHID();
       if (empty($tasks[$task_phid])) {
         continue;
       }
 
       $task_id = $tasks[$task_phid]->getID();
 
+      $comments = null;
+      if ($transaction->hasComment()) {
+        $comments = $transaction->getComment()->getContent();
+      }
+
       $results[$task_id][] = array(
         'taskID'  => $task_id,
         'transactionType'  => $transaction->getTransactionType(),
         'oldValue'  => $transaction->getOldValue(),
         'newValue'  => $transaction->getNewValue(),
-        'comments'      => $transaction->getComments(),
+        'comments'      => $comments,
         'authorPHID'  => $transaction->getAuthorPHID(),
         'dateCreated' => $transaction->getDateCreated(),
       );
