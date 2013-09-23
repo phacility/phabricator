@@ -371,7 +371,8 @@ abstract class DiffusionRequest {
    * and formatting to the URI. Parameters are:
    *
    *   - `action` One of `history`, `browse`, `change`, `lastmodified`,
-   *     `branch` or `revision-ref`. The action specified by the URI.
+   *     `branch`, `tags`, `branches`,  or `revision-ref`. The action specified
+   *      by the URI.
    *   - `callsign` Repository callsign.
    *   - `branch` Optional if action is not `branch`, branch name.
    *   - `path` Optional, path to file.

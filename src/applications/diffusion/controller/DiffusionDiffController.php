@@ -2,6 +2,10 @@
 
 final class DiffusionDiffController extends DiffusionController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $data = $data + array(
       'dblob' => $this->getRequest()->getStr('ref'),

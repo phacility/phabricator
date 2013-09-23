@@ -122,7 +122,12 @@ abstract class DiffusionController extends PhabricatorController {
       $crumb_list[] = $crumb;
       return $crumb_list;
     }
-    $crumb->setHref("/diffusion/{$callsign}/");
+    $crumb->setHref(
+      $drequest->generateURI(
+        array(
+          'action' => 'branch',
+          'path' => '/',
+        )));
     $crumb_list[] = $crumb;
 
     $raw_commit = $drequest->getRawCommit();
@@ -187,9 +192,7 @@ abstract class DiffusionController extends PhabricatorController {
         break;
       case 'change':
         $view_name = pht('Change');
-        $crumb_list[] = $crumb->setName(
-          hsprintf('%s (%s)', $path, $commit_link));
-        return $crumb_list;
+        break;
     }
 
     $uri_params = array(
@@ -199,7 +202,7 @@ abstract class DiffusionController extends PhabricatorController {
     $crumb = id(new PhabricatorCrumbView())
       ->setName($view_name);
 
-    if ($view == 'browse') {
+    if ($view == 'browse' || $view == 'change') {
       $crumb_list[] = $crumb;
       return $crumb_list;
     }
