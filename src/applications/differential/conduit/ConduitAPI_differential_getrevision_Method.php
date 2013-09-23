@@ -52,6 +52,7 @@ final class ConduitAPI_differential_getrevision_Method
     $reviewer_phids = array_values($revision->getReviewers());
 
     $diffs = id(new DifferentialDiffQuery())
+      ->setViewer($request->getUser())
       ->withRevisionIDs(array($revision_id))
       ->needChangesets(true)
       ->needArcanistProjects(true)
