@@ -194,7 +194,7 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
     }
 
     foreach ($transactions as $transaction) {
-      $transaction->setTaskID($task->getID());
+      $transaction->setTransactionTask($task);
       $transaction->save();
     }
 
@@ -463,7 +463,7 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
     $new_ccs = array_merge($current_ccs, array($user->getPHID()));
 
     $transaction = new ManiphestTransaction();
-    $transaction->setTaskID($task->getID());
+    $transaction->setTransactionTask($task);
     $transaction->setAuthorPHID($user->getPHID());
     $transaction->setTransactionType(ManiphestTransactionType::TYPE_CCS);
     $transaction->setNewValue(array_unique($new_ccs));
@@ -481,7 +481,7 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
     $new_ccs = array_diff($current_ccs, array($user->getPHID()));
 
     $transaction = new ManiphestTransaction();
-    $transaction->setTaskID($task->getID());
+    $transaction->setTransactionTask($task);
     $transaction->setAuthorPHID($user->getPHID());
     $transaction->setTransactionType(ManiphestTransactionType::TYPE_CCS);
     $transaction->setNewValue(array_unique($new_ccs));

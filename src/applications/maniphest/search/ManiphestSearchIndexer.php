@@ -38,9 +38,9 @@ final class ManiphestSearchIndexer
         time());
     }
 
-    $transactions = id(new ManiphestTransaction())->loadAllWhere(
-      'taskID = %d',
-      $task->getID());
+    $transactions = ManiphestLegacyTransactionQuery::loadByTask(
+      $this->getViewer(),
+      $task);
 
     $current_ccs = $task->getCCPHIDs();
     $owner = null;

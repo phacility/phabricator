@@ -31,9 +31,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $parent_task = id(new ManiphestTask())->load($workflow);
     }
 
-    $transactions = id(new ManiphestTransaction())->loadAllWhere(
-      'taskID = %d ORDER BY id ASC',
-      $task->getID());
+    $transactions = ManiphestLegacyTransactionQuery::loadByTask(
+      $user,
+      $task);
 
     $field_list = PhabricatorCustomField::getObjectFields(
       $task,

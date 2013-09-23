@@ -32,7 +32,9 @@ final class ManiphestTaskDescriptionChangeController
     }
 
     $transaction_id = $this->getTransactionID();
-    $transaction = id(new ManiphestTransaction())->load($transaction_id);
+    $transaction = ManiphestLegacyTransactionQuery::loadByTransactionID(
+      $user,
+      $transaction_id);
     if (!$transaction) {
       return new Aphront404Response();
     }

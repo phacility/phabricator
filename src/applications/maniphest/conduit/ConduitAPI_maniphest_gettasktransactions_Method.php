@@ -33,9 +33,14 @@ final class ConduitAPI_maniphest_gettasktransactions_Method
       return $results;
     }
 
-    $transactions = id(new ManiphestTransaction())->loadAllWhere(
-      'taskID IN (%Ld) ORDER BY id ASC',
-      $task_ids);
+    $tasks = id(new ManiphestTaskQuery())
+      ->setViewer($request->getUser())
+      ->withIDs($task_ids)
+      ->execute();
+
+    $transactions = ManiphestLegacyTransactionQuery::loadByTasks(
+      $request->getUser(),
+      $tasks);
 
     foreach ($transactions as $transaction) {
       $task_id = $transaction->getTaskID();

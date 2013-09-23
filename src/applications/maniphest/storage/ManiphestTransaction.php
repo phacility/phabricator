@@ -18,6 +18,11 @@ final class ManiphestTransaction extends ManiphestDAO
   protected $metadata = array();
   protected $contentSource;
 
+  public function setTransactionTask(ManiphestTask $task) {
+    $this->setTaskID($task->getID());
+    return $this;
+  }
+
   public function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
