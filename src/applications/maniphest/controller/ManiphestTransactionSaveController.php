@@ -197,10 +197,12 @@ final class ManiphestTransactionSaveController extends ManiphestController {
       }
     }
 
+    // Evade no-effect detection in the new editor stuff until we can switch
+    // to subscriptions.
+    $added_ccs = array_diff($added_ccs, $task->getCCPHIDs());
+
     if ($added_ccs || $force_cc_transaction) {
-      // We've added CCs, so include a CC transaction. It's safe to do this even
-      // if we're just "adding" CCs which already exist, because the
-      // ManiphestTransactionEditor is smart enough to ignore them.
+      // We've added CCs, so include a CC transaction.
       $all_ccs = array_merge($task->getCCPHIDs(), $added_ccs);
       $cc_transaction->setNewValue($all_ccs);
       $transactions[] = $cc_transaction;
