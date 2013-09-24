@@ -684,15 +684,15 @@ abstract class PhabricatorBaseEnglishTranslation
 
       '%s added %d project(s): %s' => array(
         array(
-          '%s added a project: %2$s',
-          '%s added projects: %2$s',
+          '%s added a project: %3$s',
+          '%s added projects: %3$s',
         ),
       ),
 
       '%s removed %d project(s): %s' => array(
         array(
-          '%s removed a project: %2$s',
-          '%s removed projects: %2$s',
+          '%s removed a project: %3$s',
+          '%s removed projects: %3$s',
         ),
       ),
 
@@ -744,6 +744,37 @@ abstract class PhabricatorBaseEnglishTranslation
           '%s removed dependent tasks: %3$s.',
         ),
       ),
+
+      '%s added %d revision(s): %s.' => array(
+        array(
+          '%s added a revision: %3$s.',
+          '%s added revisions: %3$s.',
+        ),
+      ),
+
+      '%s removed %d revision(s): %s.' => array(
+        array(
+          '%s removed a revision: %3$s.',
+          '%s removed revisions: %3$s.',
+        ),
+      ),
+
+      '%s added %d commit(s): %s.' => array(
+        array(
+          '%s added a commit: %3$s.',
+          '%s added commits: %3$s.',
+        ),
+      ),
+
+      '%s removed %d commit(s): %s.' => array(
+        array(
+          '%s removed a commit: %3$s.',
+          '%s removed commits: %3$s.',
+        ),
+      ),
+
+      '%s edited commit(s), added %d: %s; removed %d: %s.' =>
+        '%s edited commits, added %3$s; removed %5$s.',
 
     );
   }

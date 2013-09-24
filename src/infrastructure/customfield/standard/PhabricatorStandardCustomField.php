@@ -333,5 +333,39 @@ abstract class PhabricatorStandardCustomField
     }
   }
 
+  public function getApplicationTransactionTitleForFeed(
+    PhabricatorApplicationTransaction $xaction,
+    PhabricatorFeedStory $story) {
+
+    $author_phid = $xaction->getAuthorPHID();
+    $object_phid = $xaction->getObjectPHID();
+
+    $old = $xaction->getOldValue();
+    $new = $xaction->getNewValue();
+
+    if (!$old) {
+      return pht(
+        '%s set %s to %s on %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName(),
+        $new,
+        $xaction->renderHandleLink($object_phid));
+    } else if (!$new) {
+      return pht(
+        '%s removed %s on %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName(),
+        $xaction->renderHandleLink($object_phid));
+    } else {
+      return pht(
+        '%s changed %s from %s to %s on %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName(),
+        $old,
+        $new,
+        $xaction->renderHandleLink($object_phid));
+    }
+  }
+
 
 }

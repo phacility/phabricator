@@ -394,6 +394,198 @@ final class ManiphestTransaction
     return parent::getTitle();
   }
 
+  public function getTitleForFeed(PhabricatorFeedStory $story) {
+    $author_phid = $this->getAuthorPHID();
+    $object_phid = $this->getObjectPHID();
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_TITLE:
+        return pht(
+          '%s renamed %s from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid),
+          $old,
+          $new);
+
+      case self::TYPE_DESCRIPTION:
+        return pht(
+          '%s edited the description of %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+
+      case self::TYPE_STATUS:
+        if ($new == ManiphestTaskStatus::STATUS_OPEN) {
+          if ($old) {
+            return pht(
+              '%s reopened %s.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid));
+          } else {
+            return pht(
+              '%s created %s.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid));
+          }
+        } else {
+          switch ($new) {
+            case ManiphestTaskStatus::STATUS_CLOSED_SPITE:
+              return pht(
+                '%s closed %s out of spite.',
+                $this->renderHandleLink($author_phid),
+                $this->renderHandleLink($object_phid));
+            case ManiphestTaskStatus::STATUS_CLOSED_DUPLICATE:
+              return pht(
+                '%s closed %s as a duplicate.',
+                $this->renderHandleLink($author_phid),
+                $this->renderHandleLink($object_phid));
+            default:
+              $status_name = idx(
+                ManiphestTaskStatus::getTaskStatusMap(),
+                $new,
+                '???');
+              return pht(
+                '%s closed %s as "%s".',
+                $this->renderHandleLink($author_phid),
+                $this->renderHandleLink($object_phid),
+                $status_name);
+          }
+        }
+
+      case self::TYPE_OWNER:
+        if ($author_phid == $new) {
+          return pht(
+            '%s claimed %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        } else if (!$new) {
+          return pht(
+            '%s placed %s up for grabs.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        } else if (!$old) {
+          return pht(
+            '%s assigned %s to %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            $this->renderHandleLink($new));
+        } else {
+          return pht(
+            '%s reassigned %s from %s to %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            $this->renderHandleLink($old),
+            $this->renderHandleLink($new));
+        }
+
+      case self::TYPE_PROJECTS:
+        $added = array_diff($new, $old);
+        $removed = array_diff($old, $new);
+        if ($added && !$removed) {
+          return pht(
+            '%s added %d project(s) to %s: %s',
+            $this->renderHandleLink($author_phid),
+            count($added),
+            $this->renderHandleLink($object_phid),
+            $this->renderHandleList($added));
+        } else if ($removed && !$added) {
+          return pht(
+            '%s removed %d project(s) to %s: %s',
+            $this->renderHandleLink($author_phid),
+            count($removed),
+            $this->renderHandleLink($object_phid),
+            $this->renderHandleList($removed));
+        } else if ($removed && $added) {
+          return pht(
+            '%s changed project(s) of %s, added %d: %s; removed %d: %s',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            count($added),
+            $this->renderHandleList($added),
+            count($removed),
+            $this->renderHandleList($removed));
+        }
+
+      case self::TYPE_PRIORITY:
+        $old_name = ManiphestTaskPriority::getTaskPriorityName($old);
+        $new_name = ManiphestTaskPriority::getTaskPriorityName($new);
+
+        if ($old == ManiphestTaskPriority::getDefaultPriority()) {
+          return pht(
+            '%s triaged %s as "%s" priority.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            $new_name);
+        } else if ($old > $new) {
+          return pht(
+            '%s lowered the priority of %s from "%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            $old_name,
+            $new_name);
+        } else {
+          return pht(
+            '%s raised the priority of %s from "%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            $old_name,
+            $new_name);
+        }
+
+      case self::TYPE_CCS:
+        // TODO: Remove this when we switch to subscribers. Just reuse the
+        // code in the parent.
+        $clone = clone $this;
+        $clone->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS);
+        return $clone->getTitleForFeed($story);
+
+      case self::TYPE_EDGE:
+        // TODO: Remove this when we switch to real edges. Just reuse the
+        // code in the parent;
+        $clone = clone $this;
+        $clone->setTransactionType(PhabricatorTransactions::TYPE_EDGE);
+        return $clone->getTitleForFeed($story);
+
+      case self::TYPE_ATTACH:
+        $old = nonempty($old, array());
+        $new = nonempty($new, array());
+        $new = array_keys(idx($new, 'FILE', array()));
+        $old = array_keys(idx($old, 'FILE', array()));
+
+        $added = array_diff($new, $old);
+        $removed = array_diff($old, $new);
+        if ($added && !$removed) {
+          return pht(
+            '%s attached %d file(s) of %s: %s',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            count($added),
+            $this->renderHandleList($added));
+        } else if ($removed && !$added) {
+          return pht(
+            '%s detached %d file(s) of %s: %s',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            count($removed),
+            $this->renderHandleList($removed));
+        } else {
+          return pht(
+            '%s changed file(s) for %s, attached %d: %s; detached %d: %s',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            count($added),
+            $this->renderHandleList($added),
+            count($removed),
+            $this->renderHandleList($removed));
+        }
+
+    }
+
+    return parent::getTitleForFeed($story);
+  }
+
   public function hasChangeDetails() {
     switch ($this->getTransactionType()) {
       case self::TYPE_DESCRIPTION:
