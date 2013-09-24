@@ -731,7 +731,6 @@ phutil_register_library_map(array(
     'ManiphestTaskSearchEngine' => 'applications/maniphest/query/ManiphestTaskSearchEngine.php',
     'ManiphestTaskStatus' => 'applications/maniphest/constants/ManiphestTaskStatus.php',
     'ManiphestTaskSubscriber' => 'applications/maniphest/storage/ManiphestTaskSubscriber.php',
-    'ManiphestTransaction' => 'applications/maniphest/storage/ManiphestTransaction.php',
     'ManiphestTransactionComment' => 'applications/maniphest/storage/ManiphestTransactionComment.php',
     'ManiphestTransactionEditor' => 'applications/maniphest/editor/ManiphestTransactionEditor.php',
     'ManiphestTransactionEditorPro' => 'applications/maniphest/editor/ManiphestTransactionEditorPro.php',
