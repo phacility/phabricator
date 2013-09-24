@@ -210,9 +210,7 @@ final class ManiphestTaskEditController extends ManiphestController {
             'ip' => $request->getRemoteAddr(),
           ));
 
-        $template = new ManiphestTransaction();
-        $template->setAuthorPHID($user->getPHID());
-        $template->setContentSource($content_source);
+        $template = new ManiphestTransactionPro();
         $transactions = array();
 
         foreach ($changes as $type => $value) {
@@ -265,10 +263,11 @@ final class ManiphestTaskEditController extends ManiphestController {
           $task = $event->getValue('task');
           $transactions = $event->getValue('transactions');
 
-          $editor = new ManiphestTransactionEditor();
-          $editor->setActor($user);
-          $editor->setAuxiliaryFields($aux_fields);
-          $editor->applyTransactions($task, $transactions);
+          $editor = id(new ManiphestTransactionEditorPro())
+            ->setActor($user)
+            ->setContentSourceFromRequest($request)
+            ->setContinueOnNoEffect(true)
+            ->applyTransactions($task, $transactions);
 
           $event = new PhabricatorEvent(
             PhabricatorEventType::TYPE_MANIPHEST_DIDEDITTASK,

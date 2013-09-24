@@ -379,6 +379,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
       $xaction->setAuthorPHID($actor->getPHID());
       $xaction->setContentSource($this->getContentSource());
+      $xaction->attachViewer($this->getActor());
     }
 
     $is_preview = $this->getIsPreview();
