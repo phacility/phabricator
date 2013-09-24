@@ -682,6 +682,69 @@ abstract class PhabricatorBaseEnglishTranslation
         '%s Commits',
       ),
 
+      '%s added %d project(s): %s' => array(
+        array(
+          '%s added a project: %2$s',
+          '%s added projects: %2$s',
+        ),
+      ),
+
+      '%s removed %d project(s): %s' => array(
+        array(
+          '%s removed a project: %2$s',
+          '%s removed projects: %2$s',
+        ),
+      ),
+
+      '%s changed project(s), added %d: %s; removed %d: %s' =>
+        '%s changed projects, added: %3$s; removed: %5$s',
+
+      '%s attached %d file(s): %s' => array(
+        array(
+          '%s attached a file: %3$s',
+          '%s attached files: %3$s',
+        ),
+      ),
+
+      '%s detached %d file(s): %s' => array(
+        array(
+          '%s detached a file: %3$s',
+          '%s detached files: %3$s',
+        ),
+      ),
+
+      '%s changed file(s), attached %d: %s; detached %d: %s' =>
+        '%s changed files, attached: %3$s; detached: %5$s',
+
+
+      '%s added %d dependencie(s): %s.' => array(
+        array(
+          '%s added a dependency: %3$s',
+          '%s added a dependencies: %3$s',
+        ),
+      ),
+
+      '%s added %d dependent task(s): %s.' => array(
+        array(
+          '%s added a dependent task: %3$s',
+          '%s added dependent tasks: %3$s',
+        ),
+      ),
+
+      '%s removed %d dependencie(s): %s.' => array(
+        array(
+          '%s removed a dependency: %3$s.',
+          '%s removed dependencies: %3$s.',
+        ),
+      ),
+
+      '%s removed %d dependent task(s): %s.' => array(
+        array(
+          '%s removed a dependent task: %3$s.',
+          '%s removed dependent tasks: %3$s.',
+        ),
+      ),
+
     );
   }
 

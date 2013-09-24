@@ -308,7 +308,7 @@ final class ManiphestTransaction
             $this->renderHandleList($removed));
         } else if ($removed && $added) {
           return pht(
-            '%s changed projects, added %d: %s; removed %d: %s',
+            '%s changed project(s), added %d: %s; removed %d: %s',
             $this->renderHandleLink($author_phid),
             count($added),
             $this->renderHandleList($added),
@@ -380,7 +380,7 @@ final class ManiphestTransaction
             $this->renderHandleList($removed));
         } else {
           return pht(
-            '%s changed projects, attached %d: %s; detached %d: %s',
+            '%s changed file(s), attached %d: %s; detached %d: %s',
             $this->renderHandleLink($author_phid),
             count($added),
             $this->renderHandleList($added),
