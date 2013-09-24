@@ -432,7 +432,7 @@ final class ManiphestTransactionPro
       case self::TYPE_PRIORITY:
         $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_PRIORITY;
         break;
-      case self::TYPE_COMMENT:
+      case PhabricatorTransactions::TYPE_COMMENT:
         $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_COMMENT;
         break;
       default:
