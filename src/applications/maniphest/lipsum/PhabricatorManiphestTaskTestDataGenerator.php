@@ -17,7 +17,7 @@ final class PhabricatorManiphestTaskTestDataGenerator
       PhabricatorContentSource::SOURCE_UNKNOWN,
       array());
 
-    $template = new ManiphestTransactionPro();
+    $template = new ManiphestTransaction();
     // Accumulate Transactions
     $changes = array();
     $changes[ManiphestTransactionType::TYPE_TITLE] =

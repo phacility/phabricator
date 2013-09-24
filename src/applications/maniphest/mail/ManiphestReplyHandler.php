@@ -56,7 +56,7 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
         'id' => $mail->getID(),
       ));
 
-    $template = new ManiphestTransactionPro();
+    $template = new ManiphestTransaction();
 
     $is_unsub = false;
     if ($is_new_task) {

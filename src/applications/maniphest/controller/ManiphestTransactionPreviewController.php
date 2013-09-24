@@ -31,7 +31,7 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
 
     $action = $request->getStr('action');
 
-    $transaction = new ManiphestTransactionPro();
+    $transaction = new ManiphestTransaction();
     $transaction->setAuthorPHID($user->getPHID());
     $transaction->setTransactionType($action);
 

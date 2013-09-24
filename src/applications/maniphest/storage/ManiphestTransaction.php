@@ -1,6 +1,6 @@
 <?php
 
-final class ManiphestTransactionPro
+final class ManiphestTransaction
   extends PhabricatorApplicationTransaction {
 
   const TYPE_TITLE = 'title';
@@ -15,6 +15,11 @@ final class ManiphestTransactionPro
 
   public function getApplicationName() {
     return 'maniphest';
+  }
+
+  public function getTableName() {
+    // TODO: Remove once the "pro" table gets renamed.
+    return 'maniphest_transactionpro';
   }
 
   public function getApplicationTransactionType() {

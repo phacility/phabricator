@@ -9,7 +9,7 @@ final class ManiphestTransactionComment
   }
 
   public function getApplicationTransactionObject() {
-    return new ManiphestTransactionPro();
+    return new ManiphestTransaction();
   }
 
 }

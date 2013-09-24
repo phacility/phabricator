@@ -306,7 +306,7 @@ final class ManiphestBatchEditController extends ManiphestController {
       $value_map[$type] = $value;
     }
 
-    $template = new ManiphestTransactionPro();
+    $template = new ManiphestTransaction();
 
     foreach ($value_map as $type => $value) {
       $xaction = clone $template;

@@ -4,7 +4,7 @@ final class ManiphestTransactionQuery
   extends PhabricatorApplicationTransactionQuery {
 
   public function getTemplateApplicationTransaction() {
-    return new ManiphestTransactionPro();
+    return new ManiphestTransaction();
   }
 
 }

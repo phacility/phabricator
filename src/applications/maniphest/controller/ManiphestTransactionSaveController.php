@@ -59,7 +59,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         }
         $new[PhabricatorFilePHIDTypeFile::TYPECONST][$phid] = array();
       }
-      $transaction = new ManiphestTransactionPro();
+      $transaction = new ManiphestTransaction();
       $transaction
         ->setTransactionType(ManiphestTransactionType::TYPE_ATTACH);
       $transaction->setNewValue($new);
@@ -76,12 +76,12 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         $request->getStr('comments'),
       ));
 
-    $cc_transaction = new ManiphestTransactionPro();
+    $cc_transaction = new ManiphestTransaction();
     $cc_transaction
       ->setTransactionType(ManiphestTransactionType::TYPE_CCS);
     $force_cc_transaction = false;
 
-    $transaction = new ManiphestTransactionPro();
+    $transaction = new ManiphestTransaction();
     $transaction
       ->setTransactionType($action);
 
@@ -136,7 +136,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     }
 
     if ($request->getStr('comments')) {
-      $transactions[] = id(new ManiphestTransactionPro())
+      $transactions[] = id(new ManiphestTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
         ->attachComment(
           id(new ManiphestTransactionComment())
@@ -165,7 +165,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
             ManiphestTaskStatus::STATUS_OPEN) {
           // Closing an unassigned task. Assign the user as the owner of
           // this task.
-          $assign = new ManiphestTransactionPro();
+          $assign = new ManiphestTransaction();
           $assign->setTransactionType(ManiphestTransactionType::TYPE_OWNER);
           $assign->setNewValue($user->getPHID());
           $transactions[] = $assign;
