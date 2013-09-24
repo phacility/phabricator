@@ -198,12 +198,12 @@ final class ManiphestTransaction
 
       case self::TYPE_PRIORITY:
         if ($old == ManiphestTaskPriority::getDefaultPriority()) {
-          return 'start-sandcastle';
+          return 'normal-priority';
           return pht('Triaged');
         } else if ($old > $new) {
-          return 'download-alt';
+          return 'lower-priority';
         } else {
-          return 'upload';
+          return 'raise-priority';
         }
 
       case self::TYPE_EDGE:
