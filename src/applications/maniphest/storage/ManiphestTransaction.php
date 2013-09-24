@@ -17,11 +17,6 @@ final class ManiphestTransaction
     return 'maniphest';
   }
 
-  public function getTableName() {
-    // TODO: Remove once the "pro" table gets renamed.
-    return 'maniphest_transactionpro';
-  }
-
   public function getApplicationTransactionType() {
     return ManiphestPHIDTypeTask::TYPECONST;
   }
