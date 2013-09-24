@@ -163,10 +163,15 @@ final class PhabricatorRepositoryQuery
   }
 
   private function loadCursorObject($id) {
-    $results = id(new PhabricatorRepositoryQuery())
+    $query = id(new PhabricatorRepositoryQuery())
       ->setViewer($this->getPagingViewer())
-      ->withIDs(array((int)$id))
-      ->execute();
+      ->withIDs(array((int)$id));
+
+    if ($this->order == self::ORDER_COMMITTED) {
+      $query->needMostRecentCommits(true);
+    }
+
+    $results = $query->execute();
     return head($results);
   }
 
