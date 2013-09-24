@@ -165,7 +165,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
             ManiphestTaskStatus::STATUS_OPEN) {
           // Closing an unassigned task. Assign the user as the owner of
           // this task.
-          $assign = new ManiphestTransaction();
+          $assign = new ManiphestTransactionPro();
           $assign->setTransactionType(ManiphestTransactionType::TYPE_OWNER);
           $assign->setNewValue($user->getPHID());
           $transactions[] = $assign;
