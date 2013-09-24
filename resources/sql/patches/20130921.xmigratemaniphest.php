@@ -6,8 +6,9 @@ $conn_w = $task_table->establishConnection('w');
 $rows = new LiskRawMigrationIterator($conn_w, 'maniphest_transaction');
 $conn_w->openTransaction();
 
-$xaction_table = new ManiphestTransactionPro();
-$comment_table = new ManiphestTransactionComment();
+// NOTE: These were the correct table names at the time of this patch.
+$xaction_table_name = 'maniphest_transactionpro';
+$comment_table_name = 'maniphest_transaction_comment';
 
 foreach ($rows as $row) {
   $row_id = $row['id'];
@@ -70,7 +71,7 @@ foreach ($rows as $row) {
           commentPHID, commentVersion, transactionType, oldValue, newValue,
           contentSource, metadata, dateCreated, dateModified)
         VALUES (%s, %s, %s, %s, %s, %s, %d, %s, %ns, %ns, %s, %s, %d, %d)',
-      $xaction_table->getTableName(),
+      $xaction_table_name,
       $xaction_phid,
       $row['authorPHID'],
       $task_phid,
@@ -106,7 +107,7 @@ foreach ($rows as $row) {
           editPolicy, commentVersion, content, contentSource, isDeleted,
           dateCreated, dateModified)
         VALUES (%s, %s, %s, %s, %s, %d, %s, %s, %d, %d, %d)',
-      $comment_table->getTableName(),
+      $comment_table_name,
       $comment_phid,
       $comment_xaction_phid,
       $row['authorPHID'],
@@ -125,7 +126,7 @@ foreach ($rows as $row) {
           commentPHID, commentVersion, transactionType, oldValue, newValue,
           contentSource, metadata, dateCreated, dateModified)
         VALUES (%s, %s, %s, %s, %s, %s, %d, %s, %ns, %ns, %s, %s, %d, %d)',
-      $xaction_table->getTableName(),
+      $xaction_table_name,
       $comment_xaction_phid,
       $row['authorPHID'],
       $task_phid,

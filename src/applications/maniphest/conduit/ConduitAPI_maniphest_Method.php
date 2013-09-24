@@ -138,7 +138,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
       $changes[ManiphestTransactionType::TYPE_ATTACH] = $attached;
     }
 
-    $template = new ManiphestTransactionPro();
+    $template = new ManiphestTransaction();
 
     $transactions = array();
     foreach ($changes as $type => $value) {

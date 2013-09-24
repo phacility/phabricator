@@ -1620,6 +1620,14 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'php',
         'name' => $this->getPatchPath('20130921.xmigratemaniphest.php'),
       ),
+      '20130923.mrename.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130923.mrename.sql'),
+      ),
+      '20130924.mdraftkey.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130924.mdraftkey.sql'),
+      ),
     );
   }
 }

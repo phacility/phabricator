@@ -6,11 +6,10 @@
   background: #eeedf0;
 }
 
-.phabricator-timeline-event-view {
-  border-width: 0 0 0 3px;
+.phabricator-timeline-group {
+  border-width: 0 3px;
   border-style: solid;
   border-color: #c0c5d1;
-
 }
 
 .device-desktop .phabricator-timeline-event-view {
@@ -21,7 +20,9 @@
 
 .device-desktop .phabricator-timeline-spacer {
   min-height: 20px;
-  border-right-width: 0;
+  border-width: 0 0 0 3px;
+  border-style: solid;
+  border-color: #c0c5d1;
 }
 
 .device-desktop .phabricator-timeline-major-event,
@@ -91,6 +92,7 @@
 .phabricator-timeline-title {
   padding: 0 5px;
   overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .phabricator-timeline-title-with-icon {
@@ -112,9 +114,6 @@
   position: relative;
   margin-left: 3px;
   margin-right: 3px;
-
-  border-right-width: 3px;
-  border-right-style: solid;
 }
 
 .device .phabricator-timeline-image {
@@ -131,7 +130,7 @@
   width: 30px;
   height: 30px;
   background-color: #c0c5d1;
-  top: 0;
+  top: -1px;
   left: -3px;
 }
 
@@ -199,43 +198,43 @@
   border-color: #333;
 }
 
-.phabricator-timeline-red .phabricator-timeline-icon-fill {
+.phabricator-timeline-icon-fill-red {
   background-color: {$red};
 }
 
-.phabricator-timeline-orange .phabricator-timeline-icon-fill {
+.phabricator-timeline-icon-fill-orange {
   background-color: {$orange};
 }
 
-.phabricator-timeline-yellow .phabricator-timeline-icon-fill {
+.phabricator-timeline-icon-fill-yellow {
   background-color: {$yellow};
 }
 
-.phabricator-timeline-green .phabricator-timeline-icon-fill {
+.phabricator-timeline-icon-fill-green {
   background-color: {$green};
 }
 
-.phabricator-timeline-sky .phabricator-timeline-icon-fill {
+.phabricator-timeline-icon-fill-sky {
   background-color: {$sky};
 }
 
-.phabricator-timeline-blue .phabricator-timeline-icon-fill {
+.phabricator-timeline-icon-fill-blue {
   background-color: {$blue};
 }
 
-.phabricator-timeline-indigo .phabricator-timeline-icon-fill {
+.phabricator-timeline-icon-fill-indigo {
   background-color: {$indigo};
 }
 
-.phabricator-timeline-violet .phabricator-timeline-icon-fill {
+.phabricator-timeline-icon-fill-violet {
   background-color: {$violet};
 }
 
-.phabricator-timeline-grey .phabricator-timeline-icon-fill {
+.phabricator-timeline-icon-fill-grey {
   background-color: #888;
 }
 
-.phabricator-timeline-black .phabricator-timeline-icon-fill {
+.phabricator-timeline-icon-fill-black {
   background-color: #333;
 }
 

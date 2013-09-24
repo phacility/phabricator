@@ -62,7 +62,7 @@ final class DifferentialDiff
   }
 
   public function attachArcanistProject(
-    PhabricatorRepositoryArcanistProject $project) {
+    PhabricatorRepositoryArcanistProject $project = null) {
     $this->arcanistProject = $project;
     return $this;
   }

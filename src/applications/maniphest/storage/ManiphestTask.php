@@ -18,9 +18,9 @@ final class ManiphestTask extends ManiphestDAO
   protected $ownerPHID;
   protected $ccPHIDs = array();
 
-  protected $status;
+  protected $status = ManiphestTaskStatus::STATUS_OPEN;
   protected $priority;
-  protected $subpriority;
+  protected $subpriority = 0;
 
   protected $title;
   protected $originalTitle;

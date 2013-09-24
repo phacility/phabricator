@@ -665,7 +665,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
         // TODO: Remove this, this edge type is encumbered with a bunch of
         // legacy nonsense.
-        ManiphestTransactionPro::TYPE_EDGE => true,
+        ManiphestTransaction::TYPE_EDGE => true,
       );
 
       if (empty($exempt_types[$xaction->getTransactionType()])) {

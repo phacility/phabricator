@@ -218,6 +218,9 @@ abstract class PhabricatorStandardCustomField
   }
 
   public function renderPropertyViewValue() {
+    if (!strlen($this->getFieldValue())) {
+      return null;
+    }
     return $this->getFieldValue();
   }
 

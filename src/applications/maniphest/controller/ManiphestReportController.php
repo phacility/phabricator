@@ -79,7 +79,7 @@ final class ManiphestReportController extends ManiphestController {
       $handle = $handles[$project_phid];
     }
 
-    $table = new ManiphestTransactionPro();
+    $table = new ManiphestTransaction();
     $conn = $table->establishConnection('r');
 
     $joins = '';
@@ -652,7 +652,7 @@ final class ManiphestReportController extends ManiphestController {
     list($ignored, $window_epoch) = $this->getWindow();
 
     $table = new ManiphestTask();
-    $xtable = new ManiphestTransactionPro();
+    $xtable = new ManiphestTransaction();
     $conn_r = $table->establishConnection('r');
 
     $tasks = queryfx_all(

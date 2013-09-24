@@ -153,7 +153,7 @@ final class ManiphestTaskEditController extends ManiphestController {
           $placeholder_editor,
           PhabricatorTransactions::TYPE_CUSTOMFIELD,
           array(
-            id(new ManiphestTransactionPro())
+            id(new ManiphestTransaction())
               ->setOldValue($aux_old_value)
               ->setNewValue($aux_new_value),
           ));
@@ -210,7 +210,7 @@ final class ManiphestTaskEditController extends ManiphestController {
             'ip' => $request->getRemoteAddr(),
           ));
 
-        $template = new ManiphestTransactionPro();
+        $template = new ManiphestTransaction();
         $transactions = array();
 
         foreach ($changes as $type => $value) {

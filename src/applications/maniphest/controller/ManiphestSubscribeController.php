@@ -32,8 +32,8 @@ final class ManiphestSubscribeController extends ManiphestController {
         return new Aphront400Response();
     }
 
-    $xaction = id(new ManiphestTransactionPro())
-      ->setTransactionType(ManiphestTransactionPro::TYPE_CCS)
+    $xaction = id(new ManiphestTransaction())
+      ->setTransactionType(ManiphestTransaction::TYPE_CCS)
       ->setNewValue($ccs);
 
     $editor = id(new ManiphestTransactionEditorPro())

@@ -175,11 +175,11 @@ final class PhabricatorSearchAttachController
         $target->getAuthorPHID(),
         $target->getOwnerPHID());
 
-      $close_task = id(new ManiphestTransactionPro())
+      $close_task = id(new ManiphestTransaction())
         ->setTransactionType(ManiphestTransactionType::TYPE_STATUS)
         ->setNewValue(ManiphestTaskStatus::STATUS_CLOSED_DUPLICATE);
 
-      $merge_comment = id(new ManiphestTransactionPro())
+      $merge_comment = id(new ManiphestTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
         ->attachComment(
           id(new ManiphestTransactionComment())
@@ -200,11 +200,11 @@ final class PhabricatorSearchAttachController
 
     $task_names = implode(', ', $task_names);
 
-    $add_ccs = id(new ManiphestTransactionPro())
+    $add_ccs = id(new ManiphestTransaction())
       ->setTransactionType(ManiphestTransactionType::TYPE_CCS)
       ->setNewValue($all_ccs);
 
-    $merged_comment = id(new ManiphestTransactionPro())
+    $merged_comment = id(new ManiphestTransaction())
       ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
       ->attachComment(
         id(new ManiphestTransactionComment())

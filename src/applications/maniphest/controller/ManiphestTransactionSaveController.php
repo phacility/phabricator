@@ -59,7 +59,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         }
         $new[PhabricatorFilePHIDTypeFile::TYPECONST][$phid] = array();
       }
-      $transaction = new ManiphestTransactionPro();
+      $transaction = new ManiphestTransaction();
       $transaction
         ->setTransactionType(ManiphestTransactionType::TYPE_ATTACH);
       $transaction->setNewValue($new);
@@ -76,12 +76,11 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         $request->getStr('comments'),
       ));
 
-    $cc_transaction = new ManiphestTransactionPro();
+    $cc_transaction = new ManiphestTransaction();
     $cc_transaction
       ->setTransactionType(ManiphestTransactionType::TYPE_CCS);
-    $force_cc_transaction = false;
 
-    $transaction = new ManiphestTransactionPro();
+    $transaction = new ManiphestTransaction();
     $transaction
       ->setTransactionType($action);
 
@@ -106,13 +105,6 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         // the CC transaction later.
         $added_ccs = array_merge($added_ccs, $request->getArr('ccs'));
 
-        // Transfer any comments over to the CC transaction.
-        $cc_transaction->setComments($transaction->getComments());
-
-        // Make sure we include this transaction, even if the user didn't
-        // actually add any CC's, because we'll discard their comment otherwise.
-        $force_cc_transaction = true;
-
         // Throw away the primary transaction.
         $transaction = null;
         break;
@@ -136,7 +128,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     }
 
     if ($request->getStr('comments')) {
-      $transactions[] = id(new ManiphestTransactionPro())
+      $transactions[] = id(new ManiphestTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
         ->attachComment(
           id(new ManiphestTransactionComment())
@@ -165,7 +157,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
             ManiphestTaskStatus::STATUS_OPEN) {
           // Closing an unassigned task. Assign the user as the owner of
           // this task.
-          $assign = new ManiphestTransactionPro();
+          $assign = new ManiphestTransaction();
           $assign->setTransactionType(ManiphestTransactionType::TYPE_OWNER);
           $assign->setNewValue($user->getPHID());
           $transactions[] = $assign;
@@ -197,10 +189,12 @@ final class ManiphestTransactionSaveController extends ManiphestController {
       }
     }
 
-    if ($added_ccs || $force_cc_transaction) {
-      // We've added CCs, so include a CC transaction. It's safe to do this even
-      // if we're just "adding" CCs which already exist, because the
-      // ManiphestTransactionEditor is smart enough to ignore them.
+    // Evade no-effect detection in the new editor stuff until we can switch
+    // to subscriptions.
+    $added_ccs = array_filter(array_diff($added_ccs, $task->getCCPHIDs()));
+
+    if ($added_ccs) {
+      // We've added CCs, so include a CC transaction.
       $all_ccs = array_merge($task->getCCPHIDs(), $added_ccs);
       $cc_transaction->setNewValue($all_ccs);
       $transactions[] = $cc_transaction;

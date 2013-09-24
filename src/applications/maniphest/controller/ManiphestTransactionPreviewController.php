@@ -37,7 +37,7 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
 
     // This should really be split into a separate transaction, but it should
     // all come out in the wash once we fully move to modern stuff.
-    $transaction->getModernTransaction()->attachComment(
+    $transaction->attachComment(
       id(new ManiphestTransactionComment())
         ->setContent($comments));
 
@@ -106,18 +106,18 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
 
     $engine = new PhabricatorMarkupEngine();
     $engine->setViewer($user);
-    if ($transaction->getModernTransaction()->hasComment()) {
+    if ($transaction->hasComment()) {
       $engine->addObject(
-        $transaction->getModernTransaction()->getComment(),
+        $transaction->getComment(),
         PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
     }
     $engine->process();
 
-    $transaction->getModernTransaction()->setHandles($handles);
+    $transaction->setHandles($handles);
 
     $view = id(new PhabricatorApplicationTransactionView())
       ->setUser($user)
-      ->setTransactions(mpull($transactions, 'getModernTransaction'))
+      ->setTransactions($transactions)
       ->setIsPreview(true)
       ->setIsDetailView(true);
 
