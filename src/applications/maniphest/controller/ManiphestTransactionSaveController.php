@@ -79,7 +79,6 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     $cc_transaction = new ManiphestTransaction();
     $cc_transaction
       ->setTransactionType(ManiphestTransactionType::TYPE_CCS);
-    $force_cc_transaction = false;
 
     $transaction = new ManiphestTransaction();
     $transaction
@@ -105,13 +104,6 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         // Accumulate the new explicit CCs into the array that we'll add in
         // the CC transaction later.
         $added_ccs = array_merge($added_ccs, $request->getArr('ccs'));
-
-        // Transfer any comments over to the CC transaction.
-        $cc_transaction->setComments($transaction->getComments());
-
-        // Make sure we include this transaction, even if the user didn't
-        // actually add any CC's, because we'll discard their comment otherwise.
-        $force_cc_transaction = true;
 
         // Throw away the primary transaction.
         $transaction = null;
@@ -199,9 +191,9 @@ final class ManiphestTransactionSaveController extends ManiphestController {
 
     // Evade no-effect detection in the new editor stuff until we can switch
     // to subscriptions.
-    $added_ccs = array_diff($added_ccs, $task->getCCPHIDs());
+    $added_ccs = array_filter(array_diff($added_ccs, $task->getCCPHIDs()));
 
-    if ($added_ccs || $force_cc_transaction) {
+    if ($added_ccs) {
       // We've added CCs, so include a CC transaction.
       $all_ccs = array_merge($task->getCCPHIDs(), $added_ccs);
       $cc_transaction->setNewValue($all_ccs);
