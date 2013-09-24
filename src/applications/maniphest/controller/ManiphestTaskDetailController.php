@@ -498,11 +498,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ? $this->renderHandlesForPHIDs($task->getProjectPHIDs(), ',')
       : phutil_tag('em', array(), pht('None')));
 
-    $field_list->appendFieldsToPropertyList(
-      $task,
-      $viewer,
-      $view);
-
     $edge_types = array(
       PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK
       => pht('Dependent Tasks'),
@@ -575,6 +570,11 @@ final class ManiphestTaskDetailController extends ManiphestController {
         pht('Files'),
         $file_view->render());
     }
+
+    $field_list->appendFieldsToPropertyList(
+      $task,
+      $viewer,
+      $view);
 
     $view->invokeWillRenderEvent();
 
