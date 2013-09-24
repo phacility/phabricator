@@ -7,7 +7,7 @@ $rows = new LiskRawMigrationIterator($conn_w, 'maniphest_transaction');
 $conn_w->openTransaction();
 
 // NOTE: These were the correct table names at the time of this patch.
-$xaction_table_name = 'maniphest_transaction_pro';
+$xaction_table_name = 'maniphest_transactionpro';
 $comment_table_name = 'maniphest_transaction_comment';
 
 foreach ($rows as $row) {
