@@ -79,14 +79,14 @@ final class ManiphestReportController extends ManiphestController {
       $handle = $handles[$project_phid];
     }
 
-    $table = new ManiphestTransaction();
+    $table = new ManiphestTransactionPro();
     $conn = $table->establishConnection('r');
 
     $joins = '';
     if ($project_phid) {
       $joins = qsprintf(
         $conn,
-        'JOIN %T t ON x.taskID = t.id
+        'JOIN %T t ON x.objectPHID = t.phid
           JOIN %T p ON p.taskPHID = t.phid AND p.projectPHID = %s',
         id(new ManiphestTask())->getTableName(),
         id(new ManiphestTaskProject())->getTableName(),
@@ -522,7 +522,7 @@ final class ManiphestReportController extends ManiphestController {
         $row[] = phutil_tag(
           'a',
           array(
-            'href' => '/maniphest/view/custom/?s=oc&tasks='.$task_ids,
+            'href' => '/maniphest/?ids='.$task_ids,
             'target' => '_blank',
           ),
           number_format(count($closed)));
@@ -652,12 +652,12 @@ final class ManiphestReportController extends ManiphestController {
     list($ignored, $window_epoch) = $this->getWindow();
 
     $table = new ManiphestTask();
-    $xtable = new ManiphestTransaction();
+    $xtable = new ManiphestTransactionPro();
     $conn_r = $table->establishConnection('r');
 
     $tasks = queryfx_all(
       $conn_r,
-      'SELECT t.* FROM %T t JOIN %T x ON x.taskID = t.id
+      'SELECT t.* FROM %T t JOIN %T x ON x.objectPHID = t.phid
         WHERE t.status != 0
         AND x.oldValue IN (null, %s, %s)
         AND x.newValue NOT IN (%s, %s)

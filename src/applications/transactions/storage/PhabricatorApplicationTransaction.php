@@ -28,6 +28,7 @@ abstract class PhabricatorApplicationTransaction
   private $handles;
   private $renderingTarget = self::TARGET_HTML;
   private $transactionGroup = array();
+  private $viewer = self::ATTACHABLE;
 
   abstract public function getApplicationTransactionType();
 
@@ -118,6 +119,15 @@ abstract class PhabricatorApplicationTransaction
 
   public function getRenderingTarget() {
     return $this->renderingTarget;
+  }
+
+  public function attachViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+  public function getViewer() {
+    return $this->assertAttached($this->viewer);
   }
 
   public function getRequiredHandlePHIDs() {
@@ -306,12 +316,18 @@ abstract class PhabricatorApplicationTransaction
             $this->renderHandleLink($author_phid),
             count($add),
             $this->renderHandleList($add));
-        } else {
+        } else if ($rem) {
           return pht(
             '%s removed %d subscriber(s): %s.',
             $this->renderHandleLink($author_phid),
             count($rem),
             $this->renderHandleList($rem));
+        } else {
+          // This is used when rendering previews, before the user actually
+          // selects any CCs.
+          return pht(
+            '%s updated subscribers...',
+            $this->renderHandleLink($author_phid));
         }
         break;
       case PhabricatorTransactions::TYPE_EDGE:
@@ -347,6 +363,24 @@ abstract class PhabricatorApplicationTransaction
             $this->renderHandleList($rem));
         }
 
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $key = $this->getMetadataValue('customfield:key');
+        $field = PhabricatorCustomField::getObjectField(
+          // TODO: This is a giant hack, but we currently don't have a way to
+          // get the contextual object and this pathway is only hit by
+          // Maniphest. We should provide a way to get the actual object here.
+          new ManiphestTask(),
+          PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS,
+          $key);
+        if ($field) {
+          $field->setViewer($this->getViewer());
+          return $field->getApplicationTransactionTitle($this);
+        } else {
+          return pht(
+            '%s edited a custom field.',
+            $this->renderHandleLink($author_phid));
+        }
+
       default:
         return pht(
           '%s edited this %s.',
@@ -355,7 +389,7 @@ abstract class PhabricatorApplicationTransaction
     }
   }
 
-  public function getTitleForFeed() {
+  public function getTitleForFeed(PhabricatorFeedStory $story) {
     $author_phid = $this->getAuthorPHID();
     $object_phid = $this->getObjectPHID();
 

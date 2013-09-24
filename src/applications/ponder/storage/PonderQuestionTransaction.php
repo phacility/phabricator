@@ -24,8 +24,22 @@ final class PonderQuestionTransaction
     return new PonderQuestionTransactionComment();
   }
 
+  public function getRequiredHandlePHIDs() {
+    $phids = parent::getRequiredHandlePHIDs();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_ANSWERS:
+        $phids[] = $this->getNewAnswerPHID();
+        $phids[] = $this->getObjectPHID();
+        break;
+    }
+
+    return $phids;
+  }
+
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
+    $object_phid = $this->getObjectPHID();
 
     $old = $this->getOldValue();
     $new = $this->getNewValue();
@@ -48,10 +62,12 @@ final class PonderQuestionTransaction
           '%s edited the question description.',
           $this->renderHandleLink($author_phid));
       case self::TYPE_ANSWERS:
-        // TODO: This could be richer.
+        $answer_handle = $this->getHandle($this->getNewAnswerPHID());
+        $question_handle = $this->getHandle($object_phid);
         return pht(
-          '%s added an answer.',
-          $this->renderHandleLink($author_phid));
+          '%s answered %s',
+          $this->renderHandleLink($author_phid),
+          $answer_handle->renderLink($question_handle->getFullName()));
       case self::TYPE_STATUS:
         switch ($new) {
           case PonderQuestionStatus::STATUS_OPEN:
@@ -178,7 +194,7 @@ final class PonderQuestionTransaction
     return parent::shouldHide();
   }
 
-  public function getTitleForFeed() {
+  public function getTitleForFeed(PhabricatorFeedStory $story) {
     $author_phid = $this->getAuthorPHID();
     $object_phid = $this->getObjectPHID();
 
@@ -205,11 +221,12 @@ final class PonderQuestionTransaction
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
       case self::TYPE_ANSWERS:
-        // TODO: This could be richer, too.
+        $answer_handle = $this->getHandle($this->getNewAnswerPHID());
+        $question_handle = $this->getHandle($object_phid);
         return pht(
           '%s answered %s',
           $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($object_phid));
+          $answer_handle->renderLink($question_handle->getFullName()));
       case self::TYPE_STATUS:
         switch ($new) {
           case PonderQuestionStatus::STATUS_OPEN:
@@ -225,8 +242,67 @@ final class PonderQuestionTransaction
         }
     }
 
-    return $this->getTitle();
+    return parent::getTitleForFeed($story);
+  }
+
+  public function getBodyForFeed(PhabricatorFeedStory $story) {
+    $new = $this->getNewValue();
+    $old = $this->getOldValue();
+
+    $body = null;
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_TITLE:
+        if ($old === null) {
+          $question = $story->getObject($this->getObjectPHID());
+          return phutil_escape_html_newlines(
+            phutil_utf8_shorten($question->getContent(), 128));
+        }
+      case self::TYPE_ANSWERS:
+        $answer = $this->getNewAnswerObject($story);
+        if ($answer) {
+          return phutil_escape_html_newlines(
+            phutil_utf8_shorten($answer->getContent(), 128));
+        }
+    }
+    return parent::getBodyForFeed($story);
+  }
+
+  /**
+   * Currently the application only supports adding answers one at a time.
+   * This data is stored as a list of phids. Use this function to get the
+   * new phid.
+   */
+  private function getNewAnswerPHID() {
+    $new = $this->getNewValue();
+    $old = $this->getOldValue();
+    $add = array_diff($new, $old);
+
+    if (count($add) != 1) {
+      throw new Exception(
+        'There should be only one answer added at a time.');
+    }
+
+    return reset($add);
+  }
+
+  /**
+   * Generally, the answer object is only available if the transaction
+   * type is self::TYPE_ANSWERS.
+   *
+   * Some stories - notably ones made before D7027 - will be of the more
+   * generic @{class:PhabricatorApplicationTransactionFeedStory}. These
+   * poor stories won't have the PonderAnswer loaded, and thus will have
+   * less cool information.
+   */
+  private function getNewAnswerObject(PhabricatorFeedStory $story) {
+    if ($story instanceof PonderTransactionFeedStory) {
+      $answer_phid = $this->getNewAnswerPHID();
+      if ($answer_phid) {
+        return $story->getObject($answer_phid);
+      }
+    }
+    return null;
   }
 
 }
-

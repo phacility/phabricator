@@ -18,11 +18,26 @@ final class DiffusionRepositoryEditController extends DiffusionController {
 
     $title = pht('Edit %s', $repository->getName());
 
-    $content[] = id(new PHUIHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($title);
+    if (!$repository->isTracked()) {
+      $header->addTag(
+        id(new PhabricatorTagView())
+          ->setType(PhabricatorTagView::TYPE_STATE)
+          ->setName(pht('Inactive'))
+          ->setBackgroundColor(PhabricatorTagView::COLOR_BLACK));
+    }
+
+    $content[] = $header;
 
     $content[] = $this->buildBasicActions($repository);
     $content[] = $this->buildBasicProperties($repository);
+
+    $content[] = id(new PHUIHeaderView())
+      ->setHeader(pht('Policies'));
+
+    $content[] = $this->buildPolicyActions($repository);
+    $content[] = $this->buildPolicyProperties($repository);
 
     $content[] = id(new PHUIHeaderView())
       ->setHeader(pht('Text Encoding'));
@@ -82,8 +97,27 @@ final class DiffusionRepositoryEditController extends DiffusionController {
       ->setIcon('edit')
       ->setName(pht('Edit Basic Information'))
       ->setHref($this->getRepositoryControllerURI($repository, 'edit/basic/'))
-      ->setDisabled(!$can_edit);
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(!$can_edit);
     $view->addAction($edit);
+
+    $activate = id(new PhabricatorActionView())
+      ->setHref(
+        $this->getRepositoryControllerURI($repository, 'edit/activate/'))
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(true);
+
+    if ($repository->isTracked()) {
+      $activate
+        ->setIcon('disable')
+        ->setName(pht('Deactivate Repository'));
+    } else {
+      $activate
+        ->setIcon('enable')
+        ->setName(pht('Activate Repository'));
+    }
+
+    $view->addAction($activate);
 
     return $view;
   }
@@ -136,6 +170,7 @@ final class DiffusionRepositoryEditController extends DiffusionController {
       ->setName(pht('Edit Text Encoding'))
       ->setHref(
         $this->getRepositoryControllerURI($repository, 'edit/encoding/'))
+      ->setWorkflow(!$can_edit)
       ->setDisabled(!$can_edit);
     $view->addAction($edit);
 
@@ -158,6 +193,50 @@ final class DiffusionRepositoryEditController extends DiffusionController {
     return $view;
   }
 
+  private function buildPolicyActions(PhabricatorRepository $repository) {
+    $viewer = $this->getRequest()->getUser();
 
+    $view = id(new PhabricatorActionListView())
+      ->setObjectURI($this->getRequest()->getRequestURI())
+      ->setUser($viewer);
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $repository,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $edit = id(new PhabricatorActionView())
+      ->setIcon('edit')
+      ->setName(pht('Edit Policies'))
+      ->setHref(
+        $this->getRepositoryControllerURI($repository, 'edit/policy/'))
+      ->setWorkflow(!$can_edit)
+      ->setDisabled(!$can_edit);
+    $view->addAction($edit);
+
+    return $view;
+  }
+
+  private function buildPolicyProperties(PhabricatorRepository $repository) {
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PhabricatorPropertyListView())
+      ->setUser($viewer);
+
+    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
+      $viewer,
+      $repository);
+
+    $view->addProperty(
+      pht('Visible To'),
+      $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
+
+    $view->addProperty(
+      pht('Editable By'),
+      $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
+
+
+    return $view;
+  }
 
 }

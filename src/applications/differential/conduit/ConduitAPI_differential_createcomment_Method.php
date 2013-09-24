@@ -12,10 +12,11 @@ final class ConduitAPI_differential_createcomment_Method
 
   public function defineParamTypes() {
     return array(
-      'revision_id' => 'required revisionid',
-      'message'     => 'optional string',
-      'action'      => 'optional string',
-      'silent'      => 'optional bool',
+      'revision_id'    => 'required revisionid',
+      'message'        => 'optional string',
+      'action'         => 'optional string',
+      'silent'         => 'optional bool',
+      'attach_inlines' => 'optional bool',
     );
   }
 
@@ -52,6 +53,7 @@ final class ConduitAPI_differential_createcomment_Method
     $editor->setContentSource($content_source);
     $editor->setMessage($request->getValue('message'));
     $editor->setNoEmail($request->getValue('silent'));
+    $editor->setAttachInlineComments($request->getValue('attach_inlines'));
     $editor->save();
 
     return array(

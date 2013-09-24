@@ -1,7 +1,26 @@
 <?php
 
 final class PonderQuestionEditor
-  extends PhabricatorApplicationTransactionEditor {
+  extends PonderEditor {
+
+  private $answer;
+
+  /**
+   * This is used internally on @{method:applyInitialEffects} if a transaction
+   * of type PonderQuestionTransaction::TYPE_ANSWERS is in the mix. The value
+   * is set to the //last// answer in the transactions. Practically, one
+   * answer is given at a time in the application, though theoretically
+   * this is buggy.
+   *
+   * The answer is used in emails to generate proper links.
+   */
+  private function setAnswer(PonderAnswer $answer) {
+    $this->answer = $answer;
+    return $this;
+  }
+  private function getAnswer() {
+    return $this->answer;
+  }
 
   protected function shouldApplyInitialEffects(
     PhabricatorLiskDAO $object,
@@ -32,6 +51,7 @@ final class PonderQuestionEditor
               continue;
             }
             $answer->save();
+            $this->setAnswer($answer);
           }
           break;
       }
@@ -145,13 +165,26 @@ final class PonderQuestionEditor
     return parent::mergeTransactions($u, $v);
   }
 
-  protected function supportsFeed() {
-    return true;
-  }
-
   protected function supportsSearch() {
     return true;
   }
+
+  protected function getFeedStoryType() {
+    return 'PonderTransactionFeedStory';
+  }
+
+  protected function getFeedStoryData(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $data = parent::getFeedStoryData($object, $xactions);
+    $answer = $this->getAnswer();
+    if ($answer) {
+      $data['answerPHID'] = $answer->getPHID();
+    }
+
+    return $data;
+ }
 
   protected function shouldImplyCC(
     PhabricatorLiskDAO $object,
@@ -176,50 +209,39 @@ final class PonderQuestionEditor
       ->setMailReceiver($object);
   }
 
-  protected function buildMailTemplate(PhabricatorLiskDAO $object) {
-    $id = $object->getID();
-    $title = $object->getTitle();
-    $original_title = $object->getOriginalTitle();
-
-    return id(new PhabricatorMetaMTAMail())
-      ->setSubject("Q{$id}: {$title}")
-      ->addHeader('Thread-Topic', "Q{$id}: {$original_title}");
-  }
-
-  protected function getMailTo(PhabricatorLiskDAO $object) {
-    return array(
-      $object->getAuthorPHID(),
-      $this->requireActor()->getPHID(),
-    );
-  }
-
   protected function buildMailBody(
     PhabricatorLiskDAO $object,
     array $xactions) {
 
     $body = parent::buildMailBody($object, $xactions);
 
-    // If the user just asked the question, add the question text.
+    $header = pht('QUESTION DETAIL');
+    $uri = '/Q'.$object->getID();
     foreach ($xactions as $xaction) {
       $type = $xaction->getTransactionType();
       $old = $xaction->getOldValue();
       $new = $xaction->getNewValue();
+      // If the user just asked the question, add the question text.
       if ($type == PonderQuestionTransaction::TYPE_CONTENT) {
         if ($old === null) {
           $body->addRawSection($new);
         }
       }
+      // If the user gave an answer, add the answer text. Also update
+      // the header and uri to be more answer-specific.
+      if ($type == PonderQuestionTransaction::TYPE_ANSWERS) {
+        $answer = $this->getAnswer();
+        $body->addRawSection($answer->getContent());
+        $header = pht('ANSWER DETAIL');
+        $uri = $answer->getURI();
+      }
     }
 
     $body->addTextSection(
-      pht('QUESTION DETAIL'),
-      PhabricatorEnv::getProductionURI('/Q'.$object->getID()));
+      $header,
+      PhabricatorEnv::getProductionURI($uri));
 
     return $body;
-  }
-
-  protected function getMailSubjectPrefix() {
-    return '[Ponder]';
   }
 
 }

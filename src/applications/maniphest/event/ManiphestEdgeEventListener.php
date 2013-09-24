@@ -55,9 +55,16 @@ final class ManiphestEdgeEventListener extends PhutilEventListener {
     unset($this->edges[$id]);
     unset($this->tasks[$id]);
 
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_LEGACY,
+      array());
+
     $new_edges = $this->loadAllEdges($event);
-    $editor = new ManiphestTransactionEditor();
-    $editor->setActor($event->getUser());
+    $editor = id(new ManiphestTransactionEditorPro())
+      ->setActor($event->getUser())
+      ->setContentSource($content_source)
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true);
 
     foreach ($tasks as $phid => $task) {
       $xactions = array();
@@ -74,12 +81,11 @@ final class ManiphestEdgeEventListener extends PhutilEventListener {
           continue;
         }
 
-        $xactions[] = id(new ManiphestTransaction())
+        $xactions[] = id(new ManiphestTransactionPro())
           ->setTransactionType(ManiphestTransactionType::TYPE_EDGE)
           ->setOldValue($old_type)
           ->setNewValue($new_type)
-          ->setMetadataValue('edge:type', $type)
-          ->setAuthorPHID($event->getUser()->getPHID());
+          ->setMetadataValue('edge:type', $type);
       }
 
       if ($xactions) {

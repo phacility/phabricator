@@ -93,6 +93,15 @@ JX.install('Tokenizer', {
         null,
         JX.bind(this, this.handleEvent));
 
+      // NOTE: Safari on the iPhone does not normally delegate click events on
+      // <div /> tags. This causes the event to fire. We want a click (in this
+      // case, a touch) anywhere in the div to trigger this event so that we
+      // can focus the input. Without this, you must tap an arbitrary area on
+      // the left side of the input to focus it.
+      //
+      // http://www.quirksmode.org/blog/archives/2010/09/click_event_del.html
+      input_container.onclick = JX.bag;
+
       JX.DOM.listen(
         input_container,
         'click',
@@ -193,7 +202,6 @@ JX.install('Tokenizer', {
     },
 
     handleEvent : function(e) {
-
       this._typeahead.handleEvent(e);
       if (e.getPrevented()) {
         return;
@@ -248,10 +256,20 @@ JX.install('Tokenizer', {
       metrics.x += 24;
       metrics.setDim(focus);
 
-      // This is a pretty ugly hack to force a redraw after copy/paste in
-      // Firefox. If we don't do this, it doesn't redraw the input so pasting
-      // in an email address doesn't give you a very good behavior.
-      focus.value = focus.value;
+      // NOTE: Once, long ago, we set "focus.value = focus.value;" here to fix
+      // an issue with copy/paste in Firefox not redrawing correctly. However,
+      // this breaks input of Japanese glyphs in Chrome, and I can't reproduce
+      // the original issue in modern Firefox.
+      //
+      // If future changes muck around with things here, test that Japanese
+      // inputs still work. Example:
+      //
+      //   - Switch to Hiragana mode.
+      //   - Type "ni".
+      //   - This should produce a glyph, not the value "n".
+      //
+      // With the assignment, Chrome loses the partial input on the "n" when
+      // the value is assigned.
     },
 
     setPlaceholder : function(string) {
@@ -382,7 +400,15 @@ JX.install('Tokenizer', {
     focus : function() {
       var focus = this._focus;
       JX.DOM.show(focus);
-      setTimeout(function() { JX.DOM.focus(focus); }, 0);
+
+      // NOTE: We must fire this focus event immediately (during event
+      // handling) for the iPhone to bring up the keyboard. Previously this
+      // focus was wrapped in setTimeout(), but it's unclear why that was
+      // necessary. If this is adjusted later, make sure tapping the inactive
+      // area of the tokenizer to focus it on the iPhone still brings up the
+      // keyboard.
+
+      JX.DOM.focus(focus);
     },
 
     _didfocus : function() {

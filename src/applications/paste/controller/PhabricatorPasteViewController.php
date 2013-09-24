@@ -142,15 +142,11 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
   }
 
   private function buildHeaderView(PhabricatorPaste $paste) {
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $this->getRequest()->getUser(),
-      $paste,
-      $icon = true);
-
     $header = id(new PHUIHeaderView())
       ->setHeader($paste->getTitle())
-      ->addProperty(PHUIHeaderView::PROPERTY_POLICY,
-        $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
+      ->setUser($this->getRequest()->getUser())
+      ->setPolicyObject($paste);
+
     return $header;
   }
 

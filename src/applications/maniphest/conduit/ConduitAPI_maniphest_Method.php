@@ -68,7 +68,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
 
       $comments = $request->getValue('comments');
       if (!$is_new && $comments !== null) {
-        $changes[ManiphestTransactionType::TYPE_NONE] = null;
+        $changes[PhabricatorTransactions::TYPE_COMMENT] = null;
       }
 
       $title = $request->getValue('title');
@@ -138,28 +138,27 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
       $changes[ManiphestTransactionType::TYPE_ATTACH] = $attached;
     }
 
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_CONDUIT,
-      array());
-
-    $template = new ManiphestTransaction();
-    $template->setContentSource($content_source);
-    $template->setAuthorPHID($request->getUser()->getPHID());
+    $template = new ManiphestTransactionPro();
 
     $transactions = array();
     foreach ($changes as $type => $value) {
       $transaction = clone $template;
       $transaction->setTransactionType($type);
-      $transaction->setNewValue($value);
-      if ($type == ManiphestTransactionType::TYPE_NONE) {
-        $transaction->setComments($comments);
+      if ($type == PhabricatorTransactions::TYPE_COMMENT) {
+        $transaction->attachComment(
+          id(new ManiphestTransactionComment())
+            ->setContent($comments));
+      } else {
+        $transaction->setNewValue($value);
       }
+
       $transactions[] = $transaction;
     }
 
     $field_list = PhabricatorCustomField::getObjectFields(
       $task,
       PhabricatorCustomField::ROLE_EDIT);
+    $field_list->readFieldsFromStorage($task);
 
     $auxiliary = $request->getValue('auxiliary');
     if ($auxiliary) {
@@ -169,8 +168,8 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
         }
         $transaction = clone $template;
         $transaction->setTransactionType(
-          ManiphestTransactionType::TYPE_AUXILIARY);
-        $transaction->setMetadataValue('aux:key', $key);
+          PhabricatorTransactions::TYPE_CUSTOMFIELD);
+        $transaction->setMetadataValue('customfield:key', $key);
         $transaction->setOldValue(
           $field->getOldValueForApplicationTransactions());
         $transaction->setNewValue($auxiliary[$key]);
@@ -196,9 +195,19 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
     $task = $event->getValue('task');
     $transactions = $event->getValue('transactions');
 
-    $editor = new ManiphestTransactionEditor();
-    $editor->setActor($request->getUser());
-    $editor->setAuxiliaryFields($field_list->getFields());
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_CONDUIT,
+      array());
+
+    $editor = id(new ManiphestTransactionEditorPro())
+      ->setActor($request->getUser())
+      ->setContentSource($content_source)
+      ->setContinueOnNoEffect(true);
+
+    if (!$is_new) {
+      $editor->setContinueOnMissingFields(true);
+    }
+
     $editor->applyTransactions($task, $transactions);
 
     $event = new PhabricatorEvent(

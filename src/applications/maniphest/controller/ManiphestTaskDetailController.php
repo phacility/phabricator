@@ -31,9 +31,11 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $parent_task = id(new ManiphestTask())->load($workflow);
     }
 
-    $transactions = id(new ManiphestTransaction())->loadAllWhere(
-      'taskID = %d ORDER BY id ASC',
-      $task->getID());
+    $transactions = id(new ManiphestTransactionQuery())
+      ->setViewer($user)
+      ->withObjectPHIDs(array($task->getPHID()))
+      ->needComments(true)
+      ->execute();
 
     $field_list = PhabricatorCustomField::getObjectFields(
       $task,
@@ -69,11 +71,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $edges = idx($query->execute(), $phid);
     $phids = array_fill_keys($query->getDestinationPHIDs(), true);
 
-    foreach ($transactions as $transaction) {
-      foreach ($transaction->extractPHIDs() as $phid) {
-        $phids[$phid] = true;
-      }
-    }
     foreach ($task->getCCPHIDs() as $phid) {
       $phids[$phid] = true;
     }
@@ -98,16 +95,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $phids = array_keys($phids);
 
-    $phids = array_merge(
-      $phids,
-      array_mergev(mpull($aux_fields, 'getRequiredHandlePHIDs')));
-
     $this->loadHandles($phids);
 
     $handles = $this->getLoadedHandles();
-    foreach ($aux_fields as $aux_field) {
-      $aux_field->setHandles($handles);
-    }
 
     $context_bar = null;
 
@@ -146,16 +136,11 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $engine = new PhabricatorMarkupEngine();
     $engine->setViewer($user);
     $engine->addObject($task, ManiphestTask::MARKUP_FIELD_DESCRIPTION);
-    foreach ($transactions as $xaction) {
-      if ($xaction->hasComments()) {
-        $engine->addObject($xaction, ManiphestTransaction::MARKUP_FIELD_BODY);
-      }
-    }
-
-    foreach ($aux_fields as $aux_field) {
-      foreach ($aux_field->getMarkupFields() as $markup_field) {
-        $engine->addObject($aux_field, $markup_field);
-        $aux_field->setMarkupEngine($engine);
+    foreach ($transactions as $modern_xaction) {
+      if ($modern_xaction->getComment()) {
+        $engine->addObject(
+          $modern_xaction->getComment(),
+          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
       }
     }
 
@@ -332,12 +317,11 @@ final class ManiphestTaskDetailController extends ManiphestController {
       </div>',
       pht('Loading preview...'));
 
-    $transaction_view = new ManiphestTransactionListView();
-    $transaction_view->setTransactions($transactions);
-    $transaction_view->setHandles($this->getLoadedHandles());
-    $transaction_view->setUser($user);
-    $transaction_view->setAuxiliaryFields($aux_fields);
-    $transaction_view->setMarkupEngine($engine);
+    $timeline = id(new PhabricatorApplicationTransactionView())
+      ->setUser($user)
+      ->setObjectPHID($task->getPHID())
+      ->setTransactions($transactions)
+      ->setMarkupEngine($engine);
 
     $object_name = 'T'.$task->getID();
     $actions = $this->buildActionView($task);
@@ -359,7 +343,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
         $header,
         $actions,
         $properties,
-        $transaction_view,
+        $timeline,
         $comment_header,
         $comment_form,
         $preview_panel,
@@ -375,7 +359,10 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $view = id(new PHUIHeaderView())
       ->setHeader($task->getTitle());
 
-    $view->addTag(ManiphestView::renderTagForTask($task));
+    $status = $task->getStatus();
+    $status_name = ManiphestTaskStatus::renderFullDescription($status);
+
+    $view->addProperty(PHUIHeaderView::PROPERTY_STATUS, $status_name);
 
     return $view;
   }

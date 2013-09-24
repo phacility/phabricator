@@ -31,7 +31,9 @@ final class PhluxViewController extends PhluxController {
         ->setHref($request->getRequestURI()));
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($title);
+      ->setHeader($title)
+      ->setUser($user)
+      ->setPolicyObject($var);
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($user)
@@ -53,21 +55,10 @@ final class PhluxViewController extends PhluxController {
 
     $display_value = json_encode($var->getVariableValue());
 
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $user,
-      $var);
-
     $properties = id(new PhabricatorPropertyListView())
       ->setUser($user)
       ->setObject($var)
-      ->addProperty(pht('Value'), $display_value)
-      ->addProperty(
-        pht('Visible To'),
-        $descriptions[PhabricatorPolicyCapability::CAN_VIEW])
-      ->addProperty(
-        pht('Editable By'),
-        $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
-
+      ->addProperty(pht('Value'), $display_value);
 
     $xactions = id(new PhluxTransactionQuery())
       ->setViewer($user)

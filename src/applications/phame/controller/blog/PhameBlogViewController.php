@@ -34,7 +34,9 @@ final class PhameBlogViewController extends PhameController {
     $nav = $this->renderSideNavFilterView(null);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($blog->getName());
+      ->setHeader($blog->getName())
+      ->setUser($user)
+      ->setPolicyObject($blog);
 
     $handle_phids = array_merge(
       mpull($posts, 'getBloggerPHID'),
@@ -110,10 +112,6 @@ final class PhameBlogViewController extends PhameController {
     $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
       $user,
       $blog);
-
-    $properties->addProperty(
-      pht('Visible To'),
-      $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
 
     $properties->addProperty(
       pht('Editable By'),

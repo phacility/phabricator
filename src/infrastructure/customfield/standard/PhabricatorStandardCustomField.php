@@ -9,7 +9,11 @@ abstract class PhabricatorStandardCustomField
   private $fieldDescription;
   private $fieldConfig;
   private $applicationField;
-  private $strings;
+  private $strings = array();
+  private $caption;
+  private $fieldError;
+  private $required;
+  private $default;
 
   abstract public function getFieldType();
 
@@ -71,6 +75,15 @@ abstract class PhabricatorStandardCustomField
     return $this;
   }
 
+  public function setCaption($caption) {
+    $this->caption = $caption;
+    return $this;
+  }
+
+  public function getCaption() {
+    return $this->caption;
+  }
+
   public function setFieldDescription($description) {
     $this->fieldDescription = $description;
     return $this;
@@ -88,6 +101,16 @@ abstract class PhabricatorStandardCustomField
         case 'strings':
           $this->setStrings($value);
           break;
+        case 'caption':
+          $this->setCaption($value);
+          break;
+        case 'required':
+          $this->setRequired($value);
+          $this->setFieldError(true);
+          break;
+        case 'default':
+          $this->setFieldValue($value);
+          break;
         case 'type':
           // We set this earlier on.
           break;
@@ -101,6 +124,23 @@ abstract class PhabricatorStandardCustomField
     return idx($this->fieldConfig, $key, $default);
   }
 
+  public function setFieldError($field_error) {
+    $this->fieldError = $field_error;
+    return $this;
+  }
+
+  public function getFieldError() {
+    return $this->fieldError;
+  }
+
+  public function setRequired($required) {
+    $this->required = $required;
+    return $this;
+  }
+
+  public function getRequired() {
+    return $this->required;
+  }
 
 
 /* -(  PhabricatorCustomField  )--------------------------------------------- */
@@ -163,7 +203,9 @@ abstract class PhabricatorStandardCustomField
   public function renderEditControl() {
     return id(new AphrontFormTextControl())
       ->setName($this->getFieldKey())
+      ->setCaption($this->getCaption())
       ->setValue($this->getFieldValue())
+      ->setError($this->getFieldError())
       ->setLabel($this->getFieldName());
   }
 
@@ -215,5 +257,78 @@ abstract class PhabricatorStandardCustomField
     array $handles) {
     return;
   }
+
+  public function validateApplicationTransactions(
+    PhabricatorApplicationTransactionEditor $editor,
+    $type,
+    array $xactions) {
+
+    $this->setFieldError(null);
+
+    $errors = parent::validateApplicationTransactions(
+      $editor,
+      $type,
+      $xactions);
+
+    if ($this->getRequired()) {
+      $value = $this->getOldValueForApplicationTransactions();
+
+      $transaction = null;
+      foreach ($xactions as $xaction) {
+        $value = $xaction->getNewValue();
+        if (!$this->isValueEmpty($value)) {
+          $transaction = $xaction;
+          break;
+        }
+      }
+      if ($this->isValueEmpty($value)) {
+        $error = new PhabricatorApplicationTransactionValidationError(
+          $type,
+          pht('Required'),
+          pht('%s is required.', $this->getFieldName()),
+          $transaction);
+        $error->setIsMissingFieldError(true);
+        $errors[] = $error;
+        $this->setFieldError(pht('Required'));
+      }
+    }
+
+    return $errors;
+  }
+
+  protected function isValueEmpty($value) {
+    if (is_array($value)) {
+      return empty($value);
+    }
+    return !strlen($value);
+  }
+
+  public function getApplicationTransactionTitle(
+    PhabricatorApplicationTransaction $xaction) {
+    $author_phid = $xaction->getAuthorPHID();
+    $old = $xaction->getOldValue();
+    $new = $xaction->getNewValue();
+
+    if (!$old) {
+      return pht(
+        '%s set %s to %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName(),
+        $new);
+    } else if (!$new) {
+      return pht(
+        '%s removed %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName());
+    } else {
+      return pht(
+        '%s changed %s from %s to %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName(),
+        $old,
+        $new);
+    }
+  }
+
 
 }

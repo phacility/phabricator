@@ -17,11 +17,6 @@ final class PonderQuestionReplyHandler extends PhabricatorMailReplyHandler {
     return $this->getDefaultPublicReplyHandlerEmailAddress('Q');
   }
 
-  public function getReplyHandlerDomain() {
-    return PhabricatorEnv::getEnvConfig(
-      'metamta.maniphest.reply-handler-domain');
-  }
-
   public function getReplyHandlerInstructions() {
     return null;
   }

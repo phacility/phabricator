@@ -281,7 +281,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     $engine = $this->getOrBuildEngine();
     $comment = $xaction->getComment();
 
-    if ($comment) {
+    if ($xaction->hasComment()) {
       if ($comment->getIsDeleted()) {
         return phutil_tag(
           'em',

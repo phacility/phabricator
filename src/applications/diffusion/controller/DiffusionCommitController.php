@@ -30,6 +30,10 @@ final class DiffusionCommitController extends DiffusionController {
     $repository = $drequest->getRepository();
     $commit = $drequest->loadCommit();
 
+    $crumbs = $this->buildCrumbs(array(
+      'commit' => true,
+    ));
+
     if (!$commit) {
       $exists = $this->callConduitWithDiffusionRequest(
         'diffusion.existsquery',
@@ -37,12 +41,22 @@ final class DiffusionCommitController extends DiffusionController {
       if (!$exists) {
         return new Aphront404Response();
       }
-      return $this->buildStandardPageResponse(
-        id(new AphrontErrorView())
-        ->setTitle(pht('Error displaying commit.'))
-        ->appendChild(pht('Failed to load the commit because the commit has '.
-                      'not been parsed yet.')),
-          array('title' => pht('Commit Still Parsing')));
+
+      $error = id(new AphrontErrorView())
+        ->setTitle(pht('Commit Still Parsing'))
+        ->appendChild(
+          pht(
+            'Failed to load the commit because the commit has not been '.
+            'parsed yet.'));
+
+      return $this->buildApplicationPage(
+        array(
+          $crumbs,
+          $error,
+        ),
+        array(
+          'title' => pht('Commit Still Parsing'),
+        ));
     }
 
     $commit_data = $drequest->loadCommitData();
@@ -106,7 +120,7 @@ final class DiffusionCommitController extends DiffusionController {
       $message = $commit_data->getCommitMessage();
 
       $revision = $commit->getCommitIdentifier();
-      $message = $repository->linkBugtraq($message, $revision);
+      $message = $this->linkBugtraq($message);
 
       $message = $engine->markupText($message);
 
@@ -345,10 +359,6 @@ final class DiffusionCommitController extends DiffusionController {
     $short_name = DiffusionView::nameCommit(
       $repository,
       $commit->getCommitIdentifier());
-
-    $crumbs = $this->buildCrumbs(array(
-      'commit' => true,
-    ));
 
     $prefs = $user->loadPreferences();
     $pref_filetree = PhabricatorUserPreferences::PREFERENCE_DIFF_FILETREE;
@@ -997,6 +1007,29 @@ final class DiffusionCommitController extends DiffusionController {
     }
 
     return $view;
+  }
+
+  private function linkBugtraq($corpus) {
+    $url = PhabricatorEnv::getEnvConfig('bugtraq.url');
+    if (!strlen($url)) {
+      return $corpus;
+    }
+
+    $regexes = PhabricatorEnv::getEnvConfig('bugtraq.logregex');
+    if (!$regexes) {
+      return $corpus;
+    }
+
+    $parser = id(new PhutilBugtraqParser())
+      ->setBugtraqPattern("[[ {$url} | %BUGID% ]]")
+      ->setBugtraqCaptureExpression(array_shift($regexes));
+
+    $select = array_shift($regexes);
+    if ($select) {
+      $parser->setBugtraqSelectExpression($select);
+    }
+
+    return $parser->processCorpus($corpus);
   }
 
 }

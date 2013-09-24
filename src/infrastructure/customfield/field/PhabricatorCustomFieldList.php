@@ -27,6 +27,7 @@ final class PhabricatorCustomFieldList extends Phobject {
     return $this;
   }
 
+
   /**
    * Read stored values for all fields which support storage.
    *
@@ -65,7 +66,9 @@ final class PhabricatorCustomFieldList extends Phobject {
       $storage = idx($objects, $key);
       if ($storage) {
         $field->setValueFromStorage($storage->getFieldValue());
-      } else {
+      } else if ($object->getPHID()) {
+        // NOTE: We set this only if the object exists. Otherwise, we allow the
+        // field to retain any default value it may have.
         $field->setValueFromStorage(null);
       }
     }
@@ -100,6 +103,7 @@ final class PhabricatorCustomFieldList extends Phobject {
       $style = $field->getStyleForPropertyView();
       switch ($style) {
         case 'property':
+        case 'header':
           $head[$key] = $field;
           break;
         case 'block':
@@ -113,12 +117,39 @@ final class PhabricatorCustomFieldList extends Phobject {
     }
     $fields = $head + $tail;
 
+    $add_header = null;
+
     foreach ($fields as $field) {
       $label = $field->renderPropertyViewLabel();
       $value = $field->renderPropertyViewValue();
       if ($value !== null) {
         switch ($field->getStyleForPropertyView()) {
+          case 'header':
+            // We want to hide headers if the fields the're assciated with
+            // don't actually produce any visible properties. For example, in a
+            // list like this:
+            //
+            //   Header A
+            //   Prop A: Value A
+            //   Header B
+            //   Prop B: Value B
+            //
+            // ...if the "Prop A" field returns `null` when rendering its
+            // property value and we rendered naively, we'd get this:
+            //
+            //   Header A
+            //   Header B
+            //   Prop B: Value B
+            //
+            // This is silly. Instead, we hide "Header A".
+            $add_header = $value;
+            break;
           case 'property':
+            if ($add_header !== null) {
+              // Add the most recently seen header.
+              $view->addSectionHeader($add_header);
+              $add_header = null;
+            }
             $view->addProperty($label, $value);
             break;
           case 'block':

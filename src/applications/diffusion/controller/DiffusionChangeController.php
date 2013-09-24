@@ -2,8 +2,13 @@
 
 final class DiffusionChangeController extends DiffusionController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function processRequest() {
     $drequest = $this->diffusionRequest;
+    $viewer = $this->getRequest()->getUser();
 
     $content = array();
 
@@ -11,7 +16,8 @@ final class DiffusionChangeController extends DiffusionController {
       'diffusion.diffquery',
       array(
         'commit' => $drequest->getCommit(),
-        'path' => $drequest->getPath()));
+        'path' => $drequest->getPath(),
+      ));
     $drequest->setCommit($data['effectiveCommit']);
     $raw_changes = ArcanistDiffChange::newFromConduit($data['changes']);
     $diff = DifferentialDiff::newFromRawChanges($raw_changes);
@@ -31,7 +37,6 @@ final class DiffusionChangeController extends DiffusionController {
     );
 
     $changeset_view = new DifferentialChangesetListView();
-    $changeset_view->setTitle(DiffusionView::nameCommit($repository, $commit));
     $changeset_view->setChangesets($changesets);
     $changeset_view->setVisibleChangesets($changesets);
     $changeset_view->setRenderingReferences(
@@ -45,13 +50,13 @@ final class DiffusionChangeController extends DiffusionController {
         'view' => 'raw',
       ),
     );
+
     $right_uri = $drequest->generateURI($raw_params);
     $raw_params['params']['before'] = $drequest->getRawCommit();
     $left_uri = $drequest->generateURI($raw_params);
     $changeset_view->setRawFileURIs($left_uri, $right_uri);
 
-    $changeset_view->setRenderURI(
-      '/diffusion/'.$callsign.'/diff/');
+    $changeset_view->setRenderURI('/diffusion/'.$callsign.'/diff/');
     $changeset_view->setWhitespace(
       DifferentialChangesetParser::WHITESPACE_SHOW_ALL);
     $changeset_view->setUser($this->getRequest()->getUser());
@@ -61,22 +66,89 @@ final class DiffusionChangeController extends DiffusionController {
     require_celerity_resource('differential-core-view-css');
     $content[] = $changeset_view->render();
 
-    $nav = $this->buildSideNav('change', true);
-    $nav->appendChild($content);
     $crumbs = $this->buildCrumbs(
       array(
         'branch' => true,
         'path'   => true,
         'view'   => 'change',
       ));
-    $nav->setCrumbs($crumbs);
+
+    $links = $this->renderPathLinks($drequest, $mode = 'browse');
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($links)
+      ->setUser($viewer)
+      ->setPolicyObject($drequest->getRepository());
+    $actions = $this->buildActionView($drequest);
+    $properties = $this->buildPropertyView($drequest);
 
     return $this->buildApplicationPage(
-      $nav,
+      array(
+        $crumbs,
+        $header,
+        $actions,
+        $properties,
+        $content,
+      ),
       array(
         'title' => pht('Change'),
-        'device' => true,
       ));
+  }
+
+  private function buildActionView(DiffusionRequest $drequest) {
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PhabricatorActionListView())
+      ->setUser($viewer);
+
+    $history_uri = $drequest->generateURI(
+      array(
+        'action' => 'history',
+      ));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('View History'))
+        ->setHref($history_uri)
+        ->setIcon('history'));
+
+    $browse_uri = $drequest->generateURI(
+      array(
+        'action' => 'browse',
+      ));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Browse Content'))
+        ->setHref($browse_uri)
+        ->setIcon('file'));
+
+    return $view;
+  }
+
+  protected function buildPropertyView(DiffusionRequest $drequest) {
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PhabricatorPropertyListView())
+      ->setUser($viewer);
+
+    $stable_commit = $drequest->getStableCommitName();
+    $callsign = $drequest->getRepository()->getCallsign();
+
+    $view->addProperty(
+      pht('Commit'),
+      phutil_tag(
+        'a',
+        array(
+          'href' => $drequest->generateURI(
+            array(
+              'action' => 'commit',
+              'commit' => $stable_commit,
+            )),
+        ),
+        $drequest->getRepository()->formatCommitName($stable_commit)));
+
+    return $view;
   }
 
 }

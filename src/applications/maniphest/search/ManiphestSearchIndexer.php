@@ -38,39 +38,10 @@ final class ManiphestSearchIndexer
         time());
     }
 
-    $transactions = id(new ManiphestTransaction())->loadAllWhere(
-      'taskID = %d',
-      $task->getID());
-
-    $current_ccs = $task->getCCPHIDs();
-    $owner = null;
-    $ccs = array();
-    foreach ($transactions as $transaction) {
-      if ($transaction->hasComments()) {
-        $doc->addField(
-          PhabricatorSearchField::FIELD_COMMENT,
-          $transaction->getComments());
-      }
-
-      $author = $transaction->getAuthorPHID();
-
-      switch ($transaction->getTransactionType()) {
-        case ManiphestTransactionType::TYPE_OWNER:
-          $owner = $transaction;
-          break;
-        case ManiphestTransactionType::TYPE_CCS:
-          // For users who are still CC'd, record the first time they were
-          // added to CC.
-          foreach ($transaction->getNewValue() as $added_cc) {
-            if (in_array($added_cc, $current_ccs)) {
-              if (empty($ccs[$added_cc])) {
-                $ccs[$added_cc] = $transaction->getDateCreated();
-              }
-            }
-          }
-          break;
-      }
-    }
+    $this->indexTransactions(
+      $doc,
+      new ManiphestTransactionQuery(),
+      array($phid));
 
     foreach ($task->getProjectPHIDs() as $phid) {
       $doc->addRelationship(
@@ -80,12 +51,13 @@ final class ManiphestSearchIndexer
         $task->getDateModified()); // Bogus.
     }
 
-    if ($owner && $owner->getNewValue()) {
+    $owner = $task->getOwnerPHID();
+    if ($owner) {
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
-        $owner->getNewValue(),
+        $owner,
         PhabricatorPeoplePHIDTypeUser::TYPECONST,
-        $owner->getDateCreated());
+        time());
     } else {
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
@@ -98,16 +70,17 @@ final class ManiphestSearchIndexer
 
     // We need to load handles here since non-users may subscribe (mailing
     // lists, e.g.)
+    $ccs = $task->getCCPHIDs();
     $handles = id(new PhabricatorHandleQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withPHIDs(array_keys($ccs))
+      ->withPHIDs($ccs)
       ->execute();
-    foreach ($ccs as $cc => $time) {
+    foreach ($ccs as $cc) {
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_SUBSCRIBER,
         $handles[$cc]->getPHID(),
         $handles[$cc]->getType(),
-        $time);
+        time());
     }
 
     return $doc;

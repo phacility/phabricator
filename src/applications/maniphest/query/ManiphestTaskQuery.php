@@ -782,7 +782,7 @@ final class ManiphestTaskQuery
 
   private function loadCursorObject($id) {
     $results = id(new ManiphestTaskQuery())
-      ->setViewer($this->getViewer())
+      ->setViewer($this->getPagingViewer())
       ->withIDs(array((int)$id))
       ->execute();
     return head($results);

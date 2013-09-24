@@ -2,8 +2,7 @@
 
 final class PHUIHeaderView extends AphrontView {
 
-  const PROPERTY_STATE = 1;
-  const PROPERTY_POLICY = 2;
+  const PROPERTY_STATUS = 1;
 
   private $objectName;
   private $header;
@@ -13,7 +12,8 @@ final class PHUIHeaderView extends AphrontView {
   private $gradient;
   private $noBackground;
   private $bleedHeader;
-  private $properties;
+  private $properties = array();
+  private $policyObject;
 
   public function setHeader($header) {
     $this->header = $header;
@@ -55,6 +55,11 @@ final class PHUIHeaderView extends AphrontView {
     return $this;
   }
 
+  public function setPolicyObject(PhabricatorPolicyInterface $object) {
+    $this->policyObject = $object;
+    return $this;
+  }
+
   public function addProperty($property, $value) {
     $this->properties[$property] = $value;
     return $this;
@@ -71,7 +76,7 @@ final class PHUIHeaderView extends AphrontView {
     }
 
     if ($this->bleedHeader) {
-      $classes[] = 'phabricator-bleed-header';
+      $classes[] = 'phui-bleed-header';
     }
 
     if ($this->gradient) {
@@ -79,7 +84,7 @@ final class PHUIHeaderView extends AphrontView {
       $classes[] = 'gradient-'.$this->gradient.'-header';
     }
 
-    if ($this->properties || $this->subheader) {
+    if ($this->properties || $this->policyObject || $this->subheader) {
       $classes[] = 'phui-header-tall';
     }
 
@@ -129,20 +134,25 @@ final class PHUIHeaderView extends AphrontView {
         $this->subheader);
     }
 
-    if ($this->properties) {
+    if ($this->properties || $this->policyObject) {
       $property_list = array();
       foreach ($this->properties as $type => $property) {
         switch ($type) {
-          case self::PROPERTY_STATE:
-            $property_list[] = $property;
-          break;
-          case self::PROPERTY_POLICY:
+          case self::PROPERTY_STATUS:
             $property_list[] = $property;
           break;
           default:
             throw new Exception('Incorrect Property Passed');
           break;
         }
+      }
+
+      if ($this->policyObject) {
+        $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
+          $this->getUser(),
+          $this->policyObject,
+          true);
+        $property_list[] = $descriptions[PhabricatorPolicyCapability::CAN_VIEW];
       }
 
       $header[] = phutil_tag(

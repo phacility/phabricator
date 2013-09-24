@@ -82,6 +82,23 @@ body.device-phone .phui-header-view {
   margin: -2px 4px -2px 0;
 }
 
+.phui-header-subheader {
+  color: {$bluetext};
+}
+
 .phui-header-subheader .policy-link {
   color: {$darkbluetext};
+}
+
+.phui-header-subheader .phui-header-status-dark {
+  color: #111;
+  text-shadow: 0 1px #fff;
+}
+
+.phui-header-subheader .phui-header-status-red {
+  color: {$red};
+}
+
+.phui-header-subheader .phui-header-status-green {
+  color: {$green};
 }

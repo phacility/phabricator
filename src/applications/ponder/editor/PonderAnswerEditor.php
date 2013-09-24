@@ -1,7 +1,6 @@
 <?php
 
-final class PonderAnswerEditor
-  extends PhabricatorApplicationTransactionEditor {
+final class PonderAnswerEditor extends PonderEditor {
 
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
@@ -62,13 +61,44 @@ final class PonderAnswerEditor
     return parent::mergeTransactions($u, $v);
   }
 
-  protected function supportsFeed() {
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
     return true;
   }
 
-  protected function getMailTo(PhabricatorLiskDAO $object) {
-    return array($object->getAuthorPHID());
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    $question = $object->getQuestion();
+    return id(new PonderQuestionReplyHandler())
+      ->setMailReceiver($question);
   }
 
+  protected function buildMailTemplate(PhabricatorLiskDAO $object) {
+    $question = $object->getQuestion();
+    return parent::buildMailTemplate($question);
+  }
+
+
+  protected function buildMailBody(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $body = parent::buildMailBody($object, $xactions);
+
+    // If the user just gave the answer, add the answer text.
+    foreach ($xactions as $xaction) {
+      $type = $xaction->getTransactionType();
+      $new = $xaction->getNewValue();
+      if ($type == PonderAnswerTransaction::TYPE_CONTENT) {
+        $body->addRawSection($new);
+      }
+    }
+
+    $body->addTextSection(
+      pht('ANSWER DETAIL'),
+      PhabricatorEnv::getProductionURI($object->getURI()));
+
+    return $body;
+  }
 
 }

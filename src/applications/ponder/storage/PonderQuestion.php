@@ -62,7 +62,7 @@ final class PonderQuestion extends PonderDAO
 
     $this->setComments(idx($comments, $this->getPHID(), array()));
     foreach ($this->answers as $answer) {
-      $answer->setQuestion($this);
+      $answer->attachQuestion($this);
       $answer->setComments(idx($comments, $answer->getPHID(), array()));
     }
   }
@@ -206,6 +206,12 @@ final class PonderQuestion extends PonderDAO
   public function getOriginalTitle() {
     // TODO: Make this actually save/return the original title.
     return $this->getTitle();
+  }
+
+  public function getFullTitle() {
+    $id = $this->getID();
+    $title = $this->getTitle();
+    return "Q{$id}: {$title}";
   }
 
 

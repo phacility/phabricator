@@ -56,9 +56,7 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
         'id' => $mail->getID(),
       ));
 
-    $template = new ManiphestTransaction();
-    $template->setContentSource($content_source);
-    $template->setAuthorPHID($user->getPHID());
+    $template = new ManiphestTransactionPro();
 
     $is_unsub = false;
     if ($is_new_task) {
@@ -88,7 +86,7 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
         $command = $matches[1];
       }
 
-      $ttype = ManiphestTransactionType::TYPE_NONE;
+      $ttype = PhabricatorTransactions::TYPE_COMMENT;
       $new_value = null;
       switch ($command) {
         case 'close':
@@ -112,12 +110,22 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
           break;
       }
 
-      $xaction = clone $template;
-      $xaction->setTransactionType($ttype);
-      $xaction->setNewValue($new_value);
-      $xaction->setComments($body);
+      if ($ttype != PhabricatorTransactions::TYPE_COMMENT) {
+        $xaction = clone $template;
+        $xaction->setTransactionType($ttype);
+        $xaction->setNewValue($new_value);
+        $xactions[] = $xaction;
+      }
 
-      $xactions[] = $xaction;
+      if (strlen($body)) {
+        $xaction = clone $template;
+        $xaction->setTransactionType(PhabricatorTransactions::TYPE_COMMENT);
+        $xaction->attachComment(
+          id(new ManiphestTransactionComment())
+            ->setContent($body));
+        $xactions[] = $xaction;
+      }
+
     }
 
     $ccs = $mail->loadCCPHIDs();
@@ -149,13 +157,14 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
     $task = $event->getValue('task');
     $xactions = $event->getValue('transactions');
 
-
-    $editor = new ManiphestTransactionEditor();
-    $editor->setActor($user);
-    $editor->setParentMessageID($mail->getMessageID());
-    $editor->setExcludeMailRecipientPHIDs(
-      $this->getExcludeMailRecipientPHIDs());
-    $editor->applyTransactions($task, $xactions);
+    $editor = id(new ManiphestTransactionEditorPro())
+      ->setActor($user)
+      ->setParentMessageID($mail->getMessageID())
+      ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true)
+      ->setContentSource($content_source)
+      ->applyTransactions($task, $xactions);
 
     $event = new PhabricatorEvent(
       PhabricatorEventType::TYPE_MANIPHEST_DIDEDITTASK,

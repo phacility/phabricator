@@ -6,6 +6,7 @@ final class PhabricatorRepositoryQuery
   private $ids;
   private $phids;
   private $callsigns;
+  private $types;
 
   const STATUS_OPEN = 'status-open';
   const STATUS_CLOSED = 'status-closed';
@@ -38,6 +39,11 @@ final class PhabricatorRepositoryQuery
 
   public function withStatus($status) {
     $this->status = $status;
+    return $this;
+  }
+
+  public function withTypes(array $types) {
+    $this->types = $types;
     return $this;
   }
 
@@ -141,9 +147,6 @@ final class PhabricatorRepositoryQuery
 
   protected function getPagingColumn() {
 
-    // TODO: Add a key for ORDER_NAME.
-    // TODO: Add a key for ORDER_COMMITTED.
-
     $order = $this->order;
     switch ($order) {
       case self::ORDER_CREATED:
@@ -160,10 +163,15 @@ final class PhabricatorRepositoryQuery
   }
 
   private function loadCursorObject($id) {
-    $results = id(new PhabricatorRepositoryQuery())
-      ->setViewer($this->getViewer())
-      ->withIDs(array((int)$id))
-      ->execute();
+    $query = id(new PhabricatorRepositoryQuery())
+      ->setViewer($this->getPagingViewer())
+      ->withIDs(array((int)$id));
+
+    if ($this->order == self::ORDER_COMMITTED) {
+      $query->needMostRecentCommits(true);
+    }
+
+    $results = $query->execute();
     return head($results);
   }
 
@@ -282,6 +290,13 @@ final class PhabricatorRepositoryQuery
         $conn_r,
         'r.callsign IN (%Ls)',
         $this->callsigns);
+    }
+
+    if ($this->types) {
+      $where[] = qsprintf(
+        $conn_r,
+        'r.versionControlSystem IN (%Ls)',
+        $this->types);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

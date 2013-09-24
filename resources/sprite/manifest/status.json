@@ -154,12 +154,27 @@
     "status-oh-closed"      : {
       "name" : "status-oh-closed",
       "rule" : ".status-oh-closed",
-      "hash" : "cbc6a0959ebad3e88cc3ac67743a7f3a"
+      "hash" : "53dc3a09dc2fbd3a546e5f5619a03b30"
+    },
+    "status-oh-closed-dark" : {
+      "name" : "status-oh-closed-dark",
+      "rule" : ".status-oh-closed-dark",
+      "hash" : "fbe32ade82b9b23352bd81c1735371a5"
     },
     "status-oh-open"        : {
       "name" : "status-oh-open",
       "rule" : ".status-oh-open",
-      "hash" : "e86f83bc40e77664c91c834b27816576"
+      "hash" : "6ed5dd19324018203085c68155fae53a"
+    },
+    "status-oh-open-green"  : {
+      "name" : "status-oh-open-green",
+      "rule" : ".status-oh-open-green",
+      "hash" : "01215f7ed2b6802049ac5c259231bbe7"
+    },
+    "status-oh-open-red"    : {
+      "name" : "status-oh-open-red",
+      "rule" : ".status-oh-open-red",
+      "hash" : "fbac435cfbf49d05e7734fd6c786b0b7"
     },
     "status-open-blue"      : {
       "name" : "status-open-blue",

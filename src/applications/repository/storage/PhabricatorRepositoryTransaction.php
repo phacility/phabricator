@@ -3,6 +3,7 @@
 final class PhabricatorRepositoryTransaction
   extends PhabricatorApplicationTransaction {
 
+  const TYPE_ACTIVATE     = 'repo:activate';
   const TYPE_NAME         = 'repo:name';
   const TYPE_DESCRIPTION  = 'repo:description';
   const TYPE_ENCODING     = 'repo:encoding';
@@ -26,6 +27,16 @@ final class PhabricatorRepositoryTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
+      case self::TYPE_ACTIVATE:
+        if ($new) {
+          return pht(
+            '%s activated this repository.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s deactivated this repository.',
+            $this->renderHandleLink($author_phid));
+        }
       case self::TYPE_NAME:
         return pht(
           '%s renamed this repository from "%s" to "%s".',

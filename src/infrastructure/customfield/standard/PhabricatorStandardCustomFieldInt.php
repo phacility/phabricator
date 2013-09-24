@@ -21,7 +21,7 @@ final class PhabricatorStandardCustomFieldInt
   public function getValueForStorage() {
     $value = $this->getFieldValue();
     if (strlen($value)) {
-      return (int)$value;
+      return $value;
     } else {
       return null;
     }
@@ -66,6 +66,33 @@ final class PhabricatorStandardCustomFieldInt
         ->setLabel($this->getFieldName())
         ->setName($this->getFieldKey())
         ->setValue($value));
+  }
+
+  public function validateApplicationTransactions(
+    PhabricatorApplicationTransactionEditor $editor,
+    $type,
+    array $xactions) {
+
+    $errors = parent::validateApplicationTransactions(
+      $editor,
+      $type,
+      $xactions);
+
+    foreach ($xactions as $xaction) {
+      $value = $xaction->getNewValue();
+      if (strlen($value)) {
+        if (!preg_match('/^-?\d+/', $value)) {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            pht('%s must be an integer.', $this->getFieldName()),
+            $xaction);
+          $this->setFieldError(pht('Invalid'));
+        }
+      }
+    }
+
+    return $errors;
   }
 
 }

@@ -5,7 +5,6 @@
  */
 final class ManiphestTransactionType extends ManiphestConstants {
 
-  const TYPE_NONE         = 'comment';
   const TYPE_STATUS       = 'status';
   const TYPE_OWNER        = 'reassign';
   const TYPE_CCS          = 'ccs';
@@ -17,11 +16,10 @@ final class ManiphestTransactionType extends ManiphestConstants {
 
   const TYPE_TITLE        = 'title';
   const TYPE_DESCRIPTION  = 'description';
-  const TYPE_AUXILIARY    = 'aux';
 
   public static function getTransactionTypeMap() {
     return array(
-      self::TYPE_NONE       => pht('Comment'),
+      PhabricatorTransactions::TYPE_COMMENT => pht('Comment'),
       self::TYPE_STATUS     => pht('Close Task'),
       self::TYPE_OWNER      => pht('Reassign / Claim'),
       self::TYPE_CCS        => pht('Add CCs'),

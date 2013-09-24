@@ -12,6 +12,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $afterID;
   private $beforeID;
   private $applicationSearchConstraints = array();
+  private $internalPaging;
 
   protected function getPagingColumn() {
     return 'id';
@@ -26,6 +27,9 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   }
 
   protected function nextPage(array $page) {
+    // See getPagingViewer() for a description of this flag.
+    $this->internalPaging = true;
+
     if ($this->beforeID) {
       $this->beforeID = $this->getPagingValue(last($page));
     } else {
@@ -49,6 +53,46 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
   final protected function getBeforeID() {
     return $this->beforeID;
+  }
+
+
+  /**
+   * Get the viewer for making cursor paging queries.
+   *
+   * NOTE: You should ONLY use this viewer to load cursor objects while
+   * building paging queries.
+   *
+   * Cursor paging can happen in two ways. First, the user can request a page
+   * like `/stuff/?after=33`, which explicitly causes paging. Otherwise, we
+   * can fall back to implicit paging if we filter some results out of a
+   * result list because the user can't see them and need to go fetch some more
+   * results to generate a large enough result list.
+   *
+   * In the first case, want to use the viewer's policies to load the object.
+   * This prevents an attacker from figuring out information about an object
+   * they can't see by executing queries like `/stuff/?after=33&order=name`,
+   * which would otherwise give them a hint about the name of the object.
+   * Generally, if a user can't see an object, they can't use it to page.
+   *
+   * In the second case, we need to load the object whether the user can see
+   * it or not, because we need to examine new results. For example, if a user
+   * loads `/stuff/` and we run a query for the first 100 items that they can
+   * see, but the first 100 rows in the database aren't visible, we need to
+   * be able to issue a query for the next 100 results. If we can't load the
+   * cursor object, we'll fail or issue the same query over and over again.
+   * So, generally, internal paging must bypass policy controls.
+   *
+   * This method returns the appropriate viewer, based on the context in which
+   * the paging is occuring.
+   *
+   * @return PhabricatorUser Viewer for executing paging queries.
+   */
+  final protected function getPagingViewer() {
+    if ($this->internalPaging) {
+      return PhabricatorUser::getOmnipotentUser();
+    } else {
+      return $this->getViewer();
+    }
   }
 
   final protected function buildLimitClause(AphrontDatabaseConnection $conn_r) {

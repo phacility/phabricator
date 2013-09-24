@@ -142,22 +142,24 @@ final class ManiphestTaskEditController extends ManiphestController {
         $aux_field->readValueFromRequest($request);
         $aux_new_value = $aux_field->getNewValueForApplicationTransactions();
 
-        // TODO: What's going on here?
-        if ((int)$aux_old_value === $aux_new_value) {
-          unset($aux_fields[$aux_arr_key]);
-          continue;
-        }
+        // TODO: We're faking a call to the ApplicaitonTransaction validation
+        // logic here. We need valid objects to pass, but they aren't used
+        // in a meaningful way. For now, build User objects. Once the Maniphest
+        // objects exist, this will switch over automatically. This is a big
+        // hack but shouldn't be long for this world.
+        $placeholder_editor = new PhabricatorUserProfileEditor();
 
-        if ($aux_field->isRequired() && !$aux_field->getValue()) {
-          $errors[] = pht('%s is required.', $aux_field->getLabel());
-          $aux_field->setError(pht('Required'));
-        }
+        $field_errors = $aux_field->validateApplicationTransactions(
+          $placeholder_editor,
+          PhabricatorTransactions::TYPE_CUSTOMFIELD,
+          array(
+            id(new ManiphestTransactionPro())
+              ->setOldValue($aux_old_value)
+              ->setNewValue($aux_new_value),
+          ));
 
-        try {
-          $aux_field->validate();
-        } catch (Exception $e) {
-          $errors[] = $e->getMessage();
-          $aux_field->setError(pht('Invalid'));
+        foreach ($field_errors as $error) {
+          $errors[] = $error->getMessage();
         }
 
         $old_values[$aux_field->getFieldKey()] = $aux_old_value;
@@ -208,9 +210,7 @@ final class ManiphestTaskEditController extends ManiphestController {
             'ip' => $request->getRemoteAddr(),
           ));
 
-        $template = new ManiphestTransaction();
-        $template->setAuthorPHID($user->getPHID());
-        $template->setContentSource($content_source);
+        $template = new ManiphestTransactionPro();
         $transactions = array();
 
         foreach ($changes as $type => $value) {
@@ -224,12 +224,24 @@ final class ManiphestTaskEditController extends ManiphestController {
           foreach ($aux_fields as $aux_field) {
             $transaction = clone $template;
             $transaction->setTransactionType(
-              ManiphestTransactionType::TYPE_AUXILIARY);
+              PhabricatorTransactions::TYPE_CUSTOMFIELD);
             $aux_key = $aux_field->getFieldKey();
-            $transaction->setMetadataValue('aux:key', $aux_key);
-            $transaction->setOldValue(idx($old_values, $aux_key));
-            $transaction->setNewValue(
-              $aux_field->getNewValueForApplicationTransactions());
+            $transaction->setMetadataValue('customfield:key', $aux_key);
+            $old = idx($old_values, $aux_key);
+            $new = $aux_field->getNewValueForApplicationTransactions();
+
+            // TODO: This is a ghetto check for transactions with no effect.
+            if (!is_array($old) && !is_array($new)) {
+              if ((string)$old === (string)$new) {
+                continue;
+              }
+            } else if ($old == $new) {
+              continue;
+            }
+
+            $transaction->setOldValue($old);
+            $transaction->setNewValue($new);
+
             $transactions[] = $transaction;
           }
         }
@@ -251,10 +263,11 @@ final class ManiphestTaskEditController extends ManiphestController {
           $task = $event->getValue('task');
           $transactions = $event->getValue('transactions');
 
-          $editor = new ManiphestTransactionEditor();
-          $editor->setActor($user);
-          $editor->setAuxiliaryFields($aux_fields);
-          $editor->applyTransactions($task, $transactions);
+          $editor = id(new ManiphestTransactionEditorPro())
+            ->setActor($user)
+            ->setContentSourceFromRequest($request)
+            ->setContinueOnNoEffect(true)
+            ->applyTransactions($task, $transactions);
 
           $event = new PhabricatorEvent(
             PhabricatorEventType::TYPE_MANIPHEST_DIDEDITTASK,
@@ -340,8 +353,7 @@ final class ManiphestTaskEditController extends ManiphestController {
     $phids = array_merge(
       array($task->getOwnerPHID()),
       $task->getCCPHIDs(),
-      $task->getProjectPHIDs(),
-      array_mergev(mpull($aux_fields, 'getRequiredHandlePHIDs')));
+      $task->getProjectPHIDs());
 
     if ($parent_task) {
       $phids[] = $parent_task->getPHID();
@@ -351,10 +363,6 @@ final class ManiphestTaskEditController extends ManiphestController {
     $phids = array_unique($phids);
 
     $handles = $this->loadViewerHandles($phids);
-
-    foreach ($aux_fields as $aux_field) {
-      $aux_field->setHandles($handles);
-    }
 
     $tvalues = mpull($handles, 'getFullName', 'getPHID');
 
@@ -490,13 +498,7 @@ final class ManiphestTaskEditController extends ManiphestController {
           ->setDatasource('/typeahead/common/projects/'));
 
     foreach ($aux_fields as $aux_field) {
-      if ($aux_field->isRequired() &&
-          !$aux_field->getError() &&
-          !$aux_field->getValue()) {
-        $aux_field->setError(true);
-      }
-
-      $aux_control = $aux_field->renderControl();
+      $aux_control = $aux_field->renderEditControl();
       $form->appendChild($aux_control);
     }
 

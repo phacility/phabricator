@@ -3,10 +3,22 @@
 /**
  * @group conduit
  */
-final class ConduitAPI_differential_getdiff_Method extends ConduitAPIMethod {
+final class ConduitAPI_differential_getdiff_Method
+  extends ConduitAPIMethod {
+
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_DEPRECATED;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'This method has been deprecated in favor of differential.querydiffs.');
+  }
+
 
   public function getMethodDescription() {
-    return "Load the content of a diff from Differential.";
+    return pht('Load the content of a diff from Differential by revision id '.
+               'or diff id.');
   }
 
   public function defineParamTypes() {
@@ -22,7 +34,6 @@ final class ConduitAPI_differential_getdiff_Method extends ConduitAPIMethod {
 
   public function defineErrorTypes() {
     return array(
-      'ERR_BAD_REVISION'    => 'No such revision exists.',
       'ERR_BAD_DIFF'        => 'No such diff exists.',
     );
   }
@@ -32,51 +43,38 @@ final class ConduitAPI_differential_getdiff_Method extends ConduitAPIMethod {
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $diff = null;
+    $diff_id = $request->getValue('diff_id');
 
+    // If we have a revision ID, we need the most recent diff. Figure that out
+    // without loading all the attached data.
     $revision_id = $request->getValue('revision_id');
     if ($revision_id) {
-      $revision = id(new DifferentialRevision())->load($revision_id);
-      if (!$revision) {
-        throw new ConduitException('ERR_BAD_REVISION');
+      $diffs = id(new DifferentialDiffQuery())
+        ->setViewer($request->getUser())
+        ->withRevisionIDs(array($revision_id))
+        ->execute();
+      if ($diffs) {
+        $diff_id = head($diffs)->getID();
+      } else {
+        throw new ConduitException('ERR_BAD_DIFF');
       }
-      $diff = id(new DifferentialDiff())->loadOneWhere(
-        'revisionID = %d ORDER BY id DESC LIMIT 1',
-        $revision->getID());
-    } else {
-      $diff_id = $request->getValue('diff_id');
-      if ($diff_id) {
-        $diff = id(new DifferentialDiffQuery())
-          ->setViewer($request->getUser())
-          ->withIDs(array($diff_id))
-          ->executeOne();
-      }
+    }
+
+    $diff = null;
+    if ($diff_id) {
+      $diff = id(new DifferentialDiffQuery())
+        ->setViewer($request->getUser())
+        ->withIDs(array($diff_id))
+        ->needChangesets(true)
+        ->needArcanistProjects(true)
+        ->executeOne();
     }
 
     if (!$diff) {
       throw new ConduitException('ERR_BAD_DIFF');
     }
 
-    $diff->attachChangesets(
-      $diff->loadRelatives(new DifferentialChangeset(), 'diffID'));
-    foreach ($diff->getChangesets() as $changeset) {
-      $changeset->attachHunks(
-        $changeset->loadRelatives(new DifferentialHunk(), 'changesetID'));
-    }
-
-    $basic_dict = $diff->getDiffDict();
-
-    // for conduit calls, the basic dict is not enough
-    // we also need to include the arcanist project and author information
-    $project = $diff->loadArcanistProject();
-    if ($project) {
-      $project_name = $project->getName();
-    } else {
-      $project_name = null;
-    }
-    $basic_dict['projectName'] = $project_name;
-
-    return $basic_dict;
+    return $diff->getDiffDict();
   }
 
 }

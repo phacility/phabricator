@@ -33,8 +33,13 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
 
     $transaction = new ManiphestTransaction();
     $transaction->setAuthorPHID($user->getPHID());
-    $transaction->setComments($comments);
     $transaction->setTransactionType($action);
+
+    // This should really be split into a separate transaction, but it should
+    // all come out in the wash once we fully move to modern stuff.
+    $transaction->getModernTransaction()->attachComment(
+      id(new ManiphestTransactionComment())
+        ->setContent($comments));
 
     $value = $request->getStr('value');
     // grab phids for handles and set transaction values based on action and
@@ -56,32 +61,36 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
       case ManiphestTransactionType::TYPE_CCS:
         if ($value) {
           $value = json_decode($value);
-          $phids = $value;
-          foreach ($task->getCCPHIDs() as $cc_phid) {
-            $phids[] = $cc_phid;
-            $value[] = $cc_phid;
-          }
-          $transaction->setNewValue($value);
-        } else {
-          $phids = array();
-          $transaction->setNewValue(array());
         }
+        if (!$value) {
+          $value = array();
+        }
+        $phids = $value;
+
+        foreach ($task->getCCPHIDs() as $cc_phid) {
+          $phids[] = $cc_phid;
+          $value[] = $cc_phid;
+        }
+
         $transaction->setOldValue($task->getCCPHIDs());
+        $transaction->setNewValue($value);
         break;
       case ManiphestTransactionType::TYPE_PROJECTS:
         if ($value) {
           $value = json_decode($value);
-          $phids = $value;
-          foreach ($task->getProjectPHIDs() as $project_phid) {
-            $phids[] = $project_phid;
-            $value[] = $project_phid;
-          }
-          $transaction->setNewValue($value);
-        } else {
-          $phids = array();
-          $transaction->setNewValue(array());
         }
+        if (!$value) {
+          $value = array();
+        }
+
+        $phids = $value;
+        foreach ($task->getProjectPHIDs() as $project_phid) {
+          $phids[] = $project_phid;
+          $value[] = $project_phid;
+        }
+
         $transaction->setOldValue($task->getProjectPHIDs());
+        $transaction->setNewValue($value);
         break;
       default:
         $phids = array();
@@ -92,23 +101,28 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
 
     $handles = $this->loadViewerHandles($phids);
 
-    $transactions   = array();
+    $transactions = array();
     $transactions[] = $transaction;
 
     $engine = new PhabricatorMarkupEngine();
     $engine->setViewer($user);
-    $engine->addObject($transaction, ManiphestTransaction::MARKUP_FIELD_BODY);
+    if ($transaction->getModernTransaction()->hasComment()) {
+      $engine->addObject(
+        $transaction->getModernTransaction()->getComment(),
+        PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
+    }
     $engine->process();
 
-    $transaction_view = new ManiphestTransactionListView();
-    $transaction_view->setTransactions($transactions);
-    $transaction_view->setHandles($handles);
-    $transaction_view->setUser($user);
-    $transaction_view->setMarkupEngine($engine);
-    $transaction_view->setPreview(true);
+    $transaction->getModernTransaction()->setHandles($handles);
+
+    $view = id(new PhabricatorApplicationTransactionView())
+      ->setUser($user)
+      ->setTransactions(mpull($transactions, 'getModernTransaction'))
+      ->setIsPreview(true)
+      ->setIsDetailView(true);
 
     return id(new AphrontAjaxResponse())
-      ->setContent($transaction_view->render());
+      ->setContent((string)phutil_implode_html('', $view->buildEvents()));
   }
 
 }

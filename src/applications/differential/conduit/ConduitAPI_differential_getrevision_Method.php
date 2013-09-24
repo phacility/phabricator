@@ -51,17 +51,13 @@ final class ConduitAPI_differential_getrevision_Method
 
     $reviewer_phids = array_values($revision->getReviewers());
 
-    $diffs = $revision->loadDiffs();
-
-    $diff_dicts = array();
-    foreach ($diffs as $diff) {
-      $diff->attachChangesets($diff->loadChangesets());
-      // TODO: We could batch this to improve performance.
-      foreach ($diff->getChangesets() as $changeset) {
-        $changeset->attachHunks($changeset->loadHunks());
-      }
-      $diff_dicts[] = $diff->getDiffDict();
-    }
+    $diffs = id(new DifferentialDiffQuery())
+      ->setViewer($request->getUser())
+      ->withRevisionIDs(array($revision_id))
+      ->needChangesets(true)
+      ->needArcanistProjects(true)
+      ->execute();
+    $diff_dicts = mpull($diffs, 'getDiffDict');
 
     $commit_dicts = array();
     $commit_phids = $revision->loadCommitPHIDs();

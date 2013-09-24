@@ -75,6 +75,7 @@ final class PhabricatorStandardCustomFieldBool
   public function renderEditControl() {
     return id(new AphrontFormCheckboxControl())
       ->setLabel($this->getFieldName())
+      ->setCaption($this->getCaption())
       ->addCheckbox(
         $this->getFieldKey(),
         1,
@@ -88,6 +89,25 @@ final class PhabricatorStandardCustomFieldBool
       return $this->getString('view.yes', pht('Yes'));
     } else {
       return null;
+    }
+  }
+
+  public function getApplicationTransactionTitle(
+    PhabricatorApplicationTransaction $xaction) {
+    $author_phid = $xaction->getAuthorPHID();
+    $old = $xaction->getOldValue();
+    $new = $xaction->getNewValue();
+
+    if ($new) {
+      return pht(
+        '%s checked %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName());
+    } else {
+      return pht(
+        '%s unchecked %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName());
     }
   }
 

@@ -29,7 +29,11 @@ final class DifferentialRevisionViewController extends DifferentialController {
       return new Aphront404Response();
     }
 
-    $diffs = $revision->loadDiffs();
+    $diffs = id(new DifferentialDiffQuery())
+      ->setViewer($request->getUser())
+      ->withRevisionIDs(array($this->revisionID))
+      ->execute();
+    $diffs = array_reverse($diffs, $preserve_keys = true);
 
     if (!$diffs) {
       throw new Exception(
@@ -925,10 +929,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $diff = new DifferentialDiff();
     $diff->attachChangesets($generated_changesets);
-    $diff_dict = $diff->getDiffDict();
-
+    $raw_changes = $diff->buildChangesList();
     $changes = array();
-    foreach ($diff_dict['changes'] as $changedict) {
+    foreach ($raw_changes as $changedict) {
       $changes[] = ArcanistDiffChange::newFromDictionary($changedict);
     }
     $bundle = ArcanistBundle::newFromChanges($changes);

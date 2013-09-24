@@ -50,7 +50,7 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
           'repository/(?P<dblob>.*)'    => 'DiffusionRepositoryController',
           'change/(?P<dblob>.*)'        => 'DiffusionChangeController',
           'history/(?P<dblob>.*)'       => 'DiffusionHistoryController',
-          'browse/(?P<dblob>.*)'        => 'DiffusionBrowseController',
+          'browse/(?P<dblob>.*)'        => 'DiffusionBrowseMainController',
           'lastmodified/(?P<dblob>.*)'  => 'DiffusionLastModifiedController',
           'diff/'                       => 'DiffusionDiffController',
           'tags/(?P<dblob>.*)'          => 'DiffusionTagListController',
@@ -67,6 +67,8 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
             '' => 'DiffusionRepositoryEditController',
             'basic/' => 'DiffusionRepositoryEditBasicController',
             'encoding/' => 'DiffusionRepositoryEditEncodingController',
+            'activate/' => 'DiffusionRepositoryEditActivateController',
+            'policy/' => 'DiffusionRepositoryEditPolicyController',
           ),
         ),
         'inline/' => array(

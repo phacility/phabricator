@@ -2,6 +2,10 @@
 
 final class DiffusionTagListController extends DiffusionController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function processRequest() {
     $drequest = $this->getDiffusionRequest();
     $request = $this->getRequest();
@@ -65,20 +69,22 @@ final class DiffusionTagListController extends DiffusionController {
       $view->setHandles($handles);
 
       $panel = id(new AphrontPanelView())
-        ->setHeader(pht('Tags'))
+        ->setNoBackground(true)
         ->appendChild($view)
         ->appendChild($pager);
 
       $content = $panel;
     }
 
-    return $this->buildStandardPageResponse(
+    $crumbs = $this->buildCrumbs(
       array(
-        $this->buildCrumbs(
-          array(
-            'tags'    => true,
-            'commit'  => $drequest->getRawCommit(),
-          )),
+        'tags'    => true,
+        'commit'  => $drequest->getRawCommit(),
+      ));
+
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
         $content,
       ),
       array(

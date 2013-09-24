@@ -34,22 +34,24 @@ final class ManiphestSubpriorityController extends ManiphestController {
       $after_pri,
       $after_sub);
 
-    if ($after_pri != $task->getPriority()) {
-      $xaction = new ManiphestTransaction();
-      $xaction->setAuthorPHID($request->getUser()->getPHID());
-
-      // TODO: Content source?
-
-      $xaction->setTransactionType(ManiphestTransactionType::TYPE_PRIORITY);
-      $xaction->setNewValue($after_pri);
-
-      $editor = new ManiphestTransactionEditor();
-      $editor->setActor($request->getUser());
-      $editor->applyTransactions($task, array($xaction));
-    }
-
     $task->setSubpriority($new_sub);
-    $task->save();
+
+    if ($after_pri != $task->getPriority()) {
+      $xactions = array();
+      $xactions[] = id(new ManiphestTransactionPro())
+        ->setTransactionType(ManiphestTransactionPro::TYPE_PRIORITY)
+        ->setNewValue($after_pri);
+
+      $editor = id(new ManiphestTransactionEditorPro())
+        ->setActor($user)
+        ->setContinueOnMissingFields(true)
+        ->setContinueOnNoEffect(true)
+        ->setContentSourceFromRequest($request);
+
+      $editor->applyTransactions($task, $xactions);
+    } else {
+      $task->save();
+    }
 
     return id(new AphrontAjaxResponse())->setContent(
       array(

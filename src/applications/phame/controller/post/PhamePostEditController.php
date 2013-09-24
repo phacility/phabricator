@@ -95,7 +95,7 @@ final class PhamePostEditController
     }
 
     $handle = id(new PhabricatorHandleQuery())
-      ->withViewer($user)
+      ->setViewer($user)
       ->withPHIDs(array($post->getBlogPHID()))
       ->executeOne();
 

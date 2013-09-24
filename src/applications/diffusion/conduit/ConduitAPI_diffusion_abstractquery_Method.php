@@ -43,9 +43,10 @@ abstract class ConduitAPI_diffusion_abstractquery_Method
         $this->repository = $this->getDiffusionRequest()->getRepository();
       } else {
         $callsign = $request->getValue('callsign');
-        $repository = id(new PhabricatorRepository())->loadOneWhere(
-          'callsign = %s',
-          $callsign);
+        $repository = id(new PhabricatorRepositoryQuery())
+          ->setViewer($request->getUser())
+          ->withCallsigns(array($callsign))
+          ->executeOne();
         if (!$repository) {
           throw new ConduitException('ERR-UNKNOWN-REPOSITORY');
         }

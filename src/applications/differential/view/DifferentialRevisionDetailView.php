@@ -122,7 +122,11 @@ final class DifferentialRevisionDetailView extends AphrontView {
     $view = id(new PHUIHeaderView())
       ->setHeader($revision->getTitle($revision));
 
-    $view->addTag(self::renderTagForRevision($revision));
+    $status = $revision->getStatus();
+    $status_name =
+      DifferentialRevisionStatus::renderFullDescription($status);
+
+    $view->addProperty(PHUIHeaderView::PROPERTY_STATUS, $status_name);
 
     return $view;
   }
@@ -133,12 +137,10 @@ final class DifferentialRevisionDetailView extends AphrontView {
     $status = $revision->getStatus();
     $status_name =
       ArcanistDifferentialRevisionStatus::getNameForRevisionStatus($status);
-    $status_color =
-      DifferentialRevisionStatus::getRevisionStatusTagColor($status);
 
     return id(new PhabricatorTagView())
       ->setType(PhabricatorTagView::TYPE_STATE)
-      ->setName($status_name)
-      ->setBackgroundColor($status_color);
+      ->setName($status_name);
   }
+
 }

@@ -9,6 +9,7 @@ final class PhabricatorRepositorySearchEngine
     $saved->setParameter('callsigns', $request->getStrList('callsigns'));
     $saved->setParameter('status', $request->getStr('status'));
     $saved->setParameter('order', $request->getStr('order'));
+    $saved->setParameter('types', $request->getArr('types'));
 
     return $saved;
   }
@@ -37,6 +38,11 @@ final class PhabricatorRepositorySearchEngine
       $query->setOrder(head($this->getOrderValues()));
     }
 
+    $types = $saved->getParameter('types');
+    if ($types) {
+      $query->withTypes($types);
+    }
+
     return $query;
   }
 
@@ -45,6 +51,8 @@ final class PhabricatorRepositorySearchEngine
     PhabricatorSavedQuery $saved_query) {
 
     $callsigns = $saved_query->getParameter('callsigns', array());
+    $types = $saved_query->getParameter('types', array());
+    $types = array_fuse($types);
 
     $form
       ->appendChild(
@@ -57,7 +65,22 @@ final class PhabricatorRepositorySearchEngine
           ->setName('status')
           ->setLabel(pht('Status'))
           ->setValue($saved_query->getParameter('status'))
-          ->setOptions($this->getStatusOptions()))
+          ->setOptions($this->getStatusOptions()));
+
+    $type_control = id(new AphrontFormCheckboxControl())
+      ->setLabel(pht('Types'));
+
+    $all_types = PhabricatorRepositoryType::getAllRepositoryTypes();
+    foreach ($all_types as $key => $name) {
+      $type_control->addCheckbox(
+        'types[]',
+        $key,
+        $name,
+        isset($types[$key]));
+    }
+
+    $form
+      ->appendChild($type_control)
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setName('order')

@@ -844,6 +844,49 @@ abstract class PhabricatorCustomField {
   }
 
 
+  /**
+   * Validate transactions for an object. This allows you to raise an error
+   * when a transaction would set a field to an invalid value, or when a field
+   * is required but no transactions provide value.
+   *
+   * @param PhabricatorLiskDAO Editor applying the transactions.
+   * @param string Transaction type. This type is always
+   *   `PhabricatorTransactions::TYPE_CUSTOMFIELD`, it is provided for
+   *   convenience when constructing exceptions.
+   * @param list<PhabricatorApplicationTransaction> Transactions being applied,
+   *   which may be empty if this field is not being edited.
+   * @return list<PhabricatorApplicationTransactionValidationError> Validation
+   *   errors.
+   *
+   * @task appxaction
+   */
+  public function validateApplicationTransactions(
+    PhabricatorApplicationTransactionEditor $editor,
+    $type,
+    array $xactions) {
+    if ($this->proxy) {
+      return $this->proxy->validateApplicationTransactions(
+        $editor,
+        $type,
+        $xactions);
+    }
+    return array();
+  }
+
+  public function getApplicationTransactionTitle(
+    PhabricatorApplicationTransaction $xaction) {
+    if ($this->proxy) {
+      return $this->proxy->getApplicationTransactionTitle(
+        $xaction);
+    }
+
+    $author_phid = $xaction->getAuthorPHID();
+    return pht(
+      '%s updated this object.',
+      $xaction->renderHandleLink($author_phid));
+  }
+
+
 /* -(  Edit View  )---------------------------------------------------------- */
 
 

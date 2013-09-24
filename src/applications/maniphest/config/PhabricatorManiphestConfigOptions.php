@@ -59,7 +59,7 @@ final class PhabricatorManiphestConfigOptions
     $custom_field_type = 'custom:PhabricatorCustomFieldConfigOptionType';
 
     return array(
-      $this->newOption('maniphest.custom-fields', 'wild', array())
+      $this->newOption('maniphest.custom-field-definitions', 'wild', array())
         ->setSummary(pht("Custom Maniphest fields."))
         ->setDescription(
           pht(
@@ -67,9 +67,9 @@ final class PhabricatorManiphestConfigOptions
             "adding custom fields to Maniphest, see 'Maniphest User Guide: ".
             "Adding Custom Fields'."))
         ->addExample(
-          '{"mycompany:estimated-hours": {"label": "Estimated Hours", '.
+          '{"mycompany:estimated-hours": {"name": "Estimated Hours", '.
           '"type": "int", "caption": "Estimated number of hours this will '.
-          'take.", "required": false}}',
+          'take."}}',
           pht('Valid Setting')),
       $this->newOption('maniphest.fields', $custom_field_type, $default_fields)
         ->setCustomData(id(new ManiphestTask())->getCustomFieldBaseClass())
