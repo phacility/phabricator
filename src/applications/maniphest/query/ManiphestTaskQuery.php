@@ -482,7 +482,10 @@ final class ManiphestTaskQuery
     // fulltext search, and then use that to limit the rest of the search
     $fulltext_query = new PhabricatorSearchQuery();
     $fulltext_query->setQuery($this->fullTextSearch);
-    $fulltext_query->setParameter('limit', PHP_INT_MAX);
+
+    // NOTE: Setting this to something larger than 2^53 will raise errors in
+    // ElasticSearch, and billions of results won't fit in memory anyway.
+    $fulltext_query->setParameter('limit', 100000);
     $fulltext_query->setParameter('type', ManiphestPHIDTypeTask::TYPECONST);
 
     $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
