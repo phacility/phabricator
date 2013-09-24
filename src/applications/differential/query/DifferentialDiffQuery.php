@@ -77,13 +77,16 @@ final class DifferentialDiffQuery
           'phid IN (%Ls)',
           $phids);
       $project_map = mpull($projects, null, 'getPHID');
-      foreach ($diffs as $diff) {
-        if ($diff->getArcanistProjectPHID()) {
-          $project = $project_map[$diff->getArcanistProjectPHID()];
-          $diff->attachArcanistProject($project);
-        }
-      }
     }
+
+    foreach ($diffs as $diff) {
+      $project = null;
+      if ($diff->getArcanistProjectPHID()) {
+        $project = idx($project_map, $diff->getArcanistProjectPHID());
+      }
+      $diff->attachArcanistProject($project);
+    }
+
     return $diffs;
   }
 
