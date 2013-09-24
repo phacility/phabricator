@@ -111,11 +111,64 @@ final class PhabricatorTimelineExample extends PhabricatorUIExample {
         ->setColor($color);
     }
 
+    $vhandle = $handle->renderLink();
+
+    $group_event = id(new PhabricatorTimelineEventView())
+      ->setUserHandle($handle)
+      ->setTitle(pht('%s went to the store.', $vhandle));
+
+    $group_event->addEventToGroup(
+      id(new PhabricatorTimelineEventView())
+        ->setUserHandle($handle)
+        ->setTitle(pht('%s bought an apple.', $vhandle))
+        ->setColor('green')
+        ->setIcon('check'));
+
+    $group_event->addEventToGroup(
+      id(new PhabricatorTimelineEventView())
+        ->setUserHandle($handle)
+        ->setTitle(pht('%s bought a banana.', $vhandle))
+        ->setColor('yellow')
+        ->setIcon('check'));
+
+    $group_event->addEventToGroup(
+      id(new PhabricatorTimelineEventView())
+        ->setUserHandle($handle)
+        ->setTitle(pht('%s bought a cherry.', $vhandle))
+        ->setColor('red')
+        ->setIcon('check'));
+
+    $group_event->addEventToGroup(
+      id(new PhabricatorTimelineEventView())
+        ->setUserHandle($handle)
+        ->setTitle(pht('%s paid for his goods.', $vhandle)));
+
+    $group_event->addEventToGroup(
+      id(new PhabricatorTimelineEventView())
+        ->setUserHandle($handle)
+        ->setTitle(pht('%s returned home.', $vhandle))
+        ->setIcon('home')
+        ->setColor('blue'));
+
+    $group_event->addEventToGroup(
+      id(new PhabricatorTimelineEventView())
+        ->setUserHandle($handle)
+        ->setTitle(pht('%s related on his adventures.', $vhandle))
+        ->appendChild(
+          pht(
+            'Today, I went to the store. I bought an apple. I bought a '.
+            'banana. I bought a cherry. I paid for my goods, then I returned '.
+            'home.')));
+
+    $events[] = $group_event;
+
     $anchor = 0;
-    foreach ($events as $event) {
-      $event->setUser($user);
-      $event->setDateCreated(time() + ($anchor * 60 * 8));
-      $event->setAnchor(++$anchor);
+    foreach ($events as $group) {
+      foreach ($group->getEventGroup() as $event) {
+        $event->setUser($user);
+        $event->setDateCreated(time() + ($anchor * 60 * 8));
+        $event->setAnchor(++$anchor);
+      }
     }
 
     $timeline = id(new PhabricatorTimelineView());

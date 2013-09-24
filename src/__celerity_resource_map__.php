@@ -3461,7 +3461,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-timeline-view-css' =>
   array(
-    'uri' => '/res/725f6b17/rsrc/css/layout/phabricator-timeline-view.css',
+    'uri' => '/res/79b6d385/rsrc/css/layout/phabricator-timeline-view.css',
     'type' => 'css',
     'requires' =>
     array(
