@@ -20,20 +20,28 @@ final class ManiphestSubscribeController extends ManiphestController {
       return new Aphront404Response();
     }
 
+    $ccs = $task->getCCPHIDs();
     switch ($this->action) {
       case 'add':
-        ManiphestTransactionEditor::addCC(
-          $task,
-          $user);
+        $ccs[] = $user->getPHID();
         break;
       case 'rem':
-        ManiphestTransactionEditor::removeCC(
-          $task,
-          $user);
+        $ccs = array_diff($ccs, array($user->getPHID()));
         break;
       default:
         return new Aphront400Response();
     }
+
+    $xaction = id(new ManiphestTransactionPro())
+      ->setTransactionType(ManiphestTransactionPro::TYPE_CCS)
+      ->setNewValue($ccs);
+
+    $editor = id(new ManiphestTransactionEditorPro())
+      ->setActor($user)
+      ->setContentSourceFromRequest($request)
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true)
+      ->applyTransactions($task, array($xaction));
 
     return id(new AphrontRedirectResponse())->setURI('/T'.$task->getID());
   }

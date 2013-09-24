@@ -414,6 +414,34 @@ final class ManiphestTransactionPro
     return $view->render();
   }
 
+  public function getMailTags() {
+    $tags = array();
+    switch ($this->getTransactionType()) {
+      case self::TYPE_STATUS:
+        $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_STATUS;
+        break;
+      case self::TYPE_OWNER:
+        $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_OWNER;
+        break;
+      case self::TYPE_CCS:
+        $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_CC;
+        break;
+      case self::TYPE_PROJECTS:
+        $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_PROJECTS;
+        break;
+      case self::TYPE_PRIORITY:
+        $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_PRIORITY;
+        break;
+      case self::TYPE_COMMENT:
+        $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_COMMENT;
+        break;
+      default:
+        $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_OTHER;
+        break;
+    }
+    return $tags;
+  }
+
 
 }
 
