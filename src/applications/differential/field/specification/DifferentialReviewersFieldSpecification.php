@@ -70,7 +70,7 @@ final class DifferentialReviewersFieldSpecification
       $reviewer_map[$phid] = $this->getHandle($phid)->getFullName();
     }
     return id(new AphrontFormTokenizerControl())
-      ->setLabel('Reviewers')
+      ->setLabel(pht('Reviewers'))
       ->setName('reviewers')
       ->setUser($this->getUser())
       ->setDatasource('/typeahead/common/users/')

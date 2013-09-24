@@ -359,7 +359,10 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $view = id(new PHUIHeaderView())
       ->setHeader($task->getTitle());
 
-    $view->addTag(ManiphestView::renderTagForTask($task));
+    $status = $task->getStatus();
+    $status_name = ManiphestTaskStatus::renderFullDescription($status);
+
+    $view->addProperty(PHUIHeaderView::PROPERTY_STATUS, $status_name);
 
     return $view;
   }

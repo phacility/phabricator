@@ -21,7 +21,7 @@ final class DifferentialSummaryFieldSpecification
 
   public function renderEditControl() {
     return id(new PhabricatorRemarkupControl())
-      ->setLabel('Summary')
+      ->setLabel(pht('Summary'))
       ->setName('summary')
       ->setID($this->getControlID())
       ->setValue($this->summary);

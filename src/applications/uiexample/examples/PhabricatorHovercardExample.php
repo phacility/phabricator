@@ -38,8 +38,7 @@ final class PhabricatorHovercardExample extends PhabricatorUIExample {
 
     $tag = id(new PhabricatorTagView())
       ->setType(PhabricatorTagView::TYPE_STATE)
-      ->setBackgroundColor(PhabricatorTagView::COLOR_BLACK)
-      ->setName('Abandoned (Really)');
+      ->setName('Closed, Resolved');
     $panel = $this->createPanel("Maniphest Hovercard");
     $panel->appendChild(id(new PhabricatorHovercardView())
       ->setObjectHandle($task_handle)

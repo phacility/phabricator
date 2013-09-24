@@ -87,67 +87,79 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 }
 
 .status-info-green {
-  background-position: 0px -30px;
+  background-position: -120px -15px;
 }
 
 .status-info-red {
-  background-position: -15px -30px;
+  background-position: 0px -30px;
 }
 
 .status-info-white {
-  background-position: -30px -30px;
+  background-position: -15px -30px;
 }
 
 .status-left-blue {
-  background-position: -45px -30px;
+  background-position: -30px -30px;
 }
 
 .status-left-dark {
-  background-position: -60px -30px;
+  background-position: -45px -30px;
 }
 
 .status-left-green {
-  background-position: -75px -30px;
+  background-position: -60px -30px;
 }
 
 .status-left-red {
-  background-position: -90px -30px;
+  background-position: -75px -30px;
 }
 
 .status-left-white {
-  background-position: -105px -30px;
+  background-position: -90px -30px;
 }
 
 .status-minus-blue {
-  background-position: 0px -45px;
+  background-position: -105px -30px;
 }
 
 .status-minus-dark {
-  background-position: -15px -45px;
+  background-position: -120px -30px;
 }
 
 .status-minus-green {
-  background-position: -30px -45px;
+  background-position: 0px -45px;
 }
 
 .status-minus-red {
-  background-position: -45px -45px;
+  background-position: -15px -45px;
 }
 
 .status-minus-white {
-  background-position: -60px -45px;
+  background-position: -30px -45px;
+}
+
+.status-oh-closed-dark {
+  background-position: -45px -45px;
 }
 
 .status-oh-closed {
+  background-position: -60px -45px;
+}
+
+.status-oh-open-green {
   background-position: -75px -45px;
 }
 
-.status-oh-open {
+.status-oh-open-red {
   background-position: -90px -45px;
 }
 
-.status-open-blue {
+.status-oh-open {
   background-position: -105px -45px;
+}
+
+.status-open-blue {
+  background-position: -120px -45px;
 }
 
 .status-open-dark {

@@ -2,7 +2,7 @@
 
 final class PHUIHeaderView extends AphrontView {
 
-  const PROPERTY_STATE = 1;
+  const PROPERTY_STATUS = 1;
 
   private $objectName;
   private $header;
@@ -138,7 +138,7 @@ final class PHUIHeaderView extends AphrontView {
       $property_list = array();
       foreach ($this->properties as $type => $property) {
         switch ($type) {
-          case self::PROPERTY_STATE:
+          case self::PROPERTY_STATUS:
             $property_list[] = $property;
           break;
           default:
