@@ -450,11 +450,6 @@ abstract class DiffusionRequest {
         "Diffusion URI action '{$action}' requires callsign!");
     }
 
-    if ($req_branch && !strlen($branch)) {
-      throw new Exception(
-        "Diffusion URI action '{$action}' requires branch!");
-    }
-
     if ($req_commit && !strlen($commit)) {
       throw new Exception(
         "Diffusion URI action '{$action}' requires commit!");
@@ -471,7 +466,11 @@ abstract class DiffusionRequest {
         $uri = "/diffusion/{$callsign}{$action}/{$path}{$commit}{$line}";
         break;
       case 'branch':
-        $uri = "/diffusion/{$callsign}repository/{$path}";
+        if (strlen($path)) {
+          $uri = "/diffusion/{$callsign}repository/{$path}";
+        } else {
+          $uri = "/diffusion/{$callsign}";
+        }
         break;
       case 'external':
         $commit = ltrim($commit, ';');
