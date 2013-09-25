@@ -128,7 +128,7 @@ final class PhabricatorCountdownEditController
           ->addCancelButton($cancel_uri)
           ->setValue($submit_label));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)
       ->setFormError($error_view)
       ->setForm($form);

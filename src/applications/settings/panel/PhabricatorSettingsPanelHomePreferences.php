@@ -200,7 +200,7 @@ final class PhabricatorSettingsPanelHomePreferences
         ->setErrors(array(pht('Your preferences have been saved.')));
     }
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Home Page Preferences'))
       ->setFormError($error_view)
       ->setForm($form);

@@ -145,7 +145,7 @@ EXAMPLE;
         ->setErrors(array(pht('Your preferences have been saved.')));
     }
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Display Preferences'))
       ->setFormError($error_view)
       ->setForm($form);

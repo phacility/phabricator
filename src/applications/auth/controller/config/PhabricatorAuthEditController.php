@@ -280,7 +280,7 @@ final class PhabricatorAuthEditController
         ->setTransactions($xactions);
     }
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setFormError($errors)
       ->setForm($form);

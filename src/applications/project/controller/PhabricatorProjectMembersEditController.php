@@ -106,11 +106,11 @@ final class PhabricatorProjectMembersEditController
         id(new AphrontFormInsetView())
           ->appendChild($list));
 
-    $box = id(new PHUIFormBoxView())
+    $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Current Members (%d)', count($handles)))
       ->setForm($faux_form);
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setForm($form);
 

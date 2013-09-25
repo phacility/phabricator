@@ -164,7 +164,7 @@ final class DifferentialRevisionEditController extends DifferentialController {
       $title = pht('Create New Differential Revision');
     }
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setFormError($error_view)
       ->setForm($form);

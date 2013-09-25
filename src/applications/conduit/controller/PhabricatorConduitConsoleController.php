@@ -110,7 +110,7 @@ final class PhabricatorConduitConsoleController
           ->addCancelButton($this->getApplicationURI())
           ->setValue('Call Method'));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($method->getAPIMethodName())
       ->setFormError($status_view)
       ->setForm($form);

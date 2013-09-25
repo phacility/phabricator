@@ -66,7 +66,7 @@ final class PhabricatorSettingsPanelDiffPreferences
         ->setErrors(array(pht('Your preferences have been saved.')));
     }
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Diff Preferences'))
       ->setFormError($error_view)
       ->setForm($form);

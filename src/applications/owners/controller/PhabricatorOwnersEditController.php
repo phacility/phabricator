@@ -251,7 +251,7 @@ final class PhabricatorOwnersEditController
           ->addCancelButton($cancel_uri)
           ->setValue(pht('Save Package')));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setFormError($error_view)
       ->setForm($form);

@@ -174,7 +174,7 @@ final class PhamePostEditController
       $error_view = null;
     }
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)
       ->setFormError($error_view)
       ->setForm($form);

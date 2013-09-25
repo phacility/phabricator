@@ -193,7 +193,7 @@ final class PhabricatorConfigEditController
     $title = pht('Edit %s', $this->key);
     $short = pht('Edit');
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setFormError($error_view)
       ->setForm($form);

@@ -113,7 +113,7 @@ final class PhabricatorProjectCreateController
           ->setName(pht('Create Project'))
           ->setHref($this->getApplicationURI().'create/'));
 
-      $form_box = id(new PHUIFormBoxView())
+      $form_box = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('Create New Project'))
         ->setFormError($error_view)
         ->setForm($form);

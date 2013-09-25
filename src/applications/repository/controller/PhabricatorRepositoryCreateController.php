@@ -101,7 +101,7 @@ final class PhabricatorRepositoryCreateController
           ->setValue('Create Repository')
           ->addCancelButton('/repository/'));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Create Repository'))
       ->setFormError($error_view)
       ->setForm($form);

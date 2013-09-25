@@ -95,7 +95,7 @@ final class DiffusionRepositoryEditPolicyController
           ->setValue(pht('Save Policies'))
           ->addCancelButton($edit_uri));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setForm($form);
 

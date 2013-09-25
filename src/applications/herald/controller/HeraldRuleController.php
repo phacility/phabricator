@@ -182,7 +182,7 @@ final class HeraldRuleController extends HeraldController {
         ? pht('Edit Herald Rule')
         : pht('Create Herald Rule');
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setFormError($error_view)
       ->setForm($form);

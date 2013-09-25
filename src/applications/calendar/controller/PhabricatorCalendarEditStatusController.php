@@ -163,7 +163,7 @@ final class PhabricatorCalendarEditStatusController
     }
     $form->appendChild($submit);
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)
       ->setFormError($error_view)
       ->setForm($form);

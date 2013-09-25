@@ -231,7 +231,7 @@ final class PhabricatorSlowvoteEditController
       id(new PhabricatorCrumbView())
         ->setName($title));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setFormError($error_view)
       ->setForm($form);

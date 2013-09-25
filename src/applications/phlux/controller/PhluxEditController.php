@@ -176,7 +176,7 @@ final class PhluxEditController extends PhluxController {
           ->setHref($request->getRequestURI()));
     }
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setFormError($errors)
       ->setForm($form);

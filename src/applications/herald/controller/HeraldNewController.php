@@ -69,7 +69,7 @@ final class HeraldNewController extends HeraldController {
           ->setValue(pht('Create Rule'))
           ->addCancelButton($this->getApplicationURI()));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Create Herald Rule'))
       ->setForm($form);
 

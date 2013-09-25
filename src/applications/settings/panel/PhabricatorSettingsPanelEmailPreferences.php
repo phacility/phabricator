@@ -216,7 +216,7 @@ final class PhabricatorSettingsPanelEmailPreferences
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save Preferences')));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Email Preferences'))
       ->setFormError($notice)
       ->setForm($form);

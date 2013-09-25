@@ -322,7 +322,7 @@ final class PholioMockEditController extends PholioController {
           ->setError($e_images))
       ->appendChild($submit);
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setFormError($error_view)
       ->setForm($form);

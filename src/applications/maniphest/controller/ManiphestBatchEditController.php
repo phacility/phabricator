@@ -140,7 +140,7 @@ final class ManiphestBatchEditController extends ManiphestController {
       id(new PhabricatorCrumbView())
         ->setName($title));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Batch Edit Tasks'))
       ->setForm($form);
 

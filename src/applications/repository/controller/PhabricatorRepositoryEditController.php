@@ -155,7 +155,7 @@ final class PhabricatorRepositoryEditController
 
     $nav = $this->sideNav;
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Edit Repository'))
       ->setFormError($error_view)
       ->setForm($form);
@@ -674,7 +674,7 @@ final class PhabricatorRepositoryEditController
         id(new AphrontFormSubmitControl())
           ->setValue('Save Configuration'));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Edit Repository Tracking'))
       ->setFormError($error_view)
       ->setForm($form);

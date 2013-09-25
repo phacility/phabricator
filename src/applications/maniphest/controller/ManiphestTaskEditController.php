@@ -526,7 +526,7 @@ final class ManiphestTaskEditController extends ManiphestController {
           ->addCancelButton($cancel_uri)
           ->setValue($button_name));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($header_name)
       ->setFormError($error_view)
       ->setForm($form);

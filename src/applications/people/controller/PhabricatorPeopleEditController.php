@@ -349,7 +349,7 @@ final class PhabricatorPeopleEditController
       $title = pht('Create New User');
     }
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setFormError($error_view)
       ->setForm($form);
@@ -454,7 +454,7 @@ final class PhabricatorPeopleEditController
 
     $title = pht('Edit Role');
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setFormError($error_view)
       ->setForm($form);
@@ -496,7 +496,7 @@ final class PhabricatorPeopleEditController
 
     $title = pht('Conduit Certificate');
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setForm($form);
 
@@ -592,7 +592,7 @@ final class PhabricatorPeopleEditController
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Change Username')));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Change Username'))
       ->setFormError($errors)
       ->setForm($form);
@@ -685,7 +685,7 @@ final class PhabricatorPeopleEditController
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Delete User')));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Delete User'))
       ->setFormError($errors)
       ->setForm($form);
