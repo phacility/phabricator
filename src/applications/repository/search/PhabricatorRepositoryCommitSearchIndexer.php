@@ -17,10 +17,10 @@ final class PhabricatorRepositoryCommitSearchIndexer
     $commit_message = $commit_data->getCommitMessage();
     $author_phid = $commit_data->getCommitDetail('authorPHID');
 
-    $repository = id(new PhabricatorRepository())->loadOneWhere(
-      'id = %d',
-      $commit->getRepositoryID());
-
+    $repository = id(new PhabricatorRepositoryQuery())
+      ->setViewer($this->getViewer())
+      ->withIDs(array($commit->getRepositoryID()))
+      ->executeOne();
     if (!$repository) {
       throw new Exception("No such repository!");
     }

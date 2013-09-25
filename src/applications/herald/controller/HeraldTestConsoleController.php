@@ -20,35 +20,14 @@ final class HeraldTestConsoleController extends HeraldController {
       }
 
       if (!$errors) {
-        $matches = null;
-        $object = null;
-        if (preg_match('/^D(\d+)$/', $object_name, $matches)) {
-          $object = id(new DifferentialRevision())->load($matches[1]);
-          if (!$object) {
-            $e_name = pht('Invalid');
-            $errors[] = pht('No Differential Revision with that ID exists.');
-          }
-        } else if (preg_match('/^r([A-Z]+)(\w+)$/', $object_name, $matches)) {
-          $repo = id(new PhabricatorRepository())->loadOneWhere(
-            'callsign = %s',
-            $matches[1]);
-          if (!$repo) {
-            $e_name = pht('Invalid');
-            $errors[] = pht('There is no repository with the callsign: %s.',
-              $matches[1]);
-          }
-          $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-            'repositoryID = %d AND commitIdentifier = %s',
-            $repo->getID(),
-            $matches[2]);
-          if (!$commit) {
-            $e_name = pht('Invalid');
-            $errors[] = pht('There is no commit with that identifier.');
-          }
-          $object = $commit;
-        } else {
+        $object = id(new PhabricatorObjectQuery())
+          ->setViewer($user)
+          ->withNames(array($object_name))
+          ->executeOne();
+
+        if (!$object) {
           $e_name = pht('Invalid');
-          $errors[] = pht('This object name is not recognized.');
+          $errors[] = pht('No object exists with that name.');
         }
 
         if (!$errors) {
@@ -61,7 +40,7 @@ final class HeraldTestConsoleController extends HeraldController {
               'commitID = %d',
               $object->getID());
             $adapter = HeraldCommitAdapter::newLegacyAdapter(
-              $repo,
+              $object->getRepository(),
               $object,
               $data);
           } else {

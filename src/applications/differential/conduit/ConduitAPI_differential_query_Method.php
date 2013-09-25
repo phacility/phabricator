@@ -112,9 +112,10 @@ final class ConduitAPI_differential_query_Method
       foreach ($path_pairs as $pair) {
         list($callsign, $path) = $pair;
         if (!idx($repos, $callsign)) {
-          $repos[$callsign] = id(new PhabricatorRepository())->loadOneWhere(
-            'callsign = %s',
-            $callsign);
+          $repos[$callsign] = id(new PhabricatorRepositoryQuery())
+            ->setViewer($request->getUser())
+            ->withCallsigns(array($callsign))
+            ->executeOne();
 
           if (!$repos[$callsign]) {
             throw id(new ConduitException('ERR-INVALID-PARAMETER'))

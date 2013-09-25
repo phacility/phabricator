@@ -52,9 +52,10 @@ final class ConduitAPI_diffusion_getcommits_Method
 
     $callsigns = ipull($commits, 'callsign');
     $callsigns = array_unique($callsigns);
-    $repos = id(new PhabricatorRepository())->loadAllWhere(
-      'callsign IN (%Ls)',
-      $callsigns);
+    $repos = id(new PhabricatorRepositoryQuery())
+      ->setViewer($request->getUser())
+      ->withCallsigns($callsigns)
+      ->execute();
     $repos = mpull($repos, null, 'getCallsign');
 
     foreach ($commits as $name => $info) {

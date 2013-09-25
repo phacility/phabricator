@@ -142,7 +142,9 @@ final class PhabricatorOwnersEditController
     }
     $this->setSideNavFilter($side_nav_filter);
 
-    $repos = id(new PhabricatorRepository())->loadAll();
+    $repos = id(new PhabricatorRepositoryQuery())
+      ->setViewer($user)
+      ->execute();
 
     $default_paths = array();
     foreach ($repos as $repo) {

@@ -32,7 +32,7 @@ final class PhabricatorRepositoryArcanistProject
       PhabricatorRepositoryPHIDTypeArcanistProject::TYPECONST);
   }
 
-  // TODO: Remove.
+  // TODO: Remove. Also, T603.
   public function loadRepository() {
     if (!$this->getRepositoryID()) {
       return null;

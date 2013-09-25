@@ -452,6 +452,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public static function loadAllByPHIDOrCallsign(array $names) {
+    // TODO: (T603) Get rid of this.
+
     $repositories = array();
     foreach ($names as $name) {
       $repo = id(new PhabricatorRepository())->loadOneWhere(

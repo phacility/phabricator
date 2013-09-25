@@ -113,7 +113,7 @@ final class ReleephProject extends ReleephDAO
     return $this->assertAttached($this->repository);
   }
 
-  // TODO: Remove once everything uses ProjectQuery.
+  // TODO: Remove once everything uses ProjectQuery. Also, T603.
   public function loadPhabricatorRepository() {
     return $this->loadOneRelative(
       new PhabricatorRepository(),

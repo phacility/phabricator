@@ -10,8 +10,12 @@ final class PhabricatorRepositoryDeleteController
   }
 
   public function processRequest() {
+    $viewer = $this->getRequest()->getUser();
 
-    $repository = id(new PhabricatorRepository())->load($this->id);
+    $repository = id(new PhabricatorRepositoryQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$repository) {
       return new Aphront404Response();
     }

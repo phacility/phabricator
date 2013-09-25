@@ -403,8 +403,10 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
 
     $prefix = PhabricatorEnv::getEnvConfig('metamta.diffusion.subject-prefix');
 
-    $repository = id(new PhabricatorRepository())
-      ->load($commit->getRepositoryID());
+    $repository = id(new PhabricatorRepositoryQuery())
+      ->setViewer($this->getActor())
+      ->withIDs(array($commit->getRepositoryID()))
+      ->executeOne();
     $threading = self::getMailThreading($repository, $commit);
     list($thread_id, $thread_topic) = $threading;
 

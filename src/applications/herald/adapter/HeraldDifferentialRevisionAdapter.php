@@ -110,6 +110,8 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
 
       $repository = false;
 
+      // TODO: (T603) Implement policy stuff in Herald.
+
       if ($diff->getRepositoryUUID()) {
         $repository = id(new PhabricatorRepository())->loadOneWhere(
           'uuid = %s',

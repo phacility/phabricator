@@ -16,8 +16,12 @@ final class PhabricatorRepositoryEditController
   public function processRequest() {
 
     $request = $this->getRequest();
+    $viewer = $request->getUser();
 
-    $repository = id(new PhabricatorRepository())->load($this->id);
+    $repository = id(new PhabricatorRepositoryQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$repository) {
       return new Aphront404Response();
     }
