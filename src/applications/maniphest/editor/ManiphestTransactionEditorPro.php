@@ -189,4 +189,30 @@ final class ManiphestTransactionEditorPro
     return true;
   }
 
+  protected function supportsHerald() {
+    return true;
+  }
+
+  protected function buildHeraldAdapter(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    return id(new HeraldManiphestTaskAdapter())
+      ->setTask($object);
+  }
+
+  protected function didApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    HeraldAdapter $adapter,
+    HeraldTranscript $transcript) {
+
+    $cc_phids = $adapter->getCcPHIDs();
+    if ($cc_phids) {
+      $existing_cc = $object->getCCPHIDs();
+      $new_cc = array_unique(array_merge($cc_phids, $existing_cc));
+      $object->setCCPHIDs($new_cc);
+      $object->save();
+    }
+  }
+
 }
