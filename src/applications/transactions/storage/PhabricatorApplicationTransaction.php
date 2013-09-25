@@ -190,7 +190,7 @@ abstract class PhabricatorApplicationTransaction
     if ($this->renderingTarget == self::TARGET_HTML) {
       return $this->getHandle($phid)->renderLink();
     } else {
-      return hsprintf('%s', $this->getHandle($phid)->getName());
+      return hsprintf('%s', $this->getHandle($phid)->getLinkName());
     }
   }
 
