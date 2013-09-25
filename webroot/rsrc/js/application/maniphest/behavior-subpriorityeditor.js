@@ -16,6 +16,12 @@ JX.behavior('maniphest-subpriority-editor', function(config) {
       return tasks.concat(heads);
     })
     .setGhostHandler(function(ghost, target) {
+      if (!target) {
+        // The user is trying to drag a task above the first group header;
+        // don't permit that since it doesn't make sense.
+        return false;
+      }
+
       if (target.nextSibling) {
         if (JX.DOM.isType(target, 'h1')) {
           target.nextSibling.insertBefore(ghost, target.nextSibling.firstChild);
