@@ -65,7 +65,18 @@ final class PhabricatorStandardCustomFieldDate
       ->setCaption($this->getCaption())
       ->setAllowNull(!$this->getRequired());
 
-    $control->setValue($this->getFieldValue());
+    // If the value is already numeric, treat it as an epoch timestamp and set
+    // it directly. Otherwise, it's likely a field default, which we let users
+    // specify as a string. Parse the string into an epoch.
+
+    $value = $this->getFieldValue();
+    if (!ctype_digit($value)) {
+      $value = PhabricatorTime::parseLocalTime($value, $this->getViewer());
+    }
+
+    // If we don't have anything valid, make sure we pass `null`, since the
+    // control special-cases that.
+    $control->setValue(nonempty($value, null));
 
     return $control;
   }
