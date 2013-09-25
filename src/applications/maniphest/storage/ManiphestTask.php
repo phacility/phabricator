@@ -22,9 +22,9 @@ final class ManiphestTask extends ManiphestDAO
   protected $priority;
   protected $subpriority = 0;
 
-  protected $title;
+  protected $title = '';
   protected $originalTitle;
-  protected $description;
+  protected $description = '';
   protected $originalEmailSource;
   protected $mailKey;
 

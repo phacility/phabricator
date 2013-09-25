@@ -80,13 +80,14 @@ final class ManiphestTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
+      case self::TYPE_TITLE:
+        if (!strlen($old)) {
+          return 'green';
+        }
+
       case self::TYPE_STATUS:
         if ($new == ManiphestTaskStatus::STATUS_OPEN) {
-          if ($old) {
-            return 'violet';
-          } else {
-            return 'green';
-          }
+          return 'green';
         } else {
           return 'black';
         }
@@ -111,24 +112,22 @@ final class ManiphestTransaction
 
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
-        return pht('Retitled');
+        if (!strlen($old)) {
+          return pht('Created');
+        } else {
+          return pht('Retitled');
+        }
 
       case self::TYPE_STATUS:
-        if ($new == ManiphestTaskStatus::STATUS_OPEN) {
-          if ($old) {
+        switch ($new) {
+          case ManiphestTaskStatus::STATUS_OPEN:
             return pht('Reopened');
-          } else {
-            return pht('Created');
-          }
-        } else {
-          switch ($new) {
-            case ManiphestTaskStatus::STATUS_CLOSED_SPITE:
-              return pht('Spited');
-            case ManiphestTaskStatus::STATUS_CLOSED_DUPLICATE:
-              return pht('Merged');
-            default:
-              return pht('Closed');
-          }
+          case ManiphestTaskStatus::STATUS_CLOSED_SPITE:
+            return pht('Spited');
+          case ManiphestTaskStatus::STATUS_CLOSED_DUPLICATE:
+            return pht('Merged');
+          default:
+            return pht('Closed');
         }
 
       case self::TYPE_DESCRIPTION:
@@ -174,20 +173,22 @@ final class ManiphestTransaction
 
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
-        return 'edit';
-
-      case self::TYPE_STATUS:
-        if ($new == ManiphestTaskStatus::STATUS_OPEN) {
+        if (!strlen($old)) {
           return 'create';
         } else {
-          switch ($new) {
-            case ManiphestTaskStatus::STATUS_CLOSED_SPITE:
-              return 'dislike';
-            case ManiphestTaskStatus::STATUS_CLOSED_DUPLICATE:
-              return 'delete';
-            default:
-              return 'check';
-          }
+          return 'edit';
+        }
+
+      case self::TYPE_STATUS:
+        switch ($new) {
+          case ManiphestTaskStatus::STATUS_OPEN:
+            return 'create';
+          case ManiphestTaskStatus::STATUS_CLOSED_SPITE:
+            return 'dislike';
+          case ManiphestTaskStatus::STATUS_CLOSED_DUPLICATE:
+            return 'delete';
+          default:
+            return 'check';
         }
 
       case self::TYPE_DESCRIPTION:
@@ -225,11 +226,19 @@ final class ManiphestTransaction
 
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
-        return pht(
-          '%s changed the title from "%s" to "%s".',
-          $this->renderHandleLink($author_phid),
-          $old,
-          $new);
+        if (!strlen($old)) {
+          return pht(
+            '%s created this task.',
+            $this->renderHandleLink($author_phid),
+            $old,
+            $new);
+        } else {
+          return pht(
+            '%s changed the title from "%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $old,
+            $new);
+        }
 
       case self::TYPE_DESCRIPTION:
         return pht(
@@ -237,36 +246,29 @@ final class ManiphestTransaction
           $this->renderHandleLink($author_phid));
 
       case self::TYPE_STATUS:
-        if ($new == ManiphestTaskStatus::STATUS_OPEN) {
-          if ($old) {
+        switch ($new) {
+          case ManiphestTaskStatus::STATUS_OPEN:
             return pht(
               '%s reopened this task.',
               $this->renderHandleLink($author_phid));
-          } else {
+
+          case ManiphestTaskStatus::STATUS_CLOSED_SPITE:
             return pht(
-              '%s created this task.',
+              '%s closed this task out of spite.',
               $this->renderHandleLink($author_phid));
-          }
-        } else {
-          switch ($new) {
-            case ManiphestTaskStatus::STATUS_CLOSED_SPITE:
-              return pht(
-                '%s closed this task out of spite.',
-                $this->renderHandleLink($author_phid));
-            case ManiphestTaskStatus::STATUS_CLOSED_DUPLICATE:
-              return pht(
-                '%s closed this task as a duplicate.',
-                $this->renderHandleLink($author_phid));
-            default:
-              $status_name = idx(
-                ManiphestTaskStatus::getTaskStatusMap(),
-                $new,
-                '???');
-              return pht(
-                '%s closed this task as "%s".',
-                $this->renderHandleLink($author_phid),
-                $status_name);
-          }
+          case ManiphestTaskStatus::STATUS_CLOSED_DUPLICATE:
+            return pht(
+              '%s closed this task as a duplicate.',
+              $this->renderHandleLink($author_phid));
+          default:
+            $status_name = idx(
+              ManiphestTaskStatus::getTaskStatusMap(),
+              $new,
+              '???');
+            return pht(
+              '%s closed this task as "%s".',
+              $this->renderHandleLink($author_phid),
+              $status_name);
         }
 
       case self::TYPE_OWNER:
@@ -403,12 +405,19 @@ final class ManiphestTransaction
 
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
-        return pht(
-          '%s renamed %s from "%s" to "%s".',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($object_phid),
-          $old,
-          $new);
+        if (!strlen($old)) {
+          return pht(
+            '%s created %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        } else {
+          return pht(
+            '%s renamed %s from "%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            $old,
+            $new);
+        }
 
       case self::TYPE_DESCRIPTION:
         return pht(
@@ -418,17 +427,10 @@ final class ManiphestTransaction
 
       case self::TYPE_STATUS:
         if ($new == ManiphestTaskStatus::STATUS_OPEN) {
-          if ($old) {
-            return pht(
-              '%s reopened %s.',
-              $this->renderHandleLink($author_phid),
-              $this->renderHandleLink($object_phid));
-          } else {
-            return pht(
-              '%s created %s.',
-              $this->renderHandleLink($author_phid),
-              $this->renderHandleLink($object_phid));
-          }
+          return pht(
+            '%s reopened %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
         } else {
           switch ($new) {
             case ManiphestTaskStatus::STATUS_CLOSED_SPITE:

@@ -148,6 +148,12 @@ final class ManiphestTransactionEditorPro
 
     $body = parent::buildMailBody($object, $xactions);
 
+    if ($this->getIsNewObject()) {
+      $body->addTextSection(
+        pht('TASK DESCRIPTION'),
+        $object->getDescription());
+    }
+
     $body->addTextSection(
       pht('TASK DETAIL'),
       PhabricatorEnv::getProductionURI('/T'.$object->getID()));

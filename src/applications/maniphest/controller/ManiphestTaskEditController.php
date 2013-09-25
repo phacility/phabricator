@@ -106,22 +106,17 @@ final class ManiphestTaskEditController extends ManiphestController {
 
       $workflow = '';
 
-      if ($task->getID()) {
-        if ($new_title != $task->getTitle()) {
-          $changes[ManiphestTransaction::TYPE_TITLE] = $new_title;
-        }
-        if ($new_desc != $task->getDescription()) {
-          $changes[ManiphestTransaction::TYPE_DESCRIPTION] = $new_desc;
-        }
-        if ($new_status != $task->getStatus()) {
-          $changes[ManiphestTransaction::TYPE_STATUS] = $new_status;
-        }
-      } else {
-        $task->setTitle($new_title);
-        $task->setDescription($new_desc);
-        $changes[ManiphestTransaction::TYPE_STATUS] =
-          ManiphestTaskStatus::STATUS_OPEN;
+      if ($new_title != $task->getTitle()) {
+        $changes[ManiphestTransaction::TYPE_TITLE] = $new_title;
+      }
+      if ($new_desc != $task->getDescription()) {
+        $changes[ManiphestTransaction::TYPE_DESCRIPTION] = $new_desc;
+      }
+      if ($new_status != $task->getStatus()) {
+        $changes[ManiphestTransaction::TYPE_STATUS] = $new_status;
+      }
 
+      if (!$task->getID()) {
         $workflow = 'create';
       }
 
@@ -166,6 +161,8 @@ final class ManiphestTaskEditController extends ManiphestController {
       }
 
       if ($errors) {
+        $task->setTitle($new_title);
+        $task->setDescription($new_desc);
         $task->setPriority($request->getInt('priority'));
         $task->setOwnerPHID($owner_phid);
         $task->setCCPHIDs($request->getArr('cc'));
