@@ -213,7 +213,7 @@ final class PhabricatorPolicyFilter {
       default:
         $type = phid_get_type($policy);
         if ($type == PhabricatorProjectPHIDTypeProject::TYPECONST) {
-          if (isset($this->userProjects[$viewer->getPHID()][$policy])) {
+          if (!empty($this->userProjects[$viewer->getPHID()][$policy])) {
             return true;
           } else {
             $this->rejectObject($object, $policy, $capability);

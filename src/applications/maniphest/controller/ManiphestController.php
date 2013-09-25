@@ -20,8 +20,11 @@ abstract class ManiphestController extends PhabricatorController {
       ->setViewer($user)
       ->addNavigationItems($nav->getMenu());
 
-    $nav->addLabel(pht('Reports'));
-    $nav->addFilter('report', pht('Reports'));
+    if ($user->isLoggedIn()) {
+      // For now, don't give logged-out users access to reports.
+      $nav->addLabel(pht('Reports'));
+      $nav->addFilter('report', pht('Reports'));
+    }
 
     $nav->selectFilter(null);
 

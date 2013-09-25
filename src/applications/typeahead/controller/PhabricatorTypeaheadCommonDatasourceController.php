@@ -5,6 +5,10 @@ final class PhabricatorTypeaheadCommonDatasourceController
 
   private $type;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->type = $data['type'];
   }
@@ -230,7 +234,9 @@ final class PhabricatorTypeaheadCommonDatasourceController
     }
 
     if ($need_repos) {
-      $repos = id(new PhabricatorRepository())->loadAll();
+      $repos = id(new PhabricatorRepositoryQuery())
+        ->setViewer($viewer)
+        ->execute();
       foreach ($repos as $repo) {
         $results[] = id(new PhabricatorTypeaheadResult())
           ->setName('r'.$repo->getCallsign().' ('.$repo->getName().')')
