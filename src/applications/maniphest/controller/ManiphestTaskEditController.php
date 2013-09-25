@@ -104,21 +104,15 @@ final class ManiphestTaskEditController extends ManiphestController {
       $new_desc = $request->getStr('description');
       $new_status = $request->getStr('status');
 
-      $workflow = '';
-
-      if ($new_title != $task->getTitle()) {
-        $changes[ManiphestTransaction::TYPE_TITLE] = $new_title;
-      }
-      if ($new_desc != $task->getDescription()) {
-        $changes[ManiphestTransaction::TYPE_DESCRIPTION] = $new_desc;
-      }
-      if ($new_status != $task->getStatus()) {
-        $changes[ManiphestTransaction::TYPE_STATUS] = $new_status;
-      }
-
       if (!$task->getID()) {
         $workflow = 'create';
+      } else {
+        $workflow = '';
       }
+
+      $changes[ManiphestTransaction::TYPE_TITLE] = $new_title;
+      $changes[ManiphestTransaction::TYPE_DESCRIPTION] = $new_desc;
+      $changes[ManiphestTransaction::TYPE_STATUS] = $new_status;
 
       $owner_tokenizer = $request->getArr('assigned_to');
       $owner_phid = reset($owner_tokenizer);
@@ -168,30 +162,13 @@ final class ManiphestTaskEditController extends ManiphestController {
         $task->setCCPHIDs($request->getArr('cc'));
         $task->setProjectPHIDs($request->getArr('projects'));
       } else {
-        if ($request->getInt('priority') != $task->getPriority()) {
-          $changes[ManiphestTransaction::TYPE_PRIORITY] =
-            $request->getInt('priority');
-        }
 
-        if ($owner_phid != $task->getOwnerPHID()) {
-          $changes[ManiphestTransaction::TYPE_OWNER] = $owner_phid;
-        }
-
-        if ($request->getArr('cc') != $task->getCCPHIDs()) {
-          $changes[ManiphestTransaction::TYPE_CCS] = $request->getArr('cc');
-        }
-
-        $new_proj_arr = $request->getArr('projects');
-        $new_proj_arr = array_values($new_proj_arr);
-        sort($new_proj_arr);
-
-        $cur_proj_arr = $task->getProjectPHIDs();
-        $cur_proj_arr = array_values($cur_proj_arr);
-        sort($cur_proj_arr);
-
-        if ($new_proj_arr != $cur_proj_arr) {
-          $changes[ManiphestTransaction::TYPE_PROJECTS] = $new_proj_arr;
-        }
+        $changes[ManiphestTransaction::TYPE_PRIORITY] =
+          $request->getInt('priority');
+        $changes[ManiphestTransaction::TYPE_OWNER] = $owner_phid;
+        $changes[ManiphestTransaction::TYPE_CCS] = $request->getArr('cc');
+        $changes[ManiphestTransaction::TYPE_PROJECTS] =
+          $request->getArr('projects');
 
         if ($files) {
           $file_map = mpull($files, 'getPHID');
@@ -200,12 +177,6 @@ final class ManiphestTaskEditController extends ManiphestController {
             PhabricatorFilePHIDTypeFile::TYPECONST => $file_map,
           );
         }
-
-        $content_source = PhabricatorContentSource::newForSource(
-          PhabricatorContentSource::SOURCE_WEB,
-          array(
-            'ip' => $request->getRemoteAddr(),
-          ));
 
         $template = new ManiphestTransaction();
         $transactions = array();
@@ -226,15 +197,6 @@ final class ManiphestTaskEditController extends ManiphestController {
             $transaction->setMetadataValue('customfield:key', $aux_key);
             $old = idx($old_values, $aux_key);
             $new = $aux_field->getNewValueForApplicationTransactions();
-
-            // TODO: This is a ghetto check for transactions with no effect.
-            if (!is_array($old) && !is_array($new)) {
-              if ((string)$old === (string)$new) {
-                continue;
-              }
-            } else if ($old == $new) {
-              continue;
-            }
 
             $transaction->setOldValue($old);
             $transaction->setNewValue($new);

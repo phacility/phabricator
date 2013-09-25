@@ -34,11 +34,11 @@ final class ManiphestTransactionEditorPro
       case ManiphestTransaction::TYPE_DESCRIPTION:
         return $object->getDescription();
       case ManiphestTransaction::TYPE_OWNER:
-        return $object->getOwnerPHID();
+        return nonempty($object->getOwnerPHID(), null);
       case ManiphestTransaction::TYPE_CCS:
         return array_values(array_unique($object->getCCPHIDs()));
       case ManiphestTransaction::TYPE_PROJECTS:
-        return $object->getProjectPHIDs();
+        return array_values(array_unique($object->getProjectPHIDs()));
       case ManiphestTransaction::TYPE_ATTACH:
         return $object->getAttached();
       case ManiphestTransaction::TYPE_EDGE:
@@ -57,17 +57,37 @@ final class ManiphestTransactionEditorPro
       case ManiphestTransaction::TYPE_STATUS:
         return (int)$xaction->getNewValue();
       case ManiphestTransaction::TYPE_CCS:
+      case ManiphestTransaction::TYPE_PROJECTS:
         return array_values(array_unique($xaction->getNewValue()));
+      case ManiphestTransaction::TYPE_OWNER:
+        return nonempty($xaction->getNewValue(), null);
       case ManiphestTransaction::TYPE_TITLE:
       case ManiphestTransaction::TYPE_DESCRIPTION:
-      case ManiphestTransaction::TYPE_OWNER:
-      case ManiphestTransaction::TYPE_PROJECTS:
       case ManiphestTransaction::TYPE_ATTACH:
       case ManiphestTransaction::TYPE_EDGE:
         return $xaction->getNewValue();
     }
 
   }
+
+  protected function transactionHasEffect(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $old = $xaction->getOldValue();
+    $new = $xaction->getNewValue();
+
+    switch ($xaction->getTransactionType()) {
+      case ManiphestTransaction::TYPE_PROJECTS:
+      case ManiphestTransaction::TYPE_CCS:
+        sort($old);
+        sort($new);
+        return ($old !== $new);
+    }
+
+    return parent::transactionHasEffect($object, $xaction);
+  }
+
 
   protected function applyCustomInternalTransaction(
     PhabricatorLiskDAO $object,
