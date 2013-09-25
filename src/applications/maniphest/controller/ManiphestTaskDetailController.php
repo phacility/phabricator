@@ -1,11 +1,12 @@
 <?php
 
-/**
- * @group maniphest
- */
 final class ManiphestTaskDetailController extends ManiphestController {
 
   private $id;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
 
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
@@ -306,20 +307,23 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ),
     );
 
-    Javelin::initBehavior('maniphest-transaction-controls', array(
-      'select'     => 'transaction-action',
-      'controlMap' => $control_map,
-      'tokenizers' => $tokenizer_map,
-    ));
+    // TODO: Initializing these behaviors for logged out users fatals things.
+    if ($user->isLoggedIn()) {
+      Javelin::initBehavior('maniphest-transaction-controls', array(
+        'select'     => 'transaction-action',
+        'controlMap' => $control_map,
+        'tokenizers' => $tokenizer_map,
+      ));
 
-    Javelin::initBehavior('maniphest-transaction-preview', array(
-      'uri'        => '/maniphest/transaction/preview/'.$task->getID().'/',
-      'preview'    => 'transaction-preview',
-      'comments'   => 'transaction-comments',
-      'action'     => 'transaction-action',
-      'map'        => $control_map,
-      'tokenizers' => $tokenizer_map,
-    ));
+      Javelin::initBehavior('maniphest-transaction-preview', array(
+        'uri'        => '/maniphest/transaction/preview/'.$task->getID().'/',
+        'preview'    => 'transaction-preview',
+        'comments'   => 'transaction-comments',
+        'action'     => 'transaction-action',
+        'map'        => $control_map,
+        'tokenizers' => $tokenizer_map,
+      ));
+    }
 
     $comment_header = id(new PHUIHeaderView())
       ->setHeader($is_serious ? pht('Add Comment') : pht('Weigh In'));
@@ -350,6 +354,15 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $header = $this->buildHeaderView($task);
     $properties = $this->buildPropertyView($task, $field_list, $edges, $engine);
+
+    if (!$user->isLoggedIn()) {
+      // TODO: Eventually, everything should run through this. For now, we're
+      // only using it to get a consistent "Login to Comment" button.
+      $comment_form = id(new PhabricatorApplicationTransactionCommentView())
+        ->setUser($user)
+        ->setRequestURI($request->getRequestURI());
+      $preview_panel = null;
+    }
 
     return $this->buildApplicationPage(
       array(
@@ -393,15 +406,23 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $id = $task->getID();
     $phid = $task->getPHID();
 
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $task,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
       ->setObject($task)
-      ->setObjectURI($this->getRequest()->getRequestURI())
-      ->addAction(
+      ->setObjectURI($this->getRequest()->getRequestURI());
+
+    $view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Task'))
         ->setIcon('edit')
-        ->setHref($this->getApplicationURI("/task/edit/{$id}/")));
+        ->setHref($this->getApplicationURI("/task/edit/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
 
     if ($task->getOwnerPHID() === $viewer_phid) {
       $view->addAction(
@@ -428,7 +449,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setName(pht('Merge Duplicates In'))
         ->setHref("/search/attach/{$phid}/TASK/merge/")
         ->setWorkflow(true)
-        ->setIcon('merge'));
+        ->setIcon('merge')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
 
     $view->addAction(
       id(new PhabricatorActionView())
@@ -441,14 +464,18 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setName(pht('Edit Dependencies'))
         ->setHref("/search/attach/{$phid}/TASK/dependencies/")
         ->setWorkflow(true)
-        ->setIcon('link'));
+        ->setIcon('link')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
 
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Differential Revisions'))
         ->setHref("/search/attach/{$phid}/DREV/")
         ->setWorkflow(true)
-        ->setIcon('attach'));
+        ->setIcon('attach')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
 
     $pholio_app =
       PhabricatorApplication::getByClass('PhabricatorApplicationPholio');
@@ -458,7 +485,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setName(pht('Edit Pholio Mocks'))
         ->setHref("/search/attach/{$phid}/MOCK/edge/")
         ->setWorkflow(true)
-        ->setIcon('attach'));
+        ->setIcon('attach')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
     }
 
     return $view;
