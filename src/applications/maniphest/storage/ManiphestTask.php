@@ -27,6 +27,8 @@ final class ManiphestTask extends ManiphestDAO
   protected $description = '';
   protected $originalEmailSource;
   protected $mailKey;
+  protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
+  protected $editPolicy = PhabricatorPolicies::POLICY_USER;
 
   protected $attached = array();
   protected $projectPHIDs = array();
