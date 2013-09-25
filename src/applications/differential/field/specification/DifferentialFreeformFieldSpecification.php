@@ -150,8 +150,10 @@ abstract class DifferentialFreeformFieldSpecification
 
     $tasks = $this->findMentionedTasks($message);
     if ($tasks) {
-      $tasks = id(new ManiphestTask())
-        ->loadAllWhere('id IN (%Ld)', array_keys($tasks));
+      $tasks = id(new ManiphestTaskQuery())
+        ->setViewer($editor->getActor())
+        ->withIDs(array_keys($tasks))
+        ->execute();
       $this->saveFieldEdges(
         $editor->getRevision(),
         PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK,

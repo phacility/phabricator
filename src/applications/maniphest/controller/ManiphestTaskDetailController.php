@@ -20,7 +20,10 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
 
-    $task = id(new ManiphestTask())->load($this->id);
+    $task = id(new ManiphestTaskQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$task) {
       return new Aphront404Response();
     }
@@ -28,7 +31,10 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $workflow = $request->getStr('workflow');
     $parent_task = null;
     if ($workflow && is_numeric($workflow)) {
-      $parent_task = id(new ManiphestTask())->load($workflow);
+      $parent_task = id(new ManiphestTaskQuery())
+        ->setViewer($user)
+        ->withIDs(array($workflow))
+        ->executeOne();
     }
 
     $transactions = id(new ManiphestTransactionQuery())

@@ -30,7 +30,10 @@ final class ConduitAPI_maniphest_info_Method
   protected function execute(ConduitAPIRequest $request) {
     $task_id = $request->getValue('task_id');
 
-    $task = id(new ManiphestTask())->load($task_id);
+    $task = id(new ManiphestTaskQuery())
+      ->setViewer($request->getUser())
+      ->withIDs(array($task_id))
+      ->executeOne();
     if (!$task) {
       throw new ConduitException('ERR_BAD_TASK');
     }

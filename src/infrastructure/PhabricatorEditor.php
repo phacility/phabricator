@@ -10,11 +10,11 @@ abstract class PhabricatorEditor extends Phobject {
     return $this;
   }
 
-  final protected function getActor() {
+  final public function getActor() {
     return $this->actor;
   }
 
-  final protected function requireActor() {
+  final public function requireActor() {
     $actor = $this->getActor();
     if (!$actor) {
       throw new Exception('You must setActor()!');

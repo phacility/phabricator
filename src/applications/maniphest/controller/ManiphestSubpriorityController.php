@@ -13,13 +13,24 @@ final class ManiphestSubpriorityController extends ManiphestController {
       return new Aphront403Response();
     }
 
-    $task = id(new ManiphestTask())->load($request->getInt('task'));
+    $task = id(new ManiphestTaskQuery())
+      ->setViewer($user)
+      ->withIDs(array($request->getInt('task')))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
     if (!$task) {
       return new Aphront404Response();
     }
 
     if ($request->getInt('after')) {
-      $after_task = id(new ManiphestTask())->load($request->getInt('after'));
+      $after_task = id(new ManiphestTaskQuery())
+        ->setViewer($user)
+        ->withIDs(array($request->getInt('after')))
+        ->executeOne();
       if (!$after_task) {
         return new Aphront404Response();
       }

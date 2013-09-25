@@ -15,7 +15,10 @@ final class ManiphestSubscribeController extends ManiphestController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $task = id(new ManiphestTask())->load($this->id);
+    $task = id(new ManiphestTaskQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$task) {
       return new Aphront404Response();
     }

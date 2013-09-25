@@ -35,11 +35,15 @@ final class ConduitAPI_maniphest_update_Method
     }
 
     if ($id) {
-      $task = id(new ManiphestTask())->load($id);
+      $task = id(new ManiphestTaskQuery())
+        ->setViewer($request->getUser())
+        ->withIDs(array($id))
+        ->executeOne();
     } else {
-      $task = id(new ManiphestTask())->loadOneWhere(
-        'phid = %s',
-        $phid);
+      $task = id(new ManiphestTaskQuery())
+        ->setViewer($request->getUser())
+        ->withPHIDs(array($phid))
+        ->executeOne();
     }
 
     $params = $request->getAllParameters();

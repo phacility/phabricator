@@ -21,7 +21,15 @@ final class ManiphestTaskEditController extends ManiphestController {
     $template_id = null;
 
     if ($this->id) {
-      $task = id(new ManiphestTask())->load($this->id);
+      $task = id(new ManiphestTaskQuery())
+        ->setViewer($user)
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->withIDs(array($this->id))
+        ->executeOne();
       if (!$task) {
         return new Aphront404Response();
       }
@@ -74,7 +82,10 @@ final class ManiphestTaskEditController extends ManiphestController {
       // You can only have a parent task if you're creating a new task.
       $parent_id = $request->getInt('parent');
       if ($parent_id) {
-        $parent_task = id(new ManiphestTask())->load($parent_id);
+        $parent_task = id(new ManiphestTaskQuery())
+          ->setViewer($user)
+          ->withIDs(array($parent_id))
+          ->executeOne();
         if (!$template_id) {
           $template_id = $parent_id;
         }
@@ -274,7 +285,10 @@ final class ManiphestTaskEditController extends ManiphestController {
           $user->getPHID(),
         ));
         if ($template_id) {
-          $template_task = id(new ManiphestTask())->load($template_id);
+          $template_task = id(new ManiphestTaskQuery())
+            ->setViewer($user)
+            ->withIDs(array($template_id))
+            ->executeOne();
           if ($template_task) {
             $task->setCCPHIDs($template_task->getCCPHIDs());
             $task->setProjectPHIDs($template_task->getProjectPHIDs());

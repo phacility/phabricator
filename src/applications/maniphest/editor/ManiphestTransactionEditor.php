@@ -15,6 +15,9 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
 
   public static function getNextSubpriority($pri, $sub) {
 
+    // TODO: T603 Figure out what the policies here should be once this gets
+    // cleaned up.
+
     if ($sub === null) {
       $next = id(new ManiphestTask())->loadOneWhere(
         'priority = %d ORDER BY subpriority ASC LIMIT 1',

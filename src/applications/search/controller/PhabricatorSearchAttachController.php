@@ -149,9 +149,10 @@ final class PhabricatorSearchAttachController
       return $response;
     }
 
-    $targets = id(new ManiphestTask())->loadAllWhere(
-      'phid in (%Ls) ORDER BY id ASC',
-      array_keys($phids));
+    $targets = id(new ManiphestTaskQuery())
+      ->setViewer($user)
+      ->withPHIDs(array_keys($phids))
+      ->execute();
 
     if (empty($targets)) {
       return $response;

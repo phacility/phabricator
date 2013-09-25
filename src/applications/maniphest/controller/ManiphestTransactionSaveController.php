@@ -9,7 +9,14 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $task = id(new ManiphestTask())->load($request->getStr('taskID'));
+    // TODO: T603 This doesn't require CAN_EDIT because non-editors can still
+    // leave comments, probably? For now, this just nondisruptive. Smooth this
+    // out once policies are more clear.
+
+    $task = id(new ManiphestTaskQuery())
+      ->setViewer($user)
+      ->withIDs(array($request->getStr('taskID')))
+      ->executeOne();
     if (!$task) {
       return new Aphront404Response();
     }

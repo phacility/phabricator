@@ -56,7 +56,10 @@ final class DifferentialBranchFieldSpecification
     $match = null;
     if (preg_match('/^T(\d+)/i', $branch, $match)) { // No $ to allow T123_demo.
       list(, $task_id) = $match;
-      $task = id(new ManiphestTask())->load($task_id);
+      $task = id(new ManiphestTaskQuery())
+        ->setViewer($editor->requireActor())
+        ->withIDs(array($task_id))
+        ->executeOne();
       if ($task) {
         id(new PhabricatorEdgeEditor())
           ->setActor($this->getUser())

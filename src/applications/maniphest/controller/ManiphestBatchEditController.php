@@ -11,9 +11,15 @@ final class ManiphestBatchEditController extends ManiphestController {
     $user = $request->getUser();
 
     $task_ids = $request->getArr('batch');
-    $tasks = id(new ManiphestTask())->loadAllWhere(
-      'id IN (%Ld)',
-      $task_ids);
+    $tasks = id(new ManiphestTaskQuery())
+      ->setViewer($user)
+      ->withIDs($task_ids)
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->execute();
 
     $actions = $request->getStr('actions');
     if ($actions) {
