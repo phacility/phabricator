@@ -690,7 +690,6 @@ phutil_register_library_map(array(
     'LiskMigrationIterator' => 'infrastructure/storage/lisk/LiskMigrationIterator.php',
     'LiskRawMigrationIterator' => 'infrastructure/storage/lisk/LiskRawMigrationIterator.php',
     'ManiphestAction' => 'applications/maniphest/constants/ManiphestAction.php',
-    'ManiphestAuxiliaryFieldSpecification' => 'applications/maniphest/auxiliaryfield/ManiphestAuxiliaryFieldSpecification.php',
     'ManiphestBatchEditController' => 'applications/maniphest/controller/ManiphestBatchEditController.php',
     'ManiphestConfiguredCustomField' => 'applications/maniphest/field/ManiphestConfiguredCustomField.php',
     'ManiphestConstants' => 'applications/maniphest/constants/ManiphestConstants.php',
