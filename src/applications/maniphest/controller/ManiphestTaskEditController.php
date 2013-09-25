@@ -181,6 +181,11 @@ final class ManiphestTaskEditController extends ManiphestController {
         $changes[ManiphestTransaction::TYPE_PROJECTS] =
           $request->getArr('projects');
 
+        $changes[PhabricatorTransactions::TYPE_VIEW_POLICY] =
+          $request->getStr('viewPolicy');
+        $changes[PhabricatorTransactions::TYPE_EDIT_POLICY] =
+          $request->getStr('editPolicy');
+
         if ($files) {
           $file_map = mpull($files, 'getPHID');
           $file_map = array_fill_keys($file_map, array());
@@ -431,6 +436,11 @@ final class ManiphestTaskEditController extends ManiphestController {
             ->setOptions(ManiphestTaskStatus::getTaskStatusMap()));
     }
 
+    $policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($user)
+      ->setObject($task)
+      ->execute();
+
     $form
       ->appendChild(
         id(new AphrontFormTokenizerControl())
@@ -453,6 +463,24 @@ final class ManiphestTaskEditController extends ManiphestController {
           ->setName('priority')
           ->setOptions($priority_map)
           ->setValue($task->getPriority()))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setUser($user)
+          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
+          ->setPolicyObject($task)
+          ->setPolicies($policies)
+          ->setName('viewPolicy'))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setUser($user)
+          ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
+          ->setPolicyObject($task)
+          ->setPolicies($policies)
+          ->setCaption(
+            pht(
+              'NOTE: These policy controls still have some rough edges and '.
+              'are not yet fully functional.'))
+          ->setName('editPolicy'))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Projects'))

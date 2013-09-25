@@ -199,10 +199,25 @@ final class ManiphestTask extends ManiphestDAO
   }
 
   public function getPolicy($capability) {
-    return PhabricatorPolicies::POLICY_USER;
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return $this->getViewPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return $this->getEditPolicy();
+    }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $user) {
+
+    // The owner of a task can always view and edit it.
+    $owner_phid = $this->getOwnerPHID();
+    if ($owner_phid) {
+      $user_phid = $user->getPHID();
+      if ($user_phid == $owner_phid) {
+        return true;
+      }
+    }
+
     return false;
   }
 

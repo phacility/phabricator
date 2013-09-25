@@ -372,7 +372,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
   private function buildHeaderView(ManiphestTask $task) {
     $view = id(new PHUIHeaderView())
-      ->setHeader($task->getTitle());
+      ->setHeader($task->getTitle())
+      ->setUser($this->getRequest()->getUser())
+      ->setPolicyObject($task);
 
     $status = $task->getStatus();
     $status_name = ManiphestTaskStatus::renderFullDescription($status);

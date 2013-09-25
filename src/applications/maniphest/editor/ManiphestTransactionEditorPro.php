@@ -16,6 +16,8 @@ final class ManiphestTransactionEditorPro
     $types[] = ManiphestTransaction::TYPE_PROJECTS;
     $types[] = ManiphestTransaction::TYPE_ATTACH;
     $types[] = ManiphestTransaction::TYPE_EDGE;
+    $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
+    $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
     return $types;
   }
