@@ -108,18 +108,18 @@ final class ManiphestTaskEditController extends ManiphestController {
 
       if ($task->getID()) {
         if ($new_title != $task->getTitle()) {
-          $changes[ManiphestTransactionType::TYPE_TITLE] = $new_title;
+          $changes[ManiphestTransaction::TYPE_TITLE] = $new_title;
         }
         if ($new_desc != $task->getDescription()) {
-          $changes[ManiphestTransactionType::TYPE_DESCRIPTION] = $new_desc;
+          $changes[ManiphestTransaction::TYPE_DESCRIPTION] = $new_desc;
         }
         if ($new_status != $task->getStatus()) {
-          $changes[ManiphestTransactionType::TYPE_STATUS] = $new_status;
+          $changes[ManiphestTransaction::TYPE_STATUS] = $new_status;
         }
       } else {
         $task->setTitle($new_title);
         $task->setDescription($new_desc);
-        $changes[ManiphestTransactionType::TYPE_STATUS] =
+        $changes[ManiphestTransaction::TYPE_STATUS] =
           ManiphestTaskStatus::STATUS_OPEN;
 
         $workflow = 'create';
@@ -172,16 +172,16 @@ final class ManiphestTaskEditController extends ManiphestController {
         $task->setProjectPHIDs($request->getArr('projects'));
       } else {
         if ($request->getInt('priority') != $task->getPriority()) {
-          $changes[ManiphestTransactionType::TYPE_PRIORITY] =
+          $changes[ManiphestTransaction::TYPE_PRIORITY] =
             $request->getInt('priority');
         }
 
         if ($owner_phid != $task->getOwnerPHID()) {
-          $changes[ManiphestTransactionType::TYPE_OWNER] = $owner_phid;
+          $changes[ManiphestTransaction::TYPE_OWNER] = $owner_phid;
         }
 
         if ($request->getArr('cc') != $task->getCCPHIDs()) {
-          $changes[ManiphestTransactionType::TYPE_CCS] = $request->getArr('cc');
+          $changes[ManiphestTransaction::TYPE_CCS] = $request->getArr('cc');
         }
 
         $new_proj_arr = $request->getArr('projects');
@@ -193,13 +193,13 @@ final class ManiphestTaskEditController extends ManiphestController {
         sort($cur_proj_arr);
 
         if ($new_proj_arr != $cur_proj_arr) {
-          $changes[ManiphestTransactionType::TYPE_PROJECTS] = $new_proj_arr;
+          $changes[ManiphestTransaction::TYPE_PROJECTS] = $new_proj_arr;
         }
 
         if ($files) {
           $file_map = mpull($files, 'getPHID');
           $file_map = array_fill_keys($file_map, array());
-          $changes[ManiphestTransactionType::TYPE_ATTACH] = array(
+          $changes[ManiphestTransaction::TYPE_ATTACH] = array(
             PhabricatorFilePHIDTypeFile::TYPECONST => $file_map,
           );
         }

@@ -146,8 +146,17 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $engine->process();
 
-    $transaction_types = ManiphestTransactionType::getTransactionTypeMap();
     $resolution_types = ManiphestTaskStatus::getTaskStatusMap();
+
+    $transaction_types = array(
+      PhabricatorTransactions::TYPE_COMMENT => pht('Comment'),
+      ManiphestTransaction::TYPE_STATUS     => pht('Close Task'),
+      ManiphestTransaction::TYPE_OWNER      => pht('Reassign / Claim'),
+      ManiphestTransaction::TYPE_CCS        => pht('Add CCs'),
+      ManiphestTransaction::TYPE_PRIORITY   => pht('Change Priority'),
+      ManiphestTransaction::TYPE_ATTACH     => pht('Upload File'),
+      ManiphestTransaction::TYPE_PROJECTS   => pht('Associate Projects'),
+    );
 
     if ($task->getStatus() == ManiphestTaskStatus::STATUS_OPEN) {
       $resolution_types = array_select_keys(
@@ -162,10 +171,10 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $resolution_types = array(
         ManiphestTaskStatus::STATUS_OPEN => 'Reopened',
       );
-      $transaction_types[ManiphestTransactionType::TYPE_STATUS] =
+      $transaction_types[ManiphestTransaction::TYPE_STATUS] =
         'Reopen Task';
-      unset($transaction_types[ManiphestTransactionType::TYPE_PRIORITY]);
-      unset($transaction_types[ManiphestTransactionType::TYPE_OWNER]);
+      unset($transaction_types[ManiphestTransaction::TYPE_PRIORITY]);
+      unset($transaction_types[ManiphestTransaction::TYPE_OWNER]);
     }
 
     $default_claim = array(
@@ -260,22 +269,22 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setValue($is_serious ? pht('Submit') : pht('Avast!')));
 
     $control_map = array(
-      ManiphestTransactionType::TYPE_STATUS   => 'resolution',
-      ManiphestTransactionType::TYPE_OWNER    => 'assign_to',
-      ManiphestTransactionType::TYPE_CCS      => 'ccs',
-      ManiphestTransactionType::TYPE_PRIORITY => 'priority',
-      ManiphestTransactionType::TYPE_PROJECTS => 'projects',
-      ManiphestTransactionType::TYPE_ATTACH   => 'file',
+      ManiphestTransaction::TYPE_STATUS   => 'resolution',
+      ManiphestTransaction::TYPE_OWNER    => 'assign_to',
+      ManiphestTransaction::TYPE_CCS      => 'ccs',
+      ManiphestTransaction::TYPE_PRIORITY => 'priority',
+      ManiphestTransaction::TYPE_PROJECTS => 'projects',
+      ManiphestTransaction::TYPE_ATTACH   => 'file',
     );
 
     $tokenizer_map = array(
-      ManiphestTransactionType::TYPE_PROJECTS => array(
+      ManiphestTransaction::TYPE_PROJECTS => array(
         'id'          => 'projects-tokenizer',
         'src'         => '/typeahead/common/projects/',
         'ondemand'    => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
         'placeholder' => pht('Type a project name...'),
       ),
-      ManiphestTransactionType::TYPE_OWNER => array(
+      ManiphestTransaction::TYPE_OWNER => array(
         'id'          => 'assign-tokenizer',
         'src'         => '/typeahead/common/users/',
         'value'       => $default_claim,
@@ -283,7 +292,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
         'ondemand'    => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
         'placeholder' => pht('Type a user name...'),
       ),
-      ManiphestTransactionType::TYPE_CCS => array(
+      ManiphestTransaction::TYPE_CCS => array(
         'id'          => 'cc-tokenizer',
         'src'         => '/typeahead/common/mailable/',
         'ondemand'    => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),

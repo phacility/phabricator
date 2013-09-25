@@ -82,7 +82,7 @@ final class ManiphestEdgeEventListener extends PhutilEventListener {
         }
 
         $xactions[] = id(new ManiphestTransaction())
-          ->setTransactionType(ManiphestTransactionType::TYPE_EDGE)
+          ->setTransactionType(ManiphestTransaction::TYPE_EDGE)
           ->setOldValue($old_type)
           ->setNewValue($new_type)
           ->setMetadataValue('edge:type', $type);
