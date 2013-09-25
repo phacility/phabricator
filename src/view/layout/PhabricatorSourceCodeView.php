@@ -6,6 +6,7 @@ final class PhabricatorSourceCodeView extends AphrontView {
   private $limit;
   private $uri;
   private $highlights = array();
+  private $canClickHighlight = true;
 
   public function setLimit($limit) {
     $this->limit = $limit;
@@ -27,12 +28,19 @@ final class PhabricatorSourceCodeView extends AphrontView {
     return $this;
   }
 
+  public function disableHighlightOnClick() {
+    $this->canClickHighlight = false;
+    return $this;
+  }
+
   public function render() {
     require_celerity_resource('phabricator-source-code-view-css');
     require_celerity_resource('syntax-highlighting-css');
 
     Javelin::initBehavior('phabricator-oncopy', array());
-    Javelin::initBehavior('phabricator-line-linker');
+    if ($this->canClickHighlight) {
+      Javelin::initBehavior('phabricator-line-linker');
+    }
 
     $line_number = 1;
 
@@ -61,15 +69,22 @@ final class PhabricatorSourceCodeView extends AphrontView {
         $row_attributes['class'] = 'phabricator-source-highlight';
       }
 
-      $line_uri = $this->uri . "$" . $line_number;
-      $line_href = (string) new PhutilURI($line_uri);
+      if ($this->canClickHighlight) {
+        $line_uri = $this->uri . "$" . $line_number;
+        $line_href = (string) new PhutilURI($line_uri);
 
-      $tag_number = javelin_tag(
-        'a',
-        array(
-          'href' => $line_href
-        ),
-        $line_number);
+        $tag_number = javelin_tag(
+          'a',
+          array(
+               'href' => $line_href
+          ),
+          $line_number);
+      } else {
+        $tag_number = javelin_tag(
+          'span',
+          array(),
+          $line_number);
+      }
 
       $rows[] = phutil_tag(
         'tr',
