@@ -14,4 +14,9 @@ abstract class PhabricatorDaemon extends PhutilDaemon {
     LiskDAO::closeAllConnections();
     return;
   }
+
+  public function getViewer() {
+    return PhabricatorUser::getOmnipotentUser();
+  }
+
 }

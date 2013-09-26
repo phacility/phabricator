@@ -176,11 +176,26 @@ final class PhabricatorRepositoryPullLocalDaemon
    * @task pull
    */
   protected function loadRepositories(array $names) {
-    if (!count($names)) {
-      return id(new PhabricatorRepository())->loadAll();
-    } else {
-      return PhabricatorRepository::loadAllByPHIDOrCallsign($names);
+    $query = id(new PhabricatorRepositoryQuery())
+      ->setViewer($this->getViewer());
+
+    if ($names) {
+      $query->withCallsigns($names);
     }
+
+    $repos = $query->execute();
+
+    if ($names) {
+      $by_callsign = mpull($repos, null, 'getCallsign');
+      foreach ($names as $name) {
+        if (empty($by_callsign[$name])) {
+          throw new Exception(
+            "No repository exists with callsign '{$name}'!");
+        }
+      }
+    }
+
+    return $repos;
   }
 
   public function discoverRepository(PhabricatorRepository $repository) {
