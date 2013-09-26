@@ -34,6 +34,7 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
       self::FIELD_BODY,
       self::FIELD_AUTHOR,
       self::FIELD_CC,
+      self::FIELD_CONTENT_SOURCE,
     );
   }
 

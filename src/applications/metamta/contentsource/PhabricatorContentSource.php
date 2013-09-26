@@ -53,6 +53,19 @@ final class PhabricatorContentSource {
       array());
   }
 
+  public static function getSourceNameMap() {
+    return array(
+      self::SOURCE_WEB      => pht('Web'),
+      self::SOURCE_EMAIL    => pht('Email'),
+      self::SOURCE_CONDUIT  => pht('Conduit'),
+      self::SOURCE_MOBILE   => pht('Mobile'),
+      self::SOURCE_TABLET   => pht('Tablet'),
+      self::SOURCE_FAX      => pht('Fax'),
+      self::SOURCE_LEGACY   => pht('Legacy'),
+      self::SOURCE_UNKNOWN  => pht('Other'),
+    );
+  }
+
   public function serialize() {
     return json_encode(array(
       'source' => $this->getSource(),

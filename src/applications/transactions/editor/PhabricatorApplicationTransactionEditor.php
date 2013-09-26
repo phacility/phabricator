@@ -1496,6 +1496,7 @@ abstract class PhabricatorApplicationTransactionEditor
     array $xactions) {
 
     $adapter = $this->buildHeraldAdapter($object, $xactions);
+    $adapter->setContentSource($this->getContentSource());
     $xscript = HeraldEngine::loadAndApplyRules($adapter);
 
     $this->setHeraldAdapter($adapter);

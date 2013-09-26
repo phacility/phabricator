@@ -19,6 +19,7 @@ abstract class HeraldAdapter {
   const FIELD_RULE                   = 'rule';
   const FIELD_AFFECTED_PACKAGE       = 'affected-package';
   const FIELD_AFFECTED_PACKAGE_OWNER = 'affected-package-owner';
+  const FIELD_CONTENT_SOURCE         = 'contentsource';
 
   const CONDITION_CONTAINS      = 'contains';
   const CONDITION_NOT_CONTAINS  = '!contains';
@@ -55,6 +56,17 @@ abstract class HeraldAdapter {
   const VALUE_OWNERS_PACKAGE  = 'package';
   const VALUE_PROJECT         = 'project';
   const VALUE_FLAG_COLOR      = 'flagcolor';
+  const VALUE_CONTENT_SOURCE  = 'contentsource';
+
+  private $contentSource;
+
+  public function setContentSource(PhabricatorContentSource $content_source) {
+    $this->contentSource = $content_source;
+    return $this;
+  }
+  public function getContentSource() {
+    return $this->contentSource;
+  }
 
   abstract public function getPHID();
   abstract public function getHeraldName();
@@ -63,6 +75,8 @@ abstract class HeraldAdapter {
     switch ($field_name) {
       case self::FIELD_RULE:
         return null;
+      case self::FIELD_CONTENT_SOURCE:
+        return $this->getContentSource()->getSource();
       default:
         throw new Exception(
           "Unknown field '{$field_name}'!");
@@ -108,6 +122,7 @@ abstract class HeraldAdapter {
       self::FIELD_AFFECTED_PACKAGE => pht('Any affected package'),
       self::FIELD_AFFECTED_PACKAGE_OWNER =>
         pht("Any affected package's owner"),
+      self:: FIELD_CONTENT_SOURCE => pht('Content Source')
     );
   }
 
@@ -185,6 +200,11 @@ abstract class HeraldAdapter {
         return array(
           self::CONDITION_INCLUDE_ANY,
           self::CONDITION_INCLUDE_NONE,
+        );
+      case self::FIELD_CONTENT_SOURCE:
+        return array(
+          self::CONDITION_IS,
+          self::CONDITION_IS_NOT,
         );
       default:
         throw new Exception(
@@ -491,11 +511,18 @@ abstract class HeraldAdapter {
     switch ($condition) {
       case self::CONDITION_CONTAINS:
       case self::CONDITION_NOT_CONTAINS:
-      case self::CONDITION_IS:
-      case self::CONDITION_IS_NOT:
       case self::CONDITION_REGEXP:
       case self::CONDITION_REGEXP_PAIR:
         return self::VALUE_TEXT;
+      case self::CONDITION_IS:
+      case self::CONDITION_IS_NOT:
+        switch ($field) {
+          case self::FIELD_CONTENT_SOURCE:
+            return self::VALUE_CONTENT_SOURCE;
+          default:
+            return self::VALUE_TEXT;
+        }
+        break;
       case self::CONDITION_IS_ANY:
       case self::CONDITION_IS_NOT_ANY:
         switch ($field) {
