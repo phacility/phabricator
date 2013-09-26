@@ -121,7 +121,7 @@ final class PhabricatorSetupCheckBinaries extends PhabricatorSetupCheck {
       ->setShortName(pht("'%s' Missing", $bin))
       ->setName(pht("Missing '%s' Binary", $bin))
       ->setSummary(
-        pht("The '%s' binary could not be located or excuted.", $bin))
+        pht("The '%s' binary could not be located or executed.", $bin))
       ->setMessage($preamble.' '.$message)
       ->addPhabricatorConfig('environment.append-paths');
   }
