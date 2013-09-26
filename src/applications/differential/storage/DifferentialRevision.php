@@ -34,6 +34,7 @@ final class DifferentialRevision extends DifferentialDAO
   private $activeDiff = self::ATTACHABLE;
   private $diffIDs = self::ATTACHABLE;
   private $hashes = self::ATTACHABLE;
+  private $repository = self::ATTACHABLE;
 
   private $reviewerStatus = self::ATTACHABLE;
 
@@ -306,10 +307,25 @@ final class DifferentialRevision extends DifferentialDAO
   }
 
   public function getPolicy($capability) {
-    return PhabricatorPolicies::POLICY_USER;
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return $this->getViewPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return $this->getEditPolicy();
+    }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $user) {
+
+    // A revision's author (which effectively means "owner" after we added
+    // commandeering) can always view and edit it.
+    $author_phid = $this->getAuthorPHID();
+    if ($author_phid) {
+      if ($user->getPHID() == $author_phid) {
+        return true;
+      }
+    }
+
     return false;
   }
 
@@ -327,6 +343,15 @@ final class DifferentialRevision extends DifferentialDAO
     assert_instances_of($reviewers, 'DifferentialReviewer');
 
     $this->reviewerStatus = $reviewers;
+    return $this;
+  }
+
+  public function getRepository() {
+    return $this->assertAttached($this->repository);
+  }
+
+  public function attachRepository(PhabricatorRepository $repository = null) {
+    $this->repository = $repository;
     return $this;
   }
 }
