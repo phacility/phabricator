@@ -30,6 +30,10 @@ final class DifferentialRevisionSearchEngine
       $this->readUsersFromRequest($request, 'subscribers'));
 
     $saved->setParameter(
+      'repositoryPHIDs',
+      $request->getArr('repositories'));
+
+    $saved->setParameter(
       'draft',
       $request->getBool('draft'));
 
@@ -68,6 +72,11 @@ final class DifferentialRevisionSearchEngine
       $query->withCCs($subscriber_phids);
     }
 
+    $repository_phids = $saved->getParameter('repositoryPHIDs', array());
+    if ($repository_phids) {
+      $query->withRepositoryPHIDs($repository_phids);
+    }
+
     $draft = $saved->getParameter('draft', false);
     if ($draft && $this->requireViewer()->isLoggedIn()) {
       $query->withDraftRepliesByAuthors(
@@ -97,6 +106,7 @@ final class DifferentialRevisionSearchEngine
     $author_phids = $saved->getParameter('authorPHIDs', array());
     $reviewer_phids = $saved->getParameter('reviewerPHIDs', array());
     $subscriber_phids = $saved->getParameter('subscriberPHIDs', array());
+    $repository_phids = $saved->getParameter('repositoryPHIDs', array());
     $only_draft = $saved->getParameter('draft', false);
 
     $all_phids = array_mergev(
@@ -105,6 +115,7 @@ final class DifferentialRevisionSearchEngine
         $author_phids,
         $reviewer_phids,
         $subscriber_phids,
+        $repository_phids,
       ));
 
     $handles = id(new PhabricatorHandleQuery())
@@ -112,33 +123,37 @@ final class DifferentialRevisionSearchEngine
       ->withPHIDs($all_phids)
       ->execute();
 
-    $tokens = mpull($handles, 'getFullName', 'getPHID');
-
     $form
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Responsible Users'))
           ->setName('responsibles')
           ->setDatasource('/typeahead/common/accounts/')
-          ->setValue(array_select_keys($tokens, $responsible_phids)))
+          ->setValue(array_select_keys($handles, $responsible_phids)))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Authors'))
           ->setName('authors')
           ->setDatasource('/typeahead/common/accounts/')
-          ->setValue(array_select_keys($tokens, $author_phids)))
+          ->setValue(array_select_keys($handles, $author_phids)))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Reviewers'))
           ->setName('reviewers')
           ->setDatasource('/typeahead/common/accounts/')
-          ->setValue(array_select_keys($tokens, $reviewer_phids)))
+          ->setValue(array_select_keys($handles, $reviewer_phids)))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Subscribers'))
           ->setName('subscribers')
           ->setDatasource('/typeahead/common/allmailable/')
-          ->setValue(array_select_keys($tokens, $subscriber_phids)))
+          ->setValue(array_select_keys($handles, $subscriber_phids)))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel(pht('Repositories'))
+          ->setName('repositories')
+          ->setDatasource('/typeahead/common/repositories/')
+          ->setValue(array_select_keys($handles, $repository_phids)))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Status'))

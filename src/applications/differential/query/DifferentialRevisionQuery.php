@@ -39,6 +39,7 @@ final class DifferentialRevisionQuery
   private $branches = array();
   private $arcanistProjectPHIDs = array();
   private $draftRevisions = array();
+  private $repositoryPHIDs;
 
   private $order            = 'order-modified';
   const ORDER_MODIFIED      = 'order-modified';
@@ -243,6 +244,11 @@ final class DifferentialRevisionQuery
    */
   public function withArcanistProjectPHIDs(array $arc_project_phids) {
     $this->arcanistProjectPHIDs = $arc_project_phids;
+    return $this;
+  }
+
+  public function withRepositoryPHIDs(array $repository_phids) {
+    $this->repositoryPHIDs = $repository_phids;
     return $this;
   }
 
@@ -656,6 +662,13 @@ final class DifferentialRevisionQuery
         $conn_r,
         'r.id IN (%Ld)',
         $this->revIDs);
+    }
+
+    if ($this->repositoryPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'r.repositoryPHID IN (%Ls)',
+        $this->repositoryPHIDs);
     }
 
     if ($this->commitHashes) {
