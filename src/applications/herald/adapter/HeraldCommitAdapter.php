@@ -211,6 +211,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
       $data = $this->commitData;
       $revision_id = $data->getCommitDetail('differential.revisionID');
       if ($revision_id) {
+        // TODO: (T603) Herald policy stuff.
         $revision = id(new DifferentialRevision())->load($revision_id);
         if ($revision) {
           $revision->loadRelationships();

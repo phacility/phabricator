@@ -8,8 +8,13 @@ final class DifferentialCommentSaveController extends DifferentialController {
       return new Aphront400Response();
     }
 
+    $viewer = $request->getUser();
+
     $revision_id = $request->getInt('revision_id');
-    $revision = id(new DifferentialRevision())->load($revision_id);
+    $revision = id(new DifferentialRevisionQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($revision_id))
+      ->executeOne();
     if (!$revision) {
       return new Aphront400Response();
     }

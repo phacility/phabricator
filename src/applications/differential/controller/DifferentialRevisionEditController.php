@@ -22,6 +22,11 @@ final class DifferentialRevisionEditController extends DifferentialController {
         ->withIDs(array($this->id))
         ->needRelationships(true)
         ->needReviewerStatus(true)
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
         ->executeOne();
       if (!$revision) {
         return new Aphront404Response();

@@ -162,8 +162,10 @@ abstract class DifferentialFreeformFieldSpecification
 
     $dependents = $this->findDependentRevisions($message);
     if ($dependents) {
-      $dependents = id(new DifferentialRevision())
-        ->loadAllWhere('id IN (%Ld)', $dependents);
+      $dependents = id(new DifferentialRevisionQuery())
+        ->setViewer($editor->getActor())
+        ->withIDs($dependents)
+        ->execute();
       $this->saveFieldEdges(
         $editor->getRevision(),
         PhabricatorEdgeConfig::TYPE_DREV_DEPENDS_ON_DREV,

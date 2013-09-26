@@ -233,6 +233,10 @@ final class ConduitAPI_diffusion_getcommits_Method
   private function addDifferentialInformation(array $commits) {
     $commit_phids = ipull($commits, 'commitPHID');
 
+    // TODO: (T603) This should be policy checked, either by moving to
+    // DifferentialRevisionQuery or by doing a followup query to make sure
+    // the matched objects are visible.
+
     $rev_conn_r = id(new DifferentialRevision())->establishConnection('r');
     $revs = queryfx_all(
       $rev_conn_r,

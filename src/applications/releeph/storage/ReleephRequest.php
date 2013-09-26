@@ -248,6 +248,7 @@ final class ReleephRequest extends ReleephDAO
     }
   }
 
+  // TODO: (T603) Get rid of all this one-off ad-hoc loading.
   public function loadDifferentialRevision() {
     $diff_phid = $this->loadRequestCommitDiffPHID();
     if (!$diff_phid) {

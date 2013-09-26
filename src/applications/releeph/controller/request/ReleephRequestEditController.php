@@ -228,7 +228,10 @@ final class ReleephRequestEditController extends ReleephProjectController {
       $origin = null;
       $diff_rev_id = $request->getStr('D');
       if ($diff_rev_id) {
-        $diff_rev = id(new DifferentialRevision())->load($diff_rev_id);
+        $diff_rev = id(new DifferentialRevisionQuery())
+          ->setViewer($user)
+          ->withIDs(array($diff_rev_id))
+          ->executeOne();
         $origin = '/D'.$diff_rev->getID();
         $title = sprintf(
           'D%d: %s',

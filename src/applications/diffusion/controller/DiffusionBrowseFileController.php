@@ -550,17 +550,18 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       $commits = mpull($commits, null, 'getCommitIdentifier');
     }
 
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
     $revision_ids = id(new DifferentialRevision())
       ->loadIDsByCommitPHIDs(mpull($commits, 'getPHID'));
     $revisions = array();
     if ($revision_ids) {
-      $revisions = id(new DifferentialRevision())->loadAllWhere(
-        'id IN (%Ld)',
-        $revision_ids);
+      $revisions = id(new DifferentialRevisionQuery())
+        ->setViewer($user)
+        ->withIDs($revision_ids)
+        ->execute();
     }
-
-    $request = $this->getRequest();
-    $user = $request->getUser();
 
     Javelin::initBehavior('phabricator-oncopy', array());
 

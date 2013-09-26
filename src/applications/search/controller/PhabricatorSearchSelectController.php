@@ -93,6 +93,7 @@ final class PhabricatorSearchSelectController
 
     switch ($this->type) {
       case DifferentialPHIDTypeRevision::TYPECONST:
+        // TODO: (T603) See below. This whole thing needs cleanup.
         $objects = id(new DifferentialRevision())->loadAllWhere(
           'id IN (%Ld)',
           $object_ids);
