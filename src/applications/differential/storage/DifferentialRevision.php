@@ -25,6 +25,9 @@ final class DifferentialRevision extends DifferentialDAO
   protected $mailKey;
   protected $branchName;
   protected $arcanistProjectPHID;
+  protected $repositoryPHID;
+  protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
+  protected $editPolicy = PhabricatorPolicies::POLICY_USER;
 
   private $relationships = self::ATTACHABLE;
   private $commits = self::ATTACHABLE;
