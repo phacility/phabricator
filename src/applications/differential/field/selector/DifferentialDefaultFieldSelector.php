@@ -13,7 +13,6 @@ final class DifferentialDefaultFieldSelector
       new DifferentialReviewersFieldSpecification(),
       new DifferentialReviewedByFieldSpecification(),
       new DifferentialCCsFieldSpecification(),
-      new DifferentialViewPolicyFieldSpecification(),
       new DifferentialLintFieldSpecification(),
       new DifferentialUnitFieldSpecification(),
       new DifferentialCommitsFieldSpecification(),
