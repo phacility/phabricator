@@ -39,12 +39,14 @@ abstract class HeraldAdapter {
   const CONDITION_NOT_EXISTS    = '!exists';
   const CONDITION_REGEXP_PAIR   = 'regexp-pair';
 
-  const ACTION_ADD_CC     = 'addcc';
-  const ACTION_REMOVE_CC  = 'remcc';
-  const ACTION_EMAIL      = 'email';
-  const ACTION_NOTHING    = 'nothing';
-  const ACTION_AUDIT      = 'audit';
-  const ACTION_FLAG       = 'flag';
+  const ACTION_ADD_CC       = 'addcc';
+  const ACTION_REMOVE_CC    = 'remcc';
+  const ACTION_EMAIL        = 'email';
+  const ACTION_NOTHING      = 'nothing';
+  const ACTION_AUDIT        = 'audit';
+  const ACTION_FLAG         = 'flag';
+  const ACTION_ASSIGN_TASK  = 'assigntask';
+  const ACTION_ADD_PROJECTS = 'addprojects';
 
   const VALUE_TEXT            = 'text';
   const VALUE_NONE            = 'none';
@@ -440,21 +442,25 @@ abstract class HeraldAdapter {
     switch ($rule_type) {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
         return array(
-          self::ACTION_NOTHING    => pht('Do nothing'),
-          self::ACTION_ADD_CC     => pht('Add emails to CC'),
-          self::ACTION_REMOVE_CC  => pht('Remove emails from CC'),
-          self::ACTION_EMAIL      => pht('Send an email to'),
-          self::ACTION_AUDIT      => pht('Trigger an Audit by'),
-          self::ACTION_FLAG       => pht('Mark with flag'),
+          self::ACTION_NOTHING      => pht('Do nothing'),
+          self::ACTION_ADD_CC       => pht('Add emails to CC'),
+          self::ACTION_REMOVE_CC    => pht('Remove emails from CC'),
+          self::ACTION_EMAIL        => pht('Send an email to'),
+          self::ACTION_AUDIT        => pht('Trigger an Audit by'),
+          self::ACTION_FLAG         => pht('Mark with flag'),
+          self::ACTION_ASSIGN_TASK  => pht('Assign task to'),
+          self::ACTION_ADD_PROJECTS => pht('Add projects'),
         );
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         return array(
-          self::ACTION_NOTHING    => pht('Do nothing'),
-          self::ACTION_ADD_CC     => pht('Add me to CC'),
-          self::ACTION_REMOVE_CC  => pht('Remove me from CC'),
-          self::ACTION_EMAIL      => pht('Send me an email'),
-          self::ACTION_AUDIT      => pht('Trigger an Audit by me'),
-          self::ACTION_FLAG       => pht('Mark with flag'),
+          self::ACTION_NOTHING      => pht('Do nothing'),
+          self::ACTION_ADD_CC       => pht('Add me to CC'),
+          self::ACTION_REMOVE_CC    => pht('Remove me from CC'),
+          self::ACTION_EMAIL        => pht('Send me an email'),
+          self::ACTION_AUDIT        => pht('Trigger an Audit by me'),
+          self::ACTION_FLAG         => pht('Mark with flag'),
+          self::ACTION_ASSIGN_TASK  => pht('Assign task to me.'),
+          self::ACTION_ADD_PROJECTS => pht('Add projects'),
         );
       default:
         throw new Exception("Unknown rule type '{$rule_type}'!");
@@ -479,6 +485,7 @@ abstract class HeraldAdapter {
         case self::ACTION_ADD_CC:
         case self::ACTION_REMOVE_CC:
         case self::ACTION_AUDIT:
+        case self::ACTION_ASSIGN_TASK:
           // For personal rules, force these actions to target the rule owner.
           $target = array($author_phid);
           break;
@@ -571,9 +578,12 @@ abstract class HeraldAdapter {
         case self::ACTION_EMAIL:
         case self::ACTION_NOTHING:
         case self::ACTION_AUDIT:
+        case self::ACTION_ASSIGN_TASK:
           return self::VALUE_NONE;
         case self::ACTION_FLAG:
           return self::VALUE_FLAG_COLOR;
+        case self::ACTION_ADD_PROJECTS:
+          return self::VALUE_PROJECT;
         default:
           throw new Exception("Unknown or invalid action '{$action}'.");
       }
@@ -586,9 +596,12 @@ abstract class HeraldAdapter {
         case self::ACTION_NOTHING:
           return self::VALUE_NONE;
         case self::ACTION_AUDIT:
+        case self::ACTION_ADD_PROJECTS:
           return self::VALUE_PROJECT;
         case self::ACTION_FLAG:
           return self::VALUE_FLAG_COLOR;
+        case self::ACTION_ASSIGN_TASK:
+          return self::VALUE_USER;
         default:
           throw new Exception("Unknown or invalid action '{$action}'.");
       }

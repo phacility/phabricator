@@ -7,6 +7,8 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
 
   private $task;
   private $ccPHIDs = array();
+  private $assignPHID;
+  private $projectPHIDs = array();
 
   public function setTask(ManiphestTask $task) {
     $this->task = $task;
@@ -22,6 +24,22 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
   }
   public function getCcPHIDs() {
     return $this->ccPHIDs;
+  }
+
+  public function setAssignPHID($assign_phid) {
+    $this->assignPHID = $assign_phid;
+    return $this;
+  }
+  public function getAssignPHID() {
+    return $this->assignPHID;
+  }
+
+  public function setProjectPHIDs(array $project_phids) {
+    $this->projectPHIDs = $project_phids;
+    return $this;
+  }
+  public function getProjectPHIDs() {
+    return $this->projectPHIDs;
   }
 
   public function getAdapterContentName() {
@@ -43,12 +61,15 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
         return array(
           self::ACTION_ADD_CC,
+          self::ACTION_ASSIGN_TASK,
+          self::ACTION_ADD_PROJECTS,
           self::ACTION_NOTHING,
         );
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         return array(
           self::ACTION_ADD_CC,
           self::ACTION_FLAG,
+          self::ACTION_ASSIGN_TASK,
           self::ACTION_NOTHING,
         );
     }
@@ -105,6 +126,26 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
           $result[] = parent::applyFlagEffect(
             $effect,
             $this->getTask()->getPHID());
+          break;
+        case self::ACTION_ASSIGN_TASK:
+          $target_array = $effect->getTarget();
+          $assign_phid = reset($target_array);
+          $this->setAssignPHID($assign_phid);
+          $result[] = new HeraldApplyTranscript(
+            $effect,
+            true,
+            pht('Assigned task.'));
+          break;
+        case self::ACTION_ADD_PROJECTS:
+          $add_projects = array();
+          foreach ($effect->getTarget() as $phid) {
+            $add_projects[$phid] = true;
+          }
+          $this->setProjectPHIDs(array_keys($add_projects));
+          $result[] = new HeraldApplyTranscript(
+            $effect,
+            true,
+            pht('Added projects.'));
           break;
         default:
           throw new Exception("No rules to handle action '{$action}'.");
