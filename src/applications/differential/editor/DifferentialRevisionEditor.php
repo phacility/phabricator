@@ -126,6 +126,16 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     }
     $this->diff = $diff;
     $this->comments = $comments;
+
+    $repository = id(new DifferentialRepositoryLookup())
+      ->setViewer($this->getActor())
+      ->setDiff($diff)
+      ->lookupRepository();
+
+    if ($repository) {
+      $this->getRevision()->setRepositoryPHID($repository->getPHID());
+    }
+
     return $this;
   }
 
