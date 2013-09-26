@@ -30,10 +30,19 @@ final class ManiphestTransactionEditorPro
       case ManiphestTransaction::TYPE_PRIORITY:
         return (int)$object->getPriority();
       case ManiphestTransaction::TYPE_STATUS:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
         return (int)$object->getStatus();
       case ManiphestTransaction::TYPE_TITLE:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
         return $object->getTitle();
       case ManiphestTransaction::TYPE_DESCRIPTION:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
         return $object->getDescription();
       case ManiphestTransaction::TYPE_OWNER:
         return nonempty($object->getOwnerPHID(), null);
