@@ -416,9 +416,13 @@ final class DifferentialRevisionQuery
       // The revision has an associated repository, and the viewer can't see
       // it, and the viewer has no special capabilities. Filter out this
       // revision.
+      $this->didRejectResult($revision);
       unset($revisions[$key]);
     }
 
+    if (!$revisions) {
+      return array();
+    }
 
     $table = new DifferentialRevision();
     $conn_r = $table->establishConnection('r');

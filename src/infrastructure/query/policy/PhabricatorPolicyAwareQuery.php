@@ -190,18 +190,7 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
 
     $results = array();
 
-    $filter = new PhabricatorPolicyFilter();
-    $filter->setViewer($this->viewer);
-
-    if (!$this->capabilities) {
-      $capabilities = array(
-        PhabricatorPolicyCapability::CAN_VIEW,
-      );
-    } else {
-      $capabilities = $this->capabilities;
-    }
-    $filter->requireCapabilities($capabilities);
-    $filter->raisePolicyExceptions($this->shouldRaisePolicyExceptions());
+    $filter = $this->getPolicyFilter();
 
     $offset = (int)$this->getOffset();
     $limit  = (int)$this->getLimit();
@@ -285,6 +274,29 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
     $results = $this->didLoadResults($results);
 
     return $results;
+  }
+
+  private function getPolicyFilter() {
+    $filter = new PhabricatorPolicyFilter();
+    $filter->setViewer($this->viewer);
+    if (!$this->capabilities) {
+      $capabilities = array(
+        PhabricatorPolicyCapability::CAN_VIEW,
+      );
+    } else {
+      $capabilities = $this->capabilities;
+    }
+    $filter->requireCapabilities($capabilities);
+    $filter->raisePolicyExceptions($this->shouldRaisePolicyExceptions());
+
+    return $filter;
+  }
+
+  protected function didRejectResult(PhabricatorPolicyInterface $object) {
+    $this->getPolicyFilter()->rejectObject(
+      $object,
+      $object->getPolicy(PhabricatorPolicyCapability::CAN_VIEW),
+      PhabricatorPolicyCapability::CAN_VIEW);
   }
 
 

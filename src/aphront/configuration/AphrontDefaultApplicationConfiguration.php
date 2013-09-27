@@ -164,9 +164,23 @@ class AphrontDefaultApplicationConfiguration
         return $login_controller->processRequest();
       }
 
-      $content = hsprintf(
-        '<div class="aphront-policy-exception">%s</div>',
-        $ex->getMessage());
+      $list = $ex->getMoreInfo();
+      foreach ($list as $key => $item) {
+        $list[$key] = phutil_tag('li', array(), $item);
+      }
+      if ($list) {
+        $list = phutil_tag('ul', array(), $list);
+      }
+
+      $content = phutil_tag(
+        'div',
+        array(
+          'class' => 'aphront-policy-exception',
+        ),
+        array(
+          $ex->getMessage(),
+          $list,
+        ));
 
       $dialog = new AphrontDialogView();
       $dialog
