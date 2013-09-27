@@ -1326,6 +1326,19 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/core/behavior-more.js',
   ),
+  'javelin-behavior-audio-source' =>
+  array(
+    'uri' => '/res/21831141/rsrc/js/core/behavior-audio-source.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-vector',
+      3 => 'javelin-dom',
+    ),
+    'disk' => '/rsrc/js/core/behavior-audio-source.js',
+  ),
   'javelin-behavior-audit-preview' =>
   array(
     'uri' => '/res/d8f31e46/rsrc/js/application/diffusion/behavior-audit-preview.js',
