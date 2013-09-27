@@ -29,6 +29,10 @@ final class PhabricatorFilesConfigOptions
       'image/x-ico'               => 'image/x-icon',
       'image/x-icon'              => 'image/x-icon',
       'image/vnd.microsoft.icon'  => 'image/x-icon',
+
+      'audio/x-wav'     => 'audio/x-wav',
+      'application/ogg' => 'application/ogg',
+      'audio/mpeg'      => 'audio/mpeg',
     );
 
     $image_default = array(
@@ -39,6 +43,12 @@ final class PhabricatorFilesConfigOptions
       'image/x-ico'               => true,
       'image/x-icon'              => true,
       'image/vnd.microsoft.icon'  => true,
+    );
+
+    $audio_default = array(
+      'audio/x-wav'     => true,
+      'application/ogg' => true,
+      'audio/mpeg'      => true,
     );
 
     // largely lifted from http://en.wikipedia.org/wiki/Internet_media_type
@@ -82,7 +92,7 @@ final class PhabricatorFilesConfigOptions
             'browsers tend to freak out when viewing enormous binary files.'.
             "\n\n".
             'The keys in this map are vieweable MIME types; the values are '.
-            'the MIME type sthey are delivered as when they are viewed in '.
+            'the MIME types they are delivered as when they are viewed in '.
             'the browser.')),
       $this->newOption('files.image-mime-types', 'set', $image_default)
         ->setSummary(pht('Configure which MIME types are images.'))
@@ -90,6 +100,12 @@ final class PhabricatorFilesConfigOptions
           pht(
             'List of MIME types which can be used as the `src` for an '.
             '`<img />` tag.')),
+      $this->newOption('files.audio-mime-types', 'set', $audio_default)
+        ->setSummary(pht('Configure which MIME types are audio.'))
+        ->setDescription(
+          pht(
+            'List of MIME types which can be used to render an '.
+            '`<audio />` tag.')),
       $this->newOption('files.icon-mime-types', 'wild', $icon_default)
         ->setSummary(pht('Configure which MIME types map to which icons.'))
         ->setDescription(
