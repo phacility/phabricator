@@ -151,7 +151,7 @@
 .phabricator-remarkup audio {
   display: block;
   margin: 16px auto;
-  min-width: 300px;
+  min-width: 240px;
   width: 50%;
 }
 
