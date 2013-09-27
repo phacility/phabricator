@@ -6,6 +6,10 @@ final class DiffusionExternalController extends DiffusionController {
     // Don't build a DiffusionRequest.
   }
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
 

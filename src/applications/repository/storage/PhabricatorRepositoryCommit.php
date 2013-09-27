@@ -156,11 +156,19 @@ final class PhabricatorRepositoryCommit
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
   public function getPolicy($capability) {
-    return $this->getRepository()->getPolicy($capability);
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return $this->getRepository()->getPolicy($capability);
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        // TODO: (T603) Who should be able to edit a commit? For now, retain
+        // the existing policy.
+        return PhabricatorPolicies::POLICY_USER;
+    }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {

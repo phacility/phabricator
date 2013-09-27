@@ -7,6 +7,10 @@ final class DiffusionCommitController extends DiffusionController {
   private $auditAuthorityPHIDs;
   private $highlightedAudits;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     // This controller doesn't use blob/path stuff, just pass the dictionary
     // in directly instead of using the AphrontRequest parsing mechanism.
@@ -609,7 +613,15 @@ final class DiffusionCommitController extends DiffusionController {
     PhabricatorRepositoryCommit $commit,
     array $audit_requests) {
     assert_instances_of($audit_requests, 'PhabricatorRepositoryAuditRequest');
-    $user = $this->getRequest()->getUser();
+
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    if (!$user->isLoggedIn()) {
+      return id(new PhabricatorApplicationTransactionCommentView())
+        ->setUser($user)
+        ->setRequestURI($request->getRequestURI());
+    }
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
@@ -881,14 +893,20 @@ final class DiffusionCommitController extends DiffusionController {
       ->setObject($commit)
       ->setObjectURI($request->getRequestURI());
 
-    // TODO -- integrate permissions into whether or not this action is shown
-    $uri = '/diffusion/'.$repository->getCallSign().'/commit/'.
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $user,
+      $commit,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $uri = '/diffusion/'.$repository->getCallsign().'/commit/'.
            $commit->getCommitIdentifier().'/edit/';
 
     $action = id(new PhabricatorActionView())
       ->setName(pht('Edit Commit'))
       ->setHref($uri)
-      ->setIcon('edit');
+      ->setIcon('edit')
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(!$can_edit);
     $actions->addAction($action);
 
     require_celerity_resource('phabricator-object-selector-css');
@@ -900,7 +918,8 @@ final class DiffusionCommitController extends DiffusionController {
         ->setName(pht('Edit Maniphest Tasks'))
         ->setIcon('attach')
         ->setHref('/search/attach/'.$commit->getPHID().'/TASK/edge/')
-        ->setWorkflow(true);
+        ->setWorkflow(true)
+        ->setDisabled(!$can_edit);
       $actions->addAction($action);
     }
 
