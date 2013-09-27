@@ -30,4 +30,8 @@ final class PhabricatorConduitMethodCallLog extends PhabricatorConduitDAO
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
 }

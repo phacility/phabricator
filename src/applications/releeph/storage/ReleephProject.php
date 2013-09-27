@@ -193,4 +193,9 @@ final class ReleephProject extends ReleephDAO
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
+
 }

@@ -96,6 +96,12 @@ final class LegalpadDocument extends LegalpadDAO
     return ($user->getPHID() == $this->getCreatorPHID());
   }
 
+  public function describeAutomaticCapability($capability) {
+    return pht(
+      'The author of a document can always view and edit it.');
+  }
+
+
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
   public function getApplicationTransactionEditor() {

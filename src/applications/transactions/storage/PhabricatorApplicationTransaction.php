@@ -537,4 +537,10 @@ abstract class PhabricatorApplicationTransaction
     return ($viewer->getPHID() == $this->getAuthorPHID());
   }
 
+  public function describeAutomaticCapability($capability) {
+    // TODO: (T603) Exact policies are unclear here.
+    return null;
+  }
+
+
 }

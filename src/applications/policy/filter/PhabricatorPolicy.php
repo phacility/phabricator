@@ -130,6 +130,35 @@ final class PhabricatorPolicy {
     return $this->getName();
   }
 
+  public function getExplanation($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        switch ($this->getPHID()) {
+          case PhabricatorPolicies::POLICY_PUBLIC:
+            return pht('Visible to the entire internet.');
+          case PhabricatorPolicies::POLICY_USER:
+            return pht('Visible to all logged in users.');
+          case PhabricatorPolicies::POLICY_ADMIN:
+            return pht('Visible to all administrators.');
+          case PhabricatorPolicies::POLICY_NOONE:
+            return pht('Not visible to anyone by default.');
+        }
+
+        switch ($this->getType()) {
+          case PhabricatorPolicyType::TYPE_PROJECT:
+            return pht(
+              'Visible to members of the project "%s".',
+              $this->getName());
+          case PhabricatorPolicyType::TYPE_MASKED:
+            return pht('Other: %s', $this->getName());
+        }
+        break;
+    }
+
+
+    return pht('?');
+  }
+
   public function getFullName() {
     switch ($this->getType()) {
       case PhabricatorPolicyType::TYPE_PROJECT:

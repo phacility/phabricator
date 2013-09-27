@@ -59,4 +59,8 @@ final class PhabricatorConfigEntry extends PhabricatorConfigEntryDAO
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
 }

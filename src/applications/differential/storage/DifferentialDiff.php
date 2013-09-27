@@ -320,4 +320,12 @@ final class DifferentialDiff
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    if ($this->getRevision()) {
+      return pht(
+        'This diff is attached to a revision, and inherits its policies.');
+    }
+    return null;
+  }
+
 }

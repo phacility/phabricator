@@ -48,4 +48,17 @@ final class PhabricatorTokenGiven extends PhabricatorTokenDAO
     }
   }
 
+  public function describeAutomaticCapability($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return pht(
+          'A token inherits the policies of the object it is awarded to.');
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return pht(
+          'The user who gave a token can always edit it.');
+    }
+    return null;
+  }
+
+
 }

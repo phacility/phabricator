@@ -38,4 +38,8 @@ final class PhabricatorPolicyTestObject
     return $this;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
 }

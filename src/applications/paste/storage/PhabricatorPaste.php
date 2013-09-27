@@ -61,6 +61,11 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
     return ($user->getPHID() == $this->getAuthorPHID());
   }
 
+  public function describeAutomaticCapability($capability) {
+    return pht(
+      'The author of a paste can always view and edit it.');
+  }
+
   public function getFullName() {
     $title = $this->getTitle();
     if (!$title) {

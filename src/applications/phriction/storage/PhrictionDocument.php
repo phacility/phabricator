@@ -126,6 +126,14 @@ final class PhrictionDocument extends PhrictionDAO
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    if ($this->hasProject()) {
+      return pht(
+        "This is a project wiki page, and inherits the project's policies.");
+    }
+    return null;
+  }
+
   public function isAutomaticallySubscribed($phid) {
     return false;
   }

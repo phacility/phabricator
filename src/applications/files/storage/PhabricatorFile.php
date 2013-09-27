@@ -830,6 +830,10 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
 
 /* -(  PhabricatorSubscribableInterface Implementation  )-------------------- */
 

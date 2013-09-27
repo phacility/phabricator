@@ -221,6 +221,11 @@ final class ManiphestTask extends ManiphestDAO
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return pht(
+      'The owner of a task can always view and edit it.');
+  }
+
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 

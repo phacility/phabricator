@@ -96,6 +96,12 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
     return ($viewer->getPHID() == $this->getAuthorPHID());
   }
 
+  public function describeAutomaticCapability($capability) {
+    return pht(
+      'The author of a poll can always view and edit it.');
+  }
+
+
 
 /* -(  PhabricatorSubscribableInterface  )----------------------------------- */
 

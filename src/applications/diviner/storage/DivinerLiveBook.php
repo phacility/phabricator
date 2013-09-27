@@ -61,4 +61,8 @@ final class DivinerLiveBook extends DivinerDAO
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
 }

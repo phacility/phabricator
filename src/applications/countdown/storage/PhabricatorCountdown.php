@@ -53,4 +53,8 @@ final class PhabricatorCountdown
     return ($viewer->getPHID() == $this->getAuthorPHID());
   }
 
+  public function describeAutomaticCapability($capability) {
+    return pht('The author of a countdown can always view and edit it.');
+  }
+
 }

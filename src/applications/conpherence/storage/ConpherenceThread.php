@@ -189,4 +189,8 @@ final class ConpherenceThread extends ConpherenceDAO
     return isset($participants[$user->getPHID()]);
   }
 
+  public function describeAutomaticCapability($capability) {
+    return pht("Participants in a thread can always view and edit it.");
+  }
+
 }

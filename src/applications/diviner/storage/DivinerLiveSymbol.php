@@ -143,6 +143,10 @@ final class DivinerLiveSymbol extends DivinerDAO
     return $this->getBook()->hasAutomaticCapability($capability, $viewer);
   }
 
+  public function describeAutomaticCapability($capability) {
+    return pht('Atoms inherit the policies of the books they are part of.');
+  }
+
 
 /* -(  Markup Interface  )--------------------------------------------------- */
 

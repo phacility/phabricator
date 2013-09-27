@@ -167,6 +167,12 @@ final class PhabricatorRepositoryCommit
     return $this->getRepository()->hasAutomaticCapability($capability, $viewer);
   }
 
+  public function describeAutomaticCapability($capability) {
+    return pht(
+      'Commits inherit the policies of the repository they belong to.');
+  }
+
+
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 
   public function getUsersToNotifyOfTokenGiven() {

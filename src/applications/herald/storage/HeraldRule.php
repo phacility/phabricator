@@ -202,4 +202,10 @@ final class HeraldRule extends HeraldDAO
     }
   }
 
+  public function describeAutomaticCapability($capability) {
+    // TODO: (T603) Sort this out.
+    return null;
+  }
+
+
 }

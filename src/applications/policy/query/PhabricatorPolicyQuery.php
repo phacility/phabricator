@@ -15,10 +15,9 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
     return $this;
   }
 
-  public static function renderPolicyDescriptions(
+  public static function loadPolicies(
     PhabricatorUser $viewer,
-    PhabricatorPolicyInterface $object,
-    $icon=false) {
+    PhabricatorPolicyInterface $object) {
 
     $results = array();
     $policies = null;
@@ -32,7 +31,7 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
       }
 
       if (isset($global[$policy])) {
-        $results[$capability] = $global[$policy]->renderDescription($icon);
+        $results[$capability] = $global[$policy];
         continue;
       }
 
@@ -45,10 +44,24 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
           ->execute();
       }
 
-      $results[$capability] = $policies[$policy]->renderDescription($icon);
+      $results[$capability] = $policies[$policy];
     }
 
     return $results;
+  }
+
+  public static function renderPolicyDescriptions(
+    PhabricatorUser $viewer,
+    PhabricatorPolicyInterface $object,
+    $icon = false) {
+
+    $policies = self::loadPolicies($viewer, $object);
+
+    foreach ($policies as $capability => $policy) {
+      $policies[$capability] = $policy->renderDescription($icon);
+    }
+
+    return $policies;
   }
 
   public function execute() {

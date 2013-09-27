@@ -107,4 +107,9 @@ final class PhortunePaymentMethod extends PhortuneDAO
       $viewer);
   }
 
+  public function describeAutomaticCapability($capability) {
+    return pht(
+      'Members of an account can always view and edit its payment methods.');
+  }
+
 }

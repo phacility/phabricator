@@ -329,6 +329,26 @@ final class DifferentialRevision extends DifferentialDAO
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    $description = array(
+      pht('The owner of a revision can always view and edit it.'),
+    );
+
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        $description[] = pht(
+          "A revision's reviewers can always view it.");
+        if ($this->getRepository()) {
+          $description[] = pht(
+            'This revision belongs to a repository. Other users must be able '.
+            'to view the repository in order to view this revision.');
+        }
+        break;
+    }
+
+    return $description;
+  }
+
   public function getUsersToNotifyOfTokenGiven() {
     return array(
       $this->getAuthorPHID(),

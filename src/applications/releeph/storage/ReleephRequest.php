@@ -306,6 +306,11 @@ final class ReleephRequest extends ReleephDAO
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
+
 
 /* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
 

@@ -30,6 +30,10 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
   public function getConfiguration() {
     return array(
       // This information is better available from the history table.

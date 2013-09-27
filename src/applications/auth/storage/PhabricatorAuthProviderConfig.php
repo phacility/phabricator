@@ -81,4 +81,8 @@ final class PhabricatorAuthProviderConfig extends PhabricatorAuthDAO
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
 }

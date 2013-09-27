@@ -236,4 +236,8 @@ final class PhabricatorObjectHandle
     return true;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
 }

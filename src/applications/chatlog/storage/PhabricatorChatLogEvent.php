@@ -28,6 +28,10 @@ final class PhabricatorChatLogEvent
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
   public function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,

@@ -63,4 +63,8 @@ final class PhabricatorSavedQuery extends PhabricatorSearchDAO
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
 }

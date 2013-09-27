@@ -37,4 +37,8 @@ final class PhabricatorMetaMTAMailingList extends PhabricatorMetaMTADAO
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
 }

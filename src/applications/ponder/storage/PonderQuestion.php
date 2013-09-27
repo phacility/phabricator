@@ -203,6 +203,12 @@ final class PonderQuestion extends PonderDAO
     return ($viewer->getPHID() == $this->getAuthorPHID());
   }
 
+
+  public function describeAutomaticCapability($capability) {
+    return pht(
+      'The user who asked a question can always view and edit it.');
+  }
+
   public function getOriginalTitle() {
     // TODO: Make this actually save/return the original title.
     return $this->getTitle();

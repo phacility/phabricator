@@ -61,5 +61,9 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
 }
 

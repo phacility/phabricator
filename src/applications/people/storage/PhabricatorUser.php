@@ -834,6 +834,15 @@ EOBODY;
     return $this->getPHID() && ($viewer->getPHID() === $this->getPHID());
   }
 
+  public function describeAutomaticCapability($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return pht('Only you can edit your information.');
+      default:
+        return null;
+    }
+  }
+
 
 /* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
 

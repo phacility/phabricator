@@ -183,4 +183,8 @@ abstract class ConduitAPIMethod
     return true;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
 }

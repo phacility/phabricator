@@ -41,4 +41,8 @@ final class PhabricatorDaemonLog extends PhabricatorDaemonDAO
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
 }
