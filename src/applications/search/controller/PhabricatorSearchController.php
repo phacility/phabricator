@@ -8,6 +8,10 @@ final class PhabricatorSearchController
 
   private $key;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->key = idx($data, 'key');
   }
@@ -273,9 +277,14 @@ final class PhabricatorSearchController
       $results = null;
     }
 
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('Search')));
 
     return $this->buildApplicationPage(
       array(
+        $crumbs,
         $search_panel,
         $results,
       ),
