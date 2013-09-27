@@ -32,7 +32,7 @@ final class PhabricatorRepositoryArcanistProject
       PhabricatorRepositoryPHIDTypeArcanistProject::TYPECONST);
   }
 
-  // TODO: Remove.
+  // TODO: Remove. Also, T603.
   public function loadRepository() {
     if (!$this->getRepositoryID()) {
       return null;
@@ -85,6 +85,10 @@ final class PhabricatorRepositoryArcanistProject
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
   }
 
 }

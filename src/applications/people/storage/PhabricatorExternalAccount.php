@@ -102,4 +102,9 @@ final class PhabricatorExternalAccount extends PhabricatorUserDAO
     return ($viewer->getPHID() == $this->getUserPHID());
   }
 
+  public function describeAutomaticCapability($capability) {
+    // TODO: (T603) This is complicated.
+    return null;
+  }
+
 }

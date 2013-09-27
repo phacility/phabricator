@@ -148,11 +148,7 @@ final class PHUIHeaderView extends AphrontView {
       }
 
       if ($this->policyObject) {
-        $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-          $this->getUser(),
-          $this->policyObject,
-          true);
-        $property_list[] = $descriptions[PhabricatorPolicyCapability::CAN_VIEW];
+        $property_list[] = $this->renderPolicyProperty($this->policyObject);
       }
 
       $header[] = phutil_tag(
@@ -179,5 +175,31 @@ final class PHUIHeaderView extends AphrontView {
       ));
   }
 
+  private function renderPolicyProperty(PhabricatorPolicyInterface $object) {
+    $policies = PhabricatorPolicyQuery::loadPolicies(
+      $this->getUser(),
+      $object);
 
+    $view_capability = PhabricatorPolicyCapability::CAN_VIEW;
+    $policy = idx($policies, $view_capability);
+    if (!$policy) {
+      return null;
+    }
+
+    $phid = $object->getPHID();
+
+    $icon = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_STATUS)
+      ->setSpriteIcon($policy->getIcon());
+
+    $link = javelin_tag(
+      'a',
+      array(
+        'href' => '/policy/explain/'.$phid.'/'.$view_capability.'/',
+        'sigil' => 'workflow',
+      ),
+      $policy->getName());
+
+    return array($icon, $link);
+  }
 }

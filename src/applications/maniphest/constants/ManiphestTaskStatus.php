@@ -89,7 +89,7 @@ final class ManiphestTaskStatus extends ManiphestConstants {
     $tag = phutil_tag(
       'span',
       array(
-        'class' => 'phui-header-'.$color,
+        'class' => 'phui-header-'.$color.' plr',
       ),
       array(
         $img,

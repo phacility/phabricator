@@ -182,7 +182,7 @@ final class HeraldRuleController extends HeraldController {
         ? pht('Edit Herald Rule')
         : pht('Create Herald Rule');
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setFormError($error_view)
       ->setForm($form);
@@ -413,6 +413,8 @@ final class HeraldRuleController extends HeraldController {
           'rules' => $all_rules,
           'colors' => PhabricatorFlagColor::getColorNameMap(),
           'defaultColor' => PhabricatorFlagColor::COLOR_BLUE,
+          'contentSources' => PhabricatorContentSource::getSourceNameMap(),
+          'defaultSource' => PhabricatorContentSource::SOURCE_WEB
         ),
         'author' => array($rule->getAuthorPHID() =>
                           $handles[$rule->getAuthorPHID()]->getName()),

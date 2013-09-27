@@ -9,7 +9,14 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $task = id(new ManiphestTask())->load($request->getStr('taskID'));
+    // TODO: T603 This doesn't require CAN_EDIT because non-editors can still
+    // leave comments, probably? For now, this just nondisruptive. Smooth this
+    // out once policies are more clear.
+
+    $task = id(new ManiphestTaskQuery())
+      ->setViewer($user)
+      ->withIDs(array($request->getStr('taskID')))
+      ->executeOne();
     if (!$task) {
       return new Aphront404Response();
     }
@@ -33,7 +40,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
 
     // This means "attach a file" even though we store other types of data
     // as 'attached'.
-    if ($action == ManiphestTransactionType::TYPE_ATTACH) {
+    if ($action == ManiphestTransaction::TYPE_ATTACH) {
       if (!empty($_FILES['file'])) {
         $err = idx($_FILES['file'], 'error');
         if ($err != UPLOAD_ERR_NO_FILE) {
@@ -61,7 +68,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
       }
       $transaction = new ManiphestTransaction();
       $transaction
-        ->setTransactionType(ManiphestTransactionType::TYPE_ATTACH);
+        ->setTransactionType(ManiphestTransaction::TYPE_ATTACH);
       $transaction->setNewValue($new);
       $transactions[] = $transaction;
     }
@@ -78,29 +85,29 @@ final class ManiphestTransactionSaveController extends ManiphestController {
 
     $cc_transaction = new ManiphestTransaction();
     $cc_transaction
-      ->setTransactionType(ManiphestTransactionType::TYPE_CCS);
+      ->setTransactionType(ManiphestTransaction::TYPE_CCS);
 
     $transaction = new ManiphestTransaction();
     $transaction
       ->setTransactionType($action);
 
     switch ($action) {
-      case ManiphestTransactionType::TYPE_STATUS:
+      case ManiphestTransaction::TYPE_STATUS:
         $transaction->setNewValue($request->getStr('resolution'));
         break;
-      case ManiphestTransactionType::TYPE_OWNER:
+      case ManiphestTransaction::TYPE_OWNER:
         $assign_to = $request->getArr('assign_to');
         $assign_to = reset($assign_to);
         $transaction->setNewValue($assign_to);
         break;
-      case ManiphestTransactionType::TYPE_PROJECTS:
+      case ManiphestTransaction::TYPE_PROJECTS:
         $projects = $request->getArr('projects');
         $projects = array_merge($projects, $task->getProjectPHIDs());
         $projects = array_filter($projects);
         $projects = array_unique($projects);
         $transaction->setNewValue($projects);
         break;
-      case ManiphestTransactionType::TYPE_CCS:
+      case ManiphestTransaction::TYPE_CCS:
         // Accumulate the new explicit CCs into the array that we'll add in
         // the CC transaction later.
         $added_ccs = array_merge($added_ccs, $request->getArr('ccs'));
@@ -108,10 +115,10 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         // Throw away the primary transaction.
         $transaction = null;
         break;
-      case ManiphestTransactionType::TYPE_PRIORITY:
+      case ManiphestTransaction::TYPE_PRIORITY:
         $transaction->setNewValue($request->getInt('priority'));
         break;
-      case ManiphestTransactionType::TYPE_ATTACH:
+      case ManiphestTransaction::TYPE_ATTACH:
         // Nuke this, we created it above.
         $transaction = null;
         break;
@@ -143,7 +150,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
 
     $implicitly_claimed = false;
     switch ($action) {
-      case ManiphestTransactionType::TYPE_OWNER:
+      case ManiphestTransaction::TYPE_OWNER:
         if ($task->getOwnerPHID() == $transaction->getNewValue()) {
           // If this is actually no-op, don't generate the side effect.
           break;
@@ -151,14 +158,14 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         // Otherwise, when a task is reassigned, move the previous owner to CC.
         $added_ccs[] = $task->getOwnerPHID();
         break;
-      case ManiphestTransactionType::TYPE_STATUS:
+      case ManiphestTransaction::TYPE_STATUS:
         if (!$task->getOwnerPHID() &&
             $request->getStr('resolution') !=
             ManiphestTaskStatus::STATUS_OPEN) {
           // Closing an unassigned task. Assign the user as the owner of
           // this task.
           $assign = new ManiphestTransaction();
-          $assign->setTransactionType(ManiphestTransactionType::TYPE_OWNER);
+          $assign->setTransactionType(ManiphestTransaction::TYPE_OWNER);
           $assign->setNewValue($user->getPHID());
           $transactions[] = $assign;
 
@@ -172,7 +179,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     if ($implicitly_claimed) {
       $user_owns_task = true;
     } else {
-      if ($action == ManiphestTransactionType::TYPE_OWNER) {
+      if ($action == ManiphestTransaction::TYPE_OWNER) {
         if ($transaction->getNewValue() == $user->getPHID()) {
           $user_owns_task = true;
         }

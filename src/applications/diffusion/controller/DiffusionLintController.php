@@ -221,9 +221,10 @@ final class DiffusionLintController extends DiffusionController {
       }
 
       if ($paths) {
-        $repositories = id(new PhabricatorRepository())->loadAllWhere(
-          'phid IN (%Ls)',
-          array_unique(mpull($paths, 'getRepositoryPHID')));
+        $repositories = id(new PhabricatorRepositoryQuery())
+          ->setViewer($this->getRequest()->getUser())
+          ->withPHIDs(mpull($paths, 'getRepositoryPHID'))
+          ->execute();
         $repositories = mpull($repositories, 'getID', 'getPHID');
 
         $branches = id(new PhabricatorRepositoryBranch())->loadAllWhere(
@@ -233,7 +234,11 @@ final class DiffusionLintController extends DiffusionController {
       }
 
       foreach ($paths as $path) {
-        $branch = idx($branches, $repositories[$path->getRepositoryPHID()]);
+        $branch = idx(
+          $branches,
+          idx(
+            $repositories,
+            $path->getRepositoryPHID()));
         if ($branch) {
           $condition = qsprintf(
             $conn,

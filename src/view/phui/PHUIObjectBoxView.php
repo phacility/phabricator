@@ -1,11 +1,12 @@
 <?php
 
-final class PHUIFormBoxView extends AphrontView {
+final class PHUIObjectBoxView extends AphrontView {
 
   private $headerText;
   private $formError = null;
   private $form;
   private $validationException;
+  private $content = array();
 
   public function setHeaderText($text) {
     $this->headerText = $text;
@@ -19,6 +20,11 @@ final class PHUIFormBoxView extends AphrontView {
 
   public function setForm($form) {
     $this->form = $form;
+    return $this;
+  }
+
+  public function addContent($content) {
+    $this->content[] = $content;
     return $this;
   }
 
@@ -54,12 +60,13 @@ final class PHUIFormBoxView extends AphrontView {
           $this->formError,
           $exception_errors,
           $this->form,
+          $this->content,
         ))
       ->setBorder(true)
       ->addMargin(PHUI::MARGIN_LARGE_TOP)
       ->addMargin(PHUI::MARGIN_LARGE_LEFT)
       ->addMargin(PHUI::MARGIN_LARGE_RIGHT)
-      ->addClass('phui-form-box');
+      ->addClass('phui-object-box');
 
     return $content;
 

@@ -31,6 +31,8 @@ final class DrydockWorkingCopyBlueprint extends DrydockBlueprint {
         "Lease is missing required 'repositoryID' attribute.");
     }
 
+    // TODO: (T603) Figure out the interaction between policies and
+    // Drydock.
     $repository = id(new PhabricatorRepository())->load($repository_id);
 
     if (!$repository) {

@@ -217,6 +217,20 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
         $image);
 
       $view->addImageContent($linked_image);
+    } else if ($file->isAudio()) {
+      $audio = phutil_tag(
+        'audio',
+        array(
+          'controls' => 'controls',
+          'class' => 'phabricator-property-list-audio',
+        ),
+        phutil_tag(
+          'source',
+          array(
+            'src' => $file->getViewURI(),
+            'type' => $file->getMimeType(),
+          )));
+      $view->addImageContent($audio);
     }
 
     return $view;

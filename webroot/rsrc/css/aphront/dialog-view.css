@@ -111,3 +111,8 @@
 .aphront-access-dialog {
   width: 50%;
 }
+
+.aphront-access-dialog ul {
+  margin: 12px 24px;
+  list-style: circle;
+}

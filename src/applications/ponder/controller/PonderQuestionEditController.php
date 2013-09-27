@@ -108,7 +108,7 @@ final class PonderQuestionEditController extends PonderController {
       ->setControlID('content')
       ->setPreviewURI($this->getApplicationURI('preview/'));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Ask New Question'))
       ->setFormError($error_view)
       ->setForm($form);

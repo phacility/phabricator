@@ -228,8 +228,10 @@ final class DiffusionLintSaveRunner {
 
 
   private function blameAuthors() {
-    $repository = id(new PhabricatorRepository())->load(
-      $this->branch->getRepositoryID());
+    $repository = id(new PhabricatorRepositoryQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withIDs(array($this->branch->getRepositoryID()))
+      ->executeOne();
 
     $queries = array();
     $futures = array();

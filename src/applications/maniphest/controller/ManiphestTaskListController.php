@@ -49,6 +49,13 @@ final class ManiphestTaskListController
     $can_drag = ($order_parameter == 'priority') &&
                 ($group_parameter == 'none' || $group_parameter == 'priority');
 
+    if (!$viewer->isLoggedIn()) {
+      // TODO: (T603) Eventually, we conceivably need to make each task
+      // draggable individually, since the user may be able to edit some but
+      // not others.
+      $can_drag = false;
+    }
+
     $result = array();
 
     $lists = array();
@@ -183,6 +190,12 @@ final class ManiphestTaskListController
 
   private function renderBatchEditor(PhabricatorSavedQuery $saved_query) {
     $user = $this->getRequest()->getUser();
+
+    if (!$user->isLoggedIn()) {
+      // Don't show the batch editor or excel export for logged-out users.
+      // Technically we //could// let them export, but ehh.
+      return null;
+    }
 
     Javelin::initBehavior(
       'maniphest-batch-selector',

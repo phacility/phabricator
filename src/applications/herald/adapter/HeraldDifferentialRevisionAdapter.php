@@ -106,27 +106,33 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
 
   public function loadRepository() {
     if ($this->repository === null) {
-      $diff = $this->diff;
+      $this->repository = false;
 
-      $repository = false;
+      // TODO: (T603) Implement policy stuff in Herald.
+      $viewer = PhabricatorUser::getOmnipotentUser();
 
-      if ($diff->getRepositoryUUID()) {
-        $repository = id(new PhabricatorRepository())->loadOneWhere(
-          'uuid = %s',
-          $diff->getRepositoryUUID());
-      }
-
-      if (!$repository && $diff->getArcanistProjectPHID()) {
-        $project = id(new PhabricatorRepositoryArcanistProject())->loadOneWhere(
-          'phid = %s',
-          $diff->getArcanistProjectPHID());
-        if ($project && $project->getRepositoryID()) {
-          $repository = id(new PhabricatorRepository())->load(
-            $project->getRepositoryID());
+      $revision = $this->revision;
+      if ($revision->getRepositoryPHID()) {
+        $repositories = id(new PhabricatorRepositoryQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(array($revision->getRepositoryPHID()))
+          ->execute();
+        if ($repositories) {
+          $this->repository = head($repositories);
+          return $this->repository;
         }
       }
 
-      $this->repository = $repository;
+      $repository = id(new DifferentialRepositoryLookup())
+        ->setViewer($viewer)
+        ->setDiff($this->diff)
+        ->lookupRepository();
+      if ($repository) {
+        $this->repository = $repository;
+        return $this->repository;
+      }
+
+      $repository = false;
     }
     return $this->repository;
   }

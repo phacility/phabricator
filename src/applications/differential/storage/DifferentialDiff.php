@@ -32,6 +32,7 @@ final class DifferentialDiff
   private $unsavedChangesets = array();
   private $changesets = self::ATTACHABLE;
   private $arcanistProject = self::ATTACHABLE;
+  private $revision = self::ATTACHABLE;
 
   public function addUnsavedChangeset(DifferentialChangeset $changeset) {
     if ($this->changesets === null) {
@@ -284,6 +285,15 @@ final class DifferentialDiff
     return $changes;
   }
 
+  public function getRevision() {
+    return $this->assertAttached($this->revision);
+  }
+
+  public function attachRevision(DifferentialRevision $revision = null) {
+    $this->revision = $revision;
+    return $this;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -295,11 +305,27 @@ final class DifferentialDiff
   }
 
   public function getPolicy($capability) {
+    if ($this->getRevision()) {
+      return $this->getRevision()->getPolicy($capability);
+    }
+
     return PhabricatorPolicies::POLICY_USER;
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    if ($this->getRevision()) {
+      return $this->getRevision()->hasAutomaticCapability($capability, $viewer);
+    }
+
     return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    if ($this->getRevision()) {
+      return pht(
+        'This diff is attached to a revision, and inherits its policies.');
+    }
+    return null;
   }
 
 }

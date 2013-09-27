@@ -39,6 +39,7 @@ final class DifferentialRevisionQuery
   private $branches = array();
   private $arcanistProjectPHIDs = array();
   private $draftRevisions = array();
+  private $repositoryPHIDs;
 
   private $order            = 'order-modified';
   const ORDER_MODIFIED      = 'order-modified';
@@ -246,6 +247,11 @@ final class DifferentialRevisionQuery
     return $this;
   }
 
+  public function withRepositoryPHIDs(array $repository_phids) {
+    $this->repositoryPHIDs = $repository_phids;
+    return $this;
+  }
+
 
   /**
    * Set result ordering. Provide a class constant, such as
@@ -361,6 +367,63 @@ final class DifferentialRevisionQuery
   }
 
   public function willFilterPage(array $revisions) {
+    $viewer = $this->getViewer();
+
+    $repository_phids = mpull($revisions, 'getRepositoryPHID');
+    $repository_phids = array_filter($repository_phids);
+
+    $repositories = array();
+    if ($repository_phids) {
+      $repositories = id(new PhabricatorRepositoryQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs($repository_phids)
+        ->execute();
+      $repositories = mpull($repositories, null, 'getPHID');
+    }
+
+    // If a revision is associated with a repository:
+    //
+    //   - the viewer must be able to see the repository; or
+    //   - the viewer must have an automatic view capability.
+    //
+    // In the latter case, we'll load the revision but not load the repository.
+
+    $can_view = PhabricatorPolicyCapability::CAN_VIEW;
+    foreach ($revisions as $key => $revision) {
+      $repo_phid = $revision->getRepositoryPHID();
+      if (!$repo_phid) {
+        // The revision has no associated repository. Attach `null` and move on.
+        $revision->attachRepository(null);
+        continue;
+      }
+
+      $repository = idx($repositories, $repo_phid);
+      if ($repository) {
+        // The revision has an associated repository, and the viewer can see
+        // it. Attach it and move on.
+        $revision->attachRepository($repository);
+        continue;
+      }
+
+      if ($revision->hasAutomaticCapability($can_view, $viewer)) {
+        // The revision has an associated repository which the viewer can not
+        // see, but the viewer has an automatic capability on this revision.
+        // Load the revision without attaching a repository.
+        $revision->attachRepository(null);
+        continue;
+      }
+
+      // The revision has an associated repository, and the viewer can't see
+      // it, and the viewer has no special capabilities. Filter out this
+      // revision.
+      $this->didRejectResult($revision);
+      unset($revisions[$key]);
+    }
+
+    if (!$revisions) {
+      return array();
+    }
+
     $table = new DifferentialRevision();
     $conn_r = $table->establishConnection('r');
 
@@ -603,6 +666,13 @@ final class DifferentialRevisionQuery
         $conn_r,
         'r.id IN (%Ld)',
         $this->revIDs);
+    }
+
+    if ($this->repositoryPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'r.repositoryPHID IN (%Ls)',
+        $this->repositoryPHIDs);
     }
 
     if ($this->commitHashes) {

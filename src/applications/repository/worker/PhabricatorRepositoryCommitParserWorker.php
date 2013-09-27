@@ -31,9 +31,10 @@ abstract class PhabricatorRepositoryCommitParserWorker
       return;
     }
 
-    $repository = id(new PhabricatorRepository())->load(
-      $this->commit->getRepositoryID());
-
+    $repository = id(new PhabricatorRepositoryQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withIDs(array($this->commit->getRepositoryID()))
+      ->executeOne();
     if (!$repository) {
       return;
     }
@@ -91,6 +92,8 @@ abstract class PhabricatorRepositoryCommitParserWorker
     if (!$commit) {
       return $suffix;
     }
+
+    // TODO: (T603) This method should probably take a viewer.
 
     $repository = id(new PhabricatorRepository())
       ->load($commit->getRepositoryID());

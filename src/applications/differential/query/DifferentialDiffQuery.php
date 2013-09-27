@@ -44,6 +44,32 @@ final class DifferentialDiffQuery
   }
 
   public function willFilterPage(array $diffs) {
+    $revision_ids = array_filter(mpull($diffs, 'getRevisionID'));
+
+    $revisions = array();
+    if ($revision_ids) {
+      $revisions = id(new DifferentialRevisionQuery())
+        ->setViewer($this->getViewer())
+        ->withIDs($revision_ids)
+        ->execute();
+    }
+
+    foreach ($diffs as $key => $diff) {
+      if (!$diff->getRevisionID()) {
+        $diff->attachRevision(null);
+        continue;
+      }
+
+      $revision = idx($revisions, $diff->getRevisionID());
+      if ($revision) {
+        $diff->attachRevision($revision);
+        continue;
+      }
+
+      unset($diffs[$key]);
+    }
+
+
     if ($this->needChangesets) {
       $this->loadChangesets($diffs);
     }

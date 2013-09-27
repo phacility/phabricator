@@ -33,7 +33,9 @@ final class ConduitAPI_repository_query_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $repositories = id(new PhabricatorRepository())->loadAll();
+    $repositories = id(new PhabricatorRepositoryQuery())
+      ->setViewer($request->getUser())
+      ->execute();
 
     $results = array();
     foreach ($repositories as $repository) {

@@ -19,6 +19,7 @@ final class HarbormasterRunnerWorker extends PhabricatorWorker {
         "Commit '{$id}' does not exist!");
     }
 
+    // TODO: (T603) Policy interaction?
     $repository = id(new PhabricatorRepository())->loadOneWhere(
       'id = %d',
       $commit->getRepositoryID());

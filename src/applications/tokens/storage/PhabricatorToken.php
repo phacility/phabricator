@@ -27,6 +27,10 @@ final class PhabricatorToken extends PhabricatorTokenDAO
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
   public function renderIcon() {
     // TODO: Maybe move to a View class?
 

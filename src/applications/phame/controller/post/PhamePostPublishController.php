@@ -46,7 +46,7 @@ final class PhamePostPublishController extends PhameController {
 
     $frame = $this->renderPreviewFrame($post);
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Preview Post'))
       ->setForm($form);
 

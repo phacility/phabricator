@@ -142,7 +142,9 @@ final class PhabricatorOwnersEditController
     }
     $this->setSideNavFilter($side_nav_filter);
 
-    $repos = id(new PhabricatorRepository())->loadAll();
+    $repos = id(new PhabricatorRepositoryQuery())
+      ->setViewer($user)
+      ->execute();
 
     $default_paths = array();
     foreach ($repos as $repo) {
@@ -251,7 +253,7 @@ final class PhabricatorOwnersEditController
           ->addCancelButton($cancel_uri)
           ->setValue(pht('Save Package')));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setFormError($error_view)
       ->setForm($form);

@@ -58,7 +58,8 @@ final class PasteEmbedView extends AphrontView {
       $body_attributes,
       id(new PhabricatorSourceCodeView())
       ->setLines($lines)
-      ->setHighlights($this->highlights));
+      ->setHighlights($this->highlights)
+      ->disableHighlightOnClick());
 
     return phutil_tag(
       'div',

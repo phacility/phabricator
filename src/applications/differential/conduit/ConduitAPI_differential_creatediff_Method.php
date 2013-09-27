@@ -59,7 +59,10 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
 
     $parent_id = $request->getValue('parentRevisionID');
     if ($parent_id) {
-      $parent_rev = id(new DifferentialRevision())->load($parent_id);
+      $parent_rev = id(new DifferentialRevisionQuery())
+        ->setViewer($request->getUser())
+        ->withIDs(array($parent_id))
+        ->executeOne();
       if ($parent_rev) {
         if ($parent_rev->getStatus() !=
             ArcanistDifferentialRevisionStatus::CLOSED) {

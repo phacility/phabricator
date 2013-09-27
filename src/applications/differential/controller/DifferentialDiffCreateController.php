@@ -82,7 +82,7 @@ final class DifferentialDiffCreateController extends DifferentialController {
           ->addCancelButton($cancel_uri)
           ->setValue(pht("Create Diff")));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Create New Diff'))
       ->setFormError($errors)
       ->setForm($form);

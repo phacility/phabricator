@@ -145,12 +145,28 @@ final class PonderAnswer extends PonderDAO
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
+        if ($this->getAuthorPHID() == $viewer->getPHID()) {
+          return true;
+        }
         return $this->getQuestion()->hasAutomaticCapability(
           $capability,
           $viewer);
       case PhabricatorPolicyCapability::CAN_EDIT:
         return ($this->getAuthorPHID() == $viewer->getPHID());
     }
+  }
+
+
+  public function describeAutomaticCapability($capability) {
+    $out = array();
+    $out[] = pht("The author of an answer can always view and edit it.");
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        $out[] = pht(
+          "The user who asks a question can always view the answers.");
+        break;
+    }
+    return $out;
   }
 
 

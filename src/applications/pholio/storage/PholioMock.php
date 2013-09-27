@@ -149,6 +149,10 @@ final class PholioMock extends PholioDAO
     return ($viewer->getPHID() == $this->getAuthorPHID());
   }
 
+  public function describeAutomaticCapability($capability) {
+    return pht("A mock's owner can always view and edit it.");
+  }
+
 
 /* -(  PhabricatorMarkupInterface  )----------------------------------------- */
 

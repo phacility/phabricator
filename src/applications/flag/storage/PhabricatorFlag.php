@@ -50,4 +50,8 @@ final class PhabricatorFlag extends PhabricatorFlagDAO
     return ($viewer->getPHID() == $this->getOwnerPHID());
   }
 
+  public function describeAutomaticCapability($capability) {
+    return pht('Flags are private. Only you can view or edit your flags.');
+  }
+
 }

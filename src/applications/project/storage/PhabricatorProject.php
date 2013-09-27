@@ -60,6 +60,16 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return pht("Members of a project can always view it.");
+      case PhabricatorPolicyCapability::CAN_JOIN:
+        return pht("Users who can edit a project can always join it.");
+    }
+    return null;
+  }
+
   public function isUserMember($user_phid) {
     return $this->assertAttachedKey($this->sparseMembers, $user_phid);
   }

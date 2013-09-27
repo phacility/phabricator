@@ -22,6 +22,11 @@ final class DifferentialRevisionEditController extends DifferentialController {
         ->withIDs(array($this->id))
         ->needRelationships(true)
         ->needReviewerStatus(true)
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
         ->executeOne();
       if (!$revision) {
         return new Aphront404Response();
@@ -164,7 +169,7 @@ final class DifferentialRevisionEditController extends DifferentialController {
       $title = pht('Create New Differential Revision');
     }
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setFormError($error_view)
       ->setForm($form);

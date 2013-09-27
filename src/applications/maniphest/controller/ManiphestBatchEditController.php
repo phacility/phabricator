@@ -11,9 +11,15 @@ final class ManiphestBatchEditController extends ManiphestController {
     $user = $request->getUser();
 
     $task_ids = $request->getArr('batch');
-    $tasks = id(new ManiphestTask())->loadAllWhere(
-      'id IN (%Ld)',
-      $task_ids);
+    $tasks = id(new ManiphestTaskQuery())
+      ->setViewer($user)
+      ->withIDs($task_ids)
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->execute();
 
     $actions = $request->getStr('actions');
     if ($actions) {
@@ -140,7 +146,7 @@ final class ManiphestBatchEditController extends ManiphestController {
       id(new PhabricatorCrumbView())
         ->setName($title));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Batch Edit Tasks'))
       ->setForm($form);
 
@@ -158,13 +164,13 @@ final class ManiphestBatchEditController extends ManiphestController {
     $value_map = array();
     $type_map = array(
       'add_comment'     => PhabricatorTransactions::TYPE_COMMENT,
-      'assign'          => ManiphestTransactionType::TYPE_OWNER,
-      'status'          => ManiphestTransactionType::TYPE_STATUS,
-      'priority'        => ManiphestTransactionType::TYPE_PRIORITY,
-      'add_project'     => ManiphestTransactionType::TYPE_PROJECTS,
-      'remove_project'  => ManiphestTransactionType::TYPE_PROJECTS,
-      'add_ccs'         => ManiphestTransactionType::TYPE_CCS,
-      'remove_ccs'      => ManiphestTransactionType::TYPE_CCS,
+      'assign'          => ManiphestTransaction::TYPE_OWNER,
+      'status'          => ManiphestTransaction::TYPE_STATUS,
+      'priority'        => ManiphestTransaction::TYPE_PRIORITY,
+      'add_project'     => ManiphestTransaction::TYPE_PROJECTS,
+      'remove_project'  => ManiphestTransaction::TYPE_PROJECTS,
+      'add_ccs'         => ManiphestTransaction::TYPE_CCS,
+      'remove_ccs'      => ManiphestTransaction::TYPE_CCS,
     );
 
     $edge_edit_types = array(
@@ -195,19 +201,19 @@ final class ManiphestBatchEditController extends ManiphestController {
           case PhabricatorTransactions::TYPE_COMMENT:
             $current = null;
             break;
-          case ManiphestTransactionType::TYPE_OWNER:
+          case ManiphestTransaction::TYPE_OWNER:
             $current = $task->getOwnerPHID();
             break;
-          case ManiphestTransactionType::TYPE_STATUS:
+          case ManiphestTransaction::TYPE_STATUS:
             $current = $task->getStatus();
             break;
-          case ManiphestTransactionType::TYPE_PRIORITY:
+          case ManiphestTransaction::TYPE_PRIORITY:
             $current = $task->getPriority();
             break;
-          case ManiphestTransactionType::TYPE_PROJECTS:
+          case ManiphestTransaction::TYPE_PROJECTS:
             $current = $task->getProjectPHIDs();
             break;
-          case ManiphestTransactionType::TYPE_CCS:
+          case ManiphestTransaction::TYPE_CCS:
             $current = $task->getCCPHIDs();
             break;
         }
@@ -224,7 +230,7 @@ final class ManiphestBatchEditController extends ManiphestController {
             continue 2;
           }
           break;
-        case ManiphestTransactionType::TYPE_OWNER:
+        case ManiphestTransaction::TYPE_OWNER:
           if (empty($value)) {
             continue 2;
           }
@@ -233,12 +239,12 @@ final class ManiphestBatchEditController extends ManiphestController {
             $value = null;
           }
           break;
-        case ManiphestTransactionType::TYPE_PROJECTS:
+        case ManiphestTransaction::TYPE_PROJECTS:
           if (empty($value)) {
             continue 2;
           }
           break;
-        case ManiphestTransactionType::TYPE_CCS:
+        case ManiphestTransaction::TYPE_CCS:
           if (empty($value)) {
             continue 2;
           }
@@ -265,8 +271,8 @@ final class ManiphestBatchEditController extends ManiphestController {
             $value = $current."\n\n".$value;
           }
           break;
-        case ManiphestTransactionType::TYPE_PROJECTS:
-        case ManiphestTransactionType::TYPE_CCS:
+        case ManiphestTransaction::TYPE_PROJECTS:
+        case ManiphestTransaction::TYPE_CCS:
           $remove_actions = array(
             'remove_project' => true,
             'remove_ccs'    => true,

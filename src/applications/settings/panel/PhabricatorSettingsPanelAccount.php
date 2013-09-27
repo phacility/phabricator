@@ -137,7 +137,7 @@ final class PhabricatorSettingsPanelAccount
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save Account Settings')));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Account Settings'))
       ->setForm($form);
 

@@ -16,8 +16,12 @@ final class PhabricatorRepositoryEditController
   public function processRequest() {
 
     $request = $this->getRequest();
+    $viewer = $request->getUser();
 
-    $repository = id(new PhabricatorRepository())->load($this->id);
+    $repository = id(new PhabricatorRepositoryQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$repository) {
       return new Aphront404Response();
     }
@@ -155,7 +159,7 @@ final class PhabricatorRepositoryEditController
 
     $nav = $this->sideNav;
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Edit Repository'))
       ->setFormError($error_view)
       ->setForm($form);
@@ -674,7 +678,7 @@ final class PhabricatorRepositoryEditController
         id(new AphrontFormSubmitControl())
           ->setValue('Save Configuration'));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Edit Repository Tracking'))
       ->setFormError($error_view)
       ->setForm($form);

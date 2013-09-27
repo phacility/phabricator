@@ -117,7 +117,7 @@ final class PhamePostNewController extends PhameController {
       }
 
 
-      $form_box = id(new PHUIFormBoxView())
+      $form_box = id(new PHUIObjectBoxView())
         ->setHeaderText($title)
         ->setForm($form);
 

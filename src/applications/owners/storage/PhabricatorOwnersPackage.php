@@ -30,6 +30,10 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
   public function getConfiguration() {
     return array(
       // This information is better available from the history table.
@@ -297,6 +301,8 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
 
       $cur_paths = mgroup($cur_paths, 'getRepositoryPHID', 'getPath');
       foreach ($new_paths as $repository_phid => $paths) {
+        // TODO: (T603) Thread policy stuff in here.
+
         // get repository object for path validation
         $repository = id(new PhabricatorRepository())->loadOneWhere(
           'phid = %s',

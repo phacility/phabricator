@@ -7,6 +7,7 @@ final class PhabricatorRepositoryQuery
   private $phids;
   private $callsigns;
   private $types;
+  private $uuids;
 
   const STATUS_OPEN = 'status-open';
   const STATUS_CLOSED = 'status-closed';
@@ -44,6 +45,11 @@ final class PhabricatorRepositoryQuery
 
   public function withTypes(array $types) {
     $this->types = $types;
+    return $this;
+  }
+
+  public function withUUIDs(array $uuids) {
+    $this->uuids = $uuids;
     return $this;
   }
 
@@ -297,6 +303,13 @@ final class PhabricatorRepositoryQuery
         $conn_r,
         'r.versionControlSystem IN (%Ls)',
         $this->types);
+    }
+
+    if ($this->uuids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'r.uuid IN (%Ls)',
+        $this->uuids);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

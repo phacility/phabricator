@@ -158,10 +158,8 @@ final class PhabricatorProjectProfileController
       ->withAnyProjects(array($project->getPHID()))
       ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
       ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
-      ->setLimit(10)
-      ->setCalculateRows(true);
+      ->setLimit(10);
     $tasks = $query->execute();
-    $count = $query->getRowCount();
 
     $phids = mpull($tasks, 'getOwnerPHID');
     $phids = array_merge(
@@ -175,8 +173,6 @@ final class PhabricatorProjectProfileController
     $task_list->setTasks($tasks);
     $task_list->setHandles($handles);
 
-    $open = number_format($count);
-
     $content = hsprintf(
       '<div class="phabricator-profile-info-group profile-wrap-responsive">
         <h1 class="phabricator-profile-info-header">%s</h1>'.
@@ -184,7 +180,7 @@ final class PhabricatorProjectProfileController
           '%s'.
         '</div>
       </div>',
-      pht('Open Tasks (%s)', $open),
+      pht('Open Tasks'),
       $task_list);
 
     return $content;

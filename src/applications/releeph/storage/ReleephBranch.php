@@ -189,4 +189,9 @@ final class ReleephBranch extends ReleephDAO
     return $this->getProject()->hasAutomaticCapability($capability, $viewer);
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
+
 }

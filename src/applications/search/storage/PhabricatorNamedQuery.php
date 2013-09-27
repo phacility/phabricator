@@ -39,4 +39,11 @@ final class PhabricatorNamedQuery extends PhabricatorSearchDAO
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return pht(
+      'The queries you have saved are private. Only you can view or edit '.
+      'them.');
+  }
+
+
 }

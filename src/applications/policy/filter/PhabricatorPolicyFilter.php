@@ -213,7 +213,7 @@ final class PhabricatorPolicyFilter {
       default:
         $type = phid_get_type($policy);
         if ($type == PhabricatorProjectPHIDTypeProject::TYPECONST) {
-          if (isset($this->userProjects[$viewer->getPHID()][$policy])) {
+          if (!empty($this->userProjects[$viewer->getPHID()][$policy])) {
             return true;
           } else {
             $this->rejectObject($object, $policy, $capability);
@@ -248,28 +248,64 @@ final class PhabricatorPolicyFilter {
       "This object has an impossible {$verb} policy.");
   }
 
-  private function rejectObject($object, $policy, $capability) {
+  public function rejectObject(
+    PhabricatorPolicyInterface $object,
+    $policy,
+    $capability) {
+
     if (!$this->raisePolicyExceptions) {
       return;
     }
 
-    // TODO: clean this up
-    $verb = $capability;
-
-    $message = "You do not have permission to {$verb} this object.";
+    $more = array();
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        $message = pht(
+          'This object exists, but you do not have permission to view it.');
+        break;
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        $message = pht('You do not have permission to edit this object.');
+        break;
+      case PhabricatorPolicyCapability::CAN_JOIN:
+        $message = pht('You do not have permission to join this object.');
+        break;
+    }
 
     switch ($policy) {
       case PhabricatorPolicies::POLICY_PUBLIC:
-        $who = "This is curious, since anyone can {$verb} the object.";
+        // Presumably, this is a bug, so we don't bother specializing the
+        // strings.
+        $more = pht('This object is public.');
         break;
       case PhabricatorPolicies::POLICY_USER:
-        $who = "To {$verb} this object, you must be logged in.";
+        // We always raise this as "log in", so we don't need to specialize.
+        $more = pht('This object is available to logged in users.');
         break;
       case PhabricatorPolicies::POLICY_ADMIN:
-        $who = "To {$verb} this object, you must be an administrator.";
+        switch ($capability) {
+          case PhabricatorPolicyCapability::CAN_VIEW:
+            $more = pht('Administrators can view this object.');
+            break;
+          case PhabricatorPolicyCapability::CAN_EDIT:
+            $more = pht('Administrators can edit this object.');
+            break;
+          case PhabricatorPolicyCapability::CAN_JOIN:
+            $more = pht('Administrators can join this object.');
+            break;
+        }
         break;
       case PhabricatorPolicies::POLICY_NOONE:
-        $who = "No one can {$verb} this object.";
+        switch ($capability) {
+          case PhabricatorPolicyCapability::CAN_VIEW:
+            $more = pht('By default, no one can view this object.');
+            break;
+          case PhabricatorPolicyCapability::CAN_EDIT:
+            $more = pht('By default, no one can edit this object.');
+            break;
+          case PhabricatorPolicyCapability::CAN_JOIN:
+            $more = pht('By default, no one can join this object.');
+            break;
+        }
         break;
       default:
         $handle = id(new PhabricatorHandleQuery())
@@ -279,16 +315,55 @@ final class PhabricatorPolicyFilter {
 
         $type = phid_get_type($policy);
         if ($type == PhabricatorProjectPHIDTypeProject::TYPECONST) {
-          $who = "To {$verb} this object, you must be a member of project ".
-                 "'".$handle->getFullName()."'.";
+          switch ($capability) {
+            case PhabricatorPolicyCapability::CAN_VIEW:
+              $more = pht(
+                'This object is visible to members of the project "%s".',
+                $handle->getFullName());
+              break;
+            case PhabricatorPolicyCapability::CAN_EDIT:
+              $more = pht(
+                'This object can be edited by members of the project "%s".',
+                $handle->getFullName());
+              break;
+            case PhabricatorPolicyCapability::CAN_JOIN:
+              $more = pht(
+                'This object can be joined by members of the project "%s".',
+                $handle->getFullName());
+              break;
+          }
         } else if ($type == PhabricatorPeoplePHIDTypeUser::TYPECONST) {
-          $who = "Only '".$handle->getFullName()."' can {$verb} this object.";
+          switch ($capability) {
+            case PhabricatorPolicyCapability::CAN_VIEW:
+              $more = pht(
+                '%s can view this object.',
+                $handle->getFullName());
+              break;
+            case PhabricatorPolicyCapability::CAN_EDIT:
+              $more = pht(
+                '%s can edit this object.',
+                $handle->getFullName());
+              break;
+            case PhabricatorPolicyCapability::CAN_JOIN:
+              $more = pht(
+                '%s can join this object.',
+                $handle->getFullName());
+              break;
+          }
+
         } else {
-          $who = "It is unclear who can {$verb} this object.";
+          $who = pht("This object has an unknown policy setting.");
         }
         break;
     }
 
-    throw new PhabricatorPolicyException("{$message} {$who}");
+    $more = array_merge(
+      array($more),
+      array_filter((array)$object->describeAutomaticCapability($capability)));
+
+    $exception = new PhabricatorPolicyException($message);
+    $exception->setMoreInfo($more);
+
+    throw $exception;
   }
 }

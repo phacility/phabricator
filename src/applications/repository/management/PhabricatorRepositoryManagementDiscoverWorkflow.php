@@ -7,7 +7,7 @@ final class PhabricatorRepositoryManagementDiscoverWorkflow
     $this
       ->setName('discover')
       ->setExamples('**discover** [__options__] __repository__ ...')
-      ->setSynopsis('Discover __repository__, named by callsign or PHID.')
+      ->setSynopsis('Discover __repository__, named by callsign.')
       ->setArguments(
         array(
           array(
@@ -27,12 +27,11 @@ final class PhabricatorRepositoryManagementDiscoverWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $names = $args->getArg('repos');
-    $repos = PhabricatorRepository::loadAllByPHIDOrCallsign($names);
+    $repos = $this->loadRepositories($args, 'repos');
 
     if (!$repos) {
       throw new PhutilArgumentUsageException(
-        "Specify one or more repositories to discover, by callsign or PHID.");
+        "Specify one or more repositories to discover, by callsign.");
     }
 
     $console = PhutilConsole::getConsole();

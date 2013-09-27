@@ -92,6 +92,8 @@ final class PhabricatorRepositoryCommitOwnersWorker
     $commit_reviewedby_phid = null;
 
     if ($revision_id) {
+      // TODO: (T603) This is probably safe to use an omnipotent user on,
+      // but check things more closely.
       $revision = id(new DifferentialRevision())->load($revision_id);
       if ($revision) {
         $revision_author_phid = $revision->getAuthorPHID();

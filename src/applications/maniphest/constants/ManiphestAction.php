@@ -15,14 +15,14 @@ final class ManiphestAction extends ManiphestConstants {
   /* these actions are determined sufficiently by the transaction
      type and thus we use them here*/
   const ACTION_COMMENT     = PhabricatorTransactions::TYPE_COMMENT;
-  const ACTION_CC          = ManiphestTransactionType::TYPE_CCS;
-  const ACTION_PRIORITY    = ManiphestTransactionType::TYPE_PRIORITY;
-  const ACTION_PROJECT     = ManiphestTransactionType::TYPE_PROJECTS;
-  const ACTION_TITLE       = ManiphestTransactionType::TYPE_TITLE;
-  const ACTION_DESCRIPTION = ManiphestTransactionType::TYPE_DESCRIPTION;
-  const ACTION_REASSIGN    = ManiphestTransactionType::TYPE_OWNER;
-  const ACTION_ATTACH      = ManiphestTransactionType::TYPE_ATTACH;
-  const ACTION_EDGE        = ManiphestTransactionType::TYPE_EDGE;
+  const ACTION_CC          = ManiphestTransaction::TYPE_CCS;
+  const ACTION_PRIORITY    = ManiphestTransaction::TYPE_PRIORITY;
+  const ACTION_PROJECT     = ManiphestTransaction::TYPE_PROJECTS;
+  const ACTION_TITLE       = ManiphestTransaction::TYPE_TITLE;
+  const ACTION_DESCRIPTION = ManiphestTransaction::TYPE_DESCRIPTION;
+  const ACTION_REASSIGN    = ManiphestTransaction::TYPE_OWNER;
+  const ACTION_ATTACH      = ManiphestTransaction::TYPE_ATTACH;
+  const ACTION_EDGE        = ManiphestTransaction::TYPE_EDGE;
   const ACTION_AUXILIARY   = PhabricatorTransactions::TYPE_CUSTOMFIELD;
 
   public static function getActionPastTenseVerb($action) {

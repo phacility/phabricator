@@ -1205,8 +1205,8 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $email_to = array_unique($this->getMailTo($object));
-    $email_cc = array_unique($this->getMailCC($object));
+    $email_to = array_filter(array_unique($this->getMailTo($object)));
+    $email_cc = array_filter(array_unique($this->getMailCC($object)));
 
     $phids = array_merge($email_to, $email_cc);
     $handles = id(new PhabricatorHandleQuery())
@@ -1496,6 +1496,7 @@ abstract class PhabricatorApplicationTransactionEditor
     array $xactions) {
 
     $adapter = $this->buildHeraldAdapter($object, $xactions);
+    $adapter->setContentSource($this->getContentSource());
     $xscript = HeraldEngine::loadAndApplyRules($adapter);
 
     $this->setHeraldAdapter($adapter);

@@ -205,7 +205,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
 
     $form->appendChild($submit);
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setFormError($error_view)
       ->setForm($form);

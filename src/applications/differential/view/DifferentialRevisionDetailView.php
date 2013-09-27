@@ -120,7 +120,9 @@ final class DifferentialRevisionDetailView extends AphrontView {
 
   private function renderHeader(DifferentialRevision $revision) {
     $view = id(new PHUIHeaderView())
-      ->setHeader($revision->getTitle($revision));
+      ->setHeader($revision->getTitle($revision))
+      ->setUser($this->getUser())
+      ->setPolicyObject($revision);
 
     $status = $revision->getStatus();
     $status_name =

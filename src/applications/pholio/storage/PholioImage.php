@@ -104,4 +104,8 @@ final class PholioImage extends PholioDAO
     return $this->getMock()->hasAutomaticCapability($capability, $viewer);
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
 }

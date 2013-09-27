@@ -3,23 +3,40 @@
 final class DifferentialViewPolicyFieldSpecification
   extends DifferentialFieldSpecification {
 
-  public function shouldAppearOnRevisionView() {
+  private $value;
+
+  public function shouldAppearOnEdit() {
     return true;
   }
 
-  public function renderLabelForRevisionView() {
-    return pht('Visible To');
+  protected function didSetRevision() {
+    $this->value = $this->getRevision()->getViewPolicy();
   }
 
-  public function renderValueForRevisionView() {
-    $user = $this->getUser();
+  public function setValueFromRequest(AphrontRequest $request) {
+    $this->value = $request->getStr('viewPolicy');
+    return $this;
+  }
+
+  public function renderEditControl() {
+    $viewer = $this->getUser();
     $revision = $this->getRevision();
 
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $user,
-      $revision);
+    $policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($viewer)
+      ->setObject($revision)
+      ->execute();
 
-    return idx($descriptions, PhabricatorPolicyCapability::CAN_VIEW);
+    return id(new AphrontFormPolicyControl())
+      ->setUser($viewer)
+      ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
+      ->setPolicyObject($revision)
+      ->setPolicies($policies)
+      ->setName('viewPolicy');
+  }
+
+  public function willWriteRevision(DifferentialRevisionEditor $editor) {
+    $this->getRevision()->setViewPolicy($this->value);
   }
 
 }

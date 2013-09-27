@@ -78,7 +78,7 @@ final class PhabricatorSettingsPanelConduit
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_SHORT)
           ->setValue($user->getConduitCertificate()));
 
-    $cert_form = id(new PHUIFormBoxView())
+    $cert_form = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Arcanist Certificate'))
       ->setForm($cert_form);
 
@@ -96,7 +96,7 @@ final class PhabricatorSettingsPanelConduit
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Regenerate Certificate')));
 
-    $regen_form = id(new PHUIFormBoxView())
+    $regen_form = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Regenerate Certificate'))
       ->setForm($regen_form);
 

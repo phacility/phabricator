@@ -113,4 +113,9 @@ abstract class PhabricatorApplicationTransactionComment
     return ($viewer->getPHID() == $this->getAuthorPHID());
   }
 
+  public function describeAutomaticCapability($capability) {
+    // TODO: (T603) Policies are murky.
+    return null;
+  }
+
 }

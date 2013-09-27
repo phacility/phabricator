@@ -3,17 +3,15 @@
 final class PhabricatorRepositoryListController
   extends PhabricatorRepositoryController {
 
-  public function shouldRequireAdmin() {
-    return false;
-  }
-
   public function processRequest() {
 
     $request = $this->getRequest();
     $user = $request->getUser();
     $is_admin = $user->getIsAdmin();
 
-    $repos = id(new PhabricatorRepository())->loadAll();
+    $repos = id(new PhabricatorRepositoryQuery())
+      ->setViewer($user)
+      ->execute();
     $repos = msort($repos, 'getName');
 
     $rows = array();

@@ -1628,6 +1628,22 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130924.mdraftkey.sql'),
       ),
+      '20130925.mpolicy.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130925.mpolicy.sql'),
+      ),
+      '20130925.xpolicy.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130925.xpolicy.sql'),
+      ),
+      '20130926.dcustom.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130926.dcustom.sql'),
+      ),
+      '20130926.dinkeys.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130926.dinkeys.sql'),
+      ),
     );
   }
 }

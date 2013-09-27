@@ -188,6 +188,20 @@ final class PhameBlog extends PhameDAO
   }
 
 
+  public function describeAutomaticCapability($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return pht(
+          'Users who can edit or post on a blog can always view it.');
+      case PhabricatorPolicyCapability::CAN_JOIN:
+        return pht(
+          'Users who can edit a blog can always post on it.');
+    }
+
+    return null;
+  }
+
+
 /* -(  PhabricatorMarkupInterface Implementation  )-------------------------- */
 
 

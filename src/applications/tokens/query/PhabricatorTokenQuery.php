@@ -45,6 +45,8 @@ final class PhabricatorTokenQuery
       array('misc-4', pht('The World Burns')),
     );
 
+    $type = PhabricatorTokenPHIDTypeToken::TYPECONST;
+
     $tokens = array();
     foreach ($specs as $id => $spec) {
       list($image, $name) = $spec;
@@ -52,7 +54,7 @@ final class PhabricatorTokenQuery
       $token = id(new PhabricatorToken())
         ->setID($id)
         ->setName($name)
-        ->setPHID('PHID-TOKN-'.$image);
+        ->setPHID('PHID-'.$type.'-'.$image);
       $tokens[] = $token;
     }
 

@@ -150,6 +150,12 @@ final class PhamePost extends PhameDAO
   }
 
 
+  public function describeAutomaticCapability($capability) {
+    return pht(
+      'The author of a blog post can always view and edit it.');
+  }
+
+
 /* -(  PhabricatorMarkupInterface Implementation  )-------------------------- */
 
 

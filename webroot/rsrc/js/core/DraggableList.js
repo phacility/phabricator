@@ -126,7 +126,7 @@ JX.install('DraggableList', {
       }
       targets.sort(function(u, v) { return v.y - u.y; });
       this._targets = targets;
-      this._target = null;
+      this._target = false;
 
       if (!this.invoke('didBeginDrag', this._dragging).getPrevented()) {
         var ghost = this.getGhostNode();
@@ -159,6 +159,11 @@ JX.install('DraggableList', {
       // we're dragging or its predecessor, don't select a target, because the
       // operation would be a no-op.
 
+      // NOTE: When we're dragging into the first position in the list, we
+      // use the target `null`. When we don't have a valid target, we use
+      // the target `false`. Spooky! Magic! Anyway, `null` and `false` mean
+      // completely different things.
+
       var cur_target = null;
       var trigger;
       for (var ii = 0; ii < targets.length; ii++) {
@@ -183,10 +188,10 @@ JX.install('DraggableList', {
 
         cur_target = targets[ii].item;
         if (cur_target == dragging) {
-          cur_target = null;
+          cur_target = false;
         }
         if (targets[ii - 1] && targets[ii - 1].item == dragging) {
-          cur_target = null;
+          cur_target = false;
         }
 
         break;
@@ -201,13 +206,17 @@ JX.install('DraggableList', {
           JX.DOM.remove(ghost);
         }
 
-        if (cur_target) {
-          this.getGhostHandler()(ghost, cur_target);
+        if (cur_target !== false) {
+          var ok = this.getGhostHandler()(ghost, cur_target);
+          // If the handler returns explicit `false`, prevent the drag.
+          if (ok === false) {
+            cur_target = false;
+          }
         }
 
         target = cur_target;
 
-        if (target) {
+        if (target !== false) {
 
           // If we've changed where the ghost node is, update the adjustments
           // so we accurately reflect document state when we tweak things below.
@@ -223,7 +232,7 @@ JX.install('DraggableList', {
       // adjust the cursor position for the change in node document position.
       // Do this before choosing a new target to avoid a flash of nonsense.
 
-      if (target) {
+      if (target !== false) {
         if (adjust_y <= origin.y) {
           p.y -= adjust_h;
         }
@@ -250,7 +259,7 @@ JX.install('DraggableList', {
 
       JX.$V(0, 0).setPos(dragging);
 
-      if (target) {
+      if (target !== false) {
         JX.DOM.remove(dragging);
         JX.DOM.replace(ghost, dragging);
         this.invoke('didDrop', dragging, target);

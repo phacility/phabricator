@@ -57,6 +57,7 @@ final class PhabricatorRemarkupRuleEmbedFile
     $options['name'] = $file_name;
 
     $is_viewable_image = $file->isViewableImage();
+    $is_audio = $file->isAudio();
 
     $attrs = array();
     if ($is_viewable_image) {
@@ -91,10 +92,20 @@ final class PhabricatorRemarkupRuleEmbedFile
     $bundle['meta'] = array(
       'phid'     => $file->getPHID(),
       'viewable' => $is_viewable_image,
+      'audio'    => $is_audio,
       'uri'      => $file->getBestURI(),
       'dUri'     => $file->getDownloadURI(),
       'name'     => $options['name'],
+      'mime'     => $file->getMimeType(),
     );
+
+    if ($is_audio) {
+      $bundle['meta'] += array(
+        'autoplay' => idx($options, 'autoplay'),
+        'loop' => idx($options, 'loop'),
+      );
+    }
+
     $metadata[$phid][] = $bundle;
     $engine->setTextMetadata($metadata_key, $metadata);
 
@@ -118,7 +129,10 @@ final class PhabricatorRemarkupRuleEmbedFile
         $options = $data['options'];
         $meta    = $data['meta'];
 
-        if (!$meta['viewable'] || $options['layout'] == 'link') {
+        $is_image = idx($meta, 'viewable');
+        $is_audio = idx($meta, 'audio');
+
+        if ((!$is_image && !$is_audio) || $options['layout'] == 'link') {
           $link = id(new PhabricatorFileLinkView())
             ->setFilePHID($meta['phid'])
             ->setFileName($meta['name'])
@@ -127,6 +141,33 @@ final class PhabricatorRemarkupRuleEmbedFile
             ->setFileViewable($meta['viewable']);
           $embed = $link->render();
           $engine->overwriteStoredText($data['token'], $embed);
+          continue;
+        }
+
+        if ($is_audio) {
+          if (idx($options, 'autoplay')) {
+            $preload = 'auto';
+            $autoplay = 'autoplay';
+          } else {
+            $preload = 'none';
+            $autoplay = null;
+          }
+
+          $link = phutil_tag(
+            'audio',
+            array(
+              'controls' => 'controls',
+              'preload' => $preload,
+              'autoplay' => $autoplay,
+              'loop' => idx($options, 'loop') ? 'loop' : null,
+            ),
+            phutil_tag(
+              'source',
+              array(
+                'src' => $meta['uri'],
+                'type' => $meta['mime'],
+              )));
+          $engine->overwriteStoredText($data['token'], $link);
           continue;
         }
 

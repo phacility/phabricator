@@ -19,7 +19,9 @@ final class PhabricatorRepositoryArcanistProjectEditController
       return new Aphront404Response();
     }
 
-    $repositories = id(new PhabricatorRepository())->loadAll();
+    $repositories = id(new PhabricatorRepositoryQuery())
+      ->setViewer($user)
+      ->execute();
     $repos = array(
       0 => 'None',
     );

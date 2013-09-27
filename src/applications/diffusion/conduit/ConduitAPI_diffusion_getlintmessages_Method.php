@@ -42,8 +42,10 @@ final class ConduitAPI_diffusion_getlintmessages_Method
 
     $branch_name = $request->getValue('branch');
     if ($branch_name == '') {
-      $repository = id(new PhabricatorRepository())
-        ->load($project->getRepositoryID());
+      $repository = id(new PhabricatorRepositoryQuery())
+        ->setViewer($request->getUser())
+        ->withIDs(array($project->getRepositoryID()))
+        ->executeOne();
       $branch_name = $repository->getDefaultArcanistBranch();
     }
 

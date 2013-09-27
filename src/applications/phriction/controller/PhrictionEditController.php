@@ -226,7 +226,7 @@ final class PhrictionEditController
           ->addCancelButton($cancel_uri)
           ->setValue($submit_button));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Edit Document'))
       ->setFormError($error_view)
       ->setForm($form);

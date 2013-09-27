@@ -36,12 +36,7 @@ final class ManiphestTaskQuery
   const STATUS_DUPLICATE    = 'status-duplicate';
 
   private $statuses;
-
-  private $priority         = null;
   private $priorities;
-
-  private $minPriority      = null;
-  private $maxPriority      = null;
 
   private $groupBy          = 'group-none';
   const GROUP_NONE          = 'group-none';
@@ -56,13 +51,7 @@ final class ManiphestTaskQuery
   const ORDER_MODIFIED      = 'order-modified';
   const ORDER_TITLE         = 'order-title';
 
-  private $limit            = null;
   const DEFAULT_PAGE_SIZE   = 1000;
-
-  private $offset           = 0;
-  private $calculateRows    = false;
-
-  private $rowCount         = null;
 
   public function withAuthors(array $authors) {
     $this->authorPHIDs = $authors;
@@ -119,19 +108,8 @@ final class ManiphestTaskQuery
     return $this;
   }
 
-  public function withPriority($priority) {
-    $this->priority = $priority;
-    return $this;
-  }
-
   public function withPriorities(array $priorities) {
     $this->priorities = $priorities;
-    return $this;
-  }
-
-  public function withPrioritiesBetween($min, $max) {
-    $this->minPriority = $min;
-    $this->maxPriority = $max;
     return $this;
   }
 
@@ -153,20 +131,6 @@ final class ManiphestTaskQuery
   public function setOrderBy($order) {
     $this->orderBy = $order;
     return $this;
-  }
-
-  public function setCalculateRows($calculate_rows) {
-    $this->calculateRows = $calculate_rows;
-    return $this;
-  }
-
-  public function getRowCount() {
-    if ($this->rowCount === null) {
-      throw new Exception(
-        "You must execute a query with setCalculateRows() before you can ".
-        "retrieve a row count.");
-    }
-    return $this->rowCount;
   }
 
   public function withAnyProjects(array $projects) {
@@ -200,22 +164,11 @@ final class ManiphestTaskQuery
     $task_dao = new ManiphestTask();
     $conn = $task_dao->establishConnection('r');
 
-    if ($this->calculateRows) {
-      $calc = 'SQL_CALC_FOUND_ROWS';
-
-      // Make sure we end up in the right state if we throw a
-      // PhabricatorEmptyQueryException.
-      $this->rowCount = 0;
-    } else {
-      $calc = '';
-    }
-
     $where = array();
     $where[] = $this->buildTaskIDsWhereClause($conn);
     $where[] = $this->buildTaskPHIDsWhereClause($conn);
     $where[] = $this->buildStatusWhereClause($conn);
     $where[] = $this->buildStatusesWhereClause($conn);
-    $where[] = $this->buildPriorityWhereClause($conn);
     $where[] = $this->buildPrioritiesWhereClause($conn);
     $where[] = $this->buildAuthorWhereClause($conn);
     $where[] = $this->buildOwnerWhereClause($conn);
@@ -277,8 +230,7 @@ final class ManiphestTaskQuery
 
     $rows = queryfx_all(
       $conn,
-      'SELECT %Q task.* %Q %Q FROM %T task %Q %Q %Q %Q %Q %Q',
-      $calc,
+      'SELECT task.* %Q %Q FROM %T task %Q %Q %Q %Q %Q %Q',
       $count,
       $group_column,
       $task_dao->getTableName(),
@@ -288,15 +240,6 @@ final class ManiphestTaskQuery
       $having,
       $order,
       $this->buildLimitClause($conn));
-
-    if ($this->calculateRows) {
-      $count = queryfx_one(
-        $conn,
-        'SELECT FOUND_ROWS() N');
-      $this->rowCount = $count['N'];
-    } else {
-      $this->rowCount = null;
-    }
 
     switch ($this->groupBy) {
       case self::GROUP_PROJECT:
@@ -402,23 +345,6 @@ final class ManiphestTaskQuery
         'status IN (%Ld)',
         $this->statuses);
     }
-    return null;
-  }
-
-  private function buildPriorityWhereClause(AphrontDatabaseConnection $conn) {
-    if ($this->priority !== null) {
-      return qsprintf(
-        $conn,
-        'priority = %d',
-        $this->priority);
-    } elseif ($this->minPriority !== null && $this->maxPriority !== null) {
-      return qsprintf(
-        $conn,
-        'priority >= %d AND priority <= %d',
-        $this->minPriority,
-        $this->maxPriority);
-    }
-
     return null;
   }
 

@@ -94,7 +94,7 @@ final class PonderAnswerEditController extends PonderController {
       id(new PhabricatorCrumbView())
         ->setName(pht('Edit Answer')));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Edit Answer'))
       ->setFormError($errors)
       ->setForm($form);

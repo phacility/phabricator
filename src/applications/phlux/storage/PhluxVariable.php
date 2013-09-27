@@ -45,4 +45,8 @@ final class PhluxVariable extends PhluxDAO
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
 }

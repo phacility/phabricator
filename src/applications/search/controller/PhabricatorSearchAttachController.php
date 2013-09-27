@@ -149,9 +149,10 @@ final class PhabricatorSearchAttachController
       return $response;
     }
 
-    $targets = id(new ManiphestTask())->loadAllWhere(
-      'phid in (%Ls) ORDER BY id ASC',
-      array_keys($phids));
+    $targets = id(new ManiphestTaskQuery())
+      ->setViewer($user)
+      ->withPHIDs(array_keys($phids))
+      ->execute();
 
     if (empty($targets)) {
       return $response;
@@ -176,7 +177,7 @@ final class PhabricatorSearchAttachController
         $target->getOwnerPHID());
 
       $close_task = id(new ManiphestTransaction())
-        ->setTransactionType(ManiphestTransactionType::TYPE_STATUS)
+        ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
         ->setNewValue(ManiphestTaskStatus::STATUS_CLOSED_DUPLICATE);
 
       $merge_comment = id(new ManiphestTransaction())
@@ -201,7 +202,7 @@ final class PhabricatorSearchAttachController
     $task_names = implode(', ', $task_names);
 
     $add_ccs = id(new ManiphestTransaction())
-      ->setTransactionType(ManiphestTransactionType::TYPE_CCS)
+      ->setTransactionType(ManiphestTransaction::TYPE_CCS)
       ->setNewValue($all_ccs);
 
     $merged_comment = id(new ManiphestTransaction())

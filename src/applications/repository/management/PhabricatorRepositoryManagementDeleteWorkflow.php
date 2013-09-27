@@ -7,7 +7,7 @@ final class PhabricatorRepositoryManagementDeleteWorkflow
     $this
       ->setName('delete')
       ->setExamples('**delete** __repository__ ...')
-      ->setSynopsis('Delete __repository__, named by callsign or PHID.')
+      ->setSynopsis('Delete __repository__, named by callsign.')
       ->setArguments(
         array(
           array(
@@ -22,12 +22,11 @@ final class PhabricatorRepositoryManagementDeleteWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $names = $args->getArg('repos');
-    $repos = PhabricatorRepository::loadAllByPHIDOrCallsign($names);
+    $repos = $this->loadRepositories($args, 'repos');
 
     if (!$repos) {
       throw new PhutilArgumentUsageException(
-        "Specify one or more repositories to delete, by callsign or PHID.");
+        "Specify one or more repositories to delete, by callsign.");
     }
 
     $console = PhutilConsole::getConsole();

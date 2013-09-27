@@ -6,13 +6,19 @@ final class DiffusionExternalController extends DiffusionController {
     // Don't build a DiffusionRequest.
   }
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
 
     $uri = $request->getStr('uri');
     $id  = $request->getStr('id');
 
-    $repositories = id(new PhabricatorRepository())->loadAll();
+    $repositories = id(new PhabricatorRepositoryQuery())
+      ->setViewer($request->getUser())
+      ->execute();
 
     if ($uri) {
       $uri_path = id(new PhutilURI($uri))->getPath();

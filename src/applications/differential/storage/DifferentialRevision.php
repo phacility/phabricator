@@ -25,12 +25,16 @@ final class DifferentialRevision extends DifferentialDAO
   protected $mailKey;
   protected $branchName;
   protected $arcanistProjectPHID;
+  protected $repositoryPHID;
+  protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
+  protected $editPolicy = PhabricatorPolicies::POLICY_USER;
 
   private $relationships = self::ATTACHABLE;
   private $commits = self::ATTACHABLE;
   private $activeDiff = self::ATTACHABLE;
   private $diffIDs = self::ATTACHABLE;
   private $hashes = self::ATTACHABLE;
+  private $repository = self::ATTACHABLE;
 
   private $reviewerStatus = self::ATTACHABLE;
 
@@ -303,11 +307,46 @@ final class DifferentialRevision extends DifferentialDAO
   }
 
   public function getPolicy($capability) {
-    return PhabricatorPolicies::POLICY_USER;
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return $this->getViewPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return $this->getEditPolicy();
+    }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $user) {
+
+    // A revision's author (which effectively means "owner" after we added
+    // commandeering) can always view and edit it.
+    $author_phid = $this->getAuthorPHID();
+    if ($author_phid) {
+      if ($user->getPHID() == $author_phid) {
+        return true;
+      }
+    }
+
     return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    $description = array(
+      pht('The owner of a revision can always view and edit it.'),
+    );
+
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        $description[] = pht(
+          "A revision's reviewers can always view it.");
+        if ($this->getRepositoryPHID()) {
+          $description[] = pht(
+            'This revision belongs to a repository. Other users must be able '.
+            'to view the repository in order to view this revision.');
+        }
+        break;
+    }
+
+    return $description;
   }
 
   public function getUsersToNotifyOfTokenGiven() {
@@ -324,6 +363,15 @@ final class DifferentialRevision extends DifferentialDAO
     assert_instances_of($reviewers, 'DifferentialReviewer');
 
     $this->reviewerStatus = $reviewers;
+    return $this;
+  }
+
+  public function getRepository() {
+    return $this->assertAttached($this->repository);
+  }
+
+  public function attachRepository(PhabricatorRepository $repository = null) {
+    $this->repository = $repository;
     return $this;
   }
 }

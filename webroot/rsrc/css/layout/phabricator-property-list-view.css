@@ -115,6 +115,13 @@
   max-width: 95%;
 }
 
+.phabricator-property-list-audio {
+  display: block;
+  margin: 16px auto;
+  width: 50%;
+  min-width: 240px;
+}
+
 /* When tags appear in property lists, give them a little more vertical
    spacing. */
 .phabricator-property-list-view .phabricator-tag-view {

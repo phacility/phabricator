@@ -128,6 +128,7 @@ final class DifferentialManiphestTasksFieldSpecification
       return array();
     }
 
+    // TODO: T603 Get a viewer here so we can issue the right query.
 
     $task_ids = $matches[1];
     $tasks = id(new ManiphestTask())

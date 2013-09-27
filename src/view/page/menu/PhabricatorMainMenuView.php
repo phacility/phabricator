@@ -91,7 +91,10 @@ final class PhabricatorMainMenuView extends AphrontView {
       'helpURI' => '/help/keyboardshortcut/',
     );
 
-    if ($user->isLoggedIn()) {
+    $show_search = ($user->isLoggedIn()) ||
+                   (PhabricatorEnv::getEnvConfig('policy.allow-public'));
+
+    if ($show_search) {
       $search = new PhabricatorMainMenuSearchView();
       $search->setUser($user);
       $search->setScope($this->getDefaultSearchScope());

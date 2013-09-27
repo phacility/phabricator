@@ -46,12 +46,17 @@ final class PhortuneAccount extends PhortuneDAO
   }
 
   public function getPolicy($capability) {
-    return false;
+    return PhabricatorPolicies::POLICY_NOONE;
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     $members = array_fuse($this->getMemberPHIDs());
     return isset($members[$viewer->getPHID()]);
   }
+
+  public function describeAutomaticCapability($capability) {
+    return pht('Members of an account can always view and edit it.');
+  }
+
 
 }

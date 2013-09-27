@@ -81,7 +81,7 @@ final class PhabricatorAuthNewController
           ->addCancelButton($this->getApplicationURI())
           ->setValue(pht('Continue')));
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Add Authentication Provider'))
       ->setFormError($errors)
       ->setForm($form);

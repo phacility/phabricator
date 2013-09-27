@@ -36,6 +36,9 @@ final class ManiphestEdgeEventListener extends PhutilEventListener {
     $edges = $this->loadAllEdges($event);
     $tasks = array();
     if ($edges) {
+      // TODO: T603 This should probably all get nuked. Until then, this isn't
+      // realllllly a policy issue since callers are (or should be) doing
+      // policy checks anyway.
       $tasks = id(new ManiphestTask())->loadAllWhere(
         'phid IN (%Ls)',
         array_keys($edges));
@@ -82,7 +85,7 @@ final class ManiphestEdgeEventListener extends PhutilEventListener {
         }
 
         $xactions[] = id(new ManiphestTransaction())
-          ->setTransactionType(ManiphestTransactionType::TYPE_EDGE)
+          ->setTransactionType(ManiphestTransaction::TYPE_EDGE)
           ->setOldValue($old_type)
           ->setNewValue($new_type)
           ->setMetadataValue('edge:type', $type);

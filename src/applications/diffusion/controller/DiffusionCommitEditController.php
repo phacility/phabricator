@@ -81,7 +81,7 @@ final class DiffusionCommitEditController extends DiffusionController {
       ->addCancelButton('/r'.$callsign.$commit->getCommitIdentifier());
     $form->appendChild($submit);
 
-    $form_box = id(new PHUIFormBoxView())
+    $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)
       ->setForm($form);
 

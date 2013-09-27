@@ -148,6 +148,13 @@
   max-height: 640px;
 }
 
+.phabricator-remarkup audio {
+  display: block;
+  margin: 16px auto;
+  min-width: 240px;
+  width: 50%;
+}
+
 .phabricator-remarkup-mention-exists {
   font-weight: bold;
   background: #e6f3ff;

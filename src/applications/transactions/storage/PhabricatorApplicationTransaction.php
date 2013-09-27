@@ -190,7 +190,7 @@ abstract class PhabricatorApplicationTransaction
     if ($this->renderingTarget == self::TARGET_HTML) {
       return $this->getHandle($phid)->renderLink();
     } else {
-      return hsprintf('%s', $this->getHandle($phid)->getName());
+      return hsprintf('%s', $this->getHandle($phid)->getLinkName());
     }
   }
 
@@ -200,6 +200,18 @@ abstract class PhabricatorApplicationTransaction
       $links[] = $this->renderHandleLink($phid);
     }
     return phutil_implode_html(', ', $links);
+  }
+
+  public function renderPolicyName($phid) {
+    $policy = PhabricatorPolicy::newFromPolicyAndHandle(
+      $phid,
+      $this->getHandleIfExists($phid));
+    if ($this->renderingTarget == self::TARGET_HTML) {
+      $output = $policy->renderDescription();
+    } else {
+      $output = hsprintf('%s', $policy->getFullName());
+    }
+    return $output;
   }
 
   public function getIcon() {
@@ -281,23 +293,15 @@ abstract class PhabricatorApplicationTransaction
           '%s changed the visibility of this %s from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
           $this->getApplicationObjectTypeName(),
-          PhabricatorPolicy::newFromPolicyAndHandle(
-            $old,
-            $this->getHandleIfExists($old))->renderDescription(),
-          PhabricatorPolicy::newFromPolicyAndHandle(
-            $new,
-            $this->getHandleIfExists($new))->renderDescription());
+          $this->renderPolicyName($old),
+          $this->renderPolicyName($new));
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return pht(
           '%s changed the edit policy of this %s from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
           $this->getApplicationObjectTypeName(),
-          PhabricatorPolicy::newFromPolicyAndHandle(
-            $old,
-            $this->getHandleIfExists($old))->renderDescription(),
-          PhabricatorPolicy::newFromPolicyAndHandle(
-            $new,
-            $this->getHandleIfExists($new))->renderDescription());
+          $this->renderPolicyName($old),
+          $this->renderPolicyName($new));
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);
@@ -532,5 +536,11 @@ abstract class PhabricatorApplicationTransaction
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return ($viewer->getPHID() == $this->getAuthorPHID());
   }
+
+  public function describeAutomaticCapability($capability) {
+    // TODO: (T603) Exact policies are unclear here.
+    return null;
+  }
+
 
 }

@@ -62,7 +62,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
    * @return this
    */
   public function setMailTags(array $tags) {
-    $this->setParam('mailtags', $tags);
+    $this->setParam('mailtags', array_unique($tags));
     return $this;
   }
 

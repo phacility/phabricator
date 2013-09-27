@@ -18,7 +18,10 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
 
     $comments = $request->getStr('comments');
 
-    $task = id(new ManiphestTask())->load($this->id);
+    $task = id(new ManiphestTaskQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$task) {
       return new Aphront404Response();
     }
@@ -45,11 +48,11 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
     // grab phids for handles and set transaction values based on action and
     // value (empty or control-specific format) coming in from the wire
     switch ($action) {
-      case ManiphestTransactionType::TYPE_PRIORITY:
+      case ManiphestTransaction::TYPE_PRIORITY:
         $transaction->setOldValue($task->getPriority());
         $transaction->setNewValue($value);
         break;
-      case ManiphestTransactionType::TYPE_OWNER:
+      case ManiphestTransaction::TYPE_OWNER:
         if ($value) {
           $value = current(json_decode($value));
           $phids = array($value);
@@ -58,7 +61,7 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
         }
         $transaction->setNewValue($value);
         break;
-      case ManiphestTransactionType::TYPE_CCS:
+      case ManiphestTransaction::TYPE_CCS:
         if ($value) {
           $value = json_decode($value);
         }
@@ -75,7 +78,7 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
         $transaction->setOldValue($task->getCCPHIDs());
         $transaction->setNewValue($value);
         break;
-      case ManiphestTransactionType::TYPE_PROJECTS:
+      case ManiphestTransaction::TYPE_PROJECTS:
         if ($value) {
           $value = json_decode($value);
         }

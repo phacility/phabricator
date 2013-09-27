@@ -52,9 +52,10 @@ final class ConduitAPI_diffusion_getcommits_Method
 
     $callsigns = ipull($commits, 'callsign');
     $callsigns = array_unique($callsigns);
-    $repos = id(new PhabricatorRepository())->loadAllWhere(
-      'callsign IN (%Ls)',
-      $callsigns);
+    $repos = id(new PhabricatorRepositoryQuery())
+      ->setViewer($request->getUser())
+      ->withCallsigns($callsigns)
+      ->execute();
     $repos = mpull($repos, null, 'getCallsign');
 
     foreach ($commits as $name => $info) {
@@ -231,6 +232,10 @@ final class ConduitAPI_diffusion_getcommits_Method
    */
   private function addDifferentialInformation(array $commits) {
     $commit_phids = ipull($commits, 'commitPHID');
+
+    // TODO: (T603) This should be policy checked, either by moving to
+    // DifferentialRevisionQuery or by doing a followup query to make sure
+    // the matched objects are visible.
 
     $rev_conn_r = id(new DifferentialRevision())->establishConnection('r');
     $revs = queryfx_all(

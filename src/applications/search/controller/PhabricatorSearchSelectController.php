@@ -93,11 +93,14 @@ final class PhabricatorSearchSelectController
 
     switch ($this->type) {
       case DifferentialPHIDTypeRevision::TYPECONST:
+        // TODO: (T603) See below. This whole thing needs cleanup.
         $objects = id(new DifferentialRevision())->loadAllWhere(
           'id IN (%Ld)',
           $object_ids);
         break;
       case ManiphestPHIDTypeTask::TYPECONST:
+        // TODO: (T603) Clean this up. This should probably all run through
+        // ObjectQuery?
         $objects = id(new ManiphestTask())->loadAllWhere(
           'id IN (%Ld)',
           $object_ids);

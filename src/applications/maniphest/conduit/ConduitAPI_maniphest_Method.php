@@ -62,7 +62,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
     if ($is_new) {
       $task->setTitle((string)$request->getValue('title'));
       $task->setDescription((string)$request->getValue('description'));
-      $changes[ManiphestTransactionType::TYPE_STATUS] =
+      $changes[ManiphestTransaction::TYPE_STATUS] =
         ManiphestTaskStatus::STATUS_OPEN;
     } else {
 
@@ -73,12 +73,12 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
 
       $title = $request->getValue('title');
       if ($title !== null) {
-        $changes[ManiphestTransactionType::TYPE_TITLE] = $title;
+        $changes[ManiphestTransaction::TYPE_TITLE] = $title;
       }
 
       $desc = $request->getValue('description');
       if ($desc !== null) {
-        $changes[ManiphestTransactionType::TYPE_DESCRIPTION] = $desc;
+        $changes[ManiphestTransaction::TYPE_DESCRIPTION] = $desc;
       }
 
       $status = $request->getValue('status');
@@ -88,7 +88,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
           throw id(new ConduitException('ERR-INVALID-PARAMETER'))
             ->setErrorDescription('Status set to invalid value.');
         }
-        $changes[ManiphestTransactionType::TYPE_STATUS] = $status;
+        $changes[ManiphestTransaction::TYPE_STATUS] = $status;
       }
     }
 
@@ -99,7 +99,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
         throw id(new ConduitException('ERR-INVALID-PARAMETER'))
           ->setErrorDescription('Priority set to invalid value.');
       }
-      $changes[ManiphestTransactionType::TYPE_PRIORITY] = $priority;
+      $changes[ManiphestTransaction::TYPE_PRIORITY] = $priority;
     }
 
     $owner_phid = $request->getValue('ownerPHID');
@@ -107,7 +107,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
       $this->validatePHIDList(array($owner_phid),
                               PhabricatorPeoplePHIDTypeUser::TYPECONST,
                               'ownerPHID');
-      $changes[ManiphestTransactionType::TYPE_OWNER] = $owner_phid;
+      $changes[ManiphestTransaction::TYPE_OWNER] = $owner_phid;
     }
 
     $ccs = $request->getValue('ccPHIDs');
@@ -115,7 +115,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
       $this->validatePHIDList($ccs,
                               PhabricatorPeoplePHIDTypeUser::TYPECONST,
                               'ccPHIDS');
-      $changes[ManiphestTransactionType::TYPE_CCS] = $ccs;
+      $changes[ManiphestTransaction::TYPE_CCS] = $ccs;
     }
 
     $project_phids = $request->getValue('projectPHIDs');
@@ -123,7 +123,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
       $this->validatePHIDList($project_phids,
                               PhabricatorProjectPHIDTypeProject::TYPECONST,
                               'projectPHIDS');
-      $changes[ManiphestTransactionType::TYPE_PROJECTS] = $project_phids;
+      $changes[ManiphestTransaction::TYPE_PROJECTS] = $project_phids;
     }
 
     $file_phids = $request->getValue('filePHIDs');
@@ -135,7 +135,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
       $attached = $task->getAttached();
       $attached[PhabricatorFilePHIDTypeFile::TYPECONST] = $file_map;
 
-      $changes[ManiphestTransactionType::TYPE_ATTACH] = $attached;
+      $changes[ManiphestTransaction::TYPE_ATTACH] = $attached;
     }
 
     $template = new ManiphestTransaction();

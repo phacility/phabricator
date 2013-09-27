@@ -29,9 +29,10 @@ final class PhabricatorOwnersDetailController
     }
 
     if ($repository_phids) {
-      $repositories = id(new PhabricatorRepository())->loadAllWhere(
-        'phid in (%Ls)',
-        array_keys($repository_phids));
+      $repositories = id(new PhabricatorRepositoryQuery())
+        ->setViewer($user)
+        ->withPHIDs(array_keys($repository_phids))
+        ->execute();
       $repositories = mpull($repositories, null, 'getPHID');
     } else {
       $repositories = array();

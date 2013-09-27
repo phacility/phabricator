@@ -32,5 +32,9 @@ final class PhabricatorChatLogChannel
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
 }
 
