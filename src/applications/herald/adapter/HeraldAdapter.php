@@ -710,7 +710,9 @@ abstract class HeraldAdapter {
   }
 
 
-  public function renderRuleAsText(HeraldRule $rule) {
+  public function renderRuleAsText(HeraldRule $rule, array $handles) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
+
     $out = array();
 
     if ($rule->getMustMatchAll()) {
@@ -721,7 +723,7 @@ abstract class HeraldAdapter {
 
     $out[] = null;
     foreach ($rule->getConditions() as $condition) {
-      $out[] = "    ".$this->renderConditionAsText($condition);
+      $out[] = $this->renderConditionAsText($condition, $handles);
     }
     $out[] = null;
 
@@ -733,52 +735,115 @@ abstract class HeraldAdapter {
 
     $out[] = null;
     foreach ($rule->getActions() as $action) {
-      $out[] = "    ".$this->renderActionAsText($action);
+      $out[] = $this->renderActionAsText($action, $handles);
     }
 
-    return implode("\n", $out);
+    return phutil_implode_html("\n", $out);
   }
 
-  private function renderConditionAsText(HeraldCondition $condition) {
+  private function renderConditionAsText(
+    HeraldCondition $condition,
+    array $handles) {
     $field_type = $condition->getFieldName();
     $field_name = idx($this->getFieldNameMap(), $field_type);
 
     $condition_type = $condition->getFieldCondition();
     $condition_name = idx($this->getConditionNameMap(), $condition_type);
 
-    $value = $this->renderConditionValueAsText($condition);
+    $value = $this->renderConditionValueAsText($condition, $handles);
 
-    return "{$field_name} {$condition_name} {$value}";
+    return hsprintf('    %s %s %s', $field_name, $condition_name, $value);
   }
 
-  private function renderActionAsText(HeraldAction $action) {
+  private function renderActionAsText(
+    HeraldAction $action,
+    array $handles) {
     $rule_global = HeraldRuleTypeConfig::RULE_TYPE_GLOBAL;
 
     $action_type = $action->getAction();
     $action_name = idx($this->getActionNameMap($rule_global), $action_type);
 
-    $target = $this->renderActionTargetAsText($action);
+    $target = $this->renderActionTargetAsText($action, $handles);
 
-    return "{$action_name} {$target}";
+    return hsprintf('    %s %s', $action_name, $target);
   }
 
-  private function renderConditionValueAsText(HeraldCondition $condition) {
-    // TODO: This produces sketchy results for many conditions.
+  private function renderConditionValueAsText(
+    HeraldCondition $condition,
+    array $handles) {
+
     $value = $condition->getValue();
-    if (is_array($value)) {
-      $value = implode(', ', $value);
+    if (!is_array($value)) {
+      $value = array($value);
     }
+    foreach ($value as $index => $val) {
+      $handle = idx($handles, $val);
+      if ($handle) {
+        $value[$index] = $handle->renderLink();
+      }
+    }
+    $value = phutil_implode_html(', ', $value);
     return $value;
   }
 
-  private function renderActionTargetAsText(HeraldAction $action) {
-    // TODO: This produces sketchy results for Flags and PHIDs.
+  private function renderActionTargetAsText(
+    HeraldAction $action,
+    array $handles) {
+
     $target = $action->getTarget();
-    if (is_array($target)) {
-      $target = implode(', ', $target);
+    if (!is_array($target)) {
+      $target = array($target);
+    }
+    foreach ($target as $index => $val) {
+      $handle = idx($handles, $val);
+      if ($handle) {
+        $target[$index] = $handle->renderLink();
+      }
+    }
+    $target = phutil_implode_html(', ', $target);
+    return $target;
+  }
+
+  /**
+   * Given a @{class:HeraldRule}, this function extracts all the phids that
+   * we'll want to load as handles later.
+   *
+   * This function performs a somewhat hacky approach to figuring out what
+   * is and is not a phid - try to get the phid type and if the type is
+   * *not* unknown assume its a valid phid.
+   *
+   * Don't try this at home. Use more strongly typed data at home.
+   *
+   * Think of the children.
+   */
+  public static function getHandlePHIDs(HeraldRule $rule) {
+    $phids = array($rule->getAuthorPHID());
+    foreach ($rule->getConditions() as $condition) {
+      $value = $condition->getValue();
+      if (!is_array($value)) {
+        $value = array($value);
+      }
+      foreach ($value as $val) {
+        if (phid_get_type($val) !=
+            PhabricatorPHIDConstants::PHID_TYPE_UNKNOWN) {
+          $phids[] = $val;
+        }
+      }
     }
 
-    return $target;
+    foreach ($rule->getActions() as $action) {
+      $target = $action->getTarget();
+      if (!is_array($target)) {
+        $target = array($target);
+      }
+      foreach ($target as $val) {
+        if (phid_get_type($val) !=
+            PhabricatorPHIDConstants::PHID_TYPE_UNKNOWN) {
+          $phids[] = $val;
+        }
+      }
+    }
+    return $phids;
   }
 
 }

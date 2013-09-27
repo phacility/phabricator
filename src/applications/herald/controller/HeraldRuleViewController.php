@@ -73,7 +73,7 @@ final class HeraldRuleViewController extends HeraldController {
   private function buildPropertyView(HeraldRule $rule) {
     $viewer = $this->getRequest()->getUser();
 
-    $this->loadHandles(array($rule->getAuthorPHID()));
+    $this->loadHandles(HeraldAdapter::getHandlePHIDs($rule));
 
     $view = id(new PhabricatorPropertyListView())
       ->setUser($viewer)
@@ -104,7 +104,7 @@ final class HeraldRuleViewController extends HeraldController {
           array(
             'style' => 'white-space: pre-wrap;',
           ),
-          $adapter->renderRuleAsText($rule)));
+          $adapter->renderRuleAsText($rule, $this->getLoadedHandles())));
     }
 
     return $view;
