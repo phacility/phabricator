@@ -1458,7 +1458,7 @@ phutil_register_library_map(array(
     'PhabricatorPolicyAwareQuery' => 'infrastructure/query/policy/PhabricatorPolicyAwareQuery.php',
     'PhabricatorPolicyAwareTestQuery' => 'applications/policy/__tests__/PhabricatorPolicyAwareTestQuery.php',
     'PhabricatorPolicyCapability' => 'applications/policy/constants/PhabricatorPolicyCapability.php',
-    'PhabricatorPolicyConfigOptions' => 'applications/config/option/PhabricatorPolicyConfigOptions.php',
+    'PhabricatorPolicyConfigOptions' => 'applications/policy/config/PhabricatorPolicyConfigOptions.php',
     'PhabricatorPolicyConstants' => 'applications/policy/constants/PhabricatorPolicyConstants.php',
     'PhabricatorPolicyController' => 'applications/policy/controller/PhabricatorPolicyController.php',
     'PhabricatorPolicyDataTestCase' => 'applications/policy/__tests__/PhabricatorPolicyDataTestCase.php',
