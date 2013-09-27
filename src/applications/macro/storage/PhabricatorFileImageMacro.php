@@ -11,8 +11,15 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
   protected $phid;
   protected $name;
   protected $isDisabled = 0;
+  protected $audioPHID;
+  protected $audioBehavior = self::AUDIO_BEHAVIOR_NONE;
 
   private $file = self::ATTACHABLE;
+  private $audio = self::ATTACHABLE;
+
+  const AUDIO_BEHAVIOR_NONE   = 'audio:none';
+  const AUDIO_BEHAVIOR_ONCE   = 'audio:once';
+  const AUDIO_BEHAVIOR_LOOP   = 'audio:loop';
 
   public function attachFile(PhabricatorFile $file) {
     $this->file = $file;
@@ -21,6 +28,15 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
 
   public function getFile() {
     return $this->assertAttached($this->file);
+  }
+
+  public function attachAudio(PhabricatorFile $audio = null) {
+    $this->audio = $audio;
+    return $this;
+  }
+
+  public function getAudio() {
+    return $this->assertAttached($this->audio);
   }
 
   public function getConfiguration() {

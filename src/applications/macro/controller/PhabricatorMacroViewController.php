@@ -119,6 +119,12 @@ final class PhabricatorMacroViewController
         ->setHref($this->getApplicationURI('/edit/'.$macro->getID().'/'))
         ->setIcon('edit'));
 
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Audio'))
+        ->setHref($this->getApplicationURI('/audio/'.$macro->getID().'/'))
+        ->setIcon('herald'));
+
     if ($macro->getIsDisabled()) {
       $view->addAction(
         id(new PhabricatorActionView())
@@ -145,6 +151,25 @@ final class PhabricatorMacroViewController
     $view = id(new PhabricatorPropertyListView())
       ->setUser($this->getRequest()->getUser())
       ->setObject($macro);
+
+    switch ($macro->getAudioBehavior()) {
+      case PhabricatorFileImageMacro::AUDIO_BEHAVIOR_ONCE:
+        $view->addProperty(pht('Audio Behavior'), pht('Play Once'));
+        break;
+      case PhabricatorFileImageMacro::AUDIO_BEHAVIOR_LOOP:
+        $view->addProperty(pht('Audio Behavior'), pht('Loop'));
+        break;
+    }
+
+    $audio_phid = $macro->getAudioPHID();
+    if ($audio_phid) {
+      $this->loadHandles(array($audio_phid));
+
+      $view->addProperty(
+        pht('Audio'),
+        $this->getHandle($audio_phid)->renderLink());
+    }
+
 
     $view->invokeWillRenderEvent();
 

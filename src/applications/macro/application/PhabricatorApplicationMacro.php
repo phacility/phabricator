@@ -34,6 +34,7 @@ final class PhabricatorApplicationMacro extends PhabricatorApplication {
         'view/(?P<id>[1-9]\d*)/' => 'PhabricatorMacroViewController',
         'comment/(?P<id>[1-9]\d*)/' => 'PhabricatorMacroCommentController',
         'edit/(?P<id>[1-9]\d*)/' => 'PhabricatorMacroEditController',
+        'audio/(?P<id>[1-9]\d*)/' => 'PhabricatorMacroAudioController',
         'disable/(?P<id>[1-9]\d*)/' => 'PhabricatorMacroDisableController',
         'meme/' => 'PhabricatorMacroMemeController',
         'meme/create/' => 'PhabricatorMacroMemeDialogController',
