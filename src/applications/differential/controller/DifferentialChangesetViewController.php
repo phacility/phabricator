@@ -3,7 +3,15 @@
 final class DifferentialChangesetViewController extends DifferentialController {
 
   public function shouldRequireLogin() {
-    return !$this->allowsAnonymousAccess();
+    if ($this->allowsAnonymousAccess()) {
+      return false;
+    }
+
+    return parent::shouldRequireLogin();
+  }
+
+  public function shouldAllowPublic() {
+    return true;
   }
 
   public function processRequest() {
@@ -27,6 +35,17 @@ final class DifferentialChangesetViewController extends DifferentialController {
     if (!$changeset) {
       return new Aphront404Response();
     }
+
+    // TODO: (T603) Make Changeset policy-aware. For now, just fake it
+    // by making sure we can see the diff.
+    $diff = id(new DifferentialDiffQuery())
+      ->setViewer($request->getUser())
+      ->withIDs(array($changeset->getDiffID()))
+      ->executeOne();
+    if (!$diff) {
+      return new Aphront404Response();
+    }
+
 
     $view = $request->getStr('view');
     if ($view) {
