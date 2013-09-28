@@ -870,11 +870,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
-    return array(
-      id(new PHUIHeaderView())
-        ->setHeader(pht('Open Revisions Affecting These Files')),
-      $view,
-    );
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Open Revisions Affecting These Files'))
+      ->addContent($view);
   }
 
   /**
