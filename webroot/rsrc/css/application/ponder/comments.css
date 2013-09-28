@@ -4,11 +4,14 @@
 
 .ponder-show-comments {
   text-align: center;
-  padding: 8px 0;
+  padding: 8px;
+  margin: 0 16px;
+  float: right;
   font-weight: bold;
-  background: #f9f9f9;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid #b7b7b7;
+  background: #fff;
+  border-bottom: 1px solid {$blueborder};
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
 }
 
 .ponder-comments {

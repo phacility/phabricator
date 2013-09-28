@@ -36,7 +36,7 @@
 }
 
 .gradient-lightblue-header {
-  background-position: 0px -367px;
+  background-position: 0px -509px;
 }
 
 .gradient-menu-label, .phabricator-side-menu .phui-list-item-type-label {
@@ -44,9 +44,9 @@
 }
 
 .gradient-red-header {
-  background-position: 0px -438px;
+  background-position: 0px -367px;
 }
 
 .gradient-yellow-header {
-  background-position: 0px -509px;
+  background-position: 0px -438px;
 }

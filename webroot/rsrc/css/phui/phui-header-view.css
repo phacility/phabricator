@@ -47,10 +47,6 @@ body.device-phone .phui-header-view {
   padding: 12px 8px;
 }
 
-.device-desktop .phui-header-view {
-  width: 66%;
-}
-
 .phui-header-tags {
   margin-left: 12px;
   font-size: 13px;
@@ -87,7 +83,7 @@ body.device-phone .phui-header-view {
 }
 
 .phui-header-subheader .policy-link {
-  color: {$darkbluetext};
+  color: {$bluetext};
 }
 
 .phui-header-subheader .phui-header-status-dark {

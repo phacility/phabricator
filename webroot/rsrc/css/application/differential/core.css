@@ -9,14 +9,7 @@
 }
 
 .differential-panel {
-  margin: -1px 0px 3.6em 0px;
-  padding:      15px 2%;
-  font-size:    13px;
-  background:   #F6F6F6;
-  border-color: #c0c5d1;
-  border-style: solid;
-  border-width: 1px 0 1px 0;
-  box-shadow: 0 0 1px 1px rgba(192, 197, 209, 0.3);
+  padding: 16px;
 }
 
 .differential-panel h1 {

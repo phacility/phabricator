@@ -98,6 +98,11 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     require_celerity_resource('diffusion-source-css');
 
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($this->buildHeaderView($drequest))
+      ->addContent($this->buildActionView($drequest))
+      ->addContent($this->buildPropertyView($drequest));
+
     // Render the page.
     $content = array();
 

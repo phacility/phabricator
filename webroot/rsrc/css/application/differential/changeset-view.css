@@ -2,21 +2,17 @@
  * @provides differential-changeset-view-css
  */
 
-.differential-review-stage {
-  background: #FFFFFF;
-  padding: 0em 1.25em 0em 0em;
-}
-
 .differential-changeset {
   position: relative;
   margin: 0;
-  padding: 10px 0% 20px 2%;
+  padding: 16px 0;
 }
 
-
 .differential-diff {
-  background:         transparent;
-  width:              100%;
+  background: transparent;
+  width: 100%;
+  border-top: 1px solid #cca;
+  border-bottom: 1px solid #cca;
 }
 
 .differential-diff td {
@@ -45,12 +41,10 @@
   min-width:          45px;
   max-width:          4%;
   vertical-align:     top;
-  background:         #eeeeee;
-  color:              {$lightgreytext};
+  background:         {$lightbluebackground};
+  color:              {$bluetext};
   cursor:             pointer;
-  border-style:       solid;
-  border-width:       0px 1px;
-  border-color:       #eeeeee #999999 #eeeeee #dddddd;
+  border-right:       1px solid {$thinblueborder};
   font-size:          11px;
   overflow:           hidden;
 
@@ -168,8 +162,9 @@ td.cov-X {
 .differential-diff td.show-context,
 .differential-diff td.differential-shield {
   background: #ffffee;
-  padding: 1em 0em;
-  border: 1px solid #ccccaa;
+  padding: 12px 0;
+  border-top: 1px solid #ccccaa;
+  border-bottom: 1px solid #ccccaa;
 }
 
 .differential-diff td.show-more,
@@ -218,9 +213,8 @@ td.cov-X {
 }
 
 .differential-changeset h1 {
-  font-size:          14px;
-  font-weight:        bold;
-  padding:            2px 0 8px;
+  font-size: 14px;
+  padding: 2px 0 12px 12px;
 }
 
 .differential-reticle {
@@ -296,6 +290,7 @@ td.cov-X {
 
 .differential-changeset-buttons {
   float: right;
+  margin-right: 16px;
 }
 
 .differential-changeset-buttons a.button {

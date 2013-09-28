@@ -209,7 +209,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $comment_form = new AphrontFormView();
     $comment_form
       ->setUser($user)
-      ->setShaded(true)
       ->setAction('/maniphest/transaction/save/')
       ->setEncType('multipart/form-data')
       ->addHiddenInput('taskID', $task->getID())
@@ -364,16 +363,23 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $preview_panel = null;
     }
 
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->addContent($actions)
+      ->addContent($properties);
+
+    $comment_box = id(new PHUIObjectBoxView())
+      ->setFlush(true)
+      ->setHeader($comment_header)
+      ->addContent($comment_form);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $context_bar,
-        $header,
-        $actions,
-        $properties,
+        $object_box,
         $timeline,
-        $comment_header,
-        $comment_form,
+        $comment_box,
         $preview_panel,
       ),
       array(

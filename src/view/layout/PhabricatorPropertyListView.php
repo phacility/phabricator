@@ -180,7 +180,6 @@ final class PhabricatorPropertyListView extends AphrontView {
     $classes[] = 'phabricator-property-list-text-content';
     if ($part['type'] == 'image') {
       $classes[] = 'phabricator-property-list-image-content';
-      $classes[] = 'phabricator-remarkup-dark';
     }
     return phutil_tag(
       'div',

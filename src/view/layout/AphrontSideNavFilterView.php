@@ -288,7 +288,7 @@ final class AphrontSideNavFilterView extends AphrontView {
         phutil_tag(
           'div',
           array(
-            'class' => 'phabricator-nav-content',
+            'class' => 'phabricator-nav-content mlb',
             'id' => $content_id,
           ),
           array(

@@ -68,10 +68,23 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     $header = $this->buildHeaderView($paste);
     $actions = $this->buildActionView($user, $paste, $file);
     $properties = $this->buildPropertyView($paste, $fork_phids);
+
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->addContent($actions)
+      ->addContent($properties);
+
     $source_code = $this->buildSourceCodeView(
       $paste,
       null,
       $this->highlightMap);
+
+    $source_code = id(new PHUIBoxView())
+      ->appendChild($source_code)
+      ->setBorder(true)
+      ->addMargin(PHUI::MARGIN_LARGE_LEFT)
+      ->addMargin(PHUI::MARGIN_LARGE_RIGHT)
+      ->addMargin(PHUI::MARGIN_LARGE_TOP);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView())
       ->setActionList($actions)
@@ -123,16 +136,18 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ->setAction($this->getApplicationURI('/comment/'.$paste->getID().'/'))
       ->setSubmitButtonName($submit_button_name);
 
+    $comment_box = id(new PHUIObjectBoxView())
+      ->setFlush(true)
+      ->setHeader($add_comment_header)
+      ->addContent($add_comment_form);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
-        $actions,
-        $properties,
+        $object_box,
         $source_code,
         $timeline,
-        $add_comment_header,
-        $add_comment_form
+        $comment_box,
       ),
       array(
         'title' => $paste->getFullName(),

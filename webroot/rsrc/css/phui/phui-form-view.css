@@ -426,20 +426,6 @@ table.aphront-form-control-checkbox-layout th {
   display: none;
 }
 
-.phui-object-box .phabricator-action-header {
-  padding: 4px 5px 4px 12px;
-  border-bottom: 1px solid {$lightblueborder};
-}
-
-.phui-object-box .phabricator-action-header h3 {
-  color: {$bluetext};
-  text-shadow: 0 1px 2px #fff;
-}
-
-.phui-object-box .aphront-error-view {
-  margin-bottom: 0;
-}
-
 .phabricator-standard-custom-field-header {
   font-size: 16px;
   color: {$bluetext};

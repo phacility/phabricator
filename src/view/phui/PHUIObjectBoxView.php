@@ -7,6 +7,8 @@ final class PHUIObjectBoxView extends AphrontView {
   private $form;
   private $validationException;
   private $content = array();
+  private $header;
+  private $flush;
 
   public function setHeaderText($text) {
     $this->headerText = $text;
@@ -23,8 +25,18 @@ final class PHUIObjectBoxView extends AphrontView {
     return $this;
   }
 
+  public function setHeader(PHUIHeaderView $header) {
+    $this->header = $header;
+    return $this;
+  }
+
   public function addContent($content) {
     $this->content[] = $content;
+    return $this;
+  }
+
+  public function setFlush($flush) {
+    $this->flush = $flush;
     return $this;
   }
 
@@ -36,9 +48,16 @@ final class PHUIObjectBoxView extends AphrontView {
 
   public function render() {
 
-    $header = id(new PhabricatorActionHeaderView())
-      ->setHeaderTitle($this->headerText)
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_LIGHTBLUE);
+    require_celerity_resource('phui-object-box-css');
+
+    if ($this->header) {
+      $header = $this->header;
+      $header->setGradient(PhabricatorActionHeaderView::HEADER_LIGHTBLUE);
+    } else {
+      $header = id(new PHUIHeaderView())
+        ->setHeader($this->headerText)
+        ->setGradient(PhabricatorActionHeaderView::HEADER_LIGHTBLUE);
+    }
 
     $ex = $this->validationException;
     $exception_errors = null;
@@ -68,7 +87,10 @@ final class PHUIObjectBoxView extends AphrontView {
       ->addMargin(PHUI::MARGIN_LARGE_RIGHT)
       ->addClass('phui-object-box');
 
-    return $content;
+    if ($this->flush) {
+      $content->addClass('phui-object-box-flush');
+    }
 
+    return $content;
   }
 }
