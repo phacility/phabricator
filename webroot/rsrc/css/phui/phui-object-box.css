@@ -32,3 +32,11 @@
   margin-bottom: -12px;
   border-width: 0 0 0 1px;
 }
+
+.device-phone .phui-object-box {
+  margin-top: 0;
+}
+
+.device-phone .phui-object-box + .phui-object-box {
+  border-top: none;
+}

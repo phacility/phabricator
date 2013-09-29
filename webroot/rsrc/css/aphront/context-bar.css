@@ -3,18 +3,15 @@
  */
 
 .aphront-contextbar-view {
-  background: #efefef;
-  padding: 6px 2em;
-  border-bottom: 1px solid #dfdfdf;
-}
-
-.aphront-contextbar-core {
+  background: #fff;
+  padding: 8px 16px;
+  border-bottom: 1px solid {$lightblueborder};
 }
 
 .aphront-contextbar-content {
   padding-top: 5px;
   font-size: 13px;
-  color: {$greytext};
+  color: {$bluetext};
 }
 
 .aphront-contextbar-buttons {
@@ -23,7 +20,7 @@
 
 .aphront-contextbar-buttons label {
   font-weight: bold;
-  color: {$greytext};
+  color: {$bluetext};
 }
 
 .aphront-contextbar-buttons a {

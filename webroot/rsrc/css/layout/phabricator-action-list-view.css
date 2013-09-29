@@ -78,7 +78,7 @@
 
 .phabricator-action-view button.phabricator-action-view-item,
 .phabricator-action-view-item {
-  padding: 1px 0 1px 34px;
+  padding: 1px 0 1px 28px;
   line-height: 20px;
   display: block;
   font-size: 12px;
@@ -91,12 +91,12 @@
   height: 14px;
   position: absolute;
   top: 5px;
-  left: 13px;
+  left: 8px;
 }
 
 .device-desktop .phabricator-action-view:hover .phabricator-action-view-item {
   text-decoration: none;
-  background-color: #3875d7;
+  background-color: {$blue};
   color: #ffffff;
 }
 

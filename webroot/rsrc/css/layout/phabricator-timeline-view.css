@@ -6,6 +6,10 @@
   padding: 0 16px;
 }
 
+.device-phone .phabricator-timeline-view {
+  padding: 0;
+}
+
 .phabricator-timeline-group {
   border-width: 0 3px;
   border-style: solid;
@@ -43,8 +47,8 @@
 }
 
 .phabricator-timeline-title {
-  line-height: 28px;
-  min-height: 28px;
+  line-height: 18px;
+  min-height: 18px;
   position: relative;
 }
 
@@ -89,7 +93,7 @@
 }
 
 .phabricator-timeline-title {
-  padding: 0 5px;
+  padding: 5px;
   overflow-x: auto;
   overflow-y: hidden;
 }
@@ -106,7 +110,6 @@
 .phabricator-timeline-core-content {
   overflow-x: auto;
 }
-
 
 .device .phabricator-timeline-event-view {
   min-height: 23px;
