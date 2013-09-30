@@ -108,6 +108,17 @@ final class ManiphestTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
+      case self::TYPE_OWNER:
+        if ($this->getAuthorPHID() == $new) {
+          return 'green';
+        } else if (!$new) {
+          return 'black';
+        } else if (!$old) {
+          return 'green';
+        } else {
+          return 'green';
+        }
+
       case self::TYPE_STATUS:
         if ($new == ManiphestTaskStatus::STATUS_OPEN) {
           return 'green';
@@ -195,6 +206,12 @@ final class ManiphestTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
+      case self::TYPE_OWNER:
+        return 'user';
+
+      case self::TYPE_CCS:
+        return 'meta-mta';
+
       case self::TYPE_TITLE:
         return 'edit';
 
@@ -214,7 +231,7 @@ final class ManiphestTransaction
         return 'edit';
 
       case self::TYPE_PROJECTS:
-        return 'tag';
+        return 'project';
 
       case self::TYPE_PRIORITY:
         if ($old == ManiphestTaskPriority::getDefaultPriority()) {
