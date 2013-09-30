@@ -6,9 +6,20 @@ final class PHUIObjectBoxView extends AphrontView {
   private $formError = null;
   private $form;
   private $validationException;
-  private $content = array();
   private $header;
   private $flush;
+  private $propertyList;
+  private $actionList;
+
+  public function setActionList(PhabricatorActionListView $action_list) {
+    $this->actionList = $action_list;
+    return $this;
+  }
+
+  public function setPropertyList(PhabricatorPropertyListView $property_list) {
+    $this->propertyList = $property_list;
+    return $this;
+  }
 
   public function setHeaderText($text) {
     $this->headerText = $text;
@@ -27,11 +38,6 @@ final class PHUIObjectBoxView extends AphrontView {
 
   public function setHeader(PHUIHeaderView $header) {
     $this->header = $header;
-    return $this;
-  }
-
-  public function addContent($content) {
-    $this->content[] = $content;
     return $this;
   }
 
@@ -79,7 +85,9 @@ final class PHUIObjectBoxView extends AphrontView {
           $this->formError,
           $exception_errors,
           $this->form,
-          $this->content,
+          $this->actionList,
+          $this->propertyList,
+          $this->renderChildren(),
         ))
       ->setBorder(true)
       ->addMargin(PHUI::MARGIN_LARGE_TOP)

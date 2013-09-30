@@ -74,7 +74,7 @@ final class PhabricatorConfigAllController
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Current Settings'))
-      ->addContent($version_property_list);
+      ->setPropertyList($version_property_list);
 
     $phabricator_root = dirname(phutil_get_library_root('phabricator'));
     $version_path = $phabricator_root.'/conf/local/VERSION';

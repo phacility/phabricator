@@ -112,9 +112,9 @@ final class DifferentialRevisionDetailView extends AphrontView {
     $properties->setHasKeyboardShortcuts(true);
 
     $object_box = id(new PHUIObjectBoxView())
-        ->setHeader($header)
-        ->addContent($actions)
-        ->addContent($properties);
+      ->setHeader($header)
+      ->setActionList($actions)
+      ->setPropertyList($properties);
 
     return $object_box;
   }

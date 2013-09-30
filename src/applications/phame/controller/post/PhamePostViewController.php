@@ -50,8 +50,8 @@ final class PhamePostViewController extends PhameController {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addContent($actions)
-      ->addContent($properties);
+      ->setActionList($actions)
+      ->setPropertyList($properties);
 
     if ($post->isDraft()) {
       $object_box->appendChild(

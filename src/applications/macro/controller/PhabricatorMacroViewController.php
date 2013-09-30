@@ -93,13 +93,13 @@ final class PhabricatorMacroViewController
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addContent($actions)
-      ->addContent($properties);
+      ->setActionList($actions)
+      ->setPropertyList($properties);
 
     $comment_box = id(new PHUIObjectBoxView())
       ->setFlush(true)
       ->setHeader($add_comment_header)
-      ->addContent($add_comment_form);
+      ->appendChild($add_comment_form);
 
     return $this->buildApplicationPage(
       array(

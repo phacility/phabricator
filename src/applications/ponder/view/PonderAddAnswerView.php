@@ -45,6 +45,6 @@ final class PonderAddAnswerView extends AphrontView {
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addContent($form);
+      ->appendChild($form);
   }
 }

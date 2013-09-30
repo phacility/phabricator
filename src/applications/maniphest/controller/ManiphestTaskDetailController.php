@@ -365,13 +365,13 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addContent($actions)
-      ->addContent($properties);
+      ->setActionList($actions)
+      ->setPropertyList($properties);
 
     $comment_box = id(new PHUIObjectBoxView())
       ->setFlush(true)
       ->setHeader($comment_header)
-      ->addContent($comment_form);
+      ->appendChild($comment_form);
 
     return $this->buildApplicationPage(
       array(

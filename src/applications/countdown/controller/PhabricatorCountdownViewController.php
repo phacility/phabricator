@@ -49,8 +49,8 @@ final class PhabricatorCountdownViewController
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addContent($actions)
-      ->addContent($properties);
+      ->setActionList($actions)
+      ->setPropertyList($properties);
 
     $content = array(
       $crumbs,

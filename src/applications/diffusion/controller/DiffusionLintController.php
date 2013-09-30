@@ -168,8 +168,8 @@ final class DiffusionLintController extends DiffusionController {
 
       $object_box = id(new PHUIObjectBoxView())
         ->setHeader($header)
-        ->addContent($actions)
-        ->addContent($properties);
+        ->setActionList($actions)
+        ->setPropertyList($properties);
     } else {
       $object_box = null;
     }

@@ -100,8 +100,8 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($this->buildHeaderView($drequest))
-      ->addContent($this->buildActionView($drequest))
-      ->addContent($this->buildPropertyView($drequest));
+      ->setActionList($this->buildActionView($drequest))
+      ->setPropertyList($this->buildPropertyView($drequest));
 
     // Render the page.
     $content = array();

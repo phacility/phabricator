@@ -239,7 +239,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Table of Contents'))
-      ->addContent($content);
+      ->appendChild($content);
   }
 
   private function renderRename($display_file, $other_file, $arrow) {

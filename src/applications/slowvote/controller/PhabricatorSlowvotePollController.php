@@ -59,8 +59,8 @@ final class PhabricatorSlowvotePollController
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addContent($actions)
-      ->addContent($properties);
+      ->setActionList($actions)
+      ->setPropertyList($properties);
 
     return $this->buildApplicationPage(
       array(
@@ -181,7 +181,7 @@ final class PhabricatorSlowvotePollController
     return id(new PHUIObjectBoxView())
       ->setFlush(true)
       ->setHeader($add_comment_header)
-      ->addContent($add_comment_form);
+      ->appendChild($add_comment_form);
 
   }
 

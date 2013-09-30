@@ -105,8 +105,8 @@ final class PholioMockViewController extends PholioController {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addContent($actions)
-      ->addContent($properties);
+      ->setActionList($actions)
+      ->setPropertyList($properties);
 
     $content = array(
       $crumbs,
@@ -257,7 +257,7 @@ final class PholioMockViewController extends PholioController {
     return id(new PHUIObjectBoxView())
       ->setFlush(true)
       ->setHeader($header)
-      ->addContent($form);
+      ->appendChild($form);
   }
 
 }

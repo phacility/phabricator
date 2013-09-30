@@ -51,8 +51,8 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addContent($actions)
-      ->addContent($properties);
+      ->setActionList($actions)
+      ->setPropertyList($properties);
 
     return $this->buildApplicationPage(
       array(
@@ -113,7 +113,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     $comment_box = id(new PHUIObjectBoxView())
       ->setFlush(true)
       ->setHeader($add_comment_header)
-      ->addContent($add_comment_form);
+      ->appendChild($add_comment_form);
 
     return array(
       $timeline,

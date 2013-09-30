@@ -136,9 +136,8 @@ final class DifferentialLocalCommitsView extends AphrontView {
       phutil_implode_html("\n", $rows));
 
     return id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('Local Commits'))
-        ->addContent($content);
-
+      ->setHeaderText(pht('Local Commits'))
+      ->appendChild($content);
   }
 
   private static function formatCommit($commit) {

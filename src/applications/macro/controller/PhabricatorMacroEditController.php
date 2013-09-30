@@ -258,8 +258,8 @@ final class PhabricatorMacroEditController
             ->setValue(pht('Upload File')));
 
       $upload = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Upload New File'))
-      ->setForm($upload_form);
+        ->setHeaderText(pht('Upload New File'))
+        ->setForm($upload_form);
     }
 
     $form_box = id(new PHUIObjectBoxView())

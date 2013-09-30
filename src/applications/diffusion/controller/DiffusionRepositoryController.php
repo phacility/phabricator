@@ -176,8 +176,8 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addContent($actions)
-      ->addContent($view);
+      ->setActionList($actions)
+      ->setPropertyList($view);
 
   }
 

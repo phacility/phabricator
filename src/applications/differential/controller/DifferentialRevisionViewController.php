@@ -872,7 +872,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Open Revisions Affecting These Files'))
-      ->addContent($view);
+      ->appendChild($view);
   }
 
   /**

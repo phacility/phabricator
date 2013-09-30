@@ -170,9 +170,8 @@ final class ReleephBranchViewController extends ReleephProjectController
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addContent($actions)
-      ->addContent($properties);
-
+      ->setActionList($actions)
+      ->setPropertyList($properties);
   }
 
 }

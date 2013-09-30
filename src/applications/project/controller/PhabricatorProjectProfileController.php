@@ -74,8 +74,8 @@ final class PhabricatorProjectProfileController
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addContent($actions)
-      ->addContent($properties);
+      ->setActionList($actions)
+      ->setPropertyList($properties);
 
     return $this->buildApplicationPage(
       array(
@@ -182,7 +182,7 @@ final class PhabricatorProjectProfileController
 
     $content = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Open Tasks'))
-      ->addContent($list);
+      ->appendChild($list);
 
     return $content;
   }

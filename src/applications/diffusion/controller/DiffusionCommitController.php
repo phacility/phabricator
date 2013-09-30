@@ -140,8 +140,8 @@ final class DiffusionCommitController extends DiffusionController {
 
       $object_box = id(new PHUIObjectBoxView())
         ->setHeader($headsup_view)
-        ->addContent($headsup_actions)
-        ->addContent($property_list);
+        ->setActionList($headsup_actions)
+        ->setPropertyList($property_list);
 
       $content[] = $object_box;
     }
@@ -743,7 +743,7 @@ final class DiffusionCommitController extends DiffusionController {
 
     $comment_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addContent($form);
+      ->appendChild($form);
 
     return phutil_tag(
       'div',

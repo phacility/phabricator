@@ -88,8 +88,8 @@ final class LegalpadDocumentViewController extends LegalpadController {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addContent($actions)
-      ->addContent($properties);
+      ->setActionList($actions)
+      ->setPropertyList($properties);
 
     $content = array(
       $crumbs,
@@ -216,7 +216,7 @@ final class LegalpadDocumentViewController extends LegalpadController {
     return id(new PHUIObjectBoxView())
       ->setFlush(true)
       ->setHeader($header)
-      ->addContent($form);
+      ->appendChild($form);
 
   }
 

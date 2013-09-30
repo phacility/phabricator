@@ -52,8 +52,8 @@ final class PonderQuestionViewController extends PonderController {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addContent($actions)
-      ->addContent($properties);
+      ->setActionList($actions)
+      ->setPropertyList($properties);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
     $crumbs->setActionList($actions);
@@ -214,7 +214,7 @@ final class PonderQuestionViewController extends PonderController {
     $object_box = id(new PHUIObjectBoxView())
       ->setFlush(true)
       ->setHeaderText(pht('Question Comment'))
-      ->addContent($add_comment);
+      ->appendChild($add_comment);
 
     return $this->wrapComments(
       count($xactions),
@@ -269,8 +269,8 @@ final class PonderQuestionViewController extends PonderController {
 
       $object_box = id(new PHUIObjectBoxView())
         ->setHeader($header)
-        ->addContent($actions)
-        ->addContent($properties);
+        ->setActionList($actions)
+        ->setPropertyList($properties);
 
       $out[] = $object_box;
       $details = array();
@@ -291,7 +291,7 @@ final class PonderQuestionViewController extends PonderController {
       $comment_box = id(new PHUIObjectBoxView())
         ->setFlush(true)
         ->setHeaderText(pht('Answer Comment'))
-        ->addContent($form);
+        ->appendChild($form);
 
       $details[] = $comment_box;
 

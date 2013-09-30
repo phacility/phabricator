@@ -219,8 +219,8 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       pht('Show Diff'));
 
     return id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('Revision Update History'))
-        ->addContent($content);
+      ->setHeaderText(pht('Revision Update History'))
+      ->appendChild($content);
   }
 
   const STAR_NONE = 'none';

@@ -24,8 +24,8 @@ final class DiffusionBrowseDirectoryController
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($this->buildHeaderView($drequest))
-      ->addContent($this->buildActionView($drequest))
-      ->addContent($this->buildPropertyView($drequest));
+      ->setActionList($this->buildActionView($drequest))
+      ->setPropertyList($this->buildPropertyView($drequest));
 
     $content[] = $object_box;
     $content[] = $this->renderSearchForm($collapsed = true);
@@ -77,7 +77,7 @@ final class DiffusionBrowseDirectoryController
 
       $object_box = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('README'))
-        ->addContent($box);
+        ->appendChild($box);
 
       $content[] = $object_box;
     }

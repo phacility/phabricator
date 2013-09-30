@@ -34,8 +34,8 @@ final class HeraldRuleViewController extends HeraldController {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addContent($actions)
-      ->addContent($properties);
+      ->setActionList($actions)
+      ->setPropertyList($properties);
 
     return $this->buildApplicationPage(
       array(

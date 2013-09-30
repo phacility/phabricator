@@ -195,9 +195,9 @@ final class DifferentialAddCommentView extends AphrontView {
 
     $comment_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addContent($anchor)
-      ->addContent($warn)
-      ->addContent($form);
+      ->appendChild($anchor)
+      ->appendChild($warn)
+      ->appendChild($form);
 
     return array($comment_box, $preview);
   }
