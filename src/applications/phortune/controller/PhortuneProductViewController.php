@@ -81,12 +81,15 @@ final class PhortuneProductViewController extends PhortuneController {
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setActionList($actions)
+      ->setPropertyList($properties);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
-        $actions,
-        $properties,
+        $object_box,
         $xaction_view,
       ),
       array(

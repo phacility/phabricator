@@ -82,9 +82,10 @@ final class PhabricatorMacroEditController
           $errors[] = pht('Could not fetch URL: %s', $ex->getMessage());
         }
       } else if ($request->getStr('phid')) {
-        $file = id(new PhabricatorFile())->loadOneWhere(
-          'phid = %s',
-          $request->getStr('phid'));
+        $file = id(new PhabricatorFileQuery())
+          ->setViewer($user)
+          ->withPHIDs(array($request->getStr('phid')))
+          ->executeOne();
       }
 
       if ($file) {
@@ -258,8 +259,8 @@ final class PhabricatorMacroEditController
             ->setValue(pht('Upload File')));
 
       $upload = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Upload New File'))
-      ->setForm($upload_form);
+        ->setHeaderText(pht('Upload New File'))
+        ->setForm($upload_form);
     }
 
     $form_box = id(new PHUIObjectBoxView())

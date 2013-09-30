@@ -77,9 +77,7 @@
 }
 
 .aphront-panel-preview {
-  background: #fbfbfb;
-  border-bottom: 1px solid {$greyborder};
-  padding: 15px 20px;
+  padding: 16px;
 }
 
 .device-phone .aphront-panel-preview {
@@ -124,4 +122,3 @@
   font-size: 12px;
   color: {$greytext};
 }
-

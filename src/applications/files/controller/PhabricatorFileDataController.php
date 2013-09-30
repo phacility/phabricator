@@ -25,9 +25,10 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
         ->setURI($uri->setPath($request->getPath()));
     }
 
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'phid = %s',
-      $this->phid);
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($request->getUser())
+      ->withPHIDs(array($this->phid))
+      ->executeOne();
     if (!$file) {
       return new Aphront404Response();
     }
@@ -40,6 +41,20 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     $response = new AphrontFileResponse();
     $response->setContent($data);
     $response->setCacheDurationInSeconds(60 * 60 * 24 * 30);
+
+    // NOTE: It's important to accept "Range" requests when playing audio.
+    // If we don't, Safari has difficulty figuring out how long sounds are
+    // and glitches when trying to loop them. In particular, Safari sends
+    // an initial request for bytes 0-1 of the audio file, and things go south
+    // if we can't respond with a 206 Partial Content.
+    $range = $request->getHTTPHeader('range');
+    if ($range) {
+      $matches = null;
+      if (preg_match('/^bytes=(\d+)-(\d+)$/', $range, $matches)) {
+        $response->setHTTPResponseCode(206);
+        $response->setRange((int)$matches[1], (int)$matches[2]);
+      }
+    }
 
     $is_viewable = $file->isViewableInBrowser();
     $force_download = $request->getExists('download');

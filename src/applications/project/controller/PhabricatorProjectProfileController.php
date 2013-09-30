@@ -72,12 +72,15 @@ final class PhabricatorProjectProfileController
       id(new PhabricatorCrumbView())
         ->setName($project->getName()));
 
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setActionList($actions)
+      ->setPropertyList($properties);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
-        $actions,
-        $properties,
+        $object_box,
         $content,
       ),
       array(
@@ -173,15 +176,13 @@ final class PhabricatorProjectProfileController
     $task_list->setTasks($tasks);
     $task_list->setHandles($handles);
 
-    $content = hsprintf(
-      '<div class="phabricator-profile-info-group profile-wrap-responsive">
-        <h1 class="phabricator-profile-info-header">%s</h1>'.
-        '<div class="phabricator-profile-info-pane">'.
-          '%s'.
-        '</div>
-      </div>',
-      pht('Open Tasks'),
-      $task_list);
+    $list = id(new PHUIBoxView())
+      ->addPadding(PHUI::PADDING_LARGE)
+      ->appendChild($task_list);
+
+    $content = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Open Tasks'))
+      ->appendChild($list);
 
     return $content;
   }

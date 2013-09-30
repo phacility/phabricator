@@ -209,7 +209,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $comment_form = new AphrontFormView();
     $comment_form
       ->setUser($user)
-      ->setShaded(true)
       ->setAction('/maniphest/transaction/save/')
       ->setEncType('multipart/form-data')
       ->addHiddenInput('taskID', $task->getID())
@@ -364,16 +363,23 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $preview_panel = null;
     }
 
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setActionList($actions)
+      ->setPropertyList($properties);
+
+    $comment_box = id(new PHUIObjectBoxView())
+      ->setFlush(true)
+      ->setHeader($comment_header)
+      ->appendChild($comment_form);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $context_bar,
-        $header,
-        $actions,
-        $properties,
+        $object_box,
         $timeline,
-        $comment_header,
-        $comment_form,
+        $comment_box,
         $preview_panel,
       ),
       array(
@@ -605,9 +611,12 @@ final class ManiphestTaskDetailController extends ManiphestController {
     if ($file_infos) {
       $file_phids = array_keys($file_infos);
 
-      $files = id(new PhabricatorFile())->loadAllWhere(
-        'phid IN (%Ls)',
-        $file_phids);
+      // TODO: These should probably be handles or something; clean this up
+      // as we sort out file attachments.
+      $files = id(new PhabricatorFileQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($file_phids)
+        ->execute();
 
       $file_view = new PhabricatorFileLinkListView();
       $file_view->setFiles($files);

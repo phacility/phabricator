@@ -157,3 +157,7 @@
 .device-desktop .phui-document-offset {
   padding-right: 160px;
 }
+
+.phui-document-view .phabricator-property-list-view {
+  border-bottom: 1px solid {$thinblueborder};
+}

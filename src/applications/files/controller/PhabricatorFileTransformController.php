@@ -18,8 +18,12 @@ final class PhabricatorFileTransformController
   }
 
   public function processRequest() {
+    $viewer = $this->getRequest()->getUser();
 
-    $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $this->phid);
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($this->phid))
+      ->executeOne();
     if (!$file) {
       return new Aphront404Response();
     }
@@ -125,20 +129,17 @@ final class PhabricatorFileTransformController
   private function buildTransformedFileResponse(
     PhabricatorTransformedFile $xform) {
 
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'phid = %s',
-      $xform->getTransformedPHID());
-    if ($file) {
-      $uri = $file->getBestURI();
-    } else {
-      $bad_phid = $xform->getTransformedPHID();
-      throw new Exception(
-        "Unable to load file with phid {$bad_phid}."
-      );
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($this->getRequest()->getUser())
+      ->withPHIDs(array($xform->getTransformedPHID()))
+      ->executeOne();
+    if (!$file) {
+      return new Aphront404Response();
     }
 
     // TODO: We could just delegate to the file view controller instead,
     // which would save the client a roundtrip, but is slightly more complex.
+    $uri = $file->getBestURI();
     return id(new AphrontRedirectResponse())->setURI($uri);
   }
 

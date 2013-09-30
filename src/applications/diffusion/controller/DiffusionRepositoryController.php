@@ -174,7 +174,11 @@ final class DiffusionRepositoryController extends DiffusionController {
       $view->addTextContent($description);
     }
 
-    return array($header, $actions, $view);
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setActionList($actions)
+      ->setPropertyList($view);
+
   }
 
   private function buildBranchListTable(DiffusionRequest $drequest) {

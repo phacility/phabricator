@@ -870,33 +870,11 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
-    return array(
-      id(new PHUIHeaderView())
-        ->setHeader(pht('Open Revisions Affecting These Files')),
-      $view,
-    );
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Open Revisions Affecting These Files'))
+      ->appendChild($view);
   }
 
-  /**
-   * Straight copy of the loadFileByPhid method in
-   * @{class:DifferentialReviewRequestMail}.
-   *
-   * This is because of the code similarity between the buildPatch method in
-   * @{class:DifferentialReviewRequestMail} and @{method:buildRawDiffResponse}
-   * in this class. Both of these methods end up using call_user_func and this
-   * piece of code is the lucky function.
-   *
-   * @return mixed (@{class:PhabricatorFile} if found, null if not)
-   */
-  public function loadFileByPHID($phid) {
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'phid = %s',
-      $phid);
-    if (!$file) {
-      return null;
-    }
-    return $file->loadFileData();
-  }
 
   /**
    * Note this code is somewhat similar to the buildPatch method in
@@ -912,6 +890,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     assert_instances_of($changesets,    'DifferentialChangeset');
     assert_instances_of($vs_changesets, 'DifferentialChangeset');
+
+    $viewer = $this->getRequest()->getUser();
 
     $engine = new PhabricatorDifferenceEngine();
     $generated_changesets = array();
@@ -955,9 +935,12 @@ final class DifferentialRevisionViewController extends DifferentialController {
     foreach ($raw_changes as $changedict) {
       $changes[] = ArcanistDiffChange::newFromDictionary($changedict);
     }
-    $bundle = ArcanistBundle::newFromChanges($changes);
 
-    $bundle->setLoadFileDataCallback(array($this, 'loadFileByPHID'));
+    $loader = id(new PhabricatorFileBundleLoader())
+      ->setViewer($viewer);
+
+    $bundle = ArcanistBundle::newFromChanges($changes);
+    $bundle->setLoadFileDataCallback(array($loader, 'loadFileData'));
 
     $vcs = $repository ? $repository->getVersionControlSystem() : null;
     switch ($vcs) {

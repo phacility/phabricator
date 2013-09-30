@@ -329,9 +329,10 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
     $files = array();
     if ($file_phids) {
-      $files = id(new PhabricatorFile())->loadAllWhere(
-        'phid IN (%Ls)',
-        $file_phids);
+      $files = id(new PhabricatorFileQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withPHIDs($file_phids)
+        ->execute();
       $files = mpull($files, null, 'getPHID');
     }
 

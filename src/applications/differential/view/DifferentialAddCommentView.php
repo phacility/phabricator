@@ -71,7 +71,6 @@ final class DifferentialAddCommentView extends AphrontView {
     $form
       ->setWorkflow(true)
       ->setUser($this->user)
-      ->setShaded(true)
       ->setAction($this->actionURI)
       ->addHiddenInput('revision_id', $revision->getID())
       ->appendChild(
@@ -176,25 +175,30 @@ final class DifferentialAddCommentView extends AphrontView {
     $header = id(new PHUIHeaderView())
       ->setHeader($is_serious ? pht('Add Comment') : pht('Leap Into Action'));
 
-    return hsprintf(
-      '%s'.
-      '<div class="differential-add-comment-panel">'.
-        '%s%s%s'.
+    $anchor = id(new PhabricatorAnchorView())
+        ->setAnchorName('comment')
+        ->setNavigationMarker(true);
+
+    $warn = phutil_tag('div', array('id' => 'warnings'), $warning_container);
+
+    $preview = hsprintf(
         '<div class="aphront-panel-preview aphront-panel-flush">'.
           '<div id="comment-preview">'.
             '<span class="aphront-panel-preview-loading-text">%s</span>'.
           '</div>'.
           '<div id="inline-comment-preview">'.
           '</div>'.
-        '</div>'.
-      '</div>',
-      id(new PhabricatorAnchorView())
-        ->setAnchorName('comment')
-        ->setNavigationMarker(true)
-        ->render(),
-      $header->render(),
-      $form->render(),
-      phutil_tag('div', array('id' => 'warnings'), $warning_container),
+        '</div>',
       pht('Loading comment preview...'));
+
+
+
+    $comment_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($anchor)
+      ->appendChild($warn)
+      ->appendChild($form);
+
+    return array($comment_box, $preview);
   }
 }

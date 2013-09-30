@@ -42,7 +42,7 @@ final class DifferentialRepositoryLookup extends Phobject {
     if ($diff->getRepositoryUUID()) {
       $repositories = id(new PhabricatorRepositoryQuery())
         ->setViewer($viewer)
-        ->withUUIDs($diff->getRepositoryUUID())
+        ->withUUIDs(array($diff->getRepositoryUUID()))
         ->execute();
       if ($repositories) {
         return head($repositories);

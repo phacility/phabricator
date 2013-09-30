@@ -10,6 +10,8 @@ final class PhabricatorMacroEditor
     $types[] = PhabricatorMacroTransactionType::TYPE_NAME;
     $types[] = PhabricatorMacroTransactionType::TYPE_DISABLED;
     $types[] = PhabricatorMacroTransactionType::TYPE_FILE;
+    $types[] = PhabricatorMacroTransactionType::TYPE_AUDIO;
+    $types[] = PhabricatorMacroTransactionType::TYPE_AUDIO_BEHAVIOR;
 
     return $types;
   }
@@ -25,6 +27,10 @@ final class PhabricatorMacroEditor
         return $object->getIsDisabled();
       case PhabricatorMacroTransactionType::TYPE_FILE:
         return $object->getFilePHID();
+      case PhabricatorMacroTransactionType::TYPE_AUDIO:
+        return $object->getAudioPHID();
+      case PhabricatorMacroTransactionType::TYPE_AUDIO_BEHAVIOR:
+        return $object->getAudioBehavior();
     }
   }
 
@@ -36,6 +42,8 @@ final class PhabricatorMacroEditor
       case PhabricatorMacroTransactionType::TYPE_NAME:
       case PhabricatorMacroTransactionType::TYPE_DISABLED:
       case PhabricatorMacroTransactionType::TYPE_FILE:
+      case PhabricatorMacroTransactionType::TYPE_AUDIO:
+      case PhabricatorMacroTransactionType::TYPE_AUDIO_BEHAVIOR:
         return $xaction->getNewValue();
     }
   }
@@ -53,6 +61,12 @@ final class PhabricatorMacroEditor
         break;
       case PhabricatorMacroTransactionType::TYPE_FILE:
         $object->setFilePHID($xaction->getNewValue());
+        break;
+      case PhabricatorMacroTransactionType::TYPE_AUDIO:
+        $object->setAudioPHID($xaction->getNewValue());
+        break;
+      case PhabricatorMacroTransactionType::TYPE_AUDIO_BEHAVIOR:
+        $object->setAudioBehavior($xaction->getNewValue());
         break;
     }
   }
@@ -72,6 +86,8 @@ final class PhabricatorMacroEditor
       case PhabricatorMacroTransactionType::TYPE_NAME:
       case PhabricatorMacroTransactionType::TYPE_DISABLED:
       case PhabricatorMacroTransactionType::TYPE_FILE:
+      case PhabricatorMacroTransactionType::TYPE_AUDIO:
+      case PhabricatorMacroTransactionType::TYPE_AUDIO_BEHAVIOR:
         return $v;
     }
 

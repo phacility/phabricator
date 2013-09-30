@@ -49,12 +49,15 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
         ->setName('F'.$file->getID())
         ->setHref($this->getApplicationURI("/info/{$phid}/")));
 
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setActionList($actions)
+      ->setPropertyList($properties);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
-        $actions,
-        $properties,
+        $object_box,
         $timeline
       ),
       array(
@@ -107,10 +110,14 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       ->setAction($this->getApplicationURI('/comment/'.$file->getID().'/'))
       ->setSubmitButtonName($submit_button_name);
 
+    $comment_box = id(new PHUIObjectBoxView())
+      ->setFlush(true)
+      ->setHeader($add_comment_header)
+      ->appendChild($add_comment_form);
+
     return array(
       $timeline,
-      $add_comment_header,
-      $add_comment_form);
+      $comment_box);
   }
 
   private function buildActionView(PhabricatorFile $file) {

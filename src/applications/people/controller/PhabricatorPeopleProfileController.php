@@ -76,12 +76,15 @@ final class PhabricatorPeopleProfileController
         ->setName($user->getUsername()));
     $feed = $this->renderUserFeed($user);
 
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setActionList($actions)
+      ->setPropertyList($properties);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
-        $actions,
-        $properties,
+        $object_box,
         $feed,
       ),
       array(

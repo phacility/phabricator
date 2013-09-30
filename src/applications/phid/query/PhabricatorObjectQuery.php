@@ -5,6 +5,7 @@ final class PhabricatorObjectQuery
 
   private $phids = array();
   private $names = array();
+  private $types;
 
   private $namedResults;
 
@@ -18,12 +19,20 @@ final class PhabricatorObjectQuery
     return $this;
   }
 
+  public function withTypes(array $types) {
+    $this->types = $types;
+    return $this;
+  }
+
   public function loadPage() {
     if ($this->namedResults === null) {
       $this->namedResults = array();
     }
 
     $types = PhabricatorPHIDType::getAllTypes();
+    if ($this->types) {
+      $types = array_select_keys($types, $this->types);
+    }
 
     $names = array_unique($this->names);
     $phids = $this->phids;

@@ -10,10 +10,14 @@ final class PhabricatorFileShortcutController
   }
 
   public function processRequest() {
-    $file = id(new PhabricatorFile())->load($this->id);
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($this->getRequest()->getUser())
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$file) {
       return new Aphront404Response();
     }
+
     return id(new AphrontRedirectResponse())->setURI($file->getBestURI());
   }
 

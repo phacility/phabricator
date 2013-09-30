@@ -132,9 +132,12 @@ final class PholioMockQuery
   private function loadCoverFiles(array $mocks) {
     assert_instances_of($mocks, 'PholioMock');
     $cover_file_phids = mpull($mocks, 'getCoverPHID');
-    $cover_files = mpull(id(new PhabricatorFile())->loadAllWhere(
-      'phid IN (%Ls)',
-      $cover_file_phids), null, 'getPHID');
+    $cover_files = id(new PhabricatorFileQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs($cover_file_phids)
+      ->execute();
+
+    $cover_files = mpull($cover_files, null, 'getPHID');
 
     foreach ($mocks as $mock) {
       $file = idx($cover_files, $mock->getCoverPHID());

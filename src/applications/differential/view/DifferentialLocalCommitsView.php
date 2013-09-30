@@ -128,18 +128,16 @@ final class DifferentialLocalCommitsView extends AphrontView {
 
     $headers = phutil_tag('tr', array(), $headers);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Local Commits'))
-      ->render();
-
-    return hsprintf(
-      '%s'.
+    $content = hsprintf(
       '<div class="differential-panel">'.
         '<table class="differential-local-commits-table">%s%s</table>'.
       '</div>',
-      $header,
       $headers,
       phutil_implode_html("\n", $rows));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Local Commits'))
+      ->appendChild($content);
   }
 
   private static function formatCommit($commit) {

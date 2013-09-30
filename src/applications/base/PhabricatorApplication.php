@@ -270,7 +270,10 @@ abstract class PhabricatorApplication {
       // ensures their event handlers register in application order.
       $apps = msort($apps, 'getApplicationOrder');
       $apps = mgroup($apps, 'getApplicationGroup');
-      $apps = array_select_keys($apps, self::getApplicationGroups()) + $apps;
+
+      $group_order = array_keys(self::getApplicationGroups());
+      $apps = array_select_keys($apps, $group_order) + $apps;
+
       $apps = array_mergev($apps);
 
       $applications = $apps;

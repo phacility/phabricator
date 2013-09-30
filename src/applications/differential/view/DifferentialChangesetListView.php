@@ -200,16 +200,19 @@ final class DifferentialChangesetListView extends AphrontView {
         ->setHeader($this->getTitle());
     }
 
-    return array(
-      $header,
-      phutil_tag(
-        'div',
-        array(
-          'class' => 'differential-review-stage',
-          'id'    => 'differential-review-stage',
-        ),
-        $output),
-    );
+    $content = phutil_tag(
+      'div',
+      array(
+        'class' => 'differential-review-stage',
+        'id'    => 'differential-review-stage',
+      ),
+      $output);
+
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($content);
+
+    return $object_box;
   }
 
   /**

@@ -22,10 +22,12 @@ final class DiffusionBrowseDirectoryController
 
     $content = array();
 
-    $content[] = $this->buildHeaderView($drequest);
-    $content[] = $this->buildActionView($drequest);
-    $content[] = $this->buildPropertyView($drequest);
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($this->buildHeaderView($drequest))
+      ->setActionList($this->buildActionView($drequest))
+      ->setPropertyList($this->buildPropertyView($drequest));
 
+    $content[] = $object_box;
     $content[] = $this->renderSearchForm($collapsed = true);
 
     if (!$results->isValidResults()) {
@@ -70,18 +72,14 @@ final class DiffusionBrowseDirectoryController
       ));
     if ($readme) {
       $box = new PHUIBoxView();
-      $box->setShadow(true);
       $box->appendChild($readme);
       $box->addPadding(PHUI::PADDING_LARGE);
-      $box->addMargin(PHUI::MARGIN_LARGE);
 
-      $header = id(new PHUIHeaderView())
-        ->setHeader(pht('README'));
+      $object_box = id(new PHUIObjectBoxView())
+        ->setHeaderText(pht('README'))
+        ->appendChild($box);
 
-      $content[] = array(
-        $header,
-        $box,
-      );
+      $content[] = $object_box;
     }
 
     $crumbs = $this->buildCrumbs(

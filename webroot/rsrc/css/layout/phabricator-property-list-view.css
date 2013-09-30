@@ -3,7 +3,7 @@
  */
 
 .phabricator-property-list-view {
-  background-color: {$lightgreybackground};
+  background-color: #fff;
 }
 
 .phabricator-property-list-view .keyboard-shortcuts-available {
@@ -19,18 +19,19 @@
     url('/rsrc/image/icon/fatcow/key_question.png') right center no-repeat;
 }
 
-.phabricator-property-list-container {
+.phabricator-property-list-container +
+  .phabricator-property-list-section-header {
   border-color: {$lightgreyborder};
   border-style: solid;
-  border-width: 0 0 1px;
+  border-width: 1px 0 0;
 }
 
 .device-desktop .phabricator-property-list-container {
-  padding: 12px 0 4px 0;
+  padding: 12px 0 12px 0;
 }
 
 .device .phabricator-property-list-container {
-  padding: 12px 0 0 0;
+  padding: 12px 0 4px 0;
 }
 
 .phabricator-property-list-key {
@@ -76,25 +77,22 @@
 }
 
 .phabricator-property-list-section-header {
-  color: #9CA5B5;
+  color: {$bluetext};
   padding: 12px 16px 0px;
   text-transform: uppercase;
   font-weight: 700;
 }
 
+.phabricator-property-list-section-header + .phabricator-property-list-text-content {
+  border-top: none;
+}
+
 .phabricator-property-list-text-content {
   padding: 12px 16px;
-  background: {$lightgreybackground};
-  border-bottom: 1px solid {$lightgreyborder};
+  background: #fff;
   overflow: hidden;
+  border-top: 1px solid {$lightblueborder};
 }
-
-.phabricator-property-list-image-content {
-  background: #282828;
-  border-color: #101010;
-  color: #fff;
-}
-
 
 /* In the common case where we immediately follow a header, move back up 30px
    so we snuggle next to the header. */

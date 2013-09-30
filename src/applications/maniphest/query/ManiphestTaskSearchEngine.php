@@ -20,6 +20,10 @@ final class ManiphestTaskSearchEngine
       'authorPHIDs',
       $this->readUsersFromRequest($request, 'authors'));
 
+    $saved->setParameter(
+      'subscriberPHIDs',
+      $this->readUsersFromRequest($request, 'subscribers'));
+
     $saved->setParameter('statuses', $request->getArr('statuses'));
     $saved->setParameter('priorities', $request->getArr('priorities'));
     $saved->setParameter('group', $request->getStr('group'));
@@ -77,6 +81,11 @@ final class ManiphestTaskSearchEngine
     $author_phids = $saved->getParameter('authorPHIDs');
     if ($author_phids) {
       $query->withAuthors($author_phids);
+    }
+
+    $subscriber_phids = $saved->getParameter('subscriberPHIDs');
+    if ($subscriber_phids) {
+      $query->withSubscribers($subscriber_phids);
     }
 
     $with_unassigned = $saved->getParameter('withUnassigned');
@@ -184,6 +193,7 @@ final class ManiphestTaskSearchEngine
     $user_project_phids = $saved->getParameter(
       'userProjectPHIDs',
       array());
+    $subscriber_phids = $saved->getParameter('subscriberPHIDs', array());
 
     $all_phids = array_merge(
       $assigned_phids,
@@ -191,7 +201,8 @@ final class ManiphestTaskSearchEngine
       $all_project_phids,
       $any_project_phids,
       $exclude_project_phids,
-      $user_project_phids);
+      $user_project_phids,
+      $subscriber_phids);
 
     if ($all_phids) {
       $handles = id(new PhabricatorHandleQuery())
@@ -210,6 +221,7 @@ final class ManiphestTaskSearchEngine
       $handles,
       $exclude_project_phids);
     $user_project_handles = array_select_keys($handles, $user_project_phids);
+    $subscriber_handles = array_select_keys($handles, $subscriber_phids);
 
     $with_unassigned = $saved->getParameter('withUnassigned');
     $with_no_projects = $saved->getParameter('withNoProject');
@@ -291,6 +303,12 @@ final class ManiphestTaskSearchEngine
           ->setName('authors')
           ->setLabel(pht('Authors'))
           ->setValue($author_handles))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource('/typeahead/common/accounts/')
+          ->setName('subscribers')
+          ->setLabel(pht('Subscribers'))
+          ->setValue($subscriber_handles))
       ->appendChild($status_control)
       ->appendChild($priority_control)
       ->appendChild(

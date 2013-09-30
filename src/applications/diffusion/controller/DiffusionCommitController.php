@@ -137,9 +137,13 @@ final class DiffusionCommitController extends DiffusionController {
           ),
           $message));
       $content[] = $top_anchor;
-      $content[] = $headsup_view;
-      $content[] = $headsup_actions;
-      $content[] = $property_list;
+
+      $object_box = id(new PHUIObjectBoxView())
+        ->setHeader($headsup_view)
+        ->setActionList($headsup_actions)
+        ->setPropertyList($property_list);
+
+      $content[] = $object_box;
     }
 
     $content[] = $this->buildComments($commit);
@@ -646,7 +650,6 @@ final class DiffusionCommitController extends DiffusionController {
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setShaded(true)
       ->setAction('/audit/addcomment/')
       ->addHiddenInput('commit', $commit->getPHID())
       ->appendChild(
@@ -738,19 +741,22 @@ final class DiffusionCommitController extends DiffusionController {
     // Differential better.
     require_celerity_resource('differential-core-view-css');
 
+    $comment_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($form);
+
     return phutil_tag(
       'div',
       array(
         'id' => $pane_id,
       ),
       hsprintf(
-        '<div class="differential-add-comment-panel">%s%s%s%s</div>',
+        '<div class="differential-add-comment-panel">%s%s%s</div>',
         id(new PhabricatorAnchorView())
           ->setAnchorName('comment')
           ->setNavigationMarker(true)
           ->render(),
-        $header,
-        $form,
+        $comment_box,
         $preview_panel));
   }
 

@@ -111,11 +111,12 @@ final class DifferentialRevisionDetailView extends AphrontView {
     }
     $properties->setHasKeyboardShortcuts(true);
 
-    return hsprintf(
-      '%s%s%s',
-      $header->render(),
-      $actions->render(),
-      $properties->render());
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setActionList($actions)
+      ->setPropertyList($properties);
+
+    return $object_box;
   }
 
   private function renderHeader(DifferentialRevision $revision) {

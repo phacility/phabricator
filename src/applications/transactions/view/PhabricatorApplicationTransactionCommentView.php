@@ -148,7 +148,6 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       ->setUser($this->getUser())
       ->addSigil('transaction-append')
       ->setWorkflow(true)
-      ->setShaded(true)
       ->setMetadata(
         array(
           'objectPHID' => $this->getObjectPHID(),

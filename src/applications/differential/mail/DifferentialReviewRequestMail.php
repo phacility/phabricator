@@ -104,6 +104,7 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
   }
 
   public function loadFileByPHID($phid) {
+    // TODO: (T603) Factor this and the other one out.
     $file = id(new PhabricatorFile())->loadOneWhere(
       'phid = %s',
       $phid);
@@ -126,9 +127,15 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
     foreach ($raw_changes as $changedict) {
       $changes[] = ArcanistDiffChange::newFromDictionary($changedict);
     }
-    $bundle = ArcanistBundle::newFromChanges($changes);
 
-    $bundle->setLoadFileDataCallback(array($this, 'loadFileByPHID'));
+    // TODO: It would be nice to have a real viewer here eventually, but
+    // in the meantime anyone we're sending mail to can certainly see the
+    // patch.
+    $loader = id(new PhabricatorFileBundleLoader())
+      ->setViewer(PhabricatorUser::getOmnipotentUser());
+
+    $bundle = ArcanistBundle::newFromChanges($changes);
+    $bundle->setLoadFileDataCallback(array($loader, 'loadFileData'));
 
     $format = PhabricatorEnv::getEnvConfig('metamta.differential.patch-format');
     switch ($format) {

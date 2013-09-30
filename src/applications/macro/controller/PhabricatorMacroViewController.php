@@ -91,15 +91,22 @@ final class PhabricatorMacroViewController
       ->setAction($this->getApplicationURI('/comment/'.$macro->getID().'/'))
       ->setSubmitButtonName($submit_button_name);
 
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setActionList($actions)
+      ->setPropertyList($properties);
+
+    $comment_box = id(new PHUIObjectBoxView())
+      ->setFlush(true)
+      ->setHeader($add_comment_header)
+      ->appendChild($add_comment_form);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
-        $actions,
-        $properties,
+        $object_box,
         $timeline,
-        $add_comment_header,
-        $add_comment_form,
+        $comment_box,
       ),
       array(
         'title' => $title_short,
@@ -118,6 +125,12 @@ final class PhabricatorMacroViewController
         ->setName(pht('Edit Macro'))
         ->setHref($this->getApplicationURI('/edit/'.$macro->getID().'/'))
         ->setIcon('edit'));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Audio'))
+        ->setHref($this->getApplicationURI('/audio/'.$macro->getID().'/'))
+        ->setIcon('herald'));
 
     if ($macro->getIsDisabled()) {
       $view->addAction(
@@ -145,6 +158,25 @@ final class PhabricatorMacroViewController
     $view = id(new PhabricatorPropertyListView())
       ->setUser($this->getRequest()->getUser())
       ->setObject($macro);
+
+    switch ($macro->getAudioBehavior()) {
+      case PhabricatorFileImageMacro::AUDIO_BEHAVIOR_ONCE:
+        $view->addProperty(pht('Audio Behavior'), pht('Play Once'));
+        break;
+      case PhabricatorFileImageMacro::AUDIO_BEHAVIOR_LOOP:
+        $view->addProperty(pht('Audio Behavior'), pht('Loop'));
+        break;
+    }
+
+    $audio_phid = $macro->getAudioPHID();
+    if ($audio_phid) {
+      $this->loadHandles(array($audio_phid));
+
+      $view->addProperty(
+        pht('Audio'),
+        $this->getHandle($audio_phid)->renderLink());
+    }
+
 
     $view->invokeWillRenderEvent();
 

@@ -45,12 +45,15 @@ final class DrydockLeaseViewController extends DrydockController {
         ->setName($title)
         ->setHref($lease_uri));
 
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setActionList($actions)
+      ->setPropertyList($properties);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
-        $actions,
-        $properties,
+        $object_box,
         $log_table,
       ),
       array(

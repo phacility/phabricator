@@ -213,8 +213,8 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
       $editor_link,
       $reveal_link);
 
-    return hsprintf(
-      '%s%s'.
+    $content = hsprintf(
+      '%s'.
       '<div class="differential-toc differential-panel">'.
         '<table>'.
           '<tr>'.
@@ -232,13 +232,14 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
         ->setAnchorName('toc')
         ->setNavigationMarker(true)
         ->render(),
-      id(new PHUIHeaderView())
-        ->setHeader(pht('Table of Contents'))
-        ->render(),
       pht('Coverage (All)'),
       pht('Coverage (Touched)'),
       phutil_implode_html("\n", $rows),
       $buttons);
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Table of Contents'))
+      ->appendChild($content);
   }
 
   private function renderRename($display_file, $other_file, $arrow) {

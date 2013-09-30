@@ -1,0 +1,42 @@
+/**
+ * @provides phui-object-box-css
+ */
+
+.phui-object-box.phui-object-box-flush {
+  margin-top: 0;
+}
+
+.phui-object-box .phui-header-shell {
+  padding: 4px 5px 4px 12px;
+  border-bottom: 1px solid {$lightblueborder};
+  border-top: none;
+}
+
+.phui-object-box .phui-header-image {
+  margin: 5px 12px 5px 0;
+}
+
+.phui-object-box .phui-header-shell h1 {
+  color: {$bluetext};
+  text-shadow: 0 1px #fff;
+  padding: 8px 0;
+}
+
+.phui-object-box .aphront-error-view {
+  margin-bottom: 0;
+}
+
+.device-desktop .phui-object-box
+  .phui-header-shell + .phabricator-action-list-view {
+  margin-top: 0;
+  margin-bottom: -12px;
+  border-width: 0 0 0 1px;
+}
+
+.device-phone .phui-object-box {
+  margin-top: 0;
+}
+
+.device-phone .phui-object-box + .phui-object-box {
+  border-top: none;
+}

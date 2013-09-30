@@ -236,12 +236,10 @@ final class ReleephProjectViewController extends ReleephProjectController
         $this->renderHandlesForPHIDs($pushers));
     }
 
-    return array(
-      $header,
-      $actions,
-      $properties,
-    );
-
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setActionList($actions)
+      ->setPropertyList($properties);
   }
 
 }

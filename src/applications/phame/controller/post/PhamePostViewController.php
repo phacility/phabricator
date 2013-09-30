@@ -42,14 +42,19 @@ final class PhamePostViewController extends PhameController {
         ->setHref($this->getApplicationURI('post/view/'.$post->getID().'/')));
 
     $nav->appendChild($crumbs);
-    $nav->appendChild(
-      id(new PHUIHeaderView())
+
+    $header = id(new PHUIHeaderView())
         ->setHeader($post->getTitle())
         ->setUser($user)
-        ->setPolicyObject($post));
+        ->setPolicyObject($post);
+
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setActionList($actions)
+      ->setPropertyList($properties);
 
     if ($post->isDraft()) {
-      $nav->appendChild(
+      $object_box->appendChild(
         id(new AphrontErrorView())
           ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
           ->setTitle(pht('Draft Post'))
@@ -59,7 +64,7 @@ final class PhamePostViewController extends PhameController {
     }
 
     if (!$post->getBlog()) {
-      $nav->appendChild(
+      $object_box->appendChild(
         id(new AphrontErrorView())
           ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
           ->setTitle(pht('Not On A Blog'))
@@ -70,8 +75,7 @@ final class PhamePostViewController extends PhameController {
 
     $nav->appendChild(
       array(
-        $actions,
-        $properties,
+        $object_box,
       ));
 
     return $this->buildApplicationPage(

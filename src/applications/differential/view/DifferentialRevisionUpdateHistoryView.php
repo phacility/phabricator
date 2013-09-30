@@ -200,8 +200,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       phutil_tag('th', array(), pht('Unit')),
     )));
 
-    return hsprintf(
-      '%s'.
+    $content = hsprintf(
       '<div class="differential-revision-history differential-panel">'.
         '<form action="#toc">'.
           '<table class="differential-revision-history-table">'.
@@ -215,12 +214,13 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
           '</table>'.
         '</form>'.
       '</div>',
-      id(new PHUIHeaderView())
-        ->setHeader(pht('Revision Update History'))
-        ->render(),
       phutil_implode_html("\n", $rows),
       pht('Whitespace Changes: %s', $select),
       pht('Show Diff'));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Revision Update History'))
+      ->appendChild($content);
   }
 
   const STAR_NONE = 'none';

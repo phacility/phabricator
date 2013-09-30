@@ -46,9 +46,6 @@ final class PhabricatorSlowvotePollController
       ->setUser($user)
       ->setPolicyObject($poll);
 
-    $xaction_header = id(new PHUIHeaderView())
-      ->setHeader(pht('Ongoing Deliberations'));
-
     $actions = $this->buildActionView($poll);
     $properties = $this->buildPropertyView($poll);
 
@@ -60,19 +57,21 @@ final class PhabricatorSlowvotePollController
     $xactions = $this->buildTransactions($poll);
     $add_comment = $this->buildCommentForm($poll);
 
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setActionList($actions)
+      ->setPropertyList($properties);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
-        $actions,
-        $properties,
+        $object_box,
         phutil_tag(
           'div',
           array(
-            'class' => 'ml',
+            'class' => 'mlt mml mmr',
           ),
           $poll_view),
-        $xaction_header,
         $xactions,
         $add_comment,
       ),
@@ -179,11 +178,11 @@ final class PhabricatorSlowvotePollController
       ->setAction($this->getApplicationURI('/comment/'.$poll->getID().'/'))
       ->setSubmitButtonName($submit_button_name);
 
-    return array(
-      $add_comment_header,
-      $add_comment_form,
-    );
-  }
+    return id(new PHUIObjectBoxView())
+      ->setFlush(true)
+      ->setHeader($add_comment_header)
+      ->appendChild($add_comment_form);
 
+  }
 
 }

@@ -72,6 +72,10 @@ final class PhabricatorConfigAllController
       $version_property_list->addProperty($name, $hash);
     }
 
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Current Settings'))
+      ->setPropertyList($version_property_list);
+
     $phabricator_root = dirname(phutil_get_library_root('phabricator'));
     $version_path = $phabricator_root.'/conf/local/VERSION';
     if (Filesystem::pathExists($version_path)) {
@@ -84,7 +88,7 @@ final class PhabricatorConfigAllController
     $nav = $this->buildSideNavView();
     $nav->selectFilter('all/');
     $nav->setCrumbs($crumbs);
-    $nav->appendChild($version_property_list);
+    $nav->appendChild($object_box);
     $nav->appendChild($panel);
 
 

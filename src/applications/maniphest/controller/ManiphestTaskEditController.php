@@ -72,9 +72,10 @@ final class ManiphestTaskEditController extends ManiphestController {
       }
 
       if ($file_phids) {
-        $files = id(new PhabricatorFile())->loadAllWhere(
-          'phid IN (%Ls)',
-          $file_phids);
+        $files = id(new PhabricatorFileQuery())
+          ->setViewer($user)
+          ->withPHIDs($file_phids)
+          ->execute();
       }
 
       $template_id = $request->getInt('template');

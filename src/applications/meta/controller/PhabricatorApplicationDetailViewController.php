@@ -54,12 +54,15 @@ final class PhabricatorApplicationDetailViewController
     $properties = $this->buildPropertyView($selected);
     $actions = $this->buildActionView($user, $selected);
 
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setActionList($actions)
+      ->setPropertyList($properties);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
-        $actions,
-        $properties,
+        $object_box,
       ),
       array(
         'title' => $title,

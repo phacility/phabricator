@@ -86,11 +86,14 @@ final class LegalpadDocumentViewController extends LegalpadController {
         ->setName('L'.$document->getID())
         ->setHref($this->getApplicationURI('view/'.$document->getID())));
 
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setActionList($actions)
+      ->setPropertyList($properties);
+
     $content = array(
       $crumbs,
-      $header,
-      $actions,
-      $properties,
+      $object_box,
       $this->buildDocument($engine, $document_body),
       $xaction_view,
       $add_comment,
@@ -210,10 +213,11 @@ final class LegalpadDocumentViewController extends LegalpadController {
       ->setAction($this->getApplicationURI('/comment/'.$document->getID().'/'))
       ->setRequestURI($this->getRequest()->getRequestURI());
 
-    return array(
-      $header,
-      $form,
-    );
+    return id(new PHUIObjectBoxView())
+      ->setFlush(true)
+      ->setHeader($header)
+      ->appendChild($form);
+
   }
 
 }

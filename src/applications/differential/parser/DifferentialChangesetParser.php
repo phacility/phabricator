@@ -851,6 +851,7 @@ final class DifferentialChangesetParser {
             $file_phids[] = $new_phid;
           }
 
+          // TODO: (T603) Probably fine to use omnipotent viewer here?
           $files = id(new PhabricatorFile())->loadAllWhere(
             'phid IN (%Ls)',
             $file_phids);

@@ -56,12 +56,15 @@ final class DrydockResourceViewController extends DrydockController {
       id(new PhabricatorCrumbView())
         ->setName(pht('Resource %d', $resource->getID())));
 
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setActionList($actions)
+      ->setPropertyList($properties);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
-        $actions,
-        $properties,
+        $object_box,
         $lease_header,
         $lease_list,
         $log_table,

@@ -60,12 +60,15 @@ final class PhortuneAccountViewController extends PhortuneController {
     $purchase_history = $this->buildPurchaseHistorySection($account);
     $account_history = $this->buildAccountHistorySection($account);
 
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setActionList($actions)
+      ->setPropertyList($properties);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
-        $actions,
-        $properties,
+        $object_box,
         $payment_methods,
         $purchase_history,
         $account_history,

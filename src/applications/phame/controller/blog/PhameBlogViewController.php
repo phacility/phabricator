@@ -63,12 +63,15 @@ final class PhameBlogViewController extends PhameController {
         ->setName($blog->getName())
         ->setHref($this->getApplicationURI()));
 
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setActionList($actions)
+      ->setPropertyList($properties);
+
     $nav->appendChild(
       array(
         $crumbs,
-        $header,
-        $actions,
-        $properties,
+        $object_box,
         $post_list,
       ));
 

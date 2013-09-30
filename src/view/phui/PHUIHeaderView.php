@@ -195,6 +195,7 @@ final class PHUIHeaderView extends AphrontView {
     $link = javelin_tag(
       'a',
       array(
+        'class' => 'policy-link',
         'href' => '/policy/explain/'.$phid.'/'.$view_capability.'/',
         'sigil' => 'workflow',
       ),

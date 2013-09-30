@@ -32,12 +32,15 @@ final class HeraldRuleViewController extends HeraldController {
       id(new PhabricatorCrumbView())
         ->setName(pht('Rule %d', $rule->getID())));
 
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setActionList($actions)
+      ->setPropertyList($properties);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
-        $actions,
-        $properties,
+        $object_box,
       ),
       array(
         'title' => $rule->getName(),

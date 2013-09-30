@@ -82,12 +82,15 @@ final class DiffusionChangeController extends DiffusionController {
     $actions = $this->buildActionView($drequest);
     $properties = $this->buildPropertyView($drequest);
 
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setActionList($actions)
+      ->setPropertyList($properties);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
-        $actions,
-        $properties,
+        $object_box,
         $content,
       ),
       array(

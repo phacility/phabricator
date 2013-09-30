@@ -8,42 +8,33 @@ abstract class PhabricatorFilesManagementWorkflow
   }
 
   protected function buildIterator(PhutilArgumentParser $args) {
+    $names = $args->getArg('names');
+
     if ($args->getArg('all')) {
-      if ($args->getArg('names')) {
+      if ($names) {
         throw new PhutilArgumentUsageException(
           "Specify either a list of files or `--all`, but not both.");
       }
       return new LiskMigrationIterator(new PhabricatorFile());
     }
 
-    if ($args->getArg('names')) {
-      $iterator = array();
+    if ($names) {
+      $query = id(new PhabricatorObjectQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withNames($names)
+        ->withTypes(array(PhabricatorFilePHIDTypeFile::TYPECONST));
 
-      foreach ($args->getArg('names') as $name) {
-        $name = trim($name);
+      $query->execute();
+      $files = $query->getNamedResults();
 
-        $id = preg_replace('/^F/i', '', $name);
-        if (ctype_digit($id)) {
-          $file = id(new PhabricatorFile())->loadOneWhere(
-            'id = %d',
-            $id);
-          if (!$file) {
-            throw new PhutilArgumentUsageException(
-              "No file exists with ID '{$name}'.");
-          }
-        } else {
-          $file = id(new PhabricatorFile())->loadOneWhere(
-            'phid = %s',
-            $name);
-          if (!$file) {
-            throw new PhutilArgumentUsageException(
-              "No file exists with PHID '{$name}'.");
-          }
+      foreach ($names as $name) {
+        if (empty($files[$name])) {
+          throw new PhutilArgumentUsageException(
+            "No file '{$name}' exists!");
         }
-        $iterator[] = $file;
       }
 
-      return $iterator;
+      return array_values($files);
     }
 
     return null;

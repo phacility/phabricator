@@ -315,6 +315,7 @@ EOBODY;
       return $body;
     }
 
+    // TODO: (T603) What's the policy here?
     $files = id(new PhabricatorFile())
       ->loadAllWhere('phid in (%Ls)', $attachments);
 
