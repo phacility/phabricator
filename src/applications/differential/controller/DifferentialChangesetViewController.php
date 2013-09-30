@@ -296,6 +296,8 @@ final class DifferentialChangesetViewController extends DifferentialController {
     DifferentialChangeset $changeset,
     $is_new) {
 
+    $viewer = $this->getRequest()->getUser();
+
     if ($is_new) {
       $key = 'raw:new:phid';
     } else {
@@ -307,9 +309,13 @@ final class DifferentialChangesetViewController extends DifferentialController {
     $file = null;
     $phid = idx($metadata, $key);
     if ($phid) {
-      $file = id(new PhabricatorFile())->loadOneWhere(
-        'phid = %s',
-        $phid);
+      $file = id(new PhabricatorFileQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($phid))
+        ->execute();
+      if ($file) {
+        $file = head($file);
+      }
     }
 
     if (!$file) {

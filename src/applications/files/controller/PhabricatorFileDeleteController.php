@@ -9,13 +9,18 @@ final class PhabricatorFileDeleteController extends PhabricatorFileController {
   }
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'id = %d',
-      $this->id);
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
     if (!$file) {
       return new Aphront404Response();
     }

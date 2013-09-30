@@ -611,9 +611,12 @@ final class ManiphestTaskDetailController extends ManiphestController {
     if ($file_infos) {
       $file_phids = array_keys($file_infos);
 
-      $files = id(new PhabricatorFile())->loadAllWhere(
-        'phid IN (%Ls)',
-        $file_phids);
+      // TODO: These should probably be handles or something; clean this up
+      // as we sort out file attachments.
+      $files = id(new PhabricatorFileQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($file_phids)
+        ->execute();
 
       $file_view = new PhabricatorFileLinkListView();
       $file_view->setFiles($files);

@@ -25,9 +25,10 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
         ->setURI($uri->setPath($request->getPath()));
     }
 
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'phid = %s',
-      $this->phid);
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($request->getUser())
+      ->withPHIDs(array($this->phid))
+      ->executeOne();
     if (!$file) {
       return new Aphront404Response();
     }

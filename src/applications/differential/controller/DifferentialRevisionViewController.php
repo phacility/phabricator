@@ -887,6 +887,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
    * @return mixed (@{class:PhabricatorFile} if found, null if not)
    */
   public function loadFileByPHID($phid) {
+    // TODO: (T603) Factor this and the other one out.
     $file = id(new PhabricatorFile())->loadOneWhere(
       'phid = %s',
       $phid);

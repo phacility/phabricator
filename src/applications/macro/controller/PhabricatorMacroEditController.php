@@ -82,9 +82,10 @@ final class PhabricatorMacroEditController
           $errors[] = pht('Could not fetch URL: %s', $ex->getMessage());
         }
       } else if ($request->getStr('phid')) {
-        $file = id(new PhabricatorFile())->loadOneWhere(
-          'phid = %s',
-          $request->getStr('phid'));
+        $file = id(new PhabricatorFileQuery())
+          ->setViewer($user)
+          ->withPHIDs(array($request->getStr('phid')))
+          ->executeOne();
       }
 
       if ($file) {

@@ -162,9 +162,10 @@ final class PhabricatorPasteQuery
 
   private function loadRawContent(array $pastes) {
     $file_phids = mpull($pastes, 'getFilePHID');
-    $files = id(new PhabricatorFile())->loadAllWhere(
-      'phid IN (%Ls)',
-      $file_phids);
+    $files = id(new PhabricatorFileQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs($file_phids)
+      ->execute();
     $files = mpull($files, null, 'getPHID');
 
     foreach ($pastes as $key => $paste) {

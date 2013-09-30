@@ -19,6 +19,8 @@ abstract class PhabricatorFilesManagementWorkflow
     if ($args->getArg('names')) {
       $iterator = array();
 
+      // TODO: (T603) Convert this to ObjectNameQuery.
+
       foreach ($args->getArg('names') as $name) {
         $name = trim($name);
 

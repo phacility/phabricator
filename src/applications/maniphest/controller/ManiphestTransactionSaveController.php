@@ -33,9 +33,10 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     // Look for drag-and-drop uploads first.
     $file_phids = $request->getArr('files');
     if ($file_phids) {
-      $files = id(new PhabricatorFile())->loadAllWhere(
-        'phid in (%Ls)',
-        $file_phids);
+      $files = id(new PhabricatorFileQuery())
+        ->setViewer($user)
+        ->withPHIDs(array($file_phids))
+        ->execute();
     }
 
     // This means "attach a file" even though we store other types of data

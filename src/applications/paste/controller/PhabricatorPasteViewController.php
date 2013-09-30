@@ -44,9 +44,10 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       return new Aphront404Response();
     }
 
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'phid = %s',
-      $paste->getFilePHID());
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($paste->getFilePHID()))
+      ->executeOne();
     if (!$file) {
       return new Aphront400Response();
     }

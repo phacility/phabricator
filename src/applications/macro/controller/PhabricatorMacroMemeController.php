@@ -38,10 +38,15 @@ final class PhabricatorMacroMemeController
         $file->getPHID(), $hash);
 
     if ($xform) {
-      $memefile = id(new PhabricatorFile())->loadOneWhere(
-      'phid = %s', $xform->getTransformedPHID());
-      return $memefile->getBestURI();
+      $memefile = id(new PhabricatorFileQuery())
+        ->setViewer($user)
+        ->withPHIDs(array($xform->getTransformedPHID()))
+        ->executeOne();
+      if ($memefile) {
+        return $memefile->getBestURI();
+      }
     }
+
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
     $transformers = (new PhabricatorImageTransformer());
     $newfile = $transformers

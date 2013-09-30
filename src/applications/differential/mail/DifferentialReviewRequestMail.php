@@ -104,6 +104,7 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
   }
 
   public function loadFileByPHID($phid) {
+    // TODO: (T603) Factor this and the other one out.
     $file = id(new PhabricatorFile())->loadOneWhere(
       'phid = %s',
       $phid);

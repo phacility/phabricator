@@ -21,6 +21,8 @@ final class PhabricatorRemarkupRuleEmbedFile
     $file = null;
     if ($matches[1]) {
       // TODO: This is pretty inefficient if there are a bunch of files.
+      // TODO: (T603) This isn't policy-aware and should be extending
+      // PhabricatorRemarkupRuleObject.
       $file = id(new PhabricatorFile())->load($matches[1]);
     }
 

@@ -104,9 +104,12 @@ final class PholioImageQuery
     assert_instances_of($images, 'PholioImage');
 
     $file_phids = mpull($images, 'getFilePHID');
-    $all_files = mpull(id(new PhabricatorFile())->loadAllWhere(
-      'phid IN (%Ls)',
-      $file_phids), null, 'getPHID');
+
+    $all_files = id(new PhabricatorFileQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs($file_phids)
+      ->execute();
+    $all_files = mpull($all_files, null, 'getPHID');
 
     if ($this->needInlineComments) {
       $all_inline_comments = id(new PholioTransactionComment())
