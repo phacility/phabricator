@@ -1185,6 +1185,7 @@ phutil_register_library_map(array(
     'PhabricatorFeedStoryStatus' => 'applications/feed/story/PhabricatorFeedStoryStatus.php',
     'PhabricatorFeedStoryTypeConstants' => 'applications/feed/constants/PhabricatorFeedStoryTypeConstants.php',
     'PhabricatorFile' => 'applications/files/storage/PhabricatorFile.php',
+    'PhabricatorFileBundleLoader' => 'applications/files/query/PhabricatorFileBundleLoader.php',
     'PhabricatorFileCommentController' => 'applications/files/controller/PhabricatorFileCommentController.php',
     'PhabricatorFileController' => 'applications/files/controller/PhabricatorFileController.php',
     'PhabricatorFileDAO' => 'applications/files/storage/PhabricatorFileDAO.php',
