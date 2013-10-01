@@ -1917,6 +1917,7 @@ phutil_register_library_map(array(
     'PhrequentController' => 'applications/phrequent/controller/PhrequentController.php',
     'PhrequentDAO' => 'applications/phrequent/storage/PhrequentDAO.php',
     'PhrequentListController' => 'applications/phrequent/controller/PhrequentListController.php',
+    'PhrequentSearchEngine' => 'applications/phrequent/query/PhrequentSearchEngine.php',
     'PhrequentTrackController' => 'applications/phrequent/controller/PhrequentTrackController.php',
     'PhrequentTrackableInterface' => 'applications/phrequent/interface/PhrequentTrackableInterface.php',
     'PhrequentUIEventListener' => 'applications/phrequent/event/PhrequentUIEventListener.php',
@@ -4130,11 +4131,20 @@ phutil_register_library_map(array(
     'PhortuneWePayPaymentProvider' => 'PhortunePaymentProvider',
     'PhrequentController' => 'PhabricatorController',
     'PhrequentDAO' => 'PhabricatorLiskDAO',
-    'PhrequentListController' => 'PhrequentController',
+    'PhrequentListController' =>
+    array(
+      0 => 'PhrequentController',
+      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
+    ),
+    'PhrequentSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhrequentTrackController' => 'PhrequentController',
     'PhrequentUIEventListener' => 'PhutilEventListener',
-    'PhrequentUserTime' => 'PhrequentDAO',
-    'PhrequentUserTimeQuery' => 'PhabricatorOffsetPagedQuery',
+    'PhrequentUserTime' =>
+    array(
+      0 => 'PhrequentDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
+    'PhrequentUserTimeQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhrictionActionConstants' => 'PhrictionConstants',
     'PhrictionActionMenuEventListener' => 'PhutilEventListener',
     'PhrictionChangeType' => 'PhrictionConstants',
