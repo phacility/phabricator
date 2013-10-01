@@ -104,7 +104,48 @@ final class PhabricatorFileQuery
       $this->buildOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
 
-    return $table->loadAllFromArray($data);
+    $files = $table->loadAllFromArray($data);
+
+    if (!$files) {
+      return $files;
+    }
+
+    // We need to load attached objects to perform policy checks for files.
+    // First, load the edges.
+
+    $edge_type = PhabricatorEdgeConfig::TYPE_FILE_HAS_OBJECT;
+    $phids = mpull($files, 'getPHID');
+    $edges = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs($phids)
+      ->withEdgeTypes(array($edge_type))
+      ->execute();
+
+    $object_phids = array();
+    foreach ($files as $file) {
+      $phids = array_keys($edges[$file->getPHID()][$edge_type]);
+      $file->attachObjectPHIDs($phids);
+      foreach ($phids as $phid) {
+        $object_phids[$phid] = true;
+      }
+    }
+
+    // Now, load the objects.
+
+    $objects = array();
+    if ($object_phids) {
+      $objects = id(new PhabricatorObjectQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs($object_phids)
+        ->execute();
+      $objects = mpull($objects, null, 'getPHID');
+    }
+
+    foreach ($files as $file) {
+      $file_objects = array_select_keys($objects, $file->getObjectPHIDs());
+      $file->attachObjects($file_objects);
+    }
+
+    return $files;
   }
 
   private function buildJoinClause(AphrontDatabaseConnection $conn_r) {

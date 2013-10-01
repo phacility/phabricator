@@ -27,7 +27,11 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       ->withObjectPHIDs(array($phid))
       ->execute();
 
-    $this->loadHandles(array($file->getAuthorPHID()));
+    $handle_phids = array_merge(
+      array($file->getAuthorPHID()),
+      $file->getObjectPHIDs());
+
+    $this->loadHandles($handle_phids);
     $header = id(new PHUIHeaderView())
       ->setHeader($file->getName());
 
@@ -206,6 +210,15 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
           $value);
       }
     }
+
+    $phids = $file->getObjectPHIDs();
+    if ($phids) {
+      $view->addSectionHeader(pht('Attached'));
+      $view->addProperty(
+        pht('Attached To'),
+        $this->renderHandlesForPHIDs($phids));
+    }
+
 
     if ($file->isViewableImage()) {
 
