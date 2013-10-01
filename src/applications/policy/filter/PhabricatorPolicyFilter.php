@@ -363,7 +363,7 @@ final class PhabricatorPolicyFilter {
               break;
           }
         } else {
-          $who = pht("This object has an unknown or invalid policy setting.");
+          $more = pht("This object has an unknown or invalid policy setting.");
         }
         break;
     }
