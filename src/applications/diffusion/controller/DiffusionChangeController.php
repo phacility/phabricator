@@ -37,6 +37,7 @@ final class DiffusionChangeController extends DiffusionController {
     );
 
     $changeset_view = new DifferentialChangesetListView();
+    $changeset_view->setTitle(pht('Change'));
     $changeset_view->setChangesets($changesets);
     $changeset_view->setVisibleChangesets($changesets);
     $changeset_view->setRenderingReferences(

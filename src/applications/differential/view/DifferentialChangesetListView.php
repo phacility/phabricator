@@ -194,11 +194,8 @@ final class DifferentialChangesetListView extends AphrontView {
       ));
     }
 
-    $header = null;
-    if ($this->getTitle() !== null) {
-      $header = id(new PHUIHeaderView())
-        ->setHeader($this->getTitle());
-    }
+    $header = id(new PHUIHeaderView())
+      ->setHeader($this->getTitle());
 
     $content = phutil_tag(
       'div',
