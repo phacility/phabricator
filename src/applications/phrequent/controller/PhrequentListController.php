@@ -83,6 +83,19 @@ final class PhrequentListController extends PhrequentController
           pht(
             'Tracked %s so far',
             $time_spent));
+        if ($usertime->getObjectPHID() !== null &&
+            $usertime->getUserPHID() === $viewer->getPHID()) {
+          $item->addAction(
+            id(new PHUIListItemView())
+              ->setIcon('history')
+              ->addSigil('phrequent-stop-tracking')
+              ->setWorkflow(true)
+              ->setRenderNameAsTooltip(true)
+              ->setName(pht("Stop"))
+              ->setHref(
+                '/phrequent/track/stop/'.
+                $usertime->getObjectPHID().'/'));
+        }
         $item->setBarColor('green');
       }
 
