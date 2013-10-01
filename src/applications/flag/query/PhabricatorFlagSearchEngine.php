@@ -6,6 +6,7 @@ final class PhabricatorFlagSearchEngine
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
     $saved->setParameter('colors', $request->getArr('colors'));
+    $saved->setParameter('group', $request->getStr('group'));
     return $saved;
   }
 
@@ -18,6 +19,11 @@ final class PhabricatorFlagSearchEngine
     if ($colors) {
       $query->withColors($colors);
     }
+    $group = $saved->getParameter('group');
+    $options = $this->getGroupOptions();
+    if ($group && isset($options[$group])) {
+      $query->setGroupBy($group);
+    }
 
     return $query;
   }
@@ -26,11 +32,18 @@ final class PhabricatorFlagSearchEngine
     AphrontFormView $form,
     PhabricatorSavedQuery $saved_query) {
 
-    $form->appendChild(
-      id(new PhabricatorFlagSelectControl())
+    $form
+      ->appendChild(
+        id(new PhabricatorFlagSelectControl())
         ->setName('colors')
         ->setLabel(pht('Colors'))
-        ->setValue($saved_query->getParameter('colors', array())));
+        ->setValue($saved_query->getParameter('colors', array())))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+        ->setName('group')
+        ->setLabel(pht('Group By'))
+        ->setValue($saved_query->getParameter('group'))
+        ->setOptions($this->getGroupOptions()));
 
   }
 
@@ -57,6 +70,13 @@ final class PhabricatorFlagSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  private function getGroupOptions() {
+    return array(
+      PhabricatorFlagQuery::GROUP_NONE => pht('None'),
+      PhabricatorFlagQuery::GROUP_COLOR => pht('Color'),
+    );
   }
 
 }
