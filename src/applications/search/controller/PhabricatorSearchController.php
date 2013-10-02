@@ -36,7 +36,9 @@ final class PhabricatorSearchController
         $pref_jump = PhabricatorUserPreferences::PREFERENCE_SEARCHBAR_JUMP;
         if ($request->getStr('jump') != 'no' &&
             $user && $user->loadPreferences()->getPreference($pref_jump, 1)) {
-          $response = PhabricatorJumpNavHandler::jumpPostResponse($query_str);
+          $response = PhabricatorJumpNavHandler::getJumpResponse(
+            $user,
+            $query_str);
         } else {
           $response = null;
         }
