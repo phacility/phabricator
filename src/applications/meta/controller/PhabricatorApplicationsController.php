@@ -6,19 +6,23 @@ abstract class PhabricatorApplicationsController extends PhabricatorController {
     return true;
   }
 
-  public function buildSideNavView($filter = null, $for_app = false) {
+  public function buildSideNavView($for_app = false) {
     $user = $this->getRequest()->getUser();
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
-    $nav->addLabel(pht('Installed Applications'));
-    $nav->addFilter('/', pht('Applications'));
+
+    id(new PhabricatorAppSearchEngine())
+      ->setViewer($user)
+      ->addNavigationItems($nav->getMenu());
+
+    $nav->selectFilter(null);
 
     return $nav;
   }
 
   public function buildApplicationMenu() {
-    return $this->buildSideNavView(null, true)->getMenu();
+    return $this->buildSideNavView(true)->getMenu();
   }
 
 }

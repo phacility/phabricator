@@ -29,7 +29,8 @@ final class PhabricatorApplicationApplications extends PhabricatorApplication {
  public function getRoutes() {
     return array(
       '/applications/' => array(
-        ''                          => 'PhabricatorApplicationsListController',
+        '(?:query/(?P<queryKey>[^/]+)/)?' =>
+          'PhabricatorApplicationsListController',
         'view/(?P<application>\w+)/' =>
           'PhabricatorApplicationDetailViewController',
         '(?P<application>\w+)/(?P<action>install|uninstall)/' =>

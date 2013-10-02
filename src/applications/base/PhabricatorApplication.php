@@ -8,7 +8,8 @@
  * @task  meta  Application Management
  * @group apps
  */
-abstract class PhabricatorApplication {
+abstract class PhabricatorApplication
+  implements PhabricatorPolicyInterface {
 
   const GROUP_CORE            = 'core';
   const GROUP_COMMUNICATION   = 'communication';
@@ -49,7 +50,6 @@ abstract class PhabricatorApplication {
 
 /* -(  Application Information  )-------------------------------------------- */
 
-
   public function getName() {
     return substr(get_class($this), strlen('PhabricatorApplication'));
   }
@@ -80,6 +80,25 @@ abstract class PhabricatorApplication {
 
   public function isBeta() {
     return false;
+  }
+
+  /**
+   * Returns true if an application is first-party (developed by Phacility)
+   * and false otherwise.
+   */
+  final public function isFirstParty() {
+    $where = id(new ReflectionClass($this))->getFileName();
+    $root = phutil_get_library_root('phabricator');
+
+    if (!Filesystem::isDescendant($where, $root)) {
+      return false;
+    }
+
+    if (Filesystem::isDescendant($where, $root.'/extensions')) {
+      return false;
+    }
+
+    return true;
   }
 
   public function canUninstall() {
@@ -297,5 +316,33 @@ abstract class PhabricatorApplication {
     return $apps;
   }
 
-}
 
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::POLICY_USER;
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return PhabricatorPolicies::POLICY_ADMIN;
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
+
+}
