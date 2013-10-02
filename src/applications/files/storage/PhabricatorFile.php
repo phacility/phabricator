@@ -846,6 +846,20 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return $this;
   }
 
+  public function getImageHeight() {
+    if (!$this->isViewableImage()) {
+      return null;
+    }
+    return idx($this->metadata, self::METADATA_IMAGE_HEIGHT);
+  }
+
+  public function getImageWidth() {
+    if (!$this->isViewableImage()) {
+      return null;
+    }
+    return idx($this->metadata, self::METADATA_IMAGE_WIDTH);
+  }
+
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 
