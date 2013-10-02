@@ -391,6 +391,7 @@ phutil_register_library_map(array(
     'DifferentialPathFieldSpecification' => 'applications/differential/field/specification/DifferentialPathFieldSpecification.php',
     'DifferentialPeopleMenuEventListener' => 'applications/differential/events/DifferentialPeopleMenuEventListener.php',
     'DifferentialPrimaryPaneView' => 'applications/differential/view/DifferentialPrimaryPaneView.php',
+    'DifferentialRawDiffRenderer' => 'applications/differential/render/DifferentialRawDiffRenderer.php',
     'DifferentialReleephRequestFieldSpecification' => 'applications/releeph/differential/DifferentialReleephRequestFieldSpecification.php',
     'DifferentialRemarkupRule' => 'applications/differential/remarkup/DifferentialRemarkupRule.php',
     'DifferentialReplyHandler' => 'applications/differential/mail/DifferentialReplyHandler.php',
