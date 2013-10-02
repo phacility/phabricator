@@ -62,57 +62,15 @@ final class PhabricatorSearchSelectController
   }
 
   private function queryObjectNames($query) {
+    $viewer = $this->getRequest()->getUser();
 
-    $pattern = null;
-    switch ($this->type) {
-      case ManiphestPHIDTypeTask::TYPECONST:
-        $pattern = '/\bT(\d+)\b/i';
-        break;
-      case DifferentialPHIDTypeRevision::TYPECONST:
-        $pattern = '/\bD(\d+)\b/i';
-        break;
-      case PholioPHIDTypeMock::TYPECONST:
-        $pattern = '/\bM(\d+)\b/i';
-        break;
-    }
+    $objects = id(new PhabricatorObjectQuery())
+      ->setViewer($viewer)
+      ->withTypes(array($this->type))
+      ->withNames(array($query))
+      ->execute();
 
-    if (!$pattern) {
-      return array();
-    }
-
-    $matches = array();
-    preg_match_all($pattern, $query, $matches);
-    if (!$matches) {
-      return array();
-    }
-
-    $object_ids = $matches[1];
-    if (!$object_ids) {
-      return array();
-    }
-
-    switch ($this->type) {
-      case DifferentialPHIDTypeRevision::TYPECONST:
-        // TODO: (T603) See below. This whole thing needs cleanup.
-        $objects = id(new DifferentialRevision())->loadAllWhere(
-          'id IN (%Ld)',
-          $object_ids);
-        break;
-      case ManiphestPHIDTypeTask::TYPECONST:
-        // TODO: (T603) Clean this up. This should probably all run through
-        // ObjectQuery?
-        $objects = id(new ManiphestTask())->loadAllWhere(
-          'id IN (%Ld)',
-          $object_ids);
-        break;
-      case PholioPHIDTypeMock::TYPECONST:
-        $objects = id(new PholioMock())->loadAllWhere(
-          'id IN (%Ld)',
-          $object_ids);
-        break;
-    }
-
-    return array_fill_keys(mpull($objects, 'getPHID'), true);
+    return mpull($objects, 'getPHID');
   }
 
 }
