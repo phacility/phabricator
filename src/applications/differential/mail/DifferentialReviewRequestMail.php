@@ -103,17 +103,6 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
     return $attachments;
   }
 
-  public function loadFileByPHID($phid) {
-    // TODO: (T603) Factor this and the other one out.
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'phid = %s',
-      $phid);
-    if (!$file) {
-      return null;
-    }
-    return $file->loadFileData();
-  }
-
   private function buildPatch() {
     $diff = new DifferentialDiff();
     $diff->attachChangesets($this->getChangesets());
