@@ -20,7 +20,8 @@ final class PhabricatorAppSearchEngine
   }
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhabricatorApplicationQuery());
+    $query = id(new PhabricatorApplicationQuery())
+      ->setOrder(PhabricatorApplicationQuery::ORDER_NAME);
 
     $name = $saved->getParameter('name');
     if (strlen($name)) {

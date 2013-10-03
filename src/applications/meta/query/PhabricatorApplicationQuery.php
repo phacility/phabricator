@@ -8,6 +8,12 @@ final class PhabricatorApplicationQuery
   private $firstParty;
   private $nameContains;
   private $classes;
+  private $phids;
+
+  const ORDER_APPLICATION = 'order:application';
+  const ORDER_NAME = 'order:name';
+
+  private $order = self::ORDER_APPLICATION;
 
   public function withNameContains($name_contains) {
     $this->nameContains = $name_contains;
@@ -34,6 +40,16 @@ final class PhabricatorApplicationQuery
     return $this;
   }
 
+  public function withPHIDs(array $phids) {
+    $this->phids = $phids;
+    return $this;
+  }
+
+  public function setOrder($order) {
+    $this->order = $order;
+    return $this;
+  }
+
   public function loadPage() {
     $apps = PhabricatorApplication::getAllApplications();
 
@@ -41,6 +57,15 @@ final class PhabricatorApplicationQuery
       $classes = array_fuse($this->classes);
       foreach ($apps as $key => $app) {
         if (empty($classes[get_class($app)])) {
+          unset($apps[$key]);
+        }
+      }
+    }
+
+    if ($this->phids) {
+      $phids = array_fuse($this->phids);
+      foreach ($apps as $key => $app) {
+        if (empty($phids[$app->getPHID()])) {
           unset($apps[$key]);
         }
       }
@@ -78,7 +103,19 @@ final class PhabricatorApplicationQuery
       }
     }
 
-    return msort($apps, 'getName');
+    switch ($this->order) {
+      case self::ORDER_NAME:
+        $apps = msort($apps, 'getName');
+        break;
+      case self::ORDER_APPLICATION:
+        $apps = $apps;
+        break;
+      default:
+        throw new Exception(
+          pht('Unknown order "%s"!', $this->order));
+    }
+
+    return $apps;
   }
 
 }
