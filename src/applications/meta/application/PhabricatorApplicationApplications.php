@@ -33,6 +33,8 @@ final class PhabricatorApplicationApplications extends PhabricatorApplication {
           'PhabricatorApplicationsListController',
         'view/(?P<application>\w+)/' =>
           'PhabricatorApplicationDetailViewController',
+        'edit/(?P<application>\w+)/' =>
+          'PhabricatorApplicationEditController',
         '(?P<application>\w+)/(?P<action>install|uninstall)/' =>
           'PhabricatorApplicationUninstallController',
         ),
