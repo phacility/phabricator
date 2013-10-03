@@ -4,6 +4,7 @@
  * @task mail   Sending Mail
  * @task feed   Publishing Feed Stories
  * @task search Search Index
+ * @task files  Integration with Files
  */
 abstract class PhabricatorApplicationTransactionEditor
   extends PhabricatorEditor {
@@ -407,6 +408,8 @@ abstract class PhabricatorApplicationTransactionEditor
         throw new PhabricatorApplicationTransactionValidationException($errors);
       }
 
+      $file_phids = $this->extractFilePHIDs($object, $xactions);
+
       if ($object->getID()) {
         foreach ($xactions as $xaction) {
 
@@ -486,6 +489,10 @@ abstract class PhabricatorApplicationTransactionEditor
         } else {
           $xaction->save();
         }
+      }
+
+      if ($file_phids) {
+        $this->attachFiles($object, $file_phids);
       }
 
       foreach ($xactions as $xaction) {
@@ -715,7 +722,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $texts = array();
     foreach ($xactions as $xaction) {
-      $texts[] = $this->getMentionableTextsFromTransaction($xaction);
+      $texts[] = $this->getRemarkupBlocksFromTransaction($xaction);
     }
     $texts = array_mergev($texts);
 
@@ -748,7 +755,7 @@ abstract class PhabricatorApplicationTransactionEditor
     return $xaction;
   }
 
-  protected function getMentionableTextsFromTransaction(
+  protected function getRemarkupBlocksFromTransaction(
     PhabricatorApplicationTransaction $transaction) {
     $texts = array();
     if ($transaction->getComment()) {
@@ -1547,6 +1554,77 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     return $field;
+  }
+
+
+/* -(  Files  )-------------------------------------------------------------- */
+
+
+  /**
+   * Extract the PHIDs of any files which these transactions attach.
+   *
+   * @task files
+   */
+  private function extractFilePHIDs(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $blocks = array();
+    foreach ($xactions as $xaction) {
+      $blocks[] = $this->getRemarkupBlocksFromTransaction($xaction);
+    }
+    $blocks = array_mergev($blocks);
+
+    if (!$blocks) {
+      return array();
+    }
+
+    $phids = PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
+      $blocks);
+
+    if (!$phids) {
+      return array();
+    }
+
+    // Only let a user attach files they can actually see, since this would
+    // otherwise let you access any file by attaching it to an object you have
+    // view permission on.
+
+    $files = id(new PhabricatorFileQuery())
+      ->setViewer($this->getActor())
+      ->withPHIDs($phids)
+      ->execute();
+
+    return mpull($files, 'getPHID');
+  }
+
+
+  /**
+   * @task files
+   */
+  private function attachFiles(
+    PhabricatorLiskDAO $object,
+    array $file_phids) {
+
+    if (!$file_phids) {
+      return;
+    }
+
+    $editor = id(new PhabricatorEdgeEditor())
+      ->setActor($this->getActor());
+
+    // TODO: Edge-based events were almost certainly a terrible idea. If we
+    // don't suppress this event, the Maniphest listener reenters and adds
+    // more transactions. Just suppress it until that can get cleaned up.
+    $editor->setSuppressEvents(true);
+
+    $src = $object->getPHID();
+    $type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_FILE;
+    foreach ($file_phids as $dst) {
+      $editor->addEdge($src, $type, $dst);
+    }
+
+    $editor->save();
   }
 
 }

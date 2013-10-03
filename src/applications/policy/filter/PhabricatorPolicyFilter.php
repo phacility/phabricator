@@ -225,7 +225,8 @@ final class PhabricatorPolicyFilter {
             $this->rejectObject($object, $policy, $capability);
           }
         } else {
-          throw new Exception("Object has unknown policy '{$policy}'!");
+          // Reject objects with unknown policies.
+          $this->rejectObject($object, false, $capability);
         }
     }
 
@@ -241,11 +242,22 @@ final class PhabricatorPolicyFilter {
       return;
     }
 
-    // TODO: clean this up
-    $verb = $capability;
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        $message = pht("This object has an impossible view policy.");
+        break;
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        $message = pht("This object has an impossible edit policy.");
+        break;
+      case PhabricatorPolicyCapability::CAN_JOIN:
+        $message = pht("This object has an impossible join policy.");
+        break;
+      default:
+        $message = pht("This object has an impossible policy.");
+        break;
+    }
 
-    throw new PhabricatorPolicyException(
-      "This object has an impossible {$verb} policy.");
+    throw new PhabricatorPolicyException($message);
   }
 
   public function rejectObject(
@@ -350,9 +362,8 @@ final class PhabricatorPolicyFilter {
                 $handle->getFullName());
               break;
           }
-
         } else {
-          $who = pht("This object has an unknown policy setting.");
+          $more = pht("This object has an unknown or invalid policy setting.");
         }
         break;
     }

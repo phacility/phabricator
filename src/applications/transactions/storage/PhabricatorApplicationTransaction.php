@@ -190,7 +190,7 @@ abstract class PhabricatorApplicationTransaction
     if ($this->renderingTarget == self::TARGET_HTML) {
       return $this->getHandle($phid)->renderLink();
     } else {
-      return hsprintf('%s', $this->getHandle($phid)->getLinkName());
+      return $this->getHandle($phid)->getLinkName();
     }
   }
 
@@ -199,7 +199,11 @@ abstract class PhabricatorApplicationTransaction
     foreach ($phids as $phid) {
       $links[] = $this->renderHandleLink($phid);
     }
-    return phutil_implode_html(', ', $links);
+    if ($this->renderingTarget == self::TARGET_HTML) {
+      return phutil_implode_html(', ', $links);
+    } else {
+      return implode(', ', $links);
+    }
   }
 
   public function renderPolicyName($phid) {

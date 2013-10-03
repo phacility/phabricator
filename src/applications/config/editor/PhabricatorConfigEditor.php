@@ -105,14 +105,17 @@ final class PhabricatorConfigEditor
   }
 
   public static function storeNewValue(
-   PhabricatorConfigEntry $config_entry, $value, AphrontRequest $request) {
+    PhabricatorConfigEntry $config_entry,
+    $value,
+    AphrontRequest $request) {
+
     $xaction = id(new PhabricatorConfigTransaction())
-              ->setTransactionType(PhabricatorConfigTransaction::TYPE_EDIT)
-              ->setNewValue(
-                array(
-                   'deleted' => false,
-                   'value' => $value
-                ));
+      ->setTransactionType(PhabricatorConfigTransaction::TYPE_EDIT)
+      ->setNewValue(
+        array(
+           'deleted' => false,
+           'value' => $value
+        ));
 
     $editor = id(new PhabricatorConfigEditor())
            ->setActor($request->getUser())

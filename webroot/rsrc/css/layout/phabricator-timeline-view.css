@@ -68,7 +68,6 @@
 }
 
 .phabricator-timeline-image {
-  background: #c0c5d1;
   background-repeat: no-repeat;
   position: absolute;
 }
@@ -89,7 +88,7 @@
 
 .phabricator-timeline-major-event .phabricator-timeline-title {
   background: {$lightgreybackground};
-  min-height: 29px;
+  min-height: 18px;
 }
 
 .phabricator-timeline-title {
@@ -104,7 +103,7 @@
 
 .phabricator-timeline-major-event .phabricator-timeline-content
   .phabricator-timeline-core-content {
-  padding: 10px 15px;
+  padding: 12px;
 }
 
 .phabricator-timeline-core-content {

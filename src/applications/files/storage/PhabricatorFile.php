@@ -30,6 +30,10 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
   protected $ttl;
   protected $isExplicitUpload = 1;
+  protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
+
+  private $objects = self::ATTACHABLE;
+  private $objectPHIDs = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -803,6 +807,9 @@ final class PhabricatorFile extends PhabricatorFileDAO
           ->save();
       unset($unguarded);
 
+      $file->attachObjectPHIDs(array());
+      $file->attachObjects(array());
+
       $files[$name] = $file;
     }
 
@@ -819,6 +826,38 @@ final class PhabricatorFile extends PhabricatorFileDAO
    */
   public static function loadBuiltin(PhabricatorUser $user, $name) {
     return idx(self::loadBuiltins($user, array($name)), $name);
+  }
+
+  public function getObjects() {
+    return $this->assertAttached($this->objects);
+  }
+
+  public function attachObjects(array $objects) {
+    $this->objects = $objects;
+    return $this;
+  }
+
+  public function getObjectPHIDs() {
+    return $this->assertAttached($this->objectPHIDs);
+  }
+
+  public function attachObjectPHIDs(array $object_phids) {
+    $this->objectPHIDs = $object_phids;
+    return $this;
+  }
+
+  public function getImageHeight() {
+    if (!$this->isViewableImage()) {
+      return null;
+    }
+    return idx($this->metadata, self::METADATA_IMAGE_HEIGHT);
+  }
+
+  public function getImageWidth() {
+    if (!$this->isViewableImage()) {
+      return null;
+    }
+    return idx($this->metadata, self::METADATA_IMAGE_WIDTH);
   }
 
 
@@ -838,11 +877,35 @@ final class PhabricatorFile extends PhabricatorFileDAO
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    $viewer_phid = $viewer->getPHID();
+    if ($viewer_phid) {
+      if ($this->getAuthorPHID() == $viewer_phid) {
+        return true;
+      }
+    }
+
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        // If you can see any object this file is attached to, you can see
+        // the file.
+        return (count($this->getObjects()) > 0);
+    }
+
     return false;
   }
 
   public function describeAutomaticCapability($capability) {
-    return null;
+    $out = array();
+    $out[] = pht('The user who uploaded a file can always view and edit it.');
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        $out[] = pht(
+          'Files attached to objects are visible to users who can view '.
+          'those objects.');
+        break;
+    }
+
+    return $out;
   }
 
 

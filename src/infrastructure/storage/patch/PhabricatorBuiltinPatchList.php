@@ -1648,6 +1648,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130927.audiomacro.sql'),
       ),
+      '20130929.filepolicy.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130929.filepolicy.sql'),
+      ),
     );
   }
 }

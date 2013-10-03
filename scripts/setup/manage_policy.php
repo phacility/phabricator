@@ -16,6 +16,7 @@ $args->parseStandardArguments();
 
 $workflows = array(
   new PhabricatorPolicyManagementShowWorkflow(),
+  new PhabricatorPolicyManagementUnlockWorkflow(),
   new PhutilHelpArgumentWorkflow(),
 );
 

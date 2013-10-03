@@ -153,6 +153,25 @@ final class PhabricatorPolicy {
             return pht('Other: %s', $this->getName());
         }
         break;
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        switch ($this->getPHID()) {
+          case PhabricatorPolicies::POLICY_USER:
+            return pht('Editable by all logged in users.');
+          case PhabricatorPolicies::POLICY_ADMIN:
+            return pht('Editable by all administrators.');
+          case PhabricatorPolicies::POLICY_NOONE:
+            return pht('Not editable by default.');
+        }
+
+        switch ($this->getType()) {
+          case PhabricatorPolicyType::TYPE_PROJECT:
+            return pht(
+              'Editable by members of the project "%s".',
+              $this->getName());
+          case PhabricatorPolicyType::TYPE_MASKED:
+            return pht('Other: %s', $this->getName());
+        }
+        break;
     }
 
 

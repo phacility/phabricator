@@ -3,10 +3,14 @@
 final class PhabricatorFlagQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
+  const GROUP_COLOR = 'color';
+  const GROUP_NONE  = 'none';
+
   private $ownerPHIDs;
   private $types;
   private $objectPHIDs;
   private $colors;
+  private $groupBy = self::GROUP_NONE;
 
   private $needHandles;
   private $needObjects;
@@ -28,6 +32,16 @@ final class PhabricatorFlagQuery
 
   public function withColors(array $colors) {
     $this->colors = $colors;
+    return $this;
+  }
+
+  /**
+   * Note this is done in php and not in mySQL, which means its inappropriate
+   * for large datasets. Pragmatically, this is fine for user flags which are
+   * typically well under 100 flags per user.
+   */
+  public function setGroupBy($group) {
+    $this->groupBy = $group;
     return $this;
   }
 
@@ -94,6 +108,17 @@ final class PhabricatorFlagQuery
       foreach ($flags as $flag) {
         $flag->attachHandle($handles[$flag->getObjectPHID()]);
       }
+    }
+
+    switch ($this->groupBy) {
+      case self::GROUP_COLOR:
+        $flags = msort($flags, 'getColor');
+        break;
+      case self::GROUP_NONE:
+        break;
+      default:
+        throw new Exception("Unknown groupBy parameter: $this->groupBy");
+        break;
     }
 
     return $flags;

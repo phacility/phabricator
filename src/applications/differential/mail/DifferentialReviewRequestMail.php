@@ -103,50 +103,17 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
     return $attachments;
   }
 
-  public function loadFileByPHID($phid) {
-    // TODO: (T603) Factor this and the other one out.
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'phid = %s',
-      $phid);
-    if (!$file) {
-      return null;
-    }
-    return $file->loadFileData();
-  }
-
   private function buildPatch() {
-    $diff = new DifferentialDiff();
-    $diff->attachChangesets($this->getChangesets());
-    foreach ($diff->getChangesets() as $changeset) {
-      $changeset->attachHunks(
-        $changeset->loadRelatives(new DifferentialHunk(), 'changesetID'));
-    }
-
-    $raw_changes = $diff->buildChangesList();
-    $changes = array();
-    foreach ($raw_changes as $changedict) {
-      $changes[] = ArcanistDiffChange::newFromDictionary($changedict);
-    }
+    $renderer = new DifferentialRawDiffRenderer();
+    $renderer->setChangesets($this->getChangesets());
+    $renderer->setFormat(
+      PhabricatorEnv::getEnvConfig('metamta.differential.patch-format'));
 
     // TODO: It would be nice to have a real viewer here eventually, but
     // in the meantime anyone we're sending mail to can certainly see the
     // patch.
-    $loader = id(new PhabricatorFileBundleLoader())
-      ->setViewer(PhabricatorUser::getOmnipotentUser());
-
-    $bundle = ArcanistBundle::newFromChanges($changes);
-    $bundle->setLoadFileDataCallback(array($loader, 'loadFileData'));
-
-    $format = PhabricatorEnv::getEnvConfig('metamta.differential.patch-format');
-    switch ($format) {
-      case 'git':
-        return $bundle->toGitPatch();
-        break;
-      case 'unified':
-      default:
-        return $bundle->toUnifiedDiff();
-        break;
-    }
+    $renderer->setViewer(PhabricatorUser::getOmnipotentUser());
+    return $renderer->buildPatch();
   }
 
   protected function getMailTags() {

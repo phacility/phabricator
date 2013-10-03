@@ -1,40 +1,30 @@
 <?php
 
 final class PhabricatorApplicationsListController
-  extends PhabricatorApplicationsController {
+  extends PhabricatorApplicationsController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
+
+  private $queryKey;
+
+  public function willProcessRequest(array $data) {
+    $this->queryKey = idx($data, 'queryKey');
+  }
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->queryKey)
+      ->setSearchEngine(new PhabricatorAppSearchEngine())
+      ->setNavigation($this->buildSideNavView());
 
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('/');
-
-    $applications = PhabricatorApplication::getAllApplications();
-
-    $list = $this->buildInstalledApplicationsList($applications);
-    $title = pht('Installed Applications');
-    $nav->appendChild($list);
-
-    $crumbs = $this
-      ->buildApplicationCrumbs()
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Applications'))
-          ->setHref($this->getApplicationURI()));
-
-    $nav->setCrumbs($crumbs);
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-        'device' => true,
-      ));
+    return $this->delegateToController($controller);
   }
 
+  public function renderResultsList(
+    array $applications,
+    PhabricatorSavedQuery $query) {
+    assert_instances_of($applications, 'PhabricatorApplication');
 
-  private function buildInstalledApplicationsList(array $applications) {
     $list = new PHUIObjectItemListView();
 
     $applications = msort($applications, 'getName');

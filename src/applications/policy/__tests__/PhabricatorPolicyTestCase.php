@@ -82,7 +82,6 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
         'admin'   => false,
       ),
       'No One Policy');
-
   }
 
 
@@ -160,6 +159,46 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
   public function testOmnipotence() {
     $results = array(
       $this->buildObject(PhabricatorPolicies::POLICY_NOONE),
+    );
+
+    $query = new PhabricatorPolicyAwareTestQuery();
+    $query->setResults($results);
+    $query->setViewer(PhabricatorUser::getOmnipotentUser());
+
+    $this->assertEqual(
+      1,
+      count($query->execute()));
+  }
+
+
+  /**
+   * Test that invalid policies reject viewers of all types.
+   */
+  public function testRejectInvalidPolicy() {
+    $invalid_policy = "the duck goes quack";
+    $object = $this->buildObject($invalid_policy);
+
+    $this->expectVisibility(
+      $object = $this->buildObject($invalid_policy),
+      array(
+        'public'  => false,
+        'user'    => false,
+        'admin'   => false,
+      ),
+      'Invalid Policy');
+  }
+
+
+  /**
+   * An omnipotent user should be able to see even objects with invalid
+   * policies.
+   */
+  public function testInvalidPolicyVisibleByOmnipotentUser() {
+    $invalid_policy = "the cow goes moo";
+    $object = $this->buildObject($invalid_policy);
+
+    $results = array(
+      $object,
     );
 
     $query = new PhabricatorPolicyAwareTestQuery();

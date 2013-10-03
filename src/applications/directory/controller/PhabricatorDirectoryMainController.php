@@ -76,10 +76,11 @@ final class PhabricatorDirectoryMainController
 
   private function buildJumpResponse() {
     $request = $this->getRequest();
-
     $jump = $request->getStr('jump');
 
-    $response = PhabricatorJumpNavHandler::jumpPostResponse($jump);
+    $response = PhabricatorJumpNavHandler::getJumpResponse(
+      $request->getUser(),
+      $jump);
 
     if ($response) {
 

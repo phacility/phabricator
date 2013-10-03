@@ -26,10 +26,10 @@ final class PhabricatorConfigEntry extends PhabricatorConfigEntryDAO
 
   public static function loadConfigEntry($key) {
     $config_entry = id(new PhabricatorConfigEntry())
-                 ->loadOneWhere(
-                   'configKey = %s AND namespace = %s',
-                    $key,
-                   'default');
+      ->loadOneWhere(
+        'configKey = %s AND namespace = %s',
+        $key,
+        'default');
 
     if (!$config_entry) {
       $config_entry = id(new PhabricatorConfigEntry())

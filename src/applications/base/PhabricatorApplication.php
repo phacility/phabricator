@@ -8,7 +8,8 @@
  * @task  meta  Application Management
  * @group apps
  */
-abstract class PhabricatorApplication {
+abstract class PhabricatorApplication
+  implements PhabricatorPolicyInterface {
 
   const GROUP_CORE            = 'core';
   const GROUP_COMMUNICATION   = 'communication';
@@ -49,7 +50,6 @@ abstract class PhabricatorApplication {
 
 /* -(  Application Information  )-------------------------------------------- */
 
-
   public function getName() {
     return substr(get_class($this), strlen('PhabricatorApplication'));
   }
@@ -80,6 +80,25 @@ abstract class PhabricatorApplication {
 
   public function isBeta() {
     return false;
+  }
+
+  /**
+   * Returns true if an application is first-party (developed by Phacility)
+   * and false otherwise.
+   */
+  final public function isFirstParty() {
+    $where = id(new ReflectionClass($this))->getFileName();
+    $root = phutil_get_library_root('phabricator');
+
+    if (!Filesystem::isDescendant($where, $root)) {
+      return false;
+    }
+
+    if (Filesystem::isDescendant($where, $root.'/extensions')) {
+      return false;
+    }
+
+    return true;
   }
 
   public function canUninstall() {
@@ -297,5 +316,123 @@ abstract class PhabricatorApplication {
     return $apps;
   }
 
-}
 
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array_merge(
+      array(
+        PhabricatorPolicyCapability::CAN_VIEW,
+        PhabricatorPolicyCapability::CAN_EDIT,
+      ),
+      array_keys($this->getCustomCapabilities()));
+  }
+
+  public function getPolicy($capability) {
+    $default = $this->getCustomPolicySetting($capability);
+    if ($default) {
+      return $default;
+    }
+
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        if (PhabricatorEnv::getEnvConfig('policy.allow-public')) {
+          return PhabricatorPolicies::POLICY_PUBLIC;
+        } else {
+          return PhabricatorPolicies::POLICY_USER;
+        }
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return PhabricatorPolicies::POLICY_ADMIN;
+      default:
+        $spec = $this->getCustomCapabilitySpecification($capability);
+        return idx($spec, 'default', PhabricatorPolicies::POLICY_USER);
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
+
+/* -(  Policies  )----------------------------------------------------------- */
+
+  protected function getCustomCapabilities() {
+    return array();
+  }
+
+  private function getCustomPolicySetting($capability) {
+    if (!$this->isCapabilityEditable($capability)) {
+      return null;
+    }
+
+    $config = PhabricatorEnv::getEnvConfig('phabricator.application-settings');
+
+    $app = idx($config, $this->getPHID());
+    if (!$app) {
+      return null;
+    }
+
+    $policy = idx($app, 'policy');
+    if (!$policy) {
+      return null;
+    }
+
+    return idx($policy, $capability);
+  }
+
+
+  private function getCustomCapabilitySpecification($capability) {
+    $custom = $this->getCustomCapabilities();
+    if (empty($custom[$capability])) {
+      throw new Exception("Unknown capability '{$capability}'!");
+    }
+    return $custom[$capability];
+  }
+
+  public function getCapabilityLabel($capability) {
+    $map = array(
+      PhabricatorPolicyCapability::CAN_VIEW => pht('Can Use Application'),
+      PhabricatorPolicyCapability::CAN_EDIT => pht('Can Configure Application'),
+    );
+
+    $map += ipull($this->getCustomCapabilities(), 'label');
+
+    return idx($map, $capability);
+  }
+
+  public function isCapabilityEditable($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return $this->canUninstall();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return false;
+      default:
+        $spec = $this->getCustomCapabilitySpecification($capability);
+        return idx($spec, 'edit', true);
+    }
+  }
+
+  public function getCapabilityCaption($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        if (!$this->canUninstall()) {
+          return pht(
+            'This application is required for Phabricator to operate, so all '.
+            'users must have access to it.');
+        } else {
+          return null;
+        }
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return null;
+      default:
+        $spec = $this->getCustomCapabilitySpecification($capability);
+        return idx($spec, 'caption');
+    }
+  }
+
+}

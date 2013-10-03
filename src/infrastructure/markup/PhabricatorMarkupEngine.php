@@ -41,7 +41,7 @@ final class PhabricatorMarkupEngine {
 
   private $objects = array();
   private $viewer;
-  private $version = 7;
+  private $version = 8;
 
 
 /* -(  Markup Pipeline  )---------------------------------------------------- */

@@ -472,7 +472,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setWorkflow(true)
         ->setIcon('link')
         ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
+        ->setWorkflow(true));
 
     $view->addAction(
       id(new PhabricatorActionView())
@@ -481,7 +481,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setWorkflow(true)
         ->setIcon('attach')
         ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
+        ->setWorkflow(true));
 
     $pholio_app =
       PhabricatorApplication::getByClass('PhabricatorApplicationPholio');
@@ -493,7 +493,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setWorkflow(true)
         ->setIcon('attach')
         ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
+        ->setWorkflow(true));
     }
 
     return $view;
