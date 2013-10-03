@@ -53,6 +53,38 @@ final class PhabricatorPolicyManagementUnlockWorkflow
       ->withPHIDs(array($object->getPHID()))
       ->executeOne();
 
+    if ($object instanceof PhabricatorApplication) {
+      $application = $object;
+
+      $console->writeOut(
+        "%s\n",
+        pht('Unlocking Application: %s', $handle->getFullName()));
+
+      // For applications, we can't unlock them in a normal way and don't want
+      // to unlock every capability, just view and edit.
+      $capabilities = array(
+        PhabricatorPolicyCapability::CAN_VIEW,
+        PhabricatorPolicyCapability::CAN_EDIT,
+      );
+
+      $key = 'phabricator.application-settings';
+      $config_entry = PhabricatorConfigEntry::loadConfigEntry($key);
+      $value = $config_entry->getValue();
+
+      foreach ($capabilities as $capability) {
+        if ($application->isCapabilityEditable($capability)) {
+          unset($value[$application->getPHID()]['policy'][$capability]);
+        }
+      }
+
+      $config_entry->setValue($value);
+      $config_entry->save();
+
+      $console->writeOut("%s\n", pht('Saved application.'));
+
+      return 0;
+    }
+
     $console->writeOut("%s\n", pht('Unlocking: %s', $handle->getFullName()));
 
     $updated = false;
