@@ -127,10 +127,16 @@ abstract class PhabricatorController extends AphrontController {
     // a policy exception if the viewer doesn't have permission.
     $application = $this->getCurrentApplication();
     if ($application) {
+/*
+
+  TODO: Reenable this, but it's breaking some applications which need public
+  access in all cases, like Files and Conduit.
+
       id(new PhabricatorApplicationQuery())
         ->setViewer($user)
         ->withPHIDs(array($application->getPHID()))
         ->executeOne();
+*/
     }
 
   }

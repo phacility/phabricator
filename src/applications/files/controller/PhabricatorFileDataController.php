@@ -25,8 +25,12 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
         ->setURI($uri->setPath($request->getPath()));
     }
 
+    // NOTE: This endpoint will ideally be accessed via CDN or otherwise on
+    // a non-credentialed domain. Knowing the file's secret key gives you
+    // access, regardless of authentication on the request itself.
+
     $file = id(new PhabricatorFileQuery())
-      ->setViewer($request->getUser())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withPHIDs(array($this->phid))
       ->executeOne();
     if (!$file) {
