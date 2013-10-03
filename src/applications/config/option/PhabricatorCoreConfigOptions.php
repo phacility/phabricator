@@ -175,6 +175,10 @@ final class PhabricatorCoreConfigOptions
         ->setLocked(true)
         ->setDescription(
           pht('Array containing list of Uninstalled applications.')),
+      $this->newOption('phabricator.application-settings', 'wild', array())
+        ->setLocked(true)
+        ->setDescription(
+          pht('Customized settings for Phabricator applications.')),
       $this->newOption('welcome.html', 'string', null)
         ->setLocked(true)
         ->setDescription(
