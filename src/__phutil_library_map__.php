@@ -133,6 +133,7 @@ phutil_register_library_map(array(
     'ConduitAPI_differential_getcommitmessage_Method' => 'applications/differential/conduit/ConduitAPI_differential_getcommitmessage_Method.php',
     'ConduitAPI_differential_getcommitpaths_Method' => 'applications/differential/conduit/ConduitAPI_differential_getcommitpaths_Method.php',
     'ConduitAPI_differential_getdiff_Method' => 'applications/differential/conduit/ConduitAPI_differential_getdiff_Method.php',
+    'ConduitAPI_differential_getrawdiff_Method' => 'applications/differential/conduit/ConduitAPI_differential_getrawdiff_Method.php',
     'ConduitAPI_differential_getrevision_Method' => 'applications/differential/conduit/ConduitAPI_differential_getrevision_Method.php',
     'ConduitAPI_differential_getrevisioncomments_Method' => 'applications/differential/conduit/ConduitAPI_differential_getrevisioncomments_Method.php',
     'ConduitAPI_differential_markcommitted_Method' => 'applications/differential/conduit/ConduitAPI_differential_markcommitted_Method.php',
@@ -2223,6 +2224,7 @@ phutil_register_library_map(array(
     'ConduitAPI_differential_getcommitmessage_Method' => 'ConduitAPIMethod',
     'ConduitAPI_differential_getcommitpaths_Method' => 'ConduitAPIMethod',
     'ConduitAPI_differential_getdiff_Method' => 'ConduitAPIMethod',
+    'ConduitAPI_differential_getrawdiff_Method' => 'ConduitAPIMethod',
     'ConduitAPI_differential_getrevision_Method' => 'ConduitAPIMethod',
     'ConduitAPI_differential_getrevisioncomments_Method' => 'ConduitAPI_differential_Method',
     'ConduitAPI_differential_markcommitted_Method' => 'ConduitAPIMethod',
@@ -3003,7 +3005,11 @@ phutil_register_library_map(array(
     'PhabricatorApplicationUninstallController' => 'PhabricatorApplicationsController',
     'PhabricatorApplicationXHProf' => 'PhabricatorApplication',
     'PhabricatorApplicationsController' => 'PhabricatorController',
-    'PhabricatorApplicationsListController' => 'PhabricatorApplicationsController',
+    'PhabricatorApplicationsListController' =>
+    array(
+      0 => 'PhabricatorApplicationsController',
+      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
+    ),
     'PhabricatorAsanaConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorAuditAddCommentController' => 'PhabricatorAuditController',
     'PhabricatorAuditComment' =>
