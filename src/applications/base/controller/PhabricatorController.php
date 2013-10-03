@@ -122,6 +122,17 @@ abstract class PhabricatorController extends AphrontController {
       return new Aphront403Response();
     }
 
+    // If the user doesn't have access to the application, don't let them use
+    // any of its controllers. We query the application in order to generate
+    // a policy exception if the viewer doesn't have permission.
+    $application = $this->getCurrentApplication();
+    if ($application) {
+      id(new PhabricatorApplicationQuery())
+        ->setViewer($user)
+        ->withPHIDs(array($application->getPHID()))
+        ->executeOne();
+    }
+
   }
 
   public function buildStandardPageView() {

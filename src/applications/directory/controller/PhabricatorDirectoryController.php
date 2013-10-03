@@ -21,7 +21,10 @@ abstract class PhabricatorDirectoryController extends PhabricatorController {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI('/'));
 
-    $applications = PhabricatorApplication::getAllInstalledApplications();
+    $applications = id(new PhabricatorApplicationQuery())
+      ->setViewer($user)
+      ->withInstalled(true)
+      ->execute();
 
     foreach ($applications as $key => $application) {
       if (!$application->shouldAppearInLaunchView()) {
