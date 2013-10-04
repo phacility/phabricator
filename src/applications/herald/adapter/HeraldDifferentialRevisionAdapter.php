@@ -44,6 +44,8 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
         self::FIELD_REPOSITORY,
         self::FIELD_DIFF_FILE,
         self::FIELD_DIFF_CONTENT,
+        self::FIELD_DIFF_ADDED_CONTENT,
+        self::FIELD_DIFF_REMOVED_CONTENT,
         self::FIELD_RULE,
         self::FIELD_AFFECTED_PACKAGE,
         self::FIELD_AFFECTED_PACKAGE_OWNER,
@@ -194,6 +196,56 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
     return $dict;
   }
 
+  protected function loadAddedContentDictionary() {
+    $changesets = $this->loadChangesets();
+
+    $hunks = array();
+    if ($changesets) {
+      $hunks = id(new DifferentialHunk())->loadAllWhere(
+        'changesetID in (%Ld)',
+        mpull($changesets, 'getID'));
+    }
+
+    $dict = array();
+    $hunks = mgroup($hunks, 'getChangesetID');
+    $changesets = mpull($changesets, null, 'getID');
+    foreach ($changesets as $id => $changeset) {
+      $path = $this->getAbsoluteRepositoryPathForChangeset($changeset);
+      $content = array();
+      foreach (idx($hunks, $id, array()) as $hunk) {
+        $content[] = implode('', $hunk->getAddedLines());
+      }
+      $dict[$path] = implode("\n", $content);
+    }
+
+    return $dict;
+  }
+
+  protected function loadRemovedContentDictionary() {
+    $changesets = $this->loadChangesets();
+
+    $hunks = array();
+    if ($changesets) {
+      $hunks = id(new DifferentialHunk())->loadAllWhere(
+        'changesetID in (%Ld)',
+        mpull($changesets, 'getID'));
+    }
+
+    $dict = array();
+    $hunks = mgroup($hunks, 'getChangesetID');
+    $changesets = mpull($changesets, null, 'getID');
+    foreach ($changesets as $id => $changeset) {
+      $path = $this->getAbsoluteRepositoryPathForChangeset($changeset);
+      $content = array();
+      foreach (idx($hunks, $id, array()) as $hunk) {
+        $content[] = implode('', $hunk->getRemovedLines());
+      }
+      $dict[$path] = implode("\n", $content);
+    }
+
+    return $dict;
+  }
+
   public function loadAffectedPackages() {
     if ($this->affectedPackages === null) {
       $this->affectedPackages = array();
@@ -243,6 +295,10 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
         return $repository->getPHID();
       case self::FIELD_DIFF_CONTENT:
         return $this->loadContentDictionary();
+      case self::FIELD_DIFF_ADDED_CONTENT:
+        return $this->loadAddedContentDictionary();
+      case self::FIELD_DIFF_REMOVED_CONTENT:
+        return $this->loadRemovedContentDictionary();
       case self::FIELD_AFFECTED_PACKAGE:
         $packages = $this->loadAffectedPackages();
         return mpull($packages, 'getPHID');

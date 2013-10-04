@@ -15,6 +15,8 @@ abstract class HeraldAdapter {
   const FIELD_TAGS                   = 'tags';
   const FIELD_DIFF_FILE              = 'diff-file';
   const FIELD_DIFF_CONTENT           = 'diff-content';
+  const FIELD_DIFF_ADDED_CONTENT     = 'diff-added-content';
+  const FIELD_DIFF_REMOVED_CONTENT   = 'diff-removed-content';
   const FIELD_REPOSITORY             = 'repository';
   const FIELD_RULE                   = 'rule';
   const FIELD_AFFECTED_PACKAGE       = 'affected-package';
@@ -127,6 +129,8 @@ abstract class HeraldAdapter {
       self::FIELD_TAGS => pht('Tags'),
       self::FIELD_DIFF_FILE => pht('Any changed filename'),
       self::FIELD_DIFF_CONTENT => pht('Any changed file content'),
+      self::FIELD_DIFF_ADDED_CONTENT => pht('Any added file content'),
+      self::FIELD_DIFF_REMOVED_CONTENT => pht('Any removed file content'),
       self::FIELD_REPOSITORY => pht('Repository'),
       self::FIELD_RULE => pht('Another Herald rule'),
       self::FIELD_AFFECTED_PACKAGE => pht('Any affected package'),
@@ -197,6 +201,8 @@ abstract class HeraldAdapter {
           self::CONDITION_REGEXP,
         );
       case self::FIELD_DIFF_CONTENT:
+      case self::FIELD_DIFF_ADDED_CONTENT:
+      case self::FIELD_DIFF_REMOVED_CONTENT:
         return array(
           self::CONDITION_CONTAINS,
           self::CONDITION_REGEXP,
