@@ -49,7 +49,7 @@ final class PhabricatorManiphestTaskTestDataGenerator
       ->setContinueOnNoEffect(true)
       ->setContinueOnMissingFields(true)
       ->applyTransactions($task, $transactions);
-    return $task->save();
+    return $task;
   }
 
   public function getCCPHIDs() {

@@ -28,6 +28,9 @@ final class ManiphestTransactionEditorPro
 
     switch ($xaction->getTransactionType()) {
       case ManiphestTransaction::TYPE_PRIORITY:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
         return (int)$object->getPriority();
       case ManiphestTransaction::TYPE_STATUS:
         if ($this->getIsNewObject()) {

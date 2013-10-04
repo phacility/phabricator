@@ -78,6 +78,7 @@ final class ManiphestTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
       case self::TYPE_DESCRIPTION:
+      case self::TYPE_PRIORITY:
         if ($this->getOldValue() === null) {
           return true;
         } else {
