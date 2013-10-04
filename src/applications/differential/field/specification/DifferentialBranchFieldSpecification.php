@@ -11,22 +11,24 @@ final class DifferentialBranchFieldSpecification
     return 'Branch:';
   }
 
-  public function renderValueForRevisionView() {
-    $diff = $this->getManualDiff();
-
+  private function getBranchOrBookmarkDescription(DifferentialDiff $diff) {
     $branch = $diff->getBranch();
     $bookmark = $diff->getBookmark();
     $has_branch = ($branch != '');
     $has_bookmark = ($bookmark != '');
     if ($has_branch && $has_bookmark) {
-      $branch = "{$bookmark} bookmark on {$branch} branch";
+      return "{$bookmark} bookmark on {$branch} branch";
     } else if ($has_bookmark) {
-      $branch = "{$bookmark} bookmark";
-    } else if (!$has_branch) {
-      return null;
+      return "{$bookmark} bookmark";
+    } else if ($has_branch) {
+      return $branch;
     }
+    return null;
+  }
 
-    return $branch;
+  public function renderValueForRevisionView() {
+    $diff = $this->getManualDiff();
+    return $this->getBranchOrBookmarkDescription($diff);
   }
 
   public function renderValueForMail($phase) {
@@ -39,11 +41,13 @@ final class DifferentialBranchFieldSpecification
 
     $diff = $this->getRevision()->loadActiveDiff();
     if ($diff) {
-      $branch = $diff->getBranch();
-      if ($branch) {
-        return "BRANCH\n  $branch";
+      $description = $this->getBranchOrBookmarkDescription($diff);
+      if ($description) {
+        return "BRANCH\n  {$description}";
       }
     }
+
+    return null;
   }
 
   public function didWriteRevision(DifferentialRevisionEditor $editor) {
