@@ -82,6 +82,10 @@ abstract class PhabricatorApplication
     return false;
   }
 
+  public function isUnlisted() {
+    return false;
+  }
+
   /**
    * Returns true if an application is first-party (developed by Phacility)
    * and false otherwise.
@@ -297,7 +301,6 @@ abstract class PhabricatorApplication
 
       $applications = $apps;
     }
-
 
     return $applications;
   }

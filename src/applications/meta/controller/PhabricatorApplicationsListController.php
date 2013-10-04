@@ -30,22 +30,26 @@ final class PhabricatorApplicationsListController
     $applications = msort($applications, 'getName');
 
     foreach ($applications as $application) {
-        $item = id(new PHUIObjectItemView())
-          ->setHeader($application->getName())
-          ->setHref('/applications/view/'.get_class($application).'/')
-          ->addAttribute($application->getShortDescription());
-
-        if (!$application->isInstalled()) {
-          $item->addIcon('delete', pht('Uninstalled'));
-        }
-
-        if ($application->isBeta()) {
-          $item->addIcon('lint-warning', pht('Beta'));
-        }
-
-        $list->addItem($item);
-
+      if ($application->isUnlisted()) {
+        continue;
       }
+
+      $item = id(new PHUIObjectItemView())
+        ->setHeader($application->getName())
+        ->setHref('/applications/view/'.get_class($application).'/')
+        ->addAttribute($application->getShortDescription());
+
+      if (!$application->isInstalled()) {
+        $item->addIcon('delete', pht('Uninstalled'));
+      }
+
+      if ($application->isBeta()) {
+        $item->addIcon('lint-warning', pht('Beta'));
+      }
+
+      $list->addItem($item);
+    }
+
     return $list;
    }
 

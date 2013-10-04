@@ -11,6 +11,10 @@ final class DarkConsoleDataController extends PhabricatorController {
     return !PhabricatorEnv::getEnvConfig('darkconsole.always-on');
   }
 
+  public function shouldRequireEnabledUser() {
+    return !PhabricatorEnv::getEnvConfig('darkconsole.always-on');
+  }
+
   public function willProcessRequest(array $data) {
     $this->key = $data['key'];
   }

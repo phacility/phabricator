@@ -342,14 +342,23 @@ final class AphrontRequest {
       $expire = time() + (60 * 60 * 24 * 365 * 5);
     }
 
-    setcookie(
-      $name,
-      $value,
-      $expire,
-      $path = '/',
-      $base_domain,
-      $is_secure,
-      $http_only = true);
+
+    if (php_sapi_name() == 'cli') {
+      // Do nothing, to avoid triggering "Cannot modify header information"
+      // warnings.
+
+      // TODO: This is effectively a test for whether we're running in a unit
+      // test or not. Move this actual call to HTTPSink?
+    } else {
+      setcookie(
+        $name,
+        $value,
+        $expire,
+        $path = '/',
+        $base_domain,
+        $is_secure,
+        $http_only = true);
+    }
 
     $_COOKIE[$name] = $value;
 

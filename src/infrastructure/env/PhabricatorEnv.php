@@ -528,6 +528,8 @@ final class PhabricatorEnv {
     foreach ($tmp as $source) {
       self::$sourceStack->pushSource($source);
     }
+
+    self::dropConfigCache();
   }
 
   private static function dropConfigCache() {
