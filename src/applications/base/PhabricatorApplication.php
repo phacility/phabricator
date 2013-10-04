@@ -82,6 +82,13 @@ abstract class PhabricatorApplication
     return false;
   }
 
+  /**
+   * Return true if this application should not appear in application lists in
+   * the UI. Primarily intended for unit test applications or other
+   * pseudo-applications.
+   *
+   * @return bool True to remove application from UI lists.
+   */
   public function isUnlisted() {
     return false;
   }
@@ -89,6 +96,8 @@ abstract class PhabricatorApplication
   /**
    * Returns true if an application is first-party (developed by Phacility)
    * and false otherwise.
+   *
+   * @return bool True if this application is developed by Phacility.
    */
   final public function isFirstParty() {
     $where = id(new ReflectionClass($this))->getFileName();

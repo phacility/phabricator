@@ -30,10 +30,6 @@ final class PhabricatorApplicationsListController
     $applications = msort($applications, 'getName');
 
     foreach ($applications as $application) {
-      if ($application->isUnlisted()) {
-        continue;
-      }
-
       $item = id(new PHUIObjectItemView())
         ->setHeader($application->getName())
         ->setHref('/applications/view/'.get_class($application).'/')
