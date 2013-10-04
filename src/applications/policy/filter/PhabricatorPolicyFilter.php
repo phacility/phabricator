@@ -281,6 +281,13 @@ final class PhabricatorPolicyFilter {
       case PhabricatorPolicyCapability::CAN_JOIN:
         $message = pht('You do not have permission to join this object.');
         break;
+      default:
+        // TODO: Farm these out to applications?
+        $message = pht(
+          'You do not have a required capability ("%s") to do whatever you '.
+          'are trying to do.',
+          $capability);
+        break;
     }
 
     switch ($policy) {
@@ -369,7 +376,7 @@ final class PhabricatorPolicyFilter {
     }
 
     $more = array_merge(
-      array($more),
+      array_filter(array($more)),
       array_filter((array)$object->describeAutomaticCapability($capability)));
 
     $exception = new PhabricatorPolicyException($message);

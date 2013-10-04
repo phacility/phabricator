@@ -96,7 +96,9 @@ final class HeraldRuleViewController extends HeraldController {
     if ($adapter) {
       $view->addProperty(
         pht('Applies To'),
-        idx(HeraldAdapter::getEnabledAdapterMap(), $rule->getContentType()));
+        idx(
+          HeraldAdapter::getEnabledAdapterMap($viewer),
+          $rule->getContentType()));
 
       $view->invokeWillRenderEvent();
 

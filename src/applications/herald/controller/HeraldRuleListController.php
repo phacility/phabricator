@@ -33,7 +33,7 @@ final class HeraldRuleListController extends HeraldController
     $phids = mpull($rules, 'getAuthorPHID');
     $this->loadHandles($phids);
 
-    $content_type_map = HeraldAdapter::getEnabledAdapterMap();
+    $content_type_map = HeraldAdapter::getEnabledAdapterMap($viewer);
 
     $list = id(new PHUIObjectItemListView())
       ->setUser($viewer);

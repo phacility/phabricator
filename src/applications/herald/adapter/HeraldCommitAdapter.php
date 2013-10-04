@@ -27,9 +27,8 @@ final class HeraldCommitAdapter extends HeraldAdapter {
   protected $affectedPackages;
   protected $auditNeededPackages;
 
-  public function isEnabled() {
-    $app = 'PhabricatorApplicationDiffusion';
-    return PhabricatorApplication::isClassInstalled($app);
+  public function getAdapterApplicationClass() {
+    return 'PhabricatorApplicationDiffusion';
   }
 
   public function getAdapterContentType() {

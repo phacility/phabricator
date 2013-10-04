@@ -97,6 +97,17 @@ abstract class HeraldAdapter {
     return true;
   }
 
+  public function isAvailableToUser(PhabricatorUser $viewer) {
+    $applications = id(new PhabricatorApplicationQuery())
+      ->setViewer($viewer)
+      ->withInstalled(true)
+      ->withClasses(array($this->getAdapterApplicationClass()))
+      ->execute();
+
+    return !empty($applications);
+  }
+
+
   /**
    * NOTE: You generally should not override this; it exists to support legacy
    * adapters which had hard-coded content types.
@@ -106,6 +117,7 @@ abstract class HeraldAdapter {
   }
 
   abstract public function getAdapterContentName();
+  abstract public function getAdapterApplicationClass();
 
 
 /* -(  Fields  )------------------------------------------------------------- */
@@ -694,16 +706,6 @@ abstract class HeraldAdapter {
     return $adapters;
   }
 
-  public static function getAllEnabledAdapters() {
-    $adapters = self::getAllAdapters();
-    foreach ($adapters as $key => $adapter) {
-      if (!$adapter->isEnabled()) {
-        unset($adapters[$key]);
-      }
-    }
-    return $adapters;
-  }
-
   public static function getAdapterForContentType($content_type) {
     $adapters = self::getAllAdapters();
 
@@ -719,11 +721,14 @@ abstract class HeraldAdapter {
         $content_type));
   }
 
-  public static function getEnabledAdapterMap() {
+  public static function getEnabledAdapterMap(PhabricatorUser $viewer) {
     $map = array();
 
-    $adapters = HeraldAdapter::getAllEnabledAdapters();
+    $adapters = HeraldAdapter::getAllAdapters();
     foreach ($adapters as $adapter) {
+      if (!$adapter->isAvailableToUser($viewer)) {
+        continue;
+      }
       $type = $adapter->getAdapterContentType();
       $name = $adapter->getAdapterContentName();
       $map[$type] = $name;
@@ -732,7 +737,6 @@ abstract class HeraldAdapter {
     asort($map);
     return $map;
   }
-
 
   public function renderRuleAsText(HeraldRule $rule, array $handles) {
     assert_instances_of($handles, 'PhabricatorObjectHandle');

@@ -76,6 +76,16 @@ final class HeraldRuleQuery
   public function willFilterPage(array $rules) {
     $rule_ids = mpull($rules, 'getID');
 
+    // Filter out any rules that have invalid adapters, or have adapters the
+    // viewer isn't permitted to see or use (for example, Differential rules
+    // if the user can't use Differential or Differential is not installed).
+    $types = HeraldAdapter::getEnabledAdapterMap($this->getViewer());
+    foreach ($rules as $key => $rule) {
+      if (empty($types[$rule->getContentType()])) {
+        unset($rules[$key]);
+      }
+    }
+
     if ($this->needValidateAuthors) {
       $this->validateRuleAuthors($rules);
     }

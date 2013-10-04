@@ -2,6 +2,9 @@
 
 final class PhabricatorApplicationHerald extends PhabricatorApplication {
 
+  const CAN_CREATE_RULE = 'herald.create';
+  const CAN_CREATE_GLOBAL_RULE = 'herald.global';
+
   public function getBaseURI() {
     return '/herald/';
   }
@@ -47,5 +50,19 @@ final class PhabricatorApplicationHerald extends PhabricatorApplication {
       ),
     );
   }
+
+  protected function getCustomCapabilities() {
+    return array(
+      self::CAN_CREATE_RULE => array(
+        'label' => pht('Can Create Rules'),
+      ),
+      self::CAN_CREATE_GLOBAL_RULE => array(
+        'label' => pht('Can Create Global Rules'),
+        'caption' => pht('Global rules can bypass access controls.'),
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+    );
+  }
+
 
 }

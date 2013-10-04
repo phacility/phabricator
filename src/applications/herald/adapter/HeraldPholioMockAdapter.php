@@ -8,6 +8,10 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
   private $mock;
   private $ccPHIDs = array();
 
+  public function getAdapterApplicationClass() {
+    return 'PhabricatorApplicationPholio';
+  }
+
   public function setMock(PholioMock $mock) {
     $this->mock = $mock;
     return $this;

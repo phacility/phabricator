@@ -10,6 +10,10 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
   private $assignPHID;
   private $projectPHIDs = array();
 
+  public function getAdapterApplicationClass() {
+    return 'PhabricatorApplicationManiphest';
+  }
+
   public function setTask(ManiphestTask $task) {
     $this->task = $task;
     return $this;

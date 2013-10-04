@@ -20,9 +20,8 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
   protected $affectedPackages;
   protected $changesets;
 
-  public function isEnabled() {
-    $app = 'PhabricatorApplicationDifferential';
-    return PhabricatorApplication::isClassInstalled($app);
+  public function getAdapterApplicationClass() {
+    return 'PhabricatorApplicationDifferential';
   }
 
   public function getAdapterContentType() {

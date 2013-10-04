@@ -350,4 +350,23 @@ abstract class PhabricatorController extends AphrontController {
     return $view;
   }
 
+  protected function hasApplicationCapability($capability) {
+    return PhabricatorPolicyFilter::hasCapability(
+      $this->getRequest()->getUser(),
+      $this->getCurrentApplication(),
+      $capability);
+  }
+
+  protected function requireApplicationCapability($capability) {
+    PhabricatorPolicyFilter::requireCapability(
+      $this->getRequest()->getUser(),
+      $this->getCurrentApplication(),
+      $capability);
+  }
+
+  protected function explainApplicationCapability($capability, $message) {
+    // TODO: Render a link to get more information.
+    return $message;
+  }
+
 }

@@ -110,11 +110,13 @@ final class HeraldRuleSearchEngine
   private function getContentTypeOptions() {
     return array(
       '' => pht('(All Content Types)'),
-    ) + HeraldAdapter::getEnabledAdapterMap();
+    ) + HeraldAdapter::getEnabledAdapterMap($this->requireViewer());
   }
 
   private function getContentTypeValues() {
-    return array_fuse(array_keys(HeraldAdapter::getEnabledAdapterMap()));
+    return array_fuse(
+      array_keys(
+        HeraldAdapter::getEnabledAdapterMap($this->requireViewer())));
   }
 
   private function getRuleTypeOptions() {
