@@ -163,6 +163,16 @@ JX.install('HeraldRuleEditor', {
       JX.DOM.setContent(condition_cell, condition_select);
 
       this._onconditionchange(r);
+
+      var condition_name = this._config.conditions[row_id][1];
+      switch (condition_name) {
+        case 'unconditionally':
+          JX.DOM.hide(condition_cell);
+          break;
+        default:
+          JX.DOM.show(condition_cell);
+          break;
+      }
     },
     _onconditionchange : function(r) {
       var target = JX.DOM.find(r, 'select', 'condition-select');

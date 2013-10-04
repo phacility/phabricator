@@ -34,19 +34,21 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
   }
 
   public function getFields() {
-    return array(
-      self::FIELD_TITLE,
-      self::FIELD_BODY,
-      self::FIELD_AUTHOR,
-      self::FIELD_REVIEWERS,
-      self::FIELD_CC,
-      self::FIELD_REPOSITORY,
-      self::FIELD_DIFF_FILE,
-      self::FIELD_DIFF_CONTENT,
-      self::FIELD_RULE,
-      self::FIELD_AFFECTED_PACKAGE,
-      self::FIELD_AFFECTED_PACKAGE_OWNER,
-    );
+    return array_merge(
+      array(
+        self::FIELD_TITLE,
+        self::FIELD_BODY,
+        self::FIELD_AUTHOR,
+        self::FIELD_REVIEWERS,
+        self::FIELD_CC,
+        self::FIELD_REPOSITORY,
+        self::FIELD_DIFF_FILE,
+        self::FIELD_DIFF_CONTENT,
+        self::FIELD_RULE,
+        self::FIELD_AFFECTED_PACKAGE,
+        self::FIELD_AFFECTED_PACKAGE_OWNER,
+      ),
+      parent::getFields());
   }
 
   public function getRepetitionOptions() {

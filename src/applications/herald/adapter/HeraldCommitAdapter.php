@@ -5,10 +5,11 @@
  */
 final class HeraldCommitAdapter extends HeraldAdapter {
 
-  const FIELD_NEED_AUDIT_FOR_PACKAGE = 'need-audit-for-package';
-  const FIELD_DIFFERENTIAL_REVISION  = 'differential-revision';
-  const FIELD_DIFFERENTIAL_REVIEWERS = 'differential-reviewers';
-  const FIELD_DIFFERENTIAL_CCS       = 'differential-ccs';
+  const FIELD_NEED_AUDIT_FOR_PACKAGE      = 'need-audit-for-package';
+  const FIELD_DIFFERENTIAL_REVISION       = 'differential-revision';
+  const FIELD_DIFFERENTIAL_REVIEWERS      = 'differential-reviewers';
+  const FIELD_DIFFERENTIAL_CCS            = 'differential-ccs';
+  const FIELD_REPOSITORY_AUTOCLOSE_BRANCH = 'repository-autoclose-branch';
 
   protected $diff;
   protected $revision;
@@ -46,26 +47,30 @@ final class HeraldCommitAdapter extends HeraldAdapter {
       self::FIELD_DIFFERENTIAL_REVISION => pht('Differential revision'),
       self::FIELD_DIFFERENTIAL_REVIEWERS => pht('Differential reviewers'),
       self::FIELD_DIFFERENTIAL_CCS => pht('Differential CCs'),
+      self::FIELD_REPOSITORY_AUTOCLOSE_BRANCH => pht('On autoclose branch'),
     ) + parent::getFieldNameMap();
   }
 
   public function getFields() {
-    return array(
-      self::FIELD_BODY,
-      self::FIELD_AUTHOR,
-      self::FIELD_COMMITTER,
-      self::FIELD_REVIEWER,
-      self::FIELD_REPOSITORY,
-      self::FIELD_DIFF_FILE,
-      self::FIELD_DIFF_CONTENT,
-      self::FIELD_RULE,
-      self::FIELD_AFFECTED_PACKAGE,
-      self::FIELD_AFFECTED_PACKAGE_OWNER,
-      self::FIELD_NEED_AUDIT_FOR_PACKAGE,
-      self::FIELD_DIFFERENTIAL_REVISION,
-      self::FIELD_DIFFERENTIAL_REVIEWERS,
-      self::FIELD_DIFFERENTIAL_CCS,
-    );
+    return array_merge(
+      array(
+        self::FIELD_BODY,
+        self::FIELD_AUTHOR,
+        self::FIELD_COMMITTER,
+        self::FIELD_REVIEWER,
+        self::FIELD_REPOSITORY,
+        self::FIELD_DIFF_FILE,
+        self::FIELD_DIFF_CONTENT,
+        self::FIELD_RULE,
+        self::FIELD_AFFECTED_PACKAGE,
+        self::FIELD_AFFECTED_PACKAGE_OWNER,
+        self::FIELD_NEED_AUDIT_FOR_PACKAGE,
+        self::FIELD_DIFFERENTIAL_REVISION,
+        self::FIELD_DIFFERENTIAL_REVIEWERS,
+        self::FIELD_DIFFERENTIAL_CCS,
+        self::FIELD_REPOSITORY_AUTOCLOSE_BRANCH,
+      ),
+      parent::getFields());
   }
 
   public function getConditionsForField($field) {
@@ -93,6 +98,10 @@ final class HeraldCommitAdapter extends HeraldAdapter {
         return array(
           self::CONDITION_INCLUDE_ANY,
           self::CONDITION_INCLUDE_NONE,
+        );
+      case self::FIELD_REPOSITORY_AUTOCLOSE_BRANCH:
+        return array(
+          self::CONDITION_UNCONDITIONALLY,
         );
     }
     return parent::getConditionsForField($field);
@@ -307,6 +316,10 @@ final class HeraldCommitAdapter extends HeraldAdapter {
           return array();
         }
         return $revision->getCCPHIDs();
+      case self::FIELD_REPOSITORY_AUTOCLOSE_BRANCH:
+        return $this->repository->shouldAutocloseCommit(
+          $this->commit,
+          $this->commitData);
     }
 
     return parent::getHeraldField($field);

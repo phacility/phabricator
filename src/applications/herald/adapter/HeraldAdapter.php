@@ -20,24 +20,26 @@ abstract class HeraldAdapter {
   const FIELD_AFFECTED_PACKAGE       = 'affected-package';
   const FIELD_AFFECTED_PACKAGE_OWNER = 'affected-package-owner';
   const FIELD_CONTENT_SOURCE         = 'contentsource';
+  const FIELD_ALWAYS                 = 'always';
 
-  const CONDITION_CONTAINS      = 'contains';
-  const CONDITION_NOT_CONTAINS  = '!contains';
-  const CONDITION_IS            = 'is';
-  const CONDITION_IS_NOT        = '!is';
-  const CONDITION_IS_ANY        = 'isany';
-  const CONDITION_IS_NOT_ANY    = '!isany';
-  const CONDITION_INCLUDE_ALL   = 'all';
-  const CONDITION_INCLUDE_ANY   = 'any';
-  const CONDITION_INCLUDE_NONE  = 'none';
-  const CONDITION_IS_ME         = 'me';
-  const CONDITION_IS_NOT_ME     = '!me';
-  const CONDITION_REGEXP        = 'regexp';
-  const CONDITION_RULE          = 'conditions';
-  const CONDITION_NOT_RULE      = '!conditions';
-  const CONDITION_EXISTS        = 'exists';
-  const CONDITION_NOT_EXISTS    = '!exists';
-  const CONDITION_REGEXP_PAIR   = 'regexp-pair';
+  const CONDITION_CONTAINS        = 'contains';
+  const CONDITION_NOT_CONTAINS    = '!contains';
+  const CONDITION_IS              = 'is';
+  const CONDITION_IS_NOT          = '!is';
+  const CONDITION_IS_ANY          = 'isany';
+  const CONDITION_IS_NOT_ANY      = '!isany';
+  const CONDITION_INCLUDE_ALL     = 'all';
+  const CONDITION_INCLUDE_ANY     = 'any';
+  const CONDITION_INCLUDE_NONE    = 'none';
+  const CONDITION_IS_ME           = 'me';
+  const CONDITION_IS_NOT_ME       = '!me';
+  const CONDITION_REGEXP          = 'regexp';
+  const CONDITION_RULE            = 'conditions';
+  const CONDITION_NOT_RULE        = '!conditions';
+  const CONDITION_EXISTS          = 'exists';
+  const CONDITION_NOT_EXISTS      = '!exists';
+  const CONDITION_UNCONDITIONALLY = 'unconditionally';
+  const CONDITION_REGEXP_PAIR     = 'regexp-pair';
 
   const ACTION_ADD_CC       = 'addcc';
   const ACTION_REMOVE_CC    = 'remcc';
@@ -79,6 +81,8 @@ abstract class HeraldAdapter {
         return null;
       case self::FIELD_CONTENT_SOURCE:
         return $this->getContentSource()->getSource();
+      case self::FIELD_ALWAYS:
+        return true;
       default:
         throw new Exception(
           "Unknown field '{$field_name}'!");
@@ -105,7 +109,11 @@ abstract class HeraldAdapter {
 /* -(  Fields  )------------------------------------------------------------- */
 
 
-  abstract public function getFields();
+  public function getFields() {
+    return array(
+      self::FIELD_ALWAYS,
+    );
+  }
 
   public function getFieldNameMap() {
     return array(
@@ -124,7 +132,8 @@ abstract class HeraldAdapter {
       self::FIELD_AFFECTED_PACKAGE => pht('Any affected package'),
       self::FIELD_AFFECTED_PACKAGE_OWNER =>
         pht("Any affected package's owner"),
-      self:: FIELD_CONTENT_SOURCE => pht('Content Source')
+      self::FIELD_CONTENT_SOURCE => pht('Content Source'),
+      self::FIELD_ALWAYS => pht('Always'),
     );
   }
 
@@ -150,6 +159,7 @@ abstract class HeraldAdapter {
       self::CONDITION_NOT_RULE        => pht('does not match:'),
       self::CONDITION_EXISTS          => pht('exists'),
       self::CONDITION_NOT_EXISTS      => pht('does not exist'),
+      self::CONDITION_UNCONDITIONALLY => '',  // don't show anything!
       self::CONDITION_REGEXP_PAIR     => pht('matches regexp pair'),
     );
   }
@@ -207,6 +217,10 @@ abstract class HeraldAdapter {
         return array(
           self::CONDITION_IS,
           self::CONDITION_IS_NOT,
+        );
+      case self::FIELD_ALWAYS:
+        return array(
+          self::CONDITION_UNCONDITIONALLY,
         );
       default:
         throw new Exception(
@@ -281,6 +295,8 @@ abstract class HeraldAdapter {
         return (bool)$field_value;
       case self::CONDITION_NOT_EXISTS:
         return !$field_value;
+      case self::CONDITION_UNCONDITIONALLY:
+        return (bool)$field_value;
       case self::CONDITION_REGEXP:
         foreach ((array)$field_value as $value) {
           // We add the 'S' flag because we use the regexp multiple times.
@@ -422,6 +438,7 @@ abstract class HeraldAdapter {
       case self::CONDITION_NOT_RULE:
       case self::CONDITION_EXISTS:
       case self::CONDITION_NOT_EXISTS:
+      case self::CONDITION_UNCONDITIONALLY:
         // No explicit validation for these types, although there probably
         // should be in some cases.
         break;
@@ -559,6 +576,7 @@ abstract class HeraldAdapter {
       case self::CONDITION_IS_NOT_ME:
       case self::CONDITION_EXISTS:
       case self::CONDITION_NOT_EXISTS:
+      case self::CONDITION_UNCONDITIONALLY:
         return self::VALUE_NONE;
       case self::CONDITION_RULE:
       case self::CONDITION_NOT_RULE:

@@ -47,13 +47,15 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
   }
 
   public function getFields() {
-    return array(
-      self::FIELD_TITLE,
-      self::FIELD_BODY,
-      self::FIELD_AUTHOR,
-      self::FIELD_CC,
-      self::FIELD_CONTENT_SOURCE,
-    );
+    return array_merge(
+      array(
+        self::FIELD_TITLE,
+        self::FIELD_BODY,
+        self::FIELD_AUTHOR,
+        self::FIELD_CC,
+        self::FIELD_CONTENT_SOURCE,
+      ),
+      parent::getFields());
   }
 
   public function getActions($rule_type) {
