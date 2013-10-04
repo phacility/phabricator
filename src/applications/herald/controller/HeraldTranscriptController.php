@@ -25,10 +25,15 @@ final class HeraldTranscriptController extends HeraldController {
   }
 
   public function processRequest() {
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
 
-    $xscript = id(new HeraldTranscript())->load($this->id);
+    $xscript = id(new HeraldTranscriptQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$xscript) {
-      throw new Exception('Uknown transcript!');
+      return new Aphront404Response();
     }
 
     require_celerity_resource('herald-test-css');
@@ -46,9 +51,19 @@ final class HeraldTranscriptController extends HeraldController {
           pht('Details of this transcript have been garbage collected.')));
       $nav->appendChild($notice);
     } else {
+      $map = HeraldAdapter::getEnabledAdapterMap($viewer);
+      $object_type = $object_xscript->getType();
+      if (empty($map[$object_type])) {
+        // TODO: We should filter these out in the Query, but we have to load
+        // the objectTranscript right now, which is potentially enormous. We
+        // should denormalize the object type, or move the data into a separate
+        // table, and then filter this earlier (and thus raise a better error).
+        // For now, just block access so we don't violate policies.
+        throw new Exception(
+          pht("This transcript has an invalid or inaccessible adapter."));
+      }
 
-      $this->adapter = HeraldAdapter::getAdapterForContentType(
-        $object_xscript->getType());
+      $this->adapter = HeraldAdapter::getAdapterForContentType($object_type);
 
       $filter = $this->getFilterPHIDs();
       $this->filterTranscript($xscript, $filter);

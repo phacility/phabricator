@@ -93,10 +93,6 @@ abstract class HeraldAdapter {
 
   abstract public function applyHeraldEffects(array $effects);
 
-  public function isEnabled() {
-    return true;
-  }
-
   public function isAvailableToUser(PhabricatorUser $viewer) {
     $applications = id(new PhabricatorApplicationQuery())
       ->setViewer($viewer)

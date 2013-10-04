@@ -7,61 +7,33 @@ final class HeraldTranscriptListController extends HeraldController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    // Get one page of data together with the pager.
-    // Pull these objects manually since the serialized fields are gigantic.
-    $transcript = new HeraldTranscript();
+    $pager = new AphrontCursorPagerView();
+    $pager->readFromRequest($request);
 
-    $conn_r = $transcript->establishConnection('r');
-    $phid = $request->getStr('phid');
-    $where_clause = '';
-    if ($phid) {
-      $where_clause = qsprintf(
-        $conn_r,
-        'WHERE objectPHID = %s',
-        $phid);
-    }
-
-    $pager = new AphrontPagerView();
-    $pager->setOffset($request->getInt('offset'));
-    $pager->setURI($request->getRequestURI(), 'offset');
-
-    $limit_clause = qsprintf(
-      $conn_r,
-      'LIMIT %d, %d',
-      $pager->getOffset(),
-      $pager->getPageSize() + 1);
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT id, objectPHID, time, duration, dryRun FROM %T
-        %Q
-        ORDER BY id DESC
-        %Q',
-      $transcript->getTableName(),
-      $where_clause,
-      $limit_clause);
-
-    $data = $pager->sliceResults($data);
+    $transcripts = id(new HeraldTranscriptQuery())
+      ->setViewer($user)
+      ->needPartialRecords(true)
+      ->executeWithCursorPager($pager);
 
     // Render the table.
     $handles = array();
-    if ($data) {
-      $phids = ipull($data, 'objectPHID', 'objectPHID');
+    if ($transcripts) {
+      $phids = mpull($transcripts, 'getObjectPHID', 'getObjectPHID');
       $handles = $this->loadViewerHandles($phids);
     }
 
     $rows = array();
-    foreach ($data as $xscript) {
+    foreach ($transcripts as $xscript) {
       $rows[] = array(
-        phabricator_date($xscript['time'], $user),
-        phabricator_time($xscript['time'], $user),
-        $handles[$xscript['objectPHID']]->renderLink(),
-        $xscript['dryRun'] ? 'Yes' : '',
-        number_format((int)(1000 * $xscript['duration'])).' ms',
+        phabricator_date($xscript->getTime(), $user),
+        phabricator_time($xscript->getTime(), $user),
+        $handles[$xscript->getObjectPHID()]->renderLink(),
+        $xscript->getDryRun() ? pht('Yes') : '',
+        number_format((int)(1000 * $xscript->getDuration())).' ms',
         phutil_tag(
           'a',
           array(
-            'href' => '/herald/transcript/'.$xscript['id'].'/',
+            'href' => '/herald/transcript/'.$xscript->getID().'/',
             'class' => 'button small grey',
           ),
           pht('View Transcript')),
