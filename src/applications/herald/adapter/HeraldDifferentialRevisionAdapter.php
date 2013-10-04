@@ -62,10 +62,16 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
   public static function newLegacyAdapter(
     DifferentialRevision $revision,
     DifferentialDiff $diff) {
-
     $object = new HeraldDifferentialRevisionAdapter();
 
-    $revision->loadRelationships();
+    // Reload the revision to pick up relationship information.
+    $revision = id(new DifferentialRevisionQuery())
+      ->withIDs(array($revision->getID()))
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->needRelationships(true)
+      ->needReviewerStatus(true)
+      ->executeOne();
+
     $object->revision = $revision;
     $object->diff = $diff;
 

@@ -221,10 +221,20 @@ final class HeraldCommitAdapter extends HeraldAdapter {
       $data = $this->commitData;
       $revision_id = $data->getCommitDetail('differential.revisionID');
       if ($revision_id) {
-        // TODO: (T603) Herald policy stuff.
-        $revision = id(new DifferentialRevision())->load($revision_id);
+        // NOTE: The Herald rule owner might not actually have access to
+        // the revision, and can control which revision a commit is
+        // associated with by putting text in the commit message. However,
+        // the rules they can write against revisions don't actually expose
+        // anything interesting, so it seems reasonable to load unconditionally
+        // here.
+
+        $revision = id(new DifferentialRevisionQuery())
+          ->withIDs(array($revision_id))
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->needRelationships(true)
+          ->needReviewerStatus(true)
+          ->executeOne();
         if ($revision) {
-          $revision->loadRelationships();
           $this->affectedRevision = $revision;
         }
       }
