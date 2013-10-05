@@ -14,6 +14,19 @@ final class PhabricatorObjectHandle
   private $status = PhabricatorObjectHandleStatus::STATUS_OPEN;
   private $complete;
   private $disabled;
+  private $objectName;
+
+  public function setObjectName($object_name) {
+    $this->objectName = $object_name;
+    return $this;
+  }
+
+  public function getObjectName() {
+    if (!$this->objectName) {
+      return $this->getName();
+    }
+    return $this->objectName;
+  }
 
   public function setURI($uri) {
     $this->uri = $uri;

@@ -107,4 +107,8 @@ final class PhabricatorNotificationQuery
     return $this->formatWhereClause($where);
   }
 
+  protected function getPagingValue($item) {
+    return $item->getChronologicalKey();
+  }
+
 }

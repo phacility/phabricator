@@ -914,6 +914,7 @@ final class DifferentialRevisionQuery
     $edges = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(mpull($revisions, 'getPHID'))
       ->withEdgeTypes(array($type_reviewer))
+      ->setOrder(PhabricatorEdgeQuery::ORDER_OLDEST_FIRST)
       ->execute();
 
     foreach ($revisions as $revision) {
@@ -923,6 +924,7 @@ final class DifferentialRevisionQuery
         $data[] = array(
           'relation' => DifferentialRevision::RELATION_REVIEWER,
           'objectPHID' => $dst_phid,
+          'reasonPHID' => null,
         );
       }
 
@@ -1024,11 +1026,11 @@ final class DifferentialRevisionQuery
       ->withSourcePHIDs(mpull($revisions, 'getPHID'))
       ->withEdgeTypes(array($edge_type))
       ->needEdgeData(true)
+      ->setOrder(PhabricatorEdgeQuery::ORDER_OLDEST_FIRST)
       ->execute();
 
     foreach ($revisions as $revision) {
       $revision_edges = $edges[$revision->getPHID()][$edge_type];
-
       $reviewers = array();
       foreach ($revision_edges as $user_phid => $edge) {
         $data = $edge['data'];
