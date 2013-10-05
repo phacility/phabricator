@@ -33,6 +33,7 @@ final class DifferentialReviewersFieldSpecification
 
     $view = id(new DifferentialReviewersView())
       ->setReviewers($reviewers)
+      ->setHighlightPHIDs(array($this->getUser()->getPHID()))
       ->setHandles($this->getLoadedHandles());
 
     $diff = $this->getRevision()->loadActiveDiff();
