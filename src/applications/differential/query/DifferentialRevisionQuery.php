@@ -495,15 +495,26 @@ final class DifferentialRevisionQuery
     if ($this->responsibles) {
       $basic_authors = $this->authors;
       $basic_reviewers = $this->reviewers;
+
+      $authority_projects = id(new PhabricatorProjectQuery())
+        ->setViewer($this->getViewer())
+        ->withMemberPHIDs($this->responsibles)
+        ->execute();
+      $authority_phids = mpull($authority_projects, 'getPHID');
+
       try {
         // Build the query where the responsible users are authors.
         $this->authors = array_merge($basic_authors, $this->responsibles);
         $this->reviewers = $basic_reviewers;
         $selects[] = $this->buildSelectStatement($conn_r);
 
-        // Build the query where the responsible users are reviewers.
+        // Build the query where the responsible users are reviewers, or
+        // projects they are members of are reviewers.
         $this->authors = $basic_authors;
-        $this->reviewers = array_merge($basic_reviewers, $this->responsibles);
+        $this->reviewers = array_merge(
+          $basic_reviewers,
+          $this->responsibles,
+          $authority_phids);
         $selects[] = $this->buildSelectStatement($conn_r);
 
         // Put everything back like it was.

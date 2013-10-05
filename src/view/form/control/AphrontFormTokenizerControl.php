@@ -103,6 +103,7 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
       'repositories'    => pht('Type a repository name...'),
       'packages'        => pht('Type a package name...'),
       'arcanistproject' => pht('Type an arc project name...'),
+      'accountsorprojects' => pht('Type a user or project name...'),
     );
 
     return idx($map, $request);

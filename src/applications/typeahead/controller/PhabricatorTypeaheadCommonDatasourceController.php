@@ -85,6 +85,11 @@ final class PhabricatorTypeaheadCommonDatasourceController
         $need_users = true;
         $need_all_users = true;
         break;
+      case 'accountsorprojects':
+        $need_users = true;
+        $need_all_users = true;
+        $need_projs = true;
+        break;
       case 'arcanistprojects':
         $need_arcanist_projects = true;
         break;
