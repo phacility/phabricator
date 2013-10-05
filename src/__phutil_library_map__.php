@@ -392,6 +392,7 @@ phutil_register_library_map(array(
     'DifferentialPathFieldSpecification' => 'applications/differential/field/specification/DifferentialPathFieldSpecification.php',
     'DifferentialPeopleMenuEventListener' => 'applications/differential/events/DifferentialPeopleMenuEventListener.php',
     'DifferentialPrimaryPaneView' => 'applications/differential/view/DifferentialPrimaryPaneView.php',
+    'DifferentialProjectReviewersFieldSpecification' => 'applications/differential/field/specification/DifferentialProjectReviewersFieldSpecification.php',
     'DifferentialRawDiffRenderer' => 'applications/differential/render/DifferentialRawDiffRenderer.php',
     'DifferentialReleephRequestFieldSpecification' => 'applications/releeph/differential/DifferentialReleephRequestFieldSpecification.php',
     'DifferentialRemarkupRule' => 'applications/differential/remarkup/DifferentialRemarkupRule.php',
@@ -405,6 +406,7 @@ phutil_register_library_map(array(
     'DifferentialReviewer' => 'applications/differential/storage/DifferentialReviewer.php',
     'DifferentialReviewerStatus' => 'applications/differential/constants/DifferentialReviewerStatus.php',
     'DifferentialReviewersFieldSpecification' => 'applications/differential/field/specification/DifferentialReviewersFieldSpecification.php',
+    'DifferentialReviewersView' => 'applications/differential/view/DifferentialReviewersView.php',
     'DifferentialRevision' => 'applications/differential/storage/DifferentialRevision.php',
     'DifferentialRevisionCommentListView' => 'applications/differential/view/DifferentialRevisionCommentListView.php',
     'DifferentialRevisionCommentView' => 'applications/differential/view/DifferentialRevisionCommentView.php',
@@ -2487,6 +2489,7 @@ phutil_register_library_map(array(
     'DifferentialPathFieldSpecification' => 'DifferentialFieldSpecification',
     'DifferentialPeopleMenuEventListener' => 'PhutilEventListener',
     'DifferentialPrimaryPaneView' => 'AphrontView',
+    'DifferentialProjectReviewersFieldSpecification' => 'DifferentialFieldSpecification',
     'DifferentialReleephRequestFieldSpecification' => 'DifferentialFieldSpecification',
     'DifferentialRemarkupRule' => 'PhabricatorRemarkupRuleObject',
     'DifferentialReplyHandler' => 'PhabricatorMailReplyHandler',
@@ -2497,6 +2500,7 @@ phutil_register_library_map(array(
     'DifferentialReviewRequestMail' => 'DifferentialMail',
     'DifferentialReviewedByFieldSpecification' => 'DifferentialFieldSpecification',
     'DifferentialReviewersFieldSpecification' => 'DifferentialFieldSpecification',
+    'DifferentialReviewersView' => 'AphrontView',
     'DifferentialRevision' =>
     array(
       0 => 'DifferentialDAO',

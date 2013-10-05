@@ -11,6 +11,7 @@ final class DifferentialDefaultFieldSelector
       new DifferentialRevisionStatusFieldSpecification(),
       new DifferentialAuthorFieldSpecification(),
       new DifferentialReviewersFieldSpecification(),
+      new DifferentialProjectReviewersFieldSpecification(),
       new DifferentialReviewedByFieldSpecification(),
       new DifferentialCCsFieldSpecification(),
       new DifferentialRepositoryFieldSpecification(),

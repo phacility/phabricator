@@ -473,7 +473,25 @@ final class DiffusionCommitController extends DiffusionController {
     }
 
     if ($audit_requests) {
-      $props['Auditors'] = $this->renderAuditStatusView($audit_requests);
+      $user_requests = array();
+      $other_requests = array();
+      foreach ($audit_requests as $audit_request) {
+        if ($audit_request->isUser()) {
+          $user_requests[] = $audit_request;
+        } else {
+          $other_requests[] = $audit_request;
+        }
+      }
+
+      if ($user_requests) {
+        $props['Auditors'] = $this->renderAuditStatusView(
+          $user_requests);
+      }
+
+      if ($other_requests) {
+        $props['Project/Package Auditors'] = $this->renderAuditStatusView(
+          $other_requests);
+      }
     }
 
     $props['Committed'] = phabricator_datetime($commit->getEpoch(), $user);
@@ -1011,6 +1029,11 @@ final class DiffusionCommitController extends DiffusionController {
           break;
         case PhabricatorAuditStatusConstants::CC:
           $item->setIcon('info-dark', pht('Subscribed'));
+          break;
+        default:
+          $item->setIcon(
+            'question-dark',
+            pht('%s?', $request->getAuditStatus()));
           break;
       }
 

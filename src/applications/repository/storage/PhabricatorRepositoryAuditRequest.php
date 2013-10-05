@@ -16,4 +16,9 @@ final class PhabricatorRepositoryAuditRequest extends PhabricatorRepositoryDAO {
     ) + parent::getConfiguration();
   }
 
+  public function isUser() {
+    $user_type = PhabricatorPeoplePHIDTypeUser::TYPECONST;
+    return (phid_get_type($this->getAuditorPHID()) == $user_type);
+  }
+
 }

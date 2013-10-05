@@ -19,77 +19,27 @@ final class DifferentialReviewersFieldSpecification
   }
 
   public function renderValueForRevisionView() {
-    if (!$this->getReviewerPHIDs()) {
+    $reviewers = array();
+    foreach ($this->getRevision()->getReviewerStatus() as $reviewer) {
+      if ($reviewer->isUser()) {
+        $reviewers[] = $reviewer;
+      }
+    }
+
+    if (!$reviewers) {
       // Renders "None".
       return $this->renderUserList(array());
     }
 
-    $revision = $this->getRevision();
-    $reviewers = $revision->getReviewerStatus();
+    $view = id(new DifferentialReviewersView())
+      ->setReviewers($reviewers)
+      ->setHandles($this->getLoadedHandles());
 
-
-    $diff = $revision->loadActiveDiff();
+    $diff = $this->getRevision()->loadActiveDiff();
     if ($diff) {
-      $diff = $diff->getID();
+      $view->setActiveDiff($diff);
     }
 
-    $view = new PHUIStatusListView();
-    $handles = $this->getLoadedHandles();
-    foreach ($reviewers as $reviewer) {
-      $phid = $reviewer->getReviewerPHID();
-
-      $is_current = (!$diff) ||
-                    (!$reviewer->getDiffID()) ||
-                    ($diff == $reviewer->getDiffID());
-
-      $item = new PHUIStatusItemView();
-
-      switch ($reviewer->getStatus()) {
-        case DifferentialReviewerStatus::STATUS_ADDED:
-          $item->setIcon('open-dark', pht('Review Requested'));
-          break;
-
-        case DifferentialReviewerStatus::STATUS_ACCEPTED:
-          if ($is_current) {
-            $item->setIcon(
-              'accept-green',
-              pht('Accept'));
-          } else {
-            $item->setIcon(
-              'accept-dark',
-              pht('Accepted Prior Diff'));
-          }
-          break;
-
-        case DifferentialReviewerStatus::STATUS_REJECTED:
-          if ($is_current) {
-            $item->setIcon(
-              'reject-red',
-              pht('Requested Changes'));
-          } else {
-            $item->setIcon(
-              'reject-dark',
-              pht('Requested Changes to Prior Diff'));
-          }
-          break;
-
-        case DifferentialReviewerStatus::STATUS_COMMENTED:
-          if ($is_current) {
-            $item->setIcon(
-              'info-blue',
-              pht('Commented'));
-          } else {
-            $item->setIcon(
-              'info-dark',
-              pht('Commented Previously'));
-          }
-          break;
-
-      }
-
-      $item->setTarget($handles[$phid]->renderLink());
-      $view->addItem($item);
-    }
     return $view;
   }
 

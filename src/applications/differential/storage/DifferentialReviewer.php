@@ -24,4 +24,9 @@ final class DifferentialReviewer {
     return $this->diffID;
   }
 
+  public function isUser() {
+    $user_type = PhabricatorPeoplePHIDTypeUser::TYPECONST;
+    return (phid_get_type($this->getReviewerPHID()) == $user_type);
+  }
+
 }
