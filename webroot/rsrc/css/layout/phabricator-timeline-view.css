@@ -154,9 +154,9 @@
 }
 
 .device .phabricator-timeline-extra {
-  display: block;
-  text-align: right;
+  display: inline-block;
   line-height: 16px;
+  margin-left: 8px;
 }
 
 .phabricator-timeline-red .phabricator-timeline-border {
