@@ -1004,10 +1004,10 @@ final class DiffusionCommitController extends DiffusionController {
           $item->setIcon('warning-dark', pht('Audit Requested'));
           break;
         case PhabricatorAuditStatusConstants::RESIGNED:
-          $item->setIcon('open-dark', pht('Accepted'));
+          $item->setIcon('open-dark', pht('Resigned'));
           break;
         case PhabricatorAuditStatusConstants::CLOSED:
-          $item->setIcon('accept-blue', pht('Accepted'));
+          $item->setIcon('accept-blue', pht('Closed'));
           break;
         case PhabricatorAuditStatusConstants::CC:
           $item->setIcon('info-dark', pht('Subscribed'));

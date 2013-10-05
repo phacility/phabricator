@@ -19,7 +19,47 @@ final class DifferentialReviewersFieldSpecification
   }
 
   public function renderValueForRevisionView() {
-    return $this->renderUserList($this->getReviewerPHIDs());
+    if (!$this->getReviewerPHIDs()) {
+      // Renders "None".
+      return $this->renderUserList(array());
+    }
+
+    $revision = $this->getRevision();
+    $reviewers = $revision->getReviewerStatus();
+
+    $diff = $revision->loadActiveDiff();
+    if ($diff) {
+      $diff = $diff->getID();
+    }
+
+    $view = new PHUIStatusListView();
+    $handles = $this->getLoadedHandles();
+    foreach ($reviewers as $reviewer) {
+      $phid = $reviewer->getReviewerPHID();
+
+      $item = new PHUIStatusItemView();
+
+      switch ($reviewer->getStatus()) {
+        case DifferentialReviewerStatus::STATUS_ADDED:
+          $item->setIcon('open-dark', pht('Review Requested'));
+          break;
+        case DifferentialReviewerStatus::STATUS_REJECTED:
+          if ($reviewer->getDiffID() == $diff) {
+            $item->setIcon(
+              'reject-red',
+              pht('Requested Changes'));
+          } else {
+            $item->setIcon(
+              'reject-dark',
+              pht('Requested Changes to Prior Diff'));
+          }
+          break;
+      }
+
+      $item->setTarget($handles[$phid]->renderLink());
+      $view->addItem($item);
+    }
+    return $view;
   }
 
   private function getReviewerPHIDs() {
