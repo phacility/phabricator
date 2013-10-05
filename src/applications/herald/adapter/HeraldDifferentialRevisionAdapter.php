@@ -43,6 +43,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
         self::FIELD_TITLE,
         self::FIELD_BODY,
         self::FIELD_AUTHOR,
+        self::FIELD_AUTHOR_PROJECTS,
         self::FIELD_REVIEWERS,
         self::FIELD_CC,
         self::FIELD_REPOSITORY,
@@ -287,6 +288,18 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
       case self::FIELD_AUTHOR:
         return $this->revision->getAuthorPHID();
         break;
+      case self::FIELD_AUTHOR_PROJECTS:
+        $author_phid = $this->revision->getAuthorPHID();
+        if (!$author_phid) {
+          return array();
+        }
+
+        $projects = id(new PhabricatorProjectQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withMemberPHIDs(array($author_phid))
+          ->execute();
+
+        return mpull($projects, 'getPHID');
       case self::FIELD_DIFF_FILE:
         return $this->loadAffectedPaths();
       case self::FIELD_CC:

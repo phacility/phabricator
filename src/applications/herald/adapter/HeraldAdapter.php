@@ -23,6 +23,7 @@ abstract class HeraldAdapter {
   const FIELD_AFFECTED_PACKAGE_OWNER = 'affected-package-owner';
   const FIELD_CONTENT_SOURCE         = 'contentsource';
   const FIELD_ALWAYS                 = 'always';
+  const FIELD_AUTHOR_PROJECTS        = 'authorprojects';
 
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';
@@ -149,6 +150,7 @@ abstract class HeraldAdapter {
         pht("Any affected package's owner"),
       self::FIELD_CONTENT_SOURCE => pht('Content Source'),
       self::FIELD_ALWAYS => pht('Always'),
+      self::FIELD_AUTHOR_PROJECTS => pht("Author's projects"),
     );
   }
 
@@ -166,7 +168,7 @@ abstract class HeraldAdapter {
       self::CONDITION_IS_NOT_ANY      => pht('is not any of'),
       self::CONDITION_INCLUDE_ALL     => pht('include all of'),
       self::CONDITION_INCLUDE_ANY     => pht('include any of'),
-      self::CONDITION_INCLUDE_NONE    => pht('include none of'),
+      self::CONDITION_INCLUDE_NONE    => pht('do not include'),
       self::CONDITION_IS_ME           => pht('is myself'),
       self::CONDITION_IS_NOT_ME       => pht('is not myself'),
       self::CONDITION_REGEXP          => pht('matches regexp'),
@@ -201,6 +203,7 @@ abstract class HeraldAdapter {
       case self::FIELD_TAGS:
       case self::FIELD_REVIEWERS:
       case self::FIELD_CC:
+      case self::FIELD_AUTHOR_PROJECTS:
         return array(
           self::CONDITION_INCLUDE_ALL,
           self::CONDITION_INCLUDE_ANY,
@@ -588,6 +591,8 @@ abstract class HeraldAdapter {
             return self::VALUE_TAG;
           case self::FIELD_AFFECTED_PACKAGE:
             return self::VALUE_OWNERS_PACKAGE;
+          case self::FIELD_AUTHOR_PROJECTS:
+            return self::VALUE_PROJECT;
           default:
             return self::VALUE_USER;
         }
