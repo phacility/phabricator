@@ -2751,7 +2751,11 @@ phutil_register_library_map(array(
     'HeraldRuleTransactionComment' => 'PhabricatorApplicationTransactionComment',
     'HeraldRuleViewController' => 'HeraldController',
     'HeraldTestConsoleController' => 'HeraldController',
-    'HeraldTranscript' => 'HeraldDAO',
+    'HeraldTranscript' =>
+    array(
+      0 => 'HeraldDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
     'HeraldTranscriptController' => 'HeraldController',
     'HeraldTranscriptListController' => 'HeraldController',
     'HeraldTranscriptQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
