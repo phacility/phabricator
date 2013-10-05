@@ -49,7 +49,8 @@ final class HeraldNewController extends HeraldController {
       HeraldRuleTypeConfig::RULE_TYPE_PERSONAL =>
         pht(
           'Personal rules notify you about events. You own them, but they can '.
-          'only affect you.'),
+          'only affect you. Personal rules only trigger for objects you have '.
+          'permission to see.'),
       HeraldRuleTypeConfig::RULE_TYPE_GLOBAL =>
         phutil_implode_html(
           phutil_tag('br'),
@@ -57,7 +58,7 @@ final class HeraldNewController extends HeraldController {
             array(
               pht(
                 'Global rules notify anyone about events. Global rules can '.
-                'bypass access control policies.'),
+                'bypass access control policies and act on any object.'),
               $global_link,
             ))),
     );

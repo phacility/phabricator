@@ -24,6 +24,10 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
     return 'PhabricatorApplicationDifferential';
   }
 
+  public function getObject() {
+    return $this->revision;
+  }
+
   public function getAdapterContentType() {
     return 'differential';
   }

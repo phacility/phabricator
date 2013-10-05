@@ -7,21 +7,24 @@ final class PhabricatorFileTransformController
   private $phid;
   private $key;
 
+  public function shouldRequireLogin() {
+    return false;
+  }
+
   public function willProcessRequest(array $data) {
     $this->transform = $data['transform'];
     $this->phid      = $data['phid'];
     $this->key       = $data['key'];
   }
 
-  public function shouldRequireLogin() {
-    return false;
-  }
-
   public function processRequest() {
     $viewer = $this->getRequest()->getUser();
 
+    // NOTE: This is a public/CDN endpoint, and permission to see files is
+    // controlled by knowing the secret key, not by authentication.
+
     $file = id(new PhabricatorFileQuery())
-      ->setViewer($viewer)
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withPHIDs(array($this->phid))
       ->executeOne();
     if (!$file) {
@@ -130,7 +133,7 @@ final class PhabricatorFileTransformController
     PhabricatorTransformedFile $xform) {
 
     $file = id(new PhabricatorFileQuery())
-      ->setViewer($this->getRequest()->getUser())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withPHIDs(array($xform->getTransformedPHID()))
       ->executeOne();
     if (!$file) {

@@ -114,6 +114,7 @@ abstract class HeraldAdapter {
 
   abstract public function getAdapterContentName();
   abstract public function getAdapterApplicationClass();
+  abstract public function getObject();
 
 
 /* -(  Fields  )------------------------------------------------------------- */

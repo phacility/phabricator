@@ -12,6 +12,10 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
     return 'PhabricatorApplicationPholio';
   }
 
+  public function getObject() {
+    return $this->mock;
+  }
+
   public function setMock(PholioMock $mock) {
     $this->mock = $mock;
     return $this;
@@ -97,11 +101,9 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
             pht('Great success at doing nothing.'));
           break;
         case self::ACTION_ADD_CC:
-          $add_cc = array();
           foreach ($effect->getTarget() as $phid) {
-            $add_cc[$phid] = true;
+            $this->ccPHIDs[] = $phid;
           }
-          $this->setCcPHIDs(array_keys($add_cc));
           $result[] = new HeraldApplyTranscript(
             $effect,
             true,

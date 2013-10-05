@@ -211,6 +211,7 @@ final class HeraldRuleQuery
       }
 
       $rule->attachValidAuthor(true);
+      $rule->attachAuthor($users[$author_phid]);
     }
   }
 

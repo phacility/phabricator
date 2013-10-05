@@ -22,6 +22,10 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
     return $this->task;
   }
 
+  public function getObject() {
+    return $this->task;
+  }
+
   private function setCcPHIDs(array $cc_phids) {
     $this->ccPHIDs = $cc_phids;
     return $this;
@@ -118,11 +122,9 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
             pht('Great success at doing nothing.'));
           break;
         case self::ACTION_ADD_CC:
-          $add_cc = array();
           foreach ($effect->getTarget() as $phid) {
-            $add_cc[$phid] = true;
+            $this->ccPHIDs[] = $phid;
           }
-          $this->setCcPHIDs(array_keys($add_cc));
           $result[] = new HeraldApplyTranscript(
             $effect,
             true,
@@ -143,11 +145,9 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
             pht('Assigned task.'));
           break;
         case self::ACTION_ADD_PROJECTS:
-          $add_projects = array();
           foreach ($effect->getTarget() as $phid) {
-            $add_projects[$phid] = true;
+            $this->projectPHIDs[] = $phid;
           }
-          $this->setProjectPHIDs(array_keys($add_projects));
           $result[] = new HeraldApplyTranscript(
             $effect,
             true,
