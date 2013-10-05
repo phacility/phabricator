@@ -27,6 +27,7 @@ final class DifferentialReviewersFieldSpecification
     $revision = $this->getRevision();
     $reviewers = $revision->getReviewerStatus();
 
+
     $diff = $revision->loadActiveDiff();
     if ($diff) {
       $diff = $diff->getID();
@@ -37,14 +38,31 @@ final class DifferentialReviewersFieldSpecification
     foreach ($reviewers as $reviewer) {
       $phid = $reviewer->getReviewerPHID();
 
+      $is_current = (!$diff) ||
+                    (!$reviewer->getDiffID()) ||
+                    ($diff == $reviewer->getDiffID());
+
       $item = new PHUIStatusItemView();
 
       switch ($reviewer->getStatus()) {
         case DifferentialReviewerStatus::STATUS_ADDED:
           $item->setIcon('open-dark', pht('Review Requested'));
           break;
+
+        case DifferentialReviewerStatus::STATUS_ACCEPTED:
+          if ($is_current) {
+            $item->setIcon(
+              'accept-green',
+              pht('Accept'));
+          } else {
+            $item->setIcon(
+              'accept-dark',
+              pht('Accepted Prior Diff'));
+          }
+          break;
+
         case DifferentialReviewerStatus::STATUS_REJECTED:
-          if ($reviewer->getDiffID() == $diff) {
+          if ($is_current) {
             $item->setIcon(
               'reject-red',
               pht('Requested Changes'));
@@ -54,6 +72,19 @@ final class DifferentialReviewersFieldSpecification
               pht('Requested Changes to Prior Diff'));
           }
           break;
+
+        case DifferentialReviewerStatus::STATUS_COMMENTED:
+          if ($is_current) {
+            $item->setIcon(
+              'info-blue',
+              pht('Commented'));
+          } else {
+            $item->setIcon(
+              'info-dark',
+              pht('Commented Previously'));
+          }
+          break;
+
       }
 
       $item->setTarget($handles[$phid]->renderLink());

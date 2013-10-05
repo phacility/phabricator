@@ -93,7 +93,17 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
   }
 
   public function save() {
-    $actor              = $this->requireActor();
+    $actor = $this->requireActor();
+
+    // Reload the revision to pick up reviewer status, until we can lift this
+    // out of here.
+    $this->revision = id(new DifferentialRevisionQuery())
+      ->setViewer($actor)
+      ->withIDs(array($this->revision->getID()))
+      ->needRelationships(true)
+      ->needReviewerStatus(true)
+      ->executeOne();
+
     $revision           = $this->revision;
     $action             = $this->action;
     $actor_phid         = $actor->getPHID();
@@ -106,7 +116,6 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
       'differential.allow-reopen');
     $revision_status    = $revision->getStatus();
 
-    $revision->loadRelationships();
     $reviewer_phids = $revision->getReviewers();
     if ($reviewer_phids) {
       $reviewer_phids = array_fuse($reviewer_phids);
@@ -128,6 +137,27 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
             "You are submitting an empty comment with no action: ".
             "you must act on the revision or post a comment.");
         }
+
+        // If the actor is a reviewer, and their status is "added" (that is,
+        // they haven't accepted or requested changes to the revision),
+        // upgrade their status to "commented". If they have a stronger status
+        // already, don't overwrite it.
+        if (isset($reviewer_phids[$actor_phid])) {
+          $status_added = DifferentialReviewerStatus::STATUS_ADDED;
+          $reviewer_status = $revision->getReviewerStatus();
+          foreach ($reviewer_status as $reviewer) {
+            if ($reviewer->getReviewerPHID() == $actor_phid) {
+              if ($reviewer->getStatus() == $status_added) {
+                DifferentialRevisionEditor::updateReviewerStatus(
+                  $revision,
+                  $this->getActor(),
+                  $actor_phid,
+                  DifferentialReviewerStatus::STATUS_COMMENTED);
+              }
+            }
+          }
+        }
+
         break;
 
       case DifferentialAction::ACTION_RESIGN:
@@ -209,7 +239,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
           $revision,
           $this->getActor(),
           $actor_phid,
-          DifferentialReviewerStatus::STATUS_ADDED);
+          DifferentialReviewerStatus::STATUS_ACCEPTED);
         break;
 
       case DifferentialAction::ACTION_REQUEST:
