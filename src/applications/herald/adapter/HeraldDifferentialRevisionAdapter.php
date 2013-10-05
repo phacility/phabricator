@@ -15,6 +15,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
   protected $newCCs = array();
   protected $remCCs = array();
   protected $emailPHIDs = array();
+  protected $addReviewerPHIDs = array();
 
   protected $repository;
   protected $affectedPackages;
@@ -107,6 +108,10 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
 
   public function getEmailPHIDsAddedByHerald() {
     return $this->emailPHIDs;
+  }
+
+  public function getReviewersAddedByHerald() {
+    return $this->addReviewerPHIDs;
   }
 
   public function getPHID() {
@@ -327,6 +332,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
           self::ACTION_ADD_CC,
           self::ACTION_REMOVE_CC,
           self::ACTION_EMAIL,
+          self::ACTION_ADD_REVIEWERS,
           self::ACTION_NOTHING,
         );
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
@@ -335,6 +341,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
           self::ACTION_REMOVE_CC,
           self::ACTION_EMAIL,
           self::ACTION_FLAG,
+          self::ACTION_ADD_REVIEWERS,
           self::ACTION_NOTHING,
         );
     }
@@ -423,6 +430,15 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
             $effect,
             true,
             pht('Removed addresses from CC list.'));
+          break;
+        case self::ACTION_ADD_REVIEWERS:
+          foreach ($effect->getTarget() as $phid) {
+            $this->addReviewerPHIDs[$phid] = true;
+          }
+          $result[] = new HeraldApplyTranscript(
+            $effect,
+            true,
+            pht('Added reviewers.'));
           break;
         default:
           throw new Exception("No rules to handle action '{$action}'.");

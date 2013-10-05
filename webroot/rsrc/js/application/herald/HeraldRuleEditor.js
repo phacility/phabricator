@@ -220,6 +220,7 @@ JX.install('HeraldRuleEditor', {
         case 'tag':
         case 'package':
         case 'project':
+        case 'userorproject':
           var tokenizer = this._newTokenizer(type);
           input = tokenizer[0];
           get_fn = tokenizer[1];

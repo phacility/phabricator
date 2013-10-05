@@ -51,6 +51,7 @@ abstract class HeraldAdapter {
   const ACTION_FLAG         = 'flag';
   const ACTION_ASSIGN_TASK  = 'assigntask';
   const ACTION_ADD_PROJECTS = 'addprojects';
+  const ACTION_ADD_REVIEWERS = 'addreviewers';
 
   const VALUE_TEXT            = 'text';
   const VALUE_NONE            = 'none';
@@ -63,6 +64,7 @@ abstract class HeraldAdapter {
   const VALUE_PROJECT         = 'project';
   const VALUE_FLAG_COLOR      = 'flagcolor';
   const VALUE_CONTENT_SOURCE  = 'contentsource';
+  const VALUE_USER_OR_PROJECT = 'userorproject';
 
   private $contentSource;
 
@@ -293,7 +295,7 @@ abstract class HeraldAdapter {
         }
         if (!is_array($condition_value)) {
           throw new HeraldInvalidConditionException(
-            "Expected conditionv value to be an array.");
+            "Expected condition value to be an array.");
         }
 
         $have = array_select_keys(array_fuse($field_value), $condition_value);
@@ -482,6 +484,7 @@ abstract class HeraldAdapter {
           self::ACTION_FLAG         => pht('Mark with flag'),
           self::ACTION_ASSIGN_TASK  => pht('Assign task to'),
           self::ACTION_ADD_PROJECTS => pht('Add projects'),
+          self::ACTION_ADD_REVIEWERS => pht('Add reviewers'),
         );
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         return array(
@@ -491,8 +494,9 @@ abstract class HeraldAdapter {
           self::ACTION_EMAIL        => pht('Send me an email'),
           self::ACTION_AUDIT        => pht('Trigger an Audit by me'),
           self::ACTION_FLAG         => pht('Mark with flag'),
-          self::ACTION_ASSIGN_TASK  => pht('Assign task to me.'),
+          self::ACTION_ASSIGN_TASK  => pht('Assign task to me'),
           self::ACTION_ADD_PROJECTS => pht('Add projects'),
+          self::ACTION_ADD_REVIEWERS => pht('Add me as a reviewer'),
         );
       default:
         throw new Exception("Unknown rule type '{$rule_type}'!");
@@ -518,6 +522,7 @@ abstract class HeraldAdapter {
         case self::ACTION_REMOVE_CC:
         case self::ACTION_AUDIT:
         case self::ACTION_ASSIGN_TASK:
+        case self::ACTION_ADD_REVIEWERS:
           // For personal rules, force these actions to target the rule owner.
           $target = array($author_phid);
           break;
@@ -612,6 +617,7 @@ abstract class HeraldAdapter {
         case self::ACTION_NOTHING:
         case self::ACTION_AUDIT:
         case self::ACTION_ASSIGN_TASK:
+        case self::ACTION_ADD_REVIEWERS:
           return self::VALUE_NONE;
         case self::ACTION_FLAG:
           return self::VALUE_FLAG_COLOR;
@@ -635,6 +641,8 @@ abstract class HeraldAdapter {
           return self::VALUE_FLAG_COLOR;
         case self::ACTION_ASSIGN_TASK:
           return self::VALUE_USER;
+        case self::ACTION_ADD_REVIEWERS:
+          return self::VALUE_USER_OR_PROJECT;
         default:
           throw new Exception("Unknown or invalid action '{$action}'.");
       }
@@ -752,7 +760,10 @@ abstract class HeraldAdapter {
     }
     $out[] = null;
 
-    if ($rule->getRepetitionPolicy() == HeraldRepetitionPolicyConfig::EVERY) {
+    $integer_code_for_every = HeraldRepetitionPolicyConfig::toInt(
+      HeraldRepetitionPolicyConfig::EVERY);
+
+    if ($rule->getRepetitionPolicy() == $integer_code_for_every) {
       $out[] = pht('Take these actions every time this rule matches:');
     } else {
       $out[] = pht('Take these actions the first time this rule matches:');

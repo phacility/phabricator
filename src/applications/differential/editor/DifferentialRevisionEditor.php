@@ -272,7 +272,7 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
         $xscript_header);
 
       $sub = array(
-        'rev' => array(),
+        'rev' => $adapter->getReviewersAddedByHerald(),
         'ccs' => $adapter->getCCsAddedByHerald(),
       );
       $rem_ccs = $adapter->getCCsRemovedByHerald();
@@ -305,6 +305,9 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
 
       $stable[$key] = array_diff_key($old[$key], $add[$key] + $rem[$key]);
     }
+
+    // Prevent Herald rules from adding a revision's owner as a reviewer.
+    unset($add['rev'][$revision->getAuthorPHID()]);
 
     self::updateReviewers(
       $revision,
