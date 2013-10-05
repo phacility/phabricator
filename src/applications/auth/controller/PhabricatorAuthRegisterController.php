@@ -442,6 +442,12 @@ final class PhabricatorAuthRegisterController
 
   private function loadSetupAccount() {
     $provider = new PhabricatorAuthProviderPassword();
+    $provider->attachProviderConfig(
+      id(new PhabricatorAuthProviderConfig())
+        ->setShouldAllowRegistration(1)
+        ->setShouldAllowLogin(1)
+        ->setIsEnabled(true));
+
     $account = $provider->getDefaultExternalAccount();
     $response = null;
     return array($account, $provider, $response);
