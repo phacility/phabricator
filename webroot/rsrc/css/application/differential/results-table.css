@@ -4,37 +4,32 @@
 
 table.differential-results-table {
   border-collapse: separate;
-  border-spacing: 1px;
-  width: 100%;
+  width: 96%;
   font-size: 11px;
-  background: #fcfcec;
 }
 
 .differential-results-table th {
-  font-weight: bold;
   text-align: center;
   white-space: nowrap;
   vertical-align: middle;
   padding: 2px 4px;
-  margin: 0;
-  width: 70px;
+  width: 40px;
+  border-right: 1px solid #fff;
 }
 
 .differential-results-table td {
-  padding: 2px 8px;
+  padding: 0px 8px;
   margin: 0;
   vertical-align: middle;
 }
 
 .differential-results-table tr.differential-results-row-star th,
 .differential-results-table tr.differential-results-row-star td {
-  font-weight: bold;
-  background: #dfe3ec;
+  background: {$greybackground};
 }
 
 
 .differential-results-table tr.differential-results-row-section th {
-  font-weight: bold;
   padding-top: 4px;
   text-align: left;
 }
@@ -44,9 +39,9 @@ table.differential-results-table {
 }
 
 .differential-results-table tr.differential-results-row-excuse td {
-  padding-top: 1em;
-  padding-right: 1em;
-  padding-bottom: 1em;
+  padding-top: 8px;
+  padding-right: 8px;
+  padding-bottom: 8px;
 }
 
 .differential-results-table tr.differential-results-row-red th {
