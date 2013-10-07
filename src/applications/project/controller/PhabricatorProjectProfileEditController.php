@@ -29,7 +29,7 @@ final class PhabricatorProjectProfileEditController
     }
 
     $profile = $project->getProfile();
-    $img_src = $profile->loadProfileImageURI();
+    $img_src = $profile->getProfileImageURI();
 
     $options = PhabricatorProjectStatus::getStatusMap();
 

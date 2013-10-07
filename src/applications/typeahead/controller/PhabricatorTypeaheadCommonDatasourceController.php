@@ -231,10 +231,10 @@ final class PhabricatorTypeaheadCommonDatasourceController
           ->setDisplayType("Project")
           ->setURI('/project/view/'.$proj->getID().'/')
           ->setPHID($proj->getPHID());
+
         $prof = $proj->getProfile();
-        if ($prof) {
-          $proj_result->setImageURI($prof->loadProfileImageURI());
-        }
+        $proj_result->setImageURI($prof->getProfileImageURI());
+
         $results[] = $proj_result;
       }
     }

@@ -26,8 +26,7 @@ final class PhabricatorProjectProfileController
     }
 
     $profile = $project->getProfile();
-
-    $picture = $profile->loadProfileImageURI();
+    $picture = $profile->getProfileImageURI();
 
     require_celerity_resource('phabricator-profile-css');
 

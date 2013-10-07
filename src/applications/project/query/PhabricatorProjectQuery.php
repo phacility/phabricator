@@ -120,11 +120,41 @@ final class PhabricatorProjectQuery
           'projectPHID IN (%Ls)',
           mpull($projects, 'getPHID'));
         $profiles = mpull($profiles, null, 'getProjectPHID');
+
+        $default = null;
+
+        if ($profiles) {
+          $file_phids = mpull($profiles, 'getProfileImagePHID');
+          $files = id(new PhabricatorFileQuery())
+            ->setViewer($this->getViewer())
+            ->withPHIDs($file_phids)
+            ->execute();
+          $files = mpull($files, null, 'getPHID');
+          foreach ($profiles as $profile) {
+            $file = idx($files, $profile->getProfileImagePHID());
+            if (!$file) {
+              if (!$default) {
+                $default = PhabricatorFile::loadBuiltin(
+                  $this->getViewer(),
+                  'profile.png');
+              }
+              $file = $default;
+            }
+            $profile->attachProfileImageFile($file);
+          }
+        }
+
         foreach ($projects as $project) {
           $profile = idx($profiles, $project->getPHID());
           if (!$profile) {
+            if (!$default) {
+              $default = PhabricatorFile::loadBuiltin(
+                $this->getViewer(),
+                'profile.png');
+            }
             $profile = id(new PhabricatorProjectProfile())
-              ->setProjectPHID($project->getPHID());
+              ->setProjectPHID($project->getPHID())
+              ->attachProfileImageFile($default);
           }
           $project->attachProfile($profile);
         }
