@@ -102,6 +102,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
       ->withIDs(array($this->revision->getID()))
       ->needRelationships(true)
       ->needReviewerStatus(true)
+      ->needReviewerAuthority(true)
       ->executeOne();
 
     $revision           = $this->revision;
@@ -150,7 +151,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
               if ($reviewer->getStatus() == $status_added) {
                 DifferentialRevisionEditor::updateReviewerStatus(
                   $revision,
-                  $this->getActor(),
+                  $actor,
                   $actor_phid,
                   DifferentialReviewerStatus::STATUS_COMMENTED);
               }
@@ -208,6 +209,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
         if ($actor_is_author && !$allow_self_accept) {
           throw new Exception('You can not accept your own revision.');
         }
+
         if (($revision_status !=
              ArcanistDifferentialRevisionStatus::NEEDS_REVIEW) &&
             ($revision_status !=
@@ -235,11 +237,27 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
         $revision
           ->setStatus(ArcanistDifferentialRevisionStatus::ACCEPTED);
 
-        DifferentialRevisionEditor::updateReviewerStatus(
-          $revision,
-          $this->getActor(),
-          $actor_phid,
-          DifferentialReviewerStatus::STATUS_ACCEPTED);
+        $was_reviewer_already = false;
+        foreach ($revision->getReviewerStatus() as $reviewer) {
+          if ($reviewer->hasAuthority($actor)) {
+            DifferentialRevisionEditor::updateReviewerStatus(
+              $revision,
+              $actor,
+              $reviewer->getReviewerPHID(),
+              DifferentialReviewerStatus::STATUS_ACCEPTED);
+            if ($reviewer->getReviewerPHID() == $actor_phid) {
+              $was_reviewer_already = true;
+            }
+          }
+        }
+
+        if (!$was_reviewer_already) {
+          DifferentialRevisionEditor::updateReviewerStatus(
+            $revision,
+            $actor,
+            $actor_phid,
+            DifferentialReviewerStatus::STATUS_ACCEPTED);
+        }
         break;
 
       case DifferentialAction::ACTION_REQUEST:
@@ -307,7 +325,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
 
         DifferentialRevisionEditor::updateReviewerStatus(
           $revision,
-          $this->getActor(),
+          $actor,
           $actor_phid,
           DifferentialReviewerStatus::STATUS_REJECTED);
 
@@ -604,7 +622,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
 
     $phids = array($actor_phid);
     $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->getActor())
+      ->setViewer($actor)
       ->withPHIDs($phids)
       ->execute();
     $actor_handle = $handles[$actor_phid];
@@ -620,7 +638,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
         $comment,
         $changesets,
         $inline_comments))
-        ->setActor($this->getActor())
+        ->setActor($actor)
         ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
         ->setToPHIDs(
           array_merge(
