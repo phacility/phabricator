@@ -22,16 +22,13 @@ final class PhabricatorProjectProfileEditController
           PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
+      ->needProfiles(true)
       ->executeOne();
     if (!$project) {
       return new Aphront404Response();
     }
 
-    $profile = $project->loadProfile();
-    if (empty($profile)) {
-      $profile = new PhabricatorProjectProfile();
-    }
-
+    $profile = $project->getProfile();
     $img_src = $profile->loadProfileImageURI();
 
     $options = PhabricatorProjectStatus::getStatusMap();

@@ -5,7 +5,6 @@ final class PhabricatorProjectProfileController
 
   private $id;
   private $page;
-  private $project;
 
   public function willProcessRequest(array $data) {
     $this->id = idx($data, 'id');
@@ -16,21 +15,17 @@ final class PhabricatorProjectProfileController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $query = id(new PhabricatorProjectQuery())
+    $project = id(new PhabricatorProjectQuery())
       ->setViewer($user)
       ->withIDs(array($this->id))
-      ->needMembers(true);
-
-    $project = $query->executeOne();
-    $this->project = $project;
+      ->needMembers(true)
+      ->needProfiles(true)
+      ->executeOne();
     if (!$project) {
       return new Aphront404Response();
     }
 
-    $profile = $project->loadProfile();
-    if (!$profile) {
-      $profile = new PhabricatorProjectProfile();
-    }
+    $profile = $project->getProfile();
 
     $picture = $profile->loadProfileImageURI();
 

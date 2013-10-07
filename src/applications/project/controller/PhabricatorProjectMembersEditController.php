@@ -26,10 +26,6 @@ final class PhabricatorProjectMembersEditController
     if (!$project) {
       return new Aphront404Response();
     }
-    $profile = $project->loadProfile();
-    if (empty($profile)) {
-      $profile = new PhabricatorProjectProfile();
-    }
 
     $member_phids = $project->getMemberPHIDs();
 
