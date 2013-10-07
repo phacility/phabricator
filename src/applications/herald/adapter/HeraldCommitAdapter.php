@@ -150,6 +150,8 @@ final class HeraldCommitAdapter extends HeraldAdapter {
 
     $object = new HeraldCommitAdapter();
 
+    $commit->attachRepository($repository);
+
     $object->repository = $repository;
     $object->commit = $commit;
     $object->commitData = $commit_data;

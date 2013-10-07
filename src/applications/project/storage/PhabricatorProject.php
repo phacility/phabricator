@@ -112,15 +112,6 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return $this->assertAttached($this->memberPHIDs);
   }
 
-  public function loadMemberPHIDs() {
-    if (!$this->getPHID()) {
-      return array();
-    }
-    return PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $this->getPHID(),
-      PhabricatorEdgeConfig::TYPE_PROJ_MEMBER);
-  }
-
   public function setPhrictionSlug($slug) {
 
     // NOTE: We're doing a little magic here and stripping out '/' so that

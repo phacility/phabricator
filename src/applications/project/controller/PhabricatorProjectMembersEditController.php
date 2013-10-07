@@ -16,6 +16,7 @@ final class PhabricatorProjectMembersEditController
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($user)
       ->withIDs(array($this->id))
+      ->needMembers(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -30,7 +31,7 @@ final class PhabricatorProjectMembersEditController
       $profile = new PhabricatorProjectProfile();
     }
 
-    $member_phids = $project->loadMemberPHIDs();
+    $member_phids = $project->getMemberPHIDs();
 
     $errors = array();
     if ($request->isFormPost()) {
