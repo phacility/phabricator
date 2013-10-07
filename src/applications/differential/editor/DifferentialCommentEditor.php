@@ -116,6 +116,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
     $allow_reopen = PhabricatorEnv::getEnvConfig(
       'differential.allow-reopen');
     $revision_status    = $revision->getStatus();
+    $update_accepted_status = false;
 
     $reviewer_phids = $revision->getReviewers();
     if ($reviewer_phids) {
@@ -183,6 +184,16 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
           array(),
           array($actor_phid));
 
+        // If you are a blocking reviewer, your presence as a reviewer may be
+        // the only thing keeping a revision from transitioning to "accepted".
+        // Recalculate state after removing the resigning reviewer.
+        switch ($revision_status) {
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
+            $update_accepted_status = true;
+            break;
+        }
+
         break;
 
       case DifferentialAction::ACTION_ABANDON:
@@ -229,9 +240,6 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
               "Unexpected revision state '{$revision_status}'!");
         }
 
-        $revision
-          ->setStatus(ArcanistDifferentialRevisionStatus::ACCEPTED);
-
         $was_reviewer_already = false;
         foreach ($revision->getReviewerStatus() as $reviewer) {
           if ($reviewer->hasAuthority($actor)) {
@@ -253,6 +261,8 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
             $actor_phid,
             DifferentialReviewerStatus::STATUS_ACCEPTED);
         }
+
+        $update_accepted_status = true;
         break;
 
       case DifferentialAction::ACTION_REQUEST:
@@ -368,6 +378,8 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
 
         $revision
           ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
+
+        $update_accepted_status = true;
         break;
 
       case DifferentialAction::ACTION_CLOSE:
@@ -526,6 +538,12 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
     // by "updated". Notably, this allows "ping" comments to push it to the
     // top of the action list.
     $revision->save();
+
+    if ($update_accepted_status) {
+      $revision = DifferentialRevisionEditor::updateAcceptedStatus(
+        $actor,
+        $revision);
+    }
 
     if ($action != DifferentialAction::ACTION_RESIGN) {
       DifferentialRevisionEditor::addCC(

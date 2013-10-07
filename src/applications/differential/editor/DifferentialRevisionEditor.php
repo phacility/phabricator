@@ -381,6 +381,8 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
 
     $changesets = null;
     $comment = null;
+    $old_status = $revision->getStatus();
+
     if ($diff) {
       $changesets = $diff->loadChangesets();
       // TODO: This should probably be in DifferentialFeedbackEditor?
@@ -428,6 +430,17 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     }
 
     $revision->save();
+
+    // If the actor just deleted all the blocking/rejected reviewers, we may
+    // be able to put the revision into "accepted".
+    switch ($revision->getStatus()) {
+      case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+      case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
+        $revision = self::updateAcceptedStatus(
+          $this->getActor(),
+          $revision);
+        break;
+    }
 
     $this->didWriteRevision();
 
@@ -1108,6 +1121,56 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     if ($revision->getTestPlan() === null) {
       $revision->setTestPlan('');
     }
+  }
+
+
+  /**
+   * Try to move a revision to "accepted". We look for:
+   *
+   *   - at least one accepting reviewer who is a user; and
+   *   - no rejects; and
+   *   - no blocking reviewers.
+   */
+  public static function updateAcceptedStatus(
+    PhabricatorUser $viewer,
+    DifferentialRevision $revision) {
+
+    $revision = id(new DifferentialRevisionQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($revision->getID()))
+      ->needRelationships(true)
+      ->needReviewerStatus(true)
+      ->needReviewerAuthority(true)
+      ->executeOne();
+
+    $has_user_accept = false;
+    foreach ($revision->getReviewerStatus() as $reviewer) {
+      $status = $reviewer->getStatus();
+      if ($status == DifferentialReviewerStatus::STATUS_BLOCKING) {
+        // We have a blocking reviewer, so just leave the revision in its
+        // existing state.
+        return $revision;
+      }
+
+      if ($status == DifferentialReviewerStatus::STATUS_REJECTED) {
+        // We have a rejecting reviewer, so leave the revisoin as is.
+        return $revision;
+      }
+
+      if ($reviewer->isUser()) {
+        if ($status == DifferentialReviewerStatus::STATUS_ACCEPTED) {
+          $has_user_accept = true;
+        }
+      }
+    }
+
+    if ($has_user_accept) {
+      $revision
+        ->setStatus(ArcanistDifferentialRevisionStatus::ACCEPTED)
+        ->save();
+    }
+
+    return $revision;
   }
 
 }
