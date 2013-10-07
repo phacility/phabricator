@@ -11,6 +11,7 @@ final class PhabricatorProjectCreateController
 
     $project = new PhabricatorProject();
     $project->setAuthorPHID($user->getPHID());
+    $project->attachMemberPHIDs(array());
     $profile = new PhabricatorProjectProfile();
 
     $e_name = true;
