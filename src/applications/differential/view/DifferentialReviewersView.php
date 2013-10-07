@@ -82,6 +82,10 @@ final class DifferentialReviewersView extends AphrontView {
           }
           break;
 
+        case DifferentialReviewerStatus::STATUS_BLOCKING:
+          $item->setIcon('minus-red', pht('Blocking Review'));
+          break;
+
         default:
           $item->setIcon('question-dark', pht('%s?', $reviewer->getStatus()));
           break;

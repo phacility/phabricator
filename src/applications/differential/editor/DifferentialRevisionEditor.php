@@ -276,11 +276,14 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
         'ccs' => $adapter->getCCsAddedByHerald(),
       );
       $rem_ccs = $adapter->getCCsRemovedByHerald();
+      $blocking_reviewers = array_keys(
+        $adapter->getBlockingReviewersAddedByHerald());
     } else {
       $sub = array(
         'rev' => array(),
         'ccs' => array(),
       );
+      $blocking_reviewers = array();
     }
 
     // Remove any CCs which are prevented by Herald rules.
@@ -314,7 +317,7 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
       $this->getActor(),
       array_keys($add['rev']),
       array_keys($rem['rev']),
-      $this->getActorPHID());
+      $blocking_reviewers);
 
     // We want to attribute new CCs to a "reasonPHID", representing the reason
     // they were added. This is either a user (if some user explicitly CCs
@@ -602,7 +605,8 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     DifferentialRevision $revision,
     PhabricatorUser $actor,
     array $add_phids,
-    array $remove_phids) {
+    array $remove_phids,
+    array $blocking_phids = array()) {
 
     $reviewers = $revision->getReviewers();
 
@@ -618,21 +622,31 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     $editor = id(new PhabricatorEdgeEditor())
       ->setActor($actor);
 
-    $options = array(
-      'data' => array(
-        'status' => DifferentialReviewerStatus::STATUS_ADDED
-      )
-    );
-
     $reviewer_phids_map = array_fill_keys($reviewers, true);
 
+    $blocking_phids = array_fuse($blocking_phids);
     foreach ($add_phids as $phid) {
 
       // Adding an already existing edge again would have cause memory loss
       // That is, the previous state for that reviewer would be lost
       if (isset($reviewer_phids_map[$phid])) {
+        // TODO: If we're writing a blocking edge, we should overwrite an
+        // existing weaker edge (like "added" or "commented"), just not a
+        // stronger existing edge.
         continue;
       }
+
+      if (isset($blocking_phids[$phid])) {
+        $status = DifferentialReviewerStatus::STATUS_BLOCKING;
+      } else {
+        $status = DifferentialReviewerStatus::STATUS_ADDED;
+      }
+
+      $options = array(
+        'data' => array(
+          'status' => $status,
+        )
+      );
 
       $editor->addEdge(
         $revision->getPHID(),

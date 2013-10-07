@@ -53,6 +53,7 @@ abstract class HeraldAdapter {
   const ACTION_ASSIGN_TASK  = 'assigntask';
   const ACTION_ADD_PROJECTS = 'addprojects';
   const ACTION_ADD_REVIEWERS = 'addreviewers';
+  const ACTION_ADD_BLOCKING_REVIEWERS = 'addblockingreviewers';
 
   const VALUE_TEXT            = 'text';
   const VALUE_NONE            = 'none';
@@ -488,6 +489,7 @@ abstract class HeraldAdapter {
           self::ACTION_ASSIGN_TASK  => pht('Assign task to'),
           self::ACTION_ADD_PROJECTS => pht('Add projects'),
           self::ACTION_ADD_REVIEWERS => pht('Add reviewers'),
+          self::ACTION_ADD_BLOCKING_REVIEWERS => pht('Add blocking reviewers'),
         );
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         return array(
@@ -500,6 +502,8 @@ abstract class HeraldAdapter {
           self::ACTION_ASSIGN_TASK  => pht('Assign task to me'),
           self::ACTION_ADD_PROJECTS => pht('Add projects'),
           self::ACTION_ADD_REVIEWERS => pht('Add me as a reviewer'),
+          self::ACTION_ADD_BLOCKING_REVIEWERS =>
+            pht('Add me as a blocking reviewer'),
         );
       default:
         throw new Exception("Unknown rule type '{$rule_type}'!");
@@ -525,6 +529,7 @@ abstract class HeraldAdapter {
         case self::ACTION_REMOVE_CC:
         case self::ACTION_AUDIT:
         case self::ACTION_ASSIGN_TASK:
+        case self::ACTION_ADD_REVIEWERS:
         case self::ACTION_ADD_REVIEWERS:
           // For personal rules, force these actions to target the rule owner.
           $target = array($author_phid);
@@ -623,6 +628,7 @@ abstract class HeraldAdapter {
         case self::ACTION_AUDIT:
         case self::ACTION_ASSIGN_TASK:
         case self::ACTION_ADD_REVIEWERS:
+        case self::ACTION_ADD_BLOCKING_REVIEWERS:
           return self::VALUE_NONE;
         case self::ACTION_FLAG:
           return self::VALUE_FLAG_COLOR;
@@ -647,6 +653,7 @@ abstract class HeraldAdapter {
         case self::ACTION_ASSIGN_TASK:
           return self::VALUE_USER;
         case self::ACTION_ADD_REVIEWERS:
+        case self::ACTION_ADD_BLOCKING_REVIEWERS:
           return self::VALUE_USER_OR_PROJECT;
         default:
           throw new Exception("Unknown or invalid action '{$action}'.");
