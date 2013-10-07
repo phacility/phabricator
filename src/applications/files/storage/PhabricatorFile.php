@@ -860,6 +860,25 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return idx($this->metadata, self::METADATA_IMAGE_WIDTH);
   }
 
+  /**
+   * Write the policy edge between this file and some object.
+   *
+   * @param PhabricatorUser Acting user.
+   * @param phid Object PHID to attach to.
+   * @return this
+   */
+  public function attachToObject(PhabricatorUser $actor, $phid) {
+    $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_FILE;
+
+    id(new PhabricatorEdgeEditor())
+      ->setActor($actor)
+      ->setSuppressEvents(true)
+      ->addEdge($phid, $edge_type, $this->getPHID())
+      ->save();
+
+    return $this;
+  }
+
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 

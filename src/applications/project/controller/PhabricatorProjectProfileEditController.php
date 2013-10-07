@@ -107,7 +107,10 @@ final class PhabricatorProjectProfileEditController
               $file,
               $x = 50,
               $y = 50);
+
             $profile->setProfileImagePHID($xformed->getPHID());
+            $xformed->attachToObject($user, $project->getPHID());
+
           } else {
             $e_image = pht('Not Supported');
             $errors[] =

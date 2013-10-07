@@ -106,6 +106,26 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     }
   }
 
+  protected function extractFilePHIDsFromCustomTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PholioTransactionType::TYPE_IMAGE_FILE:
+        $new = $xaction->getNewValue();
+        $phids = array();
+        foreach ($new as $key => $images) {
+          $phids[] = mpull($images, 'getFilePHID');
+        }
+        return array_mergev($phids);
+      case PholioTransactionType::TYPE_IMAGE_REPLACE:
+        return array($xaction->getNewValue()->getFilePHID());
+    }
+
+    return array();
+  }
+
+
   protected function transactionHasEffect(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {

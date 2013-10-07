@@ -1575,13 +1575,20 @@ abstract class PhabricatorApplicationTransactionEditor
     }
     $blocks = array_mergev($blocks);
 
-    if (!$blocks) {
-      return array();
+
+    $phids = array();
+    if ($blocks) {
+      $phids[] = PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
+        $blocks);
     }
 
-    $phids = PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
-      $blocks);
+    foreach ($xactions as $xaction) {
+      $phids[] = $this->extractFilePHIDsFromCustomTransaction(
+        $object,
+        $xaction);
+    }
 
+    $phids = array_unique(array_filter(array_mergev($phids)));
     if (!$phids) {
       return array();
     }
@@ -1596,6 +1603,15 @@ abstract class PhabricatorApplicationTransactionEditor
       ->execute();
 
     return mpull($files, 'getPHID');
+  }
+
+  /**
+   * @task files
+   */
+  protected function extractFilePHIDsFromCustomTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+    return array();
   }
 
 

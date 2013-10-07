@@ -77,6 +77,18 @@ final class PhabricatorMacroEditor
     return;
   }
 
+  protected function extractFilePHIDsFromCustomTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorMacroTransactionType::TYPE_FILE:
+        return array($xaction->getNewValue());
+    }
+
+    return array();
+  }
+
   protected function mergeTransactions(
     PhabricatorApplicationTransaction $u,
     PhabricatorApplicationTransaction $v) {
