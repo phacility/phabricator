@@ -27,24 +27,10 @@ final class DifferentialProjectReviewersFieldSpecification
       return null;
     }
 
-    $highlight = array();
-    if ($this->getUser()->getPHID() != $this->getRevision()->getAuthorPHID()) {
-      // Determine which of these projects the viewer is a member of, so we can
-      // highlight them. (If the viewer is the author, skip this since they
-      // can't review.)
-      $phids = mpull($reviewers, 'getReviewerPHID');
-      $projects = id(new PhabricatorProjectQuery())
-        ->setViewer($this->getUser())
-        ->withPHIDs($phids)
-        ->withMemberPHIDs(array($this->getUser()->getPHID()))
-        ->execute();
-      $highlight = mpull($projects, 'getPHID');
-    }
-
     $view = id(new DifferentialReviewersView())
+      ->setUser($this->getUser())
       ->setReviewers($reviewers)
-      ->setHandles($this->getLoadedHandles())
-      ->setHighlightPHIDs($highlight);
+      ->setHandles($this->getLoadedHandles());
 
     $diff = $this->getRevision()->loadActiveDiff();
     if ($diff) {

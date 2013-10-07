@@ -5,7 +5,6 @@ final class DifferentialReviewersView extends AphrontView {
   private $reviewers;
   private $handles;
   private $diff;
-  private $highlightPHIDs = array();
 
   public function setReviewers(array $reviewers) {
     assert_instances_of($reviewers, 'DifferentialReviewer');
@@ -24,16 +23,10 @@ final class DifferentialReviewersView extends AphrontView {
     return $this;
   }
 
-  public function setHighlightPHIDs(array $phids) {
-    $this->highlightPHIDs = $phids;
-    return $this;
-  }
-
   public function render() {
+    $viewer = $this->getUser();
+
     $view = new PHUIStatusListView();
-
-    $highlighted = array_fuse($this->highlightPHIDs);
-
     foreach ($this->reviewers as $reviewer) {
       $phid = $reviewer->getReviewerPHID();
       $handle = $this->handles[$phid];
@@ -46,9 +39,7 @@ final class DifferentialReviewersView extends AphrontView {
 
       $item = new PHUIStatusItemView();
 
-      if (isset($highlighted[$phid])) {
-        $item->setHighlighted(true);
-      }
+      $item->setHighlighted($reviewer->hasAuthority($viewer));
 
       switch ($reviewer->getStatus()) {
         case DifferentialReviewerStatus::STATUS_ADDED:

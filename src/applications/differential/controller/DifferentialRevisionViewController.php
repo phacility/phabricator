@@ -30,6 +30,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setViewer($request->getUser())
       ->needRelationships(true)
       ->needReviewerStatus(true)
+      ->needReviewerAuthority(true)
       ->executeOne();
 
     if (!$revision) {

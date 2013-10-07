@@ -59,6 +59,7 @@ final class DifferentialRevisionQuery
   private $needCommitPHIDs    = false;
   private $needHashes         = false;
   private $needReviewerStatus = false;
+  private $needReviewerAuthority;
 
   private $buildingGlobalOrder;
 
@@ -347,6 +348,21 @@ final class DifferentialRevisionQuery
   }
 
 
+  /**
+   * Request information about the viewer's authority to act on behalf of each
+   * reviewer. In particular, they have authority to act on behalf of projects
+   * they are a member of.
+   *
+   * @param bool True to load and attach authority.
+   * @return this
+   * @task config
+   */
+  public function needReviewerAuthority($need_reviewer_authority) {
+    $this->needReviewerAuthority = $need_reviewer_authority;
+    return $this;
+  }
+
+
 /* -(  Query Execution  )---------------------------------------------------- */
 
 
@@ -450,7 +466,7 @@ final class DifferentialRevisionQuery
       $this->loadHashes($conn_r, $revisions);
     }
 
-    if ($this->needReviewerStatus) {
+    if ($this->needReviewerStatus || $this->needReviewerAuthority) {
       $this->loadReviewers($conn_r, $revisions);
     }
 
@@ -1040,15 +1056,42 @@ final class DifferentialRevisionQuery
       ->setOrder(PhabricatorEdgeQuery::ORDER_OLDEST_FIRST)
       ->execute();
 
+    $viewer = $this->getViewer();
+    $viewer_phid = $viewer->getPHID();
+
+    // Figure out which of these reviewers the viewer has authority to act as.
+    if ($this->needReviewerAuthority && $viewer_phid) {
+      $allow_key = 'differential.allow-self-accept';
+      $allow_self = PhabricatorEnv::getEnvConfig($allow_key);
+      $authority = $this->loadReviewerAuthority(
+        $revisions,
+        $edges,
+        $allow_self);
+    }
+
     foreach ($revisions as $revision) {
       $revision_edges = $edges[$revision->getPHID()][$edge_type];
       $reviewers = array();
-      foreach ($revision_edges as $user_phid => $edge) {
-        $data = $edge['data'];
-        $reviewers[] = new DifferentialReviewer(
-          $user_phid,
-          idx($data, 'status'),
-          idx($data, 'diff'));
+      foreach ($revision_edges as $reviewer_phid => $edge) {
+        $reviewer = new DifferentialReviewer($reviewer_phid, $edge['data']);
+
+        if ($this->needReviewerAuthority) {
+          if (!$viewer_phid) {
+            // Logged-out users never have authority.
+            $has_authority = false;
+          } else if ((!$allow_self) &&
+                     ($revision->getAuthorPHID() == $viewer_phid)) {
+            // The author can never have authority unless we allow self-accept.
+            $has_authority = false;
+          } else {
+            // Otherwise, look up whether th viewer has authority.
+            $has_authority = isset($authority[$reviewer_phid]);
+          }
+
+          $reviewer->attachAuthority($viewer, $has_authority);
+        }
+
+        $reviewers[$reviewer_phid] = $reviewer;
       }
 
       $revision->attachReviewerStatus($reviewers);
@@ -1090,6 +1133,56 @@ final class DifferentialRevisionQuery
 
     return array($blocking, $active, $waiting);
   }
+
+  private function loadReviewerAuthority(
+    array $revisions,
+    array $edges,
+    $allow_self) {
+
+    $revision_map = mpull($revisions, null, 'getPHID');
+    $viewer_phid = $this->getViewer()->getPHID();
+
+    // Find all the project reviewers which the user may have authority over.
+    $project_phids = array();
+    $project_type = PhabricatorProjectPHIDTypeProject::TYPECONST;
+    $edge_type = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
+    foreach ($edges as $src => $types) {
+      if (!$allow_self) {
+        if ($revision_map[$src]->getAuthorPHID() == $viewer_phid) {
+          // If self-review isn't permitted, the user will never have
+          // authority over projects on revisions they authored because you
+          // can't accept your own revisions, so we don't need to load any
+          // data about these reviewers.
+          continue;
+        }
+      }
+      $edge_data = idx($types, $edge_type, array());
+      foreach ($edge_data as $dst => $data) {
+        if (phid_get_type($dst) == $project_type) {
+          $project_phids[] = $dst;
+        }
+      }
+    }
+
+    // Now, figure out which of these projects the viewer is actually a
+    // member of.
+    $project_authority = array();
+    if ($project_phids) {
+      $project_authority = id(new PhabricatorProjectQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs($project_phids)
+        ->withMemberPHIDs(array($viewer_phid))
+        ->execute();
+      $project_authority = mpull($project_authority, 'getPHID');
+    }
+
+    // Finally, the viewer has authority over themselves.
+    return array(
+      $viewer_phid => true,
+    ) + array_fuse($project_authority);
+  }
+
+
 
 
 }
