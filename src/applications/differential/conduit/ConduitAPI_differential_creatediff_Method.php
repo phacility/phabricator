@@ -59,11 +59,15 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
 
     $parent_id = $request->getValue('parentRevisionID');
     if ($parent_id) {
+      // NOTE: If the viewer can't see the parent revision, just don't set
+      // a parent revision ID. This isn't used for anything meaningful.
+      // TODO: Can we delete this entirely?
       $parent_rev = id(new DifferentialRevisionQuery())
         ->setViewer($request->getUser())
         ->withIDs(array($parent_id))
-        ->executeOne();
+        ->execute();
       if ($parent_rev) {
+        $parent_rev = head($parent_rev);
         if ($parent_rev->getStatus() !=
             ArcanistDifferentialRevisionStatus::CLOSED) {
           $diff->setParentRevisionID($parent_id);
