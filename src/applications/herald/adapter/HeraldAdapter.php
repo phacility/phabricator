@@ -530,7 +530,7 @@ abstract class HeraldAdapter {
         case self::ACTION_AUDIT:
         case self::ACTION_ASSIGN_TASK:
         case self::ACTION_ADD_REVIEWERS:
-        case self::ACTION_ADD_REVIEWERS:
+        case self::ACTION_ADD_BLOCKING_REVIEWERS:
           // For personal rules, force these actions to target the rule owner.
           $target = array($author_phid);
           break;
