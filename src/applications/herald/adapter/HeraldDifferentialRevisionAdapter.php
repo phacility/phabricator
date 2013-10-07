@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group herald
- */
 final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
 
   protected $revision;
@@ -16,6 +13,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
   protected $remCCs = array();
   protected $emailPHIDs = array();
   protected $addReviewerPHIDs = array();
+  protected $blockingReviewerPHIDs = array();
 
   protected $repository;
   protected $affectedPackages;
