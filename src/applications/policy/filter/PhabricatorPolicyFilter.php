@@ -233,33 +233,6 @@ final class PhabricatorPolicyFilter {
     return false;
   }
 
-  private function rejectImpossiblePolicy(
-    PhabricatorPolicyInterface $object,
-    $policy,
-    $capability) {
-
-    if (!$this->raisePolicyExceptions) {
-      return;
-    }
-
-    switch ($capability) {
-      case PhabricatorPolicyCapability::CAN_VIEW:
-        $message = pht("This object has an impossible view policy.");
-        break;
-      case PhabricatorPolicyCapability::CAN_EDIT:
-        $message = pht("This object has an impossible edit policy.");
-        break;
-      case PhabricatorPolicyCapability::CAN_JOIN:
-        $message = pht("This object has an impossible join policy.");
-        break;
-      default:
-        $message = pht("This object has an impossible policy.");
-        break;
-    }
-
-    throw new PhabricatorPolicyException($message);
-  }
-
   public function rejectObject(
     PhabricatorPolicyInterface $object,
     $policy,
