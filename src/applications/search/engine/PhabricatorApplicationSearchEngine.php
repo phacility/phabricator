@@ -299,6 +299,25 @@ abstract class PhabricatorApplicationSearchEngine {
   }
 
 
+  protected function readBoolFromRequest(
+    AphrontRequest $request,
+    $key) {
+    if (!strlen($request->getStr($key))) {
+      return null;
+    }
+    return $request->getBool($key);
+  }
+
+
+  protected function getBoolFromQuery(PhabricatorSavedQuery $query, $key) {
+    $value = $query->getParameter($key);
+    if ($value === null) {
+      return $value;
+    }
+    return $value ? 'true' : 'false';
+  }
+
+
 /* -(  Dates  )-------------------------------------------------------------- */
 
 

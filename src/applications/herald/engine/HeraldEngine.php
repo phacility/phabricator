@@ -27,6 +27,7 @@ final class HeraldEngine {
   public static function loadAndApplyRules(HeraldAdapter $adapter) {
     $rules = id(new HeraldRuleQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withDisabled(false)
       ->withContentTypes(array($adapter->getAdapterContentType()))
       ->needConditionsAndActions(true)
       ->needAppliedToPHIDs(array($adapter->getPHID()))

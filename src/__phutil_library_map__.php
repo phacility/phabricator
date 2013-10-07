@@ -631,8 +631,8 @@ phutil_register_library_map(array(
     'HeraldConditionTranscript' => 'applications/herald/storage/transcript/HeraldConditionTranscript.php',
     'HeraldController' => 'applications/herald/controller/HeraldController.php',
     'HeraldDAO' => 'applications/herald/storage/HeraldDAO.php',
-    'HeraldDeleteController' => 'applications/herald/controller/HeraldDeleteController.php',
     'HeraldDifferentialRevisionAdapter' => 'applications/herald/adapter/HeraldDifferentialRevisionAdapter.php',
+    'HeraldDisableController' => 'applications/herald/controller/HeraldDisableController.php',
     'HeraldEditLogQuery' => 'applications/herald/query/HeraldEditLogQuery.php',
     'HeraldEffect' => 'applications/herald/engine/HeraldEffect.php',
     'HeraldEngine' => 'applications/herald/engine/HeraldEngine.php',
@@ -651,6 +651,7 @@ phutil_register_library_map(array(
     'HeraldRuleEdit' => 'applications/herald/storage/HeraldRuleEdit.php',
     'HeraldRuleEditHistoryController' => 'applications/herald/controller/HeraldRuleEditHistoryController.php',
     'HeraldRuleEditHistoryView' => 'applications/herald/view/HeraldRuleEditHistoryView.php',
+    'HeraldRuleEditor' => 'applications/herald/editor/HeraldRuleEditor.php',
     'HeraldRuleListController' => 'applications/herald/controller/HeraldRuleListController.php',
     'HeraldRuleQuery' => 'applications/herald/query/HeraldRuleQuery.php',
     'HeraldRuleSearchEngine' => 'applications/herald/query/HeraldRuleSearchEngine.php',
@@ -660,6 +661,7 @@ phutil_register_library_map(array(
     'HeraldRuleTypeConfig' => 'applications/herald/config/HeraldRuleTypeConfig.php',
     'HeraldRuleViewController' => 'applications/herald/controller/HeraldRuleViewController.php',
     'HeraldTestConsoleController' => 'applications/herald/controller/HeraldTestConsoleController.php',
+    'HeraldTransactionQuery' => 'applications/herald/query/HeraldTransactionQuery.php',
     'HeraldTranscript' => 'applications/herald/storage/transcript/HeraldTranscript.php',
     'HeraldTranscriptController' => 'applications/herald/controller/HeraldTranscriptController.php',
     'HeraldTranscriptListController' => 'applications/herald/controller/HeraldTranscriptListController.php',
@@ -2724,8 +2726,8 @@ phutil_register_library_map(array(
     'HeraldCondition' => 'HeraldDAO',
     'HeraldController' => 'PhabricatorController',
     'HeraldDAO' => 'PhabricatorLiskDAO',
-    'HeraldDeleteController' => 'HeraldController',
     'HeraldDifferentialRevisionAdapter' => 'HeraldAdapter',
+    'HeraldDisableController' => 'HeraldController',
     'HeraldEditLogQuery' => 'PhabricatorOffsetPagedQuery',
     'HeraldInvalidActionException' => 'Exception',
     'HeraldInvalidConditionException' => 'Exception',
@@ -2744,6 +2746,7 @@ phutil_register_library_map(array(
     'HeraldRuleEdit' => 'HeraldDAO',
     'HeraldRuleEditHistoryController' => 'HeraldController',
     'HeraldRuleEditHistoryView' => 'AphrontView',
+    'HeraldRuleEditor' => 'PhabricatorApplicationTransactionEditor',
     'HeraldRuleListController' =>
     array(
       0 => 'HeraldController',
@@ -2755,6 +2758,7 @@ phutil_register_library_map(array(
     'HeraldRuleTransactionComment' => 'PhabricatorApplicationTransactionComment',
     'HeraldRuleViewController' => 'HeraldController',
     'HeraldTestConsoleController' => 'HeraldController',
+    'HeraldTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'HeraldTranscript' =>
     array(
       0 => 'HeraldDAO',

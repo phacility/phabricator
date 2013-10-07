@@ -59,6 +59,7 @@ final class HeraldTestConsoleController extends HeraldController {
           $rules = id(new HeraldRuleQuery())
             ->setViewer($user)
             ->withContentTypes(array($adapter->getAdapterContentType()))
+            ->withDisabled(false)
             ->needConditionsAndActions(true)
             ->needAppliedToPHIDs(array($object->getPHID()))
             ->needValidateAuthors(true)

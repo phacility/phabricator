@@ -12,6 +12,7 @@ final class HeraldRule extends HeraldDAO
   protected $mustMatchAll;
   protected $repetitionPolicy;
   protected $ruleType;
+  protected $isDisabled = 0;
 
   protected $configVersion = 14;
 
@@ -198,7 +199,15 @@ final class HeraldRule extends HeraldDAO
 
   public function getPolicy($capability) {
     if ($this->isGlobalRule()) {
-      return PhabricatorPolicies::POLICY_USER;
+      switch ($capability) {
+        case PhabricatorPolicyCapability::CAN_VIEW:
+          return PhabricatorPolicies::POLICY_USER;
+        case PhabricatorPolicyCapability::CAN_EDIT:
+          $app = 'PhabricatorApplicationHerald';
+          $herald = PhabricatorApplication::getByClass($app);
+          $global = PhabricatorApplicationHerald::CAN_CREATE_GLOBAL_RULE;
+          return $herald->getPolicy($global);
+      }
     } else {
       return PhabricatorPolicies::POLICY_NOONE;
     }
@@ -213,9 +222,11 @@ final class HeraldRule extends HeraldDAO
   }
 
   public function describeAutomaticCapability($capability) {
-    // TODO: (T603) Sort this out.
+    if ($this->isPersonalRule()) {
+      return pht("A personal rule's owner can always view and edit it.");
+    }
+
     return null;
   }
-
 
 }

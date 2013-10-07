@@ -54,17 +54,16 @@ final class HeraldRuleListController extends HeraldController
         $item->addIcon('world', pht('Global Rule'));
       }
 
+      if ($rule->getIsDisabled()) {
+        $item->setDisabled(true);
+        $item->addIcon('disable-grey', pht('Disabled'));
+      }
+
       $item->addAction(
         id(new PHUIListItemView())
           ->setHref($this->getApplicationURI("history/{$id}/"))
           ->setIcon('transcript')
           ->setName(pht('Edit Log')));
-
-      $item->addAction(
-        id(new PHUIListItemView())
-          ->setHref('/herald/delete/'.$rule->getID().'/')
-          ->setIcon('delete')
-          ->setWorkflow(true));
 
       $content_type_name = idx($content_type_map, $rule->getContentType());
       $item->addAttribute(pht('Affects: %s', $content_type_name));

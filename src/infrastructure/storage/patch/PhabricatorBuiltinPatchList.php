@@ -1660,6 +1660,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'php',
         'name' => $this->getPatchPath('20131004.dxreviewers.php'),
       ),
+      '20131006.hdisable.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131006.hdisable.sql'),
+      ),
     );
   }
 }
