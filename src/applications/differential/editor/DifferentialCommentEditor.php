@@ -210,28 +210,23 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
           throw new Exception('You can not accept your own revision.');
         }
 
-        if (($revision_status !=
-             ArcanistDifferentialRevisionStatus::NEEDS_REVIEW) &&
-            ($revision_status !=
-             ArcanistDifferentialRevisionStatus::NEEDS_REVISION)) {
-
-          switch ($revision_status) {
-            case ArcanistDifferentialRevisionStatus::ACCEPTED:
-              throw new DifferentialActionHasNoEffectException(
-                "You can not accept this revision because someone else ".
-                "already accepted it.");
-            case ArcanistDifferentialRevisionStatus::ABANDONED:
-              throw new DifferentialActionHasNoEffectException(
-                "You can not accept this revision because it has been ".
-                "abandoned.");
-            case ArcanistDifferentialRevisionStatus::CLOSED:
-              throw new DifferentialActionHasNoEffectException(
-                "You can not accept this revision because it has already ".
-                "been closed.");
-            default:
-              throw new Exception(
-                "Unexpected revision state '{$revision_status}'!");
-          }
+        switch ($revision_status) {
+          case ArcanistDifferentialRevisionStatus::ABANDONED:
+            throw new DifferentialActionHasNoEffectException(
+              "You can not accept this revision because it has been ".
+              "abandoned.");
+          case ArcanistDifferentialRevisionStatus::CLOSED:
+            throw new DifferentialActionHasNoEffectException(
+              "You can not accept this revision because it has already ".
+              "been closed.");
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+          case ArcanistDifferentialRevisionStatus::ACCEPTED:
+            // We expect "Accept" from these states.
+            break;
+          default:
+            throw new Exception(
+              "Unexpected revision state '{$revision_status}'!");
         }
 
         $revision
@@ -306,9 +301,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
           case ArcanistDifferentialRevisionStatus::ACCEPTED:
           case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
           case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
-            // NOTE: We allow you to reject an already-rejected revision
-            // because it doesn't create any ambiguity and avoids a rather
-            // needless dialog.
+            // We expect rejects from these states.
             break;
           case ArcanistDifferentialRevisionStatus::ABANDONED:
             throw new DifferentialActionHasNoEffectException(
@@ -343,6 +336,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
           case ArcanistDifferentialRevisionStatus::ACCEPTED:
           case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
           case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
+            // We expect accepts from these states.
             break;
           case ArcanistDifferentialRevisionStatus::ABANDONED:
             throw new DifferentialActionHasNoEffectException(
