@@ -153,9 +153,7 @@ final class PhabricatorOwnersListController
       $phids = $request->getArr('owner');
       $phid = reset($phids);
       $handles = $this->loadViewerHandles(array($phid));
-      $owners_search_value = array(
-        $phid => $handles[$phid]->getFullName(),
-      );
+      $owners_search_value = array($handles[$phid]);
     }
 
     $callsigns = array('' => pht('(Any Repository)'));

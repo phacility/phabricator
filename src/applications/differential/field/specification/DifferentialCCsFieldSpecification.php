@@ -50,7 +50,7 @@ final class DifferentialCCsFieldSpecification
   public function renderEditControl() {
     $cc_map = array();
     foreach ($this->ccs as $phid) {
-      $cc_map[$phid] = $this->getHandle($phid)->getFullName();
+      $cc_map[] = $this->getHandle($phid);
     }
     return id(new AphrontFormTokenizerControl())
       ->setLabel('CC')

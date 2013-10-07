@@ -265,9 +265,7 @@ final class ManiphestReportController extends ManiphestController {
 
     $tokens = array();
     if ($handle) {
-      $tokens = array(
-        $handle->getPHID() => $handle->getFullName(),
-      );
+      $tokens = array($handle);
     }
 
     $filter = $this->renderReportFilters($tokens, $has_window = false);
@@ -635,9 +633,7 @@ final class ManiphestReportController extends ManiphestController {
 
     $tokens = array();
     if ($project_handle) {
-      $tokens = array(
-        $project_handle->getPHID() => $project_handle->getFullName(),
-      );
+      $tokens = array($project_handle);
     }
     $filter = $this->renderReportFilters($tokens, $has_window = true);
 

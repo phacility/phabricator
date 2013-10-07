@@ -21,18 +21,14 @@ final class DiffusionLintController extends DiffusionController {
     $owners = array();
     if (!$drequest) {
       if (!$request->getArr('owner')) {
-        if ($user->isLoggedIn()) {
-          $owners[$user->getPHID()] = $user->getFullName();
-        }
+        $owners = array($user->getPHID());
       } else {
-        $phids = $request->getArr('owner');
-        $phid = reset($phids);
-        $handles = $this->loadViewerHandles(array($phid));
-        $owners[$phid] = $handles[$phid]->getFullName();
+        $owners = array(head($request->getArr('owner')));
       }
+      $owner_handles = $this->loadViewerHandles($owners);
     }
 
-    $codes = $this->loadLintCodes(array_keys($owners));
+    $codes = $this->loadLintCodes($owners);
 
     if ($codes && !$drequest) {
       // TODO: Build some real Query classes for this stuff.
@@ -125,7 +121,7 @@ final class DiffusionLintController extends DiffusionController {
             ->setLimit(1)
             ->setName('owner')
             ->setLabel(pht('Owner'))
-            ->setValue($owners))
+            ->setValue($owner_handles))
         ->appendChild(
           id(new AphrontFormSubmitControl())
             ->setValue('Filter'));

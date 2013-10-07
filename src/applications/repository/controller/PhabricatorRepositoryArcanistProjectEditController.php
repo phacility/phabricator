@@ -59,10 +59,10 @@ final class PhabricatorRepositoryArcanistProjectEditController
     }
 
     if ($project->getSymbolIndexProjects()) {
-      $uses = id(new PhabricatorRepositoryArcanistProject())->loadAllWhere(
-        'phid in (%Ls)',
-        $project->getSymbolIndexProjects());
-      $uses = mpull($uses, 'getName', 'getPHID');
+      $uses = id(new PhabricatorHandleQuery())
+        ->setViewer($user)
+        ->withPHIDs($project->getSymbolIndexProjects())
+        ->execute();
     } else {
       $uses = array();
     }

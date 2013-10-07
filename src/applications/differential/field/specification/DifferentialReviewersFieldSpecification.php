@@ -89,7 +89,7 @@ final class DifferentialReviewersFieldSpecification
   public function renderEditControl() {
     $reviewer_map = array();
     foreach ($this->reviewers as $phid) {
-      $reviewer_map[$phid] = $this->getHandle($phid)->getFullName();
+      $reviewer_map[] = $this->getHandle($phid);
     }
     return id(new AphrontFormTokenizerControl())
       ->setLabel(pht('Reviewers'))

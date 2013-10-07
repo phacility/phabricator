@@ -135,10 +135,7 @@ final class ReleephProjectEditController extends ReleephProjectController {
       ->withPHIDs($pusher_phids)
       ->execute();
 
-    $pusher_tokens = array();
-    foreach ($pusher_phids as $phid) {
-      $pusher_tokens[$phid] = $handles[$phid]->getFullName();
-    }
+    $pusher_handles = array_select_keys($handles, $pusher_phids);
 
     $basic_inset = id(new AphrontFormInsetView())
       ->setTitle(pht('Basics'))
@@ -209,7 +206,7 @@ final class ReleephProjectEditController extends ReleephProjectController {
           ->setLabel(pht('Pushers'))
           ->setName('pushers')
           ->setDatasource('/typeahead/common/users/')
-          ->setValue($pusher_tokens));
+          ->setValue($pusher_handles));
 
     $commit_author_inset = $this->buildCommitAuthorInset($commit_author);
 

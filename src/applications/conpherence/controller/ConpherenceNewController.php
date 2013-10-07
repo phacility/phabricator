@@ -11,15 +11,12 @@ final class ConpherenceNewController extends ConpherenceController {
 
     $title = pht('New Message');
     $participants = array();
+    $participant_prefill = null;
     $message = '';
     $e_participants = null;
     $e_message = null;
 
     // this comes from ajax requests from all over. should be a single phid.
-    $participant_prefill = $request->getStr('participant');
-    if ($participant_prefill) {
-      $participants[] = $participant_prefill;
-    }
 
     if ($request->isFormPost()) {
       $participants = $request->getArr('participants');
@@ -47,15 +44,20 @@ final class ConpherenceNewController extends ConpherenceController {
         return id(new AphrontRedirectResponse())
           ->setURI($uri);
       }
+    } else {
+      $participant_prefill = $request->getStr('participant');
+      if ($participant_prefill) {
+        $participants[] = $participant_prefill;
+      }
     }
+
 
     $participant_handles = array();
     if ($participants) {
-      $handles = id(new PhabricatorHandleQuery())
+      $participant_handles = id(new PhabricatorHandleQuery())
         ->setViewer($user)
         ->withPHIDs($participants)
         ->execute();
-      $participant_handles = mpull($handles, 'getFullName', 'getPHID');
     }
 
     $submit_uri = $this->getApplicationURI('new/');
@@ -64,7 +66,7 @@ final class ConpherenceNewController extends ConpherenceController {
     // TODO - we can get a better cancel_uri once we get better at crazy
     // ajax jonx T2086
     if ($participant_prefill) {
-      $handle = $handles[$participant_prefill];
+      $handle = $participant_handles[$participant_prefill];
       $cancel_uri = $handle->getURI();
     }
 

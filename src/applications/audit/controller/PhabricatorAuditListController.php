@@ -139,9 +139,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
 
       $tok_value = null;
       if ($handle) {
-        $tok_value = array(
-          $handle->getPHID() => $handle->getFullName(),
-        );
+        $tok_value = array($handle);
       }
 
       $form->appendChild(
