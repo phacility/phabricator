@@ -357,11 +357,9 @@ final class DifferentialRevision extends DifferentialDAO
       case PhabricatorPolicyCapability::CAN_VIEW:
         $description[] = pht(
           "A revision's reviewers can always view it.");
-        if ($this->getRepositoryPHID()) {
-          $description[] = pht(
-            'This revision belongs to a repository. Other users must be able '.
-            'to view the repository in order to view this revision.');
-        }
+        $description[] = pht(
+          'If a revision belongs to a repository, other users must be able '.
+          'to view the repository in order to view the revision.');
         break;
     }
 
