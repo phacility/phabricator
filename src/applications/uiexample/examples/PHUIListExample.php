@@ -150,6 +150,45 @@ final class PHUIListExample extends PhabricatorUIExample {
       ->setHref('#')
       ->setType(PHUIListItemView::TYPE_LINK);
 
+        $item1 = id(new PHUIListItemView())
+      ->setName('Installation')
+      ->setHref('#')
+      ->setSelected(true)
+      ->setType(PHUIListItemView::TYPE_LINK);
+
+    $item2 = id(new PHUIListItemView())
+      ->setName('Webserver Config')
+      ->setHref('#')
+      ->setType(PHUIListItemView::TYPE_LINK);
+
+    $details1 = id(new PHUIListItemView())
+      ->setName('Details')
+      ->setHref('#')
+      ->setSelected(true)
+      ->setType(PHUIListItemView::TYPE_LINK);
+
+    $details2 = id(new PHUIListItemView())
+      ->setName('Lint (OK)')
+      ->setHref('#')
+      ->setType(PHUIListItemView::TYPE_LINK);
+
+    $details3 = id(new PHUIListItemView())
+      ->setName('Unit (5/5)')
+      ->setHref('#')
+      ->setType(PHUIListItemView::TYPE_LINK);
+
+    $details4 = id(new PHUIListItemView())
+      ->setName('Lint (Warn)')
+      ->setHref('#')
+      ->setStatusColor(PHUIListItemView::STATUS_WARN)
+      ->setType(PHUIListItemView::TYPE_LINK);
+
+    $details5 = id(new PHUIListItemView())
+      ->setName('Unit (3/5)')
+      ->setHref('#')
+      ->setStatusColor(PHUIListItemView::STATUS_FAIL)
+      ->setType(PHUIListItemView::TYPE_LINK);
+
     $topnav = id(new PHUIListView())
       ->setType(PHUIListView::NAVBAR_LIST)
       ->addMenuItem($home)
@@ -157,6 +196,14 @@ final class PHUIListExample extends PhabricatorUIExample {
       ->addMenuItem($item2)
       ->addMenuItem($item3)
       ->addMenuItem($item4);
+
+    $statustabs = id(new PHUIListView())
+      ->setType(PHUIListView::NAVBAR_LIST)
+      ->addMenuItem($details1)
+      ->addMenuItem($details2)
+      ->addMenuItem($details3)
+      ->addMenuItem($details4)
+      ->addMenuItem($details5);
 
     $layout1 =
       array(
@@ -187,6 +234,13 @@ final class PHUIListExample extends PhabricatorUIExample {
           ->addMargin(PHUI::MARGIN_MEDIUM)
           ->setShadow(true));
 
+    $layout5 =
+      array(
+        id(new PHUIBoxView())
+          ->appendChild($statustabs)
+          ->addMargin(PHUI::MARGIN_MEDIUM)
+          ->setShadow(true));
+
     $head1 = id(new PHUIHeaderView())
       ->setHeader(pht('Unstyled'));
 
@@ -198,6 +252,9 @@ final class PHUIListExample extends PhabricatorUIExample {
 
     $head4 = id(new PHUIHeaderView())
       ->setHeader(pht('Action Menu'));
+
+    $head5 = id(new PHUIHeaderView())
+      ->setHeader(pht('Status Tabs'));
 
     $wrap1 = id(new PHUIBoxView())
       ->appendChild($layout1)
@@ -215,6 +272,10 @@ final class PHUIListExample extends PhabricatorUIExample {
       ->appendChild($layout4)
       ->addMargin(PHUI::MARGIN_LARGE);
 
+    $wrap5 = id(new PHUIBoxView())
+      ->appendChild($layout5)
+      ->addMargin(PHUI::MARGIN_LARGE);
+
     return phutil_tag(
       'div',
         array(
@@ -227,6 +288,8 @@ final class PHUIListExample extends PhabricatorUIExample {
           $wrap2,
           $head3,
           $wrap3,
+          $head5,
+          $wrap5,
           $head4,
           $wrap4
         ));
