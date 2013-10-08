@@ -1,0 +1,2 @@
+ALTER TABLE {$NAMESPACE}_herald.herald_rule
+  ADD isDisabled INT UNSIGNED NOT NULL DEFAULT 0;

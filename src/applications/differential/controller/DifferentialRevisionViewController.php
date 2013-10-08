@@ -30,6 +30,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setViewer($request->getUser())
       ->needRelationships(true)
       ->needReviewerStatus(true)
+      ->needReviewerAuthority(true)
       ->executeOne();
 
     if (!$revision) {
@@ -587,8 +588,23 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $viewer_phid = $viewer->getPHID();
     $viewer_is_owner = ($viewer_phid == $revision->getAuthorPHID());
     $viewer_is_reviewer = in_array($viewer_phid, $revision->getReviewers());
-    $viewer_did_accept = ($viewer_phid === $revision->loadReviewedBy());
     $status = $revision->getStatus();
+
+    $viewer_has_accepted = false;
+    $viewer_has_rejected = false;
+    $status_accepted = DifferentialReviewerStatus::STATUS_ACCEPTED;
+    $status_rejected = DifferentialReviewerStatus::STATUS_REJECTED;
+    foreach ($revision->getReviewerStatus() as $reviewer) {
+      if ($reviewer->getReviewerPHID() == $viewer_phid) {
+        if ($reviewer->getStatus() == $status_accepted) {
+          $viewer_has_accepted = true;
+        }
+        if ($reviewer->getStatus() == $status_rejected) {
+          $viewer_has_rejected = true;
+        }
+        break;
+      }
+    }
 
     $allow_self_accept = PhabricatorEnv::getEnvConfig(
       'differential.allow-self-accept');
@@ -630,12 +646,13 @@ final class DifferentialRevisionViewController extends DifferentialController {
           break;
         case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
           $actions[DifferentialAction::ACTION_ACCEPT] = true;
+          $actions[DifferentialAction::ACTION_REJECT] = !$viewer_has_rejected;
           $actions[DifferentialAction::ACTION_RESIGN] = $viewer_is_reviewer;
           break;
         case ArcanistDifferentialRevisionStatus::ACCEPTED:
+          $actions[DifferentialAction::ACTION_ACCEPT] = !$viewer_has_accepted;
           $actions[DifferentialAction::ACTION_REJECT] = true;
-          $actions[DifferentialAction::ACTION_RESIGN] =
-            $viewer_is_reviewer && !$viewer_did_accept;
+          $actions[DifferentialAction::ACTION_RESIGN] = $viewer_is_reviewer;
           break;
         case ArcanistDifferentialRevisionStatus::CLOSED:
         case ArcanistDifferentialRevisionStatus::ABANDONED:

@@ -116,3 +116,11 @@
   margin: 12px 24px;
   list-style: circle;
 }
+
+.aphront-policy-rejection {
+  font-weight: bold;
+}
+
+.aphront-capability-details {
+  margin: 20px 0 4px;
+}

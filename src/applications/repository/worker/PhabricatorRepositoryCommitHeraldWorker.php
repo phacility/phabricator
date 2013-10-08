@@ -29,6 +29,7 @@ final class PhabricatorRepositoryCommitHeraldWorker
     $rules = id(new HeraldRuleQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withContentTypes(array($adapter->getAdapterContentType()))
+      ->withDisabled(false)
       ->needConditionsAndActions(true)
       ->needAppliedToPHIDs(array($adapter->getPHID()))
       ->needValidateAuthors(true)

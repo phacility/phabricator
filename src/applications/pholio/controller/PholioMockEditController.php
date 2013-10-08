@@ -230,8 +230,6 @@ final class PholioMockEditController extends PholioController {
       ->withPHIDs($v_cc)
       ->execute();
 
-    $cc_tokens = mpull($handles, 'getFullName', 'getPHID');
-
     $image_elements = array();
     foreach ($mock_images as $mock_image) {
       $image_elements[] = id(new PholioUploadedImageView())
@@ -303,7 +301,7 @@ final class PholioMockEditController extends PholioController {
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('CC'))
           ->setName('cc')
-          ->setValue($cc_tokens)
+          ->setValue($handles)
           ->setUser($user)
           ->setDatasource('/typeahead/common/mailable/'))
       ->appendChild(

@@ -154,7 +154,7 @@
     "status-oh-closed"      : {
       "name" : "status-oh-closed",
       "rule" : ".status-oh-closed",
-      "hash" : "53dc3a09dc2fbd3a546e5f5619a03b30"
+      "hash" : "cbc6a0959ebad3e88cc3ac67743a7f3a"
     },
     "status-oh-closed-dark" : {
       "name" : "status-oh-closed-dark",
@@ -164,7 +164,7 @@
     "status-oh-open"        : {
       "name" : "status-oh-open",
       "rule" : ".status-oh-open",
-      "hash" : "6ed5dd19324018203085c68155fae53a"
+      "hash" : "e86f83bc40e77664c91c834b27816576"
     },
     "status-oh-open-green"  : {
       "name" : "status-oh-open-green",

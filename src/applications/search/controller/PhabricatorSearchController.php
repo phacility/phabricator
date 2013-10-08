@@ -128,22 +128,18 @@ final class PhabricatorSearchController
     $author_value = array_select_keys(
       $handles,
       $query->getParameter('author', array()));
-    $author_value = mpull($author_value, 'getFullName', 'getPHID');
 
     $owner_value = array_select_keys(
       $handles,
       $query->getParameter('owner', array()));
-    $owner_value = mpull($owner_value, 'getFullName', 'getPHID');
 
     $subscribers_value = array_select_keys(
       $handles,
       $query->getParameter('subscribers', array()));
-    $subscribers_value = mpull($subscribers_value, 'getFullName', 'getPHID');
 
     $project_value = array_select_keys(
       $handles,
       $query->getParameter('project', array()));
-    $project_value = mpull($project_value, 'getFullName', 'getPHID');
 
     $search_form = new AphrontFormView();
     $search_form

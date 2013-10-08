@@ -12,6 +12,9 @@ final class HeraldRuleSearchEngine
 
     $saved->setParameter('contentType', $request->getStr('contentType'));
     $saved->setParameter('ruleType', $request->getStr('ruleType'));
+    $saved->setParameter(
+      'disabled',
+      $this->readBoolFromRequest($request, 'disabled'));
 
     return $saved;
   }
@@ -36,6 +39,11 @@ final class HeraldRuleSearchEngine
       $query->withRuleTypes(array($rule_type));
     }
 
+    $disabled = $saved->getParameter('disabled');
+    if ($disabled !== null) {
+      $query->withDisabled($disabled);
+    }
+
     return $query;
   }
 
@@ -44,11 +52,10 @@ final class HeraldRuleSearchEngine
     PhabricatorSavedQuery $saved_query) {
 
     $phids = $saved_query->getParameter('authorPHIDs', array());
-    $handles = id(new PhabricatorHandleQuery())
+    $author_handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->requireViewer())
       ->withPHIDs($phids)
       ->execute();
-    $author_tokens = mpull($handles, 'getFullName', 'getPHID');
 
     $content_type = $saved_query->getParameter('contentType');
     $rule_type = $saved_query->getParameter('ruleType');
@@ -59,7 +66,7 @@ final class HeraldRuleSearchEngine
           ->setDatasource('/typeahead/common/users/')
           ->setName('authors')
           ->setLabel(pht('Authors'))
-          ->setValue($author_tokens))
+          ->setValue($author_handles))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setName('contentType')
@@ -71,7 +78,18 @@ final class HeraldRuleSearchEngine
           ->setName('ruleType')
           ->setLabel(pht('Rule Type'))
           ->setValue($rule_type)
-          ->setOptions($this->getRuleTypeOptions()));
+          ->setOptions($this->getRuleTypeOptions()))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setName('disabled')
+          ->setLabel(pht('Rule Status'))
+          ->setValue($this->getBoolFromQuery($saved_query, 'disabled'))
+          ->setOptions(
+            array(
+              '' => pht('Show Enabled and Disabled Rules'),
+              'false' => pht('Show Only Enabled Rules'),
+              'true' => pht('Show Only Disabled Rules'),
+            )));
   }
 
   protected function getURI($path) {
@@ -85,6 +103,7 @@ final class HeraldRuleSearchEngine
       $names['authored'] = pht('Authored');
     }
 
+    $names['active'] = pht('Active');
     $names['all'] = pht('All');
 
     return $names;
@@ -95,13 +114,17 @@ final class HeraldRuleSearchEngine
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
+    $viewer_phid = $this->requireViewer()->getPHID();
+
     switch ($query_key) {
       case 'all':
         return $query;
+      case 'active':
+        return $query->setParameter('disabled', false);
       case 'authored':
-        return $query->setParameter(
-          'authorPHIDs',
-          array($this->requireViewer()->getPHID()));
+        return $query
+          ->setParameter('authorPHIDs', array($viewer_phid))
+          ->setParameter('disabled', false);
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
@@ -110,11 +133,13 @@ final class HeraldRuleSearchEngine
   private function getContentTypeOptions() {
     return array(
       '' => pht('(All Content Types)'),
-    ) + HeraldAdapter::getEnabledAdapterMap();
+    ) + HeraldAdapter::getEnabledAdapterMap($this->requireViewer());
   }
 
   private function getContentTypeValues() {
-    return array_fuse(array_keys(HeraldAdapter::getEnabledAdapterMap()));
+    return array_fuse(
+      array_keys(
+        HeraldAdapter::getEnabledAdapterMap($this->requireViewer())));
   }
 
   private function getRuleTypeOptions() {

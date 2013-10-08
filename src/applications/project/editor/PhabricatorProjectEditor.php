@@ -213,8 +213,7 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
         $xaction->setOldValue($project->getStatus());
         break;
       case PhabricatorProjectTransactionType::TYPE_MEMBERS:
-        $member_phids = $project->loadMemberPHIDs();
-        $project->attachMemberPHIDs($member_phids);
+        $member_phids = $project->getMemberPHIDs();
 
         $old_value = array_values($member_phids);
         $xaction->setOldValue($old_value);

@@ -12,16 +12,23 @@ final class PhabricatorAppSearchEngine
 
     $saved->setParameter('name', $request->getStr('name'));
 
-    $saved->setParameter('installed', $this->readBool($request, 'installed'));
-    $saved->setParameter('beta', $this->readBool($request, 'beta'));
-    $saved->setParameter('firstParty', $this->readBool($request, 'firstParty'));
+    $saved->setParameter(
+      'installed',
+      $this->readBoolFromRequest($request, 'installed'));
+    $saved->setParameter(
+      'beta',
+      $this->readBoolFromRequest($request, 'beta'));
+    $saved->setParameter(
+      'firstParty',
+      $this->readBoolFromRequest($request, 'firstParty'));
 
     return $saved;
   }
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new PhabricatorApplicationQuery())
-      ->setOrder(PhabricatorApplicationQuery::ORDER_NAME);
+      ->setOrder(PhabricatorApplicationQuery::ORDER_NAME)
+      ->withUnlisted(false);
 
     $name = $saved->getParameter('name');
     if (strlen($name)) {
@@ -60,7 +67,7 @@ final class PhabricatorAppSearchEngine
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Installed'))
           ->setName('installed')
-          ->setValue($this->getBool($saved, 'installed'))
+          ->setValue($this->getBoolFromQuery($saved, 'installed'))
           ->setOptions(
             array(
               '' => pht('Show All Applications'),
@@ -71,7 +78,7 @@ final class PhabricatorAppSearchEngine
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Beta'))
           ->setName('beta')
-          ->setValue($this->getBool($saved, 'beta'))
+          ->setValue($this->getBoolFromQuery($saved, 'beta'))
           ->setOptions(
             array(
               '' => pht('Show All Applications'),
@@ -82,7 +89,7 @@ final class PhabricatorAppSearchEngine
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Provenance'))
           ->setName('firstParty')
-          ->setValue($this->getBool($saved, 'firstParty'))
+          ->setValue($this->getBoolFromQuery($saved, 'firstParty'))
           ->setOptions(
             array(
               '' => pht('Show All Applications'),
@@ -115,21 +122,6 @@ final class PhabricatorAppSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
-  }
-
-  private function readBool(AphrontRequest $request, $key) {
-    if (!strlen($request->getStr($key))) {
-      return null;
-    }
-    return $request->getBool($key);
-  }
-
-  private function getBool(PhabricatorSavedQuery $query, $key) {
-    $value = $query->getParameter($key);
-    if ($value === null) {
-      return $value;
-    }
-    return $value ? 'true' : 'false';
   }
 
 }

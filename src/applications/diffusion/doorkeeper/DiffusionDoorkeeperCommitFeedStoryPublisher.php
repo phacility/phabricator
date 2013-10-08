@@ -83,7 +83,12 @@ final class DiffusionDoorkeeperCommitFeedStoryPublisher
         $request_phids = PhabricatorOwnersOwner::loadAffiliatedUserPHIDs(
           array($object->getID()));
       } else if ($object instanceof PhabricatorProject) {
-        $request_phids = $object->loadMemberPHIDs();
+        $project = id(new PhabricatorProjectQuery())
+          ->setViewer($this->getViewer())
+          ->withIDs(array($object->getID()))
+          ->needMembers(true)
+          ->executeOne();
+        $request_phids = $project->getMemberPHIDs();
       } else {
         // Dunno what this is.
         $request_phids = array();

@@ -45,7 +45,7 @@ $config_map = array(
   ),
   'PhabricatorAuthProviderPassword'       => array(
     'enabled' => 'auth.password-auth-enabled',
-    'enabled-default' => true,
+    'enabled-default' => false,
     'registration' => false,
     'type' => 'password',
     'domain' => 'self',

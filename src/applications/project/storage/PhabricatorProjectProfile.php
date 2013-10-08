@@ -6,16 +6,19 @@ final class PhabricatorProjectProfile extends PhabricatorProjectDAO {
   protected $blurb;
   protected $profileImagePHID;
 
-  public function loadProfileImageURI() {
-    $src_phid = $this->getProfileImagePHID();
+  private $profileImageFile = self::ATTACHABLE;
 
-    // TODO: (T603) Can we get rid of this and move it to a Query?
-    $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $src_phid);
-    if ($file) {
-      return $file->getBestURI();
-    }
+  public function getProfileImageURI() {
+    return $this->getProfileImageFile()->getBestURI();
+  }
 
-    return PhabricatorUser::getDefaultProfileImageURI();
+  public function attachProfileImageFile(PhabricatorFile $file) {
+    $this->profileImageFile = $file;
+    return $this;
+  }
+
+  public function getProfileImageFile() {
+    return $this->assertAttached($this->profileImageFile);
   }
 
 }

@@ -209,8 +209,12 @@ final class DoorkeeperFeedWorkerAsana extends DoorkeeperFeedWorker {
     // Add the silent followers first so that a user who is both a reviewer and
     // a CC gets silently added and then implicitly skipped by then noisy add.
     // They will get a subtask notification.
-    $this->addFollowers($oauth_token, $task_id, $silent_followers, true);
-    $this->addFollowers($oauth_token, $task_id, $noisy_followers);
+
+    // We only do this if the task still exists.
+    if (empty($extra_data['gone'])) {
+      $this->addFollowers($oauth_token, $task_id, $silent_followers, true);
+      $this->addFollowers($oauth_token, $task_id, $noisy_followers);
+    }
 
     $dst_phid = $parent_ref->getExternalObject()->getPHID();
 

@@ -85,6 +85,11 @@ final class PhabricatorTypeaheadCommonDatasourceController
         $need_users = true;
         $need_all_users = true;
         break;
+      case 'accountsorprojects':
+        $need_users = true;
+        $need_all_users = true;
+        $need_projs = true;
+        break;
       case 'arcanistprojects':
         $need_arcanist_projects = true;
         break;
@@ -218,6 +223,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
       $projs = id(new PhabricatorProjectQuery())
         ->setViewer($viewer)
         ->withStatus(PhabricatorProjectQuery::STATUS_OPEN)
+        ->needProfiles(true)
         ->execute();
       foreach ($projs as $proj) {
         $proj_result = id(new PhabricatorTypeaheadResult())
@@ -225,10 +231,10 @@ final class PhabricatorTypeaheadCommonDatasourceController
           ->setDisplayType("Project")
           ->setURI('/project/view/'.$proj->getID().'/')
           ->setPHID($proj->getPHID());
-        $prof = $proj->loadProfile();
-        if ($prof) {
-          $proj_result->setImageURI($prof->loadProfileImageURI());
-        }
+
+        $prof = $proj->getProfile();
+        $proj_result->setImageURI($prof->getProfileImageURI());
+
         $results[] = $proj_result;
       }
     }

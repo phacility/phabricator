@@ -473,7 +473,25 @@ final class DiffusionCommitController extends DiffusionController {
     }
 
     if ($audit_requests) {
-      $props['Auditors'] = $this->renderAuditStatusView($audit_requests);
+      $user_requests = array();
+      $other_requests = array();
+      foreach ($audit_requests as $audit_request) {
+        if ($audit_request->isUser()) {
+          $user_requests[] = $audit_request;
+        } else {
+          $other_requests[] = $audit_request;
+        }
+      }
+
+      if ($user_requests) {
+        $props['Auditors'] = $this->renderAuditStatusView(
+          $user_requests);
+      }
+
+      if ($other_requests) {
+        $props['Project/Package Auditors'] = $this->renderAuditStatusView(
+          $other_requests);
+      }
     }
 
     $props['Committed'] = phabricator_datetime($commit->getEpoch(), $user);
@@ -1004,13 +1022,18 @@ final class DiffusionCommitController extends DiffusionController {
           $item->setIcon('warning-dark', pht('Audit Requested'));
           break;
         case PhabricatorAuditStatusConstants::RESIGNED:
-          $item->setIcon('open-dark', pht('Accepted'));
+          $item->setIcon('open-dark', pht('Resigned'));
           break;
         case PhabricatorAuditStatusConstants::CLOSED:
-          $item->setIcon('accept-blue', pht('Accepted'));
+          $item->setIcon('accept-blue', pht('Closed'));
           break;
         case PhabricatorAuditStatusConstants::CC:
           $item->setIcon('info-dark', pht('Subscribed'));
+          break;
+        default:
+          $item->setIcon(
+            'question-dark',
+            pht('%s?', $request->getAuditStatus()));
           break;
       }
 

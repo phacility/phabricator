@@ -45,8 +45,16 @@ final class PhabricatorPolicyExplainController
       ->executeOne();
     $object_uri = $handle->getURI();
 
-    $explanation = $policy->getExplanation($capability);
+    $explanation = PhabricatorPolicy::getPolicyExplanation(
+      $viewer,
+      $policy->getPHID());
+
     $auto_info = (array)$object->describeAutomaticCapability($capability);
+
+    $auto_info = array_merge(
+      array($explanation),
+      $auto_info);
+    $auto_info = array_filter($auto_info);
 
     foreach ($auto_info as $key => $info) {
       $auto_info[$key] = phutil_tag('li', array(), $info);
@@ -56,14 +64,19 @@ final class PhabricatorPolicyExplainController
     }
 
     $content = array(
-      $explanation,
+      pht('Users with the "%s" capability:', "Can View"),
       $auto_info,
     );
+
+    $object_name = pht(
+      '%s %s',
+      $handle->getTypeName(),
+      $handle->getObjectName());
 
     $dialog = id(new AphrontDialogView())
       ->setUser($viewer)
       ->setClass('aphront-access-dialog')
-      ->setTitle(pht('Policy Details'))
+      ->setTitle(pht('Policy Details: %s', $object_name))
       ->appendChild($content)
       ->addCancelButton($object_uri, pht('Done'));
 

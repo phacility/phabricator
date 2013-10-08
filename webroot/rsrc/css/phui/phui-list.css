@@ -127,3 +127,37 @@
   float: none;
   border: none;
 }
+
+/* - Status Colors -------------------------------------------------------------
+
+  Colors for navbars
+
+*/
+
+.phui-list-item-warn .phui-list-item-href {
+  color: #bc7837;
+}
+
+.phui-list-item-fail .phui-list-item-href {
+  color: {$red};
+}
+
+.phui-list-item-warn.phui-list-item-selected .phui-list-item-href,
+.phui-list-item-warn .phui-list-item-href:hover {
+  background: {$lightyellow};
+  color: #bc7837;
+}
+
+.phui-list-item-fail.phui-list-item-selected .phui-list-item-href,
+.phui-list-item-fail .phui-list-item-href:hover {
+  background: {$lightred};
+  color: {$red};
+}
+
+.phui-list-item-warn.phui-list-item-selected .phui-list-item-href:hover {
+  background: #fcf0bd;
+}
+
+.phui-list-item-fail.phui-list-item-selected .phui-list-item-href:hover {
+  background: #f5d3d0;
+}

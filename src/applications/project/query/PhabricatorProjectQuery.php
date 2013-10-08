@@ -16,6 +16,7 @@ final class PhabricatorProjectQuery
   const STATUS_ARCHIVED = 'status-archived';
 
   private $needMembers;
+  private $needProfiles;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -44,6 +45,11 @@ final class PhabricatorProjectQuery
 
   public function needMembers($need_members) {
     $this->needMembers = $need_members;
+    return $this;
+  }
+
+  public function needProfiles($need_profiles) {
+    $this->needProfiles = $need_profiles;
     return $this;
   }
 
@@ -106,6 +112,51 @@ final class PhabricatorProjectQuery
           $projects[$row['id']]->setIsUserMember(
             $viewer_phid,
             ($row['viewerIsMember'] !== null));
+        }
+      }
+
+      if ($this->needProfiles) {
+        $profiles = id(new PhabricatorProjectProfile())->loadAllWhere(
+          'projectPHID IN (%Ls)',
+          mpull($projects, 'getPHID'));
+        $profiles = mpull($profiles, null, 'getProjectPHID');
+
+        $default = null;
+
+        if ($profiles) {
+          $file_phids = mpull($profiles, 'getProfileImagePHID');
+          $files = id(new PhabricatorFileQuery())
+            ->setViewer($this->getViewer())
+            ->withPHIDs($file_phids)
+            ->execute();
+          $files = mpull($files, null, 'getPHID');
+          foreach ($profiles as $profile) {
+            $file = idx($files, $profile->getProfileImagePHID());
+            if (!$file) {
+              if (!$default) {
+                $default = PhabricatorFile::loadBuiltin(
+                  $this->getViewer(),
+                  'profile.png');
+              }
+              $file = $default;
+            }
+            $profile->attachProfileImageFile($file);
+          }
+        }
+
+        foreach ($projects as $project) {
+          $profile = idx($profiles, $project->getPHID());
+          if (!$profile) {
+            if (!$default) {
+              $default = PhabricatorFile::loadBuiltin(
+                $this->getViewer(),
+                'profile.png');
+            }
+            $profile = id(new PhabricatorProjectProfile())
+              ->setProjectPHID($project->getPHID())
+              ->attachProfileImageFile($default);
+          }
+          $project->attachProfile($profile);
         }
       }
     }

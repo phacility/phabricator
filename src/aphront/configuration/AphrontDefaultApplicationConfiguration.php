@@ -172,22 +172,25 @@ class AphrontDefaultApplicationConfiguration
         $list = phutil_tag('ul', array(), $list);
       }
 
-      $content = phutil_tag(
-        'div',
-        array(
-          'class' => 'aphront-policy-exception',
-        ),
-        array(
-          $ex->getMessage(),
-          $list,
-        ));
+      $content = array(
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'aphront-policy-rejection',
+          ),
+          $ex->getRejection()),
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'aphront-capability-details',
+          ),
+          pht('Users with the "%s" capability:', $ex->getCapabilityName())),
+        $list,
+      );
 
       $dialog = new AphrontDialogView();
       $dialog
-        ->setTitle(
-            $is_serious
-              ? 'Access Denied'
-              : "You Shall Not Pass")
+        ->setTitle($ex->getTitle())
         ->setClass('aphront-access-dialog')
         ->setUser($user)
         ->appendChild($content);

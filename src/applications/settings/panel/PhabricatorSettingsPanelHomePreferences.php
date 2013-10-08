@@ -21,7 +21,11 @@ final class PhabricatorSettingsPanelHomePreferences
 
     require_celerity_resource('phabricator-settings-css');
 
-    $apps = PhabricatorApplication::getAllInstalledApplications();
+    $apps = id(new PhabricatorApplicationQuery())
+      ->setViewer($user)
+      ->withUnlisted(false)
+      ->execute();
+
     $pref_tiles = PhabricatorUserPreferences::PREFERENCE_APP_TILES;
     $tiles = $preferences->getPreference($pref_tiles, array());
 
@@ -137,7 +141,7 @@ final class PhabricatorSettingsPanelHomePreferences
           ));
 
         $app_column = hsprintf(
-                        "<strong>%s</strong><br /><em> Default: %s</em>"
+                        "<strong>%s</strong><br /><em>Default: %s</em>"
                         , $app->getName(), $default_name);
 
         $rows[] = array(
@@ -176,14 +180,12 @@ final class PhabricatorSettingsPanelHomePreferences
 
 
       $panel = id(new AphrontPanelView())
-                 ->setHeader($group_name)
-                 ->addClass('phabricator-settings-panelview')
-                 ->appendChild($table)
-                 ->setNoBackground();
-
+        ->setHeader($group_name)
+        ->addClass('phabricator-settings-panelview')
+        ->appendChild($table)
+        ->setNoBackground();
 
       $output[] = $panel;
-
     }
 
     $form
@@ -205,9 +207,7 @@ final class PhabricatorSettingsPanelHomePreferences
       ->setFormError($error_view)
       ->setForm($form);
 
-    return array(
-      $form_box,
-    );
+    return $form_box;
   }
 }
 

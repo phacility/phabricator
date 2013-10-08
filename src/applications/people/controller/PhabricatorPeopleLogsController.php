@@ -22,16 +22,12 @@ final class PhabricatorPeopleLogsController
       $handles = $this->loadViewerHandles($phids);
       if ($filter_user) {
         $filter_user = reset($filter_user);
-        $user_value = array(
-          $filter_user => $handles[$filter_user]->getFullName(),
-        );
+        $user_value = array($handles[$filter_user]);
       }
 
       if ($filter_actor) {
         $filter_actor = reset($filter_actor);
-        $actor_value = array(
-          $filter_actor => $handles[$filter_actor]->getFullName(),
-        );
+        $actor_value = array($handles[$filter_actor]);
       }
     }
 

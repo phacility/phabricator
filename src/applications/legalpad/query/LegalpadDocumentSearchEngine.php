@@ -53,7 +53,6 @@ final class LegalpadDocumentSearchEngine
       ->setViewer($this->requireViewer())
       ->withPHIDs($phids)
       ->execute();
-    $tokens = mpull($handles, 'getFullName', 'getPHID');
 
     $form
       ->appendChild(
@@ -61,13 +60,13 @@ final class LegalpadDocumentSearchEngine
           ->setDatasource('/typeahead/common/users/')
           ->setName('creators')
           ->setLabel(pht('Creators'))
-          ->setValue(array_select_keys($tokens, $creator_phids)))
+          ->setValue(array_select_keys($handles, $creator_phids)))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/users/')
           ->setName('contributors')
           ->setLabel(pht('Contributors'))
-          ->setValue(array_select_keys($tokens, $contributor_phids)));
+          ->setValue(array_select_keys($handles, $contributor_phids)));
 
     $this->buildDateRange(
       $form,

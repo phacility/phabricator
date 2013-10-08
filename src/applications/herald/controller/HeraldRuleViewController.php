@@ -22,7 +22,21 @@ final class HeraldRuleViewController extends HeraldController {
     }
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($rule->getName());
+      ->setUser($viewer)
+      ->setHeader($rule->getName())
+      ->setPolicyObject($rule);
+
+    if ($rule->getIsDisabled()) {
+      $header->setStatus(
+        'oh-open',
+        'red',
+        pht('Disabled'));
+    } else {
+      $header->setStatus(
+        'oh-open',
+        null,
+        pht('Active'));
+    }
 
     $actions = $this->buildActionView($rule);
     $properties = $this->buildPropertyView($rule);
@@ -37,10 +51,13 @@ final class HeraldRuleViewController extends HeraldController {
       ->setActionList($actions)
       ->setPropertyList($properties);
 
+    $timeline = $this->buildTimeline($rule);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $object_box,
+        $timeline,
       ),
       array(
         'title' => $rule->getName(),
@@ -70,6 +87,25 @@ final class HeraldRuleViewController extends HeraldController {
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
+    if ($rule->getIsDisabled()) {
+      $disable_uri = "disable/{$id}/enable/";
+      $disable_icon = 'enable';
+      $disable_name = pht('Enable Rule');
+    } else {
+      $disable_uri = "disable/{$id}/disable/";
+      $disable_icon = 'disable';
+      $disable_name = pht('Disable Rule');
+    }
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Disable Rule'))
+        ->setHref($this->getApplicationURI($disable_uri))
+        ->setIcon($disable_icon)
+        ->setName($disable_name)
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true));
+
     return $view;
   }
 
@@ -96,7 +132,9 @@ final class HeraldRuleViewController extends HeraldController {
     if ($adapter) {
       $view->addProperty(
         pht('Applies To'),
-        idx(HeraldAdapter::getEnabledAdapterMap(), $rule->getContentType()));
+        idx(
+          HeraldAdapter::getEnabledAdapterMap($viewer),
+          $rule->getContentType()));
 
       $view->invokeWillRenderEvent();
 
@@ -111,6 +149,33 @@ final class HeraldRuleViewController extends HeraldController {
     }
 
     return $view;
+  }
+
+  private function buildTimeline(HeraldRule $rule) {
+    $viewer = $this->getRequest()->getUser();
+
+    $xactions = id(new HeraldTransactionQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($rule->getPHID()))
+      ->needComments(true)
+      ->execute();
+
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($viewer);
+    foreach ($xactions as $xaction) {
+      if ($xaction->getComment()) {
+        $engine->addObject(
+          $xaction->getComment(),
+          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
+      }
+    }
+    $engine->process();
+
+    return id(new PhabricatorApplicationTransactionView())
+      ->setUser($viewer)
+      ->setObjectPHID($rule->getPHID())
+      ->setTransactions($xactions)
+      ->setMarkupEngine($engine);
   }
 
 }

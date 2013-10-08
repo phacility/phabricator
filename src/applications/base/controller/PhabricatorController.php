@@ -5,14 +5,6 @@ abstract class PhabricatorController extends AphrontController {
   private $handles;
 
   public function shouldRequireLogin() {
-
-    // If this install is configured to allow public resources and the
-    // controller works in public mode, allow the request through.
-    $is_public_allowed = PhabricatorEnv::getEnvConfig('policy.allow-public');
-    if ($is_public_allowed && $this->shouldAllowPublic()) {
-      return false;
-    }
-
     return true;
   }
 
@@ -29,33 +21,38 @@ abstract class PhabricatorController extends AphrontController {
   }
 
   public function shouldRequireEmailVerification() {
-    $need_verify = PhabricatorUserEmail::isEmailVerificationRequired();
-    $need_login = $this->shouldRequireLogin();
-
-    return ($need_login && $need_verify);
+    return PhabricatorUserEmail::isEmailVerificationRequired();
   }
 
   final public function willBeginExecution() {
 
     $request = $this->getRequest();
+    if ($request->getUser()) {
+      // NOTE: Unit tests can set a user explicitly. Normal requests are not
+      // permitted to do this.
+      PhabricatorTestCase::assertExecutingUnitTests();
+      $user = $request->getUser();
+    } else {
+      $user = new PhabricatorUser();
 
-    $user = new PhabricatorUser();
+      $phusr = $request->getCookie('phusr');
+      $phsid = $request->getCookie('phsid');
 
-    $phusr = $request->getCookie('phusr');
-    $phsid = $request->getCookie('phsid');
-
-    if (strlen($phusr) && $phsid) {
-      $info = queryfx_one(
-        $user->establishConnection('r'),
-        'SELECT u.* FROM %T u JOIN %T s ON u.phid = s.userPHID
-          AND s.type LIKE %> AND s.sessionKey = %s',
-        $user->getTableName(),
-        'phabricator_session',
-        'web-',
-        PhabricatorHash::digest($phsid));
-      if ($info) {
-        $user->loadFromArray($info);
+      if (strlen($phusr) && $phsid) {
+        $info = queryfx_one(
+          $user->establishConnection('r'),
+          'SELECT u.* FROM %T u JOIN %T s ON u.phid = s.userPHID
+            AND s.type LIKE %> AND s.sessionKey = %s',
+          $user->getTableName(),
+          'phabricator_session',
+          'web-',
+          PhabricatorHash::digest($phsid));
+        if ($info) {
+          $user->loadFromArray($info);
+        }
       }
+
+      $request->setUser($user);
     }
 
     $translation = $user->getTranslation();
@@ -67,7 +64,15 @@ abstract class PhabricatorController extends AphrontController {
         ->addTranslations($translation->getTranslations());
     }
 
-    $request->setUser($user);
+    $preferences = $user->loadPreferences();
+    if (PhabricatorEnv::getEnvConfig('darkconsole.enabled')) {
+      $dark_console = PhabricatorUserPreferences::PREFERENCE_DARK_CONSOLE;
+      if ($preferences->getPreference($dark_console) ||
+         PhabricatorEnv::getEnvConfig('darkconsole.always-on')) {
+        $console = new DarkConsoleCore();
+        $request->getApplicationConfiguration()->setConsole($console);
+      }
+    }
 
     if ($user->getIsDisabled() && $this->shouldRequireEnabledUser()) {
       $disabled_user_controller = new PhabricatorDisabledUserController(
@@ -88,55 +93,57 @@ abstract class PhabricatorController extends AphrontController {
       return $this->delegateToController($checker_controller);
     }
 
-    $preferences = $user->loadPreferences();
+    if ($this->shouldRequireLogin()) {
+      // This actually means we need either:
+      //   - a valid user, or a public controller; and
+      //   - permission to see the application.
 
-    if (PhabricatorEnv::getEnvConfig('darkconsole.enabled')) {
-      $dark_console = PhabricatorUserPreferences::PREFERENCE_DARK_CONSOLE;
-      if ($preferences->getPreference($dark_console) ||
-         PhabricatorEnv::getEnvConfig('darkconsole.always-on')) {
-        $console = new DarkConsoleCore();
-        $request->getApplicationConfiguration()->setConsole($console);
+      $auth_class = 'PhabricatorApplicationAuth';
+      $auth_application = PhabricatorApplication::getByClass($auth_class);
+
+      $allow_public = $this->shouldAllowPublic() &&
+                      PhabricatorEnv::getEnvConfig('policy.allow-public');
+
+      // If this controller isn't public, and the user isn't logged in, require
+      // login.
+      if (!$allow_public && !$user->isLoggedIn()) {
+        $login_controller = new PhabricatorAuthStartController($request);
+        $this->setCurrentApplication($auth_application);
+        return $this->delegateToController($login_controller);
+      }
+
+      if ($user->isLoggedIn()) {
+        if ($this->shouldRequireEmailVerification()) {
+          $email = $user->loadPrimaryEmail();
+          if (!$email) {
+            throw new Exception(
+              "No primary email address associated with this account!");
+          }
+          if (!$email->getIsVerified()) {
+            $controller = new PhabricatorMustVerifyEmailController($request);
+            $this->setCurrentApplication($auth_application);
+            return $this->delegateToController($controller);
+          }
+        }
+      }
+
+      // If the user doesn't have access to the application, don't let them use
+      // any of its controllers. We query the application in order to generate
+      // a policy exception if the viewer doesn't have permission.
+
+      $application = $this->getCurrentApplication();
+      if ($application) {
+        id(new PhabricatorApplicationQuery())
+          ->setViewer($user)
+          ->withPHIDs(array($application->getPHID()))
+          ->executeOne();
       }
     }
 
-    if ($this->shouldRequireLogin() && !$user->getPHID()) {
-      $login_controller = new PhabricatorAuthStartController($request);
-      $this->setCurrentApplication(
-        PhabricatorApplication::getByClass('PhabricatorApplicationAuth'));
-      return $this->delegateToController($login_controller);
-    }
-
-    if ($this->shouldRequireEmailVerification()) {
-      $email = $user->loadPrimaryEmail();
-      if (!$email) {
-        throw new Exception(
-          "No primary email address associated with this account!");
-      }
-      if (!$email->getIsVerified()) {
-        $verify_controller = new PhabricatorMustVerifyEmailController($request);
-        return $this->delegateToController($verify_controller);
-      }
-    }
-
+    // NOTE: We do this last so that users get a login page instead of a 403
+    // if they need to login.
     if ($this->shouldRequireAdmin() && !$user->getIsAdmin()) {
       return new Aphront403Response();
-    }
-
-    // If the user doesn't have access to the application, don't let them use
-    // any of its controllers. We query the application in order to generate
-    // a policy exception if the viewer doesn't have permission.
-    $application = $this->getCurrentApplication();
-    if ($application) {
-/*
-
-  TODO: Reenable this, but it's breaking some applications which need public
-  access in all cases, like Files and Conduit.
-
-      id(new PhabricatorApplicationQuery())
-        ->setViewer($user)
-        ->withPHIDs(array($application->getPHID()))
-        ->executeOne();
-*/
     }
 
   }
@@ -341,6 +348,25 @@ abstract class PhabricatorController extends AphrontController {
     }
 
     return $view;
+  }
+
+  protected function hasApplicationCapability($capability) {
+    return PhabricatorPolicyFilter::hasCapability(
+      $this->getRequest()->getUser(),
+      $this->getCurrentApplication(),
+      $capability);
+  }
+
+  protected function requireApplicationCapability($capability) {
+    PhabricatorPolicyFilter::requireCapability(
+      $this->getRequest()->getUser(),
+      $this->getCurrentApplication(),
+      $capability);
+  }
+
+  protected function explainApplicationCapability($capability, $message) {
+    // TODO: Render a link to get more information.
+    return $message;
   }
 
 }

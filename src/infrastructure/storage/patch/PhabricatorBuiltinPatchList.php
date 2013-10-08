@@ -1652,6 +1652,18 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130929.filepolicy.sql'),
       ),
+      '20131004.dxedgekey.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131004.dxedgekey.sql'),
+      ),
+      '20131004.dxreviewers.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20131004.dxreviewers.php'),
+      ),
+      '20131006.hdisable.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131006.hdisable.sql'),
+      ),
     );
   }
 }

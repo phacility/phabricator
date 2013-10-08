@@ -15,29 +15,34 @@ abstract class HeraldAdapter {
   const FIELD_TAGS                   = 'tags';
   const FIELD_DIFF_FILE              = 'diff-file';
   const FIELD_DIFF_CONTENT           = 'diff-content';
+  const FIELD_DIFF_ADDED_CONTENT     = 'diff-added-content';
+  const FIELD_DIFF_REMOVED_CONTENT   = 'diff-removed-content';
   const FIELD_REPOSITORY             = 'repository';
   const FIELD_RULE                   = 'rule';
   const FIELD_AFFECTED_PACKAGE       = 'affected-package';
   const FIELD_AFFECTED_PACKAGE_OWNER = 'affected-package-owner';
   const FIELD_CONTENT_SOURCE         = 'contentsource';
+  const FIELD_ALWAYS                 = 'always';
+  const FIELD_AUTHOR_PROJECTS        = 'authorprojects';
 
-  const CONDITION_CONTAINS      = 'contains';
-  const CONDITION_NOT_CONTAINS  = '!contains';
-  const CONDITION_IS            = 'is';
-  const CONDITION_IS_NOT        = '!is';
-  const CONDITION_IS_ANY        = 'isany';
-  const CONDITION_IS_NOT_ANY    = '!isany';
-  const CONDITION_INCLUDE_ALL   = 'all';
-  const CONDITION_INCLUDE_ANY   = 'any';
-  const CONDITION_INCLUDE_NONE  = 'none';
-  const CONDITION_IS_ME         = 'me';
-  const CONDITION_IS_NOT_ME     = '!me';
-  const CONDITION_REGEXP        = 'regexp';
-  const CONDITION_RULE          = 'conditions';
-  const CONDITION_NOT_RULE      = '!conditions';
-  const CONDITION_EXISTS        = 'exists';
-  const CONDITION_NOT_EXISTS    = '!exists';
-  const CONDITION_REGEXP_PAIR   = 'regexp-pair';
+  const CONDITION_CONTAINS        = 'contains';
+  const CONDITION_NOT_CONTAINS    = '!contains';
+  const CONDITION_IS              = 'is';
+  const CONDITION_IS_NOT          = '!is';
+  const CONDITION_IS_ANY          = 'isany';
+  const CONDITION_IS_NOT_ANY      = '!isany';
+  const CONDITION_INCLUDE_ALL     = 'all';
+  const CONDITION_INCLUDE_ANY     = 'any';
+  const CONDITION_INCLUDE_NONE    = 'none';
+  const CONDITION_IS_ME           = 'me';
+  const CONDITION_IS_NOT_ME       = '!me';
+  const CONDITION_REGEXP          = 'regexp';
+  const CONDITION_RULE            = 'conditions';
+  const CONDITION_NOT_RULE        = '!conditions';
+  const CONDITION_EXISTS          = 'exists';
+  const CONDITION_NOT_EXISTS      = '!exists';
+  const CONDITION_UNCONDITIONALLY = 'unconditionally';
+  const CONDITION_REGEXP_PAIR     = 'regexp-pair';
 
   const ACTION_ADD_CC       = 'addcc';
   const ACTION_REMOVE_CC    = 'remcc';
@@ -47,6 +52,8 @@ abstract class HeraldAdapter {
   const ACTION_FLAG         = 'flag';
   const ACTION_ASSIGN_TASK  = 'assigntask';
   const ACTION_ADD_PROJECTS = 'addprojects';
+  const ACTION_ADD_REVIEWERS = 'addreviewers';
+  const ACTION_ADD_BLOCKING_REVIEWERS = 'addblockingreviewers';
 
   const VALUE_TEXT            = 'text';
   const VALUE_NONE            = 'none';
@@ -59,6 +66,7 @@ abstract class HeraldAdapter {
   const VALUE_PROJECT         = 'project';
   const VALUE_FLAG_COLOR      = 'flagcolor';
   const VALUE_CONTENT_SOURCE  = 'contentsource';
+  const VALUE_USER_OR_PROJECT = 'userorproject';
 
   private $contentSource;
 
@@ -79,6 +87,8 @@ abstract class HeraldAdapter {
         return null;
       case self::FIELD_CONTENT_SOURCE:
         return $this->getContentSource()->getSource();
+      case self::FIELD_ALWAYS:
+        return true;
       default:
         throw new Exception(
           "Unknown field '{$field_name}'!");
@@ -87,9 +97,16 @@ abstract class HeraldAdapter {
 
   abstract public function applyHeraldEffects(array $effects);
 
-  public function isEnabled() {
-    return true;
+  public function isAvailableToUser(PhabricatorUser $viewer) {
+    $applications = id(new PhabricatorApplicationQuery())
+      ->setViewer($viewer)
+      ->withInstalled(true)
+      ->withClasses(array($this->getAdapterApplicationClass()))
+      ->execute();
+
+    return !empty($applications);
   }
+
 
   /**
    * NOTE: You generally should not override this; it exists to support legacy
@@ -100,12 +117,18 @@ abstract class HeraldAdapter {
   }
 
   abstract public function getAdapterContentName();
+  abstract public function getAdapterApplicationClass();
+  abstract public function getObject();
 
 
 /* -(  Fields  )------------------------------------------------------------- */
 
 
-  abstract public function getFields();
+  public function getFields() {
+    return array(
+      self::FIELD_ALWAYS,
+    );
+  }
 
   public function getFieldNameMap() {
     return array(
@@ -119,12 +142,16 @@ abstract class HeraldAdapter {
       self::FIELD_TAGS => pht('Tags'),
       self::FIELD_DIFF_FILE => pht('Any changed filename'),
       self::FIELD_DIFF_CONTENT => pht('Any changed file content'),
+      self::FIELD_DIFF_ADDED_CONTENT => pht('Any added file content'),
+      self::FIELD_DIFF_REMOVED_CONTENT => pht('Any removed file content'),
       self::FIELD_REPOSITORY => pht('Repository'),
       self::FIELD_RULE => pht('Another Herald rule'),
       self::FIELD_AFFECTED_PACKAGE => pht('Any affected package'),
       self::FIELD_AFFECTED_PACKAGE_OWNER =>
         pht("Any affected package's owner"),
-      self:: FIELD_CONTENT_SOURCE => pht('Content Source')
+      self::FIELD_CONTENT_SOURCE => pht('Content Source'),
+      self::FIELD_ALWAYS => pht('Always'),
+      self::FIELD_AUTHOR_PROJECTS => pht("Author's projects"),
     );
   }
 
@@ -142,7 +169,7 @@ abstract class HeraldAdapter {
       self::CONDITION_IS_NOT_ANY      => pht('is not any of'),
       self::CONDITION_INCLUDE_ALL     => pht('include all of'),
       self::CONDITION_INCLUDE_ANY     => pht('include any of'),
-      self::CONDITION_INCLUDE_NONE    => pht('include none of'),
+      self::CONDITION_INCLUDE_NONE    => pht('do not include'),
       self::CONDITION_IS_ME           => pht('is myself'),
       self::CONDITION_IS_NOT_ME       => pht('is not myself'),
       self::CONDITION_REGEXP          => pht('matches regexp'),
@@ -150,6 +177,7 @@ abstract class HeraldAdapter {
       self::CONDITION_NOT_RULE        => pht('does not match:'),
       self::CONDITION_EXISTS          => pht('exists'),
       self::CONDITION_NOT_EXISTS      => pht('does not exist'),
+      self::CONDITION_UNCONDITIONALLY => '',  // don't show anything!
       self::CONDITION_REGEXP_PAIR     => pht('matches regexp pair'),
     );
   }
@@ -176,6 +204,7 @@ abstract class HeraldAdapter {
       case self::FIELD_TAGS:
       case self::FIELD_REVIEWERS:
       case self::FIELD_CC:
+      case self::FIELD_AUTHOR_PROJECTS:
         return array(
           self::CONDITION_INCLUDE_ALL,
           self::CONDITION_INCLUDE_ANY,
@@ -187,6 +216,8 @@ abstract class HeraldAdapter {
           self::CONDITION_REGEXP,
         );
       case self::FIELD_DIFF_CONTENT:
+      case self::FIELD_DIFF_ADDED_CONTENT:
+      case self::FIELD_DIFF_REMOVED_CONTENT:
         return array(
           self::CONDITION_CONTAINS,
           self::CONDITION_REGEXP,
@@ -207,6 +238,10 @@ abstract class HeraldAdapter {
         return array(
           self::CONDITION_IS,
           self::CONDITION_IS_NOT,
+        );
+      case self::FIELD_ALWAYS:
+        return array(
+          self::CONDITION_UNCONDITIONALLY,
         );
       default:
         throw new Exception(
@@ -264,7 +299,7 @@ abstract class HeraldAdapter {
         }
         if (!is_array($condition_value)) {
           throw new HeraldInvalidConditionException(
-            "Expected conditionv value to be an array.");
+            "Expected condition value to be an array.");
         }
 
         $have = array_select_keys(array_fuse($field_value), $condition_value);
@@ -281,6 +316,8 @@ abstract class HeraldAdapter {
         return (bool)$field_value;
       case self::CONDITION_NOT_EXISTS:
         return !$field_value;
+      case self::CONDITION_UNCONDITIONALLY:
+        return (bool)$field_value;
       case self::CONDITION_REGEXP:
         foreach ((array)$field_value as $value) {
           // We add the 'S' flag because we use the regexp multiple times.
@@ -422,6 +459,7 @@ abstract class HeraldAdapter {
       case self::CONDITION_NOT_RULE:
       case self::CONDITION_EXISTS:
       case self::CONDITION_NOT_EXISTS:
+      case self::CONDITION_UNCONDITIONALLY:
         // No explicit validation for these types, although there probably
         // should be in some cases.
         break;
@@ -450,6 +488,8 @@ abstract class HeraldAdapter {
           self::ACTION_FLAG         => pht('Mark with flag'),
           self::ACTION_ASSIGN_TASK  => pht('Assign task to'),
           self::ACTION_ADD_PROJECTS => pht('Add projects'),
+          self::ACTION_ADD_REVIEWERS => pht('Add reviewers'),
+          self::ACTION_ADD_BLOCKING_REVIEWERS => pht('Add blocking reviewers'),
         );
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         return array(
@@ -459,8 +499,11 @@ abstract class HeraldAdapter {
           self::ACTION_EMAIL        => pht('Send me an email'),
           self::ACTION_AUDIT        => pht('Trigger an Audit by me'),
           self::ACTION_FLAG         => pht('Mark with flag'),
-          self::ACTION_ASSIGN_TASK  => pht('Assign task to me.'),
+          self::ACTION_ASSIGN_TASK  => pht('Assign task to me'),
           self::ACTION_ADD_PROJECTS => pht('Add projects'),
+          self::ACTION_ADD_REVIEWERS => pht('Add me as a reviewer'),
+          self::ACTION_ADD_BLOCKING_REVIEWERS =>
+            pht('Add me as a blocking reviewer'),
         );
       default:
         throw new Exception("Unknown rule type '{$rule_type}'!");
@@ -486,6 +529,8 @@ abstract class HeraldAdapter {
         case self::ACTION_REMOVE_CC:
         case self::ACTION_AUDIT:
         case self::ACTION_ASSIGN_TASK:
+        case self::ACTION_ADD_REVIEWERS:
+        case self::ACTION_ADD_BLOCKING_REVIEWERS:
           // For personal rules, force these actions to target the rule owner.
           $target = array($author_phid);
           break;
@@ -551,6 +596,8 @@ abstract class HeraldAdapter {
             return self::VALUE_TAG;
           case self::FIELD_AFFECTED_PACKAGE:
             return self::VALUE_OWNERS_PACKAGE;
+          case self::FIELD_AUTHOR_PROJECTS:
+            return self::VALUE_PROJECT;
           default:
             return self::VALUE_USER;
         }
@@ -559,6 +606,7 @@ abstract class HeraldAdapter {
       case self::CONDITION_IS_NOT_ME:
       case self::CONDITION_EXISTS:
       case self::CONDITION_NOT_EXISTS:
+      case self::CONDITION_UNCONDITIONALLY:
         return self::VALUE_NONE;
       case self::CONDITION_RULE:
       case self::CONDITION_NOT_RULE:
@@ -579,6 +627,8 @@ abstract class HeraldAdapter {
         case self::ACTION_NOTHING:
         case self::ACTION_AUDIT:
         case self::ACTION_ASSIGN_TASK:
+        case self::ACTION_ADD_REVIEWERS:
+        case self::ACTION_ADD_BLOCKING_REVIEWERS:
           return self::VALUE_NONE;
         case self::ACTION_FLAG:
           return self::VALUE_FLAG_COLOR;
@@ -602,6 +652,9 @@ abstract class HeraldAdapter {
           return self::VALUE_FLAG_COLOR;
         case self::ACTION_ASSIGN_TASK:
           return self::VALUE_USER;
+        case self::ACTION_ADD_REVIEWERS:
+        case self::ACTION_ADD_BLOCKING_REVIEWERS:
+          return self::VALUE_USER_OR_PROJECT;
         default:
           throw new Exception("Unknown or invalid action '{$action}'.");
       }
@@ -670,16 +723,6 @@ abstract class HeraldAdapter {
     return $adapters;
   }
 
-  public static function getAllEnabledAdapters() {
-    $adapters = self::getAllAdapters();
-    foreach ($adapters as $key => $adapter) {
-      if (!$adapter->isEnabled()) {
-        unset($adapters[$key]);
-      }
-    }
-    return $adapters;
-  }
-
   public static function getAdapterForContentType($content_type) {
     $adapters = self::getAllAdapters();
 
@@ -695,11 +738,14 @@ abstract class HeraldAdapter {
         $content_type));
   }
 
-  public static function getEnabledAdapterMap() {
+  public static function getEnabledAdapterMap(PhabricatorUser $viewer) {
     $map = array();
 
-    $adapters = HeraldAdapter::getAllEnabledAdapters();
+    $adapters = HeraldAdapter::getAllAdapters();
     foreach ($adapters as $adapter) {
+      if (!$adapter->isAvailableToUser($viewer)) {
+        continue;
+      }
       $type = $adapter->getAdapterContentType();
       $name = $adapter->getAdapterContentName();
       $map[$type] = $name;
@@ -708,7 +754,6 @@ abstract class HeraldAdapter {
     asort($map);
     return $map;
   }
-
 
   public function renderRuleAsText(HeraldRule $rule, array $handles) {
     assert_instances_of($handles, 'PhabricatorObjectHandle');
@@ -727,7 +772,10 @@ abstract class HeraldAdapter {
     }
     $out[] = null;
 
-    if ($rule->getRepetitionPolicy() == HeraldRepetitionPolicyConfig::EVERY) {
+    $integer_code_for_every = HeraldRepetitionPolicyConfig::toInt(
+      HeraldRepetitionPolicyConfig::EVERY);
+
+    if ($rule->getRepetitionPolicy() == $integer_code_for_every) {
       $out[] = pht('Take these actions every time this rule matches:');
     } else {
       $out[] = pht('Take these actions the first time this rule matches:');

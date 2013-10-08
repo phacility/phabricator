@@ -13,6 +13,10 @@ final class DifferentialHunk extends DifferentialDAO {
     return $this->makeContent($include = '+');
   }
 
+  public function getRemovedLines() {
+    return $this->makeContent($include = '-');
+  }
+
   public function makeNewFile() {
     return implode('', $this->makeContent($include = ' +'));
   }

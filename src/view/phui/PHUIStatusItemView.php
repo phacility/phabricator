@@ -62,6 +62,7 @@ final class PHUIStatusItemView extends AphrontTagView {
         $icon->setMetadata(
           array(
             'tip' => $this->iconLabel,
+            'size' => 240,
           ));
       }
     }

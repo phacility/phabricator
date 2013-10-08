@@ -92,8 +92,17 @@ final class PhabricatorPholioMockTestDataGenerator
       ->loadAllWhere("mimeType = %s", "image/jpeg");
     $rand_images = array();
     $quantity = rand(2, 10);
+    $quantity = min($quantity, count($images));
     foreach (array_rand($images, $quantity) as $random) {
       $rand_images[] = $images[$random]->getPHID();
+    }
+    // this means you don't have any jpegs yet. we'll
+    // just use a builtin image
+    if (empty($rand_images)) {
+      $default = PhabricatorFile::loadBuiltin(
+        PhabricatorUser::getOmnipotentUser(),
+        'profile.png');
+      $rand_images[] = $default->getPHID();
     }
     return $rand_images;
   }

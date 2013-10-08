@@ -163,6 +163,11 @@ JX.install('HeraldRuleEditor', {
       JX.DOM.setContent(condition_cell, condition_select);
 
       this._onconditionchange(r);
+
+      var condition_name = this._config.conditions[row_id][1];
+      if (condition_name == 'unconditionally') {
+        JX.DOM.hide(condition_select);
+      }
     },
     _onconditionchange : function(r) {
       var target = JX.DOM.find(r, 'select', 'condition-select');
@@ -215,6 +220,7 @@ JX.install('HeraldRuleEditor', {
         case 'tag':
         case 'package':
         case 'project':
+        case 'userorproject':
           var tokenizer = this._newTokenizer(type);
           input = tokenizer[0];
           get_fn = tokenizer[1];

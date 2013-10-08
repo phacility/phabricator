@@ -27,6 +27,7 @@ final class HeraldEngine {
   public static function loadAndApplyRules(HeraldAdapter $adapter) {
     $rules = id(new HeraldRuleQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withDisabled(false)
       ->withContentTypes(array($adapter->getAdapterContentType()))
       ->needConditionsAndActions(true)
       ->needAppliedToPHIDs(array($adapter->getPHID()))
@@ -233,15 +234,23 @@ final class HeraldEngine {
 
     $local_version = id(new HeraldRule())->getConfigVersion();
     if ($rule->getConfigVersion() > $local_version) {
-      $reason = "Rule could not be processed, it was created with a newer ".
-                "version of Herald.";
+      $reason = pht(
+        "Rule could not be processed, it was created with a newer version ".
+        "of Herald.");
       $result = false;
     } else if (!$conditions) {
-      $reason = "Rule failed automatically because it has no conditions.";
+      $reason = pht(
+        "Rule failed automatically because it has no conditions.");
       $result = false;
     } else if (!$rule->hasValidAuthor()) {
-      $reason = "Rule failed automatically because its owner is invalid ".
-                "or disabled.";
+      $reason = pht(
+        "Rule failed automatically because its owner is invalid ".
+        "or disabled.");
+      $result = false;
+    } else if (!$this->canAuthorViewObject($rule, $object)) {
+      $reason = pht(
+        "Rule failed automatically because it is a personal rule and its ".
+        "owner can not see the object.");
       $result = false;
     } else {
       foreach ($conditions as $condition) {
@@ -359,6 +368,34 @@ final class HeraldEngine {
       $effects[] = $effect;
     }
     return $effects;
+  }
+
+  private function canAuthorViewObject(
+    HeraldRule $rule,
+    HeraldAdapter $adapter) {
+
+    // Authorship is irrelevant for global rules.
+    if ($rule->isGlobalRule()) {
+      return true;
+    }
+
+    // The author must be able to create rules for the adapter's content type.
+    // In particular, this means that the application must be installed and
+    // accessible to the user. For example, if a user writes a Differential
+    // rule and then loses access to Differential, this disables the rule.
+    $enabled = HeraldAdapter::getEnabledAdapterMap($rule->getAuthor());
+    if (empty($enabled[$adapter->getAdapterContentType()])) {
+      return false;
+    }
+
+    // Finally, the author must be able to see the object itself. You can't
+    // write a personal rule that CC's you on revisions you wouldn't otherwise
+    // be able to see, for example.
+    $object = $adapter->getObject();
+    return PhabricatorPolicyFilter::hasCapability(
+      $rule->getAuthor(),
+      $object,
+      PhabricatorPolicyCapability::CAN_VIEW);
   }
 
 }

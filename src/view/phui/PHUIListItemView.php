@@ -10,6 +10,9 @@ final class PHUIListItemView extends AphrontTagView {
   const TYPE_DIVIDER  = 'type-divider';
   const TYPE_ICON     = 'type-icon';
 
+  const STATUS_WARN   = 'phui-list-item-warn';
+  const STATUS_FAIL   = 'phui-list-item-fail';
+
   private $name;
   private $href;
   private $type = self::TYPE_LINK;
@@ -19,6 +22,7 @@ final class PHUIListItemView extends AphrontTagView {
   private $selected;
   private $disabled;
   private $renderNameAsTooltip;
+  private $statusColor;
 
   public function setRenderNameAsTooltip($render_name_as_tooltip) {
     $this->renderNameAsTooltip = $render_name_as_tooltip;
@@ -92,6 +96,11 @@ final class PHUIListItemView extends AphrontTagView {
     return $this->isExternal;
   }
 
+  public function setStatusColor($color) {
+    $this->statusColor = $color;
+    return $this;
+  }
+
   protected function getTagName() {
     return 'li';
   }
@@ -107,6 +116,10 @@ final class PHUIListItemView extends AphrontTagView {
 
     if ($this->selected) {
       $classes[] = 'phui-list-item-selected';
+    }
+
+    if ($this->statusColor) {
+      $classes[] = $this->statusColor;
     }
 
     return array(

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group herald
- */
 final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
 
   protected $revision;
@@ -15,14 +12,19 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
   protected $newCCs = array();
   protected $remCCs = array();
   protected $emailPHIDs = array();
+  protected $addReviewerPHIDs = array();
+  protected $blockingReviewerPHIDs = array();
 
   protected $repository;
   protected $affectedPackages;
   protected $changesets;
 
-  public function isEnabled() {
-    $app = 'PhabricatorApplicationDifferential';
-    return PhabricatorApplication::isClassInstalled($app);
+  public function getAdapterApplicationClass() {
+    return 'PhabricatorApplicationDifferential';
+  }
+
+  public function getObject() {
+    return $this->revision;
   }
 
   public function getAdapterContentType() {
@@ -34,19 +36,24 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
   }
 
   public function getFields() {
-    return array(
-      self::FIELD_TITLE,
-      self::FIELD_BODY,
-      self::FIELD_AUTHOR,
-      self::FIELD_REVIEWERS,
-      self::FIELD_CC,
-      self::FIELD_REPOSITORY,
-      self::FIELD_DIFF_FILE,
-      self::FIELD_DIFF_CONTENT,
-      self::FIELD_RULE,
-      self::FIELD_AFFECTED_PACKAGE,
-      self::FIELD_AFFECTED_PACKAGE_OWNER,
-    );
+    return array_merge(
+      array(
+        self::FIELD_TITLE,
+        self::FIELD_BODY,
+        self::FIELD_AUTHOR,
+        self::FIELD_AUTHOR_PROJECTS,
+        self::FIELD_REVIEWERS,
+        self::FIELD_CC,
+        self::FIELD_REPOSITORY,
+        self::FIELD_DIFF_FILE,
+        self::FIELD_DIFF_CONTENT,
+        self::FIELD_DIFF_ADDED_CONTENT,
+        self::FIELD_DIFF_REMOVED_CONTENT,
+        self::FIELD_RULE,
+        self::FIELD_AFFECTED_PACKAGE,
+        self::FIELD_AFFECTED_PACKAGE_OWNER,
+      ),
+      parent::getFields());
   }
 
   public function getRepetitionOptions() {
@@ -59,10 +66,16 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
   public static function newLegacyAdapter(
     DifferentialRevision $revision,
     DifferentialDiff $diff) {
-
     $object = new HeraldDifferentialRevisionAdapter();
 
-    $revision->loadRelationships();
+    // Reload the revision to pick up relationship information.
+    $revision = id(new DifferentialRevisionQuery())
+      ->withIDs(array($revision->getID()))
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->needRelationships(true)
+      ->needReviewerStatus(true)
+      ->executeOne();
+
     $object->revision = $revision;
     $object->diff = $diff;
 
@@ -94,6 +107,14 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
 
   public function getEmailPHIDsAddedByHerald() {
     return $this->emailPHIDs;
+  }
+
+  public function getReviewersAddedByHerald() {
+    return $this->addReviewerPHIDs;
+  }
+
+  public function getBlockingReviewersAddedByHerald() {
+    return $this->blockingReviewerPHIDs;
   }
 
   public function getPHID() {
@@ -192,6 +213,56 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
     return $dict;
   }
 
+  protected function loadAddedContentDictionary() {
+    $changesets = $this->loadChangesets();
+
+    $hunks = array();
+    if ($changesets) {
+      $hunks = id(new DifferentialHunk())->loadAllWhere(
+        'changesetID in (%Ld)',
+        mpull($changesets, 'getID'));
+    }
+
+    $dict = array();
+    $hunks = mgroup($hunks, 'getChangesetID');
+    $changesets = mpull($changesets, null, 'getID');
+    foreach ($changesets as $id => $changeset) {
+      $path = $this->getAbsoluteRepositoryPathForChangeset($changeset);
+      $content = array();
+      foreach (idx($hunks, $id, array()) as $hunk) {
+        $content[] = implode('', $hunk->getAddedLines());
+      }
+      $dict[$path] = implode("\n", $content);
+    }
+
+    return $dict;
+  }
+
+  protected function loadRemovedContentDictionary() {
+    $changesets = $this->loadChangesets();
+
+    $hunks = array();
+    if ($changesets) {
+      $hunks = id(new DifferentialHunk())->loadAllWhere(
+        'changesetID in (%Ld)',
+        mpull($changesets, 'getID'));
+    }
+
+    $dict = array();
+    $hunks = mgroup($hunks, 'getChangesetID');
+    $changesets = mpull($changesets, null, 'getID');
+    foreach ($changesets as $id => $changeset) {
+      $path = $this->getAbsoluteRepositoryPathForChangeset($changeset);
+      $content = array();
+      foreach (idx($hunks, $id, array()) as $hunk) {
+        $content[] = implode('', $hunk->getRemovedLines());
+      }
+      $dict[$path] = implode("\n", $content);
+    }
+
+    return $dict;
+  }
+
   public function loadAffectedPackages() {
     if ($this->affectedPackages === null) {
       $this->affectedPackages = array();
@@ -219,6 +290,18 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
       case self::FIELD_AUTHOR:
         return $this->revision->getAuthorPHID();
         break;
+      case self::FIELD_AUTHOR_PROJECTS:
+        $author_phid = $this->revision->getAuthorPHID();
+        if (!$author_phid) {
+          return array();
+        }
+
+        $projects = id(new PhabricatorProjectQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withMemberPHIDs(array($author_phid))
+          ->execute();
+
+        return mpull($projects, 'getPHID');
       case self::FIELD_DIFF_FILE:
         return $this->loadAffectedPaths();
       case self::FIELD_CC:
@@ -241,6 +324,10 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
         return $repository->getPHID();
       case self::FIELD_DIFF_CONTENT:
         return $this->loadContentDictionary();
+      case self::FIELD_DIFF_ADDED_CONTENT:
+        return $this->loadAddedContentDictionary();
+      case self::FIELD_DIFF_REMOVED_CONTENT:
+        return $this->loadRemovedContentDictionary();
       case self::FIELD_AFFECTED_PACKAGE:
         $packages = $this->loadAffectedPackages();
         return mpull($packages, 'getPHID');
@@ -260,6 +347,8 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
           self::ACTION_ADD_CC,
           self::ACTION_REMOVE_CC,
           self::ACTION_EMAIL,
+          self::ACTION_ADD_REVIEWERS,
+          self::ACTION_ADD_BLOCKING_REVIEWERS,
           self::ACTION_NOTHING,
         );
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
@@ -268,6 +357,8 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
           self::ACTION_REMOVE_CC,
           self::ACTION_EMAIL,
           self::ACTION_FLAG,
+          self::ACTION_ADD_REVIEWERS,
+          self::ACTION_ADD_BLOCKING_REVIEWERS,
           self::ACTION_NOTHING,
         );
     }
@@ -356,6 +447,26 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
             $effect,
             true,
             pht('Removed addresses from CC list.'));
+          break;
+        case self::ACTION_ADD_REVIEWERS:
+          foreach ($effect->getTarget() as $phid) {
+            $this->addReviewerPHIDs[$phid] = true;
+          }
+          $result[] = new HeraldApplyTranscript(
+            $effect,
+            true,
+            pht('Added reviewers.'));
+          break;
+        case self::ACTION_ADD_BLOCKING_REVIEWERS:
+          // This adds reviewers normally, it just also marks them blocking.
+          foreach ($effect->getTarget() as $phid) {
+            $this->addReviewerPHIDs[$phid] = true;
+            $this->blockingReviewerPHIDs[$phid] = true;
+          }
+          $result[] = new HeraldApplyTranscript(
+            $effect,
+            true,
+            pht('Added blocking reviewers.'));
           break;
         default:
           throw new Exception("No rules to handle action '{$action}'.");

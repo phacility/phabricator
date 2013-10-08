@@ -27,11 +27,10 @@ final class PholioMockSearchEngine
     PhabricatorSavedQuery $saved_query) {
 
     $phids = $saved_query->getParameter('authorPHIDs', array());
-    $handles = id(new PhabricatorHandleQuery())
+    $author_handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->requireViewer())
       ->withPHIDs($phids)
       ->execute();
-    $author_tokens = mpull($handles, 'getFullName', 'getPHID');
 
     $form
       ->appendChild(
@@ -39,8 +38,7 @@ final class PholioMockSearchEngine
           ->setDatasource('/typeahead/common/users/')
           ->setName('authors')
           ->setLabel(pht('Authors'))
-          ->setValue($author_tokens));
-
+          ->setValue($author_handles));
   }
 
   protected function getURI($path) {

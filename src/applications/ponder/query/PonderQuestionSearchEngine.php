@@ -61,10 +61,6 @@ final class PonderQuestionSearchEngine
       ->setViewer($this->requireViewer())
       ->withPHIDs($phids)
       ->execute();
-    $tokens = mpull($handles, 'getFullName', 'getPHID');
-
-    $author_tokens = array_select_keys($tokens, $author_phids);
-    $answerer_tokens = array_select_keys($tokens, $answerer_phids);
 
     $form
       ->appendChild(
@@ -72,13 +68,13 @@ final class PonderQuestionSearchEngine
           ->setDatasource('/typeahead/common/users/')
           ->setName('authors')
           ->setLabel(pht('Authors'))
-          ->setValue($author_tokens))
+          ->setValue(array_select_keys($handles, $author_phids)))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/users/')
           ->setName('answerers')
           ->setLabel(pht('Answered By'))
-          ->setValue($answerer_tokens))
+          ->setValue(array_select_keys($handles, $answerer_phids)))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Status'))

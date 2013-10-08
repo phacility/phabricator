@@ -75,6 +75,19 @@ final class PhabricatorApplicationEditController
 
         $value[$phid]['policy'] = $result + $value[$phid]['policy'];
 
+        // Don't allow users to make policy edits which would lock them out of
+        // applications, since they would be unable to undo those actions.
+        PhabricatorEnv::overrideConfig($key, $value);
+        PhabricatorPolicyFilter::mustRetainCapability(
+          $user,
+          $application,
+          PhabricatorPolicyCapability::CAN_VIEW);
+
+        PhabricatorPolicyFilter::mustRetainCapability(
+          $user,
+          $application,
+          PhabricatorPolicyCapability::CAN_EDIT);
+
         PhabricatorConfigEditor::storeNewValue(
           $config_entry,
           $value,

@@ -7,6 +7,7 @@ final class PhabricatorApplicationQuery
   private $beta;
   private $firstParty;
   private $nameContains;
+  private $unlisted;
   private $classes;
   private $phids;
 
@@ -32,6 +33,11 @@ final class PhabricatorApplicationQuery
 
   public function withFirstParty($first_party) {
     $this->firstParty = $first_party;
+    return $this;
+  }
+
+  public function withUnlisted($unlisted) {
+    $this->unlisted = $unlisted;
     return $this;
   }
 
@@ -98,6 +104,14 @@ final class PhabricatorApplicationQuery
     if ($this->firstParty !== null) {
       foreach ($apps as $key => $app) {
         if ($app->isFirstParty() != $this->firstParty) {
+          unset($apps[$key]);
+        }
+      }
+    }
+
+    if ($this->unlisted !== null) {
+      foreach ($apps as $key => $app) {
+        if ($app->isUnlisted() != $this->unlisted) {
           unset($apps[$key]);
         }
       }

@@ -17,6 +17,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   private $subprojectsNeedUpdate;
   private $memberPHIDs = self::ATTACHABLE;
   private $sparseMembers = self::ATTACHABLE;
+  private $profile = self::ATTACHABLE;
 
   public function getCapabilities() {
     return array(
@@ -96,11 +97,13 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       PhabricatorProjectPHIDTypeProject::TYPECONST);
   }
 
-  public function loadProfile() {
-    $profile = id(new PhabricatorProjectProfile())->loadOneWhere(
-      'projectPHID = %s',
-      $this->getPHID());
-    return $profile;
+  public function getProfile() {
+    return $this->assertAttached($this->profile);
+  }
+
+  public function attachProfile(PhabricatorProjectProfile $profile) {
+    $this->profile = $profile;
+    return $this;
   }
 
   public function attachMemberPHIDs(array $phids) {
@@ -110,15 +113,6 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   public function getMemberPHIDs() {
     return $this->assertAttached($this->memberPHIDs);
-  }
-
-  public function loadMemberPHIDs() {
-    if (!$this->getPHID()) {
-      return array();
-    }
-    return PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $this->getPHID(),
-      PhabricatorEdgeConfig::TYPE_PROJ_MEMBER);
   }
 
   public function setPhrictionSlug($slug) {

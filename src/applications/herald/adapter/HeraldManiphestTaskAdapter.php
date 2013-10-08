@@ -10,11 +10,19 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
   private $assignPHID;
   private $projectPHIDs = array();
 
+  public function getAdapterApplicationClass() {
+    return 'PhabricatorApplicationManiphest';
+  }
+
   public function setTask(ManiphestTask $task) {
     $this->task = $task;
     return $this;
   }
   public function getTask() {
+    return $this->task;
+  }
+
+  public function getObject() {
     return $this->task;
   }
 
@@ -47,13 +55,15 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
   }
 
   public function getFields() {
-    return array(
-      self::FIELD_TITLE,
-      self::FIELD_BODY,
-      self::FIELD_AUTHOR,
-      self::FIELD_CC,
-      self::FIELD_CONTENT_SOURCE,
-    );
+    return array_merge(
+      array(
+        self::FIELD_TITLE,
+        self::FIELD_BODY,
+        self::FIELD_AUTHOR,
+        self::FIELD_CC,
+        self::FIELD_CONTENT_SOURCE,
+      ),
+      parent::getFields());
   }
 
   public function getActions($rule_type) {
@@ -112,11 +122,9 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
             pht('Great success at doing nothing.'));
           break;
         case self::ACTION_ADD_CC:
-          $add_cc = array();
           foreach ($effect->getTarget() as $phid) {
-            $add_cc[$phid] = true;
+            $this->ccPHIDs[] = $phid;
           }
-          $this->setCcPHIDs(array_keys($add_cc));
           $result[] = new HeraldApplyTranscript(
             $effect,
             true,
@@ -137,11 +145,9 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
             pht('Assigned task.'));
           break;
         case self::ACTION_ADD_PROJECTS:
-          $add_projects = array();
           foreach ($effect->getTarget() as $phid) {
-            $add_projects[$phid] = true;
+            $this->projectPHIDs[] = $phid;
           }
-          $this->setProjectPHIDs(array_keys($add_projects));
           $result[] = new HeraldApplyTranscript(
             $effect,
             true,

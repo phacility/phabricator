@@ -64,7 +64,8 @@ final class PhabricatorPolicyManagementShowWorkflow
     foreach ($policies as $capability => $policy) {
       $console->writeOut("  **%s**\n", $capability);
       $console->writeOut("    %s\n", $policy->renderDescription());
-      $console->writeOut("    %s\n", $policy->getExplanation($capability));
+      $console->writeOut("    %s\n",
+        PhabricatorPolicy::getPolicyExplanation($viewer, $policy->getPHID()));
       $console->writeOut("\n");
 
       $more = (array)$object->describeAutomaticCapability($capability);

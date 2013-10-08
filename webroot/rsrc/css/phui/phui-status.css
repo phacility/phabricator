@@ -29,3 +29,8 @@
 .phui-status-item-highlighted {
   background-color: {$lightyellow};
 }
+
+.phui-status-item-highlighted .phui-status-item-note {
+  background-color: #fff;
+  padding-left: 4px;
+}

@@ -36,11 +36,10 @@ final class PhabricatorProjectSearchEngine
     PhabricatorSavedQuery $saved_query) {
 
     $phids = $saved_query->getParameter('memberPHIDs', array());
-    $handles = id(new PhabricatorHandleQuery())
+    $member_handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->requireViewer())
       ->withPHIDs($phids)
       ->execute();
-    $member_tokens = mpull($handles, 'getFullName', 'getPHID');
 
     $status = $saved_query->getParameter('status');
 
@@ -50,7 +49,7 @@ final class PhabricatorProjectSearchEngine
           ->setDatasource('/typeahead/common/users/')
           ->setName('members')
           ->setLabel(pht('Members'))
-          ->setValue($member_tokens))
+          ->setValue($member_handles))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Status'))

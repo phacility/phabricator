@@ -1,10 +1,9 @@
 <?php
 
-/**
- * @group paste
- */
 final class PhabricatorPasteEditor
   extends PhabricatorApplicationTransactionEditor {
+
+  private $pasteFile;
 
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
@@ -95,10 +94,27 @@ final class PhabricatorPasteEditor
               'authorPHID' => $this->getActor()->getPHID(),
             ));
           $object->setFilePHID($paste_file->getPHID());
+
+          $this->pasteFile = $paste_file;
           break;
       }
     }
   }
+
+  protected function applyFinalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    // TODO: This should use extractFilePHIDs() instead, but the way
+    // the transactions work right now makes pretty messy.
+
+    if ($this->pasteFile) {
+      $this->pasteFile->attachToObject(
+        $this->getActor(),
+        $object->getPHID());
+    }
+  }
+
 
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,

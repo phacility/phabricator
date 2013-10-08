@@ -130,52 +130,40 @@ final class PhabricatorPolicy {
     return $this->getName();
   }
 
-  public function getExplanation($capability) {
-    switch ($capability) {
-      case PhabricatorPolicyCapability::CAN_VIEW:
-        switch ($this->getPHID()) {
-          case PhabricatorPolicies::POLICY_PUBLIC:
-            return pht('Visible to the entire internet.');
-          case PhabricatorPolicies::POLICY_USER:
-            return pht('Visible to all logged in users.');
-          case PhabricatorPolicies::POLICY_ADMIN:
-            return pht('Visible to all administrators.');
-          case PhabricatorPolicies::POLICY_NOONE:
-            return pht('Not visible to anyone by default.');
-        }
+  public static function getPolicyExplanation(
+    PhabricatorUser $viewer,
+    $policy) {
 
-        switch ($this->getType()) {
-          case PhabricatorPolicyType::TYPE_PROJECT:
-            return pht(
-              'Visible to members of the project "%s".',
-              $this->getName());
-          case PhabricatorPolicyType::TYPE_MASKED:
-            return pht('Other: %s', $this->getName());
-        }
-        break;
-      case PhabricatorPolicyCapability::CAN_EDIT:
-        switch ($this->getPHID()) {
-          case PhabricatorPolicies::POLICY_USER:
-            return pht('Editable by all logged in users.');
-          case PhabricatorPolicies::POLICY_ADMIN:
-            return pht('Editable by all administrators.');
-          case PhabricatorPolicies::POLICY_NOONE:
-            return pht('Not editable by default.');
-        }
+    switch ($policy) {
+      case PhabricatorPolicies::POLICY_PUBLIC:
+        return pht('This object is public.');
+      case PhabricatorPolicies::POLICY_USER:
+        return pht('Logged in users can take this action.');
+      case PhabricatorPolicies::POLICY_ADMIN:
+        return pht('Administrators can take this action.');
+      case PhabricatorPolicies::POLICY_NOONE:
+        return pht('By default, no one can take this action.');
+      default:
+        $handle = id(new PhabricatorHandleQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(array($policy))
+          ->executeOne();
 
-        switch ($this->getType()) {
-          case PhabricatorPolicyType::TYPE_PROJECT:
-            return pht(
-              'Editable by members of the project "%s".',
-              $this->getName());
-          case PhabricatorPolicyType::TYPE_MASKED:
-            return pht('Other: %s', $this->getName());
+        $type = phid_get_type($policy);
+        if ($type == PhabricatorProjectPHIDTypeProject::TYPECONST) {
+          return pht(
+            'Members of the project "%s" can take this action.',
+            $handle->getFullName());
+        } else if ($type == PhabricatorPeoplePHIDTypeUser::TYPECONST) {
+          return pht(
+            '%s can take this action.',
+            $handle->getFullName());
+        } else {
+          return pht(
+            'This object has an unknown or invalid policy setting ("%s").',
+            $policy);
         }
-        break;
     }
-
-
-    return pht('?');
   }
 
   public function getFullName() {

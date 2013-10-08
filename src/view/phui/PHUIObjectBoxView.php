@@ -78,6 +78,11 @@ final class PHUIObjectBoxView extends AphrontView {
       }
     }
 
+    $property_list = $this->propertyList;
+    if ($this->actionList && $this->propertyList) {
+      $property_list->setActionList($this->actionList);
+    }
+
     $content = id(new PHUIBoxView())
       ->appendChild(
         array(
@@ -85,7 +90,6 @@ final class PHUIObjectBoxView extends AphrontView {
           $this->formError,
           $exception_errors,
           $this->form,
-          $this->actionList,
           $this->propertyList,
           $this->renderChildren(),
         ))

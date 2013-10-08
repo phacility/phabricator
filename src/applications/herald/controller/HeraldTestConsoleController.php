@@ -31,6 +31,9 @@ final class HeraldTestConsoleController extends HeraldController {
         }
 
         if (!$errors) {
+
+          // TODO: Let the adapters claim objects instead.
+
           if ($object instanceof DifferentialRevision) {
             $adapter = HeraldDifferentialRevisionAdapter::newLegacyAdapter(
               $object,
@@ -43,6 +46,12 @@ final class HeraldTestConsoleController extends HeraldController {
               $object->getRepository(),
               $object,
               $data);
+          } else if ($object instanceof ManiphestTask) {
+            $adapter = id(new HeraldManiphestTaskAdapter())
+              ->setTask($object);
+          } else if ($object instanceof PholioMock) {
+            $adapter = id(new HeraldPholioMockAdapter())
+              ->setMock($object);
           } else {
             throw new Exception("Can not build adapter for object!");
           }
@@ -50,6 +59,7 @@ final class HeraldTestConsoleController extends HeraldController {
           $rules = id(new HeraldRuleQuery())
             ->setViewer($user)
             ->withContentTypes(array($adapter->getAdapterContentType()))
+            ->withDisabled(false)
             ->needConditionsAndActions(true)
             ->needAppliedToPHIDs(array($object->getPHID()))
             ->needValidateAuthors(true)
@@ -77,10 +87,10 @@ final class HeraldTestConsoleController extends HeraldController {
       $error_view = null;
     }
 
-    $text = pht('Enter an object to test rules '.
-        'for, like a Diffusion commit (e.g., rX123) or a '.
-        'Differential revision (e.g., D123). You will be shown the '.
-        'results of a dry run on the object.');
+    $text = pht(
+      'Enter an object to test rules for, like a Diffusion commit (e.g., '.
+      'rX123) or a Differential revision (e.g., D123). You will be shown '.
+      'the results of a dry run on the object.');
 
     $form = id(new AphrontFormView())
       ->setUser($user)
@@ -96,13 +106,10 @@ final class HeraldTestConsoleController extends HeraldController {
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Test Rules')));
 
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('test');
-    $nav->appendChild(
-      array(
-        $error_view,
-        $form,
-      ));
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Herald Test Console'))
+      ->setFormError($error_view)
+      ->setForm($form);
 
     $crumbs = id($this->buildApplicationCrumbs())
       ->addCrumb(
@@ -112,10 +119,9 @@ final class HeraldTestConsoleController extends HeraldController {
       ->addCrumb(
         id(new PhabricatorCrumbView())
           ->setName(pht('Test Console')));
-    $nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(
-      $nav,
+      $box,
       array(
         'title' => pht('Test Console'),
         'device' => true,

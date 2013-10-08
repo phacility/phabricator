@@ -2,43 +2,12 @@
  * @provides phabricator-action-list-view-css
  */
 
-.phabricator-action-list-view {
-  background: #ffffff;
-}
-
 .device-desktop .phabricator-action-list-view {
-  border: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
-  padding: 4px 0;
-  float: right;
-  margin-top: 0px;
-  width: 20%;
   font-size: 12px;
 }
 
-.device-desktop .phui-header-shell + .phabricator-action-list-view {
-  margin-top: -33px;
-}
-
-.device-desktop .phui-header-shell.phui-header-tall + .phabricator-action-list-view {
-  margin-top: -55px;
-}
-
-.device-desktop .phui-header-shell.phui-header-has-image +
-  .phabricator-action-list-view {
-  margin-top: -53px;
-}
-
-.device .phui-header-shell + .phabricator-action-list-view {
-  margin-top: -1px;
-}
-
 .device .phabricator-action-list-view {
-  border-top: 1px solid #dcdcdc;
   padding: 4px 0;
-}
-
-.device .phabricator-action-list-view {
   display: none;
 }
 
@@ -50,6 +19,8 @@
 .device .phabricator-action-view-item {
   font-size: 14px;
   line-height: 22px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid {$thinblueborder};
 }
 
 .phabricator-action-view {
@@ -78,10 +49,9 @@
 
 .phabricator-action-view button.phabricator-action-view-item,
 .phabricator-action-view-item {
-  padding: 1px 0 1px 28px;
-  line-height: 20px;
+  padding: 2px 4px 2px 28px;
+  line-height: 18px;
   display: block;
-  font-size: 12px;
   text-decoration: none;
   color: {$darkgreytext};
 }
@@ -91,7 +61,7 @@
   height: 14px;
   position: absolute;
   top: 5px;
-  left: 8px;
+  left: 9px;
 }
 
 .device-desktop .phabricator-action-view:hover .phabricator-action-view-item {

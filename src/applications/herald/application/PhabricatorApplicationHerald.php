@@ -2,6 +2,9 @@
 
 final class PhabricatorApplicationHerald extends PhabricatorApplication {
 
+  const CAN_CREATE_RULE = 'herald.create';
+  const CAN_CREATE_GLOBAL_RULE = 'herald.global';
+
   public function getBaseURI() {
     return '/herald/';
   }
@@ -38,8 +41,9 @@ final class PhabricatorApplicationHerald extends PhabricatorApplication {
           => 'HeraldNewController',
         'rule/(?P<id>[1-9]\d*)/' => 'HeraldRuleViewController',
         'edit/(?:(?P<id>[1-9]\d*)/)?' => 'HeraldRuleController',
+        'disable/(?P<id>[1-9]\d*)/(?P<action>\w+)/' =>
+          'HeraldDisableController',
         'history/(?:(?P<id>[1-9]\d*)/)?' => 'HeraldRuleEditHistoryController',
-        'delete/(?P<id>[1-9]\d*)/' => 'HeraldDeleteController',
         'test/' => 'HeraldTestConsoleController',
         'transcript/' => 'HeraldTranscriptListController',
         'transcript/(?P<id>[1-9]\d*)/(?:(?P<filter>\w+)/)?'
@@ -47,5 +51,19 @@ final class PhabricatorApplicationHerald extends PhabricatorApplication {
       ),
     );
   }
+
+  protected function getCustomCapabilities() {
+    return array(
+      self::CAN_CREATE_RULE => array(
+        'label' => pht('Can Create Rules'),
+      ),
+      self::CAN_CREATE_GLOBAL_RULE => array(
+        'label' => pht('Can Create Global Rules'),
+        'caption' => pht('Global rules can bypass access controls.'),
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+    );
+  }
+
 
 }

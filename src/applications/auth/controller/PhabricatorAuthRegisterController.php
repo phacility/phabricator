@@ -342,7 +342,7 @@ final class PhabricatorAuthRegisterController
     if ($must_set_password) {
       $form->appendChild(
         id(new AphrontFormRecaptchaControl())
-          ->setLabel('Captcha')
+          ->setLabel(pht('Captcha'))
           ->setError($e_captcha));
     }
 
@@ -389,12 +389,16 @@ final class PhabricatorAuthRegisterController
             'other authentication mechanisms (like LDAP or OAuth) later on.'));
     }
 
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->setForm($form)
+      ->setFormError($error_view);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $welcome_view,
-        $error_view,
-        $form,
+        $object_box,
       ),
       array(
         'title' => $title,
@@ -438,6 +442,12 @@ final class PhabricatorAuthRegisterController
 
   private function loadSetupAccount() {
     $provider = new PhabricatorAuthProviderPassword();
+    $provider->attachProviderConfig(
+      id(new PhabricatorAuthProviderConfig())
+        ->setShouldAllowRegistration(1)
+        ->setShouldAllowLogin(1)
+        ->setIsEnabled(true));
+
     $account = $provider->getDefaultExternalAccount();
     $response = null;
     return array($account, $provider, $response);

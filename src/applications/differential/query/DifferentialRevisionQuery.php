@@ -59,6 +59,7 @@ final class DifferentialRevisionQuery
   private $needCommitPHIDs    = false;
   private $needHashes         = false;
   private $needReviewerStatus = false;
+  private $needReviewerAuthority;
 
   private $buildingGlobalOrder;
 
@@ -347,6 +348,21 @@ final class DifferentialRevisionQuery
   }
 
 
+  /**
+   * Request information about the viewer's authority to act on behalf of each
+   * reviewer. In particular, they have authority to act on behalf of projects
+   * they are a member of.
+   *
+   * @param bool True to load and attach authority.
+   * @return this
+   * @task config
+   */
+  public function needReviewerAuthority($need_reviewer_authority) {
+    $this->needReviewerAuthority = $need_reviewer_authority;
+    return $this;
+  }
+
+
 /* -(  Query Execution  )---------------------------------------------------- */
 
 
@@ -450,7 +466,7 @@ final class DifferentialRevisionQuery
       $this->loadHashes($conn_r, $revisions);
     }
 
-    if ($this->needReviewerStatus) {
+    if ($this->needReviewerStatus || $this->needReviewerAuthority) {
       $this->loadReviewers($conn_r, $revisions);
     }
 
@@ -495,15 +511,26 @@ final class DifferentialRevisionQuery
     if ($this->responsibles) {
       $basic_authors = $this->authors;
       $basic_reviewers = $this->reviewers;
+
+      $authority_projects = id(new PhabricatorProjectQuery())
+        ->setViewer($this->getViewer())
+        ->withMemberPHIDs($this->responsibles)
+        ->execute();
+      $authority_phids = mpull($authority_projects, 'getPHID');
+
       try {
         // Build the query where the responsible users are authors.
         $this->authors = array_merge($basic_authors, $this->responsibles);
         $this->reviewers = $basic_reviewers;
         $selects[] = $this->buildSelectStatement($conn_r);
 
-        // Build the query where the responsible users are reviewers.
+        // Build the query where the responsible users are reviewers, or
+        // projects they are members of are reviewers.
         $this->authors = $basic_authors;
-        $this->reviewers = array_merge($basic_reviewers, $this->responsibles);
+        $this->reviewers = array_merge(
+          $basic_reviewers,
+          $this->responsibles,
+          $authority_phids);
         $selects[] = $this->buildSelectStatement($conn_r);
 
         // Put everything back like it was.
@@ -599,25 +626,32 @@ final class DifferentialRevisionQuery
     if ($this->reviewers) {
       $joins[] = qsprintf(
         $conn_r,
-        'JOIN %T reviewer_rel ON reviewer_rel.revisionID = r.id '.
-        'AND reviewer_rel.relation = %s '.
-        'AND reviewer_rel.objectPHID in (%Ls)',
-        DifferentialRevision::RELATIONSHIP_TABLE,
-        DifferentialRevision::RELATION_REVIEWER,
+        'JOIN %T e_reviewers ON e_reviewers.src = r.phid '.
+        'AND e_reviewers.type = %s '.
+        'AND e_reviewers.dst in (%Ls)',
+        PhabricatorEdgeConfig::TABLE_NAME_EDGE,
+        PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER,
         $this->reviewers);
     }
 
     if ($this->subscribers) {
+      // TODO: These can be expressed as a JOIN again (and the corresponding
+      // WHERE clause removed) once subscribers move to edges.
       $joins[] = qsprintf(
         $conn_r,
-        'JOIN %T sub_rel ON sub_rel.revisionID = r.id '.
-        'AND sub_rel.relation IN (%Ls) '.
-        'AND sub_rel.objectPHID in (%Ls)',
+        'LEFT JOIN %T sub_rel_cc ON sub_rel_cc.revisionID = r.id '.
+        'AND sub_rel_cc.relation = %s '.
+        'AND sub_rel_cc.objectPHID in (%Ls)',
         DifferentialRevision::RELATIONSHIP_TABLE,
-        array(
-          DifferentialRevision::RELATION_SUBSCRIBED,
-          DifferentialRevision::RELATION_REVIEWER,
-        ),
+        DifferentialRevision::RELATION_SUBSCRIBED,
+        $this->subscribers);
+      $joins[] = qsprintf(
+        $conn_r,
+        'LEFT JOIN %T sub_rel_reviewer ON sub_rel_reviewer.src = r.phid '.
+        'AND sub_rel_reviewer.type = %s '.
+        'AND sub_rel_reviewer.dst in (%Ls)',
+        PhabricatorEdgeConfig::TABLE_NAME_EDGE,
+        PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER,
         $this->subscribers);
     }
 
@@ -708,6 +742,13 @@ final class DifferentialRevisionQuery
         $conn_r,
         'r.arcanistProjectPHID in (%Ls)',
         $this->arcanistProjectPHIDs);
+    }
+
+    if ($this->subscribers) {
+      $where[] = qsprintf(
+        $conn_r,
+        '(sub_rel_cc.objectPHID IS NOT NULL)
+          OR (sub_rel_reviewer.dst IS NOT NULL)');
     }
 
     switch ($this->status) {
@@ -889,16 +930,32 @@ final class DifferentialRevisionQuery
     assert_instances_of($revisions, 'DifferentialRevision');
     $relationships = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T WHERE revisionID in (%Ld) ORDER BY sequence',
+      'SELECT * FROM %T WHERE revisionID in (%Ld)
+        AND relation != %s ORDER BY sequence',
       DifferentialRevision::RELATIONSHIP_TABLE,
-      mpull($revisions, 'getID'));
+      mpull($revisions, 'getID'),
+      DifferentialRevision::RELATION_REVIEWER);
     $relationships = igroup($relationships, 'revisionID');
+
+    $type_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
+    $edges = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs(mpull($revisions, 'getPHID'))
+      ->withEdgeTypes(array($type_reviewer))
+      ->setOrder(PhabricatorEdgeQuery::ORDER_OLDEST_FIRST)
+      ->execute();
+
     foreach ($revisions as $revision) {
-      $revision->attachRelationships(
-        idx(
-          $relationships,
-          $revision->getID(),
-          array()));
+      $data = idx($relationships, $revision->getID(), array());
+      $revision_edges = $edges[$revision->getPHID()][$type_reviewer];
+      foreach ($revision_edges as $dst_phid => $edge_data) {
+        $data[] = array(
+          'relation' => DifferentialRevision::RELATION_REVIEWER,
+          'objectPHID' => $dst_phid,
+          'reasonPHID' => null,
+        );
+      }
+
+      $revision->attachRelationships($data);
     }
   }
 
@@ -996,18 +1053,45 @@ final class DifferentialRevisionQuery
       ->withSourcePHIDs(mpull($revisions, 'getPHID'))
       ->withEdgeTypes(array($edge_type))
       ->needEdgeData(true)
+      ->setOrder(PhabricatorEdgeQuery::ORDER_OLDEST_FIRST)
       ->execute();
+
+    $viewer = $this->getViewer();
+    $viewer_phid = $viewer->getPHID();
+
+    // Figure out which of these reviewers the viewer has authority to act as.
+    if ($this->needReviewerAuthority && $viewer_phid) {
+      $allow_key = 'differential.allow-self-accept';
+      $allow_self = PhabricatorEnv::getEnvConfig($allow_key);
+      $authority = $this->loadReviewerAuthority(
+        $revisions,
+        $edges,
+        $allow_self);
+    }
 
     foreach ($revisions as $revision) {
       $revision_edges = $edges[$revision->getPHID()][$edge_type];
-
       $reviewers = array();
-      foreach ($revision_edges as $user_phid => $edge) {
-        $data = $edge['data'];
-        $reviewers[] = new DifferentialReviewer(
-          $user_phid,
-          idx($data, 'status'),
-          idx($data, 'diff'));
+      foreach ($revision_edges as $reviewer_phid => $edge) {
+        $reviewer = new DifferentialReviewer($reviewer_phid, $edge['data']);
+
+        if ($this->needReviewerAuthority) {
+          if (!$viewer_phid) {
+            // Logged-out users never have authority.
+            $has_authority = false;
+          } else if ((!$allow_self) &&
+                     ($revision->getAuthorPHID() == $viewer_phid)) {
+            // The author can never have authority unless we allow self-accept.
+            $has_authority = false;
+          } else {
+            // Otherwise, look up whether th viewer has authority.
+            $has_authority = isset($authority[$reviewer_phid]);
+          }
+
+          $reviewer->attachAuthority($viewer, $has_authority);
+        }
+
+        $reviewers[$reviewer_phid] = $reviewer;
       }
 
       $revision->attachReviewerStatus($reviewers);
@@ -1049,6 +1133,56 @@ final class DifferentialRevisionQuery
 
     return array($blocking, $active, $waiting);
   }
+
+  private function loadReviewerAuthority(
+    array $revisions,
+    array $edges,
+    $allow_self) {
+
+    $revision_map = mpull($revisions, null, 'getPHID');
+    $viewer_phid = $this->getViewer()->getPHID();
+
+    // Find all the project reviewers which the user may have authority over.
+    $project_phids = array();
+    $project_type = PhabricatorProjectPHIDTypeProject::TYPECONST;
+    $edge_type = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
+    foreach ($edges as $src => $types) {
+      if (!$allow_self) {
+        if ($revision_map[$src]->getAuthorPHID() == $viewer_phid) {
+          // If self-review isn't permitted, the user will never have
+          // authority over projects on revisions they authored because you
+          // can't accept your own revisions, so we don't need to load any
+          // data about these reviewers.
+          continue;
+        }
+      }
+      $edge_data = idx($types, $edge_type, array());
+      foreach ($edge_data as $dst => $data) {
+        if (phid_get_type($dst) == $project_type) {
+          $project_phids[] = $dst;
+        }
+      }
+    }
+
+    // Now, figure out which of these projects the viewer is actually a
+    // member of.
+    $project_authority = array();
+    if ($project_phids) {
+      $project_authority = id(new PhabricatorProjectQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs($project_phids)
+        ->withMemberPHIDs(array($viewer_phid))
+        ->execute();
+      $project_authority = mpull($project_authority, 'getPHID');
+    }
+
+    // Finally, the viewer has authority over themselves.
+    return array(
+      $viewer_phid => true,
+    ) + array_fuse($project_authority);
+  }
+
+
 
 
 }

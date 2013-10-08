@@ -8,6 +8,14 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
   private $mock;
   private $ccPHIDs = array();
 
+  public function getAdapterApplicationClass() {
+    return 'PhabricatorApplicationPholio';
+  }
+
+  public function getObject() {
+    return $this->mock;
+  }
+
   public function setMock(PholioMock $mock) {
     $this->mock = $mock;
     return $this;
@@ -29,12 +37,14 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
   }
 
   public function getFields() {
-    return array(
-      self::FIELD_TITLE,
-      self::FIELD_BODY,
-      self::FIELD_AUTHOR,
-      self::FIELD_CC,
-    );
+    return array_merge(
+      array(
+        self::FIELD_TITLE,
+        self::FIELD_BODY,
+        self::FIELD_AUTHOR,
+        self::FIELD_CC,
+      ),
+      parent::getFields());
   }
 
   public function getActions($rule_type) {
@@ -91,11 +101,9 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
             pht('Great success at doing nothing.'));
           break;
         case self::ACTION_ADD_CC:
-          $add_cc = array();
           foreach ($effect->getTarget() as $phid) {
-            $add_cc[$phid] = true;
+            $this->ccPHIDs[] = $phid;
           }
-          $this->setCcPHIDs(array_keys($add_cc));
           $result[] = new HeraldApplyTranscript(
             $effect,
             true,

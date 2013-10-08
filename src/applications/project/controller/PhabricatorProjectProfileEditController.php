@@ -22,17 +22,14 @@ final class PhabricatorProjectProfileEditController
           PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
+      ->needProfiles(true)
       ->executeOne();
     if (!$project) {
       return new Aphront404Response();
     }
 
-    $profile = $project->loadProfile();
-    if (empty($profile)) {
-      $profile = new PhabricatorProjectProfile();
-    }
-
-    $img_src = $profile->loadProfileImageURI();
+    $profile = $project->getProfile();
+    $img_src = $profile->getProfileImageURI();
 
     $options = PhabricatorProjectStatus::getStatusMap();
 
@@ -110,7 +107,10 @@ final class PhabricatorProjectProfileEditController
               $file,
               $x = 50,
               $y = 50);
+
             $profile->setProfileImagePHID($xformed->getPHID());
+            $xformed->attachToObject($user, $project->getPHID());
+
           } else {
             $e_image = pht('Not Supported');
             $errors[] =

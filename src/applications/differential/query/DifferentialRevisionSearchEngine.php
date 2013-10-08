@@ -23,7 +23,12 @@ final class DifferentialRevisionSearchEngine
 
     $saved->setParameter(
       'reviewerPHIDs',
-      $this->readUsersFromRequest($request, 'reviewers'));
+      $this->readUsersFromRequest(
+        $request,
+        'reviewers',
+        array(
+          PhabricatorProjectPHIDTypeProject::TYPECONST,
+        )));
 
     $saved->setParameter(
       'subscriberPHIDs',
@@ -140,7 +145,7 @@ final class DifferentialRevisionSearchEngine
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Reviewers'))
           ->setName('reviewers')
-          ->setDatasource('/typeahead/common/accounts/')
+          ->setDatasource('/typeahead/common/accountsorprojects/')
           ->setValue(array_select_keys($handles, $reviewer_phids)))
       ->appendChild(
         id(new AphrontFormTokenizerControl())

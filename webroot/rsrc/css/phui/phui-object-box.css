@@ -26,13 +26,6 @@
   margin-bottom: 0;
 }
 
-.device-desktop .phui-object-box
-  .phui-header-shell + .phabricator-action-list-view {
-  margin-top: 0;
-  margin-bottom: -12px;
-  border-width: 0 0 0 1px;
-}
-
 .device-phone .phui-object-box {
   margin-top: 0;
 }

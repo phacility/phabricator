@@ -254,11 +254,15 @@ abstract class PhabricatorApplicationSearchEngine {
    *
    * @param AphrontRequest  Request to read user PHIDs from.
    * @param string          Key to read in the request.
+   * @param list<const>     Other permitted PHID types.
    * @return list<phid>     List of user PHIDs.
    *
    * @task read
    */
-  protected function readUsersFromRequest(AphrontRequest $request, $key) {
+  protected function readUsersFromRequest(
+    AphrontRequest $request,
+    $key,
+    array $allow_types = array()) {
     $list = $request->getArr($key, null);
     if ($list === null) {
       $list = $request->getStrList($key);
@@ -266,9 +270,14 @@ abstract class PhabricatorApplicationSearchEngine {
 
     $phids = array();
     $names = array();
+    $allow_types = array_fuse($allow_types);
     $user_type = PhabricatorPHIDConstants::PHID_TYPE_USER;
     foreach ($list as $item) {
-      if (phid_get_type($item) == $user_type) {
+      $type = phid_get_type($item);
+      phlog($type);
+      if ($type == $user_type) {
+        $phids[] = $item;
+      } else if (isset($allow_types[$type])) {
         $phids[] = $item;
       } else {
         $names[] = $item;
@@ -287,6 +296,25 @@ abstract class PhabricatorApplicationSearchEngine {
     }
 
     return $phids;
+  }
+
+
+  protected function readBoolFromRequest(
+    AphrontRequest $request,
+    $key) {
+    if (!strlen($request->getStr($key))) {
+      return null;
+    }
+    return $request->getBool($key);
+  }
+
+
+  protected function getBoolFromQuery(PhabricatorSavedQuery $query, $key) {
+    $value = $query->getParameter($key);
+    if ($value === null) {
+      return $value;
+    }
+    return $value ? 'true' : 'false';
   }
 
 

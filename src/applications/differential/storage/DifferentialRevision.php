@@ -223,11 +223,30 @@ final class DifferentialRevision extends DifferentialDAO
       return;
     }
 
+    // Read "subscribed" and "unsubscribed" data out of the old relationship
+    // table.
     $data = queryfx_all(
       $this->establishConnection('r'),
-      'SELECT * FROM %T WHERE revisionID = %d ORDER BY sequence',
+      'SELECT * FROM %T WHERE revisionID = %d
+        AND relation != %s ORDER BY sequence',
       self::RELATIONSHIP_TABLE,
-      $this->getID());
+      $this->getID(),
+      self::RELATION_REVIEWER);
+
+    // Read "reviewer" data out of the new table.
+    $reviewer_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $this->getPHID(),
+      PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER);
+    $reviewer_phids = array_reverse($reviewer_phids);
+
+    foreach ($reviewer_phids as $phid) {
+      $data[] = array(
+        'relation' => self::RELATION_REVIEWER,
+        'objectPHID' => $phid,
+        'reasonPHID' => null,
+      );
+    }
+
     return $this->attachRelationships($data);
   }
 
@@ -338,11 +357,9 @@ final class DifferentialRevision extends DifferentialDAO
       case PhabricatorPolicyCapability::CAN_VIEW:
         $description[] = pht(
           "A revision's reviewers can always view it.");
-        if ($this->getRepositoryPHID()) {
-          $description[] = pht(
-            'This revision belongs to a repository. Other users must be able '.
-            'to view the repository in order to view this revision.');
-        }
+        $description[] = pht(
+          'If a revision belongs to a repository, other users must be able '.
+          'to view the repository in order to view the revision.');
         break;
     }
 

@@ -1,0 +1,61 @@
+<?php
+
+abstract class PhabricatorPolicyCapability extends Phobject {
+
+  const CAN_VIEW        = 'view';
+  const CAN_EDIT        = 'edit';
+  const CAN_JOIN        = 'join';
+
+  /**
+   * Get the unique key identifying this capability. This key must be globally
+   * unique. Application capabilities should be namespaced. For example:
+   *
+   *   application.create
+   *
+   * @return string Globally unique capability key.
+   */
+  abstract public function getCapabilityKey();
+
+
+  /**
+   * Return a human-readable descriptive name for this capability, like
+   * "Can View".
+   *
+   * @return string Human-readable name describing the capability.
+   */
+  abstract public function getCapabilityName();
+
+
+  /**
+   * Return a human-readable string describing what not having this capability
+   * prevents the user from doing. For example:
+   *
+   *   - You do not have permission to edit this object.
+   *   - You do not have permission to create new tasks.
+   *
+   * @return string Human-readable name describing what failing a check for this
+   *   capability prevents the user from doing.
+   */
+  abstract public function describeCapabilityRejection();
+
+
+  final public static function getCapabilityByKey($key) {
+    return idx(self::getCapabilityMap(), $key);
+  }
+
+  final public static function getCapabilityMap() {
+    static $map;
+    if ($map === null) {
+      $capabilities = id(new PhutilSymbolLoader())
+        ->setAncestorClass(__CLASS__)
+        ->loadObjects();
+
+      $map = mpull($capabilities, null, 'getCapabilityKey');
+    }
+
+    return $map;
+  }
+
+}
+
+

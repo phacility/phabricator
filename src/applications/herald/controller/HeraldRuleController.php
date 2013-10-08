@@ -14,7 +14,7 @@ final class HeraldRuleController extends HeraldController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $content_type_map = HeraldAdapter::getEnabledAdapterMap();
+    $content_type_map = HeraldAdapter::getEnabledAdapterMap($user);
     $rule_type_map = HeraldRuleTypeConfig::getRuleTypeMap();
 
     if ($this->id) {
@@ -42,11 +42,19 @@ final class HeraldRuleController extends HeraldController {
 
       $rule_type = $request->getStr('rule_type');
       if (!isset($rule_type_map[$rule_type])) {
-        $rule_type = HeraldRuleTypeConfig::RULE_TYPE_GLOBAL;
+        $rule_type = HeraldRuleTypeConfig::RULE_TYPE_PERSONAL;
       }
       $rule->setRuleType($rule_type);
 
       $cancel_uri = $this->getApplicationURI();
+
+      $this->requireApplicationCapability(
+        PhabricatorApplicationHerald::CAN_CREATE_RULE);
+    }
+
+    if ($rule->getRuleType() == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL) {
+      $this->requireApplicationCapability(
+        PhabricatorApplicationHerald::CAN_CREATE_GLOBAL_RULE);
     }
 
     $adapter = HeraldAdapter::getAdapterForContentType($rule->getContentType());
@@ -505,6 +513,7 @@ final class HeraldRuleController extends HeraldController {
         'repository'  => '/typeahead/common/repositories/',
         'package'     => '/typeahead/common/packages/',
         'project'     => '/typeahead/common/projects/',
+        'userorproject' => '/typeahead/common/usersorprojects/',
       ),
       'markup' => $template,
     );

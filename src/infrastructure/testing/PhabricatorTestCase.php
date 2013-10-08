@@ -37,6 +37,7 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
   private static $storageFixtureReferences = 0;
   private static $storageFixture;
   private static $storageFixtureObjectSeed = 0;
+  private static $testsAreRunning = 0;
 
   protected function getPhabricatorTestCaseConfiguration() {
     return array();
@@ -68,6 +69,8 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
         self::$storageFixture = $this->newStorageFixture();
       }
     }
+
+    ++self::$testsAreRunning;
   }
 
   public function didRunTestCases(array $test_cases) {
@@ -77,6 +80,8 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
         self::$storageFixture = null;
       }
     }
+
+    --self::$testsAreRunning;
   }
 
   protected function willRunTests() {
@@ -183,5 +188,22 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
 
     return $user;
   }
+
+
+  /**
+   * Throws unless tests are currently executing. This method can be used to
+   * guard code which is specific to unit tests and should not normally be
+   * reachable.
+   *
+   * If tests aren't currently being executed, throws an exception.
+   */
+  public static function assertExecutingUnitTests() {
+    if (!self::$testsAreRunning) {
+      throw new Exception(
+        "Executing test code outside of test execution! This code path can ".
+        "only be run during unit tests.");
+    }
+  }
+
 
 }

@@ -15,11 +15,33 @@ final class DifferentialReviewersFieldSpecification
   }
 
   public function renderLabelForRevisionView() {
-    return 'Reviewers:';
+    return pht('Reviewers');
   }
 
   public function renderValueForRevisionView() {
-    return $this->renderUserList($this->getReviewerPHIDs());
+    $reviewers = array();
+    foreach ($this->getRevision()->getReviewerStatus() as $reviewer) {
+      if ($reviewer->isUser()) {
+        $reviewers[] = $reviewer;
+      }
+    }
+
+    if (!$reviewers) {
+      // Renders "None".
+      return $this->renderUserList(array());
+    }
+
+    $view = id(new DifferentialReviewersView())
+      ->setUser($this->getUser())
+      ->setReviewers($reviewers)
+      ->setHandles($this->getLoadedHandles());
+
+    $diff = $this->getRevision()->loadActiveDiff();
+    if ($diff) {
+      $view->setActiveDiff($diff);
+    }
+
+    return $view;
   }
 
   private function getReviewerPHIDs() {
@@ -67,13 +89,13 @@ final class DifferentialReviewersFieldSpecification
   public function renderEditControl() {
     $reviewer_map = array();
     foreach ($this->reviewers as $phid) {
-      $reviewer_map[$phid] = $this->getHandle($phid)->getFullName();
+      $reviewer_map[] = $this->getHandle($phid);
     }
     return id(new AphrontFormTokenizerControl())
       ->setLabel(pht('Reviewers'))
       ->setName('reviewers')
       ->setUser($this->getUser())
-      ->setDatasource('/typeahead/common/users/')
+      ->setDatasource('/typeahead/common/usersorprojects/')
       ->setValue($reviewer_map)
       ->setError($this->error);
   }
@@ -108,9 +130,11 @@ final class DifferentialReviewersFieldSpecification
       return null;
     }
 
+    $project_type = PhabricatorProjectPHIDTypeProject::TYPECONST;
+
     $names = array();
     foreach ($this->reviewers as $phid) {
-      $names[] = $this->getHandle($phid)->getName();
+      $names[] = $this->getHandle($phid)->getObjectName();
     }
 
     return implode(', ', $names);
@@ -124,7 +148,7 @@ final class DifferentialReviewersFieldSpecification
   }
 
   public function parseValueFromCommitMessage($value) {
-    return $this->parseCommitMessageUserList($value);
+    return $this->parseCommitMessageUserOrProjectList($value);
   }
 
   public function shouldAppearOnRevisionList() {
@@ -171,7 +195,8 @@ final class DifferentialReviewersFieldSpecification
     $handles = array_select_keys(
       $handles,
       array($this->getRevision()->getPrimaryReviewer())) + $handles;
-    $names = mpull($handles, 'getName');
+
+    $names = mpull($handles, 'getObjectName');
     return 'Reviewers: '.implode(', ', $names);
   }
 

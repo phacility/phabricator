@@ -83,9 +83,6 @@ try {
       $controller->willProcessRequest($uri_data);
       $response = $controller->processRequest();
     }
-  } catch (AphrontRedirectException $ex) {
-    $response = id(new AphrontRedirectResponse())
-      ->setURI($ex->getURI());
   } catch (Exception $ex) {
     $original_exception = $ex;
     $response = $application->handleException($ex);
