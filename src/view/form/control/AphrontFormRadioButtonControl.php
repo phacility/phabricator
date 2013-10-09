@@ -50,7 +50,7 @@ final class AphrontFormRadioButtonControl extends AphrontFormControl {
         ),
         $button['label']);
 
-      if (strlen($button['caption'])) {
+      if ($button['caption']) {
         $label = hsprintf(
           '%s<div class="aphront-form-radio-caption">%s</div>',
           $label,
