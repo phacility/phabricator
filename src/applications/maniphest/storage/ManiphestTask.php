@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group maniphest
- */
 final class ManiphestTask extends ManiphestDAO
   implements
     PhabricatorMarkupInterface,
@@ -39,6 +36,22 @@ final class ManiphestTask extends ManiphestDAO
 
   private $groupByProjectPHID = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
+
+  public static function initializeNewTask(PhabricatorUser $actor) {
+    $app = id(new PhabricatorApplicationQuery())
+      ->setViewer($actor)
+      ->withClasses(array('PhabricatorApplicationManiphest'))
+      ->executeOne();
+
+    $view_policy = $app->getPolicy(ManiphestCapabilityDefaultView::CAPABILITY);
+    $edit_policy = $app->getPolicy(ManiphestCapabilityDefaultEdit::CAPABILITY);
+
+    return id(new ManiphestTask())
+      ->setPriority(ManiphestTaskPriority::getDefaultPriority())
+      ->setAuthorPHID($actor->getPHID())
+      ->setViewPolicy($view_policy)
+      ->setEditPolicy($edit_policy);
+  }
 
   public function getConfiguration() {
     return array(

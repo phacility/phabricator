@@ -36,7 +36,9 @@ abstract class PhabricatorPolicyCapability extends Phobject {
    * @return string Human-readable name describing what failing a check for this
    *   capability prevents the user from doing.
    */
-  abstract public function describeCapabilityRejection();
+  public function describeCapabilityRejection() {
+    return null;
+  }
 
 
   final public static function getCapabilityByKey($key) {

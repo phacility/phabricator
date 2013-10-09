@@ -243,15 +243,21 @@ final class PhabricatorPolicyFilter {
     }
 
     $capobj = PhabricatorPolicyCapability::getCapabilityByKey($capability);
+    $rejection = null;
     if ($capobj) {
       $rejection = $capobj->describeCapabilityRejection();
       $capability_name = $capobj->getCapabilityName();
     } else {
+      $capability_name = $capability;
+    }
+
+    if (!$rejection) {
+      // We couldn't find the capability object, or it doesn't provide a
+      // tailored rejection string.
       $rejection = pht(
         'You do not have the required capability ("%s") to do whatever you '.
         'are trying to do.',
         $capability);
-      $capability_name = $capability;
     }
 
     $more = PhabricatorPolicy::getPolicyExplanation($this->viewer, $policy);
@@ -264,7 +270,8 @@ final class PhabricatorPolicyFilter {
     // a better error message if we can.
 
     $phid = '?';
-    if ($object instanceof PhabricatorLiskDAO) {
+    if (($object instanceof PhabricatorLiskDAO) ||
+        (method_exists($object, 'getPHID'))) {
       try {
         $phid = $object->getPHID();
       } catch (Exception $ignored) {
@@ -276,6 +283,7 @@ final class PhabricatorPolicyFilter {
       ->setViewer($this->viewer)
       ->withPHIDs(array($phid))
       ->executeOne();
+
     $object_name = pht(
       '%s %s',
       $handle->getTypeName(),

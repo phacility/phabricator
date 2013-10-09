@@ -60,11 +60,8 @@ final class ManiphestCreateMailReceiver extends PhabricatorMailReceiver {
     PhabricatorMetaMTAReceivedMail $mail,
     PhabricatorUser $sender) {
 
-    $task = new ManiphestTask();
-
-    $task->setAuthorPHID($sender->getPHID());
+    $task = ManiphestTask::initializeNewTask($sender);
     $task->setOriginalEmailSource($mail->getHeader('From'));
-    $task->setPriority(ManiphestTaskPriority::getDefaultPriority());
 
     $editor = new ManiphestTransactionEditor();
     $editor->setActor($sender);

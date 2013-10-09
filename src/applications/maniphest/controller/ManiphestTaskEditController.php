@@ -34,9 +34,7 @@ final class ManiphestTaskEditController extends ManiphestController {
         return new Aphront404Response();
       }
     } else {
-      $task = new ManiphestTask();
-      $task->setPriority(ManiphestTaskPriority::getDefaultPriority());
-      $task->setAuthorPHID($user->getPHID());
+      $task = ManiphestTask::initializeNewTask($user);
 
       // These allow task creation with defaults.
       if (!$request->isFormPost()) {

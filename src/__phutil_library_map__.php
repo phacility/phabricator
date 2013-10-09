@@ -706,6 +706,8 @@ phutil_register_library_map(array(
     'LiskRawMigrationIterator' => 'infrastructure/storage/lisk/LiskRawMigrationIterator.php',
     'ManiphestAction' => 'applications/maniphest/constants/ManiphestAction.php',
     'ManiphestBatchEditController' => 'applications/maniphest/controller/ManiphestBatchEditController.php',
+    'ManiphestCapabilityDefaultEdit' => 'applications/maniphest/capability/ManiphestCapabilityDefaultEdit.php',
+    'ManiphestCapabilityDefaultView' => 'applications/maniphest/capability/ManiphestCapabilityDefaultView.php',
     'ManiphestConfiguredCustomField' => 'applications/maniphest/field/ManiphestConfiguredCustomField.php',
     'ManiphestConstants' => 'applications/maniphest/constants/ManiphestConstants.php',
     'ManiphestController' => 'applications/maniphest/controller/ManiphestController.php',
@@ -2821,6 +2823,8 @@ phutil_register_library_map(array(
     'LiskRawMigrationIterator' => 'PhutilBufferedIterator',
     'ManiphestAction' => 'ManiphestConstants',
     'ManiphestBatchEditController' => 'ManiphestController',
+    'ManiphestCapabilityDefaultEdit' => 'PhabricatorPolicyCapability',
+    'ManiphestCapabilityDefaultView' => 'PhabricatorPolicyCapability',
     'ManiphestConfiguredCustomField' =>
     array(
       0 => 'ManiphestCustomField',
