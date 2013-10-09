@@ -15,4 +15,8 @@ final class PhabricatorPolicyCapabilityCanView
     return pht('You do not have permission to view this object.');
   }
 
+  public function shouldAllowPublicPolicySetting() {
+    return true;
+  }
+
 }

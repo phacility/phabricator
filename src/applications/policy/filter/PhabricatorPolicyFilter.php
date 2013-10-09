@@ -173,9 +173,10 @@ final class PhabricatorPolicyFilter {
         $policy = PhabricatorPolicies::POLICY_USER;
       }
 
-      // If the object is set to "public" but the capability is anything other
-      // than "view", restrict the policy to "user".
-      if ($capability != PhabricatorPolicyCapability::CAN_VIEW) {
+      // If the object is set to "public" but the capability is not a public
+      // capability, restrict the policy to "user".
+      $capobj = PhabricatorPolicyCapability::getCapabilityByKey($capability);
+      if (!$capobj || !$capobj->shouldAllowPublicPolicySetting()) {
         $policy = PhabricatorPolicies::POLICY_USER;
       }
     }

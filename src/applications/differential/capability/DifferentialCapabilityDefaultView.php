@@ -13,4 +13,8 @@ final class DifferentialCapabilityDefaultView
     return pht('Default View Policy');
   }
 
+  public function shouldAllowPublicPolicySetting() {
+    return true;
+  }
+
 }

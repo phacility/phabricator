@@ -40,6 +40,15 @@ abstract class PhabricatorPolicyCapability extends Phobject {
     return null;
   }
 
+  /**
+   * Can this capability be set to "public"? Broadly, this is only appropriate
+   * for view and view-related policies.
+   *
+   * @return bool True to allow the "public" policy. Returns false by default.
+   */
+  public function shouldAllowPublicPolicySetting() {
+    return false;
+  }
 
   final public static function getCapabilityByKey($key) {
     return idx(self::getCapabilityMap(), $key);

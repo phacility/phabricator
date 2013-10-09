@@ -13,4 +13,8 @@ final class ManiphestCapabilityDefaultView
     return pht('Default View Policy');
   }
 
+  public function shouldAllowPublicPolicySetting() {
+    return true;
+  }
+
 }
