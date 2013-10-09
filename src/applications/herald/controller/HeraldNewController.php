@@ -14,9 +14,6 @@ final class HeraldNewController extends HeraldController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $this->requireApplicationCapability(
-      HeraldCapabilityCreateRules::CAPABILITY);
-
     $content_type_map = HeraldAdapter::getEnabledAdapterMap($user);
     if (empty($content_type_map[$this->contentType])) {
       $this->contentType = head_key($content_type_map);

@@ -47,9 +47,6 @@ final class HeraldRuleController extends HeraldController {
       $rule->setRuleType($rule_type);
 
       $cancel_uri = $this->getApplicationURI();
-
-      $this->requireApplicationCapability(
-        HeraldCapabilityCreateRules::CAPABILITY);
     }
 
     if ($rule->getRuleType() == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL) {
