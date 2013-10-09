@@ -15,10 +15,10 @@ final class HeraldNewController extends HeraldController {
     $user = $request->getUser();
 
     $this->requireApplicationCapability(
-      PhabricatorApplicationHerald::CAN_CREATE_RULE);
+      HeraldCapabilityCreateRules::CAPABILITY);
 
     $can_global = $this->hasApplicationCapability(
-      PhabricatorApplicationHerald::CAN_CREATE_GLOBAL_RULE);
+      HeraldCapabilityManageGlobalRules::CAPABILITY);
 
     $content_type_map = HeraldAdapter::getEnabledAdapterMap($user);
     if (empty($content_type_map[$this->contentType])) {
@@ -39,7 +39,7 @@ final class HeraldNewController extends HeraldController {
 
     if (!$can_global) {
       $global_link = $this->explainApplicationCapability(
-        PhabricatorApplicationHerald::CAN_CREATE_GLOBAL_RULE,
+        HeraldCapabilityManageGlobalRules::CAPABILITY,
         pht('You do not have permission to create or manage global rules.'));
     } else {
       $global_link = null;

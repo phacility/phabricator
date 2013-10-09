@@ -24,7 +24,7 @@ abstract class HeraldController extends PhabricatorController {
     $crumbs = parent::buildApplicationCrumbs();
 
     $can_create = $this->hasApplicationCapability(
-      PhabricatorApplicationHerald::CAN_CREATE_RULE);
+      HeraldCapabilityCreateRules::CAPABILITY);
 
     $crumbs->addAction(
       id(new PHUIListItemView())

@@ -400,21 +400,26 @@ abstract class PhabricatorApplication
 
   private function getCustomCapabilitySpecification($capability) {
     $custom = $this->getCustomCapabilities();
-    if (empty($custom[$capability])) {
+    if (!isset($custom[$capability])) {
       throw new Exception("Unknown capability '{$capability}'!");
     }
     return $custom[$capability];
   }
 
   public function getCapabilityLabel($capability) {
-    $map = array(
-      PhabricatorPolicyCapability::CAN_VIEW => pht('Can Use Application'),
-      PhabricatorPolicyCapability::CAN_EDIT => pht('Can Configure Application'),
-    );
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return pht('Can Use Application');
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return pht('Can Configure Application');
+    }
 
-    $map += ipull($this->getCustomCapabilities(), 'label');
+    $capobj = PhabricatorPolicyCapability::getCapabilityByKey($capability);
+    if ($capobj) {
+      return $capobj->getCapabilityName();
+    }
 
-    return idx($map, $capability);
+    return null;
   }
 
   public function isCapabilityEditable($capability) {

@@ -49,12 +49,12 @@ final class HeraldRuleController extends HeraldController {
       $cancel_uri = $this->getApplicationURI();
 
       $this->requireApplicationCapability(
-        PhabricatorApplicationHerald::CAN_CREATE_RULE);
+        HeraldCapabilityCreateRules::CAPABILITY);
     }
 
     if ($rule->getRuleType() == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL) {
       $this->requireApplicationCapability(
-        PhabricatorApplicationHerald::CAN_CREATE_GLOBAL_RULE);
+        HeraldCapabilityManageGlobalRules::CAPABILITY);
     }
 
     $adapter = HeraldAdapter::getAdapterForContentType($rule->getContentType());
