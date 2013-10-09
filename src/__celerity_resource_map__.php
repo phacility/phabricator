@@ -2265,6 +2265,24 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
   ),
+  'javelin-behavior-policy-rule-editor' =>
+  array(
+    'uri' => '/res/4ae4249d/rsrc/js/application/policy/behavior-policy-rule-editor.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'multirow-row-manager',
+      2 => 'javelin-dom',
+      3 => 'javelin-util',
+      4 => 'phabricator-prefab',
+      5 => 'javelin-tokenizer',
+      6 => 'javelin-typeahead',
+      7 => 'javelin-typeahead-preloaded-source',
+      8 => 'javelin-json',
+    ),
+    'disk' => '/rsrc/js/application/policy/behavior-policy-rule-editor.js',
+  ),
   'javelin-behavior-ponder-votebox' =>
   array(
     'uri' => '/res/c28daa12/rsrc/js/application/ponder/behavior-votebox.js',
@@ -3886,12 +3904,21 @@ celerity_register_resource_map(array(
   ),
   'policy-css' =>
   array(
-    'uri' => '/res/ebb12aa0/rsrc/css/application/policy/policy.css',
+    'uri' => '/res/51325bff/rsrc/css/application/policy/policy.css',
     'type' => 'css',
     'requires' =>
     array(
     ),
     'disk' => '/rsrc/css/application/policy/policy.css',
+  ),
+  'policy-edit-css' =>
+  array(
+    'uri' => '/res/1e2a2b5e/rsrc/css/application/policy/policy-edit.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/policy/policy-edit.css',
   ),
   'ponder-comment-table-css' =>
   array(
