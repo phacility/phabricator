@@ -41,15 +41,23 @@ final class PhabricatorDirectoryMainController
       $tasks_panel = null;
     }
 
+    $audit = 'PhabricatorApplicationAudit';
+    if (PhabricatorApplication::isClassInstalled($audit)) {
+      $audit_panel = $this->buildAuditPanel();
+      $commit_panel = $this->buildCommitPanel();
+    } else {
+      $audit_panel = null;
+      $commit_panel = null;
+    }
+
     if (PhabricatorEnv::getEnvConfig('welcome.html') !== null) {
       $welcome_panel = $this->buildWelcomePanel();
     } else {
       $welcome_panel = null;
     }
+
     $jump_panel = $this->buildJumpPanel();
     $revision_panel = $this->buildRevisionPanel();
-    $audit_panel = $this->buildAuditPanel();
-    $commit_panel = $this->buildCommitPanel();
 
     $content = array(
       $jump_panel,
