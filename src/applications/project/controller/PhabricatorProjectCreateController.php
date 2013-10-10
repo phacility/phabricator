@@ -9,6 +9,9 @@ final class PhabricatorProjectCreateController
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    $this->requireApplicationCapability(
+      ProjectCapabilityCreateProjects::CAPABILITY);
+
     $project = new PhabricatorProject();
     $project->setAuthorPHID($user->getPHID());
     $project->attachMemberPHIDs(array());
