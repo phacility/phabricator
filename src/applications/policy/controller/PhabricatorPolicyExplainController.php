@@ -63,8 +63,14 @@ final class PhabricatorPolicyExplainController
       $auto_info = phutil_tag('ul', array(), $auto_info);
     }
 
+    $capability_name = $capability;
+    $capobj = PhabricatorPolicyCapability::getCapabilityByKey($capability);
+    if ($capobj) {
+      $capability_name = $capobj->getCapabilityName();
+    }
+
     $content = array(
-      pht('Users with the "%s" capability:', "Can View"),
+      pht('Users with the "%s" capability:', $capability_name),
       $auto_info,
     );
 

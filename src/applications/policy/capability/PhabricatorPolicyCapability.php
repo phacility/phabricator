@@ -36,8 +36,19 @@ abstract class PhabricatorPolicyCapability extends Phobject {
    * @return string Human-readable name describing what failing a check for this
    *   capability prevents the user from doing.
    */
-  abstract public function describeCapabilityRejection();
+  public function describeCapabilityRejection() {
+    return null;
+  }
 
+  /**
+   * Can this capability be set to "public"? Broadly, this is only appropriate
+   * for view and view-related policies.
+   *
+   * @return bool True to allow the "public" policy. Returns false by default.
+   */
+  public function shouldAllowPublicPolicySetting() {
+    return false;
+  }
 
   final public static function getCapabilityByKey($key) {
     return idx(self::getCapabilityMap(), $key);

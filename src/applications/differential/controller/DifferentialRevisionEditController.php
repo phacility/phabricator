@@ -32,8 +32,7 @@ final class DifferentialRevisionEditController extends DifferentialController {
         return new Aphront404Response();
       }
     } else {
-      $revision = new DifferentialRevision();
-      $revision->attachRelationships(array());
+      $revision = DifferentialRevision::initializeNewRevision($viewer);
     }
 
     $aux_fields = $this->loadAuxiliaryFields($revision);

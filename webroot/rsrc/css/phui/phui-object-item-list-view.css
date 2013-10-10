@@ -153,14 +153,17 @@
 
 .phui-object-item-with-1-actions .phui-object-item-content-box {
   margin-right: 24px;
+  overflow: hidden;
 }
 
 .phui-object-item-with-2-actions .phui-object-item-content-box {
   margin-right: 48px;
+  overflow: hidden;
 }
 
 .phui-object-item-with-3-actions .phui-object-item-content-box {
   margin-right: 72px;
+  overflow: hidden;
 }
 
 
@@ -267,7 +270,8 @@
   margin-right: 30px;
 }
 
-.device .phui-object-item-icon-label {
+.device .phui-object-item-icon-label,
+.device .phui-object-item-icon-none {
   display: none;
 }
 

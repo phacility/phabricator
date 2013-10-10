@@ -118,5 +118,14 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
     return $status;
   }
 
+  protected function getCustomCapabilities() {
+    return array(
+      DifferentialCapabilityDefaultView::CAPABILITY => array(
+        'caption' => pht(
+          'Default view policy for newly created revisions.')
+      ),
+    );
+  }
+
 }
 

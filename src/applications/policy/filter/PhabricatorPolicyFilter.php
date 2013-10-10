@@ -173,9 +173,10 @@ final class PhabricatorPolicyFilter {
         $policy = PhabricatorPolicies::POLICY_USER;
       }
 
-      // If the object is set to "public" but the capability is anything other
-      // than "view", restrict the policy to "user".
-      if ($capability != PhabricatorPolicyCapability::CAN_VIEW) {
+      // If the object is set to "public" but the capability is not a public
+      // capability, restrict the policy to "user".
+      $capobj = PhabricatorPolicyCapability::getCapabilityByKey($capability);
+      if (!$capobj || !$capobj->shouldAllowPublicPolicySetting()) {
         $policy = PhabricatorPolicies::POLICY_USER;
       }
     }
@@ -243,15 +244,21 @@ final class PhabricatorPolicyFilter {
     }
 
     $capobj = PhabricatorPolicyCapability::getCapabilityByKey($capability);
+    $rejection = null;
     if ($capobj) {
       $rejection = $capobj->describeCapabilityRejection();
       $capability_name = $capobj->getCapabilityName();
     } else {
+      $capability_name = $capability;
+    }
+
+    if (!$rejection) {
+      // We couldn't find the capability object, or it doesn't provide a
+      // tailored rejection string.
       $rejection = pht(
         'You do not have the required capability ("%s") to do whatever you '.
         'are trying to do.',
         $capability);
-      $capability_name = $capability;
     }
 
     $more = PhabricatorPolicy::getPolicyExplanation($this->viewer, $policy);
@@ -264,7 +271,8 @@ final class PhabricatorPolicyFilter {
     // a better error message if we can.
 
     $phid = '?';
-    if ($object instanceof PhabricatorLiskDAO) {
+    if (($object instanceof PhabricatorLiskDAO) ||
+        (method_exists($object, 'getPHID'))) {
       try {
         $phid = $object->getPHID();
       } catch (Exception $ignored) {
@@ -276,6 +284,7 @@ final class PhabricatorPolicyFilter {
       ->setViewer($this->viewer)
       ->withPHIDs(array($phid))
       ->executeOne();
+
     $object_name = pht(
       '%s %s',
       $handle->getTypeName(),

@@ -6,12 +6,12 @@ final class DifferentialRevision extends DifferentialDAO
     PhabricatorPolicyInterface,
     PhrequentTrackableInterface {
 
-  protected $title;
+  protected $title = '';
   protected $originalTitle;
   protected $status;
 
-  protected $summary;
-  protected $testPlan;
+  protected $summary = '';
+  protected $testPlan = '';
 
   protected $phid;
   protected $authorPHID;
@@ -19,7 +19,7 @@ final class DifferentialRevision extends DifferentialDAO
 
   protected $dateCommitted;
 
-  protected $lineCount;
+  protected $lineCount = 0;
   protected $attached = array();
 
   protected $mailKey;
@@ -43,6 +43,22 @@ final class DifferentialRevision extends DifferentialDAO
 
   const RELATION_REVIEWER     = 'revw';
   const RELATION_SUBSCRIBED   = 'subd';
+
+  public static function initializeNewRevision(PhabricatorUser $actor) {
+    $app = id(new PhabricatorApplicationQuery())
+      ->setViewer($actor)
+      ->withClasses(array('PhabricatorApplicationDifferential'))
+      ->executeOne();
+
+    $view_policy = $app->getPolicy(
+      DifferentialCapabilityDefaultView::CAPABILITY);
+
+    return id(new DifferentialRevision())
+      ->setViewPolicy($view_policy)
+      ->setAuthorPHID($actor->getPHID())
+      ->attachRelationships(array())
+      ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
+  }
 
   public function getConfiguration() {
     return array(

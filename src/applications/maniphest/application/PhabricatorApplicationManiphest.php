@@ -90,5 +90,18 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     return $status;
   }
 
+  protected function getCustomCapabilities() {
+    return array(
+      ManiphestCapabilityDefaultView::CAPABILITY => array(
+        'caption' => pht(
+          'Default view policy for newly created tasks.'),
+      ),
+      ManiphestCapabilityDefaultEdit::CAPABILITY => array(
+        'caption' => pht(
+          'Default edit policy for newly created tasks.'),
+      ),
+    );
+  }
+
 }
 

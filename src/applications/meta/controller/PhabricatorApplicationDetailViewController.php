@@ -29,28 +29,15 @@ final class PhabricatorApplicationDetailViewController
         ->setName($selected->getName()));
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($title);
-
-    $status_tag = id(new PhabricatorTagView())
-            ->setType(PhabricatorTagView::TYPE_STATE);
+      ->setHeader($title)
+      ->setUser($user)
+      ->setPolicyObject($selected);
 
     if ($selected->isInstalled()) {
-      $status_tag->setName(pht('Installed'));
-      $status_tag->setBackgroundColor(PhabricatorTagView::COLOR_GREEN);
+      $header->setStatus('open', 'green', pht('Installed'));
     } else {
-      $status_tag->setName(pht('Uninstalled'));
-      $status_tag->setBackgroundColor(PhabricatorTagView::COLOR_RED);
+      $header->setStatus('open', 'red', pht('Uninstalled'));
     }
-
-    if ($selected->isBeta()) {
-      $beta_tag = id(new PhabricatorTagView())
-              ->setType(PhabricatorTagView::TYPE_STATE)
-              ->setName(pht('Beta'))
-              ->setBackgroundColor(PhabricatorTagView::COLOR_GREY);
-      $header->addTag($beta_tag);
-    }
-
-    $header->addTag($status_tag);
 
     $properties = $this->buildPropertyView($selected);
     $actions = $this->buildActionView($user, $selected);
@@ -76,6 +63,12 @@ final class PhabricatorApplicationDetailViewController
 
     $properties = id(new PhabricatorPropertyListView())
       ->addProperty(pht('Description'), $application->getShortDescription());
+
+    if ($application->isBeta()) {
+      $properties->addProperty(
+        pht('Release'),
+        pht('Beta'));
+    }
 
     $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
       $viewer,

@@ -40,10 +40,8 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     DifferentialDiff $diff,
     PhabricatorUser $actor) {
 
-    $revision = new DifferentialRevision();
+    $revision = DifferentialRevision::initializeNewRevision($actor);
     $revision->setPHID($revision->generatePHID());
-    $revision->setAuthorPHID($actor->getPHID());
-    $revision->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
 
     $editor = new DifferentialRevisionEditor($revision);
     $editor->setActor($actor);
@@ -168,9 +166,6 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     $revision = $this->getRevision();
 
     $is_new = $this->isNewRevision();
-    if ($is_new) {
-      $this->initializeNewRevision($revision);
-    }
 
     $revision->loadRelationships();
 
@@ -1100,29 +1095,6 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
         implode(', ', $sql));
     }
   }
-
-  private function initializeNewRevision(DifferentialRevision $revision) {
-    // These fields aren't nullable; set them to sensible defaults if they
-    // haven't been configured. We're just doing this so we can generate an
-    // ID for the revision if we don't have one already.
-    $revision->setLineCount(0);
-    if ($revision->getStatus() === null) {
-      $revision->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
-    }
-    if ($revision->getTitle() === null) {
-      $revision->setTitle('Untitled Revision');
-    }
-    if ($revision->getAuthorPHID() === null) {
-      $revision->setAuthorPHID($this->getActorPHID());
-    }
-    if ($revision->getSummary() === null) {
-      $revision->setSummary('');
-    }
-    if ($revision->getTestPlan() === null) {
-      $revision->setTestPlan('');
-    }
-  }
-
 
   /**
    * Try to move a revision to "accepted". We look for:

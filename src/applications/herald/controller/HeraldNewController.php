@@ -14,12 +14,6 @@ final class HeraldNewController extends HeraldController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $this->requireApplicationCapability(
-      PhabricatorApplicationHerald::CAN_CREATE_RULE);
-
-    $can_global = $this->hasApplicationCapability(
-      PhabricatorApplicationHerald::CAN_CREATE_GLOBAL_RULE);
-
     $content_type_map = HeraldAdapter::getEnabledAdapterMap($user);
     if (empty($content_type_map[$this->contentType])) {
       $this->contentType = head_key($content_type_map);
@@ -37,13 +31,10 @@ final class HeraldNewController extends HeraldController {
         HeraldRuleTypeConfig::RULE_TYPE_PERSONAL,
       )) + $rule_type_map;
 
-    if (!$can_global) {
-      $global_link = $this->explainApplicationCapability(
-        PhabricatorApplicationHerald::CAN_CREATE_GLOBAL_RULE,
-        pht('You do not have permission to create or manage global rules.'));
-    } else {
-      $global_link = null;
-    }
+    list($can_global, $global_link) = $this->explainApplicationCapability(
+      HeraldCapabilityManageGlobalRules::CAPABILITY,
+      pht('You have permission to create and manage global rules.'),
+      pht('You do not have permission to create or manage global rules.'));
 
     $captions = array(
       HeraldRuleTypeConfig::RULE_TYPE_PERSONAL =>
@@ -52,15 +43,12 @@ final class HeraldNewController extends HeraldController {
           'only affect you. Personal rules only trigger for objects you have '.
           'permission to see.'),
       HeraldRuleTypeConfig::RULE_TYPE_GLOBAL =>
-        phutil_implode_html(
-          phutil_tag('br'),
-          array_filter(
-            array(
-              pht(
-                'Global rules notify anyone about events. Global rules can '.
-                'bypass access control policies and act on any object.'),
-              $global_link,
-            ))),
+        array(
+          pht(
+            'Global rules notify anyone about events. Global rules can '.
+            'bypass access control policies and act on any object.'),
+          $global_link,
+        ),
     );
 
     $radio = id(new AphrontFormRadioButtonControl())

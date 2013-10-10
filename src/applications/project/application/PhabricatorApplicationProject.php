@@ -49,4 +49,11 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
     );
   }
 
+  protected function getCustomCapabilities() {
+    return array(
+      ProjectCapabilityCreateProjects::CAPABILITY => array(
+      ),
+    );
+  }
+
 }

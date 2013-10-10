@@ -36,12 +36,16 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
   }
 
   protected function getOptions() {
+    $capability = $this->capability;
+
     $options = array();
     foreach ($this->policies as $policy) {
-      if (($policy->getPHID() == PhabricatorPolicies::POLICY_PUBLIC) &&
-          ($this->capability != PhabricatorPolicyCapability::CAN_VIEW)) {
-        // Never expose "Public" for anything except "Can View".
-        continue;
+      if ($policy->getPHID() == PhabricatorPolicies::POLICY_PUBLIC) {
+        // Never expose "Public" for capabilities which don't support it.
+        $capobj = PhabricatorPolicyCapability::getCapabilityByKey($capability);
+        if (!$capobj || !$capobj->shouldAllowPublicPolicySetting()) {
+          continue;
+        }
       }
 
       $type_name = PhabricatorPolicyType::getPolicyTypeName($policy->getType());

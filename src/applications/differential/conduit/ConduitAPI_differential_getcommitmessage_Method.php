@@ -30,11 +30,12 @@ final class ConduitAPI_differential_getcommitmessage_Method
 
   protected function execute(ConduitAPIRequest $request) {
     $id = $request->getValue('revision_id');
+    $viewer = $request->getUser();
 
     if ($id) {
       $revision = id(new DifferentialRevisionQuery())
         ->withIDs(array($id))
-        ->setViewer($request->getUser())
+        ->setViewer($viewer)
         ->needRelationships(true)
         ->needReviewerStatus(true)
         ->executeOne();
@@ -43,8 +44,7 @@ final class ConduitAPI_differential_getcommitmessage_Method
         throw new ConduitException('ERR_NOT_FOUND');
       }
     } else {
-      $revision = new DifferentialRevision();
-      $revision->attachRelationships(array());
+      $revision = DifferentialRevision::initializeNewRevision($viewer);
     }
 
 
@@ -57,7 +57,7 @@ final class ConduitAPI_differential_getcommitmessage_Method
     $pro_tips = array();
 
     foreach ($aux_fields as $key => $aux_field) {
-      $aux_field->setUser($request->getUser());
+      $aux_field->setUser($viewer);
       $aux_field->setRevision($revision);
       $pro_tips[] = $aux_field->getCommitMessageTips();
       if (!$aux_field->shouldAppearOnCommitMessage()) {

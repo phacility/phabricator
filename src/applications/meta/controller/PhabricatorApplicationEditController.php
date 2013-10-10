@@ -51,10 +51,13 @@ final class PhabricatorApplicationEditController
           continue;
         }
 
-        if ($new == PhabricatorPolicies::POLICY_PUBLIC &&
-            $capability != PhabricatorPolicyCapability::CAN_VIEW) {
-          // Can't set policies other than "view" to public.
-          continue;
+        if ($new == PhabricatorPolicies::POLICY_PUBLIC) {
+          $capobj = PhabricatorPolicyCapability::getCapabilityByKey(
+            $capability);
+          if (!$capobj || !$capobj->shouldAllowPublicPolicySetting()) {
+            // Can't set non-public policies to public.
+            continue;
+          }
         }
 
         $result[$capability] = $new;

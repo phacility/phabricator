@@ -10,8 +10,30 @@
   padding: 0;
 }
 
+.phabricator-chat-log-pager-top {
+  padding: 16px 4px 8px;
+  font-weight: bold;
+  float: right;
+}
+
+.phabricator-chat-log-pager-bottom {
+  padding: 8px 4px 16px;
+  font-weight: bold;
+  float: right;
+}
+
+.phabricator-chat-log-pager-top a, .phabricator-chat-log-pager-bottom a {
+  padding: 2px 3px;
+}
+
+.phabricator-chat-log-jump {
+  padding: 16px 4px 8px;
+  font-weight: bold;
+  float: left;
+}
+
 .phabricator-chat-log-panel {
-  margin: 20px auto;
+  clear: both;
   border-left: 1px solid #e7e7e7;
   border-right: 1px solid #e7e7e7;
   border-bottom: 1px solid #c0c5d1;
