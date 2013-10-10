@@ -7,6 +7,8 @@ final class PhabricatorPolicyEditController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
+    $policy = new PhabricatorPolicy();
+
     $root_id = celerity_generate_unique_node_id();
 
     $action_options = array(
@@ -53,7 +55,6 @@ final class PhabricatorPolicyEditController
         $rule_obj = $rules[$rule_class];
 
         $value = $rule_obj->getValueForStorage(idx($rule, 'value'));
-        $value = $rule_obj->getValueForDisplay($viewer, $value);
 
         $rule_data[] = array(
           'action' => $action,
@@ -62,7 +63,13 @@ final class PhabricatorPolicyEditController
         );
       }
 
-      $default_value = $request->getStr('default');
+      $policy->setRules($rule_data);
+      $policy->setDefaultAction($request->getStr('default'));
+      $policy->save();
+
+      // TODO: Integrate with policy editors.
+      $id = $policy->getID();
+      throw new Exception("OK, saved policy {$id}!");
     } else {
       $rule_data = array(
         $default_rule,
@@ -75,7 +82,6 @@ final class PhabricatorPolicyEditController
       array(
         'name' => 'default',
       ));
-
 
     $form = id(new PHUIFormLayoutView())
       ->appendChild(
