@@ -33,7 +33,7 @@ body .phui-header-shell.phui-bleed-header
   border-top-width: 0;
 }
 
-.phabricator-property-list-view + .diviner-document-section {
+.phui-property-list-view + .diviner-document-section {
   margin-top: -1px;
 }
 

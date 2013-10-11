@@ -38,18 +38,20 @@ final class PhabricatorWorkerTaskDetailController
           $task->getID(),
           $task->getTaskClass()));
 
-      $actions    = $this->buildActionListView($task);
-      $properties = $this->buildPropertyListView($task);
+      $actions = $this->buildActionListView($task);
+      $properties = $this->buildPropertyListView($task, $actions);
 
       $retry_head = id(new PHUIHeaderView())
         ->setHeader(pht('Retries'));
 
       $retry_info = $this->buildRetryListView($task);
 
+      $object_box = id(new PHUIObjectBoxView())
+        ->setHeader($header)
+        ->addPropertyList($properties);
+
       $content = array(
-        $header,
-        $actions,
-        $properties,
+        $object_box,
         $retry_head,
         $retry_info,
       );
@@ -114,8 +116,12 @@ final class PhabricatorWorkerTaskDetailController
     return $view;
   }
 
-  private function buildPropertyListView(PhabricatorWorkerTask $task) {
-    $view = new PhabricatorPropertyListView();
+  private function buildPropertyListView(
+    PhabricatorWorkerTask $task,
+    PhabricatorActionListView $actions) {
+
+    $view = new PHUIPropertyListView();
+    $view->setActionList($actions);
 
     if ($task->isArchived()) {
       switch ($task->getResult()) {
@@ -197,7 +203,7 @@ final class PhabricatorWorkerTaskDetailController
   }
 
   private function buildRetryListView(PhabricatorWorkerTask $task) {
-    $view = new PhabricatorPropertyListView();
+    $view = new PHUIPropertyListView();
 
     $data = id(new PhabricatorWorkerTaskData())->load($task->getDataID());
     $task->setData($data->getData());

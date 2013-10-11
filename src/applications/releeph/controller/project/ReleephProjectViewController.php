@@ -220,13 +220,15 @@ final class ReleephProjectViewController extends ReleephProjectController
         ->setHref($history_uri)
         ->setIcon('transcript'));
 
-    $properties = id(new PhabricatorPropertyListView())
+    $properties = id(new PHUIPropertyListView())
       ->setUser($viewer)
       ->setObject($project);
 
     $properties->addProperty(
       pht('Repository'),
       $project->getRepository()->getName());
+
+    $properties->setActionList($actions);
 
     $pushers = $project->getPushers();
     if ($pushers) {
@@ -238,8 +240,7 @@ final class ReleephProjectViewController extends ReleephProjectController
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
   }
 
 }

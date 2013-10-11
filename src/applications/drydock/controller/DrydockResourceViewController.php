@@ -23,7 +23,7 @@ final class DrydockResourceViewController extends DrydockController {
       ->setHeader($title);
 
     $actions = $this->buildActionListView($resource);
-    $properties = $this->buildPropertyListView($resource);
+    $properties = $this->buildPropertyListView($resource, $actions);
 
     $resource_uri = 'resource/'.$resource->getID().'/';
     $resource_uri = $this->getApplicationURI($resource_uri);
@@ -58,8 +58,7 @@ final class DrydockResourceViewController extends DrydockController {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
 
     return $this->buildApplicationPage(
       array(
@@ -97,8 +96,12 @@ final class DrydockResourceViewController extends DrydockController {
     return $view;
   }
 
-  private function buildPropertyListView(DrydockResource $resource) {
-    $view = new PhabricatorPropertyListView();
+  private function buildPropertyListView(
+    DrydockResource $resource,
+    PhabricatorActionListView $actions) {
+
+    $view = new PHUIPropertyListView();
+    $view->setActionList($actions);
 
     $status = $resource->getStatus();
     $status = DrydockResourceStatus::getNameForStatus($status);

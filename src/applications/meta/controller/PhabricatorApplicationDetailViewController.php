@@ -39,13 +39,12 @@ final class PhabricatorApplicationDetailViewController
       $header->setStatus('open', 'red', pht('Uninstalled'));
     }
 
-    $properties = $this->buildPropertyView($selected);
     $actions = $this->buildActionView($user, $selected);
+    $properties = $this->buildPropertyView($selected, $actions);
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
 
     return $this->buildApplicationPage(
       array(
@@ -58,11 +57,15 @@ final class PhabricatorApplicationDetailViewController
       ));
   }
 
-  private function buildPropertyView(PhabricatorApplication $application) {
+  private function buildPropertyView(
+    PhabricatorApplication $application,
+    PhabricatorActionListView $actions) {
+
     $viewer = $this->getRequest()->getUser();
 
-    $properties = id(new PhabricatorPropertyListView())
+    $properties = id(new PHUIPropertyListView())
       ->addProperty(pht('Description'), $application->getShortDescription());
+    $properties->setActionList($actions);
 
     if ($application->isBeta()) {
       $properties->addProperty(

@@ -66,7 +66,7 @@ final class PhabricatorConfigAllController
 
     $versions = $this->loadVersions();
 
-    $version_property_list = id(new PhabricatorPropertyListView());
+    $version_property_list = id(new PHUIPropertyListView());
     foreach ($versions as $version) {
       list($name, $hash) = $version;
       $version_property_list->addProperty($name, $hash);
@@ -74,7 +74,7 @@ final class PhabricatorConfigAllController
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Current Settings'))
-      ->setPropertyList($version_property_list);
+      ->addPropertyList($version_property_list);
 
     $phabricator_root = dirname(phutil_get_library_root('phabricator'));
     $version_path = $phabricator_root.'/conf/local/VERSION';

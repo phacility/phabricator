@@ -73,7 +73,7 @@ final class PholioMockViewController extends PholioController {
       ->setPolicyObject($mock);
 
     $actions = $this->buildActionView($mock);
-    $properties = $this->buildPropertyView($mock, $engine);
+    $properties = $this->buildPropertyView($mock, $engine, $actions);
 
     require_celerity_resource('pholio-css');
     require_celerity_resource('pholio-inline-comments-css');
@@ -105,8 +105,7 @@ final class PholioMockViewController extends PholioController {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
 
     $content = array(
       $crumbs,
@@ -197,13 +196,15 @@ final class PholioMockViewController extends PholioController {
 
   private function buildPropertyView(
     PholioMock $mock,
-    PhabricatorMarkupEngine $engine) {
+    PhabricatorMarkupEngine $engine,
+    PhabricatorActionListView $actions) {
 
     $user = $this->getRequest()->getUser();
 
-    $properties = id(new PhabricatorPropertyListView())
+    $properties = id(new PHUIPropertyListView())
       ->setUser($user)
-      ->setObject($mock);
+      ->setObject($mock)
+      ->setActionList($actions);
 
     $properties->addProperty(
       pht('Author'),
@@ -222,7 +223,7 @@ final class PholioMockViewController extends PholioController {
     $properties->invokeWillRenderEvent();
 
     $properties->addImageContent(
-      $engine->getOutput($mock, PholioMock::MARKUP_FIELD_DESCRIPTION));
+        $engine->getOutput($mock, PholioMock::MARKUP_FIELD_DESCRIPTION));
 
     return $properties;
   }

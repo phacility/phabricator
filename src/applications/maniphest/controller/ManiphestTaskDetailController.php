@@ -352,7 +352,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->setActionList($actions);
 
     $header = $this->buildHeaderView($task);
-    $properties = $this->buildPropertyView($task, $field_list, $edges, $engine);
+    $properties = $this->buildPropertyView(
+      $task, $field_list, $edges, $actions);
+    $description = $this->buildDescriptionView($task, $engine);
 
     if (!$user->isLoggedIn()) {
       // TODO: Eventually, everything should run through this. For now, we're
@@ -365,8 +367,11 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
+
+    if ($description) {
+      $object_box->addPropertyList($description);
+    }
 
     $comment_box = id(new PHUIObjectBoxView())
       ->setFlush(true)
@@ -503,13 +508,14 @@ final class ManiphestTaskDetailController extends ManiphestController {
     ManiphestTask $task,
     PhabricatorCustomFieldList $field_list,
     array $edges,
-    PhabricatorMarkupEngine $engine) {
+    PhabricatorActionListView $actions) {
 
     $viewer = $this->getRequest()->getUser();
 
-    $view = id(new PhabricatorPropertyListView())
+    $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setObject($task);
+      ->setObject($task)
+      ->setActionList($actions);
 
     $view->addProperty(
       pht('Assigned To'),
@@ -633,9 +639,18 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $view->invokeWillRenderEvent();
 
+    return $view;
+  }
+
+  private function buildDescriptionView(
+    ManiphestTask $task,
+    PhabricatorMarkupEngine $engine) {
+
+    $section = null;
     if (strlen($task->getDescription())) {
-      $view->addSectionHeader(pht('Description'));
-      $view->addTextContent(
+      $section = new PHUIPropertyListView();
+      $section->addSectionHeader(pht('Description'));
+      $section->addTextContent(
         phutil_tag(
           'div',
           array(
@@ -644,7 +659,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
           $engine->getOutput($task, ManiphestTask::MARKUP_FIELD_DESCRIPTION)));
     }
 
-    return $view;
+    return $section;
   }
 
 }

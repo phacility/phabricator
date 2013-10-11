@@ -44,7 +44,7 @@ final class PhameBlogViewController extends PhameController {
     $this->loadHandles($handle_phids);
 
     $actions = $this->renderActions($blog, $user);
-    $properties = $this->renderProperties($blog, $user);
+    $properties = $this->renderProperties($blog, $user, $actions);
     $post_list = $this->renderPostList(
       $posts,
       $user,
@@ -65,8 +65,7 @@ final class PhameBlogViewController extends PhameController {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
 
     $nav->appendChild(
       array(
@@ -83,11 +82,16 @@ final class PhameBlogViewController extends PhameController {
       ));
   }
 
-  private function renderProperties(PhameBlog $blog, PhabricatorUser $user) {
+  private function renderProperties(
+    PhameBlog $blog,
+    PhabricatorUser $user,
+    PhabricatorActionListView $actions) {
+
     require_celerity_resource('aphront-tooltip-css');
     Javelin::initBehavior('phabricator-tooltips');
 
-    $properties = new PhabricatorPropertyListView();
+    $properties = new PHUIPropertyListView();
+    $properties->setActionList($actions);
 
     $properties->addProperty(
       pht('Skin'),

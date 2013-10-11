@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorPropertyListExample extends PhabricatorUIExample {
+final class PHUIPropertyListExample extends PhabricatorUIExample {
 
   public function getName() {
     return 'Property List';
@@ -8,14 +8,39 @@ final class PhabricatorPropertyListExample extends PhabricatorUIExample {
 
   public function getDescription() {
     return hsprintf(
-      'Use <tt>PhabricatorPropertyListView</tt> to render object properties.');
+      'Use <tt>PHUIPropertyListView</tt> to render object properties.');
   }
 
   public function renderExample() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $view = new PhabricatorPropertyListView();
+    $details1 = id(new PHUIListItemView())
+      ->setName('Details')
+      ->setHref('#')
+      ->setSelected(true)
+      ->setType(PHUIListItemView::TYPE_LINK);
+
+    $details2 = id(new PHUIListItemView())
+      ->setName('Lint (Warn)')
+      ->setHref('#')
+      ->setStatusColor(PHUIListItemView::STATUS_WARN)
+      ->setType(PHUIListItemView::TYPE_LINK);
+
+    $details3 = id(new PHUIListItemView())
+      ->setName('Unit (3/5)')
+      ->setHref('#')
+      ->setStatusColor(PHUIListItemView::STATUS_FAIL)
+      ->setType(PHUIListItemView::TYPE_LINK);
+
+    $statustabs = id(new PHUIListView())
+      ->setType(PHUIListView::NAVBAR_LIST)
+      ->addMenuItem($details1)
+      ->addMenuItem($details2)
+      ->addMenuItem($details3);
+
+    $view = new PHUIPropertyListView();
+    $view->setTabs($statustabs);
 
     $view->addProperty(
       pht('Color'),
@@ -36,28 +61,34 @@ final class PhabricatorPropertyListExample extends PhabricatorUIExample {
       'velit, aliquam et consequat quis, tincidunt id dolor.');
 
 
-    $view->addSectionHeader('Colors of the Rainbow');
+    $view2 = new PHUIPropertyListView();
+    $view2->addSectionHeader('Colors of the Rainbow');
 
-    $view->addProperty('R', 'Red');
-    $view->addProperty('O', 'Orange');
-    $view->addProperty('Y', 'Yellow');
-    $view->addProperty('G', 'Green');
-    $view->addProperty('B', 'Blue');
-    $view->addProperty('I', 'Indigo');
-    $view->addProperty('V', 'Violet');
+    $view2->addProperty('R', 'Red');
+    $view2->addProperty('O', 'Orange');
+    $view2->addProperty('Y', 'Yellow');
+    $view2->addProperty('G', 'Green');
+    $view2->addProperty('B', 'Blue');
+    $view2->addProperty('I', 'Indigo');
+    $view2->addProperty('V', 'Violet');
 
-    $view->addSectionHeader('Haiku About Pasta');
 
-    $view->addTextContent(
+    $view3 = new PHUIPropertyListView();
+    $view3->addSectionHeader('Haiku About Pasta');
+
+    $view3->addTextContent(
       hsprintf(
         'this is a pasta<br />'.
         'haiku. it is very bad.<br />'.
         'what did you expect?'));
 
-    $edge_cases_header = id(new PHUIHeaderView())
-      ->setHeader(pht('Edge Cases'));
+    $object_box1 = id(new PHUIObjectBoxView())
+      ->setHeaderText('PHUIPropertyListView Stackered')
+      ->addPropertyList($view)
+      ->addPropertyList($view2)
+      ->addPropertyList($view3);
 
-    $edge_cases_view = new PhabricatorPropertyListView();
+    $edge_cases_view = new PHUIPropertyListView();
 
     $edge_cases_view->addProperty(
       pht('Description'),
@@ -97,29 +128,13 @@ final class PhabricatorPropertyListExample extends PhabricatorUIExample {
       pht('Joe'),
       pht('Smith'));
 
-    $edge_cases_view->addProperty(
-      pht('Description'),
-      pht('The next section shows adjacent section headers.'));
-
-    $edge_cases_view->addSectionHeader('Several');
-    $edge_cases_view->addSectionHeader('Adjacent');
-    $edge_cases_view->addSectionHeader('Section');
-    $edge_cases_view->addSectionHeader('Headers');
-
-    $edge_cases_view->addProperty(
-      pht('Description'),
-      pht('The next section is several adjacent text blocks.'));
-
-    $edge_cases_view->addTextContent('Lorem');
-    $edge_cases_view->addTextContent('ipsum');
-    $edge_cases_view->addTextContent('dolor');
-    $edge_cases_view->addTextContent('sit');
-    $edge_cases_view->addTextContent('amet...');
+    $object_box2 = id(new PHUIObjectBoxView())
+      ->setHeaderText('Some Bad Examples')
+      ->addPropertyList($edge_cases_view);
 
     return array(
-      $view,
-      $edge_cases_header,
-      $edge_cases_view,
+      $object_box1,
+      $object_box2,
     );
   }
 }

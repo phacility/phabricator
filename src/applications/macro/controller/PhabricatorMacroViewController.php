@@ -35,7 +35,17 @@ final class PhabricatorMacroViewController
         ->setHref($this->getApplicationURI('/view/'.$macro->getID().'/'))
         ->setName($title_short));
 
-    $properties = $this->buildPropertyView($macro, $file);
+    $properties = $this->buildPropertyView($macro, $actions);
+    if ($file) {
+      $file_view = new PHUIPropertyListView();
+      $file_view->addImageContent(
+        phutil_tag(
+          'img',
+          array(
+            'src'     => $file->getViewURI(),
+            'class'   => 'phabricator-image-macro-hero',
+          )));
+    }
 
     $xactions = id(new PhabricatorMacroTransactionQuery())
       ->setViewer($request->getUser())
@@ -93,8 +103,11 @@ final class PhabricatorMacroViewController
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
+
+    if ($file_view) {
+      $object_box->addPropertyList($file_view);
+    }
 
     $comment_box = id(new PHUIObjectBoxView())
       ->setFlush(true)
@@ -153,11 +166,12 @@ final class PhabricatorMacroViewController
 
   private function buildPropertyView(
     PhabricatorFileImageMacro $macro,
-    PhabricatorFile $file = null) {
+    PhabricatorActionListView $actions) {
 
-    $view = id(new PhabricatorPropertyListView())
+    $view = id(new PHUIPropertyListView())
       ->setUser($this->getRequest()->getUser())
-      ->setObject($macro);
+      ->setObject($macro)
+      ->setActionList($actions);
 
     switch ($macro->getAudioBehavior()) {
       case PhabricatorFileImageMacro::AUDIO_BEHAVIOR_ONCE:
@@ -171,24 +185,12 @@ final class PhabricatorMacroViewController
     $audio_phid = $macro->getAudioPHID();
     if ($audio_phid) {
       $this->loadHandles(array($audio_phid));
-
       $view->addProperty(
         pht('Audio'),
         $this->getHandle($audio_phid)->renderLink());
     }
 
-
     $view->invokeWillRenderEvent();
-
-    if ($file) {
-      $view->addImageContent(
-        phutil_tag(
-          'img',
-          array(
-            'src'     => $file->getViewURI(),
-            'class'   => 'phabricator-image-macro-hero',
-          )));
-    }
 
     return $view;
   }

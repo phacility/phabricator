@@ -48,12 +48,11 @@ final class PonderQuestionViewController extends PonderController {
       ->setHeader($question->getTitle());
 
     $actions = $this->buildActionListView($question);
-    $properties = $this->buildPropertyListView($question);
+    $properties = $this->buildPropertyListView($question, $actions);
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
     $crumbs->setActionList($actions);
@@ -130,12 +129,14 @@ final class PonderQuestionViewController extends PonderController {
   }
 
   private function buildPropertyListView(
-    PonderQuestion $question) {
+    PonderQuestion $question,
+    PhabricatorActionListView $actions) {
 
     $viewer = $this->getRequest()->getUser();
-    $view = id(new PhabricatorPropertyListView())
+    $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setObject($question);
+      ->setObject($question)
+      ->setActionList($actions);
 
     $this->loadHandles(array($question->getAuthorPHID()));
 
@@ -265,12 +266,11 @@ final class PonderQuestionViewController extends PonderController {
         ->setHeader($this->getHandle($author_phid)->getFullName());
 
       $actions = $this->buildAnswerActions($answer);
-      $properties = $this->buildAnswerProperties($answer);
+      $properties = $this->buildAnswerProperties($answer, $actions);
 
       $object_box = id(new PHUIObjectBoxView())
         ->setHeader($header)
-        ->setActionList($actions)
-        ->setPropertyList($properties);
+        ->addPropertyList($properties);
 
       $out[] = $object_box;
       $details = array();
@@ -339,11 +339,15 @@ final class PonderQuestionViewController extends PonderController {
     return $view;
   }
 
-  private function buildAnswerProperties(PonderAnswer $answer) {
+  private function buildAnswerProperties(
+    PonderAnswer $answer,
+    PhabricatorActionListView $actions) {
+
     $viewer = $this->getRequest()->getUser();
-    $view = id(new PhabricatorPropertyListView())
+    $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setObject($answer);
+      ->setObject($answer)
+      ->setActionList($actions);
 
     $view->addProperty(
       pht('Created'),

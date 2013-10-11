@@ -80,7 +80,7 @@ final class DivinerAtomController extends DivinerController {
           ->setBackgroundColor(PhabricatorTagView::COLOR_BLUE)
           ->setName(DivinerAtom::getAtomTypeNameString($atom->getType())));
 
-    $properties = id(new PhabricatorPropertyListView());
+    $properties = id(new PHUIPropertyListView());
 
     $group = $atom->getProperty('group');
     if ($group) {
@@ -255,7 +255,7 @@ final class DivinerAtomController extends DivinerController {
   }
 
   private function buildExtendsAndImplements(
-    PhabricatorPropertyListView $view,
+    PHUIPropertyListView $view,
     DivinerLiveSymbol $symbol) {
 
     $lineage = $this->getExtendsLineage($symbol);
@@ -335,7 +335,7 @@ final class DivinerAtomController extends DivinerController {
   }
 
   private function buildDefined(
-    PhabricatorPropertyListView $view,
+    PHUIPropertyListView $view,
     DivinerLiveSymbol $symbol) {
 
     $atom = $symbol->getAtom();

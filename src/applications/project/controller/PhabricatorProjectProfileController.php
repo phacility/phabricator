@@ -59,7 +59,7 @@ final class PhabricatorProjectProfileController
       ->setImage($picture);
 
     $actions = $this->buildActionListView($project);
-    $properties = $this->buildPropertyListView($project);
+    $properties = $this->buildPropertyListView($project, $actions);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
@@ -68,8 +68,7 @@ final class PhabricatorProjectProfileController
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
 
     return $this->buildApplicationPage(
       array(
@@ -240,13 +239,16 @@ final class PhabricatorProjectProfileController
     return $view;
   }
 
-  private function buildPropertyListView(PhabricatorProject $project) {
+  private function buildPropertyListView(
+    PhabricatorProject $project,
+    PhabricatorActionListView $actions) {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $view = id(new PhabricatorPropertyListView())
+    $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setObject($project);
+      ->setObject($project)
+      ->setActionList($actions);
 
     $view->addProperty(
       pht('Created'),

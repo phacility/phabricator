@@ -32,7 +32,7 @@ final class PhamePostViewController extends PhameController {
         $post->getBloggerPHID(),
       ));
     $actions = $this->renderActions($post, $user);
-    $properties = $this->renderProperties($post, $user);
+    $properties = $this->renderProperties($post, $user, $actions);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
@@ -50,8 +50,7 @@ final class PhamePostViewController extends PhameController {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
 
     if ($post->isDraft()) {
       $object_box->appendChild(
@@ -167,11 +166,13 @@ final class PhamePostViewController extends PhameController {
 
   private function renderProperties(
     PhamePost $post,
-    PhabricatorUser $user) {
+    PhabricatorUser $user,
+    PhabricatorActionListView $actions) {
 
-    $properties = id(new PhabricatorPropertyListView())
+    $properties = id(new PHUIPropertyListView())
       ->setUser($user)
-      ->setObject($post);
+      ->setObject($post)
+      ->setActionList($actions);
 
     $properties->addProperty(
       pht('Blog'),

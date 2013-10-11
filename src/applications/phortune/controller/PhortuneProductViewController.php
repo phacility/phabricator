@@ -59,8 +59,9 @@ final class PhortuneProductViewController extends PhortuneController {
         ->setName(pht('#%d', $product->getID()))
         ->setHref($request->getRequestURI()));
 
-    $properties = id(new PhabricatorPropertyListView())
+    $properties = id(new PHUIPropertyListView())
       ->setUser($user)
+      ->setActionList($actions)
       ->addProperty(pht('Type'), $product->getTypeName())
       ->addProperty(
         pht('Price'),
@@ -83,8 +84,7 @@ final class PhortuneProductViewController extends PhortuneController {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
 
     return $this->buildApplicationPage(
       array(

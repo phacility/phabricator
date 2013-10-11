@@ -47,7 +47,7 @@ final class PhabricatorSlowvotePollController
       ->setPolicyObject($poll);
 
     $actions = $this->buildActionView($poll);
-    $properties = $this->buildPropertyView($poll);
+    $properties = $this->buildPropertyView($poll, $actions);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
@@ -59,8 +59,7 @@ final class PhabricatorSlowvotePollController
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
 
     return $this->buildApplicationPage(
       array(
@@ -105,12 +104,16 @@ final class PhabricatorSlowvotePollController
     return $view;
   }
 
-  private function buildPropertyView(PhabricatorSlowvotePoll $poll) {
+  private function buildPropertyView(
+    PhabricatorSlowvotePoll $poll,
+    PhabricatorActionListView $actions) {
+
     $viewer = $this->getRequest()->getUser();
 
-    $view = id(new PhabricatorPropertyListView())
+    $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setObject($poll);
+      ->setObject($poll)
+      ->setActionList($actions);
 
     $view->invokeWillRenderEvent();
 

@@ -73,7 +73,7 @@ body .diviner-document-section .phui-header-view {
   width: 100%;
 }
 
-.phabricator-property-list-view + .diviner-document-section {
+.phui-property-list-view + .diviner-document-section {
   margin-top: -1px;
 }
 

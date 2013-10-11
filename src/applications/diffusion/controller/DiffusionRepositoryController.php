@@ -147,7 +147,7 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $actions = $this->buildActionList($repository);
 
-    $view = id(new PhabricatorPropertyListView())
+    $view = id(new PHUIPropertyListView())
       ->setUser($user);
     $view->addProperty(pht('Callsign'), $repository->getCallsign());
 
@@ -174,10 +174,11 @@ final class DiffusionRepositoryController extends DiffusionController {
       $view->addTextContent($description);
     }
 
+    $view->setActionList($actions);
+
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($view);
+      ->addPropertyList($view);
 
   }
 

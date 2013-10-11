@@ -50,11 +50,12 @@ final class PhortuneAccountViewController extends PhortuneController {
 
     $crumbs->setActionList($actions);
 
-    $properties = id(new PhabricatorPropertyListView())
+    $properties = id(new PHUIPropertyListView())
       ->setObject($account)
       ->setUser($user);
 
     $properties->addProperty(pht('Balance'), $account->getBalanceInCents());
+    $properties->setActionList($actions);
 
     $payment_methods = $this->buildPaymentMethodsSection($account);
     $purchase_history = $this->buildPurchaseHistorySection($account);
@@ -62,8 +63,7 @@ final class PhortuneAccountViewController extends PhortuneController {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
 
     return $this->buildApplicationPage(
       array(
