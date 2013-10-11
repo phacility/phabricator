@@ -53,7 +53,10 @@ final class PhabricatorSearchResultView extends AphrontView {
         '');
     }
 
-    $object_name = $handle->getFullName();
+    $title = $this->emboldenQuery($handle->getFullName());
+    if ($handle->getStatus() == 'closed') {
+      $title = phutil_tag('strike', array(), $title);
+    }
 
     return hsprintf(
       '<div class="phabricator-search-result">'.
@@ -71,7 +74,7 @@ final class PhabricatorSearchResultView extends AphrontView {
           'class' => 'result-name',
           'href' => $handle->getURI(),
         ),
-        $this->emboldenQuery($object_name)),
+        $title),
       $type_name,
       $link);
   }
