@@ -8,13 +8,10 @@ final class DiffusionRepositoryEditController extends DiffusionController {
     $drequest = $this->diffusionRequest;
     $repository = $drequest->getRepository();
 
-    $content = array();
-
     $crumbs = $this->buildCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName(pht('Edit')));
-    $content[] = $crumbs;
 
     $title = pht('Edit %s', $repository->getName());
 
@@ -28,25 +25,17 @@ final class DiffusionRepositoryEditController extends DiffusionController {
           ->setBackgroundColor(PhabricatorTagView::COLOR_BLACK));
     }
 
-    $content[] = $header;
+    $basic_actions = $this->buildBasicActions($repository);
+    $basic_properties =
+      $this->buildBasicProperties($repository, $basic_actions);
 
-    $content[] = $this->buildBasicActions($repository);
-    $content[] = $this->buildBasicProperties($repository);
+    $policy_actions = $this->buildPolicyActions($repository);
+    $policy_properties =
+      $this->buildPolicyProperties($repository, $policy_actions);
 
-    $content[] = id(new PHUIHeaderView())
-      ->setHeader(pht('Policies'));
-
-    $content[] = $this->buildPolicyActions($repository);
-    $content[] = $this->buildPolicyProperties($repository);
-
-    $content[] = id(new PHUIHeaderView())
-      ->setHeader(pht('Text Encoding'));
-
-    $content[] = $this->buildEncodingActions($repository);
-    $content[] = $this->buildEncodingProperties($repository);
-
-    $content[] = id(new PHUIHeaderView())
-      ->setHeader(pht('Edit History'));
+    $encoding_actions = $this->buildEncodingActions($repository);
+    $encoding_properties =
+      $this->buildEncodingProperties($repository, $encoding_actions);
 
     $xactions = id(new PhabricatorRepositoryTransactionQuery())
       ->setViewer($user)
@@ -70,11 +59,18 @@ final class DiffusionRepositoryEditController extends DiffusionController {
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 
-    $content[] = $xaction_view;
-
+    $obj_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->addPropertyList($basic_properties)
+      ->addPropertyList($policy_properties)
+      ->addPropertyList($encoding_properties);
 
     return $this->buildApplicationPage(
-      $content,
+      array(
+        $crumbs,
+        $obj_box,
+        $xaction_view,
+      ),
       array(
         'title' => $title,
         'device' => true,
@@ -122,11 +118,15 @@ final class DiffusionRepositoryEditController extends DiffusionController {
     return $view;
   }
 
-  private function buildBasicProperties(PhabricatorRepository $repository) {
+  private function buildBasicProperties(
+    PhabricatorRepository $repository,
+    PhabricatorActionListView $actions) {
+
     $user = $this->getRequest()->getUser();
 
-    $view = id(new PhabricatorPropertyListView())
-      ->setUser($user);
+    $view = id(new PHUIPropertyListView())
+      ->setUser($user)
+      ->setActionList($actions);
 
     $view->addProperty(pht('Name'), $repository->getName());
     $view->addProperty(pht('ID'), $repository->getID());
@@ -177,11 +177,16 @@ final class DiffusionRepositoryEditController extends DiffusionController {
     return $view;
   }
 
-  private function buildEncodingProperties(PhabricatorRepository $repository) {
+  private function buildEncodingProperties(
+    PhabricatorRepository $repository,
+    PhabricatorActionListView $actions) {
+
     $user = $this->getRequest()->getUser();
 
-    $view = id(new PhabricatorPropertyListView())
-      ->setUser($user);
+    $view = id(new PHUIPropertyListView())
+      ->setUser($user)
+      ->setActionList($actions)
+      ->addSectionHeader(pht('Text Encoding'));
 
     $encoding = $repository->getDetail('encoding');
     if (!$encoding) {
@@ -217,11 +222,16 @@ final class DiffusionRepositoryEditController extends DiffusionController {
     return $view;
   }
 
-  private function buildPolicyProperties(PhabricatorRepository $repository) {
+  private function buildPolicyProperties(
+    PhabricatorRepository $repository,
+    PhabricatorActionListView $actions) {
+
     $viewer = $this->getRequest()->getUser();
 
-    $view = id(new PhabricatorPropertyListView())
-      ->setUser($viewer);
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setActionList($actions)
+      ->addSectionHeader(pht('Policies'));
 
     $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
       $viewer,

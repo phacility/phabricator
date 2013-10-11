@@ -8,16 +8,12 @@ final class PHUIObjectBoxView extends AphrontView {
   private $validationException;
   private $header;
   private $flush;
-  private $propertyList;
-  private $actionList;
+  private $propertyList = array();
 
-  public function setActionList(PhabricatorActionListView $action_list) {
-    $this->actionList = $action_list;
-    return $this;
-  }
-
-  public function setPropertyList(PhabricatorPropertyListView $property_list) {
-    $this->propertyList = $property_list;
+  // This is mostly a conveinence method to lessen code dupe
+  // when building objectboxes.
+  public function addPropertyList(PHUIPropertyListView $property_list) {
+    $this->propertyList[] = $property_list;
     return $this;
   }
 
@@ -78,9 +74,12 @@ final class PHUIObjectBoxView extends AphrontView {
       }
     }
 
-    $property_list = $this->propertyList;
-    if ($this->actionList && $this->propertyList) {
-      $property_list->setActionList($this->actionList);
+    $property_list = null;
+    if ($this->propertyList) {
+      $property_list = new PHUIPropertyGroupView();
+      foreach ($this->propertyList as $item) {
+        $property_list->addPropertyList($item);
+      }
     }
 
     $content = id(new PHUIBoxView())
@@ -90,7 +89,7 @@ final class PHUIObjectBoxView extends AphrontView {
           $this->formError,
           $exception_errors,
           $this->form,
-          $this->propertyList,
+          $property_list,
           $this->renderChildren(),
         ))
       ->setBorder(true)

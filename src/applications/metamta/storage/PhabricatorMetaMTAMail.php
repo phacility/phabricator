@@ -383,10 +383,13 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         switch ($key) {
           case 'from':
             $from = $value;
-            $actor = $actors[$from];
-
-            $actor_email = $actor->getEmailAddress();
-            $actor_name = $actor->getName();
+            $actor_email = null;
+            $actor_name = null;
+            $actor = idx($actors, $from);
+            if ($actor) {
+              $actor_email = $actor->getEmailAddress();
+              $actor_name = $actor->getName();
+            }
             $can_send_as_user = $actor_email &&
               PhabricatorEnv::getEnvConfig('metamta.can-send-as-user');
 

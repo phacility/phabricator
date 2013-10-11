@@ -85,7 +85,7 @@ final class PhabricatorCustomFieldList extends Phobject {
   public function appendFieldsToPropertyList(
     PhabricatorCustomFieldInterface $object,
     PhabricatorUser $viewer,
-    PhabricatorPropertyListView $view) {
+    PHUIPropertyListView $view) {
 
     $this->readFieldsFromStorage($object);
     $fields = $this->fields;

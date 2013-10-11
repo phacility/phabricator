@@ -39,7 +39,7 @@ final class HeraldRuleViewController extends HeraldController {
     }
 
     $actions = $this->buildActionView($rule);
-    $properties = $this->buildPropertyView($rule);
+    $properties = $this->buildPropertyView($rule, $actions);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
@@ -48,8 +48,7 @@ final class HeraldRuleViewController extends HeraldController {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
 
     $timeline = $this->buildTimeline($rule);
 
@@ -109,14 +108,18 @@ final class HeraldRuleViewController extends HeraldController {
     return $view;
   }
 
-  private function buildPropertyView(HeraldRule $rule) {
+  private function buildPropertyView(
+    HeraldRule $rule,
+    PhabricatorActionListView $actions) {
+
     $viewer = $this->getRequest()->getUser();
 
     $this->loadHandles(HeraldAdapter::getHandlePHIDs($rule));
 
-    $view = id(new PhabricatorPropertyListView())
+    $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setObject($rule);
+      ->setObject($rule)
+      ->setActionList($actions);
 
     $view->addProperty(
       pht('Rule Type'),

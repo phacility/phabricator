@@ -65,18 +65,16 @@ final class DiffusionRepositoryEditBasicController extends DiffusionController {
       }
     }
 
-    $content = array();
-
     $crumbs = $this->buildCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName(pht('Edit Basics')));
-    $content[] = $crumbs;
 
     $title = pht('Edit %s', $repository->getName());
 
+    $error_view = null;
     if ($errors) {
-      $content[] = id(new AphrontErrorView())
+      $error_view = id(new AphrontErrorView())
         ->setTitle(pht('Form Errors'))
         ->setErrors($errors);
     }
@@ -101,10 +99,15 @@ final class DiffusionRepositoryEditBasicController extends DiffusionController {
       ->appendChild(id(new PHUIFormDividerControl()))
       ->appendRemarkupInstructions($this->getReadmeInstructions());
 
-    $content[] = $form;
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->setForm($form)
+      ->setFormError($error_view);
 
     return $this->buildApplicationPage(
-      $content,
+      array(
+        $crumbs,
+        $object_box),
       array(
         'title' => $title,
         'device' => true,

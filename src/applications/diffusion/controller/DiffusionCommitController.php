@@ -113,7 +113,7 @@ final class DiffusionCommitController extends DiffusionController {
         $commit_data,
         $parents,
         $audit_requests);
-      $property_list = id(new PhabricatorPropertyListView())
+      $property_list = id(new PHUIPropertyListView())
         ->setHasKeyboardShortcuts(true)
         ->setUser($user)
         ->setObject($commit);
@@ -137,11 +137,11 @@ final class DiffusionCommitController extends DiffusionController {
           ),
           $message));
       $content[] = $top_anchor;
+      $property_list->setActionList($headsup_actions);
 
       $object_box = id(new PHUIObjectBoxView())
         ->setHeader($headsup_view)
-        ->setActionList($headsup_actions)
-        ->setPropertyList($property_list);
+        ->addPropertyList($property_list);
 
       $content[] = $object_box;
     }

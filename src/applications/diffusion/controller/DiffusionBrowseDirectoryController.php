@@ -21,11 +21,12 @@ final class DiffusionBrowseDirectoryController
     $reason = $results->getReasonForEmptyResultSet();
 
     $content = array();
+    $actions = $this->buildActionView($drequest);
+    $properties = $this->buildPropertyView($drequest, $actions);
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($this->buildHeaderView($drequest))
-      ->setActionList($this->buildActionView($drequest))
-      ->setPropertyList($this->buildPropertyView($drequest));
+      ->addPropertyList($properties);
 
     $content[] = $object_box;
     $content[] = $this->renderSearchForm($collapsed = true);

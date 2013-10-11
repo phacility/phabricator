@@ -160,12 +160,12 @@ final class DiffusionLintController extends DiffusionController {
       $properties = $this->buildPropertyView(
         $drequest,
         $branch,
-        $total);
+        $total,
+        $actions);
 
       $object_box = id(new PHUIObjectBoxView())
         ->setHeader($header)
-        ->setActionList($actions)
-        ->setPropertyList($properties);
+        ->addPropertyList($properties);
     } else {
       $object_box = null;
     }
@@ -316,12 +316,14 @@ final class DiffusionLintController extends DiffusionController {
   protected function buildPropertyView(
     DiffusionRequest $drequest,
     PhabricatorRepositoryBranch $branch,
-    $total) {
+    $total,
+    PhabricatorActionListView $actions) {
 
     $viewer = $this->getRequest()->getUser();
 
-    $view = id(new PhabricatorPropertyListView())
-      ->setUser($viewer);
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setActions($actions);
 
     $callsign = $drequest->getRepository()->getCallsign();
     $lint_commit = $branch->getLintCommit();

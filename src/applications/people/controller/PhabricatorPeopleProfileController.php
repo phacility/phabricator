@@ -68,7 +68,7 @@ final class PhabricatorPeopleProfileController
           ->setHref($this->getApplicationURI('edit/'.$user->getID().'/')));
     }
 
-    $properties = $this->buildPropertyView($user);
+    $properties = $this->buildPropertyView($user, $actions);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
@@ -78,8 +78,7 @@ final class PhabricatorPeopleProfileController
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
 
     return $this->buildApplicationPage(
       array(
@@ -93,12 +92,15 @@ final class PhabricatorPeopleProfileController
       ));
   }
 
-  private function buildPropertyView(PhabricatorUser $user) {
-    $viewer = $this->getRequest()->getUser();
+  private function buildPropertyView(
+    PhabricatorUser $user,
+    PhabricatorActionListView $actions) {
 
-    $view = id(new PhabricatorPropertyListView())
+    $viewer = $this->getRequest()->getUser();
+    $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setObject($user);
+      ->setObject($user)
+      ->setActionList($actions);
 
     $field_list = PhabricatorCustomField::getObjectFields(
       $user,

@@ -5,10 +5,12 @@ final class DiffusionBrowseSearchController extends DiffusionBrowseController {
   public function processRequest() {
     $drequest = $this->diffusionRequest;
 
+    $actions = $this->buildActionView($drequest);
+    $properties = $this->buildPropertyView($drequest, $actions);
+
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($this->buildHeaderView($drequest))
-      ->setActionList($this->buildActionView($drequest))
-      ->setPropertyList($this->buildPropertyView($drequest));
+      ->addPropertyList($properties);
 
     $content = array();
 

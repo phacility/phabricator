@@ -9,7 +9,7 @@ final class PhabricatorFileUploadDialogController
 
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
-      ->setTitle(pht('Upload Image'))
+      ->setTitle(pht('Upload File'))
       ->appendChild(pht(
         'To add files, drag and drop them into the comment text area.'))
       ->addCancelButton('/', pht('Close'));

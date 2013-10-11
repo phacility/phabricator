@@ -70,12 +70,11 @@ final class DiffusionHistoryController extends DiffusionController {
       ->setHeader($this->renderPathLinks($drequest, $mode = 'history'));
 
     $actions = $this->buildActionView($drequest);
-    $properties = $this->buildPropertyView($drequest);
+    $properties = $this->buildPropertyView($drequest, $actions);
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
 
     $crumbs = $this->buildCrumbs(
       array(
@@ -143,11 +142,15 @@ final class DiffusionHistoryController extends DiffusionController {
     return $view;
   }
 
-  protected function buildPropertyView(DiffusionRequest $drequest) {
+  protected function buildPropertyView(
+    DiffusionRequest $drequest,
+    PhabricatorActionListView $actions) {
+
     $viewer = $this->getRequest()->getUser();
 
-    $view = id(new PhabricatorPropertyListView())
-      ->setUser($viewer);
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setActionList($actions);
 
     $stable_commit = $drequest->getStableCommitName();
     $callsign = $drequest->getRepository()->getCallsign();

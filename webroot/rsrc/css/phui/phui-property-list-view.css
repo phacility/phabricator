@@ -1,12 +1,12 @@
 /**
- * @provides phabricator-property-list-view-css
+ * @provides phui-property-list-view-css
  */
 
-.phabricator-property-list-view {
+.phui-property-list-view {
   background-color: #fff;
 }
 
-.phabricator-property-list-view .keyboard-shortcuts-available {
+.phui-property-list-view .keyboard-shortcuts-available {
   float: right;
   height: 16px;
   margin: 12px 10px -28px 0px;
@@ -23,30 +23,30 @@
   display: none;
 }
 
-.phabricator-property-list-container +
-  .phabricator-property-list-section-header {
-  border-color: {$lightgreyborder};
+.phui-property-list-section +
+  .phui-property-list-section {
+  border-color: {$thinblueborder};
   border-style: solid;
   border-width: 1px 0 0;
 }
 
-.device-desktop .phabricator-property-list-container {
+.device-desktop .phui-property-list-container {
   padding: 12px 0 12px 0;
   width: 100%;
 }
 
-.device .phabricator-property-list-container {
+.device .phui-property-list-container {
   padding: 12px 0 4px 0;
 }
 
-.phabricator-property-list-key {
+.phui-property-list-key {
   color: {$bluetext};
   font-weight: bold;
   overflow: hidden;
   white-space: nowrap;
 }
 
-.device-desktop .phabricator-property-list-key {
+.device-desktop .phui-property-list-key {
   width: 18%;
   margin-left: 1%;
   text-align: right;
@@ -55,44 +55,47 @@
   margin-bottom: 4px;
 }
 
-.device .phabricator-property-list-key {
+.device .phui-property-list-key {
   padding-left: 8px;
 }
 
-.phabricator-property-list-value {
+.phui-property-list-value {
   color: {$darkgreytext};
   overflow: hidden;
   line-height: 17px;
 }
 
-.device-desktop .phabricator-property-list-value {
+.device-desktop .phui-property-list-value {
   width: 78%;
   margin-left: 1%;
   float: left;
   margin-bottom: 4px;
 }
 
-.device .phabricator-property-list-value {
+.device .phui-property-list-value {
   padding-left: 16px;
   margin-bottom: 8px;
 }
 
-.phabricator-property-list-section-header {
+.phui-property-list-section-header {
   color: {$bluetext};
   padding: 12px 16px 0px;
   text-transform: uppercase;
   font-weight: 700;
 }
 
-.phabricator-property-list-section-header + .phabricator-property-list-text-content {
-  border-top: none;
+.device .phui-property-list-section-header {
+  padding-left: 8px;
 }
 
-.phabricator-property-list-text-content {
+.phui-property-list-text-content {
   padding: 12px 16px;
   background: #fff;
   overflow: hidden;
-  border-top: 1px solid {$lightblueborder};
+}
+
+.device .phui-property-list-text-content {
+  padding: 8px;
 }
 
 /* In the common case where we immediately follow a header, move back up 30px
@@ -104,17 +107,17 @@
 
 .device-desktop .phui-header-view
   + .phabricator-action-list-view
-  + .phabricator-property-list-view {
+  + .phui-property-list-view {
   margin-top: 0px;
 }
 
 
-.phabricator-property-list-image {
+.phui-property-list-image {
   margin: auto;
   max-width: 95%;
 }
 
-.phabricator-property-list-audio {
+.phui-property-list-audio {
   display: block;
   margin: 16px auto;
   width: 50%;
@@ -123,28 +126,28 @@
 
 /* When tags appear in property lists, give them a little more vertical
    spacing. */
-.phabricator-property-list-view .phabricator-tag-view {
+.phui-property-list-view .phabricator-tag-view {
   margin: 2px 0;
 }
 
-.phabricator-property-list-properties-wrap {
+.phui-property-list-properties-wrap {
   float: left;
   width: 78%;
 }
 
-.device .phabricator-property-list-properties-wrap {
+.device .phui-property-list-properties-wrap {
   width: auto;
   border: none;
 }
 
-.phabricator-property-list-actions {
+.phui-property-list-actions {
   width: 20%;
   float: right;
   margin-right: 12px;
   border-left: 1px solid {$thinblueborder};
 }
 
-.device .phabricator-property-list-actions {
+.device .phui-property-list-actions {
   float: none;
   width: auto;
   margin: -12px 0 12px 0;

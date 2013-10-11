@@ -55,9 +55,10 @@ final class PhluxViewController extends PhluxController {
 
     $display_value = json_encode($var->getVariableValue());
 
-    $properties = id(new PhabricatorPropertyListView())
+    $properties = id(new PHUIPropertyListView())
       ->setUser($user)
       ->setObject($var)
+      ->setActionList($actions)
       ->addProperty(pht('Value'), $display_value);
 
     $xactions = id(new PhluxTransactionQuery())
@@ -76,8 +77,7 @@ final class PhluxViewController extends PhluxController {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
 
     return $this->buildApplicationPage(
       array(

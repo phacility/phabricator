@@ -112,7 +112,7 @@ $package_spec = array(
 
     'phabricator-application-launch-view-css',
     'phabricator-action-list-view-css',
-    'phabricator-property-list-view-css',
+    'phui-property-list-view-css',
     'phabricator-tag-view-css',
     'phui-list-view-css',
   ),

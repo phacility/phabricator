@@ -67,7 +67,7 @@ final class LegalpadDocumentViewController extends LegalpadController {
       ->setPolicyObject($document);
 
     $actions = $this->buildActionView($document);
-    $properties = $this->buildPropertyView($document, $engine);
+    $properties = $this->buildPropertyView($document, $engine, $actions);
 
     $comment_form_id = celerity_generate_unique_node_id();
 
@@ -88,8 +88,7 @@ final class LegalpadDocumentViewController extends LegalpadController {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
 
     $content = array(
       $crumbs,
@@ -149,13 +148,15 @@ final class LegalpadDocumentViewController extends LegalpadController {
 
   private function buildPropertyView(
     LegalpadDocument $document,
-    PhabricatorMarkupEngine $engine) {
+    PhabricatorMarkupEngine $engine,
+    PhabricatorActionListView $actions) {
 
     $user = $this->getRequest()->getUser();
 
-    $properties = id(new PhabricatorPropertyListView())
+    $properties = id(new PHUIPropertyListView())
       ->setUser($user)
-      ->setObject($document);
+      ->setObject($document)
+      ->setActionList($actions);
 
     $properties->addProperty(
       pht('Last Updated'),

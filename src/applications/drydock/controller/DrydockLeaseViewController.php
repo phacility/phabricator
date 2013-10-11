@@ -25,7 +25,7 @@ final class DrydockLeaseViewController extends DrydockController {
       ->setHeader($title);
 
     $actions = $this->buildActionListView($lease);
-    $properties = $this->buildPropertyListView($lease);
+    $properties = $this->buildPropertyListView($lease, $actions);
 
     $pager = new AphrontPagerView();
     $pager->setURI(new PhutilURI($lease_uri), 'offset');
@@ -47,8 +47,7 @@ final class DrydockLeaseViewController extends DrydockController {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
 
     return $this->buildApplicationPage(
       array(
@@ -84,8 +83,12 @@ final class DrydockLeaseViewController extends DrydockController {
     return $view;
   }
 
-  private function buildPropertyListView(DrydockLease $lease) {
-    $view = new PhabricatorPropertyListView();
+  private function buildPropertyListView(
+    DrydockLease $lease,
+    PhabricatorActionListView $actions) {
+
+    $view = new PHUIPropertyListView();
+    $view->setActionList($actions);
 
     switch ($lease->getStatus()) {
       case DrydockLeaseStatus::STATUS_ACTIVE:

@@ -160,9 +160,10 @@ final class ReleephBranchViewController extends ReleephProjectController
         ->setHref($history_uri)
         ->setIcon('transcript'));
 
-    $properties = id(new PhabricatorPropertyListView())
+    $properties = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setObject($branch);
+      ->setObject($branch)
+      ->setActionList($actions);
 
     $properties->addProperty(
       pht('Branch'),
@@ -170,8 +171,7 @@ final class ReleephBranchViewController extends ReleephProjectController
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
   }
 
 }

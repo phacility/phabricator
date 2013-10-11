@@ -204,6 +204,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'db',
         'name' => 'legalpad',
       ),
+      'db.policy' => array(
+        'type' => 'db',
+        'name' => 'policy',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -1663,6 +1667,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       '20131006.hdisable.sql' => array(
         'type' => 'sql',
         'name' => $this->getPatchPath('20131006.hdisable.sql'),
+      ),
+      '20131010.pstorage.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131010.pstorage.sql'),
       ),
     );
   }

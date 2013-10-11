@@ -85,7 +85,7 @@ final class DivinerBookController extends DivinerController {
 
   private function buildPropertyList(DivinerLiveBook $book) {
     $user = $this->getRequest()->getUser();
-    $view = id(new PhabricatorPropertyListView())
+    $view = id(new PHUIPropertyListView())
       ->setUser($user);
 
     $policies = PhabricatorPolicyQuery::renderPolicyDescriptions(

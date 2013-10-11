@@ -1149,7 +1149,7 @@ celerity_register_resource_map(array(
   ),
   'diviner-shared-css' =>
   array(
-    'uri' => '/res/cba9c99e/rsrc/css/diviner/diviner-shared.css',
+    'uri' => '/res/2e831eea/rsrc/css/diviner/diviner-shared.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3387,15 +3387,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/projects/project-tag.css',
   ),
-  'phabricator-property-list-view-css' =>
-  array(
-    'uri' => '/res/31912bb1/rsrc/css/layout/phabricator-property-list-view.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/layout/phabricator-property-list-view.css',
-  ),
   'phabricator-remarkup-css' =>
   array(
     'uri' => '/res/7e8988dd/rsrc/css/core/remarkup.css',
@@ -3760,7 +3751,7 @@ celerity_register_resource_map(array(
   ),
   'phui-document-view-css' =>
   array(
-    'uri' => '/res/40e39942/rsrc/css/phui/phui-document.css',
+    'uri' => '/res/f744b3b2/rsrc/css/phui/phui-document.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3796,7 +3787,7 @@ celerity_register_resource_map(array(
   ),
   'phui-header-view-css' =>
   array(
-    'uri' => '/res/94208bd6/rsrc/css/phui/phui-header-view.css',
+    'uri' => '/res/d4cec460/rsrc/css/phui/phui-header-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3847,6 +3838,15 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/phui/phui-pinboard-view.css',
+  ),
+  'phui-property-list-view-css' =>
+  array(
+    'uri' => '/res/6c937c64/rsrc/css/phui/phui-property-list-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/phui/phui-property-list-view.css',
   ),
   'phui-remarkup-preview-css' =>
   array(
@@ -4220,7 +4220,7 @@ celerity_register_resource_map(array(
 ), array(
   'packages' =>
   array(
-    '7cd2ded3' =>
+    '09637a26' =>
     array(
       'name' => 'core.pkg.css',
       'symbols' =>
@@ -4265,11 +4265,11 @@ celerity_register_resource_map(array(
         37 => 'phui-icon-view-css',
         38 => 'phabricator-application-launch-view-css',
         39 => 'phabricator-action-list-view-css',
-        40 => 'phabricator-property-list-view-css',
+        40 => 'phui-property-list-view-css',
         41 => 'phabricator-tag-view-css',
         42 => 'phui-list-view-css',
       ),
-      'uri' => '/res/pkg/7cd2ded3/core.pkg.css',
+      'uri' => '/res/pkg/09637a26/core.pkg.css',
       'type' => 'css',
     ),
     '64eeda79' =>
@@ -4461,15 +4461,15 @@ celerity_register_resource_map(array(
   ),
   'reverse' =>
   array(
-    'aphront-dialog-view-css' => '7cd2ded3',
-    'aphront-error-view-css' => '7cd2ded3',
-    'aphront-list-filter-view-css' => '7cd2ded3',
-    'aphront-pager-view-css' => '7cd2ded3',
-    'aphront-panel-view-css' => '7cd2ded3',
-    'aphront-table-view-css' => '7cd2ded3',
-    'aphront-tokenizer-control-css' => '7cd2ded3',
-    'aphront-tooltip-css' => '7cd2ded3',
-    'aphront-typeahead-control-css' => '7cd2ded3',
+    'aphront-dialog-view-css' => '09637a26',
+    'aphront-error-view-css' => '09637a26',
+    'aphront-list-filter-view-css' => '09637a26',
+    'aphront-pager-view-css' => '09637a26',
+    'aphront-panel-view-css' => '09637a26',
+    'aphront-table-view-css' => '09637a26',
+    'aphront-tokenizer-control-css' => '09637a26',
+    'aphront-tooltip-css' => '09637a26',
+    'aphront-typeahead-control-css' => '09637a26',
     'differential-changeset-view-css' => '4dc2311c',
     'differential-core-view-css' => '4dc2311c',
     'differential-inline-comment-editor' => '5e9e5c4e',
@@ -4483,7 +4483,7 @@ celerity_register_resource_map(array(
     'differential-table-of-contents-css' => '4dc2311c',
     'diffusion-commit-view-css' => 'c8ce2d88',
     'diffusion-icons-css' => 'c8ce2d88',
-    'global-drag-and-drop-css' => '7cd2ded3',
+    'global-drag-and-drop-css' => '09637a26',
     'inline-comment-summary-css' => '4dc2311c',
     'javelin-aphlict' => '64eeda79',
     'javelin-behavior' => '9564fa17',
@@ -4558,56 +4558,56 @@ celerity_register_resource_map(array(
     'javelin-util' => '9564fa17',
     'javelin-vector' => '9564fa17',
     'javelin-workflow' => '9564fa17',
-    'lightbox-attachment-css' => '7cd2ded3',
+    'lightbox-attachment-css' => '09637a26',
     'maniphest-task-summary-css' => '49898640',
-    'phabricator-action-list-view-css' => '7cd2ded3',
-    'phabricator-application-launch-view-css' => '7cd2ded3',
+    'phabricator-action-list-view-css' => '09637a26',
+    'phabricator-application-launch-view-css' => '09637a26',
     'phabricator-busy' => '64eeda79',
     'phabricator-content-source-view-css' => '4dc2311c',
-    'phabricator-core-css' => '7cd2ded3',
-    'phabricator-crumbs-view-css' => '7cd2ded3',
+    'phabricator-core-css' => '09637a26',
+    'phabricator-crumbs-view-css' => '09637a26',
     'phabricator-drag-and-drop-file-upload' => '5e9e5c4e',
     'phabricator-dropdown-menu' => '64eeda79',
     'phabricator-file-upload' => '64eeda79',
-    'phabricator-filetree-view-css' => '7cd2ded3',
-    'phabricator-flag-css' => '7cd2ded3',
+    'phabricator-filetree-view-css' => '09637a26',
+    'phabricator-flag-css' => '09637a26',
     'phabricator-hovercard' => '64eeda79',
-    'phabricator-jump-nav' => '7cd2ded3',
+    'phabricator-jump-nav' => '09637a26',
     'phabricator-keyboard-shortcut' => '64eeda79',
     'phabricator-keyboard-shortcut-manager' => '64eeda79',
-    'phabricator-main-menu-view' => '7cd2ded3',
+    'phabricator-main-menu-view' => '09637a26',
     'phabricator-menu-item' => '64eeda79',
-    'phabricator-nav-view-css' => '7cd2ded3',
+    'phabricator-nav-view-css' => '09637a26',
     'phabricator-notification' => '64eeda79',
-    'phabricator-notification-css' => '7cd2ded3',
-    'phabricator-notification-menu-css' => '7cd2ded3',
+    'phabricator-notification-css' => '09637a26',
+    'phabricator-notification-menu-css' => '09637a26',
     'phabricator-object-selector-css' => '4dc2311c',
     'phabricator-phtize' => '64eeda79',
     'phabricator-prefab' => '64eeda79',
     'phabricator-project-tag-css' => '49898640',
-    'phabricator-property-list-view-css' => '7cd2ded3',
-    'phabricator-remarkup-css' => '7cd2ded3',
+    'phabricator-remarkup-css' => '09637a26',
     'phabricator-shaped-request' => '5e9e5c4e',
-    'phabricator-side-menu-view-css' => '7cd2ded3',
-    'phabricator-standard-page-view' => '7cd2ded3',
-    'phabricator-tag-view-css' => '7cd2ded3',
+    'phabricator-side-menu-view-css' => '09637a26',
+    'phabricator-standard-page-view' => '09637a26',
+    'phabricator-tag-view-css' => '09637a26',
     'phabricator-textareautils' => '64eeda79',
     'phabricator-tooltip' => '64eeda79',
-    'phabricator-transaction-view-css' => '7cd2ded3',
-    'phabricator-zindex-css' => '7cd2ded3',
-    'phui-button-css' => '7cd2ded3',
-    'phui-form-css' => '7cd2ded3',
-    'phui-form-view-css' => '7cd2ded3',
-    'phui-header-view-css' => '7cd2ded3',
-    'phui-icon-view-css' => '7cd2ded3',
-    'phui-list-view-css' => '7cd2ded3',
-    'phui-object-item-list-view-css' => '7cd2ded3',
-    'phui-spacing-css' => '7cd2ded3',
-    'sprite-apps-large-css' => '7cd2ded3',
-    'sprite-gradient-css' => '7cd2ded3',
-    'sprite-icons-css' => '7cd2ded3',
-    'sprite-menu-css' => '7cd2ded3',
-    'sprite-status-css' => '7cd2ded3',
-    'syntax-highlighting-css' => '7cd2ded3',
+    'phabricator-transaction-view-css' => '09637a26',
+    'phabricator-zindex-css' => '09637a26',
+    'phui-button-css' => '09637a26',
+    'phui-form-css' => '09637a26',
+    'phui-form-view-css' => '09637a26',
+    'phui-header-view-css' => '09637a26',
+    'phui-icon-view-css' => '09637a26',
+    'phui-list-view-css' => '09637a26',
+    'phui-object-item-list-view-css' => '09637a26',
+    'phui-property-list-view-css' => '09637a26',
+    'phui-spacing-css' => '09637a26',
+    'sprite-apps-large-css' => '09637a26',
+    'sprite-gradient-css' => '09637a26',
+    'sprite-icons-css' => '09637a26',
+    'sprite-menu-css' => '09637a26',
+    'sprite-status-css' => '09637a26',
+    'syntax-highlighting-css' => '09637a26',
   ),
 ));

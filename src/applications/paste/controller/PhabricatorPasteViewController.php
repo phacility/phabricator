@@ -68,12 +68,11 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
     $header = $this->buildHeaderView($paste);
     $actions = $this->buildActionView($user, $paste, $file);
-    $properties = $this->buildPropertyView($paste, $fork_phids);
+    $properties = $this->buildPropertyView($paste, $fork_phids, $actions);
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
 
     $source_code = $this->buildSourceCodeView(
       $paste,
@@ -206,12 +205,14 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
   private function buildPropertyView(
     PhabricatorPaste $paste,
-    array $child_phids) {
+    array $child_phids,
+    PhabricatorActionListView $actions) {
 
     $user = $this->getRequest()->getUser();
-    $properties = id(new PhabricatorPropertyListView())
+    $properties = id(new PHUIPropertyListView())
       ->setUser($user)
-      ->setObject($paste);
+      ->setObject($paste)
+      ->setActionList($actions);
 
     $properties->addProperty(
       pht('Author'),

@@ -1,12 +1,32 @@
 <?php
 
-final class PhabricatorPolicy {
+final class PhabricatorPolicy
+  extends PhabricatorPolicyDAO {
 
-  private $phid;
+  const ACTION_ACCEPT = 'accept';
+  const ACTION_DENY = 'deny';
+
   private $name;
   private $type;
   private $href;
   private $icon;
+
+  protected $rules = array();
+  protected $defaultAction = self::ACTION_DENY;
+
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_AUX_PHID => true,
+      self::CONFIG_SERIALIZATION => array(
+        'rules' => self::SERIALIZATION_JSON,
+      ),
+    ) + parent::getConfiguration();
+  }
+
+  public function generatePHID() {
+    return PhabricatorPHID::generateNewPHID(
+      PhabricatorPolicyPHIDTypePolicy::TYPECONST);
+  }
 
   public static function newFromPolicyAndHandle(
     $policy_identifier,
@@ -48,6 +68,8 @@ final class PhabricatorPolicy {
         break;
     }
 
+    $policy->makeEphemeral();
+
     return $policy;
   }
 
@@ -67,15 +89,6 @@ final class PhabricatorPolicy {
 
   public function getName() {
     return $this->name;
-  }
-
-  public function setPHID($phid) {
-    $this->phid = $phid;
-    return $this;
-  }
-
-  public function getPHID() {
-    return $this->phid;
   }
 
   public function setHref($href) {

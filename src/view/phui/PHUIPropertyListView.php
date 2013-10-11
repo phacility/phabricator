@@ -1,12 +1,13 @@
 <?php
 
-final class PhabricatorPropertyListView extends AphrontView {
+final class PHUIPropertyListView extends AphrontView {
 
   private $parts = array();
   private $hasKeyboardShortcuts;
   private $object;
   private $invokedWillRenderEvent;
   private $actionList;
+  private $tabs;
 
   protected function canAppendChild() {
     return false;
@@ -47,6 +48,11 @@ final class PhabricatorPropertyListView extends AphrontView {
 
     $this->parts[] = $current;
     return $this;
+  }
+
+  public function setTabs(PHUIListView $tabs) {
+    $this->tabs = $tabs;
+    return $tabs;
   }
 
   public function addSectionHeader($name) {
@@ -90,7 +96,7 @@ final class PhabricatorPropertyListView extends AphrontView {
   public function render() {
     $this->invokeWillRenderEvent();
 
-    require_celerity_resource('phabricator-property-list-view-css');
+    require_celerity_resource('phui-property-list-view-css');
 
     $items = array();
     foreach ($this->parts as $part) {
@@ -114,9 +120,12 @@ final class PhabricatorPropertyListView extends AphrontView {
     return phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-property-list-view',
+        'class' => 'phui-property-list-section',
       ),
-      $items);
+      array(
+        $this->tabs,
+        $items,
+      ));
   }
 
   private function renderPropertyPart(array $part) {
@@ -132,14 +141,14 @@ final class PhabricatorPropertyListView extends AphrontView {
       $items[] = phutil_tag(
         'dt',
         array(
-          'class' => 'phabricator-property-list-key',
+          'class' => 'phui-property-list-key',
         ),
         array($key, ' '));
 
       $items[] = phutil_tag(
         'dd',
         array(
-          'class' => 'phabricator-property-list-value',
+          'class' => 'phui-property-list-value',
         ),
         array($value, ' '));
     }
@@ -147,7 +156,7 @@ final class PhabricatorPropertyListView extends AphrontView {
     $list = phutil_tag(
       'dl',
       array(
-        'class' => 'phabricator-property-list-properties',
+        'class' => 'phui-property-list-properties',
       ),
       $items);
 
@@ -159,7 +168,7 @@ final class PhabricatorPropertyListView extends AphrontView {
     $list = phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-property-list-properties-wrap',
+        'class' => 'phui-property-list-properties-wrap',
       ),
       array($shortcuts, $list));
 
@@ -168,7 +177,7 @@ final class PhabricatorPropertyListView extends AphrontView {
       $action_list = phutil_tag(
         'div',
         array(
-          'class' => 'phabricator-property-list-actions',
+          'class' => 'phui-property-list-actions',
         ),
         $this->actionList);
       $this->actionList = null;
@@ -177,7 +186,7 @@ final class PhabricatorPropertyListView extends AphrontView {
     return phutil_tag(
         'div',
         array(
-          'class' => 'phabricator-property-list-container grouped',
+          'class' => 'phui-property-list-container grouped',
         ),
         array($action_list, $list));
   }
@@ -186,16 +195,16 @@ final class PhabricatorPropertyListView extends AphrontView {
     return phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-property-list-section-header',
+        'class' => 'phui-property-list-section-header',
       ),
       $part['name']);
   }
 
   private function renderTextPart(array $part) {
     $classes = array();
-    $classes[] = 'phabricator-property-list-text-content';
+    $classes[] = 'phui-property-list-text-content';
     if ($part['type'] == 'image') {
-      $classes[] = 'phabricator-property-list-image-content';
+      $classes[] = 'phui-property-list-image-content';
     }
     return phutil_tag(
       'div',

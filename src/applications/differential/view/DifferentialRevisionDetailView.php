@@ -68,7 +68,7 @@ final class DifferentialRevisionDetailView extends AphrontView {
       $actions->addAction($obj);
     }
 
-    $properties = id(new PhabricatorPropertyListView())
+    $properties = id(new PHUIPropertyListView())
       ->setUser($user)
       ->setObject($revision);
 
@@ -110,11 +110,11 @@ final class DifferentialRevisionDetailView extends AphrontView {
       }
     }
     $properties->setHasKeyboardShortcuts(true);
+    $properties->setActionList($actions);
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setActionList($actions)
-      ->setPropertyList($properties);
+      ->addPropertyList($properties);
 
     return $object_box;
   }

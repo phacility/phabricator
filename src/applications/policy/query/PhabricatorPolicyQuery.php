@@ -4,6 +4,7 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
 
   private $viewer;
   private $object;
+  private $phids;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -12,6 +13,11 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
 
   public function setObject(PhabricatorPolicyInterface $object) {
     $this->object = $object;
+    return $this;
+  }
+
+  public function withPHIDs(array $phids) {
+    $this->phids = $phids;
     return $this;
   }
 
@@ -68,9 +74,6 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
     if (!$this->viewer) {
       throw new Exception('Call setViewer() before execute()!');
     }
-    if (!$this->object) {
-      throw new Exception('Call setObject() before execute()!');
-    }
 
     $results = $this->getGlobalPolicies();
 
@@ -93,13 +96,15 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
     $results = mpull($results, null, 'getPHID');
 
     $other_policies = array();
-    $capabilities = $this->object->getCapabilities();
-    foreach ($capabilities as $capability) {
-      $policy = $this->object->getPolicy($capability);
-      if (!$policy) {
-        continue;
+    if ($this->object) {
+      $capabilities = $this->object->getCapabilities();
+      foreach ($capabilities as $capability) {
+        $policy = $this->object->getPolicy($capability);
+        if (!$policy) {
+          continue;
+        }
+        $other_policies[$policy] = $policy;
       }
-      $other_policies[$policy] = $policy;
     }
 
     // If this install doesn't have "Public" enabled, remove it as an option
@@ -126,6 +131,15 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
     }
 
     $results = msort($results, 'getSortKey');
+
+    if ($this->phids) {
+      $phids = array_fuse($this->phids);
+      foreach ($results as $key => $result) {
+        if (empty($phids[$result->getPHID()])) {
+          unset($results[$key]);
+        }
+      }
+    }
 
     return $results;
   }
@@ -160,7 +174,8 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
       $results[$constant] = id(new PhabricatorPolicy())
         ->setType(PhabricatorPolicyType::TYPE_GLOBAL)
         ->setPHID($constant)
-        ->setName(self::getGlobalPolicyName($constant));
+        ->setName(self::getGlobalPolicyName($constant))
+        ->makeEphemeral();
     }
 
     return $results;
