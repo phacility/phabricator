@@ -252,6 +252,10 @@ final class PhabricatorProjectProfileController
       pht('Created'),
       phabricator_datetime($project->getDateCreated(), $viewer));
 
+    if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ARCHIVED) {
+      $view->addProperty(pht('Archived'), '');
+    }
+
     return $view;
   }
 
