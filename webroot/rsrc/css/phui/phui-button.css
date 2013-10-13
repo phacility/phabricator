@@ -192,6 +192,10 @@ a.policy-control span.phui-icon-view {
   left: 7px;
 }
 
+.dropdown-menu-frame .phabricator-menu-item-selected {
+  background: {$lightblue};
+}
+
 .dropdown-menu-frame a:hover {
   background: #005588;
   background-image: linear-gradient(to bottom, #3b86c4, #2b628f);

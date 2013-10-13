@@ -17,10 +17,15 @@ JX.install('PhabricatorMenuItem', {
     _action : null,
 
     render : function() {
+      var attrs = {
+        href: this.getHref(),
+        meta: { item: this },
+        className: this.getSelected() ? 'phabricator-menu-item-selected' : null
+      };
+
       if (this.getDisabled()) {
-        return JX.$N('span', this.getName());
+        return JX.$N('span', attrs, this.getName());
       } else {
-        var attrs = { href : this.getHref(), meta : { item : this } };
         return JX.$N('a', attrs, this.getName());
       }
     },
@@ -31,9 +36,10 @@ JX.install('PhabricatorMenuItem', {
   },
 
   properties : {
-    name : '',
-    href : '',
-    disabled : false
+    name: '',
+    href: '',
+    disabled: false,
+    selected: false
   }
 
 });

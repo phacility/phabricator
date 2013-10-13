@@ -120,6 +120,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
         'order' => $order,
         'icons' => $icons,
         'labels' => $labels,
+        'value' => $this->getValue(),
       ));
 
     $selected = $flat_options[$this->getValue()];

@@ -10,6 +10,7 @@
 JX.behavior('policy-control', function(config) {
   var control = JX.$(config.controlID);
   var input = JX.$(config.inputID);
+  var value = config.value;
 
   var menu = new JX.PhabricatorDropdownMenu(control)
     .setWidth(260);
@@ -39,7 +40,12 @@ JX.behavior('policy-control', function(config) {
               JX.DOM.find(control, 'span', 'policy-label'),
               render);
             input.value = phid;
+            value = phid;
           }, phid, render));
+
+        if (phid == value) {
+          item.setSelected(true);
+        }
 
         menu.addItem(item);
       }
