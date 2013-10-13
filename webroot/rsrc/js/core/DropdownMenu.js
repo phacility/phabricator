@@ -118,6 +118,12 @@ JX.install('PhabricatorDropdownMenu', {
       if (!item) {
         return;
       }
+
+      if (item.getDisabled()) {
+        e.prevent();
+        return;
+      }
+
       item.select();
       e.prevent();
       this.close();
