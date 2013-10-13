@@ -170,6 +170,28 @@ button.link:hover {
   color: {$lightgreytext};
 }
 
+.dropdown-menu-frame span.phui-icon-view {
+  display: inline-block;
+  padding: 0;
+  margin: 2px 8px -2px 4px;
+}
+
+a.policy-control {
+  width: 240px;
+  text-align: left;
+}
+
+a.policy-control .caret {
+  float: right;
+}
+
+a.policy-control span.phui-icon-view {
+  /* NOTE: Nudge these icons a little bit. Should this be for all
+     dropdown buttons? */
+  top: 4px;
+  left: 7px;
+}
+
 .dropdown-menu-frame a:hover {
   background: #005588;
   background-image: linear-gradient(to bottom, #3b86c4, #2b628f);

@@ -18,9 +18,9 @@ final class PhabricatorPolicyType extends PhabricatorPolicyConstants {
   public static function getPolicyTypeName($type) {
     switch ($type) {
       case self::TYPE_GLOBAL:
-        return pht('Global Policies');
+        return pht('Basic Policies');
       case self::TYPE_PROJECT:
-        return pht('Members of Project');
+        return pht('Members of Project...');
       case self::TYPE_MASKED:
       default:
         return pht('Other Policies');
