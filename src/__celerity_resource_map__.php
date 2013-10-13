@@ -2600,7 +2600,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-magical-init' =>
   array(
-    'uri' => '/res/7c6c8d5a/rsrc/externals/javelin/core/init.js',
+    'uri' => '/res/374d1f02/rsrc/externals/javelin/core/init.js',
     'type' => 'js',
     'requires' =>
     array(

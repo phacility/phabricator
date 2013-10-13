@@ -67,13 +67,15 @@
       for (var ii = 0; ii < local_queue.length; ++ii) {
         var evt = local_queue[ii];
 
-        //  Sometimes IE gives us events which throw when ".type" is accessed;
-        //  just ignore them since we can't meaningfully dispatch them. TODO:
-        //  figure out where these are coming from.
+        // Sometimes IE gives us events which throw when ".type" is accessed;
+        // just ignore them since we can't meaningfully dispatch them. TODO:
+        // figure out where these are coming from.
         try { var test = evt.type; } catch (x) { continue; }
 
         if (!loaded && evt.type == 'domready') {
-          document.body && (document.body.id = null);
+          // NOTE: Firefox interprets "document.body.id = null" as the string
+          // literal "null".
+          document.body && (document.body.id = '');
           loaded = true;
           for (var jj = 0; jj < onload.length; jj++) {
             onload[jj]();
