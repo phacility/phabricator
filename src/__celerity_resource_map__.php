@@ -700,6 +700,20 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/sprite-payments.png',
     'type' => 'png',
   ),
+  '/rsrc/image/sprite-projects-X2.png' =>
+  array(
+    'hash' => '3bd29905e197068a75ace63880a2b6eb',
+    'uri' => '/res/3bd29905/rsrc/image/sprite-projects-X2.png',
+    'disk' => '/rsrc/image/sprite-projects-X2.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/sprite-projects.png' =>
+  array(
+    'hash' => 'd9ec3fa470e6523520726ef75b011a03',
+    'uri' => '/res/d9ec3fa4/rsrc/image/sprite-projects.png',
+    'disk' => '/rsrc/image/sprite-projects.png',
+    'type' => 'png',
+  ),
   '/rsrc/image/sprite-status-X2.png' =>
   array(
     'hash' => 'ba4921c45c4de3e624e549bef9465fd9',
@@ -4194,6 +4208,15 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/sprite-payments.css',
+  ),
+  'sprite-projects-css' =>
+  array(
+    'uri' => '/res/3ff34b69/rsrc/css/sprite-projects.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/sprite-projects.css',
   ),
   'sprite-status-css' =>
   array(

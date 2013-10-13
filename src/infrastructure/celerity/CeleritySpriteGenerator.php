@@ -337,6 +337,38 @@ final class CeleritySpriteGenerator {
     return $sheet;
   }
 
+  public function buildProjectsSheet() {
+    $icons = $this->getDirectoryList('projects_1x');
+    $scales = array(
+      '1x' => 1,
+      '2x' => 2,
+    );
+    $template = id(new PhutilSprite())
+      ->setSourceSize(50, 50);
+
+    $sprites = array();
+    $prefix = 'projects_';
+    foreach ($icons as $icon) {
+      $sprite = id(clone $template)
+        ->setName($prefix.$icon)
+        ->setTargetCSS('.'.$prefix.$icon);
+
+      foreach ($scales as $scale_key => $scale) {
+        $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
+        $sprite->setSourceFile($path, $scale);
+      }
+      $sprites[] = $sprite;
+    }
+
+    $sheet = $this->buildSheet('projects', true);
+    $sheet->setScales($scales);
+    foreach ($sprites as $sprite) {
+      $sheet->addSprite($sprite);
+    }
+
+    return $sheet;
+  }
+
   public function buildPaymentsSheet() {
     $icons = $this->getDirectoryList('payments_2x');
     $scales = array(

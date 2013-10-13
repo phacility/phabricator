@@ -40,6 +40,7 @@ $sheets = array(
   'gradient' => $generator->buildGradientSheet(),
   'login' => $generator->buildLoginSheet(),
   'status' => $generator->buildStatusSheet(),
+  'projects' => $generator->buildProjectsSheet(),
 );
 
 list($err) = exec_manual('optipng');
