@@ -202,8 +202,14 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       require_celerity_resource('javelin-behavior-error-log');
     }
 
+    if ($user) {
+      $viewer = $user;
+    } else {
+      $viewer = new PhabricatorUser();
+    }
+
     $menu = id(new PhabricatorMainMenuView())
-      ->setUser($request->getUser())
+      ->setUser($viewer)
       ->setDefaultSearchScope($this->getSearchDefaultScope());
 
     if ($this->getController()) {
@@ -345,7 +351,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     $user = $request->getUser();
 
     $container = null;
-    if ($user->isLoggedIn()) {
+    if ($user && $user->isLoggedIn()) {
 
       $aphlict_object_id = celerity_generate_unique_node_id();
       $aphlict_container_id = celerity_generate_unique_node_id();
