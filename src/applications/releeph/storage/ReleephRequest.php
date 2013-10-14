@@ -55,6 +55,10 @@ final class ReleephRequest extends ReleephDAO
    */
   public function getPusherIntent() {
     $project = $this->loadReleephProject();
+    if (!$project) {
+      return null;
+    }
+
     if (!$project->getPushers()) {
       return self::INTENT_WANT;
     }
@@ -228,7 +232,10 @@ final class ReleephRequest extends ReleephDAO
   }
 
   public function loadReleephProject() {
-    return $this->loadReleephBranch()->loadReleephProject();
+    $branch = $this->loadReleephBranch();
+    if ($branch) {
+      return $branch->loadReleephProject();
+    }
   }
 
   public function loadPhabricatorRepositoryCommit() {
