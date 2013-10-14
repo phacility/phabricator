@@ -161,6 +161,11 @@ class AphrontDefaultApplicationConfiguration
         // Possibly we should add a header here like "you need to login to see
         // the thing you are trying to look at".
         $login_controller = new PhabricatorAuthStartController($request);
+
+        $auth_app_class = 'PhabricatorApplicationAuth';
+        $auth_app = PhabricatorApplication::getByClass($auth_app_class);
+        $login_controller->setCurrentApplication($auth_app);
+
         return $login_controller->processRequest();
       }
 
