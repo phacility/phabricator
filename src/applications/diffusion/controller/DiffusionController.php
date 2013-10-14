@@ -166,6 +166,12 @@ abstract class DiffusionController extends PhabricatorController {
     $path = $drequest->getPath();
     $path_parts = array_filter(explode('/', trim($path, '/')));
 
+    $divider = phutil_tag(
+      'span',
+      array(
+        'class' => 'phui-header-divider'),
+      '/');
+
     $links = array();
     if ($path_parts) {
       $links[] = phutil_tag(
@@ -177,11 +183,11 @@ abstract class DiffusionController extends PhabricatorController {
               'path' => '',
             )),
         ),
-        'r'.$drequest->getRepository()->getCallsign().'/');
+        'r'.$drequest->getRepository()->getCallsign());
+      $links[] = $divider;
       $accum = '';
       $last_key = last_key($path_parts);
       foreach ($path_parts as $key => $part) {
-        $links[] = ' ';
         $accum .= '/'.$part;
         if ($key === $last_key) {
           $links[] = $part;
@@ -195,11 +201,13 @@ abstract class DiffusionController extends PhabricatorController {
                   'path' => $accum.'/',
                 )),
             ),
-            $part.'/');
+            $part);
+          $links[] = $divider;
         }
       }
     } else {
-      $links[] = 'r'.$drequest->getRepository()->getCallsign().'/';
+      $links[] = 'r'.$drequest->getRepository()->getCallsign();
+      $links[] = $divider;
     }
 
     return $links;

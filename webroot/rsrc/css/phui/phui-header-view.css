@@ -43,6 +43,16 @@ body .phui-header-shell.phui-bleed-header
   color: {$darkbluetext};
 }
 
+.phui-header-view a {
+  color: {$darkbluetext};
+}
+
+.phui-header-divider {
+  margin: 0 4px;
+  font-weight: normal;
+  color: {$lightbluetext};
+}
+
 body.device-phone .phui-header-view {
   padding: 12px 8px;
 }
