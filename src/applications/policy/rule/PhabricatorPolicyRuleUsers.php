@@ -8,7 +8,12 @@ final class PhabricatorPolicyRuleUsers
   }
 
   public function applyRule(PhabricatorUser $viewer, $value) {
-    return isset($value[$viewer->getPHID()]);
+    foreach ($value as $phid) {
+      if ($phid == $viewer->getPHID()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public function getValueControlType() {

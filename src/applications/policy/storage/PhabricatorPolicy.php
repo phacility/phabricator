@@ -14,6 +14,8 @@ final class PhabricatorPolicy
   protected $rules = array();
   protected $defaultAction = self::ACTION_DENY;
 
+  private $ruleObjects = self::ATTACHABLE;
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -228,4 +230,55 @@ final class PhabricatorPolicy
         return $desc;
     }
   }
+
+  /**
+   * Return a list of custom rule classes (concrete subclasses of
+   * @{class:PhabricatorPolicyRule}) this policy uses.
+   *
+   * @return list<string> List of class names.
+   */
+  public function getCustomRuleClasses() {
+    $classes = array();
+
+    foreach ($this->getRules() as $rule) {
+      $class = idx($rule, 'rule');
+      try {
+        if (class_exists($class)) {
+          $classes[$class] = $class;
+        }
+      } catch (Exception $ex) {
+        continue;
+      }
+    }
+
+    return array_keys($classes);
+  }
+
+  /**
+   * Return a list of all values used by a given rule class to implement this
+   * policy. This is used to bulk load data (like project memberships) in order
+   * to apply policy filters efficiently.
+   *
+   * @param string Policy rule classname.
+   * @return list<wild> List of values used in this policy.
+   */
+  public function getCustomRuleValues($rule_class) {
+    $values = array();
+    foreach ($this->getRules() as $rule) {
+      if ($rule['rule'] == $rule_class) {
+        $values[] = $rule['value'];
+      }
+    }
+    return $values;
+  }
+
+  public function attachRuleObjects(array $objects) {
+    $this->ruleObjects = $objects;
+    return $this;
+  }
+
+  public function getRuleObjects() {
+    return $this->assertAttached($this->ruleObjects);
+  }
+
 }
