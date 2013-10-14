@@ -3,7 +3,6 @@
 final class DivinerLiveSymbol extends DivinerDAO
   implements PhabricatorPolicyInterface, PhabricatorMarkupInterface {
 
-  protected $phid;
   protected $bookPHID;
   protected $context;
   protected $type;

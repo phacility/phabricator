@@ -25,7 +25,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   const TABLE_BADCOMMIT = 'repository_badcommit';
   const TABLE_LINTMESSAGE = 'repository_lintmessage';
 
-  protected $phid;
   protected $name;
   protected $callsign;
   protected $uuid;

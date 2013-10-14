@@ -5,7 +5,6 @@ final class ReleephRequest extends ReleephDAO
     PhabricatorPolicyInterface,
     PhabricatorCustomFieldInterface {
 
-  protected $phid;
   protected $branchID;
   protected $requestUserPHID;
   protected $details = array();

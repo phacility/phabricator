@@ -10,8 +10,6 @@ final class PhameBlog extends PhameDAO
 
   const SKIN_DEFAULT = 'oblivious';
 
-  protected $id;
-  protected $phid;
   protected $name;
   protected $description;
   protected $domain;

@@ -9,7 +9,6 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
     PhabricatorTokenReceiverInterface,
     PhabricatorPolicyInterface {
 
-  protected $phid;
   protected $title;
   protected $authorPHID;
   protected $filePHID;

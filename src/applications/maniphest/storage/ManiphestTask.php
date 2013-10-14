@@ -10,7 +10,6 @@ final class ManiphestTask extends ManiphestDAO
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
 
-  protected $phid;
   protected $authorPHID;
   protected $ownerPHID;
   protected $ccPHIDs = array();

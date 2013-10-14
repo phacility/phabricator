@@ -8,7 +8,6 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
 
   protected $authorPHID;
   protected $filePHID;
-  protected $phid;
   protected $name;
   protected $isDisabled = 0;
   protected $audioPHID;

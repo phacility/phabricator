@@ -282,19 +282,9 @@ final class PhabricatorPolicyFilter {
 
     $details = array_filter(array_merge(array($more), (array)$exceptions));
 
-    // NOTE: Not every policy object has a PHID, just pull an arbitrary
-    // "unknown object" handle if this fails. We're just using this to provide
-    // a better error message if we can.
-
-    $phid = '?';
-    if (($object instanceof PhabricatorLiskDAO) ||
-        (method_exists($object, 'getPHID'))) {
-      try {
-        $phid = $object->getPHID();
-      } catch (Exception $ignored) {
-        // Ignore.
-      }
-    }
+    // NOTE: Not every type of policy object has a real PHID; just load an
+    // empty handle if a real PHID isn't available.
+    $phid = nonempty($object->getPHID(), PhabricatorPHIDConstants::PHID_VOID);
 
     $handle = id(new PhabricatorHandleQuery())
       ->setViewer($this->viewer)

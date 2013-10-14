@@ -9,7 +9,6 @@ final class LegalpadDocument extends LegalpadDAO
     PhabricatorSubscribableInterface,
     PhabricatorApplicationTransactionInterface {
 
-  protected $phid;
   protected $title;
   protected $contributorCount;
   protected $recentContributorPHIDs = array();

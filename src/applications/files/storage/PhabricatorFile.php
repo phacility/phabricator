@@ -14,7 +14,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
   const METADATA_IMAGE_WIDTH  = 'width';
   const METADATA_IMAGE_HEIGHT = 'height';
 
-  protected $phid;
   protected $name;
   protected $mimeType;
   protected $byteSize;

@@ -4,7 +4,6 @@ final class PhabricatorMetaMTAMailingList extends PhabricatorMetaMTADAO
   implements PhabricatorPolicyInterface {
 
   protected $name;
-  protected $phid;
   protected $email;
   protected $uri;
 

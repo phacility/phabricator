@@ -3,9 +3,6 @@
 final class HeraldTranscript extends HeraldDAO
   implements PhabricatorPolicyInterface {
 
-  protected $id;
-  protected $phid;
-
   protected $objectTranscript;
   protected $ruleTranscripts = array();
   protected $conditionTranscripts = array();

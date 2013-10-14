@@ -3,7 +3,6 @@
 final class ReleephBranch extends ReleephDAO
   implements PhabricatorPolicyInterface {
 
-  protected $phid;
   protected $releephProjectID;
   protected $isActive;
   protected $createdByUserPHID;

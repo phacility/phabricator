@@ -13,7 +13,6 @@ final class DifferentialRevision extends DifferentialDAO
   protected $summary = '';
   protected $testPlan = '';
 
-  protected $phid;
   protected $authorPHID;
   protected $lastReviewerPHID;
 

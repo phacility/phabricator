@@ -25,7 +25,7 @@ abstract class ConduitAPIMethod
 
   /**
    * This is mostly for compatibility with
-   * @{class:AphrontCursorPagedPolicyAwareQuery}.
+   * @{class:PhabricatorCursorPagedPolicyAwareQuery}.
    */
   public function getID() {
     return $this->getAPIMethodName();
@@ -165,6 +165,10 @@ abstract class ConduitAPIMethod
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
+
+  public function getPHID() {
+    return null;
+  }
 
   public function getCapabilities() {
     return array(

@@ -7,8 +7,6 @@ final class PhabricatorCountdown
   extends PhabricatorCountdownDAO
   implements PhabricatorPolicyInterface {
 
-  protected $id;
-  protected $phid;
   protected $title;
   protected $authorPHID;
   protected $epoch;

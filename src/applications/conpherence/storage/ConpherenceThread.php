@@ -6,8 +6,6 @@
 final class ConpherenceThread extends ConpherenceDAO
   implements PhabricatorPolicyInterface {
 
-  protected $id;
-  protected $phid;
   protected $title;
   protected $messageCount;
   protected $recentParticipantPHIDs = array();

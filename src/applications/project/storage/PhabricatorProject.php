@@ -4,7 +4,6 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   implements PhabricatorPolicyInterface {
 
   protected $name;
-  protected $phid;
   protected $status = PhabricatorProjectStatus::STATUS_ACTIVE;
   protected $authorPHID;
   protected $subprojectPHIDs = array();

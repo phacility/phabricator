@@ -3,7 +3,6 @@
 final class DivinerLiveBook extends DivinerDAO
   implements PhabricatorPolicyInterface {
 
-  protected $phid;
   protected $name;
   protected $viewPolicy;
   protected $configurationData = array();

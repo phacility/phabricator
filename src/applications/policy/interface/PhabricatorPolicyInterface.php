@@ -2,6 +2,7 @@
 
 interface PhabricatorPolicyInterface {
 
+  public function getPHID();
   public function getCapabilities();
   public function getPolicy($capability);
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer);
