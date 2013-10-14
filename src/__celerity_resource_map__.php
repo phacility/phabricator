@@ -3779,7 +3779,7 @@ celerity_register_resource_map(array(
   ),
   'phui-document-view-css' =>
   array(
-    'uri' => '/res/f744b3b2/rsrc/css/phui/phui-document.css',
+    'uri' => '/res/cac7a825/rsrc/css/phui/phui-document.css',
     'type' => 'css',
     'requires' =>
     array(
