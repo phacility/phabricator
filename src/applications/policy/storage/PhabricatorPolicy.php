@@ -64,6 +64,12 @@ final class PhabricatorPolicy
         $policy->setType(PhabricatorPolicyType::TYPE_PROJECT);
         $policy->setName($handle->getName());
         break;
+      case PhabricatorPolicyPHIDTypePolicy::TYPECONST:
+        // TODO: This creates a weird handle-based version of a rule policy.
+        // It behaves correctly, but can't be applied since it doesn't have
+        // any rules. It is used to render transactions, and might need some
+        // cleanup.
+        break;
       default:
         $policy->setType(PhabricatorPolicyType::TYPE_MASKED);
         $policy->setName($handle->getFullName());
@@ -81,6 +87,9 @@ final class PhabricatorPolicy
   }
 
   public function getType() {
+    if (!$this->type) {
+      return PhabricatorPolicyType::TYPE_CUSTOM;
+    }
     return $this->type;
   }
 
@@ -90,6 +99,9 @@ final class PhabricatorPolicy
   }
 
   public function getName() {
+    if (!$this->name) {
+      return pht('Custom Policy');
+    }
     return $this->name;
   }
 
@@ -116,6 +128,7 @@ final class PhabricatorPolicy
       case PhabricatorPolicyType::TYPE_PROJECT:
         return 'policy-project';
       break;
+      case PhabricatorPolicyType::TYPE_CUSTOM:
       case PhabricatorPolicyType::TYPE_MASKED:
         return 'policy-custom';
       break;
@@ -173,6 +186,10 @@ final class PhabricatorPolicy
           return pht(
             '%s can take this action.',
             $handle->getFullName());
+        } else if ($type == PhabricatorPolicyPHIDTypePolicy::TYPECONST) {
+          return pht(
+            'This object has a custom policy controlling who can take this '.
+            'action.');
         } else {
           return pht(
             'This object has an unknown or invalid policy setting ("%s").',
@@ -222,6 +239,8 @@ final class PhabricatorPolicy
     switch ($this->getType()) {
       case PhabricatorPolicyType::TYPE_PROJECT:
         return pht('%s (Project)', $desc);
+      case PhabricatorPolicyType::TYPE_CUSTOM:
+        return pht('Custom Policy');
       case PhabricatorPolicyType::TYPE_MASKED:
         return pht(
           '%s (You do not have permission to view policy details.)',
