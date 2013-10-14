@@ -147,6 +147,7 @@ final class PhabricatorPolicyQuery
         ->setType(PhabricatorPolicyType::TYPE_GLOBAL)
         ->setPHID($constant)
         ->setName(self::getGlobalPolicyName($constant))
+        ->setShortName(self::getGlobalPolicyShortName($constant))
         ->makeEphemeral();
     }
 
@@ -165,6 +166,15 @@ final class PhabricatorPolicyQuery
         return pht('No One');
       default:
         return pht('Unknown Policy');
+    }
+  }
+
+  private static function getGlobalPolicyShortName($policy) {
+    switch ($policy) {
+      case PhabricatorPolicies::POLICY_PUBLIC:
+        return pht('Public');
+      default:
+        return null;
     }
   }
 

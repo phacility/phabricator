@@ -224,7 +224,7 @@ final class PHUIHeaderView extends AphrontView {
         'href' => '/policy/explain/'.$phid.'/'.$view_capability.'/',
         'sigil' => 'workflow',
       ),
-      $policy->getName());
+      $policy->getShortName());
 
     return array($icon, $link);
   }

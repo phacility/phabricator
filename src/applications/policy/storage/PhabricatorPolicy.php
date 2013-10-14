@@ -8,6 +8,7 @@ final class PhabricatorPolicy
   const ACTION_DENY = 'deny';
 
   private $name;
+  private $shortName;
   private $type;
   private $href;
   private $icon;
@@ -104,6 +105,18 @@ final class PhabricatorPolicy
       return pht('Custom Policy');
     }
     return $this->name;
+  }
+
+  public function setShortName($short_name) {
+    $this->shortName = $short_name;
+    return $this;
+  }
+
+  public function getShortName() {
+    if ($this->shortName) {
+      return $this->shortName;
+    }
+    return $this->getName();
   }
 
   public function setHref($href) {
