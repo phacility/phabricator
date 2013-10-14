@@ -128,12 +128,14 @@ final class PhabricatorFileQuery
         $object_phids[$phid] = true;
       }
     }
+    $object_phids = array_keys($object_phids);
 
     // Now, load the objects.
 
     $objects = array();
     if ($object_phids) {
       $objects = id(new PhabricatorObjectQuery())
+        ->setParentQuery($this)
         ->setViewer($this->getViewer())
         ->withPHIDs($object_phids)
         ->execute();

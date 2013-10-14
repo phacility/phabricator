@@ -87,7 +87,7 @@ final class PhabricatorPasteQuery
     return $pastes;
   }
 
-  protected function willFilterPage(array $pastes) {
+  protected function didFilterPage(array $pastes) {
     if ($this->needRawContent) {
       $pastes = $this->loadRawContent($pastes);
     }
@@ -163,6 +163,7 @@ final class PhabricatorPasteQuery
   private function loadRawContent(array $pastes) {
     $file_phids = mpull($pastes, 'getFilePHID');
     $files = id(new PhabricatorFileQuery())
+      ->setParentQuery($this)
       ->setViewer($this->getViewer())
       ->withPHIDs($file_phids)
       ->execute();

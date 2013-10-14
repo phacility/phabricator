@@ -104,13 +104,27 @@ final class PhabricatorObjectQuery
   }
 
   private function loadObjectsByPHID(array $types, array $phids) {
+    $results = array();
+
+    $workspace = $this->getObjectsFromWorkspace($phids);
+
+    foreach ($phids as $key => $phid) {
+      if (isset($workspace[$phid])) {
+        $results[$phid] = $workspace[$phid];
+        unset($phids[$key]);
+      }
+    }
+
+    if (!$phids) {
+      return $results;
+    }
+
     $groups = array();
     foreach ($phids as $phid) {
       $type = phid_get_type($phid);
       $groups[$type][] = $phid;
     }
 
-    $results = array();
     foreach ($groups as $type => $group) {
       if (isset($types[$type])) {
         $objects = $types[$type]->loadObjects($this, $group);

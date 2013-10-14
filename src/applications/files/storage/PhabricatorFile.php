@@ -764,8 +764,10 @@ final class PhabricatorFile extends PhabricatorFileDAO
       );
     }
 
+    // NOTE: Anyone is allowed to access builtin files.
+
     $files = id(new PhabricatorFileQuery())
-      ->setViewer($user)
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withTransforms($specs)
       ->execute();
 

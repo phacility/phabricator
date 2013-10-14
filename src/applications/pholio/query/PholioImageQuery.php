@@ -103,9 +103,37 @@ final class PholioImageQuery
   protected function willFilterPage(array $images) {
     assert_instances_of($images, 'PholioImage');
 
+    if ($this->getMockCache()) {
+      $mocks = $this->getMockCache();
+    } else {
+      $mock_ids = mpull($images, 'getMockID');
+      // DO NOT set needImages to true; recursion results!
+      $mocks = id(new PholioMockQuery())
+        ->setViewer($this->getViewer())
+        ->withIDs($mock_ids)
+        ->execute();
+      $mocks = mpull($mocks, null, 'getID');
+    }
+    foreach ($images as $index => $image) {
+      $mock = idx($mocks, $image->getMockID());
+      if ($mock) {
+        $image->attachMock($mock);
+      } else {
+        // mock is missing or we can't see it
+        unset($images[$index]);
+      }
+    }
+
+    return $images;
+  }
+
+  protected function didFilterPage(array $images) {
+    assert_instances_of($images, 'PholioImage');
+
     $file_phids = mpull($images, 'getFilePHID');
 
     $all_files = id(new PhabricatorFileQuery())
+      ->setParentQuery($this)
       ->setViewer($this->getViewer())
       ->withPHIDs($file_phids)
       ->execute();
@@ -127,27 +155,6 @@ final class PholioImageQuery
       if ($this->needInlineComments) {
         $inlines = idx($all_inline_comments, $image->getID(), array());
         $image->attachInlineComments($inlines);
-      }
-    }
-
-    if ($this->getMockCache()) {
-      $mocks = $this->getMockCache();
-    } else {
-      $mock_ids = mpull($images, 'getMockID');
-      // DO NOT set needImages to true; recursion results!
-      $mocks = id(new PholioMockQuery())
-        ->setViewer($this->getViewer())
-        ->withIDs($mock_ids)
-        ->execute();
-      $mocks = mpull($mocks, null, 'getID');
-    }
-    foreach ($images as $index => $image) {
-      $mock = idx($mocks, $image->getMockID());
-      if ($mock) {
-        $image->attachMock($mock);
-      } else {
-        // mock is missing or we can't see it
-        unset($images[$index]);
       }
     }
 

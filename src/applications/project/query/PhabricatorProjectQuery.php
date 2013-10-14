@@ -114,50 +114,55 @@ final class PhabricatorProjectQuery
             ($row['viewerIsMember'] !== null));
         }
       }
+    }
 
-      if ($this->needProfiles) {
-        $profiles = id(new PhabricatorProjectProfile())->loadAllWhere(
-          'projectPHID IN (%Ls)',
-          mpull($projects, 'getPHID'));
-        $profiles = mpull($profiles, null, 'getProjectPHID');
+    return $projects;
+  }
 
-        $default = null;
+  protected function didFilterPage(array $projects) {
+    if ($this->needProfiles) {
+      $profiles = id(new PhabricatorProjectProfile())->loadAllWhere(
+        'projectPHID IN (%Ls)',
+        mpull($projects, 'getPHID'));
+      $profiles = mpull($profiles, null, 'getProjectPHID');
 
-        if ($profiles) {
-          $file_phids = mpull($profiles, 'getProfileImagePHID');
-          $files = id(new PhabricatorFileQuery())
-            ->setViewer($this->getViewer())
-            ->withPHIDs($file_phids)
-            ->execute();
-          $files = mpull($files, null, 'getPHID');
-          foreach ($profiles as $profile) {
-            $file = idx($files, $profile->getProfileImagePHID());
-            if (!$file) {
-              if (!$default) {
-                $default = PhabricatorFile::loadBuiltin(
-                  $this->getViewer(),
-                  'profile.png');
-              }
-              $file = $default;
-            }
-            $profile->attachProfileImageFile($file);
-          }
-        }
+      $default = null;
 
-        foreach ($projects as $project) {
-          $profile = idx($profiles, $project->getPHID());
-          if (!$profile) {
+      if ($profiles) {
+        $file_phids = mpull($profiles, 'getProfileImagePHID');
+        $files = id(new PhabricatorFileQuery())
+          ->setParentQuery($this)
+          ->setViewer($this->getViewer())
+          ->withPHIDs($file_phids)
+          ->execute();
+        $files = mpull($files, null, 'getPHID');
+        foreach ($profiles as $profile) {
+          $file = idx($files, $profile->getProfileImagePHID());
+          if (!$file) {
             if (!$default) {
               $default = PhabricatorFile::loadBuiltin(
                 $this->getViewer(),
                 'profile.png');
             }
-            $profile = id(new PhabricatorProjectProfile())
-              ->setProjectPHID($project->getPHID())
-              ->attachProfileImageFile($default);
+            $file = $default;
           }
-          $project->attachProfile($profile);
+          $profile->attachProfileImageFile($file);
         }
+      }
+
+      foreach ($projects as $project) {
+        $profile = idx($profiles, $project->getPHID());
+        if (!$profile) {
+          if (!$default) {
+            $default = PhabricatorFile::loadBuiltin(
+              $this->getViewer(),
+              'profile.png');
+          }
+          $profile = id(new PhabricatorProjectProfile())
+            ->setProjectPHID($project->getPHID())
+            ->attachProfileImageFile($default);
+        }
+        $project->attachProfile($profile);
       }
     }
 
