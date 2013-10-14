@@ -1,7 +1,8 @@
 <?php
 
 final class PhabricatorPolicy
-  extends PhabricatorPolicyDAO {
+  extends PhabricatorPolicyDAO
+  implements PhabricatorPolicyInterface {
 
   const ACTION_ALLOW = 'allow';
   const ACTION_DENY = 'deny';
@@ -298,6 +299,31 @@ final class PhabricatorPolicy
 
   public function getRuleObjects() {
     return $this->assertAttached($this->ruleObjects);
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    // NOTE: We implement policies only so we can comply with the interface.
+    // The actual query skips them, as enforcing policies on policies seems
+    // perilous and isn't currently required by the application.
+    return PhabricatorPolicies::POLICY_PUBLIC;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
   }
 
 }

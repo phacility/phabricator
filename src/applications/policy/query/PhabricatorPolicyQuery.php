@@ -1,15 +1,10 @@
 <?php
 
-final class PhabricatorPolicyQuery extends PhabricatorQuery {
+final class PhabricatorPolicyQuery
+  extends PhabricatorCursorPagedPolicyAwareQuery {
 
-  private $viewer;
   private $object;
   private $phids;
-
-  public function setViewer(PhabricatorUser $viewer) {
-    $this->viewer = $viewer;
-    return $this;
-  }
 
   public function setObject(PhabricatorPolicyInterface $object) {
     $this->object = $object;
@@ -58,11 +53,7 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
     return $policies;
   }
 
-  public function execute() {
-    if (!$this->viewer) {
-      throw new Exception('Call setViewer() before execute()!');
-    }
-
+  public function loadPage() {
     if ($this->object && $this->phids) {
       throw new Exception(
         "You can not issue a policy query with both setObject() and ".
@@ -102,7 +93,7 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
 
       if ($handle_policies) {
         $handles = id(new PhabricatorHandleQuery())
-          ->setViewer($this->viewer)
+          ->setViewer($this->getViewer())
           ->withPHIDs($handle_policies)
           ->execute();
         foreach ($handle_policies as $phid) {
@@ -179,11 +170,12 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
 
   private function loadObjectPolicyPHIDs() {
     $phids = array();
+    $viewer = $this->getViewer();
 
-    if ($this->viewer->getPHID()) {
+    if ($viewer->getPHID()) {
       $projects = id(new PhabricatorProjectQuery())
-        ->setViewer($this->viewer)
-        ->withMemberPHIDs(array($this->viewer->getPHID()))
+        ->setViewer($viewer)
+        ->withMemberPHIDs(array($viewer->getPHID()))
         ->execute();
       foreach ($projects as $project) {
         $phids[] = $project->getPHID();
@@ -213,6 +205,12 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
     }
 
     return $phids;
+  }
+
+  protected function shouldDisablePolicyFiltering() {
+    // Policy filtering of policies is currently perilous and not required by
+    // the application.
+    return true;
   }
 
 }
