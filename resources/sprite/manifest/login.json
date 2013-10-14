@@ -66,6 +66,11 @@
       "rule" : ".login-Openid",
       "hash" : "9267ffbb8d4e6dee409c4d8fa2d50c0a"
     },
+    "login-Persona"     : {
+      "name" : "login-Persona",
+      "rule" : ".login-Persona",
+      "hash" : "949faf7bf5ed377c06aa480da1f42b74"
+    },
     "login-Phabricator" : {
       "name" : "login-Phabricator",
       "rule" : ".login-Phabricator",

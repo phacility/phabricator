@@ -76,4 +76,8 @@ final class PhabricatorAuthProviderPersona
     return array($this->loadOrCreateAccount($account_id), $response);
   }
 
+  protected function getLoginIcon() {
+    return 'Persona';
+  }
+
 }
