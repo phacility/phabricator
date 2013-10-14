@@ -396,7 +396,7 @@ final class PhabricatorPolicyFilter {
       $action = $policy->getDefaultAction();
     }
 
-    if ($action === PhabricatorPolicy::ACTION_ACCEPT) {
+    if ($action === PhabricatorPolicy::ACTION_ALLOW) {
       return true;
     }
 

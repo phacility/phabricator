@@ -3,7 +3,7 @@
 final class PhabricatorPolicy
   extends PhabricatorPolicyDAO {
 
-  const ACTION_ACCEPT = 'accept';
+  const ACTION_ALLOW = 'allow';
   const ACTION_DENY = 'deny';
 
   private $name;
