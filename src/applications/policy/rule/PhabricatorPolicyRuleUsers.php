@@ -38,6 +38,10 @@ final class PhabricatorPolicyRuleUsers
   }
 
   public function getValueForDisplay(PhabricatorUser $viewer, $value) {
+    if (!$value) {
+      return array();
+    }
+
     $handles = id(new PhabricatorHandleQuery())
       ->setViewer($viewer)
       ->withPHIDs($value)

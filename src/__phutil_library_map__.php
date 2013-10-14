@@ -3676,7 +3676,11 @@ phutil_register_library_map(array(
     'PhabricatorPhrequentConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorPhrictionConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorPolicies' => 'PhabricatorPolicyConstants',
-    'PhabricatorPolicy' => 'PhabricatorPolicyDAO',
+    'PhabricatorPolicy' =>
+    array(
+      0 => 'PhabricatorPolicyDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
     'PhabricatorPolicyAwareQuery' => 'PhabricatorOffsetPagedQuery',
     'PhabricatorPolicyAwareTestQuery' => 'PhabricatorPolicyAwareQuery',
     'PhabricatorPolicyCapability' => 'Phobject',
@@ -3694,7 +3698,7 @@ phutil_register_library_map(array(
     'PhabricatorPolicyManagementUnlockWorkflow' => 'PhabricatorPolicyManagementWorkflow',
     'PhabricatorPolicyManagementWorkflow' => 'PhutilArgumentWorkflow',
     'PhabricatorPolicyPHIDTypePolicy' => 'PhabricatorPHIDType',
-    'PhabricatorPolicyQuery' => 'PhabricatorQuery',
+    'PhabricatorPolicyQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorPolicyRuleAdministrators' => 'PhabricatorPolicyRule',
     'PhabricatorPolicyRuleLunarPhase' => 'PhabricatorPolicyRule',
     'PhabricatorPolicyRuleProjects' => 'PhabricatorPolicyRule',
