@@ -42,7 +42,7 @@ JX.behavior('policy-rule-editor', function(config) {
 
   JX.DOM.listen(
     JX.DOM.findAbove(root, 'form'),
-    'submit',
+    ['submit', 'didWorkflowSubmit'],
     null,
     function(e) {
       var rules = JX.DOM.find(e.getNode('tag:form'), 'input', 'rules');

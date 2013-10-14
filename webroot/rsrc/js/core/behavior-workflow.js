@@ -8,7 +8,7 @@
 
 JX.behavior('workflow', function() {
 
-  // Listen for both real
+  // Listen for both real and synthetic submit events.
   JX.Stratcom.listen(
     ['submit', 'didSyntheticSubmit'],
     ['workflow', 'tag:form'],
