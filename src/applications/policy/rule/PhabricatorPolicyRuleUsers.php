@@ -50,4 +50,8 @@ final class PhabricatorPolicyRuleUsers
     return mpull($handles, 'getFullName', 'getPHID');
   }
 
+  public function ruleHasEffect($value) {
+    return (bool)$value;
+  }
+
 }

@@ -64,4 +64,8 @@ final class PhabricatorPolicyRuleProjects
     return mpull($handles, 'getFullName', 'getPHID');
   }
 
+  public function ruleHasEffect($value) {
+    return (bool)$value;
+  }
+
 }

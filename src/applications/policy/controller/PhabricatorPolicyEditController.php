@@ -49,6 +49,7 @@ final class PhabricatorPolicyEditController
     $default_action = $policy->getDefaultAction();
     $rule_data = $policy->getRules();
 
+    $errors = array();
     if ($request->isFormPost()) {
       $data = $request->getStr('rules');
       $data = @json_decode($data, true);
@@ -83,26 +84,42 @@ final class PhabricatorPolicyEditController
         );
       }
 
+      // Filter out nonsense rules, like a "users" rule without any users
+      // actually specified.
+      $valid_rules = array();
+      foreach ($rule_data as $rule) {
+        $rule_class = $rule['rule'];
+        if ($rules[$rule_class]->ruleHasEffect($rule['value'])) {
+          $valid_rules[] = $rule;
+        }
+      }
+
+      if (!$valid_rules) {
+        $errors[] = pht('None of these policy rules have any effect.');
+      }
+
       // NOTE: Policies are immutable once created, and we always create a new
       // policy here. If we didn't, we would need to lock this endpoint down,
       // as users could otherwise just go edit the policies of objects with
       // custom policies.
 
-      $new_policy = new PhabricatorPolicy();
-      $new_policy->setRules($rule_data);
-      $new_policy->setDefaultAction($request->getStr('default'));
-      $new_policy->save();
+      if (!$errors) {
+        $new_policy = new PhabricatorPolicy();
+        $new_policy->setRules($valid_rules);
+        $new_policy->setDefaultAction($request->getStr('default'));
+        $new_policy->save();
 
-      $data = array(
-        'phid' => $new_policy->getPHID(),
-        'info' => array(
-          'name' => $new_policy->getName(),
-          'full' => $new_policy->getName(),
-          'icon' => $new_policy->getIcon(),
-        ),
-      );
+        $data = array(
+          'phid' => $new_policy->getPHID(),
+          'info' => array(
+            'name' => $new_policy->getName(),
+            'full' => $new_policy->getName(),
+            'icon' => $new_policy->getIcon(),
+          ),
+        );
 
-      return id(new AphrontAjaxResponse())->setContent($data);
+        return id(new AphrontAjaxResponse())->setContent($data);
+      }
     }
 
     // Convert rule values to display format (for example, expanding PHIDs
@@ -120,7 +137,13 @@ final class PhabricatorPolicyEditController
         'name' => 'default',
       ));
 
+    if ($errors) {
+      $errors = id(new AphrontErrorView())
+        ->setErrors($errors);
+    }
+
     $form = id(new PHUIFormLayoutView())
+      ->appendChild($errors)
       ->appendChild(
         javelin_tag(
           'input',

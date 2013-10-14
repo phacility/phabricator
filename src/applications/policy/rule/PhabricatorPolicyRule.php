@@ -34,4 +34,15 @@ abstract class PhabricatorPolicyRule {
     return $value;
   }
 
+  /**
+   * Return true if the given value creates a rule with a meaningful effect.
+   * An example of a rule with no meaningful effect is a "users" rule with no
+   * users specified.
+   *
+   * @return bool True if the value creates a meaningful rule.
+   */
+  public function ruleHasEffect($value) {
+    return true;
+  }
+
 }
