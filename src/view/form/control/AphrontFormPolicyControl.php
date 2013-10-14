@@ -54,6 +54,48 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
         'icon' => $policy->getIcon(),
       );
     }
+
+    // If we were passed several custom policy options, throw away the ones
+    // which aren't the value for this capability. For example, an object might
+    // have a custom view pollicy and a custom edit policy. When we render
+    // the selector for "Can View", we don't want to show the "Can Edit"
+    // custom policy -- if we did, the menu would look like this:
+    //
+    //   Custom
+    //     Custom Policy
+    //     Custom Policy
+    //
+    // ...where one is the "view" custom policy, and one is the "edit" custom
+    // policy.
+
+    $type_custom = PhabricatorPolicyType::TYPE_CUSTOM;
+    if (!empty($options[$type_custom])) {
+      $options[$type_custom] = array_select_keys(
+        $options[$type_custom],
+        array($this->getValue()));
+    }
+
+    // If there aren't any custom policies, add a placeholder policy so we
+    // render a menu item. This allows the user to switch to a custom policy.
+
+    if (empty($options[$type_custom])) {
+      $placeholder = new PhabricatorPolicy();
+      $placeholder->setName(pht('Custom Policy...'));
+      $options[$type_custom][$this->getCustomPolicyPlaceholder()] = array(
+        'name' => $placeholder->getName(),
+        'full' => $placeholder->getName(),
+        'icon' => $placeholder->getIcon(),
+      );
+    }
+
+    $options = array_select_keys(
+      $options,
+      array(
+        PhabricatorPolicyType::TYPE_GLOBAL,
+        PhabricatorPolicyType::TYPE_CUSTOM,
+        PhabricatorPolicyType::TYPE_PROJECT,
+      ));
+
     return $options;
   }
 
@@ -121,6 +163,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
         'icons' => $icons,
         'labels' => $labels,
         'value' => $this->getValue(),
+        'customPlaceholder' => $this->getCustomPolicyPlaceholder(),
       ));
 
     $selected = $flat_options[$this->getValue()];
@@ -165,5 +208,8 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
       ));
   }
 
+  private function getCustomPolicyPlaceholder() {
+    return 'custom:placeholder';
+  }
 
 }

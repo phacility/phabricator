@@ -10,7 +10,7 @@ final class PhabricatorPolicyRuleProjects
   }
 
   public function willApplyRules(PhabricatorUser $viewer, array $values) {
-    $values = array_unique(array_filter($values));
+    $values = array_unique(array_filter(array_mergev($values)));
     if (!$values) {
       return;
     }

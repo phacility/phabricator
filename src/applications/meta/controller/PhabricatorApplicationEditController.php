@@ -47,8 +47,16 @@ final class PhabricatorApplicationEditController
         }
 
         if (empty($policies[$new])) {
-          // Can't set the policy to something invalid.
-          continue;
+          // Not a standard policy, check for a custom policy.
+          $policy = id(new PhabricatorPolicyQuery())
+            ->setViewer($user)
+            ->withPHIDs(array($new))
+            ->executeOne();
+          if (!$policy) {
+            // Not a custom policy either. Can't set the policy to something
+            // invalid, so skip this.
+            continue;
+          }
         }
 
         if ($new == PhabricatorPolicies::POLICY_PUBLIC) {

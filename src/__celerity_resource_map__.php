@@ -2295,7 +2295,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-policy-control' =>
   array(
-    'uri' => '/res/f43ba427/rsrc/js/application/policy/behavior-policy-control.js',
+    'uri' => '/res/ce9f54c8/rsrc/js/application/policy/behavior-policy-control.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2304,6 +2304,7 @@ celerity_register_resource_map(array(
       2 => 'javelin-util',
       3 => 'phabricator-dropdown-menu',
       4 => 'phabricator-menu-item',
+      5 => 'javelin-workflow',
     ),
     'disk' => '/rsrc/js/application/policy/behavior-policy-control.js',
   ),
