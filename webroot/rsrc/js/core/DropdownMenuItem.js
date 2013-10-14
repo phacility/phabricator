@@ -17,10 +17,21 @@ JX.install('PhabricatorMenuItem', {
     _action : null,
 
     render : function() {
+      var classes = [];
+      classes.push('dropdown-menu-item');
+
+      if (this.getSelected()) {
+        classes.push('dropdown-menu-item-selected');
+      }
+
+      if (this.getDisabled()) {
+        classes.push('dropdown-menu-item-disabled');
+      }
+
       var attrs = {
         href: this.getHref(),
         meta: { item: this },
-        className: this.getSelected() ? 'phabricator-menu-item-selected' : null
+        className: classes.join(' ')
       };
 
       if (this.getDisabled()) {

@@ -156,8 +156,7 @@ button.link:hover {
   border-bottom-color: {$greyborder};
 }
 
-.dropdown-menu-frame a,
-.dropdown-menu-frame span {
+.dropdown-menu-frame .dropdown-menu-item {
   display: block;
   padding: 2px 10px;
   clear: both;
@@ -166,11 +165,11 @@ button.link:hover {
   white-space: nowrap;
 }
 
-.dropdown-menu-frame span {
+.dropdown-menu-frame .dropdown-menu-item-disabled {
   color: {$lightgreytext};
 }
 
-.dropdown-menu-frame span.phui-icon-view {
+.dropdown-menu-frame .phui-icon-view {
   display: inline-block;
   padding: 0;
   margin: 2px 8px -2px 4px;
@@ -192,7 +191,7 @@ a.policy-control span.phui-icon-view {
   left: 7px;
 }
 
-.dropdown-menu-frame .phabricator-menu-item-selected {
+.dropdown-menu-frame .dropdown-menu-item-selected {
   background: {$lightblue};
 }
 
