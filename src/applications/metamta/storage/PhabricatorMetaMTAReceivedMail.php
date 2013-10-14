@@ -120,10 +120,15 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
   }
 
   public function getCleanTextBody() {
-    $body = idx($this->bodies, 'text');
-
+    $body = $this->getRawTextBody();
     $parser = new PhabricatorMetaMTAEmailBodyParser();
     return $parser->stripTextBody($body);
+  }
+
+  public function parseBody() {
+    $body = $this->getRawTextBody();
+    $parser = new PhabricatorMetaMTAEmailBodyParser();
+    return $parser->parseBody($body);
   }
 
   public function getRawTextBody() {

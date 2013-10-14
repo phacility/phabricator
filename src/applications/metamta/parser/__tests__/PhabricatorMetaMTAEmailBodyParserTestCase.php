@@ -12,6 +12,44 @@ final class PhabricatorMetaMTAEmailBodyParserTestCase
     }
   }
 
+  public function testEmailBodyCommandParsing() {
+    $bodies = $this->getEmailBodiesWithFullCommands();
+    foreach ($bodies as $body) {
+      $parser = new PhabricatorMetaMTAEmailBodyParser();
+      $body_data = $parser->parseBody($body);
+      $this->assertEqual('OKAY', $body_data['body']);
+      $this->assertEqual('whatevs', $body_data['command']);
+      $this->assertEqual('dude', $body_data['command_value']);
+    }
+    $bodies = $this->getEmailBodiesWithPartialCommands();
+    foreach ($bodies as $body) {
+      $parser = new PhabricatorMetaMTAEmailBodyParser();
+      $body_data = $parser->parseBody($body);
+      $this->assertEqual('OKAY', $body_data['body']);
+      $this->assertEqual('whatevs', $body_data['command']);
+      $this->assertEqual(null, $body_data['command_value']);
+    }
+  }
+
+  private function getEmailBodiesWithFullCommands() {
+    $bodies = $this->getEmailBodies();
+    $with_commands = array();
+    foreach ($bodies as $body) {
+      $with_commands[] = "!whatevs dude\n" . $body;
+    }
+    return $with_commands;
+  }
+
+  private function getEmailBodiesWithPartialCommands() {
+    $bodies = $this->getEmailBodies();
+    $with_commands = array();
+    foreach ($bodies as $body) {
+      $with_commands[] = "!whatevs\n" . $body;
+    }
+    return $with_commands;
+  }
+
+
   private function getEmailBodies() {
     $trailing_space = ' ';
 
