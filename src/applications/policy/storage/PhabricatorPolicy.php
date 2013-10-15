@@ -1,18 +1,22 @@
 <?php
 
 final class PhabricatorPolicy
-  extends PhabricatorPolicyDAO {
+  extends PhabricatorPolicyDAO
+  implements PhabricatorPolicyInterface {
 
-  const ACTION_ACCEPT = 'accept';
+  const ACTION_ALLOW = 'allow';
   const ACTION_DENY = 'deny';
 
   private $name;
+  private $shortName;
   private $type;
   private $href;
   private $icon;
 
   protected $rules = array();
   protected $defaultAction = self::ACTION_DENY;
+
+  private $ruleObjects = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -62,6 +66,12 @@ final class PhabricatorPolicy
         $policy->setType(PhabricatorPolicyType::TYPE_PROJECT);
         $policy->setName($handle->getName());
         break;
+      case PhabricatorPolicyPHIDTypePolicy::TYPECONST:
+        // TODO: This creates a weird handle-based version of a rule policy.
+        // It behaves correctly, but can't be applied since it doesn't have
+        // any rules. It is used to render transactions, and might need some
+        // cleanup.
+        break;
       default:
         $policy->setType(PhabricatorPolicyType::TYPE_MASKED);
         $policy->setName($handle->getFullName());
@@ -79,6 +89,9 @@ final class PhabricatorPolicy
   }
 
   public function getType() {
+    if (!$this->type) {
+      return PhabricatorPolicyType::TYPE_CUSTOM;
+    }
     return $this->type;
   }
 
@@ -88,7 +101,22 @@ final class PhabricatorPolicy
   }
 
   public function getName() {
+    if (!$this->name) {
+      return pht('Custom Policy');
+    }
     return $this->name;
+  }
+
+  public function setShortName($short_name) {
+    $this->shortName = $short_name;
+    return $this;
+  }
+
+  public function getShortName() {
+    if ($this->shortName) {
+      return $this->shortName;
+    }
+    return $this->getName();
   }
 
   public function setHref($href) {
@@ -114,6 +142,7 @@ final class PhabricatorPolicy
       case PhabricatorPolicyType::TYPE_PROJECT:
         return 'policy-project';
       break;
+      case PhabricatorPolicyType::TYPE_CUSTOM:
       case PhabricatorPolicyType::TYPE_MASKED:
         return 'policy-custom';
       break;
@@ -171,6 +200,10 @@ final class PhabricatorPolicy
           return pht(
             '%s can take this action.',
             $handle->getFullName());
+        } else if ($type == PhabricatorPolicyPHIDTypePolicy::TYPECONST) {
+          return pht(
+            'This object has a custom policy controlling who can take this '.
+            'action.');
         } else {
           return pht(
             'This object has an unknown or invalid policy setting ("%s").',
@@ -220,6 +253,8 @@ final class PhabricatorPolicy
     switch ($this->getType()) {
       case PhabricatorPolicyType::TYPE_PROJECT:
         return pht('%s (Project)', $desc);
+      case PhabricatorPolicyType::TYPE_CUSTOM:
+        return pht('Custom Policy');
       case PhabricatorPolicyType::TYPE_MASKED:
         return pht(
           '%s (You do not have permission to view policy details.)',
@@ -228,4 +263,80 @@ final class PhabricatorPolicy
         return $desc;
     }
   }
+
+  /**
+   * Return a list of custom rule classes (concrete subclasses of
+   * @{class:PhabricatorPolicyRule}) this policy uses.
+   *
+   * @return list<string> List of class names.
+   */
+  public function getCustomRuleClasses() {
+    $classes = array();
+
+    foreach ($this->getRules() as $rule) {
+      $class = idx($rule, 'rule');
+      try {
+        if (class_exists($class)) {
+          $classes[$class] = $class;
+        }
+      } catch (Exception $ex) {
+        continue;
+      }
+    }
+
+    return array_keys($classes);
+  }
+
+  /**
+   * Return a list of all values used by a given rule class to implement this
+   * policy. This is used to bulk load data (like project memberships) in order
+   * to apply policy filters efficiently.
+   *
+   * @param string Policy rule classname.
+   * @return list<wild> List of values used in this policy.
+   */
+  public function getCustomRuleValues($rule_class) {
+    $values = array();
+    foreach ($this->getRules() as $rule) {
+      if ($rule['rule'] == $rule_class) {
+        $values[] = $rule['value'];
+      }
+    }
+    return $values;
+  }
+
+  public function attachRuleObjects(array $objects) {
+    $this->ruleObjects = $objects;
+    return $this;
+  }
+
+  public function getRuleObjects() {
+    return $this->assertAttached($this->ruleObjects);
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    // NOTE: We implement policies only so we can comply with the interface.
+    // The actual query skips them, as enforcing policies on policies seems
+    // perilous and isn't currently required by the application.
+    return PhabricatorPolicies::POLICY_PUBLIC;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
 }

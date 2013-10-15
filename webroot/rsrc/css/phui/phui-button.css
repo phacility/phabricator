@@ -156,8 +156,7 @@ button.link:hover {
   border-bottom-color: {$greyborder};
 }
 
-.dropdown-menu-frame a,
-.dropdown-menu-frame span {
+.dropdown-menu-frame .dropdown-menu-item {
   display: block;
   padding: 2px 10px;
   clear: both;
@@ -166,8 +165,34 @@ button.link:hover {
   white-space: nowrap;
 }
 
-.dropdown-menu-frame span {
+.dropdown-menu-frame .dropdown-menu-item-disabled {
   color: {$lightgreytext};
+}
+
+.dropdown-menu-frame .phui-icon-view {
+  display: inline-block;
+  padding: 0;
+  margin: 2px 8px -2px 4px;
+}
+
+a.policy-control {
+  width: 240px;
+  text-align: left;
+}
+
+a.policy-control .caret {
+  float: right;
+}
+
+a.policy-control span.phui-icon-view {
+  /* NOTE: Nudge these icons a little bit. Should this be for all
+     dropdown buttons? */
+  top: 4px;
+  left: 7px;
+}
+
+.dropdown-menu-frame .dropdown-menu-item-selected {
+  background: {$lightblue};
 }
 
 .dropdown-menu-frame a:hover {

@@ -33,12 +33,21 @@ JX.install('PhabricatorDropdownMenu', {
       null,
       JX.bind(this, this._onclickglobal));
 
+    JX.Stratcom.listen(
+      'resize',
+      null,
+      JX.bind(this, this._onresize));
+
     JX.PhabricatorDropdownMenu.listen(
       'open',
       JX.bind(this, this.close));
   },
 
   events : ['open'],
+
+  properties : {
+    width : null
+  },
 
   members : {
     _node : null,
@@ -78,6 +87,11 @@ JX.install('PhabricatorDropdownMenu', {
       this._hide();
     },
 
+    clear : function() {
+      this._items = [];
+      return this;
+    },
+
     addItem : function(item) {
       if (__DEV__) {
         if (!(item instanceof JX.PhabricatorMenuItem)) {
@@ -104,6 +118,12 @@ JX.install('PhabricatorDropdownMenu', {
       if (!item) {
         return;
       }
+
+      if (item.getDisabled()) {
+        e.prevent();
+        return;
+      }
+
       item.select();
       e.prevent();
       this.close();
@@ -132,6 +152,20 @@ JX.install('PhabricatorDropdownMenu', {
     _show : function() {
       document.body.appendChild(this._menu);
 
+      if (this.getWidth()) {
+        new JX.Vector(this.getWidth(), null).setDim(this._menu);
+      }
+
+      this._onresize();
+
+      JX.DOM.alterClass(this._node, 'dropdown-open', true);
+    },
+
+    _onresize : function() {
+      if (!this._open) {
+        return;
+      }
+
       var m = JX.Vector.getDim(this._menu);
 
       var v = JX.$V(this._node);
@@ -143,8 +177,6 @@ JX.install('PhabricatorDropdownMenu', {
         v = v.add(0, d.y);
       }
       v.setPos(this._menu);
-
-      JX.DOM.alterClass(this._node, 'dropdown-open', true);
     },
 
     _hide : function() {

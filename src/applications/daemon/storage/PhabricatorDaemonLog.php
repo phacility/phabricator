@@ -26,6 +26,9 @@ final class PhabricatorDaemonLog extends PhabricatorDaemonDAO
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
+  public function getPHID() {
+    return null;
+  }
 
   public function getCapabilities() {
     return array(

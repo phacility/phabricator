@@ -88,6 +88,8 @@ JX.install('Workflow', {
         return;
       }
 
+      event.prevent();
+
       // Get the button (which is sometimes actually another tag, like an <a />)
       // which triggered the event. In particular, this makes sure we get the
       // right node if there is a <button> with an <img /> inside it or
@@ -98,6 +100,13 @@ JX.install('Workflow', {
         JX.Workflow._pop();
       } else {
         var form = event.getNode('jx-dialog');
+
+        // Issue a DOM event first, so form-oriented handlers can act.
+        var dom_event = JX.DOM.invoke(form, 'didWorkflowSubmit');
+        if (dom_event.getPrevented()) {
+          return;
+        }
+
         var data = JX.DOM.convertFormToListOfPairs(form);
 
         data.push([t.name, t.value || true]);
@@ -112,7 +121,6 @@ JX.install('Workflow', {
             .start();
         }
       }
-      event.prevent();
     },
     _getActiveWorkflow : function() {
       var stack = JX.Workflow._stack;

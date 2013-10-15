@@ -10,7 +10,6 @@ final class ReleephProject extends ReleephDAO
   const COMMIT_AUTHOR_FROM_DIFF = 'commit-author-is-from-diff';
   const COMMIT_AUTHOR_REQUESTOR = 'commit-author-is-requestor';
 
-  protected $phid;
   protected $name;
 
   // Specifying the place to pick from is a requirement for svn, though not

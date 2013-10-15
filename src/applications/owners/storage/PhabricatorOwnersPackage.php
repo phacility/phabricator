@@ -3,7 +3,6 @@
 final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
   implements PhabricatorPolicyInterface {
 
-  protected $phid;
   protected $name;
   protected $originalName;
   protected $auditingEnabled;

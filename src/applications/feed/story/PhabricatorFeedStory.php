@@ -283,6 +283,9 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 
+  public function getPHID() {
+    return null;
+  }
 
   /**
    * @task policy

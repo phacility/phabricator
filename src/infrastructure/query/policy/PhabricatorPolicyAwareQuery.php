@@ -33,6 +33,7 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
   private $parentQuery;
   private $rawResultLimit;
   private $capabilities;
+  private $workspace = array();
 
 
 /* -(  Query Configuration  )------------------------------------------------ */
@@ -229,6 +230,11 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
         $visible = $filter->apply($maybe_visible);
       }
 
+      if ($visible) {
+        $this->putObjectsInWorkspace($this->getWorkspaceMapForPage($visible));
+        $visible = $this->didFilterPage($visible);
+      }
+
       $removed = array();
       foreach ($maybe_visible as $key => $object) {
         if (empty($visible[$key])) {
@@ -300,6 +306,108 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
   }
 
 
+/* -(  Query Workspace  )---------------------------------------------------- */
+
+
+  /**
+   * Put a map of objects into the query workspace. Many queries perform
+   * subqueries, which can eventually end up loading the same objects more than
+   * once (often to perform policy checks).
+   *
+   * For example, loading a user may load the user's profile image, which might
+   * load the user object again in order to verify that the viewer has
+   * permission to see the file.
+   *
+   * The "query workspace" allows queries to load objects from elsewhere in a
+   * query block instead of refetching them.
+   *
+   * When using the query workspace, it's important to obey two rules:
+   *
+   * **Never put objects into the workspace which the viewer may not be able
+   * to see**. You need to apply all policy filtering //before// putting
+   * objects in the workspace. Otherwise, subqueries may read the objects and
+   * use them to permit access to content the user shouldn't be able to view.
+   *
+   * **Fully enrich objects pulled from the workspace.** After pulling objects
+   * from the workspace, you still need to load and attach any additional
+   * content the query requests. Otherwise, a query might return objects without
+   * requested content.
+   *
+   * Generally, you do not need to update the workspace yourself: it is
+   * automatically populated as a side effect of objects surviving policy
+   * filtering.
+   *
+   * @param map<phid, PhabricatorPolicyInterface> Objects to add to the query
+   *   workspace.
+   * @return this
+   * @task workspace
+   */
+  public function putObjectsInWorkspace(array $objects) {
+    assert_instances_of($objects, 'PhabricatorPolicyInterface');
+
+    $viewer_phid = $this->getViewer()->getPHID();
+
+    // The workspace is scoped per viewer to prevent accidental contamination.
+    if (empty($this->workspace[$viewer_phid])) {
+      $this->workspace[$viewer_phid] = array();
+    }
+
+    $this->workspace[$viewer_phid] += $objects;
+
+    return $this;
+  }
+
+
+  /**
+   * Retrieve objects from the query workspace. For more discussion about the
+   * workspace mechanism, see @{method:putObjectsInWorkspace}. This method
+   * searches both the current query's workspace and the workspaces of parent
+   * queries.
+   *
+   * @param list<phid> List of PHIDs to retreive.
+   * @return this
+   * @task workspace
+   */
+  public function getObjectsFromWorkspace(array $phids) {
+    $viewer_phid = $this->getViewer()->getPHID();
+
+    $results = array();
+    foreach ($phids as $key => $phid) {
+      if (isset($this->workspace[$viewer_phid][$phid])) {
+        $results[$phid] = $this->workspace[$viewer_phid][$phid];
+        unset($phids[$key]);
+      }
+    }
+
+    if ($phids && $this->getParentQuery()) {
+      $results += $this->getParentQuery()->getObjectsFromWorkspace($phids);
+    }
+
+    return $results;
+  }
+
+
+  /**
+   * Convert a result page to a `<phid, PhabricatorPolicyInterface>` map.
+   *
+   * @param list<PhabricatorPolicyInterface> Objects.
+   * @return map<phid, PhabricatorPolicyInterface> Map of objects which can
+   *   be put into the workspace.
+   * @task workspace
+   */
+  protected function getWorkspaceMapForPage(array $results) {
+    $map = array();
+    foreach ($results as $result) {
+      $phid = $result->getPHID();
+      if ($phid !== null) {
+        $map[$phid] = $result;
+      }
+    }
+
+    return $map;
+  }
+
+
 /* -(  Policy Query Implementation  )---------------------------------------- */
 
 
@@ -353,7 +461,13 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
   /**
    * Hook for applying a page filter prior to the privacy filter. This allows
    * you to drop some items from the result set without creating problems with
-   * pagination or cursor updates.
+   * pagination or cursor updates. You can also load and attach data which is
+   * required to perform policy filtering.
+   *
+   * Generally, you should load non-policy data and perform non-policy filtering
+   * later, in @{method:didFilterPage}. Strictly fewer objects will make it that
+   * far (so the program will load less data) and subqueries from that context
+   * can use the query workspace to further reduce query load.
    *
    * This method will only be called if data is available. Implementations
    * do not need to handle the case of no results specially.
@@ -363,6 +477,29 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    * @task policyimpl
    */
   protected function willFilterPage(array $page) {
+    return $page;
+  }
+
+  /**
+   * Hook for performing additional non-policy loading or filtering after an
+   * object has satisfied all policy checks. Generally, this means loading and
+   * attaching related data.
+   *
+   * Subqueries executed during this phase can use the query workspace, which
+   * may improve performance or make circular policies resolvable. Data which
+   * is not necessary for policy filtering should generally be loaded here.
+   *
+   * This callback can still filter objects (for example, if attachable data
+   * is discovered to not exist), but should not do so for policy reasons.
+   *
+   * This method will only be called if data is available. Implementations do
+   * not need to handle the case of no results specially.
+   *
+   * @param list<wild> Results from @{method:willFilterPage()}.
+   * @return list<PhabricatorPolicyInterface> Objects after additional
+   *   non-policy processing.
+   */
+  protected function didFilterPage(array $page) {
     return $page;
   }
 

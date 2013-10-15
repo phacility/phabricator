@@ -113,8 +113,10 @@ final class PhabricatorPeopleQuery
       $table->putInSet(new LiskDAOSet());
     }
 
-    $users = $table->loadAllFromArray($data);
+    return $table->loadAllFromArray($data);
+  }
 
+  protected function didFilterPage(array $users) {
     if ($this->needProfile) {
       $user_list = mpull($users, null, 'getPHID');
       $profiles = new PhabricatorUserProfile();
@@ -138,6 +140,7 @@ final class PhabricatorPeopleQuery
       $user_profile_file_phids = array_filter($user_profile_file_phids);
       if ($user_profile_file_phids) {
         $files = id(new PhabricatorFileQuery())
+          ->setParentQuery($this)
           ->setViewer($this->getViewer())
           ->withPHIDs($user_profile_file_phids)
           ->execute();

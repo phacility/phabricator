@@ -2,8 +2,51 @@
 
 final class PhabricatorMetaMTAEmailBodyParser {
 
+  /**
+   * Mails can have bodies such as
+   *
+   *   !claim
+   *
+   *   taking this task
+   *
+   * Or
+   *
+   *   !assign epriestley
+   *
+   *   please, take this task I took; its hard
+   *
+   * This function parses such an email body and returns a dictionary
+   * containing a clean body text (e.g. "taking this task"), a $command
+   * (e.g. !claim, !assign) and a $command_value (e.g. "epriestley" in the
+   * !assign example.)
+   *
+   * @return dict
+   */
+  public function parseBody($body) {
+    $body = $this->stripTextBody($body);
+    $lines = explode("\n", trim($body));
+    $first_line = head($lines);
+
+    $command = null;
+    $command_value = null;
+    $matches = null;
+    if (preg_match('/^!(\w+)\s*(\S+)?/', $first_line, $matches)) {
+      $lines = array_slice($lines, 1);
+      $body = implode("\n", $lines);
+      $body = trim($body);
+
+      $command = $matches[1];
+      $command_value = idx($matches, 2);
+    }
+
+    return array(
+      'body' => $body,
+      'command' => $command,
+      'command_value' => $command_value);
+  }
+
   public function stripTextBody($body) {
-    return $this->stripSignature($this->stripQuotedText($body));
+    return trim($this->stripSignature($this->stripQuotedText($body)));
   }
 
   private function stripQuotedText($body) {

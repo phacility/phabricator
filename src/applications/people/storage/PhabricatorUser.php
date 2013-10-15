@@ -11,7 +11,6 @@ final class PhabricatorUser
   const NAMETOKEN_TABLE = 'user_nametoken';
   const MAXIMUM_USERNAME_LENGTH = 64;
 
-  protected $phid;
   protected $userName;
   protected $realName;
   protected $sex;

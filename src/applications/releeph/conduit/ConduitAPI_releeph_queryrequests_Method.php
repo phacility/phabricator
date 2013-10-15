@@ -46,6 +46,9 @@ final class ConduitAPI_releeph_queryrequests_Method
 
     foreach ($releephRequests as $releephRequest) {
       $branch = $releephRequest->loadReleephBranch();
+      if (!$branch) {
+        continue;
+      }
       $request_commit_phid = $releephRequest->getRequestCommitPHID();
       $revisionPHID =
         $query->getRevisionPHID($request_commit_phid);

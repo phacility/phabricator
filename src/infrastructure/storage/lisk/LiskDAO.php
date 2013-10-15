@@ -892,6 +892,11 @@ abstract class LiskDAO {
   }
 
 
+  public function getPHID() {
+    return $this->phid;
+  }
+
+
   /**
    * Test if a property exists.
    *

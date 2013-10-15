@@ -15,8 +15,6 @@ final class PhamePost extends PhameDAO
   const VISIBILITY_DRAFT     = 0;
   const VISIBILITY_PUBLISHED = 1;
 
-  protected $id;
-  protected $phid;
   protected $bloggerPHID;
   protected $title;
   protected $phameTitle;

@@ -10,6 +10,7 @@ final class ReleephRequestQuery
   private $severities;
   private $requestorPHIDs;
   private $branchIDs;
+  private $revisionPHIDs;
 
   const STATUS_ALL          = 'status-all';
   const STATUS_OPEN         = 'status-open';
@@ -67,22 +68,8 @@ final class ReleephRequestQuery
   }
 
   public function withRevisionPHIDs(array $revision_phids) {
-    $type = PhabricatorEdgeConfig::TYPE_DREV_HAS_COMMIT;
-
-    $edges = id(new PhabricatorEdgeQuery())
-      ->withSourcePHIDs($revision_phids)
-      ->withEdgeTypes(array($type))
-      ->execute();
-
-    $this->commitToRevMap = array();
-
-    foreach ($edges as $revision_phid => $edge) {
-      foreach ($edge[$type] as $commitPHID => $item) {
-        $this->commitToRevMap[$commitPHID] = $revision_phid;
-      }
-    }
-
-    $this->requestedCommitPHIDs = array_keys($this->commitToRevMap);
+    $this->revisionPHIDs = $revision_phids;
+    return $this;
   }
 
   public function loadPage() {
@@ -170,6 +157,31 @@ final class ReleephRequestQuery
         $conn_r,
         'requestUserPHID IN (%Ls)',
         $this->requestorPHIDs);
+    }
+
+    if ($this->revisionPHIDs) {
+      $type = PhabricatorEdgeConfig::TYPE_DREV_HAS_COMMIT;
+
+      $edges = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs($this->revisionPHIDs)
+        ->withEdgeTypes(array($type))
+        ->execute();
+
+      $this->commitToRevMap = array();
+      foreach ($edges as $revision_phid => $edge) {
+        foreach ($edge[$type] as $commitPHID => $item) {
+          $this->commitToRevMap[$commitPHID] = $revision_phid;
+        }
+      }
+
+      if (!$this->commitToRevMap) {
+        throw new PhabricatorEmptyQueryException("Malformed Revision Phids");
+      }
+
+      $where[] = qsprintf(
+        $conn_r,
+        'requestCommitPHID IN (%Ls)',
+        array_keys($this->commitToRevMap));
     }
 
     $where[] = $this->buildPagingClause($conn_r);

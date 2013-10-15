@@ -1,15 +1,10 @@
 <?php
 
-final class PhabricatorPolicyQuery extends PhabricatorQuery {
+final class PhabricatorPolicyQuery
+  extends PhabricatorCursorPagedPolicyAwareQuery {
 
-  private $viewer;
   private $object;
   private $phids;
-
-  public function setViewer(PhabricatorUser $viewer) {
-    $this->viewer = $viewer;
-    return $this;
-  }
 
   public function setObject(PhabricatorPolicyInterface $object) {
     $this->object = $object;
@@ -26,31 +21,19 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
     PhabricatorPolicyInterface $object) {
 
     $results = array();
-    $policies = null;
-    $global = self::getGlobalPolicies();
 
-    $capabilities = $object->getCapabilities();
-    foreach ($capabilities as $capability) {
-      $policy = $object->getPolicy($capability);
-      if (!$policy) {
-        continue;
-      }
+    $map = array();
+    foreach ($object->getCapabilities() as $capability) {
+      $map[$capability] = $object->getPolicy($capability);
+    }
 
-      if (isset($global[$policy])) {
-        $results[$capability] = $global[$policy];
-        continue;
-      }
+    $policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($viewer)
+      ->withPHIDs($map)
+      ->execute();
 
-      if ($policies === null) {
-        // This slightly overfetches data, but it shouldn't generally
-        // be a problem.
-        $policies = id(new PhabricatorPolicyQuery())
-          ->setViewer($viewer)
-          ->setObject($object)
-          ->execute();
-      }
-
-      $results[$capability] = $policies[$policy];
+    foreach ($map as $capability => $phid) {
+      $results[$capability] = $policies[$phid];
     }
 
     return $results;
@@ -70,76 +53,65 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
     return $policies;
   }
 
-  public function execute() {
-    if (!$this->viewer) {
-      throw new Exception('Call setViewer() before execute()!');
+  public function loadPage() {
+    if ($this->object && $this->phids) {
+      throw new Exception(
+        "You can not issue a policy query with both setObject() and ".
+        "setPHIDs().");
+    } else if ($this->object) {
+      $phids = $this->loadObjectPolicyPHIDs();
+    } else {
+      $phids = $this->phids;
     }
 
-    $results = $this->getGlobalPolicies();
+    $phids = array_fuse($phids);
 
-    if ($this->viewer->getPHID()) {
-      $projects = id(new PhabricatorProjectQuery())
-        ->setViewer($this->viewer)
-        ->withMemberPHIDs(array($this->viewer->getPHID()))
-        ->execute();
-      if ($projects) {
-        foreach ($projects as $project) {
-          $results[] = id(new PhabricatorPolicy())
-            ->setType(PhabricatorPolicyType::TYPE_PROJECT)
-            ->setPHID($project->getPHID())
-            ->setHref('/project/view/'.$project->getID().'/')
-            ->setName($project->getName());
-        }
+    $results = array();
+
+    // First, load global policies.
+    foreach ($this->getGlobalPolicies() as $phid => $policy) {
+      if (isset($phids[$phid])) {
+        $results[$phid] = $policy;
+        unset($phids[$phid]);
       }
     }
 
-    $results = mpull($results, null, 'getPHID');
-
-    $other_policies = array();
-    if ($this->object) {
-      $capabilities = $this->object->getCapabilities();
-      foreach ($capabilities as $capability) {
-        $policy = $this->object->getPolicy($capability);
-        if (!$policy) {
-          continue;
+    // If we still need policies, we're going to have to fetch data. Bucket
+    // the remaining policies into rule-based policies and handle-based
+    // policies.
+    if ($phids) {
+      $rule_policies = array();
+      $handle_policies = array();
+      foreach ($phids as $phid) {
+        $phid_type = phid_get_type($phid);
+        if ($phid_type == PhabricatorPolicyPHIDTypePolicy::TYPECONST) {
+          $rule_policies[$phid] = $phid;
+        } else {
+          $handle_policies[$phid] = $phid;
         }
-        $other_policies[$policy] = $policy;
       }
-    }
 
-    // If this install doesn't have "Public" enabled, remove it as an option
-    // unless the object already has a "Public" policy. In this case we retain
-    // the policy but enforce it as thought it was "All Users".
-    $show_public = PhabricatorEnv::getEnvConfig('policy.allow-public');
-    if (!$show_public &&
-        empty($other_policies[PhabricatorPolicies::POLICY_PUBLIC])) {
-      unset($results[PhabricatorPolicies::POLICY_PUBLIC]);
-    }
+      if ($handle_policies) {
+        $handles = id(new PhabricatorHandleQuery())
+          ->setViewer($this->getViewer())
+          ->withPHIDs($handle_policies)
+          ->execute();
+        foreach ($handle_policies as $phid) {
+          $results[$phid] = PhabricatorPolicy::newFromPolicyAndHandle(
+            $phid,
+            $handles[$phid]);
+        }
+      }
 
-    $other_policies = array_diff_key($other_policies, $results);
-
-    if ($other_policies) {
-      $handles = id(new PhabricatorHandleQuery())
-        ->setViewer($this->viewer)
-        ->withPHIDs($other_policies)
-        ->execute();
-      foreach ($other_policies as $phid) {
-        $results[$phid] = PhabricatorPolicy::newFromPolicyAndHandle(
-          $phid,
-          $handles[$phid]);
+      if ($rule_policies) {
+        $rules = id(new PhabricatorPolicy())->loadAllWhere(
+          'phid IN (%Ls)',
+          $rule_policies);
+        $results += mpull($rules, null, 'getPHID');
       }
     }
 
     $results = msort($results, 'getSortKey');
-
-    if ($this->phids) {
-      $phids = array_fuse($this->phids);
-      foreach ($results as $key => $result) {
-        if (empty($phids[$result->getPHID()])) {
-          unset($results[$key]);
-        }
-      }
-    }
 
     return $results;
   }
@@ -175,6 +147,7 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
         ->setType(PhabricatorPolicyType::TYPE_GLOBAL)
         ->setPHID($constant)
         ->setName(self::getGlobalPolicyName($constant))
+        ->setShortName(self::getGlobalPolicyShortName($constant))
         ->makeEphemeral();
     }
 
@@ -194,6 +167,60 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
       default:
         return pht('Unknown Policy');
     }
+  }
+
+  private static function getGlobalPolicyShortName($policy) {
+    switch ($policy) {
+      case PhabricatorPolicies::POLICY_PUBLIC:
+        return pht('Public');
+      default:
+        return null;
+    }
+  }
+
+  private function loadObjectPolicyPHIDs() {
+    $phids = array();
+    $viewer = $this->getViewer();
+
+    if ($viewer->getPHID()) {
+      $projects = id(new PhabricatorProjectQuery())
+        ->setViewer($viewer)
+        ->withMemberPHIDs(array($viewer->getPHID()))
+        ->execute();
+      foreach ($projects as $project) {
+        $phids[] = $project->getPHID();
+      }
+    }
+
+    $capabilities = $this->object->getCapabilities();
+    foreach ($capabilities as $capability) {
+      $policy = $this->object->getPolicy($capability);
+      if (!$policy) {
+        continue;
+      }
+      $phids[] = $policy;
+    }
+
+    // If this install doesn't have "Public" enabled, don't include it as an
+    // option unless the object already has a "Public" policy. In this case we
+    // retain the policy but enforce it as though it was "All Users".
+    $show_public = PhabricatorEnv::getEnvConfig('policy.allow-public');
+    foreach ($this->getGlobalPolicies() as $phid => $policy) {
+      if ($phid == PhabricatorPolicies::POLICY_PUBLIC) {
+        if (!$show_public) {
+          continue;
+        }
+      }
+      $phids[] = $phid;
+    }
+
+    return $phids;
+  }
+
+  protected function shouldDisablePolicyFiltering() {
+    // Policy filtering of policies is currently perilous and not required by
+    // the application.
+    return true;
   }
 
 }

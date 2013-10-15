@@ -307,7 +307,7 @@ EOBODY;
     return $this->getSingleReplyHandlerPrefix($address);
   }
 
-  final protected function enhanceBodyWithAttachments(
+ final protected function enhanceBodyWithAttachments(
     $body,
     array $attachments,
     $format = '- {F%d, layout=link}') {

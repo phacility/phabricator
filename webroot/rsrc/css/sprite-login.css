@@ -70,18 +70,22 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: 0px -105px;
 }
 
-.login-Phabricator {
+.login-Persona {
   background-position: -35px -105px;
 }
 
-.login-TwitchTV {
+.login-Phabricator {
   background-position: -70px -105px;
 }
 
-.login-Twitter {
+.login-TwitchTV {
   background-position: -105px -105px;
 }
 
-.login-Yahoo {
+.login-Twitter {
   background-position: 0px -140px;
+}
+
+.login-Yahoo {
+  background-position: -35px -140px;
 }

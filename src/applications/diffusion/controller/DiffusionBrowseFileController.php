@@ -824,15 +824,16 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
   private function buildImageCorpus($file_uri) {
     $properties = new PHUIPropertyListView();
 
-    $properties->addProperty(
-      pht('Image'),
+    $properties->addImageContent(
       phutil_tag(
         'img',
         array(
           'src' => $file_uri,
         )));
 
-    return $properties;
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Image'))
+      ->addPropertyList($properties);
   }
 
   private function buildBinaryCorpus($file_uri, $data) {

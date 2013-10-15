@@ -506,11 +506,11 @@ final class HeraldRuleController extends HeraldController {
     return array(
       'source' => array(
         'email'       => '/typeahead/common/mailable/',
-        'user'        => '/typeahead/common/users/',
+        'user'        => '/typeahead/common/accounts/',
         'repository'  => '/typeahead/common/repositories/',
         'package'     => '/typeahead/common/packages/',
         'project'     => '/typeahead/common/projects/',
-        'userorproject' => '/typeahead/common/usersorprojects/',
+        'userorproject' => '/typeahead/common/accountsorprojects/',
       ),
       'markup' => $template,
     );

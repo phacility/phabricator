@@ -8,7 +8,6 @@ final class PhabricatorRepositoryArcanistProject
   implements PhabricatorPolicyInterface {
 
   protected $name;
-  protected $phid;
   protected $repositoryID;
 
   protected $symbolIndexLanguages = array();

@@ -162,8 +162,11 @@ final class PhrictionDocumentController
     $header = id(new PHUIHeaderView())
       ->setHeader($page_title);
 
-    $prop_list = new PHUIPropertyGroupView();
-    $prop_list->addPropertyList($properties);
+    $prop_list = null;
+    if ($properties) {
+      $prop_list = new PHUIPropertyGroupView();
+      $prop_list->addPropertyList($properties);
+    }
 
     $page_content = id(new PHUIDocumentView())
       ->setOffset(true)

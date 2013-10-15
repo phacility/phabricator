@@ -384,6 +384,7 @@ abstract class PhabricatorAuthProvider {
       array(
         'method' => 'optional string',
         'uri' => 'string',
+        'sigil' => 'optional string',
       ));
 
     $viewer = $request->getUser();
@@ -404,11 +405,11 @@ abstract class PhabricatorAuthProvider {
       ->setSpriteIcon($this->getLoginIcon());
 
     $button = id(new PHUIButtonView())
-        ->setSize(PHUIButtonView::BIG)
-        ->setColor(PHUIButtonView::GREY)
-        ->setIcon($icon)
-        ->setText($button_text)
-        ->setSubtext($this->getProviderName());
+      ->setSize(PHUIButtonView::BIG)
+      ->setColor(PHUIButtonView::GREY)
+      ->setIcon($icon)
+      ->setText($button_text)
+      ->setSubtext($this->getProviderName());
 
     $uri = $attributes['uri'];
     $uri = new PhutilURI($uri);
@@ -432,6 +433,7 @@ abstract class PhabricatorAuthProvider {
       array(
         'method' => idx($attributes, 'method', 'GET'),
         'action' => (string)$uri,
+        'sigil'  => idx($attributes, 'sigil'),
       ),
       $content);
   }

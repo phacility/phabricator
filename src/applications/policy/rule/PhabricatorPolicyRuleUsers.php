@@ -8,7 +8,12 @@ final class PhabricatorPolicyRuleUsers
   }
 
   public function applyRule(PhabricatorUser $viewer, $value) {
-    return isset($value[$viewer->getPHID()]);
+    foreach ($value as $phid) {
+      if ($phid == $viewer->getPHID()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public function getValueControlType() {
@@ -33,12 +38,20 @@ final class PhabricatorPolicyRuleUsers
   }
 
   public function getValueForDisplay(PhabricatorUser $viewer, $value) {
+    if (!$value) {
+      return array();
+    }
+
     $handles = id(new PhabricatorHandleQuery())
       ->setViewer($viewer)
       ->withPHIDs($value)
       ->execute();
 
     return mpull($handles, 'getFullName', 'getPHID');
+  }
+
+  public function ruleHasEffect($value) {
+    return (bool)$value;
   }
 
 }

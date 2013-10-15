@@ -45,6 +45,54 @@ final class DifferentialChangesetDetailView extends AphrontView {
     return $this->vsChangesetID;
   }
 
+  public function getFileIcon($filename) {
+    $path_info = pathinfo($filename);
+    $extension = $path_info['extension'];
+    switch ($extension) {
+      case 'psd':
+      case 'ai':
+        $icon = 'preview';
+        break;
+      case 'conf':
+        $icon = 'wrench';
+        break;
+      case 'wav':
+      case 'mp3':
+      case 'aiff':
+        $icon = 'music';
+        break;
+      case 'm4v':
+      case 'mov':
+        $icon = 'film';
+        break;
+      case 'sql';
+      case 'db':
+      case 'csv':
+        $icon = 'data';
+        break;
+      case 'ics':
+        $icon = 'calendar';
+        break;
+      case 'zip':
+      case 'tar':
+      case 'bz':
+      case 'tgz':
+      case 'gz':
+        $icon = 'zip';
+        break;
+      case 'png':
+      case 'jpg':
+      case 'bmp':
+      case 'gif':
+        $icon = 'image';
+        break;
+      default:
+        $icon = 'file';
+        break;
+    }
+    return $icon;
+  }
+
   public function render() {
     require_celerity_resource('differential-changeset-view-css');
     require_celerity_resource('syntax-highlighting-css');
@@ -78,6 +126,10 @@ final class DifferentialChangesetDetailView extends AphrontView {
     }
 
     $display_filename = $changeset->getDisplayFilename();
+    $display_icon = $this->getFileIcon($display_filename);
+    $icon = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+      ->setSpriteIcon($display_icon);
 
     return javelin_tag(
       'div',
@@ -98,7 +150,12 @@ final class DifferentialChangesetDetailView extends AphrontView {
           ->setNavigationMarker(true)
           ->render(),
         $buttons,
-        phutil_tag('h1', array(), $display_filename),
+        phutil_tag('h1',
+          array(
+            'class' => 'differential-file-icon-header'),
+          array(
+            $icon,
+            $display_filename)),
         phutil_tag('div', array('style' => 'clear: both'), ''),
         $this->renderChildren(),
       ));

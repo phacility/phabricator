@@ -191,10 +191,11 @@ final class PhabricatorMacroQuery
     return $this->formatWhereClause($where);
   }
 
-  protected function willFilterPage(array $macros) {
+  protected function didFilterPage(array $macros) {
     $file_phids = mpull($macros, 'getFilePHID');
     $files = id(new PhabricatorFileQuery())
       ->setViewer($this->getViewer())
+      ->setParentQuery($this)
       ->withPHIDs($file_phids)
       ->execute();
     $files = mpull($files, null, 'getPHID');

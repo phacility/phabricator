@@ -14,7 +14,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
   const METADATA_IMAGE_WIDTH  = 'width';
   const METADATA_IMAGE_HEIGHT = 'height';
 
-  protected $phid;
   protected $name;
   protected $mimeType;
   protected $byteSize;
@@ -765,8 +764,10 @@ final class PhabricatorFile extends PhabricatorFileDAO
       );
     }
 
+    // NOTE: Anyone is allowed to access builtin files.
+
     $files = id(new PhabricatorFileQuery())
-      ->setViewer($user)
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withTransforms($specs)
       ->execute();
 

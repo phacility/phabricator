@@ -7,6 +7,7 @@ final class PhabricatorPolicyFilter {
   private $capabilities;
   private $raisePolicyExceptions;
   private $userProjects;
+  private $customPolicies = array();
 
   public static function mustRetainCapability(
     PhabricatorUser $user,
@@ -85,6 +86,7 @@ final class PhabricatorPolicyFilter {
     }
 
     $need_projects = array();
+    $need_policies = array();
     foreach ($objects as $key => $object) {
       $object_capabilities = $object->getCapabilities();
       foreach ($capabilities as $capability) {
@@ -99,7 +101,15 @@ final class PhabricatorPolicyFilter {
         if ($type == PhabricatorProjectPHIDTypeProject::TYPECONST) {
           $need_projects[$policy] = $policy;
         }
+
+        if ($type == PhabricatorPolicyPHIDTypePolicy::TYPECONST) {
+          $need_policies[$policy] = $policy;
+        }
       }
+    }
+
+    if ($need_policies) {
+      $this->loadCustomPolicies(array_keys($need_policies));
     }
 
     // If we need projects, check if any of the projects we need are also the
@@ -225,6 +235,12 @@ final class PhabricatorPolicyFilter {
           } else {
             $this->rejectObject($object, $policy, $capability);
           }
+        } else if ($type == PhabricatorPolicyPHIDTypePolicy::TYPECONST) {
+          if ($this->checkCustomPolicy($policy)) {
+            return true;
+          } else {
+            $this->rejectObject($object, $policy, $capability);
+          }
         } else {
           // Reject objects with unknown policies.
           $this->rejectObject($object, false, $capability);
@@ -266,19 +282,9 @@ final class PhabricatorPolicyFilter {
 
     $details = array_filter(array_merge(array($more), (array)$exceptions));
 
-    // NOTE: Not every policy object has a PHID, just pull an arbitrary
-    // "unknown object" handle if this fails. We're just using this to provide
-    // a better error message if we can.
-
-    $phid = '?';
-    if (($object instanceof PhabricatorLiskDAO) ||
-        (method_exists($object, 'getPHID'))) {
-      try {
-        $phid = $object->getPHID();
-      } catch (Exception $ignored) {
-        // Ignore.
-      }
-    }
+    // NOTE: Not every type of policy object has a real PHID; just load an
+    // empty handle if a real PHID isn't available.
+    $phid = nonempty($object->getPHID(), PhabricatorPHIDConstants::PHID_VOID);
 
     $handle = id(new PhabricatorHandleQuery())
       ->setViewer($this->viewer)
@@ -316,4 +322,75 @@ final class PhabricatorPolicyFilter {
 
     throw $exception;
   }
+
+  private function loadCustomPolicies(array $phids) {
+    $viewer = $this->viewer;
+    $viewer_phid = $viewer->getPHID();
+
+    $custom_policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($viewer)
+      ->withPHIDs($phids)
+      ->execute();
+    $custom_policies = mpull($custom_policies, null, 'getPHID');
+
+
+    $classes = array();
+    $values = array();
+    foreach ($custom_policies as $policy) {
+      foreach ($policy->getCustomRuleClasses() as $class) {
+        $classes[$class] = $class;
+        $values[$class][] = $policy->getCustomRuleValues($class);
+      }
+    }
+
+    foreach ($classes as $class => $ignored) {
+      $object = newv($class, array());
+      $object->willApplyRules($viewer, array_mergev($values[$class]));
+      $classes[$class] = $object;
+    }
+
+    foreach ($custom_policies as $policy) {
+      $policy->attachRuleObjects($classes);
+    }
+
+    if (empty($this->customPolicies[$viewer_phid])) {
+      $this->customPolicies[$viewer_phid] = array();
+    }
+
+    $this->customPolicies[$viewer->getPHID()] += $custom_policies;
+  }
+
+  private function checkCustomPolicy($policy_phid) {
+    $viewer = $this->viewer;
+    $viewer_phid = $viewer->getPHID();
+
+    $policy = $this->customPolicies[$viewer_phid][$policy_phid];
+
+    $objects = $policy->getRuleObjects();
+    $action = null;
+    foreach ($policy->getRules() as $rule) {
+      $object = idx($objects, idx($rule, 'rule'));
+      if (!$object) {
+        // Reject, this policy has a bogus rule.
+        return false;
+      }
+
+      // If the user matches this rule, use this action.
+      if ($object->applyRule($viewer, idx($rule, 'value'))) {
+        $action = idx($rule, 'action');
+        break;
+      }
+    }
+
+    if ($action === null) {
+      $action = $policy->getDefaultAction();
+    }
+
+    if ($action === PhabricatorPolicy::ACTION_ALLOW) {
+      return true;
+    }
+
+    return false;
+  }
+
 }

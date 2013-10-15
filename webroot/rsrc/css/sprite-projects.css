@@ -1,0 +1,243 @@
+/**
+ * @provides sprite-projects-css
+ * @generated
+ */
+
+.sprite-projects {
+  background-image: url(/rsrc/image/sprite-projects.png);
+  background-repeat: no-repeat;
+}
+
+@media
+only screen and (min-device-pixel-ratio: 1.5),
+only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+  .sprite-projects {
+    background-image: url(/rsrc/image/sprite-projects-X2.png);
+    background-size: 357px 408px;
+  }
+}
+
+
+.projects_8ball {
+  background-position: 0px 0px;
+}
+
+.projects_alien {
+  background-position: -51px 0px;
+}
+
+.projects_annouce {
+  background-position: -102px 0px;
+}
+
+.projects_art {
+  background-position: -153px 0px;
+}
+
+.projects_award {
+  background-position: -204px 0px;
+}
+
+.projects_bacon {
+  background-position: -255px 0px;
+}
+
+.projects_bandaid {
+  background-position: -306px 0px;
+}
+
+.projects_beer {
+  background-position: 0px -51px;
+}
+
+.projects_bomb {
+  background-position: -51px -51px;
+}
+
+.projects_briefcase {
+  background-position: -102px -51px;
+}
+
+.projects_bug {
+  background-position: -153px -51px;
+}
+
+.projects_calendar {
+  background-position: -204px -51px;
+}
+
+.projects_cloud {
+  background-position: -255px -51px;
+}
+
+.projects_coffee {
+  background-position: -306px -51px;
+}
+
+.projects_creditcard {
+  background-position: 0px -102px;
+}
+
+.projects_death {
+  background-position: -51px -102px;
+}
+
+.projects_desktop {
+  background-position: -102px -102px;
+}
+
+.projects_dropbox {
+  background-position: -153px -102px;
+}
+
+.projects_education {
+  background-position: -204px -102px;
+}
+
+.projects_experimental {
+  background-position: -255px -102px;
+}
+
+.projects_facebook {
+  background-position: -306px -102px;
+}
+
+.projects_facility {
+  background-position: 0px -153px;
+}
+
+.projects_film {
+  background-position: -51px -153px;
+}
+
+.projects_forked {
+  background-position: -102px -153px;
+}
+
+.projects_games {
+  background-position: -153px -153px;
+}
+
+.projects_ghost {
+  background-position: -204px -153px;
+}
+
+.projects_gift {
+  background-position: -255px -153px;
+}
+
+.projects_globe {
+  background-position: -306px -153px;
+}
+
+.projects_golf {
+  background-position: 0px -204px;
+}
+
+.projects_heart {
+  background-position: -51px -204px;
+}
+
+.projects_intergalactic {
+  background-position: -102px -204px;
+}
+
+.projects_lock {
+  background-position: -153px -204px;
+}
+
+.projects_mail {
+  background-position: -204px -204px;
+}
+
+.projects_martini {
+  background-position: -255px -204px;
+}
+
+.projects_medical {
+  background-position: -306px -204px;
+}
+
+.projects_mobile {
+  background-position: 0px -255px;
+}
+
+.projects_music {
+  background-position: -51px -255px;
+}
+
+.projects_news {
+  background-position: -102px -255px;
+}
+
+.projects_orgchart {
+  background-position: -153px -255px;
+}
+
+.projects_peoples {
+  background-position: -204px -255px;
+}
+
+.projects_piechart {
+  background-position: -255px -255px;
+}
+
+.projects_poison {
+  background-position: -306px -255px;
+}
+
+.projects_putabirdonit {
+  background-position: 0px -306px;
+}
+
+.projects_radiate {
+  background-position: -51px -306px;
+}
+
+.projects_savings {
+  background-position: -102px -306px;
+}
+
+.projects_search {
+  background-position: -153px -306px;
+}
+
+.projects_shield {
+  background-position: -204px -306px;
+}
+
+.projects_speed {
+  background-position: -255px -306px;
+}
+
+.projects_sprint {
+  background-position: -306px -306px;
+}
+
+.projects_star {
+  background-position: 0px -357px;
+}
+
+.projects_storage {
+  background-position: -51px -357px;
+}
+
+.projects_tablet {
+  background-position: -102px -357px;
+}
+
+.projects_travel {
+  background-position: -153px -357px;
+}
+
+.projects_twitter {
+  background-position: -204px -357px;
+}
+
+.projects_warning {
+  background-position: -255px -357px;
+}
+
+.projects_whale {
+  background-position: -306px -357px;
+}

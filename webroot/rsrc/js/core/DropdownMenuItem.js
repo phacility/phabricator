@@ -17,10 +17,26 @@ JX.install('PhabricatorMenuItem', {
     _action : null,
 
     render : function() {
+      var classes = [];
+      classes.push('dropdown-menu-item');
+
+      if (this.getSelected()) {
+        classes.push('dropdown-menu-item-selected');
+      }
+
       if (this.getDisabled()) {
-        return JX.$N('span', this.getName());
+        classes.push('dropdown-menu-item-disabled');
+      }
+
+      var attrs = {
+        href: this.getHref(),
+        meta: { item: this },
+        className: classes.join(' ')
+      };
+
+      if (this.getDisabled()) {
+        return JX.$N('span', attrs, this.getName());
       } else {
-        var attrs = { href : this.getHref(), meta : { item : this } };
         return JX.$N('a', attrs, this.getName());
       }
     },
@@ -31,9 +47,10 @@ JX.install('PhabricatorMenuItem', {
   },
 
   properties : {
-    name : '',
-    href : '',
-    disabled : false
+    name: '',
+    href: '',
+    disabled: false,
+    selected: false
   }
 
 });

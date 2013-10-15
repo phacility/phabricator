@@ -6,6 +6,10 @@ final class PhabricatorProjectProfileController
   private $id;
   private $page;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->id = idx($data, 'id');
     $this->page = idx($data, 'page');

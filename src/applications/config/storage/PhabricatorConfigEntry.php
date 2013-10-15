@@ -3,8 +3,6 @@
 final class PhabricatorConfigEntry extends PhabricatorConfigEntryDAO
   implements PhabricatorPolicyInterface {
 
-  protected $id;
-  protected $phid;
   protected $namespace;
   protected $configKey;
   protected $value;
