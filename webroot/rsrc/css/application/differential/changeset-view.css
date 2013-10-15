@@ -451,3 +451,9 @@ tr.differential-inline-loading {
 .differential-collapse-undo a {
   font-weight: bold;
 }
+
+.differential-file-icon-header .phui-icon-view {
+  display: inline-block;
+  margin: 0 4px 2px 0;
+  vertical-align: middle;
+}
