@@ -35,10 +35,15 @@ final class PhabricatorCrumbsView extends AphrontView {
       foreach ($this->actions as $action) {
         $icon = null;
         if ($action->getIcon()) {
+          $icon_name = $action->getIcon();
+          if ($action->getDisabled()) {
+            $icon_name .= '-grey';
+          }
+
           $icon = phutil_tag(
             'span',
             array(
-              'class' => 'sprite-icons icons-'.$action->getIcon(),
+              'class' => 'sprite-icons icons-'.$icon_name,
             ),
             '');
         }
@@ -55,6 +60,11 @@ final class PhabricatorCrumbsView extends AphrontView {
         }
         $action_classes = $action->getClasses();
         $action_classes[] = 'phabricator-crumbs-action';
+
+        if ($action->getDisabled()) {
+          $action_classes[] = 'phabricator-crumbs-action-disabled';
+        }
+
         $actions[] = javelin_tag(
           'a',
           array(
