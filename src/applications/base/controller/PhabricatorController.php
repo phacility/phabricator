@@ -319,7 +319,7 @@ abstract class PhabricatorController extends AphrontController {
 
     return implode_selected_handle_links($style_map[$style],
       $this->getLoadedHandles(),
-      $phids);
+      array_filter($phids));
   }
 
   protected function buildApplicationMenu() {
