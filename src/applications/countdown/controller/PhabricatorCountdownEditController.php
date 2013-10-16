@@ -27,24 +27,23 @@ final class PhabricatorCountdownEditController
             PhabricatorPolicyCapability::CAN_EDIT,
           ))
         ->executeOne();
-
-      // If no countdown is found
       if (!$countdown) {
         return new Aphront404Response();
       }
     } else {
       $page_title = pht('Create Countdown');
-      $countdown = new PhabricatorCountdown();
-      $countdown->setEpoch(time());
+      $countdown = PhabricatorCountdown::initializeNewCountdown($user);
     }
 
     $error_view = null;
-    $e_text = null;
+    $e_text = true;
+    $e_epoch = null;
 
     if ($request->isFormPost()) {
       $errors = array();
       $title = $request->getStr('title');
       $epoch = $request->getStr('epoch');
+      $view_policy = $request->getStr('viewPolicy');
 
       $e_text = null;
       if (!strlen($title)) {
@@ -68,7 +67,7 @@ final class PhabricatorCountdownEditController
       if (!count($errors)) {
         $countdown->setTitle($title);
         $countdown->setEpoch($timestamp);
-        $countdown->setAuthorPHID($user->getPHID());
+        $countdown->setViewPolicy($view_policy);
         $countdown->save();
         return id(new AphrontRedirectResponse())
           ->setURI('/countdown/'.$countdown->getID().'/');
@@ -106,6 +105,10 @@ final class PhabricatorCountdownEditController
       $submit_label = pht('Create Countdown');
     }
 
+    $policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($user)
+      ->setObject($countdown)
+      ->execute();
 
     $form = id(new AphrontFormView())
       ->setUser($user)
@@ -114,15 +117,24 @@ final class PhabricatorCountdownEditController
         id(new AphrontFormTextControl())
           ->setLabel(pht('Title'))
           ->setValue($countdown->getTitle())
-          ->setName('title'))
+          ->setName('title')
+          ->setError($e_text))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('End Date'))
           ->setValue($display_epoch)
           ->setName('epoch')
+          ->setError($e_epoch)
           ->setCaption(pht('Examples: '.
             '2011-12-25 or 3 hours or '.
             'June 8 2011, 5 PM.')))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setUser($user)
+          ->setName('viewPolicy')
+          ->setPolicyObject($countdown)
+          ->setPolicies($policies)
+          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($cancel_uri)

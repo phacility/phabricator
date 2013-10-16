@@ -31,11 +31,6 @@ final class PhabricatorCountdownDeleteController
       return new Aphront404Response();
     }
 
-    if (($countdown->getAuthorPHID() !== $user->getPHID())
-        && $user->getIsAdmin() === false) {
-      return new Aphront403Response();
-    }
-
     if ($request->isFormPost()) {
       $countdown->delete();
       return id(new AphrontRedirectResponse())
