@@ -50,4 +50,12 @@ final class PhabricatorApplicationSlowvote extends PhabricatorApplication {
     );
   }
 
+  public function getCustomCapabilities() {
+    return array(
+      PhabricatorSlowvoteCapabilityDefaultView::CAPABILITY => array(
+        'caption' => pht('Default view policy for new polls.'),
+      ),
+    );
+  }
+
 }

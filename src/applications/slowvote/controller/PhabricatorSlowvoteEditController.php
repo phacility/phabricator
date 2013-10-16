@@ -32,9 +32,7 @@ final class PhabricatorSlowvoteEditController
       }
       $is_new = false;
     } else {
-      $poll = id(new PhabricatorSlowvotePoll())
-        ->setAuthorPHID($user->getPHID())
-        ->setViewPolicy(PhabricatorPolicies::POLICY_USER);
+      $poll = PhabricatorSlowvotePoll::initializeNewPoll($user);
       $is_new = true;
     }
 
@@ -53,6 +51,7 @@ final class PhabricatorSlowvoteEditController
       $v_description = $request->getStr('description');
       $v_responses = (int)$request->getInt('responses');
       $v_shuffle = (int)$request->getBool('shuffle');
+      $v_view_policy = $request->getStr('viewPolicy');
 
       if ($is_new) {
         $poll->setMethod($request->getInt('method'));
@@ -94,6 +93,10 @@ final class PhabricatorSlowvoteEditController
         ->setTransactionType(PhabricatorSlowvoteTransaction::TYPE_SHUFFLE)
         ->setNewValue($v_shuffle);
 
+      $xactions[] = id(clone $template)
+        ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+        ->setNewValue($v_view_policy);
+
       if (empty($errors)) {
         $editor = id(new PhabricatorSlowvoteEditor())
           ->setActor($user)
@@ -115,6 +118,8 @@ final class PhabricatorSlowvoteEditController
 
         return id(new AphrontRedirectResponse())
           ->setURI('/V'.$poll->getID());
+      } else {
+        $poll->setViewPolicy($v_view_policy);
       }
     }
 
@@ -206,6 +211,11 @@ final class PhabricatorSlowvoteEditController
       $cancel_uri = '/V'.$poll->getID();
     }
 
+    $policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($user)
+      ->setObject($poll)
+      ->execute();
+
     $form
       ->appendChild(
         id(new AphrontFormSelectControl())
@@ -221,6 +231,13 @@ final class PhabricatorSlowvoteEditController
             1,
             pht('Show choices in random order.'),
             $v_shuffle))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setUser($user)
+          ->setName('viewPolicy')
+          ->setPolicyObject($poll)
+          ->setPolicies($policies)
+          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($button)

@@ -28,6 +28,20 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   private $choices = self::ATTACHABLE;
   private $viewerChoices = self::ATTACHABLE;
 
+  public static function initializeNewPoll(PhabricatorUser $actor) {
+    $app = id(new PhabricatorApplicationQuery())
+      ->setViewer($actor)
+      ->withClasses(array('PhabricatorApplicationSlowvote'))
+      ->executeOne();
+
+    $view_policy = $app->getPolicy(
+      PhabricatorSlowvoteCapabilityDefaultView::CAPABILITY);
+
+    return id(new PhabricatorSlowvotePoll())
+      ->setAuthorPHID($actor->getPHID())
+      ->setViewPolicy($view_policy);
+  }
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
