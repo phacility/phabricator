@@ -3,7 +3,6 @@
  */
 
 .diffusion-source {
-  margin: 1em 0 2em;
   width: 100%;
   font-family: "Monaco", Consolas, monospace;
   font-size: 10px;
@@ -15,14 +14,12 @@
 }
 
 .diffusion-source th {
-  text-align:         right;
-  vertical-align:     top;
-  background:         #eeeeee;
-  color:              {$lightgreytext};
-  border-style:       solid;
-  border-width:       0px 1px;
-  border-color:       #eeeeee #999999 #eeeeee #dddddd;
-  font-size:          11px;
+  text-align: right;
+  vertical-align: top;
+  background: {$lightgreybackground};
+  color: {$bluetext};
+  border-right: 1px solid {$thinblueborder};
+  font-size: 11px;
 }
 
 .diffusion-source td {
@@ -46,7 +43,7 @@
 }
 
 .diffusion-blame-link {
-  min-width: 25px;
+  min-width: 28px;
 }
 
 .diffusion-rev-link {
@@ -61,20 +58,21 @@
 .diffusion-rev-link a,
 .diffusion-author-link a,
 .diffusion-line-link a {
-  font-weight:  bold;
+  color: {$darkbluetext};
 }
 
 .diffusion-rev-link a,
 .diffusion-author-link span,
 .diffusion-author-link a {
-  margin:       0 8px;
+  margin: 2px 8px 0;
+  display: block;
 }
 
 .diffusion-blame-link a,
 .diffusion-line-link a {
   /* Give the user a larger click target. */
-  display:      block;
-  padding:      2px 8px;
+  display: block;
+  padding: 2px 8px;
 }
 
 .diffusion-line-link {

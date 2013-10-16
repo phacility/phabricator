@@ -129,7 +129,11 @@ final class DiffusionCommitController extends DiffusionController {
       $message = $engine->markupText($message);
 
       $property_list->invokeWillRenderEvent();
-      $property_list->addTextContent(
+      $property_list->setActionList($headsup_actions);
+
+      $detail_list = new PHUIPropertyListView();
+      $detail_list->addSectionHeader(pht('Description'));
+      $detail_list->addTextContent(
         phutil_tag(
           'div',
           array(
@@ -137,11 +141,11 @@ final class DiffusionCommitController extends DiffusionController {
           ),
           $message));
       $content[] = $top_anchor;
-      $property_list->setActionList($headsup_actions);
 
       $object_box = id(new PHUIObjectBoxView())
         ->setHeader($headsup_view)
-        ->addPropertyList($property_list);
+        ->addPropertyList($property_list)
+        ->addPropertyList($detail_list);
 
       $content[] = $object_box;
     }
