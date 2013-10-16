@@ -51,6 +51,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $diff_vs = $request->getInt('vs');
 
     $target_id = $request->getInt('id');
+    phlog($target_id);
     $target = idx($diffs, $target_id, end($diffs));
 
     $target_manual = $target;

@@ -193,6 +193,9 @@ final class CelerityStaticResourceResponse {
       throw new Exception(
         'Literal </script> is not allowed inside inline script.');
     }
+    if (strpos($data, '<!') !== false) {
+      throw new Exception('Literal <! is not allowed inside inline script.');
+    }
     return hsprintf(
       // We don't use <![CDATA[ ]]> because it is ignored by HTML parsers. We
       // would need to send the document with XHTML content type.

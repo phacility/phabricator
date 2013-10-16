@@ -89,6 +89,8 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
         $new = null;
       }
 
+      phlog($this->selectedVersusDiffID, $this->selectedDiffID);
+
       if ($max_id != $id) {
         $uniq = celerity_generate_unique_node_id();
         $old_checked = ($this->selectedVersusDiffID == $id);
