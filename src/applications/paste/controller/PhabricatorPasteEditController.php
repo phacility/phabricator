@@ -21,7 +21,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
     if (!$this->id) {
       $is_create = true;
 
-      $paste = new PhabricatorPaste();
+      $paste = PhabricatorPaste::initializeNewPaste($user);
 
       $parent_id = $request->getStr('parent');
       if ($parent_id) {

@@ -349,11 +349,7 @@ abstract class PhabricatorApplication
 
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
-        if (PhabricatorEnv::getEnvConfig('policy.allow-public')) {
-          return PhabricatorPolicies::POLICY_PUBLIC;
-        } else {
-          return PhabricatorPolicies::POLICY_USER;
-        }
+        return PhabricatorPolicies::getMostOpenPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
         return PhabricatorPolicies::POLICY_ADMIN;
       default:

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * group paste
- */
 final class PhabricatorApplicationPaste extends PhabricatorApplication {
 
   public function getBaseURI() {
@@ -40,6 +37,15 @@ final class PhabricatorApplicationPaste extends PhabricatorApplication {
         'create/'                       => 'PhabricatorPasteEditController',
         'edit/(?P<id>[1-9]\d*)/'        => 'PhabricatorPasteEditController',
         'comment/(?P<id>[1-9]\d*)/'     => 'PhabricatorPasteCommentController',
+      ),
+    );
+  }
+
+  protected function getCustomCapabilities() {
+    return array(
+      PasteCapabilityDefaultView::CAPABILITY => array(
+        'caption' => pht(
+          'Default view policy for newly created pastes.')
       ),
     );
   }

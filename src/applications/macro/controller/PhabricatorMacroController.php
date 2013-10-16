@@ -28,11 +28,16 @@ abstract class PhabricatorMacroController
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
+    $can_manage = $this->hasApplicationCapability(
+      PhabricatorMacroCapabilityManage::CAPABILITY);
+
     $crumbs->addAction(
       id(new PHUIListItemView())
         ->setName(pht('Create Macro'))
         ->setHref($this->getApplicationURI('/create/'))
-        ->setIcon('create'));
+        ->setIcon('create')
+        ->setDisabled(!$can_manage)
+        ->setWorkflow(!$can_manage));
 
     return $crumbs;
   }

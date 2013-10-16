@@ -462,7 +462,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setWorkflow(true)
         ->setIcon('merge')
         ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
+        ->setWorkflow(true));
 
     $view->addAction(
       id(new PhabricatorActionView())
