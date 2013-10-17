@@ -107,6 +107,14 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
       case 'i':
         update(area, '//', sel || pht('italic text'), '//');
         break;
+      case 'link':
+        var name = pht('name');
+        if (/^https?:/i.test(sel)) {
+          update(area, '[[ ' + sel + ' | ', name, ' ]]');
+        } else {
+          update(area, '[[ ', pht('URL'), ' | ' + (sel || name) + ' ]]');
+        }
+        break;
       case 'tt':
         update(area, '`', sel || pht('monospaced text'), '`');
         break;

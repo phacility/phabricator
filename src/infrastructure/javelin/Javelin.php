@@ -27,6 +27,8 @@ final class Javelin {
           'monospaced text' => pht('monospaced text'),
           'List Item' => pht('List Item'),
           'data' => pht('data'),
+          'name' => pht('name'),
+          'URL' => pht('URL'),
         );
         break;
     }
