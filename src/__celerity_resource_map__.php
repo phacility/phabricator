@@ -1791,6 +1791,18 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/core/behavior-history-install.js',
   ),
+  'javelin-behavior-icon-composer' =>
+  array(
+    'uri' => '/res/0be5c462/rsrc/js/application/files/behavior-icon-composer.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-stratcom',
+    ),
+    'disk' => '/rsrc/js/application/files/behavior-icon-composer.js',
+  ),
   'javelin-behavior-konami' =>
   array(
     'uri' => '/res/b7bb7c24/rsrc/js/core/behavior-konami.js',
@@ -1801,6 +1813,18 @@ celerity_register_resource_map(array(
       1 => 'javelin-stratcom',
     ),
     'disk' => '/rsrc/js/core/behavior-konami.js',
+  ),
+  'javelin-behavior-launch-icon-composer' =>
+  array(
+    'uri' => '/res/202488ac/rsrc/js/application/files/behavior-launch-icon-composer.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-workflow',
+    ),
+    'disk' => '/rsrc/js/application/files/behavior-launch-icon-composer.js',
   ),
   'javelin-behavior-lightbox-attachments' =>
   array(
@@ -3062,7 +3086,7 @@ celerity_register_resource_map(array(
   ),
   'people-profile-css' =>
   array(
-    'uri' => '/res/d50d9502/rsrc/css/application/people/people-profile.css',
+    'uri' => '/res/f1da102e/rsrc/css/application/people/people-profile.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -4227,7 +4251,7 @@ celerity_register_resource_map(array(
   ),
   'sprite-projects-css' =>
   array(
-    'uri' => '/res/3ff34b69/rsrc/css/sprite-projects.css',
+    'uri' => '/res/40eacbfb/rsrc/css/sprite-projects.css',
     'type' => 'css',
     'requires' =>
     array(

@@ -129,8 +129,8 @@ final class CelerityResourceTransformer {
       $data);
   }
 
-  public function replaceCSSVariable($matches) {
-    static $map = array(
+  public static function getCSSVariableMap() {
+    return array(
       // Base Colors
       'red'           => '#c0392b',
       'lightred'      => '#f4dddb',
@@ -148,6 +148,8 @@ final class CelerityResourceTransformer {
       'lightindigo'   => '#f5e2ef',
       'violet'        => '#8e44ad',
       'lightviolet'   => '#ecdff1',
+      'charcoal'      => '#4b4d51',
+      'backdrop'      => '#c4cde0',
 
       // Base Greys
       'lightgreyborder'     => '#C7CCD9',
@@ -170,6 +172,13 @@ final class CelerityResourceTransformer {
       'bluetext'            => '#6B748C',
       'darkbluetext'        => '#464C5C',
     );
+  }
+
+  public function replaceCSSVariable($matches) {
+    static $map;
+    if (!$map) {
+      $map = self::getCSSVariableMap();
+    }
 
     $var_name = $matches[1];
     if (empty($map[$var_name])) {

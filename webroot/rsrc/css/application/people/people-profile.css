@@ -11,3 +11,69 @@ button.profile-image-button {
   padding: 4px;
   margin: 0;
 }
+
+.compose-dialog button.profile-image-button-selected {
+  background-image: none;
+  background-color: {$lightblue};
+  border-color: {$blueborder};
+}
+
+.compose-header {
+  color: {$bluetext};
+  border-bottom: 1px solid {$lightblueborder};
+  padding: 4px 0;
+  margin: 0 0 8px;
+}
+
+form.compose-dialog {
+  width: 80%;
+}
+
+.compose-dialog .phui-icon-view {
+  display: block;
+  position: relative;
+  width: 50px;
+  height: 50px;
+  background-color: {$darkgreytext};
+}
+
+.compose-dialog .compose-background-red {
+  background-color: {$red};
+}
+
+.compose-dialog .compose-background-orange {
+  background-color: {$orange};
+}
+
+.compose-dialog .compose-background-yellow {
+  background-color: {$yellow};
+}
+
+.compose-dialog .compose-background-green {
+  background-color: {$green};
+}
+
+.compose-dialog .compose-background-blue {
+  background-color: {$blue};
+}
+
+.compose-dialog .compose-background-sky {
+  background-color: {$sky};
+}
+
+.compose-dialog .compose-background-indigo {
+  background-color: {$indigo};
+}
+
+.compose-dialog .compose-background-violet {
+  background-color: {$violet};
+}
+
+.compose-dialog .compose-background-charcoal {
+  background-color: {$charcoal};
+}
+
+.compose-dialog .compose-background-backdrop {
+  background-color: {$backdrop};
+}
+

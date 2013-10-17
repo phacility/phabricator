@@ -216,6 +216,14 @@ final class PhabricatorProjectProfileController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Picture'))
+        ->setIcon('image')
+        ->setHref($this->getApplicationURI("picture/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
 
     $action = null;
     if (!$project->isUserMember($viewer->getPHID())) {
