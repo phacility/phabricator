@@ -329,6 +329,20 @@
   border-right: 1px solid #cccccc;
 }
 
+.remarkup-interpreter-error {
+  padding: 8px;
+  border: 1px solid {$red};
+  background-color: {$lightred};
+}
+
+.remarkup-cowsay {
+  white-space: pre-wrap;
+}
+
+.remarkup-figlet {
+  white-space: pre-wrap;
+}
+
 .remarkup-assist {
   display: block;
   width: 14px;
