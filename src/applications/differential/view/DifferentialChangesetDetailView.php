@@ -47,7 +47,7 @@ final class DifferentialChangesetDetailView extends AphrontView {
 
   public function getFileIcon($filename) {
     $path_info = pathinfo($filename);
-    $extension = $path_info['extension'];
+    $extension = idx($path_info, 'extension');
     switch ($extension) {
       case 'psd':
       case 'ai':

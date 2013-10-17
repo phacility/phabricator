@@ -103,6 +103,7 @@ final class PhabricatorRemarkupRuleEmbedFile
         'meta'        => array(
           'phid' => $file->getPHID(),
           'uri' => $file->getBestURI(),
+          'dUri' => $file->getDownloadURI(),
           'viewable' => true,
         ),
       ),
