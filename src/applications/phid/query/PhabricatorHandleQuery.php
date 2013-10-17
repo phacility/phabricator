@@ -18,10 +18,12 @@ final class PhabricatorHandleQuery
       return array();
     }
 
-    $objects = id(new PhabricatorObjectQuery())
+    $object_query = id(new PhabricatorObjectQuery())
       ->withPHIDs($phids)
-      ->setViewer($this->getViewer())
-      ->execute();
+      ->setViewer($this->getViewer());
+
+    $objects = $object_query->execute();
+    $filtered = $object_query->getPolicyFilteredPHIDs();
 
     $groups = array();
     foreach ($phids as $phid) {
@@ -43,6 +45,8 @@ final class PhabricatorHandleQuery
           ->setPHID($phid);
         if (isset($objects[$phid])) {
           $handles[$phid]->setComplete(true);
+        } else if (isset($filtered[$phid])) {
+          $handles[$phid]->setPolicyFiltered(true);
         }
       }
 
