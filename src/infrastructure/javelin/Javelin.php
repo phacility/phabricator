@@ -19,6 +19,16 @@ final class Javelin {
           'Configure Editor' => pht('Configure Editor'),
         );
         break;
+
+      case 'phabricator-remarkup-assist':
+        $config['pht'] = array(
+          'bold text' => pht('bold text'),
+          'italic text' => pht('italic text'),
+          'monospaced text' => pht('monospaced text'),
+          'List Item' => pht('List Item'),
+          'data' => pht('data'),
+        );
+        break;
     }
 
     $response = CelerityAPI::getStaticResourceResponse();
