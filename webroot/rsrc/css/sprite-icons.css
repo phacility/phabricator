@@ -894,58 +894,62 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -120px -210px;
 }
 
-.remarkup-assist-b {
+.remarkup-assist-link {
   background-position: -135px -210px;
 }
 
-.remarkup-assist-code {
+.remarkup-assist-b {
   background-position: -150px -210px;
 }
 
-.remarkup-assist-fullscreen {
+.remarkup-assist-code {
   background-position: -165px -210px;
 }
 
-.remarkup-control-fullscreen-mode .remarkup-assist-fullscreen {
+.remarkup-assist-fullscreen {
   background-position: -180px -210px;
 }
 
-.remarkup-assist-help {
+.remarkup-control-fullscreen-mode .remarkup-assist-fullscreen {
   background-position: -195px -210px;
 }
 
-.remarkup-assist-i {
+.remarkup-assist-help {
   background-position: -210px -210px;
 }
 
-.remarkup-assist-image {
+.remarkup-assist-i {
   background-position: 0px -225px;
 }
 
-.remarkup-assist-larger {
+.remarkup-assist-image {
   background-position: -15px -225px;
 }
 
-.remarkup-assist-meme {
+.remarkup-assist-larger {
   background-position: -30px -225px;
 }
 
-.remarkup-assist-ol {
+.remarkup-assist-meme {
   background-position: -45px -225px;
 }
 
-.remarkup-assist-table {
+.remarkup-assist-ol {
   background-position: -60px -225px;
 }
 
-.remarkup-assist-tag {
+.remarkup-assist-table {
   background-position: -75px -225px;
 }
 
-.remarkup-assist-tt {
+.remarkup-assist-tag {
   background-position: -90px -225px;
 }
 
-.remarkup-assist-ul {
+.remarkup-assist-tt {
   background-position: -105px -225px;
+}
+
+.remarkup-assist-ul {
+  background-position: -120px -225px;
 }

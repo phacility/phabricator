@@ -22,7 +22,6 @@ final class PhabricatorCountdownViewController
       ->setViewer($user)
       ->withIDs(array($this->id))
       ->executeOne();
-
     if (!$countdown) {
       return new Aphront404Response();
     }
@@ -42,7 +41,9 @@ final class PhabricatorCountdownViewController
           ->setName("C{$id}"));
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($title);
+      ->setHeader($title)
+      ->setUser($user)
+      ->setPolicyObject($countdown);
 
     $actions = $this->buildActionListView($countdown);
     $properties = $this->buildPropertyListView($countdown, $actions);

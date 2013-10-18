@@ -79,12 +79,35 @@ final class ConduitCall {
   }
 
   public function execute() {
-    if (!$this->getUser()) {
-      if ($this->shouldRequireAuthentication()) {
+    $user = $this->getUser();
+    if (!$user) {
+      $user = new PhabricatorUser();
+    }
+
+    $this->request->setUser($user);
+
+    if ($this->shouldRequireAuthentication()) {
+      if (!$user->isLoggedIn()) {
         throw new ConduitException("ERR-INVALID-AUTH");
       }
-    } else {
-      $this->request->setUser($this->getUser());
+
+      // TODO: This would be slightly cleaner by just using a Query, but the
+      // Conduit auth workflow requires the Call and User be built separately.
+      // Just do it this way for the moment.
+      $application = $this->handler->getApplication();
+      if ($application) {
+        $can_view = PhabricatorPolicyFilter::hasCapability(
+          $user,
+          $application,
+          PhabricatorPolicyCapability::CAN_VIEW);
+
+        if (!$can_view) {
+          throw new ConduitException(
+            pht(
+              "You do not have access to the application which provides this ".
+              "API method."));
+        }
+      }
     }
 
     if (!$this->shouldForceLocal() && $this->servers) {

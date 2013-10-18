@@ -142,7 +142,7 @@ final class PhabricatorProjectQuery
             if (!$default) {
               $default = PhabricatorFile::loadBuiltin(
                 $this->getViewer(),
-                'profile.png');
+                'project.png');
             }
             $file = $default;
           }
@@ -156,7 +156,7 @@ final class PhabricatorProjectQuery
           if (!$default) {
             $default = PhabricatorFile::loadBuiltin(
               $this->getViewer(),
-              'profile.png');
+              'project.png');
           }
           $profile = id(new PhabricatorProjectProfile())
             ->setProjectPHID($project->getPHID())

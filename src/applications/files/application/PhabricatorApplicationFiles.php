@@ -51,6 +51,7 @@ final class PhabricatorApplicationFiles extends PhabricatorApplication {
         '(query/(?P<key>[^/]+)/)?' => 'PhabricatorFileListController',
         'upload/' => 'PhabricatorFileUploadController',
         'dropupload/' => 'PhabricatorFileDropUploadController',
+        'compose/' => 'PhabricatorFileComposeController',
         'comment/(?P<id>[1-9]\d*)/' => 'PhabricatorFileCommentController',
         'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorFileDeleteController',
         'info/(?P<phid>[^/]+)/' => 'PhabricatorFileInfoController',

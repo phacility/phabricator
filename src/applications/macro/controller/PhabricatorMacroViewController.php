@@ -70,6 +70,8 @@ final class PhabricatorMacroViewController
       ->setMarkupEngine($engine);
 
     $header = id(new PHUIHeaderView())
+      ->setUser($user)
+      ->setPolicyObject($macro)
       ->setHeader($title_long);
 
     if ($macro->getIsDisabled()) {
@@ -128,6 +130,10 @@ final class PhabricatorMacroViewController
   }
 
   private function buildActionView(PhabricatorFileImageMacro $macro) {
+
+    $can_manage = $this->hasApplicationCapability(
+      PhabricatorMacroCapabilityManage::CAPABILITY);
+
     $request = $this->getRequest();
     $view = id(new PhabricatorActionListView())
       ->setUser($request->getUser())
@@ -137,12 +143,16 @@ final class PhabricatorMacroViewController
         id(new PhabricatorActionView())
         ->setName(pht('Edit Macro'))
         ->setHref($this->getApplicationURI('/edit/'.$macro->getID().'/'))
+        ->setDisabled(!$can_manage)
+        ->setWorkflow(!$can_manage)
         ->setIcon('edit'));
 
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Audio'))
         ->setHref($this->getApplicationURI('/audio/'.$macro->getID().'/'))
+        ->setDisabled(!$can_manage)
+        ->setWorkflow(!$can_manage)
         ->setIcon('herald'));
 
     if ($macro->getIsDisabled()) {
@@ -151,6 +161,7 @@ final class PhabricatorMacroViewController
           ->setName(pht('Restore Macro'))
           ->setHref($this->getApplicationURI('/disable/'.$macro->getID().'/'))
           ->setWorkflow(true)
+          ->setDisabled(!$can_manage)
           ->setIcon('undo'));
     } else {
       $view->addAction(
@@ -158,6 +169,7 @@ final class PhabricatorMacroViewController
           ->setName(pht('Disable Macro'))
           ->setHref($this->getApplicationURI('/disable/'.$macro->getID().'/'))
           ->setWorkflow(true)
+          ->setDisabled(!$can_manage)
           ->setIcon('delete'));
     }
 

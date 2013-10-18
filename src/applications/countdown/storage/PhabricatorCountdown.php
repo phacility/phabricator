@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group countdown
- */
 final class PhabricatorCountdown
   extends PhabricatorCountdownDAO
   implements PhabricatorPolicyInterface {
@@ -10,7 +7,22 @@ final class PhabricatorCountdown
   protected $title;
   protected $authorPHID;
   protected $epoch;
-  // protected $viewPolicy; //commented out till we have it on countdown table
+  protected $viewPolicy;
+
+  public static function initializeNewCountdown(PhabricatorUser $actor) {
+    $app = id(new PhabricatorApplicationQuery())
+      ->setViewer($actor)
+      ->withClasses(array('PhabricatorApplicationCountdown'))
+      ->executeOne();
+
+    $view_policy = $app->getPolicy(
+      PhabricatorCountdownCapabilityDefaultView::CAPABILITY);
+
+    return id(new PhabricatorCountdown())
+      ->setAuthorPHID($actor->getPHID())
+      ->setViewPolicy($view_policy)
+      ->setEpoch(PhabricatorTime::getNow());
+  }
 
   public function getConfiguration() {
     return array(
@@ -21,10 +33,6 @@ final class PhabricatorCountdown
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorCountdownPHIDTypeCountdown::TYPECONST);
-  }
-
-  public function getViewPolicy() {
-    return PhabricatorPolicies::POLICY_USER;
   }
 
 

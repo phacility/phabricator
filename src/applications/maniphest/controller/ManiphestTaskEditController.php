@@ -471,10 +471,6 @@ final class ManiphestTaskEditController extends ManiphestController {
           ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
           ->setPolicyObject($task)
           ->setPolicies($policies)
-          ->setCaption(
-            pht(
-              'NOTE: These policy controls still have some rough edges and '.
-              'are not yet fully functional.'))
           ->setName('editPolicy'))
       ->appendChild(
         id(new AphrontFormTokenizerControl())

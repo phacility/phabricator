@@ -2,10 +2,6 @@
  * @provides diffusion-commit-view-css
  */
 
-.diffusion-commit-message {
-  padding: 8px;
-}
-
 .diffusion-comment-list {
   margin: 2em;
 }

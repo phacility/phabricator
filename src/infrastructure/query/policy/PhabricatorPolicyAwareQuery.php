@@ -34,6 +34,7 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
   private $rawResultLimit;
   private $capabilities;
   private $workspace = array();
+  private $policyFilteredPHIDs = array();
 
 
 /* -(  Query Configuration  )------------------------------------------------ */
@@ -228,6 +229,17 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
         $visible = $maybe_visible;
       } else {
         $visible = $filter->apply($maybe_visible);
+
+        $policy_filtered = array();
+        foreach ($maybe_visible as $key => $object) {
+          if (empty($visible[$key])) {
+            $phid = $object->getPHID();
+            if ($phid) {
+              $policy_filtered[$phid] = $phid;
+            }
+          }
+        }
+        $this->addPolicyFilteredPHIDs($policy_filtered);
       }
 
       if ($visible) {
@@ -303,6 +315,28 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
       $object,
       $object->getPolicy(PhabricatorPolicyCapability::CAN_VIEW),
       PhabricatorPolicyCapability::CAN_VIEW);
+  }
+
+  protected function addPolicyFilteredPHIDs(array $phids) {
+    $this->policyFilteredPHIDs += $phids;
+    if ($this->getParentQuery()) {
+      $this->getParentQuery()->addPolicyFilteredPHIDs($phids);
+    }
+    return $this;
+  }
+
+  /**
+   * Return a map of all object PHIDs which were loaded in the query but
+   * filtered out by policy constraints. This allows a caller to distinguish
+   * between objects which do not exist (or, at least, were filtered at the
+   * content level) and objects which exist but aren't visible.
+   *
+   * @return map<phid, phid> Map of object PHIDs which were filtered
+   *   by policies.
+   * @task exec
+   */
+  public function getPolicyFilteredPHIDs() {
+    return $this->policyFilteredPHIDs;
   }
 
 

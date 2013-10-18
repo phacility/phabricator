@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group countdown
- */
 final class PhabricatorApplicationCountdown extends PhabricatorApplication {
 
   public function getBaseURI() {
@@ -46,6 +43,14 @@ final class PhabricatorApplicationCountdown extends PhabricatorApplication {
           => 'PhabricatorCountdownEditController',
         'delete/(?P<id>[1-9]\d*)/'
           => 'PhabricatorCountdownDeleteController'
+      ),
+    );
+  }
+
+  public function getCustomCapabilities() {
+    return array(
+      PhabricatorCountdownCapabilityDefaultView::CAPABILITY => array(
+        'caption' => pht('Default view policy for new countdowns.'),
       ),
     );
   }

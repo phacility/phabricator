@@ -10,6 +10,10 @@ final class PhabricatorMacroDisableController
   }
 
   public function processRequest() {
+
+    $this->requireApplicationCapability(
+      PhabricatorMacroCapabilityManage::CAPABILITY);
+
     $request = $this->getRequest();
     $user = $request->getUser();
 

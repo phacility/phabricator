@@ -40,6 +40,9 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       'tt'    => array(
         'tip' => pht('Monospaced'),
       ),
+      'link'  => array(
+        'tip' => pht('Link'),
+      ),
       array(
         'spacer' => true,
       ),

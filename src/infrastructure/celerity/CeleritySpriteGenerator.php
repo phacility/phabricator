@@ -347,14 +347,14 @@ final class CeleritySpriteGenerator {
       ->setSourceSize(50, 50);
 
     $sprites = array();
-    $prefix = 'projects_';
+    $prefix = 'projects-';
     foreach ($icons as $icon) {
       $sprite = id(clone $template)
         ->setName($prefix.$icon)
         ->setTargetCSS('.'.$prefix.$icon);
 
       foreach ($scales as $scale_key => $scale) {
-        $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
+        $path = $this->getPath('projects_'.$scale_key.'/'.$icon.'.png');
         $sprite->setSourceFile($path, $scale);
       }
       $sprites[] = $sprite;

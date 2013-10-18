@@ -71,11 +71,6 @@ final class DiffusionRepositoryEditPolicyController
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
-      ->appendRemarkupInstructions(
-        pht(
-          'NOTE: The "Visible To" control is not yet fully functional. It '.
-          'applies to some interfaces, but some interfaces will bypass this '.
-          'setting and act as though it were set to "all users" for now.'))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setUser($viewer)

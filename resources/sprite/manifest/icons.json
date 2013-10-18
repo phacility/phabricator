@@ -1096,6 +1096,11 @@
       "rule" : ".icons-zip-white, .device-desktop .phabricator-action-view:hover .icons-zip, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-zip",
       "hash" : "e006963c22a6be6fb72a0eefecf83649"
     },
+    "remarkup-assist-link"                : {
+      "name" : "remarkup-assist-link",
+      "rule" : ".remarkup-assist-link",
+      "hash" : "14fd38c00e80b6f4823ac543a96e63c2"
+    },
     "remarkup-assist-text_b"              : {
       "name" : "remarkup-assist-text_b",
       "rule" : ".remarkup-assist-b",

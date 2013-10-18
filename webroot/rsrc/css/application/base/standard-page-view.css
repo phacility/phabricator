@@ -95,3 +95,8 @@ a.handle-disabled {
   padding: 8px 16px;
   background: {$lightyellow};
 }
+
+.phui-handle .phui-icon-view {
+  display: inline-block;
+  margin: 2px 2px -2px 0;
+}

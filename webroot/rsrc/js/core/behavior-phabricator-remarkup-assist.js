@@ -3,12 +3,14 @@
  * @requires javelin-behavior
  *           javelin-stratcom
  *           javelin-dom
+ *           phabricator-phtize
  *           phabricator-textareautils
  *           javelin-workflow
  *           javelin-vector
  */
 
 JX.behavior('phabricator-remarkup-assist', function(config) {
+  var pht = JX.phtize(config.pht);
 
   var edit_mode = 'normal';
   var edit_root = null;
@@ -100,13 +102,21 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
 
     switch (action) {
       case 'b':
-        update(area, '**', sel || 'bold text', '**');
+        update(area, '**', sel || pht('bold text'), '**');
         break;
       case 'i':
-        update(area, '//', sel || 'italic text', '//');
+        update(area, '//', sel || pht('italic text'), '//');
+        break;
+      case 'link':
+        var name = pht('name');
+        if (/^https?:/i.test(sel)) {
+          update(area, '[[ ' + sel + ' | ', name, ' ]]');
+        } else {
+          update(area, '[[ ', pht('URL'), ' | ' + (sel || name) + ' ]]');
+        }
         break;
       case 'tt':
-        update(area, '`', sel || 'monospaced text', '`');
+        update(area, '`', sel || pht('monospaced text'), '`');
         break;
       case 'ul':
       case 'ol':
@@ -114,7 +124,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
         if (sel) {
           sel = sel.split("\n");
         } else {
-          sel = ["List Item"];
+          sel = [pht('List Item')];
         }
         sel = sel.join("\n" + ch);
         update(area, ((r.start === 0) ? "" : "\n\n") + ch, sel, "\n\n");
@@ -126,7 +136,8 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
         update(area, ((r.start === 0) ? "" : "\n\n"), sel, "\n\n");
         break;
       case 'table':
-        update(area, (r.start === 0 ? '' : '\n\n') + '| ', sel || 'data', ' |');
+        var prefix = (r.start === 0 ? '' : '\n\n');
+        update(area, prefix + '| ', sel || pht('data'), ' |');
         break;
       case 'meme':
         new JX.Workflow('/macro/meme/create/')

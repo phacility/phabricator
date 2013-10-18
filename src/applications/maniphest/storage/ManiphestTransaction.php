@@ -528,7 +528,7 @@ final class ManiphestTransaction
             $this->renderHandleList($added));
         } else if ($removed && !$added) {
           return pht(
-            '%s removed %d project(s) to %s: %s',
+            '%s removed %d project(s) from %s: %s',
             $this->renderHandleLink($author_phid),
             count($removed),
             $this->renderHandleLink($object_phid),

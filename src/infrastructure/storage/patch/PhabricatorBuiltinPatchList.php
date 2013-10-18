@@ -1672,6 +1672,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20131010.pstorage.sql'),
       ),
+      '20131015.cpolicy.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131015.cpolicy.sql'),
+      ),
     );
   }
 }

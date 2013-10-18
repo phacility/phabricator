@@ -297,10 +297,13 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       $corpus = phutil_tag(
         'div',
         array(
-          'style' => 'padding: 0 2em;',
           'id' => $id,
         ),
         $corpus_table);
+
+      $corpus = id(new PHUIObjectBoxView())
+        ->setHeaderText('File Contents')
+        ->appendChild($corpus);
 
       Javelin::initBehavior('load-blame', array('id' => $id));
     }

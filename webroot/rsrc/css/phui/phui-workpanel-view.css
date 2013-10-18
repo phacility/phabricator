@@ -15,7 +15,7 @@
 }
 
 .phui-workpanel-view .phui-workpanel-body {
-  background: #c4cde0;
+  background: {$backdrop};
   padding: 5px 5px 1px 5px;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;

@@ -8,13 +8,10 @@
   border-spacing: 1px;
 }
 
-.differential-revision-history-table th {
-  color: {$greytext};
-  padding: 4px 6px;
-}
-
+.differential-revision-history-table th,
 .differential-revision-history-table td {
-  padding: 4px 6px;
+  color: {$darkbluetext};
+  padding: 4px 8px;
 }
 
 .differential-revision-history-table td {
@@ -22,9 +19,8 @@
 }
 
 .differential-revision-history-table tr.alt {
-  background: #dcdcdc;
+  background: {$greybackground};
 }
-
 
 .differential-revision-history-table td.revhistory-desc {
   width: 100%;
@@ -41,7 +37,7 @@
 
 .differential-revision-history-table td.revhistory-old,
 .differential-revision-history-table td.revhistory-new {
-  padding: 0em 1.5em;
+  padding: 0 16px;
   text-align: center;
 }
 
@@ -65,21 +61,18 @@
   text-align: center;
 }
 
-
-
-
 .differential-revision-history-table td.diff-differ-submit {
   text-align: right;
   border-bottom: none;
-  padding: 8px 0px 4px 0px;
+  padding: 8px 0 4px 0;
 }
 
 .differential-revision-history-table td.diff-differ-submit button {
-  margin-left: 1em;
+  margin-left: 12px;
 }
 
 .differential-revision-history-table td.diff-differ-submit label {
   font-weight: bold;
-  padding-right: .25em;
+  padding-right: 4px;
   color: {$darkgreytext};
 }

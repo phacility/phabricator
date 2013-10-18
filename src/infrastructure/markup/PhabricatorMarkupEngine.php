@@ -460,6 +460,7 @@ final class PhabricatorMarkupEngine {
     $blocks[] = new PhutilRemarkupEngineRemarkupNoteBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupTableBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupSimpleTableBlockRule();
+    $blocks[] = new PhutilRemarkupEngineRemarkupInterpreterRule();
 
     $custom_block_rule_classes = $options['custom-block'];
     if ($custom_block_rule_classes) {

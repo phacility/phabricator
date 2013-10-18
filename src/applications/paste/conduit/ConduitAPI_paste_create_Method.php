@@ -51,12 +51,10 @@ final class ConduitAPI_paste_create_Method extends ConduitAPI_paste_Method {
 
     // TODO: This should use PhabricatorPasteEditor.
 
-    $paste = new PhabricatorPaste();
+    $paste = PhabricatorPaste::initializeNewPaste($user);
     $paste->setTitle($title);
     $paste->setLanguage($language);
     $paste->setFilePHID($paste_file->getPHID());
-    $paste->setAuthorPHID($user->getPHID());
-    $paste->setViewPolicy(PhabricatorPolicies::POLICY_USER);
     $paste->save();
 
     $paste_file->attachToObject($user, $paste->getPHID());

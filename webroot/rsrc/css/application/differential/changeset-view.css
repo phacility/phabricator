@@ -5,7 +5,7 @@
 .differential-changeset {
   position: relative;
   margin: 0;
-  padding: 16px 0;
+  padding-top: 32px;
 }
 
 .differential-diff {
@@ -268,7 +268,7 @@ td.cov-X {
 }
 
 .differential-inline-comment-synthetic .differential-inline-comment-head {
-  border-bottom: 1px solid {$thinblueborder};
+  border-bottom: 1px solid {$blueborder};
 }
 
 
@@ -303,7 +303,7 @@ td.cov-X {
 
 .differential-property-table {
   width: auto;
-  margin: .75em auto;
+  margin: 12px auto;
   background: #e3e3e3;
 }
 
@@ -367,8 +367,7 @@ td.cov-X {
 }
 
 .differential-inline-comment-edit-buttons {
-  padding: 5px 0 0 0;
-
+  padding: 4px 0 0 0;
 }
 
 .differential-inline-comment-edit-buttons button {
