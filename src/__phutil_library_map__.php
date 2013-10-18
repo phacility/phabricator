@@ -1958,6 +1958,8 @@ phutil_register_library_map(array(
     'PhrequentDAO' => 'applications/phrequent/storage/PhrequentDAO.php',
     'PhrequentListController' => 'applications/phrequent/controller/PhrequentListController.php',
     'PhrequentSearchEngine' => 'applications/phrequent/query/PhrequentSearchEngine.php',
+    'PhrequentTimeBlock' => 'applications/phrequent/storage/PhrequentTimeBlock.php',
+    'PhrequentTimeBlockTestCase' => 'applications/phrequent/storage/__tests__/PhrequentTimeBlockTestCase.php',
     'PhrequentTrackController' => 'applications/phrequent/controller/PhrequentTrackController.php',
     'PhrequentTrackableInterface' => 'applications/phrequent/interface/PhrequentTrackableInterface.php',
     'PhrequentUIEventListener' => 'applications/phrequent/event/PhrequentUIEventListener.php',
@@ -4230,6 +4232,8 @@ phutil_register_library_map(array(
       1 => 'PhabricatorApplicationSearchResultsControllerInterface',
     ),
     'PhrequentSearchEngine' => 'PhabricatorApplicationSearchEngine',
+    'PhrequentTimeBlock' => 'Phobject',
+    'PhrequentTimeBlockTestCase' => 'PhabricatorTestCase',
     'PhrequentTrackController' => 'PhrequentController',
     'PhrequentUIEventListener' => 'PhutilEventListener',
     'PhrequentUserTime' =>

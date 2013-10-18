@@ -21,6 +21,8 @@ final class PhrequentUserTimeQuery
   private $order = self::ORDER_ID_ASC;
   private $ended = self::ENDED_ALL;
 
+  private $needPreemptingEvents;
+
   public function withUserPHIDs($user_phids) {
     $this->userPHIDs = $user_phids;
     return $this;
@@ -38,6 +40,11 @@ final class PhrequentUserTimeQuery
 
   public function setOrder($order) {
     $this->order = $order;
+    return $this;
+  }
+
+  public function needPreemptingEvents($need_events) {
+    $this->needPreemptingEvents = $need_events;
     return $this;
   }
 
@@ -150,6 +157,61 @@ final class PhrequentUserTimeQuery
     return $usertime->loadAllFromArray($data);
   }
 
+  protected function didFilterPage(array $page) {
+    if ($this->needPreemptingEvents) {
+      $usertime = new PhrequentUserTime();
+      $conn_r = $usertime->establishConnection('r');
+
+      $preempt = array();
+      foreach ($page as $event) {
+        $preempt[] = qsprintf(
+          $conn_r,
+          '(userPHID = %s AND
+            (dateStarted BETWEEN %d AND %d) AND
+            (dateEnded IS NULL OR dateEnded > %d))',
+          $event->getUserPHID(),
+          $event->getDateStarted(),
+          nonempty($event->getDateEnded(), PhabricatorTime::getNow()),
+          $event->getDateStarted());
+      }
+
+      $preempting_events = queryfx_all(
+        $conn_r,
+        'SELECT * FROM %T WHERE %Q ORDER BY dateStarted ASC, id ASC',
+        $usertime->getTableName(),
+        implode(' OR ', $preempt));
+      $preempting_events = $usertime->loadAllFromArray($preempting_events);
+
+      $preempting_events = mgroup($preempting_events, 'getUserPHID');
+
+      foreach ($page as $event) {
+        $e_start = $event->getDateStarted();
+        $e_end = $event->getDateEnded();
+
+        $select = array();
+        $user_events = idx($preempting_events, $event->getUserPHID(), array());
+        foreach ($user_events as $u_event) {
+          if ($u_event->getID() == $event->getID()) {
+            // Don't allow an event to preempt itself.
+            continue;
+          }
+
+          $u_start = $u_event->getDateStarted();
+          $u_end = $u_event->getDateEnded();
+
+          if (($u_start >= $e_start) && ($u_end <= $e_end) &&
+              ($u_end === null || $u_end > $e_start)) {
+            $select[] = $u_event;
+          }
+        }
+
+        $event->attachPreemptingEvents($select);
+      }
+    }
+
+    return $page;
+  }
+
 /* -(  Helper Functions ) --------------------------------------------------- */
 
   public static function getEndedSearchOptions() {
@@ -202,46 +264,6 @@ final class PhrequentUserTimeQuery
       $user->getPHID(),
       $phid);
     return $count['N'] > 0;
-  }
-
-  public static function loadUserStack(PhabricatorUser $user) {
-    if (!$user->isLoggedIn()) {
-      return array();
-    }
-
-    return id(new PhrequentUserTime())->loadAllWhere(
-      'userPHID = %s AND dateEnded IS NULL
-        ORDER BY dateStarted DESC, id DESC',
-      $user->getPHID());
-  }
-
-  public static function getTotalTimeSpentOnObject($phid) {
-    $usertime_dao = new PhrequentUserTime();
-    $conn = $usertime_dao->establishConnection('r');
-
-    // First calculate all the time spent where the
-    // usertime blocks have ended.
-    $sum_ended = queryfx_one(
-      $conn,
-      'SELECT SUM(usertime.dateEnded - usertime.dateStarted) N '.
-      'FROM %T usertime '.
-      'WHERE usertime.objectPHID = %s '.
-      'AND usertime.dateEnded IS NOT NULL',
-      $usertime_dao->getTableName(),
-      $phid);
-
-    // Now calculate the time spent where the usertime
-    // blocks have not yet ended.
-    $sum_not_ended = queryfx_one(
-      $conn,
-      'SELECT SUM(UNIX_TIMESTAMP() - usertime.dateStarted) N '.
-      'FROM %T usertime '.
-      'WHERE usertime.objectPHID = %s '.
-      'AND usertime.dateEnded IS NULL',
-      $usertime_dao->getTableName(),
-      $phid);
-
-    return $sum_ended['N'] + $sum_not_ended['N'];
   }
 
   public static function getUserTimeSpentOnObject(

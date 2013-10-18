@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phrequent
- */
 final class PhrequentUserTime extends PhrequentDAO
   implements PhabricatorPolicyInterface {
 
@@ -11,6 +8,8 @@ final class PhrequentUserTime extends PhrequentDAO
   protected $note;
   protected $dateStarted;
   protected $dateEnded;
+
+  private $preemptingEvents = self::ATTACHABLE;
 
   public function getCapabilities() {
     return array(
@@ -23,8 +22,11 @@ final class PhrequentUserTime extends PhrequentDAO
 
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
-        $policy = PhabricatorPolicies::POLICY_USER;
-        break;
+        // Since it's impossible to perform any meaningful computations with
+        // time if a user can't view some of it, visibility on tracked time is
+        // unrestricted. If we eventually lock it down, it should be per-user.
+        // (This doesn't mean that users can see tracked objects.)
+        return PhabricatorPolicies::getMostOpenPolicy();
     }
 
     return $policy;
@@ -36,8 +38,29 @@ final class PhrequentUserTime extends PhrequentDAO
 
 
   public function describeAutomaticCapability($capability) {
-    return pht(
-      'The user who tracked time can always view it.');
+    return null;
+  }
+
+  public function attachPreemptingEvents(array $events) {
+    $this->preemptingEvents = $events;
+    return $this;
+  }
+
+  public function getPreemptingEvents() {
+    return $this->assertAttached($this->preemptingEvents);
+  }
+
+  public function isPreempted() {
+    if ($this->getDateEnded() !== null) {
+      return false;
+    }
+    foreach ($this->getPreemptingEvents() as $event) {
+      if ($event->getDateEnded() === null &&
+          $event->getObjectPHID() != $this->getObjectPHID()) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }
