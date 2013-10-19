@@ -17,19 +17,16 @@ final class PHUIPropertyListExample extends PhabricatorUIExample {
 
     $details1 = id(new PHUIListItemView())
       ->setName('Details')
-      ->setHref('#')
       ->setSelected(true)
       ->setType(PHUIListItemView::TYPE_LINK);
 
     $details2 = id(new PHUIListItemView())
-      ->setName('Lint (Warn)')
-      ->setHref('#')
+      ->setName('Rainbow Info')
       ->setStatusColor(PHUIListItemView::STATUS_WARN)
       ->setType(PHUIListItemView::TYPE_LINK);
 
     $details3 = id(new PHUIListItemView())
-      ->setName('Unit (3/5)')
-      ->setHref('#')
+      ->setName('Pasta Haiku')
       ->setStatusColor(PHUIListItemView::STATUS_FAIL)
       ->setType(PHUIListItemView::TYPE_LINK);
 
@@ -40,7 +37,6 @@ final class PHUIPropertyListExample extends PhabricatorUIExample {
       ->addMenuItem($details3);
 
     $view = new PHUIPropertyListView();
-    $view->setTabs($statustabs);
 
     $view->addProperty(
       pht('Color'),
@@ -84,9 +80,9 @@ final class PHUIPropertyListExample extends PhabricatorUIExample {
 
     $object_box1 = id(new PHUIObjectBoxView())
       ->setHeaderText('PHUIPropertyListView Stackered')
-      ->addPropertyList($view)
-      ->addPropertyList($view2)
-      ->addPropertyList($view3);
+      ->addPropertyList($view, $details1)
+      ->addPropertyList($view2, $details2)
+      ->addPropertyList($view3, $details3);
 
     $edge_cases_view = new PHUIPropertyListView();
 

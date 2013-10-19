@@ -2318,6 +2318,18 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
   ),
+  'javelin-behavior-phui-object-box-tabs' =>
+  array(
+    'uri' => '/res/c2318be8/rsrc/js/phui/behavior-phui-object-box-tabs.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-dom',
+    ),
+    'disk' => '/rsrc/js/phui/behavior-phui-object-box-tabs.js',
+  ),
   'javelin-behavior-policy-control' =>
   array(
     'uri' => '/res/ce9f54c8/rsrc/js/application/policy/behavior-policy-control.js',

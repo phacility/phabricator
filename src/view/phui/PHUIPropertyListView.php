@@ -7,7 +7,6 @@ final class PHUIPropertyListView extends AphrontView {
   private $object;
   private $invokedWillRenderEvent;
   private $actionList;
-  private $tabs;
 
   protected function canAppendChild() {
     return false;
@@ -48,11 +47,6 @@ final class PHUIPropertyListView extends AphrontView {
 
     $this->parts[] = $current;
     return $this;
-  }
-
-  public function setTabs(PHUIListView $tabs) {
-    $this->tabs = $tabs;
-    return $tabs;
   }
 
   public function addSectionHeader($name) {
@@ -123,7 +117,6 @@ final class PHUIPropertyListView extends AphrontView {
         'class' => 'phui-property-list-section',
       ),
       array(
-        $this->tabs,
         $items,
       ));
   }

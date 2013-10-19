@@ -8,12 +8,59 @@ final class PHUIObjectBoxView extends AphrontView {
   private $validationException;
   private $header;
   private $flush;
-  private $propertyList = array();
 
-  // This is mostly a conveinence method to lessen code dupe
-  // when building objectboxes.
-  public function addPropertyList(PHUIPropertyListView $property_list) {
-    $this->propertyList[] = $property_list;
+  private $tabs = array();
+  private $propertyLists = array();
+  private $selectedTab;
+
+  public function addPropertyList(
+    PHUIPropertyListView $property_list,
+    PHUIListItemView $tab = null) {
+
+    if ($this->propertyLists) {
+      $already_has_tabs = (bool)$this->tabs;
+      $adding_new_tab = (bool)$tab;
+
+      if ($already_has_tabs xor $adding_new_tab) {
+        throw new Exception(
+          "You can not mix tabbed and un-tabbed property lists in the same ".
+          "BoxView.");
+      }
+    }
+
+    if ($tab) {
+      if ($tab->getKey()) {
+        $key = $tab->getKey();
+      } else {
+        $key = 'tab.default.'.spl_object_hash($tab);
+        $tab->setKey($key);
+      }
+    } else {
+      $key = 'tab.default';
+    }
+
+    if ($tab) {
+      if (!$this->tabs) {
+        $this->selectedTab = $key;
+      }
+
+      if (empty($this->tabs[$key])) {
+        $tab->addSigil('phui-object-box-tab');
+        $tab->setMetadata(
+          array(
+            'tabKey' => $key,
+          ));
+
+        if (!$tab->getHref()) {
+          $tab->setHref('#');
+        }
+
+        $this->tabs[$key] = $tab;
+      }
+    }
+
+    $this->propertyLists[$key][] = $property_list;
+
     return $this;
   }
 
@@ -74,12 +121,45 @@ final class PHUIObjectBoxView extends AphrontView {
       }
     }
 
-    $property_list = null;
-    if ($this->propertyList) {
-      $property_list = new PHUIPropertyGroupView();
-      foreach ($this->propertyList as $item) {
-        $property_list->addPropertyList($item);
+    $property_lists = array();
+    $tab_map = array();
+    foreach ($this->propertyLists as $key => $list) {
+      $group = new PHUIPropertyGroupView();
+      foreach ($list as $item) {
+        $group->addPropertyList($item);
       }
+
+      if ($this->tabs) {
+        $tab_id = celerity_generate_unique_node_id();
+        $tab_map[$key] = $tab_id;
+
+        if ($key === $this->selectedTab) {
+          $style = null;
+        } else {
+          $style = 'display: none';
+        }
+
+        $property_lists[] = phutil_tag(
+          'div',
+          array(
+            'style' => $style,
+            'id' => $tab_id,
+          ),
+          $group);
+      } else {
+        $property_lists[] = $group;
+      }
+    }
+
+    $tabs = null;
+    if ($this->tabs) {
+      $tabs = id(new PHUIListView())
+        ->setType(PHUIListView::NAVBAR_LIST);
+      foreach ($this->tabs as $tab) {
+        $tabs->addMenuItem($tab);
+      }
+
+      Javelin::initBehavior('phui-object-box-tabs');
     }
 
     $content = id(new PHUIBoxView())
@@ -89,7 +169,8 @@ final class PHUIObjectBoxView extends AphrontView {
           $this->formError,
           $exception_errors,
           $this->form,
-          $property_list,
+          $tabs,
+          $property_lists,
           $this->renderChildren(),
         ))
       ->setBorder(true)
@@ -97,6 +178,14 @@ final class PHUIObjectBoxView extends AphrontView {
       ->addMargin(PHUI::MARGIN_LARGE_LEFT)
       ->addMargin(PHUI::MARGIN_LARGE_RIGHT)
       ->addClass('phui-object-box');
+
+    if ($this->tabs) {
+      $content->addSigil('phui-object-box');
+      $content->setMetadata(
+        array(
+          'tabMap' => $tab_map,
+        ));
+    }
 
     if ($this->flush) {
       $content->addClass('phui-object-box-flush');
