@@ -51,7 +51,7 @@ final class DifferentialInlineCommentQuery
   }
 
   public function execute() {
-    $table = new DifferentialInlineComment();
+    $table = new DifferentialTransactionComment();
     $conn_r = $table->establishConnection('r');
 
     $data = queryfx_all(
@@ -61,7 +61,14 @@ final class DifferentialInlineCommentQuery
       $this->buildWhereClause($conn_r),
       $this->buildLimitClause($conn_r));
 
-    return $table->loadAllFromArray($data);
+    $comments = $table->loadAllFromArray($data);
+
+    foreach ($comments as $key => $value) {
+      $comments[$key] = DifferentialInlineComment::newFromModernComment(
+        $value);
+    }
+
+    return $comments;
   }
 
   public function executeOne() {
@@ -71,17 +78,35 @@ final class DifferentialInlineCommentQuery
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
+    // Only find inline comments.
+    $where[] = qsprintf(
+      $conn_r,
+      'changesetID IS NOT NULL');
+
     if ($this->revisionIDs) {
+
+      // Look up revision PHIDs.
+      $revision_phids = queryfx_all(
+        $conn_r,
+        'SELECT phid FROM %T WHERE id IN (%Ld)',
+        id(new DifferentialRevision())->getTableName(),
+        $this->revisionIDs);
+
+      if (!$revision_phids) {
+        throw new PhabricatorEmptyQueryException();
+      }
+      $revision_phids = ipull($revision_phids, 'phid');
+
       $where[] = qsprintf(
         $conn_r,
-        'revisionID IN (%Ld)',
-        $this->revisionIDs);
+        'revisionPHID IN (%Ls)',
+        $revision_phids);
     }
 
     if ($this->notDraft) {
       $where[] = qsprintf(
         $conn_r,
-        'commentID IS NOT NULL');
+        'transactionPHID IS NOT NULL');
     }
 
     if ($this->ids) {
@@ -95,31 +120,45 @@ final class DifferentialInlineCommentQuery
       list($phid, $ids) = $this->viewerAndChangesetIDs;
       $where[] = qsprintf(
         $conn_r,
-        'changesetID IN (%Ld) AND (authorPHID = %s OR commentID IS NOT NULL)',
+        'changesetID IN (%Ld) AND
+          (authorPHID = %s OR transactionPHID IS NOT NULL)',
         $ids,
         $phid);
     }
 
     if ($this->draftComments) {
       list($phid, $rev_id) = $this->draftComments;
+
+      $rev_phid = queryfx_one(
+        $conn_r,
+        'SELECT phid FROM %T WHERE id = %d',
+        id(new DifferentialRevision())->getTableName(),
+        $rev_id);
+
+      if (!$rev_phid) {
+        throw new PhabricatorEmptyQueryException();
+      }
+
+      $rev_phid = $rev_phid['phid'];
+
       $where[] = qsprintf(
         $conn_r,
-        'authorPHID = %s AND revisionID = %d AND commentID IS NULL',
+        'authorPHID = %s AND revisionPHID = %s AND transactionPHID IS NULL',
         $phid,
-        $rev_id);
+        $rev_phid);
     }
 
     if ($this->draftsByAuthors) {
       $where[] = qsprintf(
         $conn_r,
-        'authorPHID IN (%Ls) AND commentID IS NULL',
+        'authorPHID IN (%Ls) AND transactionPHID IS NULL',
         $this->draftsByAuthors);
     }
 
     if ($this->commentIDs) {
       $where[] = qsprintf(
         $conn_r,
-        'commentID IN (%Ld)',
+        'legacyCommentID IN (%Ld)',
         $this->commentIDs);
     }
 

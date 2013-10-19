@@ -491,12 +491,19 @@ final class DifferentialRevisionQuery
         $this->draftRevisions[] = substr($draft->getDraftKey(), $len);
       }
 
+      // TODO: Restore this after drafts are sorted out. It's now very
+      // expensive to get revision IDs.
+
+      /*
+
       $inlines = id(new DifferentialInlineCommentQuery())
         ->withDraftsByAuthors($this->draftAuthors)
         ->execute();
       foreach ($inlines as $inline) {
         $this->draftRevisions[] = $inline->getRevisionID();
       }
+
+      */
 
       if (!$this->draftRevisions) {
         return array();

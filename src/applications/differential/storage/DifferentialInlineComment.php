@@ -1,21 +1,52 @@
 <?php
 
 final class DifferentialInlineComment
-  extends DifferentialDAO
   implements PhabricatorInlineCommentInterface {
 
-  protected $revisionID;
-  protected $changesetID;
-  protected $commentID;
-
-  protected $authorPHID;
-  protected $isNewFile;
-  protected $lineNumber;
-  protected $lineLength;
-  protected $content;
-  protected $cache;
-
+  private $proxy;
   private $syntheticAuthor;
+
+  public function __construct() {
+    $this->proxy = new DifferentialTransactionComment();
+  }
+
+  public function __clone() {
+    $this->proxy = clone $this->proxy;
+  }
+
+  public function save() {
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_LEGACY,
+      array());
+
+    $this->proxy
+      ->setViewPolicy('public')
+      ->setEditPolicy($this->getAuthorPHID())
+      ->setContentSource($content_source)
+      ->setCommentVersion(1)
+      ->save();
+
+    return $this;
+  }
+
+  public function delete() {
+    $this->proxy->delete();
+
+    return $this;
+  }
+
+  public function getID() {
+    return $this->proxy->getID();
+  }
+
+  public static function newFromModernComment(
+    DifferentialTransactionComment $comment) {
+
+    $obj = new DifferentialInlineComment();
+    $obj->proxy = $comment;
+
+    return $obj;
+  }
 
   public function setSyntheticAuthor($synthetic_author) {
     $this->syntheticAuthor = $synthetic_author;
@@ -34,75 +65,112 @@ final class DifferentialInlineComment
   }
 
   public function setContent($content) {
-    $this->setCache(null);
-    $this->writeField('content', $content);
+    $this->proxy->setContent($content);
     return $this;
   }
 
   public function getContent() {
-    return $this->readField('content');
+    return $this->proxy->getContent();
   }
 
   public function isDraft() {
     return !$this->getCommentID();
   }
 
-  // NOTE: We need to provide implementations so we conform to the shared
-  // interface; these are all trivial and just explicit versions of the Lisk
-  // defaults.
-
   public function setChangesetID($id) {
-    $this->writeField('changesetID', $id);
+    $this->proxy->setChangesetID($id);
     return $this;
   }
 
   public function getChangesetID() {
-    return $this->readField('changesetID');
+    return $this->proxy->getChangesetID();
   }
 
   public function setIsNewFile($is_new) {
-    $this->writeField('isNewFile', $is_new);
+    $this->proxy->setIsNewFile($is_new);
     return $this;
   }
 
   public function getIsNewFile() {
-    return $this->readField('isNewFile');
+    return $this->proxy->getIsNewFile();
   }
 
   public function setLineNumber($number) {
-    $this->writeField('lineNumber', $number);
+    $this->proxy->setLineNumber($number);
     return $this;
   }
 
   public function getLineNumber() {
-    return $this->readField('lineNumber');
+    return $this->proxy->getLineNumber();
   }
 
   public function setLineLength($length) {
-    $this->writeField('lineLength', $length);
+    $this->proxy->setLineLength($length);
     return $this;
   }
 
   public function getLineLength() {
-    return $this->readField('lineLength');
+    return $this->proxy->getLineLength();
   }
 
   public function setCache($cache) {
-    $this->writeField('cache', $cache);
     return $this;
   }
 
   public function getCache() {
-    return $this->readField('cache');
+    return null;
   }
 
   public function setAuthorPHID($phid) {
-    $this->writeField('authorPHID', $phid);
+    $this->proxy->setAuthorPHID($phid);
     return $this;
   }
 
   public function getAuthorPHID() {
-    return $this->readField('authorPHID');
+    return $this->proxy->getAuthorPHID();
+  }
+
+  public function setRevision(DifferentialRevision $revision) {
+    $this->proxy->setRevisionPHID($revision->getPHID());
+    return $this;
+  }
+
+  // Although these are purely transitional, they're also *extra* dumb.
+
+  public function setRevisionID($revision_id) {
+    $revision = id(new DifferentialRevision())->load($revision_id);
+    return $this->setRevision($revision);
+  }
+
+  public function getRevisionID() {
+    $phid = $this->proxy->getRevisionPHID();
+    if (!$phid) {
+      return null;
+    }
+
+    $revision = id(new DifferentialRevision())->loadOneWhere(
+      'phid = %s',
+      $phid);
+    if (!$revision) {
+      return null;
+    }
+    return $revision->getID();
+  }
+
+  // When setting a comment ID, we also generate a phantom transaction PHID for
+  // the future transaction.
+
+  public function setCommentID($id) {
+    $this->proxy->setLegacyCommentID($id);
+    $this->proxy->setTransactionPHID(
+      PhabricatorPHID::generateNewPHID(
+        PhabricatorApplicationTransactionPHIDTypeTransaction::TYPECONST,
+        DifferentialPHIDTypeRevision::TYPECONST));
+    return $this;
+  }
+
+  public function getCommentID() {
+    return $this->proxy->getLegacyCommentID();
   }
 
 
