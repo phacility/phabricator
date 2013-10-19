@@ -1,0 +1,14 @@
+~~~~~~
+!print .example {
+  background: #ffffff;
+}
+~~~~~~
+.printable .example {
+  background: #ffffff;
+}
+
+@media print {
+  .example {
+    background: #ffffff;
+  }
+}

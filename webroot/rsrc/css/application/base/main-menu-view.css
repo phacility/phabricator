@@ -400,3 +400,11 @@
 .phabricator-application-menu .phui-list-item-name {
   padding-left: 12px;
 }
+
+
+/* - Print ---------------------------------------------------------------------
+*/
+
+!print .phabricator-main-menu {
+  display: none;
+}

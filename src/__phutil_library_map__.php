@@ -2497,11 +2497,7 @@ phutil_register_library_map(array(
     'DifferentialHunk' => 'DifferentialDAO',
     'DifferentialHunkParserTestCase' => 'PhabricatorTestCase',
     'DifferentialHunkTestCase' => 'ArcanistPhutilTestCase',
-    'DifferentialInlineComment' =>
-    array(
-      0 => 'DifferentialDAO',
-      1 => 'PhabricatorInlineCommentInterface',
-    ),
+    'DifferentialInlineComment' => 'PhabricatorInlineCommentInterface',
     'DifferentialInlineCommentEditController' => 'PhabricatorInlineCommentController',
     'DifferentialInlineCommentEditView' => 'AphrontView',
     'DifferentialInlineCommentPreviewController' => 'PhabricatorInlineCommentPreviewController',

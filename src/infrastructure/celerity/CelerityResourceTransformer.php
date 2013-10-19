@@ -39,6 +39,7 @@ final class CelerityResourceTransformer {
 
     switch ($type) {
       case 'css':
+        $data = $this->replaceCSSPrintRules($path, $data);
         $data = $this->replaceCSSVariables($path, $data);
         $data = preg_replace_callback(
           '@url\s*\((\s*[\'"]?.*?)\)@s',
@@ -129,6 +130,14 @@ final class CelerityResourceTransformer {
       $data);
   }
 
+  private function replaceCSSPrintRules($path, $data) {
+    $this->currentPath = $path;
+    return preg_replace_callback(
+      '/!print\s+(.+?{.+?})/s',
+      array($this, 'replaceCSSPrintRule'),
+      $data);
+  }
+
   public static function getCSSVariableMap() {
     return array(
       // Base Colors
@@ -174,6 +183,7 @@ final class CelerityResourceTransformer {
     );
   }
 
+
   public function replaceCSSVariable($matches) {
     static $map;
     if (!$map) {
@@ -190,4 +200,13 @@ final class CelerityResourceTransformer {
     return $map[$var_name];
   }
 
+  public function replaceCSSPrintRule($matches) {
+    $rule = $matches[1];
+
+    $rules = array();
+    $rules[] = '.printable '.$rule;
+    $rules[] = "@media print {\n  ".str_replace("\n", "\n  ", $rule)."\n}\n";
+
+    return implode("\n\n", $rules);
+  }
 }
