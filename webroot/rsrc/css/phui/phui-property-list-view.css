@@ -24,7 +24,8 @@
 }
 
 .phui-property-list-section +
-  .phui-property-list-section {
+  .phui-property-list-section,
+.phui-property-group-noninitial {
   border-color: {$thinblueborder};
   border-style: solid;
   border-width: 1px 0 0;

@@ -44,7 +44,6 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     }
 
     $actions = $this->buildActionView($file);
-    $properties_array = $this->buildPropertyView($file, $actions);
     $timeline = $this->buildTransactionView($file, $xactions);
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
@@ -56,9 +55,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header);
 
-    foreach ($properties_array as $property_item) {
-      $object_box->addPropertyList($property_item);
-    }
+    $this->buildPropertyViews($object_box, $file, $actions);
 
     return $this->buildApplicationPage(
       array(
@@ -164,15 +161,17 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     return $view;
   }
 
-  private function buildPropertyView(
+  private function buildPropertyViews(
+    PHUIObjectBoxView $box,
     PhabricatorFile $file,
     PhabricatorActionListView $actions) {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $listview = array();
+
     $properties = id(new PHUIPropertyListView());
     $properties->setActionList($actions);
+    $box->addPropertyList($properties, pht('Details'));
 
     if ($file->getAuthorPHID()) {
       $properties->addProperty(
@@ -184,55 +183,61 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       pht('Created'),
       phabricator_datetime($file->getDateCreated(), $user));
 
-    $properties->addProperty(
+
+    $finfo = id(new PHUIPropertyListView());
+    $box->addPropertyList($finfo, pht('File Info'));
+
+    $finfo->addProperty(
       pht('Size'),
       phabricator_format_bytes($file->getByteSize()));
 
-    $properties->addSectionHeader(pht('Technical Details'));
-
-    $properties->addProperty(
+    $finfo->addProperty(
       pht('Mime Type'),
       $file->getMimeType());
 
-    $properties->addProperty(
+    $width = $file->getImageWidth();
+    if ($width) {
+      $finfo->addProperty(
+        pht('Width'),
+        pht('%s px', new PhutilNumber($width)));
+    }
+
+    $height = $file->getImageHeight();
+    if ($height) {
+      $finfo->addProperty(
+        pht('Height'),
+        pht('%s px', new PhutilNumber($height)));
+    }
+
+
+    $storage_properties = new PHUIPropertyListView();
+    $box->addPropertyList($storage_properties, pht('Storage'));
+
+    $storage_properties->addProperty(
       pht('Engine'),
       $file->getStorageEngine());
 
-    $properties->addProperty(
+    $storage_properties->addProperty(
       pht('Format'),
       $file->getStorageFormat());
 
-    $properties->addProperty(
+    $storage_properties->addProperty(
       pht('Handle'),
       $file->getStorageHandle());
 
-    $listview[] = $properties;
-
-    $metadata = $file->getMetadata();
-    if (!empty($metadata)) {
-      $mdata = id(new PHUIPropertyListView())
-        ->addSectionHeader(pht('Metadata'));
-
-      foreach ($metadata as $key => $value) {
-        $mdata->addProperty(
-          PhabricatorFile::getMetadataName($key),
-          $value);
-      }
-      $listview[] = $mdata;
-    }
 
     $phids = $file->getObjectPHIDs();
     if ($phids) {
       $attached = new PHUIPropertyListView();
-      $attached->addSectionHeader(pht('Attached'));
+      $box->addPropertyList($attached, pht('Attached'));
+
       $attached->addProperty(
         pht('Attached To'),
         $this->renderHandlesForPHIDs($phids));
-      $listview[] = $attached;
     }
 
-    if ($file->isViewableImage()) {
 
+    if ($file->isViewableImage()) {
       $image = phutil_tag(
         'img',
         array(
@@ -249,7 +254,8 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
       $media = id(new PHUIPropertyListView())
         ->addImageContent($linked_image);
-      $listview[] = $media;
+
+      $box->addPropertyList($media);
     } else if ($file->isAudio()) {
       $audio = phutil_tag(
         'audio',
@@ -265,10 +271,9 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
           )));
       $media = id(new PHUIPropertyListView())
         ->addImageContent($audio);
-      $listview[] = $media;
-    }
 
-    return $listview;
+      $box->addPropertyList($media);
+    }
   }
 
 }

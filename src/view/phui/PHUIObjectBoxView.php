@@ -11,21 +11,15 @@ final class PHUIObjectBoxView extends AphrontView {
 
   private $tabs = array();
   private $propertyLists = array();
-  private $selectedTab;
 
   public function addPropertyList(
     PHUIPropertyListView $property_list,
-    PHUIListItemView $tab = null) {
+    $tab = null) {
 
-    if ($this->propertyLists) {
-      $already_has_tabs = (bool)$this->tabs;
-      $adding_new_tab = (bool)$tab;
-
-      if ($already_has_tabs xor $adding_new_tab) {
-        throw new Exception(
-          "You can not mix tabbed and un-tabbed property lists in the same ".
-          "BoxView.");
-      }
+    if (!($tab instanceof PHUIListItemView) &&
+        ($tab !== null)) {
+      assert_stringlike($tab);
+      $tab = id(new PHUIListItemView())->setName($tab);
     }
 
     if ($tab) {
@@ -40,10 +34,6 @@ final class PHUIObjectBoxView extends AphrontView {
     }
 
     if ($tab) {
-      if (!$this->tabs) {
-        $this->selectedTab = $key;
-      }
-
       if (empty($this->tabs[$key])) {
         $tab->addSigil('phui-object-box-tab');
         $tab->setMetadata(
@@ -53,6 +43,10 @@ final class PHUIObjectBoxView extends AphrontView {
 
         if (!$tab->getHref()) {
           $tab->setHref('#');
+        }
+
+        if (!$tab->getType()) {
+          $tab->setType(PHUIListItemView::TYPE_LINK);
         }
 
         $this->tabs[$key] = $tab;
@@ -121,25 +115,44 @@ final class PHUIObjectBoxView extends AphrontView {
       }
     }
 
+    $tab_lists = array();
     $property_lists = array();
     $tab_map = array();
+
+    $default_key = 'tab.default';
+
+    // Find the selected tab, or select the first tab if none are selected.
+    if ($this->tabs) {
+      $selected_tab = null;
+      foreach ($this->tabs as $key => $tab) {
+        if ($tab->getSelected()) {
+          $selected_tab = $key;
+          break;
+        }
+      }
+      if ($selected_tab === null) {
+        head($this->tabs)->setSelected(true);
+        $selected_tab = head_key($this->tabs);
+      }
+    }
+
     foreach ($this->propertyLists as $key => $list) {
       $group = new PHUIPropertyGroupView();
       foreach ($list as $item) {
         $group->addPropertyList($item);
       }
 
-      if ($this->tabs) {
+      if ($this->tabs && $key != $default_key) {
         $tab_id = celerity_generate_unique_node_id();
         $tab_map[$key] = $tab_id;
 
-        if ($key === $this->selectedTab) {
+        if ($key === $selected_tab) {
           $style = null;
         } else {
           $style = 'display: none';
         }
 
-        $property_lists[] = phutil_tag(
+        $tab_lists[] = phutil_tag(
           'div',
           array(
             'style' => $style,
@@ -147,6 +160,9 @@ final class PHUIObjectBoxView extends AphrontView {
           ),
           $group);
       } else {
+        if ($this->tabs) {
+          $group->addClass('phui-property-group-noninitial');
+        }
         $property_lists[] = $group;
       }
     }
@@ -170,6 +186,7 @@ final class PHUIObjectBoxView extends AphrontView {
           $exception_errors,
           $this->form,
           $tabs,
+          $tab_lists,
           $property_lists,
           $this->renderChildren(),
         ))

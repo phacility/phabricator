@@ -17,18 +17,15 @@ final class PHUIPropertyListExample extends PhabricatorUIExample {
 
     $details1 = id(new PHUIListItemView())
       ->setName('Details')
-      ->setSelected(true)
-      ->setType(PHUIListItemView::TYPE_LINK);
+      ->setSelected(true);
 
     $details2 = id(new PHUIListItemView())
       ->setName('Rainbow Info')
-      ->setStatusColor(PHUIListItemView::STATUS_WARN)
-      ->setType(PHUIListItemView::TYPE_LINK);
+      ->setStatusColor(PHUIListItemView::STATUS_WARN);
 
     $details3 = id(new PHUIListItemView())
       ->setName('Pasta Haiku')
-      ->setStatusColor(PHUIListItemView::STATUS_FAIL)
-      ->setType(PHUIListItemView::TYPE_LINK);
+      ->setStatusColor(PHUIListItemView::STATUS_FAIL);
 
     $statustabs = id(new PHUIListView())
       ->setType(PHUIListView::NAVBAR_LIST)
