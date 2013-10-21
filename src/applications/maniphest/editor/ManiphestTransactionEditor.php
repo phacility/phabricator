@@ -81,8 +81,8 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_EDGE:
         return $xaction->getNewValue();
     }
-
   }
+
 
   protected function transactionHasEffect(
     PhabricatorLiskDAO $object,
@@ -248,6 +248,43 @@ final class ManiphestTransactionEditor
       $object->save();
     }
   }
+
+  protected function requireCapabilities(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    parent::requireCapabilities($object, $xaction);
+
+    $app_capability_map = array(
+      ManiphestTransaction::TYPE_PRIORITY =>
+        ManiphestCapabilityEditPriority::CAPABILITY,
+      ManiphestTransaction::TYPE_STATUS =>
+        ManiphestCapabilityEditStatus::CAPABILITY,
+      ManiphestTransaction::TYPE_PROJECTS =>
+        ManiphestCapabilityEditProjects::CAPABILITY,
+      ManiphestTransaction::TYPE_OWNER =>
+        ManiphestCapabilityEditAssign::CAPABILITY,
+      PhabricatorTransactions::TYPE_EDIT_POLICY =>
+        ManiphestCapabilityEditPolicies::CAPABILITY,
+      PhabricatorTransactions::TYPE_VIEW_POLICY =>
+        ManiphestCapabilityEditPolicies::CAPABILITY,
+    );
+
+    $transaction_type = $xaction->getTransactionType();
+    $app_capability = idx($app_capability_map, $transaction_type);
+
+    if ($app_capability) {
+      $app = id(new PhabricatorApplicationQuery())
+        ->setViewer($this->getActor())
+        ->withClasses(array('PhabricatorApplicationManiphest'))
+        ->executeOne();
+      PhabricatorPolicyFilter::requireCapability(
+        $this->getActor(),
+        $app,
+        $app_capability);
+    }
+  }
+
 
   public static function getNextSubpriority($pri, $sub) {
 

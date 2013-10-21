@@ -460,6 +460,12 @@ abstract class PhabricatorApplicationTransactionEditor
       return array();
     }
 
+    // Now that we've merged, filtered, and combined transactions, check for
+    // required capabilities.
+    foreach ($xactions as $xaction) {
+      $this->requireCapabilities($object, $xaction);
+    }
+
     $xactions = $this->sortTransactions($xactions);
 
     if ($is_preview) {
@@ -696,10 +702,6 @@ abstract class PhabricatorApplicationTransactionEditor
       $actor,
       $object,
       PhabricatorPolicyCapability::CAN_VIEW);
-
-    foreach ($xactions as $xaction) {
-      $this->requireCapabilities($object, $xaction);
-    }
   }
 
   protected function requireCapabilities(

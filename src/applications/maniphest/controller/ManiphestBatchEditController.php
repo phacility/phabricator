@@ -7,6 +7,9 @@ final class ManiphestBatchEditController extends ManiphestController {
 
   public function processRequest() {
 
+    $this->requireApplicationCapability(
+      ManiphestCapabilityBulkEdit::CAPABILITY);
+
     $request = $this->getRequest();
     $user = $request->getUser();
 

@@ -165,6 +165,27 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ManiphestTransaction::TYPE_PROJECTS   => pht('Associate Projects'),
     );
 
+    // Remove actions the user doesn't have permission to take.
+
+    $requires = array(
+      ManiphestTransaction::TYPE_OWNER =>
+        ManiphestCapabilityEditAssign::CAPABILITY,
+      ManiphestTransaction::TYPE_PRIORITY =>
+        ManiphestCapabilityEditPriority::CAPABILITY,
+      ManiphestTransaction::TYPE_PROJECTS =>
+        ManiphestCapabilityEditProjects::CAPABILITY,
+      ManiphestTransaction::TYPE_STATUS =>
+        ManiphestCapabilityEditStatus::CAPABILITY,
+    );
+
+    foreach ($transaction_types as $type => $name) {
+      if (isset($requires[$type])) {
+        if (!$this->hasApplicationCapability($requires[$type])) {
+          unset($transaction_types[$type]);
+        }
+      }
+    }
+
     if ($task->getStatus() == ManiphestTaskStatus::STATUS_OPEN) {
       $resolution_types = array_select_keys(
         $resolution_types,
