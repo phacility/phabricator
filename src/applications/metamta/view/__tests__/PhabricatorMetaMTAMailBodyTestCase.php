@@ -14,9 +14,6 @@ HEADER
   bass
   trout
 
-MANAGE HERALD RULES
-  http://test.com/rules/
-
 WHY DID I GET THIS EMAIL?
   http://test.com/xscript/
 
@@ -54,9 +51,6 @@ HEADER
   bass
   trout
 
-MANAGE HERALD RULES
-  http://test.com/rules/
-
 WHY DID I GET THIS EMAIL?
   http://test.com/xscript/
 
@@ -74,7 +68,7 @@ EOTEXT;
     $body = new PhabricatorMetaMTAMailBody();
     $body->addRawSection("salmon");
     $body->addTextSection("HEADER", "bass\ntrout\n");
-    $body->addHeraldSection("/rules/", "/xscript/");
+    $body->addHeraldSection("/xscript/");
     $body->addReplySection("pike");
 
     $this->assertEqual($expect, $body->render());

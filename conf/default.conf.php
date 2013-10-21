@@ -515,10 +515,6 @@ return array(
   // address will be stored in an 'From Email' field on the task.
   'metamta.maniphest.default-public-author' => null,
 
-  // You can disable the Herald hints in email if users prefer smaller messages.
-  // These are the links under the headers "MANAGE HERALD RULES" and
-  // "WHY DID I GET THIS EMAIL?". If you set this to true, they will not appear
-  // in any mail. Users can still navigate to the links via the web interface.
   'metamta.herald.show-hints' => true,
 
   // You can disable the hints under "REPLY HANDLER ACTIONS" if users prefer
