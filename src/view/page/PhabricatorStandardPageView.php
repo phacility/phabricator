@@ -424,6 +424,10 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $classes[] = 'platform-linux';
     }
 
+    if ($this->getRequest()->getStr('__print__')) {
+      $classes[] = 'printable';
+    }
+
     return implode(' ', $classes);
   }
 

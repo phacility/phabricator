@@ -30,7 +30,7 @@ final class DifferentialInlineCommentEditController
     }
 
     return id(new DifferentialInlineComment())
-      ->setRevisionID($revision_id)
+      ->setRevision($revision)
       ->setChangesetID($changeset_id);
   }
 

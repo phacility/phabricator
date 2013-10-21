@@ -54,7 +54,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         'corpus' => $message,
         'partial' => true,
       ));
-    $call->setUser($user);
+    $call->setUser(PhabricatorUser::getOmnipotentUser());
     $result = $call->execute();
 
     $field_values = $result['fields'];

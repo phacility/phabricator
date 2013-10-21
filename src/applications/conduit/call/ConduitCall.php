@@ -87,7 +87,8 @@ final class ConduitCall {
     $this->request->setUser($user);
 
     if ($this->shouldRequireAuthentication()) {
-      if (!$user->isLoggedIn()) {
+      // TODO: As per below, this should get centralized and cleaned up.
+      if (!$user->isLoggedIn() && !$user->isOmnipotent()) {
         throw new ConduitException("ERR-INVALID-AUTH");
       }
 

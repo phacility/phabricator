@@ -390,6 +390,15 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $comment_form->setDraft($draft);
       $comment_form->setReviewers(mpull($reviewers, 'getFullName', 'getPHID'));
       $comment_form->setCCs(mpull($ccs, 'getFullName', 'getPHID'));
+
+      // TODO: This just makes the "Z" key work. Generalize this and remove
+      // it at some point.
+      $comment_form = phutil_tag(
+        'div',
+        array(
+          'class' => 'differential-add-comment-panel',
+        ),
+        $comment_form);
     }
 
     $pane_id = celerity_generate_unique_node_id();
@@ -403,16 +412,16 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $page_pane = id(new DifferentialPrimaryPaneView())
       ->setID($pane_id)
       ->appendChild(array(
-        $comment_view->render(),
-        $diff_history->render(),
+        $comment_view,
+        $diff_history,
         $warning,
-        $local_view->render(),
-        $toc_view->render(),
+        $local_view,
+        $toc_view,
         $other_view,
-        $changeset_view->render(),
+        $changeset_view,
       ));
     if ($comment_form) {
-      $page_pane->appendChild($comment_form->render());
+      $page_pane->appendChild($comment_form);
     } else {
       // TODO: For now, just use this to get "Login to Comment".
       $page_pane->appendChild(

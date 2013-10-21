@@ -5,9 +5,9 @@ final class DifferentialTransactionComment
 
   protected $revisionPHID;
   protected $changesetID;
-  protected $isNewFile;
-  protected $lineNumber;
-  protected $lineLength;
+  protected $isNewFile = 0;
+  protected $lineNumber = 0;
+  protected $lineLength = 0;
   protected $fixedState;
   protected $hasReplies = 0;
   protected $replyToCommentPHID;

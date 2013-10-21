@@ -725,22 +725,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return $this;
   }
 
-  public static function getMetadataName($metadata) {
-    switch ($metadata) {
-      case self::METADATA_IMAGE_WIDTH:
-        $name = pht('Width');
-        break;
-      case self::METADATA_IMAGE_HEIGHT:
-        $name = pht('Height');
-        break;
-      default:
-        $name = ucfirst($metadata);
-        break;
-    }
-
-    return $name;
-  }
-
 
   /**
    * Load (or build) the {@class:PhabricatorFile} objects for builtin file
