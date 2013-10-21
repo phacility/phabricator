@@ -697,19 +697,27 @@ abstract class PhabricatorApplicationTransactionEditor
       $object,
       PhabricatorPolicyCapability::CAN_VIEW);
 
-    // TODO: This should be "$object", not "$xaction", but probably breaks a
-    // lot of stuff if fixed -- you don't need to be able to edit in order to
-    // comment. Instead, transactions should specify the capabilities they
-    // require.
+    foreach ($xactions as $xaction) {
+      $this->requireCapabilities($object, $xaction);
+    }
+  }
 
-    /*
+  protected function requireCapabilities(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
 
-    PhabricatorPolicyFilter::requireCapability(
-      $actor,
-      $xaction,
-      PhabricatorPolicyCapability::CAN_EDIT);
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        // You must have the edit capability to alter the edit policy of an
+        // object. For other default transaction types, we don't enforce
+        // anything for the moment.
 
-    */
+        PhabricatorPolicyFilter::requireCapability(
+          $this->requireActor(),
+          $object,
+          PhabricatorPolicyCapability::CAN_EDIT);
+        break;
+    }
   }
 
   private function buildMentionTransaction(
