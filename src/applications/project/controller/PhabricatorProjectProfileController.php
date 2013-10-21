@@ -59,11 +59,19 @@ final class PhabricatorProjectProfileController
 
     $header = id(new PHUIHeaderView())
       ->setHeader($project->getName())
-      ->setSubheader(phutil_utf8_shorten($profile->getBlurb(), 1024))
+      ->setUser($user)
+      ->setPolicyObject($project)
       ->setImage($picture);
 
+    if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ACTIVE) {
+      $header->setStatus('oh-ok', '', pht('Active'));
+    } else {
+      $header->setStatus('policy-noone', '', pht('Archived'));
+    }
+
+
     $actions = $this->buildActionListView($project);
-    $properties = $this->buildPropertyListView($project, $actions);
+    $properties = $this->buildPropertyListView($project, $profile, $actions);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
@@ -253,6 +261,7 @@ final class PhabricatorProjectProfileController
 
   private function buildPropertyListView(
     PhabricatorProject $project,
+    PhabricatorProjectProfile $profile,
     PhabricatorActionListView $actions) {
     $request = $this->getRequest();
     $viewer = $request->getUser();
@@ -265,6 +274,13 @@ final class PhabricatorProjectProfileController
     $view->addProperty(
       pht('Created'),
       phabricator_datetime($project->getDateCreated(), $viewer));
+
+    $view->addSectionHeader(pht('Description'));
+    $view->addTextContent(
+      PhabricatorMarkupEngine::renderOneObject(
+        id(new PhabricatorMarkupOneOff())->setContent($profile->getBlurb()),
+        'default',
+        $viewer));
 
     return $view;
   }

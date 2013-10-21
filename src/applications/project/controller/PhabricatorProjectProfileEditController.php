@@ -127,8 +127,8 @@ final class PhabricatorProjectProfileEditController
           ->setOptions($options)
           ->setValue($project->getStatus()))
       ->appendChild(
-        id(new AphrontFormTextAreaControl())
-          ->setLabel(pht('Blurb'))
+        id(new PhabricatorRemarkupControl())
+          ->setLabel(pht('Description'))
           ->setName('blurb')
           ->setValue($profile->getBlurb()))
       ->appendChild(
