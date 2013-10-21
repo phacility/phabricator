@@ -165,7 +165,7 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
     $task = $event->getValue('task');
     $xactions = $event->getValue('transactions');
 
-    $editor = id(new ManiphestTransactionEditorPro())
+    $editor = id(new ManiphestTransactionEditor())
       ->setActor($user)
       ->setParentMessageID($mail->getMessageID())
       ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())

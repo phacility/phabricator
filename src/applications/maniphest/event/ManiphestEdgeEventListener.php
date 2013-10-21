@@ -63,7 +63,7 @@ final class ManiphestEdgeEventListener extends PhutilEventListener {
       array());
 
     $new_edges = $this->loadAllEdges($event);
-    $editor = id(new ManiphestTransactionEditorPro())
+    $editor = id(new ManiphestTransactionEditor())
       ->setActor($event->getUser())
       ->setContentSource($content_source)
       ->setContinueOnNoEffect(true)

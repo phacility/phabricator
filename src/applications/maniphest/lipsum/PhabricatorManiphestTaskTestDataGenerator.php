@@ -42,7 +42,7 @@ final class PhabricatorManiphestTaskTestDataGenerator
     }
 
     // Apply Transactions
-    $editor = id(new ManiphestTransactionEditorPro())
+    $editor = id(new ManiphestTransactionEditor())
       ->setActor($author)
       ->setContentSource($content_source)
       ->setContinueOnNoEffect(true)

@@ -37,7 +37,7 @@ final class ManiphestBatchEditController extends ManiphestController {
         if ($xactions) {
           // TODO: Set content source to "batch edit".
 
-          $editor = id(new ManiphestTransactionEditorPro())
+          $editor = id(new ManiphestTransactionEditor())
             ->setActor($user)
             ->setContentSourceFromRequest($request)
             ->setContinueOnNoEffect(true)

@@ -63,9 +63,9 @@ final class ManiphestCreateMailReceiver extends PhabricatorMailReceiver {
     $task = ManiphestTask::initializeNewTask($sender);
     $task->setOriginalEmailSource($mail->getHeader('From'));
 
-    $editor = new ManiphestTransactionEditor();
-    $editor->setActor($sender);
-    $handler = $editor->buildReplyHandler($task);
+    $handler = PhabricatorEnv::newObjectFromConfig(
+      'metamta.maniphest.reply-handler');
+    $handler->setMailReceiver($task);
 
     $handler->setActor($sender);
     $handler->setExcludeMailRecipientPHIDs(

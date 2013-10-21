@@ -199,7 +199,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
       PhabricatorContentSource::SOURCE_CONDUIT,
       array());
 
-    $editor = id(new ManiphestTransactionEditorPro())
+    $editor = id(new ManiphestTransactionEditor())
       ->setActor($request->getUser())
       ->setContentSource($content_source)
       ->setContinueOnNoEffect(true);
