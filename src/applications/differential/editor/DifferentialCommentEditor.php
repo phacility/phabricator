@@ -566,7 +566,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
 
     $comment = id(new DifferentialComment())
       ->setAuthorPHID($actor_phid)
-      ->setRevisionID($revision->getID())
+      ->setRevision($revision)
       ->setAction($action)
       ->setContent((string)$this->message)
       ->setMetadata($metadata);

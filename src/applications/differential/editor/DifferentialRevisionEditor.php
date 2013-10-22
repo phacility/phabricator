@@ -783,10 +783,9 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
 
 
   private function createComment() {
-    $revision_id = $this->revision->getID();
     $comment = id(new DifferentialComment())
       ->setAuthorPHID($this->getActorPHID())
-      ->setRevisionID($revision_id)
+      ->setRevision($this->revision)
       ->setContent($this->getComments())
       ->setAction(DifferentialAction::ACTION_UPDATE)
       ->setMetadata(
