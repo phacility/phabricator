@@ -18,6 +18,7 @@ final class PHUIWorkpanelView extends AphrontView {
   }
 
   public function setHeaderAction($header_action) {
+    // TODO: This doesn't do anything?
     $this->headerAction = $header_action;
     return $this;
   }

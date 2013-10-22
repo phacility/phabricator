@@ -3966,7 +3966,7 @@ celerity_register_resource_map(array(
   ),
   'phui-workboard-view-css' =>
   array(
-    'uri' => '/res/628679e5/rsrc/css/phui/phui-workboard-view.css',
+    'uri' => '/res/445c7c7e/rsrc/css/phui/phui-workboard-view.css',
     'type' => 'css',
     'requires' =>
     array(

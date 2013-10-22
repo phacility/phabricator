@@ -6,7 +6,7 @@ final class AphrontMultiColumnView extends AphrontView {
   const GUTTER_MEDIUM = 'mmr';
   const GUTTER_LARGE = 'mlr';
 
-  private $column = array();
+  private $columns = array();
   private $fluidLayout = false;
   private $gutter;
   private $shadow;
