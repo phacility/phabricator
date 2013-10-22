@@ -1526,6 +1526,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectDAO' => 'applications/project/storage/PhabricatorProjectDAO.php',
     'PhabricatorProjectEditor' => 'applications/project/editor/PhabricatorProjectEditor.php',
     'PhabricatorProjectEditorTestCase' => 'applications/project/editor/__tests__/PhabricatorProjectEditorTestCase.php',
+    'PhabricatorProjectHistoryController' => 'applications/project/controller/PhabricatorProjectHistoryController.php',
     'PhabricatorProjectListController' => 'applications/project/controller/PhabricatorProjectListController.php',
     'PhabricatorProjectMembersEditController' => 'applications/project/controller/PhabricatorProjectMembersEditController.php',
     'PhabricatorProjectNameCollisionException' => 'applications/project/exception/PhabricatorProjectNameCollisionException.php',
@@ -1541,6 +1542,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectStatus' => 'applications/project/constants/PhabricatorProjectStatus.php',
     'PhabricatorProjectTestDataGenerator' => 'applications/project/lipsum/PhabricatorProjectTestDataGenerator.php',
     'PhabricatorProjectTransaction' => 'applications/project/storage/PhabricatorProjectTransaction.php',
+    'PhabricatorProjectTransactionQuery' => 'applications/project/query/PhabricatorProjectTransactionQuery.php',
     'PhabricatorProjectUpdateController' => 'applications/project/controller/PhabricatorProjectUpdateController.php',
     'PhabricatorQuery' => 'infrastructure/query/PhabricatorQuery.php',
     'PhabricatorRecaptchaConfigOptions' => 'applications/config/option/PhabricatorRecaptchaConfigOptions.php',
@@ -3752,6 +3754,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectDAO' => 'PhabricatorLiskDAO',
     'PhabricatorProjectEditor' => 'PhabricatorEditor',
     'PhabricatorProjectEditorTestCase' => 'PhabricatorTestCase',
+    'PhabricatorProjectHistoryController' => 'PhabricatorProjectController',
     'PhabricatorProjectListController' =>
     array(
       0 => 'PhabricatorProjectController',
@@ -3770,6 +3773,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectSearchIndexer' => 'PhabricatorSearchDocumentIndexer',
     'PhabricatorProjectTestDataGenerator' => 'PhabricatorTestDataGenerator',
     'PhabricatorProjectTransaction' => 'PhabricatorApplicationTransaction',
+    'PhabricatorProjectTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'PhabricatorProjectUpdateController' => 'PhabricatorProjectController',
     'PhabricatorRecaptchaConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorRedirectController' => 'PhabricatorController',

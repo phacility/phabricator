@@ -256,6 +256,12 @@ final class PhabricatorProjectProfileController
     }
     $view->addAction($action);
 
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('View History'))
+        ->setHref($this->getApplicationURI("history/{$id}/"))
+        ->setIcon('transcript'));
+
     return $view;
   }
 

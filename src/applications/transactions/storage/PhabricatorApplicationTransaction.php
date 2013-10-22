@@ -148,6 +148,7 @@ abstract class PhabricatorApplicationTransaction
         break;
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
         if (!PhabricatorPolicyQuery::isGlobalPolicy($old)) {
           $phids[] = array($old);
         }
@@ -226,6 +227,7 @@ abstract class PhabricatorApplicationTransaction
         return 'message';
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
         return 'lock';
       case PhabricatorTransactions::TYPE_EDGE:
         return 'link';
@@ -242,6 +244,7 @@ abstract class PhabricatorApplicationTransaction
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
         if ($this->getOldValue() === null) {
           return true;
         } else {
@@ -269,6 +272,10 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return pht(
           'This %s already has that edit policy.',
+          $this->getApplicationObjectTypeName());
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
+        return pht(
+          'This %s already has that join policy.',
           $this->getApplicationObjectTypeName());
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return pht(
@@ -302,6 +309,13 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return pht(
           '%s changed the edit policy of this %s from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $this->getApplicationObjectTypeName(),
+          $this->renderPolicyName($old),
+          $this->renderPolicyName($new));
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
+        return pht(
+          '%s changed the join policy of this %s from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
           $this->getApplicationObjectTypeName(),
           $this->renderPolicyName($old),
@@ -420,6 +434,11 @@ abstract class PhabricatorApplicationTransaction
           '%s changed the edit policy for %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
+        return pht(
+          '%s changed the join policy for %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return pht(
           '%s updated subscribers of %s.',
@@ -487,6 +506,7 @@ abstract class PhabricatorApplicationTransaction
         return pht('Commented On');
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
         return pht('Changed Policy');
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return pht('Changed Subscribers');

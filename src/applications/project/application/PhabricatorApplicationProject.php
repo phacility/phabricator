@@ -48,6 +48,7 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
         'board/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectBoardController',
         'update/(?P<id>[1-9]\d*)/(?P<action>[^/]+)/'
           => 'PhabricatorProjectUpdateController',
+        'history/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectHistoryController',
       ),
     );
   }
