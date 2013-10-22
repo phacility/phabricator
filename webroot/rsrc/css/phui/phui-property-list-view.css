@@ -23,8 +23,6 @@
   display: none;
 }
 
-.phui-property-list-section +
-  .phui-property-list-section,
 .phui-property-group-noninitial {
   border-color: {$thinblueborder};
   border-style: solid;
@@ -83,6 +81,9 @@
   padding: 12px 16px 0px;
   text-transform: uppercase;
   font-weight: 700;
+  border-color: {$thinblueborder};
+  border-style: solid;
+  border-width: 1px 0 0;
 }
 
 .device .phui-property-list-section-header {
