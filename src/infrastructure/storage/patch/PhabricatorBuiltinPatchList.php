@@ -1700,6 +1700,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'php',
         'name' => $this->getPatchPath('20131020.pxactionmig.php'),
       ),
+      '20131020.harbormaster.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131020.harbormaster.sql'),
+      ),
     );
   }
 }

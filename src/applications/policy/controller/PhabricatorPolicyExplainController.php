@@ -43,7 +43,7 @@ final class PhabricatorPolicyExplainController
       ->setViewer($viewer)
       ->withPHIDs(array($phid))
       ->executeOne();
-    $object_uri = $handle->getURI();
+    $object_uri = nonempty($handle->getURI(), '/');
 
     $explanation = PhabricatorPolicy::getPolicyExplanation(
       $viewer,
