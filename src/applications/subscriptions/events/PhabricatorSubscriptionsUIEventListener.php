@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorSubscriptionsUIEventListener
-  extends PhutilEventListener {
+  extends PhabricatorEventListener {
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS);

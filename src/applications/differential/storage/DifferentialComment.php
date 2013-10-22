@@ -20,9 +20,37 @@ final class DifferentialComment extends DifferentialDAO
 
   private $arbitraryDiffForFacebook;
 
+  public function setRevision(DifferentialRevision $revision) {
+    return $this->setRevisionID($revision->getID());
+  }
+
   public function giveFacebookSomeArbitraryDiff(DifferentialDiff $diff) {
     $this->arbitraryDiffForFacebook = $diff;
     return $this;
+  }
+
+  public function getRequiredHandlePHIDs() {
+    $phids = array();
+
+    $metadata = $this->getMetadata();
+    $added_reviewers = idx(
+      $metadata,
+      self::METADATA_ADDED_REVIEWERS);
+    if ($added_reviewers) {
+      foreach ($added_reviewers as $phid) {
+        $phids[] = $phid;
+      }
+    }
+    $added_ccs = idx(
+      $metadata,
+      self::METADATA_ADDED_CCS);
+    if ($added_ccs) {
+      foreach ($added_ccs as $phid) {
+        $phids[] = $phid;
+      }
+    }
+
+    return $phids;
   }
 
   public function getConfiguration() {
@@ -42,16 +70,8 @@ final class DifferentialComment extends DifferentialDAO
     return PhabricatorContentSource::newFromSerialized($this->contentSource);
   }
 
-
   public function getMarkupFieldKey($field) {
-    if ($this->getID()) {
-      return 'DC:'.$this->getID();
-    }
-
-    // The summary and test plan render as comments, but do not have IDs.
-    // They are also mutable. Build keys using content hashes.
-    $hash = PhabricatorHash::digest($this->getMarkupText($field));
-    return 'DC:'.$hash;
+    return 'DC:'.$this->getID();
   }
 
   public function newMarkupEngine($field) {
@@ -70,18 +90,7 @@ final class DifferentialComment extends DifferentialDAO
   }
 
   public function shouldUseMarkupCache($field) {
-    if ($this->getID()) {
-      return true;
-    }
-
-    $action = $this->getAction();
-    switch ($action) {
-      case DifferentialAction::ACTION_SUMMARIZE:
-      case DifferentialAction::ACTION_TESTPLAN:
-        return true;
-    }
-
-    return false;
+    return (bool)$this->getID();
   }
 
 }

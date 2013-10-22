@@ -27,9 +27,9 @@ final class ManiphestTaskMailReceiver extends PhabricatorObjectMailReceiver {
     PhabricatorLiskDAO $object,
     PhabricatorUser $sender) {
 
-    $editor = new ManiphestTransactionEditor();
-    $editor->setActor($sender);
-    $handler = $editor->buildReplyHandler($object);
+    $handler = PhabricatorEnv::newObjectFromConfig(
+      'metamta.maniphest.reply-handler');
+    $handler->setMailReceiver($object);
 
     $handler->setActor($sender);
     $handler->setExcludeMailRecipientPHIDs(

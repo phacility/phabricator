@@ -7,7 +7,7 @@
  *
  * @group maniphest
  */
-final class ManiphestEdgeEventListener extends PhutilEventListener {
+final class ManiphestEdgeEventListener extends PhabricatorEventListener {
 
   private $edges = array();
   private $tasks = array();
@@ -63,7 +63,7 @@ final class ManiphestEdgeEventListener extends PhutilEventListener {
       array());
 
     $new_edges = $this->loadAllEdges($event);
-    $editor = id(new ManiphestTransactionEditorPro())
+    $editor = id(new ManiphestTransactionEditor())
       ->setActor($event->getUser())
       ->setContentSource($content_source)
       ->setContinueOnNoEffect(true)

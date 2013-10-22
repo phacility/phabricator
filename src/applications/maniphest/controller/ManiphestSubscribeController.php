@@ -39,7 +39,7 @@ final class ManiphestSubscribeController extends ManiphestController {
       ->setTransactionType(ManiphestTransaction::TYPE_CCS)
       ->setNewValue($ccs);
 
-    $editor = id(new ManiphestTransactionEditorPro())
+    $editor = id(new ManiphestTransactionEditor())
       ->setActor($user)
       ->setContentSourceFromRequest($request)
       ->setContinueOnNoEffect(true)

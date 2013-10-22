@@ -34,6 +34,12 @@ final class PhabricatorApplicationPholio extends PhabricatorApplication {
     return true;
   }
 
+  public function getEventListeners() {
+    return array(
+      new PholioActionMenuEventListener(),
+    );
+  }
+
   public function getRemarkupRules() {
     return array(
       new PholioRemarkupRule(),

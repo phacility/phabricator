@@ -158,7 +158,7 @@ final class PhabricatorSearchAttachController
       return $response;
     }
 
-    $editor = id(new ManiphestTransactionEditorPro())
+    $editor = id(new ManiphestTransactionEditor())
       ->setActor($user)
       ->setContentSourceFromRequest($this->getRequest())
       ->setContinueOnNoEffect(true)

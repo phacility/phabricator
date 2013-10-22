@@ -222,7 +222,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     $task = $event->getValue('task');
     $transactions = $event->getValue('transactions');
 
-    $editor = id(new ManiphestTransactionEditorPro())
+    $editor = id(new ManiphestTransactionEditor())
       ->setActor($user)
       ->setContentSourceFromRequest($request)
       ->setContinueOnMissingFields(true)

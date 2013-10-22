@@ -278,9 +278,8 @@ abstract class DifferentialMail extends PhabricatorMail {
     $body->addReplySection($reply_handler->getReplyHandlerInstructions());
 
     if ($this->getHeraldTranscriptURI() && $this->isFirstMailToRecipients()) {
-      $manage_uri = '/herald/view/differential/';
       $xscript_uri = $this->getHeraldTranscriptURI();
-      $body->addHeraldSection($manage_uri, $xscript_uri);
+      $body->addHeraldSection($xscript_uri);
     }
 
     return $body->render();

@@ -1,7 +1,7 @@
 <?php
 
 final class PhrequentUIEventListener
-  extends PhutilEventListener {
+  extends PhabricatorEventListener {
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS);
@@ -33,6 +33,10 @@ final class PhrequentUIEventListener
       return;
     }
 
+    if (!$this->canUseApplication($event->getUser())) {
+      return;
+    }
+
     $tracking = PhrequentUserTimeQuery::isUserTrackingObject(
       $user,
       $object->getPHID());
@@ -56,9 +60,7 @@ final class PhrequentUIEventListener
       $track_action->setDisabled(true);
     }
 
-    $actions = $event->getValue('actions');
-    $actions[] = $track_action;
-    $event->setValue('actions', $actions);
+    $this->addActionMenuItems($event, $track_action);
   }
 
   private function handlePropertyEvent($ui_event) {
@@ -72,6 +74,10 @@ final class PhrequentUIEventListener
 
     if (!($object instanceof PhrequentTrackableInterface)) {
       // This object isn't a time trackable object.
+      return;
+    }
+
+    if (!$this->canUseApplication($ui_event->getUser())) {
       return;
     }
 

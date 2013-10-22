@@ -618,15 +618,6 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
 
     $reviewers = $revision->getReviewers();
 
-    // This is here until the new way proves stable enough
-    // See https://secure.phabricator.com/T1279
-    self::alterReviewers(
-      $revision,
-      $reviewers,
-      $remove_phids,
-      $add_phids,
-      $actor->getPHID());
-
     $editor = id(new PhabricatorEdgeEditor())
       ->setActor($actor);
 
@@ -679,18 +670,6 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     $reviewer_phid,
     $status) {
 
-    $reviewers = $revision->getReviewers();
-    if (!in_array($reviewer_phid, $reviewers)) {
-      // This is here until the new way proves stable enough
-      // See https://secure.phabricator.com/T1279
-      self::alterReviewers(
-        $revision,
-        $reviewers,
-        array(),
-        array($reviewer_phid),
-        $actor->getPHID());
-    }
-
     $options = array(
       'data' => array(
         'status' => $status
@@ -710,25 +689,6 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
         $reviewer_phid,
         $options)
       ->save();
-  }
-
-  /**
-   * @deprecated
-   */
-  private static function alterReviewers(
-    DifferentialRevision $revision,
-    array $stable_phids,
-    array $rem_phids,
-    array $add_phids,
-    $reason_phid) {
-
-    return self::alterRelationships(
-      $revision,
-      $stable_phids,
-      $rem_phids,
-      $add_phids,
-      $reason_phid,
-      DifferentialRevision::RELATION_REVIEWER);
   }
 
   private static function alterRelationships(
@@ -823,10 +783,9 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
 
 
   private function createComment() {
-    $revision_id = $this->revision->getID();
     $comment = id(new DifferentialComment())
       ->setAuthorPHID($this->getActorPHID())
-      ->setRevisionID($revision_id)
+      ->setRevision($this->revision)
       ->setContent($this->getComments())
       ->setAction(DifferentialAction::ACTION_UPDATE)
       ->setMetadata(

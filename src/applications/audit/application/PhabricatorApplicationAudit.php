@@ -20,7 +20,7 @@ final class PhabricatorApplicationAudit extends PhabricatorApplication {
 
   public function getEventListeners() {
     return array(
-      new AuditPeopleMenuEventListener()
+      new AuditActionMenuEventListener()
     );
   }
 

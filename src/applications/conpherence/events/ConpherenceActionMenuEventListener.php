@@ -1,6 +1,7 @@
 <?php
 
-final class PhrictionActionMenuEventListener extends PhabricatorEventListener {
+final class ConpherenceActionMenuEventListener
+  extends PhabricatorEventListener {
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS);
@@ -18,27 +19,27 @@ final class PhrictionActionMenuEventListener extends PhabricatorEventListener {
     $object = $event->getValue('object');
 
     $actions = null;
-    if ($object instanceof PhabricatorProject) {
-      $actions = $this->buildProjectActions($event);
+    if ($object instanceof PhabricatorUser) {
+      $actions = $this->renderUserItems($event);
     }
 
     $this->addActionMenuItems($event, $actions);
   }
 
-  private function buildProjectActions(PhutilEvent $event) {
+  private function renderUserItems(PhutilEvent $event) {
     if (!$this->canUseApplication($event->getUser())) {
       return null;
     }
 
-    $project = $event->getValue('object');
-    $slug = PhabricatorSlug::normalize($project->getPhrictionSlug());
-    $href = '/w/projects/'.$slug;
+    $user = $event->getValue('object');
+    $href = '/conpherence/new/?participant='.$user->getPHID();
 
     return id(new PhabricatorActionView())
-      ->setIcon('phriction-dark')
-      ->setIconSheet(PHUIIconView::SPRITE_APPS)
-      ->setName(pht('View Wiki'))
+      ->setIcon('message')
+      ->setName(pht('Send Message'))
+      ->setWorkflow(true)
       ->setHref($href);
   }
 
 }
+

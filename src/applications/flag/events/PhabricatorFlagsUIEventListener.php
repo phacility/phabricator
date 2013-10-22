@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorFlagsUIEventListener extends PhutilEventListener {
+final class PhabricatorFlagsUIEventListener extends PhabricatorEventListener {
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS);
@@ -29,6 +29,10 @@ final class PhabricatorFlagsUIEventListener extends PhutilEventListener {
       // makes less conceptual sense than flaging other types of objects. For
       // now, don't allow it.
       return;
+    }
+
+    if (!$this->canUseApplication($event->getUser())) {
+      return null;
     }
 
     $flag = PhabricatorFlagQuery::loadUserFlag($user, $object->getPHID());

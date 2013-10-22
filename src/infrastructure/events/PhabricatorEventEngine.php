@@ -26,6 +26,7 @@ final class PhabricatorEventEngine {
     foreach ($applications as $application) {
       $listeners = $application->getEventListeners();
       foreach ($listeners as $listener) {
+        $listener->setApplication($application);
         $listener->register();
       }
     }

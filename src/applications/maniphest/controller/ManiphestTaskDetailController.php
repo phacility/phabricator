@@ -165,6 +165,27 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ManiphestTransaction::TYPE_PROJECTS   => pht('Associate Projects'),
     );
 
+    // Remove actions the user doesn't have permission to take.
+
+    $requires = array(
+      ManiphestTransaction::TYPE_OWNER =>
+        ManiphestCapabilityEditAssign::CAPABILITY,
+      ManiphestTransaction::TYPE_PRIORITY =>
+        ManiphestCapabilityEditPriority::CAPABILITY,
+      ManiphestTransaction::TYPE_PROJECTS =>
+        ManiphestCapabilityEditProjects::CAPABILITY,
+      ManiphestTransaction::TYPE_STATUS =>
+        ManiphestCapabilityEditStatus::CAPABILITY,
+    );
+
+    foreach ($transaction_types as $type => $name) {
+      if (isset($requires[$type])) {
+        if (!$this->hasApplicationCapability($requires[$type])) {
+          unset($transaction_types[$type]);
+        }
+      }
+    }
+
     if ($task->getStatus() == ManiphestTaskStatus::STATUS_OPEN) {
       $resolution_types = array_select_keys(
         $resolution_types,
@@ -478,28 +499,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setIcon('link')
         ->setDisabled(!$can_edit)
         ->setWorkflow(true));
-
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Edit Differential Revisions'))
-        ->setHref("/search/attach/{$phid}/DREV/")
-        ->setWorkflow(true)
-        ->setIcon('attach')
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(true));
-
-    $pholio_app =
-      PhabricatorApplication::getByClass('PhabricatorApplicationPholio');
-    if ($pholio_app->isInstalled()) {
-      $view->addAction(
-        id(new PhabricatorActionView())
-        ->setName(pht('Edit Pholio Mocks'))
-        ->setHref("/search/attach/{$phid}/MOCK/edge/")
-        ->setWorkflow(true)
-        ->setIcon('attach')
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(true));
-    }
 
     return $view;
   }

@@ -50,19 +50,15 @@ final class PhabricatorMetaMTAMailBody {
   /**
    * Add a Herald section with a rule management URI and a transcript URI.
    *
-   * @param string URI to rule management.
    * @param string URI to rule transcripts.
    * @return this
    * @task compose
    */
-  public function addHeraldSection($rules_uri, $xscript_uri) {
+  public function addHeraldSection($xscript_uri) {
     if (!PhabricatorEnv::getEnvConfig('metamta.herald.show-hints')) {
       return $this;
     }
 
-    $this->addTextSection(
-      pht('MANAGE HERALD RULES'),
-      PhabricatorEnv::getProductionURI($rules_uri));
     $this->addTextSection(
       pht('WHY DID I GET THIS EMAIL?'),
       PhabricatorEnv::getProductionURI($xscript_uri));

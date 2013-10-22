@@ -6,7 +6,7 @@
  *
  * @group events
  */
-final class PhabricatorExampleEventListener extends PhutilEventListener {
+final class PhabricatorExampleEventListener extends PhabricatorEventListener {
 
   public function register() {
     // When your listener is installed, its register() method will be called.

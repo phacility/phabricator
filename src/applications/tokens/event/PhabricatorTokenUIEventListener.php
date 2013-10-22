@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorTokenUIEventListener
-  extends PhutilEventListener {
+  extends PhabricatorEventListener {
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS);
@@ -31,6 +31,10 @@ final class PhabricatorTokenUIEventListener
     if (!($object instanceof PhabricatorTokenReceiverInterface)) {
       // This object isn't a token receiver.
       return;
+    }
+
+    if (!$this->canUseApplication($event->getUser())) {
+      return null;
     }
 
     $current = id(new PhabricatorTokenGivenQuery())
@@ -73,6 +77,10 @@ final class PhabricatorTokenUIEventListener
     if (!($object instanceof PhabricatorTokenReceiverInterface)) {
       // This object isn't a token receiver.
       return;
+    }
+
+    if (!$this->canUseApplication($event->getUser())) {
+      return null;
     }
 
     $limit = 1;

@@ -99,7 +99,6 @@ final class PhrequentTimeBlockTestCase extends PhabricatorTestCase {
       ),
       $ranges);
 
-
     $event = $this->newEvent('T2', 100, 300);
     $event->attachPreemptingEvents(
       array(
@@ -118,8 +117,107 @@ final class PhrequentTimeBlockTestCase extends PhabricatorTestCase {
       $ranges);
   }
 
+  public function testTimelineSort() {
+    $e1 = $this->newEvent('X1', 1, 1)->setID(1);
+
+    $in = array(
+      array(
+        'event' => $e1,
+        'at' => 1,
+        'type' => 'start',
+      ),
+      array(
+        'event' => $e1,
+        'at' => 1,
+        'type' => 'end',
+      ),
+    );
+
+    usort($in, array('PhrequentTimeBlock', 'sortTimeline'));
+
+    $this->assertEqual(
+      array(
+        'start',
+        'end',
+      ),
+      ipull($in, 'type'));
+  }
+
+  public function testInstantaneousEvent() {
+
+    $event = $this->newEvent('T1', 8, 8);
+    $event->attachPreemptingEvents(array());
+
+    $block = new PhrequentTimeBlock(array($event));
+
+    $ranges = $block->getObjectTimeRanges(1800);
+    $this->assertEqual(
+      array(
+        'T1' => array(
+          array(8, 8),
+        ),
+      ),
+      $ranges);
+  }
+
+  public function testPopAcrossStrata() {
+
+    $event = $this->newEvent('T1', 1, 1000);
+    $event->attachPreemptingEvents(
+      array(
+        $this->newEvent('T2', 100, 300),
+        $this->newEvent('T1', 200, 400),
+        $this->newEvent('T3', 250, 275),
+      ));
+
+    $block = new PhrequentTimeBlock(array($event));
+
+    $ranges = $block->getObjectTimeRanges(1000);
+
+    $this->assertEqual(
+      array(
+        'T1' => array(
+          array(1, 100),
+          array(200, 250),
+          array(275, 1000),
+        ),
+      ),
+      $ranges);
+  }
+
+  public function testEndDeeperStratum() {
+    $event = $this->newEvent('T1', 1, 1000);
+    $event->attachPreemptingEvents(
+      array(
+        $this->newEvent('T2', 100, 900),
+        $this->newEvent('T1', 200, 400),
+        $this->newEvent('T3', 300, 800),
+        $this->newEvent('T1', 350, 600),
+        $this->newEvent('T4', 380, 390),
+      ));
+
+    $block = new PhrequentTimeBlock(array($event));
+
+    $ranges = $block->getObjectTimeRanges(1000);
+
+    $this->assertEqual(
+      array(
+        'T1' => array(
+          array(1, 100),
+          array(200, 300),
+          array(350, 380),
+          array(390, 600),
+          array(900, 1000),
+        ),
+      ),
+      $ranges);
+  }
+
   private function newEvent($object_phid, $start_time, $end_time) {
+    static $id = 0;
+
     return id(new PhrequentUserTime())
+      ->setID(++$id)
       ->setObjectPHID($object_phid)
       ->setDateStarted($start_time)
       ->setDateEnded($end_time);

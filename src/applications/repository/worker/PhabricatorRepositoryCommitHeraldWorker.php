@@ -119,7 +119,6 @@ final class PhabricatorRepositoryCommitHeraldWorker
 
     $xscript_id = $xscript->getID();
 
-    $manage_uri = '/herald/view/commits/';
     $why_uri = '/herald/transcript/'.$xscript_id.'/';
 
     $reply_handler = PhabricatorAuditCommentEditor::newReplyHandlerForCommit(
@@ -135,7 +134,7 @@ final class PhabricatorRepositoryCommitHeraldWorker
     $body->addTextSection(pht('DIFFERENTIAL REVISION'), $differential);
     $body->addTextSection(pht('AFFECTED FILES'), $files);
     $body->addReplySection($reply_handler->getReplyHandlerInstructions());
-    $body->addHeraldSection($manage_uri, $why_uri);
+    $body->addHeraldSection($why_uri);
     $body->addRawSection($inline_patch_text);
     $body = $body->render();
 

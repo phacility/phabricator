@@ -46,7 +46,11 @@ final class ManiphestTaskListController
       $group_parameter,
       $handles);
 
+    $can_edit_priority = $this->hasApplicationCapability(
+      ManiphestCapabilityEditPriority::CAPABILITY);
+
     $can_drag = ($order_parameter == 'priority') &&
+                ($can_edit_priority) &&
                 ($group_parameter == 'none' || $group_parameter == 'priority');
 
     if (!$viewer->isLoggedIn()) {
@@ -91,11 +95,13 @@ final class ManiphestTaskListController
         ));
     }
 
-    Javelin::initBehavior(
-      'maniphest-subpriority-editor',
-      array(
-        'uri'   =>  '/maniphest/subpriority/',
-      ));
+    if ($can_drag) {
+      Javelin::initBehavior(
+        'maniphest-subpriority-editor',
+        array(
+          'uri'   =>  '/maniphest/subpriority/',
+        ));
+    }
 
     return phutil_tag(
       'div',
@@ -190,6 +196,11 @@ final class ManiphestTaskListController
 
   private function renderBatchEditor(PhabricatorSavedQuery $saved_query) {
     $user = $this->getRequest()->getUser();
+
+    $batch_capability = ManiphestCapabilityBulkEdit::CAPABILITY;
+    if (!$this->hasApplicationCapability($batch_capability)) {
+      return null;
+    }
 
     if (!$user->isLoggedIn()) {
       // Don't show the batch editor or excel export for logged-out users.
