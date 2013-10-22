@@ -222,7 +222,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
       }
       $this->assertEqual(
         true,
-        class_exists($class),
+        (bool)PhabricatorApplication::getByClass($class),
         "Application class '{$class}' for query '{$qclass}'");
     }
   }
