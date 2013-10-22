@@ -142,4 +142,8 @@ final class PhabricatorDaemonLogQuery
     }
   }
 
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationDaemons';
+  }
+
 }

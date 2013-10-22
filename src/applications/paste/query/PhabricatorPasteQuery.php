@@ -249,4 +249,9 @@ final class PhabricatorPasteQuery
     }
   }
 
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationPaste';
+  }
+
 }

@@ -405,4 +405,8 @@ final class DivinerAtomQuery
     }
   }
 
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationDiviner';
+  }
+
 }

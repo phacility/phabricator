@@ -132,4 +132,13 @@ final class PhabricatorApplicationQuery
     return $apps;
   }
 
+
+  public function getQueryApplicationClass() {
+    // NOTE: Although this belongs to the "Applications" application, trying
+    // to filter its results just leaves us recursing indefinitely. Users
+    // always have access to applications regardless of other policy settings
+    // anyway.
+    return null;
+  }
+
 }

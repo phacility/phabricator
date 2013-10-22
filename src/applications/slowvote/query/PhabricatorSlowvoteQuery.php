@@ -168,4 +168,9 @@ final class PhabricatorSlowvoteQuery
     return 'p.id';
   }
 
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationSlowvote';
+  }
+
 }

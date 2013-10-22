@@ -160,4 +160,9 @@ final class PhabricatorFlagQuery
     return $this->formatWhereClause($where);
   }
 
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationFlags';
+  }
+
 }

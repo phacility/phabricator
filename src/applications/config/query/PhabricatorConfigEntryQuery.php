@@ -53,4 +53,8 @@ final class PhabricatorConfigEntryQuery
     return $this->formatWhereClause($where);
   }
 
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationConfig';
+  }
+
 }

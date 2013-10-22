@@ -1189,7 +1189,8 @@ final class DifferentialRevisionQuery
     ) + array_fuse($project_authority);
   }
 
-
-
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationDifferential';
+  }
 
 }

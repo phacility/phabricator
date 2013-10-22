@@ -67,4 +67,8 @@ final class PhabricatorHandleQuery
     return $results;
   }
 
+  public function getQueryApplicationClass() {
+    return null;
+  }
+
 }

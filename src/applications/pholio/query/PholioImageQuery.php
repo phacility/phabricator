@@ -161,4 +161,8 @@ final class PholioImageQuery
     return $images;
   }
 
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationPholio';
+  }
+
 }

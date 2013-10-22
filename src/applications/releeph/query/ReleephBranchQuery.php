@@ -129,4 +129,9 @@ final class ReleephBranchQuery
     return $this->formatWhereClause($where);
   }
 
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationReleeph';
+  }
+
 }

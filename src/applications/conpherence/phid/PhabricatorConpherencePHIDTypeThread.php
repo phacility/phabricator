@@ -19,15 +19,12 @@ final class PhabricatorConpherencePHIDTypeThread extends PhabricatorPHIDType {
     return new ConpherenceThread();
   }
 
-  public function loadObjects(
+  protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
 
     return id(new ConpherenceThreadQuery())
-      ->setViewer($query->getViewer())
-      ->setParentQuery($query)
-      ->withPHIDs($phids)
-      ->execute();
+      ->withPHIDs($phids);
   }
 
   public function loadHandles(

@@ -229,4 +229,9 @@ final class HeraldRuleQuery
     }
   }
 
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationHerald';
+  }
+
 }

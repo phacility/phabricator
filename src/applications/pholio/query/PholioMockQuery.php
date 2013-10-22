@@ -161,4 +161,8 @@ final class PholioMockQuery
     }
   }
 
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationPholio';
+  }
+
 }

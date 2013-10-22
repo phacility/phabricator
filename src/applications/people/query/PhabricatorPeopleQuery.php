@@ -282,4 +282,8 @@ final class PhabricatorPeopleQuery
     return 'user.phid';
   }
 
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationPeople';
+  }
+
 }

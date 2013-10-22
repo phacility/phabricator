@@ -127,4 +127,8 @@ final class ReleephProjectQuery
     }
   }
 
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationReleeph';
+  }
+
 }

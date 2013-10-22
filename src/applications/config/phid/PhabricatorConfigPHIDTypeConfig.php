@@ -16,15 +16,12 @@ final class PhabricatorConfigPHIDTypeConfig extends PhabricatorPHIDType {
     return new PhabricatorConfigEntry();
   }
 
-  public function loadObjects(
+  protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
 
     return id(new PhabricatorConfigEntryQuery())
-      ->setViewer($query->getViewer())
-      ->setParentQuery($query)
-      ->withPHIDs($phids)
-      ->execute();
+      ->withPHIDs($phids);
   }
 
   public function loadHandles(

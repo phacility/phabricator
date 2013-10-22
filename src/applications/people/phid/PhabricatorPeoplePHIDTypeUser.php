@@ -16,17 +16,14 @@ final class PhabricatorPeoplePHIDTypeUser extends PhabricatorPHIDType {
     return new PhabricatorUser();
   }
 
-  public function loadObjects(
+  protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
 
     return id(new PhabricatorPeopleQuery())
-      ->setViewer($query->getViewer())
-      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->needProfileImage(true)
-      ->needStatus(true)
-      ->execute();
+      ->needStatus(true);
   }
 
   public function loadHandles(

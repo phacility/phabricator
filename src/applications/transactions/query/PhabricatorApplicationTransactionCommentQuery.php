@@ -59,4 +59,10 @@ final class PhabricatorApplicationTransactionCommentQuery
     return $this->formatWhereClause($where);
   }
 
+  public function getQueryApplicationClass() {
+    // TODO: Figure out the app via the template?
+    return null;
+  }
+
+
 }

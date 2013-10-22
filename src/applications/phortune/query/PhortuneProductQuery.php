@@ -53,4 +53,8 @@ final class PhortuneProductQuery
     return $this->formatWhereClause($where);
   }
 
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationPhortune';
+  }
+
 }

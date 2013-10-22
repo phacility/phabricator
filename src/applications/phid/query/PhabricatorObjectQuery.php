@@ -152,4 +152,8 @@ final class PhabricatorObjectQuery
     return true;
   }
 
+  public function getQueryApplicationClass() {
+    return null;
+  }
+
 }

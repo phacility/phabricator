@@ -66,4 +66,9 @@ final class DivinerBookQuery
     return $this->formatWhereClause($where);
   }
 
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationDiviner';
+  }
+
 }

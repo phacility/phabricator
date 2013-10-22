@@ -110,4 +110,9 @@ final class PhortunePaymentMethodQuery
     return $this->formatWhereClause($where);
   }
 
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationPhortune';
+  }
+
 }

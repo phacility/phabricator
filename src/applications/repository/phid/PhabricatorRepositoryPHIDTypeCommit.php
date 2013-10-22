@@ -16,15 +16,12 @@ final class PhabricatorRepositoryPHIDTypeCommit extends PhabricatorPHIDType {
     return new PhabricatorRepositoryCommit();
   }
 
-  public function loadObjects(
+  protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
 
     return id(new DiffusionCommitQuery())
-      ->setViewer($query->getViewer())
-      ->setParentQuery($query)
-      ->withPHIDs($phids)
-      ->execute();
+      ->withPHIDs($phids);
   }
 
   public function loadHandles(

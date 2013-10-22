@@ -85,4 +85,8 @@ final class PhabricatorCountdownQuery
     return $this->formatWhereClause($where);
   }
 
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationCountdown';
+  }
+
 }

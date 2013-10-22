@@ -260,4 +260,9 @@ final class PhabricatorProjectQuery
     return implode(' ', $joins);
   }
 
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationProject';
+  }
+
 }

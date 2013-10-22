@@ -104,4 +104,9 @@ final class PhabricatorFeedQuery
     return $item['chronologicalKey'];
   }
 
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationFeed';
+  }
+
 }

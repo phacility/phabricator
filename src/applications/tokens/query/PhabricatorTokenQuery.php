@@ -61,4 +61,9 @@ final class PhabricatorTokenQuery
     return $tokens;
   }
 
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationTokens';
+  }
+
 }

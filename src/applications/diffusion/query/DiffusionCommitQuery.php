@@ -250,4 +250,8 @@ final class DiffusionCommitQuery
     }
   }
 
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationDiffusion';
+  }
+
 }
