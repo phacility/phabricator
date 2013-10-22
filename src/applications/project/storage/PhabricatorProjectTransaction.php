@@ -1,23 +1,18 @@
 <?php
 
-/**
- * @group project
- */
-final class PhabricatorProjectTransaction extends PhabricatorProjectDAO {
+final class PhabricatorProjectTransaction
+  extends PhabricatorApplicationTransaction {
 
-  protected $projectID;
-  protected $authorPHID;
-  protected $transactionType;
-  protected $oldValue;
-  protected $newValue;
+  const TYPE_NAME       = 'project:name';
+  const TYPE_MEMBERS    = 'project:members';
+  const TYPE_STATUS     = 'project:status';
 
-  public function getConfiguration() {
-    return array(
-      self::CONFIG_SERIALIZATION => array(
-        'oldValue' => self::SERIALIZATION_JSON,
-        'newValue' => self::SERIALIZATION_JSON,
-      ),
-    ) + parent::getConfiguration();
+  public function getApplicationName() {
+    return 'project';
+  }
+
+  public function getApplicationTransactionType() {
+    return PhabricatorProjectPHIDTypeProject::TYPECONST;
   }
 
 }

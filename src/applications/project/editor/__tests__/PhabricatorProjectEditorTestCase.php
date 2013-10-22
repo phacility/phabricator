@@ -94,7 +94,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $new_name = $proj->getName().' '.mt_rand();
 
     $xaction = new PhabricatorProjectTransaction();
-    $xaction->setTransactionType(PhabricatorProjectTransactionType::TYPE_NAME);
+    $xaction->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME);
     $xaction->setNewValue($new_name);
 
     $editor = new PhabricatorProjectEditor($proj);

@@ -39,31 +39,31 @@ final class PhabricatorProjectProfileEditController
         $xactions = array();
         $xaction = new PhabricatorProjectTransaction();
         $xaction->setTransactionType(
-          PhabricatorProjectTransactionType::TYPE_NAME);
+          PhabricatorProjectTransaction::TYPE_NAME);
         $xaction->setNewValue($request->getStr('name'));
         $xactions[] = $xaction;
 
         $xaction = new PhabricatorProjectTransaction();
         $xaction->setTransactionType(
-          PhabricatorProjectTransactionType::TYPE_STATUS);
+          PhabricatorProjectTransaction::TYPE_STATUS);
         $xaction->setNewValue($request->getStr('status'));
         $xactions[] = $xaction;
 
         $xaction = new PhabricatorProjectTransaction();
         $xaction->setTransactionType(
-          PhabricatorProjectTransactionType::TYPE_CAN_VIEW);
+          PhabricatorTransactions::TYPE_VIEW_POLICY);
         $xaction->setNewValue($request->getStr('can_view'));
         $xactions[] = $xaction;
 
         $xaction = new PhabricatorProjectTransaction();
         $xaction->setTransactionType(
-          PhabricatorProjectTransactionType::TYPE_CAN_EDIT);
+          PhabricatorTransactions::TYPE_EDIT_POLICY);
         $xaction->setNewValue($request->getStr('can_edit'));
         $xactions[] = $xaction;
 
         $xaction = new PhabricatorProjectTransaction();
         $xaction->setTransactionType(
-          PhabricatorProjectTransactionType::TYPE_CAN_JOIN);
+          PhabricatorTransactions::TYPE_JOIN_POLICY);
         $xaction->setNewValue($request->getStr('can_join'));
         $xactions[] = $xaction;
 
