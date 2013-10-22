@@ -86,10 +86,17 @@ final class ConduitCall {
 
     $this->request->setUser($user);
 
-    if ($this->shouldRequireAuthentication()) {
-      // TODO: As per below, this should get centralized and cleaned up.
-      if (!$user->isLoggedIn() && !$user->isOmnipotent()) {
-        throw new ConduitException("ERR-INVALID-AUTH");
+    if (!$this->shouldRequireAuthentication()) {
+      // No auth requirement here.
+    } else {
+
+      $allow_public = $this->handler->shouldAllowPublic() &&
+                      PhabricatorEnv::getEnvConfig('policy.allow-public');
+      if (!$allow_public) {
+        if (!$user->isLoggedIn() && !$user->isOmnipotent()) {
+          // TODO: As per below, this should get centralized and cleaned up.
+          throw new ConduitException("ERR-INVALID-AUTH");
+        }
       }
 
       // TODO: This would be slightly cleaner by just using a Query, but the
