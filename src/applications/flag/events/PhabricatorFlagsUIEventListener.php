@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorFlagsUIEventListener extends PhutilEventListener {
+final class PhabricatorFlagsUIEventListener extends PhabricatorEventListener {
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS);

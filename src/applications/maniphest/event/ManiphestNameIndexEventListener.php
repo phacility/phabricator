@@ -1,6 +1,6 @@
 <?php
 
-final class ManiphestNameIndexEventListener extends PhutilEventListener {
+final class ManiphestNameIndexEventListener extends PhabricatorEventListener {
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_SEARCH_DIDUPDATEINDEX);

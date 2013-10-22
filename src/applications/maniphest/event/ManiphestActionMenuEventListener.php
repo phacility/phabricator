@@ -1,6 +1,6 @@
 <?php
 
-final class ManiphestPeopleMenuEventListener extends PhutilEventListener {
+final class ManiphestActionMenuEventListener extends PhabricatorEventListener {
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS);

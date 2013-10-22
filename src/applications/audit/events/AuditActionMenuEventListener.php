@@ -1,6 +1,6 @@
 <?php
 
-final class AuditPeopleMenuEventListener extends PhutilEventListener {
+final class AuditActionMenuEventListener extends PhabricatorEventListener {
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS);

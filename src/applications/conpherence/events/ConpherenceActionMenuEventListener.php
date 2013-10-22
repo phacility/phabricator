@@ -1,6 +1,7 @@
 <?php
 
-final class ConpherencePeopleMenuEventListener extends PhutilEventListener {
+final class ConpherenceActionMenuEventListener
+  extends PhabricatorEventListener {
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS);

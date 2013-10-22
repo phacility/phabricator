@@ -3,7 +3,7 @@
 /**
  * @group console
  */
-final class DarkConsoleEventPluginAPI extends PhutilEventListener {
+final class DarkConsoleEventPluginAPI extends PhabricatorEventListener {
 
   private static $events = array();
   private static $discardMode = false;

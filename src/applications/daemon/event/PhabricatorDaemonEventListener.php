@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorDaemonEventListener extends PhutilEventListener {
+final class PhabricatorDaemonEventListener extends PhabricatorEventListener {
 
   private $daemons = array();
 

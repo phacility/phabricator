@@ -1,6 +1,7 @@
 <?php
 
-final class DifferentialHovercardEventListener extends PhutilEventListener {
+final class DifferentialHovercardEventListener
+  extends PhabricatorEventListener {
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERHOVERCARD);

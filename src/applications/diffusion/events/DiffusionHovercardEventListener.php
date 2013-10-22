@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionHovercardEventListener extends PhutilEventListener {
+final class DiffusionHovercardEventListener extends PhabricatorEventListener {
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERHOVERCARD);

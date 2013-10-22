@@ -7,7 +7,7 @@
  *
  * @group maniphest
  */
-final class ManiphestEdgeEventListener extends PhutilEventListener {
+final class ManiphestEdgeEventListener extends PhabricatorEventListener {
 
   private $edges = array();
   private $tasks = array();

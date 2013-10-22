@@ -1,6 +1,6 @@
 <?php
 
-final class PhrictionActionMenuEventListener extends PhutilEventListener {
+final class PhrictionActionMenuEventListener extends PhabricatorEventListener {
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS);

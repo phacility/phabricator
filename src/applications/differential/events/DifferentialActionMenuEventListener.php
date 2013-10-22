@@ -1,6 +1,7 @@
 <?php
 
-final class DifferentialPeopleMenuEventListener extends PhutilEventListener {
+final class DifferentialActionMenuEventListener
+  extends PhabricatorEventListener {
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS);
