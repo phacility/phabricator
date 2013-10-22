@@ -14,22 +14,31 @@ final class PhrictionActionMenuEventListener extends PhabricatorEventListener {
     }
   }
 
-  private function handleActionsEvent($event) {
-    $actions = $event->getValue('actions');
-
-    $action = id(new PhabricatorActionView())
-      ->setIcon('phriction-dark')
-      ->setIconSheet(PHUIIconView::SPRITE_APPS)
-      ->setName(pht('View Wiki'));
-
+  private function handleActionsEvent(PhutilEvent $event) {
     $object = $event->getValue('object');
+
+    $actions = null;
     if ($object instanceof PhabricatorProject) {
-      $slug = PhabricatorSlug::normalize($object->getPhrictionSlug());
-      $href = '/w/projects/'.$slug;
-      $actions[] = $action->setHref($href);
+      $actions = $this->buildProjectActions($event);
     }
 
-    $event->setValue('actions', $actions);
+    $this->addActionMenuItems($event, $actions);
+  }
+
+  private function buildProjectActions(PhutilEvent $event) {
+    if (!$this->canUseApplication($event->getUser())) {
+      return null;
+    }
+
+    $project = $event->getValue('object');
+    $slug = PhabricatorSlug::normalize($project->getPhrictionSlug());
+    $href = '/w/projects/'.$slug;
+
+    return id(new PhabricatorActionView())
+      ->setIcon('phriction-dark')
+      ->setIconSheet(PHUIIconView::SPRITE_APPS)
+      ->setName(pht('View Wiki'))
+      ->setHref($href);
   }
 
 }

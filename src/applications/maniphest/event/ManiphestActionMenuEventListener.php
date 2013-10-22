@@ -14,29 +14,58 @@ final class ManiphestActionMenuEventListener extends PhabricatorEventListener {
     }
   }
 
-  private function handleActionsEvent($event) {
-    $actions = $event->getValue('actions');
-
-    $action = id(new PhabricatorActionView())
-      ->setIcon('maniphest-dark')
-      ->setIconSheet(PHUIIconView::SPRITE_APPS)
-      ->setName(pht('View Tasks'));
-
+  private function handleActionsEvent(PhutilEvent $event) {
     $object = $event->getValue('object');
-    if ($object instanceof PhabricatorUser) {
-      $href = '/maniphest/?statuses[]=0&assigned='.$object->getPHID().'#R';
-      $actions[] = $action->setHref($href);
-    } else if ($object instanceof PhabricatorProject) {
-      $href = '/maniphest/?statuses[]=0&allProjects[]='.$object->getPHID().'#R';
-      $actions[] = $action->setHref($href);
 
-      $actions[] = id(new PhabricatorActionView())
-        ->setName(pht("Add Task"))
-        ->setIcon('create')
-        ->setHref('/maniphest/task/create/?projects=' . $object->getPHID());
+    $actions = null;
+    if ($object instanceof PhabricatorUser) {
+      $actions = $this->renderUserItems($event);
+    } else if ($object instanceof PhabricatorProject) {
+      $actions = $this->renderProjectItems($event);
     }
 
-    $event->setValue('actions', $actions);
+    $this->addActionMenuItems($event, $actions);
   }
+
+  private function renderUserItems(PhutilEvent $event) {
+    if (!$this->canUseApplication($event->getUser())) {
+      return null;
+    }
+
+    $user = $event->getValue('object');
+    $phid = $user->getPHID();
+    $view_uri = '/maniphest/?statuses[]=0&assigned='.$phid.'#R';
+
+    return id(new PhabricatorActionView())
+      ->setIcon('maniphest-dark')
+      ->setIconSheet(PHUIIconView::SPRITE_APPS)
+      ->setName(pht('View Tasks'))
+      ->setHref($view_uri);
+  }
+
+  private function renderProjectItems(PhutilEvent $event) {
+    if (!$this->canUseApplication($event->getUser())) {
+      return null;
+    }
+
+    $project = $event->getValue('object');
+
+    $phid = $project->getPHID();
+    $view_uri = '/maniphest/?statuses[]=0&allProjects[]='.$phid.'#R';
+    $create_uri = '/maniphest/task/create/?projects='.$phid;
+
+    return array(
+      id(new PhabricatorActionView())
+        ->setIcon('maniphest-dark')
+        ->setIconSheet(PHUIIconView::SPRITE_APPS)
+        ->setName(pht('View Tasks'))
+        ->setHref($view_uri),
+      id(new PhabricatorActionView())
+        ->setName(pht("Add Task"))
+        ->setIcon('create')
+        ->setHref($create_uri),
+    );
+  }
+
 
 }

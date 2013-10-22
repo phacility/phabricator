@@ -28,6 +28,26 @@ abstract class PhabricatorEventListener extends PhutilEventListener {
       PhabricatorPolicyCapability::CAN_VIEW);
   }
 
+  protected function addActionMenuItems(PhutilEvent $event, $items) {
+    if ($event->getType() !== PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS) {
+      throw new Exception("Not an action menu event!");
+    }
+
+    if (!$items) {
+      return;
+    }
+
+    if (!is_array($items)) {
+      $items = array($items);
+    }
+
+    $event_actions = $event->getValue('actions');
+    foreach ($items as $item) {
+      $event_actions[] = $item;
+    }
+    $event->setValue('actions', $event_actions);
+  }
+
 }
 
 

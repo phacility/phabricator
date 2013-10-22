@@ -500,28 +500,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setDisabled(!$can_edit)
         ->setWorkflow(true));
 
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Edit Differential Revisions'))
-        ->setHref("/search/attach/{$phid}/DREV/")
-        ->setWorkflow(true)
-        ->setIcon('attach')
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(true));
-
-    $pholio_app =
-      PhabricatorApplication::getByClass('PhabricatorApplicationPholio');
-    if ($pholio_app->isInstalled()) {
-      $view->addAction(
-        id(new PhabricatorActionView())
-        ->setName(pht('Edit Pholio Mocks'))
-        ->setHref("/search/attach/{$phid}/MOCK/edge/")
-        ->setWorkflow(true)
-        ->setIcon('attach')
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(true));
-    }
-
     return $view;
   }
 

@@ -42,7 +42,6 @@ final class PhabricatorActionListView extends AphrontView {
     PhutilEventEngine::dispatchEvent($event);
 
     $actions = $event->getValue('actions');
-
     if (!$actions) {
       return null;
     }

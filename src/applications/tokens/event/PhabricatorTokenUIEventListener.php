@@ -33,6 +33,10 @@ final class PhabricatorTokenUIEventListener
       return;
     }
 
+    if (!$this->canUseApplication($event->getUser())) {
+      return null;
+    }
+
     $current = id(new PhabricatorTokenGivenQuery())
       ->setViewer($user)
       ->withAuthorPHIDs(array($user->getPHID()))
@@ -73,6 +77,10 @@ final class PhabricatorTokenUIEventListener
     if (!($object instanceof PhabricatorTokenReceiverInterface)) {
       // This object isn't a token receiver.
       return;
+    }
+
+    if (!$this->canUseApplication($event->getUser())) {
+      return null;
     }
 
     $limit = 1;

@@ -1,6 +1,6 @@
 <?php
 
-final class ConpherenceActionMenuEventListener
+final class PholioActionMenuEventListener
   extends PhabricatorEventListener {
 
   public function register() {
@@ -19,26 +19,33 @@ final class ConpherenceActionMenuEventListener
     $object = $event->getValue('object');
 
     $actions = null;
-    if ($object instanceof PhabricatorUser) {
-      $actions = $this->renderUserItems($event);
+    if ($object instanceof ManiphestTask) {
+      $actions = $this->renderTaskItems($event);
     }
 
     $this->addActionMenuItems($event, $actions);
   }
 
-  private function renderUserItems(PhutilEvent $event) {
+  private function renderTaskItems(PhutilEvent $event) {
     if (!$this->canUseApplication($event->getUser())) {
-      return null;
+      return;
     }
 
-    $user = $event->getValue('object');
-    $href = '/conpherence/new/?participant='.$user->getPHID();
+    $task = $event->getValue('object');
+    $phid = $task->getPHID();
 
-    return id(new PhabricatorActionView())
-      ->setIcon('message')
-      ->setName(pht('Send Message'))
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $event->getUser(),
+      $task,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    return  id(new PhabricatorActionView())
+      ->setName(pht('Edit Pholio Mocks'))
+      ->setHref("/search/attach/{$phid}/MOCK/edge/")
       ->setWorkflow(true)
-      ->setHref($href);
+      ->setIcon('attach')
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(true);
   }
 
 }
