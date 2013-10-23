@@ -49,7 +49,7 @@ final class PhabricatorFlagsUIEventListener extends PhabricatorEventListener {
         ->setWorkflow(true)
         ->setHref('/flag/edit/'.$object->getPHID().'/')
         ->setName(pht('Flag For Later'))
-        ->setIcon('flag-ghost');
+        ->setIcon('flag');
 
       if (!$user->isLoggedIn()) {
         $flag_action->setDisabled(true);

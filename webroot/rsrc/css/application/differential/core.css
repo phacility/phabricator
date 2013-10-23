@@ -3,9 +3,7 @@
  */
 
 .differential-primary-pane {
-  background: #edecef;
-  padding: 1em 0em 0em 0em;
-  margin: 0em 0em 4em 0em;
+  margin-bottom: 32px;
 }
 
 .differential-panel {

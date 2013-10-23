@@ -9,12 +9,12 @@
 }
 
 .differential-local-commits-table th {
-  color: {$greytext};
+  color: {$darkbluetext};
   padding: 4px 6px;
 }
 
 .differential-local-commits-table tr.alt td {
-  background: #dcdcdc;
+  background: {$lightgreybackground};
 }
 
 .differential-local-commits-table td {
