@@ -941,6 +941,26 @@
       "rule" : ".apps-repositories-white-large",
       "hash" : "e249fe8d4137e4b357c88ee237535632"
     },
+    "apps-search-blue-large"          : {
+      "name" : "apps-search-blue-large",
+      "rule" : ".apps-search-blue-large, .phabricator-crumb-view:hover .apps-search-dark-large",
+      "hash" : "92d4f29ba421c9511c24587ddef9610c"
+    },
+    "apps-search-dark-large"          : {
+      "name" : "apps-search-dark-large",
+      "rule" : ".apps-search-dark-large",
+      "hash" : "c734624259fdbc5bd2f9a5660cea1ea9"
+    },
+    "apps-search-light-large"         : {
+      "name" : "apps-search-light-large",
+      "rule" : ".apps-search-light-large",
+      "hash" : "69e3b578e40caa14ec814b624bd596fe"
+    },
+    "apps-search-white-large"         : {
+      "name" : "apps-search-white-large",
+      "rule" : ".apps-search-white-large",
+      "hash" : "0e1f6f3142848d8a4b679aac36caa7b8"
+    },
     "apps-settings-blue-large"        : {
       "name" : "apps-settings-blue-large",
       "rule" : ".apps-settings-blue-large, .phabricator-crumb-view:hover .apps-settings-dark-large",

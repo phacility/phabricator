@@ -394,58 +394,66 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -45px -135px;
 }
 
-.apps-settings-dark {
+.apps-search-dark {
   background-position: -60px -135px;
 }
 
-.apps-settings-white {
+.apps-search-white {
   background-position: -75px -135px;
 }
 
-.apps-setup-dark {
+.apps-settings-dark {
   background-position: -90px -135px;
 }
 
-.apps-setup-white {
+.apps-settings-white {
   background-position: -105px -135px;
 }
 
-.apps-slowvote-dark {
+.apps-setup-dark {
   background-position: -120px -135px;
 }
 
-.apps-slowvote-white {
+.apps-setup-white {
   background-position: -135px -135px;
 }
 
-.apps-token-dark {
+.apps-slowvote-dark {
   background-position: 0px -150px;
 }
 
-.apps-token-white {
+.apps-slowvote-white {
   background-position: -15px -150px;
 }
 
-.apps-uiexamples-dark {
+.apps-token-dark {
   background-position: -30px -150px;
 }
 
-.apps-uiexamples-white {
+.apps-token-white {
   background-position: -45px -150px;
 }
 
-.apps-workphlow-dark {
+.apps-uiexamples-dark {
   background-position: -60px -150px;
 }
 
-.apps-workphlow-white {
+.apps-uiexamples-white {
   background-position: -75px -150px;
 }
 
-.apps-xhprof-dark {
+.apps-workphlow-dark {
   background-position: -90px -150px;
 }
 
-.apps-xhprof-white {
+.apps-workphlow-white {
   background-position: -105px -150px;
+}
+
+.apps-xhprof-dark {
+  background-position: -120px -150px;
+}
+
+.apps-xhprof-white {
+  background-position: -135px -150px;
 }
