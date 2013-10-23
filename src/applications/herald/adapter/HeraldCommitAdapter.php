@@ -17,6 +17,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
   protected $repository;
   protected $commit;
   protected $commitData;
+  private $commitDiff;
 
   protected $emailPHIDs = array();
   protected $addCCPHIDs = array();
@@ -272,15 +273,50 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     return $diff;
   }
 
-  private function loadChangesets() {
-    try {
-      $diff = $this->loadCommitDiff();
-    } catch (Exception $ex) {
-      return array(
-        '<<< Failed to load diff, this may mean the change was '.
-        'unimaginably enormous. >>>');
+  private function getDiffContent($type) {
+    if ($this->commitDiff === null) {
+      try {
+        $this->commitDiff = $this->loadCommitDiff();
+      } catch (Exception $ex) {
+        $this->commitDiff = $ex;
+        phlog($ex);
+      }
     }
-    return $diff->getChangesets();
+
+    if ($this->commitDiff instanceof Exception) {
+      $ex = $this->commitDiff;
+      $ex_class = get_class($ex);
+      $ex_message = pht('Failed to load changes: %s', $ex->getMessage());
+
+      return array(
+        '<'.$ex_class.'>' => $ex_message,
+      );
+    }
+
+    $changes = $this->commitDiff->getChangesets();
+
+    $result = array();
+    foreach ($changes as $change) {
+      $lines = array();
+      foreach ($change->getHunks() as $hunk) {
+        switch ($type) {
+          case '-':
+            $lines[] = $hunk->makeOldFile();
+            break;
+          case '+':
+            $lines[] = $hunk->makeNewFile();
+            break;
+          case '*':
+            $lines[] = $hunk->makeChanges();
+            break;
+          default:
+            throw new Exception("Unknown content selection '{$type}'!");
+        }
+      }
+      $result[$change->getFilename()] = implode("\n", $lines);
+    }
+
+    return $result;
   }
 
   public function getHeraldField($field) {
@@ -299,41 +335,11 @@ final class HeraldCommitAdapter extends HeraldAdapter {
       case self::FIELD_REPOSITORY:
         return $this->repository->getPHID();
       case self::FIELD_DIFF_CONTENT:
-        $dict = array();
-        $lines = array();
-        $changes = $this->loadChangesets();
-        foreach ($changes as $change) {
-          $lines = array();
-          foreach ($change->getHunks() as $hunk) {
-            $lines[] = $hunk->makeChanges();
-          }
-          $dict[$change->getFilename()] = implode("\n", $lines);
-        }
-        return $dict;
+        return $this->getDiffContent('*');
       case self::FIELD_DIFF_ADDED_CONTENT:
-        $dict = array();
-        $lines = array();
-        $changes = $this->loadChangesets();
-        foreach ($changes as $change) {
-          $lines = array();
-          foreach ($change->getHunks() as $hunk) {
-            $lines[] = implode('', $hunk->getAddedLines());
-          }
-          $dict[$change->getFilename()] = implode("\n", $lines);
-        }
-        return $dict;
+        return $this->getDiffContent('+');
       case self::FIELD_DIFF_REMOVED_CONTENT:
-        $dict = array();
-        $lines = array();
-        $changes = $this->loadChangesets();
-        foreach ($changes as $change) {
-          $lines = array();
-          foreach ($change->getHunks() as $hunk) {
-            $lines[] = implode('', $hunk->getRemovedLines());
-          }
-          $dict[$change->getFilename()] = implode("\n", $lines);
-        }
-        return $dict;
+        return $this->getDiffContent('-');
       case self::FIELD_AFFECTED_PACKAGE:
         $packages = $this->loadAffectedPackages();
         return mpull($packages, 'getPHID');
