@@ -135,7 +135,7 @@ button.link {
   border-bottom: none;
   text-decoration: none;
   text-shadow: none;
-  color: #3b5998;
+  color: #19558D;
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
   box-shadow: none;
@@ -172,7 +172,7 @@ button.link:hover {
 .dropdown-menu-frame .phui-icon-view {
   display: inline-block;
   padding: 0;
-  margin: 2px 8px -2px 4px;
+  margin: 2px 6px -2px 4px;
 }
 
 a.policy-control {
