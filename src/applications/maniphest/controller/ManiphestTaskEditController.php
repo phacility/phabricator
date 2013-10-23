@@ -609,7 +609,7 @@ final class ManiphestTaskEditController extends ManiphestController {
       ->setPreviewURI($this->getApplicationURI('task/descriptionpreview/'));
 
     if ($task->getID()) {
-      $page_objects = array( $task->getPHID() );
+      $page_objects = array($task->getPHID());
     } else {
       $page_objects = array();
     }

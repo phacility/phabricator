@@ -75,4 +75,9 @@ final class PhameBlogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this->formatWhereClause($where);
   }
 
+  public function getQueryApplicationClass() {
+    // TODO: Can we set this without breaking public blogs?
+    return null;
+  }
+
 }

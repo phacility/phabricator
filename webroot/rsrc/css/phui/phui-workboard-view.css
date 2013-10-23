@@ -9,7 +9,7 @@
 .phui-workboard-view-shadow {
   padding: 8px;
   min-height: 120px;
-  overflow-x: scroll;
+  overflow-x: auto;
   border-radius: 5px;
   background: rgba(150,150,150,.1);
   box-shadow: inset 0 0 5px rgba(0,0,0,.5);

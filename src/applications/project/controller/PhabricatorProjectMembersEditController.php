@@ -54,7 +54,7 @@ final class PhabricatorProjectMembersEditController
       if ($changed_something) {
         $xaction = new PhabricatorProjectTransaction();
         $xaction->setTransactionType(
-          PhabricatorProjectTransactionType::TYPE_MEMBERS);
+          PhabricatorProjectTransaction::TYPE_MEMBERS);
         $xaction->setNewValue(array_keys($member_map));
         $xactions[] = $xaction;
       }

@@ -181,5 +181,8 @@ final class LegalpadDocumentQuery
     return $documents;
   }
 
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationLegalpad';
+  }
 
 }

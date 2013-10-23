@@ -194,4 +194,9 @@ final class PonderQuestionQuery
     return implode(' ', $joins);
   }
 
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationPonder';
+  }
+
 }

@@ -28,7 +28,7 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
     self::applyOneTransaction(
       $project,
       $user,
-      PhabricatorProjectTransactionType::TYPE_MEMBERS,
+      PhabricatorProjectTransaction::TYPE_MEMBERS,
       $members);
   }
 
@@ -43,7 +43,7 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
     self::applyOneTransaction(
       $project,
       $user,
-      PhabricatorProjectTransactionType::TYPE_MEMBERS,
+      PhabricatorProjectTransaction::TYPE_MEMBERS,
       $members);
   }
 
@@ -149,15 +149,16 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
 
         foreach ($transactions as $xaction) {
           $xaction->setAuthorPHID($actor->getPHID());
-          $xaction->setProjectID($project->getID());
+          $xaction->setObjectPHID($project->getPHID());
+          $xaction->setViewPolicy('public');
+          $xaction->setEditPolicy($actor->getPHID());
+          $xaction->setContentSource(
+            PhabricatorContentSource::newForSource(
+              PhabricatorContentSource::SOURCE_LEGACY,
+              array()));
           $xaction->save();
         }
       $project->saveTransaction();
-
-      foreach ($transactions as $xaction) {
-        $this->publishTransactionStory($project, $xaction);
-      }
-
     } catch (AphrontQueryDuplicateKeyException $ex) {
       // We already validated the slug, but might race. Try again to see if
       // that's the issue. If it is, we'll throw a more specific exception. If
@@ -206,13 +207,13 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
 
     $type = $xaction->getTransactionType();
     switch ($type) {
-      case PhabricatorProjectTransactionType::TYPE_NAME:
+      case PhabricatorProjectTransaction::TYPE_NAME:
         $xaction->setOldValue($project->getName());
         break;
-      case PhabricatorProjectTransactionType::TYPE_STATUS:
+      case PhabricatorProjectTransaction::TYPE_STATUS:
         $xaction->setOldValue($project->getStatus());
         break;
-      case PhabricatorProjectTransactionType::TYPE_MEMBERS:
+      case PhabricatorProjectTransaction::TYPE_MEMBERS:
         $member_phids = $project->getMemberPHIDs();
 
         $old_value = array_values($member_phids);
@@ -224,13 +225,13 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
         $new_value = array_values($new_value);
         $xaction->setNewValue($new_value);
         break;
-      case PhabricatorProjectTransactionType::TYPE_CAN_VIEW:
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
         $xaction->setOldValue($project->getViewPolicy());
         break;
-      case PhabricatorProjectTransactionType::TYPE_CAN_EDIT:
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
         $xaction->setOldValue($project->getEditPolicy());
         break;
-      case PhabricatorProjectTransactionType::TYPE_CAN_JOIN:
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
         $xaction->setOldValue($project->getJoinPolicy());
         break;
       default:
@@ -245,7 +246,7 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
 
     $type = $xaction->getTransactionType();
     switch ($type) {
-      case PhabricatorProjectTransactionType::TYPE_NAME:
+      case PhabricatorProjectTransaction::TYPE_NAME:
         $old_slug = $project->getFullPhrictionSlug();
         $project->setName($xaction->getNewValue());
         $project->setPhrictionSlug($xaction->getNewValue());
@@ -279,10 +280,10 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
         }
         $this->validateName($project);
         break;
-      case PhabricatorProjectTransactionType::TYPE_STATUS:
+      case PhabricatorProjectTransaction::TYPE_STATUS:
         $project->setStatus($xaction->getNewValue());
         break;
-      case PhabricatorProjectTransactionType::TYPE_MEMBERS:
+      case PhabricatorProjectTransaction::TYPE_MEMBERS:
         $old = array_fill_keys($xaction->getOldValue(), true);
         $new = array_fill_keys($xaction->getNewValue(), true);
         $this->addEdges = array_keys(array_diff_key($new, $old));
@@ -291,10 +292,10 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
           $this->setShouldArchive(true);
         }
         break;
-      case PhabricatorProjectTransactionType::TYPE_CAN_VIEW:
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
         $project->setViewPolicy($xaction->getNewValue());
         break;
-      case PhabricatorProjectTransactionType::TYPE_CAN_EDIT:
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
         $project->setEditPolicy($xaction->getNewValue());
 
         // You can't edit away your ability to edit the project.
@@ -303,37 +304,12 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
           $project,
           PhabricatorPolicyCapability::CAN_EDIT);
         break;
-      case PhabricatorProjectTransactionType::TYPE_CAN_JOIN:
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
         $project->setJoinPolicy($xaction->getNewValue());
         break;
       default:
         throw new Exception("Unknown transaction type '{$type}'!");
     }
-  }
-
-  private function publishTransactionStory(
-    PhabricatorProject $project,
-    PhabricatorProjectTransaction $xaction) {
-
-    $related_phids = array(
-      $project->getPHID(),
-      $xaction->getAuthorPHID(),
-    );
-
-    id(new PhabricatorFeedStoryPublisher())
-      ->setStoryType(PhabricatorFeedStoryTypeConstants::STORY_PROJECT)
-      ->setStoryData(
-        array(
-          'projectPHID'   => $project->getPHID(),
-          'transactionID' => $xaction->getID(),
-          'type'          => $xaction->getTransactionType(),
-          'old'           => $xaction->getOldValue(),
-          'new'           => $xaction->getNewValue(),
-        ))
-      ->setStoryTime(time())
-      ->setStoryAuthorPHID($xaction->getAuthorPHID())
-      ->setRelatedPHIDs($related_phids)
-      ->publish();
   }
 
   private function transactionHasEffect(
@@ -375,12 +351,12 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
     PhabricatorProjectTransaction $xaction) {
 
     $type = $xaction->getTransactionType();
-    if ($type != PhabricatorProjectTransactionType::TYPE_MEMBERS) {
+    if ($type != PhabricatorProjectTransaction::TYPE_MEMBERS) {
       return null;
     }
 
     switch ($type) {
-      case PhabricatorProjectTransactionType::TYPE_MEMBERS:
+      case PhabricatorProjectTransaction::TYPE_MEMBERS:
         $old = $xaction->getOldValue();
         $new = $xaction->getNewValue();
 

@@ -16,15 +16,12 @@ final class PhabricatorPastePHIDTypePaste extends PhabricatorPHIDType {
     return new PhabricatorPaste();
   }
 
-  public function loadObjects(
+  protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
 
     return id(new PhabricatorPasteQuery())
-      ->setViewer($query->getViewer())
-      ->setParentQuery($query)
-      ->withPHIDs($phids)
-      ->execute();
+      ->withPHIDs($phids);
   }
 
   public function loadHandles(

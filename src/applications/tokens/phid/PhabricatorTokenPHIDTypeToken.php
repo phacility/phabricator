@@ -16,15 +16,12 @@ final class PhabricatorTokenPHIDTypeToken extends PhabricatorPHIDType {
     return new PhabricatorToken();
   }
 
-  public function loadObjects(
+  protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
 
     return id(new PhabricatorTokenQuery())
-      ->setViewer($query->getViewer())
-      ->setParentQuery($query)
-      ->withPHIDs($phids)
-      ->execute();
+      ->withPHIDs($phids);
   }
 
   public function loadHandles(

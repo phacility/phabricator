@@ -16,15 +16,12 @@ final class PhabricatorPeoplePHIDTypeExternal extends PhabricatorPHIDType {
     return new PhabricatorExternalAccount();
   }
 
-  public function loadObjects(
+  protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
 
     return id(new PhabricatorExternalAccountQuery())
-      ->setViewer($query->getViewer())
-      ->setParentQuery($query)
-      ->withPHIDs($phids)
-      ->execute();
+      ->withPHIDs($phids);
   }
 
   public function loadHandles(

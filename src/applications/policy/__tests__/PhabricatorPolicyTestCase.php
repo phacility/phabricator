@@ -210,6 +210,22 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
       count($query->execute()));
   }
 
+  public function testAllQueriesBelongToActualApplications() {
+    $queries = id(new PhutilSymbolLoader())
+      ->setAncestorClass('PhabricatorPolicyAwareQuery')
+      ->loadObjects();
+
+    foreach ($queries as $qclass => $query) {
+      $class = $query->getQueryApplicationClass();
+      if (!$class) {
+        continue;
+      }
+      $this->assertEqual(
+        true,
+        (bool)PhabricatorApplication::getByClass($class),
+        "Application class '{$class}' for query '{$qclass}'");
+    }
+  }
 
   /**
    * Test an object for visibility across multiple user specifications.

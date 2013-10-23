@@ -104,6 +104,10 @@ abstract class ConduitAPIMethod
     return true;
   }
 
+  public function shouldAllowPublic() {
+    return false;
+  }
+
   public function shouldAllowUnguardedWrites() {
     return false;
   }

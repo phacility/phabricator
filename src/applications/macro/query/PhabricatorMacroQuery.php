@@ -216,4 +216,8 @@ final class PhabricatorMacroQuery
     return 'm.id';
   }
 
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationMacro';
+  }
+
 }

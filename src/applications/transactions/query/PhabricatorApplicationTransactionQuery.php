@@ -160,4 +160,10 @@ abstract class PhabricatorApplicationTransactionQuery
     return $this->formatWhereClause($where);
   }
 
+
+  public function getQueryApplicationClass() {
+    // TODO: Sort this out?
+    return null;
+  }
+
 }

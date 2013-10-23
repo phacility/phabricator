@@ -14,22 +14,22 @@ final class PhabricatorProjectTestDataGenerator
       ->setAuthorPHID($authorPHID);
 
     $this->addTransaction(
-      PhabricatorProjectTransactionType::TYPE_NAME,
+      PhabricatorProjectTransaction::TYPE_NAME,
       $title);
     $this->addTransaction(
-      PhabricatorProjectTransactionType::TYPE_MEMBERS,
+      PhabricatorProjectTransaction::TYPE_MEMBERS,
       $this->loadMembersWithAuthor($authorPHID));
     $this->addTransaction(
-      PhabricatorProjectTransactionType::TYPE_STATUS,
+      PhabricatorProjectTransaction::TYPE_STATUS,
       $this->generateProjectStatus());
     $this->addTransaction(
-      PhabricatorProjectTransactionType::TYPE_CAN_VIEW,
+      PhabricatorTransactions::TYPE_VIEW_POLICY,
       PhabricatorPolicies::POLICY_PUBLIC);
     $this->addTransaction(
-      PhabricatorProjectTransactionType::TYPE_CAN_EDIT,
+      PhabricatorTransactions::TYPE_EDIT_POLICY,
       PhabricatorPolicies::POLICY_PUBLIC);
     $this->addTransaction(
-      PhabricatorProjectTransactionType::TYPE_CAN_JOIN,
+      PhabricatorTransactions::TYPE_JOIN_POLICY,
       PhabricatorPolicies::POLICY_PUBLIC);
 
     $editor = id(new PhabricatorProjectEditor($project))

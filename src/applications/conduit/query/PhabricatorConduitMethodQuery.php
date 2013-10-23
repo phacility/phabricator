@@ -121,4 +121,8 @@ final class PhabricatorConduitMethodQuery
     return $methods;
   }
 
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationConduit';
+  }
+
 }

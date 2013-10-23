@@ -302,4 +302,9 @@ final class PhrequentUserTimeQuery
     return $sum_ended['N'] + $sum_not_ended['N'];
   }
 
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationPhrequent';
+  }
+
 }

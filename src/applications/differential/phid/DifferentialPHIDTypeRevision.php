@@ -16,15 +16,12 @@ final class DifferentialPHIDTypeRevision extends PhabricatorPHIDType {
     return new DifferentialRevision();
   }
 
-  public function loadObjects(
+  protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
 
     return id(new DifferentialRevisionQuery())
-      ->setViewer($query->getViewer())
-      ->setParentQuery($query)
-      ->withPHIDs($phids)
-      ->execute();
+      ->withPHIDs($phids);
   }
 
   public function loadHandles(

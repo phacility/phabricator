@@ -520,10 +520,27 @@ final class CeleritySpriteGenerator {
 
     $sprites = array();
     $prefix = 'status_';
+    $extra_css = array(
+      'policy-custom-white' =>
+        ', .dropdown-menu-item:hover .status-policy-custom',
+      'policy-all-white' =>
+        ', .dropdown-menu-item:hover .status-policy-all',
+      'policy-unknown-white' =>
+        ', .dropdown-menu-item:hover .status-policy-unknown',
+      'policy-admin-white' =>
+        ', .dropdown-menu-item:hover .status-policy-admin',
+      'policy-public-white' =>
+        ', .dropdown-menu-item:hover .status-policy-public',
+      'policy-project-white' =>
+        ', .dropdown-menu-item:hover .status-policy-project',
+      'policy-noone-white' =>
+        ', .dropdown-menu-item:hover .status-policy-noone',
+    );
+
     foreach ($icons as $icon) {
       $sprite = id(clone $template)
         ->setName('status-'.$icon)
-        ->setTargetCSS('.status-'.$icon);
+        ->setTargetCSS('.status-'.$icon.idx($extra_css, $icon));
 
       foreach ($scales as $scale_key => $scale) {
         $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');

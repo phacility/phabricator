@@ -20,6 +20,12 @@ final class PhabricatorApplicationTransactionPHIDTypeTransaction
     return null;
   }
 
+  protected function buildQueryForObjects(
+    PhabricatorObjectQuery $object_query,
+    array $phids) {
+    throw new Exception();
+  }
+
   public function loadObjects(
     PhabricatorObjectQuery $object_query,
     array $phids) {
@@ -55,11 +61,17 @@ final class PhabricatorApplicationTransactionPHIDTypeTransaction
         continue;
       }
 
-      $xactions = id(clone $query)
+      $xaction_query = id(clone $query)
         ->setViewer($object_query->getViewer())
         ->setParentQuery($object_query)
-        ->withPHIDs($subtype_phids)
-        ->execute();
+        ->withPHIDs($subtype_phids);
+
+      if (!$xaction_query->canViewerUseQueryApplication()) {
+        $object_query->addPolicyFilteredPHIDs(array_fuse($subtype_phids));
+        continue;
+      }
+
+      $xactions = $xaction_query->execute();
 
       $results += mpull($xactions, null, 'getPHID');
     }

@@ -96,4 +96,8 @@ final class PhabricatorAuthProviderConfigQuery
     return $this->formatWhereClause($where);
   }
 
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationAuth';
+  }
+
 }

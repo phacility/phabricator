@@ -232,4 +232,9 @@ final class ReleephRequestQuery
     }
   }
 
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationReleeph';
+  }
+
 }

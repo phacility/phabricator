@@ -81,4 +81,10 @@ final class PhabricatorRepositoryArcanistProjectQuery
     return $this->formatWhereClause($where);
   }
 
+
+  public function getQueryApplicationClass() {
+    // TODO: Diffusion? Differential?
+    return null;
+  }
+
 }

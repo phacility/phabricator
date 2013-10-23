@@ -52,4 +52,8 @@ final class DoorkeeperExternalObjectQuery
     return $this->formatWhereClause($where);
   }
 
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationDoorkeeper';
+  }
+
 }

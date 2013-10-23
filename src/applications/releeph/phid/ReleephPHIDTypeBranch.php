@@ -16,15 +16,12 @@ final class ReleephPHIDTypeBranch extends PhabricatorPHIDType {
     return new ReleephBranch();
   }
 
-  public function loadObjects(
+  protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
 
     return id(new ReleephBranchQuery())
-      ->setViewer($query->getViewer())
-      ->setParentQuery($query)
-      ->withPHIDs($phids)
-      ->execute();
+      ->withPHIDs($phids);
   }
 
   public function loadHandles(

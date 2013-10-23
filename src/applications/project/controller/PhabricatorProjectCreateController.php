@@ -26,13 +26,13 @@ final class PhabricatorProjectCreateController
 
         $xaction = new PhabricatorProjectTransaction();
         $xaction->setTransactionType(
-          PhabricatorProjectTransactionType::TYPE_NAME);
+          PhabricatorProjectTransaction::TYPE_NAME);
         $xaction->setNewValue($request->getStr('name'));
         $xactions[] = $xaction;
 
         $xaction = new PhabricatorProjectTransaction();
         $xaction->setTransactionType(
-          PhabricatorProjectTransactionType::TYPE_MEMBERS);
+          PhabricatorProjectTransaction::TYPE_MEMBERS);
         $xaction->setNewValue(array($user->getPHID()));
         $xactions[] = $xaction;
 

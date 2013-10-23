@@ -111,4 +111,10 @@ final class PhabricatorNotificationQuery
     return $item->getChronologicalKey();
   }
 
+
+  public function getQueryApplicationClass() {
+    // TODO: No actual "Notification" app yet, but there probably should be.
+    return null;
+  }
+
 }

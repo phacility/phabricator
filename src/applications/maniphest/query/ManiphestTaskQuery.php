@@ -886,4 +886,9 @@ final class ManiphestTaskQuery
     return 'task.phid';
   }
 
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationManiphest';
+  }
+
 }

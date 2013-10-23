@@ -1098,7 +1098,7 @@
     },
     "remarkup-assist-link"                : {
       "name" : "remarkup-assist-link",
-      "rule" : ".remarkup-assist-link",
+      "rule" : ".remarkup-assist-",
       "hash" : "14fd38c00e80b6f4823ac543a96e63c2"
     },
     "remarkup-assist-text_b"              : {

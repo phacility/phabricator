@@ -81,4 +81,10 @@ final class PhabricatorNamedQueryQuery
 
     return $this->formatWhereClause($where);
   }
+
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationSearch';
+  }
+
 }

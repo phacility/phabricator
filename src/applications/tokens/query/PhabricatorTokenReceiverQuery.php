@@ -34,4 +34,8 @@ final class PhabricatorTokenReceiverQuery
     return $this->tokenCounts;
   }
 
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationTokens';
+  }
+
 }

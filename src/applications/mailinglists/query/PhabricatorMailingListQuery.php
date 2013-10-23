@@ -53,4 +53,8 @@ final class PhabricatorMailingListQuery
     return $this->formatWhereClause($where);
   }
 
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationMailingLists';
+  }
+
 }

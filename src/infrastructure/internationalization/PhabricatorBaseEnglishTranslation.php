@@ -793,6 +793,23 @@ abstract class PhabricatorBaseEnglishTranslation
       '%s edited commit(s), added %d: %s; removed %d: %s.' =>
         '%s edited commits, added %3$s; removed %5$s.',
 
+      '%s changed project member(s), added %d: %s; removed %d: %s' =>
+        '%s changed project members, added %3$s; removed %5$s',
+
+      '%s added %d project member(s): %s' => array(
+        array(
+          '%s added a member: %3$s',
+          '%s added members: %3$s',
+        ),
+      ),
+
+      '%s removed %d project member(s): %s' => array(
+        array(
+          '%s removed a member: %3$s',
+          '%s removed members: %3$s',
+        ),
+      ),
+
     );
   }
 

@@ -35,6 +35,7 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
   private $capabilities;
   private $workspace = array();
   private $policyFilteredPHIDs = array();
+  private $canUseApplication;
 
 
 /* -(  Query Configuration  )------------------------------------------------ */
@@ -213,9 +214,13 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
         $this->rawResultLimit = 0;
       }
 
-      try {
-        $page = $this->loadPage();
-      } catch (PhabricatorEmptyQueryException $ex) {
+      if ($this->canViewerUseQueryApplication()) {
+        try {
+          $page = $this->loadPage();
+        } catch (PhabricatorEmptyQueryException $ex) {
+          $page = array();
+        }
+      } else {
         $page = array();
       }
 
@@ -317,7 +322,7 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
       PhabricatorPolicyCapability::CAN_VIEW);
   }
 
-  protected function addPolicyFilteredPHIDs(array $phids) {
+  public function addPolicyFilteredPHIDs(array $phids) {
     $this->policyFilteredPHIDs += $phids;
     if ($this->getParentQuery()) {
       $this->getParentQuery()->addPolicyFilteredPHIDs($phids);
@@ -579,6 +584,45 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    */
   protected function shouldDisablePolicyFiltering() {
     return false;
+  }
+
+
+  /**
+   * If this query belongs to an application, return the application class name
+   * here. This will prevent the query from returning results if the viewer can
+   * not access the application.
+   *
+   * If this query does not belong to an application, return `null`.
+   *
+   * @return string|null Application class name.
+   */
+  abstract public function getQueryApplicationClass();
+
+
+  /**
+   * Determine if the viewer has permission to use this query's application.
+   * For queries which aren't part of an application, this method always returns
+   * true.
+   *
+   * @return bool True if the viewer has application-level permission to
+   *   execute the query.
+   */
+  public function canViewerUseQueryApplication() {
+    if ($this->canUseApplication === null) {
+      $class = $this->getQueryApplicationClass();
+      if (!$class) {
+        $this->canUseApplication = true;
+      } else {
+        $result = id(new PhabricatorApplicationQuery())
+          ->setViewer($this->getViewer())
+          ->withClasses(array($class))
+          ->execute();
+
+        $this->canUseApplication = (bool)$result;
+      }
+    }
+
+    return $this->canUseApplication;
   }
 
 }

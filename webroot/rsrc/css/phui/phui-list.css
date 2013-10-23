@@ -87,6 +87,7 @@
   list-style: none;
   overflow: hidden;
   border-bottom: 1px solid #e7e7e7;
+  background: {$lightgreybackground};
 }
 
 .phui-list-view.phui-list-navbar > li {
@@ -101,19 +102,20 @@
 }
 
 .phui-list-navbar .phui-list-item-href {
- color: #9ca5b5;
+ color: {$lightbluetext};
  padding: 8px 16px;
  font-size: 12px;
+ letter-spacing: 0.5px;
 }
 
 .phui-list-navbar .phui-list-item-selected .phui-list-item-href {
-  background: #f6f7f8;
-  color: #555;
+  background: {$greybackground};
+  color: {$darkbluetext};
 }
 
 .phui-list-navbar .phui-list-item-href:hover {
-  background: #e8e9ec;
-  color: #555;
+  background: #DEE0E4;
+  color: {$darkgreytext};
   text-decoration: none;
 }
 

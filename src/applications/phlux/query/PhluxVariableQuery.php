@@ -65,4 +65,8 @@ final class PhluxVariableQuery
     return true;
   }
 
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationPhlux';
+  }
+
 }

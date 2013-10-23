@@ -40,4 +40,8 @@ final class PhabricatorConduitLogQuery
     return $this->formatWhereClause($where);
   }
 
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationConduit';
+  }
+
 }
