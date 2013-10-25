@@ -38,7 +38,7 @@ final class PhabricatorRepositoryListController
           'a',
           array(
             'class' => 'button small grey',
-            'href'  => '/repository/edit/'.$repo->getID().'/',
+            'href'  => '/diffusion/'.$repo->getCallsign().'/edit/',
           ),
           'Edit'),
       );
