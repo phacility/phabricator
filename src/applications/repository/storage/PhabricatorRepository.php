@@ -71,6 +71,20 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return idx($this->details, $key, $default);
   }
 
+  public function getHumanReadableDetail($key, $default = null) {
+    $value = $this->getDetail($key, $default);
+
+    switch ($key) {
+      case 'branch-filter':
+      case 'close-commits-filter':
+        $value = array_keys($value);
+        $value = implode(', ', $value);
+        break;
+    }
+
+    return $value;
+  }
+
   public function setDetail($key, $value) {
     $this->details[$key] = $value;
     return $this;

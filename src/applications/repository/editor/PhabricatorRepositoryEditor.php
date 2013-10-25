@@ -10,6 +10,9 @@ final class PhabricatorRepositoryEditor
     $types[] = PhabricatorRepositoryTransaction::TYPE_NAME;
     $types[] = PhabricatorRepositoryTransaction::TYPE_DESCRIPTION;
     $types[] = PhabricatorRepositoryTransaction::TYPE_ENCODING;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_DEFAULT_BRANCH;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_TRACK_ONLY;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE_ONLY;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -29,6 +32,12 @@ final class PhabricatorRepositoryEditor
         return $object->getDetail('description');
       case PhabricatorRepositoryTransaction::TYPE_ENCODING:
         return $object->getDetail('encoding');
+      case PhabricatorRepositoryTransaction::TYPE_DEFAULT_BRANCH:
+        return $object->getDetail('default-branch');
+      case PhabricatorRepositoryTransaction::TYPE_TRACK_ONLY:
+        return array_keys($object->getDetail('branch-filter', array()));
+      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE_ONLY:
+        return array_keys($object->getDetail('close-commits-filter', array()));
     }
   }
 
@@ -41,6 +50,9 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_NAME:
       case PhabricatorRepositoryTransaction::TYPE_DESCRIPTION:
       case PhabricatorRepositoryTransaction::TYPE_ENCODING:
+      case PhabricatorRepositoryTransaction::TYPE_DEFAULT_BRANCH:
+      case PhabricatorRepositoryTransaction::TYPE_TRACK_ONLY:
+      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE_ONLY:
         return $xaction->getNewValue();
     }
   }
@@ -58,6 +70,19 @@ final class PhabricatorRepositoryEditor
         break;
       case PhabricatorRepositoryTransaction::TYPE_DESCRIPTION:
         $object->setDetail('description', $xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_DEFAULT_BRANCH:
+        $object->setDetail('default-branch', $xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_TRACK_ONLY:
+        $object->setDetail(
+          'branch-filter',
+          array_fill_keys($xaction->getNewValue(), true));
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE_ONLY:
+        $object->setDetail(
+          'close-commits-filter',
+          array_fill_keys($xaction->getNewValue(), true));
         break;
       case PhabricatorRepositoryTransaction::TYPE_ENCODING:
         // Make sure the encoding is valid by converting to UTF-8. This tests

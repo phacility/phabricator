@@ -8,6 +8,23 @@ final class DiffusionRepositoryEditController extends DiffusionController {
     $drequest = $this->diffusionRequest;
     $repository = $drequest->getRepository();
 
+    $is_svn = false;
+    $is_git = false;
+    $is_hg = false;
+    switch ($repository->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        $is_git = true;
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $is_svn = true;
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $is_hg = true;
+        break;
+    }
+
+    $has_branches = ($is_git || $is_hg);
+
     $crumbs = $this->buildCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
@@ -37,6 +54,13 @@ final class DiffusionRepositoryEditController extends DiffusionController {
     $encoding_properties =
       $this->buildEncodingProperties($repository, $encoding_actions);
 
+    $branches_properties = null;
+    if ($has_branches) {
+      $branches_properties = $this->buildBranchesProperties(
+        $repository,
+        $this->buildBranchesActions($repository));
+    }
+
     $xactions = id(new PhabricatorRepositoryTransactionQuery())
       ->setViewer($user)
       ->withObjectPHIDs(array($repository->getPHID()))
@@ -64,6 +88,10 @@ final class DiffusionRepositoryEditController extends DiffusionController {
       ->addPropertyList($basic_properties)
       ->addPropertyList($policy_properties)
       ->addPropertyList($encoding_properties);
+
+    if ($branches_properties) {
+      $obj_box->addPropertyList($branches_properties);
+    }
 
     return $this->buildApplicationPage(
       array(
@@ -248,5 +276,59 @@ final class DiffusionRepositoryEditController extends DiffusionController {
 
     return $view;
   }
+
+  private function buildBranchesActions(PhabricatorRepository $repository) {
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PhabricatorActionListView())
+      ->setObjectURI($this->getRequest()->getRequestURI())
+      ->setUser($viewer);
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $repository,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $edit = id(new PhabricatorActionView())
+      ->setIcon('edit')
+      ->setName(pht('Edit Branches'))
+      ->setHref(
+        $this->getRepositoryControllerURI($repository, 'edit/branches/'))
+      ->setWorkflow(!$can_edit)
+      ->setDisabled(!$can_edit);
+    $view->addAction($edit);
+
+    return $view;
+  }
+
+  private function buildBranchesProperties(
+    PhabricatorRepository $repository,
+    PhabricatorActionListView $actions) {
+
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setActionList($actions)
+      ->addSectionHeader(pht('Branches'));
+
+    $default_branch = nonempty(
+      $repository->getHumanReadableDetail('default-branch'),
+      phutil_tag('em', array(), $repository->getDefaultBranch()));
+    $view->addProperty(pht('Default Branch'), $default_branch);
+
+    $track_only = nonempty(
+      $repository->getHumanReadableDetail('branch-filter'),
+      phutil_tag('em', array(), pht('Track All Branches')));
+    $view->addProperty(pht('Track Only'), $track_only);
+
+    $autoclose_only = nonempty(
+      $repository->getHumanReadableDetail('close-commits-filter'),
+      phutil_tag('em', array(), pht('Autoclose On All Branches')));
+    $view->addProperty(pht('Autoclose Only'), $autoclose_only);
+
+    return $view;
+  }
+
 
 }
