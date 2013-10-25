@@ -10,6 +10,8 @@ final class PhabricatorRepositoryTransaction
   const TYPE_DEFAULT_BRANCH = 'repo:default-branch';
   const TYPE_TRACK_ONLY = 'repo:track-only';
   const TYPE_AUTOCLOSE_ONLY = 'repo:autoclose-only';
+  const TYPE_SVN_SUBPATH = 'repo:svn-subpath';
+  const TYPE_UUID = 'repo:uuid';
 
   public function getApplicationName() {
     return 'repository';
@@ -121,6 +123,44 @@ final class PhabricatorRepositoryTransaction
             $this->renderHandleLink($author_phid),
             implode(', ', $old),
             implode(', ', $new));
+        }
+        break;
+      case self::TYPE_UUID:
+        if (!strlen($new)) {
+          return pht(
+            '%s removed "%s" as the repository UUID.',
+            $this->renderHandleLink($author_phid),
+            $old);
+        } else if (!strlen($old)) {
+          return pht(
+            '%s set the repository UUID to "%s".',
+            $this->renderHandleLink($author_phid),
+            $new);
+        } else {
+          return pht(
+            '%s changed the repository UUID from "%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $old,
+            $new);
+        }
+        break;
+      case self::TYPE_SVN_SUBPATH:
+        if (!strlen($new)) {
+          return pht(
+            '%s removed "%s" as the Import Only path.',
+            $this->renderHandleLink($author_phid),
+            $old);
+        } else if (!strlen($old)) {
+          return pht(
+            '%s set the repository to import only "%s".',
+            $this->renderHandleLink($author_phid),
+            $new);
+        } else {
+          return pht(
+            '%s changed the import path from "%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $old,
+            $new);
         }
         break;
     }

@@ -61,6 +61,13 @@ final class DiffusionRepositoryEditController extends DiffusionController {
         $this->buildBranchesActions($repository));
     }
 
+    $subversion_properties = null;
+    if ($is_svn) {
+      $subversion_properties = $this->buildSubversionProperties(
+        $repository,
+        $this->buildSubversionActions($repository));
+    }
+
     $xactions = id(new PhabricatorRepositoryTransactionQuery())
       ->setViewer($user)
       ->withObjectPHIDs(array($repository->getPHID()))
@@ -91,6 +98,10 @@ final class DiffusionRepositoryEditController extends DiffusionController {
 
     if ($branches_properties) {
       $obj_box->addPropertyList($branches_properties);
+    }
+
+    if ($subversion_properties) {
+      $obj_box->addPropertyList($subversion_properties);
     }
 
     return $this->buildApplicationPage(
@@ -330,5 +341,52 @@ final class DiffusionRepositoryEditController extends DiffusionController {
     return $view;
   }
 
+  private function buildSubversionActions(PhabricatorRepository $repository) {
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PhabricatorActionListView())
+      ->setObjectURI($this->getRequest()->getRequestURI())
+      ->setUser($viewer);
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $repository,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $edit = id(new PhabricatorActionView())
+      ->setIcon('edit')
+      ->setName(pht('Edit Subversion Info'))
+      ->setHref(
+        $this->getRepositoryControllerURI($repository, 'edit/subversion/'))
+      ->setWorkflow(!$can_edit)
+      ->setDisabled(!$can_edit);
+    $view->addAction($edit);
+
+    return $view;
+  }
+
+  private function buildSubversionProperties(
+    PhabricatorRepository $repository,
+    PhabricatorActionListView $actions) {
+
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setActionList($actions)
+      ->addSectionHeader(pht('Subversion'));
+
+    $svn_uuid = nonempty(
+      $repository->getUUID(),
+      phutil_tag('em', array(), pht('Not Configured')));
+    $view->addProperty(pht('Subversion UUID'), $svn_uuid);
+
+    $svn_subpath = nonempty(
+      $repository->getHumanReadableDetail('svn-subpath'),
+      phutil_tag('em', array(), pht('Import Entire Repository')));
+    $view->addProperty(pht('Import Only'), $svn_subpath);
+
+    return $view;
+  }
 
 }
