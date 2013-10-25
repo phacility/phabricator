@@ -201,7 +201,16 @@ final class PhabricatorMarkupEngine {
   private function getMarkupFieldKey(
     PhabricatorMarkupInterface $object,
     $field) {
-    return $object->getMarkupFieldKey($field).'@'.$this->version;
+
+    $custom = array_merge(
+      self::loadCustomInlineRules(),
+      self::loadCustomBlockRules());
+
+    $custom = mpull($custom, 'getRuleVersion', null);
+    ksort($custom);
+    $custom = PhabricatorHash::digestForIndex(serialize($custom));
+
+    return $object->getMarkupFieldKey($field).'@'.$this->version.'@'.$custom;
   }
 
 
@@ -328,10 +337,6 @@ final class PhabricatorMarkupEngine {
    */
   public static function newDifferentialMarkupEngine(array $options = array()) {
     return self::newMarkupEngine(array(
-      'custom-inline' => PhabricatorEnv::getEnvConfig(
-        'differential.custom-remarkup-rules'),
-      'custom-block'  => PhabricatorEnv::getEnvConfig(
-        'differential.custom-remarkup-block-rules'),
       'differential.diff' => idx($options, 'differential.diff'),
     ));
   }
@@ -381,8 +386,6 @@ final class PhabricatorMarkupEngine {
       'pygments'      => PhabricatorEnv::getEnvConfig('pygments.enabled'),
       'youtube'       => PhabricatorEnv::getEnvConfig(
         'remarkup.enable-embedded-youtube'),
-      'custom-inline' => array(),
-      'custom-block'  => array(),
       'differential.diff' => null,
       'header.generate-toc' => false,
       'macros'        => true,
@@ -419,12 +422,6 @@ final class PhabricatorMarkupEngine {
     $rules[] = new PhutilRemarkupRuleEscapeRemarkup();
     $rules[] = new PhutilRemarkupRuleMonospace();
 
-    $custom_rule_classes = $options['custom-inline'];
-    if ($custom_rule_classes) {
-      foreach ($custom_rule_classes as $custom_rule_class) {
-        $rules[] = newv($custom_rule_class, array());
-      }
-    }
 
     $rules[] = new PhutilRemarkupRuleDocumentLink();
 
@@ -450,6 +447,10 @@ final class PhabricatorMarkupEngine {
     $rules[] = new PhutilRemarkupRuleItalic();
     $rules[] = new PhutilRemarkupRuleDel();
 
+    foreach (self::loadCustomInlineRules() as $rule) {
+      $rules[] = $rule;
+    }
+
     $blocks = array();
     $blocks[] = new PhutilRemarkupEngineRemarkupQuotesBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupLiteralBlockRule();
@@ -461,15 +462,11 @@ final class PhabricatorMarkupEngine {
     $blocks[] = new PhutilRemarkupEngineRemarkupTableBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupSimpleTableBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupInterpreterRule();
-
-    $custom_block_rule_classes = $options['custom-block'];
-    if ($custom_block_rule_classes) {
-      foreach ($custom_block_rule_classes as $custom_block_rule_class) {
-        $blocks[] = newv($custom_block_rule_class, array());
-      }
-    }
-
     $blocks[] = new PhutilRemarkupEngineRemarkupDefaultBlockRule();
+
+    foreach (self::loadCustomBlockRules() as $rule) {
+      $blocks[] = $rule;
+    }
 
     foreach ($blocks as $block) {
       $block->setMarkupRules($rules);
@@ -562,6 +559,18 @@ final class PhabricatorMarkupEngine {
     }
 
     return $best;
+  }
+
+  private static function loadCustomInlineRules() {
+    return id(new PhutilSymbolLoader())
+      ->setAncestorClass('PhabricatorRemarkupCustomInlineRule')
+      ->loadObjects();
+  }
+
+  private static function loadCustomBlockRules() {
+    return id(new PhutilSymbolLoader())
+      ->setAncestorClass('PhabricatorRemarkupCustomBlockRule')
+      ->loadObjects();
   }
 
 }

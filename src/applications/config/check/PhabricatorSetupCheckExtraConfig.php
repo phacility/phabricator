@@ -141,6 +141,11 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
 
     $ancient_config = array_fill_keys($auth_config, $reason_auth);
 
+    $markup_reason = pht(
+      'Custom remarkup rules are now added by subclassing '.
+      'PhabricatorRemarkupCustomInlineRule or '.
+      'PhabricatorRemarkupCustomBlockRule.');
+
     $ancient_config += array(
       'phid.external-loaders' =>
         pht(
@@ -155,6 +160,8 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
           'Maniphest fields are now defined in '.
           '`maniphest.custom-field-definitions`. Existing definitions have '.
           'been migrated.'),
+      'differential.custom-remarkup-rules' => $markup_reason,
+      'differential.custom-remarkup-block-rules' => $markup_reason,
     );
 
     return $ancient_config;

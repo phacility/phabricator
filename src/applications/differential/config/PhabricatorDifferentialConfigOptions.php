@@ -20,25 +20,6 @@ final class PhabricatorDifferentialConfigOptions
         ->setBaseClass('DifferentialRevisionDetailRenderer')
         ->setDescription(pht("Custom revision detail renderer.")),
       $this->newOption(
-        'differential.custom-remarkup-rules',
-        'list<string>',
-        array())
-        ->setSummary(pht('Custom remarkup rules.'))
-        ->setDescription(
-          pht(
-            "Array for custom remarkup rules. The array should have a list ".
-            "of class names of classes that extend PhutilRemarkupRule")),
-      $this->newOption(
-        'differential.custom-remarkup-block-rules',
-        'list<string>',
-        array())
-        ->setSummary(pht('Custom remarkup block rules.'))
-        ->setDescription(
-          pht(
-            "Array for custom remarkup block rules. The array should have a ".
-            "list of class names of classes that extend ".
-            "PhutilRemarkupEngineBlockRule")),
-      $this->newOption(
         'differential.whitespace-matters',
         'list<regex>',
         array(
