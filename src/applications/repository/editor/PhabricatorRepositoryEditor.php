@@ -17,6 +17,13 @@ final class PhabricatorRepositoryEditor
     $types[] = PhabricatorRepositoryTransaction::TYPE_SVN_SUBPATH;
     $types[] = PhabricatorRepositoryTransaction::TYPE_NOTIFY;
     $types[] = PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_REMOTE_URI;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_SSH_LOGIN;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_SSH_KEY;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_SSH_KEYFILE;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_HTTP_LOGIN;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_HTTP_PASS;
+
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -50,6 +57,18 @@ final class PhabricatorRepositoryEditor
         return (int)!$object->getDetail('herald-disabled');
       case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
         return (int)!$object->getDetail('disable-autoclose');
+      case PhabricatorRepositoryTransaction::TYPE_REMOTE_URI:
+        return $object->getDetail('remote-uri');
+      case PhabricatorRepositoryTransaction::TYPE_SSH_LOGIN:
+        return $object->getDetail('ssh-login');
+      case PhabricatorRepositoryTransaction::TYPE_SSH_KEY:
+        return $object->getDetail('ssh-key');
+      case PhabricatorRepositoryTransaction::TYPE_SSH_KEYFILE:
+        return $object->getDetail('ssh-keyfile');
+      case PhabricatorRepositoryTransaction::TYPE_HTTP_LOGIN:
+        return $object->getDetail('http-login');
+      case PhabricatorRepositoryTransaction::TYPE_HTTP_PASS:
+        return $object->getDetail('http-pass');
     }
   }
 
@@ -67,6 +86,12 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE_ONLY:
       case PhabricatorRepositoryTransaction::TYPE_UUID:
       case PhabricatorRepositoryTransaction::TYPE_SVN_SUBPATH:
+      case PhabricatorRepositoryTransaction::TYPE_REMOTE_URI:
+      case PhabricatorRepositoryTransaction::TYPE_SSH_LOGIN:
+      case PhabricatorRepositoryTransaction::TYPE_SSH_KEY:
+      case PhabricatorRepositoryTransaction::TYPE_SSH_KEYFILE:
+      case PhabricatorRepositoryTransaction::TYPE_HTTP_LOGIN:
+      case PhabricatorRepositoryTransaction::TYPE_HTTP_PASS:
         return $xaction->getNewValue();
       case PhabricatorRepositoryTransaction::TYPE_NOTIFY:
       case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
@@ -112,6 +137,24 @@ final class PhabricatorRepositoryEditor
         break;
       case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
         $object->setDetail('disable-autoclose', (int)!$xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_REMOTE_URI:
+        $object->setDetail('remote-uri', $xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_SSH_LOGIN:
+        $object->setDetail('ssh-login', $xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_SSH_KEY:
+        $object->setDetail('ssh-key', $xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_SSH_KEYFILE:
+        $object->setDetail('ssh-keyfile', $xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_HTTP_LOGIN:
+        $object->setDetail('http-login', $xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_HTTP_PASS:
+        $object->setDetail('http-pass', $xaction->getNewValue());
         break;
       case PhabricatorRepositoryTransaction::TYPE_ENCODING:
         // Make sure the encoding is valid by converting to UTF-8. This tests

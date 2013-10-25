@@ -14,6 +14,12 @@ final class PhabricatorRepositoryTransaction
   const TYPE_UUID = 'repo:uuid';
   const TYPE_NOTIFY = 'repo:notify';
   const TYPE_AUTOCLOSE = 'repo:autoclose';
+  const TYPE_REMOTE_URI = 'repo:remote-uri';
+  const TYPE_SSH_LOGIN = 'repo:ssh-login';
+  const TYPE_SSH_KEY = 'repo:ssh-key';
+  const TYPE_SSH_KEYFILE = 'repo:ssh-keyfile';
+  const TYPE_HTTP_LOGIN = 'repo:http-login';
+  const TYPE_HTTP_PASS = 'repo:http-pass';
 
   public function getApplicationName() {
     return 'repository';
@@ -187,7 +193,44 @@ final class PhabricatorRepositoryTransaction
             $this->renderHandleLink($author_phid));
         }
         break;
-
+      case self::TYPE_REMOTE_URI:
+        if (!strlen($old)) {
+          return pht(
+            '%s set the remote URI for this repository to "%s".',
+            $this->renderHandleLink($author_phid),
+            $new);
+        } else if (!strlen($new)) {
+          return pht(
+            '%s removed the remote URI for this repository.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s changed the remote URI for this repository from "%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $old,
+            $new);
+        }
+        break;
+      case self::TYPE_SSH_LOGIN:
+        return pht(
+          '%s updated the SSH login for this repository.',
+          $this->renderHandleLink($author_phid));
+      case self::TYPE_SSH_KEY:
+        return pht(
+          '%s updated the SSH key for this repository.',
+          $this->renderHandleLink($author_phid));
+      case self::TYPE_SSH_KEYFILE:
+        return pht(
+          '%s updated the SSH keyfile for this repository.',
+          $this->renderHandleLink($author_phid));
+      case self::TYPE_HTTP_LOGIN:
+        return pht(
+          '%s updated the HTTP login for this repository.',
+          $this->renderHandleLink($author_phid));
+      case self::TYPE_HTTP_PASS:
+        return pht(
+          '%s updated the HTTP password for this repository.',
+          $this->renderHandleLink($author_phid));
     }
 
     return parent::getTitle();

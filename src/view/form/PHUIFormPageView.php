@@ -190,6 +190,10 @@ class PHUIFormPageView extends AphrontView {
   }
 
   public function readFromObject($object) {
+    foreach ($this->getControls() as $name => $control) {
+      $control->readValueFromDictionary($object);
+    }
+
     return $this;
   }
 

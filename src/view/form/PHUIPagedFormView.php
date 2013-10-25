@@ -1,7 +1,6 @@
 <?php
 
 /**
- *
  * @task page   Managing Pages
  */
 final class PHUIPagedFormView extends AphrontTagView {
@@ -13,6 +12,7 @@ final class PHUIPagedFormView extends AphrontTagView {
   private $nextPage;
   private $prevPage;
   private $complete;
+  private $cancelURI;
 
   protected function canAppendChild() {
     return false;
@@ -211,6 +211,15 @@ final class PHUIPagedFormView extends AphrontTagView {
     return $this->name.':'.$key;
   }
 
+  public function setCancelURI($cancel_uri) {
+    $this->cancelURI = $cancel_uri;
+    return $this;
+  }
+
+  public function getCancelURI() {
+    return $this->cancelURI;
+  }
+
   public function getTagContent() {
     $form = id(new AphrontFormView())
       ->setUser($this->getUser());
@@ -240,6 +249,8 @@ final class PHUIPagedFormView extends AphrontTagView {
 
     if (!$this->isFirstPage($selected_page)) {
       $submit->addBackButton();
+    } else if ($this->getCancelURI()) {
+      $submit->addCancelButton($this->getCancelURI());
     }
 
     if ($this->isLastPage($selected_page)) {
@@ -261,11 +272,10 @@ final class PHUIPagedFormView extends AphrontTagView {
         ->setHeader($selected_page->getPageName());
     }
 
-    return array(
-      $header,
-      $errors,
-      $form,
-    );
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setFormError($errors)
+      ->setForm($form);
   }
 
 }

@@ -72,6 +72,7 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
             'branches/' => 'DiffusionRepositoryEditBranchesController',
             'subversion/' => 'DiffusionRepositoryEditSubversionController',
             'actions/' => 'DiffusionRepositoryEditActionsController',
+            '(?P<edit>remote)/' => 'DiffusionRepositoryCreateController',
           ),
         ),
         'inline/' => array(

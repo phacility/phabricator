@@ -126,6 +126,11 @@ abstract class AphrontFormControl extends AphrontView {
     return $this;
   }
 
+  public function readValueFromDictionary(array $dictionary) {
+    $this->setValue(idx($dictionary, $this->getName()));
+    return $this;
+  }
+
   public function setFormPage(PHUIFormPageView $page) {
     if ($this->formPage) {
       throw new Exception("This control is already a member of a page!");

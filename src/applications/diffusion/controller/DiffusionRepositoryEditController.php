@@ -50,6 +50,10 @@ final class DiffusionRepositoryEditController extends DiffusionController {
     $policy_properties =
       $this->buildPolicyProperties($repository, $policy_actions);
 
+    $remote_properties = $this->buildRemoteProperties(
+      $repository,
+      $this->buildRemoteActions($repository));
+
     $encoding_actions = $this->buildEncodingActions($repository);
     $encoding_properties =
       $this->buildEncodingProperties($repository, $encoding_actions);
@@ -98,6 +102,7 @@ final class DiffusionRepositoryEditController extends DiffusionController {
       ->setHeader($header)
       ->addPropertyList($basic_properties)
       ->addPropertyList($policy_properties)
+      ->addPropertyList($remote_properties)
       ->addPropertyList($encoding_properties);
 
     if ($branches_properties) {
@@ -441,6 +446,48 @@ final class DiffusionRepositoryEditController extends DiffusionController {
       : pht('On');
     $autoclose = phutil_tag('em', array(), $autoclose);
     $view->addProperty(pht('Autoclose'), $autoclose);
+
+    return $view;
+  }
+
+  private function buildRemoteActions(PhabricatorRepository $repository) {
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PhabricatorActionListView())
+      ->setObjectURI($this->getRequest()->getRequestURI())
+      ->setUser($viewer);
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $repository,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $edit = id(new PhabricatorActionView())
+      ->setIcon('edit')
+      ->setName(pht('Edit Remote'))
+      ->setHref(
+        $this->getRepositoryControllerURI($repository, 'edit/remote/'))
+      ->setWorkflow(!$can_edit)
+      ->setDisabled(!$can_edit);
+    $view->addAction($edit);
+
+    return $view;
+  }
+
+  private function buildRemoteProperties(
+    PhabricatorRepository $repository,
+    PhabricatorActionListView $actions) {
+
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setActionList($actions)
+      ->addSectionHeader(pht('Remote'));
+
+    $view->addProperty(
+      pht('Remote URI'),
+      $repository->getDetail('remote-uri'));
 
     return $view;
   }
