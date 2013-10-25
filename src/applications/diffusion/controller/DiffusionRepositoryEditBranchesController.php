@@ -1,7 +1,7 @@
 <?php
 
 final class DiffusionRepositoryEditBranchesController
-  extends DiffusionController {
+  extends DiffusionRepositoryEditController {
 
   public function processRequest() {
     $request = $this->getRequest();
@@ -18,7 +18,6 @@ final class DiffusionRepositoryEditBranchesController
         ))
       ->withIDs(array($repository->getID()))
       ->executeOne();
-
     if (!$repository) {
       return new Aphront404Response();
     }
@@ -76,7 +75,7 @@ final class DiffusionRepositoryEditBranchesController
 
     $content = array();
 
-    $crumbs = $this->buildCrumbs();
+    $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName(pht('Edit Branches')));

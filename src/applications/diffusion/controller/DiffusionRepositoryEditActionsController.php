@@ -1,7 +1,7 @@
 <?php
 
 final class DiffusionRepositoryEditActionsController
-  extends DiffusionController {
+  extends DiffusionRepositoryEditController {
 
   public function processRequest() {
     $request = $this->getRequest();
@@ -58,7 +58,7 @@ final class DiffusionRepositoryEditActionsController
 
     $content = array();
 
-    $crumbs = $this->buildCrumbs();
+    $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName(pht('Edit Actions')));

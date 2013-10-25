@@ -1,7 +1,7 @@
 <?php
 
 final class DiffusionRepositoryEditSubversionController
-  extends DiffusionController {
+  extends DiffusionRepositoryEditController {
 
   public function processRequest() {
     $request = $this->getRequest();
@@ -69,7 +69,7 @@ final class DiffusionRepositoryEditSubversionController
 
     $content = array();
 
-    $crumbs = $this->buildCrumbs();
+    $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName(pht('Edit Subversion Info')));

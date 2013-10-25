@@ -1,6 +1,7 @@
 <?php
 
-final class DiffusionRepositoryCreateController extends DiffusionController {
+final class DiffusionRepositoryCreateController
+  extends DiffusionRepositoryEditController {
 
   private $edit;
   private $repository;
@@ -131,7 +132,7 @@ final class DiffusionRepositoryCreateController extends DiffusionController {
       $form->readFromObject($dict);
     }
 
-    $crumbs = $this->buildCrumbs();
+    $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName($title));

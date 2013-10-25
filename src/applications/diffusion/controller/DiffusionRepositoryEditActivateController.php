@@ -1,7 +1,7 @@
 <?php
 
 final class DiffusionRepositoryEditActivateController
-  extends DiffusionController {
+  extends DiffusionRepositoryEditController {
 
   public function processRequest() {
     $request = $this->getRequest();
