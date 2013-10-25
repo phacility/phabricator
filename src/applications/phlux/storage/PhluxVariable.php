@@ -1,7 +1,9 @@
 <?php
 
 final class PhluxVariable extends PhluxDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorFlaggableInterface,
+    PhabricatorPolicyInterface {
 
   protected $variableKey;
   protected $variableValue;

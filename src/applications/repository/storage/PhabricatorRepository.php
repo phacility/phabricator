@@ -6,6 +6,7 @@
 final class PhabricatorRepository extends PhabricatorRepositoryDAO
   implements
     PhabricatorPolicyInterface,
+    PhabricatorFlaggableInterface,
     PhabricatorMarkupInterface {
 
   /**

@@ -9,6 +9,7 @@ final class PholioMock extends PholioDAO
     PhabricatorPolicyInterface,
     PhabricatorSubscribableInterface,
     PhabricatorTokenReceiverInterface,
+    PhabricatorFlaggableInterface,
     PhabricatorApplicationTransactionInterface {
 
   const MARKUP_FIELD_DESCRIPTION  = 'markup:description';

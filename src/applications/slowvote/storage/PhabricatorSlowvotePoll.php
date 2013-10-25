@@ -7,6 +7,7 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   implements
     PhabricatorPolicyInterface,
     PhabricatorSubscribableInterface,
+    PhabricatorFlaggableInterface,
     PhabricatorTokenReceiverInterface {
 
   const RESPONSES_VISIBLE = 0;

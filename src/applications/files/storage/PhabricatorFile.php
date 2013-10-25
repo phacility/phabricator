@@ -7,6 +7,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   implements
     PhabricatorTokenReceiverInterface,
     PhabricatorSubscribableInterface,
+    PhabricatorFlaggableInterface,
     PhabricatorPolicyInterface {
 
   const STORAGE_FORMAT_RAW  = 'raw';
