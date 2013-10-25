@@ -68,6 +68,10 @@ final class DiffusionRepositoryEditController extends DiffusionController {
         $this->buildSubversionActions($repository));
     }
 
+    $actions_properties = $this->buildActionsProperties(
+      $repository,
+      $this->buildActionsActions($repository));
+
     $xactions = id(new PhabricatorRepositoryTransactionQuery())
       ->setViewer($user)
       ->withObjectPHIDs(array($repository->getPHID()))
@@ -103,6 +107,8 @@ final class DiffusionRepositoryEditController extends DiffusionController {
     if ($subversion_properties) {
       $obj_box->addPropertyList($subversion_properties);
     }
+
+    $obj_box->addPropertyList($actions_properties);
 
     return $this->buildApplicationPage(
       array(
@@ -385,6 +391,56 @@ final class DiffusionRepositoryEditController extends DiffusionController {
       $repository->getHumanReadableDetail('svn-subpath'),
       phutil_tag('em', array(), pht('Import Entire Repository')));
     $view->addProperty(pht('Import Only'), $svn_subpath);
+
+    return $view;
+  }
+
+  private function buildActionsActions(PhabricatorRepository $repository) {
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PhabricatorActionListView())
+      ->setObjectURI($this->getRequest()->getRequestURI())
+      ->setUser($viewer);
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $repository,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $edit = id(new PhabricatorActionView())
+      ->setIcon('edit')
+      ->setName(pht('Edit Actions'))
+      ->setHref(
+        $this->getRepositoryControllerURI($repository, 'edit/actions/'))
+      ->setWorkflow(!$can_edit)
+      ->setDisabled(!$can_edit);
+    $view->addAction($edit);
+
+    return $view;
+  }
+
+  private function buildActionsProperties(
+    PhabricatorRepository $repository,
+    PhabricatorActionListView $actions) {
+
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setActionList($actions)
+      ->addSectionHeader(pht('Actions'));
+
+    $notify = $repository->getDetail('herald-disabled')
+      ? pht('Off')
+      : pht('On');
+    $notify = phutil_tag('em', array(), $notify);
+    $view->addProperty(pht('Publish/Notify'), $notify);
+
+    $autoclose = $repository->getDetail('disable-autoclose')
+      ? pht('Off')
+      : pht('On');
+    $autoclose = phutil_tag('em', array(), $autoclose);
+    $view->addProperty(pht('Autoclose'), $autoclose);
 
     return $view;
   }

@@ -15,6 +15,8 @@ final class PhabricatorRepositoryEditor
     $types[] = PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE_ONLY;
     $types[] = PhabricatorRepositoryTransaction::TYPE_UUID;
     $types[] = PhabricatorRepositoryTransaction::TYPE_SVN_SUBPATH;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_NOTIFY;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -44,6 +46,10 @@ final class PhabricatorRepositoryEditor
         return $object->getUUID();
       case PhabricatorRepositoryTransaction::TYPE_SVN_SUBPATH:
         return $object->getDetail('svn-subpath');
+      case PhabricatorRepositoryTransaction::TYPE_NOTIFY:
+        return (int)!$object->getDetail('herald-disabled');
+      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
+        return (int)!$object->getDetail('disable-autoclose');
     }
   }
 
@@ -62,6 +68,9 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_UUID:
       case PhabricatorRepositoryTransaction::TYPE_SVN_SUBPATH:
         return $xaction->getNewValue();
+      case PhabricatorRepositoryTransaction::TYPE_NOTIFY:
+      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
+        return (int)$xaction->getNewValue();
     }
   }
 
@@ -97,6 +106,12 @@ final class PhabricatorRepositoryEditor
         break;
       case PhabricatorRepositoryTransaction::TYPE_SVN_SUBPATH:
         $object->setDetail('svn-subpath', $xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_NOTIFY:
+        $object->setDetail('herald-disabled', (int)!$xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
+        $object->setDetail('disable-autoclose', (int)!$xaction->getNewValue());
         break;
       case PhabricatorRepositoryTransaction::TYPE_ENCODING:
         // Make sure the encoding is valid by converting to UTF-8. This tests

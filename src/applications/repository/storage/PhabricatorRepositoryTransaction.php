@@ -12,6 +12,8 @@ final class PhabricatorRepositoryTransaction
   const TYPE_AUTOCLOSE_ONLY = 'repo:autoclose-only';
   const TYPE_SVN_SUBPATH = 'repo:svn-subpath';
   const TYPE_UUID = 'repo:uuid';
+  const TYPE_NOTIFY = 'repo:notify';
+  const TYPE_AUTOCLOSE = 'repo:autoclose';
 
   public function getApplicationName() {
     return 'repository';
@@ -163,6 +165,29 @@ final class PhabricatorRepositoryTransaction
             $new);
         }
         break;
+      case self::TYPE_NOTIFY:
+        if ($new) {
+          return pht(
+            '%s enabled notifications and publishing for this repository.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s disabled notifications and publishing for this repository.',
+            $this->renderHandleLink($author_phid));
+        }
+        break;
+      case self::TYPE_AUTOCLOSE:
+        if ($new) {
+          return pht(
+            '%s enabled autoclose for this repository.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s disabled autoclose for this repository.',
+            $this->renderHandleLink($author_phid));
+        }
+        break;
+
     }
 
     return parent::getTitle();
