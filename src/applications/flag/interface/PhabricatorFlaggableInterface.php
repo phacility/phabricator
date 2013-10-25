@@ -1,7 +1,5 @@
 <?php
 
-interface PhabricatorFlaggableInterface {
-
-  public function getPHID();
+interface PhabricatorFlaggableInterface extends PhabricatorPHIDInterface {
 
 }
