@@ -100,9 +100,17 @@ final class ManiphestTaskEditController extends ManiphestController {
         if ($can_edit_assign) {
           $assign = $request->getStr('assign');
           if (strlen($assign)) {
-            $assign_user = id(new PhabricatorUser())->loadOneWhere(
-              'username = %s',
-              $assign);
+            $assign_user = id(new PhabricatorPeopleQuery())
+              ->setViewer($user)
+              ->withUsernames(array($assign))
+              ->executeOne();
+            if (!$assign_user) {
+              $assign_user = id(new PhabricatorPeopleQuery())
+                ->setViewer($user)
+                ->withPHIDs(array($assign))
+                ->executeOne();
+            }
+
             if ($assign_user) {
               $task->setOwnerPHID($assign_user->getPHID());
             }
