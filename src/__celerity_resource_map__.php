@@ -3883,6 +3883,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/phui/phui-icon.css',
   ),
+  'phui-info-panel-css' =>
+  array(
+    'uri' => '/res/0a9c55c3/rsrc/css/phui/phui-info-panel.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/phui/phui-info-panel.css',
+  ),
   'phui-list-view-css' =>
   array(
     'uri' => '/res/fbf42225/rsrc/css/phui/phui-list.css',
