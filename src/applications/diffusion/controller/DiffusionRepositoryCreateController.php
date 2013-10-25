@@ -22,15 +22,10 @@ final class DiffusionRepositoryCreateController extends DiffusionController {
       $repository = $this->getDiffusionRequest()->getRepository();
 
       // Make sure we have CAN_EDIT.
-      id(new PhabricatorRepositoryQuery())
-        ->setViewer($viewer)
-        ->withIDs(array($repository->getID()))
-        ->requireCapabilities(
-          array(
-            PhabricatorPolicyCapability::CAN_VIEW,
-            PhabricatorPolicyCapability::CAN_EDIT,
-          ))
-        ->executeOne();
+      PhabricatorPolicyFilter::requireCapability(
+        $viewer,
+        $repository,
+        PhabricatorPolicyCapability::CAN_EDIT);
 
       $this->setRepository($repository);
 

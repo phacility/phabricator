@@ -4,9 +4,14 @@ final class DiffusionRepositoryEditController extends DiffusionController {
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
     $drequest = $this->diffusionRequest;
     $repository = $drequest->getRepository();
+
+    PhabricatorPolicyFilter::requireCapability(
+      $viewer,
+      $repository,
+      PhabricatorPolicyCapability::CAN_EDIT);
 
     $is_svn = false;
     $is_git = false;
@@ -77,12 +82,12 @@ final class DiffusionRepositoryEditController extends DiffusionController {
       $this->buildActionsActions($repository));
 
     $xactions = id(new PhabricatorRepositoryTransactionQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withObjectPHIDs(array($repository->getPHID()))
       ->execute();
 
     $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($user);
+      ->setViewer($viewer);
     foreach ($xactions as $xaction) {
       if ($xaction->getComment()) {
         $engine->addObject(
@@ -93,7 +98,7 @@ final class DiffusionRepositoryEditController extends DiffusionController {
     $engine->process();
 
     $xaction_view = id(new PhabricatorApplicationTransactionView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setObjectPHID($repository->getPHID())
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
@@ -128,29 +133,21 @@ final class DiffusionRepositoryEditController extends DiffusionController {
   }
 
   private function buildBasicActions(PhabricatorRepository $repository) {
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
       ->setObjectURI($this->getRequest()->getRequestURI())
-      ->setUser($user);
-
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $user,
-      $repository,
-      PhabricatorPolicyCapability::CAN_EDIT);
+      ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
       ->setIcon('edit')
       ->setName(pht('Edit Basic Information'))
-      ->setHref($this->getRepositoryControllerURI($repository, 'edit/basic/'))
-      ->setDisabled(!$can_edit)
-      ->setWorkflow(!$can_edit);
+      ->setHref($this->getRepositoryControllerURI($repository, 'edit/basic/'));
     $view->addAction($edit);
 
     $activate = id(new PhabricatorActionView())
       ->setHref(
         $this->getRepositoryControllerURI($repository, 'edit/activate/'))
-      ->setDisabled(!$can_edit)
       ->setWorkflow(true);
 
     if ($repository->isTracked()) {
@@ -172,10 +169,10 @@ final class DiffusionRepositoryEditController extends DiffusionController {
     PhabricatorRepository $repository,
     PhabricatorActionListView $actions) {
 
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getRequest()->getUser();
 
     $view = id(new PHUIPropertyListView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setActionList($actions);
 
     $view->addProperty(pht('Name'), $repository->getName());
@@ -196,7 +193,7 @@ final class DiffusionRepositoryEditController extends DiffusionController {
       $description = PhabricatorMarkupEngine::renderOneObject(
         $repository,
         'description',
-        $user);
+        $viewer);
     }
     $view->addTextContent($description);
 
@@ -204,24 +201,17 @@ final class DiffusionRepositoryEditController extends DiffusionController {
   }
 
   private function buildEncodingActions(PhabricatorRepository $repository) {
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
       ->setObjectURI($this->getRequest()->getRequestURI())
-      ->setUser($user);
-
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $user,
-      $repository,
-      PhabricatorPolicyCapability::CAN_EDIT);
+      ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
       ->setIcon('edit')
       ->setName(pht('Edit Text Encoding'))
       ->setHref(
-        $this->getRepositoryControllerURI($repository, 'edit/encoding/'))
-      ->setWorkflow(!$can_edit)
-      ->setDisabled(!$can_edit);
+        $this->getRepositoryControllerURI($repository, 'edit/encoding/'));
     $view->addAction($edit);
 
     return $view;
@@ -231,10 +221,10 @@ final class DiffusionRepositoryEditController extends DiffusionController {
     PhabricatorRepository $repository,
     PhabricatorActionListView $actions) {
 
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getRequest()->getUser();
 
     $view = id(new PHUIPropertyListView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setActionList($actions)
       ->addSectionHeader(pht('Text Encoding'));
 
@@ -255,18 +245,11 @@ final class DiffusionRepositoryEditController extends DiffusionController {
       ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $repository,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
     $edit = id(new PhabricatorActionView())
       ->setIcon('edit')
       ->setName(pht('Edit Policies'))
       ->setHref(
-        $this->getRepositoryControllerURI($repository, 'edit/policy/'))
-      ->setWorkflow(!$can_edit)
-      ->setDisabled(!$can_edit);
+        $this->getRepositoryControllerURI($repository, 'edit/policy/'));
     $view->addAction($edit);
 
     return $view;
@@ -306,18 +289,11 @@ final class DiffusionRepositoryEditController extends DiffusionController {
       ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $repository,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
     $edit = id(new PhabricatorActionView())
       ->setIcon('edit')
       ->setName(pht('Edit Branches'))
       ->setHref(
-        $this->getRepositoryControllerURI($repository, 'edit/branches/'))
-      ->setWorkflow(!$can_edit)
-      ->setDisabled(!$can_edit);
+        $this->getRepositoryControllerURI($repository, 'edit/branches/'));
     $view->addAction($edit);
 
     return $view;
@@ -359,18 +335,11 @@ final class DiffusionRepositoryEditController extends DiffusionController {
       ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $repository,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
     $edit = id(new PhabricatorActionView())
       ->setIcon('edit')
       ->setName(pht('Edit Subversion Info'))
       ->setHref(
-        $this->getRepositoryControllerURI($repository, 'edit/subversion/'))
-      ->setWorkflow(!$can_edit)
-      ->setDisabled(!$can_edit);
+        $this->getRepositoryControllerURI($repository, 'edit/subversion/'));
     $view->addAction($edit);
 
     return $view;
@@ -407,18 +376,11 @@ final class DiffusionRepositoryEditController extends DiffusionController {
       ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $repository,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
     $edit = id(new PhabricatorActionView())
       ->setIcon('edit')
       ->setName(pht('Edit Actions'))
       ->setHref(
-        $this->getRepositoryControllerURI($repository, 'edit/actions/'))
-      ->setWorkflow(!$can_edit)
-      ->setDisabled(!$can_edit);
+        $this->getRepositoryControllerURI($repository, 'edit/actions/'));
     $view->addAction($edit);
 
     return $view;
@@ -457,18 +419,11 @@ final class DiffusionRepositoryEditController extends DiffusionController {
       ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $repository,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
     $edit = id(new PhabricatorActionView())
       ->setIcon('edit')
       ->setName(pht('Edit Remote'))
       ->setHref(
-        $this->getRepositoryControllerURI($repository, 'edit/remote/'))
-      ->setWorkflow(!$can_edit)
-      ->setDisabled(!$can_edit);
+        $this->getRepositoryControllerURI($repository, 'edit/remote/'));
     $view->addAction($edit);
 
     return $view;
