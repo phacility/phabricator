@@ -25,6 +25,16 @@ final class PhabricatorRepositoryPullEngine
 
     $vcs = $repository->getVersionControlSystem();
     $callsign = $repository->getCallsign();
+
+    if ($repository->isHosted()) {
+      $this->log(
+        pht(
+          'Repository "%s" is hosted, so Phabricator does not pull updates '.
+          'for it.',
+          $callsign));
+      return;
+    }
+
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         // We never pull a local copy of Subversion repositories.

@@ -128,7 +128,8 @@ final class PhabricatorRepositoryPullLocalDaemon
 
           if (!$no_discovery) {
             // TODO: It would be nice to discover only if we pulled something,
-            // but this isn't totally trivial.
+            // but this isn't totally trivial. It's slightly more complicated
+            // with hosted repositories, too.
 
             $lock_name = get_class($this).':'.$callsign;
             $lock = PhabricatorGlobalLock::newLock($lock_name);
