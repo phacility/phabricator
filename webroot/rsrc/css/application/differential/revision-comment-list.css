@@ -3,9 +3,10 @@
  */
 
 .differential-older-comments-are-hidden {
-  background: #f0f0f0;
-  border: 1px solid #d6d6d6;
+  background: {$lightyellow};
+  border: 1px solid {$yellow};
   text-align: center;
-  padding: 1em;
-  color: {$greytext};
+  padding: 12px;
+  color: {$darkgreytext};
+  margin-top: 16px;
 }
