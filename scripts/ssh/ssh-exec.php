@@ -61,6 +61,8 @@ try {
 
   $workflows = array(
     new ConduitSSHWorkflow(),
+
+    new DiffusionSSHGitUploadPackWorkflow(),
   );
 
   $workflow_names = mpull($workflows, 'getName', 'getName');
@@ -81,16 +83,24 @@ try {
     throw new Exception("Unable to open stdout.");
   }
 
+  $sock_stderr = fopen('php://stderr', 'w');
+  if (!$sock_stderr) {
+    throw new Exception("Unable to open stderr.");
+  }
+
   $socket_channel = new PhutilSocketChannel(
     $sock_stdin,
     $sock_stdout);
+  $error_channel = new PhutilSocketChannel(null, $sock_stderr);
   $metrics_channel = new PhutilMetricsChannel($socket_channel);
   $workflow->setIOChannel($metrics_channel);
+  $workflow->setErrorChannel($error_channel);
 
   $err = $workflow->execute($original_args);
 
   $metrics_channel->flush();
+  $error_channel->flush();
 } catch (Exception $ex) {
-  echo "phabricator-ssh-exec: ".$ex->getMessage()."\n";
+  fwrite(STDERR, "phabricator-ssh-exec: ".$ex->getMessage()."\n");
   exit(1);
 }

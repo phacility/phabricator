@@ -134,7 +134,7 @@ final class DiffusionRepositoryEditHostingController
 
     if ($request->isFormPost()) {
       $v_http_mode = $request->getStr('http');
-      $v_ssh_mode = PhabricatorRepository::SERVE_OFF;
+      $v_ssh_mode = $request->getStr('ssh');
 
       $xactions = array();
       $template = id(new PhabricatorRepositoryTransaction());
@@ -176,6 +176,29 @@ final class DiffusionRepositoryEditHostingController
         'writes.');
     }
 
+    $ssh_control =
+      id(new AphrontFormRadioButtonControl())
+        ->setName('ssh')
+        ->setLabel(pht('SSH'))
+        ->setValue($v_ssh_mode)
+        ->addButton(
+          PhabricatorRepository::SERVE_OFF,
+          PhabricatorRepository::getProtocolAvailabilityName(
+            PhabricatorRepository::SERVE_OFF),
+          pht('Phabricator will not serve this repository.'))
+        ->addButton(
+          PhabricatorRepository::SERVE_READONLY,
+          PhabricatorRepository::getProtocolAvailabilityName(
+            PhabricatorRepository::SERVE_READONLY),
+          pht('Phabricator will serve a read-only copy of this repository.'))
+        ->addButton(
+          PhabricatorRepository::SERVE_READWRITE,
+          PhabricatorRepository::getProtocolAvailabilityName(
+            PhabricatorRepository::SERVE_READWRITE),
+          $rw_message,
+          $repository->isHosted() ? null : 'disabled',
+          $repository->isHosted() ? null : true);
+
     $http_control =
       id(new AphrontFormRadioButtonControl())
         ->setName('http')
@@ -205,6 +228,7 @@ final class DiffusionRepositoryEditHostingController
         pht(
           'Phabricator can serve repositories over various protocols. You can '.
           'configure server protocols here.'))
+      ->appendChild($ssh_control)
       ->appendChild($http_control)
       ->appendChild(
         id(new AphrontFormSubmitControl())

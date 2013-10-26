@@ -4,6 +4,16 @@ abstract class PhabricatorSSHWorkflow extends PhutilArgumentWorkflow {
 
   private $user;
   private $iochannel;
+  private $errorChannel;
+
+  public function setErrorChannel(PhutilChannel $error_channel) {
+    $this->errorChannel = $error_channel;
+    return $this;
+  }
+
+  public function getErrorChannel() {
+    return $this->errorChannel;
+  }
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
@@ -36,6 +46,11 @@ abstract class PhabricatorSSHWorkflow extends PhutilArgumentWorkflow {
       }
     }
     return $channel->read();
+  }
+
+  public function writeIO($data) {
+    $this->getIOChannel()->write($data);
+    return $this;
   }
 
 }
