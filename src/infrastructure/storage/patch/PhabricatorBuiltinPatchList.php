@@ -1704,6 +1704,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20131020.harbormaster.sql'),
       ),
+      '20131025.repopush.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131025.repopush.sql'),
+      ),
     );
   }
 }

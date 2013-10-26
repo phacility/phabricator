@@ -31,6 +31,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   protected $uuid;
   protected $viewPolicy;
   protected $editPolicy;
+  protected $pushPolicy;
 
   protected $versionControlSystem;
   protected $details = array();
@@ -48,10 +49,12 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     $view_policy = $app->getPolicy(DiffusionCapabilityDefaultView::CAPABILITY);
     $edit_policy = $app->getPolicy(DiffusionCapabilityDefaultEdit::CAPABILITY);
+    $push_policy = $app->getPolicy(DiffusionCapabilityDefaultPush::CAPABILITY);
 
     return id(new PhabricatorRepository())
       ->setViewPolicy($view_policy)
-      ->setEditPolicy($edit_policy);
+      ->setEditPolicy($edit_policy)
+      ->setPushPolicy($push_policy);
   }
 
   public function getConfiguration() {
@@ -713,6 +716,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
       PhabricatorPolicyCapability::CAN_EDIT,
+      DiffusionCapabilityPush::CAPABILITY,
     );
   }
 
@@ -722,6 +726,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
         return $this->getEditPolicy();
+      case DiffusionCapabilityPush::CAPABILITY:
+        return $this->getPushPolicy();
     }
   }
 
