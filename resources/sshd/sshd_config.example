@@ -1,0 +1,24 @@
+###
+###  WARNING: This feature is new and experimental. Use it at your own risk!
+###
+
+# You must have OpenSSHD 6.2 or newer; support for AuthorizedKeysCommand was
+# added in this version.
+
+Port 2222
+AuthorizedKeysCommand /etc/phabricator-ssh-hook.sh
+AuthorizedKeysCommandUser some-unprivileged-user
+
+# You may need to tweak these options, but mostly they just turn off everything
+# dangerous.
+
+Protocol 2
+PermitRootLogin no
+AllowAgentForwarding no
+AllowTcpForwarding no
+PrintMotd no
+PrintLastLog no
+PasswordAuthentication no
+AuthorizedKeysFile none
+
+PidFile /var/run/sshd-phabricator.pid
