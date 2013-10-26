@@ -17,6 +17,8 @@ abstract class DiffusionController extends PhabricatorController {
     if (preg_match($regex, (string)$uri, $matches)) {
       $vcs = null;
 
+      $content_type = $request->getHTTPHeader('Content-Type');
+
       if ($request->getExists('__vcs__')) {
         // This is magic to make it easier for us to debug stuff by telling
         // users to run:
@@ -26,7 +28,12 @@ abstract class DiffusionController extends PhabricatorController {
         // ...to get a human-readable error.
         $vcs = $request->getExists('__vcs__');
       } else if ($request->getExists('service')) {
+        $service = $request->getStr('service');
+        // We get this initially for `info/refs`.
         // Git also gives us a User-Agent like "git/1.8.2.3".
+        $vcs = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
+      } else if ($content_type == 'application/x-git-upload-pack-request') {
+        // We get this for `git-upload-pack`.
         $vcs = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
       } else if ($request->getExists('cmd')) {
         // Mercurial also sends an Accept header like
@@ -125,6 +132,13 @@ abstract class DiffusionController extends PhabricatorController {
           pht('This repository is not available over HTTP.'));
     }
 
+    switch ($repository->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        return $this->serveGitRequest($repository);
+      default:
+        break;
+    }
+
     return new PhabricatorVCSResponse(
       999,
       pht('TODO: Implement meaningful responses.'));
@@ -133,22 +147,28 @@ abstract class DiffusionController extends PhabricatorController {
   private function isReadOnlyRequest(
     PhabricatorRepository $repository) {
     $request = $this->getRequest();
+    $method = $_SERVER['REQUEST_METHOD'];
 
     // TODO: This implementation is safe by default, but very incomplete.
 
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $service = $request->getStr('service');
+        $path = $this->getRequestDirectoryPath();
         // NOTE: Service names are the reverse of what you might expect, as they
         // are from the point of view of the server. The main read service is
         // "git-upload-pack", and the main write service is "git-receive-pack".
-        switch ($service) {
-          case 'git-upload-pack':
-            return true;
-          case 'git-receive-pack':
-          default:
-            return false;
+
+        if ($method == 'GET' &&
+            $path == '/info/refs' &&
+            $service == 'git-upload-pack') {
+          return true;
         }
+
+        if ($path == '/git-upload-pack') {
+          return true;
+        }
+
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         $cmd = $request->getStr('cmd');
@@ -373,6 +393,53 @@ abstract class DiffusionController extends PhabricatorController {
     }
 
     return $links;
+  }
+
+  /**
+   * @phutil-external-symbol class PhabricatorStartup
+   */
+  private function serveGitRequest(PhabricatorRepository $repository) {
+    $request = $this->getRequest();
+
+    $request_path = $this->getRequestDirectoryPath();
+    $repository_root = $repository->getLocalPath();
+
+    // Rebuild the query string to strip `__magic__` parameters and prevent
+    // issues where we might interpret inputs like "service=read&service=write"
+    // differently than the server does and pass it an unsafe command.
+    $query_data = $request->getPassthroughRequestParameters();
+    $query_string = http_build_query($query_data, '', '&');
+
+    // We're about to wipe out PATH with the rest of the environment, so
+    // resolve the binary first.
+    $bin = Filesystem::resolveBinary('git-http-backend');
+    if (!$bin) {
+      throw new Exception("Unable to find `git-http-backend` in PATH!");
+    }
+
+    $env = array(
+      'REQUEST_METHOD' => $_SERVER['REQUEST_METHOD'],
+      'QUERY_STRING' => $query_string,
+      'CONTENT_TYPE' => $_SERVER['CONTENT_TYPE'],
+      'REMOTE_USER' => '',
+      'REMOTE_ADDR' => $_SERVER['REMOTE_ADDR'],
+      'GIT_PROJECT_ROOT' => $repository_root,
+      'GIT_HTTP_EXPORT_ALL' => '1',
+      'PATH_INFO' => $request_path,
+    );
+
+    list($stdout) = id(new ExecFuture('%s', $bin))
+      ->setEnv($env, true)
+      ->write(PhabricatorStartup::getRawInput())
+      ->resolvex();
+
+    return id(new DiffusionGitResponse())->setGitData($stdout);
+  }
+
+  private function getRequestDirectoryPath() {
+    $request = $this->getRequest();
+    $request_path = $request->getRequestURI()->getPath();
+    return preg_replace('@^/diffusion/[A-Z]+@', '', $request_path);
   }
 
 }
