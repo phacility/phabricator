@@ -25,13 +25,13 @@ abstract class AphrontHTTPSink {
    * @param int Numeric HTTP status code.
    * @return void
    */
-  final public function writeHTTPStatus($code) {
+  final public function writeHTTPStatus($code, $message = '') {
     if (!preg_match('/^\d{3}$/', $code)) {
       throw new Exception("Malformed HTTP status code '{$code}'!");
     }
 
     $code = (int)$code;
-    $this->emitHTTPStatus($code);
+    $this->emitHTTPStatus($code, $message);
   }
 
 
@@ -103,7 +103,9 @@ abstract class AphrontHTTPSink {
       $response->getHeaders(),
       $response->getCacheHeaders());
 
-    $this->writeHTTPStatus($response->getHTTPResponseCode());
+    $this->writeHTTPStatus(
+      $response->getHTTPResponseCode(),
+      $response->getHTTPResponseMessage());
     $this->writeHeaders($all_headers);
     $this->writeData($response_string);
   }
@@ -112,7 +114,7 @@ abstract class AphrontHTTPSink {
 /* -(  Emitting the Response  )---------------------------------------------- */
 
 
-  abstract protected function emitHTTPStatus($code);
+  abstract protected function emitHTTPStatus($code, $message = '');
   abstract protected function emitHeader($name, $value);
   abstract protected function emitData($data);
 }

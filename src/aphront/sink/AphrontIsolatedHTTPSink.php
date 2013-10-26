@@ -11,7 +11,7 @@ final class AphrontIsolatedHTTPSink extends AphrontHTTPSink {
   private $headers;
   private $data;
 
-  protected function emitHTTPStatus($code) {
+  protected function emitHTTPStatus($code, $message = '') {
     $this->status = $code;
   }
 

@@ -49,6 +49,10 @@ abstract class AphrontResponse {
     return $this->responseCode;
   }
 
+  public function getHTTPResponseMessage() {
+    return '';
+  }
+
   public function setFrameable($frameable) {
     $this->frameable = $frameable;
     return $this;

@@ -4,6 +4,168 @@ abstract class DiffusionController extends PhabricatorController {
 
   protected $diffusionRequest;
 
+  public function willBeginExecution() {
+    $request = $this->getRequest();
+    $uri = $request->getRequestURI();
+
+    // Check if this is a VCS request, e.g. from "git clone", "hg clone", or
+    // "svn checkout". If it is, we jump off into repository serving code to
+    // process the request.
+
+    $regex = '@^/diffusion/(?P<callsign>[A-Z]+)(/|$)@';
+    $matches = null;
+    if (preg_match($regex, (string)$uri, $matches)) {
+      $vcs = null;
+
+      if ($request->getExists('__vcs__')) {
+        // This is magic to make it easier for us to debug stuff by telling
+        // users to run:
+        //
+        //   curl http://example.phabricator.com/diffusion/X/?__vcs__=1
+        //
+        // ...to get a human-readable error.
+        $vcs = $request->getExists('__vcs__');
+      } else if ($request->getExists('service')) {
+        // Git also gives us a User-Agent like "git/1.8.2.3".
+        $vcs = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
+      } else if ($request->getExists('cmd')) {
+        // Mercurial also sends an Accept header like
+        // "application/mercurial-0.1", and a User-Agent like
+        // "mercurial/proto-1.0".
+        $vcs = PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL;
+      } else {
+        // Subversion also sends an initial OPTIONS request (vs GET/POST), and
+        // has a User-Agent like "SVN/1.8.3 (x86_64-apple-darwin11.4.2)
+        // serf/1.3.2".
+        $dav = $request->getHTTPHeader('DAV');
+        $dav = new PhutilURI($dav);
+        if ($dav->getDomain() === 'subversion.tigris.org') {
+          $vcs = PhabricatorRepositoryType::REPOSITORY_TYPE_SVN;
+        }
+      }
+
+      if ($vcs) {
+        return $this->processVCSRequest($matches['callsign']);
+      }
+    }
+
+    parent::willBeginExecution();
+  }
+
+  private function processVCSRequest($callsign) {
+
+    // TODO: Authenticate user.
+
+    $viewer = new PhabricatorUser();
+
+    $allow_public = PhabricatorEnv::getEnvConfig('policy.allow-public');
+    if (!$allow_public) {
+      if (!$viewer->isLoggedIn()) {
+        return new PhabricatorVCSResponse(
+          403,
+          pht('You must log in to access repositories.'));
+      }
+    }
+
+    try {
+      $repository = id(new PhabricatorRepositoryQuery())
+        ->setViewer($viewer)
+        ->withCallsigns(array($callsign))
+        ->executeOne();
+      if (!$repository) {
+        return new PhabricatorVCSResponse(
+          404,
+          pht('No such repository exists.'));
+      }
+    } catch (PhabricatorPolicyException $ex) {
+      if ($viewer->isLoggedIn()) {
+        return new PhabricatorVCSResponse(
+          403,
+          pht('You do not have permission to access this repository.'));
+      } else {
+        return new PhabricatorVCSResponse(
+          401,
+          pht('You must log in to access this repository.'));
+      }
+    }
+
+    $is_push = !$this->isReadOnlyRequest($repository);
+
+    switch ($repository->getServeOverHTTP()) {
+      case PhabricatorRepository::SERVE_READONLY:
+        if ($is_push) {
+          return new PhabricatorVCSResponse(
+            403,
+            pht('This repository is read-only over HTTP.'));
+        }
+        break;
+      case PhabricatorRepository::SERVE_READWRITE:
+        if ($is_push) {
+          $can_push = PhabricatorPolicyFilter::hasCapability(
+            $viewer,
+            $repository,
+            DiffusionCapabilityPush::CAPABILITY);
+          if (!$can_push) {
+            if ($viewer->isLoggedIn()) {
+              return new PhabricatorVCSResponse(
+                403,
+                pht('You do not have permission to push to this repository.'));
+            } else {
+              return new PhabricatorVCSResponse(
+                401,
+                pht('You must log in to push to this repository.'));
+            }
+          }
+        }
+        break;
+      case PhabricatorRepository::SERVE_OFF:
+      default:
+        return new PhabricatorVCSResponse(
+          403,
+          pht('This repository is not available over HTTP.'));
+    }
+
+    return new PhabricatorVCSResponse(
+      999,
+      pht('TODO: Implement meaningful responses.'));
+  }
+
+  private function isReadOnlyRequest(
+    PhabricatorRepository $repository) {
+    $request = $this->getRequest();
+
+    // TODO: This implementation is safe by default, but very incomplete.
+
+    switch ($repository->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        $service = $request->getStr('service');
+        // NOTE: Service names are the reverse of what you might expect, as they
+        // are from the point of view of the server. The main read service is
+        // "git-upload-pack", and the main write service is "git-receive-pack".
+        switch ($service) {
+          case 'git-upload-pack':
+            return true;
+          case 'git-receive-pack':
+          default:
+            return false;
+        }
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $cmd = $request->getStr('cmd');
+        switch ($cmd) {
+          case 'capabilities':
+            return true;
+          default:
+            return false;
+        }
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SUBVERSION:
+        break;
+    }
+
+    return false;
+  }
+
   public function willProcessRequest(array $data) {
     if (isset($data['callsign'])) {
       $drequest = DiffusionRequest::newFromAphrontRequestDictionary(
