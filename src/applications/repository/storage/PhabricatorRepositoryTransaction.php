@@ -3,6 +3,7 @@
 final class PhabricatorRepositoryTransaction
   extends PhabricatorApplicationTransaction {
 
+  const TYPE_VCS = 'repo:vcs';
   const TYPE_ACTIVATE     = 'repo:activate';
   const TYPE_NAME         = 'repo:name';
   const TYPE_DESCRIPTION  = 'repo:description';
@@ -34,6 +35,48 @@ final class PhabricatorRepositoryTransaction
     return null;
   }
 
+  public function shouldHide() {
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_REMOTE_URI:
+      case self::TYPE_SSH_LOGIN:
+      case self::TYPE_SSH_KEY:
+      case self::TYPE_SSH_KEYFILE:
+      case self::TYPE_HTTP_LOGIN:
+      case self::TYPE_HTTP_PASS:
+        // Hide null vs empty string changes.
+        return (!strlen($old) && !strlen($new));
+      case self::TYPE_LOCAL_PATH:
+      case self::TYPE_NAME:
+        // Hide these on create, they aren't interesting and we have an
+        // explicit "create" transaction.
+        if (!strlen($old)) {
+          return true;
+        }
+        break;
+    }
+
+    return parent::shouldHide();
+  }
+
+  public function getIcon() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_VCS:
+        return 'create';
+    }
+    return parent::getIcon();
+  }
+
+  public function getColor() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_VCS:
+        return 'green';
+    }
+    return parent::getIcon();
+  }
+
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
 
@@ -41,6 +84,10 @@ final class PhabricatorRepositoryTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
+      case self::TYPE_VCS:
+        return pht(
+          '%s created this repository.',
+          $this->renderHandleLink($author_phid));
       case self::TYPE_ACTIVATE:
         if ($new) {
           return pht(

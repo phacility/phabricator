@@ -6,6 +6,7 @@ final class PhabricatorRepositoryEditor
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
+    $types[] = PhabricatorRepositoryTransaction::TYPE_VCS;
     $types[] = PhabricatorRepositoryTransaction::TYPE_ACTIVATE;
     $types[] = PhabricatorRepositoryTransaction::TYPE_NAME;
     $types[] = PhabricatorRepositoryTransaction::TYPE_DESCRIPTION;
@@ -36,6 +37,8 @@ final class PhabricatorRepositoryEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorRepositoryTransaction::TYPE_VCS:
+        return $object->getVersionControlSystem();
       case PhabricatorRepositoryTransaction::TYPE_ACTIVATE:
         return $object->isTracked();
       case PhabricatorRepositoryTransaction::TYPE_NAME:
@@ -96,6 +99,7 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_HTTP_LOGIN:
       case PhabricatorRepositoryTransaction::TYPE_HTTP_PASS:
       case PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH:
+      case PhabricatorRepositoryTransaction::TYPE_VCS:
         return $xaction->getNewValue();
       case PhabricatorRepositoryTransaction::TYPE_NOTIFY:
       case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
@@ -108,6 +112,9 @@ final class PhabricatorRepositoryEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorRepositoryTransaction::TYPE_VCS:
+        $object->setVersionControlSystem($xaction->getNewValue());
+        break;
       case PhabricatorRepositoryTransaction::TYPE_ACTIVATE:
         $object->setDetail('tracking-enabled', $xaction->getNewValue());
         break;
@@ -217,6 +224,38 @@ final class PhabricatorRepositoryEditor
     }
 
     return parent::transactionHasEffect($object, $xaction);
+  }
+
+  protected function requireCapabilities(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorRepositoryTransaction::TYPE_ACTIVATE:
+      case PhabricatorRepositoryTransaction::TYPE_NAME:
+      case PhabricatorRepositoryTransaction::TYPE_DESCRIPTION:
+      case PhabricatorRepositoryTransaction::TYPE_ENCODING:
+      case PhabricatorRepositoryTransaction::TYPE_DEFAULT_BRANCH:
+      case PhabricatorRepositoryTransaction::TYPE_TRACK_ONLY:
+      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE_ONLY:
+      case PhabricatorRepositoryTransaction::TYPE_UUID:
+      case PhabricatorRepositoryTransaction::TYPE_SVN_SUBPATH:
+      case PhabricatorRepositoryTransaction::TYPE_REMOTE_URI:
+      case PhabricatorRepositoryTransaction::TYPE_SSH_LOGIN:
+      case PhabricatorRepositoryTransaction::TYPE_SSH_KEY:
+      case PhabricatorRepositoryTransaction::TYPE_SSH_KEYFILE:
+      case PhabricatorRepositoryTransaction::TYPE_HTTP_LOGIN:
+      case PhabricatorRepositoryTransaction::TYPE_HTTP_PASS:
+      case PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH:
+      case PhabricatorRepositoryTransaction::TYPE_VCS:
+      case PhabricatorRepositoryTransaction::TYPE_NOTIFY:
+      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
+        PhabricatorPolicyFilter::requireCapability(
+          $this->requireActor(),
+          $object,
+          PhabricatorPolicyCapability::CAN_EDIT);
+        break;
+    }
   }
 
 }

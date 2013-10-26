@@ -29,8 +29,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   protected $name;
   protected $callsign;
   protected $uuid;
-  protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
-  protected $editPolicy = PhabricatorPolicies::POLICY_ADMIN;
+  protected $viewPolicy;
+  protected $editPolicy;
 
   protected $versionControlSystem;
   protected $details = array();
@@ -39,6 +39,20 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   private $commitCount = self::ATTACHABLE;
   private $mostRecentCommit = self::ATTACHABLE;
+
+  public static function initializeNewRepository(PhabricatorUser $actor) {
+    $app = id(new PhabricatorApplicationQuery())
+      ->setViewer($actor)
+      ->withClasses(array('PhabricatorApplicationDiffusion'))
+      ->executeOne();
+
+    $view_policy = $app->getPolicy(DiffusionCapabilityDefaultView::CAPABILITY);
+    $edit_policy = $app->getPolicy(DiffusionCapabilityDefaultEdit::CAPABILITY);
+
+    return id(new PhabricatorRepository())
+      ->setViewPolicy($view_policy)
+      ->setEditPolicy($edit_policy);
+  }
 
   public function getConfiguration() {
     return array(

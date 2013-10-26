@@ -336,12 +336,12 @@ final class DiffusionRepositoryEditMainController
     $view->addProperty(pht('Default Branch'), $default_branch);
 
     $track_only = nonempty(
-      $repository->getHumanReadableDetail('branch-filter'),
+      $repository->getHumanReadableDetail('branch-filter', array()),
       phutil_tag('em', array(), pht('Track All Branches')));
     $view->addProperty(pht('Track Only'), $track_only);
 
     $autoclose_only = nonempty(
-      $repository->getHumanReadableDetail('close-commits-filter'),
+      $repository->getHumanReadableDetail('close-commits-filter', array()),
       phutil_tag('em', array(), pht('Autoclose On All Branches')));
     $view->addProperty(pht('Autoclose Only'), $autoclose_only);
 

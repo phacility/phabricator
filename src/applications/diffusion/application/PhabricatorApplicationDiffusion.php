@@ -103,4 +103,17 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
     return 0.120;
   }
 
+  protected function getCustomCapabilities() {
+    return array(
+      DiffusionCapabilityDefaultView::CAPABILITY => array(
+      ),
+      DiffusionCapabilityDefaultEdit::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+      DiffusionCapabilityCreateRepositories::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+    );
+  }
+
 }
