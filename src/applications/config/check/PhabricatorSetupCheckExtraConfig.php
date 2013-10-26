@@ -162,6 +162,8 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
           'been migrated.'),
       'differential.custom-remarkup-rules' => $markup_reason,
       'differential.custom-remarkup-block-rules' => $markup_reason,
+      'auth.sshkeys.enabled' => pht(
+        'SSH keys are now actually useful, so they are always enabled.'),
     );
 
     return $ancient_config;
