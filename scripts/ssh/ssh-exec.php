@@ -63,6 +63,7 @@ try {
     new ConduitSSHWorkflow(),
 
     new DiffusionSSHGitUploadPackWorkflow(),
+    new DiffusionSSHGitReceivePackWorkflow(),
   );
 
   $workflow_names = mpull($workflows, 'getName', 'getName');
