@@ -10,6 +10,9 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
 
   abstract protected function isReadOnly();
   abstract protected function getRequestPath();
+  abstract protected function executeRepositoryOperations(
+    PhabricatorRepository $repository);
+
   protected function writeError($message) {
     $this->getErrorChannel()->write($message);
     return $this;
@@ -20,15 +23,11 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
 
     try {
       $repository = $this->loadRepository();
-
-      throw new Exception("TODO: Implement serve over SSH.");
-
+      return $this->executeRepositoryOperations($repository);
     } catch (Exception $ex) {
       $this->writeError(get_class($ex).': '.$ex->getMessage());
       return 1;
     }
-
-    return 0;
   }
 
   private function loadRepository() {
