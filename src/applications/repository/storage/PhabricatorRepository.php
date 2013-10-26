@@ -26,6 +26,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   const TABLE_BADCOMMIT = 'repository_badcommit';
   const TABLE_LINTMESSAGE = 'repository_lintmessage';
 
+  const SERVE_OFF = 'off';
+  const SERVE_READONLY = 'readonly';
+  const SERVE_READWRITE = 'readwrite';
+
   protected $name;
   protected $callsign;
   protected $uuid;
@@ -706,6 +710,43 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   public function isHg() {
     $vcs = $this->getVersionControlSystem();
     return ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL);
+  }
+
+  public function isHosted() {
+    return (bool)$this->getDetail('hosting-enabled', false);
+  }
+
+  public function setHosted($enabled) {
+    return $this->setDetail('hosting-enabled', $enabled);
+  }
+
+  public function getServeOverHTTP() {
+    return $this->getDetail('serve-over-http', self::SERVE_OFF);
+  }
+
+  public function setServeOverHTTP($mode) {
+    return $this->setDetail('serve-over-http', $mode);
+  }
+
+  public function getServeOverSSH() {
+    return $this->getDetail('serve-over-ssh', self::SERVE_OFF);
+  }
+
+  public function setServeOverSSH($mode) {
+    return $this->setDetail('serve-over-ssh', $mode);
+  }
+
+  public static function getProtocolAvailabilityName($constant) {
+    switch ($constant) {
+      case self::SERVE_OFF:
+        return pht('Off');
+      case self::SERVE_READONLY:
+        return pht('Read Only');
+      case self::SERVE_READWRITE:
+        return pht('Read/Write');
+      default:
+        return pht('Unknown');
+    }
   }
 
 

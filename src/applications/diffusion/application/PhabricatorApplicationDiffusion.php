@@ -75,6 +75,8 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
             '(?P<edit>remote)/' => 'DiffusionRepositoryCreateController',
             'local/' => 'DiffusionRepositoryEditLocalController',
             'delete/' => 'DiffusionRepositoryEditDeleteController',
+            'hosting/' => 'DiffusionRepositoryEditHostingController',
+            '(?P<serve>serve)/' => 'DiffusionRepositoryEditHostingController',
           ),
         ),
         'inline/' => array(
@@ -109,6 +111,8 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
       ),
       DiffusionCapabilityDefaultEdit::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+      DiffusionCapabilityDefaultPush::CAPABILITY => array(
       ),
       DiffusionCapabilityCreateRepositories::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,

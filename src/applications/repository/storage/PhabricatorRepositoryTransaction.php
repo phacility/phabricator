@@ -22,6 +22,10 @@ final class PhabricatorRepositoryTransaction
   const TYPE_HTTP_LOGIN = 'repo:http-login';
   const TYPE_HTTP_PASS = 'repo:http-pass';
   const TYPE_LOCAL_PATH = 'repo:local-path';
+  const TYPE_HOSTING = 'repo:hosting';
+  const TYPE_PROTOCOL_HTTP = 'repo:serve-http';
+  const TYPE_PROTOCOL_SSH = 'repo:serve-ssh';
+  const TYPE_PUSH_POLICY = 'repo:push-policy';
 
   public function getApplicationName() {
     return 'repository';
@@ -33,6 +37,22 @@ final class PhabricatorRepositoryTransaction
 
   public function getApplicationTransactionCommentObject() {
     return null;
+  }
+
+  public function getRequiredHandlePHIDs() {
+    $phids = parent::getRequiredHandlePHIDs();
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_PUSH_POLICY:
+        $phids[] = $old;
+        $phids[] = $new;
+        break;
+    }
+
+    return $phids;
   }
 
   public function shouldHide() {
@@ -285,6 +305,36 @@ final class PhabricatorRepositoryTransaction
           $this->renderHandleLink($author_phid),
           $old,
           $new);
+      case self::TYPE_HOSTING:
+        if ($new) {
+          return pht(
+            '%s changed this repository to be hosted on Phabricator.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s changed this repository to track a remote elsewhere.',
+            $this->renderHandleLink($author_phid));
+        }
+      case self::TYPE_PROTOCOL_HTTP:
+        return pht(
+          '%s changed the availability of this repository over HTTP from '.
+          '"%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          PhabricatorRepository::getProtocolAvailabilityName($old),
+          PhabricatorRepository::getProtocolAvailabilityName($new));
+      case self::TYPE_PROTOCOL_SSH:
+        return pht(
+          '%s changed the availability of this repository over SSH from '.
+          '"%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          PhabricatorRepository::getProtocolAvailabilityName($old),
+          PhabricatorRepository::getProtocolAvailabilityName($new));
+      case self::TYPE_PUSH_POLICY:
+        return pht(
+          '%s changed the push policy of this repository from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $this->renderPolicyName($old),
+          $this->renderPolicyName($new));
     }
 
     return parent::getTitle();
@@ -309,7 +359,6 @@ final class PhabricatorRepositoryTransaction
 
     return $view->render();
   }
-
 
 }
 

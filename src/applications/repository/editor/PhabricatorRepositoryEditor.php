@@ -25,6 +25,10 @@ final class PhabricatorRepositoryEditor
     $types[] = PhabricatorRepositoryTransaction::TYPE_HTTP_LOGIN;
     $types[] = PhabricatorRepositoryTransaction::TYPE_HTTP_PASS;
     $types[] = PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_HOSTING;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_PROTOCOL_HTTP;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_PROTOCOL_SSH;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY;
 
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
@@ -75,6 +79,14 @@ final class PhabricatorRepositoryEditor
         return $object->getDetail('http-pass');
       case PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH:
         return $object->getDetail('local-path');
+      case PhabricatorRepositoryTransaction::TYPE_HOSTING:
+        return $object->isHosted();
+      case PhabricatorRepositoryTransaction::TYPE_PROTOCOL_HTTP:
+        return $object->getServeOverHTTP();
+      case PhabricatorRepositoryTransaction::TYPE_PROTOCOL_SSH:
+        return $object->getServeOverSSH();
+      case PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY:
+        return $object->getPushPolicy();
     }
   }
 
@@ -100,6 +112,10 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_HTTP_PASS:
       case PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH:
       case PhabricatorRepositoryTransaction::TYPE_VCS:
+      case PhabricatorRepositoryTransaction::TYPE_HOSTING:
+      case PhabricatorRepositoryTransaction::TYPE_PROTOCOL_HTTP:
+      case PhabricatorRepositoryTransaction::TYPE_PROTOCOL_SSH:
+      case PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY:
         return $xaction->getNewValue();
       case PhabricatorRepositoryTransaction::TYPE_NOTIFY:
       case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
@@ -170,6 +186,14 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH:
         $object->setDetail('local-path', $xaction->getNewValue());
         break;
+      case PhabricatorRepositoryTransaction::TYPE_HOSTING:
+        return $object->setHosted($xaction->getNewValue());
+      case PhabricatorRepositoryTransaction::TYPE_PROTOCOL_HTTP:
+        return $object->setServeOverHTTP($xaction->getNewValue());
+      case PhabricatorRepositoryTransaction::TYPE_PROTOCOL_SSH:
+        return $object->setServeOverSSH($xaction->getNewValue());
+      case PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY:
+        return $object->setPushPolicy($xaction->getNewValue());
       case PhabricatorRepositoryTransaction::TYPE_ENCODING:
         // Make sure the encoding is valid by converting to UTF-8. This tests
         // that the user has mbstring installed, and also that they didn't type
@@ -250,6 +274,10 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_VCS:
       case PhabricatorRepositoryTransaction::TYPE_NOTIFY:
       case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
+      case PhabricatorRepositoryTransaction::TYPE_HOSTING:
+      case PhabricatorRepositoryTransaction::TYPE_PROTOCOL_HTTP:
+      case PhabricatorRepositoryTransaction::TYPE_PROTOCOL_SSH:
+      case PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY:
         PhabricatorPolicyFilter::requireCapability(
           $this->requireActor(),
           $object,
