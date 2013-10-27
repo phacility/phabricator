@@ -1080,11 +1080,5 @@ final class DiffusionCommitController extends DiffusionController {
     return $parser->processCorpus($corpus);
   }
 
-  private function renderStatusMessage($title, $body) {
-    return id(new AphrontErrorView())
-      ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
-      ->setTitle($title)
-      ->appendChild($body);
-  }
 
 }

@@ -442,5 +442,11 @@ abstract class DiffusionController extends PhabricatorController {
     return preg_replace('@^/diffusion/[A-Z]+@', '', $request_path);
   }
 
+  protected function renderStatusMessage($title, $body) {
+    return id(new AphrontErrorView())
+      ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+      ->setTitle($title)
+      ->appendChild($body);
+  }
 }
 

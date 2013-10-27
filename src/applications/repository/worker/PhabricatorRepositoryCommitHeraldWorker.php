@@ -24,6 +24,13 @@ final class PhabricatorRepositoryCommitHeraldWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
+    // Don't take any actions on an importing repository. Principally, this
+    // avoids generating thousands of audits or emails when you import an
+    // established repository on an existing install.
+    if ($repository->isImporting()) {
+      return;
+    }
+
     $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
       'commitID = %d',
       $commit->getID());

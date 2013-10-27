@@ -192,24 +192,32 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function execLocalCommand($pattern /* , $arg, ... */) {
+    $this->assertLocalExists();
+
     $args = func_get_args();
     $args = $this->formatLocalCommand($args);
     return call_user_func_array('exec_manual', $args);
   }
 
   public function execxLocalCommand($pattern /* , $arg, ... */) {
+    $this->assertLocalExists();
+
     $args = func_get_args();
     $args = $this->formatLocalCommand($args);
     return call_user_func_array('execx', $args);
   }
 
   public function getLocalCommandFuture($pattern /* , $arg, ... */) {
+    $this->assertLocalExists();
+
     $args = func_get_args();
     $args = $this->formatLocalCommand($args);
     return newv('ExecFuture', $args);
   }
 
   public function passthruLocalCommand($pattern /* , $arg, ... */) {
+    $this->assertLocalExists();
+
     $args = func_get_args();
     $args = $this->formatLocalCommand($args);
     return call_user_func_array('phutil_passthru', $args);
@@ -433,6 +441,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function shouldAutocloseBranch($branch) {
+    if ($this->isImporting()) {
+      return false;
+    }
+
     if ($this->getDetail('disable-autoclose', false)) {
       return false;
     }
@@ -484,6 +496,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     return 'r'.$this->getCallsign().$short_identifier;
+  }
+
+  public function isImporting() {
+    return (bool)$this->getDetail('importing', false);
   }
 
 /* -(  Repository URI Management  )------------------------------------------ */
@@ -747,6 +763,27 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       default:
         return pht('Unknown');
     }
+  }
+
+
+  /**
+   * Raise more useful errors when there are basic filesystem problems.
+   */
+  private function assertLocalExists() {
+    switch ($this->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        if (!$this->isHosted()) {
+          // For non-hosted SVN repositories, we don't expect a local directory
+          // to exist.
+          return;
+        }
+        break;
+    }
+
+    $local = $this->getLocalPath();
+    Filesystem::assertExists($local);
+    Filesystem::assertIsDirectory($local);
+    Filesystem::assertReadable($local);
   }
 
 
