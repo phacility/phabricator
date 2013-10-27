@@ -12,6 +12,18 @@ final class PhabricatorRepositoryCommitHeraldWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
+    $result = $this->applyHeraldRules($repository, $commit);
+
+    $commit->writeImportStatusFlag(
+      PhabricatorRepositoryCommit::IMPORTED_HERALD);
+
+    return $result;
+  }
+
+  private function applyHeraldRules(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit) {
+
     $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
       'commitID = %d',
       $commit->getID());
