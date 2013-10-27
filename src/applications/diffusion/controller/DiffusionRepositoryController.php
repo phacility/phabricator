@@ -40,6 +40,7 @@ final class DiffusionRepositoryController extends DiffusionController {
           }
         }
       }
+      $history_exception = null;
     } catch (Exception $ex) {
       $history_results = null;
       $history = null;
@@ -68,6 +69,7 @@ final class DiffusionRepositoryController extends DiffusionController {
         }
       }
 
+      $browse_exception = null;
     } catch (Exception $ex) {
       $browse_results = null;
       $browse_paths = null;

@@ -7,8 +7,7 @@ extends DiffusionStableCommitNameQuery {
     $repository = $this->getRepository();
     $branch = $this->getBranch();
     list($stdout) = $repository->execxLocalCommand(
-      'rev-parse --verify %s/%s',
-      DiffusionBranchInformation::DEFAULT_GIT_REMOTE,
+      'rev-parse --verify %s',
       $branch);
 
     $commit = trim($stdout);

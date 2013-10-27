@@ -37,8 +37,12 @@ final class DiffusionRepositoryEditBranchesController
     $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
 
     $v_default = $repository->getHumanReadableDetail('default-branch');
-    $v_track = $repository->getHumanReadableDetail('branch-filter');
-    $v_autoclose = $repository->getHumanReadableDetail('close-commits-filter');
+    $v_track = $repository->getHumanReadableDetail(
+      'branch-filter',
+      array());
+    $v_autoclose = $repository->getHumanReadableDetail(
+      'close-commits-filter',
+      array());
 
     if ($request->isFormPost()) {
       $v_default = $request->getStr('default');
