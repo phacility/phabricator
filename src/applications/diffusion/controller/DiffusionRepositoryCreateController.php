@@ -457,6 +457,21 @@ final class DiffusionRepositoryCreateController
         }
       }
 
+      // Catch confusion between Git/SCP-style URIs and normal URIs. See T3619
+      // for discussion. This is usually a user adding "ssh://" to an implicit
+      // SSH Git URI.
+      if ($proto == 'ssh') {
+        if (preg_match('(^[^:@]+://[^/:]+:[^\d])', $v_remote)) {
+          $c_remote->setError(pht('Invalid'));
+          $page->addPageError(
+            pht(
+              "The Remote URI is not formatted correctly. Remote URIs ".
+              "with an explicit protocol should be in the form ".
+              "'proto://domain/path', not 'proto://domain:/path'. ".
+              "The ':/path' syntax is only valid in SCP-style URIs."));
+        }
+      }
+
       switch ($proto) {
         case 'ssh':
         case 'http':
