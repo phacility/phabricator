@@ -108,12 +108,12 @@
 
 .differential-diff td.new-copy,
 .differential-diff td.new-copy span.bright {
-  background: #ffffaa;
+  background: {$lightyellow};
 }
 
 .differential-diff td.new-move,
 .differential-diff td.new-move span.bright {
-  background: #eeee44;
+  background: {$yellow};
 }
 
 .differential-diff td.comment {
@@ -425,17 +425,12 @@ tr.differential-inline-loading {
   margin-top: -72px;
 }
 
-.differential-loading a {
-  color: #3b5998;
-}
-
 .differential-loading {
-  color: #999966;
-  background: #ffffee;
-  border: 1px solid #ccccaa;
-  padding: 1em;
+  border-top: 1px solid {$yellow};
+  border-bottom: 1px solid {$yellow};
+  background-color: {$lightyellow};
+  padding: 12px;
   text-align: center;
-  font-size: 11px;
 }
 
 .differential-collapse-undo {

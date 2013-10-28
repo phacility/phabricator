@@ -10,6 +10,20 @@ final class PhabricatorRepositoryEditor
     $types[] = PhabricatorRepositoryTransaction::TYPE_NAME;
     $types[] = PhabricatorRepositoryTransaction::TYPE_DESCRIPTION;
     $types[] = PhabricatorRepositoryTransaction::TYPE_ENCODING;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_DEFAULT_BRANCH;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_TRACK_ONLY;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE_ONLY;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_UUID;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_SVN_SUBPATH;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_NOTIFY;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_REMOTE_URI;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_SSH_LOGIN;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_SSH_KEY;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_SSH_KEYFILE;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_HTTP_LOGIN;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_HTTP_PASS;
+
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -29,6 +43,32 @@ final class PhabricatorRepositoryEditor
         return $object->getDetail('description');
       case PhabricatorRepositoryTransaction::TYPE_ENCODING:
         return $object->getDetail('encoding');
+      case PhabricatorRepositoryTransaction::TYPE_DEFAULT_BRANCH:
+        return $object->getDetail('default-branch');
+      case PhabricatorRepositoryTransaction::TYPE_TRACK_ONLY:
+        return array_keys($object->getDetail('branch-filter', array()));
+      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE_ONLY:
+        return array_keys($object->getDetail('close-commits-filter', array()));
+      case PhabricatorRepositoryTransaction::TYPE_UUID:
+        return $object->getUUID();
+      case PhabricatorRepositoryTransaction::TYPE_SVN_SUBPATH:
+        return $object->getDetail('svn-subpath');
+      case PhabricatorRepositoryTransaction::TYPE_NOTIFY:
+        return (int)!$object->getDetail('herald-disabled');
+      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
+        return (int)!$object->getDetail('disable-autoclose');
+      case PhabricatorRepositoryTransaction::TYPE_REMOTE_URI:
+        return $object->getDetail('remote-uri');
+      case PhabricatorRepositoryTransaction::TYPE_SSH_LOGIN:
+        return $object->getDetail('ssh-login');
+      case PhabricatorRepositoryTransaction::TYPE_SSH_KEY:
+        return $object->getDetail('ssh-key');
+      case PhabricatorRepositoryTransaction::TYPE_SSH_KEYFILE:
+        return $object->getDetail('ssh-keyfile');
+      case PhabricatorRepositoryTransaction::TYPE_HTTP_LOGIN:
+        return $object->getDetail('http-login');
+      case PhabricatorRepositoryTransaction::TYPE_HTTP_PASS:
+        return $object->getDetail('http-pass');
     }
   }
 
@@ -41,7 +81,21 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_NAME:
       case PhabricatorRepositoryTransaction::TYPE_DESCRIPTION:
       case PhabricatorRepositoryTransaction::TYPE_ENCODING:
+      case PhabricatorRepositoryTransaction::TYPE_DEFAULT_BRANCH:
+      case PhabricatorRepositoryTransaction::TYPE_TRACK_ONLY:
+      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE_ONLY:
+      case PhabricatorRepositoryTransaction::TYPE_UUID:
+      case PhabricatorRepositoryTransaction::TYPE_SVN_SUBPATH:
+      case PhabricatorRepositoryTransaction::TYPE_REMOTE_URI:
+      case PhabricatorRepositoryTransaction::TYPE_SSH_LOGIN:
+      case PhabricatorRepositoryTransaction::TYPE_SSH_KEY:
+      case PhabricatorRepositoryTransaction::TYPE_SSH_KEYFILE:
+      case PhabricatorRepositoryTransaction::TYPE_HTTP_LOGIN:
+      case PhabricatorRepositoryTransaction::TYPE_HTTP_PASS:
         return $xaction->getNewValue();
+      case PhabricatorRepositoryTransaction::TYPE_NOTIFY:
+      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
+        return (int)$xaction->getNewValue();
     }
   }
 
@@ -58,6 +112,49 @@ final class PhabricatorRepositoryEditor
         break;
       case PhabricatorRepositoryTransaction::TYPE_DESCRIPTION:
         $object->setDetail('description', $xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_DEFAULT_BRANCH:
+        $object->setDetail('default-branch', $xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_TRACK_ONLY:
+        $object->setDetail(
+          'branch-filter',
+          array_fill_keys($xaction->getNewValue(), true));
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE_ONLY:
+        $object->setDetail(
+          'close-commits-filter',
+          array_fill_keys($xaction->getNewValue(), true));
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_UUID:
+        $object->setUUID($xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_SVN_SUBPATH:
+        $object->setDetail('svn-subpath', $xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_NOTIFY:
+        $object->setDetail('herald-disabled', (int)!$xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
+        $object->setDetail('disable-autoclose', (int)!$xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_REMOTE_URI:
+        $object->setDetail('remote-uri', $xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_SSH_LOGIN:
+        $object->setDetail('ssh-login', $xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_SSH_KEY:
+        $object->setDetail('ssh-key', $xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_SSH_KEYFILE:
+        $object->setDetail('ssh-keyfile', $xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_HTTP_LOGIN:
+        $object->setDetail('http-login', $xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_HTTP_PASS:
+        $object->setDetail('http-pass', $xaction->getNewValue());
         break;
       case PhabricatorRepositoryTransaction::TYPE_ENCODING:
         // Make sure the encoding is valid by converting to UTF-8. This tests

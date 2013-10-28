@@ -1096,11 +1096,6 @@
       "rule" : ".icons-zip-white, .device-desktop .phabricator-action-view:hover .icons-zip, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-zip",
       "hash" : "e006963c22a6be6fb72a0eefecf83649"
     },
-    "remarkup-assist-link"                : {
-      "name" : "remarkup-assist-link",
-      "rule" : ".remarkup-assist-",
-      "hash" : "14fd38c00e80b6f4823ac543a96e63c2"
-    },
     "remarkup-assist-text_b"              : {
       "name" : "remarkup-assist-text_b",
       "rule" : ".remarkup-assist-b",
@@ -1140,6 +1135,11 @@
       "name" : "remarkup-assist-text_larger",
       "rule" : ".remarkup-assist-larger",
       "hash" : "05909067a2513b9b664b313974643ce3"
+    },
+    "remarkup-assist-text_link"           : {
+      "name" : "remarkup-assist-text_link",
+      "rule" : ".remarkup-assist-link",
+      "hash" : "3a6575ca85ddfaa63103d5a8ab80fc09"
     },
     "remarkup-assist-text_meme"           : {
       "name" : "remarkup-assist-text_meme",

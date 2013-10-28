@@ -1,7 +1,9 @@
 <?php
 
 final class HeraldRule extends HeraldDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorFlaggableInterface,
+    PhabricatorPolicyInterface {
 
   const TABLE_RULE_APPLIED = 'herald_ruleapplied';
 

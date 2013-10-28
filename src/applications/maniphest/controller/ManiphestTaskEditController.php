@@ -49,9 +49,49 @@ final class ManiphestTaskEditController extends ManiphestController {
         $task->setTitle($request->getStr('title'));
 
         if ($can_edit_projects) {
-          $default_projects = $request->getStr('projects');
-          if ($default_projects) {
-            $task->setProjectPHIDs(explode(';', $default_projects));
+          $projects = $request->getStr('projects');
+          if ($projects) {
+            $tokens = explode(';', $projects);
+
+            $slug_map = id(new PhabricatorProjectQuery())
+              ->setViewer($user)
+              ->withPhrictionSlugs($tokens)
+              ->execute();
+
+            $name_map = id(new PhabricatorProjectQuery())
+              ->setViewer($user)
+              ->withNames($tokens)
+              ->execute();
+
+            $phid_map = id(new PhabricatorProjectQuery())
+              ->setViewer($user)
+              ->withPHIDs($tokens)
+              ->execute();
+
+            $all_map = mpull($slug_map, null, 'getPhrictionSlug') +
+              mpull($name_map, null, 'getName') +
+              mpull($phid_map, null, 'getPHID');
+
+            $default_projects = array();
+            foreach ($tokens as $token) {
+              if (isset($all_map[$token])) {
+                $default_projects[] = $all_map[$token]->getPHID();
+              }
+            }
+
+            if ($default_projects) {
+              $task->setProjectPHIDs($default_projects);
+            }
+          }
+        }
+
+        if ($can_edit_priority) {
+          $priority = $request->getInt('priority');
+          if ($priority !== null) {
+            $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
+            if (isset($priority_map[$priority])) {
+                $task->setPriority($priority);
+            }
           }
         }
 
@@ -60,9 +100,17 @@ final class ManiphestTaskEditController extends ManiphestController {
         if ($can_edit_assign) {
           $assign = $request->getStr('assign');
           if (strlen($assign)) {
-            $assign_user = id(new PhabricatorUser())->loadOneWhere(
-              'username = %s',
-              $assign);
+            $assign_user = id(new PhabricatorPeopleQuery())
+              ->setViewer($user)
+              ->withUsernames(array($assign))
+              ->executeOne();
+            if (!$assign_user) {
+              $assign_user = id(new PhabricatorPeopleQuery())
+                ->setViewer($user)
+                ->withPHIDs(array($assign))
+                ->executeOne();
+            }
+
             if ($assign_user) {
               $task->setOwnerPHID($assign_user->getPHID());
             }

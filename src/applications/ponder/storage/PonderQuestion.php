@@ -5,6 +5,7 @@ final class PonderQuestion extends PonderDAO
     PhabricatorMarkupInterface,
     PonderVotableInterface,
     PhabricatorSubscribableInterface,
+    PhabricatorFlaggableInterface,
     PhabricatorPolicyInterface,
     PhabricatorTokenReceiverInterface {
 

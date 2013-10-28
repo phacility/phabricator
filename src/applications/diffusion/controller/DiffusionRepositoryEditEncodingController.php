@@ -1,7 +1,7 @@
 <?php
 
 final class DiffusionRepositoryEditEncodingController
-  extends DiffusionController {
+  extends DiffusionRepositoryEditController {
 
   public function processRequest() {
     $request = $this->getRequest();
@@ -56,7 +56,7 @@ final class DiffusionRepositoryEditEncodingController
       }
     }
 
-    $crumbs = $this->buildCrumbs();
+    $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName(pht('Edit Encoding')));

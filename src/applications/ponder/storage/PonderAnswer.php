@@ -5,6 +5,7 @@ final class PonderAnswer extends PonderDAO
     PhabricatorMarkupInterface,
     PonderVotableInterface,
     PhabricatorPolicyInterface,
+    PhabricatorFlaggableInterface,
     PhabricatorSubscribableInterface,
     PhabricatorTokenReceiverInterface {
 

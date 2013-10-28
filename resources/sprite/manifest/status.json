@@ -1,6 +1,11 @@
 {
   "version" : 1,
   "sprites" : {
+    "status-accept"               : {
+      "name" : "status-accept",
+      "rule" : ".status-accept",
+      "hash" : "6493498ca9beb344cffa6211fb80cbfd"
+    },
     "status-accept-blue"          : {
       "name" : "status-accept-blue",
       "rule" : ".status-accept-blue",
@@ -25,6 +30,11 @@
       "name" : "status-accept-white",
       "rule" : ".status-accept-white",
       "hash" : "8ecccf5e2ce6658d8a1e963e4be6f6e9"
+    },
+    "status-add"                  : {
+      "name" : "status-add",
+      "rule" : ".status-add",
+      "hash" : "165d43c1451fb9ffd69c36ede87c7875"
     },
     "status-add-blue"             : {
       "name" : "status-add-blue",
@@ -51,6 +61,11 @@
       "rule" : ".status-add-white",
       "hash" : "1a8ab412f40c569acdc709fb281fefde"
     },
+    "status-down"                 : {
+      "name" : "status-down",
+      "rule" : ".status-down",
+      "hash" : "85d3b2376bbed1b48cb777f07a4e244e"
+    },
     "status-down-blue"            : {
       "name" : "status-down-blue",
       "rule" : ".status-down-blue",
@@ -75,6 +90,11 @@
       "name" : "status-down-white",
       "rule" : ".status-down-white",
       "hash" : "5bc0af6641ef545218ecced2d25e9a10"
+    },
+    "status-info"                 : {
+      "name" : "status-info",
+      "rule" : ".status-info",
+      "hash" : "3b9d6abe2fb44b0959208632a77d3582"
     },
     "status-info-blue"            : {
       "name" : "status-info-blue",
@@ -101,6 +121,11 @@
       "rule" : ".status-info-white",
       "hash" : "b70025f459685371f8397b61944bef7d"
     },
+    "status-left"                 : {
+      "name" : "status-left",
+      "rule" : ".status-left",
+      "hash" : "4649139ffc7e668b67d6978bbd5cbf15"
+    },
     "status-left-blue"            : {
       "name" : "status-left-blue",
       "rule" : ".status-left-blue",
@@ -125,6 +150,11 @@
       "name" : "status-left-white",
       "rule" : ".status-left-white",
       "hash" : "9e89400271b55590e610188d93671934"
+    },
+    "status-minus"                : {
+      "name" : "status-minus",
+      "rule" : ".status-minus",
+      "hash" : "a232bd27513a71ce8f4cd163d8aa05cf"
     },
     "status-minus-blue"           : {
       "name" : "status-minus-blue",
@@ -185,6 +215,11 @@
       "name" : "status-oh-open-red",
       "rule" : ".status-oh-open-red",
       "hash" : "982610ba3d0bad1aaa11dcd3b593adbf"
+    },
+    "status-open"                 : {
+      "name" : "status-open",
+      "rule" : ".status-open",
+      "hash" : "5b6b67382052982358d0047f07dd0424"
     },
     "status-open-blue"            : {
       "name" : "status-open-blue",
@@ -281,6 +316,11 @@
       "rule" : ".status-policy-unknown-white, .dropdown-menu-item:hover .status-policy-unknown",
       "hash" : "98985bfa005672c4b88feaf88cfa72bc"
     },
+    "status-question"             : {
+      "name" : "status-question",
+      "rule" : ".status-question",
+      "hash" : "f7290c6ba78eb37a6641eecfdc128f08"
+    },
     "status-question-blue"        : {
       "name" : "status-question-blue",
       "rule" : ".status-question-blue",
@@ -306,6 +346,11 @@
       "rule" : ".status-question-white",
       "hash" : "5e7f546f978d1d0545cad127ea3bcf80"
     },
+    "status-reject"               : {
+      "name" : "status-reject",
+      "rule" : ".status-reject",
+      "hash" : "288489e716b390c5404969f9979b9ded"
+    },
     "status-reject-blue"          : {
       "name" : "status-reject-blue",
       "rule" : ".status-reject-blue",
@@ -330,6 +375,11 @@
       "name" : "status-reject-white",
       "rule" : ".status-reject-white",
       "hash" : "e709a3fb3081a395900deaef0591066c"
+    },
+    "status-right"                : {
+      "name" : "status-right",
+      "rule" : ".status-right",
+      "hash" : "cd61a821b88b7c76a43d7f405d54b6cc"
     },
     "status-right-blue"           : {
       "name" : "status-right-blue",
@@ -376,6 +426,11 @@
       "rule" : ".status-time-yellow",
       "hash" : "79756bcf7f2401d7e3a97ff03b981dcb"
     },
+    "status-up"                   : {
+      "name" : "status-up",
+      "rule" : ".status-up",
+      "hash" : "d42ac0a3f7bbae3bf57478f533ae88f4"
+    },
     "status-up-blue"              : {
       "name" : "status-up-blue",
       "rule" : ".status-up-blue",
@@ -400,6 +455,11 @@
       "name" : "status-up-white",
       "rule" : ".status-up-white",
       "hash" : "ce80e291bc905b2692ad9f3ece7cf206"
+    },
+    "status-warning"              : {
+      "name" : "status-warning",
+      "rule" : ".status-warning",
+      "hash" : "425a02c06f9590e9f7c078badf832d0c"
     },
     "status-warning-blue"         : {
       "name" : "status-warning-blue",

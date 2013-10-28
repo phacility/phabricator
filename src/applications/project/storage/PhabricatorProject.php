@@ -1,7 +1,9 @@
 <?php
 
 final class PhabricatorProject extends PhabricatorProjectDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorFlaggableInterface,
+    PhabricatorPolicyInterface {
 
   protected $name;
   protected $status = PhabricatorProjectStatus::STATUS_ACTIVE;

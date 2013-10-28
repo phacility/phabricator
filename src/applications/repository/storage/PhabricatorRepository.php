@@ -6,6 +6,7 @@
 final class PhabricatorRepository extends PhabricatorRepositoryDAO
   implements
     PhabricatorPolicyInterface,
+    PhabricatorFlaggableInterface,
     PhabricatorMarkupInterface {
 
   /**
@@ -68,6 +69,20 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function getDetail($key, $default = null) {
     return idx($this->details, $key, $default);
+  }
+
+  public function getHumanReadableDetail($key, $default = null) {
+    $value = $this->getDetail($key, $default);
+
+    switch ($key) {
+      case 'branch-filter':
+      case 'close-commits-filter':
+        $value = array_keys($value);
+        $value = implode(', ', $value);
+        break;
+    }
+
+    return $value;
   }
 
   public function setDetail($key, $value) {

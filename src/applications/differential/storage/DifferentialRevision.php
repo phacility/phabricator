@@ -4,6 +4,7 @@ final class DifferentialRevision extends DifferentialDAO
   implements
     PhabricatorTokenReceiverInterface,
     PhabricatorPolicyInterface,
+    PhabricatorFlaggableInterface,
     PhrequentTrackableInterface {
 
   protected $title = '';

@@ -471,6 +471,16 @@
       "rule" : ".apps-repositories-white",
       "hash" : "848bb97c36e927353a097f2e7312841d"
     },
+    "apps-search-dark"          : {
+      "name" : "apps-search-dark",
+      "rule" : ".apps-search-dark",
+      "hash" : "c1e382d74a101b4dc40a8a498fb301e1"
+    },
+    "apps-search-white"         : {
+      "name" : "apps-search-white",
+      "rule" : ".apps-search-white",
+      "hash" : "97fed01d5d3295baa51cab8e2e6721ab"
+    },
     "apps-settings-dark"        : {
       "name" : "apps-settings-dark",
       "rule" : ".apps-settings-dark",

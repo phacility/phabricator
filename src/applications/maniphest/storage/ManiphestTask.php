@@ -5,6 +5,7 @@ final class ManiphestTask extends ManiphestDAO
     PhabricatorMarkupInterface,
     PhabricatorPolicyInterface,
     PhabricatorTokenReceiverInterface,
+    PhabricatorFlaggableInterface,
     PhrequentTrackableInterface,
     PhabricatorCustomFieldInterface {
 

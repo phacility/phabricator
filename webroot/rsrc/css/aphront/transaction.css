@@ -15,9 +15,9 @@
 
 .phabricator-transaction-detail {
   border-color: #dddddd;
-  border-width: 1px 10px;
+  border-width: 1px 4px;
   border-style: solid;
-  margin-left: 54px;
+  margin-left: 60px;
 }
 
 .device-phone .phabricator-transaction-detail {
@@ -27,8 +27,8 @@
 }
 
 .phabricator-transaction-header {
-  background: #f3f3f3;
-  padding: 4px 1em;
+  background: {$lightgreybackground};
+  padding: 5px 8px;
 }
 
 .phabricator-transaction-header a {

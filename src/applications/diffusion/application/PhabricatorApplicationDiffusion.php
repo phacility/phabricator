@@ -64,11 +64,15 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
           'commit/(?P<commit>[a-z0-9]+)/edit/'
             => 'DiffusionCommitEditController',
           'edit/' => array(
-            '' => 'DiffusionRepositoryEditController',
+            '' => 'DiffusionRepositoryEditMainController',
             'basic/' => 'DiffusionRepositoryEditBasicController',
             'encoding/' => 'DiffusionRepositoryEditEncodingController',
             'activate/' => 'DiffusionRepositoryEditActivateController',
             'policy/' => 'DiffusionRepositoryEditPolicyController',
+            'branches/' => 'DiffusionRepositoryEditBranchesController',
+            'subversion/' => 'DiffusionRepositoryEditSubversionController',
+            'actions/' => 'DiffusionRepositoryEditActionsController',
+            '(?P<edit>remote)/' => 'DiffusionRepositoryCreateController',
           ),
         ),
         'inline/' => array(

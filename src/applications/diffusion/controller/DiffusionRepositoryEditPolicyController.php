@@ -1,7 +1,7 @@
 <?php
 
 final class DiffusionRepositoryEditPolicyController
-  extends DiffusionController {
+  extends DiffusionRepositoryEditController {
 
   public function processRequest() {
     $request = $this->getRequest();
@@ -57,7 +57,7 @@ final class DiffusionRepositoryEditPolicyController
 
     $content = array();
 
-    $crumbs = $this->buildCrumbs();
+    $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName(pht('Edit Policies')));

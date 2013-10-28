@@ -6,25 +6,59 @@ running.
 
 = Installation Requirements =
 
-Phabricator is a LAMP application suite, so you basically need LAMP:
+You will need **a computer**. Options include:
 
-  - **Linux**: Some flavor of Linux is required. Mac OS X is an acceptable
-    flavor of Linux. Windows is not an acceptable flavor of Linux. Phabricator
-    will not install or work properly on Windows. (If you want it to, send
-    patches.) Phabricator has active contributors running it on Mac OS X, Amazon
-    Linux, Ubuntu, RHEL and CentOS; if you run into issues on other flavors,
-    send patches or complaints.
-  - **Apache** (or nginx, or lighttpd): You need Apache 2.2.7+ (or another
-    tested webserver). You can probably use something else, but you're
-    on your own.
-  - **MySQL**: You need MySQL.
-  - **PHP**: You need PHP 5.2 or newer.
+  - **A Normal Computer**: This is strongly recommended. Many installs use a VM
+    in EC2. Phabricator installs properly and works well on a normal computer.
+  - **A Shared Host**: This may work, but is not recommended. Many shared
+    hosting environments have restrictions which prevent some of Phabricator's
+    features from working. Consider using a normal computer instead.
+  - **A SAN Appliance, Network Router, Gaming Console, Raspberry Pi, etc.**:
+    Although you may be able to install Phabricator on specialized hardware, it
+    is unlikely to work well and will be difficult for us to support. Strongly
+    consider using a normal computer instead.
+  - **A Toaster, Car, Firearm, Thermostat, etc.**: Yes, many modern devices now
+    have embedded computing capability. We live in interesting times. However,
+    you should not install Phabricator on these devices. Instead, install it on
+    a normal computer.
+
+You will need an **operating system** which is **not Windows**. Phabricator runs
+on most operating systems which are not Windows.
+
+  - **Linux**: Most installs use Linux.
+  - **Mac OS X**: Mac OS X is an acceptable flavor of Linux.
+  - **FreeBSD**: While FreeBSD is certainly not a flavor of Linux, it is a fine
+    operating system possessed of many desirable qualities, and Phabricator will
+    install and run properly on FreeBSD.
+  - **Solaris, etc.**: Other systems which look like Linux and quack like Linux
+    will generally work fine, although we may suffer a reduced ability to
+    support and resolve issues on unusual operating systems.
 
 NOTE: The command line interface to Phabricator, "Arcanist", //does// work on
 Windows. For instructions, see @{article:Arcanist User Guide: Windows}.
 
-You'll probably also need a **domain name** and you'll certainly need
-**a computer** with a connection to **the internet**.
+Beyond an operating system, you will need **a webserver**.
+
+  - **Apache**: Many installs use Apache + `mod_php`.
+  - **nginx**: Many installs use nginx + `php-fpm`.
+  - **lighttpd**: `lighttpd` is less popular than Apache or nginx, but it
+    works fine.
+  - **Other**: Other webservers which can run PHP are also likely to work fine,
+    although these installation instructions will not cover how to set them up.
+  - **PHP Builtin Server**: You can use the builtin PHP webserver for
+    development or testing, although it should not be used in production.
+
+You will also need:
+
+  - **MySQL**: You need MySQL.
+  - **PHP**: You need PHP 5.2 or newer.
+
+You'll probably also need a **domain name**. In particular, you should read this
+note:
+
+NOTE: Phabricator must be installed on an entire domain. You can not install it
+to a path on an existing domain, like `example.com/phabricator/`. Instead,
+install it to an entire domain or subdomain, like `phabricator.example.com`.
 
 = Installing Required Components =
 

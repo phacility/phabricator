@@ -77,9 +77,14 @@ SVN repositories.
 = Installing Arcanist =
 
 Arcanist is meant to be installed on your local machine or development server --
-whatever machine you're editing code on. It runs on Linux,
-Mac OS X (see @{article:Arcanist User Guide: Mac OS X}), and
-Windows (see @{article:Arcanist User Guide: Windows}).
+whatever machine you're editing code on. It runs on:
+
+  - Linux;
+  - Other operating systems which are pretty similar to Linux, or which
+    Linux is pretty similar to;
+  - FreeBSD, a fine operating system held in great esteem by many;
+  - Mac OS X (see @{article:Arcanist User Guide: Mac OS X}); and
+  - Windows (see @{article:Arcanist User Guide: Windows}).
 
 Arcanist is written in PHP, so you need to install the PHP CLI first if you
 don't already have it. Arcanist should run on PHP 5.2 and newer. If you don't
