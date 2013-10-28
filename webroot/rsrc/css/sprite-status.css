@@ -13,7 +13,7 @@ only screen and (min-device-pixel-ratio: 1.5),
 only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   .sprite-status {
     background-image: url(/rsrc/image/sprite-status-X2.png);
-    background-size: 135px 150px;
+    background-size: 150px 150px;
   }
 }
 
@@ -38,322 +38,370 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -60px 0px;
 }
 
-.status-add-blue {
+.status-accept {
   background-position: -75px 0px;
 }
 
-.status-add-dark {
+.status-add-blue {
   background-position: -90px 0px;
 }
 
-.status-add-green {
+.status-add-dark {
   background-position: -105px 0px;
 }
 
-.status-add-red {
+.status-add-green {
   background-position: -120px 0px;
+}
+
+.status-add-red {
+  background-position: -135px 0px;
 }
 
 .status-add-white {
   background-position: 0px -15px;
 }
 
-.status-down-blue {
+.status-add {
   background-position: -15px -15px;
 }
 
-.status-down-dark {
+.status-down-blue {
   background-position: -30px -15px;
 }
 
-.status-down-green {
+.status-down-dark {
   background-position: -45px -15px;
 }
 
-.status-down-red {
+.status-down-green {
   background-position: -60px -15px;
 }
 
-.status-down-white {
+.status-down-red {
   background-position: -75px -15px;
 }
 
-.status-info-blue {
+.status-down-white {
   background-position: -90px -15px;
 }
 
-.status-info-dark {
+.status-down {
   background-position: -105px -15px;
 }
 
-.status-info-green {
+.status-info-blue {
   background-position: -120px -15px;
 }
 
-.status-info-red {
+.status-info-dark {
+  background-position: -135px -15px;
+}
+
+.status-info-green {
   background-position: 0px -30px;
 }
 
-.status-info-white {
+.status-info-red {
   background-position: -15px -30px;
 }
 
-.status-left-blue {
+.status-info-white {
   background-position: -30px -30px;
 }
 
-.status-left-dark {
+.status-info {
   background-position: -45px -30px;
 }
 
-.status-left-green {
+.status-left-blue {
   background-position: -60px -30px;
 }
 
-.status-left-red {
+.status-left-dark {
   background-position: -75px -30px;
 }
 
-.status-left-white {
+.status-left-green {
   background-position: -90px -30px;
 }
 
-.status-minus-blue {
+.status-left-red {
   background-position: -105px -30px;
 }
 
-.status-minus-dark {
+.status-left-white {
   background-position: -120px -30px;
 }
 
-.status-minus-green {
+.status-left {
+  background-position: -135px -30px;
+}
+
+.status-minus-blue {
   background-position: 0px -45px;
 }
 
-.status-minus-red {
+.status-minus-dark {
   background-position: -15px -45px;
 }
 
-.status-minus-white {
+.status-minus-green {
   background-position: -30px -45px;
 }
 
-.status-oh-closed-dark {
+.status-minus-red {
   background-position: -45px -45px;
 }
 
-.status-oh-closed {
+.status-minus-white {
   background-position: -60px -45px;
 }
 
-.status-oh-ok-dark {
+.status-minus {
   background-position: -75px -45px;
 }
 
-.status-oh-ok {
+.status-oh-closed-dark {
   background-position: -90px -45px;
 }
 
-.status-oh-open-green {
+.status-oh-closed {
   background-position: -105px -45px;
 }
 
-.status-oh-open-red {
+.status-oh-ok-dark {
   background-position: -120px -45px;
 }
 
-.status-oh-open {
+.status-oh-ok {
+  background-position: -135px -45px;
+}
+
+.status-oh-open-green {
   background-position: 0px -60px;
 }
 
-.status-open-blue {
+.status-oh-open-red {
   background-position: -15px -60px;
 }
 
-.status-open-dark {
+.status-oh-open {
   background-position: -30px -60px;
 }
 
-.status-open-green {
+.status-open-blue {
   background-position: -45px -60px;
 }
 
-.status-open-red {
+.status-open-dark {
   background-position: -60px -60px;
 }
 
-.status-open-white {
+.status-open-green {
   background-position: -75px -60px;
 }
 
-.status-policy-admin-white, .dropdown-menu-item:hover .status-policy-admin {
+.status-open-red {
   background-position: -90px -60px;
 }
 
-.status-policy-admin {
+.status-open-white {
   background-position: -105px -60px;
 }
 
-.status-policy-all-white, .dropdown-menu-item:hover .status-policy-all {
+.status-open {
   background-position: -120px -60px;
 }
 
-.status-policy-all {
+.status-policy-admin-white, .dropdown-menu-item:hover .status-policy-admin {
+  background-position: -135px -60px;
+}
+
+.status-policy-admin {
   background-position: 0px -75px;
 }
 
-.status-policy-custom-white, .dropdown-menu-item:hover .status-policy-custom {
+.status-policy-all-white, .dropdown-menu-item:hover .status-policy-all {
   background-position: -15px -75px;
 }
 
-.status-policy-custom {
+.status-policy-all {
   background-position: -30px -75px;
 }
 
-.status-policy-noone-white, .dropdown-menu-item:hover .status-policy-noone {
+.status-policy-custom-white, .dropdown-menu-item:hover .status-policy-custom {
   background-position: -45px -75px;
 }
 
-.status-policy-noone {
+.status-policy-custom {
   background-position: -60px -75px;
 }
 
-.status-policy-project-white, .dropdown-menu-item:hover .status-policy-project {
+.status-policy-noone-white, .dropdown-menu-item:hover .status-policy-noone {
   background-position: -75px -75px;
 }
 
-.status-policy-project {
+.status-policy-noone {
   background-position: -90px -75px;
 }
 
-.status-policy-public-white, .dropdown-menu-item:hover .status-policy-public {
+.status-policy-project-white, .dropdown-menu-item:hover .status-policy-project {
   background-position: -105px -75px;
 }
 
-.status-policy-public {
+.status-policy-project {
   background-position: -120px -75px;
 }
 
-.status-policy-unknown-white, .dropdown-menu-item:hover .status-policy-unknown {
+.status-policy-public-white, .dropdown-menu-item:hover .status-policy-public {
+  background-position: -135px -75px;
+}
+
+.status-policy-public {
   background-position: 0px -90px;
 }
 
-.status-policy-unknown {
+.status-policy-unknown-white, .dropdown-menu-item:hover .status-policy-unknown {
   background-position: -15px -90px;
 }
 
-.status-question-blue {
+.status-policy-unknown {
   background-position: -30px -90px;
 }
 
-.status-question-dark {
+.status-question-blue {
   background-position: -45px -90px;
 }
 
-.status-question-green {
+.status-question-dark {
   background-position: -60px -90px;
 }
 
-.status-question-red {
+.status-question-green {
   background-position: -75px -90px;
 }
 
-.status-question-white {
+.status-question-red {
   background-position: -90px -90px;
 }
 
-.status-reject-blue {
+.status-question-white {
   background-position: -105px -90px;
 }
 
-.status-reject-dark {
+.status-question {
   background-position: -120px -90px;
 }
 
-.status-reject-green {
+.status-reject-blue {
+  background-position: -135px -90px;
+}
+
+.status-reject-dark {
   background-position: 0px -105px;
 }
 
-.status-reject-red {
+.status-reject-green {
   background-position: -15px -105px;
 }
 
-.status-reject-white {
+.status-reject-red {
   background-position: -30px -105px;
 }
 
-.status-right-blue {
+.status-reject-white {
   background-position: -45px -105px;
 }
 
-.status-right-dark {
+.status-reject {
   background-position: -60px -105px;
 }
 
-.status-right-green {
+.status-right-blue {
   background-position: -75px -105px;
 }
 
-.status-right-red {
+.status-right-dark {
   background-position: -90px -105px;
 }
 
-.status-right-white {
+.status-right-green {
   background-position: -105px -105px;
 }
 
-.status-time-green {
+.status-right-red {
   background-position: -120px -105px;
 }
 
-.status-time-orange {
+.status-right-white {
   background-position: 0px -120px;
 }
 
-.status-time-red {
+.status-right {
   background-position: -15px -120px;
 }
 
-.status-time-yellow {
+.status-time-green {
   background-position: -30px -120px;
 }
 
-.status-up-blue {
+.status-time-orange {
   background-position: -45px -120px;
 }
 
-.status-up-dark {
+.status-time-red {
   background-position: -60px -120px;
 }
 
-.status-up-green {
+.status-time-yellow {
   background-position: -75px -120px;
 }
 
-.status-up-red {
+.status-up-blue {
   background-position: -90px -120px;
 }
 
-.status-up-white {
+.status-up-dark {
   background-position: -105px -120px;
 }
 
-.status-warning-blue {
+.status-up-green {
   background-position: -120px -120px;
 }
 
-.status-warning-dark {
+.status-up-red {
   background-position: 0px -135px;
 }
 
-.status-warning-green {
+.status-up-white {
   background-position: -15px -135px;
 }
 
-.status-warning-red {
+.status-up {
   background-position: -30px -135px;
 }
 
-.status-warning-white {
+.status-warning-blue {
   background-position: -45px -135px;
+}
+
+.status-warning-dark {
+  background-position: -60px -135px;
+}
+
+.status-warning-green {
+  background-position: -75px -135px;
+}
+
+.status-warning-red {
+  background-position: -90px -135px;
+}
+
+.status-warning-white {
+  background-position: -105px -135px;
+}
+
+.status-warning {
+  background-position: -120px -135px;
 }
