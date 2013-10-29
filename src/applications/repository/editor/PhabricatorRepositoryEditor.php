@@ -23,6 +23,7 @@ final class PhabricatorRepositoryEditor
     $types[] = PhabricatorRepositoryTransaction::TYPE_SSH_KEYFILE;
     $types[] = PhabricatorRepositoryTransaction::TYPE_HTTP_LOGIN;
     $types[] = PhabricatorRepositoryTransaction::TYPE_HTTP_PASS;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH;
 
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
@@ -69,6 +70,8 @@ final class PhabricatorRepositoryEditor
         return $object->getDetail('http-login');
       case PhabricatorRepositoryTransaction::TYPE_HTTP_PASS:
         return $object->getDetail('http-pass');
+      case PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH:
+        return $object->getDetail('local-path');
     }
   }
 
@@ -92,6 +95,7 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_SSH_KEYFILE:
       case PhabricatorRepositoryTransaction::TYPE_HTTP_LOGIN:
       case PhabricatorRepositoryTransaction::TYPE_HTTP_PASS:
+      case PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH:
         return $xaction->getNewValue();
       case PhabricatorRepositoryTransaction::TYPE_NOTIFY:
       case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
@@ -155,6 +159,9 @@ final class PhabricatorRepositoryEditor
         break;
       case PhabricatorRepositoryTransaction::TYPE_HTTP_PASS:
         $object->setDetail('http-pass', $xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH:
+        $object->setDetail('local-path', $xaction->getNewValue());
         break;
       case PhabricatorRepositoryTransaction::TYPE_ENCODING:
         // Make sure the encoding is valid by converting to UTF-8. This tests

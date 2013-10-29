@@ -19,12 +19,16 @@ final class DiffusionRepositoryEditMainController
     $is_hg = false;
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        $has_local = true;
         $is_git = true;
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        // TOOD: This will be true for hosted SVN repositories.
+        $has_local = false;
         $is_svn = true;
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $has_local = true;
         $is_hg = true;
         break;
     }
@@ -75,6 +79,13 @@ final class DiffusionRepositoryEditMainController
         $this->buildSubversionActions($repository));
     }
 
+    $local_properties = null;
+    if ($has_local) {
+      $local_properties = $this->buildLocalProperties(
+        $repository,
+        $this->buildLocalActions($repository));
+    }
+
     $actions_properties = $this->buildActionsProperties(
       $repository,
       $this->buildActionsActions($repository));
@@ -105,8 +116,13 @@ final class DiffusionRepositoryEditMainController
       ->setHeader($header)
       ->addPropertyList($basic_properties)
       ->addPropertyList($policy_properties)
-      ->addPropertyList($remote_properties)
-      ->addPropertyList($encoding_properties);
+      ->addPropertyList($remote_properties);
+
+    if ($local_properties) {
+      $obj_box->addPropertyList($local_properties);
+    }
+
+    $obj_box->addPropertyList($encoding_properties);
 
     if ($branches_properties) {
       $obj_box->addPropertyList($branches_properties);
@@ -440,9 +456,43 @@ final class DiffusionRepositoryEditMainController
 
     $view->addProperty(
       pht('Remote URI'),
-      $repository->getDetail('remote-uri'));
+      $repository->getHumanReadableDetail('remote-uri'));
 
     return $view;
   }
 
+  private function buildLocalActions(PhabricatorRepository $repository) {
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PhabricatorActionListView())
+      ->setObjectURI($this->getRequest()->getRequestURI())
+      ->setUser($viewer);
+
+    $edit = id(new PhabricatorActionView())
+      ->setIcon('edit')
+      ->setName(pht('Edit Local'))
+      ->setHref(
+        $this->getRepositoryControllerURI($repository, 'edit/local/'));
+    $view->addAction($edit);
+
+    return $view;
+  }
+
+  private function buildLocalProperties(
+    PhabricatorRepository $repository,
+    PhabricatorActionListView $actions) {
+
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setActionList($actions)
+      ->addSectionHeader(pht('Local'));
+
+    $view->addProperty(
+      pht('Local Path'),
+      $repository->getHumanReadableDetail('local-path'));
+
+    return $view;
+  }
 }

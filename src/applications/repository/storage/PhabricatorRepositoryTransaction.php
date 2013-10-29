@@ -20,6 +20,7 @@ final class PhabricatorRepositoryTransaction
   const TYPE_SSH_KEYFILE = 'repo:ssh-keyfile';
   const TYPE_HTTP_LOGIN = 'repo:http-login';
   const TYPE_HTTP_PASS = 'repo:http-pass';
+  const TYPE_LOCAL_PATH = 'repo:local-path';
 
   public function getApplicationName() {
     return 'repository';
@@ -231,6 +232,12 @@ final class PhabricatorRepositoryTransaction
         return pht(
           '%s updated the HTTP password for this repository.',
           $this->renderHandleLink($author_phid));
+      case self::TYPE_LOCAL_PATH:
+        return pht(
+          '%s changed the local path from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $old,
+          $new);
     }
 
     return parent::getTitle();
