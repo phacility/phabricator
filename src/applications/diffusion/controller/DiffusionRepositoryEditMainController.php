@@ -41,12 +41,10 @@ final class DiffusionRepositoryEditMainController
 
     $header = id(new PHUIHeaderView())
       ->setHeader($title);
-    if (!$repository->isTracked()) {
-      $header->addTag(
-        id(new PhabricatorTagView())
-          ->setType(PhabricatorTagView::TYPE_STATE)
-          ->setName(pht('Inactive'))
-          ->setBackgroundColor(PhabricatorTagView::COLOR_BLACK));
+    if ($repository->isTracked()) {
+      $header->setStatus('oh-ok', '', pht('Active'));
+    } else {
+      $header->setStatus('policy-noone', '', pht('Inactive'));
     }
 
     $basic_actions = $this->buildBasicActions($repository);
