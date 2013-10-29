@@ -74,6 +74,7 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
             'actions/' => 'DiffusionRepositoryEditActionsController',
             '(?P<edit>remote)/' => 'DiffusionRepositoryCreateController',
             'local/' => 'DiffusionRepositoryEditLocalController',
+            'delete/' => 'DiffusionRepositoryEditDeleteController',
           ),
         ),
         'inline/' => array(

@@ -174,6 +174,14 @@ final class DiffusionRepositoryEditMainController
 
     $view->addAction($activate);
 
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Delete Repository'))
+        ->setIcon('delete')
+        ->setHref(
+          $this->getRepositoryControllerURI($repository, 'edit/delete/'))
+        ->setWorkflow(true));
+
     return $view;
   }
 

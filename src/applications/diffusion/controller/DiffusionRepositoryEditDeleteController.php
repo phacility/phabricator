@@ -1,34 +1,36 @@
 <?php
 
-final class PhabricatorRepositoryDeleteController
-  extends PhabricatorRepositoryController {
-
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
+final class DiffusionRepositoryEditDeleteController
+  extends DiffusionRepositoryEditController {
 
   public function processRequest() {
-    $viewer = $this->getRequest()->getUser();
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+    $drequest = $this->diffusionRequest;
+    $repository = $drequest->getRepository();
 
     $repository = id(new PhabricatorRepositoryQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->withIDs(array($repository->getID()))
       ->executeOne();
     if (!$repository) {
       return new Aphront404Response();
     }
 
-    $request = $this->getRequest();
-
-    if ($request->isDialogFormPost()) {
-      return id(new AphrontRedirectResponse())->setURI('/repository/');
-    }
+    $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
 
     $dialog = new AphrontDialogView();
-    $text_1 = pht('If you really want to delete the repository, you must run:');
-    $command = 'bin/repository delete '.$repository->getCallsign();
+    $text_1 = pht(
+      'If you really want to delete the repository, run this command from '.
+      'the command line:');
+    $command = csprintf(
+      'phabricator/ $ ./bin/repository delete %s',
+      $repository->getCallsign());
     $text_2 = pht('Repositories touch many objects and as such deletes are '.
                   'prohibitively expensive to run from the web UI.');
     $body = phutil_tag(
@@ -43,13 +45,14 @@ final class PhabricatorRepositoryDeleteController
         phutil_tag('p', array(), $text_2),
       ));
 
-    $dialog
+    $dialog = id(new AphrontDialogView())
       ->setUser($request->getUser())
       ->setTitle(pht('Really want to delete the repository?'))
       ->appendChild($body)
-      ->setSubmitURI('/repository/delete/'.$this->id.'/')
-      ->addSubmitButton(pht('Okay'));
+      ->addCancelButton($edit_uri, pht('Okay'));
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
+
+
 }

@@ -41,14 +41,6 @@ final class PhabricatorRepositoryListController
             'href'  => '/repository/edit/'.$repo->getID().'/',
           ),
           'Edit'),
-        javelin_tag(
-          'a',
-          array(
-            'class' => 'button small grey',
-            'href'  => '/repository/delete/'.$repo->getID().'/',
-            'sigil' => 'workflow',
-          ),
-          'Delete'),
       );
     }
 
@@ -60,7 +52,6 @@ final class PhabricatorRepositoryListController
         'Type',
         'Diffusion',
         '',
-        ''
       ));
     $table->setColumnClasses(
       array(
@@ -68,7 +59,6 @@ final class PhabricatorRepositoryListController
         'wide',
         null,
         null,
-        'action',
         'action',
       ));
 
@@ -78,7 +68,6 @@ final class PhabricatorRepositoryListController
         true,
         true,
         true,
-        $is_admin,
         $is_admin,
       ));
 
