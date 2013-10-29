@@ -8,7 +8,7 @@ final class PhabricatorWorkingCopyPullTestCase
 
     $this->assertEqual(
       true,
-      Filesystem::pathExists($repo->getLocalPath().'/.git'));
+      Filesystem::pathExists($repo->getLocalPath().'/HEAD'));
   }
 
   public function testHgPullBasic() {

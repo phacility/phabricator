@@ -26,7 +26,18 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
       PhabricatorPolicyCapability::CAN_JOIN => pht('Joinable By'),
     );
 
-    $this->setLabel(idx($labels, $this->capability, pht('Unknown Policy')));
+    if (isset($labels[$capability])) {
+      $label = $labels[$capability];
+    } else {
+      $capobj = PhabricatorPolicyCapability::getCapabilityByKey($capability);
+      if ($capobj) {
+        $label = $capobj->getCapabilityName();
+      } else {
+        $label = pht('Capability "%s"', $capability);
+      }
+    }
+
+    $this->setLabel($label);
 
     return $this;
   }

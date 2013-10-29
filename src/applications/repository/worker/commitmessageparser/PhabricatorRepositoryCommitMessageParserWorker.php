@@ -220,6 +220,9 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     }
 
     $data->save();
+
+    $commit->writeImportStatusFlag(
+      PhabricatorRepositoryCommit::IMPORTED_MESSAGE);
   }
 
   private function loadUserName($user_phid, $default, PhabricatorUser $actor) {
@@ -249,7 +252,17 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       ->loadRawDiff();
 
     // TODO: Support adds, deletes and moves under SVN.
-    $changes = id(new ArcanistDiffParser())->parseDiff($raw_diff);
+    if (strlen($raw_diff)) {
+      $changes = id(new ArcanistDiffParser())->parseDiff($raw_diff);
+    } else {
+      // This is an empty diff, maybe made with `git commit --allow-empty`.
+      // NOTE: These diffs have the same tree hash as their ancestors, so
+      // they may attach to revisions in an unexpected way. Just let this
+      // happen for now, although it might make sense to special case it
+      // eventually.
+      $changes = array();
+    }
+
     $diff = DifferentialDiff::newFromRawChanges($changes)
       ->setRevisionID($revision->getID())
       ->setAuthorPHID($actor_phid)

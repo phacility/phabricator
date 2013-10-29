@@ -90,7 +90,6 @@ final class DiffusionRepositoryListController extends DiffusionController
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-
     id(new PhabricatorRepositorySearchEngine())
       ->setViewer($viewer)
       ->addNavigationItems($nav->getMenu());
@@ -98,6 +97,22 @@ final class DiffusionRepositoryListController extends DiffusionController
     $nav->selectFilter(null);
 
     return $nav;
+  }
+
+  public function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $can_create = $this->hasApplicationCapability(
+      DiffusionCapabilityCreateRepositories::CAPABILITY);
+
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+        ->setName(pht('Import Repository'))
+        ->setHref($this->getApplicationURI('/create/'))
+        ->setDisabled(!$can_create)
+        ->setIcon('create'));
+
+    return $crumbs;
   }
 
   private function buildShortcuts() {

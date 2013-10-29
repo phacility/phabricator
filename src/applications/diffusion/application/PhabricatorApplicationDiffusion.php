@@ -75,8 +75,17 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
             '(?P<edit>remote)/' => 'DiffusionRepositoryCreateController',
             'local/' => 'DiffusionRepositoryEditLocalController',
             'delete/' => 'DiffusionRepositoryEditDeleteController',
+            'hosting/' => 'DiffusionRepositoryEditHostingController',
+            '(?P<serve>serve)/' => 'DiffusionRepositoryEditHostingController',
           ),
         ),
+
+        // NOTE: This must come after the rule above; it just gives us a
+        // catch-all for serving repositories over HTTP. We must accept
+        // requests without the trailing "/" because SVN commands don't
+        // necessarily include it.
+        '(?P<callsign>[A-Z]+)(/|$).*' => 'DiffusionRepositoryDefaultController',
+
         'inline/' => array(
           'edit/(?P<phid>[^/]+)/'    => 'DiffusionInlineCommentController',
           'preview/(?P<phid>[^/]+)/' =>
@@ -101,6 +110,21 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
 
   public function getApplicationOrder() {
     return 0.120;
+  }
+
+  protected function getCustomCapabilities() {
+    return array(
+      DiffusionCapabilityDefaultView::CAPABILITY => array(
+      ),
+      DiffusionCapabilityDefaultEdit::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+      DiffusionCapabilityDefaultPush::CAPABILITY => array(
+      ),
+      DiffusionCapabilityCreateRepositories::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+    );
   }
 
 }

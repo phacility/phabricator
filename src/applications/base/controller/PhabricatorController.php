@@ -24,7 +24,7 @@ abstract class PhabricatorController extends AphrontController {
     return PhabricatorUserEmail::isEmailVerificationRequired();
   }
 
-  final public function willBeginExecution() {
+  public function willBeginExecution() {
 
     $request = $this->getRequest();
     if ($request->getUser()) {

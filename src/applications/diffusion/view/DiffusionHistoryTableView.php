@@ -21,6 +21,8 @@ final class DiffusionHistoryTableView extends DiffusionView {
         $commit_phids[] = $item->getCommit()->getPHID();
       }
     }
+
+    // TODO: Get rid of this.
     $this->revisions = id(new DifferentialRevision())
       ->loadIDsByCommitPHIDs($commit_phids);
     return $this;

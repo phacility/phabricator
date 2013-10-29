@@ -38,7 +38,7 @@ final class PhabricatorRepositoryListController
           'a',
           array(
             'class' => 'button small grey',
-            'href'  => '/repository/edit/'.$repo->getID().'/',
+            'href'  => '/diffusion/'.$repo->getCallsign().'/edit/',
           ),
           'Edit'),
       );
@@ -74,7 +74,7 @@ final class PhabricatorRepositoryListController
     $panel = new AphrontPanelView();
     $panel->setHeader('Repositories');
     if ($is_admin) {
-      $panel->setCreateButton('Create New Repository', '/repository/create/');
+      $panel->setCreateButton('Create New Repository', '/diffusion/create/');
     }
     $panel->appendChild($table);
     $panel->setNoBackground();

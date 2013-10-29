@@ -58,6 +58,9 @@ final class PhabricatorRepositoryCommitOwnersWorker
       $commit->save();
     }
 
+    $commit->writeImportStatusFlag(
+      PhabricatorRepositoryCommit::IMPORTED_OWNERS);
+
     if ($this->shouldQueueFollowupTasks()) {
       PhabricatorWorker::scheduleTask(
         'PhabricatorRepositoryCommitHeraldWorker',
