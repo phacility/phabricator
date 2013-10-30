@@ -786,6 +786,25 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     Filesystem::assertReadable($local);
   }
 
+  /**
+   * Determine if the working copy is bare or not. In Git, this corresponds
+   * to `--bare`. In Mercurial, `--noupdate`.
+   */
+  public function isWorkingCopyBare() {
+    switch ($this->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        return false;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        $local = $this->getLocalPath();
+        if (Filesystem::pathExists($local.'/.git')) {
+          return false;
+        } else {
+          return true;
+        }
+    }
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

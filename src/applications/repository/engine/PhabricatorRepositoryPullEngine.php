@@ -177,7 +177,16 @@ final class PhabricatorRepositoryPullEngine
     $retry = false;
     do {
       // This is a local command, but needs credentials.
-      $future = $repository->getRemoteCommandFuture('fetch --all --prune');
+      if ($repository->isWorkingCopyBare()) {
+        // For bare working copies, we need this magic incantation.
+        $future = $repository->getRemoteCommandFuture(
+          'fetch origin %s --prune',
+          '+refs/heads/*:refs/heads/*');
+      } else {
+        $future = $repository->getRemoteCommandFuture(
+          'fetch --all --prune');
+      }
+
       $future->setCWD($path);
       list($err, $stdout, $stderr) = $future->resolve();
 

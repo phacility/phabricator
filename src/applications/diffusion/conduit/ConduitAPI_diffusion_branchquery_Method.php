@@ -30,14 +30,22 @@ final class ConduitAPI_diffusion_branchquery_Method
     // We need to add 1 in case we pick up HEAD.
     $count = $offset + $limit + 1;
 
-    list($stdout) = $repository->execxLocalCommand(
-      'for-each-ref %C --sort=-creatordate --format=%s refs/remotes',
-      $count ? '--count='.(int)$count : null,
-      '%(refname:short) %(objectname)');
-
-    $branch_list = DiffusionGitBranch::parseRemoteBranchOutput(
-      $stdout,
-      $only_this_remote = DiffusionBranchInformation::DEFAULT_GIT_REMOTE);
+    if ($repository->isWorkingCopyBare()) {
+      list($stdout) = $repository->execxLocalCommand(
+        'for-each-ref %C --sort=-creatordate --format=%s refs/heads',
+        $count ? '--count='.(int)$count : null,
+        '%(refname:short) %(objectname)');
+      $branch_list = DiffusionGitBranch::parseLocalBranchOutput(
+        $stdout);
+    } else {
+      list($stdout) = $repository->execxLocalCommand(
+        'for-each-ref %C --sort=-creatordate --format=%s refs/remotes',
+        $count ? '--count='.(int)$count : null,
+        '%(refname:short) %(objectname)');
+      $branch_list = DiffusionGitBranch::parseRemoteBranchOutput(
+        $stdout,
+        $only_this_remote = DiffusionBranchInformation::DEFAULT_GIT_REMOTE);
+    }
 
     $branches = array();
     foreach ($branch_list as $name => $head) {
