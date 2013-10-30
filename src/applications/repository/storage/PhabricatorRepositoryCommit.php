@@ -36,6 +36,10 @@ final class PhabricatorRepositoryCommit
     return $this->assertAttached($this->repository);
   }
 
+  public function isPartiallyImported($mask) {
+    return (($mask & $this->getImportStatus()) == $mask);
+  }
+
   public function isImported() {
     return ($this->getImportStatus() == self::IMPORTED_ALL);
   }
@@ -218,7 +222,9 @@ final class PhabricatorRepositoryCommit
       'mailKey' => $this->getMailKey(),
       'authorPHID' => $this->getAuthorPHID(),
       'auditStatus' => $this->getAuditStatus(),
-      'summary' => $this->getSummary());
+      'summary' => $this->getSummary(),
+      'importStatus' => $this->getImportStatus(),
+    );
   }
 
   public static function newFromDictionary(array $dict) {

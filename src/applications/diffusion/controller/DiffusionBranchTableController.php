@@ -55,7 +55,7 @@ final class DiffusionBranchTableController extends DiffusionController {
 
     $crumbs = $this->buildCrumbs(
       array(
-        'branches'    => true,
+        'branches' => true,
       ));
 
     return $this->buildApplicationPage(
