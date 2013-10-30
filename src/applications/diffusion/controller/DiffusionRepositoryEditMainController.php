@@ -565,6 +565,10 @@ final class DiffusionRepositoryEditMainController
 
     $view = new PHUIStatusListView();
 
+    $messages = id(new PhabricatorRepositoryStatusMessage())
+      ->loadAllWhere('repositoryID = %d', $repository->getID());
+    $messages = mpull($messages, null, 'getStatusType');
+
     if ($repository->isTracked()) {
       $view->addItem(
         id(new PHUIStatusItemView())
@@ -655,12 +659,53 @@ final class DiffusionRepositoryEditMainController
 
     if ($repository->usesLocalWorkingCopy()) {
       $local_path = $repository->getLocalPath();
-      if (Filesystem::pathExists($local_path)) {
-        $view->addItem(
-          id(new PHUIStatusItemView())
-            ->setIcon('accept-green')
-            ->setTarget(pht('Working Copy OK'))
-            ->setNote(phutil_tag('tt', array(), $local_path)));
+      $message = idx($messages, PhabricatorRepositoryStatusMessage::TYPE_INIT);
+      if ($message) {
+        switch ($message->getStatusCode()) {
+          case PhabricatorRepositoryStatusMessage::CODE_ERROR:
+            $view->addItem(
+              id(new PHUIStatusItemView())
+                ->setIcon('warning-red')
+                ->setTarget(pht('Initialization Error'))
+                ->setNote($message->getParameter('message')));
+            return $view;
+          case PhabricatorRepositoryStatusMessage::CODE_OKAY:
+              if (Filesystem::pathExists($local_path)) {
+                $view->addItem(
+                  id(new PHUIStatusItemView())
+                    ->setIcon('accept-green')
+                    ->setTarget(pht('Working Copy OK'))
+                    ->setNote(phutil_tag('tt', array(), $local_path)));
+              } else {
+                $view->addItem(
+                  id(new PHUIStatusItemView())
+                    ->setIcon('warning-red')
+                    ->setTarget(pht('Working Copy Error'))
+                    ->setNote(
+                      pht(
+                        'Working copy %s has been deleted, or is not '.
+                        'readable by the webserver. Make this directory '.
+                        'readable. If it has been deleted, the daemons should '.
+                        'restore it automatically.',
+                        phutil_tag('tt', array(), $local_path))));
+                return $view;
+              }
+            break;
+          case PhabricatorRepositoryStatusMessage::CODE_WORKING:
+            $view->addItem(
+              id(new PHUIStatusItemView())
+                ->setIcon('time-green')
+                ->setTarget(pht('Initializing Working Copy'))
+                ->setNote(pht('Daemons are initilizing the working copy.')));
+            return $view;
+          default:
+            $view->addItem(
+              id(new PHUIStatusItemView())
+                ->setIcon('warning-red')
+                ->setTarget(pht('Unknown Init Status'))
+                ->setNote($message->getStatusCode()));
+            return $view;
+        }
       } else {
         $view->addItem(
           id(new PHUIStatusItemView())

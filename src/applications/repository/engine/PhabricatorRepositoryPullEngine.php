@@ -27,7 +27,7 @@ final class PhabricatorRepositoryPullEngine
     $callsign = $repository->getCallsign();
 
     if ($repository->isHosted()) {
-      $this->log(
+      $this->skipPull(
         pht(
           'Repository "%s" is hosted, so Phabricator does not pull updates '.
           'for it.',
@@ -38,10 +38,11 @@ final class PhabricatorRepositoryPullEngine
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         // We never pull a local copy of Subversion repositories.
-        $this->log(
-          "Repository '%s' is a Subversion repository, which does not require ".
-          "a local working copy to be pulled.",
-          $callsign);
+        $this->skipPull(
+          pht(
+            "Repository '%s' is a Subversion repository, which does not ".
+            "require a local working copy to be pulled.",
+            $callsign));
         return;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $is_git = true;
@@ -50,42 +51,89 @@ final class PhabricatorRepositoryPullEngine
         $is_hg = true;
         break;
       default:
-        throw new Exception("Unsupported VCS '{$vcs}'!");
+        $this->abortPull(pht('Unknown VCS "%s"!', $vcs));
     }
 
     $callsign = $repository->getCallsign();
     $local_path = $repository->getLocalPath();
     if ($local_path === null) {
-      throw new Exception(
-        "No local path is configured for repository '{$callsign}'.");
+      $this->abortPull(
+        pht(
+          "No local path is configured for repository '%s'.",
+          $callsign));
     }
 
-    $dirname = dirname($local_path);
-    if (!Filesystem::pathExists($dirname)) {
-      Filesystem::createDirectory($dirname, 0755, $recursive = true);
+    try {
+      $dirname = dirname($local_path);
+      if (!Filesystem::pathExists($dirname)) {
+        Filesystem::createDirectory($dirname, 0755, $recursive = true);
+      }
+
+      if (!Filesystem::pathExists($local_path)) {
+        $this->logPull(
+          pht(
+            "Creating a new working copy for repository '%s'.",
+            $callsign));
+        if ($is_git) {
+          $this->executeGitCreate();
+        } else {
+          $this->executeMercurialCreate();
+        }
+      } else {
+        $this->logPull(
+          pht(
+            "Updating the working copy for repository '%s'.",
+            $callsign));
+        if ($is_git) {
+          $this->executeGitUpdate();
+        } else {
+          $this->executeMercurialUpdate();
+        }
+      }
+    } catch (Exception $ex) {
+      $this->abortPull(
+        pht('Pull of "%s" failed: %s', $callsign, $ex->getMessage()),
+        $ex);
     }
 
-    if (!Filesystem::pathExists($local_path)) {
-      $this->log(
-        "Creating a new working copy for repository '%s'.",
-        $callsign);
-      if ($is_git) {
-        $this->executeGitCreate();
-      } else {
-        $this->executeMercurialCreate();
-      }
-    } else {
-      $this->log(
-        "Updating the working copy for repository '%s'.",
-        $callsign);
-      if ($is_git) {
-        $this->executeGitUpdate();
-      } else {
-        $this->executeMercurialUpdate();
-      }
-    }
+    $this->donePull();
 
     return $this;
+  }
+
+  private function skipPull($message) {
+    $this->updateRepositoryInitStatus(null);
+    $this->log('%s', $message);
+  }
+
+  private function abortPull($message, Exception $ex = null) {
+    $code_error = PhabricatorRepositoryStatusMessage::CODE_ERROR;
+    $this->updateRepositoryInitStatus($code_error, $message);
+    if ($ex) {
+      throw $ex;
+    } else {
+      throw new Exception($message);
+    }
+  }
+
+  private function logPull($message) {
+    $code_working = PhabricatorRepositoryStatusMessage::CODE_WORKING;
+    $this->updateRepositoryInitStatus($code_working, $message);
+    $this->log('%s', $message);
+  }
+
+  private function donePull() {
+    $code_okay = PhabricatorRepositoryStatusMessage::CODE_OKAY;
+    $this->updateRepositoryInitStatus($code_okay);
+  }
+
+  private function updateRepositoryInitStatus($code, $message = null) {
+    $this->getRepository()->writeStatusMessage(
+      PhabricatorRepositoryStatusMessage::TYPE_INIT,
+      $code,
+      array(
+        'message' => $message
+      ));
   }
 
 
