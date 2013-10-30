@@ -149,6 +149,12 @@ From: Abraham Lincoln <alincoln@logcab.in>
 Subject: Core World Tariffs
 EOMAIL
 ,
+<<<EOMAIL
+OKAY
+
+> On 17 Oct 2013, at 17:47, "Someone" <somebody@somewhere> wrote:
+> ...
+EOMAIL
     );
   }
 
