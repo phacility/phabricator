@@ -252,10 +252,8 @@ final class DiffusionCommitController extends DiffusionController {
         $warning_view = id(new AphrontErrorView())
           ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
           ->setTitle('Very Large Commit')
-          ->appendChild(phutil_tag(
-            'p',
-            array(),
-            pht("This commit is very large. Load each file individually.")));
+          ->appendChild(
+            pht("This commit is very large. Load each file individually."));
 
         $change_panel->appendChild($warning_view);
         $change_panel->addButton($show_all_button);
