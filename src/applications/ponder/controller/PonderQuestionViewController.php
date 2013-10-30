@@ -160,6 +160,7 @@ final class PonderQuestionViewController extends PonderController {
       ->setCount($question->getVoteCount())
       ->setVote($question->getUserVote());
 
+    $view->addSectionHeader(pht('Question'));
     $view->addTextContent(
       array(
         $votable,
@@ -361,6 +362,7 @@ final class PonderQuestionViewController extends PonderController {
       ->setCount($answer->getVoteCount())
       ->setVote($answer->getUserVote());
 
+    $view->addSectionHeader(pht('Answer'));
     $view->addTextContent(
       array(
         $votable,
