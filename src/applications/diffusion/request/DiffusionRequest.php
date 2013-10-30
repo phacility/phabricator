@@ -277,7 +277,9 @@ abstract class DiffusionRequest {
         'repositoryID = %d AND commitIdentifier = %s',
         $repository->getID(),
         $this->getCommit());
-      $commit->attachRepository($repository);
+      if ($commit) {
+        $commit->attachRepository($repository);
+      }
       $this->repositoryCommit = $commit;
     }
     return $this->repositoryCommit;
