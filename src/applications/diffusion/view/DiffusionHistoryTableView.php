@@ -113,7 +113,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
       }
 
       $commit = $history->getCommit();
-      if ($commit && !$commit->getIsUnparsed() && $data) {
+      if ($commit && $commit->isImported() && $data) {
         $change = $this->linkChange(
           $history->getChangeType(),
           $history->getFileType(),

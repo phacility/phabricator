@@ -73,8 +73,8 @@ final class DiffusionTagListView extends DiffusionView {
         // unique data which isn't otherwise available.
         $description = $tag->getDescription();
       } else {
-        if ($commit && $commit->getCommitData()) {
-          $description = $commit->getCommitData()->getSummary();
+        if ($commit) {
+          $description = $commit->getSummary();
         } else {
           $description = $tag->getDescription();
         }

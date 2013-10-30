@@ -225,15 +225,15 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->withRepositoryIDs(array($drequest->getRepository()->getID()))
       ->execute();
 
-    $table = new DiffusionBranchTableView();
-    $table->setDiffusionRequest($drequest);
-    $table->setBranches($branches);
-    $table->setCommits($commits);
-    $table->setUser($this->getRequest()->getUser());
+    $table = id(new DiffusionBranchTableView())
+      ->setUser($viewer)
+      ->setDiffusionRequest($drequest)
+      ->setBranches($branches)
+      ->setCommits($commits);
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Branches'));
-    $panel->setNoBackground();
+    $panel = id(new AphrontPanelView())
+      ->setHeader(pht('Branches'))
+      ->setNoBackground();
 
     if ($more_branches) {
       $panel->setCaption(pht('Showing %d branches.', $limit));
@@ -257,6 +257,8 @@ final class DiffusionRepositoryController extends DiffusionController {
   }
 
   private function buildTagListTable(DiffusionRequest $drequest) {
+    $viewer = $this->getRequest()->getUser();
+
     $tag_limit = 15;
     $tags = array();
     try {
@@ -281,26 +283,26 @@ final class DiffusionRepositoryController extends DiffusionController {
     $more_tags = (count($tags) > $tag_limit);
     $tags = array_slice($tags, 0, $tag_limit);
 
-    $commits = id(new PhabricatorAuditCommitQuery())
-      ->withIdentifiers(
-        $drequest->getRepository()->getID(),
-        mpull($tags, 'getCommitIdentifier'))
+    $commits = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withIdentifiers(mpull($tags, 'getCommitIdentifier'))
+      ->withRepositoryIDs(array($drequest->getRepository()->getID()))
       ->needCommitData(true)
       ->execute();
 
-    $view = new DiffusionTagListView();
-    $view->setDiffusionRequest($drequest);
-    $view->setTags($tags);
-    $view->setUser($this->getRequest()->getUser());
-    $view->setCommits($commits);
+    $view = id(new DiffusionTagListView())
+      ->setUser($viewer)
+      ->setDiffusionRequest($drequest)
+      ->setTags($tags)
+      ->setCommits($commits);
 
     $phids = $view->getRequiredHandlePHIDs();
     $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Tags'));
-    $panel->setNoBackground(true);
+    $panel = id(new AphrontPanelView())
+      ->setHeader(pht('Tags'))
+      ->setNoBackground(true);
 
     if ($more_tags) {
       $panel->setCaption(pht('Showing the %d most recent tags.', $tag_limit));
