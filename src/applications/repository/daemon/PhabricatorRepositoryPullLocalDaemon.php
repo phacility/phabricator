@@ -526,18 +526,12 @@ final class PhabricatorRepositoryPullLocalDaemon
       $repository->getRemoteURI(),
       $repository->getLocalPath());
 
-    if ($repository->isWorkingCopyBare()) {
-      list($stdout) = $repository->execxLocalCommand(
-        'branch --verbose --no-abbrev');
-      $branches = DiffusionGitBranch::parseLocalBranchOutput(
-        $stdout);
-    } else {
-      list($stdout) = $repository->execxLocalCommand(
-        'branch -r --verbose --no-abbrev');
-      $branches = DiffusionGitBranch::parseRemoteBranchOutput(
-        $stdout,
-        $only_this_remote = DiffusionBranchInformation::DEFAULT_GIT_REMOTE);
-    }
+    $refs = id(new DiffusionLowLevelGitRefQuery())
+      ->setRepository($repository)
+      ->withIsOriginBranch(true)
+      ->execute();
+
+    $branches = mpull($refs, 'getCommitIdentifier', 'getShortName');
 
     if (!$branches) {
       // This repository has no branches at all, so we don't need to do
