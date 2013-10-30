@@ -25,7 +25,6 @@ final class PhabricatorRepositoryCommit
 
   private $commitData = self::ATTACHABLE;
   private $audits;
-  private $isUnparsed;
   private $repository = self::ATTACHABLE;
 
   public function attachRepository(PhabricatorRepository $repository) {
@@ -35,15 +34,6 @@ final class PhabricatorRepositoryCommit
 
   public function getRepository() {
     return $this->assertAttached($this->repository);
-  }
-
-  public function setIsUnparsed($is_unparsed) {
-    $this->isUnparsed = $is_unparsed;
-    return $this;
-  }
-
-  public function getIsUnparsed() {
-    return $this->isUnparsed;
   }
 
   public function isImported() {
