@@ -47,7 +47,8 @@ final class LegalpadDocumentSignController extends LegalpadController {
       $has_signed = true;
       $error_view = id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setTitle(pht('You have already agreed to these terms.'));
+        ->setTitle(pht('Already Signed'))
+        ->appendChild(pht('Thank you for signing and agreeing'));
       $data = $signature->getSignatureData();
     }
 
@@ -101,7 +102,8 @@ final class LegalpadDocumentSignController extends LegalpadController {
         $has_signed = true;
         $error_view = id(new AphrontErrorView())
           ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-          ->setTitle(pht('Signature successful. Thank you.'));
+          ->setTitle(pht('Signature successful'))
+          ->appendChild(pht('Thank you for signing and agreeing'));
       } else {
         $error_view = id(new AphrontErrorView())
           ->setTitle(pht('Error in submission.'))
@@ -126,14 +128,14 @@ final class LegalpadDocumentSignController extends LegalpadController {
       id(new PHUIDocumentView())
       ->setHeader($header)
       ->appendChild($this->buildDocument($engine, $document_body)),
-      $error_view,
       $this->buildSignatureForm(
         $document_body,
         $signature,
         $has_signed,
         $e_name,
         $e_email,
-        $e_address_1));
+        $e_address_1,
+        $error_view));
 
     return $this->buildApplicationPage(
       $content,
@@ -148,15 +150,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
     PhabricatorMarkupEngine
     $engine, LegalpadDocumentBody $body) {
 
-    require_celerity_resource('legalpad-documentbody-css');
-
-    return phutil_tag(
-      'div',
-      array(
-        'class' => 'legalpad-documentbody'
-      ),
-      $engine->getOutput($body, LegalpadDocumentBody::MARKUP_FIELD_TEXT));
-
+    return $engine->getOutput($body, LegalpadDocumentBody::MARKUP_FIELD_TEXT);
   }
 
   private function buildSignatureForm(
@@ -165,7 +159,8 @@ final class LegalpadDocumentSignController extends LegalpadController {
     $has_signed = false,
     $e_name = true,
     $e_email = true,
-    $e_address_1 = true) {
+    $e_address_1 = true,
+    $error_view = null) {
 
     $user = $this->getRequest()->getUser();
     if ($has_signed) {
@@ -178,57 +173,55 @@ final class LegalpadDocumentSignController extends LegalpadController {
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->appendChild(
-        id(new AphrontFormInsetView())
-        ->setTitle(pht('Sign and Agree'))
-        ->setDescription($instructions)
-        ->setContent(phutil_tag('br', array()))
-        ->appendChild(
-          id(new AphrontFormTextControl())
-          ->setLabel(pht('Name'))
-          ->setValue(idx($data, 'name', ''))
-          ->setName('name')
-          ->setError($e_name)
-          ->setDisabled($has_signed))
-        ->appendChild(
-          id(new AphrontFormTextControl())
-          ->setLabel(pht('Email'))
-          ->setValue(idx($data, 'email', ''))
-          ->setName('email')
-          ->setError($e_email)
-          ->setDisabled($has_signed))
-        ->appendChild(
-          id(new AphrontFormTextControl())
-          ->setLabel(pht('Address line 1'))
-          ->setValue(idx($data, 'address_1', ''))
-          ->setName('address_1')
-          ->setError($e_address_1)
-          ->setDisabled($has_signed))
-        ->appendChild(
-          id(new AphrontFormTextControl())
-          ->setLabel(pht('Address line 2'))
-          ->setValue(idx($data, 'address_2', ''))
-          ->setName('address_2')
-          ->setDisabled($has_signed))
-        ->appendChild(
-          id(new AphrontFormTextControl())
-          ->setLabel(pht('Phone'))
-          ->setValue(idx($data, 'phone', ''))
-          ->setName('phone')
-          ->setDisabled($has_signed))
-        ->appendChild(
-          id(new AphrontFormCheckboxControl())
-          ->addCheckbox(
-            'agree',
-            'agree',
-            pht('I agree to the terms laid forth above.'),
-            $has_signed)
-          ->setDisabled($has_signed))
-        ->appendChild(
-          id(new AphrontFormSubmitControl())
-          ->setValue(pht('Sign and Agree'))
-          ->setDisabled($has_signed)));
+        id(new AphrontFormTextControl())
+        ->setLabel(pht('Name'))
+        ->setValue(idx($data, 'name', ''))
+        ->setName('name')
+        ->setError($e_name)
+        ->setDisabled($has_signed))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+        ->setLabel(pht('Email'))
+        ->setValue(idx($data, 'email', ''))
+        ->setName('email')
+        ->setError($e_email)
+        ->setDisabled($has_signed))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+        ->setLabel(pht('Address line 1'))
+        ->setValue(idx($data, 'address_1', ''))
+        ->setName('address_1')
+        ->setError($e_address_1)
+        ->setDisabled($has_signed))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+        ->setLabel(pht('Address line 2'))
+        ->setValue(idx($data, 'address_2', ''))
+        ->setName('address_2')
+        ->setDisabled($has_signed))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+        ->setLabel(pht('Phone'))
+        ->setValue(idx($data, 'phone', ''))
+        ->setName('phone')
+        ->setDisabled($has_signed))
+      ->appendChild(
+        id(new AphrontFormCheckboxControl())
+        ->addCheckbox(
+          'agree',
+          'agree',
+          pht('I agree to the terms laid forth above.'),
+          $has_signed)
+        ->setDisabled($has_signed))
+      ->appendChild(
+        id(new AphrontFormSubmitControl())
+        ->setValue(pht('Sign and Agree'))
+        ->setDisabled($has_signed));
 
-    return $form;
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Sign and Agree'))
+      ->setFormError($error_view)
+      ->setForm($form);
   }
 
 }

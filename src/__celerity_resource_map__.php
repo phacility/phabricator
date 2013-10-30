@@ -2981,15 +2981,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/externals/javelin/lib/Workflow.js',
   ),
-  'legalpad-documentbody-css' =>
-  array(
-    'uri' => '/res/034c3494/rsrc/css/application/legalpad/legalpad-documentbody.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/application/legalpad/legalpad-documentbody.css',
-  ),
   'lightbox-attachment-css' =>
   array(
     'uri' => '/res/4657e15d/rsrc/css/aphront/lightbox-attachment.css',
