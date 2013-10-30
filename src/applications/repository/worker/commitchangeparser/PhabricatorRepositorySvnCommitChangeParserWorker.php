@@ -73,6 +73,7 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
           $deleted_paths[$path] = $raw_info;
           break;
         case 'A':
+        case 'R':
           $add_paths[$path] = $raw_info;
           break;
       }
