@@ -26,11 +26,16 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   const TABLE_BADCOMMIT = 'repository_badcommit';
   const TABLE_LINTMESSAGE = 'repository_lintmessage';
 
+  const SERVE_OFF = 'off';
+  const SERVE_READONLY = 'readonly';
+  const SERVE_READWRITE = 'readwrite';
+
   protected $name;
   protected $callsign;
   protected $uuid;
-  protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
-  protected $editPolicy = PhabricatorPolicies::POLICY_ADMIN;
+  protected $viewPolicy;
+  protected $editPolicy;
+  protected $pushPolicy;
 
   protected $versionControlSystem;
   protected $details = array();
@@ -39,6 +44,22 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   private $commitCount = self::ATTACHABLE;
   private $mostRecentCommit = self::ATTACHABLE;
+
+  public static function initializeNewRepository(PhabricatorUser $actor) {
+    $app = id(new PhabricatorApplicationQuery())
+      ->setViewer($actor)
+      ->withClasses(array('PhabricatorApplicationDiffusion'))
+      ->executeOne();
+
+    $view_policy = $app->getPolicy(DiffusionCapabilityDefaultView::CAPABILITY);
+    $edit_policy = $app->getPolicy(DiffusionCapabilityDefaultEdit::CAPABILITY);
+    $push_policy = $app->getPolicy(DiffusionCapabilityDefaultPush::CAPABILITY);
+
+    return id(new PhabricatorRepository())
+      ->setViewPolicy($view_policy)
+      ->setEditPolicy($edit_policy)
+      ->setPushPolicy($push_policy);
+  }
 
   public function getConfiguration() {
     return array(
@@ -171,24 +192,32 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function execLocalCommand($pattern /* , $arg, ... */) {
+    $this->assertLocalExists();
+
     $args = func_get_args();
     $args = $this->formatLocalCommand($args);
     return call_user_func_array('exec_manual', $args);
   }
 
   public function execxLocalCommand($pattern /* , $arg, ... */) {
+    $this->assertLocalExists();
+
     $args = func_get_args();
     $args = $this->formatLocalCommand($args);
     return call_user_func_array('execx', $args);
   }
 
   public function getLocalCommandFuture($pattern /* , $arg, ... */) {
+    $this->assertLocalExists();
+
     $args = func_get_args();
     $args = $this->formatLocalCommand($args);
     return newv('ExecFuture', $args);
   }
 
   public function passthruLocalCommand($pattern /* , $arg, ... */) {
+    $this->assertLocalExists();
+
     $args = func_get_args();
     $args = $this->formatLocalCommand($args);
     return call_user_func_array('phutil_passthru', $args);
@@ -412,6 +441,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function shouldAutocloseBranch($branch) {
+    if ($this->isImporting()) {
+      return false;
+    }
+
     if ($this->getDetail('disable-autoclose', false)) {
       return false;
     }
@@ -463,6 +496,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     return 'r'.$this->getCallsign().$short_identifier;
+  }
+
+  public function isImporting() {
+    return (bool)$this->getDetail('importing', false);
   }
 
 /* -(  Repository URI Management  )------------------------------------------ */
@@ -691,6 +728,83 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL);
   }
 
+  public function isHosted() {
+    return (bool)$this->getDetail('hosting-enabled', false);
+  }
+
+  public function setHosted($enabled) {
+    return $this->setDetail('hosting-enabled', $enabled);
+  }
+
+  public function getServeOverHTTP() {
+    return $this->getDetail('serve-over-http', self::SERVE_OFF);
+  }
+
+  public function setServeOverHTTP($mode) {
+    return $this->setDetail('serve-over-http', $mode);
+  }
+
+  public function getServeOverSSH() {
+    return $this->getDetail('serve-over-ssh', self::SERVE_OFF);
+  }
+
+  public function setServeOverSSH($mode) {
+    return $this->setDetail('serve-over-ssh', $mode);
+  }
+
+  public static function getProtocolAvailabilityName($constant) {
+    switch ($constant) {
+      case self::SERVE_OFF:
+        return pht('Off');
+      case self::SERVE_READONLY:
+        return pht('Read Only');
+      case self::SERVE_READWRITE:
+        return pht('Read/Write');
+      default:
+        return pht('Unknown');
+    }
+  }
+
+
+  /**
+   * Raise more useful errors when there are basic filesystem problems.
+   */
+  private function assertLocalExists() {
+    switch ($this->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        if (!$this->isHosted()) {
+          // For non-hosted SVN repositories, we don't expect a local directory
+          // to exist.
+          return;
+        }
+        break;
+    }
+
+    $local = $this->getLocalPath();
+    Filesystem::assertExists($local);
+    Filesystem::assertIsDirectory($local);
+    Filesystem::assertReadable($local);
+  }
+
+  /**
+   * Determine if the working copy is bare or not. In Git, this corresponds
+   * to `--bare`. In Mercurial, `--noupdate`.
+   */
+  public function isWorkingCopyBare() {
+    switch ($this->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        return false;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        $local = $this->getLocalPath();
+        if (Filesystem::pathExists($local.'/.git')) {
+          return false;
+        } else {
+          return true;
+        }
+    }
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -699,6 +813,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
       PhabricatorPolicyCapability::CAN_EDIT,
+      DiffusionCapabilityPush::CAPABILITY,
     );
   }
 
@@ -708,6 +823,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
         return $this->getEditPolicy();
+      case DiffusionCapabilityPush::CAPABILITY:
+        return $this->getPushPolicy();
     }
   }
 

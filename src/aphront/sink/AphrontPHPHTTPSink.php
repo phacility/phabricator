@@ -7,9 +7,13 @@
  */
 final class AphrontPHPHTTPSink extends AphrontHTTPSink {
 
-  protected function emitHTTPStatus($code) {
+  protected function emitHTTPStatus($code, $message = '') {
     if ($code != 200) {
-      header("HTTP/1.0 {$code}");
+      $header = "HTTP/1.0 {$code}";
+      if (strlen($message)) {
+        $header .= " {$message}";
+      }
+      header($header);
     }
   }
 

@@ -25,6 +25,16 @@ final class PhabricatorRepositoryPullEngine
 
     $vcs = $repository->getVersionControlSystem();
     $callsign = $repository->getCallsign();
+
+    if ($repository->isHosted()) {
+      $this->log(
+        pht(
+          'Repository "%s" is hosted, so Phabricator does not pull updates '.
+          'for it.',
+          $callsign));
+      return;
+    }
+
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         // We never pull a local copy of Subversion repositories.
@@ -89,7 +99,7 @@ final class PhabricatorRepositoryPullEngine
     $repository = $this->getRepository();
 
     $repository->execxRemoteCommand(
-      'clone --origin origin %s %s',
+      'clone --bare %s %s',
       $repository->getRemoteURI(),
       rtrim($repository->getLocalPath(), '/'));
   }
@@ -139,12 +149,11 @@ final class PhabricatorRepositoryPullEngine
       $repo_path = rtrim($stdout, "\n");
 
       if (empty($repo_path)) {
-        $err = true;
-        $message =
-          "Expected to find a git repository at '{$path}', but ".
-          "there was no result from `git rev-parse --show-toplevel`. ".
-          "Something is misconfigured or broken. The git repository ".
-          "may be inside a '.git/' directory.";
+        // This can mean one of two things: we're in a bare repository, or
+        // we're inside a git repository inside another git repository. Since
+        // the first is dramatically more likely now that we perform bare
+        // clones and I don't have a great way to test for the latter, assume
+        // we're OK.
       } else if (!Filesystem::pathsAreEquivalent($repo_path, $path)) {
         $err = true;
         $message =
@@ -168,7 +177,16 @@ final class PhabricatorRepositoryPullEngine
     $retry = false;
     do {
       // This is a local command, but needs credentials.
-      $future = $repository->getRemoteCommandFuture('fetch --all --prune');
+      if ($repository->isWorkingCopyBare()) {
+        // For bare working copies, we need this magic incantation.
+        $future = $repository->getRemoteCommandFuture(
+          'fetch origin %s --prune',
+          '+refs/heads/*:refs/heads/*');
+      } else {
+        $future = $repository->getRemoteCommandFuture(
+          'fetch --all --prune');
+      }
+
       $future->setCWD($path);
       list($err, $stdout, $stderr) = $future->resolve();
 

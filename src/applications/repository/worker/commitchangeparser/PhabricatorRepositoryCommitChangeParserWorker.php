@@ -58,6 +58,9 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
   protected function finishParse() {
     $commit = $this->commit;
 
+    $commit->writeImportStatusFlag(
+      PhabricatorRepositoryCommit::IMPORTED_CHANGE);
+
     id(new PhabricatorSearchIndexer())
       ->indexDocumentByPHID($commit->getPHID());
 

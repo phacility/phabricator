@@ -559,13 +559,6 @@ return array(
   // to have.
   'auth.sessions.conduit'       => 5,
 
-  // Set this true to enable the Settings -> SSH Public Keys panel, which will
-  // allow users to associated SSH public keys with their accounts. This is only
-  // really useful if you're setting up services over SSH and want to use
-  // Phabricator for authentication; in most situations you can leave this
-  // disabled.
-  'auth.sshkeys.enabled'        => false,
-
   // If true, email addresses must be verified (by clicking a link in an
   // email) before a user can login. By default, verification is optional
   // unless 'auth.email-domains' is nonempty (see below).

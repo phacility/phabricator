@@ -45,7 +45,8 @@ abstract class PhabricatorWorkingCopyTestCase extends PhabricatorTestCase {
     $dir = PhutilDirectoryFixture::newFromArchive($path);
     $local = new TempFile('.ignore');
 
-    $repo = id(new PhabricatorRepository())
+    $user = $this->generateNewTestUser();
+    $repo = PhabricatorRepository::initializeNewRepository($user)
       ->setCallsign($callsign)
       ->setName(pht('Test Repo "%s"', $callsign))
       ->setVersionControlSystem($vcs_type)

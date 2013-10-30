@@ -25,13 +25,20 @@ final class ConduitAPI_diffusion_commitbranchesquery_Method
     $repository = $drequest->getRepository();
     $commit = $request->getValue('commit');
 
-    list($contains) = $repository->execxLocalCommand(
-      'branch -r --verbose --no-abbrev --contains %s',
-      $commit);
-
-    return DiffusionGitBranch::parseRemoteBranchOutput(
-      $contains,
-      DiffusionBranchInformation::DEFAULT_GIT_REMOTE);
+    if ($repository->isWorkingCopyBare()) {
+      list($contains) = $repository->execxLocalCommand(
+        'branch --verbose --no-abbrev --contains %s',
+        $commit);
+      return DiffusionGitBranch::parseLocalBranchOutput(
+        $contains);
+    } else {
+      list($contains) = $repository->execxLocalCommand(
+        'branch -r --verbose --no-abbrev --contains %s',
+        $commit);
+      return DiffusionGitBranch::parseRemoteBranchOutput(
+        $contains,
+        DiffusionBranchInformation::DEFAULT_GIT_REMOTE);
+    }
   }
 
   protected function getMercurialResult(ConduitAPIRequest $request) {

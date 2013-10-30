@@ -76,7 +76,6 @@ final class DiffusionCommitController extends DiffusionController {
     $this->auditAuthorityPHIDs =
       PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($user);
 
-
     $is_foreign = $commit_data->getCommitDetail('foreign-svn-stub');
     $changesets = null;
     if ($is_foreign) {
@@ -154,10 +153,14 @@ final class DiffusionCommitController extends DiffusionController {
 
     $hard_limit = 1000;
 
-    $change_query = DiffusionPathChangeQuery::newFromDiffusionRequest(
-      $drequest);
-    $change_query->setLimit($hard_limit + 1);
-    $changes = $change_query->loadChanges();
+    if ($commit->isImported()) {
+      $change_query = DiffusionPathChangeQuery::newFromDiffusionRequest(
+        $drequest);
+      $change_query->setLimit($hard_limit + 1);
+      $changes = $change_query->loadChanges();
+    } else {
+      $changes = array();
+    }
 
     $was_limited = (count($changes) > $hard_limit);
     if ($was_limited) {
@@ -206,37 +209,29 @@ final class DiffusionCommitController extends DiffusionController {
     }
 
     if ($bad_commit) {
-      $error_panel = new AphrontErrorView();
-      $error_panel->setTitle(pht('Bad Commit'));
-      $error_panel->appendChild($bad_commit['description']);
-
-      $content[] = $error_panel;
+      $content[] = $this->renderStatusMessage(
+        pht('Bad Commit'),
+        $bad_commit['description']);
     } else if ($is_foreign) {
       // Don't render anything else.
+    } else if (!$commit->isImported()) {
+      $content[] = $this->renderStatusMessage(
+        pht('Still Importing...'),
+        pht(
+          'This commit is still importing. Changes will be visible once '.
+          'the import finishes.'));
     } else if (!count($changes)) {
-      $no_changes = new AphrontErrorView();
-      $no_changes->setSeverity(AphrontErrorView::SEVERITY_WARNING);
-      $no_changes->setTitle(pht('Not Yet Parsed'));
-      // TODO: This can also happen with weird SVN changes that don't do
-      // anything (or only alter properties?), although the real no-changes case
-      // is extremely rare and might be impossible to produce organically. We
-      // should probably write some kind of "Nothing Happened!" change into the
-      // DB once we parse these changes so we can distinguish between
-      // "not parsed yet" and "no changes".
-      $no_changes->appendChild(
-        pht("This commit hasn't been fully parsed yet (or doesn't affect any ".
-        "paths)."));
-      $content[] = $no_changes;
+      $content[] = $this->renderStatusMessage(
+        pht('Empty Commit'),
+        pht(
+          'This commit is empty and does not affect any paths.'));
     } else if ($was_limited) {
-      $huge_commit = new AphrontErrorView();
-      $huge_commit->setSeverity(AphrontErrorView::SEVERITY_WARNING);
-      $huge_commit->setTitle(pht('Enormous Commit'));
-      $huge_commit->appendChild(
+      $content[] = $this->renderStatusMessage(
+        pht('Enormous Commit'),
         pht(
           'This commit is enormous, and affects more than %d files. '.
           'Changes are not shown.',
           $hard_limit));
-      $content[] = $huge_commit;
     } else {
       // The user has clicked "Show All Changes", and we should show all the
       // changes inline even if there are more than the soft limit.
@@ -253,13 +248,12 @@ final class DiffusionCommitController extends DiffusionController {
             'href'    => '?show_all=true',
           ),
           pht('Show All Changes'));
+
         $warning_view = id(new AphrontErrorView())
           ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
           ->setTitle('Very Large Commit')
-          ->appendChild(phutil_tag(
-            'p',
-            array(),
-            pht("This commit is very large. Load each file individually.")));
+          ->appendChild(
+            pht("This commit is very large. Load each file individually."));
 
         $change_panel->appendChild($warning_view);
         $change_panel->addButton($show_all_button);
@@ -1083,5 +1077,6 @@ final class DiffusionCommitController extends DiffusionController {
 
     return $parser->processCorpus($corpus);
   }
+
 
 }

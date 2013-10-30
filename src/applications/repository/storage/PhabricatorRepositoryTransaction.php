@@ -3,6 +3,7 @@
 final class PhabricatorRepositoryTransaction
   extends PhabricatorApplicationTransaction {
 
+  const TYPE_VCS = 'repo:vcs';
   const TYPE_ACTIVATE     = 'repo:activate';
   const TYPE_NAME         = 'repo:name';
   const TYPE_DESCRIPTION  = 'repo:description';
@@ -20,6 +21,11 @@ final class PhabricatorRepositoryTransaction
   const TYPE_SSH_KEYFILE = 'repo:ssh-keyfile';
   const TYPE_HTTP_LOGIN = 'repo:http-login';
   const TYPE_HTTP_PASS = 'repo:http-pass';
+  const TYPE_LOCAL_PATH = 'repo:local-path';
+  const TYPE_HOSTING = 'repo:hosting';
+  const TYPE_PROTOCOL_HTTP = 'repo:serve-http';
+  const TYPE_PROTOCOL_SSH = 'repo:serve-ssh';
+  const TYPE_PUSH_POLICY = 'repo:push-policy';
 
   public function getApplicationName() {
     return 'repository';
@@ -33,6 +39,64 @@ final class PhabricatorRepositoryTransaction
     return null;
   }
 
+  public function getRequiredHandlePHIDs() {
+    $phids = parent::getRequiredHandlePHIDs();
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_PUSH_POLICY:
+        $phids[] = $old;
+        $phids[] = $new;
+        break;
+    }
+
+    return $phids;
+  }
+
+  public function shouldHide() {
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_REMOTE_URI:
+      case self::TYPE_SSH_LOGIN:
+      case self::TYPE_SSH_KEY:
+      case self::TYPE_SSH_KEYFILE:
+      case self::TYPE_HTTP_LOGIN:
+      case self::TYPE_HTTP_PASS:
+        // Hide null vs empty string changes.
+        return (!strlen($old) && !strlen($new));
+      case self::TYPE_LOCAL_PATH:
+      case self::TYPE_NAME:
+        // Hide these on create, they aren't interesting and we have an
+        // explicit "create" transaction.
+        if (!strlen($old)) {
+          return true;
+        }
+        break;
+    }
+
+    return parent::shouldHide();
+  }
+
+  public function getIcon() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_VCS:
+        return 'create';
+    }
+    return parent::getIcon();
+  }
+
+  public function getColor() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_VCS:
+        return 'green';
+    }
+    return parent::getIcon();
+  }
+
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
 
@@ -40,6 +104,10 @@ final class PhabricatorRepositoryTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
+      case self::TYPE_VCS:
+        return pht(
+          '%s created this repository.',
+          $this->renderHandleLink($author_phid));
       case self::TYPE_ACTIVATE:
         if ($new) {
           return pht(
@@ -231,6 +299,42 @@ final class PhabricatorRepositoryTransaction
         return pht(
           '%s updated the HTTP password for this repository.',
           $this->renderHandleLink($author_phid));
+      case self::TYPE_LOCAL_PATH:
+        return pht(
+          '%s changed the local path from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $old,
+          $new);
+      case self::TYPE_HOSTING:
+        if ($new) {
+          return pht(
+            '%s changed this repository to be hosted on Phabricator.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s changed this repository to track a remote elsewhere.',
+            $this->renderHandleLink($author_phid));
+        }
+      case self::TYPE_PROTOCOL_HTTP:
+        return pht(
+          '%s changed the availability of this repository over HTTP from '.
+          '"%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          PhabricatorRepository::getProtocolAvailabilityName($old),
+          PhabricatorRepository::getProtocolAvailabilityName($new));
+      case self::TYPE_PROTOCOL_SSH:
+        return pht(
+          '%s changed the availability of this repository over SSH from '.
+          '"%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          PhabricatorRepository::getProtocolAvailabilityName($old),
+          PhabricatorRepository::getProtocolAvailabilityName($new));
+      case self::TYPE_PUSH_POLICY:
+        return pht(
+          '%s changed the push policy of this repository from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $this->renderPolicyName($old),
+          $this->renderPolicyName($new));
     }
 
     return parent::getTitle();
@@ -255,7 +359,6 @@ final class PhabricatorRepositoryTransaction
 
     return $view->render();
   }
-
 
 }
 

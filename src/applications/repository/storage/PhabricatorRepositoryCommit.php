@@ -15,6 +15,13 @@ final class PhabricatorRepositoryCommit
   protected $authorPHID;
   protected $auditStatus = PhabricatorAuditCommitStatusConstants::NONE;
   protected $summary = '';
+  protected $importStatus = 0;
+
+  const IMPORTED_MESSAGE = 1;
+  const IMPORTED_CHANGE = 2;
+  const IMPORTED_OWNERS = 4;
+  const IMPORTED_HERALD = 8;
+  const IMPORTED_ALL = 15;
 
   private $commitData = self::ATTACHABLE;
   private $audits;
@@ -37,6 +44,20 @@ final class PhabricatorRepositoryCommit
 
   public function getIsUnparsed() {
     return $this->isUnparsed;
+  }
+
+  public function isImported() {
+    return ($this->getImportStatus() == self::IMPORTED_ALL);
+  }
+
+  public function writeImportStatusFlag($flag) {
+    queryfx(
+      $this->establishConnection('w'),
+      'UPDATE %T SET importStatus = (importStatus | %d) WHERE id = %d',
+      $this->getTableName(),
+      $flag,
+      $this->getID());
+    return $this;
   }
 
   public function getConfiguration() {

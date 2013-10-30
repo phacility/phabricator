@@ -54,7 +54,8 @@ abstract class PhabricatorRepositoryEngine {
     if ($this->getVerbose()) {
       $console = PhutilConsole::getConsole();
       $argv = func_get_args();
-      call_user_func_array(array($console, 'writeLog'), $argv);
+      $argv[0] = $argv[0]."\n";
+      call_user_func_array(array($console, 'writeOut'), $argv);
     }
     return $this;
   }

@@ -19,12 +19,15 @@ final class DiffusionRepositoryEditMainController
     $is_hg = false;
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        $has_local = true;
         $is_git = true;
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $has_local = $repository->isHosted();
         $is_svn = true;
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $has_local = true;
         $is_hg = true;
         break;
     }
@@ -37,12 +40,10 @@ final class DiffusionRepositoryEditMainController
 
     $header = id(new PHUIHeaderView())
       ->setHeader($title);
-    if (!$repository->isTracked()) {
-      $header->addTag(
-        id(new PhabricatorTagView())
-          ->setType(PhabricatorTagView::TYPE_STATE)
-          ->setName(pht('Inactive'))
-          ->setBackgroundColor(PhabricatorTagView::COLOR_BLACK));
+    if ($repository->isTracked()) {
+      $header->setStatus('oh-ok', '', pht('Active'));
+    } else {
+      $header->setStatus('policy-noone', '', pht('Inactive'));
     }
 
     $basic_actions = $this->buildBasicActions($repository);
@@ -61,6 +62,10 @@ final class DiffusionRepositoryEditMainController
     $encoding_properties =
       $this->buildEncodingProperties($repository, $encoding_actions);
 
+    $hosting_properties = $this->buildHostingProperties(
+      $repository,
+      $this->buildHostingActions($repository));
+
     $branches_properties = null;
     if ($has_branches) {
       $branches_properties = $this->buildBranchesProperties(
@@ -73,6 +78,13 @@ final class DiffusionRepositoryEditMainController
       $subversion_properties = $this->buildSubversionProperties(
         $repository,
         $this->buildSubversionActions($repository));
+    }
+
+    $local_properties = null;
+    if ($has_local) {
+      $local_properties = $this->buildLocalProperties(
+        $repository,
+        $this->buildLocalActions($repository));
     }
 
     $actions_properties = $this->buildActionsProperties(
@@ -105,8 +117,14 @@ final class DiffusionRepositoryEditMainController
       ->setHeader($header)
       ->addPropertyList($basic_properties)
       ->addPropertyList($policy_properties)
-      ->addPropertyList($remote_properties)
-      ->addPropertyList($encoding_properties);
+      ->addPropertyList($hosting_properties)
+      ->addPropertyList($remote_properties);
+
+    if ($local_properties) {
+      $obj_box->addPropertyList($local_properties);
+    }
+
+    $obj_box->addPropertyList($encoding_properties);
 
     if ($branches_properties) {
       $obj_box->addPropertyList($branches_properties);
@@ -159,6 +177,14 @@ final class DiffusionRepositoryEditMainController
     }
 
     $view->addAction($activate);
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Delete Repository'))
+        ->setIcon('delete')
+        ->setHref(
+          $this->getRepositoryControllerURI($repository, 'edit/delete/'))
+        ->setWorkflow(true));
 
     return $view;
   }
@@ -276,6 +302,10 @@ final class DiffusionRepositoryEditMainController
       pht('Editable By'),
       $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
 
+    $pushable = $repository->isHosted()
+      ? $descriptions[DiffusionCapabilityPush::CAPABILITY]
+      : phutil_tag('em', array(), pht('Not a Hosted Repository'));
+    $view->addProperty(pht('Pushable By'), $pushable);
 
     return $view;
   }
@@ -314,12 +344,12 @@ final class DiffusionRepositoryEditMainController
     $view->addProperty(pht('Default Branch'), $default_branch);
 
     $track_only = nonempty(
-      $repository->getHumanReadableDetail('branch-filter'),
+      $repository->getHumanReadableDetail('branch-filter', array()),
       phutil_tag('em', array(), pht('Track All Branches')));
     $view->addProperty(pht('Track Only'), $track_only);
 
     $autoclose_only = nonempty(
-      $repository->getHumanReadableDetail('close-commits-filter'),
+      $repository->getHumanReadableDetail('close-commits-filter', array()),
       phutil_tag('em', array(), pht('Autoclose On All Branches')));
     $view->addProperty(pht('Autoclose Only'), $autoclose_only);
 
@@ -440,7 +470,94 @@ final class DiffusionRepositoryEditMainController
 
     $view->addProperty(
       pht('Remote URI'),
-      $repository->getDetail('remote-uri'));
+      $repository->getHumanReadableDetail('remote-uri'));
+
+    return $view;
+  }
+
+  private function buildLocalActions(PhabricatorRepository $repository) {
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PhabricatorActionListView())
+      ->setObjectURI($this->getRequest()->getRequestURI())
+      ->setUser($viewer);
+
+    $edit = id(new PhabricatorActionView())
+      ->setIcon('edit')
+      ->setName(pht('Edit Local'))
+      ->setHref(
+        $this->getRepositoryControllerURI($repository, 'edit/local/'));
+    $view->addAction($edit);
+
+    return $view;
+  }
+
+  private function buildLocalProperties(
+    PhabricatorRepository $repository,
+    PhabricatorActionListView $actions) {
+
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setActionList($actions)
+      ->addSectionHeader(pht('Local'));
+
+    $view->addProperty(
+      pht('Local Path'),
+      $repository->getHumanReadableDetail('local-path'));
+
+    return $view;
+  }
+
+  private function buildHostingActions(PhabricatorRepository $repository) {
+    $user = $this->getRequest()->getUser();
+
+    $view = id(new PhabricatorActionListView())
+      ->setObjectURI($this->getRequest()->getRequestURI())
+      ->setUser($user);
+
+    $edit = id(new PhabricatorActionView())
+      ->setIcon('edit')
+      ->setName(pht('Edit Hosting'))
+      ->setHref(
+        $this->getRepositoryControllerURI($repository, 'edit/hosting/'));
+    $view->addAction($edit);
+
+    return $view;
+  }
+
+  private function buildHostingProperties(
+    PhabricatorRepository $repository,
+    PhabricatorActionListView $actions) {
+
+    $user = $this->getRequest()->getUser();
+
+    $view = id(new PHUIPropertyListView())
+      ->setUser($user)
+      ->setActionList($actions)
+      ->addSectionHeader(pht('Hosting'));
+
+    $hosting = $repository->isHosted()
+      ? pht('Hosted on Phabricator')
+      : pht('Hosted Elsewhere');
+    $view->addProperty(pht('Hosting'), phutil_tag('em', array(), $hosting));
+
+    $view->addProperty(
+      pht('Serve over HTTP'),
+      phutil_tag(
+        'em',
+        array(),
+        PhabricatorRepository::getProtocolAvailabilityName(
+          $repository->getServeOverHTTP())));
+
+    $view->addProperty(
+      pht('Serve over SSH'),
+      phutil_tag(
+        'em',
+        array(),
+        PhabricatorRepository::getProtocolAvailabilityName(
+          $repository->getServeOverSSH())));
 
     return $view;
   }

@@ -32,6 +32,9 @@ final class DiffusionRepositoryCreateController
 
       $cancel_uri = $this->getRepositoryControllerURI($repository, 'edit/');
     } else {
+      $this->requireApplicationCapability(
+        DiffusionCapabilityCreateRepositories::CAPABILITY);
+
       $cancel_uri = $this->getApplicationURI();
     }
 
@@ -60,15 +63,19 @@ final class DiffusionRepositoryCreateController
     if ($request->isFormPost()) {
       $form->readFromRequest($request);
       if ($form->isComplete()) {
+        $is_create = ($this->edit === null);
 
-        if ($this->edit != 'remote') {
-          // TODO: This exception is heartwarming but should probably take more
-          // substantive actions.
-          throw new Exception("GOOD JOB AT FORM");
+        if ($is_create) {
+          $repository = PhabricatorRepository::initializeNewRepository(
+            $viewer);
         }
 
         $template = id(new PhabricatorRepositoryTransaction());
 
+        $type_name = PhabricatorRepositoryTransaction::TYPE_NAME;
+        $type_vcs = PhabricatorRepositoryTransaction::TYPE_VCS;
+        $type_activate = PhabricatorRepositoryTransaction::TYPE_ACTIVATE;
+        $type_local_path = PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH;
         $type_remote_uri = PhabricatorRepositoryTransaction::TYPE_REMOTE_URI;
         $type_ssh_login = PhabricatorRepositoryTransaction::TYPE_SSH_LOGIN;
         $type_ssh_key = PhabricatorRepositoryTransaction::TYPE_SSH_KEY;
@@ -77,6 +84,48 @@ final class DiffusionRepositoryCreateController
         $type_http_pass = PhabricatorRepositoryTransaction::TYPE_HTTP_PASS;
 
         $xactions = array();
+
+        // If we're creating a new repository, set all this core stuff.
+        if ($is_create) {
+          $callsign = $form->getPage('name')
+            ->getControl('callsign')->getValue();
+
+          // We must set this to a unique value to save the repository
+          // initially, and it's immutable, so we don't bother using
+          // transactions to apply this change.
+          $repository->setCallsign($callsign);
+
+          // Put the repository in "Importing" mode until we finish
+          // parsing it.
+          $repository->setDetail('importing', true);
+
+          $xactions[] = id(clone $template)
+            ->setTransactionType($type_name)
+            ->setNewValue(
+              $form->getPage('name')->getControl('name')->getValue());
+
+          $xactions[] = id(clone $template)
+            ->setTransactionType($type_vcs)
+            ->setNewValue(
+              $form->getPage('vcs')->getControl('vcs')->getValue());
+
+          $activate = $form->getPage('done')
+            ->getControl('activate')->getValue();
+          $xactions[] = id(clone $template)
+            ->setTransactionType($type_activate)
+            ->setNewValue(
+              ($activate == 'start'));
+
+          $default_local_path = PhabricatorEnv::getEnvConfig(
+            'repository.default-local-path');
+
+          $default_local_path = rtrim($default_local_path, '/');
+          $default_local_path = $default_local_path.'/'.$callsign.'/';
+
+          $xactions[] = id(clone $template)
+            ->setTransactionType($type_local_path)
+            ->setNewValue($default_local_path);
+        }
 
         $xactions[] = id(clone $template)
           ->setTransactionType($type_remote_uri)
@@ -408,6 +457,21 @@ final class DiffusionRepositoryCreateController
         }
       }
 
+      // Catch confusion between Git/SCP-style URIs and normal URIs. See T3619
+      // for discussion. This is usually a user adding "ssh://" to an implicit
+      // SSH Git URI.
+      if ($proto == 'ssh') {
+        if (preg_match('(^[^:@]+://[^/:]+:[^\d])', $v_remote)) {
+          $c_remote->setError(pht('Invalid'));
+          $page->addPageError(
+            pht(
+              "The Remote URI is not formatted correctly. Remote URIs ".
+              "with an explicit protocol should be in the form ".
+              "'proto://domain/path', not 'proto://domain:/path'. ".
+              "The ':/path' syntax is only valid in SCP-style URIs."));
+        }
+      }
+
       switch ($proto) {
         case 'ssh':
         case 'http':
@@ -619,7 +683,7 @@ final class DiffusionRepositoryCreateController
             pht('Configure More Options First'),
             pht(
               'Configure more options before beginning the repository '.
-              'import. This will let you fine-tune settings.. You can '.
+              'import. This will let you fine-tune settings. You can '.
               'start the import whenever you are ready.')));
   }
 

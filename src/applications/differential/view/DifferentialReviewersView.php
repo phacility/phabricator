@@ -43,7 +43,7 @@ final class DifferentialReviewersView extends AphrontView {
 
       switch ($reviewer->getStatus()) {
         case DifferentialReviewerStatus::STATUS_ADDED:
-          $item->setIcon('open-dark', pht('Review Requested'));
+          $item->setIcon('open', pht('Review Requested'));
           break;
 
         case DifferentialReviewerStatus::STATUS_ACCEPTED:
@@ -73,7 +73,7 @@ final class DifferentialReviewersView extends AphrontView {
         case DifferentialReviewerStatus::STATUS_COMMENTED:
           if ($is_current) {
             $item->setIcon(
-              'info-blue',
+              'info',
               pht('Commented'));
           } else {
             $item->setIcon(
@@ -87,7 +87,7 @@ final class DifferentialReviewersView extends AphrontView {
           break;
 
         default:
-          $item->setIcon('question-dark', pht('%s?', $reviewer->getStatus()));
+          $item->setIcon('question', pht('%s?', $reviewer->getStatus()));
           break;
 
       }

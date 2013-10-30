@@ -38,17 +38,9 @@ final class PhabricatorRepositoryListController
           'a',
           array(
             'class' => 'button small grey',
-            'href'  => '/repository/edit/'.$repo->getID().'/',
+            'href'  => '/diffusion/'.$repo->getCallsign().'/edit/',
           ),
           'Edit'),
-        javelin_tag(
-          'a',
-          array(
-            'class' => 'button small grey',
-            'href'  => '/repository/delete/'.$repo->getID().'/',
-            'sigil' => 'workflow',
-          ),
-          'Delete'),
       );
     }
 
@@ -60,7 +52,6 @@ final class PhabricatorRepositoryListController
         'Type',
         'Diffusion',
         '',
-        ''
       ));
     $table->setColumnClasses(
       array(
@@ -68,7 +59,6 @@ final class PhabricatorRepositoryListController
         'wide',
         null,
         null,
-        'action',
         'action',
       ));
 
@@ -79,13 +69,12 @@ final class PhabricatorRepositoryListController
         true,
         true,
         $is_admin,
-        $is_admin,
       ));
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Repositories');
     if ($is_admin) {
-      $panel->setCreateButton('Create New Repository', '/repository/create/');
+      $panel->setCreateButton('Create New Repository', '/diffusion/create/');
     }
     $panel->appendChild($table);
     $panel->setNoBackground();

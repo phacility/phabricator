@@ -27,7 +27,12 @@ form.aphront-dialog-view .aphront-error-view {
   padding: 12px;
 }
 
-.aphront-error-view-head {
+.aphront-panel-plain .aphront-error-view {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+h1.aphront-error-view-head {
   padding: 10px 10px 0 10px;
   font-weight: bold;
   color: {$darkgreytext};

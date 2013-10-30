@@ -128,7 +128,8 @@ final class PhabricatorRepositoryPullLocalDaemon
 
           if (!$no_discovery) {
             // TODO: It would be nice to discover only if we pulled something,
-            // but this isn't totally trivial.
+            // but this isn't totally trivial. It's slightly more complicated
+            // with hosted repositories, too.
 
             $lock_name = get_class($this).':'.$callsign;
             $lock = PhabricatorGlobalLock::newLock($lock_name);
@@ -200,28 +201,41 @@ final class PhabricatorRepositoryPullLocalDaemon
 
   public function discoverRepository(PhabricatorRepository $repository) {
     $vcs = $repository->getVersionControlSystem();
+
+    $result = null;
+    $refs = null;
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        return $this->executeGitDiscover($repository);
+        $result = $this->executeGitDiscover($repository);
+        break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         $refs = $this->getDiscoveryEngine($repository)
           ->discoverCommits();
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        return $this->executeHgDiscover($repository);
+        $result = $this->executeHgDiscover($repository);
+        break;
       default:
         throw new Exception("Unknown VCS '{$vcs}'!");
     }
 
-    foreach ($refs as $ref) {
-      $this->recordCommit(
-        $repository,
-        $ref->getIdentifier(),
-        $ref->getEpoch(),
-        $ref->getBranch());
+    if ($refs !== null) {
+      foreach ($refs as $ref) {
+        $this->recordCommit(
+          $repository,
+          $ref->getIdentifier(),
+          $ref->getEpoch(),
+          $ref->getBranch());
+      }
     }
 
-    return (bool)count($refs);
+    $this->checkIfRepositoryIsFullyImported($repository);
+
+    if ($refs !== null) {
+      return (bool)count($refs);
+    } else {
+      return $result;
+    }
   }
 
   private function getDiscoveryEngine(PhabricatorRepository $repository) {
@@ -455,7 +469,39 @@ final class PhabricatorRepositoryPullLocalDaemon
     return $repository->getID().':'.$commit_identifier;
   }
 
+  private function checkIfRepositoryIsFullyImported(
+    PhabricatorRepository $repository) {
 
+    // Check if the repository has the "Importing" flag set. We want to clear
+    // the flag if we can.
+    $importing = $repository->getDetail('importing');
+    if (!$importing) {
+      // This repository isn't marked as "Importing", so we're done.
+      return;
+    }
+
+    // Look for any commit which hasn't imported.
+    $unparsed_commit = queryfx_one(
+      $repository->establishConnection('r'),
+      'SELECT * FROM %T WHERE repositoryID = %d AND importStatus != %d',
+      id(new PhabricatorRepositoryCommit())->getTableName(),
+      $repository->getID(),
+      PhabricatorRepositoryCommit::IMPORTED_ALL);
+    if ($unparsed_commit) {
+      // We found a commit which still needs to import, so we can't clear the
+      // flag.
+      return;
+    }
+
+    // Clear the "importing" flag.
+    $repository->openTransaction();
+      $repository->beginReadLocking();
+        $repository = $repository->reload();
+        $repository->setDetail('importing', false);
+        $repository->save();
+      $repository->endReadLocking();
+    $repository->saveTransaction();
+  }
 
 /* -(  Git Implementation  )------------------------------------------------- */
 
@@ -480,12 +526,24 @@ final class PhabricatorRepositoryPullLocalDaemon
       $repository->getRemoteURI(),
       $repository->getLocalPath());
 
-    list($stdout) = $repository->execxLocalCommand(
-      'branch -r --verbose --no-abbrev');
+    if ($repository->isWorkingCopyBare()) {
+      list($stdout) = $repository->execxLocalCommand(
+        'branch --verbose --no-abbrev');
+      $branches = DiffusionGitBranch::parseLocalBranchOutput(
+        $stdout);
+    } else {
+      list($stdout) = $repository->execxLocalCommand(
+        'branch -r --verbose --no-abbrev');
+      $branches = DiffusionGitBranch::parseRemoteBranchOutput(
+        $stdout,
+        $only_this_remote = DiffusionBranchInformation::DEFAULT_GIT_REMOTE);
+    }
 
-    $branches = DiffusionGitBranch::parseRemoteBranchOutput(
-      $stdout,
-      $only_this_remote = DiffusionBranchInformation::DEFAULT_GIT_REMOTE);
+    if (!$branches) {
+      // This repository has no branches at all, so we don't need to do
+      // anything. Generally, this means the repository is empty.
+      return;
+    }
 
     $callsign = $repository->getCallsign();
 

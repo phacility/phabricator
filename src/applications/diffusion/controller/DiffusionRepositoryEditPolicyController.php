@@ -27,16 +27,19 @@ final class DiffusionRepositoryEditPolicyController
 
     $v_view = $repository->getViewPolicy();
     $v_edit = $repository->getEditPolicy();
+    $v_push = $repository->getPushPolicy();
 
     if ($request->isFormPost()) {
       $v_view = $request->getStr('viewPolicy');
       $v_edit = $request->getStr('editPolicy');
+      $v_push = $request->getStr('pushPolicy');
 
       $xactions = array();
       $template = id(new PhabricatorRepositoryTransaction());
 
       $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
       $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
+      $type_push = PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY;
 
       $xactions[] = id(clone $template)
         ->setTransactionType($type_view)
@@ -45,6 +48,12 @@ final class DiffusionRepositoryEditPolicyController
       $xactions[] = id(clone $template)
         ->setTransactionType($type_edit)
         ->setNewValue($v_edit);
+
+      if ($repository->isHosted()) {
+        $xactions[] = id(clone $template)
+          ->setTransactionType($type_push)
+          ->setNewValue($v_push);
+      }
 
       id(new PhabricatorRepositoryEditor())
         ->setContinueOnNoEffect(true)
@@ -62,7 +71,7 @@ final class DiffusionRepositoryEditPolicyController
       id(new PhabricatorCrumbView())
         ->setName(pht('Edit Policies')));
 
-    $title = pht('Edit %s', $repository->getName());
+    $title = pht('Edit Policies (%s)', $repository->getName());
 
     $policies = id(new PhabricatorPolicyQuery())
       ->setViewer($viewer)
@@ -84,7 +93,25 @@ final class DiffusionRepositoryEditPolicyController
           ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
           ->setPolicyObject($repository)
           ->setPolicies($policies)
-          ->setName('editPolicy'))
+          ->setName('editPolicy'));
+
+    if ($repository->isHosted()) {
+      $form->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setUser($viewer)
+          ->setCapability(DiffusionCapabilityPush::CAPABILITY)
+          ->setPolicyObject($repository)
+          ->setPolicies($policies)
+          ->setName('pushPolicy'));
+    } else {
+      $form->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel(pht('Can Push'))
+          ->setValue(
+            phutil_tag('em', array(), pht('Not a Hosted Repository'))));
+    }
+
+    $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save Policies'))

@@ -29,10 +29,6 @@ final class PhabricatorApplicationRepositories extends PhabricatorApplication {
     return array(
       '/repository/' => array(
         ''                     => 'PhabricatorRepositoryListController',
-        'create/'              => 'PhabricatorRepositoryCreateController',
-        'edit/(?P<id>[1-9]\d*)/(?:(?P<view>\w+)/)?' =>
-          'PhabricatorRepositoryEditController',
-        'delete/(?P<id>[1-9]\d*)/'  => 'PhabricatorRepositoryDeleteController',
         'project/edit/(?P<id>[1-9]\d*)/' =>
           'PhabricatorRepositoryArcanistProjectEditController',
         'project/delete/(?P<id>[1-9]\d*)/' =>

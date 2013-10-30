@@ -31,8 +31,7 @@ final class DiffusionGitRequest extends DiffusionRequest {
     if ($this->commit) {
       return $this->commit;
     }
-    $remote = DiffusionBranchInformation::DEFAULT_GIT_REMOTE;
-    return $remote.'/'.$this->getBranch();
+    return $this->getBranch();
   }
 
 }

@@ -62,15 +62,24 @@ final class ConduitAPI_repository_create_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    if (!$request->getUser()->getIsAdmin()) {
-      throw new ConduitException('ERR-PERMISSIONS');
-    }
+    $application = id(new PhabricatorApplicationQuery())
+      ->setViewer($request->getUser())
+      ->withClasses(array('PhabricatorApplicationDiffusion'))
+      ->executeOne();
+
+    PhabricatorPolicyFilter::requireCapability(
+      $request->getUser(),
+      $application,
+      DiffusionCapabilityCreateRepositories::CAPABILITY);
 
     // TODO: This has some duplication with (and lacks some of the validation
     // of) the web workflow; refactor things so they can share more code as this
-    // stabilizes.
+    // stabilizes. Specifically, this should move to transactions since they
+    // work properly now.
 
-    $repository = new PhabricatorRepository();
+    $repository = PhabricatorRepository::initializeNewRepository(
+      $request->getUser());
+
     $repository->setName($request->getValue('name'));
 
     $callsign = $request->getValue('callsign');

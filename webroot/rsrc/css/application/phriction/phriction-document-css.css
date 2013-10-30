@@ -43,8 +43,8 @@
   text-shadow: 0 1px 2px #fff;
 }
 
-.phriction-document-history-diff {
-  padding: 0 2em 2em;
+.phriction-document-history-diff .phui-object-item-list-view {
+  padding: 0 16px;
 }
 
 .phriction-revert-table {
@@ -54,16 +54,24 @@
 .phriction-revert-table td {
   text-align: center;
   width: 50%;
-  padding: .5em 0;
+  padding: 8px 0;
+  margin: 0 16px;
+  background-color: {$lightbluebackground};
+  border-top: 1px solid {$lightblueborder};
 }
 
 .phriction-history-nav-table {
   width: 100%;
+  margin-bottom: 20px;
 }
 
 .phriction-history-nav-table td {
   width: 50%;
   color: {$darkgreytext};
+}
+
+.phriction-history-nav-table td {
+  padding: 8px 16px;
 }
 
 .phriction-history-nav-table td.nav-next {

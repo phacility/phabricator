@@ -16,7 +16,7 @@ final class PhabricatorSettingsPanelSSHKeys
   }
 
   public function isEnabled() {
-    return PhabricatorEnv::getEnvConfig('auth.sshkeys.enabled');
+    return true;
   }
 
   public function processRequest(AphrontRequest $request) {

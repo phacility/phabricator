@@ -169,6 +169,38 @@ final class ConduitAPI_differential_parsecommitmessage_Method
       $fields[$name] = $data;
     }
 
+    // This is another piece of special-cased magic which allows you to
+    // enter a ridiculously long title, or just type a big block of stream
+    // of consciousness text, and have some sort of reasonable result conjured
+    // from it.
+    if (isset($fields['title'])) {
+      $terminal = '...';
+      $title = $fields['title'];
+      $short = phutil_utf8_shorten($title, 250, $terminal);
+      if ($short != $title) {
+
+        // If we shortened the title, split the rest into the summary, so
+        // we end up with a title like:
+        //
+        //    Title title tile title title...
+        //
+        // ...and a summary like:
+        //
+        //    ...title title title.
+        //
+        //    Summary summary summary summary.
+
+        $summary = idx($fields, 'summary', '');
+        $offset = strlen($short) - strlen($terminal);
+        $remainder = ltrim(substr($fields['title'], $offset));
+        $summary = '...'.$remainder."\n\n".$summary;
+        $summary = rtrim($summary, "\n");
+
+        $fields['title'] = $short;
+        $fields['summary'] = $summary;
+      }
+    }
+
     return $fields;
   }
 
