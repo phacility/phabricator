@@ -81,7 +81,8 @@ final class PhabricatorRepositoryCommit
       $this->getID());
   }
 
-  public function attachCommitData(PhabricatorRepositoryCommitData $data) {
+  public function attachCommitData(
+    PhabricatorRepositoryCommitData $data = null) {
     $this->commitData = $data;
     return $this;
   }
