@@ -143,7 +143,6 @@ final class PhabricatorRepositoryListController
 
     return $this->buildStandardPageResponse(
       array(
-        $this->renderDaemonNotice(),
         $panel,
         $project_panel,
       ),
