@@ -96,6 +96,12 @@ abstract class DiffusionController extends PhabricatorController {
       }
     }
 
+    if (!$repository->isTracked()) {
+      return new PhabricatorVCSResponse(
+        403,
+        pht('This repository is inactive.'));
+    }
+
     $is_push = !$this->isReadOnlyRequest($repository);
 
     switch ($repository->getServeOverHTTP()) {

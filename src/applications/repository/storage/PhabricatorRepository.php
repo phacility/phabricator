@@ -805,6 +805,16 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
   }
 
+  public function usesLocalWorkingCopy() {
+    switch ($this->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        return $this->isHosted();
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        return true;
+    }
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
