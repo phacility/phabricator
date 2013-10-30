@@ -88,12 +88,12 @@ final class LegalpadDocumentViewController extends LegalpadController {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addPropertyList($properties);
+      ->addPropertyList($properties)
+      ->addPropertyList($this->buildDocument($engine, $document_body));
 
     $content = array(
       $crumbs,
       $object_box,
-      $this->buildDocument($engine, $document_body),
       $xaction_view,
       $add_comment,
     );
@@ -111,14 +111,12 @@ final class LegalpadDocumentViewController extends LegalpadController {
     PhabricatorMarkupEngine
     $engine, LegalpadDocumentBody $body) {
 
-    require_celerity_resource('legalpad-documentbody-css');
-
-    return phutil_tag(
-      'div',
-      array(
-        'class' => 'legalpad-documentbody'
-      ),
+    $view = new PHUIPropertyListView();
+    $view->addSectionHeader(pht('Document'));
+    $view->addTextContent(
       $engine->getOutput($body, LegalpadDocumentBody::MARKUP_FIELD_TEXT));
+
+    return $view;
 
   }
 
