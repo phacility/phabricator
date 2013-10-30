@@ -60,7 +60,6 @@
 
 .phui-property-list-value {
   color: {$darkgreytext};
-  overflow: hidden;
   line-height: 17px;
 }
 
