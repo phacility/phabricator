@@ -185,6 +185,7 @@ final class DiffusionRepositoryController extends DiffusionController {
         $repository,
         'description',
         $user);
+      $view->addSectionHeader(pht('Description'));
       $view->addTextContent($description);
     }
 
