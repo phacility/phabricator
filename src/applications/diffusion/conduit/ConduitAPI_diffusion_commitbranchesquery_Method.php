@@ -25,6 +25,8 @@ final class ConduitAPI_diffusion_commitbranchesquery_Method
     $repository = $drequest->getRepository();
     $commit = $request->getValue('commit');
 
+    // NOTE: We can't use DiffusionLowLevelGitRefQuery here because
+    // `git for-each-ref` does not support `--contains`.
     if ($repository->isWorkingCopyBare()) {
       list($contains) = $repository->execxLocalCommand(
         'branch --verbose --no-abbrev --contains %s',

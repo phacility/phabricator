@@ -9,7 +9,7 @@ final class DiffusionTagListController extends DiffusionController {
   public function processRequest() {
     $drequest = $this->getDiffusionRequest();
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
     $repository = $drequest->getRepository();
 
@@ -42,25 +42,22 @@ final class DiffusionTagListController extends DiffusionController {
 
     $content = null;
     if (!$tags) {
-      $content = new AphrontErrorView();
-      $content->setTitle(pht('No Tags'));
-      if ($is_commit) {
-        $content->appendChild(pht('This commit has no tags.'));
-      } else {
-        $content->appendChild(pht('This repository has no tags.'));
-      }
-      $content->setSeverity(AphrontErrorView::SEVERITY_NODATA);
+      $content = $this->renderStatusMessage(
+        pht('No Tags'),
+        $is_commit
+          ? pht('This commit has no tags.')
+          : pht('This repository has no tags.'));
     } else {
-      $commits = id(new PhabricatorAuditCommitQuery())
-        ->withIdentifiers(
-          $drequest->getRepository()->getID(),
-          mpull($tags, 'getCommitIdentifier'))
+      $commits = id(new DiffusionCommitQuery())
+        ->setViewer($viewer)
+        ->withRepositoryIDs(array($repository->getID()))
+        ->withIdentifiers(mpull($tags, 'getCommitIdentifier'))
         ->needCommitData(true)
         ->execute();
 
       $view = id(new DiffusionTagListView())
         ->setTags($tags)
-        ->setUser($user)
+        ->setUser($viewer)
         ->setCommits($commits)
         ->setDiffusionRequest($drequest);
 
@@ -78,8 +75,8 @@ final class DiffusionTagListController extends DiffusionController {
 
     $crumbs = $this->buildCrumbs(
       array(
-        'tags'    => true,
-        'commit'  => $drequest->getRawCommit(),
+        'tags' => true,
+        'commit' => $drequest->getRawCommit(),
       ));
 
     return $this->buildApplicationPage(
@@ -89,7 +86,7 @@ final class DiffusionTagListController extends DiffusionController {
       ),
       array(
         'title' => array(
-          'Tags',
+          pht('Tags'),
           $repository->getCallsign().' Repository',
         ),
       ));

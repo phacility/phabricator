@@ -75,53 +75,31 @@ final class ConduitAPI_diffusion_tagsquery_Method
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    $count = $offset + $limit;
-
-    list($stdout) = $repository->execxLocalCommand(
-      'for-each-ref %C --sort=-creatordate --format=%s refs/tags',
-      $count ? '--count='.(int)$count : null,
-      '%(objectname) %(objecttype) %(refname) %(*objectname) %(*objecttype) '.
-        '%(subject)%01%(creator)');
-
-    $stdout = trim($stdout);
-    if (!strlen($stdout)) {
-      return array();
-    }
+    $refs = id(new DiffusionLowLevelGitRefQuery())
+      ->setRepository($repository)
+      ->withIsTag(true)
+      ->execute();
 
     $tags = array();
-    foreach (explode("\n", $stdout) as $line) {
-      list($info, $creator) = explode("\1", $line);
-      list(
-        $objectname,
-        $objecttype,
-        $refname,
-        $refobjectname,
-        $refobjecttype,
-        $description) = explode(' ', $info, 6);
-
-      $matches = null;
-      if (!preg_match('/^(.*) ([0-9]+) ([0-9+-]+)$/', $creator, $matches)) {
-        // It's possible a tag doesn't have a creator (tagger)
-        $author = null;
-        $epoch = null;
-      } else {
-        $author = $matches[1];
-        $epoch  = $matches[2];
-      }
-
-      $tag = new DiffusionRepositoryTag();
-      $tag->setAuthor($author);
-      $tag->setEpoch($epoch);
-      $tag->setCommitIdentifier(nonempty($refobjectname, $objectname));
-      $tag->setName(preg_replace('@^refs/tags/@', '', $refname));
-      $tag->setDescription($description);
-      $tag->setType('git/'.$objecttype);
+    foreach ($refs as $ref) {
+      $fields = $ref->getRawFields();
+      $tag = id(new DiffusionRepositoryTag())
+        ->setAuthor($fields['author'])
+        ->setEpoch($fields['epoch'])
+        ->setCommitIdentifier($ref->getCommitIdentifier())
+        ->setName($ref->getShortName())
+        ->setDescription($fields['subject'])
+        ->setType('git/'.$fields['objecttype']);
 
       $tags[] = $tag;
     }
 
     if ($offset) {
       $tags = array_slice($tags, $offset);
+    }
+
+    if ($limit) {
+      $tags = array_slice($tags, 0, $limit);
     }
 
     if ($serialize) {

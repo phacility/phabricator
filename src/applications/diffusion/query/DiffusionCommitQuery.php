@@ -8,6 +8,9 @@ final class DiffusionCommitQuery
   private $phids;
   private $defaultRepository;
   private $identifierMap;
+  private $repositoryIDs;
+
+  private $needCommitData;
 
   /**
    * Load commits by partial or full identifiers, e.g. "rXab82393", "rX1234",
@@ -34,6 +37,11 @@ final class DiffusionCommitQuery
     return $this;
   }
 
+  public function withRepositoryIDs(array $repository_ids) {
+    $this->repositoryIDs = $repository_ids;
+    return $this;
+  }
+
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -41,6 +49,11 @@ final class DiffusionCommitQuery
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  public function needCommitData($need) {
+    $this->needCommitData = $need;
     return $this;
   }
 
@@ -71,7 +84,7 @@ final class DiffusionCommitQuery
     return $table->loadAllFromArray($data);
   }
 
-  public function willFilterPage(array $commits) {
+  protected function willFilterPage(array $commits) {
     $repository_ids = mpull($commits, 'getRepositoryID', 'getRepositoryID');
     $repos = id(new PhabricatorRepositoryQuery())
       ->setViewer($this->getViewer())
@@ -126,6 +139,22 @@ final class DiffusionCommitQuery
       }
 
       $this->identifierMap += $result;
+    }
+
+    return $commits;
+  }
+
+  protected function didFilterPage(array $commits) {
+
+    if ($this->needCommitData) {
+      $data = id(new PhabricatorRepositoryCommitData())->loadAllWhere(
+        'commitID in (%Ld)',
+        mpull($commits, 'getID'));
+      $data = mpull($data, null, 'getCommitID');
+      foreach ($commits as $commit) {
+        $commit_data = idx($data, $commit->getID());
+        $commit->attachCommitData($commit_data);
+      }
     }
 
     return $commits;
@@ -235,6 +264,13 @@ final class DiffusionCommitQuery
         $conn_r,
         'phid IN (%Ls)',
         $this->phids);
+    }
+
+    if ($this->repositoryIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'repositoryID IN (%Ld)',
+        $this->repositoryIDs);
     }
 
     return $this->formatWhereClause($where);

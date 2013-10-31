@@ -51,7 +51,7 @@ final class PhabricatorMetaMTAEmailBodyParser {
 
   private function stripQuotedText($body) {
     $body = preg_replace(
-      '/^\s*On\b.*\bwrote:.*?/msU',
+      '/^\s*>?\s*On\b.*\bwrote:.*?/msU',
       '',
       $body);
 

@@ -1712,6 +1712,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20131026.commitstatus.sql'),
       ),
+      '20131030.repostatusmessage.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131030.repostatusmessage.sql'),
+      ),
     );
   }
 }

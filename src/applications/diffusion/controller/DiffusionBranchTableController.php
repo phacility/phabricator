@@ -9,7 +9,7 @@ final class DiffusionBranchTableController extends DiffusionController {
   public function processRequest() {
     $drequest = $this->getDiffusionRequest();
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
     $repository = $drequest->getRepository();
 
@@ -29,21 +29,19 @@ final class DiffusionBranchTableController extends DiffusionController {
 
     $content = null;
     if (!$branches) {
-      $content = new AphrontErrorView();
-      $content->setTitle(pht('No Branches'));
-      $content->appendChild(pht('This repository has no branches.'));
-      $content->setSeverity(AphrontErrorView::SEVERITY_NODATA);
+      $content = $this->renderStatusMessage(
+        pht('No Branches'),
+        pht('This repository has no branches.'));
     } else {
-      $commits = id(new PhabricatorAuditCommitQuery())
-        ->withIdentifiers(
-          $drequest->getRepository()->getID(),
-          mpull($branches, 'getHeadCommitIdentifier'))
-        ->needCommitData(true)
+      $commits = id(new DiffusionCommitQuery())
+        ->setViewer($viewer)
+        ->withIdentifiers(mpull($branches, 'getHeadCommitIdentifier'))
+        ->withRepositoryIDs(array($repository->getID()))
         ->execute();
 
       $view = id(new DiffusionBranchTableView())
+        ->setUser($viewer)
         ->setBranches($branches)
-        ->setUser($user)
         ->setCommits($commits)
         ->setDiffusionRequest($drequest);
 
@@ -57,7 +55,7 @@ final class DiffusionBranchTableController extends DiffusionController {
 
     $crumbs = $this->buildCrumbs(
       array(
-        'branches'    => true,
+        'branches' => true,
       ));
 
     return $this->buildApplicationPage(
@@ -67,8 +65,8 @@ final class DiffusionBranchTableController extends DiffusionController {
       ),
       array(
         'title' => array(
-          'Branches',
-          $repository->getCallsign().' Repository',
+          pht('Branches'),
+          'r'.$repository->getCallsign(),
         ),
       ));
   }

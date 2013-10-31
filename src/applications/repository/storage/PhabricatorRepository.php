@@ -805,6 +805,53 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
   }
 
+  public function usesLocalWorkingCopy() {
+    switch ($this->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        return $this->isHosted();
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        return true;
+    }
+  }
+
+  public function writeStatusMessage(
+    $status_type,
+    $status_code,
+    array $parameters = array()) {
+
+    $table = new PhabricatorRepositoryStatusMessage();
+    $conn_w = $table->establishConnection('w');
+    $table_name = $table->getTableName();
+
+    if ($status_code === null) {
+      queryfx(
+        $conn_w,
+        'DELETE FROM %T WHERE repositoryID = %d AND statusType = %s',
+        $table_name,
+        $this->getID(),
+        $status_type);
+    } else {
+      queryfx(
+        $conn_w,
+        'INSERT INTO %T
+          (repositoryID, statusType, statusCode, parameters, epoch)
+          VALUES (%d, %s, %s, %s, %d)
+          ON DUPLICATE KEY UPDATE
+            statusCode = VALUES(statusCode),
+            parameters = VALUES(parameters),
+            epoch = VALUES(epoch)',
+        $table_name,
+        $this->getID(),
+        $status_type,
+        $status_code,
+        json_encode($parameters),
+        time());
+    }
+
+    return $this;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

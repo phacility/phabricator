@@ -25,7 +25,6 @@ final class PhabricatorRepositoryCommit
 
   private $commitData = self::ATTACHABLE;
   private $audits;
-  private $isUnparsed;
   private $repository = self::ATTACHABLE;
 
   public function attachRepository(PhabricatorRepository $repository) {
@@ -37,13 +36,8 @@ final class PhabricatorRepositoryCommit
     return $this->assertAttached($this->repository);
   }
 
-  public function setIsUnparsed($is_unparsed) {
-    $this->isUnparsed = $is_unparsed;
-    return $this;
-  }
-
-  public function getIsUnparsed() {
-    return $this->isUnparsed;
+  public function isPartiallyImported($mask) {
+    return (($mask & $this->getImportStatus()) == $mask);
   }
 
   public function isImported() {
@@ -81,7 +75,8 @@ final class PhabricatorRepositoryCommit
       $this->getID());
   }
 
-  public function attachCommitData(PhabricatorRepositoryCommitData $data) {
+  public function attachCommitData(
+    PhabricatorRepositoryCommitData $data = null) {
     $this->commitData = $data;
     return $this;
   }
@@ -227,7 +222,9 @@ final class PhabricatorRepositoryCommit
       'mailKey' => $this->getMailKey(),
       'authorPHID' => $this->getAuthorPHID(),
       'auditStatus' => $this->getAuditStatus(),
-      'summary' => $this->getSummary());
+      'summary' => $this->getSummary(),
+      'importStatus' => $this->getImportStatus(),
+    );
   }
 
   public static function newFromDictionary(array $dict) {

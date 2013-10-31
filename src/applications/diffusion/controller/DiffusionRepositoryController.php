@@ -198,64 +198,67 @@ final class DiffusionRepositoryController extends DiffusionController {
   }
 
   private function buildBranchListTable(DiffusionRequest $drequest) {
-    if ($drequest->getBranch() !== null) {
-      $limit = 15;
+    $viewer = $this->getRequest()->getUser();
 
-      $branches = DiffusionBranchInformation::newFromConduit(
-        $this->callConduitWithDiffusionRequest(
-          'diffusion.branchquery',
-          array(
-            'limit' => $limit
-          )));
-      if (!$branches) {
-        return null;
-      }
-
-      $more_branches = (count($branches) > $limit);
-      $branches = array_slice($branches, 0, $limit);
-
-      $commits = id(new PhabricatorAuditCommitQuery())
-        ->withIdentifiers(
-          $drequest->getRepository()->getID(),
-          mpull($branches, 'getHeadCommitIdentifier'))
-        ->needCommitData(true)
-        ->execute();
-
-      $table = new DiffusionBranchTableView();
-      $table->setDiffusionRequest($drequest);
-      $table->setBranches($branches);
-      $table->setCommits($commits);
-      $table->setUser($this->getRequest()->getUser());
-
-      $panel = new AphrontPanelView();
-      $panel->setHeader(pht('Branches'));
-      $panel->setNoBackground();
-
-      if ($more_branches) {
-        $panel->setCaption(pht('Showing %d branches.', $limit));
-      }
-
-      $panel->addButton(
-        phutil_tag(
-          'a',
-          array(
-            'href' => $drequest->generateURI(
-              array(
-                'action' => 'branches',
-              )),
-            'class' => 'grey button',
-          ),
-          pht("Show All Branches \xC2\xBB")));
-
-      $panel->appendChild($table);
-
-      return $panel;
+    if ($drequest->getBranch() === null) {
+      return null;
     }
 
-    return null;
+    $limit = 15;
+
+    $branches = DiffusionBranchInformation::newFromConduit(
+      $this->callConduitWithDiffusionRequest(
+        'diffusion.branchquery',
+        array(
+          'limit' => $limit + 1,
+        )));
+    if (!$branches) {
+      return null;
+    }
+
+    $more_branches = (count($branches) > $limit);
+    $branches = array_slice($branches, 0, $limit);
+
+    $commits = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withIdentifiers(mpull($branches, 'getHeadCommitIdentifier'))
+      ->withRepositoryIDs(array($drequest->getRepository()->getID()))
+      ->execute();
+
+    $table = id(new DiffusionBranchTableView())
+      ->setUser($viewer)
+      ->setDiffusionRequest($drequest)
+      ->setBranches($branches)
+      ->setCommits($commits);
+
+    $panel = id(new AphrontPanelView())
+      ->setHeader(pht('Branches'))
+      ->setNoBackground();
+
+    if ($more_branches) {
+      $panel->setCaption(pht('Showing %d branches.', $limit));
+    }
+
+    $panel->addButton(
+      phutil_tag(
+        'a',
+        array(
+          'href' => $drequest->generateURI(
+            array(
+              'action' => 'branches',
+            )),
+          'class' => 'grey button',
+        ),
+        pht("Show All Branches \xC2\xBB")));
+
+    $panel->appendChild($table);
+
+    return $panel;
   }
 
   private function buildTagListTable(DiffusionRequest $drequest) {
+    $viewer = $this->getRequest()->getUser();
+
     $tag_limit = 15;
     $tags = array();
     try {
@@ -280,26 +283,26 @@ final class DiffusionRepositoryController extends DiffusionController {
     $more_tags = (count($tags) > $tag_limit);
     $tags = array_slice($tags, 0, $tag_limit);
 
-    $commits = id(new PhabricatorAuditCommitQuery())
-      ->withIdentifiers(
-        $drequest->getRepository()->getID(),
-        mpull($tags, 'getCommitIdentifier'))
+    $commits = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withIdentifiers(mpull($tags, 'getCommitIdentifier'))
+      ->withRepositoryIDs(array($drequest->getRepository()->getID()))
       ->needCommitData(true)
       ->execute();
 
-    $view = new DiffusionTagListView();
-    $view->setDiffusionRequest($drequest);
-    $view->setTags($tags);
-    $view->setUser($this->getRequest()->getUser());
-    $view->setCommits($commits);
+    $view = id(new DiffusionTagListView())
+      ->setUser($viewer)
+      ->setDiffusionRequest($drequest)
+      ->setTags($tags)
+      ->setCommits($commits);
 
     $phids = $view->getRequiredHandlePHIDs();
     $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Tags'));
-    $panel->setNoBackground(true);
+    $panel = id(new AphrontPanelView())
+      ->setHeader(pht('Tags'))
+      ->setNoBackground(true);
 
     if ($more_tags) {
       $panel->setCaption(pht('Showing the %d most recent tags.', $tag_limit));

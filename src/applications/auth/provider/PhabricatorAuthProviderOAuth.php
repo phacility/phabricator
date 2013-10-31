@@ -282,9 +282,9 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
       // Don't return a token with fewer than this many seconds remaining until
       // it expires.
       $shortest_token = 60;
-
       if ($access_token) {
-        if ($access_expires > (time() + $shortest_token)) {
+        if ($access_expires === null ||
+            $access_expires > (time() + $shortest_token)) {
           return $access_token;
         }
       }

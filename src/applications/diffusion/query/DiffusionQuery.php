@@ -99,8 +99,8 @@ abstract class DiffusionQuery extends PhabricatorQuery {
     $commits = mpull($commits, null, 'getCommitIdentifier');
 
     // Build empty commit objects for every commit, so we can show unparsed
-    // commits in history views as "unparsed" instead of not showing them. This
-    // makes the process of importing and parsing commits much clearer to the
+    // commits in history views (as "Importing") instead of not showing them.
+    // This makes the process of importing and parsing commits clearer to the
     // user.
 
     $commit_list = array();
@@ -110,7 +110,6 @@ abstract class DiffusionQuery extends PhabricatorQuery {
         $commit_obj = new PhabricatorRepositoryCommit();
         $commit_obj->setRepositoryID($repository->getID());
         $commit_obj->setCommitIdentifier($identifier);
-        $commit_obj->setIsUnparsed(true);
         $commit_obj->makeEphemeral();
       }
       $commit_list[$identifier] = $commit_obj;

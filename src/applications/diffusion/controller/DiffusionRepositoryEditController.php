@@ -3,7 +3,7 @@
 abstract class DiffusionRepositoryEditController
   extends DiffusionController {
 
-  public function buildApplicationCrumbs() {
+  public function buildApplicationCrumbs($is_main = false) {
     $crumbs = parent::buildApplicationCrumbs();
 
     if ($this->diffusionRequest) {
@@ -16,10 +16,16 @@ abstract class DiffusionRepositoryEditController
           ->setName('r'.$repository->getCallsign())
           ->setHref($repo_uri));
 
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Edit'))
-          ->setHref($edit_uri));
+      if ($is_main) {
+        $crumbs->addCrumb(
+          id(new PhabricatorCrumbView())
+            ->setName(pht('Edit Repository')));
+      } else {
+        $crumbs->addCrumb(
+          id(new PhabricatorCrumbView())
+            ->setName(pht('Edit'))
+            ->setHref($edit_uri));
+      }
     }
 
     return $crumbs;

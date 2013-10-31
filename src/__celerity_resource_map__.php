@@ -1154,7 +1154,7 @@ celerity_register_resource_map(array(
   ),
   'diffusion-source-css' =>
   array(
-    'uri' => '/res/f4a2f867/rsrc/css/application/diffusion/diffusion-source.css',
+    'uri' => '/res/5076c269/rsrc/css/application/diffusion/diffusion-source.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -2980,15 +2980,6 @@ celerity_register_resource_map(array(
       7 => 'javelin-uri',
     ),
     'disk' => '/rsrc/externals/javelin/lib/Workflow.js',
-  ),
-  'legalpad-documentbody-css' =>
-  array(
-    'uri' => '/res/034c3494/rsrc/css/application/legalpad/legalpad-documentbody.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/application/legalpad/legalpad-documentbody.css',
   ),
   'lightbox-attachment-css' =>
   array(
