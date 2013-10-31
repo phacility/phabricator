@@ -28,7 +28,15 @@ final class DiffusionSSHGitReceivePackWorkflow
     $future = new ExecFuture(
       'git-receive-pack %s',
       $repository->getLocalPath());
-    return $this->passthruIO($future);
+    $err = $this->passthruIO($future);
+
+    if (!$err) {
+      $repository->writeStatusMessage(
+        PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
+        PhabricatorRepositoryStatusMessage::CODE_OKAY);
+    }
+
+    return $err;
   }
 
 }

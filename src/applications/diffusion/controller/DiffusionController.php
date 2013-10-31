@@ -140,14 +140,23 @@ abstract class DiffusionController extends PhabricatorController {
 
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        return $this->serveGitRequest($repository);
+        $result = $this->serveGitRequest($repository);
       default:
+        $result = new PhabricatorVCSResponse(
+          999,
+          pht('TODO: Implement meaningful responses.'));
         break;
     }
 
-    return new PhabricatorVCSResponse(
-      999,
-      pht('TODO: Implement meaningful responses.'));
+    $code = $result->getHTTPResponseCode();
+
+    if ($is_push && ($code == 200)) {
+      $repository->writeStatusMessage(
+        PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
+        PhabricatorRepositoryStatusMessage::CODE_OKAY);
+    }
+
+    return $result;
   }
 
   private function isReadOnlyRequest(
