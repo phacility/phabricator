@@ -118,8 +118,9 @@ final class DifferentialRevisionDetailView extends AphrontView {
       $properties->addSectionHeader(pht('Summary'));
       $properties->addTextContent(
         PhabricatorMarkupEngine::renderOneObject(
-          id(new PhabricatorMarkupOneOff())->setContent(
-            $revision->getSummary()),
+          id(new PhabricatorMarkupOneOff())
+            ->setPreserveLinebreaks(true)
+            ->setContent($revision->getSummary()),
           'default',
           $user));
     }
@@ -128,8 +129,9 @@ final class DifferentialRevisionDetailView extends AphrontView {
       $properties->addSectionHeader(pht('Test Plan'));
       $properties->addTextContent(
         PhabricatorMarkupEngine::renderOneObject(
-          id(new PhabricatorMarkupOneOff())->setContent(
-            $revision->getTestPlan()),
+          id(new PhabricatorMarkupOneOff())
+            ->setPreserveLinebreaks(true)
+            ->setContent($revision->getTestPlan()),
           'default',
           $user));
     }
