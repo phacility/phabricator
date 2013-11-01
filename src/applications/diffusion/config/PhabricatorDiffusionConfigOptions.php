@@ -84,6 +84,24 @@ final class PhabricatorDiffusionConfigOptions
           'Regular expression to link external bug tracker. See '.
             'http://tortoisesvn.net/docs/release/TortoiseSVN_en/'.
             'tsvn-dug-bugtracker.html for further explanation.')),
+      $this->newOption('diffusion.allow-http-auth', 'bool', false)
+        ->setBoolOptions(
+          array(
+            pht('Allow HTTP Basic Auth'),
+            pht('Disable HTTP Basic Auth'),
+          ))
+        ->setSummary(pht('Enable HTTP Basic Auth for repositories.'))
+        ->setDescription(
+          pht(
+            "Phabricator can serve repositories over HTTP, using HTTP basic ".
+            "auth.\n\n".
+            "Because HTTP basic auth is less secure than SSH auth, it is ".
+            "disabled by default. You can enable it here if you'd like to use ".
+            "it anyway. There's nothing fundamentally insecure about it as ".
+            "long as Phabricator uses HTTPS, but it presents a much lower ".
+            "barrier to attackers than SSH does.\n\n".
+            "Consider using SSH for authenticated access to repositories ".
+            "instead of HTTP."))
     );
   }
 
