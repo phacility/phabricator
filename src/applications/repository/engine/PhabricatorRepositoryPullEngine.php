@@ -26,7 +26,7 @@ final class PhabricatorRepositoryPullEngine
 
     $is_hg = false;
     $is_git = false;
-    $is_svn = true;
+    $is_svn = false;
 
     $vcs = $repository->getVersionControlSystem();
     $callsign = $repository->getCallsign();
