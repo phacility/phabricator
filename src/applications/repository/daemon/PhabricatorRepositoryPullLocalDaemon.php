@@ -536,19 +536,21 @@ final class PhabricatorRepositoryPullLocalDaemon
   private function executeGitDiscover(
     PhabricatorRepository $repository) {
 
-    list($remotes) = $repository->execxLocalCommand(
-      'remote show -n origin');
+    if (!$repository->isHosted()) {
+      list($remotes) = $repository->execxLocalCommand(
+        'remote show -n origin');
 
-    $matches = null;
-    if (!preg_match('/^\s*Fetch URL:\s*(.*?)\s*$/m', $remotes, $matches)) {
-      throw new Exception(
-        "Expected 'Fetch URL' in 'git remote show -n origin'.");
+      $matches = null;
+      if (!preg_match('/^\s*Fetch URL:\s*(.*?)\s*$/m', $remotes, $matches)) {
+        throw new Exception(
+          "Expected 'Fetch URL' in 'git remote show -n origin'.");
+      }
+
+      self::executeGitVerifySameOrigin(
+        $matches[1],
+        $repository->getRemoteURI(),
+        $repository->getLocalPath());
     }
-
-    self::executeGitVerifySameOrigin(
-      $matches[1],
-      $repository->getRemoteURI(),
-      $repository->getLocalPath());
 
     $refs = id(new DiffusionLowLevelGitRefQuery())
       ->setRepository($repository)
@@ -743,6 +745,11 @@ final class PhabricatorRepositoryPullLocalDaemon
   private function executeHgDiscover(PhabricatorRepository $repository) {
     // NOTE: "--debug" gives us 40-character hashes.
     list($stdout) = $repository->execxLocalCommand('--debug branches');
+
+    if (!trim($stdout)) {
+      // No branches; likely a newly initialized repository.
+      return false;
+    }
 
     $branches = ArcanistMercurialParser::parseMercurialBranches($stdout);
     $got_something = false;

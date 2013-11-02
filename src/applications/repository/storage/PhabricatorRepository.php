@@ -161,8 +161,16 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       throw new Exception("Not a subversion repository!");
     }
 
-    $uri = $this->getDetail('remote-uri');
+    if ($this->isHosted()) {
+      $uri = 'file://'.$this->getLocalPath();
+    } else {
+      $uri = $this->getDetail('remote-uri');
+    }
+
     $subpath = $this->getDetail('svn-subpath');
+    if ($subpath) {
+      $subpath = '/'.ltrim($subpath, '/');
+    }
 
     return $uri.$subpath;
   }
@@ -609,6 +617,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
    * @task uri
    */
   private function shouldUseSSH() {
+    if ($this->isHosted()) {
+      return false;
+    }
+
     $protocol = $this->getRemoteProtocol();
     if ($this->isSSHProtocol($protocol)) {
       return (bool)$this->getSSHKeyfile();
@@ -626,6 +638,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
    * @task uri
    */
   private function shouldUseHTTP() {
+    if ($this->isHosted()) {
+      return false;
+    }
+
     $protocol = $this->getRemoteProtocol();
     if ($protocol == 'http' || $protocol == 'https') {
       return (bool)$this->getDetail('http-login');
@@ -643,6 +659,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
    * @task uri
    */
   private function shouldUseSVNProtocol() {
+    if ($this->isHosted()) {
+      return false;
+    }
+
     $protocol = $this->getRemoteProtocol();
     if ($protocol == 'svn') {
       return (bool)$this->getDetail('http-login');
@@ -788,14 +808,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
    * Raise more useful errors when there are basic filesystem problems.
    */
   private function assertLocalExists() {
-    switch ($this->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        if (!$this->isHosted()) {
-          // For non-hosted SVN repositories, we don't expect a local directory
-          // to exist.
-          return;
-        }
-        break;
+    if (!$this->usesLocalWorkingCopy()) {
+      return;
     }
 
     $local = $this->getLocalPath();
