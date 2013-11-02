@@ -349,6 +349,11 @@ final class DiffusionRepositoryEditMainController
     $autoclose_only = nonempty(
       $repository->getHumanReadableDetail('close-commits-filter', array()),
       phutil_tag('em', array(), pht('Autoclose On All Branches')));
+
+    if ($repository->getDetail('disable-autoclose')) {
+      $autoclose_only = phutil_tag('em', array(), pht('Disabled'));
+    }
+
     $view->addProperty(pht('Autoclose Only'), $autoclose_only);
 
     return $view;

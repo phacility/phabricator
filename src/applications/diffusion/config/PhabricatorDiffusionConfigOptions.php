@@ -101,7 +101,14 @@ final class PhabricatorDiffusionConfigOptions
             "long as Phabricator uses HTTPS, but it presents a much lower ".
             "barrier to attackers than SSH does.\n\n".
             "Consider using SSH for authenticated access to repositories ".
-            "instead of HTTP."))
+            "instead of HTTP.")),
+      $this->newOption('diffusion.ssh-user', 'string', null)
+        ->setSummary(pht('Login username for SSH connections to repositories.'))
+        ->setDescription(
+          pht(
+            'When constructing clone URIs to show to users, Diffusion will '.
+            'fill in this login username. If you have configured a VCS user '.
+            'like `git`, you should provide it here.')),
     );
   }
 

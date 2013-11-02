@@ -737,7 +737,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function getServeOverHTTP() {
-    return $this->getDetail('serve-over-http', self::SERVE_OFF);
+    $serve = $this->getDetail('serve-over-http', self::SERVE_OFF);
+    return $this->normalizeServeConfigSetting($serve);
   }
 
   public function setServeOverHTTP($mode) {
@@ -745,7 +746,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function getServeOverSSH() {
-    return $this->getDetail('serve-over-ssh', self::SERVE_OFF);
+    $serve = $this->getDetail('serve-over-ssh', self::SERVE_OFF);
+    return $this->normalizeServeConfigSetting($serve);
   }
 
   public function setServeOverSSH($mode) {
@@ -762,6 +764,22 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         return pht('Read/Write');
       default:
         return pht('Unknown');
+    }
+  }
+
+  private function normalizeServeConfigSetting($value) {
+    switch ($value) {
+      case self::SERVE_OFF:
+      case self::SERVE_READONLY:
+        return $value;
+      case self::SERVE_READWRITE:
+        if ($this->isHosted()) {
+          return self::SERVE_READWRITE;
+        } else {
+          return self::SERVE_READONLY;
+        }
+      default:
+        return self::SERVE_OFF;
     }
   }
 

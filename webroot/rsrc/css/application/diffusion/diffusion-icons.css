@@ -26,3 +26,17 @@
 .diffusion-path-icon-link {
   background-image: url(/rsrc/image/icon/fatcow/page_white_link.png);
 }
+
+input.diffusion-clone-uri {
+  display: block;
+  width: 100%;
+  border: 1px solid #efefef;
+  box-shadow: none;
+  height: 24px;
+}
+
+.diffusion-clone-extras {
+  font-size: 11px;
+  text-align: right;
+  color: {$lightgreytext};
+}

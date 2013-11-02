@@ -126,8 +126,12 @@ final class DiffusionRepositoryEditHostingController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $v_http_mode = $repository->getServeOverHTTP();
-    $v_ssh_mode = $repository->getServeOverSSH();
+    $v_http_mode = $repository->getDetail(
+      'serve-over-http',
+      PhabricatorRepository::SERVE_OFF);
+    $v_ssh_mode = $repository->getDetail(
+      'serve-over-ssh',
+      PhabricatorRepository::SERVE_OFF);
 
     $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
     $prev_uri = $this->getRepositoryControllerURI($repository, 'edit/hosting/');
@@ -167,13 +171,19 @@ final class DiffusionRepositoryEditHostingController
     $title = pht('Edit Protocols (%s)', $repository->getName());
 
 
-    if ($repository->isHosted()) {
-      $rw_message = pht(
-        'Phabricator will serve a read-write copy of this repository');
-    } else {
-      $rw_message = pht(
-        'This repository is hosted elsewhere, so Phabricator can not perform '.
-        'writes.');
+    $rw_message = pht(
+      'Phabricator will serve a read-write copy of this repository.');
+
+    if (!$repository->isHosted()) {
+      $rw_message = array(
+        $rw_message,
+        phutil_tag('br'),
+        phutil_tag('br'),
+        pht(
+          '%s: This repository is hosted elsewhere, so Phabricator can not '.
+          'perform writes. This mode will act like "Read Only" for '.
+          'repositories hosted elsewhere.',
+          phutil_tag('strong', array(), 'WARNING')));
     }
 
     $ssh_control =
@@ -185,19 +195,19 @@ final class DiffusionRepositoryEditHostingController
           PhabricatorRepository::SERVE_OFF,
           PhabricatorRepository::getProtocolAvailabilityName(
             PhabricatorRepository::SERVE_OFF),
-          pht('Phabricator will not serve this repository.'))
+          pht('Phabricator will not serve this repository over SSH.'))
         ->addButton(
           PhabricatorRepository::SERVE_READONLY,
           PhabricatorRepository::getProtocolAvailabilityName(
             PhabricatorRepository::SERVE_READONLY),
-          pht('Phabricator will serve a read-only copy of this repository.'))
+          pht(
+            'Phabricator will serve a read-only copy of this repository '.
+            'over SSH.'))
         ->addButton(
           PhabricatorRepository::SERVE_READWRITE,
           PhabricatorRepository::getProtocolAvailabilityName(
             PhabricatorRepository::SERVE_READWRITE),
-          $rw_message,
-          $repository->isHosted() ? null : 'disabled',
-          $repository->isHosted() ? null : true);
+          $rw_message);
 
     $http_control =
       id(new AphrontFormRadioButtonControl())
@@ -208,19 +218,19 @@ final class DiffusionRepositoryEditHostingController
           PhabricatorRepository::SERVE_OFF,
           PhabricatorRepository::getProtocolAvailabilityName(
             PhabricatorRepository::SERVE_OFF),
-          pht('Phabricator will not serve this repository.'))
+          pht('Phabricator will not serve this repository over HTTP.'))
         ->addButton(
           PhabricatorRepository::SERVE_READONLY,
           PhabricatorRepository::getProtocolAvailabilityName(
             PhabricatorRepository::SERVE_READONLY),
-          pht('Phabricator will serve a read-only copy of this repository.'))
+          pht(
+            'Phabricator will serve a read-only copy of this repository '.
+            'over HTTP.'))
         ->addButton(
           PhabricatorRepository::SERVE_READWRITE,
           PhabricatorRepository::getProtocolAvailabilityName(
             PhabricatorRepository::SERVE_READWRITE),
-          $rw_message,
-          $repository->isHosted() ? null : 'disabled',
-          $repository->isHosted() ? null : true);
+          $rw_message);
 
     $form = id(new AphrontFormView())
       ->setUser($user)
@@ -228,7 +238,19 @@ final class DiffusionRepositoryEditHostingController
         pht(
           'Phabricator can serve repositories over various protocols. You can '.
           'configure server protocols here.'))
-      ->appendChild($ssh_control)
+      ->appendChild($ssh_control);
+
+    if (!PhabricatorEnv::getEnvConfig('diffusion.allow-http-auth')) {
+      $form->appendRemarkupInstructions(
+        pht(
+          'NOTE: The configuration setting [[ %s | %s ]] is currently '.
+          'disabled. You must enable it to activate authenticated access '.
+          'to repositories over HTTP.',
+          '/config/edit/diffusion.allow-http-auth/',
+          'diffusion.allow-http-auth'));
+    }
+
+    $form
       ->appendChild($http_control)
       ->appendChild(
         id(new AphrontFormSubmitControl())

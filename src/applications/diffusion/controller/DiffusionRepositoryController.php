@@ -165,18 +165,64 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setUser($user);
     $view->addProperty(pht('Callsign'), $repository->getCallsign());
 
-    switch ($repository->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $view->addProperty(
-          pht('Clone URI'),
-          $repository->getPublicRemoteURI());
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        $view->addProperty(
-          pht('Repository Root'),
-          $repository->getPublicRemoteURI());
-        break;
+    if ($repository->isHosted()) {
+      $serve_off = PhabricatorRepository::SERVE_OFF;
+      $callsign = $repository->getCallsign();
+      $repo_path = '/diffusion/'.$callsign.'/';
+
+      $serve_ssh = $repository->getServeOverSSH();
+      if ($serve_ssh !== $serve_off) {
+        $uri = new PhutilURI(PhabricatorEnv::getProductionURI($repo_path));
+        $uri->setProtocol('ssh');
+
+        $ssh_user = PhabricatorEnv::getEnvConfig('diffusion.ssh-user');
+        if ($ssh_user) {
+          $uri->setUser($ssh_user);
+        }
+
+        // This isn't quite right, but for now it's probably better to drop
+        // the port than sometimes show ":8080", etc. Using most VCS commands
+        // against nonstandard ports is a huge pain so few installs are likely
+        // to configure SSH on a nonstandard port.
+        $uri->setPort(null);
+
+        $clone_uri = $this->renderCloneURI(
+          $uri,
+          $serve_ssh,
+          '/settings/panel/ssh/');
+
+        $view->addProperty(pht('Clone URI (SSH)'), $clone_uri);
+      }
+
+      $serve_http = $repository->getServeOverHTTP();
+      if ($serve_http !== $serve_off) {
+        $http_uri = PhabricatorEnv::getProductionURI($repo_path);
+
+        $clone_uri = $this->renderCloneURI(
+          $http_uri,
+          $serve_http,
+          PhabricatorEnv::getEnvConfig('diffusion.allow-http-auth')
+            ? '/settings/panel/vcspassword/'
+            : null);
+
+        $view->addProperty(pht('Clone URI (HTTP)'), $clone_uri);
+      }
+    } else {
+      switch ($repository->getVersionControlSystem()) {
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+          $view->addProperty(
+            pht('Clone URI'),
+            $this->renderCloneURI(
+              $repository->getPublicRemoteURI()));
+          break;
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+          $view->addProperty(
+            pht('Repository Root'),
+            $this->renderCloneURI(
+              $repository->getPublicRemoteURI()));
+          break;
+      }
     }
 
     $description = $repository->getDetail('description');
@@ -454,6 +500,55 @@ final class DiffusionRepositoryController extends DiffusionController {
     $browse_panel->setNoBackground();
 
     return $browse_panel;
+  }
+
+  private function renderCloneURI(
+    $uri,
+    $serve_mode = null,
+    $manage_uri = null) {
+
+    require_celerity_resource('diffusion-icons-css');
+
+    Javelin::initBehavior('select-on-click');
+
+    $input = javelin_tag(
+      'input',
+      array(
+        'type' => 'text',
+        'value' => (string)$uri,
+        'class' => 'diffusion-clone-uri',
+        'sigil' => 'select-on-click',
+      ));
+
+    $extras = array();
+    if ($serve_mode) {
+      if ($serve_mode === PhabricatorRepository::SERVE_READONLY) {
+        $extras[] = pht('(Read Only)');
+      }
+    }
+
+    if ($manage_uri) {
+      if ($this->getRequest()->getUser()->isLoggedIn()) {
+        $extras[] = phutil_tag(
+          'a',
+          array(
+            'href' => $manage_uri,
+          ),
+          pht('Manage Credentials'));
+      }
+    }
+
+    if ($extras) {
+      $extras = phutil_implode_html(' ', $extras);
+      $extras = phutil_tag(
+        'div',
+        array(
+          'class' => 'diffusion-clone-extras',
+        ),
+        $extras);
+    }
+
+    return array($input, $extras);
   }
 
 }
