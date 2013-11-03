@@ -181,6 +181,7 @@ abstract class DiffusionController extends PhabricatorController {
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $result = $this->serveGitRequest($repository);
+        break;
       default:
         $result = new PhabricatorVCSResponse(
           999,
