@@ -311,6 +311,16 @@
       "rule" : ".apps-paste-white",
       "hash" : "ed5ec1ee39cc2a01f568f91c72141bfb"
     },
+    "apps-pebkac-dark"          : {
+      "name" : "apps-pebkac-dark",
+      "rule" : ".apps-pebkac-dark",
+      "hash" : "4adb4a8f0a8c5bc5462bb806ceafc63f"
+    },
+    "apps-pebkac-white"         : {
+      "name" : "apps-pebkac-white",
+      "rule" : ".apps-pebkac-white",
+      "hash" : "35438c7a295df21aa2fa4771a5c3c986"
+    },
     "apps-people-dark"          : {
       "name" : "apps-people-dark",
       "rule" : ".apps-people-dark",

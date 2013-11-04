@@ -621,6 +621,26 @@
       "rule" : ".apps-paste-white-large",
       "hash" : "94cf3ee0f2b15b82ad8f62cb9399ecad"
     },
+    "apps-pebkac-blue-large"          : {
+      "name" : "apps-pebkac-blue-large",
+      "rule" : ".apps-pebkac-blue-large, .phabricator-crumb-view:hover .apps-pebkac-dark-large",
+      "hash" : "7a1010119d4589609f364c603cd03d1b"
+    },
+    "apps-pebkac-dark-large"          : {
+      "name" : "apps-pebkac-dark-large",
+      "rule" : ".apps-pebkac-dark-large",
+      "hash" : "617142b451eec10fe60246eec52a99d0"
+    },
+    "apps-pebkac-light-large"         : {
+      "name" : "apps-pebkac-light-large",
+      "rule" : ".apps-pebkac-light-large",
+      "hash" : "2319b657d0fe3df60b234e8961c4869e"
+    },
+    "apps-pebkac-white-large"         : {
+      "name" : "apps-pebkac-white-large",
+      "rule" : ".apps-pebkac-white-large",
+      "hash" : "25eb13ac78cf507b6ec66016cd477cfe"
+    },
     "apps-people-blue-large"          : {
       "name" : "apps-people-blue-large",
       "rule" : ".apps-people-blue-large, .phabricator-crumb-view:hover .apps-people-dark-large",
