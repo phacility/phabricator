@@ -135,6 +135,7 @@
 .aphront-multi-column-column-outer {
   display: table-cell;
   height: 100%;
+  vertical-align: top;
 }
 
 .phui-box-shadow .aphront-multi-column-column-outer {

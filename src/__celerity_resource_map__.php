@@ -884,7 +884,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-multi-column-view-css' =>
   array(
-    'uri' => '/res/f7f25fb7/rsrc/css/aphront/multi-column.css',
+    'uri' => '/res/23590410/rsrc/css/aphront/multi-column.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3994,7 +3994,7 @@ celerity_register_resource_map(array(
   ),
   'phui-workpanel-view-css' =>
   array(
-    'uri' => '/res/a81825b2/rsrc/css/phui/phui-workpanel-view.css',
+    'uri' => '/res/a64ca5c1/rsrc/css/phui/phui-workpanel-view.css',
     'type' => 'css',
     'requires' =>
     array(
