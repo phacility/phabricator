@@ -597,6 +597,64 @@ final class DiffusionRepositoryEditMainController
       return $view;
     }
 
+    if ($repository->isHosted()) {
+      $binaries = array();
+      if ($repository->getServeOverHTTP() != PhabricatorRepository::SERVE_OFF) {
+        switch ($repository->getVersionControlSystem()) {
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+            $binaries['Git HTTP serve'] = 'git-http-backend';
+            break;
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+            $binaries['SVN serve'] = 'svnserve';
+            $binaries['SVN admin'] = 'svnadmin';
+            break;
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+            $binaries['Mercurial'] = 'hg';
+            break;
+        }
+      }
+      if ($repository->getServeOverSSH() != PhabricatorRepository::SERVE_OFF) {
+        switch ($repository->getVersionControlSystem()) {
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+            $binaries['Git SSH receive'] = 'git-receive-pack';
+            $binaries['Git SSH upload'] = 'git-upload-pack';
+            break;
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+            $binaries['SVN serve'] = 'svnserve';
+            $binaries['SVN admin'] = 'svnadmin';
+            break;
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+            $binaries['Mercurial'] = 'hg';
+            break;
+        }
+      }
+      $binaries = array_unique($binaries);
+      foreach ($binaries as $name => $binary) {
+        if (!Filesystem::binaryExists($binary)) {
+          $view->addItem(
+            id(new PHUIStatusItemView())
+              ->setIcon('warning-red')
+              ->setTarget(pht(
+                '%s tool not found in PATH',
+                $name))
+              ->setNote(pht(
+                'You may need to configure %s.',
+                phutil_tag('tt', array(), 'environment.append-paths'))));
+        } else {
+          $view->addItem(
+            id(new PHUIStatusItemView())
+              ->setIcon('accept-green')
+              ->setTarget(pht(
+                '%s tool found',
+                $name))
+              ->setNote(phutil_tag(
+                'tt',
+                array(),
+                Filesystem::resolveBinary($binary))));
+        }
+      }
+    }
+
     $doc_href = PhabricatorEnv::getDocLink(
       'article/Managing_Daemons_with_phd.html');
     $daemon_instructions = pht(
