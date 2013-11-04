@@ -537,7 +537,7 @@ abstract class DiffusionController extends PhabricatorController {
     }
 
     $user = id(new PhabricatorPeopleQuery())
-      ->setViewer(new PhabricatorUser())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withUsernames(array($username))
       ->executeOne();
     if (!$user) {
