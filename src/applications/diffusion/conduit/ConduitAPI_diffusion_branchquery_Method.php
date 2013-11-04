@@ -65,17 +65,9 @@ final class ConduitAPI_diffusion_branchquery_Method
     $offset = $request->getValue('offset');
     $limit = $request->getValue('limit');
 
-    list($stdout) = $repository->execxLocalCommand(
-      '--debug branches');
-    $branch_info = ArcanistMercurialParser::parseMercurialBranches($stdout);
-
-    $branches = array();
-    foreach ($branch_info as $name => $info) {
-      $branch = new DiffusionBranchInformation();
-      $branch->setName($name);
-      $branch->setHeadCommitIdentifier($info['rev']);
-      $branches[] = $branch->toDictionary();
-    }
+    $branches = id(new DiffusionLowLevelMercurialBranchesQuery())
+      ->setRepository($repository)
+      ->execute();
 
     if ($offset) {
       $branches = array_slice($branches, $offset);
@@ -85,6 +77,6 @@ final class ConduitAPI_diffusion_branchquery_Method
       $branches = array_slice($branches, 0, $limit);
     }
 
-    return $branches;
+    return mpull($branches, 'toDictionary');
   }
 }

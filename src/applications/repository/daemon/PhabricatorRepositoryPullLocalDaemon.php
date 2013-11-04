@@ -743,15 +743,12 @@ final class PhabricatorRepositoryPullLocalDaemon
 
 
   private function executeHgDiscover(PhabricatorRepository $repository) {
-    // NOTE: "--debug" gives us 40-character hashes.
-    list($stdout) = $repository->execxLocalCommand('--debug branches');
 
-    if (!trim($stdout)) {
-      // No branches; likely a newly initialized repository.
-      return false;
-    }
+    $branches = id(new DiffusionLowLevelMercurialBranchesQuery())
+      ->setRepository($repository)
+      ->execute();
+    $branches = mpull($branches, 'getHeadCommitIdentifier', 'getName');
 
-    $branches = ArcanistMercurialParser::parseMercurialBranches($stdout);
     $got_something = false;
     foreach ($branches as $name => $branch) {
       $commit = $branch['rev'];
