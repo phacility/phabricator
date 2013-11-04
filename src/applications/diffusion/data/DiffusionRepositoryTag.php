@@ -9,6 +9,8 @@ final class DiffusionRepositoryTag {
   private $description;
   private $type;
 
+  private $message = false;
+
   public function setType($type) {
     $this->type = $type;
     return $this;
@@ -63,26 +65,51 @@ final class DiffusionRepositoryTag {
     return $this->author;
   }
 
+  public function attachMessage($message) {
+    $this->message = $message;
+    return $this;
+  }
+
+  public function getMessage() {
+    if ($this->message === false) {
+      throw new Exception("Message is not attached!");
+    }
+    return $this->message;
+  }
+
   public function toDictionary() {
-    return array(
+    $dict = array(
       'author' => $this->getAuthor(),
       'epoch' => $this->getEpoch(),
       'commitIdentifier' => $this->getCommitIdentifier(),
       'name' => $this->getName(),
       'description' => $this->getDescription(),
-      'type' => $this->getType());
+      'type' => $this->getType(),
+    );
+
+    if ($this->message !== false) {
+      $dict['message'] = $this->message;
+    }
+
+    return $dict;
   }
 
   public static function newFromConduit(array $dicts) {
     $tags = array();
     foreach ($dicts as $dict) {
-      $tags[] = id(new DiffusionRepositoryTag())
+      $tag = id(new DiffusionRepositoryTag())
         ->setAuthor($dict['author'])
         ->setEpoch($dict['epoch'])
         ->setCommitIdentifier($dict['commitIdentifier'])
         ->setName($dict['name'])
         ->setDescription($dict['description'])
         ->setType($dict['type']);
+
+      if (array_key_exists('message', $dict)) {
+        $tag->attachMessage($dict['message']);
+      }
+
+      $tags[] = $tag;
     }
     return $tags;
   }

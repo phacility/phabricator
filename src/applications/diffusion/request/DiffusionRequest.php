@@ -646,6 +646,10 @@ abstract class DiffusionRequest {
     $this->tagContent = $commit_data['tagContent'];
   }
 
+  public function getCommitType() {
+    return $this->commitType;
+  }
+
   private function queryStableCommitName() {
     if ($this->commit) {
       $this->stableCommitName = $this->commit;
