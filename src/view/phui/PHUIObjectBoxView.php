@@ -138,8 +138,13 @@ final class PHUIObjectBoxView extends AphrontView {
 
     foreach ($this->propertyLists as $key => $list) {
       $group = new PHUIPropertyGroupView();
+      $i = 0;
       foreach ($list as $item) {
         $group->addPropertyList($item);
+        if ($i > 0) {
+          $item->addClass('phui-property-list-section-noninitial');
+        }
+        $i++;
       }
 
       if ($this->tabs && $key != $default_key) {
