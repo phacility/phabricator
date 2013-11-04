@@ -79,6 +79,25 @@ final class ConduitCall {
   }
 
   public function execute() {
+    $profiler = PhutilServiceProfiler::getInstance();
+    $call_id = $profiler->beginServiceCall(
+      array(
+        'type' => 'conduit',
+        'method' => $this->method,
+      ));
+
+    try {
+      $result = $this->executeMethod();
+    } catch (Exception $ex) {
+      $profiler->endServiceCall($call_id, array());
+      throw $ex;
+    }
+
+    $profiler->endServiceCall($call_id, array());
+    return $result;
+  }
+
+  private function executeMethod() {
     $user = $this->getUser();
     if (!$user) {
       $user = new PhabricatorUser();
