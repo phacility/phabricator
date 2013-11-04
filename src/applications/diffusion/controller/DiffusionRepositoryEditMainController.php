@@ -597,61 +597,79 @@ final class DiffusionRepositoryEditMainController
       return $view;
     }
 
+    $binaries = array();
+    switch ($repository->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        $binaries[] = 'git';
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $binaries[] = 'svn';
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $binaries[] = 'hg';
+        break;
+    }
+
     if ($repository->isHosted()) {
-      $binaries = array();
       if ($repository->getServeOverHTTP() != PhabricatorRepository::SERVE_OFF) {
         switch ($repository->getVersionControlSystem()) {
           case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-            $binaries['Git HTTP serve'] = 'git-http-backend';
+            $binaries[] = 'git-http-backend';
             break;
           case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-            $binaries['SVN serve'] = 'svnserve';
-            $binaries['SVN admin'] = 'svnadmin';
+            $binaries[] = 'svnserve';
+            $binaries[] = 'svnadmin';
             break;
           case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-            $binaries['Mercurial'] = 'hg';
+            $binaries[] = 'hg';
             break;
         }
       }
       if ($repository->getServeOverSSH() != PhabricatorRepository::SERVE_OFF) {
         switch ($repository->getVersionControlSystem()) {
           case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-            $binaries['Git SSH receive'] = 'git-receive-pack';
-            $binaries['Git SSH upload'] = 'git-upload-pack';
+            $binaries[] = 'git-receive-pack';
+            $binaries[] = 'git-upload-pack';
             break;
           case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-            $binaries['SVN serve'] = 'svnserve';
-            $binaries['SVN admin'] = 'svnadmin';
+            $binaries[] = 'svnserve';
+            $binaries[] = 'svnadmin';
             break;
           case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-            $binaries['Mercurial'] = 'hg';
+            $binaries[] = 'hg';
             break;
         }
       }
-      $binaries = array_unique($binaries);
-      foreach ($binaries as $name => $binary) {
-        if (!Filesystem::binaryExists($binary)) {
-          $view->addItem(
-            id(new PHUIStatusItemView())
-              ->setIcon('warning-red')
-              ->setTarget(pht(
-                '%s tool not found in PATH',
-                $name))
-              ->setNote(pht(
-                'You may need to configure %s.',
-                phutil_tag('tt', array(), 'environment.append-paths'))));
-        } else {
-          $view->addItem(
-            id(new PHUIStatusItemView())
-              ->setIcon('accept-green')
-              ->setTarget(pht(
-                '%s tool found',
-                $name))
-              ->setNote(phutil_tag(
-                'tt',
-                array(),
-                Filesystem::resolveBinary($binary))));
-        }
+    }
+
+    $binaries = array_unique($binaries);
+    foreach ($binaries as $binary) {
+      $where = Filesystem::resolveBinary($binary);
+      if (!$where) {
+        $config_href = '/config/edit/environment.append-paths/';
+        $config_link = phutil_tag(
+          'a',
+          array(
+            'href' => $config_href,
+          ),
+          'environment.append-paths');
+
+        $view->addItem(
+          id(new PHUIStatusItemView())
+            ->setIcon('warning-red')
+            ->setTarget(
+              pht('Missing Binary %s', phutil_tag('tt', array(), $binary)))
+            ->setNote(pht(
+              "Unable to find this binary in the webserver's PATH. You may ".
+              "need to configure %s.",
+              $config_link)));
+      } else {
+        $view->addItem(
+          id(new PHUIStatusItemView())
+            ->setIcon('accept-green')
+            ->setTarget(
+              pht('Found Binary %s', phutil_tag('tt', array(), $binary)))
+            ->setNote(phutil_tag('tt', array(), $where)));
       }
     }
 
