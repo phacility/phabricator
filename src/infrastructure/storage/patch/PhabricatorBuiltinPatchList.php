@@ -1716,6 +1716,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20131030.repostatusmessage.sql'),
       ),
+      '20131031.vcspassword.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131031.vcspassword.sql'),
+      ),
     );
   }
 }

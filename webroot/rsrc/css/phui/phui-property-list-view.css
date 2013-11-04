@@ -23,7 +23,8 @@
   display: none;
 }
 
-.phui-property-group-noninitial {
+.phui-property-group-noninitial,
+.phui-property-list-section-noninitial {
   border-color: {$thinblueborder};
   border-style: solid;
   border-width: 1px 0 0;
@@ -83,6 +84,10 @@
   border-color: {$thinblueborder};
   border-style: solid;
   border-width: 1px 0 0;
+}
+
+.phui-property-list-section-noninitial .phui-property-list-section-header {
+  border-top: none;
 }
 
 .device .phui-property-list-section-header {

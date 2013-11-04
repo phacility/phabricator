@@ -43,7 +43,9 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
       '/diffusion/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'DiffusionRepositoryListController',
-        'create/' => 'DiffusionRepositoryCreateController',
+        'new/' => 'DiffusionRepositoryNewController',
+        '(?P<edit>create)/' => 'DiffusionRepositoryCreateController',
+        '(?P<edit>import)/' => 'DiffusionRepositoryCreateController',
         '(?P<callsign>[A-Z]+)/' => array(
           '' => 'DiffusionRepositoryController',
 

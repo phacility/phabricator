@@ -35,6 +35,9 @@ abstract class DiffusionController extends PhabricatorController {
       } else if ($content_type == 'application/x-git-upload-pack-request') {
         // We get this for `git-upload-pack`.
         $vcs = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
+      } else if ($content_type == 'application/x-git-receive-pack-request') {
+        // We get this for `git-receive-pack`.
+        $vcs = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
       } else if ($request->getExists('cmd')) {
         // Mercurial also sends an Accept header like
         // "application/mercurial-0.1", and a User-Agent like
@@ -61,16 +64,37 @@ abstract class DiffusionController extends PhabricatorController {
 
   private function processVCSRequest($callsign) {
 
-    // TODO: Authenticate user.
+    // If authentication credentials have been provided, try to find a user
+    // that actually matches those credentials.
+    if (isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_AUTH_PW'])) {
+      $username = $_SERVER['PHP_AUTH_USER'];
+      $password = new PhutilOpaqueEnvelope($_SERVER['PHP_AUTH_PW']);
 
-    $viewer = new PhabricatorUser();
-
-    $allow_public = PhabricatorEnv::getEnvConfig('policy.allow-public');
-    if (!$allow_public) {
-      if (!$viewer->isLoggedIn()) {
+      $viewer = $this->authenticateHTTPRepositoryUser($username, $password);
+      if (!$viewer) {
         return new PhabricatorVCSResponse(
           403,
-          pht('You must log in to access repositories.'));
+          pht('Invalid credentials.'));
+      }
+    } else {
+      // User hasn't provided credentials, which means we count them as
+      // being "not logged in".
+      $viewer = new PhabricatorUser();
+    }
+
+    $allow_public = PhabricatorEnv::getEnvConfig('policy.allow-public');
+    $allow_auth = PhabricatorEnv::getEnvConfig('diffusion.allow-http-auth');
+    if (!$allow_public) {
+      if (!$viewer->isLoggedIn()) {
+        if ($allow_auth) {
+          return new PhabricatorVCSResponse(
+            401,
+            pht('You must log in to access repositories.'));
+        } else {
+          return new PhabricatorVCSResponse(
+            403,
+            pht('Public and authenticated HTTP access are both forbidden.'));
+        }
       }
     }
 
@@ -90,9 +114,17 @@ abstract class DiffusionController extends PhabricatorController {
           403,
           pht('You do not have permission to access this repository.'));
       } else {
-        return new PhabricatorVCSResponse(
-          401,
-          pht('You must log in to access this repository.'));
+        if ($allow_auth) {
+          return new PhabricatorVCSResponse(
+            401,
+            pht('You must log in to access this repository.'));
+        } else {
+          return new PhabricatorVCSResponse(
+            403,
+            pht(
+              'This repository requires authentication, which is forbidden '.
+              'over HTTP.'));
+        }
       }
     }
 
@@ -124,9 +156,17 @@ abstract class DiffusionController extends PhabricatorController {
                 403,
                 pht('You do not have permission to push to this repository.'));
             } else {
-              return new PhabricatorVCSResponse(
-                401,
-                pht('You must log in to push to this repository.'));
+              if ($allow_auth) {
+                return new PhabricatorVCSResponse(
+                  401,
+                  pht('You must log in to push to this repository.'));
+              } else {
+                return new PhabricatorVCSResponse(
+                  403,
+                  pht(
+                    'Pushing to this repository requires authentication, '.
+                    'which is forbidden over HTTP.'));
+              }
             }
           }
         }
@@ -140,14 +180,26 @@ abstract class DiffusionController extends PhabricatorController {
 
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        return $this->serveGitRequest($repository);
+        $result = $this->serveGitRequest($repository, $viewer);
+        break;
       default:
+        $result = new PhabricatorVCSResponse(
+          999,
+          pht('TODO: Implement meaningful responses.'));
         break;
     }
 
-    return new PhabricatorVCSResponse(
-      999,
-      pht('TODO: Implement meaningful responses.'));
+    $code = $result->getHTTPResponseCode();
+
+    if ($is_push && ($code == 200)) {
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $repository->writeStatusMessage(
+          PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
+          PhabricatorRepositoryStatusMessage::CODE_OKAY);
+      unset($unguarded);
+    }
+
+    return $result;
   }
 
   private function isReadOnlyRequest(
@@ -404,7 +456,9 @@ abstract class DiffusionController extends PhabricatorController {
   /**
    * @phutil-external-symbol class PhabricatorStartup
    */
-  private function serveGitRequest(PhabricatorRepository $repository) {
+  private function serveGitRequest(
+    PhabricatorRepository $repository,
+    PhabricatorUser $viewer) {
     $request = $this->getRequest();
 
     $request_path = $this->getRequestDirectoryPath();
@@ -413,7 +467,16 @@ abstract class DiffusionController extends PhabricatorController {
     // Rebuild the query string to strip `__magic__` parameters and prevent
     // issues where we might interpret inputs like "service=read&service=write"
     // differently than the server does and pass it an unsafe command.
-    $query_data = $request->getPassthroughRequestParameters();
+
+    // NOTE: This does not use getPassthroughRequestParameters() because
+    // that code is HTTP-method agnostic and will encode POST data.
+
+    $query_data = $_GET;
+    foreach ($query_data as $key => $value) {
+      if (!strncmp($key, '__', 2)) {
+        unset($query_data[$key]);
+      }
+    }
     $query_string = http_build_query($query_data, '', '&');
 
     // We're about to wipe out PATH with the rest of the environment, so
@@ -426,18 +489,32 @@ abstract class DiffusionController extends PhabricatorController {
     $env = array(
       'REQUEST_METHOD' => $_SERVER['REQUEST_METHOD'],
       'QUERY_STRING' => $query_string,
-      'CONTENT_TYPE' => $_SERVER['CONTENT_TYPE'],
-      'REMOTE_USER' => '',
+      'CONTENT_TYPE' => $request->getHTTPHeader('Content-Type'),
+      'HTTP_CONTENT_ENCODING' => $request->getHTTPHeader('Content-Encoding'),
       'REMOTE_ADDR' => $_SERVER['REMOTE_ADDR'],
       'GIT_PROJECT_ROOT' => $repository_root,
       'GIT_HTTP_EXPORT_ALL' => '1',
       'PATH_INFO' => $request_path,
+
+      'REMOTE_USER' => $viewer->getUsername(),
+
+      // TODO: Set these correctly.
+      // GIT_COMMITTER_NAME
+      // GIT_COMMITTER_EMAIL
     );
 
-    list($stdout) = id(new ExecFuture('%s', $bin))
+    $input = PhabricatorStartup::getRawInput();
+
+    list($err, $stdout, $stderr) = id(new ExecFuture('%s', $bin))
       ->setEnv($env, true)
-      ->write(PhabricatorStartup::getRawInput())
-      ->resolvex();
+      ->write($input)
+      ->resolve();
+
+    if ($err) {
+      return new PhabricatorVCSResponse(
+        500,
+        pht('Error %d: %s', $err, $stderr));
+    }
 
     return id(new DiffusionGitResponse())->setGitData($stdout);
   }
@@ -453,6 +530,44 @@ abstract class DiffusionController extends PhabricatorController {
       ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
       ->setTitle($title)
       ->appendChild($body);
+  }
+
+  private function authenticateHTTPRepositoryUser(
+    $username,
+    PhutilOpaqueEnvelope $password) {
+
+    if (!PhabricatorEnv::getEnvConfig('diffusion.allow-http-auth')) {
+      // No HTTP auth permitted.
+      return null;
+    }
+
+    $user = id(new PhabricatorPeopleQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withUsernames(array($username))
+      ->executeOne();
+    if (!$user) {
+      // Username doesn't match anything.
+      return null;
+    }
+
+    $password_entry = id(new PhabricatorRepositoryVCSPassword())
+      ->loadOneWhere('userPHID = %s', $user->getPHID());
+    if (!$password_entry) {
+      // User doesn't have a password set.
+      return null;
+    }
+
+    if (!$password_entry->comparePassword($password, $user)) {
+      // Password doesn't match.
+      return null;
+    }
+
+    if ($user->getIsDisabled()) {
+      // User is disabled.
+      return null;
+    }
+
+    return $user;
   }
 }
 

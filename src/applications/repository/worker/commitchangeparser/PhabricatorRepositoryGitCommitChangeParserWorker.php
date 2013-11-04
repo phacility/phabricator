@@ -3,16 +3,9 @@
 final class PhabricatorRepositoryGitCommitChangeParserWorker
   extends PhabricatorRepositoryCommitChangeParserWorker {
 
-  protected function parseCommit(
+  protected function parseCommitChanges(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
-
-    $full_name = 'r'.$repository->getCallsign().$commit->getCommitIdentifier();
-    echo "Parsing {$full_name}...\n";
-    if ($this->isBadCommit($full_name)) {
-      echo "This commit is marked bad!\n";
-      return;
-    }
 
     // Check if the commit has parents. We're testing to see whether it is the
     // first commit in history (in which case we must use "git log") or some
@@ -272,8 +265,6 @@ final class PhabricatorRepositoryGitCommitChangeParserWorker
         PhabricatorRepository::TABLE_PATHCHANGE,
         implode(', ', $sql_chunk));
     }
-
-    $this->finishParse();
   }
 
 }

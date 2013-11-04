@@ -52,9 +52,12 @@ final class DiffusionRepositoryEditMainController
     $policy_properties =
       $this->buildPolicyProperties($repository, $policy_actions);
 
-    $remote_properties = $this->buildRemoteProperties(
-      $repository,
-      $this->buildRemoteActions($repository));
+    $remote_properties = null;
+    if (!$repository->isHosted()) {
+      $remote_properties = $this->buildRemoteProperties(
+        $repository,
+        $this->buildRemoteActions($repository));
+    }
 
     $encoding_actions = $this->buildEncodingActions($repository);
     $encoding_properties =
@@ -115,8 +118,11 @@ final class DiffusionRepositoryEditMainController
       ->setHeader($header)
       ->addPropertyList($basic_properties)
       ->addPropertyList($policy_properties)
-      ->addPropertyList($hosting_properties)
-      ->addPropertyList($remote_properties);
+      ->addPropertyList($hosting_properties);
+
+    if ($remote_properties) {
+      $obj_box->addPropertyList($remote_properties);
+    }
 
     if ($local_properties) {
       $obj_box->addPropertyList($local_properties);
@@ -349,6 +355,11 @@ final class DiffusionRepositoryEditMainController
     $autoclose_only = nonempty(
       $repository->getHumanReadableDetail('close-commits-filter', array()),
       phutil_tag('em', array(), pht('Autoclose On All Branches')));
+
+    if ($repository->getDetail('disable-autoclose')) {
+      $autoclose_only = phutil_tag('em', array(), pht('Disabled'));
+    }
+
     $view->addProperty(pht('Autoclose Only'), $autoclose_only);
 
     return $view;
@@ -563,6 +574,8 @@ final class DiffusionRepositoryEditMainController
   private function buildRepositoryStatus(
     PhabricatorRepository $repository) {
 
+    $viewer = $this->getRequest()->getUser();
+
     $view = new PHUIStatusListView();
 
     $messages = id(new PhabricatorRepositoryStatusMessage())
@@ -696,7 +709,7 @@ final class DiffusionRepositoryEditMainController
               id(new PHUIStatusItemView())
                 ->setIcon('time-green')
                 ->setTarget(pht('Initializing Working Copy'))
-                ->setNote(pht('Daemons are initilizing the working copy.')));
+                ->setNote(pht('Daemons are initializing the working copy.')));
             return $view;
           default:
             $view->addItem(
@@ -715,6 +728,92 @@ final class DiffusionRepositoryEditMainController
               pht('Waiting for daemons to build a working copy.')));
         return $view;
       }
+    }
+
+    $message = idx($messages, PhabricatorRepositoryStatusMessage::TYPE_FETCH);
+    if ($message) {
+      switch ($message->getStatusCode()) {
+        case PhabricatorRepositoryStatusMessage::CODE_ERROR:
+          $view->addItem(
+            id(new PHUIStatusItemView())
+              ->setIcon('warning-red')
+              ->setTarget(pht('Update Error'))
+              ->setNote($message->getParameter('message')));
+          return $view;
+        case PhabricatorRepositoryStatusMessage::CODE_OKAY:
+          $view->addItem(
+            id(new PHUIStatusItemView())
+              ->setIcon('accept-green')
+              ->setTarget(pht('Updates OK'))
+              ->setNote(
+                pht(
+                  'Last updated %s.',
+                  phabricator_datetime($message->getEpoch(), $viewer))));
+          break;
+      }
+    } else {
+      $view->addItem(
+        id(new PHUIStatusItemView())
+          ->setIcon('time-orange')
+          ->setTarget(pht('Waiting For Update'))
+          ->setNote(
+            pht('Waiting for daemons to read updates.')));
+    }
+
+    if ($repository->isImporting()) {
+      $progress = queryfx_all(
+        $repository->establishConnection('r'),
+        'SELECT importStatus, count(*) N FROM %T WHERE repositoryID = %d
+          GROUP BY importStatus',
+        id(new PhabricatorRepositoryCommit())->getTableName(),
+        $repository->getID());
+
+      $done = 0;
+      $total = 0;
+      foreach ($progress as $row) {
+        $total += $row['N'] * 4;
+        $status = $row['importStatus'];
+        if ($status & PhabricatorRepositoryCommit::IMPORTED_MESSAGE) {
+          $done += $row['N'];
+        }
+        if ($status & PhabricatorRepositoryCommit::IMPORTED_CHANGE) {
+          $done += $row['N'];
+        }
+        if ($status & PhabricatorRepositoryCommit::IMPORTED_OWNERS) {
+          $done += $row['N'];
+        }
+        if ($status & PhabricatorRepositoryCommit::IMPORTED_HERALD) {
+          $done += $row['N'];
+        }
+      }
+
+      if ($total) {
+        $percentage = 100 * ($done / $total);
+      } else {
+        $percentage = 0;
+      }
+
+      $percentage = sprintf('%.1f%%', $percentage);
+
+      $view->addItem(
+        id(new PHUIStatusItemView())
+          ->setIcon('time-green')
+          ->setTarget(pht('Importing'))
+          ->setNote(
+            pht('%s Complete', $percentage)));
+    } else {
+      $view->addItem(
+        id(new PHUIStatusItemView())
+          ->setIcon('accept-green')
+          ->setTarget(pht('Fully Imported')));
+    }
+
+    if (idx($messages, PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE)) {
+      $view->addItem(
+        id(new PHUIStatusItemView())
+          ->setIcon('up')
+          ->setTarget(pht('Prioritized'))
+          ->setNote(pht('This repository will be updated soon.')));
     }
 
     return $view;

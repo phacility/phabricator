@@ -1,0 +1,8 @@
+CREATE TABLE {$NAMESPACE}_repository.repository_vcspassword (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  userPHID VARCHAR(64) NOT NULL COLLATE utf8_bin,
+  passwordHash VARCHAR(50) NOT NULL COLLATE utf8_bin,
+  dateCreated INT UNSIGNED NOT NULL,
+  dateModified INT UNSIGNED NOT NULL,
+  UNIQUE KEY `key_phid` (userPHID)
+) ENGINE=InnoDB, CHARSET utf8;

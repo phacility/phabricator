@@ -107,8 +107,8 @@ final class DiffusionRepositoryListController extends DiffusionController
 
     $crumbs->addAction(
       id(new PHUIListItemView())
-        ->setName(pht('Import Repository'))
-        ->setHref($this->getApplicationURI('/create/'))
+        ->setName(pht('New Repository'))
+        ->setHref($this->getApplicationURI('new/'))
         ->setDisabled(!$can_create)
         ->setIcon('create'));
 

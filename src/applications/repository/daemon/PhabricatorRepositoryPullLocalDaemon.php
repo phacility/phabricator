@@ -92,6 +92,15 @@ final class PhabricatorRepositoryPullLocalDaemon
       shuffle($repositories);
       $repositories = mpull($repositories, null, 'getID');
 
+      // If any repositories have the NEEDS_UPDATE flag set, pull them
+      // as soon as possible.
+      $type_need_update = PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE;
+      $need_update_messages = id(new PhabricatorRepositoryStatusMessage())
+        ->loadAllWhere('statusType = %s', $type_need_update);
+      foreach ($need_update_messages as $message) {
+        $retry_after[$message->getRepositoryID()] = time();
+      }
+
       // If any repositories were deleted, remove them from the retry timer map
       // so we don't end up with a retry timer that never gets updated and
       // causes us to sleep for the minimum amount of time.
@@ -135,9 +144,23 @@ final class PhabricatorRepositoryPullLocalDaemon
             $lock = PhabricatorGlobalLock::newLock($lock_name);
             $lock->lock();
 
+            $repository->writeStatusMessage(
+              PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
+              null);
+
             try {
               $this->discoverRepository($repository);
+              $repository->writeStatusMessage(
+                PhabricatorRepositoryStatusMessage::TYPE_FETCH,
+                PhabricatorRepositoryStatusMessage::CODE_OKAY);
             } catch (Exception $ex) {
+              $repository->writeStatusMessage(
+                PhabricatorRepositoryStatusMessage::TYPE_FETCH,
+                PhabricatorRepositoryStatusMessage::CODE_ERROR,
+                array(
+                  'message' => pht(
+                    'Error updating working copy: %s', $ex->getMessage()),
+                ));
               $lock->unlock();
               throw $ex;
             }
@@ -483,7 +506,8 @@ final class PhabricatorRepositoryPullLocalDaemon
     // Look for any commit which hasn't imported.
     $unparsed_commit = queryfx_one(
       $repository->establishConnection('r'),
-      'SELECT * FROM %T WHERE repositoryID = %d AND importStatus != %d',
+      'SELECT * FROM %T WHERE repositoryID = %d AND importStatus != %d
+        LIMIT 1',
       id(new PhabricatorRepositoryCommit())->getTableName(),
       $repository->getID(),
       PhabricatorRepositoryCommit::IMPORTED_ALL);
@@ -512,19 +536,21 @@ final class PhabricatorRepositoryPullLocalDaemon
   private function executeGitDiscover(
     PhabricatorRepository $repository) {
 
-    list($remotes) = $repository->execxLocalCommand(
-      'remote show -n origin');
+    if (!$repository->isHosted()) {
+      list($remotes) = $repository->execxLocalCommand(
+        'remote show -n origin');
 
-    $matches = null;
-    if (!preg_match('/^\s*Fetch URL:\s*(.*?)\s*$/m', $remotes, $matches)) {
-      throw new Exception(
-        "Expected 'Fetch URL' in 'git remote show -n origin'.");
+      $matches = null;
+      if (!preg_match('/^\s*Fetch URL:\s*(.*?)\s*$/m', $remotes, $matches)) {
+        throw new Exception(
+          "Expected 'Fetch URL' in 'git remote show -n origin'.");
+      }
+
+      self::executeGitVerifySameOrigin(
+        $matches[1],
+        $repository->getRemoteURI(),
+        $repository->getLocalPath());
     }
-
-    self::executeGitVerifySameOrigin(
-      $matches[1],
-      $repository->getRemoteURI(),
-      $repository->getLocalPath());
 
     $refs = id(new DiffusionLowLevelGitRefQuery())
       ->setRepository($repository)
@@ -719,6 +745,11 @@ final class PhabricatorRepositoryPullLocalDaemon
   private function executeHgDiscover(PhabricatorRepository $repository) {
     // NOTE: "--debug" gives us 40-character hashes.
     list($stdout) = $repository->execxLocalCommand('--debug branches');
+
+    if (!trim($stdout)) {
+      // No branches; likely a newly initialized repository.
+      return false;
+    }
 
     $branches = ArcanistMercurialParser::parseMercurialBranches($stdout);
     $got_something = false;

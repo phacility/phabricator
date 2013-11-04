@@ -5,9 +5,13 @@
  * @{class:PhabricatorRepository} objects. Used by
  * @{class:PhabricatorRepositoryPullLocalDaemon}.
  *
+ * This class also covers initial working copy setup through `git clone`,
+ * `git init`, `hg clone`, `hg init`, or `svnadmin create`.
+ *
  * @task pull     Pulling Working Copies
  * @task git      Pulling Git Working Copies
  * @task hg       Pulling Mercurial Working Copies
+ * @task svn      Pulling Subversion Working Copies
  * @task internal Internals
  */
 final class PhabricatorRepositoryPullEngine
@@ -22,28 +26,24 @@ final class PhabricatorRepositoryPullEngine
 
     $is_hg = false;
     $is_git = false;
+    $is_svn = false;
 
     $vcs = $repository->getVersionControlSystem();
     $callsign = $repository->getCallsign();
 
-    if ($repository->isHosted()) {
-      $this->skipPull(
-        pht(
-          'Repository "%s" is hosted, so Phabricator does not pull updates '.
-          'for it.',
-          $callsign));
-      return;
-    }
-
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        // We never pull a local copy of Subversion repositories.
-        $this->skipPull(
-          pht(
-            "Repository '%s' is a Subversion repository, which does not ".
-            "require a local working copy to be pulled.",
-            $callsign));
-        return;
+        // We never pull a local copy of non-hosted Subversion repositories.
+        if (!$repository->isHosted()) {
+          $this->skipPull(
+            pht(
+              "Repository '%s' is a non-hosted Subversion repository, which ".
+              "does not require a local working copy to be pulled.",
+              $callsign));
+          return;
+        }
+        $is_svn = true;
+        break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $is_git = true;
         break;
@@ -76,18 +76,28 @@ final class PhabricatorRepositoryPullEngine
             $callsign));
         if ($is_git) {
           $this->executeGitCreate();
-        } else {
+        } else if ($is_hg) {
           $this->executeMercurialCreate();
+        } else {
+          $this->executeSubversionCreate();
         }
       } else {
-        $this->logPull(
-          pht(
-            "Updating the working copy for repository '%s'.",
-            $callsign));
-        if ($is_git) {
-          $this->executeGitUpdate();
+        if ($repository->isHosted()) {
+          $this->logPull(
+            pht(
+              "Repository '%s' is hosted, so Phabricator does not pull ".
+              "updates for it.",
+              $callsign));
         } else {
-          $this->executeMercurialUpdate();
+          $this->logPull(
+            pht(
+              "Updating the working copy for repository '%s'.",
+              $callsign));
+          if ($is_git) {
+            $this->executeGitUpdate();
+          } else {
+            $this->executeMercurialUpdate();
+          }
         }
       }
     } catch (Exception $ex) {
@@ -102,8 +112,8 @@ final class PhabricatorRepositoryPullEngine
   }
 
   private function skipPull($message) {
-    $this->updateRepositoryInitStatus(null);
     $this->log('%s', $message);
+    $this->donePull();
   }
 
   private function abortPull($message, Exception $ex = null) {
@@ -146,10 +156,18 @@ final class PhabricatorRepositoryPullEngine
   private function executeGitCreate() {
     $repository = $this->getRepository();
 
-    $repository->execxRemoteCommand(
-      'clone --bare %s %s',
-      $repository->getRemoteURI(),
-      rtrim($repository->getLocalPath(), '/'));
+    $path = rtrim($repository->getLocalPath(), '/');
+
+    if ($repository->isHosted()) {
+      $repository->execxRemoteCommand(
+        'init --bare -- %s',
+        $path);
+    } else {
+      $repository->execxRemoteCommand(
+        'clone --bare -- %s %s',
+        $repository->getRemoteURI(),
+        $path);
+    }
   }
 
 
@@ -270,10 +288,18 @@ final class PhabricatorRepositoryPullEngine
   private function executeMercurialCreate() {
     $repository = $this->getRepository();
 
-    $repository->execxRemoteCommand(
-      'clone %s %s',
-      $repository->getRemoteURI(),
-      rtrim($repository->getLocalPath(), '/'));
+    $path = rtrim($repository->getLocalPath(), '/');
+
+    if ($repository->isHosted()) {
+      $repository->execxRemoteCommand(
+        'init -- %s',
+        $path);
+    } else {
+      $repository->execxRemoteCommand(
+        'clone -- %s %s',
+        $repository->getRemoteURI(),
+        $path);
+    }
   }
 
 
@@ -315,6 +341,20 @@ final class PhabricatorRepositoryPullEngine
         throw $ex;
       }
     }
+  }
+
+
+/* -(  Pulling Subversion Working Copies  )---------------------------------- */
+
+
+  /**
+   * @task svn
+   */
+  private function executeSubversionCreate() {
+    $repository = $this->getRepository();
+
+    $path = rtrim($repository->getLocalPath(), '/');
+    execx('svnadmin create -- %s', $path);
   }
 
 

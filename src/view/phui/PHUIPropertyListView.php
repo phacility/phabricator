@@ -7,6 +7,7 @@ final class PHUIPropertyListView extends AphrontView {
   private $object;
   private $invokedWillRenderEvent;
   private $actionList;
+  private $classes = array();
 
   protected function canAppendChild() {
     return false;
@@ -19,6 +20,11 @@ final class PHUIPropertyListView extends AphrontView {
 
   public function setActionList(PhabricatorActionListView $list) {
     $this->actionList = $list;
+    return $this;
+  }
+
+  public function addClass($class) {
+    $this->classes[] = $class;
     return $this;
   }
 
@@ -110,11 +116,13 @@ final class PHUIPropertyListView extends AphrontView {
           throw new Exception(pht("Unknown part type '%s'!", $type));
       }
     }
+    $this->classes[] = 'phui-property-list-section';
+    $classes = implode(' ', $this->classes);
 
     return phutil_tag(
       'div',
       array(
-        'class' => 'phui-property-list-section',
+        'class' => $classes,
       ),
       array(
         $items,

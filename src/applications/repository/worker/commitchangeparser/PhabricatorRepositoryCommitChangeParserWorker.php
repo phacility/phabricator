@@ -9,6 +9,31 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
     return 60 * 60 * 24;
   }
 
+  abstract protected function parseCommitChanges(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit);
+
+  protected function parseCommit(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit) {
+
+    $identifier = $commit->getCommitIdentifier();
+    $callsign = $repository->getCallsign();
+    $full_name = 'r'.$callsign.$identifier;
+
+    $this->log("Parsing %s...\n", $full_name);
+    if ($this->isBadCommit($full_name)) {
+      $this->log("This commit is marked bad!");
+      $result = null;
+    } else {
+      $result = $this->parseCommitChanges($repository, $commit);
+    }
+
+    $this->finishParse();
+
+    return $result;
+  }
+
   public static function lookupOrCreatePaths(array $paths) {
     $repository = new PhabricatorRepository();
     $conn_w = $repository->establishConnection('w');

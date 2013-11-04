@@ -3,16 +3,9 @@
 final class PhabricatorRepositoryMercurialCommitChangeParserWorker
   extends PhabricatorRepositoryCommitChangeParserWorker {
 
-  protected function parseCommit(
+  protected function parseCommitChanges(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
-
-    $full_name = 'r'.$repository->getCallsign().$commit->getCommitIdentifier();
-    echo "Parsing {$full_name}...\n";
-    if ($this->isBadCommit($full_name)) {
-      echo "This commit is marked bad!\n";
-      return;
-    }
 
     list($stdout) = $repository->execxLocalCommand(
       'status -C --change %s',
@@ -307,8 +300,6 @@ final class PhabricatorRepositoryMercurialCommitChangeParserWorker
         PhabricatorRepository::TABLE_PATHCHANGE,
         implode(', ', $sql_chunk));
     }
-
-    $this->finishParse();
   }
 
   private function mercurialPathExists(
