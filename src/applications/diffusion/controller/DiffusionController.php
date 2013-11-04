@@ -180,7 +180,7 @@ abstract class DiffusionController extends PhabricatorController {
 
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $result = $this->serveGitRequest($repository);
+        $result = $this->serveGitRequest($repository, $viewer);
         break;
       default:
         $result = new PhabricatorVCSResponse(
@@ -192,9 +192,11 @@ abstract class DiffusionController extends PhabricatorController {
     $code = $result->getHTTPResponseCode();
 
     if ($is_push && ($code == 200)) {
-      $repository->writeStatusMessage(
-        PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
-        PhabricatorRepositoryStatusMessage::CODE_OKAY);
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $repository->writeStatusMessage(
+          PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
+          PhabricatorRepositoryStatusMessage::CODE_OKAY);
+      unset($unguarded);
     }
 
     return $result;
@@ -454,7 +456,9 @@ abstract class DiffusionController extends PhabricatorController {
   /**
    * @phutil-external-symbol class PhabricatorStartup
    */
-  private function serveGitRequest(PhabricatorRepository $repository) {
+  private function serveGitRequest(
+    PhabricatorRepository $repository,
+    PhabricatorUser $viewer) {
     $request = $this->getRequest();
 
     $request_path = $this->getRequestDirectoryPath();
@@ -492,8 +496,9 @@ abstract class DiffusionController extends PhabricatorController {
       'GIT_HTTP_EXPORT_ALL' => '1',
       'PATH_INFO' => $request_path,
 
+      'REMOTE_USER' => $viewer->getUsername(),
+
       // TODO: Set these correctly.
-      'REMOTE_USER' => '',
       // GIT_COMMITTER_NAME
       // GIT_COMMITTER_EMAIL
     );
