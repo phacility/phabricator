@@ -131,7 +131,9 @@ final class DiffusionCommitController extends DiffusionController {
       $property_list->setActionList($headsup_actions);
 
       $detail_list = new PHUIPropertyListView();
-      $detail_list->addSectionHeader(pht('Description'));
+      $detail_list->addSectionHeader(
+        pht('Description'),
+        PHUIPropertyListView::ICON_SUMMARY);
       $detail_list->addTextContent(
         phutil_tag(
           'div',
