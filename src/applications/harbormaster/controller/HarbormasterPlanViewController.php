@@ -88,14 +88,6 @@ final class HarbormasterPlanViewController
         ->setDisabled(!$can_edit)
         ->setIcon('edit'));
 
-    $list->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Manually Execute Plan'))
-        ->setHref($this->getApplicationURI("plan/execute/{$id}/"))
-        ->setWorkflow(true)
-        ->setDisabled(!$can_edit)
-        ->setIcon('arrow_right'));
-
     return $list;
   }
 

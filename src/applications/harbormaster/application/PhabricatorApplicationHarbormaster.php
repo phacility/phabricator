@@ -44,13 +44,13 @@ final class PhabricatorApplicationHarbormaster extends PhabricatorApplication {
           => 'HarbormasterBuildableListController',
         'buildable/' => array(
           'edit/(?:(?P<id>\d+)/)?' => 'HarbormasterBuildableEditController',
+          'apply/(?:(?P<id>\d+)/)?' => 'HarbormasterBuildableApplyController',
         ),
         'plan/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?'
             => 'HarbormasterPlanListController',
           'edit/(?:(?P<id>\d+)/)?' => 'HarbormasterPlanEditController',
           '(?P<id>\d+)/' => 'HarbormasterPlanViewController',
-          'execute/(?P<id>\d+)/' => 'HarbormasterPlanExecuteController',
         ),
       ),
     );

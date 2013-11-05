@@ -656,7 +656,9 @@ phutil_register_library_map(array(
     'HarbormasterBuildStepQuery' => 'applications/harbormaster/query/HarbormasterBuildStepQuery.php',
     'HarbormasterBuildTarget' => 'applications/harbormaster/storage/build/HarbormasterBuildTarget.php',
     'HarbormasterBuildTargetQuery' => 'applications/harbormaster/query/HarbormasterBuildTargetQuery.php',
+    'HarbormasterBuildWorker' => 'applications/harbormaster/worker/HarbormasterBuildWorker.php',
     'HarbormasterBuildable' => 'applications/harbormaster/storage/HarbormasterBuildable.php',
+    'HarbormasterBuildableApplyController' => 'applications/harbormaster/controller/HarbormasterBuildableApplyController.php',
     'HarbormasterBuildableArtifactQuery' => 'applications/harbormaster/query/HarbormasterBuildableArtifactQuery.php',
     'HarbormasterBuildableEditController' => 'applications/harbormaster/controller/HarbormasterBuildableEditController.php',
     'HarbormasterBuildableListController' => 'applications/harbormaster/controller/HarbormasterBuildableListController.php',
@@ -675,11 +677,9 @@ phutil_register_library_map(array(
     'HarbormasterPHIDTypeBuildable' => 'applications/harbormaster/phid/HarbormasterPHIDTypeBuildable.php',
     'HarbormasterPlanController' => 'applications/harbormaster/controller/HarbormasterPlanController.php',
     'HarbormasterPlanEditController' => 'applications/harbormaster/controller/HarbormasterPlanEditController.php',
-    'HarbormasterPlanExecuteController' => 'applications/harbormaster/controller/HarbormasterPlanExecuteController.php',
     'HarbormasterPlanListController' => 'applications/harbormaster/controller/HarbormasterPlanListController.php',
     'HarbormasterPlanViewController' => 'applications/harbormaster/controller/HarbormasterPlanViewController.php',
     'HarbormasterRemarkupRule' => 'applications/harbormaster/remarkup/HarbormasterRemarkupRule.php',
-    'HarbormasterRunnerWorker' => 'applications/harbormaster/worker/HarbormasterRunnerWorker.php',
     'HarbormasterScratchTable' => 'applications/harbormaster/storage/HarbormasterScratchTable.php',
     'HeraldAction' => 'applications/herald/storage/HeraldAction.php',
     'HeraldAdapter' => 'applications/herald/adapter/HeraldAdapter.php',
@@ -2868,11 +2868,13 @@ phutil_register_library_map(array(
     'HarbormasterBuildStepQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'HarbormasterBuildTarget' => 'HarbormasterDAO',
     'HarbormasterBuildTargetQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'HarbormasterBuildWorker' => 'PhabricatorWorker',
     'HarbormasterBuildable' =>
     array(
       0 => 'HarbormasterDAO',
       1 => 'PhabricatorPolicyInterface',
     ),
+    'HarbormasterBuildableApplyController' => 'HarbormasterController',
     'HarbormasterBuildableArtifactQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'HarbormasterBuildableEditController' => 'HarbormasterController',
     'HarbormasterBuildableListController' =>
@@ -2895,7 +2897,6 @@ phutil_register_library_map(array(
     'HarbormasterPHIDTypeBuildable' => 'PhabricatorPHIDType',
     'HarbormasterPlanController' => 'PhabricatorController',
     'HarbormasterPlanEditController' => 'HarbormasterPlanController',
-    'HarbormasterPlanExecuteController' => 'HarbormasterPlanController',
     'HarbormasterPlanListController' =>
     array(
       0 => 'HarbormasterPlanController',
@@ -2903,7 +2904,6 @@ phutil_register_library_map(array(
     ),
     'HarbormasterPlanViewController' => 'HarbormasterPlanController',
     'HarbormasterRemarkupRule' => 'PhabricatorRemarkupRuleObject',
-    'HarbormasterRunnerWorker' => 'PhabricatorWorker',
     'HarbormasterScratchTable' => 'HarbormasterDAO',
     'HeraldAction' => 'HeraldDAO',
     'HeraldApplyTranscript' => 'HeraldDAO',
