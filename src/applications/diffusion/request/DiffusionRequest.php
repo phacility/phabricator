@@ -643,7 +643,7 @@ abstract class DiffusionRequest {
     }
 
     if ($this->getSupportsBranches()) {
-      $branch = $this->getBranch();
+      $branch = $this->getResolvableBranchName($this->getBranch());
     } else {
       $branch = 'HEAD';
     }
@@ -658,6 +658,10 @@ abstract class DiffusionRequest {
 
     $this->stableCommitName = idx(head($matches), 'identifier');
     return $this->stableCommitName;
+  }
+
+  protected function getResolvableBranchName($branch) {
+    return $branch;
   }
 
   private function resolveRefs(array $refs) {
