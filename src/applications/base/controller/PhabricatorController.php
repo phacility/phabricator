@@ -249,9 +249,10 @@ abstract class PhabricatorController extends AphrontController {
         $view->appendChild(hsprintf(
           '<div style="padding: 2em 0;">%s</div>',
           $response->buildResponseString()));
-        $response = new AphrontWebpageResponse();
-        $response->setContent($view->render());
-        return $response;
+        $page_response = new AphrontWebpageResponse();
+        $page_response->setContent($view->render());
+        $page_response->setHTTPResponseCode($response->getHTTPResponseCode());
+        return $page_response;
       } else {
         $response->getDialog()->setIsStandalone(true);
 
