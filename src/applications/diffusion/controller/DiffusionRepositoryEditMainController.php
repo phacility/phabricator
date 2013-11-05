@@ -726,27 +726,27 @@ final class DiffusionRepositoryEditMainController
           ->setNote($daemon_instructions));
     }
 
-    $local_parent = dirname($repository->getLocalPath());
-    if (Filesystem::pathExists($local_parent)) {
-      $view->addItem(
-        id(new PHUIStatusItemView())
-          ->setIcon('accept-green')
-          ->setTarget(pht('Storage Directory OK'))
-          ->setNote(phutil_tag('tt', array(), $local_parent)));
-    } else {
-      $view->addItem(
-        id(new PHUIStatusItemView())
-          ->setIcon('warning-red')
-          ->setTarget(pht('No Storage Directory'))
-          ->setNote(
-            pht(
-              'Storage directory %s does not exist, or is not readable by '.
-              'the webserver. Create this directory or make it readable.',
-              phutil_tag('tt', array(), $local_parent))));
-      return $view;
-    }
-
     if ($repository->usesLocalWorkingCopy()) {
+      $local_parent = dirname($repository->getLocalPath());
+      if (Filesystem::pathExists($local_parent)) {
+        $view->addItem(
+          id(new PHUIStatusItemView())
+            ->setIcon('accept-green')
+            ->setTarget(pht('Storage Directory OK'))
+            ->setNote(phutil_tag('tt', array(), $local_parent)));
+      } else {
+        $view->addItem(
+          id(new PHUIStatusItemView())
+            ->setIcon('warning-red')
+            ->setTarget(pht('No Storage Directory'))
+            ->setNote(
+              pht(
+                'Storage directory %s does not exist, or is not readable by '.
+                'the webserver. Create this directory or make it readable.',
+                phutil_tag('tt', array(), $local_parent))));
+        return $view;
+      }
+
       $local_path = $repository->getLocalPath();
       $message = idx($messages, PhabricatorRepositoryStatusMessage::TYPE_INIT);
       if ($message) {
