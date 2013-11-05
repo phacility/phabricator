@@ -1720,6 +1720,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20131031.vcspassword.sql'),
       ),
+      '20131105.buildstep.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131105.buildstep.sql'),
+      ),
     );
   }
 }

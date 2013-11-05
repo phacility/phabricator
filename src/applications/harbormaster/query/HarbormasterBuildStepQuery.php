@@ -5,6 +5,7 @@ final class HarbormasterBuildStepQuery
 
   private $ids;
   private $phids;
+  private $buildPlanPHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -13,6 +14,11 @@ final class HarbormasterBuildStepQuery
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  public function withBuildPlanPHIDs(array $phids) {
+    $this->buildPlanPHIDs = $phids;
     return $this;
   }
 
@@ -48,9 +54,41 @@ final class HarbormasterBuildStepQuery
         $this->phids);
     }
 
+    if ($this->buildPlanPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'buildPlanPHID in (%Ls)',
+        $this->buildPlanPHIDs);
+    }
+
     $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
+  }
+
+  protected function willFilterPage(array $page) {
+    $plans = array();
+
+    $buildplan_phids = array_filter(mpull($page, 'getBuildPlanPHID'));
+    if ($buildplan_phids) {
+      $plans = id(new PhabricatorObjectQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs($buildplan_phids)
+        ->setParentQuery($this)
+        ->execute();
+      $plans = mpull($plans, null, 'getPHID');
+    }
+
+    foreach ($page as $key => $build) {
+      $buildable_phid = $build->getBuildPlanPHID();
+      if (empty($plans[$buildable_phid])) {
+        unset($page[$key]);
+        continue;
+      }
+      $build->attachBuildPlan($plans[$buildable_phid]);
+    }
+
+    return $page;
   }
 
   public function getQueryApplicationClass() {

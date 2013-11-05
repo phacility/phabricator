@@ -32,11 +32,25 @@ final class HarbormasterBuildWorker extends PhabricatorWorker {
       $buildable = $build->getBuildable();
       $plan = $build->getBuildPlan();
 
-      // TODO: Do the actual build here.
-      sleep(15);
+      $steps = id(new HarbormasterBuildStepQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withBuildPlanPHIDs(array($plan->getPHID()))
+        ->execute();
 
-      // If we get to here, then the build has passed.
-      $build->setBuildStatus(HarbormasterBuild::STATUS_PASSED);
+      // Perform the build.
+      foreach ($steps as $step) {
+        $implementation = $step->getStepImplementation();
+        $implementation->execute($build);
+        if ($build->getBuildStatus() !== HarbormasterBuild::STATUS_BUILDING) {
+          break;
+        }
+      }
+
+      // If we get to here, then the build has finished.  Set it to passed
+      // if no build step explicitly set the status.
+      if ($build->getBuildStatus() === HarbormasterBuild::STATUS_BUILDING) {
+        $build->setBuildStatus(HarbormasterBuild::STATUS_PASSED);
+      }
       $build->save();
     } catch (Exception $e) {
       // If any exception is raised, the build is marked as a failure and
