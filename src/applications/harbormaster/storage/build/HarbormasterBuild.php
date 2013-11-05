@@ -40,6 +40,11 @@ final class HarbormasterBuild extends HarbormasterDAO
    */
   const STATUS_FAILED = 'failed';
 
+  /**
+   * The build encountered an unexpected error.
+   */
+  const STATUS_ERROR = 'error';
+
   public static function initializeNewBuild(PhabricatorUser $actor) {
     return id(new HarbormasterBuild())
       ->setBuildStatus(self::STATUS_INACTIVE);

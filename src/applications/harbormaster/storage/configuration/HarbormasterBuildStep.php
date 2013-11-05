@@ -46,9 +46,16 @@ final class HarbormasterBuildStep extends HarbormasterDAO
       throw new Exception("No implementation set for the given step.");
     }
 
-    // TODO: We should look up the class in phutil's system to ensure
-    // that it actually extends BuildStepImplementation.
+    static $implementations = null;
+    if ($implementations === null) {
+      $implementations = BuildStepImplementation::getImplementations();
+    }
+
     $class = $this->className;
+    if (!in_array($class, $implementations)) {
+      throw new Exception(
+        "Class name '".$class."' does not extend BuildStepImplementation.");
+    }
     $implementation = newv($class, array());
     $implementation->loadSettings($this);
     return $implementation;

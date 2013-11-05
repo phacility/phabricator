@@ -40,6 +40,10 @@ final class HarbormasterBuildWorker extends PhabricatorWorker {
       // Perform the build.
       foreach ($steps as $step) {
         $implementation = $step->getStepImplementation();
+        if (!$implementation->validateSettings()) {
+          $build->setBuildStatus(HarbormasterBuild::STATUS_ERROR);
+          break;
+        }
         $implementation->execute($build);
         if ($build->getBuildStatus() !== HarbormasterBuild::STATUS_BUILDING) {
           break;
@@ -56,7 +60,7 @@ final class HarbormasterBuildWorker extends PhabricatorWorker {
       // If any exception is raised, the build is marked as a failure and
       // the exception is re-thrown (this ensures we don't leave builds
       // in an inconsistent state).
-      $build->setBuildStatus(HarbormasterBuild::STATUS_FAILED);
+      $build->setBuildStatus(HarbormasterBuild::STATUS_ERROR);
       $build->save();
       throw $e;
     }

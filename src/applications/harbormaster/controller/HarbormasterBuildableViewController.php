@@ -62,6 +62,10 @@ final class HarbormasterBuildableViewController
           $item->setBarColor('red');
           $item->addAttribute(pht('Failed'));
           break;
+        case HarbormasterBuild::STATUS_ERROR:
+          $item->setBarColor('red');
+          $item->addAttribute(pht('Unexpected Error'));
+          break;
       }
       $build_list->addItem($item);
     }
