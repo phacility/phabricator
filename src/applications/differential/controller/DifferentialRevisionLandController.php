@@ -1,0 +1,130 @@
+<?php
+
+final class DifferentialRevisionLandController extends DifferentialController {
+
+  private $revisionID;
+  private $strategyClass;
+  private $pushStrategy;
+
+  public function willProcessRequest(array $data) {
+    $this->revisionID = $data['id'];
+    $this->strategyClass = $data['strategy'];
+  }
+
+  public function processRequest() {
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $revision_id = $this->revisionID;
+
+    $revision = id(new DifferentialRevisionQuery())
+      ->withIDs(array($revision_id))
+      ->setViewer($viewer)
+      ->executeOne();
+    if (!$revision) {
+      return new Aphront404Response();
+    }
+
+    if (is_subclass_of($this->strategyClass, 'DifferentialLandingStrategy')) {
+      $this->pushStrategy = newv($this->strategyClass, array());
+    } else {
+      throw new Exception(
+        "Strategy type must be a valid class name and must subclass ".
+        "DifferentialLandingStrategy. ".
+        "'{$this->strategyClass}' is not a subclass of ".
+        "DifferentialLandingStrategy.");
+    }
+
+    if ($request->isDialogFormPost()) {
+      try {
+        $this->attemptLand($revision, $request);
+        $title = pht("Success!");
+        $text = pht("Revision was successfully landed.");
+      } catch (Exception $ex) {
+        $title = pht("Failed to land revision");
+        $text = 'moo';
+        if ($ex instanceof PhutilProxyException) {
+          $text = hsprintf(
+            '%s:<br><pre>%s</pre>',
+            $ex->getMessage(),
+            $ex->getPreviousException()->getMessage());
+        } else {
+          $text = hsprintf('<pre>%s</pre>', $ex->getMessage());
+        }
+        $text = id(new AphrontErrorView())
+           ->appendChild($text);
+      }
+
+      $dialog = id(new AphrontDialogView())
+        ->setUser($viewer)
+        ->setTitle($title)
+        ->appendChild(phutil_tag('p', array(), $text))
+        ->setSubmitURI('/D'.$revision_id)
+        ->addSubmitButton(pht('Done'));
+
+      return id(new AphrontDialogResponse())->setDialog($dialog);
+    }
+
+    $prompt = hsprintf('%s<br><br>%s',
+      pht(
+        'This will squash and rebase revision %s, and push it to '.
+          'origin/master.',
+        $revision_id),
+      pht('It is an experimental feature and may not work.'));
+
+    $dialog = id(new AphrontDialogView())
+      ->setUser($viewer)
+      ->setTitle(pht("Land Revision %s?", $revision_id))
+      ->appendChild($prompt)
+      ->setSubmitURI($request->getRequestURI())
+      ->addSubmitButton(pht('Land it!'))
+      ->addCancelButton('/D'.$revision_id);
+
+    return id(new AphrontDialogResponse())->setDialog($dialog);
+  }
+
+  private function attemptLand($revision, $request) {
+    $status = $revision->getStatus();
+    if ($status != ArcanistDifferentialRevisionStatus::ACCEPTED) {
+      throw new Exception("Only Accepted revisions can be landed.");
+    }
+
+    $repository = $revision->getRepository();
+
+    if ($repository === null) {
+      throw new Exception("revision is not attached to a repository.");
+    }
+
+    $can_push = PhabricatorPolicyFilter::hasCapability(
+      $request->getUser(),
+      $repository,
+      DiffusionCapabilityPush::CAPABILITY);
+
+    if (!$can_push) {
+      throw new Exception(
+        pht('You do not have permission to push to this repository.'));
+    }
+
+    $lock = $this->lockRepository($repository);
+
+    try {
+      $this->pushStrategy->processLandRequest(
+        $request,
+        $revision,
+        $repository);
+    } catch (Exception $e) {
+      $lock->unlock();
+      throw $e;
+    }
+
+    $lock->unlock();
+  }
+
+  private function lockRepository($repository) {
+    $lock_name = __CLASS__.':'.($repository->getCallsign());
+    $lock = PhabricatorGlobalLock::newLock($lock_name);
+    $lock->lock();
+    return $lock;
+  }
+}
+
