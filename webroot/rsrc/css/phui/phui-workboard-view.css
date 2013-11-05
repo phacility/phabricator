@@ -15,6 +15,15 @@
   box-shadow: inset 0 0 5px rgba(0,0,0,.5);
 }
 
+.phui-workboard-view-shadow::-webkit-scrollbar {
+  height: 12px;
+}
+
+.phui-workboard-view-shadow::-webkit-scrollbar-thumb {
+  background: {$lightbluetext};
+  border-radius: 10px;
+}
+
 .phui-workboard-action-list {
   width: 60px;
   float: left;
