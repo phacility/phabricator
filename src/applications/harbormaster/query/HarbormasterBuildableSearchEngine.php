@@ -10,8 +10,9 @@ final class HarbormasterBuildableSearchEngine
   }
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new HarbormasterBuildableQuery());
-    $query->needBuildableHandles(true);
+    $query = id(new HarbormasterBuildableQuery())
+      ->needBuildableHandles(true)
+      ->needBuilds(true);
 
     return $query;
   }
