@@ -34,6 +34,17 @@ final class DifferentialDiff
   private $arcanistProject = self::ATTACHABLE;
   private $revision = self::ATTACHABLE;
 
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_AUX_PHID => true,
+    ) + parent::getConfiguration();
+  }
+
+  public function generatePHID() {
+    return PhabricatorPHID::generateNewPHID(
+      DifferentialPHIDTypeDiff::TYPECONST);
+  }
+
   public function addUnsavedChangeset(DifferentialChangeset $changeset) {
     if ($this->changesets === null) {
       $this->changesets = array();

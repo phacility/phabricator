@@ -4,12 +4,18 @@ final class DifferentialDiffQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
+  private $phids;
   private $revisionIDs;
   private $needChangesets = false;
   private $needArcanistProjects = false;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
+    return $this;
+  }
+
+  public function withPHIDs(array $phids) {
+    $this->phids = $phids;
     return $this;
   }
 
@@ -124,6 +130,13 @@ final class DifferentialDiffQuery
         $conn_r,
         'id IN (%Ld)',
         $this->ids);
+    }
+
+    if ($this->phids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'phid IN (%Ls)',
+        $this->phids);
     }
 
     if ($this->revisionIDs) {

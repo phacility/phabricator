@@ -1724,6 +1724,18 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20131105.buildstep.sql'),
       ),
+      '20131106.diffphid.1.col.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131106.diffphid.1.col.sql'),
+      ),
+      '20131106.diffphid.2.mig.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20131106.diffphid.2.mig.php'),
+      ),
+      '20131106.diffphid.3.key.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131106.diffphid.3.key.sql'),
+      ),
     );
   }
 }
