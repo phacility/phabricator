@@ -55,16 +55,69 @@ final class HarbormasterPlanViewController
       id(new PhabricatorCrumbView())
         ->setName(pht("Plan %d", $id)));
 
+    $step_list = $this->buildStepList($plan);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $box,
+        $step_list,
         $xaction_view,
       ),
       array(
         'title' => $title,
         'device' => true,
       ));
+  }
+
+  private function buildStepList(HarbormasterBuildPlan $plan) {
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $steps = id(new HarbormasterBuildStepQuery())
+      ->setViewer($viewer)
+      ->withBuildPlanPHIDs(array($plan->getPHID()))
+      ->execute();
+
+    $can_edit = $this->hasApplicationCapability(
+      HarbormasterCapabilityManagePlans::CAPABILITY);
+
+    $i = 1;
+    $step_list = id(new PHUIObjectItemListView())
+      ->setUser($viewer);
+    foreach ($steps as $step) {
+      $implementation = $step->getStepImplementation();
+      $item = id(new PHUIObjectItemView())
+        ->setObjectName("Step ".$i++)
+        ->setHeader($implementation->getName());
+
+      if (!$implementation->validateSettings()) {
+        $item
+          ->setBarColor('red')
+          ->addAttribute(pht('This step is not configured correctly.'));
+      } else {
+        $item->addAttribute($implementation->getDescription());
+      }
+
+      if ($can_edit) {
+        $edit_uri = $this->getApplicationURI("step/edit/".$step->getID()."/");
+        $item
+          ->setHref($edit_uri)
+          ->addAction(
+            id(new PHUIListItemView())
+              ->setIcon('delete')
+              ->addSigil('harbormaster-build-step-delete')
+              ->setWorkflow(true)
+              ->setRenderNameAsTooltip(true)
+              ->setName(pht("Delete"))
+              ->setHref(
+                $this->getApplicationURI("step/delete/".$step->getID()."/")));
+      }
+
+      $step_list->addItem($item);
+    }
+
+    return $step_list;
   }
 
   private function buildActionList(HarbormasterBuildPlan $plan) {
@@ -90,11 +143,11 @@ final class HarbormasterPlanViewController
 
     $list->addAction(
       id(new PhabricatorActionView())
-        ->setName(pht('Manually Execute Plan'))
-        ->setHref($this->getApplicationURI("plan/execute/{$id}/"))
-        ->setWorkflow(true)
+        ->setName(pht('Add Build Step'))
+        ->setHref($this->getApplicationURI("step/add/{$id}/"))
+        ->setWorkflow($can_edit)
         ->setDisabled(!$can_edit)
-        ->setIcon('arrow_right'));
+        ->setIcon('new'));
 
     return $list;
   }

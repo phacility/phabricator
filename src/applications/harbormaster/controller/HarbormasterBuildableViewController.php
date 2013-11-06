@@ -37,6 +37,36 @@ final class HarbormasterBuildableViewController
       $item = id(new PHUIObjectItemView())
         ->setObjectName(pht('Build %d', $build->getID()))
         ->setHeader($build->getName());
+      switch ($build->getBuildStatus()) {
+        case HarbormasterBuild::STATUS_INACTIVE:
+          $item->setBarColor('grey');
+          $item->addAttribute(pht('Inactive'));
+          break;
+        case HarbormasterBuild::STATUS_PENDING:
+          $item->setBarColor('blue');
+          $item->addAttribute(pht('Pending'));
+          break;
+        case HarbormasterBuild::STATUS_WAITING:
+          $item->setBarColor('blue');
+          $item->addAttribute(pht('Waiting on Resource'));
+          break;
+        case HarbormasterBuild::STATUS_BUILDING:
+          $item->setBarColor('yellow');
+          $item->addAttribute(pht('Building'));
+          break;
+        case HarbormasterBuild::STATUS_PASSED:
+          $item->setBarColor('green');
+          $item->addAttribute(pht('Passed'));
+          break;
+        case HarbormasterBuild::STATUS_FAILED:
+          $item->setBarColor('red');
+          $item->addAttribute(pht('Failed'));
+          break;
+        case HarbormasterBuild::STATUS_ERROR:
+          $item->setBarColor('red');
+          $item->addAttribute(pht('Unexpected Error'));
+          break;
+      }
       $build_list->addItem($item);
     }
 
@@ -79,6 +109,15 @@ final class HarbormasterBuildableViewController
       ->setUser($viewer)
       ->setObject($buildable)
       ->setObjectURI("/B{$id}");
+
+    $apply_uri = $this->getApplicationURI('/buildable/apply/'.$id.'/');
+
+    $list->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Apply Build Plan'))
+        ->setIcon('edit')
+        ->setHref($apply_uri)
+        ->setWorkflow(true));
 
     return $list;
   }

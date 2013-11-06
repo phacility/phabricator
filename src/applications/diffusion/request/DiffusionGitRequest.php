@@ -32,11 +32,15 @@ final class DiffusionGitRequest extends DiffusionRequest {
       return $this->commit;
     }
 
+    return $this->getResolvableBranchName($this->getBranch());
+  }
+
+  protected function getResolvableBranchName($branch) {
     if ($this->repository->isWorkingCopyBare()) {
-      return $this->getBranch();
+      return $branch;
     } else {
       $remote = DiffusionBranchInformation::DEFAULT_GIT_REMOTE;
-      return $remote.'/'.$this->getBranch();
+      return $remote.'/'.$branch;
     }
   }
 

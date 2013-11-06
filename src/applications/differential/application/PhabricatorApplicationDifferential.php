@@ -32,6 +32,7 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
     return array(
       new DifferentialActionMenuEventListener(),
       new DifferentialHovercardEventListener(),
+      new DifferentialLandingActionMenuEventListener(),
     );
   }
 
@@ -48,6 +49,8 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
         'changeset/' => 'DifferentialChangesetViewController',
         'revision/edit/(?:(?P<id>[1-9]\d*)/)?'
           => 'DifferentialRevisionEditController',
+        'revision/land/(?:(?P<id>[1-9]\d*))/(?P<strategy>[^/]+)/'
+          => 'DifferentialRevisionLandController',
         'comment/' => array(
           'preview/(?P<id>[1-9]\d*)/' => 'DifferentialCommentPreviewController',
           'save/' => 'DifferentialCommentSaveController',

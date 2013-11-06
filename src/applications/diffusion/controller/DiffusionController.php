@@ -8,6 +8,8 @@ abstract class DiffusionController extends PhabricatorController {
     $request = $this->getRequest();
     $uri = $request->getRequestURI();
 
+    $user_agent = idx($_SERVER, 'HTTP_USER_AGENT');
+
     // Check if this is a VCS request, e.g. from "git clone", "hg clone", or
     // "svn checkout". If it is, we jump off into repository serving code to
     // process the request.
@@ -27,6 +29,8 @@ abstract class DiffusionController extends PhabricatorController {
         //
         // ...to get a human-readable error.
         $vcs = $request->getExists('__vcs__');
+      } else if (strncmp($user_agent, "git/", 4) === 0) {
+        $vcs = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
       } else if ($request->getExists('service')) {
         $service = $request->getStr('service');
         // We get this initially for `info/refs`.
@@ -538,6 +542,16 @@ abstract class DiffusionController extends PhabricatorController {
 
     if (!PhabricatorEnv::getEnvConfig('diffusion.allow-http-auth')) {
       // No HTTP auth permitted.
+      return null;
+    }
+
+    if (!strlen($username)) {
+      // No username.
+      return null;
+    }
+
+    if (!strlen($password->openEnvelope())) {
+      // No password.
       return null;
     }
 

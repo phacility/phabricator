@@ -12,10 +12,12 @@ final class HarbormasterBuildable extends HarbormasterDAO
   private $containerObject = self::ATTACHABLE;
   private $buildableHandle = self::ATTACHABLE;
 
+  const STATUS_WHATEVER = 'whatever';
+
   public static function initializeNewBuildable(PhabricatorUser $actor) {
     return id(new HarbormasterBuildable())
-      ->setBuildStatus('new')         // TODO: Define these.
-      ->setBuildableStatus('active'); // TODO: Define these, too.
+      ->setBuildStatus(self::STATUS_WHATEVER)
+      ->setBuildableStatus(self::STATUS_WHATEVER);
   }
 
   public function getConfiguration() {

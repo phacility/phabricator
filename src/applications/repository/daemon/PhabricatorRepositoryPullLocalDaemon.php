@@ -750,8 +750,7 @@ final class PhabricatorRepositoryPullLocalDaemon
     $branches = mpull($branches, 'getHeadCommitIdentifier', 'getName');
 
     $got_something = false;
-    foreach ($branches as $name => $branch) {
-      $commit = $branch['rev'];
+    foreach ($branches as $name => $commit) {
       if ($this->isKnownCommit($repository, $commit)) {
         continue;
       } else {

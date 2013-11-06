@@ -36,7 +36,7 @@ final class HarbormasterBuildableListController
       $id = $buildable->getID();
 
       $item = id(new PHUIObjectItemView())
-        ->setHeader(pht('Build %d', $buildable->getID()));
+        ->setHeader(pht('Buildable %d', $buildable->getID()));
 
       if ($id) {
         $item->setHref("/B{$id}");
