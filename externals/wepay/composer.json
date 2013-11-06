@@ -1,0 +1,13 @@
+{
+	"name": "wepay/php-sdk",
+	"description": "WePay APIv2 SDK for PHP",
+	"authors": [
+		{
+			"name": "WePay",
+			"email": "api@wepay.com"
+		}
+	],
+	"autoload": {
+		"files": ["wepay.php"]
+	}
+}
