@@ -21,6 +21,7 @@ $workflows = array(
   new PhabricatorRepositoryManagementListWorkflow(),
   new PhabricatorRepositoryManagementDeleteWorkflow(),
   new PhabricatorRepositoryManagementMarkImportedWorkflow(),
+  new PhabricatorRepositoryManagementImportingWorkflow(),
   new PhutilHelpArgumentWorkflow(),
 );
 
