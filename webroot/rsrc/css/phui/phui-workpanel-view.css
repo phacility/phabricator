@@ -52,27 +52,11 @@
   display: inline-block;
 }
 
-.aphront-multi-column-fixed .aphront-multi-column-1-up
-  .aphront-multi-column-column-outer .phui-workpanel-body,
-.aphront-multi-column-fixed .aphront-multi-column-2-up
-  .aphront-multi-column-column-outer .phui-workpanel-body,
-.aphront-multi-column-fixed .aphront-multi-column-3-up
-  .aphront-multi-column-column-outer .phui-workpanel-body {
+.aphront-multi-column-fixed .phui-workpanel-body {
   width: 300px;
 }
 
-.aphront-multi-column-fixed .aphront-multi-column-4-up
-  .aphront-multi-column-column-outer .phui-workpanel-body,
-.aphront-multi-column-fixed .aphront-multi-column-5-up
-  .aphront-multi-column-column-outer .phui-workpanel-body,
-.aphront-multi-column-fixed .aphront-multi-column-6-up
-  .aphront-multi-column-column-outer .phui-workpanel-body,
-.aphront-multi-column-fixed .aphront-multi-column-7-up
-  .aphront-multi-column-column-outer .phui-workpanel-body {
-  width: 240px;
-}
-
-.device-phone .aphront-multi-column-outer
+.device .aphront-multi-column-outer
   div.aphront-multi-column-column-outer .phui-workpanel-body {
   width: auto;
 }

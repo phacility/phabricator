@@ -4,6 +4,7 @@ final class PHUIWorkboardView extends AphrontView {
 
   private $panels = array();
   private $fluidLayout = false;
+  private $fluidishLayout = false;
   private $actions = array();
 
   public function addPanel(PHUIWorkpanelView $panel) {
@@ -13,6 +14,11 @@ final class PHUIWorkboardView extends AphrontView {
 
   public function setFluidLayout($layout) {
     $this->fluidLayout = $layout;
+    return $this;
+  }
+
+  public function setFluidishLayout($layout) {
+    $this->fluidishLayout = $layout;
     return $this;
   }
 
@@ -45,7 +51,12 @@ final class PHUIWorkboardView extends AphrontView {
 
     $view = new AphrontMultiColumnView();
     $view->setGutter(AphrontMultiColumnView::GUTTER_MEDIUM);
-    $view->setFluidLayout($this->fluidLayout);
+    if ($this->fluidLayout) {
+      $view->setFluidLayout($this->fluidLayout);
+    }
+    if ($this->fluidishLayout) {
+      $view->setFluidishLayout($this->fluidishLayout);
+    }
     foreach ($this->panels as $panel) {
       $view->addColumn($panel);
     }

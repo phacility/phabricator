@@ -68,7 +68,8 @@ final class PhabricatorProjectBoardController
     }
 
     $board = id(new PHUIWorkboardView())
-      ->setUser($viewer);
+      ->setUser($viewer)
+      ->setFluidishLayout(true);
 
     foreach ($columns as $column) {
       $panel = id(new PHUIWorkpanelView())
