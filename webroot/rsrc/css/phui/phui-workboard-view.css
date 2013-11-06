@@ -7,12 +7,8 @@
 }
 
 .phui-workboard-view-shadow {
-  padding: 8px;
-  min-height: 120px;
   overflow-x: auto;
-  border-radius: 5px;
-  background: rgba(150,150,150,.1);
-  box-shadow: inset 0 0 5px rgba(0,0,0,.5);
+  padding-bottom: 8px;
 }
 
 .phui-workboard-view-shadow::-webkit-scrollbar {
@@ -28,33 +24,33 @@
   width: 60px;
   float: left;
   min-height: 60px;
-  border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px;
-  margin-top: 40px;
-  background: rgba(150,150,150,.2);
-}
-
-.device-phone .phui-workboard-view-shadow {
-  background: none;
-  box-shadow: none;
-  padding: 0;
-  margin: 0 auto;
-  width: 100%;
+  border-radius: 5px;
+  margin-right: 8px;
+  background: {$lightbluebackground};
+  border: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
 }
 
 .device-phone .phui-workboard-action-list {
   width: 100%;
   float: none;
   display: block;
-  border-radius: 3px;
-  margin: 0 0 5px;
   overflow: hidden;
+  border: none;
+  background: none;
+  border-radius: none;
+  min-height: 0;
+}
+
+.phui-workboard-action-list li:first-child {
+  padding-top: 5px;
 }
 
 .device-phone .phui-workboard-action-list li {
   display: inline;
   float: left;
-  margin: 0px;
+  margin: 0;
+  padding: 0 0 8px 0;
 }
 
 .phui-workboard-action-list .phui-icon-view {
@@ -62,10 +58,12 @@
   vertical-align: top;
   width: 50px;
   height: 50px;
-  margin: 5px 4px 5px 5px;
+  margin: 0 4px 5px 5px;
 }
 
 .device-phone .phui-workboard-action-list .phui-icon-view {
-  margin-right: 0;
+  background-size: 35px;
+  height: 35px;
+  width: 35px;
+  margin: 0 3px;
 }
-
