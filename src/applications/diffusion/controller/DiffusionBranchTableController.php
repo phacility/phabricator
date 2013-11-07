@@ -36,7 +36,7 @@ final class DiffusionBranchTableController extends DiffusionController {
       $commits = id(new DiffusionCommitQuery())
         ->setViewer($viewer)
         ->withIdentifiers(mpull($branches, 'getHeadCommitIdentifier'))
-        ->withRepositoryIDs(array($repository->getID()))
+        ->withRepository($repository)
         ->execute();
 
       $view = id(new DiffusionBranchTableView())

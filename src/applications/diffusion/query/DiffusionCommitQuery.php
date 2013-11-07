@@ -52,6 +52,17 @@ final class DiffusionCommitQuery
     return $this;
   }
 
+
+  /**
+   * Look up commits in a specific repository. This is a shorthand for calling
+   * @{method:withDefaultRepository} and @{method:withRepositoryIDs}.
+   */
+  public function withRepository(PhabricatorRepository $repository) {
+    $this->withDefaultRepository($repository);
+    $this->withRepositoryIDs(array($repository->getID()));
+    return $this;
+  }
+
   public function needCommitData($need) {
     $this->needCommitData = $need;
     return $this;

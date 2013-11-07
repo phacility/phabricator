@@ -81,7 +81,7 @@ final class DiffusionRenameHistoryQuery {
     $commit = id(new DiffusionCommitQuery())
       ->setViewer($this->viewer)
       ->withIdentifiers(array($commit_identifier))
-      ->withDefaultRepository($this->request->getRepository())
+      ->withRepository($this->request->getRepository())
       ->executeOne();
     return $commit->getID();
   }

@@ -555,7 +555,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
     if ($commits) {
       $commits = id(new DiffusionCommitQuery())
         ->setViewer($viewer)
-        ->withRepositoryIDs(array($drequest->getRepository()->getID()))
+        ->withRepository($drequest->getRepository())
         ->withIdentifiers($commits)
         ->execute();
       $commits = mpull($commits, null, 'getCommitIdentifier');
