@@ -598,6 +598,8 @@ abstract class HeraldAdapter {
             return self::VALUE_OWNERS_PACKAGE;
           case self::FIELD_AUTHOR_PROJECTS:
             return self::VALUE_PROJECT;
+          case self::FIELD_REVIEWERS:
+            return self::VALUE_USER_OR_PROJECT;
           default:
             return self::VALUE_USER;
         }
