@@ -208,6 +208,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'db',
         'name' => 'policy',
       ),
+      'db.nuance' => array(
+        'type' => 'db',
+        'name' => 'nuance',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -1719,6 +1723,26 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       '20131031.vcspassword.sql' => array(
         'type' => 'sql',
         'name' => $this->getPatchPath('20131031.vcspassword.sql'),
+      ),
+      '20131105.buildstep.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131105.buildstep.sql'),
+      ),
+      '20131106.diffphid.1.col.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131106.diffphid.1.col.sql'),
+      ),
+      '20131106.diffphid.2.mig.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20131106.diffphid.2.mig.php'),
+      ),
+      '20131106.diffphid.3.key.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131106.diffphid.3.key.sql'),
+      ),
+      '20131106.nuance-v0.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131106.nuance-v0.sql'),
       ),
     );
   }

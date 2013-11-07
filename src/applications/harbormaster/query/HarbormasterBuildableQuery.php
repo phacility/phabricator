@@ -10,6 +10,7 @@ final class HarbormasterBuildableQuery
 
   private $needContainerObjects;
   private $needBuildableHandles;
+  private $needBuilds;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -38,6 +39,11 @@ final class HarbormasterBuildableQuery
 
   public function needBuildableHandles($need) {
     $this->needBuildableHandles = $need;
+    return $this;
+  }
+
+  public function needBuilds($need) {
+    $this->needBuilds = $need;
     return $this;
   }
 
@@ -116,6 +122,18 @@ final class HarbormasterBuildableQuery
       foreach ($page as $key => $buildable) {
         $handle_phid = $buildable->getBuildablePHID();
         $buildable->attachBuildableHandle(idx($handles, $handle_phid));
+      }
+    }
+
+    if ($this->needBuilds) {
+      $builds = id(new HarbormasterBuildQuery())
+        ->setViewer($this->getViewer())
+        ->setParentQuery($this)
+        ->withBuildablePHIDs(mpull($page, 'getPHID'))
+        ->execute();
+      $builds = mgroup($builds, 'getBuildablePHID');
+      foreach ($page as $key => $buildable) {
+        $buildable->attachBuilds(idx($builds, $buildable->getPHID(), array()));
       }
     }
 

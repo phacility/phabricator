@@ -10,9 +10,44 @@ final class HarbormasterBuild extends HarbormasterDAO
   private $buildable = self::ATTACHABLE;
   private $buildPlan = self::ATTACHABLE;
 
+  /**
+   * Not currently being built.
+   */
+  const STATUS_INACTIVE = 'inactive';
+
+  /**
+   * Pending pick up by the Harbormaster daemon.
+   */
+  const STATUS_PENDING = 'pending';
+
+  /**
+   * Waiting for a resource to be allocated (not yet relevant).
+   */
+  const STATUS_WAITING = 'waiting';
+
+  /**
+   * Current building the buildable.
+   */
+  const STATUS_BUILDING = 'building';
+
+  /**
+   * The build has passed.
+   */
+  const STATUS_PASSED = 'passed';
+
+  /**
+   * The build has failed.
+   */
+  const STATUS_FAILED = 'failed';
+
+  /**
+   * The build encountered an unexpected error.
+   */
+  const STATUS_ERROR = 'error';
+
   public static function initializeNewBuild(PhabricatorUser $actor) {
     return id(new HarbormasterBuild())
-      ->setBuildStatus('building'); // TODO: Sort this.
+      ->setBuildStatus(self::STATUS_INACTIVE);
   }
 
   public function getConfiguration() {

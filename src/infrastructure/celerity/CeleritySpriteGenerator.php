@@ -312,24 +312,30 @@ final class CeleritySpriteGenerator {
   }
 
   public function buildTokenSheet() {
-    $tokens = $this->getDirectoryList('tokens_1x');
-
+    $icons = $this->getDirectoryList('tokens_1x');
+    $scales = array(
+      '1x' => 1,
+      '2x' => 2,
+    );
     $template = id(new PhutilSprite())
       ->setSourceSize(16, 16);
 
     $sprites = array();
-    foreach ($tokens as $token) {
-      $path = $this->getPath('tokens_1x/'.$token.'.png');
-
+    $prefix = 'tokens_';
+    foreach ($icons as $icon) {
       $sprite = id(clone $template)
-        ->setName('tokens-'.$token)
-        ->setTargetCSS('.tokens-'.$token)
-        ->setSourceFile($path, 1);
+        ->setName('tokens-'.$icon)
+        ->setTargetCSS('.tokens-'.$icon);
 
+      foreach ($scales as $scale_key => $scale) {
+        $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
+        $sprite->setSourceFile($path, $scale);
+      }
       $sprites[] = $sprite;
     }
 
-    $sheet = $this->buildSheet('tokens', false);
+    $sheet = $this->buildSheet('tokens', true);
+    $sheet->setScales($scales);
     foreach ($sprites as $sprite) {
       $sheet->addSprite($sprite);
     }

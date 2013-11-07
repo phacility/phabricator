@@ -18,7 +18,6 @@ abstract class DiffusionRequest {
   protected $symbolicCommit;
   protected $commit;
   protected $commitType = 'commit';
-  protected $tagContent;
   protected $branch;
   protected $lint;
 
@@ -261,10 +260,6 @@ abstract class DiffusionRequest {
       'repositoryID = %d AND name = %s',
       $this->getRepository()->getID(),
       $this->getArcanistBranch());
-  }
-
-  public function getTagContent() {
-    return $this->tagContent;
   }
 
   public function loadCommit() {
@@ -624,45 +619,67 @@ abstract class DiffusionRequest {
   }
 
   final protected function expandCommitName() {
-    if ($this->shouldInitFromConduit()) {
-      $commit_data = DiffusionQuery::callConduitWithDiffusionRequest(
-        $this->getUser(),
-        $this,
-        'diffusion.expandshortcommitquery',
-        array(
-          'commit' => $this->commit
-        ));
-    } else {
-      $repository = $this->getRepository();
-      $this->validateWorkingCopy($repository->getLocalPath());
-      $query = DiffusionExpandShortNameQuery::newFromRepository(
-        $repository);
-      $query->setCommit($this->commit);
-      $commit_data = $query->expand();
+    $results = $this->resolveRefs(array($this->commit));
+    $matches = idx($results, $this->commit, array());
+    if (count($results) !== 1) {
+      throw new Exception(
+        pht('Ref "%s" is ambiguous or does not exist.', $this->commit));
     }
 
-    $this->commit = $commit_data['commit'];
-    $this->commitType = $commit_data['commitType'];
-    $this->tagContent = $commit_data['tagContent'];
+    $match = head($matches);
+
+    $this->commit = $match['identifier'];
+    $this->commitType = $match['type'];
+  }
+
+  public function getCommitType() {
+    return $this->commitType;
   }
 
   private function queryStableCommitName() {
     if ($this->commit) {
       $this->stableCommitName = $this->commit;
-    } else if ($this->shouldInitFromConduit()) {
-      $this->stableCommitName = DiffusionQuery::callConduitWithDiffusionRequest(
-        $this->getUser(),
-        $this,
-        'diffusion.stablecommitnamequery',
-        array(
-          'branch' => $this->getBranch()
-        ));
-    } else {
-      $query = DiffusionStableCommitNameQuery::newFromRepository(
-        $this->getRepository());
-      $query->setBranch($this->getBranch());
-      $this->stableCommitName = $query->load();
+      return $this->stableCommitName;
     }
+
+    if ($this->getSupportsBranches()) {
+      $branch = $this->getResolvableBranchName($this->getBranch());
+    } else {
+      $branch = 'HEAD';
+    }
+
+    $results = $this->resolveRefs(array($branch));
+
+    $matches = idx($results, $branch, array());
+    if (count($matches) !== 1) {
+      throw new Exception(
+        pht('Ref "%s" is ambiguous or does not exist.', $branch));
+    }
+
+    $this->stableCommitName = idx(head($matches), 'identifier');
     return $this->stableCommitName;
   }
+
+  protected function getResolvableBranchName($branch) {
+    return $branch;
+  }
+
+  private function resolveRefs(array $refs) {
+    if ($this->shouldInitFromConduit()) {
+      return DiffusionQuery::callConduitWithDiffusionRequest(
+        $this->getUser(),
+        $this,
+        'diffusion.resolverefs',
+        array(
+          'refs' => $refs,
+        ));
+    } else {
+      return id(new DiffusionLowLevelResolveRefsQuery())
+        ->setRepository($this->getRepository())
+        ->withRefs($refs)
+        ->execute();
+    }
+  }
+
+
 }

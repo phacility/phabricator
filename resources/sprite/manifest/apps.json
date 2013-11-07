@@ -291,6 +291,16 @@
       "rule" : ".apps-new-white",
       "hash" : "dc5ce42c7d60e6ba37b07631b3c3280a"
     },
+    "apps-nuance-dark"          : {
+      "name" : "apps-nuance-dark",
+      "rule" : ".apps-nuance-dark",
+      "hash" : "e20c19670e1c9b9d1f9267bf7f017aba"
+    },
+    "apps-nuance-white"         : {
+      "name" : "apps-nuance-white",
+      "rule" : ".apps-nuance-white",
+      "hash" : "368f1241b438492642520a037a1ac294"
+    },
     "apps-owners-dark"          : {
       "name" : "apps-owners-dark",
       "rule" : ".apps-owners-dark",

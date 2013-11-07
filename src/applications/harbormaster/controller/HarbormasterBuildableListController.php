@@ -36,13 +36,36 @@ final class HarbormasterBuildableListController
       $id = $buildable->getID();
 
       $item = id(new PHUIObjectItemView())
-        ->setHeader(pht('Build %d', $buildable->getID()));
+        ->setHeader(pht('Buildable %d', $buildable->getID()));
+      $item->addAttribute($buildable->getBuildableHandle()->getFullName());
 
       if ($id) {
         $item->setHref("/B{$id}");
       }
 
       $list->addItem($item);
+
+      // TODO: This is proof-of-concept for getting meaningful status
+      // information into this list, and should get an improvement pass
+      // once we're a little farther along.
+
+      $all_pass = true;
+      $any_fail = false;
+      foreach ($buildable->getBuilds() as $build) {
+        if ($build->getBuildStatus() != HarbormasterBuild::STATUS_PASSED) {
+          $all_pass = false;
+        }
+        if ($build->getBuildStatus() == HarbormasterBuild::STATUS_FAILED ||
+            $build->getBuildStatus() == HarbormasterBuild::STATUS_ERROR) {
+          $any_fail = true;
+        }
+      }
+
+      if ($any_fail) {
+        $item->setBarColor('red');
+      } else if ($all_pass) {
+        $item->setBarColor('green');
+      }
     }
 
     return $list;

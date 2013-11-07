@@ -6,85 +6,61 @@
   width: 100%;
 }
 
-.device-phone .aphront-multi-column-outer {
+.device .aphront-multi-column-outer {
   padding: 0;
   margin: 0 auto;
   width: 100%;
 }
 
 .aphront-multi-column-inner .aphront-multi-column-column-last,
-.device-phone .aphront-multi-column-column {
+.device .aphront-multi-column-column {
   margin: 0;
 }
 
-.device-phone .aphront-multi-column-outer
+.device .aphront-multi-column-outer
   div.aphront-multi-column-column-outer {
   width: auto;
   margin-bottom: 16px;
 }
 
-/* math here is based on panel width and margins */
-.aphront-multi-column-fixed
-  .aphront-multi-column-inner.aphront-multi-column-1-up {
-  width: 310px;
-}
-
-.aphront-multi-column-fixed
-  .aphront-multi-column-inner.aphront-multi-column-2-up {
-  width: 620px;
-}
-
-.aphront-multi-column-fixed
-  .aphront-multi-column-inner.aphront-multi-column-3-up {
-  width: 930px;
-}
-
-.aphront-multi-column-fixed
-  .aphront-multi-column-inner.aphront-multi-column-4-up {
-  width: 1008px;
-}
-
-.aphront-multi-column-fixed
-  .aphront-multi-column-inner.aphront-multi-column-5-up {
-  width: 1250px;
-}
-
-.aphront-multi-column-fixed
-  .aphront-multi-column-inner.aphront-multi-column-6-up {
-  width: 1500px;
-}
-
-.aphront-multi-column-fixed
-  .aphront-multi-column-inner.aphront-multi-column-7-up {
-  width: 1750px;
-}
-
-.device-phone .aphront-multi-column-fixed .aphront-multi-column-inner {
+.device .aphront-multi-column-fixed .aphront-multi-column-inner {
    width: 100%;
 }
 
-/* Panels require a fixed width to overflow well. */
-.aphront-multi-column-fixed .aphront-multi-column-1-up
-  .aphront-multi-column-column-outer,
-.aphront-multi-column-fixed .aphront-multi-column-2-up
-  .aphront-multi-column-column-outer,
-.aphront-multi-column-fixed .aphront-multi-column-3-up
-  .aphront-multi-column-column-outer {
+.aphront-multi-column-fixed .aphront-multi-column-column-outer {
   width: 300px;
 }
 
-.aphront-multi-column-fixed .aphront-multi-column-4-up
-  .aphront-multi-column-column-outer,
-.aphront-multi-column-fixed .aphront-multi-column-5-up
-  .aphront-multi-column-column-outer,
-.aphront-multi-column-fixed .aphront-multi-column-6-up
-  .aphront-multi-column-column-outer,
-.aphront-multi-column-fixed .aphront-multi-column-7-up
-  .aphront-multi-column-column-outer {
-  width: 240px;
+/* flexible, but with a minimum */
+.device-desktop .aphront-multi-column-fluidish .aphront-multi-column-1-up {
+  min-width: 200px;
 }
 
-/* fluid/flex styles */
+.device-desktop .aphront-multi-column-fluidish .aphront-multi-column-2-up {
+  min-width: 400px;
+}
+
+.device-desktop .aphront-multi-column-fluidish .aphront-multi-column-3-up {
+  min-width: 600px;
+}
+
+.device-desktop .aphront-multi-column-fluidish .aphront-multi-column-4-up {
+  min-width: 800px;
+}
+
+.device-desktop .aphront-multi-column-fluidish .aphront-multi-column-5-up {
+  min-width: 1000px;
+}
+
+.device-desktop .aphront-multi-column-fluidish .aphront-multi-column-6-up {
+  min-width: 1200px;
+}
+
+.device-desktop .aphront-multi-column-fluidish .aphront-multi-column-7-up {
+  min-width: 1400px;
+}
+
+/* table division */
 .aphront-multi-column-fluid .aphront-multi-column-1-up
   .aphront-multi-column-column-outer {
   width: 100%;
@@ -127,7 +103,12 @@
   width: 100%;
 }
 
-.device-phone .aphront-multi-column-inner {
+/* magic sauce */
+.aphront-multi-column-fluid .aphront-multi-column-inner {
+  table-layout: fixed;
+}
+
+.device .aphront-multi-column-inner {
   display: block;
   width: auto;
 }
@@ -135,6 +116,7 @@
 .aphront-multi-column-column-outer {
   display: table-cell;
   height: 100%;
+  vertical-align: top;
 }
 
 .phui-box-shadow .aphront-multi-column-column-outer {
@@ -147,17 +129,17 @@
   border: none;
 }
 
-.device-phone .aphront-multi-column-column-outer {
+.device .aphront-multi-column-column-outer {
   display: block;
   border: none;
 }
 
-.device-phone .phui-box-shadow .aphront-multi-column-column-outer {
+.device .phui-box-shadow .aphront-multi-column-column-outer {
   padding-bottom: 20px;
   border-bottom: 1px solid #e7e7e7;
 }
 
-.device-phone .phui-box-shadow .aphront-multi-colum-column-outer-last {
+.device .phui-box-shadow .aphront-multi-colum-column-outer-last {
   border: none;
   padding-bottom: 0;
 }

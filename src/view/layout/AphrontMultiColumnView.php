@@ -8,6 +8,7 @@ final class AphrontMultiColumnView extends AphrontView {
 
   private $columns = array();
   private $fluidLayout = false;
+  private $fluidishLayout = false;
   private $gutter;
   private $shadow;
 
@@ -18,6 +19,12 @@ final class AphrontMultiColumnView extends AphrontView {
 
   public function setFluidlayout($layout) {
     $this->fluidLayout = $layout;
+    return $this;
+  }
+
+  public function setFluidishLayout($layout) {
+    $this->fluidLayout = true;
+    $this->fluidishLayout = $layout;
     return $this;
   }
 
@@ -85,6 +92,9 @@ final class AphrontMultiColumnView extends AphrontView {
     $classes[] = 'aphront-multi-column-outer';
     if ($this->fluidLayout) {
       $classes[] = 'aphront-multi-column-fluid';
+      if ($this->fluidishLayout) {
+        $classes[] = 'aphront-multi-column-fluidish';
+      }
     } else {
       $classes[] = 'aphront-multi-column-fixed';
     }

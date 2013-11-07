@@ -214,160 +214,168 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -120px -60px;
 }
 
-.status-policy-admin-white, .dropdown-menu-item:hover .status-policy-admin {
+.status-pl-summary {
   background-position: -135px -60px;
 }
 
-.status-policy-admin {
+.status-pl-testplan {
   background-position: 0px -75px;
 }
 
-.status-policy-all-white, .dropdown-menu-item:hover .status-policy-all {
+.status-policy-admin-white, .dropdown-menu-item:hover .status-policy-admin {
   background-position: -15px -75px;
 }
 
-.status-policy-all {
+.status-policy-admin {
   background-position: -30px -75px;
 }
 
-.status-policy-custom-white, .dropdown-menu-item:hover .status-policy-custom {
+.status-policy-all-white, .dropdown-menu-item:hover .status-policy-all {
   background-position: -45px -75px;
 }
 
-.status-policy-custom {
+.status-policy-all {
   background-position: -60px -75px;
 }
 
-.status-policy-noone-white, .dropdown-menu-item:hover .status-policy-noone {
+.status-policy-custom-white, .dropdown-menu-item:hover .status-policy-custom {
   background-position: -75px -75px;
 }
 
-.status-policy-noone {
+.status-policy-custom {
   background-position: -90px -75px;
 }
 
-.status-policy-project-white, .dropdown-menu-item:hover .status-policy-project {
+.status-policy-noone-white, .dropdown-menu-item:hover .status-policy-noone {
   background-position: -105px -75px;
 }
 
-.status-policy-project {
+.status-policy-noone {
   background-position: -120px -75px;
 }
 
-.status-policy-public-white, .dropdown-menu-item:hover .status-policy-public {
+.status-policy-project-white, .dropdown-menu-item:hover .status-policy-project {
   background-position: -135px -75px;
 }
 
-.status-policy-public {
+.status-policy-project {
   background-position: 0px -90px;
 }
 
-.status-policy-unknown-white, .dropdown-menu-item:hover .status-policy-unknown {
+.status-policy-public-white, .dropdown-menu-item:hover .status-policy-public {
   background-position: -15px -90px;
 }
 
-.status-policy-unknown {
+.status-policy-public {
   background-position: -30px -90px;
 }
 
-.status-question-blue {
+.status-policy-unknown-white, .dropdown-menu-item:hover .status-policy-unknown {
   background-position: -45px -90px;
 }
 
-.status-question-dark {
+.status-policy-unknown {
   background-position: -60px -90px;
 }
 
-.status-question-green {
+.status-question-blue {
   background-position: -75px -90px;
 }
 
-.status-question-red {
+.status-question-dark {
   background-position: -90px -90px;
 }
 
-.status-question-white {
+.status-question-green {
   background-position: -105px -90px;
 }
 
-.status-question {
+.status-question-red {
   background-position: -120px -90px;
 }
 
-.status-reject-blue {
+.status-question-white {
   background-position: -135px -90px;
 }
 
-.status-reject-dark {
+.status-question {
   background-position: 0px -105px;
 }
 
-.status-reject-green {
+.status-reject-blue {
   background-position: -15px -105px;
 }
 
-.status-reject-red {
+.status-reject-dark {
   background-position: -30px -105px;
 }
 
-.status-reject-white {
+.status-reject-green {
   background-position: -45px -105px;
 }
 
-.status-reject {
+.status-reject-red {
   background-position: -60px -105px;
 }
 
-.status-right-blue {
+.status-reject-white {
   background-position: -75px -105px;
 }
 
-.status-right-dark {
+.status-reject {
   background-position: -90px -105px;
 }
 
-.status-right-green {
+.status-right-blue {
   background-position: -105px -105px;
 }
 
-.status-right-red {
+.status-right-dark {
   background-position: -120px -105px;
 }
 
-.status-right-white {
+.status-right-green {
+  background-position: -135px -105px;
+}
+
+.status-right-red {
   background-position: 0px -120px;
 }
 
-.status-right {
+.status-right-white {
   background-position: -15px -120px;
 }
 
-.status-time-green {
+.status-right {
   background-position: -30px -120px;
 }
 
-.status-time-orange {
+.status-time-green {
   background-position: -45px -120px;
 }
 
-.status-time-red {
+.status-time-orange {
   background-position: -60px -120px;
 }
 
-.status-time-yellow {
+.status-time-red {
   background-position: -75px -120px;
 }
 
-.status-up-blue {
+.status-time-yellow {
   background-position: -90px -120px;
 }
 
-.status-up-dark {
+.status-up-blue {
   background-position: -105px -120px;
 }
 
-.status-up-green {
+.status-up-dark {
   background-position: -120px -120px;
+}
+
+.status-up-green {
+  background-position: -135px -120px;
 }
 
 .status-up-red {

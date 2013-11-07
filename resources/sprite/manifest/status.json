@@ -246,6 +246,16 @@
       "rule" : ".status-open-white",
       "hash" : "169dc0e8f36444ea30163181f9c88dc2"
     },
+    "status-pl-summary"           : {
+      "name" : "status-pl-summary",
+      "rule" : ".status-pl-summary",
+      "hash" : "0abd0eab8617fb88f9b8f4d2f00e17b8"
+    },
+    "status-pl-testplan"          : {
+      "name" : "status-pl-testplan",
+      "rule" : ".status-pl-testplan",
+      "hash" : "03dbb3c53bfddfb553d49c6f27a76765"
+    },
     "status-policy-admin"         : {
       "name" : "status-policy-admin",
       "rule" : ".status-policy-admin",

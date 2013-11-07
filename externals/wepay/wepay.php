@@ -5,7 +5,7 @@ class WePay {
 	/**
 	 * Version number - sent in user agent string
 	 */
-	const VERSION = '0.1.3';
+	const VERSION = '0.1.4';
 
 	/**
 	 * Scope fields
@@ -183,7 +183,7 @@ class WePay {
 			self::$ch = NULL;
 		}
 	}
-
+	
 	/**
 	 * create the cURL request and execute it
 	 */
@@ -196,14 +196,14 @@ class WePay {
 		curl_setopt(self::$ch, CURLOPT_HTTPHEADER, $headers);
 		curl_setopt(self::$ch, CURLOPT_TIMEOUT, 30); // 30-second timeout, adjust to taste
 		curl_setopt(self::$ch, CURLOPT_POST, !empty($values)); // WePay's API is not strictly RESTful, so all requests are sent as POST unless there are no request values
-
+		
 		$uri = self::getDomain() . $endpoint;
 		curl_setopt(self::$ch, CURLOPT_URL, $uri);
-
+		
 		if (!empty($values)) {
 			curl_setopt(self::$ch, CURLOPT_POSTFIELDS, json_encode($values));
 		}
-
+		
 		$raw = curl_exec(self::$ch);
 		if ($errno = curl_errno(self::$ch)) {
 			// Set up special handling for request timeouts
@@ -213,26 +213,23 @@ class WePay {
 			throw new Exception('cURL error while making API call to WePay: ' . curl_error(self::$ch), $errno);
 		}
 		$result = json_decode($raw);
-
-		$error_code = null;
-		if (isset($result->error_code)) {
-		  $error_code = $result->error_code;
-		}
-
 		$httpCode = curl_getinfo(self::$ch, CURLINFO_HTTP_CODE);
 		if ($httpCode >= 400) {
+			if (!isset($result->error_code)) {
+				throw new WePayServerException("WePay returned an error response with no error_code, please alert api@wepay.com. Original message: $result->error_description", $httpCode, $result, 0);
+			}
 			if ($httpCode >= 500) {
-				throw new WePayServerException($result->error_description, $httpCode, $result, $error_code);
+				throw new WePayServerException($result->error_description, $httpCode, $result, $result->error_code);
 			}
 			switch ($result->error) {
 				case 'invalid_request':
-					throw new WePayRequestException($result->error_description, $httpCode, $result, $error_code);
+					throw new WePayRequestException($result->error_description, $httpCode, $result, $result->error_code);
 				case 'access_denied':
 				default:
-					throw new WePayPermissionException($result->error_description, $httpCode, $result, $error_code);
+					throw new WePayPermissionException($result->error_description, $httpCode, $result, $result->error_code);
 			}
 		}
-
+		
 		return $result;
 	}
 
@@ -246,13 +243,13 @@ class WePay {
 	 */
 	public function request($endpoint, array $values = array()) {
 		$headers = array();
-
+		
 		if ($this->token) { // if we have an access_token, add it to the Authorization header
 			$headers[] = "Authorization: Bearer $this->token";
 		}
-
+		
 		$result = self::make_request($endpoint, $values, $headers);
-
+		
 		return $result;
 	}
 }

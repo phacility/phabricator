@@ -16,6 +16,10 @@ abstract class DiffusionLowLevelQuery extends Phobject {
   }
 
   public function execute() {
+    if (!$this->getRepository()) {
+      throw new Exception("Call setRepository() before execute()!");
+    }
+
     return $this->executeQuery();
   }
 

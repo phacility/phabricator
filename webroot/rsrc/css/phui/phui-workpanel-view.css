@@ -8,6 +8,15 @@
   border-top-right-radius: 5px;
 }
 
+.device-phone .phui-workboard-view {
+  width: auto;
+  margin: 0 8px;
+}
+
+.phui-workpanel-view .phui-object-item-objname {
+  display: none;
+}
+
 .phui-workpanel-view .phui-workpanel-header-action {
   float: right;
   width: 24px;
@@ -41,4 +50,13 @@
 .phui-workpanel-view .phui-list-item-name {
   padding-left: 5px;
   display: inline-block;
+}
+
+.aphront-multi-column-fixed .phui-workpanel-body {
+  width: 300px;
+}
+
+.device .aphront-multi-column-outer
+  div.aphront-multi-column-column-outer .phui-workpanel-body {
+  width: auto;
 }

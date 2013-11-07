@@ -30,7 +30,7 @@ final class DiffusionGitResponse extends AphrontResponse {
   }
 
   public function getHeaders() {
-    return $this->headers;
+    return array_merge(parent::getHeaders(), $this->headers);
   }
 
   public function getCacheHeaders() {

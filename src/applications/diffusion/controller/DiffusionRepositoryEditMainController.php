@@ -597,6 +597,82 @@ final class DiffusionRepositoryEditMainController
       return $view;
     }
 
+    $binaries = array();
+    switch ($repository->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        $binaries[] = 'git';
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $binaries[] = 'svn';
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $binaries[] = 'hg';
+        break;
+    }
+
+    if ($repository->isHosted()) {
+      if ($repository->getServeOverHTTP() != PhabricatorRepository::SERVE_OFF) {
+        switch ($repository->getVersionControlSystem()) {
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+            $binaries[] = 'git-http-backend';
+            break;
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+            $binaries[] = 'svnserve';
+            $binaries[] = 'svnadmin';
+            break;
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+            $binaries[] = 'hg';
+            break;
+        }
+      }
+      if ($repository->getServeOverSSH() != PhabricatorRepository::SERVE_OFF) {
+        switch ($repository->getVersionControlSystem()) {
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+            $binaries[] = 'git-receive-pack';
+            $binaries[] = 'git-upload-pack';
+            break;
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+            $binaries[] = 'svnserve';
+            $binaries[] = 'svnadmin';
+            break;
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+            $binaries[] = 'hg';
+            break;
+        }
+      }
+    }
+
+    $binaries = array_unique($binaries);
+    foreach ($binaries as $binary) {
+      $where = Filesystem::resolveBinary($binary);
+      if (!$where) {
+        $config_href = '/config/edit/environment.append-paths/';
+        $config_link = phutil_tag(
+          'a',
+          array(
+            'href' => $config_href,
+          ),
+          'environment.append-paths');
+
+        $view->addItem(
+          id(new PHUIStatusItemView())
+            ->setIcon('warning-red')
+            ->setTarget(
+              pht('Missing Binary %s', phutil_tag('tt', array(), $binary)))
+            ->setNote(pht(
+              "Unable to find this binary in the webserver's PATH. You may ".
+              "need to configure %s.",
+              $config_link)));
+      } else {
+        $view->addItem(
+          id(new PHUIStatusItemView())
+            ->setIcon('accept-green')
+            ->setTarget(
+              pht('Found Binary %s', phutil_tag('tt', array(), $binary)))
+            ->setNote(phutil_tag('tt', array(), $where)));
+      }
+    }
+
     $doc_href = PhabricatorEnv::getDocLink(
       'article/Managing_Daemons_with_phd.html');
     $daemon_instructions = pht(
@@ -650,27 +726,27 @@ final class DiffusionRepositoryEditMainController
           ->setNote($daemon_instructions));
     }
 
-    $local_parent = dirname($repository->getLocalPath());
-    if (Filesystem::pathExists($local_parent)) {
-      $view->addItem(
-        id(new PHUIStatusItemView())
-          ->setIcon('accept-green')
-          ->setTarget(pht('Storage Directory OK'))
-          ->setNote(phutil_tag('tt', array(), $local_parent)));
-    } else {
-      $view->addItem(
-        id(new PHUIStatusItemView())
-          ->setIcon('warning-red')
-          ->setTarget(pht('No Storage Directory'))
-          ->setNote(
-            pht(
-              'Storage directory %s does not exist, or is not readable by '.
-              'the webserver. Create this directory or make it readable.',
-              phutil_tag('tt', array(), $local_parent))));
-      return $view;
-    }
-
     if ($repository->usesLocalWorkingCopy()) {
+      $local_parent = dirname($repository->getLocalPath());
+      if (Filesystem::pathExists($local_parent)) {
+        $view->addItem(
+          id(new PHUIStatusItemView())
+            ->setIcon('accept-green')
+            ->setTarget(pht('Storage Directory OK'))
+            ->setNote(phutil_tag('tt', array(), $local_parent)));
+      } else {
+        $view->addItem(
+          id(new PHUIStatusItemView())
+            ->setIcon('warning-red')
+            ->setTarget(pht('No Storage Directory'))
+            ->setNote(
+              pht(
+                'Storage directory %s does not exist, or is not readable by '.
+                'the webserver. Create this directory or make it readable.',
+                phutil_tag('tt', array(), $local_parent))));
+        return $view;
+      }
+
       $local_path = $repository->getLocalPath();
       $message = idx($messages, PhabricatorRepositoryStatusMessage::TYPE_INIT);
       if ($message) {

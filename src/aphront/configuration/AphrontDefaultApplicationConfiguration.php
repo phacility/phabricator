@@ -222,6 +222,7 @@ class AphrontDefaultApplicationConfiguration
 
       $response = new AphrontWebpageResponse();
       $response->setContent($view->render());
+      $response->setHTTPResponseCode(500);
 
       return $response;
     }
@@ -268,6 +269,7 @@ class AphrontDefaultApplicationConfiguration
 
     $response = new AphrontDialogResponse();
     $response->setDialog($dialog);
+    $response->setHTTPResponseCode(500);
 
     return $response;
   }

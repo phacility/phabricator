@@ -581,6 +581,26 @@
       "rule" : ".apps-new-white-large",
       "hash" : "be597ce11c4d1630f67282cd7b81cc85"
     },
+    "apps-nuance-blue-large"          : {
+      "name" : "apps-nuance-blue-large",
+      "rule" : ".apps-nuance-blue-large, .phabricator-crumb-view:hover .apps-nuance-dark-large",
+      "hash" : "a6c11b6c091b15c93bb75e40f5014c46"
+    },
+    "apps-nuance-dark-large"          : {
+      "name" : "apps-nuance-dark-large",
+      "rule" : ".apps-nuance-dark-large",
+      "hash" : "a179a6802048440f0c4dfd99784ad740"
+    },
+    "apps-nuance-light-large"         : {
+      "name" : "apps-nuance-light-large",
+      "rule" : ".apps-nuance-light-large",
+      "hash" : "f6f36066f33b015e0e44e125182db158"
+    },
+    "apps-nuance-white-large"         : {
+      "name" : "apps-nuance-white-large",
+      "rule" : ".apps-nuance-white-large",
+      "hash" : "8510afe6941a33000ca02a054a3f78e0"
+    },
     "apps-owners-blue-large"          : {
       "name" : "apps-owners-blue-large",
       "rule" : ".apps-owners-blue-large, .phabricator-crumb-view:hover .apps-owners-dark-large",

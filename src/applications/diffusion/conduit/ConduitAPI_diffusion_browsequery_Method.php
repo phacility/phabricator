@@ -198,7 +198,7 @@ final class ConduitAPI_diffusion_browsequery_Method
 
     list($entire_manifest) = $repository->execxLocalCommand(
       'manifest --rev %s',
-      $commit);
+      hgsprintf('%s', $commit));
     $entire_manifest = explode("\n", $entire_manifest);
 
     $results = array();

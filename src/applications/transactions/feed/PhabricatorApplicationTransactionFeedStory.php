@@ -11,16 +11,19 @@ class PhabricatorApplicationTransactionFeedStory
   }
 
   public function getRequiredObjectPHIDs() {
-    return array(
-      $this->getPrimaryTransactionPHID(),
-    );
+    return $this->getValue('transactionPHIDs');
   }
 
   public function getRequiredHandlePHIDs() {
     $phids = array();
-    $phids[] = array($this->getValue('objectPHID'));
-    $phids[] = $this->getPrimaryTransaction()->getRequiredHandlePHIDs();
-    return array_mergev($phids);
+    $phids[] = $this->getValue('objectPHID');
+    foreach ($this->getValue('transactionPHIDs') as $xaction_phid) {
+      $xaction = $this->getObject($xaction_phid);
+      foreach ($xaction->getRequiredHandlePHIDs() as $handle_phid) {
+        $phids[] = $handle_phid;
+      }
+    }
+    return $phids;
   }
 
   protected function getPrimaryTransactionPHID() {
@@ -40,18 +43,23 @@ class PhabricatorApplicationTransactionFeedStory
     $view->setAppIconFromPHID($handle->getPHID());
 
     $xaction_phids = $this->getValue('transactionPHIDs');
-    $xaction = $this->getObject(head($xaction_phids));
+    $xaction = $this->getPrimaryTransaction();
 
     $xaction->setHandles($this->getHandles());
     $view->setTitle($xaction->getTitleForFeed($this));
-    $body = $xaction->getBodyForFeed($this);
-    if (nonempty($body)) {
-      $view->appendChild($body);
+
+    foreach ($xaction_phids as $xaction_phid) {
+      $secondary_xaction = $this->getObject($xaction_phid);
+      $secondary_xaction->setHandles($this->getHandles());
+
+      $body = $secondary_xaction->getBodyForFeed($this);
+      if (nonempty($body)) {
+        $view->appendChild($body);
+      }
     }
 
     $view->setImage(
-      $this->getHandle(
-        $this->getPrimaryTransaction()->getAuthorPHID())->getImageURI());
+      $this->getHandle($xaction->getAuthorPHID())->getImageURI());
 
     return $view;
   }

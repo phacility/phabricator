@@ -27,7 +27,19 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
         'uri'             => '/file/dropupload/',
       ));
 
-    Javelin::initBehavior('phabricator-remarkup-assist', array());
+    Javelin::initBehavior(
+      'phabricator-remarkup-assist',
+      array(
+        'pht' => array(
+          'bold text' => pht('bold text'),
+          'italic text' => pht('italic text'),
+          'monospaced text' => pht('monospaced text'),
+          'List Item' => pht('List Item'),
+          'data' => pht('data'),
+          'name' => pht('name'),
+          'URL' => pht('URL'),
+        ),
+      ));
     Javelin::initBehavior('phabricator-tooltips', array());
 
     $actions = array(
