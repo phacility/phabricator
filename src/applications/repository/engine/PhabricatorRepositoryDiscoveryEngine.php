@@ -40,17 +40,15 @@ final class PhabricatorRepositoryDiscoveryEngine
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         $refs = $this->discoverSubversionCommits();
         break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $refs = $this->discoverMercurialCommits();
+        break;
 /*
-
-      TODO: Implement these!
+  TODO: Implement this!
 
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $refs = $this->executeGitDiscovery();
+        $refs = $this->discoverGitCommits();
         break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $refs = $this->executeMercurialDiscovery();
-        break;
-
 */
       default:
         throw new Exception("Unknown VCS '{$vcs}'!");
@@ -138,7 +136,111 @@ final class PhabricatorRepositoryDiscoveryEngine
   }
 
 
+/* -(  Discovering Mercurial Repositories  )--------------------------------- */
+
+
+  /**
+   * @task hg
+   */
+  private function discoverMercurialCommits() {
+    $repository = $this->getRepository();
+
+    $branches = id(new DiffusionLowLevelMercurialBranchesQuery())
+      ->setRepository($repository)
+      ->execute();
+    $branches = mpull($branches, 'getHeadCommitIdentifier', 'getName');
+
+    $refs = array();
+    foreach ($branches as $name => $commit) {
+      $this->log("Examining branch '{$name}', at {$commit}'.");
+      if (!$repository->shouldTrackBranch($name)) {
+        $this->log("Skipping, branch is untracked.");
+        continue;
+      }
+
+      if ($this->isKnownCommit($commit)) {
+        $this->log("Skipping, tip is a known commit.");
+        continue;
+      }
+
+      $this->log("Looking for new commits.");
+      $refs[] = $this->discoverMercurialAncestry($repository, $commit);
+    }
+
+    return array_mergev($refs);
+  }
+
+
+  /**
+   * @task hg
+   */
+  private function discoverMercurialAncestry(
+    PhabricatorRepository $repository,
+    $commit) {
+
+    $discover = array($commit);
+    $graph = array();
+    $seen = array();
+
+    $stream = new PhabricatorMercurialGraphStream($repository);
+
+    // Find all the reachable, undiscovered commits. Build a graph of the
+    // edges.
+    while ($discover) {
+      $target = array_pop($discover);
+
+      if (empty($graph[$target])) {
+        $graph[$target] = array();
+      }
+
+      $parents = $stream->getParents($target);
+      foreach ($parents as $parent) {
+        if ($this->isKnownCommit($parent)) {
+          continue;
+        }
+
+        $graph[$target][$parent] = true;
+
+        if (empty($seen[$parent])) {
+          $seen[$parent] = true;
+          $discover[] = $parent;
+        }
+      }
+    }
+
+    // Now, sort them topographically.
+    $commits = $this->reduceGraph($graph);
+
+    $refs = array();
+    foreach ($commits as $commit) {
+      $refs[] = id(new PhabricatorRepositoryCommitRef())
+        ->setIdentifier($commit)
+        ->setEpoch($stream->getCommitDate($commit));
+    }
+
+    return $refs;
+  }
+
+
 /* -(  Internals  )---------------------------------------------------------- */
+
+
+  private function reduceGraph(array $edges) {
+    foreach ($edges as $commit => $parents) {
+      $edges[$commit] = array_keys($parents);
+    }
+
+    $graph = new PhutilDirectedScalarGraph();
+    $graph->addNodes($edges);
+
+    $commits = $graph->getTopographicallySortedNodes();
+
+    // NOTE: We want the most ancestral nodes first, so we need to reverse the
+    // list we get out of AbstractDirectedGraph.
+    $commits = array_reverse($commits);
+
+    return $commits;
+  }
 
 
   private function isKnownCommit($identifier) {

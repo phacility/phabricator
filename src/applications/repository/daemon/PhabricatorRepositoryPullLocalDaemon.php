@@ -232,11 +232,9 @@ final class PhabricatorRepositoryPullLocalDaemon
         $result = $this->executeGitDiscover($repository);
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         $refs = $this->getDiscoveryEngine($repository)
           ->discoverCommits();
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $result = $this->executeHgDiscover($repository);
         break;
       default:
         throw new Exception("Unknown VCS '{$vcs}'!");
@@ -738,64 +736,5 @@ final class PhabricatorRepositoryPullLocalDaemon
     return $path;
   }
 
-
-/* -(  Mercurial Implementation  )------------------------------------------- */
-
-
-  private function executeHgDiscover(PhabricatorRepository $repository) {
-
-    $branches = id(new DiffusionLowLevelMercurialBranchesQuery())
-      ->setRepository($repository)
-      ->execute();
-    $branches = mpull($branches, 'getHeadCommitIdentifier', 'getName');
-
-    $got_something = false;
-    foreach ($branches as $name => $commit) {
-      if ($this->isKnownCommit($repository, $commit)) {
-        continue;
-      } else {
-        $this->executeHgDiscoverCommit($repository, $commit);
-        $got_something = true;
-      }
-    }
-
-    return $got_something;
-  }
-
-  private function executeHgDiscoverCommit(
-    PhabricatorRepository $repository,
-    $commit) {
-
-    $discover = array($commit);
-    $insert = array($commit);
-
-    $seen_parent = array();
-
-    $stream = new PhabricatorMercurialGraphStream($repository);
-
-    // For all the new commits at the branch heads, walk backward until we
-    // find only commits we've aleady seen.
-    while ($discover) {
-      $target = array_pop($discover);
-
-      $parents = $stream->getParents($target);
-
-      foreach ($parents as $parent) {
-        if (isset($seen_parent[$parent])) {
-          continue;
-        }
-        $seen_parent[$parent] = true;
-        if (!$this->isKnownCommit($repository, $parent)) {
-          $discover[] = $parent;
-          $insert[] = $parent;
-        }
-      }
-    }
-
-    foreach ($insert as $target) {
-      $epoch = $stream->getCommitDate($target);
-      $this->recordCommit($repository, $target, $epoch);
-    }
-  }
 
 }
