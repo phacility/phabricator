@@ -482,51 +482,51 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -290px -203px;
 }
 
-.apps-owners-light-large {
+.apps-nuance-light-large {
   background-position: -319px -203px;
 }
 
-.apps-owners-dark-large {
+.apps-nuance-dark-large {
   background-position: -348px -203px;
 }
 
-.apps-owners-blue-large, .phabricator-crumb-view:hover .apps-owners-dark-large {
+.apps-nuance-blue-large, .phabricator-crumb-view:hover .apps-nuance-dark-large {
   background-position: -377px -203px;
 }
 
-.apps-owners-white-large {
+.apps-nuance-white-large {
   background-position: -406px -203px;
 }
 
-.apps-paste-light-large {
+.apps-owners-light-large {
   background-position: 0px -232px;
 }
 
-.apps-paste-dark-large {
+.apps-owners-dark-large {
   background-position: -29px -232px;
 }
 
-.apps-paste-blue-large, .phabricator-crumb-view:hover .apps-paste-dark-large {
+.apps-owners-blue-large, .phabricator-crumb-view:hover .apps-owners-dark-large {
   background-position: -58px -232px;
 }
 
-.apps-paste-white-large {
+.apps-owners-white-large {
   background-position: -87px -232px;
 }
 
-.apps-pebkac-light-large {
+.apps-paste-light-large {
   background-position: -116px -232px;
 }
 
-.apps-pebkac-dark-large {
+.apps-paste-dark-large {
   background-position: -145px -232px;
 }
 
-.apps-pebkac-blue-large, .phabricator-crumb-view:hover .apps-pebkac-dark-large {
+.apps-paste-blue-large, .phabricator-crumb-view:hover .apps-paste-dark-large {
   background-position: -174px -232px;
 }
 
-.apps-pebkac-white-large {
+.apps-paste-white-large {
   background-position: -203px -232px;
 }
 

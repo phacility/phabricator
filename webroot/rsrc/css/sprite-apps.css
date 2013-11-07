@@ -250,27 +250,27 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -75px -75px;
 }
 
-.apps-owners-dark {
+.apps-nuance-dark {
   background-position: -90px -75px;
 }
 
-.apps-owners-white {
+.apps-nuance-white {
   background-position: -105px -75px;
 }
 
-.apps-paste-dark {
+.apps-owners-dark {
   background-position: -120px -75px;
 }
 
-.apps-paste-white {
+.apps-owners-white {
   background-position: -135px -75px;
 }
 
-.apps-pebkac-dark {
+.apps-paste-dark {
   background-position: 0px -90px;
 }
 
-.apps-pebkac-white {
+.apps-paste-white {
   background-position: -15px -90px;
 }
 

@@ -208,6 +208,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'db',
         'name' => 'policy',
       ),
+      'db.nuance' => array(
+        'type' => 'db',
+        'name' => 'nuance',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -1735,6 +1739,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       '20131106.diffphid.3.key.sql' => array(
         'type' => 'sql',
         'name' => $this->getPatchPath('20131106.diffphid.3.key.sql'),
+      ),
+      '20131106.nuance-v0.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131106.nuance-v0.sql'),
       ),
     );
   }
