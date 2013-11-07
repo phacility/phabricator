@@ -176,6 +176,9 @@ final class DiffusionServeController extends DiffusionController {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $result = $this->serveGitRequest($repository, $viewer);
         break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $result = $this->serveMercurialRequest($repository, $viewer);
+        break;
       default:
         $result = new PhabricatorVCSResponse(
           999,
@@ -224,13 +227,43 @@ final class DiffusionServeController extends DiffusionController {
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         $cmd = $request->getStr('cmd');
-        switch ($cmd) {
-          case 'capabilities':
+        if ($cmd == 'batch') {
+          // For "batch" we get a "cmds" argument like
+          //
+          //   heads ;known nodes=
+          //
+          // We need to examine the commands (here, "heads" and "known") to
+          // make sure they're all read-only.
+
+          $args = $this->getMercurialArguments();
+          $cmds = idx($args, 'cmds');
+          if ($cmds) {
+
+            // NOTE: Mercurial has some code to escape semicolons, but it does
+            // not actually function for command separation. For example, these
+            // two batch commands will produce completely different results (the
+            // former will run the lookup; the latter will fail with a parser
+            // error):
+            //
+            //  lookup key=a:xb;lookup key=z* 0
+            //  lookup key=a:;b;lookup key=z* 0
+            //               ^
+            //               |
+            //               +-- Note semicolon.
+            //
+            // So just split unconditionally.
+
+            $cmds = explode(';', $cmds);
+            foreach ($cmds as $sub_cmd) {
+              $name = head(explode(' ', $sub_cmd, 2));
+              if (!DiffusionMercurialWireProtocol::isReadOnlyCommand($name)) {
+                return false;
+              }
+            }
             return true;
-          default:
-            return false;
+          }
         }
-        break;
+        return DiffusionMercurialWireProtocol::isReadOnlyCommand($cmd);
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SUBVERSION:
         break;
     }
@@ -357,5 +390,127 @@ final class DiffusionServeController extends DiffusionController {
 
     return $user;
   }
+
+  private function serveMercurialRequest(PhabricatorRepository $repository) {
+    $request = $this->getRequest();
+
+    $bin = Filesystem::resolveBinary('hg');
+    if (!$bin) {
+      throw new Exception("Unable to find `hg` in PATH!");
+    }
+
+    $env = array();
+    $input = PhabricatorStartup::getRawInput();
+
+    $cmd = $request->getStr('cmd');
+
+    $args = $this->getMercurialArguments();
+    $args = $this->formatMercurialArguments($cmd, $args);
+
+    if (strlen($input)) {
+      $input = strlen($input)."\n".$input."0\n";
+    }
+
+    list($err, $stdout, $stderr) = id(new ExecFuture('%s serve --stdio', $bin))
+      ->setEnv($env, true)
+      ->setCWD($repository->getLocalPath())
+      ->write("{$cmd}\n{$args}{$input}")
+      ->resolve();
+
+    if ($err) {
+      return new PhabricatorVCSResponse(
+        500,
+        pht('Error %d: %s', $err, $stderr));
+    }
+
+    if ($cmd == 'getbundle' ||
+        $cmd == 'changegroup' ||
+        $cmd == 'changegroupsubset') {
+      // We're not completely sure that "changegroup" and "changegroupsubset"
+      // actually work, they're for very old Mercurial.
+      $body = gzcompress($stdout);
+    } else if ($cmd == 'unbundle') {
+      // This includes diagnostic information and anything echoed by commit
+      // hooks. We ignore `stdout` since it just has protocol garbage, and
+      // substitute `stderr`.
+      $body = strlen($stderr)."\n".$stderr;
+    } else {
+      list($length, $body) = explode("\n", $stdout, 2);
+    }
+
+    return id(new DiffusionMercurialResponse())->setContent($body);
+  }
+
+
+  private function getMercurialArguments() {
+    // Mercurial sends arguments in HTTP headers. "Why?", you might wonder,
+    // "Why would you do this?".
+
+    $args_raw = array();
+    for ($ii = 1; ; $ii++) {
+      $header = 'HTTP_X_HGARG_'.$ii;
+      if (!array_key_exists($header, $_SERVER)) {
+        break;
+      }
+      $args_raw[] = $_SERVER[$header];
+    }
+    $args_raw = implode('', $args_raw);
+
+    return id(new PhutilQueryStringParser())
+      ->parseQueryString($args_raw);
+  }
+
+  private function formatMercurialArguments($command, array $arguments) {
+    $spec = DiffusionMercurialWireProtocol::getCommandArgs($command);
+
+    $out = array();
+
+    // Mercurial takes normal arguments like this:
+    //
+    //   name <length(value)>
+    //   value
+
+    $has_star = false;
+    foreach ($spec as $arg_key) {
+      if ($arg_key == '*') {
+        $has_star = true;
+        continue;
+      }
+      if (isset($arguments[$arg_key])) {
+        $value = $arguments[$arg_key];
+        $size = strlen($value);
+        $out[] = "{$arg_key} {$size}\n{$value}";
+        unset($arguments[$arg_key]);
+      }
+    }
+
+    if ($has_star) {
+
+      // Mercurial takes arguments for variable argument lists roughly like
+      // this:
+      //
+      //   * <count(args)>
+      //   argname1 <length(argvalue1)>
+      //   argvalue1
+      //   argname2 <length(argvalue2)>
+      //   argvalue2
+
+      $count = count($arguments);
+
+      $out[] = "* {$count}\n";
+
+      foreach ($arguments as $key => $value) {
+        if (in_array($key, $spec)) {
+          // We already added this argument above, so skip it.
+          continue;
+        }
+        $size = strlen($value);
+        $out[] = "{$key} {$size}\n{$value}";
+      }
+    }
+
+    return implode('', $out);
+  }
+
 }
 
