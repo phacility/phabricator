@@ -4,7 +4,7 @@ final class PhabricatorConduitSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
   public function getPageSize(PhabricatorSavedQuery $saved) {
-    return INF;
+    return PHP_INT_MAX - 1;
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
