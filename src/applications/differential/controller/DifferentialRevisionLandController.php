@@ -68,7 +68,7 @@ final class DifferentialRevisionLandController extends DifferentialController {
     $prompt = hsprintf('%s<br><br>%s',
       pht(
         'This will squash and rebase revision %s, and push it to '.
-          'origin/master.',
+          'the default / master branch.',
         $revision_id),
       pht('It is an experimental feature and may not work.'));
 
