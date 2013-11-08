@@ -55,11 +55,22 @@ this:
   </VirtualHost>
 
 If Apache isn't currently configured to serve documents out of the directory
-where you put Phabricator, you may also need to add a section like this:
+where you put Phabricator, you may also need to add `<Directory />` section. The
+syntax for this section depends on which version of Apache you're running.
+(If you don't know, you can usually figure this out by running `httpd -v`.)
+For Apache versions older than 2.4, use this:
 
+  name="Apache Older Than 2.4"
   <Directory "/path/to/phabricator/webroot">
     Order allow,deny
     Allow from all
+  </Directory>
+
+For Apache versions 2.4 and newer, use this:
+
+  name="Apache 2.4 and Newer"
+  <Directory "/path/to/phabricator/webroot">
+    Require all granted
   </Directory>
 
 After making your edits, restart Apache, then continue to "Setup" below.
