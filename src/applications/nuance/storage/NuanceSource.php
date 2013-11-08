@@ -36,6 +36,22 @@ final class NuanceSource
     return '/nuance/source/view/'.$this->getID().'/';
   }
 
+  public static function initializeNewSource(PhabricatorUser $actor) {
+    $app = id(new PhabricatorApplicationQuery())
+      ->setViewer($actor)
+      ->withClasses(array('PhabricatorApplicationNuance'))
+      ->executeOne();
+
+    $view_policy = $app->getPolicy(
+      NuanceCapabilitySourceDefaultView::CAPABILITY);
+    $edit_policy = $app->getPolicy(
+      NuanceCapabilitySourceDefaultEdit::CAPABILITY);
+
+    return id(new NuanceSource())
+      ->setViewPolicy($view_policy)
+      ->setEditPolicy($edit_policy);
+  }
+
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
