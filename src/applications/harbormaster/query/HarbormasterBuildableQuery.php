@@ -9,6 +9,7 @@ final class HarbormasterBuildableQuery
   private $containerPHIDs;
 
   private $needContainerObjects;
+  private $needContainerHandles;
   private $needBuildableHandles;
   private $needBuilds;
 
@@ -34,6 +35,11 @@ final class HarbormasterBuildableQuery
 
   public function needContainerObjects($need) {
     $this->needContainerObjects = $need;
+    return $this;
+  }
+
+  public function needContainerHandles($need) {
+    $this->needContainerHandles = $need;
     return $this;
   }
 
@@ -88,22 +94,42 @@ final class HarbormasterBuildableQuery
   }
 
   protected function didFilterPage(array $page) {
-    if ($this->needContainerObjects) {
-      $containers = array();
-
+    if ($this->needContainerObjects || $this->needContainerHandles) {
       $container_phids = array_filter(mpull($page, 'getContainerPHID'));
-      if ($container_phids) {
-        $containers = id(new PhabricatorObjectQuery())
-          ->setViewer($this->getViewer())
-          ->withPHIDs($container_phids)
-          ->setParentQuery($this)
-          ->execute();
-        $containers = mpull($containers, null, 'getPHID');
+
+      if ($this->needContainerObjects) {
+        $containers = array();
+
+        if ($container_phids) {
+          $containers = id(new PhabricatorObjectQuery())
+            ->setViewer($this->getViewer())
+            ->withPHIDs($container_phids)
+            ->setParentQuery($this)
+            ->execute();
+          $containers = mpull($containers, null, 'getPHID');
+        }
+
+        foreach ($page as $key => $buildable) {
+          $container_phid = $buildable->getContainerPHID();
+          $buildable->attachContainerObject(idx($containers, $container_phid));
+        }
       }
 
-      foreach ($page as $key => $buildable) {
-        $container_phid = $buildable->getContainerPHID();
-        $buildable->attachContainerObject(idx($containers, $container_phid));
+      if ($this->needContainerHandles) {
+        $handles = array();
+
+        if ($container_phids) {
+          $handles = id(new PhabricatorHandleQuery())
+            ->setViewer($this->getViewer())
+            ->withPHIDs($container_phids)
+            ->setParentQuery($this)
+            ->execute();
+        }
+
+        foreach ($page as $key => $buildable) {
+          $container_phid = $buildable->getContainerPHID();
+          $buildable->attachContainerHandle(idx($handles, $container_phid));
+        }
       }
     }
 

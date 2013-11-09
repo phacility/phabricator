@@ -19,7 +19,7 @@ final class HarbormasterBuildableViewController
       ->setViewer($viewer)
       ->withIDs(array($id))
       ->needBuildableHandles(true)
-      ->needContainerObjects(true)
+      ->needContainerHandles(true)
       ->executeOne();
     if (!$buildable) {
       return new Aphront404Response();
@@ -138,6 +138,12 @@ final class HarbormasterBuildableViewController
     $properties->addProperty(
       pht('Buildable'),
       $buildable->getBuildableHandle()->renderLink());
+
+    if ($buildable->getContainerHandle() !== null) {
+      $properties->addProperty(
+        pht('Container'),
+        $buildable->getContainerHandle()->renderLink());
+    }
 
   }
 

@@ -511,6 +511,7 @@ final class HeraldRuleController extends HeraldController {
         'package'     => '/typeahead/common/packages/',
         'project'     => '/typeahead/common/projects/',
         'userorproject' => '/typeahead/common/accountsorprojects/',
+        'buildplan'   => '/typeahead/common/buildplans/',
       ),
       'markup' => $template,
     );

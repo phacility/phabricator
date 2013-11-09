@@ -14,6 +14,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
   protected $emailPHIDs = array();
   protected $addReviewerPHIDs = array();
   protected $blockingReviewerPHIDs = array();
+  protected $buildPlans = array();
 
   protected $repository;
   protected $affectedPackages;
@@ -115,6 +116,10 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
 
   public function getBlockingReviewersAddedByHerald() {
     return $this->blockingReviewerPHIDs;
+  }
+
+  public function getBuildPlans() {
+    return $this->buildPlans;
   }
 
   public function getPHID() {
@@ -349,6 +354,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
           self::ACTION_EMAIL,
           self::ACTION_ADD_REVIEWERS,
           self::ACTION_ADD_BLOCKING_REVIEWERS,
+          self::ACTION_APPLY_BUILD_PLANS,
           self::ACTION_NOTHING,
         );
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
@@ -467,6 +473,15 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
             $effect,
             true,
             pht('Added blocking reviewers.'));
+          break;
+        case self::ACTION_APPLY_BUILD_PLANS:
+          foreach ($effect->getTarget() as $phid) {
+            $this->buildPlans[] = $phid;
+          }
+          $result[] = new HeraldApplyTranscript(
+            $effect,
+            true,
+            pht('Applied build plans.'));
           break;
         default:
           throw new Exception("No rules to handle action '{$action}'.");

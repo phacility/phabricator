@@ -66,6 +66,11 @@ final class PhabricatorRepositoryCommitHeraldWorker
       $this->createAudits($commit, $audit_phids, $cc_phids, $rules);
     }
 
+    HarbormasterBuildable::applyBuildPlans(
+      $commit->getPHID(),
+      $repository->getPHID(),
+      $adapter->getBuildPlans());
+
     $explicit_auditors = $this->createAuditsFromCommitMessage($commit, $data);
 
     if ($repository->getDetail('herald-disabled')) {

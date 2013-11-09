@@ -22,6 +22,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
   protected $emailPHIDs = array();
   protected $addCCPHIDs = array();
   protected $auditMap = array();
+  protected $buildPlans = array();
 
   protected $affectedPaths;
   protected $affectedRevision;
@@ -120,7 +121,8 @@ final class HeraldCommitAdapter extends HeraldAdapter {
           self::ACTION_ADD_CC,
           self::ACTION_EMAIL,
           self::ACTION_AUDIT,
-          self::ACTION_NOTHING,
+          self::ACTION_APPLY_BUILD_PLANS,
+          self::ACTION_NOTHING
         );
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         return array(
@@ -174,6 +176,10 @@ final class HeraldCommitAdapter extends HeraldAdapter {
 
   public function getAuditMap() {
     return $this->auditMap;
+  }
+
+  public function getBuildPlans() {
+    return $this->buildPlans;
   }
 
   public function getHeraldName() {
@@ -421,6 +427,15 @@ final class HeraldCommitAdapter extends HeraldAdapter {
             $effect,
             true,
             pht('Triggered an audit.'));
+          break;
+        case self::ACTION_APPLY_BUILD_PLANS:
+          foreach ($effect->getTarget() as $phid) {
+            $this->buildPlans[] = $phid;
+          }
+          $result[] = new HeraldApplyTranscript(
+            $effect,
+            true,
+            pht('Applied build plans.'));
           break;
         case self::ACTION_FLAG:
           $result[] = parent::applyFlagEffect(

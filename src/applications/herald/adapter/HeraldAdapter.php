@@ -54,6 +54,7 @@ abstract class HeraldAdapter {
   const ACTION_ADD_PROJECTS = 'addprojects';
   const ACTION_ADD_REVIEWERS = 'addreviewers';
   const ACTION_ADD_BLOCKING_REVIEWERS = 'addblockingreviewers';
+  const ACTION_APPLY_BUILD_PLANS = 'applybuildplans';
 
   const VALUE_TEXT            = 'text';
   const VALUE_NONE            = 'none';
@@ -67,6 +68,7 @@ abstract class HeraldAdapter {
   const VALUE_FLAG_COLOR      = 'flagcolor';
   const VALUE_CONTENT_SOURCE  = 'contentsource';
   const VALUE_USER_OR_PROJECT = 'userorproject';
+  const VALUE_BUILD_PLAN      = 'buildplan';
 
   private $contentSource;
 
@@ -490,6 +492,7 @@ abstract class HeraldAdapter {
           self::ACTION_ADD_PROJECTS => pht('Add projects'),
           self::ACTION_ADD_REVIEWERS => pht('Add reviewers'),
           self::ACTION_ADD_BLOCKING_REVIEWERS => pht('Add blocking reviewers'),
+          self::ACTION_APPLY_BUILD_PLANS => pht('Apply build plans'),
         );
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         return array(
@@ -657,6 +660,8 @@ abstract class HeraldAdapter {
         case self::ACTION_ADD_REVIEWERS:
         case self::ACTION_ADD_BLOCKING_REVIEWERS:
           return self::VALUE_USER_OR_PROJECT;
+        case self::ACTION_APPLY_BUILD_PLANS:
+          return self::VALUE_BUILD_PLAN;
         default:
           throw new Exception("Unknown or invalid action '{$action}'.");
       }

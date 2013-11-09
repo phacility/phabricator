@@ -273,6 +273,11 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
       $rem_ccs = $adapter->getCCsRemovedByHerald();
       $blocking_reviewers = array_keys(
         $adapter->getBlockingReviewersAddedByHerald());
+
+      HarbormasterBuildable::applyBuildPlans(
+        $diff->getPHID(),
+        $revision->getPHID(),
+        $adapter->getBuildPlans());
     } else {
       $sub = array(
         'rev' => array(),
