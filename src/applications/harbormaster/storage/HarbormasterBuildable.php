@@ -34,6 +34,7 @@ final class HarbormasterBuildable extends HarbormasterDAO
     $buildable = id(new HarbormasterBuildableQuery())
       ->setViewer($actor)
       ->withBuildablePHIDs(array($buildable_object_phid))
+      ->setLimit(1)
       ->executeOne();
     if ($buildable) {
       return $buildable;
