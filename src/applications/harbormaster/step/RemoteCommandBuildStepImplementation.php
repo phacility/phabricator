@@ -25,24 +25,12 @@ final class RemoteCommandBuildStepImplementation
     HarbormasterBuildStep $build_step) {
 
     $settings = $this->getSettings();
-
-    $parameters = array();
-    $matches = array();
     $variables = $this->retrieveVariablesFromBuild($build);
-    $command = $settings['command'];
-    preg_match_all(
-      "/\\\$\\{(?P<name>[a-z\.]+)\\}/",
-      $command,
-      $matches);
-    foreach ($matches["name"] as $match) {
-      $parameters[] = idx($variables, $match, "");
-    }
-    $command = str_replace("%", "%%", $command);
-    $command = preg_replace("/\\\$\\{(?P<name>[a-z\.]+)\\}/", "%s", $command);
 
-    $command = vcsprintf(
-      $command,
-      $parameters);
+    $command = $this->mergeVariables(
+      'vcsprintf',
+      $settings['command'],
+      $variables);
 
     $future = null;
     if (empty($settings['sshkey'])) {

@@ -26,7 +26,7 @@ final class HarbormasterBuildCancelController
     $build_uri = $this->getApplicationURI('/build/'.$build->getID());
 
     if ($request->isDialogFormPost()) {
-      $build->setCancelRequested(true);
+      $build->setCancelRequested(1);
       $build->save();
 
       return id(new AphrontRedirectResponse())->setURI($build_uri);

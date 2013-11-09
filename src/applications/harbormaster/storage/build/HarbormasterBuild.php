@@ -54,7 +54,7 @@ final class HarbormasterBuild extends HarbormasterDAO
   public static function initializeNewBuild(PhabricatorUser $actor) {
     return id(new HarbormasterBuild())
       ->setBuildStatus(self::STATUS_INACTIVE)
-      ->setCancelRequested(false);
+      ->setCancelRequested(0);
   }
 
   public function getConfiguration() {
@@ -118,7 +118,7 @@ final class HarbormasterBuild extends HarbormasterDAO
     $copy = id(new HarbormasterBuild())->load($this->getID());
     if ($copy->getCancelRequested()) {
       $this->setBuildStatus(HarbormasterBuild::STATUS_CANCELLED);
-      $this->setCancelRequested(false);
+      $this->setCancelRequested(0);
       $this->save();
       return true;
     }

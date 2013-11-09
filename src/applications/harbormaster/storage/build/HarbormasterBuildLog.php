@@ -28,7 +28,7 @@ final class HarbormasterBuildLog extends HarbormasterDAO
       ->setBuildPHID($build->getPHID())
       ->setBuildStepPHID($build_step->getPHID())
       ->setDuration(null)
-      ->setLive(false);
+      ->setLive(0);
   }
 
   public function getConfiguration() {
@@ -70,7 +70,7 @@ final class HarbormasterBuildLog extends HarbormasterDAO
       throw new Exception("Live logging has already started for this log.");
     }
 
-    $this->setLive(true);
+    $this->setLive(1);
     $this->save();
 
     return time();
@@ -150,7 +150,7 @@ final class HarbormasterBuildLog extends HarbormasterDAO
     if ($start > 0) {
       $this->setDuration(time() - $start);
     }
-    $this->setLive(false);
+    $this->setLive(0);
     $this->save();
   }
 
