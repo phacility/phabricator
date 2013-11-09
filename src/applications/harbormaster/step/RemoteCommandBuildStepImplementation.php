@@ -31,14 +31,14 @@ final class RemoteCommandBuildStepImplementation
     $variables = $this->retrieveVariablesFromBuild($build);
     $command = $settings['command'];
     preg_match_all(
-      "/\\\$\\{(?P<name>[a-z]+)\\}/",
+      "/\\\$\\{(?P<name>[a-z\.]+)\\}/",
       $command,
       $matches);
     foreach ($matches["name"] as $match) {
       $parameters[] = idx($variables, $match, "");
     }
     $command = str_replace("%", "%%", $command);
-    $command = preg_replace("/\\\$\\{(?P<name>[a-z]+)\\}/", "%s", $command);
+    $command = preg_replace("/\\\$\\{(?P<name>[a-z\.]+)\\}/", "%s", $command);
 
     $command = vcsprintf(
       $command,
@@ -89,6 +89,12 @@ final class RemoteCommandBuildStepImplementation
 
     // Get the return value so we can log that as well.
     list($err) = $future->resolve();
+
+    // Retrieve the last few bits of information.
+    list($stdout, $stderr) = $future->read();
+    $log_stdout->append($stdout);
+    $log_stderr->append($stderr);
+    $future->discardBuffers();
 
     $log_stdout->finalize($start_stdout);
     $log_stderr->finalize($start_stderr);

@@ -4,29 +4,31 @@ abstract class VariableBuildStepImplementation extends BuildStepImplementation {
 
   public function retrieveVariablesFromBuild(HarbormasterBuild $build) {
     $results = array(
-      'revision' => null,
-      'commit' => null,
-      'repository' => null,
-      'vcs' => null,
-      'uri' => null,
-      'timestamp' => null);
+      'buildable.revision' => null,
+      'buildable.commit' => null,
+      'repository.callsign' => null,
+      'repository.vcs' => null,
+      'repository.uri' => null,
+      'step.timestamp' => null,
+      'build.id' => null);
 
     $buildable = $build->getBuildable();
     $object = $buildable->getBuildableObject();
 
     $repo = null;
     if ($object instanceof DifferentialRevision) {
-      $results['revision'] = $object->getID();
+      $results['buildable.revision'] = $object->getID();
       $repo = $object->getRepository();
     } else if ($object instanceof PhabricatorRepositoryCommit) {
-      $results['commit'] = $object->getCommitIdentifier();
+      $results['buildable.commit'] = $object->getCommitIdentifier();
       $repo = $object->getRepository();
     }
 
-    $results['repository'] = $repo->getCallsign();
-    $results['vcs'] = $repo->getVersionControlSystem();
-    $results['uri'] = $repo->getPublicRemoteURI();
-    $results['timestamp'] = time();
+    $results['repository.callsign'] = $repo->getCallsign();
+    $results['repository.vcs'] = $repo->getVersionControlSystem();
+    $results['repository.uri'] = $repo->getPublicRemoteURI();
+    $results['step.timestamp'] = time();
+    $results['build.id'] = $build->getID();
 
     return $results;
   }
@@ -44,12 +46,17 @@ abstract class VariableBuildStepImplementation extends BuildStepImplementation {
 
   public function getAvailableVariables() {
     return array(
-      'revision' => pht('The differential revision ID, if applicable.'),
-      'commit' => pht('The commit identifier, if applicable.'),
-      'repository' => pht('The callsign of the repository in Phabricator.'),
-      'vcs' => pht('The version control system, either "svn", "hg" or "git".'),
-      'uri' => pht('The URI to clone or checkout the repository from.'),
-      'timestamp' => pht('The current UNIX timestamp.'));
+      'buildable.revision' =>
+        pht('The differential revision ID, if applicable.'),
+      'buildable.commit' => pht('The commit identifier, if applicable.'),
+      'repository.callsign' =>
+        pht('The callsign of the repository in Phabricator.'),
+      'repository.vcs' =>
+        pht('The version control system, either "svn", "hg" or "git".'),
+      'repository.uri' =>
+        pht('The URI to clone or checkout the repository from.'),
+      'step.timestamp' => pht('The current UNIX timestamp.'),
+      'build.id' => pht('The ID of the current build.'));
   }
 
   public function getSettingRemarkupInstructions() {
