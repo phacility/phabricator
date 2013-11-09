@@ -90,13 +90,13 @@ final class DarkConsoleErrorLogPlugin extends DarkConsolePlugin {
     $table->setHeaders(array('Error'));
     $table->setNoDataString('No errors.');
 
-    return hsprintf(
-      '<div>'.
-        '<div>%s</div>'.
-        '<pre class="PhabricatorMonospaced">%s</pre>'.
-      '</div>',
-      $table->render(),
-      phutil_implode_html('', $details));
+    return phutil_tag(
+      'div',
+      array(),
+      array(
+        phutil_tag('div', array(), $table->render()),
+        phutil_tag('pre', array('class' => 'PhabricatorMonospaced'), $details),
+      ));
   }
 }
 

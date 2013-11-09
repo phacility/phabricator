@@ -248,13 +248,13 @@ class AphrontDefaultApplicationConfiguration
       $trace = null;
     }
 
-    $content = hsprintf(
-      '<div class="aphront-unhandled-exception">'.
-        '<div class="exception-message">%s</div>'.
-        '%s'.
-      '</div>',
-      $message,
-      $trace);
+    $content = phutil_tag(
+      'div',
+      array('class' => 'aphront-unhandled-exception'),
+      array(
+        phutil_tag('div', array('class' => 'exception-message'), $message),
+        $trace,
+      ));
 
     $dialog = new AphrontDialogView();
     $dialog
@@ -384,12 +384,16 @@ class AphrontDefaultApplicationConfiguration
         'wide',
       ));
 
-    return hsprintf(
-      '<div class="exception-trace">'.
-        '<div class="exception-trace-header">Stack Trace</div>'.
-        '%s'.
-      '</div>',
-      $table->render());
+    return phutil_tag(
+      'div',
+      array('class' => 'exception-trace'),
+      array(
+        phutil_tag(
+          'div',
+          array('class' => 'exception-trace-header'),
+          pht('Stack Trace')),
+        $table->render(),
+      ));
   }
 
 }
