@@ -38,7 +38,9 @@ abstract class BuildStepImplementation {
   /**
    * Run the build step against the specified build.
    */
-  abstract public function execute(HarbormasterBuild $build);
+  abstract public function execute(
+    HarbormasterBuild $build,
+    HarbormasterBuildStep $build_step);
 
   /**
    * Gets the settings for this build step.
@@ -84,5 +86,12 @@ abstract class BuildStepImplementation {
    */
   public function getSettingDefinitions() {
     return array();
+  }
+
+  /**
+   * Return relevant setting instructions as Remarkup.
+   */
+  public function getSettingRemarkupInstructions() {
+    return null;
   }
 }
