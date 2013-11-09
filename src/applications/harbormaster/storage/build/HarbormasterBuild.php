@@ -65,7 +65,7 @@ final class HarbormasterBuild extends HarbormasterDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      HarbormasterPHIDTypeBuildPlan::TYPECONST);
+      HarbormasterPHIDTypeBuild::TYPECONST);
   }
 
   public function attachBuildable(HarbormasterBuildable $buildable) {

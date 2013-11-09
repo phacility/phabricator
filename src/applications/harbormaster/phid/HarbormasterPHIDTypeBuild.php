@@ -30,7 +30,13 @@ final class HarbormasterPHIDTypeBuild extends PhabricatorPHIDType {
     array $objects) {
 
     foreach ($handles as $phid => $handle) {
-      $build_plan = $objects[$phid];
+      $build = $objects[$phid];
+      $handles[$phid]->setName(pht(
+        'Build %d: %s',
+        $build->getID(),
+        $build->getName()));
+      $handles[$phid]->setURI(
+        '/harbormaster/build/'.$build->getID());
     }
   }
 

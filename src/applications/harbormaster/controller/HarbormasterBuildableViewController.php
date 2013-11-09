@@ -28,7 +28,6 @@ final class HarbormasterBuildableViewController
     $builds = id(new HarbormasterBuildQuery())
       ->setViewer($viewer)
       ->withBuildablePHIDs(array($buildable->getPHID()))
-      ->needBuildPlans(true)
       ->execute();
 
     $build_list = id(new PHUIObjectItemListView())

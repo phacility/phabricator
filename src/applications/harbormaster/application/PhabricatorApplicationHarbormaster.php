@@ -26,6 +26,12 @@ final class PhabricatorApplicationHarbormaster extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
+  public function getEventListeners() {
+    return array(
+      new HarbormasterUIEventListener(),
+    );
+  }
+
   public function isBeta() {
     return true;
   }

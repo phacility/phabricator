@@ -9,8 +9,6 @@ final class HarbormasterBuildQuery
   private $buildablePHIDs;
   private $buildPlanPHIDs;
 
-  private $needBuildPlans;
-
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -33,11 +31,6 @@ final class HarbormasterBuildQuery
 
   public function withBuildPlanPHIDs(array $build_plan_phids) {
     $this->buildPlanPHIDs = $build_plan_phids;
-    return $this;
-  }
-
-  public function needBuildPlans($need_plans) {
-    $this->needBuildPlans = $need_plans;
     return $this;
   }
 
@@ -82,23 +75,21 @@ final class HarbormasterBuildQuery
   }
 
   protected function didFilterPage(array $page) {
-    if ($this->needBuildPlans) {
-      $plans = array();
+    $plans = array();
 
-      $plan_phids = array_filter(mpull($page, 'getBuildPlanPHID'));
-      if ($plan_phids) {
-        $plans = id(new PhabricatorObjectQuery())
-          ->setViewer($this->getViewer())
-          ->withPHIDs($plan_phids)
-          ->setParentQuery($this)
-          ->execute();
-        $plans = mpull($plans, null, 'getPHID');
-      }
+    $plan_phids = array_filter(mpull($page, 'getBuildPlanPHID'));
+    if ($plan_phids) {
+      $plans = id(new PhabricatorObjectQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs($plan_phids)
+        ->setParentQuery($this)
+        ->execute();
+      $plans = mpull($plans, null, 'getPHID');
+    }
 
-      foreach ($page as $key => $build) {
-        $plan_phid = $build->getBuildPlanPHID();
-        $build->attachBuildPlan(idx($plans, $plan_phid));
-      }
+    foreach ($page as $key => $build) {
+      $plan_phid = $build->getBuildPlanPHID();
+      $build->attachBuildPlan(idx($plans, $plan_phid));
     }
 
     return $page;

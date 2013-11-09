@@ -16,9 +16,10 @@ abstract class VariableBuildStepImplementation extends BuildStepImplementation {
     $object = $buildable->getBuildableObject();
 
     $repo = null;
-    if ($object instanceof DifferentialRevision) {
-      $results['buildable.revision'] = $object->getID();
-      $repo = $object->getRepository();
+    if ($object instanceof DifferentialDiff) {
+      $revision = $object->getRevision();
+      $results['buildable.revision'] = $revision->getID();
+      $repo = $revision->getRepository();
     } else if ($object instanceof PhabricatorRepositoryCommit) {
       $results['buildable.commit'] = $object->getCommitIdentifier();
       $repo = $object->getRepository();

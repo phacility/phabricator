@@ -187,6 +187,21 @@ final class HarbormasterBuildViewController
       pht('Status'),
       $this->getStatus($build));
 
+    $handles = id(new PhabricatorHandleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array(
+        $build->getBuildablePHID(),
+        $build->getBuildPlanPHID()))
+      ->execute();
+
+    $properties->addProperty(
+      pht('Buildable'),
+      $handles[$build->getBuildablePHID()]->renderLink());
+
+    $properties->addProperty(
+      pht('Build Plan'),
+      $handles[$build->getBuildPlanPHID()]->renderLink());
+
   }
 
   private function getStatus(HarbormasterBuild $build) {

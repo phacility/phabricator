@@ -18,7 +18,6 @@ final class HarbormasterBuildWorker extends PhabricatorWorker {
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withBuildStatuses(array(HarbormasterBuild::STATUS_PENDING))
       ->withIDs(array($id))
-      ->needBuildPlans(true)
       ->executeOne();
     if (!$build) {
       throw new PhabricatorWorkerPermanentFailureException(
