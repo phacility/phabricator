@@ -66,13 +66,12 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
         'action' => '/search/',
         'method' => 'POST',
       ),
-      hsprintf(
-        '<div class="phabricator-main-menu-search-container">'.
-          '%s<button>Search</button>%s%s'.
-        '</div>',
+      phutil_tag_div('phabricator-main-menu-search-container', array(
         $input,
+        phutil_tag('button', array(), pht('Search')),
         $scope_input,
-        $target));
+        $target,
+      )));
 
     return $form;
   }

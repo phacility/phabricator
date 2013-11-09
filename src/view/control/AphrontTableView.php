@@ -272,10 +272,13 @@ final class AphrontTableView extends AphrontView {
       }
     } else {
       $colspan = max(count(array_filter($visibility)), 1);
-      $table[] = hsprintf(
-        '<tr class="no-data"><td colspan="%s">%s</td></tr>',
-        $colspan,
-        coalesce($this->noDataString, pht('No data available.')));
+      $table[] = phutil_tag(
+        'tr',
+        array('class' => 'no-data'),
+        phutil_tag(
+          'td',
+          array('colspan' => $colspan),
+          coalesce($this->noDataString, pht('No data available.'))));
     }
 
     $table_class = 'aphront-table-view';
@@ -287,7 +290,7 @@ final class AphrontTableView extends AphrontView {
     }
 
     $html = phutil_tag('table', array('class' => $table_class), $table);
-    return hsprintf('<div class="aphront-table-wrap">%s</div>', $html);
+    return phutil_tag_div('aphront-table-wrap', $html);
   }
 
   public static function renderSingleDisplayLine($line) {

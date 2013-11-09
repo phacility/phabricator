@@ -69,25 +69,20 @@ final class AphrontPanelView extends AphrontView {
     }
 
     if ($this->caption !== null) {
-      $caption = phutil_tag(
-        'div',
-        array('class' => 'aphront-panel-view-caption'),
-        $this->caption);
+      $caption = phutil_tag_div('aphront-panel-view-caption', $this->caption);
     } else {
       $caption = null;
     }
 
     $buttons = null;
     if ($this->buttons) {
-      $buttons = hsprintf(
-        '<div class="aphront-panel-view-buttons">%s</div>',
+      $buttons = phutil_tag_div(
+        'aphront-panel-view-buttons',
         phutil_implode_html(" ", $this->buttons));
     }
-    $header_elements = hsprintf(
-      '<div class="aphront-panel-header">%s%s%s</div>',
-      $buttons,
-      $header,
-      $caption);
+    $header_elements = phutil_tag_div(
+      'aphront-panel-header',
+      array($buttons, $header, $caption));
 
     $table = phutil_implode_html('', $this->renderChildren());
 

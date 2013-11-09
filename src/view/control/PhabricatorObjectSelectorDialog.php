@@ -117,22 +117,19 @@ final class PhabricatorObjectSelectorDialog {
         'action' => $this->submitURI,
         'id'     => $search_id,
       ),
-      hsprintf(
-        '<table class="phabricator-object-selector-search">
-          <tr>
-            <td class="phabricator-object-selector-search-filter">%s</td>
-            <td class="phabricator-object-selector-search-text">%s</td>
-          </tr>
-        </table>',
-        phutil_tag(
-          'select',
-            array('id' => $filter_id),
-          $options),
-        phutil_tag(
-          'input',
-            array(
-              'id' => $query_id,
-              'type' => 'text'))));
+      phutil_tag(
+        'table',
+        array('class' => 'phabricator-object-selector-search'),
+        phutil_tag('tr', array(), array(
+          phutil_tag(
+            'td',
+            array('class' => 'phabricator-object-selector-search-filter'),
+            phutil_tag('select', array('id' => $filter_id), $options)),
+          phutil_tag(
+            'td',
+            array('class' => 'phabricator-object-selector-search-text'),
+            phutil_tag('input', array('id' => $query_id, 'type' => 'text'))),
+        ))));
 
     $result_box = phutil_tag(
       'div',
@@ -142,17 +139,15 @@ final class PhabricatorObjectSelectorDialog {
       ),
       '');
 
-    $attached_box = hsprintf(
-      '<div class="phabricator-object-selector-current">'.
-        '<div class="phabricator-object-selector-currently-attached">'.
-          '<div class="phabricator-object-selector-header">%s</div>'.
-          '<div id="%s"></div>'.
-          '%s'.
-        '</div>'.
-      '</div>',
-      $this->header,
-      $current_id,
-      $instructions);
+    $attached_box = phutil_tag_div(
+      'phabricator-object-selector-current',
+      phutil_tag_div(
+        'phabricator-object-selector-currently-attached',
+        array(
+          phutil_tag_div('phabricator-object-selector-header', $this->header),
+          phutil_tag('div', array('id' => $current_id)),
+          $instructions,
+        )));
 
     $dialog = new AphrontDialogView();
     $dialog

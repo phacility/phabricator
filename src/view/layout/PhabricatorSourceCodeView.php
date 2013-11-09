@@ -116,11 +116,8 @@ final class PhabricatorSourceCodeView extends AphrontView {
     $classes[] = 'remarkup-code';
     $classes[] = 'PhabricatorMonospaced';
 
-    return phutil_tag(
-      'div',
-      array(
-        'class' => 'phabricator-source-code-container',
-      ),
+    return phutil_tag_div(
+      'phabricator-source-code-container',
       javelin_tag(
         'table',
         array(

@@ -62,6 +62,10 @@ final class PhabricatorTransactionView extends AphrontView {
 
     $transaction_id = $this->anchorName ? 'anchor-'.$this->anchorName : null;
 
+    $header = phutil_tag_div(
+      'phabricator-transaction-header',
+      array($info, $actions));
+
     return phutil_tag(
       'div',
       array(
@@ -69,15 +73,9 @@ final class PhabricatorTransactionView extends AphrontView {
         'id'    => $transaction_id,
         'style' => $style,
       ),
-      hsprintf(
-        '<div class="phabricator-transaction-detail %s">'.
-          '<div class="phabricator-transaction-header">%s%s</div>'.
-          '%s'.
-        '</div>',
-        $classes,
-        $info,
-        $actions,
-        $content));
+      phutil_tag_div(
+        'phabricator-transaction-detail '.$classes,
+        array($header, $content)));
 
   }
 
@@ -118,8 +116,9 @@ final class PhabricatorTransactionView extends AphrontView {
 
     $info = phutil_implode_html(" \xC2\xB7 ", $info);
 
-    return hsprintf(
-      '<span class="phabricator-transaction-info">%s</span>',
+    return phutil_tag(
+      'span',
+      array('class' => 'phabricator-transaction-info'),
       $info);
   }
 
@@ -139,9 +138,8 @@ final class PhabricatorTransactionView extends AphrontView {
     if (!$this->hasChildren()) {
       return null;
     }
-    return phutil_tag(
-      'div',
-      array('class' => 'phabricator-transaction-content'),
+    return phutil_tag_div(
+      'phabricator-transaction-content',
       $this->renderChildren());
   }
 
