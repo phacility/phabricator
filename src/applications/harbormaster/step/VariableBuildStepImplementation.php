@@ -4,6 +4,7 @@ abstract class VariableBuildStepImplementation extends BuildStepImplementation {
 
   public function retrieveVariablesFromBuild(HarbormasterBuild $build) {
     $results = array(
+      'buildable.diff' => null,
       'buildable.revision' => null,
       'buildable.commit' => null,
       'repository.callsign' => null,
@@ -17,6 +18,7 @@ abstract class VariableBuildStepImplementation extends BuildStepImplementation {
 
     $repo = null;
     if ($object instanceof DifferentialDiff) {
+      $results['buildable.diff'] = $object->getID();
       $revision = $object->getRevision();
       $results['buildable.revision'] = $revision->getID();
       $repo = $revision->getRepository();
@@ -72,6 +74,8 @@ abstract class VariableBuildStepImplementation extends BuildStepImplementation {
 
   public function getAvailableVariables() {
     return array(
+      'buildable.diff' =>
+        pht('The differential diff ID, if applicable.'),
       'buildable.revision' =>
         pht('The differential revision ID, if applicable.'),
       'buildable.commit' => pht('The commit identifier, if applicable.'),

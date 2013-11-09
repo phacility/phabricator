@@ -42,8 +42,11 @@ final class HarbormasterBuildableEditController
           ->executeOne();
 
         if ($object instanceof DifferentialRevision) {
-          throw new Exception(
-            "TODO: We need to assign PHIDs to diffs before this will work.");
+          $revision = $object;
+          $object = $object->loadActiveDiff();
+          $buildable
+            ->setBuildablePHID($object->getPHID())
+            ->setContainerPHID($revision->getPHID());
         } else if ($object instanceof PhabricatorRepositoryCommit) {
           $buildable
             ->setBuildablePHID($object->getPHID())
