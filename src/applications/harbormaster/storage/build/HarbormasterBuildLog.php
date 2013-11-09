@@ -95,6 +95,7 @@ final class HarbormasterBuildLog extends HarbormasterDAO
         $current = substr($current, self::CHUNK_BYTE_LIMIT);
         $this->append($part);
       }
+      $this->append($current);
       return;
     }
 
