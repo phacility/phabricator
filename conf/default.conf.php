@@ -895,6 +895,11 @@ return array(
   // revision is even older than it is marked as old.
   'differential.days-stale' => 3,
 
+  // If true, comment emails will contain small code patch snippets of the code
+  // the comment applies to, and a full conversation history of the comment
+  // thread.
+  'differential.email-comment-context' => false,
+
 // -- Repositories ---------------------------------------------------------- //
 
   // The default location in which to store local copies of repositories.
