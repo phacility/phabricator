@@ -71,7 +71,7 @@ foreach (Futures($futures)->limit(8) as $file => $future) {
 
     // also, "normalize" c++ and c#
     $language = str_ireplace("c++", "cpp", $language);
-    $language = str_ireplace("c#", "csharp", $language);
+    $language = str_ireplace("c#", "cs", $language);
 
     // Ruby has "singleton method", for example
     $type = substr(str_replace(' ', '_', $type), 0, 12);
