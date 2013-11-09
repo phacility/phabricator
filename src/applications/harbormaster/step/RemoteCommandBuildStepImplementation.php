@@ -26,20 +26,38 @@ final class RemoteCommandBuildStepImplementation
 
     $settings = $this->getSettings();
 
+    $parameters = array();
+    $matches = array();
+    $variables = $this->retrieveVariablesFromBuild($build);
+    $command = $settings['command'];
+    preg_match_all(
+      "/\\\$\\{(?P<name>[a-z]+)\\}/",
+      $command,
+      $matches);
+    foreach ($matches["name"] as $match) {
+      $parameters[] = idx($variables, $match, "");
+    }
+    $command = str_replace("%", "%%", $command);
+    $command = preg_replace("/\\\$\\{(?P<name>[a-z]+)\\}/", "%s", $command);
+
+    $command = vcsprintf(
+      $command,
+      $parameters);
+
     $future = null;
     if (empty($settings['sshkey'])) {
       $future = new ExecFuture(
         'ssh -o "StrictHostKeyChecking no" -p %s %s %s',
         $settings['sshport'],
         $settings['sshuser'].'@'.$settings['sshhost'],
-        $this->mergeVariables($build, $settings['command']));
+        $command);
     } else {
       $future = new ExecFuture(
         'ssh -o "StrictHostKeyChecking no" -p %s -i %s %s %s',
         $settings['sshport'],
         $settings['sshkey'],
         $settings['sshuser'].'@'.$settings['sshhost'],
-        $this->mergeVariables($build, $settings['command']));
+        $command);
     }
 
     $log_stdout = $build->createLog($build_step, "remote", "stdout");
