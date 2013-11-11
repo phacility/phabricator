@@ -258,13 +258,16 @@ final class PonderQuestionTransaction
           return phutil_escape_html_newlines(
             phutil_utf8_shorten($question->getContent(), 128));
         }
+        break;
       case self::TYPE_ANSWERS:
         $answer = $this->getNewAnswerObject($story);
         if ($answer) {
           return phutil_escape_html_newlines(
             phutil_utf8_shorten($answer->getContent(), 128));
         }
+        break;
     }
+
     return parent::getBodyForFeed($story);
   }
 
