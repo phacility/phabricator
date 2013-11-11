@@ -329,6 +329,14 @@ final class DiffusionServeController extends DiffusionController {
       ->resolve();
 
     if ($err) {
+      if ($this->isValidGitShallowCloneResponse($stdout, $stderr)) {
+        // Ignore the error if the response passes this special check for
+        // validity.
+        $err = 0;
+      }
+    }
+
+    if ($err) {
       return new PhabricatorVCSResponse(
         500,
         pht('Error %d: %s', $err, $stderr));
@@ -512,5 +520,27 @@ final class DiffusionServeController extends DiffusionController {
     return implode('', $out);
   }
 
+  private function isValidGitShallowCloneResponse($stdout, $stderr) {
+    // If you execute `git clone --depth N ...`, git sends a request which
+    // `git-http-backend` responds to by emitting valid output and then exiting
+    // with a failure code and an error message. If we ignore this error,
+    // everything works.
+
+    // This is a pretty funky fix: it would be nice to more precisely detect
+    // that a request is a `--depth N` clone request, but we don't have any code
+    // to decode protocol frames yet. Instead, look for reasonable evidence
+    // in the error and output that we're looking at a `--depth` clone.
+
+    // For evidence this isn't completely crazy, see:
+    // https://github.com/schacon/grack/pull/7
+
+    $stdout_regexp = '(^Content-Type: application/x-git-upload-pack-result)m';
+    $stderr_regexp = '(The remote end hung up unexpectedly)';
+
+    $has_pack = preg_match($stdout_regexp, $stdout);
+    $is_hangup = preg_match($stderr_regexp, $stderr);
+
+    return $has_pack && $is_hangup;
+  }
 }
 
