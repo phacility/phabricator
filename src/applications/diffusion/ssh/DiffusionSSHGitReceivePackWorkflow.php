@@ -35,6 +35,7 @@ final class DiffusionSSHGitReceivePackWorkflow
       $repository->writeStatusMessage(
         PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
         PhabricatorRepositoryStatusMessage::CODE_OKAY);
+      $this->waitForGitClient();
     }
 
     return $err;
