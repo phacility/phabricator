@@ -36,8 +36,9 @@ final class DifferentialDiffViewController extends DifferentialController {
       // TODO: implement optgroup support in AphrontFormSelectControl?
       $select = array();
       $select[] = hsprintf('<optgroup label="%s">', pht('Create New Revision'));
-      $select[] = hsprintf(
-        '<option value="">%s</option>',
+      $select[] = phutil_tag(
+        'option',
+        array('value' => ''),
         pht('Create a new Revision...'));
       $select[] = hsprintf('</optgroup>');
 

@@ -28,7 +28,7 @@ final class PhabricatorDebugController extends PhabricatorController {
     $out = ob_get_clean();
 
     $response = new AphrontWebpageResponse();
-    $response->setContent(hsprintf('<pre>%s</pre>', $out));
+    $response->setContent(phutil_tag('pre', array(), $out));
     return $response;
   }
 

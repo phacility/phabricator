@@ -133,7 +133,7 @@ final class HeraldTranscriptController extends HeraldController {
       $value = implode(', ', $value);
     }
 
-    return hsprintf('<span class="condition-test-value">%s</span>', $value);
+    return phutil_tag('span', array('class' => 'condition-test-value'), $value);
   }
 
   private function buildSideNav() {
@@ -306,13 +306,15 @@ final class HeraldTranscriptController extends HeraldController {
       }
 
       if ($apply_xscript->getApplied()) {
-        $success = pht('SUCCESS');
-        $outcome =
-          hsprintf('<span class="outcome-success">%s</span>', $success);
+        $outcome = phutil_tag(
+          'span',
+          array('class' => 'outcome-success'),
+          pht('SUCCESS'));
       } else {
-        $failure = pht('FAILURE');
-        $outcome =
-          hsprintf('<span class="outcome-failure">%s</span>', $failure);
+        $outcome = phutil_tag(
+          'span',
+          array('class' => 'outcome-failure'),
+          pht('FAILURE'));
       }
 
       $rows[] = array(
@@ -366,23 +368,21 @@ final class HeraldTranscriptController extends HeraldController {
       $cond_markup = array();
       foreach ($xscript->getConditionTranscriptsForRule($rule_id) as $cond) {
         if ($cond->getNote()) {
-          $note = hsprintf(
-            '<div class="herald-condition-note">%s</div>',
-            $cond->getNote());
+          $note = phutil_tag_div('herald-condition-note', $cond->getNote());
         } else {
           $note = null;
         }
 
         if ($cond->getResult()) {
-          $result = hsprintf(
-            '<span class="herald-outcome condition-pass">'.
-              "\xE2\x9C\x93".
-            '</span>');
+          $result = phutil_tag(
+            'span',
+            array('class' => 'herald-outcome condition-pass'),
+            "\xE2\x9C\x93");
         } else {
-          $result = hsprintf(
-            '<span class="herald-outcome condition-fail">'.
-              "\xE2\x9C\x98".
-            '</span>');
+          $result = phutil_tag(
+            'span',
+            array('class' => 'herald-outcome condition-fail'),
+            "\xE2\x9C\x98");
         }
 
         $cond_markup[] = phutil_tag(
@@ -398,18 +398,23 @@ final class HeraldTranscriptController extends HeraldController {
       }
 
       if ($rule->getResult()) {
-        $pass = pht('PASS');
-        $result = hsprintf(
-          '<span class="herald-outcome rule-pass">%s</span>', $pass);
+        $result = phutil_tag(
+          'span',
+          array('class' => 'herald-outcome rule-pass'),
+          pht('PASS'));
         $class = 'herald-rule-pass';
       } else {
-        $fail = pht('FAIL');
-        $result = hsprintf(
-          '<span class="herald-outcome rule-fail">%s</span>', $fail);
+        $result = phutil_tag(
+          'span',
+          array('class' => 'herald-outcome rule-fail'),
+          pht('FAIL'));
         $class = 'herald-rule-fail';
       }
 
-      $cond_markup[] = hsprintf('<li>%s %s</li>', $result, $rule->getReason());
+      $cond_markup[] = phutil_tag(
+        'li',
+        array(),
+        array($result, $rule->getReason()));
       $user_phid = $this->getRequest()->getUser()->getPHID();
 
       $name = $rule->getRuleName();
@@ -420,11 +425,11 @@ final class HeraldTranscriptController extends HeraldController {
           array(
             'class' => $class,
           ),
-          hsprintf(
-            '<div class="rule-name"><strong>%s</strong> %s</div>%s',
-            $name,
-            $handles[$rule->getRuleOwner()]->getName(),
-            phutil_tag('ul', array(), $cond_markup)));
+          phutil_tag_div('rule-name', array(
+            phutil_tag('strong', array(), $name),
+            ' ',
+            phutil_tag('ul', array(), $cond_markup),
+          )));
     }
 
     $panel = '';

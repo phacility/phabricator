@@ -200,23 +200,25 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       phutil_tag('th', array(), pht('Unit')),
     )));
 
-    $content = hsprintf(
-      '<div class="differential-revision-history differential-panel">'.
-        '<form action="#toc">'.
-          '<table class="differential-revision-history-table">'.
-            '%s'.
-            '<tr>'.
-              '<td colspan="9" class="diff-differ-submit">'.
-                '<label>%s</label>'.
-                '<button>%s</button>'.
-              '</td>'.
-            '</tr>'.
-          '</table>'.
-        '</form>'.
-      '</div>',
-      phutil_implode_html("\n", $rows),
-      pht('Whitespace Changes: %s', $select),
-      pht('Show Diff'));
+    $label = pht('Whitespace Changes: %s', $select);
+
+    $content = phutil_tag_div(
+      'differential-revision-history differential-panel',
+      phutil_tag(
+        'form',
+        array('action' => '#toc'),
+        phutil_tag(
+          'table',
+          array('class' => 'differential-revision-history-table'), array(
+            phutil_implode_html("\n", $rows),
+            phutil_tag('tr', array(), phutil_tag(
+              'td',
+              array('colspan' => 9, 'class' => 'diff-differ-submit'),
+              array(
+                phutil_tag('label', array(), $label),
+                phutil_tag('button', array(), pht('Show Diff')),
+              )))
+          ))));
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Revision Update History'))

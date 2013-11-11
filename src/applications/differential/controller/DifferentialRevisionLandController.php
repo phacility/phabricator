@@ -49,7 +49,7 @@ final class DifferentialRevisionLandController extends DifferentialController {
             $ex->getMessage(),
             $ex->getPreviousException()->getMessage());
         } else {
-          $text = hsprintf('<pre>%s</pre>', $ex->getMessage());
+          $text = phutil_tag('pre', array(), $ex->getMessage());
         }
         $text = id(new AphrontErrorView())
            ->appendChild($text);

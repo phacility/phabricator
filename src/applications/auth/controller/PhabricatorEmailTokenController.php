@@ -51,11 +51,12 @@ final class PhabricatorEmailTokenController
         'invalid or out of date. Make sure you are copy-and-pasting the '.
         'entire link into your browser. You can try again, or request '.
         'a new email.')));
-      $view->appendChild(hsprintf(
-        '<div class="aphront-failure-continue">'.
-          '<a class="button" href="/login/email/">%s</a>'.
-        '</div>',
-        pht('Send Another Email')));
+      $view->appendChild(phutil_tag_div(
+        'aphront-failure-continue',
+        phutil_tag(
+          'a',
+          array('class' => 'button', 'href' => '/login/email/'),
+          pht('Send Another Email'))));
 
       return $this->buildStandardPageResponse(
         $view,

@@ -250,9 +250,7 @@ abstract class DifferentialChangesetHTMLRenderer
       }
     }
 
-    return hsprintf(
-      '<div class="differential-meta-notice">%s</div>',
-      $message);
+    return phutil_tag_div('differential-meta-notice', $message);
   }
 
   protected function renderPropertyChangeHeader() {
@@ -281,27 +279,21 @@ abstract class DifferentialChangesetHTMLRenderer
           $nval = phutil_escape_html_newlines($nval);
         }
 
-        $rows[] = hsprintf(
-          '<tr>'.
-            '<th>%s</th>'.
-            '<td class="oval">%s</td>'.
-            '<td class="nval">%s</td>'.
-          '</tr>',
-          $key,
-          $oval,
-          $nval);
+        $rows[] = phutil_tag('tr', array(), array(
+          phutil_tag('th', array(), $key),
+          phutil_tag('td', array('class' => 'oval'), $oval),
+          phutil_tag('td', array('class' => 'nval'), $nval),
+        ));
       }
     }
 
-    array_unshift($rows, hsprintf(
-      '<tr class="property-table-header">'.
-        '<th>%s</th>'.
-        '<td class="oval">%s</td>'.
-        '<td class="nval">%s</td>'.
-      '</tr>',
-      pht('Property Changes'),
-      pht('Old Value'),
-      pht('New Value')));
+    array_unshift(
+      $rows,
+      phutil_tag('tr', array('class' => 'property-table-header'), array(
+        phutil_tag('th', array(), pht('Property Changes')),
+        phutil_tag('td', array('class' => 'oval'), pht('Old Value')),
+        phutil_tag('td', array('class' => 'nval'), pht('New Value')),
+      )));
 
     return phutil_tag(
       'table',

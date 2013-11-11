@@ -69,25 +69,20 @@ final class DiffusionLintController extends DiffusionController {
 
       $total += $code['n'];
 
+      $href_lint = $drequest->generateURI(array(
+        'action' => 'lint',
+        'lint' => $code['code'],
+      ));
+      $href_browse = $drequest->generateURI(array(
+        'action' => 'browse',
+        'lint' => $code['code'],
+      ));
+      $href_repo = $drequest->generateURI(array('action' => 'lint'));
+
       $rows[] = array(
-        hsprintf(
-          '<a href="%s">%s</a>',
-          $drequest->generateURI(array(
-            'action' => 'lint',
-            'lint' => $code['code'],
-          )),
-          $code['n']),
-        hsprintf(
-          '<a href="%s">%s</a>',
-          $drequest->generateURI(array(
-            'action' => 'browse',
-            'lint' => $code['code'],
-          )),
-          $code['files']),
-        hsprintf(
-          '<a href="%s">%s</a>',
-          $drequest->generateURI(array('action' => 'lint')),
-          $drequest->getCallsign()),
+        phutil_tag('a', array('href' => $href_lint), $code['n']),
+        phutil_tag('a', array('href' => $href_browse), $code['files']),
+        phutil_tag('a', array('href' => $href_repo), $drequest->getCallsign()),
         ArcanistLintSeverity::getStringForSeverity($code['maxSeverity']),
         $code['code'],
         $code['maxName'],

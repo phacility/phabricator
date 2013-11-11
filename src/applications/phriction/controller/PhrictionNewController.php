@@ -26,7 +26,7 @@ final class PhrictionNewController extends PhrictionController {
           ->setUser($user)
           ->appendChild(pht(
             'The document %s already exists. Do you want to edit it instead?',
-            hsprintf('<tt>%s</tt>', $slug)))
+            phutil_tag('tt', array(), $slug)))
           ->addHiddenInput('slug', $slug)
           ->addHiddenInput('prompt', 'yes')
           ->addCancelButton('/w/')

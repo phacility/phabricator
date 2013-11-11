@@ -52,10 +52,9 @@ final class PhabricatorProjectProfileController
       ->addColumn($feed)
       ->setFluidLayout(true);
 
-    $content = hsprintf(
-      '<div class="phabricator-project-layout">%s%s</div>',
-        $tasks,
-        $content);
+    $content = phutil_tag_div(
+      'phabricator-project-layout',
+      array($tasks, $content));
 
     $header = id(new PHUIHeaderView())
       ->setHeader($project->getName())
@@ -109,17 +108,20 @@ final class PhabricatorProjectProfileController
     if ($affiliated) {
       $affiliated = phutil_tag('ul', array(), $affiliated);
     } else {
-      $affiliated = hsprintf('<p><em>%s</em></p>', pht(
-        'No one is affiliated with this project.'));
+      $affiliated = phutil_tag('p', array(),
+        phutil_tag('em', array(),
+          pht('No one is affiliated with this project.')));
     }
 
-    return hsprintf(
-      '<div class="phabricator-profile-info-group profile-wrap-responsive">'.
-        '<h1 class="phabricator-profile-info-header">%s</h1>'.
-        '<div class="phabricator-profile-info-pane">%s</div>'.
-      '</div>',
-      pht('People'),
-      $affiliated);
+    return phutil_tag_div(
+      'phabricator-profile-info-group profile-wrap-responsive',
+      array(
+        phutil_tag(
+          'h1',
+          array('class' => 'phabricator-profile-info-header'),
+          pht('People')),
+        phutil_tag_div('phabricator-profile-info-pane', $affiliated),
+      ));
   }
 
   private function renderFeedPage(
@@ -147,10 +149,8 @@ final class PhabricatorProjectProfileController
     $builder->setShowHovercards(true);
     $view = $builder->buildView();
 
-    return hsprintf(
-      '<div class="profile-feed profile-wrap-responsive">'.
-        '%s'.
-      '</div>',
+    return phutil_tag_div(
+      'profile-feed profile-wrap-responsive',
       $view->render());
   }
 

@@ -45,14 +45,12 @@ final class PhabricatorNotificationListController
       $builder = new PhabricatorNotificationBuilder($notifications);
       $view = $builder->buildView()->render();
     } else {
-      $view = hsprintf(
-        '<div class="phabricator-notification no-notifications">%s</div>',
+      $view = phutil_tag_div(
+        'phabricator-notification no-notifications',
         $no_data);
     }
 
-    $view = hsprintf(
-      '<div class="phabricator-notification-list">%s</div>',
-      $view);
+    $view = phutil_tag_div('phabricator-notification-list', $view);
 
     $panel = new AphrontPanelView();
     $panel->setHeader($header);

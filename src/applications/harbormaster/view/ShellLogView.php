@@ -61,15 +61,23 @@ final class ShellLogView extends AphrontView {
 
       // TODO: Provide nice links.
 
+      $th = phutil_tag(
+        'th',
+        array(
+          'class' => 'phabricator-source-line',
+          'style' => 'background-color: #fff;',
+        ),
+        $content_number);
+
+      $td = phutil_tag(
+        'td',
+        array('class' => 'phabricator-source-code'),
+        $content_line);
+
       $rows[] = phutil_tag(
         'tr',
         $row_attributes,
-        hsprintf(
-          '<th class="phabricator-source-line" '.
-          'style="background-color: #fff;">%s</th>'.
-          '<td class="phabricator-source-code">%s</td>',
-          $content_number,
-          $content_line));
+        array($th, $td));
 
       if ($hit_limit) {
         break;

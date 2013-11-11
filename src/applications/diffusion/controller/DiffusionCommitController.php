@@ -744,20 +744,25 @@ final class DiffusionCommitController extends DiffusionController {
       'inlineuri'  => '/diffusion/inline/preview/'.$commit->getPHID().'/',
     ));
 
-    $preview_panel = hsprintf(
-      '<div class="aphront-panel-preview aphront-panel-flush">
-        <div id="audit-preview">
-          <div class="aphront-panel-preview-loading-text">
-            Loading preview...
-          </div>
-        </div>
-        <div id="inline-comment-preview">
-        </div>
-      </div>');
+    $loading = phutil_tag_div(
+      'aphront-panel-preview-loading-text',
+      pht('Loading preview...'));
+
+    $preview_panel = phutil_tag_div(
+      'aphront-panel-preview aphront-panel-flush',
+      array(
+        phutil_tag('div', array('id' => 'audit-preview'), $loading),
+        phutil_tag('div', array('id' => 'inline-comment-preview'))
+      ));
 
     // TODO: This is pretty awkward, unify the CSS between Diffusion and
     // Differential better.
     require_celerity_resource('differential-core-view-css');
+
+    $anchor = id(new PhabricatorAnchorView())
+      ->setAnchorName('comment')
+      ->setNavigationMarker(true)
+      ->render();
 
     $comment_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -768,14 +773,9 @@ final class DiffusionCommitController extends DiffusionController {
       array(
         'id' => $pane_id,
       ),
-      hsprintf(
-        '<div class="differential-add-comment-panel">%s%s%s</div>',
-        id(new PhabricatorAnchorView())
-          ->setAnchorName('comment')
-          ->setNavigationMarker(true)
-          ->render(),
-        $comment_box,
-        $preview_panel));
+      phutil_tag_div(
+        'differential-add-comment-panel',
+        array($anchor, $comment_box, $preview_panel)));
   }
 
   /**

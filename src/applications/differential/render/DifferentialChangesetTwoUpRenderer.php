@@ -222,7 +222,7 @@ final class DifferentialChangesetTwoUpRenderer
             $cov_class = $coverage[$n_num - 1];
           }
           $cov_class = 'cov-'.$cov_class;
-          $n_cov = hsprintf('<td class="cov %s"></td>', $cov_class);
+          $n_cov = phutil_tag('td', array('class' => "cov {$cov_class}"));
           $n_colspan--;
         }
 
@@ -240,7 +240,7 @@ final class DifferentialChangesetTwoUpRenderer
           $n_classes = $n_class;
 
           if ($new_lines[$ii]['type'] == '\\' || !isset($copy_lines[$n_num])) {
-            $n_copy = hsprintf('<td class="copy %s"></td>', $n_class);
+            $n_copy = phutil_tag('td', array('class' => "copy {$n_class}"));
           } else {
             list($orig_file, $orig_line, $orig_type) = $copy_lines[$n_num];
             $title = ($orig_type == '-' ? 'Moved' : 'Copied').' from ';
@@ -283,29 +283,25 @@ final class DifferentialChangesetTwoUpRenderer
         $n_id = null;
       }
 
+      // NOTE: This is a unicode zero-width space, which we use as a hint
+      // when intercepting 'copy' events to make sure sensible text ends
+      // up on the clipboard. See the 'phabricator-oncopy' behavior.
+      $zero_space = "\xE2\x80\x8B";
+
       // NOTE: The Javascript is sensitive to whitespace changes in this
       // block!
 
-      $html[] = hsprintf(
-        '<tr>'.
-          '%s'.
-          '<td class="%s">%s</td>'.
-          '%s'.
-          '%s'.
-          // NOTE: This is a unicode zero-width space, which we use as a hint
-          // when intercepting 'copy' events to make sure sensible text ends
-          // up on the clipboard. See the 'phabricator-oncopy' behavior.
-          '<td class="%s" colspan="%s">'.
-            "\xE2\x80\x8B%s".
-          '</td>'.
-          '%s'.
-        '</tr>',
+      $html[] = phutil_tag('tr', array(), array(
         phutil_tag('th', array('id' => $o_id), $o_num),
-        $o_classes, $o_text,
+        phutil_tag('td', array('class' => $o_classes), $o_text),
         phutil_tag('th', array('id' => $n_id), $n_num),
         $n_copy,
-        $n_classes, $n_colspan, $n_text,
-        $n_cov);
+        phutil_tag(
+          'td',
+          array('class' => $n_classes, 'colspan' => $n_colspan),
+          array($zero_space, $n_text)),
+        $n_cov,
+      ));
 
       if ($context_not_available && ($ii == $rows - 1)) {
         $html[] = $context_not_available;
@@ -328,29 +324,27 @@ final class DifferentialChangesetTwoUpRenderer
               }
             }
           }
-          $html[] = hsprintf(
-            '<tr class="inline">'.
-              '<th />'.
-              '<td class="left">%s</td>'.
-              '<th />'.
-              '<td colspan="3" class="right3">%s</td>'.
-            '</tr>',
-            $comment_html,
-            $new);
+          $html[] = phutil_tag('tr', array('class' => 'inline'), array(
+            phutil_tag('th', array()),
+            phutil_tag('td', array('class' => 'left'), $comment_html),
+            phutil_tag('th', array()),
+            phutil_tag('td', array('colspan' => 3, 'class' => 'right3'), $new),
+          ));
         }
       }
       if ($n_num && isset($new_comments[$n_num])) {
         foreach ($new_comments[$n_num] as $comment) {
           $comment_html = $this->renderInlineComment($comment,
                                                      $on_right = true);
-          $html[] = hsprintf(
-            '<tr class="inline">'.
-              '<th />'.
-              '<td class="left" />'.
-              '<th />'.
-              '<td colspan="3" class="right3">%s</td>'.
-            '</tr>',
-            $comment_html);
+          $html[] = phutil_tag('tr', array('class' => 'inline'), array(
+            phutil_tag('th', array()),
+            phutil_tag('td', array('class' => 'left')),
+            phutil_tag('th', array()),
+            phutil_tag(
+              'td',
+              array('colspan' => 3, 'class' => 'right3'),
+              $comment_html),
+          ));
         }
       }
     }
@@ -395,40 +389,39 @@ final class DifferentialChangesetTwoUpRenderer
     foreach ($this->getOldComments() as $on_line => $comment_group) {
       foreach ($comment_group as $comment) {
         $comment_html = $this->renderInlineComment($comment, $on_right = false);
-        $html_old[] = hsprintf(
-          '<tr class="inline">'.
-          '<th />'.
-          '<td class="left">%s</td>'.
-          '<th />'.
-          '<td class="right3" colspan="3" />'.
-          '</tr>',
-          $comment_html);
+        $html_old[] = phutil_tag('tr', array('class' => 'inline'), array(
+          phutil_tag('th', array()),
+          phutil_tag('td', array('class' => 'left'), $comment_html),
+          phutil_tag('th', array()),
+          phutil_tag('td', array('colspan' => 3, 'class' => 'right3')),
+        ));
       }
     }
     foreach ($this->getNewComments() as $lin_line => $comment_group) {
       foreach ($comment_group as $comment) {
         $comment_html = $this->renderInlineComment($comment, $on_right = true);
-        $html_new[] = hsprintf(
-          '<tr class="inline">'.
-          '<th />'.
-          '<td class="left" />'.
-          '<th />'.
-          '<td class="right3" colspan="3">%s</td>'.
-          '</tr>',
-          $comment_html);
+        $html_new[] = phutil_tag('tr', array('class' => 'inline'), array(
+          phutil_tag('th', array()),
+          phutil_tag('td', array('class' => 'left')),
+          phutil_tag('th', array()),
+          phutil_tag(
+            'td',
+            array('colspan' => 3, 'class' => 'right3'),
+            $comment_html),
+        ));
       }
     }
 
     if (!$old) {
-      $th_old = hsprintf('<th></th>');
+      $th_old = phutil_tag('th', array());
     } else {
-      $th_old = hsprintf('<th id="C%sOL1">1</th>', $vs);
+      $th_old = phutil_tag('th', array('id' => "C{$vs}OL1"), 1);
     }
 
     if (!$new) {
-      $th_new = hsprintf('<th></th>');
+      $th_new = phutil_tag('th', array());
     } else {
-      $th_new = hsprintf('<th id="C%sNL1">1</th>', $id);
+      $th_new = phutil_tag('th', array('id' => "C{$id}OL1"), 1);
     }
 
     $output = hsprintf(

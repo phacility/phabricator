@@ -174,15 +174,13 @@ final class PhrictionDiffController
           pht('Most Recent Change'));
       }
 
-      $navigation_table = hsprintf(
-        '<table class="phriction-history-nav-table">
-          <tr>
-            <td class="nav-prev">%s</td>
-            <td class="nav-next">%s</td>
-          </tr>
-        </table>',
-        $link_l,
-        $link_r);
+      $navigation_table = phutil_tag(
+        'table',
+        array('class' => 'phriction-history-nav-table'),
+        phutil_tag('tr', array(), array(
+          phutil_tag('td', array('class' => 'nav-prev'), $link_l),
+          phutil_tag('td', array('class' => 'nav-next'), $link_r),
+        )));
     }
 
 

@@ -181,16 +181,17 @@ final class DifferentialAddCommentView extends AphrontView {
 
     $warn = phutil_tag('div', array('id' => 'warnings'), $warning_container);
 
-    $preview = hsprintf(
-        '<div class="aphront-panel-preview aphront-panel-flush">'.
-          '<div id="comment-preview">'.
-            '<span class="aphront-panel-preview-loading-text">%s</span>'.
-          '</div>'.
-          '<div id="inline-comment-preview">'.
-          '</div>'.
-        '</div>',
+    $loading = phutil_tag(
+      'span',
+      array('class' => 'aphront-panel-preview-loading-text'),
       pht('Loading comment preview...'));
 
+    $preview = phutil_tag_div(
+      'aphront-panel-preview aphront-panel-flush',
+      array(
+        phutil_tag('div', array('id' => 'comment-preview'), $loading),
+        phutil_tag('div', array('id' => 'inline-comment-preview')),
+      ));
 
 
     $comment_box = id(new PHUIObjectBoxView())

@@ -473,10 +473,10 @@ final class PhabricatorConfigEditController
     }
 
     $table = array();
-    $table[] = hsprintf(
-      '<tr class="column-labels"><th>%s</th><th>%s</th></tr>',
-      pht('Example'),
-      pht('Value'));
+    $table[] = phutil_tag('tr', array('class' => 'column-labels'), array(
+      phutil_tag('th', array(), pht('Example')),
+      phutil_tag('th', array(), pht('Value')),
+    ));
     foreach ($examples as $example) {
       list($value, $description) = $example;
 
@@ -488,10 +488,10 @@ final class PhabricatorConfigEditController
         }
       }
 
-      $table[] = hsprintf(
-        '<tr><th>%s</th><td>%s</td></tr>',
-        $description,
-        $value);
+      $table[] = phutil_tag('tr', array(), array(
+        phutil_tag('th', array(), $description),
+        phutil_tag('th', array(), $value),
+      ));
     }
 
     require_celerity_resource('config-options-css');
@@ -509,10 +509,10 @@ final class PhabricatorConfigEditController
     $stack = $stack->getStack();
 
     $table = array();
-    $table[] = hsprintf(
-      '<tr class="column-labels"><th>%s</th><th>%s</th></tr>',
-      pht('Source'),
-      pht('Value'));
+    $table[] = phutil_tag('tr', array('class' => 'column-labels'), array(
+      phutil_tag('th', array(), pht('Source')),
+      phutil_tag('th', array(), pht('Value')),
+    ));
     foreach ($stack as $key => $source) {
       $value = $source->getKeys(
         array(
@@ -526,10 +526,10 @@ final class PhabricatorConfigEditController
           $value[$option->getKey()]);
       }
 
-      $table[] = hsprintf(
-        '<tr><th>%s</th><td>%s</td></tr>',
-        $source->getName(),
-        $value);
+      $table[] = phutil_tag('tr', array('class' => 'column-labels'), array(
+        phutil_tag('th', array(), $source->getName()),
+        phutil_tag('td', array(), $value),
+      ));
     }
 
     require_celerity_resource('config-options-css');

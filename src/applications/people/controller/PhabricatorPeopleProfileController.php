@@ -127,10 +127,8 @@ final class PhabricatorPeopleProfileController
     $builder->setShowHovercards(true);
     $view = $builder->buildView();
 
-    return hsprintf(
-      '<div class="profile-feed profile-wrap-responsive">
-        %s
-      </div>',
+    return phutil_tag_div(
+      'profile-feed profile-wrap-responsive',
       $view->render());
   }
 }

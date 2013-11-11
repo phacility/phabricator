@@ -27,9 +27,7 @@ final class PhabricatorFeedDetailController extends PhabricatorFeedController {
 
     $title = pht('Story');
 
-    $feed_view = hsprintf(
-      '<div class="phabricator-feed-frame">%s</div>',
-      $feed_view);
+    $feed_view = phutil_tag_div('phabricator-feed-frame', $feed_view);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(

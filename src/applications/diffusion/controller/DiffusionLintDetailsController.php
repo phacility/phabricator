@@ -15,22 +15,22 @@ final class DiffusionLintDetailsController extends DiffusionController {
 
     $rows = array();
     foreach ($messages as $message) {
-      $path = hsprintf(
-        '<a href="%s">%s</a>',
-        $drequest->generateURI(array(
+      $path = phutil_tag(
+        'a',
+        array('href' => $drequest->generateURI(array(
           'action' => 'lint',
           'path' => $message['path'],
-        )),
+        ))),
         substr($message['path'], strlen($drequest->getPath()) + 1));
 
-      $line = hsprintf(
-        '<a href="%s">%s</a>',
-        $drequest->generateURI(array(
+      $line = phutil_tag(
+        'a',
+        array('href' => $drequest->generateURI(array(
           'action' => 'browse',
           'path' => $message['path'],
           'line' => $message['line'],
           'commit' => $branch->getLintCommit(),
-        )),
+        ))),
         $message['line']);
 
       $author = $message['authorPHID'];

@@ -29,9 +29,7 @@ final class PhabricatorOwnersDeleteController
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
       ->setTitle('Really delete this package?')
-      ->appendChild(hsprintf(
-        '<p>%s</p>',
-        $text))
+      ->appendChild(phutil_tag('p', array(), $text))
       ->addSubmitButton(pht('Delete'))
       ->addCancelButton('/owners/package/'.$package->getID().'/')
       ->setSubmitURI($request->getRequestURI());

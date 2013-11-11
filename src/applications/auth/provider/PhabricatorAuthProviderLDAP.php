@@ -254,18 +254,18 @@ final class PhabricatorAuthProviderLDAP
     $captions = array(
       self::KEY_HOSTNAME =>
         pht('Example: %s',
-          hsprintf('<tt>%s</tt>', pht('ldap.example.com'))),
+          phutil_tag('tt', array(), pht('ldap.example.com'))),
       self::KEY_DISTINGUISHED_NAME =>
         pht('Example: %s',
-          hsprintf('<tt>%s</tt>', pht('ou=People, dc=example, dc=com'))),
+          phutil_tag('tt', array(), pht('ou=People, dc=example, dc=com'))),
       self::KEY_SEARCH_ATTRIBUTE =>
         pht('Example: %s',
-          hsprintf('<tt>%s</tt>', pht('sn'))),
+          phutil_tag('tt', array(), pht('sn'))),
       self::KEY_USERNAME_ATTRIBUTE =>
         pht('Optional, if different from search attribute.'),
       self::KEY_REALNAME_ATTRIBUTES =>
         pht('Optional. Example: %s',
-          hsprintf('<tt>%s</tt>', pht('firstname, lastname'))),
+          phutil_tag('tt', array(), pht('firstname, lastname'))),
       self::KEY_REFERRALS =>
         pht('Follow referrals. Disable this for Windows AD 2003.'),
       self::KEY_START_TLS =>

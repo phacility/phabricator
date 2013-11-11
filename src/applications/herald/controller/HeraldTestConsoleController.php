@@ -94,8 +94,8 @@ final class HeraldTestConsoleController extends HeraldController {
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->appendChild(hsprintf(
-        '<p class="aphront-form-instructions">%s</p>', $text))
+      ->appendChild(
+        phutil_tag('p', array('class' => 'aphront-form-instructions'), $text))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Object Name'))
