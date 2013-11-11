@@ -25,7 +25,6 @@ final class NuanceItemEditController extends NuanceController {
 
     if ($is_new) {
       $item = new NuanceItem();
-
     } else {
       $item = id(new NuanceItemQuery())
         ->setViewer($user)

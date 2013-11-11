@@ -68,7 +68,7 @@ final class HarbormasterPlanEditController
       $id = $plan->getID();
 
       $title = pht('Edit Build Plan');
-      $cancel_uri = "/B{$id}";
+      $cancel_uri = $this->getApplicationURI('plan/'.$plan->getID().'/');
       $save_button = pht('Save Build Plan');
     }
 

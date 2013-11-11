@@ -25,7 +25,8 @@ final class PhabricatorFeedPublicStreamController
       ->setFramed(true)
       ->setUser($viewer);
 
-    $view = hsprintf('<div class="phabricator-public-feed-frame">%s</div>',
+    $view = phutil_tag_div(
+      'phabricator-public-feed-frame',
       $builder->buildView());
 
     return $this->buildStandardPageResponse(

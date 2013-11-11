@@ -268,7 +268,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $commits = id(new DiffusionCommitQuery())
       ->setViewer($viewer)
       ->withIdentifiers(mpull($branches, 'getHeadCommitIdentifier'))
-      ->withRepositoryIDs(array($drequest->getRepository()->getID()))
+      ->withRepository($drequest->getRepository())
       ->execute();
 
     $table = id(new DiffusionBranchTableView())
@@ -332,7 +332,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $commits = id(new DiffusionCommitQuery())
       ->setViewer($viewer)
       ->withIdentifiers(mpull($tags, 'getCommitIdentifier'))
-      ->withRepositoryIDs(array($drequest->getRepository()->getID()))
+      ->withRepository($drequest->getRepository())
       ->needCommitData(true)
       ->execute();
 

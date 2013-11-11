@@ -72,8 +72,8 @@ final class ConpherenceNotificationPanelController
       }
       $content = $view->render();
     } else {
-      $content = hsprintf(
-        '<div class="phabricator-notification no-notifications">%s</div>',
+      $content = phutil_tag_div(
+        'phabricator-notification no-notifications',
         pht('You have no messages.'));
     }
 

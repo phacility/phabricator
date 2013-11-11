@@ -1,0 +1,16 @@
+batch
+* 0
+cmds 19
+heads ;known nodes=
+~~~~~~~~~~
+[
+  {
+    "command" : "batch",
+    "arguments" : {
+      "*" : {
+      },
+      "cmds" : "heads ;known nodes="
+    },
+    "raw" : "batch\n* 0\ncmds 19\nheads ;known nodes="
+  }
+]

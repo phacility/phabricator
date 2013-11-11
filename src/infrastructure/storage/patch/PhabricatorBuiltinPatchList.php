@@ -1744,6 +1744,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20131106.nuance-v0.sql'),
       ),
+      '20131107.buildlog.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131107.buildlog.sql'),
+      ),
     );
   }
 }

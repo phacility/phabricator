@@ -287,9 +287,12 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
       case PholioTransactionType::TYPE_DESCRIPTION:
         return $v;
       case PholioTransactionType::TYPE_IMAGE_REPLACE:
-        if ($u->getNewValue() == $v->getOldValue()) {
+        $u_img = $u->getNewValue();
+        $v_img = $v->getNewValue();
+        if ($u_img->getReplacesImagePHID() == $v_img->getReplacesImagePHID()) {
           return $v;
         }
+        break;
       case PholioTransactionType::TYPE_IMAGE_FILE:
         return $this->mergePHIDOrEdgeTransactions($u, $v);
       case PholioTransactionType::TYPE_IMAGE_NAME:

@@ -63,6 +63,11 @@ final class HarbormasterStepEditController
     $form = id(new AphrontFormView())
       ->setUser($viewer);
 
+    $instructions = $implementation->getSettingRemarkupInstructions();
+    if ($instructions !== null) {
+      $form->appendRemarkupInstructions($instructions);
+    }
+
     // We need to render out all of the fields for the settings that
     // the implementation has.
     foreach ($implementation->getSettingDefinitions() as $name => $opt) {

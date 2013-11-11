@@ -252,7 +252,7 @@ final class ManiphestReportController extends ManiphestController {
         "of this project in the past but no longer is, it is not ".
         "counted at all.");
       $header = pht("Task Burn Rate for Project %s", $handle->renderLink());
-      $caption = hsprintf("<p>%s</p>", $inst);
+      $caption = phutil_tag('p', array(), $inst);
     } else {
       $header = pht("Task Burn Rate for All Tasks");
       $caption = null;
@@ -362,9 +362,9 @@ final class ManiphestReportController extends ManiphestController {
     $fmt = number_format($delta);
     if ($delta > 0) {
       $fmt = '+'.$fmt;
-      $fmt = hsprintf('<span class="red">%s</span>', $fmt);
+      $fmt = phutil_tag('span', array('class' => 'red'), $fmt);
     } else {
-      $fmt = hsprintf('<span class="green">%s</span>', $fmt);
+      $fmt = phutil_tag('span', array('class' => 'green'), $fmt);
     }
 
     return array(

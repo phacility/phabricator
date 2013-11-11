@@ -139,12 +139,12 @@ final class DiffusionCommentView extends AphrontView {
     if (!strlen($comment->getContent()) && empty($this->inlineComments)) {
       return null;
     } else {
-      return hsprintf(
-        '<div class="phabricator-remarkup">%s%s</div>',
+      return phutil_tag_div('phabricator-remarkup', array(
         $engine->getOutput(
           $comment,
           PhabricatorAuditComment::MARKUP_FIELD_BODY),
-        $this->renderInlines());
+        $this->renderInlines(),
+      ));
     }
   }
 

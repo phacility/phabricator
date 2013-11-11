@@ -26,14 +26,20 @@ final class PhrictionNewController extends PhrictionController {
           ->setUser($user)
           ->appendChild(pht(
             'The document %s already exists. Do you want to edit it instead?',
-            hsprintf('<tt>%s</tt>', $slug)))
+            phutil_tag('tt', array(), $slug)))
           ->addHiddenInput('slug', $slug)
           ->addHiddenInput('prompt', 'yes')
           ->addCancelButton('/w/')
           ->addSubmitButton(pht('Edit Document'));
 
         return id(new AphrontDialogResponse())->setDialog($dialog);
-      } elseif (substr($slug, 0, 9) == 'projects/') {
+      } else if (PhrictionDocument::isProjectSlug($slug)) {
+        $project = id(new PhabricatorProjectQuery())
+          ->setViewer($user)
+          ->withPhrictionSlugs(array(
+            PhrictionDocument::getProjectSlugIdentifier($slug)))
+          ->executeOne();
+        if (!$project) {
           $dialog = new AphrontDialogView();
           $dialog->setSubmitURI('/w/')
               ->setTitle(pht('Oops!'))
@@ -44,12 +50,12 @@ final class PhrictionNewController extends PhrictionController {
                   Create a new project with this name first.'))
               ->addCancelButton('/w/', 'Okay');
           return id(new AphrontDialogResponse())->setDialog($dialog);
-
-      } else {
-        $uri  = '/phriction/edit/?slug='.$slug;
-        return id(new AphrontRedirectResponse())
-          ->setURI($uri);
+        }
       }
+
+      $uri  = '/phriction/edit/?slug='.$slug;
+      return id(new AphrontRedirectResponse())
+        ->setURI($uri);
     }
 
     if ($slug == '/') {

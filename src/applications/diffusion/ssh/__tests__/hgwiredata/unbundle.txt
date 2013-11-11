@@ -1,0 +1,28 @@
+unbundle
+heads 53
+686173686564 8022e00be6886fcf1be8f57f96c78aa924967f8320
+aaaaaaaaaaaaaaaaaaaa20
+bbbbbbbbbbbbbbbbbbbb0
+
+~~~~~~~~~~
+[
+  {
+    "command" : "unbundle",
+    "arguments" : {
+      "heads" : "686173686564 8022e00be6886fcf1be8f57f96c78aa924967f83"
+    },
+    "raw" : "unbundle\nheads 53\n686173686564 8022e00be6886fcf1be8f57f96c78aa924967f83"
+  },
+  {
+    "command" : "<raw-data>",
+    "raw" : "20\naaaaaaaaaaaaaaaaaaaa"
+  },
+  {
+    "command" : "<raw-data>",
+    "raw" : "20\nbbbbbbbbbbbbbbbbbbbb"
+  },
+  {
+    "command" : "<raw-data>",
+    "raw" : "0\n"
+  }
+]

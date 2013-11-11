@@ -4,7 +4,7 @@ final class PhabricatorConduitSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
   public function getPageSize(PhabricatorSavedQuery $saved) {
-    return INF;
+    return PHP_INT_MAX - 1;
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
@@ -61,8 +61,9 @@ final class PhabricatorConduitSearchEngine
           ->setLabel('Applications')
           ->setName('applicationNames')
           ->setValue(implode(', ', $names))
-          ->setCaption(
-            pht('Example: %s', hsprintf('<tt>differential, paste</tt>'))));
+          ->setCaption(pht(
+            'Example: %s',
+            phutil_tag('tt', array(), 'differential, paste'))));
 
     $is_stable = $saved->getParameter('isStable');
     $is_unstable = $saved->getParameter('isUnstable');

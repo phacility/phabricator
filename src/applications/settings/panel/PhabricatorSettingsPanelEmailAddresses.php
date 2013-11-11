@@ -301,9 +301,9 @@ final class PhabricatorSettingsPanelEmailAddresses
       ->setUser($user)
       ->addHiddenInput('verify', $email_id)
       ->setTitle(pht("Send Another Verification Email?"))
-      ->appendChild(hsprintf(
-        '<p>%s</p>',
-        pht('Send another copy of the verification email to %s?', $address)))
+      ->appendChild(phutil_tag('p', array(), pht(
+        'Send another copy of the verification email to %s?',
+        $address)))
       ->addSubmitButton(pht('Send Email'))
       ->addCancelButton($uri);
 
@@ -342,10 +342,10 @@ final class PhabricatorSettingsPanelEmailAddresses
       ->setUser($user)
       ->addHiddenInput('primary', $email_id)
       ->setTitle(pht("Change primary email address?"))
-      ->appendChild(hsprintf(
-        '<p>If you change your primary address, Phabricator will send'.
-          ' all email to %s.</p>',
-        $address))
+      ->appendChild(phutil_tag('p', array(), pht(
+        'If you change your primary address, Phabricator will send'.
+          ' all email to %s.',
+        $address)))
       ->addSubmitButton(pht('Change Primary Address'))
       ->addCancelButton($uri);
 

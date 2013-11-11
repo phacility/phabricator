@@ -149,21 +149,20 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
     $log = $data['log'];
     $results = array();
 
-    $results[] = hsprintf(
-      '<div class="dark-console-panel-header">'.
-        '%s'.
-        '<h1>Calls to External Services</h1>'.
-        '<div style="clear: both;"></div>'.
-      '</div>',
-      phutil_tag(
-        'a',
-        array(
-          'href'  => $data['analyzeURI'],
-          'class' => $data['didAnalyze']
-            ? 'disabled button'
-            : 'green button',
-        ),
-        'Analyze Query Plans'));
+    $results[] = phutil_tag(
+      'div',
+      array('class' => 'dark-console-panel-header'),
+      array(
+        phutil_tag(
+          'a',
+          array(
+            'href'  => $data['analyzeURI'],
+            'class' => $data['didAnalyze'] ? 'disabled button' : 'green button',
+          ),
+          pht('Analyze Query Plans')),
+        phutil_tag('h1', array(), pht('Calls to External Services')),
+        phutil_tag('div', array('style' => 'clear: both;')),
+      ));
 
     $page_total = $data['end'] - $data['start'];
     $totals = array();

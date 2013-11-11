@@ -31,17 +31,10 @@ final class HarbormasterBuildableApplyController
         ->withIDs(array($request->getInt('build-plan')))
         ->executeOne();
 
-      $build = HarbormasterBuild::initializeNewBuild($viewer);
-      $build->setBuildablePHID($buildable->getPHID());
-      $build->setBuildPlanPHID($plan->getPHID());
-      $build->setBuildStatus(HarbormasterBuild::STATUS_PENDING);
-      $build->save();
-
-      PhabricatorWorker::scheduleTask(
-        'HarbormasterBuildWorker',
-        array(
-          'buildID' => $build->getID()
-        ));
+      HarbormasterBuildable::applyBuildPlans(
+        $buildable->getBuildablePHID(),
+        $buildable->getContainerPHID(),
+        array($plan->getPHID()));
 
       return id(new AphrontRedirectResponse())->setURI($buildable_uri);
     }

@@ -47,8 +47,8 @@ final class PhabricatorFeedBuilder {
 
       if ($date !== $last_date) {
         if ($last_date !== null) {
-          $null_view->appendChild(hsprintf(
-            '<div class="phabricator-feed-story-date-separator"></div>'));
+          $null_view->appendChild(
+            phutil_tag_div('phabricator-feed-story-date-separator'));
         }
         $last_date = $date;
         $header = new PhabricatorActionHeaderView();

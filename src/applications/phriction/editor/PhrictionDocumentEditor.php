@@ -240,9 +240,11 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
     $project_phid = null;
     $slug = $document->getSlug();
     if (PhrictionDocument::isProjectSlug($slug)) {
-      $project = id(new PhabricatorProject())->loadOneWhere(
-        'phrictionSlug = %s',
-        PhrictionDocument::getProjectSlugIdentifier($slug));
+      $project = id(new PhabricatorProjectQuery())
+        ->setViewer($this->requireActor())
+        ->withPhrictionSlugs(array(
+          PhrictionDocument::getProjectSlugIdentifier($slug)))
+        ->executeOne();
       if ($project) {
         $project_phid = $project->getPHID();
       }

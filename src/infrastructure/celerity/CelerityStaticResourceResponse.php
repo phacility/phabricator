@@ -196,10 +196,11 @@ final class CelerityStaticResourceResponse {
     if (strpos($data, '<!') !== false) {
       throw new Exception('Literal <! is not allowed inside inline script.');
     }
-    return hsprintf(
-      // We don't use <![CDATA[ ]]> because it is ignored by HTML parsers. We
-      // would need to send the document with XHTML content type.
-      '<script type="text/javascript">%s</script>',
+    // We don't use <![CDATA[ ]]> because it is ignored by HTML parsers. We
+    // would need to send the document with XHTML content type.
+    return phutil_tag(
+      'script',
+      array('type' => 'text/javascript'),
       phutil_safe_html($data));
   }
 

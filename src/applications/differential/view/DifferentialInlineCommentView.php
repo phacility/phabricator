@@ -217,6 +217,11 @@ final class DifferentialInlineCommentView extends AphrontView {
       $author = $handles[$inline->getAuthorPHID()]->getName();
     }
 
+    $line = phutil_tag(
+      'span',
+      array('class' => 'differential-inline-comment-line'),
+      $line);
+
     $markup = javelin_tag(
       'div',
       array(
@@ -224,18 +229,19 @@ final class DifferentialInlineCommentView extends AphrontView {
         'sigil' => $sigil,
         'meta'  => $metadata,
       ),
-      hsprintf(
-        '<div class="differential-inline-comment-head">'.
-          '%s%s <span class="differential-inline-comment-line">%s</span> %s'.
-        '</div>'.
-        '<div class="differential-inline-comment-content">'.
-          '<div class="phabricator-remarkup">%s</div>'.
-        '</div>',
-        $anchor,
-        $links,
-        $line,
-        $author,
-        $content));
+      array(
+        phutil_tag_div('differential-inline-comment-head', array(
+          $anchor,
+          $links,
+          ' ',
+          $line,
+          ' ',
+          $author,
+        )),
+        phutil_tag_div(
+          'differential-inline-comment-content',
+          phutil_tag_div('phabricator-remarkup', $content)),
+      ));
 
     return $this->scaffoldMarkup($markup);
   }
@@ -248,17 +254,16 @@ final class DifferentialInlineCommentView extends AphrontView {
     $left_markup = !$this->onRight ? $markup : '';
     $right_markup = $this->onRight ? $markup : '';
 
-    return hsprintf(
-      '<table>'.
-        '<tr class="inline">'.
-          '<th></th>'.
-          '<td class="left">%s</td>'.
-          '<th></th>'.
-          '<td class="right3" colspan="3">%s</td>'.
-        '</tr>'.
-      '</table>',
-      $left_markup,
-      $right_markup);
+    return phutil_tag('table', array(),
+      phutil_tag('tr', array(), array(
+        phutil_tag('th', array()),
+        phutil_tag('td', array('class' => 'left'), $left_markup),
+        phutil_tag('th', array()),
+        phutil_tag(
+          'td',
+          array('colspan' => 3, 'class' => 'right3'),
+          $right_markup),
+      )));
   }
 
 }

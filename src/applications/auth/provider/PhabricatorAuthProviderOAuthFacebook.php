@@ -84,9 +84,7 @@ final class PhabricatorAuthProviderOAuthFacebook
               "improves security by preventing an attacker from capturing ".
               "an insecure Facebook session and escalating it into a ".
               "Phabricator session. Enabling it is recommended.",
-              hsprintf(
-                '<strong>%s</strong>',
-                pht('Require Secure Browsing:')))));
+              phutil_tag('strong', array(), pht('Require Secure Browsing:')))));
   }
 
   public function renderConfigPropertyTransactionTitle(

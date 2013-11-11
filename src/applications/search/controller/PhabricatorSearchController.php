@@ -252,18 +252,17 @@ final class PhabricatorSearchController
           $results[] = $view->render();
         }
 
-        $results = hsprintf(
-          '<div class="phabricator-search-result-list">'.
-            '%s'.
-            '<div class="search-results-pager">%s</div>'.
-          '</div>',
+        $results = phutil_tag_div('phabricator-search-result-list', array(
           phutil_implode_html("\n", $results),
-          $pager->render());
+          phutil_tag_div('search-results-pager', $pager->render()),
+        ));
       } else {
-        $results = hsprintf(
-          '<div class="phabricator-search-result-list">'.
-            '<p class="phabricator-search-no-results">No search results.</p>'.
-          '</div>');
+        $results = phutil_tag_div(
+          'phabricator-search-result-list',
+          phutil_tag(
+            'p',
+            array('class' => 'phabricator-search-no-results'),
+            pht('No search results.')));
       }
       $results = id(new PHUIBoxView())
         ->addMargin(PHUI::MARGIN_LARGE)

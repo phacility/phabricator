@@ -136,7 +136,8 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
       $pchar =
         ($changeset->getOldProperties() === $changeset->getNewProperties())
           ? null
-          : hsprintf('<span title="%s">M</span>', pht('Properties Changed'));
+          : phutil_tag('span', array('title' => pht('Properties Changed')), 'M')
+        ;
 
       $fname = $changeset->getFilename();
       $cov  = $this->renderCoverage($coverage, $fname);
@@ -152,28 +153,25 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
           (isset($this->visibleChangesets[$id]) ? 'Loading...' : '?'));
       }
 
-      $rows[] = hsprintf(
-          '<tr>'.
-            '<td class="differential-toc-char" title="%s">%s</td>'.
-            '<td class="differential-toc-prop">%s</td>'.
-            '<td class="differential-toc-ftype">%s</td>'.
-            '<td class="differential-toc-file">%s%s</td>'.
-            '<td class="differential-toc-cov">%s</td>'.
-            '<td class="differential-toc-mcov">%s</td>'.
-          '</tr>',
-          $chartitle, $char,
-          $pchar,
-          $desc,
-          $link, $lines,
-          $cov,
-          $mcov);
+      $rows[] = phutil_tag('tr', array(), array(
+        phutil_tag(
+          'td',
+          array('class' => 'differential-toc-char', 'title' => $chartitle),
+          $char),
+        phutil_tag('td', array('class' => 'differential-toc-prop'), $pchar),
+        phutil_tag('td', array('class' => 'differential-toc-ftype'), $desc),
+        phutil_tag(
+          'td',
+          array('class' => 'differential-toc-file'),
+          array($link, $lines)),
+        phutil_tag('td', array('class' => 'differential-toc-cov'), $cov),
+        phutil_tag('td', array('class' => 'differential-toc-mcov'), $mcov),
+      ));
       if ($meta) {
-        $rows[] = hsprintf(
-          '<tr>'.
-            '<td colspan="3"></td>'.
-            '<td class="differential-toc-meta">%s</td>'.
-          '</tr>',
-          $meta);
+        $rows[] = phutil_tag('tr', array(), array(
+          phutil_tag('td', array('colspan' => 3)),
+          phutil_tag('td', array('class' => 'differential-toc-meta'), $meta),
+        ));
       }
       if ($this->diff && $this->repository) {
         $paths[] =
@@ -208,10 +206,9 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
         ),
         pht('Show All Context'));
 
-    $buttons = hsprintf(
-      '<tr><td colspan="7">%s%s</td></tr>',
-      $editor_link,
-      $reveal_link);
+    $buttons = phutil_tag('tr', array(),
+      phutil_tag('td', array('colspan' => 7),
+        array($editor_link, $reveal_link)));
 
     $content = hsprintf(
       '%s'.

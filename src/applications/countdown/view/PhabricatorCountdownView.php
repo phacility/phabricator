@@ -42,30 +42,31 @@ final class PhabricatorCountdownView extends AphrontTagView {
     }
 
 
-    $container = celerity_generate_unique_node_id();
-    $content = hsprintf(
-      '<div class="phabricator-timer" id="%s">
-        %s
-        <table class="phabricator-timer-table">
-          <tr>
-            <th>%s</th>
-            <th>%s</th>
-            <th>%s</th>
-            <th>%s</th>
-          </tr>
-          <tr>%s%s%s%s</tr>
-        </table>
-      </div>',
-      $container,
-      $header,
-      pht('Days'),
-      pht('Hours'),
-      pht('Minutes'),
-      pht('Seconds'),
+    $ths = array(
+      phutil_tag('th', array(), pht('Days')),
+      phutil_tag('th', array(), pht('Hours')),
+      phutil_tag('th', array(), pht('Minutes')),
+      phutil_tag('th', array(), pht('Seconds')),
+    );
+
+    $dashes = array(
       javelin_tag('td', array('sigil' => 'phabricator-timer-days'), '-'),
       javelin_tag('td', array('sigil' => 'phabricator-timer-hours'), '-'),
       javelin_tag('td', array('sigil' => 'phabricator-timer-minutes'), '-'),
-      javelin_tag('td', array('sigil' => 'phabricator-timer-seconds'), '-'));
+      javelin_tag('td', array('sigil' => 'phabricator-timer-seconds'), '-'),
+    );
+
+    $container = celerity_generate_unique_node_id();
+    $content = phutil_tag(
+      'div',
+      array('class' => 'phabricator-timer', 'id' => $container),
+      array(
+        $header,
+        phutil_tag('table', array('class' => 'phabricator-timer-table'), array(
+          phutil_tag('tr', array(), $ths),
+          phutil_tag('tr', array(), $dashes),
+        )),
+      ));
 
     Javelin::initBehavior('countdown-timer', array(
       'timestamp' => $countdown->getEpoch(),

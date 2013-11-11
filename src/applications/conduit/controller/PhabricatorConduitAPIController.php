@@ -423,7 +423,10 @@ final class PhabricatorConduitAPIController
       $value = $json->encodeFormatted($value);
     }
 
-    $value = hsprintf('<pre style="white-space: pre-wrap;">%s</pre>', $value);
+    $value = phutil_tag(
+      'pre',
+      array('style' => 'white-space: pre-wrap;'),
+      $value);
 
     return $value;
   }

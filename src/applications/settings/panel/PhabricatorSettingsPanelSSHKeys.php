@@ -81,9 +81,17 @@ final class PhabricatorSettingsPanelSSHKeys
 
         if (!$errors) {
           list($type, $body, $comment) = $parts;
-          if (!preg_match('/^ssh-dsa|ssh-rsa$/', $type)) {
+
+          $recognized_keys = array(
+            'ssh-dsa',
+            'ssh-rsa',
+            'ecdsa-sha2-nistp256',
+          );
+
+          if (!in_array($type, $recognized_keys)) {
             $e_key = pht('Invalid');
-            $errors[] = pht('Public key should be "ssh-dsa" or "ssh-rsa".');
+            $type_list = implode(', ', $recognized_keys);
+            $errors[] = pht('Public key should be one of: %s', $type_list);
           } else {
             $key->setKeyType($type);
             $key->setKeyBody($body);

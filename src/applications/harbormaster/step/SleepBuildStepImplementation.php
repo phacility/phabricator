@@ -16,7 +16,10 @@ final class SleepBuildStepImplementation extends BuildStepImplementation {
     return pht('Sleep for %s seconds.', $settings['seconds']);
   }
 
-  public function execute(HarbormasterBuild $build) {
+  public function execute(
+    HarbormasterBuild $build,
+    HarbormasterBuildStep $build_step) {
+
     $settings = $this->getSettings();
 
     sleep($settings['seconds']);

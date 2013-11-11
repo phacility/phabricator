@@ -19,11 +19,6 @@ final class PhabricatorMacroDisableController
 
     $macro = id(new PhabricatorMacroQuery())
       ->setViewer($user)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
       ->withIDs(array($this->id))
       ->executeOne();
     if (!$macro) {

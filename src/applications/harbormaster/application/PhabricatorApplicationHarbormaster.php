@@ -26,6 +26,12 @@ final class PhabricatorApplicationHarbormaster extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
+  public function getEventListeners() {
+    return array(
+      new HarbormasterUIEventListener(),
+    );
+  }
+
   public function isBeta() {
     return true;
   }
@@ -50,6 +56,10 @@ final class PhabricatorApplicationHarbormaster extends PhabricatorApplication {
           'add/(?:(?P<id>\d+)/)?' => 'HarbormasterStepAddController',
           'edit/(?:(?P<id>\d+)/)?' => 'HarbormasterStepEditController',
           'delete/(?:(?P<id>\d+)/)?' => 'HarbormasterStepDeleteController',
+        ),
+        'build/' => array(
+          '(?:(?P<id>\d+)/)?' => 'HarbormasterBuildViewController',
+          'cancel/(?:(?P<id>\d+)/)?' => 'HarbormasterBuildCancelController',
         ),
         'plan/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?'

@@ -36,4 +36,32 @@ final class DifferentialGetWorkingCopy {
     return $workspace;
   }
 
+  /**
+   * Creates and/or cleans a workspace for the requested repo.
+   *
+   * return ArcanistMercurialAPI
+   */
+  public static function getCleanMercurialWorkspace(
+    PhabricatorRepository $repo) {
+
+    $origin_path = $repo->getLocalPath();
+
+    $path = rtrim($origin_path, '/');
+    $path = $path . '__workspace';
+
+    if (!Filesystem::pathExists($path)) {
+      $repo->execxLocalCommand(
+        'clone -- file://%s %s',
+        $origin_path,
+        $path);
+    }
+
+    $workspace = new ArcanistMercurialAPI($path);
+    $workspace->execxLocal('pull');
+    $workspace->execxLocal('update --clean default');
+    $workspace->reloadWorkingCopy();
+
+    return $workspace;
+  }
+
 }

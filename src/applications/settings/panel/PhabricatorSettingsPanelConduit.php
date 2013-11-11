@@ -67,11 +67,12 @@ final class PhabricatorSettingsPanelConduit
     $cert_form = new AphrontFormView();
     $cert_form
       ->setUser($user)
-      ->appendChild(hsprintf(
-        '<p class="aphront-form-instructions">%s</p>',
+      ->appendChild(phutil_tag(
+        'p',
+        array('class' => 'aphront-form-instructions'),
         pht('This certificate allows you to authenticate over Conduit, '.
           'the Phabricator API. Normally, you just run %s to install it.',
-          hsprintf('<tt>%s</tt>', 'arc install-certificate'))))
+          phutil_tag('tt', array(), 'arc install-certificate'))))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel(pht('Certificate'))
@@ -90,8 +91,10 @@ final class PhabricatorSettingsPanelConduit
       ->setUser($user)
       ->setAction($this->getPanelURI())
       ->setWorkflow(true)
-      ->appendChild(hsprintf(
-        '<p class="aphront-form-instructions">%s</p>', $regen_instruction))
+      ->appendChild(phutil_tag(
+        'p',
+        array('class' => 'aphront-form-instructions'),
+        $regen_instruction))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Regenerate Certificate')));

@@ -62,38 +62,41 @@ final class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
 
     $result = array();
 
-    $header = hsprintf(
-      '<div class="dark-console-panel-header">'.
-        '%s'.
-        '<h1>XHProf Profiler</h1>'.
-      '</div>',
-      phutil_tag(
-        'a',
-        array(
-          'href'  => $profile_uri,
-          'class' => $run
-            ? 'disabled button'
-            : 'green button',
-        ),
-        'Profile Page'));
+    $header = phutil_tag(
+      'div',
+      array('class' => 'dark-console-panel-header'),
+      array(
+        phutil_tag(
+          'a',
+          array(
+            'href'  => $profile_uri,
+            'class' => $run ? 'disabled button' : 'green button',
+          ),
+          pht('Profile Page')),
+        phutil_tag('h1', array(), pht('XHProf Profiler')),
+      ));
     $result[] = $header;
 
     if ($run) {
-      $result[] = hsprintf(
-        '<a href="/xhprof/profile/%s/" '.
-          'class="bright-link" '.
-          'style="float: right; margin: 1em 2em 0 0;'.
-            'font-weight: bold;" '.
-          'target="_blank">Profile Permalink</a>'.
-        '<iframe src="/xhprof/profile/%s/?frame=true"></iframe>',
-        $run,
-        $run);
+      $result[] = phutil_tag(
+        'a',
+        array(
+          'href' => "/xhprof/profile/$run/",
+          'class' => 'bright-link',
+          'style' => 'float: right; margin: 1em 2em 0 0; font-weight: bold;',
+          'target' => '_blank',
+        ),
+        pht('Profile Permalink'));
+      $result = phutil_tag(
+        'iframe',
+        array('src' => "/xhprof/profile/$run/?frame=true"));
     } else {
-      $result[] = hsprintf(
-        '<div class="dark-console-no-content">'.
+      $result[] = phutil_tag(
+        'div',
+        array('class' => 'dark-console-no-content'),
+        pht(
           'Profiling was not enabled for this page. Use the button above '.
-          'to enable it.'.
-        '</div>');
+          'to enable it.'));
     }
 
     return phutil_implode_html("\n", $result);

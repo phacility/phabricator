@@ -50,5 +50,20 @@ final class PhabricatorApplicationNuance extends PhabricatorApplication {
     );
   }
 
+  protected function getCustomCapabilities() {
+    return array(
+      NuanceCapabilitySourceDefaultView::CAPABILITY => array(
+        'caption' => pht(
+          'Default view policy for newly created sources.'),
+      ),
+      NuanceCapabilitySourceDefaultEdit::CAPABILITY => array(
+        'caption' => pht(
+          'Default edit policy for newly created sources.'),
+      ),
+      NuanceCapabilitySourceManage::CAPABILITY => array(
+      ),
+    );
+  }
+
 }
 

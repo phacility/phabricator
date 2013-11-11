@@ -32,9 +32,7 @@ final class PhabricatorFeedListController extends PhabricatorFeedController
     $builder->setUser($this->getRequest()->getUser());
     $view = $builder->buildView();
 
-    return hsprintf(
-      '<div class="phabricator-feed-frame">%s</div>',
-      $view);
+    return phutil_tag_div('phabricator-feed-frame', $view);
   }
 
 }

@@ -18,11 +18,17 @@ final class HarbormasterBuildWorker extends PhabricatorWorker {
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withBuildStatuses(array(HarbormasterBuild::STATUS_PENDING))
       ->withIDs(array($id))
-      ->needBuildPlans(true)
       ->executeOne();
     if (!$build) {
       throw new PhabricatorWorkerPermanentFailureException(
         pht('Invalid build ID "%s".', $id));
+    }
+
+    // It's possible for the user to request cancellation before
+    // a worker picks up a build.  We check to see if the build
+    // is already cancelled, and return if it is.
+    if ($build->checkForCancellation()) {
+      return;
     }
 
     try {
@@ -44,11 +50,20 @@ final class HarbormasterBuildWorker extends PhabricatorWorker {
           $build->setBuildStatus(HarbormasterBuild::STATUS_ERROR);
           break;
         }
-        $implementation->execute($build);
+        $implementation->execute($build, $step);
         if ($build->getBuildStatus() !== HarbormasterBuild::STATUS_BUILDING) {
           break;
         }
+        if ($build->checkForCancellation()) {
+          break;
+        }
       }
+
+      // Check to see if the user requested cancellation.  If they did and
+      // we get to here, they might have either cancelled too late, or the
+      // step isn't cancellation aware.  In either case we ignore the result
+      // and move to a cancelled state.
+      $build->checkForCancellation();
 
       // If we get to here, then the build has finished.  Set it to passed
       // if no build step explicitly set the status.

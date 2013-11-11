@@ -19,7 +19,7 @@ final class HarbormasterBuildableViewController
       ->setViewer($viewer)
       ->withIDs(array($id))
       ->needBuildableHandles(true)
-      ->needContainerObjects(true)
+      ->needContainerHandles(true)
       ->executeOne();
     if (!$buildable) {
       return new Aphront404Response();
@@ -28,44 +28,54 @@ final class HarbormasterBuildableViewController
     $builds = id(new HarbormasterBuildQuery())
       ->setViewer($viewer)
       ->withBuildablePHIDs(array($buildable->getPHID()))
-      ->needBuildPlans(true)
       ->execute();
 
     $build_list = id(new PHUIObjectItemListView())
       ->setUser($viewer);
     foreach ($builds as $build) {
+      $view_uri = $this->getApplicationURI('/build/'.$build->getID().'/');
       $item = id(new PHUIObjectItemView())
         ->setObjectName(pht('Build %d', $build->getID()))
-        ->setHeader($build->getName());
-      switch ($build->getBuildStatus()) {
-        case HarbormasterBuild::STATUS_INACTIVE:
-          $item->setBarColor('grey');
-          $item->addAttribute(pht('Inactive'));
-          break;
-        case HarbormasterBuild::STATUS_PENDING:
-          $item->setBarColor('blue');
-          $item->addAttribute(pht('Pending'));
-          break;
-        case HarbormasterBuild::STATUS_WAITING:
-          $item->setBarColor('blue');
-          $item->addAttribute(pht('Waiting on Resource'));
-          break;
-        case HarbormasterBuild::STATUS_BUILDING:
-          $item->setBarColor('yellow');
-          $item->addAttribute(pht('Building'));
-          break;
-        case HarbormasterBuild::STATUS_PASSED:
-          $item->setBarColor('green');
-          $item->addAttribute(pht('Passed'));
-          break;
-        case HarbormasterBuild::STATUS_FAILED:
-          $item->setBarColor('red');
-          $item->addAttribute(pht('Failed'));
-          break;
-        case HarbormasterBuild::STATUS_ERROR:
-          $item->setBarColor('red');
-          $item->addAttribute(pht('Unexpected Error'));
-          break;
+        ->setHeader($build->getName())
+        ->setHref($view_uri);
+      if ($build->getCancelRequested()) {
+        $item->setBarColor('black');
+        $item->addAttribute(pht('Cancelling'));
+      } else {
+        switch ($build->getBuildStatus()) {
+          case HarbormasterBuild::STATUS_INACTIVE:
+            $item->setBarColor('grey');
+            $item->addAttribute(pht('Inactive'));
+            break;
+          case HarbormasterBuild::STATUS_PENDING:
+            $item->setBarColor('blue');
+            $item->addAttribute(pht('Pending'));
+            break;
+          case HarbormasterBuild::STATUS_WAITING:
+            $item->setBarColor('blue');
+            $item->addAttribute(pht('Waiting on Resource'));
+            break;
+          case HarbormasterBuild::STATUS_BUILDING:
+            $item->setBarColor('yellow');
+            $item->addAttribute(pht('Building'));
+            break;
+          case HarbormasterBuild::STATUS_PASSED:
+            $item->setBarColor('green');
+            $item->addAttribute(pht('Passed'));
+            break;
+          case HarbormasterBuild::STATUS_FAILED:
+            $item->setBarColor('red');
+            $item->addAttribute(pht('Failed'));
+            break;
+          case HarbormasterBuild::STATUS_ERROR:
+            $item->setBarColor('red');
+            $item->addAttribute(pht('Unexpected Error'));
+            break;
+          case HarbormasterBuild::STATUS_CANCELLED:
+            $item->setBarColor('black');
+            $item->addAttribute(pht('Cancelled'));
+            break;
+        }
       }
       $build_list->addItem($item);
     }
@@ -138,6 +148,12 @@ final class HarbormasterBuildableViewController
     $properties->addProperty(
       pht('Buildable'),
       $buildable->getBuildableHandle()->renderLink());
+
+    if ($buildable->getContainerHandle() !== null) {
+      $properties->addProperty(
+        pht('Container'),
+        $buildable->getContainerHandle()->renderLink());
+    }
 
   }
 

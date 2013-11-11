@@ -50,7 +50,7 @@ final class DiffusionTagListController extends DiffusionController {
     } else {
       $commits = id(new DiffusionCommitQuery())
         ->setViewer($viewer)
-        ->withRepositoryIDs(array($repository->getID()))
+        ->withRepository($repository)
         ->withIdentifiers(mpull($tags, 'getCommitIdentifier'))
         ->needCommitData(true)
         ->execute();

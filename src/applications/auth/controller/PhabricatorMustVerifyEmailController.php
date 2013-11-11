@@ -48,8 +48,8 @@ final class PhabricatorMustVerifyEmailController
     $error_view->appendChild(phutil_tag('p', array(), pht(
       'If you did not receive an email, you can click the button below '.
       'to try sending another one.')));
-    $error_view->appendChild(hsprintf(
-      '<div class="aphront-failure-continue">%s</div>',
+    $error_view->appendChild(phutil_tag_div(
+      'aphront-failure-continue',
       phabricator_form(
         $user,
         array(

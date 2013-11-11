@@ -298,11 +298,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     $developer_warning = null;
     if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode') &&
         DarkConsoleErrorLogPluginAPI::getErrors()) {
-      $developer_warning = phutil_tag(
-        'div',
-        array(
-          'class' => 'aphront-developer-error-callout',
-        ),
+      $developer_warning = phutil_tag_div(
+        'aphront-developer-error-callout',
         pht(
           'This page raised PHP errors. Find them in DarkConsole '.
           'or the error log.'));
@@ -313,11 +310,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     if ($user && $user->getIsAdmin()) {
       $open = PhabricatorSetupCheck::getOpenSetupIssueCount();
       if ($open) {
-        $setup_warning = phutil_tag(
-          'div',
-          array(
-            'class' => 'setup-warning-callout',
-          ),
+        $setup_warning = phutil_tag_div(
+          'setup-warning-callout',
           phutil_tag(
             'a',
             array(
@@ -334,16 +328,16 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
           'id' => 'base-page',
           'class' => 'phabricator-standard-page',
         ),
-        hsprintf(
-          '%s%s%s'.
-          '<div class="phabricator-standard-page-body">'.
-            '%s%s<div style="clear: both;"></div>'.
-          '</div>',
-        $developer_warning,
-        $setup_warning,
-        $header_chrome,
-        ($console ? hsprintf('<darkconsole />') : null),
-        parent::getBody()));
+        array(
+          $developer_warning,
+          $setup_warning,
+          $header_chrome,
+          phutil_tag_div('phabricator-standard-page-body', array(
+            ($console ? hsprintf('<darkconsole />') : null),
+            parent::getBody(),
+            phutil_tag('div', array('style' => 'clear: both;')),
+          )),
+        ));
   }
 
   protected function getTail() {
