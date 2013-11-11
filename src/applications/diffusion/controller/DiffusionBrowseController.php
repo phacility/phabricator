@@ -104,18 +104,21 @@ abstract class DiffusionBrowseController extends DiffusionController {
     // TODO: Ideally, this should live in Owners and be event-triggered, but
     // there's no reasonable object for it to react to right now.
 
-    $owners_uri = id(new PhutilURI('/owners/view/search/'))
-      ->setQueryParams(
-        array(
-          'repository' => $drequest->getCallsign(),
-          'path' => '/'.$drequest->getPath(),
-        ));
+    $owners = 'PhabricatorApplicationOwners';
+    if (PhabricatorApplication::isClassInstalled($owners)) {
+      $owners_uri = id(new PhutilURI('/owners/view/search/'))
+        ->setQueryParams(
+          array(
+            'repository' => $drequest->getCallsign(),
+            'path' => '/'.$drequest->getPath(),
+          ));
 
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Find Owners'))
-        ->setHref((string)$owners_uri)
-        ->setIcon('preview'));
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Find Owners'))
+          ->setHref((string)$owners_uri)
+          ->setIcon('preview'));
+    }
 
     return $view;
   }
