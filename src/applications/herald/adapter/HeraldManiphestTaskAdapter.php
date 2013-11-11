@@ -62,6 +62,7 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
         self::FIELD_AUTHOR,
         self::FIELD_CC,
         self::FIELD_CONTENT_SOURCE,
+        self::FIELD_PROJECTS,
       ),
       parent::getFields());
   }
@@ -103,6 +104,8 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
         return $this->getTask()->getAuthorPHID();
       case self::FIELD_CC:
         return $this->getTask()->getCCPHIDs();
+      case self::FIELD_PROJECTS:
+        return $this->getTask()->getProjectPHIDs();
     }
 
     return parent::getHeraldField($field);
