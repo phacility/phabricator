@@ -139,6 +139,12 @@ final class PhabricatorSSHPassthruCommand extends Phobject {
       if ($done) {
         break;
       }
+
+      // If the client has disconnected, kill the subprocess and bail.
+      if (!$io_channel->isOpenForWriting()) {
+        $this->execFuture->resolveKill();
+        break;
+      }
     }
 
     list($err) = $this->execFuture->resolve();

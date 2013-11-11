@@ -7,6 +7,9 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
   private $hasWriteAccess;
 
   public function getRepository() {
+    if (!$this->repository) {
+      throw new Exception("Call loadRepository() before getRepository()!");
+    }
     return $this->repository;
   }
 
@@ -14,9 +17,7 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
     return $this->args;
   }
 
-  abstract protected function getRequestPath();
-  abstract protected function executeRepositoryOperations(
-    PhabricatorRepository $repository);
+  abstract protected function executeRepositoryOperations();
 
   protected function writeError($message) {
     $this->getErrorChannel()->write($message);
@@ -27,18 +28,15 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
     $this->args = $args;
 
     try {
-      $repository = $this->loadRepository();
-      $this->repository = $repository;
-      return $this->executeRepositoryOperations($repository);
+      return $this->executeRepositoryOperations();
     } catch (Exception $ex) {
       $this->writeError(get_class($ex).': '.$ex->getMessage());
       return 1;
     }
   }
 
-  private function loadRepository() {
+  protected function loadRepository($path) {
     $viewer = $this->getUser();
-    $path = $this->getRequestPath();
 
     $regex = '@^/?diffusion/(?P<callsign>[A-Z]+)(?:/|$)@';
     $matches = null;
@@ -74,10 +72,12 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
           pht('This repository is not available over SSH.'));
     }
 
+    $this->repository = $repository;
+
     return $repository;
   }
 
-  protected function requireWriteAccess() {
+  protected function requireWriteAccess($protocol_command = null) {
     if ($this->hasWriteAccess === true) {
       return;
     }
@@ -87,8 +87,16 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
 
     switch ($repository->getServeOverSSH()) {
       case PhabricatorRepository::SERVE_READONLY:
-        throw new Exception(
-          pht('This repository is read-only over SSH.'));
+        if ($protocol_command !== null) {
+          throw new Exception(
+            pht(
+              'This repository is read-only over SSH (tried to execute '.
+              'protocol command "%s").',
+              $protocol_command));
+        } else {
+          throw new Exception(
+            pht('This repository is read-only over SSH.'));
+        }
         break;
       case PhabricatorRepository::SERVE_READWRITE:
         $can_push = PhabricatorPolicyFilter::hasCapability(

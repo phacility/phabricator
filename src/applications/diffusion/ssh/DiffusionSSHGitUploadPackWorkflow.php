@@ -14,13 +14,10 @@ final class DiffusionSSHGitUploadPackWorkflow
       ));
   }
 
-  public function getRequestPath() {
+  protected function executeRepositoryOperations() {
     $args = $this->getArgs();
-    return head($args->getArg('dir'));
-  }
-
-  protected function executeRepositoryOperations(
-    PhabricatorRepository $repository) {
+    $path = head($args->getArg('dir'));
+    $repository = $this->loadRepository($path);
 
     $future = new ExecFuture('git-upload-pack %s', $repository->getLocalPath());
 

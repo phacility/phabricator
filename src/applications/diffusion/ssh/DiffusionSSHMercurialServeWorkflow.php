@@ -24,12 +24,10 @@ final class DiffusionSSHMercurialServeWorkflow
       ));
   }
 
-  public function getRequestPath() {
-    return $this->getArgs()->getArg('repository');
-  }
-
-  protected function executeRepositoryOperations(
-    PhabricatorRepository $repository) {
+  protected function executeRepositoryOperations() {
+    $args = $this->getArgs();
+    $path = $args->getArg('repository');
+    $repository = $this->loadRepository($path);
 
     $args = $this->getArgs();
 

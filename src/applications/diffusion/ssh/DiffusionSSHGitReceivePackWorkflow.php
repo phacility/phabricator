@@ -14,13 +14,10 @@ final class DiffusionSSHGitReceivePackWorkflow
       ));
   }
 
-  public function getRequestPath() {
+  protected function executeRepositoryOperations() {
     $args = $this->getArgs();
-    return head($args->getArg('dir'));
-  }
-
-  protected function executeRepositoryOperations(
-    PhabricatorRepository $repository) {
+    $path = head($args->getArg('dir'));
+    $repository = $this->loadRepository($path);
 
     // This is a write, and must have write access.
     $this->requireWriteAccess();
@@ -28,6 +25,7 @@ final class DiffusionSSHGitReceivePackWorkflow
     $future = new ExecFuture(
       'git-receive-pack %s',
       $repository->getLocalPath());
+
     $err = $this->newPassthruCommand()
       ->setIOChannel($this->getIOChannel())
       ->setCommandChannelFromExecFuture($future)
