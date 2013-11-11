@@ -202,27 +202,28 @@ final class ConduitAPI_differential_query_Method
       $auxiliary_fields = $this->loadAuxiliaryFields(
                                  $revision, $request->getUser());
       $result = array(
-        'id'            => $id,
-        'phid'          => $revision->getPHID(),
-        'title'         => $revision->getTitle(),
-        'uri'           => PhabricatorEnv::getProductionURI('/D'.$id),
-        'dateCreated'   => $revision->getDateCreated(),
-        'dateModified'  => $revision->getDateModified(),
-        'authorPHID'    => $revision->getAuthorPHID(),
-        'status'        => $revision->getStatus(),
-        'statusName'    =>
+        'id'                  => $id,
+        'phid'                => $revision->getPHID(),
+        'title'               => $revision->getTitle(),
+        'uri'                 => PhabricatorEnv::getProductionURI('/D'.$id),
+        'dateCreated'         => $revision->getDateCreated(),
+        'dateModified'        => $revision->getDateModified(),
+        'authorPHID'          => $revision->getAuthorPHID(),
+        'status'              => $revision->getStatus(),
+        'statusName'          =>
           ArcanistDifferentialRevisionStatus::getNameForRevisionStatus(
             $revision->getStatus()),
-        'branch'        => $diff->getBranch(),
-        'summary'       => $revision->getSummary(),
-        'testPlan'      => $revision->getTestPlan(),
-        'lineCount'     => $revision->getLineCount(),
-        'diffs'         => $revision->getDiffIDs(),
-        'commits'       => $revision->getCommitPHIDs(),
-        'reviewers'     => array_values($revision->getReviewers()),
-        'ccs'           => array_values($revision->getCCPHIDs()),
-        'hashes'        => $revision->getHashes(),
-        'auxiliary'     => $auxiliary_fields,
+        'branch'              => $diff->getBranch(),
+        'summary'             => $revision->getSummary(),
+        'testPlan'            => $revision->getTestPlan(),
+        'lineCount'           => $revision->getLineCount(),
+        'diffs'               => $revision->getDiffIDs(),
+        'commits'             => $revision->getCommitPHIDs(),
+        'reviewers'           => array_values($revision->getReviewers()),
+        'ccs'                 => array_values($revision->getCCPHIDs()),
+        'hashes'              => $revision->getHashes(),
+        'auxiliary'           => $auxiliary_fields,
+        'arcanistProjectPHID' => $diff->getArcanistProjectPHID()
       );
 
       // TODO: This is a hacky way to put permissions on this field until we
