@@ -14,10 +14,6 @@ final class DiffusionSSHGitReceivePackWorkflow
       ));
   }
 
-  public function isReadOnly() {
-    return false;
-  }
-
   public function getRequestPath() {
     $args = $this->getArgs();
     return head($args->getArg('dir'));
@@ -25,10 +21,17 @@ final class DiffusionSSHGitReceivePackWorkflow
 
   protected function executeRepositoryOperations(
     PhabricatorRepository $repository) {
+
+    // This is a write, and must have write access.
+    $this->requireWriteAccess();
+
     $future = new ExecFuture(
       'git-receive-pack %s',
       $repository->getLocalPath());
-    $err = $this->passthruIO($future);
+    $err = $this->newPassthruCommand()
+      ->setIOChannel($this->getIOChannel())
+      ->setCommandChannelFromExecFuture($future)
+      ->execute();
 
     if (!$err) {
       $repository->writeStatusMessage(

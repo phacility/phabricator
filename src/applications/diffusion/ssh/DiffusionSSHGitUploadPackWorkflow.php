@@ -14,10 +14,6 @@ final class DiffusionSSHGitUploadPackWorkflow
       ));
   }
 
-  public function isReadOnly() {
-    return true;
-  }
-
   public function getRequestPath() {
     $args = $this->getArgs();
     return head($args->getArg('dir'));
@@ -28,7 +24,10 @@ final class DiffusionSSHGitUploadPackWorkflow
 
     $future = new ExecFuture('git-upload-pack %s', $repository->getLocalPath());
 
-    return $this->passthruIO($future);
+    return $this->newPassthruCommand()
+      ->setIOChannel($this->getIOChannel())
+      ->setCommandChannelFromExecFuture($future)
+      ->execute();
   }
 
 }

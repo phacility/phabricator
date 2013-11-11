@@ -1746,6 +1746,7 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryVCSPassword' => 'applications/repository/storage/PhabricatorRepositoryVCSPassword.php',
     'PhabricatorS3FileStorageEngine' => 'applications/files/engine/PhabricatorS3FileStorageEngine.php',
     'PhabricatorSQLPatchList' => 'infrastructure/storage/patch/PhabricatorSQLPatchList.php',
+    'PhabricatorSSHPassthruCommand' => 'infrastructure/ssh/PhabricatorSSHPassthruCommand.php',
     'PhabricatorSSHWorkflow' => 'infrastructure/ssh/PhabricatorSSHWorkflow.php',
     'PhabricatorSavedQuery' => 'applications/search/storage/PhabricatorSavedQuery.php',
     'PhabricatorSavedQueryQuery' => 'applications/search/query/PhabricatorSavedQueryQuery.php',
@@ -4175,6 +4176,7 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'PhabricatorRepositoryVCSPassword' => 'PhabricatorRepositoryDAO',
     'PhabricatorS3FileStorageEngine' => 'PhabricatorFileStorageEngine',
+    'PhabricatorSSHPassthruCommand' => 'Phobject',
     'PhabricatorSSHWorkflow' => 'PhutilArgumentWorkflow',
     'PhabricatorSavedQuery' =>
     array(

@@ -3,12 +3,17 @@
 abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
 
   private $args;
+  private $repository;
+  private $hasWriteAccess;
+
+  public function getRepository() {
+    return $this->repository;
+  }
 
   public function getArgs() {
     return $this->args;
   }
 
-  abstract protected function isReadOnly();
   abstract protected function getRequestPath();
   abstract protected function executeRepositoryOperations(
     PhabricatorRepository $repository);
@@ -23,6 +28,7 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
 
     try {
       $repository = $this->loadRepository();
+      $this->repository = $repository;
       return $this->executeRepositoryOperations($repository);
     } catch (Exception $ex) {
       $this->writeError(get_class($ex).': '.$ex->getMessage());
@@ -56,26 +62,11 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
         pht('No repository "%s" exists!', $callsign));
     }
 
-    $is_push = !$this->isReadOnly();
-
     switch ($repository->getServeOverSSH()) {
       case PhabricatorRepository::SERVE_READONLY:
-        if ($is_push) {
-          throw new Exception(
-            pht('This repository is read-only over SSH.'));
-        }
-        break;
       case PhabricatorRepository::SERVE_READWRITE:
-        if ($is_push) {
-          $can_push = PhabricatorPolicyFilter::hasCapability(
-            $viewer,
-            $repository,
-            DiffusionCapabilityPush::CAPABILITY);
-          if (!$can_push) {
-            throw new Exception(
-              pht('You do not have permission to push to this repository.'));
-          }
-        }
+        // If we have read or read/write access, proceed for now. We will
+        // check write access when the user actually issues a write command.
         break;
       case PhabricatorRepository::SERVE_OFF:
       default:
@@ -85,5 +76,41 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
 
     return $repository;
   }
+
+  protected function requireWriteAccess() {
+    if ($this->hasWriteAccess === true) {
+      return;
+    }
+
+    $repository = $this->getRepository();
+    $viewer = $this->getUser();
+
+    switch ($repository->getServeOverSSH()) {
+      case PhabricatorRepository::SERVE_READONLY:
+        throw new Exception(
+          pht('This repository is read-only over SSH.'));
+        break;
+      case PhabricatorRepository::SERVE_READWRITE:
+        $can_push = PhabricatorPolicyFilter::hasCapability(
+          $viewer,
+          $repository,
+          DiffusionCapabilityPush::CAPABILITY);
+        if (!$can_push) {
+          throw new Exception(
+            pht('You do not have permission to push to this repository.'));
+        }
+        break;
+      case PhabricatorRepository::SERVE_OFF:
+      default:
+        // This shouldn't be reachable because we don't get this far if the
+        // repository isn't enabled, but kick them out anyway.
+        throw new Exception(
+          pht('This repository is not available over SSH.'));
+    }
+
+    $this->hasWriteAccess = true;
+    return $this->hasWriteAccess;
+  }
+
 
 }
