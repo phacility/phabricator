@@ -1,0 +1,10 @@
+capabilities
+
+~~~~~~~~~~
+[
+  {
+    "command" : "capabilities",
+    "arguments" : [],
+    "raw" : "capabilities\n"
+  }
+]

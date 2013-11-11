@@ -76,6 +76,13 @@ final class PhabricatorSSHPassthruCommand extends Phobject {
 
   public function writeErrorIOCallback(PhutilChannel $channel, $data) {
     $this->errorChannel->write($data);
+
+    // TODO: Because of the way `waitForAny()` works, we degrade to a busy
+    // wait if we hand it a writable, write-only channel. We should handle this
+    // case better in `waitForAny()`. For now, just flush the error channel
+    // explicity after writing data over it.
+
+    $this->errorChannel->flush();
   }
 
   public function execute() {
@@ -98,7 +105,9 @@ final class PhabricatorSSHPassthruCommand extends Phobject {
     $channels = array($command_channel, $io_channel, $error_channel);
 
     while (true) {
-      PhutilChannel::waitForAny($channels);
+      // TODO: See note in writeErrorIOCallback!
+      $wait = array($command_channel, $io_channel);
+      PhutilChannel::waitForAny($wait);
 
       $io_channel->update();
       $command_channel->update();
@@ -107,21 +116,24 @@ final class PhabricatorSSHPassthruCommand extends Phobject {
       $done = !$command_channel->isOpen();
 
       $in_message = $io_channel->read();
-      $in_message = $this->willWriteData($in_message);
       if ($in_message !== null) {
-        $command_channel->write($in_message);
+        $in_message = $this->willWriteData($in_message);
+        if ($in_message !== null) {
+          $command_channel->write($in_message);
+        }
       }
 
       $out_message = $command_channel->read();
-      $out_message = $this->willReadData($out_message);
       if ($out_message !== null) {
-        $io_channel->write($out_message);
+        $out_message = $this->willReadData($out_message);
+        if ($out_message !== null) {
+          $io_channel->write($out_message);
+        }
       }
 
       // If we have nothing left on stdin, close stdin on the subprocess.
       if (!$io_channel->isOpenForReading()) {
-        // TODO: This should probably be part of PhutilExecChannel?
-        $this->execFuture->write('');
+        $command_channel->closeWriteChannel();
       }
 
       if ($done) {

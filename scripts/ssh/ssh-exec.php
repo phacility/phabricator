@@ -61,7 +61,7 @@ try {
 
   $workflows = array(
     new ConduitSSHWorkflow(),
-
+    new DiffusionSSHMercurialServeWorkflow(),
     new DiffusionSSHGitUploadPackWorkflow(),
     new DiffusionSSHGitReceivePackWorkflow(),
   );
