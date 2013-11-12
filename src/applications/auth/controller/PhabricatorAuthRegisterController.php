@@ -59,16 +59,30 @@ final class PhabricatorAuthRegisterController
     $default_realname = $account->getRealName();
     $default_email = $account->getEmail();
     if ($default_email) {
-      // If the account source provided an email but it's not allowed by
-      // the configuration, just pretend we didn't get an email at all.
+      // If the account source provided an email, but it's not allowed by
+      // the configuration, roadblock the user. Previously, we let the user
+      // pick a valid email address instead, but this does not align well with
+      // user expectation and it's not clear the cases it enables are valuable.
+      // See discussion in T3472.
       if (!PhabricatorUserEmail::isAllowedAddress($default_email)) {
-        $default_email = null;
+        return $this->renderError(
+          array(
+            pht(
+              'The account you are attempting to register with has an invalid '.
+              'email address (%s). This Phabricator install only allows '.
+              'registration with specific email addresses:',
+              $default_email),
+            phutil_tag('br'),
+            phutil_tag('br'),
+            PhabricatorUserEmail::describeAllowedAddresses(),
+          ));
       }
 
       // If the account source provided an email, but another account already
       // has that email, just pretend we didn't get an email.
 
       // TODO: See T3340.
+      // TODO: See T3472.
 
       if ($default_email) {
         $same_email = id(new PhabricatorUserEmail())->loadOneWhere(
