@@ -325,7 +325,9 @@ final class PhabricatorPeopleEditController
       if ($user->getIsDisabled()) {
         $roles[] = pht('Disabled');
       }
-
+      if (!$user->getIsApproved()) {
+        $roles[] = pht('Not Approved');
+      }
       if (!$roles) {
         $roles[] = pht('Normal User');
       }

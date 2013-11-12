@@ -219,7 +219,7 @@ final class HeraldRuleQuery
         $rule->attachValidAuthor(false);
         continue;
       }
-      if ($users[$author_phid]->getIsDisabled()) {
+      if (!$users[$author_phid]->isUserActivated()) {
         $rule->attachValidAuthor(false);
         continue;
       }

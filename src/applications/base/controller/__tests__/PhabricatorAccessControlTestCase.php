@@ -31,7 +31,7 @@ final class PhabricatorAccessControlTestCase
     $u_unverified = $this->generateNewTestUser()
       ->setUsername('unverified')
       ->save();
-    $u_unverified->loadPrimaryEmail()->setIsVerified(0)->save();
+    $u_unverified->setIsEmailVerified(0)->save();
 
     $u_normal = $this->generateNewTestUser()
       ->setUsername('normal')

@@ -111,6 +111,16 @@ final class AphrontDialogView extends AphrontView {
     return $this;
   }
 
+  public function appendParagraph($paragraph) {
+    return $this->appendChild(
+      phutil_tag(
+        'p',
+        array(
+          'class' => 'aphront-dialog-view-paragraph',
+        ),
+        $paragraph));
+  }
+
   final public function render() {
     require_celerity_resource('aphront-dialog-view-css');
 

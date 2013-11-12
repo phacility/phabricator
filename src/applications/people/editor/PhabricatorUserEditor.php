@@ -41,6 +41,12 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     // Always set a new user's email address to primary.
     $email->setIsPrimary(1);
 
+    // If the primary address is already verified, also set the verified flag
+    // on the user themselves.
+    if ($email->getIsVerified()) {
+      $user->setIsEmailVerified(1);
+    }
+
     $this->willAddEmail($email);
 
     $user->openTransaction();

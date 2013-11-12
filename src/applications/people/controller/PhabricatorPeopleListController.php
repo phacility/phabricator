@@ -61,6 +61,10 @@ final class PhabricatorPeopleListController extends PhabricatorPeopleController
         $item->addIcon('disable', pht('Disabled'));
       }
 
+      if (!$user->getIsApproved()) {
+        $item->addIcon('raise-priority', pht('Not Approved'));
+      }
+
       if ($user->getIsAdmin()) {
         $item->addIcon('highlight', pht('Admin'));
       }

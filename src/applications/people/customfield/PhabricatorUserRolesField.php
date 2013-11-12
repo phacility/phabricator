@@ -31,6 +31,9 @@ final class PhabricatorUserRolesField
     if ($user->getIsDisabled()) {
       $roles[] = pht('Disabled');
     }
+    if (!$user->getIsApproved()) {
+      $roles[] = pht('Not Approved');
+    }
     if ($user->getIsSystemAgent()) {
       $roles[] = pht('Bot');
     }

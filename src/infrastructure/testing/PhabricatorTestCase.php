@@ -105,6 +105,11 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
       'phabricator.show-beta-applications',
       true);
 
+    // Reset application settings to defaults, particularly policies.
+    $this->env->overrideEnvConfig(
+      'phabricator.application-settings',
+      array());
+
     // TODO: Remove this when we remove "releeph.installed".
     $this->env->overrideEnvConfig('releeph.installed', true);
   }

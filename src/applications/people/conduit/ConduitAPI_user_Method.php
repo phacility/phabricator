@@ -32,6 +32,14 @@ abstract class ConduitAPI_user_Method extends ConduitAPIMethod {
       $roles[] = 'unverified';
     }
 
+    if ($user->getIsApproved()) {
+      $roles[] = 'approved';
+    }
+
+    if ($user->isUserActivated()) {
+      $roles[] = 'activated';
+    }
+
     $return = array(
       'phid'      => $user->getPHID(),
       'userName'  => $user->getUserName(),

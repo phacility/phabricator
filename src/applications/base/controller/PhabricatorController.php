@@ -114,12 +114,7 @@ abstract class PhabricatorController extends AphrontController {
 
       if ($user->isLoggedIn()) {
         if ($this->shouldRequireEmailVerification()) {
-          $email = $user->loadPrimaryEmail();
-          if (!$email) {
-            throw new Exception(
-              "No primary email address associated with this account!");
-          }
-          if (!$email->getIsVerified()) {
+          if (!$user->getIsEmailVerified()) {
             $controller = new PhabricatorMustVerifyEmailController($request);
             $this->setCurrentApplication($auth_application);
             return $this->delegateToController($controller);
