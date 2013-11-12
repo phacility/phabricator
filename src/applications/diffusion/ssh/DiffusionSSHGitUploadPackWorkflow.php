@@ -21,10 +21,16 @@ final class DiffusionSSHGitUploadPackWorkflow
 
     $future = new ExecFuture('git-upload-pack %s', $repository->getLocalPath());
 
-    return $this->newPassthruCommand()
+    $err = $this->newPassthruCommand()
       ->setIOChannel($this->getIOChannel())
       ->setCommandChannelFromExecFuture($future)
       ->execute();
+
+    if (!$err) {
+      $this->waitForGitClient();
+    }
+
+    return $err;
   }
 
 }

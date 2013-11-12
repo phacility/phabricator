@@ -24,6 +24,7 @@ abstract class HeraldAdapter {
   const FIELD_CONTENT_SOURCE         = 'contentsource';
   const FIELD_ALWAYS                 = 'always';
   const FIELD_AUTHOR_PROJECTS        = 'authorprojects';
+  const FIELD_PROJECTS               = 'projects';
 
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';
@@ -154,6 +155,7 @@ abstract class HeraldAdapter {
       self::FIELD_CONTENT_SOURCE => pht('Content Source'),
       self::FIELD_ALWAYS => pht('Always'),
       self::FIELD_AUTHOR_PROJECTS => pht("Author's projects"),
+      self::FIELD_PROJECTS => pht("Projects"),
     );
   }
 
@@ -207,6 +209,7 @@ abstract class HeraldAdapter {
       case self::FIELD_REVIEWERS:
       case self::FIELD_CC:
       case self::FIELD_AUTHOR_PROJECTS:
+      case self::FIELD_PROJECTS:
         return array(
           self::CONDITION_INCLUDE_ALL,
           self::CONDITION_INCLUDE_ANY,
@@ -600,6 +603,7 @@ abstract class HeraldAdapter {
           case self::FIELD_AFFECTED_PACKAGE:
             return self::VALUE_OWNERS_PACKAGE;
           case self::FIELD_AUTHOR_PROJECTS:
+          case self::FIELD_PROJECTS:
             return self::VALUE_PROJECT;
           case self::FIELD_REVIEWERS:
             return self::VALUE_USER_OR_PROJECT;

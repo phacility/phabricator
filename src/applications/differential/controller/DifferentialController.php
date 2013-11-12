@@ -2,10 +2,6 @@
 
 abstract class DifferentialController extends PhabricatorController {
 
-  protected function allowsAnonymousAccess() {
-    return PhabricatorEnv::getEnvConfig('differential.anonymous-access');
-  }
-
   public function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 

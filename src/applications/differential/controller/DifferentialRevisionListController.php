@@ -5,13 +5,6 @@ final class DifferentialRevisionListController extends DifferentialController
 
   private $queryKey;
 
-  public function shouldRequireLogin() {
-    if ($this->allowsAnonymousAccess()) {
-      return false;
-    }
-    return parent::shouldRequireLogin();
-  }
-
   public function shouldAllowPublic() {
     return true;
   }

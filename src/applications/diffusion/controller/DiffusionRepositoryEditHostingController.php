@@ -126,6 +126,9 @@ final class DiffusionRepositoryEditHostingController
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    $type = $repository->getVersionControlSystem();
+    $is_svn = ($type == PhabricatorRepositoryType::REPOSITORY_TYPE_SVN);
+
     $v_http_mode = $repository->getDetail(
       'serve-over-http',
       PhabricatorRepository::SERVE_OFF);
@@ -146,9 +149,11 @@ final class DiffusionRepositoryEditHostingController
       $type_http = PhabricatorRepositoryTransaction::TYPE_PROTOCOL_HTTP;
       $type_ssh = PhabricatorRepositoryTransaction::TYPE_PROTOCOL_SSH;
 
-      $xactions[] = id(clone $template)
-        ->setTransactionType($type_http)
-        ->setNewValue($v_http_mode);
+      if (!$is_svn) {
+        $xactions[] = id(clone $template)
+          ->setTransactionType($type_http)
+          ->setNewValue($v_http_mode);
+      }
 
       $xactions[] = id(clone $template)
         ->setTransactionType($type_ssh)
@@ -231,6 +236,18 @@ final class DiffusionRepositoryEditHostingController
           PhabricatorRepository::getProtocolAvailabilityName(
             PhabricatorRepository::SERVE_READWRITE),
           $rw_message);
+
+    if ($is_svn) {
+      $http_control = id(new AphrontFormMarkupControl())
+        ->setLabel(pht('HTTP'))
+        ->setValue(
+          phutil_tag(
+            'em',
+            array(),
+            pht(
+              'Phabricator does not currently support HTTP access to '.
+              'Subversion repositories.')));
+    }
 
     $form = id(new AphrontFormView())
       ->setUser($user)
