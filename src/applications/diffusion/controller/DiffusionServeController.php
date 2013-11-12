@@ -172,18 +172,53 @@ final class DiffusionServeController extends DiffusionController {
           pht('This repository is not available over HTTP.'));
     }
 
-    switch ($repository->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $result = $this->serveGitRequest($repository, $viewer);
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $result = $this->serveMercurialRequest($repository, $viewer);
-        break;
-      default:
-        $result = new PhabricatorVCSResponse(
-          999,
-          pht('TODO: Implement meaningful responses.'));
-        break;
+    $vcs_type = $repository->getVersionControlSystem();
+    $req_type = $this->isVCSRequest($request);
+
+    if ($vcs_type != $req_type) {
+      switch ($req_type) {
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+          $result = new PhabricatorVCSResponse(
+            500,
+            pht('This is not a Git repository.'));
+          break;
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+          $result = new PhabricatorVCSResponse(
+            500,
+            pht('This is not a Mercurial repository.'));
+          break;
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+          $result = new PhabricatorVCSResponse(
+            500,
+            pht('This is not a Subversion repository.'));
+          break;
+        default:
+          $result = new PhabricatorVCSResponse(
+            500,
+            pht('Unknown request type.'));
+          break;
+      }
+    } else {
+      switch ($vcs_type) {
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+          $result = $this->serveGitRequest($repository, $viewer);
+          break;
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+          $result = $this->serveMercurialRequest($repository, $viewer);
+          break;
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+          $result = new PhabricatorVCSResponse(
+            500,
+            pht(
+              'Phabricator does not support HTTP access to Subversion '.
+              'repositories.'));
+          break;
+        default:
+          $result = new PhabricatorVCSResponse(
+            500,
+            pht('Unknown version control system.'));
+          break;
+      }
     }
 
     $code = $result->getHTTPResponseCode();
@@ -232,7 +267,7 @@ final class DiffusionServeController extends DiffusionController {
           return DiffusionMercurialWireProtocol::isReadOnlyBatchCommand($cmds);
         }
         return DiffusionMercurialWireProtocol::isReadOnlyCommand($cmd);
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SUBVERSION:
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         break;
     }
 

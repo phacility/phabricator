@@ -757,6 +757,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function getServeOverHTTP() {
+    if ($this->isSVN()) {
+      return self::SERVE_OFF;
+    }
     $serve = $this->getDetail('serve-over-http', self::SERVE_OFF);
     return $this->normalizeServeConfigSetting($serve);
   }
