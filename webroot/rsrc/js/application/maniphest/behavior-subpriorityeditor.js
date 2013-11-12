@@ -57,8 +57,11 @@ JX.behavior('maniphest-subpriority-editor', function(config) {
       var nodes = JX.$H(r.tasks).getFragment().firstChild;
       var task = JX.DOM.find(nodes, 'li', 'maniphest-task');
       JX.DOM.replace(node, task);
-
       draggable.unlock();
+      JX.Stratcom.invoke(
+        'subpriority-changed',
+        null,
+        { 'task' : task });
     };
 
     new JX.Workflow(config.uri, data)
