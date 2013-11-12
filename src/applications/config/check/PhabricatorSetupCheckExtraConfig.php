@@ -164,6 +164,9 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
       'differential.custom-remarkup-block-rules' => $markup_reason,
       'auth.sshkeys.enabled' => pht(
         'SSH keys are now actually useful, so they are always enabled.'),
+      'differential.anonymous-access' => pht(
+        'Phabricator now has meaningful global access controls. See '.
+        '`policy.allow-public`.'),
     );
 
     return $ancient_config;

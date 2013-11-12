@@ -4,13 +4,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
   private $revisionID;
 
-  public function shouldRequireLogin() {
-    if ($this->allowsAnonymousAccess()) {
-      return false;
-    }
-    return parent::shouldRequireLogin();
-  }
-
   public function shouldAllowPublic() {
     return true;
   }

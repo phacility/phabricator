@@ -6,6 +6,10 @@
 final class ConduitAPI_differential_getdiff_Method
   extends ConduitAPIMethod {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function getMethodStatus() {
     return self::METHOD_STATUS_DEPRECATED;
   }
@@ -36,10 +40,6 @@ final class ConduitAPI_differential_getdiff_Method
     return array(
       'ERR_BAD_DIFF'        => 'No such diff exists.',
     );
-  }
-
-  public function shouldRequireAuthentication() {
-    return !PhabricatorEnv::getEnvConfig('differential.anonymous-access');
   }
 
   protected function execute(ConduitAPIRequest $request) {

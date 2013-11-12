@@ -2,14 +2,6 @@
 
 final class DifferentialChangesetViewController extends DifferentialController {
 
-  public function shouldRequireLogin() {
-    if ($this->allowsAnonymousAccess()) {
-      return false;
-    }
-
-    return parent::shouldRequireLogin();
-  }
-
   public function shouldAllowPublic() {
     return true;
   }

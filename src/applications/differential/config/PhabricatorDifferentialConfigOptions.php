@@ -96,18 +96,6 @@ final class PhabricatorDifferentialConfigOptions
             'sketchy and implies the revision may not actually be receiving '.
             'thorough review. You can enable "!accept" by setting this '.
             'option to true.')),
-      $this->newOption('differential.anonymous-access', 'bool', false)
-        ->setBoolOptions(
-          array(
-            pht('Allow guests to view revisions'),
-            pht('Require authentication to view revisions'),
-          ))
-        ->setSummary(pht('Anonymous access to Differential revisions.'))
-        ->setDescription(
-          pht(
-            "If you set this to true, users won't need to login to view ".
-            "Differential revisions. Anonymous users will have read-only ".
-            "access and won't be able to interact with the revisions.")),
       $this->newOption('differential.generated-paths', 'list<regex>', array())
         ->setSummary(pht("File regexps to treat as automatically generated."))
         ->setDescription(
