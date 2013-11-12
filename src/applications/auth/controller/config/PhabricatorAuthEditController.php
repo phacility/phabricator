@@ -169,14 +169,35 @@ final class PhabricatorAuthEditController
       $cancel_uri = $this->getApplicationURI();
     }
 
-    $str_registration = hsprintf(
-      '<strong>%s:</strong> %s',
-      pht('Allow Registration'),
+    $config_name = 'auth.email-domains';
+    $config_href = '/config/edit/'.$config_name.'/';
+
+    $email_domains = PhabricatorEnv::getEnvConfig($config_name);
+    if ($email_domains) {
+      $registration_warning = pht(
+        "Users will only be able to register with a verified email address ".
+        "at one of the configured [[ %s | %s ]] domains: **%s**",
+        $config_href,
+        $config_name,
+        implode(', ', $email_domains));
+    } else {
+      $registration_warning = pht(
+        "NOTE: Any user who can browse to this install's login page will be ".
+        "able to register a Phabricator account. To restrict who can register ".
+        "an account, configure [[ %s | %s ]].",
+        $config_href,
+        $config_name);
+    }
+
+    $str_registration = array(
+      phutil_tag('strong', array(), pht('Allow Registration:')),
+      ' ',
       pht(
         'Allow users to register new Phabricator accounts using this '.
         'provider. If you disable registration, users can still use this '.
         'provider to log in to existing accounts, but will not be able to '.
-        'create new accounts.'));
+        'create new accounts.'),
+    );
 
     $str_link = hsprintf(
       '<strong>%s:</strong> %s',
@@ -229,6 +250,7 @@ final class PhabricatorAuthEditController
             1,
             $str_registration,
             $v_registration))
+      ->appendRemarkupInstructions($registration_warning)
       ->appendChild(
         id(new AphrontFormCheckboxControl())
           ->addCheckbox(

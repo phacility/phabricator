@@ -90,9 +90,43 @@ final class PhabricatorAuthListController
       id(new PhabricatorCrumbView())
         ->setName(pht('Auth Providers')));
 
+    $config_name = 'auth.email-domains';
+    $config_href = '/config/edit/'.$config_name.'/';
+    $config_link = phutil_tag(
+      'a',
+      array(
+        'href' => $config_href,
+        'target' => '_blank',
+      ),
+      $config_name);
+
+    $warning = new AphrontErrorView();
+
+    $email_domains = PhabricatorEnv::getEnvConfig($config_name);
+    if ($email_domains) {
+      $warning->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+      $warning->setTitle(pht('Registration is Restricted'));
+      $warning->appendChild(
+        pht(
+          'Only users with a verified email address at one of the %s domains '.
+          'will be able to register a Phabricator account: %s',
+          $config_link,
+          phutil_tag('strong', array(), implode(', ', $email_domains))));
+    } else {
+      $warning->setSeverity(AphrontErrorView::SEVERITY_WARNING);
+      $warning->setTitle(pht('Anyone Can Register an Account'));
+      $warning->appendChild(
+        pht(
+          'Anyone who can browse to this Phabricator install will be able to '.
+          'register an account. To restrict who can register an account, '.
+          'configure %s.',
+          $config_link));
+    }
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
+        $warning,
         $list,
       ),
       array(
