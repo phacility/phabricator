@@ -22,9 +22,15 @@ final class DiffusionRepositoryEditBranchesController
       return new Aphront404Response();
     }
 
+    $is_git = false;
+    $is_hg = false;
+
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        $is_git = true;
+        break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $is_hg = true;
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         throw new Exception(
@@ -64,9 +70,11 @@ final class DiffusionRepositoryEditBranchesController
         ->setTransactionType($type_track)
         ->setNewValue($v_track);
 
-      $xactions[] = id(clone $template)
-        ->setTransactionType($type_autoclose)
-        ->setNewValue($v_autoclose);
+      if (!$is_hg) {
+        $xactions[] = id(clone $template)
+          ->setTransactionType($type_autoclose)
+          ->setNewValue($v_autoclose);
+      }
 
       id(new PhabricatorRepositoryEditor())
         ->setContinueOnNoEffect(true)
@@ -119,18 +127,22 @@ final class DiffusionRepositoryEditBranchesController
           ->setLabel(pht('Track Only'))
           ->setValue($v_track)
           ->setCaption(
-            pht('Example: %s', phutil_tag('tt', array(), 'master, develop'))))
-      ->appendChild(
+            pht('Example: %s', phutil_tag('tt', array(), 'master, develop'))));
+
+    if (!$is_hg) {
+      $form->appendChild(
         id(new AphrontFormTextControl())
           ->setName('autoclose')
           ->setLabel(pht('Autoclose Only'))
           ->setValue($v_autoclose)
           ->setCaption(
-            pht('Example: %s', phutil_tag('tt', array(), 'master, release'))))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue(pht('Save Branches'))
-          ->addCancelButton($edit_uri));
+            pht('Example: %s', phutil_tag('tt', array(), 'master, release'))));
+    }
+
+    $form->appendChild(
+      id(new AphrontFormSubmitControl())
+        ->setValue(pht('Save Branches'))
+        ->addCancelButton($edit_uri));
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
