@@ -326,13 +326,20 @@ final class PhabricatorAuthRegisterController
     }
 
 
-    $form
-      ->appendChild(
+    if ($can_edit_username) {
+      $form->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Phabricator Username'))
           ->setName('username')
           ->setValue($value_username)
           ->setError($e_username));
+    } else {
+      $form->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel(pht('Phabricator Username'))
+          ->setValue($value_username)
+          ->setError($e_username));
+    }
 
     if ($must_set_password) {
       $form->appendChild(
