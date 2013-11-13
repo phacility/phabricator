@@ -51,8 +51,7 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
           ->setName(pht('Log In'))
           // TODO: Login icon?
           ->setIcon('power')
-          ->setWorkflow(true)
-          ->setHref('/auth/login/');
+          ->setHref('/auth/start/');
         $items[] = $item;
       }
     }
