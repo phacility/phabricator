@@ -40,7 +40,7 @@ final class ManiphestTaskListController
     $group_parameter = nonempty($query->getParameter('group'), 'priority');
     $order_parameter = nonempty($query->getParameter('order'), 'priority');
 
-    $handles = $this->loadTaskHandles($tasks);
+    $handles = ManiphestTaskListView::loadTaskHandles($viewer, $tasks);
     $groups = $this->groupTasks(
       $tasks,
       $group_parameter,
@@ -112,30 +112,6 @@ final class ManiphestTaskListController
         $lists,
         $this->renderBatchEditor($query),
       ));
-  }
-
-  private function loadTaskHandles(array $tasks) {
-    assert_instances_of($tasks, 'ManiphestTask');
-
-    $phids = array();
-    foreach ($tasks as $task) {
-      $assigned_phid = $task->getOwnerPHID();
-      if ($assigned_phid) {
-        $phids[] = $assigned_phid;
-      }
-      foreach ($task->getProjectPHIDs() as $project_phid) {
-        $phids[] = $project_phid;
-      }
-    }
-
-    if (!$phids) {
-      return array();
-    }
-
-    return id(new PhabricatorHandleQuery())
-      ->setViewer($this->getRequest()->getUser())
-      ->withPHIDs($phids)
-      ->execute();
   }
 
   private function groupTasks(array $tasks, $group, array $handles) {
