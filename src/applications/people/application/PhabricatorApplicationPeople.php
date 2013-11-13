@@ -41,6 +41,8 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
       '/people/' => array(
         '(query/(?P<key>[^/]+)/)?' => 'PhabricatorPeopleListController',
         'logs/' => 'PhabricatorPeopleLogsController',
+        'approve/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleApproveController',
+        'disable/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleDisableController',
         'edit/(?:(?P<id>[1-9]\d*)/(?:(?P<view>\w+)/)?)?'
           => 'PhabricatorPeopleEditController',
         'ldap/' => 'PhabricatorPeopleLdapController',

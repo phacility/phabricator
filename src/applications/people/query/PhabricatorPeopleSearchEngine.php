@@ -15,6 +15,7 @@ final class PhabricatorPeopleSearchEngine
     $saved->setParameter('isAdmin', $request->getStr('isAdmin'));
     $saved->setParameter('isDisabled', $request->getStr('isDisabled'));
     $saved->setParameter('isSystemAgent', $request->getStr('isSystemAgent'));
+    $saved->setParameter('needsApproval', $request->getStr('needsApproval'));
     $saved->setParameter('createdStart', $request->getStr('createdStart'));
     $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
 
@@ -40,6 +41,8 @@ final class PhabricatorPeopleSearchEngine
     $is_admin = $saved->getParameter('isAdmin');
     $is_disabled = $saved->getParameter('isDisabled');
     $is_system_agent = $saved->getParameter('isSystemAgent');
+    $needs_approval = $saved->getParameter('needsApproval');
+    $no_disabled = $saved->getParameter('noDisabled');
 
     if ($is_admin) {
       $query->withIsAdmin(true);
@@ -47,10 +50,16 @@ final class PhabricatorPeopleSearchEngine
 
     if ($is_disabled) {
       $query->withIsDisabled(true);
+    } else if ($no_disabled) {
+      $query->withIsDisabled(false);
     }
 
     if ($is_system_agent) {
       $query->withIsSystemAgent(true);
+    }
+
+    if ($needs_approval) {
+      $query->withIsApproved(false);
     }
 
     $start = $this->parseDateTime($saved->getParameter('createdStart'));
@@ -79,6 +88,7 @@ final class PhabricatorPeopleSearchEngine
     $is_admin = $saved->getParameter('isAdmin');
     $is_disabled = $saved->getParameter('isDisabled');
     $is_system_agent = $saved->getParameter('isSystemAgent');
+    $needs_approval = $saved->getParameter('needsApproval');
 
     $form
       ->appendChild(
@@ -108,7 +118,12 @@ final class PhabricatorPeopleSearchEngine
             'isSystemAgent',
             1,
             pht('Show only System Agents.'),
-            $is_system_agent));
+            $is_system_agent)
+          ->addCheckbox(
+            'needsApproval',
+            1,
+            pht('Show only users who need approval.'),
+            $needs_approval));
 
     $this->appendCustomFieldsToForm($form, $saved);
 
@@ -130,6 +145,11 @@ final class PhabricatorPeopleSearchEngine
       'all' => pht('All'),
     );
 
+    $viewer = $this->requireViewer();
+    if ($viewer->getIsAdmin()) {
+      $names['approval'] = pht('Approval Queue');
+    }
+
     return $names;
   }
 
@@ -140,6 +160,10 @@ final class PhabricatorPeopleSearchEngine
     switch ($query_key) {
       case 'all':
         return $query;
+      case 'approval':
+        return $query
+          ->setParameter('needsApproval', true)
+          ->setParameter('noDisabled', true);
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);

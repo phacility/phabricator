@@ -297,6 +297,44 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
   /**
    * @task role
    */
+  public function approveUser(PhabricatorUser $user, $approve) {
+    $actor = $this->requireActor();
+
+    if (!$user->getID()) {
+      throw new Exception("User has not been created yet!");
+    }
+
+    $user->openTransaction();
+      $user->beginWriteLocking();
+
+        $user->reload();
+        if ($user->getIsApproved() == $approve) {
+          $user->endWriteLocking();
+          $user->killTransaction();
+          return $this;
+        }
+
+        $log = PhabricatorUserLog::newLog(
+          $actor,
+          $user,
+          PhabricatorUserLog::ACTION_APPROVE);
+        $log->setOldValue($user->getIsApproved());
+        $log->setNewValue($approve);
+
+        $user->setIsApproved($approve);
+        $user->save();
+
+        $log->save();
+
+      $user->endWriteLocking();
+    $user->saveTransaction();
+
+    return $this;
+  }
+
+  /**
+   * @task role
+   */
   public function deleteUser(PhabricatorUser $user, $disable) {
     $actor = $this->requireActor();
 

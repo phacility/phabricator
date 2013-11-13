@@ -120,6 +120,11 @@ abstract class PhabricatorController extends AphrontController {
             return $this->delegateToController($controller);
           }
         }
+        if (!$user->getIsApproved()) {
+          $controller = new PhabricatorAuthNeedsApprovalController($request);
+          $this->setCurrentApplication($auth_application);
+          return $this->delegateToController($controller);
+        }
       }
 
       // If the user doesn't have access to the application, don't let them use
