@@ -182,6 +182,9 @@ final class PhabricatorPeopleEditController
               ->setAddress($new_email)
               ->setIsVerified(0);
 
+            // Automatically approve the user, since an admin is creating them.
+            $user->setIsApproved(1);
+
             id(new PhabricatorUserEditor())
               ->setActor($admin)
               ->createNewUser($user, $email);

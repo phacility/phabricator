@@ -232,6 +232,19 @@ final class PhabricatorAuthRegisterController
           $user->setUsername($value_username);
           $user->setRealname($value_realname);
 
+          if ($is_setup) {
+            $must_approve = false;
+          } else {
+            $must_approve = PhabricatorEnv::getEnvConfig(
+              'auth.require-approval');
+          }
+
+          if ($must_approve) {
+            $user->setIsApproved(0);
+          } else {
+            $user->setIsApproved(1);
+          }
+
           $user->openTransaction();
 
             $editor = id(new PhabricatorUserEditor())
@@ -255,6 +268,10 @@ final class PhabricatorAuthRegisterController
 
           if (!$email_obj->getIsVerified()) {
             $email_obj->sendVerificationEmail($user);
+          }
+
+          if ($must_approve) {
+            $this->sendWaitingForApprovalEmail($user);
           }
 
           return $this->loginUser($user);
@@ -504,6 +521,45 @@ final class PhabricatorAuthRegisterController
     return $this->renderErrorPage(
       pht('Registration Failed'),
       array($message));
+  }
+
+  private function sendWaitingForApprovalEmail(PhabricatorUser $user) {
+    $title = '[Phabricator] '.pht(
+      'New User "%s" Awaiting Approval',
+      $user->getUsername());
+
+    $body = new PhabricatorMetaMTAMailBody();
+
+    $body->addRawSection(
+      pht(
+        'Newly registered user "%s" is awaiting account approval by an '.
+        'administrator.',
+        $user->getUsername()));
+
+    $body->addTextSection(
+      pht('APPROVAL QUEUE'),
+      PhabricatorEnv::getProductionURI(
+        '/people/query/approval/'));
+
+    $body->addTextSection(
+      pht('DISABLE APPROVAL QUEUE'),
+      PhabricatorEnv::getProductionURI(
+        '/config/edit/auth.require-approval/'));
+
+    $admins = id(new PhabricatorPeopleQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withIsAdmin(true)
+      ->execute();
+
+    if (!$admins) {
+      return;
+    }
+
+    $mail = id(new PhabricatorMetaMTAMail())
+      ->addTos(mpull($admins, 'getPHID'))
+      ->setSubject($title)
+      ->setBody($body->render())
+      ->saveAndSend();
   }
 
 }

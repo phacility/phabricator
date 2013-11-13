@@ -30,7 +30,7 @@ final class PhabricatorUser
   protected $isAdmin = 0;
   protected $isDisabled = 0;
   protected $isEmailVerified = 0;
-  protected $isApproved = 1;
+  protected $isApproved = 0;
 
   private $profileImage = null;
   private $profile = null;

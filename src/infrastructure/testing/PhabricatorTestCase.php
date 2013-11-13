@@ -181,7 +181,8 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
 
     $user = id(new PhabricatorUser())
       ->setRealName("Test User {$seed}}")
-      ->setUserName("test{$seed}");
+      ->setUserName("test{$seed}")
+      ->setIsApproved(1);
 
     $email = id(new PhabricatorUserEmail())
       ->setAddress("testuser{$seed}@example.com")

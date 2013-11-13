@@ -42,6 +42,7 @@ if ($existing_email) {
 $user = new PhabricatorUser();
 $user->setUsername($username);
 $user->setRealname($realname);
+$user->setIsApproved(1);
 
 $email_object = id(new PhabricatorUserEmail())
   ->setAddress($email)
