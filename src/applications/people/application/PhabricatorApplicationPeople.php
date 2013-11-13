@@ -62,13 +62,39 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
     );
   }
 
+  public function loadStatus(PhabricatorUser $user) {
+    if (!$user->getIsAdmin()) {
+      return array();
+    }
+
+    $need_approval = id(new PhabricatorPeopleQuery())
+      ->setViewer($user)
+      ->withIsApproved(false)
+      ->execute();
+
+    if (!$need_approval) {
+      return array();
+    }
+
+    $status = array();
+
+    $count = count($need_approval);
+    $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
+    $status[] = id(new PhabricatorApplicationStatusView())
+      ->setType($type)
+      ->setText(pht('%d User(s) Need Approval', $count))
+      ->setCount($count);
+
+    return $status;
+  }
+
   public function buildMainMenuItems(
     PhabricatorUser $user,
     PhabricatorController $controller = null) {
 
     $items = array();
 
-    if ($user->isLoggedIn()) {
+    if ($user->isLoggedIn() && $user->isUserActivated()) {
       $image = $user->loadProfileImageURI();
 
       $item = new PHUIListItemView();

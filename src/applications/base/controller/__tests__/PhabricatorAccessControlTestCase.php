@@ -47,6 +47,11 @@ final class PhabricatorAccessControlTestCase
       ->setUsername('admin')
       ->save();
 
+    $u_notapproved = $this->generateNewTestUser()
+      ->setIsApproved(0)
+      ->setUsername('notapproved')
+      ->save();
+
     $env = PhabricatorEnv::beginScopedEnv();
     $env->overrideEnvConfig('phabricator.base-uri', 'http://'.$host);
     $env->overrideEnvConfig('policy.allow-public', false);
@@ -68,6 +73,7 @@ final class PhabricatorAccessControlTestCase
       array(
         $u_public,
         $u_disabled,
+        $u_notapproved,
       ));
 
 
@@ -86,6 +92,7 @@ final class PhabricatorAccessControlTestCase
         $u_unverified,
         $u_public,
         $u_disabled,
+        $u_notapproved,
       ));
 
     $this->checkAccess(
@@ -100,6 +107,7 @@ final class PhabricatorAccessControlTestCase
       array(
         $u_public,
         $u_disabled,
+        $u_notapproved,
       ));
     $env->overrideEnvConfig('auth.require-email-verification', false);
 
@@ -118,6 +126,7 @@ final class PhabricatorAccessControlTestCase
         $u_unverified,
         $u_public,
         $u_disabled,
+        $u_notapproved,
       ));
 
 
@@ -132,6 +141,7 @@ final class PhabricatorAccessControlTestCase
         $u_unverified,
         $u_admin,
         $u_disabled,
+        $u_notapproved,
       ),
       array(
         $u_public,
@@ -152,6 +162,7 @@ final class PhabricatorAccessControlTestCase
       ),
       array(
         $u_disabled,
+        $u_notapproved,
       ));
 
 
@@ -184,6 +195,7 @@ final class PhabricatorAccessControlTestCase
       ),
       array(
         $u_disabled,
+        $u_notapproved,
       ));
     $env->overrideEnvConfig('policy.allow-public', false);
 
@@ -208,6 +220,7 @@ final class PhabricatorAccessControlTestCase
         $u_admin,
         $u_public,
         $u_disabled,
+        $u_notapproved,
       ));
 
     $this->checkAccess(
@@ -222,6 +235,7 @@ final class PhabricatorAccessControlTestCase
       ),
       array(
         $u_disabled,
+        $u_notapproved,
       ));
   }
 
