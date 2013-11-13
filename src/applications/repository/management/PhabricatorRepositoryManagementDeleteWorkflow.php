@@ -15,6 +15,10 @@ final class PhabricatorRepositoryManagementDeleteWorkflow
             'help'        => 'Show additional debugging information.',
           ),
           array(
+            'name'        => 'force',
+            'help'        => 'Do not prompt for confirmation.',
+          ),
+          array(
             'name'        => 'repos',
             'wildcard'    => true,
           ),
@@ -30,9 +34,25 @@ final class PhabricatorRepositoryManagementDeleteWorkflow
     }
 
     $console = PhutilConsole::getConsole();
+
+    if (!$args->getArg('force')) {
+      $console->writeOut("%s\n\n", pht('These repositories will be deleted:'));
+
+      foreach ($repos as $repo) {
+        $console->writeOut(
+          "  %s %s\n",
+          'r'.$repo->getCallsign(),
+          $repo->getName());
+      }
+
+      $prompt = pht('Permanently delete these repositories?');
+      if (!$console->confirm($prompt)) {
+        return 1;
+      }
+    }
+
     foreach ($repos as $repo) {
       $console->writeOut("Deleting '%s'...\n", $repo->getCallsign());
-
       $repo->delete();
     }
 
