@@ -36,10 +36,11 @@ final class PhabricatorMarkupOneOff implements PhabricatorMarkupInterface {
   }
 
   public function newMarkupEngine($field) {
-    return PhabricatorMarkupEngine::newMarkupEngine(
-      array(
-        'preserve-linebreaks' => $this->preserveLinebreaks,
-      ));
+    if ($this->preserveLinebreaks) {
+      return PhabricatorMarkupEngine::getEngine();
+    } else {
+      return PhabricatorMarkupEngine::getEngine('nolinebreaks');
+    }
   }
 
   public function getMarkupText($field) {
