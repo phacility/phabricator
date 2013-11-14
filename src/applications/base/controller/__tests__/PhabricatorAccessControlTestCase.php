@@ -31,7 +31,7 @@ final class PhabricatorAccessControlTestCase
     $u_unverified = $this->generateNewTestUser()
       ->setUsername('unverified')
       ->save();
-    $u_unverified->loadPrimaryEmail()->setIsVerified(0)->save();
+    $u_unverified->setIsEmailVerified(0)->save();
 
     $u_normal = $this->generateNewTestUser()
       ->setUsername('normal')
@@ -45,6 +45,11 @@ final class PhabricatorAccessControlTestCase
     $u_admin = $this->generateNewTestUser()
       ->setIsAdmin(true)
       ->setUsername('admin')
+      ->save();
+
+    $u_notapproved = $this->generateNewTestUser()
+      ->setIsApproved(0)
+      ->setUsername('notapproved')
       ->save();
 
     $env = PhabricatorEnv::beginScopedEnv();
@@ -68,6 +73,7 @@ final class PhabricatorAccessControlTestCase
       array(
         $u_public,
         $u_disabled,
+        $u_notapproved,
       ));
 
 
@@ -86,6 +92,7 @@ final class PhabricatorAccessControlTestCase
         $u_unverified,
         $u_public,
         $u_disabled,
+        $u_notapproved,
       ));
 
     $this->checkAccess(
@@ -100,6 +107,7 @@ final class PhabricatorAccessControlTestCase
       array(
         $u_public,
         $u_disabled,
+        $u_notapproved,
       ));
     $env->overrideEnvConfig('auth.require-email-verification', false);
 
@@ -118,6 +126,7 @@ final class PhabricatorAccessControlTestCase
         $u_unverified,
         $u_public,
         $u_disabled,
+        $u_notapproved,
       ));
 
 
@@ -132,6 +141,7 @@ final class PhabricatorAccessControlTestCase
         $u_unverified,
         $u_admin,
         $u_disabled,
+        $u_notapproved,
       ),
       array(
         $u_public,
@@ -152,6 +162,7 @@ final class PhabricatorAccessControlTestCase
       ),
       array(
         $u_disabled,
+        $u_notapproved,
       ));
 
 
@@ -184,6 +195,7 @@ final class PhabricatorAccessControlTestCase
       ),
       array(
         $u_disabled,
+        $u_notapproved,
       ));
     $env->overrideEnvConfig('policy.allow-public', false);
 
@@ -208,6 +220,7 @@ final class PhabricatorAccessControlTestCase
         $u_admin,
         $u_public,
         $u_disabled,
+        $u_notapproved,
       ));
 
     $this->checkAccess(
@@ -222,6 +235,7 @@ final class PhabricatorAccessControlTestCase
       ),
       array(
         $u_disabled,
+        $u_notapproved,
       ));
   }
 

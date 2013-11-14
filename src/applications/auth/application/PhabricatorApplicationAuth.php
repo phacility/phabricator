@@ -41,6 +41,19 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
         ->setHref('/logout/')
         ->setSelected(($controller instanceof PhabricatorLogoutController));
       $items[] = $item;
+    } else {
+      if ($controller instanceof PhabricatorAuthController) {
+        // Don't show the "Login" item on auth controllers, since they're
+        // generally all related to logging in anyway.
+      } else {
+        $item = id(new PHUIListItemView())
+          ->addClass('core-menu-item')
+          ->setName(pht('Log In'))
+          // TODO: Login icon?
+          ->setIcon('power')
+          ->setHref('/auth/start/');
+        $items[] = $item;
+      }
     }
 
     return $items;

@@ -124,3 +124,7 @@
 .aphront-capability-details {
   margin: 20px 0 4px;
 }
+
+.aphront-dialog-view-paragraph + .aphront-dialog-view-paragraph {
+  margin-top: 16px;
+}

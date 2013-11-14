@@ -313,24 +313,11 @@ final class PhabricatorConduitAPIController
     ConduitAPIRequest $request,
     PhabricatorUser $user) {
 
-    if ($user->getIsDisabled()) {
+    if (!$user->isUserActivated()) {
       return array(
         'ERR-USER-DISABLED',
-        'User is disabled.');
-    }
-
-    if (PhabricatorUserEmail::isEmailVerificationRequired()) {
-      $email = $user->loadPrimaryEmail();
-      if (!$email) {
-        return array(
-          'ERR-USER-NOEMAIL',
-          'User has no primary email address.');
-      }
-      if (!$email->getIsVerified()) {
-        return array(
-          'ERR-USER-UNVERIFIED',
-          'User has unverified email address.');
-      }
+        pht('User account is not activated.'),
+      );
     }
 
     $request->setUser($user);

@@ -59,16 +59,30 @@ final class PhabricatorAuthRegisterController
     $default_realname = $account->getRealName();
     $default_email = $account->getEmail();
     if ($default_email) {
-      // If the account source provided an email but it's not allowed by
-      // the configuration, just pretend we didn't get an email at all.
+      // If the account source provided an email, but it's not allowed by
+      // the configuration, roadblock the user. Previously, we let the user
+      // pick a valid email address instead, but this does not align well with
+      // user expectation and it's not clear the cases it enables are valuable.
+      // See discussion in T3472.
       if (!PhabricatorUserEmail::isAllowedAddress($default_email)) {
-        $default_email = null;
+        return $this->renderError(
+          array(
+            pht(
+              'The account you are attempting to register with has an invalid '.
+              'email address (%s). This Phabricator install only allows '.
+              'registration with specific email addresses:',
+              $default_email),
+            phutil_tag('br'),
+            phutil_tag('br'),
+            PhabricatorUserEmail::describeAllowedAddresses(),
+          ));
       }
 
       // If the account source provided an email, but another account already
       // has that email, just pretend we didn't get an email.
 
       // TODO: See T3340.
+      // TODO: See T3472.
 
       if ($default_email) {
         $same_email = id(new PhabricatorUserEmail())->loadOneWhere(
@@ -218,6 +232,19 @@ final class PhabricatorAuthRegisterController
           $user->setUsername($value_username);
           $user->setRealname($value_realname);
 
+          if ($is_setup) {
+            $must_approve = false;
+          } else {
+            $must_approve = PhabricatorEnv::getEnvConfig(
+              'auth.require-approval');
+          }
+
+          if ($must_approve) {
+            $user->setIsApproved(0);
+          } else {
+            $user->setIsApproved(1);
+          }
+
           $user->openTransaction();
 
             $editor = id(new PhabricatorUserEditor())
@@ -241,6 +268,10 @@ final class PhabricatorAuthRegisterController
 
           if (!$email_obj->getIsVerified()) {
             $email_obj->sendVerificationEmail($user);
+          }
+
+          if ($must_approve) {
+            $this->sendWaitingForApprovalEmail($user);
           }
 
           return $this->loginUser($user);
@@ -295,13 +326,20 @@ final class PhabricatorAuthRegisterController
     }
 
 
-    $form
-      ->appendChild(
+    if ($can_edit_username) {
+      $form->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Phabricator Username'))
           ->setName('username')
           ->setValue($value_username)
           ->setError($e_username));
+    } else {
+      $form->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel(pht('Phabricator Username'))
+          ->setValue($value_username)
+          ->setError($e_username));
+    }
 
     if ($must_set_password) {
       $form->appendChild(
@@ -490,6 +528,45 @@ final class PhabricatorAuthRegisterController
     return $this->renderErrorPage(
       pht('Registration Failed'),
       array($message));
+  }
+
+  private function sendWaitingForApprovalEmail(PhabricatorUser $user) {
+    $title = '[Phabricator] '.pht(
+      'New User "%s" Awaiting Approval',
+      $user->getUsername());
+
+    $body = new PhabricatorMetaMTAMailBody();
+
+    $body->addRawSection(
+      pht(
+        'Newly registered user "%s" is awaiting account approval by an '.
+        'administrator.',
+        $user->getUsername()));
+
+    $body->addTextSection(
+      pht('APPROVAL QUEUE'),
+      PhabricatorEnv::getProductionURI(
+        '/people/query/approval/'));
+
+    $body->addTextSection(
+      pht('DISABLE APPROVAL QUEUE'),
+      PhabricatorEnv::getProductionURI(
+        '/config/edit/auth.require-approval/'));
+
+    $admins = id(new PhabricatorPeopleQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withIsAdmin(true)
+      ->execute();
+
+    if (!$admins) {
+      return;
+    }
+
+    $mail = id(new PhabricatorMetaMTAMail())
+      ->addTos(mpull($admins, 'getPHID'))
+      ->setSubject($title)
+      ->setBody($body->render())
+      ->saveAndSend();
   }
 
 }

@@ -1748,6 +1748,14 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20131107.buildlog.sql'),
       ),
+      '20131112.userverified.1.col.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131112.userverified.1.col.sql'),
+      ),
+      '20131112.userverified.2.mig.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20131112.userverified.2.mig.php'),
+      ),
     );
   }
 }

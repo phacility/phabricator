@@ -39,8 +39,20 @@ final class PhabricatorEmailVerificationController
       $continue = pht('Continue to Phabricator');
     } else {
       $guard = AphrontWriteGuard::beginScopedUnguardedWrites();
-        $email->setIsVerified(1);
-        $email->save();
+        $email->openTransaction();
+
+          $email->setIsVerified(1);
+          $email->save();
+
+          // If the user just verified their primary email address, mark their
+          // account as email verified.
+          $user_primary = $user->loadPrimaryEmail();
+          if ($user_primary->getID() == $email->getID()) {
+            $user->setIsEmailVerified(1);
+            $user->save();
+          }
+
+        $email->saveTransaction();
       unset($guard);
 
       $title = pht('Address Verified');

@@ -202,13 +202,16 @@ final class PhabricatorMarkupEngine {
     PhabricatorMarkupInterface $object,
     $field) {
 
-    $custom = array_merge(
-      self::loadCustomInlineRules(),
-      self::loadCustomBlockRules());
+    static $custom;
+    if ($custom === null) {
+      $custom = array_merge(
+        self::loadCustomInlineRules(),
+        self::loadCustomBlockRules());
 
-    $custom = mpull($custom, 'getRuleVersion', null);
-    ksort($custom);
-    $custom = PhabricatorHash::digestForIndex(serialize($custom));
+      $custom = mpull($custom, 'getRuleVersion', null);
+      ksort($custom);
+      $custom = PhabricatorHash::digestForIndex(serialize($custom));
+    }
 
     return $object->getMarkupFieldKey($field).'@'.$this->version.'@'.$custom;
   }
@@ -363,6 +366,10 @@ final class PhabricatorMarkupEngine {
     switch ($ruleset) {
       case 'default':
         $engine = self::newMarkupEngine(array());
+        break;
+      case 'nolinebreaks':
+        $engine = self::newMarkupEngine(array());
+        $engine->setConfig('preserve-linebreaks', false);
         break;
       case 'diviner':
         $engine = self::newMarkupEngine(array());

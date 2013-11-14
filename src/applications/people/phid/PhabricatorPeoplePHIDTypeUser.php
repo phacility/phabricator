@@ -38,7 +38,7 @@ final class PhabricatorPeoplePHIDTypeUser extends PhabricatorPHIDType {
       $handle->setFullName(
         $user->getUsername().' ('.$user->getRealName().')');
       $handle->setImageURI($user->loadProfileImageURI());
-      $handle->setDisabled($user->getIsDisabled());
+      $handle->setDisabled(!$user->isUserActivated());
       if ($user->hasStatus()) {
         $status = $user->getStatus();
         $handle->setStatus($status->getTextStatus());

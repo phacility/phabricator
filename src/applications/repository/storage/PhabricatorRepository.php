@@ -577,7 +577,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
    *              @{class@libphutil:PhutilGitURI}.
    * @task uri
    */
-  private function getRemoteURIObject() {
+  public function getRemoteURIObject() {
     $raw_uri = $this->getDetail('remote-uri');
     if (!$raw_uri) {
       return new PhutilURI('');

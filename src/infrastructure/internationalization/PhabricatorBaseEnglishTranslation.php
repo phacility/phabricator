@@ -810,6 +810,11 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
+      '%d User(s) Need Approval' => array(
+        '%d User Needs Approval',
+        '%d Users Need Approval',
+      ),
+
     );
   }
 

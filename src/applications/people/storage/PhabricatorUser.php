@@ -29,6 +29,8 @@ final class PhabricatorUser
   protected $isSystemAgent = 0;
   protected $isAdmin = 0;
   protected $isDisabled = 0;
+  protected $isEmailVerified = 0;
+  protected $isApproved = 0;
 
   private $profileImage = null;
   private $profile = null;
@@ -51,9 +53,39 @@ final class PhabricatorUser
         return (bool)$this->isDisabled;
       case 'isSystemAgent':
         return (bool)$this->isSystemAgent;
+      case 'isEmailVerified':
+        return (bool)$this->isEmailVerified;
+      case 'isApproved':
+        return (bool)$this->isApproved;
       default:
         return parent::readField($field);
     }
+  }
+
+
+  /**
+   * Is this a live account which has passed required approvals? Returns true
+   * if this is an enabled, verified (if required), approved (if required)
+   * account, and false otherwise.
+   *
+   * @return bool True if this is a standard, usable account.
+   */
+  public function isUserActivated() {
+    if ($this->getIsDisabled()) {
+      return false;
+    }
+
+    if (!$this->getIsApproved()) {
+      return false;
+    }
+
+    if (PhabricatorUserEmail::isEmailVerificationRequired()) {
+      if (!$this->getIsEmailVerified()) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   public function getConfiguration() {

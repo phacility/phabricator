@@ -87,7 +87,7 @@ final class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
           'target' => '_blank',
         ),
         pht('Profile Permalink'));
-      $result = phutil_tag(
+      $result[] = phutil_tag(
         'iframe',
         array('src' => "/xhprof/profile/$run/?frame=true"));
     } else {

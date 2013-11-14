@@ -63,6 +63,9 @@ final class PhabricatorMailManagementShowInboundWorkflow
       $info[] = null;
       $info[] = pht('HEADERS');
       foreach ($message->getHeaders() as $key => $value) {
+        if (is_array($value)) {
+          $value = implode("\n", $value);
+        }
         $info[] = pht('%s: %s', $key, $value);
       }
 

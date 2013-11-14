@@ -9,6 +9,7 @@ final class PhabricatorContentSource {
   const SOURCE_MOBILE   = 'mobile';
   const SOURCE_TABLET   = 'tablet';
   const SOURCE_FAX      = 'fax';
+  const SOURCE_CONSOLE  = 'console';
   const SOURCE_LEGACY   = 'legacy';
 
   private $source;
@@ -39,6 +40,12 @@ final class PhabricatorContentSource {
     return $obj;
   }
 
+  public static function newConsoleSource() {
+    return self::newForSource(
+      PhabricatorContentSource::SOURCE_CONSOLE,
+      array());
+  }
+
   public static function newFromRequest(AphrontRequest $request) {
     return self::newForSource(
       PhabricatorContentSource::SOURCE_WEB,
@@ -61,6 +68,7 @@ final class PhabricatorContentSource {
       self::SOURCE_MOBILE   => pht('Mobile'),
       self::SOURCE_TABLET   => pht('Tablet'),
       self::SOURCE_FAX      => pht('Fax'),
+      self::SOURCE_CONSOLE  => pht('Console'),
       self::SOURCE_LEGACY   => pht('Legacy'),
       self::SOURCE_UNKNOWN  => pht('Other'),
     );

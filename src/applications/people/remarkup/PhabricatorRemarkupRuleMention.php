@@ -107,7 +107,7 @@ final class PhabricatorRemarkupRuleMention
           ->setName('@'.$user->getUserName())
           ->setHref('/p/'.$user->getUserName().'/');
 
-        if ($user->getIsDisabled()) {
+        if (!$user->isUserActivated()) {
           $tag->setDotColor(PhabricatorTagView::COLOR_GREY);
         } else {
           $status = idx($user_statuses, $user->getPHID());

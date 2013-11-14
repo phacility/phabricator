@@ -55,8 +55,7 @@ final class ManiphestBatchEditController extends ManiphestController {
         ->setURI('/maniphest/?ids='.$task_ids);
     }
 
-    $handle_phids = mpull($tasks, 'getOwnerPHID');
-    $handles = $this->loadViewerHandles($handle_phids);
+    $handles = ManiphestTaskListView::loadTaskHandles($user, $tasks);
 
     $list = new ManiphestTaskListView();
     $list->setTasks($tasks);

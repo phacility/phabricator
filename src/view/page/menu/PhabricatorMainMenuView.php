@@ -44,7 +44,7 @@ final class PhabricatorMainMenuView extends AphrontView {
     $search_button = '';
     $app_button = '';
 
-    if ($user->isLoggedIn()) {
+    if ($user->isLoggedIn() && $user->isUserActivated()) {
       list($menu, $dropdowns) = $this->renderNotificationMenu();
       $alerts[] = $menu;
       $menus = array_merge($menus, $dropdowns);
@@ -91,8 +91,11 @@ final class PhabricatorMainMenuView extends AphrontView {
       'helpURI' => '/help/keyboardshortcut/',
     );
 
-    $show_search = ($user->isLoggedIn()) ||
-                   (PhabricatorEnv::getEnvConfig('policy.allow-public'));
+    if ($user->isLoggedIn()) {
+      $show_search = $user->isUserActivated();
+    } else {
+      $show_search = PhabricatorEnv::getEnvConfig('policy.allow-public');
+    }
 
     if ($show_search) {
       $search = new PhabricatorMainMenuSearchView();

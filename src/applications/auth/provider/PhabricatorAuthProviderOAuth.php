@@ -37,6 +37,11 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
     $adapter = $this->getAdapter();
     $adapter->setState(PhabricatorHash::digest($request->getCookie('phcid')));
 
+    $scope = $request->getStr("scope");
+    if ($scope) {
+      $adapter->setScope($scope);
+    }
+
     $attributes = array(
       'method' => 'GET',
       'uri' => $adapter->getAuthenticateURI(),

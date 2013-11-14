@@ -26,40 +26,7 @@ final class DiffusionRepositoryEditLocalController
     $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
 
     $v_local = $repository->getHumanReadableDetail('local-path');
-    $e_local = true;
     $errors = array();
-
-    if ($request->isFormPost()) {
-      $v_local = $request->getStr('local');
-
-      if (!strlen($v_local)) {
-        $e_local = pht('Required');
-        $errors[] = pht('You must specify a local path.');
-      }
-
-      if (!$errors) {
-        $xactions = array();
-        $template = id(new PhabricatorRepositoryTransaction());
-
-        $type_local = PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH;
-
-        $xactions[] = id(clone $template)
-          ->setTransactionType($type_local)
-          ->setNewValue($v_local);
-
-        try {
-          id(new PhabricatorRepositoryEditor())
-            ->setContinueOnNoEffect(true)
-            ->setContentSourceFromRequest($request)
-            ->setActor($user)
-            ->applyTransactions($repository, $xactions);
-
-          return id(new AphrontRedirectResponse())->setURI($edit_uri);
-        } catch (Exception $ex) {
-          $errors[] = $ex->getMessage();
-        }
-      }
-    }
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
@@ -79,18 +46,19 @@ final class DiffusionRepositoryEditLocalController
       ->setUser($user)
       ->appendRemarkupInstructions(
         pht(
-          'You can adjust the local path for this repository here. This is '.
-          'an advanced setting and you usually should not change it.'))
+          "You can not adjust the local path for this repository from the ".
+          "web interface. To edit it, run this command:\n\n".
+          "  phabricator/ $ ./bin/repository edit %s --as %s --local-path ...",
+          $repository->getCallsign(),
+          $user->getUsername()))
       ->appendChild(
-        id(new AphrontFormTextControl())
+        id(new AphrontFormMarkupControl())
           ->setName('local')
           ->setLabel(pht('Local Path'))
-          ->setValue($v_local)
-          ->setError($e_local))
+          ->setValue($v_local))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue(pht('Save Local'))
-          ->addCancelButton($edit_uri));
+          ->addCancelButton($edit_uri, pht('Done')));
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)

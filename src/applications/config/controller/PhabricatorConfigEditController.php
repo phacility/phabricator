@@ -490,7 +490,7 @@ final class PhabricatorConfigEditController
 
       $table[] = phutil_tag('tr', array(), array(
         phutil_tag('th', array(), $description),
-        phutil_tag('th', array(), $value),
+        phutil_tag('td', array(), $value),
       ));
     }
 

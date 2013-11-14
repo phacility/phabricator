@@ -82,6 +82,11 @@ final class PhabricatorMetaMTAActorQuery extends PhabricatorQuery {
           $actor->setUndeliverable(
             pht('This user is a bot; bot accounts do not receive mail.'));
         }
+
+        // NOTE: We do send email to unapproved users, and to unverified users,
+        // because it would otherwise be impossible to get them to verify their
+        // email addresses. Possibly we should white-list this kind of mail and
+        // deny all other types of mail.
       }
 
       $email = idx($emails, $phid);

@@ -181,6 +181,7 @@ $user->openTransaction();
     $editor->createNewUser($user, $email);
   } else {
     if ($verify_email) {
+      $user->setIsEmailVerified(1);
       $verify_email->setIsVerified($set_verified ? 1 : 0);
     }
     $editor->updateUser($user, $verify_email);

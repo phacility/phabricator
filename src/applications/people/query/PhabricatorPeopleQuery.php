@@ -13,6 +13,7 @@ final class PhabricatorPeopleQuery
   private $isAdmin;
   private $isSystemAgent;
   private $isDisabled;
+  private $isApproved;
   private $nameLike;
 
   private $needPrimaryEmail;
@@ -67,6 +68,11 @@ final class PhabricatorPeopleQuery
 
   public function withIsDisabled($disabled) {
     $this->isDisabled = $disabled;
+    return $this;
+  }
+
+  public function withIsApproved($approved) {
+    $this->isApproved = $approved;
     return $this;
   }
 
@@ -249,10 +255,18 @@ final class PhabricatorPeopleQuery
         'user.isAdmin = 1');
     }
 
-    if ($this->isDisabled) {
+    if ($this->isDisabled !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'user.isDisabled = 1');
+        'user.isDisabled = %d',
+        (int)$this->isDisabled);
+    }
+
+    if ($this->isApproved !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'user.isApproved = %d',
+        (int)$this->isApproved);
     }
 
     if ($this->isSystemAgent) {

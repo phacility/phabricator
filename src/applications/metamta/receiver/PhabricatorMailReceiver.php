@@ -19,16 +19,13 @@ abstract class PhabricatorMailReceiver {
     PhabricatorMetaMTAReceivedMail $mail,
     PhabricatorUser $sender) {
 
-    if ($sender->getIsDisabled()) {
+    if (!$sender->isUserActivated()) {
       throw new PhabricatorMetaMTAReceivedMailProcessingException(
         MetaMTAReceivedMailStatus::STATUS_DISABLED_SENDER,
         pht(
-          "Sender '%s' has a disabled user account.",
+          "Sender '%s' does not have an activated user account.",
           $sender->getUsername()));
     }
-
-
-    return;
   }
 
   /**

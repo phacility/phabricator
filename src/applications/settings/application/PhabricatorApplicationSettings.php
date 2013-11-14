@@ -37,7 +37,7 @@ final class PhabricatorApplicationSettings extends PhabricatorApplication {
 
     $items = array();
 
-    if ($user->isLoggedIn()) {
+    if ($user->isLoggedIn() && $user->isUserActivated()) {
       $selected = ($controller instanceof PhabricatorSettingsMainController);
       $item = new PHUIListItemView();
       $item->setName(pht('Settings'));

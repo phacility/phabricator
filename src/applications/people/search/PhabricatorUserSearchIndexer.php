@@ -20,7 +20,7 @@ final class PhabricatorUserSearchIndexer
     // TODO: Index the blurbs from their profile or something? Probably not
     // actually useful...
 
-    if (!$user->getIsDisabled()) {
+    if ($user->isUserActivated()) {
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
         $user->getPHID(),

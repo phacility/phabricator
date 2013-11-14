@@ -182,6 +182,9 @@ final class PhabricatorPeopleEditController
               ->setAddress($new_email)
               ->setIsVerified(0);
 
+            // Automatically approve the user, since an admin is creating them.
+            $user->setIsApproved(1);
+
             id(new PhabricatorUserEditor())
               ->setActor($admin)
               ->createNewUser($user, $email);
@@ -325,7 +328,9 @@ final class PhabricatorPeopleEditController
       if ($user->getIsDisabled()) {
         $roles[] = pht('Disabled');
       }
-
+      if (!$user->getIsApproved()) {
+        $roles[] = pht('Not Approved');
+      }
       if (!$roles) {
         $roles[] = pht('Normal User');
       }

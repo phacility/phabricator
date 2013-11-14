@@ -382,6 +382,11 @@ final class DiffusionServeController extends DiffusionController {
       return null;
     }
 
+    if (!$user->isUserActivated()) {
+      // User is not activated.
+      return null;
+    }
+
     $password_entry = id(new PhabricatorRepositoryVCSPassword())
       ->loadOneWhere('userPHID = %s', $user->getPHID());
     if (!$password_entry) {
@@ -391,11 +396,6 @@ final class DiffusionServeController extends DiffusionController {
 
     if (!$password_entry->comparePassword($password, $user)) {
       // Password doesn't match.
-      return null;
-    }
-
-    if ($user->getIsDisabled()) {
-      // User is disabled.
       return null;
     }
 
