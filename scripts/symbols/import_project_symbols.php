@@ -202,7 +202,7 @@ foreach ($input as $key => $line) {
 }
 
 if (count($symbols)) {
-  commit_symbols($symbols, $project, $args->getArg('no-purge'));
+  commit_symbols($symbols, $project, $no_purge);
 }
 
 echo "Done.\n";
