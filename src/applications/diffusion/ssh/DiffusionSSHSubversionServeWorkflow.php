@@ -38,7 +38,10 @@ final class DiffusionSSHSubversionServeWorkflow
       throw new Exception("Expected `svnserve -t`!");
     }
 
-    $future = new ExecFuture('svnserve -t');
+    $command = csprintf('svnserve -t');
+    $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
+
+    $future = new ExecFuture('%C', $command);
 
     $this->inProtocol = new DiffusionSubversionWireProtocol();
     $this->outProtocol = new DiffusionSubversionWireProtocol();

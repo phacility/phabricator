@@ -19,7 +19,10 @@ final class DiffusionSSHGitUploadPackWorkflow
     $path = head($args->getArg('dir'));
     $repository = $this->loadRepository($path);
 
-    $future = new ExecFuture('git-upload-pack %s', $repository->getLocalPath());
+    $command = csprintf('git-upload-pack -- %s', $repository->getLocalPath());
+    $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
+
+    $future = new ExecFuture('%C', $command);
 
     $err = $this->newPassthruCommand()
       ->setIOChannel($this->getIOChannel())

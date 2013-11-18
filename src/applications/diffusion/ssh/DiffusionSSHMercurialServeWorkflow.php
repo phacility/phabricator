@@ -39,12 +39,12 @@ final class DiffusionSSHMercurialServeWorkflow
       throw new Exception("Expected `hg ... serve`!");
     }
 
-    $future = new ExecFuture(
-      'hg -R %s serve --stdio',
-      $repository->getLocalPath());
+    $command = csprintf('hg -R %s serve --stdio', $repository->getLocalPath());
+    $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
+
+    $future = new ExecFuture('%C', $command);
 
     $io_channel = $this->getIOChannel();
-
     $protocol_channel = new DiffusionSSHMercurialWireClientProtocolChannel(
       $io_channel);
 

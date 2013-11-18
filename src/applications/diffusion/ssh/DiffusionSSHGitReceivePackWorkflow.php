@@ -22,9 +22,10 @@ final class DiffusionSSHGitReceivePackWorkflow
     // This is a write, and must have write access.
     $this->requireWriteAccess();
 
-    $future = new ExecFuture(
-      'git-receive-pack %s',
-      $repository->getLocalPath());
+    $command = csprintf('git-receive-pack %s', $repository->getLocalPath());
+    $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
+
+    $future = new ExecFuture('%C', $command);
 
     $err = $this->newPassthruCommand()
       ->setIOChannel($this->getIOChannel())

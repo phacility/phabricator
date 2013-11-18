@@ -120,5 +120,4 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
     return $this->hasWriteAccess;
   }
 
-
 }
