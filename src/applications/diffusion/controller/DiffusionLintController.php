@@ -318,7 +318,7 @@ final class DiffusionLintController extends DiffusionController {
 
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setActions($actions);
+      ->setActionList($actions);
 
     $callsign = $drequest->getRepository()->getCallsign();
     $lint_commit = $branch->getLintCommit();
