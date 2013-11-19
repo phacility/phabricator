@@ -242,7 +242,9 @@ final class PhabricatorMarkupEngine {
     }
 
     foreach ($objects as $key => $info) {
-      if (isset($blocks[$key])) {
+      // False check in case MySQL doesn't support unicode characters
+      // in the string (T1191), resulting in unserialize returning false.
+      if (isset($blocks[$key]) && $blocks[$key]->getCacheData() !== false) {
         // If we already have a preprocessing cache, we don't need to rebuild
         // it.
         continue;
