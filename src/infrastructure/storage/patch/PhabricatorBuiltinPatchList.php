@@ -1756,6 +1756,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'php',
         'name' => $this->getPatchPath('20131112.userverified.2.mig.php'),
       ),
+      '20131118.ownerorder.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20131118.ownerorder.php'),
+      ),
     );
   }
 }
