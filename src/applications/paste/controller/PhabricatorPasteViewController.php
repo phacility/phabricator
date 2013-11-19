@@ -157,8 +157,10 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
   }
 
   private function buildHeaderView(PhabricatorPaste $paste) {
+    $title = (nonempty($paste->getTitle())) ?
+      $paste->getTitle() : pht('(An Untitled Masterwork)');
     $header = id(new PHUIHeaderView())
-      ->setHeader($paste->getTitle())
+      ->setHeader($title)
       ->setUser($this->getRequest()->getUser())
       ->setPolicyObject($paste);
 
