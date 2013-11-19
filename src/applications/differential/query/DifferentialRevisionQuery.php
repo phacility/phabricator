@@ -429,6 +429,13 @@ final class DifferentialRevisionQuery
         continue;
       }
 
+      if ($this->getViewer()->isOmnipotent()) {
+        // The viewer is omnipotent. Allow the revision to load even without
+        // a repository.
+        $revision->attachRepository(null);
+        continue;
+      }
+
       // The revision has an associated repository, and the viewer can't see
       // it, and the viewer has no special capabilities. Filter out this
       // revision.
