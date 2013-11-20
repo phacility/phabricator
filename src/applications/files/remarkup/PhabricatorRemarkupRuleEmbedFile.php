@@ -50,9 +50,11 @@ final class PhabricatorRemarkupRuleEmbedFile
 
   private function getFileOptions($option_string) {
     $options = array(
-      'size'    => 'thumb',
+      'size'    => null,
       'layout'  => 'left',
       'float'   => false,
+      'width'   => null,
+      'height'  => null,
     );
 
     if ($option_string) {
@@ -73,23 +75,40 @@ final class PhabricatorRemarkupRuleEmbedFile
 
     $attrs = array();
     $image_class = null;
-    switch ((string)$options['size']) {
-      case 'full':
+
+    $use_size = true;
+    if (!$options['size']) {
+      $width = $this->parseDimension($options['width']);
+      $height = $this->parseDimension($options['height']);
+      if ($width || $height) {
+        $use_size = false;
         $attrs += array(
           'src' => $file->getBestURI(),
-          'width' => $file->getImageWidth(),
-          'height' => $file->getImageHeight(),
+          'width' => $width,
+          'height' => $height,
         );
-        break;
-      case 'thumb':
-      default:
-        $attrs['src'] = $file->getPreview220URI();
-        $dimensions =
-          PhabricatorImageTransformer::getPreviewDimensions($file, 220);
-        $attrs['width'] = $dimensions['sdx'];
-        $attrs['height'] = $dimensions['sdy'];
-        $image_class = 'phabricator-remarkup-embed-image';
-        break;
+      }
+    }
+
+    if ($use_size) {
+      switch ((string)$options['size']) {
+        case 'full':
+          $attrs += array(
+            'src' => $file->getBestURI(),
+            'width' => $file->getImageWidth(),
+            'height' => $file->getImageHeight(),
+          );
+          break;
+        case 'thumb':
+        default:
+          $attrs['src'] = $file->getPreview220URI();
+          $dimensions =
+            PhabricatorImageTransformer::getPreviewDimensions($file, 220);
+          $attrs['width'] = $dimensions['sdx'];
+          $attrs['height'] = $dimensions['sdy'];
+          $image_class = 'phabricator-remarkup-embed-image';
+          break;
+      }
     }
 
     $img = phutil_tag('img', $attrs);
@@ -184,6 +203,16 @@ final class PhabricatorRemarkupRuleEmbedFile
       ->setFileDownloadURI($file->getDownloadURI())
       ->setFileViewURI($file->getBestURI())
       ->setFileViewable($options['viewable']);
+  }
+
+  private function parseDimension($string) {
+    $string = trim($string);
+
+    if (preg_match('/^(?:\d*\\.)?\d+%?$/', $string)) {
+      return $string;
+    }
+
+    return null;
   }
 
 }
