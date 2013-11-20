@@ -97,19 +97,12 @@ final class PhabricatorWorkingCopyDiscoveryTestCase
     foreach ($cases as $case) {
       list($remote, $config, $expect, $message) = $case;
 
-      $ex = null;
-      try {
-        PhabricatorRepositoryPullLocalDaemon::executeGitverifySameOrigin(
-          $remote,
-          $config,
-          '(a test case)');
-      } catch (Exception $exception) {
-        $ex = $exception;
-      }
-
       $this->assertEqual(
         $expect,
-        !$ex,
+        PhabricatorRepositoryPullLocalDaemon::isSameGitOrigin(
+          $remote,
+          $config,
+          '(a test case)'),
         "Verification that '{$remote}' and '{$config}' are the same origin ".
         "had a different outcome than expected: {$message}");
     }

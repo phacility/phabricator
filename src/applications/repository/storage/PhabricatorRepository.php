@@ -898,6 +898,18 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
   }
 
+  public function canDestroyWorkingCopy() {
+    if ($this->isHosted()) {
+      // Never destroy hosted working copies.
+      return false;
+    }
+
+    $default_path = PhabricatorEnv::getEnvConfig(
+      'repository.default-local-path');
+    return Filesystem::isDescendant($this->getLocalPath(), $default_path);
+  }
+
+
   public function writeStatusMessage(
     $status_type,
     $status_code,

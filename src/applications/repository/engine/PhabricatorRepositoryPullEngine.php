@@ -231,7 +231,7 @@ final class PhabricatorRepositoryPullEngine
       }
     }
 
-    if ($err && $this->canDestroyWorkingCopy($path)) {
+    if ($err && $repository->canDestroyWorkingCopy()) {
       phlog("Repository working copy at '{$path}' failed sanity check; ".
             "destroying and re-cloning. {$message}");
       Filesystem::remove($path);
@@ -256,7 +256,7 @@ final class PhabricatorRepositoryPullEngine
       $future->setCWD($path);
       list($err, $stdout, $stderr) = $future->resolve();
 
-      if ($err && !$retry && $this->canDestroyWorkingCopy($path)) {
+      if ($err && !$retry && $repository->canDestroyWorkingCopy()) {
         $retry = true;
         // Fix remote origin url if it doesn't match our configuration
         $origin_url = $repository->execLocalCommand(
@@ -355,16 +355,6 @@ final class PhabricatorRepositoryPullEngine
 
     $path = rtrim($repository->getLocalPath(), '/');
     execx('svnadmin create -- %s', $path);
-  }
-
-
-/* -(  Internals  )---------------------------------------------------------- */
-
-
-  private function canDestroyWorkingCopy($path) {
-    $default_path = PhabricatorEnv::getEnvConfig(
-      'repository.default-local-path');
-    return Filesystem::isDescendant($path, $default_path);
   }
 
 }
