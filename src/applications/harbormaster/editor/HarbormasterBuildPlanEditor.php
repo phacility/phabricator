@@ -64,14 +64,11 @@ final class HarbormasterBuildPlanEditor
 
     switch ($type) {
       case HarbormasterBuildPlanTransaction::TYPE_NAME:
-        $missing_name = true;
-        if (strlen($object->getName()) && empty($xactions)) {
-          $missing_name = false;
-        } else if (strlen(last($xactions)->getNewValue())) {
-          $missing_name = false;
-        }
+        $missing = $this->validateIsEmptyTextField(
+          $object->getName(),
+          $xactions);
 
-        if ($missing_name) {
+        if ($missing) {
           $error = new PhabricatorApplicationTransactionValidationError(
             $type,
             pht('Required'),

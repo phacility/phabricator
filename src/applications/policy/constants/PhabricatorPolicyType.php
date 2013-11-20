@@ -3,6 +3,7 @@
 final class PhabricatorPolicyType extends PhabricatorPolicyConstants {
 
   const TYPE_GLOBAL       = 'global';
+  const TYPE_USER         = 'user';
   const TYPE_CUSTOM       = 'custom';
   const TYPE_PROJECT      = 'project';
   const TYPE_MASKED       = 'masked';
@@ -10,8 +11,9 @@ final class PhabricatorPolicyType extends PhabricatorPolicyConstants {
   public static function getPolicyTypeOrder($type) {
     static $map = array(
       self::TYPE_GLOBAL   => 0,
-      self::TYPE_CUSTOM   => 1,
-      self::TYPE_PROJECT  => 2,
+      self::TYPE_USER     => 1,
+      self::TYPE_CUSTOM   => 2,
+      self::TYPE_PROJECT  => 3,
       self::TYPE_MASKED   => 9,
     );
     return idx($map, $type, 9);
@@ -21,6 +23,8 @@ final class PhabricatorPolicyType extends PhabricatorPolicyConstants {
     switch ($type) {
       case self::TYPE_GLOBAL:
         return pht('Basic Policies');
+      case self::TYPE_USER:
+        return pht('User Policies');
       case self::TYPE_CUSTOM:
         return pht('Advanced');
       case self::TYPE_PROJECT:

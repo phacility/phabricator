@@ -212,6 +212,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'db',
         'name' => 'nuance',
       ),
+      'db.passphrase' => array(
+        'type' => 'db',
+        'name' => 'passphrase',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -1759,6 +1763,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       '20131118.ownerorder.php' => array(
         'type' => 'php',
         'name' => $this->getPatchPath('20131118.ownerorder.php'),
+      ),
+      '20131119.passphrase.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131119.passphrase.sql'),
       ),
     );
   }
