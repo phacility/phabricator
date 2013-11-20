@@ -1768,6 +1768,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20131119.passphrase.sql'),
       ),
+      '20131120.nuancesourcetype.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131120.nuancesourcetype.sql'),
+      ),
     );
   }
 }

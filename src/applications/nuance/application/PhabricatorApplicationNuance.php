@@ -23,6 +23,10 @@ final class PhabricatorApplicationNuance extends PhabricatorApplication {
     return true;
   }
 
+  public function getBaseURI() {
+    return '/nuance/';
+  }
+
   public function getRoutes() {
     return array(
       '/nuance/' => array(

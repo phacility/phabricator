@@ -47,9 +47,14 @@ final class NuanceSource
     $edit_policy = $app->getPolicy(
       NuanceCapabilitySourceDefaultEdit::CAPABILITY);
 
+    $definitions = NuanceSourceDefinition::getAllDefinitions();
+    $lucky_definition = head($definitions);
+
     return id(new NuanceSource())
       ->setViewPolicy($view_policy)
-      ->setEditPolicy($edit_policy);
+      ->setEditPolicy($edit_policy)
+      ->setType($lucky_definition->getSourceTypeConstant());
+
   }
 
   public function getCapabilities() {
