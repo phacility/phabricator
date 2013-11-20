@@ -326,6 +326,16 @@
       "rule" : ".status-policy-unknown-white, .dropdown-menu-item:hover .status-policy-unknown",
       "hash" : "98985bfa005672c4b88feaf88cfa72bc"
     },
+    "status-policy-user"          : {
+      "name" : "status-policy-user",
+      "rule" : ".status-policy-user",
+      "hash" : "6c21aa20866d5b86f074bdcf4f487d40"
+    },
+    "status-policy-user-white"    : {
+      "name" : "status-policy-user-white",
+      "rule" : ".status-policy-user-white",
+      "hash" : "97a569e973df3f1e4fe012adf216ca40"
+    },
     "status-question"             : {
       "name" : "status-question",
       "rule" : ".status-question",
