@@ -34,12 +34,12 @@
     "apps-authentication-dark"  : {
       "name" : "apps-authentication-dark",
       "rule" : ".apps-authentication-dark",
-      "hash" : "5ae0f7e5d45df5da12ecc447f44bc7d9"
+      "hash" : "8616a1c5aeeeac1ce87376f2f0757439"
     },
     "apps-authentication-white" : {
       "name" : "apps-authentication-white",
       "rule" : ".apps-authentication-white",
-      "hash" : "567b1e8f11974b0817250b933b9dd3de"
+      "hash" : "9478fbaeee9e5cc44c4a5b483645caed"
     },
     "apps-calendar-dark"        : {
       "name" : "apps-calendar-dark",
@@ -310,6 +310,16 @@
       "name" : "apps-owners-white",
       "rule" : ".apps-owners-white",
       "hash" : "7f409576c8ddab7a513313c301c61683"
+    },
+    "apps-passphrase-dark"      : {
+      "name" : "apps-passphrase-dark",
+      "rule" : ".apps-passphrase-dark",
+      "hash" : "1ee5fc48415e60795f6f00422f72e170"
+    },
+    "apps-passphrase-white"     : {
+      "name" : "apps-passphrase-white",
+      "rule" : ".apps-passphrase-white",
+      "hash" : "a6dc3274fd093b0545937d6a495b391f"
     },
     "apps-paste-dark"           : {
       "name" : "apps-paste-dark",
