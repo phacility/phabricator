@@ -24,7 +24,7 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
     // recursive paths were affected if it was moved or copied. This is very
     // complicated and has many special cases.
 
-    $uri = $repository->getDetail('remote-uri');
+    $uri = $repository->getSubversionPathURI();
     $svn_commit = $commit->getCommitIdentifier();
 
     // Pull the top-level path changes out of "svn log". This is pretty
@@ -561,7 +561,7 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
     array $paths) {
 
     $result_map = array();
-    $repository_uri = $repository->getDetail('remote-uri');
+    $repository_uri = $repository->getSubversionPathURI();
 
     if (isset($paths['/'])) {
       $result_map['/'] = DifferentialChangeType::FILE_DIRECTORY;
@@ -572,9 +572,10 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
     $path_mapping = array();
     foreach ($paths as $path => $lookup) {
       $parent = dirname($lookup['rawPath']);
-      $parent = ltrim($parent, '/');
-      $parent = $this->encodeSVNPath($parent);
-      $parent = $repository_uri.$parent.'@'.$lookup['rawCommit'];
+      $parent = $repository->getSubversionPathURI(
+        $parent,
+        $lookup['rawCommit']);
+
       $parent = escapeshellarg($parent);
       $parents[$parent] = true;
       $path_mapping[$parent][] = dirname($path);
@@ -626,12 +627,6 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
     return $result_map;
   }
 
-  private function encodeSVNPath($path) {
-    $path = rawurlencode($path);
-    $path = str_replace('%2F', '/', $path);
-    return $path;
-  }
-
   private function getFileTypeFromSVNKind($kind) {
     $kind = (string)$kind;
     switch ($kind) {
@@ -648,9 +643,9 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
 
     $path = $info['rawPath'];
     $rev  = $info['rawCommit'];
-    $path = $this->encodeSVNPath($path);
 
-    $hashkey = md5($repository->getDetail('remote-uri').$path.'@'.$rev);
+    $path_uri = $repository->getSubversionPathURI($path, $rev);
+    $hashkey = md5($path_uri);
 
     // This method is quite horrible. The underlying challenge is that some
     // commits in the Facebook repository are enormous, taking multiple hours
@@ -664,10 +659,8 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
     if (!Filesystem::pathExists($cache_loc)) {
       $tmp = new TempFile();
       $repository->execxRemoteCommand(
-        '--xml ls -R %s%s@%d > %s',
-        $repository->getDetail('remote-uri'),
-        $path,
-        $rev,
+        '--xml ls -R %s > %s',
+        $path_uri,
         $tmp);
       execx(
         'mv %s %s',

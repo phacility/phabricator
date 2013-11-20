@@ -156,6 +156,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function getSubversionBaseURI() {
+    $subpath = $this->getDetail('svn-subpath');
+    if (!strlen($subpath)) {
+      $subpath = null;
+    }
+    return $this->getSubversionPathURI($subpath);
+  }
+
+  public function getSubversionPathURI($path = null, $commit = null) {
     $vcs = $this->getVersionControlSystem();
     if ($vcs != PhabricatorRepositoryType::REPOSITORY_TYPE_SVN) {
       throw new Exception("Not a subversion repository!");
@@ -167,12 +175,23 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       $uri = $this->getDetail('remote-uri');
     }
 
-    $subpath = $this->getDetail('svn-subpath');
-    if ($subpath) {
-      $subpath = '/'.ltrim($subpath, '/');
+    $uri = rtrim($uri, '/');
+
+    if (strlen($path)) {
+      $path = rawurlencode($path);
+      $path = str_replace('%2F', '/', $path);
+      $uri = $uri.'/'.ltrim($path, '/');
     }
 
-    return $uri.$subpath;
+    if ($path !== null || $commit !== null) {
+      $uri .= '@';
+    }
+
+    if ($commit !== null) {
+      $uri .= $commit;
+    }
+
+    return $uri;
   }
 
   public function execRemoteCommand($pattern /* , $arg, ... */) {
