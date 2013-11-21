@@ -155,12 +155,12 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $this->getDetail('local-path');
   }
 
-  public function getSubversionBaseURI() {
+  public function getSubversionBaseURI($commit = null) {
     $subpath = $this->getDetail('svn-subpath');
     if (!strlen($subpath)) {
       $subpath = null;
     }
-    return $this->getSubversionPathURI($subpath);
+    return $this->getSubversionPathURI($subpath, $commit);
   }
 
   public function getSubversionPathURI($path = null, $commit = null) {

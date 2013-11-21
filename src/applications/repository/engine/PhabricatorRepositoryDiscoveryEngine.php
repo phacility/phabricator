@@ -88,10 +88,9 @@ final class PhabricatorRepositoryDiscoveryEngine
 
       try {
         list($xml, $stderr) = $repository->execxRemoteCommand(
-          'log --xml --quiet --limit %d %s@%s',
+          'log --xml --quiet --limit %d %s',
           $limit,
-          $repository->getSubversionBaseURI(),
-          $at_rev);
+          $repository->getSubversionBaseURI($at_rev));
       } catch (CommandException $ex) {
         $stderr = $ex->getStdErr();
         if (preg_match('/(path|File) not found/', $stderr)) {
