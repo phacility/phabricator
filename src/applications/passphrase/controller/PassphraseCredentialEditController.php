@@ -129,8 +129,16 @@ final class PassphraseCredentialEditController extends PassphraseController {
 
         $credential->saveTransaction();
 
-        return id(new AphrontRedirectResponse())
-          ->setURI('/K'.$credential->getID());
+        if ($request->isAjax()) {
+          return id(new AphrontAjaxResponse())->setContent(
+            array(
+              'phid' => $credential->getPHID(),
+              'name' => 'K'.$credential->getID().' '.$credential->getName(),
+            ));
+        } else {
+          return id(new AphrontRedirectResponse())
+            ->setURI('/K'.$credential->getID());
+        }
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $credential->killTransaction();
 
@@ -151,8 +159,14 @@ final class PassphraseCredentialEditController extends PassphraseController {
 
     $secret_control = $type->newSecretControl();
 
-    $form = id(new AphrontFormView())
-      ->setUser($viewer)
+    if ($request->isAjax()) {
+      $form = new PHUIFormLayoutView();
+    } else {
+      $form = id(new AphrontFormView())
+        ->setUser($viewer);
+    }
+
+    $form
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('name')
@@ -197,11 +211,6 @@ final class PassphraseCredentialEditController extends PassphraseController {
           ->setLabel($type->getSecretLabel())
           ->setValue($v_secret));
 
-    $form->appendChild(
-      id(new AphrontFormSubmitControl())
-        ->setValue(pht('Save'))
-        ->addCancelButton($this->getApplicationURI()));
-
     $crumbs = $this->buildApplicationCrumbs();
 
     if ($is_new) {
@@ -221,6 +230,23 @@ final class PassphraseCredentialEditController extends PassphraseController {
         id(new PhabricatorCrumbView())
           ->setName(pht('Edit')));
     }
+
+    if ($request->isAjax()) {
+      $dialog = id(new AphrontDialogView())
+        ->setUser($viewer)
+        ->setWidth(AphrontDialogView::WIDTH_FORM)
+        ->setTitle($title)
+        ->appendChild($form)
+        ->addSubmitButton(pht('Create Credential'))
+        ->addCancelButton($this->getApplicationURI());
+
+      return id(new AphrontDialogResponse())->setDialog($dialog);
+    }
+
+    $form->appendChild(
+      id(new AphrontFormSubmitControl())
+        ->setValue(pht('Save'))
+        ->addCancelButton($this->getApplicationURI()));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($header)

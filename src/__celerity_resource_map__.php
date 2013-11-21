@@ -1980,6 +1980,20 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/owners/owners-path-editor.js',
   ),
+  'javelin-behavior-passphrase-credential-control' =>
+  array(
+    'uri' => '/res/b599c028/rsrc/js/application/passphrase/phame-credential-control.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-stratcom',
+      3 => 'javelin-workflow',
+      4 => 'javelin-util',
+    ),
+    'disk' => '/rsrc/js/application/passphrase/phame-credential-control.js',
+  ),
   'javelin-behavior-persona-login' =>
   array(
     'uri' => '/res/128fdf56/rsrc/js/application/auth/behavior-persona-login.js',
