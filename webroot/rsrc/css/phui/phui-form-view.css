@@ -411,8 +411,7 @@ table.aphront-form-control-checkbox-layout th {
 }
 
 .login-to-comment {
-  padding: 12px;
-  float: right;
+  margin: 12px;
 }
 
 .phui-form-divider hr {

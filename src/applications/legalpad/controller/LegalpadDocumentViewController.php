@@ -196,9 +196,6 @@ final class LegalpadDocumentViewController extends LegalpadController {
       ? pht('Add Comment')
       : pht('Debate Legislation');
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title);
-
     $button_name = $is_serious
       ? pht('Add Comment')
       : pht('Commence Filibuster');
@@ -207,15 +204,13 @@ final class LegalpadDocumentViewController extends LegalpadController {
       ->setUser($user)
       ->setObjectPHID($document->getPHID())
       ->setFormID($comment_form_id)
+      ->setHeaderText($title)
       ->setDraft($draft)
       ->setSubmitButtonName($button_name)
       ->setAction($this->getApplicationURI('/comment/'.$document->getID().'/'))
       ->setRequestURI($this->getRequest()->getRequestURI());
 
-    return id(new PHUIObjectBoxView())
-      ->setFlush(true)
-      ->setHeader($header)
-      ->appendChild($form);
+    return $form;
 
   }
 

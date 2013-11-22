@@ -94,11 +94,9 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
-    $add_comment_header = id(new PHUIHeaderView())
-      ->setHeader(
-        $is_serious
-          ? pht('Add Comment')
-          : pht('Question File Integrity'));
+    $add_comment_header = $is_serious
+      ? pht('Add Comment')
+      : pht('Question File Integrity');
 
     $submit_button_name = $is_serious
       ? pht('Add Comment')
@@ -110,17 +108,13 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       ->setUser($user)
       ->setObjectPHID($file->getPHID())
       ->setDraft($draft)
+      ->setHeaderText($add_comment_header)
       ->setAction($this->getApplicationURI('/comment/'.$file->getID().'/'))
       ->setSubmitButtonName($submit_button_name);
 
-    $comment_box = id(new PHUIObjectBoxView())
-      ->setFlush(true)
-      ->setHeader($add_comment_header)
-      ->appendChild($add_comment_form);
-
     return array(
       $timeline,
-      $comment_box);
+      $add_comment_form);
   }
 
   private function buildActionView(PhabricatorFile $file) {

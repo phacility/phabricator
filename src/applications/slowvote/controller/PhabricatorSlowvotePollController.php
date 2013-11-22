@@ -162,11 +162,9 @@ final class PhabricatorSlowvotePollController
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
-    $add_comment_header = id(new PHUIHeaderView())
-      ->setHeader(
-        $is_serious
-          ? pht('Add Comment')
-          : pht('Enter Deliberations'));
+    $add_comment_header = $is_serious
+      ? pht('Add Comment')
+      : pht('Enter Deliberations');
 
     $submit_button_name = $is_serious
       ? pht('Add Comment')
@@ -174,17 +172,13 @@ final class PhabricatorSlowvotePollController
 
     $draft = PhabricatorDraft::newFromUserAndKey($viewer, $poll->getPHID());
 
-    $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
+    return id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($viewer)
       ->setObjectPHID($poll->getPHID())
       ->setDraft($draft)
+      ->setHeaderText($add_comment_header)
       ->setAction($this->getApplicationURI('/comment/'.$poll->getID().'/'))
       ->setSubmitButtonName($submit_button_name);
-
-    return id(new PHUIObjectBoxView())
-      ->setFlush(true)
-      ->setHeader($add_comment_header)
-      ->appendChild($add_comment_form);
 
   }
 
