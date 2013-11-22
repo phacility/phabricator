@@ -198,7 +198,16 @@ final class PhabricatorApplicationSearchController
 
       $pager = new AphrontCursorPagerView();
       $pager->readFromRequest($request);
-      $pager->setPageSize($engine->getPageSize($saved_query));
+      $page_size = $engine->getPageSize($saved_query);
+      if (is_finite($page_size)) {
+        $pager->setPageSize($page_size);
+      } else {
+        // Consider an INF pagesize to mean a large finite pagesize.
+
+        // TODO: It would be nice to handle this more gracefully, but math
+        // with INF seems to vary across PHP versions, systems, and runtimes.
+        $pager->setPageSize(0xFFFF);
+      }
       $objects = $query->setViewer($request->getUser())
         ->executeWithCursorPager($pager);
 
