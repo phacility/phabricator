@@ -80,6 +80,10 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
             'hosting/' => 'DiffusionRepositoryEditHostingController',
             '(?P<serve>serve)/' => 'DiffusionRepositoryEditHostingController',
           ),
+          'mirror/' => array(
+            'edit/(?:(?P<id>\d+)/)?' => 'DiffusionMirrorEditController',
+            'delete/(?P<id>\d+)/' => 'DiffusionMirrorDeleteController',
+          ),
         ),
 
         // NOTE: This must come after the rule above; it just gives us a

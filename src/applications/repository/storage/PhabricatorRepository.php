@@ -740,6 +740,12 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         $commit->delete();
       }
 
+      $mirrors = id(new PhabricatorRepositoryMirror())
+        ->loadAllWhere('repositoryPHID = %s', $this->getPHID());
+      foreach ($mirrors as $mirror) {
+        $mirror->delete();
+      }
+
       $conn_w = $this->establishConnection('w');
 
       queryfx(
@@ -894,6 +900,17 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return Filesystem::isDescendant($this->getLocalPath(), $default_path);
   }
 
+  public function canMirror() {
+    if (!$this->isHosted()) {
+      return false;
+    }
+
+    if ($this->isGit()) {
+      return true;
+    }
+
+    return false;
+  }
 
   public function writeStatusMessage(
     $status_type,

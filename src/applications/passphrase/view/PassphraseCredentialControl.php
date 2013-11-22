@@ -68,15 +68,19 @@ final class PassphraseCredentialControl extends AphrontFormControl {
         'sigil' => 'passphrase-credential-select',
       ));
 
-    $button = javelin_tag(
-      'a',
-      array(
-        'href' => '#',
-        'class' => 'button grey',
-        'sigil' => 'passphrase-credential-add',
-        'mustcapture' => true,
-      ),
-      pht('Add Credential'));
+    if ($this->credentialType) {
+      $button = javelin_tag(
+        'a',
+        array(
+          'href' => '#',
+          'class' => 'button grey',
+          'sigil' => 'passphrase-credential-add',
+          'mustcapture' => true,
+        ),
+        pht('Add Credential'));
+    } else {
+      $button = null;
+    }
 
     return javelin_tag(
       'div',
