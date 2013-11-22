@@ -1982,7 +1982,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-passphrase-credential-control' =>
   array(
-    'uri' => '/res/e606ad52/rsrc/js/application/passphrase/phame-credential-control.js',
+    'uri' => '/res/70823662/rsrc/js/application/passphrase/phame-credential-control.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1991,6 +1991,7 @@ celerity_register_resource_map(array(
       2 => 'javelin-stratcom',
       3 => 'javelin-workflow',
       4 => 'javelin-util',
+      5 => 'javelin-uri',
     ),
     'disk' => '/rsrc/js/application/passphrase/phame-credential-control.js',
   ),

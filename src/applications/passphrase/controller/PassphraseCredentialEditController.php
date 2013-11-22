@@ -45,6 +45,9 @@ final class PassphraseCredentialEditController extends PassphraseController {
         ->setProvidesType($type->getProvidesType());
 
       $is_new = true;
+
+      // Prefill username if provided.
+      $credential->setUsername($request->getStr('username'));
     }
 
     $errors = array();
