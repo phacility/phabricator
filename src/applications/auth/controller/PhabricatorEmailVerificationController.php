@@ -44,7 +44,7 @@ final class PhabricatorEmailVerificationController
         'user. Make sure you followed the link in the email correctly and are '.
         'logged in with the user account associated with the email address.');
       $continue = pht('Rats!');
-    } else if ($email->getIsVerified()) {
+    } else if ($email->getIsVerified() && $user->getIsEmailVerified()) {
       $title = pht('Address Already Verified');
       $content = pht(
         'This email address has already been verified.');

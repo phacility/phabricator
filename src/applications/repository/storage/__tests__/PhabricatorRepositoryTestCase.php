@@ -94,6 +94,17 @@ final class PhabricatorRepositoryTestCase
     $this->assertEqual(
       'file:///var/repo/SVN/%3F@22',
       $repo->getSubversionPathURI('?', 22));
+
+    $repo->setDetail('svn-subpath', 'quack/trunk/');
+
+    $this->assertEqual(
+      'file:///var/repo/SVN/quack/trunk/@',
+      $repo->getSubversionBaseURI());
+
+    $this->assertEqual(
+      'file:///var/repo/SVN/quack/trunk/@HEAD',
+      $repo->getSubversionBaseURI('HEAD'));
+
   }
 
 
