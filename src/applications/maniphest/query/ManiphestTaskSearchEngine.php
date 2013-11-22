@@ -362,6 +362,7 @@ final class ManiphestTaskSearchEngine
     if ($this->requireViewer()->isLoggedIn()) {
       $names['assigned'] = pht('Assigned');
       $names['authored'] = pht('Authored');
+      $names['subscribed'] = pht('Subscribed');
     }
 
     $names['open'] = pht('Open Tasks');
@@ -383,6 +384,10 @@ final class ManiphestTaskSearchEngine
       case 'assigned':
         return $query
           ->setParameter('assignedPHIDs', array($viewer_phid))
+          ->setParameter('statuses', array(ManiphestTaskStatus::STATUS_OPEN));
+      case 'subscribed':
+        return $query
+          ->setParameter('subscriberPHIDs', array($viewer_phid))
           ->setParameter('statuses', array(ManiphestTaskStatus::STATUS_OPEN));
       case 'open':
         return $query

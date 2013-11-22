@@ -294,6 +294,15 @@ final class PhabricatorImageTransformer {
     $lower_text,
     $mime_type) {
     $img = imagecreatefromstring($data);
+
+    // Some PNGs have color palettes, and allocating the dark border color
+    // fails and gives us whatever's first in the color table. Copy the image
+    // to a fresh truecolor canvas before working with it.
+
+    $truecolor = imagecreatetruecolor(imagesx($img), imagesy($img));
+    imagecopy($truecolor, $img, 0, 0, 0, 0, imagesx($img), imagesy($img));
+    $img = $truecolor;
+
     $phabricator_root = dirname(phutil_get_library_root('phabricator'));
     $font_root = $phabricator_root.'/resources/font/';
     $font_path = $font_root.'tuffy.ttf';

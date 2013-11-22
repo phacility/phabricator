@@ -147,122 +147,130 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 }
 
 .apps-files-dark {
-  background-position: 0px -45px;
+  background-position: -150px -30px;
 }
 
 .apps-files-white {
-  background-position: -15px -45px;
+  background-position: 0px -45px;
 }
 
 .apps-flags-dark {
-  background-position: -30px -45px;
+  background-position: -15px -45px;
 }
 
 .apps-flags-white {
-  background-position: -45px -45px;
+  background-position: -30px -45px;
 }
 
 .apps-harbormaster-dark {
-  background-position: -60px -45px;
+  background-position: -45px -45px;
 }
 
 .apps-harbormaster-white {
-  background-position: -75px -45px;
+  background-position: -60px -45px;
 }
 
 .apps-help-dark {
-  background-position: -90px -45px;
+  background-position: -75px -45px;
 }
 
 .apps-help-white {
-  background-position: -105px -45px;
+  background-position: -90px -45px;
 }
 
 .apps-herald-dark {
-  background-position: -120px -45px;
+  background-position: -105px -45px;
 }
 
 .apps-herald-white {
-  background-position: -135px -45px;
+  background-position: -120px -45px;
 }
 
 .apps-home-dark {
-  background-position: 0px -60px;
+  background-position: -135px -45px;
 }
 
 .apps-home-white {
-  background-position: -15px -60px;
+  background-position: -150px -45px;
 }
 
 .apps-legalpad-dark {
-  background-position: -30px -60px;
+  background-position: 0px -60px;
 }
 
 .apps-legalpad-white {
-  background-position: -45px -60px;
+  background-position: -15px -60px;
 }
 
 .apps-logo-dark {
-  background-position: -60px -60px;
+  background-position: -30px -60px;
 }
 
 .apps-logo-white {
-  background-position: -75px -60px;
+  background-position: -45px -60px;
 }
 
 .apps-macro-dark {
-  background-position: -90px -60px;
+  background-position: -60px -60px;
 }
 
 .apps-macro-white {
-  background-position: -105px -60px;
+  background-position: -75px -60px;
 }
 
 .apps-mail-dark {
-  background-position: -120px -60px;
+  background-position: -90px -60px;
 }
 
 .apps-mail-white {
-  background-position: -135px -60px;
+  background-position: -105px -60px;
 }
 
 .apps-maniphest-dark {
-  background-position: 0px -75px;
+  background-position: -120px -60px;
 }
 
 .apps-maniphest-white {
-  background-position: -15px -75px;
+  background-position: -135px -60px;
 }
 
 .apps-metamta-dark {
-  background-position: -30px -75px;
+  background-position: 0px -75px;
 }
 
 .apps-metamta-white {
-  background-position: -45px -75px;
+  background-position: -15px -75px;
 }
 
 .apps-new-dark {
-  background-position: -60px -75px;
+  background-position: -30px -75px;
 }
 
 .apps-new-white {
-  background-position: -75px -75px;
+  background-position: -45px -75px;
 }
 
 .apps-nuance-dark {
-  background-position: -90px -75px;
+  background-position: -60px -75px;
 }
 
 .apps-nuance-white {
-  background-position: -105px -75px;
+  background-position: -75px -75px;
 }
 
 .apps-owners-dark {
-  background-position: -120px -75px;
+  background-position: -90px -75px;
 }
 
 .apps-owners-white {
+  background-position: -105px -75px;
+}
+
+.apps-passphrase-dark {
+  background-position: -120px -75px;
+}
+
+.apps-passphrase-white {
   background-position: -135px -75px;
 }
 

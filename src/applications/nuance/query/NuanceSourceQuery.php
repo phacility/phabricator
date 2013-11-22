@@ -35,7 +35,7 @@ final class NuanceSourceQuery
 
     $data = queryfx_all(
       $conn_r,
-      'SELECT FROM %T %Q %Q %Q',
+      'SELECT * FROM %T %Q %Q %Q',
       $table->getTableName(),
       $this->buildWhereClause($conn_r),
       $this->buildOrderClause($conn_r),

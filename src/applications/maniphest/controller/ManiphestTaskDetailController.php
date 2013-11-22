@@ -345,8 +345,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ));
     }
 
-    $comment_header = id(new PHUIHeaderView())
-      ->setHeader($is_serious ? pht('Add Comment') : pht('Weigh In'));
+    $comment_header = $is_serious
+      ? pht('Add Comment')
+      : pht('Weigh In');
 
     $preview_panel = phutil_tag_div(
       'aphront-panel-preview',
@@ -397,7 +398,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $comment_box = id(new PHUIObjectBoxView())
       ->setFlush(true)
-      ->setHeader($comment_header)
+      ->setHeaderText($comment_header)
       ->appendChild($comment_form);
 
     return $this->buildApplicationPage(

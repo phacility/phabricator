@@ -38,11 +38,22 @@ final class PhabricatorFormExample extends PhabricatorUIExample {
       $null_value = $null_time->readValueFromRequest($request);
     }
 
+    $divider_control = new AphrontFormDividerControl();
+
+    $credentials = array();
+    $password_control = id(new PassphraseCredentialControl())
+      ->setName('credentialPHID')
+      ->setLabel(pht('Password'))
+      ->setCredentialType('password')
+      ->setOptions($credentials);
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->appendChild($start_time)
       ->appendChild($end_time)
       ->appendChild($null_time)
+      ->appendChild($divider_control)
+      ->appendChild($password_control)
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Submit'));

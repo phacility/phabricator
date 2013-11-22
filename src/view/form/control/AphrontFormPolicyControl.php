@@ -103,6 +103,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
       $options,
       array(
         PhabricatorPolicyType::TYPE_GLOBAL,
+        PhabricatorPolicyType::TYPE_USER,
         PhabricatorPolicyType::TYPE_CUSTOM,
         PhabricatorPolicyType::TYPE_PROJECT,
       ));

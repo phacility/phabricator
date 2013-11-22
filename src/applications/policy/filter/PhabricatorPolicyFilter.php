@@ -259,6 +259,15 @@ final class PhabricatorPolicyFilter {
       return;
     }
 
+    if ($this->viewer->isOmnipotent()) {
+      // Never raise policy exceptions for the omnipotent viewer. Although we
+      // will never normally issue a policy rejection for the omnipotent
+      // viewer, we can end up here when queries blanket reject objects that
+      // have failed to load, without distinguishing between nonexistent and
+      // nonvisible objects.
+      return;
+    }
+
     $capobj = PhabricatorPolicyCapability::getCapabilityByKey($capability);
     $rejection = null;
     if ($capobj) {

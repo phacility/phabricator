@@ -569,22 +569,22 @@ celerity_register_resource_map(array(
   ),
   '/rsrc/image/sprite-apps-X2.png' =>
   array(
-    'hash' => '67e8a6bf2d7fbb0b7961f1a0dcf8592b',
-    'uri' => '/res/67e8a6bf/rsrc/image/sprite-apps-X2.png',
+    'hash' => '5524cf1c3d9fbb11f84aab0ac4f59a39',
+    'uri' => '/res/5524cf1c/rsrc/image/sprite-apps-X2.png',
     'disk' => '/rsrc/image/sprite-apps-X2.png',
     'type' => 'png',
   ),
   '/rsrc/image/sprite-apps-large-X2.png' =>
   array(
-    'hash' => '9bed1778022e2bd25d658842be54844d',
-    'uri' => '/res/9bed1778/rsrc/image/sprite-apps-large-X2.png',
+    'hash' => '21f6292dbe389c0927256d0b9dabc1d7',
+    'uri' => '/res/21f6292d/rsrc/image/sprite-apps-large-X2.png',
     'disk' => '/rsrc/image/sprite-apps-large-X2.png',
     'type' => 'png',
   ),
   '/rsrc/image/sprite-apps-large.png' =>
   array(
-    'hash' => '518d6e5487c8d3758921ad85c1bb7d60',
-    'uri' => '/res/518d6e54/rsrc/image/sprite-apps-large.png',
+    'hash' => '245efbdfe8035bf3d11e6a84f91bf7ef',
+    'uri' => '/res/245efbdf/rsrc/image/sprite-apps-large.png',
     'disk' => '/rsrc/image/sprite-apps-large.png',
     'type' => 'png',
   ),
@@ -597,8 +597,8 @@ celerity_register_resource_map(array(
   ),
   '/rsrc/image/sprite-apps.png' =>
   array(
-    'hash' => '9024ab95247f936f41c0b51c75e2e228',
-    'uri' => '/res/9024ab95/rsrc/image/sprite-apps.png',
+    'hash' => '44e7fff8e876e82536f282fd3d7e313b',
+    'uri' => '/res/44e7fff8/rsrc/image/sprite-apps.png',
     'disk' => '/rsrc/image/sprite-apps.png',
     'type' => 'png',
   ),
@@ -716,15 +716,15 @@ celerity_register_resource_map(array(
   ),
   '/rsrc/image/sprite-status-X2.png' =>
   array(
-    'hash' => 'bb0d9cc2fec8e852c69790cbb626c6b1',
-    'uri' => '/res/bb0d9cc2/rsrc/image/sprite-status-X2.png',
+    'hash' => 'f197d134b8f851d7d0d29b1a2f82c13e',
+    'uri' => '/res/f197d134/rsrc/image/sprite-status-X2.png',
     'disk' => '/rsrc/image/sprite-status-X2.png',
     'type' => 'png',
   ),
   '/rsrc/image/sprite-status.png' =>
   array(
-    'hash' => 'b78e998cb34964052b17a8777651ecbd',
-    'uri' => '/res/b78e998c/rsrc/image/sprite-status.png',
+    'hash' => '9246600e0ee7860a5c65b3cc1f66961d',
+    'uri' => '/res/9246600e/rsrc/image/sprite-status.png',
     'disk' => '/rsrc/image/sprite-status.png',
     'type' => 'png',
   ),
@@ -1979,6 +1979,20 @@ celerity_register_resource_map(array(
       1 => 'javelin-behavior',
     ),
     'disk' => '/rsrc/js/application/owners/owners-path-editor.js',
+  ),
+  'javelin-behavior-passphrase-credential-control' =>
+  array(
+    'uri' => '/res/e606ad52/rsrc/js/application/passphrase/phame-credential-control.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-stratcom',
+      3 => 'javelin-workflow',
+      4 => 'javelin-util',
+    ),
+    'disk' => '/rsrc/js/application/passphrase/phame-credential-control.js',
   ),
   'javelin-behavior-persona-login' =>
   array(
@@ -3868,7 +3882,7 @@ celerity_register_resource_map(array(
   ),
   'phui-form-view-css' =>
   array(
-    'uri' => '/res/3621b05d/rsrc/css/phui/phui-form-view.css',
+    'uri' => '/res/c77cb7c8/rsrc/css/phui/phui-form-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -4183,7 +4197,7 @@ celerity_register_resource_map(array(
   ),
   'sprite-apps-css' =>
   array(
-    'uri' => '/res/774f4bad/rsrc/css/sprite-apps.css',
+    'uri' => '/res/262fc049/rsrc/css/sprite-apps.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -4192,7 +4206,7 @@ celerity_register_resource_map(array(
   ),
   'sprite-apps-large-css' =>
   array(
-    'uri' => '/res/b547fab1/rsrc/css/sprite-apps-large.css',
+    'uri' => '/res/bb7b692d/rsrc/css/sprite-apps-large.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -4291,7 +4305,7 @@ celerity_register_resource_map(array(
   ),
   'sprite-status-css' =>
   array(
-    'uri' => '/res/f08fd1e1/rsrc/css/sprite-status.css',
+    'uri' => '/res/a7f117c7/rsrc/css/sprite-status.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -4328,7 +4342,7 @@ celerity_register_resource_map(array(
 ), array(
   'packages' =>
   array(
-    '1a71c1b4' =>
+    '7bc8b0c9' =>
     array(
       'name' => 'core.pkg.css',
       'symbols' =>
@@ -4377,7 +4391,7 @@ celerity_register_resource_map(array(
         41 => 'phabricator-tag-view-css',
         42 => 'phui-list-view-css',
       ),
-      'uri' => '/res/pkg/1a71c1b4/core.pkg.css',
+      'uri' => '/res/pkg/7bc8b0c9/core.pkg.css',
       'type' => 'css',
     ),
     '2c1dba03' =>
@@ -4569,15 +4583,15 @@ celerity_register_resource_map(array(
   ),
   'reverse' =>
   array(
-    'aphront-dialog-view-css' => '1a71c1b4',
-    'aphront-error-view-css' => '1a71c1b4',
-    'aphront-list-filter-view-css' => '1a71c1b4',
-    'aphront-pager-view-css' => '1a71c1b4',
-    'aphront-panel-view-css' => '1a71c1b4',
-    'aphront-table-view-css' => '1a71c1b4',
-    'aphront-tokenizer-control-css' => '1a71c1b4',
-    'aphront-tooltip-css' => '1a71c1b4',
-    'aphront-typeahead-control-css' => '1a71c1b4',
+    'aphront-dialog-view-css' => '7bc8b0c9',
+    'aphront-error-view-css' => '7bc8b0c9',
+    'aphront-list-filter-view-css' => '7bc8b0c9',
+    'aphront-pager-view-css' => '7bc8b0c9',
+    'aphront-panel-view-css' => '7bc8b0c9',
+    'aphront-table-view-css' => '7bc8b0c9',
+    'aphront-tokenizer-control-css' => '7bc8b0c9',
+    'aphront-tooltip-css' => '7bc8b0c9',
+    'aphront-typeahead-control-css' => '7bc8b0c9',
     'differential-changeset-view-css' => '1084b12b',
     'differential-core-view-css' => '1084b12b',
     'differential-inline-comment-editor' => '5e9e5c4e',
@@ -4591,7 +4605,7 @@ celerity_register_resource_map(array(
     'differential-table-of-contents-css' => '1084b12b',
     'diffusion-commit-view-css' => '7aa115b4',
     'diffusion-icons-css' => '7aa115b4',
-    'global-drag-and-drop-css' => '1a71c1b4',
+    'global-drag-and-drop-css' => '7bc8b0c9',
     'inline-comment-summary-css' => '1084b12b',
     'javelin-aphlict' => '2c1dba03',
     'javelin-behavior' => '3e3be199',
@@ -4666,56 +4680,56 @@ celerity_register_resource_map(array(
     'javelin-util' => '3e3be199',
     'javelin-vector' => '3e3be199',
     'javelin-workflow' => '3e3be199',
-    'lightbox-attachment-css' => '1a71c1b4',
+    'lightbox-attachment-css' => '7bc8b0c9',
     'maniphest-task-summary-css' => '49898640',
-    'phabricator-action-list-view-css' => '1a71c1b4',
-    'phabricator-application-launch-view-css' => '1a71c1b4',
+    'phabricator-action-list-view-css' => '7bc8b0c9',
+    'phabricator-application-launch-view-css' => '7bc8b0c9',
     'phabricator-busy' => '2c1dba03',
     'phabricator-content-source-view-css' => '1084b12b',
-    'phabricator-core-css' => '1a71c1b4',
-    'phabricator-crumbs-view-css' => '1a71c1b4',
+    'phabricator-core-css' => '7bc8b0c9',
+    'phabricator-crumbs-view-css' => '7bc8b0c9',
     'phabricator-drag-and-drop-file-upload' => '5e9e5c4e',
     'phabricator-dropdown-menu' => '2c1dba03',
     'phabricator-file-upload' => '2c1dba03',
-    'phabricator-filetree-view-css' => '1a71c1b4',
-    'phabricator-flag-css' => '1a71c1b4',
+    'phabricator-filetree-view-css' => '7bc8b0c9',
+    'phabricator-flag-css' => '7bc8b0c9',
     'phabricator-hovercard' => '2c1dba03',
-    'phabricator-jump-nav' => '1a71c1b4',
+    'phabricator-jump-nav' => '7bc8b0c9',
     'phabricator-keyboard-shortcut' => '2c1dba03',
     'phabricator-keyboard-shortcut-manager' => '2c1dba03',
-    'phabricator-main-menu-view' => '1a71c1b4',
+    'phabricator-main-menu-view' => '7bc8b0c9',
     'phabricator-menu-item' => '2c1dba03',
-    'phabricator-nav-view-css' => '1a71c1b4',
+    'phabricator-nav-view-css' => '7bc8b0c9',
     'phabricator-notification' => '2c1dba03',
-    'phabricator-notification-css' => '1a71c1b4',
-    'phabricator-notification-menu-css' => '1a71c1b4',
+    'phabricator-notification-css' => '7bc8b0c9',
+    'phabricator-notification-menu-css' => '7bc8b0c9',
     'phabricator-object-selector-css' => '1084b12b',
     'phabricator-phtize' => '2c1dba03',
     'phabricator-prefab' => '2c1dba03',
     'phabricator-project-tag-css' => '49898640',
-    'phabricator-remarkup-css' => '1a71c1b4',
+    'phabricator-remarkup-css' => '7bc8b0c9',
     'phabricator-shaped-request' => '5e9e5c4e',
-    'phabricator-side-menu-view-css' => '1a71c1b4',
-    'phabricator-standard-page-view' => '1a71c1b4',
-    'phabricator-tag-view-css' => '1a71c1b4',
+    'phabricator-side-menu-view-css' => '7bc8b0c9',
+    'phabricator-standard-page-view' => '7bc8b0c9',
+    'phabricator-tag-view-css' => '7bc8b0c9',
     'phabricator-textareautils' => '2c1dba03',
     'phabricator-tooltip' => '2c1dba03',
-    'phabricator-transaction-view-css' => '1a71c1b4',
-    'phabricator-zindex-css' => '1a71c1b4',
-    'phui-button-css' => '1a71c1b4',
-    'phui-form-css' => '1a71c1b4',
-    'phui-form-view-css' => '1a71c1b4',
-    'phui-header-view-css' => '1a71c1b4',
-    'phui-icon-view-css' => '1a71c1b4',
-    'phui-list-view-css' => '1a71c1b4',
-    'phui-object-item-list-view-css' => '1a71c1b4',
-    'phui-property-list-view-css' => '1a71c1b4',
-    'phui-spacing-css' => '1a71c1b4',
-    'sprite-apps-large-css' => '1a71c1b4',
-    'sprite-gradient-css' => '1a71c1b4',
-    'sprite-icons-css' => '1a71c1b4',
-    'sprite-menu-css' => '1a71c1b4',
-    'sprite-status-css' => '1a71c1b4',
-    'syntax-highlighting-css' => '1a71c1b4',
+    'phabricator-transaction-view-css' => '7bc8b0c9',
+    'phabricator-zindex-css' => '7bc8b0c9',
+    'phui-button-css' => '7bc8b0c9',
+    'phui-form-css' => '7bc8b0c9',
+    'phui-form-view-css' => '7bc8b0c9',
+    'phui-header-view-css' => '7bc8b0c9',
+    'phui-icon-view-css' => '7bc8b0c9',
+    'phui-list-view-css' => '7bc8b0c9',
+    'phui-object-item-list-view-css' => '7bc8b0c9',
+    'phui-property-list-view-css' => '7bc8b0c9',
+    'phui-spacing-css' => '7bc8b0c9',
+    'sprite-apps-large-css' => '7bc8b0c9',
+    'sprite-gradient-css' => '7bc8b0c9',
+    'sprite-icons-css' => '7bc8b0c9',
+    'sprite-menu-css' => '7bc8b0c9',
+    'sprite-status-css' => '7bc8b0c9',
+    'syntax-highlighting-css' => '7bc8b0c9',
   ),
 ));

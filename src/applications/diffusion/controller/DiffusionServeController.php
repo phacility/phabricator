@@ -326,7 +326,10 @@ final class DiffusionServeController extends DiffusionController {
 
     $input = PhabricatorStartup::getRawInput();
 
-    list($err, $stdout, $stderr) = id(new ExecFuture('%s', $bin))
+    $command = csprintf('%s', $bin);
+    $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
+
+    list($err, $stdout, $stderr) = id(new ExecFuture('%C', $command))
       ->setEnv($env, true)
       ->write($input)
       ->resolve();
@@ -422,7 +425,10 @@ final class DiffusionServeController extends DiffusionController {
       $input = strlen($input)."\n".$input."0\n";
     }
 
-    list($err, $stdout, $stderr) = id(new ExecFuture('%s serve --stdio', $bin))
+    $command = csprintf('%s serve --stdio', $bin);
+    $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
+
+    list($err, $stdout, $stderr) = id(new ExecFuture('%C', $command))
       ->setEnv($env, true)
       ->setCWD($repository->getLocalPath())
       ->write("{$cmd}\n{$args}{$input}")
@@ -545,5 +551,6 @@ final class DiffusionServeController extends DiffusionController {
 
     return $has_pack && $is_hangup;
   }
+
 }
 

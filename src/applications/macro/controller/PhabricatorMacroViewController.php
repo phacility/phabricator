@@ -84,11 +84,9 @@ final class PhabricatorMacroViewController
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
-    $add_comment_header = id(new PHUIHeaderView())
-      ->setHeader(
-        $is_serious
-          ? pht('Add Comment')
-          : pht('Grovel in Awe'));
+    $comment_header = $is_serious
+      ? pht('Add Comment')
+      : pht('Grovel in Awe');
 
     $submit_button_name = $is_serious
       ? pht('Add Comment')
@@ -100,6 +98,7 @@ final class PhabricatorMacroViewController
       ->setUser($user)
       ->setObjectPHID($macro->getPHID())
       ->setDraft($draft)
+      ->setHeaderText($comment_header)
       ->setAction($this->getApplicationURI('/comment/'.$macro->getID().'/'))
       ->setSubmitButtonName($submit_button_name);
 
@@ -111,17 +110,12 @@ final class PhabricatorMacroViewController
       $object_box->addPropertyList($file_view);
     }
 
-    $comment_box = id(new PHUIObjectBoxView())
-      ->setFlush(true)
-      ->setHeader($add_comment_header)
-      ->appendChild($add_comment_form);
-
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $object_box,
         $timeline,
-        $comment_box,
+        $add_comment_form,
       ),
       array(
         'title' => $title_short,

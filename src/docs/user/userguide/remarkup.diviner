@@ -345,6 +345,8 @@ Valid options are:
   - **size** thumb (default), full
   - **name** with `layout=link` or for non-images, use this name for the link
     text
+  - **width** Scale image to a specific width.
+  - **height** Scale image to a specific height.
 
 == Embedding Countdowns
 

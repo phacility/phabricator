@@ -155,7 +155,15 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $this->getDetail('local-path');
   }
 
-  public function getSubversionBaseURI() {
+  public function getSubversionBaseURI($commit = null) {
+    $subpath = $this->getDetail('svn-subpath');
+    if (!strlen($subpath)) {
+      $subpath = null;
+    }
+    return $this->getSubversionPathURI($subpath, $commit);
+  }
+
+  public function getSubversionPathURI($path = null, $commit = null) {
     $vcs = $this->getVersionControlSystem();
     if ($vcs != PhabricatorRepositoryType::REPOSITORY_TYPE_SVN) {
       throw new Exception("Not a subversion repository!");
@@ -167,116 +175,198 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       $uri = $this->getDetail('remote-uri');
     }
 
-    $subpath = $this->getDetail('svn-subpath');
-    if ($subpath) {
-      $subpath = '/'.ltrim($subpath, '/');
+    $uri = rtrim($uri, '/');
+
+    if (strlen($path)) {
+      $path = rawurlencode($path);
+      $path = str_replace('%2F', '/', $path);
+      $uri = $uri.'/'.ltrim($path, '/');
     }
 
-    return $uri.$subpath;
+    if ($path !== null || $commit !== null) {
+      $uri .= '@';
+    }
+
+    if ($commit !== null) {
+      $uri .= $commit;
+    }
+
+    return $uri;
   }
+
+
+/* -(  Remote Command Execution  )------------------------------------------- */
+
 
   public function execRemoteCommand($pattern /* , $arg, ... */) {
     $args = func_get_args();
-    $args = $this->formatRemoteCommand($args);
-    return call_user_func_array('exec_manual', $args);
+    return $this->newRemoteCommandFuture($args)->resolve();
   }
 
   public function execxRemoteCommand($pattern /* , $arg, ... */) {
     $args = func_get_args();
-    $args = $this->formatRemoteCommand($args);
-    return call_user_func_array('execx', $args);
+    return $this->newRemoteCommandFuture($args)->resolvex();
   }
 
   public function getRemoteCommandFuture($pattern /* , $arg, ... */) {
     $args = func_get_args();
-    $args = $this->formatRemoteCommand($args);
-    return newv('ExecFuture', $args);
+    return $this->newRemoteCommandFuture($args);
   }
 
   public function passthruRemoteCommand($pattern /* , $arg, ... */) {
     $args = func_get_args();
-    $args = $this->formatRemoteCommand($args);
-    return call_user_func_array('phutil_passthru', $args);
+    return $this->newRemoteCommandPassthru($args)->execute();
   }
 
-  public function execLocalCommand($pattern /* , $arg, ... */) {
-    $this->assertLocalExists();
+  private function newRemoteCommandFuture(array $argv) {
+    $argv = $this->formatRemoteCommand($argv);
+    $future = newv('ExecFuture', $argv);
+    $future->setEnv($this->getRemoteCommandEnvironment());
+    return $future;
+  }
 
+  private function newRemoteCommandPassthru(array $argv) {
+    $argv = $this->formatRemoteCommand($argv);
+    $passthru = newv('PhutilExecPassthru', $argv);
+    $passthru->setEnv($this->getRemoteCommandEnvironment());
+    return $passthru;
+  }
+
+
+/* -(  Local Command Execution  )-------------------------------------------- */
+
+
+  public function execLocalCommand($pattern /* , $arg, ... */) {
     $args = func_get_args();
-    $args = $this->formatLocalCommand($args);
-    return call_user_func_array('exec_manual', $args);
+    return $this->newLocalCommandFuture($args)->resolve();
   }
 
   public function execxLocalCommand($pattern /* , $arg, ... */) {
-    $this->assertLocalExists();
-
     $args = func_get_args();
-    $args = $this->formatLocalCommand($args);
-    return call_user_func_array('execx', $args);
+    return $this->newLocalCommandFuture($args)->resolvex();
   }
 
   public function getLocalCommandFuture($pattern /* , $arg, ... */) {
-    $this->assertLocalExists();
-
     $args = func_get_args();
-    $args = $this->formatLocalCommand($args);
-    return newv('ExecFuture', $args);
+    return $this->newLocalCommandFuture($args);
   }
 
   public function passthruLocalCommand($pattern /* , $arg, ... */) {
-    $this->assertLocalExists();
-
     $args = func_get_args();
-    $args = $this->formatLocalCommand($args);
-    return call_user_func_array('phutil_passthru', $args);
+    return $this->newLocalCommandPassthru($args)->execute();
   }
 
+  private function newLocalCommandFuture(array $argv) {
+    $this->assertLocalExists();
+
+    $argv = $this->formatLocalCommand($argv);
+    $future = newv('ExecFuture', $argv);
+    $future->setEnv($this->getLocalCommandEnvironment());
+
+    if ($this->usesLocalWorkingCopy()) {
+      $future->setCWD($this->getLocalPath());
+    }
+
+    return $future;
+  }
+
+  private function newLocalCommandPassthru(array $argv) {
+    $this->assertLocalExists();
+
+    $argv = $this->formatLocalCommand($argv);
+    $future = newv('PhutilExecPassthru', $argv);
+    $future->setEnv($this->getLocalCommandEnvironment());
+
+    if ($this->usesLocalWorkingCopy()) {
+      $future->setCWD($this->getLocalPath());
+    }
+
+    return $future;
+  }
+
+
+/* -(  Command Infrastructure  )--------------------------------------------- */
+
+
+  private function getSSHWrapper() {
+    $root = dirname(phutil_get_library_root('phabricator'));
+    return $root.'/bin/ssh-connect';
+  }
+
+  private function getCommonCommandEnvironment() {
+    $env = array(
+      // NOTE: Force the language to "C", which overrides locale settings.
+      // This makes stuff print in English instead of, e.g., French, so we can
+      // parse the output of some commands, error messages, etc.
+      'LANG' => 'C',
+    );
+
+    switch ($this->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        // NOTE: See T2965. Some time after Git 1.7.5.4, Git started fataling if
+        // it can not read $HOME. For many users, $HOME points at /root (this
+        // seems to be a default result of Apache setup). Instead, explicitly
+        // point $HOME at a readable, empty directory so that Git looks for the
+        // config file it's after, fails to locate it, and moves on. This is
+        // really silly, but seems like the least damaging approach to
+        // mitigating the issue.
+
+        $root = dirname(phutil_get_library_root('phabricator'));
+        $env['HOME'] = $root.'/support/empty/';
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        // NOTE: This overrides certain configuration, extensions, and settings
+        // which make Mercurial commands do random unusual things.
+        $env['HGPLAIN'] = 1;
+        break;
+      default:
+        throw new Exception("Unrecognized version control system.");
+    }
+
+    return $env;
+  }
+
+  private function getLocalCommandEnvironment() {
+    return $this->getCommonCommandEnvironment();
+  }
+
+  private function getRemoteCommandEnvironment() {
+    $env = $this->getCommonCommandEnvironment();
+
+    if ($this->shouldUseSSH()) {
+      // NOTE: This is read by `bin/ssh-connect`, and tells it which credentials
+      // to use.
+      $env['PHABRICATOR_SSH_TARGET'] = $this->getCallsign();
+      switch ($this->getVersionControlSystem()) {
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+          // Force SVN to use `bin/ssh-connect`.
+          $env['SVN_SSH'] = $this->getSSHWrapper();
+          break;
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+          // Force Git to use `bin/ssh-connect`.
+          $env['GIT_SSH'] = $this->getSSHWrapper();
+          break;
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+          // We force Mercurial through `bin/ssh-connect` too, but it uses a
+          // command-line flag instead of an environmental variable.
+          break;
+        default:
+          throw new Exception("Unrecognized version control system.");
+      }
+    }
+
+    return $env;
+  }
 
   private function formatRemoteCommand(array $args) {
     $pattern = $args[0];
     $args = array_slice($args, 1);
 
-    $empty = $this->getEmptyReadableDirectoryPath();
-
-    if ($this->shouldUseSSH()) {
-      switch ($this->getVersionControlSystem()) {
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-          $pattern = "SVN_SSH=%s svn --non-interactive {$pattern}";
-          array_unshift(
-            $args,
-            csprintf(
-              'ssh -l %P -i %P',
-              new PhutilOpaqueEnvelope($this->getSSHLogin()),
-              new PhutilOpaqueEnvelope($this->getSSHKeyfile())));
-          break;
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-          $command = call_user_func_array(
-            'csprintf',
-            array_merge(
-              array(
-                "(ssh-add %P && HOME=%s git {$pattern})",
-                new PhutilOpaqueEnvelope($this->getSSHKeyfile()),
-                $empty,
-              ),
-              $args));
-          $pattern = "ssh-agent sh -c %s";
-          $args = array($command);
-          break;
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-          $pattern = "hg --config ui.ssh=%s {$pattern}";
-          array_unshift(
-            $args,
-            csprintf(
-              'ssh -l %P -i %P',
-              new PhutilOpaqueEnvelope($this->getSSHLogin()),
-              new PhutilOpaqueEnvelope($this->getSSHKeyfile())));
-          break;
-        default:
-          throw new Exception("Unrecognized version control system.");
-      }
-    } else if ($this->shouldUseHTTP()) {
-      switch ($this->getVersionControlSystem()) {
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+    switch ($this->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        if ($this->shouldUseHTTP()) {
           $pattern =
             "svn ".
             "--non-interactive ".
@@ -289,45 +379,37 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
             $args,
             new PhutilOpaqueEnvelope($this->getDetail('http-login')),
             new PhutilOpaqueEnvelope($this->getDetail('http-pass')));
-          break;
-        default:
-          throw new Exception(
-            "No support for HTTP Basic Auth in this version control system.");
-      }
-    } else if ($this->shouldUseSVNProtocol()) {
-      switch ($this->getVersionControlSystem()) {
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-            $pattern =
-              "svn ".
-              "--non-interactive ".
-              "--no-auth-cache ".
-              "--username %P ".
-              "--password %P ".
-              $pattern;
-            array_unshift(
-              $args,
-              new PhutilOpaqueEnvelope($this->getDetail('http-login')),
-              new PhutilOpaqueEnvelope($this->getDetail('http-pass')));
-            break;
-        default:
-          throw new Exception(
-            "SVN protocol is SVN only.");
-      }
-    } else {
-      switch ($this->getVersionControlSystem()) {
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        } else if ($this->shouldUseSVNProtocol()) {
+          $pattern =
+            "svn ".
+            "--non-interactive ".
+            "--no-auth-cache ".
+            "--username %P ".
+            "--password %P ".
+            $pattern;
+          array_unshift(
+            $args,
+            new PhutilOpaqueEnvelope($this->getDetail('http-login')),
+            new PhutilOpaqueEnvelope($this->getDetail('http-pass')));
+        } else {
           $pattern = "svn --non-interactive {$pattern}";
-          break;
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-          $pattern = "HOME=%s git {$pattern}";
-          array_unshift($args, $empty);
-          break;
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        }
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        $pattern = "git {$pattern}";
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        if ($this->shouldUseSSH()) {
+          $pattern = "hg --config ui.ssh=%s {$pattern}";
+          array_unshift(
+            $args,
+            $this->getSSHWrapper());
+        } else {
           $pattern = "hg {$pattern}";
-          break;
-        default:
-          throw new Exception("Unrecognized version control system.");
-      }
+        }
+        break;
+      default:
+        throw new Exception("Unrecognized version control system.");
     }
 
     array_unshift($args, $pattern);
@@ -339,21 +421,15 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $pattern = $args[0];
     $args = array_slice($args, 1);
 
-    $empty = $this->getEmptyReadableDirectoryPath();
-
     switch ($this->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        $pattern = "(cd %s && svn --non-interactive {$pattern})";
-        array_unshift($args, $this->getLocalPath());
+        $pattern = "svn --non-interactive {$pattern}";
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $pattern = "(cd %s && HOME=%s git {$pattern})";
-        array_unshift($args, $this->getLocalPath(), $empty);
+        $pattern = "git {$pattern}";
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $hgplain = (phutil_is_windows() ? "set HGPLAIN=1 &&" : "HGPLAIN=1");
-        $pattern = "(cd %s && {$hgplain} hg {$pattern})";
-        array_unshift($args, $this->getLocalPath());
+        $pattern = "hg {$pattern}";
         break;
       default:
         throw new Exception("Unrecognized version control system.");
@@ -364,40 +440,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $args;
   }
 
-  private function getEmptyReadableDirectoryPath() {
-    // See T2965. Some time after Git 1.7.5.4, Git started fataling if it can
-    // not read $HOME. For many users, $HOME points at /root (this seems to be
-    // a default result of Apache setup). Instead, explicitly point $HOME at a
-    // readable, empty directory so that Git looks for the config file it's
-    // after, fails to locate it, and moves on. This is really silly, but seems
-    // like the least damaging approach to mitigating the issue.
-    $root = dirname(phutil_get_library_root('phabricator'));
-    return $root.'/support/empty/';
-  }
-
-  private function getSSHLogin() {
+  public function getSSHLogin() {
     return $this->getDetail('ssh-login');
-  }
-
-  private function getSSHKeyfile() {
-    if ($this->sshKeyfile === null) {
-      $key = $this->getDetail('ssh-key');
-      $keyfile = $this->getDetail('ssh-keyfile');
-      if ($keyfile) {
-        // Make sure we can read the file, that it exists, etc.
-        Filesystem::readFile($keyfile);
-        $this->sshKeyfile = $keyfile;
-      } else if ($key) {
-        $keyfile = new TempFile('phabricator-repository-ssh-key');
-        chmod($keyfile, 0600);
-        Filesystem::writeFile($keyfile, $key);
-        $this->sshKeyfile = $keyfile;
-      } else {
-        $this->sshKeyfile = '';
-      }
-    }
-
-    return (string)$this->sshKeyfile;
   }
 
   public function getURI() {
@@ -536,14 +580,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     // Make sure we don't leak anything if this repo is using HTTP Basic Auth
     // with the credentials in the URI or something zany like that.
 
-    if ($uri instanceof PhutilGitURI) {
-      if (!$this->getDetail('show-user', false)) {
-        $uri->setUser(null);
-      }
-    } else {
-      if (!$this->getDetail('show-user', false)) {
-        $uri->setUser(null);
-      }
+    // If repository is not accessed over SSH we remove both username and
+    // password.
+    if (!$this->shouldUseSSH()) {
+      $uri->setUser(null);
       $uri->setPass(null);
     }
 
@@ -623,10 +663,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     $protocol = $this->getRemoteProtocol();
     if ($this->isSSHProtocol($protocol)) {
-      return (bool)$this->getSSHKeyfile();
-    } else {
-      return false;
+      $key = $this->getDetail('ssh-key');
+      $keyfile = $this->getDetail('ssh-keyfile');
+      if ($key || $keyfile) {
+        return true;
+      }
     }
+
+    return false;
   }
 
 
@@ -849,6 +893,18 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         return true;
     }
   }
+
+  public function canDestroyWorkingCopy() {
+    if ($this->isHosted()) {
+      // Never destroy hosted working copies.
+      return false;
+    }
+
+    $default_path = PhabricatorEnv::getEnvConfig(
+      'repository.default-local-path');
+    return Filesystem::isDescendant($this->getLocalPath(), $default_path);
+  }
+
 
   public function writeStatusMessage(
     $status_type,

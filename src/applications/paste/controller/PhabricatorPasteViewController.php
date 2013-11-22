@@ -117,11 +117,9 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
-    $add_comment_header = id(new PHUIHeaderView())
-      ->setHeader(
-        $is_serious
-          ? pht('Add Comment')
-          : pht('Debate Paste Accuracy'));
+    $add_comment_header = $is_serious
+      ? pht('Add Comment')
+      : pht('Debate Paste Accuracy');
 
     $submit_button_name = $is_serious
       ? pht('Add Comment')
@@ -133,13 +131,9 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ->setUser($user)
       ->setObjectPHID($paste->getPHID())
       ->setDraft($draft)
+      ->setHeaderText($add_comment_header)
       ->setAction($this->getApplicationURI('/comment/'.$paste->getID().'/'))
       ->setSubmitButtonName($submit_button_name);
-
-    $comment_box = id(new PHUIObjectBoxView())
-      ->setFlush(true)
-      ->setHeader($add_comment_header)
-      ->appendChild($add_comment_form);
 
     return $this->buildApplicationPage(
       array(
@@ -147,7 +141,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
         $object_box,
         $source_code,
         $timeline,
-        $comment_box,
+        $add_comment_form,
       ),
       array(
         'title' => $paste->getFullName(),
@@ -157,8 +151,10 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
   }
 
   private function buildHeaderView(PhabricatorPaste $paste) {
+    $title = (nonempty($paste->getTitle())) ?
+      $paste->getTitle() : pht('(An Untitled Masterwork)');
     $header = id(new PHUIHeaderView())
-      ->setHeader($paste->getTitle())
+      ->setHeader($title)
       ->setUser($this->getRequest()->getUser())
       ->setPolicyObject($paste);
 

@@ -11,6 +11,10 @@ final class PhabricatorAuthNeedsApprovalController
     return false;
   }
 
+  public function shouldRequireEnabledUser() {
+    return false;
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();

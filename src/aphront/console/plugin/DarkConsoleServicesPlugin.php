@@ -15,17 +15,36 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
     return 'Information about services.';
   }
 
+  public static function getQueryAnalyzerHeader() {
+    return 'X-Phabricator-QueryAnalyzer';
+  }
+
+  public static function isQueryAnalyzerRequested() {
+    if (!empty($_REQUEST['__analyze__'])) {
+      return true;
+    }
+
+    $header = AphrontRequest::getHTTPHeader(self::getQueryAnalyzerHeader());
+    if ($header) {
+      return true;
+    }
+
+    return false;
+  }
+
   /**
    * @phutil-external-symbol class PhabricatorStartup
    */
   public function generateData() {
+
+    $should_analyze = self::isQueryAnalyzerRequested();
 
     $log = PhutilServiceProfiler::getInstance()->getServiceCallLog();
     foreach ($log as $key => $entry) {
       $config = idx($entry, 'config', array());
       unset($log[$key]['config']);
 
-      if (empty($_REQUEST['__analyze__'])) {
+      if (!$should_analyze) {
         $log[$key]['explain'] = array(
           'sev'     => 7,
           'size'    => null,
@@ -139,7 +158,7 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
       'analyzeURI' => (string)$this
         ->getRequestURI()
         ->alter('__analyze__', true),
-      'didAnalyze' => isset($_REQUEST['__analyze__']),
+      'didAnalyze' => $should_analyze,
     );
   }
 

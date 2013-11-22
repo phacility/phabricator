@@ -66,6 +66,10 @@ final class PhabricatorPolicy
         $policy->setType(PhabricatorPolicyType::TYPE_PROJECT);
         $policy->setName($handle->getName());
         break;
+      case PhabricatorPeoplePHIDTypeUser::TYPECONST:
+        $policy->setType(PhabricatorPolicyType::TYPE_USER);
+        $policy->setName($handle->getFullName());
+        break;
       case PhabricatorPolicyPHIDTypePolicy::TYPECONST:
         // TODO: This creates a weird handle-based version of a rule policy.
         // It behaves correctly, but can't be applied since it doesn't have
@@ -138,17 +142,15 @@ final class PhabricatorPolicy
           PhabricatorPolicies::POLICY_NOONE   => 'policy-noone',
         );
         return idx($map, $this->getPHID(), 'policy-unknown');
-      break;
+      case PhabricatorPolicyType::TYPE_USER:
+        return 'policy-user';
       case PhabricatorPolicyType::TYPE_PROJECT:
         return 'policy-project';
-      break;
       case PhabricatorPolicyType::TYPE_CUSTOM:
       case PhabricatorPolicyType::TYPE_MASKED:
         return 'policy-custom';
-      break;
       default:
         return 'policy-unknown';
-      break;
     }
   }
 

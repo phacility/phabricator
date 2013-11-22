@@ -28,7 +28,6 @@ final class NuanceSourceEditController extends NuanceController {
 
     if ($is_new) {
       $source = NuanceSource::initializeNewSource($user);
-      $title = pht('Create Source');
     } else {
       $source = id(new NuanceSourceQuery())
         ->setViewer($user)
@@ -39,71 +38,29 @@ final class NuanceSourceEditController extends NuanceController {
             PhabricatorPolicyCapability::CAN_EDIT,
           ))
         ->executeOne();
-      $title = pht('Edit Source');
     }
 
     if (!$source) {
       return new Aphront404Response();
     }
 
-    $error_view = null;
-    $e_name = null;
-    if ($request->isFormPost()) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('This does not work at all yet.'));
-    }
+    $definition = NuanceSourceDefinition::getDefinitionForSource($source);
+    $definition->setActor($user);
 
-    $policies = id(new PhabricatorPolicyQuery())
-      ->setViewer($user)
-      ->setObject($source)
-      ->execute();
+    $response = $definition->buildEditLayout($request);
+    if ($response instanceof AphrontResponse) {
+      return $response;
+    }
+    $layout = $response;
 
     $crumbs = $this->buildApplicationCrumbs();
-
-    $form = id(new AphrontFormView())
-      ->setUser($user)
-      ->appendChild(
-        id(new AphrontFormTextControl())
-        ->setLabel(pht('Name'))
-        ->setName('name')
-        ->setError($e_name)
-        ->setValue($source->getName()))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-        ->setLabel(pht('Type'))
-        ->setName('type')
-        ->setOptions(NuanceSourceType::getSelectOptions())
-        ->setValue($source->getType()))
-      ->appendChild(
-        id(new AphrontFormPolicyControl())
-        ->setUser($user)
-        ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
-        ->setPolicyObject($source)
-        ->setPolicies($policies)
-        ->setName('viewPolicy'))
-      ->appendChild(
-        id(new AphrontFormPolicyControl())
-        ->setUser($user)
-        ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
-        ->setPolicyObject($source)
-        ->setPolicies($policies)
-        ->setName('editPolicy'))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-        ->setValue(pht('Save')));
-
-    $layout = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
-      ->setFormError($error_view)
-      ->setForm($form);
-
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $layout,
       ),
       array(
-        'title' => $title,
+        'title' => $definition->getEditTitle(),
         'device' => true));
   }
 }

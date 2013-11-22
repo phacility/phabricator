@@ -18,6 +18,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   private $requestURI;
   private $showPreview = true;
   private $objectPHID;
+  private $headerText;
 
   public function setObjectPHID($object_phid) {
     $this->objectPHID = $object_phid;
@@ -72,25 +73,28 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     return $this->action;
   }
 
+  public function setHeaderText($text) {
+    $this->headerText = $text;
+    return $this;
+  }
+
   public function render() {
 
     $user = $this->getUser();
     if (!$user->isLoggedIn()) {
       $uri = id(new PhutilURI('/login/'))
         ->setQueryParam('next', (string) $this->getRequestURI());
-      return phutil_tag(
-        'div',
-        array(
-          'class' => 'login-to-comment'
-        ),
-        javelin_tag(
-          'a',
-          array(
-            'class' => 'button',
-            'sigil' => 'workflow',
-            'href' => $uri
-          ),
-          pht('Login to Comment')));
+      return id(new PHUIObjectBoxView())
+        ->setHeaderText(pht('Add Comment'))
+        ->appendChild(
+          javelin_tag(
+            'a',
+            array(
+              'class' => 'login-to-comment button',
+              'sigil' => 'workflow',
+              'href' => $uri
+            ),
+            pht('Login to Comment')));
     }
 
     $data = array();
@@ -124,7 +128,12 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
           : null,
       ));
 
-    return array($comment, $preview);
+    $comment_box = id(new PHUIObjectBoxView())
+      ->setFlush(true)
+      ->setHeaderText($this->headerText)
+      ->appendChild($comment);
+
+    return array($comment_box, $preview);
   }
 
   private function renderCommentPanel() {
@@ -174,23 +183,13 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     $preview = id(new PhabricatorTimelineView())
       ->setID($this->getPreviewTimelineID());
 
-    $header = phutil_tag(
-      'div',
-      array(
-        'class' => 'phabricator-timeline-preview-header',
-      ),
-      pht('Preview'));
-
     return phutil_tag(
       'div',
       array(
         'id'    => $this->getPreviewPanelID(),
         'style' => 'display: none',
       ),
-      array(
-        $header,
-        $preview,
-      ));
+      $preview);
   }
 
   private function getPreviewPanelID() {

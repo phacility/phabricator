@@ -64,22 +64,22 @@
     "apps-authentication-blue-large"  : {
       "name" : "apps-authentication-blue-large",
       "rule" : ".apps-authentication-blue-large, .phabricator-crumb-view:hover .apps-authentication-dark-large",
-      "hash" : "9a8389120be19de5b0fba2814736d2c4"
+      "hash" : "3d5e35b539e11d69635d04651c973adf"
     },
     "apps-authentication-dark-large"  : {
       "name" : "apps-authentication-dark-large",
       "rule" : ".apps-authentication-dark-large",
-      "hash" : "478a7a1ae296ccf988ccce89bc7de25d"
+      "hash" : "2321ca8222a5368f80717c5424f3fd17"
     },
     "apps-authentication-light-large" : {
       "name" : "apps-authentication-light-large",
       "rule" : ".apps-authentication-light-large",
-      "hash" : "034256f1056033424b936e94debaa9ad"
+      "hash" : "8ec1778a94a9b17d22dec23e466077b3"
     },
     "apps-authentication-white-large" : {
       "name" : "apps-authentication-white-large",
       "rule" : ".apps-authentication-white-large",
-      "hash" : "29a681a8825dbeb805480bdddb91c737"
+      "hash" : "9ccbff0a913a20892846b0df6a502bbe"
     },
     "apps-calendar-blue-large"        : {
       "name" : "apps-calendar-blue-large",
@@ -620,6 +620,26 @@
       "name" : "apps-owners-white-large",
       "rule" : ".apps-owners-white-large",
       "hash" : "a267ce517c928ce5861fe7ac85116af7"
+    },
+    "apps-passphrase-blue-large"      : {
+      "name" : "apps-passphrase-blue-large",
+      "rule" : ".apps-passphrase-blue-large, .phabricator-crumb-view:hover .apps-passphrase-dark-large",
+      "hash" : "bb5ff2b25e5f7df50ec77ed4a5d38ea6"
+    },
+    "apps-passphrase-dark-large"      : {
+      "name" : "apps-passphrase-dark-large",
+      "rule" : ".apps-passphrase-dark-large",
+      "hash" : "8f5dea9e2e329a1d5001bbc8e739899c"
+    },
+    "apps-passphrase-light-large"     : {
+      "name" : "apps-passphrase-light-large",
+      "rule" : ".apps-passphrase-light-large",
+      "hash" : "b036bcd1cff87d5733fee676ae1d45c0"
+    },
+    "apps-passphrase-white-large"     : {
+      "name" : "apps-passphrase-white-large",
+      "rule" : ".apps-passphrase-white-large",
+      "hash" : "7c16e3be0fec2b107da1a770026e1155"
     },
     "apps-paste-blue-large"           : {
       "name" : "apps-paste-blue-large",

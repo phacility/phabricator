@@ -495,8 +495,18 @@ final class PhabricatorUser
       }
     }
     $token = $this->generateEmailToken($email);
-    $uri = PhabricatorEnv::getProductionURI('/login/etoken/'.$token.'/');
+
+    $uri = '/login/etoken/'.$token.'/';
+    try {
+      $uri = PhabricatorEnv::getProductionURI($uri);
+    } catch (Exception $ex) {
+      // If a user runs `bin/auth recover` before configuring the base URI,
+      // just show the path. We don't have any way to figure out the domain.
+      // See T4132.
+    }
+
     $uri = new PhutilURI($uri);
+
     return $uri->alter('email', $email->getAddress());
   }
 

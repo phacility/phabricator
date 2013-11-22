@@ -19,7 +19,7 @@ final class PhabricatorMustVerifyEmailController
 
     $email = $user->loadPrimaryEmail();
 
-    if ($email->getIsVerified()) {
+    if ($user->getIsEmailVerified()) {
       return id(new AphrontRedirectResponse())->setURI('/');
     }
 

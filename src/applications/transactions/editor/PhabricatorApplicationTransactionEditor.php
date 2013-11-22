@@ -1129,6 +1129,39 @@ abstract class PhabricatorApplicationTransactionEditor
   }
 
 
+  /**
+   * Check for a missing text field.
+   *
+   * A text field is missing if the object has no value and there are no
+   * transactions which set a value, or if the transactions remove the value.
+   * This method is intended to make implementing @{method:validateTransaction}
+   * more convenient:
+   *
+   *   $missing = $this->validateIsEmptyTextField(
+   *     $object->getName(),
+   *     $xactions);
+   *
+   * This will return `true` if the net effect of the object and transactions
+   * is an empty field.
+   *
+   * @param wild Current field value.
+   * @param list<PhabricatorApplicationTransaction> Transactions editing the
+   *          field.
+   * @return bool True if the field will be an empty text field after edits.
+   */
+  protected function validateIsEmptyTextField($field_value, array $xactions) {
+    if (strlen($field_value) && empty($xactions)) {
+      return false;
+    }
+
+    if ($xactions && strlen(last($xactions)->getNewValue())) {
+      return false;
+    }
+
+    return true;
+  }
+
+
 /* -(  Implicit CCs  )------------------------------------------------------- */
 
 

@@ -117,7 +117,26 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_DESCRIPTION:
         return $object->setDescription($xaction->getNewValue());
       case ManiphestTransaction::TYPE_OWNER:
-        return $object->setOwnerPHID($xaction->getNewValue());
+        $phid = $xaction->getNewValue();
+
+        // Update the "ownerOrdering" column to contain the full name of the
+        // owner, if the task is assigned.
+
+        $handle = null;
+        if ($phid) {
+          $handle = id(new PhabricatorHandleQuery())
+            ->setViewer($this->getActor())
+            ->withPHIDs(array($phid))
+            ->executeOne();
+        }
+
+        if ($handle) {
+          $object->setOwnerOrdering($handle->getName());
+        } else {
+          $object->setOwnerOrdering(null);
+        }
+
+        return $object->setOwnerPHID($phid);
       case ManiphestTransaction::TYPE_CCS:
         return $object->setCCPHIDs($xaction->getNewValue());
       case ManiphestTransaction::TYPE_PROJECTS:

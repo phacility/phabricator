@@ -185,6 +185,9 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       if (DarkConsoleXHProfPluginAPI::isProfilerStarted()) {
         $headers[DarkConsoleXHProfPluginAPI::getProfilerHeader()] = 'page';
       }
+      if (DarkConsoleServicesPlugin::isQueryAnalyzerRequested()) {
+        $headers[DarkConsoleServicesPlugin::getQueryAnalyzerHeader()] = true;
+      }
 
       Javelin::initBehavior(
         'dark-console',

@@ -15,9 +15,21 @@ final class PhabricatorEmailVerificationController
     return false;
   }
 
+  public function shouldRequireEnabledUser() {
+    // Unapproved users are allowed to verify their email addresses. We'll kick
+    // disabled users out later.
+    return false;
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
+
+    if ($user->getIsDisabled()) {
+      // We allowed unapproved and disabled users to hit this controller, but
+      // want to kick out disabled users now.
+      return new Aphront400Response();
+    }
 
     $email = id(new PhabricatorUserEmail())->loadOneWhere(
       'userPHID = %s AND verificationCode = %s',
@@ -32,7 +44,7 @@ final class PhabricatorEmailVerificationController
         'user. Make sure you followed the link in the email correctly and are '.
         'logged in with the user account associated with the email address.');
       $continue = pht('Rats!');
-    } else if ($email->getIsVerified()) {
+    } else if ($email->getIsVerified() && $user->getIsEmailVerified()) {
       $title = pht('Address Already Verified');
       $content = pht(
         'This email address has already been verified.');

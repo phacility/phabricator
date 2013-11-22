@@ -41,6 +41,14 @@ final class PhabricatorPHDConfigOptions
             "of output, but can help debug issues. Daemons launched in debug ".
             "mode with 'phd debug' are always launched in verbose mode. See ".
             "also 'phd.trace'.")),
+      $this->newOption('phd.user', 'string', null)
+        ->setSummary(pht("System user to run daemons as."))
+        ->setDescription(
+          pht(
+            "Specify a system user to run the daemons as. Primarily, this ".
+            "user will own the working copies of any repositories that ".
+            "Phabricator imports or manages. This option is new and ".
+            "experimental.")),
       $this->newOption('phd.trace', 'bool', false)
         ->setBoolOptions(
           array(

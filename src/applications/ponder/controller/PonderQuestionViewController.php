@@ -210,19 +210,15 @@ final class PonderQuestionViewController extends PonderController {
       ->setUser($viewer)
       ->setObjectPHID($question->getPHID())
       ->setShowPreview(false)
+      ->setHeaderText(pht('Question Comment'))
       ->setAction($this->getApplicationURI("/question/comment/{$id}/"))
       ->setSubmitButtonName(pht('Comment'));
-
-    $object_box = id(new PHUIObjectBoxView())
-      ->setFlush(true)
-      ->setHeaderText(pht('Question Comment'))
-      ->appendChild($add_comment);
 
     return $this->wrapComments(
       count($xactions),
       array(
         $timeline,
-        $object_box,
+        $add_comment,
       ));
   }
 
@@ -286,15 +282,11 @@ final class PonderQuestionViewController extends PonderController {
         ->setUser($viewer)
         ->setObjectPHID($answer->getPHID())
         ->setShowPreview(false)
+        ->setHeaderText(pht('Answer Comment'))
         ->setAction($this->getApplicationURI("/answer/comment/{$id}/"))
         ->setSubmitButtonName(pht('Comment'));
 
-      $comment_box = id(new PHUIObjectBoxView())
-        ->setFlush(true)
-        ->setHeaderText(pht('Answer Comment'))
-        ->appendChild($form);
-
-      $details[] = $comment_box;
+      $details[] = $form;
 
       $out[] = $this->wrapComments(
         count($xactions),

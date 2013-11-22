@@ -70,8 +70,24 @@ final class DifferentialUnitFieldSpecification
         $udata[$key]['sort'] = idx($sort_map, idx($test, 'result'));
       }
       $udata = isort($udata, 'sort');
-
-      foreach ($udata as $test) {
+      $engine = new PhabricatorMarkupEngine();
+      $engine->setViewer($this->getUser());
+      $markup_objects = array();
+      foreach ($udata as $key => $test) {
+        $userdata = idx($test, 'userdata');
+        if ($userdata) {
+          if ($userdata !== false) {
+            $userdata = str_replace("\000", '', $userdata);
+          }
+          $markup_object = id(new PhabricatorMarkupOneOff())
+              ->setContent($userdata)
+              ->setPreserveLinebreaks(true);
+          $engine->addObject($markup_object, 'default');
+          $markup_objects[$key] = $markup_object;
+        }
+      }
+      $engine->process();
+      foreach ($udata as $key => $test) {
         $result = idx($test, 'result');
 
         $default_hide = false;
@@ -110,17 +126,10 @@ final class DifferentialUnitFieldSpecification
           'show'  => $show,
         );
 
-        $userdata = idx($test, 'userdata');
-        if ($userdata) {
-          if ($userdata !== false) {
-            $userdata = str_replace("\000", '', $userdata);
-          }
-          $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
-          $engine->setConfig('viewer', $this->getUser());
-          $userdata = $engine->markupText($userdata);
+        if (isset($markup_objects[$key])) {
           $rows[] = array(
             'style' => 'details',
-            'value' => $userdata,
+            'value' => $engine->getOutput($markup_objects[$key], 'default'),
             'show'  => false,
           );
           if (empty($hidden['details'])) {

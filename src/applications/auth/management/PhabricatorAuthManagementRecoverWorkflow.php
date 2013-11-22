@@ -72,7 +72,8 @@ final class PhabricatorAuthManagementRecoverWorkflow
     $console = PhutilConsole::getConsole();
     $console->writeOut(
       pht(
-        'Use this link to recover access to the "%s" account:',
+        'Use this link to recover access to the "%s" account from the web '.
+        'interface:',
         $username));
     $console->writeOut("\n\n");
     $console->writeOut("    %s", $user->getEmailLoginURI());
