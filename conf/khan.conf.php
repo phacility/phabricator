@@ -9,7 +9,7 @@ return array(
   // Only allow people at khanacademy.org to register.
   'auth.email-domains' => array(
     'khanacademy.org',
-  ),		       
+  ),
 
   // Allow, but don't require, a user to say how they did testing.
   'differential.require-test-plan-field' => false,
@@ -45,12 +45,14 @@ return array(
   // This apparently avoids some cookie-based attacks.
   'security.alternate-file-domain'  => 'http://phabricator-files.khanacademy.org/',
 
-  // pygments doesn't know .q files are sql.  We add that.  (The
-  // .arcconfig comes default.conf; I'm not sure if read_config does
-  // merging on sub-arrays properly, so I just repeat it to be safe.)
+  // pygments doesn't know .q files are sql or that jsx is javascript(-ish).
+  // We add that.  (The .arcconfig comes default.conf; I'm not sure if
+  // read_config does merging on sub-arrays properly, so I just repeat it to be
+  // safe.)
   'syntax.filemap' => array(
     '@\.arcconfig$@' => 'js',
     '@\.q$@' => 'mysql',
+    '@\.jsx$@' => 'js',
   ),
 
 ) + phabricator_read_config_file('production');
