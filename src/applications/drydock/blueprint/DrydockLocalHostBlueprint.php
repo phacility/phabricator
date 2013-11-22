@@ -3,8 +3,7 @@
 final class DrydockLocalHostBlueprint extends DrydockBlueprint {
 
   public function isEnabled() {
-    // TODO: Figure this out.
-    return true;
+    return false;
   }
 
   public function canAllocateMoreResources(array $pool) {
@@ -34,6 +33,8 @@ final class DrydockLocalHostBlueprint extends DrydockBlueprint {
     $resource = $this->newResourceTemplate('Host (localhost)');
     $resource->setStatus(DrydockResourceStatus::STATUS_OPEN);
     $resource->setAttribute('path', $path);
+    $resource->setAttribute('remote', "false");
+    $resource->setAttribute('preallocated', "false");
     $resource->save();
 
     return $resource;
@@ -42,7 +43,7 @@ final class DrydockLocalHostBlueprint extends DrydockBlueprint {
   protected function canAllocateLease(
     DrydockResource $resource,
     DrydockLease $lease) {
-    return true;
+    return false;
   }
 
   protected function shouldAllocateLease(
