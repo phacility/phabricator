@@ -100,6 +100,7 @@ try {
 
   $err = $workflow->execute($original_args);
 
+
   $metrics_channel->flush();
   $error_channel->flush();
 } catch (Exception $ex) {

@@ -1,0 +1,205 @@
+@title Diffusion User Guide: Repository Hosting
+@group userguide
+
+Guide to configuring Phabricator repository hosting.
+
+= Overview =
+
+Phabricator can host repositories and provide authenticated read and write
+access to them over HTTP and SSH. This document describes how to configure
+repository hosting.
+
+NOTE: This feature is new and has some rough edges. Let us know if you run into
+issues (see @{article:Give Feedback! Get Support!}).
+
+= Understanding Supported Protocols =
+
+Phabricator supports hosting over these protocols:
+
+| VCS | SSH | HTTP |
+|-----|-----|------|
+| Git | Supported | Supported |
+| Mercurial | Supported | Supported |
+| Subversion | Supported | Not Supported |
+
+All supported protocols handle reads (pull/checkout/clone) and writes
+(push/commit). Of the two protocols, SSH is generally more robust, secure and
+performant, but HTTP is easier to set up and supports anonymous access.
+
+| | SSH | HTTP |
+| |-----|------|
+| Reads | Yes | Yes |
+| Writes | Yes | Yes |
+| Authenticated Access | Yes | Yes |
+| Anonymous Access | No | Yes |
+| Security | Better (Asymetric Key) | Okay (Password) |
+| Performance | Better | Okay |
+| Setup | Hard | Easy |
+
+Each repository can be configured individually, and you can use either protocol,
+or both, or a mixture across different repositories.
+
+SSH is recommended unless you need anonymous access, or are not able to
+configure it for technical reasons.
+
+= Configuring System User Accounts =
+
+Phabricator uses as many as three user accounts. This section will guide you
+through creating and configuring them. These are system user accounts on the
+machine Phabricator runs on, not Phabricator user accounts.
+
+The system accounts are:
+
+  - The user the daemons run as. We'll call this `daemon-user`. For more
+    information on the daemons, see @{article:Managing Daemons with phd}.
+  - The user the webserver runs as. We'll call this `www-user`. If you do not
+    plan to make repositories available over HTTP, you do not need to perform
+    any special configuration for this user.
+  - The user that users will connect over SSH as. We'll call this `vcs-user`.
+    If you do not plan to make repositories available over SSH, you do not need
+    to perform any special configuration for this user.
+
+To configure these users:
+
+  - Create a `daemon-user` if one does not already exist (you can call this user
+    whatever you want, or use an existing account). When you start the daemons,
+    start them using this user.
+  - Create a `www-user` if one does not already exist. Run your webserver as
+    this user. In most cases, this user will already exist.
+  - Create a `vcs-user` if one does not already exist. Common names for this
+    user are `git` or `hg`. When users clone repositories, they will use a URI
+    like `vcs-user@phabricator.yourcompany.com`.
+
+Now, allow the `vcs-user` and `www-user` to `sudo` as the `daemon-user`. Add
+this to `/etc/sudoers`, using `visudo` or `sudoedit`.
+
+If you plan to use SSH:
+
+  vcs-user ALL=(daemon-user) SETENV: NOPASSWD: /path/to/bin/git-upload-pack, /path/to/bin/git-receive-pack, /path/to/bin/hg, /path/to/bin/svnserve
+
+If you plan to use HTTP:
+
+  www-user ALL=(daemon-user) SETENV: NOPASSWD: /usr/bin/git-http-backend, /usr/bin/hg
+
+Replace `vcs-user`, `www-user` and `daemon-user` with the right usernames for
+your configuration. Make sure all the paths point to the real locations of the
+binaries on your system. You can omit any binaries associated with VCSes you do
+not use.
+
+Adding these commands to `sudoers` will allow the daemon and webserver users to
+write to repositories as the daemon user.
+
+Finally, once you've configured `sudoers`, set `phd.user` to the `daemon-user`:
+
+  phabricator/ $ ./bin/config set phd.user daemon-user
+
+= Configuring HTTP =
+
+If you plan to use authenticated HTTP, you need to set
+`diffusion.allow-http-auth` in Config. If you don't plan to use HTTP, or plan to
+use only anonymous HTTP, you can leave this setting disabled.
+
+Otherwise, if you've configured system accounts above, you're all set. No
+additional server configuration is required to make HTTP work.
+
+= Configuring SSH =
+
+SSH access requires some additional setup. Here's an overview of how setup
+works:
+
+  - You'll move the normal `sshd` daemon to another port, like `222`. When
+    connecting to the machine to administrate it, you'll use this alternate
+    port.
+  - You'll run a highly restricted `sshd` on port 22, with a special locked-down
+    configuration that uses Phabricator to authorize users and execute commands.
+  - The `sshd` on port 22 **MUST** be 6.2 or newer, because Phabricator relies
+    on the `AuthorizedKeysCommand` option.
+
+Here's a walkthrough of how to perform this configuration in detail:
+
+**Move Normal SSHD**: Be careful when editing the configuration for `sshd`. If
+you get it wrong, you may lock yourself out of the machine. Restarting `sshd`
+generally will not interrupt existing connections, but you should exercise
+caution. Two strategies you can use to mitigate this risk are: smoke-test
+configuration by starting a second `sshd`; and use a `screen` session which
+automatically repairs configuration unless stopped.
+
+To smoke-test a configuration, just start another `sshd` using the `-f` flag:
+
+  sudo sshd -f /path/to/config_file.edited
+
+You can then connect and make sure the edited config file is valid before
+replacing your primary configuration file.
+
+To automatically repair configuration, start a `screen` session with a command
+like this in it:
+
+  sleep 60 ; mv sshd_config.good sshd_config ; /etc/init.d/sshd restart
+
+The specific command may vary for your system, but the general idea is to have
+the machine automatically restore configuration after some period of time if
+you don't stop it. If you lock yourself out, this will fix things automatically.
+
+Now that you're ready to edit your configuration, open up your `sshd` config
+(often `/etc/ssh/sshd_config`) and change the `Port` setting to some other port,
+like `222` (you can choose any port other than 22).
+
+  Port 222
+
+Very carefully, restart `sshd`. Verify that you can connect on the new port:
+
+  ssh -p 222 ...
+
+**Configure and Start Phabricator SSHD**: Now, configure and start a second
+`sshd` instance which will run on port `22`. This instance will use a special
+locked-down configuration that uses Phabricator to handle authentication and
+command execution.
+
+There are three major steps:
+
+  - Create a `phabricator-ssh-hook.sh` file.
+  - Create a `sshd_phabricator` config file.
+  - Start a copy of `sshd` using the new configuration.
+
+**Create `phabricator-ssh-hook.sh`**: Copy the template in
+`phabricator/resources/sshd/phabricator-ssh-hook.sh` to somewhere like
+`/usr/libexec/phabricator-ssh-hook.sh` and edit it to have the correct
+settings. Then make it owned by `root` and restrict editing:
+
+  sudo chown root /path/to/phabricator-ssh-hook.sh
+  sudo chmod 755 /path/to/phabricator-ssh-hook.sh
+
+If you don't do this, `sshd` will refuse to execute the hook.
+
+**Create `sshd_config` for Phabricator**: Copy the template in
+`phabricator/resources/sshd/sshd_config.phabricator.example` to somewhere like
+`/etc/ssh/sshd_config.phabricator`.
+
+Open the file and edit the `AuthorizedKeysCommand` and
+`AuthorizedKeysCommandUser` settings to be correct for your system.
+
+**Start SSHD**: Now, start the Phabricator `sshd`:
+
+  sudo sshd -f /path/to/sshd_config.phabricator
+
+If you did everything correctly, you should be able to run this:
+
+  echo {} | ssh vcs-user@phabricator.yourcompany.com conduit conduit.ping
+
+...and get a response like this:
+
+  {"result":"orbital","error_code":null,"error_info":null}
+
+(If you get an authentication error, make sure you added your public key in
+**Settings > SSH Public Keys**.)
+
+= Authentication Over HTTP =
+
+To authenticate over HTTP, users should configure a **VCS Password** in the
+**Settings** screen. This panel is available only if `diffusion.allow-http-auth`
+is enabled.
+
+= Authentication Over SSH =
+
+To authenticate over SSH, users should add **SSH Public Keys** in the
+**Settings** screen.

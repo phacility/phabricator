@@ -1,8 +1,14 @@
 #!/bin/sh
 
-###
-###  WARNING: This feature is new and experimental. Use it at your own risk!
-###
+# NOTE: Replace this with the username that you expect users to connect with.
+VCSUSER="vcs-user"
 
-ROOT=/INSECURE/devtools/phabricator
+# NOTE: Replace this with the path to your Phabricator directory.
+ROOT="/path/to/phabricator"
+
+if [ "$1" -ne "$VCSUSER" ];
+then
+  exit 1
+fi
+
 exec "$ROOT/bin/ssh-auth" $@

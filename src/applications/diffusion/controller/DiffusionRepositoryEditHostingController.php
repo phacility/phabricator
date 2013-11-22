@@ -92,15 +92,18 @@ final class DiffusionRepositoryEditHostingController
             'Users will not be able to push commits to this repository.'))
         ->setValue($v_hosting);
 
+    $doc_href = PhabricatorEnv::getDoclink(
+      'article/Diffusion_User_Guide_Repository_Hosting.html');
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->appendRemarkupInstructions(
         pht(
-          'NOTE: Hosting is extremely new and barely works! Use it at '.
-          'your own risk.'.
-          "\n\n".
           'Phabricator can host repositories, or it can track repositories '.
-          'hosted elsewhere (like on GitHub or Bitbucket).'))
+          'hosted elsewhere (like on GitHub or Bitbucket). For information '.
+          'on configuring hosting, see [[ %s | Diffusion User Guide: '.
+          'Repository Hosting]]',
+          $doc_href))
       ->appendChild($hosted_control)
       ->appendChild(
         id(new AphrontFormSubmitControl())
