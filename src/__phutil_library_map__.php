@@ -947,6 +947,7 @@ phutil_register_library_map(array(
     'PackageDeleteMail' => 'applications/owners/mail/PackageDeleteMail.php',
     'PackageMail' => 'applications/owners/mail/PackageMail.php',
     'PackageModifyMail' => 'applications/owners/mail/PackageModifyMail.php',
+    'PassphraseAbstractKey' => 'applications/passphrase/keys/PassphraseAbstractKey.php',
     'PassphraseController' => 'applications/passphrase/controller/PassphraseController.php',
     'PassphraseCredential' => 'applications/passphrase/storage/PassphraseCredential.php',
     'PassphraseCredentialControl' => 'applications/passphrase/view/PassphraseCredentialControl.php',
@@ -968,6 +969,8 @@ phutil_register_library_map(array(
     'PassphraseCredentialViewController' => 'applications/passphrase/controller/PassphraseCredentialViewController.php',
     'PassphraseDAO' => 'applications/passphrase/storage/PassphraseDAO.php',
     'PassphrasePHIDTypeCredential' => 'applications/passphrase/phid/PassphrasePHIDTypeCredential.php',
+    'PassphrasePasswordKey' => 'applications/passphrase/keys/PassphrasePasswordKey.php',
+    'PassphraseSSHKey' => 'applications/passphrase/keys/PassphraseSSHKey.php',
     'PassphraseSecret' => 'applications/passphrase/storage/PassphraseSecret.php',
     'PasteCapabilityDefaultView' => 'applications/paste/capability/PasteCapabilityDefaultView.php',
     'PasteCreateMailReceiver' => 'applications/paste/mail/PasteCreateMailReceiver.php',
@@ -3330,6 +3333,7 @@ phutil_register_library_map(array(
     'PackageDeleteMail' => 'PackageMail',
     'PackageMail' => 'PhabricatorMail',
     'PackageModifyMail' => 'PackageMail',
+    'PassphraseAbstractKey' => 'Phobject',
     'PassphraseController' => 'PhabricatorController',
     'PassphraseCredential' =>
     array(
@@ -3359,6 +3363,8 @@ phutil_register_library_map(array(
     'PassphraseCredentialViewController' => 'PassphraseController',
     'PassphraseDAO' => 'PhabricatorLiskDAO',
     'PassphrasePHIDTypeCredential' => 'PhabricatorPHIDType',
+    'PassphrasePasswordKey' => 'PassphraseAbstractKey',
+    'PassphraseSSHKey' => 'PassphraseAbstractKey',
     'PassphraseSecret' => 'PassphraseDAO',
     'PasteCapabilityDefaultView' => 'PhabricatorPolicyCapability',
     'PasteCreateMailReceiver' => 'PhabricatorMailReceiver',

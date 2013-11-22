@@ -3,8 +3,10 @@
 final class PassphraseCredentialTypeSSHPrivateKeyFile
   extends PassphraseCredentialTypeSSHPrivateKey {
 
+  const CREDENTIAL_TYPE = 'ssh-key-file';
+
   public function getCredentialType() {
-    return 'ssh-key-file';
+    return self::CREDENTIAL_TYPE;
   }
 
   public function getCredentialTypeName() {

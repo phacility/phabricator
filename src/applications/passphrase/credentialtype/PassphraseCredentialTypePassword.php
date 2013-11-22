@@ -3,12 +3,15 @@
 final class PassphraseCredentialTypePassword
   extends PassphraseCredentialType {
 
+  const CREDENTIAL_TYPE = 'password';
+  const PROVIDES_TYPE = 'provides/password';
+
   public function getCredentialType() {
-    return 'password';
+    return self::CREDENTIAL_TYPE;
   }
 
   public function getProvidesType() {
-    return 'provides/password';
+    return self::PROVIDES_TYPE;
   }
 
   public function getCredentialTypeName() {
