@@ -337,7 +337,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     if ($this->shouldUseSSH()) {
       // NOTE: This is read by `bin/ssh-connect`, and tells it which credentials
       // to use.
-      $env['PHABRICATOR_SSH_TARGET'] = $this->getCallsign();
+      $env['PHABRICATOR_CREDENTIAL'] = $this->getCredentialPHID();
       switch ($this->getVersionControlSystem()) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
           // Force SVN to use `bin/ssh-connect`.

@@ -252,6 +252,15 @@ final class PhabricatorRepositoryPullLocalDaemon
 
     $this->checkIfRepositoryIsFullyImported($repository);
 
+    try {
+      $this->pushToMirrors($repository);
+    } catch (Exception $ex) {
+      // TODO: We should report these into the UI properly, but for
+      // now just complain. These errors are much less severe than
+      // pull errors.
+      phlog($ex);
+    }
+
     if ($refs !== null) {
       return (bool)count($refs);
     } else {
@@ -802,4 +811,43 @@ final class PhabricatorRepositoryPullLocalDaemon
   }
 
 
+  private function pushToMirrors(PhabricatorRepository $repository) {
+    if (!$repository->canMirror()) {
+      return;
+    }
+
+    $mirrors = id(new PhabricatorRepositoryMirrorQuery())
+      ->setViewer($this->getViewer())
+      ->withRepositoryPHIDs(array($repository->getPHID()))
+      ->execute();
+
+    // TODO: This is a little bit janky, but we don't have first-class
+    // infrastructure for running remote commands against an arbitrary remote
+    // right now. Just make an emphemeral copy of the repository and muck with
+    // it a little bit. In the medium term, we should pull this command stuff
+    // out and use it here and for "Land to ...".
+
+    $proxy = clone $repository;
+    $proxy->makeEphemeral();
+
+    $proxy->setDetail('hosting-enabled', false);
+    foreach ($mirrors as $mirror) {
+      $proxy->setDetail('remote-uri', $mirror->getRemoteURI());
+      $proxy->setCredentialPHID($mirror->getCredentialPHID());
+
+      $this->log(pht('Pushing to remote "%s"...', $mirror->getRemoteURI()));
+
+      if (!$proxy->isGit()) {
+        throw new Exception('Unsupported VCS!');
+      }
+
+      $future = $proxy->getRemoteCommandFuture(
+        'push --verbose --mirror -- %s',
+        $proxy->getRemoteURI());
+
+      $future
+        ->setCWD($proxy->getLocalPath())
+        ->resolvex();
+    }
+  }
 }

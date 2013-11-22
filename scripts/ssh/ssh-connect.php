@@ -7,21 +7,6 @@
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
-$target_name = getenv('PHABRICATOR_SSH_TARGET');
-if (!$target_name) {
-  throw new Exception(pht("No 'PHABRICATOR_SSH_TARGET' in environment!"));
-}
-
-$viewer = PhabricatorUser::getOmnipotentUser();
-
-$repository = id(new PhabricatorRepositoryQuery())
-  ->setViewer($viewer)
-  ->withCallsigns(array($target_name))
-  ->executeOne();
-if (!$repository) {
-  throw new Exception(pht('No repository with callsign "%s"!', $target_name));
-}
-
 $pattern = array();
 $arguments = array();
 
@@ -30,8 +15,9 @@ $pattern[] = 'ssh';
 $pattern[] = '-o';
 $pattern[] = 'StrictHostKeyChecking=no';
 
-$credential_phid = $repository->getCredentialPHID();
+$credential_phid = getenv('PHABRICATOR_CREDENTIAL');
 if ($credential_phid) {
+  $viewer = PhabricatorUser::getOmnipotentUser();
   $key = PassphraseSSHKey::loadFromPHID($credential_phid, $viewer);
 
   $pattern[] = '-l %P';
