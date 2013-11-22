@@ -580,14 +580,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     // Make sure we don't leak anything if this repo is using HTTP Basic Auth
     // with the credentials in the URI or something zany like that.
 
-    if ($uri instanceof PhutilGitURI) {
-      if (!$this->getDetail('show-user', false)) {
-        $uri->setUser(null);
-      }
-    } else {
-      if (!$this->getDetail('show-user', false)) {
-        $uri->setUser(null);
-      }
+    // If repository is not accessed over SSH we remove both username and
+    // password.
+    if (!$this->shouldUseSSH()) {
+      $uri->setUser(null);
       $uri->setPass(null);
     }
 
