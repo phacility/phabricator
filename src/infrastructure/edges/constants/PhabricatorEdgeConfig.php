@@ -60,6 +60,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_MOCK_HAS_TASK              = 37;
   const TYPE_TASK_HAS_MOCK              = 38;
 
+  const TYPE_OBJECT_USES_CREDENTIAL     = 39;
+  const TYPE_CREDENTIAL_USED_BY_OBJECT  = 40;
+
   const TYPE_TEST_NO_CYCLE              = 9000;
 
   const TYPE_PHOB_HAS_ASANATASK         = 80001;
@@ -70,6 +73,7 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   const TYPE_PHOB_HAS_JIRAISSUE         = 80004;
   const TYPE_JIRAISSUE_HAS_PHOB         = 80005;
+
 
   public static function getInverse($edge_type) {
     static $map = array(
@@ -134,7 +138,10 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       self::TYPE_REVIEWER_FOR_DREV => self::TYPE_DREV_HAS_REVIEWER,
 
       self::TYPE_PHOB_HAS_JIRAISSUE => self::TYPE_JIRAISSUE_HAS_PHOB,
-      self:: TYPE_JIRAISSUE_HAS_PHOB => self::TYPE_PHOB_HAS_JIRAISSUE
+      self::TYPE_JIRAISSUE_HAS_PHOB => self::TYPE_PHOB_HAS_JIRAISSUE,
+
+      self::TYPE_OBJECT_USES_CREDENTIAL => self::TYPE_CREDENTIAL_USED_BY_OBJECT,
+      self::TYPE_CREDENTIAL_USED_BY_OBJECT => self::TYPE_OBJECT_USES_CREDENTIAL,
     );
 
     return idx($map, $edge_type);

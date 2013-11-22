@@ -19,6 +19,7 @@ final class PassphraseCredential extends PassphraseDAO
     return id(new PassphraseCredential())
       ->setName('')
       ->setUsername('')
+      ->setDescription('')
       ->setIsDestroyed(0)
       ->setViewPolicy($actor->getPHID())
       ->setEditPolicy($actor->getPHID());
