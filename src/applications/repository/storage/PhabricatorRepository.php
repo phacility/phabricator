@@ -39,8 +39,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   protected $versionControlSystem;
   protected $details = array();
-
-  private $sshKeyfile;
+  protected $credentialPHID;
 
   private $commitCount = self::ATTACHABLE;
   private $mostRecentCommit = self::ATTACHABLE;
@@ -366,31 +365,29 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     switch ($this->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        if ($this->shouldUseHTTP()) {
-          $pattern =
-            "svn ".
-            "--non-interactive ".
-            "--no-auth-cache ".
-            "--trust-server-cert ".
-            "--username %P ".
-            "--password %P ".
-            $pattern;
-          array_unshift(
-            $args,
-            new PhutilOpaqueEnvelope($this->getDetail('http-login')),
-            new PhutilOpaqueEnvelope($this->getDetail('http-pass')));
-        } else if ($this->shouldUseSVNProtocol()) {
-          $pattern =
-            "svn ".
-            "--non-interactive ".
-            "--no-auth-cache ".
-            "--username %P ".
-            "--password %P ".
-            $pattern;
-          array_unshift(
-            $args,
-            new PhutilOpaqueEnvelope($this->getDetail('http-login')),
-            new PhutilOpaqueEnvelope($this->getDetail('http-pass')));
+        if ($this->shouldUseHTTP() || $this->shouldUseSVNProtocol()) {
+          $flags = array();
+          $flag_args = array();
+          $flags[] = '--non-interactive';
+          $flags[] = '--no-auth-cache';
+          if ($this->shouldUseHTTP()) {
+            $flags[] = '--trust-server-cert';
+          }
+
+          $credential_phid = $this->getCredentialPHID();
+          if ($credential_phid) {
+            $key = PassphrasePasswordKey::loadFromPHID(
+              $credential_phid,
+              PhabricatorUser::getOmnipotentUser());
+            $flags[] = '--username %P';
+            $flags[] = '--password %P';
+            $flag_args[] = $key->getUsernameEnvelope();
+            $flag_args[] = $key->getPasswordEnvelope();
+          }
+
+          $flags = implode(' ', $flags);
+          $pattern = "svn {$flags} {$pattern}";
+          $args = array_mergev(array($flag_args, $args));
         } else {
           $pattern = "svn --non-interactive {$pattern}";
         }
@@ -687,11 +684,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     $protocol = $this->getRemoteProtocol();
-    if ($protocol == 'http' || $protocol == 'https') {
-      return (bool)$this->getDetail('http-login');
-    } else {
-      return false;
-    }
+    return ($protocol == 'http' || $protocol == 'https');
   }
 
 
@@ -708,11 +701,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     $protocol = $this->getRemoteProtocol();
-    if ($protocol == 'svn') {
-      return (bool)$this->getDetail('http-login');
-    } else {
-      return false;
-    }
+    return ($protocol == 'svn');
   }
 
 

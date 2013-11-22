@@ -45,6 +45,11 @@ final class PassphraseCredential extends PassphraseDAO
     return $this->assertAttached($this->secret);
   }
 
+  public function getCredentialTypeImplementation() {
+    $type = $this->getCredentialType();
+    return PassphraseCredentialType::getTypeByConstant($type);
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

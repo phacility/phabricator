@@ -27,11 +27,7 @@ final class ConduitAPI_repository_create_Method
       'encoding'            => 'optional string',
       'tracking'            => 'optional bool',
       'uri'                 => 'optional string',
-      'sshUser'             => 'optional string',
-      'sshKey'              => 'optional string',
-      'sshKeyFile'          => 'optional string',
-      'httpUser'            => 'optional string',
-      'httpPassword'        => 'optional string',
+      'credentialPHID'      => 'optional string',
       'localPath'           => 'optional string',
       'svnSubpath'          => 'optional string',
       'branchFilter'        => 'optional list<string>',
@@ -100,6 +96,8 @@ final class ConduitAPI_repository_create_Method
     }
     $repository->setVersionControlSystem($map[$vcs]);
 
+    $repository->setCredentialPHID($request->getValue('credentialPHID'));
+
     $details = array(
       'encoding'          => $request->getValue('encoding'),
       'description'       => $request->getValue('description'),
@@ -114,9 +112,6 @@ final class ConduitAPI_repository_create_Method
         true),
       'pull-frequency'    => $request->getValue('pullFrequency'),
       'default-branch'    => $request->getValue('defaultBranch'),
-      'ssh-login'         => $request->getValue('sshUser'),
-      'ssh-key'           => $request->getValue('sshKey'),
-      'ssh-keyfile'       => $request->getValue('sshKeyFile'),
       'herald-disabled'   => !$request->getValue('heraldEnabled', true),
       'svn-subpath'       => $request->getValue('svnSubpath'),
       'disable-autoclose' => !$request->getValue('autocloseEnabled', true),

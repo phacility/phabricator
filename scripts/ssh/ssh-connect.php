@@ -12,8 +12,10 @@ if (!$target_name) {
   throw new Exception(pht("No 'PHABRICATOR_SSH_TARGET' in environment!"));
 }
 
+$viewer = PhabricatorUser::getOmnipotentUser();
+
 $repository = id(new PhabricatorRepositoryQuery())
-  ->setViewer(PhabricatorUser::getOmnipotentUser())
+  ->setViewer($viewer)
   ->withCallsigns(array($target_name))
   ->executeOne();
 if (!$repository) {
@@ -28,30 +30,14 @@ $pattern[] = 'ssh';
 $pattern[] = '-o';
 $pattern[] = 'StrictHostKeyChecking=no';
 
-$login = $repository->getSSHLogin();
-if (strlen($login)) {
-  $pattern[] = '-l';
-  $pattern[] = '%P';
-  $arguments[] = new PhutilOpaqueEnvelope($login);
-}
+$credential_phid = $repository->getCredentialPHID();
+if ($credential_phid) {
+  $key = PassphraseSSHKey::loadFromPHID($credential_phid, $viewer);
 
-$ssh_identity = null;
-
-$key = $repository->getDetail('ssh-key');
-$keyfile = $repository->getDetail('ssh-keyfile');
-if ($keyfile) {
-  $ssh_identity = $keyfile;
-} else if ($key) {
-  $tmpfile = new TempFile('phabricator-repository-ssh-key');
-  chmod($tmpfile, 0600);
-  Filesystem::writeFile($tmpfile, $key);
-  $ssh_identity = (string)$tmpfile;
-}
-
-if ($ssh_identity) {
-  $pattern[] = '-i';
-  $pattern[] = '%P';
-  $arguments[] = new PhutilOpaqueEnvelope($keyfile);
+  $pattern[] = '-l %P';
+  $arguments[] = $key->getUsernameEnvelope();
+  $pattern[] = '-i %P';
+  $arguments[] = $key->getKeyfileEnvelope();
 }
 
 $pattern[] = '--';

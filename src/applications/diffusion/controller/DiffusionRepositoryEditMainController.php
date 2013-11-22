@@ -481,6 +481,14 @@ final class DiffusionRepositoryEditMainController
       pht('Remote URI'),
       $repository->getHumanReadableDetail('remote-uri'));
 
+    $credential_phid = $repository->getCredentialPHID();
+    if ($credential_phid) {
+      $this->loadHandles(array($credential_phid));
+      $view->addProperty(
+        pht('Credential'),
+        $this->getHandle($credential_phid)->renderLink());
+    }
+
     return $view;
   }
 
