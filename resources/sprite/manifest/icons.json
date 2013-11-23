@@ -796,6 +796,21 @@
       "rule" : ".icons-normal-priority-white, .device-desktop .phabricator-action-view:hover .icons-normal-priority, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-normal-priority",
       "hash" : "fd9a696de97bde0c45d57e77fa2e7c4a"
     },
+    "icons-octocat"                       : {
+      "name" : "icons-octocat",
+      "rule" : ".icons-octocat",
+      "hash" : "72ac2c8c30caec1d591cf1073c26cc61"
+    },
+    "icons-octocat-grey"                  : {
+      "name" : "icons-octocat-grey",
+      "rule" : ".icons-octocat-grey",
+      "hash" : "808474ec2801f155663054bf5e78cba4"
+    },
+    "icons-octocat-white"                 : {
+      "name" : "icons-octocat-white",
+      "rule" : ".icons-octocat-white, .device-desktop .phabricator-action-view:hover .icons-octocat, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-octocat",
+      "hash" : "bda54b23d423de7b35a964ce9fdea4f2"
+    },
     "icons-perflab"                       : {
       "name" : "icons-perflab",
       "rule" : ".icons-perflab",
