@@ -15,6 +15,11 @@ $pattern[] = 'ssh';
 $pattern[] = '-o';
 $pattern[] = 'StrictHostKeyChecking=no';
 
+// This prevents "known host" failures, and covers for issues where HOME is set
+// to something unusual.
+$pattern[] = '-o';
+$pattern[] = 'UserKnownHostsFile=/dev/null';
+
 $credential_phid = getenv('PHABRICATOR_CREDENTIAL');
 if ($credential_phid) {
   $viewer = PhabricatorUser::getOmnipotentUser();
