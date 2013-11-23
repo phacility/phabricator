@@ -581,6 +581,8 @@ final class DiffusionRepositoryCreateController
         'credential');
     } else if ($proto == 'file') {
       $c_credential->setHidden(true);
+      $provides_type = null;
+
       $page->addRemarkupInstructions(
         pht(
           'You do not need to configure any credentials for repositories '.
