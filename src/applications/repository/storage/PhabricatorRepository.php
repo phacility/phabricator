@@ -660,11 +660,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     $protocol = $this->getRemoteProtocol();
     if ($this->isSSHProtocol($protocol)) {
-      $key = $this->getDetail('ssh-key');
-      $keyfile = $this->getDetail('ssh-keyfile');
-      if ($key || $keyfile) {
-        return true;
-      }
+      return true;
     }
 
     return false;
