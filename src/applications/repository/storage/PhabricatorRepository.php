@@ -298,6 +298,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       // This makes stuff print in English instead of, e.g., French, so we can
       // parse the output of some commands, error messages, etc.
       'LANG' => 'C',
+
+      // Propagate PHABRICATOR_ENV explicitly. For discussion, see T4155.
+      'PHABRICATOR_ENV' => PhabricatorEnv::getSelectedEnvironmentName(),
     );
 
     switch ($this->getVersionControlSystem()) {
