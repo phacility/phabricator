@@ -253,8 +253,10 @@ final class PhabricatorAuthProviderLDAP
 
     $captions = array(
       self::KEY_HOSTNAME =>
-        pht('Example: %s',
-          phutil_tag('tt', array(), pht('ldap.example.com'))),
+        pht('Example: %s%sFor LDAPS, use: %s',
+          phutil_tag('tt', array(), pht('ldap.example.com')),
+          phutil_tag('br'),
+          phutil_tag('tt', array(), pht('ldaps://ldaps.example.com/'))),
       self::KEY_DISTINGUISHED_NAME =>
         pht('Example: %s',
           phutil_tag('tt', array(), pht('ou=People, dc=example, dc=com'))),
