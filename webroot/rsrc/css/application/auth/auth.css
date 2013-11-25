@@ -24,13 +24,13 @@
 }
 
 .auth-account-view {
-  border: 1px solid #aaaaaa;
+  background-color: #fff;
+  border: 1px solid {$lightblueborder};
   background-repeat: no-repeat;
   background-position: 4px 4px;
   padding: 4px 4px 4px 62px;
   min-height: 50px;
   border-radius: 2px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 .auth-account-view-name {

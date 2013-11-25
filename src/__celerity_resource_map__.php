@@ -975,7 +975,7 @@ celerity_register_resource_map(array(
   ),
   'auth-css' =>
   array(
-    'uri' => '/res/9e544d3c/rsrc/css/application/auth/auth.css',
+    'uri' => '/res/a55f96ce/rsrc/css/application/auth/auth.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3551,7 +3551,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-source-code-view-css' =>
   array(
-    'uri' => '/res/aee63670/rsrc/css/layout/phabricator-source-code-view.css',
+    'uri' => '/res/f70ef208/rsrc/css/layout/phabricator-source-code-view.css',
     'type' => 'css',
     'requires' =>
     array(
