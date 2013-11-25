@@ -14,6 +14,7 @@ final class PhabricatorRemarkupBlockInterpreterFiglet
     }
 
     $future = id(new ExecFuture('figlet'))
+      ->setTimeout(15)
       ->write(trim($content, "\n"));
 
     list($err, $stdout, $stderr) = $future->resolve();

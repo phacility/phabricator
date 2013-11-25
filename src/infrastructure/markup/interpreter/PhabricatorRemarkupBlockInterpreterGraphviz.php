@@ -14,6 +14,7 @@ final class PhabricatorRemarkupBlockInterpreterGraphviz
     }
 
     $future = id(new ExecFuture('dot -T%s', 'png'))
+      ->setTimeout(15)
       ->write(trim($content));
 
     list($err, $stdout, $stderr) = $future->resolve();
@@ -21,7 +22,9 @@ final class PhabricatorRemarkupBlockInterpreterGraphviz
     if ($err) {
       return $this->markupError(
         pht(
-          'Execution of `dot` failed, check your syntax: %s', $stderr));
+          'Execution of `dot` failed (#%d), check your syntax: %s',
+          $err,
+          $stderr));
     }
 
     $file = PhabricatorFile::buildFromFileDataOrHash(

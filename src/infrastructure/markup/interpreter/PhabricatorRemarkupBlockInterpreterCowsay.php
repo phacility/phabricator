@@ -29,6 +29,7 @@ final class PhabricatorRemarkupBlockInterpreterCowsay
       $tongue,
       $cow);
 
+    $future->setTimeout(15);
     $future->write($content);
 
     list($err, $stdout, $stderr) = $future->resolve();
