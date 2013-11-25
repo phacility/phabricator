@@ -370,6 +370,8 @@ final class ManiphestTaskEditController extends ManiphestController {
             $task->setProjectPHIDs($template_task->getProjectPHIDs());
             $task->setOwnerPHID($template_task->getOwnerPHID());
             $task->setPriority($template_task->getPriority());
+            $task->setViewPolicy($template_task->getViewPolicy());
+            $task->setEditPolicy($template_task->getEditPolicy());
 
             $template_fields = PhabricatorCustomField::getObjectFields(
               $template_task,
