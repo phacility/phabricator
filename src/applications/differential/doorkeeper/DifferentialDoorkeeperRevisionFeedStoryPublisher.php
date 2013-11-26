@@ -78,13 +78,7 @@ final class DifferentialDoorkeeperRevisionFeedStoryPublisher
   }
 
   public function isObjectClosed($object) {
-    switch ($object->getStatus()) {
-      case ArcanistDifferentialRevisionStatus::CLOSED:
-      case ArcanistDifferentialRevisionStatus::ABANDONED:
-        return true;
-      default:
-        return false;
-    }
+    return $object->isClosed();
   }
 
   public function getResponsibilityTitle($object) {

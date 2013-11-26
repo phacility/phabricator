@@ -114,11 +114,6 @@ final class DifferentialRevisionListView extends AphrontView {
     $list = new PHUIObjectItemListView();
     $list->setCards(true);
 
-    $do_not_display_age = array(
-      ArcanistDifferentialRevisionStatus::CLOSED => true,
-      ArcanistDifferentialRevisionStatus::ABANDONED => true,
-    );
-
     foreach ($this->revisions as $revision) {
       $item = id(new PHUIObjectItemView())
         ->setUser($user);
@@ -146,8 +141,7 @@ final class DifferentialRevisionListView extends AphrontView {
       $status = $revision->getStatus();
       $show_age = ($fresh || $stale) &&
                   $this->highlightAge &&
-                  empty($do_not_display_age[$status]);
-
+                  !$revision->isClosed();
 
       $object_age = PHUIObjectItemView::AGE_FRESH;
       foreach ($this->fields as $field) {

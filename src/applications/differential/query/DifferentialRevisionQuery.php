@@ -23,8 +23,7 @@ final class DifferentialRevisionQuery
   const STATUS_ACCEPTED       = 'status-accepted';
   const STATUS_NEEDS_REVIEW   = 'status-needs-review';
   const STATUS_NEEDS_REVISION = 'status-needs-revision';
-  const STATUS_CLOSED         = 'status-closed';    // NOTE: Same as 'committed'
-  const STATUS_COMMITTED      = 'status-committed'; // TODO: Remove.
+  const STATUS_CLOSED         = 'status-closed';
   const STATUS_ABANDONED      = 'status-abandoned';
 
   private $authors = array();
@@ -772,11 +771,7 @@ final class DifferentialRevisionQuery
         $where[] = qsprintf(
           $conn_r,
           'r.status IN (%Ld)',
-          array(
-            ArcanistDifferentialRevisionStatus::NEEDS_REVIEW,
-            ArcanistDifferentialRevisionStatus::NEEDS_REVISION,
-            ArcanistDifferentialRevisionStatus::ACCEPTED,
-          ));
+          DifferentialRevisionStatus::getOpenStatuses());
         break;
       case self::STATUS_NEEDS_REVIEW:
         $where[] = qsprintf(
@@ -802,19 +797,11 @@ final class DifferentialRevisionQuery
             ArcanistDifferentialRevisionStatus::ACCEPTED,
           ));
         break;
-      case self::STATUS_COMMITTED:
-        phlog(
-          "WARNING: DifferentialRevisionQuery using deprecated ".
-          "STATUS_COMMITTED constant. This will be removed soon. ".
-          "Use STATUS_CLOSED.");
-        // fallthrough
       case self::STATUS_CLOSED:
         $where[] = qsprintf(
           $conn_r,
           'r.status IN (%Ld)',
-          array(
-            ArcanistDifferentialRevisionStatus::CLOSED,
-          ));
+          DifferentialRevisionStatus::getClosedStatuses());
         break;
       case self::STATUS_ABANDONED:
         $where[] = qsprintf(
