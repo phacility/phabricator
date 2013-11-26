@@ -72,10 +72,16 @@ final class DifferentialRevisionStatus {
   }
 
   public static function getClosedStatuses() {
-    return array(
+    $statuses = array(
       ArcanistDifferentialRevisionStatus::CLOSED,
       ArcanistDifferentialRevisionStatus::ABANDONED,
     );
+
+    if (PhabricatorEnv::getEnvConfig('differential.close-on-accept')) {
+      $statuses[] = ArcanistDifferentialRevisionStatus::ACCEPTED;
+    }
+
+    return $statuses;
   }
 
   public static function getOpenStatuses() {

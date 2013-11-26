@@ -146,6 +146,26 @@ final class PhabricatorDifferentialConfigOptions
               "is accidentally closed or if a developer changes his or her ".
               "mind after closing a revision.  If it is false, reopening ".
               "is not allowed.")),
+      $this->newOption('differential.close-on-accept', 'bool', false)
+        ->setBoolOptions(
+          array(
+            pht('Treat Accepted Revisions as "Closed"'),
+            pht('Treat Accepted Revisions as "Open"'),
+          ))
+        ->setSummary(pht('Allows "Accepted" to act as a closed status.'))
+        ->setDescription(
+          pht(
+            'Normally, Differential revisions remain on the dashboard when '.
+            'they are "Accepted", and the author then commits the changes '.
+            'to "Close" the revision and move it off the dashboard.'.
+            "\n\n".
+            'If you have an unusual workflow where Differential is used for '.
+            'post-commit review (normally called "Audit", elsewhere in '.
+            'Phabricator), you can set this flag to treat the "Accepted" '.
+            'state as a "Closed" state and end the review workflow early.'.
+            "\n\n".
+            'This sort of workflow is very unusual. Very few installs should '.
+            'need to change this option.')),
       $this->newOption('differential.days-fresh', 'int', 1)
         ->setSummary(
           pht(
