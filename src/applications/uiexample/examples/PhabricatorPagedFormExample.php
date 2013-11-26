@@ -18,24 +18,28 @@ final class PhabricatorPagedFormExample extends PhabricatorUIExample {
 
 
     $page1 = id(new PHUIFormPageView())
+      ->setPageName(pht('Page 1'))
       ->addControl(
         id(new AphrontFormTextControl())
           ->setName('page1')
           ->setLabel('Page 1'));
 
     $page2 = id(new PHUIFormPageView())
+      ->setPageName(pht('Page 2'))
       ->addControl(
         id(new AphrontFormTextControl())
           ->setName('page2')
           ->setLabel('Page 2'));
 
     $page3 = id(new PHUIFormPageView())
+      ->setPageName(pht('Page 3'))
       ->addControl(
         id(new AphrontFormTextControl())
           ->setName('page3')
           ->setLabel('Page 3'));
 
     $page4 = id(new PHUIFormPageView())
+      ->setPageName(pht('Page 4'))
       ->addControl(
         id(new AphrontFormTextControl())
           ->setName('page4')
