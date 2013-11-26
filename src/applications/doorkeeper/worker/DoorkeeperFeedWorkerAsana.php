@@ -110,6 +110,8 @@ final class DoorkeeperFeedWorkerAsana extends DoorkeeperFeedWorker {
       'assignee' => $owner_asana_id,
     );
 
+    $projects = $this->getAsanaProjectIDs();
+
     $extra_data = array();
     if ($main_edge) {
       $extra_data = $main_edge['data'];
@@ -164,6 +166,7 @@ final class DoorkeeperFeedWorkerAsana extends DoorkeeperFeedWorker {
         'POST',
         array(
           'workspace' => $workspace_id,
+          'projects' => $projects,
           // NOTE: We initially create parent tasks in the "Later" state but
           // don't update it afterward, even if the corresponding object
           // becomes actionable. The expectation is that users will prioritize
@@ -214,6 +217,9 @@ final class DoorkeeperFeedWorkerAsana extends DoorkeeperFeedWorker {
     if (empty($extra_data['gone'])) {
       $this->addFollowers($oauth_token, $task_id, $silent_followers, true);
       $this->addFollowers($oauth_token, $task_id, $noisy_followers);
+
+      // We're also going to synchronize project data here.
+      $this->addProjects($oauth_token, $task_id, $projects);
     }
 
     $dst_phid = $parent_ref->getExternalObject()->getPHID();
@@ -647,6 +653,39 @@ final class DoorkeeperFeedWorkerAsana extends DoorkeeperFeedWorker {
       "tasks/{$task_id}/addFollowers",
       'POST',
       $data);
+  }
+
+  private function getAsanaProjectIDs() {
+    $project_ids = array();
+
+    $publisher = $this->getPublisher();
+    $config = PhabricatorEnv::getEnvConfig('asana.project-ids');
+    if (is_array($config)) {
+      $ids = idx($config, get_class($publisher));
+      if (is_array($ids)) {
+        foreach ($ids as $id) {
+          if (is_scalar($id)) {
+            $project_ids[] = $id;
+          }
+        }
+      }
+    }
+
+    return $project_ids;
+  }
+
+  private function addProjects(
+    $oauth_token,
+    $task_id,
+    array $project_ids) {
+    foreach ($project_ids as $project_id) {
+      $data = array('project' => $project_id);
+      $this->makeAsanaAPICall(
+        $oauth_token,
+        "tasks/{$task_id}/addProject",
+        'POST',
+        $data);
+    }
   }
 
 }
