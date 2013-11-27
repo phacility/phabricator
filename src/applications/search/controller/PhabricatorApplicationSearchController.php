@@ -107,11 +107,24 @@ final class PhabricatorApplicationSearchController
       $run_query = false;
       $query_key = $request->getStr('query');
     } else if (!strlen($this->queryKey)) {
-      if ($request->isHTTPGet() && $request->getPassthroughRequestData()) {
+      $found_query_data = false;
+
+      if ($request->isHTTPGet()) {
         // If this is a GET request and it has some query data, don't
-        // do anything. We'll build and execute a query from it below.
-        // This allows external tools to build URIs like "/query/?users=a,b".
-      } else {
+        // do anything unless it's only before= or after=. We'll build and
+        // execute a query from it below. This allows external tools to build
+        // URIs like "/query/?users=a,b".
+        $pt_data = $request->getPassthroughRequestData();
+
+        foreach ($pt_data as $pt_key => $pt_value) {
+          if ($pt_key != 'before' && $pt_key != 'after') {
+            $found_query_data = true;
+            break;
+          }
+        }
+      }
+
+      if (!$found_query_data) {
         // Otherwise, there's no query data so just run the user's default
         // query for this application.
         $query_key = head_key($engine->loadEnabledNamedQueries());
