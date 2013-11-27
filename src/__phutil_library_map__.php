@@ -2970,10 +2970,14 @@ phutil_register_library_map(array(
     'DrydockManagementWaitForLeaseWorkflow' => 'DrydockManagementWorkflow',
     'DrydockManagementWorkflow' => 'PhutilArgumentWorkflow',
     'DrydockPreallocatedHostBlueprint' => 'DrydockBlueprint',
-    'DrydockResource' => 'DrydockDAO',
+    'DrydockResource' =>
+    array(
+      0 => 'DrydockDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
     'DrydockResourceCloseController' => 'DrydockController',
     'DrydockResourceListController' => 'DrydockController',
-    'DrydockResourceQuery' => 'PhabricatorOffsetPagedQuery',
+    'DrydockResourceQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'DrydockResourceStatus' => 'DrydockConstants',
     'DrydockResourceViewController' => 'DrydockController',
     'DrydockSSHCommandInterface' => 'DrydockCommandInterface',

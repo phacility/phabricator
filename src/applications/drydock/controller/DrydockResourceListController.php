@@ -14,6 +14,7 @@ final class DrydockResourceListController extends DrydockController {
     $pager = new AphrontPagerView();
     $pager->setURI(new PhutilURI('/drydock/resource/'), 'offset');
     $resources = id(new DrydockResourceQuery())
+      ->setViewer($user)
       ->executeWithOffsetPager($pager);
 
     $resource_list = $this->buildResourceListView($resources);

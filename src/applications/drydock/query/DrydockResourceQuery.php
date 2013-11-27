@@ -1,15 +1,28 @@
 <?php
 
-final class DrydockResourceQuery extends PhabricatorOffsetPagedQuery {
+final class DrydockResourceQuery
+  extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
+  private $statuses;
+  private $types;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
   }
 
-  public function execute() {
+  public function withTypes(array $types) {
+    $this->types = $types;
+    return $this;
+  }
+
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
+    return $this;
+  }
+
+  public function loadPage() {
     $table = new DrydockResource();
     $conn_r = $table->establishConnection('r');
 
@@ -36,11 +49,27 @@ final class DrydockResourceQuery extends PhabricatorOffsetPagedQuery {
         $this->ids);
     }
 
+    if ($this->types) {
+      $where[] = qsprintf(
+        $conn_r,
+        'type IN (%Ls)',
+        $this->types);
+    }
+
+    if ($this->statuses) {
+      $where[] = qsprintf(
+        $conn_r,
+        'status IN (%Ls)',
+        $this->statuses);
+    }
+
+    $where[] = $this->buildPagingClause($conn_r);
+
     return $this->formatWhereClause($where);
   }
 
-  private function buildOrderClause(AphrontDatabaseConnection $conn_r) {
-    return qsprintf($conn_r, 'ORDER BY id DESC');
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationDrydock';
   }
 
 }
