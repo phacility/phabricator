@@ -129,6 +129,7 @@ final class ConduitAPI_diffusion_getcommits_Method
 
     $commits = $this->addRepositoryCommitDataInformation($commits);
     $commits = $this->addDifferentialInformation($commits);
+    $commits = $this->addManiphestInformation($commits);
 
     foreach ($commits as $name => $commit) {
       $results[$name] = $commit;
@@ -256,6 +257,33 @@ final class ConduitAPI_diffusion_getcommits_Method
           'differentialRevisionPHID'  => $rev['phid'],
         );
       }
+    }
+
+    return $commits;
+  }
+
+  /**
+   * Enhances the commits list with Maniphest information.
+   */
+  private function addManiphestInformation(array $commits) {
+    $task_type = PhabricatorEdgeConfig::TYPE_COMMIT_HAS_TASK;
+
+    $commit_phids = ipull($commits, 'commitPHID');
+
+    $edge_query = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs($commit_phids)
+      ->withEdgeTypes(array($task_type));
+
+    $edges = $edge_query->execute();
+
+    foreach ($commits as $name => $commit) {
+      $task_phids = $edge_query->getDestinationPHIDs(
+        array($commit['commitPHID']),
+        array($task_type));
+
+      $commits[$name] += array(
+        'taskPHIDs' => $task_phids,
+      );
     }
 
     return $commits;
