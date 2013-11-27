@@ -14,13 +14,13 @@ foreach (new LiskMigrationIterator($table) as $repository) {
     continue;
   }
 
-  $uri = $repository->getRemoteURI();
-  if (!$uri) {
+  $raw_uri = $repository->getRemoteURI();
+  if (!$raw_uri) {
     echo "...no remote URI.\n";
     continue;
   }
 
-  $uri = new PhutilURI($uri);
+  $uri = new PhutilURI($raw_uri);
 
   $proto = strtolower($uri->getProtocol());
   if ($proto == 'http' || $proto == 'https' || $proto == 'svn') {
@@ -29,6 +29,16 @@ foreach (new LiskMigrationIterator($table) as $repository) {
     $type = PassphraseCredentialTypePassword::CREDENTIAL_TYPE;
   } else {
     $username = $repository->getDetail('ssh-login');
+    if (!$username) {
+      // If there's no explicit username, check for one in the URI. This is
+      // possible with older repositories.
+      $username = $uri->getUser();
+      if (!$username) {
+        // Also check for a Git/SCP-style URI.
+        $git_uri = new PhutilGitURI($raw_uri);
+        $username = $git_uri->getUser();
+      }
+    }
     $file = $repository->getDetail('ssh-keyfile');
     if ($file) {
       $secret = $file;
