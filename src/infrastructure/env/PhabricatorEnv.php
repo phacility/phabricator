@@ -108,6 +108,10 @@ final class PhabricatorEnv {
     }
     putenv('PATH='.$env_path);
 
+    // Write this back into $_ENV, too, so ExecFuture picks it up when creating
+    // subprocess environments.
+    $_ENV['PATH'] = $env_path;
+
     PhabricatorEventEngine::initialize();
 
     $translation = PhabricatorEnv::newObjectFromConfig('translation.provider');
