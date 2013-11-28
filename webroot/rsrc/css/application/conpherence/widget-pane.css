@@ -6,13 +6,13 @@
 .loading .widgets-loading-mask {
   position: fixed;
   right: 0px;
-  top: 76px;
-  bottom: 0px;
   width: 240px;
   border-width: 0 0 0 1px;
-  border-color: #CCC;
+  border-color: {$lightblueborder};
   border-style: solid;
   overflow-y: auto;
+  background: #fff;
+  height: 100%;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -68,11 +68,8 @@
 }
 
 .conpherence-widget-pane .widgets-body {
-  position: fixed;
   overflow-y: auto;
-  bottom: 0px;
   width: 100%;
-  top: 76px;
 }
 
 #widgets-settings {
@@ -80,7 +77,6 @@
 }
 
 .device-desktop .conpherence-widget-pane .widgets-body {
-  top: 108px;
   width: 240px;
 }
 
