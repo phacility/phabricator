@@ -3,8 +3,8 @@
  * @requires aphront-dialog-view-css
  */
 
-.phabricator-object-selector-dialog {
-  width: 960px;
+.device-desktop .phabricator-object-selector-dialog {
+  width: 860px;
 }
 
 .phabricator-object-selector-dialog .aphront-dialog-body {
@@ -13,7 +13,8 @@
 
 .phabricator-object-selector-search {
   width: 100%;
-  background: #ededed;
+  background: {$lightbluebackground};
+  border-bottom: 1px solid {$thinblueborder};
 }
 
 .phabricator-object-selector-search td {
@@ -25,27 +26,42 @@ td.phabricator-object-selector-search-text {
   width: 100%;
 }
 
+.phabricator-object-selector-row:hover {
+  background-color: {$greybackground};
+}
+
+.phabricator-object-selector-row:hover a {
+  text-decoration: none;
+}
+
 .phabricator-object-selector-search-text input {
   width: 100%;
+  border-radius: 14px;
+  padding: 4px 8px;
+  height: 26px;
+  margin: 2px 0;
+}
+
+.phabricator-object-selector-popicon {
+  display: inline-block;
+  margin-top: 4px;
 }
 
 .phabricator-object-selector-results {
   position: relative;
   height: 24em;
-  border: solid #bbbbbb;
-  border-width: 1px 0px;
   overflow-y: scroll;
   overflow-x: hidden;
 }
 
 .phabricator-object-selector-handle {
   width: 100%;
-  background: #e9e9e9;
+  background: {$lightgreybackground};
   margin-bottom: 1px;
 }
 
 .phabricator-object-selector-handle td {
-  padding: 4px 1em;
+  padding: 4px 8px;
 }
 
 .phabricator-object-selector-handle th {
@@ -57,14 +73,14 @@ td.phabricator-object-selector-search-text {
 
 .phabricator-object-selector-handle th a {
   display: block;
-  padding: 4px 1em;
+  padding: 4px 0;
 }
 
 .phabricator-object-selector-header {
-  padding: 2px;
-  border-bottom: 1px solid #d0d0d0;
-  margin-bottom: 16px;
-  color: {$darkgreytext};
+  margin-bottom: 8px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: {$bluetext};
 }
 
 .phabricator-object-selector-attach-explicit {
@@ -74,17 +90,13 @@ td.phabricator-object-selector-search-text {
   border-width: 1px 0px;
 }
 
-.phabricator-object-selector-currently-attached {
-  background: #fff;
-  padding: 16px;
-  border: 1px solid #dddddd;
-}
-
 .phabricator-object-selector-current {
-  background: #ededed;
-  padding: 8px 8px;
+  border-top: 1px solid {$thinblueborder};
 }
 
+.phabricator-object-selector-currently-attached {
+  padding: 8px;
+}
 
 .object-selector-nothing {
   padding: 1em;
