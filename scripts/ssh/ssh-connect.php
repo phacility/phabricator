@@ -7,6 +7,20 @@
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
+// Contrary to the documentation, Git may pass a "-p" flag. If it does, respect
+// it and move it before the "--" argument.
+$args = new PhutilArgumentParser($argv);
+$args->parsePartial(
+  array(
+    array(
+      'name' => 'port',
+      'short' => 'p',
+      'param' => pht('port'),
+      'help' => pht('Port number to connect to.'),
+    ),
+  ));
+$unconsumed_argv = $args->getUnconsumedArgumentVector();
+
 $pattern = array();
 $arguments = array();
 
@@ -31,9 +45,15 @@ if ($credential_phid) {
   $arguments[] = $key->getKeyfileEnvelope();
 }
 
+$port = $args->getArg('port');
+if ($port) {
+  $pattern[] = '-p %d';
+  $arguments[] = $port;
+}
+
 $pattern[] = '--';
 
-$passthru_args = array_slice($argv, 1);
+$passthru_args = $unconsumed_argv;
 foreach ($passthru_args as $passthru_arg) {
   $pattern[] = '%s';
   $arguments[] = $passthru_arg;
