@@ -87,6 +87,8 @@ final class PhabricatorRepositoryPullEngine
             $this->installGitHook();
           } else if ($is_svn) {
             $this->installSubversionHook();
+          } else if ($is_hg) {
+            $this->installMercurialHook();
           } else {
             $this->logPull(
               pht(
@@ -335,7 +337,7 @@ final class PhabricatorRepositoryPullEngine
         $path);
     } else {
       $repository->execxRemoteCommand(
-        'clone -- %s %s',
+        'clone --noupdate -- %s %s',
         $repository->getRemoteURI(),
         $path);
     }
@@ -380,6 +382,33 @@ final class PhabricatorRepositoryPullEngine
         throw $ex;
       }
     }
+  }
+
+
+  /**
+   * @task hg
+   */
+  private function installMercurialHook() {
+    $repository = $this->getRepository();
+    $path = $repository->getLocalPath().'.hg/hgrc';
+
+    $root = dirname(phutil_get_library_root('phabricator'));
+    $bin = $root.'/bin/commit-hook';
+
+    $data = array();
+    $data[] = '[hooks]';
+    $data[] = csprintf(
+      'pretxnchangegroup.phabricator = %s %s %s',
+      $bin,
+      $repository->getCallsign(),
+      'pretxnchangegroup');
+    $data[] = null;
+
+    $data = implode("\n", $data);
+
+    $this->log('%s', pht('Installing commit hook config to "%s"...', $path));
+
+    Filesystem::writeFile($path, $data);
   }
 
 

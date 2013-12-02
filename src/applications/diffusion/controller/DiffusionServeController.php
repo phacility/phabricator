@@ -406,7 +406,9 @@ final class DiffusionServeController extends DiffusionController {
     return $user;
   }
 
-  private function serveMercurialRequest(PhabricatorRepository $repository) {
+  private function serveMercurialRequest(
+    PhabricatorRepository $repository,
+    PhabricatorUser $viewer) {
     $request = $this->getRequest();
 
     $bin = Filesystem::resolveBinary('hg');
@@ -414,7 +416,9 @@ final class DiffusionServeController extends DiffusionController {
       throw new Exception("Unable to find `hg` in PATH!");
     }
 
-    $env = array();
+    $env = array(
+      'PHABRICATOR_USER' => $viewer->getUsername(),
+    );
     $input = PhabricatorStartup::getRawInput();
 
     $cmd = $request->getStr('cmd');

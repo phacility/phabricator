@@ -29,11 +29,16 @@ $engine->setRepository($repository);
 
 // Figure out which user is writing the commit.
 
-if ($repository->isGit()) {
+if ($repository->isGit() || $repository->isHg()) {
   $username = getenv('PHABRICATOR_USER');
   if (!strlen($username)) {
     throw new Exception(pht('usage: PHABRICATOR_USER should be defined!'));
   }
+
+  // TODO: If this is a Mercurial repository, the hook we're responding to
+  // is available in $argv[2]. It's unclear if we actually need this, or if
+  // we can block all actions we care about with just pretxnchangegroup.
+
 } else if ($repository->isSVN()) {
   // NOTE: In Subversion, the entire environment gets wiped so we can't read
   // PHABRICATOR_USER. Instead, we've set "--tunnel-user" to specify the
@@ -50,7 +55,7 @@ if ($repository->isGit()) {
 
   $engine->setSubversionTransactionInfo($svn_txn, $svn_repo);
 } else {
-  throw new Exceptiont(pht('Unknown repository type.'));
+  throw new Exception(pht('Unknown repository type.'));
 }
 
 $user = id(new PhabricatorPeopleQuery())
@@ -67,9 +72,16 @@ $engine->setViewer($user);
 
 // Read stdin for the hook engine.
 
-$stdin = @file_get_contents('php://stdin');
-if ($stdin === false) {
-  throw new Exception(pht('Failed to read stdin!'));
+if ($repository->isHg()) {
+  // Mercurial leaves stdin open, so we can't just read it until EOF.
+  $stdin = '';
+} else {
+  // Git and Subversion write data into stdin and then close it. Read the
+  // data.
+  $stdin = @file_get_contents('php://stdin');
+  if ($stdin === false) {
+    throw new Exception(pht('Failed to read stdin!'));
+  }
 }
 
 $engine->setStdin($stdin);

@@ -51,6 +51,9 @@ final class DiffusionCommitHookEngine extends Phobject {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         $err = $this->executeSubversionHook();
         break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $err = $this->executeMercurialHook();
+        break;
       default:
         throw new Exception(pht('Unsupported repository type "%s"!', $type));
     }
@@ -69,6 +72,13 @@ final class DiffusionCommitHookEngine extends Phobject {
   private function executeSubversionHook() {
 
     // TODO: Do useful things here, too.
+
+    return 0;
+  }
+
+  private function executeMercurialHook() {
+
+    // TODO: Here, too, useful things should be done.
 
     return 0;
   }
