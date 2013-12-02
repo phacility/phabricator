@@ -69,7 +69,7 @@ foreach ($map as $credential_type => $credential_usernames) {
       $callsigns = mpull($repositories, 'getCallsign');
       $name = pht(
         'Migrated Repository Credential (%s)',
-        implode(', ', $callsigns));
+        phutil_utf8_shorten(implode(', ', $callsigns), 128));
 
       echo "Creating: {$name}...\n";
 
