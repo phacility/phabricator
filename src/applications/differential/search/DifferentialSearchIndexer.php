@@ -44,8 +44,7 @@ final class DifferentialSearchIndexer
       PhabricatorPeoplePHIDTypeUser::TYPECONST,
       $rev->getDateCreated());
 
-    if ($rev->getStatus() != ArcanistDifferentialRevisionStatus::CLOSED &&
-        $rev->getStatus() != ArcanistDifferentialRevisionStatus::ABANDONED) {
+    if (!$rev->isClosed()) {
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
         $rev->getPHID(),

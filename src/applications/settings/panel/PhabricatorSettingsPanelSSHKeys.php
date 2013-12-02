@@ -160,16 +160,12 @@ final class PhabricatorSettingsPanelSSHKeys
           ->addCancelButton($this->getPanelURI())
           ->setValue($save));
 
-    $header_title = new PHUIHeaderView();
-    $header_title->setHeader($header);
+    $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText($header)
+      ->setFormError($error_view)
+      ->setForm($form);
 
-    return id(new AphrontNullView())
-      ->appendChild(
-        array(
-          $error_view,
-          $header_title,
-          $form,
-        ));
+    return $form_box;
   }
 
   private function renderKeyListView(AphrontRequest $request) {

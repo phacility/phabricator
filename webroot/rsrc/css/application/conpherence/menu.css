@@ -3,12 +3,7 @@
  */
 
 .conpherence-layout {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  top: 44px;
-  background: #fff;
+  position: relative;
 }
 
 .conpherence-layout .conpherence-no-threads {
@@ -37,16 +32,17 @@
   position: absolute;
   overflow-x: hidden;
   overflow-y: auto;
-  top: 0;
-  bottom: 0;
 }
+
 .device-desktop .conpherence-layout .conpherence-menu-pane,
 .device-desktop .conpherence-layout .phabricator-nav-column-background {
   width: 280px;
 }
+
 .device .conpherence-menu-pane {
   top: 41px;
 }
+
 .device .conpherence-role-list .conpherence-menu-pane {
   top: 0px;
 }

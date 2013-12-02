@@ -83,11 +83,19 @@ final class PhabricatorRepositoryPullEngine
         }
       } else {
         if ($repository->isHosted()) {
-          $this->logPull(
-            pht(
-              "Repository '%s' is hosted, so Phabricator does not pull ".
-              "updates for it.",
-              $callsign));
+          if ($is_git) {
+            $this->installGitHook();
+          } else if ($is_svn) {
+            $this->installSubversionHook();
+          } else if ($is_hg) {
+            $this->installMercurialHook();
+          } else {
+            $this->logPull(
+              pht(
+                "Repository '%s' is hosted, so Phabricator does not pull ".
+                "updates for it.",
+                $callsign));
+          }
         } else {
           $this->logPull(
             pht(
@@ -144,6 +152,22 @@ final class PhabricatorRepositoryPullEngine
       array(
         'message' => $message
       ));
+  }
+
+  private function installHook($path) {
+    $this->log('%s', pht('Installing commit hook to "%s"...', $path));
+
+    $repository = $this->getRepository();
+    $callsign = $repository->getCallsign();
+
+    $root = dirname(phutil_get_library_root('phabricator'));
+    $bin = $root.'/bin/commit-hook';
+    $cmd = csprintf('exec -- %s %s "$@"', $bin, $callsign);
+
+    $hook = "#!/bin/sh\n{$cmd}\n";
+
+    Filesystem::writeFile($path, $hook);
+    Filesystem::changePermissions($path, 0755);
   }
 
 
@@ -279,6 +303,23 @@ final class PhabricatorRepositoryPullEngine
   }
 
 
+  /**
+   * @task git
+   */
+  private function installGitHook() {
+    $repository = $this->getRepository();
+    $path = $repository->getLocalPath();
+
+    if ($repository->isWorkingCopyBare()) {
+      $path .= 'hooks/pre-receive';
+    } else {
+      $path .= '.git/hooks/pre-receive';
+    }
+
+    $this->installHook($path);
+  }
+
+
 /* -(  Pulling Mercurial Working Copies  )----------------------------------- */
 
 
@@ -296,7 +337,7 @@ final class PhabricatorRepositoryPullEngine
         $path);
     } else {
       $repository->execxRemoteCommand(
-        'clone -- %s %s',
+        'clone --noupdate -- %s %s',
         $repository->getRemoteURI(),
         $path);
     }
@@ -344,6 +385,33 @@ final class PhabricatorRepositoryPullEngine
   }
 
 
+  /**
+   * @task hg
+   */
+  private function installMercurialHook() {
+    $repository = $this->getRepository();
+    $path = $repository->getLocalPath().'.hg/hgrc';
+
+    $root = dirname(phutil_get_library_root('phabricator'));
+    $bin = $root.'/bin/commit-hook';
+
+    $data = array();
+    $data[] = '[hooks]';
+    $data[] = csprintf(
+      'pretxnchangegroup.phabricator = %s %s %s',
+      $bin,
+      $repository->getCallsign(),
+      'pretxnchangegroup');
+    $data[] = null;
+
+    $data = implode("\n", $data);
+
+    $this->log('%s', pht('Installing commit hook config to "%s"...', $path));
+
+    Filesystem::writeFile($path, $data);
+  }
+
+
 /* -(  Pulling Subversion Working Copies  )---------------------------------- */
 
 
@@ -356,5 +424,16 @@ final class PhabricatorRepositoryPullEngine
     $path = rtrim($repository->getLocalPath(), '/');
     execx('svnadmin create -- %s', $path);
   }
+
+  /**
+   * @task svn
+   */
+  private function installSubversionHook() {
+    $repository = $this->getRepository();
+    $path = $repository->getLocalPath().'hooks/pre-commit';
+
+    $this->installHook($path);
+  }
+
 
 }

@@ -25,7 +25,8 @@ final class DiffusionSSHGitReceivePackWorkflow
     $command = csprintf('git-receive-pack %s', $repository->getLocalPath());
     $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
 
-    $future = new ExecFuture('%C', $command);
+    $future = id(new ExecFuture('%C', $command))
+      ->setEnv($this->getEnvironment());
 
     $err = $this->newPassthruCommand()
       ->setIOChannel($this->getIOChannel())

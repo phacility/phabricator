@@ -407,4 +407,9 @@ final class DifferentialRevision extends DifferentialDAO
     $this->repository = $repository;
     return $this;
   }
+
+  public function isClosed() {
+    return DifferentialRevisionStatus::isClosedStatus($this->getStatus());
+  }
+
 }

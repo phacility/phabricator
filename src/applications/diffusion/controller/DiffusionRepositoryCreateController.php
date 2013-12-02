@@ -94,12 +94,8 @@ final class DiffusionRepositoryCreateController
         $type_activate = PhabricatorRepositoryTransaction::TYPE_ACTIVATE;
         $type_local_path = PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH;
         $type_remote_uri = PhabricatorRepositoryTransaction::TYPE_REMOTE_URI;
-        $type_ssh_login = PhabricatorRepositoryTransaction::TYPE_SSH_LOGIN;
-        $type_ssh_key = PhabricatorRepositoryTransaction::TYPE_SSH_KEY;
-        $type_ssh_keyfile = PhabricatorRepositoryTransaction::TYPE_SSH_KEYFILE;
-        $type_http_login = PhabricatorRepositoryTransaction::TYPE_HTTP_LOGIN;
-        $type_http_pass = PhabricatorRepositoryTransaction::TYPE_HTTP_PASS;
         $type_hosting = PhabricatorRepositoryTransaction::TYPE_HOSTING;
+        $type_credential = PhabricatorRepositoryTransaction::TYPE_CREDENTIAL;
 
         $xactions = array();
 
@@ -159,29 +155,9 @@ final class DiffusionRepositoryCreateController
                 ->getValue());
 
           $xactions[] = id(clone $template)
-            ->setTransactionType($type_ssh_login)
+            ->setTransactionType($type_credential)
             ->setNewValue(
-              $form->getPage('auth')->getControl('ssh-login')->getValue());
-
-          $xactions[] = id(clone $template)
-            ->setTransactionType($type_ssh_key)
-            ->setNewValue(
-              $form->getPage('auth')->getControl('ssh-key')->getValue());
-
-          $xactions[] = id(clone $template)
-            ->setTransactionType($type_ssh_keyfile)
-            ->setNewValue(
-              $form->getPage('auth')->getControl('ssh-keyfile')->getValue());
-
-          $xactions[] = id(clone $template)
-            ->setTransactionType($type_http_login)
-            ->setNewValue(
-              $form->getPage('auth')->getControl('http-login')->getValue());
-
-          $xactions[] = id(clone $template)
-            ->setTransactionType($type_http_pass)
-            ->setNewValue(
-              $form->getPage('auth')->getControl('http-pass')->getValue());
+              $form->getPage('auth')->getControl('credential')->getValue());
         }
 
         id(new PhabricatorRepositoryEditor())
@@ -198,11 +174,7 @@ final class DiffusionRepositoryCreateController
       if ($repository) {
         $dict = array(
           'remoteURI' => $repository->getRemoteURI(),
-          'ssh-login' => $repository->getDetail('ssh-login'),
-          'ssh-key' => $repository->getDetail('ssh-key'),
-          'ssh-keyfile' => $repository->getDetail('ssh-keyfile'),
-          'http-login' => $repository->getDetail('http-login'),
-          'http-pass' => $repository->getDetail('http-pass'),
+          'credential' => $repository->getCredentialPHID(),
         );
       }
       $form->readFromObject($dict);
@@ -550,40 +522,13 @@ final class DiffusionRepositoryCreateController
       ->setUser($this->getRequest()->getUser())
       ->setAdjustFormPageCallback(array($this, 'adjustAuthPage'))
       ->addControl(
-        id(new AphrontFormTextControl())
-          ->setName('ssh-login')
-          ->setLabel('SSH User'))
-      ->addControl(
-        id(new AphrontFormTextAreaControl())
-          ->setName('ssh-key')
-          ->setLabel('SSH Private Key')
-          ->setHeight(AphrontFormTextAreaControl::HEIGHT_SHORT)
-          ->setCaption(
-            hsprintf('Specify the entire private key, <em>or</em>...')))
-      ->addControl(
-        id(new AphrontFormTextControl())
-          ->setName('ssh-keyfile')
-          ->setLabel('SSH Private Key Path')
-          ->setCaption(
-            '...specify a path on disk where the daemon should '.
-            'look for a private key.'))
-      ->addControl(
-        id(new AphrontFormTextControl())
-          ->setName('http-login')
-          ->setLabel('Username'))
-      ->addControl(
-        id(new AphrontFormPasswordControl())
-          ->setName('http-pass')
-          ->setLabel('Password'));
+        id(new PassphraseCredentialControl())
+          ->setName('credential'));
   }
 
 
   public function adjustAuthPage($page) {
     $form = $page->getForm();
-
-    $remote_uri = $form->getPage('remote-uri')
-      ->getControl('remoteURI')
-      ->getValue();
 
     if ($this->getRepository()) {
       $vcs = $this->getRepository()->getVersionControlSystem();
@@ -591,64 +536,74 @@ final class DiffusionRepositoryCreateController
       $vcs = $form->getPage('vcs')->getControl('vcs')->getValue();
     }
 
+    $remote_uri = $form->getPage('remote-uri')
+      ->getControl('remoteURI')
+      ->getValue();
     $proto = $this->getRemoteURIProtocol($remote_uri);
     $remote_user = $this->getRemoteURIUser($remote_uri);
 
-    $page->getControl('ssh-login')->setHidden(true);
-    $page->getControl('ssh-key')->setHidden(true);
-    $page->getControl('ssh-keyfile')->setHidden(true);
-    $page->getControl('http-login')->setHidden(true);
-    $page->getControl('http-pass')->setHidden(true);
+    $c_credential = $page->getControl('credential');
+    $c_credential->setDefaultUsername($remote_user);
 
     if ($this->isSSHProtocol($proto)) {
-      $page->getControl('ssh-login')->setHidden(false);
-      $page->getControl('ssh-key')->setHidden(false);
-      $page->getControl('ssh-keyfile')->setHidden(false);
-
-      $c_login = $page->getControl('ssh-login');
-      if (!strlen($c_login->getValue())) {
-        $c_login->setValue($remote_user);
-      }
+      $c_credential->setLabel(pht('SSH Key'));
+      $c_credential->setCredentialType(
+        PassphraseCredentialTypeSSHPrivateKeyText::CREDENTIAL_TYPE);
+      $provides_type = PassphraseCredentialTypeSSHPrivateKey::PROVIDES_TYPE;
 
       $page->addRemarkupInstructions(
         pht(
-          'Enter the username and private key to use to connect to the '.
-          'the repository hosted at:'.
+          'Choose or add the SSH credentials to use to connect to the the '.
+          'repository hosted at:'.
           "\n\n".
           "  lang=text\n".
-          "  %s".
-          "\n\n".
-          'You can either copy/paste the entire private key, or put it '.
-          'somewhere on disk and provide the path to it.',
+          "  %s",
           $remote_uri),
-        'ssh-login');
-
+        'credential');
     } else if ($this->isUsernamePasswordProtocol($proto)) {
-      $page->getControl('http-login')->setHidden(false);
-      $page->getControl('http-pass')->setHidden(false);
+      $c_credential->setLabel(pht('Password'));
+      $c_credential->setAllowNull(true);
+      $c_credential->setCredentialType(
+        PassphraseCredentialTypePassword::CREDENTIAL_TYPE);
+      $provides_type = PassphraseCredentialTypePassword::PROVIDES_TYPE;
 
       $page->addRemarkupInstructions(
         pht(
-          'Enter the a username and pasword used to connect to the '.
+          'Choose the a username and pasword used to connect to the '.
           'repository hosted at:'.
           "\n\n".
           "  lang=text\n".
           "  %s".
           "\n\n".
           "If this repository does not require a username or password, ".
-          "you can leave these fields blank.",
+          "you can continue to the next step.",
           $remote_uri),
-        'http-login');
+        'credential');
     } else if ($proto == 'file') {
+      $c_credential->setHidden(true);
+      $provides_type = null;
+
       $page->addRemarkupInstructions(
         pht(
-          'You do not need to configure any authentication options for '.
-          'repositories accessed over the `file://` protocol. Continue '.
-          'to the next step.'),
-        'ssh-login');
+          'You do not need to configure any credentials for repositories '.
+          'accessed over the `file://` protocol. Continue to the next step.'),
+        'credential');
     } else {
       throw new Exception("Unknown URI protocol!");
     }
+
+    if ($provides_type) {
+      $viewer = $this->getRequest()->getUser();
+
+      $options = id(new PassphraseCredentialQuery())
+        ->setViewer($viewer)
+        ->withIsDestroyed(false)
+        ->withProvidesTypes(array($provides_type))
+        ->execute();
+
+      $c_credential->setOptions($options);
+    }
+
   }
 
   public function validateAuthPage(PHUIFormPageView $page) {
@@ -656,49 +611,46 @@ final class DiffusionRepositoryCreateController
     $remote_uri = $form->getPage('remote')->getControl('remoteURI')->getValue();
     $proto = $this->getRemoteURIProtocol($remote_uri);
 
+    $c_credential = $page->getControl('credential');
+    $v_credential = $c_credential->getValue();
+
+    // NOTE: We're using the omnipotent user here because the viewer might be
+    // editing a repository they're allowed to edit which uses a credential they
+    // are not allowed to see. This is fine, as long as they don't change it.
+    $credential = id(new PassphraseCredentialQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs(array($v_credential))
+      ->executeOne();
+
     if ($this->isSSHProtocol($proto)) {
-      $c_user = $page->getControl('ssh-login');
-      $c_key = $page->getControl('ssh-key');
-      $c_file = $page->getControl('ssh-keyfile');
-
-      $v_user = $c_user->getValue();
-      $v_key = $c_key->getValue();
-      $v_file = $c_file->getValue();
-
-      if (!strlen($v_user)) {
-        $c_user->setError(pht('Required'));
+      if (!$credential) {
+        $c_credential->setError(pht('Required'));
         $page->addPageError(
-          pht('You must provide an SSH login username to connect over SSH.'));
+          pht('You must choose an SSH credential to connect over SSH.'));
       }
 
-      if (!strlen($v_key) && !strlen($v_file)) {
-        $c_key->setError(pht('No Key'));
-        $c_file->setError(pht('No Key'));
+      $ssh_type = PassphraseCredentialTypeSSHPrivateKey::PROVIDES_TYPE;
+      if ($credential->getProvidesType() !== $ssh_type) {
+        $c_credential->setError(pht('Invalid'));
         $page->addPageError(
           pht(
-            'You must provide either a private key or the path to a private '.
-            'key to connect over SSH.'));
-      } else if (strlen($v_key) && strlen($v_file)) {
-        $c_key->setError(pht('Ambiguous'));
-        $c_file->setError(pht('Ambiguous'));
-        $page->addPageError(
-          pht(
-            'Provide either a private key or the path to a private key, not '.
-            'both.'));
-      } else if (!preg_match('/PRIVATE KEY/', $v_key)) {
-        $c_key->setError(pht('Invalid'));
-        $page->addPageError(
-          pht(
-            'The private key you provided is missing the PRIVATE KEY header. '.
-            'You should include the header and footer. (Did you provide a '.
-            'public key by mistake?)'));
+            'You must choose an SSH credential, not some other type '.
+            'of credential.'));
       }
 
-      return $c_user->isValid() &&
-             $c_key->isValid() &&
-             $c_file->isValid();
     } else if ($this->isUsernamePasswordProtocol($proto)) {
-      return true;
+      if ($credential) {
+        $password_type = PassphraseCredentialTypePassword::PROVIDES_TYPE;
+        if ($credential->getProvidesType() !== $password_type) {
+        $c_credential->setError(pht('Invalid'));
+        $page->addPageError(
+          pht(
+            'You must choose a username/password credential, not some other '.
+            'type of credential.'));
+        }
+      }
+
+      return $c_credential->isValid();
     } else {
       return true;
     }

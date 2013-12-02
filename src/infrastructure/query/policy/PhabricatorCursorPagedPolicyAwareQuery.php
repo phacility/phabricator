@@ -19,6 +19,11 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   }
 
   protected function getPagingValue($result) {
+    if (!is_object($result)) {
+      // This interface can't be typehinted and PHP gets really angry if we
+      // call a method on a non-object, so add an explicit check here.
+      throw new Exception(pht('Expected object, got "%s"!', gettype($result)));
+    }
     return $result->getID();
   }
 

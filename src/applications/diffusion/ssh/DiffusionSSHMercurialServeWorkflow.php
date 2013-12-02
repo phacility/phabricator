@@ -42,7 +42,8 @@ final class DiffusionSSHMercurialServeWorkflow
     $command = csprintf('hg -R %s serve --stdio', $repository->getLocalPath());
     $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
 
-    $future = new ExecFuture('%C', $command);
+    $future = id(new ExecFuture('%C', $command))
+      ->setEnv($this->getEnvironment());
 
     $io_channel = $this->getIOChannel();
     $protocol_channel = new DiffusionSSHMercurialWireClientProtocolChannel(

@@ -16,16 +16,19 @@ final class PhabricatorRepositoryTransaction
   const TYPE_NOTIFY = 'repo:notify';
   const TYPE_AUTOCLOSE = 'repo:autoclose';
   const TYPE_REMOTE_URI = 'repo:remote-uri';
-  const TYPE_SSH_LOGIN = 'repo:ssh-login';
-  const TYPE_SSH_KEY = 'repo:ssh-key';
-  const TYPE_SSH_KEYFILE = 'repo:ssh-keyfile';
-  const TYPE_HTTP_LOGIN = 'repo:http-login';
-  const TYPE_HTTP_PASS = 'repo:http-pass';
   const TYPE_LOCAL_PATH = 'repo:local-path';
   const TYPE_HOSTING = 'repo:hosting';
   const TYPE_PROTOCOL_HTTP = 'repo:serve-http';
   const TYPE_PROTOCOL_SSH = 'repo:serve-ssh';
   const TYPE_PUSH_POLICY = 'repo:push-policy';
+  const TYPE_CREDENTIAL = 'repo:credential';
+
+  // TODO: Clean up these legacy transaction types.
+  const TYPE_SSH_LOGIN = 'repo:ssh-login';
+  const TYPE_SSH_KEY = 'repo:ssh-key';
+  const TYPE_SSH_KEYFILE = 'repo:ssh-keyfile';
+  const TYPE_HTTP_LOGIN = 'repo:http-login';
+  const TYPE_HTTP_PASS = 'repo:http-pass';
 
   public function getApplicationName() {
     return 'repository';

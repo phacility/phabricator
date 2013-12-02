@@ -58,16 +58,11 @@ final class DifferentialJIRAIssuesFieldSpecification
 
     $links = array();
     foreach ($xobjs as $xobj) {
-      $links[] = phutil_tag(
-        'a',
-        array(
-          'href' => $xobj->getObjectURI(),
-          'target' => '_blank',
-        ),
-        $xobj->getObjectID());
+      $links[] = id(new DoorkeeperTagView())
+        ->setExternalObject($xobj);
     }
 
-    return phutil_implode_html(', ', $links);
+    return phutil_implode_html(phutil_tag('br'), $links);
   }
 
   public function shouldAppearOnConduitView() {

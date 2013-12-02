@@ -70,4 +70,36 @@ final class DifferentialRevisionStatus {
 
     return $tag;
   }
+
+  public static function getClosedStatuses() {
+    $statuses = array(
+      ArcanistDifferentialRevisionStatus::CLOSED,
+      ArcanistDifferentialRevisionStatus::ABANDONED,
+    );
+
+    if (PhabricatorEnv::getEnvConfig('differential.close-on-accept')) {
+      $statuses[] = ArcanistDifferentialRevisionStatus::ACCEPTED;
+    }
+
+    return $statuses;
+  }
+
+  public static function getOpenStatuses() {
+    return array_diff(self::getAllStatuses(), self::getClosedStatuses());
+  }
+
+  public static function getAllStatuses() {
+    return array(
+      ArcanistDifferentialRevisionStatus::NEEDS_REVIEW,
+      ArcanistDifferentialRevisionStatus::NEEDS_REVISION,
+      ArcanistDifferentialRevisionStatus::ACCEPTED,
+      ArcanistDifferentialRevisionStatus::CLOSED,
+      ArcanistDifferentialRevisionStatus::ABANDONED,
+    );
+  }
+
+  public static function isClosedStatus($status) {
+    return in_array($status, self::getClosedStatuses());
+  }
+
 }

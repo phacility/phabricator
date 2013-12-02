@@ -1772,6 +1772,22 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20131120.nuancesourcetype.sql'),
       ),
+      '20131121.passphraseedge.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131121.passphraseedge.sql'),
+      ),
+      '20131121.repocredentials.1.col.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131121.repocredentials.1.col.sql'),
+      ),
+      '20131121.repocredentials.2.mig.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20131121.repocredentials.2.mig.php'),
+      ),
+      '20131122.repomirror.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131122.repomirror.sql'),
+      ),
     );
   }
 }

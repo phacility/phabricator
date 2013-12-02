@@ -1,17 +1,15 @@
-###
-###  WARNING: This feature is new and experimental. Use it at your own risk!
-###
+# NOTE: You must have OpenSSHD 6.2 or newer; support for AuthorizedKeysCommand
+# was added in this version.
 
-# You must have OpenSSHD 6.2 or newer; support for AuthorizedKeysCommand was
-# added in this version.
+# NOTE: Edit these to the correct values for your setup.
 
-Port 2222
 AuthorizedKeysCommand /etc/phabricator-ssh-hook.sh
-AuthorizedKeysCommandUser some-unprivileged-user
+AuthorizedKeysCommandUser vcs-user
 
 # You may need to tweak these options, but mostly they just turn off everything
 # dangerous.
 
+Port 22
 Protocol 2
 PermitRootLogin no
 AllowAgentForwarding no

@@ -38,7 +38,9 @@ final class DiffusionSSHSubversionServeWorkflow
       throw new Exception("Expected `svnserve -t`!");
     }
 
-    $command = csprintf('svnserve -t');
+    $command = csprintf(
+      'svnserve -t --tunnel-user=%s',
+      $this->getUser()->getUsername());
     $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
 
     $future = new ExecFuture('%C', $command);

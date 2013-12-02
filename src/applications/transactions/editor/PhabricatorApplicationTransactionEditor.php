@@ -322,13 +322,19 @@ abstract class PhabricatorApplicationTransactionEditor
   protected function applyCustomInternalTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
-    throw new Exception("Capability not supported!");
+    $type = $xaction->getTransactionType();
+    throw new Exception(
+      "Transaction type '{$type}' is missing an internal apply ".
+      "implementation!");
   }
 
   protected function applyCustomExternalTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
-    throw new Exception("Capability not supported!");
+    $type = $xaction->getTransactionType();
+    throw new Exception(
+      "Transaction type '{$type}' is missing an external apply ".
+      "implementation!");
   }
 
   protected function applyFinalEffects(

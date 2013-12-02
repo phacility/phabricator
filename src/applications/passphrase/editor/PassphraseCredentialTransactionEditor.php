@@ -86,7 +86,14 @@ final class PassphraseCredentialTransactionEditor
           }
         }
         return;
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        $object->setViewPolicy($xaction->getNewValue());
+        return;
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        $object->setEditPolicy($xaction->getNewValue());
+        return;
     }
+
     return parent::applyCustomInternalTransaction($object, $xaction);
   }
 
@@ -100,6 +107,8 @@ final class PassphraseCredentialTransactionEditor
       case PassphraseCredentialTransaction::TYPE_USERNAME:
       case PassphraseCredentialTransaction::TYPE_SECRET_ID:
       case PassphraseCredentialTransaction::TYPE_DESTROY:
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return;
     }
 

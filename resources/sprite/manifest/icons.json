@@ -796,6 +796,21 @@
       "rule" : ".icons-normal-priority-white, .device-desktop .phabricator-action-view:hover .icons-normal-priority, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-normal-priority",
       "hash" : "fd9a696de97bde0c45d57e77fa2e7c4a"
     },
+    "icons-octocat"                       : {
+      "name" : "icons-octocat",
+      "rule" : ".icons-octocat",
+      "hash" : "72ac2c8c30caec1d591cf1073c26cc61"
+    },
+    "icons-octocat-grey"                  : {
+      "name" : "icons-octocat-grey",
+      "rule" : ".icons-octocat-grey",
+      "hash" : "808474ec2801f155663054bf5e78cba4"
+    },
+    "icons-octocat-white"                 : {
+      "name" : "icons-octocat-white",
+      "rule" : ".icons-octocat-white, .device-desktop .phabricator-action-view:hover .icons-octocat, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-octocat",
+      "hash" : "bda54b23d423de7b35a964ce9fdea4f2"
+    },
     "icons-perflab"                       : {
       "name" : "icons-perflab",
       "rule" : ".icons-perflab",
@@ -810,6 +825,21 @@
       "name" : "icons-perflab-white",
       "rule" : ".icons-perflab-white, .device-desktop .phabricator-action-view:hover .icons-perflab, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-perflab",
       "hash" : "386f22dd33e0f5e48e294582ca7e1913"
+    },
+    "icons-popout"                        : {
+      "name" : "icons-popout",
+      "rule" : ".icons-popout",
+      "hash" : "83c413187ec4d5730203494bdb70a6f2"
+    },
+    "icons-popout-grey"                   : {
+      "name" : "icons-popout-grey",
+      "rule" : ".icons-popout-grey",
+      "hash" : "203aaa1696fe7fdf7f287d5f2908b2ef"
+    },
+    "icons-popout-white"                  : {
+      "name" : "icons-popout-white",
+      "rule" : ".icons-popout-white, .device-desktop .phabricator-action-view:hover .icons-popout, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-popout",
+      "hash" : "924b3bf8f4768bf647237de4eaa3613e"
     },
     "icons-preview"                       : {
       "name" : "icons-preview",

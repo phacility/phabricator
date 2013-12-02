@@ -21,6 +21,16 @@ final class PhabricatorAsanaConfigOptions
             'ID here.'.
             "\n\n".
             "NOTE: This feature is new and experimental.")),
+      $this->newOption('asana.project-ids', 'wild', null)
+        ->setSummary(pht("Optional Asana projects to use as application tags."))
+        ->setDescription(
+          pht(
+            'When Phabricator creates tasks in Asana, it can add the tasks '.
+            'to Asana projects based on which application the corresponding '.
+            'object in Phabricator comes from. For example, you can add code '.
+            'reviews in Asana to a "Differential" project.'.
+            "\n\n".
+            'NOTE: This feature is new and experimental.'))
     );
   }
 
@@ -31,6 +41,8 @@ final class PhabricatorAsanaConfigOptions
     switch ($option->getKey()) {
       case 'asana.workspace-id':
         break;
+      case 'asana.project-ids':
+        return $this->renderContextualProjectDescription($option, $request);
       default:
         return parent::renderContextualDescription($option, $request);
     }
@@ -89,5 +101,48 @@ final class PhabricatorAsanaConfigOptions
       $viewer);
   }
 
+  private function renderContextualProjectDescription(
+    PhabricatorConfigOption $option,
+    AphrontRequest $request) {
+
+    $viewer = $request->getUser();
+
+    $publishers = id(new PhutilSymbolLoader())
+      ->setAncestorClass('DoorkeeperFeedStoryPublisher')
+      ->loadObjects();
+
+    $out = array();
+    $out[] = pht(
+      'To specify projects to add tasks to, enter a JSON map with publisher '.
+      'class names as keys and a list of project IDs as values. For example, '.
+      'to put Differential tasks into Asana projects with IDs `123` and '.
+      '`456`, enter:'.
+      "\n\n".
+      "  lang=txt\n".
+      "  {\n".
+      "    \"DifferentialDoorkeeperRevisionFeedStoryPublisher\" : [123, 456]\n".
+      "  }\n");
+
+    $out[] = pht('Available publishers class names are:');
+    foreach ($publishers as $publisher) {
+      $out[] = '  - `'.get_class($publisher).'`';
+    }
+
+    $out[] = pht(
+      'You can find an Asana project ID by clicking the project in Asana and '.
+      'then examining the URL:'.
+      "\n\n".
+      "  lang=txt\n".
+      "  https://app.asana.com/0/12345678901234567890/111111111111111111\n".
+      "                          ^^^^^^^^^^^^^^^^^^^^\n".
+      "                        This is the ID to use.\n");
+
+    $out = implode("\n", $out);
+
+    return PhabricatorMarkupEngine::renderOneObject(
+      id(new PhabricatorMarkupOneOff())->setContent($out),
+      'default',
+      $viewer);
+  }
 
 }

@@ -151,6 +151,17 @@ final class PassphraseCredentialViewController extends PassphraseController {
       pht('Username'),
       $credential->getUsername());
 
+    $used_by_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $credential->getPHID(),
+      PhabricatorEdgeConfig::TYPE_CREDENTIAL_USED_BY_OBJECT);
+
+    if ($used_by_phids) {
+      $this->loadHandles($used_by_phids);
+      $properties->addProperty(
+        pht('Used By'),
+        $this->renderHandlesForPHIDs($used_by_phids));
+    }
+
     $description = $credential->getDescription();
     if (strlen($description)) {
       $properties->addSectionHeader(

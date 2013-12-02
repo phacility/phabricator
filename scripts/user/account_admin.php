@@ -4,6 +4,29 @@
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
+$table = new PhabricatorUser();
+$any_user = queryfx_one(
+  $table->establishConnection('r'),
+  'SELECT * FROM %T LIMIT 1',
+  $table->getTableName());
+$is_first_user = (!$any_user);
+
+if ($is_first_user) {
+  echo pht(
+    "WARNING\n\n".
+    "You're about to create the first account on this install. Normally, you ".
+    "should use the web interface to create the first account, not this ".
+    "script.\n\n".
+    "If you use the web interface, it will drop you into a nice UI workflow ".
+    "which gives you more help setting up your install. If you create an ".
+    "account with this script instead, you will skip the setup help and you ".
+    "will not be able to access it later.");
+  if (!phutil_console_confirm(pht("Skip easy setup and create account?"))) {
+    echo pht("Cancelled.")."\n";
+    exit(1);
+  }
+}
+
 echo "Enter a username to create a new account or edit an existing account.";
 
 $username = phutil_console_prompt("Enter a username:");
@@ -177,6 +200,9 @@ $user->openTransaction();
     $email = id(new PhabricatorUserEmail())
       ->setAddress($create_email)
       ->setIsVerified(1);
+
+    // Unconditionally approve new accounts created from the CLI.
+    $user->setIsApproved(1);
 
     $editor->createNewUser($user, $email);
   } else {

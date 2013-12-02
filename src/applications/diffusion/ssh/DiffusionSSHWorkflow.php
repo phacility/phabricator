@@ -17,6 +17,12 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
     return $this->args;
   }
 
+  public function getEnvironment() {
+    return array(
+      'PHABRICATOR_USER' => $this->getUser()->getUsername(),
+    );
+  }
+
   abstract protected function executeRepositoryOperations();
 
   protected function writeError($message) {

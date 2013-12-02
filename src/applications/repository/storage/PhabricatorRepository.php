@@ -39,8 +39,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   protected $versionControlSystem;
   protected $details = array();
-
-  private $sshKeyfile;
+  protected $credentialPHID;
 
   private $commitCount = self::ATTACHABLE;
   private $mostRecentCommit = self::ATTACHABLE;
@@ -295,10 +294,13 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   private function getCommonCommandEnvironment() {
     $env = array(
-      // NOTE: Force the language to "C", which overrides locale settings.
-      // This makes stuff print in English instead of, e.g., French, so we can
-      // parse the output of some commands, error messages, etc.
-      'LANG' => 'C',
+      // NOTE: Force the language to "en_US.UTF-8", which overrides locale
+      // settings. This makes stuff print in English instead of, e.g., French,
+      // so we can parse the output of some commands, error messages, etc.
+      'LANG' => 'en_US.UTF-8',
+
+      // Propagate PHABRICATOR_ENV explicitly. For discussion, see T4155.
+      'PHABRICATOR_ENV' => PhabricatorEnv::getSelectedEnvironmentName(),
     );
 
     switch ($this->getVersionControlSystem()) {
@@ -338,7 +340,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     if ($this->shouldUseSSH()) {
       // NOTE: This is read by `bin/ssh-connect`, and tells it which credentials
       // to use.
-      $env['PHABRICATOR_SSH_TARGET'] = $this->getCallsign();
+      $env['PHABRICATOR_CREDENTIAL'] = $this->getCredentialPHID();
       switch ($this->getVersionControlSystem()) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
           // Force SVN to use `bin/ssh-connect`.
@@ -366,31 +368,29 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     switch ($this->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        if ($this->shouldUseHTTP()) {
-          $pattern =
-            "svn ".
-            "--non-interactive ".
-            "--no-auth-cache ".
-            "--trust-server-cert ".
-            "--username %P ".
-            "--password %P ".
-            $pattern;
-          array_unshift(
-            $args,
-            new PhutilOpaqueEnvelope($this->getDetail('http-login')),
-            new PhutilOpaqueEnvelope($this->getDetail('http-pass')));
-        } else if ($this->shouldUseSVNProtocol()) {
-          $pattern =
-            "svn ".
-            "--non-interactive ".
-            "--no-auth-cache ".
-            "--username %P ".
-            "--password %P ".
-            $pattern;
-          array_unshift(
-            $args,
-            new PhutilOpaqueEnvelope($this->getDetail('http-login')),
-            new PhutilOpaqueEnvelope($this->getDetail('http-pass')));
+        if ($this->shouldUseHTTP() || $this->shouldUseSVNProtocol()) {
+          $flags = array();
+          $flag_args = array();
+          $flags[] = '--non-interactive';
+          $flags[] = '--no-auth-cache';
+          if ($this->shouldUseHTTP()) {
+            $flags[] = '--trust-server-cert';
+          }
+
+          $credential_phid = $this->getCredentialPHID();
+          if ($credential_phid) {
+            $key = PassphrasePasswordKey::loadFromPHID(
+              $credential_phid,
+              PhabricatorUser::getOmnipotentUser());
+            $flags[] = '--username %P';
+            $flags[] = '--password %P';
+            $flag_args[] = $key->getUsernameEnvelope();
+            $flag_args[] = $key->getPasswordEnvelope();
+          }
+
+          $flags = implode(' ', $flags);
+          $pattern = "svn {$flags} {$pattern}";
+          $args = array_mergev(array($flag_args, $args));
         } else {
           $pattern = "svn --non-interactive {$pattern}";
         }
@@ -663,11 +663,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     $protocol = $this->getRemoteProtocol();
     if ($this->isSSHProtocol($protocol)) {
-      $key = $this->getDetail('ssh-key');
-      $keyfile = $this->getDetail('ssh-keyfile');
-      if ($key || $keyfile) {
-        return true;
-      }
+      return true;
     }
 
     return false;
@@ -687,11 +683,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     $protocol = $this->getRemoteProtocol();
-    if ($protocol == 'http' || $protocol == 'https') {
-      return (bool)$this->getDetail('http-login');
-    } else {
-      return false;
-    }
+    return ($protocol == 'http' || $protocol == 'https');
   }
 
 
@@ -708,11 +700,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     $protocol = $this->getRemoteProtocol();
-    if ($protocol == 'svn') {
-      return (bool)$this->getDetail('http-login');
-    } else {
-      return false;
-    }
+    return ($protocol == 'svn');
   }
 
 
@@ -749,6 +737,12 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         // note PhabricatorRepositoryAuditRequests and
         // PhabricatorRepositoryCommitData are deleted here too.
         $commit->delete();
+      }
+
+      $mirrors = id(new PhabricatorRepositoryMirror())
+        ->loadAllWhere('repositoryPHID = %s', $this->getPHID());
+      foreach ($mirrors as $mirror) {
+        $mirror->delete();
       }
 
       $conn_w = $this->establishConnection('w');
@@ -905,6 +899,17 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return Filesystem::isDescendant($this->getLocalPath(), $default_path);
   }
 
+  public function canMirror() {
+    if (!$this->isHosted()) {
+      return false;
+    }
+
+    if ($this->isGit()) {
+      return true;
+    }
+
+    return false;
+  }
 
   public function writeStatusMessage(
     $status_type,

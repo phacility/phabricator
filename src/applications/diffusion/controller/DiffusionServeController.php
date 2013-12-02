@@ -318,6 +318,7 @@ final class DiffusionServeController extends DiffusionController {
       'PATH_INFO' => $request_path,
 
       'REMOTE_USER' => $viewer->getUsername(),
+      'PHABRICATOR_USER' => $viewer->getUsername(),
 
       // TODO: Set these correctly.
       // GIT_COMMITTER_NAME
@@ -405,7 +406,9 @@ final class DiffusionServeController extends DiffusionController {
     return $user;
   }
 
-  private function serveMercurialRequest(PhabricatorRepository $repository) {
+  private function serveMercurialRequest(
+    PhabricatorRepository $repository,
+    PhabricatorUser $viewer) {
     $request = $this->getRequest();
 
     $bin = Filesystem::resolveBinary('hg');
@@ -413,7 +416,9 @@ final class DiffusionServeController extends DiffusionController {
       throw new Exception("Unable to find `hg` in PATH!");
     }
 
-    $env = array();
+    $env = array(
+      'PHABRICATOR_USER' => $viewer->getUsername(),
+    );
     $input = PhabricatorStartup::getRawInput();
 
     $cmd = $request->getStr('cmd');

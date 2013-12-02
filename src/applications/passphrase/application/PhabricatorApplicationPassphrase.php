@@ -26,8 +26,8 @@ final class PhabricatorApplicationPassphrase extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
-  public function isBeta() {
-    return true;
+  public function canUninstall() {
+    return false;
   }
 
   public function getRoutes() {

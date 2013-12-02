@@ -15,6 +15,11 @@ $rows = queryfx_all(
   $user_dao->getTableName(),
   $ssh_dao->getTableName());
 
+if (!$rows) {
+  echo pht("No keys found.")."\n";
+  exit(1);
+}
+
 $bin = $root.'/bin/ssh-exec';
 foreach ($rows as $row) {
   $user = $row['userName'];

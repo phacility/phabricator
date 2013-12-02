@@ -14,9 +14,26 @@
 }
 
 .aphront-pager-view a {
-  padding:    2px 3px;
+  padding: 3px 7px;
+  border: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
+  margin: 0 2px;
+  background: #fff;
+  color: {$lightbluetext};
+  display: inline-block;
+  border-radius: 2px;
+}
+
+.aphront-pager-view a:hover {
+  text-decoration: none;
+  border: 1px solid {$greyborder};
+  border-bottom: 1px solid {$darkgreyborder};
+  color: {$darkgreytext};
 }
 
 .aphront-pager-view a.current {
-  border-bottom: 2px solid;
+  background: {$greybackground};
+  border: 1px solid {$greyborder};
+  border-bottom: 1px solid {$darkgreyborder};
+  color: {$darkgreytext};
 }

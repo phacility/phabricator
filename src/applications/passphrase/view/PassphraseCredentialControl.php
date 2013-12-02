@@ -4,6 +4,18 @@ final class PassphraseCredentialControl extends AphrontFormControl {
 
   private $options;
   private $credentialType;
+  private $defaultUsername;
+  private $allowNull;
+
+  public function setAllowNull($allow_null) {
+    $this->allowNull = $allow_null;
+    return $this;
+  }
+
+  public function setDefaultUsername($default_username) {
+    $this->defaultUsername = $default_username;
+    return $this;
+  }
 
   public function setCredentialType($credential_type) {
     $this->credentialType = $credential_type;
@@ -35,9 +47,13 @@ final class PassphraseCredentialControl extends AphrontFormControl {
     }
 
     $disabled = $this->getDisabled();
-    if (!$options_map) {
-      $options_map[''] = pht('(No Existing Credentials)');
-      $disabled = true;
+    if ($this->allowNull) {
+      $options_map = array('' => pht('(No Credentials)')) + $options_map;
+    } else {
+      if (!$options_map) {
+        $options_map[''] = pht('(No Existing Credentials)');
+        $disabled = true;
+      }
     }
 
     Javelin::initBehavior('passphrase-credential-control');
@@ -52,15 +68,19 @@ final class PassphraseCredentialControl extends AphrontFormControl {
         'sigil' => 'passphrase-credential-select',
       ));
 
-    $button = javelin_tag(
-      'a',
-      array(
-        'href' => '#',
-        'class' => 'button grey',
-        'sigil' => 'passphrase-credential-add',
-        'mustcapture' => true,
-      ),
-      pht('Add Credential'));
+    if ($this->credentialType) {
+      $button = javelin_tag(
+        'a',
+        array(
+          'href' => '#',
+          'class' => 'button grey',
+          'sigil' => 'passphrase-credential-add',
+          'mustcapture' => true,
+        ),
+        pht('Add Credential'));
+    } else {
+      $button = null;
+    }
 
     return javelin_tag(
       'div',
@@ -68,6 +88,8 @@ final class PassphraseCredentialControl extends AphrontFormControl {
         'sigil' => 'passphrase-credential-control',
         'meta' => array(
           'type' => $this->getCredentialType(),
+          'username' => $this->defaultUsername,
+          'allowNull' => $this->allowNull,
         ),
       ),
       array(

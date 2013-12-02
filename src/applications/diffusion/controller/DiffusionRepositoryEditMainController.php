@@ -67,6 +67,7 @@ final class DiffusionRepositoryEditMainController
       $repository,
       $this->buildHostingActions($repository));
 
+
     $branches_properties = null;
     if ($has_branches) {
       $branches_properties = $this->buildBranchesProperties(
@@ -114,36 +115,78 @@ final class DiffusionRepositoryEditMainController
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 
-    $obj_box = id(new PHUIObjectBoxView())
+    $boxes = array();
+
+    $boxes[] = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addPropertyList($basic_properties)
-      ->addPropertyList($policy_properties)
+      ->addPropertyList($basic_properties);
+
+    $boxes[] = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Policies'))
+      ->addPropertyList($policy_properties);
+
+    $boxes[] = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Hosting'))
       ->addPropertyList($hosting_properties);
 
+    if ($repository->canMirror()) {
+      $mirror_actions = $this->buildMirrorActions($repository);
+      $mirror_properties = $this->buildMirrorProperties(
+        $repository,
+        $mirror_actions);
+
+      $mirrors = id(new PhabricatorRepositoryMirrorQuery())
+        ->setViewer($viewer)
+        ->withRepositoryPHIDs(array($repository->getPHID()))
+        ->execute();
+
+      $mirror_list = $this->buildMirrorList($repository, $mirrors);
+
+      $boxes[] = id(new PhabricatorAnchorView())->setAnchorName('mirrors');
+
+      $boxes[] = id(new PHUIObjectBoxView())
+        ->setHeaderText(pht('Mirrors'))
+        ->addPropertyList($mirror_properties);
+
+      $boxes[] = $mirror_list;
+    }
+
     if ($remote_properties) {
-      $obj_box->addPropertyList($remote_properties);
+      $boxes[] = id(new PHUIObjectBoxView())
+        ->setHeaderText(pht('Remote'))
+        ->addPropertyList($remote_properties);
     }
 
     if ($local_properties) {
-      $obj_box->addPropertyList($local_properties);
+      $boxes[] = id(new PHUIObjectBoxView())
+        ->setHeaderText(pht('Local'))
+        ->addPropertyList($local_properties);
     }
 
-    $obj_box->addPropertyList($encoding_properties);
+    $boxes[] = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Text Encoding'))
+      ->addPropertyList($encoding_properties);
 
     if ($branches_properties) {
-      $obj_box->addPropertyList($branches_properties);
+      $boxes[] = id(new PHUIObjectBoxView())
+        ->setHeaderText(pht('Branches'))
+        ->addPropertyList($branches_properties);
     }
 
     if ($subversion_properties) {
-      $obj_box->addPropertyList($subversion_properties);
+      $boxes[] = id(new PHUIObjectBoxView())
+        ->setHeaderText(pht('Subversion'))
+        ->addPropertyList($subversion_properties);
     }
 
-    $obj_box->addPropertyList($actions_properties);
+    $boxes[] = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Actions'))
+      ->addPropertyList($actions_properties);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $obj_box,
+        $boxes,
         $xaction_view,
       ),
       array(
@@ -253,8 +296,7 @@ final class DiffusionRepositoryEditMainController
 
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setActionList($actions)
-      ->addSectionHeader(pht('Text Encoding'));
+      ->setActionList($actions);
 
     $encoding = $repository->getDetail('encoding');
     if (!$encoding) {
@@ -291,8 +333,7 @@ final class DiffusionRepositoryEditMainController
 
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setActionList($actions)
-      ->addSectionHeader(pht('Policies'));
+      ->setActionList($actions);
 
     $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
       $viewer,
@@ -339,8 +380,7 @@ final class DiffusionRepositoryEditMainController
 
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setActionList($actions)
-      ->addSectionHeader(pht('Branches'));
+      ->setActionList($actions);
 
     $default_branch = nonempty(
       $repository->getHumanReadableDetail('default-branch'),
@@ -390,8 +430,7 @@ final class DiffusionRepositoryEditMainController
 
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setActionList($actions)
-      ->addSectionHeader(pht('Subversion'));
+      ->setActionList($actions);
 
     $svn_uuid = nonempty(
       $repository->getUUID(),
@@ -431,8 +470,7 @@ final class DiffusionRepositoryEditMainController
 
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setActionList($actions)
-      ->addSectionHeader(pht('Actions'));
+      ->setActionList($actions);
 
     $notify = $repository->getDetail('herald-disabled')
       ? pht('Off')
@@ -474,12 +512,19 @@ final class DiffusionRepositoryEditMainController
 
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setActionList($actions)
-      ->addSectionHeader(pht('Remote'));
+      ->setActionList($actions);
 
     $view->addProperty(
       pht('Remote URI'),
       $repository->getHumanReadableDetail('remote-uri'));
+
+    $credential_phid = $repository->getCredentialPHID();
+    if ($credential_phid) {
+      $this->loadHandles(array($credential_phid));
+      $view->addProperty(
+        pht('Credential'),
+        $this->getHandle($credential_phid)->renderLink());
+    }
 
     return $view;
   }
@@ -509,8 +554,7 @@ final class DiffusionRepositoryEditMainController
 
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setActionList($actions)
-      ->addSectionHeader(pht('Local'));
+      ->setActionList($actions);
 
     $view->addProperty(
       pht('Local Path'),
@@ -544,8 +588,7 @@ final class DiffusionRepositoryEditMainController
 
     $view = id(new PHUIPropertyListView())
       ->setUser($user)
-      ->setActionList($actions)
-      ->addSectionHeader(pht('Hosting'));
+      ->setActionList($actions);
 
     $hosting = $repository->isHosted()
       ? pht('Hosted on Phabricator')
@@ -894,5 +937,87 @@ final class DiffusionRepositoryEditMainController
 
     return $view;
   }
+
+  private function buildMirrorActions(
+    PhabricatorRepository $repository) {
+
+    $viewer = $this->getRequest()->getUser();
+
+    $mirror_actions = id(new PhabricatorActionListView())
+      ->setObjectURI($this->getRequest()->getRequestURI())
+      ->setUser($viewer);
+
+    $new_mirror_uri = $this->getRepositoryControllerURI(
+      $repository,
+      'mirror/edit/');
+
+    $mirror_actions->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Add Mirror'))
+        ->setIcon('new')
+        ->setHref($new_mirror_uri)
+        ->setWorkflow(true));
+
+    return $mirror_actions;
+  }
+
+  private function buildMirrorProperties(
+    PhabricatorRepository $repository,
+    PhabricatorActionListView $actions) {
+
+    $viewer = $this->getRequest()->getUser();
+
+    $mirror_properties = id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setActionList($actions);
+
+    $mirror_properties->addProperty(
+      '',
+      phutil_tag(
+        'em',
+        array(),
+        pht('Automatically push changes into other remotes.')));
+
+    return $mirror_properties;
+  }
+
+  private function buildMirrorList(
+    PhabricatorRepository $repository,
+    array $mirrors) {
+    assert_instances_of($mirrors, 'PhabricatorRepositoryMirror');
+
+    $mirror_list = id(new PHUIObjectItemListView())
+      ->setNoDataString(pht('This repository has no configured mirrors.'));
+
+    foreach ($mirrors as $mirror) {
+      $item = id(new PHUIObjectItemView())
+        ->setHeader($mirror->getRemoteURI());
+
+      $edit_uri = $this->getRepositoryControllerURI(
+        $repository,
+        'mirror/edit/'.$mirror->getID().'/');
+
+      $delete_uri = $this->getRepositoryControllerURI(
+        $repository,
+        'mirror/delete/'.$mirror->getID().'/');
+
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setIcon('edit')
+          ->setHref($edit_uri)
+          ->setWorkflow(true));
+
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setIcon('delete')
+          ->setHref($delete_uri)
+          ->setWorkflow(true));
+
+      $mirror_list->addItem($item);
+    }
+
+    return $mirror_list;
+  }
+
 
 }
