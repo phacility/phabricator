@@ -178,6 +178,9 @@ $user->openTransaction();
       ->setAddress($create_email)
       ->setIsVerified(1);
 
+    // Unconditionally approve new accounts created from the CLI.
+    $user->setIsApproved(1);
+
     $editor->createNewUser($user, $email);
   } else {
     if ($verify_email) {
