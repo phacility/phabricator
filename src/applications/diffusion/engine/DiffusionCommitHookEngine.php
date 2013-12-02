@@ -5,6 +5,15 @@ final class DiffusionCommitHookEngine extends Phobject {
   private $viewer;
   private $repository;
   private $stdin;
+  private $subversionTransaction;
+  private $subversionRepository;
+
+
+  public function setSubversionTransactionInfo($transaction, $repository) {
+    $this->subversionTransaction = $transaction;
+    $this->subversionRepository = $repository;
+    return $this;
+  }
 
   public function setStdin($stdin) {
     $this->stdin = $stdin;
@@ -39,6 +48,9 @@ final class DiffusionCommitHookEngine extends Phobject {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $err = $this->executeGitHook();
         break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $err = $this->executeSubversionHook();
+        break;
       default:
         throw new Exception(pht('Unsupported repository type "%s"!', $type));
     }
@@ -50,6 +62,13 @@ final class DiffusionCommitHookEngine extends Phobject {
     $updates = $this->parseGitUpdates($this->getStdin());
 
     // TODO: Do useful things.
+
+    return 0;
+  }
+
+  private function executeSubversionHook() {
+
+    // TODO: Do useful things here, too.
 
     return 0;
   }

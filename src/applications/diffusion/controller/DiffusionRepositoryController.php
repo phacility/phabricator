@@ -173,7 +173,12 @@ final class DiffusionRepositoryController extends DiffusionController {
       $serve_ssh = $repository->getServeOverSSH();
       if ($serve_ssh !== $serve_off) {
         $uri = new PhutilURI(PhabricatorEnv::getProductionURI($repo_path));
-        $uri->setProtocol('ssh');
+
+        if ($repository->isSVN()) {
+          $uri->setProtocol('svn+ssh');
+        } else {
+          $uri->setProtocol('ssh');
+        }
 
         $ssh_user = PhabricatorEnv::getEnvConfig('diffusion.ssh-user');
         if ($ssh_user) {

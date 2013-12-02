@@ -85,6 +85,8 @@ final class PhabricatorRepositoryPullEngine
         if ($repository->isHosted()) {
           if ($is_git) {
             $this->installGitHook();
+          } else if ($is_svn) {
+            $this->installSubversionHook();
           } else {
             $this->logPull(
               pht(
@@ -158,7 +160,7 @@ final class PhabricatorRepositoryPullEngine
 
     $root = dirname(phutil_get_library_root('phabricator'));
     $bin = $root.'/bin/commit-hook';
-    $cmd = csprintf('exec -- %s %s', $bin, $callsign);
+    $cmd = csprintf('exec -- %s %s "$@"', $bin, $callsign);
 
     $hook = "#!/bin/sh\n{$cmd}\n";
 
@@ -392,6 +394,16 @@ final class PhabricatorRepositoryPullEngine
 
     $path = rtrim($repository->getLocalPath(), '/');
     execx('svnadmin create -- %s', $path);
+  }
+
+  /**
+   * @task svn
+   */
+  private function installSubversionHook() {
+    $repository = $this->getRepository();
+    $path = $repository->getLocalPath().'hooks/pre-commit';
+
+    $this->installHook($path);
   }
 
 
