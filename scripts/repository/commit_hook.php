@@ -86,6 +86,43 @@ if ($repository->isHg()) {
 
 $engine->setStdin($stdin);
 
-$err = $engine->execute();
+try {
+  $err = $engine->execute();
+} catch (DiffusionCommitHookRejectException $ex) {
+  $console = PhutilConsole::getConsole();
+
+  if (PhabricatorEnv::getEnvConfig('phabricator.serious-business')) {
+    $preamble = pht('*** PUSH REJECTED BY COMMIT HOOK ***');
+  } else {
+    $preamble = pht(<<<EOTXT
++---------------------------------------------------------------+
+|      * * * PUSH REJECTED BY EVIL DRAGON BUREAUCRATS * * *     |
++---------------------------------------------------------------+
+            \
+             \                    ^    /^
+              \                  / \  // \
+               \   |\___/|      /   \//  .\
+                \  /V  V  \__  /    //  | \ \           *----*
+                  /     /  \/_/    //   |  \  \          \   |
+                  @___@`    \/_   //    |   \   \         \/\ \
+                 0/0/|       \/_ //     |    \    \         \  \
+             0/0/0/0/|        \///      |     \     \       |  |
+          0/0/0/0/0/_|_ /   (  //       |      \     _\     |  /
+       0/0/0/0/0/0/`/,_ _ _/  ) ; -.    |    _ _\.-~       /   /
+                   ,-}        _      *-.|.-~-.           .~    ~
+  \     \__/        `/\      /                 ~-. _ .-~      /
+   \____(Oo)           *.   }            {                   /
+   (    (--)          .----~-.\        \-`                 .~
+   //__\\\\  \ DENIED!  ///.----..<        \             _ -~
+  //    \\\\               ///-._ _ _ _ _ _ _{^ - - - - ~
+
+EOTXT
+);
+  }
+
+  $console->writeErr("%s\n\n", $preamble);
+  $console->writeErr("%s\n\n", $ex->getMessage());
+  $err = 1;
+}
 
 exit($err);

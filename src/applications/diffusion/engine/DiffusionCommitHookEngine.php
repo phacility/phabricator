@@ -67,6 +67,8 @@ final class DiffusionCommitHookEngine extends Phobject {
   private function executeGitHook() {
     $updates = $this->parseGitUpdates($this->getStdin());
 
+    $this->rejectGitDangerousChanges($updates);
+
     // TODO: Do cheap checks: non-ff commits, mutating refs without access,
     // creating or deleting things you can't touch. We can do all non-content
     // checks here.
@@ -101,8 +103,10 @@ final class DiffusionCommitHookEngine extends Phobject {
 
       if (preg_match('(^refs/heads/)', $update['ref'])) {
         $update['type'] = 'branch';
+        $update['ref.short'] = substr($update['ref'], strlen('refs/heads/'));
       } else if (preg_match('(^refs/tags/)', $update['ref'])) {
         $update['type'] = 'tag';
+        $update['ref.short'] = substr($update['ref'], strlen('refs/tags/'));
       } else {
         $update['type'] = 'unknown';
       }
@@ -159,7 +163,7 @@ final class DiffusionCommitHookEngine extends Phobject {
   private function findGitNewCommits(array $updates) {
     $futures = array();
     foreach ($updates as $key => $update) {
-      if ($update['type'] == 'delete') {
+      if ($update['operation'] == 'delete') {
         // Deleting a branch or tag can never create any new commits.
         continue;
       }
@@ -181,6 +185,61 @@ final class DiffusionCommitHookEngine extends Phobject {
     }
 
     return $updates;
+  }
+
+  private function rejectGitDangerousChanges(array $updates) {
+    $repository = $this->getRepository();
+    if ($repository->shouldAllowDangerousChanges()) {
+      return;
+    }
+
+    foreach ($updates as $update) {
+      if ($update['type'] != 'branch') {
+        // For now, we don't consider deleting or moving tags to be a
+        // "dangerous" update. It's way harder to get wrong and should be easy
+        // to recover from once we have better logging.
+        continue;
+      }
+
+      if ($update['operation'] == 'create') {
+        // Creating a branch is never dangerous.
+        continue;
+      }
+
+      if ($update['operation'] == 'change') {
+        if ($update['old'] == $update['merge-base']) {
+          // This is a fast-forward update to an existing branch.
+          // These are safe.
+          continue;
+        }
+      }
+
+      // We either have a branch deletion or a non fast-forward branch update.
+      // Format a message and reject the push.
+
+      if ($update['operation'] == 'delete') {
+        $message = pht(
+          "DANGEROUS CHANGE: The change you're attempting to push deletes ".
+          "the branch '%s'.",
+          $update['ref.short']);
+      } else {
+        $message = pht(
+          "DANGEROUS CHANGE: The change you're attempting to push updates ".
+          "the branch '%s' from '%s' to '%s', but this is not a fast-forward. ".
+          "Pushes which rewrite published branch history are dangerous.",
+          $update['ref.short'],
+          $update['old.short'],
+          $update['new.short']);
+      }
+
+      $boilerplate = pht(
+        "Dangerous change protection is enabled for this repository.\n".
+        "Edit the repository configuration before making dangerous changes.");
+
+      $message = $message."\n".$boilerplate;
+
+      throw new DiffusionCommitHookRejectException($message);
+    }
   }
 
   private function executeSubversionHook() {
