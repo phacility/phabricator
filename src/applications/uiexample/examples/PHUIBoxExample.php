@@ -58,6 +58,26 @@ final class PHUIBoxExample extends PhabricatorUIExample {
           ->addPadding(PHUI::PADDING_LARGE)
           ->addMargin(PHUI::MARGIN_LARGE_BOTTOM));
 
+    $image = id(new PHUIIconView())
+          ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+          ->setSpriteIcon('love');
+    $button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setColor(PHUIButtonView::SIMPLE)
+        ->setIcon($image)
+        ->setText('Such Wow')
+        ->addClass(PHUI::MARGIN_SMALL_RIGHT);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader('Fancy Box')
+      ->addActionLink($button);
+
+    $obj4 = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild(id(new PHUIBoxView())
+        ->addPadding(PHUI::PADDING_MEDIUM)
+        ->appendChild('Such Fancy, Nice Box, Many Corners.'));
+
     $head1 = id(new PHUIHeaderView())
       ->setHeader(pht('Plain Box'));
 
@@ -66,6 +86,9 @@ final class PHUIBoxExample extends PhabricatorUIExample {
 
     $head3 = id(new PHUIHeaderView())
       ->setHeader(pht('Shadow Box with space'));
+
+    $head4 = id(new PHUIHeaderView())
+      ->setHeader(pht('PHUIObjectBoxView'));
 
     $wrap1 = id(new PHUIBoxView())
       ->appendChild($layout1)
@@ -88,7 +111,9 @@ final class PHUIBoxExample extends PhabricatorUIExample {
           $head2,
           $wrap2,
           $head3,
-          $wrap3
+          $wrap3,
+          $head4,
+          $obj4,
         ));
         }
 }

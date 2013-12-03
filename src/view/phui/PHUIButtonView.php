@@ -6,6 +6,7 @@ final class PHUIButtonView extends AphrontTagView {
   const GREY = 'grey';
   const BLACK = 'black';
   const DISABLED = 'disabled';
+  const SIMPLE = 'simple';
 
   const SMALL = 'small';
   const BIG = 'big';
