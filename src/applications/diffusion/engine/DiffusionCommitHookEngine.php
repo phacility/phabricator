@@ -206,7 +206,7 @@ final class DiffusionCommitHookEngine extends Phobject {
         continue;
       }
 
-      if ($update['operation'] == 'change') {
+      if ($update['operation'] == 'update') {
         if ($update['old'] == $update['merge-base']) {
           // This is a fast-forward update to an existing branch.
           // These are safe.
