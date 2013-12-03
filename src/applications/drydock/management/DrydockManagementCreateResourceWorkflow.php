@@ -16,8 +16,8 @@ final class DrydockManagementCreateResourceWorkflow
           ),
           array(
             'name'      => 'blueprint',
-            'param'     => 'blueprint_type',
-            'help'      => 'Blueprint type.',
+            'param'     => 'blueprint_id',
+            'help'      => 'Blueprint ID.',
           ),
           array(
             'name'      => 'attributes',
@@ -36,10 +36,10 @@ final class DrydockManagementCreateResourceWorkflow
         "Specify a resource name with `--name`.");
     }
 
-    $blueprint_type = $args->getArg('blueprint');
-    if (!$blueprint_type) {
+    $blueprint_id = $args->getArg('blueprint');
+    if (!$blueprint_id) {
       throw new PhutilArgumentUsageException(
-        "Specify a blueprint type with `--blueprint`.");
+        "Specify a blueprint ID with `--blueprint`.");
     }
 
     $attributes = $args->getArg('attributes');
@@ -49,9 +49,15 @@ final class DrydockManagementCreateResourceWorkflow
       $attributes = $options->parse($attributes);
     }
 
+    $blueprint = id(new DrydockBlueprint())->load((int)$blueprint_id);
+    if (!$blueprint) {
+      throw new PhutilArgumentUsageException(
+        "Specified blueprint does not exist.");
+    }
+
     $resource = new DrydockResource();
-    $resource->setBlueprintClass($blueprint_type);
-    $resource->setType(id(new $blueprint_type())->getType());
+    $resource->setBlueprintPHID($blueprint->getPHID());
+    $resource->setType($blueprint->getImplementation()->getType());
     $resource->setName($resource_name);
     $resource->setStatus(DrydockResourceStatus::STATUS_OPEN);
     if ($attributes) {

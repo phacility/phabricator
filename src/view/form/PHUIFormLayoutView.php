@@ -14,6 +14,29 @@ final class PHUIFormLayoutView extends AphrontView {
     return $this;
   }
 
+  public function appendInstructions($text) {
+    return $this->appendChild(
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'aphront-form-instructions',
+        ),
+        $text));
+  }
+
+  public function appendRemarkupInstructions($remarkup) {
+    if ($this->getUser() === null) {
+      throw new Exception(
+        "Call `setUser` before appending Remarkup to PHUIFormLayoutView.");
+    }
+
+    return $this->appendInstructions(
+      PhabricatorMarkupEngine::renderOneObject(
+        id(new PhabricatorMarkupOneOff())->setContent($remarkup),
+        'default',
+        $this->getUser()));
+  }
+
   public function render() {
     $classes = array('phui-form-view');
 

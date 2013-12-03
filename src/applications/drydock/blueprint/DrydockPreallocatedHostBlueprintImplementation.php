@@ -1,9 +1,14 @@
 <?php
 
-final class DrydockPreallocatedHostBlueprint extends DrydockBlueprint {
+final class DrydockPreallocatedHostBlueprintImplementation
+  extends DrydockBlueprintImplementation {
 
   public function isEnabled() {
     return true;
+  }
+
+  public function getDescription() {
+    return pht('Leases out preallocated, remote hosts.');
   }
 
   public function canAllocateMoreResources(array $pool) {

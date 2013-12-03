@@ -1,9 +1,14 @@
 <?php
 
-final class DrydockLocalHostBlueprint extends DrydockBlueprint {
+final class DrydockLocalHostBlueprintImplementation
+  extends DrydockBlueprintImplementation {
 
   public function isEnabled() {
     return false;
+  }
+
+  public function getDescription() {
+    return pht('Allocates storage on the local host.');
   }
 
   public function canAllocateMoreResources(array $pool) {
