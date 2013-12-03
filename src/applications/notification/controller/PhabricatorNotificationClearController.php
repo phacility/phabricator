@@ -38,7 +38,7 @@ final class PhabricatorNotificationClearController
     }
 
     $dialog->addCancelButton('/notification/');
-    $dialog->addSubmitButton('Mark All Read');
+    $dialog->addSubmitButton(pht('Mark All Read'));
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
