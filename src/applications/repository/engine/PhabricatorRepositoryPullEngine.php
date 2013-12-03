@@ -311,9 +311,9 @@ final class PhabricatorRepositoryPullEngine
     $path = $repository->getLocalPath();
 
     if ($repository->isWorkingCopyBare()) {
-      $path .= 'hooks/pre-receive';
+      $path .= '/hooks/pre-receive';
     } else {
-      $path .= '.git/hooks/pre-receive';
+      $path .= '/.git/hooks/pre-receive';
     }
 
     $this->installHook($path);
@@ -390,7 +390,7 @@ final class PhabricatorRepositoryPullEngine
    */
   private function installMercurialHook() {
     $repository = $this->getRepository();
-    $path = $repository->getLocalPath().'.hg/hgrc';
+    $path = $repository->getLocalPath().'/.hg/hgrc';
 
     $root = dirname(phutil_get_library_root('phabricator'));
     $bin = $root.'/bin/commit-hook';
@@ -430,7 +430,7 @@ final class PhabricatorRepositoryPullEngine
    */
   private function installSubversionHook() {
     $repository = $this->getRepository();
-    $path = $repository->getLocalPath().'hooks/pre-commit';
+    $path = $repository->getLocalPath().'/hooks/pre-commit';
 
     $this->installHook($path);
   }
