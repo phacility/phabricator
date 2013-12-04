@@ -41,12 +41,12 @@ final class DrydockPreallocatedHostBlueprintImplementation
     // we have all the information we need.
     PhutilTypeSpec::checkMap(
       $resource->getAttributesForTypeSpec(
-        array('platform', 'host', 'port', 'user', 'path')),
+        array('platform', 'host', 'port', 'credential', 'path')),
       array(
         'platform' => 'string',
         'host' => 'string',
         'port' => 'string', // Value is a string from the command line
-        'user' => 'string',
+        'credential' => 'string',
         'path' => 'string',
       ));
     $v_platform = $resource->getAttribute('platform');
@@ -103,8 +103,7 @@ final class DrydockPreallocatedHostBlueprintImplementation
           ->setConfiguration(array(
             'host' => $resource->getAttribute('host'),
             'port' => $resource->getAttribute('port'),
-            'user' => $resource->getAttribute('user'),
-            'ssh-keyfile' => $resource->getAttribute('ssh-keyfile'),
+            'credential' => $resource->getAttribute('credential'),
             'platform' => $resource->getAttribute('platform')));
     }
 
