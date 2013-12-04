@@ -13,7 +13,6 @@
   bottom: 0px;
   min-width: 300px;
   width: auto;
-  background: #fff;
 }
 
 .device .conpherence-message-pane,
@@ -135,6 +134,9 @@
   border-top: 1px solid #d7d7d7;
   margin: 5px 15px;
   min-height: auto;
+}
+.device-phone .conpherence-message-pane .date-marker {
+  margin: 5px 0;
 }
 .conpherence-message-pane .date-marker .date {
   position: relative;

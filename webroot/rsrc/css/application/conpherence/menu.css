@@ -3,7 +3,12 @@
  */
 
 .conpherence-layout {
-  position: relative;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 44px;
+  background: #fff;
 }
 
 .conpherence-layout .conpherence-no-threads {
@@ -32,6 +37,8 @@
   position: absolute;
   overflow-x: hidden;
   overflow-y: auto;
+  top: 0;
+  bottom: 0;
 }
 
 .device-desktop .conpherence-layout .conpherence-menu-pane,
