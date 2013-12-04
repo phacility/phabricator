@@ -35,6 +35,10 @@ final class DrydockResource extends DrydockDAO
     return idx($this->attributes, $key, $default);
   }
 
+  public function getAttributesForTypeSpec(array $attribute_names) {
+    return array_select_keys($this->attributes, $attribute_names);
+  }
+
   public function setAttribute($key, $value) {
     $this->attributes[$key] = $value;
     return $this;
