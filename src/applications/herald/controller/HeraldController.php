@@ -39,7 +39,7 @@ abstract class HeraldController extends PhabricatorController {
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
     if ($for_app) {
-      $nav->addFilter('create', pht('Create Rule'));
+      $nav->addFilter('new', pht('Create Rule'));
     }
 
     id(new HeraldRuleSearchEngine())
