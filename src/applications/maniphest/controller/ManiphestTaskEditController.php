@@ -665,6 +665,14 @@ final class ManiphestTaskEditController extends ManiphestController {
     }
 
     $crumbs = $this->buildApplicationCrumbs();
+
+    if ($task->getID()) {
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName('T'.$task->getID())
+          ->setHref('/T'.$task->getID()));
+    }
+
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName($header_name));
