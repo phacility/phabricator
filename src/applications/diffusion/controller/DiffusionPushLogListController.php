@@ -41,6 +41,10 @@ final class DiffusionPushLogListController extends DiffusionController
           ),
           $callsign),
         $this->getHandle($log->getPusherPHID())->renderLink(),
+        $log->getRemoteAddress()
+          ? long2ip($log->getRemoteAddress())
+          : null,
+        $log->getRemoteProtocol(),
         $log->getRefType(),
         $log->getRefName(),
         $log->getRefOldShort(),
@@ -54,6 +58,8 @@ final class DiffusionPushLogListController extends DiffusionController
         array(
           pht('Repository'),
           pht('Pusher'),
+          pht('From'),
+          pht('Via'),
           pht('Type'),
           pht('Name'),
           pht('Old'),
@@ -62,6 +68,8 @@ final class DiffusionPushLogListController extends DiffusionController
         ))
       ->setColumnClasses(
         array(
+          '',
+          '',
           '',
           '',
           '',

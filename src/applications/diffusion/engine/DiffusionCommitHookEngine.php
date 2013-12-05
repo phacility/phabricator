@@ -7,12 +7,35 @@
  */
 final class DiffusionCommitHookEngine extends Phobject {
 
+  const ENV_USER = 'PHABRICATOR_USER';
+  const ENV_REMOTE_ADDRESS = 'PHABRICATOR_REMOTE_ADDRESS';
+  const ENV_REMOTE_PROTOCOL = 'PHABRICATOR_REMOTE_PROTOCOL';
+
   private $viewer;
   private $repository;
   private $stdin;
   private $subversionTransaction;
   private $subversionRepository;
+  private $remoteAddress;
+  private $remoteProtocol;
 
+  public function setRemoteProtocol($remote_protocol) {
+    $this->remoteProtocol = $remote_protocol;
+    return $this;
+  }
+
+  public function getRemoteProtocol() {
+    return $this->remoteProtocol;
+  }
+
+  public function setRemoteAddress($remote_address) {
+    $this->remoteAddress = $remote_address;
+    return $this;
+  }
+
+  public function getRemoteAddress() {
+    return $this->remoteAddress;
+  }
 
   public function setSubversionTransactionInfo($transaction, $repository) {
     $this->subversionTransaction = $transaction;
@@ -86,13 +109,21 @@ final class DiffusionCommitHookEngine extends Phobject {
     $transaction_key = PhabricatorHash::digestForIndex(
       Filesystem::readRandomBytes(64));
 
+    // If whatever we have here isn't a valid IPv4 address, just store `null`.
+    // Older versions of PHP return `-1` on failure instead of `false`.
+    $remote_address = $this->getRemoteAddress();
+    $remote_address = max(0, ip2long($remote_address));
+    $remote_address = nonempty($remote_address, null);
+
+    $remote_protocol = $this->getRemoteProtocol();
+
     $logs = array();
     foreach ($updates as $update) {
       $log = PhabricatorRepositoryPushLog::initializeNewLog($this->getViewer())
         ->setRepositoryPHID($this->getRepository()->getPHID())
         ->setEpoch(time())
-        ->setRemoteAddress(null) // TODO: Populate this where possible.
-        ->setRemoteProtocol(null) // TODO: Populate this where possible.
+        ->setRemoteAddress($remote_address)
+        ->setRemoteProtocol($remote_protocol)
         ->setTransactionKey($transaction_key)
         ->setRefType($update['type'])
         ->setRefNameHash(PhabricatorHash::digestForIndex($update['ref']))

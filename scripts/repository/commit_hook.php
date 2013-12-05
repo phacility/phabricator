@@ -30,9 +30,10 @@ $engine->setRepository($repository);
 // Figure out which user is writing the commit.
 
 if ($repository->isGit() || $repository->isHg()) {
-  $username = getenv('PHABRICATOR_USER');
+  $username = getenv(DiffusionCommitHookEngine::ENV_USER);
   if (!strlen($username)) {
-    throw new Exception(pht('usage: PHABRICATOR_USER should be defined!'));
+    throw new Exception(
+      pht('usage: %s should be defined!', DiffusionCommitHookEngine::ENV_USER));
   }
 
   // TODO: If this is a Mercurial repository, the hook we're responding to
@@ -41,8 +42,8 @@ if ($repository->isGit() || $repository->isHg()) {
 
 } else if ($repository->isSVN()) {
   // NOTE: In Subversion, the entire environment gets wiped so we can't read
-  // PHABRICATOR_USER. Instead, we've set "--tunnel-user" to specify the
-  // correct user; read this user out of the commit log.
+  // DiffusionCommitHookEngine::ENV_USER. Instead, we've set "--tunnel-user" to
+  // specify the correct user; read this user out of the commit log.
 
   if ($argc < 4) {
     throw new Exception(pht('usage: commit-hook <callsign> <repo> <txn>'));
@@ -85,6 +86,16 @@ if ($repository->isHg()) {
 }
 
 $engine->setStdin($stdin);
+
+$remote_address = getenv(DiffusionCommitHookEngine::ENV_REMOTE_ADDRESS);
+if (strlen($remote_address)) {
+  $engine->setRemoteAddress($remote_address);
+}
+
+$remote_protocol = getenv(DiffusionCommitHookEngine::ENV_REMOTE_PROTOCOL);
+if (strlen($remote_protocol)) {
+  $engine->setRemoteProtocol($remote_protocol);
+}
 
 try {
   $err = $engine->execute();
