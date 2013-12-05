@@ -370,12 +370,18 @@
   border-left-color: #d7d7d7;
 }
 
+.phui-object-item-disabled .phui-object-item-link,
+.phui-object-item-disabled .phui-object-item-link a {
+  color: {$lightgreytext};
+}
+
 .phui-object-item-disabled .phui-object-item-frame {
   border-color: #d7d7d7;
 }
 
 .phui-object-item-disabled .phui-object-item-objname {
   color: {$greytext};
+  text-decoration: line-through;
 }
 
 
