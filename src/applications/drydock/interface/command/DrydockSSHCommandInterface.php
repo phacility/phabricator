@@ -44,10 +44,8 @@ final class DrydockSSHCommandInterface extends DrydockCommandInterface {
       $full_command = 'C:\\Windows\\system32\\cmd.exe /C '.$full_command;
     }
 
-    // NOTE: The "-t -t" is for psuedo-tty allocation so we can "sudo" on some
-    // systems, but maybe more trouble than it's worth?
     return new ExecFuture(
-      'ssh -t -t -o StrictHostKeyChecking=no -p %s -i %P %P@%s -- %s',
+      'ssh -o StrictHostKeyChecking=no -p %s -i %P %P@%s -- %s',
       $this->getConfig('port'),
       $this->passphraseSSHKey->getKeyfileEnvelope(),
       $this->passphraseSSHKey->getUsernameEnvelope(),
