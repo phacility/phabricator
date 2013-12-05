@@ -84,8 +84,11 @@ final class PhabricatorSettingsPanelSSHKeys
 
           $recognized_keys = array(
             'ssh-dsa',
+            'ssh-dss',
             'ssh-rsa',
             'ecdsa-sha2-nistp256',
+            'ecdsa-sha2-nistp384',
+            'ecdsa-sha2-nistp521',
           );
 
           if (!in_array($type, $recognized_keys)) {
