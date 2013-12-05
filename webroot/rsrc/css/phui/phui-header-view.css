@@ -44,6 +44,10 @@ body .phui-header-shell.phui-bleed-header
   position: relative;
 }
 
+.phui-header-view a {
+  color: {$darkbluetext};
+}
+
 .phui-header-view .phui-header-action-links {
   position: absolute;
   top: 5px;
