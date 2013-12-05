@@ -106,6 +106,19 @@ final class HarbormasterBuild extends HarbormasterDAO
     return $log;
   }
 
+  public function createArtifact(
+    HarbormasterBuildTarget $build_target,
+    $artifact_key,
+    $artifact_type) {
+
+    $artifact =
+      HarbormasterBuildArtifact::initializeNewBuildArtifact($build_target);
+    $artifact->setArtifactKey($artifact_key);
+    $artifact->setArtifactType($artifact_type);
+    $artifact->save();
+    return $artifact;
+  }
+
   /**
    * Checks for and handles build cancellation.  If this method returns
    * true, the caller should stop any current operations and return control

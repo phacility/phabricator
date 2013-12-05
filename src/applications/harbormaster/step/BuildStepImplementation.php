@@ -57,13 +57,14 @@ abstract class BuildStepImplementation {
   }
 
   /**
-   * Loads the settings for this build step implementation from a build target.
+   * Loads the settings for this build step implementation from a build
+   * step or target.
    */
-  public final function loadSettings(HarbormasterBuildTarget $build_target) {
+  public final function loadSettings($build_object) {
     $this->settings = array();
     $this->validateSettingDefinitions();
     foreach ($this->getSettingDefinitions() as $name => $opt) {
-      $this->settings[$name] = $build_target->getDetail($name);
+      $this->settings[$name] = $build_object->getDetail($name);
     }
     return $this->settings;
   }
@@ -93,5 +94,58 @@ abstract class BuildStepImplementation {
    */
   public function getSettingRemarkupInstructions() {
     return null;
+  }
+
+  /**
+   * Return the name of artifacts produced by this command.
+   *
+   * Something like:
+   *
+   *   return array(
+   *     'some_name_input_by_user' => 'host');
+   *
+   * Future steps will calculate all available artifact mappings
+   * before them and filter on the type.
+   *
+   * @return array The mappings of artifact names to their types.
+   */
+  public function getArtifactMappings() {
+    return array();
+  }
+
+  /**
+   * Returns a list of all artifacts made available by previous build steps.
+   */
+  public static function getAvailableArtifacts(
+    HarbormasterBuildStep $current_build_step,
+    $artifact_type) {
+
+    $build_plan_phid = $current_build_step->getBuildPlanPHID();
+
+    $build_plan = id(new HarbormasterBuildPlanQuery())
+      ->withPHIDs(array($build_plan_phid))
+      ->executeOne();
+
+    $build_steps = $build_plan->loadOrderedBuildSteps();
+
+    $previous_implementations = array();
+    for ($i = 0; $i < count($build_steps); $i++) {
+      if ($build_steps[$i]->getPHID() === $current_build_step->getPHID()) {
+        break;
+      }
+      $previous_implementations[$i] = $build_steps[$i]->getStepImplementation();
+    }
+
+    $artifact_arrays = mpull($previous_implementations, 'getArtifactMappings');
+    $artifacts = array();
+    foreach ($artifact_arrays as $array) {
+      foreach ($array as $name => $type) {
+        if ($type !== $artifact_type) {
+          continue;
+        }
+        $artifacts[$name] = $type;
+      }
+    }
+    return $artifacts;
   }
 }

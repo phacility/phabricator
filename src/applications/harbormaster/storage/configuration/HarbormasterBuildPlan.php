@@ -36,6 +36,19 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
     return $this->assertAttached($this->buildSteps);
   }
 
+  /**
+   * Returns a standard, ordered list of build steps for this build plan.
+   *
+   * This method should be used to load build steps for a given build plan
+   * so that the ordering is consistent.
+   */
+  public function loadOrderedBuildSteps() {
+    return id(new HarbormasterBuildStepQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withBuildPlanPHIDs(array($this->getPHID()))
+      ->execute();
+  }
+
 
 /* -(  PhabricatorSubscribableInterface  )----------------------------------- */
 

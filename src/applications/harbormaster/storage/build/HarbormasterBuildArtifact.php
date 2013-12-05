@@ -3,11 +3,17 @@
 final class HarbormasterBuildArtifact extends HarbormasterDAO
   implements PhabricatorPolicyInterface {
 
-  protected $buildablePHID;
+  protected $buildTargetPHID;
   protected $artifactType;
   protected $artifactIndex;
   protected $artifactKey;
   protected $artifactData = array();
+
+  public static function initializeNewBuildArtifact(
+    HarbormasterBuildTarget $build_target) {
+    return id(new HarbormasterBuildArtifact())
+      ->setBuildTargetPHID($build_target->getPHID());
+  }
 
   public function getConfiguration() {
     return array(
@@ -27,7 +33,8 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
   }
 
   public function setArtifactKey($key) {
-    $this->artifactIndex = PhabricatorHash::digestForIndex($key);
+    $this->artifactIndex =
+      PhabricatorHash::digestForIndex($this->buildTargetPHID.$key);
     $this->artifactKey = $key;
     return $this;
   }

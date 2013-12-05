@@ -775,6 +775,7 @@ phutil_register_library_map(array(
     'JavelinUIExample' => 'applications/uiexample/examples/JavelinUIExample.php',
     'JavelinViewExample' => 'applications/uiexample/examples/JavelinViewExample.php',
     'JavelinViewExampleServerView' => 'applications/uiexample/examples/JavelinViewExampleServerView.php',
+    'LeaseHostBuildStepImplementation' => 'applications/harbormaster/step/LeaseHostBuildStepImplementation.php',
     'LegalpadConstants' => 'applications/legalpad/constants/LegalpadConstants.php',
     'LegalpadController' => 'applications/legalpad/controller/LegalpadController.php',
     'LegalpadDAO' => 'applications/legalpad/storage/LegalpadDAO.php',
@@ -3154,6 +3155,7 @@ phutil_register_library_map(array(
     'JavelinUIExample' => 'PhabricatorUIExample',
     'JavelinViewExample' => 'PhabricatorUIExample',
     'JavelinViewExampleServerView' => 'AphrontView',
+    'LeaseHostBuildStepImplementation' => 'BuildStepImplementation',
     'LegalpadController' => 'PhabricatorController',
     'LegalpadDAO' => 'PhabricatorLiskDAO',
     'LegalpadDocument' =>

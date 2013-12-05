@@ -38,10 +38,7 @@ final class HarbormasterBuildWorker extends PhabricatorWorker {
       $buildable = $build->getBuildable();
       $plan = $build->getBuildPlan();
 
-      $steps = id(new HarbormasterBuildStepQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withBuildPlanPHIDs(array($plan->getPHID()))
-        ->execute();
+      $steps = $plan->loadOrderedBuildSteps();
 
       // Perform the build.
       foreach ($steps as $step) {
