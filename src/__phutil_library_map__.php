@@ -102,6 +102,7 @@ phutil_register_library_map(array(
     'CelerityResourceTransformerTestCase' => 'infrastructure/celerity/__tests__/CelerityResourceTransformerTestCase.php',
     'CeleritySpriteGenerator' => 'infrastructure/celerity/CeleritySpriteGenerator.php',
     'CelerityStaticResourceResponse' => 'infrastructure/celerity/CelerityStaticResourceResponse.php',
+    'CommandBuildStepImplementation' => 'applications/harbormaster/step/CommandBuildStepImplementation.php',
     'ConduitAPIMethod' => 'applications/conduit/method/ConduitAPIMethod.php',
     'ConduitAPIRequest' => 'applications/conduit/protocol/ConduitAPIRequest.php',
     'ConduitAPIResponse' => 'applications/conduit/protocol/ConduitAPIResponse.php',
@@ -2322,7 +2323,6 @@ phutil_register_library_map(array(
     'ReleephStatusFieldSpecification' => 'applications/releeph/field/specification/ReleephStatusFieldSpecification.php',
     'ReleephSummaryFieldSpecification' => 'applications/releeph/field/specification/ReleephSummaryFieldSpecification.php',
     'ReleephUserView' => 'applications/releeph/view/user/ReleephUserView.php',
-    'RemoteCommandBuildStepImplementation' => 'applications/harbormaster/step/RemoteCommandBuildStepImplementation.php',
     'ShellLogView' => 'applications/harbormaster/view/ShellLogView.php',
     'SleepBuildStepImplementation' => 'applications/harbormaster/step/SleepBuildStepImplementation.php',
     'SlowvoteEmbedView' => 'applications/slowvote/view/SlowvoteEmbedView.php',
@@ -2442,6 +2442,7 @@ phutil_register_library_map(array(
     'CelerityResourceController' => 'PhabricatorController',
     'CelerityResourceGraph' => 'AbstractDirectedGraph',
     'CelerityResourceTransformerTestCase' => 'PhabricatorTestCase',
+    'CommandBuildStepImplementation' => 'VariableBuildStepImplementation',
     'ConduitAPIMethod' =>
     array(
       0 => 'Phobject',
@@ -4950,7 +4951,6 @@ phutil_register_library_map(array(
     'ReleephStatusFieldSpecification' => 'ReleephFieldSpecification',
     'ReleephSummaryFieldSpecification' => 'ReleephFieldSpecification',
     'ReleephUserView' => 'AphrontView',
-    'RemoteCommandBuildStepImplementation' => 'VariableBuildStepImplementation',
     'ShellLogView' => 'AphrontView',
     'SleepBuildStepImplementation' => 'BuildStepImplementation',
     'SlowvoteEmbedView' => 'AphrontView',

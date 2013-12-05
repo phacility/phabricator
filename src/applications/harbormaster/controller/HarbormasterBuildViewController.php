@@ -73,9 +73,9 @@ final class HarbormasterBuildViewController
         ->setHeader($header)
         ->addPropertyList($properties);
 
+      $targets[] = $this->buildArtifacts($build_target);
       $targets[] = $this->buildLog($build, $build_target);
     }
-
 
     return $this->buildApplicationPage(
       array(
@@ -87,6 +87,35 @@ final class HarbormasterBuildViewController
         'title' => $title,
         'device' => true,
       ));
+  }
+
+  private function buildArtifacts(HarbormasterBuildTarget $build_target) {
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $artifacts = id(new HarbormasterBuildArtifactQuery())
+      ->setViewer($viewer)
+      ->withBuildTargetPHIDs(array($build_target->getPHID()))
+      ->execute();
+
+    if (count($artifacts) === 0) {
+      return null;
+    }
+
+    $list = new PHUIObjectItemListView();
+
+    foreach ($artifacts as $artifact) {
+      $list->addItem($artifact->getObjectItemView($viewer));
+    }
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Build Artifacts'))
+      ->setUser($viewer);
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeader($header);
+
+    return array($box, $list);
   }
 
   private function buildLog(

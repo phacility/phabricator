@@ -1,14 +1,14 @@
 <?php
 
-final class RemoteCommandBuildStepImplementation
+final class CommandBuildStepImplementation
   extends VariableBuildStepImplementation {
 
   public function getName() {
-    return pht('Run Remote Command');
+    return pht('Run Command');
   }
 
   public function getGenericDescription() {
-    return pht('Run a command on another machine.');
+    return pht('Run a command on Drydock host.');
   }
 
   public function getDescription() {
@@ -17,7 +17,7 @@ final class RemoteCommandBuildStepImplementation
     return pht(
       'Run \'%s\' on \'%s\'.',
       $settings['command'],
-      $settings['sshhost']);
+      $settings['hostartifact']);
   }
 
   public function execute(
@@ -32,21 +32,34 @@ final class RemoteCommandBuildStepImplementation
       $settings['command'],
       $variables);
 
-    $future = null;
-    if (empty($settings['sshkey'])) {
-      $future = new ExecFuture(
-        'ssh -o "StrictHostKeyChecking no" -p %s %s %s',
-        $settings['sshport'],
-        $settings['sshuser'].'@'.$settings['sshhost'],
-        $command);
-    } else {
-      $future = new ExecFuture(
-        'ssh -o "StrictHostKeyChecking no" -p %s -i %s %s %s',
-        $settings['sshport'],
-        $settings['sshkey'],
-        $settings['sshuser'].'@'.$settings['sshhost'],
-        $command);
+    $artifact = id(new HarbormasterBuildArtifactQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withArtifactKeys(
+        $build->getPHID(),
+        array($settings['hostartifact']))
+      ->executeOne();
+    if ($artifact === null) {
+      throw new Exception("Associated Drydock host artifact not found!");
     }
+
+    $data = $artifact->getArtifactData();
+
+    // FIXME: Is there a better way of doing this?
+    $lease = id(new DrydockLease())->load(
+      $data['drydock-lease']);
+    if ($lease === null) {
+      throw new Exception("Associated Drydock lease not found!");
+    }
+    $resource = id(new DrydockResource())->load(
+      $lease->getResourceID());
+    if ($resource === null) {
+      throw new Exception("Associated Drydock resource not found!");
+    }
+    $lease->attachResource($resource);
+
+    $interface = $lease->getInterface('command');
+
+    $future = $interface->getExecFuture('%C', $command);
 
     $log_stdout = $build->createLog($build_target, "remote", "stdout");
     $log_stderr = $build->createLog($build_target, "remote", "stderr");
@@ -98,25 +111,12 @@ final class RemoteCommandBuildStepImplementation
     if ($settings['command'] === null || !is_string($settings['command'])) {
       return false;
     }
-    if ($settings['sshhost'] === null || !is_string($settings['sshhost'])) {
-      return false;
-    }
-    if ($settings['sshuser'] === null || !is_string($settings['sshuser'])) {
-      return false;
-    }
-    if ($settings['sshkey'] === null || !is_string($settings['sshkey'])) {
-      return false;
-    }
-    if ($settings['sshport'] === null || !is_int($settings['sshport']) ||
-        $settings['sshport'] <= 0 || $settings['sshport'] >= 65536) {
+    if ($settings['hostartifact'] === null ||
+      !is_string($settings['hostartifact'])) {
       return false;
     }
 
-    $whitelist = PhabricatorEnv::getEnvConfig(
-      'harbormaster.temporary.hosts.whitelist');
-    if (!in_array($settings['sshhost'], $whitelist)) {
-      return false;
-    }
+    // TODO: Check if the host artifact is provided by previous build steps.
 
     return true;
   }
@@ -127,25 +127,13 @@ final class RemoteCommandBuildStepImplementation
         'name' => 'Command',
         'description' => 'The command to execute on the remote machine.',
         'type' => BuildStepImplementation::SETTING_TYPE_STRING),
-      'sshhost' => array(
-        'name' => 'SSH Host',
-        'description' => 'The SSH host that the command will be run on.',
-        'type' => BuildStepImplementation::SETTING_TYPE_STRING),
-      'sshport' => array(
-        'name' => 'SSH Port',
-        'description' => 'The SSH port to connect to.',
-        'type' => BuildStepImplementation::SETTING_TYPE_INTEGER,
-        'default' => 22), // TODO: 'default' doesn't do anything yet..
-      'sshuser' => array(
-        'name' => 'SSH Username',
-        'description' => 'The SSH username to use.',
-        'type' => BuildStepImplementation::SETTING_TYPE_STRING),
-      'sshkey' => array(
-        'name' => 'SSH Identity File',
+      'hostartifact' => array(
+        'name' => 'Host Artifact',
         'description' =>
-          'The path to the SSH identity file (private key) '.
-          'on the local web server.',
-        'type' => BuildStepImplementation::SETTING_TYPE_STRING));
+          'The host artifact that determines what machine the command '.
+          'will run on.',
+        'type' => BuildStepImplementation::SETTING_TYPE_ARTIFACT,
+        'artifact_type' => HarbormasterBuildArtifact::TYPE_HOST));
   }
 
 }

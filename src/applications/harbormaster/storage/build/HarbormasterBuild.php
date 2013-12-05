@@ -113,7 +113,7 @@ final class HarbormasterBuild extends HarbormasterDAO
 
     $artifact =
       HarbormasterBuildArtifact::initializeNewBuildArtifact($build_target);
-    $artifact->setArtifactKey($artifact_key);
+    $artifact->setArtifactKey($this->getPHID(), $artifact_key);
     $artifact->setArtifactType($artifact_type);
     $artifact->save();
     return $artifact;
@@ -172,7 +172,7 @@ final class HarbormasterBuild extends HarbormasterDAO
     return $results;
   }
 
-  public function getAvailableBuildVariables() {
+  public static function getAvailableBuildVariables() {
     return array(
       'buildable.diff' =>
         pht('The differential diff ID, if applicable.'),

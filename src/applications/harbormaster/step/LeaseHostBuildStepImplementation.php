@@ -15,8 +15,10 @@ final class LeaseHostBuildStepImplementation
     $settings = $this->getSettings();
 
     return pht(
-      'Obtain a lease on a Drydock host whose platform is \'%s\'.',
-      $settings['platform']);
+      'Obtain a lease on a Drydock host whose platform is \'%s\' and store '.
+      'the resulting lease in a host artifact called \'%s\'.',
+      $settings['platform'],
+      $settings['name']);
   }
 
   public function execute(
@@ -41,10 +43,17 @@ final class LeaseHostBuildStepImplementation
     $artifact = $build->createArtifact(
       $build_target,
       $settings['name'],
-      'host');
+      HarbormasterBuildArtifact::TYPE_HOST);
     $artifact->setArtifactData(array(
       'drydock-lease' => $lease->getID()));
     $artifact->save();
+  }
+
+  public function getArtifactMappings() {
+    $settings = $this->getSettings();
+
+    return array(
+      $settings['name'] => 'host');
   }
 
   public function validateSettings() {

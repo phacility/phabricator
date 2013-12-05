@@ -7,6 +7,7 @@ abstract class BuildStepImplementation {
   const SETTING_TYPE_STRING = 'string';
   const SETTING_TYPE_INTEGER = 'integer';
   const SETTING_TYPE_BOOLEAN = 'boolean';
+  const SETTING_TYPE_ARTIFACT = 'artifact';
 
   public static function getImplementations() {
     $symbols = id(new PhutilSymbolLoader())
@@ -117,23 +118,18 @@ abstract class BuildStepImplementation {
    * Returns a list of all artifacts made available by previous build steps.
    */
   public static function getAvailableArtifacts(
+    HarbormasterBuildPlan $build_plan,
     HarbormasterBuildStep $current_build_step,
     $artifact_type) {
-
-    $build_plan_phid = $current_build_step->getBuildPlanPHID();
-
-    $build_plan = id(new HarbormasterBuildPlanQuery())
-      ->withPHIDs(array($build_plan_phid))
-      ->executeOne();
 
     $build_steps = $build_plan->loadOrderedBuildSteps();
 
     $previous_implementations = array();
-    for ($i = 0; $i < count($build_steps); $i++) {
-      if ($build_steps[$i]->getPHID() === $current_build_step->getPHID()) {
+    foreach ($build_steps as $build_step) {
+      if ($build_step->getPHID() === $current_build_step->getPHID()) {
         break;
       }
-      $previous_implementations[$i] = $build_steps[$i]->getStepImplementation();
+      $previous_implementations[] = $build_step->getStepImplementation();
     }
 
     $artifact_arrays = mpull($previous_implementations, 'getArtifactMappings');

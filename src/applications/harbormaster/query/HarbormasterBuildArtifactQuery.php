@@ -7,6 +7,7 @@ final class HarbormasterBuildArtifactQuery
   private $buildTargetPHIDs;
   private $artifactTypes;
   private $artifactKeys;
+  private $keyBuildPHID;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -23,7 +24,8 @@ final class HarbormasterBuildArtifactQuery
     return $this;
   }
 
-  public function withArtifactKeys(array $artifact_keys) {
+  public function withArtifactKeys($build_phid, array $artifact_keys) {
+    $this->keyBuildPHID = $build_phid;
     $this->artifactKeys = $artifact_keys;
     return $this;
   }
@@ -95,7 +97,8 @@ final class HarbormasterBuildArtifactQuery
     if ($this->artifactKeys) {
       $indexes = array();
       foreach ($this->artifactKeys as $key) {
-        $indexes[] = PhabricatorHash::digestForIndex($key);
+        $indexes[] = PhabricatorHash::digestForIndex(
+          $this->keyBuildPHID.$key);
       }
 
       $where[] = qsprintf(

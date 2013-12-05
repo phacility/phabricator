@@ -37,10 +37,11 @@ abstract class VariableBuildStepImplementation extends BuildStepImplementation {
   }
 
   public function getSettingRemarkupInstructions() {
+    $variables = HarbormasterBuild::getAvailableBuildVariables();
     $text = '';
     $text .= pht('The following variables are available: ')."\n";
     $text .= "\n";
-    foreach ($this->getAvailableVariables() as $name => $desc) {
+    foreach ($variables as $name => $desc) {
       $text .= '  - `'.$name.'`: '.$desc."\n";
     }
     $text .= "\n";
