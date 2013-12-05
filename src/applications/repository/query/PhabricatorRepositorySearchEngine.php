@@ -10,6 +10,7 @@ final class PhabricatorRepositorySearchEngine
     $saved->setParameter('status', $request->getStr('status'));
     $saved->setParameter('order', $request->getStr('order'));
     $saved->setParameter('types', $request->getArr('types'));
+    $saved->setParameter('name', $request->getStr('name'));
 
     return $saved;
   }
@@ -43,6 +44,11 @@ final class PhabricatorRepositorySearchEngine
       $query->withTypes($types);
     }
 
+    $name = $saved->getParameter('name');
+    if (strlen($name)) {
+      $query->withNameContains($name);
+    }
+
     return $query;
   }
 
@@ -53,6 +59,7 @@ final class PhabricatorRepositorySearchEngine
     $callsigns = $saved_query->getParameter('callsigns', array());
     $types = $saved_query->getParameter('types', array());
     $types = array_fuse($types);
+    $name = $saved_query->getParameter('name');
 
     $form
       ->appendChild(
@@ -60,6 +67,11 @@ final class PhabricatorRepositorySearchEngine
           ->setName('callsigns')
           ->setLabel(pht('Callsigns'))
           ->setValue(implode(', ', $callsigns)))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName('name')
+          ->setLabel(pht('Name Contains'))
+          ->setValue($name))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setName('status')

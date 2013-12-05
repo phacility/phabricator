@@ -18,6 +18,7 @@ a navigational command into the box and press return.
   - **r** - Jump to Diffusion.
   - **rXYZ** - Jump to Diffusion Repository XYZ.
   - **rXYZabcdef** - Jump to Diffusion Commit rXYZabcdef.
+  - **r <name>** - Search for repositories by name.
   - **u** - Jump to People
   - **u username** - Jump to username's Profile
   - **p** - Jump to Project
