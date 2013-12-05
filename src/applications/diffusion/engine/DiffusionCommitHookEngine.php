@@ -18,6 +18,7 @@ final class DiffusionCommitHookEngine extends Phobject {
   private $subversionRepository;
   private $remoteAddress;
   private $remoteProtocol;
+  private $transactionKey;
 
   public function setRemoteProtocol($remote_protocol) {
     $this->remoteProtocol = $remote_protocol;
@@ -35,6 +36,23 @@ final class DiffusionCommitHookEngine extends Phobject {
 
   public function getRemoteAddress() {
     return $this->remoteAddress;
+  }
+
+  private function getRemoteAddressForLog() {
+    // If whatever we have here isn't a valid IPv4 address, just store `null`.
+    // Older versions of PHP return `-1` on failure instead of `false`.
+    $remote_address = $this->getRemoteAddress();
+    $remote_address = max(0, ip2long($remote_address));
+    $remote_address = nonempty($remote_address, null);
+    return $remote_address;
+  }
+
+  private function getTransactionKey() {
+    if (!$this->transactionKey) {
+      $entropy = Filesystem::readRandomBytes(64);
+      $this->transactionKey = PhabricatorHash::digestForIndex($entropy);
+    }
+    return $this->transactionKey;
   }
 
   public function setSubversionTransactionInfo($transaction, $repository) {
@@ -89,6 +107,18 @@ final class DiffusionCommitHookEngine extends Phobject {
     return $err;
   }
 
+  private function newPushLog() {
+    return PhabricatorRepositoryPushLog::initializeNewLog($this->getViewer())
+      ->setRepositoryPHID($this->getRepository()->getPHID())
+      ->setEpoch(time())
+      ->setRemoteAddress($this->getRemoteAddressForLog())
+      ->setRemoteProtocol($this->getRemoteProtocol())
+      ->setTransactionKey($this->getTransactionKey())
+      ->setRejectCode(PhabricatorRepositoryPushLog::REJECT_ACCEPT)
+      ->setRejectDetails(null);
+  }
+
+
   /**
    * @task git
    */
@@ -106,34 +136,17 @@ final class DiffusionCommitHookEngine extends Phobject {
     // TODO: Now, do content checks.
 
     // TODO: Generalize this; just getting some data in the database for now.
-    $transaction_key = PhabricatorHash::digestForIndex(
-      Filesystem::readRandomBytes(64));
-
-    // If whatever we have here isn't a valid IPv4 address, just store `null`.
-    // Older versions of PHP return `-1` on failure instead of `false`.
-    $remote_address = $this->getRemoteAddress();
-    $remote_address = max(0, ip2long($remote_address));
-    $remote_address = nonempty($remote_address, null);
-
-    $remote_protocol = $this->getRemoteProtocol();
 
     $logs = array();
     foreach ($updates as $update) {
-      $log = PhabricatorRepositoryPushLog::initializeNewLog($this->getViewer())
-        ->setRepositoryPHID($this->getRepository()->getPHID())
-        ->setEpoch(time())
-        ->setRemoteAddress($remote_address)
-        ->setRemoteProtocol($remote_protocol)
-        ->setTransactionKey($transaction_key)
+      $log = $this->newPushLog()
         ->setRefType($update['type'])
         ->setRefNameHash(PhabricatorHash::digestForIndex($update['ref']))
         ->setRefNameRaw($update['ref'])
         ->setRefNameEncoding(phutil_is_utf8($update['ref']) ? 'utf8' : null)
         ->setRefOld($update['old'])
         ->setRefNew($update['new'])
-        ->setMergeBase(idx($update, 'merge-base'))
-        ->setRejectCode(PhabricatorRepositoryPushLog::REJECT_ACCEPT)
-        ->setRejectDetails(null);
+        ->setMergeBase(idx($update, 'merge-base'));
 
       $flags = 0;
       if ($update['operation'] == 'create') {
@@ -148,6 +161,18 @@ final class DiffusionCommitHookEngine extends Phobject {
       }
 
       $log->setChangeFlags($flags);
+      $logs[] = $log;
+    }
+
+    // Now, build logs for all the commits.
+    // TODO: Generalize this, too.
+    $commits = array_mergev(ipull($updates, 'commits'));
+    $commits = array_unique($commits);
+    foreach ($commits as $commit) {
+      $log = $this->newPushLog()
+        ->setRefType(PhabricatorRepositoryPushLog::REFTYPE_COMMIT)
+        ->setRefNew($commit)
+        ->setChangeFlags(PhabricatorRepositoryPushLog::CHANGEFLAG_ADD);
       $logs[] = $log;
     }
 

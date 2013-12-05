@@ -6,6 +6,8 @@ final class PhabricatorRepositoryPushLogQuery
   private $ids;
   private $repositoryPHIDs;
   private $pusherPHIDs;
+  private $refTypes;
+  private $newRefs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -19,6 +21,16 @@ final class PhabricatorRepositoryPushLogQuery
 
   public function withPusherPHIDs(array $pusher_phids) {
     $this->pusherPHIDs = $pusher_phids;
+    return $this;
+  }
+
+  public function withRefTypes(array $ref_types) {
+    $this->refTypes = $ref_types;
+    return $this;
+  }
+
+  public function withNewRefs(array $new_refs) {
+    $this->newRefs = $new_refs;
     return $this;
   }
 
@@ -84,6 +96,20 @@ final class PhabricatorRepositoryPushLogQuery
         $conn_r,
         'pusherPHID in (%Ls)',
         $this->pusherPHIDs);
+    }
+
+    if ($this->refTypes) {
+      $where[] = qsprintf(
+        $conn_r,
+        'refType IN (%Ls)',
+        $this->refTypes);
+    }
+
+    if ($this->newRefs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'refNew IN (%Ls)',
+        $this->newRefs);
     }
 
     $where[] = $this->buildPagingClause($conn_r);
