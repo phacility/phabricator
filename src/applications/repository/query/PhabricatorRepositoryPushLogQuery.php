@@ -5,6 +5,7 @@ final class PhabricatorRepositoryPushLogQuery
 
   private $ids;
   private $repositoryPHIDs;
+  private $pusherPHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -13,6 +14,11 @@ final class PhabricatorRepositoryPushLogQuery
 
   public function withRepositoryPHIDs(array $repository_phids) {
     $this->repositoryPHIDs = $repository_phids;
+    return $this;
+  }
+
+  public function withPusherPHIDs(array $pusher_phids) {
+    $this->pusherPHIDs = $pusher_phids;
     return $this;
   }
 
@@ -71,6 +77,13 @@ final class PhabricatorRepositoryPushLogQuery
         $conn_r,
         'repositoryPHID IN (%Ls)',
         $this->repositoryPHIDs);
+    }
+
+    if ($this->pusherPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'pusherPHID in (%Ls)',
+        $this->pusherPHIDs);
     }
 
     $where[] = $this->buildPagingClause($conn_r);
