@@ -21,17 +21,17 @@ final class HarbormasterHTTPRequestBuildStepImplementation
 
   public function execute(
     HarbormasterBuild $build,
-    HarbormasterBuildStep $build_step) {
+    HarbormasterBuildTarget $build_target) {
 
     $settings = $this->getSettings();
-    $variables = $this->retrieveVariablesFromBuild($build);
+    $variables = $build_target->getVariables();
 
     $uri = $this->mergeVariables(
       'vurisprintf',
       $settings['uri'],
       $variables);
 
-    $log_body = $build->createLog($build_step, $uri, 'http-body');
+    $log_body = $build->createLog($build_target, $uri, 'http-body');
     $start = $log_body->start();
 
     list($status, $body, $headers) = id(new HTTPSFuture($uri))

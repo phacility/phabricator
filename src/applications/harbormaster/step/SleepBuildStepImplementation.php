@@ -18,7 +18,7 @@ final class SleepBuildStepImplementation extends BuildStepImplementation {
 
   public function execute(
     HarbormasterBuild $build,
-    HarbormasterBuildStep $build_step) {
+    HarbormasterBuildTarget $build_target) {
 
     $settings = $this->getSettings();
 

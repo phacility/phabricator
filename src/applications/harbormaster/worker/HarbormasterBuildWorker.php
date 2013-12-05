@@ -45,12 +45,21 @@ final class HarbormasterBuildWorker extends PhabricatorWorker {
 
       // Perform the build.
       foreach ($steps as $step) {
-        $implementation = $step->getStepImplementation();
+
+        // Create the target at this step.
+        // TODO: Support variable artifacts.
+        $target = HarbormasterBuildTarget::initializeNewBuildTarget(
+          $build,
+          $step,
+          $build->retrieveVariablesFromBuild());
+        $target->save();
+
+        $implementation = $target->getImplementation();
         if (!$implementation->validateSettings()) {
           $build->setBuildStatus(HarbormasterBuild::STATUS_ERROR);
           break;
         }
-        $implementation->execute($build, $step);
+        $implementation->execute($build, $target);
         if ($build->getBuildStatus() !== HarbormasterBuild::STATUS_BUILDING) {
           break;
         }

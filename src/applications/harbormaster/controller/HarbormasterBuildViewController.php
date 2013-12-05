@@ -41,13 +41,47 @@ final class HarbormasterBuildViewController
       id(new PhabricatorCrumbView())
         ->setName($title));
 
-    $logs = $this->buildLog($build);
+    $build_targets = id(new HarbormasterBuildTargetQuery())
+      ->setViewer($viewer)
+      ->withBuildPHIDs(array($build->getPHID()))
+      ->execute();
+
+    $targets = array();
+    foreach ($build_targets as $build_target) {
+      $header = id(new PHUIHeaderView())
+        ->setHeader(pht('Build Target %d', $build_target->getID()))
+        ->setUser($viewer);
+      $properties = new PHUIPropertyListView();
+
+      $details = $build_target->getDetails();
+      if ($details) {
+        $properties->addSectionHeader(pht('Configuration Details'));
+        foreach ($details as $key => $value) {
+          $properties->addProperty($key, $value);
+        }
+      }
+
+      $variables = $build_target->getVariables();
+      if ($variables) {
+        $properties->addSectionHeader(pht('Variables'));
+        foreach ($variables as $key => $value) {
+          $properties->addProperty($key, $value);
+        }
+      }
+
+      $targets[] = id(new PHUIObjectBoxView())
+        ->setHeader($header)
+        ->addPropertyList($properties);
+
+      $targets[] = $this->buildLog($build, $build_target);
+    }
+
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $box,
-        $logs
+        $targets
       ),
       array(
         'title' => $title,
@@ -55,14 +89,17 @@ final class HarbormasterBuildViewController
       ));
   }
 
-  private function buildLog(HarbormasterBuild $build) {
+  private function buildLog(
+    HarbormasterBuild $build,
+    HarbormasterBuildTarget $build_target) {
+
     $request = $this->getRequest();
     $viewer = $request->getUser();
     $limit = $request->getInt('l', 25);
 
     $logs = id(new HarbormasterBuildLogQuery())
       ->setViewer($viewer)
-      ->withBuildPHIDs(array($build->getPHID()))
+      ->withBuildTargetPHIDs(array($build_target->getPHID()))
       ->execute();
 
     $log_boxes = array();

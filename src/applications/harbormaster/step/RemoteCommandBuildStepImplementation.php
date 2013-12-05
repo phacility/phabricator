@@ -22,10 +22,10 @@ final class RemoteCommandBuildStepImplementation
 
   public function execute(
     HarbormasterBuild $build,
-    HarbormasterBuildStep $build_step) {
+    HarbormasterBuildTarget $build_target) {
 
     $settings = $this->getSettings();
-    $variables = $this->retrieveVariablesFromBuild($build);
+    $variables = $build_target->getVariables();
 
     $command = $this->mergeVariables(
       'vcsprintf',
@@ -48,8 +48,8 @@ final class RemoteCommandBuildStepImplementation
         $command);
     }
 
-    $log_stdout = $build->createLog($build_step, "remote", "stdout");
-    $log_stderr = $build->createLog($build_step, "remote", "stderr");
+    $log_stdout = $build->createLog($build_target, "remote", "stdout");
+    $log_stderr = $build->createLog($build_target, "remote", "stderr");
 
     $start_stdout = $log_stdout->start();
     $start_stderr = $log_stderr->start();

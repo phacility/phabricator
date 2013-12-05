@@ -677,6 +677,7 @@ phutil_register_library_map(array(
     'FileReplyHandler' => 'applications/files/mail/FileReplyHandler.php',
     'HarbormasterBuild' => 'applications/harbormaster/storage/build/HarbormasterBuild.php',
     'HarbormasterBuildArtifact' => 'applications/harbormaster/storage/build/HarbormasterBuildArtifact.php',
+    'HarbormasterBuildArtifactQuery' => 'applications/harbormaster/query/HarbormasterBuildArtifactQuery.php',
     'HarbormasterBuildCancelController' => 'applications/harbormaster/controller/HarbormasterBuildCancelController.php',
     'HarbormasterBuildItem' => 'applications/harbormaster/storage/build/HarbormasterBuildItem.php',
     'HarbormasterBuildItemQuery' => 'applications/harbormaster/query/HarbormasterBuildItemQuery.php',
@@ -698,7 +699,6 @@ phutil_register_library_map(array(
     'HarbormasterBuildWorker' => 'applications/harbormaster/worker/HarbormasterBuildWorker.php',
     'HarbormasterBuildable' => 'applications/harbormaster/storage/HarbormasterBuildable.php',
     'HarbormasterBuildableApplyController' => 'applications/harbormaster/controller/HarbormasterBuildableApplyController.php',
-    'HarbormasterBuildableArtifactQuery' => 'applications/harbormaster/query/HarbormasterBuildableArtifactQuery.php',
     'HarbormasterBuildableEditController' => 'applications/harbormaster/controller/HarbormasterBuildableEditController.php',
     'HarbormasterBuildableListController' => 'applications/harbormaster/controller/HarbormasterBuildableListController.php',
     'HarbormasterBuildableQuery' => 'applications/harbormaster/query/HarbormasterBuildableQuery.php',
@@ -3023,6 +3023,7 @@ phutil_register_library_map(array(
       0 => 'HarbormasterDAO',
       1 => 'PhabricatorPolicyInterface',
     ),
+    'HarbormasterBuildArtifactQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'HarbormasterBuildCancelController' => 'HarbormasterController',
     'HarbormasterBuildItem' => 'HarbormasterDAO',
     'HarbormasterBuildItemQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
@@ -3051,7 +3052,11 @@ phutil_register_library_map(array(
       1 => 'PhabricatorPolicyInterface',
     ),
     'HarbormasterBuildStepQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
-    'HarbormasterBuildTarget' => 'HarbormasterDAO',
+    'HarbormasterBuildTarget' =>
+    array(
+      0 => 'HarbormasterDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
     'HarbormasterBuildTargetQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'HarbormasterBuildViewController' => 'HarbormasterController',
     'HarbormasterBuildWorker' => 'PhabricatorWorker',
@@ -3061,7 +3066,6 @@ phutil_register_library_map(array(
       1 => 'PhabricatorPolicyInterface',
     ),
     'HarbormasterBuildableApplyController' => 'HarbormasterController',
-    'HarbormasterBuildableArtifactQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'HarbormasterBuildableEditController' => 'HarbormasterController',
     'HarbormasterBuildableListController' =>
     array(

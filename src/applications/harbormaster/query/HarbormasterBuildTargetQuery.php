@@ -5,6 +5,7 @@ final class HarbormasterBuildTargetQuery
 
   private $ids;
   private $phids;
+  private $buildPHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -13,6 +14,11 @@ final class HarbormasterBuildTargetQuery
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  public function withBuildPHIDs(array $build_phids) {
+    $this->buildPHIDs = $build_phids;
     return $this;
   }
 
@@ -48,9 +54,41 @@ final class HarbormasterBuildTargetQuery
         $this->phids);
     }
 
+    if ($this->buildPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'buildPHID in (%Ls)',
+        $this->buildPHIDs);
+    }
+
     $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
+  }
+
+  protected function willFilterPage(array $page) {
+    $builds = array();
+
+    $build_phids = array_filter(mpull($page, 'getBuildPHID'));
+    if ($build_phids) {
+      $builds = id(new PhabricatorObjectQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs($build_phids)
+        ->setParentQuery($this)
+        ->execute();
+      $builds = mpull($builds, null, 'getPHID');
+    }
+
+    foreach ($page as $key => $build_target) {
+      $build_phid = $build_target->getBuildPHID();
+      if (empty($builds[$build_phid])) {
+        unset($page[$key]);
+        continue;
+      }
+      $build_target->attachBuild($builds[$build_phid]);
+    }
+
+    return $page;
   }
 
   public function getQueryApplicationClass() {

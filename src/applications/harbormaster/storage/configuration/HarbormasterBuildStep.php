@@ -41,26 +41,6 @@ final class HarbormasterBuildStep extends HarbormasterDAO
     return $this;
   }
 
-  public function getStepImplementation() {
-    if ($this->className === null) {
-      throw new Exception("No implementation set for the given step.");
-    }
-
-    static $implementations = null;
-    if ($implementations === null) {
-      $implementations = BuildStepImplementation::getImplementations();
-    }
-
-    $class = $this->className;
-    if (!in_array($class, $implementations)) {
-      throw new Exception(
-        "Class name '".$class."' does not extend BuildStepImplementation.");
-    }
-    $implementation = newv($class, array());
-    $implementation->loadSettings($this);
-    return $implementation;
-  }
-
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

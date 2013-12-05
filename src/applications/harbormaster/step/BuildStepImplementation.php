@@ -36,11 +36,11 @@ abstract class BuildStepImplementation {
   }
 
   /**
-   * Run the build step against the specified build.
+   * Run the build target against the specified build.
    */
   abstract public function execute(
     HarbormasterBuild $build,
-    HarbormasterBuildStep $build_step);
+    HarbormasterBuildTarget $build_target);
 
   /**
    * Gets the settings for this build step.
@@ -57,13 +57,13 @@ abstract class BuildStepImplementation {
   }
 
   /**
-   * Loads the settings for this build step implementation from the build step.
+   * Loads the settings for this build step implementation from a build target.
    */
-  public final function loadSettings(HarbormasterBuildStep $build_step) {
+  public final function loadSettings(HarbormasterBuildTarget $build_target) {
     $this->settings = array();
     $this->validateSettingDefinitions();
     foreach ($this->getSettingDefinitions() as $name => $opt) {
-      $this->settings[$name] = $build_step->getDetail($name);
+      $this->settings[$name] = $build_target->getDetail($name);
     }
     return $this->settings;
   }

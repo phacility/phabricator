@@ -95,11 +95,11 @@ final class HarbormasterBuild extends HarbormasterDAO
   }
 
   public function createLog(
-    HarbormasterBuildStep $build_step,
+    HarbormasterBuildTarget $build_target,
     $log_source,
     $log_type) {
 
-    $log = HarbormasterBuildLog::initializeNewBuildLog($this, $build_step);
+    $log = HarbormasterBuildLog::initializeNewBuildLog($build_target);
     $log->setLogSource($log_source);
     $log->setLogType($log_type);
     $log->save();
@@ -123,6 +123,57 @@ final class HarbormasterBuild extends HarbormasterDAO
       return true;
     }
     return false;
+  }
+
+  public function retrieveVariablesFromBuild() {
+    $results = array(
+      'buildable.diff' => null,
+      'buildable.revision' => null,
+      'buildable.commit' => null,
+      'repository.callsign' => null,
+      'repository.vcs' => null,
+      'repository.uri' => null,
+      'step.timestamp' => null,
+      'build.id' => null);
+
+    $buildable = $this->getBuildable();
+    $object = $buildable->getBuildableObject();
+
+    $repo = null;
+    if ($object instanceof DifferentialDiff) {
+      $results['buildable.diff'] = $object->getID();
+      $revision = $object->getRevision();
+      $results['buildable.revision'] = $revision->getID();
+      $repo = $revision->getRepository();
+    } else if ($object instanceof PhabricatorRepositoryCommit) {
+      $results['buildable.commit'] = $object->getCommitIdentifier();
+      $repo = $object->getRepository();
+    }
+
+    $results['repository.callsign'] = $repo->getCallsign();
+    $results['repository.vcs'] = $repo->getVersionControlSystem();
+    $results['repository.uri'] = $repo->getPublicRemoteURI();
+    $results['step.timestamp'] = time();
+    $results['build.id'] = $this->getID();
+
+    return $results;
+  }
+
+  public function getAvailableBuildVariables() {
+    return array(
+      'buildable.diff' =>
+        pht('The differential diff ID, if applicable.'),
+      'buildable.revision' =>
+        pht('The differential revision ID, if applicable.'),
+      'buildable.commit' => pht('The commit identifier, if applicable.'),
+      'repository.callsign' =>
+        pht('The callsign of the repository in Phabricator.'),
+      'repository.vcs' =>
+        pht('The version control system, either "svn", "hg" or "git".'),
+      'repository.uri' =>
+        pht('The URI to clone or checkout the repository from.'),
+      'step.timestamp' => pht('The current UNIX timestamp.'),
+      'build.id' => pht('The ID of the current build.'));
   }
 
 
