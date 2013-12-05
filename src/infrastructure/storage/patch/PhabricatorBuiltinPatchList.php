@@ -1800,6 +1800,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20131205.buildtargets.sql'),
       ),
+      '20131204.pushlog.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131204.pushlog.sql'),
+      ),
     );
   }
 }

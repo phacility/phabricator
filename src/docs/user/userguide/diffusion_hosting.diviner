@@ -31,8 +31,10 @@ performant, but HTTP is easier to set up and supports anonymous access.
 | Reads | Yes | Yes |
 | Writes | Yes | Yes |
 | Authenticated Access | Yes | Yes |
+| Push Logs | Yes | Yes |
+| Commit Hooks | Yes | Yes |
 | Anonymous Access | No | Yes |
-| Security | Better (Asymetric Key) | Okay (Password) |
+| Security | Better (Asymmetric Key) | Okay (Password) |
 | Performance | Better | Okay |
 | Setup | Hard | Easy |
 

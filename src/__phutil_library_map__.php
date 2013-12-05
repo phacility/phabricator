@@ -522,6 +522,7 @@ phutil_register_library_map(array(
     'DiffusionPathQuery' => 'applications/diffusion/query/DiffusionPathQuery.php',
     'DiffusionPathQueryTestCase' => 'applications/diffusion/query/pathid/__tests__/DiffusionPathQueryTestCase.php',
     'DiffusionPathValidateController' => 'applications/diffusion/controller/DiffusionPathValidateController.php',
+    'DiffusionPushLogListController' => 'applications/diffusion/controller/DiffusionPushLogListController.php',
     'DiffusionQuery' => 'applications/diffusion/query/DiffusionQuery.php',
     'DiffusionRawDiffQuery' => 'applications/diffusion/query/rawdiff/DiffusionRawDiffQuery.php',
     'DiffusionRemarkupRule' => 'applications/diffusion/remarkup/DiffusionRemarkupRule.php',
@@ -1793,6 +1794,9 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryPHIDTypeRepository' => 'applications/repository/phid/PhabricatorRepositoryPHIDTypeRepository.php',
     'PhabricatorRepositoryPullEngine' => 'applications/repository/engine/PhabricatorRepositoryPullEngine.php',
     'PhabricatorRepositoryPullLocalDaemon' => 'applications/repository/daemon/PhabricatorRepositoryPullLocalDaemon.php',
+    'PhabricatorRepositoryPushLog' => 'applications/repository/storage/PhabricatorRepositoryPushLog.php',
+    'PhabricatorRepositoryPushLogQuery' => 'applications/repository/query/PhabricatorRepositoryPushLogQuery.php',
+    'PhabricatorRepositoryPushLogSearchEngine' => 'applications/repository/query/PhabricatorRepositoryPushLogSearchEngine.php',
     'PhabricatorRepositoryQuery' => 'applications/repository/query/PhabricatorRepositoryQuery.php',
     'PhabricatorRepositorySearchEngine' => 'applications/repository/query/PhabricatorRepositorySearchEngine.php',
     'PhabricatorRepositoryShortcut' => 'applications/repository/storage/PhabricatorRepositoryShortcut.php',
@@ -2848,6 +2852,11 @@ phutil_register_library_map(array(
     'DiffusionPathCompleteController' => 'DiffusionController',
     'DiffusionPathQueryTestCase' => 'PhabricatorTestCase',
     'DiffusionPathValidateController' => 'DiffusionController',
+    'DiffusionPushLogListController' =>
+    array(
+      0 => 'DiffusionController',
+      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
+    ),
     'DiffusionQuery' => 'PhabricatorQuery',
     'DiffusionRawDiffQuery' => 'DiffusionQuery',
     'DiffusionRemarkupRule' => 'PhabricatorRemarkupRuleObject',
@@ -4309,6 +4318,13 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryPHIDTypeRepository' => 'PhabricatorPHIDType',
     'PhabricatorRepositoryPullEngine' => 'PhabricatorRepositoryEngine',
     'PhabricatorRepositoryPullLocalDaemon' => 'PhabricatorDaemon',
+    'PhabricatorRepositoryPushLog' =>
+    array(
+      0 => 'PhabricatorRepositoryDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
+    'PhabricatorRepositoryPushLogQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'PhabricatorRepositoryPushLogSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorRepositoryQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorRepositorySearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorRepositoryShortcut' => 'PhabricatorRepositoryDAO',

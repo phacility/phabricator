@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @task git  Git Hooks
+ * @task hg   Mercurial Hooks
+ * @task svn  Subversion Hooks
+ */
 final class DiffusionCommitHookEngine extends Phobject {
 
   private $viewer;
@@ -76,6 +81,48 @@ final class DiffusionCommitHookEngine extends Phobject {
     $updates = $this->findGitNewCommits($updates);
 
     // TODO: Now, do content checks.
+
+    // TODO: Generalize this; just getting some data in the database for now.
+    $transaction_key = PhabricatorHash::digestForIndex(
+      Filesystem::readRandomBytes(64));
+
+    $logs = array();
+    foreach ($updates as $update) {
+      $log = PhabricatorRepositoryPushLog::initializeNewLog($this->getViewer())
+        ->setRepositoryPHID($this->getRepository()->getPHID())
+        ->setEpoch(time())
+        ->setRemoteAddress(null) // TODO: Populate this where possible.
+        ->setRemoteProtocol(null) // TODO: Populate this where possible.
+        ->setTransactionKey($transaction_key)
+        ->setRefType($update['type'])
+        ->setRefNameHash(PhabricatorHash::digestForIndex($update['ref']))
+        ->setRefNameRaw($update['ref'])
+        ->setRefNameEncoding(phutil_is_utf8($update['ref']) ? 'utf8' : null)
+        ->setRefOld($update['old'])
+        ->setRefNew($update['new'])
+        ->setMergeBase(idx($update, 'merge-base'))
+        ->setRejectCode(PhabricatorRepositoryPushLog::REJECT_ACCEPT)
+        ->setRejectDetails(null);
+
+      $flags = 0;
+      if ($update['operation'] == 'create') {
+        $flags = $flags | PhabricatorRepositoryPushLog::CHANGEFLAG_ADD;
+      } else if ($update['operation'] == 'delete') {
+        $flags = $flags | PhabricatorRepositoryPushLog::CHANGEFLAG_DELETE;
+      } else {
+        // TODO: This isn't correct; these might be APPEND or REWRITE, and
+        // if they're REWRITE they might be DANGEROUS. Fix this when this
+        // gets generalized.
+        $flags = $flags | PhabricatorRepositoryPushLog::CHANGEFLAG_APPEND;
+      }
+
+      $log->setChangeFlags($flags);
+      $logs[] = $log;
+    }
+
+    foreach ($logs as $log) {
+      $log->save();
+    }
 
     return 0;
   }
