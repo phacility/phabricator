@@ -2,7 +2,7 @@
 
 final class DrydockBlueprintScopeGuard {
 
-  public function __construct(DrydockBlueprint $blueprint) {
+  public function __construct(DrydockBlueprintImplementation $blueprint) {
     $this->blueprint = $blueprint;
   }
 

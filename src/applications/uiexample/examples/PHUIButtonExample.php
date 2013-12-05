@@ -119,8 +119,25 @@ final class PHUIButtonExample extends PhabricatorUIExample {
         ->addClass(PHUI::MARGIN_SMALL_RIGHT);
     }
 
+    $column2 = array();
+    $icons = array(
+      'Subscribe' => 'meta-mta',
+      'Edit' => 'edit');
+    foreach ($icons as $text => $icon) {
+      $image = id(new PHUIIconView())
+          ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+          ->setSpriteIcon($icon);
+      $column2[] = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setColor(PHUIButtonView::SIMPLE)
+        ->setIcon($image)
+        ->setText($text)
+        ->addClass(PHUI::MARGIN_SMALL_RIGHT);
+    }
+
     $layout3 = id(new AphrontMultiColumnView())
       ->addColumn($column)
+      ->addColumn($column2)
       ->setFluidLayout(true)
       ->setGutter(AphrontMultiColumnView::GUTTER_MEDIUM);
 

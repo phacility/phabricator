@@ -577,6 +577,25 @@ final class DiffusionRepositoryEditMainController
         $this->getRepositoryControllerURI($repository, 'edit/hosting/'));
     $view->addAction($edit);
 
+    if ($repository->canAllowDangerousChanges()) {
+      if ($repository->shouldAllowDangerousChanges()) {
+        $changes = id(new PhabricatorActionView())
+          ->setIcon('blame')
+          ->setName(pht('Prevent Dangerous Changes'))
+          ->setHref(
+            $this->getRepositoryControllerURI($repository, 'edit/dangerous/'))
+          ->setWorkflow(true);
+      } else {
+        $changes = id(new PhabricatorActionView())
+          ->setIcon('warning')
+          ->setName(pht('Allow Dangerous Changes'))
+          ->setHref(
+            $this->getRepositoryControllerURI($repository, 'edit/dangerous/'))
+          ->setWorkflow(true);
+      }
+      $view->addAction($changes);
+    }
+
     return $view;
   }
 
@@ -610,6 +629,18 @@ final class DiffusionRepositoryEditMainController
         array(),
         PhabricatorRepository::getProtocolAvailabilityName(
           $repository->getServeOverSSH())));
+
+    if ($repository->canAllowDangerousChanges()) {
+      if ($repository->shouldAllowDangerousChanges()) {
+        $description = pht('Allowed');
+      } else {
+        $description = pht('Not Allowed');
+      }
+
+      $view->addProperty(
+        pht('Dangerous Changes'),
+        $description);
+    }
 
     return $view;
   }

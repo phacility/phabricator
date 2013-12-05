@@ -6,7 +6,7 @@ VCSUSER="vcs-user"
 # NOTE: Replace this with the path to your Phabricator directory.
 ROOT="/path/to/phabricator"
 
-if [ "$1" -ne "$VCSUSER" ];
+if [ "$1" != "$VCSUSER" ];
 then
   exit 1
 fi

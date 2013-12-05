@@ -3,15 +3,13 @@
 final class HarbormasterBuildLog extends HarbormasterDAO
   implements PhabricatorPolicyInterface {
 
-  protected $buildPHID;
-  protected $buildStepPHID;
+  protected $buildTargetPHID;
   protected $logSource;
   protected $logType;
   protected $duration;
   protected $live;
 
-  private $build = self::ATTACHABLE;
-  private $buildStep = self::ATTACHABLE;
+  private $buildTarget = self::ATTACHABLE;
 
   const CHUNK_BYTE_LIMIT = 102400;
 
@@ -21,12 +19,10 @@ final class HarbormasterBuildLog extends HarbormasterDAO
   const ENCODING_TEXT = 'text';
 
   public static function initializeNewBuildLog(
-    HarbormasterBuild $build,
-    HarbormasterBuildStep $build_step) {
+    HarbormasterBuildTarget $build_target) {
 
     return id(new HarbormasterBuildLog())
-      ->setBuildPHID($build->getPHID())
-      ->setBuildStepPHID($build_step->getPHID())
+      ->setBuildTargetPHID($build_target->getPHID())
       ->setDuration(null)
       ->setLive(0);
   }
@@ -42,27 +38,17 @@ final class HarbormasterBuildLog extends HarbormasterDAO
       HarbormasterPHIDTypeBuildLog::TYPECONST);
   }
 
-  public function attachBuild(HarbormasterBuild $build) {
-    $this->build = $build;
+  public function attachBuildTarget(HarbormasterBuildTarget $build_target) {
+    $this->buildTarget = $build_target;
     return $this;
   }
 
-  public function getBuild() {
-    return $this->assertAttached($this->build);
+  public function getBuildTarget() {
+    return $this->assertAttached($this->buildTarget);
   }
 
   public function getName() {
     return pht('Build Log');
-  }
-
-  public function attachBuildStep(
-    HarbormasterBuildStep $build_step = null) {
-    $this->buildStep = $build_step;
-    return $this;
-  }
-
-  public function getBuildStep() {
-    return $this->assertAttached($this->buildStep);
   }
 
   public function start() {
@@ -189,18 +175,18 @@ final class HarbormasterBuildLog extends HarbormasterDAO
   }
 
   public function getPolicy($capability) {
-    return $this->getBuild()->getPolicy($capability);
+    return $this->getBuildTarget()->getPolicy($capability);
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return $this->getBuild()->hasAutomaticCapability(
+    return $this->getBuildTarget()->hasAutomaticCapability(
       $capability,
       $viewer);
   }
 
   public function describeAutomaticCapability($capability) {
     return pht(
-      'Users must be able to see a build to view it\'s build log.');
+      'Users must be able to see a build target to view it\'s build log.');
   }
 
 

@@ -5,10 +5,11 @@
  * @task resource   Resource Allocation
  * @task log        Logging
  */
-abstract class DrydockBlueprint {
+abstract class DrydockBlueprintImplementation {
 
   private $activeResource;
   private $activeLease;
+  private $instance;
 
   abstract public function getType();
   abstract public function getInterface(
@@ -17,6 +18,8 @@ abstract class DrydockBlueprint {
     $type);
 
   abstract public function isEnabled();
+
+  abstract public function getDescription();
 
   public function getBlueprintClass() {
     return get_class($this);
@@ -35,6 +38,20 @@ abstract class DrydockBlueprint {
     }
 
     return $lease;
+  }
+
+  protected function getInstance() {
+    if (!$this->instance) {
+      throw new Exception(
+        "Attach the blueprint instance to the implementation.");
+    }
+
+    return $this->instance;
+  }
+
+  public function attachInstance(DrydockBlueprint $instance) {
+    $this->instance = $instance;
+    return $this;
   }
 
 
@@ -343,13 +360,13 @@ abstract class DrydockBlueprint {
   }
 
 
-  public static function getAllBlueprints() {
+  public static function getAllBlueprintImplementations() {
     static $list = null;
 
     if ($list === null) {
       $blueprints = id(new PhutilSymbolLoader())
         ->setType('class')
-        ->setAncestorClass('DrydockBlueprint')
+        ->setAncestorClass('DrydockBlueprintImplementation')
         ->setConcreteOnly(true)
         ->selectAndLoadSymbols();
       $list = ipull($blueprints, 'name', 'name');
@@ -361,16 +378,17 @@ abstract class DrydockBlueprint {
     return $list;
   }
 
-  public static function getAllBlueprintsForResource($type) {
+  public static function getAllBlueprintImplementationsForResource($type) {
     static $groups = null;
     if ($groups === null) {
-      $groups = mgroup(self::getAllBlueprints(), 'getType');
+      $groups = mgroup(self::getAllBlueprintImplementations(), 'getType');
     }
     return idx($groups, $type, array());
   }
 
   protected function newResourceTemplate($name) {
     $resource = new DrydockResource();
+    $resource->setBlueprintPHID($this->getInstance()->getPHID());
     $resource->setBlueprintClass($this->getBlueprintClass());
     $resource->setType($this->getType());
     $resource->setStatus(DrydockResourceStatus::STATUS_PENDING);

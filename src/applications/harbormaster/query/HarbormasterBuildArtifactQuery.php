@@ -1,20 +1,21 @@
 <?php
 
-final class HarbormasterBuildableArtifactQuery
+final class HarbormasterBuildArtifactQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
-  private $buildablePHIDs;
+  private $buildTargetPHIDs;
   private $artifactTypes;
   private $artifactKeys;
+  private $keyBuildPHID;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
   }
 
-  public function withBuildablePHIDs(array $buildable_phids) {
-    $this->buildablePHIDs = $buildable_phids;
+  public function withBuildTargetPHIDs(array $build_target_phids) {
+    $this->buildTargetPHIDs = $build_target_phids;
     return $this;
   }
 
@@ -23,7 +24,8 @@ final class HarbormasterBuildableArtifactQuery
     return $this;
   }
 
-  public function withArtifactKeys(array $artifact_keys) {
+  public function withArtifactKeys($build_phid, array $artifact_keys) {
+    $this->keyBuildPHID = $build_phid;
     $this->artifactKeys = $artifact_keys;
     return $this;
   }
@@ -44,25 +46,25 @@ final class HarbormasterBuildableArtifactQuery
   }
 
   protected function willFilterPage(array $page) {
-    $buildables = array();
+    $build_targets = array();
 
-    $buildable_phids = array_filter(mpull($page, 'getBuildablePHID'));
-    if ($buildable_phids) {
-      $buildables = id(new PhabricatorObjectQuery())
+    $build_target_phids = array_filter(mpull($page, 'getBuildTargetPHID'));
+    if ($build_target_phids) {
+      $build_targets = id(new HarbormasterBuildTargetQuery())
         ->setViewer($this->getViewer())
-        ->withPHIDs($buildable_phids)
+        ->withPHIDs($build_target_phids)
         ->setParentQuery($this)
         ->execute();
-      $buildables = mpull($buildables, null, 'getPHID');
+      $build_targets = mpull($build_targets, null, 'getPHID');
     }
 
-    foreach ($page as $key => $artifact) {
-      $buildable_phid = $artifact->getBuildablePHID();
-      if (empty($buildables[$buildable_phid])) {
+    foreach ($page as $key => $build_log) {
+      $build_target_phid = $build_log->getBuildTargetPHID();
+      if (empty($build_targets[$build_target_phid])) {
         unset($page[$key]);
         continue;
       }
-      $artifact->attachBuildable($buildables[$buildable_phid]);
+      $build_log->attachBuildTarget($build_targets[$build_target_phid]);
     }
 
     return $page;
@@ -78,11 +80,11 @@ final class HarbormasterBuildableArtifactQuery
         $this->ids);
     }
 
-    if ($this->buildablePHIDs) {
+    if ($this->buildTargetPHIDs) {
       $where[] = qsprintf(
         $conn_r,
-        'buildablePHID IN (%Ls)',
-        $this->buildablePHIDs);
+        'buildTargetPHID IN (%Ls)',
+        $this->buildTargetPHIDs);
     }
 
     if ($this->artifactTypes) {
@@ -95,7 +97,8 @@ final class HarbormasterBuildableArtifactQuery
     if ($this->artifactKeys) {
       $indexes = array();
       foreach ($this->artifactKeys as $key) {
-        $indexes[] = PhabricatorHash::digestForIndex($key);
+        $indexes[] = PhabricatorHash::digestForIndex(
+          $this->keyBuildPHID.$key);
       }
 
       $where[] = qsprintf(

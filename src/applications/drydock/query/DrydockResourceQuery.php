@@ -6,6 +6,7 @@ final class DrydockResourceQuery
   private $ids;
   private $statuses;
   private $types;
+  private $blueprintPHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -19,6 +20,11 @@ final class DrydockResourceQuery
 
   public function withStatuses(array $statuses) {
     $this->statuses = $statuses;
+    return $this;
+  }
+
+  public function withBlueprintPHIDs(array $blueprint_phids) {
+    $this->blueprintPHIDs = $blueprint_phids;
     return $this;
   }
 
@@ -61,6 +67,13 @@ final class DrydockResourceQuery
         $conn_r,
         'status IN (%Ls)',
         $this->statuses);
+    }
+
+    if ($this->blueprintPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'blueprintPHID IN (%Ls)',
+        $this->blueprintPHIDs);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

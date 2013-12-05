@@ -70,6 +70,7 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
             'basic/' => 'DiffusionRepositoryEditBasicController',
             'encoding/' => 'DiffusionRepositoryEditEncodingController',
             'activate/' => 'DiffusionRepositoryEditActivateController',
+            'dangerous/' => 'DiffusionRepositoryEditDangerousController',
             'policy/' => 'DiffusionRepositoryEditPolicyController',
             'branches/' => 'DiffusionRepositoryEditBranchesController',
             'subversion/' => 'DiffusionRepositoryEditSubversionController',

@@ -40,12 +40,16 @@ final class DrydockLeaseQuery extends PhabricatorOffsetPagedQuery {
         'id IN (%Ld)',
         mpull($leases, 'getResourceID'));
 
-      foreach ($leases as $lease) {
+      foreach ($leases as $key => $lease) {
         if ($lease->getResourceID()) {
           $resource = idx($resources, $lease->getResourceID());
           if ($resource) {
             $lease->attachResource($resource);
+          } else {
+            unset($leases[$key]);
           }
+        } else {
+          unset($leases[$key]);
         }
       }
     }

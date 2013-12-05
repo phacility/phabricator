@@ -5,7 +5,7 @@ final class DrydockResource extends DrydockDAO
 
   protected $id;
   protected $phid;
-  protected $blueprintClass;
+  protected $blueprintPHID;
   protected $status;
 
   protected $type;
@@ -35,6 +35,10 @@ final class DrydockResource extends DrydockDAO
     return idx($this->attributes, $key, $default);
   }
 
+  public function getAttributesForTypeSpec(array $attribute_names) {
+    return array_select_keys($this->attributes, $attribute_names);
+  }
+
   public function setAttribute($key, $value) {
     $this->attributes[$key] = $value;
     return $this;
@@ -50,7 +54,9 @@ final class DrydockResource extends DrydockDAO
 
   public function getBlueprint() {
     if (empty($this->blueprint)) {
-      $this->blueprint = newv($this->blueprintClass, array());
+      $blueprint = id(new DrydockBlueprint())
+        ->loadOneWhere('phid = %s', $this->blueprintPHID);
+      $this->blueprint = $blueprint->getImplementation();
     }
     return $this->blueprint;
   }
@@ -76,7 +82,7 @@ final class DrydockResource extends DrydockDAO
             $lease->setStatus(DrydockLeaseStatus::STATUS_RELEASED);
             break;
         }
-        DrydockBlueprint::writeLog($this, $lease, $message);
+        DrydockBlueprintImplementation::writeLog($this, $lease, $message);
         $lease->save();
       }
 

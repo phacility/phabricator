@@ -1788,6 +1788,18 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20131122.repomirror.sql'),
       ),
+      '20131123.drydockblueprintpolicy.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131123.drydockblueprintpolicy.sql'),
+      ),
+      '20131129.drydockresourceblueprint.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131129.drydockresourceblueprint.sql'),
+      ),
+      '20131205.buildtargets.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131205.buildtargets.sql'),
+      ),
     );
   }
 }

@@ -911,6 +911,22 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return false;
   }
 
+  public function canAllowDangerousChanges() {
+    if (!$this->isHosted()) {
+      return false;
+    }
+
+    if ($this->isGit()) {
+      return true;
+    }
+
+    return false;
+  }
+
+  public function shouldAllowDangerousChanges() {
+    return (bool)$this->getDetail('allow-dangerous-changes');
+  }
+
   public function writeStatusMessage(
     $status_type,
     $status_code,

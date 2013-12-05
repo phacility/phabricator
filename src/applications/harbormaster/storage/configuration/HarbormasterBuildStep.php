@@ -61,7 +61,6 @@ final class HarbormasterBuildStep extends HarbormasterDAO
     return $implementation;
   }
 
-
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 

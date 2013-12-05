@@ -10,6 +10,11 @@
   padding: 20px;
 }
 
+.device-desktop .phui-object-box .phui-object-list-cards {
+  padding: 12px;
+  background-color: #E5E8EE;
+}
+
 .phui-object-item-list-view + .phui-object-item-list-view {
   padding-top: 0;
 }
@@ -370,12 +375,18 @@
   border-left-color: #d7d7d7;
 }
 
+.phui-object-item-disabled .phui-object-item-link,
+.phui-object-item-disabled .phui-object-item-link a {
+  color: {$lightgreytext};
+}
+
 .phui-object-item-disabled .phui-object-item-frame {
   border-color: #d7d7d7;
 }
 
 .phui-object-item-disabled .phui-object-item-objname {
   color: {$greytext};
+  text-decoration: line-through;
 }
 
 

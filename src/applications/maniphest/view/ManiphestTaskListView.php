@@ -59,11 +59,7 @@ final class ManiphestTaskListView extends ManiphestView {
 
       $status = $task->getStatus();
       if ($status != ManiphestTaskStatus::STATUS_OPEN) {
-        $item->addFootIcon(
-          ($status == ManiphestTaskStatus::STATUS_CLOSED_RESOLVED)
-            ? 'enable-white'
-            : 'delete-white',
-          idx($status_map, $status, 'Unknown'));
+        $item->setDisabled(true);
       }
 
       $item->setBarColor(idx($color_map, $task->getPriority(), 'grey'));

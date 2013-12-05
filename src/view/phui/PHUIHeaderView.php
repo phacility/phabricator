@@ -13,6 +13,7 @@ final class PHUIHeaderView extends AphrontView {
   private $noBackground;
   private $bleedHeader;
   private $properties = array();
+  private $actionLinks = array();
   private $policyObject;
 
   public function setHeader($header) {
@@ -62,6 +63,11 @@ final class PHUIHeaderView extends AphrontView {
 
   public function addProperty($property, $value) {
     $this->properties[$property] = $value;
+    return $this;
+  }
+
+  public function addActionLink(PHUIButtonView $button) {
+    $this->actionLinks[] = $button;
     return $this;
   }
 
@@ -182,6 +188,22 @@ final class PHUIHeaderView extends AphrontView {
           'class' => 'phui-header-subheader',
         ),
         $property_list);
+    }
+
+    if ($this->actionLinks) {
+      $actions = array();
+      foreach ($this->actionLinks as $button) {
+        $button->setColor(PHUIButtonView::SIMPLE);
+        $button->addClass(PHUI::MARGIN_SMALL_LEFT);
+        $button->addClass('phui-header-action-link');
+        $actions[] = $button;
+      }
+      $header[] = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-header-action-links',
+        ),
+        $actions);
     }
 
     return phutil_tag(

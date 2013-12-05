@@ -130,6 +130,7 @@ final class PHUIObjectItemListExample extends PhabricatorUIExample {
       id(new PHUIObjectItemView())
         ->setHeader(pht('House of Cards'))
         ->setBarColor('yellow')
+        ->setDisabled(true)
         ->addByline(pht('Owner: %s', $owner)));
 
     $author = phutil_tag('a', array('href' => '#'), pht('agoat'));

@@ -2,41 +2,6 @@
 
 abstract class VariableBuildStepImplementation extends BuildStepImplementation {
 
-  public function retrieveVariablesFromBuild(HarbormasterBuild $build) {
-    $results = array(
-      'buildable.diff' => null,
-      'buildable.revision' => null,
-      'buildable.commit' => null,
-      'repository.callsign' => null,
-      'repository.vcs' => null,
-      'repository.uri' => null,
-      'step.timestamp' => null,
-      'build.id' => null);
-
-    $buildable = $build->getBuildable();
-    $object = $buildable->getBuildableObject();
-
-    $repo = null;
-    if ($object instanceof DifferentialDiff) {
-      $results['buildable.diff'] = $object->getID();
-      $revision = $object->getRevision();
-      $results['buildable.revision'] = $revision->getID();
-      $repo = $revision->getRepository();
-    } else if ($object instanceof PhabricatorRepositoryCommit) {
-      $results['buildable.commit'] = $object->getCommitIdentifier();
-      $repo = $object->getRepository();
-    }
-
-    $results['repository.callsign'] = $repo->getCallsign();
-    $results['repository.vcs'] = $repo->getVersionControlSystem();
-    $results['repository.uri'] = $repo->getPublicRemoteURI();
-    $results['step.timestamp'] = time();
-    $results['build.id'] = $build->getID();
-
-    return $results;
-  }
-
-
   /**
    * Convert a user-provided string with variables in it, like:
    *
@@ -71,29 +36,12 @@ abstract class VariableBuildStepImplementation extends BuildStepImplementation {
     return call_user_func($function, $pattern, $argv);
   }
 
-
-  public function getAvailableVariables() {
-    return array(
-      'buildable.diff' =>
-        pht('The differential diff ID, if applicable.'),
-      'buildable.revision' =>
-        pht('The differential revision ID, if applicable.'),
-      'buildable.commit' => pht('The commit identifier, if applicable.'),
-      'repository.callsign' =>
-        pht('The callsign of the repository in Phabricator.'),
-      'repository.vcs' =>
-        pht('The version control system, either "svn", "hg" or "git".'),
-      'repository.uri' =>
-        pht('The URI to clone or checkout the repository from.'),
-      'step.timestamp' => pht('The current UNIX timestamp.'),
-      'build.id' => pht('The ID of the current build.'));
-  }
-
   public function getSettingRemarkupInstructions() {
+    $variables = HarbormasterBuild::getAvailableBuildVariables();
     $text = '';
     $text .= pht('The following variables are available: ')."\n";
     $text .= "\n";
-    foreach ($this->getAvailableVariables() as $name => $desc) {
+    foreach ($variables as $name => $desc) {
       $text .= '  - `'.$name.'`: '.$desc."\n";
     }
     $text .= "\n";

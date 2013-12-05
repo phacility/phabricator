@@ -24,7 +24,7 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
   }
 
   private function logToDrydock($message) {
-    DrydockBlueprint::writeLog(
+    DrydockBlueprintImplementation::writeLog(
       null,
       $this->loadLease(),
       $message);
@@ -52,8 +52,19 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
     }
   }
 
+  private function loadAllBlueprints() {
+    $instances = id(new DrydockBlueprint())->loadAll();
+    $blueprints = array();
+    foreach ($instances as $instance) {
+      $blueprints[$instance->getPHID()] = $instance;
+    }
+    return $blueprints;
+  }
+
   private function allocateLease(DrydockLease $lease) {
     $type = $lease->getResourceType();
+
+    $blueprints = $this->loadAllBlueprints();
 
     $pool = id(new DrydockResource())->loadAllWhere(
       'type = %s AND status = %s',
@@ -65,14 +76,15 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
 
     $candidates = array();
     foreach ($pool as $key => $candidate) {
-      try {
-        $blueprint = $candidate->getBlueprint();
-      } catch (Exception $ex) {
+      if (!isset($blueprints[$candidate->getBlueprintPHID()])) {
         unset($pool[$key]);
         continue;
       }
 
-      if ($blueprint->filterResource($candidate, $lease)) {
+      $blueprint = $blueprints[$candidate->getBlueprintPHID()];
+      $implementation = $blueprint->getImplementation();
+
+      if ($implementation->filterResource($candidate, $lease)) {
         $candidates[] = $candidate;
       }
     }
@@ -83,7 +95,8 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
     if ($candidates) {
       shuffle($candidates);
       foreach ($candidates as $candidate_resource) {
-        $blueprint = $candidate_resource->getBlueprint();
+        $blueprint = $blueprints[$candidate_resource->getBlueprintPHID()]
+          ->getImplementation();
         if ($blueprint->allocateLease($candidate_resource, $lease)) {
           $resource = $candidate_resource;
           break;
@@ -92,7 +105,8 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
     }
 
     if (!$resource) {
-      $blueprints = DrydockBlueprint::getAllBlueprintsForResource($type);
+      $blueprints = DrydockBlueprintImplementation
+        ::getAllBlueprintImplementationsForResource($type);
 
       $this->logToDrydock(
         pht('Found %d Blueprints', count($blueprints)));

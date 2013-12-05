@@ -70,6 +70,17 @@ a.grey:visited {
   text-shadow: none;
 }
 
+button.simple,
+input[type="submit"].simple,
+a.simple,
+a.simple:visited {
+  background-color: transparent;
+  background-image: none;
+  border: 1px solid transparent;
+  color: {$bluetext};
+  text-shadow: 0 1px #fff;
+}
+
 a.disabled,
 button.disabled,
 button[disabled] {
@@ -100,6 +111,16 @@ a.button:hover,
 button:hover {
   text-decoration: none;
   box-shadow: inset 0 0 5px rgba(0,0,0,.4);
+}
+
+a.button.simple:hover,
+button.simple:hover {
+  background-color: #fff;
+  border: 1px solid {$lightgreyborder};
+  background-image: none;
+  border-bottom: 1px solid {$greyborder};
+  text-shadow: none;
+  box-shadow: none;
 }
 
 a.button.grey:hover,

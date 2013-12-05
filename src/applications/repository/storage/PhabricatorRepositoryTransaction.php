@@ -22,6 +22,7 @@ final class PhabricatorRepositoryTransaction
   const TYPE_PROTOCOL_SSH = 'repo:serve-ssh';
   const TYPE_PUSH_POLICY = 'repo:push-policy';
   const TYPE_CREDENTIAL = 'repo:credential';
+  const TYPE_DANGEROUS = 'repo:dangerous';
 
   // TODO: Clean up these legacy transaction types.
   const TYPE_SSH_LOGIN = 'repo:ssh-login';
@@ -338,6 +339,16 @@ final class PhabricatorRepositoryTransaction
           $this->renderHandleLink($author_phid),
           $this->renderPolicyName($old),
           $this->renderPolicyName($new));
+      case self::TYPE_DANGEROUS:
+        if ($new) {
+          return pht(
+            '%s disabled protection against dangerous changes.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s enabled protection against dangerous changes.',
+            $this->renderHandleLink($author_phid));
+        }
     }
 
     return parent::getTitle();

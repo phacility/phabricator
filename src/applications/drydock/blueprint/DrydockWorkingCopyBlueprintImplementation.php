@@ -1,9 +1,14 @@
 <?php
 
-final class DrydockWorkingCopyBlueprint extends DrydockBlueprint {
+final class DrydockWorkingCopyBlueprintImplementation
+  extends DrydockBlueprintImplementation {
 
   public function isEnabled() {
     return true;
+  }
+
+  public function getDescription() {
+    return pht('Allocates out working copies of repositories.');
   }
 
   protected function canAllocateLease(

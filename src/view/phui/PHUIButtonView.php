@@ -6,6 +6,7 @@ final class PHUIButtonView extends AphrontTagView {
   const GREY = 'grey';
   const BLACK = 'black';
   const DISABLED = 'disabled';
+  const SIMPLE = 'simple';
 
   const SMALL = 'small';
   const BIG = 'big';
@@ -17,9 +18,15 @@ final class PHUIButtonView extends AphrontTagView {
   private $tag = 'button';
   private $dropdown;
   private $icon;
+  private $href = null;
 
   public function setText($text) {
     $this->text = $text;
+    return $this;
+  }
+
+  public function setHref($href) {
+    $this->href = $href;
     return $this;
   }
 
@@ -80,7 +87,8 @@ final class PHUIButtonView extends AphrontTagView {
       $classes[] = 'has-icon';
     }
 
-    return array('class' => $classes);
+    return array('class' => $classes,
+                  'href' => $this->href);
   }
 
   protected function getTagContent() {

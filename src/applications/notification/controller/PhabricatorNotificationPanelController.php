@@ -36,7 +36,7 @@ final class PhabricatorNotificationPanelController
         array(
           'href' => '/notification/',
         ),
-        'View All Notifications'));
+        pht('View All Notifications')));
 
     $unread_count = id(new PhabricatorFeedStoryNotification())
       ->countUnread($user);

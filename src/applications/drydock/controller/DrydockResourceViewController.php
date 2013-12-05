@@ -33,9 +33,6 @@ final class DrydockResourceViewController extends DrydockController {
       ->needResources(true)
       ->execute();
 
-    $lease_header = id(new PHUIHeaderView())
-      ->setHeader(pht('Leases'));
-
     $lease_list = $this->buildLeaseListView($leases);
     $lease_list->setNoDataString(pht('This resource has no leases.'));
 
@@ -64,7 +61,6 @@ final class DrydockResourceViewController extends DrydockController {
       array(
         $crumbs,
         $object_box,
-        $lease_header,
         $lease_list,
         $log_table,
       ),
@@ -113,6 +109,11 @@ final class DrydockResourceViewController extends DrydockController {
     $view->addProperty(
       pht('Resource Type'),
       $resource->getType());
+
+    // TODO: Load handle.
+    $view->addProperty(
+      pht('Blueprint'),
+      $resource->getBlueprintPHID());
 
     $attributes = $resource->getAttributes();
     if ($attributes) {

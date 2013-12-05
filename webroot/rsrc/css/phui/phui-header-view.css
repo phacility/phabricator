@@ -41,10 +41,23 @@ body .phui-header-shell.phui-bleed-header
   padding: 16px;
   font-size: 15px;
   color: {$darkbluetext};
+  position: relative;
 }
 
 .phui-header-view a {
   color: {$darkbluetext};
+}
+
+.phui-header-view .phui-header-action-links {
+  position: absolute;
+  top: 5px;
+  right: 0;
+}
+
+.device-phone .phui-header-action-link .phui-button-text {
+  visibility: hidden;
+  width: 0;
+  margin-left: 12px;
 }
 
 .phui-header-divider {

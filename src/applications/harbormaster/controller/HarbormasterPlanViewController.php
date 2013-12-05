@@ -86,7 +86,31 @@ final class HarbormasterPlanViewController
     $step_list = id(new PHUIObjectItemListView())
       ->setUser($viewer);
     foreach ($steps as $step) {
-      $implementation = $step->getStepImplementation();
+      $implementation = null;
+      try {
+        $implementation = $step->getStepImplementation();
+      } catch (Exception $ex) {
+        // We can't initialize the implementation.  This might be because
+        // it's been renamed or no longer exists.
+        $item = id(new PHUIObjectItemView())
+          ->setObjectName("Step ".$i++)
+          ->setHeader(pht('Unknown Implementation'))
+          ->setBarColor('red')
+          ->addAttribute(pht(
+            'This step has an invalid implementation (%s).',
+            $step->getClassName()))
+          ->addAction(
+            id(new PHUIListItemView())
+              ->setIcon('delete')
+              ->addSigil('harbormaster-build-step-delete')
+              ->setWorkflow(true)
+              ->setRenderNameAsTooltip(true)
+              ->setName(pht("Delete"))
+              ->setHref(
+                $this->getApplicationURI("step/delete/".$step->getID()."/")));
+        $step_list->addItem($item);
+        continue;
+      }
       $item = id(new PHUIObjectItemView())
         ->setObjectName("Step ".$i++)
         ->setHeader($implementation->getName());

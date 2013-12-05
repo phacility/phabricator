@@ -17,8 +17,8 @@ final class HarbormasterBuildLogQuery
     return $this;
   }
 
-  public function withBuildPHIDs(array $build_phids) {
-    $this->buildPHIDs = $build_phids;
+  public function withBuildTargetPHIDs(array $build_target_phids) {
+    $this->buildTargetPHIDs = $build_target_phids;
     return $this;
   }
 
@@ -38,25 +38,25 @@ final class HarbormasterBuildLogQuery
   }
 
   protected function willFilterPage(array $page) {
-    $builds = array();
+    $build_targets = array();
 
-    $build_phids = array_filter(mpull($page, 'getBuildPHID'));
-    if ($build_phids) {
-      $builds = id(new HarbormasterBuildQuery())
+    $build_target_phids = array_filter(mpull($page, 'getBuildTargetPHID'));
+    if ($build_target_phids) {
+      $build_targets = id(new HarbormasterBuildTargetQuery())
         ->setViewer($this->getViewer())
-        ->withPHIDs($build_phids)
+        ->withPHIDs($build_target_phids)
         ->setParentQuery($this)
         ->execute();
-      $builds = mpull($builds, null, 'getPHID');
+      $build_targets = mpull($build_targets, null, 'getPHID');
     }
 
     foreach ($page as $key => $build_log) {
-      $build_phid = $build_log->getBuildPHID();
-      if (empty($builds[$build_phid])) {
+      $build_target_phid = $build_log->getBuildTargetPHID();
+      if (empty($build_targets[$build_target_phid])) {
         unset($page[$key]);
         continue;
       }
-      $build_log->attachBuild($builds[$build_phid]);
+      $build_log->attachBuildTarget($build_targets[$build_target_phid]);
     }
 
     return $page;
@@ -79,11 +79,11 @@ final class HarbormasterBuildLogQuery
         $this->phids);
     }
 
-    if ($this->buildPHIDs) {
+    if ($this->buildTargetPHIDs) {
       $where[] = qsprintf(
         $conn_r,
-        'buildPHID IN (%Ls)',
-        $this->buildPHIDs);
+        'buildTargetPHID IN (%Ls)',
+        $this->buildTargetPHIDs);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

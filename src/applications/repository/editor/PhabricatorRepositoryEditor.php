@@ -30,6 +30,7 @@ final class PhabricatorRepositoryEditor
     $types[] = PhabricatorRepositoryTransaction::TYPE_PROTOCOL_SSH;
     $types[] = PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY;
     $types[] = PhabricatorRepositoryTransaction::TYPE_CREDENTIAL;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_DANGEROUS;
 
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
@@ -80,6 +81,8 @@ final class PhabricatorRepositoryEditor
         return $object->getPushPolicy();
       case PhabricatorRepositoryTransaction::TYPE_CREDENTIAL:
         return $object->getCredentialPHID();
+      case PhabricatorRepositoryTransaction::TYPE_DANGEROUS:
+        return $object->shouldAllowDangerousChanges();
     }
   }
 
@@ -110,6 +113,7 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_PROTOCOL_SSH:
       case PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY:
       case PhabricatorRepositoryTransaction::TYPE_CREDENTIAL:
+      case PhabricatorRepositoryTransaction::TYPE_DANGEROUS:
         return $xaction->getNewValue();
       case PhabricatorRepositoryTransaction::TYPE_NOTIFY:
       case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
@@ -175,6 +179,9 @@ final class PhabricatorRepositoryEditor
         return $object->setPushPolicy($xaction->getNewValue());
       case PhabricatorRepositoryTransaction::TYPE_CREDENTIAL:
         return $object->setCredentialPHID($xaction->getNewValue());
+      case PhabricatorRepositoryTransaction::TYPE_DANGEROUS:
+        $object->setDetail('allow-dangerous-changes', $xaction->getNewValue());
+        return;
       case PhabricatorRepositoryTransaction::TYPE_ENCODING:
         // Make sure the encoding is valid by converting to UTF-8. This tests
         // that the user has mbstring installed, and also that they didn't type
@@ -285,6 +292,7 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_PROTOCOL_SSH:
       case PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY:
       case PhabricatorRepositoryTransaction::TYPE_CREDENTIAL:
+      case PhabricatorRepositoryTransaction::TYPE_DANGEROUS:
         PhabricatorPolicyFilter::requireCapability(
           $this->requireActor(),
           $object,
