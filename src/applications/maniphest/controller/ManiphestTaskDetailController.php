@@ -382,10 +382,15 @@ final class ManiphestTaskDetailController extends ManiphestController {
     if (!$user->isLoggedIn()) {
       // TODO: Eventually, everything should run through this. For now, we're
       // only using it to get a consistent "Login to Comment" button.
-      $comment_form = id(new PhabricatorApplicationTransactionCommentView())
+      $comment_box = id(new PhabricatorApplicationTransactionCommentView())
         ->setUser($user)
         ->setRequestURI($request->getRequestURI());
       $preview_panel = null;
+    } else {
+      $comment_box = id(new PHUIObjectBoxView())
+        ->setFlush(true)
+        ->setHeaderText($comment_header)
+        ->appendChild($comment_form);
     }
 
     $object_box = id(new PHUIObjectBoxView())
@@ -395,11 +400,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     if ($description) {
       $object_box->addPropertyList($description);
     }
-
-    $comment_box = id(new PHUIObjectBoxView())
-      ->setFlush(true)
-      ->setHeaderText($comment_header)
-      ->appendChild($comment_form);
 
     return $this->buildApplicationPage(
       array(

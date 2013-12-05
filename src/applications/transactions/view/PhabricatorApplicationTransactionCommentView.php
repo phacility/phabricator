@@ -85,6 +85,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       $uri = id(new PhutilURI('/login/'))
         ->setQueryParam('next', (string) $this->getRequestURI());
       return id(new PHUIObjectBoxView())
+        ->setFlush(true)
         ->setHeaderText(pht('Add Comment'))
         ->appendChild(
           javelin_tag(
