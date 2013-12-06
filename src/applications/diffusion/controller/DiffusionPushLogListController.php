@@ -30,8 +30,34 @@ final class DiffusionPushLogListController extends DiffusionController
 
     $this->loadHandles(mpull($logs, 'getPusherPHID'));
 
+    // Figure out which repositories are editable. We only let you see remote
+    // IPs if you have edit capability on a repository.
+    $editable_repos = array();
+    if ($logs) {
+      $editable_repos = id(new PhabricatorRepositoryQuery())
+        ->setViewer($viewer)
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->withPHIDs(mpull($logs, 'getRepositoryPHID'))
+        ->execute();
+      $editable_repos = mpull($editable_repos, null, 'getPHID');
+    }
+
     $rows = array();
     foreach ($logs as $log) {
+
+      // Reveal this if it's valid and the user can edit the repository.
+      $remote_addr = '-';
+      if (isset($editable_repos[$log->getRepositoryPHID()])) {
+        $remote_long = $log->getRemoteAddress();
+        if ($remote_long) {
+          $remote_addr = long2ip($remote_long);
+        }
+      }
+
       $callsign = $log->getRepository()->getCallsign();
       $rows[] = array(
         phutil_tag(
@@ -41,14 +67,22 @@ final class DiffusionPushLogListController extends DiffusionController
           ),
           $callsign),
         $this->getHandle($log->getPusherPHID())->renderLink(),
-        $log->getRemoteAddress()
-          ? long2ip($log->getRemoteAddress())
-          : null,
+        $remote_addr,
         $log->getRemoteProtocol(),
         $log->getRefType(),
         $log->getRefName(),
-        $log->getRefOldShort(),
-        $log->getRefNewShort(),
+        phutil_tag(
+          'a',
+          array(
+            'href' => '/r'.$callsign.$log->getRefOld(),
+          ),
+          $log->getRefOldShort()),
+        phutil_tag(
+          'a',
+          array(
+            'href' => '/r'.$callsign.$log->getRefNew(),
+          ),
+          $log->getRefNewShort()),
         phabricator_datetime($log->getEpoch(), $viewer),
       );
     }
