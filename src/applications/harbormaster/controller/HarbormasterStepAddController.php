@@ -36,10 +36,13 @@ final class HarbormasterStepAddController
         return $this->createDialog($implementations);
       }
 
+      $steps = $plan->loadOrderedBuildSteps();
+
       $step = new HarbormasterBuildStep();
       $step->setBuildPlanPHID($plan->getPHID());
       $step->setClassName($class);
       $step->setDetails(array());
+      $step->setSequence(count($steps) + 1);
       $step->save();
 
       $edit_uri = $this->getApplicationURI("step/edit/".$step->getID()."/");

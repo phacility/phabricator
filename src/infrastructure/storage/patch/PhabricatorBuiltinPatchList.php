@@ -1804,6 +1804,14 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20131204.pushlog.sql'),
       ),
+      '20131205.buildsteporder.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131205.buildsteporder.sql'),
+      ),
+      '20131205.buildstepordermig.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20131205.buildstepordermig.php'),
+      ),
     );
   }
 }

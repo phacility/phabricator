@@ -94,7 +94,7 @@ final class HarbormasterStepEditController
         case BuildStepImplementation::SETTING_TYPE_ARTIFACT:
           $filter = $opt['artifact_type'];
           $available_artifacts =
-            BuildStepImplementation::getAvailableArtifacts(
+            BuildStepImplementation::loadAvailableArtifacts(
               $plan,
               $step,
               $filter);

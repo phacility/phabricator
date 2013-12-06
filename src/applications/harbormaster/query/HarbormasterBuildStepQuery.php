@@ -23,7 +23,7 @@ final class HarbormasterBuildStepQuery
   }
 
   public function getPagingColumn() {
-    return 'id';
+    return 'sequence';
   }
 
   public function getReversePaging() {

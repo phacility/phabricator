@@ -6,6 +6,7 @@ final class HarbormasterBuildStep extends HarbormasterDAO
   protected $buildPlanPHID;
   protected $className;
   protected $details = array();
+  protected $sequence;
 
   private $buildPlan = self::ATTACHABLE;
 
@@ -60,6 +61,7 @@ final class HarbormasterBuildStep extends HarbormasterDAO
     $implementation->loadSettings($this);
     return $implementation;
   }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
