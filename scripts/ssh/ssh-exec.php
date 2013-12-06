@@ -135,7 +135,7 @@ try {
     ));
 
   if ($rethrow) {
-    throw $ex;
+    throw $rethrow;
   }
 } catch (Exception $ex) {
   fwrite(STDERR, "phabricator-ssh-exec: ".$ex->getMessage()."\n");
