@@ -615,6 +615,33 @@ final class CeleritySpriteGenerator {
     return $sheet;
   }
 
+  public function buildMainHeaderSheet() {
+    $gradients = $this->getDirectoryList('main_header');
+    $template = new PhutilSprite();
+
+    $sprites = array();
+    foreach ($gradients as $gradient) {
+      $path = $this->getPath('main_header/'.$gradient.'.png');
+      $sprite = id(clone $template)
+        ->setName('main-header-'.$gradient)
+        ->setSourceFile($path)
+        ->setTargetCSS('.main-header-'.$gradient);
+      $sprite->setSourceSize(6, 44);
+      $sprites[] = $sprite;
+    }
+
+    $sheet = $this->buildSheet('main-header',
+      false,
+      PhutilSpriteSheet::TYPE_REPEAT_X);
+
+    foreach ($sprites as $sprite) {
+      $sheet->addSprite($sprite);
+    }
+
+    return $sheet;
+  }
+
+
   public function buildAppsSheet() {
     return $this->buildAppsSheetVariant(1);
   }

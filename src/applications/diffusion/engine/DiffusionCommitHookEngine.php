@@ -1,13 +1,59 @@
 <?php
 
+/**
+ * @task git  Git Hooks
+ * @task hg   Mercurial Hooks
+ * @task svn  Subversion Hooks
+ */
 final class DiffusionCommitHookEngine extends Phobject {
+
+  const ENV_USER = 'PHABRICATOR_USER';
+  const ENV_REMOTE_ADDRESS = 'PHABRICATOR_REMOTE_ADDRESS';
+  const ENV_REMOTE_PROTOCOL = 'PHABRICATOR_REMOTE_PROTOCOL';
 
   private $viewer;
   private $repository;
   private $stdin;
   private $subversionTransaction;
   private $subversionRepository;
+  private $remoteAddress;
+  private $remoteProtocol;
+  private $transactionKey;
 
+  public function setRemoteProtocol($remote_protocol) {
+    $this->remoteProtocol = $remote_protocol;
+    return $this;
+  }
+
+  public function getRemoteProtocol() {
+    return $this->remoteProtocol;
+  }
+
+  public function setRemoteAddress($remote_address) {
+    $this->remoteAddress = $remote_address;
+    return $this;
+  }
+
+  public function getRemoteAddress() {
+    return $this->remoteAddress;
+  }
+
+  private function getRemoteAddressForLog() {
+    // If whatever we have here isn't a valid IPv4 address, just store `null`.
+    // Older versions of PHP return `-1` on failure instead of `false`.
+    $remote_address = $this->getRemoteAddress();
+    $remote_address = max(0, ip2long($remote_address));
+    $remote_address = nonempty($remote_address, null);
+    return $remote_address;
+  }
+
+  private function getTransactionKey() {
+    if (!$this->transactionKey) {
+      $entropy = Filesystem::readRandomBytes(64);
+      $this->transactionKey = PhabricatorHash::digestForIndex($entropy);
+    }
+    return $this->transactionKey;
+  }
 
   public function setSubversionTransactionInfo($transaction, $repository) {
     $this->subversionTransaction = $transaction;
@@ -61,6 +107,18 @@ final class DiffusionCommitHookEngine extends Phobject {
     return $err;
   }
 
+  private function newPushLog() {
+    return PhabricatorRepositoryPushLog::initializeNewLog($this->getViewer())
+      ->setRepositoryPHID($this->getRepository()->getPHID())
+      ->setEpoch(time())
+      ->setRemoteAddress($this->getRemoteAddressForLog())
+      ->setRemoteProtocol($this->getRemoteProtocol())
+      ->setTransactionKey($this->getTransactionKey())
+      ->setRejectCode(PhabricatorRepositoryPushLog::REJECT_ACCEPT)
+      ->setRejectDetails(null);
+  }
+
+
   /**
    * @task git
    */
@@ -76,6 +134,51 @@ final class DiffusionCommitHookEngine extends Phobject {
     $updates = $this->findGitNewCommits($updates);
 
     // TODO: Now, do content checks.
+
+    // TODO: Generalize this; just getting some data in the database for now.
+
+    $logs = array();
+    foreach ($updates as $update) {
+      $log = $this->newPushLog()
+        ->setRefType($update['type'])
+        ->setRefNameHash(PhabricatorHash::digestForIndex($update['ref']))
+        ->setRefNameRaw($update['ref'])
+        ->setRefNameEncoding(phutil_is_utf8($update['ref']) ? 'utf8' : null)
+        ->setRefOld($update['old'])
+        ->setRefNew($update['new'])
+        ->setMergeBase(idx($update, 'merge-base'));
+
+      $flags = 0;
+      if ($update['operation'] == 'create') {
+        $flags = $flags | PhabricatorRepositoryPushLog::CHANGEFLAG_ADD;
+      } else if ($update['operation'] == 'delete') {
+        $flags = $flags | PhabricatorRepositoryPushLog::CHANGEFLAG_DELETE;
+      } else {
+        // TODO: This isn't correct; these might be APPEND or REWRITE, and
+        // if they're REWRITE they might be DANGEROUS. Fix this when this
+        // gets generalized.
+        $flags = $flags | PhabricatorRepositoryPushLog::CHANGEFLAG_APPEND;
+      }
+
+      $log->setChangeFlags($flags);
+      $logs[] = $log;
+    }
+
+    // Now, build logs for all the commits.
+    // TODO: Generalize this, too.
+    $commits = array_mergev(ipull($updates, 'commits'));
+    $commits = array_unique($commits);
+    foreach ($commits as $commit) {
+      $log = $this->newPushLog()
+        ->setRefType(PhabricatorRepositoryPushLog::REFTYPE_COMMIT)
+        ->setRefNew($commit)
+        ->setChangeFlags(PhabricatorRepositoryPushLog::CHANGEFLAG_ADD);
+      $logs[] = $log;
+    }
+
+    foreach ($logs as $log) {
+      $log->save();
+    }
 
     return 0;
   }

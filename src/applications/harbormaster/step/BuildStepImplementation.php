@@ -117,12 +117,28 @@ abstract class BuildStepImplementation {
   /**
    * Returns a list of all artifacts made available by previous build steps.
    */
-  public static function getAvailableArtifacts(
+  public static function loadAvailableArtifacts(
     HarbormasterBuildPlan $build_plan,
     HarbormasterBuildStep $current_build_step,
     $artifact_type) {
 
     $build_steps = $build_plan->loadOrderedBuildSteps();
+
+    return self::getAvailableArtifacts(
+      $build_plan,
+      $build_steps,
+      $current_build_step,
+      $artifact_type);
+  }
+
+  /**
+   * Returns a list of all artifacts made available by previous build steps.
+   */
+  public static function getAvailableArtifacts(
+    HarbormasterBuildPlan $build_plan,
+    array $build_steps,
+    HarbormasterBuildStep $current_build_step,
+    $artifact_type) {
 
     $previous_implementations = array();
     foreach ($build_steps as $build_step) {
@@ -136,7 +152,7 @@ abstract class BuildStepImplementation {
     $artifacts = array();
     foreach ($artifact_arrays as $array) {
       foreach ($array as $name => $type) {
-        if ($type !== $artifact_type) {
+        if ($type !== $artifact_type && $artifact_type !== null) {
           continue;
         }
         $artifacts[$name] = $type;

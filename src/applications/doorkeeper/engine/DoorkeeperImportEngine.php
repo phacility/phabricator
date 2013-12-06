@@ -53,6 +53,12 @@ final class DoorkeeperImportEngine extends Phobject {
           $xobj = $ref
             ->newExternalObject()
             ->setImporterPHID($viewer->getPHID());
+
+          // NOTE: Fill the new external object into the object map, so we'll
+          // reference the same external object if more than one ref is the
+          // same. This prevents issues later where we double-populate
+          // external objects when handed duplicate refs.
+          $xobjs[$ref->getObjectKey()] = $xobj;
         }
         $ref->attachExternalObject($xobj);
       }

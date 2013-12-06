@@ -46,6 +46,9 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
         'new/' => 'DiffusionRepositoryNewController',
         '(?P<edit>create)/' => 'DiffusionRepositoryCreateController',
         '(?P<edit>import)/' => 'DiffusionRepositoryCreateController',
+        'pushlog/(?:query/(?P<queryKey>[^/]+)/)?'
+          => 'DiffusionPushLogListController',
+
         '(?P<callsign>[A-Z]+)/' => array(
           '' => 'DiffusionRepositoryController',
 
@@ -58,7 +61,6 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
           'tags/(?P<dblob>.*)'          => 'DiffusionTagListController',
           'branches/(?P<dblob>.*)'      => 'DiffusionBranchTableController',
           'lint/(?P<dblob>.*)'          => 'DiffusionLintController',
-
           'commit/(?P<commit>[a-z0-9]+)/branches/'
             => 'DiffusionCommitBranchesController',
           'commit/(?P<commit>[a-z0-9]+)/tags/'

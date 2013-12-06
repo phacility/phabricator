@@ -105,6 +105,12 @@ final class DrydockPreallocatedHostBlueprintImplementation
             'port' => $resource->getAttribute('port'),
             'credential' => $resource->getAttribute('credential'),
             'platform' => $resource->getAttribute('platform')));
+      case 'filesystem':
+        return id(new DrydockSFTPFilesystemInterface())
+          ->setConfiguration(array(
+            'host' => $resource->getAttribute('host'),
+            'port' => $resource->getAttribute('port'),
+            'credential' => $resource->getAttribute('credential')));
     }
 
     throw new Exception("No interface of type '{$type}'.");

@@ -56,7 +56,7 @@ final class DrydockBlueprintQuery
     if ($this->phids) {
       $where[] = qsprintf(
         $conn_r,
-        'phid IN (%Ld)',
+        'phid IN (%Ls)',
         $this->phids);
     }
 

@@ -119,6 +119,19 @@ final class HarbormasterBuild extends HarbormasterDAO
     return $artifact;
   }
 
+  public function loadArtifact($name) {
+    $artifact = id(new HarbormasterBuildArtifactQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withArtifactKeys(
+        $this->getPHID(),
+        array($name))
+      ->executeOne();
+    if ($artifact === null) {
+      throw new Exception("Artifact not found!");
+    }
+    return $artifact;
+  }
+
   /**
    * Checks for and handles build cancellation.  If this method returns
    * true, the caller should stop any current operations and return control

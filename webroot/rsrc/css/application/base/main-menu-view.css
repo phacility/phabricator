@@ -12,7 +12,6 @@
 
 .phabricator-main-menu {
   background: #2d3236;
-  background-image: url(/rsrc/image/texture/phlnx-bg.png);
   background-repeat: repeat-x;
   position: relative;
   box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.25);
@@ -49,11 +48,7 @@
   padding-left: 6px;
 }
 
-.device-desktop .phabricator-main-menu-logo:hover {
-  background-color: rgba(0,0,0,.6);
-}
-
-.phabricator-main-menu-logo-image {
+.menu-logo-image {
   position: absolute;
   width: 149px;
   height: 26px;
@@ -146,11 +141,16 @@
   font-size: 13px;
   border: 1px solid #333;
   border-radius: 12px;
-  background-color: #555;
+  background-color: #222;
+  opacity: .8;
   height: 26px;
   line-height: 12px;
   box-shadow: 0px 1px 1px rgba(128, 128, 128, 0.25);
   padding: 6px 32px 6px 10px;
+}
+
+.phabricator-main-menu.main-header-dark .phabricator-main-menu-search input {
+  background-color: #555;
 }
 
 .device .phabricator-main-menu-search input {
@@ -161,6 +161,7 @@
 
 .phabricator-main-menu .phabricator-main-menu-search input:focus {
   background: #fff;
+  opacity: 1;
   color: #333;
   border-color: #e7e7e7;
   box-shadow: none;
@@ -169,13 +170,13 @@
 }
 
 .phabricator-main-menu-search input.jx-typeahead-placeholder {
-  color: {$lightgreytext};
+  color: #fff;
 }
 
 .phabricator-main-menu-search button {
   position: absolute;
   color: transparent;
-  background: transparent 5px 6px url(/rsrc/image/search.png) no-repeat;
+  background: transparent 5px 6px url(/rsrc/image/search-white.png) no-repeat;
   border: none;
   outline: none;
   box-shadow: none;
@@ -353,9 +354,16 @@
   display: block;
 }
 
-.device-desktop .phabricator-application-menu
- .core-menu-item.phui-list-item-view:hover {
+.device-desktop .main-header-dark .phabricator-application-menu
+ .core-menu-item.phui-list-item-view:hover,
+.device-desktop .main-header-dark .phabricator-main-menu-logo:hover {
   background-color: rgba(0,0,0,.6);
+}
+
+.device-desktop .phabricator-application-menu
+ .core-menu-item.phui-list-item-view:hover,
+.device-desktop .phabricator-main-menu-logo:hover {
+  background-color: rgba(0,0,0,.3);
 }
 
 .device-desktop .phabricator-application-menu .phui-list-item-view {

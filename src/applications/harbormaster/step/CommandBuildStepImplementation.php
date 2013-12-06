@@ -32,30 +32,9 @@ final class CommandBuildStepImplementation
       $settings['command'],
       $variables);
 
-    $artifact = id(new HarbormasterBuildArtifactQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withArtifactKeys(
-        $build->getPHID(),
-        array($settings['hostartifact']))
-      ->executeOne();
-    if ($artifact === null) {
-      throw new Exception("Associated Drydock host artifact not found!");
-    }
+    $artifact = $build->loadArtifact($settings['hostartifact']);
 
-    $data = $artifact->getArtifactData();
-
-    // FIXME: Is there a better way of doing this?
-    $lease = id(new DrydockLease())->load(
-      $data['drydock-lease']);
-    if ($lease === null) {
-      throw new Exception("Associated Drydock lease not found!");
-    }
-    $resource = id(new DrydockResource())->load(
-      $lease->getResourceID());
-    if ($resource === null) {
-      throw new Exception("Associated Drydock resource not found!");
-    }
-    $lease->attachResource($resource);
+    $lease = $artifact->loadDrydockLease();
 
     $interface = $lease->getInterface('command');
 

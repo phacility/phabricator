@@ -1,8 +1,12 @@
 #!/usr/bin/env php
 <?php
 
+$ssh_start_time = microtime(true);
+
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
+
+$ssh_log = PhabricatorSSHLog::getLog();
 
 // First, figure out the authenticated user.
 $args = new PhutilArgumentParser($argv);
@@ -38,6 +42,12 @@ try {
     throw new Exception("Invalid username.");
   }
 
+  $ssh_log->setData(
+    array(
+      'u' => $user->getUsername(),
+      'P' => $user->getPHID(),
+    ));
+
   if (!$user->isUserActivated()) {
     throw new Exception(pht("Your account is not activated."));
   }
@@ -54,6 +64,15 @@ try {
   if (!$original_argv) {
     throw new Exception("No interactive logins.");
   }
+
+  $ssh_log->setData(
+    array(
+      'C' => $original_argv[0],
+      'U' => phutil_utf8_shorten(
+        implode(' ', array_slice($original_argv, 1)),
+        128),
+    ));
+
   $command = head($original_argv);
   array_unshift($original_argv, 'phabricator-ssh-exec');
 
@@ -98,12 +117,35 @@ try {
   $workflow->setIOChannel($metrics_channel);
   $workflow->setErrorChannel($error_channel);
 
-  $err = $workflow->execute($original_args);
+  $rethrow = null;
+  try {
+    $err = $workflow->execute($original_args);
 
+    $metrics_channel->flush();
+    $error_channel->flush();
+  } catch (Exception $ex) {
+    $rethrow = $ex;
+  }
 
-  $metrics_channel->flush();
-  $error_channel->flush();
+  // Always write this if we got as far as building a metrics channel.
+  $ssh_log->setData(
+    array(
+      'i' => $metrics_channel->getBytesRead(),
+      'o' => $metrics_channel->getBytesWritten(),
+    ));
+
+  if ($rethrow) {
+    throw $rethrow;
+  }
 } catch (Exception $ex) {
   fwrite(STDERR, "phabricator-ssh-exec: ".$ex->getMessage()."\n");
-  exit(1);
+  $err = 1;
 }
+
+$ssh_log->setData(
+  array(
+    'c' => $err,
+    'T' => (int)(1000000 * (microtime(true) - $ssh_start_time)),
+  ));
+
+exit($err);

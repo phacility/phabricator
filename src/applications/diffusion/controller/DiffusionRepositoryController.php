@@ -399,6 +399,18 @@ final class DiffusionRepositoryController extends DiffusionController {
         ->setWorkflow(!$can_edit)
         ->setDisabled(!$can_edit));
 
+    if ($repository->isHosted()) {
+      $callsign = $repository->getCallsign();
+      $push_uri = $this->getApplicationURI(
+        'pushlog/?repositories=r'.$callsign);
+
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('View Push Logs'))
+          ->setIcon('transcript')
+          ->setHref($push_uri));
+    }
+
     return $view;
   }
 

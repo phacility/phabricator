@@ -8,6 +8,7 @@ final class PhabricatorRepositoryQuery
   private $callsigns;
   private $types;
   private $uuids;
+  private $nameContains;
 
   const STATUS_OPEN = 'status-open';
   const STATUS_CLOSED = 'status-closed';
@@ -50,6 +51,11 @@ final class PhabricatorRepositoryQuery
 
   public function withUUIDs(array $uuids) {
     $this->uuids = $uuids;
+    return $this;
+  }
+
+  public function withNameContains($contains) {
+    $this->nameContains = $contains;
     return $this;
   }
 
@@ -310,6 +316,13 @@ final class PhabricatorRepositoryQuery
         $conn_r,
         'r.uuid IN (%Ls)',
         $this->uuids);
+    }
+
+    if (strlen($this->nameContains)) {
+      $where[] = qsprintf(
+        $conn_r,
+        'name LIKE %~',
+        $this->nameContains);
     }
 
     $where[] = $this->buildPagingClause($conn_r);
