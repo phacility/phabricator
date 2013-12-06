@@ -31,6 +31,20 @@ final class PhabricatorMetaMTAEmailBodyParserTestCase
     }
   }
 
+  public function testFalsePositiveForOnWrote() {
+    $body = <<<EOEMAIL
+On which horse shall you ride?
+
+On Sep 23, alincoln wrote:
+
+> Hey bro do you want to go ride horses tomorrow?
+EOEMAIL;
+
+    $parser = new PhabricatorMetaMTAEmailBodyParser();
+    $stripped = $parser->stripTextBody($body);
+    $this->assertEqual("On which horse shall you ride?", $stripped);
+  }
+
   private function getEmailBodiesWithFullCommands() {
     $bodies = $this->getEmailBodies();
     $with_commands = array();
