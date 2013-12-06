@@ -109,7 +109,7 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    * @task config
    */
   final public function shouldRaisePolicyExceptions() {
-    return (bool) $this->raisePolicyExceptions;
+    return (bool)$this->raisePolicyExceptions;
   }
 
 

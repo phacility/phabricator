@@ -156,10 +156,10 @@ final class PhabricatorPolicyFilter {
           // If we're missing any capability, move on to the next object.
           continue 2;
         }
-
-        // If we make it here, we have all of the required capabilities.
-        $filtered[$key] = $object;
       }
+
+      // If we make it here, we have all of the required capabilities.
+      $filtered[$key] = $object;
     }
 
     return $filtered;
