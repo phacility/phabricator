@@ -72,6 +72,30 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
     }
   }
 
+  public function loadDrydockLease() {
+    if ($this->getArtifactType() !== self::TYPE_HOST) {
+      throw new Exception(
+        "`loadDrydockLease` may only be called on host artifacts.");
+    }
+
+    $data = $this->getArtifactData();
+
+    // FIXME: Is there a better way of doing this?
+    $lease = id(new DrydockLease())->load(
+      $data['drydock-lease']);
+    if ($lease === null) {
+      throw new Exception("Associated Drydock lease not found!");
+    }
+    $resource = id(new DrydockResource())->load(
+      $lease->getResourceID());
+    if ($resource === null) {
+      throw new Exception("Associated Drydock resource not found!");
+    }
+    $lease->attachResource($resource);
+
+    return $lease;
+  }
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 
