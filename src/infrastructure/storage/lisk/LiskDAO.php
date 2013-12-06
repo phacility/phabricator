@@ -1244,7 +1244,17 @@ abstract class LiskDAO {
     $columns = array_keys($data);
 
     foreach ($data as $key => $value) {
-      $data[$key] = qsprintf($conn, '%ns', $value);
+      try {
+        $data[$key] = qsprintf($conn, '%ns', $value);
+      } catch (AphrontQueryParameterException $parameter_exception) {
+        throw new PhutilProxyException(
+          pht(
+            "Unable to insert or update object of class %s, field '%s' ".
+            "has a nonscalar value.",
+            get_class($this),
+            $key),
+          $parameter_exception);
+      }
     }
     $data = implode(', ', $data);
 
