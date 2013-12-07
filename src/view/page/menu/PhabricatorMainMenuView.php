@@ -68,8 +68,7 @@ final class PhabricatorMainMenuView extends AphrontView {
     $classes = array();
     $classes[] = 'phabricator-main-menu';
     $classes[] = 'sprite-main-header';
-    // TODO: Let admins or users set header
-    $classes[] = 'main-header-dark';
+    $classes[] = 'main-header-'.PhabricatorEnv::getEnvConfig('ui.header-color');
 
     return phutil_tag(
       'div',

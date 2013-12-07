@@ -1790,6 +1790,20 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/core/behavior-global-drag-and-drop.js',
   ),
+  'javelin-behavior-harbormaster-reorder-steps' =>
+  array(
+    'uri' => '/res/035fe63d/rsrc/js/application/harbormaster/behavior-reorder-steps.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-workflow',
+      3 => 'javelin-dom',
+      4 => 'phabricator-draggable-list',
+    ),
+    'disk' => '/rsrc/js/application/harbormaster/behavior-reorder-steps.js',
+  ),
   'javelin-behavior-herald-rule-editor' =>
   array(
     'uri' => '/res/77a0c945/rsrc/js/application/herald/herald-rule-editor.js',
