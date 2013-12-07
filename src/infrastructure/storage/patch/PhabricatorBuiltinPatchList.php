@@ -216,6 +216,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'db',
         'name' => 'passphrase',
       ),
+      'db.phragment' => array(
+        'type' => 'db',
+        'name' => 'phragment',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -1811,6 +1815,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       '20131205.buildstepordermig.php' => array(
         'type' => 'php',
         'name' => $this->getPatchPath('20131205.buildstepordermig.php'),
+      ),
+      '20131206.phragment.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131206.phragment.sql'),
       ),
     );
   }
