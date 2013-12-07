@@ -66,13 +66,16 @@ abstract class PhragmentController extends PhabricatorController {
 
     $this->loadHandles($phids);
 
-    $file = id(new PhabricatorFileQuery())
-      ->setViewer($viewer)
-      ->withPHIDs(array($fragment->getLatestVersion()->getFilePHID()))
-      ->executeOne();
+    $file = null;
     $file_uri = null;
-    if ($file !== null) {
-      $file_uri = $file->getBestURI();
+    if (!$fragment->isDirectory()) {
+      $file = id(new PhabricatorFileQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($fragment->getLatestVersion()->getFilePHID()))
+        ->executeOne();
+      if ($file !== null) {
+        $file_uri = $file->getBestURI();
+      }
     }
 
     $header = id(new PHUIHeaderView())
@@ -96,12 +99,21 @@ abstract class PhragmentController extends PhabricatorController {
         ->setHref($this->getApplicationURI("zip/".$fragment->getPath()))
         ->setDisabled(false) // TODO: Policy
         ->setIcon('zip'));
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Update Fragment'))
-        ->setHref($this->getApplicationURI("update/".$fragment->getPath()))
-        ->setDisabled(false) // TODO: Policy
-        ->setIcon('edit'));
+    if (!$fragment->isDirectory()) {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Update Fragment'))
+          ->setHref($this->getApplicationURI("update/".$fragment->getPath()))
+          ->setDisabled(false) // TODO: Policy
+          ->setIcon('edit'));
+    } else {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Convert to File'))
+          ->setHref($this->getApplicationURI("update/".$fragment->getPath()))
+          ->setDisabled(false) // TODO: Policy
+          ->setIcon('edit'));
+    }
     if ($is_history_view) {
       $actions->addAction(
         id(new PhabricatorActionView())
@@ -121,9 +133,18 @@ abstract class PhragmentController extends PhabricatorController {
       ->setObject($fragment)
       ->setActionList($actions);
 
-    $properties->addProperty(
-      pht('Latest Version'),
-      $this->renderHandlesForPHIDs(array($fragment->getLatestVersionPHID())));
+    if (!$fragment->isDirectory()) {
+      $properties->addProperty(
+        pht('Type'),
+        pht('File'));
+      $properties->addProperty(
+        pht('Latest Version'),
+        $this->renderHandlesForPHIDs(array($fragment->getLatestVersionPHID())));
+    } else {
+      $properties->addProperty(
+        pht('Type'),
+        pht('Directory'));
+    }
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)

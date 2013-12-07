@@ -54,21 +54,12 @@ final class PhragmentCreateController extends PhragmentController {
           $depth = $parent->getDepth() + 1;
         }
 
-        $version = id(new PhragmentFragmentVersion());
-        $version->setSequence(0);
-        $version->setFragmentPHID(''); // Can't set this yet...
-        $version->setFilePHID($file->getPHID());
-        $version->save();
-
-        $fragment->setPath(trim($parent_path.'/'.$v_name, '/'));
-        $fragment->setDepth($depth);
-        $fragment->setLatestVersionPHID($version->getPHID());
-        $fragment->setViewPolicy($v_viewpolicy);
-        $fragment->setEditPolicy($v_editpolicy);
-        $fragment->save();
-
-        $version->setFragmentPHID($fragment->getPHID());
-        $version->save();
+        PhragmentFragment::createFromFile(
+          $viewer,
+          $file,
+          trim($parent_path.'/'.$v_name, '/'),
+          $v_viewpolicy,
+          $v_editpolicy);
 
         return id(new AphrontRedirectResponse())
           ->setURI('/phragment/browse/'.trim($parent_path.'/'.$v_name, '/'));

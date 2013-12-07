@@ -31,22 +31,14 @@ final class PhragmentUpdateController extends PhragmentController {
       }
 
       if (!count($errors)) {
-        $existing = id(new PhragmentFragmentVersionQuery())
-          ->setViewer($viewer)
-          ->withFragmentPHIDs(array($fragment->getPHID()))
-          ->execute();
-        $sequence = count($existing);
-
-        $fragment->openTransaction();
-          $version = id(new PhragmentFragmentVersion());
-          $version->setSequence($sequence);
-          $version->setFragmentPHID($fragment->getPHID());
-          $version->setFilePHID($file->getPHID());
-          $version->save();
-
-          $fragment->setLatestVersionPHID($version->getPHID());
-          $fragment->save();
-        $fragment->saveTransaction();
+        // If the file is a ZIP archive (has application/zip mimetype)
+        // then we extract the zip and apply versions for each of the
+        // individual fragments, creating and deleting files as needed.
+        if ($file->getMimeType() === "application/zip") {
+          $fragment->updateFromZIP($viewer, $file);
+        } else {
+          $fragment->updateFromFile($viewer, $file);
+        }
 
         return id(new AphrontRedirectResponse())
           ->setURI('/phragment/browse/'.$fragment->getPath());

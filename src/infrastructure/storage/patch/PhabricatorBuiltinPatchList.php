@@ -1820,6 +1820,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20131206.phragment.sql'),
       ),
+      '20131206.phragmentnull.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131206.phragmentnull.sql'),
+      ),
     );
   }
 }

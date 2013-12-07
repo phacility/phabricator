@@ -115,7 +115,6 @@ final class PhragmentFragmentQuery
       foreach ($page as $key => $fragment) {
         $version_phid = $fragment->getLatestVersionPHID();
         if (empty($versions[$version_phid])) {
-          unset($page[$key]);
           continue;
         }
         $fragment->attachLatestVersion($versions[$version_phid]);
