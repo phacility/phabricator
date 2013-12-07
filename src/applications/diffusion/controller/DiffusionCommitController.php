@@ -519,13 +519,14 @@ final class DiffusionCommitController extends DiffusionController {
       }
     }
 
+    $author_phid = $data->getCommitDetail('authorPHID');
+    $author_name = $data->getAuthorName();
+
     if (!$repository->isSVN()) {
       $authored_info = id(new PHUIStatusItemView());
       // TODO: In Git, a distinct authorship date is available. When present,
       // we should show it here.
 
-      $author_phid = $data->getCommitDetail('authorPHID');
-      $author_name = $data->getAuthorName();
       if ($author_phid) {
         $authored_info->setTarget($handles[$author_phid]->renderLink());
       } else if (strlen($author_name)) {
