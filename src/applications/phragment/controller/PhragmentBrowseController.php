@@ -30,7 +30,7 @@ final class PhragmentBrowseController extends PhragmentController {
         ->setHref($this->getApplicationURI('/create/'.$path))
         ->setIcon('create'));
 
-    $current_box = $this->createCurrentFragmentView($current);
+    $current_box = $this->createCurrentFragmentView($current, false);
 
     $list = id(new PHUIObjectItemListView())
       ->setUser($viewer);
@@ -74,35 +74,8 @@ final class PhragmentBrowseController extends PhragmentController {
         $current_box,
         $list),
       array(
-        'title' => pht('Browse Phragments'),
+        'title' => pht('Browse Fragments'),
         'device' => true));
-  }
-
-  private function createCurrentFragmentView($fragment) {
-    if ($fragment === null) {
-      return null;
-    }
-
-    $viewer = $this->getRequest()->getUser();
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader($fragment->getName())
-      ->setPolicyObject($fragment)
-      ->setUser($viewer);
-    $properties = new PHUIPropertyListView();
-
-    $phids = array();
-    $phids[] = $fragment->getLatestVersionPHID();
-
-    $this->loadHandles($phids);
-
-    $properties->addProperty(
-      pht('Latest Version'),
-      $this->renderHandlesForPHIDs(array($fragment->getLatestVersionPHID())));
-
-    return id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
   }
 
 }

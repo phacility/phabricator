@@ -36,6 +36,8 @@ final class PhabricatorApplicationPhragment extends PhabricatorApplication {
         '' => 'PhragmentBrowseController',
         'browse/(?P<dblob>.*)' => 'PhragmentBrowseController',
         'create/(?P<dblob>.*)' => 'PhragmentCreateController',
+        'update/(?P<dblob>.*)' => 'PhragmentUpdateController',
+        'history/(?P<dblob>.*)' => 'PhragmentHistoryController',
       ),
     );
   }

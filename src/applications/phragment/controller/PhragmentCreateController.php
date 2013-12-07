@@ -134,7 +134,7 @@ final class PhragmentCreateController extends PhragmentController {
         $crumbs,
         $box),
       array(
-        'title' => pht('Create Phragment'),
+        'title' => pht('Create Fragment'),
         'device' => true));
   }
 
