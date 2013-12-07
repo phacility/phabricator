@@ -2187,6 +2187,7 @@ phutil_register_library_map(array(
     'PhragmentPHIDTypeFragmentVersion' => 'applications/phragment/phid/PhragmentPHIDTypeFragmentVersion.php',
     'PhragmentPatchUtil' => 'applications/phragment/util/PhragmentPatchUtil.php',
     'PhragmentUpdateController' => 'applications/phragment/controller/PhragmentUpdateController.php',
+    'PhragmentZIPController' => 'applications/phragment/controller/PhragmentZIPController.php',
     'PhrequentController' => 'applications/phrequent/controller/PhrequentController.php',
     'PhrequentDAO' => 'applications/phrequent/storage/PhrequentDAO.php',
     'PhrequentListController' => 'applications/phrequent/controller/PhrequentListController.php',
@@ -4785,6 +4786,7 @@ phutil_register_library_map(array(
     'PhragmentPHIDTypeFragmentVersion' => 'PhabricatorPHIDType',
     'PhragmentPatchUtil' => 'Phobject',
     'PhragmentUpdateController' => 'PhragmentController',
+    'PhragmentZIPController' => 'PhragmentController',
     'PhrequentController' => 'PhabricatorController',
     'PhrequentDAO' => 'PhabricatorLiskDAO',
     'PhrequentListController' =>

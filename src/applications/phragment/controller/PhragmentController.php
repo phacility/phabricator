@@ -92,6 +92,12 @@ abstract class PhragmentController extends PhabricatorController {
         ->setIcon('download'));
     $actions->addAction(
       id(new PhabricatorActionView())
+        ->setName(pht('Download Contents as ZIP'))
+        ->setHref($this->getApplicationURI("zip/".$fragment->getPath()))
+        ->setDisabled(false) // TODO: Policy
+        ->setIcon('zip'));
+    $actions->addAction(
+      id(new PhabricatorActionView())
         ->setName(pht('Update Fragment'))
         ->setHref($this->getApplicationURI("update/".$fragment->getPath()))
         ->setDisabled(false) // TODO: Policy
