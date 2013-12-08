@@ -162,6 +162,33 @@ final class PhragmentFragment extends PhragmentDAO
       $mappings[$path] = $data;
     }
 
+    // We need to detect any directories that are in the ZIP folder that
+    // aren't explicitly noted in the ZIP.  This can happen if the file
+    // entries in the ZIP look like:
+    //
+    //  * something/blah.png
+    //  * something/other.png
+    //  * test.png
+    //
+    // Where there is no explicit "something/" entry.
+    foreach ($mappings as $path_key => $data) {
+      if ($data === null) {
+        continue;
+      }
+      $directory = dirname($path_key);
+      while ($directory !== ".") {
+        if (!array_key_exists($directory, $mappings)) {
+          $mappings[$directory] = null;
+        }
+        if (dirname($directory) === $directory) {
+          // dirname() will not reduce this directory any further; to
+          // prevent infinite loop we just break out here.
+          break;
+        }
+        $directory = dirname($directory);
+      }
+    }
+
     // Adjust the paths relative to this fragment so we can look existing
     // fragments up in the DB.
     $base_path = $this->getPath();
