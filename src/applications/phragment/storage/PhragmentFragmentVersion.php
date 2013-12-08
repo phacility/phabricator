@@ -22,7 +22,7 @@ final class PhragmentFragmentVersion extends PhragmentDAO
   }
 
   public function getURI() {
-    return '/phragment/patch/'.$this->getID().'/';
+    return '/phragment/version/'.$this->getID().'/';
   }
 
   public function getFragment() {

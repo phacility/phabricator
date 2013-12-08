@@ -6,6 +6,8 @@ final class PhragmentFragmentVersionQuery
   private $ids;
   private $phids;
   private $fragmentPHIDs;
+  private $sequences;
+  private $sequenceBefore;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -19,6 +21,16 @@ final class PhragmentFragmentVersionQuery
 
   public function withFragmentPHIDs(array $fragment_phids) {
     $this->fragmentPHIDs = $fragment_phids;
+    return $this;
+  }
+
+  public function withSequences(array $sequences) {
+    $this->sequences = $sequences;
+    return $this;
+  }
+
+  public function withSequenceBefore($current) {
+    $this->sequenceBefore = $current;
     return $this;
   }
 
@@ -59,6 +71,20 @@ final class PhragmentFragmentVersionQuery
         $conn_r,
         'fragmentPHID IN (%Ls)',
         $this->fragmentPHIDs);
+    }
+
+    if ($this->sequences) {
+      $where[] = qsprintf(
+        $conn_r,
+        'sequence IN (%Ld)',
+        $this->sequences);
+    }
+
+    if ($this->sequenceBefore !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'sequence < %d',
+        $this->sequenceBefore);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

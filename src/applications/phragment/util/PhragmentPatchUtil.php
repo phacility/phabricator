@@ -9,7 +9,7 @@ final class PhragmentPatchUtil extends Phobject {
    *
    * @phutil-external-symbol class diff_match_patch
    */
-  public function calculatePatch(
+  public static function calculatePatch(
     PhabricatorFile $old = null,
     PhabricatorFile $new = null) {
 
