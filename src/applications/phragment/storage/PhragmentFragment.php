@@ -42,6 +42,10 @@ final class PhragmentFragment extends PhragmentDAO
     return $this->latestVersionPHID === null;
   }
 
+  public function isDeleted() {
+    return $this->getLatestVersion()->getFilePHID() === null;
+  }
+
   public function getLatestVersion() {
     if ($this->latestVersionPHID === null) {
       return null;

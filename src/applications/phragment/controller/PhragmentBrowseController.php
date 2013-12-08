@@ -66,6 +66,10 @@ final class PhragmentBrowseController extends PhragmentController {
         $item->addAttribute(pht(
           'Latest Version %s',
           $fragment->getLatestVersion()->getSequence()));
+        if ($fragment->isDeleted()) {
+          $item->setDisabled(true);
+          $item->addAttribute(pht('Deleted'));
+        }
       } else {
         $item->addAttribute('Directory');
       }

@@ -134,9 +134,15 @@ abstract class PhragmentController extends PhabricatorController {
       ->setActionList($actions);
 
     if (!$fragment->isDirectory()) {
-      $properties->addProperty(
-        pht('Type'),
-        pht('File'));
+      if ($fragment->isDeleted()) {
+        $properties->addProperty(
+          pht('Type'),
+          pht('File (Deleted)'));
+      } else {
+        $properties->addProperty(
+          pht('Type'),
+          pht('File'));
+      }
       $properties->addProperty(
         pht('Latest Version'),
         $this->renderHandlesForPHIDs(array($fragment->getLatestVersionPHID())));

@@ -52,6 +52,11 @@ final class PhragmentHistoryController extends PhragmentController {
         $version->getDateCreated(),
         $viewer));
 
+      if ($version->getFilePHID() === null) {
+        $item->setDisabled(true);
+        $item->addAttribute('Deletion');
+      }
+
       $disabled = !isset($files[$version->getFilePHID()]);
       $action = id(new PHUIListItemView())
         ->setIcon('download')
