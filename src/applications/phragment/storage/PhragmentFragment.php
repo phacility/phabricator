@@ -203,7 +203,7 @@ final class PhragmentFragment extends PhragmentDAO
     $children = id(new PhragmentFragmentQuery())
       ->setViewer($viewer)
       ->needLatestVersion(true)
-      ->withPaths($paths)
+      ->withLeadingPath($this->getPath().'/')
       ->execute();
     $children = mpull($children, null, 'getPath');
 
