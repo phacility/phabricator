@@ -95,6 +95,9 @@ final class PhragmentZIPController extends PhragmentController {
 
     if (count($children) === 0) {
       $path = substr($current->getPath(), strlen($base_path) + 1);
+      if ($current->getLatestVersion() === null) {
+        return array();
+      }
       return array($path => $current->getLatestVersion()->getFilePHID());
     } else {
       $mappings = array();
