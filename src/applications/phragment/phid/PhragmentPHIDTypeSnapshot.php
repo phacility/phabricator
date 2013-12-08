@@ -1,27 +1,27 @@
 <?php
 
-final class PhragmentPHIDTypeFragment
+final class PhragmentPHIDTypeSnapshot
   extends PhabricatorPHIDType {
 
-  const TYPECONST = 'PHRF';
+  const TYPECONST = 'PHRS';
 
   public function getTypeConstant() {
     return self::TYPECONST;
   }
 
   public function getTypeName() {
-    return pht('Fragment');
+    return pht('Snapshot');
   }
 
   public function newObject() {
-    return new PhragmentFragment();
+    return new PhragmentSnapshot();
   }
 
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
 
-    return id(new PhragmentFragmentQuery())
+    return id(new PhragmentSnapshotQuery())
       ->withPHIDs($phids);
   }
 
@@ -32,13 +32,12 @@ final class PhragmentPHIDTypeFragment
 
     $viewer = $query->getViewer();
     foreach ($handles as $phid => $handle) {
-      $fragment = $objects[$phid];
+      $snapshot = $objects[$phid];
 
       $handle->setName(pht(
-        "Fragment %s: %s",
-        $fragment->getID(),
-        $fragment->getName()));
-      $handle->setURI($fragment->getURI());
+        'Snapshot: %s',
+        $snapshot->getName()));
+      $handle->setURI($snapshot->getURI());
     }
   }
 

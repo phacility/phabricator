@@ -64,6 +64,16 @@ abstract class PhragmentController extends PhabricatorController {
     $phids = array();
     $phids[] = $fragment->getLatestVersionPHID();
 
+    $snapshot_phids = array();
+    $snapshots = id(new PhragmentSnapshotQuery())
+      ->setViewer($viewer)
+      ->withPrimaryFragmentPHIDs(array($fragment->getPHID()))
+      ->execute();
+    foreach ($snapshots as $snapshot) {
+      $phids[] = $snapshot->getPHID();
+      $snapshot_phids[] = $snapshot->getPHID();
+    }
+
     $this->loadHandles($phids);
 
     $file = null;
@@ -127,6 +137,21 @@ abstract class PhragmentController extends PhabricatorController {
           ->setHref($this->getApplicationURI("history/".$fragment->getPath()))
           ->setIcon('history'));
     }
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Create Snapshot'))
+        ->setHref($this->getApplicationURI(
+          "snapshot/create/".$fragment->getPath()))
+        ->setDisabled(false) // TODO: Policy
+        ->setIcon('snapshot'));
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Promote Snapshot to Here'))
+        ->setHref($this->getApplicationURI(
+          "snapshot/promote/latest/".$fragment->getPath()))
+        ->setWorkflow(true)
+        ->setDisabled(false) // TODO: Policy
+        ->setIcon('promote'));
 
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer)
@@ -150,6 +175,12 @@ abstract class PhragmentController extends PhabricatorController {
       $properties->addProperty(
         pht('Type'),
         pht('Directory'));
+    }
+
+    if (count($snapshot_phids) > 0) {
+      $properties->addProperty(
+        pht('Snapshots'),
+        $this->renderHandlesForPHIDs($snapshot_phids));
     }
 
     return id(new PHUIObjectBoxView())

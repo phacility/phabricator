@@ -56,7 +56,7 @@ final class PhragmentBrowseController extends PhragmentController {
     foreach ($fragments as $fragment) {
       $item = id(new PHUIObjectItemView());
       $item->setHeader($fragment->getName());
-      $item->setHref($this->getApplicationURI('/browse/'.$fragment->getPath()));
+      $item->setHref($fragment->getURI());
       if (!$fragment->isDirectory()) {
         $item->addAttribute(pht(
           'Last Updated %s',

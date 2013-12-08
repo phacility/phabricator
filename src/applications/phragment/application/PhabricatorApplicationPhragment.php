@@ -39,9 +39,19 @@ final class PhabricatorApplicationPhragment extends PhabricatorApplication {
         'update/(?P<dblob>.*)' => 'PhragmentUpdateController',
         'history/(?P<dblob>.*)' => 'PhragmentHistoryController',
         'zip/(?P<dblob>.*)' => 'PhragmentZIPController',
+        'zip@(?P<snapshot>[^/]+)/(?P<dblob>.*)' => 'PhragmentZIPController',
         'version/(?P<id>[0-9]*)/' => 'PhragmentVersionController',
         'patch/(?P<aid>[0-9x]*)/(?P<bid>[0-9]*)/' => 'PhragmentPatchController',
         'revert/(?P<id>[0-9]*)/(?P<dblob>.*)' => 'PhragmentRevertController',
+        'snapshot/' => array(
+          'create/(?P<dblob>.*)' => 'PhragmentSnapshotCreateController',
+          'view/(?P<id>[0-9]*)/' => 'PhragmentSnapshotViewController',
+          'delete/(?P<id>[0-9]*)/' => 'PhragmentSnapshotDeleteController',
+          'promote/' => array(
+            'latest/(?P<dblob>.*)' => 'PhragmentSnapshotPromoteController',
+            '(?P<id>[0-9]*)/' => 'PhragmentSnapshotPromoteController',
+          ),
+        ),
       ),
     );
   }

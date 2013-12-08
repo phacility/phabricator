@@ -3,9 +3,13 @@
 final class PhragmentZIPController extends PhragmentController {
 
   private $dblob;
+  private $snapshot;
+
+  private $snapshotCache;
 
   public function willProcessRequest(array $data) {
     $this->dblob = idx($data, "dblob", "");
+    $this->snapshot = idx($data, "snapshot", null);
   }
 
   public function processRequest() {
@@ -17,6 +21,27 @@ final class PhragmentZIPController extends PhragmentController {
       return new Aphront404Response();
     }
     $fragment = idx($parents, count($parents) - 1, null);
+
+    if ($this->snapshot !== null) {
+      $snapshot = id(new PhragmentSnapshotQuery())
+        ->setViewer($viewer)
+        ->withPrimaryFragmentPHIDs(array($fragment->getPHID()))
+        ->withNames(array($this->snapshot))
+        ->executeOne();
+      if ($snapshot === null) {
+        return new Aphront404Response();
+      }
+
+      $cache = id(new PhragmentSnapshotChildQuery())
+        ->setViewer($viewer)
+        ->needFragmentVersions(true)
+        ->withSnapshotPHIDs(array($snapshot->getPHID()))
+        ->execute();
+      $this->snapshotCache = mpull(
+        $cache,
+        'getFragmentVersion',
+        'getFragmentPHID');
+    }
 
     $temp = new TempFile();
 
@@ -95,10 +120,10 @@ final class PhragmentZIPController extends PhragmentController {
 
     if (count($children) === 0) {
       $path = substr($current->getPath(), strlen($base_path) + 1);
-      if ($current->getLatestVersion() === null) {
+      if ($this->getVersion($current) === null) {
         return array();
       }
-      return array($path => $current->getLatestVersion()->getFilePHID());
+      return array($path => $this->getVersion($current)->getFilePHID());
     } else {
       $mappings = array();
       foreach ($children as $child) {
@@ -108,6 +133,14 @@ final class PhragmentZIPController extends PhragmentController {
         }
       }
       return $mappings;
+    }
+  }
+
+  private function getVersion($fragment) {
+    if ($this->snapshot === null) {
+      return $fragment->getLatestVersion();
+    } else {
+      return idx($this->snapshotCache, $fragment->getPHID(), null);
     }
   }
 

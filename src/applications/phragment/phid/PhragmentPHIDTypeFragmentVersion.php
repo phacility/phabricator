@@ -34,7 +34,10 @@ final class PhragmentPHIDTypeFragmentVersion
     foreach ($handles as $phid => $handle) {
       $version = $objects[$phid];
 
-      $handle->setName($version->getSequence());
+      $handle->setName(pht(
+        "Fragment Version %d: %s",
+        $version->getSequence(),
+        $version->getFragment()->getName()));
       $handle->setURI($version->getURI());
     }
   }

@@ -8,7 +8,7 @@ final class PhragmentFragmentQuery
   private $paths;
   private $leadingPath;
   private $depths;
-  private $needsLatestVersion;
+  private $needLatestVersion;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -36,7 +36,7 @@ final class PhragmentFragmentQuery
   }
 
   public function needLatestVersion($need_latest_version) {
-    $this->needsLatestVersion = $need_latest_version;
+    $this->needLatestVersion = $need_latest_version;
     return $this;
   }
 
@@ -99,7 +99,7 @@ final class PhragmentFragmentQuery
   }
 
   protected function didFilterPage(array $page) {
-    if ($this->needsLatestVersion) {
+    if ($this->needLatestVersion) {
       $versions = array();
 
       $version_phids = array_filter(mpull($page, 'getLatestVersionPHID'));

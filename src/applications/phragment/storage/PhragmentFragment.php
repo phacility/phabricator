@@ -23,7 +23,7 @@ final class PhragmentFragment extends PhragmentDAO
   }
 
   public function getURI() {
-    return '/phragment/fragment/'.$this->getID().'/';
+    return '/phragment/browse/'.$this->getPath();
   }
 
   public function getName() {
