@@ -96,6 +96,28 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
     return $lease;
   }
 
+  public function loadPhabricatorFile() {
+    if ($this->getArtifactType() !== self::TYPE_FILE) {
+      throw new Exception(
+        "`loadPhabricatorFile` may only be called on file artifacts.");
+    }
+
+    $data = $this->getArtifactData();
+
+    // The data for TYPE_FILE is an array with a single PHID in it.
+    $phid = $data["filePHID"];
+
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs(array($phid))
+      ->executeOne();
+    if ($file === null) {
+      throw new Exception("Associated file not found!");
+    }
+    return $file;
+  }
+
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 

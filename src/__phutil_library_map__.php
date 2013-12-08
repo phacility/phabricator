@@ -2282,6 +2282,7 @@ phutil_register_library_map(array(
     'PonderVoteSaveController' => 'applications/ponder/controller/PonderVoteSaveController.php',
     'ProjectCapabilityCreateProjects' => 'applications/project/capability/ProjectCapabilityCreateProjects.php',
     'ProjectRemarkupRule' => 'applications/project/remarkup/ProjectRemarkupRule.php',
+    'PublishFragmentBuildStepImplementation' => 'applications/harbormaster/step/PublishFragmentBuildStepImplementation.php',
     'QueryFormattingTestCase' => 'infrastructure/storage/__tests__/QueryFormattingTestCase.php',
     'ReleephAuthorFieldSpecification' => 'applications/releeph/field/specification/ReleephAuthorFieldSpecification.php',
     'ReleephBranch' => 'applications/releeph/storage/ReleephBranch.php',
@@ -4947,6 +4948,7 @@ phutil_register_library_map(array(
     'PonderVoteSaveController' => 'PonderController',
     'ProjectCapabilityCreateProjects' => 'PhabricatorPolicyCapability',
     'ProjectRemarkupRule' => 'PhabricatorRemarkupRuleObject',
+    'PublishFragmentBuildStepImplementation' => 'VariableBuildStepImplementation',
     'QueryFormattingTestCase' => 'PhabricatorTestCase',
     'ReleephAuthorFieldSpecification' => 'ReleephFieldSpecification',
     'ReleephBranch' =>

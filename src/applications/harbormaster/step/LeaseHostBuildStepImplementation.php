@@ -53,7 +53,7 @@ final class LeaseHostBuildStepImplementation
     $settings = $this->getSettings();
 
     return array(
-      $settings['name'] => 'host');
+      $settings['name'] => HarbormasterBuildArtifact::TYPE_HOST);
   }
 
   public function validateSettings() {

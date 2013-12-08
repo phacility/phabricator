@@ -51,6 +51,13 @@ final class UploadArtifactBuildStepImplementation
     $artifact->save();
   }
 
+  public function getArtifactMappings() {
+    $settings = $this->getSettings();
+
+    return array(
+      $settings['name'] => HarbormasterBuildArtifact::TYPE_FILE);
+  }
+
   public function validateSettings() {
     $settings = $this->getSettings();
 
