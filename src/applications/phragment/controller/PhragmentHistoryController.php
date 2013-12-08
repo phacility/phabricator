@@ -44,6 +44,7 @@ final class PhragmentHistoryController extends PhragmentController {
       ->execute();
     $files = mpull($files, null, 'getPHID');
 
+    $first = true;
     foreach ($versions as $version) {
       $item = id(new PHUIObjectItemView());
       $item->setHeader('Version '.$version->getSequence());
@@ -57,6 +58,16 @@ final class PhragmentHistoryController extends PhragmentController {
         $item->addAttribute('Deletion');
       }
 
+      if (!$first) {
+        $item->addAction(id(new PHUIListItemView())
+          ->setIcon('undo')
+          ->setRenderNameAsTooltip(true)
+          ->setWorkflow(true)
+          ->setName(pht("Revert to Here"))
+          ->setHref($this->getApplicationURI(
+            "revert/".$version->getID()."/".$current->getPath())));
+      }
+
       $disabled = !isset($files[$version->getFilePHID()]);
       $action = id(new PHUIListItemView())
         ->setIcon('download')
@@ -68,6 +79,8 @@ final class PhragmentHistoryController extends PhragmentController {
       }
       $item->addAction($action);
       $list->addItem($item);
+
+      $first = false;
     }
 
     return $this->buildApplicationPage(
