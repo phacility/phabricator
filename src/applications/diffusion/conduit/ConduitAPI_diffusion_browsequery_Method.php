@@ -100,6 +100,15 @@ final class ConduitAPI_diffusion_browsequery_Method
 
     $results = array();
     foreach (explode("\0", rtrim($stdout)) as $line) {
+      if (substr_count($line, ' ') < 4) {
+        throw new Exception(
+          pht(
+            'Expected "<mode> <type> <hash> <size> <name>", for ls-tree of '.
+            '"%s:%s", got: %s',
+            $commit,
+            $path,
+            $line));
+      }
 
       // NOTE: Limit to 5 components so we parse filenames with spaces in them
       // correctly.
