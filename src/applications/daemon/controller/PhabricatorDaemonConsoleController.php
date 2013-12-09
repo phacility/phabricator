@@ -7,13 +7,23 @@ final class PhabricatorDaemonConsoleController
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    $window_start = (time() - (60 * 15));
+
+    // Assume daemons spend about 250ms second in overhead per task acquiring
+    // leases and doing other bookkeeping. This is probably an over-estimation,
+    // but we'd rather show that utilization is too high than too low.
+    $lease_overhead = 0.250;
+
     $completed = id(new PhabricatorWorkerArchiveTask())->loadAllWhere(
       'dateModified > %d',
-      time() - (60 * 15));
+      $window_start);
 
     $failed = id(new PhabricatorWorkerActiveTask())->loadAllWhere(
       'failureTime > %d',
-      time() - (60 * 15));
+      $window_start);
+
+    $usage_total = 0;
+    $usage_start = PHP_INT_MAX;
 
     $completed_info = array();
     foreach ($completed as $completed_task) {
@@ -27,6 +37,11 @@ final class PhabricatorDaemonConsoleController
       $completed_info[$class]['n']++;
       $duration = $completed_task->getDuration();
       $completed_info[$class]['duration'] += $duration;
+
+      // NOTE: Duration is in microseconds, but we're just using seconds to
+      // compute utilization.
+      $usage_total += $lease_overhead + ($duration / 1000000);
+      $usage_start = min($usage_start, $completed_task->getDateModified());
     }
 
     $completed_info = isort($completed_info, 'n');
@@ -41,9 +56,46 @@ final class PhabricatorDaemonConsoleController
     }
 
     if ($failed) {
+      // Add the time it takes to restart the daemons. This includes a guess
+      // about other overhead of 2X.
+      $usage_total += PhutilDaemonOverseer::RESTART_WAIT * count($failed) * 2;
+      foreach ($failed as $failed_task) {
+        $usage_start = min($usage_start, $failed_task->getFailureTime());
+      }
+
       $rows[] = array(
         phutil_tag('em', array(), pht('Temporary Failures')),
         count($failed),
+        null,
+      );
+    }
+
+    $logs = id(new PhabricatorDaemonLogQuery())
+      ->setViewer($user)
+      ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
+      ->execute();
+
+    $taskmasters = 0;
+    foreach ($logs as $log) {
+      if ($log->getDaemon() == 'PhabricatorTaskmasterDaemon') {
+        $taskmasters++;
+      }
+    }
+
+    if ($taskmasters && $usage_total) {
+      // Total number of wall-time seconds the daemons have been running since
+      // the oldest event. For very short times round up to 15s so we don't
+      // render any ridiculous numbers if you reload the page immediately after
+      // restarting the daemons.
+      $available_time = $taskmasters * max(15, (time() - $usage_start));
+
+      // Percentage of those wall-time seconds we can account for, which the
+      // daemons spent doing work:
+      $used_time = ($usage_total / $available_time);
+
+      $rows[] = array(
+        phutil_tag('em', array(), pht('Queue Utilization (Approximate)')),
+        sprintf('%.1f%%', 100 * $used_time),
         null,
       );
     }
@@ -70,11 +122,6 @@ final class PhabricatorDaemonConsoleController
     $completed_panel = new AphrontPanelView();
     $completed_panel->appendChild($completed_table);
     $completed_panel->setNoBackground();
-
-    $logs = id(new PhabricatorDaemonLogQuery())
-      ->setViewer($user)
-      ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
-      ->execute();
 
     $daemon_header = id(new PHUIHeaderView())
       ->setHeader(pht('Active Daemons'));
