@@ -69,9 +69,8 @@ final class DifferentialLandingToGitHub
       return;
     }
 
-    return $this->createActionView(
-      $revision,
-      pht('Land to GitHub'));
+    return $this->createActionView($revision, pht('Land to GitHub'))
+      ->setIcon('octocat');
   }
 
   public function pushWorkspaceRepository(
