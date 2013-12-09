@@ -60,7 +60,7 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
         'SELECT id, leaseOwner FROM %T %Q %Q %Q',
         $task_table->getTableName(),
         $this->buildWhereClause($conn_w, $phase),
-        $this->buildOrderClause($conn_w),
+        $this->buildOrderClause($conn_w, $phase),
         $this->buildLimitClause($conn_w, $limit - $leased));
 
       // NOTE: Sometimes, we'll race with another worker and they'll grab
@@ -102,7 +102,7 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
       $task_table->getTableName(),
       $taskdata_table->getTableName(),
       $lease_ownership_name,
-      $this->buildOrderClause($conn_w),
+      $this->buildOrderClause($conn_w, $phase),
       $this->buildLimitClause($conn_w, $limit));
 
     $tasks = $task_table->loadAllFromArray($data);
@@ -188,8 +188,26 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
 
   }
 
-  private function buildOrderClause(AphrontDatabaseConnection $conn_w) {
-    return qsprintf($conn_w, 'ORDER BY id ASC');
+  private function buildOrderClause(AphrontDatabaseConnection $conn_w, $phase) {
+    switch ($phase) {
+      case self::PHASE_UNLEASED:
+        // When selecting new tasks, we want to consume them in roughly
+        // FIFO order, so we order by the task ID.
+        return qsprintf($conn_w, 'ORDER BY id ASC');
+      case self::PHASE_EXPIRED:
+        // When selecting failed tasks, we want to consume them in roughly
+        // FIFO order of their failures, which is not necessarily their original
+        // queue order.
+
+        // Particularly, this is important for tasks which use soft failures to
+        // indicate that they are waiting on other tasks to complete: we need to
+        // push them to the end of the queue after they fail, at least on
+        // average, so we don't deadlock retrying the same blocked task over
+        // and over again.
+        return qsprintf($conn_w, 'ORDER BY leaseExpires ASC');
+      default:
+        throw new Exception(pht('Unknown phase "%s"!', $phase));
+    }
   }
 
   private function buildLimitClause(AphrontDatabaseConnection $conn_w, $limit) {

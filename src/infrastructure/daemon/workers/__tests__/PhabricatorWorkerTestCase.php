@@ -49,7 +49,6 @@ final class PhabricatorWorkerTestCase extends PhabricatorTestCase {
     $this->expectNextLease($task1);
   }
 
-
   public function testExecuteTask() {
     $task = $this->scheduleAndExecuteTask();
 
@@ -153,6 +152,24 @@ final class PhabricatorWorkerTestCase extends PhabricatorTestCase {
       ));
 
     $this->assertEqual(true, ($task->getLeaseExpires() - time()) > 1000);
+  }
+
+  public function testLeasedIsOldestFirst() {
+    // Tasks which expired earlier should lease first, all else being equal.
+
+    $task1 = $this->scheduleTask();
+    $task2 = $this->scheduleTask();
+
+    $task1->setLeaseOwner('test');
+    $task1->setLeaseExpires(time() - 100000);
+    $task1->forceSaveWithoutLease();
+
+    $task2->setLeaseOwner('test');
+    $task2->setLeaseExpires(time() - 200000);
+    $task2->forceSaveWithoutLease();
+
+    $this->expectNextLease($task2);
+    $this->expectNextLease($task1);
   }
 
   private function expectNextLease($task) {
