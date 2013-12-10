@@ -2366,6 +2366,7 @@ phutil_register_library_map(array(
     'SlowvoteRemarkupRule' => 'applications/slowvote/remarkup/SlowvoteRemarkupRule.php',
     'UploadArtifactBuildStepImplementation' => 'applications/harbormaster/step/UploadArtifactBuildStepImplementation.php',
     'VariableBuildStepImplementation' => 'applications/harbormaster/step/VariableBuildStepImplementation.php',
+    'WaitForPreviousBuildStepImplementation' => 'applications/harbormaster/step/WaitForPreviousBuildStepImplementation.php',
   ),
   'function' =>
   array(
@@ -5056,5 +5057,6 @@ phutil_register_library_map(array(
     'SlowvoteRemarkupRule' => 'PhabricatorRemarkupRuleObject',
     'UploadArtifactBuildStepImplementation' => 'VariableBuildStepImplementation',
     'VariableBuildStepImplementation' => 'BuildStepImplementation',
+    'WaitForPreviousBuildStepImplementation' => 'BuildStepImplementation',
   ),
 ));

@@ -52,8 +52,8 @@ final class HarbormasterBuildableViewController
             $item->addAttribute(pht('Pending'));
             break;
           case HarbormasterBuild::STATUS_WAITING:
-            $item->setBarColor('blue');
-            $item->addAttribute(pht('Waiting on Resource'));
+            $item->setBarColor('violet');
+            $item->addAttribute(pht('Waiting'));
             break;
           case HarbormasterBuild::STATUS_BUILDING:
             $item->setBarColor('yellow');

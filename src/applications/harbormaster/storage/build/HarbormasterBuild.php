@@ -94,6 +94,13 @@ final class HarbormasterBuild extends HarbormasterDAO
     return $this->assertAttached($this->buildPlan);
   }
 
+  public function isBuilding() {
+    return $this->getBuildStatus() === self::STATUS_PENDING ||
+      $this->getBuildStatus() === self::STATUS_WAITING ||
+      $this->getBuildStatus() === self::STATUS_BUILDING ||
+      $this->getCancelRequested();
+  }
+
   public function createLog(
     HarbormasterBuildTarget $build_target,
     $log_source,
