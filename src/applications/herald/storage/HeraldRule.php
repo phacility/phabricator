@@ -16,7 +16,7 @@ final class HeraldRule extends HeraldDAO
   protected $ruleType;
   protected $isDisabled = 0;
 
-  protected $configVersion = 14;
+  protected $configVersion = 15;
 
   private $ruleApplied = self::ATTACHABLE; // phids for which this rule has been applied
   private $validAuthor = self::ATTACHABLE;
