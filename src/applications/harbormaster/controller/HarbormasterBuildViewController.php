@@ -49,7 +49,10 @@ final class HarbormasterBuildViewController
     $targets = array();
     foreach ($build_targets as $build_target) {
       $header = id(new PHUIHeaderView())
-        ->setHeader(pht('Build Target %d', $build_target->getID()))
+        ->setHeader(pht(
+          'Build Target %d (%s)',
+          $build_target->getID(),
+          $build_target->getImplementation()->getName()))
         ->setUser($viewer);
       $properties = new PHUIPropertyListView();
 
@@ -280,7 +283,7 @@ final class HarbormasterBuildViewController
       case HarbormasterBuild::STATUS_PENDING:
         return pht('Pending');
       case HarbormasterBuild::STATUS_WAITING:
-        return pht('Waiting on Resource');
+        return pht('Waiting');
       case HarbormasterBuild::STATUS_BUILDING:
         return pht('Building');
       case HarbormasterBuild::STATUS_PASSED:

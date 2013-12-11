@@ -2,7 +2,7 @@
 
 final class PassphraseCredentialControl extends AphrontFormControl {
 
-  private $options;
+  private $options = array();
   private $credentialType;
   private $defaultUsername;
   private $allowNull;

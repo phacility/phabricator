@@ -50,10 +50,29 @@ final class PhabricatorMetaMTAEmailBodyParser {
   }
 
   private function stripQuotedText($body) {
-    $body = preg_replace(
-      '/^\s*>?\s*On\b.*\bwrote:.*?/msU',
-      '',
-      $body);
+
+    // Look for "On <date>, <user> wrote:". This may be split across multiple
+    // lines. We need to be careful not to remove all of a message like this:
+    //
+    //   On which day do you want to meet?
+    //
+    //   On <date>, <user> wrote:
+    //   > Let's set up a meeting.
+
+    $start = null;
+    $lines = phutil_split_lines($body);
+    foreach ($lines as $key => $line) {
+      if (preg_match('/^\s*>?\s*On\b/', $line)) {
+        $start = $key;
+      }
+      if ($start !== null) {
+        if (preg_match('/\bwrote:/', $line)) {
+          $lines = array_slice($lines, 0, $start);
+          $body = implode('', $lines);
+          break;
+        }
+      }
+    }
 
     // Outlook english
     $body = preg_replace(

@@ -53,7 +53,7 @@ abstract class BuildStepImplementation {
   /**
    * Validate the current settings of this build step.
    */
-  public function validate() {
+  public function validateSettings() {
     return true;
   }
 

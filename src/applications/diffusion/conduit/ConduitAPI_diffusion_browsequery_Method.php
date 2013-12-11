@@ -100,10 +100,22 @@ final class ConduitAPI_diffusion_browsequery_Method
 
     $results = array();
     foreach (explode("\0", rtrim($stdout)) as $line) {
-
       // NOTE: Limit to 5 components so we parse filenames with spaces in them
       // correctly.
-      list($mode, $type, $hash, $size, $name) = preg_split('/\s+/', $line, 5);
+      // NOTE: The output uses a mixture of tabs and one-or-more spaces to
+      // delimit fields.
+      $parts = preg_split('/\s+/', $line, 5);
+      if (count($parts) < 5) {
+        throw new Exception(
+          pht(
+            'Expected "<mode> <type> <hash> <size>\t<name>", for ls-tree of '.
+            '"%s:%s", got: %s',
+            $commit,
+            $path,
+            $line));
+      }
+
+      list($mode, $type, $hash, $size, $name) = $parts;
 
       $path_result = new DiffusionRepositoryPath();
 
