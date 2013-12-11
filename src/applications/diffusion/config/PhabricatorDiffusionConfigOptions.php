@@ -109,6 +109,13 @@ final class PhabricatorDiffusionConfigOptions
             'When constructing clone URIs to show to users, Diffusion will '.
             'fill in this login username. If you have configured a VCS user '.
             'like `git`, you should provide it here.')),
+      $this->newOption('diffusion.ssh-port', 'int', null)
+        ->setSummary(pht('Port for SSH connections to repositories.'))
+        ->setDescription(
+          pht(
+            'When constructing clone URIs to show to users, Diffusion by '.
+            'default will not display a port assuming the default for your '.
+            'VCS. Explicitly declare when running on a non-standard port.')),
     );
   }
 
