@@ -276,6 +276,38 @@ final class PhragmentFragment extends PhragmentDAO
   }
 
 
+/* -(  Utility  )  ---------------------------------------------------------- */
+
+
+  public function getFragmentMappings(
+    PhabricatorUser $viewer,
+    $base_path) {
+
+    $children = id(new PhragmentFragmentQuery())
+      ->setViewer($viewer)
+      ->needLatestVersion(true)
+      ->withLeadingPath($this->getPath().'/')
+      ->withDepths(array($this->getDepth() + 1))
+      ->execute();
+
+    if (count($children) === 0) {
+      $path = substr($this->getPath(), strlen($base_path) + 1);
+      return array($path => $this);
+    } else {
+      $mappings = array();
+      foreach ($children as $child) {
+        $child_mappings = $child->getFragmentMappings(
+          $viewer,
+          $base_path);
+        foreach ($child_mappings as $key => $value) {
+          $mappings[$key] = $value;
+        }
+      }
+      return $mappings;
+    }
+  }
+
+
 /* -(  Policy Interface  )--------------------------------------------------- */
 
 

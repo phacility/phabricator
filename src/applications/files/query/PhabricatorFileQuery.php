@@ -13,6 +13,7 @@ final class PhabricatorFileQuery
   private $transforms;
   private $dateCreatedAfter;
   private $dateCreatedBefore;
+  private $contentHashes;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -36,6 +37,11 @@ final class PhabricatorFileQuery
 
   public function withDateCreatedAfter($date_created_after) {
     $this->dateCreatedAfter = $date_created_after;
+    return $this;
+  }
+
+  public function withContentHashes(array $content_hashes) {
+    $this->contentHashes = $content_hashes;
     return $this;
   }
 
@@ -226,6 +232,13 @@ final class PhabricatorFileQuery
         $conn_r,
         'f.dateCreated <= %d',
         $this->dateCreatedBefore);
+    }
+
+    if ($this->contentHashes) {
+      $where[] = qsprintf(
+        $conn_r,
+        'f.contentHash IN (%Ls)',
+        $this->contentHashes);
     }
 
     return $this->formatWhereClause($where);

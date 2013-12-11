@@ -111,29 +111,18 @@ final class PhragmentZIPController extends PhragmentController {
    * Returns a list of mappings like array('some/path.txt' => 'file PHID');
    */
   private function getFragmentMappings(PhragmentFragment $current, $base_path) {
-    $children = id(new PhragmentFragmentQuery())
-      ->setViewer($this->getRequest()->getUser())
-      ->needLatestVersion(true)
-      ->withLeadingPath($current->getPath().'/')
-      ->withDepths(array($current->getDepth() + 1))
-      ->execute();
+    $mappings = $current->getFragmentMappings(
+      $this->getRequest()->getUser(),
+      $base_path);
 
-    if (count($children) === 0) {
-      $path = substr($current->getPath(), strlen($base_path) + 1);
-      if ($this->getVersion($current) === null) {
-        return array();
+    $result = array();
+    foreach ($mappings as $path => $fragment) {
+      $version = $this->getVersion($fragment);
+      if ($version !== null) {
+        $result[$path] = $version->getFilePHID();
       }
-      return array($path => $this->getVersion($current)->getFilePHID());
-    } else {
-      $mappings = array();
-      foreach ($children as $child) {
-        $child_mappings = $this->getFragmentMappings($child, $base_path);
-        foreach ($child_mappings as $key => $value) {
-          $mappings[$key] = $value;
-        }
-      }
-      return $mappings;
     }
+    return $result;
   }
 
   private function getVersion($fragment) {
