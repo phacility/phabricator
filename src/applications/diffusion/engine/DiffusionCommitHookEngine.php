@@ -256,8 +256,19 @@ final class DiffusionCommitHookEngine extends Phobject {
     }
 
     foreach (Futures($futures)->limit(8) as $key => $future) {
-      list($stdout) = $future->resolvex();
-      $updates[$key]['merge-base'] = rtrim($stdout, "\n");
+
+      // If 'old' and 'new' have no common ancestors (for example, a force push
+      // which completely rewrites a ref), `git merge-base` will exit with
+      // an error and no output. It would be nice to find a positive test
+      // for this instead, but I couldn't immediately come up with one. See
+      // T4224. Assume this means there are no ancestors.
+
+      list($err, $stdout) = $future->resolve();
+      if ($err) {
+        $updates[$key]['merge-base'] = null;
+      } else {
+        $updates[$key]['merge-base'] = rtrim($stdout, "\n");
+      }
     }
 
     return $updates;
