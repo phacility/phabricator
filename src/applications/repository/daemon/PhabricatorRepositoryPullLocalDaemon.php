@@ -842,8 +842,8 @@ final class PhabricatorRepositoryPullLocalDaemon
       }
 
       $future = $proxy->getRemoteCommandFuture(
-        'push --verbose --mirror -- %s',
-        $proxy->getRemoteURI());
+        'push --verbose --mirror -- %P',
+        $proxy->getRemoteURIEnvelope());
 
       $future
         ->setCWD($proxy->getLocalPath())

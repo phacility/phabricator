@@ -188,8 +188,8 @@ final class PhabricatorRepositoryPullEngine
         $path);
     } else {
       $repository->execxRemoteCommand(
-        'clone --bare -- %s %s',
-        $repository->getRemoteURI(),
+        'clone --bare -- %P %s',
+        $repository->getRemoteURIEnvelope(),
         $path);
     }
   }
@@ -337,8 +337,8 @@ final class PhabricatorRepositoryPullEngine
         $path);
     } else {
       $repository->execxRemoteCommand(
-        'clone --noupdate -- %s %s',
-        $repository->getRemoteURI(),
+        'clone --noupdate -- %P %s',
+        $repository->getRemoteURIEnvelope(),
         $path);
     }
   }

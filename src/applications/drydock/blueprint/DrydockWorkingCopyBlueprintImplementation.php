@@ -63,8 +63,8 @@ final class DrydockWorkingCopyBlueprintImplementation
 
     $cmd = $host_lease->getInterface('command');
     $cmd->execx(
-      'git clone --origin origin %s %s',
-      $repository->getRemoteURI(),
+      'git clone --origin origin %P %s',
+      $repository->getRemoteURIEnvelope(),
       $path);
 
     $this->log(pht('Complete.'));
