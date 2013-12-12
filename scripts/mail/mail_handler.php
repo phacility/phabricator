@@ -1,13 +1,36 @@
 #!/usr/bin/env php
 <?php
 
+// NOTE: This script is very oldschool and takes the environment as an argument.
+// Some day, we could take a shot at cleaning this up.
 if ($argc > 1) {
-  $_SERVER['PHABRICATOR_ENV'] = $argv[1];
+  foreach (array_slice($argv, 1) as $arg) {
+    if (!preg_match('/^-/', $arg)) {
+      $_SERVER['PHABRICATOR_ENV'] = $arg;
+      break;
+    }
+  }
 }
 
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 require_once $root.'/externals/mimemailparser/MimeMailParser.class.php';
+
+$args = new PhutilArgumentParser($argv);
+$args->parseStandardArguments();
+$args->parse(
+  array(
+    array(
+      'name' => 'process-duplicates',
+      'help' => pht(
+        "Process this message, even if it's a duplicate of another message. ".
+        "This is mostly useful when debugging issues with mail routing."),
+    ),
+    array(
+      'name' => 'env',
+      'wildcard' => true,
+    ),
+  ));
 
 $parser = new MimeMailParser();
 $parser->setText(file_get_contents('php://stdin'));
@@ -27,6 +50,10 @@ if (
 $headers = $parser->getHeaders();
 $headers['subject'] = iconv_mime_decode($headers['subject'], 0, "UTF-8");
 $headers['from'] = iconv_mime_decode($headers['from'], 0, "UTF-8");
+
+if ($args->getArg('process-duplicates')) {
+  $headers['message-id'] = Filesystem::readRandomCharacters(64);
+}
 
 $received = new PhabricatorMetaMTAReceivedMail();
 $received->setHeaders($headers);
@@ -62,6 +89,8 @@ try {
   $received
     ->setMessage('EXCEPTION: '.$e->getMessage())
     ->save();
+
+  throw $e;
 }
 
 
