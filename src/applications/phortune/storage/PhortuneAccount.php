@@ -46,7 +46,12 @@ final class PhortuneAccount extends PhortuneDAO
   }
 
   public function getPolicy($capability) {
-    return PhabricatorPolicies::POLICY_NOONE;
+    if ($this->getPHID() === null) {
+      // Allow a user to create an account for themselves.
+      return PhabricatorPolicies::POLICY_USER;
+    } else {
+      return PhabricatorPolicies::POLICY_NOONE;
+    }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
