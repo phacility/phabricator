@@ -4,6 +4,10 @@ final class PhragmentVersionController extends PhragmentController {
 
   private $id;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->id = idx($data, "id", 0);
   }
@@ -41,7 +45,7 @@ final class PhragmentVersionController extends PhragmentController {
       ->withPHIDs(array($version->getFilePHID()))
       ->executeOne();
     if ($file !== null) {
-      $file_uri = $file->getBestURI();
+      $file_uri = $file->getDownloadURI();
     }
 
     $header = id(new PHUIHeaderView())
@@ -59,8 +63,8 @@ final class PhragmentVersionController extends PhragmentController {
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Download Version'))
-        ->setHref($file_uri)
-        ->setDisabled($file === null)
+        ->setDisabled($file === null || !$this->isCorrectlyConfigured())
+        ->setHref($this->isCorrectlyConfigured() ? $file_uri : null)
         ->setIcon('download'));
 
     $properties = id(new PHUIPropertyListView())
@@ -78,6 +82,7 @@ final class PhragmentVersionController extends PhragmentController {
     return $this->buildApplicationPage(
       array(
         $crumbs,
+        $this->renderConfigurationWarningIfRequired(),
         $box,
         $this->renderPatchFromPreviousVersion($version, $file),
         $this->renderPreviousVersionList($version)),
@@ -155,11 +160,13 @@ final class PhragmentVersionController extends PhragmentController {
       $item->addAttribute(phabricator_datetime(
         $previous_version->getDateCreated(),
         $viewer));
+      $patch_uri = $this->getApplicationURI(
+        'patch/'.$previous_version->getID().'/'.$version->getID());
       $item->addAction(id(new PHUIListItemView())
         ->setIcon('patch')
         ->setName(pht("Get Patch"))
-        ->setHref($this->getApplicationURI(
-          'patch/'.$previous_version->getID().'/'.$version->getID())));
+        ->setHref($this->isCorrectlyConfigured() ? $patch_uri : null)
+        ->setDisabled(!$this->isCorrectlyConfigured()));
       $list->addItem($item);
     }
 

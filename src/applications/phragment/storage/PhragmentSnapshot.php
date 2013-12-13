@@ -48,9 +48,7 @@ final class PhragmentSnapshot extends PhragmentDAO
 
 
   public function getCapabilities() {
-    return array(
-      PhabricatorPolicyCapability::CAN_VIEW
-    );
+    return $this->getPrimaryFragment()->getCapabilities();
   }
 
   public function getPolicy($capability) {

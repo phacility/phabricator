@@ -40,7 +40,7 @@ final class PhabricatorActionView extends AphrontView {
    * viewing.
    */
   public function getHref() {
-    if ($this->workflow || $this->renderAsForm) {
+    if (($this->workflow || $this->renderAsForm) && !$this->download) {
       if (!$this->user || !$this->user->isLoggedIn()) {
         return id(new PhutilURI('/auth/start/'))
           ->setQueryParam('next', (string)$this->getObjectURI());

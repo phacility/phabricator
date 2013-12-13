@@ -2180,6 +2180,7 @@ phutil_register_library_map(array(
     'PhortuneTestPaymentProvider' => 'applications/phortune/provider/PhortuneTestPaymentProvider.php',
     'PhortuneWePayPaymentProvider' => 'applications/phortune/provider/PhortuneWePayPaymentProvider.php',
     'PhragmentBrowseController' => 'applications/phragment/controller/PhragmentBrowseController.php',
+    'PhragmentCapabilityCanCreate' => 'applications/phragment/capability/PhragmentCapabilityCanCreate.php',
     'PhragmentController' => 'applications/phragment/controller/PhragmentController.php',
     'PhragmentCreateController' => 'applications/phragment/controller/PhragmentCreateController.php',
     'PhragmentDAO' => 'applications/phragment/storage/PhragmentDAO.php',
@@ -2193,6 +2194,7 @@ phutil_register_library_map(array(
     'PhragmentPHIDTypeSnapshot' => 'applications/phragment/phid/PhragmentPHIDTypeSnapshot.php',
     'PhragmentPatchController' => 'applications/phragment/controller/PhragmentPatchController.php',
     'PhragmentPatchUtil' => 'applications/phragment/util/PhragmentPatchUtil.php',
+    'PhragmentPolicyController' => 'applications/phragment/controller/PhragmentPolicyController.php',
     'PhragmentRevertController' => 'applications/phragment/controller/PhragmentRevertController.php',
     'PhragmentSnapshot' => 'applications/phragment/storage/PhragmentSnapshot.php',
     'PhragmentSnapshotChild' => 'applications/phragment/storage/PhragmentSnapshotChild.php',
@@ -4790,6 +4792,7 @@ phutil_register_library_map(array(
     'PhortuneTestPaymentProvider' => 'PhortunePaymentProvider',
     'PhortuneWePayPaymentProvider' => 'PhortunePaymentProvider',
     'PhragmentBrowseController' => 'PhragmentController',
+    'PhragmentCapabilityCanCreate' => 'PhabricatorPolicyCapability',
     'PhragmentController' => 'PhabricatorController',
     'PhragmentCreateController' => 'PhragmentController',
     'PhragmentDAO' => 'PhabricatorLiskDAO',
@@ -4811,6 +4814,7 @@ phutil_register_library_map(array(
     'PhragmentPHIDTypeSnapshot' => 'PhabricatorPHIDType',
     'PhragmentPatchController' => 'PhragmentController',
     'PhragmentPatchUtil' => 'Phobject',
+    'PhragmentPolicyController' => 'PhragmentController',
     'PhragmentRevertController' => 'PhragmentController',
     'PhragmentSnapshot' =>
     array(

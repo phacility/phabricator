@@ -123,6 +123,7 @@ final class PhragmentCreateController extends PhragmentController {
     return $this->buildApplicationPage(
       array(
         $crumbs,
+        $this->renderConfigurationWarningIfRequired(),
         $box),
       array(
         'title' => pht('Create Fragment'),

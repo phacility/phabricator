@@ -37,6 +37,7 @@ final class PhabricatorApplicationPhragment extends PhabricatorApplication {
         'browse/(?P<dblob>.*)' => 'PhragmentBrowseController',
         'create/(?P<dblob>.*)' => 'PhragmentCreateController',
         'update/(?P<dblob>.*)' => 'PhragmentUpdateController',
+        'policy/(?P<dblob>.*)' => 'PhragmentPolicyController',
         'history/(?P<dblob>.*)' => 'PhragmentHistoryController',
         'zip/(?P<dblob>.*)' => 'PhragmentZIPController',
         'zip@(?P<snapshot>[^/]+)/(?P<dblob>.*)' => 'PhragmentZIPController',
@@ -52,6 +53,13 @@ final class PhabricatorApplicationPhragment extends PhabricatorApplication {
             '(?P<id>[0-9]*)/' => 'PhragmentSnapshotPromoteController',
           ),
         ),
+      ),
+    );
+  }
+
+  protected function getCustomCapabilities() {
+    return array(
+      PhragmentCapabilityCanCreate::CAPABILITY => array(
       ),
     );
   }

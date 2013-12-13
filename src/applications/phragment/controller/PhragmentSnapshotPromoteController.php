@@ -23,6 +23,9 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
     if ($this->dblob !== null) {
       $this->targetFragment = id(new PhragmentFragmentQuery())
         ->setViewer($viewer)
+        ->requireCapabilities(array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT))
         ->withPaths(array($this->dblob))
         ->executeOne();
       if ($this->targetFragment === null) {
@@ -40,6 +43,9 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
     if ($this->id !== null) {
       $this->targetSnapshot = id(new PhragmentSnapshotQuery())
         ->setViewer($viewer)
+        ->requireCapabilities(array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT))
         ->withIDs(array($this->id))
         ->executeOne();
       if ($this->targetSnapshot === null) {
@@ -141,7 +147,13 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
         }
       $snapshot->saveTransaction();
 
-      return id(new AphrontRedirectResponse());
+      if ($this->id === null) {
+        return id(new AphrontRedirectResponse())
+          ->setURI($this->targetFragment->getURI());
+      } else {
+        return id(new AphrontRedirectResponse())
+          ->setURI($this->targetSnapshot->getURI());
+      }
     }
 
     return $this->createDialog();
