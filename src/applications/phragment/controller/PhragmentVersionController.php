@@ -84,58 +84,10 @@ final class PhragmentVersionController extends PhragmentController {
         $crumbs,
         $this->renderConfigurationWarningIfRequired(),
         $box,
-        $this->renderPatchFromPreviousVersion($version, $file),
         $this->renderPreviousVersionList($version)),
       array(
         'title' => pht('View Version'),
         'device' => true));
-  }
-
-  private function renderPatchFromPreviousVersion(
-    PhragmentFragmentVersion $version,
-    PhabricatorFile $file) {
-
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    $previous_file = null;
-    $previous = id(new PhragmentFragmentVersionQuery())
-      ->setViewer($viewer)
-      ->withFragmentPHIDs(array($version->getFragmentPHID()))
-      ->withSequences(array($version->getSequence() - 1))
-      ->executeOne();
-    if ($previous !== null) {
-      $previous_file = id(new PhabricatorFileQuery())
-        ->setViewer($viewer)
-        ->withPHIDs(array($previous->getFilePHID()))
-        ->executeOne();
-    }
-
-    $patch = PhragmentPatchUtil::calculatePatch($previous_file, $file);
-
-    if ($patch === null) {
-      return id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setTitle(pht("Identical Version"))
-        ->appendChild(phutil_tag(
-          'p',
-          array(),
-          pht("This version is identical to the previous version.")));
-    }
-
-    if (strlen($patch) > 20480) {
-      // Patch is longer than 20480 characters.  Trim it and let the user know.
-      $patch = substr($patch, 0, 20480)."\n...\n";
-      $patch .= pht(
-        "This patch is longer than 20480 characters.  Use the link ".
-        "in the action list to download the full patch.");
-    }
-
-    return id(new PHUIObjectBoxView())
-      ->setHeader(id(new PHUIHeaderView())
-        ->setHeader(pht('Differences since previous version')))
-      ->appendChild(id(new PhabricatorSourceCodeView())
-        ->setLines(phutil_split_lines($patch)));
   }
 
   private function renderPreviousVersionList(
