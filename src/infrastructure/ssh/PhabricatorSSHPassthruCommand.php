@@ -76,13 +76,6 @@ final class PhabricatorSSHPassthruCommand extends Phobject {
 
   public function writeErrorIOCallback(PhutilChannel $channel, $data) {
     $this->errorChannel->write($data);
-
-    // TODO: Because of the way `waitForAny()` works, we degrade to a busy
-    // wait if we hand it a writable, write-only channel. We should handle this
-    // case better in `waitForAny()`. For now, just flush the error channel
-    // explicity after writing data over it.
-
-    $this->errorChannel->flush();
   }
 
   public function execute() {
@@ -105,9 +98,7 @@ final class PhabricatorSSHPassthruCommand extends Phobject {
     $channels = array($command_channel, $io_channel, $error_channel);
 
     while (true) {
-      // TODO: See note in writeErrorIOCallback!
-      $wait = array($command_channel, $io_channel);
-      PhutilChannel::waitForAny($wait);
+      PhutilChannel::waitForAny($channels);
 
       $io_channel->update();
       $command_channel->update();
