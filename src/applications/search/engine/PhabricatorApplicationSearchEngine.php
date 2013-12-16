@@ -274,7 +274,6 @@ abstract class PhabricatorApplicationSearchEngine {
     $user_type = PhabricatorPHIDConstants::PHID_TYPE_USER;
     foreach ($list as $item) {
       $type = phid_get_type($item);
-      phlog($type);
       if ($type == $user_type) {
         $phids[] = $item;
       } else if (isset($allow_types[$type])) {

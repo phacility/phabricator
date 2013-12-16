@@ -147,6 +147,10 @@ final class PhabricatorApplicationSearchController
       $named_query = idx($engine->loadEnabledNamedQueries(), $query_key);
     } else {
       $saved_query = $engine->buildSavedQueryFromRequest($request);
+
+      // Save the query to generate a query key, so "Save Custom Query..." and
+      // other features like Maniphest's "Export..." work correctly.
+      $this->saveQuery($saved_query);
     }
 
     $nav->selectFilter(
