@@ -185,11 +185,7 @@ final class DiffusionRepositoryController extends DiffusionController {
           $uri->setUser($ssh_user);
         }
 
-        // This isn't quite right, but for now it's probably better to drop
-        // the port than sometimes show ":8080", etc. Using most VCS commands
-        // against nonstandard ports is a huge pain so few installs are likely
-        // to configure SSH on a nonstandard port.
-        $uri->setPort(null);
+        $uri->setPort(PhabricatorEnv::getEnvConfig('diffusion.ssh-port'));
 
         $clone_uri = $this->renderCloneURI(
           $uri,

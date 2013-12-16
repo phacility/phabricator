@@ -4,6 +4,10 @@ final class PhragmentHistoryController extends PhragmentController {
 
   private $dblob;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->dblob = idx($data, "dblob", "");
   }
@@ -21,11 +25,14 @@ final class PhragmentHistoryController extends PhragmentController {
     $path = $current->getPath();
 
     $crumbs = $this->buildApplicationCrumbsWithPath($parents);
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setName(pht('Create Fragment'))
-        ->setHref($this->getApplicationURI('/create/'.$path))
-        ->setIcon('create'));
+    if ($this->hasApplicationCapability(
+      PhragmentCapabilityCanCreate::CAPABILITY)) {
+      $crumbs->addAction(
+        id(new PHUIListItemView())
+          ->setName(pht('Create Fragment'))
+          ->setHref($this->getApplicationURI('/create/'.$path))
+          ->setIcon('create'));
+    }
 
     $current_box = $this->createCurrentFragmentView($current, true);
 
@@ -44,6 +51,11 @@ final class PhragmentHistoryController extends PhragmentController {
       ->execute();
     $files = mpull($files, null, 'getPHID');
 
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $current,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
     $first = true;
     foreach ($versions as $version) {
       $item = id(new PHUIObjectItemView());
@@ -58,7 +70,7 @@ final class PhragmentHistoryController extends PhragmentController {
         $item->addAttribute('Deletion');
       }
 
-      if (!$first) {
+      if (!$first && $can_edit) {
         $item->addAction(id(new PHUIListItemView())
           ->setIcon('undo')
           ->setRenderNameAsTooltip(true)
@@ -71,13 +83,15 @@ final class PhragmentHistoryController extends PhragmentController {
       $disabled = !isset($files[$version->getFilePHID()]);
       $action = id(new PHUIListItemView())
         ->setIcon('download')
-        ->setDisabled($disabled)
+        ->setDisabled($disabled || !$this->isCorrectlyConfigured())
         ->setRenderNameAsTooltip(true)
         ->setName(pht("Download"));
-      if (!$disabled) {
-        $action->setHref($files[$version->getFilePHID()]->getBestURI());
+      if (!$disabled && $this->isCorrectlyConfigured()) {
+        $action->setHref($files[$version->getFilePHID()]
+          ->getDownloadURI($version->getURI()));
       }
       $item->addAction($action);
+
       $list->addItem($item);
 
       $first = false;
@@ -86,6 +100,7 @@ final class PhragmentHistoryController extends PhragmentController {
     return $this->buildApplicationPage(
       array(
         $crumbs,
+        $this->renderConfigurationWarningIfRequired(),
         $current_box,
         $list),
       array(

@@ -81,7 +81,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       'callsign'    => $this->getCallsign(),
       'vcs'         => $this->getVersionControlSystem(),
       'uri'         => PhabricatorEnv::getProductionURI($this->getURI()),
-      'remoteURI'   => (string)$this->getPublicRemoteURI(),
+      'remoteURI'   => (string)$this->getRemoteURI(),
       'tracking'    => $this->getDetail('tracking-enabled'),
       'description' => $this->getDetail('description'),
     );
@@ -440,10 +440,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $args;
   }
 
-  public function getSSHLogin() {
-    return $this->getDetail('ssh-login');
-  }
-
   public function getURI() {
     return '/diffusion/'.$this->getCallsign().'/';
   }
@@ -569,6 +565,37 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
 
   /**
+   * Get the remote URI for this repository, including credentials if they're
+   * used by this repository.
+   *
+   * @return PhutilOpaqueEnvelope URI, possibly including credentials.
+   * @task uri
+   */
+  public function getRemoteURIEnvelope() {
+    $uri = $this->getRemoteURIObject();
+
+    $remote_protocol = $this->getRemoteProtocol();
+    if ($remote_protocol == 'http' || $remote_protocol == 'https') {
+      // For SVN, we use `--username` and `--password` flags separately, so
+      // don't add any credentials here.
+      if (!$this->isSVN()) {
+        $credential_phid = $this->getCredentialPHID();
+        if ($credential_phid) {
+          $key = PassphrasePasswordKey::loadFromPHID(
+            $credential_phid,
+            PhabricatorUser::getOmnipotentUser());
+
+          $uri->setUser($key->getUsernameEnvelope()->openEnvelope());
+          $uri->setPass($key->getPasswordEnvelope()->openEnvelope());
+        }
+      }
+    }
+
+    return new PhutilOpaqueEnvelope((string)$uri);
+  }
+
+
+  /**
    * Get the remote URI for this repository, without authentication information.
    *
    * @return string Repository URI.
@@ -584,7 +611,12 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     // password.
     if (!$this->shouldUseSSH()) {
       $uri->setUser(null);
-      $uri->setPass(null);
+
+      // This might be a Git URI or a normal URI. If it's Git, there's no
+      // password support.
+      if ($uri instanceof PhutilURI) {
+        $uri->setPass(null);
+      }
     }
 
     return (string)$uri;
@@ -629,19 +661,11 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     $uri = new PhutilURI($raw_uri);
     if ($uri->getProtocol()) {
-      if ($this->isSSHProtocol($uri->getProtocol())) {
-        if ($this->getSSHLogin()) {
-          $uri->setUser($this->getSSHLogin());
-        }
-      }
       return $uri;
     }
 
     $uri = new PhutilGitURI($raw_uri);
     if ($uri->getDomain()) {
-      if ($this->getSSHLogin()) {
-        $uri->setUser($this->getSSHLogin());
-      }
       return $uri;
     }
 

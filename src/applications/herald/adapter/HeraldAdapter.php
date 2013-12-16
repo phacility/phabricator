@@ -199,21 +199,31 @@ abstract class HeraldAdapter {
         );
       case self::FIELD_AUTHOR:
       case self::FIELD_COMMITTER:
-      case self::FIELD_REPOSITORY:
       case self::FIELD_REVIEWER:
         return array(
           self::CONDITION_IS_ANY,
           self::CONDITION_IS_NOT_ANY,
+        );
+      case self::FIELD_REPOSITORY:
+        return array(
+          self::CONDITION_IS_ANY,
+          self::CONDITION_IS_NOT_ANY,
+          self::CONDITION_EXISTS,
+          self::CONDITION_NOT_EXISTS,
         );
       case self::FIELD_TAGS:
       case self::FIELD_REVIEWERS:
       case self::FIELD_CC:
       case self::FIELD_AUTHOR_PROJECTS:
       case self::FIELD_PROJECTS:
+      case self::FIELD_AFFECTED_PACKAGE:
+      case self::FIELD_AFFECTED_PACKAGE_OWNER:
         return array(
           self::CONDITION_INCLUDE_ALL,
           self::CONDITION_INCLUDE_ANY,
           self::CONDITION_INCLUDE_NONE,
+          self::CONDITION_EXISTS,
+          self::CONDITION_NOT_EXISTS,
         );
       case self::FIELD_DIFF_FILE:
         return array(
@@ -232,12 +242,6 @@ abstract class HeraldAdapter {
         return array(
           self::CONDITION_RULE,
           self::CONDITION_NOT_RULE,
-        );
-      case self::FIELD_AFFECTED_PACKAGE:
-      case self::FIELD_AFFECTED_PACKAGE_OWNER:
-        return array(
-          self::CONDITION_INCLUDE_ANY,
-          self::CONDITION_INCLUDE_NONE,
         );
       case self::FIELD_CONTENT_SOURCE:
         return array(

@@ -21,6 +21,11 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
       return new Aphront404Response();
     }
 
+    PhabricatorPolicyFilter::requireCapability(
+      $viewer,
+      $fragment,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
     $children = id(new PhragmentFragmentQuery())
       ->setViewer($viewer)
       ->needLatestVersion(true)
@@ -161,6 +166,7 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
     return $this->buildApplicationPage(
       array(
         $crumbs,
+        $this->renderConfigurationWarningIfRequired(),
         $box),
       array(
         'title' => pht('Create Fragment'),
