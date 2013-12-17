@@ -24,6 +24,7 @@ final class DiffusionCommitHookEngine extends Phobject {
   private $remoteAddress;
   private $remoteProtocol;
   private $transactionKey;
+  private $mercurialHook;
 
 
 /* -(  Config  )------------------------------------------------------------- */
@@ -95,6 +96,15 @@ final class DiffusionCommitHookEngine extends Phobject {
 
   public function getViewer() {
     return $this->viewer;
+  }
+
+  public function setMercurialHook($mercurial_hook) {
+    $this->mercurialHook = $mercurial_hook;
+    return $this;
+  }
+
+  public function getMercurialHook() {
+    return $this->mercurialHook;
   }
 
 
@@ -239,7 +249,10 @@ final class DiffusionCommitHookEngine extends Phobject {
       } else if (preg_match('(^refs/tags/)', $ref_raw)) {
         $ref_type = PhabricatorRepositoryPushLog::REFTYPE_TAG;
       } else {
-        $ref_type = PhabricatorRepositoryPushLog::REFTYPE_UNKNOWN;
+        throw new Exception(
+          pht(
+            "Unable to identify the reftype of '%s'. Rejecting push.",
+            $ref_raw));
       }
 
       $ref_update = $this->newPushLog()
@@ -413,6 +426,20 @@ final class DiffusionCommitHookEngine extends Phobject {
 
 
   private function findMercurialRefUpdates() {
+    $hook = $this->getMercurialHook();
+    switch ($hook) {
+      case 'pretxnchangegroup':
+        return $this->findMercurialChangegroupRefUpdates();
+      case 'prepushkey':
+        return $this->findMercurialPushKeyRefUpdates();
+      case 'pretag':
+        return $this->findMercurialPreTagRefUpdates();
+      default:
+        throw new Exception(pht('Unrecognized hook "%s"!', $hook));
+    }
+  }
+
+  private function findMercurialChangegroupRefUpdates() {
     $hg_node = getenv('HG_NODE');
     if (!$hg_node) {
       throw new Exception(pht('Expected HG_NODE in environment!'));
@@ -594,6 +621,87 @@ final class DiffusionCommitHookEngine extends Phobject {
     return $ref_updates;
   }
 
+  private function findMercurialPushKeyRefUpdates() {
+    $key_namespace = getenv('HG_NAMESPACE');
+
+    if ($key_namespace === 'phases') {
+      // Mercurial changes commit phases as part of normal push operations. We
+      // just ignore these, as they don't seem to represent anything
+      // interesting.
+      return array();
+    }
+
+    $key_name = getenv('HG_KEY');
+
+    $key_old = getenv('HG_OLD');
+    if (!strlen($key_old)) {
+      $key_old = null;
+    }
+
+    $key_new = getenv('HG_NEW');
+    if (!strlen($key_new)) {
+      $key_new = null;
+    }
+
+    if ($key_namespace !== 'bookmarks') {
+      throw new Exception(
+        pht(
+          "Unknown Mercurial key namespace '%s', with key '%s' (%s -> %s). ".
+          "Rejecting push.",
+          $key_namespace,
+          $key_name,
+          coalesce($key_old, pht('null')),
+          coalesce($key_new, pht('null'))));
+    }
+
+    if ($key_old === $key_new) {
+      // We get a callback when the bookmark doesn't change. Just ignore this,
+      // as it's a no-op.
+      return array();
+    }
+
+    $ref_flags = 0;
+    $merge_base = null;
+    if ($key_old === null) {
+      $ref_flags |= PhabricatorRepositoryPushLog::CHANGEFLAG_ADD;
+    } else if ($key_new === null) {
+      $ref_flags |= PhabricatorRepositoryPushLog::CHANGEFLAG_DELETE;
+    } else {
+      list($merge_base_raw) = $this->getRepository()->execxLocalCommand(
+        'log --template %s --rev %s',
+        '{node}',
+        hgsprintf('ancestor(%s, %s)', $key_old, $key_new));
+
+      if (strlen(trim($merge_base_raw))) {
+        $merge_base = trim($merge_base_raw);
+      }
+
+      if ($merge_base && ($merge_base === $key_old)) {
+        $ref_flags |= PhabricatorRepositoryPushLog::CHANGEFLAG_APPEND;
+      } else {
+        $ref_flags |= PhabricatorRepositoryPushLog::CHANGEFLAG_REWRITE;
+      }
+    }
+
+    $ref_update = $this->newPushLog()
+      ->setRefType(PhabricatorRepositoryPushLog::REFTYPE_BOOKMARK)
+      ->setRefName($key_name)
+      ->setRefOld(coalesce($key_old, self::EMPTY_HASH))
+      ->setRefNew(coalesce($key_new, self::EMPTY_HASH))
+      ->setChangeFlags($ref_flags);
+
+    return array($ref_update);
+  }
+
+  private function findMercurialPreTagRefUpdates() {
+    return array();
+  }
+
+  private function findMercurialContentUpdates(array $ref_updates) {
+    // TODO: Implement.
+    return array();
+  }
+
   private function parseMercurialCommits($raw) {
     $commits_lines = explode("\2", $raw);
     $commits_lines = array_filter($commits_lines);
@@ -624,11 +732,6 @@ final class DiffusionCommitHookEngine extends Phobject {
     }
 
     return $heads;
-  }
-
-  private function findMercurialContentUpdates(array $ref_updates) {
-    // TODO: Implement.
-    return array();
   }
 
 

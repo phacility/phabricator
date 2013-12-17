@@ -397,11 +397,27 @@ final class PhabricatorRepositoryPullEngine
 
     $data = array();
     $data[] = '[hooks]';
+
+    // This hook handles normal pushes.
     $data[] = csprintf(
       'pretxnchangegroup.phabricator = %s %s %s',
       $bin,
       $repository->getCallsign(),
       'pretxnchangegroup');
+
+    // This one handles creating bookmarks.
+    $data[] = csprintf(
+      'prepushkey.phabricator = %s %s %s',
+      $bin,
+      $repository->getCallsign(),
+      'prepushkey');
+
+    // This one handles creating tags.
+    $data[] = csprintf(
+      'pretag.phabricator = %s %s %s',
+      $bin,
+      $repository->getCallsign(),
+      'pretag');
     $data[] = null;
 
     $data = implode("\n", $data);
