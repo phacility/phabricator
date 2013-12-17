@@ -57,8 +57,14 @@ final class PhabricatorRepositoryPushLog
 
   public function getConfiguration() {
     return array(
+      self::CONFIG_AUX_PHID => true,
       self::CONFIG_TIMESTAMPS => false,
     ) + parent::getConfiguration();
+  }
+
+  public function generatePHID() {
+    return PhabricatorPHID::generateNewPHID(
+      PhabricatorRepositoryPHIDTypePushLog::TYPECONST);
   }
 
   public function attachRepository(PhabricatorRepository $repository) {
