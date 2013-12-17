@@ -345,10 +345,9 @@ final class DiffusionCommitHookEngine extends Phobject {
             $ref_flags |= PhabricatorRepositoryPushLog::CHANGEFLAG_DANGEROUS;
 
             $dangerous = pht(
-              "DANGEROUS CHANGE: The change you're attempting to push updates ".
-              "the branch '%s' from '%s' to '%s', but this is not a ".
-              "fast-forward. Pushes which rewrite published branch history ".
-              "are dangerous.",
+              "The change you're attempting to push updates the branch '%s' ".
+              "from '%s' to '%s', but this is not a fast-forward. Pushes ".
+              "which rewrite published branch history are dangerous.",
               $ref_update->getRefName(),
               $ref_update->getRefOldShort(),
               $ref_update->getRefNewShort());
@@ -414,8 +413,217 @@ final class DiffusionCommitHookEngine extends Phobject {
 
 
   private function findMercurialRefUpdates() {
-    // TODO: Implement.
-    return array();
+    $hg_node = getenv('HG_NODE');
+    if (!$hg_node) {
+      throw new Exception(pht('Expected HG_NODE in environment!'));
+    }
+
+    // NOTE: We need to make sure this is passed to subprocesses, or they won't
+    // be able to see new commits. Mercurial uses this as a marker to determine
+    // whether the pending changes are visible or not.
+    $_ENV['HG_PENDING'] = getenv('HG_PENDING');
+    $repository = $this->getRepository();
+
+    $futures = array();
+
+    foreach (array('old', 'new') as $key) {
+      $futures[$key] = $repository->getLocalCommandFuture(
+        'heads --template %s',
+        '{node}\1{branches}\2');
+    }
+    // Wipe HG_PENDING out of the old environment so we see the pre-commit
+    // state of the repository.
+    $futures['old']->updateEnv('HG_PENDING', null);
+
+    $futures['commits'] = $repository->getLocalCommandFuture(
+      "log --rev %s --rev tip --template %s",
+      hgsprintf('%s', $hg_node),
+      '{node}\1{branches}\2');
+
+    // Resolve all of the futures now. We don't need the 'commits' future yet,
+    // but it simplifies the logic to just get it out of the way.
+    foreach (Futures($futures) as $future) {
+      $future->resolvex();
+    }
+
+    list($commit_raw) = $futures['commits']->resolvex();
+    $commit_map = $this->parseMercurialCommits($commit_raw);
+
+    list($old_raw) = $futures['old']->resolvex();
+    $old_refs = $this->parseMercurialHeads($old_raw);
+
+    list($new_raw) = $futures['new']->resolvex();
+    $new_refs = $this->parseMercurialHeads($new_raw);
+
+    $all_refs = array_keys($old_refs + $new_refs);
+
+    $ref_updates = array();
+    foreach ($all_refs as $ref) {
+      $old_heads = idx($old_refs, $ref, array());
+      $new_heads = idx($new_refs, $ref, array());
+
+      sort($old_heads);
+      sort($new_heads);
+
+      if ($old_heads === $new_heads) {
+        // No changes to this branch, so skip it.
+        continue;
+      }
+
+      if (!$new_heads) {
+        if ($old_heads) {
+          // It looks like this push deletes a branch, but that isn't possible
+          // in Mercurial, so something is going wrong here. Bail out.
+          throw new Exception(
+            pht(
+              'Mercurial repository has no new head for branch "%s" after '.
+              'push. This is unexpected; rejecting change.'));
+        } else {
+          // Obviously, this should never be possible either, as it makes
+          // no sense. Explode.
+          throw new Exception(
+            pht(
+              'Mercurial repository has no new or old heads for branch "%s" '.
+              'after push. This makes no sense; rejecting change.'));
+        }
+      }
+
+      $stray_heads = array();
+      if (count($old_heads) > 1) {
+        // HORRIBLE: In Mercurial, branches can have multiple heads. If the
+        // old branch had multiple heads, we need to figure out which new
+        // heads descend from which old heads, so we can tell whether you're
+        // actively creating new heads (dangerous) or just working in a
+        // repository that's already full of garbage (strongly discouraged but
+        // not as inherently dangerous). These cases should be very uncommon.
+
+        $dfutures = array();
+        foreach ($old_heads as $old_head) {
+          $dfutures[$old_head] = $repository->getLocalCommandFuture(
+            'log --rev %s --template %s',
+            hgsprintf('(descendants(%s) and head())', $old_head),
+            '{node}\1');
+        }
+
+        $head_map = array();
+        foreach (Futures($dfutures) as $future_head => $dfuture) {
+          list($stdout) = $dfuture->resolvex();
+          $head_map[$future_head] = array_filter(explode("\1", $stdout));
+        }
+
+        // Now, find all the new stray heads this push creates, if any. These
+        // are new heads which do not descend from the old heads.
+        $seen = array_fuse(array_mergev($head_map));
+        foreach ($new_heads as $new_head) {
+          if (empty($seen[$new_head])) {
+            $head_map[self::EMPTY_HASH][] = $new_head;
+          }
+        }
+      } else if ($old_heads) {
+        $head_map[head($old_heads)] = $new_heads;
+      } else {
+        $head_map[self::EMPTY_HASH] = $new_heads;
+      }
+
+      foreach ($head_map as $old_head => $child_heads) {
+        foreach ($child_heads as $new_head) {
+          if ($new_head === $old_head) {
+            continue;
+          }
+
+          $ref_flags = 0;
+          $dangerous = null;
+          if ($old_head == self::EMPTY_HASH) {
+            $ref_flags |= PhabricatorRepositoryPushLog::CHANGEFLAG_ADD;
+          } else {
+            $ref_flags |= PhabricatorRepositoryPushLog::CHANGEFLAG_APPEND;
+          }
+
+          $splits_existing_head = (count($child_heads) > 1);
+          $creates_duplicate_head = ($old_head == self::EMPTY_HASH) &&
+                                    (count($head_map) > 1);
+
+          if ($splits_existing_head || $creates_duplicate_head) {
+            $readable_child_heads = array();
+            foreach ($child_heads as $child_head) {
+              $readable_child_heads[] = substr($child_head, 0, 12);
+            }
+
+            $ref_flags |= PhabricatorRepositoryPushLog::CHANGEFLAG_DANGEROUS;
+
+            if ($splits_existing_head) {
+              // We're splitting an existing head into two or more heads.
+              // This is dangerous, and a super bad idea. Note that we're only
+              // raising this if you're actively splitting a branch head. If a
+              // head split in the past, we don't consider appends to it
+              // to be dangerous.
+              $dangerous = pht(
+                "The change you're attempting to push splits the head of ".
+                "branch '%s' into multiple heads: %s. This is inadvisable ".
+                "and dangerous.",
+                $ref,
+                implode(', ', $readable_child_heads));
+            } else {
+              // We're adding a second (or more) head to a branch. The new
+              // head is not a descendant of any old head.
+              $dangerous = pht(
+                "The change you're attempting to push creates new, divergent ".
+                "heads for the branch '%s': %s. This is inadvisable and ".
+                "dangerous.",
+                $ref,
+                implode(', ', $readable_child_heads));
+            }
+          }
+
+          $ref_update = $this->newPushLog()
+            ->setRefType(PhabricatorRepositoryPushLog::REFTYPE_BRANCH)
+            ->setRefName($ref)
+            ->setRefOld($old_head)
+            ->setRefNew($new_head)
+            ->setChangeFlags($ref_flags);
+
+          if ($dangerous !== null) {
+            $ref_update->attachDangerousChangeDescription($dangerous);
+          }
+
+          $ref_updates[] = $ref_update;
+        }
+      }
+    }
+
+    return $ref_updates;
+  }
+
+  private function parseMercurialCommits($raw) {
+    $commits_lines = explode("\2", $raw);
+    $commits_lines = array_filter($commits_lines);
+    $commit_map = array();
+    foreach ($commits_lines as $commit_line) {
+      list($node, $branches_raw) = explode("\1", $commit_line);
+
+      if (!strlen($branches_raw)) {
+        $branches = array('default');
+      } else {
+        $branches = explode(' ', $branches_raw);
+      }
+
+      $commit_map[$node] = $branches;
+    }
+
+    return $commit_map;
+  }
+
+  private function parseMercurialHeads($raw) {
+    $heads_map = $this->parseMercurialCommits($raw);
+
+    $heads = array();
+    foreach ($heads_map as $commit => $branches) {
+      foreach ($branches as $branch) {
+        $heads[$branch][] = $commit;
+      }
+    }
+
+    return $heads;
   }
 
   private function findMercurialContentUpdates(array $ref_updates) {

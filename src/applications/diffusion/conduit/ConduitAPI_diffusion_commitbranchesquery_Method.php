@@ -48,6 +48,8 @@ final class ConduitAPI_diffusion_commitbranchesquery_Method
     $repository = $drequest->getRepository();
     $commit = $request->getValue('commit');
 
+    // TODO: This should use `branches`.
+
     list($contains) = $repository->execxLocalCommand(
       'log --template %s --limit 1 --rev %s --',
       '{branch}',
