@@ -359,6 +359,7 @@ final class HeraldEngine {
       $effect->setTarget($action->getTarget());
 
       $effect->setRuleID($rule->getID());
+      $effect->setRulePHID($rule->getPHID());
 
       $name = $rule->getName();
       $id   = $rule->getID();
