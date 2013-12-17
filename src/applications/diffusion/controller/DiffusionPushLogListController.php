@@ -83,6 +83,10 @@ final class DiffusionPushLogListController extends DiffusionController
             'href' => '/r'.$callsign.$log->getRefNew(),
           ),
           $log->getRefNewShort()),
+
+        // TODO: Make these human-readable.
+        $log->getChangeFlags(),
+        $log->getRejectCode(),
         phabricator_datetime($log->getEpoch(), $viewer),
       );
     }
@@ -98,6 +102,8 @@ final class DiffusionPushLogListController extends DiffusionController
           pht('Name'),
           pht('Old'),
           pht('New'),
+          pht('Flags'),
+          pht('Code'),
           pht('Date'),
         ))
       ->setColumnClasses(

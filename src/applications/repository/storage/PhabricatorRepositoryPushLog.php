@@ -18,6 +18,7 @@ final class PhabricatorRepositoryPushLog
   const REFTYPE_BOOKMARK = 'bookmark';
   const REFTYPE_SVN = 'svn';
   const REFTYPE_COMMIT = 'commit';
+  const REFTYPE_UNKNOWN = 'unknown';
 
   const CHANGEFLAG_ADD = 1;
   const CHANGEFLAG_DELETE = 2;
@@ -29,6 +30,7 @@ final class PhabricatorRepositoryPushLog
   const REJECT_DANGEROUS = 1;
   const REJECT_HERALD = 2;
   const REJECT_EXTERNAL = 3;
+  const REJECT_BROKEN = 4;
 
   protected $repositoryPHID;
   protected $epoch;
@@ -47,6 +49,7 @@ final class PhabricatorRepositoryPushLog
   protected $rejectCode;
   protected $rejectDetails;
 
+  private $dangerousChangeDescription = self::ATTACHABLE;
   private $repository = self::ATTACHABLE;
 
   public static function initializeNewLog(PhabricatorUser $viewer) {
@@ -76,6 +79,16 @@ final class PhabricatorRepositoryPushLog
     return phutil_utf8ize($this->getRefNameRaw());
   }
 
+  public function setRefName($ref_raw) {
+    $encoding = phutil_is_utf8($ref_raw) ? 'utf8' : null;
+
+    $this->setRefNameRaw($ref_raw);
+    $this->setRefNameHash(PhabricatorHash::digestForIndex($ref_raw));
+    $this->setRefNameEncoding($encoding);
+
+    return $this;
+  }
+
   public function getRefOldShort() {
     if ($this->getRepository()->isSVN()) {
       return $this->getRefOld();
@@ -88,6 +101,19 @@ final class PhabricatorRepositoryPushLog
       return $this->getRefNew();
     }
     return substr($this->getRefNew(), 0, 12);
+  }
+
+  public function hasChangeFlags($mask) {
+    return ($this->changeFlags & $mask);
+  }
+
+  public function attachDangerousChangeDescription($description) {
+    $this->dangerousChangeDescription = $description;
+    return $this;
+  }
+
+  public function getDangerousChangeDescription() {
+    return $this->assertAttached($this->dangerousChangeDescription);
   }
 
 
