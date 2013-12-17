@@ -26,6 +26,8 @@ final class DiffusionCommitHookEngine extends Phobject {
   private $transactionKey;
   private $mercurialHook;
 
+  private $heraldViewerProjects;
+
 
 /* -(  Config  )------------------------------------------------------------- */
 
@@ -130,7 +132,7 @@ final class DiffusionCommitHookEngine extends Phobject {
         throw $ex;
       }
 
-      // TODO: Fire ref herald rules.
+      $this->applyHeraldRefRules($ref_updates);
 
       $content_updates = $this->findContentUpdates($ref_updates);
       $all_updates = array_merge($all_updates, $content_updates);
@@ -221,6 +223,84 @@ final class DiffusionCommitHookEngine extends Phobject {
   }
 
 
+/* -(  Herald  )------------------------------------------------------------- */
+
+
+  private function applyHeraldRefRules(array $ref_updates) {
+    if (!$ref_updates) {
+      return;
+    }
+
+    $engine = new HeraldEngine();
+    $rules = null;
+    $blocking_effect = null;
+    foreach ($ref_updates as $ref_update) {
+      $adapter = id(new HeraldPreCommitRefAdapter())
+        ->setPushLog($ref_update)
+        ->setHookEngine($this);
+
+      if ($rules === null) {
+        $rules = $engine->loadRulesForAdapter($adapter);
+      }
+
+      $effects = $engine->applyRules($rules, $adapter);
+      $engine->applyEffects($effects, $adapter, $rules);
+      $xscript = $engine->getTranscript();
+
+      if ($blocking_effect === null) {
+        foreach ($effects as $effect) {
+          if ($effect->getAction() == HeraldAdapter::ACTION_BLOCK) {
+            $blocking_effect = $effect;
+            break;
+          }
+        }
+      }
+    }
+
+    if ($blocking_effect) {
+      foreach ($ref_updates as $ref_update) {
+        $ref_update->setRejectCode(PhabricatorRepositoryPushLog::REJECT_HERALD);
+        $ref_update->setRejectDetails($blocking_effect->getRulePHID());
+      }
+
+      $message = $blocking_effect->getTarget();
+      if (!strlen($message)) {
+        $message = pht('(None.)');
+      }
+
+      $rules = mpull($rules, null, 'getID');
+      $rule = idx($rules, $effect->getRuleID());
+      if ($rule && strlen($rule->getName())) {
+        $rule_name = $rule->getName();
+      } else {
+        $rule_name = pht('Unnamed Herald Rule');
+      }
+
+      throw new DiffusionCommitHookRejectException(
+        pht(
+          "This commit was rejected by Herald pre-commit rule %s.\n".
+          "Rule: %s\n".
+          "Reason: %s",
+          'H'.$blocking_effect->getRuleID(),
+          $rule_name,
+          $message));
+    }
+  }
+
+  public function loadViewerProjectPHIDsForHerald() {
+    // This just caches the viewer's projects so we don't need to load them
+    // over and over again when applying Herald rules.
+    if ($this->heraldViewerProjects === null) {
+      $this->heraldViewerProjects = id(new PhabricatorProjectQuery())
+        ->setViewer($this->getViewer())
+        ->withMemberPHIDs(array($this->getViewer()->getPHID()))
+        ->execute();
+    }
+
+    return mpull($this->heraldViewerProjects, 'getPHID');
+  }
+
+
 /* -(  Git  )---------------------------------------------------------------- */
 
 
@@ -246,8 +326,10 @@ final class DiffusionCommitHookEngine extends Phobject {
 
       if (preg_match('(^refs/heads/)', $ref_raw)) {
         $ref_type = PhabricatorRepositoryPushLog::REFTYPE_BRANCH;
+        $ref_raw = substr($ref_raw, strlen('refs/heads/'));
       } else if (preg_match('(^refs/tags/)', $ref_raw)) {
         $ref_type = PhabricatorRepositoryPushLog::REFTYPE_TAG;
+        $ref_raw = substr($ref_raw, strlen('refs/tags/'));
       } else {
         throw new Exception(
           pht(
@@ -764,7 +846,12 @@ final class DiffusionCommitHookEngine extends Phobject {
     // code. This indicates a broken hook, and covers the case where we
     // encounter some unexpected exception and consequently reject the changes.
 
+    // NOTE: We generate PHIDs up front so the Herald transcripts can pick them
+    // up.
+    $phid = id(new PhabricatorRepositoryPushLog())->generatePHID();
+
     return PhabricatorRepositoryPushLog::initializeNewLog($this->getViewer())
+      ->setPHID($phid)
       ->attachRepository($this->getRepository())
       ->setRepositoryPHID($this->getRepository()->getPHID())
       ->setEpoch(time())

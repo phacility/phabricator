@@ -233,16 +233,13 @@ JX.install('HeraldRuleEditor', {
           set_fn = JX.bag;
           break;
         case 'contentsource':
-          input = this._renderSelect(this._config.template.contentSources);
-          get_fn = function() { return input.value; };
-          set_fn = function(v) { input.value = v; };
-          set_fn(this._config.template.defaultSource);
-          break;
         case 'flagcolor':
-          input = this._renderSelect(this._config.template.colors);
+        case 'value-ref-type':
+        case 'value-ref-change':
+          input = this._renderSelect(this._config.select[type].options);
           get_fn = function() { return input.value; };
           set_fn = function(v) { input.value = v; };
-          set_fn(this._config.template.defaultColor);
+          set_fn(this._config.select[type]['default']);
           break;
         default:
           input = JX.$N('input', {type: 'text'});

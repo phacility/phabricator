@@ -24,8 +24,8 @@ final class HeraldEngine {
     return idx($this->rules, $id);
   }
 
-  public static function loadAndApplyRules(HeraldAdapter $adapter) {
-    $rules = id(new HeraldRuleQuery())
+  public function loadRulesForAdapter(HeraldAdapter $adapter) {
+    return id(new HeraldRuleQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withDisabled(false)
       ->withContentTypes(array($adapter->getAdapterContentType()))
@@ -33,8 +33,12 @@ final class HeraldEngine {
       ->needAppliedToPHIDs(array($adapter->getPHID()))
       ->needValidateAuthors(true)
       ->execute();
+  }
 
+  public static function loadAndApplyRules(HeraldAdapter $adapter) {
     $engine = new HeraldEngine();
+
+    $rules = $engine->loadRulesForAdapter($adapter);
     $effects = $engine->applyRules($rules, $adapter);
     $engine->applyEffects($effects, $adapter, $rules);
 

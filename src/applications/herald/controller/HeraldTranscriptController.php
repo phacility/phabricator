@@ -293,6 +293,10 @@ final class HeraldTranscriptController extends HeraldController {
         case HeraldAdapter::ACTION_FLAG:
           $target = PhabricatorFlagColor::getColorName($target);
           break;
+        case HeraldAdapter::ACTION_BLOCK:
+          // Target is a text string.
+          $target = $target;
+          break;
         default:
           if ($target) {
             foreach ($target as $k => $phid) {
