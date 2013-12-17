@@ -733,13 +733,26 @@ final class DiffusionCommitHookEngine extends Phobject {
 
 
   private function findSubversionRefUpdates() {
-    // TODO: Implement.
+    // Subversion doesn't have any kind of mutable ref metadata.
     return array();
   }
 
   private function findSubversionContentUpdates(array $ref_updates) {
-    // TODO: Implement.
-    return array();
+    list($youngest) = execx(
+      'svnlook youngest %s',
+      $this->subversionRepository);
+    $ref_new = (int)$youngest + 1;
+
+    $ref_flags = 0;
+    $ref_flags |= PhabricatorRepositoryPushLog::CHANGEFLAG_ADD;
+    $ref_flags |= PhabricatorRepositoryPushLog::CHANGEFLAG_APPEND;
+
+    $ref_content = $this->newPushLog()
+      ->setRefType(PhabricatorRepositoryPushLog::REFTYPE_COMMIT)
+      ->setRefNew($ref_new)
+      ->setChangeFlags($ref_flags);
+
+    return array($ref_content);
   }
 
 

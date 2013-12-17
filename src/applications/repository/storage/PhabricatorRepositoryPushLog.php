@@ -16,7 +16,6 @@ final class PhabricatorRepositoryPushLog
   const REFTYPE_BRANCH = 'branch';
   const REFTYPE_TAG = 'tag';
   const REFTYPE_BOOKMARK = 'bookmark';
-  const REFTYPE_SVN = 'svn';
   const REFTYPE_COMMIT = 'commit';
 
   const CHANGEFLAG_ADD = 1;
