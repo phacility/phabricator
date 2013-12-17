@@ -432,8 +432,6 @@ final class DiffusionCommitHookEngine extends Phobject {
         return $this->findMercurialChangegroupRefUpdates();
       case 'prepushkey':
         return $this->findMercurialPushKeyRefUpdates();
-      case 'pretag':
-        return $this->findMercurialPreTagRefUpdates();
       default:
         throw new Exception(pht('Unrecognized hook "%s"!', $hook));
     }
@@ -691,10 +689,6 @@ final class DiffusionCommitHookEngine extends Phobject {
       ->setChangeFlags($ref_flags);
 
     return array($ref_update);
-  }
-
-  private function findMercurialPreTagRefUpdates() {
-    return array();
   }
 
   private function findMercurialContentUpdates(array $ref_updates) {

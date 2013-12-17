@@ -412,12 +412,6 @@ final class PhabricatorRepositoryPullEngine
       $repository->getCallsign(),
       'prepushkey');
 
-    // This one handles creating tags.
-    $data[] = csprintf(
-      'pretag.phabricator = %s %s %s',
-      $bin,
-      $repository->getCallsign(),
-      'pretag');
     $data[] = null;
 
     $data = implode("\n", $data);
