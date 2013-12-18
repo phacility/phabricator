@@ -7,7 +7,7 @@ final class PhabricatorRepositorySvnCommitMessageParserWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    $uri = $repository->getDetail('remote-uri');
+    $uri = $repository->getSubversionPathURI();
 
     $log = $this->getSVNLogXMLObject(
       $uri,
