@@ -37,8 +37,4 @@ final class PhabricatorPeoplePHIDTypeExternal extends PhabricatorPHIDType {
     }
   }
 
-  public function canLoadNamedObject($name) {
-    return false;
-  }
-
 }

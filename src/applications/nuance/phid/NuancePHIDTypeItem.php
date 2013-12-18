@@ -39,8 +39,4 @@ final class NuancePHIDTypeItem
     }
   }
 
-  public function canLoadNamedObject($name) {
-    return false;
-  }
-
 }

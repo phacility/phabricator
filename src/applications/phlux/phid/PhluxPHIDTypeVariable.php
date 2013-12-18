@@ -40,8 +40,4 @@ final class PhluxPHIDTypeVariable extends PhabricatorPHIDType {
     }
   }
 
-  public function canLoadNamedObject($name) {
-    return false;
-  }
-
 }

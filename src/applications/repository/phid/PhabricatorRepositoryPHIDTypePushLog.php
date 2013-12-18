@@ -37,8 +37,4 @@ final class PhabricatorRepositoryPHIDTypePushLog
     }
   }
 
-  public function canLoadNamedObject($name) {
-    return false;
-  }
-
 }
