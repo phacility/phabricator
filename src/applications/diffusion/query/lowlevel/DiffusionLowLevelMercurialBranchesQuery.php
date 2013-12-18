@@ -12,6 +12,7 @@ final class DiffusionLowLevelMercurialBranchesQuery
     // NOTE: `--debug` gives us 40-character hashes.
     list($stdout) = $repository->execxLocalCommand(
       '--debug branches');
+    $stdout = PhabricatorRepository::filterMercurialDebugOutput($stdout);
 
     $branches = array();
 

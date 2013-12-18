@@ -440,6 +440,29 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $args;
   }
 
+  /**
+   * Sanitize output of an `hg` command invoked with the `--debug` flag to make
+   * it usable.
+   *
+   * @param string Output from `hg --debug ...`
+   * @return string Usable output.
+   */
+  public static function filterMercurialDebugOutput($stdout) {
+    // When hg commands are run with `--debug` and some config file isn't
+    // trusted, Mercurial prints out a warning to stdout, twice, after Feb 2011.
+    //
+    // http://selenic.com/pipermail/mercurial-devel/2011-February/028541.html
+
+    $lines = preg_split('/(?<=\n)/', $stdout);
+    $regex = '/ignoring untrusted configuration option .*\n$/';
+
+    foreach ($lines as $key => $line) {
+      $lines[$key] = preg_replace($regex, '', $line);
+    }
+
+    return implode('', $lines);
+  }
+
   public function getURI() {
     return '/diffusion/'.$this->getCallsign().'/';
   }
