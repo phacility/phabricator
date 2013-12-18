@@ -25,6 +25,7 @@ final class DiffusionCommitHookEngine extends Phobject {
   private $remoteProtocol;
   private $transactionKey;
   private $mercurialHook;
+  private $mercurialCommits = array();
 
   private $heraldViewerProjects;
 
@@ -578,6 +579,7 @@ final class DiffusionCommitHookEngine extends Phobject {
 
     list($commit_raw) = $futures['commits']->resolvex();
     $commit_map = $this->parseMercurialCommits($commit_raw);
+    $this->mercurialCommits = $commit_map;
 
     list($old_raw) = $futures['old']->resolvex();
     $old_refs = $this->parseMercurialHeads($old_raw);
@@ -797,8 +799,16 @@ final class DiffusionCommitHookEngine extends Phobject {
   }
 
   private function findMercurialContentUpdates(array $ref_updates) {
-    // TODO: Implement.
-    return array();
+    $content_updates = array();
+
+    foreach ($this->mercurialCommits as $commit => $branches) {
+      $content_updates[$commit] = $this->newPushLog()
+        ->setRefType(PhabricatorRepositoryPushLog::REFTYPE_COMMIT)
+        ->setRefNew($commit)
+        ->setChangeFlags(PhabricatorRepositoryPushLog::CHANGEFLAG_ADD);
+    }
+
+    return $content_updates;
   }
 
   private function parseMercurialCommits($raw) {
