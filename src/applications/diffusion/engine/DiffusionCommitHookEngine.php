@@ -132,12 +132,13 @@ final class DiffusionCommitHookEngine extends Phobject {
         throw $ex;
       }
 
-      $this->applyHeraldRefRules($ref_updates);
+      $this->applyHeraldRefRules($ref_updates, $all_updates);
 
       $content_updates = $this->findContentUpdates($ref_updates);
       $all_updates = array_merge($all_updates, $content_updates);
 
-      // TODO: Fire content Herald rules.
+      $this->applyHeraldContentRules($content_updates, $all_updates);
+
       // TODO: Fire external hooks.
 
       // If we make it this far, we're accepting these changes. Mark all the
@@ -225,19 +226,41 @@ final class DiffusionCommitHookEngine extends Phobject {
 
 /* -(  Herald  )------------------------------------------------------------- */
 
+  private function applyHeraldRefRules(
+    array $ref_updates,
+    array $all_updates) {
+    $this->applyHeraldRules(
+      $ref_updates,
+      new HeraldPreCommitRefAdapter(),
+      $all_updates);
+  }
 
-  private function applyHeraldRefRules(array $ref_updates) {
-    if (!$ref_updates) {
+  private function applyHeraldContentRules(
+    array $content_updates,
+    array $all_updates) {
+    $this->applyHeraldRules(
+      $content_updates,
+      new HeraldPreCommitContentAdapter(),
+      $all_updates);
+  }
+
+  private function applyHeraldRules(
+    array $updates,
+    HeraldAdapter $adapter_template,
+    array $all_updates) {
+
+    if (!$updates) {
       return;
     }
+
+    $adapter_template->setHookEngine($this);
 
     $engine = new HeraldEngine();
     $rules = null;
     $blocking_effect = null;
-    foreach ($ref_updates as $ref_update) {
-      $adapter = id(new HeraldPreCommitRefAdapter())
-        ->setPushLog($ref_update)
-        ->setHookEngine($this);
+    foreach ($updates as $update) {
+      $adapter = id(clone $adapter_template)
+        ->setPushLog($update);
 
       if ($rules === null) {
         $rules = $engine->loadRulesForAdapter($adapter);
@@ -258,9 +281,9 @@ final class DiffusionCommitHookEngine extends Phobject {
     }
 
     if ($blocking_effect) {
-      foreach ($ref_updates as $ref_update) {
-        $ref_update->setRejectCode(PhabricatorRepositoryPushLog::REJECT_HERALD);
-        $ref_update->setRejectDetails($blocking_effect->getRulePHID());
+      foreach ($all_updates as $update) {
+        $update->setRejectCode(PhabricatorRepositoryPushLog::REJECT_HERALD);
+        $update->setRejectDetails($blocking_effect->getRulePHID());
       }
 
       $message = $blocking_effect->getTarget();
