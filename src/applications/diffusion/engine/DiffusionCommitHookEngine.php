@@ -885,4 +885,43 @@ final class DiffusionCommitHookEngine extends Phobject {
       ->setRejectDetails(null);
   }
 
+  public function loadChangesetsForCommit($identifier) {
+    $vcs = $this->getRepository()->getVersionControlSystem();
+    switch ($vcs) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        // For git and hg, we can use normal commands.
+        $drequest = DiffusionRequest::newFromDictionary(
+          array(
+            'repository' => $this->getRepository(),
+            'user' => $this->getViewer(),
+            'commit' => $identifier,
+          ));
+        $raw_diff = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest)
+          ->setTimeout(5 * 60)
+          ->setLinesOfContext(0)
+          ->loadRawDiff();
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        // TODO: This diff has 3 lines of context, which produces slightly
+        // incorrect "added file content" and "removed file content" results.
+        // This may also choke on binaries, but "svnlook diff" does not support
+        // the "--diff-cmd" flag.
+
+        // For subversion, we need to use `svnlook`.
+        list($raw_diff) = execx(
+          'svnlook diff -t %s %s',
+          $this->subversionTransaction,
+          $this->subversionRepository);
+        break;
+      default:
+        throw new Exception(pht("Unknown VCS '%s!'", $vcs));
+    }
+
+    $parser = new ArcanistDiffParser();
+    $changes = $parser->parseDiff($raw_diff);
+    $diff = DifferentialDiff::newFromRawChanges($changes);
+    return $diff->getChangesets();
+  }
+
 }

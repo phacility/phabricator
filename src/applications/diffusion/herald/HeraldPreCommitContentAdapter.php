@@ -4,6 +4,7 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
 
   private $log;
   private $hookEngine;
+  private $changesets;
 
   public function setPushLog(PhabricatorRepositoryPushLog $log) {
     $this->log = $log;
@@ -35,6 +36,11 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
   public function getFields() {
     return array_merge(
       array(
+        self::FIELD_BODY,
+        self::FIELD_DIFF_FILE,
+        self::FIELD_DIFF_CONTENT,
+        self::FIELD_DIFF_ADDED_CONTENT,
+        self::FIELD_DIFF_REMOVED_CONTENT,
         self::FIELD_REPOSITORY,
         self::FIELD_PUSHER,
         self::FIELD_PUSHER_PROJECTS,
@@ -78,6 +84,14 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
   public function getHeraldField($field) {
     $log = $this->getObject();
     switch ($field) {
+      case self::FIELD_DIFF_FILE:
+        return $this->getDiffContent('name');
+      case self::FIELD_DIFF_CONTENT:
+        return $this->getDiffContent('*');
+      case self::FIELD_DIFF_ADDED_CONTENT:
+        return $this->getDiffContent('+');
+      case self::FIELD_DIFF_REMOVED_CONTENT:
+        return $this->getDiffContent('-');
       case self::FIELD_REPOSITORY:
         return $this->hookEngine->getRepository()->getPHID();
       case self::FIELD_PUSHER:
@@ -88,7 +102,6 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
 
     return parent::getHeraldField($field);
   }
-
 
   public function applyHeraldEffects(array $effects) {
     assert_instances_of($effects, 'HeraldEffect');
@@ -111,6 +124,55 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
           break;
         default:
           throw new Exception(pht('No rules to handle action "%s"!', $action));
+      }
+    }
+
+    return $result;
+  }
+
+  private function getDiffContent($type) {
+    if ($this->changesets === null) {
+      try {
+        $this->changesets = $this->hookEngine->loadChangesetsForCommit(
+          $this->log->getRefNew());
+      } catch (Exception $ex) {
+        $this->changesets = $ex;
+      }
+    }
+
+    if ($this->changesets instanceof Exception) {
+      $ex_class = get_class($this->changesets);
+      $ex_message = $this->changesets->getmessage();
+      if ($type === 'name') {
+        return array("<{$ex_class}: {$ex_message}>");
+      } else {
+        return array("<{$ex_class}>" => $ex_message);
+      }
+    }
+
+    $result = array();
+    if ($type === 'name') {
+      foreach ($this->changesets as $change) {
+        $result[] = $change->getFilename();
+      }
+    } else {
+      foreach ($this->changesets as $change) {
+        $lines = array();
+        foreach ($change->getHunks() as $hunk) {
+          switch ($type) {
+            case '-':
+              $lines[] = $hunk->makeOldFile();
+              break;
+            case '+':
+              $lines[] = $hunk->makeNewFile();
+              break;
+            case '*':
+            default:
+              $lines[] = $hunk->makeChanges();
+              break;
+          }
+        }
+        $result[$change->getFilename()] = implode('', $lines);
       }
     }
 
