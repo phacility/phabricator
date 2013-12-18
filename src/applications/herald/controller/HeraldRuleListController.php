@@ -41,7 +41,7 @@ final class HeraldRuleListController extends HeraldController
       $id = $rule->getID();
 
       $item = id(new PHUIObjectItemView())
-        ->setObjectName(pht('Rule %s', $rule->getID()))
+        ->setObjectName("H{$id}")
         ->setHeader($rule->getName())
         ->setHref($this->getApplicationURI("rule/{$id}/"));
 

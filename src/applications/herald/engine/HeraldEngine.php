@@ -368,7 +368,9 @@ final class HeraldEngine {
       $name = $rule->getName();
       $id   = $rule->getID();
       $effect->setReason(
-        'Conditions were met for Herald rule "'.$name.'" (#'.$id.').');
+        pht(
+          'Conditions were met for %s',
+          "H{$id} {$name}"));
 
       $effects[] = $effect;
     }

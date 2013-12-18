@@ -758,6 +758,7 @@ phutil_register_library_map(array(
     'HeraldPholioMockAdapter' => 'applications/herald/adapter/HeraldPholioMockAdapter.php',
     'HeraldPreCommitRefAdapter' => 'applications/diffusion/herald/HeraldPreCommitRefAdapter.php',
     'HeraldRecursiveConditionsException' => 'applications/herald/engine/exception/HeraldRecursiveConditionsException.php',
+    'HeraldRemarkupRule' => 'applications/herald/remarkup/HeraldRemarkupRule.php',
     'HeraldRepetitionPolicyConfig' => 'applications/herald/config/HeraldRepetitionPolicyConfig.php',
     'HeraldRule' => 'applications/herald/storage/HeraldRule.php',
     'HeraldRuleController' => 'applications/herald/controller/HeraldRuleController.php',
@@ -3181,6 +3182,7 @@ phutil_register_library_map(array(
     'HeraldPholioMockAdapter' => 'HeraldAdapter',
     'HeraldPreCommitRefAdapter' => 'HeraldAdapter',
     'HeraldRecursiveConditionsException' => 'Exception',
+    'HeraldRemarkupRule' => 'PhabricatorRemarkupRuleObject',
     'HeraldRule' =>
     array(
       0 => 'HeraldDAO',
