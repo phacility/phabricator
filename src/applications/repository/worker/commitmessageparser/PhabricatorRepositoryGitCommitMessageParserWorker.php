@@ -7,32 +7,16 @@ final class PhabricatorRepositoryGitCommitMessageParserWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    // NOTE: %B was introduced somewhat recently in git's history, so pull
-    // commit message information with %s and %b instead.
-    // Even though we pass --encoding here, git doesn't always succeed, so
-    // we try a little harder, since git *does* tell us what the actual encoding
-    // is correctly (unless it doesn't; encoding is sometimes empty).
-    list($info) = $repository->execxLocalCommand(
-      'log -n 1 --encoding=%s --format=%s %s --',
-      'UTF-8',
-      implode('%x00', array('%e', '%cn', '%ce', '%an', '%ae', '%s%n%n%b')),
-      $commit->getCommitIdentifier());
+    $ref = id(new DiffusionLowLevelGitCommitQuery())
+      ->setRepository($repository)
+      ->withIdentifier($commit->getCommitIdentifier())
+      ->execute();
 
-    $parts = explode("\0", $info);
-    $encoding = array_shift($parts);
-
-    foreach ($parts as $key => $part) {
-      if ($encoding) {
-        $part = phutil_utf8_convert($part, 'UTF-8', $encoding);
-      }
-      $parts[$key] = phutil_utf8ize($part);
-    }
-
-    $committer_name   = $parts[0];
-    $committer_email  = $parts[1];
-    $author_name      = $parts[2];
-    $author_email     = $parts[3];
-    $message          = $parts[4];
+    $committer_name   = $ref->getCommitterName();
+    $committer_email  = $ref->getCommitterEmail();
+    $author_name      = $ref->getAuthorName();
+    $author_email     = $ref->getAuthorEmail();
+    $message          = $ref->getMessage();
 
     if (strlen($author_email)) {
       $author = "{$author_name} <{$author_email}>";
