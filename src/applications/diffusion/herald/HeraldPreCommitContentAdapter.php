@@ -38,6 +38,8 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
     return array_merge(
       array(
         self::FIELD_BODY,
+        self::FIELD_AUTHOR,
+        self::FIELD_COMMITTER,
         self::FIELD_DIFF_FILE,
         self::FIELD_DIFF_CONTENT,
         self::FIELD_DIFF_ADDED_CONTENT,
@@ -87,6 +89,10 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
     switch ($field) {
       case self::FIELD_BODY:
         return $this->getCommitRef()->getMessage();
+      case self::FIELD_AUTHOR:
+        return $this->getAuthorPHID();
+      case self::FIELD_COMMITTER:
+        return $this->getCommitterPHID();
       case self::FIELD_DIFF_FILE:
         return $this->getDiffContent('name');
       case self::FIELD_DIFF_CONTENT:
@@ -188,6 +194,54 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
         $this->log->getRefNew());
     }
     return $this->commitRef;
+  }
+
+  private function getAuthorPHID() {
+    $repository = $this->hookEngine->getRepository();
+    $vcs = $repository->getVersionControlSystem();
+    switch ($vcs) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $ref = $this->getCommitRef();
+        $author = $ref->getAuthor();
+        if (!strlen($author)) {
+          return null;
+        }
+        return $this->lookupUser($author);
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        // In Subversion, the pusher is always the author.
+        return $this->hookEngine->getViewer()->getPHID();
+    }
+  }
+
+  private function getCommitterPHID() {
+    $repository = $this->hookEngine->getRepository();
+    $vcs = $repository->getVersionControlSystem();
+    switch ($vcs) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        // Here, if there's no committer, we're going to return the author
+        // instead.
+        $ref = $this->getCommitRef();
+        $committer = $ref->getCommitter();
+        if (!strlen($committer)) {
+          return $this->getAuthorPHID();
+        }
+        $phid = $this->lookupUser($committer);
+        if (!$phid) {
+          return $this->getAuthorPHID();
+        }
+        return $phid;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        // In Subversion, the pusher is always the committer.
+        return $this->hookEngine->getViewer()->getPHID();
+    }
+  }
+
+  private function lookupUser($author) {
+    return id(new DiffusionResolveUserQuery())
+      ->withName($author)
+      ->execute();
   }
 
 }
