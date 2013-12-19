@@ -7,7 +7,7 @@ final class PhabricatorRepositoryGitCommitMessageParserWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    $ref = id(new DiffusionLowLevelGitCommitQuery())
+    $ref = id(new DiffusionLowLevelCommitQuery())
       ->setRepository($repository)
       ->withIdentifier($commit->getCommitIdentifier())
       ->execute();

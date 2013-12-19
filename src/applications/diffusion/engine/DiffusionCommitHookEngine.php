@@ -939,12 +939,8 @@ final class DiffusionCommitHookEngine extends Phobject {
     $vcs = $repository->getVersionControlSystem();
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        return id(new DiffusionLowLevelGitCommitQuery())
-          ->setRepository($repository)
-          ->withIdentifier($identifier)
-          ->execute();
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        return id(new DiffusionLowLevelMercurialCommitQuery())
+        return id(new DiffusionLowLevelCommitQuery())
           ->setRepository($repository)
           ->withIdentifier($identifier)
           ->execute();

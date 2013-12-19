@@ -7,7 +7,7 @@ final class PhabricatorRepositoryMercurialCommitMessageParserWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    $ref = id(new DiffusionLowLevelMercurialCommitQuery())
+    $ref = id(new DiffusionLowLevelCommitQuery())
       ->setRepository($repository)
       ->withIdentifier($commit->getCommitIdentifier())
       ->execute();

@@ -29,7 +29,7 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
 
     // Pull the top-level path changes out of "svn log". This is pretty
     // straightforward; just parse the XML log.
-    $log = $this->getSVNLogXMLObject($uri, $svn_commit, $verbose = true);
+    $log = $this->getSVNLogXMLObject($uri, $svn_commit);
 
     $entry = $log->logentry[0];
 
@@ -767,6 +767,23 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
       $parents[] = '/'.implode('/', $parts);
     }
     return $parents;
+  }
+
+  /**
+   * This method is kind of awkward here but both the SVN message and
+   * change parsers use it.
+   */
+  private function getSVNLogXMLObject($uri, $revision) {
+    list($xml) = $this->repository->execxRemoteCommand(
+      "log --xml --verbose --limit 1 %s@%d",
+      $uri,
+      $revision);
+
+    // Subversion may send us back commit messages which won't parse because
+    // they have non UTF-8 garbage in them. Slam them into valid UTF-8.
+    $xml = phutil_utf8ize($xml);
+
+    return new SimpleXMLElement($xml);
   }
 
 }

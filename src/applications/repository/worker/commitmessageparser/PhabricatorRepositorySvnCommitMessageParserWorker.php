@@ -7,17 +7,13 @@ final class PhabricatorRepositorySvnCommitMessageParserWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    $uri = $repository->getSubversionPathURI();
+    $ref = id(new DiffusionLowLevelCommitQuery())
+      ->setRepository($repository)
+      ->withIdentifier($commit->getCommitIdentifier())
+      ->execute();
 
-    $log = $this->getSVNLogXMLObject(
-      $uri,
-      $commit->getCommitIdentifier(),
-      $verbose = false);
-
-    $entry = $log->logentry[0];
-
-    $author = (string)$entry->author;
-    $message = (string)$entry->msg;
+    $author = $ref->getAuthor();
+    $message = $ref->getMessage();
 
     $this->updateCommitData($author, $message);
 
