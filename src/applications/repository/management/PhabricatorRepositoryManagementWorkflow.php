@@ -30,5 +30,27 @@ abstract class PhabricatorRepositoryManagementWorkflow
     return $repos;
   }
 
+  protected function loadCommits(PhutilArgumentParser $args, $param) {
+    $names = $args->getArg($param);
+    if (!$names) {
+      return null;
+    }
+
+    $query = id(new DiffusionCommitQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withIdentifiers($names);
+
+    $query->execute();
+    $map = $query->getIdentifierMap();
+
+    foreach ($names as $name) {
+      if (empty($map[$name])) {
+        throw new PhutilArgumentUsageException(
+          pht('Commit "%s" does not exist or is ambiguous.', $name));
+      }
+    }
+
+    return $map;
+  }
 
 }
