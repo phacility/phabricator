@@ -23,10 +23,7 @@ final class PhabricatorChatLogChannelListController
 
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Channel List'))
-          ->setHref($this->getApplicationURI()));
+      ->addTextCrumb(pht('Channel List'), $this->getApplicationURI());
 
     return $this->buildApplicationPage(
       array(

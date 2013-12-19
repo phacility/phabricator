@@ -232,14 +232,12 @@ final class PhabricatorRepositoryCommitHeraldWorker
           }
           if ($status == PhabricatorAuditStatusConstants::AUDIT_REQUIRED) {
             $reasons[] = pht(
-              'Herald Rule #%d "%s" Triggered Audit',
-              $id,
-              $rule_name);
+              '%s Triggered Audit',
+              "H{$id} {$rule_name}");
           } else {
             $reasons[] = pht(
-              'Herald Rule #%d "%s" Triggered CC',
-              $id,
-              $rule_name);
+              '%s Triggered CC',
+              "H{$id} {$rule_name}");
           }
         }
 

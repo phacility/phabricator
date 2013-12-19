@@ -88,9 +88,7 @@ final class DifferentialDiffCreateController extends DifferentialController {
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Create Diff')));
+    $crumbs->addTextCrumb(pht('Create Diff'));
 
     if ($errors) {
       $errors = id(new AphrontErrorView())

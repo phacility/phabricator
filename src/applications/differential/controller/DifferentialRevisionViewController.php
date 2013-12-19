@@ -421,10 +421,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     );
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($object_id)
-        ->setHref('/'.$object_id));
+    $crumbs->addTextCrumb($object_id, '/'.$object_id);
 
     $prefs = $user->loadPreferences();
 

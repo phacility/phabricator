@@ -1211,7 +1211,7 @@ celerity_register_resource_map(array(
   ),
   'herald-rule-editor' =>
   array(
-    'uri' => '/res/928275b4/rsrc/js/application/herald/HeraldRuleEditor.js',
+    'uri' => '/res/92c05b75/rsrc/js/application/herald/HeraldRuleEditor.js',
     'type' => 'js',
     'requires' =>
     array(

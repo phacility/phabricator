@@ -47,10 +47,9 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     $timeline = $this->buildTransactionView($file, $xactions);
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName('F'.$file->getID())
-        ->setHref($this->getApplicationURI("/info/{$phid}/")));
+    $crumbs->addTextCrumb(
+      'F'.$file->getID(),
+      $this->getApplicationURI("/info/{$phid}/"));
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header);

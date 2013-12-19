@@ -29,9 +29,7 @@ final class DiffusionRepositoryEditLocalController
     $errors = array();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Edit Local')));
+    $crumbs->addTextCrumb(pht('Edit Local'));
 
     $title = pht('Edit %s', $repository->getName());
 

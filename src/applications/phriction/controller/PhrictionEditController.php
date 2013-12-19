@@ -241,17 +241,12 @@ final class PhrictionEditController
 
     $crumbs = $this->buildApplicationCrumbs();
     if ($document->getID()) {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($content->getTitle())
-          ->setHref(PhrictionDocument::getSlugURI($document->getSlug())));
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Edit')));
+      $crumbs->addTextCrumb(
+        $content->getTitle(),
+        PhrictionDocument::getSlugURI($document->getSlug()));
+      $crumbs->addTextCrumb(pht('Edit'));
     } else {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Create')));
+      $crumbs->addTextCrumb(pht('Create'));
     }
 
     return $this->buildApplicationPage(

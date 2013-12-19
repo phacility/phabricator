@@ -9,14 +9,10 @@ final class DiffusionSvnFileContentQuery extends DiffusionFileContentQuery {
     $path = $drequest->getPath();
     $commit = $drequest->getCommit();
 
-    $remote_uri = $repository->getRemoteURI();
-
     return $repository->getRemoteCommandFuture(
-      '%C %s%s@%s',
+      '%C %s',
       $this->getNeedsBlame() ? 'blame --force' : 'cat',
-      $remote_uri,
-      phutil_escape_uri($path),
-      $commit);
+      $repository->getSubversionPathURI($path, $commit));
   }
 
   protected function executeQueryFromFuture(Future $future) {

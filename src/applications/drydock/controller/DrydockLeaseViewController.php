@@ -40,10 +40,7 @@ final class DrydockLeaseViewController extends DrydockController {
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title)
-        ->setHref($lease_uri));
+    $crumbs->addTextCrumb($title, $lease_uri);
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)

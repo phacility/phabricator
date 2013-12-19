@@ -39,8 +39,4 @@ final class NuancePHIDTypeQueue
     }
   }
 
-  public function canLoadNamedObject($name) {
-    return false;
-  }
-
 }

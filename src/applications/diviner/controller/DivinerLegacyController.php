@@ -43,9 +43,7 @@ final class DivinerLegacyController extends DivinerController {
     }
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Documentation')));
+    $crumbs->addTextCrumb(pht('Documentation'));
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Documentation'));

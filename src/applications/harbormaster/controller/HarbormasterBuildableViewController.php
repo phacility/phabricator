@@ -94,9 +94,7 @@ final class HarbormasterBuildableViewController
     $this->buildPropertyLists($box, $buildable, $actions);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName("B{$id}"));
+    $crumbs->addTextCrumb("B{$id}");
 
     return $this->buildApplicationPage(
       array(

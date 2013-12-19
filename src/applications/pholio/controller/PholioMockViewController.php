@@ -98,10 +98,7 @@ final class PholioMockViewController extends PholioController {
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName('M'.$mock->getID())
-        ->setHref('/M'.$mock->getID()));
+    $crumbs->addTextCrumb('M'.$mock->getID(), '/M'.$mock->getID());
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)

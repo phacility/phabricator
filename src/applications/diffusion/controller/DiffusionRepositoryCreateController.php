@@ -181,9 +181,7 @@ final class DiffusionRepositoryCreateController
     }
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title));
+    $crumbs->addTextCrumb($title);
 
     return $this->buildApplicationPage(
       array(

@@ -70,13 +70,8 @@ final class PhabricatorAuthConfirmLinkController
     $dialog->appendChild($form);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Confirm Link'))
-        ->setHref($panel_uri));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($provider->getProviderName()));
+    $crumbs->addTextCrumb(pht('Confirm Link'), $panel_uri);
+    $crumbs->addTextCrumb($provider->getProviderName());
 
     return $this->buildApplicationPage(
       array(

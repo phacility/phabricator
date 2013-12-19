@@ -380,15 +380,9 @@ final class PhabricatorConduitAPIController
 
     $method_uri = $this->getApplicationURI('method/'.$method.'/');
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($method)
-          ->setHref($method_uri))
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Call')));
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb($method, $method_uri)
+      ->addTextCrumb(pht('Call'));
 
     return $this->buildApplicationPage(
       array(

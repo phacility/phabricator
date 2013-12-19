@@ -51,9 +51,7 @@ final class HarbormasterPlanViewController
     $this->buildPropertyLists($box, $plan, $actions);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht("Plan %d", $id)));
+    $crumbs->addTextCrumb(pht("Plan %d", $id));
 
     $step_list = $this->buildStepList($plan);
 

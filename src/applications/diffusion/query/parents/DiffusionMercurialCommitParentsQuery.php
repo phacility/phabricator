@@ -10,6 +10,7 @@ final class DiffusionMercurialCommitParentsQuery
     list($stdout) = $repository->execxLocalCommand(
       'log --debug --limit 1 --template={parents} --rev %s',
       $drequest->getStableCommitName());
+    $stdout = PhabricatorRepository::filterMercurialDebugOutput($stdout);
 
     $hashes = preg_split('/\s+/', trim($stdout));
     foreach ($hashes as $key => $value) {

@@ -87,9 +87,7 @@ final class PhabricatorAuthNewController
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Add Provider')));
+    $crumbs->addTextCrumb(pht('Add Provider'));
 
     return $this->buildApplicationPage(
       array(

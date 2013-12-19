@@ -37,9 +37,7 @@ final class HarbormasterBuildViewController
     $this->buildPropertyLists($box, $build, $actions);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title));
+    $crumbs->addTextCrumb($title);
 
     $build_targets = id(new HarbormasterBuildTargetQuery())
       ->setViewer($viewer)

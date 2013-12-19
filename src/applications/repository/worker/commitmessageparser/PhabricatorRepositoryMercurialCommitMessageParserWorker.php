@@ -7,16 +7,13 @@ final class PhabricatorRepositoryMercurialCommitMessageParserWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    list($stdout) = $repository->execxLocalCommand(
-      'log --template %s --rev %s',
-      '{author}\\n{desc}',
-      $commit->getCommitIdentifier());
+    $ref = id(new DiffusionLowLevelMercurialCommitQuery())
+      ->setRepository($repository)
+      ->withIdentifier($commit->getCommitIdentifier())
+      ->execute();
 
-    list($author, $message) = explode("\n", $stdout, 2);
-
-    $author = phutil_utf8ize($author);
-    $message = phutil_utf8ize($message);
-    $message = trim($message);
+    $author = $ref->getAuthor();
+    $message = $ref->getMessage();
 
     $this->updateCommitData($author, $message);
 

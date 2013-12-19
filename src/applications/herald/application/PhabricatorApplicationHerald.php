@@ -30,6 +30,12 @@ final class PhabricatorApplicationHerald extends PhabricatorApplication {
     return self::GROUP_ORGANIZATION;
   }
 
+  public function getRemarkupRules() {
+    return array(
+      new HeraldRemarkupRule(),
+    );
+  }
+
   public function getRoutes() {
     return array(
       '/herald/' => array(

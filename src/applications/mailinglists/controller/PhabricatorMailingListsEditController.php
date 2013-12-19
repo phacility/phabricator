@@ -117,13 +117,9 @@ final class PhabricatorMailingListsEditController
           ->addCancelButton($this->getApplicationURI()));
 
     if ($list->getID()) {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Edit Mailing List')));
+      $crumbs->addTextCrumb(pht('Edit Mailing List'));
     } else {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Create Mailing List')));
+      $crumbs->addTextCrumb(pht('Create Mailing List'));
     }
 
     $form_box = id(new PHUIObjectBoxView())

@@ -25,6 +25,8 @@ abstract class HeraldAdapter {
   const FIELD_ALWAYS                 = 'always';
   const FIELD_AUTHOR_PROJECTS        = 'authorprojects';
   const FIELD_PROJECTS               = 'projects';
+  const FIELD_PUSHER                 = 'pusher';
+  const FIELD_PUSHER_PROJECTS        = 'pusher-projects';
 
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';
@@ -44,6 +46,8 @@ abstract class HeraldAdapter {
   const CONDITION_NOT_EXISTS      = '!exists';
   const CONDITION_UNCONDITIONALLY = 'unconditionally';
   const CONDITION_REGEXP_PAIR     = 'regexp-pair';
+  const CONDITION_HAS_BIT         = 'bit';
+  const CONDITION_NOT_BIT         = '!bit';
 
   const ACTION_ADD_CC       = 'addcc';
   const ACTION_REMOVE_CC    = 'remcc';
@@ -56,6 +60,7 @@ abstract class HeraldAdapter {
   const ACTION_ADD_REVIEWERS = 'addreviewers';
   const ACTION_ADD_BLOCKING_REVIEWERS = 'addblockingreviewers';
   const ACTION_APPLY_BUILD_PLANS = 'applybuildplans';
+  const ACTION_BLOCK = 'block';
 
   const VALUE_TEXT            = 'text';
   const VALUE_NONE            = 'none';
@@ -156,6 +161,8 @@ abstract class HeraldAdapter {
       self::FIELD_ALWAYS => pht('Always'),
       self::FIELD_AUTHOR_PROJECTS => pht("Author's projects"),
       self::FIELD_PROJECTS => pht("Projects"),
+      self::FIELD_PUSHER => pht('Pusher'),
+      self::FIELD_PUSHER_PROJECTS => pht("Pusher's projects"),
     );
   }
 
@@ -183,6 +190,8 @@ abstract class HeraldAdapter {
       self::CONDITION_NOT_EXISTS      => pht('does not exist'),
       self::CONDITION_UNCONDITIONALLY => '',  // don't show anything!
       self::CONDITION_REGEXP_PAIR     => pht('matches regexp pair'),
+      self::CONDITION_HAS_BIT         => pht('has bit'),
+      self::CONDITION_NOT_BIT         => pht('lacks bit'),
     );
   }
 
@@ -200,6 +209,7 @@ abstract class HeraldAdapter {
       case self::FIELD_AUTHOR:
       case self::FIELD_COMMITTER:
       case self::FIELD_REVIEWER:
+      case self::FIELD_PUSHER:
         return array(
           self::CONDITION_IS_ANY,
           self::CONDITION_IS_NOT_ANY,
@@ -218,6 +228,7 @@ abstract class HeraldAdapter {
       case self::FIELD_PROJECTS:
       case self::FIELD_AFFECTED_PACKAGE:
       case self::FIELD_AFFECTED_PACKAGE_OWNER:
+      case self::FIELD_PUSHER_PROJECTS:
         return array(
           self::CONDITION_INCLUDE_ALL,
           self::CONDITION_INCLUDE_ANY,
@@ -392,6 +403,10 @@ abstract class HeraldAdapter {
           $result = !$result;
         }
         return $result;
+      case self::CONDITION_HAS_BIT:
+        return (($condition_value & $field_value) === $condition_value);
+      case self::CONDITION_NOT_BIT:
+        return (($condition_value & $field_value) !== $condition_value);
       default:
         throw new HeraldInvalidConditionException(
           "Unknown condition '{$condition_type}'.");
@@ -469,6 +484,8 @@ abstract class HeraldAdapter {
       case self::CONDITION_EXISTS:
       case self::CONDITION_NOT_EXISTS:
       case self::CONDITION_UNCONDITIONALLY:
+      case self::CONDITION_HAS_BIT:
+      case self::CONDITION_NOT_BIT:
         // No explicit validation for these types, although there probably
         // should be in some cases.
         break;
@@ -500,6 +517,7 @@ abstract class HeraldAdapter {
           self::ACTION_ADD_REVIEWERS => pht('Add reviewers'),
           self::ACTION_ADD_BLOCKING_REVIEWERS => pht('Add blocking reviewers'),
           self::ACTION_APPLY_BUILD_PLANS => pht('Apply build plans'),
+          self::ACTION_BLOCK => pht('Block change with message'),
         );
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         return array(
@@ -551,6 +569,7 @@ abstract class HeraldAdapter {
             $target = PhabricatorFlagColor::COLOR_BLUE;
           }
           break;
+        case self::ACTION_BLOCK:
         case self::ACTION_NOTHING:
           break;
         default:
@@ -607,6 +626,7 @@ abstract class HeraldAdapter {
           case self::FIELD_AFFECTED_PACKAGE:
             return self::VALUE_OWNERS_PACKAGE;
           case self::FIELD_AUTHOR_PROJECTS:
+          case self::FIELD_PUSHER_PROJECTS:
           case self::FIELD_PROJECTS:
             return self::VALUE_PROJECT;
           case self::FIELD_REVIEWERS:
@@ -658,18 +678,20 @@ abstract class HeraldAdapter {
           return self::VALUE_EMAIL;
         case self::ACTION_NOTHING:
           return self::VALUE_NONE;
-        case self::ACTION_AUDIT:
         case self::ACTION_ADD_PROJECTS:
           return self::VALUE_PROJECT;
         case self::ACTION_FLAG:
           return self::VALUE_FLAG_COLOR;
         case self::ACTION_ASSIGN_TASK:
           return self::VALUE_USER;
+        case self::ACTION_AUDIT:
         case self::ACTION_ADD_REVIEWERS:
         case self::ACTION_ADD_BLOCKING_REVIEWERS:
           return self::VALUE_USER_OR_PROJECT;
         case self::ACTION_APPLY_BUILD_PLANS:
           return self::VALUE_BUILD_PLAN;
+        case self::ACTION_BLOCK:
+          return self::VALUE_TEXT;
         default:
           throw new Exception("Unknown or invalid action '{$action}'.");
       }

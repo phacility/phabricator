@@ -97,13 +97,10 @@ final class HeraldTranscriptController extends HeraldController {
     }
 
     $crumbs = id($this->buildApplicationCrumbs())
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Transcripts'))
-          ->setHref($this->getApplicationURI('/transcript/')))
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($xscript->getID()));
+      ->addTextCrumb(
+        pht('Transcripts'),
+        $this->getApplicationURI('/transcript/'))
+      ->addTextCrumb($xscript->getID());
     $nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(
@@ -292,6 +289,10 @@ final class HeraldTranscriptController extends HeraldController {
           break;
         case HeraldAdapter::ACTION_FLAG:
           $target = PhabricatorFlagColor::getColorName($target);
+          break;
+        case HeraldAdapter::ACTION_BLOCK:
+          // Target is a text string.
+          $target = $target;
           break;
         default:
           if ($target) {

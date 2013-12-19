@@ -173,8 +173,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())->setName($short));
+    $crumbs->addTextCrumb($short);
 
 
     $preview = id(new PHUIRemarkupPreviewPanel())

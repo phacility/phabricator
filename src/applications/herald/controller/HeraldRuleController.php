@@ -194,9 +194,7 @@ final class HeraldRuleController extends HeraldController {
 
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($title));
+      ->addTextCrumb($title);
 
     return $this->buildApplicationPage(
       array(
@@ -349,6 +347,7 @@ final class HeraldRuleController extends HeraldController {
 
         switch ($action->getAction()) {
           case HeraldAdapter::ACTION_FLAG:
+          case HeraldAdapter::ACTION_BLOCK:
             $current_value = $action->getTarget();
             break;
           default:
@@ -414,12 +413,42 @@ final class HeraldRuleController extends HeraldController {
         'root' => 'herald-rule-edit-form',
         'conditions' => (object)$serial_conditions,
         'actions' => (object)$serial_actions,
+        'select' => array(
+          HeraldAdapter::VALUE_CONTENT_SOURCE => array(
+            'options' => PhabricatorContentSource::getSourceNameMap(),
+            'default' => PhabricatorContentSource::SOURCE_WEB,
+          ),
+          HeraldAdapter::VALUE_FLAG_COLOR => array(
+            'options' => PhabricatorFlagColor::getColorNameMap(),
+            'default' => PhabricatorFlagColor::COLOR_BLUE,
+          ),
+          HeraldPreCommitRefAdapter::VALUE_REF_TYPE => array(
+            'options' => array(
+              PhabricatorRepositoryPushLog::REFTYPE_BRANCH
+                => pht('branch (git/hg)'),
+              PhabricatorRepositoryPushLog::REFTYPE_TAG
+                => pht('tag (git)'),
+              PhabricatorRepositoryPushLog::REFTYPE_BOOKMARK
+                => pht('bookmark (hg)'),
+            ),
+            'default' => PhabricatorRepositoryPushLog::REFTYPE_BRANCH,
+          ),
+          HeraldPreCommitRefAdapter::VALUE_REF_CHANGE => array(
+            'options' => array(
+              PhabricatorRepositoryPushLog::CHANGEFLAG_ADD =>
+                pht('change creates ref'),
+              PhabricatorRepositoryPushLog::CHANGEFLAG_DELETE =>
+                pht('change deletes ref'),
+              PhabricatorRepositoryPushLog::CHANGEFLAG_REWRITE =>
+                pht('change rewrites ref'),
+              PhabricatorRepositoryPushLog::CHANGEFLAG_DANGEROUS =>
+                pht('dangerous change'),
+            ),
+            'default' => PhabricatorRepositoryPushLog::CHANGEFLAG_ADD,
+          ),
+        ),
         'template' => $this->buildTokenizerTemplates() + array(
           'rules' => $all_rules,
-          'colors' => PhabricatorFlagColor::getColorNameMap(),
-          'defaultColor' => PhabricatorFlagColor::COLOR_BLUE,
-          'contentSources' => PhabricatorContentSource::getSourceNameMap(),
-          'defaultSource' => PhabricatorContentSource::SOURCE_WEB
         ),
         'author' => array($rule->getAuthorPHID() =>
                           $handles[$rule->getAuthorPHID()]->getName()),

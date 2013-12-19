@@ -165,15 +165,11 @@ final class PhabricatorProjectProfileEditController
       ->setFormError($error_view)
       ->setForm($form);
 
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($project->getName())
-        ->setHref('/project/view/'.$project->getID().'/'));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Edit Project'))
-        ->setHref($this->getApplicationURI()));
+    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView())
+      ->addTextCrumb(
+        $project->getName(),
+        '/project/view/'.$project->getID().'/')
+      ->addTextCrumb(pht('Edit Project'), $this->getApplicationURI());
 
     return $this->buildApplicationPage(
       array(

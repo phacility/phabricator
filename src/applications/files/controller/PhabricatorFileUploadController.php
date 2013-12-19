@@ -60,10 +60,7 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
       ->appendChild($instructions);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Upload'))
-        ->setHref($request->getRequestURI()));
+    $crumbs->addTextCrumb(pht('Upload'), $request->getRequestURI());
 
     $title = pht('Upload File');
 

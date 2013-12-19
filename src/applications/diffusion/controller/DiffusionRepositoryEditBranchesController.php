@@ -88,9 +88,7 @@ final class DiffusionRepositoryEditBranchesController
     $content = array();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Edit Branches')));
+    $crumbs->addTextCrumb(pht('Edit Branches'));
 
     $title = pht('Edit Branches (%s)', $repository->getName());
 

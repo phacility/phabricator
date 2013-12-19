@@ -61,6 +61,31 @@ final class DiffusionSubversionWireProtocolTestCase
       ));
   }
 
+  public function testSubversionWireProtocolPartialFrame() {
+    $proto = new DiffusionSubversionWireProtocol();
+
+    // This is primarily a test that we don't hang when we write() a frame
+    // which straddles a string boundary.
+    $msg1 = $proto->writeData('( duck 5:qu');
+    $msg2 = $proto->writeData('ack ) ');
+
+    $this->assertEqual(array(), ipull($msg1, 'structure'));
+    $this->assertEqual(
+      array(
+        array(
+          array(
+            'type' => 'word',
+            'value' => 'duck',
+          ),
+          array(
+            'type'=> 'string',
+            'value' => 'quack',
+          ),
+        ),
+      ),
+      ipull($msg2, 'structure'));
+  }
+
   private function assertSameSubversionMessages($string, array $structs) {
     $proto = new DiffusionSubversionWireProtocol();
 

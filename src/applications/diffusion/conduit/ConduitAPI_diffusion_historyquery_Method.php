@@ -128,6 +128,7 @@ extends ConduitAPI_diffusion_abstractquery_Method {
       hgsprintf('reverse(%s::%s)', '0', $commit_hash),
       $path_arg);
 
+    $stdout = PhabricatorRepository::filterMercurialDebugOutput($stdout);
     $lines = explode("\n", trim($stdout));
     $lines = array_slice($lines, $offset);
 

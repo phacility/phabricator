@@ -67,9 +67,7 @@ final class DiffusionRepositoryNewController
           ->addCancelButton($this->getApplicationURI()));
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('New Repository')));
+    $crumbs->addTextCrumb(pht('New Repository'));
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Create or Import Repository'))

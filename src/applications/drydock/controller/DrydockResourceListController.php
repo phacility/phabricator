@@ -20,10 +20,7 @@ final class DrydockResourceListController extends DrydockController {
     $resource_list = $this->buildResourceListView($resources);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title)
-        ->setHref($request->getRequestURI()));
+    $crumbs->addTextCrumb($title, $request->getRequestURI());
 
     $nav = $this->buildSideNav('resource');
     $nav->setCrumbs($crumbs);

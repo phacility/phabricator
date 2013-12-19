@@ -59,9 +59,7 @@ final class DiffusionRepositoryEditActionsController
     $content = array();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Edit Actions')));
+    $crumbs->addTextCrumb(pht('Edit Actions'));
 
     $title = pht('Edit Actions (%s)', $repository->getName());
 

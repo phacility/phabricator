@@ -42,9 +42,7 @@ final class DrydockBlueprintViewController extends DrydockController {
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Blueprint %d', $blueprint->getID())));
+    $crumbs->addTextCrumb(pht('Blueprint %d', $blueprint->getID()));
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)

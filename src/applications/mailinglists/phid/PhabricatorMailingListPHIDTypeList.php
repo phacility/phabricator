@@ -37,8 +37,4 @@ final class PhabricatorMailingListPHIDTypeList extends PhabricatorPHIDType {
     }
   }
 
-  public function canLoadNamedObject($name) {
-    return false;
-  }
-
 }

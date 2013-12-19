@@ -38,8 +38,4 @@ final class PhabricatorPolicyPHIDTypePolicy
     }
   }
 
-  public function canLoadNamedObject($name) {
-    return false;
-  }
-
 }

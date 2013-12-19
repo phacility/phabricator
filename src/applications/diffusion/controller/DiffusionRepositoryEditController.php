@@ -11,20 +11,12 @@ abstract class DiffusionRepositoryEditController
       $repo_uri = $this->getRepositoryControllerURI($repository, '');
       $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
 
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName('r'.$repository->getCallsign())
-          ->setHref($repo_uri));
+      $crumbs->addTextCrumb('r'.$repository->getCallsign(), $repo_uri);
 
       if ($is_main) {
-        $crumbs->addCrumb(
-          id(new PhabricatorCrumbView())
-            ->setName(pht('Edit Repository')));
+        $crumbs->addTextCrumb(pht('Edit Repository'));
       } else {
-        $crumbs->addCrumb(
-          id(new PhabricatorCrumbView())
-            ->setName(pht('Edit'))
-            ->setHref($edit_uri));
+        $crumbs->addTextCrumb(pht('Edit'), $edit_uri);
       }
     }
 

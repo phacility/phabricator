@@ -50,9 +50,7 @@ final class PhabricatorSlowvotePollController
     $properties = $this->buildPropertyView($poll, $actions);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName('V'.$poll->getID()));
+    $crumbs->addTextCrumb('V'.$poll->getID());
 
     $xactions = $this->buildTransactions($poll);
     $add_comment = $this->buildCommentForm($poll);

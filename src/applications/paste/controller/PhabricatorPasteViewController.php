@@ -88,10 +88,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView())
       ->setActionList($actions)
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName('P'.$paste->getID())
-          ->setHref('/P'.$paste->getID()));
+      ->addTextCrumb('P'.$paste->getID(), '/P'.$paste->getID());
 
     $xactions = id(new PhabricatorPasteTransactionQuery())
       ->setViewer($request->getUser())

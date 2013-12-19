@@ -32,9 +32,7 @@ final class ReleephBranchHistoryController extends ReleephProjectController {
       ->setTransactions($xactions);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('History')));
+    $crumbs->addTextCrumb(pht('History'));
 
     return $this->buildApplicationPage(
       array(

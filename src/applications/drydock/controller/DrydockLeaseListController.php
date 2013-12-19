@@ -31,10 +31,7 @@ final class DrydockLeaseListController extends DrydockController {
       ));
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title)
-        ->setHref($request->getRequestURI()));
+    $crumbs->addTextCrumb($title, $request->getRequestURI());
     $nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(

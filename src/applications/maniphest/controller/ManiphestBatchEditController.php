@@ -144,9 +144,7 @@ final class ManiphestBatchEditController extends ManiphestController {
     $title = pht('Batch Editor');
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title));
+    $crumbs->addTextCrumb($title);
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Batch Edit Tasks'))

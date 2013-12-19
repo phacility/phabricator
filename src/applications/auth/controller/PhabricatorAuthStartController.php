@@ -126,9 +126,7 @@ final class PhabricatorAuthStartController
     $login_message = phutil_safe_html($login_message);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Login')));
+    $crumbs->addTextCrumb(pht('Login'));
 
     return $this->buildApplicationPage(
       array(

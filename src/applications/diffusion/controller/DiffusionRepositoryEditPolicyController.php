@@ -67,9 +67,7 @@ final class DiffusionRepositoryEditPolicyController
     $content = array();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Edit Policies')));
+    $crumbs->addTextCrumb(pht('Edit Policies'));
 
     $title = pht('Edit Policies (%s)', $repository->getName());
 

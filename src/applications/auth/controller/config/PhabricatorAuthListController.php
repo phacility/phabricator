@@ -86,9 +86,7 @@ final class PhabricatorAuthListController
           pht('Add Authentication Provider'))));
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Auth Providers')));
+    $crumbs->addTextCrumb(pht('Auth Providers'));
 
     $config_name = 'auth.email-domains';
     $config_href = '/config/edit/'.$config_name.'/';

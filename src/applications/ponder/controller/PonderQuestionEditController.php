@@ -117,17 +117,10 @@ final class PonderQuestionEditController extends PonderController {
 
     $id = $question->getID();
     if ($id) {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName("Q{$id}")
-          ->setHref("/Q{$id}"));
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Edit')));
+      $crumbs->addTextCrumb("Q{$id}", "/Q{$id}");
+      $crumbs->addTextCrumb(pht('Edit'));
     } else {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Ask Question')));
+      $crumbs->addTextCrumb(pht('Ask Question'));
     }
 
     return $this->buildApplicationPage(

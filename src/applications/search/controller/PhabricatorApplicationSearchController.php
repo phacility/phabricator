@@ -147,6 +147,10 @@ final class PhabricatorApplicationSearchController
       $named_query = idx($engine->loadEnabledNamedQueries(), $query_key);
     } else {
       $saved_query = $engine->buildSavedQueryFromRequest($request);
+
+      // Save the query to generate a query key, so "Save Custom Query..." and
+      // other features like Maniphest's "Export..." work correctly.
+      $this->saveQuery($saved_query);
     }
 
     $nav->selectFilter(
@@ -256,9 +260,7 @@ final class PhabricatorApplicationSearchController
 
     $crumbs = $parent
       ->buildApplicationCrumbs()
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht("Search")));
+      ->addTextCrumb(pht("Search"));
 
     $nav->setCrumbs($crumbs);
 
@@ -340,10 +342,7 @@ final class PhabricatorApplicationSearchController
 
     $crumbs = $parent
       ->buildApplicationCrumbs()
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht("Saved Queries"))
-          ->setHref($engine->getQueryManagementURI()));
+      ->addTextCrumb(pht("Saved Queries"), $engine->getQueryManagementURI());
 
     $nav->selectFilter('query/edit');
     $nav->setCrumbs($crumbs);

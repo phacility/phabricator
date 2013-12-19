@@ -154,9 +154,7 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
       ->appendInstructions($container);
 
     $crumbs = $this->buildApplicationCrumbsWithPath($parents);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Create Snapshot')));
+    $crumbs->addTextCrumb(pht('Create Snapshot'));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Create Snapshot of %s', $fragment->getName()))

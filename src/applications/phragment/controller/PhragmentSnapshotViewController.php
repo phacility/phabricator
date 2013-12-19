@@ -40,9 +40,7 @@ final class PhragmentSnapshotViewController extends PhragmentController {
     }
 
     $crumbs = $this->buildApplicationCrumbsWithPath($parents);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('"%s" Snapshot', $snapshot->getName())));
+    $crumbs->addTextCrumb(pht('"%s" Snapshot', $snapshot->getName()));
 
     $children = id(new PhragmentSnapshotChildQuery())
       ->setViewer($viewer)

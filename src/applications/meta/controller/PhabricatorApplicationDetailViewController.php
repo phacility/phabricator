@@ -24,9 +24,7 @@ final class PhabricatorApplicationDetailViewController
     $title = $selected->getName();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($selected->getName()));
+    $crumbs->addTextCrumb($selected->getName());
 
     $header = id(new PHUIHeaderView())
       ->setHeader($title)

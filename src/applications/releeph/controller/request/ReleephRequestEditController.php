@@ -272,20 +272,13 @@ final class ReleephRequestEditController extends ReleephProjectController {
       $title = pht('Edit Releeph Request');
       $submit_name = pht('Save');
 
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName('RQ'.$rq->getID())
-          ->setHref('/RQ'.$rq->getID()));
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Edit')));
+      $crumbs->addTextCrumb('RQ'.$rq->getID(), '/RQ'.$rq->getID());
+      $crumbs->addTextCrumb(pht('Edit'));
 
     } else {
       $title = pht('Create Releeph Request');
       $submit_name = pht('Create');
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('New Request')));
+      $crumbs->addTextCrumb(pht('New Request'));
     }
 
     $form->appendChild(

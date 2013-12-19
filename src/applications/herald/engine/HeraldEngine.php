@@ -24,8 +24,8 @@ final class HeraldEngine {
     return idx($this->rules, $id);
   }
 
-  public static function loadAndApplyRules(HeraldAdapter $adapter) {
-    $rules = id(new HeraldRuleQuery())
+  public function loadRulesForAdapter(HeraldAdapter $adapter) {
+    return id(new HeraldRuleQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withDisabled(false)
       ->withContentTypes(array($adapter->getAdapterContentType()))
@@ -33,8 +33,12 @@ final class HeraldEngine {
       ->needAppliedToPHIDs(array($adapter->getPHID()))
       ->needValidateAuthors(true)
       ->execute();
+  }
 
+  public static function loadAndApplyRules(HeraldAdapter $adapter) {
     $engine = new HeraldEngine();
+
+    $rules = $engine->loadRulesForAdapter($adapter);
     $effects = $engine->applyRules($rules, $adapter);
     $engine->applyEffects($effects, $adapter, $rules);
 
@@ -359,11 +363,14 @@ final class HeraldEngine {
       $effect->setTarget($action->getTarget());
 
       $effect->setRuleID($rule->getID());
+      $effect->setRulePHID($rule->getPHID());
 
       $name = $rule->getName();
       $id   = $rule->getID();
       $effect->setReason(
-        'Conditions were met for Herald rule "'.$name.'" (#'.$id.').');
+        pht(
+          'Conditions were met for %s',
+          "H{$id} {$name}"));
 
       $effects[] = $effect;
     }

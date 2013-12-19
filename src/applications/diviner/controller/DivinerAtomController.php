@@ -59,18 +59,15 @@ final class DivinerAtomController extends DivinerController {
     $atom = $symbol->getAtom();
     $crumbs = $this->buildApplicationCrumbs();
 
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($book->getShortTitle())
-        ->setHref('/book/'.$book->getName().'/'));
+    $crumbs->addTextCrumb(
+      $book->getShortTitle(),
+      '/book/'.$book->getName().'/');
 
     $atom_short_title = $atom->getDocblockMetaValue(
       'short',
       $symbol->getTitle());
 
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($atom_short_title));
+    $crumbs->addTextCrumb($atom_short_title);
 
     $header = id(new PHUIHeaderView())
       ->setHeader($this->renderFullSignature($symbol))

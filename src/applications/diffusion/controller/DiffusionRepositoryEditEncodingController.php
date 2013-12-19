@@ -57,9 +57,7 @@ final class DiffusionRepositoryEditEncodingController
     }
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Edit Encoding')));
+    $crumbs->addTextCrumb(pht('Edit Encoding'));
 
     $title = pht('Edit %s', $repository->getName());
 

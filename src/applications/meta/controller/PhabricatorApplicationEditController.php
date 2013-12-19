@@ -146,13 +146,8 @@ final class PhabricatorApplicationEditController
         ->addCancelButton($view_uri));
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($application->getName())
-        ->setHref($view_uri));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Edit Policies')));
+    $crumbs->addTextCrumb($application->getName(), $view_uri);
+    $crumbs->addTextCrumb(pht('Edit Policies'));
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Edit Policies: %s', $application->getName()));

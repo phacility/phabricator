@@ -74,18 +74,13 @@ final class ReleephRequestViewController extends ReleephProjectController {
       ->setSubmitButtonName('Comment');
 
     $crumbs = $this->buildApplicationCrumbs()
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($releeph_project->getName())
-          ->setHref($releeph_project->getURI()))
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($releeph_branch->getDisplayNameWithDetail())
-          ->setHref($releeph_branch->getURI()))
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName('RQ'.$releeph_request->getID())
-          ->setHref('/RQ'.$releeph_request->getID()));
+      ->addTextCrumb($releeph_project->getName(), $releeph_project->getURI())
+      ->addTextCrumb(
+        $releeph_branch->getDisplayNameWithDetail(),
+        $releeph_branch->getURI())
+      ->addTextCrumb(
+        'RQ'.$releeph_request->getID(),
+        '/RQ'.$releeph_request->getID());
 
     return $this->buildStandardPageResponse(
       array(

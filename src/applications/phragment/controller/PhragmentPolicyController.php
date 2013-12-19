@@ -88,9 +88,7 @@ final class PhragmentPolicyController extends PhragmentController {
             $this->getApplicationURI('browse/'.$fragment->getPath())));
 
     $crumbs = $this->buildApplicationCrumbsWithPath($parents);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Edit Fragment Policies')));
+    $crumbs->addTextCrumb(pht('Edit Fragment Policies'));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Edit Fragment Policies: %s', $fragment->getPath()))

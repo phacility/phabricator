@@ -89,13 +89,8 @@ final class PhabricatorProjectProfilePictureController
 
     $title = pht('Edit Project Picture');
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($project->getName())
-        ->setHref($project_uri));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title));
+    $crumbs->addTextCrumb($project->getName(), $project_uri);
+    $crumbs->addTextCrumb($title);
 
     $form = id(new PHUIFormLayoutView())
       ->setUser($viewer);

@@ -26,9 +26,7 @@ final class PhabricatorDaemonLogViewController
       $log->getID());
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Daemon %s', $log->getID())));
+    $crumbs->addTextCrumb(pht('Daemon %s', $log->getID()));
 
     $header = id(new PHUIHeaderView())
       ->setHeader($log->getDaemon());

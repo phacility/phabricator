@@ -135,14 +135,12 @@ final class PhortuneProductEditController extends PhabricatorController {
 
     $title = pht('Edit Product');
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Products'))
-        ->setHref($this->getApplicationURI('product/')));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($is_create ? pht('Create') : pht('Edit'))
-        ->setHref($request->getRequestURI()));
+    $crumbs->addTextCrumb(
+      pht('Products'),
+      $this->getApplicationURI('product/'));
+    $crumbs->addTextCrumb(
+      $is_create ? pht('Create') : pht('Edit'),
+      $request->getRequestURI());
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Edit Product'));

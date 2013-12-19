@@ -36,9 +36,10 @@ if ($repository->isGit() || $repository->isHg()) {
       pht('usage: %s should be defined!', DiffusionCommitHookEngine::ENV_USER));
   }
 
-  // TODO: If this is a Mercurial repository, the hook we're responding to
-  // is available in $argv[2]. It's unclear if we actually need this, or if
-  // we can block all actions we care about with just pretxnchangegroup.
+  if ($repository->isHg()) {
+    // We respond to several different hooks in Mercurial.
+    $engine->setMercurialHook($argv[2]);
+  }
 
 } else if ($repository->isSVN()) {
   // NOTE: In Subversion, the entire environment gets wiped so we can't read

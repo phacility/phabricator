@@ -36,10 +36,9 @@ final class PhamePostViewController extends PhameController {
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($post->getTitle())
-        ->setHref($this->getApplicationURI('post/view/'.$post->getID().'/')));
+    $crumbs->addTextCrumb(
+      $post->getTitle(),
+      $this->getApplicationURI('post/view/'.$post->getID().'/'));
 
     $nav->appendChild($crumbs);
 

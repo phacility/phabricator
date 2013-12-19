@@ -90,18 +90,11 @@ final class PhabricatorCountdownEditController
     $cancel_uri = '/countdown/';
     if ($countdown->getID()) {
       $cancel_uri = '/countdown/'.$countdown->getID().'/';
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName('C'.$countdown->getID())
-          ->setHref($cancel_uri));
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Edit')));
+      $crumbs->addTextCrumb('C'.$countdown->getID(), $cancel_uri);
+      $crumbs->addTextCrumb(pht('Edit'));
       $submit_label = pht('Save Changes');
     } else {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Create Countdown')));
+      $crumbs->addTextCrumb(pht('Create Countdown'));
       $submit_label = pht('Create Countdown');
     }
 
