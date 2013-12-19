@@ -31,10 +31,7 @@ final class PhluxListController extends PhluxController {
 
     $title = pht('Variable List');
 
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title)
-        ->setHref($this->getApplicationURI()));
+    $crumbs->addTextCrumb($title, $this->getApplicationURI());
 
     return $this->buildApplicationPage(
       array(

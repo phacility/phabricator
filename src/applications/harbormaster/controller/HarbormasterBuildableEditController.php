@@ -119,18 +119,11 @@ final class HarbormasterBuildableEditController
 
     $crumbs = $this->buildApplicationCrumbs();
     if ($is_new) {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('New Buildable')));
+      $crumbs->addTextCrumb(pht('New Buildable'));
     } else {
       $id = $buildable->getID();
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName("B{$id}")
-          ->setHref("/B{$id}"));
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Edit')));
+      $crumbs->addTextCrumb("B{$id}", "/B{$id}");
+      $crumbs->addTextCrumb(pht('Edit'));
     }
 
     return $this->buildApplicationPage(

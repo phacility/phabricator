@@ -89,9 +89,7 @@ final class HeraldNewController extends HeraldController {
 
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Create Rule')));
+      ->addTextCrumb(pht('Create Rule'));
 
     return $this->buildApplicationPage(
       array(

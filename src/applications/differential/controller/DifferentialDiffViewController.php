@@ -146,9 +146,7 @@ final class DifferentialDiffViewController extends DifferentialController {
       ->setUser($request->getUser());
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Diff %d', $diff->getID())));
+    $crumbs->addTextCrumb(pht('Diff %d', $diff->getID()));
 
     return $this->buildApplicationPage(
       array(

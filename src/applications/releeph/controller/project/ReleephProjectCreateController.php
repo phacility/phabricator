@@ -114,9 +114,7 @@ final class ReleephProjectCreateController extends ReleephProjectController {
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('New Project')));
+    $crumbs->addTextCrumb(pht('New Project'));
 
     return $this->buildApplicationPage(
       array(

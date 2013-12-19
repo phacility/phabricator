@@ -26,10 +26,7 @@ final class PhabricatorConfigListController
 
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Config'))
-          ->setHref($this->getApplicationURI()));
+      ->addTextCrumb(pht('Config'), $this->getApplicationURI());
 
     $nav->setCrumbs($crumbs);
 

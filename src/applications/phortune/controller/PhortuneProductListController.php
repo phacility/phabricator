@@ -17,10 +17,7 @@ final class PhortuneProductListController extends PhabricatorController {
     $title = pht('Product List');
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName('Products')
-        ->setHref($this->getApplicationURI('product/')));
+    $crumbs->addTextCrumb('Products', $this->getApplicationURI('product/'));
     $crumbs->addAction(
       id(new PHUIListItemView())
         ->setName(pht('Create Product'))

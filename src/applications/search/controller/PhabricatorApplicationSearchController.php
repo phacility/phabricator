@@ -260,9 +260,7 @@ final class PhabricatorApplicationSearchController
 
     $crumbs = $parent
       ->buildApplicationCrumbs()
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht("Search")));
+      ->addTextCrumb(pht("Search"));
 
     $nav->setCrumbs($crumbs);
 
@@ -344,10 +342,7 @@ final class PhabricatorApplicationSearchController
 
     $crumbs = $parent
       ->buildApplicationCrumbs()
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht("Saved Queries"))
-          ->setHref($engine->getQueryManagementURI()));
+      ->addTextCrumb(pht("Saved Queries"), $engine->getQueryManagementURI());
 
     $nav->selectFilter('query/edit');
     $nav->setCrumbs($crumbs);

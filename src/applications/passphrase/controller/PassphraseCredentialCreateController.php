@@ -55,9 +55,7 @@ final class PassphraseCredentialCreateController extends PassphraseController {
     $title = pht('New Credential');
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Create')));
+    $crumbs->addTextCrumb(pht('Create'));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Create New Credential'))

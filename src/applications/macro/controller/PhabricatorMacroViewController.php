@@ -30,10 +30,9 @@ final class PhabricatorMacroViewController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setHref($this->getApplicationURI('/view/'.$macro->getID().'/'))
-        ->setName($title_short));
+    $crumbs->addTextCrumb(
+      $title_short,
+      $this->getApplicationURI('/view/'.$macro->getID().'/'));
 
     $properties = $this->buildPropertyView($macro, $actions);
     if ($file) {

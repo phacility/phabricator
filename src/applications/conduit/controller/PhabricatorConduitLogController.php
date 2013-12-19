@@ -40,9 +40,7 @@ final class PhabricatorConduitLogController
     $table = $this->renderCallTable($calls, $conns);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Call Logs')));
+    $crumbs->addTextCrumb(pht('Call Logs'));
 
     return $this->buildApplicationPage(
       array(

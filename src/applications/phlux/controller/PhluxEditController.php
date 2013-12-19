@@ -164,16 +164,10 @@ final class PhluxEditController extends PhluxController {
 
     if ($is_new) {
       $title = pht('Create Variable');
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($title)
-          ->setHref($request->getRequestURI()));
+      $crumbs->addTextCrumb($title, $request->getRequestURI());
     } else {
       $title = pht('Edit %s', $this->key);
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($title)
-          ->setHref($request->getRequestURI()));
+      $crumbs->addTextCrumb($title, $request->getRequestURI());
     }
 
     $form_box = id(new PHUIObjectBoxView())

@@ -58,10 +58,7 @@ final class PhameBlogViewController extends PhameController {
 
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($blog->getName())
-        ->setHref($this->getApplicationURI()));
+    $crumbs->addTextCrumb($blog->getName(), $this->getApplicationURI());
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)

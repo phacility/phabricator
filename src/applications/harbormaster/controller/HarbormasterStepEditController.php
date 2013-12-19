@@ -132,13 +132,10 @@ final class HarbormasterStepEditController
 
     $crumbs = $this->buildApplicationCrumbs();
     $id = $plan->getID();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht("Plan %d", $id))
-        ->setHref($this->getApplicationURI("plan/{$id}/")));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Edit Step')));
+    $crumbs->addTextCrumb(
+      pht("Plan %d", $id),
+      $this->getApplicationURI("plan/{$id}/"));
+    $crumbs->addTextCrumb(pht('Edit Step'));
 
     return $this->buildApplicationPage(
       array(

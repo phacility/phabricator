@@ -112,13 +112,10 @@ final class HeraldTestConsoleController extends HeraldController {
       ->setForm($form);
 
     $crumbs = id($this->buildApplicationCrumbs())
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Transcripts'))
-          ->setHref($this->getApplicationURI('/transcript/')))
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Test Console')));
+      ->addTextCrumb(
+        pht('Transcripts'),
+        $this->getApplicationURI('/transcript/'))
+      ->addTextCrumb(pht('Test Console'));
 
     return $this->buildApplicationPage(
       $box,

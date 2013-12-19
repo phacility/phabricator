@@ -51,10 +51,7 @@ final class PhamePostPublishController extends PhameController {
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Preview'))
-        ->setHref($view_uri));
+    $crumbs->addTextCrumb(pht('Preview'), $view_uri);
 
     $nav = $this->renderSideNavFilterView(null);
     $nav->appendChild(

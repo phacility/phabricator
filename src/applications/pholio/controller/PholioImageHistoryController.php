@@ -69,14 +69,8 @@ final class PholioImageHistoryController extends PholioController {
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-        ->setName('M'.$mock->getID())
-        ->setHref('/M'.$mock->getID()))
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-        ->setName('Image History')
-        ->setHref($request->getRequestURI()));
+      ->addTextCrumb('M'.$mock->getID(), '/M'.$mock->getID())
+      ->addTextCrumb('Image History', $request->getRequestURI());
 
     $content = array(
       $crumbs,

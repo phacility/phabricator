@@ -61,13 +61,8 @@ final class PhabricatorPeopleProfileEditController
 
     $title = pht('Edit Profile');
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($user->getUsername())
-        ->setHref($profile_uri));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title));
+    $crumbs->addTextCrumb($user->getUsername(), $profile_uri);
+    $crumbs->addTextCrumb($title);
 
     $form = id(new AphrontFormView())
       ->setUser($viewer);

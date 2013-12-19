@@ -49,9 +49,7 @@ final class PhabricatorConduitTokenController
       ->appendRemarkupInstructions($post_instructions);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Install Certificate')));
+    $crumbs->addTextCrumb(pht('Install Certificate'));
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Certificate Token'))

@@ -10,6 +10,22 @@ final class PhabricatorCrumbsView extends AphrontView {
     return false;
   }
 
+
+  /**
+   * Convenience method for adding a simple crumb with just text, or text and
+   * a link.
+   *
+   * @param string  Text of the crumb.
+   * @param string? Optional href for the crumb.
+   * @return this
+   */
+  public function addTextCrumb($text, $href = null) {
+    return $this->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($text)
+        ->setHref($href));
+  }
+
   public function addCrumb(PhabricatorCrumbView $crumb) {
     $this->crumbs[] = $crumb;
     return $this;

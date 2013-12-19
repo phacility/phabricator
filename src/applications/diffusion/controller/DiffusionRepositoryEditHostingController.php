@@ -67,9 +67,7 @@ final class DiffusionRepositoryEditHostingController
     }
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Edit Hosting')));
+    $crumbs->addTextCrumb(pht('Edit Hosting'));
 
     $title = pht('Edit Hosting (%s)', $repository->getName());
 
@@ -172,9 +170,7 @@ final class DiffusionRepositoryEditHostingController
     }
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Edit Protocols')));
+    $crumbs->addTextCrumb(pht('Edit Protocols'));
 
     $title = pht('Edit Protocols (%s)', $repository->getName());
 

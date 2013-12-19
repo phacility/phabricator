@@ -23,21 +23,12 @@ final class PhabricatorPeopleEditController
         return new Aphront404Response();
       }
       $base_uri = '/people/edit/'.$user->getID().'/';
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Edit User'))
-          ->setHref('/people/edit/'));
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($user->getFullName())
-          ->setHref($base_uri));
+      $crumbs->addTextCrumb(pht('Edit User'), '/people/edit/');
+      $crumbs->addTextCrumb($user->getFullName(), $base_uri);
     } else {
       $user = new PhabricatorUser();
       $base_uri = '/people/edit/';
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Create New User'))
-          ->setHref($base_uri));
+      $crumbs->addTextCrumb(pht('Create New User'), $base_uri);
     }
 
     $nav = new AphrontSideNavFilterView();

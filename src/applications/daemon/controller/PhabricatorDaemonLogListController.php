@@ -19,9 +19,7 @@ final class PhabricatorDaemonLogListController
     $daemon_table->setDaemonLogs($logs);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('All Daemons')));
+    $crumbs->addTextCrumb(pht('All Daemons'));
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('log');

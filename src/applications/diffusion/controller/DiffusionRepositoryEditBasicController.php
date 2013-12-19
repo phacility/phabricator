@@ -67,9 +67,7 @@ final class DiffusionRepositoryEditBasicController
     }
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Edit Basics')));
+    $crumbs->addTextCrumb(pht('Edit Basics'));
 
     $title = pht('Edit %s', $repository->getName());
 

@@ -111,15 +111,11 @@ final class PhabricatorProjectMembersEditController
       ->setHeaderText($title)
       ->setForm($form);
 
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($project->getName())
-        ->setHref('/project/view/'.$project->getID().'/'));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Edit Members'))
-        ->setHref($this->getApplicationURI()));
+    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView())
+      ->addTextCrumb(
+        $project->getName(),
+        '/project/view/'.$project->getID().'/')
+      ->addTextCrumb(pht('Edit Members'), $this->getApplicationURI());
 
     return $this->buildApplicationPage(
       array(

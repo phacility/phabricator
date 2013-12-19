@@ -86,9 +86,7 @@ final class ReleephBranchEditController extends ReleephProjectController {
       $releeph_branch->getDisplayNameWithDetail());
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Edit')));
+    $crumbs->addTextCrumb(pht('Edit'));
 
     return $this->buildApplicationPage(
       array(

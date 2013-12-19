@@ -212,13 +212,9 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
     if (!$is_create) {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName('P'.$paste->getID())
-          ->setHref('/P'.$paste->getID()));
+      $crumbs->addTextCrumb('P'.$paste->getID(), '/P'.$paste->getID());
     }
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())->setName($short));
+    $crumbs->addTextCrumb($short);
 
     return $this->buildApplicationPage(
       array(

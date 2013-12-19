@@ -112,10 +112,9 @@ final class PhabricatorProjectCreateController
             ->addCancelButton('/project/'));
 
       $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Create Project'))
-          ->setHref($this->getApplicationURI().'create/'));
+      $crumbs->addTextCrumb(
+        pht('Create Project'),
+        $this->getApplicationURI().'create/');
 
       $form_box = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('Create New Project'))

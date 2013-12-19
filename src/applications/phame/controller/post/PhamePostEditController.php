@@ -177,10 +177,9 @@ final class PhamePostEditController
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($page_title)
-        ->setHref($this->getApplicationURI('/post/view/'.$this->id.'/')));
+    $crumbs->addTextCrumb(
+      $page_title,
+      $this->getApplicationURI('/post/view/'.$this->id.'/'));
 
     $nav = $this->renderSideNavFilterView(null);
     $nav->appendChild(

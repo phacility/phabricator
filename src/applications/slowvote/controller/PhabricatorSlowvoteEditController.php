@@ -244,9 +244,7 @@ final class PhabricatorSlowvoteEditController
           ->addCancelButton($cancel_uri));
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title));
+    $crumbs->addTextCrumb($title);
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)

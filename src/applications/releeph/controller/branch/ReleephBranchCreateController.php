@@ -99,9 +99,7 @@ final class ReleephBranchCreateController extends ReleephProjectController {
           ->addCancelButton($project_uri));
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('New Branch')));
+    $crumbs->addTextCrumb(pht('New Branch'));
 
     return $this->buildApplicationPage(
       array(

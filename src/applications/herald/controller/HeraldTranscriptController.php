@@ -97,13 +97,10 @@ final class HeraldTranscriptController extends HeraldController {
     }
 
     $crumbs = id($this->buildApplicationCrumbs())
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Transcripts'))
-          ->setHref($this->getApplicationURI('/transcript/')))
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($xscript->getID()));
+      ->addTextCrumb(
+        pht('Transcripts'),
+        $this->getApplicationURI('/transcript/'))
+      ->addTextCrumb($xscript->getID());
     $nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(

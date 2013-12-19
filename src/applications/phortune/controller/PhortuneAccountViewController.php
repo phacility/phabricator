@@ -24,10 +24,7 @@ final class PhortuneAccountViewController extends PhortuneController {
     $title = $account->getName();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Account'))
-        ->setHref($request->getRequestURI()));
+    $crumbs->addTextCrumb(pht('Account'), $request->getRequestURI());
 
     $header = id(new PHUIHeaderView())
       ->setHeader($title);

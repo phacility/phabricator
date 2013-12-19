@@ -60,9 +60,7 @@ final class PhabricatorTokenGivenController extends PhabricatorTokenController {
     $nav = $this->buildSideNav();
     $nav->setCrumbs(
       $this->buildApplicationCrumbs()
-        ->addCrumb(
-          id(new PhabricatorCrumbView())
-            ->setName($title)));
+        ->addTextCrumb($title));
     $nav->selectFilter('given/');
 
     $nav->appendChild($list);

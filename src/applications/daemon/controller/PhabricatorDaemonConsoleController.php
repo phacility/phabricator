@@ -211,9 +211,7 @@ final class PhabricatorDaemonConsoleController
     $queued_panel->setNoBackground();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Console')));
+    $crumbs->addTextCrumb(pht('Console'));
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('/');

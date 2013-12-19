@@ -62,9 +62,7 @@ final class PhragmentUpdateController extends PhragmentController {
             $this->getApplicationURI('browse/'.$fragment->getPath())));
 
     $crumbs = $this->buildApplicationCrumbsWithPath($parents);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Update Fragment')));
+    $crumbs->addTextCrumb(pht('Update Fragment'));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Update Fragment: %s', $fragment->getPath()))

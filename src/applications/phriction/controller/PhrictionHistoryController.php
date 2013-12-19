@@ -138,11 +138,9 @@ final class PhrictionHistoryController
     foreach ($crumb_views as $view) {
       $crumbs->addCrumb($view);
     }
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('History'))
-        ->setHref(
-          PhrictionDocument::getSlugURI($document->getSlug(), 'history')));
+    $crumbs->addTextCrumb(
+      pht('History'),
+      PhrictionDocument::getSlugURI($document->getSlug(), 'history'));
 
     $header = new PHUIHeaderView();
     $header->setHeader(pht('Document History for %s',

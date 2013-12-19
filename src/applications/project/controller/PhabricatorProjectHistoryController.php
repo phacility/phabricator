@@ -37,14 +37,11 @@ final class PhabricatorProjectHistoryController
       ->setObjectPHID($project->getPHID())
       ->setTransactions($xactions);
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($project->getName())
-        ->setHref($this->getApplicationURI("view/{$id}/")));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('History')));
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb(
+        $project->getName(),
+        $this->getApplicationURI("view/{$id}/"))
+      ->addTextCrumb(pht('History'));
 
     return $this->buildApplicationPage(
       array(

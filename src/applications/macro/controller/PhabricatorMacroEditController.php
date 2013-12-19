@@ -219,19 +219,13 @@ final class PhabricatorMacroEditController
       $title = pht('Edit Image Macro');
       $crumb = pht('Edit Macro');
 
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setHref($view_uri)
-          ->setName(pht('Macro "%s"', $macro->getName())));
+      $crumbs->addTextCrumb(pht('Macro "%s"', $macro->getName()), $view_uri);
     } else {
       $title = pht('Create Image Macro');
       $crumb = pht('Create Macro');
     }
 
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setHref($request->getRequestURI())
-        ->setName($crumb));
+    $crumbs->addCrumb($crumb, $request->getRequestURI());
 
     $upload = null;
     if ($macro->getID()) {

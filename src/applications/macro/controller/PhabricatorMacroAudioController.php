@@ -132,15 +132,8 @@ final class PhabricatorMacroAudioController
     $title = pht('Edit Audio Behavior');
     $crumb = pht('Edit Audio');
 
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setHref($view_uri)
-        ->setName(pht('Macro "%s"', $macro->getName())));
-
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setHref($request->getRequestURI())
-        ->setName($crumb));
+    $crumbs->addTextCrumb(pht('Macro "%s"', $macro->getName()), $view_uri);
+    $crumbs->addTextCrumb($crumb, $request->getRequestURI());
 
     $upload_form = id(new AphrontFormView())
       ->setEncType('multipart/form-data')

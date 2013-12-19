@@ -31,9 +31,7 @@ final class PhragmentVersionController extends PhragmentController {
     $current = idx($parents, count($parents) - 1, null);
 
     $crumbs = $this->buildApplicationCrumbsWithPath($parents);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('View Version %d', $version->getSequence())));
+    $crumbs->addTextCrumb(pht('View Version %d', $version->getSequence()));
 
     $phids = array();
     $phids[] = $version->getFilePHID();

@@ -116,9 +116,7 @@ final class PhabricatorConduitConsoleController
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($method->getAPIMethodName()));
+    $crumbs->addTextCrumb($method->getAPIMethodName());
 
     return $this->buildApplicationPage(
       array(

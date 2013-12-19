@@ -281,9 +281,7 @@ final class PhabricatorAuthEditController
     }
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($crumb));
+    $crumbs->addTextCrumb($crumb);
 
     $xaction_view = null;
     if (!$is_new) {

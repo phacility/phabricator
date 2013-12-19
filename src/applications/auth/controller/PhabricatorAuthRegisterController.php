@@ -401,17 +401,11 @@ final class PhabricatorAuthRegisterController
     $crumbs = $this->buildApplicationCrumbs();
 
     if ($is_setup) {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Setup Admin Account')));
+      $crumbs->addTextCrumb(pht('Setup Admin Account'));
         $title = pht('Welcome to Phabricator');
     } else {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Register')));
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($provider->getProviderName()));
+      $crumbs->addTextCrumb(pht('Register'));
+      $crumbs->addTextCrumb($provider->getProviderName());
         $title = pht('Phabricator Registration');
     }
 

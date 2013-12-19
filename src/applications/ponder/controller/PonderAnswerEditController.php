@@ -86,13 +86,8 @@ final class PonderAnswerEditController extends PonderController {
           ->addCancelButton($answer_uri));
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName("Q{$qid}")
-        ->setHref($answer_uri));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Edit Answer')));
+    $crumbs->addTextCrumb("Q{$qid}", $answer_uri);
+    $crumbs->addTextCrumb(pht('Edit Answer'));
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Edit Answer'))

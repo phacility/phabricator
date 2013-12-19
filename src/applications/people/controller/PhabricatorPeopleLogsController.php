@@ -207,10 +207,7 @@ final class PhabricatorPeopleLogsController
     $filter = new AphrontListFilterView();
     $filter->appendChild($form);
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
-    $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Activity Logs'))
-          ->setHref('/people/logs/'));
+    $crumbs->addTextCrumb(pht('Activity Logs'), '/people/logs/');
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('logs');

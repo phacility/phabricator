@@ -70,9 +70,7 @@ final class DiffusionRepositoryEditSubversionController
     $content = array();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Edit Subversion Info')));
+    $crumbs->addTextCrumb(pht('Edit Subversion Info'));
 
     $title = pht('Edit Subversion Info (%s)', $repository->getName());
 

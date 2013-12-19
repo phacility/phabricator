@@ -219,19 +219,14 @@ final class PassphraseCredentialEditController extends PassphraseController {
     if ($is_new) {
       $title = pht('Create Credential');
       $header = pht('Create New Credential');
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Create')));
+      $crumbs->addTextCrumb(pht('Create'));
     } else {
       $title = pht('Edit Credential');
       $header = pht('Edit Credential %s', 'K'.$credential->getID());
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName('K'.$credential->getID())
-          ->setHref('/K'.$credential->getID()));
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Edit')));
+      $crumbs->addTextCrumb(
+        'K'.$credential->getID(),
+        '/K'.$credential->getID());
+      $crumbs->addTextCrumb(pht('Edit'));
     }
 
     if ($request->isAjax()) {

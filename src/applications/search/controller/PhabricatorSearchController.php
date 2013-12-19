@@ -275,9 +275,7 @@ final class PhabricatorSearchController
     }
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Search')));
+    $crumbs->addTextCrumb(pht('Search'));
 
     return $this->buildApplicationPage(
       array(

@@ -18,10 +18,7 @@ final class DrydockBlueprintListController extends DrydockController {
     $blueprint_list = $this->buildBlueprintListView($blueprints);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title)
-        ->setHref($request->getRequestURI()));
+    $crumbs->addTextCrumb($title, $request->getRequestURI());
 
     $crumbs->addAction(
       id(new PHUIListItemView())

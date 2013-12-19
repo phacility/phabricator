@@ -50,14 +50,12 @@ final class PhortuneProductViewController extends PhortuneController {
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Products'))
-        ->setHref($this->getApplicationURI('product/')));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('#%d', $product->getID()))
-        ->setHref($request->getRequestURI()));
+    $crumbs->addTextCrumb(
+      pht('Products'),
+      $this->getApplicationURI('product/'));
+    $crumbs->addTextCrumb(
+      pht('#%d', $product->getID()),
+      $request->getRequestURI());
 
     $properties = id(new PHUIPropertyListView())
       ->setUser($user)

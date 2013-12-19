@@ -29,14 +29,11 @@ final class PhabricatorDaemonLogEventViewController
 
     $daemon_id = $event->getLogID();
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Daemon %s', $daemon_id))
-        ->setHref($this->getApplicationURI("log/{$daemon_id}/")));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Event %s', $event->getID())));
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb(
+        pht('Daemon %s', $daemon_id),
+        $this->getApplicationURI("log/{$daemon_id}/"))
+      ->addTextCrumb(pht('Event %s', $event->getID()));
 
 
     return $this->buildApplicationPage(

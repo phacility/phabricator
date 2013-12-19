@@ -41,9 +41,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
 
     $title = pht('%s %s', 'K'.$credential->getID(), $credential->getName());
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName('K'.$credential->getID()));
+    $crumbs->addTextCrumb('K'.$credential->getID());
 
     $header = $this->buildHeaderView($credential);
     $actions = $this->buildActionView($credential);

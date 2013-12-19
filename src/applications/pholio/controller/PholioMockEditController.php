@@ -326,10 +326,7 @@ final class PholioMockEditController extends PholioController {
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title)
-        ->setHref($this->getApplicationURI()));
+    $crumbs->addTextCrumb($title, $this->getApplicationURI());
 
     $content = array(
       $crumbs,

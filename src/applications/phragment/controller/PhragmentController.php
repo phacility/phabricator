@@ -41,15 +41,11 @@ abstract class PhragmentController extends PhabricatorController {
 
   protected function buildApplicationCrumbsWithPath(array $fragments) {
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName('/')
-        ->setHref('/phragment/'));
+    $crumbs->addTextCrumb('/', '/phragment/');
     foreach ($fragments as $parent) {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($parent->getName())
-          ->setHref('/phragment/browse/'.$parent->getPath()));
+      $crumbs->addTextCrumb(
+        $parent->getName(),
+        '/phragment/browse/'.$parent->getPath());
     }
     return $crumbs;
   }

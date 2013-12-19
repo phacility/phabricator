@@ -199,22 +199,13 @@ final class PhabricatorConfigEditController
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Config'))
-        ->setHref($this->getApplicationURI()));
+    $crumbs->addTextCrumb(pht('Config'), $this->getApplicationURI());
 
     if ($group) {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($group->getName())
-          ->setHref($group_uri));
+      $crumbs->addTextCrumb($group->getName(), $group_uri);
     }
 
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($this->key)
-        ->setHref('/config/edit/'.$this->key));
+    $crumbs->addTextCrumb($this->key, '/config/edit/'.$this->key);
 
     $xactions = id(new PhabricatorConfigTransactionQuery())
       ->withObjectPHIDs(array($config_entry->getPHID()))

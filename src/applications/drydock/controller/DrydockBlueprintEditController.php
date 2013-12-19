@@ -80,12 +80,8 @@ final class DrydockBlueprintEditController extends DrydockController {
 
     $title = pht('Edit Blueprint');
     $header = pht('Edit Blueprint %d', $blueprint->getID());
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Blueprint %d', $blueprint->getID())));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Edit')));
+    $crumbs->addTextCrumb(pht('Blueprint %d', $blueprint->getID()));
+    $crumbs->addTextCrumb(pht('Edit'));
 
     if ($request->isAjax()) {
       $dialog = id(new AphrontDialogView())

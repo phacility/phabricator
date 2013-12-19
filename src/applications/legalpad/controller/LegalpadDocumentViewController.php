@@ -81,10 +81,9 @@ final class LegalpadDocumentViewController extends LegalpadController {
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
     $crumbs->setActionList($actions);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName('L'.$document->getID())
-        ->setHref($this->getApplicationURI('view/'.$document->getID())));
+    $crumbs->addTextCrumb(
+      'L'.$document->getID(),
+      $this->getApplicationURI('view/'.$document->getID()));
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)

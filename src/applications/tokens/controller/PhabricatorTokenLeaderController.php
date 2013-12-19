@@ -42,9 +42,7 @@ final class PhabricatorTokenLeaderController
     $nav = $this->buildSideNav();
     $nav->setCrumbs(
       $this->buildApplicationCrumbs()
-        ->addCrumb(
-          id(new PhabricatorCrumbView())
-            ->setName($title)));
+        ->addTextCrumb($title));
     $nav->selectFilter('leaders/');
 
     $nav->appendChild($list);

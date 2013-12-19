@@ -43,10 +43,7 @@ final class DrydockLogController extends DrydockController {
       ));
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title)
-        ->setHref($this->getApplicationURI('/logs/')));
+    $crumbs->addTextCrumb($title, $this->getApplicationURI('/logs/'));
     $nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(

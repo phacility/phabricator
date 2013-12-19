@@ -44,9 +44,7 @@ final class HeraldRuleViewController extends HeraldController {
     $id = $rule->getID();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName("H{$id}"));
+    $crumbs->addTextCrumb("H{$id}");
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)

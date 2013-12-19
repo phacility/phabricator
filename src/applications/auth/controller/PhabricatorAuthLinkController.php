@@ -115,13 +115,8 @@ final class PhabricatorAuthLinkController
     }
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Link Account'))
-        ->setHref($panel_uri));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($provider->getProviderName($name)));
+    $crumbs->addTextCrumb(pht('Link Account'), $panel_uri);
+    $crumbs->addTextCrumb($provider->getProviderName($name));
 
     return $this->buildApplicationPage(
       array(
