@@ -5,6 +5,7 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
   private $log;
   private $hookEngine;
   private $changesets;
+  private $commitRef;
 
   public function setPushLog(PhabricatorRepositoryPushLog $log) {
     $this->log = $log;
@@ -84,6 +85,8 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
   public function getHeraldField($field) {
     $log = $this->getObject();
     switch ($field) {
+      case self::FIELD_BODY:
+        return $this->getCommitRef()->getMessage();
       case self::FIELD_DIFF_FILE:
         return $this->getDiffContent('name');
       case self::FIELD_DIFF_CONTENT:
@@ -177,6 +180,14 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
     }
 
     return $result;
+  }
+
+  private function getCommitRef() {
+    if ($this->commitRef === null) {
+      $this->commitRef = $this->hookEngine->loadCommitRefForCommit(
+        $this->log->getRefNew());
+    }
+    return $this->commitRef;
   }
 
 }

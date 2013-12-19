@@ -934,4 +934,34 @@ final class DiffusionCommitHookEngine extends Phobject {
     return $diff->getChangesets();
   }
 
+  public function loadCommitRefForCommit($identifier) {
+    $repository = $this->getRepository();
+    $vcs = $repository->getVersionControlSystem();
+    switch ($vcs) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        return id(new DiffusionLowLevelGitCommitQuery())
+          ->setRepository($repository)
+          ->withIdentifier($identifier)
+          ->execute();
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        return id(new DiffusionLowLevelMercurialCommitQuery())
+          ->setRepository($repository)
+          ->withIdentifier($identifier)
+          ->execute();
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        // For subversion, we need to use `svnlook`.
+        list($message) = execx(
+          'svnlook log -t %s %s',
+          $this->subversionTransaction,
+          $this->subversionRepository);
+
+        return id(new DiffusionCommitRef())
+          ->setMessage($message);
+        break;
+      default:
+        throw new Exception(pht("Unknown VCS '%s!'", $vcs));
+    }
+  }
+
+
 }
