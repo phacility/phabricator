@@ -12,23 +12,9 @@ final class PhabricatorRepositoryGitCommitMessageParserWorker
       ->withIdentifier($commit->getCommitIdentifier())
       ->execute();
 
-    $committer_name   = $ref->getCommitterName();
-    $committer_email  = $ref->getCommitterEmail();
-    $author_name      = $ref->getAuthorName();
-    $author_email     = $ref->getAuthorEmail();
-    $message          = $ref->getMessage();
-
-    if (strlen($author_email)) {
-      $author = "{$author_name} <{$author_email}>";
-    } else {
-      $author = "{$author_name}";
-    }
-
-    if (strlen($committer_email)) {
-      $committer = "{$committer_name} <{$committer_email}>";
-    } else {
-      $committer = "{$committer_name}";
-    }
+    $committer = $ref->getCommitter();
+    $author = $ref->getAuthor();
+    $message = $ref->getMessage();
 
     if ($committer == $author) {
       $committer = null;

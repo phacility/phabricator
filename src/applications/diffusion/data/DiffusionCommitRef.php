@@ -56,4 +56,24 @@ final class DiffusionCommitRef extends Phobject {
     return $this->message;
   }
 
+  public function getAuthor() {
+    return $this->formatUser($this->authorName, $this->authorEmail);
+  }
+
+  public function getCommitter() {
+    return $this->formatUser($this->committerName, $this->committerEmail);
+  }
+
+  private function formatUser($name, $email) {
+    if (strlen($name) && strlen($email)) {
+      return "{$name} <{$email}>";
+    } else if (strlen($email)) {
+      return $email;
+    } else if (strlen($name)) {
+      return $name;
+    } else {
+      return null;
+    }
+  }
+
 }
