@@ -678,13 +678,13 @@ abstract class HeraldAdapter {
           return self::VALUE_EMAIL;
         case self::ACTION_NOTHING:
           return self::VALUE_NONE;
-        case self::ACTION_AUDIT:
         case self::ACTION_ADD_PROJECTS:
           return self::VALUE_PROJECT;
         case self::ACTION_FLAG:
           return self::VALUE_FLAG_COLOR;
         case self::ACTION_ASSIGN_TASK:
           return self::VALUE_USER;
+        case self::ACTION_AUDIT:
         case self::ACTION_ADD_REVIEWERS:
         case self::ACTION_ADD_BLOCKING_REVIEWERS:
           return self::VALUE_USER_OR_PROJECT;
