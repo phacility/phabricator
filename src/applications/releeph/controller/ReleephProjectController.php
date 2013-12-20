@@ -135,7 +135,7 @@ abstract class ReleephProjectController extends ReleephController {
       $project_id = $project->getID();
       $project_uri = $this->getApplicationURI("project/{$project_id}/");
 
-      $crumbs->addCrumb($project->getName(), $project_uri);
+      $crumbs->addTextCrumb($project->getName(), $project_uri);
     } catch (Exception $ex) {
       // TODO: This is derps.
     }
@@ -143,7 +143,7 @@ abstract class ReleephProjectController extends ReleephController {
     try {
       $branch = $this->getReleephBranch();
       $branch_uri = $branch->getURI();
-      $crumbs->addCrumb($branch->getDisplayNameWithDetail(), $branch_uri);
+      $crumbs->addTextCrumb($branch->getDisplayNameWithDetail(), $branch_uri);
     } catch (Exception $ex) {
       // TODO: This is also derps.
     }

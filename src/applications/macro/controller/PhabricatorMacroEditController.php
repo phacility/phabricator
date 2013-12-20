@@ -225,7 +225,7 @@ final class PhabricatorMacroEditController
       $crumb = pht('Create Macro');
     }
 
-    $crumbs->addCrumb($crumb, $request->getRequestURI());
+    $crumbs->addTextCrumb($crumb, $request->getRequestURI());
 
     $upload = null;
     if ($macro->getID()) {
