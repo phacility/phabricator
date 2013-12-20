@@ -43,16 +43,11 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         $author_phid);
     }
 
-    $call = new ConduitCall(
-      'differential.parsecommitmessage',
-      array(
-        'corpus' => $message,
-        'partial' => true,
-      ));
-    $call->setUser(PhabricatorUser::getOmnipotentUser());
-    $result = $call->execute();
-
-    $field_values = $result['fields'];
+    $field_values = id(new DiffusionLowLevelCommitFieldsQuery())
+      ->setRepository($repository)
+      ->withCommitRef($ref)
+      ->execute();
+    $revision_id = idx($field_values, 'revisionID');
 
     if (!empty($field_values['reviewedByPHIDs'])) {
       $data->setCommitDetail(
@@ -60,26 +55,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         reset($field_values['reviewedByPHIDs']));
     }
 
-    $revision_id = idx($field_values, 'revisionID');
-    if (!$revision_id && $hashes) {
-      $hash_list = array();
-      foreach ($hashes as $hash) {
-        $hash_list[] = array($hash->getHashType(), $hash->getHashValue());
-      }
-      $revisions = id(new DifferentialRevisionQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withCommitHashes($hash_list)
-        ->execute();
-
-      if (!empty($revisions)) {
-        $revision = $this->identifyBestRevision($revisions);
-        $revision_id = $revision->getID();
-      }
-    }
-
-    $data->setCommitDetail(
-      'differential.revisionID',
-      $revision_id);
+    $data->setCommitDetail('differential.revisionID', $revision_id);
 
     if ($author_phid != $commit->getAuthorPHID()) {
       $commit->setAuthorPHID($author_phid);
@@ -384,65 +360,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     }
 
     return null;
-  }
-
-  /**
-   * When querying for revisions by hash, more than one revision may be found.
-   * This function identifies the "best" revision from such a set.  Typically,
-   * there is only one revision found.   Otherwise, we try to pick an accepted
-   * revision first, followed by an open revision, and otherwise we go with a
-   * closed or abandoned revision as a last resort.
-   */
-  private function identifyBestRevision(array $revisions) {
-    assert_instances_of($revisions, 'DifferentialRevision');
-    // get the simplest, common case out of the way
-    if (count($revisions) == 1) {
-      return reset($revisions);
-    }
-
-    $first_choice = array();
-    $second_choice = array();
-    $third_choice = array();
-    foreach ($revisions as $revision) {
-      switch ($revision->getStatus()) {
-        // "Accepted" revisions -- ostensibly what we're looking for!
-        case ArcanistDifferentialRevisionStatus::ACCEPTED:
-          $first_choice[] = $revision;
-          break;
-        // "Open" revisions
-        case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
-        case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
-          $second_choice[] = $revision;
-          break;
-        // default is a wtf? here
-        default:
-        case ArcanistDifferentialRevisionStatus::ABANDONED:
-        case ArcanistDifferentialRevisionStatus::CLOSED:
-          $third_choice[] = $revision;
-          break;
-      }
-    }
-
-    // go down the ladder like a bro at last call
-    if (!empty($first_choice)) {
-      return $this->identifyMostRecentRevision($first_choice);
-    }
-    if (!empty($second_choice)) {
-      return $this->identifyMostRecentRevision($second_choice);
-    }
-    if (!empty($third_choice)) {
-      return $this->identifyMostRecentRevision($third_choice);
-    }
-  }
-
-  /**
-   * Given a set of revisions, returns the revision with the latest
-   * updated time. This is ostensibly the most recent revision.
-   */
-  private function identifyMostRecentRevision(array $revisions) {
-    assert_instances_of($revisions, 'DifferentialRevision');
-    $revisions = msort($revisions, 'getDateModified');
-    return end($revisions);
   }
 
   private function resolveUserPHID(
