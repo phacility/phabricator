@@ -205,15 +205,20 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     DifferentialRevision $revision,
     $actor_phid) {
 
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
     $drequest = DiffusionRequest::newFromDictionary(array(
-      'user' => PhabricatorUser::getOmnipotentUser(),
-      'initFromConduit' => false,
+      'user' => $viewer,
       'repository' => $this->repository,
-      'commit' => $this->commit->getCommitIdentifier(),
     ));
 
-    $raw_diff = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest)
-      ->loadRawDiff();
+    $raw_diff = DiffusionQuery::callConduitWithDiffusionRequest(
+      $viewer,
+      $drequest,
+      'diffusion.rawdiffquery',
+      array(
+        'commit' => $this->commit->getCommitIdentifier(),
+      ));
 
     // TODO: Support adds, deletes and moves under SVN.
     if (strlen($raw_diff)) {
@@ -248,10 +253,15 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       $diff->setArcanistProjectPHID($arcanist_project->getPHID());
     }
 
-    $parents = DiffusionCommitParentsQuery::newFromDiffusionRequest($drequest)
-      ->loadParents();
+    $parents = DiffusionQuery::callConduitWithDiffusionRequest(
+      $viewer,
+      $drequest,
+      'diffusion.commitparentsquery',
+      array(
+        'commit' => $this->commit->getCommitIdentifier(),
+      ));
     if ($parents) {
-      $diff->setSourceControlBaseRevision(head_key($parents));
+      $diff->setSourceControlBaseRevision(head($parents));
     }
 
     // TODO: Attach binary files.

@@ -82,15 +82,10 @@ final class WaitForPreviousBuildStepImplementation
     $call->setUser(PhabricatorUser::getOmnipotentUser());
     $parents = $call->execute();
 
-    $hashes = array();
-    foreach ($parents as $parent => $obj) {
-      $hashes[] = $parent;
-    }
-
     $parents = id(new DiffusionCommitQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withRepository($commit->getRepository())
-      ->withIdentifiers($hashes)
+      ->withIdentifiers($parents)
       ->execute();
 
     $blockers = array();
