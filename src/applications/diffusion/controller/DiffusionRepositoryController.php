@@ -531,6 +531,7 @@ final class DiffusionRepositoryController extends DiffusionController {
         'value' => (string)$uri,
         'class' => 'diffusion-clone-uri',
         'sigil' => 'select-on-click',
+        'readonly' => 'true',
       ));
 
     $extras = array();
