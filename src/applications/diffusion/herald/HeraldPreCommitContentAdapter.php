@@ -50,6 +50,7 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
         self::FIELD_PUSHER,
         self::FIELD_PUSHER_PROJECTS,
         self::FIELD_DIFFERENTIAL_REVISION,
+        self::FIELD_DIFFERENTIAL_ACCEPTED,
         self::FIELD_DIFFERENTIAL_REVIEWERS,
         self::FIELD_DIFFERENTIAL_CCS,
         self::FIELD_RULE,
@@ -115,6 +116,16 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
       case self::FIELD_DIFFERENTIAL_REVISION:
         $revision = $this->getRevision();
         if (!$revision) {
+          return null;
+        }
+        return $revision->getPHID();
+      case self::FIELD_DIFFERENTIAL_ACCEPTED:
+        $revision = $this->getRevision();
+        if (!$revision) {
+          return null;
+        }
+        $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
+        if ($revision->getStatus() != $status_accepted) {
           return null;
         }
         return $revision->getPHID();

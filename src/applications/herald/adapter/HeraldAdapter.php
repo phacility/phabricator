@@ -30,6 +30,7 @@ abstract class HeraldAdapter {
   const FIELD_DIFFERENTIAL_REVISION  = 'differential-revision';
   const FIELD_DIFFERENTIAL_REVIEWERS = 'differential-reviewers';
   const FIELD_DIFFERENTIAL_CCS       = 'differential-ccs';
+  const FIELD_DIFFERENTIAL_ACCEPTED  = 'differential-accepted';
 
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';
@@ -169,6 +170,8 @@ abstract class HeraldAdapter {
       self::FIELD_DIFFERENTIAL_REVISION => pht('Differential revision'),
       self::FIELD_DIFFERENTIAL_REVIEWERS => pht('Differential reviewers'),
       self::FIELD_DIFFERENTIAL_CCS => pht('Differential CCs'),
+      self::FIELD_DIFFERENTIAL_ACCEPTED
+        => pht('Accepted Differential revision'),
     );
   }
 
@@ -284,6 +287,7 @@ abstract class HeraldAdapter {
           self::CONDITION_INCLUDE_NONE,
         );
       case self::FIELD_DIFFERENTIAL_REVISION:
+      case self::FIELD_DIFFERENTIAL_ACCEPTED:
         return array(
           self::CONDITION_EXISTS,
           self::CONDITION_NOT_EXISTS,

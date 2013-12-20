@@ -336,6 +336,16 @@ final class HeraldCommitAdapter extends HeraldAdapter {
           return null;
         }
         return $revision->getID();
+      case self::FIELD_DIFFERENTIAL_ACCEPTED:
+        $revision = $this->loadDifferentialRevision();
+        if (!$revision) {
+          return null;
+        }
+        $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
+        if ($revision->getStatus() != $status_accepted) {
+          return null;
+        }
+        return $revision->getPHID();
       case self::FIELD_DIFFERENTIAL_REVIEWERS:
         $revision = $this->loadDifferentialRevision();
         if (!$revision) {
