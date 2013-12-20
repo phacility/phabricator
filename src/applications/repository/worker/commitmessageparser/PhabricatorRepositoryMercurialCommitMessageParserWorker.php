@@ -12,10 +12,7 @@ final class PhabricatorRepositoryMercurialCommitMessageParserWorker
       ->withIdentifier($commit->getCommitIdentifier())
       ->execute();
 
-    $author = $ref->getAuthor();
-    $message = $ref->getMessage();
-
-    $this->updateCommitData($author, $message);
+    $this->updateCommitData($ref);
 
     if ($this->shouldQueueFollowupTasks()) {
       PhabricatorWorker::scheduleTask(
@@ -24,18 +21,6 @@ final class PhabricatorRepositoryMercurialCommitMessageParserWorker
           'commitID' => $commit->getID(),
         ));
     }
-  }
-
-  protected function getCommitHashes(
-    PhabricatorRepository $repository,
-    PhabricatorRepositoryCommit $commit) {
-
-    $commit_hash = $commit->getCommitIdentifier();
-
-    return array(
-      array(ArcanistDifferentialRevisionHash::HASH_MERCURIAL_COMMIT,
-            $commit_hash),
-    );
   }
 
 }

@@ -3,14 +3,12 @@
 abstract class PhabricatorRepositoryCommitMessageParserWorker
   extends PhabricatorRepositoryCommitParserWorker {
 
-  abstract protected function getCommitHashes(
-    PhabricatorRepository $repository,
-    PhabricatorRepositoryCommit $commit);
-
-  final protected function updateCommitData($author, $message,
-    $committer = null) {
-
+  final protected function updateCommitData(DiffusionCommitRef $ref) {
     $commit = $this->commit;
+    $author = $ref->getAuthor();
+    $message = $ref->getMessage();
+    $committer = $ref->getCommitter();
+    $hashes = $ref->getHashes();
 
     $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
       'commitID = %d',
@@ -26,7 +24,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
     $data->setCommitMessage($message);
 
-    if ($committer) {
+    if (strlen($committer)) {
       $data->setCommitDetail('committer', $committer);
       $data->setCommitDetail(
         'committerPHID',
@@ -63,20 +61,19 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     }
 
     $revision_id = idx($field_values, 'revisionID');
-    if (!$revision_id) {
-      $hashes = $this->getCommitHashes(
-        $repository,
-        $commit);
-      if ($hashes) {
-        $revisions = id(new DifferentialRevisionQuery())
-          ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->withCommitHashes($hashes)
-          ->execute();
+    if (!$revision_id && $hashes) {
+      $hash_list = array();
+      foreach ($hashes as $hash) {
+        $hash_list[] = array($hash->getHashType(), $hash->getHashValue());
+      }
+      $revisions = id(new DifferentialRevisionQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withCommitHashes($hash_list)
+        ->execute();
 
-        if (!empty($revisions)) {
-          $revision = $this->identifyBestRevision($revisions);
-          $revision_id = $revision->getID();
-        }
+      if (!empty($revisions)) {
+        $revision = $this->identifyBestRevision($revisions);
+        $revision_id = $revision->getID();
       }
     }
 

@@ -51,7 +51,9 @@ final class DiffusionLowLevelCommitQuery
     list($info) = $repository->execxLocalCommand(
       'log -n 1 --encoding=%s --format=%s %s --',
       'UTF-8',
-      implode('%x00', array('%e', '%cn', '%ce', '%an', '%ae', '%s%n%n%b')),
+      implode(
+        '%x00',
+        array('%e', '%cn', '%ce', '%an', '%ae', '%T', '%s%n%n%b')),
       $this->identifier);
 
     $parts = explode("\0", $info);
@@ -67,12 +69,22 @@ final class DiffusionLowLevelCommitQuery
       }
     }
 
+    $hashes = array(
+      id(new DiffusionCommitHash())
+        ->setHashType(ArcanistDifferentialRevisionHash::HASH_GIT_COMMIT)
+        ->setHashValue($this->identifier),
+      id(new DiffusionCommitHash())
+        ->setHashType(ArcanistDifferentialRevisionHash::HASH_GIT_TREE)
+        ->setHashValue($parts[4]),
+    );
+
     return id(new DiffusionCommitRef())
       ->setCommitterName($parts[0])
       ->setCommitterEmail($parts[1])
       ->setAuthorName($parts[2])
       ->setAuthorEmail($parts[3])
-      ->setMessage($parts[4]);
+      ->setHashes($hashes)
+      ->setMessage($parts[5]);
   }
 
   private function loadMercurialCommitRef() {
@@ -90,10 +102,17 @@ final class DiffusionLowLevelCommitQuery
 
     list($author_name, $author_email) = $this->splitUserIdentifier($author);
 
+    $hashes = array(
+      id(new DiffusionCommitHash())
+        ->setHashType(ArcanistDifferentialRevisionHash::HASH_MERCURIAL_COMMIT)
+        ->setHashValue($this->identifier),
+    );
+
     return id(new DiffusionCommitRef())
       ->setAuthorName($author_name)
       ->setAuthorEmail($author_email)
-      ->setMessage($message);
+      ->setMessage($message)
+      ->setHashes($hashes);
   }
 
   private function loadSubversionCommitRef() {
@@ -114,10 +133,14 @@ final class DiffusionLowLevelCommitQuery
 
     list($author_name, $author_email) = $this->splitUserIdentifier($author);
 
+    // No hashes in Subversion.
+    $hashes = array();
+
     return id(new DiffusionCommitRef())
       ->setAuthorName($author_name)
       ->setAuthorEmail($author_email)
-      ->setMessage($message);
+      ->setMessage($message)
+      ->setHashes($hashes);
   }
 
   private function splitUserIdentifier($user) {
