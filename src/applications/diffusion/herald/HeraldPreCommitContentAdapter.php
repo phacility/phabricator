@@ -53,6 +53,7 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
         self::FIELD_DIFFERENTIAL_ACCEPTED,
         self::FIELD_DIFFERENTIAL_REVIEWERS,
         self::FIELD_DIFFERENTIAL_CCS,
+        self::FIELD_IS_MERGE_COMMIT,
         self::FIELD_RULE,
       ),
       parent::getFields());
@@ -141,6 +142,8 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
           return array();
         }
         return $revision->getCCPHIDs();
+      case self::FIELD_IS_MERGE_COMMIT:
+        return $this->getIsMergeCommit();
     }
 
     return parent::getHeraldField($field);
@@ -304,6 +307,26 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
     }
 
     return $this->revision;
+  }
+
+  private function getIsMergeCommit() {
+    $repository = $this->hookEngine->getRepository();
+    $vcs = $repository->getVersionControlSystem();
+    switch ($vcs) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $parents = id(new DiffusionLowLevelParentsQuery())
+          ->setRepository($repository)
+          ->withIdentifier($this->log->getRefNew())
+          ->execute();
+
+        return (count($parents) > 1);
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        // NOTE: For now, we ignore "svn:mergeinfo" at all levels. We might
+        // change this some day, but it's not nearly as clear a signal as
+        // ancestry is in Git/Mercurial.
+        return false;
+    }
   }
 
 }

@@ -31,6 +31,7 @@ abstract class HeraldAdapter {
   const FIELD_DIFFERENTIAL_REVIEWERS = 'differential-reviewers';
   const FIELD_DIFFERENTIAL_CCS       = 'differential-ccs';
   const FIELD_DIFFERENTIAL_ACCEPTED  = 'differential-accepted';
+  const FIELD_IS_MERGE_COMMIT        = 'is-merge-commit';
 
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';
@@ -52,6 +53,8 @@ abstract class HeraldAdapter {
   const CONDITION_REGEXP_PAIR     = 'regexp-pair';
   const CONDITION_HAS_BIT         = 'bit';
   const CONDITION_NOT_BIT         = '!bit';
+  const CONDITION_IS_TRUE         = 'true';
+  const CONDITION_IS_FALSE        = 'false';
 
   const ACTION_ADD_CC       = 'addcc';
   const ACTION_REMOVE_CC    = 'remcc';
@@ -172,6 +175,7 @@ abstract class HeraldAdapter {
       self::FIELD_DIFFERENTIAL_CCS => pht('Differential CCs'),
       self::FIELD_DIFFERENTIAL_ACCEPTED
         => pht('Accepted Differential revision'),
+      self::FIELD_IS_MERGE_COMMIT => pht('Commit is a merge'),
     );
   }
 
@@ -186,6 +190,8 @@ abstract class HeraldAdapter {
       self::CONDITION_IS              => pht('is'),
       self::CONDITION_IS_NOT          => pht('is not'),
       self::CONDITION_IS_ANY          => pht('is any of'),
+      self::CONDITION_IS_TRUE         => pht('is true'),
+      self::CONDITION_IS_FALSE        => pht('is false'),
       self::CONDITION_IS_NOT_ANY      => pht('is not any of'),
       self::CONDITION_INCLUDE_ALL     => pht('include all of'),
       self::CONDITION_INCLUDE_ANY     => pht('include any of'),
@@ -292,6 +298,11 @@ abstract class HeraldAdapter {
           self::CONDITION_EXISTS,
           self::CONDITION_NOT_EXISTS,
         );
+      case self::FIELD_IS_MERGE_COMMIT:
+        return array(
+          self::CONDITION_IS_TRUE,
+          self::CONDITION_IS_FALSE,
+        );
       default:
         throw new Exception(
           "This adapter does not define conditions for field '{$field}'!");
@@ -362,8 +373,10 @@ abstract class HeraldAdapter {
           array_fuse($field_value),
           $condition_value);
       case self::CONDITION_EXISTS:
+      case self::CONDITION_IS_TRUE:
         return (bool)$field_value;
       case self::CONDITION_NOT_EXISTS:
+      case self::CONDITION_IS_FALSE:
         return !$field_value;
       case self::CONDITION_UNCONDITIONALLY:
         return (bool)$field_value;
@@ -515,6 +528,8 @@ abstract class HeraldAdapter {
       case self::CONDITION_UNCONDITIONALLY:
       case self::CONDITION_HAS_BIT:
       case self::CONDITION_NOT_BIT:
+      case self::CONDITION_IS_TRUE:
+      case self::CONDITION_IS_FALSE:
         // No explicit validation for these types, although there probably
         // should be in some cases.
         break;
@@ -669,6 +684,8 @@ abstract class HeraldAdapter {
       case self::CONDITION_EXISTS:
       case self::CONDITION_NOT_EXISTS:
       case self::CONDITION_UNCONDITIONALLY:
+      case self::CONDITION_IS_TRUE:
+      case self::CONDITION_IS_FALSE:
         return self::VALUE_NONE;
       case self::CONDITION_RULE:
       case self::CONDITION_NOT_RULE:

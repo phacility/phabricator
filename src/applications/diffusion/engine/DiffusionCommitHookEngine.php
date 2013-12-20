@@ -259,6 +259,7 @@ final class DiffusionCommitHookEngine extends Phobject {
     $engine = new HeraldEngine();
     $rules = null;
     $blocking_effect = null;
+    $blocked_update = null;
     foreach ($updates as $update) {
       $adapter = id(clone $adapter_template)
         ->setPushLog($update);
@@ -275,6 +276,7 @@ final class DiffusionCommitHookEngine extends Phobject {
         foreach ($effects as $effect) {
           if ($effect->getAction() == HeraldAdapter::ACTION_BLOCK) {
             $blocking_effect = $effect;
+            $blocked_update = $update;
             break;
           }
         }
@@ -300,12 +302,19 @@ final class DiffusionCommitHookEngine extends Phobject {
         $rule_name = pht('Unnamed Herald Rule');
       }
 
+      $blocked_ref_name = coalesce(
+        $blocked_update->getRefName(),
+        $blocked_update->getRefNewShort());
+      $blocked_name = $blocked_update->getRefType().'/'.$blocked_ref_name;
+
       throw new DiffusionCommitHookRejectException(
         pht(
-          "This commit was rejected by Herald pre-commit rule %s.\n".
-          "Rule: %s\n".
+          "This push was rejected by Herald push rule %s.\n".
+          "Change: %s\n".
+          "  Rule: %s\n".
           "Reason: %s",
           'H'.$blocking_effect->getRuleID(),
+          $blocked_name,
           $rule_name,
           $message));
     }
