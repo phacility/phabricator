@@ -6,6 +6,8 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
   private $hookEngine;
   private $changesets;
   private $commitRef;
+  private $fields;
+  private $revision = false;
 
   public function setPushLog(PhabricatorRepositoryPushLog $log) {
     $this->log = $log;
@@ -47,6 +49,9 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
         self::FIELD_REPOSITORY,
         self::FIELD_PUSHER,
         self::FIELD_PUSHER_PROJECTS,
+        self::FIELD_DIFFERENTIAL_REVISION,
+        self::FIELD_DIFFERENTIAL_REVIEWERS,
+        self::FIELD_DIFFERENTIAL_CCS,
         self::FIELD_RULE,
       ),
       parent::getFields());
@@ -107,6 +112,24 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
         return $this->hookEngine->getViewer()->getPHID();
       case self::FIELD_PUSHER_PROJECTS:
         return $this->hookEngine->loadViewerProjectPHIDsForHerald();
+      case self::FIELD_DIFFERENTIAL_REVISION:
+        $revision = $this->getRevision();
+        if (!$revision) {
+          return null;
+        }
+        return $revision->getPHID();
+      case self::FIELD_DIFFERENTIAL_REVIEWERS:
+        $revision = $this->getRevision();
+        if (!$revision) {
+          return array();
+        }
+        return $revision->getReviewers();
+      case self::FIELD_DIFFERENTIAL_CCS:
+        $revision = $this->getRevision();
+        if (!$revision) {
+          return array();
+        }
+        return $revision->getCCPHIDs();
     }
 
     return parent::getHeraldField($field);
@@ -242,6 +265,34 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
     return id(new DiffusionResolveUserQuery())
       ->withName($author)
       ->execute();
+  }
+
+  private function getCommitFields() {
+    if ($this->fields === null) {
+      $this->fields = id(new DiffusionLowLevelCommitFieldsQuery())
+        ->setRepository($this->hookEngine->getRepository())
+        ->withCommitRef($this->getCommitRef())
+        ->execute();
+    }
+    return $this->fields;
+  }
+
+  private function getRevision() {
+    if ($this->revision === false) {
+      $fields = $this->getCommitFields();
+      $revision_id = idx($fields, 'revisionID');
+      if (!$revision_id) {
+        $this->revision = null;
+      } else {
+        $this->revision = id(new DifferentialRevisionQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withIDs(array($revision_id))
+          ->needRelationships(true)
+          ->executeOne();
+      }
+    }
+
+    return $this->revision;
   }
 
 }

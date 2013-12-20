@@ -27,6 +27,9 @@ abstract class HeraldAdapter {
   const FIELD_PROJECTS               = 'projects';
   const FIELD_PUSHER                 = 'pusher';
   const FIELD_PUSHER_PROJECTS        = 'pusher-projects';
+  const FIELD_DIFFERENTIAL_REVISION  = 'differential-revision';
+  const FIELD_DIFFERENTIAL_REVIEWERS = 'differential-reviewers';
+  const FIELD_DIFFERENTIAL_CCS       = 'differential-ccs';
 
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';
@@ -163,6 +166,9 @@ abstract class HeraldAdapter {
       self::FIELD_PROJECTS => pht("Projects"),
       self::FIELD_PUSHER => pht('Pusher'),
       self::FIELD_PUSHER_PROJECTS => pht("Pusher's projects"),
+      self::FIELD_DIFFERENTIAL_REVISION => pht('Differential revision'),
+      self::FIELD_DIFFERENTIAL_REVIEWERS => pht('Differential reviewers'),
+      self::FIELD_DIFFERENTIAL_CCS => pht('Differential CCs'),
     );
   }
 
@@ -262,6 +268,25 @@ abstract class HeraldAdapter {
       case self::FIELD_ALWAYS:
         return array(
           self::CONDITION_UNCONDITIONALLY,
+        );
+      case self::FIELD_DIFFERENTIAL_REVIEWERS:
+        return array(
+          self::CONDITION_EXISTS,
+          self::CONDITION_NOT_EXISTS,
+          self::CONDITION_INCLUDE_ALL,
+          self::CONDITION_INCLUDE_ANY,
+          self::CONDITION_INCLUDE_NONE,
+        );
+      case self::FIELD_DIFFERENTIAL_CCS:
+        return array(
+          self::CONDITION_INCLUDE_ALL,
+          self::CONDITION_INCLUDE_ANY,
+          self::CONDITION_INCLUDE_NONE,
+        );
+      case self::FIELD_DIFFERENTIAL_REVISION:
+        return array(
+          self::CONDITION_EXISTS,
+          self::CONDITION_NOT_EXISTS,
         );
       default:
         throw new Exception(
