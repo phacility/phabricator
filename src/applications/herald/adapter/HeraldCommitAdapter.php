@@ -67,6 +67,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
         self::FIELD_AFFECTED_PACKAGE_OWNER,
         self::FIELD_NEED_AUDIT_FOR_PACKAGE,
         self::FIELD_DIFFERENTIAL_REVISION,
+        self::FIELD_DIFFERENTIAL_ACCEPTED,
         self::FIELD_DIFFERENTIAL_REVIEWERS,
         self::FIELD_DIFFERENTIAL_CCS,
         self::FIELD_REPOSITORY_AUTOCLOSE_BRANCH,
