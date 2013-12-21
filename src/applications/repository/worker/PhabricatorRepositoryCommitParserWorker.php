@@ -64,19 +64,21 @@ abstract class PhabricatorRepositoryCommitParserWorker
     return (bool)$bad_commit;
   }
 
-  public function renderForDisplay() {
-    $suffix = parent::renderForDisplay();
-    $commit = $this->loadCommit();
+  public function renderForDisplay(PhabricatorUser $viewer) {
+    $suffix = parent::renderForDisplay($viewer);
+
+    $commit = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withIDs(array(idx($this->getTaskData(), 'commitID')))
+      ->executeOne();
     if (!$commit) {
       return $suffix;
     }
 
-    // TODO: (T603) This method should probably take a viewer.
+    $link = DiffusionView::linkCommit(
+      $commit->getRepository(),
+      $commit->getCommitIdentifier());
 
-    $repository = id(new PhabricatorRepository())
-      ->load($commit->getRepositoryID());
-    $link = DiffusionView::linkCommit($repository,
-                                      $commit->getCommitIdentifier());
-    return hsprintf('%s%s', $link, $suffix);
+    return array($link, $suffix);
   }
 }
