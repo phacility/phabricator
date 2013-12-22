@@ -60,6 +60,7 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
         self::FIELD_TITLE,
         self::FIELD_BODY,
         self::FIELD_AUTHOR,
+        self::FIELD_ASSIGNEE,
         self::FIELD_CC,
         self::FIELD_CONTENT_SOURCE,
         self::FIELD_PROJECTS,
@@ -102,6 +103,8 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
         return $this->getTask()->getDescription();
       case self::FIELD_AUTHOR:
         return $this->getTask()->getAuthorPHID();
+      case self::FIELD_ASSIGNEE:
+        return $this->getTask()->getOwnerPHID();
       case self::FIELD_CC:
         return $this->getTask()->getCCPHIDs();
       case self::FIELD_PROJECTS:

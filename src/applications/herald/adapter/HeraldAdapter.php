@@ -8,6 +8,7 @@ abstract class HeraldAdapter {
   const FIELD_TITLE                  = 'title';
   const FIELD_BODY                   = 'body';
   const FIELD_AUTHOR                 = 'author';
+  const FIELD_ASSIGNEE               = 'assignee';
   const FIELD_REVIEWER               = 'reviewer';
   const FIELD_REVIEWERS              = 'reviewers';
   const FIELD_COMMITTER              = 'committer';
@@ -150,6 +151,7 @@ abstract class HeraldAdapter {
       self::FIELD_TITLE => pht('Title'),
       self::FIELD_BODY => pht('Body'),
       self::FIELD_AUTHOR => pht('Author'),
+      self::FIELD_ASSIGNEE => pht('Assignee'),
       self::FIELD_COMMITTER => pht('Committer'),
       self::FIELD_REVIEWER => pht('Reviewer'),
       self::FIELD_REVIEWERS => pht('Reviewers'),
@@ -230,6 +232,7 @@ abstract class HeraldAdapter {
           self::CONDITION_IS_NOT_ANY,
         );
       case self::FIELD_REPOSITORY:
+      case self::FIELD_ASSIGNEE:
         return array(
           self::CONDITION_IS_ANY,
           self::CONDITION_IS_NOT_ANY,
