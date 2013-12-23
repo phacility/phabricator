@@ -583,17 +583,22 @@ final class DiffusionCommitHookEngine extends Phobject {
     // Resolve all of the futures now. We don't need the 'commits' future yet,
     // but it simplifies the logic to just get it out of the way.
     foreach (Futures($futures) as $future) {
-      $future->resolvex();
+      $future->resolve();
     }
 
     list($commit_raw) = $futures['commits']->resolvex();
     $commit_map = $this->parseMercurialCommits($commit_raw);
     $this->mercurialCommits = $commit_map;
 
-    list($old_raw) = $futures['old']->resolvex();
+    // NOTE: `hg heads` exits with an error code and no output if the repository
+    // has no heads. Most commonly this happens on a new repository. We know
+    // we can run `hg` successfully since the `hg log` above didn't error, so
+    // just ignore the error code.
+
+    list($err, $old_raw) = $futures['old']->resolve();
     $old_refs = $this->parseMercurialHeads($old_raw);
 
-    list($new_raw) = $futures['new']->resolvex();
+    list($err, $new_raw) = $futures['new']->resolve();
     $new_refs = $this->parseMercurialHeads($new_raw);
 
     $all_refs = array_keys($old_refs + $new_refs);
