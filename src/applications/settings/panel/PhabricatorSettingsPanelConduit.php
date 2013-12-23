@@ -64,6 +64,8 @@ final class PhabricatorSettingsPanelConduit
       $notice = null;
     }
 
+    Javelin::initBehavior('select-on-click');
+
     $cert_form = new AphrontFormView();
     $cert_form
       ->setUser($user)
@@ -77,6 +79,8 @@ final class PhabricatorSettingsPanelConduit
         id(new AphrontFormTextAreaControl())
           ->setLabel(pht('Certificate'))
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_SHORT)
+          ->setReadonly(true)
+          ->setSigil('select-on-click')
           ->setValue($user->getConduitCertificate()));
 
     $cert_form = id(new PHUIObjectBoxView())
