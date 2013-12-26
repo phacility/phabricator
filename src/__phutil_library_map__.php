@@ -653,6 +653,7 @@ phutil_register_library_map(array(
     'DrydockLeaseListController' => 'applications/drydock/controller/DrydockLeaseListController.php',
     'DrydockLeaseQuery' => 'applications/drydock/query/DrydockLeaseQuery.php',
     'DrydockLeaseReleaseController' => 'applications/drydock/controller/DrydockLeaseReleaseController.php',
+    'DrydockLeaseSearchEngine' => 'applications/drydock/query/DrydockLeaseSearchEngine.php',
     'DrydockLeaseStatus' => 'applications/drydock/constants/DrydockLeaseStatus.php',
     'DrydockLeaseViewController' => 'applications/drydock/controller/DrydockLeaseViewController.php',
     'DrydockLocalCommandInterface' => 'applications/drydock/interface/command/DrydockLocalCommandInterface.php',
@@ -3046,10 +3047,19 @@ phutil_register_library_map(array(
     'DrydockController' => 'PhabricatorController',
     'DrydockDAO' => 'PhabricatorLiskDAO',
     'DrydockFilesystemInterface' => 'DrydockInterface',
-    'DrydockLease' => 'DrydockDAO',
-    'DrydockLeaseListController' => 'DrydockController',
-    'DrydockLeaseQuery' => 'PhabricatorOffsetPagedQuery',
+    'DrydockLease' =>
+    array(
+      0 => 'DrydockDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
+    'DrydockLeaseListController' =>
+    array(
+      0 => 'DrydockController',
+      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
+    ),
+    'DrydockLeaseQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'DrydockLeaseReleaseController' => 'DrydockController',
+    'DrydockLeaseSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'DrydockLeaseStatus' => 'DrydockConstants',
     'DrydockLeaseViewController' => 'DrydockController',
     'DrydockLocalCommandInterface' => 'DrydockCommandInterface',
