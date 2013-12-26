@@ -50,7 +50,9 @@ final class PhabricatorApplicationDrydock extends PhabricatorApplication {
           '(?P<id>[1-9]\d*)/' => 'DrydockLeaseViewController',
           '(?P<id>[1-9]\d*)/release/' => 'DrydockLeaseReleaseController',
         ),
-        'log/' => 'DrydockLogController',
+        'log/' => array(
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'DrydockLogListController',
+        ),
       ),
     );
   }

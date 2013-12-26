@@ -18,8 +18,9 @@ abstract class DrydockController extends PhabricatorController {
       ->setViewer($this->getRequest()->getUser())
       ->addNavigationItems($nav->getMenu(), pht('Resources'));
 
-    $nav->addLabel(pht('Logs'));
-    $nav->addFilter('log',       'Logs');
+    id(new DrydockLogSearchEngine())
+      ->setViewer($this->getRequest()->getUser())
+      ->addNavigationItems($nav->getMenu(), pht('Logs'));
 
     $nav->selectFilter($selected, 'resource');
 

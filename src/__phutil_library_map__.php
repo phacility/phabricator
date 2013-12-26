@@ -660,8 +660,9 @@ phutil_register_library_map(array(
     'DrydockLocalCommandInterface' => 'applications/drydock/interface/command/DrydockLocalCommandInterface.php',
     'DrydockLocalHostBlueprintImplementation' => 'applications/drydock/blueprint/DrydockLocalHostBlueprintImplementation.php',
     'DrydockLog' => 'applications/drydock/storage/DrydockLog.php',
-    'DrydockLogController' => 'applications/drydock/controller/DrydockLogController.php',
+    'DrydockLogListController' => 'applications/drydock/controller/DrydockLogListController.php',
     'DrydockLogQuery' => 'applications/drydock/query/DrydockLogQuery.php',
+    'DrydockLogSearchEngine' => 'applications/drydock/query/DrydockLogSearchEngine.php',
     'DrydockManagementCloseWorkflow' => 'applications/drydock/management/DrydockManagementCloseWorkflow.php',
     'DrydockManagementCreateResourceWorkflow' => 'applications/drydock/management/DrydockManagementCreateResourceWorkflow.php',
     'DrydockManagementLeaseWorkflow' => 'applications/drydock/management/DrydockManagementLeaseWorkflow.php',
@@ -3073,9 +3074,18 @@ phutil_register_library_map(array(
     'DrydockLeaseViewController' => 'DrydockController',
     'DrydockLocalCommandInterface' => 'DrydockCommandInterface',
     'DrydockLocalHostBlueprintImplementation' => 'DrydockBlueprintImplementation',
-    'DrydockLog' => 'DrydockDAO',
-    'DrydockLogController' => 'DrydockController',
-    'DrydockLogQuery' => 'PhabricatorOffsetPagedQuery',
+    'DrydockLog' =>
+    array(
+      0 => 'DrydockDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
+    'DrydockLogListController' =>
+    array(
+      0 => 'DrydockController',
+      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
+    ),
+    'DrydockLogQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'DrydockLogSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'DrydockManagementCloseWorkflow' => 'DrydockManagementWorkflow',
     'DrydockManagementCreateResourceWorkflow' => 'DrydockManagementWorkflow',
     'DrydockManagementLeaseWorkflow' => 'DrydockManagementWorkflow',
