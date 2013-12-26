@@ -642,6 +642,7 @@ phutil_register_library_map(array(
     'DrydockBlueprintListController' => 'applications/drydock/controller/DrydockBlueprintListController.php',
     'DrydockBlueprintQuery' => 'applications/drydock/query/DrydockBlueprintQuery.php',
     'DrydockBlueprintScopeGuard' => 'applications/drydock/util/DrydockBlueprintScopeGuard.php',
+    'DrydockBlueprintSearchEngine' => 'applications/drydock/query/DrydockBlueprintSearchEngine.php',
     'DrydockBlueprintViewController' => 'applications/drydock/controller/DrydockBlueprintViewController.php',
     'DrydockCommandInterface' => 'applications/drydock/interface/command/DrydockCommandInterface.php',
     'DrydockConstants' => 'applications/drydock/constants/DrydockConstants.php',
@@ -3042,8 +3043,13 @@ phutil_register_library_map(array(
     ),
     'DrydockBlueprintCreateController' => 'DrydockController',
     'DrydockBlueprintEditController' => 'DrydockController',
-    'DrydockBlueprintListController' => 'DrydockController',
+    'DrydockBlueprintListController' =>
+    array(
+      0 => 'DrydockController',
+      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
+    ),
     'DrydockBlueprintQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'DrydockBlueprintSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'DrydockBlueprintViewController' => 'DrydockController',
     'DrydockCommandInterface' => 'DrydockInterface',
     'DrydockController' => 'PhabricatorController',

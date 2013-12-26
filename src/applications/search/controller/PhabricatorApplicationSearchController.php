@@ -154,8 +154,8 @@ final class PhabricatorApplicationSearchController
     }
 
     $nav->selectFilter(
-      'query/'.$saved_query->getQueryKey(),
-      'query/advanced');
+      $engine->getNavPrefix().'query/'.$saved_query->getQueryKey(),
+      $engine->getNavPrefix().'query/advanced');
 
     $form = id(new AphrontFormView())
       ->setUser($user);

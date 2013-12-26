@@ -5,12 +5,17 @@ abstract class DrydockController extends PhabricatorController {
   final protected function buildSideNav($selected = null) {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI('/drydock/'));
-    $nav->addFilter('blueprint', 'Blueprints');
-    $nav->addFilter('resource',  'Resources');
+
+    id(new DrydockBlueprintSearchEngine())
+      ->setViewer($this->getRequest()->getUser())
+      ->addNavigationItems($nav->getMenu(), pht('Blueprints'));
 
     id(new DrydockLeaseSearchEngine())
       ->setViewer($this->getRequest()->getUser())
       ->addNavigationItems($nav->getMenu(), pht('Leases'));
+
+    $nav->addLabel(pht('Resources'));
+    $nav->addFilter('resource',  'Resources');
 
     $nav->addLabel(pht('Logs'));
     $nav->addFilter('log',       'Logs');
