@@ -26,9 +26,10 @@ abstract class DrydockBlueprintImplementation {
   }
 
   protected function loadLease($lease_id) {
+    // TODO: Get rid of this?
     $query = id(new DrydockLeaseQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withIDs(array($lease_id))
-      ->needResources(true)
       ->execute();
 
     $lease = idx($query, $lease_id);

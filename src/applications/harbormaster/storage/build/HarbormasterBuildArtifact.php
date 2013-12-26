@@ -59,6 +59,7 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
           ->setHref($handle->getURI());
       case self::TYPE_HOST:
         $leases = id(new DrydockLeaseQuery())
+          ->setViewer($viewer)
           ->withIDs(array($data["drydock-lease"]))
           ->execute();
         $lease = $leases[$data["drydock-lease"]];

@@ -13,7 +13,7 @@ final class DrydockLeaseListController extends DrydockController {
     $pager->setOffset($request->getInt('offset'));
 
     $leases = id(new DrydockLeaseQuery())
-      ->needResources(true)
+      ->setViewer($user)
       ->executeWithOffsetPager($pager);
 
     $title = pht('Leases');

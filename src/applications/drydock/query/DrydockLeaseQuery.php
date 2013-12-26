@@ -1,27 +1,22 @@
 <?php
 
-final class DrydockLeaseQuery extends PhabricatorOffsetPagedQuery {
+final class DrydockLeaseQuery
+  extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
   private $resourceIDs;
-  private $needResources;
-
-  public function withResourceIDs(array $ids) {
-    $this->resourceIDs = $ids;
-    return $this;
-  }
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
   }
 
-  public function needResources($need_resources) {
-    $this->needResources = $need_resources;
+  public function withResourceIDs(array $ids) {
+    $this->resourceIDs = $ids;
     return $this;
   }
 
-  public function execute() {
+  public function loadPage() {
     $table = new DrydockLease();
     $conn_r = $table->establishConnection('r');
 
@@ -33,25 +28,23 @@ final class DrydockLeaseQuery extends PhabricatorOffsetPagedQuery {
       $this->buildOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
 
-    $leases = $table->loadAllFromArray($data);
+    return $table->loadAllFromArray($data);
+  }
 
-    if ($leases && $this->needResources) {
-      $resources = id(new DrydockResource())->loadAllWhere(
-        'id IN (%Ld)',
-        mpull($leases, 'getResourceID'));
+  public function willFilterPage(array $leases) {
+    $resources = id(new DrydockResourceQuery())
+      ->setParentQuery($this)
+      ->setViewer($this->getViewer())
+      ->withIDs(mpull($leases, 'getResourceID'))
+      ->execute();
 
-      foreach ($leases as $key => $lease) {
-        if ($lease->getResourceID()) {
-          $resource = idx($resources, $lease->getResourceID());
-          if ($resource) {
-            $lease->attachResource($resource);
-          } else {
-            unset($leases[$key]);
-          }
-        } else {
-          unset($leases[$key]);
-        }
+    foreach ($leases as $key => $lease) {
+      $resource = idx($resources, $lease->getResourceID());
+      if (!$resource) {
+        unset($leases[$key]);
+        continue;
       }
+      $lease->attachResource($resource);
     }
 
     return $leases;
@@ -74,11 +67,13 @@ final class DrydockLeaseQuery extends PhabricatorOffsetPagedQuery {
         $this->ids);
     }
 
+    $where[] = $this->buildPagingClause($conn_r);
+
     return $this->formatWhereClause($where);
   }
 
-  private function buildOrderClause(AphrontDatabaseConnection $conn_r) {
-    return qsprintf($conn_r, 'ORDER BY id DESC');
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationDrydock';
   }
 
 }

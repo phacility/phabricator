@@ -1,6 +1,7 @@
 <?php
 
-final class DrydockLease extends DrydockDAO {
+final class DrydockLease extends DrydockDAO
+  implements PhabricatorPolicyInterface {
 
   protected $resourceID;
   protected $resourceType;
@@ -185,6 +186,28 @@ final class DrydockLease extends DrydockDAO {
 
     self::waitForLeases(array($this));
     return $this;
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return $this->getResource()->getPolicy($capability);
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return $this->getResource()->hasAutomaticCapability($capability, $viewer);
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return pht('Leases inherit policies from the resources they lease.');
   }
 
 }
