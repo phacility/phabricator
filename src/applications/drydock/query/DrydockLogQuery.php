@@ -1,14 +1,9 @@
 <?php
 
-final class DrydockLogQuery extends PhabricatorOffsetPagedQuery {
-
-  const ORDER_EPOCH   = 'order-epoch';
-  const ORDER_ID      = 'order-id';
+final class DrydockLogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $resourceIDs;
   private $leaseIDs;
-  private $afterID;
-  private $order = self::ORDER_EPOCH;
 
   public function withResourceIDs(array $ids) {
     $this->resourceIDs = $ids;
@@ -20,17 +15,7 @@ final class DrydockLogQuery extends PhabricatorOffsetPagedQuery {
     return $this;
   }
 
-  public function setOrder($order) {
-    $this->order = $order;
-    return $this;
-  }
-
-  public function withAfterID($id) {
-    $this->afterID = $id;
-    return $this;
-  }
-
-  public function execute() {
+  public function loadPage() {
     $table = new DrydockLog();
     $conn_r = $table->establishConnection('r');
 
@@ -43,6 +28,26 @@ final class DrydockLogQuery extends PhabricatorOffsetPagedQuery {
       $this->buildLimitClause($conn_r));
 
     return $table->loadAllFromArray($data);
+  }
+
+  public function willFilterPage(array $logs) {
+    $resource_ids = mpull($logs, 'getResourceID');
+    $resources = id(new DrydockResourceQuery())
+      ->setParentQuery($this)
+      ->setViewer($this->getViewer())
+      ->withIDs($resource_ids)
+      ->execute();
+
+    foreach ($logs as $key => $log) {
+      $resource = idx($resources, $log->getResourceID());
+      if (!$resource) {
+        unset($logs[$key]);
+        continue;
+      }
+      $log->attachResource($resource);
+    }
+
+    return $logs;
   }
 
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
@@ -62,25 +67,13 @@ final class DrydockLogQuery extends PhabricatorOffsetPagedQuery {
         $this->leaseIDs);
     }
 
-    if ($this->afterID) {
-      $where[] = qsprintf(
-        $conn_r,
-        'id > %d',
-        $this->afterID);
-    }
+    $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
   }
 
-  private function buildOrderClause(AphrontDatabaseConnection $conn_r) {
-    switch ($this->order) {
-      case self::ORDER_EPOCH:
-        return 'ORDER BY log.epoch DESC, log.id DESC';
-      case self::ORDER_ID:
-        return 'ORDER BY id ASC';
-      default:
-        throw new Exception("Unknown order '{$this->order}'!");
-    }
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationDrydock';
   }
 
 }

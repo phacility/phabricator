@@ -8,7 +8,8 @@ final class DrydockLogController extends DrydockController {
 
     $nav = $this->buildSideNav('log');
 
-    $query = new DrydockLogQuery();
+    $query = id(new DrydockLogQuery())
+      ->setViewer($user);
 
     $resource_ids = $request->getStrList('resource');
     if ($resource_ids) {

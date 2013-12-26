@@ -41,6 +41,7 @@ final class DrydockResourceViewController extends DrydockController {
     $pager->setOffset($request->getInt('offset'));
 
     $logs = id(new DrydockLogQuery())
+      ->setViewer($user)
       ->withResourceIDs(array($resource->getID()))
       ->executeWithOffsetPager($pager);
 

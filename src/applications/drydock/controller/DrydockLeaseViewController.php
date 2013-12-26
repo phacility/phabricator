@@ -32,6 +32,7 @@ final class DrydockLeaseViewController extends DrydockController {
     $pager->setOffset($request->getInt('offset'));
 
     $logs = id(new DrydockLogQuery())
+      ->setViewer($user)
       ->withLeaseIDs(array($lease->getID()))
       ->executeWithOffsetPager($pager);
 

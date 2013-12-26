@@ -59,9 +59,8 @@ final class DrydockManagementLeaseWorkflow
       }
 
       $logs = id(new DrydockLogQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
         ->withLeaseIDs(array($lease->getID()))
-        ->withAfterID($cursor)
-        ->setOrder(DrydockLogQuery::ORDER_ID)
         ->execute();
 
       if ($logs) {
