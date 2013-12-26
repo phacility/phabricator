@@ -7,6 +7,7 @@ final class HarbormasterBuildable extends HarbormasterDAO
   protected $containerPHID;
   protected $buildStatus;
   protected $buildableStatus;
+  protected $isManualBuildable;
 
   private $buildableObject = self::ATTACHABLE;
   private $containerObject = self::ATTACHABLE;
@@ -18,6 +19,7 @@ final class HarbormasterBuildable extends HarbormasterDAO
 
   public static function initializeNewBuildable(PhabricatorUser $actor) {
     return id(new HarbormasterBuildable())
+      ->setIsManualBuildable(0)
       ->setBuildStatus(self::STATUS_WHATEVER)
       ->setBuildableStatus(self::STATUS_WHATEVER);
   }
@@ -34,6 +36,7 @@ final class HarbormasterBuildable extends HarbormasterDAO
     $buildable = id(new HarbormasterBuildableQuery())
       ->setViewer($actor)
       ->withBuildablePHIDs(array($buildable_object_phid))
+      ->withManualBuildables(false)
       ->setLimit(1)
       ->executeOne();
     if ($buildable) {

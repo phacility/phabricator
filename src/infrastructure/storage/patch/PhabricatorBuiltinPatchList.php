@@ -1848,6 +1848,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20131219.pxdrop.sql'),
       ),
+      '20131224.harbormanual.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131224.harbormanual.sql'),
+      ),
     );
   }
 }

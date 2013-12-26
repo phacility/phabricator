@@ -118,15 +118,6 @@ final class HarbormasterBuildableViewController
       ->setObject($buildable)
       ->setObjectURI("/B{$id}");
 
-    $apply_uri = $this->getApplicationURI('/buildable/apply/'.$id.'/');
-
-    $list->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Apply Build Plan'))
-        ->setIcon('edit')
-        ->setHref($apply_uri)
-        ->setWorkflow(true));
-
     return $list;
   }
 
@@ -152,6 +143,12 @@ final class HarbormasterBuildableViewController
         pht('Container'),
         $buildable->getContainerHandle()->renderLink());
     }
+
+    $properties->addProperty(
+      pht('Origin'),
+      $buildable->getIsManualBuildable()
+        ? pht('Manual Buildable')
+        : pht('Automatic Buildable'));
 
   }
 

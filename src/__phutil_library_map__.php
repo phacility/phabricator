@@ -707,8 +707,6 @@ phutil_register_library_map(array(
     'HarbormasterBuildViewController' => 'applications/harbormaster/controller/HarbormasterBuildViewController.php',
     'HarbormasterBuildWorker' => 'applications/harbormaster/worker/HarbormasterBuildWorker.php',
     'HarbormasterBuildable' => 'applications/harbormaster/storage/HarbormasterBuildable.php',
-    'HarbormasterBuildableApplyController' => 'applications/harbormaster/controller/HarbormasterBuildableApplyController.php',
-    'HarbormasterBuildableEditController' => 'applications/harbormaster/controller/HarbormasterBuildableEditController.php',
     'HarbormasterBuildableListController' => 'applications/harbormaster/controller/HarbormasterBuildableListController.php',
     'HarbormasterBuildableQuery' => 'applications/harbormaster/query/HarbormasterBuildableQuery.php',
     'HarbormasterBuildableSearchEngine' => 'applications/harbormaster/query/HarbormasterBuildableSearchEngine.php',
@@ -730,6 +728,7 @@ phutil_register_library_map(array(
     'HarbormasterPlanEditController' => 'applications/harbormaster/controller/HarbormasterPlanEditController.php',
     'HarbormasterPlanListController' => 'applications/harbormaster/controller/HarbormasterPlanListController.php',
     'HarbormasterPlanOrderController' => 'applications/harbormaster/controller/HarbormasterPlanOrderController.php',
+    'HarbormasterPlanRunController' => 'applications/harbormaster/controller/HarbormasterPlanRunController.php',
     'HarbormasterPlanViewController' => 'applications/harbormaster/controller/HarbormasterPlanViewController.php',
     'HarbormasterRemarkupRule' => 'applications/harbormaster/remarkup/HarbormasterRemarkupRule.php',
     'HarbormasterScratchTable' => 'applications/harbormaster/storage/HarbormasterScratchTable.php',
@@ -3133,8 +3132,6 @@ phutil_register_library_map(array(
       0 => 'HarbormasterDAO',
       1 => 'PhabricatorPolicyInterface',
     ),
-    'HarbormasterBuildableApplyController' => 'HarbormasterController',
-    'HarbormasterBuildableEditController' => 'HarbormasterController',
     'HarbormasterBuildableListController' =>
     array(
       0 => 'HarbormasterController',
@@ -3164,6 +3161,7 @@ phutil_register_library_map(array(
       1 => 'PhabricatorApplicationSearchResultsControllerInterface',
     ),
     'HarbormasterPlanOrderController' => 'HarbormasterController',
+    'HarbormasterPlanRunController' => 'HarbormasterController',
     'HarbormasterPlanViewController' => 'HarbormasterPlanController',
     'HarbormasterRemarkupRule' => 'PhabricatorRemarkupRuleObject',
     'HarbormasterScratchTable' => 'HarbormasterDAO',

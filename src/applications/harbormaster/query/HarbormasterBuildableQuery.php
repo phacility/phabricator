@@ -7,6 +7,7 @@ final class HarbormasterBuildableQuery
   private $phids;
   private $buildablePHIDs;
   private $containerPHIDs;
+  private $manualBuildables;
 
   private $needContainerObjects;
   private $needContainerHandles;
@@ -30,6 +31,11 @@ final class HarbormasterBuildableQuery
 
   public function withContainerPHIDs(array $container_phids) {
     $this->containerPHIDs = $container_phids;
+    return $this;
+  }
+
+  public function withManualBuildables($manual) {
+    $this->manualBuildables = $manual;
     return $this;
   }
 
@@ -195,6 +201,13 @@ final class HarbormasterBuildableQuery
         $conn_r,
         'containerPHID in (%Ls)',
         $this->containerPHIDs);
+    }
+
+    if ($this->manualBuildables !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'isManualBuildable = %d',
+        (int)$this->manualBuildables);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

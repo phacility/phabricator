@@ -42,6 +42,9 @@ final class HarbormasterBuildableSearchEngine
     $buildable_phids = array_merge($commits, $diffs);
     $saved->setParameter('buildablePHIDs', $buildable_phids);
 
+    $saved->setParameter(
+      'manual',
+      $this->readBoolFromRequest($request, 'manual'));
 
     return $saved;
   }
@@ -61,6 +64,11 @@ final class HarbormasterBuildableSearchEngine
 
     if ($buildable_phids) {
       $query->withBuildablePHIDs($buildable_phids);
+    }
+
+    $manual = $saved->getParameter('manual');
+    if ($manual !== null) {
+      $query->withManualBuildables($manual);
     }
 
     return $query;
@@ -126,7 +134,18 @@ final class HarbormasterBuildableSearchEngine
         id(new AphrontFormTextControl())
           ->setLabel(pht('Commits'))
           ->setName('commits')
-          ->setValue(implode(', ', $commit_names)));
+          ->setValue(implode(', ', $commit_names)))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Origin'))
+          ->setName('manual')
+          ->setValue($this->getBoolFromQuery($saved_query, 'manual'))
+          ->setOptions(
+            array(
+              '' => pht('(All Origins)'),
+              'true' => pht('Manual Buildables'),
+              'false' => pht('Automatic Buildables'),
+            )));
   }
 
   protected function getURI($path) {

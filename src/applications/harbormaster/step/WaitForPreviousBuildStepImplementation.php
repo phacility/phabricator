@@ -102,6 +102,7 @@ final class WaitForPreviousBuildStepImplementation
     $buildables = id(new HarbormasterBuildableQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withBuildablePHIDs($build_objects)
+      ->withManualBuildables(false)
       ->execute();
     $buildable_phids = mpull($buildables, 'getPHID');
 
