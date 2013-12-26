@@ -676,6 +676,7 @@ phutil_register_library_map(array(
     'DrydockResourceCloseController' => 'applications/drydock/controller/DrydockResourceCloseController.php',
     'DrydockResourceListController' => 'applications/drydock/controller/DrydockResourceListController.php',
     'DrydockResourceQuery' => 'applications/drydock/query/DrydockResourceQuery.php',
+    'DrydockResourceSearchEngine' => 'applications/drydock/query/DrydockResourceSearchEngine.php',
     'DrydockResourceStatus' => 'applications/drydock/constants/DrydockResourceStatus.php',
     'DrydockResourceViewController' => 'applications/drydock/controller/DrydockResourceViewController.php',
     'DrydockSFTPFilesystemInterface' => 'applications/drydock/interface/filesystem/DrydockSFTPFilesystemInterface.php',
@@ -3091,8 +3092,13 @@ phutil_register_library_map(array(
       1 => 'PhabricatorPolicyInterface',
     ),
     'DrydockResourceCloseController' => 'DrydockController',
-    'DrydockResourceListController' => 'DrydockController',
+    'DrydockResourceListController' =>
+    array(
+      0 => 'DrydockController',
+      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
+    ),
     'DrydockResourceQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'DrydockResourceSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'DrydockResourceStatus' => 'DrydockConstants',
     'DrydockResourceViewController' => 'DrydockController',
     'DrydockSFTPFilesystemInterface' => 'DrydockFilesystemInterface',

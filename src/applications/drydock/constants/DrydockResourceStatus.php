@@ -9,15 +9,25 @@ final class DrydockResourceStatus extends DrydockConstants {
   const STATUS_DESTROYED    = 4;
 
   public static function getNameForStatus($status) {
-    static $map = array(
-      self::STATUS_PENDING      => 'Pending',
-      self::STATUS_OPEN         => 'Open',
-      self::STATUS_CLOSED       => 'Closed',
-      self::STATUS_BROKEN       => 'Broken',
-      self::STATUS_DESTROYED    => 'Destroyed',
+    $map = array(
+      self::STATUS_PENDING      => pht('Pending'),
+      self::STATUS_OPEN         => pht('Open'),
+      self::STATUS_CLOSED       => pht('Closed'),
+      self::STATUS_BROKEN       => pht('Broken'),
+      self::STATUS_DESTROYED    => pht('Destroyed'),
     );
 
     return idx($map, $status, 'Unknown');
+  }
+
+  public static function getAllStatuses() {
+    return array(
+     self::STATUS_PENDING,
+     self::STATUS_OPEN,
+     self::STATUS_CLOSED,
+     self::STATUS_BROKEN,
+     self::STATUS_DESTROYED,
+    );
   }
 
 }
