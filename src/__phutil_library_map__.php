@@ -707,6 +707,7 @@ phutil_register_library_map(array(
     'HarbormasterBuildViewController' => 'applications/harbormaster/controller/HarbormasterBuildViewController.php',
     'HarbormasterBuildWorker' => 'applications/harbormaster/worker/HarbormasterBuildWorker.php',
     'HarbormasterBuildable' => 'applications/harbormaster/storage/HarbormasterBuildable.php',
+    'HarbormasterBuildableInterface' => 'applications/harbormaster/interface/HarbormasterBuildableInterface.php',
     'HarbormasterBuildableListController' => 'applications/harbormaster/controller/HarbormasterBuildableListController.php',
     'HarbormasterBuildableQuery' => 'applications/harbormaster/query/HarbormasterBuildableQuery.php',
     'HarbormasterBuildableSearchEngine' => 'applications/harbormaster/query/HarbormasterBuildableSearchEngine.php',
@@ -715,6 +716,8 @@ phutil_register_library_map(array(
     'HarbormasterController' => 'applications/harbormaster/controller/HarbormasterController.php',
     'HarbormasterDAO' => 'applications/harbormaster/storage/HarbormasterDAO.php',
     'HarbormasterHTTPRequestBuildStepImplementation' => 'applications/harbormaster/step/HarbormasterHTTPRequestBuildStepImplementation.php',
+    'HarbormasterManagementBuildWorkflow' => 'applications/harbormaster/management/HarbormasterManagementBuildWorkflow.php',
+    'HarbormasterManagementWorkflow' => 'applications/harbormaster/management/HarbormasterManagementWorkflow.php',
     'HarbormasterObject' => 'applications/harbormaster/storage/HarbormasterObject.php',
     'HarbormasterPHIDTypeBuild' => 'applications/harbormaster/phid/HarbormasterPHIDTypeBuild.php',
     'HarbormasterPHIDTypeBuildItem' => 'applications/harbormaster/phid/HarbormasterPHIDTypeBuildItem.php',
@@ -2747,6 +2750,7 @@ phutil_register_library_map(array(
     array(
       0 => 'DifferentialDAO',
       1 => 'PhabricatorPolicyInterface',
+      2 => 'HarbormasterBuildableInterface',
     ),
     'DifferentialDiffContentMail' => 'DifferentialMail',
     'DifferentialDiffCreateController' => 'DifferentialController',
@@ -2814,6 +2818,7 @@ phutil_register_library_map(array(
       2 => 'PhabricatorPolicyInterface',
       3 => 'PhabricatorFlaggableInterface',
       4 => 'PhrequentTrackableInterface',
+      5 => 'HarbormasterBuildableInterface',
     ),
     'DifferentialRevisionCommentListView' => 'AphrontView',
     'DifferentialRevisionCommentView' => 'AphrontView',
@@ -3131,6 +3136,7 @@ phutil_register_library_map(array(
     array(
       0 => 'HarbormasterDAO',
       1 => 'PhabricatorPolicyInterface',
+      2 => 'HarbormasterBuildableInterface',
     ),
     'HarbormasterBuildableListController' =>
     array(
@@ -3144,6 +3150,8 @@ phutil_register_library_map(array(
     'HarbormasterController' => 'PhabricatorController',
     'HarbormasterDAO' => 'PhabricatorLiskDAO',
     'HarbormasterHTTPRequestBuildStepImplementation' => 'VariableBuildStepImplementation',
+    'HarbormasterManagementBuildWorkflow' => 'HarbormasterManagementWorkflow',
+    'HarbormasterManagementWorkflow' => 'PhutilArgumentWorkflow',
     'HarbormasterObject' => 'HarbormasterDAO',
     'HarbormasterPHIDTypeBuild' => 'PhabricatorPHIDType',
     'HarbormasterPHIDTypeBuildItem' => 'PhabricatorPHIDType',
@@ -4342,6 +4350,7 @@ phutil_register_library_map(array(
       1 => 'PhabricatorPolicyInterface',
       2 => 'PhabricatorFlaggableInterface',
       3 => 'PhabricatorTokenReceiverInterface',
+      4 => 'HarbormasterBuildableInterface',
     ),
     'PhabricatorRepositoryCommitChangeParserWorker' => 'PhabricatorRepositoryCommitParserWorker',
     'PhabricatorRepositoryCommitData' => 'PhabricatorRepositoryDAO',

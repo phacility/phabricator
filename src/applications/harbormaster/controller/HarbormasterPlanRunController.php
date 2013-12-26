@@ -41,16 +41,10 @@ final class HarbormasterPlanRunController
           ->withNames(array($v_name))
           ->executeOne();
 
-        if ($object instanceof DifferentialRevision) {
-          $revision = $object;
-          $object = $object->loadActiveDiff();
+        if ($object instanceof HarbormasterBuildableInterface) {
           $buildable
-            ->setBuildablePHID($object->getPHID())
-            ->setContainerPHID($revision->getPHID());
-        } else if ($object instanceof PhabricatorRepositoryCommit) {
-          $buildable
-            ->setBuildablePHID($object->getPHID())
-            ->setContainerPHID($object->getRepository()->getPHID());
+            ->setBuildablePHID($object->getHarbormasterBuildablePHID())
+            ->setContainerPHID($object->getHarbormasterContainerPHID());
         } else {
           $e_name = pht('Invalid');
           $errors[] = pht('Enter the name of a revision or commit.');
@@ -62,6 +56,7 @@ final class HarbormasterPlanRunController
 
       if (!$errors) {
         $buildable->save();
+        $buildable->applyPlan($plan);
 
         $buildable_uri = '/B'.$buildable->getID();
         return id(new AphrontRedirectResponse())->setURI($buildable_uri);
@@ -80,8 +75,12 @@ final class HarbormasterPlanRunController
       ->setUser($viewer)
       ->appendRemarkupInstructions(
         pht(
-          "Enter the name of a commit or revision to run this plan on.\n\n".
-          "For example: `rX123456` or `D123`"))
+          "Enter the name of a commit or revision to run this plan on (for ".
+          "example, `rX123456` or `D123`).\n\n".
+          "For more detailed output, you can also run manual builds from ".
+          "the command line:\n\n".
+          "  phabricator/ $ ./bin/harbormaster build <object> --plan %s",
+          $plan->getID()))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Buildable Name')
@@ -90,7 +89,7 @@ final class HarbormasterPlanRunController
           ->setValue($v_name));
 
     $dialog = id(new AphrontDialogView())
-      ->setWidth(AphrontDialogView::WIDTH_FORM)
+      ->setWidth(AphrontDialogView::WIDTH_FULL)
       ->setUser($viewer)
       ->setTitle($title)
       ->appendChild($form)

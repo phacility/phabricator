@@ -5,7 +5,8 @@ final class PhabricatorRepositoryCommit
   implements
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
-    PhabricatorTokenReceiverInterface {
+    PhabricatorTokenReceiverInterface,
+    HarbormasterBuildableInterface {
 
   protected $repositoryID;
   protected $phid;
@@ -231,4 +232,17 @@ final class PhabricatorRepositoryCommit
     return id(new PhabricatorRepositoryCommit())
       ->loadFromArray($dict);
   }
+
+
+/* -(  HarbormasterBuildableInterface  )------------------------------------- */
+
+
+  public function getHarbormasterBuildablePHID() {
+    return $this->getPHID();
+  }
+
+  public function getHarbormasterContainerPHID() {
+    return $this->getRepository()->getPHID();
+  }
+
 }

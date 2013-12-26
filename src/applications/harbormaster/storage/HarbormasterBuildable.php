@@ -1,7 +1,9 @@
 <?php
 
 final class HarbormasterBuildable extends HarbormasterDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    HarbormasterBuildableInterface {
 
   protected $buildablePHID;
   protected $containerPHID;
@@ -86,19 +88,25 @@ final class HarbormasterBuildable extends HarbormasterDAO
         continue;
       }
 
-      $build = HarbormasterBuild::initializeNewBuild(
-        PhabricatorUser::getOmnipotentUser());
-      $build->setBuildablePHID($buildable->getPHID());
-      $build->setBuildPlanPHID($plan->getPHID());
-      $build->setBuildStatus(HarbormasterBuild::STATUS_PENDING);
-      $build->save();
-
-      PhabricatorWorker::scheduleTask(
-        'HarbormasterBuildWorker',
-        array(
-          'buildID' => $build->getID()
-        ));
+      $buildable->applyPlan($plan);
     }
+  }
+
+  public function applyPlan(HarbormasterBuildPlan $plan) {
+    $viewer = PhabricatorUser::getOmnipotentUser();
+    $build = HarbormasterBuild::initializeNewBuild($viewer)
+      ->setBuildablePHID($this->getPHID())
+      ->setBuildPlanPHID($plan->getPHID())
+      ->setBuildStatus(HarbormasterBuild::STATUS_PENDING)
+      ->save();
+
+    PhabricatorWorker::scheduleTask(
+      'HarbormasterBuildWorker',
+      array(
+        'buildID' => $build->getID()
+      ));
+
+    return $this;
   }
 
   public function getConfiguration() {
@@ -183,5 +191,22 @@ final class HarbormasterBuildable extends HarbormasterDAO
       'Users must be able to see the revision or repository to see a '.
       'buildable.');
   }
+
+
+
+/* -(  HarbormasterBuildableInterface  )------------------------------------- */
+
+
+  public function getHarbormasterBuildablePHID() {
+    // NOTE: This is essentially just for convenience, as it allows you create
+    // a copy of a buildable by specifying `B123` without bothering to go
+    // look up the underlying object.
+    return $this->getBuildablePHID();
+  }
+
+  public function getHarbormasterContainerPHID() {
+    return $this->getContainerPHID();
+  }
+
 
 }
