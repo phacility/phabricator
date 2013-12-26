@@ -26,6 +26,7 @@ final class DiffusionCommitHookEngine extends Phobject {
   private $transactionKey;
   private $mercurialHook;
   private $mercurialCommits = array();
+  private $gitCommits = array();
 
   private $heraldViewerProjects;
 
@@ -427,6 +428,7 @@ final class DiffusionCommitHookEngine extends Phobject {
         $merge_base = rtrim($stdout, "\n");
       }
 
+      $ref_update = $ref_updates[$key];
       $ref_update->setMergeBase($merge_base);
     }
 
@@ -525,7 +527,20 @@ final class DiffusionCommitHookEngine extends Phobject {
 
       $commits = phutil_split_lines($stdout, $retain_newlines = false);
 
+      // If we're looking at a branch, mark all of the new commits as on that
+      // branch. It's only possible for these commits to be on updated branches,
+      // since any other branch heads are necessarily behind them.
+      $branch_name = null;
+      $ref_update = $ref_updates[$key];
+      $type_branch = PhabricatorRepositoryPushLog::REFTYPE_BRANCH;
+      if ($ref_update->getRefType() == $type_branch) {
+        $branch_name = $ref_update->getRefName();
+      }
+
       foreach ($commits as $commit) {
+        if ($branch_name) {
+          $this->gitCommits[$commit][] = $branch_name;
+        }
         $content_updates[$commit] = $this->newPushLog()
           ->setRefType(PhabricatorRepositoryPushLog::REFTYPE_COMMIT)
           ->setRefNew($commit)
@@ -970,6 +985,20 @@ final class DiffusionCommitHookEngine extends Phobject {
         break;
       default:
         throw new Exception(pht("Unknown VCS '%s!'", $vcs));
+    }
+  }
+
+  public function loadBranches($identifier) {
+    $repository = $this->getRepository();
+    $vcs = $repository->getVersionControlSystem();
+    switch ($vcs) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        return idx($this->gitCommits, $identifier, array());
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        return idx($this->mercurialCommits, $identifier, array());
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        // Subversion doesn't have branches.
+        return array();
     }
   }
 

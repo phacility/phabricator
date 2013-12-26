@@ -33,6 +33,7 @@ abstract class HeraldAdapter {
   const FIELD_DIFFERENTIAL_CCS       = 'differential-ccs';
   const FIELD_DIFFERENTIAL_ACCEPTED  = 'differential-accepted';
   const FIELD_IS_MERGE_COMMIT        = 'is-merge-commit';
+  const FIELD_BRANCHES               = 'branches';
 
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';
@@ -178,6 +179,7 @@ abstract class HeraldAdapter {
       self::FIELD_DIFFERENTIAL_ACCEPTED
         => pht('Accepted Differential revision'),
       self::FIELD_IS_MERGE_COMMIT => pht('Commit is a merge'),
+      self::FIELD_BRANCHES => pht('Commit\'s branches'),
     );
   }
 
@@ -255,6 +257,7 @@ abstract class HeraldAdapter {
           self::CONDITION_NOT_EXISTS,
         );
       case self::FIELD_DIFF_FILE:
+      case self::FIELD_BRANCHES:
         return array(
           self::CONDITION_CONTAINS,
           self::CONDITION_REGEXP,

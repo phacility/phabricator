@@ -42,6 +42,7 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
         self::FIELD_BODY,
         self::FIELD_AUTHOR,
         self::FIELD_COMMITTER,
+        self::FIELD_BRANCHES,
         self::FIELD_DIFF_FILE,
         self::FIELD_DIFF_CONTENT,
         self::FIELD_DIFF_ADDED_CONTENT,
@@ -100,6 +101,8 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
         return $this->getAuthorPHID();
       case self::FIELD_COMMITTER:
         return $this->getCommitterPHID();
+      case self::FIELD_BRANCHES:
+        return $this->getBranches();
       case self::FIELD_DIFF_FILE:
         return $this->getDiffContent('name');
       case self::FIELD_DIFF_CONTENT:
@@ -327,6 +330,10 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
         // ancestry is in Git/Mercurial.
         return false;
     }
+  }
+
+  private function getBranches() {
+    return $this->hookEngine->loadBranches($this->log->getRefNew());
   }
 
 }
