@@ -77,6 +77,12 @@ final class HarbormasterBuildable extends HarbormasterDAO
       ->withPHIDs($plan_phids)
       ->execute();
     foreach ($plans as $plan) {
+      if ($plan->isDisabled()) {
+        // TODO: This should be communicated more clearly -- maybe we should
+        // create the build but set the status to "disabled" or "derelict".
+        continue;
+      }
+
       $build = HarbormasterBuild::initializeNewBuild(
         PhabricatorUser::getOmnipotentUser());
       $build->setBuildablePHID($buildable->getPHID());

@@ -178,6 +178,24 @@ final class HarbormasterPlanViewController
         ->setDisabled(!$can_edit)
         ->setIcon('edit'));
 
+    if ($plan->isDisabled()) {
+      $list->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Enable Plan'))
+          ->setHref($this->getApplicationURI("plan/disable/{$id}/"))
+          ->setWorkflow(true)
+          ->setDisabled(!$can_edit)
+          ->setIcon('enable'));
+    } else {
+      $list->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Disable Plan'))
+          ->setHref($this->getApplicationURI("plan/disable/{$id}/"))
+          ->setWorkflow(true)
+          ->setDisabled(!$can_edit)
+          ->setIcon('disable'));
+    }
+
     $list->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Add Build Step'))

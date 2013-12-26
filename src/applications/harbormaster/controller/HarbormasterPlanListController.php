@@ -39,6 +39,10 @@ final class HarbormasterPlanListController
         ->setObjectName(pht('Plan %d', $plan->getID()))
         ->setHeader($plan->getName());
 
+      if ($plan->isDisabled()) {
+        $item->setDisabled(true);
+      }
+
       $item->setHref($this->getApplicationURI("plan/{$id}/"));
 
       $list->addItem($item);

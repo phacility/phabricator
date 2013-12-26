@@ -726,6 +726,7 @@ phutil_register_library_map(array(
     'HarbormasterPHIDTypeBuildTarget' => 'applications/harbormaster/phid/HarbormasterPHIDTypeBuildTarget.php',
     'HarbormasterPHIDTypeBuildable' => 'applications/harbormaster/phid/HarbormasterPHIDTypeBuildable.php',
     'HarbormasterPlanController' => 'applications/harbormaster/controller/HarbormasterPlanController.php',
+    'HarbormasterPlanDisableController' => 'applications/harbormaster/controller/HarbormasterPlanDisableController.php',
     'HarbormasterPlanEditController' => 'applications/harbormaster/controller/HarbormasterPlanEditController.php',
     'HarbormasterPlanListController' => 'applications/harbormaster/controller/HarbormasterPlanListController.php',
     'HarbormasterPlanOrderController' => 'applications/harbormaster/controller/HarbormasterPlanOrderController.php',
@@ -3155,6 +3156,7 @@ phutil_register_library_map(array(
     'HarbormasterPHIDTypeBuildTarget' => 'PhabricatorPHIDType',
     'HarbormasterPHIDTypeBuildable' => 'PhabricatorPHIDType',
     'HarbormasterPlanController' => 'PhabricatorController',
+    'HarbormasterPlanDisableController' => 'HarbormasterPlanController',
     'HarbormasterPlanEditController' => 'HarbormasterPlanController',
     'HarbormasterPlanListController' =>
     array(
