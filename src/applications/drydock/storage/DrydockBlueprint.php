@@ -9,6 +9,8 @@ final class DrydockBlueprint extends DrydockDAO
   protected $editPolicy;
   protected $details;
 
+  private $implementation = self::ATTACHABLE;
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -33,6 +35,12 @@ final class DrydockBlueprint extends DrydockDAO
     }
     return id(new $class())->attachInstance($this);
   }
+
+  public function attachImplementation(DrydockBlueprintImplementation $impl) {
+    $this->implementation = $impl;
+    return $this;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

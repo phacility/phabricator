@@ -668,6 +668,8 @@ phutil_register_library_map(array(
     'DrydockManagementWaitForLeaseWorkflow' => 'applications/drydock/management/DrydockManagementWaitForLeaseWorkflow.php',
     'DrydockManagementWorkflow' => 'applications/drydock/management/DrydockManagementWorkflow.php',
     'DrydockPHIDTypeBlueprint' => 'applications/drydock/phid/DrydockPHIDTypeBlueprint.php',
+    'DrydockPHIDTypeLease' => 'applications/drydock/phid/DrydockPHIDTypeLease.php',
+    'DrydockPHIDTypeResource' => 'applications/drydock/phid/DrydockPHIDTypeResource.php',
     'DrydockPreallocatedHostBlueprintImplementation' => 'applications/drydock/blueprint/DrydockPreallocatedHostBlueprintImplementation.php',
     'DrydockResource' => 'applications/drydock/storage/DrydockResource.php',
     'DrydockResourceCloseController' => 'applications/drydock/controller/DrydockResourceCloseController.php',
@@ -3074,6 +3076,8 @@ phutil_register_library_map(array(
     'DrydockManagementWaitForLeaseWorkflow' => 'DrydockManagementWorkflow',
     'DrydockManagementWorkflow' => 'PhutilArgumentWorkflow',
     'DrydockPHIDTypeBlueprint' => 'PhabricatorPHIDType',
+    'DrydockPHIDTypeLease' => 'PhabricatorPHIDType',
+    'DrydockPHIDTypeResource' => 'PhabricatorPHIDType',
     'DrydockPreallocatedHostBlueprintImplementation' => 'DrydockBlueprintImplementation',
     'DrydockResource' =>
     array(

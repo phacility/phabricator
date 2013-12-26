@@ -4,11 +4,17 @@ final class DrydockLeaseQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
+  private $phids;
   private $resourceIDs;
   private $statuses;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
+    return $this;
+  }
+
+  public function withPHIDs(array $phids) {
+    $this->phids = $phids;
     return $this;
   }
 
@@ -71,6 +77,13 @@ final class DrydockLeaseQuery
         $conn_r,
         'id IN (%Ld)',
         $this->ids);
+    }
+
+    if ($this->phids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'phid IN (%Ls)',
+        $this->phids);
     }
 
     if ($this->statuses) {

@@ -34,7 +34,7 @@ final class DrydockBlueprintQuery
       DrydockBlueprintImplementation::getAllBlueprintImplementations();
 
     foreach ($blueprints as $blueprint) {
-      if (array_key_exists($implementations, $blueprint->getClassName())) {
+      if (array_key_exists($blueprint->getClassName(), $implementations)) {
         $blueprint->attachImplementation(
           $implementations[$blueprint->getClassName()]);
       }

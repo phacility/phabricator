@@ -27,8 +27,7 @@ final class DrydockResource extends DrydockDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_DRYR);
+    return PhabricatorPHID::generateNewPHID(DrydockPHIDTypeResource::TYPECONST);
   }
 
   public function getAttribute($key, $default = null) {

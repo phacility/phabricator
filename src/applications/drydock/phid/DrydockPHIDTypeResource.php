@@ -1,26 +1,26 @@
 <?php
 
-final class DrydockPHIDTypeBlueprint extends PhabricatorPHIDType {
+final class DrydockPHIDTypeResource extends PhabricatorPHIDType {
 
-  const TYPECONST = 'DRYB';
+  const TYPECONST = 'DRYR';
 
   public function getTypeConstant() {
     return self::TYPECONST;
   }
 
   public function getTypeName() {
-    return pht('Blueprint');
+    return pht('Drydock Resource');
   }
 
   public function newObject() {
-    return new DrydockBlueprint();
+    return new DrydockResource();
   }
 
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
 
-    return id(new DrydockBlueprintQuery())
+    return id(new DrydockResourceQuery())
       ->withPHIDs($phids);
   }
 
@@ -30,10 +30,10 @@ final class DrydockPHIDTypeBlueprint extends PhabricatorPHIDType {
     array $objects) {
 
     foreach ($handles as $phid => $handle) {
-      $blueprint = $objects[$phid];
-      $id = $blueprint->getID();
+      $resource = $objects[$phid];
+      $id = $resource->getID();
 
-      $handle->setURI("/drydock/blueprint/{$id}/");
+      $handle->setURI("/drydock/resource/{$id}/");
     }
   }
 
