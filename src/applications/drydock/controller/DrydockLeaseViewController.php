@@ -1,6 +1,6 @@
 <?php
 
-final class DrydockLeaseViewController extends DrydockController {
+final class DrydockLeaseViewController extends DrydockLeaseController {
 
   private $id;
 

@@ -1,6 +1,6 @@
 <?php
 
-final class DrydockLogListController extends DrydockController
+final class DrydockLogListController extends DrydockLogController
   implements PhabricatorApplicationSearchResultsControllerInterface {
 
   private $queryKey;
@@ -18,7 +18,7 @@ final class DrydockLogListController extends DrydockController
     $controller = id(new PhabricatorApplicationSearchController($request))
       ->setQueryKey($this->queryKey)
       ->setSearchEngine(new DrydockLogSearchEngine())
-      ->setNavigation($this->buildSideNav());
+      ->setNavigation($this->buildSideNavView());
 
     return $this->delegateToController($controller);
   }

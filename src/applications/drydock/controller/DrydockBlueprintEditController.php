@@ -1,6 +1,6 @@
 <?php
 
-final class DrydockBlueprintEditController extends DrydockController {
+final class DrydockBlueprintEditController extends DrydockBlueprintController {
 
   private $id;
 

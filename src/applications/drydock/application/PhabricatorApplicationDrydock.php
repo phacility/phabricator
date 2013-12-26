@@ -33,7 +33,7 @@ final class PhabricatorApplicationDrydock extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/drydock/' => array(
-        '' => 'DrydockResourceListController',
+        '' => 'DrydockConsoleController',
         'blueprint/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'DrydockBlueprintListController',
           '(?P<id>[1-9]\d*)/' => 'DrydockBlueprintViewController',

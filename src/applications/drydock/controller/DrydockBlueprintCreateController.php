@@ -1,10 +1,7 @@
 <?php
 
 final class DrydockBlueprintCreateController
-  extends DrydockController {
-
-  public function willProcessRequest(array $data) {
-  }
+  extends DrydockBlueprintController {
 
   public function processRequest() {
     $request = $this->getRequest();

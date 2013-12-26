@@ -107,40 +107,27 @@ abstract class PhabricatorApplicationSearchEngine {
       ->setEngineClassName(get_class($this));
   }
 
-  public function getNavPrefix() {
-    return get_class($this).':';
-  }
-
-  public function addNavigationItems(PHUIListView $menu, $label = null) {
+  public function addNavigationItems(PHUIListView $menu) {
     $viewer = $this->requireViewer();
 
-    $menu->newLabel(coalesce($label, pht('Queries')));
+    $menu->newLabel(pht('Queries'));
 
     $named_queries = $this->loadEnabledNamedQueries();
-    $prefix = $this->getNavPrefix();
 
     foreach ($named_queries as $query) {
       $key = $query->getQueryKey();
       $uri = $this->getQueryResultsPageURI($key);
-      $menu->newLink(
-        $query->getQueryName(),
-        $uri,
-        $prefix.'query/'.$key);
+      $menu->newLink($query->getQueryName(), $uri, 'query/'.$key);
     }
 
     if ($viewer->isLoggedIn()) {
       $manage_uri = $this->getQueryManagementURI();
-      $menu->newLink(
-        pht('Edit Queries...'),
-        $manage_uri,
-        $prefix.'query/edit');
+      $menu->newLink(pht('Edit Queries...'), $manage_uri, 'query/edit');
     }
 
     $menu->newLabel(pht('Search'));
     $advanced_uri = $this->getQueryResultsPageURI('advanced');
-    $menu->newLink(
-      pht('Advanced Search'),
-      $advanced_uri, $prefix.'query/advanced');
+    $menu->newLink(pht('Advanced Search'), $advanced_uri, 'query/advanced');
 
     return $this;
   }

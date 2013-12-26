@@ -1,6 +1,6 @@
 <?php
 
-final class DrydockLeaseListController extends DrydockController
+final class DrydockLeaseListController extends DrydockLeaseController
   implements PhabricatorApplicationSearchResultsControllerInterface {
 
   private $queryKey;
@@ -18,7 +18,7 @@ final class DrydockLeaseListController extends DrydockController
     $controller = id(new PhabricatorApplicationSearchController($request))
       ->setQueryKey($this->queryKey)
       ->setSearchEngine(new DrydockLeaseSearchEngine())
-      ->setNavigation($this->buildSideNav());
+      ->setNavigation($this->buildSideNavView());
 
     return $this->delegateToController($controller);
   }

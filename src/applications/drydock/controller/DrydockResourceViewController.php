@@ -1,6 +1,6 @@
 <?php
 
-final class DrydockResourceViewController extends DrydockController {
+final class DrydockResourceViewController extends DrydockResourceController {
 
   private $id;
 
