@@ -35,7 +35,7 @@ final class HarbormasterUIEventListener
       return;
     }
 
-    $buildable_phid = $object->getBuildablePHID();
+    $buildable_phid = $object->getHarbormasterBuildablePHID();
     if (!$buildable_phid) {
       return;
     }
