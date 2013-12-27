@@ -12,6 +12,11 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
     return 'PhabricatorApplicationPholio';
   }
 
+  public function getAdapterContentDescription() {
+    return pht(
+      'React to mocks being created or updated.');
+  }
+
   public function getObject() {
     return $this->mock;
   }

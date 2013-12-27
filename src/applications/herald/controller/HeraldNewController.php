@@ -53,19 +53,21 @@ final class HeraldNewController extends HeraldController {
       ->setUser($user)
       ->setAction($this->getApplicationURI('new/'));
 
-    $rule_types = $this->renderRuleTypeControl($rule_type_map, $e_rule);
+    $content_types = $this->renderContentTypeControl(
+      $content_type_map,
+      $e_type);
+
+    $rule_types = $this->renderRuleTypeControl(
+      $rule_type_map,
+      $e_rule);
 
     switch ($step) {
       case 0:
       default:
         $form
           ->addHiddenInput('step', 1)
-          ->appendChild(
-            id(new AphrontFormSelectControl())
-              ->setLabel(pht('New Rule for'))
-              ->setName('content_type')
-              ->setValue($request->getStr('content_type'))
-              ->setOptions($content_type_map));
+          ->appendChild($content_types);
+
         $cancel_text = null;
         $cancel_uri = $this->getApplicationURI();
         break;
@@ -73,7 +75,16 @@ final class HeraldNewController extends HeraldController {
         $form
           ->addHiddenInput('content_type', $request->getStr('content_type'))
           ->addHiddenInput('step', 2)
+          ->appendChild(
+            id(new AphrontFormStaticControl())
+              ->setLabel(pht('Rule for'))
+              ->setValue(
+                phutil_tag(
+                  'strong',
+                  array(),
+                  idx($content_type_map, $content_type))))
           ->appendChild($rule_types);
+
         $cancel_text = pht('Back');
         $cancel_uri = id(new PhutilURI('new/'))
           ->setQueryParams(
@@ -111,6 +122,27 @@ final class HeraldNewController extends HeraldController {
         'device' => true,
       ));
   }
+
+  private function renderContentTypeControl(array $content_type_map, $e_type) {
+    $request = $this->getRequest();
+
+    $radio = id(new AphrontFormRadioButtonControl())
+      ->setLabel(pht('New Rule for'))
+      ->setName('content_type')
+      ->setValue($request->getStr('content_type'))
+      ->setError($e_type);
+
+    foreach ($content_type_map as $value => $name) {
+      $adapter = HeraldAdapter::getAdapterForContentType($value);
+      $radio->addButton(
+        $value,
+        $name,
+        phutil_escape_html_newlines($adapter->getAdapterContentDescription()));
+    }
+
+    return $radio;
+  }
+
 
   private function renderRuleTypeControl(array $rule_type_map, $e_rule) {
     $request = $this->getRequest();

@@ -31,6 +31,16 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
     return pht('Commit Hook: Commit Content');
   }
 
+  public function getAdapterSortOrder() {
+    return 2500;
+  }
+
+  public function getAdapterContentDescription() {
+    return pht(
+      "React to commits being pushed to hosted repositories.\n".
+      "Hook rules can block changes.");
+  }
+
   public function getFieldNameMap() {
     return array(
     ) + parent::getFieldNameMap();

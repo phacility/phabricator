@@ -36,6 +36,13 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
     return pht('Differential Revisions');
   }
 
+  public function getAdapterContentDescription() {
+    return pht(
+      "React to revisions being created or updated.\n".
+      "Revision rules can send email, flag revisions, add reviewers, ".
+      "and run build plans.");
+  }
+
   public function getFields() {
     return array_merge(
       array(

@@ -34,6 +34,16 @@ final class HeraldPreCommitRefAdapter extends HeraldAdapter {
     return pht('Commit Hook: Branches/Tags/Bookmarks');
   }
 
+  public function getAdapterSortOrder() {
+    return 2000;
+  }
+
+  public function getAdapterContentDescription() {
+    return pht(
+      "React to branches and tags being pushed to hosted repositories.\n".
+      "Hook rules can block changes.");
+  }
+
   public function getFieldNameMap() {
     return array(
       self::FIELD_REF_TYPE => pht('Ref type'),

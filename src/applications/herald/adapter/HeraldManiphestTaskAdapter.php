@@ -14,6 +14,11 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
     return 'PhabricatorApplicationManiphest';
   }
 
+  public function getAdapterContentDescription() {
+    return pht(
+      'React to tasks being created or updated.');
+  }
+
   public function setTask(ManiphestTask $task) {
     $this->task = $task;
     return $this;

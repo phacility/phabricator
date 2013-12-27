@@ -42,6 +42,13 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     return pht('Commits');
   }
 
+  public function getAdapterContentDescription() {
+    return pht(
+      "React to new commits appearing in tracked repositories.\n".
+      "Commit rules can send email, flag commits, trigger audits, ".
+      "and run build plans.");
+  }
+
   public function getFieldNameMap() {
     return array(
       self::FIELD_NEED_AUDIT_FOR_PACKAGE =>

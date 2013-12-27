@@ -136,8 +136,20 @@ abstract class HeraldAdapter {
   }
 
   abstract public function getAdapterContentName();
+  abstract public function getAdapterContentDescription();
   abstract public function getAdapterApplicationClass();
   abstract public function getObject();
+
+  public function getAdapterSortKey() {
+    return sprintf(
+      '%08d%s',
+      $this->getAdapterSortOrder(),
+      $this->getAdapterContentName());
+  }
+
+  public function getAdapterSortOrder() {
+    return 1000;
+  }
 
 
 /* -(  Fields  )------------------------------------------------------------- */
@@ -814,6 +826,7 @@ abstract class HeraldAdapter {
       $adapters = id(new PhutilSymbolLoader())
         ->setAncestorClass(__CLASS__)
         ->loadObjects();
+      $adapters = msort($adapters, 'getAdapterSortKey');
     }
     return $adapters;
   }
@@ -846,7 +859,6 @@ abstract class HeraldAdapter {
       $map[$type] = $name;
     }
 
-    asort($map);
     return $map;
   }
 
