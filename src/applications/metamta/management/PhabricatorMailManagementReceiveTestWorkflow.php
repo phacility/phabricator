@@ -42,7 +42,7 @@ final class PhabricatorMailManagementReceiveTestWorkflow
     }
 
     $user = id(new PhabricatorPeopleQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($this->getViewer())
       ->withUsernames(array($as))
       ->executeOne();
     if (!$user) {

@@ -1,16 +1,12 @@
 <?php
 
-abstract class DivinerWorkflow extends PhutilArgumentWorkflow {
+abstract class DivinerWorkflow extends PhabricatorManagementWorkflow {
 
   private $config;
   private $bookConfigPath;
 
   public function getBookConfigPath() {
     return $this->bookConfigPath;
-  }
-
-  public function isExecutable() {
-    return true;
   }
 
   protected function getConfig($key, $default = null) {

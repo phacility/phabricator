@@ -22,7 +22,7 @@ final class PhabricatorMailManagementListOutboundWorkflow
 
   public function execute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
-    $viewer = PhabricatorUser::getOmnipotentUser();
+    $viewer = $this->getViewer();
 
     $mails = id(new PhabricatorMetaMTAMail())->loadAllWhere(
       '1 = 1 ORDER BY id DESC LIMIT %d',

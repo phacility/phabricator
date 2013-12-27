@@ -89,7 +89,7 @@ final class PhabricatorRepositoryManagementLookupUsersWorkflow
     }
 
     return id(new PhabricatorHandleQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($this->getViewer())
       ->withPHIDs(array($phid))
       ->executeOne();
   }

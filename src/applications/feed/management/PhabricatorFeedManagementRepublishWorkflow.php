@@ -21,7 +21,7 @@ final class PhabricatorFeedManagementRepublishWorkflow
 
   public function execute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
-    $viewer = PhabricatorUser::getOmnipotentUser();
+    $viewer = $this->getViewer();
 
     $key = $args->getArg('key');
     if (count($key) < 1) {

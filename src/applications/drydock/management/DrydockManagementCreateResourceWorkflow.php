@@ -49,7 +49,7 @@ final class DrydockManagementCreateResourceWorkflow
       $attributes = $options->parse($attributes);
     }
 
-    $viewer = PhabricatorUser::getOmnipotentUser();
+    $viewer = $this->getViewer();
 
     $blueprint = id(new DrydockBlueprintQuery())
       ->setViewer($viewer)

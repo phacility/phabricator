@@ -1,11 +1,7 @@
 <?php
 
 abstract class PhabricatorRepositoryManagementWorkflow
-  extends PhutilArgumentWorkflow {
-
-  public function isExecutable() {
-    return true;
-  }
+  extends PhabricatorManagementWorkflow {
 
   protected function loadRepositories(PhutilArgumentParser $args, $param) {
     $callsigns = $args->getArg($param);
@@ -15,7 +11,7 @@ abstract class PhabricatorRepositoryManagementWorkflow
     }
 
     $repos = id(new PhabricatorRepositoryQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($this->getViewer())
       ->withCallsigns($callsigns)
       ->execute();
 
@@ -37,7 +33,7 @@ abstract class PhabricatorRepositoryManagementWorkflow
     }
 
     $query = id(new DiffusionCommitQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($this->getViewer())
       ->withIdentifiers($names);
 
     $query->execute();

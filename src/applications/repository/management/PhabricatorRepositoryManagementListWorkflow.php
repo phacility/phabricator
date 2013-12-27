@@ -14,7 +14,7 @@ final class PhabricatorRepositoryManagementListWorkflow
     $console = PhutilConsole::getConsole();
 
     $repos = id(new PhabricatorRepositoryQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($this->getViewer())
       ->execute();
     if ($repos) {
       foreach ($repos as $repo) {

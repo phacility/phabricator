@@ -25,7 +25,7 @@ final class DrydockManagementReleaseWorkflow
         "Specify one or more lease IDs to release.");
     }
 
-    $viewer = PhabricatorUser::getOmnipotentUser();
+    $viewer = $this->getViewer();
 
     $leases = id(new DrydockLeaseQuery())
       ->setViewer($viewer)

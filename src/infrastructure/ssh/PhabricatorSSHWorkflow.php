@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorSSHWorkflow extends PhutilArgumentWorkflow {
+abstract class PhabricatorSSHWorkflow extends PhabricatorManagementWorkflow {
 
   private $user;
   private $iochannel;
@@ -22,10 +22,6 @@ abstract class PhabricatorSSHWorkflow extends PhutilArgumentWorkflow {
 
   public function getUser() {
     return $this->user;
-  }
-
-  final public function isExecutable() {
-    return false;
   }
 
   public function setIOChannel(PhutilChannel $channel) {

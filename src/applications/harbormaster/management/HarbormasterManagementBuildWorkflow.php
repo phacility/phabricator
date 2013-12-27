@@ -23,7 +23,7 @@ final class HarbormasterManagementBuildWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $viewer = PhabricatorUser::getOmnipotentUser();
+    $viewer = $this->getViewer();
 
     $names = $args->getArg('buildable');
     if (count($names) != 1) {

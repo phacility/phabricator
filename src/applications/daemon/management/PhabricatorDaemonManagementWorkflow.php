@@ -1,11 +1,7 @@
 <?php
 
 abstract class PhabricatorDaemonManagementWorkflow
-  extends PhutilArgumentWorkflow {
-
-  public function isExecutable() {
-    return true;
-  }
+  extends PhabricatorManagementWorkflow {
 
   protected function loadAvailableDaemonClasses() {
     $loader = new PhutilSymbolLoader();

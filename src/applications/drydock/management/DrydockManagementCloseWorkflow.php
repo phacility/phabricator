@@ -25,7 +25,7 @@ final class DrydockManagementCloseWorkflow
         "Specify one or more resource IDs to close.");
     }
 
-    $viewer = PhabricatorUser::getOmnipotentUser();
+    $viewer = $this->getViewer();
 
     $resources = id(new DrydockResourceQuery())
       ->setViewer($viewer)

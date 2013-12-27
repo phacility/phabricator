@@ -61,7 +61,7 @@ final class PhabricatorLipsumGenerateWorkflow
     echo "\n";
     while (true) {
       $type = $supported_types[array_rand($supported_types)];
-      $admin = PhabricatorUser::getOmnipotentUser();
+      $admin = $this->getViewer();
       try {
         $taskgen = newv($type, array());
         $object = $taskgen->generate();
