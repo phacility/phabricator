@@ -147,12 +147,17 @@ final class HeraldNewController extends HeraldController {
   private function renderRuleTypeControl(array $rule_type_map, $e_rule) {
     $request = $this->getRequest();
 
-    // Reorder array to put "personal" first.
+    // Reorder array to put less powerful rules first.
     $rule_type_map = array_select_keys(
       $rule_type_map,
       array(
         HeraldRuleTypeConfig::RULE_TYPE_PERSONAL,
+        HeraldRuleTypeConfig::RULE_TYPE_OBJECT,
+        HeraldRuleTypeConfig::RULE_TYPE_GLOBAL,
       )) + $rule_type_map;
+
+    // TODO: Enable this.
+    unset($rule_type_map[HeraldRuleTypeConfig::RULE_TYPE_OBJECT]);
 
     list($can_global, $global_link) = $this->explainApplicationCapability(
       HeraldCapabilityManageGlobalRules::CAPABILITY,

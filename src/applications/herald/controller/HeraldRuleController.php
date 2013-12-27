@@ -49,7 +49,7 @@ final class HeraldRuleController extends HeraldController {
       $cancel_uri = $this->getApplicationURI();
     }
 
-    if ($rule->getRuleType() == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL) {
+    if ($rule->isGlobalRule()) {
       $this->requireApplicationCapability(
         HeraldCapabilityManageGlobalRules::CAPABILITY);
     }
@@ -561,7 +561,17 @@ final class HeraldRuleController extends HeraldController {
       ->withContentTypes(array($rule->getContentType()))
       ->execute();
 
-    if ($rule->getRuleType() == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
+    if ($rule->isObjectRule()) {
+      // Object rules may depend on other rules for the same object.
+      $all_rules += id(new HeraldRuleQuery())
+        ->setViewer($viewer)
+        ->withRuleTypes(array(HeraldRuleTypeConfig::RULE_TYPE_OBJECT))
+        ->withContentTypes(array($rule->getContentType()))
+        ->withTriggerObjectPHIDs(array($rule->getTriggerObjectPHID()))
+        ->execute();
+    }
+
+    if ($rule->isPersonalRule()) {
       // Personal rules may depend upon your other personal rules.
       $all_rules += id(new HeraldRuleQuery())
         ->setViewer($viewer)

@@ -28,7 +28,7 @@ final class HeraldDisableController extends HeraldController {
       return new Aphront404Response();
     }
 
-    if ($rule->getRuleType() == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL) {
+    if ($rule->isGlobalRule()) {
       $this->requireApplicationCapability(
         HeraldCapabilityManageGlobalRules::CAPABILITY);
     }

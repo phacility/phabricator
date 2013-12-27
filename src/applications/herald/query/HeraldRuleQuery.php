@@ -9,6 +9,7 @@ final class HeraldRuleQuery
   private $ruleTypes;
   private $contentTypes;
   private $disabled;
+  private $triggerObjectPHIDs;
 
   private $needConditionsAndActions;
   private $needAppliedToPHIDs;
@@ -46,6 +47,11 @@ final class HeraldRuleQuery
 
   public function withDisabled($disabled) {
     $this->disabled = $disabled;
+    return $this;
+  }
+
+  public function withTriggerObjectPHIDs(array $phids) {
+    $this->triggerObjectPHIDs = $phids;
     return $this;
   }
 
@@ -137,6 +143,35 @@ final class HeraldRuleQuery
       }
     }
 
+    $object_phids = array();
+    foreach ($rules as $rule) {
+      if ($rule->isObjectRule()) {
+        $object_phids[] = $rule->getTriggerObjectPHID();
+      }
+    }
+
+    if ($object_phids) {
+      $objects = id(new PhabricatorObjectQuery())
+        ->setParentQuery($this)
+        ->setViewer($this->getViewer())
+        ->withPHIDs($object_phids)
+        ->execute();
+      $objects = mpull($objects, null, 'getPHID');
+    } else {
+      $objects = array();
+    }
+
+    foreach ($rules as $key => $rule) {
+      if ($rule->isObjectRule()) {
+        $object = idx($objects, $rule->getTriggerObjectPHID());
+        if (!$object) {
+          unset($rules[$key]);
+          continue;
+        }
+        $rule->attachTriggerObject($object);
+      }
+    }
+
     return $rules;
   }
 
@@ -185,6 +220,13 @@ final class HeraldRuleQuery
         (int)$this->disabled);
     }
 
+    if ($this->triggerObjectPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'rule.triggerObjectPHID IN (%Ls)',
+        $this->triggerObjectPHIDs);
+    }
+
     $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
@@ -192,9 +234,9 @@ final class HeraldRuleQuery
 
   private function validateRuleAuthors(array $rules) {
 
-    // "Global" rules always have valid authors.
+    // "Global" and "Object" rules always have valid authors.
     foreach ($rules as $key => $rule) {
-      if ($rule->isGlobalRule()) {
+      if ($rule->isGlobalRule() || $rule->isObjectRule()) {
         $rule->attachValidAuthor(true);
         unset($rules[$key]);
         continue;
