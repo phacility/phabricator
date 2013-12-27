@@ -41,7 +41,9 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
       array(
         self::FIELD_BODY,
         self::FIELD_AUTHOR,
+        self::FIELD_AUTHOR_RAW,
         self::FIELD_COMMITTER,
+        self::FIELD_COMMITTER_RAW,
         self::FIELD_BRANCHES,
         self::FIELD_DIFF_FILE,
         self::FIELD_DIFF_CONTENT,
@@ -99,8 +101,12 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
         return $this->getCommitRef()->getMessage();
       case self::FIELD_AUTHOR:
         return $this->getAuthorPHID();
+      case self::FIELD_AUTHOR_RAW:
+        return $this->getAuthorRaw();
       case self::FIELD_COMMITTER:
         return $this->getCommitterPHID();
+      case self::FIELD_COMMITTER_RAW:
+        return $this->getCommitterRaw();
       case self::FIELD_BRANCHES:
         return $this->getBranches();
       case self::FIELD_DIFF_FILE:
@@ -275,6 +281,40 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         // In Subversion, the pusher is always the committer.
         return $this->hookEngine->getViewer()->getPHID();
+    }
+  }
+
+  private function getAuthorRaw() {
+    $repository = $this->hookEngine->getRepository();
+    $vcs = $repository->getVersionControlSystem();
+    switch ($vcs) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $ref = $this->getCommitRef();
+        return $ref->getAuthor();
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        // In Subversion, the pusher is always the author.
+        return $this->hookEngine->getViewer()->getUsername();
+    }
+  }
+
+  private function getCommitterRaw() {
+    $repository = $this->hookEngine->getRepository();
+    $vcs = $repository->getVersionControlSystem();
+    switch ($vcs) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        // Here, if there's no committer, we're going to return the author
+        // instead.
+        $ref = $this->getCommitRef();
+        $committer = $ref->getCommitter();
+        if (strlen($committer)) {
+          return $committer;
+        }
+        return $ref->getAuthor();
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        // In Subversion, the pusher is always the committer.
+        return $this->hookEngine->getViewer()->getUsername();
     }
   }
 

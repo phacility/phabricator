@@ -34,6 +34,8 @@ abstract class HeraldAdapter {
   const FIELD_DIFFERENTIAL_ACCEPTED  = 'differential-accepted';
   const FIELD_IS_MERGE_COMMIT        = 'is-merge-commit';
   const FIELD_BRANCHES               = 'branches';
+  const FIELD_AUTHOR_RAW             = 'author-raw';
+  const FIELD_COMMITTER_RAW          = 'committer-raw';
 
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';
@@ -180,6 +182,8 @@ abstract class HeraldAdapter {
         => pht('Accepted Differential revision'),
       self::FIELD_IS_MERGE_COMMIT => pht('Commit is a merge'),
       self::FIELD_BRANCHES => pht('Commit\'s branches'),
+      self::FIELD_AUTHOR_RAW => pht('Raw author name'),
+      self::FIELD_COMMITTER_RAW => pht('Raw committer name'),
     );
   }
 
@@ -218,6 +222,8 @@ abstract class HeraldAdapter {
     switch ($field) {
       case self::FIELD_TITLE:
       case self::FIELD_BODY:
+      case self::FIELD_COMMITTER_RAW:
+      case self::FIELD_AUTHOR_RAW:
         return array(
           self::CONDITION_CONTAINS,
           self::CONDITION_NOT_CONTAINS,
