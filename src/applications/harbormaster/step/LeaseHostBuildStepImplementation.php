@@ -28,11 +28,13 @@ final class LeaseHostBuildStepImplementation
     $settings = $this->getSettings();
 
     // Create the lease.
-    $lease = new DrydockLease();
-    $lease->setResourceType('host');
-    $lease->setAttributes(
-      array('platform' => $settings['platform']));
-    $lease->queueForActivation();
+    $lease = id(new DrydockLease())
+      ->setResourceType('host')
+      ->setAttributes(
+        array(
+          'platform' => $settings['platform'],
+        ))
+      ->queueForActivation();
 
     // Wait until the lease is fulfilled.
     // TODO: This will throw an exception if the lease can't be fulfilled;

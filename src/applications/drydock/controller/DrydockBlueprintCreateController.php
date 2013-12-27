@@ -16,12 +16,12 @@ final class DrydockBlueprintCreateController
         return $this->createDialog($implementations);
       }
 
-      $blueprint = new DrydockBlueprint();
-      $blueprint->setClassName($class);
-      $blueprint->setDetails(array());
-      $blueprint->setViewPolicy(PhabricatorPolicies::POLICY_ADMIN);
-      $blueprint->setEditPolicy(PhabricatorPolicies::POLICY_ADMIN);
-      $blueprint->save();
+      $blueprint = id(new DrydockBlueprint())
+        ->setClassName($class)
+        ->setDetails(array())
+        ->setViewPolicy(PhabricatorPolicies::POLICY_ADMIN)
+        ->setEditPolicy(PhabricatorPolicies::POLICY_ADMIN)
+        ->save();
 
       $edit_uri = $this->getApplicationURI(
         "blueprint/edit/".$blueprint->getID()."/");

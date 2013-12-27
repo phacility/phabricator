@@ -9,6 +9,7 @@ final class DrydockLog extends DrydockDAO
   protected $message;
 
   private $resource = self::ATTACHABLE;
+  private $lease = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -25,6 +26,15 @@ final class DrydockLog extends DrydockDAO
     return $this->assertAttached($this->resource);
   }
 
+  public function attachLease(DrydockLease $lease = null) {
+    $this->lease = $lease;
+    return $this;
+  }
+
+  public function getLease() {
+    return $this->assertAttached($this->lease);
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -36,17 +46,17 @@ final class DrydockLog extends DrydockDAO
   }
 
   public function getPolicy($capability) {
-    if (!$this->getResource()) {
-      return PhabricatorPolicies::getMostOpenPolicy();
+    if ($this->getResource()) {
+      return $this->getResource()->getPolicy($capability);
     }
-    return $this->getResource()->getPolicy($capability);
+    return $this->getLease()->getPolicy($capability);
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    if (!$this->getResource()) {
-      return false;
+    if ($this->getResource()) {
+      return $this->getResource()->hasAutomaticCapability($capability, $viewer);
     }
-    return $this->getResource()->hasAutomaticCapability($capability, $viewer);
+    return $this->getLease()->hasAutomaticCapability($capability, $viewer);
   }
 
   public function describeAutomaticCapability($capability) {

@@ -67,7 +67,7 @@ final class DrydockLease extends DrydockDAO
     return $this->assertAttached($this->resource);
   }
 
-  public function attachResource(DrydockResource $resource) {
+  public function attachResource(DrydockResource $resource = null) {
     $this->resource = $resource;
     return $this;
   }
@@ -194,11 +194,17 @@ final class DrydockLease extends DrydockDAO
   }
 
   public function getPolicy($capability) {
-    return $this->getResource()->getPolicy($capability);
+    if ($this->getResource()) {
+      return $this->getResource()->getPolicy($capability);
+    }
+    return PhabricatorPolicies::getMostOpenPolicy();
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return $this->getResource()->hasAutomaticCapability($capability, $viewer);
+    if ($this->getResource()) {
+      return $this->getResource()->hasAutomaticCapability($capability, $viewer);
+    }
+    return false;
   }
 
   public function describeAutomaticCapability($capability) {

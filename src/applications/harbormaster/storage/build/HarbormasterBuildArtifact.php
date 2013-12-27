@@ -82,6 +82,7 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
     $data = $this->getArtifactData();
 
     // FIXME: Is there a better way of doing this?
+    // TODO: Policy stuff, etc.
     $lease = id(new DrydockLease())->load(
       $data['drydock-lease']);
     if ($lease === null) {

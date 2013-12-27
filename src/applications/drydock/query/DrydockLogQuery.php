@@ -31,16 +31,58 @@ final class DrydockLogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   }
 
   public function willFilterPage(array $logs) {
-    $resource_ids = mpull($logs, 'getResourceID');
-    $resources = id(new DrydockResourceQuery())
-      ->setParentQuery($this)
-      ->setViewer($this->getViewer())
-      ->withIDs($resource_ids)
-      ->execute();
+    $resource_ids = array_filter(mpull($logs, 'getResourceID'));
+    if ($resource_ids) {
+      $resources = id(new DrydockResourceQuery())
+        ->setParentQuery($this)
+        ->setViewer($this->getViewer())
+        ->withIDs($resource_ids)
+        ->execute();
+    } else {
+      $resources = array();
+    }
 
     foreach ($logs as $key => $log) {
-      $resource = idx($resources, $log->getResourceID());
+      $resource = null;
+      if ($log->getResourceID()) {
+        $resource = idx($resources, $log->getResourceID());
+        if (!$resource) {
+          unset($logs[$key]);
+          continue;
+        }
+      }
       $log->attachResource($resource);
+    }
+
+    $lease_ids = array_filter(mpull($logs, 'getLeaseID'));
+    if ($lease_ids) {
+      $leases = id(new DrydockLeaseQuery())
+        ->setParentQuery($this)
+        ->setViewer($this->getViewer())
+        ->withIDs($lease_ids)
+        ->execute();
+    } else {
+      $leases = array();
+    }
+
+    foreach ($logs as $key => $log) {
+      $lease = null;
+      if ($log->getLeaseID()) {
+        $lease = idx($leases, $log->getLeaseID());
+        if (!$lease) {
+          unset($logs[$key]);
+          continue;
+        }
+      }
+      $log->attachLease($lease);
+    }
+
+    // These logs are meaningless and their policies aren't computable. They
+    // shouldn't exist, but throw them away if they do.
+    foreach ($logs as $key => $log) {
+      if (!$log->getResource() && !$log->getLease()) {
+        unset($logs[$key]);
+      }
     }
 
     return $logs;

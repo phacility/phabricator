@@ -122,6 +122,7 @@ abstract class DrydockBlueprintImplementation {
       $resource->beginReadLocking();
         $resource->reload();
 
+        // TODO: Policy stuff.
         $other_leases = id(new DrydockLease())->loadAllWhere(
           'status IN (%Ld) AND resourceID = %d',
           array(
@@ -388,13 +389,13 @@ abstract class DrydockBlueprintImplementation {
   }
 
   protected function newResourceTemplate($name) {
-    $resource = new DrydockResource();
-    $resource->setBlueprintPHID($this->getInstance()->getPHID());
-    $resource->setBlueprintClass($this->getBlueprintClass());
-    $resource->setType($this->getType());
-    $resource->setStatus(DrydockResourceStatus::STATUS_PENDING);
-    $resource->setName($name);
-    $resource->save();
+    $resource = id(new DrydockResource())
+      ->setBlueprintPHID($this->getInstance()->getPHID())
+      ->setBlueprintClass($this->getBlueprintClass())
+      ->setType($this->getType())
+      ->setStatus(DrydockResourceStatus::STATUS_PENDING)
+      ->setName($name)
+      ->save();
 
     $this->activeResource = $resource;
 

@@ -44,17 +44,25 @@ final class DrydockLeaseQuery
   }
 
   public function willFilterPage(array $leases) {
-    $resources = id(new DrydockResourceQuery())
-      ->setParentQuery($this)
-      ->setViewer($this->getViewer())
-      ->withIDs(mpull($leases, 'getResourceID'))
-      ->execute();
+    $resource_ids = array_filter(mpull($leases, 'getResourceID'));
+    if ($resource_ids) {
+      $resources = id(new DrydockResourceQuery())
+        ->setParentQuery($this)
+        ->setViewer($this->getViewer())
+        ->withIDs($resource_ids)
+        ->execute();
+    } else {
+      $resources = array();
+    }
 
     foreach ($leases as $key => $lease) {
-      $resource = idx($resources, $lease->getResourceID());
-      if (!$resource) {
-        unset($leases[$key]);
-        continue;
+      $resource = null;
+      if ($lease->getResourceID()) {
+        $resource = idx($resources, $lease->getResourceID());
+        if (!$resource) {
+          unset($leases[$key]);
+          continue;
+        }
       }
       $lease->attachResource($resource);
     }
