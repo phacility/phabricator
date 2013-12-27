@@ -99,14 +99,9 @@ try {
   exit(1);
 }
 
-$workflows = array(
-  new PhabricatorStorageManagementDatabasesWorkflow(),
-  new PhabricatorStorageManagementDestroyWorkflow(),
-  new PhabricatorStorageManagementDumpWorkflow(),
-  new PhabricatorStorageManagementStatusWorkflow(),
-  new PhabricatorStorageManagementProbeWorkflow(),
-  new PhabricatorStorageManagementUpgradeWorkflow(),
-);
+$workflows = id(new PhutilSymbolLoader())
+  ->setAncestorClass('PhabricatorStorageManagementWorkflow')
+  ->loadObjects();
 
 $patches = PhabricatorSQLPatchList::buildAllPatches();
 

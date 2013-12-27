@@ -14,12 +14,8 @@ EOSYNOPSIS
 );
 $args->parseStandardArguments();
 
-$workflows = array(
-  new DrydockManagementLeaseWorkflow(),
-  new DrydockManagementCloseWorkflow(),
-  new DrydockManagementReleaseWorkflow(),
-  new DrydockManagementCreateResourceWorkflow(),
-  new PhutilHelpArgumentWorkflow(),
-);
-
+$workflows = id(new PhutilSymbolLoader())
+  ->setAncestorClass('DrydockManagementWorkflow')
+  ->loadObjects();
+$workflows[] = new PhutilHelpArgumentWorkflow();
 $args->parseWorkflows($workflows);

@@ -18,5 +18,4 @@ $workflows = id(new PhutilSymbolLoader())
   ->setAncestorClass('HarbormasterManagementWorkflow')
   ->loadObjects();
 $workflows[] = new PhutilHelpArgumentWorkflow();
-
 $args->parseWorkflows($workflows);
