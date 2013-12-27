@@ -85,14 +85,28 @@ abstract class PhabricatorWorker {
   }
 
   final public static function scheduleTask($task_class, $data) {
+    $task = id(new PhabricatorWorkerActiveTask())
+      ->setTaskClass($task_class)
+      ->setData($data);
+
     if (self::$runAllTasksInProcess) {
+      // Do the work in-process.
       $worker = newv($task_class, array($data));
       $worker->doWork();
+
+      // Now, save a task row and immediately archive it so we can return an
+      // object with a valid ID.
+      $task->openTransaction();
+        $task->save();
+        $archived = $task->archiveTask(
+          PhabricatorWorkerArchiveTask::RESULT_SUCCESS,
+          0);
+      $task->saveTransaction();
+
+      return $archived;
     } else {
-      return id(new PhabricatorWorkerActiveTask())
-        ->setTaskClass($task_class)
-        ->setData($data)
-        ->save();
+      $task->save();
+      return $task;
     }
   }
 
@@ -105,6 +119,10 @@ abstract class PhabricatorWorker {
    * @return void
    */
   final public static function waitForTasks(array $task_ids) {
+    if (!$task_ids) {
+      return;
+    }
+
     $task_table = new PhabricatorWorkerActiveTask();
 
     $waiting = array_fuse($task_ids);
@@ -149,7 +167,8 @@ abstract class PhabricatorWorker {
 
     foreach ($tasks as $task) {
       if ($task->getResult() != PhabricatorWorkerArchiveTask::RESULT_SUCCESS) {
-        throw new Exception("Task ".$task->getID()." failed!");
+        throw new Exception(
+          pht("Task %d failed!", $task->getID()));
       }
     }
   }

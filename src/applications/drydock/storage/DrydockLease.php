@@ -91,23 +91,17 @@ final class DrydockLease extends DrydockDAO
     $this->setStatus(DrydockLeaseStatus::STATUS_PENDING);
     $this->save();
 
-    // NOTE: Prevent a race where some eager worker quickly grabs the task
-    // before we can save the Task ID.
+    $task = PhabricatorWorker::scheduleTask(
+      'DrydockAllocatorWorker',
+      $this->getID());
 
-    $this->openTransaction();
-      $this->beginReadLocking();
+    // NOTE: Scheduling the task might execute it in-process, if we're running
+    // from a CLI script. Reload the lease to make sure we have the most
+    // up-to-date information. Normally, this has no effect.
+    $this->reload();
 
-        $this->reload();
-
-        $task = PhabricatorWorker::scheduleTask(
-          'DrydockAllocatorWorker',
-          $this->getID());
-
-        $this->setTaskID($task->getID());
-        $this->save();
-
-      $this->endReadLocking();
-    $this->saveTransaction();
+    $this->setTaskID($task->getID());
+    $this->save();
 
     return $this;
   }
@@ -163,6 +157,8 @@ final class DrydockLease extends DrydockDAO
           case DrydockLeaseStatus::STATUS_PENDING:
           case DrydockLeaseStatus::STATUS_ACQUIRING:
             break;
+          default:
+            throw new Exception("Unknown status??");
         }
       }
 

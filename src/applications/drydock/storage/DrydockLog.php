@@ -16,7 +16,7 @@ final class DrydockLog extends DrydockDAO
     ) + parent::getConfiguration();
   }
 
-  public function attachResource(DrydockResource $resource) {
+  public function attachResource(DrydockResource $resource = null) {
     $this->resource = $resource;
     return $this;
   }
@@ -36,10 +36,16 @@ final class DrydockLog extends DrydockDAO
   }
 
   public function getPolicy($capability) {
+    if (!$this->getResource()) {
+      return PhabricatorPolicies::getMostOpenPolicy();
+    }
     return $this->getResource()->getPolicy($capability);
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    if (!$this->getResource()) {
+      return false;
+    }
     return $this->getResource()->hasAutomaticCapability($capability, $viewer);
   }
 

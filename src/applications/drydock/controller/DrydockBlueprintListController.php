@@ -53,4 +53,14 @@ final class DrydockBlueprintListController extends DrydockBlueprintController
     return $view;
   }
 
+  public function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+        ->setName(pht('New Blueprint'))
+        ->setHref($this->getApplicationURI('/blueprint/create/'))
+        ->setIcon('create'));
+    return $crumbs;
+  }
+
 }

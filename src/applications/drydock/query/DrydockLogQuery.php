@@ -40,10 +40,6 @@ final class DrydockLogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     foreach ($logs as $key => $log) {
       $resource = idx($resources, $log->getResourceID());
-      if (!$resource) {
-        unset($logs[$key]);
-        continue;
-      }
       $log->attachResource($resource);
     }
 
