@@ -233,7 +233,7 @@ abstract class PhabricatorApplicationTransaction
         return 'link';
     }
 
-    return null;
+    return 'edit';
   }
 
   public function getColor() {
@@ -535,6 +535,57 @@ abstract class PhabricatorApplicationTransaction
 
   public function getTransactionGroup() {
     return $this->transactionGroup;
+  }
+
+  /**
+   * Should this transaction be visually grouped with an existing transaction
+   * group?
+   *
+   * @param list<PhabricatorApplicationTransaction> List of transactions.
+   * @return bool True to display in a group with the other transactions.
+   */
+  public function shouldDisplayGroupWith(array $group) {
+    $type_comment = PhabricatorTransactions::TYPE_COMMENT;
+
+    $this_source = null;
+    if ($this->getContentSource()) {
+      $this_source = $this->getContentSource()->getSource();
+    }
+
+    foreach ($group as $xaction) {
+      // Don't group transactions by different authors.
+      if ($xaction->getAuthorPHID() != $this->getAuthorPHID()) {
+        return false;
+      }
+
+      // Don't group transactions for different objects.
+      if ($xaction->getObjectPHID() != $this->getObjectPHID()) {
+        return false;
+      }
+
+      // Don't group anything into a group which already has a comment.
+      if ($xaction->getTransactionType() == $type_comment) {
+        return false;
+      }
+
+      // Don't group transactions from different content sources.
+      $other_source = null;
+      if ($xaction->getContentSource()) {
+        $other_source = $xaction->getContentSource()->getSource();
+      }
+
+      if ($other_source != $this_source) {
+        return false;
+      }
+
+      // Don't group transactions which happened more than 2 minutes apart.
+      $apart = abs($xaction->getDateCreated() - $this->getDateCreated());
+      if ($apart > (60 * 2)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
 

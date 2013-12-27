@@ -119,15 +119,17 @@ final class PhabricatorTimelineEventView extends AphrontView {
       $extra = array();
       $is_first_extra = true;
       foreach ($this->getEventGroup() as $event) {
-        $extra[] = $this->renderExtra($is_first_extra);
+        $extra[] = $event->renderExtra($is_first_extra);
         $is_first_extra = false;
       }
+      $extra = array_reverse($extra);
+      $extra = array_mergev($extra);
       $extra = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-timeline-extra',
         ),
-        phutil_implode_html(" \xC2\xB7 ", array_mergev($extra)));
+        phutil_implode_html(" \xC2\xB7 ", $extra));
     } else {
       $extra = null;
     }
