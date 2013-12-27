@@ -1,6 +1,6 @@
 <?php
 
-final class DrydockLogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
+final class DrydockLogQuery extends DrydockQuery {
 
   private $resourceIDs;
   private $leaseIDs;
@@ -108,10 +108,6 @@ final class DrydockLogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
-  }
-
-  public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationDrydock';
   }
 
 }

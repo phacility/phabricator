@@ -1,7 +1,6 @@
 <?php
 
-final class DrydockBlueprintQuery
-  extends PhabricatorCursorPagedPolicyAwareQuery {
+final class DrydockBlueprintQuery extends DrydockQuery {
 
   private $ids;
   private $phids;
@@ -61,10 +60,6 @@ final class DrydockBlueprintQuery
     }
 
     return $this->formatWhereClause($where);
-  }
-
-  public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationDrydock';
   }
 
 }
