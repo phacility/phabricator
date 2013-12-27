@@ -40,8 +40,7 @@ final class PhabricatorApplicationHerald extends PhabricatorApplication {
     return array(
       '/herald/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?' => 'HeraldRuleListController',
-        'new/(?:(?P<type>[^/]+)/(?:(?P<rule_type>[^/]+)/)?)?'
-          => 'HeraldNewController',
+        'new/' => 'HeraldNewController',
         'rule/(?P<id>[1-9]\d*)/' => 'HeraldRuleViewController',
         'edit/(?:(?P<id>[1-9]\d*)/)?' => 'HeraldRuleController',
         'disable/(?P<id>[1-9]\d*)/(?P<action>\w+)/' =>

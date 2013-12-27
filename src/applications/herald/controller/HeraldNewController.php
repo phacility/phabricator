@@ -2,27 +2,118 @@
 
 final class HeraldNewController extends HeraldController {
 
-  private $contentType;
-  private $ruleType;
-
-  public function willProcessRequest(array $data) {
-    $this->contentType = idx($data, 'type');
-    $this->ruleType = idx($data, 'rule_type');
-  }
-
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
     $content_type_map = HeraldAdapter::getEnabledAdapterMap($user);
-    if (empty($content_type_map[$this->contentType])) {
-      $this->contentType = head_key($content_type_map);
+    $rule_type_map = HeraldRuleTypeConfig::getRuleTypeMap();
+
+    $errors = array();
+
+    $e_type = null;
+    $e_rule = null;
+
+    $step = 0;
+    if ($request->isFormPost()) {
+      $step = $request->getInt('step');
+      $content_type = $request->getStr('content_type');
+      if (empty($content_type_map[$content_type])) {
+        $errors[] = pht('You must choose a content type for this rule.');
+        $e_type = pht('Required');
+        $step = 0;
+      }
+
+      if (!$errors && $step > 1) {
+        $rule_type = $request->getStr('rule_type');
+        if (empty($rule_type_map[$rule_type])) {
+          $errors[] = pht('You must choose a rule type for this rule.');
+          $e_rule = pht('Required');
+          $step = 1;
+        }
+      }
+
+      if (!$errors && $step == 2) {
+        $uri = id(new PhutilURI('edit/'))
+          ->setQueryParams(
+            array(
+              'content_type' => $content_type,
+              'rule_type' => $rule_type,
+            ));
+        $uri = $this->getApplicationURI($uri);
+        return id(new AphrontRedirectResponse())->setURI($uri);
+      }
     }
 
-    $rule_type_map = HeraldRuleTypeConfig::getRuleTypeMap();
-    if (empty($rule_type_map[$this->ruleType])) {
-      $this->ruleType = HeraldRuleTypeConfig::RULE_TYPE_PERSONAL;
+    if ($errors) {
+      $errors = id(new AphrontErrorView())->setErrors($errors);
     }
+
+    $form = id(new AphrontFormView())
+      ->setUser($user)
+      ->setAction($this->getApplicationURI('new/'));
+
+    $rule_types = $this->renderRuleTypeControl($rule_type_map, $e_rule);
+
+    switch ($step) {
+      case 0:
+      default:
+        $form
+          ->addHiddenInput('step', 1)
+          ->appendChild(
+            id(new AphrontFormSelectControl())
+              ->setLabel(pht('New Rule for'))
+              ->setName('content_type')
+              ->setValue($request->getStr('content_type'))
+              ->setOptions($content_type_map));
+        $cancel_text = null;
+        $cancel_uri = $this->getApplicationURI();
+        break;
+      case 1:
+        $form
+          ->addHiddenInput('content_type', $request->getStr('content_type'))
+          ->addHiddenInput('step', 2)
+          ->appendChild($rule_types);
+        $cancel_text = pht('Back');
+        $cancel_uri = id(new PhutilURI('new/'))
+          ->setQueryParams(
+            array(
+              'content_type' => $request->getStr('content_type'),
+              'step' => 1,
+            ));
+        $cancel_uri = $this->getApplicationURI($cancel_uri);
+        break;
+    }
+
+
+    $form
+      ->appendChild(
+        id(new AphrontFormSubmitControl())
+          ->setValue(pht('Continue'))
+          ->addCancelButton($cancel_uri, $cancel_text));
+
+    $form_box = id(new PHUIObjectBoxView())
+      ->setFormError($errors)
+      ->setHeaderText(pht('Create Herald Rule'))
+      ->setForm($form);
+
+    $crumbs = $this
+      ->buildApplicationCrumbs()
+      ->addTextCrumb(pht('Create Rule'));
+
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $form_box,
+      ),
+      array(
+        'title' => pht('Create Herald Rule'),
+        'device' => true,
+      ));
+  }
+
+  private function renderRuleTypeControl(array $rule_type_map, $e_rule) {
+    $request = $this->getRequest();
 
     // Reorder array to put "personal" first.
     $rule_type_map = array_select_keys(
@@ -54,7 +145,8 @@ final class HeraldNewController extends HeraldController {
     $radio = id(new AphrontFormRadioButtonControl())
       ->setLabel(pht('Type'))
       ->setName('rule_type')
-      ->setValue($this->ruleType);
+      ->setValue($request->getStr('rule_type'))
+      ->setError($e_rule);
 
     foreach ($rule_type_map as $value => $name) {
       $disabled = ($value == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL) &&
@@ -68,38 +160,6 @@ final class HeraldNewController extends HeraldController {
         $disabled);
     }
 
-    $form = id(new AphrontFormView())
-      ->setUser($user)
-      ->setAction('/herald/edit/')
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('New Rule for'))
-          ->setName('content_type')
-          ->setValue($this->contentType)
-          ->setOptions($content_type_map))
-      ->appendChild($radio)
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue(pht('Create Rule'))
-          ->addCancelButton($this->getApplicationURI()));
-
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Create Herald Rule'))
-      ->setForm($form);
-
-    $crumbs = $this
-      ->buildApplicationCrumbs()
-      ->addTextCrumb(pht('Create Rule'));
-
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-      ),
-      array(
-        'title' => pht('Create Herald Rule'),
-        'device' => true,
-      ));
+    return $radio;
   }
-
 }
