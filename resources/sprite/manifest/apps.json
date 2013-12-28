@@ -411,6 +411,16 @@
       "rule" : ".apps-phpast-white",
       "hash" : "3c72bb3a2701584538d677e9a792837e"
     },
+    "apps-phragment-dark"       : {
+      "name" : "apps-phragment-dark",
+      "rule" : ".apps-phragment-dark",
+      "hash" : "436e9896b3ecc51019c5b2bdfba0bebe"
+    },
+    "apps-phragment-white"      : {
+      "name" : "apps-phragment-white",
+      "rule" : ".apps-phragment-white",
+      "hash" : "58bd0db2496cc31221c56b796d741d36"
+    },
     "apps-phrequent-dark"       : {
       "name" : "apps-phrequent-dark",
       "rule" : ".apps-phrequent-dark",

@@ -235,114 +235,122 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 }
 
 .apps-metamta-dark {
-  background-position: 0px -75px;
+  background-position: -150px -60px;
 }
 
 .apps-metamta-white {
-  background-position: -15px -75px;
+  background-position: 0px -75px;
 }
 
 .apps-new-dark {
-  background-position: -30px -75px;
+  background-position: -15px -75px;
 }
 
 .apps-new-white {
-  background-position: -45px -75px;
+  background-position: -30px -75px;
 }
 
 .apps-nuance-dark {
-  background-position: -60px -75px;
+  background-position: -45px -75px;
 }
 
 .apps-nuance-white {
-  background-position: -75px -75px;
+  background-position: -60px -75px;
 }
 
 .apps-owners-dark {
-  background-position: -90px -75px;
+  background-position: -75px -75px;
 }
 
 .apps-owners-white {
-  background-position: -105px -75px;
+  background-position: -90px -75px;
 }
 
 .apps-passphrase-dark {
-  background-position: -120px -75px;
+  background-position: -105px -75px;
 }
 
 .apps-passphrase-white {
-  background-position: -135px -75px;
+  background-position: -120px -75px;
 }
 
 .apps-paste-dark {
-  background-position: 0px -90px;
+  background-position: -135px -75px;
 }
 
 .apps-paste-white {
-  background-position: -15px -90px;
+  background-position: -150px -75px;
 }
 
 .apps-people-dark {
-  background-position: -30px -90px;
+  background-position: 0px -90px;
 }
 
 .apps-people-white {
-  background-position: -45px -90px;
+  background-position: -15px -90px;
 }
 
 .apps-phage-dark {
-  background-position: -60px -90px;
+  background-position: -30px -90px;
 }
 
 .apps-phage-white {
-  background-position: -75px -90px;
+  background-position: -45px -90px;
 }
 
 .apps-phame-dark {
-  background-position: -90px -90px;
+  background-position: -60px -90px;
 }
 
 .apps-phame-white {
-  background-position: -105px -90px;
+  background-position: -75px -90px;
 }
 
 .apps-phid-dark {
-  background-position: -120px -90px;
+  background-position: -90px -90px;
 }
 
 .apps-phid-white {
-  background-position: -135px -90px;
+  background-position: -105px -90px;
 }
 
 .apps-phlux-dark {
-  background-position: 0px -105px;
+  background-position: -120px -90px;
 }
 
 .apps-phlux-white {
-  background-position: -15px -105px;
+  background-position: -135px -90px;
 }
 
 .apps-pholio-dark {
-  background-position: -30px -105px;
+  background-position: 0px -105px;
 }
 
 .apps-pholio-white {
-  background-position: -45px -105px;
+  background-position: -15px -105px;
 }
 
 .apps-phortune-dark {
-  background-position: -60px -105px;
+  background-position: -30px -105px;
 }
 
 .apps-phortune-white {
-  background-position: -75px -105px;
+  background-position: -45px -105px;
 }
 
 .apps-phpast-dark {
-  background-position: -90px -105px;
+  background-position: -60px -105px;
 }
 
 .apps-phpast-white {
+  background-position: -75px -105px;
+}
+
+.apps-phragment-dark {
+  background-position: -90px -105px;
+}
+
+.apps-phragment-white {
   background-position: -105px -105px;
 }
 

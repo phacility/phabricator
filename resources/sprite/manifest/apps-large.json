@@ -821,6 +821,26 @@
       "rule" : ".apps-phpast-white-large",
       "hash" : "69ffddb6e09d2f0fb9dd286bec30ed85"
     },
+    "apps-phragment-blue-large"       : {
+      "name" : "apps-phragment-blue-large",
+      "rule" : ".apps-phragment-blue-large, .phabricator-crumb-view:hover .apps-phragment-dark-large",
+      "hash" : "d41b01892ba6b3a68bc09aa996077126"
+    },
+    "apps-phragment-dark-large"       : {
+      "name" : "apps-phragment-dark-large",
+      "rule" : ".apps-phragment-dark-large",
+      "hash" : "35a854a1cd62fb6223811d31d1076dfd"
+    },
+    "apps-phragment-light-large"      : {
+      "name" : "apps-phragment-light-large",
+      "rule" : ".apps-phragment-light-large",
+      "hash" : "26eb4af0e4792cd5c7bdf480afc520c5"
+    },
+    "apps-phragment-white-large"      : {
+      "name" : "apps-phragment-white-large",
+      "rule" : ".apps-phragment-white-large",
+      "hash" : "6ef73910f67c20ed29491b6192cfb263"
+    },
     "apps-phrequent-blue-large"       : {
       "name" : "apps-phrequent-blue-large",
       "rule" : ".apps-phrequent-blue-large, .phabricator-crumb-view:hover .apps-phrequent-dark-large",
