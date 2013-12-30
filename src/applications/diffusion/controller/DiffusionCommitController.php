@@ -1049,7 +1049,15 @@ final class DiffusionCommitController extends DiffusionController {
       $raw_diff,
       array(
         'name' => $drequest->getCommit().'.diff',
+        'ttl' => (60 * 60 * 24),
+        'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
       ));
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $file->attachToObject(
+        $this->getRequest()->getUser(),
+        $drequest->getRepository()->getPHID());
+    unset($unguarded);
 
     return id(new AphrontRedirectResponse())->setURI($file->getBestURI());
   }

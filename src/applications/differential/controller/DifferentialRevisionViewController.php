@@ -70,6 +70,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     if ($request->getExists('download')) {
       return $this->buildRawDiffResponse(
+        $revision,
         $changesets,
         $vs_changesets,
         $vs_map,
@@ -850,6 +851,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
    * @return @{class:AphrontRedirectResponse}
    */
   private function buildRawDiffResponse(
+    DifferentialRevision $revision,
     array $changesets,
     array $vs_changesets,
     array $vs_map,
@@ -910,7 +912,15 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $raw_diff,
       array(
         'name' => $file_name,
+        'ttl' => (60 * 60 * 24),
+        'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
       ));
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $file->attachToObject(
+        $this->getRequest()->getUser(),
+        $revision->getPHID());
+    unset($unguarded);
 
     return id(new AphrontRedirectResponse())->setURI($file->getBestURI());
 

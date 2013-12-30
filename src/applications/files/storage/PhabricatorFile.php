@@ -175,12 +175,16 @@ final class PhabricatorFile extends PhabricatorFileDAO
       $file_ttl = idx($params, 'ttl');
       $authorPHID = idx($params, 'authorPHID');
 
-      $new_file = new  PhabricatorFile();
+      $new_file = new PhabricatorFile();
 
       $new_file->setName($file_name);
       $new_file->setByteSize($copy_of_byteSize);
       $new_file->setAuthorPHID($authorPHID);
       $new_file->setTtl($file_ttl);
+
+      if (idx($params, 'viewPolicy')) {
+        $new_file->setViewPolicy($params['viewPolicy']);
+      }
 
       $new_file->setContentHash($hash);
       $new_file->setStorageEngine($copy_of_storage_engine);
@@ -261,6 +265,10 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $file->setAuthorPHID($authorPHID);
     $file->setTtl($file_ttl);
     $file->setContentHash(self::hashFileContent($data));
+
+    if (idx($params, 'viewPolicy')) {
+      $file->setViewPolicy($params['viewPolicy']);
+    }
 
     $file->setStorageEngine($engine_identifier);
     $file->setStorageHandle($data_handle);
@@ -877,8 +885,12 @@ final class PhabricatorFile extends PhabricatorFileDAO
   }
 
   public function getPolicy($capability) {
-    // TODO: Implement proper per-object policies.
-    return PhabricatorPolicies::POLICY_USER;
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return $this->getViewPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return PhabricatorPolicies::POLICY_NOONE;
+    }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {

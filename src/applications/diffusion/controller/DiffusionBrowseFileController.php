@@ -810,12 +810,21 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
   }
 
   private function loadFileForData($path, $data) {
-    return PhabricatorFile::buildFromFileDataOrHash(
+    $file = PhabricatorFile::buildFromFileDataOrHash(
       $data,
       array(
         'name' => basename($path),
         'ttl' => time() + 60 * 60 * 24,
+        'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
       ));
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $file->attachToObject(
+        $this->getRequest()->getUser(),
+        $this->getDiffusionRequest()->getRepository()->getPHID());
+    unset($unguarded);
+
+    return $file;
   }
 
   private function buildRawResponse($path, $data) {
