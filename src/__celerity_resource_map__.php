@@ -853,7 +853,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-contextbar-view-css' =>
   array(
-    'uri' => '/res/46c6248f/rsrc/css/aphront/context-bar.css',
+    'uri' => '/res/d2e04a0a/rsrc/css/aphront/context-bar.css',
     'type' => 'css',
     'requires' =>
     array(
