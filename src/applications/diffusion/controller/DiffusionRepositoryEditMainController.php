@@ -231,6 +231,7 @@ final class DiffusionRepositoryEditMainController
         ->setIcon('delete')
         ->setHref(
           $this->getRepositoryControllerURI($repository, 'edit/delete/'))
+        ->setDisabled(true)
         ->setWorkflow(true));
 
     return $view;
