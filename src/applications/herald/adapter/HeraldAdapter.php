@@ -144,6 +144,18 @@ abstract class HeraldAdapter {
     return false;
   }
 
+  public function canTriggerOnObject($object) {
+    return false;
+  }
+
+  public function explainValidTriggerObjects() {
+    return pht('This adapter can not trigger on objects.');
+  }
+
+  public function getTriggerObjectPHIDs() {
+    return array($this->getPHID());
+  }
+
   public function getAdapterSortKey() {
     return sprintf(
       '%08d%s',
@@ -577,6 +589,7 @@ abstract class HeraldAdapter {
   public function getActionNameMap($rule_type) {
     switch ($rule_type) {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
+      case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
         return array(
           self::ACTION_NOTHING      => pht('Do nothing'),
           self::ACTION_ADD_CC       => pht('Add emails to CC'),
@@ -1002,6 +1015,11 @@ abstract class HeraldAdapter {
         }
       }
     }
+
+    if ($rule->isObjectRule()) {
+      $phids[] = $rule->getTriggerObjectPHID();
+    }
+
     return $phids;
   }
 

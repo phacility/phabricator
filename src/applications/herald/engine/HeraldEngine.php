@@ -420,13 +420,13 @@ final class HeraldEngine {
     }
 
     $trigger_phid = $rule->getTriggerObjectPHID();
-    $object_phid = $adapter->getPHID();
+    $object_phids = $adapter->getTriggerObjectPHIDs();
 
-    if ($trigger_phid == $object_phid) {
-      return true;
+    if ($object_phids) {
+      if (in_array($trigger_phid, $object_phids)) {
+        return true;
+      }
     }
-
-    // TODO: We should also handle projects.
 
     return false;
   }

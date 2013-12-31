@@ -46,6 +46,38 @@ final class HeraldRuleController extends HeraldController {
       }
       $rule->setRuleType($rule_type);
 
+      $adapter = HeraldAdapter::getAdapterForContentType(
+        $rule->getContentType());
+
+      if (!$adapter->supportsRuleType($rule->getRuleType())) {
+        throw new Exception(
+          pht(
+            "This rule's content type does not support the selected rule ".
+            "type."));
+      }
+
+      if ($rule->isObjectRule()) {
+        $rule->setTriggerObjectPHID($request->getStr('targetPHID'));
+        $object = id(new PhabricatorObjectQuery())
+          ->setViewer($user)
+          ->withPHIDs(array($rule->getTriggerObjectPHID()))
+          ->requireCapabilities(
+            array(
+              PhabricatorPolicyCapability::CAN_VIEW,
+              PhabricatorPolicyCapability::CAN_EDIT,
+            ))
+          ->executeOne();
+        if (!$object) {
+          throw new Exception(
+            pht('No valid object provided for object rule!'));
+        }
+
+        if (!$adapter->canTriggerOnObject($object)) {
+          throw new Exception(
+            pht('Object is of wrong type for adapter!'));
+        }
+      }
+
       $cancel_uri = $this->getApplicationURI();
     }
 
@@ -63,12 +95,6 @@ final class HeraldRuleController extends HeraldController {
           "This rule was created with a newer version of Herald. You can not ".
           "view or edit it in this older version. Upgrade your Phabricator ".
           "deployment."));
-    }
-
-    if (!$adapter->supportsRuleType($rule->getRuleType())) {
-      throw new Exception(
-        pht(
-          "This rule's content type does not support the selected rule type."));
     }
 
     // Upgrade rule version to our version, since we might add newly-defined
@@ -133,6 +159,16 @@ final class HeraldRuleController extends HeraldController {
           ->setError($e_name)
           ->setValue($rule->getName()));
 
+    $trigger_object_control = false;
+    if ($rule->isObjectRule()) {
+      $trigger_object_control = id(new AphrontFormStaticControl())
+        ->setValue(
+          pht(
+            'This rule triggers for %s.',
+            $handles[$rule->getTriggerObjectPHID()]->renderLink()));
+    }
+
+
     $form
       ->appendChild(
         id(new AphrontFormMarkupControl())
@@ -140,6 +176,7 @@ final class HeraldRuleController extends HeraldController {
             "This %s rule triggers for %s.",
             phutil_tag('strong', array(), $rule_type_name),
             phutil_tag('strong', array(), $content_type_name))))
+      ->appendChild($trigger_object_control)
       ->appendChild(
         id(new AphrontFormInsetView())
           ->setTitle(pht('Conditions'))
@@ -488,6 +525,10 @@ final class HeraldRuleController extends HeraldController {
     }
 
     $phids[] = $rule->getAuthorPHID();
+
+    if ($rule->isObjectRule()) {
+      $phids[] = $rule->getTriggerObjectPHID();
+    }
 
     return $this->loadViewerHandles($phids);
   }

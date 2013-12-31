@@ -44,12 +44,31 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
   public function supportsRuleType($rule_type) {
     switch ($rule_type) {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
+      case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
         return true;
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
-      case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
       default:
         return false;
     }
+  }
+
+  public function canTriggerOnObject($object) {
+    if ($object instanceof PhabricatorRepository) {
+      return true;
+    }
+    return false;
+  }
+
+  public function explainValidTriggerObjects() {
+    return pht(
+      'This rule can trigger for **repositories**.');
+  }
+
+  public function getTriggerObjectPHIDs() {
+    return array(
+      $this->hookEngine->getRepository()->getPHID(),
+      $this->getPHID(),
+    );
   }
 
   public function getFieldNameMap() {
@@ -92,6 +111,7 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
   public function getActions($rule_type) {
     switch ($rule_type) {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
+      case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
         return array(
           self::ACTION_BLOCK,
           self::ACTION_NOTHING
