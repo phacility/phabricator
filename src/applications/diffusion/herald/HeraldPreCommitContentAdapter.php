@@ -41,6 +41,17 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
       "Hook rules can block changes.");
   }
 
+  public function supportsRuleType($rule_type) {
+    switch ($rule_type) {
+      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
+        return true;
+      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
+      case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
+      default:
+        return false;
+    }
+  }
+
   public function getFieldNameMap() {
     return array(
     ) + parent::getFieldNameMap();

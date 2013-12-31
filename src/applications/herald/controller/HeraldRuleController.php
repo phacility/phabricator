@@ -59,9 +59,16 @@ final class HeraldRuleController extends HeraldController {
     $local_version = id(new HeraldRule())->getConfigVersion();
     if ($rule->getConfigVersion() > $local_version) {
       throw new Exception(
-        "This rule was created with a newer version of Herald. You can not ".
-        "view or edit it in this older version. Upgrade your Phabricator ".
-        "deployment.");
+        pht(
+          "This rule was created with a newer version of Herald. You can not ".
+          "view or edit it in this older version. Upgrade your Phabricator ".
+          "deployment."));
+    }
+
+    if (!$adapter->supportsRuleType($rule->getRuleType())) {
+      throw new Exception(
+        pht(
+          "This rule's content type does not support the selected rule type."));
     }
 
     // Upgrade rule version to our version, since we might add newly-defined

@@ -53,17 +53,13 @@ final class HeraldNewController extends HeraldController {
       ->setUser($user)
       ->setAction($this->getApplicationURI('new/'));
 
-    $content_types = $this->renderContentTypeControl(
-      $content_type_map,
-      $e_type);
-
-    $rule_types = $this->renderRuleTypeControl(
-      $rule_type_map,
-      $e_rule);
-
     switch ($step) {
       case 0:
       default:
+        $content_types = $this->renderContentTypeControl(
+          $content_type_map,
+          $e_type);
+
         $form
           ->addHiddenInput('step', 1)
           ->appendChild($content_types);
@@ -72,6 +68,10 @@ final class HeraldNewController extends HeraldController {
         $cancel_uri = $this->getApplicationURI();
         break;
       case 1:
+        $rule_types = $this->renderRuleTypeControl(
+          $rule_type_map,
+          $e_rule);
+
         $form
           ->addHiddenInput('content_type', $request->getStr('content_type'))
           ->addHiddenInput('step', 2)
@@ -185,14 +185,31 @@ final class HeraldNewController extends HeraldController {
       ->setValue($request->getStr('rule_type'))
       ->setError($e_rule);
 
+    $adapter = HeraldAdapter::getAdapterForContentType(
+      $request->getStr('content_type'));
+
     foreach ($rule_type_map as $value => $name) {
+      $caption = idx($captions, $value);
       $disabled = ($value == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL) &&
                   (!$can_global);
+
+      if (!$adapter->supportsRuleType($value)) {
+        $disabled = true;
+        $caption = array(
+          $caption,
+          "\n\n",
+          phutil_tag(
+            'em',
+            array(),
+            pht(
+              'This rule type is not supported by the selected content type.')),
+        );
+      }
 
       $radio->addButton(
         $value,
         $name,
-        idx($captions, $value),
+        phutil_escape_html_newlines($caption),
         $disabled ? 'disabled' : null,
         $disabled);
     }

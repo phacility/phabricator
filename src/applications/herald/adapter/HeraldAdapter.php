@@ -140,6 +140,10 @@ abstract class HeraldAdapter {
   abstract public function getAdapterApplicationClass();
   abstract public function getObject();
 
+  public function supportsRuleType($rule_type) {
+    return false;
+  }
+
   public function getAdapterSortKey() {
     return sprintf(
       '%08d%s',
