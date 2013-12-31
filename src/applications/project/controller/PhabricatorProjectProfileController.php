@@ -180,13 +180,9 @@ final class PhabricatorProjectProfileController
     $task_list->setTasks($tasks);
     $task_list->setHandles($handles);
 
-    $list = id(new PHUIBoxView())
-      ->addPadding(PHUI::PADDING_LARGE)
-      ->appendChild($task_list);
-
     $content = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Open Tasks'))
-      ->appendChild($list);
+      ->appendChild($task_list);
 
     return $content;
   }
