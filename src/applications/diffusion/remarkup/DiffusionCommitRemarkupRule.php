@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionRemarkupRule
+final class DiffusionCommitRemarkupRule
   extends PhabricatorRemarkupRuleObject {
 
   protected function getObjectNamePrefix() {
