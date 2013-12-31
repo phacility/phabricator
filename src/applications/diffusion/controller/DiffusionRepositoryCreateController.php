@@ -16,12 +16,13 @@ final class DiffusionRepositoryCreateController
     $viewer = $request->getUser();
 
     // NOTE: We can end up here via either "Create Repository", or via
-    // "Import Repository", or via "Edit Remote". In the latter case, we show
-    // only a few of the pages.
+    // "Import Repository", or via "Edit Remote", or via "Edit Policies". In
+    // the latter two cases, we show only a few of the pages.
 
     $repository = null;
     switch ($this->edit) {
       case 'remote':
+      case 'policy':
         $repository = $this->getDiffusionRequest()->getRepository();
 
         // Make sure we have CAN_EDIT.
@@ -56,11 +57,17 @@ final class DiffusionRepositoryCreateController
           ->addPage('remote-uri', $this->buildRemoteURIPage())
           ->addPage('auth', $this->buildAuthPage());
         break;
+      case 'policy':
+        $title = pht('Edit Policies');
+        $form
+          ->addPage('policy', $this->buildPolicyPage());
+        break;
       case 'create':
         $title = pht('Create Repository');
         $form
           ->addPage('vcs', $this->buildVCSPage())
           ->addPage('name', $this->buildNamePage())
+          ->addPage('policy', $this->buildPolicyPage())
           ->addPage('done', $this->buildDonePage());
         break;
       case 'import':
@@ -70,6 +77,7 @@ final class DiffusionRepositoryCreateController
           ->addPage('name', $this->buildNamePage())
           ->addPage('remote-uri', $this->buildRemoteURIPage())
           ->addPage('auth', $this->buildAuthPage())
+          ->addPage('policy', $this->buildPolicyPage())
           ->addPage('done', $this->buildDonePage());
         break;
     }
@@ -80,6 +88,7 @@ final class DiffusionRepositoryCreateController
 
         $is_create = ($this->edit === 'import' || $this->edit === 'create');
         $is_auth = ($this->edit == 'import' || $this->edit == 'remote');
+        $is_policy = ($this->edit != 'remote');
         $is_init = ($this->edit == 'create');
 
         if ($is_create) {
@@ -96,6 +105,9 @@ final class DiffusionRepositoryCreateController
         $type_remote_uri = PhabricatorRepositoryTransaction::TYPE_REMOTE_URI;
         $type_hosting = PhabricatorRepositoryTransaction::TYPE_HOSTING;
         $type_credential = PhabricatorRepositoryTransaction::TYPE_CREDENTIAL;
+        $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
+        $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
+        $type_push = PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY;
 
         $xactions = array();
 
@@ -160,6 +172,25 @@ final class DiffusionRepositoryCreateController
               $form->getPage('auth')->getControl('credential')->getValue());
         }
 
+        if ($is_policy) {
+          $xactions[] = id(clone $template)
+            ->setTransactionType($type_view)
+            ->setNewValue(
+              $form->getPage('policy')->getControl('viewPolicy')->getValue());
+
+          $xactions[] = id(clone $template)
+            ->setTransactionType($type_edit)
+            ->setNewValue(
+              $form->getPage('policy')->getControl('editPolicy')->getValue());
+
+          if ($is_init || $repository->isHosted()) {
+            $xactions[] = id(clone $template)
+              ->setTransactionType($type_push)
+              ->setNewValue(
+                $form->getPage('policy')->getControl('pushPolicy')->getValue());
+          }
+        }
+
         id(new PhabricatorRepositoryEditor())
           ->setContinueOnNoEffect(true)
           ->setContentSourceFromRequest($request)
@@ -175,6 +206,9 @@ final class DiffusionRepositoryCreateController
         $dict = array(
           'remoteURI' => $repository->getRemoteURI(),
           'credential' => $repository->getCredentialPHID(),
+          'viewPolicy' => $repository->getViewPolicy(),
+          'editPolicy' => $repository->getEditPolicy(),
+          'pushPolicy' => $repository->getPushPolicy(),
         );
       }
       $form->readFromObject($dict);
@@ -652,6 +686,122 @@ final class DiffusionRepositoryCreateController
     } else {
       return true;
     }
+  }
+
+
+/* -(  Page: Policy  )------------------------------------------------------- */
+
+
+  private function buildPolicyPage() {
+    $viewer = $this->getRequest()->getUser();
+    if ($this->getRepository()) {
+      $repository = $this->getRepository();
+    } else {
+      $repository = PhabricatorRepository::initializeNewRepository($viewer);
+    }
+
+    $policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($viewer)
+      ->setObject($repository)
+      ->execute();
+
+    $view_policy = id(new AphrontFormPolicyControl())
+      ->setUser($viewer)
+      ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
+      ->setPolicyObject($repository)
+      ->setPolicies($policies)
+      ->setName('viewPolicy');
+
+    $edit_policy = id(new AphrontFormPolicyControl())
+      ->setUser($viewer)
+      ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
+      ->setPolicyObject($repository)
+      ->setPolicies($policies)
+      ->setName('editPolicy');
+
+    $push_policy = id(new AphrontFormPolicyControl())
+      ->setUser($viewer)
+      ->setCapability(DiffusionCapabilityPush::CAPABILITY)
+      ->setPolicyObject($repository)
+      ->setPolicies($policies)
+      ->setName('pushPolicy');
+
+    return id(new PHUIFormPageView())
+        ->setPageName(pht('Policies'))
+        ->setValidateFormPageCallback(array($this, 'validatePolicyPage'))
+        ->setAdjustFormPageCallback(array($this, 'adjustPolicyPage'))
+        ->setUser($viewer)
+        ->addRemarkupInstructions(
+          pht(
+            "Select access policies for this repository."))
+        ->addControl($view_policy)
+        ->addControl($edit_policy)
+        ->addControl($push_policy);
+  }
+
+  public function adjustPolicyPage(PHUIFormPageView $page) {
+    if ($this->getRepository()) {
+      $repository = $this->getRepository();
+      $show_push = $repository->isHosted();
+    } else {
+      $show_push = ($this->edit == 'create');
+    }
+
+    if (!$show_push) {
+      $c_push = $page->getControl('pushPolicy');
+      $c_push->setHidden(true);
+    }
+  }
+
+  public function validatePolicyPage(PHUIFormPageView $page) {
+    $form = $page->getForm();
+    $viewer = $this->getRequest()->getUser();
+
+    $c_view = $page->getControl('viewPolicy');
+    $c_edit = $page->getControl('editPolicy');
+    $c_push = $page->getControl('pushPolicy');
+    $v_view = $c_view->getValue();
+    $v_edit = $c_edit->getValue();
+    $v_push = $c_push->getValue();
+
+    if ($this->getRepository()) {
+      $repository = $this->getRepository();
+    } else {
+      $repository = PhabricatorRepository::initializeNewRepository($viewer);
+    }
+
+    $proxy = clone $repository;
+    $proxy->setViewPolicy($v_view);
+    $proxy->setEditPolicy($v_edit);
+
+    $can_view = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $proxy,
+      PhabricatorPolicyCapability::CAN_VIEW);
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $proxy,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    if (!$can_view) {
+      $c_view->setError(pht('Invalid'));
+      $page->addPageError(
+        pht(
+          'You can not use the selected policy, because you would be unable '.
+          'to see the repository.'));
+    }
+
+    if (!$can_edit) {
+      $c_edit->setError(pht('Invalid'));
+      $page->addPageError(
+        pht(
+          'You can not use the selected edit policy, because you would be '.
+          'unable to edit the repository.'));
+    }
+
+    return $c_view->isValid() &&
+           $c_edit->isValid();
   }
 
 /* -(  Page: Done  )--------------------------------------------------------- */

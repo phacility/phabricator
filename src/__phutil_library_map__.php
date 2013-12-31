@@ -546,7 +546,6 @@ phutil_register_library_map(array(
     'DiffusionRepositoryEditHostingController' => 'applications/diffusion/controller/DiffusionRepositoryEditHostingController.php',
     'DiffusionRepositoryEditLocalController' => 'applications/diffusion/controller/DiffusionRepositoryEditLocalController.php',
     'DiffusionRepositoryEditMainController' => 'applications/diffusion/controller/DiffusionRepositoryEditMainController.php',
-    'DiffusionRepositoryEditPolicyController' => 'applications/diffusion/controller/DiffusionRepositoryEditPolicyController.php',
     'DiffusionRepositoryEditSubversionController' => 'applications/diffusion/controller/DiffusionRepositoryEditSubversionController.php',
     'DiffusionRepositoryListController' => 'applications/diffusion/controller/DiffusionRepositoryListController.php',
     'DiffusionRepositoryNewController' => 'applications/diffusion/controller/DiffusionRepositoryNewController.php',
@@ -2945,7 +2944,6 @@ phutil_register_library_map(array(
     'DiffusionRepositoryEditHostingController' => 'DiffusionRepositoryEditController',
     'DiffusionRepositoryEditLocalController' => 'DiffusionRepositoryEditController',
     'DiffusionRepositoryEditMainController' => 'DiffusionRepositoryEditController',
-    'DiffusionRepositoryEditPolicyController' => 'DiffusionRepositoryEditController',
     'DiffusionRepositoryEditSubversionController' => 'DiffusionRepositoryEditController',
     'DiffusionRepositoryListController' =>
     array(
