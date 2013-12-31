@@ -190,6 +190,11 @@ final class PhabricatorPolicyQuery
       foreach ($projects as $project) {
         $phids[] = $project->getPHID();
       }
+
+      // Include the "current viewer" policy. This improves consistency, but
+      // is also useful for creating private instances of normally-shared object
+      // types, like repositories.
+      $phids[] = $viewer->getPHID();
     }
 
     $capabilities = $this->object->getCapabilities();
