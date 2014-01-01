@@ -190,17 +190,6 @@ $args->setSynopsis(
 $args->parse(
   array(
     array(
-      'name'     => 'output',
-      'param'    => 'path',
-      'default'  => '../src/__celerity_resource_map__.php',
-      'help'     => "Set the path for resource map. It is usually useful for ".
-                    "'celerity.resource-path' configuration.",
-    ),
-    array(
-      'name'     => 'with-custom',
-      'help'     => 'Include resources in <webroot>/rsrc/custom/.',
-    ),
-    array(
       'name'     => 'webroot',
       'wildcard' => true,
     ),
@@ -212,8 +201,9 @@ if (count($root) != 1 || !is_dir(reset($root))) {
 }
 $root = Filesystem::resolvePath(reset($root));
 
-$celerity_path = Filesystem::resolvePath($args->getArg('output'), $root);
-$with_custom = $args->getArg('with-custom');
+$celerity_path = Filesystem::resolvePath(
+  '../src/__celerity_resource_map__.php',
+  $root);
 
 $resource_hash = PhabricatorEnv::getEnvConfig('celerity.resource-hash');
 $runtime_map = array();
@@ -227,9 +217,6 @@ $finder = id(new FileFinder($root))
   ->withSuffix('swf')
   ->withFollowSymlinks(true)
   ->setGenerateChecksums(true);
-if (!$with_custom) {
-  $finder->excludePath('./rsrc/custom');
-}
 $raw_files = $finder->find();
 
 echo "Processing ".count($raw_files)." files";
@@ -261,9 +248,6 @@ $finder = id(new FileFinder($root))
   ->withSuffix('css')
   ->withFollowSymlinks(true)
   ->setGenerateChecksums(true);
-if (!$with_custom) {
-  $finder->excludePath('./rsrc/custom');
-}
 $files = $finder->find();
 
 echo "Processing ".count($files)." files";

@@ -167,6 +167,9 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
       'differential.anonymous-access' => pht(
         'Phabricator now has meaningful global access controls. See '.
         '`policy.allow-public`.'),
+      'celerity.resource-path' => pht(
+        'An alternate resource map is no longer supported. Instead, use '.
+        'multiple maps. See T4222.'),
     );
 
     return $ancient_config;
