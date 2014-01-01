@@ -7,11 +7,22 @@ abstract class CelerityResources {
 
   abstract public function getName();
   abstract public function getPathToMap();
+  abstract public function getResourceData($name);
   abstract public function findBinaryResources();
   abstract public function findTextResources();
 
-  public function getResourceHashKey() {
-    return PhabricatorEnv::getEnvConfig('celerity.resource-hash');
+  public function getCelerityHash($data) {
+    $tail = PhabricatorEnv::getEnvConfig('celerity.resource-hash');
+    $hash = PhabricatorHash::digest($data, $tail);
+    return substr($hash, 0, 8);
+  }
+
+  public function getResourceType($path) {
+    return CelerityResourceTransformer::getResourceType($path);
+  }
+
+  public function getResourceURI($hash, $name) {
+    return "/res/{$hash}/{$name}";
   }
 
   public static function getAll() {

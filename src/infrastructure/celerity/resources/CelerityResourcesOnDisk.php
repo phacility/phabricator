@@ -7,6 +7,10 @@ abstract class CelerityResourcesOnDisk extends CelerityResources {
 
   abstract public function getPathToResources();
 
+  public function getResourceData($name) {
+    return Filesystem::readFile($this->getPathToResources().'/'.$name);
+  }
+
   public function findBinaryResources() {
     return $this->findResourcesWithSuffixes($this->getBinaryFileSuffixes());
   }
@@ -47,7 +51,7 @@ abstract class CelerityResourcesOnDisk extends CelerityResources {
 
     $results = array();
     foreach ($raw_files as $path => $hash) {
-      $readable = '/'.Filesystem::readablePath($path, $root);
+      $readable = Filesystem::readablePath($path, $root);
       $results[$readable] = $hash;
     }
 
