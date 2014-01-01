@@ -2,127 +2,17 @@
  * @provides phabricator-profile-css
  */
 
-table.phabricator-profile-master-layout {
-  width: 100%;
-}
-
-td.phabricator-profile-navigation {
-  width: 300px;
-  background: #efefef;
-  border-right: 1px solid #cccccc;
-  padding-top: 8px;
-  padding-bottom: 8em;
-}
-
-td.phabricator-profile-navigation a,
-td.phabricator-profile-navigation span {
-  display: block;
-  margin: 0 0 2px;
-  min-width: 150px;
-  font-weight: bold;
-  white-space: nowrap;
-  text-decoration: none;
-}
-
-td.phabricator-profile-navigation a {
-  padding: 4px 8px 4px 10px;
-}
-
-td.phabricator-profile-navigation a:hover {
-  text-decoration: none;
-  background: #cccccc;
-}
-
-td.phabricator-profile-navigation  a.phabricator-profile-item-selected,
-td.phabricator-profile-navigation  a.phabricator-profile-item-selected :hover {
-  background: #cccccc;
-}
-
-td.phabricator-profile-navigation hr {
-  border: none;
-  background: #cccccc;
-  padding: 0;
-  margin: 10px 0;
-  height: 1px;
-}
-
-td.phabricator-profile-navigation h1,
-td.phabricator-profile-navigation h2 {
-  padding: 2px 0px 0px 10px;
-}
-
-td.phabricator-profile-content {
-  padding: 2em 2%;
-}
-
-.phabricator-profile-info-table th {
-  font-weight: bold;
-  text-align: right;
-  color: {$greytext};
-  width: 10%;
-  padding: 4px;
-}
-
-.phabricator-profile-info-table td {
-  width: 100%;
-  padding: 4px;
-}
-
-.phabricator-profile-info-group {
-  box-shadow: 0 1px 1px rgba(0,0,0,.4);
-}
-
-.phabricator-profile-info-header {
-  padding: 8px;
-  background: #e7e7e7;
-  border-bottom: 1px solid #d9d9d9;
-}
-
-.phabricator-profile-info-pane {
-  padding: 8px .5em;
-  background: #fff;
-}
-
-.phabricator-profile-info-table {
-  width: 100%;
-}
-
-h2.phabricator-profile-realname {
-  color: {$greytext};
-}
-
-img.phabricator-profile-image {
-  width: 280px;
-  margin: 10px;
-}
-
-.phabricator-profile-info-pane-more-link {
-  text-align: right;
-  padding: .25em;
-  font-weight: bold;
-  margin: .5em 1em 0;
-}
-
-.profile-wrap-responsive {
-  margin: 20px;
-}
-
-.device .profile-wrap-responsive {
-  margin-left: 10px;
-  margin-right: 10px;
-}
-
-.device-desktop .profile-feed {
+.device-desktop .profile-feed,
+.device-tablet .profile-feed {
   max-width: 640px;
+  padding: 12px 16px;
+}
+
+.device-phone .profile-feed {
+  padding: 12px 0;
 }
 
 .profile-feed .phabricator-action-header-title {
   font-size: 16px;
   margin-bottom: 5px;
-}
-
-.device-desktop .phabricator-project-layout
-  .aphront-multi-column-column-outer:first-child
-  .phabricator-profile-info-group {
-  margin-right: 0;
 }

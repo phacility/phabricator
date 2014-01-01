@@ -126,7 +126,7 @@ final class PhabricatorPeopleProfileController
     $view = $builder->buildView();
 
     return phutil_tag_div(
-      'profile-feed profile-wrap-responsive',
+      'profile-feed',
       $view->render());
   }
 }
