@@ -3,7 +3,7 @@
 /**
  * Defines the location of static resources on disk.
  */
-abstract class CelerityResourcesOnDisk extends CelerityResources {
+abstract class CelerityResourcesOnDisk extends CelerityPhysicalResources {
 
   abstract public function getPathToResources();
 

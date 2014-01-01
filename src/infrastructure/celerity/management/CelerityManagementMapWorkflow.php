@@ -13,7 +13,7 @@ final class CelerityManagementMapWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $resources_map = CelerityResources::getAll();
+    $resources_map = CelerityPhysicalResources::getAll();
 
     $this->log(
       pht(
@@ -32,10 +32,10 @@ final class CelerityManagementMapWorkflow
   /**
    * Rebuild the resource map for a resource source.
    *
-   * @param CelerityResources Resource source to rebuild.
+   * @param CelerityPhysicalResources Resource source to rebuild.
    * @return void
    */
-  private function rebuildResources(CelerityResources $resources) {
+  private function rebuildResources(CelerityPhysicalResources $resources) {
     $this->log(
       pht(
         'Rebuilding resource source "%s" (%s)...',
@@ -127,10 +127,12 @@ final class CelerityManagementMapWorkflow
    * Find binary resources (like PNG and SWF) and return information about
    * them.
    *
-   * @param CelerityResources Resource map to find binary resources for.
+   * @param CelerityPhysicalResources Resource map to find binary resources for.
    * @return map<string, map<string, string>> Resource information map.
    */
-  private function rebuildBinaryResources(CelerityResources $resources) {
+  private function rebuildBinaryResources(
+    CelerityPhysicalResources $resources) {
+
     $binary_map = $resources->findBinaryResources();
 
     $result_map = array();
@@ -150,12 +152,12 @@ final class CelerityManagementMapWorkflow
   /**
    * Find text resources (like JS and CSS) and return information about them.
    *
-   * @param CelerityResources Resource map to find text resources for.
+   * @param CelerityPhysicalResources Resource map to find text resources for.
    * @param CelerityResourceTransformer Configured resource transformer.
    * @return map<string, map<string, string>> Resource information map.
    */
   private function rebuildTextResources(
-    CelerityResources $resources,
+    CelerityPhysicalResources $resources,
     CelerityResourceTransformer $xformer) {
 
     $text_map = $resources->findTextResources();
@@ -262,13 +264,13 @@ final class CelerityManagementMapWorkflow
   /**
    * Build package specifications for a given resource source.
    *
-   * @param CelerityResources Resource source to rebuild.
+   * @param CelerityPhysicalResources Resource source to rebuild.
    * @param list<string, string> Map of `@provides` to hashes.
    * @param list<string, string> Map of hashes to resource names.
    * @return map<string, map<string, string>> Package information maps.
    */
   private function rebuildPackages(
-    CelerityResources $resources,
+    CelerityPhysicalResources $resources,
     array $symbol_map,
     array $reverse_map) {
 

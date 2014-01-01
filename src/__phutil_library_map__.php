@@ -98,6 +98,7 @@ phutil_register_library_map(array(
     'CelerityManagementWorkflow' => 'infrastructure/celerity/management/CelerityManagementWorkflow.php',
     'CelerityPhabricatorResourceController' => 'infrastructure/celerity/CelerityPhabricatorResourceController.php',
     'CelerityPhabricatorResources' => 'infrastructure/celerity/resources/CelerityPhabricatorResources.php',
+    'CelerityPhysicalResources' => 'infrastructure/celerity/resources/CelerityPhysicalResources.php',
     'CelerityResourceController' => 'infrastructure/celerity/CelerityResourceController.php',
     'CelerityResourceGraph' => 'infrastructure/celerity/CelerityResourceGraph.php',
     'CelerityResourceMap' => 'infrastructure/celerity/CelerityResourceMap.php',
@@ -2096,6 +2097,7 @@ phutil_register_library_map(array(
     'PhameBlogQuery' => 'applications/phame/query/PhameBlogQuery.php',
     'PhameBlogSkin' => 'applications/phame/skins/PhameBlogSkin.php',
     'PhameBlogViewController' => 'applications/phame/controller/blog/PhameBlogViewController.php',
+    'PhameCelerityResources' => 'applications/phame/celerity/PhameCelerityResources.php',
     'PhameController' => 'applications/phame/controller/PhameController.php',
     'PhameDAO' => 'applications/phame/storage/PhameDAO.php',
     'PhamePost' => 'applications/phame/storage/PhamePost.php',
@@ -2514,10 +2516,11 @@ phutil_register_library_map(array(
     'CelerityManagementWorkflow' => 'PhabricatorManagementWorkflow',
     'CelerityPhabricatorResourceController' => 'CelerityResourceController',
     'CelerityPhabricatorResources' => 'CelerityResourcesOnDisk',
+    'CelerityPhysicalResources' => 'CelerityResources',
     'CelerityResourceController' => 'PhabricatorController',
     'CelerityResourceGraph' => 'AbstractDirectedGraph',
     'CelerityResourceTransformerTestCase' => 'PhabricatorTestCase',
-    'CelerityResourcesOnDisk' => 'CelerityResources',
+    'CelerityResourcesOnDisk' => 'CelerityPhysicalResources',
     'CommandBuildStepImplementation' => 'VariableBuildStepImplementation',
     'ConduitAPIMethod' =>
     array(
@@ -4726,6 +4729,7 @@ phutil_register_library_map(array(
     'PhameBlogQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhameBlogSkin' => 'PhabricatorController',
     'PhameBlogViewController' => 'PhameController',
+    'PhameCelerityResources' => 'CelerityResources',
     'PhameController' => 'PhabricatorController',
     'PhameDAO' => 'PhabricatorLiskDAO',
     'PhamePost' =>

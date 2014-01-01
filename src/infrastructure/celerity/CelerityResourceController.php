@@ -2,8 +2,6 @@
 
 abstract class CelerityResourceController extends PhabricatorController {
 
-  abstract protected function getRootDirectory();
-
   protected function buildResourceTransformer() {
     return null;
   }
@@ -14,6 +12,10 @@ abstract class CelerityResourceController extends PhabricatorController {
 
   public function shouldRequireEnabledUser() {
     return false;
+  }
+
+  public function getCelerityResourceMap() {
+    return CelerityResourceMap::getInstance();
   }
 
   protected function serveResource($path, $package_hash = null) {
@@ -37,7 +39,7 @@ abstract class CelerityResourceController extends PhabricatorController {
       return $this->makeResponseCacheable(new Aphront304Response());
     }
 
-    $map = CelerityResourceMap::getInstance();
+    $map = $this->getCelerityResourceMap();
 
     if ($map->isPackageResource($path)) {
       $resource_names = $map->getResourceNamesForPackageName($path);
