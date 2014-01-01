@@ -249,8 +249,7 @@ final class CelerityStaticResourceResponse {
         $mtime = 0;
         foreach ($resource['symbols'] as $symbol) {
           $map = CelerityResourceMap::getInstance();
-          $symbol_info = $map->lookupSymbolInformation($symbol);
-          $mtime = max($mtime, (int)filemtime($root.$symbol_info['disk']));
+          $mtime = max($mtime, $map->getModifiedTimeForSymbol($symbol));
         }
       }
 

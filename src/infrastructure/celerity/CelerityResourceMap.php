@@ -104,7 +104,7 @@ final class CelerityResourceMap {
     return $paths;
   }
 
-  public function lookupSymbolInformation($symbol) {
+  private function lookupSymbolInformation($symbol) {
     return idx($this->resourceMap, $symbol);
   }
 
@@ -121,11 +121,45 @@ final class CelerityResourceMap {
 
 
   /**
+   * Get the epoch timestamp of the last modification time of a symbol.
+   *
+   * @param string Resource symbol to lookup.
+   * @return int Epoch timestamp of last resource modification.
+   */
+  public function getModifiedTimeForSymbol($symbol) {
+    $info = $this->lookupSymbolInformation($symbol);
+    if ($info) {
+      $root = dirname(phutil_get_library_root('phabricator')).'/webroot';
+      return (int)filemtime($root.$info['disk']);
+    }
+    return 0;
+  }
+
+
+  /**
+   * Return the fully-qualified, absolute URI for the resource associated with
+   * a symbol. This method is fairly low-level and ignores packaging.
+   *
+   * @param string Resource symbol to lookup.
+   * @return string|null  Fully-qualified resource URI, or null if the symbol
+   *                      is unknown.
+   */
+  public function getFullyQualifiedURIForSymbol($symbol) {
+    $info = $this->lookupSymbolInformation($symbol);
+    if ($info) {
+      return idx($info, 'uri');
+    }
+    return null;
+  }
+
+
+  /**
    * Return the fully-qualified, absolute URI for the resource associated with
    * a resource name. This method is fairly low-level and ignores packaging.
    *
    * @param string Resource name to lookup.
-   * @return string Fully-qualified resource URI.
+   * @return string|null  Fully-qualified resource URI, or null if the name
+   *                      is unknown.
    */
   public function getFullyQualifiedURIForName($name) {
     $info = $this->lookupFileInformation($name);
@@ -140,12 +174,28 @@ final class CelerityResourceMap {
    * Return the resource symbols required by a named resource.
    *
    * @param string Resource name to lookup.
-   * @return list<string> List of required symbols.
+   * @return list<string>|null  List of required symbols, or null if the name
+   *                            is unknown.
    */
   public function getRequiredSymbolsForName($name) {
     $info = $this->lookupFileInformation($name);
     if ($info) {
       return idx($info, 'requires', array());
+    }
+    return null;
+  }
+
+
+  /**
+   * Return the resource name for a given symbol.
+   *
+   * @param string Resource symbol to lookup.
+   * @return string|null Resource name, or null if the symbol is unknown.
+   */
+  public function getResourceNameForSymbol($symbol) {
+    $info = $this->lookupSymbolInformation($symbol);
+    if ($info) {
+      return idx($info, 'disk');
     }
     return null;
   }
