@@ -147,21 +147,20 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
       $path);
     $need = $external_classes;
 
-    $info = $celerity->lookupFileInformation(substr($path, strlen('webroot')));
-    if (!$info) {
-      $info = array();
+    $resource_name = substr($path, strlen('webroot'));
+    $requires = $celerity->getRequiredSymbolsForName($resource_name);
+    if (!$requires) {
+      $requires = array();
     }
 
-    $requires = idx($info, 'requires', array());
-
-    foreach ($requires as $key => $name) {
-      $symbol_info = $celerity->lookupSymbolInformation($name);
+    foreach ($requires as $key => $symbol_name) {
+      $symbol_info = $celerity->lookupSymbolInformation($symbol_name);
       if (!$symbol_info) {
         $this->raiseLintAtLine(
           0,
           0,
           self::LINT_UNKNOWN_DEPENDENCY,
-          "This file @requires component '{$name}', but it does not ".
+          "This file @requires component '{$symbol_name}', but it does not ".
           "exist. You may need to rebuild the Celerity map.");
         unset($requires[$key]);
         continue;

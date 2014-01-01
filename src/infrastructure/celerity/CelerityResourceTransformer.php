@@ -127,9 +127,9 @@ final class CelerityResourceTransformer {
         $uri = $this->rawResourceMap[$uri]['uri'];
       }
     } else if ($this->celerityMap) {
-      $info = $this->celerityMap->lookupFileInformation($uri);
-      if ($info) {
-        $uri = $info['uri'];
+      $resource_uri = $this->celerityMap->getFullyQualifiedURIForName($uri);
+      if ($resource_uri) {
+        $uri = $resource_uri;
       }
     }
 

@@ -108,7 +108,7 @@ final class CelerityResourceMap {
     return idx($this->resourceMap, $symbol);
   }
 
-  public function lookupFileInformation($path) {
+  private function lookupFileInformation($path) {
     if (empty($this->reverseMap)) {
       $this->reverseMap = array();
       foreach ($this->resourceMap as $symbol => $data) {
@@ -118,5 +118,37 @@ final class CelerityResourceMap {
     }
     return idx($this->reverseMap, $path);
   }
+
+
+  /**
+   * Return the fully-qualified, absolute URI for the resource associated with
+   * a resource name. This method is fairly low-level and ignores packaging.
+   *
+   * @param string Resource name to lookup.
+   * @return string Fully-qualified resource URI.
+   */
+  public function getFullyQualifiedURIForName($name) {
+    $info = $this->lookupFileInformation($name);
+    if ($info) {
+      return idx($info, 'uri');
+    }
+    return null;
+  }
+
+
+  /**
+   * Return the resource symbols required by a named resource.
+   *
+   * @param string Resource name to lookup.
+   * @return list<string> List of required symbols.
+   */
+  public function getRequiredSymbolsForName($name) {
+    $info = $this->lookupFileInformation($name);
+    if ($info) {
+      return idx($info, 'requires', array());
+    }
+    return null;
+  }
+
 
 }
