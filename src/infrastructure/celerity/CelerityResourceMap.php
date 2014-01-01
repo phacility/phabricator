@@ -5,34 +5,44 @@
  * resources, resource dependencies, and packaging information. You generally do
  * not need to invoke it directly; instead, you call higher-level Celerity APIs
  * and it uses the resource map to satisfy your requests.
- *
- * @group celerity
  */
 final class CelerityResourceMap {
 
   private static $instance;
-  private $resourceMap;
+
+  private $resources;
+  private $symbolMap;
+  private $requiresMap;
   private $packageMap;
-  private $reverseMap;
+  private $nameMap;
+  private $hashMap;
+
+  public function __construct(CelerityResources $resources) {
+    $this->resources = $resources;
+
+    $map = $resources->loadMap();
+    $this->symbolMap = idx($map, 'symbols', array());
+    $this->requiresMap = idx($map, 'requires', array());
+    $this->packageMap = idx($map, 'packages', array());
+    $this->nameMap = idx($map, 'names', array());
+
+    // We derive these reverse maps at runtime.
+
+    $this->hashMap = array_flip($this->nameMap);
+    $this->componentMap = array();
+    foreach ($this->packageMap as $package_name => $symbols) {
+      foreach ($symbols as $symbol) {
+        $this->componentMap[$symbol] = $package_name;
+      }
+    }
+  }
 
   public static function getInstance() {
     if (empty(self::$instance)) {
-      self::$instance = new CelerityResourceMap();
-      $root = phutil_get_library_root('phabricator');
-
-      $path = '__celerity_resource_map__.php';
-      $ok = include_once $root.'/'.$path;
-      if (!$ok) {
-        throw new Exception(
-          "Failed to load Celerity resource map!");
-      }
+      $resources = new CelerityPhabricatorResources();
+      self::$instance = new CelerityResourceMap($resources);
     }
     return self::$instance;
-  }
-
-  public function setResourceMap($resource_map) {
-    $this->resourceMap = $resource_map;
-    return $this;
   }
 
   public function getPackagedNamesForSymbols(array $symbols) {
@@ -53,91 +63,71 @@ final class CelerityResourceMap {
   }
 
   private function resolveResource(array &$map, $symbol) {
-    if (empty($this->resourceMap[$symbol])) {
+    if (empty($this->symbolMap[$symbol])) {
       throw new Exception(
-        "Attempting to resolve unknown Celerity resource, '{$symbol}'.");
+        pht(
+          'Attempting to resolve unknown resource, "%s".',
+          $symbol));
     }
 
-    $info = $this->resourceMap[$symbol];
-    foreach ($info['requires'] as $requires) {
-      if (!empty($map[$requires])) {
+    $hash = $this->symbolMap[$symbol];
+
+    $map[$symbol] = $hash;
+
+    if (isset($this->requiresMap[$hash])) {
+      $requires = $this->requiresMap[$hash];
+    } else {
+      $requires = array();
+    }
+
+    foreach ($requires as $required_symbol) {
+      if (!empty($map[$required_symbol])) {
         continue;
       }
-      $this->resolveResource($map, $requires);
+      $this->resolveResource($map, $required_symbol);
     }
-
-    $map[$symbol] = $info;
-  }
-
-  public function setPackageMap($package_map) {
-    $this->packageMap = $package_map;
-    return $this;
   }
 
   private function packageResources(array $resolved_map) {
     $packaged = array();
     $handled = array();
-    foreach ($resolved_map as $symbol => $info) {
+    foreach ($resolved_map as $symbol => $hash) {
       if (isset($handled[$symbol])) {
         continue;
       }
-      if (empty($this->packageMap['reverse'][$symbol])) {
-        $packaged[$symbol] = $info;
+
+      if (empty($this->componentMap[$symbol])) {
+        $packaged[] = $this->hashMap[$hash];
       } else {
-        $package = $this->packageMap['reverse'][$symbol];
-        $package_info = $this->packageMap['packages'][$package];
-        $packaged[$package_info['name']] = $package_info;
-        foreach ($package_info['symbols'] as $packaged_symbol) {
-          $handled[$packaged_symbol] = true;
+        $package_name = $this->componentMap[$symbol];
+        $packaged[] = $package_name;
+
+        $package_symbols = $this->packageMap[$package_name];
+        foreach ($package_symbols as $package_symbol) {
+          $handled[$package_symbol] = true;
         }
       }
     }
 
-    $names = array();
-    foreach ($packaged as $key => $resource) {
-      if (isset($resource['disk'])) {
-        $names[] = $resource['disk'];
-      } else {
-        $names[] = $key;
-      }
-    }
-
-    return $names;
+    return $packaged;
   }
 
   public function getResourceDataForName($resource_name) {
-    $root = phutil_get_library_root('phabricator');
-    $root = dirname($root).'/webroot/';
-    return Filesystem::readFile($root.$resource_name);
+    return $this->resources->getResourceData($resource_name);
   }
 
-  public function getResourceNamesForPackageHash($package_hash) {
-    $package = idx($this->packageMap['packages'], $package_hash);
-    if (!$package) {
+  public function getResourceNamesForPackageName($package_name) {
+    $package_symbols = idx($this->packageMap, $package_name);
+    if (!$package_symbols) {
       return null;
     }
 
-    $paths = array();
-    foreach ($package['symbols'] as $symbol) {
-      $paths[] = $this->resourceMap[$symbol]['disk'];
+    $resource_names = array();
+    foreach ($package_symbols as $symbol) {
+      $resource_names[] = $this->hashMap[$this->symbolMap[$symbol]];
     }
 
-    return $paths;
-  }
-
-  private function lookupSymbolInformation($symbol) {
-    return idx($this->resourceMap, $symbol);
-  }
-
-  private function lookupFileInformation($path) {
-    if (empty($this->reverseMap)) {
-      $this->reverseMap = array();
-      foreach ($this->resourceMap as $symbol => $data) {
-        $data['provides'] = $symbol;
-        $this->reverseMap[$data['disk']] = $data;
-      }
-    }
-    return idx($this->reverseMap, $path);
+    return $resource_names;
   }
 
 
@@ -148,32 +138,18 @@ final class CelerityResourceMap {
    * @return int Epoch timestamp of last resource modification.
    */
   public function getModifiedTimeForName($name) {
-    $package_hash = null;
-    foreach ($this->packageMap['packages'] as $hash => $package) {
-      if ($package['name'] == $name) {
-        $package_hash = $hash;
-        break;
-      }
-    }
-
-    $root = dirname(phutil_get_library_root('phabricator')).'/webroot';
-
-    $mtime = 0;
-
-    if ($package_hash) {
-      $names = $this->getResourceNamesForPackageHash($package_hash);
-      foreach ($names as $component_name) {
-        $info = $this->lookupFileInformation($component_name);
-        if ($info) {
-          $mtime = max($mtime, (int)filemtime($root.$info['disk']));
-        }
+    if ($this->isPackageResource($name)) {
+      $names = array();
+      foreach ($this->packageMap[$name] as $symbol) {
+        $names[] = $this->getResourceNameForSymbol($symbol);
       }
     } else {
-      $info = $this->lookupFileInformation($name);
-      if ($info) {
-        $root = dirname(phutil_get_library_root('phabricator')).'/webroot';
-        $mtime = (int)filemtime($root.$info['disk']);
-      }
+      $names = array($name);
+    }
+
+    $mtime = 0;
+    foreach ($names as $name) {
+      $mtime = max($mtime, $this->resources->getResourceModifiedTime($name));
     }
 
     return $mtime;
@@ -185,15 +161,11 @@ final class CelerityResourceMap {
    * method is fairly low-level and ignores packaging.
    *
    * @param string Resource symbol to lookup.
-   * @return string|null  Fully-qualified resource URI, or null if the symbol
-   *                      is unknown.
+   * @return string|null Resource URI, or null if the symbol is unknown.
    */
   public function getURIForSymbol($symbol) {
-    $info = $this->lookupSymbolInformation($symbol);
-    if ($info) {
-      return idx($info, 'uri');
-    }
-    return null;
+    $hash = idx($this->symbolMap, $symbol);
+    return $this->getURIForHash($hash);
   }
 
 
@@ -202,22 +174,26 @@ final class CelerityResourceMap {
    * This method is fairly low-level and ignores packaging.
    *
    * @param string Resource name to lookup.
-   * @return string|null  Fully-qualified resource URI, or null if the name
-   *                      is unknown.
+   * @return string|null  Resource URI, or null if the name is unknown.
    */
   public function getURIForName($name) {
-    $info = $this->lookupFileInformation($name);
-    if ($info) {
-      return idx($info, 'uri');
-    }
+    $hash = idx($this->nameMap, $name);
+    return $this->getURIForHash($hash);
+  }
 
-    foreach ($this->packageMap['packages'] as $hash => $package) {
-      if ($package['name'] == $name) {
-        return $package['uri'];
-      }
-    }
 
-    return null;
+  /**
+   * Return the absolute URI for a resource, identified by hash.
+   * This method is fairly low-level and ignores packaging.
+   *
+   * @param string Resource hash to lookup.
+   * @return string|null Resource URI, or null if the hash is unknown.
+   */
+  private function getURIForHash($hash) {
+    if ($hash === null) {
+      return null;
+    }
+    return $this->resources->getResourceURI($hash, $this->hashMap[$hash]);
   }
 
 
@@ -229,11 +205,11 @@ final class CelerityResourceMap {
    *                            is unknown.
    */
   public function getRequiredSymbolsForName($name) {
-    $info = $this->lookupFileInformation($name);
-    if ($info) {
-      return idx($info, 'requires', array());
+    $hash = idx($this->symbolMap, $name);
+    if ($hash === null) {
+      return null;
     }
-    return null;
+    return idx($this->requiresMap, $hash, array());
   }
 
 
@@ -244,12 +220,12 @@ final class CelerityResourceMap {
    * @return string|null Resource name, or null if the symbol is unknown.
    */
   public function getResourceNameForSymbol($symbol) {
-    $info = $this->lookupSymbolInformation($symbol);
-    if ($info) {
-      return idx($info, 'disk');
-    }
-    return null;
+    $hash = idx($this->symbolMap, $symbol);
+    return idx($this->hashMap, $hash);
   }
 
+  public function isPackageResource($name) {
+    return isset($this->packageMap[$name]);
+  }
 
 }

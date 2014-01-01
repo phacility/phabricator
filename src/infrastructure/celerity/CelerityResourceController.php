@@ -39,8 +39,8 @@ abstract class CelerityResourceController extends PhabricatorController {
 
     $map = CelerityResourceMap::getInstance();
 
-    if ($package_hash) {
-      $resource_names = $map->getResourceNamesForPackageHash($package_hash);
+    if ($map->isPackageResource($path)) {
+      $resource_names = $map->getResourceNamesForPackageName($path);
       if (!$resource_names) {
         return new Aphront404Response();
       }

@@ -15,9 +15,16 @@ final class CelerityManagementMapWorkflow
   public function execute(PhutilArgumentParser $args) {
     $resources_map = CelerityResources::getAll();
 
+    $this->log(
+      pht(
+        "Rebuilding %d resource source(s).",
+        new PhutilNumber(count($resources_map))));
+
     foreach ($resources_map as $name => $resources) {
       $this->rebuildResources($resources);
     }
+
+    $this->log(pht("Done."));
 
     return 0;
   }
@@ -29,7 +36,18 @@ final class CelerityManagementMapWorkflow
    * @return void
    */
   private function rebuildResources(CelerityResources $resources) {
+    $this->log(
+      pht(
+        'Rebuilding resource source "%s" (%s)...',
+        $resources->getName(),
+        get_class($resources)));
+
     $binary_map = $this->rebuildBinaryResources($resources);
+
+    $this->log(
+      pht(
+        'Found %d binary resources.',
+        new PhutilNumber(count($binary_map))));
 
     $xformer = id(new CelerityResourceTransformer())
       ->setMinify(false)
@@ -37,12 +55,17 @@ final class CelerityManagementMapWorkflow
 
     $text_map = $this->rebuildTextResources($resources, $xformer);
 
+    $this->log(
+      pht(
+        'Found %d text resources.',
+        new PhutilNumber(count($text_map))));
+
     $resource_graph = array();
     $requires_map = array();
-    $provides_map = array();
+    $symbol_map = array();
     foreach ($text_map as $name => $info) {
       if (isset($info['provides'])) {
-        $provides_map[$info['provides']] = $info['hash'];
+        $symbol_map[$info['provides']] = $info['hash'];
 
         // We only need to check for cycles and add this to the requires map
         // if it actually requires anything.
@@ -54,15 +77,49 @@ final class CelerityManagementMapWorkflow
     }
 
     $this->detectGraphCycles($resource_graph);
+    $name_map = ipull($binary_map, 'hash') + ipull($text_map, 'hash');
+    $hash_map = array_flip($name_map);
 
-    $hash_map = ipull($binary_map, 'hash') + ipull($text_map, 'hash');
+    $package_map = $this->rebuildPackages(
+      $resources,
+      $symbol_map,
+      $hash_map);
 
+    $this->log(
+      pht(
+        'Found %d packages.',
+        new PhutilNumber(count($package_map))));
 
-    // TODO: Actually do things.
+    $component_map = array();
+    foreach ($package_map as $package_name => $package_info) {
+      foreach ($package_info['symbols'] as $symbol) {
+        $component_map[$symbol] = $package_name;
+      }
+    }
 
-    var_dump($provides_map);
-    var_dump($requires_map);
-    var_dump($hash_map);
+    $name_map = $this->mergeNameMaps(
+      array(
+        array(pht('Binary'), ipull($binary_map, 'hash')),
+        array(pht('Text'), ipull($text_map, 'hash')),
+        array(pht('Package'), ipull($package_map, 'hash')),
+      ));
+    $package_map = ipull($package_map, 'symbols');
+
+    ksort($name_map);
+    ksort($symbol_map);
+    ksort($requires_map);
+    ksort($package_map);
+
+    $map_content = $this->formatMapContent(array(
+      'names' => $name_map,
+      'symbols' => $symbol_map,
+      'requires' => $requires_map,
+      'packages' => $package_map,
+    ));
+
+    $map_path = $resources->getPathToMap();
+    $this->log(pht('Writing map "%s".', Filesystem::readablePath($map_path)));
+    Filesystem::writeFile($map_path, $map_content);
   }
 
 
@@ -201,5 +258,113 @@ final class CelerityManagementMapWorkflow
       }
     }
   }
+
+  /**
+   * Build package specifications for a given resource source.
+   *
+   * @param CelerityResources Resource source to rebuild.
+   * @param list<string, string> Map of `@provides` to hashes.
+   * @param list<string, string> Map of hashes to resource names.
+   * @return map<string, map<string, string>> Package information maps.
+   */
+  private function rebuildPackages(
+    CelerityResources $resources,
+    array $symbol_map,
+    array $reverse_map) {
+
+    $package_map = array();
+
+    $package_spec = $resources->getResourcePackages();
+    foreach ($package_spec as $package_name => $package_symbols) {
+      $type = null;
+      $hashes = array();
+      foreach ($package_symbols as $symbol) {
+        $symbol_hash = idx($symbol_map, $symbol);
+        if ($symbol_hash === null) {
+          throw new Exception(
+            pht(
+              'Package specification for "%s" includes "%s", but that symbol '.
+              'is not @provided by any resource.',
+              $package_name,
+              $symbol));
+        }
+
+        $resource_name = $reverse_map[$symbol_hash];
+        $resource_type = $resources->getResourceType($resource_name);
+        if ($type === null) {
+          $type = $resource_type;
+        } else if ($type !== $resource_type) {
+          throw new Exception(
+            pht(
+              'Package specification for "%s" includes resources of multiple '.
+              'types (%s, %s). Each package may only contain one type of '.
+              'resource.',
+              $package_name,
+              $type,
+              $resource_type));
+        }
+
+        $hashes[] = $symbol.':'.$symbol_hash;
+      }
+
+      $hash = $resources->getCelerityHash(implode("\n", $hashes));
+      $package_map[$package_name] = array(
+        'hash' => $hash,
+        'symbols' => $package_symbols,
+      );
+    }
+
+    return $package_map;
+  }
+
+  private function mergeNameMaps(array $maps) {
+    $result = array();
+    $origin = array();
+    foreach ($maps as $map) {
+      list($map_name, $data) = $map;
+      foreach ($data as $name => $hash) {
+        if (empty($result[$name])) {
+          $result[$name] = $hash;
+          $origin[$name] = $map_name;
+        } else {
+          $old = $origin[$name];
+          $new = $map_name;
+          throw new Exception(
+            pht(
+              'Resource source defines two resources with the same name, '.
+              '"%s". One is defined in the "%s" map; the other in the "%s" '.
+              'map. Each resource must have a unique name.',
+              $name,
+              $old,
+              $new));
+        }
+      }
+    }
+    return $result;
+  }
+
+  private function log($message) {
+    $console = PhutilConsole::getConsole();
+    $console->writeErr("%s\n", $message);
+  }
+
+  private function formatMapContent(array $data) {
+    $content = var_export($data, true);
+    $content = preg_replace('/\s+$/m', '', $content);
+    $content = preg_replace('/array \(/', 'array(', $content);
+
+    $generated = '@'.'generated';
+    return <<<EOFILE
+<?php
+
+/**
+ * This file is automatically generated. Use 'bin/celerity map' to rebuild it.
+ * {$generated}
+ */
+return {$content};
+
+EOFILE;
+  }
+
 
 }

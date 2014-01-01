@@ -5,11 +5,14 @@
  */
 abstract class CelerityResources {
 
+  private $map;
+
   abstract public function getName();
   abstract public function getPathToMap();
   abstract public function getResourceData($name);
   abstract public function findBinaryResources();
   abstract public function findTextResources();
+  abstract public function getResourceModifiedTime($name);
 
   public function getCelerityHash($data) {
     $tail = PhabricatorEnv::getEnvConfig('celerity.resource-hash');
@@ -23,6 +26,17 @@ abstract class CelerityResources {
 
   public function getResourceURI($hash, $name) {
     return "/res/{$hash}/{$name}";
+  }
+
+  public function getResourcePackages() {
+    return array();
+  }
+
+  public function loadMap() {
+    if ($this->map === null) {
+      $this->map = include $this->getPathToMap();
+    }
+    return $this->map;
   }
 
   public static function getAll() {

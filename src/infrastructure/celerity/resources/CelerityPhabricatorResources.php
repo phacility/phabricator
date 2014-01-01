@@ -21,4 +21,8 @@ final class CelerityPhabricatorResources extends CelerityResourcesOnDisk {
     return dirname(phutil_get_library_root('phabricator')).'/'.$to_file;
   }
 
+  public function getResourcePackages() {
+    return include $this->getPhabricatorPath('resources/celerity/packages.php');
+  }
+
 }

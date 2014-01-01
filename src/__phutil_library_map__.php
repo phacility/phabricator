@@ -2408,7 +2408,6 @@ phutil_register_library_map(array(
     '_phabricator_time_format' => 'view/viewutils.php',
     'celerity_generate_unique_node_id' => 'infrastructure/celerity/api.php',
     'celerity_get_resource_uri' => 'infrastructure/celerity/api.php',
-    'celerity_register_resource_map' => 'infrastructure/celerity/map.php',
     'implode_selected_handle_links' => 'applications/phid/handle/view/render.php',
     'javelin_tag' => 'infrastructure/javelin/markup.php',
     'phabricator_date' => 'view/viewutils.php',

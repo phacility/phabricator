@@ -39,7 +39,7 @@ final class PhameResourceController extends CelerityResourceController {
     $spec = $skin->getSpecification();
 
     $this->root = $spec->getRootDirectory().DIRECTORY_SEPARATOR;
-    return $this->serveResource($this->name, $package_hash = null);
+    return $this->serveResource($this->name);
   }
 
   protected function buildResourceTransformer() {

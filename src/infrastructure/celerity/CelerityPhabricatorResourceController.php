@@ -12,7 +12,6 @@ final class CelerityPhabricatorResourceController
 
   private $path;
   private $hash;
-  private $package;
 
   protected function getRootDirectory() {
     $root = dirname(phutil_get_library_root('phabricator'));
@@ -22,15 +21,10 @@ final class CelerityPhabricatorResourceController
   public function willProcessRequest(array $data) {
     $this->path = $data['path'];
     $this->hash = $data['hash'];
-    $this->package = !empty($data['package']);
   }
 
   public function processRequest() {
-    $package_hash = null;
-    if ($this->package) {
-      $package_hash = $this->hash;
-    }
-    return $this->serveResource($this->path, $package_hash);
+    return $this->serveResource($this->path);
   }
 
   protected function buildResourceTransformer() {

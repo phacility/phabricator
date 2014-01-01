@@ -7,8 +7,12 @@ abstract class CelerityResourcesOnDisk extends CelerityResources {
 
   abstract public function getPathToResources();
 
+  private function getPathToResource($name) {
+    return $this->getPathToResources().DIRECTORY_SEPARATOR.$name;
+  }
+
   public function getResourceData($name) {
-    return Filesystem::readFile($this->getPathToResources().'/'.$name);
+    return Filesystem::readFile($this->getPathToResource($name));
   }
 
   public function findBinaryResources() {
@@ -17,6 +21,10 @@ abstract class CelerityResourcesOnDisk extends CelerityResources {
 
   public function findTextResources() {
     return $this->findResourcesWithSuffixes($this->getTextFileSuffixes());
+  }
+
+  public function getResourceModifiedTime($name) {
+    return (int)filemtime($this->getPathToResource($name));
   }
 
   protected function getBinaryFileSuffixes() {
