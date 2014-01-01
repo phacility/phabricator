@@ -35,7 +35,12 @@ final class CelerityResourceMap {
     return $this;
   }
 
-  public function resolveResources(array $symbols) {
+  public function getPackagedNamesForSymbols(array $symbols) {
+    $resolved = $this->resolveResources($symbols);
+    return $this->packageResources($resolved);
+  }
+
+  private function resolveResources(array $symbols) {
     $map = array();
     foreach ($symbols as $symbol) {
       if (!empty($map[$symbol])) {
@@ -69,7 +74,7 @@ final class CelerityResourceMap {
     return $this;
   }
 
-  public function packageResources(array $resolved_map) {
+  private function packageResources(array $resolved_map) {
     $packaged = array();
     $handled = array();
     foreach ($resolved_map as $symbol => $info) {
@@ -87,7 +92,17 @@ final class CelerityResourceMap {
         }
       }
     }
-    return $packaged;
+
+    $names = array();
+    foreach ($packaged as $key => $resource) {
+      if (isset($resource['disk'])) {
+        $names[] = $resource['disk'];
+      } else {
+        $names[] = $key;
+      }
+    }
+
+    return $names;
   }
 
   public function getResourceDataForName($resource_name) {
@@ -132,25 +147,48 @@ final class CelerityResourceMap {
    * @param string Resource symbol to lookup.
    * @return int Epoch timestamp of last resource modification.
    */
-  public function getModifiedTimeForSymbol($symbol) {
-    $info = $this->lookupSymbolInformation($symbol);
-    if ($info) {
-      $root = dirname(phutil_get_library_root('phabricator')).'/webroot';
-      return (int)filemtime($root.$info['disk']);
+  public function getModifiedTimeForName($name) {
+    $package_hash = null;
+    foreach ($this->packageMap['packages'] as $hash => $package) {
+      if ($package['name'] == $name) {
+        $package_hash = $hash;
+        break;
+      }
     }
-    return 0;
+
+    $root = dirname(phutil_get_library_root('phabricator')).'/webroot';
+
+    $mtime = 0;
+
+    if ($package_hash) {
+      $names = $this->getResourceNamesForPackageHash($package_hash);
+      foreach ($names as $component_name) {
+        $info = $this->lookupFileInformation($component_name);
+        if ($info) {
+          $mtime = max($mtime, (int)filemtime($root.$info['disk']));
+        }
+      }
+    } else {
+      $info = $this->lookupFileInformation($name);
+      if ($info) {
+        $root = dirname(phutil_get_library_root('phabricator')).'/webroot';
+        $mtime = (int)filemtime($root.$info['disk']);
+      }
+    }
+
+    return $mtime;
   }
 
 
   /**
-   * Return the fully-qualified, absolute URI for the resource associated with
-   * a symbol. This method is fairly low-level and ignores packaging.
+   * Return the absolute URI for the resource associated with a symbol. This
+   * method is fairly low-level and ignores packaging.
    *
    * @param string Resource symbol to lookup.
    * @return string|null  Fully-qualified resource URI, or null if the symbol
    *                      is unknown.
    */
-  public function getFullyQualifiedURIForSymbol($symbol) {
+  public function getURIForSymbol($symbol) {
     $info = $this->lookupSymbolInformation($symbol);
     if ($info) {
       return idx($info, 'uri');
@@ -160,18 +198,25 @@ final class CelerityResourceMap {
 
 
   /**
-   * Return the fully-qualified, absolute URI for the resource associated with
-   * a resource name. This method is fairly low-level and ignores packaging.
+   * Return the absolute URI for the resource associated with a resource name.
+   * This method is fairly low-level and ignores packaging.
    *
    * @param string Resource name to lookup.
    * @return string|null  Fully-qualified resource URI, or null if the name
    *                      is unknown.
    */
-  public function getFullyQualifiedURIForName($name) {
+  public function getURIForName($name) {
     $info = $this->lookupFileInformation($name);
     if ($info) {
       return idx($info, 'uri');
     }
+
+    foreach ($this->packageMap['packages'] as $hash => $package) {
+      if ($package['name'] == $name) {
+        return $package['uri'];
+      }
+    }
+
     return null;
   }
 

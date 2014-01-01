@@ -52,7 +52,7 @@ function celerity_generate_unique_node_id() {
 function celerity_get_resource_uri($resource) {
   $map = CelerityResourceMap::getInstance();
 
-  $uri = $map->getFullyQualifiedURIForName($resource);
+  $uri = $map->getURIForName($resource);
   if ($uri) {
     return $uri;
   }

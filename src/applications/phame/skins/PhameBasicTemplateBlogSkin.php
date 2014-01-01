@@ -31,14 +31,14 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
 
     $map = CelerityResourceMap::getInstance();
     $resource_symbol = 'syntax-highlighting-css';
-    $resource_uri = $map->getFullyQualifiedURIForSymbol($resource_symbol);
+    $resource_uri = $map->getURIForSymbol($resource_symbol);
 
     $this->cssResources[] = phutil_tag(
       'link',
       array(
         'rel'   => 'stylesheet',
         'type'  => 'text/css',
-        'href'  => $resource_uri,
+        'href'  => PhabricatorEnv::getCDNURI($resource_uri),
       ));
 
     $this->cssResources = phutil_implode_html("\n", $this->cssResources);

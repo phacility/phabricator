@@ -62,8 +62,10 @@ final class CelerityStaticResourceResponse {
   private function resolveResources() {
     if ($this->needsResolve) {
       $map = CelerityResourceMap::getInstance();
-      $this->resolved = $map->resolveResources(array_keys($this->symbols));
-      $this->packaged = $map->packageResources($this->resolved);
+
+      $symbols = array_keys($this->symbols);
+      $this->packaged = $map->getPackagedNamesForSymbols($symbols);
+
       $this->needsResolve = false;
     }
     return $this;
@@ -71,8 +73,7 @@ final class CelerityStaticResourceResponse {
 
   public function renderSingleResource($symbol) {
     $map = CelerityResourceMap::getInstance();
-    $resolved = $map->resolveResources(array($symbol));
-    $packaged = $map->packageResources($resolved);
+    $packaged = $map->getPackagedNamesForSymbols(array($symbol));
     return $this->renderPackagedResources($packaged);
   }
 
@@ -80,9 +81,10 @@ final class CelerityStaticResourceResponse {
     $this->resolveResources();
 
     $resources = array();
-    foreach ($this->packaged as $resource) {
-      if ($resource['type'] == $type) {
-        $resources[] = $resource;
+    foreach ($this->packaged as $name) {
+      $resource_type = CelerityResourceTransformer::getResourceType($name);
+      if ($resource_type == $type) {
+        $resources[] = $name;
       }
     }
 
@@ -91,21 +93,22 @@ final class CelerityStaticResourceResponse {
 
   private function renderPackagedResources(array $resources) {
     $output = array();
-    foreach ($resources as $resource) {
-      if (isset($this->hasRendered[$resource['uri']])) {
+    foreach ($resources as $name) {
+      if (isset($this->hasRendered[$name])) {
         continue;
       }
-      $this->hasRendered[$resource['uri']] = true;
+      $this->hasRendered[$name] = true;
 
-      $output[] = $this->renderResource($resource);
+      $output[] = $this->renderResource($name);
       $output[] = "\n";
     }
     return phutil_implode_html('', $output);
   }
 
-  private function renderResource(array $resource) {
-    $uri = $this->getURI($resource);
-    switch ($resource['type']) {
+  private function renderResource($name) {
+    $uri = $this->getURI($name);
+    $type = CelerityResourceTransformer::getResourceType($name);
+    switch ($type) {
       case 'css':
         return phutil_tag(
           'link',
@@ -232,8 +235,9 @@ final class CelerityStaticResourceResponse {
     return $response;
   }
 
-  private function getURI($resource) {
-    $uri = $resource['uri'];
+  private function getURI($name) {
+    $map = CelerityResourceMap::getInstance();
+    $uri = $map->getURIForName($name);
 
     // In developer mode, we dump file modification times into the URI. When a
     // page is reloaded in the browser, any resources brought in by Ajax calls
@@ -242,17 +246,7 @@ final class CelerityStaticResourceResponse {
     // the map script). In production, we can assume the map script gets run
     // after changes, and safely skip this.
     if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
-      $root = dirname(phutil_get_library_root('phabricator')).'/webroot';
-      if (isset($resource['disk'])) {
-        $mtime = (int)filemtime($root.$resource['disk']);
-      } else {
-        $mtime = 0;
-        foreach ($resource['symbols'] as $symbol) {
-          $map = CelerityResourceMap::getInstance();
-          $mtime = max($mtime, $map->getModifiedTimeForSymbol($symbol));
-        }
-      }
-
+      $mtime = $map->getModifiedTimeForName($name);
       $uri = preg_replace('@^/res/@', '/res/'.$mtime.'T/', $uri);
     }
 
