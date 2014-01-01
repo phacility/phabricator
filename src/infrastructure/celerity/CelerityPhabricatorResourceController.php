@@ -13,9 +13,8 @@ final class CelerityPhabricatorResourceController
   private $path;
   private $hash;
 
-  protected function getRootDirectory() {
-    $root = dirname(phutil_get_library_root('phabricator'));
-    return $root.'/webroot/';
+  public function getCelerityResourceMap() {
+    return CelerityResourceMap::getNamedInstance('phabricator');
   }
 
   public function willProcessRequest(array $data) {
@@ -28,12 +27,14 @@ final class CelerityPhabricatorResourceController
   }
 
   protected function buildResourceTransformer() {
-    $xformer = new CelerityResourceTransformer();
-    $xformer->setMinify(
-      !PhabricatorEnv::getEnvConfig('phabricator.developer-mode') &&
-      PhabricatorEnv::getEnvConfig('celerity.minify'));
-    $xformer->setCelerityMap(CelerityResourceMap::getInstance());
-    return $xformer;
+    $minify_on = PhabricatorEnv::getEnvConfig('celerity.minify');
+    $developer_on = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
+
+    $should_minify = ($minify_on && !$developer_on);
+
+    return id(new CelerityResourceTransformer())
+      ->setMinify($should_minify)
+      ->setCelerityMap($this->getCelerityResourceMap());
   }
 
 }

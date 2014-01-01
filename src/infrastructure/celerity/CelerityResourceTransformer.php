@@ -6,7 +6,6 @@
 final class CelerityResourceTransformer {
 
   private $minify;
-  private $rawResourceMap;
   private $rawURIMap;
   private $celerityMap;
   private $translateURICallback;
@@ -19,11 +18,6 @@ final class CelerityResourceTransformer {
 
   public function setMinify($minify) {
     $this->minify = $minify;
-    return $this;
-  }
-
-  public function setRawResourceMap(array $raw_resource_map) {
-    $this->rawResourceMap = $raw_resource_map;
     return $this;
   }
 
@@ -121,10 +115,6 @@ final class CelerityResourceTransformer {
     if ($this->rawURIMap !== null) {
       if (isset($this->rawURIMap[$uri])) {
         $uri = $this->rawURIMap[$uri];
-      }
-    } else if ($this->rawResourceMap) {
-      if (isset($this->rawResourceMap[$uri]['uri'])) {
-        $uri = $this->rawResourceMap[$uri]['uri'];
       }
     } else if ($this->celerityMap) {
       $resource_uri = $this->celerityMap->getURIForName($uri);

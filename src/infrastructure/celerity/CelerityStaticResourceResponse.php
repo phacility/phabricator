@@ -61,7 +61,7 @@ final class CelerityStaticResourceResponse {
 
   private function resolveResources() {
     if ($this->needsResolve) {
-      $map = CelerityResourceMap::getInstance();
+      $map = CelerityResourceMap::getNamedInstance('phabricator');
 
       $symbols = array_keys($this->symbols);
       $this->packaged = $map->getPackagedNamesForSymbols($symbols);
@@ -71,8 +71,8 @@ final class CelerityStaticResourceResponse {
     return $this;
   }
 
-  public function renderSingleResource($symbol) {
-    $map = CelerityResourceMap::getInstance();
+  public function renderSingleResource($symbol, $source_name) {
+    $map = CelerityResourceMap::getNamedInstance($source_name);
     $packaged = $map->getPackagedNamesForSymbols(array($symbol));
     return $this->renderPackagedResources($packaged);
   }
@@ -236,7 +236,7 @@ final class CelerityStaticResourceResponse {
   }
 
   private function getURI($name) {
-    $map = CelerityResourceMap::getInstance();
+    $map = CelerityResourceMap::getNamedInstance('phabricator');
     $uri = $map->getURIForName($name);
 
     // In developer mode, we dump file modification times into the URI. When a

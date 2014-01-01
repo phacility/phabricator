@@ -14,9 +14,7 @@ abstract class CelerityResourceController extends PhabricatorController {
     return false;
   }
 
-  public function getCelerityResourceMap() {
-    return CelerityResourceMap::getInstance();
-  }
+  abstract public function getCelerityResourceMap();
 
   protected function serveResource($path, $package_hash = null) {
     // Sanity checking to keep this from exposing anything sensitive, since it

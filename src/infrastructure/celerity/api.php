@@ -49,8 +49,8 @@ function celerity_generate_unique_node_id() {
  *
  * @group celerity
  */
-function celerity_get_resource_uri($resource) {
-  $map = CelerityResourceMap::getInstance();
+function celerity_get_resource_uri($resource, $source = 'phabricator') {
+  $map = CelerityResourceMap::getNamedInstance($source);
 
   $uri = $map->getURIForName($resource);
   if ($uri) {

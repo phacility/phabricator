@@ -29,7 +29,7 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
       }
     }
 
-    $map = CelerityResourceMap::getInstance();
+    $map = CelerityResourceMap::getNamedInstance('phabricator');
     $resource_symbol = 'syntax-highlighting-css';
     $resource_uri = $map->getURIForSymbol($resource_symbol);
 

@@ -139,7 +139,7 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
       }
     }
 
-    $celerity = CelerityResourceMap::getInstance();
+    $celerity = CelerityResourceMap::getNamedInstance('phabricator');
 
     $path = preg_replace(
       '@^externals/javelinjs/src/@',

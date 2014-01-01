@@ -8,7 +8,7 @@
  */
 final class CelerityResourceMap {
 
-  private static $instance;
+  private static $instances = array();
 
   private $resources;
   private $symbolMap;
@@ -37,12 +37,20 @@ final class CelerityResourceMap {
     }
   }
 
-  public static function getInstance() {
-    if (empty(self::$instance)) {
-      $resources = new CelerityPhabricatorResources();
-      self::$instance = new CelerityResourceMap($resources);
+  public static function getNamedInstance($name) {
+    if (empty(self::$instances[$name])) {
+      $resources_list = CelerityPhysicalResources::getAll();
+      if (empty($resources_list[$name])) {
+        throw new Exception(
+          pht(
+            'No resource source exists with name "%s"!', $name));
+      }
+
+      $instance = new CelerityResourceMap($resources_list[$name]);
+      self::$instances[$name] = $instance;
     }
-    return self::$instance;
+
+    return self::$instances[$name];
   }
 
   public function getPackagedNamesForSymbols(array $symbols) {

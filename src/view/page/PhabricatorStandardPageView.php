@@ -255,7 +255,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       parent::getHead(),
       phutil_safe_html($monospaced),
       phutil_safe_html($monospaced_win),
-      $response->renderSingleResource('javelin-magical-init'));
+      $response->renderSingleResource('javelin-magical-init', 'phabricator'));
   }
 
   public function setGlyph($glyph) {
