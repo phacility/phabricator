@@ -10,7 +10,7 @@ final class CelerityPhabricatorResources extends CelerityResourcesOnDisk {
   }
 
   public function getPathToResources() {
-    return $this->getPhabricatorPath('webroot/rsrc/');
+    return $this->getPhabricatorPath('webroot/');
   }
 
   public function getPathToMap() {

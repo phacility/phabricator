@@ -112,14 +112,26 @@ final class CelerityResourceTransformer {
   public function translateResourceURI(array $matches) {
     $uri = trim($matches[1], "'\" \r\t\n");
 
-    if ($this->rawURIMap !== null) {
-      if (isset($this->rawURIMap[$uri])) {
-        $uri = $this->rawURIMap[$uri];
+    $alternatives = array_unique(
+      array(
+        $uri,
+        ltrim($uri, '/'),
+      ));
+
+    foreach ($alternatives as $alternative) {
+      if ($this->rawURIMap !== null) {
+        if (isset($this->rawURIMap[$alternative])) {
+          $uri = $this->rawURIMap[$alternative];
+          break;
+        }
       }
-    } else if ($this->celerityMap) {
-      $resource_uri = $this->celerityMap->getURIForName($uri);
-      if ($resource_uri) {
-        $uri = $resource_uri;
+
+      if ($this->celerityMap) {
+        $resource_uri = $this->celerityMap->getURIForName($alternative);
+        if ($resource_uri) {
+          $uri = $resource_uri;
+          break;
+        }
       }
     }
 
