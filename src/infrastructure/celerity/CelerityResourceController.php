@@ -16,10 +16,6 @@ abstract class CelerityResourceController extends PhabricatorController {
     return false;
   }
 
-  private function getDiskPath($to_resource = null) {
-    return $this->getRootDirectory().$to_resource;
-  }
-
   protected function serveResource($path, $package_hash = null) {
     // Sanity checking to keep this from exposing anything sensitive, since it
     // ultimately boils down to disk reads.
@@ -41,18 +37,18 @@ abstract class CelerityResourceController extends PhabricatorController {
       return $this->makeResponseCacheable(new Aphront304Response());
     }
 
+    $map = CelerityResourceMap::getInstance();
+
     if ($package_hash) {
-      $map = CelerityResourceMap::getInstance();
-      $paths = $map->resolvePackage($package_hash);
-      if (!$paths) {
+      $resource_names = $map->getResourceNamesForPackageHash($package_hash);
+      if (!$resource_names) {
         return new Aphront404Response();
       }
 
       try {
         $data = array();
-        foreach ($paths as $package_path) {
-          $disk_path = $this->getDiskPath($package_path);
-          $data[] = Filesystem::readFile($disk_path);
+        foreach ($resource_names as $resource_name) {
+          $data[] = $map->getResourceDataForName($resource_name);
         }
         $data = implode("\n\n", $data);
       } catch (Exception $ex) {
@@ -60,8 +56,7 @@ abstract class CelerityResourceController extends PhabricatorController {
       }
     } else {
       try {
-        $disk_path = $this->getDiskPath($path);
-        $data = Filesystem::readFile($disk_path);
+        $data = $map->getResourceDataForName($path);
       } catch (Exception $ex) {
         return new Aphront404Response();
       }

@@ -90,7 +90,13 @@ final class CelerityResourceMap {
     return $packaged;
   }
 
-  public function resolvePackage($package_hash) {
+  public function getResourceDataForName($resource_name) {
+    $root = phutil_get_library_root('phabricator');
+    $root = dirname($root).'/webroot/';
+    return Filesystem::readFile($root.$resource_name);
+  }
+
+  public function getResourceNamesForPackageHash($package_hash) {
     $package = idx($this->packageMap['packages'], $package_hash);
     if (!$package) {
       return null;
