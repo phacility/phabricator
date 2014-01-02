@@ -1856,6 +1856,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20131227.heraldobject.sql'),
       ),
+      '20131231.dropshortcut.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20131231.dropshortcut.sql'),
+      ),
     );
   }
 }
