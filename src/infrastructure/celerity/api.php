@@ -15,9 +15,9 @@
  *
  * @group celerity
  */
-function require_celerity_resource($symbol) {
+function require_celerity_resource($symbol, $source_name = 'phabricator') {
   $response = CelerityAPI::getStaticResourceResponse();
-  $response->requireResource($symbol);
+  $response->requireResource($symbol, $source_name);
 }
 
 

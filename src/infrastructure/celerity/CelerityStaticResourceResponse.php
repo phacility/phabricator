@@ -39,8 +39,12 @@ final class CelerityStaticResourceResponse {
    * a behavior will execute only once even if it is initialized multiple times.
    * If $config is nonempty, the behavior will be invoked once for each config.
    */
-  public function initBehavior($behavior, array $config = array()) {
-    $this->requireResource('javelin-behavior-'.$behavior);
+  public function initBehavior(
+    $behavior,
+    array $config = array(),
+    $source_name = 'phabricator') {
+
+    $this->requireResource('javelin-behavior-'.$behavior, $source_name);
 
     if (empty($this->behaviors[$behavior])) {
       $this->behaviors[$behavior] = array();
@@ -53,19 +57,39 @@ final class CelerityStaticResourceResponse {
     return $this;
   }
 
-  public function requireResource($symbol) {
-    $this->symbols[$symbol] = true;
+  public function requireResource($symbol, $source_name) {
+    if (isset($this->symbols[$source_name][$symbol])) {
+      return $this;
+    }
+
+    // Verify that the resource exists.
+    $map = CelerityResourceMap::getNamedInstance($source_name);
+    $name = $map->getResourceNameForSymbol($symbol);
+    if ($name === null) {
+      throw new Exception(
+        pht(
+          'No resource with symbol "%s" exists in source "%s"!',
+          $symbol,
+          $source_name));
+    }
+
+    $this->symbols[$source_name][$symbol] = true;
     $this->needsResolve = true;
+
     return $this;
   }
 
   private function resolveResources() {
     if ($this->needsResolve) {
-      $map = CelerityResourceMap::getNamedInstance('phabricator');
+      $this->packaged = array();
+      foreach ($this->symbols as $source_name => $symbols_map) {
+        $symbols = array_keys($symbols_map);
 
-      $symbols = array_keys($this->symbols);
-      $this->packaged = $map->getPackagedNamesForSymbols($symbols);
+        $map = CelerityResourceMap::getNamedInstance($source_name);
+        $packaged = $map->getPackagedNamesForSymbols($symbols);
 
+        $this->packaged[$source_name] = $packaged;
+      }
       $this->needsResolve = false;
     }
     return $this;
@@ -74,24 +98,34 @@ final class CelerityStaticResourceResponse {
   public function renderSingleResource($symbol, $source_name) {
     $map = CelerityResourceMap::getNamedInstance($source_name);
     $packaged = $map->getPackagedNamesForSymbols(array($symbol));
-    return $this->renderPackagedResources($packaged);
+    return $this->renderPackagedResources($map, $packaged);
   }
 
   public function renderResourcesOfType($type) {
     $this->resolveResources();
 
-    $resources = array();
-    foreach ($this->packaged as $name) {
-      $resource_type = CelerityResourceTransformer::getResourceType($name);
-      if ($resource_type == $type) {
-        $resources[] = $name;
+    $result = array();
+    foreach ($this->packaged as $source_name => $resource_names) {
+      $map = CelerityResourceMap::getNamedInstance($source_name);
+
+      $resources_of_type = array();
+      foreach ($resource_names as $resource_name) {
+        $resource_type = $map->getResourceTypeForName($resource_name);
+        if ($resource_type == $type) {
+          $resources_of_type[] = $resource_name;
+        }
       }
+
+      $result[] = $this->renderPackagedResources($map, $resources_of_type);
     }
 
-    return $this->renderPackagedResources($resources);
+    return phutil_implode_html('', $result);
   }
 
-  private function renderPackagedResources(array $resources) {
+  private function renderPackagedResources(
+    CelerityResourceMap $map,
+    array $resources) {
+
     $output = array();
     foreach ($resources as $name) {
       if (isset($this->hasRendered[$name])) {
@@ -99,15 +133,19 @@ final class CelerityStaticResourceResponse {
       }
       $this->hasRendered[$name] = true;
 
-      $output[] = $this->renderResource($name);
-      $output[] = "\n";
+      $output[] = $this->renderResource($map, $name);
     }
-    return phutil_implode_html('', $output);
+
+    return $output;
   }
 
-  private function renderResource($name) {
-    $uri = $this->getURI($name);
-    $type = CelerityResourceTransformer::getResourceType($name);
+  private function renderResource(
+    CelerityResourceMap $map,
+    $name) {
+
+    $uri = $this->getURI($map, $name);
+    $type = $map->getResourceTypeForName($name);
+
     switch ($type) {
       case 'css':
         return phutil_tag(
@@ -126,7 +164,12 @@ final class CelerityStaticResourceResponse {
           ),
           '');
     }
-    throw new Exception("Unable to render resource.");
+
+    throw new Exception(
+      pht(
+        'Unable to render resource "%s", which has unknown type "%s".',
+        $name,
+        $type));
   }
 
   public function renderHTMLFooter() {
@@ -225,8 +268,11 @@ final class CelerityStaticResourceResponse {
 
     $this->resolveResources();
     $resources = array();
-    foreach ($this->packaged as $resource) {
-      $resources[] = $this->getURI($resource);
+    foreach ($this->packaged as $source_name => $resource_names) {
+      $map = CelerityResourceMap::getNamedInstance($source_name);
+      foreach ($resource_names as $resource_name) {
+        $resources[] = $this->getURI($map, $resource_name);
+      }
     }
     if ($resources) {
       $response['javelin_resources'] = $resources;
@@ -235,8 +281,10 @@ final class CelerityStaticResourceResponse {
     return $response;
   }
 
-  private function getURI($name) {
-    $map = CelerityResourceMap::getNamedInstance('phabricator');
+  private function getURI(
+    CelerityResourceMap $map,
+    $name) {
+
     $uri = $map->getURIForName($name);
 
     // In developer mode, we dump file modification times into the URI. When a

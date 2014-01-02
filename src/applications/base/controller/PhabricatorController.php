@@ -408,4 +408,9 @@ abstract class PhabricatorController extends AphrontController {
     return array($can_act, $message);
   }
 
+  public function getDefaultResourceSource() {
+    return 'phabricator';
+  }
+
+
 }

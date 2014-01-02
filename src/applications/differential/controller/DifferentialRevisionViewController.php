@@ -497,8 +497,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
       );
     }
 
-    require_celerity_resource('phabricator-object-selector-css');
-    require_celerity_resource('javelin-behavior-phabricator-object-selector');
+    $this->requireResource('phabricator-object-selector-css');
+    $this->requireResource('javelin-behavior-phabricator-object-selector');
 
     $links[] = array(
       'icon'  => 'link',

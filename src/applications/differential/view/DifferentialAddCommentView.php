@@ -48,7 +48,7 @@ final class DifferentialAddCommentView extends AphrontView {
 
   public function render() {
 
-    require_celerity_resource('differential-revision-add-comment-css');
+    $this->requireResource('differential-revision-add-comment-css');
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 

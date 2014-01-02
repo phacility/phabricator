@@ -67,8 +67,8 @@ final class DifferentialRevisionCommentView extends AphrontView {
       throw new Exception("Call setUser() before rendering!");
     }
 
-    require_celerity_resource('phabricator-remarkup-css');
-    require_celerity_resource('differential-revision-comment-css');
+    $this->requireResource('phabricator-remarkup-css');
+    $this->requireResource('differential-revision-comment-css');
 
     $comment = $this->comment;
 

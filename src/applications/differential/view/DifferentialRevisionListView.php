@@ -102,8 +102,8 @@ final class DifferentialRevisionListView extends AphrontView {
         -$stale);
     }
 
-    Javelin::initBehavior('phabricator-tooltips', array());
-    require_celerity_resource('aphront-tooltip-css');
+    $this->initBehavior('phabricator-tooltips', array());
+    $this->requireResource('aphront-tooltip-css');
 
     $flagged = mpull($this->flags, null, 'getObjectPHID');
 

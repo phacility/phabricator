@@ -236,4 +236,8 @@ final class CelerityResourceMap {
     return isset($this->packageMap[$name]);
   }
 
+  public function getResourceTypeForName($name) {
+    return $this->resources->getResourceType($name);
+  }
+
 }
