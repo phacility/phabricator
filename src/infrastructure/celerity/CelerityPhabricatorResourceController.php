@@ -12,17 +12,27 @@ final class CelerityPhabricatorResourceController
 
   private $path;
   private $hash;
+  private $library;
 
   public function getCelerityResourceMap() {
-    return CelerityResourceMap::getNamedInstance('phabricator');
+    return CelerityResourceMap::getNamedInstance($this->library);
   }
 
   public function willProcessRequest(array $data) {
     $this->path = $data['path'];
     $this->hash = $data['hash'];
+    $this->library = $data['library'];
   }
 
   public function processRequest() {
+    // Check that the resource library exists before trying to serve resources
+    // from it.
+    try {
+      $this->getCelerityResourceMap();
+    } catch (Exception $ex) {
+      return new Aphront400Response();
+    }
+
     return $this->serveResource($this->path);
   }
 

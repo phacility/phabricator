@@ -30,6 +30,15 @@ abstract class CelerityPhysicalResources extends CelerityResources {
 
       foreach ($resources_list as $resources) {
         $name = $resources->getName();
+
+        if (!preg_match('/^[a-z0-9]+/', $name)) {
+          throw new Exception(
+            pht(
+              'Resources name "%s" is not valid; it must contain only '.
+              'lowercase latin letters and digits.',
+              $name));
+        }
+
         if (empty($resources_map[$name])) {
           $resources_map[$name] = $resources;
         } else {

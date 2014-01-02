@@ -25,7 +25,8 @@ abstract class CelerityResources {
   }
 
   public function getResourceURI($hash, $name) {
-    return "/res/{$hash}/{$name}";
+    $resources = $this->getName();
+    return "/res/{$resources}/{$hash}/{$name}";
   }
 
   public function getResourcePackages() {
