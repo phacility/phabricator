@@ -172,7 +172,8 @@ final class HeraldNewController extends HeraldController {
           ->appendRemarkupInstructions(
             pht(
               'Choose the object this rule will act on (for example, enter '.
-              '`rX` to act on the `rX` repository).'))
+              '`rX` to act on the `rX` repository, or `#project` to act on '.
+              'a project).'))
           ->appendRemarkupInstructions(
             $adapter->explainValidTriggerObjects())
           ->appendChild(

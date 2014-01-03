@@ -1,31 +1,11 @@
 <?php
 
-final class HeraldPreCommitContentAdapter extends HeraldAdapter {
+final class HeraldPreCommitContentAdapter extends HeraldPreCommitAdapter {
 
-  private $log;
-  private $hookEngine;
   private $changesets;
   private $commitRef;
   private $fields;
   private $revision = false;
-
-  public function setPushLog(PhabricatorRepositoryPushLog $log) {
-    $this->log = $log;
-    return $this;
-  }
-
-  public function setHookEngine(DiffusionCommitHookEngine $engine) {
-    $this->hookEngine = $engine;
-    return $this;
-  }
-
-  public function getAdapterApplicationClass() {
-    return 'PhabricatorApplicationDiffusion';
-  }
-
-  public function getObject() {
-    return $this->log;
-  }
 
   public function getAdapterContentName() {
     return pht('Commit Hook: Commit Content');
@@ -39,41 +19,6 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
     return pht(
       "React to commits being pushed to hosted repositories.\n".
       "Hook rules can block changes.");
-  }
-
-  public function supportsRuleType($rule_type) {
-    switch ($rule_type) {
-      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
-      case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
-        return true;
-      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
-      default:
-        return false;
-    }
-  }
-
-  public function canTriggerOnObject($object) {
-    if ($object instanceof PhabricatorRepository) {
-      return true;
-    }
-    return false;
-  }
-
-  public function explainValidTriggerObjects() {
-    return pht(
-      'This rule can trigger for **repositories**.');
-  }
-
-  public function getTriggerObjectPHIDs() {
-    return array(
-      $this->hookEngine->getRepository()->getPHID(),
-      $this->getPHID(),
-    );
-  }
-
-  public function getFieldNameMap() {
-    return array(
-    ) + parent::getFieldNameMap();
   }
 
   public function getFields() {
@@ -90,6 +35,7 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
         self::FIELD_DIFF_ADDED_CONTENT,
         self::FIELD_DIFF_REMOVED_CONTENT,
         self::FIELD_REPOSITORY,
+        self::FIELD_REPOSITORY_PROJECTS,
         self::FIELD_PUSHER,
         self::FIELD_PUSHER_PROJECTS,
         self::FIELD_DIFFERENTIAL_REVISION,
@@ -102,37 +48,8 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
       parent::getFields());
   }
 
-  public function getConditionsForField($field) {
-    switch ($field) {
-    }
-    return parent::getConditionsForField($field);
-  }
-
-  public function getActions($rule_type) {
-    switch ($rule_type) {
-      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
-      case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
-        return array(
-          self::ACTION_BLOCK,
-          self::ACTION_NOTHING
-        );
-      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
-        return array(
-          self::ACTION_NOTHING,
-        );
-    }
-  }
-
-  public function getValueTypeForFieldAndCondition($field, $condition) {
-    return parent::getValueTypeForFieldAndCondition($field, $condition);
-  }
-
-  public function getPHID() {
-    return $this->getObject()->getPHID();
-  }
-
   public function getHeraldName() {
-    return pht('Push Log');
+    return pht('Push Log (Content)');
   }
 
   public function getHeraldField($field) {
@@ -159,11 +76,13 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
       case self::FIELD_DIFF_REMOVED_CONTENT:
         return $this->getDiffContent('-');
       case self::FIELD_REPOSITORY:
-        return $this->hookEngine->getRepository()->getPHID();
+        return $this->getHookEngine()->getRepository()->getPHID();
+      case self::FIELD_REPOSITORY_PROJECTS:
+        return $this->getHookEngine()->getRepository()->getProjectPHIDs();
       case self::FIELD_PUSHER:
-        return $this->hookEngine->getViewer()->getPHID();
+        return $this->getHookEngine()->getViewer()->getPHID();
       case self::FIELD_PUSHER_PROJECTS:
-        return $this->hookEngine->loadViewerProjectPHIDsForHerald();
+        return $this->getHookEngine()->loadViewerProjectPHIDsForHerald();
       case self::FIELD_DIFFERENTIAL_REVISION:
         $revision = $this->getRevision();
         if (!$revision) {
@@ -199,38 +118,11 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
     return parent::getHeraldField($field);
   }
 
-  public function applyHeraldEffects(array $effects) {
-    assert_instances_of($effects, 'HeraldEffect');
-
-    $result = array();
-    foreach ($effects as $effect) {
-      $action = $effect->getAction();
-      switch ($action) {
-        case self::ACTION_NOTHING:
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Did nothing.'));
-          break;
-        case self::ACTION_BLOCK:
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Blocked push.'));
-          break;
-        default:
-          throw new Exception(pht('No rules to handle action "%s"!', $action));
-      }
-    }
-
-    return $result;
-  }
-
   private function getDiffContent($type) {
     if ($this->changesets === null) {
       try {
-        $this->changesets = $this->hookEngine->loadChangesetsForCommit(
-          $this->log->getRefNew());
+        $this->changesets = $this->getHookEngine()->loadChangesetsForCommit(
+          $this->getObject()->getRefNew());
       } catch (Exception $ex) {
         $this->changesets = $ex;
       }
@@ -277,14 +169,14 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
 
   private function getCommitRef() {
     if ($this->commitRef === null) {
-      $this->commitRef = $this->hookEngine->loadCommitRefForCommit(
-        $this->log->getRefNew());
+      $this->commitRef = $this->getHookEngine()->loadCommitRefForCommit(
+        $this->getObject()->getRefNew());
     }
     return $this->commitRef;
   }
 
   private function getAuthorPHID() {
-    $repository = $this->hookEngine->getRepository();
+    $repository = $this->getHookEngine()->getRepository();
     $vcs = $repository->getVersionControlSystem();
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
@@ -297,12 +189,12 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
         return $this->lookupUser($author);
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         // In Subversion, the pusher is always the author.
-        return $this->hookEngine->getViewer()->getPHID();
+        return $this->getHookEngine()->getViewer()->getPHID();
     }
   }
 
   private function getCommitterPHID() {
-    $repository = $this->hookEngine->getRepository();
+    $repository = $this->getHookEngine()->getRepository();
     $vcs = $repository->getVersionControlSystem();
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
@@ -321,12 +213,12 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
         return $phid;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         // In Subversion, the pusher is always the committer.
-        return $this->hookEngine->getViewer()->getPHID();
+        return $this->getHookEngine()->getViewer()->getPHID();
     }
   }
 
   private function getAuthorRaw() {
-    $repository = $this->hookEngine->getRepository();
+    $repository = $this->getHookEngine()->getRepository();
     $vcs = $repository->getVersionControlSystem();
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
@@ -335,12 +227,12 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
         return $ref->getAuthor();
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         // In Subversion, the pusher is always the author.
-        return $this->hookEngine->getViewer()->getUsername();
+        return $this->getHookEngine()->getViewer()->getUsername();
     }
   }
 
   private function getCommitterRaw() {
-    $repository = $this->hookEngine->getRepository();
+    $repository = $this->getHookEngine()->getRepository();
     $vcs = $repository->getVersionControlSystem();
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
@@ -355,7 +247,7 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
         return $ref->getAuthor();
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         // In Subversion, the pusher is always the committer.
-        return $this->hookEngine->getViewer()->getUsername();
+        return $this->getHookEngine()->getViewer()->getUsername();
     }
   }
 
@@ -368,7 +260,7 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
   private function getCommitFields() {
     if ($this->fields === null) {
       $this->fields = id(new DiffusionLowLevelCommitFieldsQuery())
-        ->setRepository($this->hookEngine->getRepository())
+        ->setRepository($this->getHookEngine()->getRepository())
         ->withCommitRef($this->getCommitRef())
         ->execute();
     }
@@ -394,14 +286,14 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
   }
 
   private function getIsMergeCommit() {
-    $repository = $this->hookEngine->getRepository();
+    $repository = $this->getHookEngine()->getRepository();
     $vcs = $repository->getVersionControlSystem();
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         $parents = id(new DiffusionLowLevelParentsQuery())
           ->setRepository($repository)
-          ->withIdentifier($this->log->getRefNew())
+          ->withIdentifier($this->getObject()->getRefNew())
           ->execute();
 
         return (count($parents) > 1);
@@ -414,7 +306,8 @@ final class HeraldPreCommitContentAdapter extends HeraldAdapter {
   }
 
   private function getBranches() {
-    return $this->hookEngine->loadBranches($this->log->getRefNew());
+    return $this->getHookEngine()->loadBranches(
+      $this->getObject()->getRefNew());
   }
 
 }

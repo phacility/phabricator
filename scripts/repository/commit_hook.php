@@ -13,6 +13,7 @@ $engine = new DiffusionCommitHookEngine();
 $repository = id(new PhabricatorRepositoryQuery())
   ->setViewer(PhabricatorUser::getOmnipotentUser())
   ->withCallsigns(array($argv[1]))
+  ->needProjectPHIDs(true)
   ->executeOne();
 
 if (!$repository) {

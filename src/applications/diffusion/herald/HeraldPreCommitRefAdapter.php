@@ -1,9 +1,6 @@
 <?php
 
-final class HeraldPreCommitRefAdapter extends HeraldAdapter {
-
-  private $log;
-  private $hookEngine;
+final class HeraldPreCommitRefAdapter extends HeraldPreCommitAdapter {
 
   const FIELD_REF_TYPE = 'ref-type';
   const FIELD_REF_NAME = 'ref-name';
@@ -11,24 +8,6 @@ final class HeraldPreCommitRefAdapter extends HeraldAdapter {
 
   const VALUE_REF_TYPE = 'value-ref-type';
   const VALUE_REF_CHANGE = 'value-ref-change';
-
-  public function setPushLog(PhabricatorRepositoryPushLog $log) {
-    $this->log = $log;
-    return $this;
-  }
-
-  public function setHookEngine(DiffusionCommitHookEngine $engine) {
-    $this->hookEngine = $engine;
-    return $this;
-  }
-
-  public function getAdapterApplicationClass() {
-    return 'PhabricatorApplicationDiffusion';
-  }
-
-  public function getObject() {
-    return $this->log;
-  }
 
   public function getAdapterContentName() {
     return pht('Commit Hook: Branches/Tags/Bookmarks');
@@ -42,36 +21,6 @@ final class HeraldPreCommitRefAdapter extends HeraldAdapter {
     return pht(
       "React to branches and tags being pushed to hosted repositories.\n".
       "Hook rules can block changes.");
-  }
-
-  public function supportsRuleType($rule_type) {
-    switch ($rule_type) {
-      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
-      case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
-        return true;
-      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
-      default:
-        return false;
-    }
-  }
-
-  public function canTriggerOnObject($object) {
-    if ($object instanceof PhabricatorRepository) {
-      return true;
-    }
-    return false;
-  }
-
-  public function explainValidTriggerObjects() {
-    return pht(
-      'This rule can trigger for **repositories**.');
-  }
-
-  public function getTriggerObjectPHIDs() {
-    return array(
-      $this->hookEngine->getRepository()->getPHID(),
-      $this->getPHID(),
-    );
   }
 
   public function getFieldNameMap() {
@@ -89,6 +38,7 @@ final class HeraldPreCommitRefAdapter extends HeraldAdapter {
         self::FIELD_REF_NAME,
         self::FIELD_REF_CHANGE,
         self::FIELD_REPOSITORY,
+        self::FIELD_REPOSITORY_PROJECTS,
         self::FIELD_PUSHER,
         self::FIELD_PUSHER_PROJECTS,
         self::FIELD_RULE,
@@ -119,21 +69,6 @@ final class HeraldPreCommitRefAdapter extends HeraldAdapter {
     return parent::getConditionsForField($field);
   }
 
-  public function getActions($rule_type) {
-    switch ($rule_type) {
-      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
-      case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
-        return array(
-          self::ACTION_BLOCK,
-          self::ACTION_NOTHING
-        );
-      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
-        return array(
-          self::ACTION_NOTHING,
-        );
-    }
-  }
-
   public function getValueTypeForFieldAndCondition($field, $condition) {
     switch ($field) {
       case self::FIELD_REF_TYPE:
@@ -145,12 +80,8 @@ final class HeraldPreCommitRefAdapter extends HeraldAdapter {
     return parent::getValueTypeForFieldAndCondition($field, $condition);
   }
 
-  public function getPHID() {
-    return $this->getObject()->getPHID();
-  }
-
   public function getHeraldName() {
-    return pht('Push Log');
+    return pht('Push Log (Ref)');
   }
 
   public function getHeraldField($field) {
@@ -163,42 +94,16 @@ final class HeraldPreCommitRefAdapter extends HeraldAdapter {
       case self::FIELD_REF_CHANGE:
         return $log->getChangeFlags();
       case self::FIELD_REPOSITORY:
-        return $this->hookEngine->getRepository()->getPHID();
+        return $this->getHookEngine()->getRepository()->getPHID();
+      case self::FIELD_REPOSITORY_PROJECTS:
+        return $this->getHookEngine()->getRepository()->getProjectPHIDs();
       case self::FIELD_PUSHER:
-        return $this->hookEngine->getViewer()->getPHID();
+        return $this->getHookEngine()->getViewer()->getPHID();
       case self::FIELD_PUSHER_PROJECTS:
-        return $this->hookEngine->loadViewerProjectPHIDsForHerald();
+        return $this->getHookEngine()->loadViewerProjectPHIDsForHerald();
     }
 
     return parent::getHeraldField($field);
-  }
-
-
-  public function applyHeraldEffects(array $effects) {
-    assert_instances_of($effects, 'HeraldEffect');
-
-    $result = array();
-    foreach ($effects as $effect) {
-      $action = $effect->getAction();
-      switch ($action) {
-        case self::ACTION_NOTHING:
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Did nothing.'));
-          break;
-        case self::ACTION_BLOCK:
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Blocked push.'));
-          break;
-        default:
-          throw new Exception(pht('No rules to handle action "%s"!', $action));
-      }
-    }
-
-    return $result;
   }
 
 }
