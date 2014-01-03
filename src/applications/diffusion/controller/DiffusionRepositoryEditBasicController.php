@@ -16,6 +16,7 @@ final class DiffusionRepositoryEditBasicController
           PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
+      ->needProjectPHIDs(true)
       ->withIDs(array($repository->getID()))
       ->executeOne();
 
@@ -33,6 +34,7 @@ final class DiffusionRepositoryEditBasicController
     if ($request->isFormPost()) {
       $v_name = $request->getStr('name');
       $v_desc = $request->getStr('description');
+      $v_projects = $request->getArr('projectPHIDs');
 
       if (!strlen($v_name)) {
         $e_name = pht('Required');
@@ -47,6 +49,7 @@ final class DiffusionRepositoryEditBasicController
 
         $type_name = PhabricatorRepositoryTransaction::TYPE_NAME;
         $type_desc = PhabricatorRepositoryTransaction::TYPE_DESCRIPTION;
+        $type_edge = PhabricatorTransactions::TYPE_EDGE;
 
         $xactions[] = id(clone $template)
           ->setTransactionType($type_name)
@@ -55,6 +58,16 @@ final class DiffusionRepositoryEditBasicController
         $xactions[] = id(clone $template)
           ->setTransactionType($type_desc)
           ->setNewValue($v_desc);
+
+        $xactions[] = id(clone $template)
+          ->setTransactionType($type_edge)
+          ->setMetadataValue(
+            'edge:type',
+            PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT)
+          ->setNewValue(
+            array(
+              '=' => array_fuse($v_projects),
+            ));
 
         id(new PhabricatorRepositoryEditor())
           ->setContinueOnNoEffect(true)
@@ -78,6 +91,8 @@ final class DiffusionRepositoryEditBasicController
         ->setErrors($errors);
     }
 
+    $project_handles = $this->loadViewerHandles($repository->getProjectPHIDs());
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->appendChild(
@@ -91,6 +106,12 @@ final class DiffusionRepositoryEditBasicController
           ->setName('description')
           ->setLabel(pht('Description'))
           ->setValue($v_desc))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource('/typeahead/common/projects/')
+          ->setName('projectPHIDs')
+          ->setLabel(pht('Projects'))
+          ->setValue($project_handles))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save'))

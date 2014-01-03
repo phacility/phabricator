@@ -32,6 +32,7 @@ final class PhabricatorRepositoryEditor
     $types[] = PhabricatorRepositoryTransaction::TYPE_CREDENTIAL;
     $types[] = PhabricatorRepositoryTransaction::TYPE_DANGEROUS;
 
+    $types[] = PhabricatorTransactions::TYPE_EDGE;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 

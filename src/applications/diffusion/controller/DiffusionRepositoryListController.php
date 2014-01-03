@@ -30,6 +30,11 @@ final class DiffusionRepositoryListController extends DiffusionController
 
     $viewer = $this->getRequest()->getUser();
 
+    $project_phids = array_fuse(
+      array_mergev(
+        mpull($repositories, 'getProjectPHIDs')));
+    $project_handles = $this->loadViewerHandles($project_phids);
+
     $list = new PHUIObjectItemListView();
     foreach ($repositories as $repository) {
       $id = $repository->getID();
@@ -49,7 +54,8 @@ final class DiffusionRepositoryListController extends DiffusionController
         $item->setEpoch($commit->getEpoch());
       }
 
-      $item->addAttribute(
+      $item->addIcon(
+        'none',
         PhabricatorRepositoryType::getNameForRepositoryType(
           $repository->getVersionControlSystem()));
 
@@ -70,6 +76,15 @@ final class DiffusionRepositoryListController extends DiffusionController
             pht('%s Commit(s)', new PhutilNumber($size))));
       } else {
         $item->addAttribute(pht('No Commits'));
+      }
+
+      $handles = array_select_keys(
+        $project_handles,
+        $repository->getProjectPHIDs());
+      if ($handles) {
+        $item->addAttribute(
+          id(new ManiphestTaskProjectsView())
+            ->setHandles($handles));
       }
 
       if (!$repository->isTracked()) {

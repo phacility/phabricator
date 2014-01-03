@@ -165,6 +165,16 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setUser($user);
     $view->addProperty(pht('Callsign'), $repository->getCallsign());
 
+    $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $repository->getPHID(),
+      PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT);
+    if ($project_phids) {
+      $this->loadHandles($project_phids);
+      $view->addProperty(
+        pht('Projects'),
+        $this->renderHandlesForPHIDs($project_phids));
+    }
+
     if ($repository->isHosted()) {
       $serve_off = PhabricatorRepository::SERVE_OFF;
       $callsign = $repository->getCallsign();

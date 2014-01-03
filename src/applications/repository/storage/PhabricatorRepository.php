@@ -43,6 +43,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   private $commitCount = self::ATTACHABLE;
   private $mostRecentCommit = self::ATTACHABLE;
+  private $projectPHIDs = self::ATTACHABLE;
 
   public static function initializeNewRepository(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -191,6 +192,15 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     return $uri;
+  }
+
+  public function attachProjectPHIDs(array $project_phids) {
+    $this->projectPHIDs = $project_phids;
+    return $this;
+  }
+
+  public function getProjectPHIDs() {
+    return $this->assertAttached($this->projectPHIDs);
   }
 
 
