@@ -945,6 +945,35 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
   }
 
+  public function getHookDirectories() {
+    $directories = array();
+    if (!$this->isHosted()) {
+      return $directories;
+    }
+
+    $root = $this->getLocalPath();
+
+    switch ($this->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        if ($this->isWorkingCopyBare()) {
+          $directories[] = $root.'/hooks/pre-receive-phabricator.d/';
+        } else {
+          $directories[] = $root.'/.git/hooks/pre-receive-phabricator.d/';
+        }
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $directories[] = $root.'/hooks/pre-commit-phabricator.d/';
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        // NOTE: We don't support custom Mercurial hooks for now because they're
+        // messy and we can't easily just drop a `hooks.d/` directory next to
+        // the hooks.
+        break;
+    }
+
+    return $directories;
+  }
+
   public function canDestroyWorkingCopy() {
     if ($this->isHosted()) {
       // Never destroy hosted working copies.

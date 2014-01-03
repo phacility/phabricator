@@ -103,6 +103,10 @@ final class PhabricatorRepositoryPullEngine
         } else if ($is_hg) {
           $this->installMercurialHook();
         }
+
+        foreach ($repository->getHookDirectories() as $directory) {
+          $this->installHookDirectory($directory);
+        }
       }
 
     } catch (Exception $ex) {
@@ -171,6 +175,17 @@ final class PhabricatorRepositoryPullEngine
 
     Filesystem::writeFile($path, $hook);
     Filesystem::changePermissions($path, 0755);
+  }
+
+  private function installHookDirectory($path) {
+    $readme = pht(
+      "To add custom hook scripts to this repository, add them to this ".
+      "directory.\n\nPhabricator will run any executables in this directory ".
+      "after running its own checks, as though they were normal hook ".
+      "scripts.");
+
+    Filesystem::createDirectory($path, 0755);
+    Filesystem::writeFile($path.'/README', $readme);
   }
 
 
@@ -311,15 +326,15 @@ final class PhabricatorRepositoryPullEngine
    */
   private function installGitHook() {
     $repository = $this->getRepository();
-    $path = $repository->getLocalPath();
+    $root = $repository->getLocalPath();
 
     if ($repository->isWorkingCopyBare()) {
-      $path .= '/hooks/pre-receive';
+      $path = '/hooks/pre-receive';
     } else {
-      $path .= '/.git/hooks/pre-receive';
+      $path = '/.git/hooks/pre-receive';
     }
 
-    $this->installHook($path);
+    $this->installHook($root.$path);
   }
 
 
@@ -438,14 +453,17 @@ final class PhabricatorRepositoryPullEngine
     execx('svnadmin create -- %s', $path);
   }
 
+
   /**
    * @task svn
    */
   private function installSubversionHook() {
     $repository = $this->getRepository();
-    $path = $repository->getLocalPath().'/hooks/pre-commit';
+    $root = $repository->getLocalPath();
 
-    $this->installHook($path);
+    $path = '/hooks/pre-commit';
+
+    $this->installHook($root.$path);
   }
 
 

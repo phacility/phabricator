@@ -88,6 +88,7 @@ if ($repository->isHg()) {
 }
 
 $engine->setStdin($stdin);
+$engine->setOriginalArgv(array_slice($argv, 2));
 
 $remote_address = getenv(DiffusionCommitHookEngine::ENV_REMOTE_ADDRESS);
 if (strlen($remote_address)) {
