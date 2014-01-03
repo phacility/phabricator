@@ -18,6 +18,7 @@ abstract class HeraldAdapter {
   const FIELD_DIFF_CONTENT           = 'diff-content';
   const FIELD_DIFF_ADDED_CONTENT     = 'diff-added-content';
   const FIELD_DIFF_REMOVED_CONTENT   = 'diff-removed-content';
+  const FIELD_DIFF_ENORMOUS          = 'diff-enormous';
   const FIELD_REPOSITORY             = 'repository';
   const FIELD_REPOSITORY_PROJECTS    = 'repository-projects';
   const FIELD_RULE                   = 'rule';
@@ -193,6 +194,7 @@ abstract class HeraldAdapter {
       self::FIELD_DIFF_CONTENT => pht('Any changed file content'),
       self::FIELD_DIFF_ADDED_CONTENT => pht('Any added file content'),
       self::FIELD_DIFF_REMOVED_CONTENT => pht('Any removed file content'),
+      self::FIELD_DIFF_ENORMOUS => pht('Change is enormous'),
       self::FIELD_REPOSITORY => pht('Repository'),
       self::FIELD_REPOSITORY_PROJECTS => pht('Repository\'s projects'),
       self::FIELD_RULE => pht('Another Herald rule'),
@@ -342,6 +344,7 @@ abstract class HeraldAdapter {
           self::CONDITION_NOT_EXISTS,
         );
       case self::FIELD_IS_MERGE_COMMIT:
+      case self::FIELD_DIFF_ENORMOUS:
         return array(
           self::CONDITION_IS_TRUE,
           self::CONDITION_IS_FALSE,

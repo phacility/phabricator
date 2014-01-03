@@ -99,6 +99,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
         self::FIELD_DIFF_CONTENT,
         self::FIELD_DIFF_ADDED_CONTENT,
         self::FIELD_DIFF_REMOVED_CONTENT,
+        self::FIELD_DIFF_ENORMOUS,
         self::FIELD_RULE,
         self::FIELD_AFFECTED_PACKAGE,
         self::FIELD_AFFECTED_PACKAGE_OWNER,
@@ -277,14 +278,26 @@ final class HeraldCommitAdapter extends HeraldAdapter {
         'commit' => $this->commit->getCommitIdentifier(),
       ));
 
+    $byte_limit = (1024 * 1024 * 1024); // 1GB
+
     $raw = DiffusionQuery::callConduitWithDiffusionRequest(
       PhabricatorUser::getOmnipotentUser(),
       $drequest,
       'diffusion.rawdiffquery',
       array(
         'commit' => $this->commit->getCommitIdentifier(),
-        'timeout' => 60 * 60 * 15,
-        'linesOfContext' => 0));
+        'timeout' => (60 * 15), // 15 minutes
+        'byteLimit' => $byte_limit,
+        'linesOfContext' => 0,
+      ));
+
+    if (strlen($raw) >= $byte_limit) {
+      throw new Exception(
+        pht(
+          'The raw text of this change is enormous (larger than %d bytes). '.
+          'Herald can not process it.',
+          $byte_limit));
+    }
 
     $parser = new ArcanistDiffParser();
     $changes = $parser->parseDiff($raw);
@@ -360,6 +373,9 @@ final class HeraldCommitAdapter extends HeraldAdapter {
         return $this->getDiffContent('+');
       case self::FIELD_DIFF_REMOVED_CONTENT:
         return $this->getDiffContent('-');
+      case self::FIELD_DIFF_ENORMOUS:
+        $this->getDiffContent('*');
+        return ($this->commitDiff instanceof Exception);
       case self::FIELD_AFFECTED_PACKAGE:
         $packages = $this->loadAffectedPackages();
         return mpull($packages, 'getPHID');
