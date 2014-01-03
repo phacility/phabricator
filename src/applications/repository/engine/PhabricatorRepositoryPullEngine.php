@@ -159,7 +159,13 @@ final class PhabricatorRepositoryPullEngine
 
     $root = dirname(phutil_get_library_root('phabricator'));
     $bin = $root.'/bin/commit-hook';
-    $cmd = csprintf('exec %s %s "$@"', $bin, $callsign);
+
+    $full_php_path = Filesystem::resolveBinary('php');
+    $cmd = csprintf(
+      'exec %s -f %s -- %s "$@"',
+      $full_php_path,
+      $bin,
+      $callsign);
 
     $hook = "#!/bin/sh\n{$cmd}\n";
 
