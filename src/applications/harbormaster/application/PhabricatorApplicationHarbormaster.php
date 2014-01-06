@@ -53,6 +53,10 @@ final class PhabricatorApplicationHarbormaster extends PhabricatorApplication {
           'edit/(?:(?P<id>\d+)/)?' => 'HarbormasterStepEditController',
           'delete/(?:(?P<id>\d+)/)?' => 'HarbormasterStepDeleteController',
         ),
+        'buildable/' => array(
+          '(?P<id>\d+)/(?P<action>stop|resume|restart)/'
+            => 'HarbormasterBuildableActionController',
+        ),
         'build/' => array(
           '(?:(?P<id>\d+)/)?' => 'HarbormasterBuildViewController',
           '(?P<action>stop|resume|restart)/(?P<id>\d+)/(?:(?P<via>[^/]+)/)?'

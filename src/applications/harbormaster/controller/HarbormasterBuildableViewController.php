@@ -20,19 +20,15 @@ final class HarbormasterBuildableViewController
       ->withIDs(array($id))
       ->needBuildableHandles(true)
       ->needContainerHandles(true)
+      ->needBuilds(true)
       ->executeOne();
     if (!$buildable) {
       return new Aphront404Response();
     }
 
-    $builds = id(new HarbormasterBuildQuery())
-      ->setViewer($viewer)
-      ->withBuildablePHIDs(array($buildable->getPHID()))
-      ->execute();
-
     $build_list = id(new PHUIObjectItemListView())
       ->setUser($viewer);
-    foreach ($builds as $build) {
+    foreach ($buildable->getBuilds() as $build) {
       $view_uri = $this->getApplicationURI('/build/'.$build->getID().'/');
       $item = id(new PHUIObjectItemView())
         ->setObjectName(pht('Build %d', $build->getID()))
@@ -152,7 +148,56 @@ final class HarbormasterBuildableViewController
     $list = id(new PhabricatorActionListView())
       ->setUser($viewer)
       ->setObject($buildable)
-      ->setObjectURI("/B{$id}");
+      ->setObjectURI($buildable->getMonogram());
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $buildable,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $can_restart = false;
+    $can_resume = false;
+    $can_stop = false;
+
+    foreach ($buildable->getBuilds() as $build) {
+      if ($build->canRestartBuild()) {
+        $can_restart = true;
+      }
+      if ($build->canResumeBuild()) {
+        $can_resume = true;
+      }
+      if ($build->canStopBuild()) {
+        $can_stop = true;
+      }
+    }
+
+    $restart_uri = "buildable/{$id}/restart/";
+    $stop_uri = "buildable/{$id}/stop/";
+    $resume_uri = "buildable/{$id}/resume/";
+
+    $list->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('backward')
+        ->setName(pht('Restart All Builds'))
+        ->setHref($this->getApplicationURI($restart_uri))
+        ->setWorkflow(true)
+        ->setDisabled(!$can_restart || !$can_edit));
+
+    $list->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('stop')
+        ->setName(pht('Stop All Builds'))
+        ->setHref($this->getApplicationURI($stop_uri))
+        ->setWorkflow(true)
+        ->setDisabled(!$can_stop || !$can_edit));
+
+    $list->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('play')
+        ->setName(pht('Resume All Builds'))
+        ->setHref($this->getApplicationURI($resume_uri))
+        ->setWorkflow(true)
+        ->setDisabled(!$can_resume || !$can_edit));
 
     return $list;
   }

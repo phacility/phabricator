@@ -311,6 +311,7 @@ final class HarbormasterBuild extends HarbormasterDAO
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
@@ -325,8 +326,7 @@ final class HarbormasterBuild extends HarbormasterDAO
   }
 
   public function describeAutomaticCapability($capability) {
-    return pht(
-      'Users must be able to see a buildable to view its build plans.');
+    return pht('A build inherits policies from its buildable.');
   }
 
 }

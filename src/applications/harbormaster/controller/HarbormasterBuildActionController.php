@@ -21,6 +21,11 @@ final class HarbormasterBuildActionController
     $build = id(new HarbormasterBuildQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->id))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->executeOne();
     if (!$build) {
       return new Aphront404Response();
@@ -42,7 +47,7 @@ final class HarbormasterBuildActionController
 
     switch ($this->via) {
       case 'buildable':
-        $return_uri = $build->getBuildable()->getMonogram();
+        $return_uri = '/'.$build->getBuildable()->getMonogram();
         break;
       default:
         $return_uri = $this->getApplicationURI('/build/'.$build->getID().'/');
