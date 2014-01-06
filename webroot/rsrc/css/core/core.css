@@ -109,7 +109,7 @@ img {
   height: 44px;
   border-radius: 5px;
   opacity: 0.4;
-  background: #000 url(/res/cb6fc6eb/rsrc/image/loading/compass_24.gif) center no-repeat;
+  background: #000 url(/rsrc/image/loading/compass_24.gif) center no-repeat;
 }
 
 .grouped:after {

@@ -7,7 +7,7 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => 'b5d5ae70',
+    'core.pkg.css' => '2af78812',
     'core.pkg.js' => 'c907bd96',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => '827749c1',
@@ -112,7 +112,7 @@ return array(
     'rsrc/css/application/slowvote/slowvote.css' => '266df6a1',
     'rsrc/css/application/tokens/tokens.css' => 'fb286311',
     'rsrc/css/application/uiexample/example.css' => '4741b891',
-    'rsrc/css/core/core.css' => 'd04a45a7',
+    'rsrc/css/core/core.css' => 'da26ddb2',
     'rsrc/css/core/remarkup.css' => '32cace73',
     'rsrc/css/core/syntax.css' => '3c18c1cb',
     'rsrc/css/core/z-index.css' => '1bbbd4f1',
@@ -669,7 +669,7 @@ return array(
     'phabricator-busy' => '6453c869',
     'phabricator-chatlog-css' => '0cd2bc78',
     'phabricator-content-source-view-css' => '4b8b05d4',
-    'phabricator-core-css' => 'd04a45a7',
+    'phabricator-core-css' => 'da26ddb2',
     'phabricator-countdown-css' => '86b7b0a0',
     'phabricator-crumbs-view-css' => '2d9db584',
     'phabricator-drag-and-drop-file-upload' => 'ae6abfba',
