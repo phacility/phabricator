@@ -270,6 +270,14 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     return $this->affectedRevision;
   }
 
+  public static function getEnormousByteLimit() {
+    return 1024 * 1024 * 1024; // 1GB
+  }
+
+  public static function getEnormousTimeLimit() {
+    return 60 * 15; // 15 Minutes
+  }
+
   private function loadCommitDiff() {
     $drequest = DiffusionRequest::newFromDictionary(
       array(
@@ -278,7 +286,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
         'commit' => $this->commit->getCommitIdentifier(),
       ));
 
-    $byte_limit = (1024 * 1024 * 1024); // 1GB
+    $byte_limit = self::getEnormousByteLimit();
 
     $raw = DiffusionQuery::callConduitWithDiffusionRequest(
       PhabricatorUser::getOmnipotentUser(),
@@ -286,7 +294,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
       'diffusion.rawdiffquery',
       array(
         'commit' => $this->commit->getCommitIdentifier(),
-        'timeout' => (60 * 15), // 15 minutes
+        'timeout' => self::getEnormousTimeLimit(),
         'byteLimit' => $byte_limit,
         'linesOfContext' => 0,
       ));

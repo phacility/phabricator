@@ -1004,6 +1004,9 @@ final class DiffusionCommitHookEngine extends Phobject {
   }
 
   public function loadChangesetsForCommit($identifier) {
+    $byte_limit = HeraldCommitAdapter::getEnormousByteLimit();
+    $time_limit = HeraldCommitAdapter::getEnormousTimeLimit();
+
     $vcs = $this->getRepository()->getVersionControlSystem();
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
@@ -1015,8 +1018,10 @@ final class DiffusionCommitHookEngine extends Phobject {
             'user' => $this->getViewer(),
             'commit' => $identifier,
           ));
+
         $raw_diff = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest)
-          ->setTimeout(5 * 60)
+          ->setTimeout($time_limit)
+          ->setByteLimit($byte_limit)
           ->setLinesOfContext(0)
           ->loadRawDiff();
         break;
@@ -1027,13 +1032,27 @@ final class DiffusionCommitHookEngine extends Phobject {
         // the "--diff-cmd" flag.
 
         // For subversion, we need to use `svnlook`.
-        list($raw_diff) = execx(
+        $future = new ExecFuture(
           'svnlook diff -t %s %s',
           $this->subversionTransaction,
           $this->subversionRepository);
+
+        $future->setTimeout($time_limit);
+        $future->setStdoutSizeLimit($byte_limit);
+        $future->setStderrSizeLimit($byte_limit);
+
+        list($raw_diff) = $future->resolvex();
         break;
       default:
         throw new Exception(pht("Unknown VCS '%s!'", $vcs));
+    }
+
+    if (strlen($raw_diff) >= $byte_limit) {
+      throw new Exception(
+        pht(
+          'The raw text of this change is enormous (larger than %d '.
+          'bytes). Herald can not process it.',
+          $byte_limit));
     }
 
     $parser = new ArcanistDiffParser();

@@ -34,6 +34,7 @@ final class HeraldPreCommitContentAdapter extends HeraldPreCommitAdapter {
         self::FIELD_DIFF_CONTENT,
         self::FIELD_DIFF_ADDED_CONTENT,
         self::FIELD_DIFF_REMOVED_CONTENT,
+        self::FIELD_DIFF_ENORMOUS,
         self::FIELD_REPOSITORY,
         self::FIELD_REPOSITORY_PROJECTS,
         self::FIELD_PUSHER,
@@ -75,6 +76,9 @@ final class HeraldPreCommitContentAdapter extends HeraldPreCommitAdapter {
         return $this->getDiffContent('+');
       case self::FIELD_DIFF_REMOVED_CONTENT:
         return $this->getDiffContent('-');
+      case self::FIELD_DIFF_ENORMOUS:
+        $this->getDiffContent('*');
+        return ($this->changesets instanceof Exception);
       case self::FIELD_REPOSITORY:
         return $this->getHookEngine()->getRepository()->getPHID();
       case self::FIELD_REPOSITORY_PROJECTS:
