@@ -88,10 +88,6 @@ final class HarbormasterBuildableListController
       ->setViewer($user)
       ->addNavigationItems($nav->getMenu());
 
-    if ($for_app) {
-      $nav->addFilter('new/', pht('New Build Plan'));
-    }
-
     $nav->addLabel(pht('Build Plans'));
     $nav->addFilter('plan/', pht('Manage Build Plans'));
 

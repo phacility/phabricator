@@ -38,9 +38,9 @@ final class HarbormasterBuildableViewController
         ->setObjectName(pht('Build %d', $build->getID()))
         ->setHeader($build->getName())
         ->setHref($view_uri);
-      if ($build->getCancelRequested()) {
+      if ($build->isStopping()) {
         $item->setBarColor('black');
-        $item->addAttribute(pht('Cancelling'));
+        $item->addAttribute(pht('Stopping'));
       } else {
         switch ($build->getBuildStatus()) {
           case HarbormasterBuild::STATUS_INACTIVE:
@@ -71,9 +71,9 @@ final class HarbormasterBuildableViewController
             $item->setBarColor('red');
             $item->addAttribute(pht('Unexpected Error'));
             break;
-          case HarbormasterBuild::STATUS_CANCELLED:
+          case HarbormasterBuild::STATUS_STOPPED:
             $item->setBarColor('black');
-            $item->addAttribute(pht('Cancelled'));
+            $item->addAttribute(pht('Stopped'));
             break;
         }
       }

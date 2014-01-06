@@ -6,10 +6,10 @@ final class HarbormasterBuild extends HarbormasterDAO
   protected $buildablePHID;
   protected $buildPlanPHID;
   protected $buildStatus;
-  protected $cancelRequested;
 
   private $buildable = self::ATTACHABLE;
   private $buildPlan = self::ATTACHABLE;
+  private $unprocessedCommands = self::ATTACHABLE;
 
   /**
    * Not currently being built.
@@ -47,14 +47,13 @@ final class HarbormasterBuild extends HarbormasterDAO
   const STATUS_ERROR = 'error';
 
   /**
-   * The build has been cancelled.
+   * The build has been stopped.
    */
-  const STATUS_CANCELLED = 'cancelled';
+  const STATUS_STOPPED = 'stopped';
 
   public static function initializeNewBuild(PhabricatorUser $actor) {
     return id(new HarbormasterBuild())
-      ->setBuildStatus(self::STATUS_INACTIVE)
-      ->setCancelRequested(0);
+      ->setBuildStatus(self::STATUS_INACTIVE);
   }
 
   public function getConfiguration() {
@@ -97,8 +96,7 @@ final class HarbormasterBuild extends HarbormasterDAO
   public function isBuilding() {
     return $this->getBuildStatus() === self::STATUS_PENDING ||
       $this->getBuildStatus() === self::STATUS_WAITING ||
-      $this->getBuildStatus() === self::STATUS_BUILDING ||
-      $this->getCancelRequested();
+      $this->getBuildStatus() === self::STATUS_BUILDING;
   }
 
   public function createLog(
@@ -106,10 +104,11 @@ final class HarbormasterBuild extends HarbormasterDAO
     $log_source,
     $log_type) {
 
-    $log = HarbormasterBuildLog::initializeNewBuildLog($build_target);
-    $log->setLogSource($log_source);
-    $log->setLogType($log_type);
-    $log->save();
+    $log = HarbormasterBuildLog::initializeNewBuildLog($build_target)
+      ->setLogSource($log_source)
+      ->setLogType($log_type)
+      ->save();
+
     return $log;
   }
 
@@ -137,25 +136,6 @@ final class HarbormasterBuild extends HarbormasterDAO
       throw new Exception("Artifact not found!");
     }
     return $artifact;
-  }
-
-  /**
-   * Checks for and handles build cancellation.  If this method returns
-   * true, the caller should stop any current operations and return control
-   * as quickly as possible.
-   */
-  public function checkForCancellation() {
-    // Here we load a copy of the current build and check whether
-    // the user requested cancellation.  We can't do `reload()` here
-    // in case there are changes that have not yet been saved.
-    $copy = id(new HarbormasterBuild())->load($this->getID());
-    if ($copy->getCancelRequested()) {
-      $this->setBuildStatus(HarbormasterBuild::STATUS_CANCELLED);
-      $this->setCancelRequested(0);
-      $this->save();
-      return true;
-    }
-    return false;
   }
 
   public function retrieveVariablesFromBuild() {
@@ -210,6 +190,71 @@ final class HarbormasterBuild extends HarbormasterDAO
         pht('The URI to clone or checkout the repository from.'),
       'step.timestamp' => pht('The current UNIX timestamp.'),
       'build.id' => pht('The ID of the current build.'));
+  }
+
+  public function isComplete() {
+    switch ($this->getBuildStatus()) {
+      case self::STATUS_PASSED:
+      case self::STATUS_FAILED:
+      case self::STATUS_ERROR:
+      case self::STATUS_STOPPED:
+        return true;
+    }
+
+    return false;
+  }
+
+  public function isStopped() {
+    return ($this->getBuildStatus() == self::STATUS_STOPPED);
+  }
+
+
+/* -(  Build Commands  )----------------------------------------------------- */
+
+
+  public function getUnprocessedCommands() {
+    return $this->assertAttached($this->unprocessedCommands);
+  }
+
+  public function attachUnprocessedCommands(array $commands) {
+    $this->unprocessedCommands = $commands;
+    return $this;
+  }
+
+  public function hasWaitingCommand($command_name) {
+    foreach ($this->getUnprocessedCommands() as $command_object) {
+      if ($command_object->getCommand() == $command_name) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public function canRestartBuild() {
+    return !$this->isRestarting();
+  }
+
+  public function canStopBuild() {
+    return !$this->isComplete() &&
+           !$this->isStopped() &&
+           !$this->isStopping();
+  }
+
+  public function canResumeBuild() {
+    return $this->isStopped() &&
+           !$this->isResuming();
+  }
+
+  public function isStopping() {
+    return $this->hasWaitingCommand(HarbormasterBuildCommand::COMMAND_STOP);
+  }
+
+  public function isResuming() {
+    return $this->hasWaitingCommand(HarbormasterBuildCommand::COMMAND_RESUME);
+  }
+
+  public function isRestarting() {
+    return $this->hasWaitingCommand(HarbormasterBuildCommand::COMMAND_RESTART);
   }
 
 

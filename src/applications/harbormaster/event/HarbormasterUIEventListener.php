@@ -94,8 +94,8 @@ final class HarbormasterUIEventListener
         case HarbormasterBuild::STATUS_ERROR:
           $item->setIcon('minus-red', pht('Unexpected Error'));
           break;
-        case HarbormasterBuild::STATUS_CANCELLED:
-          $item->setIcon('minus-dark', pht('Cancelled'));
+        case HarbormasterBuild::STATUS_STOPPED:
+          $item->setIcon('minus-dark', pht('Stopped'));
           break;
         default:
           $item->setIcon('question', pht('Unknown'));

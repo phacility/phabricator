@@ -1,6 +1,6 @@
 <?php
 
-abstract class HarbormasterPlanController extends PhabricatorController {
+abstract class HarbormasterPlanController extends HarbormasterController {
 
   public function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();

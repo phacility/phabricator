@@ -72,16 +72,52 @@ final class HarbormasterBuildEngine extends Phobject {
   }
 
   private function updateBuild(HarbormasterBuild $build) {
-    // TODO: Handle cancellation and restarts.
 
-    if ($build->getBuildStatus() == HarbormasterBuild::STATUS_PENDING) {
+    $should_stop = false;
+    $should_resume = false;
+    $should_restart = false;
+    foreach ($build->getUnprocessedCommands() as $command) {
+      switch ($command->getCommand()) {
+        case HarbormasterBuildCommand::COMMAND_STOP:
+          $should_stop = true;
+          $should_resume = false;
+          break;
+        case HarbormasterBuildCommand::COMMAND_RESUME:
+          $should_resume = true;
+          $should_stop = false;
+          break;
+        case HarbormasterBuildCommand::COMMAND_RESTART:
+          $should_restart = true;
+          $should_resume = true;
+          $should_stop = false;
+          break;
+      }
+    }
+
+    if (($build->getBuildStatus() == HarbormasterBuild::STATUS_PENDING) ||
+        ($should_restart)) {
       $this->destroyBuildTargets($build);
       $build->setBuildStatus(HarbormasterBuild::STATUS_BUILDING);
       $build->save();
     }
 
+    if ($should_resume) {
+      $build->setBuildStatus(HarbormasterBuild::STATUS_BUILDING);
+      $build->save();
+    }
+
+    if ($should_stop && !$build->isComplete()) {
+      $build->setBuildStatus(HarbormasterBuild::STATUS_STOPPED);
+      $build->save();
+    }
+
+    foreach ($build->getUnprocessedCommands() as $command) {
+      $command->delete();
+    }
+    $build->attachUnprocessedCommands(array());
+
     if ($build->getBuildStatus() == HarbormasterBuild::STATUS_BUILDING) {
-      return $this->updateBuildSteps($build);
+      $this->updateBuildSteps($build);
     }
   }
 
@@ -118,8 +154,7 @@ final class HarbormasterBuildEngine extends Phobject {
       if ($step_targets) {
         $is_complete = true;
         foreach ($step_targets as $target) {
-          // TODO: Move this to a top-level "status" field on BuildTarget.
-          if (!$target->getDetail('__done__')) {
+          if (!$target->isComplete()) {
             $is_complete = false;
             break;
           }
@@ -127,8 +162,7 @@ final class HarbormasterBuildEngine extends Phobject {
 
         $is_failed = false;
         foreach ($step_targets as $target) {
-          // TODO: Move this to a top-level "status" field on BuildTarget.
-          if ($target->getDetail('__failed__')) {
+          if ($target->isFailed()) {
             $is_failed = true;
             break;
           }
@@ -212,7 +246,7 @@ final class HarbormasterBuildEngine extends Phobject {
     foreach ($runnable as $runnable_step) {
       $target = HarbormasterBuildTarget::initializeNewBuildTarget(
         $build,
-        $step,
+        $runnable_step,
         $build->retrieveVariablesFromBuild());
       $target->save();
 

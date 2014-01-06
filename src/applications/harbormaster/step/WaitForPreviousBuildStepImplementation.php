@@ -113,7 +113,7 @@ final class WaitForPreviousBuildStepImplementation
       ->execute();
 
     foreach ($builds as $build) {
-      if ($build->isBuilding()) {
+      if (!$build->isComplete()) {
         $blockers[] = pht('Build %d', $build->getID());
       }
     }

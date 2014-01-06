@@ -57,6 +57,10 @@ final class HarbormasterPlanListController
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
+    if ($for_app) {
+      $nav->addFilter('new/', pht('New Build Plan'));
+    }
+
     id(new HarbormasterBuildPlanSearchEngine())
       ->setViewer($user)
       ->addNavigationItems($nav->getMenu());
