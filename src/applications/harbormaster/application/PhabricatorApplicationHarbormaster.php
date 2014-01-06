@@ -55,7 +55,7 @@ final class PhabricatorApplicationHarbormaster extends PhabricatorApplication {
         ),
         'build/' => array(
           '(?:(?P<id>\d+)/)?' => 'HarbormasterBuildViewController',
-          '(?P<action>stop|resume|restart)/(?:(?P<id>\d+)/)?'
+          '(?P<action>stop|resume|restart)/(?P<id>\d+)/(?:(?P<via>[^/]+)/)?'
             => 'HarbormasterBuildActionController',
         ),
         'plan/' => array(

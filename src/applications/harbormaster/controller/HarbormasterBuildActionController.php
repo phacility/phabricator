@@ -5,10 +5,12 @@ final class HarbormasterBuildActionController
 
   private $id;
   private $action;
+  private $via;
 
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
     $this->action = $data['action'];
+    $this->via = idx($data, 'via');
   }
 
   public function processRequest() {
@@ -38,7 +40,14 @@ final class HarbormasterBuildActionController
         return new Aphront400Response();
     }
 
-    $build_uri = $this->getApplicationURI('/build/'.$build->getID().'/');
+    switch ($this->via) {
+      case 'buildable':
+        $return_uri = $build->getBuildable()->getMonogram();
+        break;
+      default:
+        $return_uri = $this->getApplicationURI('/build/'.$build->getID().'/');
+        break;
+    }
 
     if ($request->isDialogFormPost() && $can_issue) {
 
@@ -58,7 +67,7 @@ final class HarbormasterBuildActionController
           'buildID' => $build->getID()
         ));
 
-      return id(new AphrontRedirectResponse())->setURI($build_uri);
+      return id(new AphrontRedirectResponse())->setURI($return_uri);
     }
 
     switch ($command) {
@@ -134,7 +143,7 @@ final class HarbormasterBuildActionController
       ->setUser($viewer)
       ->setTitle($title)
       ->appendChild($body)
-      ->addCancelButton($build_uri);
+      ->addCancelButton($return_uri);
 
     if ($can_issue) {
       $dialog->addSubmitButton($submit);

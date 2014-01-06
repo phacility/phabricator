@@ -26,6 +26,10 @@ final class HarbormasterBuildable extends HarbormasterDAO
       ->setBuildableStatus(self::STATUS_WHATEVER);
   }
 
+  public function getMonogram() {
+    return 'B'.$this->getID();
+  }
+
   /**
    * Returns an existing buildable for the object's PHID or creates a
    * new buildable implicitly if needed.

@@ -38,45 +38,81 @@ final class HarbormasterBuildableViewController
         ->setObjectName(pht('Build %d', $build->getID()))
         ->setHeader($build->getName())
         ->setHref($view_uri);
-      if ($build->isStopping()) {
-        $item->setBarColor('black');
-        $item->addAttribute(pht('Stopping'));
-      } else {
-        switch ($build->getBuildStatus()) {
-          case HarbormasterBuild::STATUS_INACTIVE:
-            $item->setBarColor('grey');
-            $item->addAttribute(pht('Inactive'));
-            break;
-          case HarbormasterBuild::STATUS_PENDING:
-            $item->setBarColor('blue');
-            $item->addAttribute(pht('Pending'));
-            break;
-          case HarbormasterBuild::STATUS_WAITING:
-            $item->setBarColor('violet');
-            $item->addAttribute(pht('Waiting'));
-            break;
-          case HarbormasterBuild::STATUS_BUILDING:
-            $item->setBarColor('yellow');
-            $item->addAttribute(pht('Building'));
-            break;
-          case HarbormasterBuild::STATUS_PASSED:
-            $item->setBarColor('green');
-            $item->addAttribute(pht('Passed'));
-            break;
-          case HarbormasterBuild::STATUS_FAILED:
-            $item->setBarColor('red');
-            $item->addAttribute(pht('Failed'));
-            break;
-          case HarbormasterBuild::STATUS_ERROR:
-            $item->setBarColor('red');
-            $item->addAttribute(pht('Unexpected Error'));
-            break;
-          case HarbormasterBuild::STATUS_STOPPED:
-            $item->setBarColor('black');
-            $item->addAttribute(pht('Stopped'));
-            break;
-        }
+
+      switch ($build->getBuildStatus()) {
+        case HarbormasterBuild::STATUS_INACTIVE:
+          $item->setBarColor('grey');
+          $item->addAttribute(pht('Inactive'));
+          break;
+        case HarbormasterBuild::STATUS_PENDING:
+          $item->setBarColor('blue');
+          $item->addAttribute(pht('Pending'));
+          break;
+        case HarbormasterBuild::STATUS_WAITING:
+          $item->setBarColor('violet');
+          $item->addAttribute(pht('Waiting'));
+          break;
+        case HarbormasterBuild::STATUS_BUILDING:
+          $item->setBarColor('yellow');
+          $item->addAttribute(pht('Building'));
+          break;
+        case HarbormasterBuild::STATUS_PASSED:
+          $item->setBarColor('green');
+          $item->addAttribute(pht('Passed'));
+          break;
+        case HarbormasterBuild::STATUS_FAILED:
+          $item->setBarColor('red');
+          $item->addAttribute(pht('Failed'));
+          break;
+        case HarbormasterBuild::STATUS_ERROR:
+          $item->setBarColor('red');
+          $item->addAttribute(pht('Unexpected Error'));
+          break;
+        case HarbormasterBuild::STATUS_STOPPED:
+          $item->setBarColor('black');
+          $item->addAttribute(pht('Stopped'));
+          break;
       }
+
+      if ($build->isRestarting()) {
+        $item->addIcon('backward', pht('Restarting'));
+      } else if ($build->isStopping()) {
+        $item->addIcon('stop', pht('Stopping'));
+      } else if ($build->isResuming()) {
+        $item->addIcon('play', pht('Resuming'));
+      }
+
+      $build_id = $build->getID();
+
+      $restart_uri = "build/restart/{$build_id}/buildable/";
+      $resume_uri = "build/resume/{$build_id}/buildable/";
+      $stop_uri = "build/stop/{$build_id}/buildable/";
+
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setIcon('backward')
+          ->setName(pht('Restart'))
+          ->setHref($this->getApplicationURI($restart_uri))
+          ->setWorkflow(true)
+          ->setDisabled(!$build->canRestartBuild()));
+
+      if ($build->canResumeBuild()) {
+        $item->addAction(
+          id(new PHUIListItemView())
+            ->setIcon('play')
+            ->setName(pht('Resume'))
+            ->setHref($this->getApplicationURI($resume_uri))
+            ->setWorkflow(true));
+      } else {
+        $item->addAction(
+          id(new PHUIListItemView())
+            ->setIcon('stop')
+            ->setName(pht('Stop'))
+            ->setHref($this->getApplicationURI($stop_uri))
+            ->setWorkflow(true)
+            ->setDisabled(!$build->canStopBuild()));
+      }
+
       $build_list->addItem($item);
     }
 

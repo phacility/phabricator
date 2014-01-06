@@ -30,6 +30,14 @@ final class HarbormasterBuildViewController
       ->setUser($viewer)
       ->setPolicyObject($build);
 
+    if ($build->isRestarting()) {
+      $header->setStatus('warning', 'red', pht('Restarting'));
+    } else if ($build->isStopping()) {
+      $header->setStatus('warning', 'red', pht('Stopping'));
+    } else if ($build->isResuming()) {
+      $header->setStatus('warning', 'red', pht('Resuming'));
+    }
+
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header);
 
@@ -37,6 +45,9 @@ final class HarbormasterBuildViewController
     $this->buildPropertyLists($box, $build, $actions);
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(
+      $build->getBuildable()->getMonogram(),
+      '/'.$build->getBuildable()->getMonogram());
     $crumbs->addTextCrumb($title);
 
     $build_targets = id(new HarbormasterBuildTargetQuery())
