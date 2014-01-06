@@ -607,7 +607,7 @@ abstract class HeraldAdapter {
           self::ACTION_ADD_PROJECTS => pht('Add projects'),
           self::ACTION_ADD_REVIEWERS => pht('Add reviewers'),
           self::ACTION_ADD_BLOCKING_REVIEWERS => pht('Add blocking reviewers'),
-          self::ACTION_APPLY_BUILD_PLANS => pht('Apply build plans'),
+          self::ACTION_APPLY_BUILD_PLANS => pht('Run build plans'),
           self::ACTION_BLOCK => pht('Block change with message'),
         );
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
