@@ -13,6 +13,7 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
   protected $isDisabled = 0;
   protected $audioPHID;
   protected $audioBehavior = self::AUDIO_BEHAVIOR_NONE;
+  protected $mailKey;
 
   private $file = self::ATTACHABLE;
   private $audio = self::ATTACHABLE;
@@ -50,9 +51,17 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
       PhabricatorMacroPHIDTypeMacro::TYPECONST);
   }
 
-  public function isAutomaticallySubscribed($phid) {
-    return false;
+
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+    return parent::save();
   }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
 
   public function getApplicationTransactionEditor() {
     return new PhabricatorMacroEditor();
@@ -61,6 +70,18 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
   public function getApplicationTransactionObject() {
     return new PhabricatorMacroTransaction();
   }
+
+
+/* -(  PhabricatorSubscribableInterface  )----------------------------------- */
+
+
+  public function isAutomaticallySubscribed($phid) {
+    return false;
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
 
   public function getCapabilities() {
     return array(
