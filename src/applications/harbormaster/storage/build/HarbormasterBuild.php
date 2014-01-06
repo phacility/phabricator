@@ -56,6 +56,15 @@ final class HarbormasterBuild extends HarbormasterDAO
       ->setBuildStatus(self::STATUS_INACTIVE);
   }
 
+  public function delete() {
+    $this->openTransaction();
+      $this->deleteUnprocessedCommands();
+      $result = parent::delete();
+    $this->saveTransaction();
+
+    return $result;
+  }
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -212,22 +221,13 @@ final class HarbormasterBuild extends HarbormasterDAO
 /* -(  Build Commands  )----------------------------------------------------- */
 
 
-  public function getUnprocessedCommands() {
+  private function getUnprocessedCommands() {
     return $this->assertAttached($this->unprocessedCommands);
   }
 
   public function attachUnprocessedCommands(array $commands) {
     $this->unprocessedCommands = $commands;
     return $this;
-  }
-
-  public function hasWaitingCommand($command_name) {
-    foreach ($this->getUnprocessedCommands() as $command_object) {
-      if ($command_object->getCommand() == $command_name) {
-        return true;
-      }
-    }
-    return false;
   }
 
   public function canRestartBuild() {
@@ -246,15 +246,62 @@ final class HarbormasterBuild extends HarbormasterDAO
   }
 
   public function isStopping() {
-    return $this->hasWaitingCommand(HarbormasterBuildCommand::COMMAND_STOP);
+    $is_stopping = false;
+    foreach ($this->getUnprocessedCommands() as $command_object) {
+      $command = $command_object->getCommand();
+      switch ($command) {
+        case HarbormasterBuildCommand::COMMAND_STOP:
+          $is_stopping = true;
+          break;
+        case HarbormasterBuildCommand::COMMAND_RESUME:
+        case HarbormasterBuildCommand::COMMAND_RESTART:
+          $is_stopping = false;
+          break;
+      }
+    }
+
+    return $is_stopping;
   }
 
   public function isResuming() {
-    return $this->hasWaitingCommand(HarbormasterBuildCommand::COMMAND_RESUME);
+    $is_resuming = false;
+    foreach ($this->getUnprocessedCommands() as $command_object) {
+      $command = $command_object->getCommand();
+      switch ($command) {
+        case HarbormasterBuildCommand::COMMAND_RESTART:
+        case HarbormasterBuildCommand::COMMAND_RESUME:
+          $is_resuming = true;
+          break;
+        case HarbormasterBuildCommand::COMMAND_STOP:
+          $is_resuming = false;
+          break;
+      }
+    }
+
+    return $is_resuming;
   }
 
   public function isRestarting() {
-    return $this->hasWaitingCommand(HarbormasterBuildCommand::COMMAND_RESTART);
+    $is_restarting = false;
+    foreach ($this->getUnprocessedCommands() as $command_object) {
+      $command = $command_object->getCommand();
+      switch ($command) {
+        case HarbormasterBuildCommand::COMMAND_RESTART:
+          $is_restarting = true;
+          break;
+      }
+    }
+
+    return $is_restarting;
+  }
+
+  public function deleteUnprocessedCommands() {
+    foreach ($this->getUnprocessedCommands() as $key => $command_object) {
+      $command_object->delete();
+      unset($this->unprocessedCommands[$key]);
+    }
+
+    return $this;
   }
 
 

@@ -72,49 +72,24 @@ final class HarbormasterBuildEngine extends Phobject {
   }
 
   private function updateBuild(HarbormasterBuild $build) {
-
-    $should_stop = false;
-    $should_resume = false;
-    $should_restart = false;
-    foreach ($build->getUnprocessedCommands() as $command) {
-      switch ($command->getCommand()) {
-        case HarbormasterBuildCommand::COMMAND_STOP:
-          $should_stop = true;
-          $should_resume = false;
-          break;
-        case HarbormasterBuildCommand::COMMAND_RESUME:
-          $should_resume = true;
-          $should_stop = false;
-          break;
-        case HarbormasterBuildCommand::COMMAND_RESTART:
-          $should_restart = true;
-          $should_resume = true;
-          $should_stop = false;
-          break;
-      }
-    }
-
     if (($build->getBuildStatus() == HarbormasterBuild::STATUS_PENDING) ||
-        ($should_restart)) {
+        ($build->isRestarting())) {
       $this->destroyBuildTargets($build);
       $build->setBuildStatus(HarbormasterBuild::STATUS_BUILDING);
       $build->save();
     }
 
-    if ($should_resume) {
+    if ($build->isResuming()) {
       $build->setBuildStatus(HarbormasterBuild::STATUS_BUILDING);
       $build->save();
     }
 
-    if ($should_stop && !$build->isComplete()) {
+    if ($build->isStopping() && !$build->isComplete()) {
       $build->setBuildStatus(HarbormasterBuild::STATUS_STOPPED);
       $build->save();
     }
 
-    foreach ($build->getUnprocessedCommands() as $command) {
-      $command->delete();
-    }
-    $build->attachUnprocessedCommands(array());
+    $build->deleteUnprocessedCommands();
 
     if ($build->getBuildStatus() == HarbormasterBuild::STATUS_BUILDING) {
       $this->updateBuildSteps($build);
