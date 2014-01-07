@@ -88,10 +88,14 @@ final class PhabricatorAuditCommitListView extends AphrontView {
         $auditors = phutil_implode_html(', ', $auditors);
       }
       $committed = phabricator_datetime($commit->getEpoch(), $this->user);
+      $audit_status = $commit->getAuditStatus();
       $commit_status = PhabricatorAuditCommitStatusConstants::getStatusName(
-          $commit->getAuditStatus());
+        $audit_status);
+      $status_color = PhabricatorAuditCommitStatusConstants::getStatusColor(
+        $audit_status);
 
       $item = id(new PHUIObjectItemView())
+          ->setBarColor($status_color)
           ->setObjectName($commit_name)
           ->setHeader($commit_desc)
           ->setHref($commit_link)

@@ -31,4 +31,23 @@ final class PhabricatorAuditCommitStatusConstants {
     );
   }
 
+  public static function getStatusColor($code) {
+    switch ($code) {
+      case self::CONCERN_RAISED:
+        $color = 'red';
+        break;
+      case self::NEEDS_AUDIT:
+      case self::PARTIALLY_AUDITED:
+        $color = 'orange';
+        break;
+      case self::FULLY_AUDITED:
+        $color = 'green';
+        break;
+      default:
+        $color = null;
+        break;
+    }
+    return $color;
+  }
+
 }
