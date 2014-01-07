@@ -123,13 +123,11 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     if ($readme) {
       $box = new PHUIBoxView();
-      $box->setShadow(true);
       $box->appendChild($readme);
       $box->addPadding(PHUI::PADDING_LARGE);
 
-      $panel = new AphrontPanelView();
-      $panel->setHeader(pht('README'));
-      $panel->setNoBackground();
+      $panel = new PHUIObjectBoxView();
+      $panel->setHeaderText(pht('README'));
       $panel->appendChild($box);
       $content[] = $panel;
     }
@@ -288,26 +286,24 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setBranches($branches)
       ->setCommits($commits);
 
-    $panel = id(new AphrontPanelView())
-      ->setHeader(pht('Branches'))
-      ->setNoBackground();
+    $panel = new PHUIObjectBoxView();
+    $header = new PHUIHeaderView();
+    $header->setHeader(pht('Branches'));
 
     if ($more_branches) {
-      $panel->setCaption(pht('Showing %d branches.', $limit));
+      $header->setSubHeader(pht('Showing %d branches.', $limit));
     }
 
-    $panel->addButton(
-      phutil_tag(
-        'a',
-        array(
-          'href' => $drequest->generateURI(
+    $button = new PHUIButtonView();
+    $button->setText(pht("Show All Branches"));
+    $button->setTag('a');
+    $button->setHref($drequest->generateURI(
             array(
               'action' => 'branches',
-            )),
-          'class' => 'grey button',
-        ),
-        pht("Show All Branches \xC2\xBB")));
+            )));
 
+    $header->addActionLink($button);
+    $panel->setHeader($header);
     $panel->appendChild($table);
 
     return $panel;
@@ -471,10 +467,9 @@ final class DiffusionRepositoryController extends DiffusionController {
       ),
       pht('View Full Commit History'));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht("Recent Commits &middot; %s", $all));
+    $panel = new PHUIObjectBoxView();
+    $panel->setHeaderText(pht("Recent Commits &middot; %s", $all));
     $panel->appendChild($history_table);
-    $panel->setNoBackground();
 
     return $panel;
   }
@@ -513,14 +508,13 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $browse_uri = $drequest->generateURI(array('action' => 'browse'));
 
-    $browse_panel = new AphrontPanelView();
-    $browse_panel->setHeader(
+    $browse_panel = new PHUIObjectBoxView();
+    $browse_panel->setHeaderText(
       phutil_tag(
         'a',
         array('href' => $browse_uri),
         pht('Browse Repository')));
     $browse_panel->appendChild($browse_table);
-    $browse_panel->setNoBackground();
 
     return $browse_panel;
   }
