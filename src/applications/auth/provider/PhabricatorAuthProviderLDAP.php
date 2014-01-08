@@ -361,7 +361,7 @@ final class PhabricatorAuthProviderLDAP
           $label);
       }
 
-      if (!strlen($old)) {
+      if ($old === null || $old === '') {
         return pht(
           '%s set the "%s" value to "%s".',
           $xaction->renderHandleLink($author_phid),
