@@ -44,7 +44,8 @@ body .phui-header-shell.phui-bleed-header
   position: relative;
 }
 
-.phui-header-view a {
+.phui-header-view a,
+.phui-header-view a.simple {
   color: {$darkbluetext};
 }
 
