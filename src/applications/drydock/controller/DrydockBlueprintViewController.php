@@ -65,21 +65,28 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
   }
 
   private function buildActionListView(DrydockBlueprint $blueprint) {
+    $viewer = $this->getRequest()->getUser();
+
     $view = id(new PhabricatorActionListView())
-      ->setUser($this->getRequest()->getUser())
+      ->setUser($viewer)
       ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($blueprint);
 
     $uri = '/blueprint/edit/'.$blueprint->getID().'/';
     $uri = $this->getApplicationURI($uri);
 
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $blueprint,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
     $view->addAction(
       id(new PhabricatorActionView())
         ->setHref($uri)
-        ->setName(pht('Edit Blueprint Policies'))
+        ->setName(pht('Edit Blueprint'))
         ->setIcon('edit')
-        ->setWorkflow(true)
-        ->setDisabled(false));
+        ->setWorkflow(!$can_edit)
+        ->setDisabled(!$can_edit));
 
     return $view;
   }

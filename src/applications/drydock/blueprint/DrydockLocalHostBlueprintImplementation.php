@@ -7,8 +7,13 @@ final class DrydockLocalHostBlueprintImplementation
     return false;
   }
 
+  public function getBlueprintName() {
+    return pht('Local Host');
+  }
+
   public function getDescription() {
-    return pht('Allocates storage on the local host.');
+    return pht(
+      'Allows Drydock to run on the local host.');
   }
 
   public function canAllocateMoreResources(array $pool) {

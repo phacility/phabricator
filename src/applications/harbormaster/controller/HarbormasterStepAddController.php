@@ -33,7 +33,7 @@ final class HarbormasterStepAddController
     if ($request->isDialogFormPost()) {
       $class = $request->getStr('step-type');
       if (!in_array($class, $implementations)) {
-        return $this->createDialog($implementations);
+        return $this->createDialog($implementations, $cancel_uri);
       }
 
       $steps = $plan->loadOrderedBuildSteps();

@@ -7,8 +7,12 @@ final class DrydockWorkingCopyBlueprintImplementation
     return true;
   }
 
+  public function getBlueprintName() {
+    return pht('Working Copy');
+  }
+
   public function getDescription() {
-    return pht('Allocates out working copies of repositories.');
+    return pht('Allows Drydock to check out working copies of repositories.');
   }
 
   protected function canAllocateLease(
