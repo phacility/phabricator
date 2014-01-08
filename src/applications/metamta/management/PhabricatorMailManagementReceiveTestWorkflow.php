@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorMailManagementReceiveTestWorkflow
-  extends PhabricatorSearchManagementWorkflow {
+  extends PhabricatorMailManagementWorkflow {
 
   protected function didConstruct() {
     $this
@@ -42,7 +42,7 @@ final class PhabricatorMailManagementReceiveTestWorkflow
     }
 
     $user = id(new PhabricatorPeopleQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($this->getViewer())
       ->withUsernames(array($as))
       ->executeOne();
     if (!$user) {

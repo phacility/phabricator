@@ -17,6 +17,7 @@ final class PhabricatorRepositorySearchEngine
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new PhabricatorRepositoryQuery())
+      ->needProjectPHIDs(true)
       ->needCommitCounts(true)
       ->needMostRecentCommits(true);
 

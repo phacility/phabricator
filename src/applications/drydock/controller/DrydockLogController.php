@@ -1,58 +1,27 @@
 <?php
 
-final class DrydockLogController extends DrydockController {
+abstract class DrydockLogController
+  extends DrydockController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function buildSideNavView() {
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    $nav = $this->buildSideNav('log');
+    id(new DrydockLogSearchEngine())
+      ->setViewer($this->getRequest()->getUser())
+      ->addNavigationItems($nav->getMenu());
 
-    $query = new DrydockLogQuery();
+    $nav->selectFilter(null);
 
-    $resource_ids = $request->getStrList('resource');
-    if ($resource_ids) {
-      $query->withResourceIDs($resource_ids);
-    }
+    return $nav;
+  }
 
-    $lease_ids = $request->getStrList('lease');
-    if ($lease_ids) {
-      $query->withLeaseIDs($lease_ids);
-    }
-
-    $pager = new AphrontPagerView();
-    $pager->setPageSize(500);
-    $pager->setOffset($request->getInt('offset'));
-    $pager->setURI($request->getRequestURI(), 'offset');
-
-    $logs = $query->executeWithOffsetPager($pager);
-
-    $title = pht('Logs');
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title);
-
-    $table = $this->buildLogTableView($logs);
-    $table->appendChild($pager);
-
-    $nav->appendChild(
-      array(
-        $header,
-        $table,
-        $pager,
-      ));
-
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($title, $this->getApplicationURI('/logs/'));
-    $nav->setCrumbs($crumbs);
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-        'device' => true,
-      ));
-
+  public function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+    $crumbs->addTextCrumb(
+      pht('Logs'),
+      $this->getApplicationURI('log/'));
+    return $crumbs;
   }
 
 }

@@ -5,7 +5,8 @@ final class DifferentialRevision extends DifferentialDAO
     PhabricatorTokenReceiverInterface,
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
-    PhrequentTrackableInterface {
+    PhrequentTrackableInterface,
+    HarbormasterBuildableInterface {
 
   protected $title = '';
   protected $originalTitle;
@@ -410,6 +411,18 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function isClosed() {
     return DifferentialRevisionStatus::isClosedStatus($this->getStatus());
+  }
+
+
+/* -(  HarbormasterBuildableInterface  )------------------------------------- */
+
+
+  public function getHarbormasterBuildablePHID() {
+    return $this->loadActiveDiff()->getPHID();
+  }
+
+  public function getHarbormasterContainerPHID() {
+    return $this->getPHID();
   }
 
 }

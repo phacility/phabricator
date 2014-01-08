@@ -6,7 +6,7 @@
 final class CelerityResourceTransformer {
 
   private $minify;
-  private $rawResourceMap;
+  private $rawURIMap;
   private $celerityMap;
   private $translateURICallback;
   private $currentPath;
@@ -21,14 +21,18 @@ final class CelerityResourceTransformer {
     return $this;
   }
 
-  public function setRawResourceMap(array $raw_resource_map) {
-    $this->rawResourceMap = $raw_resource_map;
-    return $this;
-  }
-
   public function setCelerityMap(CelerityResourceMap $celerity_map) {
     $this->celerityMap = $celerity_map;
     return $this;
+  }
+
+  public function setRawURIMap(array $raw_urimap) {
+    $this->rawURIMap = $raw_urimap;
+    return $this;
+  }
+
+  public function getRawURIMap() {
+    return $this->rawURIMap;
   }
 
   /**
@@ -108,14 +112,26 @@ final class CelerityResourceTransformer {
   public function translateResourceURI(array $matches) {
     $uri = trim($matches[1], "'\" \r\t\n");
 
-    if ($this->rawResourceMap) {
-      if (isset($this->rawResourceMap[$uri]['uri'])) {
-        $uri = $this->rawResourceMap[$uri]['uri'];
+    $alternatives = array_unique(
+      array(
+        $uri,
+        ltrim($uri, '/'),
+      ));
+
+    foreach ($alternatives as $alternative) {
+      if ($this->rawURIMap !== null) {
+        if (isset($this->rawURIMap[$alternative])) {
+          $uri = $this->rawURIMap[$alternative];
+          break;
+        }
       }
-    } else if ($this->celerityMap) {
-      $info = $this->celerityMap->lookupFileInformation($uri);
-      if ($info) {
-        $uri = $info['uri'];
+
+      if ($this->celerityMap) {
+        $resource_uri = $this->celerityMap->getURIForName($alternative);
+        if ($resource_uri) {
+          $uri = $resource_uri;
+          break;
+        }
       }
     }
 

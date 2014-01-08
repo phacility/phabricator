@@ -109,23 +109,41 @@ final class PhabricatorTimelineEventView extends AphrontView {
     return $this;
   }
 
-
-  public function renderEventTitle() {
+  protected function renderEventTitle($is_first_event, $force_icon) {
     $title = $this->title;
     if (($title === null) && !$this->hasChildren()) {
       $title = '';
     }
 
-    $extra = $this->renderExtra();
+    if ($is_first_event) {
+      $extra = array();
+      $is_first_extra = true;
+      foreach ($this->getEventGroup() as $event) {
+        $extra[] = $event->renderExtra($is_first_extra);
+        $is_first_extra = false;
+      }
+      $extra = array_reverse($extra);
+      $extra = array_mergev($extra);
+      $extra = phutil_tag(
+        'span',
+        array(
+          'class' => 'phabricator-timeline-extra',
+        ),
+        phutil_implode_html(" \xC2\xB7 ", $extra));
+    } else {
+      $extra = null;
+    }
 
-    if ($title !== null || $extra !== null) {
+    if ($title !== null || $extra) {
       $title_classes = array();
       $title_classes[] = 'phabricator-timeline-title';
 
       $icon = null;
-      if ($this->icon) {
+      if ($this->icon || $force_icon) {
         $title_classes[] = 'phabricator-timeline-title-with-icon';
+      }
 
+      if ($this->icon) {
         $fill_classes = array();
         $fill_classes[] = 'phabricator-timeline-icon-fill';
         if ($this->color) {
@@ -159,10 +177,24 @@ final class PhabricatorTimelineEventView extends AphrontView {
 
   public function render() {
 
+    $events = $this->getEventGroup();
+
+    // Move events with icons first.
+    $icon_keys = array();
+    foreach ($this->getEventGroup() as $key => $event) {
+      if ($event->icon) {
+        $icon_keys[] = $key;
+      }
+    }
+    $events = array_select_keys($events, $icon_keys) + $events;
+    $force_icon = (bool)$icon_keys;
+
     $group_titles = array();
     $group_children = array();
-    foreach ($this->getEventGroup() as $event) {
-      $group_titles[] = $event->renderEventTitle();
+    $is_first_event = true;
+    foreach ($events as $event) {
+      $group_titles[] = $event->renderEventTitle($is_first_event, $force_icon);
+      $is_first_event = false;
       if ($event->hasChildren()) {
         $group_children[] = $event->renderChildren();
       }
@@ -264,14 +296,13 @@ final class PhabricatorTimelineEventView extends AphrontView {
         $content));
   }
 
-  private function renderExtra() {
+  private function renderExtra($is_first_extra) {
     $extra = array();
 
     if ($this->getIsPreview()) {
       $extra[] = pht('PREVIEW');
     } else {
       $xaction_phid = $this->getTransactionPHID();
-
 
       if ($this->getIsEdited()) {
         $extra[] = javelin_tag(
@@ -293,46 +324,50 @@ final class PhabricatorTimelineEventView extends AphrontView {
           pht('Edit'));
       }
 
-      $source = $this->getContentSource();
-      if ($source) {
-        $extra[] = id(new PhabricatorContentSourceView())
-          ->setContentSource($source)
-          ->setUser($this->getUser())
-          ->render();
-      }
-
-      if ($this->getDateCreated()) {
-        $date = phabricator_datetime(
-          $this->getDateCreated(),
-          $this->getUser());
-        if ($this->anchor) {
-          Javelin::initBehavior('phabricator-watch-anchor');
-
-          $anchor = id(new PhabricatorAnchorView())
-            ->setAnchorName($this->anchor)
+      if ($is_first_extra) {
+        $source = $this->getContentSource();
+        if ($source) {
+          $extra[] = id(new PhabricatorContentSourceView())
+            ->setContentSource($source)
+            ->setUser($this->getUser())
             ->render();
-
-          $date = array(
-            $anchor,
-            phutil_tag(
-              'a',
-              array(
-                'href' => '#'.$this->anchor,
-              ),
-              $date),
-          );
         }
-        $extra[] = $date;
-      }
-    }
 
-    if ($extra) {
-      $extra = phutil_tag(
-        'span',
-        array(
-          'class' => 'phabricator-timeline-extra',
-        ),
-        phutil_implode_html(" \xC2\xB7 ", $extra));
+        $date_created = null;
+        foreach ($this->getEventGroup() as $event) {
+          if ($event->getDateCreated()) {
+            if ($date_created === null) {
+              $date_created = $event->getDateCreated();
+            } else {
+              $date_created = min($event->getDateCreated(), $date_created);
+            }
+          }
+        }
+
+        if ($date_created) {
+          $date = phabricator_datetime(
+            $this->getDateCreated(),
+            $this->getUser());
+          if ($this->anchor) {
+            Javelin::initBehavior('phabricator-watch-anchor');
+
+            $anchor = id(new PhabricatorAnchorView())
+              ->setAnchorName($this->anchor)
+              ->render();
+
+            $date = array(
+              $anchor,
+              phutil_tag(
+                'a',
+                array(
+                  'href' => '#'.$this->anchor,
+                ),
+                $date),
+            );
+          }
+          $extra[] = $date;
+        }
+      }
     }
 
     return $extra;

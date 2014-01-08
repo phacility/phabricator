@@ -52,6 +52,7 @@ final class DrydockWorkingCopyBlueprintImplementation
         throw new Exception("Unsupported VCS!");
     }
 
+    // TODO: Policy stuff here too.
     $host_lease = id(new DrydockLease())
       ->setResourceType('host')
       ->waitUntilActive();

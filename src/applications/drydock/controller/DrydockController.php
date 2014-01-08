@@ -2,21 +2,10 @@
 
 abstract class DrydockController extends PhabricatorController {
 
-  final protected function buildSideNav($selected) {
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI('/drydock/'));
-    $nav->addFilter('blueprint', 'Blueprints');
-    $nav->addFilter('resource',  'Resources');
-    $nav->addFilter('lease',     'Leases');
-    $nav->addFilter('log',       'Logs');
-
-    $nav->selectFilter($selected, 'resource');
-
-    return $nav;
-  }
+  abstract function buildSideNavView();
 
   public function buildApplicationMenu() {
-    return $this->buildSideNav(null)->getMenu();
+    return $this->buildSideNavView()->getMenu();
   }
 
   protected function buildLogTableView(array $logs) {
@@ -80,11 +69,12 @@ abstract class DrydockController extends PhabricatorController {
   protected function buildLeaseListView(array $leases) {
     assert_instances_of($leases, 'DrydockLease');
 
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getRequest()->getUser();
     $view = new PHUIObjectItemListView();
 
     foreach ($leases as $lease) {
       $item = id(new PHUIObjectItemView())
+        ->setUser($viewer)
         ->setHeader($lease->getLeaseName())
         ->setHref($this->getApplicationURI('/lease/'.$lease->getID().'/'));
 
@@ -107,9 +97,7 @@ abstract class DrydockController extends PhabricatorController {
 
       $status = DrydockLeaseStatus::getNameForStatus($lease->getStatus());
       $item->addAttribute($status);
-
-      $date_created = phabricator_date($lease->getDateCreated(), $user);
-      $item->addAttribute(pht('Created on %s', $date_created));
+      $item->setEpoch($lease->getDateCreated());
 
       if ($lease->isActive()) {
         $item->setBarColor('green');

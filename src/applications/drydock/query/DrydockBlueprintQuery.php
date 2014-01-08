@@ -1,7 +1,6 @@
 <?php
 
-final class DrydockBlueprintQuery
-  extends PhabricatorCursorPagedPolicyAwareQuery {
+final class DrydockBlueprintQuery extends DrydockQuery {
 
   private $ids;
   private $phids;
@@ -34,7 +33,7 @@ final class DrydockBlueprintQuery
       DrydockBlueprintImplementation::getAllBlueprintImplementations();
 
     foreach ($blueprints as $blueprint) {
-      if (array_key_exists($implementations, $blueprint->getClassName())) {
+      if (array_key_exists($blueprint->getClassName(), $implementations)) {
         $blueprint->attachImplementation(
           $implementations[$blueprint->getClassName()]);
       }
@@ -61,10 +60,6 @@ final class DrydockBlueprintQuery
     }
 
     return $this->formatWhereClause($where);
-  }
-
-  public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationDrydock';
   }
 
 }

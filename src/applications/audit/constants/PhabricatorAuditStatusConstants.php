@@ -40,6 +40,9 @@ final class PhabricatorAuditStatusConstants {
       case self::AUDIT_REQUIRED:
         $color = 'orange';
         break;
+      case self::ACCEPTED:
+        $color = 'green';
+        break;
       default:
         $color = null;
         break;

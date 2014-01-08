@@ -1,14 +1,9 @@
 <?php
 
-final class DrydockLogQuery extends PhabricatorOffsetPagedQuery {
-
-  const ORDER_EPOCH   = 'order-epoch';
-  const ORDER_ID      = 'order-id';
+final class DrydockLogQuery extends DrydockQuery {
 
   private $resourceIDs;
   private $leaseIDs;
-  private $afterID;
-  private $order = self::ORDER_EPOCH;
 
   public function withResourceIDs(array $ids) {
     $this->resourceIDs = $ids;
@@ -20,17 +15,7 @@ final class DrydockLogQuery extends PhabricatorOffsetPagedQuery {
     return $this;
   }
 
-  public function setOrder($order) {
-    $this->order = $order;
-    return $this;
-  }
-
-  public function withAfterID($id) {
-    $this->afterID = $id;
-    return $this;
-  }
-
-  public function execute() {
+  public function loadPage() {
     $table = new DrydockLog();
     $conn_r = $table->establishConnection('r');
 
@@ -43,6 +28,64 @@ final class DrydockLogQuery extends PhabricatorOffsetPagedQuery {
       $this->buildLimitClause($conn_r));
 
     return $table->loadAllFromArray($data);
+  }
+
+  public function willFilterPage(array $logs) {
+    $resource_ids = array_filter(mpull($logs, 'getResourceID'));
+    if ($resource_ids) {
+      $resources = id(new DrydockResourceQuery())
+        ->setParentQuery($this)
+        ->setViewer($this->getViewer())
+        ->withIDs($resource_ids)
+        ->execute();
+    } else {
+      $resources = array();
+    }
+
+    foreach ($logs as $key => $log) {
+      $resource = null;
+      if ($log->getResourceID()) {
+        $resource = idx($resources, $log->getResourceID());
+        if (!$resource) {
+          unset($logs[$key]);
+          continue;
+        }
+      }
+      $log->attachResource($resource);
+    }
+
+    $lease_ids = array_filter(mpull($logs, 'getLeaseID'));
+    if ($lease_ids) {
+      $leases = id(new DrydockLeaseQuery())
+        ->setParentQuery($this)
+        ->setViewer($this->getViewer())
+        ->withIDs($lease_ids)
+        ->execute();
+    } else {
+      $leases = array();
+    }
+
+    foreach ($logs as $key => $log) {
+      $lease = null;
+      if ($log->getLeaseID()) {
+        $lease = idx($leases, $log->getLeaseID());
+        if (!$lease) {
+          unset($logs[$key]);
+          continue;
+        }
+      }
+      $log->attachLease($lease);
+    }
+
+    // These logs are meaningless and their policies aren't computable. They
+    // shouldn't exist, but throw them away if they do.
+    foreach ($logs as $key => $log) {
+      if (!$log->getResource() && !$log->getLease()) {
+        unset($logs[$key]);
+      }
+    }
+
+    return $logs;
   }
 
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
@@ -62,25 +105,9 @@ final class DrydockLogQuery extends PhabricatorOffsetPagedQuery {
         $this->leaseIDs);
     }
 
-    if ($this->afterID) {
-      $where[] = qsprintf(
-        $conn_r,
-        'id > %d',
-        $this->afterID);
-    }
+    $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
-  }
-
-  private function buildOrderClause(AphrontDatabaseConnection $conn_r) {
-    switch ($this->order) {
-      case self::ORDER_EPOCH:
-        return 'ORDER BY log.epoch DESC, log.id DESC';
-      case self::ORDER_ID:
-        return 'ORDER BY id ASC';
-      default:
-        throw new Exception("Unknown order '{$this->order}'!");
-    }
   }
 
 }

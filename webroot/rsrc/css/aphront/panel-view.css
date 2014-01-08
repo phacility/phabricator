@@ -7,12 +7,12 @@
   background: {$lightgreybackground};
   border: 1px solid #c0c0c0;
   border-width: 1px 0 0;
-  padding: 1em 2em;
-  margin: 20px 20px 40px 20px;
+  padding: 8px 16px;
+  margin: 20px 16px 40px 16px;
 }
 
 .device-phone .aphront-panel-view {
-  margin: 20px 10px 40px 10px;
+  margin: 20px 8px 40px 8px;
 }
 
 .aphront-unpadded-panel-view {

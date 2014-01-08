@@ -1,43 +1,34 @@
 <?php
 
-final class DrydockResourceListController extends DrydockController {
+final class DrydockResourceListController extends DrydockResourceController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
+
+  private $queryKey;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
+
+  public function willProcessRequest(array $data) {
+    $this->queryKey = idx($data, 'queryKey');
+  }
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->queryKey)
+      ->setSearchEngine(new DrydockResourceSearchEngine())
+      ->setNavigation($this->buildSideNavView());
 
-    $title = pht('Resources');
+    return $this->delegateToController($controller);
+  }
 
-    $resource_header = id(new PHUIHeaderView())
-      ->setHeader($title);
+  public function renderResultsList(
+    array $resources,
+    PhabricatorSavedQuery $query) {
+    assert_instances_of($resources, 'DrydockResource');
 
-    $pager = new AphrontPagerView();
-    $pager->setURI(new PhutilURI('/drydock/resource/'), 'offset');
-    $resources = id(new DrydockResourceQuery())
-      ->setViewer($user)
-      ->executeWithOffsetPager($pager);
-
-    $resource_list = $this->buildResourceListView($resources);
-
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($title, $request->getRequestURI());
-
-    $nav = $this->buildSideNav('resource');
-    $nav->setCrumbs($crumbs);
-    $nav->appendChild(
-      array(
-        $resource_header,
-        $resource_list,
-        $pager,
-      ));
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-        'device' => true,
-      ));
-
+    return $this->buildResourceListView($resources);
   }
 
 }

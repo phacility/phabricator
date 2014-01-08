@@ -256,6 +256,11 @@ final class HeraldEngine {
         "Rule failed automatically because it is a personal rule and its ".
         "owner can not see the object.");
       $result = false;
+    } else if (!$this->canRuleApplyToObject($rule, $object)) {
+      $reason = pht(
+        "Rule failed automatically because it is an object rule which is ".
+        "not relevant for this object.");
+      $result = false;
     } else {
       foreach ($conditions as $condition) {
         $match = $this->doesConditionMatch($rule, $condition, $object);
@@ -381,8 +386,8 @@ final class HeraldEngine {
     HeraldRule $rule,
     HeraldAdapter $adapter) {
 
-    // Authorship is irrelevant for global rules.
-    if ($rule->isGlobalRule()) {
+    // Authorship is irrelevant for global rules and object rules.
+    if ($rule->isGlobalRule() || $rule->isObjectRule()) {
       return true;
     }
 
@@ -403,6 +408,27 @@ final class HeraldEngine {
       $rule->getAuthor(),
       $object,
       PhabricatorPolicyCapability::CAN_VIEW);
+  }
+
+  private function canRuleApplyToObject(
+    HeraldRule $rule,
+    HeraldAdapter $adapter) {
+
+    // Rules which are not object rules can apply to anything.
+    if (!$rule->isObjectRule()) {
+      return true;
+    }
+
+    $trigger_phid = $rule->getTriggerObjectPHID();
+    $object_phids = $adapter->getTriggerObjectPHIDs();
+
+    if ($object_phids) {
+      if (in_array($trigger_phid, $object_phids)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
 }

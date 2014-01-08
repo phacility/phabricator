@@ -107,7 +107,6 @@ abstract class PhabricatorApplicationSearchEngine {
       ->setEngineClassName(get_class($this));
   }
 
-
   public function addNavigationItems(PHUIListView $menu) {
     $viewer = $this->requireViewer();
 
@@ -263,10 +262,8 @@ abstract class PhabricatorApplicationSearchEngine {
     AphrontRequest $request,
     $key,
     array $allow_types = array()) {
-    $list = $request->getArr($key, null);
-    if ($list === null) {
-      $list = $request->getStrList($key);
-    }
+
+    $list = $this->readListFromRequest($request, $key);
 
     $phids = array();
     $names = array();
@@ -316,14 +313,7 @@ abstract class PhabricatorApplicationSearchEngine {
     $key,
     array $allow_types = array()) {
 
-    $list = $request->getArr($key, null);
-    if ($list === null) {
-      $list = $request->getStrList($key);
-    }
-
-    if (!$list) {
-      return array();
-    }
+    $list = $this->readListFromRequest($request, $key);
 
     $objects = id(new PhabricatorObjectQuery())
       ->setViewer($this->requireViewer())
@@ -343,6 +333,36 @@ abstract class PhabricatorApplicationSearchEngine {
           unset($list[$key]);
         }
       }
+    }
+
+    return $list;
+  }
+
+
+  /**
+   * Read a list of items from the request, in either array format or string
+   * format:
+   *
+   *   list[]=item1&list[]=item2
+   *   list=item1,item2
+   *
+   * This provides flexibility when constructing URIs, especially from external
+   * sources.
+   *
+   * @param AphrontRequest  Request to read PHIDs from.
+   * @param string          Key to read in the request.
+   * @return list<string>   List of values.
+   */
+  protected function readListFromRequest(
+    AphrontRequest $request,
+    $key) {
+    $list = $request->getArr($key, null);
+    if ($list === null) {
+      $list = $request->getStrList($key);
+    }
+
+    if (!$list) {
+      return array();
     }
 
     return $list;

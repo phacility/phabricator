@@ -1,6 +1,6 @@
 <?php
 
-final class DrydockLeaseViewController extends DrydockController {
+final class DrydockLeaseViewController extends DrydockLeaseController {
 
   private $id;
 
@@ -10,9 +10,12 @@ final class DrydockLeaseViewController extends DrydockController {
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
-    $lease = id(new DrydockLease())->load($this->id);
+    $lease = id(new DrydockLeaseQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$lease) {
       return new Aphront404Response();
     }
@@ -32,6 +35,7 @@ final class DrydockLeaseViewController extends DrydockController {
     $pager->setOffset($request->getInt('offset'));
 
     $logs = id(new DrydockLogQuery())
+      ->setViewer($viewer)
       ->withLeaseIDs(array($lease->getID()))
       ->executeWithOffsetPager($pager);
 

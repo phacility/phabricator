@@ -125,7 +125,7 @@ extends ConduitAPI_diffusion_abstractquery_Method {
       '{node};{parents}\\n',
       ($offset + $limit), // No '--skip' in Mercurial.
       $branch_arg,
-      hgsprintf('reverse(%s::%s)', '0', $commit_hash),
+      hgsprintf('reverse(ancestors(%s))', $commit_hash),
       $path_arg);
 
     $stdout = PhabricatorRepository::filterMercurialDebugOutput($stdout);

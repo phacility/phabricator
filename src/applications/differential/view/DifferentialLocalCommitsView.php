@@ -20,7 +20,7 @@ final class DifferentialLocalCommitsView extends AphrontView {
       return null;
     }
 
-    require_celerity_resource('differential-local-commits-view-css');
+    $this->requireResource('differential-local-commits-view-css');
 
     $has_tree = false;
     $has_local = false;

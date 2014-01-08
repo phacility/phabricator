@@ -30,6 +30,14 @@ final class HarbormasterBuildViewController
       ->setUser($viewer)
       ->setPolicyObject($build);
 
+    if ($build->isRestarting()) {
+      $header->setStatus('warning', 'red', pht('Restarting'));
+    } else if ($build->isStopping()) {
+      $header->setStatus('warning', 'red', pht('Stopping'));
+    } else if ($build->isResuming()) {
+      $header->setStatus('warning', 'red', pht('Resuming'));
+    }
+
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header);
 
@@ -37,6 +45,9 @@ final class HarbormasterBuildViewController
     $this->buildPropertyLists($box, $build, $actions);
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(
+      $build->getBuildable()->getMonogram(),
+      '/'.$build->getBuildable()->getMonogram());
     $crumbs->addTextCrumb($title);
 
     $build_targets = id(new HarbormasterBuildTargetQuery())
@@ -214,25 +225,33 @@ final class HarbormasterBuildViewController
       ->setObject($build)
       ->setObjectURI("/build/{$id}");
 
-    $action =
+    $can_restart = $build->canRestartBuild();
+    $can_stop = $build->canStopBuild();
+    $can_resume = $build->canResumeBuild();
+
+    $list->addAction(
       id(new PhabricatorActionView())
-        ->setName(pht('Cancel Build'))
-        ->setIcon('delete');
-    switch ($build->getBuildStatus()) {
-      case HarbormasterBuild::STATUS_PENDING:
-      case HarbormasterBuild::STATUS_WAITING:
-      case HarbormasterBuild::STATUS_BUILDING:
-        $cancel_uri = $this->getApplicationURI('/build/cancel/'.$id.'/');
-        $action
-          ->setHref($cancel_uri)
-          ->setWorkflow(true);
-        break;
-      default:
-        $action
-          ->setDisabled(true);
-        break;
-    }
-    $list->addAction($action);
+        ->setName(pht('Restart Build'))
+        ->setIcon('backward')
+        ->setHref($this->getApplicationURI('/build/restart/'.$id.'/'))
+        ->setDisabled(!$can_restart)
+        ->setWorkflow(true));
+
+    $list->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Stop Build'))
+        ->setIcon('stop')
+        ->setHref($this->getApplicationURI('/build/stop/'.$id.'/'))
+        ->setDisabled(!$can_stop)
+        ->setWorkflow(true));
+
+    $list->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Resume Build'))
+        ->setIcon('play')
+        ->setHref($this->getApplicationURI('/build/resume/'.$id.'/'))
+        ->setDisabled(!$can_resume)
+        ->setWorkflow(true));
 
     return $list;
   }
@@ -272,8 +291,8 @@ final class HarbormasterBuildViewController
   }
 
   private function getStatus(HarbormasterBuild $build) {
-    if ($build->getCancelRequested()) {
-      return pht('Cancelling');
+    if ($build->isStopping()) {
+      return pht('Stopping');
     }
     switch ($build->getBuildStatus()) {
       case HarbormasterBuild::STATUS_INACTIVE:
@@ -290,8 +309,8 @@ final class HarbormasterBuildViewController
         return pht('Failed');
       case HarbormasterBuild::STATUS_ERROR:
         return pht('Unexpected Error');
-      case HarbormasterBuild::STATUS_CANCELLED:
-        return pht('Cancelled');
+      case HarbormasterBuild::STATUS_STOPPED:
+        return pht('Stopped');
       default:
         return pht('Unknown');
     }

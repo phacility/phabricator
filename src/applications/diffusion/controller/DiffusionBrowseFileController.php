@@ -810,12 +810,21 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
   }
 
   private function loadFileForData($path, $data) {
-    return PhabricatorFile::buildFromFileDataOrHash(
+    $file = PhabricatorFile::buildFromFileDataOrHash(
       $data,
       array(
         'name' => basename($path),
         'ttl' => time() + 60 * 60 * 24,
+        'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
       ));
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $file->attachToObject(
+        $this->getRequest()->getUser(),
+        $this->getDiffusionRequest()->getRepository()->getPHID());
+    unset($unguarded);
+
+    return $file;
   }
 
   private function buildRawResponse($path, $data) {
@@ -857,17 +866,16 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
     // NOTE: We need to get the grandparent so we can capture filename changes
     // in the parent.
 
-    $parent = $this->loadParentRevisionOf($before);
+    $parent = $this->loadParentCommitOf($before);
     $old_filename = null;
     $was_created = false;
     if ($parent) {
-      $grandparent = $this->loadParentRevisionOf(
-        $parent->getCommitIdentifier());
+      $grandparent = $this->loadParentCommitOf($parent);
 
       if ($grandparent) {
         $rename_query = new DiffusionRenameHistoryQuery();
         $rename_query->setRequest($drequest);
-        $rename_query->setOldCommit($grandparent->getCommitIdentifier());
+        $rename_query->setOldCommit($grandparent);
         $rename_query->setViewer($request->getUser());
         $old_filename = $rename_query->loadOldFilename();
         $was_created = $rename_query->getWasCreated();
@@ -955,7 +963,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
     return $line;
   }
 
-  private function loadParentRevisionOf($commit) {
+  private function loadParentCommitOf($commit) {
     $drequest = $this->getDiffusionRequest();
     $user = $this->getRequest()->getUser();
 
@@ -963,7 +971,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       array(
         'user' => $user,
         'repository' => $drequest->getRepository(),
-        'commit'     => $commit,
+        'commit' => $commit,
       ));
 
     $parents = DiffusionQuery::callConduitWithDiffusionRequest(
@@ -971,7 +979,8 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       $before_req,
       'diffusion.commitparentsquery',
       array(
-        'commit' => $commit));
+        'commit' => $commit,
+      ));
 
     return head($parents);
   }

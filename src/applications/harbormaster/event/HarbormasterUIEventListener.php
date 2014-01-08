@@ -24,12 +24,19 @@ final class HarbormasterUIEventListener
       return;
     }
 
-    $target = null;
-    if ($object instanceof PhabricatorRepositoryCommit) {
-      $target = $object;
-    } elseif ($object instanceof DifferentialRevision) {
-      $target = $object->loadActiveDiff();
-    } else {
+    if ($object instanceof HarbormasterBuildable) {
+      // Although HarbormasterBuildable implements the correct interface, it
+      // does not make sense to show a build's build status. In the best case
+      // it is meaningless, and in the worst case it's confusing.
+      return;
+    }
+
+    if (!($object instanceof HarbormasterBuildableInterface)) {
+      return;
+    }
+
+    $buildable_phid = $object->getHarbormasterBuildablePHID();
+    if (!$buildable_phid) {
       return;
     }
 
@@ -39,7 +46,8 @@ final class HarbormasterUIEventListener
 
     $buildables = id(new HarbormasterBuildableQuery())
       ->setViewer($user)
-      ->withBuildablePHIDs(array($target->getPHID()))
+      ->withManualBuildables(false)
+      ->withBuildablePHIDs(array($buildable_phid))
       ->execute();
     if (!$buildables) {
       return;
@@ -62,8 +70,7 @@ final class HarbormasterUIEventListener
 
     foreach ($builds as $build) {
       $item = new PHUIStatusItemView();
-      $item->setTarget(
-        $build_handles[$build->getPHID()]->renderLink());
+      $item->setTarget($build_handles[$build->getPHID()]->renderLink());
 
       switch ($build->getBuildStatus()) {
         case HarbormasterBuild::STATUS_INACTIVE:
@@ -87,8 +94,8 @@ final class HarbormasterUIEventListener
         case HarbormasterBuild::STATUS_ERROR:
           $item->setIcon('minus-red', pht('Unexpected Error'));
           break;
-        case HarbormasterBuild::STATUS_CANCELLED:
-          $item->setIcon('minus-dark', pht('Cancelled'));
+        case HarbormasterBuild::STATUS_STOPPED:
+          $item->setIcon('minus-dark', pht('Stopped'));
           break;
         default:
           $item->setIcon('question', pht('Unknown'));

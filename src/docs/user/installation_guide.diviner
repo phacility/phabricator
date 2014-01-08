@@ -155,10 +155,10 @@ See <https://bugs.php.net/bug.php?id=59747> for more information.
 Since Phabricator is under active development, you should update frequently. To
 update Phabricator:
 
-  - Stop the webserver.
+  - Stop the webserver (including `php-fpm`, if you use it).
   - Run `git pull` in `libphutil/`, `arcanist/` and `phabricator/`.
   - Run `phabricator/bin/storage upgrade`.
-  - Restart the webserver.
+  - Restart the webserver (and `php-fpm`, if you stopped it earlier).
 
 For more details, see @{article:Configuration Guide}. You can use a script
 similar to this one to automate the process:

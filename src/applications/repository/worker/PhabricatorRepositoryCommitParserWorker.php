@@ -52,28 +52,6 @@ abstract class PhabricatorRepositoryCommitParserWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit);
 
-  /**
-   * This method is kind of awkward here but both the SVN message and
-   * change parsers use it.
-   */
-  protected function getSVNLogXMLObject($uri, $revision, $verbose = false) {
-
-    if ($verbose) {
-      $verbose = '--verbose';
-    }
-
-    list($xml) = $this->repository->execxRemoteCommand(
-      "log --xml {$verbose} --limit 1 %s@%d",
-      $uri,
-      $revision);
-
-    // Subversion may send us back commit messages which won't parse because
-    // they have non UTF-8 garbage in them. Slam them into valid UTF-8.
-    $xml = phutil_utf8ize($xml);
-
-    return new SimpleXMLElement($xml);
-  }
-
   protected function isBadCommit($full_commit_name) {
     $repository = new PhabricatorRepository();
 
@@ -86,19 +64,21 @@ abstract class PhabricatorRepositoryCommitParserWorker
     return (bool)$bad_commit;
   }
 
-  public function renderForDisplay() {
-    $suffix = parent::renderForDisplay();
-    $commit = $this->loadCommit();
+  public function renderForDisplay(PhabricatorUser $viewer) {
+    $suffix = parent::renderForDisplay($viewer);
+
+    $commit = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withIDs(array(idx($this->getTaskData(), 'commitID')))
+      ->executeOne();
     if (!$commit) {
       return $suffix;
     }
 
-    // TODO: (T603) This method should probably take a viewer.
+    $link = DiffusionView::linkCommit(
+      $commit->getRepository(),
+      $commit->getCommitIdentifier());
 
-    $repository = id(new PhabricatorRepository())
-      ->load($commit->getRepositoryID());
-    $link = DiffusionView::linkCommit($repository,
-                                      $commit->getCommitIdentifier());
-    return hsprintf('%s%s', $link, $suffix);
+    return array($link, $suffix);
   }
 }

@@ -25,14 +25,21 @@ final class DrydockManagementReleaseWorkflow
         "Specify one or more lease IDs to release.");
     }
 
+    $viewer = $this->getViewer();
+
+    $leases = id(new DrydockLeaseQuery())
+      ->setViewer($viewer)
+      ->withIDs($ids)
+      ->execute();
+
     foreach ($ids as $id) {
-      $lease = id(new DrydockLease())->load($id);
+      $lease = idx($leases, $id);
       if (!$lease) {
         $console->writeErr("Lease %d does not exist!\n", $id);
       } else if ($lease->getStatus() != DrydockLeaseStatus::STATUS_ACTIVE) {
         $console->writeErr("Lease %d is not 'active'!\n", $id);
       } else {
-        $resource = $lease->loadResource();
+        $resource = $lease->getResource();
         $blueprint = $resource->getBlueprint();
         $blueprint->releaseLease($resource, $lease);
 

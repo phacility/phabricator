@@ -22,9 +22,7 @@ final class DiffusionSvnRawDiffQuery extends DiffusionRawDiffQuery {
       $commit,
       $repository->getSubversionPathURI($drequest->getPath()));
 
-    if ($this->getTimeout()) {
-      $future->setTimeout($this->getTimeout());
-    }
+    $this->configureFuture($future);
 
     list($raw_diff) = $future->resolvex();
     return $raw_diff;

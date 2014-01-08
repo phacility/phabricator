@@ -16,7 +16,7 @@ final class HeraldTranscriptController extends HeraldController {
     $map = $this->getFilterMap();
     $this->filter = idx($data, 'filter');
     if (empty($map[$this->filter])) {
-      $this->filter = self::FILTER_AFFECTED;
+      $this->filter = self::FILTER_ALL;
     }
   }
 
@@ -149,9 +149,9 @@ final class HeraldTranscriptController extends HeraldController {
 
   protected function getFilterMap() {
     return array(
-      self::FILTER_AFFECTED => pht('Rules that Affected Me'),
-      self::FILTER_OWNED    => pht('Rules I Own'),
       self::FILTER_ALL      => pht('All Rules'),
+      self::FILTER_OWNED    => pht('Rules I Own'),
+      self::FILTER_AFFECTED => pht('Rules that Affected Me'),
     );
   }
 

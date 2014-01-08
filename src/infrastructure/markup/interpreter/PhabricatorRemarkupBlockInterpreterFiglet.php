@@ -13,7 +13,9 @@ final class PhabricatorRemarkupBlockInterpreterFiglet
         pht('Unable to locate the `figlet` binary. Install figlet.'));
     }
 
-    $future = id(new ExecFuture('figlet'))
+    $font = idx($argv, 'font', 'standard');
+    $safe_font = preg_replace('/[^0-9a-zA-Z-_.]/', '', $font);
+    $future = id(new ExecFuture('figlet -f %s', $safe_font))
       ->setTimeout(15)
       ->write(trim($content, "\n"));
 

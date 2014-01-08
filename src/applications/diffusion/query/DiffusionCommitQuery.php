@@ -76,11 +76,13 @@ final class DiffusionCommitQuery
     return $this->identifierMap;
   }
 
-  protected function loadPage() {
+  protected function willExecute() {
     if ($this->identifierMap === null) {
       $this->identifierMap = array();
     }
+  }
 
+  protected function loadPage() {
     $table = new PhabricatorRepositoryCommit();
     $conn_r = $table->establishConnection('r');
 

@@ -1018,10 +1018,6 @@ return array(
   // "phd debug" are always launched in trace mdoe. See also 'phd.verbose'.
   'phd.trace' => false,
 
-  // Path to custom celerity resource map relative to 'phabricator/src'.
-  // See also `scripts/celerity_mapper.php`.
-  'celerity.resource-path' => '__celerity_resource_map__.php',
-
   // This value is an input to the hash function when building resource hashes.
   // It has no security value, but if you accidentally poison user caches (by
   // pushing a bad patch or having something go wrong with a CDN, e.g.) you can

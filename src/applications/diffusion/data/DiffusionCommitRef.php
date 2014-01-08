@@ -7,6 +7,16 @@ final class DiffusionCommitRef extends Phobject {
   private $authorEmail;
   private $committerName;
   private $committerEmail;
+  private $hashes = array();
+
+  public function setHashes(array $hashes) {
+    $this->hashes = $hashes;
+    return $this;
+  }
+
+  public function getHashes() {
+    return $this->hashes;
+  }
 
   public function setCommitterEmail($committer_email) {
     $this->committerEmail = $committer_email;

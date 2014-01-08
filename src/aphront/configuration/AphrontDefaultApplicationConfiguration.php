@@ -73,7 +73,7 @@ class AphrontDefaultApplicationConfiguration
     return array(
       '/res/' => array(
         '(?:(?P<mtime>[0-9]+)T/)?'.
-        '(?P<package>pkg/)?'.
+        '(?P<library>[^/]+)/'.
         '(?P<hash>[a-f0-9]{8})/'.
         '(?P<path>.+\.(?:css|js|jpg|png|swf|gif))'
           => 'CelerityPhabricatorResourceController',

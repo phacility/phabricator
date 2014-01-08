@@ -17,7 +17,6 @@ final class DiffusionRepositoryListController extends DiffusionController
     $request = $this->getRequest();
     $controller = id(new PhabricatorApplicationSearchController($request))
       ->setQueryKey($this->queryKey)
-      ->setPreface($this->buildShortcuts())
       ->setSearchEngine(new PhabricatorRepositorySearchEngine())
       ->setNavigation($this->buildSideNavView());
 
@@ -30,6 +29,11 @@ final class DiffusionRepositoryListController extends DiffusionController
     assert_instances_of($repositories, 'PhabricatorRepository');
 
     $viewer = $this->getRequest()->getUser();
+
+    $project_phids = array_fuse(
+      array_mergev(
+        mpull($repositories, 'getProjectPHIDs')));
+    $project_handles = $this->loadViewerHandles($project_phids);
 
     $list = new PHUIObjectItemListView();
     foreach ($repositories as $repository) {
@@ -50,7 +54,8 @@ final class DiffusionRepositoryListController extends DiffusionController
         $item->setEpoch($commit->getEpoch());
       }
 
-      $item->addAttribute(
+      $item->addIcon(
+        'none',
         PhabricatorRepositoryType::getNameForRepositoryType(
           $repository->getVersionControlSystem()));
 
@@ -71,6 +76,15 @@ final class DiffusionRepositoryListController extends DiffusionController
             pht('%s Commit(s)', new PhutilNumber($size))));
       } else {
         $item->addAttribute(pht('No Commits'));
+      }
+
+      $handles = array_select_keys(
+        $project_handles,
+        $repository->getProjectPHIDs());
+      if ($handles) {
+        $item->addAttribute(
+          id(new ManiphestTaskProjectsView())
+            ->setHandles($handles));
       }
 
       if (!$repository->isTracked()) {
@@ -113,35 +127,6 @@ final class DiffusionRepositoryListController extends DiffusionController
         ->setIcon('create'));
 
     return $crumbs;
-  }
-
-  private function buildShortcuts() {
-    $shortcuts = id(new PhabricatorRepositoryShortcut())->loadAll();
-    if ($shortcuts) {
-      $shortcuts = msort($shortcuts, 'getSequence');
-
-      $rows = array();
-      foreach ($shortcuts as $shortcut) {
-        $rows[] = array(
-          $shortcut->getName(),
-          $shortcut->getHref(),
-          $shortcut->getDescription(),
-        );
-      }
-
-      $list = new PHUIObjectItemListView();
-      foreach ($rows as $row) {
-        $item = id(new PHUIObjectItemView())
-          ->setHeader($row[0])
-          ->setHref($row[1])
-          ->setSubhead(($row[2] ? $row[2] : pht('No Description')));
-        $list->addItem($item);
-      }
-      $shortcut_panel = array($list, phutil_tag('hr'));
-    } else {
-      $shortcut_panel = null;
-    }
-    return $shortcut_panel;
   }
 
 }

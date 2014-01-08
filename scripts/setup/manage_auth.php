@@ -14,11 +14,8 @@ EOSYNOPSIS
   );
 $args->parseStandardArguments();
 
-$workflows = array(
-  new PhabricatorAuthManagementRecoverWorkflow(),
-  new PhabricatorAuthManagementRefreshWorkflow(),
-  new PhabricatorAuthManagementLDAPWorkflow(),
-  new PhutilHelpArgumentWorkflow(),
-);
-
+$workflows = id(new PhutilSymbolLoader())
+  ->setAncestorClass('PhabricatorAuthManagementWorkflow')
+  ->loadObjects();
+$workflows[] = new PhutilHelpArgumentWorkflow();
 $args->parseWorkflows($workflows);

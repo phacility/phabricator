@@ -24,6 +24,12 @@ final class DifferentialGetWorkingCopy {
         'clone -- file://%s %s',
         $origin_path,
         $path);
+
+      if (!$repo->isHosted()) {
+        id(new ArcanistGitAPI($path))->execxLocal(
+          'remote set-url origin %s',
+          $repo->getRemoteURI());
+      }
     }
 
     $workspace = new ArcanistGitAPI($path);

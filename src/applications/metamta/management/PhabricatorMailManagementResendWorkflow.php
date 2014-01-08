@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorMailManagementResendWorkflow
-  extends PhabricatorSearchManagementWorkflow {
+  extends PhabricatorMailManagementWorkflow {
 
   protected function didConstruct() {
     $this

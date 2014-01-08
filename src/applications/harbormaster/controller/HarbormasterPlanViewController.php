@@ -178,13 +178,39 @@ final class HarbormasterPlanViewController
         ->setDisabled(!$can_edit)
         ->setIcon('edit'));
 
+    if ($plan->isDisabled()) {
+      $list->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Enable Plan'))
+          ->setHref($this->getApplicationURI("plan/disable/{$id}/"))
+          ->setWorkflow(true)
+          ->setDisabled(!$can_edit)
+          ->setIcon('enable'));
+    } else {
+      $list->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Disable Plan'))
+          ->setHref($this->getApplicationURI("plan/disable/{$id}/"))
+          ->setWorkflow(true)
+          ->setDisabled(!$can_edit)
+          ->setIcon('disable'));
+    }
+
     $list->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Add Build Step'))
         ->setHref($this->getApplicationURI("step/add/{$id}/"))
-        ->setWorkflow($can_edit)
+        ->setWorkflow(true)
         ->setDisabled(!$can_edit)
         ->setIcon('new'));
+
+    $list->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Run Plan Manually'))
+        ->setHref($this->getApplicationURI("plan/run/{$id}/"))
+        ->setWorkflow(true)
+        ->setDisabled(!$can_edit)
+        ->setIcon('start-sandcastle'));
 
     return $list;
   }

@@ -19,6 +19,7 @@ final class DiffusionCommitHookEngine extends Phobject {
   private $viewer;
   private $repository;
   private $stdin;
+  private $originalArgv;
   private $subversionTransaction;
   private $subversionRepository;
   private $remoteAddress;
@@ -26,6 +27,7 @@ final class DiffusionCommitHookEngine extends Phobject {
   private $transactionKey;
   private $mercurialHook;
   private $mercurialCommits = array();
+  private $gitCommits = array();
 
   private $heraldViewerProjects;
 
@@ -81,6 +83,15 @@ final class DiffusionCommitHookEngine extends Phobject {
 
   public function getStdin() {
     return $this->stdin;
+  }
+
+  public function setOriginalArgv(array $original_argv) {
+    $this->originalArgv = $original_argv;
+    return $this;
+  }
+
+  public function getOriginalArgv() {
+    return $this->originalArgv;
   }
 
   public function setRepository(PhabricatorRepository $repository) {
@@ -140,7 +151,8 @@ final class DiffusionCommitHookEngine extends Phobject {
 
       $this->applyHeraldContentRules($content_updates, $all_updates);
 
-      // TODO: Fire external hooks.
+      // Run custom scripts in `hook.d/` directories.
+      $this->applyCustomHooks($all_updates);
 
       // If we make it this far, we're accepting these changes. Mark all the
       // logs as accepted.
@@ -259,6 +271,7 @@ final class DiffusionCommitHookEngine extends Phobject {
     $engine = new HeraldEngine();
     $rules = null;
     $blocking_effect = null;
+    $blocked_update = null;
     foreach ($updates as $update) {
       $adapter = id(clone $adapter_template)
         ->setPushLog($update);
@@ -275,6 +288,7 @@ final class DiffusionCommitHookEngine extends Phobject {
         foreach ($effects as $effect) {
           if ($effect->getAction() == HeraldAdapter::ACTION_BLOCK) {
             $blocking_effect = $effect;
+            $blocked_update = $update;
             break;
           }
         }
@@ -300,12 +314,19 @@ final class DiffusionCommitHookEngine extends Phobject {
         $rule_name = pht('Unnamed Herald Rule');
       }
 
+      $blocked_ref_name = coalesce(
+        $blocked_update->getRefName(),
+        $blocked_update->getRefNewShort());
+      $blocked_name = $blocked_update->getRefType().'/'.$blocked_ref_name;
+
       throw new DiffusionCommitHookRejectException(
         pht(
-          "This commit was rejected by Herald pre-commit rule %s.\n".
-          "Rule: %s\n".
+          "This push was rejected by Herald push rule %s.\n".
+          "Change: %s\n".
+          "  Rule: %s\n".
           "Reason: %s",
           'H'.$blocking_effect->getRuleID(),
+          $blocked_name,
           $rule_name,
           $message));
     }
@@ -418,6 +439,7 @@ final class DiffusionCommitHookEngine extends Phobject {
         $merge_base = rtrim($stdout, "\n");
       }
 
+      $ref_update = $ref_updates[$key];
       $ref_update->setMergeBase($merge_base);
     }
 
@@ -516,7 +538,20 @@ final class DiffusionCommitHookEngine extends Phobject {
 
       $commits = phutil_split_lines($stdout, $retain_newlines = false);
 
+      // If we're looking at a branch, mark all of the new commits as on that
+      // branch. It's only possible for these commits to be on updated branches,
+      // since any other branch heads are necessarily behind them.
+      $branch_name = null;
+      $ref_update = $ref_updates[$key];
+      $type_branch = PhabricatorRepositoryPushLog::REFTYPE_BRANCH;
+      if ($ref_update->getRefType() == $type_branch) {
+        $branch_name = $ref_update->getRefName();
+      }
+
       foreach ($commits as $commit) {
+        if ($branch_name) {
+          $this->gitCommits[$commit][] = $branch_name;
+        }
         $content_updates[$commit] = $this->newPushLog()
           ->setRefType(PhabricatorRepositoryPushLog::REFTYPE_COMMIT)
           ->setRefNew($commit)
@@ -525,6 +560,74 @@ final class DiffusionCommitHookEngine extends Phobject {
     }
 
     return $content_updates;
+  }
+
+/* -(  Custom  )------------------------------------------------------------- */
+
+  private function applyCustomHooks(array $updates) {
+    $args = $this->getOriginalArgv();
+    $stdin = $this->getStdin();
+    $console = PhutilConsole::getConsole();
+
+    $env = array(
+      'PHABRICATOR_REPOSITORY' => $this->getRepository()->getCallsign(),
+      self::ENV_USER => $this->getViewer()->getUsername(),
+      self::ENV_REMOTE_PROTOCOL => $this->getRemoteProtocol(),
+      self::ENV_REMOTE_ADDRESS => $this->getRemoteAddress(),
+    );
+
+    $directories = $this->getRepository()->getHookDirectories();
+    foreach ($directories as $directory) {
+      $hooks = $this->getExecutablesInDirectory($directory);
+      sort($hooks);
+      foreach ($hooks as $hook) {
+        // NOTE: We're explicitly running the hooks in sequential order to
+        // make this more predictable.
+        $future = id(new ExecFuture('%s %Ls', $hook, $args))
+          ->setEnv($env, $wipe_process_env = false)
+          ->write($stdin);
+
+        list($err, $stdout, $stderr) = $future->resolve();
+        if (!$err) {
+          // This hook ran OK, but echo its output in case there was something
+          // informative.
+          $console->writeOut("%s", $stdout);
+          $console->writeErr("%s", $stderr);
+          continue;
+        }
+
+        // Mark everything as rejected by this hook.
+        foreach ($updates as $update) {
+          $update->setRejectCode(
+            PhabricatorRepositoryPushLog::REJECT_EXTERNAL);
+          $update->setRejectDetails(basename($hook));
+        }
+
+        throw new DiffusionCommitHookRejectException(
+          pht(
+            "This push was rejected by custom hook script '%s':\n\n%s%s",
+            basename($hook),
+            $stdout,
+            $stderr));
+      }
+    }
+  }
+
+  private function getExecutablesInDirectory($directory) {
+    $executables = array();
+
+    if (!Filesystem::pathExists($directory)) {
+      return $executables;
+    }
+
+    foreach (Filesystem::listDirectory($directory) as $path) {
+      $full_path = $directory.DIRECTORY_SEPARATOR.$path;
+      if (is_executable($full_path)) {
+        $executables[] = $full_path;
+      }
+    }
+
+    return $executables;
   }
 
 
@@ -574,17 +677,22 @@ final class DiffusionCommitHookEngine extends Phobject {
     // Resolve all of the futures now. We don't need the 'commits' future yet,
     // but it simplifies the logic to just get it out of the way.
     foreach (Futures($futures) as $future) {
-      $future->resolvex();
+      $future->resolve();
     }
 
     list($commit_raw) = $futures['commits']->resolvex();
     $commit_map = $this->parseMercurialCommits($commit_raw);
     $this->mercurialCommits = $commit_map;
 
-    list($old_raw) = $futures['old']->resolvex();
+    // NOTE: `hg heads` exits with an error code and no output if the repository
+    // has no heads. Most commonly this happens on a new repository. We know
+    // we can run `hg` successfully since the `hg log` above didn't error, so
+    // just ignore the error code.
+
+    list($err, $old_raw) = $futures['old']->resolve();
     $old_refs = $this->parseMercurialHeads($old_raw);
 
-    list($new_raw) = $futures['new']->resolvex();
+    list($err, $new_raw) = $futures['new']->resolve();
     $new_refs = $this->parseMercurialHeads($new_raw);
 
     $all_refs = array_keys($old_refs + $new_refs);
@@ -896,6 +1004,9 @@ final class DiffusionCommitHookEngine extends Phobject {
   }
 
   public function loadChangesetsForCommit($identifier) {
+    $byte_limit = HeraldCommitAdapter::getEnormousByteLimit();
+    $time_limit = HeraldCommitAdapter::getEnormousTimeLimit();
+
     $vcs = $this->getRepository()->getVersionControlSystem();
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
@@ -907,8 +1018,10 @@ final class DiffusionCommitHookEngine extends Phobject {
             'user' => $this->getViewer(),
             'commit' => $identifier,
           ));
+
         $raw_diff = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest)
-          ->setTimeout(5 * 60)
+          ->setTimeout($time_limit)
+          ->setByteLimit($byte_limit)
           ->setLinesOfContext(0)
           ->loadRawDiff();
         break;
@@ -919,13 +1032,27 @@ final class DiffusionCommitHookEngine extends Phobject {
         // the "--diff-cmd" flag.
 
         // For subversion, we need to use `svnlook`.
-        list($raw_diff) = execx(
+        $future = new ExecFuture(
           'svnlook diff -t %s %s',
           $this->subversionTransaction,
           $this->subversionRepository);
+
+        $future->setTimeout($time_limit);
+        $future->setStdoutSizeLimit($byte_limit);
+        $future->setStderrSizeLimit($byte_limit);
+
+        list($raw_diff) = $future->resolvex();
         break;
       default:
         throw new Exception(pht("Unknown VCS '%s!'", $vcs));
+    }
+
+    if (strlen($raw_diff) >= $byte_limit) {
+      throw new Exception(
+        pht(
+          'The raw text of this change is enormous (larger than %d '.
+          'bytes). Herald can not process it.',
+          $byte_limit));
     }
 
     $parser = new ArcanistDiffParser();
@@ -939,12 +1066,8 @@ final class DiffusionCommitHookEngine extends Phobject {
     $vcs = $repository->getVersionControlSystem();
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        return id(new DiffusionLowLevelGitCommitQuery())
-          ->setRepository($repository)
-          ->withIdentifier($identifier)
-          ->execute();
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        return id(new DiffusionLowLevelMercurialCommitQuery())
+        return id(new DiffusionLowLevelCommitQuery())
           ->setRepository($repository)
           ->withIdentifier($identifier)
           ->execute();
@@ -960,6 +1083,20 @@ final class DiffusionCommitHookEngine extends Phobject {
         break;
       default:
         throw new Exception(pht("Unknown VCS '%s!'", $vcs));
+    }
+  }
+
+  public function loadBranches($identifier) {
+    $repository = $this->getRepository();
+    $vcs = $repository->getVersionControlSystem();
+    switch ($vcs) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        return idx($this->gitCommits, $identifier, array());
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        return idx($this->mercurialCommits, $identifier, array());
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        // Subversion doesn't have branches.
+        return array();
     }
   }
 

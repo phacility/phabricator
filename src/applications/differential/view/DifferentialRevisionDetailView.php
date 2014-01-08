@@ -45,7 +45,7 @@ final class DifferentialRevisionDetailView extends AphrontView {
 
   public function render() {
 
-    require_celerity_resource('differential-core-view-css');
+    $this->requireResource('differential-core-view-css');
 
     $revision = $this->revision;
     $user = $this->getUser();

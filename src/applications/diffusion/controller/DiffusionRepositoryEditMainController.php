@@ -231,6 +231,7 @@ final class DiffusionRepositoryEditMainController
         ->setIcon('delete')
         ->setHref(
           $this->getRepositoryControllerURI($repository, 'edit/delete/'))
+        ->setDisabled(true)
         ->setWorkflow(true));
 
     return $view;
@@ -251,6 +252,16 @@ final class DiffusionRepositoryEditMainController
 
     $view->addProperty(pht('Type'), $type);
     $view->addProperty(pht('Callsign'), $repository->getCallsign());
+
+    $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $repository->getPHID(),
+      PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT);
+    if ($project_phids) {
+      $this->loadHandles($project_phids);
+      $view->addProperty(
+        pht('Projects'),
+        $this->renderHandlesForPHIDs($project_phids));
+    }
 
     $view->addProperty(
       pht('Status'),

@@ -6,6 +6,7 @@ final class HarbormasterBuildPlanEditor
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
     $types[] = HarbormasterBuildPlanTransaction::TYPE_NAME;
+    $types[] = HarbormasterBuildPlanTransaction::TYPE_STATUS;
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
     return $types;
   }
@@ -19,6 +20,8 @@ final class HarbormasterBuildPlanEditor
           return null;
         }
         return $object->getName();
+      case HarbormasterBuildPlanTransaction::TYPE_STATUS:
+        return $object->getPlanStatus();
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -29,6 +32,8 @@ final class HarbormasterBuildPlanEditor
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
       case HarbormasterBuildPlanTransaction::TYPE_NAME:
+        return $xaction->getNewValue();
+      case HarbormasterBuildPlanTransaction::TYPE_STATUS:
         return $xaction->getNewValue();
     }
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -41,6 +46,9 @@ final class HarbormasterBuildPlanEditor
       case HarbormasterBuildPlanTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
         return;
+      case HarbormasterBuildPlanTransaction::TYPE_STATUS:
+        $object->setPlanStatus($xaction->getNewValue());
+        return;
     }
     return parent::applyCustomInternalTransaction($object, $xaction);
   }
@@ -50,6 +58,7 @@ final class HarbormasterBuildPlanEditor
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
       case HarbormasterBuildPlanTransaction::TYPE_NAME:
+      case HarbormasterBuildPlanTransaction::TYPE_STATUS:
         return;
     }
     return parent::applyCustomExternalTransaction($object, $xaction);

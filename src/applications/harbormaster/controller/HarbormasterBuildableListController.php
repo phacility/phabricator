@@ -37,13 +37,20 @@ final class HarbormasterBuildableListController
 
       $item = id(new PHUIObjectItemView())
         ->setHeader(pht('Buildable %d', $buildable->getID()));
+      $item->addAttribute($buildable->getContainerHandle()->getName());
       $item->addAttribute($buildable->getBuildableHandle()->getFullName());
 
       if ($id) {
         $item->setHref("/B{$id}");
       }
 
+      if ($buildable->getIsManualBuildable()) {
+        $item->addIcon('wrench-grey', pht('Manual'));
+      }
+
       $list->addItem($item);
+
+
 
       // TODO: This is proof-of-concept for getting meaningful status
       // information into this list, and should get an improvement pass
@@ -81,12 +88,7 @@ final class HarbormasterBuildableListController
       ->setViewer($user)
       ->addNavigationItems($nav->getMenu());
 
-    if ($for_app) {
-      $nav->addFilter('new/', pht('New Build Plan'));
-    }
-
-    $nav->addLabel('Utilities');
-    $nav->addFilter('buildable/edit/', pht('New Manual Build'));
+    $nav->addLabel(pht('Build Plans'));
     $nav->addFilter('plan/', pht('Manage Build Plans'));
 
     $nav->selectFilter(null);

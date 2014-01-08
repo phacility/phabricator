@@ -25,8 +25,15 @@ final class DrydockManagementCloseWorkflow
         "Specify one or more resource IDs to close.");
     }
 
+    $viewer = $this->getViewer();
+
+    $resources = id(new DrydockResourceQuery())
+      ->setViewer($viewer)
+      ->withIDs($ids)
+      ->execute();
+
     foreach ($ids as $id) {
-      $resource = id(new DrydockResource())->load($id);
+      $resource = idx($resources, $id);
       if (!$resource) {
         $console->writeErr("Resource %d does not exist!\n", $id);
       } else if ($resource->getStatus() != DrydockResourceStatus::STATUS_OPEN) {

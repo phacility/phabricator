@@ -32,7 +32,7 @@ final class PhabricatorDaemonManagementLogWorkflow
     $id = head($id);
 
     $daemon = id(new PhabricatorDaemonLogQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($this->getViewer())
       ->withIDs(array($id))
       ->executeOne();
 

@@ -9,9 +9,10 @@ final class PhameResourceController extends CelerityResourceController {
   private $hash;
   private $name;
   private $root;
+  private $celerityResourceMap;
 
-  protected function getRootDirectory() {
-    return $this->root;
+  public function getCelerityResourceMap() {
+    return $this->celerityResourceMap;
   }
 
   public function willProcessRequest(array $data) {
@@ -26,9 +27,13 @@ final class PhameResourceController extends CelerityResourceController {
 
     // We require a visible blog associated with a given skin to serve
     // resources, so you can't go fishing around where you shouldn't be.
+    // However, since these resources may be served off a CDN domain, we're
+    // bypassing the actual policy check. The blog needs to exist, but you
+    // don't necessarily need to be able to see it in order to see static
+    // resources on it.
 
     $blog = id(new PhameBlogQuery())
-      ->setViewer($user)
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withIDs(array($this->id))
       ->executeOne();
     if (!$blog) {
@@ -38,8 +43,13 @@ final class PhameResourceController extends CelerityResourceController {
     $skin = $blog->getSkinRenderer($request);
     $spec = $skin->getSpecification();
 
-    $this->root = $spec->getRootDirectory().DIRECTORY_SEPARATOR;
-    return $this->serveResource($this->name, $package_hash = null);
+    $resources = new PhameCelerityResources();
+    $resources->setSkin($spec);
+
+    $this->root = $spec->getRootDirectory();
+    $this->celerityResourceMap = new CelerityResourceMap($resources);
+
+    return $this->serveResource($this->name);
   }
 
   protected function buildResourceTransformer() {

@@ -6,9 +6,6 @@
 final class HeraldCommitAdapter extends HeraldAdapter {
 
   const FIELD_NEED_AUDIT_FOR_PACKAGE      = 'need-audit-for-package';
-  const FIELD_DIFFERENTIAL_REVISION       = 'differential-revision';
-  const FIELD_DIFFERENTIAL_REVIEWERS      = 'differential-reviewers';
-  const FIELD_DIFFERENTIAL_CCS            = 'differential-ccs';
   const FIELD_REPOSITORY_AUTOCLOSE_BRANCH = 'repository-autoclose-branch';
 
   protected $diff;
@@ -45,13 +42,47 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     return pht('Commits');
   }
 
+  public function getAdapterContentDescription() {
+    return pht(
+      "React to new commits appearing in tracked repositories.\n".
+      "Commit rules can send email, flag commits, trigger audits, ".
+      "and run build plans.");
+  }
+
+  public function supportsRuleType($rule_type) {
+    switch ($rule_type) {
+      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
+      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
+      case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  public function canTriggerOnObject($object) {
+    if ($object instanceof PhabricatorRepository) {
+      return true;
+    }
+    return false;
+  }
+
+  public function getTriggerObjectPHIDs() {
+    return array(
+      $this->repository->getPHID(),
+      $this->getPHID(),
+    );
+  }
+
+  public function explainValidTriggerObjects() {
+    return pht(
+      'This rule can trigger for **repositories**.');
+  }
+
   public function getFieldNameMap() {
     return array(
       self::FIELD_NEED_AUDIT_FOR_PACKAGE =>
         pht('Affected packages that need audit'),
-      self::FIELD_DIFFERENTIAL_REVISION => pht('Differential revision'),
-      self::FIELD_DIFFERENTIAL_REVIEWERS => pht('Differential reviewers'),
-      self::FIELD_DIFFERENTIAL_CCS => pht('Differential CCs'),
       self::FIELD_REPOSITORY_AUTOCLOSE_BRANCH => pht('On autoclose branch'),
     ) + parent::getFieldNameMap();
   }
@@ -68,11 +99,13 @@ final class HeraldCommitAdapter extends HeraldAdapter {
         self::FIELD_DIFF_CONTENT,
         self::FIELD_DIFF_ADDED_CONTENT,
         self::FIELD_DIFF_REMOVED_CONTENT,
+        self::FIELD_DIFF_ENORMOUS,
         self::FIELD_RULE,
         self::FIELD_AFFECTED_PACKAGE,
         self::FIELD_AFFECTED_PACKAGE_OWNER,
         self::FIELD_NEED_AUDIT_FOR_PACKAGE,
         self::FIELD_DIFFERENTIAL_REVISION,
+        self::FIELD_DIFFERENTIAL_ACCEPTED,
         self::FIELD_DIFFERENTIAL_REVIEWERS,
         self::FIELD_DIFFERENTIAL_CCS,
         self::FIELD_REPOSITORY_AUTOCLOSE_BRANCH,
@@ -82,25 +115,6 @@ final class HeraldCommitAdapter extends HeraldAdapter {
 
   public function getConditionsForField($field) {
     switch ($field) {
-      case self::FIELD_DIFFERENTIAL_REVIEWERS:
-        return array(
-          self::CONDITION_EXISTS,
-          self::CONDITION_NOT_EXISTS,
-          self::CONDITION_INCLUDE_ALL,
-          self::CONDITION_INCLUDE_ANY,
-          self::CONDITION_INCLUDE_NONE,
-        );
-      case self::FIELD_DIFFERENTIAL_CCS:
-        return array(
-          self::CONDITION_INCLUDE_ALL,
-          self::CONDITION_INCLUDE_ANY,
-          self::CONDITION_INCLUDE_NONE,
-        );
-      case self::FIELD_DIFFERENTIAL_REVISION:
-        return array(
-          self::CONDITION_EXISTS,
-          self::CONDITION_NOT_EXISTS,
-        );
       case self::FIELD_NEED_AUDIT_FOR_PACKAGE:
         return array(
           self::CONDITION_INCLUDE_ANY,
@@ -117,6 +131,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
   public function getActions($rule_type) {
     switch ($rule_type) {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
+      case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
         return array(
           self::ACTION_ADD_CC,
           self::ACTION_EMAIL,
@@ -255,6 +270,14 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     return $this->affectedRevision;
   }
 
+  public static function getEnormousByteLimit() {
+    return 1024 * 1024 * 1024; // 1GB
+  }
+
+  public static function getEnormousTimeLimit() {
+    return 60 * 15; // 15 Minutes
+  }
+
   private function loadCommitDiff() {
     $drequest = DiffusionRequest::newFromDictionary(
       array(
@@ -263,14 +286,26 @@ final class HeraldCommitAdapter extends HeraldAdapter {
         'commit' => $this->commit->getCommitIdentifier(),
       ));
 
+    $byte_limit = self::getEnormousByteLimit();
+
     $raw = DiffusionQuery::callConduitWithDiffusionRequest(
       PhabricatorUser::getOmnipotentUser(),
       $drequest,
       'diffusion.rawdiffquery',
       array(
         'commit' => $this->commit->getCommitIdentifier(),
-        'timeout' => 60 * 60 * 15,
-        'linesOfContext' => 0));
+        'timeout' => self::getEnormousTimeLimit(),
+        'byteLimit' => $byte_limit,
+        'linesOfContext' => 0,
+      ));
+
+    if (strlen($raw) >= $byte_limit) {
+      throw new Exception(
+        pht(
+          'The raw text of this change is enormous (larger than %d bytes). '.
+          'Herald can not process it.',
+          $byte_limit));
+    }
 
     $parser = new ArcanistDiffParser();
     $changes = $parser->parseDiff($raw);
@@ -346,6 +381,9 @@ final class HeraldCommitAdapter extends HeraldAdapter {
         return $this->getDiffContent('+');
       case self::FIELD_DIFF_REMOVED_CONTENT:
         return $this->getDiffContent('-');
+      case self::FIELD_DIFF_ENORMOUS:
+        $this->getDiffContent('*');
+        return ($this->commitDiff instanceof Exception);
       case self::FIELD_AFFECTED_PACKAGE:
         $packages = $this->loadAffectedPackages();
         return mpull($packages, 'getPHID');
@@ -361,6 +399,16 @@ final class HeraldCommitAdapter extends HeraldAdapter {
           return null;
         }
         return $revision->getID();
+      case self::FIELD_DIFFERENTIAL_ACCEPTED:
+        $revision = $this->loadDifferentialRevision();
+        if (!$revision) {
+          return null;
+        }
+        $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
+        if ($revision->getStatus() != $status_accepted) {
+          return null;
+        }
+        return $revision->getPHID();
       case self::FIELD_DIFFERENTIAL_REVIEWERS:
         $revision = $this->loadDifferentialRevision();
         if (!$revision) {

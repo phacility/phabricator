@@ -144,11 +144,10 @@ final class PhabricatorRepositoryPullLocalDaemon
             $lock = PhabricatorGlobalLock::newLock($lock_name);
             $lock->lock();
 
-            $repository->writeStatusMessage(
-              PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
-              null);
-
             try {
+              $repository->writeStatusMessage(
+                PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
+                null);
               $this->discoverRepository($repository);
               $repository->writeStatusMessage(
                 PhabricatorRepositoryStatusMessage::TYPE_FETCH,

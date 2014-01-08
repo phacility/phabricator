@@ -23,6 +23,7 @@ final class PhabricatorRepositoryQuery
 
   private $needMostRecentCommits;
   private $needCommitCounts;
+  private $needProjectPHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -66,6 +67,11 @@ final class PhabricatorRepositoryQuery
 
   public function needMostRecentCommits($need_commits) {
     $this->needMostRecentCommits = $need_commits;
+    return $this;
+  }
+
+  public function needProjectPHIDs($need_phids) {
+    $this->needProjectPHIDs = $need_phids;
     return $this;
   }
 
@@ -116,7 +122,6 @@ final class PhabricatorRepositoryQuery
       }
     }
 
-
     return $repositories;
   }
 
@@ -142,6 +147,27 @@ final class PhabricatorRepositoryQuery
           break;
         default:
           throw new Exception("Unknown status '{$status}'!");
+      }
+    }
+
+    return $repositories;
+  }
+
+  public function didFilterPage(array $repositories) {
+    if ($this->needProjectPHIDs) {
+      $type_project = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT;
+
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(mpull($repositories, 'getPHID'))
+        ->withEdgeTypes(array($type_project));
+      $edge_query->execute();
+
+      foreach ($repositories as $repository) {
+        $project_phids = $edge_query->getDestinationPHIDs(
+          array(
+            $repository->getPHID(),
+          ));
+        $repository->attachProjectPHIDs($project_phids);
       }
     }
 

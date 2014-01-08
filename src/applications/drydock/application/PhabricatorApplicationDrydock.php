@@ -33,24 +33,26 @@ final class PhabricatorApplicationDrydock extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/drydock/' => array(
-        '' => 'DrydockResourceListController',
+        '' => 'DrydockConsoleController',
         'blueprint/' => array(
-          '' => 'DrydockBlueprintListController',
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'DrydockBlueprintListController',
           '(?P<id>[1-9]\d*)/' => 'DrydockBlueprintViewController',
           'create/' => 'DrydockBlueprintCreateController',
           'edit/(?P<id>[1-9]\d*)/' => 'DrydockBlueprintEditController',
         ),
         'resource/' => array(
-          '' => 'DrydockResourceListController',
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'DrydockResourceListController',
           '(?P<id>[1-9]\d*)/' => 'DrydockResourceViewController',
           '(?P<id>[1-9]\d*)/close/' => 'DrydockResourceCloseController',
         ),
         'lease/' => array(
-          '' => 'DrydockLeaseListController',
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'DrydockLeaseListController',
           '(?P<id>[1-9]\d*)/' => 'DrydockLeaseViewController',
           '(?P<id>[1-9]\d*)/release/' => 'DrydockLeaseReleaseController',
         ),
-        'log/' => 'DrydockLogController',
+        'log/' => array(
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'DrydockLogListController',
+        ),
       ),
     );
   }

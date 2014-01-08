@@ -6,10 +6,11 @@
   position: relative;
   margin: 0;
   padding-top: 32px;
+  overflow-x: auto;
 }
 
 .differential-diff {
-  background: transparent;
+  background: #fff;
   width: 100%;
   border-top: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$lightblueborder};

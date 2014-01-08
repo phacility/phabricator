@@ -87,8 +87,8 @@ final class PhabricatorSortTableExample extends PhabricatorUIExample {
       $reverse,
       $orders);
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Sortable Table of Vehicles');
+    $panel = new PHUIObjectBoxView();
+    $panel->setHeaderText('Sortable Table of Vehicles');
     $panel->appendChild($table);
 
     return $panel;

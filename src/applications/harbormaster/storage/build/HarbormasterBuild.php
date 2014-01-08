@@ -6,10 +6,10 @@ final class HarbormasterBuild extends HarbormasterDAO
   protected $buildablePHID;
   protected $buildPlanPHID;
   protected $buildStatus;
-  protected $cancelRequested;
 
   private $buildable = self::ATTACHABLE;
   private $buildPlan = self::ATTACHABLE;
+  private $unprocessedCommands = self::ATTACHABLE;
 
   /**
    * Not currently being built.
@@ -47,14 +47,22 @@ final class HarbormasterBuild extends HarbormasterDAO
   const STATUS_ERROR = 'error';
 
   /**
-   * The build has been cancelled.
+   * The build has been stopped.
    */
-  const STATUS_CANCELLED = 'cancelled';
+  const STATUS_STOPPED = 'stopped';
 
   public static function initializeNewBuild(PhabricatorUser $actor) {
     return id(new HarbormasterBuild())
-      ->setBuildStatus(self::STATUS_INACTIVE)
-      ->setCancelRequested(0);
+      ->setBuildStatus(self::STATUS_INACTIVE);
+  }
+
+  public function delete() {
+    $this->openTransaction();
+      $this->deleteUnprocessedCommands();
+      $result = parent::delete();
+    $this->saveTransaction();
+
+    return $result;
   }
 
   public function getConfiguration() {
@@ -97,8 +105,7 @@ final class HarbormasterBuild extends HarbormasterDAO
   public function isBuilding() {
     return $this->getBuildStatus() === self::STATUS_PENDING ||
       $this->getBuildStatus() === self::STATUS_WAITING ||
-      $this->getBuildStatus() === self::STATUS_BUILDING ||
-      $this->getCancelRequested();
+      $this->getBuildStatus() === self::STATUS_BUILDING;
   }
 
   public function createLog(
@@ -106,10 +113,11 @@ final class HarbormasterBuild extends HarbormasterDAO
     $log_source,
     $log_type) {
 
-    $log = HarbormasterBuildLog::initializeNewBuildLog($build_target);
-    $log->setLogSource($log_source);
-    $log->setLogType($log_type);
-    $log->save();
+    $log = HarbormasterBuildLog::initializeNewBuildLog($build_target)
+      ->setLogSource($log_source)
+      ->setLogType($log_type)
+      ->save();
+
     return $log;
   }
 
@@ -137,25 +145,6 @@ final class HarbormasterBuild extends HarbormasterDAO
       throw new Exception("Artifact not found!");
     }
     return $artifact;
-  }
-
-  /**
-   * Checks for and handles build cancellation.  If this method returns
-   * true, the caller should stop any current operations and return control
-   * as quickly as possible.
-   */
-  public function checkForCancellation() {
-    // Here we load a copy of the current build and check whether
-    // the user requested cancellation.  We can't do `reload()` here
-    // in case there are changes that have not yet been saved.
-    $copy = id(new HarbormasterBuild())->load($this->getID());
-    if ($copy->getCancelRequested()) {
-      $this->setBuildStatus(HarbormasterBuild::STATUS_CANCELLED);
-      $this->setCancelRequested(0);
-      $this->save();
-      return true;
-    }
-    return false;
   }
 
   public function retrieveVariablesFromBuild() {
@@ -212,6 +201,109 @@ final class HarbormasterBuild extends HarbormasterDAO
       'build.id' => pht('The ID of the current build.'));
   }
 
+  public function isComplete() {
+    switch ($this->getBuildStatus()) {
+      case self::STATUS_PASSED:
+      case self::STATUS_FAILED:
+      case self::STATUS_ERROR:
+      case self::STATUS_STOPPED:
+        return true;
+    }
+
+    return false;
+  }
+
+  public function isStopped() {
+    return ($this->getBuildStatus() == self::STATUS_STOPPED);
+  }
+
+
+/* -(  Build Commands  )----------------------------------------------------- */
+
+
+  private function getUnprocessedCommands() {
+    return $this->assertAttached($this->unprocessedCommands);
+  }
+
+  public function attachUnprocessedCommands(array $commands) {
+    $this->unprocessedCommands = $commands;
+    return $this;
+  }
+
+  public function canRestartBuild() {
+    return !$this->isRestarting();
+  }
+
+  public function canStopBuild() {
+    return !$this->isComplete() &&
+           !$this->isStopped() &&
+           !$this->isStopping();
+  }
+
+  public function canResumeBuild() {
+    return $this->isStopped() &&
+           !$this->isResuming();
+  }
+
+  public function isStopping() {
+    $is_stopping = false;
+    foreach ($this->getUnprocessedCommands() as $command_object) {
+      $command = $command_object->getCommand();
+      switch ($command) {
+        case HarbormasterBuildCommand::COMMAND_STOP:
+          $is_stopping = true;
+          break;
+        case HarbormasterBuildCommand::COMMAND_RESUME:
+        case HarbormasterBuildCommand::COMMAND_RESTART:
+          $is_stopping = false;
+          break;
+      }
+    }
+
+    return $is_stopping;
+  }
+
+  public function isResuming() {
+    $is_resuming = false;
+    foreach ($this->getUnprocessedCommands() as $command_object) {
+      $command = $command_object->getCommand();
+      switch ($command) {
+        case HarbormasterBuildCommand::COMMAND_RESTART:
+        case HarbormasterBuildCommand::COMMAND_RESUME:
+          $is_resuming = true;
+          break;
+        case HarbormasterBuildCommand::COMMAND_STOP:
+          $is_resuming = false;
+          break;
+      }
+    }
+
+    return $is_resuming;
+  }
+
+  public function isRestarting() {
+    $is_restarting = false;
+    foreach ($this->getUnprocessedCommands() as $command_object) {
+      $command = $command_object->getCommand();
+      switch ($command) {
+        case HarbormasterBuildCommand::COMMAND_RESTART:
+          $is_restarting = true;
+          break;
+      }
+    }
+
+    return $is_restarting;
+  }
+
+  public function deleteUnprocessedCommands() {
+    foreach ($this->getUnprocessedCommands() as $key => $command_object) {
+      $command_object->delete();
+      unset($this->unprocessedCommands[$key]);
+    }
+
+    return $this;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -219,6 +311,7 @@ final class HarbormasterBuild extends HarbormasterDAO
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
@@ -233,8 +326,7 @@ final class HarbormasterBuild extends HarbormasterDAO
   }
 
   public function describeAutomaticCapability($capability) {
-    return pht(
-      'Users must be able to see a buildable to view its build plans.');
+    return pht('A build inherits policies from its buildable.');
   }
 
 }

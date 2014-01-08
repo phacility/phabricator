@@ -1,6 +1,6 @@
 <?php
 
-final class DrydockResourceViewController extends DrydockController {
+final class DrydockResourceViewController extends DrydockResourceController {
 
   private $id;
 
@@ -10,9 +10,12 @@ final class DrydockResourceViewController extends DrydockController {
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
-    $resource = id(new DrydockResource())->load($this->id);
+    $resource = id(new DrydockResourceQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$resource) {
       return new Aphront404Response();
     }
@@ -29,8 +32,8 @@ final class DrydockResourceViewController extends DrydockController {
     $resource_uri = $this->getApplicationURI($resource_uri);
 
     $leases = id(new DrydockLeaseQuery())
+      ->setViewer($viewer)
       ->withResourceIDs(array($resource->getID()))
-      ->needResources(true)
       ->execute();
 
     $lease_list = $this->buildLeaseListView($leases);
@@ -41,6 +44,7 @@ final class DrydockResourceViewController extends DrydockController {
     $pager->setOffset($request->getInt('offset'));
 
     $logs = id(new DrydockLogQuery())
+      ->setViewer($viewer)
       ->withResourceIDs(array($resource->getID()))
       ->executeWithOffsetPager($pager);
 

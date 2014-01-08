@@ -14,15 +14,9 @@ EOSYNOPSIS
   );
 $args->parseStandardArguments();
 
-$workflows = array(
-  new PhutilHelpArgumentWorkflow(),
-  new PhabricatorMailManagementResendWorkflow(),
-  new PhabricatorMailManagementShowOutboundWorkflow(),
-  new PhabricatorMailManagementShowInboundWorkflow(),
-  new PhabricatorMailManagementSendTestWorkflow(),
-  new PhabricatorMailManagementReceiveTestWorkflow(),
-  new PhabricatorMailManagementListInboundWorkflow(),
-  new PhabricatorMailManagementListOutboundWorkflow(),
-);
-
+$workflows = id(new PhutilSymbolLoader())
+  ->setAncestorClass('PhabricatorMailManagementWorkflow')
+  ->loadObjects();
+$workflows[] = new PhutilHelpArgumentWorkflow();
 $args->parseWorkflows($workflows);
+

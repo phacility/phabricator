@@ -33,6 +33,8 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
     $this->loadHandles($handle_phids);
     $header = id(new PHUIHeaderView())
+      ->setUser($user)
+      ->setPolicyObject($file)
       ->setHeader($file->getName());
 
     $ttl = $file->getTTL();

@@ -45,16 +45,10 @@ final class PhabricatorProjectProfileController
     $query->setViewer($this->getRequest()->getUser());
     $stories = $query->execute();
     $feed = $this->renderStories($stories);
-    $people = $this->renderPeoplePage($project, $profile);
-
-    $content = id(new AphrontMultiColumnView())
-      ->addColumn($people)
-      ->addColumn($feed)
-      ->setFluidLayout(true);
 
     $content = phutil_tag_div(
       'phabricator-project-layout',
-      array($tasks, $content));
+      array($tasks, $feed));
 
     $header = id(new PHUIHeaderView())
       ->setHeader($project->getName())
@@ -92,37 +86,6 @@ final class PhabricatorProjectProfileController
       ));
   }
 
-  private function renderPeoplePage(
-    PhabricatorProject $project,
-    PhabricatorProjectProfile $profile) {
-
-    $member_phids = $project->getMemberPHIDs();
-    $handles = $this->loadViewerHandles($member_phids);
-
-    $affiliated = array();
-    foreach ($handles as $phids => $handle) {
-      $affiliated[] = phutil_tag('li', array(), $handle->renderLink());
-    }
-
-    if ($affiliated) {
-      $affiliated = phutil_tag('ul', array(), $affiliated);
-    } else {
-      $affiliated = phutil_tag('p', array(),
-        phutil_tag('em', array(),
-          pht('No one is affiliated with this project.')));
-    }
-
-    return phutil_tag_div(
-      'phabricator-profile-info-group profile-wrap-responsive',
-      array(
-        phutil_tag(
-          'h1',
-          array('class' => 'phabricator-profile-info-header'),
-          pht('People')),
-        phutil_tag_div('phabricator-profile-info-pane', $affiliated),
-      ));
-  }
-
   private function renderFeedPage(
     PhabricatorProject $project,
     PhabricatorProjectProfile $profile) {
@@ -149,7 +112,7 @@ final class PhabricatorProjectProfileController
     $view = $builder->buildView();
 
     return phutil_tag_div(
-      'profile-feed profile-wrap-responsive',
+      'profile-feed',
       $view->render());
   }
 
@@ -180,13 +143,9 @@ final class PhabricatorProjectProfileController
     $task_list->setTasks($tasks);
     $task_list->setHandles($handles);
 
-    $list = id(new PHUIBoxView())
-      ->addPadding(PHUI::PADDING_LARGE)
-      ->appendChild($task_list);
-
     $content = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Open Tasks'))
-      ->appendChild($list);
+      ->appendChild($task_list);
 
     return $content;
   }
@@ -271,6 +230,8 @@ final class PhabricatorProjectProfileController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
+    $this->loadHandles($project->getMemberPHIDs());
+
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
       ->setObject($project)
@@ -279,6 +240,12 @@ final class PhabricatorProjectProfileController
     $view->addProperty(
       pht('Created'),
       phabricator_datetime($project->getDateCreated(), $viewer));
+
+    $view->addProperty(
+      pht('Members'),
+      $project->getMemberPHIDs()
+      ? $this->renderHandlesForPHIDs($project->getMemberPHIDs(), ',')
+      : phutil_tag('em', array(), pht('None')));
 
     $view->addSectionHeader(pht('Description'));
     $view->addTextContent(

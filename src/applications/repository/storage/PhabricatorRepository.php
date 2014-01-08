@@ -43,6 +43,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   private $commitCount = self::ATTACHABLE;
   private $mostRecentCommit = self::ATTACHABLE;
+  private $projectPHIDs = self::ATTACHABLE;
 
   public static function initializeNewRepository(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -191,6 +192,15 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     return $uri;
+  }
+
+  public function attachProjectPHIDs(array $project_phids) {
+    $this->projectPHIDs = $project_phids;
+    return $this;
+  }
+
+  public function getProjectPHIDs() {
+    return $this->assertAttached($this->projectPHIDs);
   }
 
 
@@ -933,6 +943,35 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         return true;
     }
+  }
+
+  public function getHookDirectories() {
+    $directories = array();
+    if (!$this->isHosted()) {
+      return $directories;
+    }
+
+    $root = $this->getLocalPath();
+
+    switch ($this->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        if ($this->isWorkingCopyBare()) {
+          $directories[] = $root.'/hooks/pre-receive-phabricator.d/';
+        } else {
+          $directories[] = $root.'/.git/hooks/pre-receive-phabricator.d/';
+        }
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $directories[] = $root.'/hooks/pre-commit-phabricator.d/';
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        // NOTE: We don't support custom Mercurial hooks for now because they're
+        // messy and we can't easily just drop a `hooks.d/` directory next to
+        // the hooks.
+        break;
+    }
+
+    return $directories;
   }
 
   public function canDestroyWorkingCopy() {

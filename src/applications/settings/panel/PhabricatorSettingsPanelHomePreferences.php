@@ -140,9 +140,10 @@ final class PhabricatorSettingsPanelHomePreferences
             'checked' => $full_radio_button_status,
           ));
 
+        $desc = $app->getShortDescription();
         $app_column = hsprintf(
-                        "<strong>%s</strong><br /><em>Default: %s</em>"
-                        , $app->getName(), $default_name);
+                        "<strong>%s</strong><br/ >%s, <em>Default: %s</em>",
+                        $app->getName(), $desc, $default_name);
 
         $rows[] = array(
           $app_column,
@@ -179,20 +180,23 @@ final class PhabricatorSettingsPanelHomePreferences
           ));
 
 
-      $panel = id(new AphrontPanelView())
-        ->setHeader($group_name)
-        ->addClass('phabricator-settings-panelview')
-        ->appendChild($table)
-        ->setNoBackground();
+      $panel = id(new PHUIObjectBoxView())
+        ->setHeaderText($group_name)
+        ->appendChild($table);
 
       $output[] = $panel;
     }
 
-    $form
-      ->appendChild($output)
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue(pht('Save Preferences')));
+    $save_button =
+      id(new AphrontFormSubmitControl())
+        ->setValue(pht('Save Preferences'));
+
+    $output[] = id(new PHUIBoxView())
+      ->addPadding(PHUI::PADDING_LARGE)
+      ->addClass('phabricator-settings-homepagetable-button')
+      ->appendChild($save_button);
+
+    $form->appendChild($output);
 
     $error_view = null;
     if ($request->getStr('saved') === 'true') {
@@ -202,12 +206,14 @@ final class PhabricatorSettingsPanelHomePreferences
         ->setErrors(array(pht('Your preferences have been saved.')));
     }
 
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Home Page Preferences'))
-      ->setFormError($error_view)
-      ->setForm($form);
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Home Page Preferences'));
 
-    return $form_box;
+    $form = id(new PHUIBoxView())
+      ->addClass('phabricator-settings-homepagetable-wrap')
+      ->appendChild($form);
+
+    return array($header, $error_view, $form);
   }
 }
 

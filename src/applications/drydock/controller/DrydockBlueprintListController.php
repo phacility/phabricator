@@ -1,52 +1,34 @@
 <?php
 
-final class DrydockBlueprintListController extends DrydockController {
+final class DrydockBlueprintListController extends DrydockBlueprintController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
+
+  private $queryKey;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
+
+  public function willProcessRequest(array $data) {
+    $this->queryKey = idx($data, 'queryKey');
+  }
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->queryKey)
+      ->setSearchEngine(new DrydockBlueprintSearchEngine())
+      ->setNavigation($this->buildSideNavView());
 
-    $title = pht('Blueprints');
-
-    $blueprint_header = id(new PHUIHeaderView())
-      ->setHeader($title);
-
-    $blueprints = id(new DrydockBlueprintQuery())
-      ->setViewer($user)
-      ->execute();
-
-    $blueprint_list = $this->buildBlueprintListView($blueprints);
-
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($title, $request->getRequestURI());
-
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setName(pht('New Blueprint'))
-        ->setHref($this->getApplicationURI('blueprint/create/'))
-        ->setIcon('create'));
-
-    $nav = $this->buildSideNav('blueprint');
-    $nav->setCrumbs($crumbs);
-    $nav->appendChild(
-      array(
-        $blueprint_header,
-        $blueprint_list
-      ));
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-        'device' => true,
-      ));
-
+    return $this->delegateToController($controller);
   }
 
-  protected function buildBlueprintListView(array $blueprints) {
+  public function renderResultsList(
+    array $blueprints,
+    PhabricatorSavedQuery $query) {
     assert_instances_of($blueprints, 'DrydockBlueprint');
 
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getRequest()->getUser();
     $view = new PHUIObjectItemListView();
 
     foreach ($blueprints as $blueprint) {
@@ -69,6 +51,16 @@ final class DrydockBlueprintListController extends DrydockController {
     }
 
     return $view;
+  }
+
+  public function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+        ->setName(pht('New Blueprint'))
+        ->setHref($this->getApplicationURI('/blueprint/create/'))
+        ->setIcon('create'));
+    return $crumbs;
   }
 
 }

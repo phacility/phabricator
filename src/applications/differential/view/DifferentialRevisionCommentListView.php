@@ -53,7 +53,7 @@ final class DifferentialRevisionCommentListView extends AphrontView {
 
   public function render() {
 
-    require_celerity_resource('differential-revision-comment-list-css');
+    $this->requireResource('differential-revision-comment-list-css');
 
     $engine = new PhabricatorMarkupEngine();
     $engine->setViewer($this->user);
@@ -154,7 +154,7 @@ final class DifferentialRevisionCommentListView extends AphrontView {
     $visible = array_reverse($visible);
 
     if ($hidden) {
-      Javelin::initBehavior(
+      $this->initBehavior(
         'differential-show-all-comments',
         array(
           'markup' => implode("\n", $hidden),

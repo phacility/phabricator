@@ -92,7 +92,7 @@ final class PhabricatorSearchManagementIndexWorkflow
 
   private function loadPHIDsByNames(array $names) {
     $query = id(new PhabricatorObjectQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($this->getViewer())
       ->withNames($names);
     $query->execute();
     $objects = $query->getNamedResults();

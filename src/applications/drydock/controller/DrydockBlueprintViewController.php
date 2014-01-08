@@ -1,6 +1,6 @@
 <?php
 
-final class DrydockBlueprintViewController extends DrydockController {
+final class DrydockBlueprintViewController extends DrydockBlueprintController {
 
   private $id;
 
@@ -10,9 +10,12 @@ final class DrydockBlueprintViewController extends DrydockController {
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
-    $blueprint = id(new DrydockBlueprint())->load($this->id);
+    $blueprint = id(new DrydockBlueprintQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$blueprint) {
       return new Aphront404Response();
     }
@@ -30,7 +33,7 @@ final class DrydockBlueprintViewController extends DrydockController {
 
     $resources = id(new DrydockResourceQuery())
       ->withBlueprintPHIDs(array($blueprint->getPHID()))
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->execute();
 
     $resource_list = $this->buildResourceListView($resources);

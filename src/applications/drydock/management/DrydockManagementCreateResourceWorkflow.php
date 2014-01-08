@@ -49,17 +49,22 @@ final class DrydockManagementCreateResourceWorkflow
       $attributes = $options->parse($attributes);
     }
 
-    $blueprint = id(new DrydockBlueprint())->load((int)$blueprint_id);
+    $viewer = $this->getViewer();
+
+    $blueprint = id(new DrydockBlueprintQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($blueprint_id))
+      ->executeOne();
     if (!$blueprint) {
       throw new PhutilArgumentUsageException(
         "Specified blueprint does not exist.");
     }
 
-    $resource = new DrydockResource();
-    $resource->setBlueprintPHID($blueprint->getPHID());
-    $resource->setType($blueprint->getImplementation()->getType());
-    $resource->setName($resource_name);
-    $resource->setStatus(DrydockResourceStatus::STATUS_OPEN);
+    $resource = id(new DrydockResource())
+      ->setBlueprintPHID($blueprint->getPHID())
+      ->setType($blueprint->getImplementation()->getType())
+      ->setName($resource_name)
+      ->setStatus(DrydockResourceStatus::STATUS_OPEN);
     if ($attributes) {
       $resource->setAttributes($attributes);
     }

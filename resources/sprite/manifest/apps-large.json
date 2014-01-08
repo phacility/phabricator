@@ -364,7 +364,7 @@
     "apps-harbormaster-blue-large"    : {
       "name" : "apps-harbormaster-blue-large",
       "rule" : ".apps-harbormaster-blue-large, .phabricator-crumb-view:hover .apps-harbormaster-dark-large",
-      "hash" : "c4c81a696f9a4e1242324a1e420ab35b"
+      "hash" : "6912f9730452b2272439f7a77b4d0469"
     },
     "apps-harbormaster-dark-large"    : {
       "name" : "apps-harbormaster-dark-large",
@@ -784,12 +784,12 @@
     "apps-phortune-blue-large"        : {
       "name" : "apps-phortune-blue-large",
       "rule" : ".apps-phortune-blue-large, .phabricator-crumb-view:hover .apps-phortune-dark-large",
-      "hash" : "78c71081f4f3c8f5075041f5e6c802a1"
+      "hash" : "99363e792c5ec614d6979a73c42a0506"
     },
     "apps-phortune-dark-large"        : {
       "name" : "apps-phortune-dark-large",
       "rule" : ".apps-phortune-dark-large",
-      "hash" : "7e8a5ad784e4353309c8ae496dff9141"
+      "hash" : "64c5f757d1182df3cb529628cf4d46bf"
     },
     "apps-phortune-light-large"       : {
       "name" : "apps-phortune-light-large",
@@ -820,6 +820,26 @@
       "name" : "apps-phpast-white-large",
       "rule" : ".apps-phpast-white-large",
       "hash" : "69ffddb6e09d2f0fb9dd286bec30ed85"
+    },
+    "apps-phragment-blue-large"       : {
+      "name" : "apps-phragment-blue-large",
+      "rule" : ".apps-phragment-blue-large, .phabricator-crumb-view:hover .apps-phragment-dark-large",
+      "hash" : "d41b01892ba6b3a68bc09aa996077126"
+    },
+    "apps-phragment-dark-large"       : {
+      "name" : "apps-phragment-dark-large",
+      "rule" : ".apps-phragment-dark-large",
+      "hash" : "35a854a1cd62fb6223811d31d1076dfd"
+    },
+    "apps-phragment-light-large"      : {
+      "name" : "apps-phragment-light-large",
+      "rule" : ".apps-phragment-light-large",
+      "hash" : "26eb4af0e4792cd5c7bdf480afc520c5"
+    },
+    "apps-phragment-white-large"      : {
+      "name" : "apps-phragment-white-large",
+      "rule" : ".apps-phragment-white-large",
+      "hash" : "6ef73910f67c20ed29491b6192cfb263"
     },
     "apps-phrequent-blue-large"       : {
       "name" : "apps-phrequent-blue-large",

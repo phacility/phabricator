@@ -82,15 +82,10 @@ final class WaitForPreviousBuildStepImplementation
     $call->setUser(PhabricatorUser::getOmnipotentUser());
     $parents = $call->execute();
 
-    $hashes = array();
-    foreach ($parents as $parent => $obj) {
-      $hashes[] = $parent;
-    }
-
     $parents = id(new DiffusionCommitQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withRepository($commit->getRepository())
-      ->withIdentifiers($hashes)
+      ->withIdentifiers($parents)
       ->execute();
 
     $blockers = array();
@@ -107,6 +102,7 @@ final class WaitForPreviousBuildStepImplementation
     $buildables = id(new HarbormasterBuildableQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withBuildablePHIDs($build_objects)
+      ->withManualBuildables(false)
       ->execute();
     $buildable_phids = mpull($buildables, 'getPHID');
 
@@ -117,7 +113,7 @@ final class WaitForPreviousBuildStepImplementation
       ->execute();
 
     foreach ($builds as $build) {
-      if ($build->isBuilding()) {
+      if (!$build->isComplete()) {
         $blockers[] = pht('Build %d', $build->getID());
       }
     }

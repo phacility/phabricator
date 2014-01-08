@@ -15,8 +15,9 @@ final class HeraldRule extends HeraldDAO
   protected $repetitionPolicy;
   protected $ruleType;
   protected $isDisabled = 0;
+  protected $triggerObjectPHID;
 
-  protected $configVersion = 19;
+  protected $configVersion = 26;
 
   // phids for which this rule has been applied
   private $ruleApplied = self::ATTACHABLE;
@@ -24,6 +25,7 @@ final class HeraldRule extends HeraldDAO
   private $author = self::ATTACHABLE;
   private $conditions;
   private $actions;
+  private $triggerObject = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -146,9 +148,7 @@ final class HeraldRule extends HeraldDAO
   }
 
   public function delete() {
-
-// TODO:
-//    $this->openTransaction();
+    $this->openTransaction();
       queryfx(
         $this->establishConnection('w'),
         'DELETE FROM %T WHERE ruleID = %d',
@@ -159,8 +159,10 @@ final class HeraldRule extends HeraldDAO
         'DELETE FROM %T WHERE ruleID = %d',
         id(new HeraldAction())->getTableName(),
         $this->getID());
-      parent::delete();
-//    $this->saveTransaction();
+      $result = parent::delete();
+    $this->saveTransaction();
+
+    return $result;
   }
 
   public function hasValidAuthor() {
@@ -189,6 +191,19 @@ final class HeraldRule extends HeraldDAO
     return ($this->getRuleType() === HeraldRuleTypeConfig::RULE_TYPE_PERSONAL);
   }
 
+  public function isObjectRule() {
+    return ($this->getRuleType() == HeraldRuleTypeConfig::RULE_TYPE_OBJECT);
+  }
+
+  public function attachTriggerObject($trigger_object) {
+    $this->triggerObject = $trigger_object;
+    return $this;
+  }
+
+  public function getTriggerObject() {
+    return $this->assertAttached($this->triggerObject);
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -211,6 +226,8 @@ final class HeraldRule extends HeraldDAO
           $global = HeraldCapabilityManageGlobalRules::CAPABILITY;
           return $herald->getPolicy($global);
       }
+    } else if ($this->isObjectRule()) {
+      return $this->getTriggerObject()->getPolicy($capability);
     } else {
       return PhabricatorPolicies::POLICY_NOONE;
     }
@@ -227,6 +244,8 @@ final class HeraldRule extends HeraldDAO
   public function describeAutomaticCapability($capability) {
     if ($this->isPersonalRule()) {
       return pht("A personal rule's owner can always view and edit it.");
+    } else if ($this->isObjectRule()) {
+      return pht("Object rules inherit the policies of their objects.");
     }
 
     return null;

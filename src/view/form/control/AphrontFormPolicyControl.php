@@ -124,8 +124,10 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
       // TODO: Make this configurable.
       $policy = PhabricatorPolicies::POLICY_USER;
     }
-    $this->setValue($policy);
 
+    if (!$this->getValue()) {
+      $this->setValue($policy);
+    }
 
     $control_id = celerity_generate_unique_node_id();
     $input_id = celerity_generate_unique_node_id();

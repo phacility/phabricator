@@ -4,6 +4,11 @@ final class NuanceItem
   extends NuanceDAO
   implements PhabricatorPolicyInterface {
 
+  const STATUS_OPEN     = 0;
+  const STATUS_ASSIGNED = 10;
+  const STATUS_CLOSED   = 20;
+
+  protected $status;
   protected $ownerPHID;
   protected $requestorPHID;
   protected $sourcePHID;
@@ -12,6 +17,11 @@ final class NuanceItem
   protected $mailKey;
   protected $dateNuanced;
 
+  public static function initializeNewItem(PhabricatorUser $user) {
+    return id(new NuanceItem())
+      ->setDateNuanced(time())
+      ->setStatus(NuanceItem::STATUS_OPEN);
+  }
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -74,7 +84,7 @@ final class NuanceItem
 
   public function getPolicy($capability) {
     // TODO - this should be based on the queues the item currently resides in
-    return PhabricatorPolicies::POLICY_NOONE;
+    return PhabricatorPolicies::POLICY_USER;
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
@@ -92,4 +102,17 @@ final class NuanceItem
     return null;
   }
 
+  public function toDictionary() {
+    return array(
+      'id' => $this->getID(),
+      'phid' => $this->getPHID(),
+      'ownerPHID' => $this->getOwnerPHID(),
+      'requestorPHID' => $this->getRequestorPHID(),
+      'sourcePHID' => $this->getSourcePHID(),
+      'sourceLabel' => $this->getSourceLabel(),
+      'dateCreated' => $this->getDateCreated(),
+      'dateModified' => $this->getDateModified(),
+      'dateNuanced' => $this->getDateNuanced(),
+    );
+  }
 }

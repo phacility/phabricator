@@ -22,7 +22,7 @@ final class PhabricatorPolicyManagementUnlockWorkflow
 
   public function execute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
-    $viewer = PhabricatorUser::getOmnipotentUser();
+    $viewer = $this->getViewer();
 
     $obj_names = $args->getArg('objects');
     if (!$obj_names) {

@@ -11,6 +11,10 @@ final class PhabricatorAuthProviderOAuth1JIRA
     return pht('JIRA');
   }
 
+  public function getDescriptionForCreate() {
+    return pht('Configure JIRA OAuth. NOTE: Only supports JIRA 6.');
+  }
+
   public function getConfigurationHelp() {
     if ($this->isSetup()) {
       return pht(
@@ -161,6 +165,11 @@ final class PhabricatorAuthProviderOAuth1JIRA
           "Install the 'openssl' extension, restart your webserver, and try ".
           "again."));
     }
+
+    $form->appendRemarkupInstructions(
+      pht(
+        'NOTE: This provider **only supports JIRA 6**. It will not work with '.
+        'JIRA 5 or earlier.'));
 
     $is_setup = $this->isSetup();
 

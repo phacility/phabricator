@@ -1,15 +1,20 @@
 <?php
 
-final class DrydockResourceQuery
-  extends PhabricatorCursorPagedPolicyAwareQuery {
+final class DrydockResourceQuery extends DrydockQuery {
 
   private $ids;
+  private $phids;
   private $statuses;
   private $types;
   private $blueprintPHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
+    return $this;
+  }
+
+  public function withPHIDs(array $phids) {
+    $this->phids = $phids;
     return $this;
   }
 
@@ -55,6 +60,13 @@ final class DrydockResourceQuery
         $this->ids);
     }
 
+    if ($this->phids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'phid IN (%Ls)',
+        $this->phids);
+    }
+
     if ($this->types) {
       $where[] = qsprintf(
         $conn_r,
@@ -79,10 +91,6 @@ final class DrydockResourceQuery
     $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
-  }
-
-  public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationDrydock';
   }
 
 }

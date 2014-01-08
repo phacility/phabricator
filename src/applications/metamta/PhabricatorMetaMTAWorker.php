@@ -41,7 +41,7 @@ final class PhabricatorMetaMTAWorker
     return $this->message;
   }
 
-  public function renderForDisplay() {
+  public function renderForDisplay(PhabricatorUser $viewer) {
     return phutil_tag(
       'pre',
       array(
