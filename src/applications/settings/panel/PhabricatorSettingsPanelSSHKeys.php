@@ -224,18 +224,24 @@ final class PhabricatorSettingsPanelSSHKeys
         'action',
       ));
 
-    $panel = new AphrontPanelView();
-    $panel->addButton(
-      phutil_tag(
-        'a',
-        array(
-          'href' => $this->getPanelURI('?edit=true'),
-          'class' => 'green button',
-        ),
-        pht('Add New Public Key')));
-    $panel->setHeader(pht('SSH Public Keys'));
+    $panel = new PHUIObjectBoxView();
+    $header = new PHUIHeaderView();
+
+    $icon = id(new PHUIIconView())
+          ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+          ->setSpriteIcon('new');
+
+    $button = new PHUIButtonView();
+    $button->setText(pht('Add New Public Key'));
+    $button->setHref($this->getPanelURI('?edit=true'));
+    $button->setTag('a');
+    $button->setIcon($icon);
+
+    $header->setHeader(pht('SSH Public Keys'));
+    $header->addActionLink($button);
+
+    $panel->setHeader($header);
     $panel->appendChild($table);
-    $panel->setNoBackground();
 
     return $panel;
   }
