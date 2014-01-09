@@ -39,13 +39,8 @@ final class HeraldTestConsoleController extends HeraldController {
               $object,
               $object->loadActiveDiff());
           } else if ($object instanceof PhabricatorRepositoryCommit) {
-            $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
-              'commitID = %d',
-              $object->getID());
-            $adapter = HeraldCommitAdapter::newLegacyAdapter(
-              $object->getRepository(),
-              $object,
-              $data);
+            $adapter = id(new HeraldCommitAdapter())
+              ->setCommit($object);
           } else if ($object instanceof ManiphestTask) {
             $adapter = id(new HeraldManiphestTaskAdapter())
               ->setTask($object);

@@ -42,10 +42,8 @@ final class PhabricatorRepositoryCommitHeraldWorker
           'or no longer exists.'));
     }
 
-    $adapter = HeraldCommitAdapter::newLegacyAdapter(
-      $repository,
-      $commit,
-      $data);
+    $adapter = id(new HeraldCommitAdapter())
+      ->setCommit($commit);
 
     $rules = id(new HeraldRuleQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
