@@ -38,7 +38,7 @@ final class PhabricatorApplicationDrydock extends PhabricatorApplication {
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'DrydockBlueprintListController',
           '(?P<id>[1-9]\d*)/' => 'DrydockBlueprintViewController',
           'create/' => 'DrydockBlueprintCreateController',
-          'edit/(?P<id>[1-9]\d*)/' => 'DrydockBlueprintEditController',
+          'edit/(?:(?P<id>[1-9]\d*)/)?' => 'DrydockBlueprintEditController',
         ),
         'resource/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'DrydockResourceListController',

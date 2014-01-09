@@ -42,9 +42,15 @@ final class PHUIWorkpanelView extends AphrontView {
           $footer_tag);
     }
 
+    $header_edit = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS)
+      ->setSpriteIcon('settings-grey')
+      ->setHref('#');
+
     $header = id(new PhabricatorActionHeaderView())
       ->setHeaderTitle($this->header)
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_GREY);
+      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_GREY)
+      ->addAction($header_edit);
 
     $body = phutil_tag(
       'div',

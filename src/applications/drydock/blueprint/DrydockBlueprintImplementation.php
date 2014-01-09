@@ -19,6 +19,7 @@ abstract class DrydockBlueprintImplementation {
 
   abstract public function isEnabled();
 
+  abstract public function getBlueprintName();
   abstract public function getDescription();
 
   public function getBlueprintClass() {
@@ -386,6 +387,10 @@ abstract class DrydockBlueprintImplementation {
       $groups = mgroup(self::getAllBlueprintImplementations(), 'getType');
     }
     return idx($groups, $type, array());
+  }
+
+  public static function getNamedImplementation($class) {
+    return idx(self::getAllBlueprintImplementations(), $class);
   }
 
   protected function newResourceTemplate($name) {

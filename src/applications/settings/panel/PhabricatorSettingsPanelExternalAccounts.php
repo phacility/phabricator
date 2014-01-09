@@ -36,6 +36,7 @@ final class PhabricatorSettingsPanelExternalAccounts
     $linked = id(new PHUIObjectItemListView())
       ->setUser($viewer)
       ->setCards(true)
+      ->setFlush(true)
       ->setNoDataString(pht('You have no linked accounts.'));
 
     $login_accounts = 0;
@@ -99,6 +100,7 @@ final class PhabricatorSettingsPanelExternalAccounts
     $linkable = id(new PHUIObjectItemListView())
       ->setUser($viewer)
       ->setCards(true)
+      ->setFlush(true)
       ->setNoDataString(
         pht('Your account is linked with all available providers.'));
 

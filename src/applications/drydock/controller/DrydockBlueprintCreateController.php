@@ -10,56 +10,75 @@ final class DrydockBlueprintCreateController
     $implementations =
       DrydockBlueprintImplementation::getAllBlueprintImplementations();
 
+    $errors = array();
+    $e_blueprint = null;
+
     if ($request->isFormPost()) {
       $class = $request->getStr('blueprint-type');
       if (!isset($implementations[$class])) {
-        return $this->createDialog($implementations);
+        $e_blueprint = pht('Required');
+        $errors[] = pht('You must choose a blueprint type.');
       }
 
-      $blueprint = id(new DrydockBlueprint())
-        ->setClassName($class)
-        ->setDetails(array())
-        ->setViewPolicy(PhabricatorPolicies::POLICY_ADMIN)
-        ->setEditPolicy(PhabricatorPolicies::POLICY_ADMIN)
-        ->save();
-
-      $edit_uri = $this->getApplicationURI(
-        "blueprint/edit/".$blueprint->getID()."/");
-
-      return id(new AphrontRedirectResponse())->setURI($edit_uri);
+      if (!$errors) {
+        $edit_uri = $this->getApplicationURI('blueprint/edit/?class='.$class);
+        return id(new AphrontRedirectResponse())->setURI($edit_uri);
+      }
     }
 
-    return $this->createDialog($implementations);
-  }
-
-  function createDialog(array $implementations) {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $error_view = null;
+    if ($errors) {
+      $error_view = id(new AphrontErrorView())
+        ->setErrors($errors);
+    }
 
     $control = id(new AphrontFormRadioButtonControl())
-      ->setName('blueprint-type');
+      ->setName('blueprint-type')
+      ->setLabel(pht('Blueprint Type'))
+      ->setError($e_blueprint);
 
     foreach ($implementations as $implementation_name => $implementation) {
-      $control
-        ->addButton(
-          $implementation_name,
-          $implementation->getBlueprintClass(),
-          $implementation->getDescription());
+      $disabled = !$implementation->isEnabled();
+
+      $control->addButton(
+        $implementation_name,
+        $implementation->getBlueprintName(),
+        array(
+          pht('Provides: %s', $implementation->getType()),
+          phutil_tag('br'),
+          phutil_tag('br'),
+          $implementation->getDescription(),
+        ),
+        $disabled ? 'disabled' : null,
+        $disabled);
     }
 
-    $dialog = new AphrontDialogView();
-    $dialog->setTitle(pht('Create New Blueprint'))
-            ->setUser($viewer)
-            ->addSubmitButton(pht('Create Blueprint'))
-            ->addCancelButton($this->getApplicationURI('blueprint/'));
-    $dialog->appendChild(
-      phutil_tag(
-        'p',
-        array(),
-        pht(
-          'Select what type of blueprint you want to create: ')));
-    $dialog->appendChild($control);
-    return id(new AphrontDialogResponse())->setDialog($dialog);
+    $title = pht('Create New Blueprint');
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('New Blueprint'));
+
+    $form = id(new AphrontFormView())
+      ->setUser($viewer)
+      ->appendChild($control)
+      ->appendChild(
+        id(new AphrontFormSubmitControl())
+          ->addCancelButton($this->getApplicationURI('blueprint/'))
+          ->setValue(pht('Continue')));
+
+    $box = id(new PHUIObjectBoxView())
+      ->setFormError($error_view)
+      ->setHeaderText($title)
+      ->setForm($form);
+
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $box,
+      ),
+      array(
+        'title' => $title,
+        'device' => true,
+      ));
   }
 
 }

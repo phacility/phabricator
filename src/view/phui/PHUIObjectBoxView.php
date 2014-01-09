@@ -8,6 +8,7 @@ final class PHUIObjectBoxView extends AphrontView {
   private $validationException;
   private $header;
   private $flush;
+  private $id;
 
   private $tabs = array();
   private $propertyLists = array();
@@ -70,6 +71,11 @@ final class PHUIObjectBoxView extends AphrontView {
 
   public function setForm($form) {
     $this->form = $form;
+    return $this;
+  }
+
+  public function setID($id) {
+    $this->id = $id;
     return $this;
   }
 
@@ -196,6 +202,7 @@ final class PHUIObjectBoxView extends AphrontView {
           $this->renderChildren(),
         ))
       ->setBorder(true)
+      ->setID($this->id)
       ->addMargin(PHUI::MARGIN_LARGE_TOP)
       ->addMargin(PHUI::MARGIN_LARGE_LEFT)
       ->addMargin(PHUI::MARGIN_LARGE_RIGHT)

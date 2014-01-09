@@ -7,8 +7,12 @@ final class DrydockPreallocatedHostBlueprintImplementation
     return true;
   }
 
+  public function getBlueprintName() {
+    return pht('Remote Host (Preallocated)');
+  }
+
   public function getDescription() {
-    return pht('Leases out preallocated, remote hosts.');
+    return pht('Allows Drydock to run on specific remote hosts you configure.');
   }
 
   public function canAllocateMoreResources(array $pool) {

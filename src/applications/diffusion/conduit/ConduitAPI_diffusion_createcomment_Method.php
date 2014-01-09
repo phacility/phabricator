@@ -21,6 +21,7 @@ final class ConduitAPI_diffusion_createcomment_Method
       'phid'    => 'required string',
       'action'  => 'optional string',
       'message' => 'required string',
+      'silent'  => 'optional bool',
     );
   }
 
@@ -73,6 +74,7 @@ final class ConduitAPI_diffusion_createcomment_Method
 
     id(new PhabricatorAuditCommentEditor($commit))
       ->setActor($request->getUser())
+      ->setNoEmail($request->getValue('silent'))
       ->addComment($comment);
 
     return true;
