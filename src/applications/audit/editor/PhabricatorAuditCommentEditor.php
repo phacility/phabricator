@@ -8,6 +8,8 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
   private $auditors = array();
   private $ccs = array();
 
+  private $noEmail;
+
   public function __construct(PhabricatorRepositoryCommit $commit) {
     $this->commit = $commit;
     return $this;
@@ -25,6 +27,11 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
 
   public function setAttachInlineComments($attach_inline_comments) {
     $this->attachInlineComments = $attach_inline_comments;
+    return $this;
+  }
+
+  public function setNoEmail($no_email) {
+    $this->noEmail = $no_email;
     return $this;
   }
 
@@ -297,7 +304,9 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     id(new PhabricatorSearchIndexer())
       ->indexDocumentByPHID($commit->getPHID());
 
-    $this->sendMail($comment, $other_comments, $inline_comments, $requests);
+    if (!$this->noEmail) {
+      $this->sendMail($comment, $other_comments, $inline_comments, $requests);
+    }
   }
 
 
