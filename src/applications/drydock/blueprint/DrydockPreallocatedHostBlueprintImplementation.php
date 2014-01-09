@@ -8,7 +8,7 @@ final class DrydockPreallocatedHostBlueprintImplementation
   }
 
   public function getBlueprintName() {
-    return pht('Remote Host (Preallocated)');
+    return pht('Preallocated Remote Hosts');
   }
 
   public function getDescription() {

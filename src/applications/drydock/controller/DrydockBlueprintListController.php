@@ -33,19 +33,15 @@ final class DrydockBlueprintListController extends DrydockBlueprintController
 
     foreach ($blueprints as $blueprint) {
       $item = id(new PHUIObjectItemView())
-        ->setHeader($blueprint->getClassName())
+        ->setHeader($blueprint->getBlueprintName())
         ->setHref($this->getApplicationURI('/blueprint/'.$blueprint->getID()))
         ->setObjectName(pht('Blueprint %d', $blueprint->getID()));
 
-      if ($blueprint->getImplementation()->isEnabled()) {
-        $item->addAttribute(pht('Enabled'));
-        $item->setBarColor('green');
-      } else {
-        $item->addAttribute(pht('Disabled'));
-        $item->setBarColor('red');
+      if (!$blueprint->getImplementation()->isEnabled()) {
+        $item->setDisabled(true);
       }
 
-      $item->addAttribute($blueprint->getImplementation()->getDescription());
+      $item->addAttribute($blueprint->getImplementation()->getBlueprintName());
 
       $view->addItem($item);
     }

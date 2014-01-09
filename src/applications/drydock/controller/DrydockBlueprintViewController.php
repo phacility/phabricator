@@ -20,10 +20,12 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
       return new Aphront404Response();
     }
 
-    $title = 'Blueprint '.$blueprint->getID().' '.$blueprint->getClassName();
+    $title = $blueprint->getBlueprintName();
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($title);
+      ->setHeader($title)
+      ->setUser($viewer)
+      ->setPolicyObject($blueprint);
 
     $actions = $this->buildActionListView($blueprint);
     $properties = $this->buildPropertyListView($blueprint, $actions);
@@ -99,8 +101,8 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
     $view->setActionList($actions);
 
     $view->addProperty(
-      pht('Implementation'),
-      $blueprint->getClassName());
+      pht('Type'),
+      $blueprint->getImplementation()->getBlueprintName());
 
     return $view;
   }

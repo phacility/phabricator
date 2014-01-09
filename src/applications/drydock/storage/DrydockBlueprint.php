@@ -3,13 +3,18 @@
 final class DrydockBlueprint extends DrydockDAO
   implements PhabricatorPolicyInterface {
 
-  protected $phid;
   protected $className;
+  protected $blueprintName;
   protected $viewPolicy;
   protected $editPolicy;
-  protected $details;
+  protected $details = array();
 
   private $implementation = self::ATTACHABLE;
+
+  public static function initializeNewBlueprint(PhabricatorUser $actor) {
+    return id(new DrydockBlueprint())
+      ->setBlueprintName('');
+  }
 
   public function getConfiguration() {
     return array(
