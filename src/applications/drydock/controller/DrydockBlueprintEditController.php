@@ -29,6 +29,9 @@ final class DrydockBlueprintEditController extends DrydockBlueprintController {
       $impl = $blueprint->getImplementation();
       $cancel_uri = $this->getApplicationURI('blueprint/'.$this->id.'/');
     } else {
+      $this->requireApplicationCapability(
+        DrydockCapabilityCreateBlueprints::CAPABILITY);
+
       $class = $request->getStr('class');
 
       $impl = DrydockBlueprintImplementation::getNamedImplementation($class);
