@@ -294,9 +294,14 @@ final class DiffusionRepositoryController extends DiffusionController {
       $header->setSubHeader(pht('Showing %d branches.', $limit));
     }
 
+    $icon = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+      ->setSpriteIcon('fork');
+
     $button = new PHUIButtonView();
     $button->setText(pht("Show All Branches"));
     $button->setTag('a');
+    $button->setIcon($icon);
     $button->setHref($drequest->generateURI(
             array(
               'action' => 'branches',
@@ -455,20 +460,26 @@ final class DiffusionRepositoryController extends DiffusionController {
     }
 
     $history_table->setIsHead(true);
-
     $callsign = $drequest->getRepository()->getCallsign();
-    $all = phutil_tag(
-      'a',
-      array(
-        'href' => $drequest->generateURI(
-          array(
-            'action' => 'history',
-          )),
-      ),
-      pht('View Full Commit History'));
+
+    $icon = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+      ->setSpriteIcon('transcript');
+
+    $button = id(new PHUIButtonView())
+      ->setText(pht('View Full History'))
+      ->setHref($drequest->generateURI(
+        array(
+          'action' => 'history',
+        )))
+      ->setTag('a')
+      ->setIcon($icon);
 
     $panel = new PHUIObjectBoxView();
-    $panel->setHeaderText(pht("Recent Commits &middot; %s", $all));
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Recent Commits'))
+      ->addActionLink($button);
+    $panel->setHeader($header);
     $panel->appendChild($history_table);
 
     return $panel;
@@ -509,11 +520,21 @@ final class DiffusionRepositoryController extends DiffusionController {
     $browse_uri = $drequest->generateURI(array('action' => 'browse'));
 
     $browse_panel = new PHUIObjectBoxView();
-    $browse_panel->setHeaderText(
-      phutil_tag(
-        'a',
-        array('href' => $browse_uri),
-        pht('Browse Repository')));
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Repository'));
+
+    $icon = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+      ->setSpriteIcon('data');
+
+    $button = new PHUIButtonView();
+    $button->setText(pht('Browse Repository'));
+    $button->setTag('a');
+    $button->setIcon($icon);
+    $button->setHref($browse_uri);
+
+    $header->addActionLink($button);
+    $browse_panel->setHeader($header);
     $browse_panel->appendChild($browse_table);
 
     return $browse_panel;

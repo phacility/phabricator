@@ -247,17 +247,21 @@ final class DiffusionCommitController extends DiffusionController {
       // changes inline even if there are more than the soft limit.
       $show_all_details = $request->getBool('show_all');
 
-      $change_panel = new AphrontPanelView();
-      $change_panel->setHeader("Changes (".number_format($count).")");
+      $change_panel = new PHUIObjectBoxView();
+      $header = new PHUIHeaderView();
+      $header->setHeader("Changes (".number_format($count).")");
       $change_panel->setID('toc');
       if ($count > self::CHANGES_LIMIT && !$show_all_details) {
-        $show_all_button = phutil_tag(
-          'a',
-          array(
-            'class'   => 'button green',
-            'href'    => '?show_all=true',
-          ),
-          pht('Show All Changes'));
+
+        $icon = id(new PHUIIconView())
+          ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+          ->setSpriteIcon('transcript');
+
+        $button = id(new PHUIButtonView())
+          ->setText(pht('Show All Changes'))
+          ->setHref('?show_all=true')
+          ->setTag('a')
+          ->setIcon($icon);
 
         $warning_view = id(new AphrontErrorView())
           ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
@@ -265,12 +269,12 @@ final class DiffusionCommitController extends DiffusionController {
           ->appendChild(
             pht("This commit is very large. Load each file individually."));
 
-        $change_panel->appendChild($warning_view);
-        $change_panel->addButton($show_all_button);
+        $change_panel->setFormError($warning_view);
+        $header->addActionLink($button);
       }
 
       $change_panel->appendChild($change_table);
-      $change_panel->setNoBackground();
+      $change_panel->setHeader($header);
 
       $content[] = $change_panel;
 
