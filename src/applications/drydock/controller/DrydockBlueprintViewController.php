@@ -53,11 +53,26 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
       ->setHeader($header)
       ->addPropertyList($properties);
 
+    $xactions = id(new DrydockBlueprintTransactionQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($blueprint->getPHID()))
+      ->execute();
+
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($viewer);
+
+    $timeline = id(new PhabricatorApplicationTransactionView())
+      ->setUser($viewer)
+      ->setObjectPHID($blueprint->getPHID())
+      ->setTransactions($xactions)
+      ->setMarkupEngine($engine);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $object_box,
-        $resource_list
+        $resource_list,
+        $timeline,
       ),
       array(
         'device'  => true,

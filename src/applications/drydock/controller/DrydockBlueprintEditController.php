@@ -57,13 +57,27 @@ final class DrydockBlueprintEditController extends DrydockBlueprintController {
         $errors[] = pht('You must name this blueprint.');
       }
 
-      // TODO: We should use transactions here.
-      $blueprint->setViewPolicy($v_view_policy);
-      $blueprint->setEditPolicy($v_edit_policy);
-      $blueprint->setBlueprintName($v_name);
-
       if (!$errors) {
-        $blueprint->save();
+        $xactions = array();
+
+        $xactions[] = id(new DrydockBlueprintTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+          ->setNewValue($v_view_policy);
+
+        $xactions[] = id(new DrydockBlueprintTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
+          ->setNewValue($v_edit_policy);
+
+        $xactions[] = id(new DrydockBlueprintTransaction())
+          ->setTransactionType(DrydockBlueprintTransaction::TYPE_NAME)
+          ->setNewValue($v_name);
+
+        $editor = id(new DrydockBlueprintEditor())
+          ->setActor($viewer)
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnNoEffect(true);
+
+        $editor->applyTransactions($blueprint, $xactions);
 
         $id = $blueprint->getID();
         $save_uri = $this->getApplicationURI("blueprint/{$id}/");
