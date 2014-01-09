@@ -17,12 +17,12 @@ $repository = id(new PhabricatorRepositoryQuery())
   ->executeOne();
 
 if (!$repository) {
-  throw new Exception(pht('No such repository "%s"!', $callsign));
+  throw new Exception(pht('No such repository "%s"!', $argv[1]));
 }
 
 if (!$repository->isHosted()) {
   // This should be redundant, but double check just in case.
-  throw new Exception(pht('Repository "%s" is not hosted!', $callsign));
+  throw new Exception(pht('Repository "%s" is not hosted!', $argv[1]));
 }
 
 $engine->setRepository($repository);
