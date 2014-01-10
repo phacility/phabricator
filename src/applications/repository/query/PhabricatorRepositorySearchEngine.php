@@ -9,6 +9,7 @@ final class PhabricatorRepositorySearchEngine
     $saved->setParameter('callsigns', $request->getStrList('callsigns'));
     $saved->setParameter('status', $request->getStr('status'));
     $saved->setParameter('order', $request->getStr('order'));
+    $saved->setParameter('hosted', $request->getStr('hosted'));
     $saved->setParameter('types', $request->getArr('types'));
     $saved->setParameter('name', $request->getStr('name'));
 
@@ -38,6 +39,12 @@ final class PhabricatorRepositorySearchEngine
       $query->setOrder($order);
     } else {
       $query->setOrder(head($this->getOrderValues()));
+    }
+
+    $hosted = $saved->getParameter('hosted');
+    $hosted = idx($this->getHostedValues(), $hosted);
+    if ($hosted) {
+      $query->withHosted($hosted);
     }
 
     $types = $saved->getParameter('types');
@@ -78,7 +85,13 @@ final class PhabricatorRepositorySearchEngine
           ->setName('status')
           ->setLabel(pht('Status'))
           ->setValue($saved_query->getParameter('status'))
-          ->setOptions($this->getStatusOptions()));
+          ->setOptions($this->getStatusOptions()))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setName('hosted')
+          ->setLabel(pht('Hosted'))
+          ->setValue($saved_query->getParameter('hosted'))
+          ->setOptions($this->getHostedOptions()));
 
     $type_control = id(new AphrontFormCheckboxControl())
       ->setLabel(pht('Types'));
@@ -164,5 +177,20 @@ final class PhabricatorRepositorySearchEngine
     );
   }
 
+  private function getHostedOptions() {
+    return array(
+      '' => pht('Hosted and Remote Repositories'),
+      'phabricator' => pht('Hosted Repositories'),
+      'remote' => pht('Remote Repositories'),
+    );
+  }
+
+  private function getHostedValues() {
+    return array(
+      '' => PhabricatorRepositoryQuery::HOSTED_ALL,
+      'phabricator' => PhabricatorRepositoryQuery::HOSTED_PHABRICATOR,
+      'remote' => PhabricatorRepositoryQuery::HOSTED_REMOTE,
+    );
+  }
 
 }
