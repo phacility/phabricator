@@ -83,14 +83,6 @@ final class DiffusionRepositoryEditBasicController
     $crumbs->addTextCrumb(pht('Edit Basics'));
 
     $title = pht('Edit %s', $repository->getName());
-
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Form Errors'))
-        ->setErrors($errors);
-    }
-
     $project_handles = $this->loadViewerHandles($repository->getProjectPHIDs());
 
     $form = id(new AphrontFormView())
@@ -122,7 +114,7 @@ final class DiffusionRepositoryEditBasicController
     $object_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setForm($form)
-      ->setFormError($error_view);
+      ->setFormErrors($errors);
 
     return $this->buildApplicationPage(
       array(

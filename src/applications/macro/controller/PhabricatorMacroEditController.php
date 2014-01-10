@@ -135,14 +135,6 @@ final class PhabricatorMacroEditController
       }
     }
 
-    if ($errors) {
-      $error_view = new AphrontErrorView();
-      $error_view->setTitle(pht('Form Errors'));
-      $error_view->setErrors($errors);
-    } else {
-      $error_view = null;
-    }
-
     $current_file = null;
     if ($macro->getFilePHID()) {
       $current_file = $macro->getFile();
@@ -257,7 +249,7 @@ final class PhabricatorMacroEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return $this->buildApplicationPage(

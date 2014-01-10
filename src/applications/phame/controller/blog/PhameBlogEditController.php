@@ -162,17 +162,9 @@ final class PhameBlogEditController
         ->addCancelButton($cancel_uri)
         ->setValue($submit_button));
 
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Form Errors'))
-        ->setErrors($errors);
-    } else {
-      $error_view = null;
-    }
-
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();

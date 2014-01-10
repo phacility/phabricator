@@ -86,13 +86,6 @@ final class DiffusionSetPasswordPanel extends PhabricatorSettingsPanel {
 
     $title = pht('Set VCS Password');
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Form Errors'))
-        ->setErrors($errors);
-    }
-
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->appendRemarkupInstructions(
@@ -165,7 +158,7 @@ final class DiffusionSetPasswordPanel extends PhabricatorSettingsPanel {
     $object_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setForm($form)
-      ->setFormError($error_view);
+      ->setFormErrors($errors);
 
     $remove_form = id(new AphrontFormView())
       ->setUser($user);

@@ -86,11 +86,6 @@ final class DrydockBlueprintEditController extends DrydockBlueprintController {
       }
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())->setErrors($errors);
-    }
-
     $policies = id(new PhabricatorPolicyQuery())
       ->setViewer($viewer)
       ->setObject($blueprint)
@@ -144,7 +139,7 @@ final class DrydockBlueprintEditController extends DrydockBlueprintController {
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($header)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return $this->buildApplicationPage(

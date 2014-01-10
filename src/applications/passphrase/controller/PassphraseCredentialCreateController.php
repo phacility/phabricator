@@ -26,12 +26,6 @@ final class PassphraseCredentialCreateController extends PassphraseController {
       }
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setErrors($errors);
-    }
-
     $types_control = id(new AphrontFormRadioButtonControl())
       ->setName('type')
       ->setLabel(pht('Credential Type'))
@@ -59,7 +53,7 @@ final class PassphraseCredentialCreateController extends PassphraseController {
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Create New Credential'))
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return $this->buildApplicationPage(

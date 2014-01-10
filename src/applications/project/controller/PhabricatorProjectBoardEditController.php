@@ -63,11 +63,6 @@ final class PhabricatorProjectBoardEditController
         return id(new AphrontRedirectResponse())->setURI($view_uri);
       }
     }
-    if ($errors) {
-      $error_view = new AphrontErrorView();
-      $error_view->setTitle(pht('Form Errors'));
-      $error_view->setErrors($errors);
-    }
 
     $form = new AphrontFormView();
     $form->setUser($request->getUser())
@@ -98,7 +93,7 @@ final class PhabricatorProjectBoardEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($errors)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return $this->buildApplicationPage(

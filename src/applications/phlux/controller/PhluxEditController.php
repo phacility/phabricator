@@ -109,11 +109,6 @@ final class PhluxEditController extends PhluxController {
       }
     }
 
-    if ($errors) {
-      $errors = id(new AphrontErrorView())
-        ->setErrors($errors);
-    }
-
     $policies = id(new PhabricatorPolicyQuery())
       ->setViewer($user)
       ->setObject($var)
@@ -172,7 +167,7 @@ final class PhluxEditController extends PhluxController {
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($errors)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return $this->buildApplicationPage(

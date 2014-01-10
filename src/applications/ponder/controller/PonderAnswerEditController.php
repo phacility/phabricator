@@ -61,10 +61,6 @@ final class PonderAnswerEditController extends PonderController {
       }
     }
 
-    if ($errors) {
-      $errors = id(new AphrontErrorView())->setErrors($errors);
-    }
-
     $answer_content_id = celerity_generate_unique_node_id();
 
     $form = id(new AphrontFormView())
@@ -91,7 +87,7 @@ final class PonderAnswerEditController extends PonderController {
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Edit Answer'))
-      ->setFormError($errors)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     $preview = id(new PHUIRemarkupPreviewPanel())

@@ -195,8 +195,11 @@ final class PhabricatorConfigEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($error_view)
       ->setForm($form);
+
+    if ($error_view) {
+       $form_box->setErrorView($error_view);
+    }
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Config'), $this->getApplicationURI());

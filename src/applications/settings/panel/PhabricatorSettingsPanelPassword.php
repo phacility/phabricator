@@ -108,21 +108,6 @@ final class PhabricatorSettingsPanelPassword
       }
     }
 
-    $notice = null;
-    if (!$errors) {
-      if ($request->getStr('saved')) {
-        $notice = new AphrontErrorView();
-        $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-        $notice->setTitle(pht('Changes Saved'));
-        $notice->appendChild(
-          phutil_tag('p', array(), pht('Your password has been updated.')));
-      }
-    } else {
-      $notice = new AphrontErrorView();
-      $notice->setTitle(pht('Error Changing Password'));
-      $notice->setErrors($errors);
-    }
-
     $len_caption = null;
     if ($min_len) {
       $len_caption = pht('Minimum password length: %d characters.', $min_len);
@@ -161,7 +146,8 @@ final class PhabricatorSettingsPanelPassword
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Change Password'))
-      ->setFormError($notice)
+      ->setFormSaved($request->getStr('saved'))
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return array(

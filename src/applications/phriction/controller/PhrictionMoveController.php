@@ -111,7 +111,6 @@ final class PhrictionMoveController
 
     if ($errors) {
       $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Form Errors'))
         ->setErrors($errors);
     }
 

@@ -51,21 +51,6 @@ final class PhabricatorSettingsPanelAccount
       }
     }
 
-    $notice = null;
-    if (!$errors) {
-      if ($request->getStr('saved')) {
-        $notice = new AphrontErrorView();
-        $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-        $notice->setTitle(pht('Changes Saved'));
-        $notice->appendChild(
-          phutil_tag('p', array(), pht('Your changes have been saved.')));
-        $notice = $notice->render();
-      }
-    } else {
-      $notice = new AphrontErrorView();
-      $notice->setErrors($errors);
-    }
-
     $timezone_ids = DateTimeZone::listIdentifiers();
     $timezone_id_map = array_fuse($timezone_ids);
 
@@ -139,10 +124,11 @@ final class PhabricatorSettingsPanelAccount
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Account Settings'))
+      ->setFormSaved($request->getStr('saved'))
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return array(
-      $notice,
       $form_box,
     );
   }

@@ -199,14 +199,6 @@ final class PholioMockEditController extends PholioController {
       }
     }
 
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Form Errors'))
-        ->setErrors($errors);
-    } else {
-      $error_view = null;
-    }
-
     if ($this->id) {
       $submit = id(new AphrontFormSubmitControl())
         ->addCancelButton('/M'.$this->id)
@@ -322,7 +314,7 @@ final class PholioMockEditController extends PholioController {
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();

@@ -112,13 +112,6 @@ final class PhabricatorOwnersEditController
       }
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = new AphrontErrorView();
-      $error_view->setTitle(pht('Package Errors'));
-      $error_view->setErrors($errors);
-    }
-
     $handles = $this->loadViewerHandles($owners);
 
     $primary = $package->getPrimaryOwnerPHID();
@@ -252,7 +245,7 @@ final class PhabricatorOwnersEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     $nav = $this->buildSideNavView();

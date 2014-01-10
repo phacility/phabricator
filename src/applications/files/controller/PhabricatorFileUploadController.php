@@ -64,18 +64,12 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
 
     $title = pht('Upload File');
 
-    if ($errors) {
-      $errors = id(new AphrontErrorView())
-        ->setTitle(pht('Form Errors'))
-        ->setErrors($errors);
-    }
-
     $global_upload = id(new PhabricatorGlobalUploadTargetView())
       ->setShowIfSupportedID($support_id);
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($errors)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return $this->buildApplicationPage(

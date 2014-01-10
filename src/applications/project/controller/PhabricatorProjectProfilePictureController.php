@@ -222,11 +222,6 @@ final class PhabricatorProjectProfilePictureController
         ->setLabel(pht('Quick Create'))
         ->setValue($compose_form));
 
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
-      ->setFormError($errors)
-      ->setForm($form);
-
     $upload_form = id(new AphrontFormView())
       ->setUser($viewer)
       ->setEncType('multipart/form-data')
@@ -242,13 +237,9 @@ final class PhabricatorProjectProfilePictureController
           ->addCancelButton($project_uri)
           ->setValue(pht('Upload Picture')));
 
-    if ($errors) {
-      $errors = id(new AphrontErrorView())->setErrors($errors);
-    }
-
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($errors)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     $upload_box = id(new PHUIObjectBoxView())

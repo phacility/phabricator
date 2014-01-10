@@ -84,14 +84,8 @@ final class DifferentialDiffCreateController extends DifferentialController {
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Create New Diff'))
-      ->setForm($form);
-
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_ERROR)
-        ->appendChild($errors);
-      $form_box->setFormError($error_view);
-    }
+      ->setForm($form)
+      ->setFormErrors($errors);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Create Diff'));

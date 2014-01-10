@@ -29,12 +29,6 @@ final class DrydockBlueprintCreateController
       }
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setErrors($errors);
-    }
-
     $control = id(new AphrontFormRadioButtonControl())
       ->setName('blueprint-type')
       ->setLabel(pht('Blueprint Type'))
@@ -69,7 +63,7 @@ final class DrydockBlueprintCreateController
           ->setValue(pht('Continue')));
 
     $box = id(new PHUIObjectBoxView())
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setHeaderText($title)
       ->setForm($form);
 

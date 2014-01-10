@@ -108,13 +108,6 @@ final class DifferentialRevisionEditController extends DifferentialController {
       $form->setAction('/differential/revision/edit/');
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Form Errors'))
-        ->setErrors($errors);
-    }
-
     if ($diff && $revision->getID()) {
       $form
         ->appendChild(
@@ -168,7 +161,7 @@ final class DifferentialRevisionEditController extends DifferentialController {
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     $crumbs->addTextCrumb($title);

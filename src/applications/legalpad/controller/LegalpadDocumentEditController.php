@@ -102,11 +102,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
       }
     }
 
-    $error_view = null;
     if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('A Fatal Omission!'))
-        ->setErrors($errors);
       // set these to what was specified in the form on post
       $document->setViewPolicy($can_view);
       $document->setEditPolicy($can_edit);
@@ -169,7 +165,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());

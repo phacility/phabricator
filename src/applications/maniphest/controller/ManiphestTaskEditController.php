@@ -419,7 +419,6 @@ final class ManiphestTaskEditController extends ManiphestController {
     if ($errors) {
       $error_view = new AphrontErrorView();
       $error_view->setErrors($errors);
-      $error_view->setTitle(pht('Form Errors'));
     }
 
     $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
@@ -650,7 +649,7 @@ final class ManiphestTaskEditController extends ManiphestController {
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($header_name)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     $preview = id(new PHUIRemarkupPreviewPanel())
