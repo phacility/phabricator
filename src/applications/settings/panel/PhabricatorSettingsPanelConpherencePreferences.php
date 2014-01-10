@@ -56,20 +56,10 @@ final class PhabricatorSettingsPanelConpherencePreferences
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save Preferences')));
 
-    $error_view = null;
-    if ($request->getBool('saved')) {
-      $error_view = id(new AphrontErrorView())
-        ->appendChild(pht('Preferences Saved'))
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-    }
-
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Conpherence Preferences'))
-      ->setForm($form);
-
-    if ($error_view) {
-       $form_box->setErrorView($error_view);
-    }
+      ->setForm($form)
+      ->setFormSaved($request->getBool('saved'));
 
     return array(
       $form_box,
