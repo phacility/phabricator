@@ -1753,6 +1753,7 @@ phutil_register_library_map(array(
     'PhabricatorPolicyType' => 'applications/policy/constants/PhabricatorPolicyType.php',
     'PhabricatorProject' => 'applications/project/storage/PhabricatorProject.php',
     'PhabricatorProjectBoardController' => 'applications/project/controller/PhabricatorProjectBoardController.php',
+    'PhabricatorProjectBoardEditController' => 'applications/project/controller/PhabricatorProjectBoardEditController.php',
     'PhabricatorProjectColumn' => 'applications/project/storage/PhabricatorProjectColumn.php',
     'PhabricatorProjectColumnQuery' => 'applications/project/query/PhabricatorProjectColumnQuery.php',
     'PhabricatorProjectConstants' => 'applications/project/constants/PhabricatorProjectConstants.php',
@@ -4362,6 +4363,7 @@ phutil_register_library_map(array(
       2 => 'PhabricatorPolicyInterface',
     ),
     'PhabricatorProjectBoardController' => 'PhabricatorProjectController',
+    'PhabricatorProjectBoardEditController' => 'PhabricatorProjectController',
     'PhabricatorProjectColumn' =>
     array(
       0 => 'PhabricatorProjectDAO',

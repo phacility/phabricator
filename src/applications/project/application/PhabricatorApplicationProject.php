@@ -46,6 +46,8 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
           'PhabricatorProjectProfilePictureController',
         'create/' => 'PhabricatorProjectCreateController',
         'board/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectBoardController',
+        'board/(?P<projectID>[1-9]\d*)/edit/(?:(?P<id>\d+)/)?'
+          => 'PhabricatorProjectBoardEditController',
         'update/(?P<id>[1-9]\d*)/(?P<action>[^/]+)/'
           => 'PhabricatorProjectUpdateController',
         'history/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectHistoryController',
