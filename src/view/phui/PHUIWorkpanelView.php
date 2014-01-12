@@ -4,7 +4,7 @@ final class PHUIWorkpanelView extends AphrontView {
 
   private $cards = array();
   private $header;
-  private $headerAction;
+  private $editURI;
   private $footerAction;
 
   public function setCards(PHUIObjectItemListView $cards) {
@@ -17,9 +17,8 @@ final class PHUIWorkpanelView extends AphrontView {
     return $this;
   }
 
-  public function setHeaderAction($header_action) {
-    // TODO: This doesn't do anything?
-    $this->headerAction = $header_action;
+  public function setEditURI($edit_uri) {
+    $this->editURI = $edit_uri;
     return $this;
   }
 
@@ -45,7 +44,7 @@ final class PHUIWorkpanelView extends AphrontView {
     $header_edit = id(new PHUIIconView())
       ->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS)
       ->setSpriteIcon('settings-grey')
-      ->setHref('#');
+      ->setHref($this->editURI);
 
     $header = id(new PhabricatorActionHeaderView())
       ->setHeaderTitle($this->header)

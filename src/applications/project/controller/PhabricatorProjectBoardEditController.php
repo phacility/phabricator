@@ -32,8 +32,18 @@ final class PhabricatorProjectBoardEditController
     $is_new = ($this->id ? false : true);
 
     if (!$is_new) {
-      // TODO: LATER!
-      throw new Exception("When I'm ready!");
+      $column = id(new PhabricatorProjectColumnQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($this->id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
+      if (!$column) {
+        return new Aphront404Response();
+      }
     } else {
       $column = new PhabricatorProjectColumn();
     }
@@ -54,9 +64,22 @@ final class PhabricatorProjectBoardEditController
         $e_name = null;
       }
 
-      $column->setProjectPHID($project->getPHID());
-      $column->attachProject($project);
-      $column->setSequence(0);
+      if ($is_new) {
+        $column->setProjectPHID($project->getPHID());
+        $column->attachProject($project);
+
+        $columns = id(new PhabricatorProjectColumnQuery())
+          ->setViewer($viewer)
+          ->withProjectPHIDs(array($project->getPHID()))
+          ->execute();
+
+        $new_sequence = 1;
+        if ($columns) {
+          $values = mpull($columns, 'getSequence');
+          $new_sequence = max($values) + 1;
+        }
+        $column->setSequence($new_sequence);
+      }
 
       if (!$errors) {
         $column->save();

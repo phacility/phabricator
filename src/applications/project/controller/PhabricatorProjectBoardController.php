@@ -30,27 +30,6 @@ final class PhabricatorProjectBoardController
       ->withProjectPHIDs(array($project->getPHID()))
       ->execute();
 
-    // TODO: Completely making this part up.
-    $columns[] = id(new PhabricatorProjectColumn())
-      ->setName('Backlog')
-      ->setPHID(0)
-      ->setSequence(0);
-
-    $columns[] = id(new PhabricatorProjectColumn())
-      ->setName('Assigned')
-      ->setPHID(1)
-      ->setSequence(1);
-
-    $columns[] = id(new PhabricatorProjectColumn())
-      ->setName('In Progress')
-      ->setPHID(2)
-      ->setSequence(2);
-
-    $columns[] = id(new PhabricatorProjectColumn())
-      ->setName('Completed')
-      ->setPHID(3)
-      ->setSequence(3);
-
     msort($columns, 'getSequence');
 
     $tasks = id(new ManiphestTaskQuery())
@@ -61,10 +40,15 @@ final class PhabricatorProjectBoardController
       ->execute();
     $tasks = mpull($tasks, null, 'getPHID');
 
-    // TODO: This is also made up.
+    // TODO: This is so made up.
     $task_map = array();
     foreach ($tasks as $task) {
-      $task_map[mt_rand(0, 3)][] = $task->getPHID();
+      if ($columns) {
+        $random_column = $columns[array_rand($columns)]->getPHID();
+      } else {
+        $random_column = 0;
+      }
+      $task_map[$random_column][] = $task->getPHID();
     }
 
     $board = id(new PHUIWorkboardView())
@@ -73,7 +57,8 @@ final class PhabricatorProjectBoardController
 
     foreach ($columns as $column) {
       $panel = id(new PHUIWorkpanelView())
-        ->setHeader($column->getName());
+        ->setHeader($column->getName())
+        ->setEditURI('edit/'.$column->getID().'/');
 
       $cards = id(new PHUIObjectItemListView())
         ->setUser($viewer)
