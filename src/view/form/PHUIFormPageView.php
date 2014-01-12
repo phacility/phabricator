@@ -13,7 +13,7 @@ class PHUIFormPageView extends AphrontView {
   private $isValid;
   private $validateFormPageCallback;
   private $adjustFormPageCallback;
-  private $pageErrors;
+  private $pageErrors = array();
   private $pageName;
 
 
