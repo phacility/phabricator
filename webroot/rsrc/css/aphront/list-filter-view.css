@@ -3,10 +3,10 @@
  */
 
 .aphront-list-filter-wrap {
-  border-left: 1px solid {$lightgreyborder};
-  border-right: 1px solid {$lightgreyborder};
-  border-bottom: 1px solid {$greyborder};
-  margin: 0 20px;
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
+  margin: 0 16px;
 }
 
 .aphront-list-filter-view {
