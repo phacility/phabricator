@@ -112,6 +112,12 @@ final class PhabricatorProjectBoardEditController
         ->addCancelButton($view_uri));
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(
+      $project->getName(),
+      $this->getApplicationURI('view/'.$project->getID().'/'));
+    $crumbs->addTextCrumb(
+      pht('Board'),
+      $this->getApplicationURI('board/'.$project->getID().'/'));
     $crumbs->addTextCrumb($title);
 
     $form_box = id(new PHUIObjectBoxView())

@@ -74,6 +74,15 @@ final class PhabricatorProjectBoardController
     }
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(
+      $project->getName(),
+      $this->getApplicationURI('view/'.$project->getID().'/'));
+    $crumbs->addTextCrumb(pht('Board'));
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $project,
+      PhabricatorPolicyCapability::CAN_EDIT);
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($viewer)
@@ -81,7 +90,9 @@ final class PhabricatorProjectBoardController
         id(new PhabricatorActionView())
           ->setName(pht('Add Column/Milestone/Sprint'))
           ->setHref($this->getApplicationURI('board/'.$this->id.'/edit/'))
-          ->setIcon('create'));
+          ->setIcon('create')
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(!$can_edit));
 
     $plist = id(new PHUIPropertyListView());
     // TODO: Need this to get actions to render.

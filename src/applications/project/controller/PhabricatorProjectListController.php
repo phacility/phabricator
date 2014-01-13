@@ -51,4 +51,21 @@ final class PhabricatorProjectListController
     return $list;
   }
 
+  public function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $can_create = $this->hasApplicationCapability(
+      ProjectCapabilityCreateProjects::CAPABILITY);
+
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+        ->setName(pht('Create Project'))
+        ->setHref($this->getApplicationURI('create/'))
+        ->setIcon('create')
+        ->setWorkflow(!$can_create)
+        ->setDisabled(!$can_create));
+
+    return $crumbs;
+  }
+
 }
