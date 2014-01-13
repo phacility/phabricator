@@ -30,7 +30,21 @@ final class PhabricatorProjectBoardController
       ->withProjectPHIDs(array($project->getPHID()))
       ->execute();
 
-    msort($columns, 'getSequence');
+    $columns = mpull($columns, null, 'getSequence');
+
+    // If there's no default column, create one now.
+    if (empty($columns[0])) {
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $column = PhabricatorProjectColumn::initializeNewColumn($viewer)
+          ->setSequence(0)
+          ->setProjectPHID($project->getPHID())
+          ->save();
+        $column->attachProject($project);
+        $columns[0] = $column;
+      unset($unguarded);
+    }
+
+    ksort($columns);
 
     $tasks = id(new ManiphestTaskQuery())
       ->setViewer($viewer)
@@ -40,15 +54,11 @@ final class PhabricatorProjectBoardController
       ->execute();
     $tasks = mpull($tasks, null, 'getPHID');
 
-    // TODO: This is so made up.
     $task_map = array();
+    $default_phid = $columns[0]->getPHID();
+
     foreach ($tasks as $task) {
-      if ($columns) {
-        $random_column = $columns[array_rand($columns)]->getPHID();
-      } else {
-        $random_column = 0;
-      }
-      $task_map[$random_column][] = $task->getPHID();
+      $task_map[$default_phid][] = $task->getPHID();
     }
 
     $board = id(new PHUIWorkboardView())
@@ -57,7 +67,8 @@ final class PhabricatorProjectBoardController
 
     foreach ($columns as $column) {
       $panel = id(new PHUIWorkpanelView())
-        ->setHeader($column->getName())
+        ->setHeader($column->getDisplayName())
+        ->setHeaderColor($column->getHeaderColor())
         ->setEditURI('edit/'.$column->getID().'/');
 
       $cards = id(new PHUIObjectItemListView())
@@ -114,7 +125,7 @@ final class PhabricatorProjectBoardController
         $board_box,
       ),
       array(
-        'title' => pht('Board'),
+        'title' => pht('%s Board', $project->getName()),
         'device' => true,
       ));
   }

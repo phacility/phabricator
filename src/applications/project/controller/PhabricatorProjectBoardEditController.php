@@ -45,7 +45,7 @@ final class PhabricatorProjectBoardEditController
         return new Aphront404Response();
       }
     } else {
-      $column = new PhabricatorProjectColumn();
+      $column = PhabricatorProjectColumn::initializeNewColumn($viewer);
     }
 
     $errors = array();
