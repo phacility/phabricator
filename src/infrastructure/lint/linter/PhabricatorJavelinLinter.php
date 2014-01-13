@@ -147,7 +147,7 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
       $path);
     $need = $external_classes;
 
-    $resource_name = substr($path, strlen('webroot'));
+    $resource_name = substr($path, strlen('webroot/'));
     $requires = $celerity->getRequiredSymbolsForName($resource_name);
     if (!$requires) {
       $requires = array();
@@ -170,7 +170,7 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
         // If JS requires CSS, just assume everything is fine.
         unset($requires[$key]);
       } else {
-        $symbol_path = 'webroot'.$requires_name;
+        $symbol_path = 'webroot/'.$requires_name;
         list($ignored, $req_install) = $this->getUsedAndInstalledSymbolsForPath(
           $symbol_path);
         if (array_intersect_key($req_install, $external_classes)) {

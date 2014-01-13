@@ -213,7 +213,7 @@ final class CelerityResourceMap {
    *                            is unknown.
    */
   public function getRequiredSymbolsForName($name) {
-    $hash = idx($this->symbolMap, $name);
+    $hash = idx($this->nameMap, $name);
     if ($hash === null) {
       return null;
     }

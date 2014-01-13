@@ -197,12 +197,21 @@ JX.install('DraggableList', {
         break;
       }
 
+      // If the dragged row is the first row, don't allow it to be dragged
+      // into the first position, since this operation doesn't make sense.
+      if (cur_target === null) {
+        var first_item = targets[targets.length - 1].item;
+        if (dragging === first_item) {
+          cur_target = false;
+        }
+      }
+
       // If we've selected a new target, update the UI to show where we're
       // going to drop the row.
 
-      if (cur_target != target) {
+      if (cur_target !== target) {
 
-        if (target) {
+        if (target !== false) {
           JX.DOM.remove(ghost);
         }
 
