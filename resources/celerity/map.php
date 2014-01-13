@@ -392,7 +392,7 @@ return array(
     'rsrc/js/application/policy/behavior-policy-control.js' => 'c01153ea',
     'rsrc/js/application/policy/behavior-policy-rule-editor.js' => '263aeb8c',
     'rsrc/js/application/ponder/behavior-votebox.js' => '327dbe61',
-    'rsrc/js/application/projects/behavior-project-boards.js' => '9c9f91ec',
+    'rsrc/js/application/projects/behavior-project-boards.js' => '1b9facd8',
     'rsrc/js/application/projects/behavior-project-create.js' => '065227cc',
     'rsrc/js/application/releeph/releeph-preview-branch.js' => '9eb2cedb',
     'rsrc/js/application/releeph/releeph-request-state-change.js' => 'fe7fc914',
@@ -417,7 +417,7 @@ return array(
     'rsrc/js/application/uiexample/notification-example.js' => 'c51a6616',
     'rsrc/js/core/Busy.js' => '6453c869',
     'rsrc/js/core/DragAndDropFileUpload.js' => 'ae6abfba',
-    'rsrc/js/core/DraggableList.js' => '14824eb5',
+    'rsrc/js/core/DraggableList.js' => '1681c4d4',
     'rsrc/js/core/DropdownMenu.js' => '2f6f80f4',
     'rsrc/js/core/DropdownMenuItem.js' => '0f386ef4',
     'rsrc/js/core/FileUpload.js' => '96713558',
@@ -603,7 +603,7 @@ return array(
     'javelin-behavior-policy-control' => 'c01153ea',
     'javelin-behavior-policy-rule-editor' => '263aeb8c',
     'javelin-behavior-ponder-votebox' => '327dbe61',
-    'javelin-behavior-project-boards' => '9c9f91ec',
+    'javelin-behavior-project-boards' => '1b9facd8',
     'javelin-behavior-project-create' => '065227cc',
     'javelin-behavior-refresh-csrf' => 'c4b31646',
     'javelin-behavior-releeph-preview-branch' => '9eb2cedb',
@@ -675,7 +675,7 @@ return array(
     'phabricator-countdown-css' => '86b7b0a0',
     'phabricator-crumbs-view-css' => '2d9db584',
     'phabricator-drag-and-drop-file-upload' => 'ae6abfba',
-    'phabricator-draggable-list' => '14824eb5',
+    'phabricator-draggable-list' => '1681c4d4',
     'phabricator-dropdown-menu' => '2f6f80f4',
     'phabricator-fatal-config-template-css' => '25d446d6',
     'phabricator-feed-css' => '4716c86f',
@@ -871,7 +871,7 @@ return array(
       4 => 'javelin-util',
       5 => 'phabricator-shaped-request',
     ),
-    '14824eb5' =>
+    '1681c4d4' =>
     array(
       0 => 'javelin-install',
       1 => 'javelin-dom',
@@ -897,6 +897,15 @@ return array(
       0 => 'javelin-install',
       1 => 'javelin-util',
       2 => 'phabricator-keyboard-shortcut-manager',
+    ),
+    '1b9facd8' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-util',
+      3 => 'javelin-stratcom',
+      4 => 'javelin-workflow',
+      5 => 'phabricator-draggable-list',
     ),
     '1e1c8a59' =>
     array(
@@ -1399,13 +1408,6 @@ return array(
       2 => 'javelin-stratcom',
       3 => 'javelin-vector',
       4 => 'phabricator-hovercard',
-    ),
-    '9c9f91ec' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-      2 => 'javelin-util',
-      3 => 'phabricator-draggable-list',
     ),
     '9db3d160' =>
     array(

@@ -72,6 +72,7 @@ final class PhabricatorProjectBoardController
       'project-boards',
       array(
         'boardID' => $board_id,
+        'moveURI' => $this->getApplicationURI('move/'.$project->getID().'/'),
       ));
 
     foreach ($columns as $column) {
@@ -85,7 +86,11 @@ final class PhabricatorProjectBoardController
         ->setCards(true)
         ->setFlush(true)
         ->setAllowEmptyList(true)
-        ->addSigil('project-column');
+        ->addSigil('project-column')
+        ->setMetadata(
+          array(
+            'columnPHID' => $column->getPHID(),
+          ));
       $task_phids = idx($task_map, $column->getPHID(), array());
       foreach (array_select_keys($tasks, $task_phids) as $task) {
         $cards->addItem($this->renderTaskCard($task));
@@ -164,6 +169,10 @@ final class PhabricatorProjectBoardController
       ->setGrippable($can_edit)
       ->setHref('/T'.$task->getID())
       ->addSigil('project-card')
+      ->setMetadata(
+        array(
+          'objectPHID' => $task->getPHID(),
+        ))
       ->addAction(
         id(new PHUIListItemView())
           ->setName(pht('Edit'))

@@ -420,6 +420,13 @@ JX.install('DraggableList', {
     },
 
     lock : function() {
+      for (var ii = 0; ii < this._group.length; ii++) {
+        this._group[ii]._lock();
+      }
+      return this;
+    },
+
+    _lock : function() {
       this._locked++;
       if (this._locked === 1) {
         this.invoke('didLock');
@@ -427,7 +434,14 @@ JX.install('DraggableList', {
       return this;
     },
 
-    unlock : function() {
+    unlock: function() {
+      for (var ii = 0; ii < this._group.length; ii++) {
+        this._group[ii]._unlock();
+      }
+      return this;
+    },
+
+    _unlock : function() {
       if (__DEV__) {
         if (!this._locked) {
           JX.$E("JX.Draggable.unlock(): Draggable is not locked!");
