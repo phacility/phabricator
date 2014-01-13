@@ -84,12 +84,17 @@ final class PhabricatorProjectBoardController
         ->setUser($viewer)
         ->setCards(true)
         ->setFlush(true)
+        ->setAllowEmptyList(true)
         ->addSigil('project-column');
       $task_phids = idx($task_map, $column->getPHID(), array());
       foreach (array_select_keys($tasks, $task_phids) as $task) {
         $cards->addItem($this->renderTaskCard($task));
       }
       $panel->setCards($cards);
+
+      if (!$task_phids) {
+        $cards->addClass('project-column-empty');
+      }
 
       $board->addPanel($panel);
     }

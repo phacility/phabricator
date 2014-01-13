@@ -12,6 +12,10 @@ JX.behavior('project-boards', function(config) {
     return JX.DOM.scry(col, 'li', 'project-card');
   }
 
+  function onupdate(node) {
+    JX.DOM.alterClass(node, 'project-column-empty', !this.findItems().length);
+  }
+
   var lists = [];
   var ii;
   var cols = JX.DOM.scry(JX.$(config.boardID), 'ul', 'project-column');
@@ -19,6 +23,10 @@ JX.behavior('project-boards', function(config) {
   for (ii = 0; ii < cols.length; ii++) {
     var list = new JX.DraggableList('project-card', cols[ii])
       .setFindItemsHandler(JX.bind(null, finditems, cols[ii]));
+
+    list.listen('didSend', JX.bind(list, onupdate, cols[ii]));
+    list.listen('didReceive', JX.bind(list, onupdate, cols[ii]));
+
     lists.push(list);
   }
 

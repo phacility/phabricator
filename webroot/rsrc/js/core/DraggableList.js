@@ -31,7 +31,9 @@ JX.install('DraggableList', {
     'didBeginDrag',
     'didCancelDrag',
     'didEndDrag',
-    'didDrop'],
+    'didDrop',
+    'didSend',
+    'didReceive'],
 
   properties : {
     findItemsHandler : null
@@ -378,18 +380,28 @@ JX.install('DraggableList', {
         return;
       }
 
-      var target = this._target;
-      var dragging = this._dragging;
-      var ghost = this.getGhostNode();
+      var p = JX.$V(e);
 
+      var dragging = this._dragging;
       this._dragging = null;
+
+      var target = false;
+      var ghost = false;
+
+      var target_list = this._getTargetList(p);
+      if (target_list) {
+        target = target_list._target;
+        ghost = target_list.getGhostNode();
+      }
 
       JX.$V(0, 0).setPos(dragging);
 
       if (target !== false) {
         JX.DOM.remove(dragging);
         JX.DOM.replace(ghost, dragging);
-        this.invoke('didDrop', dragging, target);
+        this.invoke('didSend', dragging, target_list);
+        target_list.invoke('didReceive', dragging, this);
+        target_list.invoke('didDrop', dragging, target, this);
       } else {
         this.invoke('didCancelDrag', dragging);
       }

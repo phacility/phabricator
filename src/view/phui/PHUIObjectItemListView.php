@@ -10,6 +10,17 @@ final class PHUIObjectItemListView extends AphrontTagView {
   private $noDataString;
   private $flush;
   private $plain;
+  private $allowEmptyList;
+
+
+  public function setAllowEmptyList($allow_empty_list) {
+    $this->allowEmptyList = $allow_empty_list;
+    return $this;
+  }
+
+  public function getAllowEmptyList() {
+    return $this->allowEmptyList;
+  }
 
   public function setFlush($flush) {
     $this->flush = $flush;
@@ -92,6 +103,8 @@ final class PHUIObjectItemListView extends AphrontTagView {
 
     if ($this->items) {
       $items = $this->items;
+    } else if ($this->allowEmptyList) {
+      $items = null;
     } else {
       $string = nonempty($this->noDataString, pht('No data.'));
       $items = id(new AphrontErrorView())
