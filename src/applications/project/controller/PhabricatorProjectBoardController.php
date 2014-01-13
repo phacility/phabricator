@@ -61,9 +61,18 @@ final class PhabricatorProjectBoardController
       $task_map[$default_phid][] = $task->getPHID();
     }
 
+    $board_id = celerity_generate_unique_node_id();
+
     $board = id(new PHUIWorkboardView())
       ->setUser($viewer)
-      ->setFluidishLayout(true);
+      ->setFluidishLayout(true)
+      ->setID($board_id);
+
+    $this->initBehavior(
+      'project-boards',
+      array(
+        'boardID' => $board_id,
+      ));
 
     foreach ($columns as $column) {
       $panel = id(new PHUIWorkpanelView())
@@ -74,7 +83,8 @@ final class PhabricatorProjectBoardController
       $cards = id(new PHUIObjectItemListView())
         ->setUser($viewer)
         ->setCards(true)
-        ->setFlush(true);
+        ->setFlush(true)
+        ->addSigil('project-column');
       $task_phids = idx($task_map, $column->getPHID(), array());
       foreach (array_select_keys($tasks, $task_phids) as $task) {
         $cards->addItem($this->renderTaskCard($task));
@@ -148,6 +158,7 @@ final class PhabricatorProjectBoardController
       ->setHeader($task->getTitle())
       ->setGrippable($can_edit)
       ->setHref('/T'.$task->getID())
+      ->addSigil('project-card')
       ->addAction(
         id(new PHUIListItemView())
           ->setName(pht('Edit'))

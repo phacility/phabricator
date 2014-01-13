@@ -572,3 +572,7 @@
   padding-top: 0;
 }
 
+.drag-target-list {
+  /* TODO: This is a work in progress. */
+  background: red;
+}
