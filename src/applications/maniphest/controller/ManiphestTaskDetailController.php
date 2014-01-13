@@ -548,11 +548,52 @@ final class ManiphestTaskDetailController extends ManiphestController {
           $source));
     }
 
-    $view->addProperty(
-      pht('Projects'),
-      $task->getProjectPHIDs()
-      ? $this->renderHandlesForPHIDs($task->getProjectPHIDs(), ',')
-      : phutil_tag('em', array(), pht('None')));
+    $project_phids = $task->getProjectPHIDs();
+    if ($project_phids) {
+      // If we end up with real-world projects with many hundreds of columns, it
+      // might be better to just load all the edges, then load those columns and
+      // work backward that way, or denormalize this data more.
+
+      $columns = id(new PhabricatorProjectColumnQuery())
+        ->setViewer($viewer)
+        ->withProjectPHIDs($project_phids)
+        ->execute();
+      $columns = mpull($columns, null, 'getPHID');
+
+      $column_edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_COLUMN;
+      $all_column_phids = array_keys($columns);
+
+      $column_edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(array($task->getPHID()))
+        ->withEdgeTypes(array($column_edge_type))
+        ->withDestinationPHIDs($all_column_phids);
+      $column_edge_query->execute();
+      $in_column_phids = array_fuse($column_edge_query->getDestinationPHIDs());
+
+      $column_groups = mgroup($columns, 'getProjectPHID');
+
+      $project_rows = array();
+      foreach ($project_phids as $project_phid) {
+        $row = array();
+
+        $handle = $this->getHandle($project_phid);
+        $row[] = $handle->renderLink();
+
+        $columns = idx($column_groups, $project_phid, array());
+        $column = head(array_intersect_key($columns, $in_column_phids));
+        if ($column) {
+          if (!$column->isDefaultColumn()) {
+            $row[] = pht(' (%s)', $column->getDisplayName());
+          }
+        }
+
+        $project_rows[] = phutil_tag('div', array(), $row);
+      }
+    } else {
+      $project_rows = phutil_tag('em', array(), pht('None'));
+    }
+
+    $view->addProperty(pht('Projects'), $project_rows);
 
     $edge_types = array(
       PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK
