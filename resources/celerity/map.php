@@ -416,7 +416,7 @@ return array(
     'rsrc/js/application/uiexample/notification-example.js' => 'c51a6616',
     'rsrc/js/core/Busy.js' => '6453c869',
     'rsrc/js/core/DragAndDropFileUpload.js' => 'ae6abfba',
-    'rsrc/js/core/DraggableList.js' => 'f0a4bbdf',
+    'rsrc/js/core/DraggableList.js' => '6f5a879c',
     'rsrc/js/core/DropdownMenu.js' => '2f6f80f4',
     'rsrc/js/core/DropdownMenuItem.js' => '0f386ef4',
     'rsrc/js/core/FileUpload.js' => '96713558',
@@ -673,7 +673,7 @@ return array(
     'phabricator-countdown-css' => '86b7b0a0',
     'phabricator-crumbs-view-css' => '2d9db584',
     'phabricator-drag-and-drop-file-upload' => 'ae6abfba',
-    'phabricator-draggable-list' => 'f0a4bbdf',
+    'phabricator-draggable-list' => '6f5a879c',
     'phabricator-dropdown-menu' => '2f6f80f4',
     'phabricator-fatal-config-template-css' => '25d446d6',
     'phabricator-feed-css' => '4716c86f',
@@ -1191,6 +1191,15 @@ return array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
       2 => 'javelin-workflow',
+    ),
+    '6f5a879c' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-dom',
+      2 => 'javelin-stratcom',
+      3 => 'javelin-util',
+      4 => 'javelin-vector',
+      5 => 'javelin-magical-init',
     ),
     '71755c79' =>
     array(
@@ -1846,15 +1855,6 @@ return array(
       1 => 'javelin-dom',
       2 => 'javelin-util',
       3 => 'javelin-request',
-    ),
-    'f0a4bbdf' =>
-    array(
-      0 => 'javelin-install',
-      1 => 'javelin-dom',
-      2 => 'javelin-stratcom',
-      3 => 'javelin-util',
-      4 => 'javelin-vector',
-      5 => 'javelin-magical-init',
     ),
     'f2441746' =>
     array(

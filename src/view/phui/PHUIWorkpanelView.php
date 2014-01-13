@@ -1,6 +1,6 @@
 <?php
 
-final class PHUIWorkpanelView extends AphrontView {
+final class PHUIWorkpanelView extends AphrontTagView {
 
   private $cards = array();
   private $header;
@@ -33,7 +33,13 @@ final class PHUIWorkpanelView extends AphrontView {
     return $this;
   }
 
-  public function render() {
+  public function getTagAttributes() {
+    return array(
+      'class' => 'phui-workpanel-view',
+    );
+  }
+
+  public function getTagContent() {
     require_celerity_resource('phui-workpanel-view-css');
 
     $footer = '';
@@ -75,11 +81,6 @@ final class PHUIWorkpanelView extends AphrontView {
         $footer,
       ));
 
-    return phutil_tag(
-      'div',
-        array(
-          'class' => 'phui-workpanel-view'
-        ),
-        $view);
+    return $view;
   }
 }
