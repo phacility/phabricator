@@ -23,6 +23,10 @@ form.aphront-dialog-view .aphront-error-view {
   margin: 8px;
 }
 
+.aphront-error-view .phui-form-view {
+  padding: 0;
+}
+
 .aphront-error-view-body {
   padding: 12px;
 }

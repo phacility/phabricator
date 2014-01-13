@@ -20,10 +20,10 @@ final class DifferentialDiffViewController extends DifferentialController {
       return new Aphront404Response();
     }
 
+    $error_view = id(new AphrontErrorView())
+        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
     if ($diff->getRevisionID()) {
-      $top_part = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->appendChild(
+      $error_view->appendChild(
           pht(
             'This diff belongs to revision %s.',
             phutil_tag(
@@ -85,7 +85,7 @@ final class DifferentialDiffViewController extends DifferentialController {
           id(new AphrontFormSubmitControl())
           ->setValue(pht('Continue')));
 
-      $top_part = $form;
+        $error_view->appendChild($form);
     }
 
     $props = id(new DifferentialDiffProperty())->loadAllWhere(
@@ -148,12 +148,15 @@ final class DifferentialDiffViewController extends DifferentialController {
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Diff %d', $diff->getID()));
 
+    $prop_box = id(new PHUIObjectBoxView())
+      ->setHeader($property_head)
+      ->addPropertyList($property_view)
+      ->setErrorView($error_view);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $top_part,
-        $property_head,
-        $property_view,
+        $prop_box,
         $table_of_contents,
         $details,
       ),
