@@ -54,12 +54,14 @@ final class PhabricatorProjectBoardController
       ->execute();
     $tasks = mpull($tasks, null, 'getPHID');
 
-    $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_COLUMN;
-    $edge_query = id(new PhabricatorEdgeQuery())
-      ->withSourcePHIDs(mpull($tasks, 'getPHID'))
-      ->withEdgeTypes(array($edge_type))
-      ->withDestinationPHIDs(mpull($columns, 'getPHID'));
-    $edge_query->execute();
+    if ($tasks) {
+      $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_COLUMN;
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(mpull($tasks, 'getPHID'))
+        ->withEdgeTypes(array($edge_type))
+        ->withDestinationPHIDs(mpull($columns, 'getPHID'));
+      $edge_query->execute();
+    }
 
     $task_map = array();
     $default_phid = $columns[0]->getPHID();
