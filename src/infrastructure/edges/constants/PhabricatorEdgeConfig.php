@@ -66,6 +66,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_OBJECT_HAS_PROJECT         = 41;
   const TYPE_PROJECT_HAS_OBJECT         = 42;
 
+  const TYPE_OBJECT_HAS_COLUMN          = 43;
+  const TYPE_COLUMN_HAS_OBJECT          = 44;
+
   const TYPE_TEST_NO_CYCLE              = 9000;
 
   const TYPE_PHOB_HAS_ASANATASK         = 80001;
@@ -76,7 +79,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   const TYPE_PHOB_HAS_JIRAISSUE         = 80004;
   const TYPE_JIRAISSUE_HAS_PHOB         = 80005;
-
 
   public static function getInverse($edge_type) {
     static $map = array(
@@ -148,6 +150,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
       self::TYPE_OBJECT_HAS_PROJECT => self::TYPE_PROJECT_HAS_OBJECT,
       self::TYPE_PROJECT_HAS_OBJECT => self::TYPE_OBJECT_HAS_PROJECT,
+
+      self::TYPE_OBJECT_HAS_COLUMN => self::TYPE_COLUMN_HAS_OBJECT,
+      self::TYPE_COLUMN_HAS_OBJECT => self::TYPE_OBJECT_HAS_COLUMN,
     );
 
     return idx($map, $edge_type);

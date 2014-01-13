@@ -54,11 +54,23 @@ final class PhabricatorProjectBoardController
       ->execute();
     $tasks = mpull($tasks, null, 'getPHID');
 
+    $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_COLUMN;
+    $edge_query = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs(mpull($tasks, 'getPHID'))
+      ->withEdgeTypes(array($edge_type))
+      ->withDestinationPHIDs(mpull($columns, 'getPHID'));
+    $edge_query->execute();
+
     $task_map = array();
     $default_phid = $columns[0]->getPHID();
-
     foreach ($tasks as $task) {
-      $task_map[$default_phid][] = $task->getPHID();
+      $task_phid = $task->getPHID();
+      $column_phids = $edge_query->getDestinationPHIDs(array($task_phid));
+
+      $column_phid = head($column_phids);
+      $column_phid = nonempty($column_phid, $default_phid);
+
+      $task_map[$column_phid][] = $task_phid;
     }
 
     $board_id = celerity_generate_unique_node_id();
