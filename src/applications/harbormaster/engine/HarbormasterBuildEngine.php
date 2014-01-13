@@ -163,17 +163,17 @@ final class HarbormasterBuildEngine extends Phobject {
       }
     }
 
-    // If every step is complete, we're done with this build. Mark it passed
-    // and bail.
-    if (count($complete) == count($steps)) {
-      $build->setBuildStatus(HarbormasterBuild::STATUS_PASSED);
+    // If any step failed, fail the whole build, then bail.
+    if (count($failed)) {
+      $build->setBuildStatus(HarbormasterBuild::STATUS_FAILED);
       $build->save();
       return;
     }
 
-    // If any step failed, fail the whole build, then bail.
-    if (count($failed)) {
-      $build->setBuildStatus(HarbormasterBuild::STATUS_FAILED);
+    // If every step is complete, we're done with this build. Mark it passed
+    // and bail.
+    if (count($complete) == count($steps)) {
+      $build->setBuildStatus(HarbormasterBuild::STATUS_PASSED);
       $build->save();
       return;
     }

@@ -53,16 +53,6 @@ final class CommandBuildStepImplementation
       $log_stderr->append($stderr);
       $future->discardBuffers();
 
-      // Check to see if we have moved from a "Building" status.  This
-      // can occur if the user cancels the build, in which case we want
-      // to terminate whatever we're doing and return as quickly as possible.
-      if ($build->checkForCancellation()) {
-        $log_stdout->finalize($start_stdout);
-        $log_stderr->finalize($start_stderr);
-        $future->resolveKill();
-        return;
-      }
-
       // Wait one second before querying for more data.
       sleep(1);
     }
@@ -80,7 +70,7 @@ final class CommandBuildStepImplementation
     $log_stderr->finalize($start_stderr);
 
     if ($err) {
-      $build->setBuildStatus(HarbormasterBuild::STATUS_FAILED);
+      throw new Exception(pht('Command failed with error %d.', $err));
     }
   }
 

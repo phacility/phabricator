@@ -46,6 +46,17 @@ final class HarbormasterTargetWorker extends HarbormasterWorker {
         $target->save();
       }
     } catch (Exception $ex) {
+      phlog($ex);
+
+      try {
+        $log = $build->createLog($target, 'core', 'exception');
+        $start = $log->start();
+        $log->append((string)$ex);
+        $log->finalize($start);
+      } catch (Exception $log_ex) {
+        phlog($log_ex);
+      }
+
       $target->setTargetStatus(HarbormasterBuildTarget::STATUS_FAILED);
       $target->save();
     }
