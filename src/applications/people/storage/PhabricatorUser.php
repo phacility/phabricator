@@ -431,9 +431,9 @@ final class PhabricatorUser
       }
     }
 
-    $log = PhabricatorUserLog::newLog(
+    $log = PhabricatorUserLog::initializeNewLog(
       $this,
-      $this,
+      $this->getPHID(),
       PhabricatorUserLog::ACTION_LOGIN);
     $log->setDetails(
       array(

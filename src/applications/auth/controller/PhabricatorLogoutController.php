@@ -23,9 +23,9 @@ final class PhabricatorLogoutController
 
     if ($request->isFormPost()) {
 
-      $log = PhabricatorUserLog::newLog(
+      $log = PhabricatorUserLog::initializeNewLog(
         $user,
-        $user,
+        $user->getPHID(),
         PhabricatorUserLog::ACTION_LOGOUT);
       $log->save();
 

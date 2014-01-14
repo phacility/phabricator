@@ -185,9 +185,9 @@ final class PhabricatorAuthProviderPassword
     }
 
     if (!$account) {
-      $log = PhabricatorUserLog::newLog(
+      $log = PhabricatorUserLog::initializeNewLog(
         null,
-        $log_user,
+        $log_user ? $log_user->getPHID() : null,
         PhabricatorUserLog::ACTION_LOGIN_FAILURE);
       $log->save();
 

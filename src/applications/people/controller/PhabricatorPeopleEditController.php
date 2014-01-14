@@ -356,9 +356,9 @@ final class PhabricatorPeopleEditController
 
     if ($request->isFormPost()) {
 
-      $log_template = PhabricatorUserLog::newLog(
+      $log_template = PhabricatorUserLog::initializeNewLog(
         $admin,
-        $user,
+        $user->getPHID(),
         null);
 
       $logs = array();
