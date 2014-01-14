@@ -44,7 +44,7 @@ abstract class PhabricatorController extends AphrontController {
           'SELECT u.* FROM %T u JOIN %T s ON u.phid = s.userPHID
             AND s.type LIKE %> AND s.sessionKey = %s',
           $user->getTableName(),
-          'phabricator_session',
+          PhabricatorUser::SESSION_TABLE,
           'web-',
           PhabricatorHash::digest($phsid));
         if ($info) {
