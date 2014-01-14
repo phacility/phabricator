@@ -235,14 +235,11 @@ abstract class PhabricatorInlineCommentController
   }
 
   private function renderTextArea($text) {
-    return javelin_tag(
-      'textarea',
-      array(
-        'class' => 'differential-inline-comment-edit-textarea',
-        'sigil' => 'differential-inline-comment-edit-textarea',
-        'name' => 'text',
-      ),
-      $text);
+    return id(new PhabricatorRemarkupControl())
+      ->setUser($this->getRequest()->getUser())
+      ->setSigil('differential-inline-comment-edit-textarea')
+      ->setName('text')
+      ->setValue($text);
   }
 
 }

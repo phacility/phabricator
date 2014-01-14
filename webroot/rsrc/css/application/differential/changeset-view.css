@@ -287,10 +287,9 @@ td.cov-X {
   font-style:   normal;
 }
 
-
-.differential-inline-comment-edit-textarea {
+.differential-inline-comment-edit-body .aphront-form-input {
+  margin: 0;
   width: 100%;
-  height: 12em;
 }
 
 .differential-changeset-buttons {
