@@ -42,6 +42,7 @@ final class ReleephDefaultFieldSelector extends ReleephFieldSelector {
         new ReleephBranchCommitFieldSpecification(),
         new ReleephDiffSizeFieldSpecification(),
         new ReleephDiffChurnFieldSpecification(),
+        new ReleephDependsOnFieldSpecification(),
         new ReleephFacebookTagFieldSpecification(),
         new ReleephFacebookTasksFieldSpecification(),
       );
@@ -76,6 +77,7 @@ final class ReleephDefaultFieldSelector extends ReleephFieldSelector {
             'ReleephOriginalCommitFieldSpecification',
             'ReleephDiffSizeFieldSpecification',
             'ReleephDiffChurnFieldSpecification',
+            'ReleephDependsOnFieldSpecification',
             'ReleephFacebookTasksFieldSpecification',
           )),
           'right' => self::selectFields($fields, array(
