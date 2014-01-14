@@ -138,15 +138,6 @@ details.
 EODOC
 ));
 
-    $immediately_description = $this->deformat(pht(<<<EODOC
-When email is sent, try to hand it off to the MTA immediately instead of
-queueing it for delivery by the daemons. If you are running the Phabricator
-daemons with "phd start", you should disable this to provide a (sometimes
-substantial) performance boost. It's on by default to make setup and
-configuration a little easier.
-EODOC
-));
-
     $placeholder_description = $this->deformat(pht(<<<EODOC
 When sending a message that has no To recipient (i.e. all recipients are CC'd,
 for example when multiplexing mail), set the To field to the following value. If
@@ -298,14 +289,6 @@ EODOC
           ))
         ->setSummary(pht('Trust "Reply-To" headers for authentication.'))
         ->setDescription($reply_to_description),
-      $this->newOption('metamta.send-immediately', 'bool', true)
-        ->setBoolOptions(
-          array(
-            pht('Send Immediately (Slow)'),
-            pht('Send Via Daemons (Must Run Daemons)'),
-          ))
-        ->setSummary(pht('Improve performance by sending email via daemons.'))
-        ->setDescription($immediately_description),
       $this->newOption('metamta.placeholder-to-recipient', 'string', null)
         ->setSummary(pht('Placeholder for mail with only CCs.'))
         ->setDescription($placeholder_description),

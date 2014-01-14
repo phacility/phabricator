@@ -152,17 +152,6 @@ disable outbound mail, if you don't want to send mail or don't want to configure
 it yet. Just set **metamta.mail-adapter** to
 "PhabricatorMailImplementationTestAdapter".
 
-= Configuring MetaMTA to Send Mail Using a Daemon =
-
-Regardless of how you are sending outbound email, you can move the handoff to
-the MTA out of the main process and into a daemon. This will greatly improve
-application performance if your mailer is slow, like Amazon SES. In particular,
-commenting on Differential Revisions and Maniphest Tasks sends outbound email.
-
-If you set **metamta.send-immediately** to ##false## in your configuration,
-MetaMTA will queue mail to be send by a PhabricatorTaskmasterDaemon.
-For more information on using daemons, see @{article:Managing Daemons with phd}.
-
 = Testing and Debugging Outbound Email =
 
 You can use the `bin/mail` utility to test, debug, and examine outbound mail. In
