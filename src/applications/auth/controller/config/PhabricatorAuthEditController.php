@@ -212,8 +212,8 @@ final class PhabricatorAuthEditController
         'existing Phabricator accounts. If you disable this, Phabricator '.
         'accounts will be permanently bound to provider accounts.'));
 
-    $status_tag = id(new PhabricatorTagView())
-      ->setType(PhabricatorTagView::TYPE_STATE);
+    $status_tag = id(new PHUITagView())
+      ->setType(PHUITagView::TYPE_STATE);
     if ($is_new) {
       $status_tag
         ->setName(pht('New Provider'))

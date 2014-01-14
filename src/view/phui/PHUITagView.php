@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorTagView extends AphrontView {
+final class PHUITagView extends AphrontView {
 
   const TYPE_PERSON         = 'person';
   const TYPE_OBJECT         = 'object';
@@ -102,27 +102,27 @@ final class PhabricatorTagView extends AphrontView {
       throw new Exception(pht("You must call setType() before render()!"));
     }
 
-    require_celerity_resource('phabricator-tag-view-css');
+    require_celerity_resource('phui-tag-view-css');
     $classes = array(
-      'phabricator-tag-view',
-      'phabricator-tag-type-'.$this->type,
+      'phui-tag-view',
+      'phui-tag-type-'.$this->type,
     );
 
     if ($this->closed) {
-      $classes[] = 'phabricator-tag-state-closed';
+      $classes[] = 'phui-tag-state-closed';
     }
 
     $color = null;
     if ($this->backgroundColor) {
-      $color = 'phabricator-tag-color-'.$this->backgroundColor;
+      $color = 'phui-tag-color-'.$this->backgroundColor;
     }
 
     if ($this->dotColor) {
-      $dotcolor = 'phabricator-tag-color-'.$this->dotColor;
+      $dotcolor = 'phui-tag-color-'.$this->dotColor;
       $dot = phutil_tag(
         'span',
         array(
-          'class' => 'phabricator-tag-dot '.$dotcolor,
+          'class' => 'phui-tag-dot '.$dotcolor,
         ),
         '');
     } else {
@@ -131,7 +131,7 @@ final class PhabricatorTagView extends AphrontView {
 
     if ($this->icon) {
       $icon = $this->icon;
-      $classes[] = 'phabricator-tag-icon-view';
+      $classes[] = 'phui-tag-icon-view';
     } else {
       $icon = null;
     }
@@ -139,19 +139,19 @@ final class PhabricatorTagView extends AphrontView {
     $content = phutil_tag(
       'span',
       array(
-        'class' => 'phabricator-tag-core '.$color,
+        'class' => 'phui-tag-core '.$color,
       ),
       array($dot, $this->name));
 
     if ($this->barColor) {
-      $barcolor = 'phabricator-tag-color-'.$this->barColor;
+      $barcolor = 'phui-tag-color-'.$this->barColor;
       $bar = phutil_tag(
         'span',
         array(
-          'class' => 'phabricator-tag-bar '.$barcolor,
+          'class' => 'phui-tag-bar '.$barcolor,
         ),
         '');
-      $classes[] = 'phabricator-tag-view-has-bar';
+      $classes[] = 'phui-tag-view-has-bar';
     } else {
       $bar = null;
     }

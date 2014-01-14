@@ -75,10 +75,10 @@ final class PhabricatorMacroViewController
 
     if ($macro->getIsDisabled()) {
       $header->addTag(
-        id(new PhabricatorTagView())
-          ->setType(PhabricatorTagView::TYPE_STATE)
+        id(new PHUITagView())
+          ->setType(PHUITagView::TYPE_STATE)
           ->setName(pht('Macro Disabled'))
-          ->setBackgroundColor(PhabricatorTagView::COLOR_BLACK));
+          ->setBackgroundColor(PHUITagView::COLOR_BLACK));
     }
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');

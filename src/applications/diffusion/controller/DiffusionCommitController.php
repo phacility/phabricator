@@ -487,22 +487,22 @@ final class DiffusionCommitController extends DiffusionController {
     if ($commit->getAuditStatus()) {
       $status = PhabricatorAuditCommitStatusConstants::getStatusName(
         $commit->getAuditStatus());
-      $tag = id(new PhabricatorTagView())
-        ->setType(PhabricatorTagView::TYPE_STATE)
+      $tag = id(new PHUITagView())
+        ->setType(PHUITagView::TYPE_STATE)
         ->setName($status);
 
       switch ($commit->getAuditStatus()) {
         case PhabricatorAuditCommitStatusConstants::NEEDS_AUDIT:
-          $tag->setBackgroundColor(PhabricatorTagView::COLOR_ORANGE);
+          $tag->setBackgroundColor(PHUITagView::COLOR_ORANGE);
           break;
         case PhabricatorAuditCommitStatusConstants::CONCERN_RAISED:
-          $tag->setBackgroundColor(PhabricatorTagView::COLOR_RED);
+          $tag->setBackgroundColor(PHUITagView::COLOR_RED);
           break;
         case PhabricatorAuditCommitStatusConstants::PARTIALLY_AUDITED:
-          $tag->setBackgroundColor(PhabricatorTagView::COLOR_BLUE);
+          $tag->setBackgroundColor(PHUITagView::COLOR_BLUE);
           break;
         case PhabricatorAuditCommitStatusConstants::FULLY_AUDITED:
-          $tag->setBackgroundColor(PhabricatorTagView::COLOR_GREEN);
+          $tag->setBackgroundColor(PHUITagView::COLOR_GREEN);
           break;
       }
 

@@ -112,7 +112,7 @@ return array(
     'phabricator-application-launch-view-css',
     'phabricator-action-list-view-css',
     'phui-property-list-view-css',
-    'phabricator-tag-view-css',
+    'phui-tag-view-css',
     'phui-list-view-css',
   ),
   'differential.pkg.css' => array(

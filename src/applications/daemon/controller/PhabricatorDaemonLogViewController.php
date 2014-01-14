@@ -31,29 +31,29 @@ final class PhabricatorDaemonLogViewController
     $header = id(new PHUIHeaderView())
       ->setHeader($log->getDaemon());
 
-    $tag = id(new PhabricatorTagView())
-      ->setType(PhabricatorTagView::TYPE_STATE);
+    $tag = id(new PHUITagView())
+      ->setType(PHUITagView::TYPE_STATE);
 
     $status = $log->getStatus();
     switch ($status) {
       case PhabricatorDaemonLog::STATUS_UNKNOWN:
-        $tag->setBackgroundColor(PhabricatorTagView::COLOR_ORANGE);
+        $tag->setBackgroundColor(PHUITagView::COLOR_ORANGE);
         $tag->setName(pht('Unknown'));
         break;
       case PhabricatorDaemonLog::STATUS_RUNNING:
-        $tag->setBackgroundColor(PhabricatorTagView::COLOR_GREEN);
+        $tag->setBackgroundColor(PHUITagView::COLOR_GREEN);
         $tag->setName(pht('Running'));
         break;
       case PhabricatorDaemonLog::STATUS_DEAD:
-        $tag->setBackgroundColor(PhabricatorTagView::COLOR_RED);
+        $tag->setBackgroundColor(PHUITagView::COLOR_RED);
         $tag->setName(pht('Dead'));
         break;
       case PhabricatorDaemonLog::STATUS_WAIT:
-        $tag->setBackgroundColor(PhabricatorTagView::COLOR_BLUE);
+        $tag->setBackgroundColor(PHUITagView::COLOR_BLUE);
         $tag->setName(pht('Waiting'));
         break;
       case PhabricatorDaemonLog::STATUS_EXITED:
-        $tag->setBackgroundColor(PhabricatorTagView::COLOR_GREY);
+        $tag->setBackgroundColor(PHUITagView::COLOR_GREY);
         $tag->setName(pht('Exited'));
         break;
     }

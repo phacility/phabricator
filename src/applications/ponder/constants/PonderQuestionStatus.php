@@ -25,7 +25,7 @@ final class PonderQuestionStatus extends PonderConstants {
 
   public static function getQuestionStatusTagColor($status) {
     $map = array(
-      self::STATUS_CLOSED => PhabricatorTagView::COLOR_BLACK,
+      self::STATUS_CLOSED => PHUITagView::COLOR_BLACK,
     );
 
     return idx($map, $status);

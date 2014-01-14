@@ -137,7 +137,7 @@
 
 /* When tags appear in property lists, give them a little more vertical
    spacing. */
-.phui-property-list-view .phabricator-tag-view {
+.phui-property-list-view .phui-tag-view {
   margin: 2px 0;
 }
 
