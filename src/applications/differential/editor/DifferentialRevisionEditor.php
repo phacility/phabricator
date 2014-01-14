@@ -534,7 +534,7 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
       ->publish();
 
     id(new PhabricatorSearchIndexer())
-      ->indexDocumentByPHID($revision->getPHID());
+      ->queueDocumentForIndexing($revision->getPHID());
   }
 
   public static function addCCAndUpdateRevision(
