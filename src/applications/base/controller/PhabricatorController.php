@@ -35,20 +35,12 @@ abstract class PhabricatorController extends AphrontController {
     } else {
       $user = new PhabricatorUser();
 
-      $phusr = $request->getCookie('phusr');
       $phsid = $request->getCookie('phsid');
-
-      if (strlen($phusr) && $phsid) {
-        $info = queryfx_one(
-          $user->establishConnection('r'),
-          'SELECT u.* FROM %T u JOIN %T s ON u.phid = s.userPHID
-            AND s.type LIKE %> AND s.sessionKey = %s',
-          $user->getTableName(),
-          PhabricatorUser::SESSION_TABLE,
-          'web-',
-          PhabricatorHash::digest($phsid));
-        if ($info) {
-          $user->loadFromArray($info);
+      if ($phsid) {
+        $session_user = id(new PhabricatorAuthSessionEngine())
+          ->loadUserForSession('web', $phsid);
+        if ($session_user) {
+          $user = $session_user;
         }
       }
 

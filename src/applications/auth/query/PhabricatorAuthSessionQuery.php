@@ -4,9 +4,21 @@ final class PhabricatorAuthSessionQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $identityPHIDs;
+  private $sessionKeys;
+  private $sessionTypes;
 
   public function withIdentityPHIDs(array $identity_phids) {
     $this->identityPHIDs = $identity_phids;
+    return $this;
+  }
+
+  public function withSessionKeys(array $keys) {
+    $this->sessionKeys = $keys;
+    return $this;
+  }
+
+  public function withSessionTypes(array $types) {
+    $this->sessionTypes = $types;
     return $this;
   }
 
@@ -55,6 +67,28 @@ final class PhabricatorAuthSessionQuery
         $conn_r,
         'userPHID IN (%Ls)',
         $this->identityPHIDs);
+    }
+
+    if ($this->sessionKeys) {
+      $hashes = array();
+      foreach ($this->sessionKeys as $session_key) {
+        $hashes[] = PhabricatorHash::digest($session_key);
+      }
+      $where[] = qsprintf(
+        $conn_r,
+        'sessionKey IN (%Ls)',
+        $hashes);
+    }
+
+    if ($this->sessionTypes) {
+      $clauses = array();
+      foreach ($this->sessionTypes as $session_type) {
+        $clauses[] = qsprintf(
+          $conn_r,
+          'type LIKE %>',
+          $session_type.'-');
+      }
+      $where[] = '('.implode(') OR (', $clauses).')';
     }
 
     $where[] = $this->buildPagingClause($conn_r);

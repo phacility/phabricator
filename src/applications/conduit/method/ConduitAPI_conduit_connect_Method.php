@@ -142,7 +142,8 @@ final class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
       if ($valid != $signature) {
         throw new ConduitException('ERR-INVALID-CERTIFICATE');
       }
-      $session_key = $user->establishSession('conduit');
+      $session_key = id(new PhabricatorAuthSessionEngine())
+        ->establishSession('conduit', $user->getPHID());
     } else {
       throw new ConduitException('ERR-NO-CERTIFICATE');
     }
