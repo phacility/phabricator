@@ -7,7 +7,7 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => '5c4061d8',
+    'core.pkg.css' => 'a35f9047',
     'core.pkg.js' => 'c907bd96',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => '827749c1',
@@ -124,7 +124,7 @@ return array(
     'rsrc/css/layout/phabricator-hovercard-view.css' => '67c12b16',
     'rsrc/css/layout/phabricator-side-menu-view.css' => '503699d0',
     'rsrc/css/layout/phabricator-source-code-view.css' => '62a99814',
-    'rsrc/css/layout/phabricator-tag-view.css' => 'c0363c26',
+    'rsrc/css/layout/phabricator-tag-view.css' => '4c983c74',
     'rsrc/css/layout/phabricator-timeline-view.css' => 'f4f846c4',
     'rsrc/css/phui/phui-box.css' => '21da4d8c',
     'rsrc/css/phui/phui-button.css' => '8106a67a',
@@ -707,7 +707,7 @@ return array(
     'phabricator-slowvote-css' => '266df6a1',
     'phabricator-source-code-view-css' => '62a99814',
     'phabricator-standard-page-view' => '517cdfb1',
-    'phabricator-tag-view-css' => 'c0363c26',
+    'phabricator-tag-view-css' => '4c983c74',
     'phabricator-textareautils' => 'b3ec3cfc',
     'phabricator-timeline-view-css' => 'f4f846c4',
     'phabricator-tooltip' => '0a81ea29',
