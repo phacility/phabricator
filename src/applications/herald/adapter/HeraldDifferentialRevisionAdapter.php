@@ -353,7 +353,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
       case self::FIELD_REPOSITORY_PROJECTS:
         $repository = $this->loadRepository();
         if (!$repository) {
-          return null;
+          return array();
         }
         return $repository->getProjectPHIDs();
       case self::FIELD_DIFF_CONTENT:
