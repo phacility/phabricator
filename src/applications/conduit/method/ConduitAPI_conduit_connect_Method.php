@@ -143,7 +143,9 @@ final class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
         throw new ConduitException('ERR-INVALID-CERTIFICATE');
       }
       $session_key = id(new PhabricatorAuthSessionEngine())
-        ->establishSession('conduit', $user->getPHID());
+        ->establishSession(
+          PhabricatorAuthSession::TYPE_CONDUIT,
+          $user->getPHID());
     } else {
       throw new ConduitException('ERR-NO-CERTIFICATE');
     }

@@ -65,7 +65,7 @@ abstract class PhabricatorAuthController extends PhabricatorController {
   protected function loginUser(PhabricatorUser $user) {
 
     $response = $this->buildLoginValidateResponse($user);
-    $session_type = 'web';
+    $session_type = PhabricatorAuthSession::TYPE_WEB;
 
     $event_type = PhabricatorEventType::TYPE_AUTH_WILLLOGINUSER;
     $event_data = array(

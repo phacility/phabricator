@@ -3,6 +3,9 @@
 final class PhabricatorAuthSession extends PhabricatorAuthDAO
   implements PhabricatorPolicyInterface {
 
+  const TYPE_WEB      = 'web';
+  const TYPE_CONDUIT  = 'conduit';
+
   protected $userPHID;
   protected $type;
   protected $sessionKey;

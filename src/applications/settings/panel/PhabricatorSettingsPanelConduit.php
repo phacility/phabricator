@@ -37,7 +37,7 @@ final class PhabricatorSettingsPanelConduit
       $sessions = id(new PhabricatorAuthSessionQuery())
         ->setViewer($user)
         ->withIdentityPHIDs(array($user->getPHID()))
-        ->withSessionTypes(array('conduit'))
+        ->withSessionTypes(array(PhabricatorAuthSession::TYPE_CONDUIT))
         ->execute();
       foreach ($sessions as $session) {
         $session->delete();

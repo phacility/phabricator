@@ -36,7 +36,8 @@ final class PhabricatorAuthSessionEngine extends Phobject {
    * You can configure the maximum number of concurrent sessions for various
    * session types in the Phabricator configuration.
    *
-   * @param   string  Session type, like "web".
+   * @param   const   Session type constant (see
+   *                  @{class:PhabricatorAuthSession}).
    * @param   phid    Identity to establish a session for, usually a user PHID.
    * @return  string  Newly generated session key.
    */
@@ -56,10 +57,10 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
     $session_limit = 1;
     switch ($session_type) {
-      case 'web':
+      case PhabricatorAuthSession::TYPE_WEB:
         $session_limit = PhabricatorEnv::getEnvConfig('auth.sessions.web');
         break;
-      case 'conduit':
+      case PhabricatorAuthSession::TYPE_CONDUIT:
         $session_limit = PhabricatorEnv::getEnvConfig('auth.sessions.conduit');
         break;
       default:

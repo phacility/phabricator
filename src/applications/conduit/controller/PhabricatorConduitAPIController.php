@@ -280,7 +280,7 @@ final class PhabricatorConduitAPIController
     }
 
     $user = id(new PhabricatorAuthSessionEngine())
-      ->loadUserForSession('conduit', $session_key);
+      ->loadUserForSession(PhabricatorAuthSession::TYPE_CONDUIT, $session_key);
 
     if (!$user) {
       return array(
