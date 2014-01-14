@@ -15,12 +15,11 @@ input.phabricator-jump-nav[type='text'] {
 
 .phabricator-jump-nav-caption {
   margin-top: 4px;
-  padding-bottom: 4px;
   font-size: 11px;
   color: {$greytext};
   text-align: left;
 }
 
 .phabricator-jump-nav-container form {
-  padding: 20px;
+  padding: 12px 16px;
 }

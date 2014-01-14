@@ -7,7 +7,7 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => 'dddca4dc',
+    'core.pkg.css' => '5c4061d8',
     'core.pkg.js' => 'c907bd96',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => '827749c1',
@@ -68,7 +68,7 @@ return array(
     'rsrc/css/application/diffusion/commit-view.css' => '92d1e8f9',
     'rsrc/css/application/diffusion/diffusion-icons.css' => '384a0f7d',
     'rsrc/css/application/diffusion/diffusion-source.css' => '66fdf661',
-    'rsrc/css/application/directory/phabricator-jump-nav.css' => 'dfe804e2',
+    'rsrc/css/application/directory/phabricator-jump-nav.css' => 'f0c5e726',
     'rsrc/css/application/feed/feed.css' => '4716c86f',
     'rsrc/css/application/files/global-drag-and-drop.css' => '697324ad',
     'rsrc/css/application/flag/flag.css' => '5337623f',
@@ -684,7 +684,7 @@ return array(
     'phabricator-flag-css' => '5337623f',
     'phabricator-hovercard' => '4f344388',
     'phabricator-hovercard-view-css' => '67c12b16',
-    'phabricator-jump-nav' => 'dfe804e2',
+    'phabricator-jump-nav' => 'f0c5e726',
     'phabricator-keyboard-shortcut' => '1ae869f2',
     'phabricator-keyboard-shortcut-manager' => 'ad7a69ca',
     'phabricator-main-menu-view' => 'aba0b7a6',
