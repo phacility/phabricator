@@ -76,13 +76,6 @@ final class PonderQuestionEditController extends PonderController {
       }
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Form Errors'))
-        ->setErrors($errors);
-    }
-
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->appendChild(
@@ -110,7 +103,7 @@ final class PonderQuestionEditController extends PonderController {
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Ask New Question'))
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();

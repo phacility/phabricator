@@ -30,10 +30,6 @@ final class WaitForPreviousBuildStepImplementation
       return;
     }
 
-    // We are blocked until all previous builds finish.
-    $build->setBuildStatus(HarbormasterBuild::STATUS_WAITING);
-    $build->save();
-
     // Block until all previous builds of the same build plan have
     // finished.
     $plan = $build->getBuildPlan();
@@ -42,13 +38,6 @@ final class WaitForPreviousBuildStepImplementation
     $log_start = null;
     $blockers = $this->getBlockers($object, $plan, $build);
     while (count($blockers) > 0) {
-      if ($build->checkForCancellation()) {
-        if ($log !== null) {
-          $log->finalize($log_start);
-        }
-        return;
-      }
-
       if ($log === null) {
         $log = $build->createLog($build_target, "waiting", "blockers");
         $log_start = $log->start();
@@ -56,16 +45,14 @@ final class WaitForPreviousBuildStepImplementation
 
       $log->append("Blocked by: ".implode(",", $blockers)."\n");
 
+      // TODO: This should fail temporarily instead after setting the target to
+      // waiting, and thereby push the build into a waiting status.
       sleep(1);
       $blockers = $this->getBlockers($object, $plan, $build);
     }
     if ($log !== null) {
       $log->finalize($log_start);
     }
-
-    // Move back into building status.
-    $build->setBuildStatus(HarbormasterBuild::STATUS_BUILDING);
-    $build->save();
   }
 
   private function getBlockers(

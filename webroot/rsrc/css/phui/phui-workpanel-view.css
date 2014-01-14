@@ -56,7 +56,16 @@
   width: 300px;
 }
 
+.phui-workpanel-body .phui-object-item-list-view {
+  min-height: 54px;
+}
+
 .device .aphront-multi-column-outer
   div.aphront-multi-column-column-outer .phui-workpanel-body {
   width: auto;
+}
+
+.project-column-empty {
+  /* TODO: Use this to put some kind of reasonable null state in the columns? */
+  background: {$red};
 }

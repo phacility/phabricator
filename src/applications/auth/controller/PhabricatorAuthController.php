@@ -65,7 +65,7 @@ abstract class PhabricatorAuthController extends PhabricatorController {
   protected function loginUser(PhabricatorUser $user) {
 
     $response = $this->buildLoginValidateResponse($user);
-    $session_type = 'web';
+    $session_type = PhabricatorAuthSession::TYPE_WEB;
 
     $event_type = PhabricatorEventType::TYPE_AUTH_WILLLOGINUSER;
     $event_data = array(
@@ -81,7 +81,8 @@ abstract class PhabricatorAuthController extends PhabricatorController {
 
     $should_login = $event->getValue('shouldLogin');
     if ($should_login) {
-      $session_key = $user->establishSession($session_type);
+      $session_key = id(new PhabricatorAuthSessionEngine())
+        ->establishSession($session_type, $user->getPHID());
 
       // NOTE: We allow disabled users to login and roadblock them later, so
       // there's no check for users being disabled here.

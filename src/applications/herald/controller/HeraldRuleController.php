@@ -118,14 +118,6 @@ final class HeraldRuleController extends HeraldController {
       }
     }
 
-    if ($errors) {
-      $error_view = new AphrontErrorView();
-      $error_view->setTitle(pht('Form Errors'));
-      $error_view->setErrors($errors);
-    } else {
-      $error_view = null;
-    }
-
     $must_match_selector = $this->renderMustMatchSelector($rule);
     $repetition_selector = $this->renderRepetitionSelector($rule, $adapter);
 
@@ -233,7 +225,7 @@ final class HeraldRuleController extends HeraldController {
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     $crumbs = $this

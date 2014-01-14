@@ -80,9 +80,7 @@ final class PhabricatorTagExample extends PhabricatorUIExample {
 
     $intro = id(new PHUIBoxView())
       ->appendChild($intro)
-      ->setShadow(true)
-      ->addPadding(PHUI::PADDING_LARGE)
-      ->addMargin(PHUI::MARGIN_LARGE);
+      ->addPadding(PHUI::PADDING_LARGE);
 
     $header1 = id(new PHUIHeaderView())
       ->setHeader('Colors');
@@ -99,13 +97,7 @@ final class PhabricatorTagExample extends PhabricatorUIExample {
 
     $content1 = id(new PHUIBoxView())
       ->appendChild($tags)
-      ->setShadow(true)
-      ->addPadding(PHUI::PADDING_LARGE)
-      ->addMargin(PHUI::MARGIN_LARGE);
-
-    $header2 = id(new PHUIHeaderView())
-      ->setHeader('Holidays?');
-
+      ->addPadding(PHUI::PADDING_LARGE);
 
     $tags = array();
     $tags[] = id(new PhabricatorTagView())
@@ -131,10 +123,59 @@ final class PhabricatorTagExample extends PhabricatorUIExample {
 
     $content2 = id(new PHUIBoxView())
       ->appendChild($tags)
-      ->setShadow(true)
-      ->addPadding(PHUI::PADDING_LARGE)
-      ->addMargin(PHUI::MARGIN_LARGE);
+      ->addPadding(PHUI::PADDING_LARGE);
 
-    return array($intro, $header1, $content1, $header2, $content2);
+    $icons = array();
+    $icons[] = id(new PhabricatorTagView())
+      ->setType(PhabricatorTagView::TYPE_STATE)
+      ->setBackgroundColor(PhabricatorTagView::COLOR_GREEN)
+      ->setIcon('check-white')
+      ->setName('Passed');
+    $icons[] = hsprintf('<br /><br />');
+    $icons[] = id(new PhabricatorTagView())
+      ->setType(PhabricatorTagView::TYPE_STATE)
+      ->setBackgroundColor(PhabricatorTagView::COLOR_RED)
+      ->setIcon('delete-white')
+      ->setName('Failed');
+    $icons[] = hsprintf('<br /><br />');
+    $icons[] = id(new PhabricatorTagView())
+      ->setType(PhabricatorTagView::TYPE_STATE)
+      ->setBackgroundColor(PhabricatorTagView::COLOR_BLUE)
+      ->setIcon('refresh-white')
+      ->setName('Running');
+    $icons[] = hsprintf('<br /><br />');
+    $icons[] = id(new PhabricatorTagView())
+      ->setType(PhabricatorTagView::TYPE_STATE)
+      ->setBackgroundColor(PhabricatorTagView::COLOR_GREY)
+      ->setIcon('pause-white')
+      ->setName('Paused');
+    $icons[] = hsprintf('<br /><br />');
+    $icons[] = id(new PhabricatorTagView())
+      ->setType(PhabricatorTagView::TYPE_STATE)
+      ->setBackgroundColor(PhabricatorTagView::COLOR_BLACK)
+      ->setIcon('stop-white')
+      ->setName('Stopped');
+
+    $content3 = id(new PHUIBoxView())
+      ->appendChild($icons)
+      ->addPadding(PHUI::PADDING_LARGE);
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText('Inline')
+      ->appendChild($intro);
+
+    $box1 = id(new PHUIObjectBoxView())
+      ->setHeaderText('Colors')
+      ->appendChild($content1);
+
+    $box2 = id(new PHUIObjectBoxView())
+      ->setHeaderText('Holidays')
+      ->appendChild($content2);
+
+    $box3 = id(new PHUIObjectBoxView())
+      ->setHeaderText('Icons')
+      ->appendChild($content3);
+
+    return array($box, $box1, $box2, $box3);
   }
 }

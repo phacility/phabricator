@@ -34,13 +34,14 @@ final class PhabricatorSettingsPanelConduit
           ->setDialog($dialog);
       }
 
-      $conn = $user->establishConnection('w');
-      queryfx(
-        $conn,
-        'DELETE FROM %T WHERE userPHID = %s AND type LIKE %>',
-        PhabricatorUser::SESSION_TABLE,
-        $user->getPHID(),
-        'conduit');
+      $sessions = id(new PhabricatorAuthSessionQuery())
+        ->setViewer($user)
+        ->withIdentityPHIDs(array($user->getPHID()))
+        ->withSessionTypes(array(PhabricatorAuthSession::TYPE_CONDUIT))
+        ->execute();
+      foreach ($sessions as $session) {
+        $session->delete();
+      }
 
       // This implicitly regenerates the certificate.
       $user->setConduitCertificate(null);

@@ -299,13 +299,6 @@ return array(
   'metamta.mail-adapter'        =>
     'PhabricatorMailImplementationPHPMailerLiteAdapter',
 
-  // When email is sent, try to hand it off to the MTA immediately instead of
-  // queueing it for delivery by the daemons. If you are running the Phabricator
-  // daemons with "phd start", you should disable this to provide a (sometimes
-  // substantial) performance boost. It's on by default to make setup and
-  // configuration a little easier.
-  'metamta.send-immediately'    => true,
-
   // When email is sent, what format should Phabricator use for user's
   // email addresses? Valid values are:
   //  - 'short' - 'gwashington <gwashington@example.com>'

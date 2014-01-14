@@ -69,7 +69,9 @@ final class PonderQuestionViewController extends PonderController {
       array(
         'device' => true,
         'title' => 'Q'.$question->getID().' '.$question->getTitle(),
-        'pageObjects' => array($question->getPHID()),
+        'pageObjects' => array_merge(
+          array($question->getPHID()),
+          mpull($question->getAnswers(), 'getPHID')),
       ));
   }
 

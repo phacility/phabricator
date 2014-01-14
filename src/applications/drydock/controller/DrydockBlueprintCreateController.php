@@ -7,6 +7,9 @@ final class DrydockBlueprintCreateController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
+    $this->requireApplicationCapability(
+      DrydockCapabilityCreateBlueprints::CAPABILITY);
+
     $implementations =
       DrydockBlueprintImplementation::getAllBlueprintImplementations();
 
@@ -24,12 +27,6 @@ final class DrydockBlueprintCreateController
         $edit_uri = $this->getApplicationURI('blueprint/edit/?class='.$class);
         return id(new AphrontRedirectResponse())->setURI($edit_uri);
       }
-    }
-
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setErrors($errors);
     }
 
     $control = id(new AphrontFormRadioButtonControl())
@@ -66,7 +63,7 @@ final class DrydockBlueprintCreateController
           ->setValue(pht('Continue')));
 
     $box = id(new PHUIObjectBoxView())
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setHeaderText($title)
       ->setForm($form);
 

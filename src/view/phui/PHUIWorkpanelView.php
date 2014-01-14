@@ -1,11 +1,12 @@
 <?php
 
-final class PHUIWorkpanelView extends AphrontView {
+final class PHUIWorkpanelView extends AphrontTagView {
 
   private $cards = array();
   private $header;
-  private $headerAction;
+  private $editURI;
   private $footerAction;
+  private $headerColor = PhabricatorActionHeaderView::HEADER_GREY;
 
   public function setCards(PHUIObjectItemListView $cards) {
     $this->cards[] = $cards;
@@ -17,9 +18,8 @@ final class PHUIWorkpanelView extends AphrontView {
     return $this;
   }
 
-  public function setHeaderAction($header_action) {
-    // TODO: This doesn't do anything?
-    $this->headerAction = $header_action;
+  public function setEditURI($edit_uri) {
+    $this->editURI = $edit_uri;
     return $this;
   }
 
@@ -28,7 +28,18 @@ final class PHUIWorkpanelView extends AphrontView {
     return $this;
   }
 
-  public function render() {
+  public function setHeaderColor($header_color) {
+    $this->headerColor = $header_color;
+    return $this;
+  }
+
+  public function getTagAttributes() {
+    return array(
+      'class' => 'phui-workpanel-view',
+    );
+  }
+
+  public function getTagContent() {
     require_celerity_resource('phui-workpanel-view-css');
 
     $footer = '';
@@ -45,11 +56,11 @@ final class PHUIWorkpanelView extends AphrontView {
     $header_edit = id(new PHUIIconView())
       ->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS)
       ->setSpriteIcon('settings-grey')
-      ->setHref('#');
+      ->setHref($this->editURI);
 
     $header = id(new PhabricatorActionHeaderView())
       ->setHeaderTitle($this->header)
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_GREY)
+      ->setHeaderColor($this->headerColor)
       ->addAction($header_edit);
 
     $body = phutil_tag(
@@ -70,11 +81,6 @@ final class PHUIWorkpanelView extends AphrontView {
         $footer,
       ));
 
-    return phutil_tag(
-      'div',
-        array(
-          'class' => 'phui-workpanel-view'
-        ),
-        $view);
+    return $view;
   }
 }

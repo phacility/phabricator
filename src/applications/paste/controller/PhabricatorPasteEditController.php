@@ -123,13 +123,6 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
       }
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('A Fatal Omission!'))
-        ->setErrors($errors);
-    }
-
     $form = new AphrontFormView();
 
     $langs = array(
@@ -207,7 +200,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());

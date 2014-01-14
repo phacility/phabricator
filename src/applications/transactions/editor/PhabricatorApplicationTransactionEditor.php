@@ -533,7 +533,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
     if ($this->supportsSearch()) {
       id(new PhabricatorSearchIndexer())
-        ->indexDocumentByPHID($object->getPHID());
+        ->queueDocumentForIndexing($object->getPHID());
     }
 
     if ($this->supportsFeed()) {

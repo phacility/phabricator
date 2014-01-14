@@ -33,13 +33,6 @@ final class DiffusionRepositoryEditLocalController
 
     $title = pht('Edit %s', $repository->getName());
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Form Errors'))
-        ->setErrors($errors);
-    }
-
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->appendRemarkupInstructions(
@@ -61,7 +54,7 @@ final class DiffusionRepositoryEditLocalController
     $object_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setForm($form)
-      ->setFormError($error_view);
+      ->setFormErrors($errors);
 
     return $this->buildApplicationPage(
       array(

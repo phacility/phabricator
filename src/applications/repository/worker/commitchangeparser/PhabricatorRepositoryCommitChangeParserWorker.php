@@ -87,7 +87,7 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
       PhabricatorRepositoryCommit::IMPORTED_CHANGE);
 
     id(new PhabricatorSearchIndexer())
-      ->indexDocumentByPHID($commit->getPHID());
+      ->queueDocumentForIndexing($commit->getPHID());
 
     PhabricatorOwnersPackagePathValidator::updateOwnersPackagePaths($commit);
     if ($this->shouldQueueFollowupTasks()) {

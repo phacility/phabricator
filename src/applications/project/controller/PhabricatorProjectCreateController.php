@@ -67,7 +67,6 @@ final class PhabricatorProjectCreateController
     $error_view = null;
     if ($errors) {
       $error_view = new AphrontErrorView();
-      $error_view->setTitle(pht('Form Errors'));
       $error_view->setErrors($errors);
     }
 
@@ -118,7 +117,7 @@ final class PhabricatorProjectCreateController
 
       $form_box = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('Create New Project'))
-        ->setFormError($error_view)
+        ->setFormErrors($errors)
         ->setForm($form);
 
       return $this->buildApplicationPage(

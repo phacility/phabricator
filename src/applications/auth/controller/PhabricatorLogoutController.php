@@ -23,9 +23,9 @@ final class PhabricatorLogoutController
 
     if ($request->isFormPost()) {
 
-      $log = PhabricatorUserLog::newLog(
+      $log = PhabricatorUserLog::initializeNewLog(
         $user,
-        $user,
+        $user->getPHID(),
         PhabricatorUserLog::ACTION_LOGOUT);
       $log->save();
 
@@ -34,7 +34,13 @@ final class PhabricatorLogoutController
       // try to login again and tell them to clear any junk.
       $phsid = $request->getCookie('phsid');
       if ($phsid) {
-        $user->destroySession($phsid);
+        $session = id(new PhabricatorAuthSessionQuery())
+          ->setViewer($user)
+          ->withSessionKeys(array($phsid))
+          ->executeOne();
+        if ($session) {
+          $session->delete();
+        }
       }
       $request->clearCookie('phsid');
 

@@ -153,10 +153,6 @@ final class PhabricatorAuthEditController
       $issues = array();
     }
 
-    if ($errors) {
-      $errors = id(new AphrontErrorView())->setErrors($errors);
-    }
-
     if ($is_new) {
       $button = pht('Add Provider');
       $crumb = pht('Add Provider');
@@ -302,7 +298,7 @@ final class PhabricatorAuthEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($errors)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return $this->buildApplicationPage(

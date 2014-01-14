@@ -137,17 +137,9 @@ EXAMPLE;
       id(new AphrontFormSubmitControl())
         ->setValue(pht('Save Preferences')));
 
-    $error_view = null;
-    if ($request->getStr('saved') === 'true') {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Preferences Saved'))
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setErrors(array(pht('Your preferences have been saved.')));
-    }
-
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Display Preferences'))
-      ->setFormError($error_view)
+      ->setFormSaved($request->getStr('saved') === 'true')
       ->setForm($form);
 
     return array(

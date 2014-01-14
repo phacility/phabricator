@@ -64,19 +64,24 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     if ($object instanceof PhabricatorRepository) {
       return true;
     }
+    if ($object instanceof PhabricatorProject) {
+      return true;
+    }
     return false;
   }
 
   public function getTriggerObjectPHIDs() {
-    return array(
-      $this->repository->getPHID(),
-      $this->getPHID(),
-    );
+    return array_merge(
+      array(
+        $this->repository->getPHID(),
+        $this->getPHID(),
+      ),
+      $this->repository->getProjectPHIDs());
   }
 
   public function explainValidTriggerObjects() {
     return pht(
-      'This rule can trigger for **repositories**.');
+      'This rule can trigger for **repositories** and **projects**.');
   }
 
   public function getFieldNameMap() {
@@ -95,6 +100,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
         self::FIELD_COMMITTER,
         self::FIELD_REVIEWER,
         self::FIELD_REPOSITORY,
+        self::FIELD_REPOSITORY_PROJECTS,
         self::FIELD_DIFF_FILE,
         self::FIELD_DIFF_CONTENT,
         self::FIELD_DIFF_ADDED_CONTENT,
@@ -175,6 +181,35 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     $object->commitData = $commit_data;
 
     return $object;
+  }
+
+  public function setCommit(PhabricatorRepositoryCommit $commit) {
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
+    $repository = id(new PhabricatorRepositoryQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($commit->getRepositoryID()))
+      ->needProjectPHIDs(true)
+      ->executeOne();
+    if (!$repository) {
+      throw new Exception(pht('Unable to load repository!'));
+    }
+
+    $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
+      'commitID = %d',
+      $commit->getID());
+    if (!$data) {
+      throw new Exception(pht('Unable to load commit data!'));
+    }
+
+    $this->commit = clone $commit;
+    $this->commit->attachRepository($repository);
+    $this->commit->attachCommitData($data);
+
+    $this->repository = $repository;
+    $this->commitData = $data;
+
+    return $this;
   }
 
   public function getPHID() {
@@ -375,6 +410,8 @@ final class HeraldCommitAdapter extends HeraldAdapter {
         return $this->loadAffectedPaths();
       case self::FIELD_REPOSITORY:
         return $this->repository->getPHID();
+      case self::FIELD_REPOSITORY_PROJECTS:
+        return $this->repository->getProjectPHIDs();
       case self::FIELD_DIFF_CONTENT:
         return $this->getDiffContent('*');
       case self::FIELD_DIFF_ADDED_CONTENT:

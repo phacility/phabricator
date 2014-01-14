@@ -126,13 +126,6 @@ final class PhabricatorSettingsPanelSSHKeys
       }
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = new AphrontErrorView();
-      $error_view->setTitle(pht('Form Errors'));
-      $error_view->setErrors($errors);
-    }
-
     $is_new = !$key->getID();
 
     if ($is_new) {
@@ -165,7 +158,7 @@ final class PhabricatorSettingsPanelSSHKeys
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($header)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return $form_box;

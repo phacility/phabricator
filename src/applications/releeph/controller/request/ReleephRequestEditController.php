@@ -204,7 +204,6 @@ final class ReleephRequestEditController extends ReleephProjectController {
     if ($errors) {
       $error_view = new AphrontErrorView();
       $error_view->setErrors($errors);
-      $error_view->setTitle('Form Errors');
     }
 
     $form = id(new AphrontFormView())

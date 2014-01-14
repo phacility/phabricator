@@ -74,13 +74,6 @@ final class PhabricatorMailingListsEditController
       }
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Form Errors'))
-        ->setErrors($errors);
-    }
-
     $form = new AphrontFormView();
     $form->setUser($request->getUser());
     if ($list->getID()) {
@@ -124,7 +117,7 @@ final class PhabricatorMailingListsEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return $this->buildApplicationPage(

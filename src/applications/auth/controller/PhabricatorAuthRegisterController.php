@@ -304,13 +304,6 @@ final class PhabricatorAuthRegisterController
       unset($unguarded);
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = new AphrontErrorView();
-      $error_view->setTitle(pht('Registration Failed'));
-      $error_view->setErrors($errors);
-    }
-
     $form = id(new AphrontFormView())
       ->setUser($request->getUser());
 
@@ -424,7 +417,7 @@ final class PhabricatorAuthRegisterController
     $object_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setForm($form)
-      ->setFormError($error_view);
+      ->setFormErrors($errors);
 
     return $this->buildApplicationPage(
       array(

@@ -37,10 +37,6 @@ final class PhabricatorAuthNewController
       }
     }
 
-    if ($errors) {
-      $errors = id(new AphrontErrorView())->setErrors($errors);
-    }
-
     $options = id(new AphrontFormRadioButtonControl())
       ->setLabel(pht('Provider'))
       ->setName('provider')
@@ -83,7 +79,7 @@ final class PhabricatorAuthNewController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Add Authentication Provider'))
-      ->setFormError($errors)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();

@@ -9,7 +9,7 @@
 }
 
 form.aphront-dialog-view .aphront-error-view {
-  margin: 8px 0;
+  margin: 0 0 12px 0;
 }
 
 .aphront-error-view {
@@ -21,6 +21,10 @@ form.aphront-dialog-view .aphront-error-view {
 
 .device-phone .aphront-error-view {
   margin: 8px;
+}
+
+.aphront-error-view .phui-form-view {
+  padding: 0;
 }
 
 .aphront-error-view-body {

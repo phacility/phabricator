@@ -56,7 +56,10 @@ final class DifferentialCommentMail extends DifferentialMail {
         break;
     }
 
-    if (strlen(trim($comment->getContent()))) {
+    $has_comment = strlen(trim($comment->getContent()));
+    $has_inlines = (bool)$this->getInlineComments();
+
+    if ($has_comment || $has_inlines) {
       switch ($action) {
         case DifferentialAction::ACTION_CLOSE:
           // Commit comments are auto-generated and not especially interesting,
@@ -66,6 +69,10 @@ final class DifferentialCommentMail extends DifferentialMail {
           $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMENT;
           break;
       }
+    }
+
+    if (!$tags) {
+      $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_OTHER;
     }
 
     return $tags;

@@ -116,7 +116,6 @@ final class ReleephProjectEditController extends ReleephProjectController {
     if ($errors) {
       $error_view = new AphrontErrorView();
       $error_view->setErrors($errors);
-      $error_view->setTitle(pht('Form Errors'));
     }
 
     $projects = mpull(

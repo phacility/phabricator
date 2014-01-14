@@ -98,10 +98,6 @@ final class HeraldNewController extends HeraldController {
     $content_type = $request->getStr('content_type');
     $rule_type = $request->getStr('rule_type');
 
-    if ($errors) {
-      $errors = id(new AphrontErrorView())->setErrors($errors);
-    }
-
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->setAction($this->getApplicationURI('new/'));
@@ -203,7 +199,7 @@ final class HeraldNewController extends HeraldController {
           ->addCancelButton($cancel_uri, $cancel_text));
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setFormError($errors)
+      ->setFormErrors($errors)
       ->setHeaderText(pht('Create Herald Rule'))
       ->setForm($form);
 

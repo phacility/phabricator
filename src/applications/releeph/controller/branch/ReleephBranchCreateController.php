@@ -68,7 +68,6 @@ final class ReleephBranchCreateController extends ReleephProjectController {
     if ($errors) {
       $error_view = new AphrontErrorView();
       $error_view->setErrors($errors);
-      $error_view->setTitle(pht('Form Errors'));
     }
 
     $project_id = $releeph_project->getID();

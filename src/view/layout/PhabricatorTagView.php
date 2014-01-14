@@ -30,6 +30,7 @@ final class PhabricatorTagView extends AphrontView {
   private $closed;
   private $external;
   private $id;
+  private $icon;
 
   public function setID($id) {
     $this->id = $id;
@@ -88,6 +89,14 @@ final class PhabricatorTagView extends AphrontView {
     return $this;
   }
 
+  public function setIcon($icon) {
+    $icon_view = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+      ->setSpriteIcon($icon);
+    $this->icon = $icon_view;
+    return $this;
+  }
+
   public function render() {
     if (!$this->type) {
       throw new Exception(pht("You must call setType() before render()!"));
@@ -118,6 +127,13 @@ final class PhabricatorTagView extends AphrontView {
         '');
     } else {
       $dot = null;
+    }
+
+    if ($this->icon) {
+      $icon = $this->icon;
+      $classes[] = 'phabricator-tag-icon-view';
+    } else {
+      $icon = null;
     }
 
     $content = phutil_tag(
@@ -155,7 +171,7 @@ final class PhabricatorTagView extends AphrontView {
           ),
           'target' => $this->external ? '_blank' : null,
         ),
-        array($bar, $content));
+        array($bar, $icon, $content));
     } else {
       return phutil_tag(
         $this->href ? 'a' : 'span',
@@ -165,7 +181,7 @@ final class PhabricatorTagView extends AphrontView {
           'class' => implode(' ', $classes),
           'target' => $this->external ? '_blank' : null,
         ),
-        array($bar, $content));
+        array($bar, $icon, $content));
     }
   }
 

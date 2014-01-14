@@ -700,7 +700,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
       ->publish();
 
     id(new PhabricatorSearchIndexer())
-      ->indexDocumentByPHID($revision->getPHID());
+      ->queueDocumentForIndexing($revision->getPHID());
 
     return $comment;
   }

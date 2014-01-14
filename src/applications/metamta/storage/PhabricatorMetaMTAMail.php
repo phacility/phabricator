@@ -289,25 +289,13 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   }
 
   /**
-   * Save a newly created mail to the database and attempt to send it
-   * immediately if the server is configured for immediate sends. When
-   * applications generate new mail they should generally use this method to
-   * deliver it. If the server doesn't use immediate sends, this has the same
-   * effect as calling save(): the mail will eventually be delivered by the
-   * MetaMTA daemon.
+   * Save a newly created mail to the database. The mail will eventually be
+   * delivered by the MetaMTA daemon.
    *
    * @return this
    */
   public function saveAndSend() {
-    $ret = null;
-
-    if (PhabricatorEnv::getEnvConfig('metamta.send-immediately')) {
-      $ret = $this->sendNow();
-    } else {
-      $ret = $this->save();
-    }
-
-    return $ret;
+    return $this->save();
   }
 
   protected function didWriteData() {

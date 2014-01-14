@@ -35,9 +35,9 @@ final class PhabricatorUserLog extends PhabricatorUserDAO {
   protected $remoteAddr;
   protected $session;
 
-  public static function newLog(
+  public static function initializeNewLog(
     PhabricatorUser $actor = null,
-    PhabricatorUser $user = null,
+    $object_phid,
     $action) {
 
     $log = new PhabricatorUserLog();
@@ -46,15 +46,8 @@ final class PhabricatorUserLog extends PhabricatorUserDAO {
       $log->setActorPHID($actor->getPHID());
     }
 
-    if ($user) {
-      $log->setUserPHID($user->getPHID());
-    } else {
-      $log->setUserPHID('');
-    }
-
-    if ($action) {
-      $log->setAction($action);
-    }
+    $log->setUserPHID((string)$object_phid);
+    $log->setAction($action);
 
     return $log;
   }

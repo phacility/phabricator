@@ -10,6 +10,11 @@ final class PhabricatorProjectColumn
 
   private $project = self::ATTACHABLE;
 
+  public static function initializeNewColumn(PhabricatorUser $user) {
+    return id(new PhabricatorProjectColumn())
+      ->setName('');
+  }
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -28,6 +33,24 @@ final class PhabricatorProjectColumn
 
   public function getProject() {
     return $this->assertAttached($this->project);
+  }
+
+  public function isDefaultColumn() {
+    return ($this->getSequence() == 0);
+  }
+
+  public function getDisplayName() {
+    if ($this->isDefaultColumn()) {
+      return pht('Backlog');
+    }
+    return $this->getName();
+  }
+
+  public function getHeaderColor() {
+    if ($this->isDefaultColumn()) {
+      return PhabricatorActionHeaderView::HEADER_DARK_GREY;
+    }
+    return PhabricatorActionHeaderView::HEADER_GREY;
   }
 
 

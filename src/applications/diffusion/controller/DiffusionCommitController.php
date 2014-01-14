@@ -269,7 +269,7 @@ final class DiffusionCommitController extends DiffusionController {
           ->appendChild(
             pht("This commit is very large. Load each file individually."));
 
-        $change_panel->setFormError($warning_view);
+        $change_panel->setErrorView($warning_view);
         $header->addActionLink($button);
       }
 

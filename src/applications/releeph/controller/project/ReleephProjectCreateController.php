@@ -52,12 +52,6 @@ final class ReleephProjectCreateController extends ReleephProjectController {
       }
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = new AphrontErrorView();
-      $error_view->setErrors($errors);
-    }
-
     $arc_project_options = $this->getArcProjectSelectOptions($arc_projects);
 
     $project_name_input = id(new AphrontFormTextControl())
@@ -110,7 +104,7 @@ final class ReleephProjectCreateController extends ReleephProjectController {
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Create New Project'))
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();

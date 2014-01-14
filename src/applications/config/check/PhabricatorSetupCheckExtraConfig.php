@@ -170,6 +170,8 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
       'celerity.resource-path' => pht(
         'An alternate resource map is no longer supported. Instead, use '.
         'multiple maps. See T4222.'),
+      'metamta.send-immediately' => pht(
+        'Mail is now always delivered by the daemons.'),
     );
 
     return $ancient_config;

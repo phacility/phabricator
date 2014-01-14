@@ -165,7 +165,7 @@ final class PhabricatorCalendarEditStatusController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     $nav = $this->buildSideNavView($status);

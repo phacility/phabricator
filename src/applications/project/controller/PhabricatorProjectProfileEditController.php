@@ -93,13 +93,6 @@ final class PhabricatorProjectProfileEditController
       }
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = new AphrontErrorView();
-      $error_view->setTitle(pht('Form Errors'));
-      $error_view->setErrors($errors);
-    }
-
     $header_name = pht('Edit Project');
     $title = pht('Edit Project');
     $action = '/project/edit/'.$project->getID().'/';
@@ -162,7 +155,7 @@ final class PhabricatorProjectProfileEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView())

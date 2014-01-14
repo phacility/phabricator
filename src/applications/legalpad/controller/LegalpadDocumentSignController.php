@@ -220,7 +220,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Sign and Agree'))
-      ->setFormError($error_view)
+      ->setErrorView($error_view)
       ->setForm($form);
   }
 

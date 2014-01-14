@@ -213,7 +213,7 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
     $document->attachContent($new_content);
 
     id(new PhabricatorSearchIndexer())
-      ->indexDocumentByPHID($document->getPHID());
+      ->queueDocumentForIndexing($document->getPHID());
 
     // Stub out empty parent documents if they don't exist
     $ancestral_slugs = PhabricatorSlug::getAncestry($document->getSlug());

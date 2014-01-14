@@ -3,13 +3,30 @@
 final class DrydockBlueprint extends DrydockDAO
   implements PhabricatorPolicyInterface {
 
-  protected $phid;
   protected $className;
+  protected $blueprintName;
   protected $viewPolicy;
   protected $editPolicy;
-  protected $details;
+  protected $details = array();
 
   private $implementation = self::ATTACHABLE;
+
+  public static function initializeNewBlueprint(PhabricatorUser $actor) {
+    $app = id(new PhabricatorApplicationQuery())
+      ->setViewer($actor)
+      ->withClasses(array('PhabricatorApplicationDrydock'))
+      ->executeOne();
+
+    $view_policy = $app->getPolicy(
+      DrydockCapabilityDefaultView::CAPABILITY);
+    $edit_policy = $app->getPolicy(
+      DrydockCapabilityDefaultEdit::CAPABILITY);
+
+    return id(new DrydockBlueprint())
+      ->setViewPolicy($view_policy)
+      ->setEditPolicy($edit_policy)
+      ->setBlueprintName('');
+  }
 
   public function getConfiguration() {
     return array(
@@ -62,19 +79,10 @@ final class DrydockBlueprint extends DrydockDAO
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    switch ($capability) {
-      case PhabricatorPolicyCapability::CAN_VIEW:
-      case PhabricatorPolicyCapability::CAN_EDIT:
-        return $viewer->getIsAdmin();
-    }
+    return false;
   }
 
   public function describeAutomaticCapability($capability) {
-    switch ($capability) {
-      case PhabricatorPolicyCapability::CAN_VIEW:
-        return pht('Administrators can always view blueprints.');
-      case PhabricatorPolicyCapability::CAN_EDIT:
-        return pht('Administrators can always edit blueprints.');
-    }
+    return null;
   }
 }

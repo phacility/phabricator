@@ -1,9 +1,14 @@
 <?php
 
-/**
- * @group search
- */
 final class PhabricatorSearchIndexer {
+
+  public function queueDocumentForIndexing($phid) {
+    PhabricatorWorker::scheduleTask(
+      'PhabricatorSearchWorker',
+      array(
+        'documentPHID' => $phid,
+      ));
+  }
 
   public function indexDocumentByPHID($phid) {
     $doc_indexer_symbols = id(new PhutilSymbolLoader())

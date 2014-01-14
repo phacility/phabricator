@@ -35,7 +35,6 @@ final class PhabricatorCountdownEditController
       $countdown = PhabricatorCountdown::initializeNewCountdown($user);
     }
 
-    $error_view = null;
     $e_text = true;
     $e_epoch = null;
 
@@ -71,11 +70,6 @@ final class PhabricatorCountdownEditController
         $countdown->save();
         return id(new AphrontRedirectResponse())
           ->setURI('/countdown/'.$countdown->getID().'/');
-      } else {
-        $error_view = id(new AphrontErrorView())
-          ->setErrors($errors)
-          ->setTitle(pht('It\'s not The Final Countdown (du nu nuuu nun)' .
-            ' until you fix these problem'));
       }
     }
 
@@ -135,7 +129,7 @@ final class PhabricatorCountdownEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return $this->buildApplicationPage(
