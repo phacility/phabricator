@@ -26,7 +26,6 @@ final class PHUITagView extends AphrontView {
   private $phid;
   private $backgroundColor;
   private $dotColor;
-  private $barColor;
   private $closed;
   private $external;
   private $id;
@@ -51,11 +50,6 @@ final class PHUITagView extends AphrontView {
         $this->setBackgroundColor(self::COLOR_PERSON);
         break;
     }
-    return $this;
-  }
-
-  public function setBarColor($bar_color) {
-    $this->barColor = $bar_color;
     return $this;
   }
 
@@ -143,19 +137,6 @@ final class PHUITagView extends AphrontView {
       ),
       array($dot, $this->name));
 
-    if ($this->barColor) {
-      $barcolor = 'phui-tag-color-'.$this->barColor;
-      $bar = phutil_tag(
-        'span',
-        array(
-          'class' => 'phui-tag-bar '.$barcolor,
-        ),
-        '');
-      $classes[] = 'phui-tag-view-has-bar';
-    } else {
-      $bar = null;
-    }
-
     if ($this->phid) {
       Javelin::initBehavior('phabricator-hovercards');
 
@@ -171,7 +152,7 @@ final class PHUITagView extends AphrontView {
           ),
           'target' => $this->external ? '_blank' : null,
         ),
-        array($bar, $icon, $content));
+        array($icon, $content));
     } else {
       return phutil_tag(
         $this->href ? 'a' : 'span',
@@ -181,7 +162,7 @@ final class PHUITagView extends AphrontView {
           'class' => implode(' ', $classes),
           'target' => $this->external ? '_blank' : null,
         ),
-        array($bar, $icon, $content));
+        array($icon, $content));
     }
   }
 

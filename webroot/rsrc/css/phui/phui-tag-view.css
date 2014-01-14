@@ -39,21 +39,15 @@ a.phui-tag-view:hover {
   padding-left: 22px;
 }
 
-.phui-tag-view-has-bar .phui-tag-core {
-  border-radius: 0 3px 3px 0;
-  border-width: 1px 1px 1px 0;
-}
-
 .phui-tag-dot {
   position: relative;
   display: inline-block;
   width: 6px;
   height: 6px;
-  margin-right: 3px;
+  margin-right: 4px;
   top: -1px;
   border-radius: 6px;
   border: 1px solid transparent;
-  box-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
 }
 
 .phui-tag-type-state {
@@ -140,12 +134,4 @@ a.phui-tag-view:hover
 a.phui-tag-view:hover
   .phui-tag-core.phui-tag-color-object {
   border-color: #d7d7d7;
-}
-
-.phui-tag-bar {
-  padding-left: 4px;
-  border-width: 1px;
-  border-style: solid;
-  border-right-color: rgba(0, 0, 0, 0.33);
-  border-radius: 2px 0 0 2px;
 }

@@ -69,7 +69,6 @@ final class PHUITagExample extends PhabricatorUIExample {
     $intro[] = id(new PHUITagView())
       ->setType(PHUITagView::TYPE_OBJECT)
       ->setName('T123: Water The Dog')
-      ->setBarColor(PHUITagView::COLOR_RED)
       ->setHref('#');
     $intro[] = ' -- that task is ';
     $intro[] = id(new PHUITagView())
