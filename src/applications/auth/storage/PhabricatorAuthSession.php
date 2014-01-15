@@ -15,7 +15,6 @@ final class PhabricatorAuthSession extends PhabricatorAuthDAO
 
   public function getConfiguration() {
     return array(
-      self::CONFIG_IDS => self::IDS_MANUAL,
       self::CONFIG_TIMESTAMPS => false,
     ) + parent::getConfiguration();
   }
@@ -37,17 +36,6 @@ final class PhabricatorAuthSession extends PhabricatorAuthDAO
 
   public function getIdentityObject() {
     return $this->assertAttached($this->identityObject);
-  }
-
-  public function delete() {
-    // TODO: We don't have a proper `id` column yet, so make this work as
-    // expected until we do.
-    queryfx(
-      $this->establishConnection('w'),
-      'DELETE FROM %T WHERE sessionKey = %s',
-      $this->getTableName(),
-      $this->getSessionKey());
-    return $this;
   }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
