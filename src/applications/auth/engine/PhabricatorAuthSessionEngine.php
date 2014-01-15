@@ -5,11 +5,15 @@ final class PhabricatorAuthSessionEngine extends Phobject {
   public function loadUserForSession($session_type, $session_key) {
     $session_table = new PhabricatorAuthSession();
     $user_table = new PhabricatorUser();
-    $conn_r = $session_table->establishConnection('w');
+    $conn_r = $session_table->establishConnection('r');
+
+    // NOTE: We're being clever here because this happens on every page load,
+    // and by joining we can save a query.
 
     $info = queryfx_one(
       $conn_r,
-      'SELECT u.* FROM %T u JOIN %T s ON u.phid = s.userPHID
+      'SELECT s.sessionExpires AS _sessionExpires, s.id AS _sessionID, u.*
+        FROM %T u JOIN %T s ON u.phid = s.userPHID
         AND s.type LIKE %> AND s.sessionKey = %s',
       $user_table->getTableName(),
       $session_table->getTableName(),
@@ -18,6 +22,29 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
     if (!$info) {
       return null;
+    }
+
+    $expires = $info['_sessionExpires'];
+    $id = $info['_sessionID'];
+    unset($info['_sessionExpires']);
+    unset($info['_sessionID']);
+
+    $ttl = PhabricatorAuthSession::getSessionTypeTTL($session_type);
+
+    // If more than 20% of the time on this session has been used, refresh the
+    // TTL back up to the full duration. The idea here is that sessions are
+    // good forever if used regularly, but get GC'd when they fall out of use.
+
+    if (time() + (0.80 * $ttl) > $expires) {
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $conn_w = $session_table->establishConnection('w');
+        queryfx(
+          $conn_w,
+          'UPDATE %T SET sessionExpires = UNIX_TIMESTAMP() + %d WHERE id = %d',
+          $session_table->getTableName(),
+          $ttl,
+          $id);
+      unset($unguarded);
     }
 
     return $user_table->loadFromArray($info);
@@ -84,6 +111,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     // Consume entropy to generate a new session key, forestalling the eventual
     // heat death of the universe.
     $session_key = Filesystem::readRandomCharacters(40);
+    $session_ttl = PhabricatorAuthSession::getSessionTypeTTL($session_type);
 
     // Load all the currently active sessions.
     $sessions = queryfx_all(
@@ -119,12 +147,14 @@ final class PhabricatorAuthSessionEngine extends Phobject {
           // care if we race here or not.
           queryfx(
             $conn_w,
-            'INSERT IGNORE INTO %T (userPHID, type, sessionKey, sessionStart)
-              VALUES (%s, %s, %s, 0)',
+            'INSERT IGNORE INTO %T
+              (userPHID, type, sessionKey, sessionStart, sessionExpires)
+              VALUES (%s, %s, %s, 0, UNIX_TIMESTAMP() + %d)',
             $session_table->getTableName(),
             $identity_phid,
             $establish_type,
-            PhabricatorHash::digest($session_key));
+            PhabricatorHash::digest($session_key),
+            $session_ttl);
           break;
         }
       }
@@ -144,10 +174,12 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
       queryfx(
         $conn_w,
-        'UPDATE %T SET sessionKey = %s, sessionStart = UNIX_TIMESTAMP()
+        'UPDATE %T SET sessionKey = %s, sessionStart = UNIX_TIMESTAMP(),
+            sessionExpires = UNIX_TIMESTAMP() + %d
           WHERE userPHID = %s AND type = %s AND sessionKey = %s',
         $session_table->getTableName(),
         PhabricatorHash::digest($session_key),
+        $session_ttl,
         $identity_phid,
         $establish_type,
         $expect_key);

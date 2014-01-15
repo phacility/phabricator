@@ -60,6 +60,7 @@ final class PhabricatorSettingsPanelSessions
         substr($session->getSessionKey(), 0, 12),
         $session->getType(),
         phabricator_datetime($session->getSessionStart(), $viewer),
+        phabricator_datetime($session->getSessionExpires(), $viewer),
       );
     }
 
@@ -72,12 +73,14 @@ final class PhabricatorSettingsPanelSessions
         pht('Session'),
         pht('Type'),
         pht('Created'),
+        pht('Expires'),
       ));
     $table->setColumnClasses(
       array(
         'wide',
         'n',
         '',
+        'right',
         'right',
       ));
 
