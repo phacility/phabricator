@@ -10,7 +10,7 @@ $args = new PhutilArgumentParser($argv);
 $args->setTagline('manage daemons');
 $args->setSynopsis(<<<EOSYNOPSIS
 **phd** __command__ [__options__]
-    Manage Phabricator daeons.
+    Manage Phabricator daemons.
 
 EOSYNOPSIS
   );
