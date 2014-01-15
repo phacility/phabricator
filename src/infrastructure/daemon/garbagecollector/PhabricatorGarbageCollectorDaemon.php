@@ -9,8 +9,11 @@
 final class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
 
   public function run() {
+    $collectors = id(new PhutilSymbolLoader())
+      ->setAncestorClass('PhabricatorGarbageCollector')
+      ->loadObjects();
+
     do {
-      $n_herald = $this->collectHeraldTranscripts();
       $n_daemon = $this->collectDaemonLogs();
       $n_parse  = $this->collectParseCaches();
       $n_markup = $this->collectMarkupCaches();
@@ -22,7 +25,6 @@ final class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
       $n_ccons  = $this->collectExpiredConduitConnections();
 
       $collected = array(
-        'Herald Transcript'           => $n_herald,
         'Daemon Log'                  => $n_daemon,
         'Differential Parse Cache'    => $n_parse,
         'Markup Cache'                => $n_markup,
@@ -41,6 +43,32 @@ final class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
       }
 
       $total = array_sum($collected);
+
+      // TODO: This logic is unnecessarily complex for now to facilitate a
+      // gradual conversion to the new GC infrastructure.
+
+      $had_more_garbage = false;
+      foreach ($collectors as $name => $collector) {
+        $more_garbage = false;
+        do {
+          if ($more_garbage) {
+            $this->log(pht('Collecting more garbage with "%s".', $name));
+          } else {
+            $this->log(pht('Collecting garbage with "%s".', $name));
+          }
+
+          $more_garbage = $collector->collectGarbage();
+          if ($more_garbage) {
+            $had_more_garbage = true;
+          }
+          $this->stillWorking();
+        } while ($more_garbage);
+      }
+
+      if ($had_more_garbage) {
+        $total += 100;
+      }
+
       if ($total < 100) {
         // We didn't max out any of the GCs so we're basically caught up. Ease
         // off the GC loop so we don't keep doing table scans just to delete
@@ -51,31 +79,6 @@ final class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
       }
     } while (true);
 
-  }
-
-  private function collectHeraldTranscripts() {
-    $ttl = PhabricatorEnv::getEnvConfig('gcdaemon.ttl.herald-transcripts');
-    if ($ttl <= 0) {
-      return 0;
-    }
-
-    $table = new HeraldTranscript();
-    $conn_w = $table->establishConnection('w');
-
-    queryfx(
-      $conn_w,
-      'UPDATE %T SET
-          objectTranscript     = "",
-          ruleTranscripts      = "",
-          conditionTranscripts = "",
-          applyTranscripts     = "",
-          garbageCollected     = 1
-        WHERE garbageCollected = 0 AND `time` < %d
-        LIMIT 100',
-      $table->getTableName(),
-      time() - $ttl);
-
-    return $conn_w->getAffectedRows();
   }
 
   private function collectDaemonLogs() {
