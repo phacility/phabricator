@@ -841,6 +841,21 @@
       "rule" : ".icons-octocat-white, .device-desktop .phabricator-action-view:hover .icons-octocat, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-octocat",
       "hash" : "bda54b23d423de7b35a964ce9fdea4f2"
     },
+    "icons-ok"                            : {
+      "name" : "icons-ok",
+      "rule" : ".icons-ok",
+      "hash" : "6b2617f884e0d2ccb86dcef002d589ba"
+    },
+    "icons-ok-grey"                       : {
+      "name" : "icons-ok-grey",
+      "rule" : ".icons-ok-grey",
+      "hash" : "9cfda8cc4cb2dbca5f99a24efa5705a3"
+    },
+    "icons-ok-white"                      : {
+      "name" : "icons-ok-white",
+      "rule" : ".icons-ok-white, .device-desktop .phabricator-action-view:hover .icons-ok, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-ok",
+      "hash" : "cabecea04bc54ca57214fa53f6eb5118"
+    },
     "icons-pause"                         : {
       "name" : "icons-pause",
       "rule" : ".icons-pause",

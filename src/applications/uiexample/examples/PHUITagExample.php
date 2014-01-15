@@ -125,7 +125,7 @@ final class PHUITagExample extends PhabricatorUIExample {
     $icons[] = id(new PHUITagView())
       ->setType(PHUITagView::TYPE_STATE)
       ->setBackgroundColor(PHUITagView::COLOR_GREEN)
-      ->setIcon('check-white')
+      ->setIcon('ok-white')
       ->setName('Passed');
     $icons[] = hsprintf('<br /><br />');
     $icons[] = id(new PHUITagView())
@@ -137,7 +137,7 @@ final class PHUITagExample extends PhabricatorUIExample {
     $icons[] = id(new PHUITagView())
       ->setType(PHUITagView::TYPE_STATE)
       ->setBackgroundColor(PHUITagView::COLOR_BLUE)
-      ->setIcon('refresh-white')
+      ->setIcon('play-white')
       ->setName('Running');
     $icons[] = hsprintf('<br /><br />');
     $icons[] = id(new PHUITagView())
