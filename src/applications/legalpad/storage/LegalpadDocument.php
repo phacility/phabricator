@@ -61,6 +61,10 @@ final class LegalpadDocument extends LegalpadDAO
     return parent::save();
   }
 
+  public function getMonogram() {
+    return 'L'.$this->getID();
+  }
+
 /* -(  PhabricatorSubscribableInterface Implementation  )-------------------- */
 
   public function isAutomaticallySubscribed($phid) {
