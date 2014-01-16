@@ -557,6 +557,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return true;
     }
 
+    // TODO: Remove this eventually, it's no longer written to by the import
+    // pipeline (however, old tasks may still be queued which don't reflect
+    // the new data format).
     $branches = $data->getCommitDetail('seenOnBranches', array());
     foreach ($branches as $branch) {
       if ($this->shouldAutocloseBranch($branch)) {

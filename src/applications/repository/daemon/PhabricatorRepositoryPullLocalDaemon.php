@@ -246,7 +246,7 @@ final class PhabricatorRepositoryPullLocalDaemon
           $repository,
           $ref->getIdentifier(),
           $ref->getEpoch(),
-          $ref->getBranch());
+          $close_immediately = true);
       }
     }
 
@@ -319,56 +319,21 @@ final class PhabricatorRepositoryPullLocalDaemon
     return true;
   }
 
-  private function isKnownCommitOnAnyAutocloseBranch(
-    PhabricatorRepository $repository,
-    $target) {
-
-    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-      'repositoryID = %d AND commitIdentifier = %s',
-      $repository->getID(),
-      $target);
-
-    if (!$commit) {
-      $callsign = $repository->getCallsign();
-
-      $console = PhutilConsole::getConsole();
-      $console->writeErr(
-        "WARNING: Repository '%s' is missing commits ('%s' is missing from ".
-        "history). Run '%s' to repair the repository.\n",
-        $callsign,
-        $target,
-        "bin/repository discover --repair {$callsign}");
-
-      return false;
-    }
-
-    $data = $commit->loadCommitData();
-    if (!$data) {
-      return false;
-    }
-
-    if ($repository->shouldAutocloseCommit($commit, $data)) {
-      return true;
-    }
-
-    return false;
-  }
-
   private function recordCommit(
     PhabricatorRepository $repository,
     $commit_identifier,
     $epoch,
-    $branch = null) {
+    $close_immediately) {
 
     $commit = new PhabricatorRepositoryCommit();
     $commit->setRepositoryID($repository->getID());
     $commit->setCommitIdentifier($commit_identifier);
     $commit->setEpoch($epoch);
+    if ($close_immediately) {
+      $commit->setImportStatus(PhabricatorRepositoryCommit::IMPORTED_CLOSEABLE);
+    }
 
     $data = new PhabricatorRepositoryCommitData();
-    if ($branch) {
-      $data->setCommitDetail('seenOnBranches', array($branch));
-    }
 
     try {
       $commit->openTransaction();
@@ -417,43 +382,6 @@ final class PhabricatorRepositoryPullLocalDaemon
       // in a good state if we ignore the failure.
       $this->setCache($repository, $commit_identifier);
     }
-  }
-
-  private function updateCommit(
-    PhabricatorRepository $repository,
-    $commit_identifier,
-    $branch) {
-
-    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-      'repositoryID = %d AND commitIdentifier = %s',
-      $repository->getID(),
-      $commit_identifier);
-
-    if (!$commit) {
-      // This can happen if the phabricator DB doesn't have the commit info,
-      // or the commit is so big that phabricator couldn't parse it. In this
-      // case we just ignore it.
-      return;
-    }
-
-    $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
-      'commitID = %d',
-      $commit->getID());
-    if (!$data) {
-      $data = new PhabricatorRepositoryCommitData();
-      $data->setCommitID($commit->getID());
-    }
-    $branches = $data->getCommitDetail('seenOnBranches', array());
-    $branches[] = $branch;
-    $data->setCommitDetail('seenOnBranches', $branches);
-    $data->save();
-
-    $this->insertTask(
-      $repository,
-      $commit,
-      array(
-        'only' => true
-      ));
   }
 
   private function insertTask(
@@ -566,6 +494,8 @@ final class PhabricatorRepositoryPullLocalDaemon
       return;
     }
 
+    $branches = $this->sortBranches($repository, $branches);
+
     $callsign = $repository->getCallsign();
 
     $tracked_something = false;
@@ -586,7 +516,10 @@ final class PhabricatorRepositoryPullLocalDaemon
       }
 
       $this->log("Looking for new commits.");
-      $this->executeGitDiscoverCommit($repository, $commit, $name, false);
+      $this->executeGitDiscoverCommit(
+        $repository,
+        $commit,
+        $repository->shouldAutocloseBranch($name));
     }
 
     if (!$tracked_something) {
@@ -596,31 +529,29 @@ final class PhabricatorRepositoryPullLocalDaemon
         "Repository r{$repo_callsign} '{$repo_name}' has no tracked branches! ".
         "Verify that your branch filtering settings are correct.");
     }
-
-
-    $this->log("Discovering commits on autoclose branches...");
-    foreach ($branches as $name => $commit) {
-      $this->log("Examining branch '{$name}', at {$commit}'.");
-      if (!$repository->shouldTrackBranch($name)) {
-        $this->log("Skipping, branch is untracked.");
-        continue;
-      }
-
-      if (!$repository->shouldAutocloseBranch($name)) {
-        $this->log("Skipping, branch is not autoclose.");
-        continue;
-      }
-
-      if ($this->isKnownCommitOnAnyAutocloseBranch($repository, $commit)) {
-        $this->log("Skipping, commit is known on an autoclose branch.");
-        continue;
-      }
-
-      $this->log("Looking for new autoclose commits.");
-      $this->executeGitDiscoverCommit($repository, $commit, $name, true);
-    }
   }
 
+  /**
+   * Sort branches so we process closeable branches first. This makes the
+   * whole import process a little cheaper, since we can close these commits
+   * the first time through rather than catching them in the refs step.
+   */
+  private function sortBranches(
+    PhabricatorRepository $repository,
+    array $branches) {
+
+    $head_branches = array();
+    $tail_branches = array();
+    foreach ($branches as $name => $commit) {
+      if ($repository->shouldAutocloseBranch($name)) {
+        $head_branches[$name] = $commit;
+      } else {
+        $tail_branches[$name] = $commit;
+      }
+    }
+
+    return $head_branches + $tail_branches;
+  }
 
 
   /**
@@ -629,8 +560,7 @@ final class PhabricatorRepositoryPullLocalDaemon
   private function executeGitDiscoverCommit(
     PhabricatorRepository $repository,
     $commit,
-    $branch,
-    $autoclose) {
+    $close_immediately) {
 
     $discover = array($commit);
     $insert = array($commit);
@@ -651,15 +581,9 @@ final class PhabricatorRepositoryPullLocalDaemon
           continue;
         }
         $seen_parent[$parent] = true;
-        if ($autoclose) {
-          $known = $this->isKnownCommitOnAnyAutocloseBranch(
-            $repository,
-            $parent);
-        } else {
-          $known = $this->isKnownCommit($repository, $parent);
-        }
+        $known = $this->isKnownCommit($repository, $parent);
         if (!$known) {
-          $this->log("Discovered commit '{$parent}'.");
+          $this->log(pht('Discovered commit "%s".', $parent));
           $discover[] = $parent;
           $insert[] = $parent;
         }
@@ -670,22 +594,14 @@ final class PhabricatorRepositoryPullLocalDaemon
     }
 
     $n = count($insert);
-    if ($autoclose) {
-      $this->log("Found {$n} new autoclose commits on branch '{$branch}'.");
-    } else {
-      $this->log("Found {$n} new commits on branch '{$branch}'.");
-    }
+    $this->log(pht('Found %d new commits.', new PhutilNumber($n)));
 
     while (true) {
       $target = array_pop($insert);
       $epoch = $stream->getCommitDate($target);
       $epoch = trim($epoch);
 
-      if ($autoclose) {
-        $this->updateCommit($repository, $target, $branch);
-      } else {
-        $this->recordCommit($repository, $target, $epoch, $branch);
-      }
+      $this->recordCommit($repository, $target, $epoch, $close_immediately);
 
       if (empty($insert)) {
         break;

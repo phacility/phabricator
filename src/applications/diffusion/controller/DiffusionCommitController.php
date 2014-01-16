@@ -348,10 +348,8 @@ final class DiffusionCommitController extends DiffusionController {
       $change_list->setRenderURI('/diffusion/'.$callsign.'/diff/');
       $change_list->setRepository($repository);
       $change_list->setUser($user);
-      // pick the first branch for "Browse in Diffusion" View Option
-      $branches     = $commit_data->getCommitDetail('seenOnBranches', array());
-      $first_branch = reset($branches);
-      $change_list->setBranch($first_branch);
+
+      // TODO: Try to setBranch() to something reasonable here?
 
       $change_list->setStandaloneURI(
         '/diffusion/'.$callsign.'/diff/');
