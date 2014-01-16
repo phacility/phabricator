@@ -43,13 +43,9 @@ final class PhabricatorRepositoryDiscoveryEngine
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         $refs = $this->discoverMercurialCommits();
         break;
-/*
-  TODO: Implement this!
-
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $refs = $this->discoverGitCommits();
         break;
-*/
       default:
         throw new Exception("Unknown VCS '{$vcs}'!");
     }
@@ -60,6 +56,157 @@ final class PhabricatorRepositoryDiscoveryEngine
     }
 
     return $refs;
+  }
+
+
+/* -(  Discovering Git Repositories  )--------------------------------------- */
+
+
+  /**
+   * @task git
+   */
+  private function discoverGitCommits() {
+    $repository = $this->getRepository();
+
+    if (!$repository->isHosted()) {
+      $this->verifyGitOrigin($repository);
+    }
+
+    $branches = id(new DiffusionLowLevelGitRefQuery())
+      ->setRepository($repository)
+      ->withIsOriginBranch(true)
+      ->execute();
+
+    if (!$branches) {
+      // This repository has no branches at all, so we don't need to do
+      // anything. Generally, this means the repository is empty.
+      return array();
+    }
+
+    $branches = $this->sortBranches($branches);
+    $branches = mpull($branches, 'getCommitIdentifier', 'getShortName');
+
+    $this->log(
+      pht(
+        'Discovering commits in repository %s.',
+        $repository->getCallsign()));
+
+    $refs = array();
+    foreach ($branches as $name => $commit) {
+      $this->log(pht('Examining branch "%s", at "%s".', $name, $commit));
+
+      if (!$repository->shouldTrackBranch($name)) {
+        $this->log(pht("Skipping, branch is untracked."));
+        continue;
+      }
+
+      if ($this->isKnownCommit($commit)) {
+        $this->log(pht("Skipping, HEAD is known."));
+        continue;
+      }
+
+      $this->log(pht("Looking for new commits."));
+
+      $refs[] = $this->discoverStreamAncestry(
+        new PhabricatorGitGraphStream($repository, $commit),
+        $commit,
+        $repository->shouldAutocloseBranch($name));
+    }
+
+    return array_mergev($refs);
+  }
+
+
+  /**
+   * Verify that the "origin" remote exists, and points at the correct URI.
+   *
+   * This catches or corrects some types of misconfiguration, and also repairs
+   * an issue where Git 1.7.1 does not create an "origin" for `--bare` clones.
+   * See T4041.
+   *
+   * @param   PhabricatorRepository Repository to verify.
+   * @return  void
+   */
+  private function verifyGitOrigin(PhabricatorRepository $repository) {
+    list($remotes) = $repository->execxLocalCommand(
+      'remote show -n origin');
+
+    $matches = null;
+    if (!preg_match('/^\s*Fetch URL:\s*(.*?)\s*$/m', $remotes, $matches)) {
+      throw new Exception(
+        "Expected 'Fetch URL' in 'git remote show -n origin'.");
+    }
+
+    $remote_uri = $matches[1];
+    $expect_remote = $repository->getRemoteURI();
+
+    if ($remote_uri == "origin") {
+      // If a remote does not exist, git pretends it does and prints out a
+      // made up remote where the URI is the same as the remote name. This is
+      // definitely not correct.
+
+      // Possibly, we should use `git remote --verbose` instead, which does not
+      // suffer from this problem (but is a little more complicated to parse).
+      $valid = false;
+      $exists = false;
+    } else {
+      $normal_type_git = PhabricatorRepositoryURINormalizer::TYPE_GIT;
+
+      $remote_normal = id(new PhabricatorRepositoryURINormalizer(
+        $normal_type_git,
+        $remote_uri))->getNormalizedPath();
+
+      $expect_normal = id(new PhabricatorRepositoryURINormalizer(
+        $normal_type_git,
+        $expect_remote))->getNormalizedPath();
+
+      $valid = ($remote_normal == $expect_normal);
+      $exists = true;
+    }
+
+    if (!$valid) {
+      if (!$exists) {
+        // If there's no "origin" remote, just create it regardless of how
+        // strongly we own the working copy. There is almost no conceivable
+        // scenario in which this could do damage.
+        $this->log(
+          pht(
+            'Remote "origin" does not exist. Creating "origin", with '.
+            'URI "%s".',
+            $expect_remote));
+        $repository->execxLocalCommand(
+          'remote add origin %P',
+          $repository->getRemoteURIEnvelope());
+
+        // NOTE: This doesn't fetch the origin (it just creates it), so we won't
+        // know about origin branches until the next "pull" happens. That's fine
+        // for our purposes, but might impact things in the future.
+      } else {
+        if ($repository->canDestroyWorkingCopy()) {
+          // Bad remote, but we can try to repair it.
+          $this->log(
+            pht(
+              'Remote "origin" exists, but is pointed at the wrong URI, "%s". '.
+              'Resetting origin URI to "%s.',
+              $remote_uri,
+              $expect_remote));
+          $repository->execxLocalCommand(
+            'remote set-url origin %P',
+            $repository->getRemoteURIEnvelope());
+        } else {
+          // Bad remote and we aren't comfortable repairing it.
+          $message = pht(
+            'Working copy at "%s" has a mismatched origin URI, "%s". '.
+            'The expected origin URI is "%s". Fix your configuration, or '.
+            'set the remote URI correctly. To avoid breaking anything, '.
+            'Phabricator will not automatically fix this.',
+            $repository->getLocalPath(),
+            $remote_uri,
+            $expect_remote);
+          throw new Exception($message);
+        }
+      }
+    }
   }
 
 
@@ -108,7 +255,8 @@ final class PhabricatorRepositoryDiscoveryEngine
         $epoch = (int)strtotime((string)$entry->date[0]);
         $refs[$identifier] = id(new PhabricatorRepositoryCommitRef())
           ->setIdentifier($identifier)
-          ->setEpoch($epoch);
+          ->setEpoch($epoch)
+          ->setCanCloseImmediately(true);
 
         if ($upper_bound === null) {
           $upper_bound = $identifier;
@@ -147,41 +295,48 @@ final class PhabricatorRepositoryDiscoveryEngine
     $branches = id(new DiffusionLowLevelMercurialBranchesQuery())
       ->setRepository($repository)
       ->execute();
-    $branches = mpull($branches, 'getHeadCommitIdentifier', 'getName');
 
     $refs = array();
-    foreach ($branches as $name => $commit) {
-      $this->log("Examining branch '{$name}', at {$commit}'.");
+    foreach ($branches as $branch) {
+      // NOTE: Mercurial branches may have multiple heads, so the names may
+      // not be unique.
+      $name = $branch->getShortName();
+      $commit = $branch->getCommitIdentifier();
+
+      $this->log(pht('Examining branch "%s" head "%s".', $name, $commit));
       if (!$repository->shouldTrackBranch($name)) {
-        $this->log("Skipping, branch is untracked.");
+        $this->log(pht("Skipping, branch is untracked."));
         continue;
       }
 
       if ($this->isKnownCommit($commit)) {
-        $this->log("Skipping, tip is a known commit.");
+        $this->log(pht("Skipping, this head is a known commit."));
         continue;
       }
 
-      $this->log("Looking for new commits.");
-      $refs[] = $this->discoverMercurialAncestry($repository, $commit);
+      $this->log(pht("Looking for new commits."));
+
+      $refs[] = $this->discoverStreamAncestry(
+        new PhabricatorMercurialGraphStream($repository, $commit),
+        $commit,
+        $close_immediately = true);
     }
 
     return array_mergev($refs);
   }
 
 
-  /**
-   * @task hg
-   */
-  private function discoverMercurialAncestry(
-    PhabricatorRepository $repository,
-    $commit) {
+/* -(  Internals  )---------------------------------------------------------- */
+
+
+  private function discoverStreamAncestry(
+    PhabricatorRepositoryGraphStream $stream,
+    $commit,
+    $close_immediately) {
 
     $discover = array($commit);
     $graph = array();
     $seen = array();
-
-    $stream = new PhabricatorMercurialGraphStream($repository);
 
     // Find all the reachable, undiscovered commits. Build a graph of the
     // edges.
@@ -214,14 +369,12 @@ final class PhabricatorRepositoryDiscoveryEngine
     foreach ($commits as $commit) {
       $refs[] = id(new PhabricatorRepositoryCommitRef())
         ->setIdentifier($commit)
-        ->setEpoch($stream->getCommitDate($commit));
+        ->setEpoch($stream->getCommitDate($commit))
+        ->setCanCloseImmediately($close_immediately);
     }
 
     return $refs;
   }
-
-
-/* -(  Internals  )---------------------------------------------------------- */
 
 
   private function reduceGraph(array $edges) {
@@ -269,6 +422,35 @@ final class PhabricatorRepositoryDiscoveryEngine
     }
 
     return true;
+  }
+
+
+  /**
+   * Sort branches so we process closeable branches first. This makes the
+   * whole import process a little cheaper, since we can close these commits
+   * the first time through rather than catching them in the refs step.
+   *
+   * @task internal
+   *
+   * @param   list<DiffusionRepositoryRef> List of branch heads.
+   * @return  list<DiffusionRepositoryRef> Sorted list of branch heads.
+   */
+  private function sortBranches(array $branches) {
+    $repository = $this->getRepository();
+
+    $head_branches = array();
+    $tail_branches = array();
+    foreach ($branches as $branch) {
+      $name = $branch->getShortName();
+
+      if ($repository->shouldAutocloseBranch($name)) {
+        $head_branches[] = $branch;
+      } else {
+        $tail_branches[] = $branch;
+      }
+    }
+
+    return array_merge($head_branches, $tail_branches);
   }
 
 }
