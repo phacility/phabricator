@@ -552,6 +552,11 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         throw new Exception("Unrecognized version control system.");
     }
 
+    $closeable_flag = PhabricatorRepositoryCommit::IMPORTED_CLOSEABLE;
+    if ($commit->isPartiallyImported($closeable_flag)) {
+      return true;
+    }
+
     $branches = $data->getCommitDetail('seenOnBranches', array());
     foreach ($branches as $branch) {
       if ($this->shouldAutocloseBranch($branch)) {

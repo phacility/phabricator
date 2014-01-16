@@ -9,10 +9,13 @@ final class PhabricatorRepositoryRefEngine
 
   private $newRefs = array();
   private $deadRefs = array();
+  private $closeCommits = array();
+  private $hasNoCursors;
 
   public function updateRefs() {
     $this->newRefs = array();
     $this->deadRefs = array();
+    $this->closeCommits = array();
 
     $repository = $this->getRepository();
 
@@ -50,9 +53,24 @@ final class PhabricatorRepositoryRefEngine
       ->execute();
     $cursor_groups = mgroup($all_cursors, 'getRefType');
 
+    $this->hasNoCursors = (!$all_cursors);
+
+    // Find all the heads of closing refs.
+    $all_closing_heads = array();
+    foreach ($all_cursors as $cursor) {
+      if ($this->shouldCloseRef($cursor->getRefType(), $cursor->getRefName())) {
+        $all_closing_heads[] = $cursor->getCommitIdentifier();
+      }
+    }
+    $all_closing_heads = array_unique($all_closing_heads);
+
     foreach ($maps as $type => $refs) {
       $cursor_group = idx($cursor_groups, $type, array());
-      $this->updateCursors($cursor_group, $refs, $type);
+      $this->updateCursors($cursor_group, $refs, $type, $all_closing_heads);
+    }
+
+    if ($this->closeCommits) {
+      $this->setCloseFlagOnCommits($this->closeCommits);
     }
 
     if ($this->newRefs || $this->deadRefs) {
@@ -80,10 +98,18 @@ final class PhabricatorRepositoryRefEngine
     return $this;
   }
 
+  private function markCloseCommits(array $identifiers) {
+    foreach ($identifiers as $identifier) {
+      $this->closeCommits[$identifier] = $identifier;
+    }
+    return $this;
+  }
+
   private function updateCursors(
     array $cursors,
     array $new_refs,
-    $ref_type) {
+    $ref_type,
+    array $all_closing_heads) {
     $repository = $this->getRepository();
 
     // NOTE: Mercurial branches may have multiple branch heads; this logic
@@ -149,8 +175,14 @@ final class PhabricatorRepositoryRefEngine
             ->setCommitIdentifier($identifier));
       }
 
-      foreach ($added_commits as $identifier) {
-        // TODO: Do autoclose stuff here.
+      if ($this->shouldCloseRef($ref_type, $name)) {
+        foreach ($added_commits as $identifier) {
+          $new_identifiers = $this->loadNewCommitIdentifiers(
+            $identifier,
+            $all_closing_heads);
+
+          $this->markCloseCommits($new_identifiers);
+        }
       }
     }
 
@@ -167,6 +199,133 @@ final class PhabricatorRepositoryRefEngine
         foreach ($cursor_group as $cursor) {
           $this->markRefDead($cursor);
         }
+      }
+    }
+  }
+
+  private function shouldCloseRef($ref_type, $ref_name) {
+    if ($ref_type !== PhabricatorRepositoryRefCursor::TYPE_BRANCH) {
+      return false;
+    }
+
+    if ($this->hasNoCursors) {
+      // If we don't have any cursors, don't close things. Particularly, this
+      // corresponds to the case where you've just updated to this code on an
+      // existing repository: we don't want to requeue message steps for every
+      // commit on a closeable ref.
+      return false;
+    }
+
+    return $this->getRepository()->shouldAutocloseBranch($ref_name);
+  }
+
+  /**
+   * Find all ancestors of a new closing branch head which are not ancestors
+   * of any old closing branch head.
+   */
+  private function loadNewCommitIdentifiers(
+    $new_head,
+    array $all_closing_heads) {
+
+    $repository = $this->getRepository();
+    $vcs = $repository->getVersionControlSystem();
+    switch ($vcs) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        if ($all_closing_heads) {
+          $escheads = array();
+          foreach ($all_closing_heads as $head) {
+            $escheads[] = hgsprintf('%s', $head);
+          }
+          $escheads = implode(' or ', $escheads);
+          list($stdout) = $this->getRepository()->execxLocalCommand(
+            'log --template %s --rev %s',
+            '{node}\n',
+            hgsprintf('%s', $new_head).' - ('.$escheads.')');
+        } else {
+          list($stdout) = $this->getRepository()->execxLocalCommand(
+            'log --template %s --rev %s',
+            '{node}\n',
+            hgsprintf('%s', $new_head));
+        }
+        return phutil_split_lines($stdout, $retain_newlines = false);
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        if ($all_closing_heads) {
+          list($stdout) = $this->getRepository()->execxLocalCommand(
+            'log --format=%s %s --not %Ls',
+            '%H',
+            $new_head,
+            $all_closing_heads);
+        } else {
+          list($stdout) = $this->getRepository()->execxLocalCommand(
+            'log --format=%s %s',
+            '%H',
+            $new_head);
+        }
+        return phutil_split_lines($stdout, $retain_newlines = false);
+      default:
+        throw new Exception(pht('Unsupported VCS "%s"!', $vcs));
+    }
+  }
+
+  /**
+   * Mark a list of commits as closeable, and queue workers for those commits
+   * which don't already have the flag.
+   */
+  private function setCloseFlagOnCommits(array $identifiers) {
+    $repository = $this->getRepository();
+    $commit_table = new PhabricatorRepositoryCommit();
+    $conn_w = $commit_table->establishConnection('w');
+
+    $vcs = $repository->getVersionControlSystem();
+    switch ($vcs) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        $class = 'PhabricatorRepositoryGitCommitMessageParserWorker';
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $class = 'PhabricatorRepositorySvnCommitMessageParserWorker';
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $class = 'PhabricatorRepositoryMercurialCommitMessageParserWorker';
+        break;
+      default:
+        throw new Exception("Unknown repository type '{$vcs}'!");
+    }
+
+    $all_commits = queryfx_all(
+      $conn_w,
+      'SELECT id, commitIdentifier, importStatus FROM %T
+        WHERE commitIdentifier IN (%Ls)',
+      $commit_table->getTableName(),
+      $identifiers);
+
+    $closeable_flag = PhabricatorRepositoryCommit::IMPORTED_CLOSEABLE;
+
+    $all_commits = ipull($all_commits, null, 'commitIdentifier');
+    foreach ($identifiers as $identifier) {
+      $row = idx($all_commits, $identifier);
+
+      if (!$row) {
+        throw new Exception(
+          pht(
+            'Commit "%s" has not been discovered yet! Run discovery before '.
+            'updating refs.',
+            $identifier));
+      }
+
+      if (!($row['importStatus'] & $closeable_flag)) {
+        queryfx(
+          $conn_w,
+          'UPDATE %T SET importStatus = (importStatus | %d) WHERE id = %d',
+          $commit_table->getTableName(),
+          $closeable_flag,
+          $row['id']);
+
+        $data = array(
+          'commitID' => $row['id'],
+          'only' => true,
+        );
+
+        PhabricatorWorker::scheduleTask($class, $data);
       }
     }
   }
