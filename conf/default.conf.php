@@ -543,15 +543,6 @@ return array(
 
 // -- Auth ------------------------------------------------------------------ //
 
-  // Maximum number of simultaneous web sessions each user is permitted to have.
-  // Setting this to "1" will prevent a user from logging in on more than one
-  // browser at the same time.
-  'auth.sessions.web'           => 5,
-
-  // Maximum number of simultaneous Conduit sessions each user is permitted
-  // to have.
-  'auth.sessions.conduit'       => 5,
-
   // If true, email addresses must be verified (by clicking a link in an
   // email) before a user can login. By default, verification is optional
   // unless 'auth.email-domains' is nonempty (see below).

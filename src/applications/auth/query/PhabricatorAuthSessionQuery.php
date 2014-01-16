@@ -81,23 +81,15 @@ final class PhabricatorAuthSessionQuery
     }
 
     if ($this->sessionTypes) {
-      $clauses = array();
-      foreach ($this->sessionTypes as $session_type) {
-        $clauses[] = qsprintf(
-          $conn_r,
-          'type LIKE %>',
-          $session_type.'-');
-      }
-      $where[] = '('.implode(') OR (', $clauses).')';
+      $where[] = qsprintf(
+        $conn_r,
+        'type IN (%Ls)',
+        $this->sessionTypes);
     }
 
     $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
-  }
-
-  public function getPagingColumn() {
-    return 'sessionKey';
   }
 
   public function getQueryApplicationClass() {
