@@ -24,6 +24,8 @@ final class PhabricatorRepositoryCommit
   const IMPORTED_HERALD = 8;
   const IMPORTED_ALL = 15;
 
+  const IMPORTED_CLOSEABLE = 1024;
+
   private $commitData = self::ATTACHABLE;
   private $audits;
   private $repository = self::ATTACHABLE;
@@ -42,7 +44,7 @@ final class PhabricatorRepositoryCommit
   }
 
   public function isImported() {
-    return ($this->getImportStatus() == self::IMPORTED_ALL);
+    return $this->isPartiallyImported(self::IMPORTED_ALL);
   }
 
   public function writeImportStatusFlag($flag) {

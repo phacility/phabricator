@@ -175,4 +175,15 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
     return $value[$key];
   }
 
+  protected function detectEncodingForStorage($string) {
+    return phutil_is_utf8($string) ? 'utf8' : null;
+  }
+
+  protected function getUTF8StringFromStorage($string, $encoding) {
+    if ($encoding == 'utf8') {
+      return $string;
+    }
+    return phutil_utf8ize($string);
+  }
+
 }

@@ -149,6 +149,7 @@ final class PhabricatorRepositoryPullLocalDaemon
                 PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
                 null);
               $this->discoverRepository($repository);
+              $this->updateRepositoryRefs($repository);
               $repository->writeStatusMessage(
                 PhabricatorRepositoryStatusMessage::TYPE_FETCH,
                 PhabricatorRepositoryStatusMessage::CODE_OKAY);
@@ -265,6 +266,12 @@ final class PhabricatorRepositoryPullLocalDaemon
     } else {
       return $result;
     }
+  }
+
+  private function updateRepositoryRefs(PhabricatorRepository $repository) {
+    id(new PhabricatorRepositoryRefEngine())
+      ->setRepository($repository)
+      ->updateRefs();
   }
 
   private function getDiscoveryEngine(PhabricatorRepository $repository) {
@@ -613,6 +620,7 @@ final class PhabricatorRepositoryPullLocalDaemon
       $this->executeGitDiscoverCommit($repository, $commit, $name, true);
     }
   }
+
 
 
   /**

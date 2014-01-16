@@ -802,6 +802,12 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         $mirror->delete();
       }
 
+      $ref_cursors = id(new PhabricatorRepositoryRefCursor())
+        ->loadAllWhere('repositoryPHID = %s', $this->getPHID());
+      foreach ($ref_cursors as $cursor) {
+        $cursor->delete();
+      }
+
       $conn_w = $this->establishConnection('w');
 
       queryfx(

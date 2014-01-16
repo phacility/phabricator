@@ -42,4 +42,15 @@ final class DiffusionBranchInformation {
     );
   }
 
+  // TODO: These are hacks to make this compatible with DiffusionRepositoryRef
+  // for PhabricatorRepositoryRefEngine. The two classes should be merged.
+
+  public function getShortName() {
+    return $this->getName();
+  }
+
+  public function getCommitIdentifier() {
+    return $this->getHeadCommitIdentifier();
+  }
+
 }
