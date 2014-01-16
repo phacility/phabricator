@@ -103,9 +103,9 @@ final class ReleephBranchViewController extends ReleephProjectController
 
     if (!$branch->getIsActive()) {
       $header->addTag(
-        id(new PhabricatorTagView())
-          ->setType(PhabricatorTagView::TYPE_STATE)
-          ->setBackgroundColor(PhabricatorTagView::COLOR_BLACK)
+        id(new PHUITagView())
+          ->setType(PHUITagView::TYPE_STATE)
+          ->setBackgroundColor(PHUITagView::COLOR_BLACK)
           ->setName(pht('Closed')));
     }
 

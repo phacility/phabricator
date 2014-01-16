@@ -101,22 +101,22 @@ final class PhabricatorRemarkupRuleMention
         $user = $actual_users[$username];
         Javelin::initBehavior('phabricator-hovercards');
 
-        $tag = id(new PhabricatorTagView())
-          ->setType(PhabricatorTagView::TYPE_PERSON)
+        $tag = id(new PHUITagView())
+          ->setType(PHUITagView::TYPE_PERSON)
           ->setPHID($user->getPHID())
           ->setName('@'.$user->getUserName())
           ->setHref('/p/'.$user->getUserName().'/');
 
         if (!$user->isUserActivated()) {
-          $tag->setDotColor(PhabricatorTagView::COLOR_GREY);
+          $tag->setDotColor(PHUITagView::COLOR_GREY);
         } else {
           $status = idx($user_statuses, $user->getPHID());
           if ($status) {
             $status = $status->getStatus();
             if ($status == PhabricatorUserStatus::STATUS_AWAY) {
-              $tag->setDotColor(PhabricatorTagView::COLOR_RED);
+              $tag->setDotColor(PHUITagView::COLOR_RED);
             } else if ($status == PhabricatorUserStatus::STATUS_AWAY) {
-              $tag->setDotColor(PhabricatorTagView::COLOR_ORANGE);
+              $tag->setDotColor(PHUITagView::COLOR_ORANGE);
             }
           }
         }

@@ -13,22 +13,6 @@ final class PhabricatorAuthenticationConfigOptions
 
   public function getOptions() {
     return array(
-      $this->newOption('auth.sessions.web', 'int', 5)
-        ->setSummary(
-          pht("Number of web sessions a user can have simultaneously."))
-        ->setDescription(
-          pht(
-            "Maximum number of simultaneous web sessions each user is ".
-            "permitted to have. Setting this to '1' will prevent a user from ".
-            "logging in on more than one browser at the same time.")),
-      $this->newOption('auth.sessions.conduit', 'int', 5)
-        ->setSummary(
-          pht(
-            "Number of simultaneous Conduit sessions each user is permitted."))
-        ->setDescription(
-          pht(
-            "Maximum number of simultaneous Conduit sessions each user is ".
-            "permitted to have.")),
       $this->newOption('auth.require-email-verification', 'bool', false)
         ->setBoolOptions(
           array(

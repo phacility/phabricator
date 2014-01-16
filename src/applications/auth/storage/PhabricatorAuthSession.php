@@ -10,12 +10,12 @@ final class PhabricatorAuthSession extends PhabricatorAuthDAO
   protected $type;
   protected $sessionKey;
   protected $sessionStart;
+  protected $sessionExpires;
 
   private $identityObject = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
-      self::CONFIG_IDS => self::IDS_MANUAL,
       self::CONFIG_TIMESTAMPS => false,
     ) + parent::getConfiguration();
   }
@@ -39,16 +39,17 @@ final class PhabricatorAuthSession extends PhabricatorAuthDAO
     return $this->assertAttached($this->identityObject);
   }
 
-  public function delete() {
-    // TODO: We don't have a proper `id` column yet, so make this work as
-    // expected until we do.
-    queryfx(
-      $this->establishConnection('w'),
-      'DELETE FROM %T WHERE sessionKey = %s',
-      $this->getTableName(),
-      $this->getSessionKey());
-    return $this;
+  public static function getSessionTypeTTL($session_type) {
+    switch ($session_type) {
+      case self::TYPE_WEB:
+        return (60 * 60 * 24 * 30); // 30 days
+      case self::TYPE_CONDUIT:
+        return (60 * 60 * 24); // 24 hours
+      default:
+        throw new Exception(pht('Unknown session type "%s".', $session_type));
+    }
   }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

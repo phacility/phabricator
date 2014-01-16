@@ -85,10 +85,10 @@ abstract class PhabricatorRemarkupRuleObject
   }
 
   protected function renderHovertag($name, $href, array $attr = array()) {
-    return id(new PhabricatorTagView())
+    return id(new PHUITagView())
       ->setName($name)
       ->setHref($href)
-      ->setType(PhabricatorTagView::TYPE_OBJECT)
+      ->setType(PHUITagView::TYPE_OBJECT)
       ->setPHID(idx($attr, 'phid'))
       ->setClosed(idx($attr, 'closed'))
       ->render();

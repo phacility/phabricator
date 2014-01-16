@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorTagView extends AphrontView {
+final class PHUITagView extends AphrontView {
 
   const TYPE_PERSON         = 'person';
   const TYPE_OBJECT         = 'object';
@@ -26,7 +26,6 @@ final class PhabricatorTagView extends AphrontView {
   private $phid;
   private $backgroundColor;
   private $dotColor;
-  private $barColor;
   private $closed;
   private $external;
   private $id;
@@ -51,11 +50,6 @@ final class PhabricatorTagView extends AphrontView {
         $this->setBackgroundColor(self::COLOR_PERSON);
         break;
     }
-    return $this;
-  }
-
-  public function setBarColor($bar_color) {
-    $this->barColor = $bar_color;
     return $this;
   }
 
@@ -102,27 +96,27 @@ final class PhabricatorTagView extends AphrontView {
       throw new Exception(pht("You must call setType() before render()!"));
     }
 
-    require_celerity_resource('phabricator-tag-view-css');
+    require_celerity_resource('phui-tag-view-css');
     $classes = array(
-      'phabricator-tag-view',
-      'phabricator-tag-type-'.$this->type,
+      'phui-tag-view',
+      'phui-tag-type-'.$this->type,
     );
 
     if ($this->closed) {
-      $classes[] = 'phabricator-tag-state-closed';
+      $classes[] = 'phui-tag-state-closed';
     }
 
     $color = null;
     if ($this->backgroundColor) {
-      $color = 'phabricator-tag-color-'.$this->backgroundColor;
+      $color = 'phui-tag-color-'.$this->backgroundColor;
     }
 
     if ($this->dotColor) {
-      $dotcolor = 'phabricator-tag-color-'.$this->dotColor;
+      $dotcolor = 'phui-tag-color-'.$this->dotColor;
       $dot = phutil_tag(
         'span',
         array(
-          'class' => 'phabricator-tag-dot '.$dotcolor,
+          'class' => 'phui-tag-dot '.$dotcolor,
         ),
         '');
     } else {
@@ -131,7 +125,7 @@ final class PhabricatorTagView extends AphrontView {
 
     if ($this->icon) {
       $icon = $this->icon;
-      $classes[] = 'phabricator-tag-icon-view';
+      $classes[] = 'phui-tag-icon-view';
     } else {
       $icon = null;
     }
@@ -139,22 +133,9 @@ final class PhabricatorTagView extends AphrontView {
     $content = phutil_tag(
       'span',
       array(
-        'class' => 'phabricator-tag-core '.$color,
+        'class' => 'phui-tag-core '.$color,
       ),
       array($dot, $this->name));
-
-    if ($this->barColor) {
-      $barcolor = 'phabricator-tag-color-'.$this->barColor;
-      $bar = phutil_tag(
-        'span',
-        array(
-          'class' => 'phabricator-tag-bar '.$barcolor,
-        ),
-        '');
-      $classes[] = 'phabricator-tag-view-has-bar';
-    } else {
-      $bar = null;
-    }
 
     if ($this->phid) {
       Javelin::initBehavior('phabricator-hovercards');
@@ -171,7 +152,7 @@ final class PhabricatorTagView extends AphrontView {
           ),
           'target' => $this->external ? '_blank' : null,
         ),
-        array($bar, $icon, $content));
+        array($icon, $content));
     } else {
       return phutil_tag(
         $this->href ? 'a' : 'span',
@@ -181,7 +162,7 @@ final class PhabricatorTagView extends AphrontView {
           'class' => implode(' ', $classes),
           'target' => $this->external ? '_blank' : null,
         ),
-        array($bar, $icon, $content));
+        array($icon, $content));
     }
   }
 

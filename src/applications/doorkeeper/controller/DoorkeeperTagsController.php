@@ -45,11 +45,11 @@ final class DoorkeeperTagsController extends PhabricatorController {
 
       $id = $id_map[$key];
 
-      $tag = id(new PhabricatorTagView())
+      $tag = id(new PHUITagView())
         ->setID($id)
         ->setName($ref->getFullName())
         ->setHref($uri)
-        ->setType(PhabricatorTagView::TYPE_OBJECT)
+        ->setType(PHUITagView::TYPE_OBJECT)
         ->setExternal(true)
         ->render();
 

@@ -10,6 +10,7 @@ final class LegalpadDocumentQuery
   private $phids;
   private $creatorPHIDs;
   private $contributorPHIDs;
+  private $signerPHIDs;
   private $dateCreatedAfter;
   private $dateCreatedBefore;
 
@@ -33,6 +34,11 @@ final class LegalpadDocumentQuery
 
   public function withContributorPHIDs(array $phids) {
     $this->contributorPHIDs = $phids;
+    return $this;
+  }
+
+  public function withSignerPHIDs(array $phids) {
+    $this->signerPHIDs = $phids;
     return $this;
   }
 
@@ -75,6 +81,27 @@ final class LegalpadDocumentQuery
   }
 
   protected function willFilterPage(array $documents) {
+    if ($this->signerPHIDs) {
+      $document_map = mpull($documents, null, 'getPHID');
+      $signatures = id(new LegalpadDocumentSignature())
+        ->loadAllWhere(
+          'documentPHID IN (%Ls) AND signerPHID IN (%Ls)',
+          array_keys($document_map),
+          $this->signerPHIDs);
+      $signatures = mgroup($signatures, 'getDocumentPHID');
+      foreach ($document_map as $document_phid => $document) {
+        $sigs = idx($signatures, $document_phid, array());
+        foreach ($sigs as $index => $sig) {
+          if ($sig->getDocumentVersion() != $document->getVersions()) {
+            unset($sigs[$index]);
+          }
+        }
+        $signer_phids = mpull($sigs, 'getSignerPHID');
+        if (array_diff($this->signerPHIDs, $signer_phids)) {
+          unset($documents[$document->getID()]);
+        }
+      }
+    }
     if ($this->needDocumentBodies) {
       $documents = $this->loadDocumentBodies($documents);
     }

@@ -31,11 +31,11 @@ final class DoorkeeperTagView extends AphrontView {
 
     Javelin::initBehavior('doorkeeper-tag', array('tags' => array($spec)));
 
-    return id(new PhabricatorTagView())
+    return id(new PHUITagView())
       ->setID($tag_id)
       ->setHref($href)
       ->setName($href)
-      ->setType(PhabricatorTagView::TYPE_OBJECT)
+      ->setType(PHUITagView::TYPE_OBJECT)
       ->setExternal(true);
   }
 
