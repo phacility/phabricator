@@ -58,10 +58,10 @@ final class LegalpadDocumentSignController extends LegalpadController {
     if ($signer_phid) {
       $signature = id(new LegalpadDocumentSignature())
         ->loadOneWhere(
-          'documentPHID = %s AND documentVersion = %d AND signerPHID = %s',
+          'documentPHID = %s AND signerPHID = %s AND documentVersion = %d',
           $document->getPHID(),
-          $document->getVersions(),
-          $signer_phid);
+          $signer_phid,
+          $document->getVersions());
     }
 
     if (!$signature) {

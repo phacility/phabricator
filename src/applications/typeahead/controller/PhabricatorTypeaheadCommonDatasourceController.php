@@ -37,6 +37,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $need_jump_objects = false;
     $need_build_plans = false;
     $need_macros = false;
+    $need_legalpad_documents = false;
     switch ($this->type) {
       case 'mainsearch':
         $need_users = true;
@@ -100,6 +101,9 @@ final class PhabricatorTypeaheadCommonDatasourceController
         break;
       case 'macros':
         $need_macros = true;
+        break;
+      case 'legalpaddocuments':
+        $need_legalpad_documents = true;
         break;
     }
 
@@ -249,6 +253,18 @@ final class PhabricatorTypeaheadCommonDatasourceController
         $results[] = id(new PhabricatorTypeaheadResult())
           ->setPHID($phid)
           ->setName($name);
+      }
+    }
+
+    if ($need_legalpad_documents) {
+      $documents = id(new LegalpadDocumentQuery())
+        ->setViewer($viewer)
+        ->execute();
+      $documents = mpull($documents, 'getTitle', 'getPHID');
+      foreach ($documents as $phid => $title) {
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setPHID($phid)
+          ->setName($title);
       }
     }
 
