@@ -719,7 +719,17 @@ final class PhabricatorRepositoryPullLocalDaemon
       $valid = false;
       $exists = false;
     } else {
-      $valid = self::isSameGitOrigin($remote_uri, $expect_remote);
+      $normal_type_git = PhabricatorRepositoryURINormalizer::TYPE_GIT;
+
+      $remote_normal = id(new PhabricatorRepositoryURINormalizer(
+        $normal_type_git,
+        $remote_uri))->getNormalizedPath();
+
+      $expect_normal = id(new PhabricatorRepositoryURINormalizer(
+        $normal_type_git,
+        $expect_remote))->getNormalizedPath();
+
+      $valid = ($remote_normal == $expect_normal);
       $exists = true;
     }
 
@@ -767,48 +777,6 @@ final class PhabricatorRepositoryPullLocalDaemon
       }
     }
   }
-
-
-
-  /**
-   * @task git
-   */
-  public static function isSameGitOrigin($remote, $expect) {
-    $remote_path = self::getPathFromGitURI($remote);
-    $expect_path = self::getPathFromGitURI($expect);
-
-    $remote_match = self::executeGitNormalizePath($remote_path);
-    $expect_match = self::executeGitNormalizePath($expect_path);
-
-    return ($remote_match == $expect_match);
-  }
-
-  private static function getPathFromGitURI($raw_uri) {
-    $uri = new PhutilURI($raw_uri);
-    if ($uri->getProtocol()) {
-      return $uri->getPath();
-    }
-
-    $uri = new PhutilGitURI($raw_uri);
-    if ($uri->getDomain()) {
-      return $uri->getPath();
-    }
-
-    return $raw_uri;
-  }
-
-
-  /**
-   * @task git
-   */
-  private static function executeGitNormalizePath($path) {
-    // Strip away "/" and ".git", so similar paths correctly match.
-
-    $path = trim($path, '/');
-    $path = preg_replace('/\.git$/', '', $path);
-    return $path;
-  }
-
 
   private function pushToMirrors(PhabricatorRepository $repository) {
     if (!$repository->canMirror()) {
