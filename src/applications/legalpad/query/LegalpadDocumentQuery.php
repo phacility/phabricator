@@ -16,6 +16,7 @@ final class LegalpadDocumentQuery
 
   private $needDocumentBodies;
   private $needContributors;
+  private $needSignatures;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -49,6 +50,11 @@ final class LegalpadDocumentQuery
 
   public function needContributors($need_contributors) {
     $this->needContributors = $need_contributors;
+    return $this;
+  }
+
+  public function needSignatures($need_signatures) {
+    $this->needSignatures = $need_signatures;
     return $this;
   }
 
@@ -102,12 +108,17 @@ final class LegalpadDocumentQuery
         }
       }
     }
+
     if ($this->needDocumentBodies) {
       $documents = $this->loadDocumentBodies($documents);
     }
 
     if ($this->needContributors) {
       $documents = $this->loadContributors($documents);
+    }
+
+    if ($this->needSignatures) {
+      $documents = $this->loadSignatures($documents);
     }
 
     return $documents;
@@ -203,6 +214,28 @@ final class LegalpadDocumentQuery
       $data = $contributor_data[$document_phid];
       $contributors = array_keys(idx($data, $edge_type, array()));
       $document->attachContributors($contributors);
+    }
+
+    return $documents;
+  }
+
+  private function loadSignatures(array $documents) {
+    $document_map = mpull($documents, null, 'getPHID');
+
+    $signatures = id(new LegalpadDocumentSignature())
+      ->loadAllWhere(
+      'documentPHID IN (%Ls)',
+      array_keys($document_map));
+    $signatures = mgroup($signatures, 'getDocumentPHID');
+
+    foreach ($documents as $document) {
+      $sigs = idx($signatures, $document->getPHID());
+      foreach ($sigs as $index => $sig) {
+        if ($sig->getDocumentVersion() != $document->getVersions()) {
+          unset($sigs[$index]);
+        }
+      }
+      $document->attachSignatures($sigs);
     }
 
     return $documents;

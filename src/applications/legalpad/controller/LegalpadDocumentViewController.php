@@ -82,7 +82,7 @@ final class LegalpadDocumentViewController extends LegalpadController {
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
     $crumbs->setActionList($actions);
     $crumbs->addTextCrumb(
-      'L'.$document->getID(),
+      $document->getMonogram(),
       $this->getApplicationURI('view/'.$document->getID()));
 
     $object_box = id(new PHUIObjectBoxView())
@@ -139,6 +139,12 @@ final class LegalpadDocumentViewController extends LegalpadController {
         ->setHref($this->getApplicationURI('/edit/'.$document->getID().'/'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+      ->setIcon('like')
+      ->setName(pht('Sign Document'))
+      ->setHref('/'.$document->getMonogram()));
 
     return $actions;
   }

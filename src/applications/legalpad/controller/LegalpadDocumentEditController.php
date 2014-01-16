@@ -23,6 +23,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
         ->setCreatorPHID($user->getPHID())
         ->setContributorCount(0)
         ->setRecentContributorPHIDs(array())
+        ->attachSignatures(array())
         ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
         ->setEditPolicy(PhabricatorPolicies::POLICY_USER);
       $body = id(new LegalpadDocumentBody())
@@ -37,6 +38,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
       $document = id(new LegalpadDocumentQuery())
         ->setViewer($user)
         ->needDocumentBodies(true)
+        ->needSignatures(true)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -147,6 +149,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
         ->setPolicies($policies)
         ->setName('can_edit'));
 
+    $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
     $submit = new AphrontFormSubmitControl();
     if ($is_create) {
       $submit->setValue(pht('Create Document'));
@@ -158,6 +161,17 @@ final class LegalpadDocumentEditController extends LegalpadController {
           $this->getApplicationURI('view/'.$document->getID()));
       $title = pht('Update Document');
       $short = pht('Update');
+      $signatures = $document->getSignatures();
+      if ($signatures) {
+        $form->appendInstructions(pht(
+          'Warning: there are %d signature(s) already for this document. '.
+          'Updating the title or text will invalidate these signatures and '.
+          'users will need to sign again. Proceed carefully.',
+          count($signatures)));
+      }
+      $crumbs->addTextCrumb(
+        $document->getMonogram(),
+        $this->getApplicationURI('view/'.$document->getID()));
     }
 
     $form
@@ -168,9 +182,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
       ->setFormErrors($errors)
       ->setForm($form);
 
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
     $crumbs->addTextCrumb($short);
-
 
     $preview = id(new PHUIRemarkupPreviewPanel())
       ->setHeader(pht('Document Preview'))
