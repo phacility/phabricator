@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group legalpad
- */
 final class LegalpadDocumentQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
@@ -89,11 +86,11 @@ final class LegalpadDocumentQuery
   protected function willFilterPage(array $documents) {
     if ($this->signerPHIDs) {
       $document_map = mpull($documents, null, 'getPHID');
-      $signatures = id(new LegalpadDocumentSignature())
-        ->loadAllWhere(
-          'documentPHID IN (%Ls) AND signerPHID IN (%Ls)',
-          array_keys($document_map),
-          $this->signerPHIDs);
+      $signatures = id(new LegalpadDocumentSignatureQuery())
+        ->setViewer($this->getViewer())
+        ->withDocumentPHIDs(array_keys($document_map))
+        ->wtihSignerPHIDs($this->signerPHIDs)
+        ->execute();
       $signatures = mgroup($signatures, 'getDocumentPHID');
       foreach ($document_map as $document_phid => $document) {
         $sigs = idx($signatures, $document_phid, array());
@@ -222,10 +219,10 @@ final class LegalpadDocumentQuery
   private function loadSignatures(array $documents) {
     $document_map = mpull($documents, null, 'getPHID');
 
-    $signatures = id(new LegalpadDocumentSignature())
-      ->loadAllWhere(
-      'documentPHID IN (%Ls)',
-      array_keys($document_map));
+    $signatures = id(new LegalpadDocumentSignatureQuery())
+      ->setViewer($this->getViewer())
+      ->withDocumentPHIDs(array_keys($document_map))
+      ->execute();
     $signatures = mgroup($signatures, 'getDocumentPHID');
 
     foreach ($documents as $document) {

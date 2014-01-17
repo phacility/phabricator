@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group legalpad
- */
 final class LegalpadDocumentSignController extends LegalpadController {
 
   private $id;
@@ -56,12 +53,12 @@ final class LegalpadDocumentSignController extends LegalpadController {
     }
 
     if ($signer_phid) {
-      $signature = id(new LegalpadDocumentSignature())
-        ->loadOneWhere(
-          'documentPHID = %s AND signerPHID = %s AND documentVersion = %d',
-          $document->getPHID(),
-          $signer_phid,
-          $document->getVersions());
+      $signature = id(new LegalpadDocumentSignatureQuery())
+        ->setViewer($user)
+        ->withDocumentPHIDs(array($document->getPHID()))
+        ->withSignerPHIDs(array($signer_phid))
+        ->withDocumentVersions(array($document->getVersions()))
+        ->executeOne();
     }
 
     if (!$signature) {

@@ -132,11 +132,13 @@ final class LegalpadDocumentViewController extends LegalpadController {
       $document,
       PhabricatorPolicyCapability::CAN_EDIT);
 
+    $doc_id = $document->getID();
+
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setIcon('edit')
         ->setName(pht('Edit Document'))
-        ->setHref($this->getApplicationURI('/edit/'.$document->getID().'/'))
+        ->setHref($this->getApplicationURI('/edit/'.$doc_id.'/'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
@@ -145,6 +147,12 @@ final class LegalpadDocumentViewController extends LegalpadController {
       ->setIcon('like')
       ->setName(pht('Sign Document'))
       ->setHref('/'.$document->getMonogram()));
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+      ->setIcon('transcript')
+      ->setName(pht('View Signatures'))
+      ->setHref($this->getApplicationURI('/signatures/'.$doc_id.'/')));
 
     return $actions;
   }

@@ -842,6 +842,8 @@ phutil_register_library_map(array(
     'LegalpadDocumentSearchEngine' => 'applications/legalpad/query/LegalpadDocumentSearchEngine.php',
     'LegalpadDocumentSignController' => 'applications/legalpad/controller/LegalpadDocumentSignController.php',
     'LegalpadDocumentSignature' => 'applications/legalpad/storage/LegalpadDocumentSignature.php',
+    'LegalpadDocumentSignatureListController' => 'applications/legalpad/controller/LegalpadDocumentSignatureListController.php',
+    'LegalpadDocumentSignatureQuery' => 'applications/legalpad/query/LegalpadDocumentSignatureQuery.php',
     'LegalpadDocumentSignatureVerificationController' => 'applications/legalpad/controller/LegalpadDocumentSignatureVerificationController.php',
     'LegalpadDocumentViewController' => 'applications/legalpad/controller/LegalpadDocumentViewController.php',
     'LegalpadMockMailReceiver' => 'applications/legalpad/mail/LegalpadMockMailReceiver.php',
@@ -3374,7 +3376,13 @@ phutil_register_library_map(array(
     'LegalpadDocumentQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'LegalpadDocumentSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'LegalpadDocumentSignController' => 'LegalpadController',
-    'LegalpadDocumentSignature' => 'LegalpadDAO',
+    'LegalpadDocumentSignature' =>
+    array(
+      0 => 'LegalpadDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
+    'LegalpadDocumentSignatureListController' => 'LegalpadController',
+    'LegalpadDocumentSignatureQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'LegalpadDocumentSignatureVerificationController' => 'LegalpadController',
     'LegalpadDocumentViewController' => 'LegalpadController',
     'LegalpadMockMailReceiver' => 'PhabricatorObjectMailReceiver',
