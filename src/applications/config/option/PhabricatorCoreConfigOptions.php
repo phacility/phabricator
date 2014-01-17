@@ -76,6 +76,16 @@ final class PhabricatorCoreConfigOptions
         ->addExample('America/Chicago', pht('US Central (CDT)'))
         ->addExample('America/Boise', pht('US Mountain (MDT)'))
         ->addExample('America/Los_Angeles', pht('US West (PDT)')),
+      $this->newOption('phabricator.cookie-prefix', 'string', null)
+        ->setSummary(
+          pht("Set a string Phabricator should use to prefix ".
+              "cookie names"))
+        ->setDescription(
+          pht(
+            "Cookies set for x.com are also sent for y.x.com. Assuming ".
+            "Phabricator instances are running on both domains, this will ".
+            "create a collision preventing you from logging in."))
+        ->addExample('dev', pht('Prefix cookie with "dev"')),
       $this->newOption('phabricator.show-beta-applications', 'bool', false)
         ->setBoolOptions(
           array(

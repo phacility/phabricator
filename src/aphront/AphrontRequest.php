@@ -273,11 +273,26 @@ final class AphrontRequest {
     return $this->validateCSRF();
   }
 
+  final public function setCookiePrefix($prefix) {
+    $this->cookiePrefix = $prefix;
+    return $this;
+  }
+
+  final private function getPrefixedCookieName($name) {
+    if (strlen($this->cookiePrefix)) {
+      return $this->cookiePrefix.'_'.$name;
+    } else {
+      return $name;
+    }
+  }
+
   final public function getCookie($name, $default = null) {
+    $name = $this->getPrefixedCookieName($name);
     return idx($_COOKIE, $name, $default);
   }
 
   final public function clearCookie($name) {
+    $name = $this->getPrefixedCookieName($name);
     $this->setCookie($name, '', time() - (60 * 60 * 24 * 30));
     unset($_COOKIE[$name]);
   }
@@ -342,6 +357,7 @@ final class AphrontRequest {
       $expire = time() + (60 * 60 * 24 * 365 * 5);
     }
 
+    $name = $this->getPrefixedCookieName($name);
 
     if (php_sapi_name() == 'cli') {
       // Do nothing, to avoid triggering "Cannot modify header information"
