@@ -89,7 +89,7 @@ final class LegalpadDocumentQuery
       $signatures = id(new LegalpadDocumentSignatureQuery())
         ->setViewer($this->getViewer())
         ->withDocumentPHIDs(array_keys($document_map))
-        ->wtihSignerPHIDs($this->signerPHIDs)
+        ->withSignerPHIDs($this->signerPHIDs)
         ->execute();
       $signatures = mgroup($signatures, 'getDocumentPHID');
       foreach ($document_map as $document_phid => $document) {
