@@ -226,7 +226,7 @@ final class LegalpadDocumentQuery
     $signatures = mgroup($signatures, 'getDocumentPHID');
 
     foreach ($documents as $document) {
-      $sigs = idx($signatures, $document->getPHID());
+      $sigs = idx($signatures, $document->getPHID(), array());
       foreach ($sigs as $index => $sig) {
         if ($sig->getDocumentVersion() != $document->getVersions()) {
           unset($sigs[$index]);
