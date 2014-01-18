@@ -87,9 +87,7 @@ final class PhabricatorRepositoryPullLocalDaemon
 
       // If any repositories have the NEEDS_UPDATE flag set, pull them
       // as soon as possible.
-      $type_need_update = PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE;
-      $need_update_messages = id(new PhabricatorRepositoryStatusMessage())
-        ->loadAllWhere('statusType = %s', $type_need_update);
+      $need_update_messages = $this->loadRepositoryUpdateMessages();
       foreach ($need_update_messages as $message) {
         $retry_after[$message->getRepositoryID()] = time();
       }
@@ -184,10 +182,20 @@ final class PhabricatorRepositoryPullLocalDaemon
         $sleep_until = time() + $min_sleep;
       }
 
-      $this->sleep($sleep_until - time());
+      while (($sleep_until - time()) > 0) {
+        $this->sleep(1);
+        if ($this->loadRepositoryUpdateMessages()) {
+          break;
+        }
+      }
     }
   }
 
+  private function loadRepositoryUpdateMessages() {
+    $type_need_update = PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE;
+    return id(new PhabricatorRepositoryStatusMessage())
+      ->loadAllWhere('statusType = %s', $type_need_update);
+  }
 
   /**
    * @task pull
