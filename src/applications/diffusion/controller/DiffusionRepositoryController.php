@@ -261,12 +261,11 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $limit = 15;
 
-    $branches = DiffusionBranchInformation::newFromConduit(
-      $this->callConduitWithDiffusionRequest(
-        'diffusion.branchquery',
-        array(
-          'limit' => $limit + 1,
-        )));
+    $branches = $this->callConduitWithDiffusionRequest(
+      'diffusion.branchquery',
+      array(
+        'limit' => $limit + 1,
+      ));
     if (!$branches) {
       return null;
     }
@@ -274,9 +273,11 @@ final class DiffusionRepositoryController extends DiffusionController {
     $more_branches = (count($branches) > $limit);
     $branches = array_slice($branches, 0, $limit);
 
+    $branches = DiffusionRepositoryRef::loadAllFromDictionaries($branches);
+
     $commits = id(new DiffusionCommitQuery())
       ->setViewer($viewer)
-      ->withIdentifiers(mpull($branches, 'getHeadCommitIdentifier'))
+      ->withIdentifiers(mpull($branches, 'getCommitIdentifier'))
       ->withRepository($drequest->getRepository())
       ->execute();
 

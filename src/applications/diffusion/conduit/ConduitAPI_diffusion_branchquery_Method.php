@@ -21,62 +21,53 @@ final class ConduitAPI_diffusion_branchquery_Method
     );
   }
 
+
   protected function getGitResult(ConduitAPIRequest $request) {
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
-    $limit = $request->getValue('limit');
-    $offset = $request->getValue('offset');
 
     $refs = id(new DiffusionLowLevelGitRefQuery())
       ->setRepository($repository)
       ->withIsOriginBranch(true)
       ->execute();
 
-    $branches = array();
-    foreach ($refs as $ref) {
-      $branch = id(new DiffusionBranchInformation())
-        ->setName($ref->getShortName())
-        ->setHeadCommitIdentifier($ref->getCommitIdentifier());
+    return $this->processBranchRefs($request, $refs);
+  }
 
-      if (!$repository->shouldTrackBranch($branch->getName())) {
-        continue;
+  protected function getMercurialResult(ConduitAPIRequest $request) {
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
+
+    $refs = id(new DiffusionLowLevelMercurialBranchesQuery())
+      ->setRepository($repository)
+      ->execute();
+
+    return $this->processBranchRefs($request, $refs);
+  }
+
+  private function processBranchRefs(ConduitAPIRequest $request, array $refs) {
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
+    $offset = $request->getValue('offset');
+    $limit = $request->getValue('limit');
+
+    foreach ($refs as $key => $ref) {
+      if (!$repository->shouldTrackBranch($ref->getShortName())) {
+        unset($refs[$key]);
       }
-
-      $branches[] = $branch->toDictionary();
     }
 
     // NOTE: We can't apply the offset or limit until here, because we may have
     // filtered untrackable branches out of the result set.
 
     if ($offset) {
-      $branches = array_slice($branches, $offset);
+      $refs = array_slice($refs, $offset);
     }
 
     if ($limit) {
-      $branches = array_slice($branches, 0, $limit);
+      $refs = array_slice($refs, 0, $limit);
     }
 
-    return $branches;
-  }
-
-  protected function getMercurialResult(ConduitAPIRequest $request) {
-    $drequest = $this->getDiffusionRequest();
-    $repository = $drequest->getRepository();
-    $offset = $request->getValue('offset');
-    $limit = $request->getValue('limit');
-
-    $branches = id(new DiffusionLowLevelMercurialBranchesQuery())
-      ->setRepository($repository)
-      ->execute();
-
-    if ($offset) {
-      $branches = array_slice($branches, $offset);
-    }
-
-    if ($limit) {
-      $branches = array_slice($branches, 0, $limit);
-    }
-
-    return mpull($branches, 'toDictionary');
+    return mpull($refs, 'toDictionary');
   }
 }

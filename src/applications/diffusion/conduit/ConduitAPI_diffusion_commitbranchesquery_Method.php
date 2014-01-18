@@ -39,7 +39,7 @@ final class ConduitAPI_diffusion_commitbranchesquery_Method
         $commit);
       return DiffusionGitBranch::parseRemoteBranchOutput(
         $contains,
-        DiffusionBranchInformation::DEFAULT_GIT_REMOTE);
+        DiffusionGitBranch::DEFAULT_GIT_REMOTE);
     }
   }
 
@@ -48,7 +48,10 @@ final class ConduitAPI_diffusion_commitbranchesquery_Method
     $repository = $drequest->getRepository();
     $commit = $request->getValue('commit');
 
-    // TODO: This should use `branches`.
+    // TODO: This should use `branches`. Also, this entire method's API needs
+    // to be fixed to support multiple branch heads in Mercurial. We should
+    // probably return `DiffusionRepositoryRefs` and probably merge this into
+    // `diffusion.branchesquery`.
 
     list($contains) = $repository->execxLocalCommand(
       'log --template %s --limit 1 --rev %s --',
