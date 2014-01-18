@@ -29,13 +29,7 @@
 final class PhabricatorRepositoryPullLocalDaemon
   extends PhabricatorDaemon {
 
-  private $repair;
   private $discoveryEngines = array();
-
-  public function setRepair($repair) {
-    $this->repair = $repair;
-    return $this;
-  }
 
 
 /* -(  Pulling Repositories  )----------------------------------------------- */
@@ -225,14 +219,6 @@ final class PhabricatorRepositoryPullLocalDaemon
     $refs = $this->getDiscoveryEngine($repository)
       ->discoverCommits();
 
-    foreach ($refs as $ref) {
-      $this->recordCommit(
-        $repository,
-        $ref->getIdentifier(),
-        $ref->getEpoch(),
-        $ref->getCanCloseImmediately());
-    }
-
     $this->checkIfRepositoryIsFullyImported($repository);
 
     try {
@@ -262,100 +248,12 @@ final class PhabricatorRepositoryPullLocalDaemon
     $id = $repository->getID();
     if (empty($this->discoveryEngines[$id])) {
       $engine = id(new PhabricatorRepositoryDiscoveryEngine())
-          ->setRepository($repository)
-          ->setVerbose($this->getVerbose())
-          ->setRepairMode($this->repair);
+        ->setRepository($repository)
+        ->setVerbose($this->getVerbose());
 
       $this->discoveryEngines[$id] = $engine;
     }
     return $this->discoveryEngines[$id];
-  }
-
-  private function recordCommit(
-    PhabricatorRepository $repository,
-    $commit_identifier,
-    $epoch,
-    $close_immediately) {
-
-    $commit = new PhabricatorRepositoryCommit();
-    $commit->setRepositoryID($repository->getID());
-    $commit->setCommitIdentifier($commit_identifier);
-    $commit->setEpoch($epoch);
-    if ($close_immediately) {
-      $commit->setImportStatus(PhabricatorRepositoryCommit::IMPORTED_CLOSEABLE);
-    }
-
-    $data = new PhabricatorRepositoryCommitData();
-
-    try {
-      $commit->openTransaction();
-        $commit->save();
-        $data->setCommitID($commit->getID());
-        $data->save();
-      $commit->saveTransaction();
-
-      $this->insertTask($repository, $commit);
-
-      queryfx(
-        $repository->establishConnection('w'),
-        'INSERT INTO %T (repositoryID, size, lastCommitID, epoch)
-          VALUES (%d, 1, %d, %d)
-          ON DUPLICATE KEY UPDATE
-            size = size + 1,
-            lastCommitID =
-              IF(VALUES(epoch) > epoch, VALUES(lastCommitID), lastCommitID),
-            epoch = IF(VALUES(epoch) > epoch, VALUES(epoch), epoch)',
-        PhabricatorRepository::TABLE_SUMMARY,
-        $repository->getID(),
-        $commit->getID(),
-        $epoch);
-
-      if ($this->repair) {
-        // Normally, the query should throw a duplicate key exception. If we
-        // reach this in repair mode, we've actually performed a repair.
-        $this->log("Repaired commit '{$commit_identifier}'.");
-      }
-
-      PhutilEventEngine::dispatchEvent(
-        new PhabricatorEvent(
-          PhabricatorEventType::TYPE_DIFFUSION_DIDDISCOVERCOMMIT,
-          array(
-            'repository'  => $repository,
-            'commit'      => $commit,
-          )));
-
-    } catch (AphrontQueryDuplicateKeyException $ex) {
-      $commit->killTransaction();
-      // Ignore. This can happen because we discover the same new commit
-      // more than once when looking at history, or because of races or
-      // data inconsistency or cosmic radiation; in any case, we're still
-      // in a good state if we ignore the failure.
-    }
-  }
-
-  private function insertTask(
-    PhabricatorRepository $repository,
-    PhabricatorRepositoryCommit $commit,
-    $data = array()) {
-
-    $vcs = $repository->getVersionControlSystem();
-    switch ($vcs) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $class = 'PhabricatorRepositoryGitCommitMessageParserWorker';
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        $class = 'PhabricatorRepositorySvnCommitMessageParserWorker';
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $class = 'PhabricatorRepositoryMercurialCommitMessageParserWorker';
-        break;
-      default:
-        throw new Exception("Unknown repository type '{$vcs}'!");
-    }
-
-    $data['commitID'] = $commit->getID();
-
-    PhabricatorWorker::scheduleTask($class, $data);
   }
 
   private function checkIfRepositoryIsFullyImported(
