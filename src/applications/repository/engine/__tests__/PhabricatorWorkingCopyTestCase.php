@@ -76,9 +76,18 @@ abstract class PhabricatorWorkingCopyTestCase extends PhabricatorTestCase {
       ->setRepository($repository)
       ->pullRepository();
 
-    $this->pulled[$callsign] = true;
+    return $repository;
+  }
+
+  protected function buildDiscoveredRepository($callsign) {
+    $repository = $this->buildPulledRepository($callsign);
+
+    id(new PhabricatorRepositoryDiscoveryEngine())
+      ->setRepository($repository)
+      ->discoverCommits($repository);
 
     return $repository;
   }
+
 
 }

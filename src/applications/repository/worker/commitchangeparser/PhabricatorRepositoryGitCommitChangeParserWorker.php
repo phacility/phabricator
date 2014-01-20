@@ -228,25 +228,16 @@ final class PhabricatorRepositoryGitCommitChangeParserWorker
       }
     }
 
-
     $results = array();
     foreach ($changes as $change) {
-      $target_path_id = $change['targetPathID']
-        ? (int)$change['targetPathID']
-        : null;
-
-      $target_commit_id = $change['targetCommitID']
-        ? (int)$change['targetCommitID']
-        : null;
-
       $result = id(new PhabricatorRepositoryParsedChange())
-        ->setPathID((int)$change['pathID'])
-        ->setTargetPathID($target_path_id)
-        ->setTargetCommitID($target_commit_id)
-        ->setChangeType((int)$change['changeType'])
+        ->setPathID($change['pathID'])
+        ->setTargetPathID($change['targetPathID'])
+        ->setTargetCommitID($change['targetCommitID'])
+        ->setChangeType($change['changeType'])
         ->setFileType($change['fileType'])
-        ->setIsDirect((int)$change['isDirect'])
-        ->setCommitSequence((int)$change['commitSequence']);
+        ->setIsDirect($change['isDirect'])
+        ->setCommitSequence($change['commitSequence']);
 
       $results[] = $result;
     }

@@ -35,6 +35,12 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
     $this->finishParse();
   }
 
+  public function parseChangesForUnitTest(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit) {
+    return $this->parseCommitChanges($repository, $commit);
+  }
+
   public static function lookupOrCreatePaths(array $paths) {
     $repository = new PhabricatorRepository();
     $conn_w = $repository->establishConnection('w');

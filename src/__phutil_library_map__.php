@@ -1255,6 +1255,7 @@ phutil_register_library_map(array(
     'PhabricatorCalendarHolidayTestCase' => 'applications/calendar/storage/__tests__/PhabricatorCalendarHolidayTestCase.php',
     'PhabricatorCalendarViewStatusController' => 'applications/calendar/controller/PhabricatorCalendarViewStatusController.php',
     'PhabricatorCampfireProtocolAdapter' => 'infrastructure/daemon/bot/adapter/PhabricatorCampfireProtocolAdapter.php',
+    'PhabricatorChangeParserTestCase' => 'applications/repository/worker/__tests__/PhabricatorChangeParserTestCase.php',
     'PhabricatorChangesetResponse' => 'infrastructure/diff/PhabricatorChangesetResponse.php',
     'PhabricatorChatLogChannel' => 'applications/chatlog/storage/PhabricatorChatLogChannel.php',
     'PhabricatorChatLogChannelListController' => 'applications/chatlog/controller/PhabricatorChatLogChannelListController.php',
@@ -3846,6 +3847,7 @@ phutil_register_library_map(array(
     'PhabricatorCalendarHolidayTestCase' => 'PhabricatorTestCase',
     'PhabricatorCalendarViewStatusController' => 'PhabricatorCalendarController',
     'PhabricatorCampfireProtocolAdapter' => 'PhabricatorBotBaseStreamingProtocolAdapter',
+    'PhabricatorChangeParserTestCase' => 'PhabricatorWorkingCopyTestCase',
     'PhabricatorChangesetResponse' => 'AphrontProxyResponse',
     'PhabricatorChatLogChannel' =>
     array(
