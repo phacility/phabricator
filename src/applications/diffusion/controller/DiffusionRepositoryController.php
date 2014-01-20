@@ -359,25 +359,31 @@ final class DiffusionRepositoryController extends DiffusionController {
     $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
-    $panel = id(new AphrontPanelView())
-      ->setHeader(pht('Tags'))
-      ->setNoBackground(true);
+    $panel = new PHUIObjectBoxView();
+    $header = new PHUIHeaderView();
+    $header->setHeader(pht('Tags'));
 
     if ($more_tags) {
-      $panel->setCaption(pht('Showing the %d most recent tags.', $tag_limit));
+      $header->setSubHeader(
+        pht('Showing the %d most recent tags.', $tag_limit));
     }
 
-    $panel->addButton(
-      phutil_tag(
-        'a',
-        array(
-          'href' => $drequest->generateURI(
+    $icon = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+      ->setSpriteIcon('tag');
+
+    $button = new PHUIButtonView();
+    $button->setText(pht("Show All Tags"));
+    $button->setTag('a');
+    $button->setIcon($icon);
+    $button->setHref($drequest->generateURI(
             array(
               'action' => 'tags',
-            )),
-          'class' => 'grey button',
-        ),
-        pht("Show All Tags \xC2\xBB")));
+            )));
+
+    $header->addActionLink($button);
+
+    $panel->setHeader($header);
     $panel->appendChild($view);
 
     return $panel;
