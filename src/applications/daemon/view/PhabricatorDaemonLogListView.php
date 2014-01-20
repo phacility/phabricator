@@ -17,7 +17,9 @@ final class PhabricatorDaemonLogListView extends AphrontView {
       throw new Exception("Call setUser() before rendering!");
     }
 
-    $list = id(new PHUIObjectItemListView());
+    $list = id(new PHUIObjectItemListView())
+      ->setCards(true)
+      ->setFlush(true);
     foreach ($this->daemonLogs as $log) {
       $id = $log->getID();
       $epoch = $log->getDateCreated();
