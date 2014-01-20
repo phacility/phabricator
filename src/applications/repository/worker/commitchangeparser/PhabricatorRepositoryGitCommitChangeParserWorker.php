@@ -228,43 +228,30 @@ final class PhabricatorRepositoryGitCommitChangeParserWorker
       }
     }
 
-    $conn_w = $repository->establishConnection('w');
 
-    $changes_sql = array();
+    $results = array();
     foreach ($changes as $change) {
-      $values = array(
-        (int)$change['repositoryID'],
-        (int)$change['pathID'],
-        (int)$change['commitID'],
-        $change['targetPathID']
-          ? (int)$change['targetPathID']
-          : 'null',
-        $change['targetCommitID']
-          ? (int)$change['targetCommitID']
-          : 'null',
-        (int)$change['changeType'],
-        (int)$change['fileType'],
-        (int)$change['isDirect'],
-        (int)$change['commitSequence'],
-      );
-      $changes_sql[] = '('.implode(', ', $values).')';
+      $target_path_id = $change['targetPathID']
+        ? (int)$change['targetPathID']
+        : null;
+
+      $target_commit_id = $change['targetCommitID']
+        ? (int)$change['targetCommitID']
+        : null;
+
+      $result = id(new PhabricatorRepositoryParsedChange())
+        ->setPathID((int)$change['pathID'])
+        ->setTargetPathID($target_path_id)
+        ->setTargetCommitID($target_commit_id)
+        ->setChangeType((int)$change['changeType'])
+        ->setFileType($change['fileType'])
+        ->setIsDirect((int)$change['isDirect'])
+        ->setCommitSequence((int)$change['commitSequence']);
+
+      $results[] = $result;
     }
 
-    queryfx(
-      $conn_w,
-      'DELETE FROM %T WHERE commitID = %d',
-      PhabricatorRepository::TABLE_PATHCHANGE,
-      $commit->getID());
-    foreach (array_chunk($changes_sql, 256) as $sql_chunk) {
-      queryfx(
-        $conn_w,
-        'INSERT INTO %T
-          (repositoryID, pathID, commitID, targetPathID, targetCommitID,
-            changeType, fileType, isDirect, commitSequence)
-          VALUES %Q',
-        PhabricatorRepository::TABLE_PATHCHANGE,
-        implode(', ', $sql_chunk));
-    }
+    return $results;
   }
 
 }

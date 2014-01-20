@@ -300,6 +300,8 @@ final class PhabricatorRepositoryMercurialCommitChangeParserWorker
         PhabricatorRepository::TABLE_PATHCHANGE,
         implode(', ', $sql_chunk));
     }
+
+    return array();
   }
 
   private function mercurialPathExists(
