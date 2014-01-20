@@ -202,6 +202,197 @@ final class PhabricatorChangeParserTestCase
       ));
   }
 
+  public function testMercurialParser() {
+    $repository = $this->buildDiscoveredRepository('CHB');
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
+    $commits = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withRepositoryIDs(array($repository->getID()))
+      ->execute();
+
+    $this->expectChanges(
+      $repository,
+      $commits,
+      array(
+        '970357a2dc4264060e65d68e42240bb4e5984085' => array(
+          array(
+            '/',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHILD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            0,
+            1390249395,
+          ),
+          array(
+            '/file_moved',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHANGE,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            1390249395,
+          ),
+        ),
+
+        'fbb49af9788e5dbffbc05a060b680df1fd457be3' => array(
+          array(
+            '/',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHILD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            0,
+            1390249380,
+          ),
+          array(
+            '/file_link',
+            null,
+            null,
+            DifferentialChangeType::TYPE_ADD,
+            // TODO: This is not correct, and should be FILE_SYMLINK. See
+            // note in the parser about this. This is a known bug.
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            1390249380,
+          ),
+        ),
+
+        '0e8d3465944c7ed7a7c139da7edc652cf80dba69' => array(
+          array(
+            '/',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHILD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            0,
+            1390249342,
+          ),
+          array(
+            '/dir',
+            null,
+            null,
+            DifferentialChangeType::TYPE_ADD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            1,
+            1390249342,
+          ),
+          array(
+            '/dir/subfile',
+            null,
+            null,
+            DifferentialChangeType::TYPE_ADD,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            1390249342,
+          ),
+        ),
+
+        '22c75131ff15c8a44d7a729c4542b7f4c8ed27f4' => array(
+          array(
+            '/',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHILD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            0,
+            1390249320,
+          ),
+          array(
+            '/file',
+            null,
+            null,
+            DifferentialChangeType::TYPE_MOVE_AWAY,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            1390249320,
+          ),
+          array(
+            '/file_moved',
+            '/file',
+            '22c75131ff15c8a44d7a729c4542b7f4c8ed27f4',
+            DifferentialChangeType::TYPE_MOVE_HERE,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            1390249320,
+          ),
+        ),
+
+        'd9d252df30cb7251ad3ea121eff30c7d2e36dd67' => array(
+          array(
+            '/',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHILD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            0,
+            1390249308,
+          ),
+          array(
+            '/file',
+            null,
+            null,
+            DifferentialChangeType::TYPE_COPY_AWAY,
+            DifferentialChangeType::FILE_NORMAL,
+            0,
+            1390249308,
+          ),
+          array(
+            '/file_copy',
+            '/file',
+            'd9d252df30cb7251ad3ea121eff30c7d2e36dd67',
+            DifferentialChangeType::TYPE_COPY_HERE,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            1390249308,
+          ),
+        ),
+
+        '1fc0445d5e3d0f33e9dcbb68bbe419a847460d25' => array(
+          array(
+            '/',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHILD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            0,
+            1390249294,
+          ),
+          array(
+            '/file',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHANGE,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            1390249294,
+          ),
+        ),
+
+        '61518e196efb7f80700333cc0d00634c2578871a' => array(
+          array(
+            '/',
+            null,
+            null,
+            DifferentialChangeType::TYPE_ADD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            1,
+            1390249286,
+          ),
+          array(
+            '/file',
+            null,
+            null,
+            DifferentialChangeType::TYPE_ADD,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            1390249286,
+          ),
+        ),
+      ));
+  }
+
   private function expectChanges(
     PhabricatorRepository $repository,
     array $commits,
@@ -210,6 +401,9 @@ final class PhabricatorChangeParserTestCase
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $parser = 'PhabricatorRepositoryGitCommitChangeParserWorker';
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $parser = 'PhabricatorRepositoryMercurialCommitChangeParserWorker';
         break;
       default:
         throw new Exception(pht('No support yet.'));
