@@ -406,6 +406,98 @@ final class PhabricatorChangeParserTestCase
       $repository,
       $commits,
       array(
+        '15' => array(
+          array(
+            '/',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHILD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            0,
+            15,
+          ),
+          array(
+            '/file_copy',
+            null,
+            null,
+            DifferentialChangeType::TYPE_MULTICOPY,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            15,
+          ),
+          array(
+            '/file_copy_x',
+            '/file_copy',
+            '12',
+            DifferentialChangeType::TYPE_MOVE_HERE,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            15,
+          ),
+          array(
+            '/file_copy_y',
+            '/file_copy',
+            '12',
+            DifferentialChangeType::TYPE_MOVE_HERE,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            15,
+          ),
+          array(
+            '/file_copy_z',
+            '/file_copy',
+            '12',
+            DifferentialChangeType::TYPE_MOVE_HERE,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            15,
+          ),
+        ),
+
+        // Add a file from a different revision
+        '14' => array(
+          array(
+            '/',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHILD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            0,
+            14,
+          ),
+          array(
+            '/file',
+            null,
+            null,
+            DifferentialChangeType::TYPE_COPY_AWAY,
+            DifferentialChangeType::FILE_NORMAL,
+            0,
+            14,
+          ),
+          array(
+            '/file_1',
+            '/file',
+            '1',
+            DifferentialChangeType::TYPE_COPY_HERE,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            14,
+          ),
+        ),
+
+        // Property change on "/"
+        '13' => array(
+          array(
+            '/',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHANGE,
+            DifferentialChangeType::FILE_DIRECTORY,
+            1,
+            13,
+          ),
+        ),
+
         // Copy a directory, removing and adding files to the copy
         '12' => array(
           array(
