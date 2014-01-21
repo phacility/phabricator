@@ -962,7 +962,7 @@ final class PhabricatorChangeParserTestCase
 
     id(new PhabricatorRepositoryDiscoveryEngine())
       ->setRepository($repository)
-      ->discoverCommits($repository);
+      ->discoverCommits();
 
     $viewer = PhabricatorUser::getOmnipotentUser();
 
@@ -1055,6 +1055,54 @@ final class PhabricatorChangeParserTestCase
         ),
       ));
   }
+
+  public function testSubversionValidRootParser() {
+    // First, automatically configure the root correctly.
+    $repository = $this->buildBareRepository('CHD');
+    id(new PhabricatorRepositoryPullEngine())
+      ->setRepository($repository)
+      ->pullRepository();
+
+    $caught = null;
+    try {
+      id(new PhabricatorRepositoryDiscoveryEngine())
+        ->setRepository($repository)
+        ->discoverCommits();
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+
+    $this->assertEqual(
+      false,
+      ($caught instanceof Exception),
+      pht('Natural SVN root should work properly.'));
+
+
+    // This time, artificially break the root. We expect this to fail.
+    $repository = $this->buildBareRepository('CHD');
+    $repository->setDetail(
+      'remote-uri',
+      $repository->getDetail('remote-uri').'trunk/');
+
+    id(new PhabricatorRepositoryPullEngine())
+      ->setRepository($repository)
+      ->pullRepository();
+
+    $caught = null;
+    try {
+      id(new PhabricatorRepositoryDiscoveryEngine())
+        ->setRepository($repository)
+        ->discoverCommits();
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+
+    $this->assertEqual(
+      true,
+      ($caught instanceof Exception),
+      pht('Artificial SVN root should fail.'));
+  }
+
 
   private function expectChanges(
     PhabricatorRepository $repository,

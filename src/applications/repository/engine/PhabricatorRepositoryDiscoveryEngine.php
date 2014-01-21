@@ -225,6 +225,10 @@ final class PhabricatorRepositoryDiscoveryEngine
   private function discoverSubversionCommits() {
     $repository = $this->getRepository();
 
+    if (!$repository->isHosted()) {
+      $this->verifySubversionRoot($repository);
+    }
+
     $upper_bound = null;
     $limit = 1;
     $refs = array();
@@ -286,6 +290,43 @@ final class PhabricatorRepositoryDiscoveryEngine
     $refs = array_reverse($refs);
 
     return $refs;
+  }
+
+
+  private function verifySubversionRoot(PhabricatorRepository $repository) {
+    list($xml) = $repository->execxRemoteCommand(
+      'info --xml %s',
+      $repository->getSubversionPathURI());
+
+    $xml = phutil_utf8ize($xml);
+    $xml = new SimpleXMLElement($xml);
+
+    $remote_root = (string)($xml->entry[0]->repository[0]->root[0]);
+    $expect_root = $repository->getSubversionPathURI();
+
+    $normal_type_svn = PhabricatorRepositoryURINormalizer::TYPE_SVN;
+
+    $remote_normal = id(new PhabricatorRepositoryURINormalizer(
+      $normal_type_svn,
+      $remote_root))->getNormalizedPath();
+
+    $expect_normal = id(new PhabricatorRepositoryURINormalizer(
+      $normal_type_svn,
+      $expect_root))->getNormalizedPath();
+
+    if ($remote_normal != $expect_normal) {
+      throw new Exception(
+        pht(
+          'Repository "%s" does not have a correctly configured remote URI. '.
+          'The remote URI for a Subversion repository MUST point at the '.
+          'repository root. The root for this repository is "%s", but the '.
+          'configured URI is "%s". To resolve this error, set the remote URI '.
+          'to point at the repository root. If you want to import only part '.
+          'of a Subversion repository, use the "Import Only" option.',
+          $repository->getCallsign(),
+          $remote_root,
+          $expect_root));
+    }
   }
 
 
