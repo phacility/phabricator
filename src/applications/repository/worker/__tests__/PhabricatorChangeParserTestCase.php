@@ -952,6 +952,110 @@ final class PhabricatorChangeParserTestCase
       ));
   }
 
+  public function testSubversionPartialParser() {
+    $repository = $this->buildBareRepository('CHD');
+    $repository->setDetail('svn-subpath', 'trunk/');
+
+    id(new PhabricatorRepositoryPullEngine())
+      ->setRepository($repository)
+      ->pullRepository();
+
+    id(new PhabricatorRepositoryDiscoveryEngine())
+      ->setRepository($repository)
+      ->discoverCommits($repository);
+
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
+    $commits = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withRepositoryIDs(array($repository->getID()))
+      ->execute();
+
+    $this->expectChanges(
+      $repository,
+      $commits,
+      array(
+        // Copy of a file outside of the subpath from an earlier revision
+        // into the subpath.
+        4 => array(
+          array(
+            '/',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHILD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            0,
+            4,
+          ),
+          array(
+            '/goat',
+            null,
+            null,
+            DifferentialChangeType::TYPE_COPY_AWAY,
+            DifferentialChangeType::FILE_NORMAL,
+            0,
+            4,
+          ),
+          array(
+            '/trunk',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHILD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            0,
+            4,
+          ),
+          array(
+            '/trunk/goat',
+            '/goat',
+            '1',
+            DifferentialChangeType::TYPE_COPY_HERE,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            4,
+          ),
+        ),
+        3 => array(
+          array(
+            '/',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHILD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            0,
+            3,
+          ),
+          array(
+            '/trunk',
+            null,
+            null,
+            DifferentialChangeType::TYPE_ADD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            1,
+            3,
+          ),
+          array(
+            '/trunk/apple',
+            null,
+            null,
+            DifferentialChangeType::TYPE_ADD,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            3,
+          ),
+          array(
+            '/trunk/banana',
+            null,
+            null,
+            DifferentialChangeType::TYPE_ADD,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            3,
+          ),
+        ),
+      ));
+  }
+
   private function expectChanges(
     PhabricatorRepository $repository,
     array $commits,
@@ -1023,7 +1127,10 @@ final class PhabricatorChangeParserTestCase
       ksort($dicts);
       ksort($expect_changes);
 
-      $this->assertEqual($expect_changes, $dicts);
+      $this->assertEqual(
+        $expect_changes,
+        $dicts,
+        pht('Commit %s', $commit_identifier));
     }
   }
 
