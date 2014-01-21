@@ -73,6 +73,7 @@ final class PhabricatorDaemonConsoleController
     $logs = id(new PhabricatorDaemonLogQuery())
       ->setViewer($user)
       ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
+      ->setAllowStatusWrites(true)
       ->execute();
 
     $taskmasters = 0;

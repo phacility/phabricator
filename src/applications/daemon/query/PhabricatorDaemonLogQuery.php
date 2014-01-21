@@ -9,6 +9,7 @@ final class PhabricatorDaemonLogQuery
   private $ids;
   private $status = self::STATUS_ALL;
   private $daemonClasses;
+  private $allowStatusWrites;
 
   public static function getTimeUntilUnknown() {
     return 3 * PhutilDaemonOverseer::HEARTBEAT_WAIT;
@@ -30,6 +31,11 @@ final class PhabricatorDaemonLogQuery
 
   public function withDaemonClasses(array $classes) {
     $this->daemonClasses = $classes;
+    return $this;
+  }
+
+  public function setAllowStatusWrites($allow) {
+    $this->allowStatusWrites = $allow;
     return $this;
   }
 
@@ -80,11 +86,16 @@ final class PhabricatorDaemonLogQuery
         $status = $status_dead;
       }
 
-      // If we changed the daemon's status, update it.
+      // If we changed the daemon's status, adjust it.
       if ($status != $daemon->getStatus()) {
-        $guard = AphrontWriteGuard::beginScopedUnguardedWrites();
-        $daemon->setStatus($status)->save();
-        unset($guard);
+        $daemon->setStatus($status);
+
+        // ...and write it, if we're in a context where that's reasonable.
+        if ($this->allowStatusWrites) {
+          $guard = AphrontWriteGuard::beginScopedUnguardedWrites();
+            $daemon->save();
+          unset($guard);
+        }
       }
 
       // If the daemon no longer matches the filter, get rid of it.

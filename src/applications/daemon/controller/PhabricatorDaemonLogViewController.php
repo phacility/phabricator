@@ -16,6 +16,7 @@ final class PhabricatorDaemonLogViewController
     $log = id(new PhabricatorDaemonLogQuery())
       ->setViewer($user)
       ->withIDs(array($this->id))
+      ->setAllowStatusWrites(true)
       ->executeOne();
     if (!$log) {
       return new Aphront404Response();
