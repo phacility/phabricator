@@ -37,7 +37,7 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
       // TODO: Explicitly mark this commit as broken elsewhere? This isn't
       // supposed to happen but we have some cases like rE27 and rG935 in the
       // Facebook repositories where things got all clowned up.
-      return;
+      return array();
     }
 
     $raw_paths = array();
