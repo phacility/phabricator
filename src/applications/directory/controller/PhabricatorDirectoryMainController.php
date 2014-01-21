@@ -128,18 +128,10 @@ final class PhabricatorDirectoryMainController
         'Nothing appears to be critically broken right now.');
     }
 
+    $href = '/maniphest/?statuses[]=0&priorities[]='.$unbreak_now.'#R';
+    $title = pht('Unbreak Now!');
     $panel = new AphrontPanelView();
-    $panel->setHeader('Unbreak Now!');
-    $panel->setCaption('Open tasks with "Unbreak Now!" priority.');
-    $panel->addButton(
-      phutil_tag(
-        'a',
-        array(
-          'href' => '/maniphest/?statuses[]=0&priorities[]='.$unbreak_now.'#R',
-          'class' => 'grey button',
-        ),
-        "View All Unbreak Now \xC2\xBB"));
-
+    $panel->setHeader($this->renderSectionHeader($title, $href));
     $panel->appendChild($this->buildTaskListView($tasks));
     $panel->setNoBackground();
 
@@ -180,21 +172,11 @@ final class PhabricatorDirectoryMainController
           'need triage.'));
     }
 
+    $title = pht('Needs Triage');
+    $href = '/maniphest/?statuses[]=0&priorities[]='.$needs_triage.
+                    '&userProjects[]='.$user->getPHID().'#R';
     $panel = new AphrontPanelView();
-    $panel->setHeader('Needs Triage');
-    $panel->setCaption(hsprintf(
-      'Open tasks with "Needs Triage" priority in '.
-      '<a href="/project/">projects you are a member of</a>.'));
-
-    $panel->addButton(
-      phutil_tag(
-        'a',
-        array(
-          'href' => '/maniphest/?statuses[]=0&priorities[]='.$needs_triage.
-                    '&userProjects[]='.$user->getPHID().'#R',
-          'class' => 'grey button',
-        ),
-        "View All Triage \xC2\xBB"));
+    $panel->setHeader($this->renderSectionHeader($title, $href));
     $panel->appendChild($this->buildTaskListView($tasks));
     $panel->setNoBackground();
 
@@ -223,18 +205,10 @@ final class PhabricatorDirectoryMainController
         'No revisions are waiting on you.');
     }
 
+    $title = pht('Revisions Waiting on You');
+    $href = '/differential';
     $panel = new AphrontPanelView();
-    $panel->setHeader('Revisions Waiting on You');
-    $panel->setCaption('Revisions waiting for you for review or commit.');
-
-    $panel->addButton(
-      phutil_tag(
-        'a',
-        array(
-          'href' => '/differential/',
-          'class' => 'button grey',
-        ),
-        "View Active Revisions \xC2\xBB"));
+    $panel->setHeader($this->renderSectionHeader($title, $href));
 
     $revision_view = id(new DifferentialRevisionListView())
       ->setHighlightAge(true)
@@ -288,17 +262,10 @@ final class PhabricatorDirectoryMainController
         'You have no assigned tasks.');
     }
 
+    $title = pht('Assigned Tasks');
+    $href = '/maniphest';
     $panel = new AphrontPanelView();
-    $panel->setHeader('Assigned Tasks');
-
-    $panel->addButton(
-      phutil_tag(
-        'a',
-        array(
-          'href' => '/maniphest/',
-          'class' => 'button grey',
-        ),
-        "View Active Tasks \xC2\xBB"));
+    $panel->setHeader($this->renderSectionHeader($title, $href));
     $panel->appendChild($this->buildTaskListView($tasks));
     $panel->setNoBackground();
 
@@ -390,6 +357,16 @@ final class PhabricatorDirectoryMainController
     return $container;
   }
 
+  private function renderSectionHeader($title, $href) {
+    $header = phutil_tag(
+      'a',
+      array(
+        'href' => $href,
+      ),
+      $title);
+    return $header;
+  }
+
   private function renderMiniPanel($title, $body) {
     $panel = new AphrontMiniPanelView();
     $panel->appendChild(
@@ -435,18 +412,11 @@ final class PhabricatorDirectoryMainController
     $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
+    $title = pht('Audits');
+    $href = '/audit/';
     $panel = new AphrontPanelView();
-    $panel->setHeader('Audits');
-    $panel->setCaption('Commits awaiting your audit.');
+    $panel->setHeader($this->renderSectionHeader($title, $href));
     $panel->appendChild($view);
-    $panel->addButton(
-      phutil_tag(
-        'a',
-        array(
-          'href' => '/audit/',
-          'class' => 'button grey',
-        ),
-        "View Active Audits \xC2\xBB"));
     $panel->setNoBackground();
 
     return $panel;
@@ -480,18 +450,11 @@ final class PhabricatorDirectoryMainController
     $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
+    $title = pht('Problem Commits');
+    $href = '/audit/';
     $panel = new AphrontPanelView();
-    $panel->setHeader('Problem Commits');
-    $panel->setCaption('Commits which auditors have raised concerns about.');
+    $panel->setHeader($this->renderSectionHeader($title, $href));
     $panel->appendChild($view);
-    $panel->addButton(
-      phutil_tag(
-        'a',
-        array(
-          'href' => '/audit/',
-          'class' => 'button grey',
-        ),
-        "View Problem Commits \xC2\xBB"));
     $panel->setNoBackground();
 
     return $panel;
