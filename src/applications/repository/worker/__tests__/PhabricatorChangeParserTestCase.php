@@ -393,6 +393,199 @@ final class PhabricatorChangeParserTestCase
       ));
   }
 
+  public function testSubversionParser() {
+    $repository = $this->buildDiscoveredRepository('CHC');
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
+    $commits = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withRepositoryIDs(array($repository->getID()))
+      ->execute();
+
+    $this->expectChanges(
+      $repository,
+      $commits,
+      array(
+        '7' => array(
+          array(
+            '/',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHILD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            0,
+            7,
+          ),
+          array(
+            '/file_moved',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHANGE,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            7,
+          ),
+        ),
+
+        '6' => array(
+          array(
+            '/',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHILD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            0,
+            6,
+          ),
+          array(
+            '/file_link',
+            null,
+            null,
+            DifferentialChangeType::TYPE_ADD,
+            // TODO: This is not correct, and should be FILE_SYMLINK.
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            6,
+          ),
+        ),
+
+        '5' => array(
+          array(
+            '/',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHILD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            0,
+            5,
+          ),
+          array(
+            '/dir',
+            null,
+            null,
+            DifferentialChangeType::TYPE_ADD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            1,
+            5,
+          ),
+          array(
+            '/dir/subfile',
+            null,
+            null,
+            DifferentialChangeType::TYPE_ADD,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            5,
+          ),
+        ),
+
+        '4' => array(
+          array(
+            '/',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHILD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            0,
+            4,
+          ),
+          array(
+            '/file',
+            null,
+            null,
+            DifferentialChangeType::TYPE_MOVE_AWAY,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            4,
+          ),
+          array(
+            '/file_moved',
+            '/file',
+            '2',
+            DifferentialChangeType::TYPE_MOVE_HERE,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            4,
+          ),
+        ),
+
+        '3' => array(
+          array(
+            '/',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHILD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            0,
+            3,
+          ),
+          array(
+            '/file',
+            null,
+            null,
+            DifferentialChangeType::TYPE_COPY_AWAY,
+            DifferentialChangeType::FILE_NORMAL,
+            0,
+            3,
+          ),
+          array(
+            '/file_copy',
+            '/file',
+            '2',
+            DifferentialChangeType::TYPE_COPY_HERE,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            3,
+          ),
+        ),
+
+        '2' => array(
+          array(
+            '/',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHILD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            0,
+            2,
+          ),
+          array(
+            '/file',
+            null,
+            null,
+            DifferentialChangeType::TYPE_CHANGE,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            2,
+          ),
+        ),
+
+        '1' => array(
+          array(
+            '/',
+            null,
+            null,
+            // The Git and Svn parsers don't recognize the first commit as
+            // creating "/", while the Mercurial parser does. All the parsers
+            // should probably behave like the Mercurial parser.
+            DifferentialChangeType::TYPE_CHILD,
+            DifferentialChangeType::FILE_DIRECTORY,
+            0,
+            1,
+          ),
+          array(
+            '/file',
+            null,
+            null,
+            DifferentialChangeType::TYPE_ADD,
+            DifferentialChangeType::FILE_NORMAL,
+            1,
+            1,
+          ),
+        ),
+      ));
+  }
+
   private function expectChanges(
     PhabricatorRepository $repository,
     array $commits,
@@ -404,6 +597,9 @@ final class PhabricatorChangeParserTestCase
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         $parser = 'PhabricatorRepositoryMercurialCommitChangeParserWorker';
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $parser = 'PhabricatorRepositorySvnCommitChangeParserWorker';
         break;
       default:
         throw new Exception(pht('No support yet.'));
@@ -448,7 +644,7 @@ final class PhabricatorChangeParserTestCase
         $dicts[$key] = array(
           $path_map[(int)$change->getPathID()],
           $target_path,
-          $target_commit,
+          $target_commit ? (string)$target_commit : null,
           (int)$change->getChangeType(),
           (int)$change->getFileType(),
           (int)$change->getIsDirect(),
