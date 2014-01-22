@@ -36,12 +36,14 @@ final class DiffusionRepositoryListController extends DiffusionController
     $project_handles = $this->loadViewerHandles($project_phids);
 
     $list = new PHUIObjectItemListView();
+    $list->setCards(true);
     foreach ($repositories as $repository) {
       $id = $repository->getID();
 
       $item = id(new PHUIObjectItemView())
         ->setUser($viewer)
         ->setHeader($repository->getName())
+        ->setObjectName('r'.$repository->getCallsign())
         ->setHref($this->getApplicationURI($repository->getCallsign().'/'));
 
       $commit = $repository->getMostRecentCommit();
