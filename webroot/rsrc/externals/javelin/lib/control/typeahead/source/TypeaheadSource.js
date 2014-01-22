@@ -185,7 +185,9 @@ JX.install('TypeaheadSource', {
       this._raw[obj.id] = obj;
       var t = this.tokenize(obj.tokenizable || obj.name);
       for (var jj = 0; jj < t.length; ++jj) {
-        this._lookup[t[jj]] = this._lookup[t[jj]] || [];
+        if (!this._lookup.hasOwnProperty(t[jj])) {
+          this._lookup[t[jj]] = [];
+        }
         this._lookup[t[jj]].push(obj.id);
       }
     },
