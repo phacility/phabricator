@@ -38,10 +38,11 @@ final class PhabricatorRepositoryManagementDiscoverWorkflow
     foreach ($repos as $repo) {
       $console->writeOut("Discovering '%s'...\n", $repo->getCallsign());
 
-      $daemon = new PhabricatorRepositoryPullLocalDaemon(array());
-      $daemon->setVerbose($args->getArg('verbose'));
-      $daemon->setRepair($args->getArg('repair'));
-      $daemon->discoverRepository($repo);
+      id(new PhabricatorRepositoryDiscoveryEngine())
+        ->setRepository($repo)
+        ->setVerbose($args->getArg('verbose'))
+        ->setRepairMode($args->getArg('repair'))
+        ->discoverCommits();
     }
 
     $console->writeOut("Done.\n");

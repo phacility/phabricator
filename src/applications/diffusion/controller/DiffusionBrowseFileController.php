@@ -774,7 +774,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
           "\xE2\x80\x8B",
 
           // TODO: [HTML] Not ideal.
-          phutil_safe_html($line['data']),
+          phutil_safe_html(str_replace("\t", '  ', $line['data'])),
         ));
 
       $rows[] = phutil_tag(

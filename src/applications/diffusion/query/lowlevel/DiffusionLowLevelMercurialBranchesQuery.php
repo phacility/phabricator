@@ -18,9 +18,9 @@ final class DiffusionLowLevelMercurialBranchesQuery
 
     $lines = ArcanistMercurialParser::parseMercurialBranches($stdout);
     foreach ($lines as $name => $spec) {
-      $branches[] = id(new DiffusionBranchInformation())
-        ->setName($name)
-        ->setHeadCommitIdentifier($spec['rev']);
+      $branches[] = id(new DiffusionRepositoryRef())
+        ->setShortName($name)
+        ->setCommitIdentifier($spec['rev']);
     }
 
     return $branches;

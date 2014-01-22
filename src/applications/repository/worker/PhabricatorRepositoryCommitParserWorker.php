@@ -40,8 +40,7 @@ abstract class PhabricatorRepositoryCommitParserWorker
     }
 
     $this->repository = $repository;
-
-    return $this->parseCommit($repository, $this->commit);
+    $this->parseCommit($repository, $this->commit);
   }
 
   final protected function shouldQueueFollowupTasks() {

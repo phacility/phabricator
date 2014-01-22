@@ -552,6 +552,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         throw new Exception("Unrecognized version control system.");
     }
 
+    $closeable_flag = PhabricatorRepositoryCommit::IMPORTED_CLOSEABLE;
+    if ($commit->isPartiallyImported($closeable_flag)) {
+      return true;
+    }
+
+    // TODO: Remove this eventually, it's no longer written to by the import
+    // pipeline (however, old tasks may still be queued which don't reflect
+    // the new data format).
     $branches = $data->getCommitDetail('seenOnBranches', array());
     foreach ($branches as $branch) {
       if ($this->shouldAutocloseBranch($branch)) {
@@ -800,6 +808,12 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         ->loadAllWhere('repositoryPHID = %s', $this->getPHID());
       foreach ($mirrors as $mirror) {
         $mirror->delete();
+      }
+
+      $ref_cursors = id(new PhabricatorRepositoryRefCursor())
+        ->loadAllWhere('repositoryPHID = %s', $this->getPHID());
+      foreach ($ref_cursors as $cursor) {
+        $cursor->delete();
       }
 
       $conn_w = $this->establishConnection('w');

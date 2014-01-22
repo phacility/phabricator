@@ -1,9 +1,8 @@
 <?php
 
-/**
- * @group legalpad
- */
-final class LegalpadDocumentSignature extends LegalpadDAO {
+final class LegalpadDocumentSignature
+  extends LegalpadDAO
+  implements PhabricatorPolicyInterface {
 
   const VERIFIED = 0;
   const UNVERIFIED = 1;
@@ -32,6 +31,28 @@ final class LegalpadDocumentSignature extends LegalpadDAO {
 
   public function isVerified() {
     return $this->getVerified() != self::UNVERIFIED;
+  }
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::POLICY_USER;
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
   }
 
 }

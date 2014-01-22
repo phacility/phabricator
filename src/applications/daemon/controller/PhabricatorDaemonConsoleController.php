@@ -73,6 +73,7 @@ final class PhabricatorDaemonConsoleController
     $logs = id(new PhabricatorDaemonLogQuery())
       ->setViewer($user)
       ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
+      ->setAllowStatusWrites(true)
       ->execute();
 
     $taskmasters = 0;
@@ -116,15 +117,10 @@ final class PhabricatorDaemonConsoleController
         'n',
       ));
 
-    $completed_header = id(new PHUIHeaderView())
-      ->setHeader(pht('Recently Completed Tasks (Last 15m)'));
-
-    $completed_panel = new AphrontPanelView();
+    $completed_panel = new PHUIObjectBoxView();
+    $completed_panel->setHeaderText(
+      pht('Recently Completed Tasks (Last 15m)'));
     $completed_panel->appendChild($completed_table);
-    $completed_panel->setNoBackground();
-
-    $daemon_header = id(new PHUIHeaderView())
-      ->setHeader(pht('Active Daemons'));
 
     $daemon_table = new PhabricatorDaemonLogListView();
     $daemon_table->setUser($user);
@@ -151,6 +147,10 @@ final class PhabricatorDaemonConsoleController
       );
     }
 
+    $daemon_panel = new PHUIObjectBoxView();
+    $daemon_panel->setHeaderText(pht('Active Daemons'));
+    $daemon_panel->appendChild($daemon_table);
+
     $leased_table = new AphrontTableView($rows);
     $leased_table->setHeaders(
       array(
@@ -172,10 +172,9 @@ final class PhabricatorDaemonConsoleController
       ));
     $leased_table->setNoDataString(pht('No tasks are leased by workers.'));
 
-    $leased_panel = new AphrontPanelView();
-    $leased_panel->setHeader('Leased Tasks');
+    $leased_panel = new PHUIObjectBoxView();
+    $leased_panel->setHeaderText(pht('Leased Tasks'));
     $leased_panel->appendChild($leased_table);
-    $leased_panel->setNoBackground();
 
     $task_table = new PhabricatorWorkerActiveTask();
     $queued = queryfx_all(
@@ -205,10 +204,9 @@ final class PhabricatorDaemonConsoleController
       ));
     $queued_table->setNoDataString(pht('Task queue is empty.'));
 
-    $queued_panel = new AphrontPanelView();
-    $queued_panel->setHeader(pht('Queued Tasks'));
+    $queued_panel = new PHUIObjectBoxView();
+    $queued_panel->setHeaderText(pht('Queued Tasks'));
     $queued_panel->appendChild($queued_table);
-    $queued_panel->setNoBackground();
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Console'));
@@ -218,10 +216,8 @@ final class PhabricatorDaemonConsoleController
     $nav->appendChild(
       array(
         $crumbs,
-        $completed_header,
         $completed_panel,
-        $daemon_header,
-        $daemon_table,
+        $daemon_panel,
         $queued_panel,
         $leased_panel,
       ));

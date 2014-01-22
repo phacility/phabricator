@@ -6,12 +6,13 @@ final class DiffusionBranchTableView extends DiffusionView {
   private $commits = array();
 
   public function setBranches(array $branches) {
-    assert_instances_of($branches, 'DiffusionBranchInformation');
+    assert_instances_of($branches, 'DiffusionRepositoryRef');
     $this->branches = $branches;
     return $this;
   }
 
   public function setCommits(array $commits) {
+    assert_instances_of($commits, 'PhabricatorRepositoryCommit');
     $this->commits = mpull($commits, null, 'getCommitIdentifier');
     return $this;
   }
@@ -23,7 +24,7 @@ final class DiffusionBranchTableView extends DiffusionView {
     $rows = array();
     $rowc = array();
     foreach ($this->branches as $branch) {
-      $commit = idx($this->commits, $branch->getHeadCommitIdentifier());
+      $commit = idx($this->commits, $branch->getCommitIdentifier());
       if ($commit) {
         $details = $commit->getSummary();
         $datetime = phabricator_datetime($commit->getEpoch(), $this->user);
@@ -39,7 +40,7 @@ final class DiffusionBranchTableView extends DiffusionView {
             'href' => $drequest->generateURI(
               array(
                 'action' => 'history',
-                'branch' => $branch->getName(),
+                'branch' => $branch->getShortName(),
               ))
           ),
           pht('History')),
@@ -49,17 +50,17 @@ final class DiffusionBranchTableView extends DiffusionView {
             'href' => $drequest->generateURI(
               array(
                 'action' => 'browse',
-                'branch' => $branch->getName(),
+                'branch' => $branch->getShortName(),
               )),
           ),
-          $branch->getName()),
+          $branch->getShortName()),
         self::linkCommit(
           $drequest->getRepository(),
-          $branch->getHeadCommitIdentifier()),
+          $branch->getCommitIdentifier()),
         $datetime,
         AphrontTableView::renderSingleDisplayLine($details),
       );
-      if ($branch->getName() == $current_branch) {
+      if ($branch->getShortName() == $current_branch) {
         $rowc[] = 'highlighted';
       } else {
         $rowc[] = null;

@@ -29,7 +29,7 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
 
     // Pull the top-level path changes out of "svn log". This is pretty
     // straightforward; just parse the XML log.
-    $log = $this->getSVNLogXMLObject($uri, $svn_commit);
+    $log = $this->getSVNLogXMLObject($repository, $uri, $svn_commit);
 
     $entry = $log->logentry[0];
 
@@ -37,7 +37,7 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
       // TODO: Explicitly mark this commit as broken elsewhere? This isn't
       // supposed to happen but we have some cases like rE27 and rG935 in the
       // Facebook repositories where things got all clowned up.
-      return;
+      return array();
     }
 
     $raw_paths = array();
@@ -357,56 +357,50 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
     $path_map = $this->lookupOrCreatePaths($lookup_paths);
     $commit_map = $this->lookupSvnCommits($repository, $lookup_commits);
 
-    $this->writeChanges($repository, $commit, $effects, $path_map, $commit_map);
     $this->writeBrowse($repository, $commit, $effects, $path_map);
+
+    return $this->buildChanges(
+      $repository,
+      $commit,
+      $effects,
+      $path_map,
+      $commit_map);
   }
 
-  private function writeChanges(
+  private function buildChanges(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit,
     array $effects,
     array $path_map,
     array $commit_map) {
 
-    $conn_w = $repository->establishConnection('w');
-
-    $sql = array();
+    $results = array();
     foreach ($effects as $effect) {
-      $sql[] = qsprintf(
-        $conn_w,
-        '(%d, %d, %d, %nd, %nd, %d, %d, %d, %d)',
-        $repository->getID(),
-        $path_map[$effect['rawPath']],
-        $commit->getID(),
-        $effect['rawTargetPath']
-          ? $path_map[$effect['rawTargetPath']]
-          : null,
-        $effect['rawTargetCommit']
-          ? $commit_map[$effect['rawTargetCommit']]
-          : null,
-        $effect['changeType'],
-        $effect['fileType'],
-        $effect['rawDirect']
-          ? 1
-          : 0,
-        $commit->getCommitIdentifier());
+      $path_id = $path_map[$effect['rawPath']];
+
+      $target_path_id = null;
+      if ($effect['rawTargetPath']) {
+        $target_path_id = $path_map[$effect['rawTargetPath']];
+      }
+
+      $target_commit_id = null;
+      if ($effect['rawTargetCommit']) {
+        $target_commit_id = $commit_map[$effect['rawTargetCommit']];
+      }
+
+      $result = id(new PhabricatorRepositoryParsedChange())
+        ->setPathID($path_id)
+        ->setTargetPathID($target_path_id)
+        ->setTargetCommitID($target_commit_id)
+        ->setChangeType($effect['changeType'])
+        ->setFileType($effect['fileType'])
+        ->setIsDirect($effect['rawDirect'])
+        ->setCommitSequence($commit->getCommitIdentifier());
+
+      $results[] = $result;
     }
 
-    queryfx(
-      $conn_w,
-      'DELETE FROM %T WHERE commitID = %d',
-      PhabricatorRepository::TABLE_PATHCHANGE,
-      $commit->getID());
-    foreach (array_chunk($sql, 512) as $sql_chunk) {
-      queryfx(
-        $conn_w,
-        'INSERT INTO %T
-          (repositoryID, pathID, commitID, targetPathID, targetCommitID,
-            changeType, fileType, isDirect, commitSequence)
-          VALUES %Q',
-        PhabricatorRepository::TABLE_PATHCHANGE,
-        implode(', ', $sql_chunk));
-    }
+    return $results;
   }
 
   private function writeBrowse(
@@ -769,13 +763,12 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
     return $parents;
   }
 
-  /**
-   * This method is kind of awkward here but both the SVN message and
-   * change parsers use it.
-   */
-  private function getSVNLogXMLObject($uri, $revision) {
-    list($xml) = $this->repository->execxRemoteCommand(
-      "log --xml --verbose --limit 1 %s@%d",
+  private function getSVNLogXMLObject(
+    PhabricatorRepository $repository,
+    $uri,
+    $revision) {
+    list($xml) = $repository->execxRemoteCommand(
+      'log --xml --verbose --limit 1 %s@%d',
       $uri,
       $revision);
 

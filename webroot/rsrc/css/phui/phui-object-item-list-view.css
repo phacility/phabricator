@@ -7,7 +7,7 @@
 }
 
 .device-desktop .phui-object-item-list-view {
-  padding: 20px;
+  padding: 16px;
 }
 
 .phui-object-item-list-view + .phui-object-item-list-view {
@@ -537,9 +537,10 @@
 
 .drag-ghost {
   position: relative;
-  border: 1px dashed #aaaaaa;
-  background: #f9f9f9;
-  margin: 4px;
+  border: 1px dashed #fff;
+  background: rgba(255,255,255,.5);
+  margin-bottom: 4px;
+  border-radius: 3px;
 }
 
 .drag-dragging {

@@ -3,7 +3,7 @@
  */
 
 .maniphest-task-group {
-  padding-bottom: 30px;
+  padding-bottom: 24px;
 }
 
 .maniphest-batch-selected td {
@@ -75,9 +75,9 @@
 }
 
 .maniphest-list-container {
-  padding: 20px;
+  padding: 16px;
 }
 
 .device-phone .maniphest-list-container {
-  padding: 20px 5px;
+  padding: 20px 4px;
 }

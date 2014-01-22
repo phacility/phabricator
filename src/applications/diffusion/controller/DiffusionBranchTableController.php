@@ -18,14 +18,15 @@ final class DiffusionBranchTableController extends DiffusionController {
     $pager->setOffset($request->getInt('offset'));
 
     // TODO: Add support for branches that contain commit
-    $branches = DiffusionBranchInformation::newFromConduit(
-      $this->callConduitWithDiffusionRequest(
-        'diffusion.branchquery',
-        array(
-          'offset' => $pager->getOffset(),
-          'limit' => $pager->getPageSize() + 1
-        )));
+    $branches = $this->callConduitWithDiffusionRequest(
+      'diffusion.branchquery',
+      array(
+        'offset' => $pager->getOffset(),
+        'limit' => $pager->getPageSize() + 1
+      ));
     $branches = $pager->sliceResults($branches);
+
+    $branches = DiffusionRepositoryRef::loadAllFromDictionaries($branches);
 
     $content = null;
     if (!$branches) {
@@ -35,7 +36,7 @@ final class DiffusionBranchTableController extends DiffusionController {
     } else {
       $commits = id(new DiffusionCommitQuery())
         ->setViewer($viewer)
-        ->withIdentifiers(mpull($branches, 'getHeadCommitIdentifier'))
+        ->withIdentifiers(mpull($branches, 'getCommitIdentifier'))
         ->withRepository($repository)
         ->execute();
 

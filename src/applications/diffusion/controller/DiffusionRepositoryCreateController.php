@@ -473,8 +473,10 @@ final class DiffusionRepositoryCreateController
         "| `svn://svn.example.net/svnroot/` |\n".
         "| `file:///local/path/to/svnroot/` |\n".
         "\n\n".
-        "Make sure you specify the root of the repository, not a ".
-        "subdirectory.");
+        "You **MUST** specify the root of the repository, not a ".
+        "subdirectory. (If you want to import only part of a Subversion ".
+        "repository, use the //Import Only// option at the end of this ".
+        "workflow.)");
     } else {
       throw new Exception("Unsupported VCS!");
     }

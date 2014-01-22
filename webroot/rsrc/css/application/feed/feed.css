@@ -19,11 +19,15 @@
 
 .device-desktop .phabricator-feed-frame {
   max-width: 600px;
-  margin: 20px;
+  margin: 16px;
+}
+
+.phabricator-feed-frame .phabricator-action-header {
+  padding: 0;
 }
 
 .phabricator-feed-story-date-separator {
-  margin-top: 2em;
+  margin-top: 16px;
 }
 
 .phabricator-feed-newer-link {

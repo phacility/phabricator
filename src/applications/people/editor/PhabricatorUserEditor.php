@@ -536,7 +536,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
         $email->setIsPrimary(1);
         $email->save();
 
-        $log = PhabricatorUserLog::initialieNewLog(
+        $log = PhabricatorUserLog::initializeNewLog(
           $actor,
           $user->getPHID(),
           PhabricatorUserLog::ACTION_EMAIL_PRIMARY);

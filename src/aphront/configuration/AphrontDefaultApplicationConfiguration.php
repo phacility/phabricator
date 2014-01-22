@@ -107,9 +107,12 @@ class AphrontDefaultApplicationConfiguration
 
     $data += $parser->parseQueryString(idx($_SERVER, 'QUERY_STRING', ''));
 
+    $cookie_prefix = PhabricatorEnv::getEnvConfig('phabricator.cookie-prefix');
+
     $request = new AphrontRequest($this->getHost(), $this->getPath());
     $request->setRequestData($data);
     $request->setApplicationConfiguration($this);
+    $request->setCookiePrefix($cookie_prefix);
 
     return $request;
   }

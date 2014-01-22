@@ -1,7 +1,7 @@
-@title Configuring Backups
+@title Configuring Backups and Performing Migrations
 @group config
 
-Advice for backing up Phabricator.
+Advice for backing up Phabricator, or migrating from one machine to another.
 
 = Overview =
 
@@ -16,12 +16,17 @@ which needs to be backed up are:
 
 This document discusses approaches for backing up this data.
 
+If you are migrating from one machine to another, you can generally follow the
+same steps you would if you were creating a backup and then restoring it, you
+will just backup the old machine and then restore the data onto the new
+machine.
+
 = Backup: MySQL Databases =
 
 Most of Phabricator's data is stored in MySQL, and it's the most important thing
 to back up. You can run `bin/storage dump` to get a dump of all the MySQL
-databases. This is a convenience script which just runs a normal `mysqldump`
-of every database Phabricator owns.
+databases. This is a convenience script which just runs a normal `mysqldump`,
+but will only dump databases Phabricator owns.
 
 Since most of this data is compressible, it may be helpful to run it through
 gzip prior to storage. For example:

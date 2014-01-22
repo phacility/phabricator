@@ -21,6 +21,7 @@ final class LegalpadDocument extends LegalpadDAO
 
   private $documentBody = self::ATTACHABLE;
   private $contributors = self::ATTACHABLE;
+  private $signatures   = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -51,6 +52,15 @@ final class LegalpadDocument extends LegalpadDAO
 
   public function attachContributors(array $contributors) {
     $this->contributors = $contributors;
+    return $this;
+  }
+
+  public function getSignatures() {
+    return $this->assertAttached($this->signatures);
+  }
+
+  public function attachSignatures(array $signatures) {
+    $this->signatures = $signatures;
     return $this;
   }
 

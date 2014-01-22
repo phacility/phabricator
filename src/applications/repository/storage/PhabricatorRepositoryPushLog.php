@@ -77,18 +77,15 @@ final class PhabricatorRepositoryPushLog
   }
 
   public function getRefName() {
-    if ($this->getRefNameEncoding() == 'utf8') {
-      return $this->getRefNameRaw();
-    }
-    return phutil_utf8ize($this->getRefNameRaw());
+    return $this->getUTF8StringFromStorage(
+      $this->getRefNameRaw(),
+      $this->getRefNameEncoding());
   }
 
   public function setRefName($ref_raw) {
-    $encoding = phutil_is_utf8($ref_raw) ? 'utf8' : null;
-
     $this->setRefNameRaw($ref_raw);
     $this->setRefNameHash(PhabricatorHash::digestForIndex($ref_raw));
-    $this->setRefNameEncoding($encoding);
+    $this->setRefNameEncoding($this->detectEncodingForStorage($ref_raw));
 
     return $this;
   }

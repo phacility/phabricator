@@ -191,6 +191,11 @@ span.single-display-line-content {
   position: absolute;
 }
 
+.device-phone span.single-display-line-content {
+  white-space: nowrap;
+  position: static;
+}
+
 .aphront-table-view tr.highlighted {
   background: #fcf8e2;
 }

@@ -66,6 +66,16 @@
 }
 
 .project-column-empty {
-  /* TODO: Use this to put some kind of reasonable null state in the columns? */
-  background: {$red};
+  background: rgba(255,255,255,.4);
+  border-radius: 3px;
+  margin-bottom: 4px;
+  border: 1px dashed #fff;
+}
+
+.project-column-empty .drag-ghost {
+  display: none;
+}
+
+.project-column-empty.drag-target-list {
+  background: rgba(255,255,255,.7);
 }

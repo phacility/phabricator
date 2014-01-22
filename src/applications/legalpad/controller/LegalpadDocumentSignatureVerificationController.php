@@ -21,8 +21,18 @@ extends LegalpadController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $signature = id(new LegalpadDocumentSignature())
-      ->loadOneWhere('secretKey = %s', $this->code);
+    // this page can be accessed by not logged in users to valid their
+    // signatures. use the omnipotent user for these cases.
+    if (!$user->isLoggedIn()) {
+      $viewer = PhabricatorUser::getOmnipotentUser();
+    } else {
+      $viewer = $user;
+    }
+
+    $signature = id(new LegalpadDocumentSignatureQuery())
+      ->setViewer($viewer)
+      ->withSecretKeys(array($this->code))
+      ->executeOne();
 
     if (!$signature) {
       $title = pht('Unable to Verify Signature');

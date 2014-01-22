@@ -34,6 +34,7 @@ final class PhabricatorDaemonManagementLogWorkflow
     $daemon = id(new PhabricatorDaemonLogQuery())
       ->setViewer($this->getViewer())
       ->withIDs(array($id))
+      ->setAllowStatusWrites(true)
       ->executeOne();
 
     if (!$daemon) {

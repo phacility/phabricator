@@ -39,7 +39,7 @@ final class DiffusionGitRequest extends DiffusionRequest {
     if ($this->repository->isWorkingCopyBare()) {
       return $branch;
     } else {
-      $remote = DiffusionBranchInformation::DEFAULT_GIT_REMOTE;
+      $remote = DiffusionGitBranch::DEFAULT_GIT_REMOTE;
       return $remote.'/'.$branch;
     }
   }
