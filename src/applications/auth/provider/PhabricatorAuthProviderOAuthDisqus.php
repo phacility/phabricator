@@ -8,7 +8,7 @@ final class PhabricatorAuthProviderOAuthDisqus
   }
 
   public function getConfigurationHelp() {
-    $login_uri = $this->getLoginURI();
+    $login_uri = PhabricatorEnv::getURI($this->getLoginURI());
 
     return pht(
       "To configure Disqus OAuth, create a new application here:".

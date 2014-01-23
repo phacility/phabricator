@@ -25,7 +25,7 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
     $adapter->setClientSecret(
       new PhutilOpaqueEnvelope(
         $config->getProperty(self::PROPERTY_APP_SECRET)));
-    $adapter->setRedirectURI($this->getLoginURI());
+    $adapter->setRedirectURI(PhabricatorEnv::getURI($this->getLoginURI()));
     return $adapter;
   }
 

@@ -8,7 +8,7 @@ final class PhabricatorAuthProviderOAuthAmazon
   }
 
   public function getConfigurationHelp() {
-    $login_uri = $this->getLoginURI();
+    $login_uri = PhabricatorEnv::getURI($this->getLoginURI());
 
     $uri = new PhutilURI(PhabricatorEnv::getProductionURI('/'));
     $https_note = null;

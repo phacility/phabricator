@@ -21,7 +21,7 @@ final class PhabricatorAuthProviderOAuth1JIRA
         "**Step 1 of 2**: Provide the name and URI for your JIRA install.\n\n".
         "In the next step, you will configure JIRA.");
     } else {
-      $login_uri = $this->getLoginURI();
+      $login_uri = PhabricatorEnv::getURI($this->getLoginURI());
       return pht(
         "**Step 2 of 2**: In this step, you will configure JIRA.\n\n".
         "**Create a JIRA Application**: Log into JIRA and go to ".

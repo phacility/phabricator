@@ -29,7 +29,7 @@ final class PhabricatorAuthProviderPersona
     Javelin::initBehavior(
       'persona-login',
       array(
-        'loginURI' => $this->getLoginURI(),
+        'loginURI' => PhabricatorEnv::getURI($this->getLoginURI()),
       ));
 
     return $this->renderStandardLoginButton(

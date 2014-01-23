@@ -9,7 +9,7 @@ final class PhabricatorAuthProviderOAuthAsana
 
   public function getConfigurationHelp() {
     $app_uri = PhabricatorEnv::getProductionURI('/');
-    $login_uri = $this->getLoginURI();
+    $login_uri = PhabricatorEnv::getURI($this->getLoginURI());
 
     return pht(
       "To configure Asana OAuth, create a new application here:".
