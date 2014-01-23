@@ -75,11 +75,15 @@ final class PhabricatorSettingsPanelPassword
       if (strlen($pass) < $min_len) {
         $errors[] = pht('Your new password is too short.');
         $e_new = pht('Too Short');
-      }
-
-      if ($pass !== $conf) {
+      } else if ($pass !== $conf) {
         $errors[] = pht('New password and confirmation do not match.');
         $e_conf = pht('Invalid');
+      } else if (PhabricatorCommonPasswords::isCommonPassword($pass)) {
+        $e_new = pht('Very Weak');
+        $e_conf = pht('Very Weak');
+        $errors[] = pht(
+          'Your new password is very weak: it is one of the most common '.
+          'passwords in use. Choose a stronger password.');
       }
 
       if (!$errors) {

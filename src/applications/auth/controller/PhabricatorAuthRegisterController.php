@@ -182,6 +182,14 @@ final class PhabricatorAuthRegisterController
           $errors[] = pht(
             'Password is too short (must be at least %d characters long).',
             $min_len);
+        } else if (
+          PhabricatorCommonPasswords::isCommonPassword($value_password)) {
+
+          $e_password = pht('Very Weak');
+          $errors[] = pht(
+            'Password is pathologically weak. This password is one of the '.
+            'most common passwords in use, and is extremely easy for '.
+            'attackers to guess. You must choose a stronger password.');
         } else {
           $e_password = null;
         }
