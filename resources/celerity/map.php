@@ -7,7 +7,7 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => '2eafddad',
+    'core.pkg.css' => '6c70dd0e',
     'core.pkg.js' => 'c907bd96',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => '5a65a762',
@@ -40,7 +40,7 @@ return array(
     'rsrc/css/aphront/typeahead.css' => '00c9a200',
     'rsrc/css/application/auth/auth.css' => '1e655982',
     'rsrc/css/application/base/main-menu-view.css' => 'aba0b7a6',
-    'rsrc/css/application/base/notification-menu.css' => '07433791',
+    'rsrc/css/application/base/notification-menu.css' => 'fc9a363c',
     'rsrc/css/application/base/phabricator-application-launch-view.css' => '6f8453d9',
     'rsrc/css/application/base/standard-page-view.css' => '517cdfb1',
     'rsrc/css/application/chatlog/chatlog.css' => '0cd2bc78',
@@ -693,7 +693,7 @@ return array(
     'phabricator-nav-view-css' => 'd0d4a509',
     'phabricator-notification' => '95944043',
     'phabricator-notification-css' => '6901121e',
-    'phabricator-notification-menu-css' => '07433791',
+    'phabricator-notification-menu-css' => 'fc9a363c',
     'phabricator-object-list-view-css' => '1a1ea560',
     'phabricator-object-selector-css' => '029a133d',
     'phabricator-phtize' => 'd254d646',
