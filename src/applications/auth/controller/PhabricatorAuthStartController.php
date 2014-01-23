@@ -86,9 +86,8 @@ final class PhabricatorAuthStartController
     }
 
     if (!$request->isFormPost()) {
-      $request->setCookie(
-        PhabricatorCookies::COOKIE_NEXTURI,
-        $next_uri);
+      PhabricatorCookies::setNextURICookie($request, $next_uri);
+
       $request->setCookie(
         PhabricatorCookies::COOKIE_CLIENTID,
         Filesystem::readRandomCharacters(16));

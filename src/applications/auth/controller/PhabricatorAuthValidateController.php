@@ -54,7 +54,7 @@ final class PhabricatorAuthValidateController
       return $this->renderErrors($failures);
     }
 
-    $next = $request->getCookie(PhabricatorCookies::COOKIE_NEXTURI);
+    $next = PhabricatorCookies::getNextURICookie($request);
     $request->clearCookie(PhabricatorCookies::COOKIE_NEXTURI);
 
     if (!PhabricatorEnv::isValidLocalWebResource($next)) {

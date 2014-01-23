@@ -86,7 +86,7 @@ final class PhabricatorEmailTokenController
           ));
     }
 
-    $request->setCookie(PhabricatorCookies::COOKIE_NEXTURI, $next);
+    PhabricatorCookies::setNextURICookie($request, $next, $force = true);
 
     return $this->loginUser($target_user);
   }
