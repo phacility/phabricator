@@ -163,22 +163,25 @@ final class PhabricatorAuthProviderPassword
     $account = null;
     $log_user = null;
 
-    if (!$require_captcha || $captcha_valid) {
-      $username_or_email = $request->getStr('username');
-      if (strlen($username_or_email)) {
-        $user = id(new PhabricatorUser())->loadOneWhere(
-          'username = %s',
-          $username_or_email);
+    if ($request->isFormPost()) {
+      if (!$require_captcha || $captcha_valid) {
+        $username_or_email = $request->getStr('username');
+        if (strlen($username_or_email)) {
+          $user = id(new PhabricatorUser())->loadOneWhere(
+            'username = %s',
+            $username_or_email);
 
-        if (!$user) {
-          $user = PhabricatorUser::loadOneWithEmailAddress($username_or_email);
-        }
+          if (!$user) {
+            $user = PhabricatorUser::loadOneWithEmailAddress(
+              $username_or_email);
+          }
 
-        if ($user) {
-          $envelope = new PhutilOpaqueEnvelope($request->getStr('password'));
-          if ($user->comparePassword($envelope)) {
-            $account = $this->loadOrCreateAccount($user->getPHID());
-            $log_user = $user;
+          if ($user) {
+            $envelope = new PhutilOpaqueEnvelope($request->getStr('password'));
+            if ($user->comparePassword($envelope)) {
+              $account = $this->loadOrCreateAccount($user->getPHID());
+              $log_user = $user;
+            }
           }
         }
       }
