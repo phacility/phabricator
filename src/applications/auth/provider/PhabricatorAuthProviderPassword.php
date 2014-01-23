@@ -185,14 +185,15 @@ final class PhabricatorAuthProviderPassword
     }
 
     if (!$account) {
-      $log = PhabricatorUserLog::initializeNewLog(
-        null,
-        $log_user ? $log_user->getPHID() : null,
-        PhabricatorUserLog::ACTION_LOGIN_FAILURE);
-      $log->save();
+      if ($request->isFormPost()) {
+        $log = PhabricatorUserLog::initializeNewLog(
+          null,
+          $log_user ? $log_user->getPHID() : null,
+          PhabricatorUserLog::ACTION_LOGIN_FAILURE);
+        $log->save();
+      }
 
       $request->clearCookie(PhabricatorCookies::COOKIE_USERNAME);
-      $request->clearCookie(PhabricatorCookies::COOKIE_SESSION);
 
       $response = $controller->buildProviderPageResponse(
         $this,
