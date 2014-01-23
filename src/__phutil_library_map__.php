@@ -1319,6 +1319,7 @@ phutil_register_library_map(array(
     'PhabricatorContentSource' => 'applications/metamta/contentsource/PhabricatorContentSource.php',
     'PhabricatorContentSourceView' => 'applications/metamta/contentsource/PhabricatorContentSourceView.php',
     'PhabricatorController' => 'applications/base/controller/PhabricatorController.php',
+    'PhabricatorCookies' => 'applications/auth/constants/PhabricatorCookies.php',
     'PhabricatorCoreConfigOptions' => 'applications/config/option/PhabricatorCoreConfigOptions.php',
     'PhabricatorCountdown' => 'applications/countdown/storage/PhabricatorCountdown.php',
     'PhabricatorCountdownCapabilityDefaultView' => 'applications/countdown/capability/PhabricatorCountdownCapabilityDefaultView.php',
@@ -3934,6 +3935,7 @@ phutil_register_library_map(array(
     'PhabricatorConpherencePHIDTypeThread' => 'PhabricatorPHIDType',
     'PhabricatorContentSourceView' => 'AphrontView',
     'PhabricatorController' => 'AphrontController',
+    'PhabricatorCookies' => 'Phobject',
     'PhabricatorCoreConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorCountdown' =>
     array(

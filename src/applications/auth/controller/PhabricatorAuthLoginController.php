@@ -166,7 +166,9 @@ final class PhabricatorAuthLoginController
       $account->save();
     unset($unguarded);
 
-    $this->getRequest()->setCookie('phreg', $registration_key);
+    $this->getRequest()->setCookie(
+      PhabricatorCookies::COOKIE_REGISTRATION,
+      $registration_key);
 
     return id(new AphrontRedirectResponse())->setURI($next_uri);
   }

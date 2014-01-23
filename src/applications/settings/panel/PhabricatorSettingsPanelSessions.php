@@ -40,11 +40,8 @@ final class PhabricatorSettingsPanelSessions
       ->withPHIDs($identity_phids)
       ->execute();
 
-    // TODO: Once this has a real ID column, use that instead.
-    $sessions = msort($sessions, 'getSessionStart');
-    $sessions = array_reverse($sessions);
-
-    $current_key = PhabricatorHash::digest($request->getCookie('phsid'));
+    $current_key = PhabricatorHash::digest(
+      $request->getCookie(PhabricatorCookies::COOKIE_SESSION));
 
     $rows = array();
     $rowc = array();

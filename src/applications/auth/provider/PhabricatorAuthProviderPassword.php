@@ -87,7 +87,7 @@ final class PhabricatorAuthProviderPassword
 
     $v_user = nonempty(
       $request->getStr('username'),
-      $request->getCookie('phusr'));
+      $request->getCookie(PhabricatorCookies::COOKIE_USERNAME));
 
     $e_user = null;
     $e_pass = null;
@@ -191,8 +191,8 @@ final class PhabricatorAuthProviderPassword
         PhabricatorUserLog::ACTION_LOGIN_FAILURE);
       $log->save();
 
-      $request->clearCookie('phusr');
-      $request->clearCookie('phsid');
+      $request->clearCookie(PhabricatorCookies::COOKIE_USERNAME);
+      $request->clearCookie(PhabricatorCookies::COOKIE_SESSION);
 
       $response = $controller->buildProviderPageResponse(
         $this,

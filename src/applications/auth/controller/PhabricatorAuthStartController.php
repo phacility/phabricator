@@ -24,10 +24,10 @@ final class PhabricatorAuthStartController
       return $this->processConduitRequest();
     }
 
-    if ($request->getCookie('phusr') && $request->getCookie('phsid')) {
+    if (strlen($request->getCookie(PhabricatorCookies::COOKIE_SESSION))) {
       // The session cookie is invalid, so clear it.
-      $request->clearCookie('phusr');
-      $request->clearCookie('phsid');
+      $request->clearCookie(PhabricatorCookies::COOKIE_USERNAME);
+      $request->clearCookie(PhabricatorCookies::COOKIE_SESSION);
 
       return $this->renderError(
         pht(
@@ -71,8 +71,12 @@ final class PhabricatorAuthStartController
     }
 
     if (!$request->isFormPost()) {
-      $request->setCookie('next_uri', $next_uri);
-      $request->setCookie('phcid', Filesystem::readRandomCharacters(16));
+      $request->setCookie(
+        PhabricatorCookies::COOKIE_NEXTURI,
+        $next_uri);
+      $request->setCookie(
+        PhabricatorCookies::COOKIE_CLIENTID,
+        Filesystem::readRandomCharacters(16));
     }
 
     $not_buttons = array();

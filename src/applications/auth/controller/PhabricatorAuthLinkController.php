@@ -79,7 +79,10 @@ final class PhabricatorAuthLinkController
 
     $panel_uri = '/settings/panel/external/';
 
-    $request->setCookie('phcid', Filesystem::readRandomCharacters(16));
+    $request->setCookie(
+      PhabricatorCookies::COOKIE_CLIENTID,
+      Filesystem::readRandomCharacters(16));
+
     switch ($this->action) {
       case 'link':
         $form = $provider->buildLinkForm($this);
