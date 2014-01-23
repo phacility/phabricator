@@ -163,6 +163,17 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     Javelin::initBehavior('history-install');
     Javelin::initBehavior('phabricator-gesture');
 
+    // If the client doesn't have a session token, generate an anonymous
+    // session. This is used to provide CSRF protection to logged-out users.
+    $session_token = $request->getCookie(PhabricatorCookies::COOKIE_SESSION);
+    if (!strlen($session_token)) {
+      $anonymous_session = id(new PhabricatorAuthSessionEngine())
+        ->establishSession('web', null);
+      $request->setCookie(
+        PhabricatorCookies::COOKIE_SESSION,
+        $anonymous_session);
+    }
+
     $current_token = null;
     if ($user) {
       $current_token = $user->getCSRFToken();

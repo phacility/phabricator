@@ -68,6 +68,7 @@ final class PhabricatorUserLog extends PhabricatorUserDAO {
     if (!$this->session) {
       // TODO: This is not correct if there's a cookie prefix. This object
       // should take an AphrontRequest.
+      // TODO: Maybe record session kind, or drop this for anonymous sessions?
       $this->setSession(idx($_COOKIE, PhabricatorCookies::COOKIE_SESSION));
     }
     $this->details['host'] = php_uname('n');
