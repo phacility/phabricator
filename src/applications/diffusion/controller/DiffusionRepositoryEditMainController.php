@@ -954,7 +954,13 @@ final class DiffusionRepositoryEditMainController
         $percentage = 0;
       }
 
-      $percentage = sprintf('%.1f%%', $percentage);
+      // Cap this at "99.99%", because it's confusing to users when the actual
+      // fraction is "99.996%" and it rounds up to "100.00%".
+      if ($percentage > 99.99) {
+        $percentage = 99.99;
+      }
+
+      $percentage = sprintf('%.2f%%', $percentage);
 
       $view->addItem(
         id(new PHUIStatusItemView())
