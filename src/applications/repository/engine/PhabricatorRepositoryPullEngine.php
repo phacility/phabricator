@@ -303,10 +303,10 @@ final class PhabricatorRepositoryPullEngine
         // Fix remote origin url if it doesn't match our configuration
         $origin_url = $repository->execLocalCommand(
           'config --get remote.origin.url');
-        $remote_uri = $repository->getDetail('remote-uri');
-        if ($origin_url != $remote_uri) {
+        $remote_uri = $repository->getRemoteURIEnvelope();
+        if ($origin_url != $remote_uri->openEnvelope()) {
           $repository->execLocalCommand(
-            'remote set-url origin %s',
+            'remote set-url origin %P',
             $remote_uri);
         }
       } else if ($err) {
