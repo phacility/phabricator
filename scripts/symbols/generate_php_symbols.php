@@ -34,6 +34,10 @@ foreach (Futures($futures)->limit(8) as $file => $future) {
   $functions = $root->selectDescendantsOfType('n_FUNCTION_DECLARATION');
   foreach ($functions as $function) {
     $name = $function->getChildByIndex(2);
+    // Skip anonymous functions
+    if (!$name->getConcreteString()) {
+      continue;
+    }
     print_symbol($file, 'function', $name);
   }
 
