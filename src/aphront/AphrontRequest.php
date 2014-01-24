@@ -212,22 +212,25 @@ final class AphrontRequest {
       // Add some diagnostic details so we can figure out if some CSRF issues
       // are JS problems or people accessing Ajax URIs directly with their
       // browsers.
-      if ($token) {
-        $token_info = "with an invalid CSRF token";
-      } else {
-        $token_info = "without a CSRF token";
-      }
+      $more_info = array();
 
       if ($this->isAjax()) {
-        $more_info = "(This was an Ajax request, {$token_info}.)";
+        $more_info[] = pht('This was an Ajax request.');
       } else {
-        $more_info = "(This was a web request, {$token_info}.)";
+        $more_info[] = pht('This was a Web request.');
+      }
+
+      if ($token) {
+        $more_info[] = pht('This request had an invalid CSRF token.');
+      } else {
+        $more_info[] = pht('This request had no CSRF token.');
       }
 
       // Give a more detailed explanation of how to avoid the exception
       // in developer mode.
       if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
-        $more_info = $more_info .
+        // TODO: Clean this up, see T1921.
+        $more_info[] =
           "To avoid this error, use phabricator_form() to construct forms. " .
           "If you are already using phabricator_form(), make sure the form " .
           "'action' uses a relative URI (i.e., begins with a '/'). Forms " .
@@ -249,14 +252,11 @@ final class AphrontRequest {
       // but give the user some indication of what happened since the workflow
       // is incredibly confusing otherwise.
       throw new AphrontCSRFException(
-        "The form you just submitted did not include a valid CSRF token. ".
-        "This token is a technical security measure which prevents a ".
-        "certain type of login hijacking attack. However, the token can ".
-        "become invalid if you leave a page open for more than six hours ".
-        "without a connection to the internet. To fix this problem: reload ".
-        "the page, and then resubmit it. All data inserted to the form will ".
-        "be lost in some browsers so copy them somewhere before reloading.\n\n".
-        $more_info);
+        pht(
+          "You are trying to save some data to Phabricator, but the request ".
+          "your browser made included an incorrect token. Reload the page ".
+          "and try again. You may need to clear your cookies.\n\n%s",
+          implode("\n", $more_info)));
     }
 
     return true;

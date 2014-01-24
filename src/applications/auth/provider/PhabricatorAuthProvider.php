@@ -259,8 +259,7 @@ abstract class PhabricatorAuthProvider {
 
   public function getLoginURI() {
     $app = PhabricatorApplication::getByClass('PhabricatorApplicationAuth');
-    $uri = $app->getApplicationURI('/login/'.$this->getProviderKey().'/');
-    return PhabricatorEnv::getURI($uri);
+    return $app->getApplicationURI('/login/'.$this->getProviderKey().'/');
   }
 
   public function getSettingsURI() {

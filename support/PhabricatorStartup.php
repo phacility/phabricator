@@ -280,6 +280,11 @@ final class PhabricatorStartup {
   private static function setupPHP() {
     error_reporting(E_ALL | E_STRICT);
     ini_set('memory_limit', -1);
+
+    // If we have libxml, disable the incredibly dangerous entity loader.
+    if (function_exists('libxml_disable_entity_loader')) {
+      libxml_disable_entity_loader(true);
+    }
   }
 
   /**

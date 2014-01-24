@@ -8,7 +8,7 @@ final class PhabricatorAuthProviderOAuthTwitch
   }
 
   public function getConfigurationHelp() {
-    $login_uri = $this->getLoginURI();
+    $login_uri = PhabricatorEnv::getURI($this->getLoginURI());
 
     return pht(
       "To configure Twitch.tv OAuth, create a new application here:".

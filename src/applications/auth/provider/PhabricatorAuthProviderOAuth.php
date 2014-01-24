@@ -25,7 +25,7 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
     $adapter->setClientSecret(
       new PhutilOpaqueEnvelope(
         $config->getProperty(self::PROPERTY_APP_SECRET)));
-    $adapter->setRedirectURI($this->getLoginURI());
+    $adapter->setRedirectURI(PhabricatorEnv::getURI($this->getLoginURI()));
     return $adapter;
   }
 
@@ -35,9 +35,11 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
 
   protected function renderLoginForm(AphrontRequest $request, $mode) {
     $adapter = $this->getAdapter();
-    $adapter->setState(PhabricatorHash::digest($request->getCookie('phcid')));
+    $adapter->setState(
+      PhabricatorHash::digest(
+        $request->getCookie(PhabricatorCookies::COOKIE_CLIENTID)));
 
-    $scope = $request->getStr("scope");
+    $scope = $request->getStr('scope');
     if ($scope) {
       $adapter->setScope($scope);
     }
@@ -81,14 +83,15 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
     }
 
     if ($adapter->supportsStateParameter()) {
-      $phcid = $request->getCookie('phcid');
+      $phcid = $request->getCookie(PhabricatorCookies::COOKIE_CLIENTID);
       if (!strlen($phcid)) {
         $response = $controller->buildProviderErrorResponse(
           $this,
           pht(
-            'Your browser did not submit a "phcid" cookie with OAuth state '.
+            'Your browser did not submit a "%s" cookie with OAuth state '.
             'information in the request. Check that cookies are enabled. '.
-            'If this problem persists, you may need to clear your cookies.'));
+            'If this problem persists, you may need to clear your cookies.',
+            PhabricatorCookies::COOKIE_CLIENTID));
       }
 
       $state = $request->getStr('state');

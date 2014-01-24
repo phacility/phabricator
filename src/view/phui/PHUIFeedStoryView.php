@@ -99,13 +99,27 @@ final class PHUIFeedStoryView extends AphrontView {
     return $this->href;
   }
 
-  public function renderNotification() {
+  public function renderNotification($user) {
     $classes = array(
       'phabricator-notification',
     );
 
     if (!$this->viewed) {
       $classes[] = 'phabricator-notification-unread';
+    }
+    if ($this->epoch) {
+      if ($user) {
+        $foot = phabricator_datetime($this->epoch, $user);
+        $foot = phutil_tag(
+          'span',
+          array(
+            'class' => 'phabricator-notification-date'),
+          $foot);
+      } else {
+        $foot = null;
+      }
+    } else {
+      $foot = pht('No time specified.');
     }
 
     return javelin_tag(
@@ -117,7 +131,7 @@ final class PHUIFeedStoryView extends AphrontView {
           'href' => $this->getHref(),
         ),
       ),
-      $this->title);
+      array($this->title, $foot));
   }
 
   public function render() {

@@ -8,7 +8,7 @@ final class PhabricatorAuthProviderOAuthGoogle
   }
 
   public function getConfigurationHelp() {
-    $login_uri = $this->getLoginURI();
+    $login_uri = PhabricatorEnv::getURI($this->getLoginURI());
 
     return pht(
       "To configure Google OAuth, create a new 'API Project' here:".
@@ -38,7 +38,7 @@ final class PhabricatorAuthProviderOAuthGoogle
 
   public function getLoginURI() {
     // TODO: Clean this up. See PhabricatorAuthOldOAuthRedirectController.
-    return PhabricatorEnv::getURI('/oauth/google/login/');
+    return '/oauth/google/login/';
   }
 
 }

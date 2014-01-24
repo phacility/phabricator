@@ -32,8 +32,8 @@ final class PhabricatorLogoutController
       // Destroy the user's session in the database so logout works even if
       // their cookies have some issues. We'll detect cookie issues when they
       // try to login again and tell them to clear any junk.
-      $phsid = $request->getCookie('phsid');
-      if ($phsid) {
+      $phsid = $request->getCookie(PhabricatorCookies::COOKIE_SESSION);
+      if (strlen($phsid)) {
         $session = id(new PhabricatorAuthSessionQuery())
           ->setViewer($user)
           ->withSessionKeys(array($phsid))
@@ -42,7 +42,7 @@ final class PhabricatorLogoutController
           $session->delete();
         }
       }
-      $request->clearCookie('phsid');
+      $request->clearCookie(PhabricatorCookies::COOKIE_SESSION);
 
       return id(new AphrontRedirectResponse())
         ->setURI('/login/');
@@ -52,8 +52,7 @@ final class PhabricatorLogoutController
       $dialog = id(new AphrontDialogView())
         ->setUser($user)
         ->setTitle(pht('Log out of Phabricator?'))
-        ->appendChild(phutil_tag('p', array(), pht(
-          'Are you sure you want to log out?')))
+        ->appendChild(pht('Are you sure you want to log out?'))
         ->addSubmitButton(pht('Logout'))
         ->addCancelButton('/');
 

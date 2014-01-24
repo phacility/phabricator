@@ -2,7 +2,79 @@
 
 final class PhabricatorAuthSessionEngine extends Phobject {
 
-  public function loadUserForSession($session_type, $session_key) {
+  /**
+   * Session issued to normal users after they login through a standard channel.
+   * Associates the client with a standard user identity.
+   */
+  const KIND_USER      = 'U';
+
+
+  /**
+   * Session issued to users who login with some sort of credentials but do not
+   * have full accounts. These are sometimes called "grey users".
+   *
+   * TODO: We do not currently issue these sessions, see T4310.
+   */
+  const KIND_EXTERNAL  = 'X';
+
+
+  /**
+   * Session issued to logged-out users which has no real identity information.
+   * Its purpose is to protect logged-out users from CSRF.
+   */
+  const KIND_ANONYMOUS = 'A';
+
+
+  /**
+   * Session kind isn't known.
+   */
+  const KIND_UNKNOWN   = '?';
+
+
+  /**
+   * Get the session kind (e.g., anonymous, user, external account) from a
+   * session token. Returns a `KIND_` constant.
+   *
+   * @param   string  Session token.
+   * @return  const   Session kind constant.
+   */
+  public static function getSessionKindFromToken($session_token) {
+    if (strpos($session_token, '/') === false) {
+      // Old-style session, these are all user sessions.
+      return self::KIND_USER;
+    }
+
+    list($kind, $key) = explode('/', $session_token, 2);
+
+    switch ($kind) {
+      case self::KIND_ANONYMOUS:
+      case self::KIND_USER:
+      case self::KIND_EXTERNAL:
+        return $kind;
+      default:
+        return self::KIND_UNKNOWN;
+    }
+  }
+
+
+  public function loadUserForSession($session_type, $session_token) {
+    $session_kind = self::getSessionKindFromToken($session_token);
+    switch ($session_kind) {
+      case self::KIND_ANONYMOUS:
+        // Don't bother trying to load a user for an anonymous session, since
+        // neither the session nor the user exist.
+        return null;
+      case self::KIND_UNKNOWN:
+        // If we don't know what kind of session this is, don't go looking for
+        // it.
+        return null;
+      case self::KIND_USER:
+        break;
+      case self::KIND_EXTERNAL:
+        // TODO: Implement these (T4310).
+        return null;
+    }
+
     $session_table = new PhabricatorAuthSession();
     $user_table = new PhabricatorUser();
     $conn_r = $session_table->establishConnection('r');
@@ -18,7 +90,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       $user_table->getTableName(),
       $session_table->getTableName(),
       $session_type,
-      PhabricatorHash::digest($session_key));
+      PhabricatorHash::digest($session_token));
 
     if (!$info) {
       return null;
@@ -63,18 +135,23 @@ final class PhabricatorAuthSessionEngine extends Phobject {
    * You can configure the maximum number of concurrent sessions for various
    * session types in the Phabricator configuration.
    *
-   * @param   const   Session type constant (see
-   *                  @{class:PhabricatorAuthSession}).
-   * @param   phid    Identity to establish a session for, usually a user PHID.
-   * @return  string  Newly generated session key.
+   * @param   const     Session type constant (see
+   *                    @{class:PhabricatorAuthSession}).
+   * @param   phid|null Identity to establish a session for, usually a user
+   *                    PHID. With `null`, generates an anonymous session.
+   * @return  string    Newly generated session key.
    */
   public function establishSession($session_type, $identity_phid) {
-    $session_table = new PhabricatorAuthSession();
-    $conn_w = $session_table->establishConnection('w');
-
     // Consume entropy to generate a new session key, forestalling the eventual
     // heat death of the universe.
     $session_key = Filesystem::readRandomCharacters(40);
+
+    if ($identity_phid === null) {
+      return self::KIND_ANONYMOUS.'/'.$session_key;
+    }
+
+    $session_table = new PhabricatorAuthSession();
+    $conn_w = $session_table->establishConnection('w');
 
     // This has a side effect of validating the session type.
     $session_ttl = PhabricatorAuthSession::getSessionTypeTTL($session_type);

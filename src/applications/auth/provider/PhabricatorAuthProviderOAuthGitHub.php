@@ -9,7 +9,7 @@ final class PhabricatorAuthProviderOAuthGitHub
 
   public function getConfigurationHelp() {
     $uri = PhabricatorEnv::getProductionURI('/');
-    $callback_uri = $this->getLoginURI();
+    $callback_uri = PhabricatorEnv::getURI($this->getLoginURI());
 
     return pht(
       "To configure GitHub OAuth, create a new GitHub Application here:".
@@ -38,7 +38,7 @@ final class PhabricatorAuthProviderOAuthGitHub
 
   public function getLoginURI() {
     // TODO: Clean this up. See PhabricatorAuthOldOAuthRedirectController.
-    return PhabricatorEnv::getURI('/oauth/github/login/');
+    return '/oauth/github/login/';
   }
 
 }

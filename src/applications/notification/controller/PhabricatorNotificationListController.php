@@ -43,6 +43,7 @@ final class PhabricatorNotificationListController
 
     if ($notifications) {
       $builder = new PhabricatorNotificationBuilder($notifications);
+      $builder->setUser($user);
       $view = $builder->buildView()->render();
     } else {
       $view = phutil_tag_div(

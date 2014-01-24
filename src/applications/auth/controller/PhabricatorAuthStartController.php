@@ -24,17 +24,32 @@ final class PhabricatorAuthStartController
       return $this->processConduitRequest();
     }
 
-    if ($request->getCookie('phusr') && $request->getCookie('phsid')) {
-      // The session cookie is invalid, so clear it.
-      $request->clearCookie('phusr');
-      $request->clearCookie('phsid');
+    // If the user gets this far, they aren't logged in, so if they have a
+    // user session token we can conclude that it's invalid: if it was valid,
+    // they'd have been logged in above and never made it here. Try to clear
+    // it and warn the user they may need to nuke their cookies.
 
-      return $this->renderError(
-        pht(
-          "Your login session is invalid. Try reloading the page and logging ".
-          "in again. If that does not work, clear your browser cookies."));
+    $session_token = $request->getCookie(PhabricatorCookies::COOKIE_SESSION);
+    if (strlen($session_token)) {
+      $kind = PhabricatorAuthSessionEngine::getSessionKindFromToken(
+        $session_token);
+      switch ($kind) {
+        case PhabricatorAuthSessionEngine::KIND_ANONYMOUS:
+          // If this is an anonymous session. It's expected that they won't
+          // be logged in, so we can just continue.
+          break;
+        default:
+          // The session cookie is invalid, so clear it.
+          $request->clearCookie(PhabricatorCookies::COOKIE_USERNAME);
+          $request->clearCookie(PhabricatorCookies::COOKIE_SESSION);
+
+          return $this->renderError(
+            pht(
+              "Your login session is invalid. Try reloading the page and ".
+              "logging in again. If that does not work, clear your browser ".
+              "cookies."));
+      }
     }
-
 
     $providers = PhabricatorAuthProvider::getAllEnabledProviders();
     foreach ($providers as $key => $provider) {
@@ -71,8 +86,11 @@ final class PhabricatorAuthStartController
     }
 
     if (!$request->isFormPost()) {
-      $request->setCookie('next_uri', $next_uri);
-      $request->setCookie('phcid', Filesystem::readRandomCharacters(16));
+      PhabricatorCookies::setNextURICookie($request, $next_uri);
+
+      $request->setCookie(
+        PhabricatorCookies::COOKIE_CLIENTID,
+        Filesystem::readRandomCharacters(16));
     }
 
     $not_buttons = array();

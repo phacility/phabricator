@@ -39,6 +39,8 @@ final class PhabricatorUser
   private $omnipotent = false;
   private $customFields = self::ATTACHABLE;
 
+  private $alternateCSRFString = self::ATTACHABLE;
+
   protected function readField($field) {
     switch ($field) {
       case 'timezoneIdentifier':
@@ -217,12 +219,7 @@ final class PhabricatorUser
   }
 
   public function validateCSRFToken($token) {
-    if (!$this->getPHID()) {
-      return true;
-    }
-
     $salt = null;
-
     $version = 'plain';
 
     // This is a BREACH-mitigating token. See T3684.
@@ -287,8 +284,15 @@ final class PhabricatorUser
   }
 
   private function generateToken($epoch, $frequency, $key, $len) {
+    if ($this->getPHID()) {
+      $vec = $this->getPHID().$this->getPasswordHash();
+    } else {
+      $vec = $this->getAlternateCSRFString();
+    }
+
     $time_block = floor($epoch / $frequency);
-    $vec = $this->getPHID().$this->getPasswordHash().$key.$time_block;
+    $vec = $vec.$key.$time_block;
+
     return substr(PhabricatorHash::digest($vec), 0, $len);
   }
 
@@ -437,6 +441,15 @@ final class PhabricatorUser
         '%r' => phutil_escape_uri($callsign),
       ));
     }
+  }
+
+  public function getAlternateCSRFString() {
+    return $this->assertAttached($this->alternateCSRFString);
+  }
+
+  public function attachAlternateCSRFString($string) {
+    $this->alternateCSRFString = $string;
+    return $this;
   }
 
   private static function tokenizeName($name) {

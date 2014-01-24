@@ -34,14 +34,27 @@ abstract class PhabricatorController extends AphrontController {
       $user = $request->getUser();
     } else {
       $user = new PhabricatorUser();
+      $session_engine = new PhabricatorAuthSessionEngine();
 
-      $phsid = $request->getCookie('phsid');
-      if ($phsid) {
-        $session_user = id(new PhabricatorAuthSessionEngine())
-          ->loadUserForSession(PhabricatorAuthSession::TYPE_WEB, $phsid);
+      $phsid = $request->getCookie(PhabricatorCookies::COOKIE_SESSION);
+      if (strlen($phsid)) {
+        $session_user = $session_engine->loadUserForSession(
+          PhabricatorAuthSession::TYPE_WEB,
+          $phsid);
         if ($session_user) {
           $user = $session_user;
         }
+      } else {
+        // If the client doesn't have a session token, generate an anonymous
+        // session. This is used to provide CSRF protection to logged-out users.
+        $phsid = $session_engine->establishSession(
+          PhabricatorAuthSession::TYPE_WEB,
+          null);
+        $request->setCookie(PhabricatorCookies::COOKIE_SESSION, $phsid);
+      }
+
+      if (!$user->isLoggedIn()) {
+        $user->attachAlternateCSRFString(PhabricatorHash::digest($phsid));
       }
 
       $request->setUser($user);

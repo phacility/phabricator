@@ -38,23 +38,48 @@ function javelin_tag(
 function phabricator_form(PhabricatorUser $user, $attributes, $content) {
   $body = array();
 
-  if (strcasecmp(idx($attributes, 'method'), 'POST') == 0 &&
-      !preg_match('#^(https?:|//)#', idx($attributes, 'action'))) {
-    $body[] = phutil_tag(
-      'input',
-      array(
-        'type' => 'hidden',
-        'name' => AphrontRequest::getCSRFTokenName(),
-        'value' => $user->getCSRFToken(),
-      ));
+  $http_method = idx($attributes, 'method');
+  $is_post = (strcasecmp($http_method, 'POST') === 0);
 
-    $body[] = phutil_tag(
-      'input',
-      array(
-        'type' => 'hidden',
-        'name' => '__form__',
-        'value' => true,
-      ));
+  $http_action = idx($attributes, 'action');
+  $is_absolute_uri = preg_match('#^(https?:|//)#', $http_action);
+
+  if ($is_post) {
+    if ($is_absolute_uri) {
+      $is_dev = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
+      if ($is_dev) {
+        $form_domain = id(new PhutilURI($http_action))
+          ->getDomain();
+        $host_domain = id(new PhutilURI(PhabricatorEnv::getURI('/')))
+          ->getDomain();
+
+        if (strtolower($form_domain) == strtolower($host_domain)) {
+          throw new Exception(
+            pht(
+              "You are building a <form /> that submits to Phabricator, but ".
+              "has an absolute URI in its 'action' attribute ('%s'). To avoid ".
+              "leaking CSRF tokens, Phabricator does not add CSRF information ".
+              "to forms with absolute URIs. Instead, use a relative URI.",
+              $http_action));
+        }
+      }
+    } else {
+      $body[] = phutil_tag(
+        'input',
+        array(
+          'type' => 'hidden',
+          'name' => AphrontRequest::getCSRFTokenName(),
+          'value' => $user->getCSRFToken(),
+        ));
+
+      $body[] = phutil_tag(
+        'input',
+        array(
+          'type' => 'hidden',
+          'name' => '__form__',
+          'value' => true,
+        ));
+    }
   }
 
   if (is_array($content)) {

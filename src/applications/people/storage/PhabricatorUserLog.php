@@ -66,7 +66,10 @@ final class PhabricatorUserLog extends PhabricatorUserDAO {
       $this->remoteAddr = idx($_SERVER, 'REMOTE_ADDR', '');
     }
     if (!$this->session) {
-      $this->setSession(idx($_COOKIE, 'phsid'));
+      // TODO: This is not correct if there's a cookie prefix. This object
+      // should take an AphrontRequest.
+      // TODO: Maybe record session kind, or drop this for anonymous sessions?
+      $this->setSession(idx($_COOKIE, PhabricatorCookies::COOKIE_SESSION));
     }
     $this->details['host'] = php_uname('n');
     $this->details['user_agent'] = AphrontRequest::getHTTPHeader('User-Agent');

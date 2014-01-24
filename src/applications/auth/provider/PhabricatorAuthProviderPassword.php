@@ -87,7 +87,7 @@ final class PhabricatorAuthProviderPassword
 
     $v_user = nonempty(
       $request->getStr('username'),
-      $request->getCookie('phusr'));
+      $request->getCookie(PhabricatorCookies::COOKIE_USERNAME));
 
     $e_user = null;
     $e_pass = null;
@@ -163,36 +163,40 @@ final class PhabricatorAuthProviderPassword
     $account = null;
     $log_user = null;
 
-    if (!$require_captcha || $captcha_valid) {
-      $username_or_email = $request->getStr('username');
-      if (strlen($username_or_email)) {
-        $user = id(new PhabricatorUser())->loadOneWhere(
-          'username = %s',
-          $username_or_email);
+    if ($request->isFormPost()) {
+      if (!$require_captcha || $captcha_valid) {
+        $username_or_email = $request->getStr('username');
+        if (strlen($username_or_email)) {
+          $user = id(new PhabricatorUser())->loadOneWhere(
+            'username = %s',
+            $username_or_email);
 
-        if (!$user) {
-          $user = PhabricatorUser::loadOneWithEmailAddress($username_or_email);
-        }
+          if (!$user) {
+            $user = PhabricatorUser::loadOneWithEmailAddress(
+              $username_or_email);
+          }
 
-        if ($user) {
-          $envelope = new PhutilOpaqueEnvelope($request->getStr('password'));
-          if ($user->comparePassword($envelope)) {
-            $account = $this->loadOrCreateAccount($user->getPHID());
-            $log_user = $user;
+          if ($user) {
+            $envelope = new PhutilOpaqueEnvelope($request->getStr('password'));
+            if ($user->comparePassword($envelope)) {
+              $account = $this->loadOrCreateAccount($user->getPHID());
+              $log_user = $user;
+            }
           }
         }
       }
     }
 
     if (!$account) {
-      $log = PhabricatorUserLog::initializeNewLog(
-        null,
-        $log_user ? $log_user->getPHID() : null,
-        PhabricatorUserLog::ACTION_LOGIN_FAILURE);
-      $log->save();
+      if ($request->isFormPost()) {
+        $log = PhabricatorUserLog::initializeNewLog(
+          null,
+          $log_user ? $log_user->getPHID() : null,
+          PhabricatorUserLog::ACTION_LOGIN_FAILURE);
+        $log->save();
+      }
 
-      $request->clearCookie('phusr');
-      $request->clearCookie('phsid');
+      $request->clearCookie(PhabricatorCookies::COOKIE_USERNAME);
 
       $response = $controller->buildProviderPageResponse(
         $this,

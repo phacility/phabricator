@@ -50,7 +50,6 @@ final class PhabricatorAuthSession extends PhabricatorAuthDAO
     }
   }
 
-
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 
