@@ -47,6 +47,11 @@ abstract class PhabricatorRepositoryEngine {
   }
 
 
+  public function getViewer() {
+    return PhabricatorUser::getOmnipotentUser();
+  }
+
+
   /**
    * @task internal
    */
