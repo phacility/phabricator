@@ -1000,10 +1000,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function canMirror() {
-    if (!$this->isHosted()) {
-      return false;
-    }
-
     if ($this->isGit()) {
       return true;
     }
