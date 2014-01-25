@@ -3,16 +3,13 @@
  */
 
 .legalpad .phabricator-remarkup .remarkup-note {
-  border-radius: 14px;
-  -moz-border-radius: 14px;
+  border-radius: 15px;
 }
 
 .legalpad .phabricator-remarkup .remarkup-warning {
-  border-radius: 14px;
-  -moz-border-radius: 14px;
+  border-radius: 15px;
 }
 
 .legalpad .phabricator-remarkup .remarkup-important {
-  border-radius: 14px;
-  -moz-border-radius: 14px;
+  border-radius: 15px;
 }
