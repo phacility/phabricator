@@ -77,15 +77,23 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function toDictionary() {
     return array(
+      'id'          => $this->getID(),
       'name'        => $this->getName(),
       'phid'        => $this->getPHID(),
       'callsign'    => $this->getCallsign(),
+      'monogram'    => $this->getMonogram(),
       'vcs'         => $this->getVersionControlSystem(),
       'uri'         => PhabricatorEnv::getProductionURI($this->getURI()),
       'remoteURI'   => (string)$this->getRemoteURI(),
-      'tracking'    => $this->getDetail('tracking-enabled'),
       'description' => $this->getDetail('description'),
+      'isActive'    => $this->isTracked(),
+      'isHosted'    => $this->isHosted(),
+      'isImporting' => $this->isImporting(),
     );
+  }
+
+  public function getMonogram() {
+    return 'r'.$this->getCallsign();
   }
 
   public function getDetail($key, $default = null) {
