@@ -18,6 +18,28 @@ final class PhabricatorRepositoryMirrorEngine
       ->withRepositoryPHIDs(array($repository->getPHID()))
       ->execute();
 
+    $exceptions = array();
+    foreach ($mirrors as $mirror) {
+      try {
+        $this->pushRepositoryToMirror($repository, $mirror);
+      } catch (Exception $ex) {
+        $exceptions[] = $ex;
+      }
+    }
+
+    if ($exceptions) {
+      throw new PhutilAggregateException(
+        pht(
+          'Exceptions occurred while mirroring the "%s" repository.',
+          $repository->getCallsign()),
+        $exceptions);
+    }
+  }
+
+  private function pushRepositoryToMirror(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryMirror $mirror) {
+
     // TODO: This is a little bit janky, but we don't have first-class
     // infrastructure for running remote commands against an arbitrary remote
     // right now. Just make an emphemeral copy of the repository and muck with
@@ -28,24 +50,22 @@ final class PhabricatorRepositoryMirrorEngine
     $proxy->makeEphemeral();
 
     $proxy->setDetail('hosting-enabled', false);
-    foreach ($mirrors as $mirror) {
-      $proxy->setDetail('remote-uri', $mirror->getRemoteURI());
-      $proxy->setCredentialPHID($mirror->getCredentialPHID());
+    $proxy->setDetail('remote-uri', $mirror->getRemoteURI());
+    $proxy->setCredentialPHID($mirror->getCredentialPHID());
 
-      $this->log(pht('Pushing to remote "%s"...', $mirror->getRemoteURI()));
+    $this->log(pht('Pushing to remote "%s"...', $mirror->getRemoteURI()));
 
-      if (!$proxy->isGit()) {
-        throw new Exception('Unsupported VCS!');
-      }
-
-      $future = $proxy->getRemoteCommandFuture(
-        'push --verbose --mirror -- %P',
-        $proxy->getRemoteURIEnvelope());
-
-      $future
-        ->setCWD($proxy->getLocalPath())
-        ->resolvex();
+    if (!$proxy->isGit()) {
+      throw new Exception(pht('Unsupported VCS!'));
     }
+
+    $future = $proxy->getRemoteCommandFuture(
+      'push --verbose --mirror -- %P',
+      $proxy->getRemoteURIEnvelope());
+
+    $future
+      ->setCWD($proxy->getLocalPath())
+      ->resolvex();
   }
 
 }
