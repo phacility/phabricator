@@ -485,6 +485,30 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return '/diffusion/'.$this->getCallsign().'/';
   }
 
+  public function getNormalizedPath() {
+    switch ($this->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        $normalized_uri = new PhabricatorRepositoryURINormalizer(
+          PhabricatorRepositoryURINormalizer::TYPE_GIT,
+          $this->getURI());
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $normalized_uri = new PhabricatorRepositoryURINormalizer(
+          PhabricatorRepositoryURINormalizer::TYPE_SVN,
+          $this->getURI());
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $normalized_uri = new PhabricatorRepositoryURINormalizer(
+          PhabricatorRepositoryURINormalizer::TYPE_MERCURIAL,
+          $this->getURI());
+        break;
+      default:
+        throw new Exception("Unrecognized version control system.");
+    }
+
+    return $normalized_uri->getNormalizedPath();
+  }
+
   public function isTracked() {
     return $this->getDetail('tracking-enabled', false);
   }

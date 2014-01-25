@@ -21,6 +21,7 @@ final class ConduitAPI_repository_query_Method
       'phids' => 'optional list<phid>',
       'callsigns' => 'optional list<string>',
       'vcsTypes' => 'optional list<string>',
+      'remoteURIs' => 'optional list<string>',
     );
   }
 
@@ -55,6 +56,11 @@ final class ConduitAPI_repository_query_Method
     $vcs_types = $request->getValue('vcsTypes', array());
     if ($vcs_types) {
       $query->withTypes($vcs_types);
+    }
+
+    $remote_uris = $request->getValue('remoteURIs', array());
+    if ($remote_uris) {
+      $query->withRemoteURIs($remote_uris);
     }
 
     $repositories = $query->execute();

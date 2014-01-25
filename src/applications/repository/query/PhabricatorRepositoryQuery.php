@@ -9,6 +9,7 @@ final class PhabricatorRepositoryQuery
   private $types;
   private $uuids;
   private $nameContains;
+  private $remoteURIs;
 
   const STATUS_OPEN = 'status-open';
   const STATUS_CLOSED = 'status-closed';
@@ -70,6 +71,11 @@ final class PhabricatorRepositoryQuery
     return $this;
   }
 
+  public function withRemoteURIs(array $uris) {
+    $this->remoteURIs = $uris;
+    return $this;
+  }
+
   public function needCommitCounts($need_counts) {
     $this->needCommitCounts = $need_counts;
     return $this;
@@ -89,6 +95,7 @@ final class PhabricatorRepositoryQuery
     $this->order = $order;
     return $this;
   }
+
 
   protected function loadPage() {
     $table = new PhabricatorRepository();
@@ -159,6 +166,7 @@ final class PhabricatorRepositoryQuery
           throw new Exception("Unknown status '{$status}'!");
       }
 
+      // TODO: This should also be denormalized.
       $hosted = $this->hosted;
       switch ($hosted) {
         case self::HOSTED_PHABRICATOR:
@@ -175,6 +183,17 @@ final class PhabricatorRepositoryQuery
           break;
         default:
           throw new Exception("Uknown hosted failed '${hosted}'!");
+      }
+    }
+
+    // TODO: Denormalize this, too.
+    if ($this->remoteURIs) {
+      $try_uris = $this->getNormalizedPaths();
+      $try_uris = array_fuse($try_uris);
+      foreach ($repositories as $key => $repository) {
+        if (!isset($try_uris[$repository->getNormalizedPath()])) {
+          unset($repositories[$key]);
+        }
       }
     }
 
@@ -387,6 +406,30 @@ final class PhabricatorRepositoryQuery
 
   public function getQueryApplicationClass() {
     return 'PhabricatorApplicationDiffusion';
+  }
+
+  private function getNormalizedPaths() {
+    $normalized_uris = array();
+
+    // Since we don't know which type of repository this URI is in the general
+    // case, just generate all the normalizations. We could refine this in some
+    // cases: if the query specifies VCS types, or the URI is a git-style URI
+    // or an `svn+ssh` URI, we could deduce how to normalize it. However, this
+    // would be more complicated and it's not clear if it matters in practice.
+
+    foreach ($this->remoteURIs as $uri) {
+      $normalized_uris[] = new PhabricatorRepositoryURINormalizer(
+        PhabricatorRepositoryURINormalizer::TYPE_GIT,
+        $uri);
+      $normalized_uris[] = new PhabricatorRepositoryURINormalizer(
+        PhabricatorRepositoryURINormalizer::TYPE_SVN,
+        $uri);
+      $normalized_uris[] = new PhabricatorRepositoryURINormalizer(
+        PhabricatorRepositoryURINormalizer::TYPE_MERCURIAL,
+        $uri);
+    }
+
+    return array_unique(mpull($normalized_uris, 'getNormalizedPath'));
   }
 
 }
