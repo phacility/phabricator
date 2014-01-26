@@ -53,7 +53,7 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
 
     $diff->setBranch($request->getValue('branch'));
     $diff->setCreationMethod($request->getValue('creationMethod'));
-    $diff->setAuthorPHID($request->getViewer()->getPHID());
+    $diff->setAuthorPHID($request->getUser()->getPHID());
     $diff->setBookmark($request->getValue('bookmark'));
 
     // TODO: Remove this eventually; for now continue writing the UUID. Note
@@ -64,7 +64,7 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
     $repository_phid = $request->getValue('repositoryPHID');
     if ($repository_phid) {
       $repository = id(new PhabricatorRepositoryQuery())
-        ->setViewer($request->getViewer())
+        ->setViewer($request->getUser())
         ->withPHIDs(array($repository_phid))
         ->executeOne();
       if ($repository) {
