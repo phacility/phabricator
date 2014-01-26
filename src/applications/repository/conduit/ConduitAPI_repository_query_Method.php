@@ -22,6 +22,7 @@ final class ConduitAPI_repository_query_Method
       'callsigns' => 'optional list<string>',
       'vcsTypes' => 'optional list<string>',
       'remoteURIs' => 'optional list<string>',
+      'uuids' => 'optional list<string>',
     );
   }
 
@@ -61,6 +62,11 @@ final class ConduitAPI_repository_query_Method
     $remote_uris = $request->getValue('remoteURIs', array());
     if ($remote_uris) {
       $query->withRemoteURIs($remote_uris);
+    }
+
+    $uuids = $request->getValue('uuids', array());
+    if ($uuids) {
+      $query->withUUIDs($uuids);
     }
 
     $repositories = $query->execute();
