@@ -16,9 +16,6 @@ class AphrontDefaultApplicationConfiguration
 
   public function getURIMap() {
     return $this->getResourceURIMapRules() + array(
-      '/(?:(?P<filter>(?:jump))/)?' =>
-        'PhabricatorDirectoryMainController',
-
       '/typeahead/' => array(
         'common/(?P<type>\w+)/'
           => 'PhabricatorTypeaheadCommonDatasourceController',

@@ -1,7 +1,7 @@
 <?php
 
-final class PhabricatorDirectoryMainController
-  extends PhabricatorDirectoryController {
+final class PhabricatorHomeMainController
+  extends PhabricatorHomeController {
 
   private $filter;
   private $minipanels = array();
