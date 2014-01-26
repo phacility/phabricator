@@ -6,6 +6,10 @@ final class PhabricatorHomeMainController
   private $filter;
   private $minipanels = array();
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->filter = idx($data, 'filter');
   }
