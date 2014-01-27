@@ -1,10 +1,9 @@
 <?php
 
 /**
+ * @task data   Accessing Request Data
+ * @task cookie Managing Cookies
  *
- * @task data Accessing Request Data
- *
- * @group aphront
  */
 final class AphrontRequest {
 
@@ -297,61 +296,75 @@ final class AphrontRequest {
     unset($_COOKIE[$name]);
   }
 
+  /**
+   * Get the domain which cookies should be set on for this request, or null
+   * if the request does not correspond to a valid cookie domain.
+   *
+   * @return PhutilURI|null   Domain URI, or null if no valid domain exists.
+   *
+   * @task cookie
+   */
+  private function getCookieDomainURI() {
+    $host = $this->getHost();
+
+    // If there's no base domain configured, just use whatever the request
+    // domain is. This makes setup easier, and we'll tell administrators to
+    // configure a base domain during the setup process.
+    $base_uri = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
+    if (!strlen($base_uri)) {
+      return new PhutilURI('http://'.$host.'/');
+    }
+
+    $alternates = PhabricatorEnv::getEnvConfig('phabricator.allowed-uris');
+    $allowed_uris = array_merge(
+      array($base_uri),
+      $alternates);
+
+    foreach ($allowed_uris as $allowed_uri) {
+      $uri = new PhutilURI($allowed_uri);
+      if ($uri->getDomain() == $host) {
+        return $uri;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Determine if security policy rules will allow cookies to be set when
+   * responding to the request.
+   *
+   * @return bool True if setCookie() will succeed. If this method returns
+   *              false, setCookie() will throw.
+   *
+   * @task cookie
+   */
+  final public function canSetCookies() {
+    return (bool)$this->getCookieDomainURI();
+  }
+
   final public function setCookie($name, $value, $expire = null) {
 
     $is_secure = false;
 
-    // If a base URI has been configured, ensure cookies are only set on that
-    // domain. Also, use the URI protocol to control SSL-only cookies.
-    $base_uri = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
-    if ($base_uri) {
-      $alternates = PhabricatorEnv::getEnvConfig('phabricator.allowed-uris');
-      $allowed_uris = array_merge(
-        array($base_uri),
-        $alternates);
+    $base_domain_uri = $this->getCookieDomainURI();
+    if (!$base_domain_uri) {
+      $configured_as = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
+      $accessed_as = $this->getHost();
 
-      $host = $this->getHost();
-
-      $match = null;
-      foreach ($allowed_uris as $allowed_uri) {
-        $uri = new PhutilURI($allowed_uri);
-        $domain = $uri->getDomain();
-        if ($host == $domain) {
-          $match = $uri;
-          break;
-        }
-      }
-
-      if ($match === null) {
-        if (count($allowed_uris) > 1) {
-          throw new Exception(
-            pht(
-              'This Phabricator install is configured as "%s", but you are '.
-              'accessing it via "%s". Access Phabricator via the primary '.
-              'configured domain, or one of the permitted alternate '.
-              'domains: %s. Phabricator will not set cookies on other domains '.
-              'for security reasons.',
-              $base_uri,
-              $host,
-              implode(', ', $alternates)));
-        } else {
-          throw new Exception(
-            pht(
-              'This Phabricator install is configured as "%s", but you are '.
-              'accessing it via "%s". Acccess Phabricator via the primary '.
-              'configured domain. Phabricator will not set cookies on other '.
-              'domains for security reasons.',
-              $base_uri,
-              $host));
-        }
-      }
-
-      $base_domain = $match->getDomain();
-      $is_secure = ($match->getProtocol() == 'https');
-    } else {
-      $base_uri = new PhutilURI(PhabricatorEnv::getRequestBaseURI());
-      $base_domain = $base_uri->getDomain();
+      throw new Exception(
+        pht(
+          'This Phabricator install is configured as "%s", but you are '.
+          'using the domain name "%s" to access a page which is trying to '.
+          'set a cookie. Acccess Phabricator on the configured primary '.
+          'domain or  a configured alternate domain. Phabricator will not '.
+          'set cookies on other domains for security reasons.',
+          $configured_as,
+          $accessed_as));
     }
+
+    $base_domain = $base_domain_uri->getDomain();
+    $is_secure = ($base_domain_uri->getProtocol() == 'https');
 
     if ($expire === null) {
       $expire = time() + (60 * 60 * 24 * 365 * 5);

@@ -77,15 +77,23 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function toDictionary() {
     return array(
+      'id'          => $this->getID(),
       'name'        => $this->getName(),
       'phid'        => $this->getPHID(),
       'callsign'    => $this->getCallsign(),
+      'monogram'    => $this->getMonogram(),
       'vcs'         => $this->getVersionControlSystem(),
       'uri'         => PhabricatorEnv::getProductionURI($this->getURI()),
       'remoteURI'   => (string)$this->getRemoteURI(),
-      'tracking'    => $this->getDetail('tracking-enabled'),
       'description' => $this->getDetail('description'),
+      'isActive'    => $this->isTracked(),
+      'isHosted'    => $this->isHosted(),
+      'isImporting' => $this->isImporting(),
     );
+  }
+
+  public function getMonogram() {
+    return 'r'.$this->getCallsign();
   }
 
   public function getDetail($key, $default = null) {
@@ -475,6 +483,30 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function getURI() {
     return '/diffusion/'.$this->getCallsign().'/';
+  }
+
+  public function getNormalizedPath() {
+    switch ($this->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        $normalized_uri = new PhabricatorRepositoryURINormalizer(
+          PhabricatorRepositoryURINormalizer::TYPE_GIT,
+          $this->getURI());
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $normalized_uri = new PhabricatorRepositoryURINormalizer(
+          PhabricatorRepositoryURINormalizer::TYPE_SVN,
+          $this->getURI());
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $normalized_uri = new PhabricatorRepositoryURINormalizer(
+          PhabricatorRepositoryURINormalizer::TYPE_MERCURIAL,
+          $this->getURI());
+        break;
+      default:
+        throw new Exception("Unrecognized version control system.");
+    }
+
+    return $normalized_uri->getNormalizedPath();
   }
 
   public function isTracked() {
@@ -1000,10 +1032,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function canMirror() {
-    if (!$this->isHosted()) {
-      return false;
-    }
-
     if ($this->isGit()) {
       return true;
     }

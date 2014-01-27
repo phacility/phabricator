@@ -50,8 +50,14 @@ abstract class PhabricatorController extends AphrontController {
         $phsid = $session_engine->establishSession(
           PhabricatorAuthSession::TYPE_WEB,
           null);
-        $request->setCookie(PhabricatorCookies::COOKIE_SESSION, $phsid);
+
+        // This may be a resource request, in which case we just don't set
+        // the cookie.
+        if ($request->canSetCookies()) {
+          $request->setCookie(PhabricatorCookies::COOKIE_SESSION, $phsid);
+        }
       }
+
 
       if (!$user->isLoggedIn()) {
         $user->attachAlternateCSRFString(PhabricatorHash::digest($phsid));

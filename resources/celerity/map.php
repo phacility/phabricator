@@ -7,7 +7,7 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => '5ad20a3f',
+    'core.pkg.css' => '63255578',
     'core.pkg.js' => 'c907bd96',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => '5a65a762',
@@ -74,6 +74,7 @@ return array(
     'rsrc/css/application/flag/flag.css' => '5337623f',
     'rsrc/css/application/herald/herald-test.css' => '2b7d0f54',
     'rsrc/css/application/herald/herald.css' => '59d48f01',
+    'rsrc/css/application/legalpad/legalpad-document.css' => 'cd275275',
     'rsrc/css/application/maniphest/batch-editor.css' => '78444bc1',
     'rsrc/css/application/maniphest/report.css' => '6fc16517',
     'rsrc/css/application/maniphest/task-edit.css' => '8e23031b',
@@ -113,7 +114,7 @@ return array(
     'rsrc/css/application/tokens/tokens.css' => 'fb286311',
     'rsrc/css/application/uiexample/example.css' => '4741b891',
     'rsrc/css/core/core.css' => 'da26ddb2',
-    'rsrc/css/core/remarkup.css' => 'bec51bf1',
+    'rsrc/css/core/remarkup.css' => 'ca7f2265',
     'rsrc/css/core/syntax.css' => '3c18c1cb',
     'rsrc/css/core/z-index.css' => '1bbbd4f1',
     'rsrc/css/diviner/diviner-shared.css' => 'be90f718',
@@ -655,6 +656,7 @@ return array(
     'javelin-view-renderer' => '77461fd6',
     'javelin-view-visitor' => 'ca704f2b',
     'javelin-workflow' => 'd16edeae',
+    'legalpad-document-css' => 'cd275275',
     'lightbox-attachment-css' => '686f8885',
     'maniphest-batch-editor' => '78444bc1',
     'maniphest-report-css' => '6fc16517',
@@ -700,7 +702,7 @@ return array(
     'phabricator-prefab' => '9eaf0bfa',
     'phabricator-profile-css' => '3a7e04ca',
     'phabricator-project-tag-css' => '095c9404',
-    'phabricator-remarkup-css' => 'bec51bf1',
+    'phabricator-remarkup-css' => 'ca7f2265',
     'phabricator-search-results-css' => 'f240504c',
     'phabricator-settings-css' => 'ea8f5915',
     'phabricator-shaped-request' => 'dfa181a4',

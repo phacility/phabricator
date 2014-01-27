@@ -110,7 +110,9 @@ final class LegalpadDocumentViewController extends LegalpadController {
     PhabricatorMarkupEngine
     $engine, LegalpadDocumentBody $body) {
 
+    $this->requireResource('legalpad-document-css');
     $view = new PHUIPropertyListView();
+    $view->addClass('legalpad');
     $view->addSectionHeader(pht('Document'));
     $view->addTextContent(
       $engine->getOutput($body, LegalpadDocumentBody::MARKUP_FIELD_TEXT));

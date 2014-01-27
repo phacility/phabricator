@@ -1,10 +1,14 @@
 <?php
 
-final class PhabricatorDirectoryMainController
-  extends PhabricatorDirectoryController {
+final class PhabricatorHomeMainController
+  extends PhabricatorHomeController {
 
   private $filter;
   private $minipanels = array();
+
+  public function shouldAllowPublic() {
+    return true;
+  }
 
   public function willProcessRequest(array $data) {
     $this->filter = idx($data, 'filter');

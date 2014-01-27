@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorDirectoryController extends PhabricatorController {
+abstract class PhabricatorHomeController extends PhabricatorController {
 
   public function buildStandardPageResponse($view, array $data) {
     $page = $this->buildStandardPageView();

@@ -177,9 +177,10 @@ final class LegalpadDocumentSignController extends LegalpadController {
       ->setHeader($title);
 
     $content = array(
-      id(new PHUIDocumentView())
-      ->setHeader($header)
-      ->appendChild($this->buildDocument($engine, $document_body)),
+      $this->buildDocument(
+        $header,
+        $engine,
+        $document_body),
       $this->buildSignatureForm(
         $document_body,
         $signature,
@@ -199,10 +200,17 @@ final class LegalpadDocumentSignController extends LegalpadController {
   }
 
   private function buildDocument(
-    PhabricatorMarkupEngine
-    $engine, LegalpadDocumentBody $body) {
+    PHUIHeaderView $header,
+    PhabricatorMarkupEngine $engine,
+    LegalpadDocumentBody $body) {
 
-    return $engine->getOutput($body, LegalpadDocumentBody::MARKUP_FIELD_TEXT);
+    $this->requireResource('legalpad-document-css');
+    return id(new PHUIDocumentView())
+      ->addClass('legalpad')
+      ->setHeader($header)
+      ->appendChild($engine->getOutput(
+        $body,
+        LegalpadDocumentBody::MARKUP_FIELD_TEXT));
   }
 
   private function buildSignatureForm(

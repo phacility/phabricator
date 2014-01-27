@@ -40,6 +40,7 @@ final class PhabricatorRepositoryURINormalizer extends Phobject {
 
   const TYPE_GIT = 'git';
   const TYPE_SVN = 'svn';
+  const TYPE_MERCURIAL = 'hg';
 
   private $type;
   private $uri;
@@ -48,6 +49,7 @@ final class PhabricatorRepositoryURINormalizer extends Phobject {
     switch ($type) {
       case self::TYPE_GIT:
       case self::TYPE_SVN:
+      case self::TYPE_MERCURIAL:
         break;
       default:
         throw new Exception(pht('Unknown URI type "%s"!'));
@@ -79,6 +81,7 @@ final class PhabricatorRepositoryURINormalizer extends Phobject {
 
         return $this->uri;
       case self::TYPE_SVN:
+      case self::TYPE_MERCURIAL:
         $uri = new PhutilURI($this->uri);
         if ($uri->getProtocol()) {
           return $uri->getPath();
@@ -101,6 +104,7 @@ final class PhabricatorRepositoryURINormalizer extends Phobject {
         $path = preg_replace('/\.git$/', '', $path);
         break;
       case self::TYPE_SVN:
+      case self::TYPE_MERCURIAL:
         break;
     }
 
