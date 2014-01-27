@@ -375,7 +375,7 @@ return array(
     'rsrc/js/application/herald/herald-rule-editor.js' => '7ebaeed3',
     'rsrc/js/application/maniphest/behavior-batch-editor.js' => '391457d7',
     'rsrc/js/application/maniphest/behavior-batch-selector.js' => 'ead554ec',
-    'rsrc/js/application/maniphest/behavior-line-chart.js' => 'a91d3891',
+    'rsrc/js/application/maniphest/behavior-line-chart.js' => 'cdcbe8a4',
     'rsrc/js/application/maniphest/behavior-list-edit.js' => 'cf76cfd5',
     'rsrc/js/application/maniphest/behavior-subpriorityeditor.js' => '84845b5b',
     'rsrc/js/application/maniphest/behavior-transaction-controls.js' => '75e50c72',
@@ -565,7 +565,7 @@ return array(
     'javelin-behavior-konami' => '5bc2cb21',
     'javelin-behavior-launch-icon-composer' => '6ec125a0',
     'javelin-behavior-lightbox-attachments' => '3aa45ad9',
-    'javelin-behavior-line-chart' => 'a91d3891',
+    'javelin-behavior-line-chart' => 'cdcbe8a4',
     'javelin-behavior-load-blame' => '42126667',
     'javelin-behavior-maniphest-batch-editor' => '391457d7',
     'javelin-behavior-maniphest-batch-selector' => 'ead554ec',
@@ -1467,12 +1467,6 @@ return array(
       1 => 'javelin-dom',
       2 => 'javelin-stratcom',
     ),
-    'a91d3891' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-      2 => 'javelin-vector',
-    ),
     'ad7a69ca' =>
     array(
       0 => 'javelin-install',
@@ -1674,6 +1668,12 @@ return array(
       2 => 'javelin-typeahead',
       3 => 'javelin-typeahead-ondemand-source',
       4 => 'javelin-dom',
+    ),
+    'cdcbe8a4' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-vector',
     ),
     'ce0c217a' =>
     array(
