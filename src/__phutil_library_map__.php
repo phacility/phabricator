@@ -168,7 +168,7 @@ phutil_register_library_map(array(
     'ConduitAPI_diffusion_lastmodifiedquery_Method' => 'applications/diffusion/conduit/ConduitAPI_diffusion_lastmodifiedquery_Method.php',
     'ConduitAPI_diffusion_looksoon_Method' => 'applications/diffusion/conduit/ConduitAPI_diffusion_looksoon_Method.php',
     'ConduitAPI_diffusion_mergedcommitsquery_Method' => 'applications/diffusion/conduit/ConduitAPI_diffusion_mergedcommitsquery_Method.php',
-    'ConduitAPI_diffusion_querycommits_Method' => 'applications/diffusion/conduit/ConduitAPI_diffusion_querycommits.php',
+    'ConduitAPI_diffusion_querycommits_Method' => 'applications/diffusion/conduit/ConduitAPI_diffusion_querycommits_Method.php',
     'ConduitAPI_diffusion_rawdiffquery_Method' => 'applications/diffusion/conduit/ConduitAPI_diffusion_rawdiffquery_Method.php',
     'ConduitAPI_diffusion_readmequery_Method' => 'applications/diffusion/conduit/ConduitAPI_diffusion_readmequery_Method.php',
     'ConduitAPI_diffusion_refsquery_Method' => 'applications/diffusion/conduit/ConduitAPI_diffusion_refsquery_Method.php',
