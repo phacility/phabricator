@@ -486,21 +486,27 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function getNormalizedPath() {
+    if ($this->isHosted()) {
+      $uri = PhabricatorEnv::getProductionURI($this->getURI());
+    } else {
+      $uri = $this->getRemoteURI();
+    }
+
     switch ($this->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $normalized_uri = new PhabricatorRepositoryURINormalizer(
           PhabricatorRepositoryURINormalizer::TYPE_GIT,
-          $this->getRemoteURI());
+          $uri);
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         $normalized_uri = new PhabricatorRepositoryURINormalizer(
           PhabricatorRepositoryURINormalizer::TYPE_SVN,
-          $this->getRemoteURI());
+          $uri);
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         $normalized_uri = new PhabricatorRepositoryURINormalizer(
           PhabricatorRepositoryURINormalizer::TYPE_MERCURIAL,
-          $this->getRemoteURI());
+          $uri);
         break;
       default:
         throw new Exception("Unrecognized version control system.");
