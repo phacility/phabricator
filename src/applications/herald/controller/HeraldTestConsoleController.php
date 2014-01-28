@@ -74,15 +74,13 @@ final class HeraldTestConsoleController extends HeraldController {
       }
     }
 
-    $text = pht(
-      'Enter an object to test rules for, like a Diffusion commit (e.g., '.
-      'rX123) or a Differential revision (e.g., D123). You will be shown '.
-      'the results of a dry run on the object.');
-
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->appendChild(
-        phutil_tag('p', array('class' => 'aphront-form-instructions'), $text))
+      ->appendRemarkupInstructions(
+        pht(
+        'Enter an object to test rules for, like a Diffusion commit (e.g., '.
+        '`rX123`) or a Differential revision (e.g., `D123`). You will be '.
+        'shown the results of a dry run on the object.'))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Object Name'))

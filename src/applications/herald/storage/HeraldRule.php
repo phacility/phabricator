@@ -17,7 +17,7 @@ final class HeraldRule extends HeraldDAO
   protected $isDisabled = 0;
   protected $triggerObjectPHID;
 
-  protected $configVersion = 27;
+  protected $configVersion = 28;
 
   // phids for which this rule has been applied
   private $ruleApplied = self::ATTACHABLE;
@@ -134,8 +134,7 @@ final class HeraldRule extends HeraldDAO
       $child->setRuleID($this->getID());
     }
 
-// TODO:
-//    $this->openTransaction();
+    $this->openTransaction();
       queryfx(
         $this->establishConnection('w'),
         'DELETE FROM %T WHERE ruleID = %d',
@@ -144,7 +143,7 @@ final class HeraldRule extends HeraldDAO
       foreach ($children as $child) {
         $child->save();
       }
-//    $this->saveTransaction();
+    $this->saveTransaction();
   }
 
   public function delete() {
