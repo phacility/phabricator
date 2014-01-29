@@ -6,18 +6,7 @@ final class PhabricatorHomeQuickCreateController
   public function processRequest() {
     $viewer = $this->getRequest()->getUser();
 
-    $applications = id(new PhabricatorApplicationQuery())
-      ->setViewer($viewer)
-      ->withInstalled(true)
-      ->execute();
-
-    $items = array();
-    foreach ($applications as $application) {
-      $app_items = $application->getQuickCreateItems($viewer);
-      foreach ($app_items as $app_item) {
-        $items[] = $app_item;
-      }
-    }
+    $items = $this->getCurrentApplication()->loadAllQuickCreateItems($viewer);
 
     $list = id(new PHUIObjectItemListView())
       ->setUser($viewer);

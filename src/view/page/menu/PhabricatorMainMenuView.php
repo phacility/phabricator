@@ -395,6 +395,13 @@ final class PhabricatorMainMenuView extends AphrontView {
       $notification_dropdown,
       $message_notification_dropdown);
 
+    $applications = PhabricatorApplication::getAllInstalledApplications();
+    foreach ($applications as $application) {
+      $dropdowns[] = $application->buildMainMenuExtraNodes(
+        $this->getUser(),
+        $this->getController());
+    }
+
     return array(
       hsprintf('%s%s', $bubble_tag, $message_tag),
       $dropdowns
