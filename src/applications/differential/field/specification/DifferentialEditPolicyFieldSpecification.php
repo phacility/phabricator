@@ -32,10 +32,7 @@ final class DifferentialEditPolicyFieldSpecification
       ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
       ->setPolicyObject($revision)
       ->setPolicies($policies)
-      ->setName('editPolicy')
-      ->setCaption(
-        pht(
-          'NOTE: These policy features are not yet fully supported.'));
+      ->setName('editPolicy');
   }
 
   public function willWriteRevision(DifferentialRevisionEditor $editor) {
