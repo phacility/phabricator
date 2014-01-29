@@ -70,4 +70,16 @@ final class PhabricatorApplicationPholio extends PhabricatorApplication {
     );
   }
 
+  public function getQuickCreateItems(PhabricatorUser $viewer) {
+    $items = array();
+
+    $item = id(new PHUIListItemView())
+      ->setName(pht('Pholio Mock'))
+      ->setIcon('new')
+      ->setHref($this->getBaseURI().'new/');
+    $items[] = $item;
+
+    return $items;
+  }
+
 }

@@ -54,7 +54,7 @@ final class PhabricatorApplicationConpherence extends PhabricatorApplication {
     $items = array();
 
     $item = id(new PHUIListItemView())
-      ->setName(pht('New Conpherence Thread'))
+      ->setName(pht('Conpherence Thread'))
       ->setIcon('new')
       ->setWorkflow(true)
       ->setHref($this->getBaseURI().'new/');
