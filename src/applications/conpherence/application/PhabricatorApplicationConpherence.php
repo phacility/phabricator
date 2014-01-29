@@ -50,4 +50,18 @@ final class PhabricatorApplicationConpherence extends PhabricatorApplication {
     );
   }
 
+  public function getQuickCreateItems(PhabricatorUser $viewer) {
+    $items = array();
+
+    $item = id(new PHUIListItemView())
+      ->setName(pht('New Conpherence Thread'))
+      ->setIcon('new')
+      ->setWorkflow(true)
+      ->setHref($this->getBaseURI().'new/');
+    $items[] = $item;
+
+    return $items;
+  }
+
+
 }

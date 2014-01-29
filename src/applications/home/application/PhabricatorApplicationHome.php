@@ -17,6 +17,9 @@ final class PhabricatorApplicationHome extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/(?:(?P<filter>(?:jump))/)?' => 'PhabricatorHomeMainController',
+      '/home/' => array(
+        'create/' => 'PhabricatorHomeQuickCreateController',
+      ),
     );
   }
 
@@ -26,6 +29,29 @@ final class PhabricatorApplicationHome extends PhabricatorApplication {
 
   public function canUninstall() {
     return false;
+  }
+
+  public function getApplicationOrder() {
+    return 9;
+  }
+
+  public function buildMainMenuItems(
+    PhabricatorUser $user,
+    PhabricatorController $controller = null) {
+
+    $items = array();
+
+    if ($user->isLoggedIn() && $user->isUserActivated()) {
+      $item = id(new PHUIListItemView())
+        ->setName(pht('Create New...'))
+        ->setIcon('new')
+        ->addClass('core-menu-item')
+        ->setHref('/home/create/')
+        ->setOrder(300);
+      $items[] = $item;
+    }
+
+    return $items;
   }
 
 }

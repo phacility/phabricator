@@ -50,4 +50,16 @@ final class PhabricatorApplicationPaste extends PhabricatorApplication {
     );
   }
 
+  public function getQuickCreateItems(PhabricatorUser $viewer) {
+    $items = array();
+
+    $item = id(new PHUIListItemView())
+      ->setName(pht('New Paste'))
+      ->setIcon('new')
+      ->setHref($this->getBaseURI().'create/');
+    $items[] = $item;
+
+    return $items;
+  }
+
 }

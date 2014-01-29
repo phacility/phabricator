@@ -90,6 +90,18 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     return $status;
   }
 
+  public function getQuickCreateItems(PhabricatorUser $viewer) {
+    $items = array();
+
+    $item = id(new PHUIListItemView())
+      ->setName(pht('New Maniphest Task'))
+      ->setIcon('new')
+      ->setHref($this->getBaseURI().'task/create/');
+    $items[] = $item;
+
+    return $items;
+  }
+
   protected function getCustomCapabilities() {
     return array(
       ManiphestCapabilityDefaultView::CAPABILITY => array(

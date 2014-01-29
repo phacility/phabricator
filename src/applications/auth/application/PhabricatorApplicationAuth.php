@@ -39,7 +39,8 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
         ->setIcon('power')
         ->setWorkflow(true)
         ->setHref('/logout/')
-        ->setSelected(($controller instanceof PhabricatorLogoutController));
+        ->setSelected(($controller instanceof PhabricatorLogoutController))
+        ->setOrder(900);
       $items[] = $item;
     } else {
       if ($controller instanceof PhabricatorAuthController) {
@@ -51,7 +52,8 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
           ->setName(pht('Log In'))
           // TODO: Login icon?
           ->setIcon('power')
-          ->setHref('/auth/start/');
+          ->setHref('/auth/start/')
+          ->setOrder(900);
         $items[] = $item;
       }
     }

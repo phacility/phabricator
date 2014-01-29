@@ -23,6 +23,16 @@ final class PHUIListItemView extends AphrontTagView {
   private $disabled;
   private $renderNameAsTooltip;
   private $statusColor;
+  private $order;
+
+  public function setOrder($order) {
+    $this->order = $order;
+    return $this;
+  }
+
+  public function getOrder() {
+    return $this->order;
+  }
 
   public function setRenderNameAsTooltip($render_name_as_tooltip) {
     $this->renderNameAsTooltip = $render_name_as_tooltip;

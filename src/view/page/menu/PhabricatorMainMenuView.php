@@ -163,6 +163,8 @@ final class PhabricatorMainMenuView extends AphrontView {
       }
     }
 
+    $actions = msort($actions, 'getOrder');
+
     $view = $this->getApplicationMenu();
 
     if (!$view) {
