@@ -101,6 +101,22 @@ final class HarbormasterBuildEngine extends Phobject {
       ->setViewer($this->getViewer())
       ->withBuildPHIDs(array($build->getPHID()))
       ->execute();
+
+    if (!$targets) {
+      return;
+    }
+
+    $target_phids = mpull($targets, 'getPHID');
+
+    $artifacts = id(new HarbormasterBuildArtifactQuery())
+      ->setViewer($this->getViewer())
+      ->withBuildTargetPHIDs($target_phids)
+      ->execute();
+
+    foreach ($artifacts as $artifact) {
+      $artifact->delete();
+    }
+
     foreach ($targets as $target) {
       $target->delete();
     }
