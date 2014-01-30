@@ -1050,7 +1050,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return false;
     }
 
-    if ($this->isGit()) {
+    if ($this->isGit() || $this->isHg()) {
       return true;
     }
 
