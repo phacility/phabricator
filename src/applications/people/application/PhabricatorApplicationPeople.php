@@ -62,6 +62,14 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
     );
   }
 
+
+  protected function getCustomCapabilities() {
+    return array(
+      PeopleCapabilityBrowseUserDirectory::CAPABILITY => array(
+      ),
+    );
+  }
+
   public function loadStatus(PhabricatorUser $user) {
     if (!$user->getIsAdmin()) {
       return array();

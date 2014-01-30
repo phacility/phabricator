@@ -19,6 +19,11 @@ final class PhabricatorPeopleListController extends PhabricatorPeopleController
 
   public function processRequest() {
     $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $this->requireApplicationCapability(
+      PeopleCapabilityBrowseUserDirectory::CAPABILITY);
+
     $controller = id(new PhabricatorApplicationSearchController($request))
       ->setQueryKey($this->key)
       ->setSearchEngine(new PhabricatorPeopleSearchEngine())
