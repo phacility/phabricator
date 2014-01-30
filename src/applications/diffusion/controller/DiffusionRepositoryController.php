@@ -176,38 +176,50 @@ final class DiffusionRepositoryController extends DiffusionController {
     if ($repository->isHosted()) {
       $ssh_uri = $repository->getSSHCloneURIObject();
       if ($ssh_uri) {
-        $clone_uri = $this->renderCloneURI(
+        $clone_uri = $this->renderCloneCommand(
+          $repository,
           $ssh_uri,
           $repository->getServeOverSSH(),
           '/settings/panel/ssh/');
 
-        $view->addProperty(pht('Clone URI (SSH)'), $clone_uri);
+        $view->addProperty(
+          $repository->isSVN()
+            ? pht('Checkout (SSH)')
+            : pht('Clone (SSH)'),
+          $clone_uri);
       }
 
       $http_uri = $repository->getHTTPCloneURIObject();
       if ($http_uri) {
-        $clone_uri = $this->renderCloneURI(
+        $clone_uri = $this->renderCloneCommand(
+          $repository,
           $http_uri,
           $repository->getServeOverHTTP(),
           PhabricatorEnv::getEnvConfig('diffusion.allow-http-auth')
             ? '/settings/panel/vcspassword/'
             : null);
 
-        $view->addProperty(pht('Clone URI (HTTP)'), $clone_uri);
+        $view->addProperty(
+          $repository->isSVN()
+            ? pht('Checkout (HTTP)')
+            : pht('Clone (HTTP)'),
+          $clone_uri);
       }
     } else {
       switch ($repository->getVersionControlSystem()) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
           $view->addProperty(
-            pht('Clone URI'),
-            $this->renderCloneURI(
+            pht('Clone'),
+            $this->renderCloneCommand(
+              $repository,
               $repository->getPublicCloneURI()));
           break;
         case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
           $view->addProperty(
-            pht('Repository Root'),
-            $this->renderCloneURI(
+            pht('Checkout'),
+            $this->renderCloneCommand(
+              $repository,
               $repository->getPublicCloneURI()));
           break;
       }
@@ -526,7 +538,8 @@ final class DiffusionRepositoryController extends DiffusionController {
     return $browse_panel;
   }
 
-  private function renderCloneURI(
+  private function renderCloneCommand(
+    PhabricatorRepository $repository,
     $uri,
     $serve_mode = null,
     $manage_uri = null) {
@@ -535,11 +548,32 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     Javelin::initBehavior('select-on-click');
 
+    switch ($repository->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        $command = csprintf(
+          'git clone %s %s',
+          $uri,
+          $repository->getCloneName());
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $command = csprintf(
+          'hg clone %s %s',
+          $uri,
+          $repository->getCloneName());
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $command = csprintf(
+          'svn checkout %s %s',
+          $uri,
+          $repository->getCloneName());
+        break;
+    }
+
     $input = javelin_tag(
       'input',
       array(
         'type' => 'text',
-        'value' => (string)$uri,
+        'value' => (string)$command,
         'class' => 'diffusion-clone-uri',
         'sigil' => 'select-on-click',
         'readonly' => 'true',

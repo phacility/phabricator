@@ -212,6 +212,34 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
 
+  /**
+   * Get the name of the directory this repository should clone or checkout
+   * into. For example, if the repository name is "Example Repository", a
+   * reasonable name might be "example-repository". This is used to help users
+   * get reasonable results when cloning repositories, since they generally do
+   * not want to clone into directories called "X/" or "Example Repository/".
+   *
+   * @return string
+   */
+  public function getCloneName() {
+    $name = $this->getDetail('clone-name');
+
+    // Make some reasonable effort to produce reasonable default directory
+    // names from repository names.
+    if (!strlen($name)) {
+      $name = $this->getName();
+      $name = phutil_utf8_strtolower($name);
+      $name = preg_replace('@[/ -:]+@', '-', $name);
+      $name = trim($name, '-');
+      if (!strlen($name)) {
+        $name = $this->getCallsign();
+      }
+    }
+
+    return $name;
+  }
+
+
 /* -(  Remote Command Execution  )------------------------------------------- */
 
 

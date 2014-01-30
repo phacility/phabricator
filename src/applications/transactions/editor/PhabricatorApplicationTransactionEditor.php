@@ -228,6 +228,7 @@ abstract class PhabricatorApplicationTransactionEditor
   private function applyInternalEffects(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
+
     switch ($xaction->getTransactionType()) {
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
         $object->setViewPolicy($xaction->getNewValue());
