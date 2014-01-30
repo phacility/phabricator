@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * This class adds a "Land this" button to revision view.
+ */
 final class DifferentialLandingActionMenuEventListener
   extends PhabricatorEventListener {
 
@@ -17,13 +20,9 @@ final class DifferentialLandingActionMenuEventListener
 
   private function handleActionsEvent(PhutilEvent $event) {
     $object = $event->getValue('object');
-
-    $actions = null;
     if ($object instanceof DifferentialRevision) {
-      $actions = $this->renderRevisionAction($event);
+      $this->renderRevisionAction($event);
     }
-
-    $this->addActionMenuItems($event, $actions);
   }
 
   private function renderRevisionAction(PhutilEvent $event) {
@@ -42,13 +41,15 @@ final class DifferentialLandingActionMenuEventListener
       ->setAncestorClass('DifferentialLandingStrategy')
       ->loadObjects();
     foreach ($strategies as $strategy) {
-      $actions = $strategy->createMenuItems(
-          $event->getUser(),
-          $revision,
-          $repository);
-      $this->addActionMenuItems($event, $actions);
+      $viewer = $event->getUser();
+      $action = $strategy->createMenuItem($viewer, $revision, $repository);
+      if ($action == null)
+        continue;
+      if ($strategy->isActionDisabled($viewer, $revision, $repository)) {
+        $action->setDisabled(true);
+      }
+      $this->addActionMenuItems($event, $action);
     }
   }
 
 }
-
