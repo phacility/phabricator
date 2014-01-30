@@ -2197,6 +2197,7 @@ phutil_register_library_map(array(
     'PhluxVariableQuery' => 'applications/phlux/query/PhluxVariableQuery.php',
     'PhluxViewController' => 'applications/phlux/controller/PhluxViewController.php',
     'PholioActionMenuEventListener' => 'applications/pholio/event/PholioActionMenuEventListener.php',
+    'PholioCapabilityDefaultView' => 'applications/pholio/capability/PholioCapabilityDefaultView.php',
     'PholioConstants' => 'applications/pholio/constants/PholioConstants.php',
     'PholioController' => 'applications/pholio/controller/PholioController.php',
     'PholioDAO' => 'applications/pholio/storage/PholioDAO.php',
@@ -4938,6 +4939,7 @@ phutil_register_library_map(array(
     'PhluxVariableQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhluxViewController' => 'PhluxController',
     'PholioActionMenuEventListener' => 'PhabricatorEventListener',
+    'PholioCapabilityDefaultView' => 'PhabricatorPolicyCapability',
     'PholioController' => 'PhabricatorController',
     'PholioDAO' => 'PhabricatorLiskDAO',
     'PholioImage' =>

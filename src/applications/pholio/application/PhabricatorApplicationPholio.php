@@ -82,4 +82,11 @@ final class PhabricatorApplicationPholio extends PhabricatorApplication {
     return $items;
   }
 
+  protected function getCustomCapabilities() {
+    return array(
+      PholioCapabilityDefaultView::CAPABILITY => array(
+      ),
+    );
+  }
+
 }
