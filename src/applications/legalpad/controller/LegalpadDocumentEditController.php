@@ -18,14 +18,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
     if (!$this->id) {
       $is_create = true;
 
-      $document = id(new LegalpadDocument())
-        ->setVersions(0)
-        ->setCreatorPHID($user->getPHID())
-        ->setContributorCount(0)
-        ->setRecentContributorPHIDs(array())
-        ->attachSignatures(array())
-        ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
-        ->setEditPolicy(PhabricatorPolicies::POLICY_USER);
+      $document = LegalpadDocument::initializeNewDocument($user);
       $body = id(new LegalpadDocumentBody())
         ->setCreatorPHID($user->getPHID());
       $document->attachDocumentBody($body);

@@ -51,4 +51,13 @@ final class PhabricatorApplicationLegalpad extends PhabricatorApplication {
       ));
   }
 
+  protected function getCustomCapabilities() {
+    return array(
+      LegalpadCapabilityDefaultView::CAPABILITY => array(
+      ),
+      LegalpadCapabilityDefaultEdit::CAPABILITY => array(
+      ),
+    );
+  }
+
 }
