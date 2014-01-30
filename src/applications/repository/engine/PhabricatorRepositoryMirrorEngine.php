@@ -55,9 +55,17 @@ final class PhabricatorRepositoryMirrorEngine
 
     $this->log(pht('Pushing to remote "%s"...', $mirror->getRemoteURI()));
 
-    if (!$proxy->isGit()) {
+    if ($proxy->isGit()) {
+      $this->pushToGitRepository($proxy);
+    } else if ($proxy->isHg()) {
+      $this->pushToHgRepository($proxy);
+    } else {
       throw new Exception(pht('Unsupported VCS!'));
     }
+  }
+
+  private function pushToGitRepository(
+    PhabricatorRepository $proxy) {
 
     $future = $proxy->getRemoteCommandFuture(
       'push --verbose --mirror -- %P',
@@ -66,6 +74,26 @@ final class PhabricatorRepositoryMirrorEngine
     $future
       ->setCWD($proxy->getLocalPath())
       ->resolvex();
+  }
+
+  private function pushToHgRepository(
+    PhabricatorRepository $proxy) {
+
+    $future = $proxy->getRemoteCommandFuture(
+      'push --verbose --rev tip -- %P',
+      $proxy->getRemoteURIEnvelope());
+
+    try {
+      $future
+        ->setCWD($proxy->getLocalPath())
+        ->resolvex();
+    } catch (CommandException $ex) {
+      if (preg_match('/no changes found/', $ex->getStdOut())) {
+        // mercurial says nothing changed, but that's good
+      } else {
+        throw $ex;
+      }
+    }
   }
 
 }
