@@ -6,7 +6,7 @@ final class PassphraseCredentialCreateController extends PassphraseController {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $types = PassphraseCredentialType::getAllTypes();
+    $types = PassphraseCredentialType::getAllCreateableTypes();
     $types = mpull($types, null, 'getCredentialType');
     $types = msort($types, 'getCredentialTypeName');
 
