@@ -174,42 +174,21 @@ final class DiffusionRepositoryController extends DiffusionController {
     }
 
     if ($repository->isHosted()) {
-      $serve_off = PhabricatorRepository::SERVE_OFF;
-      $callsign = $repository->getCallsign();
-      $repo_path = '/diffusion/'.$callsign.'/';
-
-      $serve_ssh = $repository->getServeOverSSH();
-      if ($serve_ssh !== $serve_off) {
-        $uri = new PhutilURI(PhabricatorEnv::getProductionURI($repo_path));
-
-        if ($repository->isSVN()) {
-          $uri->setProtocol('svn+ssh');
-        } else {
-          $uri->setProtocol('ssh');
-        }
-
-        $ssh_user = PhabricatorEnv::getEnvConfig('diffusion.ssh-user');
-        if ($ssh_user) {
-          $uri->setUser($ssh_user);
-        }
-
-        $uri->setPort(PhabricatorEnv::getEnvConfig('diffusion.ssh-port'));
-
+      $ssh_uri = $repository->getSSHCloneURIObject();
+      if ($ssh_uri) {
         $clone_uri = $this->renderCloneURI(
-          $uri,
-          $serve_ssh,
+          $ssh_uri,
+          $repository->getServeOverSSH(),
           '/settings/panel/ssh/');
 
         $view->addProperty(pht('Clone URI (SSH)'), $clone_uri);
       }
 
-      $serve_http = $repository->getServeOverHTTP();
-      if ($serve_http !== $serve_off) {
-        $http_uri = PhabricatorEnv::getProductionURI($repo_path);
-
+      $http_uri = $repository->getHTTPCloneURIObject();
+      if ($http_uri) {
         $clone_uri = $this->renderCloneURI(
           $http_uri,
-          $serve_http,
+          $repository->getServeOverHTTP(),
           PhabricatorEnv::getEnvConfig('diffusion.allow-http-auth')
             ? '/settings/panel/vcspassword/'
             : null);
@@ -223,13 +202,13 @@ final class DiffusionRepositoryController extends DiffusionController {
           $view->addProperty(
             pht('Clone URI'),
             $this->renderCloneURI(
-              $repository->getPublicRemoteURI()));
+              $repository->getPublicCloneURI()));
           break;
         case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
           $view->addProperty(
             pht('Repository Root'),
             $this->renderCloneURI(
-              $repository->getPublicRemoteURI()));
+              $repository->getPublicCloneURI()));
           break;
       }
     }

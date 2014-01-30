@@ -486,11 +486,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function getNormalizedPath() {
-    if ($this->isHosted()) {
-      $uri = PhabricatorEnv::getProductionURI($this->getURI());
-    } else {
-      $uri = $this->getRemoteURI();
-    }
+    $uri = (string)$this->getCloneURIObject();
 
     switch ($this->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
@@ -629,6 +625,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return (bool)$this->getDetail('importing', false);
   }
 
+
 /* -(  Repository URI Management  )------------------------------------------ */
 
 
@@ -675,26 +672,29 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
 
   /**
-   * Get the remote URI for this repository, without authentication information.
+   * Get the clone (or checkout) URI for this repository, without authentication
+   * information.
    *
    * @return string Repository URI.
    * @task uri
    */
-  public function getPublicRemoteURI() {
-    $uri = $this->getRemoteURIObject();
+  public function getPublicCloneURI() {
+    $uri = $this->getCloneURIObject();
 
     // Make sure we don't leak anything if this repo is using HTTP Basic Auth
     // with the credentials in the URI or something zany like that.
 
     // If repository is not accessed over SSH we remove both username and
     // password.
-    if (!$this->shouldUseSSH()) {
-      $uri->setUser(null);
+    if (!$this->isHosted()) {
+      if (!$this->shouldUseSSH()) {
+        $uri->setUser(null);
 
-      // This might be a Git URI or a normal URI. If it's Git, there's no
-      // password support.
-      if ($uri instanceof PhutilURI) {
-        $uri->setPass(null);
+        // This might be a Git URI or a normal URI. If it's Git, there's no
+        // password support.
+        if ($uri instanceof PhutilURI) {
+          $uri->setPass(null);
+        }
       }
     }
 
@@ -749,6 +749,94 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     throw new Exception("Remote URI '{$raw_uri}' could not be parsed!");
+  }
+
+
+  /**
+   * Get the "best" clone/checkout URI for this repository, on any protocol.
+   */
+  public function getCloneURIObject() {
+    if (!$this->isHosted()) {
+      return $this->getRemoteURIObject();
+    }
+
+    // Choose the best URI: pick a read/write URI over a URI which is not
+    // read/write, and SSH over HTTP.
+
+    $serve_ssh = $this->getServeOverSSH();
+    $serve_http = $this->getServeOverHTTP();
+
+    if ($serve_ssh === self::SERVE_READWRITE) {
+      return $this->getSSHCloneURIObject();
+    } else if ($serve_http === self::SERVE_READWRITE) {
+      return $this->getHTTPCloneURIObject();
+    } else if ($serve_ssh !== self::SERVE_OFF) {
+      return $this->getSSHCloneURIObject();
+    } else if ($serve_http !== self::SERVE_OFF) {
+      return $this->getHTTPCloneURIObject();
+    } else {
+      return null;
+    }
+  }
+
+
+  /**
+   * Get the repository's SSH clone/checkout URI, if one exists.
+   */
+  public function getSSHCloneURIObject() {
+    if (!$this->isHosted()) {
+      if ($this->shouldUseSSH()) {
+        return $this->getRemoteURIObject();
+      } else {
+        return null;
+      }
+    }
+
+    $serve_ssh = $this->getServeOverSSH();
+    if ($serve_ssh === self::SERVE_OFF) {
+      return null;
+    }
+
+    $uri = new PhutilURI(PhabricatorEnv::getProductionURI($this->getURI()));
+
+    if ($this->isSVN()) {
+      $uri->setProtocol('svn+ssh');
+    } else {
+      $uri->setProtocol('ssh');
+    }
+
+    $ssh_user = PhabricatorEnv::getEnvConfig('diffusion.ssh-user');
+    if ($ssh_user) {
+      $uri->setUser($ssh_user);
+    }
+
+    $uri->setPort(PhabricatorEnv::getEnvConfig('diffusion.ssh-port'));
+
+    return $uri;
+  }
+
+
+  /**
+   * Get the repository's HTTP clone/checkout URI, if one exists.
+   */
+  public function getHTTPCloneURIObject() {
+    if (!$this->isHosted()) {
+      if ($this->shouldUseHTTP()) {
+        return $this->getRemoteURIObject();
+      } else {
+        return null;
+      }
+    }
+
+    $serve_http = $this->getServeOverHTTP();
+    if ($serve_http === self::SERVE_OFF) {
+      return null;
+    }
+
+
+    $uri = PhabricatorEnv::getProductionURI($this->getURI());
+
+    return $uri;
   }
 
 

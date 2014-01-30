@@ -33,7 +33,7 @@ final class DiffusionExternalController extends DiffusionController {
         if ($remote_uri->getPath() == $uri_path) {
           $matches[$key] = 1;
         }
-        if ($repository->getPublicRemoteURI() == $uri) {
+        if ($repository->getPublicCloneURI() == $uri) {
           $matches[$key] = 2;
         }
         if ($repository->getRemoteURI() == $uri) {

@@ -175,7 +175,7 @@ final class HarbormasterBuild extends HarbormasterDAO
     if ($repo) {
       $results['repository.callsign'] = $repo->getCallsign();
       $results['repository.vcs'] = $repo->getVersionControlSystem();
-      $results['repository.uri'] = $repo->getPublicRemoteURI();
+      $results['repository.uri'] = $repo->getPublicCloneURI();
     }
 
     $results['step.timestamp'] = time();
