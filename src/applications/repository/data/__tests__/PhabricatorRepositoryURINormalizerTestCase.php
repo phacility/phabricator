@@ -16,6 +16,8 @@ final class PhabricatorRepositoryURINormalizerTestCase
       'user@domain.com:path/repo/' => 'path/repo',
       'file:///path/to/local/repo.git' => 'path/to/local/repo',
       '/path/to/local/repo.git' => 'path/to/local/repo',
+      'ssh://something.com/diffusion/X/anything.git' => 'diffusion/X',
+      'ssh://something.com/diffusion/X/' => 'diffusion/X',
     );
 
     $type_git = PhabricatorRepositoryURINormalizer::TYPE_GIT;

@@ -833,6 +833,12 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       $uri->setProtocol('ssh');
     }
 
+    if ($this->isGit()) {
+      $uri->setPath($uri->getPath().$this->getCloneName().'.git');
+    } else if ($this->isHg()) {
+      $uri->setPath($uri->getPath().$this->getCloneName().'/');
+    }
+
     $ssh_user = PhabricatorEnv::getEnvConfig('diffusion.ssh-user');
     if ($ssh_user) {
       $uri->setUser($ssh_user);
@@ -861,8 +867,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return null;
     }
 
-
     $uri = PhabricatorEnv::getProductionURI($this->getURI());
+    $uri = new PhutilURI($uri);
+
+    if ($this->isGit()) {
+      $uri->setPath($uri->getPath().$this->getCloneName().'.git');
+    } else if ($this->isHg()) {
+      $uri->setPath($uri->getPath().$this->getCloneName().'/');
+    }
 
     return $uri;
   }

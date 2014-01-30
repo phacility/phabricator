@@ -551,15 +551,13 @@ final class DiffusionRepositoryController extends DiffusionController {
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $command = csprintf(
-          'git clone %s %s',
-          $uri,
-          $repository->getCloneName());
+          'git clone %s',
+          $uri);
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         $command = csprintf(
-          'hg clone %s %s',
-          $uri,
-          $repository->getCloneName());
+          'hg clone %s',
+          $uri);
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         $command = csprintf(
