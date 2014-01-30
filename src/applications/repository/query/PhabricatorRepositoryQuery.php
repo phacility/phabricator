@@ -10,6 +10,7 @@ final class PhabricatorRepositoryQuery
   private $uuids;
   private $nameContains;
   private $remoteURIs;
+  private $anyProjectPHIDs;
 
   const STATUS_OPEN = 'status-open';
   const STATUS_CLOSED = 'status-closed';
@@ -73,6 +74,11 @@ final class PhabricatorRepositoryQuery
 
   public function withRemoteURIs(array $uris) {
     $this->remoteURIs = $uris;
+    return $this;
+  }
+
+  public function withAnyProjects(array $projects) {
+    $this->anyProjectPHIDs = $projects;
     return $this;
   }
 
@@ -350,6 +356,12 @@ final class PhabricatorRepositoryQuery
         PhabricatorRepository::TABLE_SUMMARY);
     }
 
+    if ($this->anyProjectPHIDs) {
+      $joins[] = qsprintf(
+        $conn_r,
+        'JOIN edge e ON e.src = r.phid');
+    }
+
     return implode(' ', $joins);
   }
 
@@ -396,6 +408,13 @@ final class PhabricatorRepositoryQuery
         $conn_r,
         'name LIKE %~',
         $this->nameContains);
+    }
+
+    if ($this->anyProjectPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'e.dst IN (%Ls)',
+        $this->anyProjectPHIDs);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

@@ -12,6 +12,7 @@ final class PhabricatorRepositorySearchEngine
     $saved->setParameter('hosted', $request->getStr('hosted'));
     $saved->setParameter('types', $request->getArr('types'));
     $saved->setParameter('name', $request->getStr('name'));
+    $saved->setParameter('anyProjectPHIDs', $request->getArr('anyProjects'));
 
     return $saved;
   }
@@ -57,6 +58,11 @@ final class PhabricatorRepositorySearchEngine
       $query->withNameContains($name);
     }
 
+    $any_project_phids = $saved->getParameter('anyProjectPHIDs');
+    if ($any_project_phids) {
+      $query->withAnyProjects($any_project_phids);
+    }
+
     return $query;
   }
 
@@ -68,6 +74,16 @@ final class PhabricatorRepositorySearchEngine
     $types = $saved_query->getParameter('types', array());
     $types = array_fuse($types);
     $name = $saved_query->getParameter('name');
+    $any_project_phids = $saved_query->getParameter('anyProjectPHIDs', array());
+
+    if ($any_project_phids) {
+      $any_project_handles = id(new PhabricatorHandleQuery())
+        ->setViewer($this->requireViewer())
+        ->withPHIDs($any_project_phids)
+        ->execute();
+    } else {
+      $any_project_handles = array();
+    }
 
     $form
       ->appendChild(
@@ -80,6 +96,12 @@ final class PhabricatorRepositorySearchEngine
           ->setName('name')
           ->setLabel(pht('Name Contains'))
           ->setValue($name))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource('/typeahead/common/projects/')
+          ->setName('anyProjects')
+          ->setLabel(pht('In Any Project'))
+          ->setValue($any_project_handles))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setName('status')
