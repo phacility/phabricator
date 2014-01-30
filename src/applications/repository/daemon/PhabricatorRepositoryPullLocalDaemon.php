@@ -283,10 +283,11 @@ final class PhabricatorRepositoryPullLocalDaemon
     // Look for any commit which hasn't imported.
     $unparsed_commit = queryfx_one(
       $repository->establishConnection('r'),
-      'SELECT * FROM %T WHERE repositoryID = %d AND importStatus != %d
+      'SELECT * FROM %T WHERE repositoryID = %d AND (importStatus & %d) != %d
         LIMIT 1',
       id(new PhabricatorRepositoryCommit())->getTableName(),
       $repository->getID(),
+      PhabricatorRepositoryCommit::IMPORTED_ALL,
       PhabricatorRepositoryCommit::IMPORTED_ALL);
     if ($unparsed_commit) {
       // We found a commit which still needs to import, so we can't clear the
