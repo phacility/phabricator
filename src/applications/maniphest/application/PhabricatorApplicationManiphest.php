@@ -28,10 +28,6 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     );
   }
 
-  public function getQuickCreateURI() {
-    return $this->getBaseURI().'task/create/';
-  }
-
   public function getEventListeners() {
     return array(
       new ManiphestNameIndexEventListener(),

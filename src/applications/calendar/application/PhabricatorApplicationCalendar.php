@@ -32,10 +32,6 @@ final class PhabricatorApplicationCalendar extends PhabricatorApplication {
     return true;
   }
 
-  public function getQuickCreateURI() {
-    return $this->getBaseURI().'status/create/';
-  }
-
   public function getRoutes() {
     return array(
       '/calendar/' => array(

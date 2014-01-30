@@ -276,18 +276,6 @@ abstract class PhabricatorApplication
 
 
   /**
-   * On the Phabricator homepage sidebar, this function returns the URL for
-   * a quick create X link which is displayed in the wide button only.
-   *
-   * @return string
-   * @task ui
-   */
-  public function getQuickCreateURI() {
-    return null;
-  }
-
-
-  /**
    * Build items for the "quick create" menu.
    *
    * @param   PhabricatorUser         The viewing user.

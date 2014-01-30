@@ -29,11 +29,6 @@ final class PhabricatorApplicationLegalpad extends PhabricatorApplication {
     return self::GROUP_COMMUNICATION;
   }
 
-  public function getQuickCreateURI() {
-    return $this->getBaseURI().'create/';
-  }
-
-
   public function isBeta() {
     return true;
   }

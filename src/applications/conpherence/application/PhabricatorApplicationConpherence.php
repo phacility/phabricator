@@ -9,10 +9,6 @@ final class PhabricatorApplicationConpherence extends PhabricatorApplication {
     return '/conpherence/';
   }
 
-  public function getQuickCreateURI() {
-    return $this->getBaseURI().'new/';
-  }
-
   public function getShortDescription() {
     return pht('Messaging');
   }
