@@ -19,6 +19,7 @@ final class PHUIListItemView extends AphrontTagView {
   private $isExternal;
   private $key;
   private $icon;
+  private $appIcon;
   private $selected;
   private $disabled;
   private $renderNameAsTooltip;
@@ -54,6 +55,11 @@ final class PHUIListItemView extends AphrontTagView {
 
   public function setIcon($icon) {
     $this->icon = $icon;
+    return $this;
+  }
+
+  public function setAppIcon($icon) {
+    $this->appIcon = $icon;
     return $this;
   }
 
@@ -120,7 +126,7 @@ final class PHUIListItemView extends AphrontTagView {
     $classes[] = 'phui-list-item-view';
     $classes[] = 'phui-list-item-'.$this->type;
 
-    if ($this->icon) {
+    if ($this->icon || $this->appIcon) {
       $classes[] = 'phui-list-item-has-icon';
     }
 
@@ -186,6 +192,13 @@ final class PHUIListItemView extends AphrontTagView {
         ->addClass('phui-list-item-icon')
         ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
         ->setSpriteIcon($icon_name);
+    }
+
+    if ($this->appIcon) {
+      $icon = id(new PHUIIconView())
+        ->addClass('phui-list-item-icon')
+        ->setSpriteSheet(PHUIIconView::SPRITE_APPS)
+        ->setSpriteIcon($this->appIcon);
     }
 
     return javelin_tag(

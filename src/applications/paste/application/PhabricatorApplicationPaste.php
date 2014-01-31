@@ -51,7 +51,7 @@ final class PhabricatorApplicationPaste extends PhabricatorApplication {
 
     $item = id(new PHUIListItemView())
       ->setName(pht('Paste'))
-      ->setIcon('new')
+      ->setAppIcon('paste-dark')
       ->setHref($this->getBaseURI().'create/');
     $items[] = $item;
 

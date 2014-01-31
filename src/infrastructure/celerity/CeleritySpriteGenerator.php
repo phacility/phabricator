@@ -722,6 +722,10 @@ final class CeleritySpriteGenerator {
           $css .= ', .phabricator-crumb-view:hover .apps-'.$app.'-dark-large';
         }
 
+        if ($color == 'white' && $variant == 1) {
+          $css .= ', .phui-list-item-href:hover .apps-'.$app.'-dark';
+        }
+
         $sprite = id(clone $template)
           ->setName('apps-'.$app.'-'.$color.$variant_short)
           ->setTargetCSS($css);

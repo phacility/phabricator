@@ -56,7 +56,7 @@ final class PhabricatorApplicationCalendar extends PhabricatorApplication {
 
     $item = id(new PHUIListItemView())
       ->setName(pht('Calendar Event'))
-      ->setIcon('new')
+      ->setAppIcon('calendar-dark')
       ->setHref($this->getBaseURI().'status/create/');
     $items[] = $item;
 

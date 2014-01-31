@@ -75,7 +75,7 @@ final class PhabricatorApplicationPholio extends PhabricatorApplication {
 
     $item = id(new PHUIListItemView())
       ->setName(pht('Pholio Mock'))
-      ->setIcon('new')
+      ->setAppIcon('pholio-dark')
       ->setHref($this->getBaseURI().'new/');
     $items[] = $item;
 
