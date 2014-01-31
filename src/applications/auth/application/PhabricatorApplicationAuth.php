@@ -36,7 +36,7 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
       $item = id(new PHUIListItemView())
         ->addClass('core-menu-item')
         ->setName(pht('Log Out'))
-        ->setIcon('power')
+        ->setIcon('logout-sm')
         ->setWorkflow(true)
         ->setHref('/logout/')
         ->setSelected(($controller instanceof PhabricatorLogoutController))

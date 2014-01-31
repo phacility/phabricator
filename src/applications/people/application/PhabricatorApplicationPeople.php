@@ -109,7 +109,7 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
         ->setName($user->getUsername())
         ->setHref('/p/'.$user->getUsername().'/')
         ->addClass('core-menu-item')
-        ->setOrder(200);
+        ->setOrder(100);
 
       $classes = array(
         'phabricator-core-menu-icon',

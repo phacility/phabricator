@@ -7,7 +7,7 @@ final class PhabricatorApplicationHome extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Where the Heart Is');
+    return pht('Where the <3 is');
   }
 
   public function getIconName() {
@@ -55,7 +55,7 @@ final class PhabricatorApplicationHome extends PhabricatorApplication {
 
       $item = id(new PHUIListItemView())
         ->setName(pht('Create New...'))
-        ->setIcon('new')
+        ->setIcon('new-sm')
         ->addClass('core-menu-item')
         ->setHref('/home/create/')
         ->addSigil('quick-create-menu')

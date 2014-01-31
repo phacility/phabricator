@@ -41,7 +41,7 @@ final class PhabricatorApplicationSettings extends PhabricatorApplication {
       $selected = ($controller instanceof PhabricatorSettingsMainController);
       $item = id(new PHUIListItemView())
         ->setName(pht('Settings'))
-        ->setIcon('settings')
+        ->setIcon('settings-sm')
         ->addClass('core-menu-item')
         ->setSelected($selected)
         ->setHref('/settings/')

@@ -61,8 +61,8 @@ final class PhabricatorApplicationDiviner extends PhabricatorApplication {
       $item = id(new PHUIListItemView())
         ->setName(pht('%s Help', $application->getName()))
         ->addClass('core-menu-item')
-        ->setIcon('help')
-        ->setOrder(100)
+        ->setIcon('info-sm')
+        ->setOrder(200)
         ->setHref($application->getHelpURI());
       $items[] = $item;
     }

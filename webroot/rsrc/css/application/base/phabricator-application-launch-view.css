@@ -65,6 +65,11 @@ a.application-tile-full.application-tile-create {
   left: 10px;
 }
 
+.device-desktop a.phabricator-application-launch-container:hover {
+  background-color: #1e2225;
+  text-decoration: none;
+}
+
 .phabricator-application-launch-name {
   display: block;
   margin-top: 42px;
