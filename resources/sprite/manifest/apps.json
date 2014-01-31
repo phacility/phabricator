@@ -151,6 +151,16 @@
       "rule" : ".apps-fact-white",
       "hash" : "f387ef4101d9ae0511d975cd25e9b9aa"
     },
+    "apps-fancyhome-dark"       : {
+      "name" : "apps-fancyhome-dark",
+      "rule" : ".apps-fancyhome-dark",
+      "hash" : "f30cddee675af2b6b26c11482d2ffee0"
+    },
+    "apps-fancyhome-white"      : {
+      "name" : "apps-fancyhome-white",
+      "rule" : ".apps-fancyhome-white",
+      "hash" : "c15085891df0cf3f10853101f7dea8e1"
+    },
     "apps-feed-dark"            : {
       "name" : "apps-feed-dark",
       "rule" : ".apps-feed-dark",
@@ -221,6 +231,16 @@
       "rule" : ".apps-home-white",
       "hash" : "3b034189ce2507d5acf06a018325524d"
     },
+    "apps-info-sm-dark"         : {
+      "name" : "apps-info-sm-dark",
+      "rule" : ".apps-info-sm-dark",
+      "hash" : "17fd77d321b15ba97b1f3ebca0bd7aae"
+    },
+    "apps-info-sm-white"        : {
+      "name" : "apps-info-sm-white",
+      "rule" : ".apps-info-sm-white",
+      "hash" : "6c64dfe542b04f8416425367a846405a"
+    },
     "apps-legalpad-dark"        : {
       "name" : "apps-legalpad-dark",
       "rule" : ".apps-legalpad-dark",
@@ -240,6 +260,16 @@
       "name" : "apps-logo-white",
       "rule" : ".apps-logo-white",
       "hash" : "885b8ab26f2873d326e2173fad44dce7"
+    },
+    "apps-logout-sm-dark"       : {
+      "name" : "apps-logout-sm-dark",
+      "rule" : ".apps-logout-sm-dark",
+      "hash" : "91aee4598898303c499059bf0eef89df"
+    },
+    "apps-logout-sm-white"      : {
+      "name" : "apps-logout-sm-white",
+      "rule" : ".apps-logout-sm-white",
+      "hash" : "f59a87ceda18a9debe58eb063005183c"
     },
     "apps-macro-dark"           : {
       "name" : "apps-macro-dark",
@@ -285,6 +315,16 @@
       "name" : "apps-new-dark",
       "rule" : ".apps-new-dark",
       "hash" : "39f2b8d62c4595dc653badf9f11a08d7"
+    },
+    "apps-new-sm-dark"          : {
+      "name" : "apps-new-sm-dark",
+      "rule" : ".apps-new-sm-dark",
+      "hash" : "05a66a5134ed52c1c92af03aa5340d13"
+    },
+    "apps-new-sm-white"         : {
+      "name" : "apps-new-sm-white",
+      "rule" : ".apps-new-sm-white",
+      "hash" : "915ae9ea3fa178c6bb78096e8d7b985c"
     },
     "apps-new-white"            : {
       "name" : "apps-new-white",
@@ -515,6 +555,16 @@
       "name" : "apps-settings-dark",
       "rule" : ".apps-settings-dark",
       "hash" : "a5ebbb89a36998a4f4a42e8ae43eedd2"
+    },
+    "apps-settings-sm-dark"     : {
+      "name" : "apps-settings-sm-dark",
+      "rule" : ".apps-settings-sm-dark",
+      "hash" : "584388f560e271e86f02a3cf2ffff94c"
+    },
+    "apps-settings-sm-white"    : {
+      "name" : "apps-settings-sm-white",
+      "rule" : ".apps-settings-sm-white",
+      "hash" : "66a979f4618a3c8fa916fa13382c590e"
     },
     "apps-settings-white"       : {
       "name" : "apps-settings-white",
