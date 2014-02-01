@@ -41,6 +41,7 @@ final class PHUIFormMultiSubmitControl extends AphrontFormControl {
         'class' => $class,
         'disabled' => $this->getDisabled() ? 'disabled' : null,
       ));
+    return $this;
   }
 
   protected function getCustomControlClass() {

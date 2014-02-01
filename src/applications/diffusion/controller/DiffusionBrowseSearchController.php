@@ -53,16 +53,29 @@ final class DiffusionBrowseSearchController extends DiffusionBrowseController {
     $pager->setURI($this->getRequest()->getRequestURI(), 'page');
 
     try {
-
-      $results = $this->callConduitWithDiffusionRequest(
-        'diffusion.searchquery',
-        array(
-          'grep' => $this->getRequest()->getStr('grep'),
-          'stableCommitName' => $drequest->getStableCommitName(),
-          'path' => $drequest->getPath(),
-          'limit' => $limit + 1,
-          'offset' => $page));
-
+      if ($this->getRequest()->getStr('__grep__')) {
+        $results = $this->callConduitWithDiffusionRequest(
+          'diffusion.searchquery',
+          array(
+            'grep' => $this->getRequest()->getStr('grep'),
+            'stableCommitName' => $drequest->getStableCommitName(),
+            'path' => $drequest->getPath(),
+            'limit' => $limit + 1,
+            'offset' => $page));
+      } else { // Filename search.
+        $results_raw = $this->callConduitWithDiffusionRequest(
+          'diffusion.querypaths',
+          array(
+            'pattern' => $this->getRequest()->getStr('grep'),
+            'commit' => $drequest->getStableCommitName(),
+            'path' => $drequest->getPath(),
+            'limit' => $limit + 1,
+            'offset' => $page));
+        $results = [];
+        foreach ($results_raw as $result) {
+          $results[] = array($result, null, null);
+        }
+      }
     } catch (ConduitException $ex) {
       $err = $ex->getErrorDescription();
       if ($err != '') {

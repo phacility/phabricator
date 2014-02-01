@@ -26,8 +26,9 @@ abstract class DiffusionBrowseController extends DiffusionController {
               ->setValue($this->getRequest()->getStr('grep'))
               ->setCaption(pht('Enter a regular expression.')))
           ->appendChild(
-            id(new AphrontFormSubmitControl())
-              ->setValue(pht('Search File Content')));
+            id(new PHUIFormMultiSubmitControl())
+              ->addButton('__ls__', pht('Search File Names'))
+              ->addButton('__grep__', pht('Search File Content')));
         break;
     }
 
