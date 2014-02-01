@@ -19,6 +19,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
   private $excludePHIDs = array();
   private $overrideNoSelfMail = false;
+  private $recipientExpansionMap;
 
   public function __construct() {
 
@@ -379,7 +380,8 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
             $mailer->addReplyTo($value, $reply_to_name);
             break;
           case 'to':
-            $to_actors = array_select_keys($deliverable_actors, $value);
+            $to_phids = $this->expandRecipients($value);
+            $to_actors = array_select_keys($deliverable_actors, $to_phids);
             $add_to = array_merge(
               $add_to,
               mpull($to_actors, 'getEmailAddress'));
@@ -388,7 +390,8 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
             $add_to = array_merge($add_to, $value);
             break;
           case 'cc':
-            $cc_actors = array_select_keys($deliverable_actors, $value);
+            $cc_phids = $this->expandRecipients($value);
+            $cc_actors = array_select_keys($deliverable_actors, $cc_phids);
             $add_cc = array_merge(
               $add_cc,
               mpull($cc_actors, 'getEmailAddress'));
@@ -685,7 +688,52 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       $this->getToPHIDs(),
       $this->getCcPHIDs());
 
+    $this->loadRecipientExpansions($actor_phids);
+    $actor_phids = $this->expandRecipients($actor_phids);
+
     return $this->loadActors($actor_phids);
+  }
+
+  private function loadRecipientExpansions(array $phids) {
+    $expansions = id(new PhabricatorMetaMTAMemberQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs($phids)
+      ->execute();
+
+    $this->recipientExpansionMap = $expansions;
+
+    return $this;
+  }
+
+  /**
+   * Expand a list of recipient PHIDs (possibly including aggregate recipients
+   * like projects) into a deaggregated list of individual recipient PHIDs.
+   * For example, this will expand project PHIDs into a list of the project's
+   * members.
+   *
+   * @param list<phid>  List of recipient PHIDs, possibly including aggregate
+   *                    recipients.
+   * @return list<phid> Deaggregated list of mailable recipients.
+   */
+  private function expandRecipients(array $phids) {
+    if ($this->recipientExpansionMap === null) {
+      throw new Exception(
+        pht(
+          'Call loadRecipientExpansions() before expandRecipients()!'));
+    }
+
+    $results = array();
+    foreach ($phids as $phid) {
+      if (!isset($this->recipientExpansionMap[$phid])) {
+        $results[$phid] = $phid;
+      } else {
+        foreach ($this->recipientExpansionMap[$phid] as $recipient_phid) {
+          $results[$recipient_phid] = $recipient_phid;
+        }
+      }
+    }
+
+    return array_keys($results);
   }
 
   private function filterDeliverableActors(array $actors) {

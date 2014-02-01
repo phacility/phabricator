@@ -198,6 +198,15 @@ EOBODY;
       }
     }
 
+    // TODO: This is pretty messy. We should really be doing all of this
+    // multiplexing in the task queue, but that requires significant rewriting
+    // in the general case. ApplicationTransactions can do it fairly easily,
+    // but other mail sites currently can not, so we need to support this
+    // junky version until they catch up and we can swap things over.
+
+    $to_handles = $this->expandRecipientHandles($to_handles);
+    $cc_handles = $this->expandRecipientHandles($cc_handles);
+
     $tos = mpull($to_handles, null, 'getPHID');
     $ccs = mpull($cc_handles, null, 'getPHID');
 
@@ -219,6 +228,8 @@ EOBODY;
     $body .= $this->getRecipientsSummary($to_handles, $cc_handles);
 
     foreach ($recipients as $phid => $recipient) {
+
+
       $mail = clone $mail_template;
       if (isset($to_handles[$phid])) {
         $mail->addTos(array($phid));
@@ -330,6 +341,34 @@ EOBODY;
     }
 
     return rtrim($body);
+  }
+
+  private function expandRecipientHandles(array $handles) {
+    if (!$handles) {
+      return array();
+    }
+
+    $phids = mpull($handles, 'getPHID');
+    $map = id(new PhabricatorMetaMTAMemberQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs($phids)
+      ->execute();
+
+    $results = array();
+    foreach ($phids as $phid) {
+      if (isset($map[$phid])) {
+        foreach ($map[$phid] as $expanded_phid) {
+          $results[$expanded_phid] = $expanded_phid;
+        }
+      } else {
+        $results[$phid] = $phid;
+      }
+    }
+
+    return id(new PhabricatorHandleQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs($results)
+      ->execute();
   }
 
 }
