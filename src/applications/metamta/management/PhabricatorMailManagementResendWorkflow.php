@@ -54,9 +54,6 @@ final class PhabricatorMailManagementResendWorkflow
       }
 
       $message->setStatus(PhabricatorMetaMTAMail::STATUS_QUEUE);
-      $message->setRetryCount(0);
-      $message->setNextRetry(time());
-
       $message->save();
 
       $mailer_task = PhabricatorWorker::scheduleTask(

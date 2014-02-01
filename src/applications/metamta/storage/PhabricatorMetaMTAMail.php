@@ -1,8 +1,6 @@
 <?php
 
 /**
- * See #394445 for an explanation of why this thing even exists.
- *
  * @task recipients   Managing Recipients
  */
 final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
@@ -12,14 +10,11 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   const STATUS_FAIL  = 'fail';
   const STATUS_VOID  = 'void';
 
-  const MAX_RETRIES   = 250;
   const RETRY_DELAY   = 5;
 
   protected $parameters;
   protected $status;
   protected $message;
-  protected $retryCount;
-  protected $nextRetry;
   protected $relatedPHID;
 
   private $excludePHIDs = array();
@@ -28,8 +23,6 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   public function __construct() {
 
     $this->status     = self::STATUS_QUEUE;
-    $this->retryCount = 0;
-    $this->nextRetry  = time();
     $this->parameters = array();
 
     parent::__construct();
@@ -228,15 +221,6 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
-  public function getSimulatedFailureCount() {
-    return nonempty($this->getParam('simulated-failures'), 0);
-  }
-
-  public function setSimulatedFailureCount($count) {
-    $this->setParam('simulated-failures', $count);
-    return $this;
-  }
-
   public function getWorkerTaskID() {
     return $this->getParam('worker-task');
   }
@@ -338,10 +322,6 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     if (!$force_send) {
       if ($this->getStatus() != self::STATUS_QUEUE) {
         throw new Exception("Trying to send an already-sent mail!");
-      }
-
-      if (time() < $this->getNextRetry()) {
-        throw new Exception("Trying to send an email before next retry!");
       }
     }
 
@@ -611,32 +591,20 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       return $this->save();
     }
 
-    if ($this->getRetryCount() < $this->getSimulatedFailureCount()) {
+    try {
+      $ok = $mailer->send();
+      $error = null;
+    } catch (PhabricatorMetaMTAPermanentFailureException $ex) {
+      $this->setStatus(self::STATUS_FAIL);
+      $this->setMessage($ex->getMessage());
+      return $this->save();
+    } catch (Exception $ex) {
       $ok = false;
-      $error = 'Simulated failure.';
-    } else {
-      try {
-        $ok = $mailer->send();
-        $error = null;
-      } catch (PhabricatorMetaMTAPermanentFailureException $ex) {
-        $this->setStatus(self::STATUS_FAIL);
-        $this->setMessage($ex->getMessage());
-        return $this->save();
-      } catch (Exception $ex) {
-        $ok = false;
-        $error = $ex->getMessage()."\n".$ex->getTraceAsString();
-      }
+      $error = $ex->getMessage()."\n".$ex->getTraceAsString();
     }
 
     if (!$ok) {
       $this->setMessage($error);
-      if ($this->getRetryCount() > self::MAX_RETRIES) {
-        $this->setStatus(self::STATUS_FAIL);
-      } else {
-        $this->setRetryCount($this->getRetryCount() + 1);
-        $next_retry = time() + ($this->getRetryCount() * self::RETRY_DELAY);
-        $this->setNextRetry($next_retry);
-      }
     } else {
       $this->setStatus(self::STATUS_SENT);
     }
