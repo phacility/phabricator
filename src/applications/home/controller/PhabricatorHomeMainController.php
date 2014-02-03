@@ -95,16 +95,13 @@ final class PhabricatorHomeMainController
       $jump);
 
     if ($response) {
-
       return $response;
     } else if ($request->isFormPost()) {
-      $query = id(new PhabricatorSavedQuery())
-        ->setEngineClassName('PhabricatorSearchApplicationSearchEngine')
-        ->setParameter('query', $jump)
-        ->save();
+      $uri = new PhutilURI('/search/');
+      $uri->setQueryParam('query', $jump);
+      $uri->setQueryParam('search:primary', 'true');
 
-      return id(new AphrontRedirectResponse())
-        ->setURI('/search/'.$query->getQueryKey().'/');
+      return id(new AphrontRedirectResponse())->setURI((string)$uri);
     } else {
       return id(new AphrontRedirectResponse())->setURI('/');
     }
