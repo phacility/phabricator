@@ -349,7 +349,7 @@ abstract class PhabricatorApplicationSearchEngine {
    * This provides flexibility when constructing URIs, especially from external
    * sources.
    *
-   * @param AphrontRequest  Request to read PHIDs from.
+   * @param AphrontRequest  Request to read strings from.
    * @param string          Key to read in the request.
    * @return list<string>   List of values.
    */
