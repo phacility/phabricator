@@ -509,11 +509,15 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
           "Missing commits ({$need}) in a SVN repository which is not ".
           "configured for subdirectory-only parsing!");
       }
+
       foreach ($need as $foreign_commit) {
         $commit = new PhabricatorRepositoryCommit();
         $commit->setRepositoryID($repository->getID());
         $commit->setCommitIdentifier($foreign_commit);
         $commit->setEpoch(0);
+        // Mark this commit as imported so it doesn't prevent the repository
+        // from transitioning into the "Imported" state.
+        $commit->setImportStatus(PhabricatorRepositoryCommit::IMPORTED_ALL);
         $commit->save();
 
         $data = new PhabricatorRepositoryCommitData();

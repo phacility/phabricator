@@ -1103,11 +1103,55 @@ final class PhabricatorChangeParserTestCase
       pht('Artificial SVN root should fail.'));
   }
 
+  public function testSubversionForeignStubsParser() {
+    $repository = $this->buildBareRepository('CHE');
+    $repository->setDetail('svn-subpath', 'branch/');
 
-  private function expectChanges(
+    id(new PhabricatorRepositoryPullEngine())
+      ->setRepository($repository)
+      ->pullRepository();
+
+    id(new PhabricatorRepositoryDiscoveryEngine())
+      ->setRepository($repository)
+      ->discoverCommits();
+
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
+    $commits = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withRepositoryIDs(array($repository->getID()))
+      ->execute();
+
+    foreach ($commits as $commit) {
+      $this->parseCommit($repository, $commit);
+    }
+
+    // As a side effect, we expect parsing these commits to have created
+    // foreign stubs of other commits.
+
+    $commits = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withRepositoryIDs(array($repository->getID()))
+      ->execute();
+
+    $commits = mpull($commits, null, 'getCommitIdentifier');
+
+    $this->assertEqual(
+      true,
+      isset($commits['2']),
+      'Expect rCHE2 to exist as a foreign stub.');
+
+    // The foreign stub should be marked imported.
+
+    $commit = $commits['2'];
+    $this->assertEqual(
+      PhabricatorRepositoryCommit::IMPORTED_ALL,
+      (int)$commit->getImportStatus());
+  }
+
+  private function parseCommit(
     PhabricatorRepository $repository,
-    array $commits,
-    array $expect) {
+    PhabricatorRepositoryCommit $commit) {
 
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
@@ -1123,6 +1167,15 @@ final class PhabricatorChangeParserTestCase
         throw new Exception(pht('No support yet.'));
     }
 
+    $parser_object = newv($parser, array(array()));
+    return $parser_object->parseChangesForUnitTest($repository, $commit);
+  }
+
+  private function expectChanges(
+    PhabricatorRepository $repository,
+    array $commits,
+    array $expect) {
+
     foreach ($commits as $commit) {
       $commit_identifier = $commit->getCommitIdentifier();
       $expect_changes = idx($expect, $commit_identifier);
@@ -1137,8 +1190,7 @@ final class PhabricatorChangeParserTestCase
             $repository->getCallsign()));
       }
 
-      $parser_object = newv($parser, array(array()));
-      $changes = $parser_object->parseChangesForUnitTest($repository, $commit);
+      $changes = $this->parseCommit($repository, $commit);
 
       $path_map = id(new DiffusionPathQuery())
         ->withPathIDs(mpull($changes, 'getPathID'))
