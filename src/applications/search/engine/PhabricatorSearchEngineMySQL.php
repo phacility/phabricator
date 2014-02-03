@@ -142,7 +142,7 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
     return $adoc;
   }
 
-  public function executeSearch(PhabricatorSearchQuery $query) {
+  public function executeSearch(PhabricatorSavedQuery $query) {
 
     $where = array();
     $join  = array();
@@ -156,7 +156,7 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
 
     $conn_r = $dao_doc->establishConnection('r');
 
-    $q = $query->getQuery();
+    $q = $query->getParameter('query');
 
     if (strlen($q)) {
      $join[] = qsprintf(
@@ -281,7 +281,7 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
 
   protected function joinRelationship(
     AphrontDatabaseConnection $conn,
-    PhabricatorSearchQuery $query,
+    PhabricatorSavedQuery $query,
     $field,
     $type) {
 

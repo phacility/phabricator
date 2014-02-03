@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group search
- */
 final class PhabricatorSearchResultView extends AphrontView {
 
   private $handle;
@@ -14,7 +11,7 @@ final class PhabricatorSearchResultView extends AphrontView {
     return $this;
   }
 
-  public function setQuery(PhabricatorSearchQuery $query) {
+  public function setQuery(PhabricatorSavedQuery $query) {
     $this->query = $query;
     return $this;
   }
@@ -84,7 +81,7 @@ final class PhabricatorSearchResultView extends AphrontView {
       return $str;
     }
 
-    $query = $this->query->getQuery();
+    $query = $this->query->getParameter('query');
 
     $quoted_regexp = '/"([^"]*)"/';
     $matches = array(1 => array());

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group search
- */
 final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
   private $uri;
   private $timeout;
@@ -94,14 +91,14 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
     return $doc;
   }
 
-  private function buildSpec(PhabricatorSearchQuery $query) {
+  private function buildSpec(PhabricatorSavedQuery $query) {
     $spec = array();
     $filter = array();
 
-    if ($query->getQuery() != '') {
+    if ($query->getParameter('query') != '') {
       $spec[] = array(
         'field' => array(
-          'field.corpus' => $query->getQuery(),
+          'field.corpus' => $query->getParameter('query'),
         ),
       );
     }
@@ -167,7 +164,7 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
       );
     }
 
-    if (!$query->getQuery()) {
+    if (!$query->getParameter('query')) {
       $spec['sort'] = array(
         array('dateCreated' => 'desc'),
       );
@@ -179,7 +176,7 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
     return $spec;
   }
 
-  public function executeSearch(PhabricatorSearchQuery $query) {
+  public function executeSearch(PhabricatorSavedQuery $query) {
     $type = $query->getParameter('type');
     if ($type) {
       $uri = "/phabricator/{$type}/_search";
@@ -197,11 +194,13 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
       // elasticsearch probably uses Lucene query syntax:
       // http://lucene.apache.org/core/3_6_1/queryparsersyntax.html
       // Try literal search if operator search fails.
-      if (!$query->getQuery()) {
+      if (!$query->getParameter('query')) {
         throw $ex;
       }
       $query = clone $query;
-      $query->setQuery(addcslashes($query->getQuery(), '+-&|!(){}[]^"~*?:\\'));
+      $query->setQuery(
+        addcslashes(
+          $query->getParameter('query'), '+-&|!(){}[]^"~*?:\\'));
       $response = $this->executeRequest($uri, $this->buildSpec($query));
     }
 

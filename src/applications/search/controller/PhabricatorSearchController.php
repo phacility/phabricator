@@ -21,14 +21,15 @@ final class PhabricatorSearchController
     $user = $request->getUser();
 
     if ($this->key) {
-      $query = id(new PhabricatorSearchQuery())->loadOneWhere(
+      $query = id(new PhabricatorSavedQuery())->loadOneWhere(
         'queryKey = %s',
         $this->key);
       if (!$query) {
         return new Aphront404Response();
       }
     } else {
-      $query = new PhabricatorSearchQuery();
+      $query = id(new PhabricatorSavedQuery())
+        ->setEngineClassName('PhabricatorSearchApplicationSearchEngine');
 
       if ($request->isFormPost()) {
         $query_str = $request->getStr('query');
@@ -45,7 +46,7 @@ final class PhabricatorSearchController
         if ($response) {
           return $response;
         } else {
-          $query->setQuery($query_str);
+          $query->setParameter('query', $query_str);
 
           if ($request->getStr('scope')) {
             switch ($request->getStr('scope')) {
@@ -101,7 +102,11 @@ final class PhabricatorSearchController
             }
           }
 
-          $query->save();
+          try {
+            $query->save();
+          } catch (AphrontQueryDuplicateKeyException $ex) {
+            // Someone has already executed this query.
+          }
           return id(new AphrontRedirectResponse())
             ->setURI('/search/'.$query->getQueryKey().'/');
         }
@@ -157,7 +162,7 @@ final class PhabricatorSearchController
         id(new AphrontFormTextControl())
           ->setLabel('Search')
           ->setName('query')
-          ->setValue($query->getQuery()))
+          ->setValue($query->getParameter('query')))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel('Document Type')
@@ -227,7 +232,7 @@ final class PhabricatorSearchController
       if (!$request->getInt('page')) {
         $named = id(new PhabricatorObjectQuery())
           ->setViewer($user)
-          ->withNames(array($query->getQuery()))
+          ->withNames(array($query->getParameter('queyr')))
           ->execute();
         if ($named) {
           $results = array_merge(array_keys($named), $results);

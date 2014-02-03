@@ -98,9 +98,10 @@ final class PhabricatorHomeMainController
 
       return $response;
     } else if ($request->isFormPost()) {
-      $query = new PhabricatorSearchQuery();
-      $query->setQuery($jump);
-      $query->save();
+      $query = id(new PhabricatorSavedQuery())
+        ->setEngineClassName('PhabricatorSearchApplicationSearchEngine')
+        ->setParameter('query', $jump)
+        ->save();
 
       return id(new AphrontRedirectResponse())
         ->setURI('/search/'.$query->getQueryKey().'/');
