@@ -30,9 +30,52 @@ final class PhabricatorSearchController
       }
     }
 
+    $engine = new PhabricatorSearchApplicationSearchEngine();
+    $engine->setViewer($viewer);
+
+    // NOTE: This is a little weird. If we're coming from primary search, we
+    // load the user's first search filter and overwrite the "query" part of
+    // it, then send them to that result page. This is sort of odd, but lets
+    // users choose a default query like "Open Tasks" in a reasonable way,
+    // with only this piece of somewhat-sketchy code. See discussion in T4365.
+
+    if ($request->getBool('search:primary')) {
+      $named_queries = $engine->loadEnabledNamedQueries();
+      if ($named_queries) {
+        $named = head($named_queries);
+
+        $query_key = $named->getQueryKey();
+        $saved = null;
+        if ($engine->isBuiltinQuery($query_key)) {
+          $saved = $engine->buildSavedQueryFromBuiltin($query_key);
+        } else {
+          $saved = id(new PhabricatorSavedQueryQuery())
+            ->setViewer($viewer)
+            ->withQueryKeys(array($query_key))
+            ->executeOne();
+        }
+
+        if ($saved) {
+          $saved->setParameter('query', $request->getStr('query'));
+          $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+            try {
+              $saved->setID(null)->save();
+            } catch (AphrontQueryDuplicateKeyException $ex) {
+              // Ignore, this is just a repeated search.
+            }
+          unset($unguarded);
+
+          $results_uri = $engine->getQueryResultsPageURI(
+            $saved->getQueryKey()).'#R';
+
+          return id(new AphrontRedirectResponse())->setURI($results_uri);
+        }
+      }
+    }
+
     $controller = id(new PhabricatorApplicationSearchController($request))
       ->setQueryKey($this->queryKey)
-      ->setSearchEngine(new PhabricatorSearchApplicationSearchEngine())
+      ->setSearchEngine($engine)
       ->setUseOffsetPaging(true)
       ->setNavigation($this->buildSideNavView());
 

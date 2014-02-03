@@ -2,13 +2,7 @@
 
 final class PhabricatorMainMenuSearchView extends AphrontView {
 
-  private $scope;
   private $id;
-
-  public function setScope($scope) {
-    $this->scope = $scope;
-    return $this;
-  }
 
   public function getID() {
     if (!$this->id) {
@@ -32,8 +26,6 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
         'autocomplete' => 'off',
       ));
 
-    $scope = $this->scope;
-
     $target = javelin_tag(
       'div',
       array(
@@ -49,15 +41,15 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
         'input'       => $search_id,
         'src'         => '/typeahead/common/mainsearch/',
         'limit'       => 10,
-        'placeholder' => PhabricatorSearchScope::getScopePlaceholder($scope),
+        'placeholder' => pht('Search'),
       ));
 
-    $scope_input = phutil_tag(
+    $primary_input = phutil_tag(
       'input',
       array(
         'type' => 'hidden',
-        'name' => 'scope',
-        'value' => $scope,
+        'name' => 'search:primary',
+        'value' => 'true',
       ));
 
     $form = phabricator_form(
@@ -69,7 +61,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
       phutil_tag_div('phabricator-main-menu-search-container', array(
         $input,
         phutil_tag('button', array(), pht('Search')),
-        $scope_input,
+        $primary_input,
         $target,
       )));
 

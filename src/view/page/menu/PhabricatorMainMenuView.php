@@ -2,7 +2,6 @@
 
 final class PhabricatorMainMenuView extends AphrontView {
 
-  private $defaultSearchScope;
   private $controller;
   private $applicationMenu;
 
@@ -22,15 +21,6 @@ final class PhabricatorMainMenuView extends AphrontView {
 
   public function getController() {
     return $this->controller;
-  }
-
-  public function setDefaultSearchScope($default_search_scope) {
-    $this->defaultSearchScope = $default_search_scope;
-    return $this;
-  }
-
-  public function getDefaultSearchScope() {
-    return $this->defaultSearchScope;
   }
 
   public function render() {
@@ -105,7 +95,6 @@ final class PhabricatorMainMenuView extends AphrontView {
     if ($show_search) {
       $search = new PhabricatorMainMenuSearchView();
       $search->setUser($user);
-      $search->setScope($this->getDefaultSearchScope());
       $result = $search;
 
       $pref_shortcut = PhabricatorUserPreferences::PREFERENCE_SEARCH_SHORTCUT;

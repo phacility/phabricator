@@ -13,7 +13,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   private $menuContent;
   private $showChrome = true;
   private $disableConsole;
-  private $searchDefaultScope;
   private $pageObjects = array();
   private $applicationMenu;
 
@@ -56,15 +55,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
   public function getShowChrome() {
     return $this->showChrome;
-  }
-
-  public function setSearchDefaultScope($search_default_scope) {
-    $this->searchDefaultScope = $search_default_scope;
-    return $this;
-  }
-
-  public function getSearchDefaultScope() {
-    return $this->searchDefaultScope;
   }
 
   public function appendPageObjects(array $objs) {
@@ -212,8 +202,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     }
 
     $menu = id(new PhabricatorMainMenuView())
-      ->setUser($viewer)
-      ->setDefaultSearchScope($this->getSearchDefaultScope());
+      ->setUser($viewer);
 
     if ($this->getController()) {
       $menu->setController($this->getController());
