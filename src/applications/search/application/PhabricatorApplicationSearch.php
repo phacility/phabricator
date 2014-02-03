@@ -29,8 +29,7 @@ final class PhabricatorApplicationSearch extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/search/' => array(
-        '' => 'PhabricatorSearchController',
-        '(?P<key>[^/]+)/' => 'PhabricatorSearchController',
+        '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhabricatorSearchController',
         'attach/(?P<phid>[^/]+)/(?P<type>\w+)/(?:(?P<action>\w+)/)?'
           => 'PhabricatorSearchAttachController',
         'select/(?P<type>\w+)/'

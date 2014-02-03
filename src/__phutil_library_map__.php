@@ -4692,7 +4692,11 @@ phutil_register_library_map(array(
     'PhabricatorSearchAttachController' => 'PhabricatorSearchBaseController',
     'PhabricatorSearchBaseController' => 'PhabricatorController',
     'PhabricatorSearchConfigOptions' => 'PhabricatorApplicationConfigOptions',
-    'PhabricatorSearchController' => 'PhabricatorSearchBaseController',
+    'PhabricatorSearchController' =>
+    array(
+      0 => 'PhabricatorSearchBaseController',
+      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
+    ),
     'PhabricatorSearchDAO' => 'PhabricatorLiskDAO',
     'PhabricatorSearchDeleteController' => 'PhabricatorSearchBaseController',
     'PhabricatorSearchDocument' => 'PhabricatorSearchDAO',
