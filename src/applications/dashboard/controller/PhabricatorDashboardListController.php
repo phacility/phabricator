@@ -33,11 +33,38 @@ final class PhabricatorDashboardListController
     return $nav;
   }
 
+  public function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+        ->setIcon('create')
+        ->setName(pht('Create Dashboard'))
+        ->setHref($this->getApplicationURI().'create/'));
+
+    return $crumbs;
+  }
+
   public function renderResultsList(
     array $dashboards,
     PhabricatorSavedQuery $query) {
+    $viewer = $this->getRequest()->getUser();
 
-    return 'got '.count($dashboards).' ok';
+    $list = new PHUIObjectItemListView();
+    $list->setUser($viewer);
+    foreach ($dashboards as $dashboard) {
+      $id = $dashboard->getID();
+
+      $item = id(new PHUIObjectItemView())
+        ->setObjectName(pht('Dashboard %d', $id))
+        ->setHeader($dashboard->getName())
+        ->setHref($this->getApplicationURI("view/{$id}/"))
+        ->setObject($dashboard);
+
+      $list->addItem($item);
+    }
+
+    return $list;
   }
 
 }
