@@ -28,10 +28,6 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     );
   }
 
-  public function getQuickCreateURI() {
-    return $this->getBaseURI().'task/create/';
-  }
-
   public function getEventListeners() {
     return array(
       new ManiphestNameIndexEventListener(),
@@ -88,6 +84,18 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
       ->setCount($count);
 
     return $status;
+  }
+
+  public function getQuickCreateItems(PhabricatorUser $viewer) {
+    $items = array();
+
+    $item = id(new PHUIListItemView())
+      ->setName(pht('Maniphest Task'))
+      ->setAppIcon('maniphest-dark')
+      ->setHref($this->getBaseURI().'task/create/');
+    $items[] = $item;
+
+    return $items;
   }
 
   protected function getCustomCapabilities() {

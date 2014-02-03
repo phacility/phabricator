@@ -32,10 +32,6 @@ final class PhabricatorApplicationCalendar extends PhabricatorApplication {
     return true;
   }
 
-  public function getQuickCreateURI() {
-    return $this->getBaseURI().'status/create/';
-  }
-
   public function getRoutes() {
     return array(
       '/calendar/' => array(
@@ -53,6 +49,18 @@ final class PhabricatorApplicationCalendar extends PhabricatorApplication {
         ),
       ),
     );
+  }
+
+  public function getQuickCreateItems(PhabricatorUser $viewer) {
+    $items = array();
+
+    $item = id(new PHUIListItemView())
+      ->setName(pht('Calendar Event'))
+      ->setAppIcon('calendar-dark')
+      ->setHref($this->getBaseURI().'status/create/');
+    $items[] = $item;
+
+    return $items;
   }
 
 }

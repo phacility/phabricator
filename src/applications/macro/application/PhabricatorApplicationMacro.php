@@ -22,10 +22,6 @@ final class PhabricatorApplicationMacro extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
-  public function getQuickCreateURI() {
-    return $this->getBaseURI().'create/';
-  }
-
   public function getRoutes() {
     return array(
       '/macro/' => array(

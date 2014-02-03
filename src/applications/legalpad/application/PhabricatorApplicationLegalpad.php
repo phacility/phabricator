@@ -29,11 +29,6 @@ final class PhabricatorApplicationLegalpad extends PhabricatorApplication {
     return self::GROUP_COMMUNICATION;
   }
 
-  public function getQuickCreateURI() {
-    return $this->getBaseURI().'create/';
-  }
-
-
   public function isBeta() {
     return true;
   }
@@ -54,6 +49,15 @@ final class PhabricatorApplicationLegalpad extends PhabricatorApplication {
         'document/' => array(
           'preview/' => 'PhabricatorMarkupPreviewController'),
       ));
+  }
+
+  protected function getCustomCapabilities() {
+    return array(
+      LegalpadCapabilityDefaultView::CAPABILITY => array(
+      ),
+      LegalpadCapabilityDefaultEdit::CAPABILITY => array(
+      ),
+    );
   }
 
 }

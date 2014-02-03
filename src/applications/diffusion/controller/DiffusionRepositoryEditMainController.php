@@ -253,6 +253,15 @@ final class DiffusionRepositoryEditMainController
     $view->addProperty(pht('Type'), $type);
     $view->addProperty(pht('Callsign'), $repository->getCallsign());
 
+
+    $clone_name = $repository->getDetail('clone-name');
+
+    $view->addProperty(
+      pht('Clone/Checkout As'),
+      $clone_name
+        ? $clone_name.'/'
+        : phutil_tag('em', array(), $repository->getCloneName().'/'));
+
     $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $repository->getPHID(),
       PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT);

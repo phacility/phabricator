@@ -163,6 +163,8 @@ final class PhabricatorMainMenuView extends AphrontView {
       }
     }
 
+    $actions = msort($actions, 'getOrder');
+
     $view = $this->getApplicationMenu();
 
     if (!$view) {
@@ -392,6 +394,13 @@ final class PhabricatorMainMenuView extends AphrontView {
     $dropdowns = array(
       $notification_dropdown,
       $message_notification_dropdown);
+
+    $applications = PhabricatorApplication::getAllInstalledApplications();
+    foreach ($applications as $application) {
+      $dropdowns[] = $application->buildMainMenuExtraNodes(
+        $this->getUser(),
+        $this->getController());
+    }
 
     return array(
       hsprintf('%s%s', $bubble_tag, $message_tag),

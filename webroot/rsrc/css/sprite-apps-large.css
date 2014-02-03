@@ -13,7 +13,7 @@ only screen and (min-device-pixel-ratio: 1.5),
 only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   .sprite-apps-large {
     background-image: url(/rsrc/image/sprite-apps-large-X2.png);
-    background-size: 435px 464px;
+    background-size: 464px 464px;
   }
 }
 
@@ -79,183 +79,199 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 }
 
 .apps-authentication-white-large {
-  background-position: 0px -29px;
+  background-position: -435px 0px;
 }
 
 .apps-calendar-light-large {
-  background-position: -29px -29px;
+  background-position: 0px -29px;
 }
 
 .apps-calendar-dark-large {
-  background-position: -58px -29px;
+  background-position: -29px -29px;
 }
 
 .apps-calendar-blue-large, .phabricator-crumb-view:hover .apps-calendar-dark-large {
-  background-position: -87px -29px;
+  background-position: -58px -29px;
 }
 
 .apps-calendar-white-large {
-  background-position: -116px -29px;
+  background-position: -87px -29px;
 }
 
 .apps-chatlog-light-large {
-  background-position: -145px -29px;
+  background-position: -116px -29px;
 }
 
 .apps-chatlog-dark-large {
-  background-position: -174px -29px;
+  background-position: -145px -29px;
 }
 
 .apps-chatlog-blue-large, .phabricator-crumb-view:hover .apps-chatlog-dark-large {
-  background-position: -203px -29px;
+  background-position: -174px -29px;
 }
 
 .apps-chatlog-white-large {
-  background-position: -232px -29px;
+  background-position: -203px -29px;
 }
 
 .apps-conduit-light-large {
-  background-position: -261px -29px;
+  background-position: -232px -29px;
 }
 
 .apps-conduit-dark-large {
-  background-position: -290px -29px;
+  background-position: -261px -29px;
 }
 
 .apps-conduit-blue-large, .phabricator-crumb-view:hover .apps-conduit-dark-large {
-  background-position: -319px -29px;
+  background-position: -290px -29px;
 }
 
 .apps-conduit-white-large {
-  background-position: -348px -29px;
+  background-position: -319px -29px;
 }
 
 .apps-conpherence-light-large {
-  background-position: -377px -29px;
+  background-position: -348px -29px;
 }
 
 .apps-conpherence-dark-large {
-  background-position: -406px -29px;
+  background-position: -377px -29px;
 }
 
 .apps-conpherence-blue-large, .phabricator-crumb-view:hover .apps-conpherence-dark-large {
-  background-position: 0px -58px;
+  background-position: -406px -29px;
 }
 
 .apps-conpherence-white-large {
-  background-position: -29px -58px;
+  background-position: -435px -29px;
 }
 
 .apps-countdown-light-large {
-  background-position: -58px -58px;
+  background-position: 0px -58px;
 }
 
 .apps-countdown-dark-large {
-  background-position: -87px -58px;
+  background-position: -29px -58px;
 }
 
 .apps-countdown-blue-large, .phabricator-crumb-view:hover .apps-countdown-dark-large {
-  background-position: -116px -58px;
+  background-position: -58px -58px;
 }
 
 .apps-countdown-white-large {
-  background-position: -145px -58px;
+  background-position: -87px -58px;
 }
 
 .apps-daemon-light-large {
-  background-position: -174px -58px;
+  background-position: -116px -58px;
 }
 
 .apps-daemon-dark-large {
-  background-position: -203px -58px;
+  background-position: -145px -58px;
 }
 
 .apps-daemon-blue-large, .phabricator-crumb-view:hover .apps-daemon-dark-large {
-  background-position: -232px -58px;
+  background-position: -174px -58px;
 }
 
 .apps-daemon-white-large {
-  background-position: -261px -58px;
+  background-position: -203px -58px;
 }
 
 .apps-differential-light-large {
-  background-position: -290px -58px;
+  background-position: -232px -58px;
 }
 
 .apps-differential-dark-large {
-  background-position: -319px -58px;
+  background-position: -261px -58px;
 }
 
 .apps-differential-blue-large, .phabricator-crumb-view:hover .apps-differential-dark-large {
-  background-position: -348px -58px;
+  background-position: -290px -58px;
 }
 
 .apps-differential-white-large {
-  background-position: -377px -58px;
+  background-position: -319px -58px;
 }
 
 .apps-diffusion-light-large {
-  background-position: -406px -58px;
+  background-position: -348px -58px;
 }
 
 .apps-diffusion-dark-large {
-  background-position: 0px -87px;
+  background-position: -377px -58px;
 }
 
 .apps-diffusion-blue-large, .phabricator-crumb-view:hover .apps-diffusion-dark-large {
-  background-position: -29px -87px;
+  background-position: -406px -58px;
 }
 
 .apps-diffusion-white-large {
-  background-position: -58px -87px;
+  background-position: -435px -58px;
 }
 
 .apps-diviner-light-large {
-  background-position: -87px -87px;
+  background-position: 0px -87px;
 }
 
 .apps-diviner-dark-large {
-  background-position: -116px -87px;
+  background-position: -29px -87px;
 }
 
 .apps-diviner-blue-large, .phabricator-crumb-view:hover .apps-diviner-dark-large {
-  background-position: -145px -87px;
+  background-position: -58px -87px;
 }
 
 .apps-diviner-white-large {
-  background-position: -174px -87px;
+  background-position: -87px -87px;
 }
 
 .apps-drydock-light-large {
-  background-position: -203px -87px;
+  background-position: -116px -87px;
 }
 
 .apps-drydock-dark-large {
-  background-position: -232px -87px;
+  background-position: -145px -87px;
 }
 
 .apps-drydock-blue-large, .phabricator-crumb-view:hover .apps-drydock-dark-large {
-  background-position: -261px -87px;
+  background-position: -174px -87px;
 }
 
 .apps-drydock-white-large {
-  background-position: -290px -87px;
+  background-position: -203px -87px;
 }
 
 .apps-fact-light-large {
-  background-position: -319px -87px;
+  background-position: -232px -87px;
 }
 
 .apps-fact-dark-large {
-  background-position: -348px -87px;
+  background-position: -261px -87px;
 }
 
 .apps-fact-blue-large, .phabricator-crumb-view:hover .apps-fact-dark-large {
-  background-position: -377px -87px;
+  background-position: -290px -87px;
 }
 
 .apps-fact-white-large {
+  background-position: -319px -87px;
+}
+
+.apps-fancyhome-light-large {
+  background-position: -348px -87px;
+}
+
+.apps-fancyhome-dark-large {
+  background-position: -377px -87px;
+}
+
+.apps-fancyhome-blue-large, .phabricator-crumb-view:hover .apps-fancyhome-dark-large {
   background-position: -406px -87px;
+}
+
+.apps-fancyhome-white-large {
+  background-position: -435px -87px;
 }
 
 .apps-feed-light-large {
@@ -319,629 +335,693 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 }
 
 .apps-harbormaster-white-large {
-  background-position: 0px -145px;
+  background-position: -435px -116px;
 }
 
 .apps-help-light-large {
-  background-position: -29px -145px;
+  background-position: 0px -145px;
 }
 
 .apps-help-dark-large {
-  background-position: -58px -145px;
+  background-position: -29px -145px;
 }
 
 .apps-help-blue-large, .phabricator-crumb-view:hover .apps-help-dark-large {
-  background-position: -87px -145px;
+  background-position: -58px -145px;
 }
 
 .apps-help-white-large {
-  background-position: -116px -145px;
+  background-position: -87px -145px;
 }
 
 .apps-herald-light-large {
-  background-position: -145px -145px;
+  background-position: -116px -145px;
 }
 
 .apps-herald-dark-large {
-  background-position: -174px -145px;
+  background-position: -145px -145px;
 }
 
 .apps-herald-blue-large, .phabricator-crumb-view:hover .apps-herald-dark-large {
-  background-position: -203px -145px;
+  background-position: -174px -145px;
 }
 
 .apps-herald-white-large {
-  background-position: -232px -145px;
+  background-position: -203px -145px;
 }
 
 .apps-home-light-large {
-  background-position: -261px -145px;
+  background-position: -232px -145px;
 }
 
 .apps-home-dark-large {
-  background-position: -290px -145px;
+  background-position: -261px -145px;
 }
 
 .apps-home-blue-large, .phabricator-crumb-view:hover .apps-home-dark-large {
-  background-position: -319px -145px;
+  background-position: -290px -145px;
 }
 
 .apps-home-white-large {
+  background-position: -319px -145px;
+}
+
+.apps-info-sm-light-large {
   background-position: -348px -145px;
 }
 
-.apps-legalpad-light-large {
+.apps-info-sm-dark-large {
   background-position: -377px -145px;
 }
 
-.apps-legalpad-dark-large {
+.apps-info-sm-blue-large, .phabricator-crumb-view:hover .apps-info-sm-dark-large {
   background-position: -406px -145px;
 }
 
-.apps-legalpad-blue-large, .phabricator-crumb-view:hover .apps-legalpad-dark-large {
+.apps-info-sm-white-large {
+  background-position: -435px -145px;
+}
+
+.apps-legalpad-light-large {
   background-position: 0px -174px;
 }
 
-.apps-legalpad-white-large {
+.apps-legalpad-dark-large {
   background-position: -29px -174px;
 }
 
-.apps-logo-light-large {
+.apps-legalpad-blue-large, .phabricator-crumb-view:hover .apps-legalpad-dark-large {
   background-position: -58px -174px;
 }
 
-.apps-logo-dark-large {
+.apps-legalpad-white-large {
   background-position: -87px -174px;
 }
 
-.apps-logo-blue-large, .phabricator-crumb-view:hover .apps-logo-dark-large {
+.apps-logo-light-large {
   background-position: -116px -174px;
 }
 
-.apps-logo-white-large {
+.apps-logo-dark-large {
   background-position: -145px -174px;
 }
 
-.apps-macro-light-large {
+.apps-logo-blue-large, .phabricator-crumb-view:hover .apps-logo-dark-large {
   background-position: -174px -174px;
 }
 
-.apps-macro-dark-large {
+.apps-logo-white-large {
   background-position: -203px -174px;
 }
 
-.apps-macro-blue-large, .phabricator-crumb-view:hover .apps-macro-dark-large {
+.apps-logout-sm-light-large {
   background-position: -232px -174px;
 }
 
-.apps-macro-white-large {
+.apps-logout-sm-dark-large {
   background-position: -261px -174px;
 }
 
-.apps-mail-light-large {
+.apps-logout-sm-blue-large, .phabricator-crumb-view:hover .apps-logout-sm-dark-large {
   background-position: -290px -174px;
 }
 
-.apps-mail-dark-large {
+.apps-logout-sm-white-large {
   background-position: -319px -174px;
 }
 
-.apps-mail-blue-large, .phabricator-crumb-view:hover .apps-mail-dark-large {
+.apps-macro-light-large {
   background-position: -348px -174px;
 }
 
-.apps-mail-white-large {
+.apps-macro-dark-large {
   background-position: -377px -174px;
 }
 
-.apps-maniphest-light-large {
+.apps-macro-blue-large, .phabricator-crumb-view:hover .apps-macro-dark-large {
   background-position: -406px -174px;
 }
 
-.apps-maniphest-dark-large {
+.apps-macro-white-large {
+  background-position: -435px -174px;
+}
+
+.apps-mail-light-large {
   background-position: 0px -203px;
 }
 
-.apps-maniphest-blue-large, .phabricator-crumb-view:hover .apps-maniphest-dark-large {
+.apps-mail-dark-large {
   background-position: -29px -203px;
 }
 
-.apps-maniphest-white-large {
+.apps-mail-blue-large, .phabricator-crumb-view:hover .apps-mail-dark-large {
   background-position: -58px -203px;
 }
 
-.apps-metamta-light-large {
+.apps-mail-white-large {
   background-position: -87px -203px;
 }
 
-.apps-metamta-dark-large {
+.apps-maniphest-light-large {
   background-position: -116px -203px;
 }
 
-.apps-metamta-blue-large, .phabricator-crumb-view:hover .apps-metamta-dark-large {
+.apps-maniphest-dark-large {
   background-position: -145px -203px;
 }
 
-.apps-metamta-white-large {
+.apps-maniphest-blue-large, .phabricator-crumb-view:hover .apps-maniphest-dark-large {
   background-position: -174px -203px;
 }
 
-.apps-new-light-large {
+.apps-maniphest-white-large {
   background-position: -203px -203px;
 }
 
-.apps-new-dark-large {
+.apps-metamta-light-large {
   background-position: -232px -203px;
 }
 
-.apps-new-blue-large, .phabricator-crumb-view:hover .apps-new-dark-large {
+.apps-metamta-dark-large {
   background-position: -261px -203px;
 }
 
-.apps-new-white-large {
+.apps-metamta-blue-large, .phabricator-crumb-view:hover .apps-metamta-dark-large {
   background-position: -290px -203px;
 }
 
-.apps-nuance-light-large {
+.apps-metamta-white-large {
   background-position: -319px -203px;
 }
 
-.apps-nuance-dark-large {
+.apps-new-sm-light-large {
   background-position: -348px -203px;
 }
 
-.apps-nuance-blue-large, .phabricator-crumb-view:hover .apps-nuance-dark-large {
+.apps-new-sm-dark-large {
   background-position: -377px -203px;
 }
 
-.apps-nuance-white-large {
+.apps-new-sm-blue-large, .phabricator-crumb-view:hover .apps-new-sm-dark-large {
   background-position: -406px -203px;
 }
 
-.apps-owners-light-large {
+.apps-new-sm-white-large {
+  background-position: -435px -203px;
+}
+
+.apps-new-light-large {
   background-position: 0px -232px;
 }
 
-.apps-owners-dark-large {
+.apps-new-dark-large {
   background-position: -29px -232px;
 }
 
-.apps-owners-blue-large, .phabricator-crumb-view:hover .apps-owners-dark-large {
+.apps-new-blue-large, .phabricator-crumb-view:hover .apps-new-dark-large {
   background-position: -58px -232px;
 }
 
-.apps-owners-white-large {
+.apps-new-white-large {
   background-position: -87px -232px;
 }
 
-.apps-passphrase-light-large {
+.apps-nuance-light-large {
   background-position: -116px -232px;
 }
 
-.apps-passphrase-dark-large {
+.apps-nuance-dark-large {
   background-position: -145px -232px;
 }
 
-.apps-passphrase-blue-large, .phabricator-crumb-view:hover .apps-passphrase-dark-large {
+.apps-nuance-blue-large, .phabricator-crumb-view:hover .apps-nuance-dark-large {
   background-position: -174px -232px;
 }
 
-.apps-passphrase-white-large {
+.apps-nuance-white-large {
   background-position: -203px -232px;
 }
 
-.apps-paste-light-large {
+.apps-owners-light-large {
   background-position: -232px -232px;
 }
 
-.apps-paste-dark-large {
+.apps-owners-dark-large {
   background-position: -261px -232px;
 }
 
-.apps-paste-blue-large, .phabricator-crumb-view:hover .apps-paste-dark-large {
+.apps-owners-blue-large, .phabricator-crumb-view:hover .apps-owners-dark-large {
   background-position: -290px -232px;
 }
 
-.apps-paste-white-large {
+.apps-owners-white-large {
   background-position: -319px -232px;
 }
 
-.apps-people-light-large {
+.apps-passphrase-light-large {
   background-position: -348px -232px;
 }
 
-.apps-people-dark-large {
+.apps-passphrase-dark-large {
   background-position: -377px -232px;
 }
 
-.apps-people-blue-large, .phabricator-crumb-view:hover .apps-people-dark-large {
+.apps-passphrase-blue-large, .phabricator-crumb-view:hover .apps-passphrase-dark-large {
   background-position: -406px -232px;
 }
 
-.apps-people-white-large {
+.apps-passphrase-white-large {
+  background-position: -435px -232px;
+}
+
+.apps-paste-light-large {
   background-position: 0px -261px;
 }
 
-.apps-phage-light-large {
+.apps-paste-dark-large {
   background-position: -29px -261px;
 }
 
-.apps-phage-dark-large {
+.apps-paste-blue-large, .phabricator-crumb-view:hover .apps-paste-dark-large {
   background-position: -58px -261px;
 }
 
-.apps-phage-blue-large, .phabricator-crumb-view:hover .apps-phage-dark-large {
+.apps-paste-white-large {
   background-position: -87px -261px;
 }
 
-.apps-phage-white-large {
+.apps-people-light-large {
   background-position: -116px -261px;
 }
 
-.apps-phame-light-large {
+.apps-people-dark-large {
   background-position: -145px -261px;
 }
 
-.apps-phame-dark-large {
+.apps-people-blue-large, .phabricator-crumb-view:hover .apps-people-dark-large {
   background-position: -174px -261px;
 }
 
-.apps-phame-blue-large, .phabricator-crumb-view:hover .apps-phame-dark-large {
+.apps-people-white-large {
   background-position: -203px -261px;
 }
 
-.apps-phame-white-large {
+.apps-phage-light-large {
   background-position: -232px -261px;
 }
 
-.apps-phid-light-large {
+.apps-phage-dark-large {
   background-position: -261px -261px;
 }
 
-.apps-phid-dark-large {
+.apps-phage-blue-large, .phabricator-crumb-view:hover .apps-phage-dark-large {
   background-position: -290px -261px;
 }
 
-.apps-phid-blue-large, .phabricator-crumb-view:hover .apps-phid-dark-large {
+.apps-phage-white-large {
   background-position: -319px -261px;
 }
 
-.apps-phid-white-large {
+.apps-phame-light-large {
   background-position: -348px -261px;
 }
 
-.apps-phlux-light-large {
+.apps-phame-dark-large {
   background-position: -377px -261px;
 }
 
-.apps-phlux-dark-large {
+.apps-phame-blue-large, .phabricator-crumb-view:hover .apps-phame-dark-large {
   background-position: -406px -261px;
 }
 
-.apps-phlux-blue-large, .phabricator-crumb-view:hover .apps-phlux-dark-large {
+.apps-phame-white-large {
+  background-position: -435px -261px;
+}
+
+.apps-phid-light-large {
   background-position: 0px -290px;
 }
 
-.apps-phlux-white-large {
+.apps-phid-dark-large {
   background-position: -29px -290px;
 }
 
-.apps-pholio-light-large {
+.apps-phid-blue-large, .phabricator-crumb-view:hover .apps-phid-dark-large {
   background-position: -58px -290px;
 }
 
-.apps-pholio-dark-large {
+.apps-phid-white-large {
   background-position: -87px -290px;
 }
 
-.apps-pholio-blue-large, .phabricator-crumb-view:hover .apps-pholio-dark-large {
+.apps-phlux-light-large {
   background-position: -116px -290px;
 }
 
-.apps-pholio-white-large {
+.apps-phlux-dark-large {
   background-position: -145px -290px;
 }
 
-.apps-phortune-light-large {
+.apps-phlux-blue-large, .phabricator-crumb-view:hover .apps-phlux-dark-large {
   background-position: -174px -290px;
 }
 
-.apps-phortune-dark-large {
+.apps-phlux-white-large {
   background-position: -203px -290px;
 }
 
-.apps-phortune-blue-large, .phabricator-crumb-view:hover .apps-phortune-dark-large {
+.apps-pholio-light-large {
   background-position: -232px -290px;
 }
 
-.apps-phortune-white-large {
+.apps-pholio-dark-large {
   background-position: -261px -290px;
 }
 
-.apps-phpast-light-large {
+.apps-pholio-blue-large, .phabricator-crumb-view:hover .apps-pholio-dark-large {
   background-position: -290px -290px;
 }
 
-.apps-phpast-dark-large {
+.apps-pholio-white-large {
   background-position: -319px -290px;
 }
 
-.apps-phpast-blue-large, .phabricator-crumb-view:hover .apps-phpast-dark-large {
+.apps-phortune-light-large {
   background-position: -348px -290px;
 }
 
-.apps-phpast-white-large {
+.apps-phortune-dark-large {
   background-position: -377px -290px;
 }
 
-.apps-phragment-light-large {
+.apps-phortune-blue-large, .phabricator-crumb-view:hover .apps-phortune-dark-large {
   background-position: -406px -290px;
 }
 
-.apps-phragment-dark-large {
+.apps-phortune-white-large {
+  background-position: -435px -290px;
+}
+
+.apps-phpast-light-large {
   background-position: 0px -319px;
 }
 
-.apps-phragment-blue-large, .phabricator-crumb-view:hover .apps-phragment-dark-large {
+.apps-phpast-dark-large {
   background-position: -29px -319px;
 }
 
-.apps-phragment-white-large {
+.apps-phpast-blue-large, .phabricator-crumb-view:hover .apps-phpast-dark-large {
   background-position: -58px -319px;
 }
 
-.apps-phrequent-light-large {
+.apps-phpast-white-large {
   background-position: -87px -319px;
 }
 
-.apps-phrequent-dark-large {
+.apps-phragment-light-large {
   background-position: -116px -319px;
 }
 
-.apps-phrequent-blue-large, .phabricator-crumb-view:hover .apps-phrequent-dark-large {
+.apps-phragment-dark-large {
   background-position: -145px -319px;
 }
 
-.apps-phrequent-white-large {
+.apps-phragment-blue-large, .phabricator-crumb-view:hover .apps-phragment-dark-large {
   background-position: -174px -319px;
 }
 
-.apps-phriction-light-large {
+.apps-phragment-white-large {
   background-position: -203px -319px;
 }
 
-.apps-phriction-dark-large {
+.apps-phrequent-light-large {
   background-position: -232px -319px;
 }
 
-.apps-phriction-blue-large, .phabricator-crumb-view:hover .apps-phriction-dark-large {
+.apps-phrequent-dark-large {
   background-position: -261px -319px;
 }
 
-.apps-phriction-white-large {
+.apps-phrequent-blue-large, .phabricator-crumb-view:hover .apps-phrequent-dark-large {
   background-position: -290px -319px;
 }
 
-.apps-policy-light-large {
+.apps-phrequent-white-large {
   background-position: -319px -319px;
 }
 
-.apps-policy-dark-large {
+.apps-phriction-light-large {
   background-position: -348px -319px;
 }
 
-.apps-policy-blue-large, .phabricator-crumb-view:hover .apps-policy-dark-large {
+.apps-phriction-dark-large {
   background-position: -377px -319px;
 }
 
-.apps-policy-white-large {
+.apps-phriction-blue-large, .phabricator-crumb-view:hover .apps-phriction-dark-large {
   background-position: -406px -319px;
 }
 
-.apps-ponder-light-large {
+.apps-phriction-white-large {
+  background-position: -435px -319px;
+}
+
+.apps-policy-light-large {
   background-position: 0px -348px;
 }
 
-.apps-ponder-dark-large {
+.apps-policy-dark-large {
   background-position: -29px -348px;
 }
 
-.apps-ponder-blue-large, .phabricator-crumb-view:hover .apps-ponder-dark-large {
+.apps-policy-blue-large, .phabricator-crumb-view:hover .apps-policy-dark-large {
   background-position: -58px -348px;
 }
 
-.apps-ponder-white-large {
+.apps-policy-white-large {
   background-position: -87px -348px;
 }
 
-.apps-power-light-large {
+.apps-ponder-light-large {
   background-position: -116px -348px;
 }
 
-.apps-power-dark-large {
+.apps-ponder-dark-large {
   background-position: -145px -348px;
 }
 
-.apps-power-blue-large, .phabricator-crumb-view:hover .apps-power-dark-large {
+.apps-ponder-blue-large, .phabricator-crumb-view:hover .apps-ponder-dark-large {
   background-position: -174px -348px;
 }
 
-.apps-power-white-large {
+.apps-ponder-white-large {
   background-position: -203px -348px;
 }
 
-.apps-projects-light-large {
+.apps-power-light-large {
   background-position: -232px -348px;
 }
 
-.apps-projects-dark-large {
+.apps-power-dark-large {
   background-position: -261px -348px;
 }
 
-.apps-projects-blue-large, .phabricator-crumb-view:hover .apps-projects-dark-large {
+.apps-power-blue-large, .phabricator-crumb-view:hover .apps-power-dark-large {
   background-position: -290px -348px;
 }
 
-.apps-projects-white-large {
+.apps-power-white-large {
   background-position: -319px -348px;
 }
 
-.apps-releeph-light-large {
+.apps-projects-light-large {
   background-position: -348px -348px;
 }
 
-.apps-releeph-dark-large {
+.apps-projects-dark-large {
   background-position: -377px -348px;
 }
 
-.apps-releeph-blue-large, .phabricator-crumb-view:hover .apps-releeph-dark-large {
+.apps-projects-blue-large, .phabricator-crumb-view:hover .apps-projects-dark-large {
   background-position: -406px -348px;
 }
 
-.apps-releeph-white-large {
+.apps-projects-white-large {
   background-position: 0px -377px;
 }
 
-.apps-repositories-light-large {
+.apps-releeph-light-large {
   background-position: -29px -377px;
 }
 
-.apps-repositories-dark-large {
+.apps-releeph-dark-large {
   background-position: -58px -377px;
 }
 
-.apps-repositories-blue-large, .phabricator-crumb-view:hover .apps-repositories-dark-large {
+.apps-releeph-blue-large, .phabricator-crumb-view:hover .apps-releeph-dark-large {
   background-position: -87px -377px;
 }
 
-.apps-repositories-white-large {
+.apps-releeph-white-large {
   background-position: -116px -377px;
 }
 
-.apps-search-light-large {
+.apps-repositories-light-large {
   background-position: -145px -377px;
 }
 
-.apps-search-dark-large {
+.apps-repositories-dark-large {
   background-position: -174px -377px;
 }
 
-.apps-search-blue-large, .phabricator-crumb-view:hover .apps-search-dark-large {
+.apps-repositories-blue-large, .phabricator-crumb-view:hover .apps-repositories-dark-large {
   background-position: -203px -377px;
 }
 
-.apps-search-white-large {
+.apps-repositories-white-large {
   background-position: -232px -377px;
 }
 
-.apps-settings-light-large {
+.apps-search-light-large {
   background-position: -261px -377px;
 }
 
-.apps-settings-dark-large {
+.apps-search-dark-large {
   background-position: -290px -377px;
 }
 
-.apps-settings-blue-large, .phabricator-crumb-view:hover .apps-settings-dark-large {
+.apps-search-blue-large, .phabricator-crumb-view:hover .apps-search-dark-large {
   background-position: -319px -377px;
 }
 
-.apps-settings-white-large {
+.apps-search-white-large {
   background-position: -348px -377px;
 }
 
-.apps-setup-light-large {
+.apps-settings-sm-light-large {
   background-position: -377px -377px;
 }
 
-.apps-setup-dark-large {
+.apps-settings-sm-dark-large {
   background-position: -406px -377px;
 }
 
-.apps-setup-blue-large, .phabricator-crumb-view:hover .apps-setup-dark-large {
+.apps-settings-sm-blue-large, .phabricator-crumb-view:hover .apps-settings-sm-dark-large {
   background-position: 0px -406px;
 }
 
-.apps-setup-white-large {
+.apps-settings-sm-white-large {
   background-position: -29px -406px;
 }
 
-.apps-slowvote-light-large {
+.apps-settings-light-large {
   background-position: -58px -406px;
 }
 
-.apps-slowvote-dark-large {
+.apps-settings-dark-large {
   background-position: -87px -406px;
 }
 
-.apps-slowvote-blue-large, .phabricator-crumb-view:hover .apps-slowvote-dark-large {
+.apps-settings-blue-large, .phabricator-crumb-view:hover .apps-settings-dark-large {
   background-position: -116px -406px;
 }
 
-.apps-slowvote-white-large {
+.apps-settings-white-large {
   background-position: -145px -406px;
 }
 
-.apps-token-light-large {
+.apps-setup-light-large {
   background-position: -174px -406px;
 }
 
-.apps-token-dark-large {
+.apps-setup-dark-large {
   background-position: -203px -406px;
 }
 
-.apps-token-blue-large, .phabricator-crumb-view:hover .apps-token-dark-large {
+.apps-setup-blue-large, .phabricator-crumb-view:hover .apps-setup-dark-large {
   background-position: -232px -406px;
 }
 
-.apps-token-white-large {
+.apps-setup-white-large {
   background-position: -261px -406px;
 }
 
-.apps-uiexamples-light-large {
+.apps-slowvote-light-large {
   background-position: -290px -406px;
 }
 
-.apps-uiexamples-dark-large {
+.apps-slowvote-dark-large {
   background-position: -319px -406px;
 }
 
-.apps-uiexamples-blue-large, .phabricator-crumb-view:hover .apps-uiexamples-dark-large {
+.apps-slowvote-blue-large, .phabricator-crumb-view:hover .apps-slowvote-dark-large {
   background-position: -348px -406px;
 }
 
-.apps-uiexamples-white-large {
+.apps-slowvote-white-large {
   background-position: -377px -406px;
 }
 
-.apps-workphlow-light-large {
+.apps-token-light-large {
   background-position: -406px -406px;
 }
 
-.apps-workphlow-dark-large {
+.apps-token-dark-large {
   background-position: 0px -435px;
 }
 
-.apps-workphlow-blue-large, .phabricator-crumb-view:hover .apps-workphlow-dark-large {
+.apps-token-blue-large, .phabricator-crumb-view:hover .apps-token-dark-large {
   background-position: -29px -435px;
 }
 
-.apps-workphlow-white-large {
+.apps-token-white-large {
   background-position: -58px -435px;
 }
 
-.apps-xhprof-light-large {
+.apps-uiexamples-light-large {
   background-position: -87px -435px;
 }
 
-.apps-xhprof-dark-large {
+.apps-uiexamples-dark-large {
   background-position: -116px -435px;
 }
 
-.apps-xhprof-blue-large, .phabricator-crumb-view:hover .apps-xhprof-dark-large {
+.apps-uiexamples-blue-large, .phabricator-crumb-view:hover .apps-uiexamples-dark-large {
   background-position: -145px -435px;
 }
 
-.apps-xhprof-white-large {
+.apps-uiexamples-white-large {
   background-position: -174px -435px;
+}
+
+.apps-workphlow-light-large {
+  background-position: -203px -435px;
+}
+
+.apps-workphlow-dark-large {
+  background-position: -232px -435px;
+}
+
+.apps-workphlow-blue-large, .phabricator-crumb-view:hover .apps-workphlow-dark-large {
+  background-position: -261px -435px;
+}
+
+.apps-workphlow-white-large {
+  background-position: -290px -435px;
+}
+
+.apps-xhprof-light-large {
+  background-position: -319px -435px;
+}
+
+.apps-xhprof-dark-large {
+  background-position: -348px -435px;
+}
+
+.apps-xhprof-blue-large, .phabricator-crumb-view:hover .apps-xhprof-dark-large {
+  background-position: -377px -435px;
+}
+
+.apps-xhprof-white-large {
+  background-position: -406px -435px;
 }

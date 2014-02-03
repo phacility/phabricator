@@ -212,6 +212,34 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
 
+  /**
+   * Get the name of the directory this repository should clone or checkout
+   * into. For example, if the repository name is "Example Repository", a
+   * reasonable name might be "example-repository". This is used to help users
+   * get reasonable results when cloning repositories, since they generally do
+   * not want to clone into directories called "X/" or "Example Repository/".
+   *
+   * @return string
+   */
+  public function getCloneName() {
+    $name = $this->getDetail('clone-name');
+
+    // Make some reasonable effort to produce reasonable default directory
+    // names from repository names.
+    if (!strlen($name)) {
+      $name = $this->getName();
+      $name = phutil_utf8_strtolower($name);
+      $name = preg_replace('@[/ -:]+@', '-', $name);
+      $name = trim($name, '-');
+      if (!strlen($name)) {
+        $name = $this->getCallsign();
+      }
+    }
+
+    return $name;
+  }
+
+
 /* -(  Remote Command Execution  )------------------------------------------- */
 
 
@@ -486,21 +514,23 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function getNormalizedPath() {
+    $uri = (string)$this->getCloneURIObject();
+
     switch ($this->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $normalized_uri = new PhabricatorRepositoryURINormalizer(
           PhabricatorRepositoryURINormalizer::TYPE_GIT,
-          $this->getURI());
+          $uri);
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         $normalized_uri = new PhabricatorRepositoryURINormalizer(
           PhabricatorRepositoryURINormalizer::TYPE_SVN,
-          $this->getURI());
+          $uri);
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         $normalized_uri = new PhabricatorRepositoryURINormalizer(
           PhabricatorRepositoryURINormalizer::TYPE_MERCURIAL,
-          $this->getURI());
+          $uri);
         break;
       default:
         throw new Exception("Unrecognized version control system.");
@@ -623,6 +653,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return (bool)$this->getDetail('importing', false);
   }
 
+
 /* -(  Repository URI Management  )------------------------------------------ */
 
 
@@ -669,26 +700,29 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
 
   /**
-   * Get the remote URI for this repository, without authentication information.
+   * Get the clone (or checkout) URI for this repository, without authentication
+   * information.
    *
    * @return string Repository URI.
    * @task uri
    */
-  public function getPublicRemoteURI() {
-    $uri = $this->getRemoteURIObject();
+  public function getPublicCloneURI() {
+    $uri = $this->getCloneURIObject();
 
     // Make sure we don't leak anything if this repo is using HTTP Basic Auth
     // with the credentials in the URI or something zany like that.
 
     // If repository is not accessed over SSH we remove both username and
     // password.
-    if (!$this->shouldUseSSH()) {
-      $uri->setUser(null);
+    if (!$this->isHosted()) {
+      if (!$this->shouldUseSSH()) {
+        $uri->setUser(null);
 
-      // This might be a Git URI or a normal URI. If it's Git, there's no
-      // password support.
-      if ($uri instanceof PhutilURI) {
-        $uri->setPass(null);
+        // This might be a Git URI or a normal URI. If it's Git, there's no
+        // password support.
+        if ($uri instanceof PhutilURI) {
+          $uri->setPass(null);
+        }
       }
     }
 
@@ -743,6 +777,106 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     throw new Exception("Remote URI '{$raw_uri}' could not be parsed!");
+  }
+
+
+  /**
+   * Get the "best" clone/checkout URI for this repository, on any protocol.
+   */
+  public function getCloneURIObject() {
+    if (!$this->isHosted()) {
+      return $this->getRemoteURIObject();
+    }
+
+    // Choose the best URI: pick a read/write URI over a URI which is not
+    // read/write, and SSH over HTTP.
+
+    $serve_ssh = $this->getServeOverSSH();
+    $serve_http = $this->getServeOverHTTP();
+
+    if ($serve_ssh === self::SERVE_READWRITE) {
+      return $this->getSSHCloneURIObject();
+    } else if ($serve_http === self::SERVE_READWRITE) {
+      return $this->getHTTPCloneURIObject();
+    } else if ($serve_ssh !== self::SERVE_OFF) {
+      return $this->getSSHCloneURIObject();
+    } else if ($serve_http !== self::SERVE_OFF) {
+      return $this->getHTTPCloneURIObject();
+    } else {
+      return null;
+    }
+  }
+
+
+  /**
+   * Get the repository's SSH clone/checkout URI, if one exists.
+   */
+  public function getSSHCloneURIObject() {
+    if (!$this->isHosted()) {
+      if ($this->shouldUseSSH()) {
+        return $this->getRemoteURIObject();
+      } else {
+        return null;
+      }
+    }
+
+    $serve_ssh = $this->getServeOverSSH();
+    if ($serve_ssh === self::SERVE_OFF) {
+      return null;
+    }
+
+    $uri = new PhutilURI(PhabricatorEnv::getProductionURI($this->getURI()));
+
+    if ($this->isSVN()) {
+      $uri->setProtocol('svn+ssh');
+    } else {
+      $uri->setProtocol('ssh');
+    }
+
+    if ($this->isGit()) {
+      $uri->setPath($uri->getPath().$this->getCloneName().'.git');
+    } else if ($this->isHg()) {
+      $uri->setPath($uri->getPath().$this->getCloneName().'/');
+    }
+
+    $ssh_user = PhabricatorEnv::getEnvConfig('diffusion.ssh-user');
+    if ($ssh_user) {
+      $uri->setUser($ssh_user);
+    }
+
+    $uri->setPort(PhabricatorEnv::getEnvConfig('diffusion.ssh-port'));
+
+    return $uri;
+  }
+
+
+  /**
+   * Get the repository's HTTP clone/checkout URI, if one exists.
+   */
+  public function getHTTPCloneURIObject() {
+    if (!$this->isHosted()) {
+      if ($this->shouldUseHTTP()) {
+        return $this->getRemoteURIObject();
+      } else {
+        return null;
+      }
+    }
+
+    $serve_http = $this->getServeOverHTTP();
+    if ($serve_http === self::SERVE_OFF) {
+      return null;
+    }
+
+    $uri = PhabricatorEnv::getProductionURI($this->getURI());
+    $uri = new PhutilURI($uri);
+
+    if ($this->isGit()) {
+      $uri->setPath($uri->getPath().$this->getCloneName().'.git');
+    } else if ($this->isHg()) {
+      $uri->setPath($uri->getPath().$this->getCloneName().'/');
+    }
+
+    return $uri;
   }
 
 
@@ -1032,7 +1166,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function canMirror() {
-    if ($this->isGit()) {
+    if ($this->isGit() || $this->isHg()) {
       return true;
     }
 
@@ -1044,7 +1178,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return false;
     }
 
-    if ($this->isGit()) {
+    if ($this->isGit() || $this->isHg()) {
       return true;
     }
 

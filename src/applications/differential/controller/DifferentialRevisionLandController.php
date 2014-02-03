@@ -68,6 +68,26 @@ final class DifferentialRevisionLandController extends DifferentialController {
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
+    $is_disabled = $this->pushStrategy->isActionDisabled(
+      $viewer,
+      $revision,
+      $revision->getRepository());
+    if ($is_disabled) {
+      if (is_string($is_disabled)) {
+        $explain = $is_disabled;
+      } else {
+        $explain = pht("This action is not currently enabled.");
+      }
+      $dialog = id(new AphrontDialogView())
+        ->setUser($viewer)
+        ->setTitle(pht("Can't land revision"))
+        ->appendChild($explain)
+        ->addCancelButton('/D'.$revision_id);
+
+      return id(new AphrontDialogResponse())->setDialog($dialog);
+    }
+
+
     $prompt = hsprintf('%s<br><br>%s',
       pht(
         'This will squash and rebase revision %s, and push it to '.

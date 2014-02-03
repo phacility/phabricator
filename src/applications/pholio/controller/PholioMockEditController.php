@@ -38,10 +38,7 @@ final class PholioMockEditController extends PholioController {
       $files = mpull($mock_images, 'getFile');
       $mock_images = mpull($mock_images, null, 'getFilePHID');
     } else {
-      $mock = id(new PholioMock())
-        ->setAuthorPHID($user->getPHID())
-        ->attachImages(array())
-        ->setViewPolicy(PhabricatorPolicies::POLICY_USER);
+      $mock = PholioMock::initializeNewMock($user);
 
       $title = pht('Create Mock');
 

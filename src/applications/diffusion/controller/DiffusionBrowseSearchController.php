@@ -43,7 +43,6 @@ final class DiffusionBrowseSearchController extends DiffusionBrowseController {
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
     $results = array();
-    $no_data = pht('No results found.');
 
     $limit = 100;
     $page = $this->getRequest()->getInt('page', 0);
@@ -52,17 +51,34 @@ final class DiffusionBrowseSearchController extends DiffusionBrowseController {
     $pager->setOffset($page);
     $pager->setURI($this->getRequest()->getRequestURI(), 'page');
 
+    $search_mode = null;
+
     try {
-
-      $results = $this->callConduitWithDiffusionRequest(
-        'diffusion.searchquery',
-        array(
-          'grep' => $this->getRequest()->getStr('grep'),
-          'stableCommitName' => $drequest->getStableCommitName(),
-          'path' => $drequest->getPath(),
-          'limit' => $limit + 1,
-          'offset' => $page));
-
+      if (strlen($this->getRequest()->getStr('grep'))) {
+        $search_mode = 'grep';
+        $query_string = $this->getRequest()->getStr('grep');
+        $results = $this->callConduitWithDiffusionRequest(
+          'diffusion.searchquery',
+          array(
+            'grep' => $query_string,
+            'stableCommitName' => $drequest->getStableCommitName(),
+            'path' => $drequest->getPath(),
+            'limit' => $limit + 1,
+            'offset' => $page,
+          ));
+      } else { // Filename search.
+        $search_mode = 'find';
+        $query_string = $this->getRequest()->getStr('find');
+        $results = $this->callConduitWithDiffusionRequest(
+          'diffusion.querypaths',
+          array(
+            'pattern' => $query_string,
+            'commit' => $drequest->getStableCommitName(),
+            'path' => $drequest->getPath(),
+            'limit' => $limit + 1,
+            'offset' => $page,
+          ));
+      }
     } catch (ConduitException $ex) {
       $err = $ex->getErrorDescription();
       if ($err != '') {
@@ -73,6 +89,34 @@ final class DiffusionBrowseSearchController extends DiffusionBrowseController {
     }
 
     $results = $pager->sliceResults($results);
+
+    if ($search_mode == 'grep') {
+      $table = $this->renderGrepResults($results);
+      $header = pht(
+        'File content matching "%s" under "%s"',
+        $query_string,
+        nonempty($drequest->getPath(), '/'));
+    } else {
+      $table = $this->renderFindResults($results);
+      $header = pht(
+        'Paths matching "%s" under "%s"',
+        $query_string,
+        nonempty($drequest->getPath(), '/'));
+    }
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText($header)
+      ->appendChild($table);
+
+    $pager_box = id(new PHUIBoxView())
+      ->addMargin(PHUI::MARGIN_LARGE)
+      ->appendChild($pager);
+
+    return array($box, $pager_box);
+  }
+
+  private function renderGrepResults(array $results) {
+    $drequest = $this->getDiffusionRequest();
 
     require_celerity_resource('syntax-highlighting-css');
 
@@ -126,12 +170,40 @@ final class DiffusionBrowseSearchController extends DiffusionBrowseController {
       ->setClassName('remarkup-code')
       ->setHeaders(array(pht('Path'), pht('Line'), pht('String')))
       ->setColumnClasses(array('', 'n', 'wide'))
-      ->setNoDataString($no_data);
+      ->setNoDataString(
+        pht(
+          'The pattern you searched for was not found in the content of any '.
+          'files.'));
 
-    return id(new AphrontPanelView())
-      ->setNoBackground(true)
-      ->appendChild($table)
-      ->appendChild($pager);
+    return $table;
+  }
+
+  private function renderFindResults(array $results) {
+    $drequest = $this->getDiffusionRequest();
+
+    $rows = array();
+    foreach ($results as $result) {
+      $href = $drequest->generateURI(array(
+        'action' => 'browse',
+        'path' => $result,
+      ));
+
+      $readable = Filesystem::readablePath($result, $drequest->getPath());
+
+      $rows[] = array(
+        phutil_tag('a', array('href' => $href), $readable),
+      );
+    }
+
+    $table = id(new AphrontTableView($rows))
+      ->setHeaders(array(pht('Path')))
+      ->setColumnClasses(array('wide'))
+      ->setNoDataString(
+        pht(
+          'The pattern you searched for did not match the names of any '.
+          'files.'));
+
+    return $table;
   }
 
 }

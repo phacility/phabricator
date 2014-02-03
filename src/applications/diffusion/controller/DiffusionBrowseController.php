@@ -8,37 +8,45 @@ abstract class DiffusionBrowseController extends DiffusionController {
 
   protected function renderSearchForm($collapsed) {
     $drequest = $this->getDiffusionRequest();
+
+    $forms = array();
     $form = id(new AphrontFormView())
       ->setUser($this->getRequest()->getUser())
       ->setMethod('GET');
 
     switch ($drequest->getRepository()->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        $form->appendChild(pht('Search is not available in Subversion.'));
+        $forms[] = id(clone $form)
+          ->appendChild(pht('Search is not available in Subversion.'));
         break;
-
       default:
-        $form
+        $forms[] = id(clone $form)
           ->appendChild(
-            id(new AphrontFormTextControl())
-              ->setLabel(pht('Search Here'))
+            id(new AphrontFormTextWithSubmitControl())
+              ->setLabel(pht('File Name'))
+              ->setSubmitLabel(pht('Search File Names'))
+              ->setName('find')
+              ->setValue($this->getRequest()->getStr('find')));
+        $forms[] = id(clone $form)
+          ->appendChild(
+            id(new AphrontFormTextWithSubmitControl())
+              ->setLabel(pht('Pattern'))
+              ->setSubmitLabel(pht('Grep File Content'))
               ->setName('grep')
-              ->setValue($this->getRequest()->getStr('grep'))
-              ->setCaption(pht('Enter a regular expression.')))
-          ->appendChild(
-            id(new AphrontFormSubmitControl())
-              ->setValue(pht('Search File Content')));
+              ->setValue($this->getRequest()->getStr('grep')));
         break;
     }
 
+
     $filter = new AphrontListFilterView();
-    $filter->appendChild($form);
+    $filter->appendChild($forms);
+
 
     if ($collapsed) {
       $filter->setCollapsed(
         pht('Show Search'),
         pht('Hide Search'),
-        pht('Search for file content in this directory.'),
+        pht('Search for file names or content in this directory.'),
         '#');
     }
 

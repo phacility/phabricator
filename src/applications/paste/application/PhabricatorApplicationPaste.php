@@ -18,10 +18,6 @@ final class PhabricatorApplicationPaste extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
-  public function getQuickCreateURI() {
-    return $this->getBaseURI().'create/';
-  }
-
   public function getRemarkupRules() {
     return array(
       new PhabricatorPasteRemarkupRule(),
@@ -48,6 +44,18 @@ final class PhabricatorApplicationPaste extends PhabricatorApplication {
           'Default view policy for newly created pastes.')
       ),
     );
+  }
+
+  public function getQuickCreateItems(PhabricatorUser $viewer) {
+    $items = array();
+
+    $item = id(new PHUIListItemView())
+      ->setName(pht('Paste'))
+      ->setAppIcon('paste-dark')
+      ->setHref($this->getBaseURI().'create/');
+    $items[] = $item;
+
+    return $items;
   }
 
 }

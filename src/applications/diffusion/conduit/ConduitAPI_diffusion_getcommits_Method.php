@@ -7,7 +7,15 @@ final class ConduitAPI_diffusion_getcommits_Method
   extends ConduitAPI_diffusion_Method {
 
   public function getMethodDescription() {
-    return "Retrieve Diffusion commit information.";
+    return pht('Retrieve Diffusion commit information.');
+  }
+
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_DEPRECATED;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht('Obsoleted by diffusion.querycommits.');
   }
 
   public function defineParamTypes() {

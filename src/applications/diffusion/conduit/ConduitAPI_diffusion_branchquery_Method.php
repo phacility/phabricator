@@ -100,6 +100,12 @@ final class ConduitAPI_diffusion_branchquery_Method
     return $this->processBranchRefs($request, $refs);
   }
 
+  protected function getSVNResult(ConduitAPIRequest $request) {
+    // Since SVN doesn't have meaningful branches, just return nothing for all
+    // queries.
+    return array();
+  }
+
   private function processBranchRefs(ConduitAPIRequest $request, array $refs) {
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
@@ -125,4 +131,5 @@ final class ConduitAPI_diffusion_branchquery_Method
 
     return mpull($refs, 'toDictionary');
   }
+
 }

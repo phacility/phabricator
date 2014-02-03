@@ -58,11 +58,12 @@ final class PhabricatorApplicationDiviner extends PhabricatorApplication {
     }
 
     if ($application && $application->getHelpURI()) {
-      $item = new PHUIListItemView();
-      $item->setName(pht('%s Help', $application->getName()));
-      $item->addClass('core-menu-item');
-      $item->setIcon('help');
-      $item->setHref($application->getHelpURI());
+      $item = id(new PHUIListItemView())
+        ->setName(pht('%s Help', $application->getName()))
+        ->addClass('core-menu-item')
+        ->setIcon('info-sm')
+        ->setOrder(200)
+        ->setHref($application->getHelpURI());
       $items[] = $item;
     }
 

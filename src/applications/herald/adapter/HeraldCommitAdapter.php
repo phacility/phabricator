@@ -88,7 +88,8 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     return array(
       self::FIELD_NEED_AUDIT_FOR_PACKAGE =>
         pht('Affected packages that need audit'),
-      self::FIELD_REPOSITORY_AUTOCLOSE_BRANCH => pht('On autoclose branch'),
+      self::FIELD_REPOSITORY_AUTOCLOSE_BRANCH
+        => pht('Commit is on closing branch'),
     ) + parent::getFieldNameMap();
   }
 
@@ -114,6 +115,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
         self::FIELD_DIFFERENTIAL_ACCEPTED,
         self::FIELD_DIFFERENTIAL_REVIEWERS,
         self::FIELD_DIFFERENTIAL_CCS,
+        self::FIELD_BRANCHES,
         self::FIELD_REPOSITORY_AUTOCLOSE_BRANCH,
       ),
       parent::getFields());
@@ -461,6 +463,18 @@ final class HeraldCommitAdapter extends HeraldAdapter {
           return array();
         }
         return $revision->getCCPHIDs();
+      case self::FIELD_BRANCHES:
+        $params = array(
+          'callsign' => $this->repository->getCallsign(),
+          'contains' => $this->commit->getCommitIdentifier(),
+        );
+
+        $result = id(new ConduitCall('diffusion.branchquery', $params))
+          ->setUser(PhabricatorUser::getOmnipotentUser())
+          ->execute();
+
+        $refs = DiffusionRepositoryRef::loadAllFromDictionaries($result);
+        return mpull($refs, 'getShortName');
       case self::FIELD_REPOSITORY_AUTOCLOSE_BRANCH:
         return $this->repository->shouldAutocloseCommit(
           $this->commit,

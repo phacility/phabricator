@@ -294,6 +294,7 @@ final class ManiphestReportController extends ManiphestController {
         $burn_y,
       ),
       'xformat' => 'epoch',
+      'yformat' => 'int',
     ));
 
     return array($filter, $chart, $panel);

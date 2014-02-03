@@ -108,6 +108,15 @@ final class PhabricatorRepositoryURINormalizer extends Phobject {
         break;
     }
 
+    // If this is a Phabricator URI, strip it down to the callsign. We mutably
+    // allow you to clone repositories as "/diffusion/X/anything.git", for
+    // example.
+
+    $matches = null;
+    if (preg_match('@^(diffusion/[A-Z]+)@', $path, $matches)) {
+      $path = $matches[1];
+    }
+
     return $path;
   }
 

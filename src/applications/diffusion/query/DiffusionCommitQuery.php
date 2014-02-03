@@ -259,7 +259,8 @@ final class DiffusionCommitQuery
         // If we discarded all possible identifiers (e.g., they all referenced
         // bogus repositories or were all too short), make sure the query finds
         // nothing.
-        throw new PhabricatorEmptyQueryException('No commit identifiers.');
+        throw new PhabricatorEmptyQueryException(
+          pht('No commit identifiers.'));
       }
 
       $where[] = '('.implode(' OR ', $sql).')';
@@ -285,6 +286,8 @@ final class DiffusionCommitQuery
         'repositoryID IN (%Ld)',
         $this->repositoryIDs);
     }
+
+    $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
   }

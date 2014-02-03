@@ -125,31 +125,9 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
           'style' => nonempty(implode('; ', $styles), null),
         ),
         '');
-
-      $classes = array();
-      if ($application->getQuickCreateURI()) {
-        $classes[] = 'phabricator-application-create-icon';
-        $classes[] = 'sprite-icons';
-        $classes[] = 'icons-new-white';
-        $plus_icon = phutil_tag(
-          'span',
-          array(
-            'class' => implode(' ', $classes),
-          ),
-          '');
-
-        $create_button = phutil_tag(
-          'a',
-          array(
-            'href' => $application->getQuickCreateURI(),
-            'class' => 'phabricator-application-launch-create',
-          ),
-          $plus_icon);
-        $classes = array();
-        $classes[] = 'application-tile-create';
-      }
     }
 
+    $classes = array();
     $classes[] = 'phabricator-application-launch-container';
     if ($this->fullWidth) {
       $classes[] = 'application-tile-full';

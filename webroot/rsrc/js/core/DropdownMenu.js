@@ -77,6 +77,8 @@ JX.install('PhabricatorDropdownMenu', {
 
       this._open = true;
       this._show();
+
+      return this;
     },
 
     close : function() {
@@ -85,6 +87,8 @@ JX.install('PhabricatorDropdownMenu', {
       }
       this._open = false;
       this._hide();
+
+      return this;
     },
 
     clear : function() {

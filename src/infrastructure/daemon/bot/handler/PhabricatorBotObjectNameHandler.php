@@ -83,12 +83,16 @@ final class PhabricatorBotObjectNameHandler extends PhabricatorBotHandler {
       $pattern =
         '@'.
         '(?<!/)(?:^|\b)'.
-        '(r[A-Z]+[0-9a-z]{1,40})'.
+        '(r[A-Z]+)([0-9a-z]{0,40})'.
         '(?:\b|$)'.
         '@';
       if (preg_match_all($pattern, $message, $matches, PREG_SET_ORDER)) {
         foreach ($matches as $match) {
-          $commit_names[] = $match[1];
+          if ($match[2]) {
+            $commit_names[] = $match[1].$match[2];
+          } else {
+            $object_names[] = $match[1];
+          }
         }
       }
 

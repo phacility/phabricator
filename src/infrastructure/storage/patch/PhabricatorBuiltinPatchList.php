@@ -117,6 +117,7 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       'db.nuance' => array(),
       'db.passphrase' => array(),
       'db.phragment' => array(),
+      'db.dashboard' => array(),
       '0000.legacy.sql' => array(
         'legacy' => 0,
       ),

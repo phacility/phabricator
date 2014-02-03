@@ -29,10 +29,6 @@ final class PhabricatorApplicationFiles extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
-  public function getQuickCreateURI() {
-    return $this->getBaseURI().'upload/';
-  }
-
   public function canUninstall() {
     return false;
   }

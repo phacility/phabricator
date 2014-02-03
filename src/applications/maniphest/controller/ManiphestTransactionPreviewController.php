@@ -95,6 +95,11 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
         $transaction->setOldValue($task->getProjectPHIDs());
         $transaction->setNewValue($value);
         break;
+      case ManiphestTransaction::TYPE_STATUS:
+        $phids = array();
+        $transaction->setOldvalue($task->getStatus());
+        $transaction->setNewValue($value);
+        break;
       default:
         $phids = array();
         $transaction->setNewValue($value);
