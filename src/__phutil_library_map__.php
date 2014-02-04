@@ -1967,7 +1967,6 @@ phutil_register_library_map(array(
     'PhabricatorSearchQuery' => 'applications/search/storage/PhabricatorSearchQuery.php',
     'PhabricatorSearchRelationship' => 'applications/search/constants/PhabricatorSearchRelationship.php',
     'PhabricatorSearchResultView' => 'applications/search/view/PhabricatorSearchResultView.php',
-    'PhabricatorSearchScope' => 'applications/search/constants/PhabricatorSearchScope.php',
     'PhabricatorSearchSelectController' => 'applications/search/controller/PhabricatorSearchSelectController.php',
     'PhabricatorSearchWorker' => 'applications/search/worker/PhabricatorSearchWorker.php',
     'PhabricatorSecurityConfigOptions' => 'applications/config/option/PhabricatorSecurityConfigOptions.php',
