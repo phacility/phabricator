@@ -74,7 +74,7 @@ abstract class DiffusionController extends PhabricatorController {
     }
 
     $callsign = $repository->getCallsign();
-    $repository_name = 'r'.$callsign;
+    $repository_name = $repository->getName();
 
     if (!$spec['commit'] && !$spec['tags'] && !$spec['branches']) {
       $branch_name = $drequest->getBranch();
