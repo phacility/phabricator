@@ -72,6 +72,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
         self::FIELD_RULE,
         self::FIELD_AFFECTED_PACKAGE,
         self::FIELD_AFFECTED_PACKAGE_OWNER,
+        self::FIELD_OBJECT_IS_NEW,
       ),
       parent::getFields());
   }
