@@ -357,7 +357,7 @@ final class AphrontRequest {
           'This Phabricator install is configured as "%s", but you are '.
           'using the domain name "%s" to access a page which is trying to '.
           'set a cookie. Acccess Phabricator on the configured primary '.
-          'domain or  a configured alternate domain. Phabricator will not '.
+          'domain or a configured alternate domain. Phabricator will not '.
           'set cookies on other domains for security reasons.',
           $configured_as,
           $accessed_as));
