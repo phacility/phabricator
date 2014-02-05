@@ -18,6 +18,16 @@ return array(
   // Logging.
   'log.access.path'             => '/home/ubuntu/logs/phabricator.log',
 
+  // Custom Maniphest fields
+  'maniphest.custom-fields' => array(
+    'khan:duedate' => array(
+      'name'       => 'Target Completion Date',
+      'type'       => 'date',
+      'caption'    => 'The date you expect to have this task completed by',
+      'required'   => false,
+    )
+  ),
+
   // Basic email domain configuration.
   'metamta.default-address' => 'noreply@phabricator.khanacademy.org',
   'metamta.domain'          => 'phabricator.khanacademy.org',
