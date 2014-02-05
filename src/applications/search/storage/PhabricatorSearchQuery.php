@@ -1,7 +1,18 @@
 <?php
 
 /**
- * @group search
+ * Obsolete storage for saved search parameters. This class is no longer used;
+ * it was obsoleted by the introduction of {@class:PhabricatorSavedQuery}.
+ *
+ * This class is retained only because one of the migrations
+ * (`20130913.maniphest.1.migratesearch.php`) relies on it to migrate old saved
+ * Maniphest searches to new infrastructure. We can remove this class and the
+ * corresponding migration after installs have had a reasonable amount of time
+ * to perform it.
+ *
+ * TODO: Remove this class after 2014-09-13, roughly.
+ *
+ * @deprecated
  */
 final class PhabricatorSearchQuery extends PhabricatorSearchDAO {
 

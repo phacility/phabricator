@@ -7,6 +7,16 @@ final class PhabricatorApplicationSearchController
   private $navigation;
   private $queryKey;
   private $preface;
+  private $useOffsetPaging;
+
+  public function setUseOffsetPaging($use_offset_paging) {
+    $this->useOffsetPaging = $use_offset_paging;
+    return $this;
+  }
+
+  public function getUseOffsetPaging() {
+    return $this->useOffsetPaging;
+  }
 
   public function setPreface($preface) {
     $this->preface = $preface;
@@ -213,7 +223,12 @@ final class PhabricatorApplicationSearchController
 
       $query = $engine->buildQueryFromSavedQuery($saved_query);
 
-      $pager = new AphrontCursorPagerView();
+      $use_offset_paging = $this->getUseOffsetPaging();
+      if ($use_offset_paging) {
+        $pager = new AphrontPagerView();
+      } else {
+        $pager = new AphrontCursorPagerView();
+      }
       $pager->readFromRequest($request);
       $page_size = $engine->getPageSize($saved_query);
       if (is_finite($page_size)) {
@@ -225,8 +240,14 @@ final class PhabricatorApplicationSearchController
         // with INF seems to vary across PHP versions, systems, and runtimes.
         $pager->setPageSize(0xFFFF);
       }
-      $objects = $query->setViewer($request->getUser())
-        ->executeWithCursorPager($pager);
+
+      $query->setViewer($request->getUser());
+
+      if ($use_offset_paging) {
+        $objects = $query->executeWithOffsetPager($pager);
+      } else {
+        $objects = $query->executeWithCursorPager($pager);
+      }
 
       $list = $parent->renderResultsList($objects, $saved_query);
 

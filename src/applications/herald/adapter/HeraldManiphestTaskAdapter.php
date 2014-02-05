@@ -80,6 +80,7 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
         self::FIELD_CC,
         self::FIELD_CONTENT_SOURCE,
         self::FIELD_PROJECTS,
+        self::FIELD_IS_NEW_OBJECT,
       ),
       parent::getFields());
   }

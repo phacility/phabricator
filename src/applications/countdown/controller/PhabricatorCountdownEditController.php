@@ -38,8 +38,8 @@ final class PhabricatorCountdownEditController
     $e_text = true;
     $e_epoch = null;
 
+    $errors = array();
     if ($request->isFormPost()) {
-      $errors = array();
       $title = $request->getStr('title');
       $epoch = $request->getStr('epoch');
       $view_policy = $request->getStr('viewPolicy');

@@ -33,11 +33,39 @@ final class PhabricatorDashboardPanelListController
     return $nav;
   }
 
+  public function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $crumbs->addTextCrumb(pht('Panels'), $this->getApplicationURI().'panel/');
+
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+        ->setIcon('create')
+        ->setName(pht('Create Panel'))
+        ->setHref($this->getApplicationURI().'panel/create/'));
+
+    return $crumbs;
+  }
+
   public function renderResultsList(
     array $panels,
     PhabricatorSavedQuery $query) {
 
-    return 'got '.count($panels).' ok';
+    $viewer = $this->getRequest()->getUser();
+
+    $list = new PHUIObjectItemListView();
+    $list->setUser($viewer);
+    foreach ($panels as $panel) {
+      $item = id(new PHUIObjectItemView())
+        ->setObjectName($panel->getMonogram())
+        ->setHeader($panel->getName())
+        ->setHref('/'.$panel->getMonogram())
+        ->setObject($panel);
+
+      $list->addItem($item);
+    }
+
+    return $list;
   }
 
 }

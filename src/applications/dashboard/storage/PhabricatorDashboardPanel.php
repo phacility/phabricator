@@ -3,12 +3,21 @@
 /**
  * An individual dashboard panel.
  */
-final class PhabricatorDashboardPanel extends PhabricatorDashboardDAO {
+final class PhabricatorDashboardPanel
+  extends PhabricatorDashboardDAO
+  implements PhabricatorPolicyInterface {
 
-  private $name;
-  private $viewPolicy;
-  private $editPolicy;
-  private $properties = array();
+  protected $name;
+  protected $viewPolicy;
+  protected $editPolicy;
+  protected $properties = array();
+
+  public static function initializeNewPanel(PhabricatorUser $actor) {
+    return id(new PhabricatorDashboardPanel())
+      ->setName('')
+      ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setEditPolicy($actor->getPHID());
+  }
 
   public function getConfiguration() {
     return array(
@@ -21,7 +30,7 @@ final class PhabricatorDashboardPanel extends PhabricatorDashboardDAO {
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorDashboardPHIDTypeDashboard::TYPECONST);
+      PhabricatorDashboardPHIDTypePanel::TYPECONST);
   }
 
   public function getProperty($key, $default = null) {

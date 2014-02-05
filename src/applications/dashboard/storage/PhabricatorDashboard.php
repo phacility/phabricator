@@ -6,9 +6,16 @@
 final class PhabricatorDashboard extends PhabricatorDashboardDAO
   implements PhabricatorPolicyInterface {
 
-  private $name;
-  private $viewPolicy;
-  private $editPolicy;
+  protected $name;
+  protected $viewPolicy;
+  protected $editPolicy;
+
+  public static function initializeNewDashboard(PhabricatorUser $actor) {
+    return id(new PhabricatorDashboard())
+      ->setName('')
+      ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setEditPolicy($actor->getPHID());
+  }
 
   public function getConfiguration() {
     return array(

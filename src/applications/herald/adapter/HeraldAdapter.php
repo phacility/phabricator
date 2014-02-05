@@ -38,6 +38,7 @@ abstract class HeraldAdapter {
   const FIELD_BRANCHES               = 'branches';
   const FIELD_AUTHOR_RAW             = 'author-raw';
   const FIELD_COMMITTER_RAW          = 'committer-raw';
+  const FIELD_IS_NEW_OBJECT          = 'new-object';
 
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';
@@ -90,6 +91,7 @@ abstract class HeraldAdapter {
   const VALUE_BUILD_PLAN      = 'buildplan';
 
   private $contentSource;
+  private $isNewObject;
 
   public function setContentSource(PhabricatorContentSource $content_source) {
     $this->contentSource = $content_source;
@@ -97,6 +99,18 @@ abstract class HeraldAdapter {
   }
   public function getContentSource() {
     return $this->contentSource;
+  }
+
+  public function getIsNewObject() {
+    if (is_bool($this->isNewObject)) {
+      return $this->isNewObject;
+    }
+
+    throw new Exception(pht('You must setIsNewObject to a boolean first!'));
+  }
+  public function setIsNewObject($new) {
+    $this->isNewObject = (bool) $new;
+    return $this;
   }
 
   abstract public function getPHID();
@@ -110,6 +124,8 @@ abstract class HeraldAdapter {
         return $this->getContentSource()->getSource();
       case self::FIELD_ALWAYS:
         return true;
+      case self::FIELD_IS_NEW_OBJECT:
+        return $this->getIsNewObject();
       default:
         throw new Exception(
           "Unknown field '{$field_name}'!");
@@ -216,6 +232,7 @@ abstract class HeraldAdapter {
       self::FIELD_BRANCHES => pht('Commit\'s branches'),
       self::FIELD_AUTHOR_RAW => pht('Raw author name'),
       self::FIELD_COMMITTER_RAW => pht('Raw committer name'),
+      self::FIELD_IS_NEW_OBJECT => pht('Is newly created?'),
     );
   }
 
@@ -345,6 +362,7 @@ abstract class HeraldAdapter {
         );
       case self::FIELD_IS_MERGE_COMMIT:
       case self::FIELD_DIFF_ENORMOUS:
+      case self::FIELD_IS_NEW_OBJECT:
         return array(
           self::CONDITION_IS_TRUE,
           self::CONDITION_IS_FALSE,

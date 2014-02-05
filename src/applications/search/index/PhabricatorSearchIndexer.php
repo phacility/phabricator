@@ -11,16 +11,9 @@ final class PhabricatorSearchIndexer {
   }
 
   public function indexDocumentByPHID($phid) {
-    $doc_indexer_symbols = id(new PhutilSymbolLoader())
+    $indexers = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhabricatorSearchDocumentIndexer')
-      ->setConcreteOnly(true)
-      ->setType('class')
-      ->selectAndLoadSymbols();
-
-    $indexers = array();
-    foreach ($doc_indexer_symbols as $symbol) {
-      $indexers[] = newv($symbol['name'], array());
-    }
+      ->loadObjects();
 
     foreach ($indexers as $indexer) {
       if ($indexer->shouldIndexDocumentByPHID($phid)) {

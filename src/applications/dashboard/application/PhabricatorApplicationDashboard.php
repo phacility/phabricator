@@ -11,7 +11,7 @@ final class PhabricatorApplicationDashboard extends PhabricatorApplication {
   }
 
   public function getIconName() {
-    return 'dashboard';
+    return 'fancyhome';
   }
 
   public function getRoutes() {
@@ -21,9 +21,14 @@ final class PhabricatorApplicationDashboard extends PhabricatorApplication {
         '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'PhabricatorDashboardListController',
         'view/(?P<id>\d+)/' => 'PhabricatorDashboardViewController',
+        'create/' => 'PhabricatorDashboardEditController',
+        'edit/(?:(?P<id>\d+)/)?' => 'PhabricatorDashboardEditController',
+
         'panel/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?'
             => 'PhabricatorDashboardPanelListController',
+          'create/' => 'PhabricatorDashboardPanelEditController',
+          'edit/(?:(?P<id>\d+)/)?' => 'PhabricatorDashboardPanelEditController',
         ),
       ),
     );

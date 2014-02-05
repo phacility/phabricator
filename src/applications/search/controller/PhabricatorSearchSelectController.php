@@ -16,10 +16,11 @@ final class PhabricatorSearchSelectController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $query = new PhabricatorSearchQuery();
+    $query = new PhabricatorSavedQuery();
     $query_str = $request->getStr('query');
 
-    $query->setQuery($query_str);
+    $query->setEngineClassName('PhabricatorSearchApplicationSearchEngine');
+    $query->setParameter('query', $query_str);
     $query->setParameter('type', $this->type);
 
     switch ($request->getStr('filter')) {

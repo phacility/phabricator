@@ -44,13 +44,13 @@ final class DifferentialSearchIndexer
       PhabricatorPeoplePHIDTypeUser::TYPECONST,
       $rev->getDateCreated());
 
-    if (!$rev->isClosed()) {
-      $doc->addRelationship(
-        PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
-        $rev->getPHID(),
-        DifferentialPHIDTypeRevision::TYPECONST,
-        time());
-    }
+    $doc->addRelationship(
+      $rev->isClosed()
+        ? PhabricatorSearchRelationship::RELATIONSHIP_CLOSED
+        : PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
+      $rev->getPHID(),
+      DifferentialPHIDTypeRevision::TYPECONST,
+      time());
 
     $comments = id(new DifferentialCommentQuery())
       ->withRevisionIDs(array($rev->getID()))
@@ -74,10 +74,19 @@ final class DifferentialSearchIndexer
     // If a revision needs review, the owners are the reviewers. Otherwise, the
     // owner is the author (e.g., accepted, rejected, closed).
     if ($rev->getStatus() == ArcanistDifferentialRevisionStatus::NEEDS_REVIEW) {
-      foreach ($rev->getReviewers() as $phid) {
+      $reviewers = $rev->getReviewers();
+      if ($reviewers) {
+        foreach ($reviewers as $phid) {
+          $doc->addRelationship(
+            PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
+            $phid,
+            PhabricatorPeoplePHIDTypeUser::TYPECONST,
+            $rev->getDateModified()); // Bogus timestamp.
+        }
+      } else {
         $doc->addRelationship(
-          PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
-          $phid,
+          PhabricatorSearchRelationship::RELATIONSHIP_UNOWNED,
+          $rev->getPHID(),
           PhabricatorPeoplePHIDTypeUser::TYPECONST,
           $rev->getDateModified()); // Bogus timestamp.
       }
@@ -85,7 +94,7 @@ final class DifferentialSearchIndexer
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
         $rev->getAuthorPHID(),
-        PhabricatorPeoplePHIDTypeUser::TYPECONST,
+        PhabricatorPHIDConstants::PHID_TYPE_VOID,
         $rev->getDateCreated());
     }
 

@@ -256,6 +256,7 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
       $adapter->setExplicitCCs($new['ccs']);
       $adapter->setExplicitReviewers($new['rev']);
       $adapter->setForbiddenCCs($revision->loadUnsubscribedPHIDs());
+      $adapter->setIsNewObject($is_new);
 
       $xscript = HeraldEngine::loadAndApplyRules($adapter);
       $xscript_uri = '/herald/transcript/'.$xscript->getID().'/';
