@@ -24,7 +24,7 @@ return array(
       'name'       => 'Target Completion Date',
       'type'       => 'date',
       'caption'    => 'The date you expect to have this task completed by',
-      'required'   => true,
+      'required'   => false,
     )
   ),
 
