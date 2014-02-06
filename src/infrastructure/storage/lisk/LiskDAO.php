@@ -775,7 +775,7 @@ abstract class LiskDAO {
    * row in retrieving other rows. Example of a correct usage:
    *
    *   $status = $author->loadOneRelative(
-   *     new PhabricatorUserStatus(),
+   *     new PhabricatorCalendarEvent(),
    *     'userPHID',
    *     'getPHID',
    *     '(UNIX_TIMESTAMP() BETWEEN dateFrom AND dateTo)');

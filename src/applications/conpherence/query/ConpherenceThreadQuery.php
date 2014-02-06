@@ -221,7 +221,7 @@ final class ConpherenceThreadQuery
       $this->getViewer());
     $start_epoch = $epochs['start_epoch'];
     $end_epoch = $epochs['end_epoch'];
-    $statuses = id(new PhabricatorUserStatus())
+    $statuses = id(new PhabricatorCalendarEvent())
       ->loadAllWhere(
         'userPHID in (%Ls) AND dateTo >= %d AND dateFrom <= %d',
         $participant_phids,

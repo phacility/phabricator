@@ -167,7 +167,7 @@ final class PhabricatorPeopleQuery
 
     if ($this->needStatus) {
       $user_list = mpull($users, null, 'getPHID');
-      $statuses = id(new PhabricatorUserStatus())->loadCurrentStatuses(
+      $statuses = id(new PhabricatorCalendarEvent())->loadCurrentStatuses(
         array_keys($user_list));
       foreach ($user_list as $phid => $user) {
         $status = idx($statuses, $phid);

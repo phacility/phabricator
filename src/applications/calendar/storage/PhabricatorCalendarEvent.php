@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorUserStatus extends PhabricatorUserDAO {
+final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO {
 
   protected $userPHID;
   protected $dateFrom;
@@ -34,7 +34,7 @@ final class PhabricatorUserStatus extends PhabricatorUserDAO {
 
   public function getTerseSummary(PhabricatorUser $viewer) {
     $until = phabricator_date($this->dateTo, $viewer);
-    if ($this->status == PhabricatorUserStatus::STATUS_SPORADIC) {
+    if ($this->status == PhabricatorCalendarEvent::STATUS_SPORADIC) {
       return 'Sporadic until '.$until;
     } else {
       return 'Away until '.$until;
@@ -65,7 +65,7 @@ final class PhabricatorUserStatus extends PhabricatorUserDAO {
   public function save() {
 
     if ($this->getDateTo() <= $this->getDateFrom()) {
-      throw new PhabricatorUserStatusInvalidEpochException();
+      throw new PhabricatorCalendarEventInvalidEpochException();
     }
 
     $this->openTransaction();
@@ -82,7 +82,7 @@ final class PhabricatorUserStatus extends PhabricatorUserDAO {
       if ($overlap) {
         $this->endWriteLocking();
         $this->killTransaction();
-        throw new PhabricatorUserStatusOverlapException();
+        throw new PhabricatorCalendarEventOverlapException();
       }
     }
 

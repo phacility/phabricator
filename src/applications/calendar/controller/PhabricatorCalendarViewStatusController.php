@@ -16,7 +16,7 @@ final class PhabricatorCalendarViewStatusController
     $request  = $this->getRequest();
     $user     = $request->getUser();
     $handle   = $this->getHandle($this->phid);
-    $statuses = id(new PhabricatorUserStatus())
+    $statuses = id(new PhabricatorCalendarEvent())
       ->loadAllWhere('userPHID = %s AND dateTo > UNIX_TIMESTAMP()',
                      $this->phid);
 
@@ -43,7 +43,7 @@ final class PhabricatorCalendarViewStatusController
   }
 
   private function buildStatusList(array $statuses) {
-    assert_instances_of($statuses, 'PhabricatorUserStatus');
+    assert_instances_of($statuses, 'PhabricatorCalendarEvent');
 
     $user = $this->getRequest()->getUser();
 
@@ -66,7 +66,7 @@ final class PhabricatorCalendarViewStatusController
       $from = phabricator_datetime($status->getDateFrom(), $user);
       $to   = phabricator_datetime($status->getDateTo(), $user);
 
-      $color = ($status->getStatus() == PhabricatorUserStatus::STATUS_AWAY)
+      $color = ($status->getStatus() == PhabricatorCalendarEvent::STATUS_AWAY)
         ? 'red'
         : 'yellow';
 

@@ -30,7 +30,7 @@ final class PhabricatorCalendarEditStatusController
       ->setInitialTime(AphrontFormDateControl::TIME_END_OF_DAY);
 
     if ($this->isCreate()) {
-      $status       = new PhabricatorUserStatus();
+      $status       = new PhabricatorCalendarEvent();
       $end_value    = $end_time->readValueFromRequest($request);
       $start_value  = $start_time->readValueFromRequest($request);
       $submit_label = pht('Create');
@@ -38,7 +38,7 @@ final class PhabricatorCalendarEditStatusController
       $page_title   = pht('Create Status');
       $redirect     = 'created';
     } else {
-      $status = id(new PhabricatorUserStatus())
+      $status = id(new PhabricatorCalendarEvent())
         ->loadOneWhere('id = %d', $this->id);
       $end_time->setValue($status->getDateTo());
       $start_time->setValue($status->getDateFrom());
@@ -67,9 +67,9 @@ final class PhabricatorCalendarEditStatusController
           ->setDateTo($end_value)
           ->setDescription($description)
           ->save();
-      } catch (PhabricatorUserStatusInvalidEpochException $e) {
+      } catch (PhabricatorCalendarEventInvalidEpochException $e) {
         $errors[] = pht('Start must be before end.');
-      } catch (PhabricatorUserStatusOverlapException $e) {
+      } catch (PhabricatorCalendarEventOverlapException $e) {
         $errors[] = pht('There is already a status within the specified '.
                     'timeframe. Edit or delete this existing status.');
       }

@@ -12,7 +12,7 @@ final class PhabricatorCalendarDeleteStatusController
   public function processRequest() {
     $request  = $this->getRequest();
     $user     = $request->getUser();
-    $status   = id(new PhabricatorUserStatus())
+    $status   = id(new PhabricatorCalendarEvent())
       ->loadOneWhere('id = %d', $this->id);
 
     if (!$status) {

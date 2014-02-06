@@ -19,7 +19,7 @@ final class PhabricatorCalendarBrowseController
       "{$year}-{$month}-01",
       "{$year}-{$month}-31");
 
-    $statuses = id(new PhabricatorUserStatus())
+    $statuses = id(new PhabricatorCalendarEvent())
       ->loadAllWhere(
         'dateTo >= %d AND dateFrom <= %d',
         strtotime("{$year}-{$month}-01"),

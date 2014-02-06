@@ -3,7 +3,7 @@
 abstract class PhabricatorCalendarController extends PhabricatorController {
 
 
-  protected function buildSideNavView(PhabricatorUserStatus $status = null) {
+  protected function buildSideNavView(PhabricatorCalendarEvent $status = null) {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
