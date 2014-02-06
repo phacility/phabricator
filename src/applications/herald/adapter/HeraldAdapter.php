@@ -194,6 +194,7 @@ abstract class HeraldAdapter {
   public function getFields() {
     return array(
       self::FIELD_ALWAYS,
+      self::FIELD_RULE,
     );
   }
 
