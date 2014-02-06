@@ -1265,6 +1265,7 @@ phutil_register_library_map(array(
     'PhabricatorCalendarEvent' => 'applications/calendar/storage/PhabricatorCalendarEvent.php',
     'PhabricatorCalendarEventInvalidEpochException' => 'applications/calendar/exception/PhabricatorCalendarEventInvalidEpochException.php',
     'PhabricatorCalendarEventOverlapException' => 'applications/calendar/exception/PhabricatorCalendarEventOverlapException.php',
+    'PhabricatorCalendarEventQuery' => 'applications/calendar/query/PhabricatorCalendarEventQuery.php',
     'PhabricatorCalendarHoliday' => 'applications/calendar/storage/PhabricatorCalendarHoliday.php',
     'PhabricatorCalendarHolidayTestCase' => 'applications/calendar/storage/__tests__/PhabricatorCalendarHolidayTestCase.php',
     'PhabricatorCalendarViewStatusController' => 'applications/calendar/controller/PhabricatorCalendarViewStatusController.php',
@@ -3900,9 +3901,14 @@ phutil_register_library_map(array(
     'PhabricatorCalendarDAO' => 'PhabricatorLiskDAO',
     'PhabricatorCalendarDeleteStatusController' => 'PhabricatorCalendarController',
     'PhabricatorCalendarEditStatusController' => 'PhabricatorCalendarController',
-    'PhabricatorCalendarEvent' => 'PhabricatorCalendarDAO',
+    'PhabricatorCalendarEvent' =>
+    array(
+      0 => 'PhabricatorCalendarDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
     'PhabricatorCalendarEventInvalidEpochException' => 'Exception',
     'PhabricatorCalendarEventOverlapException' => 'Exception',
+    'PhabricatorCalendarEventQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorCalendarHoliday' => 'PhabricatorCalendarDAO',
     'PhabricatorCalendarHolidayTestCase' => 'PhabricatorTestCase',
     'PhabricatorCalendarViewStatusController' => 'PhabricatorCalendarController',

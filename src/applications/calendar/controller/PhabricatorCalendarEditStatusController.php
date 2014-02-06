@@ -38,18 +38,22 @@ final class PhabricatorCalendarEditStatusController
       $page_title   = pht('Create Status');
       $redirect     = 'created';
     } else {
-      $status = id(new PhabricatorCalendarEvent())
-        ->loadOneWhere('id = %d', $this->id);
+      $status = id(new PhabricatorCalendarEventQuery())
+        ->setViewer($user)
+        ->withIDs(array($this->id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
+
       $end_time->setValue($status->getDateTo());
       $start_time->setValue($status->getDateFrom());
       $submit_label = pht('Update');
       $filter       = 'status/edit/'.$status->getID().'/';
       $page_title   = pht('Update Status');
       $redirect     = 'updated';
-
-      if ($status->getUserPHID() != $user->getPHID()) {
-        return new Aphront403Response();
-      }
     }
 
     $errors = array();

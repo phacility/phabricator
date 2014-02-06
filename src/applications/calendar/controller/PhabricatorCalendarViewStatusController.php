@@ -12,13 +12,15 @@ final class PhabricatorCalendarViewStatusController
   }
 
   public function processRequest() {
-
     $request  = $this->getRequest();
     $user     = $request->getUser();
     $handle   = $this->getHandle($this->phid);
-    $statuses = id(new PhabricatorCalendarEvent())
-      ->loadAllWhere('userPHID = %s AND dateTo > UNIX_TIMESTAMP()',
-                     $this->phid);
+
+    $statuses = id(new PhabricatorCalendarEventQuery())
+      ->setViewer($user)
+      ->withInvitedPHIDs(array($this->phid))
+      ->withDateRange(time(), strtotime('2037-01-01 12:00:00'))
+      ->execute();
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter($this->getFilter());
