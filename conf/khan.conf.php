@@ -19,7 +19,7 @@ return array(
   'log.access.path'             => '/home/ubuntu/logs/phabricator.log',
 
   // Custom Maniphest fields
-  'maniphest.custom-fields' => array(
+  'maniphest.custom-field-definitions' => array(
     'khan:duedate' => array(
       'name'       => 'Target Completion Date',
       'type'       => 'date',
