@@ -303,7 +303,7 @@ final class AphrontCalendarMonthView extends AphrontView {
 
     if ($user->getPHID() == $event->getUserPHID()) {
       $tag  = 'a';
-      $href = '/calendar/status/edit/'.$event->getEventID().'/';
+      $href = '/calendar/event/edit/'.$event->getEventID().'/';
     } else {
       $tag  = 'div';
       $href = null;

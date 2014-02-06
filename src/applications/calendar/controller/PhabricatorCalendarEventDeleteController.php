@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorCalendarDeleteStatusController
+final class PhabricatorCalendarEventDeleteController
   extends PhabricatorCalendarController {
 
   private $id;
@@ -45,7 +45,7 @@ final class PhabricatorCalendarDeleteStatusController
       pht('Permanently delete this status? This action can not be undone.'));
     $dialog->addSubmitButton(pht('Delete'));
     $dialog->addCancelButton(
-      $this->getApplicationURI('status/edit/'.$status->getID().'/'));
+      $this->getApplicationURI('event/'));
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
 

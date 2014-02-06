@@ -106,7 +106,7 @@ final class ConpherenceLayoutView extends AphrontView {
             'createData' => array(
               'refreshFromResponse' => false,
               'action' => ConpherenceUpdateActions::ADD_STATUS,
-              'customHref' => '/calendar/status/create/'
+              'customHref' => '/calendar/event/create/'
             )
           ),
           'widgets-settings' => array(

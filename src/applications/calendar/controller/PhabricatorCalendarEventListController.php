@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorCalendarViewStatusController
+final class PhabricatorCalendarEventListController
   extends PhabricatorCalendarController {
 
   private $phid;
@@ -52,7 +52,7 @@ final class PhabricatorCalendarViewStatusController
     $list = new PHUIObjectItemListView();
     foreach ($statuses as $status) {
       if ($status->getUserPHID() == $user->getPHID()) {
-        $href = $this->getApplicationURI('/status/edit/'.$status->getID().'/');
+        $href = $this->getApplicationURI('/event/edit/'.$status->getID().'/');
       } else {
         $from  = $status->getDateFrom();
         $month = phabricator_format_local_time($from, $user, 'm');
@@ -99,11 +99,7 @@ final class PhabricatorCalendarViewStatusController
   }
 
   private function getFilter() {
-    if ($this->isUserRequest()) {
-      $filter = 'status/';
-    } else {
-      $filter = 'status/view/'.$this->phid.'/';
-    }
+    $filter = 'event/';
 
     return $filter;
   }

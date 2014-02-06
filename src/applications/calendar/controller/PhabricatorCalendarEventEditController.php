@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorCalendarEditStatusController
+final class PhabricatorCalendarEventEditController
   extends PhabricatorCalendarController {
 
   private $id;
@@ -35,7 +35,7 @@ final class PhabricatorCalendarEditStatusController
       $start_value  = $start_time->readValueFromRequest($request);
       $submit_label = pht('Create');
       $filter       = 'status/create/';
-      $page_title   = pht('Create Status');
+      $page_title   = pht('Create Event');
       $redirect     = 'created';
     } else {
       $status = id(new PhabricatorCalendarEventQuery())
@@ -51,8 +51,8 @@ final class PhabricatorCalendarEditStatusController
       $end_time->setValue($status->getDateTo());
       $start_time->setValue($status->getDateFrom());
       $submit_label = pht('Update');
-      $filter       = 'status/edit/'.$status->getID().'/';
-      $page_title   = pht('Update Status');
+      $filter       = 'event/edit/'.$status->getID().'/';
+      $page_title   = pht('Update Event');
       $redirect     = 'updated';
     }
 
@@ -125,10 +125,10 @@ final class PhabricatorCalendarEditStatusController
         ->setTitle($page_title)
         ->setWidth(AphrontDialogView::WIDTH_FORM);
       if ($this->isCreate()) {
-        $dialog->setSubmitURI($this->getApplicationURI('status/create/'));
+        $dialog->setSubmitURI($this->getApplicationURI('event/create/'));
       } else {
         $dialog->setSubmitURI(
-          $this->getApplicationURI('status/edit/'.$status->getID().'/'));
+          $this->getApplicationURI('event/edit/'.$status->getID().'/'));
       }
       $form = new PHUIFormLayoutView();
       if ($error_view) {
@@ -156,8 +156,8 @@ final class PhabricatorCalendarEditStatusController
       $submit->addCancelButton($this->getApplicationURI());
     } else {
       $submit->addCancelButton(
-        $this->getApplicationURI('status/delete/'.$status->getID().'/'),
-        pht('Delete Status'));
+        $this->getApplicationURI('event/delete/'.$status->getID().'/'),
+        pht('Delete Event'));
     }
 
     if ($request->isAjax()) {
