@@ -1013,9 +1013,16 @@ abstract class HeraldAdapter {
       $target = array($target);
     }
     foreach ($target as $index => $val) {
-      $handle = idx($handles, $val);
-      if ($handle) {
-        $target[$index] = $handle->renderLink();
+      switch ($action->getAction()) {
+        case self::ACTION_FLAG:
+          $target[$index] = PhabricatorFlagColor::getColorName($val);
+          break;
+        default:
+          $handle = idx($handles, $val);
+          if ($handle) {
+            $target[$index] = $handle->renderLink();
+          }
+          break;
       }
     }
     $target = phutil_implode_html(', ', $target);
