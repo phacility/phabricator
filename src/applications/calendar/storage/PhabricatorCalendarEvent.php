@@ -34,6 +34,17 @@ final class PhabricatorCalendarEvent
     return $options[$this->status];
   }
 
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_AUX_PHID => true,
+    ) + parent::getConfiguration();
+  }
+
+  public function generatePHID() {
+    return PhabricatorPHID::generateNewPHID(
+      PhabricatorCalendarPHIDTypeEvent::TYPECONST);
+  }
+
   public function getTerseSummary(PhabricatorUser $viewer) {
     $until = phabricator_date($this->dateTo, $viewer);
     if ($this->status == PhabricatorCalendarEvent::STATUS_SPORADIC) {

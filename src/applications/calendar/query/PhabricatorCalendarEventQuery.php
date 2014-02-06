@@ -4,6 +4,7 @@ final class PhabricatorCalendarEventQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
+  private $phids;
   private $rangeBegin;
   private $rangeEnd;
   private $invitedPHIDs;
@@ -11,6 +12,11 @@ final class PhabricatorCalendarEventQuery
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
+    return $this;
+  }
+
+  public function withPHIDs(array $phids) {
+    $this->phids = $phids;
     return $this;
   }
 
@@ -53,6 +59,13 @@ final class PhabricatorCalendarEventQuery
         $conn_r,
         'id IN (%Ld)',
         $this->ids);
+    }
+
+    if ($this->phids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'phid IN (%Ls)',
+        $this->phids);
     }
 
     if ($this->rangeBegin) {
