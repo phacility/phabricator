@@ -36,6 +36,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $need_symbols = false;
     $need_jump_objects = false;
     $need_build_plans = false;
+    $need_task_priority = false;
     $need_macros = false;
     $need_legalpad_documents = false;
     switch ($this->type) {
@@ -98,6 +99,9 @@ final class PhabricatorTypeaheadCommonDatasourceController
         break;
       case 'buildplans':
         $need_build_plans = true;
+        break;
+      case 'taskpriority':
+        $need_task_priority = true;
         break;
       case 'macros':
         $need_macros = true;
@@ -240,6 +244,16 @@ final class PhabricatorTypeaheadCommonDatasourceController
         $results[] = id(new PhabricatorTypeaheadResult())
           ->setName($plan->getName())
           ->setPHID($plan->getPHID());
+      }
+    }
+
+    if ($need_task_priority) {
+      $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
+      foreach ($priority_map as $value => $name) {
+        // NOTE: $value is not a phid but is unique. This'll work.
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setPHID($value)
+          ->setName($name);
       }
     }
 
