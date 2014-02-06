@@ -1,62 +1,66 @@
 <?php
 
 final class PhabricatorCalendarEventListController
-  extends PhabricatorCalendarController {
+  extends PhabricatorCalendarController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
 
-  private $phid;
+  private $queryKey;
 
   public function willProcessRequest(array $data) {
-    $user = $this->getRequest()->getUser();
-    $this->phid = idx($data, 'phid', $user->getPHID());
-    $this->loadHandles(array($this->phid));
+    $this->queryKey = idx($data, 'queryKey');
   }
 
   public function processRequest() {
-    $request  = $this->getRequest();
-    $user     = $request->getUser();
-    $handle   = $this->getHandle($this->phid);
-
-    $statuses = id(new PhabricatorCalendarEventQuery())
-      ->setViewer($user)
-      ->withInvitedPHIDs(array($this->phid))
-      ->withDateRange(time(), strtotime('2037-01-01 12:00:00'))
-      ->execute();
-
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter($this->getFilter());
-
-    $page_title = $this->getPageTitle();
-
-    $status_list = $this->buildStatusList($statuses);
-    $status_list->setNoDataString($this->getNoDataString());
-
-    $nav->appendChild(
-      array(
-        id(new PHUIHeaderView())->setHeader($page_title),
-        $status_list,
-      ));
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $page_title,
-        'device' => true
-      ));
+    $request = $this->getRequest();
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->queryKey)
+      ->setSearchEngine(new PhabricatorCalendarEventSearchEngine())
+      ->setNavigation($this->buildSideNav());
+    return $this->delegateToController($controller);
   }
 
-  private function buildStatusList(array $statuses) {
-    assert_instances_of($statuses, 'PhabricatorCalendarEvent');
-
+  public function buildSideNav() {
     $user = $this->getRequest()->getUser();
 
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
+
+    id(new PhabricatorCalendarEventSearchEngine())
+      ->setViewer($user)
+      ->addNavigationItems($nav->getMenu());
+
+    $nav->selectFilter(null);
+
+    return $nav;
+  }
+
+  public function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+        ->setIcon('create')
+        ->setName(pht('Create Event'))
+        ->setHref($this->getApplicationURI().'create/'));
+
+    return $crumbs;
+  }
+
+  public function renderResultsList(
+    array $events,
+    PhabricatorSavedQuery $query) {
+    assert_instances_of($events, 'PhabricatorCalendarEvent');
+
+    $viewer = $this->getRequest()->getUser();
+
     $list = new PHUIObjectItemListView();
-    foreach ($statuses as $status) {
-      if ($status->getUserPHID() == $user->getPHID()) {
-        $href = $this->getApplicationURI('/event/edit/'.$status->getID().'/');
+    foreach ($events as $event) {
+      if ($event->getUserPHID() == $viewer->getPHID()) {
+        $href = $this->getApplicationURI('/event/edit/'.$event->getID().'/');
       } else {
-        $from  = $status->getDateFrom();
-        $month = phabricator_format_local_time($from, $user, 'm');
-        $year  = phabricator_format_local_time($from, $user, 'Y');
+        $from  = $event->getDateFrom();
+        $month = phabricator_format_local_time($from, $viewer, 'm');
+        $year  = phabricator_format_local_time($from, $viewer, 'Y');
         $uri   = new PhutilURI($this->getApplicationURI());
         $uri->setQueryParams(
           array(
@@ -65,59 +69,25 @@ final class PhabricatorCalendarEventListController
           ));
         $href = (string) $uri;
       }
-      $from = phabricator_datetime($status->getDateFrom(), $user);
-      $to   = phabricator_datetime($status->getDateTo(), $user);
+      $from = phabricator_datetime($event->getDateFrom(), $viewer);
+      $to   = phabricator_datetime($event->getDateTo(), $viewer);
 
-      $color = ($status->getStatus() == PhabricatorCalendarEvent::STATUS_AWAY)
+      $color = ($event->getStatus() == PhabricatorCalendarEvent::STATUS_AWAY)
         ? 'red'
         : 'yellow';
 
       $item = id(new PHUIObjectItemView())
-        ->setHeader($status->getTerseSummary($user))
+        ->setHeader($event->getTerseSummary($viewer))
         ->setHref($href)
         ->setBarColor($color)
         ->addAttribute(pht('From %s to %s', $from, $to))
         ->addAttribute(
-            phutil_utf8_shorten($status->getDescription(), 64));
+            phutil_utf8_shorten($event->getDescription(), 64));
 
       $list->addItem($item);
     }
 
     return $list;
-  }
-
-  private function getNoDataString() {
-    if ($this->isUserRequest()) {
-      $no_data =
-        pht('You do not have any upcoming status events.');
-    } else {
-      $no_data =
-        pht('%s does not have any upcoming status events.',
-            $this->getHandle($this->phid)->getName());
-    }
-    return $no_data;
-  }
-
-  private function getFilter() {
-    $filter = 'event/';
-
-    return $filter;
-  }
-
-  private function getPageTitle() {
-    if ($this->isUserRequest()) {
-      $page_title = pht('Upcoming Statuses');
-    } else {
-      $page_title = pht(
-        'Upcoming Statuses for %s',
-        $this->getHandle($this->phid)->getName());
-    }
-    return $page_title;
-  }
-
-  private function isUserRequest() {
-    $user = $this->getRequest()->getUser();
-    return $this->phid == $user->getPHID();
   }
 
 }

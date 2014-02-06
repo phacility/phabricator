@@ -37,7 +37,8 @@ final class PhabricatorApplicationCalendar extends PhabricatorApplication {
       '/calendar/' => array(
         '' => 'PhabricatorCalendarBrowseController',
         'event/' => array(
-          '' => 'PhabricatorCalendarEventListController',
+          '(?:query/(?P<queryKey>[^/]+)/)?' =>
+            'PhabricatorCalendarEventListController',
           'create/' =>
             'PhabricatorCalendarEventEditController',
           'edit/(?P<id>[1-9]\d*)/' =>
