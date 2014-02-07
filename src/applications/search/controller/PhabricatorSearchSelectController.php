@@ -21,7 +21,7 @@ final class PhabricatorSearchSelectController
 
     $query->setEngineClassName('PhabricatorSearchApplicationSearchEngine');
     $query->setParameter('query', $query_str);
-    $query->setParameter('type', $this->type);
+    $query->setParameter('types', array($this->type));
 
     switch ($request->getStr('filter')) {
       case 'assigned':
