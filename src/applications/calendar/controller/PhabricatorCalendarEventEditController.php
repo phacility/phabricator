@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorCalendarEditStatusController
+final class PhabricatorCalendarEventEditController
   extends PhabricatorCalendarController {
 
   private $id;
@@ -30,26 +30,30 @@ final class PhabricatorCalendarEditStatusController
       ->setInitialTime(AphrontFormDateControl::TIME_END_OF_DAY);
 
     if ($this->isCreate()) {
-      $status       = new PhabricatorUserStatus();
+      $status       = new PhabricatorCalendarEvent();
       $end_value    = $end_time->readValueFromRequest($request);
       $start_value  = $start_time->readValueFromRequest($request);
       $submit_label = pht('Create');
       $filter       = 'status/create/';
-      $page_title   = pht('Create Status');
+      $page_title   = pht('Create Event');
       $redirect     = 'created';
     } else {
-      $status = id(new PhabricatorUserStatus())
-        ->loadOneWhere('id = %d', $this->id);
+      $status = id(new PhabricatorCalendarEventQuery())
+        ->setViewer($user)
+        ->withIDs(array($this->id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
+
       $end_time->setValue($status->getDateTo());
       $start_time->setValue($status->getDateFrom());
       $submit_label = pht('Update');
-      $filter       = 'status/edit/'.$status->getID().'/';
-      $page_title   = pht('Update Status');
+      $filter       = 'event/edit/'.$status->getID().'/';
+      $page_title   = pht('Update Event');
       $redirect     = 'updated';
-
-      if ($status->getUserPHID() != $user->getPHID()) {
-        return new Aphront403Response();
-      }
     }
 
     $errors = array();
@@ -67,9 +71,9 @@ final class PhabricatorCalendarEditStatusController
           ->setDateTo($end_value)
           ->setDescription($description)
           ->save();
-      } catch (PhabricatorUserStatusInvalidEpochException $e) {
+      } catch (PhabricatorCalendarEventInvalidEpochException $e) {
         $errors[] = pht('Start must be before end.');
-      } catch (PhabricatorUserStatusOverlapException $e) {
+      } catch (PhabricatorCalendarEventOverlapException $e) {
         $errors[] = pht('There is already a status within the specified '.
                     'timeframe. Edit or delete this existing status.');
       }
@@ -121,10 +125,10 @@ final class PhabricatorCalendarEditStatusController
         ->setTitle($page_title)
         ->setWidth(AphrontDialogView::WIDTH_FORM);
       if ($this->isCreate()) {
-        $dialog->setSubmitURI($this->getApplicationURI('status/create/'));
+        $dialog->setSubmitURI($this->getApplicationURI('event/create/'));
       } else {
         $dialog->setSubmitURI(
-          $this->getApplicationURI('status/edit/'.$status->getID().'/'));
+          $this->getApplicationURI('event/edit/'.$status->getID().'/'));
       }
       $form = new PHUIFormLayoutView();
       if ($error_view) {
@@ -152,8 +156,7 @@ final class PhabricatorCalendarEditStatusController
       $submit->addCancelButton($this->getApplicationURI());
     } else {
       $submit->addCancelButton(
-        $this->getApplicationURI('status/delete/'.$status->getID().'/'),
-        pht('Delete Status'));
+        $this->getApplicationURI('event/view/'.$status->getID().'/'));
     }
 
     if ($request->isAjax()) {

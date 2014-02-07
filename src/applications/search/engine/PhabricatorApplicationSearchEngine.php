@@ -368,6 +368,17 @@ abstract class PhabricatorApplicationSearchEngine {
     return $list;
   }
 
+  protected function readDateFromRequest(
+    AphrontRequest $request,
+    $key) {
+
+    return id(new AphrontFormDateControl())
+      ->setUser($this->requireViewer())
+      ->setName($key)
+      ->setAllowNull(true)
+      ->readValueFromRequest($request);
+  }
+
   protected function readBoolFromRequest(
     AphrontRequest $request,
     $key) {

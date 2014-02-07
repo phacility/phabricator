@@ -80,6 +80,7 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
         self::FIELD_CC,
         self::FIELD_CONTENT_SOURCE,
         self::FIELD_PROJECTS,
+        self::FIELD_TASK_PRIORITY,
         self::FIELD_IS_NEW_OBJECT,
       ),
       parent::getFields());
@@ -126,6 +127,8 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
         return $this->getTask()->getCCPHIDs();
       case self::FIELD_PROJECTS:
         return $this->getTask()->getProjectPHIDs();
+      case self::FIELD_TASK_PRIORITY:
+        return $this->getTask()->getPriority();
     }
 
     return parent::getHeraldField($field);

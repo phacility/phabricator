@@ -609,14 +609,13 @@ EOBODY;
     return celerity_get_resource_uri('/rsrc/image/avatar.png');
   }
 
-  public function attachStatus(PhabricatorUserStatus $status) {
+  public function attachStatus(PhabricatorCalendarEvent $status) {
     $this->status = $status;
     return $this;
   }
 
   public function getStatus() {
-    $this->assertAttached($this->status);
-    return $this->status;
+    return $this->assertAttached($this->status);
   }
 
   public function hasStatus() {

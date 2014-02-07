@@ -87,7 +87,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
     $result = parent::setValue($epoch);
 
     if ($epoch === null) {
-      return;
+      return $result;
     }
 
     $readable = $this->formatTime($epoch, 'Y!m!d!g:i A');

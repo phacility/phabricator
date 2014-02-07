@@ -69,7 +69,7 @@ final class ConduitAPI_user_query_Method
     }
     $users = $query->execute();
 
-    $statuses = id(new PhabricatorUserStatus())->loadCurrentStatuses(
+    $statuses = id(new PhabricatorCalendarEvent())->loadCurrentStatuses(
       mpull($users, 'getPHID'));
 
     $results = array();

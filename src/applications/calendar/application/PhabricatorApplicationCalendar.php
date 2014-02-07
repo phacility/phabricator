@@ -36,16 +36,17 @@ final class PhabricatorApplicationCalendar extends PhabricatorApplication {
     return array(
       '/calendar/' => array(
         '' => 'PhabricatorCalendarBrowseController',
-        'status/' => array(
-          '' => 'PhabricatorCalendarViewStatusController',
+        'event/' => array(
+          '(?:query/(?P<queryKey>[^/]+)/)?' =>
+            'PhabricatorCalendarEventListController',
           'create/' =>
-            'PhabricatorCalendarEditStatusController',
-          'delete/(?P<id>[1-9]\d*)/' =>
-            'PhabricatorCalendarDeleteStatusController',
+            'PhabricatorCalendarEventEditController',
           'edit/(?P<id>[1-9]\d*)/' =>
-            'PhabricatorCalendarEditStatusController',
-          'view/(?P<phid>[^/]+)/' =>
-            'PhabricatorCalendarViewStatusController',
+            'PhabricatorCalendarEventEditController',
+          'delete/(?P<id>[1-9]\d*)/' =>
+            'PhabricatorCalendarEventDeleteController',
+          'view/(?P<id>[1-9]\d*)/' =>
+            'PhabricatorCalendarEventViewController',
         ),
       ),
     );
@@ -57,7 +58,7 @@ final class PhabricatorApplicationCalendar extends PhabricatorApplication {
     $item = id(new PHUIListItemView())
       ->setName(pht('Calendar Event'))
       ->setAppIcon('calendar-dark')
-      ->setHref($this->getBaseURI().'status/create/');
+      ->setHref($this->getBaseURI().'event/create/');
     $items[] = $item;
 
     return $items;

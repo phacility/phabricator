@@ -19,11 +19,12 @@ final class PhabricatorCalendarBrowseController
       "{$year}-{$month}-01",
       "{$year}-{$month}-31");
 
-    $statuses = id(new PhabricatorUserStatus())
-      ->loadAllWhere(
-        'dateTo >= %d AND dateFrom <= %d',
+    $statuses = id(new PhabricatorCalendarEventQuery())
+      ->setViewer($user)
+      ->withDateRange(
         strtotime("{$year}-{$month}-01"),
-        strtotime("{$year}-{$month}-01 next month"));
+        strtotime("{$year}-{$month}-01 next month"))
+      ->execute();
 
     if ($month == $month_d && $year == $year_d) {
       $month_view = new AphrontCalendarMonthView($month, $year, $day);

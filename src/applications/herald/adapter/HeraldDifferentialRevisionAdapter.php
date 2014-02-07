@@ -69,10 +69,9 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
         self::FIELD_DIFF_CONTENT,
         self::FIELD_DIFF_ADDED_CONTENT,
         self::FIELD_DIFF_REMOVED_CONTENT,
-        self::FIELD_RULE,
         self::FIELD_AFFECTED_PACKAGE,
         self::FIELD_AFFECTED_PACKAGE_OWNER,
-        self::FIELD_OBJECT_IS_NEW,
+        self::FIELD_IS_NEW_OBJECT,
       ),
       parent::getFields());
   }

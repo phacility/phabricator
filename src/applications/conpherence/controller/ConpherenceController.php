@@ -25,7 +25,7 @@ abstract class ConpherenceController extends PhabricatorController {
       id(new PHUIListItemView())
       ->setName(pht('New Calendar Item'))
       ->setType(PHUIListItemView::TYPE_LINK)
-      ->setHref('/calendar/status/create/')
+      ->setHref('/calendar/event/create/')
       ->addSigil('conpherence-widget-adder')
       ->setMetadata(array('widget' => 'widgets-calendar')));
 

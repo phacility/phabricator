@@ -107,7 +107,6 @@ final class HeraldCommitAdapter extends HeraldAdapter {
         self::FIELD_DIFF_ADDED_CONTENT,
         self::FIELD_DIFF_REMOVED_CONTENT,
         self::FIELD_DIFF_ENORMOUS,
-        self::FIELD_RULE,
         self::FIELD_AFFECTED_PACKAGE,
         self::FIELD_AFFECTED_PACKAGE_OWNER,
         self::FIELD_NEED_AUDIT_FOR_PACKAGE,

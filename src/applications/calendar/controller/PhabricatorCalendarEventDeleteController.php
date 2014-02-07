@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorCalendarDeleteStatusController
+final class PhabricatorCalendarEventDeleteController
   extends PhabricatorCalendarController {
 
   private $id;
@@ -12,14 +12,19 @@ final class PhabricatorCalendarDeleteStatusController
   public function processRequest() {
     $request  = $this->getRequest();
     $user     = $request->getUser();
-    $status   = id(new PhabricatorUserStatus())
-      ->loadOneWhere('id = %d', $this->id);
+
+    $status = id(new PhabricatorCalendarEventQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
 
     if (!$status) {
       return new Aphront404Response();
-    }
-    if ($status->getUserPHID() != $user->getPHID()) {
-      return new Aphront403Response();
     }
 
     if ($request->isFormPost()) {
@@ -36,13 +41,11 @@ final class PhabricatorCalendarDeleteStatusController
     $dialog = new AphrontDialogView();
     $dialog->setUser($user);
     $dialog->setTitle(pht('Really delete status?'));
-    $dialog->appendChild(phutil_tag(
-      'p',
-      array(),
-      pht('Permanently delete this status? This action can not be undone.')));
+    $dialog->appendChild(
+      pht('Permanently delete this status? This action can not be undone.'));
     $dialog->addSubmitButton(pht('Delete'));
     $dialog->addCancelButton(
-      $this->getApplicationURI('status/edit/'.$status->getID().'/'));
+      $this->getApplicationURI('event/'));
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
 

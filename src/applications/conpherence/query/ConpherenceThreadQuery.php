@@ -221,12 +221,12 @@ final class ConpherenceThreadQuery
       $this->getViewer());
     $start_epoch = $epochs['start_epoch'];
     $end_epoch = $epochs['end_epoch'];
-    $statuses = id(new PhabricatorUserStatus())
-      ->loadAllWhere(
-        'userPHID in (%Ls) AND dateTo >= %d AND dateFrom <= %d',
-        $participant_phids,
-        $start_epoch,
-        $end_epoch);
+    $statuses = id(new PhabricatorCalendarEventQuery())
+      ->setViewer($this->getViewer())
+      ->withInvitedPHIDs($participant_phids)
+      ->withDateRange($start_epoch, $end_epoch)
+      ->execute();
+
     $statuses = mgroup($statuses, 'getUserPHID');
 
     // attached files

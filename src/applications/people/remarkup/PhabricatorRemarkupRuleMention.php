@@ -76,7 +76,7 @@ final class PhabricatorRemarkupRuleMention
       ->execute();
 
     if ($users) {
-      $user_statuses = id(new PhabricatorUserStatus())
+      $user_statuses = id(new PhabricatorCalendarEvent())
         ->loadCurrentStatuses(mpull($users, 'getPHID'));
       $user_statuses = mpull($user_statuses, null, 'getUserPHID');
     } else {
@@ -113,9 +113,9 @@ final class PhabricatorRemarkupRuleMention
           $status = idx($user_statuses, $user->getPHID());
           if ($status) {
             $status = $status->getStatus();
-            if ($status == PhabricatorUserStatus::STATUS_AWAY) {
+            if ($status == PhabricatorCalendarEvent::STATUS_AWAY) {
               $tag->setDotColor(PHUITagView::COLOR_RED);
-            } else if ($status == PhabricatorUserStatus::STATUS_AWAY) {
+            } else if ($status == PhabricatorCalendarEvent::STATUS_AWAY) {
               $tag->setDotColor(PHUITagView::COLOR_ORANGE);
             }
           }

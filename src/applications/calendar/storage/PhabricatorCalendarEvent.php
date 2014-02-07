@@ -1,6 +1,8 @@
 <?php
 
-final class PhabricatorUserStatus extends PhabricatorUserDAO {
+final class PhabricatorCalendarEvent
+  extends PhabricatorCalendarDAO
+  implements PhabricatorPolicyInterface {
 
   protected $userPHID;
   protected $dateFrom;
@@ -32,9 +34,20 @@ final class PhabricatorUserStatus extends PhabricatorUserDAO {
     return $options[$this->status];
   }
 
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_AUX_PHID => true,
+    ) + parent::getConfiguration();
+  }
+
+  public function generatePHID() {
+    return PhabricatorPHID::generateNewPHID(
+      PhabricatorCalendarPHIDTypeEvent::TYPECONST);
+  }
+
   public function getTerseSummary(PhabricatorUser $viewer) {
     $until = phabricator_date($this->dateTo, $viewer);
-    if ($this->status == PhabricatorUserStatus::STATUS_SPORADIC) {
+    if ($this->status == PhabricatorCalendarEvent::STATUS_SPORADIC) {
       return 'Sporadic until '.$until;
     } else {
       return 'Away until '.$until;
@@ -65,7 +78,7 @@ final class PhabricatorUserStatus extends PhabricatorUserDAO {
   public function save() {
 
     if ($this->getDateTo() <= $this->getDateFrom()) {
-      throw new PhabricatorUserStatusInvalidEpochException();
+      throw new PhabricatorCalendarEventInvalidEpochException();
     }
 
     $this->openTransaction();
@@ -82,7 +95,7 @@ final class PhabricatorUserStatus extends PhabricatorUserDAO {
       if ($overlap) {
         $this->endWriteLocking();
         $this->killTransaction();
-        throw new PhabricatorUserStatusOverlapException();
+        throw new PhabricatorCalendarEventOverlapException();
       }
     }
 
@@ -90,6 +103,34 @@ final class PhabricatorUserStatus extends PhabricatorUserDAO {
 
     $this->endWriteLocking();
     return $this->saveTransaction();
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::getMostOpenPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return $this->getUserPHID();
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
   }
 
 }
