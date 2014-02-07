@@ -22,7 +22,7 @@ final class ManiphestTaskSearchEngine
 
     $saved->setParameter(
       'subscriberPHIDs',
-      $this->readUsersFromRequest($request, 'subscribers'));
+      $this->readPHIDsFromRequest($request, 'subscribers'));
 
     $saved->setParameter('statuses', $request->getArr('statuses'));
     $saved->setParameter('priorities', $request->getArr('priorities'));
@@ -305,7 +305,7 @@ final class ManiphestTaskSearchEngine
           ->setValue($author_handles))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/accounts/')
+          ->setDatasource('/typeahead/common/mailable/')
           ->setName('subscribers')
           ->setLabel(pht('Subscribers'))
           ->setValue($subscriber_handles))
