@@ -62,12 +62,18 @@ final class ConduitAPI_diffusion_querycommits_Method
 
     $data = array();
     foreach ($commits as $commit) {
+      $callsign = $commit->getRepository()->getCallsign();
+      $identifier = $commit->getCommitIdentifier();
+      $uri = '/r'.$callsign.$identifier;
+      $uri = PhabricatorEnv::getProductionURI($uri);
+
       $data[$commit->getPHID()] = array(
         'id' => $commit->getID(),
         'phid' => $commit->getPHID(),
         'repositoryPHID' => $commit->getRepository()->getPHID(),
-        'identifier' => $commit->getCommitIdentifier(),
+        'identifier' => $identifier,
         'epoch' => $commit->getEpoch(),
+        'uri' => $uri,
         'isImporting' => !$commit->isImported(),
       );
     }
