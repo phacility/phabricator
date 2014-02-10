@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group legalpad
- */
 final class PhabricatorApplicationLegalpad extends PhabricatorApplication {
 
   public function getBaseURI() {
@@ -31,6 +28,12 @@ final class PhabricatorApplicationLegalpad extends PhabricatorApplication {
 
   public function isBeta() {
     return true;
+  }
+
+  public function getRemarkupRules() {
+    return array(
+      new LegalpadDocumentRemarkupRule(),
+    );
   }
 
   public function getRoutes() {

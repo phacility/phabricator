@@ -842,6 +842,7 @@ phutil_register_library_map(array(
     'LegalpadDocumentEditor' => 'applications/legalpad/editor/LegalpadDocumentEditor.php',
     'LegalpadDocumentListController' => 'applications/legalpad/controller/LegalpadDocumentListController.php',
     'LegalpadDocumentQuery' => 'applications/legalpad/query/LegalpadDocumentQuery.php',
+    'LegalpadDocumentRemarkupRule' => 'applications/legalpad/remarkup/LegalpadDocumentRemarkupRule.php',
     'LegalpadDocumentSearchEngine' => 'applications/legalpad/query/LegalpadDocumentSearchEngine.php',
     'LegalpadDocumentSignController' => 'applications/legalpad/controller/LegalpadDocumentSignController.php',
     'LegalpadDocumentSignature' => 'applications/legalpad/storage/LegalpadDocumentSignature.php',
@@ -3438,6 +3439,7 @@ phutil_register_library_map(array(
       1 => 'PhabricatorApplicationSearchResultsControllerInterface',
     ),
     'LegalpadDocumentQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'LegalpadDocumentRemarkupRule' => 'PhabricatorRemarkupRuleObject',
     'LegalpadDocumentSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'LegalpadDocumentSignController' => 'LegalpadController',
     'LegalpadDocumentSignature' =>
