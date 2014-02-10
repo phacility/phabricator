@@ -170,16 +170,26 @@ final class PonderQuestion extends PonderDAO
     return $this->getPHID();
   }
 
-  public function isAutomaticallySubscribed($phid) {
-    return ($phid == $this->getAuthorPHID());
-  }
-
   public function save() {
     if (!$this->getMailKey()) {
       $this->setMailKey(Filesystem::readRandomCharacters(20));
     }
     return parent::save();
   }
+
+  public function getOriginalTitle() {
+    // TODO: Make this actually save/return the original title.
+    return $this->getTitle();
+  }
+
+  public function getFullTitle() {
+    $id = $this->getID();
+    $title = $this->getTitle();
+    return "Q{$id}: {$title}";
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
   public function getCapabilities() {
     return array(
@@ -210,15 +220,20 @@ final class PonderQuestion extends PonderDAO
       'The user who asked a question can always view and edit it.');
   }
 
-  public function getOriginalTitle() {
-    // TODO: Make this actually save/return the original title.
-    return $this->getTitle();
+
+/* -(  PhabricatorSubscribableInterface  )----------------------------------- */
+
+
+  public function isAutomaticallySubscribed($phid) {
+    return ($phid == $this->getAuthorPHID());
   }
 
-  public function getFullTitle() {
-    $id = $this->getID();
-    $title = $this->getTitle();
-    return "Q{$id}: {$title}";
+  public function shouldShowSubscribersProperty() {
+    return true;
+  }
+
+  public function shouldAllowSubscription($phid) {
+    return true;
   }
 
 

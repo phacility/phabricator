@@ -3,7 +3,8 @@
 final class PhabricatorProject extends PhabricatorProjectDAO
   implements
     PhabricatorFlaggableInterface,
-    PhabricatorPolicyInterface {
+    PhabricatorPolicyInterface,
+    PhabricatorSubscribableInterface {
 
   protected $name;
   protected $status = PhabricatorProjectStatus::STATUS_ACTIVE;
@@ -15,7 +16,6 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   protected $editPolicy;
   protected $joinPolicy;
 
-  private $subprojectsNeedUpdate;
   private $memberPHIDs = self::ATTACHABLE;
   private $sparseMembers = self::ATTACHABLE;
   private $profile = self::ATTACHABLE;
@@ -133,5 +133,22 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     $slug = $this->getPhrictionSlug();
     return 'projects/'.$slug;
   }
+
+
+/* -(  PhabricatorSubscribableInterface  )----------------------------------- */
+
+
+  public function isAutomaticallySubscribed($phid) {
+    return false;
+  }
+
+  public function shouldShowSubscribersProperty() {
+    return false;
+  }
+
+  public function shouldAllowSubscription($phid) {
+    return false;
+  }
+
 
 }

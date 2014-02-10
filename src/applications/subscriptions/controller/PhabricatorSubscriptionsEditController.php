@@ -56,6 +56,13 @@ final class PhabricatorSubscriptionsEditController
         $handle->getURI());
     }
 
+    if (!$object->shouldAllowSubscription($user->getPHID())) {
+      return $this->buildErrorResponse(
+        pht('You Can Not Subscribe'),
+        pht('You can not subscribe to this object.'),
+        $handle->getURI());
+    }
+
     if ($object instanceof PhabricatorApplicationTransactionInterface) {
       if ($is_add) {
         $xaction_value = array(

@@ -4555,6 +4555,7 @@ phutil_register_library_map(array(
       0 => 'PhabricatorProjectDAO',
       1 => 'PhabricatorFlaggableInterface',
       2 => 'PhabricatorPolicyInterface',
+      3 => 'PhabricatorSubscribableInterface',
     ),
     'PhabricatorProjectBoardController' => 'PhabricatorProjectController',
     'PhabricatorProjectBoardEditController' => 'PhabricatorProjectController',

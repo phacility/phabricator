@@ -33,6 +33,11 @@ final class PhabricatorSubscriptionsUIEventListener
       return;
     }
 
+    if (!$object->shouldAllowSubscription($user->getPHID())) {
+      // This object doesn't allow the viewer to subscribe.
+      return;
+    }
+
     if ($object->isAutomaticallySubscribed($user->getPHID())) {
       $sub_action = id(new PhabricatorActionView())
         ->setWorkflow(true)
@@ -95,6 +100,12 @@ final class PhabricatorSubscriptionsUIEventListener
       // This object isn't subscribable.
       return;
     }
+
+    if (!$object->shouldShowSubscribersProperty()) {
+      // This object doesn't render subscribers in its property list.
+      return;
+    }
+
     $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
       $object->getPHID());
     if ($subscribers) {

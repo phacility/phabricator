@@ -214,6 +214,7 @@ final class PhabricatorProjectProfileController
     }
     $view->addAction($action);
 
+
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('View History'))
