@@ -17,9 +17,6 @@ final class PhabricatorUserSearchIndexer
     $doc->setDocumentCreated($user->getDateCreated());
     $doc->setDocumentModified($user->getDateModified());
 
-    // TODO: Index the blurbs from their profile or something? Probably not
-    // actually useful...
-
     $doc->addRelationship(
       $user->isUserActivated()
         ? PhabricatorSearchRelationship::RELATIONSHIP_OPEN
@@ -27,6 +24,8 @@ final class PhabricatorUserSearchIndexer
       $user->getPHID(),
       PhabricatorPeoplePHIDTypeUser::TYPECONST,
       time());
+
+    $this->indexCustomFields($doc, $user);
 
     return $doc;
   }

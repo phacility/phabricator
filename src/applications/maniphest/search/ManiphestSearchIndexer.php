@@ -81,6 +81,8 @@ final class ManiphestSearchIndexer
         time());
     }
 
+    $this->indexCustomFields($doc, $task);
+
     return $doc;
   }
 }

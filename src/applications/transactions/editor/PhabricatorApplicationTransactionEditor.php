@@ -591,6 +591,11 @@ abstract class PhabricatorApplicationTransactionEditor
       // need it to be up to date once the next page loads, but if we don't go
       // there we we could move it into search once search moves to the daemons.
 
+      // It now happens in the search indexer as well, but the search indexer is
+      // always daemonized, so the logic above still potentially holds. We could
+      // possibly get rid of this. The major motivation for putting it in the
+      // indexer was to enable reindexing to work.
+
       $fields = PhabricatorCustomField::getObjectFields(
         $object,
         PhabricatorCustomField::ROLE_APPLICATIONSEARCH);
