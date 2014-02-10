@@ -174,6 +174,24 @@ final class PhabricatorProjectProfileController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
+    if ($project->isArchived()) {
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Unarchive Project'))
+          ->setIcon('enable')
+          ->setHref($this->getApplicationURI("archive/{$id}/"))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+    } else {
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Archive Project'))
+          ->setIcon('disable')
+          ->setHref($this->getApplicationURI("archive/{$id}/"))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+    }
+
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Members'))

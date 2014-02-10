@@ -29,7 +29,6 @@ final class PhabricatorProjectProfileEditController
     }
 
     $profile = $project->getProfile();
-    $options = PhabricatorProjectStatus::getStatusMap();
 
     $e_name = true;
 
@@ -40,10 +39,6 @@ final class PhabricatorProjectProfileEditController
       $xactions[] = id(new PhabricatorProjectTransaction())
         ->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME)
         ->setNewValue($request->getStr('name'));
-
-      $xactions[] = id(new PhabricatorProjectTransaction())
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_STATUS)
-        ->setNewValue($request->getStr('status'));
 
       $xactions[] = id(new PhabricatorProjectTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
@@ -101,12 +96,6 @@ final class PhabricatorProjectProfileEditController
           ->setName('name')
           ->setValue($project->getName())
           ->setError($e_name))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Project Status'))
-          ->setName('status')
-          ->setOptions($options)
-          ->setValue($project->getStatus()))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setLabel(pht('Description'))

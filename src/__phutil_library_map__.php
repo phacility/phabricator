@@ -1825,6 +1825,7 @@ phutil_register_library_map(array(
     'PhabricatorPolicyTestObject' => 'applications/policy/__tests__/PhabricatorPolicyTestObject.php',
     'PhabricatorPolicyType' => 'applications/policy/constants/PhabricatorPolicyType.php',
     'PhabricatorProject' => 'applications/project/storage/PhabricatorProject.php',
+    'PhabricatorProjectArchiveController' => 'applications/project/controller/PhabricatorProjectArchiveController.php',
     'PhabricatorProjectBoardController' => 'applications/project/controller/PhabricatorProjectBoardController.php',
     'PhabricatorProjectBoardEditController' => 'applications/project/controller/PhabricatorProjectBoardEditController.php',
     'PhabricatorProjectColumn' => 'applications/project/storage/PhabricatorProjectColumn.php',
@@ -4557,6 +4558,7 @@ phutil_register_library_map(array(
       2 => 'PhabricatorPolicyInterface',
       3 => 'PhabricatorSubscribableInterface',
     ),
+    'PhabricatorProjectArchiveController' => 'PhabricatorProjectController',
     'PhabricatorProjectBoardController' => 'PhabricatorProjectController',
     'PhabricatorProjectBoardEditController' => 'PhabricatorProjectController',
     'PhabricatorProjectColumn' =>

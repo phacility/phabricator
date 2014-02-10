@@ -147,6 +147,10 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return 'projects/'.$slug;
   }
 
+  public function isArchived() {
+    return ($this->getStatus() == PhabricatorProjectStatus::STATUS_ARCHIVED);
+  }
+
 
 /* -(  PhabricatorSubscribableInterface  )----------------------------------- */
 
