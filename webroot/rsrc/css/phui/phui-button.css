@@ -338,3 +338,27 @@ a.toggle-fixed {
   line-height: 15px;
   font-weight: normal;
 }
+
+/* PHUI Button Bar */
+
+.phui-button-bar a.button {
+  display: inline-block;
+  height: 16px;
+  width: 12px;
+}
+
+.phui-button-bar .phui-button-bar-first {
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+
+.phui-button-bar .phui-button-bar-middle {
+  border-radius: 0;
+  border-left: none;
+}
+
+.phui-button-bar .phui-button-bar-last {
+  border-left: none;
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
+}
