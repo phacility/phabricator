@@ -18,51 +18,6 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
     return $this->shouldArchive;
   }
 
-  public static function applyJoinProject(
-    PhabricatorProject $project,
-    PhabricatorUser $user) {
-
-    $members = $project->getMemberPHIDs();
-    $members[] = $user->getPHID();
-
-    self::applyOneTransaction(
-      $project,
-      $user,
-      PhabricatorProjectTransaction::TYPE_MEMBERS,
-      $members);
-  }
-
-  public static function applyLeaveProject(
-    PhabricatorProject $project,
-    PhabricatorUser $user) {
-
-    $members = array_fill_keys($project->getMemberPHIDs(), true);
-    unset($members[$user->getPHID()]);
-    $members = array_keys($members);
-
-    self::applyOneTransaction(
-      $project,
-      $user,
-      PhabricatorProjectTransaction::TYPE_MEMBERS,
-      $members);
-  }
-
-  private static function applyOneTransaction(
-    PhabricatorProject $project,
-    PhabricatorUser $user,
-    $type,
-    $new_value) {
-
-    $xaction = new PhabricatorProjectTransaction();
-    $xaction->setTransactionType($type);
-    $xaction->setNewValue($new_value);
-
-    $editor = new PhabricatorProjectEditor($project);
-    $editor->setActor($user);
-    $editor->applyTransactions(array($xaction));
-  }
-
-
   public function __construct(PhabricatorProject $project) {
     $this->project = $project;
   }
@@ -94,30 +49,10 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
         $project,
         PhabricatorPolicyCapability::CAN_VIEW);
 
-      $need_edit = false;
-      $need_join = false;
-      foreach ($transactions as $key => $xaction) {
-        if ($this->getTransactionRequiresEditCapability($xaction)) {
-          $need_edit = true;
-        }
-        if ($this->getTransactionRequiresJoinCapability($xaction)) {
-          $need_join = true;
-        }
-      }
-
-      if ($need_edit) {
-        PhabricatorPolicyFilter::requireCapability(
-          $actor,
-          $project,
-          PhabricatorPolicyCapability::CAN_EDIT);
-      }
-
-      if ($need_join) {
-        PhabricatorPolicyFilter::requireCapability(
-          $actor,
-          $project,
-          PhabricatorPolicyCapability::CAN_JOIN);
-      }
+      PhabricatorPolicyFilter::requireCapability(
+        $actor,
+        $project,
+        PhabricatorPolicyCapability::CAN_EDIT);
     }
 
     if (!$transactions) {
@@ -315,77 +250,6 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
   private function transactionHasEffect(
     PhabricatorProjectTransaction $xaction) {
     return ($xaction->getOldValue() !== $xaction->getNewValue());
-  }
-
-
-  /**
-   * All transactions except joining or leaving a project require edit
-   * capability.
-   */
-  private function getTransactionRequiresEditCapability(
-    PhabricatorProjectTransaction $xaction) {
-    return ($this->isJoinOrLeaveTransaction($xaction) === null);
-  }
-
-
-  /**
-   * Joining a project requires the join capability. Anyone leave a project.
-   */
-  private function getTransactionRequiresJoinCapability(
-    PhabricatorProjectTransaction $xaction) {
-    $type = $this->isJoinOrLeaveTransaction($xaction);
-    return ($type == 'join');
-  }
-
-
-  /**
-   * Returns 'join' if this transaction causes the acting user ONLY to join the
-   * project.
-   *
-   * Returns 'leave' if this transaction causes the acting user ONLY to leave
-   * the project.
-   *
-   * Returns null in all other cases.
-   */
-  private function isJoinOrLeaveTransaction(
-    PhabricatorProjectTransaction $xaction) {
-
-    $type = $xaction->getTransactionType();
-    if ($type != PhabricatorProjectTransaction::TYPE_MEMBERS) {
-      return null;
-    }
-
-    switch ($type) {
-      case PhabricatorProjectTransaction::TYPE_MEMBERS:
-        $old = $xaction->getOldValue();
-        $new = $xaction->getNewValue();
-
-        $add = array_diff($new, $old);
-        $rem = array_diff($old, $new);
-
-        if (count($add) > 1) {
-          return null;
-        } else if (count($add) == 1) {
-          if (reset($add) != $this->getActor()->getPHID()) {
-            return null;
-          } else {
-            return 'join';
-          }
-        }
-
-        if (count($rem) > 1) {
-          return null;
-        } else if (count($rem) == 1) {
-          if (reset($rem) != $this->getActor()->getPHID()) {
-            return null;
-          } else {
-            return 'leave';
-          }
-        }
-        break;
-    }
-
-    return true;
   }
 
 }
