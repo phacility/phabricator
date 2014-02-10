@@ -36,6 +36,7 @@ $sheets = array(
   'apps-large' => $generator->buildAppsLargeSheet(),
   'payments' => $generator->buildPaymentsSheet(),
   'tokens' => $generator->buildTokenSheet(),
+  'buttonbar' => $generator->buildButtonBarSheet(),
   'docs' => $generator->buildDocsSheet(),
   'gradient' => $generator->buildGradientSheet(),
   'main-header' => $generator->buildMainHeaderSheet(),
