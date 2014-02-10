@@ -44,7 +44,6 @@ final class HeraldPreCommitContentAdapter extends HeraldPreCommitAdapter {
         self::FIELD_DIFFERENTIAL_REVIEWERS,
         self::FIELD_DIFFERENTIAL_CCS,
         self::FIELD_IS_MERGE_COMMIT,
-        self::FIELD_RULE,
       ),
       parent::getFields());
   }

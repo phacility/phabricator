@@ -41,7 +41,6 @@ final class HeraldPreCommitRefAdapter extends HeraldPreCommitAdapter {
         self::FIELD_REPOSITORY_PROJECTS,
         self::FIELD_PUSHER,
         self::FIELD_PUSHER_PROJECTS,
-        self::FIELD_RULE,
       ),
       parent::getFields());
   }
