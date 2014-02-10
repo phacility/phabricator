@@ -75,12 +75,24 @@ final class PhabricatorProjectProfilePictureController
 
       if (!$errors) {
         if ($is_default) {
-          $project->setProfileImagePHID(null);
+          $new_value = null;
         } else {
-          $project->setProfileImagePHID($xformed->getPHID());
-          $xformed->attachToObject($viewer, $project->getPHID());
+          $new_value = $xformed->getPHID();
         }
-        $project->save();
+
+        $xactions = array();
+        $xactions[] = id(new PhabricatorProjectTransaction())
+          ->setTransactionType(PhabricatorProjectTransaction::TYPE_IMAGE)
+          ->setNewValue($new_value);
+
+        $editor = id(new PhabricatorProjectTransactionEditor())
+          ->setActor($viewer)
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnMissingFields(true)
+          ->setContinueOnNoEffect(true);
+
+        $editor->applyTransactions($project, $xactions);
+
         return id(new AphrontRedirectResponse())->setURI($project_uri);
       }
     }

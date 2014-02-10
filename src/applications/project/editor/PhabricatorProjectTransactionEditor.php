@@ -13,6 +13,7 @@ final class PhabricatorProjectTransactionEditor
 
     $types[] = PhabricatorProjectTransaction::TYPE_NAME;
     $types[] = PhabricatorProjectTransaction::TYPE_STATUS;
+    $types[] = PhabricatorProjectTransaction::TYPE_IMAGE;
 
     return $types;
   }
@@ -26,6 +27,8 @@ final class PhabricatorProjectTransactionEditor
         return $object->getName();
       case PhabricatorProjectTransaction::TYPE_STATUS:
         return $object->getStatus();
+      case PhabricatorProjectTransaction::TYPE_IMAGE:
+        return $object->getProfileImagePHID();
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -38,6 +41,7 @@ final class PhabricatorProjectTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorProjectTransaction::TYPE_NAME:
       case PhabricatorProjectTransaction::TYPE_STATUS:
+      case PhabricatorProjectTransaction::TYPE_IMAGE:
         return $xaction->getNewValue();
     }
 
@@ -54,6 +58,9 @@ final class PhabricatorProjectTransactionEditor
         return;
       case PhabricatorProjectTransaction::TYPE_STATUS:
         $object->setStatus($xaction->getNewValue());
+        return;
+      case PhabricatorProjectTransaction::TYPE_IMAGE:
+        $object->setProfileImagePHID($xaction->getNewValue());
         return;
       case PhabricatorTransactions::TYPE_EDGE:
         return;
@@ -113,6 +120,7 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
       case PhabricatorTransactions::TYPE_EDGE:
       case PhabricatorProjectTransaction::TYPE_STATUS:
+      case PhabricatorProjectTransaction::TYPE_IMAGE:
         return;
     }
 
@@ -156,6 +164,7 @@ final class PhabricatorProjectTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorProjectTransaction::TYPE_NAME:
       case PhabricatorProjectTransaction::TYPE_STATUS:
+      case PhabricatorProjectTransaction::TYPE_IMAGE:
         PhabricatorPolicyFilter::requireCapability(
           $this->requireActor(),
           $object,
@@ -200,6 +209,22 @@ final class PhabricatorProjectTransactionEditor
 
   protected function supportsSearch() {
     return true;
+  }
+
+  protected function extractFilePHIDsFromCustomTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorProjectTransaction::TYPE_IMAGE:
+        $new = $xaction->getNewValue();
+        if ($new) {
+          return array($new);
+        }
+        break;
+    }
+
+    return parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
   }
 
 }
