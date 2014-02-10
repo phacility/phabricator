@@ -246,7 +246,7 @@ final class PhabricatorProjectQuery
     if ($this->memberPHIDs) {
       return 'GROUP BY p.id';
     } else {
-      return '';
+      return $this->buildApplicationSearchGroupClause($conn_r);
     }
   }
 
@@ -270,12 +270,18 @@ final class PhabricatorProjectQuery
         PhabricatorEdgeConfig::TYPE_PROJ_MEMBER);
     }
 
+    $joins[] = $this->buildApplicationSearchJoinClause($conn_r);
+
     return implode(' ', $joins);
   }
 
 
   public function getQueryApplicationClass() {
     return 'PhabricatorApplicationProject';
+  }
+
+  protected function getApplicationSearchObjectPHIDColumn() {
+    return 'p.phid';
   }
 
 }

@@ -4,7 +4,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   implements
     PhabricatorFlaggableInterface,
     PhabricatorPolicyInterface,
-    PhabricatorSubscribableInterface {
+    PhabricatorSubscribableInterface,
+    PhabricatorCustomFieldInterface {
 
   protected $name;
   protected $status = PhabricatorProjectStatus::STATUS_ACTIVE;
@@ -19,6 +20,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   private $memberPHIDs = self::ATTACHABLE;
   private $sparseMembers = self::ATTACHABLE;
   private $profile = self::ATTACHABLE;
+  private $customFields = self::ATTACHABLE;
 
   public static function initializeNewProject(PhabricatorUser $actor) {
     return id(new PhabricatorProject())
@@ -165,6 +167,27 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   public function shouldAllowSubscription($phid) {
     return false;
+  }
+
+
+/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+
+
+  public function getCustomFieldSpecificationForRole($role) {
+    return PhabricatorEnv::getEnvConfig('projects.fields');
+  }
+
+  public function getCustomFieldBaseClass() {
+    return 'PhabricatorProjectCustomField';
+  }
+
+  public function getCustomFields() {
+    return $this->assertAttached($this->customFields);
+  }
+
+  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
+    $this->customFields = $fields;
+    return $this;
   }
 
 

@@ -10,12 +10,11 @@ final class PhabricatorProjectProfileEditController
   }
 
   public function processRequest() {
-
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
     $project = id(new PhabricatorProjectQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withIDs(array($this->id))
       ->requireCapabilities(
         array(
@@ -30,49 +29,80 @@ final class PhabricatorProjectProfileEditController
 
     $profile = $project->getProfile();
 
-    $e_name = true;
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $project,
+      PhabricatorCustomField::ROLE_EDIT);
+    $field_list
+      ->setViewer($viewer)
+      ->readFieldsFromStorage($project);
 
-    $errors = array();
+    $view_uri = $this->getApplicationURI('view/'.$project->getID().'/');
+
+    $e_name = true;
+    $e_edit = null;
+
+    $v_name = $project->getName();
+    $v_desc = $profile->getBlurb();
+
+    $validation_exception = null;
+
     if ($request->isFormPost()) {
-      $xactions = array();
+      $e_name = null;
+
+      $v_name = $request->getStr('name');
+      $v_desc = $request->getStr('blurb');
+      $v_view = $request->getStr('can_view');
+      $v_edit = $request->getStr('can_edit');
+      $v_join = $request->getStr('can_join');
+
+      $xactions = $field_list->buildFieldTransactionsFromRequest(
+        new PhabricatorProjectTransaction(),
+        $request);
+
+      $type_name = PhabricatorProjectTransaction::TYPE_NAME;
+      $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
       $xactions[] = id(new PhabricatorProjectTransaction())
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME)
+        ->setTransactionType($type_name)
         ->setNewValue($request->getStr('name'));
 
       $xactions[] = id(new PhabricatorProjectTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
-        ->setNewValue($request->getStr('can_view'));
+        ->setNewValue($v_view);
 
       $xactions[] = id(new PhabricatorProjectTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
-        ->setNewValue($request->getStr('can_edit'));
+        ->setTransactionType($type_edit)
+        ->setNewValue($v_edit);
 
       $xactions[] = id(new PhabricatorProjectTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_JOIN_POLICY)
-        ->setNewValue($request->getStr('can_join'));
+        ->setNewValue($v_join);
 
       $editor = id(new PhabricatorProjectTransactionEditor())
-        ->setActor($user)
+        ->setActor($viewer)
         ->setContentSourceFromRequest($request)
-        ->setContinueOnNoEffect(true)
-        ->applyTransactions($project, $xactions);
+        ->setContinueOnNoEffect(true);
 
-      $profile->setBlurb($request->getStr('blurb'));
+      try {
+        $editor->applyTransactions($project, $xactions);
 
-      if (!strlen($project->getName())) {
-        $e_name = pht('Required');
-        $errors[] = pht('Project name is required.');
-      } else {
-        $e_name = null;
-      }
-
-      if (!$errors) {
-        $project->save();
-        $profile->setProjectPHID($project->getPHID());
+        // TODO: Move this into a custom field.
+        $profile->setBlurb($request->getStr('blurb'));
+        if (!$profile->getProjectPHID()) {
+          $profile->setProjectPHID($project->getPHID());
+        }
         $profile->save();
-        return id(new AphrontRedirectResponse())
-          ->setURI('/project/view/'.$project->getID().'/');
+
+        return id(new AphrontRedirectResponse())->setURI($view_uri);
+      } catch (PhabricatorApplicationTransactionValidationException $ex) {
+        $validation_exception = $ex;
+
+        $e_name = $ex->getShortMessage($type_name);
+        $e_edit = $ex->getShortMessage($type_edit);
+
+        $project->setViewPolicy($v_view);
+        $project->setEditPolicy($v_edit);
+        $project->setJoinPolicy($v_join);
       }
     }
 
@@ -81,29 +111,33 @@ final class PhabricatorProjectProfileEditController
     $action = '/project/edit/'.$project->getID().'/';
 
     $policies = id(new PhabricatorPolicyQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->setObject($project)
       ->execute();
 
     $form = new AphrontFormView();
     $form
       ->setID('project-edit-form')
-      ->setUser($user)
+      ->setUser($viewer)
       ->setAction($action)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name'))
           ->setName('name')
-          ->setValue($project->getName())
+          ->setValue($v_name)
           ->setError($e_name))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setLabel(pht('Description'))
           ->setName('blurb')
-          ->setValue($profile->getBlurb()))
+          ->setValue($v_desc));
+
+    $field_list->appendFieldsToForm($form);
+
+    $form
       ->appendChild(
         id(new AphrontFormPolicyControl())
-          ->setUser($user)
+          ->setUser($viewer)
           ->setName('can_view')
           ->setCaption(pht('Members can always view a project.'))
           ->setPolicyObject($project)
@@ -111,14 +145,15 @@ final class PhabricatorProjectProfileEditController
           ->setCapability(PhabricatorPolicyCapability::CAN_VIEW))
       ->appendChild(
         id(new AphrontFormPolicyControl())
-          ->setUser($user)
+          ->setUser($viewer)
           ->setName('can_edit')
           ->setPolicyObject($project)
           ->setPolicies($policies)
-          ->setCapability(PhabricatorPolicyCapability::CAN_EDIT))
+          ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
+          ->setError($e_edit))
       ->appendChild(
         id(new AphrontFormPolicyControl())
-          ->setUser($user)
+          ->setUser($viewer)
           ->setName('can_join')
           ->setCaption(
             pht('Users who can edit a project can always join a project.'))
@@ -127,18 +162,16 @@ final class PhabricatorProjectProfileEditController
           ->setCapability(PhabricatorPolicyCapability::CAN_JOIN))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->addCancelButton('/project/view/'.$project->getID().'/')
+          ->addCancelButton($view_uri)
           ->setValue(pht('Save')));
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormErrors($errors)
+      ->setValidationException($validation_exception)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView())
-      ->addTextCrumb(
-        $project->getName(),
-        '/project/view/'.$project->getID().'/')
+      ->addTextCrumb($project->getName(), $view_uri)
       ->addTextCrumb(pht('Edit Project'), $this->getApplicationURI());
 
     return $this->buildApplicationPage(

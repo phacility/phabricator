@@ -266,6 +266,11 @@ final class PhabricatorProjectProfileController
       ? $this->renderHandlesForPHIDs($project->getMemberPHIDs(), ',')
       : phutil_tag('em', array(), pht('None')));
 
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $project,
+      PhabricatorCustomField::ROLE_VIEW);
+    $field_list->appendFieldsToPropertyList($project, $viewer, $view);
+
     $view->addSectionHeader(pht('Description'));
     $view->addTextContent(
       PhabricatorMarkupEngine::renderOneObject(

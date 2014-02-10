@@ -3,6 +3,10 @@
 final class PhabricatorProjectSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getCustomFieldObject() {
+    return new PhabricatorProject();
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -10,6 +14,8 @@ final class PhabricatorProjectSearchEngine
       'memberPHIDs',
       $this->readUsersFromRequest($request, 'members'));
     $saved->setParameter('status', $request->getStr('status'));
+
+    $this->readCustomFieldsFromRequest($request, $saved);
 
     return $saved;
   }
@@ -28,20 +34,22 @@ final class PhabricatorProjectSearchEngine
       $query->withStatus($status);
     }
 
+    $this->applyCustomFieldsToQuery($query, $saved);
+
     return $query;
   }
 
   public function buildSearchForm(
     AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {
+    PhabricatorSavedQuery $saved) {
 
-    $phids = $saved_query->getParameter('memberPHIDs', array());
+    $phids = $saved->getParameter('memberPHIDs', array());
     $member_handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->requireViewer())
       ->withPHIDs($phids)
       ->execute();
 
-    $status = $saved_query->getParameter('status');
+    $status = $saved->getParameter('status');
 
     $form
       ->appendChild(
@@ -56,6 +64,8 @@ final class PhabricatorProjectSearchEngine
           ->setName('status')
           ->setOptions($this->getStatusOptions())
           ->setValue($status));
+
+    $this->appendCustomFieldsToForm($form, $saved);
   }
 
   protected function getURI($path) {
