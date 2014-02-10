@@ -23,18 +23,17 @@ final class PhabricatorProjectProfileController
       ->setViewer($user)
       ->withIDs(array($this->id))
       ->needMembers(true)
-      ->needProfiles(true)
+      ->needImages(true)
       ->executeOne();
     if (!$project) {
       return new Aphront404Response();
     }
 
-    $profile = $project->getProfile();
-    $picture = $profile->getProfileImageURI();
+    $picture = $project->getProfileImageURI();
 
     require_celerity_resource('phabricator-profile-css');
 
-    $tasks = $this->renderTasksPage($project, $profile);
+    $tasks = $this->renderTasksPage($project);
 
     $query = new PhabricatorFeedQuery();
     $query->setFilterPHIDs(
@@ -62,9 +61,8 @@ final class PhabricatorProjectProfileController
       $header->setStatus('policy-noone', '', pht('Archived'));
     }
 
-
     $actions = $this->buildActionListView($project);
-    $properties = $this->buildPropertyListView($project, $profile, $actions);
+    $properties = $this->buildPropertyListView($project, $actions);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($project->getName())
@@ -86,9 +84,7 @@ final class PhabricatorProjectProfileController
       ));
   }
 
-  private function renderFeedPage(
-    PhabricatorProject $project,
-    PhabricatorProjectProfile $profile) {
+  private function renderFeedPage(PhabricatorProject $project) {
 
     $query = new PhabricatorFeedQuery();
     $query->setFilterPHIDs(array($project->getPHID()));
@@ -117,9 +113,7 @@ final class PhabricatorProjectProfileController
   }
 
 
-  private function renderTasksPage(
-    PhabricatorProject $project,
-    PhabricatorProjectProfile $profile) {
+  private function renderTasksPage(PhabricatorProject $project) {
 
     $user = $this->getRequest()->getUser();
 
@@ -244,7 +238,6 @@ final class PhabricatorProjectProfileController
 
   private function buildPropertyListView(
     PhabricatorProject $project,
-    PhabricatorProjectProfile $profile,
     PhabricatorActionListView $actions) {
     $request = $this->getRequest();
     $viewer = $request->getUser();

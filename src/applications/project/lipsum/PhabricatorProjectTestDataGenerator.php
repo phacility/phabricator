@@ -37,11 +37,6 @@ final class PhabricatorProjectTestDataGenerator
       ->setContentSource(PhabricatorContentSource::newConsoleSource())
       ->applyTransactions($project, $this->xactions);
 
-    $profile = id(new PhabricatorProjectProfile())
-      ->setBlurb($this->generateDescription())
-      ->setProjectPHID($project->getPHID())
-      ->save();
-
     return $project->save();
   }
 

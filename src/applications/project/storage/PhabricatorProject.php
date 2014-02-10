@@ -12,6 +12,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   protected $authorPHID;
   protected $subprojectPHIDs = array();
   protected $phrictionSlug;
+  protected $profileImagePHID;
 
   protected $viewPolicy;
   protected $editPolicy;
@@ -19,8 +20,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   private $memberPHIDs = self::ATTACHABLE;
   private $sparseMembers = self::ATTACHABLE;
-  private $profile = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
+  private $profileImageFile = self::ATTACHABLE;
 
   public static function initializeNewProject(PhabricatorUser $actor) {
     return id(new PhabricatorProject())
@@ -113,15 +114,6 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       PhabricatorProjectPHIDTypeProject::TYPECONST);
   }
 
-  public function getProfile() {
-    return $this->assertAttached($this->profile);
-  }
-
-  public function attachProfile(PhabricatorProjectProfile $profile) {
-    $this->profile = $profile;
-    return $this;
-  }
-
   public function attachMemberPHIDs(array $phids) {
     $this->memberPHIDs = $phids;
     return $this;
@@ -151,6 +143,19 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   public function isArchived() {
     return ($this->getStatus() == PhabricatorProjectStatus::STATUS_ARCHIVED);
+  }
+
+  public function getProfileImageURI() {
+    return $this->getProfileImageFile()->getBestURI();
+  }
+
+  public function attachProfileImageFile(PhabricatorFile $file) {
+    $this->profileImageFile = $file;
+    return $this;
+  }
+
+  public function getProfileImageFile() {
+    return $this->assertAttached($this->profileImageFile);
   }
 
 

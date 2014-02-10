@@ -16,7 +16,6 @@ final class PhabricatorProjectProfilePictureController
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->id))
-      ->needProfiles(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -75,14 +74,13 @@ final class PhabricatorProjectProfilePictureController
       }
 
       if (!$errors) {
-        $profile = $project->getProfile();
         if ($is_default) {
-          $profile->setProfileImagePHID(null);
+          $project->setProfileImagePHID(null);
         } else {
-          $profile->setProfileImagePHID($xformed->getPHID());
+          $project->setProfileImagePHID($xformed->getPHID());
           $xformed->attachToObject($viewer, $project->getPHID());
         }
-        $profile->save();
+        $project->save();
         return id(new AphrontRedirectResponse())->setURI($project_uri);
       }
     }
@@ -99,7 +97,7 @@ final class PhabricatorProjectProfilePictureController
 
     $images = array();
 
-    $current = $project->getProfile()->getProfileImagePHID();
+    $current = $project->getProfileImagePHID();
     $has_current = false;
     if ($current) {
       $files = id(new PhabricatorFileQuery())

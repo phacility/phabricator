@@ -13,7 +13,6 @@ final class PhabricatorProjectCreateController
       ProjectCapabilityCreateProjects::CAPABILITY);
 
     $project = PhabricatorProject::initializeNewProject($user);
-    $profile = new PhabricatorProjectProfile();
 
     $e_name = true;
     $errors = array();
@@ -42,9 +41,6 @@ final class PhabricatorProjectCreateController
 
       if (!$errors) {
         $project->save();
-        $profile->setProjectPHID($project->getPHID());
-        $profile->setBlurb('');
-        $profile->save();
 
         if ($request->isAjax()) {
           return id(new AphrontAjaxResponse())

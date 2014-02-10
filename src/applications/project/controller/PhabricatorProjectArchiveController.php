@@ -21,7 +21,6 @@ final class PhabricatorProjectArchiveController
           PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
-      ->needProfiles(true)
       ->executeOne();
     if (!$project) {
       return new Aphront404Response();
