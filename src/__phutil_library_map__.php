@@ -1836,7 +1836,6 @@ phutil_register_library_map(array(
     'PhabricatorProjectCustomFieldStorage' => 'applications/project/storage/PhabricatorProjectCustomFieldStorage.php',
     'PhabricatorProjectCustomFieldStringIndex' => 'applications/project/storage/PhabricatorProjectCustomFieldStringIndex.php',
     'PhabricatorProjectDAO' => 'applications/project/storage/PhabricatorProjectDAO.php',
-    'PhabricatorProjectEditor' => 'applications/project/editor/PhabricatorProjectEditor.php',
     'PhabricatorProjectEditorTestCase' => 'applications/project/editor/__tests__/PhabricatorProjectEditorTestCase.php',
     'PhabricatorProjectHistoryController' => 'applications/project/controller/PhabricatorProjectHistoryController.php',
     'PhabricatorProjectListController' => 'applications/project/controller/PhabricatorProjectListController.php',
@@ -4572,7 +4571,6 @@ phutil_register_library_map(array(
     'PhabricatorProjectCustomFieldStorage' => 'PhabricatorCustomFieldStorage',
     'PhabricatorProjectCustomFieldStringIndex' => 'PhabricatorCustomFieldStringIndexStorage',
     'PhabricatorProjectDAO' => 'PhabricatorLiskDAO',
-    'PhabricatorProjectEditor' => 'PhabricatorEditor',
     'PhabricatorProjectEditorTestCase' => 'PhabricatorTestCase',
     'PhabricatorProjectHistoryController' => 'PhabricatorProjectController',
     'PhabricatorProjectListController' =>

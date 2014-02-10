@@ -12,37 +12,33 @@ final class PhabricatorProjectCreateController
     $this->requireApplicationCapability(
       ProjectCapabilityCreateProjects::CAPABILITY);
 
-    $project = new PhabricatorProject();
-    $project->setAuthorPHID($user->getPHID());
-    $project->attachMemberPHIDs(array());
+    $project = PhabricatorProject::initializeNewProject($user);
     $profile = new PhabricatorProjectProfile();
 
     $e_name = true;
     $errors = array();
     if ($request->isFormPost()) {
+      $xactions = array();
 
-      try {
-        $xactions = array();
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME)
+        ->setNewValue($request->getStr('name'));
 
-        $xaction = new PhabricatorProjectTransaction();
-        $xaction->setTransactionType(
-          PhabricatorProjectTransaction::TYPE_NAME);
-        $xaction->setNewValue($request->getStr('name'));
-        $xactions[] = $xaction;
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', PhabricatorEdgeConfig::TYPE_PROJ_MEMBER)
+        ->setNewValue(
+          array(
+            '+' => array($user->getPHID() => $user->getPHID()),
+          ));
 
-        $xaction = new PhabricatorProjectTransaction();
-        $xaction->setTransactionType(
-          PhabricatorProjectTransaction::TYPE_MEMBERS);
-        $xaction->setNewValue(array($user->getPHID()));
-        $xactions[] = $xaction;
+      $editor = id(new PhabricatorProjectTransactionEditor())
+        ->setActor($user)
+        ->setContinueOnNoEffect(true)
+        ->setContentSourceFromRequest($request)
+        ->applyTransactions($project, $xactions);
 
-        $editor = new PhabricatorProjectEditor($project);
-        $editor->setActor($user);
-        $editor->applyTransactions($xactions);
-      } catch (PhabricatorProjectNameCollisionException $ex) {
-        $e_name = 'Not Unique';
-        $errors[] = $ex->getMessage();
-      }
+      // TODO: Deal with name collision exceptions more gracefully.
 
       $profile->setBlurb($request->getStr('blurb'));
 
@@ -103,7 +99,6 @@ final class PhabricatorProjectCreateController
 
       return id(new AphrontDialogResponse())->setDialog($dialog);
     } else {
-
       $form
         ->appendChild(
           id(new AphrontFormSubmitControl())

@@ -20,6 +20,16 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   private $sparseMembers = self::ATTACHABLE;
   private $profile = self::ATTACHABLE;
 
+  public static function initializeNewProject(PhabricatorUser $actor) {
+    return id(new PhabricatorProject())
+      ->setName('')
+      ->setAuthorPHID($actor->getPHID())
+      ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setEditPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setJoinPolicy(PhabricatorPolicies::POLICY_USER)
+      ->attachMemberPHIDs(array());
+  }
+
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
@@ -73,6 +83,9 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   }
 
   public function isUserMember($user_phid) {
+    if ($this->memberPHIDs !== self::ATTACHABLE) {
+      return in_array($user_phid, $this->memberPHIDs);
+    }
     return $this->assertAttachedKey($this->sparseMembers, $user_phid);
   }
 

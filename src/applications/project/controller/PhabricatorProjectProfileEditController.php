@@ -35,45 +35,33 @@ final class PhabricatorProjectProfileEditController
 
     $errors = array();
     if ($request->isFormPost()) {
-      try {
-        $xactions = array();
-        $xaction = new PhabricatorProjectTransaction();
-        $xaction->setTransactionType(
-          PhabricatorProjectTransaction::TYPE_NAME);
-        $xaction->setNewValue($request->getStr('name'));
-        $xactions[] = $xaction;
+      $xactions = array();
 
-        $xaction = new PhabricatorProjectTransaction();
-        $xaction->setTransactionType(
-          PhabricatorProjectTransaction::TYPE_STATUS);
-        $xaction->setNewValue($request->getStr('status'));
-        $xactions[] = $xaction;
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME)
+        ->setNewValue($request->getStr('name'));
 
-        $xaction = new PhabricatorProjectTransaction();
-        $xaction->setTransactionType(
-          PhabricatorTransactions::TYPE_VIEW_POLICY);
-        $xaction->setNewValue($request->getStr('can_view'));
-        $xactions[] = $xaction;
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorProjectTransaction::TYPE_STATUS)
+        ->setNewValue($request->getStr('status'));
 
-        $xaction = new PhabricatorProjectTransaction();
-        $xaction->setTransactionType(
-          PhabricatorTransactions::TYPE_EDIT_POLICY);
-        $xaction->setNewValue($request->getStr('can_edit'));
-        $xactions[] = $xaction;
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+        ->setNewValue($request->getStr('can_view'));
 
-        $xaction = new PhabricatorProjectTransaction();
-        $xaction->setTransactionType(
-          PhabricatorTransactions::TYPE_JOIN_POLICY);
-        $xaction->setNewValue($request->getStr('can_join'));
-        $xactions[] = $xaction;
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
+        ->setNewValue($request->getStr('can_edit'));
 
-        $editor = new PhabricatorProjectEditor($project);
-        $editor->setActor($user);
-        $editor->applyTransactions($xactions);
-      } catch (PhabricatorProjectNameCollisionException $ex) {
-        $e_name = pht('Not Unique');
-        $errors[] = $ex->getMessage();
-      }
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_JOIN_POLICY)
+        ->setNewValue($request->getStr('can_join'));
+
+      $editor = id(new PhabricatorProjectTransactionEditor())
+        ->setActor($user)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->applyTransactions($project, $xactions);
 
       $profile->setBlurb($request->getStr('blurb'));
 

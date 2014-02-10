@@ -97,9 +97,10 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $xaction->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME);
     $xaction->setNewValue($new_name);
 
-    $editor = new PhabricatorProjectEditor($proj);
+    $editor = new PhabricatorProjectTransactionEditor();
     $editor->setActor($user);
-    $editor->applyTransactions(array($xaction));
+    $editor->setContentSource(PhabricatorContentSource::newConsoleSource());
+    $editor->applyTransactions($proj, array($xaction));
 
     return true;
   }

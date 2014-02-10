@@ -7,6 +7,12 @@ final class PhabricatorProjectTransactionEditor
     $types = parent::getTransactionTypes();
 
     $types[] = PhabricatorTransactions::TYPE_EDGE;
+    $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
+    $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
+    $types[] = PhabricatorTransactions::TYPE_JOIN_POLICY;
+
+    $types[] = PhabricatorProjectTransaction::TYPE_NAME;
+    $types[] = PhabricatorProjectTransaction::TYPE_STATUS;
 
     return $types;
   }
@@ -16,6 +22,10 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorProjectTransaction::TYPE_NAME:
+        return $object->getName();
+      case PhabricatorProjectTransaction::TYPE_STATUS:
+        return $object->getStatus();
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -26,6 +36,9 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorProjectTransaction::TYPE_NAME:
+      case PhabricatorProjectTransaction::TYPE_STATUS:
+        return $xaction->getNewValue();
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -36,7 +49,22 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorProjectTransaction::TYPE_NAME:
+        $object->setName($xaction->getNewValue());
+        return;
+      case PhabricatorProjectTransaction::TYPE_STATUS:
+        $object->setStatus($xaction->getNewValue());
+        return;
       case PhabricatorTransactions::TYPE_EDGE:
+        return;
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        $object->setViewPolicy($xaction->getNewValue());
+        return;
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        $object->setEditPolicy($xaction->getNewValue());
+        return;
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
+        $object->setJoinPolicy($xaction->getNewValue());
         return;
     }
 
@@ -48,7 +76,43 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorProjectTransaction::TYPE_NAME:
+        $old_slug = $object->getFullPhrictionSlug();
+        $object->setPhrictionSlug($xaction->getNewValue());
+        $changed_slug = $old_slug != $object->getFullPhrictionSlug();
+        if ($xaction->getOldValue() && $changed_slug) {
+          $old_document = id(new PhrictionDocument())
+            ->loadOneWhere(
+              'slug = %s',
+              $old_slug);
+          if ($old_document && $old_document->getStatus() ==
+              PhrictionDocumentStatus::STATUS_EXISTS) {
+            $content = id(new PhrictionContent())
+              ->load($old_document->getContentID());
+            $from_editor = id(PhrictionDocumentEditor::newForSlug($old_slug))
+              ->setActor($this->getActor())
+              ->setTitle($content->getTitle())
+              ->setContent($content->getContent())
+              ->setDescription($content->getDescription());
+
+            $target_editor = id(PhrictionDocumentEditor::newForSlug(
+              $object->getFullPhrictionSlug()))
+              ->setActor($this->getActor())
+              ->setTitle($content->getTitle())
+              ->setContent($content->getContent())
+              ->setDescription($content->getDescription())
+              ->moveHere($old_document->getID(), $old_document->getPHID());
+
+            $target_document = $target_editor->getDocument();
+            $from_editor->moveAway($target_document->getID());
+          }
+        }
+        return;
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
       case PhabricatorTransactions::TYPE_EDGE:
+      case PhabricatorProjectTransaction::TYPE_STATUS:
         return;
     }
 
@@ -63,16 +127,40 @@ final class PhabricatorProjectTransactionEditor
     $errors = parent::validateTransaction($object, $type, $xactions);
 
     switch ($type) {
+      case PhabricatorProjectTransaction::TYPE_NAME:
+        $missing = $this->validateIsEmptyTextField(
+          $object->getName(),
+          $xactions);
+
+        if ($missing) {
+          $error = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Required'),
+            pht('Project name is required.'),
+            nonempty(last($xactions), null));
+
+          $error->setIsMissingFieldError(true);
+          $errors[] = $error;
+        }
+        break;
     }
 
     return $errors;
   }
+
 
   protected function requireCapabilities(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorProjectTransaction::TYPE_NAME:
+      case PhabricatorProjectTransaction::TYPE_STATUS:
+        PhabricatorPolicyFilter::requireCapability(
+          $this->requireActor(),
+          $object,
+          PhabricatorPolicyCapability::CAN_EDIT);
+        return;
       case PhabricatorTransactions::TYPE_EDGE:
         switch ($xaction->getMetadataValue('edge:type')) {
           case PhabricatorEdgeConfig::TYPE_PROJ_MEMBER:
@@ -107,7 +195,11 @@ final class PhabricatorProjectTransactionEditor
         break;
     }
 
-    return parent::requireCapabilities();
+    return parent::requireCapabilities($object, $xaction);
+  }
+
+  protected function supportsSearch() {
+    return true;
   }
 
 }
