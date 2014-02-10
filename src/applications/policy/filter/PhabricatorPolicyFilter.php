@@ -8,6 +8,7 @@ final class PhabricatorPolicyFilter {
   private $raisePolicyExceptions;
   private $userProjects;
   private $customPolicies = array();
+  private $forcedPolicy;
 
   public static function mustRetainCapability(
     PhabricatorUser $user,
@@ -25,11 +26,48 @@ final class PhabricatorPolicyFilter {
     PhabricatorUser $user,
     PhabricatorPolicyInterface $object,
     $capability) {
-    $filter = new PhabricatorPolicyFilter();
-    $filter->setViewer($user);
-    $filter->requireCapabilities(array($capability));
-    $filter->raisePolicyExceptions(true);
-    $filter->apply(array($object));
+    $filter = id(new PhabricatorPolicyFilter())
+      ->setViewer($user)
+      ->requireCapabilities(array($capability))
+      ->raisePolicyExceptions(true)
+      ->apply(array($object));
+  }
+
+  /**
+   * Perform a capability check, acting as though an object had a specific
+   * policy. This is primarily used to check if a policy is valid (for example,
+   * to prevent users from editing away their ability to edit an object).
+   *
+   * Specifically, a check like this:
+   *
+   *   PhabricatorPolicyFilter::requireCapabilityWithForcedPolicy(
+   *     $viewer,
+   *     $object,
+   *     PhabricatorPolicyCapability::CAN_EDIT,
+   *     $potential_new_policy);
+   *
+   * ...will throw a @{class:PhabricatorPolicyException} if the new policy would
+   * remove the user's ability to edit the object.
+   *
+   * @param PhabricatorUser   The viewer to perform a policy check for.
+   * @param PhabricatorPolicyInterface The object to perform a policy check on.
+   * @param string            Capability to test.
+   * @param string            Perform the test as though the object has this
+   *                          policy instead of the policy it actually has.
+   * @return void
+   */
+  public static function requireCapabilityWithForcedPolicy(
+    PhabricatorUser $viewer,
+    PhabricatorPolicyInterface $object,
+    $capability,
+    $forced_policy) {
+
+    id(new PhabricatorPolicyFilter())
+      ->setViewer($viewer)
+      ->requireCapabilities(array($capability))
+      ->raisePolicyExceptions(true)
+      ->forcePolicy($forced_policy)
+      ->apply(array($object));
   }
 
   public static function hasCapability(
@@ -57,6 +95,11 @@ final class PhabricatorPolicyFilter {
 
   public function raisePolicyExceptions($raise) {
     $this->raisePolicyExceptions = $raise;
+    return $this;
+  }
+
+  public function forcePolicy($forced_policy) {
+    $this->forcedPolicy = $forced_policy;
     return $this;
   }
 
@@ -96,7 +139,7 @@ final class PhabricatorPolicyFilter {
             "not have that capability!");
         }
 
-        $policy = $object->getPolicy($capability);
+        $policy = $this->getObjectPolicy($object, $capability);
         $type = phid_get_type($policy);
         if ($type == PhabricatorProjectPHIDTypeProject::TYPECONST) {
           $need_projects[$policy] = $policy;
@@ -169,7 +212,7 @@ final class PhabricatorPolicyFilter {
     PhabricatorPolicyInterface $object,
     $capability) {
 
-    $policy = $object->getPolicy($capability);
+    $policy = $this->getObjectPolicy($object, $capability);
 
     if (!$policy) {
       // TODO: Formalize this somehow?
@@ -400,6 +443,17 @@ final class PhabricatorPolicyFilter {
     }
 
     return false;
+  }
+
+  private function getObjectPolicy(
+    PhabricatorPolicyInterface $object,
+    $capability) {
+
+    if ($this->forcedPolicy) {
+      return $this->forcedPolicy;
+    } else {
+      return $object->getPolicy($capability);
+    }
   }
 
 }

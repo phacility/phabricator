@@ -1144,6 +1144,29 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $errors = array();
     switch ($type) {
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        // Make sure the user isn't editing away their ability to edit this
+        // object.
+        foreach ($xactions as $xaction) {
+          try {
+            PhabricatorPolicyFilter::requireCapabilityWithForcedPolicy(
+              $this->requireActor(),
+              $object,
+              PhabricatorPolicyCapability::CAN_EDIT,
+              $xaction->getNewValue());
+          } catch (PhabricatorPolicyException $ex) {
+            $errors[] = array(
+              new PhabricatorApplicationTransactionValidationError(
+                $type,
+                pht('Invalid'),
+                pht(
+                  'You can not select this edit policy, because you would '.
+                  'no longer be able to edit the object.'),
+                $xaction),
+            );
+          }
+        }
+        break;
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $groups = array();
         foreach ($xactions as $xaction) {
