@@ -1840,6 +1840,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectCustomFieldStorage' => 'applications/project/storage/PhabricatorProjectCustomFieldStorage.php',
     'PhabricatorProjectCustomFieldStringIndex' => 'applications/project/storage/PhabricatorProjectCustomFieldStringIndex.php',
     'PhabricatorProjectDAO' => 'applications/project/storage/PhabricatorProjectDAO.php',
+    'PhabricatorProjectDescriptionField' => 'applications/project/customfield/PhabricatorProjectDescriptionField.php',
     'PhabricatorProjectEditorTestCase' => 'applications/project/editor/__tests__/PhabricatorProjectEditorTestCase.php',
     'PhabricatorProjectHistoryController' => 'applications/project/controller/PhabricatorProjectHistoryController.php',
     'PhabricatorProjectListController' => 'applications/project/controller/PhabricatorProjectListController.php',
@@ -1855,6 +1856,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectQuery' => 'applications/project/query/PhabricatorProjectQuery.php',
     'PhabricatorProjectSearchEngine' => 'applications/project/query/PhabricatorProjectSearchEngine.php',
     'PhabricatorProjectSearchIndexer' => 'applications/project/search/PhabricatorProjectSearchIndexer.php',
+    'PhabricatorProjectStandardCustomField' => 'applications/project/customfield/PhabricatorProjectStandardCustomField.php',
     'PhabricatorProjectStatus' => 'applications/project/constants/PhabricatorProjectStatus.php',
     'PhabricatorProjectTestDataGenerator' => 'applications/project/lipsum/PhabricatorProjectTestDataGenerator.php',
     'PhabricatorProjectTransaction' => 'applications/project/storage/PhabricatorProjectTransaction.php',
@@ -4574,7 +4576,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorProjectConfiguredCustomField' =>
     array(
-      0 => 'PhabricatorProjectCustomField',
+      0 => 'PhabricatorProjectStandardCustomField',
       1 => 'PhabricatorStandardCustomFieldInterface',
     ),
     'PhabricatorProjectController' => 'PhabricatorController',
@@ -4584,6 +4586,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectCustomFieldStorage' => 'PhabricatorCustomFieldStorage',
     'PhabricatorProjectCustomFieldStringIndex' => 'PhabricatorCustomFieldStringIndexStorage',
     'PhabricatorProjectDAO' => 'PhabricatorLiskDAO',
+    'PhabricatorProjectDescriptionField' => 'PhabricatorProjectStandardCustomField',
     'PhabricatorProjectEditorTestCase' => 'PhabricatorTestCase',
     'PhabricatorProjectHistoryController' => 'PhabricatorProjectController',
     'PhabricatorProjectListController' =>
@@ -4603,6 +4606,11 @@ phutil_register_library_map(array(
     'PhabricatorProjectQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorProjectSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorProjectSearchIndexer' => 'PhabricatorSearchDocumentIndexer',
+    'PhabricatorProjectStandardCustomField' =>
+    array(
+      0 => 'PhabricatorProjectCustomField',
+      1 => 'PhabricatorStandardCustomFieldInterface',
+    ),
     'PhabricatorProjectTestDataGenerator' => 'PhabricatorTestDataGenerator',
     'PhabricatorProjectTransaction' => 'PhabricatorApplicationTransaction',
     'PhabricatorProjectTransactionEditor' => 'PhabricatorApplicationTransactionEditor',

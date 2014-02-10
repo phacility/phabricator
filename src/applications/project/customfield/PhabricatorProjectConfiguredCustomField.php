@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorProjectConfiguredCustomField
-  extends PhabricatorProjectCustomField
+  extends PhabricatorProjectStandardCustomField
   implements PhabricatorStandardCustomFieldInterface {
 
   public function getStandardCustomFieldNamespace() {
@@ -14,18 +14,6 @@ final class PhabricatorProjectConfiguredCustomField
       PhabricatorEnv::getEnvConfig(
         'projects.custom-field-definitions',
         array()));
-  }
-
-  public function newStorageObject() {
-    return new PhabricatorProjectCustomFieldStorage();
-  }
-
-  protected function newStringIndexStorage() {
-    return new PhabricatorProjectCustomFieldStringIndex();
-  }
-
-  protected function newNumericIndexStorage() {
-    return new PhabricatorProjectCustomFieldNumericIndex();
   }
 
 }

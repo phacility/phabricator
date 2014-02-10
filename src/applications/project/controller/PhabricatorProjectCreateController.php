@@ -40,11 +40,10 @@ final class PhabricatorProjectCreateController
 
       // TODO: Deal with name collision exceptions more gracefully.
 
-      $profile->setBlurb($request->getStr('blurb'));
-
       if (!$errors) {
         $project->save();
         $profile->setProjectPHID($project->getPHID());
+        $profile->setBlurb('');
         $profile->save();
 
         if ($request->isAjax()) {
@@ -79,13 +78,7 @@ final class PhabricatorProjectCreateController
           ->setLabel(pht('Name'))
           ->setName('name')
           ->setValue($project->getName())
-          ->setError($e_name))
-      ->appendChild(
-        id(new AphrontFormTextAreaControl())
-          ->setLabel(pht('Blurb'))
-          ->setName('blurb')
-          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
-          ->setValue($profile->getBlurb()));
+          ->setError($e_name));
 
     if ($request->isAjax()) {
       $dialog = id(new AphrontDialogView())

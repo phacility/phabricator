@@ -12,9 +12,9 @@ final class PhabricatorProjectConfigOptions
   }
 
   public function getOptions() {
-    // This is intentionally blank for now, until we can move more Project
-    // logic to custom fields.
-    $default_fields = array();
+    $default_fields = array(
+      'std:project:internal:description' => true,
+    );
 
     foreach ($default_fields as $key => $enabled) {
       $default_fields[$key] = array(

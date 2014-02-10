@@ -21,13 +21,10 @@ final class PhabricatorProjectProfileEditController
           PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
-      ->needProfiles(true)
       ->executeOne();
     if (!$project) {
       return new Aphront404Response();
     }
-
-    $profile = $project->getProfile();
 
     $field_list = PhabricatorCustomField::getObjectFields(
       $project,
@@ -42,7 +39,6 @@ final class PhabricatorProjectProfileEditController
     $e_edit = null;
 
     $v_name = $project->getName();
-    $v_desc = $profile->getBlurb();
 
     $validation_exception = null;
 
@@ -50,7 +46,6 @@ final class PhabricatorProjectProfileEditController
       $e_name = null;
 
       $v_name = $request->getStr('name');
-      $v_desc = $request->getStr('blurb');
       $v_view = $request->getStr('can_view');
       $v_edit = $request->getStr('can_edit');
       $v_join = $request->getStr('can_join');
@@ -86,13 +81,6 @@ final class PhabricatorProjectProfileEditController
       try {
         $editor->applyTransactions($project, $xactions);
 
-        // TODO: Move this into a custom field.
-        $profile->setBlurb($request->getStr('blurb'));
-        if (!$profile->getProjectPHID()) {
-          $profile->setProjectPHID($project->getPHID());
-        }
-        $profile->save();
-
         return id(new AphrontRedirectResponse())->setURI($view_uri);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
@@ -108,7 +96,6 @@ final class PhabricatorProjectProfileEditController
 
     $header_name = pht('Edit Project');
     $title = pht('Edit Project');
-    $action = '/project/edit/'.$project->getID().'/';
 
     $policies = id(new PhabricatorPolicyQuery())
       ->setViewer($viewer)
@@ -117,20 +104,13 @@ final class PhabricatorProjectProfileEditController
 
     $form = new AphrontFormView();
     $form
-      ->setID('project-edit-form')
       ->setUser($viewer)
-      ->setAction($action)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name'))
           ->setName('name')
           ->setValue($v_name)
-          ->setError($e_name))
-      ->appendChild(
-        id(new PhabricatorRemarkupControl())
-          ->setLabel(pht('Description'))
-          ->setName('blurb')
-          ->setValue($v_desc));
+          ->setError($e_name));
 
     $field_list->appendFieldsToForm($form);
 

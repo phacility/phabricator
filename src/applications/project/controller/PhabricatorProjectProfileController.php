@@ -271,13 +271,6 @@ final class PhabricatorProjectProfileController
       PhabricatorCustomField::ROLE_VIEW);
     $field_list->appendFieldsToPropertyList($project, $viewer, $view);
 
-    $view->addSectionHeader(pht('Description'));
-    $view->addTextContent(
-      PhabricatorMarkupEngine::renderOneObject(
-        id(new PhabricatorMarkupOneOff())->setContent($profile->getBlurb()),
-        'default',
-        $viewer));
-
     return $view;
   }
 
