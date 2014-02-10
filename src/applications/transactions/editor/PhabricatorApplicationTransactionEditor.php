@@ -208,6 +208,38 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->getApplicationTransactionHasEffect($xaction);
+      case PhabricatorTransactions::TYPE_EDGE:
+        // A straight value comparison here doesn't always get the right
+        // result, because newly added edges aren't fully populated. Instead,
+        // compare the changes in a more granular way.
+        $old = $xaction->getOldValue();
+        $new = $xaction->getNewValue();
+
+        $old_dst = array_keys($old);
+        $new_dst = array_keys($new);
+
+        // NOTE: For now, we don't consider edge reordering to be a change.
+        // We have very few order-dependent edges and effectively no order
+        // oriented UI. This might change in the future.
+        sort($old_dst);
+        sort($new_dst);
+
+        if ($old_dst !== $new_dst) {
+          // We've added or removed edges, so this transaction definitely
+          // has an effect.
+          return true;
+        }
+
+        // We haven't added or removed edges, but we might have changed
+        // edge data.
+        foreach ($old as $key => $old_value) {
+          $new_value = $new[$key];
+          if ($old_value['data'] !== $new_value['data']) {
+            return true;
+          }
+        }
+
+        return false;
     }
 
     return ($xaction->getOldValue() !== $xaction->getNewValue());
@@ -1011,7 +1043,7 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     if (!isset($edge['data'])) {
-      $edge['data'] = null;
+      $edge['data'] = array();
     }
 
     return $edge;
