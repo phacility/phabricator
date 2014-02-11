@@ -171,7 +171,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   }
 
   public function shouldAllowSubscription($phid) {
-    return false;
+    return $this->isUserMember($phid);
   }
 
 

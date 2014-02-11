@@ -118,9 +118,35 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
-      case PhabricatorTransactions::TYPE_EDGE:
       case PhabricatorProjectTransaction::TYPE_STATUS:
       case PhabricatorProjectTransaction::TYPE_IMAGE:
+        return;
+      case PhabricatorTransactions::TYPE_EDGE:
+        switch ($xaction->getMetadataValue('edge:type')) {
+          case PhabricatorEdgeConfig::TYPE_PROJ_MEMBER:
+            // When project members are added or removed, add or remove their
+            // subscriptions.
+            $old = $xaction->getOldValue();
+            $new = $xaction->getNewValue();
+            $add = array_keys(array_diff_key($new, $old));
+            $rem = array_keys(array_diff_key($old, $new));
+
+            // NOTE: The subscribe is "explicit" because there's no implicit
+            // unsubscribe, so Join -> Leave -> Join doesn't resubscribe you
+            // if we use an implicit subscribe, even though you never willfully
+            // unsubscribed. Not sure if adding implicit unsubscribe (which
+            // would not write the unsubscribe row) is justified to deal with
+            // this, which is a fairly weird edge case and pretty arguable both
+            // ways.
+
+            id(new PhabricatorSubscriptionsEditor())
+              ->setActor($this->requireActor())
+              ->setObject($object)
+              ->subscribeExplicit($add)
+              ->unsubscribe($rem)
+              ->save();
+            break;
+        }
         return;
     }
 
