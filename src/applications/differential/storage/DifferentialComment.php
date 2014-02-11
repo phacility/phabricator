@@ -127,7 +127,7 @@ final class DifferentialComment extends DifferentialDAO
     $this->openTransaction();
       $result = parent::save();
 
-      if (strlen($this->getContent())) {
+      if ($this->getContent() !== null) {
         $content_source = PhabricatorContentSource::newForSource(
           PhabricatorContentSource::SOURCE_LEGACY,
           array());
