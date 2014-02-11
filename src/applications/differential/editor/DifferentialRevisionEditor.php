@@ -786,21 +786,29 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
 
 
   private function createComment() {
-    $comment = id(new DifferentialComment())
+    $template = id(new DifferentialComment())
       ->setAuthorPHID($this->getActorPHID())
-      ->setRevision($this->revision)
-      ->setContent($this->getComments())
+      ->setRevision($this->revision);
+    if ($this->contentSource) {
+      $template->setContentSource($this->contentSource);
+    }
+
+    // Write the "update active diff" transaction.
+    id(clone $template)
       ->setAction(DifferentialAction::ACTION_UPDATE)
       ->setMetadata(
         array(
           DifferentialComment::METADATA_DIFF_ID => $this->getDiff()->getID(),
-        ));
+        ))
+      ->save();
 
-    if ($this->contentSource) {
-      $comment->setContentSource($this->contentSource);
+    // If we have a comment, write the "add a comment" transaction.
+    if (strlen($this->getComments())) {
+      id(clone $template)
+        ->setAction(DifferentialAction::ACTION_COMMENT)
+        ->setContent($this->getComments())
+        ->save();
     }
-
-    $comment->save();
   }
 
   private function updateAuxiliaryFields() {

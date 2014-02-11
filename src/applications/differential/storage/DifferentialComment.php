@@ -127,24 +127,27 @@ final class DifferentialComment extends DifferentialDAO
     $this->openTransaction();
       $result = parent::save();
 
-      $content_source = PhabricatorContentSource::newForSource(
-        PhabricatorContentSource::SOURCE_LEGACY,
-        array());
+      if (strlen($this->getContent())) {
+        $content_source = PhabricatorContentSource::newForSource(
+          PhabricatorContentSource::SOURCE_LEGACY,
+          array());
 
-      $xaction_phid = PhabricatorPHID::generateNewPHID(
-        PhabricatorApplicationTransactionPHIDTypeTransaction::TYPECONST,
-        DifferentialPHIDTypeRevision::TYPECONST);
+        $xaction_phid = PhabricatorPHID::generateNewPHID(
+          PhabricatorApplicationTransactionPHIDTypeTransaction::TYPECONST,
+          DifferentialPHIDTypeRevision::TYPECONST);
 
-      $proxy = $this->getProxyComment();
-      $proxy
-        ->setAuthorPHID($this->getAuthorPHID())
-        ->setViewPolicy('public')
-        ->setEditPolicy($this->getAuthorPHID())
-        ->setContentSource($content_source)
-        ->setCommentVersion(1)
-        ->setLegacyCommentID($this->getID())
-        ->setTransactionPHID($xaction_phid)
-        ->save();
+        $proxy = $this->getProxyComment();
+        $proxy
+          ->setAuthorPHID($this->getAuthorPHID())
+          ->setViewPolicy('public')
+          ->setEditPolicy($this->getAuthorPHID())
+          ->setContentSource($content_source)
+          ->setCommentVersion(1)
+          ->setLegacyCommentID($this->getID())
+          ->setTransactionPHID($xaction_phid)
+          ->save();
+      }
+
     $this->saveTransaction();
 
     return $result;
