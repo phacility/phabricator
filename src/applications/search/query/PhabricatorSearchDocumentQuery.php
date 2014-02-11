@@ -25,12 +25,29 @@ final class PhabricatorSearchDocumentQuery
   }
 
   protected function willFilterPage(array $handles) {
+
+    // NOTE: This is used by the object selector dialog to exclude the object
+    // you're looking at, so that, e.g., a task can't be set as a dependency
+    // of itself in the UI.
+
+    // TODO: Remove this after object selection moves to ApplicationSearch.
+
+    $exclude = array();
+    if ($this->savedQuery) {
+      $exclude_phids = $this->savedQuery->getParameter('excludePHIDs', array());
+      $exclude = array_fuse($exclude_phids);
+    }
+
     foreach ($handles as $key => $handle) {
       if (!$handle->isComplete()) {
         unset($handles[$key]);
         continue;
       }
       if ($handle->getPolicyFiltered()) {
+        unset($handles[$key]);
+        continue;
+      }
+      if (isset($exclude[$handle->getPHID()])) {
         unset($handles[$key]);
         continue;
       }
