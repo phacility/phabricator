@@ -55,6 +55,7 @@ final class PhabricatorProjectTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorProjectTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
+        $object->setPhrictionSlug($xaction->getNewValue());
         return;
       case PhabricatorProjectTransaction::TYPE_STATUS:
         $object->setStatus($xaction->getNewValue());
@@ -84,35 +85,37 @@ final class PhabricatorProjectTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorProjectTransaction::TYPE_NAME:
-        $old_slug = $object->getFullPhrictionSlug();
-        $object->setPhrictionSlug($xaction->getNewValue());
-        $changed_slug = $old_slug != $object->getFullPhrictionSlug();
-        if ($xaction->getOldValue() && $changed_slug) {
-          $old_document = id(new PhrictionDocument())
-            ->loadOneWhere(
-              'slug = %s',
-              $old_slug);
-          if ($old_document && $old_document->getStatus() ==
-              PhrictionDocumentStatus::STATUS_EXISTS) {
-            $content = id(new PhrictionContent())
-              ->load($old_document->getContentID());
-            $from_editor = id(PhrictionDocumentEditor::newForSlug($old_slug))
-              ->setActor($this->getActor())
-              ->setTitle($content->getTitle())
-              ->setContent($content->getContent())
-              ->setDescription($content->getDescription());
+        if ($xaction->getOldValue() === null) {
+          // Project was just created, we don't need to move anything.
+          return;
+        }
 
-            $target_editor = id(PhrictionDocumentEditor::newForSlug(
-              $object->getFullPhrictionSlug()))
-              ->setActor($this->getActor())
-              ->setTitle($content->getTitle())
-              ->setContent($content->getContent())
-              ->setDescription($content->getDescription())
-              ->moveHere($old_document->getID(), $old_document->getPHID());
+        $clone_object = clone $object;
+        $clone_object->setPhrictionSlug($xaction->getOldValue());
+        $old_slug = $clone_object->getFullPhrictionSlug();
 
-            $target_document = $target_editor->getDocument();
-            $from_editor->moveAway($target_document->getID());
-          }
+        $old_document = id(new PhrictionDocument())
+          ->loadOneWhere('slug = %s', $old_slug);
+        if ($old_document && $old_document->getStatus() ==
+            PhrictionDocumentStatus::STATUS_EXISTS) {
+          $content = id(new PhrictionContent())
+            ->load($old_document->getContentID());
+          $from_editor = id(PhrictionDocumentEditor::newForSlug($old_slug))
+            ->setActor($this->getActor())
+            ->setTitle($content->getTitle())
+            ->setContent($content->getContent())
+            ->setDescription($content->getDescription());
+
+          $target_editor = id(PhrictionDocumentEditor::newForSlug(
+            $object->getFullPhrictionSlug()))
+            ->setActor($this->getActor())
+            ->setTitle($content->getTitle())
+            ->setContent($content->getContent())
+            ->setDescription($content->getDescription())
+            ->moveHere($old_document->getID(), $old_document->getPHID());
+
+          $target_document = $target_editor->getDocument();
+          $from_editor->moveAway($target_document->getID());
         }
         return;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
