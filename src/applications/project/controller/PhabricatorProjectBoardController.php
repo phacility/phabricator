@@ -19,6 +19,7 @@ final class PhabricatorProjectBoardController
 
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
+      ->needImages(true)
       ->withIDs(array($this->id))
       ->executeOne();
     if (!$project) {
@@ -133,19 +134,32 @@ final class PhabricatorProjectBoardController
       ->setUser($viewer)
       ->addAction(
         id(new PhabricatorActionView())
-          ->setName(pht('Add Column/Milestone/Sprint'))
+          ->setName(pht('Add Column'))
           ->setHref($this->getApplicationURI('board/'.$this->id.'/edit/'))
           ->setIcon('create')
           ->setDisabled(!$can_edit)
           ->setWorkflow(!$can_edit));
 
     $plist = id(new PHUIPropertyListView());
+
     // TODO: Need this to get actions to render.
-    $plist->addProperty(pht('Ignore'), pht('This Property'));
+    $plist->addProperty(
+      pht('Project Boards'),
+      phutil_tag(
+        'em',
+        array(),
+        pht(
+          'This feature is beta, but should mostly work.')));
     $plist->setActionList($actions);
 
-    $header = id(new PHUIObjectBoxView())
-      ->setHeaderText($project->getName())
+    $header = id(new PHUIHeaderView())
+      ->setHeader($project->getName())
+      ->setUser($viewer)
+      ->setImage($project->getProfileImageURI())
+      ->setPolicyObject($project);
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
       ->addPropertyList($plist);
 
     $board_box = id(new PHUIBoxView())
@@ -155,7 +169,7 @@ final class PhabricatorProjectBoardController
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
+        $box,
         $board_box,
       ),
       array(
