@@ -93,7 +93,7 @@ final class DifferentialRevisionCommentListView extends AphrontView {
       $view->setUser($this->user);
       $view->setHandles($this->handles);
       $view->setMarkupEngine($engine);
-      $view->setInlineComments(idx($inlines, $comment->getID(), array()));
+//      $view->setInlineComments(idx($inlines, $comment->getID(), array()));
       $view->setChangesets($this->changesets);
       $view->setTargetDiff($this->target);
       $view->setRevision($this->getRevision());
@@ -132,7 +132,7 @@ final class DifferentialRevisionCommentListView extends AphrontView {
     $hidden = array();
     if ($last_comment !== null) {
       foreach ($objs as $position => $comment) {
-        if (!$comment->getID()) {
+        if (!$comment->getPHID()) {
           // These are synthetic comments with summary/test plan information.
           $header[] = $html[$position];
           unset($html[$position]);

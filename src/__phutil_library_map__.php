@@ -464,6 +464,7 @@ phutil_register_library_map(array(
     'DifferentialTitleFieldSpecification' => 'applications/differential/field/specification/DifferentialTitleFieldSpecification.php',
     'DifferentialTransaction' => 'applications/differential/storage/DifferentialTransaction.php',
     'DifferentialTransactionComment' => 'applications/differential/storage/DifferentialTransactionComment.php',
+    'DifferentialTransactionQuery' => 'applications/differential/query/DifferentialTransactionQuery.php',
     'DifferentialUnitFieldSpecification' => 'applications/differential/field/specification/DifferentialUnitFieldSpecification.php',
     'DifferentialUnitStatus' => 'applications/differential/constants/DifferentialUnitStatus.php',
     'DifferentialUnitTestResult' => 'applications/differential/constants/DifferentialUnitTestResult.php',
@@ -2856,11 +2857,7 @@ phutil_register_library_map(array(
     'DifferentialChangesetTwoUpRenderer' => 'DifferentialChangesetHTMLRenderer',
     'DifferentialChangesetTwoUpTestRenderer' => 'DifferentialChangesetTestRenderer',
     'DifferentialChangesetViewController' => 'DifferentialController',
-    'DifferentialComment' =>
-    array(
-      0 => 'DifferentialDAO',
-      1 => 'PhabricatorMarkupInterface',
-    ),
+    'DifferentialComment' => 'PhabricatorMarkupInterface',
     'DifferentialCommentEditor' => 'PhabricatorEditor',
     'DifferentialCommentMail' => 'DifferentialMail',
     'DifferentialCommentPreviewController' => 'DifferentialController',
@@ -2981,6 +2978,7 @@ phutil_register_library_map(array(
     'DifferentialTitleFieldSpecification' => 'DifferentialFreeformFieldSpecification',
     'DifferentialTransaction' => 'PhabricatorApplicationTransaction',
     'DifferentialTransactionComment' => 'PhabricatorApplicationTransactionComment',
+    'DifferentialTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'DifferentialUnitFieldSpecification' => 'DifferentialFieldSpecification',
     'DifferentialViewPolicyFieldSpecification' => 'DifferentialFieldSpecification',
     'DiffusionBranchTableController' => 'DiffusionController',

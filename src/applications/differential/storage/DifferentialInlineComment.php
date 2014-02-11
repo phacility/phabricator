@@ -14,7 +14,7 @@ final class DifferentialInlineComment
     $this->proxy = clone $this->proxy;
   }
 
-  public function save() {
+  public function getTransactionCommentForSave() {
     $content_source = PhabricatorContentSource::newForSource(
       PhabricatorContentSource::SOURCE_LEGACY,
       array());
@@ -23,8 +23,14 @@ final class DifferentialInlineComment
       ->setViewPolicy('public')
       ->setEditPolicy($this->getAuthorPHID())
       ->setContentSource($content_source)
-      ->setCommentVersion(1)
-      ->save();
+      ->setCommentVersion(1);
+
+    return $this->proxy;
+  }
+
+
+  public function save() {
+    $this->getTransactionCommentForSave()->save();
 
     return $this;
   }
@@ -74,7 +80,7 @@ final class DifferentialInlineComment
   }
 
   public function isDraft() {
-    return !$this->getCommentID();
+    return !$this->proxy->getTransactionPHID();
   }
 
   public function setChangesetID($id) {

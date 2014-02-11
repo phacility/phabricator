@@ -158,7 +158,7 @@ final class DifferentialRevision extends DifferentialDAO
       return array();
     }
     return id(new DifferentialCommentQuery())
-      ->withRevisionIDs(array($this->getID()))
+      ->withRevisionPHIDs(array($this->getPHID()))
       ->execute();
   }
 
@@ -194,7 +194,7 @@ final class DifferentialRevision extends DifferentialDAO
         $this->getID());
 
       $comments = id(new DifferentialCommentQuery())
-        ->withRevisionIDs(array($this->getID()))
+        ->withRevisionPHIDs(array($this->getPHID()))
         ->execute();
       foreach ($comments as $comment) {
         $comment->delete();

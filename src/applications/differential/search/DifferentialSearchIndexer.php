@@ -53,7 +53,7 @@ final class DifferentialSearchIndexer
       time());
 
     $comments = id(new DifferentialCommentQuery())
-      ->withRevisionIDs(array($rev->getID()))
+      ->withRevisionPHIDs(array($rev->getPHID()))
       ->execute();
 
     $inlines = id(new DifferentialInlineCommentQuery())
