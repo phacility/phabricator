@@ -647,7 +647,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
       $mail = id(new DifferentialCommentMail(
         $revision,
         $actor_handle,
-        $comment,
+        array($comment),
         $changesets,
         $inline_comments))
         ->setActor($actor)

@@ -381,24 +381,21 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     $actor_handle = $handles[$this->getActorPHID()];
 
     $changesets = null;
-    $comment = null;
     $old_status = $revision->getStatus();
 
     if ($diff) {
       $changesets = $diff->loadChangesets();
       // TODO: This should probably be in DifferentialFeedbackEditor?
       if (!$is_new) {
-        $comment = $this->createComment();
-      }
-      if ($comment) {
+        $this->createComment();
         $mail[] = id(new DifferentialNewDiffMail(
             $revision,
             $actor_handle,
             $changesets))
           ->setActor($this->getActor())
-          ->setIsFirstMailAboutRevision($is_new)
-          ->setIsFirstMailToRecipients($is_new)
-          ->setComments($this->getComments())
+          ->setIsFirstMailAboutRevision(false)
+          ->setIsFirstMailToRecipients(false)
+          ->setCommentText($this->getComments())
           ->setToPHIDs(array_keys($stable['rev']))
           ->setCCPHIDs(array_keys($stable['ccs']));
       }
@@ -804,8 +801,6 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     }
 
     $comment->save();
-
-    return $comment;
   }
 
   private function updateAuxiliaryFields() {
