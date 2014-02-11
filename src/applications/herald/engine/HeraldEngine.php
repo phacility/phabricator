@@ -61,10 +61,14 @@ final class HeraldEngine {
     $effects = array();
     foreach ($rules as $phid => $rule) {
       $this->stack = array();
+
+      $policy_first = HeraldRepetitionPolicyConfig::FIRST;
+      $policy_first_int = HeraldRepetitionPolicyConfig::toInt($policy_first);
+      $is_first_only = ($rule->getRepetitionPolicy() == $policy_first_int);
+
       try {
         if (!$this->getDryRun() &&
-            ($rule->getRepetitionPolicy() ==
-             HeraldRepetitionPolicyConfig::FIRST) &&
+            $is_first_only &&
             $rule->getRuleApplied($object->getPHID())) {
           // This is not a dry run, and this rule is only supposed to be
           // applied a single time, and it's already been applied...
