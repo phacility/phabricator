@@ -133,7 +133,7 @@ final class PhabricatorSearchController
     return id(new PHUIBoxView())
       ->addMargin(PHUI::MARGIN_LARGE)
       ->addPadding(PHUI::PADDING_LARGE)
-      ->setShadow(true)
+      ->setBorder(true)
       ->appendChild($results)
       ->addClass('phabricator-search-result-box');
   }

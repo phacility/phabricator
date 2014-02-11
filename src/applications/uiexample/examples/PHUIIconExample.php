@@ -120,7 +120,7 @@ final class PHUIIconExample extends PhabricatorUIExample {
           ->appendChild($actionview)
           ->addMargin(PHUI::MARGIN_MEDIUM)
           ->addPadding(PHUI::PADDING_SMALL)
-          ->setShadow(true));
+          ->setBorder(true));
 
     $layout2 =
       array(
@@ -128,7 +128,7 @@ final class PHUIIconExample extends PhabricatorUIExample {
           ->appendChild(array($person1, $person2, $person3))
           ->addMargin(PHUI::MARGIN_MEDIUM)
           ->addPadding(PHUI::PADDING_SMALL)
-          ->setShadow(true));
+          ->setBorder(true));
 
     $layout2a =
       array(
@@ -136,7 +136,7 @@ final class PHUIIconExample extends PhabricatorUIExample {
           ->appendChild(array($person4, $person5, $person6))
           ->addMargin(PHUI::MARGIN_MEDIUM)
           ->addPadding(PHUI::PADDING_SMALL)
-          ->setShadow(true));
+          ->setBorder(true));
 
     $layout3 =
       array(
@@ -144,7 +144,7 @@ final class PHUIIconExample extends PhabricatorUIExample {
           ->appendChild($tokenview)
           ->addMargin(PHUI::MARGIN_MEDIUM)
           ->addPadding(PHUI::PADDING_SMALL)
-          ->setShadow(true));
+          ->setBorder(true));
 
     $layout4 =
       array(
@@ -152,7 +152,7 @@ final class PHUIIconExample extends PhabricatorUIExample {
           ->appendChild(array($card1, $card2, $card3, $card4, $card5))
           ->addMargin(PHUI::MARGIN_MEDIUM)
           ->addPadding(PHUI::PADDING_MEDIUM)
-          ->setShadow(true));
+          ->setBorder(true));
 
     $layout5 =
       array(
@@ -160,7 +160,7 @@ final class PHUIIconExample extends PhabricatorUIExample {
           ->appendChild($loginview)
           ->addMargin(PHUI::MARGIN_MEDIUM)
           ->addPadding(PHUI::PADDING_MEDIUM)
-          ->setShadow(true));
+          ->setBorder(true));
 
     $head1 = id(new PHUIHeaderView())
       ->setHeader(pht('Action Icons!'));
