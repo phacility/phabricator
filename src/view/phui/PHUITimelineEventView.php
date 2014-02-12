@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorTimelineEventView extends AphrontView {
+final class PHUITimelineEventView extends AphrontView {
 
   private $userHandle;
   private $title;
@@ -104,7 +104,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
     return array_merge(array($this), $this->eventGroup);
   }
 
-  public function addEventToGroup(PhabricatorTimelineEventView $event) {
+  public function addEventToGroup(PHUITimelineEventView $event) {
     $this->eventGroup[] = $event;
     return $this;
   }
@@ -127,7 +127,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
       $extra = phutil_tag(
         'span',
         array(
-          'class' => 'phabricator-timeline-extra',
+          'class' => 'phui-timeline-extra',
         ),
         phutil_implode_html(" \xC2\xB7 ", $extra));
     } else {
@@ -136,18 +136,18 @@ final class PhabricatorTimelineEventView extends AphrontView {
 
     if ($title !== null || $extra) {
       $title_classes = array();
-      $title_classes[] = 'phabricator-timeline-title';
+      $title_classes[] = 'phui-timeline-title';
 
       $icon = null;
       if ($this->icon || $force_icon) {
-        $title_classes[] = 'phabricator-timeline-title-with-icon';
+        $title_classes[] = 'phui-timeline-title-with-icon';
       }
 
       if ($this->icon) {
         $fill_classes = array();
-        $fill_classes[] = 'phabricator-timeline-icon-fill';
+        $fill_classes[] = 'phui-timeline-icon-fill';
         if ($this->color) {
-          $fill_classes[] = 'phabricator-timeline-icon-fill-'.$this->color;
+          $fill_classes[] = 'phui-timeline-icon-fill-'.$this->color;
         }
 
         $icon = phutil_tag(
@@ -158,7 +158,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
           phutil_tag(
             'span',
             array(
-              'class' => 'phabricator-timeline-icon sprite-icons '.
+              'class' => 'phui-timeline-icon sprite-icons '.
                          'icons-'.$this->icon.'-white',
             ),
             ''));
@@ -203,7 +203,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
     $wedge = phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-timeline-wedge phabricator-timeline-border',
+        'class' => 'phui-timeline-wedge phui-timeline-border',
       ),
       '');
 
@@ -212,40 +212,40 @@ final class PhabricatorTimelineEventView extends AphrontView {
       'div',
       array(
         'style' => 'background-image: url('.$image_uri.')',
-        'class' => 'phabricator-timeline-image',
+        'class' => 'phui-timeline-image',
       ),
       '');
 
     $content_classes = array();
-    $content_classes[] = 'phabricator-timeline-content';
+    $content_classes[] = 'phui-timeline-content';
 
     $classes = array();
-    $classes[] = 'phabricator-timeline-event-view';
+    $classes[] = 'phui-timeline-event-view';
     if ($group_children) {
-      $classes[] = 'phabricator-timeline-major-event';
+      $classes[] = 'phui-timeline-major-event';
       $content = phutil_tag(
         'div',
         array(
-          'class' => 'phabricator-timeline-inner-content',
+          'class' => 'phui-timeline-inner-content',
         ),
         array(
           $group_titles,
           phutil_tag(
             'div',
             array(
-              'class' => 'phabricator-timeline-core-content',
+              'class' => 'phui-timeline-core-content',
             ),
             $group_children),
         ));
     } else {
-      $classes[] = 'phabricator-timeline-minor-event';
+      $classes[] = 'phui-timeline-minor-event';
       $content = $group_titles;
     }
 
     $content = phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-timeline-group phabricator-timeline-border',
+        'class' => 'phui-timeline-group phui-timeline-border',
       ),
       $content);
 
@@ -257,7 +257,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
       array($image, $wedge, $content));
 
     $outer_classes = $this->classes;
-    $outer_classes[] = 'phabricator-timeline-shell';
+    $outer_classes[] = 'phui-timeline-shell';
     $color = null;
     foreach ($this->getEventGroup() as $event) {
       if ($event->color) {
@@ -267,7 +267,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
     }
 
     if ($color) {
-      $outer_classes[] = 'phabricator-timeline-'.$color;
+      $outer_classes[] = 'phui-timeline-'.$color;
     }
 
     $sigil = null;

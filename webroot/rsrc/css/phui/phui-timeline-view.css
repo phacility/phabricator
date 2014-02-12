@@ -1,0 +1,243 @@
+/**
+ * @provides phui-timeline-view-css
+ */
+
+.phui-timeline-view {
+  padding: 0 16px;
+}
+
+.phui-timeline-major-event .phui-timeline-group {
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
+}
+
+.device-desktop .phui-timeline-event-view {
+  margin-left: 62px;
+  position: relative;
+}
+
+.device-desktop .phui-timeline-event-view.phui-timeline-minor-event {
+  margin-left: 65px;
+}
+
+.device-desktop .phui-timeline-spacer {
+  min-height: 16px;
+  border-width: 0 0 0 1px;
+  border-style: solid;
+  border-color: {$lightblueborder};
+  margin-left: 78px;
+}
+
+.device-desktop .phui-timeline-wedge {
+  border-bottom: 1px solid {$lightblueborder};
+  position: absolute;
+  width: 12px;
+}
+
+.phui-timeline-major-event .phui-timeline-content {
+  border-top: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$lightblueborder};
+}
+
+.phui-timeline-title {
+  line-height: 18px;
+  min-height: 18px;
+  position: relative;
+  color: {$darkbluetext};
+}
+
+.phui-timeline-minor-event .phui-timeline-title {
+  padding: 4px 8px 4px 33px;
+  color: {$bluetext};
+}
+
+.phui-timeline-title a {
+  font-weight: bold;
+}
+
+.phui-timeline-title a.phui-link-person {
+  color: {$darkbluetext};
+}
+
+.device-desktop .phui-timeline-wedge {
+  left: -12px;
+}
+
+.device-desktop .phui-timeline-major-event .phui-timeline-wedge {
+  top: 24px;
+}
+
+.device-desktop .phui-timeline-minor-event .phui-timeline-wedge {
+  top: 12px;
+  left: -18px;
+  width: 20px;
+}
+
+.phui-timeline-image {
+  background-repeat: no-repeat;
+  position: absolute;
+  border-radius: 3px;
+}
+
+.device-desktop .phui-timeline-major-event .phui-timeline-image {
+  width: 50px;
+  height: 50px;
+  top: 0px;
+  left: -62px;
+}
+
+.device-desktop .phui-timeline-minor-event .phui-timeline-image {
+  width: 26px;
+  height: 26px;
+  background-size: 26px auto;
+  left: -41px;
+}
+
+.phui-timeline-major-event .phui-timeline-title {
+  background: {$lightgreybackground};
+  min-height: 18px;
+}
+
+.phui-timeline-title {
+  padding: 5px 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.phui-timeline-title-with-icon {
+  padding-left: 38px;
+}
+
+.phui-timeline-major-event .phui-timeline-content
+  .phui-timeline-core-content {
+  padding: 16px 12px;
+  line-height: 18px;
+  background: #fff;
+}
+
+.phui-timeline-core-content {
+  overflow-x: auto;
+}
+
+.device .phui-timeline-event-view {
+  min-height: 23px;
+  position: relative;
+  margin-left: 3px;
+  margin-right: 3px;
+}
+
+.device .phui-timeline-image {
+  display: none;
+}
+
+.device .phui-timeline-spacer {
+  min-height: 8px;
+  border-width: 0;
+}
+
+.phui-timeline-icon-fill {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background-color: {$lightblueborder};
+  top: 0;
+  left: 0;
+}
+
+.phui-timeline-icon {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  height: 14px;
+  width: 14px;
+}
+
+.phui-timeline-minor-event .phui-timeline-icon-fill {
+  height: 26px;
+  width: 26px;
+  border-radius: 3px;
+}
+
+.phui-timeline-minor-event .phui-timeline-icon {
+  top: 6px;
+  left: 6px;
+}
+
+.phui-timeline-extra, .phui-timeline-extra a {
+  font-size: 11px;
+  font-weight: normal;
+}
+
+.device-desktop .phui-timeline-extra {
+  float: right;
+}
+
+.device .phui-timeline-extra {
+  display: inline-block;
+  line-height: 16px;
+  margin-left: 8px;
+}
+
+.phui-timeline-icon-fill-red {
+  background-color: {$red};
+}
+
+.phui-timeline-icon-fill-orange {
+  background-color: {$orange};
+}
+
+.phui-timeline-icon-fill-yellow {
+  background-color: {$yellow};
+}
+
+.phui-timeline-icon-fill-green {
+  background-color: {$green};
+}
+
+.phui-timeline-icon-fill-sky {
+  background-color: {$sky};
+}
+
+.phui-timeline-icon-fill-blue {
+  background-color: {$blue};
+}
+
+.phui-timeline-icon-fill-indigo {
+  background-color: {$indigo};
+}
+
+.phui-timeline-icon-fill-violet {
+  background-color: {$violet};
+}
+
+.phui-timeline-icon-fill-grey {
+  background-color: #888;
+}
+
+.phui-timeline-icon-fill-black {
+  background-color: #333;
+}
+
+.phui-timeline-shell.anchor-target {
+  background: rgba(255, 255, 0, 0.50);
+  box-shadow: 0 0 3px 6px rgba(255, 255, 0, 0.50);
+}
+
+.phui-timeline-preview-header {
+  background: #e0e3ec;
+  color: {$darkgreytext};
+  padding: 4px 1.25%;
+  border: solid {$blueborder} 1px 0;
+}
+
+.phui-timeline-change-details {
+  padding: 10px 0;
+  border-style: solid;
+  border-color: #efefef;
+  border-width: 1px 0;
+}
+
+.phui-timeline-extra .phabricator-content-source-view,
+.phui-timeline-extra a {
+  color: {$lightbluetext};
+}

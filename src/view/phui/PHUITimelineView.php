@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorTimelineView extends AphrontView {
+final class PHUITimelineView extends AphrontView {
 
   private $events = array();
   private $id;
@@ -10,13 +10,13 @@ final class PhabricatorTimelineView extends AphrontView {
     return $this;
   }
 
-  public function addEvent(PhabricatorTimelineEventView $event) {
+  public function addEvent(PHUITimelineEventView $event) {
     $this->events[] = $event;
     return $this;
   }
 
   public function render() {
-    require_celerity_resource('phabricator-timeline-view-css');
+    require_celerity_resource('phui-timeline-view-css');
 
     $spacer = self::renderSpacer();
 
@@ -30,7 +30,7 @@ final class PhabricatorTimelineView extends AphrontView {
     return phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-timeline-view',
+        'class' => 'phui-timeline-view',
         'id' => $this->id,
       ),
       $events);
@@ -40,8 +40,8 @@ final class PhabricatorTimelineView extends AphrontView {
     return phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-timeline-event-view '.
-                   'phabricator-timeline-spacer',
+        'class' => 'phui-timeline-event-view '.
+                   'phui-timeline-spacer',
       ),
       '');
   }
