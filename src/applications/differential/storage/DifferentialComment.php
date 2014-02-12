@@ -21,6 +21,12 @@ final class DifferentialComment extends DifferentialDAO
   private $arbitraryDiffForFacebook;
   private $proxyComment;
 
+  public function __clone() {
+    if ($this->proxyComment) {
+      $this->proxyComment = clone $this->proxyComment;
+    }
+  }
+
   public function getContent() {
     return $this->getProxyComment()->getContent();
   }
