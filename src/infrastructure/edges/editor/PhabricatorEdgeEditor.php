@@ -220,13 +220,15 @@ final class PhabricatorEdgeEditor extends PhabricatorEditor {
 
     foreach ($writes as $write) {
       list($key, $src_type, $data) = $write;
-      $conn_w = PhabricatorEdgeConfig::establishConnection($src_type, 'w');
-      queryfx(
-        $conn_w,
-        'INSERT INTO %T (data) VALUES (%s)',
-        PhabricatorEdgeConfig::TABLE_NAME_EDGEDATA,
-        $data);
-      $this->addEdges[$key]['data_id'] = $conn_w->getInsertID();
+      if($src_type != '????') {
+        $conn_w = PhabricatorEdgeConfig::establishConnection($src_type, 'w');
+        queryfx(
+          $conn_w,
+          'INSERT INTO %T (data) VALUES (%s)',
+          PhabricatorEdgeConfig::TABLE_NAME_EDGEDATA,
+          $data);
+        $this->addEdges[$key]['data_id'] = $conn_w->getInsertID();
+      }
     }
   }
 
@@ -257,20 +259,22 @@ final class PhabricatorEdgeEditor extends PhabricatorEditor {
 
     $inserts = array();
     foreach ($adds as $src_type => $edges) {
-      $conn_w = PhabricatorEdgeConfig::establishConnection($src_type, 'w');
-      $sql = array();
-      foreach ($edges as $edge) {
-        $sql[] = qsprintf(
-          $conn_w,
-          '(%s, %d, %s, %d, %d, %nd)',
-          $edge['src'],
-          $edge['type'],
-          $edge['dst'],
-          $edge['dateCreated'],
-          $edge['seq'],
-          idx($edge, 'data_id'));
+      if($src_type != '????') {
+        $conn_w = PhabricatorEdgeConfig::establishConnection($src_type, 'w');
+        $sql = array();
+        foreach ($edges as $edge) {
+          $sql[] = qsprintf(
+            $conn_w,
+            '(%s, %d, %s, %d, %d, %nd)',
+            $edge['src'],
+            $edge['type'],
+            $edge['dst'],
+            $edge['dateCreated'],
+            $edge['seq'],
+            idx($edge, 'data_id'));
+        }
+        $inserts[] = array($conn_w, $sql);
       }
-      $inserts[] = array($conn_w, $sql);
     }
 
     foreach ($inserts as $insert) {
