@@ -2953,6 +2953,7 @@ phutil_register_library_map(array(
       3 => 'PhabricatorFlaggableInterface',
       4 => 'PhrequentTrackableInterface',
       5 => 'HarbormasterBuildableInterface',
+      6 => 'PhabricatorSubscribableInterface',
     ),
     'DifferentialRevisionCommentListView' => 'AphrontView',
     'DifferentialRevisionCommentView' => 'AphrontView',
