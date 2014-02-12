@@ -53,6 +53,7 @@ final class ConduitAPI_differential_getrevisioncomments_Method
     }
 
     foreach ($comments as $comment) {
+      // TODO: Sort this out in the ID -> PHID change.
       $revision_id = $comment->getRevisionID();
       $result = array(
         'revisionID'  => $revision_id,

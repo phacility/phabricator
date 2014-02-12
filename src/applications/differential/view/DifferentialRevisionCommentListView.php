@@ -9,6 +9,16 @@ final class DifferentialRevisionCommentListView extends AphrontView {
   private $target;
   private $versusDiffID;
   private $id;
+  private $revision;
+
+  public function setRevision(DifferentialRevision $revision) {
+    $this->revision = $revision;
+    return $this;
+  }
+
+  public function getRevision() {
+    return $this->revision;
+  }
 
   public function setComments(array $comments) {
     assert_instances_of($comments, 'DifferentialComment');
@@ -86,6 +96,7 @@ final class DifferentialRevisionCommentListView extends AphrontView {
       $view->setInlineComments(idx($inlines, $comment->getID(), array()));
       $view->setChangesets($this->changesets);
       $view->setTargetDiff($this->target);
+      $view->setRevision($this->getRevision());
       $view->setVersusDiffID($this->versusDiffID);
       if ($comment->getAction() == DifferentialAction::ACTION_SUMMARIZE) {
         $view->setAnchorName('summary');

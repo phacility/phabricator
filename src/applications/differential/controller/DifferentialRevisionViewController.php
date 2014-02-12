@@ -266,6 +266,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $comment_view->setUser($user);
     $comment_view->setTargetDiff($target);
     $comment_view->setVersusDiffID($diff_vs);
+    $comment_view->setRevision($revision);
 
     if ($arc_project) {
       Javelin::initBehavior(
