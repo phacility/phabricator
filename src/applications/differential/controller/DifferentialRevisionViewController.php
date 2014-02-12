@@ -258,15 +258,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $revision_detail->setActions($actions);
     $revision_detail->setUser($user);
 
-    $comment_view = new DifferentialRevisionCommentListView();
-    $comment_view->setComments($comments);
-    $comment_view->setHandles($handles);
-    $comment_view->setInlineComments($inlines);
-    $comment_view->setChangesets($all_changesets);
-    $comment_view->setUser($user);
-    $comment_view->setTargetDiff($target);
-    $comment_view->setVersusDiffID($diff_vs);
-    $comment_view->setRevision($revision);
+    $comment_view = $this->buildTransactions(
+      $revision,
+      $changesets);
 
     if ($arc_project) {
       Javelin::initBehavior(
@@ -926,4 +920,28 @@ final class DifferentialRevisionViewController extends DifferentialController {
     return id(new AphrontRedirectResponse())->setURI($file->getBestURI());
 
   }
+
+  private function buildTransactions(
+    DifferentialRevision $revision,
+    array $changesets) {
+    $viewer = $this->getRequest()->getUser();
+
+    $xactions = id(new DifferentialTransactionQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($revision->getPHID()))
+      ->needComments(true)
+      ->execute();
+
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($viewer);
+
+    $timeline = id(new DifferentialTransactionView())
+      ->setUser($viewer)
+      ->setObjectPHID($revision->getPHID())
+      ->setChangesets($changesets)
+      ->setTransactions($xactions);
+
+    return $timeline;
+  }
+
 }

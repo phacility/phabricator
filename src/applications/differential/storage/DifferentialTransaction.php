@@ -18,4 +18,20 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
     return new DifferentialTransactionComment();
   }
 
+  public function getTitle() {
+    $author_phid = $this->getAuthorPHID();
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_INLINE:
+        return pht(
+          '%s added inline comments.',
+          $this->renderHandleLink($author_phid));
+    }
+
+    return parent::getTitle();
+  }
+
 }
