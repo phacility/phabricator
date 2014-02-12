@@ -142,10 +142,7 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
         $editor->setParentMessageID($this->receivedMail->getMessageID());
       }
       $editor->setMessage($body);
-      $comment = $editor->save();
-
-      return $comment->getID();
-
+      $editor->save();
     } catch (Exception $ex) {
       if ($this->receivedMail) {
         $error_body = $this->receivedMail->getRawTextBody();

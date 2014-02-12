@@ -6,7 +6,7 @@
   z-index: 1;
 }
 
-.device-desktop .phabricator-timeline-minor-event .phabricator-timeline-image {
+.device-desktop .phui-timeline-minor-event .phui-timeline-image {
   z-index: 2;
 }
 
@@ -30,7 +30,7 @@
   z-index: 3;
 }
 
-.phabricator-timeline-icon-fill {
+.phui-timeline-icon-fill {
   z-index: 3;
 }
 

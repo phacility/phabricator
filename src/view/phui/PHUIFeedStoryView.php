@@ -265,7 +265,7 @@ final class PHUIFeedStoryView extends AphrontView {
 
     return id(new PHUIBoxView())
       ->addClass(implode(' ', $classes))
-      ->setShadow(true)
+      ->setBorder(true)
       ->addMargin(PHUI::MARGIN_MEDIUM_BOTTOM)
       ->appendChild(array($head, $body, $foot));
   }

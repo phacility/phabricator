@@ -6,7 +6,8 @@ final class DifferentialRevision extends DifferentialDAO
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
     PhrequentTrackableInterface,
-    HarbormasterBuildableInterface {
+    HarbormasterBuildableInterface,
+    PhabricatorSubscribableInterface {
 
   protected $title = '';
   protected $originalTitle;
@@ -39,7 +40,6 @@ final class DifferentialRevision extends DifferentialDAO
 
   private $reviewerStatus = self::ATTACHABLE;
 
-  const RELATIONSHIP_TABLE    = 'differential_relationship';
   const TABLE_COMMIT          = 'differential_commit';
 
   const RELATION_REVIEWER     = 'revw';
@@ -190,12 +190,6 @@ final class DifferentialRevision extends DifferentialDAO
       queryfx(
         $conn_w,
         'DELETE FROM %T WHERE revisionID = %d',
-        self::RELATIONSHIP_TABLE,
-        $this->getID());
-
-      queryfx(
-        $conn_w,
-        'DELETE FROM %T WHERE revisionID = %d',
         self::TABLE_COMMIT,
         $this->getID());
 
@@ -240,22 +234,24 @@ final class DifferentialRevision extends DifferentialDAO
       return;
     }
 
-    // Read "subscribed" and "unsubscribed" data out of the old relationship
-    // table.
-    $data = queryfx_all(
-      $this->establishConnection('r'),
-      'SELECT * FROM %T WHERE revisionID = %d
-        AND relation != %s ORDER BY sequence',
-      self::RELATIONSHIP_TABLE,
-      $this->getID(),
-      self::RELATION_REVIEWER);
+    $data = array();
 
-    // Read "reviewer" data out of the new table.
+    $subscriber_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $this->getPHID(),
+      PhabricatorEdgeConfig::TYPE_OBJECT_HAS_SUBSCRIBER);
+    $subscriber_phids = array_reverse($subscriber_phids);
+    foreach ($subscriber_phids as $phid) {
+      $data[] = array(
+        'relation' => self::RELATION_SUBSCRIBED,
+        'objectPHID' => $phid,
+        'reasonPHID' => null,
+      );
+    }
+
     $reviewer_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $this->getPHID(),
       PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER);
     $reviewer_phids = array_reverse($reviewer_phids);
-
     foreach ($reviewer_phids as $phid) {
       $data[] = array(
         'relation' => self::RELATION_REVIEWER,
@@ -288,12 +284,6 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function getRawRelations($relation) {
     return idx($this->relationships, $relation, array());
-  }
-
-  public function loadUnsubscribedPHIDs() {
-    return PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $this->phid,
-      PhabricatorEdgeConfig::TYPE_OBJECT_HAS_UNSUBSCRIBER);
   }
 
   public function getPrimaryReviewer() {
@@ -423,6 +413,27 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function getHarbormasterContainerPHID() {
     return $this->getPHID();
+  }
+
+
+/* -(  PhabricatorSubscribableInterface  )----------------------------------- */
+
+
+  public function isAutomaticallySubscribed($phid) {
+    // TODO: Reviewers are also automatically subscribed, but that data may
+    // not always be loaded, so be conservative for now. All the editing code
+    // has checks around this already.
+    return ($phid == $this->getAuthorPHID());
+  }
+
+  public function shouldShowSubscribersProperty() {
+    // TODO: For now, Differential has its own stuff.
+    return false;
+  }
+
+  public function shouldAllowSubscription($phid) {
+    // TODO: For now, Differential has its own stuff.
+    return false;
   }
 
 }

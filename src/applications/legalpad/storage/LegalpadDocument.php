@@ -91,13 +91,25 @@ final class LegalpadDocument extends LegalpadDAO
     return 'L'.$this->getID();
   }
 
-/* -(  PhabricatorSubscribableInterface Implementation  )-------------------- */
+
+/* -(  PhabricatorSubscribableInterface  )----------------------------------- */
+
 
   public function isAutomaticallySubscribed($phid) {
     return ($this->creatorPHID == $phid);
   }
 
-/* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
+  public function shouldShowSubscribersProperty() {
+    return true;
+  }
+
+  public function shouldAllowSubscription($phid) {
+    return true;
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
 
   public function getCapabilities() {
     return array(

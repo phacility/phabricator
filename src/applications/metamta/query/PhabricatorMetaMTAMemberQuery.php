@@ -37,15 +37,15 @@ final class PhabricatorMetaMTAMemberQuery extends PhabricatorQuery {
     foreach ($type_map as $type => $phids) {
       switch ($type) {
         case PhabricatorProjectPHIDTypeProject::TYPECONST:
-          // TODO: For now, project members are always on the "mailing list"
-          // implied by the project, but we should differentiate members and
-          // subscribers (i.e., allow you to unsubscribe from mail about
-          // a project).
+          // NOTE: We're loading the projects here in order to respect policies.
 
           $projects = id(new PhabricatorProjectQuery())
             ->setViewer($this->getViewer())
-            ->needMembers(true)
             ->withPHIDs($phids)
+            ->execute();
+
+          $subscribers = id(new PhabricatorSubscribersQuery())
+            ->withObjectPHIDs($phids)
             ->execute();
 
           $projects = mpull($projects, null, 'getPHID');
@@ -54,7 +54,7 @@ final class PhabricatorMetaMTAMemberQuery extends PhabricatorQuery {
             if (!$project) {
               $results[$phid] = array();
             } else {
-              $results[$phid] = $project->getMemberPHIDs();
+              $results[$phid] = idx($subscribers, $phid, array());
             }
           }
           break;

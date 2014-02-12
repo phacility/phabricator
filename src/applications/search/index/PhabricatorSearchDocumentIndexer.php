@@ -106,6 +106,29 @@ abstract class PhabricatorSearchDocumentIndexer {
     }
   }
 
+  protected function indexCustomFields(
+    PhabricatorSearchAbstractDocument $doc,
+    PhabricatorCustomFieldInterface $object) {
+
+    // Rebuild the ApplicationSearch indexes. These are internal and not part of
+    // the fulltext search, but putting them in this workflow allows users to
+    // use the same tools to rebuild the indexes, which is easy to understand.
+
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $object,
+      PhabricatorCustomField::ROLE_APPLICATIONSEARCH);
+
+    $field_list->setViewer($this->getViewer());
+    $field_list->readFieldsFromStorage($object);
+    $field_list->rebuildIndexes($object);
+
+    // We could also allow fields to provide fulltext content, and index it
+    // here on the document. No one has asked for this yet, though, and the
+    // existing "search" key isn't a good fit to interpret to mean we should
+    // index stuff here, since it can be set on a lot of fields which don't
+    // contain anything resembling fulltext.
+  }
+
   private function dispatchDidUpdateIndexEvent(
     $phid,
     PhabricatorSearchAbstractDocument $document) {

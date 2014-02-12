@@ -219,6 +219,10 @@ final class PholioMockViewController extends PholioController {
 
     $properties->invokeWillRenderEvent();
 
+    $properties->addSectionHeader(
+        pht('Description'),
+        PHUIPropertyListView::ICON_SUMMARY);
+
     $properties->addImageContent(
         $engine->getOutput($mock, PholioMock::MARKUP_FIELD_DESCRIPTION));
 

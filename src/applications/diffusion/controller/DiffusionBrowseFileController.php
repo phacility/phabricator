@@ -891,7 +891,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       $follow = 'created';
     } else if ($parent) {
       // If we found a parent, jump to it. This is the normal case.
-      $target_commit = $parent->getCommitIdentifier();
+      $target_commit = $parent;
     } else {
       // If there's no parent, this was probably created in the initial commit?
       // And the "was_created" check will fail because we can't identify the

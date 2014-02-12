@@ -462,16 +462,8 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
         $added_ccs = $this->filterAddedCCs($added_ccs);
 
         if ($added_ccs) {
-          foreach ($added_ccs as $cc) {
-            DifferentialRevisionEditor::addCC(
-              $revision,
-              $cc,
-              $actor_phid);
-          }
-
           $key = DifferentialComment::METADATA_ADDED_CCS;
           $metadata[$key] = $added_ccs;
-
         } else {
           if ($user_tried_to_add == 0) {
             throw new DifferentialActionHasNoEffectException(
@@ -564,18 +556,85 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
     $event->setUser($actor);
     PhutilEventEngine::dispatchEvent($event);
 
-    $comment = id(new DifferentialComment())
+    $template = id(new DifferentialComment())
       ->setAuthorPHID($actor_phid)
-      ->setRevision($revision)
-      ->setAction($action)
-      ->setContent((string)$this->message)
-      ->setMetadata($metadata);
+      ->setRevision($revision);
 
     if ($this->contentSource) {
-      $comment->setContentSource($this->contentSource);
+      $template->setContentSource($this->contentSource);
     }
 
-    $comment->save();
+    $comments = array();
+
+    // If this edit performs a meaningful action, save a transaction for the
+    // action. Do this first, since the mail currently assumes the first
+    // transaction is the strongest.
+    if ($action != DifferentialAction::ACTION_COMMENT &&
+        $action != DifferentialAction::ACTION_ADDREVIEWERS &&
+        $action != DifferentialAction::ACTION_ADDCCS) {
+      $comments[] = id(clone $template)
+        ->setAction($action);
+    }
+
+    // If this edit adds reviewers, save a transaction for those changes.
+    $rev_add = DifferentialComment::METADATA_ADDED_REVIEWERS;
+    $rev_rem = DifferentialComment::METADATA_REMOVED_REVIEWERS;
+    if (idx($metadata, $rev_add) || idx($metadata, $rev_rem)) {
+      $reviewer_meta = array_select_keys($metadata, array($rev_add, $rev_rem));
+
+      $comments[] = id(clone $template)
+        ->setAction(DifferentialAction::ACTION_ADDREVIEWERS)
+        ->setMetadata($reviewer_meta);
+    }
+
+    // If this edit adds CCs, save a transaction for the new CCs. We build this
+    // for either explicit CCs, or for @mentions. First, find any "@mentions" in
+    // the comment blocks.
+    $content_blocks = array($this->message);
+    foreach ($inline_comments as $inline) {
+      $content_blocks[] = $inline->getContent();
+    }
+    $mention_ccs = PhabricatorMarkupEngine::extractPHIDsFromMentions(
+      $content_blocks);
+
+    // Now, build a comment if we have explicit action CCs or mention CCs.
+    $cc_add = DifferentialComment::METADATA_ADDED_CCS;
+    if (idx($metadata, $cc_add) || $mention_ccs) {
+      $all_adds = array_merge(
+        idx($metadata, $cc_add, array()),
+        $mention_ccs);
+      $all_adds = $this->filterAddedCCs($all_adds);
+      if ($all_adds) {
+        $cc_meta = array(
+          DifferentialComment::METADATA_ADDED_CCS => $all_adds,
+        );
+
+        foreach ($all_adds as $cc_phid) {
+          DifferentialRevisionEditor::addCC(
+            $revision,
+            $cc_phid,
+            $actor_phid);
+        }
+
+        $comments[] = id(clone $template)
+          ->setAction(DifferentialAction::ACTION_ADDCCS)
+          ->setMetadata($cc_meta);
+      }
+    }
+
+    // If this edit has comments or inline comments, save a transaction for
+    // the comment content.
+    if (strlen($this->message) || $inline_comments) {
+      $comments[] = id(clone $template)
+        ->setAction(DifferentialAction::ACTION_COMMENT)
+        ->setContent((string)$this->message);
+    }
+
+    foreach ($comments as $comment) {
+      $comment->save();
+    }
+
+    $last_comment = last($comments);
 
     $changesets = array();
     if ($inline_comments) {
@@ -587,46 +646,12 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
           $load_ids);
       }
       foreach ($inline_comments as $inline) {
-        $inline->setCommentID($comment->getID());
+        // For now, attach inlines to the last comment. We'll eventually give
+        // them their own transactions, but this would be fairly gross during
+        // the storage transition and we'll have to do special thing with these
+        // during migration anyway.
+        $inline->setCommentID($last_comment->getID());
         $inline->save();
-      }
-    }
-
-    // Find any "@mentions" in the comment blocks.
-    $content_blocks = array($comment->getContent());
-    foreach ($inline_comments as $inline) {
-      $content_blocks[] = $inline->getContent();
-    }
-    $mention_ccs = PhabricatorMarkupEngine::extractPHIDsFromMentions(
-      $content_blocks);
-    if ($mention_ccs) {
-      $mention_ccs = $this->filterAddedCCs($mention_ccs);
-      if ($mention_ccs) {
-        $metadata = $comment->getMetadata();
-        $metacc = idx(
-          $metadata,
-          DifferentialComment::METADATA_ADDED_CCS,
-          array());
-        foreach ($mention_ccs as $cc_phid) {
-          DifferentialRevisionEditor::addCC(
-            $revision,
-            $cc_phid,
-            $actor_phid);
-          $metacc[] = $cc_phid;
-        }
-        $metadata[DifferentialComment::METADATA_ADDED_CCS] = $metacc;
-
-        $comment->setMetadata($metadata);
-        $comment->save();
-
-        $event = new PhabricatorEvent(
-          PhabricatorEventType::TYPE_DIFFERENTIAL_DIDEDITREVISION,
-            array(
-              'revision'      => $revision,
-              'new'           => $is_new,
-            ));
-        $event->setUser($actor);
-        PhutilEventEngine::dispatchEvent($event);
       }
     }
 
@@ -647,7 +672,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
       $mail = id(new DifferentialCommentMail(
         $revision,
         $actor_handle,
-        $comment,
+        $comments,
         $changesets,
         $inline_comments))
         ->setActor($actor)
@@ -665,18 +690,19 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
       $mailed_phids = $mail->getRawMail()->buildRecipientList();
     }
 
+
     $event_data = array(
       'revision_id'          => $revision->getID(),
       'revision_phid'        => $revision->getPHID(),
       'revision_name'        => $revision->getTitle(),
       'revision_author_phid' => $revision->getAuthorPHID(),
-      'action'               => $comment->getAction(),
-      'feedback_content'     => $comment->getContent(),
+      'action'               => head($comments)->getAction(),
+      'feedback_content'     => $this->message,
       'actor_phid'           => $actor_phid,
 
       // NOTE: Don't use this, it will be removed after ApplicationTransactions.
       // For now, it powers inline comment rendering over the Asana brdige.
-      'temporaryCommentID'   => $comment->getID(),
+      'temporaryCommentID'   => $last_comment->getID(),
     );
 
     id(new PhabricatorFeedStoryPublisher())
@@ -701,8 +727,6 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
 
     id(new PhabricatorSearchIndexer())
       ->queueDocumentForIndexing($revision->getPHID());
-
-    return $comment;
   }
 
   private function filterAddedCCs(array $ccs) {

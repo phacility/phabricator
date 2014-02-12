@@ -17,7 +17,7 @@ final class PhabricatorProjectQuery
   const STATUS_ARCHIVED = 'status-archived';
 
   private $needMembers;
-  private $needProfiles;
+  private $needImages;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -54,8 +54,8 @@ final class PhabricatorProjectQuery
     return $this;
   }
 
-  public function needProfiles($need_profiles) {
-    $this->needProfiles = $need_profiles;
+  public function needImages($need_images) {
+    $this->needImages = $need_images;
     return $this;
   }
 
@@ -126,49 +126,27 @@ final class PhabricatorProjectQuery
   }
 
   protected function didFilterPage(array $projects) {
-    if ($this->needProfiles) {
-      $profiles = id(new PhabricatorProjectProfile())->loadAllWhere(
-        'projectPHID IN (%Ls)',
-        mpull($projects, 'getPHID'));
-      $profiles = mpull($profiles, null, 'getProjectPHID');
-
+    if ($this->needImages) {
       $default = null;
 
-      if ($profiles) {
-        $file_phids = mpull($profiles, 'getProfileImagePHID');
-        $files = id(new PhabricatorFileQuery())
-          ->setParentQuery($this)
-          ->setViewer($this->getViewer())
-          ->withPHIDs($file_phids)
-          ->execute();
-        $files = mpull($files, null, 'getPHID');
-        foreach ($profiles as $profile) {
-          $file = idx($files, $profile->getProfileImagePHID());
-          if (!$file) {
-            if (!$default) {
-              $default = PhabricatorFile::loadBuiltin(
-                $this->getViewer(),
-                'project.png');
-            }
-            $file = $default;
-          }
-          $profile->attachProfileImageFile($file);
-        }
-      }
-
+      $file_phids = mpull($projects, 'getProfileImagePHID');
+      $files = id(new PhabricatorFileQuery())
+        ->setParentQuery($this)
+        ->setViewer($this->getViewer())
+        ->withPHIDs($file_phids)
+        ->execute();
+      $files = mpull($files, null, 'getPHID');
       foreach ($projects as $project) {
-        $profile = idx($profiles, $project->getPHID());
-        if (!$profile) {
+        $file = idx($files, $project->getProfileImagePHID());
+        if (!$file) {
           if (!$default) {
             $default = PhabricatorFile::loadBuiltin(
               $this->getViewer(),
               'project.png');
           }
-          $profile = id(new PhabricatorProjectProfile())
-            ->setProjectPHID($project->getPHID())
-            ->attachProfileImageFile($default);
+          $file = $default;
         }
-        $project->attachProfile($profile);
+        $project->attachProfileImageFile($file);
       }
     }
 
@@ -246,7 +224,7 @@ final class PhabricatorProjectQuery
     if ($this->memberPHIDs) {
       return 'GROUP BY p.id';
     } else {
-      return '';
+      return $this->buildApplicationSearchGroupClause($conn_r);
     }
   }
 
@@ -270,12 +248,18 @@ final class PhabricatorProjectQuery
         PhabricatorEdgeConfig::TYPE_PROJ_MEMBER);
     }
 
+    $joins[] = $this->buildApplicationSearchJoinClause($conn_r);
+
     return implode(' ', $joins);
   }
 
 
   public function getQueryApplicationClass() {
     return 'PhabricatorApplicationProject';
+  }
+
+  protected function getApplicationSearchObjectPHIDColumn() {
+    return 'p.phid';
   }
 
 }

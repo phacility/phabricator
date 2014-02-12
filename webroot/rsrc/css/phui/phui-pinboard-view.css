@@ -3,7 +3,7 @@
  */
 
 .phui-pinboard-view {
-  padding: 8px 0 20px 20px;
+  padding: 8px 0 16px 16px;
   overflow: hidden;
   margin: 12px 0;
 }
@@ -35,7 +35,7 @@
 }
 
 .phui-pinboard-item-header {
-  padding: 5px 10px;
+  padding: 4px 8px;
   display: block;
   font-weight: bold;
   border-top-left-radius: 3px;
@@ -46,7 +46,7 @@
 }
 
 .phui-pinboard-item-header a {
-  color: #333;
+  color: {$bluetext};
 }
 
 .phui-pinboard-item-image-link {
@@ -55,7 +55,7 @@
 }
 
 .phui-pinboard-item-content {
-  padding: 0 10px 5px;
+  padding: 0 8px 4px;
   overflow: hidden;
   color: {$greytext};
   font-size: 11px;
@@ -63,13 +63,13 @@
 
 .phui-pinboard-item-count {
   float: left;
-  margin-left: 10px;
+  margin-left: 8px;
 }
 
 .phui-pinboard-icons {
-  padding: 0 10px 10px 0;
-  color: #aaa;
-  border-bottom: 1px solid #e7e7e7;
+  padding: 0 8px 8px 0;
+  color: {$darkbluetext};
+  border-bottom: 1px solid {$lightblueborder};
   margin-bottom: 5px;
   overflow: hidden;
 }

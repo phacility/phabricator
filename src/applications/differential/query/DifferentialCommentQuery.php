@@ -24,7 +24,15 @@ final class DifferentialCommentQuery
       $this->buildWhereClause($conn_r),
       $this->buildLimitClause($conn_r));
 
-    return $table->loadAllFromArray($data);
+    $comments = $table->loadAllFromArray($data);
+
+    // We've moved the actual text storage into DifferentialTransactionComment,
+    // so load the relevant pieces of text we need.
+    if ($comments) {
+      $this->loadCommentText($comments);
+    }
+
+    return $comments;
   }
 
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
@@ -39,5 +47,26 @@ final class DifferentialCommentQuery
 
     return $this->formatWhereClause($where);
   }
+
+  private function loadCommentText(array $comments) {
+    $table = new DifferentialTransactionComment();
+    $conn_r = $table->establishConnection('r');
+
+    $data = queryfx_all(
+      $conn_r,
+      'SELECT * FROM %T WHERE legacyCommentID IN (%Ld) AND changesetID IS NULL',
+      $table->getTableName(),
+      mpull($comments, 'getID'));
+    $texts = $table->loadAllFromArray($data);
+    $texts = mpull($texts, null, 'getLegacyCommentID');
+
+    foreach ($comments as $comment) {
+      $text = idx($texts, $comment->getID());
+      if ($text) {
+        $comment->setProxyComment($text);
+      }
+    }
+  }
+
 
 }

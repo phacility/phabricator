@@ -250,12 +250,16 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     $rem_ccs = array();
     $xscript_phid = null;
     if ($diff) {
+      $unsubscribed_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $revision->getPHID(),
+        PhabricatorEdgeConfig::TYPE_OBJECT_HAS_UNSUBSCRIBER);
+
       $adapter = HeraldDifferentialRevisionAdapter::newLegacyAdapter(
         $revision,
         $diff);
       $adapter->setExplicitCCs($new['ccs']);
       $adapter->setExplicitReviewers($new['rev']);
-      $adapter->setForbiddenCCs($revision->loadUnsubscribedPHIDs());
+      $adapter->setForbiddenCCs($unsubscribed_phids);
       $adapter->setIsNewObject($is_new);
 
       $xscript = HeraldEngine::loadAndApplyRules($adapter);
@@ -381,24 +385,21 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     $actor_handle = $handles[$this->getActorPHID()];
 
     $changesets = null;
-    $comment = null;
     $old_status = $revision->getStatus();
 
     if ($diff) {
       $changesets = $diff->loadChangesets();
       // TODO: This should probably be in DifferentialFeedbackEditor?
       if (!$is_new) {
-        $comment = $this->createComment();
-      }
-      if ($comment) {
+        $this->createComment();
         $mail[] = id(new DifferentialNewDiffMail(
             $revision,
             $actor_handle,
             $changesets))
           ->setActor($this->getActor())
-          ->setIsFirstMailAboutRevision($is_new)
-          ->setIsFirstMailToRecipients($is_new)
-          ->setComments($this->getComments())
+          ->setIsFirstMailAboutRevision(false)
+          ->setIsFirstMailToRecipients(false)
+          ->setCommentText($this->getComments())
           ->setToPHIDs(array_keys($stable['rev']))
           ->setCCPHIDs(array_keys($stable['ccs']));
       }
@@ -600,13 +601,12 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     $dont_add = self::getImpliedCCs($revision);
     $add_phids = array_diff($add_phids, $dont_add);
 
-    return self::alterRelationships(
-      $revision,
-      $stable_phids,
-      $rem_phids,
-      $add_phids,
-      $reason_phid,
-      DifferentialRevision::RELATION_SUBSCRIBED);
+    id(new PhabricatorSubscriptionsEditor())
+      ->setActor(PhabricatorUser::getOmnipotentUser())
+      ->setObject($revision)
+      ->subscribeExplicit($add_phids)
+      ->unsubscribe($rem_phids)
+      ->save();
   }
 
   private static function getImpliedCCs(DifferentialRevision $revision) {
@@ -697,115 +697,30 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
       ->save();
   }
 
-  private static function alterRelationships(
-    DifferentialRevision $revision,
-    array $stable_phids,
-    array $rem_phids,
-    array $add_phids,
-    $reason_phid,
-    $relation_type) {
-
-    $rem_map = array_fill_keys($rem_phids, true);
-    $add_map = array_fill_keys($add_phids, true);
-
-    $seq_map = array_values($stable_phids);
-    $seq_map = array_flip($seq_map);
-    foreach ($rem_map as $phid => $ignored) {
-      if (!isset($seq_map[$phid])) {
-        $seq_map[$phid] = count($seq_map);
-      }
-    }
-    foreach ($add_map as $phid => $ignored) {
-      if (!isset($seq_map[$phid])) {
-        $seq_map[$phid] = count($seq_map);
-      }
-    }
-
-    $raw = $revision->getRawRelations($relation_type);
-    $raw = ipull($raw, null, 'objectPHID');
-
-    $sequence = count($seq_map);
-    foreach ($raw as $phid => $ignored) {
-      if (isset($seq_map[$phid])) {
-        $raw[$phid]['sequence'] = $seq_map[$phid];
-      } else {
-        $raw[$phid]['sequence'] = $sequence++;
-      }
-    }
-    $raw = isort($raw, 'sequence');
-
-    foreach ($raw as $phid => $ignored) {
-      if (isset($rem_map[$phid])) {
-        unset($raw[$phid]);
-      }
-    }
-
-    foreach ($add_phids as $add) {
-      $reason = is_array($reason_phid)
-        ? idx($reason_phid, $add)
-        : $reason_phid;
-
-      $raw[$add] = array(
-        'objectPHID'  => $add,
-        'sequence'    => idx($seq_map, $add, $sequence++),
-        'reasonPHID'  => $reason,
-      );
-    }
-
-    $conn_w = $revision->establishConnection('w');
-
-    $sql = array();
-    foreach ($raw as $relation) {
-      $sql[] = qsprintf(
-        $conn_w,
-        '(%d, %s, %s, %d, %s)',
-        $revision->getID(),
-        $relation_type,
-        $relation['objectPHID'],
-        $relation['sequence'],
-        $relation['reasonPHID']);
-    }
-
-    $conn_w->openTransaction();
-      queryfx(
-        $conn_w,
-        'DELETE FROM %T WHERE revisionID = %d AND relation = %s',
-        DifferentialRevision::RELATIONSHIP_TABLE,
-        $revision->getID(),
-        $relation_type);
-      if ($sql) {
-        queryfx(
-          $conn_w,
-          'INSERT INTO %T
-            (revisionID, relation, objectPHID, sequence, reasonPHID)
-          VALUES %Q',
-          DifferentialRevision::RELATIONSHIP_TABLE,
-          implode(', ', $sql));
-      }
-    $conn_w->saveTransaction();
-
-    $revision->loadRelationships();
-  }
-
-
   private function createComment() {
-    $comment = id(new DifferentialComment())
+    $template = id(new DifferentialComment())
       ->setAuthorPHID($this->getActorPHID())
-      ->setRevision($this->revision)
-      ->setContent($this->getComments())
+      ->setRevision($this->revision);
+    if ($this->contentSource) {
+      $template->setContentSource($this->contentSource);
+    }
+
+    // Write the "update active diff" transaction.
+    id(clone $template)
       ->setAction(DifferentialAction::ACTION_UPDATE)
       ->setMetadata(
         array(
           DifferentialComment::METADATA_DIFF_ID => $this->getDiff()->getID(),
-        ));
+        ))
+      ->save();
 
-    if ($this->contentSource) {
-      $comment->setContentSource($this->contentSource);
+    // If we have a comment, write the "add a comment" transaction.
+    if (strlen($this->getComments())) {
+      id(clone $template)
+        ->setAction(DifferentialAction::ACTION_COMMENT)
+        ->setContent($this->getComments())
+        ->save();
     }
-
-    $comment->save();
-
-    return $comment;
   }
 
   private function updateAuxiliaryFields() {

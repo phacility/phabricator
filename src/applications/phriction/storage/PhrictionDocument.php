@@ -104,6 +104,10 @@ final class PhrictionDocument extends PhrictionDAO
     return $parts[1].'/';
   }
 
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
@@ -133,11 +137,25 @@ final class PhrictionDocument extends PhrictionDAO
     return null;
   }
 
+
+/* -(  PhabricatorSubscribableInterface  )----------------------------------- */
+
+
   public function isAutomaticallySubscribed($phid) {
     return false;
   }
 
+  public function shouldShowSubscribersProperty() {
+    return true;
+  }
+
+  public function shouldAllowSubscription($phid) {
+    return true;
+  }
+
+
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
 
   public function getUsersToNotifyOfTokenGiven() {
     return PhabricatorSubscribersQuery::loadSubscribersForPHID($this->phid);

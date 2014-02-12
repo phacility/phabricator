@@ -91,7 +91,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
       throw new Exception("Call setObjectPHID() before render()!");
     }
 
-    $view = new PhabricatorTimelineView();
+    $view = new PHUITimelineView();
     $events = $this->buildEvents();
     foreach ($events as $event) {
       $view->addEvent($event);
@@ -176,7 +176,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
       'div',
       array(
         'id'    => $content_id,
-        'class' => 'phabricator-timeline-change-details',
+        'class' => 'phui-timeline-change-details',
       ),
       $xaction->renderChangeDetails($this->getUser()));
 
@@ -293,7 +293,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     $anchor) {
     $viewer = $this->getUser();
 
-    $event = id(new PhabricatorTimelineEventView())
+    $event = id(new PHUITimelineEventView())
       ->setUser($viewer)
       ->setTransactionPHID($xaction->getPHID())
       ->setUserHandle($xaction->getHandle($xaction->getAuthorPHID()))

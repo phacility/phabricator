@@ -17,6 +17,9 @@ final class PhabricatorProjectSearchIndexer
     $doc->setDocumentCreated($project->getDateCreated());
     $doc->setDocumentModified($project->getDateModified());
 
+    $this->indexSubscribers($doc);
+    $this->indexCustomFields($doc, $project);
+
     // NOTE: This could be more full-featured, but for now we're mostly
     // interested in the side effects of indexing.
 

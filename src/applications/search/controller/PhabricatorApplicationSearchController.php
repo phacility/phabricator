@@ -262,7 +262,7 @@ final class PhabricatorApplicationSearchController
           $pager_box = id(new PHUIBoxView())
             ->addPadding(PHUI::PADDING_MEDIUM)
             ->addMargin(PHUI::MARGIN_LARGE)
-            ->setShadow(true)
+            ->setBorder(true)
             ->appendChild($pager);
           $nav->appendChild($pager_box);
         }

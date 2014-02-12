@@ -19,55 +19,59 @@ final class DifferentialCommentMail extends DifferentialMail {
   public function __construct(
     DifferentialRevision $revision,
     PhabricatorObjectHandle $actor,
-    DifferentialComment $comment,
+    array $comments,
     array $changesets,
     array $inline_comments) {
+
+    assert_instances_of($comments, 'DifferentialComment');
     assert_instances_of($changesets, 'DifferentialChangeset');
     assert_instances_of($inline_comments, 'PhabricatorInlineCommentInterface');
 
     $this->setRevision($revision);
     $this->setActorHandle($actor);
-    $this->setComment($comment);
+    $this->setComments($comments);
     $this->setChangesets($changesets);
     $this->setInlineComments($inline_comments);
 
   }
 
   protected function getMailTags() {
-    $tags    = array();
-    $comment = $this->getComment();
-    $action  = $comment->getAction();
+    $tags = array();
 
-    switch ($action) {
-      case DifferentialAction::ACTION_ADDCCS:
-        $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_CC;
-        break;
-      case DifferentialAction::ACTION_CLOSE:
-        $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_CLOSED;
-        break;
-      case DifferentialAction::ACTION_ADDREVIEWERS:
-        $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEWERS;
-        break;
-      case DifferentialAction::ACTION_COMMENT:
-        // this is a comment which we will check separately below for content
-        break;
-      default:
-        $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_OTHER;
-        break;
-    }
+    foreach ($this->getComments() as $comment) {
+      $action = $comment->getAction();
 
-    $has_comment = strlen(trim($comment->getContent()));
-    $has_inlines = (bool)$this->getInlineComments();
-
-    if ($has_comment || $has_inlines) {
       switch ($action) {
+        case DifferentialAction::ACTION_ADDCCS:
+          $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_CC;
+          break;
         case DifferentialAction::ACTION_CLOSE:
-          // Commit comments are auto-generated and not especially interesting,
-          // so don't tag them as having a comment.
+          $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_CLOSED;
+          break;
+        case DifferentialAction::ACTION_ADDREVIEWERS:
+          $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEWERS;
+          break;
+        case DifferentialAction::ACTION_COMMENT:
+          // this is a comment which we will check separately below for content
           break;
         default:
-          $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMENT;
+          $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_OTHER;
           break;
+      }
+
+      $has_comment = strlen(trim($comment->getContent()));
+      $has_inlines = (bool)$this->getInlineComments();
+
+      if ($has_comment || $has_inlines) {
+        switch ($action) {
+          case DifferentialAction::ACTION_CLOSE:
+            // Commit comments are auto-generated and not especially
+            // interesting, so don't tag them as having a comment.
+            break;
+          default:
+            $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMENT;
+            break;
+        }
       }
     }
 
@@ -84,7 +88,9 @@ final class DifferentialCommentMail extends DifferentialMail {
   }
 
   protected function getVerb() {
-    $comment = $this->getComment();
+    // NOTE: Eventually, this will use getStrongestAction() transaction logic.
+    // For now, pick the first comment.
+    $comment = head($this->getComments());
     $action = $comment->getAction();
     $verb = DifferentialAction::getActionPastTenseVerb($action);
     return $verb;
@@ -94,16 +100,22 @@ final class DifferentialCommentMail extends DifferentialMail {
     parent::prepareBody();
 
     // If the commented added reviewers or CCs, list them explicitly.
-    $meta = $this->getComment()->getMetadata();
-    $m_reviewers = idx(
-      $meta,
-      DifferentialComment::METADATA_ADDED_REVIEWERS,
-      array());
-    $m_cc = idx(
-      $meta,
-      DifferentialComment::METADATA_ADDED_CCS,
-      array());
-    $load = array_merge($m_reviewers, $m_cc);
+    $load = array();
+    foreach ($this->comments as $comment) {
+      $meta = $comment->getMetadata();
+      $m_reviewers = idx(
+        $meta,
+        DifferentialComment::METADATA_ADDED_REVIEWERS,
+        array());
+      $m_cc = idx(
+        $meta,
+        DifferentialComment::METADATA_ADDED_CCS,
+        array());
+      $load[] = $m_reviewers;
+      $load[] = $m_cc;
+    }
+
+    $load = array_mergev($load);
     if ($load) {
       $handles = id(new PhabricatorHandleQuery())
         ->setViewer($this->getActor())
@@ -119,8 +131,10 @@ final class DifferentialCommentMail extends DifferentialMail {
   }
 
   protected function renderBody() {
+    // TODO: This will be ApplicationTransactions eventually, but split the
+    // difference for now.
 
-    $comment = $this->getComment();
+    $comment = head($this->getComments());
 
     $actor = $this->getActorName();
     $name  = $this->getRevision()->getTitle();
@@ -139,10 +153,12 @@ final class DifferentialCommentMail extends DifferentialMail {
 
     $body[] = null;
 
-    $content = $comment->getContent();
-    if (strlen($content)) {
-      $body[] = $this->formatText($content);
-      $body[] = null;
+    foreach ($this->getComments() as $comment) {
+      $content = $comment->getContent();
+      if (strlen($content)) {
+        $body[] = $this->formatText($content);
+        $body[] = null;
+      }
     }
 
     if ($this->getChangedByCommit()) {

@@ -19,6 +19,7 @@ final class PHUIButtonView extends AphrontTagView {
   private $dropdown;
   private $icon;
   private $href = null;
+  private $title = null;
 
   public function setText($text) {
     $this->text = $text;
@@ -27,6 +28,11 @@ final class PHUIButtonView extends AphrontTagView {
 
   public function setHref($href) {
     $this->href = $href;
+    return $this;
+  }
+
+  public function setTitle($title) {
+    $this->title = $title;
     return $this;
   }
 
@@ -87,8 +93,9 @@ final class PHUIButtonView extends AphrontTagView {
       $classes[] = 'has-icon';
     }
 
-    return array('class' => $classes,
-                  'href' => $this->href);
+    return array('class'  => $classes,
+                 'href'   => $this->href,
+                 'title'  => $this->title);
   }
 
   protected function getTagContent() {

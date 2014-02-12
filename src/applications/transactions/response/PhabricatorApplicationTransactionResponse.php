@@ -78,7 +78,7 @@ final class PhabricatorApplicationTransactionResponse
 
     $content = array(
       'xactions' => $xactions,
-      'spacer'   => PhabricatorTimelineView::renderSpacer(),
+      'spacer'   => PHUITimelineView::renderSpacer(),
     );
 
     return $this->getProxy()->setContent($content);

@@ -50,6 +50,7 @@ final class PholioMockEditController extends PholioController {
     $e_name = true;
     $e_images = true;
     $errors = array();
+    $posted_mock_images = array();
 
     $v_name = $mock->getName();
     $v_desc = $mock->getDescription();
@@ -100,94 +101,99 @@ final class PholioMockEditController extends PholioController {
         $mock->setCoverPHID(head($files)->getPHID());
       }
 
-      if (!$errors) {
-        foreach ($mock_xactions as $type => $value) {
-          $xactions[$type] = id(new PholioTransaction())
-            ->setTransactionType($type)
-            ->setNewValue($value);
+      foreach ($mock_xactions as $type => $value) {
+        $xactions[$type] = id(new PholioTransaction())
+          ->setTransactionType($type)
+          ->setNewValue($value);
+      }
+
+      $order = $request->getStrList('imageOrder');
+      $sequence_map = array_flip($order);
+      $replaces = $request->getArr('replaces');
+      $replaces_map = array_flip($replaces);
+
+      /**
+       * Foreach file posted, check to see whether we are replacing an image,
+       * adding an image, or simply updating image metadata. Create
+       * transactions for these cases as appropos.
+       */
+      foreach ($files as $file_phid => $file) {
+        $replaces_image_phid = null;
+        if (isset($replaces_map[$file_phid])) {
+          $old_file_phid = $replaces_map[$file_phid];
+          $old_image = idx($mock_images, $old_file_phid);
+          if ($old_image) {
+            $replaces_image_phid = $old_image->getPHID();
+          }
         }
 
-        $order = $request->getStrList('imageOrder');
-        $sequence_map = array_flip($order);
-        $replaces = $request->getArr('replaces');
-        $replaces_map = array_flip($replaces);
+        $existing_image = idx($mock_images, $file_phid);
 
-        /**
-         * Foreach file posted, check to see whether we are replacing an image,
-         * adding an image, or simply updating image metadata. Create
-         * transactions for these cases as appropos.
-         */
-        foreach ($files as $file_phid => $file) {
-          $replaces_image_phid = null;
-          if (isset($replaces_map[$file_phid])) {
-            $old_file_phid = $replaces_map[$file_phid];
-            $old_image = idx($mock_images, $old_file_phid);
-            if ($old_image) {
-              $replaces_image_phid = $old_image->getPHID();
-            }
-          }
+        $title = (string)$request->getStr('title_'.$file_phid);
+        $description = (string)$request->getStr('description_'.$file_phid);
+        $sequence = $sequence_map[$file_phid];
 
-          $existing_image = idx($mock_images, $file_phid);
-
-          $title = (string)$request->getStr('title_'.$file_phid);
-          $description = (string)$request->getStr('description_'.$file_phid);
-          $sequence = $sequence_map[$file_phid];
-
-          if ($replaces_image_phid) {
-            $replace_image = id(new PholioImage())
-              ->setReplacesImagePHID($replaces_image_phid)
-              ->setFilePhid($file_phid)
-              ->setName(strlen($title) ? $title : $file->getName())
-              ->setDescription($description)
-              ->setSequence($sequence);
-            $xactions[] = id(new PholioTransaction())
-              ->setTransactionType(
-                PholioTransactionType::TYPE_IMAGE_REPLACE)
+        if ($replaces_image_phid) {
+          $replace_image = id(new PholioImage())
+            ->setReplacesImagePHID($replaces_image_phid)
+            ->setFilePhid($file_phid)
+            ->attachFile($file)
+            ->setName(strlen($title) ? $title : $file->getName())
+            ->setDescription($description)
+            ->setSequence($sequence);
+          $xactions[] = id(new PholioTransaction())
+            ->setTransactionType(
+              PholioTransactionType::TYPE_IMAGE_REPLACE)
               ->setNewValue($replace_image);
-         } else if (!$existing_image) { // this is an add
-            $add_image = id(new PholioImage())
-              ->setFilePhid($file_phid)
-              ->setName(strlen($title) ? $title : $file->getName())
-              ->setDescription($description)
-              ->setSequence($sequence);
-            $xactions[] = id(new PholioTransaction())
-              ->setTransactionType(PholioTransactionType::TYPE_IMAGE_FILE)
+          $posted_mock_images[] = $replace_image;
+        } else if (!$existing_image) { // this is an add
+          $add_image = id(new PholioImage())
+            ->setFilePhid($file_phid)
+            ->attachFile($file)
+            ->setName(strlen($title) ? $title : $file->getName())
+            ->setDescription($description)
+            ->setSequence($sequence);
+          $xactions[] = id(new PholioTransaction())
+            ->setTransactionType(PholioTransactionType::TYPE_IMAGE_FILE)
+            ->setNewValue(
+              array('+' => array($add_image)));
+          $posted_mock_images[] = $add_image;
+        } else {
+          $xactions[] = id(new PholioTransaction())
+            ->setTransactionType(PholioTransactionType::TYPE_IMAGE_NAME)
+            ->setNewValue(
+              array($existing_image->getPHID() => $title));
+          $xactions[] = id(new PholioTransaction())
+            ->setTransactionType(
+              PholioTransactionType::TYPE_IMAGE_DESCRIPTION)
               ->setNewValue(
-                array('+' => array($add_image)));
-          } else {
-            $xactions[] = id(new PholioTransaction())
-              ->setTransactionType(PholioTransactionType::TYPE_IMAGE_NAME)
+                array($existing_image->getPHID() => $description));
+          $xactions[] = id(new PholioTransaction())
+            ->setTransactionType(
+              PholioTransactionType::TYPE_IMAGE_SEQUENCE)
               ->setNewValue(
-                array($existing_image->getPHID() => $title));
-            $xactions[] = id(new PholioTransaction())
-              ->setTransactionType(
-                PholioTransactionType::TYPE_IMAGE_DESCRIPTION)
-                ->setNewValue(
-                  array($existing_image->getPHID() => $description));
-            $xactions[] = id(new PholioTransaction())
-              ->setTransactionType(
-                PholioTransactionType::TYPE_IMAGE_SEQUENCE)
-                ->setNewValue(
-                  array($existing_image->getPHID() => $sequence));
-          }
+                array($existing_image->getPHID() => $sequence));
+          $posted_mock_images[] = $existing_image;
         }
-        foreach ($mock_images as $file_phid => $mock_image) {
-          if (!isset($files[$file_phid]) && !isset($replaces[$file_phid])) {
-            // this is an outright delete
-            $xactions[] = id(new PholioTransaction())
-              ->setTransactionType(PholioTransactionType::TYPE_IMAGE_FILE)
-              ->setNewValue(
-                array('-' => array($mock_image)));
-          }
+      }
+      foreach ($mock_images as $file_phid => $mock_image) {
+        if (!isset($files[$file_phid]) && !isset($replaces[$file_phid])) {
+          // this is an outright delete
+          $xactions[] = id(new PholioTransaction())
+            ->setTransactionType(PholioTransactionType::TYPE_IMAGE_FILE)
+            ->setNewValue(
+              array('-' => array($mock_image)));
         }
+      }
 
+      if (!$errors) {
         $mock->openTransaction();
-          $editor = id(new PholioMockEditor())
-            ->setContentSourceFromRequest($request)
-            ->setContinueOnNoEffect(true)
-            ->setActor($user);
+        $editor = id(new PholioMockEditor())
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnNoEffect(true)
+          ->setActor($user);
 
-          $xactions = $editor->applyTransactions($mock, $xactions);
+        $xactions = $editor->applyTransactions($mock, $xactions);
 
         $mock->saveTransaction();
 
@@ -220,10 +226,16 @@ final class PholioMockEditController extends PholioController {
       ->execute();
 
     $image_elements = array();
-    foreach ($mock_images as $mock_image) {
+    if ($posted_mock_images) {
+      $display_mock_images = $posted_mock_images;
+    } else {
+      $display_mock_images = $mock_images;
+    }
+    foreach ($display_mock_images as $mock_image) {
       $image_elements[] = id(new PholioUploadedImageView())
         ->setUser($user)
-        ->setImage($mock_image);
+        ->setImage($mock_image)
+        ->setReplacesPHID($mock_image->getReplacesImagePHID());
     }
 
     $list_id = celerity_generate_unique_node_id();
@@ -276,37 +288,37 @@ final class PholioMockEditController extends PholioController {
       ->appendChild($order_control)
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setName('name')
-          ->setValue($v_name)
-          ->setLabel(pht('Name'))
-          ->setError($e_name))
+        ->setName('name')
+        ->setValue($v_name)
+        ->setLabel(pht('Name'))
+        ->setError($e_name))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
-          ->setName('description')
-          ->setValue($v_desc)
-          ->setLabel(pht('Description'))
-          ->setUser($user))
+        ->setName('description')
+        ->setValue($v_desc)
+        ->setLabel(pht('Description'))
+        ->setUser($user))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setLabel(pht('CC'))
-          ->setName('cc')
-          ->setValue($handles)
-          ->setUser($user)
-          ->setDatasource('/typeahead/common/mailable/'))
+        ->setLabel(pht('CC'))
+        ->setName('cc')
+        ->setValue($handles)
+        ->setUser($user)
+        ->setDatasource('/typeahead/common/mailable/'))
       ->appendChild(
         id(new AphrontFormPolicyControl())
-          ->setUser($user)
-          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
-          ->setPolicyObject($mock)
-          ->setPolicies($policies)
-          ->setName('can_view'))
+        ->setUser($user)
+        ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
+        ->setPolicyObject($mock)
+        ->setPolicies($policies)
+        ->setName('can_view'))
       ->appendChild(
         id(new AphrontFormMarkupControl())
-          ->setValue($list_control))
+        ->setValue($list_control))
       ->appendChild(
         id(new AphrontFormMarkupControl())
-          ->setValue($drop_control)
-          ->setError($e_images))
+        ->setValue($drop_control)
+        ->setError($e_images))
       ->appendChild($submit);
 
     $form_box = id(new PHUIObjectBoxView())

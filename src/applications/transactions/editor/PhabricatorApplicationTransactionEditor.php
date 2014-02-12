@@ -139,6 +139,8 @@ abstract class PhabricatorApplicationTransactionEditor
         return $object->getViewPolicy();
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return $object->getEditPolicy();
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
+        return $object->getJoinPolicy();
       case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $xaction->getMetadataValue('edge:type');
         if (!$edge_type) {
@@ -175,6 +177,7 @@ abstract class PhabricatorApplicationTransactionEditor
         return $this->getPHIDTransactionNewValue($xaction);
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
         return $xaction->getNewValue();
       case PhabricatorTransactions::TYPE_EDGE:
         return $this->getEdgeTransactionNewValue($xaction);
@@ -208,6 +211,38 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->getApplicationTransactionHasEffect($xaction);
+      case PhabricatorTransactions::TYPE_EDGE:
+        // A straight value comparison here doesn't always get the right
+        // result, because newly added edges aren't fully populated. Instead,
+        // compare the changes in a more granular way.
+        $old = $xaction->getOldValue();
+        $new = $xaction->getNewValue();
+
+        $old_dst = array_keys($old);
+        $new_dst = array_keys($new);
+
+        // NOTE: For now, we don't consider edge reordering to be a change.
+        // We have very few order-dependent edges and effectively no order
+        // oriented UI. This might change in the future.
+        sort($old_dst);
+        sort($new_dst);
+
+        if ($old_dst !== $new_dst) {
+          // We've added or removed edges, so this transaction definitely
+          // has an effect.
+          return true;
+        }
+
+        // We haven't added or removed edges, but we might have changed
+        // edge data.
+        foreach ($old as $key => $old_value) {
+          $new_value = $new[$key];
+          if ($old_value['data'] !== $new_value['data']) {
+            return true;
+          }
+        }
+
+        return false;
     }
 
     return ($xaction->getOldValue() !== $xaction->getNewValue());
@@ -555,6 +590,11 @@ abstract class PhabricatorApplicationTransactionEditor
       // now I'm putting it here since I think we might end up with things that
       // need it to be up to date once the next page loads, but if we don't go
       // there we we could move it into search once search moves to the daemons.
+
+      // It now happens in the search indexer as well, but the search indexer is
+      // always daemonized, so the logic above still potentially holds. We could
+      // possibly get rid of this. The major motivation for putting it in the
+      // indexer was to enable reindexing to work.
 
       $fields = PhabricatorCustomField::getObjectFields(
         $object,
@@ -1011,7 +1051,7 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     if (!isset($edge['data'])) {
-      $edge['data'] = null;
+      $edge['data'] = array();
     }
 
     return $edge;
@@ -1109,6 +1149,29 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $errors = array();
     switch ($type) {
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        // Make sure the user isn't editing away their ability to edit this
+        // object.
+        foreach ($xactions as $xaction) {
+          try {
+            PhabricatorPolicyFilter::requireCapabilityWithForcedPolicy(
+              $this->requireActor(),
+              $object,
+              PhabricatorPolicyCapability::CAN_EDIT,
+              $xaction->getNewValue());
+          } catch (PhabricatorPolicyException $ex) {
+            $errors[] = array(
+              new PhabricatorApplicationTransactionValidationError(
+                $type,
+                pht('Invalid'),
+                pht(
+                  'You can not select this edit policy, because you would '.
+                  'no longer be able to edit the object.'),
+                $xaction),
+            );
+          }
+        }
+        break;
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $groups = array();
         foreach ($xactions as $xaction) {

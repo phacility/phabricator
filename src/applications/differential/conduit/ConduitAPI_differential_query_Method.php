@@ -164,7 +164,7 @@ final class ConduitAPI_differential_query_Method
       $query->withResponsibleUsers($responsible_users);
     }
     if ($subscribers) {
-      $query->withSubscribers($subscribers);
+      $query->withCCs($subscribers);
     }
     if ($branches) {
       $query->withBranches($branches);
