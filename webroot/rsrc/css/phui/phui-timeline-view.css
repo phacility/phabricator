@@ -4,10 +4,18 @@
 
 .phui-timeline-view {
   padding: 0 16px;
+  background-image: url('/rsrc/image/BFCFDA.png');
+  background-repeat: repeat-y;
+  background-position: 94px;
+}
+
+.device-tablet .phui-timeline-view {
+  background-position: 31px;
 }
 
 .device-phone .phui-timeline-view {
   padding: 0;
+  background-position: 20px;
 }
 
 .phui-timeline-major-event .phui-timeline-group {
@@ -27,15 +35,17 @@
 .device-desktop .phui-timeline-spacer {
   min-height: 16px;
   border-width: 0 0 0 1px;
-  border-style: solid;
-  border-color: {$lightblueborder};
-  margin-left: 78px;
 }
 
 .device-desktop .phui-timeline-wedge {
   border-bottom: 1px solid {$lightblueborder};
   position: absolute;
   width: 12px;
+}
+
+.device-phone .phui-timeline-minor-event,
+.device-tablet .phui-timeline-minor-event {
+  padding-left: 3px;
 }
 
 .phui-timeline-major-event .phui-timeline-content {
