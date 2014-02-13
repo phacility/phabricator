@@ -80,20 +80,13 @@ abstract class PhabricatorMailReceiver {
     $email_key = 'phabricator.allow-email-users';
     $allow_email_users = PhabricatorEnv::getEnvConfig($email_key);
     if ($allow_email_users) {
-      $xuser = id(new PhabricatorExternalAccount())->loadOneWhere(
-        'accountType = %s AND accountDomain = %s and accountID = %s',
-        'email',
-        'self',
-        $from);
-      if (!$xuser) {
-        $xuser = id(new PhabricatorExternalAccount())
-          ->setAccountID($from)
-          ->setAccountType('email')
-          ->setAccountDomain('self')
-          ->setDisplayName($from)
-          ->setEmail($from)
-          ->save();
-      }
+      $from_obj = new PhutilEmailAddress($from);
+      $xuser = id(new PhabricatorExternalAccountQuery())
+        ->setViewer($user)
+        ->withAccountTypes(array('email'))
+        ->withAccountDomains(array($from_obj->getDomainName(), 'self'))
+        ->withAccountIDs(array($from_obj->getAddress()))
+        ->loadOneOrCreate();
       return $xuser->getPhabricatorUser();
     } else {
       $reasons[] = pht(

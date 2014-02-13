@@ -16,37 +16,43 @@ final class PhabricatorSearchSelectController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $query = new PhabricatorSearchQuery();
+    $query = new PhabricatorSavedQuery();
     $query_str = $request->getStr('query');
 
-    $query->setQuery($query_str);
-    $query->setParameter('type', $this->type);
+    $query->setEngineClassName('PhabricatorSearchApplicationSearchEngine');
+    $query->setParameter('query', $query_str);
+    $query->setParameter('types', array($this->type));
+
+    $status_open = PhabricatorSearchRelationship::RELATIONSHIP_OPEN;
 
     switch ($request->getStr('filter')) {
       case 'assigned':
-        $query->setParameter('owner', array($user->getPHID()));
-        $query->setParameter('open', 1);
+        $query->setParameter('ownerPHIDs', array($user->getPHID()));
+        $query->setParameter('statuses', array($status_open));
         break;
       case 'created';
-        $query->setParameter('author', array($user->getPHID()));
+        $query->setParameter('authorPHIDs', array($user->getPHID()));
         // TODO - if / when we allow pholio mocks to be archived, etc
         // update this
         if ($this->type != PholioPHIDTypeMock::TYPECONST) {
-          $query->setParameter('open', 1);
+          $query->setParameter('statuses', array($status_open));
         }
         break;
       case 'open':
-        $query->setParameter('open', 1);
+        $query->setParameter('statuses', array($status_open));
         break;
     }
 
-    $query->setParameter('exclude', $request->getStr('exclude'));
-    $query->setParameter('limit', 100);
+    $query->setParameter('excludePHIDs', array($request->getStr('exclude')));
 
-    $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
-    $results = $engine->executeSearch($query);
+    $results = id(new PhabricatorSearchDocumentQuery())
+      ->setViewer($user)
+      ->withSavedQuery($query)
+      ->setOffset(0)
+      ->setLimit(100)
+      ->execute();
 
-    $phids = array_fill_keys($results, true);
+    $phids = array_fill_keys(mpull($results, 'getPHID'), true);
     $phids += $this->queryObjectNames($query_str);
 
     $phids = array_keys($phids);

@@ -45,7 +45,7 @@ final class DifferentialRevisionDetailView extends AphrontView {
 
   public function render() {
 
-    require_celerity_resource('differential-core-view-css');
+    $this->requireResource('differential-core-view-css');
 
     $revision = $this->revision;
     $user = $this->getUser();
@@ -169,8 +169,8 @@ final class DifferentialRevisionDetailView extends AphrontView {
     $status_name =
       ArcanistDifferentialRevisionStatus::getNameForRevisionStatus($status);
 
-    return id(new PhabricatorTagView())
-      ->setType(PhabricatorTagView::TYPE_STATE)
+    return id(new PHUITagView())
+      ->setType(PHUITagView::TYPE_STATE)
       ->setName($status_name);
   }
 

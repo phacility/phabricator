@@ -29,10 +29,6 @@ final class PhabricatorApplicationFiles extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
-  public function getQuickCreateURI() {
-    return $this->getBaseURI().'upload/';
-  }
-
   public function canUninstall() {
     return false;
   }
@@ -61,6 +57,7 @@ final class PhabricatorApplicationFiles extends PhabricatorApplication {
         'xform/(?P<transform>[^/]+)/(?P<phid>[^/]+)/(?P<key>[^/]+)/'
           => 'PhabricatorFileTransformController',
         'uploaddialog/' => 'PhabricatorFileUploadDialogController',
+        'download/(?P<phid>[^/]+)/' => 'PhabricatorFileDialogController',
       ),
     );
   }

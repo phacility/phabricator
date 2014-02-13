@@ -14,9 +14,8 @@ EOHELP
 );
 $args->parseStandardArguments();
 
-$args->parseWorkflows(
-  array(
-    new DivinerGenerateWorkflow(),
-    new DivinerAtomizeWorkflow(),
-    new PhutilHelpArgumentWorkflow(),
-  ));
+$workflows = id(new PhutilSymbolLoader())
+  ->setAncestorClass('DivinerWorkflow')
+  ->loadObjects();
+$workflows[] = new PhutilHelpArgumentWorkflow();
+$args->parseWorkflows($workflows);

@@ -14,6 +14,29 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
     return 'PhabricatorApplicationManiphest';
   }
 
+  public function getAdapterContentDescription() {
+    return pht(
+      'React to tasks being created or updated.');
+  }
+
+  public function getRepetitionOptions() {
+    return array(
+      HeraldRepetitionPolicyConfig::EVERY,
+      HeraldRepetitionPolicyConfig::FIRST,
+    );
+  }
+
+  public function supportsRuleType($rule_type) {
+    switch ($rule_type) {
+      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
+      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
+        return true;
+      case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
+      default:
+        return false;
+    }
+  }
+
   public function setTask(ManiphestTask $task) {
     $this->task = $task;
     return $this;
@@ -60,9 +83,12 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
         self::FIELD_TITLE,
         self::FIELD_BODY,
         self::FIELD_AUTHOR,
+        self::FIELD_ASSIGNEE,
         self::FIELD_CC,
         self::FIELD_CONTENT_SOURCE,
         self::FIELD_PROJECTS,
+        self::FIELD_TASK_PRIORITY,
+        self::FIELD_IS_NEW_OBJECT,
       ),
       parent::getFields());
   }
@@ -102,10 +128,14 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
         return $this->getTask()->getDescription();
       case self::FIELD_AUTHOR:
         return $this->getTask()->getAuthorPHID();
+      case self::FIELD_ASSIGNEE:
+        return $this->getTask()->getOwnerPHID();
       case self::FIELD_CC:
         return $this->getTask()->getCCPHIDs();
       case self::FIELD_PROJECTS:
         return $this->getTask()->getProjectPHIDs();
+      case self::FIELD_TASK_PRIORITY:
+        return $this->getTask()->getPriority();
     }
 
     return parent::getHeraldField($field);

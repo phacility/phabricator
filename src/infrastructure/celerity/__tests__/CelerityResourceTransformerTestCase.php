@@ -22,11 +22,9 @@ final class CelerityResourceTransformerTestCase extends PhabricatorTestCase {
       );
 
       $xformer = new CelerityResourceTransformer();
-      $xformer->setRawResourceMap(
+      $xformer->setRawURIMap(
         array(
-          '/rsrc/example.png' => array(
-            'uri' => '/res/hash/example.png',
-          ),
+          '/rsrc/example.png' => '/res/hash/example.png',
         ));
       $xformer->setMinify($options['minify']);
 

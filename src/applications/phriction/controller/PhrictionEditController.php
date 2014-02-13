@@ -149,13 +149,6 @@ final class PhrictionEditController
       }
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Form Errors'))
-        ->setErrors($errors);
-    }
-
     if ($document->getID()) {
       $panel_header = pht('Edit Phriction Document');
       $submit_button = pht('Save Changes');
@@ -230,7 +223,7 @@ final class PhrictionEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Edit Document'))
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     $preview = id(new PHUIRemarkupPreviewPanel())
@@ -241,17 +234,12 @@ final class PhrictionEditController
 
     $crumbs = $this->buildApplicationCrumbs();
     if ($document->getID()) {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($content->getTitle())
-          ->setHref(PhrictionDocument::getSlugURI($document->getSlug())));
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Edit')));
+      $crumbs->addTextCrumb(
+        $content->getTitle(),
+        PhrictionDocument::getSlugURI($document->getSlug()));
+      $crumbs->addTextCrumb(pht('Edit'));
     } else {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Create')));
+      $crumbs->addTextCrumb(pht('Create'));
     }
 
     return $this->buildApplicationPage(

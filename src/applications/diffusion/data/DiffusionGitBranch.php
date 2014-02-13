@@ -2,6 +2,8 @@
 
 final class DiffusionGitBranch {
 
+  const DEFAULT_GIT_REMOTE = 'origin';
+
   /**
    * Parse the output of 'git branch -r --verbose --no-abbrev' or similar into
    * a map. For instance:

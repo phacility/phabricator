@@ -65,7 +65,7 @@ abstract class PhabricatorAuthController extends PhabricatorController {
   protected function loginUser(PhabricatorUser $user) {
 
     $response = $this->buildLoginValidateResponse($user);
-    $session_type = 'web';
+    $session_type = PhabricatorAuthSession::TYPE_WEB;
 
     $event_type = PhabricatorEventType::TYPE_AUTH_WILLLOGINUSER;
     $event_data = array(
@@ -81,14 +81,19 @@ abstract class PhabricatorAuthController extends PhabricatorController {
 
     $should_login = $event->getValue('shouldLogin');
     if ($should_login) {
-      $session_key = $user->establishSession($session_type);
+      $session_key = id(new PhabricatorAuthSessionEngine())
+        ->establishSession($session_type, $user->getPHID());
 
       // NOTE: We allow disabled users to login and roadblock them later, so
       // there's no check for users being disabled here.
 
       $request = $this->getRequest();
-      $request->setCookie('phusr', $user->getUsername());
-      $request->setCookie('phsid', $session_key);
+      $request->setCookie(
+        PhabricatorCookies::COOKIE_USERNAME,
+        $user->getUsername());
+      $request->setCookie(
+        PhabricatorCookies::COOKIE_SESSION,
+        $session_key);
 
       $this->clearRegistrationCookies();
     }
@@ -100,15 +105,15 @@ abstract class PhabricatorAuthController extends PhabricatorController {
     $request = $this->getRequest();
 
     // Clear the registration key.
-    $request->clearCookie('phreg');
+    $request->clearCookie(PhabricatorCookies::COOKIE_REGISTRATION);
 
     // Clear the client ID / OAuth state key.
-    $request->clearCookie('phcid');
+    $request->clearCookie(PhabricatorCookies::COOKIE_CLIENTID);
   }
 
   private function buildLoginValidateResponse(PhabricatorUser $user) {
     $validate_uri = new PhutilURI($this->getApplicationURI('validate/'));
-    $validate_uri->setQueryParam('phusr', $user->getUsername());
+    $validate_uri->setQueryParam('expect', $user->getUsername());
 
     return id(new AphrontRedirectResponse())->setURI((string)$validate_uri);
   }
@@ -167,7 +172,8 @@ abstract class PhabricatorAuthController extends PhabricatorController {
       return array($account, $provider, $response);
     }
 
-    $registration_key = $request->getCookie('phreg');
+    $registration_key = $request->getCookie(
+      PhabricatorCookies::COOKIE_REGISTRATION);
 
     // NOTE: This registration key check is not strictly necessary, because
     // we're only creating new accounts, not linking existing accounts. It
@@ -180,7 +186,7 @@ abstract class PhabricatorAuthController extends PhabricatorController {
     // since you could have simply completed the process yourself.
 
     if (!$registration_key) {
-      $response =  $this->renderError(
+      $response = $this->renderError(
         pht(
           'Your browser did not submit a registration key with the request. '.
           'You must use the same browser to begin and complete registration. '.

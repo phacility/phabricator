@@ -34,13 +34,14 @@ final class PhabricatorSettingsPanelConduit
           ->setDialog($dialog);
       }
 
-      $conn = $user->establishConnection('w');
-      queryfx(
-        $conn,
-        'DELETE FROM %T WHERE userPHID = %s AND type LIKE %>',
-        PhabricatorUser::SESSION_TABLE,
-        $user->getPHID(),
-        'conduit');
+      $sessions = id(new PhabricatorAuthSessionQuery())
+        ->setViewer($user)
+        ->withIdentityPHIDs(array($user->getPHID()))
+        ->withSessionTypes(array(PhabricatorAuthSession::TYPE_CONDUIT))
+        ->execute();
+      foreach ($sessions as $session) {
+        $session->delete();
+      }
 
       // This implicitly regenerates the certificate.
       $user->setConduitCertificate(null);
@@ -64,6 +65,8 @@ final class PhabricatorSettingsPanelConduit
       $notice = null;
     }
 
+    Javelin::initBehavior('select-on-click');
+
     $cert_form = new AphrontFormView();
     $cert_form
       ->setUser($user)
@@ -77,6 +80,8 @@ final class PhabricatorSettingsPanelConduit
         id(new AphrontFormTextAreaControl())
           ->setLabel(pht('Certificate'))
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_SHORT)
+          ->setReadonly(true)
+          ->setSigil('select-on-click')
           ->setValue($user->getConduitCertificate()));
 
     $cert_form = id(new PHUIObjectBoxView())

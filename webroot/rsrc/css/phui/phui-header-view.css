@@ -44,7 +44,8 @@ body .phui-header-shell.phui-bleed-header
   position: relative;
 }
 
-.phui-header-view a {
+.phui-header-view a,
+.phui-header-view a.simple {
   color: {$darkbluetext};
 }
 
@@ -75,7 +76,7 @@ body.device-phone .phui-header-view {
   font-size: 13px;
 }
 
-.phui-header-tags .phabricator-tag-view {
+.phui-header-tags .phui-tag-view {
   margin-left: 4px;
 }
 

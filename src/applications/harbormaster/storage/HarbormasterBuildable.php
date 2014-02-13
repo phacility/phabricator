@@ -1,12 +1,15 @@
 <?php
 
 final class HarbormasterBuildable extends HarbormasterDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    HarbormasterBuildableInterface {
 
   protected $buildablePHID;
   protected $containerPHID;
   protected $buildStatus;
   protected $buildableStatus;
+  protected $isManualBuildable;
 
   private $buildableObject = self::ATTACHABLE;
   private $containerObject = self::ATTACHABLE;
@@ -18,8 +21,13 @@ final class HarbormasterBuildable extends HarbormasterDAO
 
   public static function initializeNewBuildable(PhabricatorUser $actor) {
     return id(new HarbormasterBuildable())
+      ->setIsManualBuildable(0)
       ->setBuildStatus(self::STATUS_WHATEVER)
       ->setBuildableStatus(self::STATUS_WHATEVER);
+  }
+
+  public function getMonogram() {
+    return 'B'.$this->getID();
   }
 
   /**
@@ -34,6 +42,7 @@ final class HarbormasterBuildable extends HarbormasterDAO
     $buildable = id(new HarbormasterBuildableQuery())
       ->setViewer($actor)
       ->withBuildablePHIDs(array($buildable_object_phid))
+      ->withManualBuildables(false)
       ->setLimit(1)
       ->executeOne();
     if ($buildable) {
@@ -77,19 +86,31 @@ final class HarbormasterBuildable extends HarbormasterDAO
       ->withPHIDs($plan_phids)
       ->execute();
     foreach ($plans as $plan) {
-      $build = HarbormasterBuild::initializeNewBuild(
-        PhabricatorUser::getOmnipotentUser());
-      $build->setBuildablePHID($buildable->getPHID());
-      $build->setBuildPlanPHID($plan->getPHID());
-      $build->setBuildStatus(HarbormasterBuild::STATUS_PENDING);
-      $build->save();
+      if ($plan->isDisabled()) {
+        // TODO: This should be communicated more clearly -- maybe we should
+        // create the build but set the status to "disabled" or "derelict".
+        continue;
+      }
 
-      PhabricatorWorker::scheduleTask(
-        'HarbormasterBuildWorker',
-        array(
-          'buildID' => $build->getID()
-        ));
+      $buildable->applyPlan($plan);
     }
+  }
+
+  public function applyPlan(HarbormasterBuildPlan $plan) {
+    $viewer = PhabricatorUser::getOmnipotentUser();
+    $build = HarbormasterBuild::initializeNewBuild($viewer)
+      ->setBuildablePHID($this->getPHID())
+      ->setBuildPlanPHID($plan->getPHID())
+      ->setBuildStatus(HarbormasterBuild::STATUS_PENDING)
+      ->save();
+
+    PhabricatorWorker::scheduleTask(
+      'HarbormasterBuildWorker',
+      array(
+        'buildID' => $build->getID()
+      ));
+
+    return $this;
   }
 
   public function getConfiguration() {
@@ -156,6 +177,7 @@ final class HarbormasterBuildable extends HarbormasterDAO
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
@@ -170,9 +192,24 @@ final class HarbormasterBuildable extends HarbormasterDAO
   }
 
   public function describeAutomaticCapability($capability) {
-    return pht(
-      'Users must be able to see the revision or repository to see a '.
-      'buildable.');
+    return pht('A buildable inherits policies from the underlying object.');
   }
+
+
+
+/* -(  HarbormasterBuildableInterface  )------------------------------------- */
+
+
+  public function getHarbormasterBuildablePHID() {
+    // NOTE: This is essentially just for convenience, as it allows you create
+    // a copy of a buildable by specifying `B123` without bothering to go
+    // look up the underlying object.
+    return $this->getBuildablePHID();
+  }
+
+  public function getHarbormasterContainerPHID() {
+    return $this->getContainerPHID();
+  }
+
 
 }

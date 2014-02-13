@@ -62,6 +62,14 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
     );
   }
 
+
+  protected function getCustomCapabilities() {
+    return array(
+      PeopleCapabilityBrowseUserDirectory::CAPABILITY => array(
+      ),
+    );
+  }
+
   public function loadStatus(PhabricatorUser $user) {
     if (!$user->getIsAdmin()) {
       return array();
@@ -97,10 +105,11 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
     if ($user->isLoggedIn() && $user->isUserActivated()) {
       $image = $user->loadProfileImageURI();
 
-      $item = new PHUIListItemView();
-      $item->setName($user->getUsername());
-      $item->setHref('/p/'.$user->getUsername().'/');
-      $item->addClass('core-menu-item');
+      $item = id(new PHUIListItemView())
+        ->setName($user->getUsername())
+        ->setHref('/p/'.$user->getUsername().'/')
+        ->addClass('core-menu-item')
+        ->setOrder(100);
 
       $classes = array(
         'phabricator-core-menu-icon',

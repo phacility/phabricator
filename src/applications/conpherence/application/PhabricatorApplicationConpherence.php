@@ -9,10 +9,6 @@ final class PhabricatorApplicationConpherence extends PhabricatorApplication {
     return '/conpherence/';
   }
 
-  public function getQuickCreateURI() {
-    return $this->getBaseURI().'new/';
-  }
-
   public function getShortDescription() {
     return pht('Messaging');
   }
@@ -49,5 +45,19 @@ final class PhabricatorApplicationConpherence extends PhabricatorApplication {
       ),
     );
   }
+
+  public function getQuickCreateItems(PhabricatorUser $viewer) {
+    $items = array();
+
+    $item = id(new PHUIListItemView())
+      ->setName(pht('Conpherence Thread'))
+      ->setAppIcon('conpherence-dark')
+      ->setWorkflow(true)
+      ->setHref($this->getBaseURI().'new/');
+    $items[] = $item;
+
+    return $items;
+  }
+
 
 }

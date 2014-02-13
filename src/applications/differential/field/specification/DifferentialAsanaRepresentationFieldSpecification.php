@@ -65,11 +65,11 @@ final class DifferentialAsanaRepresentationFieldSpecification
         ),
       ));
 
-    return id(new PhabricatorTagView())
+    return id(new PHUITagView())
       ->setID($tag_id)
       ->setName($href)
       ->setHref($href)
-      ->setType(PhabricatorTagView::TYPE_OBJECT)
+      ->setType(PHUITagView::TYPE_OBJECT)
       ->setExternal(true);
   }
 

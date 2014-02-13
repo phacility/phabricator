@@ -1,6 +1,6 @@
 <?php
 
-final class DrydockBlueprintViewController extends DrydockController {
+final class DrydockBlueprintViewController extends DrydockBlueprintController {
 
   private $id;
 
@@ -10,17 +10,22 @@ final class DrydockBlueprintViewController extends DrydockController {
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
-    $blueprint = id(new DrydockBlueprint())->load($this->id);
+    $blueprint = id(new DrydockBlueprintQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$blueprint) {
       return new Aphront404Response();
     }
 
-    $title = 'Blueprint '.$blueprint->getID().' '.$blueprint->getClassName();
+    $title = $blueprint->getBlueprintName();
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($title);
+      ->setHeader($title)
+      ->setUser($viewer)
+      ->setPolicyObject($blueprint);
 
     $actions = $this->buildActionListView($blueprint);
     $properties = $this->buildPropertyListView($blueprint, $actions);
@@ -30,7 +35,7 @@ final class DrydockBlueprintViewController extends DrydockController {
 
     $resources = id(new DrydockResourceQuery())
       ->withBlueprintPHIDs(array($blueprint->getPHID()))
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->execute();
 
     $resource_list = $this->buildResourceListView($resources);
@@ -42,19 +47,32 @@ final class DrydockBlueprintViewController extends DrydockController {
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Blueprint %d', $blueprint->getID())));
+    $crumbs->addTextCrumb(pht('Blueprint %d', $blueprint->getID()));
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($properties);
 
+    $xactions = id(new DrydockBlueprintTransactionQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($blueprint->getPHID()))
+      ->execute();
+
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($viewer);
+
+    $timeline = id(new PhabricatorApplicationTransactionView())
+      ->setUser($viewer)
+      ->setObjectPHID($blueprint->getPHID())
+      ->setTransactions($xactions)
+      ->setMarkupEngine($engine);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $object_box,
-        $resource_list
+        $resource_list,
+        $timeline,
       ),
       array(
         'device'  => true,
@@ -64,21 +82,28 @@ final class DrydockBlueprintViewController extends DrydockController {
   }
 
   private function buildActionListView(DrydockBlueprint $blueprint) {
+    $viewer = $this->getRequest()->getUser();
+
     $view = id(new PhabricatorActionListView())
-      ->setUser($this->getRequest()->getUser())
+      ->setUser($viewer)
       ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($blueprint);
 
     $uri = '/blueprint/edit/'.$blueprint->getID().'/';
     $uri = $this->getApplicationURI($uri);
 
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $blueprint,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
     $view->addAction(
       id(new PhabricatorActionView())
         ->setHref($uri)
-        ->setName(pht('Edit Blueprint Policies'))
+        ->setName(pht('Edit Blueprint'))
         ->setIcon('edit')
-        ->setWorkflow(true)
-        ->setDisabled(false));
+        ->setWorkflow(!$can_edit)
+        ->setDisabled(!$can_edit));
 
     return $view;
   }
@@ -91,8 +116,8 @@ final class DrydockBlueprintViewController extends DrydockController {
     $view->setActionList($actions);
 
     $view->addProperty(
-      pht('Implementation'),
-      $blueprint->getClassName());
+      pht('Type'),
+      $blueprint->getImplementation()->getBlueprintName());
 
     return $view;
   }

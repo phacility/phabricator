@@ -47,7 +47,7 @@ final class DifferentialLandingToGitHub
   /**
    * returns PhabricatorActionView or an array of PhabricatorActionView or null.
    */
-  public function createMenuItems(
+  public function createMenuItem(
     PhabricatorUser $viewer,
     DifferentialRevision $revision,
     PhabricatorRepository $repository) {

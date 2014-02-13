@@ -12,14 +12,15 @@ final class DiffusionLowLevelMercurialBranchesQuery
     // NOTE: `--debug` gives us 40-character hashes.
     list($stdout) = $repository->execxLocalCommand(
       '--debug branches');
+    $stdout = PhabricatorRepository::filterMercurialDebugOutput($stdout);
 
     $branches = array();
 
     $lines = ArcanistMercurialParser::parseMercurialBranches($stdout);
     foreach ($lines as $name => $spec) {
-      $branches[] = id(new DiffusionBranchInformation())
-        ->setName($name)
-        ->setHeadCommitIdentifier($spec['rev']);
+      $branches[] = id(new DiffusionRepositoryRef())
+        ->setShortName($name)
+        ->setCommitIdentifier($spec['rev']);
     }
 
     return $branches;

@@ -195,26 +195,20 @@ final class PhabricatorConfigEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($error_view)
       ->setForm($form);
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Config'))
-        ->setHref($this->getApplicationURI()));
-
-    if ($group) {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($group->getName())
-          ->setHref($group_uri));
+    if ($error_view) {
+       $form_box->setErrorView($error_view);
     }
 
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($this->key)
-        ->setHref('/config/edit/'.$this->key));
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Config'), $this->getApplicationURI());
+
+    if ($group) {
+      $crumbs->addTextCrumb($group->getName(), $group_uri);
+    }
+
+    $crumbs->addTextCrumb($this->key, '/config/edit/'.$this->key);
 
     $xactions = id(new PhabricatorConfigTransactionQuery())
       ->withObjectPHIDs(array($config_entry->getPHID()))

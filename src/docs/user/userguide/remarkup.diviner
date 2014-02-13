@@ -18,7 +18,7 @@ formatting text in Remarkup.
 
 These are inline styles, and can be applied to most text:
 
-  **bold** //italic// ##monospaced## `monospaced` ~~deleted~~
+  **bold** //italic// ##monospaced## `monospaced` ~~deleted~~ __underlined__
   D123 T123 rX123           # Link to Objects
   {D123} {T123}             # Link to Objects (Full Name)
   {F123}                    # Embed Images
@@ -58,9 +58,10 @@ Format **basic text styles** like this:
   ##monospaced text##
   `monospaced text`
   ~~deleted text~~
+  __underlined text__
 
 Those produce **bold text**, //italic text//, ##monospaced text##,
-`monospaced text` and ~~deleted text~~, respectively.
+`monospaced text`, ~~deleted text~~, and __underlined text__, respectively.
 
 = Layout =
 
@@ -240,9 +241,21 @@ You can use ##lines=N## to limit the vertical size of a chunk of code, and
   <p>Mangostine</p>
   <p>Melon</p>
 
-You can also use "NOTE:" to call out an important idea.
+You can also use "NOTE:", "WARNING:", or "IMPORTANT:" to call out an important
+ idea.
 
-NOTE: Don't cross the streams!
+NOTE: Best practices in proton pack operation include not crossing the streams.
+
+WARNING: Crossing the streams can result in total protonic reversal!
+
+IMPORTANT: Don't cross the streams!
+
+You can also use "(NOTE)", "(WARNING)", or "(IMPORTANT)" to get the same
+ effect but without "(NOTE"), "(WARNING)", or "(IMPORTANT)" appearing in the
+ rendered result. For example
+
+(NOTE) Dr. Egon Spengler is the best resource for additional proton pack
+ questions.
 
 = Linking URIs =
 

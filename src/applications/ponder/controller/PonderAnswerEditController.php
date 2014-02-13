@@ -61,10 +61,6 @@ final class PonderAnswerEditController extends PonderController {
       }
     }
 
-    if ($errors) {
-      $errors = id(new AphrontErrorView())->setErrors($errors);
-    }
-
     $answer_content_id = celerity_generate_unique_node_id();
 
     $form = id(new AphrontFormView())
@@ -86,17 +82,12 @@ final class PonderAnswerEditController extends PonderController {
           ->addCancelButton($answer_uri));
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName("Q{$qid}")
-        ->setHref($answer_uri));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Edit Answer')));
+    $crumbs->addTextCrumb("Q{$qid}", $answer_uri);
+    $crumbs->addTextCrumb(pht('Edit Answer'));
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Edit Answer'))
-      ->setFormError($errors)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     $preview = id(new PHUIRemarkupPreviewPanel())

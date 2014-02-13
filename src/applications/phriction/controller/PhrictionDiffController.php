@@ -107,21 +107,16 @@ final class PhrictionDiffController
       $crumbs->addCrumb($view);
     }
 
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('History'))
-        ->setHref(PhrictionDocument::getSlugURI($slug, 'history')));
-
+    $crumbs->addTextCrumb(
+      pht('History'),
+      PhrictionDocument::getSlugURI($slug, 'history'));
 
     $title = pht("Version %s vs %s", $l, $r);
 
     $header = id(new PHUIHeaderView())
       ->setHeader($title);
 
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title)
-        ->setHref($request->getRequestURI()));
+    $crumbs->addTextCrumb($title, $request->getRequestURI());
 
 
     $comparison_table = $this->renderComparisonTable(

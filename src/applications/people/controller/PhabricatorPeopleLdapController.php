@@ -38,10 +38,9 @@ final class PhabricatorPeopleLdapController
       ->appendChild($form);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Import Ldap Users'))
-        ->setHref($this->getApplicationURI('/ldap/')));
+    $crumbs->addTextCrumb(
+      pht('Import Ldap Users'),
+      $this->getApplicationURI('/ldap/'));
 
     $nav = $this->buildSideNavView();
     $nav->setCrumbs($crumbs);

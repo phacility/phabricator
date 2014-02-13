@@ -30,10 +30,9 @@ final class PhabricatorMacroViewController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setHref($this->getApplicationURI('/view/'.$macro->getID().'/'))
-        ->setName($title_short));
+    $crumbs->addTextCrumb(
+      $title_short,
+      $this->getApplicationURI('/view/'.$macro->getID().'/'));
 
     $properties = $this->buildPropertyView($macro, $actions);
     if ($file) {
@@ -76,10 +75,10 @@ final class PhabricatorMacroViewController
 
     if ($macro->getIsDisabled()) {
       $header->addTag(
-        id(new PhabricatorTagView())
-          ->setType(PhabricatorTagView::TYPE_STATE)
+        id(new PHUITagView())
+          ->setType(PHUITagView::TYPE_STATE)
           ->setName(pht('Macro Disabled'))
-          ->setBackgroundColor(PhabricatorTagView::COLOR_BLACK));
+          ->setBackgroundColor(PHUITagView::COLOR_BLACK));
     }
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');

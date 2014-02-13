@@ -146,6 +146,10 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
       'PhabricatorRemarkupCustomInlineRule or '.
       'PhabricatorRemarkupCustomBlockRule.');
 
+    $session_reason = pht(
+      'Sessions now expire and are garbage collected rather than having an '.
+      'arbitrary concurrency limit.');
+
     $ancient_config += array(
       'phid.external-loaders' =>
         pht(
@@ -167,6 +171,13 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
       'differential.anonymous-access' => pht(
         'Phabricator now has meaningful global access controls. See '.
         '`policy.allow-public`.'),
+      'celerity.resource-path' => pht(
+        'An alternate resource map is no longer supported. Instead, use '.
+        'multiple maps. See T4222.'),
+      'metamta.send-immediately' => pht(
+        'Mail is now always delivered by the daemons.'),
+      'auth.sessions.conduit' => $session_reason,
+      'auth.sessions.web' => $session_reason,
     );
 
     return $ancient_config;

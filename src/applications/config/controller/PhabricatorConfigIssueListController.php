@@ -30,10 +30,7 @@ final class PhabricatorConfigIssueListController
 
     $crumbs = $this
       ->buildApplicationCrumbs($nav)
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Setup'))
-          ->setHref($this->getApplicationURI('issue/')));
+      ->addTextCrumb(pht('Setup'), $this->getApplicationURI('issue/'));
 
     $nav->setCrumbs($crumbs);
 

@@ -35,12 +35,11 @@ final class PhabricatorCountdownEditController
       $countdown = PhabricatorCountdown::initializeNewCountdown($user);
     }
 
-    $error_view = null;
     $e_text = true;
     $e_epoch = null;
 
+    $errors = array();
     if ($request->isFormPost()) {
-      $errors = array();
       $title = $request->getStr('title');
       $epoch = $request->getStr('epoch');
       $view_policy = $request->getStr('viewPolicy');
@@ -71,11 +70,6 @@ final class PhabricatorCountdownEditController
         $countdown->save();
         return id(new AphrontRedirectResponse())
           ->setURI('/countdown/'.$countdown->getID().'/');
-      } else {
-        $error_view = id(new AphrontErrorView())
-          ->setErrors($errors)
-          ->setTitle(pht('It\'s not The Final Countdown (du nu nuuu nun)' .
-            ' until you fix these problem'));
       }
     }
 
@@ -90,18 +84,11 @@ final class PhabricatorCountdownEditController
     $cancel_uri = '/countdown/';
     if ($countdown->getID()) {
       $cancel_uri = '/countdown/'.$countdown->getID().'/';
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName('C'.$countdown->getID())
-          ->setHref($cancel_uri));
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Edit')));
+      $crumbs->addTextCrumb('C'.$countdown->getID(), $cancel_uri);
+      $crumbs->addTextCrumb(pht('Edit'));
       $submit_label = pht('Save Changes');
     } else {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Create Countdown')));
+      $crumbs->addTextCrumb(pht('Create Countdown'));
       $submit_label = pht('Create Countdown');
     }
 
@@ -142,7 +129,7 @@ final class PhabricatorCountdownEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return $this->buildApplicationPage(

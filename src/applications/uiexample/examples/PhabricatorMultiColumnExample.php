@@ -97,7 +97,7 @@ final class PhabricatorMultiColumnExample extends PhabricatorUIExample {
       ->addColumn($friday)
       ->addColumn($saturday)
       ->setFluidLayout(true)
-      ->setShadow(true);
+      ->setBorder(true);
 
     $shipping = id(new PHUIFormLayoutView())
       ->setUser($user)
@@ -160,7 +160,7 @@ final class PhabricatorMultiColumnExample extends PhabricatorUIExample {
       ->addColumn(hsprintf('<h1>%s</h1>%s', $billing_title, $shipping))
       ->addColumn(hsprintf('<h1>%s</h1>%s', $cc_title, $cc))
       ->setFluidLayout(true)
-      ->setShadow(true);
+      ->setBorder(true);
 
     $wrap1 = phutil_tag(
       'div',

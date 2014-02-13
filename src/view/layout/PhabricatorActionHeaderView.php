@@ -32,7 +32,7 @@ final class PhabricatorActionHeaderView extends AphrontView {
     return $this;
   }
 
-  public function setTag(PhabricatorTagView $tag) {
+  public function setTag(PHUITagView $tag) {
     $this->actions[] = $tag;
     return $this;
   }

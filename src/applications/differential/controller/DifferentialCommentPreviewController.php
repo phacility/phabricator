@@ -10,13 +10,19 @@ final class DifferentialCommentPreviewController
   }
 
   public function processRequest() {
-
     $request = $this->getRequest();
+    $viewer = $request->getUser();
 
-    $author_phid = $request->getUser()->getPHID();
+    $revision = id(new DifferentialRevisionQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->id))
+      ->executeOne();
+    if (!$revision) {
+      return new Aphront404Response();
+    }
 
+    $author_phid = $viewer->getPHID();
     $action = $request->getStr('action');
-
 
     $comment = new DifferentialComment();
     $comment->setContent($request->getStr('content'));
@@ -51,6 +57,7 @@ final class DifferentialCommentPreviewController
     $view->setComment($comment);
     $view->setHandles($handles);
     $view->setMarkupEngine($engine);
+    $view->setRevision($revision);
     $view->setPreview(true);
     $view->setTargetDiff(null);
 

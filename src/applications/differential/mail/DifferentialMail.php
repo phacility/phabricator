@@ -9,7 +9,7 @@ abstract class DifferentialMail extends PhabricatorMail {
   protected $actorHandle;
 
   protected $revision;
-  protected $comment;
+  protected $comments;
   protected $changesets;
   protected $inlineComments;
   protected $isFirstMailAboutRevision;
@@ -370,13 +370,13 @@ abstract class DifferentialMail extends PhabricatorMail {
     return "D{$id}: {$title}";
   }
 
-  public function setComment($comment) {
-    $this->comment = $comment;
+  public function setComments(array $comments) {
+    $this->comments = $comments;
     return $this;
   }
 
-  public function getComment() {
-    return $this->comment;
+  public function getComments() {
+    return $this->comments;
   }
 
   public function setChangesets($changesets) {

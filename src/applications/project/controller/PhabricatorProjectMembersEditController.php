@@ -29,41 +29,34 @@ final class PhabricatorProjectMembersEditController
 
     $member_phids = $project->getMemberPHIDs();
 
-    $errors = array();
     if ($request->isFormPost()) {
-      $changed_something = false;
-      $member_map = array_fill_keys($member_phids, true);
+      $member_spec = array();
 
       $remove = $request->getStr('remove');
       if ($remove) {
-        if (isset($member_map[$remove])) {
-          unset($member_map[$remove]);
-          $changed_something = true;
-        }
-      } else {
-        $new_members = $request->getArr('phids');
-        foreach ($new_members as $member) {
-          if (empty($member_map[$member])) {
-            $member_map[$member] = true;
-            $changed_something = true;
-          }
-        }
+        $member_spec['-'] = array_fuse(array($remove));
       }
+
+      $add_members = $request->getArr('phids');
+      if ($add_members) {
+        $member_spec['+'] = array_fuse($add_members);
+      }
+
+      $type_member = PhabricatorEdgeConfig::TYPE_PROJ_MEMBER;
 
       $xactions = array();
-      if ($changed_something) {
-        $xaction = new PhabricatorProjectTransaction();
-        $xaction->setTransactionType(
-          PhabricatorProjectTransaction::TYPE_MEMBERS);
-        $xaction->setNewValue(array_keys($member_map));
-        $xactions[] = $xaction;
-      }
 
-      if ($xactions) {
-        $editor = new PhabricatorProjectEditor($project);
-        $editor->setActor($user);
-        $editor->applyTransactions($xactions);
-      }
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $type_member)
+        ->setNewValue($member_spec);
+
+      $editor = id(new PhabricatorProjectTransactionEditor($project))
+        ->setActor($user)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true)
+        ->applyTransactions($project, $xactions);
 
       return id(new AphrontRedirectResponse())
         ->setURI($request->getRequestURI());
@@ -111,15 +104,11 @@ final class PhabricatorProjectMembersEditController
       ->setHeaderText($title)
       ->setForm($form);
 
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($project->getName())
-        ->setHref('/project/view/'.$project->getID().'/'));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Edit Members'))
-        ->setHref($this->getApplicationURI()));
+    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView())
+      ->addTextCrumb(
+        $project->getName(),
+        '/project/view/'.$project->getID().'/')
+      ->addTextCrumb(pht('Edit Members'), $this->getApplicationURI());
 
     return $this->buildApplicationPage(
       array(

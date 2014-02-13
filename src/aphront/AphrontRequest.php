@@ -1,10 +1,9 @@
 <?php
 
 /**
+ * @task data   Accessing Request Data
+ * @task cookie Managing Cookies
  *
- * @task data Accessing Request Data
- *
- * @group aphront
  */
 final class AphrontRequest {
 
@@ -212,22 +211,25 @@ final class AphrontRequest {
       // Add some diagnostic details so we can figure out if some CSRF issues
       // are JS problems or people accessing Ajax URIs directly with their
       // browsers.
-      if ($token) {
-        $token_info = "with an invalid CSRF token";
-      } else {
-        $token_info = "without a CSRF token";
-      }
+      $more_info = array();
 
       if ($this->isAjax()) {
-        $more_info = "(This was an Ajax request, {$token_info}.)";
+        $more_info[] = pht('This was an Ajax request.');
       } else {
-        $more_info = "(This was a web request, {$token_info}.)";
+        $more_info[] = pht('This was a Web request.');
+      }
+
+      if ($token) {
+        $more_info[] = pht('This request had an invalid CSRF token.');
+      } else {
+        $more_info[] = pht('This request had no CSRF token.');
       }
 
       // Give a more detailed explanation of how to avoid the exception
       // in developer mode.
       if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
-        $more_info = $more_info .
+        // TODO: Clean this up, see T1921.
+        $more_info[] =
           "To avoid this error, use phabricator_form() to construct forms. " .
           "If you are already using phabricator_form(), make sure the form " .
           "'action' uses a relative URI (i.e., begins with a '/'). Forms " .
@@ -249,14 +251,11 @@ final class AphrontRequest {
       // but give the user some indication of what happened since the workflow
       // is incredibly confusing otherwise.
       throw new AphrontCSRFException(
-        "The form you just submitted did not include a valid CSRF token. ".
-        "This token is a technical security measure which prevents a ".
-        "certain type of login hijacking attack. However, the token can ".
-        "become invalid if you leave a page open for more than six hours ".
-        "without a connection to the internet. To fix this problem: reload ".
-        "the page, and then resubmit it. All data inserted to the form will ".
-        "be lost in some browsers so copy them somewhere before reloading.\n\n".
-        $more_info);
+        pht(
+          "You are trying to save some data to Phabricator, but the request ".
+          "your browser made included an incorrect token. Reload the page ".
+          "and try again. You may need to clear your cookies.\n\n%s",
+          implode("\n", $more_info)));
     }
 
     return true;
@@ -273,75 +272,105 @@ final class AphrontRequest {
     return $this->validateCSRF();
   }
 
+  final public function setCookiePrefix($prefix) {
+    $this->cookiePrefix = $prefix;
+    return $this;
+  }
+
+  final private function getPrefixedCookieName($name) {
+    if (strlen($this->cookiePrefix)) {
+      return $this->cookiePrefix.'_'.$name;
+    } else {
+      return $name;
+    }
+  }
+
   final public function getCookie($name, $default = null) {
+    $name = $this->getPrefixedCookieName($name);
     return idx($_COOKIE, $name, $default);
   }
 
   final public function clearCookie($name) {
+    $name = $this->getPrefixedCookieName($name);
     $this->setCookie($name, '', time() - (60 * 60 * 24 * 30));
     unset($_COOKIE[$name]);
+  }
+
+  /**
+   * Get the domain which cookies should be set on for this request, or null
+   * if the request does not correspond to a valid cookie domain.
+   *
+   * @return PhutilURI|null   Domain URI, or null if no valid domain exists.
+   *
+   * @task cookie
+   */
+  private function getCookieDomainURI() {
+    $host = $this->getHost();
+
+    // If there's no base domain configured, just use whatever the request
+    // domain is. This makes setup easier, and we'll tell administrators to
+    // configure a base domain during the setup process.
+    $base_uri = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
+    if (!strlen($base_uri)) {
+      return new PhutilURI('http://'.$host.'/');
+    }
+
+    $alternates = PhabricatorEnv::getEnvConfig('phabricator.allowed-uris');
+    $allowed_uris = array_merge(
+      array($base_uri),
+      $alternates);
+
+    foreach ($allowed_uris as $allowed_uri) {
+      $uri = new PhutilURI($allowed_uri);
+      if ($uri->getDomain() == $host) {
+        return $uri;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Determine if security policy rules will allow cookies to be set when
+   * responding to the request.
+   *
+   * @return bool True if setCookie() will succeed. If this method returns
+   *              false, setCookie() will throw.
+   *
+   * @task cookie
+   */
+  final public function canSetCookies() {
+    return (bool)$this->getCookieDomainURI();
   }
 
   final public function setCookie($name, $value, $expire = null) {
 
     $is_secure = false;
 
-    // If a base URI has been configured, ensure cookies are only set on that
-    // domain. Also, use the URI protocol to control SSL-only cookies.
-    $base_uri = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
-    if ($base_uri) {
-      $alternates = PhabricatorEnv::getEnvConfig('phabricator.allowed-uris');
-      $allowed_uris = array_merge(
-        array($base_uri),
-        $alternates);
+    $base_domain_uri = $this->getCookieDomainURI();
+    if (!$base_domain_uri) {
+      $configured_as = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
+      $accessed_as = $this->getHost();
 
-      $host = $this->getHost();
-
-      $match = null;
-      foreach ($allowed_uris as $allowed_uri) {
-        $uri = new PhutilURI($allowed_uri);
-        $domain = $uri->getDomain();
-        if ($host == $domain) {
-          $match = $uri;
-          break;
-        }
-      }
-
-      if ($match === null) {
-        if (count($allowed_uris) > 1) {
-          throw new Exception(
-            pht(
-              'This Phabricator install is configured as "%s", but you are '.
-              'accessing it via "%s". Access Phabricator via the primary '.
-              'configured domain, or one of the permitted alternate '.
-              'domains: %s. Phabricator will not set cookies on other domains '.
-              'for security reasons.',
-              $base_uri,
-              $host,
-              implode(', ', $alternates)));
-        } else {
-          throw new Exception(
-            pht(
-              'This Phabricator install is configured as "%s", but you are '.
-              'accessing it via "%s". Acccess Phabricator via the primary '.
-              'configured domain. Phabricator will not set cookies on other '.
-              'domains for security reasons.',
-              $base_uri,
-              $host));
-        }
-      }
-
-      $base_domain = $match->getDomain();
-      $is_secure = ($match->getProtocol() == 'https');
-    } else {
-      $base_uri = new PhutilURI(PhabricatorEnv::getRequestBaseURI());
-      $base_domain = $base_uri->getDomain();
+      throw new Exception(
+        pht(
+          'This Phabricator install is configured as "%s", but you are '.
+          'using the domain name "%s" to access a page which is trying to '.
+          'set a cookie. Acccess Phabricator on the configured primary '.
+          'domain or a configured alternate domain. Phabricator will not '.
+          'set cookies on other domains for security reasons.',
+          $configured_as,
+          $accessed_as));
     }
+
+    $base_domain = $base_domain_uri->getDomain();
+    $is_secure = ($base_domain_uri->getProtocol() == 'https');
 
     if ($expire === null) {
       $expire = time() + (60 * 60 * 24 * 365 * 5);
     }
 
+    $name = $this->getPrefixedCookieName($name);
 
     if (php_sapi_name() == 'cli') {
       // Do nothing, to avoid triggering "Cannot modify header information"

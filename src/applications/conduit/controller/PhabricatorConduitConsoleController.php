@@ -112,13 +112,14 @@ final class PhabricatorConduitConsoleController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($method->getAPIMethodName())
-      ->setFormError($status_view)
       ->setForm($form);
 
+    if ($status_view) {
+      $form_box->setErrorView($status_view);
+    }
+
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($method->getAPIMethodName()));
+    $crumbs->addTextCrumb($method->getAPIMethodName());
 
     return $this->buildApplicationPage(
       array(

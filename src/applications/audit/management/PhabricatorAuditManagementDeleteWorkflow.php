@@ -178,10 +178,6 @@ final class PhabricatorAuditManagementDeleteWorkflow
     return 0;
   }
 
-  private function getViewer() {
-    return PhabricatorUser::getOmnipotentUser();
-  }
-
   private function loadUsers($users) {
     $users = $this->parseList($users);
     if (!$users) {

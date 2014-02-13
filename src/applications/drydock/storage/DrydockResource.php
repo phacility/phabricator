@@ -27,8 +27,7 @@ final class DrydockResource extends DrydockDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_DRYR);
+    return PhabricatorPHID::generateNewPHID(DrydockPHIDTypeResource::TYPECONST);
   }
 
   public function getAttribute($key, $default = null) {
@@ -53,6 +52,7 @@ final class DrydockResource extends DrydockDAO
   }
 
   public function getBlueprint() {
+    // TODO: Policy stuff.
     if (empty($this->blueprint)) {
       $blueprint = id(new DrydockBlueprint())
         ->loadOneWhere('phid = %s', $this->blueprintPHID);
@@ -63,13 +63,16 @@ final class DrydockResource extends DrydockDAO
 
   public function closeResource() {
     $this->openTransaction();
-      $leases = id(new DrydockLease())->loadAllWhere(
-        'resourceID = %d AND status IN (%Ld)',
-        $this->getID(),
-        array(
-          DrydockLeaseStatus::STATUS_PENDING,
-          DrydockLeaseStatus::STATUS_ACTIVE,
-        ));
+      $statuses = array(
+        DrydockLeaseStatus::STATUS_PENDING,
+        DrydockLeaseStatus::STATUS_ACTIVE,
+      );
+
+      $leases = id(new DrydockLeaseQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withResourceIDs(array($this->getID()))
+        ->withStatuses($statuses)
+        ->execute();
 
       foreach ($leases as $lease) {
         switch ($lease->getStatus()) {

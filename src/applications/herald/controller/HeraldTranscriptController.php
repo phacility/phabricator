@@ -16,7 +16,7 @@ final class HeraldTranscriptController extends HeraldController {
     $map = $this->getFilterMap();
     $this->filter = idx($data, 'filter');
     if (empty($map[$this->filter])) {
-      $this->filter = self::FILTER_AFFECTED;
+      $this->filter = self::FILTER_ALL;
     }
   }
 
@@ -97,13 +97,10 @@ final class HeraldTranscriptController extends HeraldController {
     }
 
     $crumbs = id($this->buildApplicationCrumbs())
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Transcripts'))
-          ->setHref($this->getApplicationURI('/transcript/')))
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($xscript->getID()));
+      ->addTextCrumb(
+        pht('Transcripts'),
+        $this->getApplicationURI('/transcript/'))
+      ->addTextCrumb($xscript->getID());
     $nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(
@@ -152,9 +149,9 @@ final class HeraldTranscriptController extends HeraldController {
 
   protected function getFilterMap() {
     return array(
-      self::FILTER_AFFECTED => pht('Rules that Affected Me'),
-      self::FILTER_OWNED    => pht('Rules I Own'),
       self::FILTER_ALL      => pht('All Rules'),
+      self::FILTER_OWNED    => pht('Rules I Own'),
+      self::FILTER_AFFECTED => pht('Rules that Affected Me'),
     );
   }
 
@@ -292,6 +289,10 @@ final class HeraldTranscriptController extends HeraldController {
           break;
         case HeraldAdapter::ACTION_FLAG:
           $target = PhabricatorFlagColor::getColorName($target);
+          break;
+        case HeraldAdapter::ACTION_BLOCK:
+          // Target is a text string.
+          $target = $target;
           break;
         default:
           if ($target) {

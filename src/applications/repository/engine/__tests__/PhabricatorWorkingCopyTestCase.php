@@ -11,6 +11,14 @@ abstract class PhabricatorWorkingCopyTestCase extends PhabricatorTestCase {
   }
 
   protected function buildBareRepository($callsign) {
+    $existing_repository = id(new PhabricatorRepositoryQuery())
+      ->withCallsigns(array($callsign))
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->executeOne();
+    if ($existing_repository) {
+      $existing_repository->delete();
+    }
+
     $data_dir = dirname(__FILE__).'/data/';
 
     $types = array(
@@ -76,9 +84,18 @@ abstract class PhabricatorWorkingCopyTestCase extends PhabricatorTestCase {
       ->setRepository($repository)
       ->pullRepository();
 
-    $this->pulled[$callsign] = true;
+    return $repository;
+  }
+
+  protected function buildDiscoveredRepository($callsign) {
+    $repository = $this->buildPulledRepository($callsign);
+
+    id(new PhabricatorRepositoryDiscoveryEngine())
+      ->setRepository($repository)
+      ->discoverCommits();
 
     return $repository;
   }
+
 
 }

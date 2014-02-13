@@ -11,50 +11,34 @@ final class ProjectRemarkupRule
   }
 
   protected function getObjectIDPattern() {
-    // NOTE: This explicitly does not match strings which contain only
-    // digits, because digit strings like "#123" are used to reference tasks at
-    // Facebook and are somewhat conventional in general.
-    return '[^\s.!,:;]*[^\s\d.!,:;]+[^\s.!,:;]*';
+    return
+      PhabricatorProjectPHIDTypeProject::getProjectMonogramPatternFragment();
   }
 
   protected function loadObjects(array $ids) {
     $viewer = $this->getEngine()->getConfig('viewer');
 
-    // If the user types "#YoloSwag", we still want to match "#yoloswag", so
-    // we normalize, query, and then map back to the original inputs.
-
-    $map = array();
-    foreach ($ids as $key => $slug) {
-      $map[$this->normalizeSlug($slug)][] = $slug;
+    // Put the "#" back on the front of these IDs.
+    $names = array();
+    foreach ($ids as $id) {
+      $names[] = '#'.$id;
     }
 
-    $projects = id(new PhabricatorProjectQuery())
+    // Issue a query by object name.
+    $query = id(new PhabricatorObjectQuery())
       ->setViewer($viewer)
-      ->withPhrictionSlugs(array_keys($map))
-      ->execute();
+      ->withNames($names);
 
+    $query->execute();
+    $projects = $query->getNamedResults();
+
+    // Slice the "#" off again.
     $result = array();
-    foreach ($projects as $project) {
-      $slugs = array($project->getPhrictionSlug());
-      foreach ($slugs as $slug) {
-        foreach ($map[$slug] as $original) {
-          $result[$original] = $project;
-        }
-      }
+    foreach ($projects as $name => $project) {
+      $result[substr($name, 1)] = $project;
     }
-
 
     return $result;
-  }
-
-  private function normalizeSlug($slug) {
-    // NOTE: We're using phutil_utf8_strtolower() (and not PhabricatorSlug's
-    // normalize() method) because this normalization should be only somewhat
-    // liberal. We want "#YOLO" to match against "#yolo", but "#\\yo!!lo"
-    // should not. normalize() strips out most punctuation and leads to
-    // excessively aggressive matches.
-
-    return phutil_utf8_strtolower($slug).'/';
   }
 
 }

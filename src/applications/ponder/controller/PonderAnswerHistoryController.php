@@ -46,17 +46,9 @@ final class PonderAnswerHistoryController extends PonderController {
     $aid = $answer->getID();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName("Q{$qid}")
-        ->setHref("/Q{$qid}"));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName("A{$aid}")
-        ->setHref("/Q{$qid}#{$aid}"));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('History')));
+    $crumbs->addTextCrumb("Q{$qid}", "/Q{$qid}");
+    $crumbs->addTextCrumb("A{$aid}", "/Q{$qid}#{$aid}");
+    $crumbs->addTextCrumb(pht('History'));
 
     return $this->buildApplicationPage(
       array(

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioMock extends PholioDAO
   implements
     PhabricatorMarkupInterface,
@@ -27,6 +24,20 @@ final class PholioMock extends PholioDAO
   private $allImages = self::ATTACHABLE;
   private $coverFile = self::ATTACHABLE;
   private $tokenCount = self::ATTACHABLE;
+
+  public static function initializeNewMock(PhabricatorUser $actor) {
+    $app = id(new PhabricatorApplicationQuery())
+      ->setViewer($actor)
+      ->withClasses(array('PhabricatorApplicationPholio'))
+      ->executeOne();
+
+    $view_policy = $app->getPolicy(PholioCapabilityDefaultView::CAPABILITY);
+
+    return id(new PholioMock())
+      ->setAuthorPHID($actor->getPHID())
+      ->attachImages(array())
+      ->setViewPolicy($view_policy);
+  }
 
   public function getConfiguration() {
     return array(
@@ -124,6 +135,14 @@ final class PholioMock extends PholioDAO
 
   public function isAutomaticallySubscribed($phid) {
     return ($this->authorPHID == $phid);
+  }
+
+  public function shouldShowSubscribersProperty() {
+    return true;
+  }
+
+  public function shouldAllowSubscription($phid) {
+    return true;
   }
 
 

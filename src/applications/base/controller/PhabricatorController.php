@@ -34,22 +34,33 @@ abstract class PhabricatorController extends AphrontController {
       $user = $request->getUser();
     } else {
       $user = new PhabricatorUser();
+      $session_engine = new PhabricatorAuthSessionEngine();
 
-      $phusr = $request->getCookie('phusr');
-      $phsid = $request->getCookie('phsid');
-
-      if (strlen($phusr) && $phsid) {
-        $info = queryfx_one(
-          $user->establishConnection('r'),
-          'SELECT u.* FROM %T u JOIN %T s ON u.phid = s.userPHID
-            AND s.type LIKE %> AND s.sessionKey = %s',
-          $user->getTableName(),
-          'phabricator_session',
-          'web-',
-          PhabricatorHash::digest($phsid));
-        if ($info) {
-          $user->loadFromArray($info);
+      $phsid = $request->getCookie(PhabricatorCookies::COOKIE_SESSION);
+      if (strlen($phsid)) {
+        $session_user = $session_engine->loadUserForSession(
+          PhabricatorAuthSession::TYPE_WEB,
+          $phsid);
+        if ($session_user) {
+          $user = $session_user;
         }
+      } else {
+        // If the client doesn't have a session token, generate an anonymous
+        // session. This is used to provide CSRF protection to logged-out users.
+        $phsid = $session_engine->establishSession(
+          PhabricatorAuthSession::TYPE_WEB,
+          null);
+
+        // This may be a resource request, in which case we just don't set
+        // the cookie.
+        if ($request->canSetCookies()) {
+          $request->setCookie(PhabricatorCookies::COOKIE_SESSION, $phsid);
+        }
+      }
+
+
+      if (!$user->isLoggedIn()) {
+        $user->attachAlternateCSRFString(PhabricatorHash::digest($phsid));
       }
 
       $request->setUser($user);
@@ -407,5 +418,10 @@ abstract class PhabricatorController extends AphrontController {
 
     return array($can_act, $message);
   }
+
+  public function getDefaultResourceSource() {
+    return 'phabricator';
+  }
+
 
 }

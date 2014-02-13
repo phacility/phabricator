@@ -69,10 +69,7 @@ final class PhamePostNewController extends PhameController {
     $nav->selectFilter('post/new');
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title)
-        ->setHref($view_uri));
+    $crumbs->addTextCrumb($title, $view_uri);
     $nav->appendChild($crumbs);
 
     if (!$blogs) {

@@ -150,25 +150,27 @@ final class PhabricatorAuthProviderLDAP
       return array($account, $response);
     }
 
-    try {
-      if (strlen($username) && $has_password) {
-        $adapter = $this->getAdapter();
-        $adapter->setLoginUsername($username);
-        $adapter->setLoginPassword($password);
+    if ($request->isFormPost()) {
+      try {
+        if (strlen($username) && $has_password) {
+          $adapter = $this->getAdapter();
+          $adapter->setLoginUsername($username);
+          $adapter->setLoginPassword($password);
 
-        // TODO: This calls ldap_bind() eventually, which dumps cleartext
-        // passwords to the error log. See note in PhutilAuthAdapterLDAP.
-        // See T3351.
+          // TODO: This calls ldap_bind() eventually, which dumps cleartext
+          // passwords to the error log. See note in PhutilAuthAdapterLDAP.
+          // See T3351.
 
-        DarkConsoleErrorLogPluginAPI::enableDiscardMode();
-          $account_id = $adapter->getAccountID();
-        DarkConsoleErrorLogPluginAPI::disableDiscardMode();
-      } else {
-        throw new Exception("Username and password are required!");
+          DarkConsoleErrorLogPluginAPI::enableDiscardMode();
+            $account_id = $adapter->getAccountID();
+          DarkConsoleErrorLogPluginAPI::disableDiscardMode();
+        } else {
+          throw new Exception("Username and password are required!");
+        }
+      } catch (Exception $ex) {
+        // TODO: Make this cleaner.
+        throw $ex;
       }
-    } catch (Exception $ex) {
-      // TODO: Make this cleaner.
-      throw $ex;
     }
 
     return array($this->loadOrCreateAccount($account_id), $response);
@@ -361,7 +363,7 @@ final class PhabricatorAuthProviderLDAP
           $label);
       }
 
-      if (!strlen($old)) {
+      if ($old === null || $old === '') {
         return pht(
           '%s set the "%s" value to "%s".',
           $xaction->renderHandleLink($author_phid),

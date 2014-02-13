@@ -13,10 +13,13 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
 
   private function loadLease() {
     if (empty($this->lease)) {
-      $lease = id(new DrydockLease())->load($this->getTaskData());
+      $lease = id(new DrydockLeaseQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withIDs(array($this->getTaskData()))
+        ->executeOne();
       if (!$lease) {
         throw new PhabricatorWorkerPermanentFailureException(
-          "No such lease!");
+          pht("No such lease %d!", $this->getTaskData()));
       }
       $this->lease = $lease;
     }
@@ -53,7 +56,10 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
   }
 
   private function loadAllBlueprints() {
-    $instances = id(new DrydockBlueprint())->loadAll();
+    $viewer = PhabricatorUser::getOmnipotentUser();
+    $instances = id(new DrydockBlueprintQuery())
+      ->setViewer($viewer)
+      ->execute();
     $blueprints = array();
     foreach ($instances as $instance) {
       $blueprints[$instance->getPHID()] = $instance;
@@ -66,6 +72,7 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
 
     $blueprints = $this->loadAllBlueprints();
 
+    // TODO: Policy stuff.
     $pool = id(new DrydockResource())->loadAllWhere(
       'type = %s AND status = %s',
       $lease->getResourceType(),

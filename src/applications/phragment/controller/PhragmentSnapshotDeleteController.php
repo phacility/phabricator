@@ -14,6 +14,9 @@ final class PhragmentSnapshotDeleteController extends PhragmentController {
 
     $snapshot = id(new PhragmentSnapshotQuery())
       ->setViewer($viewer)
+      ->requireCapabilities(array(
+        PhabricatorPolicyCapability::CAN_VIEW,
+        PhabricatorPolicyCapability::CAN_EDIT))
       ->withIDs(array($this->id))
       ->executeOne();
     if ($snapshot === null) {

@@ -102,6 +102,14 @@ final class DiffusionCommitController extends DiffusionController {
         'diffusion.commitparentsquery',
         array('commit' => $drequest->getCommit()));
 
+      if ($parents) {
+        $parents = id(new DiffusionCommitQuery())
+          ->setViewer($user)
+          ->withRepository($repository)
+          ->withIdentifiers($parents)
+          ->execute();
+      }
+
       $headsup_view = id(new PHUIHeaderView())
         ->setHeader(nonempty($commit->getSummary(), pht('Commit Detail')));
 
@@ -239,17 +247,21 @@ final class DiffusionCommitController extends DiffusionController {
       // changes inline even if there are more than the soft limit.
       $show_all_details = $request->getBool('show_all');
 
-      $change_panel = new AphrontPanelView();
-      $change_panel->setHeader("Changes (".number_format($count).")");
+      $change_panel = new PHUIObjectBoxView();
+      $header = new PHUIHeaderView();
+      $header->setHeader("Changes (".number_format($count).")");
       $change_panel->setID('toc');
       if ($count > self::CHANGES_LIMIT && !$show_all_details) {
-        $show_all_button = phutil_tag(
-          'a',
-          array(
-            'class'   => 'button green',
-            'href'    => '?show_all=true',
-          ),
-          pht('Show All Changes'));
+
+        $icon = id(new PHUIIconView())
+          ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+          ->setSpriteIcon('transcript');
+
+        $button = id(new PHUIButtonView())
+          ->setText(pht('Show All Changes'))
+          ->setHref('?show_all=true')
+          ->setTag('a')
+          ->setIcon($icon);
 
         $warning_view = id(new AphrontErrorView())
           ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
@@ -257,12 +269,12 @@ final class DiffusionCommitController extends DiffusionController {
           ->appendChild(
             pht("This commit is very large. Load each file individually."));
 
-        $change_panel->appendChild($warning_view);
-        $change_panel->addButton($show_all_button);
+        $change_panel->setErrorView($warning_view);
+        $header->addActionLink($button);
       }
 
       $change_panel->appendChild($change_table);
-      $change_panel->setNoBackground();
+      $change_panel->setHeader($header);
 
       $content[] = $change_panel;
 
@@ -336,10 +348,8 @@ final class DiffusionCommitController extends DiffusionController {
       $change_list->setRenderURI('/diffusion/'.$callsign.'/diff/');
       $change_list->setRepository($repository);
       $change_list->setUser($user);
-      // pick the first branch for "Browse in Diffusion" View Option
-      $branches     = $commit_data->getCommitDetail('seenOnBranches', array());
-      $first_branch = reset($branches);
-      $change_list->setBranch($first_branch);
+
+      // TODO: Try to setBranch() to something reasonable here?
 
       $change_list->setStandaloneURI(
         '/diffusion/'.$callsign.'/diff/');
@@ -475,22 +485,22 @@ final class DiffusionCommitController extends DiffusionController {
     if ($commit->getAuditStatus()) {
       $status = PhabricatorAuditCommitStatusConstants::getStatusName(
         $commit->getAuditStatus());
-      $tag = id(new PhabricatorTagView())
-        ->setType(PhabricatorTagView::TYPE_STATE)
+      $tag = id(new PHUITagView())
+        ->setType(PHUITagView::TYPE_STATE)
         ->setName($status);
 
       switch ($commit->getAuditStatus()) {
         case PhabricatorAuditCommitStatusConstants::NEEDS_AUDIT:
-          $tag->setBackgroundColor(PhabricatorTagView::COLOR_ORANGE);
+          $tag->setBackgroundColor(PHUITagView::COLOR_ORANGE);
           break;
         case PhabricatorAuditCommitStatusConstants::CONCERN_RAISED:
-          $tag->setBackgroundColor(PhabricatorTagView::COLOR_RED);
+          $tag->setBackgroundColor(PHUITagView::COLOR_RED);
           break;
         case PhabricatorAuditCommitStatusConstants::PARTIALLY_AUDITED:
-          $tag->setBackgroundColor(PhabricatorTagView::COLOR_BLUE);
+          $tag->setBackgroundColor(PHUITagView::COLOR_BLUE);
           break;
         case PhabricatorAuditCommitStatusConstants::FULLY_AUDITED:
-          $tag->setBackgroundColor(PhabricatorTagView::COLOR_GREEN);
+          $tag->setBackgroundColor(PHUITagView::COLOR_GREEN);
           break;
       }
 
@@ -1041,7 +1051,15 @@ final class DiffusionCommitController extends DiffusionController {
       $raw_diff,
       array(
         'name' => $drequest->getCommit().'.diff',
+        'ttl' => (60 * 60 * 24),
+        'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
       ));
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $file->attachToObject(
+        $this->getRequest()->getUser(),
+        $drequest->getRepository()->getPHID());
+    unset($unguarded);
 
     return id(new AphrontRedirectResponse())->setURI($file->getBestURI());
   }

@@ -3,11 +3,14 @@
 final class PHUIObjectBoxView extends AphrontView {
 
   private $headerText;
-  private $formError = null;
+  private $formErrors = null;
+  private $formSaved = false;
+  private $errorView;
   private $form;
   private $validationException;
   private $header;
   private $flush;
+  private $id;
 
   private $tabs = array();
   private $propertyLists = array();
@@ -63,13 +66,40 @@ final class PHUIObjectBoxView extends AphrontView {
     return $this;
   }
 
-  public function setFormError($error) {
-    $this->formError = $error;
+  public function setFormErrors(array $errors, $title = null) {
+    if (nonempty($errors)) {
+      $this->formErrors = id(new AphrontErrorView())
+        ->setTitle($title)
+        ->setErrors($errors);
+    }
+    return $this;
+  }
+
+  public function setFormSaved($saved, $text = null) {
+    if (!$text) {
+      $text = pht('Changes saved.');
+    }
+    if ($saved) {
+      $save = id(new AphrontErrorView())
+        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+        ->appendChild($text);
+      $this->formSaved = $save;
+    }
+    return $this;
+  }
+
+  public function setErrorView(AphrontErrorView $view) {
+    $this->errorView = $view;
     return $this;
   }
 
   public function setForm($form) {
     $this->form = $form;
+    return $this;
+  }
+
+  public function setID($id) {
+    $this->id = $id;
     return $this;
   }
 
@@ -187,7 +217,9 @@ final class PHUIObjectBoxView extends AphrontView {
       ->appendChild(
         array(
           $header,
-          $this->formError,
+          $this->errorView,
+          $this->formErrors,
+          $this->formSaved,
           $exception_errors,
           $this->form,
           $tabs,
@@ -196,6 +228,7 @@ final class PHUIObjectBoxView extends AphrontView {
           $this->renderChildren(),
         ))
       ->setBorder(true)
+      ->setID($this->id)
       ->addMargin(PHUI::MARGIN_LARGE_TOP)
       ->addMargin(PHUI::MARGIN_LARGE_LEFT)
       ->addMargin(PHUI::MARGIN_LARGE_RIGHT)

@@ -23,21 +23,12 @@ final class PhabricatorPeopleEditController
         return new Aphront404Response();
       }
       $base_uri = '/people/edit/'.$user->getID().'/';
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Edit User'))
-          ->setHref('/people/edit/'));
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($user->getFullName())
-          ->setHref($base_uri));
+      $crumbs->addTextCrumb(pht('Edit User'), '/people/edit/');
+      $crumbs->addTextCrumb($user->getFullName(), $base_uri);
     } else {
       $user = new PhabricatorUser();
       $base_uri = '/people/edit/';
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Create New User'))
-          ->setHref($base_uri));
+      $crumbs->addTextCrumb(pht('Create New User'), $base_uri);
     }
 
     $nav = new AphrontSideNavFilterView();
@@ -223,13 +214,6 @@ final class PhabricatorPeopleEditController
       }
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Form Errors'))
-        ->setErrors($errors);
-    }
-
     $form = new AphrontFormView();
     $form->setUser($admin);
     if ($user->getID()) {
@@ -356,7 +340,7 @@ final class PhabricatorPeopleEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return array($form_box);
@@ -372,9 +356,9 @@ final class PhabricatorPeopleEditController
 
     if ($request->isFormPost()) {
 
-      $log_template = PhabricatorUserLog::newLog(
+      $log_template = PhabricatorUserLog::initializeNewLog(
         $admin,
-        $user,
+        $user->getPHID(),
         null);
 
       $logs = array();
@@ -404,14 +388,6 @@ final class PhabricatorPeopleEditController
           ->setURI($request->getRequestURI()->alter('saved', 'true'));
       }
     }
-
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Form Errors'))
-        ->setErrors($errors);
-    }
-
 
     $form = id(new AphrontFormView())
       ->setUser($admin)
@@ -461,7 +437,7 @@ final class PhabricatorPeopleEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return array($form_box);
@@ -546,14 +522,6 @@ final class PhabricatorPeopleEditController
       }
     }
 
-    if ($errors) {
-      $errors = id(new AphrontErrorView())
-        ->setTitle(pht('Form Errors'))
-        ->setErrors($errors);
-    } else {
-      $errors = null;
-    }
-
     $inst1 = pht('Be careful when renaming users!');
     $inst2 = pht('The old username will no longer be tied to the user, so '.
           'anything which uses it (like old commit messages) will no longer '.
@@ -599,7 +567,7 @@ final class PhabricatorPeopleEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Change Username'))
-      ->setFormError($errors)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return array($form_box);
@@ -645,14 +613,6 @@ final class PhabricatorPeopleEditController
       }
     }
 
-    if ($errors) {
-      $errors = id(new AphrontErrorView())
-        ->setTitle(pht('Form Errors'))
-        ->setErrors($errors);
-    } else {
-      $errors = null;
-    }
-
     $str1 = pht('Be careful when deleting users!');
     $str2 = pht('If this user interacted with anything, it is generally '.
         'better to disable them, not delete them. If you delete them, it will '.
@@ -692,7 +652,7 @@ final class PhabricatorPeopleEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Delete User'))
-      ->setFormError($errors)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return array($form_box);

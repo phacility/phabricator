@@ -1,6 +1,6 @@
 <?php
 
-final class DrydockLeaseReleaseController extends DrydockController {
+final class DrydockLeaseReleaseController extends DrydockLeaseController {
 
   private $id;
 
@@ -12,7 +12,10 @@ final class DrydockLeaseReleaseController extends DrydockController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $lease = id(new DrydockLease())->load($this->id);
+    $lease = id(new DrydockLeaseQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$lease) {
       return new Aphront404Response();
     }
@@ -45,7 +48,7 @@ final class DrydockLeaseReleaseController extends DrydockController {
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
-    $resource = $lease->loadResource();
+    $resource = $lease->getResource();
     $blueprint = $resource->getBlueprint();
     $blueprint->releaseLease($resource, $lease);
 

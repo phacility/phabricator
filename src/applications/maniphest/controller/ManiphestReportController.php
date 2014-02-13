@@ -55,9 +55,7 @@ final class ManiphestReportController extends ManiphestController {
     $nav->appendChild($core);
     $nav->setCrumbs(
       $this->buildApplicationCrumbs()
-        ->addCrumb(
-          id(new PhabricatorCrumbView())
-            ->setName(pht('Reports'))));
+        ->addTextCrumb(pht('Reports')));
 
     return $this->buildApplicationPage(
       $nav,
@@ -245,7 +243,7 @@ final class ManiphestReportController extends ManiphestController {
 
     if ($handle) {
       $inst = pht(
-        "NOTE: This table reflects tasks <em>currently</em> in ".
+        "NOTE: This table reflects tasks currently in ".
         "the project. If a task was opened in the past but added to ".
         "the project recently, it is counted on the day it was ".
         "opened, not the day it was categorized. If a task was part ".
@@ -296,6 +294,7 @@ final class ManiphestReportController extends ManiphestController {
         $burn_y,
       ),
       'xformat' => 'epoch',
+      'yformat' => 'int',
     ));
 
     return array($filter, $chart, $panel);

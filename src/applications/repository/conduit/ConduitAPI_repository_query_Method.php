@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_repository_query_Method
   extends ConduitAPI_repository_Method {
 
@@ -11,15 +8,21 @@ final class ConduitAPI_repository_query_Method
   }
 
   public function getMethodStatusDescription() {
-    return "Repository methods are new and subject to change.";
+    return pht("Repository methods are new and subject to change.");
   }
 
   public function getMethodDescription() {
-    return "Query repositories.";
+    return pht("Query repositories.");
   }
 
   public function defineParamTypes() {
     return array(
+      'ids' => 'optional list<int>',
+      'phids' => 'optional list<phid>',
+      'callsigns' => 'optional list<string>',
+      'vcsTypes' => 'optional list<string>',
+      'remoteURIs' => 'optional list<string>',
+      'uuids' => 'optional list<string>',
     );
   }
 
@@ -33,9 +36,40 @@ final class ConduitAPI_repository_query_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $repositories = id(new PhabricatorRepositoryQuery())
-      ->setViewer($request->getUser())
-      ->execute();
+    $query = id(new PhabricatorRepositoryQuery())
+      ->setViewer($request->getUser());
+
+    $ids = $request->getValue('ids', array());
+    if ($ids) {
+      $query->withIDs($ids);
+    }
+
+    $phids = $request->getValue('phids', array());
+    if ($phids) {
+      $query->withPHIDs($phids);
+    }
+
+    $callsigns = $request->getValue('callsigns', array());
+    if ($callsigns) {
+      $query->withCallsigns($callsigns);
+    }
+
+    $vcs_types = $request->getValue('vcsTypes', array());
+    if ($vcs_types) {
+      $query->withTypes($vcs_types);
+    }
+
+    $remote_uris = $request->getValue('remoteURIs', array());
+    if ($remote_uris) {
+      $query->withRemoteURIs($remote_uris);
+    }
+
+    $uuids = $request->getValue('uuids', array());
+    if ($uuids) {
+      $query->withUUIDs($uuids);
+    }
+
+    $repositories = $query->execute();
 
     $results = array();
     foreach ($repositories as $repository) {

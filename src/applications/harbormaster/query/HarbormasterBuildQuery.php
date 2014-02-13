@@ -92,6 +92,16 @@ final class HarbormasterBuildQuery
       $build->attachBuildPlan(idx($plans, $plan_phid));
     }
 
+    $build_phids = mpull($page, 'getPHID');
+    $commands = id(new HarbormasterBuildCommand())->loadAllWhere(
+      'targetPHID IN (%Ls) ORDER BY id ASC',
+      $build_phids);
+    $commands = mgroup($commands, 'getTargetPHID');
+    foreach ($page as $build) {
+      $unprocessed_commands = idx($commands, $build->getPHID(), array());
+      $build->attachUnprocessedCommands($unprocessed_commands);
+    }
+
     return $page;
   }
 

@@ -59,25 +59,22 @@ final class DivinerAtomController extends DivinerController {
     $atom = $symbol->getAtom();
     $crumbs = $this->buildApplicationCrumbs();
 
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($book->getShortTitle())
-        ->setHref('/book/'.$book->getName().'/'));
+    $crumbs->addTextCrumb(
+      $book->getShortTitle(),
+      '/book/'.$book->getName().'/');
 
     $atom_short_title = $atom->getDocblockMetaValue(
       'short',
       $symbol->getTitle());
 
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($atom_short_title));
+    $crumbs->addTextCrumb($atom_short_title);
 
     $header = id(new PHUIHeaderView())
       ->setHeader($this->renderFullSignature($symbol))
       ->addTag(
-        id(new PhabricatorTagView())
-          ->setType(PhabricatorTagView::TYPE_STATE)
-          ->setBackgroundColor(PhabricatorTagView::COLOR_BLUE)
+        id(new PHUITagView())
+          ->setType(PHUITagView::TYPE_STATE)
+          ->setBackgroundColor(PHUITagView::COLOR_BLUE)
           ->setName(DivinerAtom::getAtomTypeNameString($atom->getType())));
 
     $properties = id(new PHUIPropertyListView());
@@ -209,9 +206,9 @@ final class DivinerAtomController extends DivinerController {
         $inherited = $spec['inherited'];
         if ($inherited) {
           $method_header->addTag(
-            id(new PhabricatorTagView())
-              ->setType(PhabricatorTagView::TYPE_STATE)
-              ->setBackgroundColor(PhabricatorTagView::COLOR_GREY)
+            id(new PHUITagView())
+              ->setType(PHUITagView::TYPE_STATE)
+              ->setBackgroundColor(PHUITagView::COLOR_GREY)
               ->setName(pht('Inherited')));
         }
 
@@ -294,8 +291,8 @@ final class DivinerAtomController extends DivinerController {
   }
 
   private function renderAtomTag(DivinerLiveSymbol $symbol) {
-    return id(new PhabricatorTagView())
-      ->setType(PhabricatorTagView::TYPE_OBJECT)
+    return id(new PHUITagView())
+      ->setType(PHUITagView::TYPE_OBJECT)
       ->setName($symbol->getName())
       ->setHref($symbol->getURI());
   }

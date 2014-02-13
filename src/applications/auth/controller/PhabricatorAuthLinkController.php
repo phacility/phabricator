@@ -79,7 +79,10 @@ final class PhabricatorAuthLinkController
 
     $panel_uri = '/settings/panel/external/';
 
-    $request->setCookie('phcid', Filesystem::readRandomCharacters(16));
+    $request->setCookie(
+      PhabricatorCookies::COOKIE_CLIENTID,
+      Filesystem::readRandomCharacters(16));
+
     switch ($this->action) {
       case 'link':
         $form = $provider->buildLinkForm($this);
@@ -115,13 +118,8 @@ final class PhabricatorAuthLinkController
     }
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Link Account'))
-        ->setHref($panel_uri));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($provider->getProviderName($name)));
+    $crumbs->addTextCrumb(pht('Link Account'), $panel_uri);
+    $crumbs->addTextCrumb($provider->getProviderName($name));
 
     return $this->buildApplicationPage(
       array(

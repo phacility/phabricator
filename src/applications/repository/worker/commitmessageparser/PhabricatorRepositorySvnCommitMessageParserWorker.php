@@ -7,19 +7,12 @@ final class PhabricatorRepositorySvnCommitMessageParserWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    $uri = $repository->getDetail('remote-uri');
+    $ref = id(new DiffusionLowLevelCommitQuery())
+      ->setRepository($repository)
+      ->withIdentifier($commit->getCommitIdentifier())
+      ->execute();
 
-    $log = $this->getSVNLogXMLObject(
-      $uri,
-      $commit->getCommitIdentifier(),
-      $verbose = false);
-
-    $entry = $log->logentry[0];
-
-    $author = (string)$entry->author;
-    $message = (string)$entry->msg;
-
-    $this->updateCommitData($author, $message);
+    $this->updateCommitData($ref);
 
     if ($this->shouldQueueFollowupTasks()) {
       PhabricatorWorker::scheduleTask(
@@ -28,12 +21,6 @@ final class PhabricatorRepositorySvnCommitMessageParserWorker
           'commitID' => $commit->getID(),
         ));
     }
-  }
-
-  protected function getCommitHashes(
-    PhabricatorRepository $repository,
-    PhabricatorRepositoryCommit $commit) {
-    return array();
   }
 
 }

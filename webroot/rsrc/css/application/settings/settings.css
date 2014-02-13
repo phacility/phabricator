@@ -2,19 +2,24 @@
  * @provides phabricator-settings-css
  */
 
-.phabricator-settings-homepagetable {
-  width: 60% !important;
-  margin: auto;
-}
-
-.phabricator-settings-homepagetable td.fixed {
-  width: 24px;
-  text-align: center;
-
-}
-
-.phabricator-settings-panelview h1 {
+.phabricator-settings-homepagetable .fixed {
+  width: 48px;
   text-align: center;
 }
 
+.phabricator-settings-homepagetable td em {
+  color: {$lightgreytext};
+}
 
+.phabricator-settings-homepagetable-button .aphront-form-input {
+  margin: 0;
+  width: auto;
+}
+
+.phabricator-settings-homepagetable-button .aphront-form-control {
+  padding: 0;
+}
+
+.phabricator-settings-homepagetable-wrap .phui-form-view {
+  padding: 0;
+}

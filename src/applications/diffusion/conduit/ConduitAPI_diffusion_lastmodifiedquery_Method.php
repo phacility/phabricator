@@ -87,7 +87,7 @@ final class ConduitAPI_diffusion_lastmodifiedquery_Method
     list($hash) = $repository->execxLocalCommand(
       'log --template %s --limit 1 --removed --rev %s -- %s',
       '{node}',
-      hgsprintf('reverse(%s::%s)', '0', $drequest->getCommit()),
+      hgsprintf('reverse(ancestors(%s))',  $drequest->getCommit()),
       nonempty(ltrim($path, '/'), '.'));
 
     return $this->loadDataFromHash($hash);

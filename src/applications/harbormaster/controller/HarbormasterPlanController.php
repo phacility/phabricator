@@ -1,14 +1,13 @@
 <?php
 
-abstract class HarbormasterPlanController extends PhabricatorController {
+abstract class HarbormasterPlanController extends HarbormasterController {
 
   public function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Build Plans'))
-        ->setHref($this->getApplicationURI('plan/')));
+    $crumbs->addTextCrumb(
+      pht('Build Plans'),
+      $this->getApplicationURI('plan/'));
 
     return $crumbs;
   }

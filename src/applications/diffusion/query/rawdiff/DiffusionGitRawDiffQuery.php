@@ -34,9 +34,7 @@ final class DiffusionGitRawDiffQuery extends DiffusionRawDiffQuery {
       $commit,
       $path);
 
-    if ($this->getTimeout()) {
-      $future->setTimeout($this->getTimeout());
-    }
+    $this->configureFuture($future);
 
     try {
       list($raw_diff) = $future->resolvex();
@@ -61,9 +59,7 @@ final class DiffusionGitRawDiffQuery extends DiffusionRawDiffQuery {
         $commit,
         $drequest->getPath());
 
-      if ($this->getTimeout()) {
-        $future->setTimeout($this->getTimeout());
-      }
+      $this->configureFuture($future);
 
       list($raw_diff) = $future->resolvex();
     }

@@ -16,7 +16,6 @@ final class PhabricatorProjectProfilePictureController
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->id))
-      ->needProfiles(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -75,27 +74,33 @@ final class PhabricatorProjectProfilePictureController
       }
 
       if (!$errors) {
-        $profile = $project->getProfile();
         if ($is_default) {
-          $profile->setProfileImagePHID(null);
+          $new_value = null;
         } else {
-          $profile->setProfileImagePHID($xformed->getPHID());
-          $xformed->attachToObject($viewer, $project->getPHID());
+          $new_value = $xformed->getPHID();
         }
-        $profile->save();
+
+        $xactions = array();
+        $xactions[] = id(new PhabricatorProjectTransaction())
+          ->setTransactionType(PhabricatorProjectTransaction::TYPE_IMAGE)
+          ->setNewValue($new_value);
+
+        $editor = id(new PhabricatorProjectTransactionEditor())
+          ->setActor($viewer)
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnMissingFields(true)
+          ->setContinueOnNoEffect(true);
+
+        $editor->applyTransactions($project, $xactions);
+
         return id(new AphrontRedirectResponse())->setURI($project_uri);
       }
     }
 
     $title = pht('Edit Project Picture');
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($project->getName())
-        ->setHref($project_uri));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title));
+    $crumbs->addTextCrumb($project->getName(), $project_uri);
+    $crumbs->addTextCrumb($title);
 
     $form = id(new PHUIFormLayoutView())
       ->setUser($viewer);
@@ -104,7 +109,7 @@ final class PhabricatorProjectProfilePictureController
 
     $images = array();
 
-    $current = $project->getProfile()->getProfileImagePHID();
+    $current = $project->getProfileImagePHID();
     $has_current = false;
     if ($current) {
       $files = id(new PhabricatorFileQuery())
@@ -227,11 +232,6 @@ final class PhabricatorProjectProfilePictureController
         ->setLabel(pht('Quick Create'))
         ->setValue($compose_form));
 
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
-      ->setFormError($errors)
-      ->setForm($form);
-
     $upload_form = id(new AphrontFormView())
       ->setUser($viewer)
       ->setEncType('multipart/form-data')
@@ -247,13 +247,9 @@ final class PhabricatorProjectProfilePictureController
           ->addCancelButton($project_uri)
           ->setValue(pht('Upload Picture')));
 
-    if ($errors) {
-      $errors = id(new AphrontErrorView())->setErrors($errors);
-    }
-
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($errors)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     $upload_box = id(new PHUIObjectBoxView())

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group legalpad
- */
 final class LegalpadDocument extends LegalpadDAO
   implements
     PhabricatorPolicyInterface,
@@ -21,6 +18,26 @@ final class LegalpadDocument extends LegalpadDAO
 
   private $documentBody = self::ATTACHABLE;
   private $contributors = self::ATTACHABLE;
+  private $signatures   = self::ATTACHABLE;
+
+  public static function initializeNewDocument(PhabricatorUser $actor) {
+    $app = id(new PhabricatorApplicationQuery())
+      ->setViewer($actor)
+      ->withClasses(array('PhabricatorApplicationLegalpad'))
+      ->executeOne();
+
+    $view_policy = $app->getPolicy(LegalpadCapabilityDefaultView::CAPABILITY);
+    $edit_policy = $app->getPolicy(LegalpadCapabilityDefaultEdit::CAPABILITY);
+
+    return id(new LegalpadDocument())
+      ->setVersions(0)
+      ->setCreatorPHID($actor->getPHID())
+      ->setContributorCount(0)
+      ->setRecentContributorPHIDs(array())
+      ->attachSignatures(array())
+      ->setViewPolicy($view_policy)
+      ->setEditPolicy($edit_policy);
+  }
 
   public function getConfiguration() {
     return array(
@@ -54,6 +71,15 @@ final class LegalpadDocument extends LegalpadDAO
     return $this;
   }
 
+  public function getSignatures() {
+    return $this->assertAttached($this->signatures);
+  }
+
+  public function attachSignatures(array $signatures) {
+    $this->signatures = $signatures;
+    return $this;
+  }
+
   public function save() {
     if (!$this->getMailKey()) {
       $this->setMailKey(Filesystem::readRandomCharacters(20));
@@ -61,13 +87,29 @@ final class LegalpadDocument extends LegalpadDAO
     return parent::save();
   }
 
-/* -(  PhabricatorSubscribableInterface Implementation  )-------------------- */
+  public function getMonogram() {
+    return 'L'.$this->getID();
+  }
+
+
+/* -(  PhabricatorSubscribableInterface  )----------------------------------- */
+
 
   public function isAutomaticallySubscribed($phid) {
     return ($this->creatorPHID == $phid);
   }
 
-/* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
+  public function shouldShowSubscribersProperty() {
+    return true;
+  }
+
+  public function shouldAllowSubscription($phid) {
+    return true;
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
 
   public function getCapabilities() {
     return array(

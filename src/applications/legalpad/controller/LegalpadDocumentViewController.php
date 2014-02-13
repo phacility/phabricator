@@ -81,10 +81,9 @@ final class LegalpadDocumentViewController extends LegalpadController {
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
     $crumbs->setActionList($actions);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName('L'.$document->getID())
-        ->setHref($this->getApplicationURI('view/'.$document->getID())));
+    $crumbs->addTextCrumb(
+      $document->getMonogram(),
+      $this->getApplicationURI('view/'.$document->getID()));
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -111,7 +110,9 @@ final class LegalpadDocumentViewController extends LegalpadController {
     PhabricatorMarkupEngine
     $engine, LegalpadDocumentBody $body) {
 
+    $this->requireResource('legalpad-document-css');
     $view = new PHUIPropertyListView();
+    $view->addClass('legalpad');
     $view->addSectionHeader(pht('Document'));
     $view->addTextContent(
       $engine->getOutput($body, LegalpadDocumentBody::MARKUP_FIELD_TEXT));
@@ -133,13 +134,27 @@ final class LegalpadDocumentViewController extends LegalpadController {
       $document,
       PhabricatorPolicyCapability::CAN_EDIT);
 
+    $doc_id = $document->getID();
+
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setIcon('edit')
         ->setName(pht('Edit Document'))
-        ->setHref($this->getApplicationURI('/edit/'.$document->getID().'/'))
+        ->setHref($this->getApplicationURI('/edit/'.$doc_id.'/'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+      ->setIcon('like')
+      ->setName(pht('Sign Document'))
+      ->setHref('/'.$document->getMonogram()));
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+      ->setIcon('transcript')
+      ->setName(pht('View Signatures'))
+      ->setHref($this->getApplicationURI('/signatures/'.$doc_id.'/')));
 
     return $actions;
   }

@@ -1,11 +1,7 @@
 <?php
 
 abstract class PhabricatorFilesManagementWorkflow
-  extends PhutilArgumentWorkflow {
-
-  public function isExecutable() {
-    return true;
-  }
+  extends PhabricatorManagementWorkflow {
 
   protected function buildIterator(PhutilArgumentParser $args) {
     $names = $args->getArg('names');
@@ -20,7 +16,7 @@ abstract class PhabricatorFilesManagementWorkflow
 
     if ($names) {
       $query = id(new PhabricatorObjectQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->setViewer($this->getViewer())
         ->withNames($names)
         ->withTypes(array(PhabricatorFilePHIDTypeFile::TYPECONST));
 

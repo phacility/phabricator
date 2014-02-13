@@ -262,12 +262,8 @@ final class PHUIPagedFormView extends AphrontTagView {
     $form->appendChild($selected_page);
     $form->appendChild($submit);
 
-    if ($errors) {
-      $errors = id(new AphrontErrorView())->setErrors($errors);
-    }
-
     $box = id(new PHUIObjectBoxView())
-      ->setFormError($errors)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     if ($selected_page->getPageName()) {

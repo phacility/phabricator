@@ -66,12 +66,12 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     if ($is_viewable && !$force_download) {
       $response->setMimeType($file->getViewableMimeType());
     } else {
-      if (!$request->isHTTPPost()) {
-        // NOTE: Require POST to download files. We'd rather go full-bore and
-        // do a real CSRF check, but can't currently authenticate users on the
-        // file domain. This should blunt any attacks based on iframes, script
-        // tags, applet tags, etc., at least. Send the user to the "info" page
-        // if they're using some other method.
+      if (!$request->isHTTPPost() && !$alt_domain) {
+        // NOTE: Require POST to download files from the primary domain. We'd
+        // rather go full-bore and do a real CSRF check, but can't currently
+        // authenticate users on the file domain. This should blunt any
+        // attacks based on iframes, script tags, applet tags, etc., at least.
+        // Send the user to the "info" page if they're using some other method.
         return id(new AphrontRedirectResponse())
           ->setURI(PhabricatorEnv::getProductionURI($file->getBestURI()));
       }

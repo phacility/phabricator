@@ -3,7 +3,7 @@
  */
 
 .phabricator-chat-log-wrap {
-  padding: 0 20px;
+  padding: 0 16px;
 }
 
 .device-phone .phabricator-chat-log-wrap {
@@ -34,15 +34,12 @@
 
 .phabricator-chat-log-panel {
   clear: both;
-  border-left: 1px solid #e7e7e7;
-  border-right: 1px solid #e7e7e7;
-  border-bottom: 1px solid #c0c5d1;
+  border: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
 }
 
 .phabricator-chat-log {
   width: 100%;
-  border: 1px solid #e7e7e7;
-  box-shadow: 0 1px 1px rgba(0,0,0,.2);
 }
 
 .phabricator-chat-log td {
@@ -51,28 +48,24 @@
 }
 
 .phabricator-chat-log tr {
-  background: #fafafa;
+  background: #fff;
 }
 
 .phabricator-chat-log tr td.author {
-  background: #e7e7ee;
+  background: {$greybackground};
 }
 
 .phabricator-chat-log tr.alternate {
-  border-top: 1px solid #e7e7e7;
-  border-bottom: 1px solid #e7e7e7;
+  border-top: 1px solid {$thinblueborder};
+  border-bottom: 1px solid {$thinblueborder};
 }
 
 .phabricator-chat-log tr.alternate td.author {
-  background: #dfdfe6;
+  background: {$darkgreybackground};
 }
 
 .phabricator-chat-log tr.highlight td {
-  background: #ffff88;
-}
-
-.phabricator-chat-log tr.highlight td.author {
-  background: #eeee88;
+  background: {$lightyellow};
 }
 
 .phabricator-chat-log td.timestamp {
@@ -82,7 +75,7 @@
 }
 
 .phabricator-chat-log td.message .timestamp {
-  color: #a1a5a9;
+  color: {$bluetext};
   font-size: 11px;
   float: right;
   margin-left: 5px;
@@ -93,7 +86,7 @@
   text-align: right;
   font-weight: bold;
   width: 140px;
-  color: #555555;
+  color: {$darkbluetext};
 }
 
 .device-phone .phabricator-chat-log td.author {

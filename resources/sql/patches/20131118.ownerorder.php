@@ -3,6 +3,9 @@
 $table = new ManiphestTask();
 $conn_w = $table->establishConnection('w');
 
+$user_table = new PhabricatorUser();
+$user_conn = $user_table->establishConnection('r');
+
 foreach (new LiskMigrationIterator($table) as $task) {
   $id = $task->getID();
 
@@ -14,13 +17,14 @@ foreach (new LiskMigrationIterator($table) as $task) {
     continue;
   }
 
-  $owner_handle = id(new PhabricatorHandleQuery())
-    ->setViewer(PhabricatorUser::getOmnipotentUser())
-    ->withPHIDs(array($owner_phid))
-    ->executeOne();
+  $owner_row = queryfx_one(
+    $user_conn,
+    'SELECT * FROM %T WHERE phid = %s',
+    $user_table->getTableName(),
+    $owner_phid);
 
-  if ($owner_handle) {
-    $value = $owner_handle->getName();
+  if ($owner_row) {
+    $value = $owner_row['userName'];
   } else {
     $value = null;
   }

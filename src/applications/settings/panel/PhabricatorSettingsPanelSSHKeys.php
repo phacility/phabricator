@@ -126,13 +126,6 @@ final class PhabricatorSettingsPanelSSHKeys
       }
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = new AphrontErrorView();
-      $error_view->setTitle(pht('Form Errors'));
-      $error_view->setErrors($errors);
-    }
-
     $is_new = !$key->getID();
 
     if ($is_new) {
@@ -165,7 +158,7 @@ final class PhabricatorSettingsPanelSSHKeys
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($header)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return $form_box;
@@ -224,18 +217,24 @@ final class PhabricatorSettingsPanelSSHKeys
         'action',
       ));
 
-    $panel = new AphrontPanelView();
-    $panel->addButton(
-      phutil_tag(
-        'a',
-        array(
-          'href' => $this->getPanelURI('?edit=true'),
-          'class' => 'green button',
-        ),
-        pht('Add New Public Key')));
-    $panel->setHeader(pht('SSH Public Keys'));
+    $panel = new PHUIObjectBoxView();
+    $header = new PHUIHeaderView();
+
+    $icon = id(new PHUIIconView())
+          ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+          ->setSpriteIcon('new');
+
+    $button = new PHUIButtonView();
+    $button->setText(pht('Add New Public Key'));
+    $button->setHref($this->getPanelURI('?edit=true'));
+    $button->setTag('a');
+    $button->setIcon($icon);
+
+    $header->setHeader(pht('SSH Public Keys'));
+    $header->addActionLink($button);
+
+    $panel->setHeader($header);
     $panel->appendChild($table);
-    $panel->setNoBackground();
 
     return $panel;
   }

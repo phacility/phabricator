@@ -59,6 +59,7 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
           ->setHref($handle->getURI());
       case self::TYPE_HOST:
         $leases = id(new DrydockLeaseQuery())
+          ->setViewer($viewer)
           ->withIDs(array($data["drydock-lease"]))
           ->execute();
         $lease = $leases[$data["drydock-lease"]];
@@ -81,6 +82,7 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
     $data = $this->getArtifactData();
 
     // FIXME: Is there a better way of doing this?
+    // TODO: Policy stuff, etc.
     $lease = id(new DrydockLease())->load(
       $data['drydock-lease']);
     if ($lease === null) {

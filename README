@@ -1,12 +1,22 @@
-Phabricator is an open source collection of web applications which make it
-easier to write, review, and share source code. Phabricator was developed at
-Facebook.
+Phabricator is an open source collection of web applications which help
+software companies build better software.
 
-It's pretty high-quality and usable, but under active development so things 
-may change quickly.
+Phabricator includes applications for:
 
-You can learn more about the project and find links to documentation and
-resources at: http://phabricator.org/
+  - reviewing and auditing source code;
+  - hosting and browsing repositories;
+  - assembling a party to venture forth;
+  - tracking bugs;
+  - hiding stuff from coworkers; and
+  - also some other things.
+
+You can learn more about the project (and find links to documentation and
+resources) here:
+
+  http://phabricator.org/
+
+Phabricator is developed and maintained by Phacility. The first version of
+Phabricator was originally built at Facebook.
 
 LICENSE
 

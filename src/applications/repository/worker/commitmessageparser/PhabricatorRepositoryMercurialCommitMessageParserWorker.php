@@ -7,18 +7,12 @@ final class PhabricatorRepositoryMercurialCommitMessageParserWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    list($stdout) = $repository->execxLocalCommand(
-      'log --template %s --rev %s',
-      '{author}\\n{desc}',
-      $commit->getCommitIdentifier());
+    $ref = id(new DiffusionLowLevelCommitQuery())
+      ->setRepository($repository)
+      ->withIdentifier($commit->getCommitIdentifier())
+      ->execute();
 
-    list($author, $message) = explode("\n", $stdout, 2);
-
-    $author = phutil_utf8ize($author);
-    $message = phutil_utf8ize($message);
-    $message = trim($message);
-
-    $this->updateCommitData($author, $message);
+    $this->updateCommitData($ref);
 
     if ($this->shouldQueueFollowupTasks()) {
       PhabricatorWorker::scheduleTask(
@@ -27,18 +21,6 @@ final class PhabricatorRepositoryMercurialCommitMessageParserWorker
           'commitID' => $commit->getID(),
         ));
     }
-  }
-
-  protected function getCommitHashes(
-    PhabricatorRepository $repository,
-    PhabricatorRepositoryCommit $commit) {
-
-    $commit_hash = $commit->getCommitIdentifier();
-
-    return array(
-      array(ArcanistDifferentialRevisionHash::HASH_MERCURIAL_COMMIT,
-            $commit_hash),
-    );
   }
 
 }

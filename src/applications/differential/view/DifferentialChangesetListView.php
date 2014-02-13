@@ -103,7 +103,7 @@ final class DifferentialChangesetListView extends AphrontView {
   }
 
   public function render() {
-    require_celerity_resource('differential-changeset-view-css');
+    $this->requireResource('differential-changeset-view-css');
 
     $changesets = $this->changesets;
 
@@ -183,20 +183,20 @@ final class DifferentialChangesetListView extends AphrontView {
       $output[] = $detail->render();
     }
 
-    require_celerity_resource('aphront-tooltip-css');
+    $this->requireResource('aphront-tooltip-css');
 
-    Javelin::initBehavior('differential-populate', array(
+    $this->initBehavior('differential-populate', array(
       'registry'    => $mapping,
       'whitespace'  => $this->whitespace,
       'uri'         => $this->renderURI,
     ));
 
-    Javelin::initBehavior('differential-show-more', array(
+    $this->initBehavior('differential-show-more', array(
       'uri' => $this->renderURI,
       'whitespace' => $this->whitespace,
     ));
 
-    Javelin::initBehavior('differential-comment-jump', array());
+    $this->initBehavior('differential-comment-jump', array());
 
     if ($this->inlineURI) {
       $undo_templates = $this->renderUndoTemplates();

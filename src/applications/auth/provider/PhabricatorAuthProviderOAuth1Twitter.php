@@ -8,7 +8,7 @@ final class PhabricatorAuthProviderOAuth1Twitter
   }
 
   public function getConfigurationHelp() {
-    $login_uri = $this->getLoginURI();
+    $login_uri = PhabricatorEnv::getURI($this->getLoginURI());
 
     return pht(
       "To configure Twitter OAuth, create a new application here:".

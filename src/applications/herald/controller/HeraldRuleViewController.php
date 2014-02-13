@@ -41,10 +41,10 @@ final class HeraldRuleViewController extends HeraldController {
     $actions = $this->buildActionView($rule);
     $properties = $this->buildPropertyView($rule, $actions);
 
+    $id = $rule->getID();
+
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Rule %d', $rule->getID())));
+    $crumbs->addTextCrumb("H{$id}");
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -131,6 +131,7 @@ final class HeraldRuleViewController extends HeraldController {
         $this->getHandle($rule->getAuthorPHID())->renderLink());
     }
 
+
     $adapter = HeraldAdapter::getAdapterForContentType($rule->getContentType());
     if ($adapter) {
       $view->addProperty(
@@ -138,6 +139,12 @@ final class HeraldRuleViewController extends HeraldController {
         idx(
           HeraldAdapter::getEnabledAdapterMap($viewer),
           $rule->getContentType()));
+
+      if ($rule->isObjectRule()) {
+        $view->addProperty(
+          pht('Trigger Object'),
+          $this->getHandle($rule->getTriggerObjectPHID())->renderLink());
+      }
 
       $view->invokeWillRenderEvent();
 

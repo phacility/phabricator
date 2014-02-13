@@ -39,8 +39,4 @@ final class NuancePHIDTypeRequestor
     }
   }
 
-  public function canLoadNamedObject($name) {
-    return false;
-  }
-
 }

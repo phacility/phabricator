@@ -11,6 +11,16 @@ final class DifferentialRevisionCommentView extends AphrontView {
   private $target;
   private $anchorName;
   private $versusDiffID;
+  private $revision;
+
+  public function setRevision(DifferentialRevision $revision) {
+    $this->revision = $revision;
+    return $this;
+  }
+
+  public function getRevision() {
+    return $this->revision;
+  }
 
   public function setComment($comment) {
     $this->comment = $comment;
@@ -67,8 +77,8 @@ final class DifferentialRevisionCommentView extends AphrontView {
       throw new Exception("Call setUser() before rendering!");
     }
 
-    require_celerity_resource('phabricator-remarkup-css');
-    require_celerity_resource('differential-revision-comment-css');
+    $this->requireResource('phabricator-remarkup-css');
+    $this->requireResource('differential-revision-comment-css');
 
     $comment = $this->comment;
 
@@ -112,20 +122,17 @@ final class DifferentialRevisionCommentView extends AphrontView {
       DifferentialComment::METADATA_ADDED_CCS,
       array());
 
-    $verb = DifferentialAction::getActionPastTenseVerb($comment->getAction());
-
     $actions = array();
-    // TODO: i18n
     switch ($comment->getAction()) {
       case DifferentialAction::ACTION_ADDCCS:
-        $actions[] = hsprintf(
+        $actions[] = pht(
           "%s added CCs: %s.",
           $author_link,
           $this->renderHandleList($added_ccs));
         $added_ccs = null;
         break;
       case DifferentialAction::ACTION_ADDREVIEWERS:
-        $actions[] = hsprintf(
+        $actions[] = pht(
           "%s added reviewers: %s.",
           $author_link,
           $this->renderHandleList($added_reviewers));
@@ -137,44 +144,40 @@ final class DifferentialRevisionCommentView extends AphrontView {
           $diff_link = phutil_tag(
             'a',
             array(
-              'href' => '/D'.$comment->getRevisionID().'?id='.$diff_id,
+              'href' => '/D'.$this->getRevision()->getID().'?id='.$diff_id,
             ),
             'Diff #'.$diff_id);
-          $actions[] = hsprintf(
+          $actions[] = pht(
             "%s updated this revision to %s.",
             $author_link,
             $diff_link);
         } else {
-          $actions[] = hsprintf(
-            "%s %s this revision.",
-            $author_link,
-            $verb);
+          $actions[] = DifferentialAction::getBasicStoryText(
+            $comment->getAction(), $author_link);
         }
         break;
       default:
-        $actions[] = hsprintf(
-          "%s %s this revision.",
-          $author_link,
-          $verb);
+          $actions[] = DifferentialAction::getBasicStoryText(
+            $comment->getAction(), $author_link);
         break;
     }
 
     if ($added_reviewers) {
-      $actions[] = hsprintf(
+      $actions[] = pht(
         "%s added reviewers: %s.",
         $author_link,
         $this->renderHandleList($added_reviewers));
     }
 
     if ($removed_reviewers) {
-      $actions[] = hsprintf(
+      $actions[] = pht(
         "%s removed reviewers: %s.",
         $author_link,
         $this->renderHandleList($removed_reviewers));
     }
 
     if ($added_ccs) {
-      $actions[] = hsprintf(
+      $actions[] = pht(
         "%s added CCs: %s.",
         $author_link,
         $this->renderHandleList($added_ccs));
@@ -197,7 +200,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
       $xaction_view->setEpoch($comment->getDateCreated());
       if ($this->anchorName) {
         $anchor_text =
-          'D'.$comment->getRevisionID().
+          'D'.$this->getRevision()->getID().
           '#'.preg_replace('/^comment-/', '', $this->anchorName);
 
         $xaction_view->setAnchor($this->anchorName, $anchor_text);
@@ -286,7 +289,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
           $diff_id = $changeset->getDiffID();
           $item['where'] = '(On Diff #'.$diff_id.')';
           $item['href'] =
-            'D'.$this->comment->getRevisionID().
+            'D'.$this->getRevision()->getID().
             '?id='.$diff_id.
             '#inline-'.$inline->getID();
         }

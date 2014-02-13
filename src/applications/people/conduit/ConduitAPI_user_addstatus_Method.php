@@ -42,16 +42,16 @@ final class ConduitAPI_user_addstatus_Method extends ConduitAPI_user_Method {
     $description = $request->getValue('description', '');
 
     try {
-      id(new PhabricatorUserStatus())
+      id(new PhabricatorCalendarEvent())
         ->setUserPHID($user_phid)
         ->setDateFrom($from)
         ->setDateTo($to)
         ->setTextStatus($status)
         ->setDescription($description)
         ->save();
-    } catch (PhabricatorUserStatusInvalidEpochException $e) {
+    } catch (PhabricatorCalendarEventInvalidEpochException $e) {
       throw new ConduitException('ERR-BAD-EPOCH');
-    } catch (PhabricatorUserStatusOverlapException $e) {
+    } catch (PhabricatorCalendarEventOverlapException $e) {
       throw new ConduitException('ERR-OVERLAP');
     }
   }

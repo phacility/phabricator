@@ -30,7 +30,7 @@ abstract class PhabricatorAuthProviderOAuth1 extends PhabricatorAuthProvider {
     if (strlen($secret)) {
       $adapter->setConsumerSecret(new PhutilOpaqueEnvelope($secret));
     }
-    $adapter->setCallbackURI($this->getLoginURI());
+    $adapter->setCallbackURI(PhabricatorEnv::getURI($this->getLoginURI()));
     return $adapter;
   }
 

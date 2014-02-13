@@ -18,6 +18,12 @@ final class ConpherenceThread extends ConpherenceDAO
   private $widgetData = self::ATTACHABLE;
   private $images = array();
 
+  public function initializeNewThread(PhabricatorUser $sender) {
+    return id(new ConpherenceThread())
+      ->setMessageCount(0)
+      ->setTitle('');
+  }
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,

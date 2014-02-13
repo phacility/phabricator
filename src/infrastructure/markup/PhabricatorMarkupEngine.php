@@ -455,6 +455,7 @@ final class PhabricatorMarkupEngine {
     $rules[] = new PhutilRemarkupRuleBold();
     $rules[] = new PhutilRemarkupRuleItalic();
     $rules[] = new PhutilRemarkupRuleDel();
+    $rules[] = new PhutilRemarkupRuleUnderline();
 
     foreach (self::loadCustomInlineRules() as $rule) {
       $rules[] = $rule;

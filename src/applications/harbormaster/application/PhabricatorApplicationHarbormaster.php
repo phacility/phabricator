@@ -48,24 +48,27 @@ final class PhabricatorApplicationHarbormaster extends PhabricatorApplication {
       '/harbormaster/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'HarbormasterBuildableListController',
-        'buildable/' => array(
-          'edit/(?:(?P<id>\d+)/)?' => 'HarbormasterBuildableEditController',
-          'apply/(?:(?P<id>\d+)/)?' => 'HarbormasterBuildableApplyController',
-        ),
         'step/' => array(
           'add/(?:(?P<id>\d+)/)?' => 'HarbormasterStepAddController',
           'edit/(?:(?P<id>\d+)/)?' => 'HarbormasterStepEditController',
           'delete/(?:(?P<id>\d+)/)?' => 'HarbormasterStepDeleteController',
         ),
+        'buildable/' => array(
+          '(?P<id>\d+)/(?P<action>stop|resume|restart)/'
+            => 'HarbormasterBuildableActionController',
+        ),
         'build/' => array(
           '(?:(?P<id>\d+)/)?' => 'HarbormasterBuildViewController',
-          'cancel/(?:(?P<id>\d+)/)?' => 'HarbormasterBuildCancelController',
+          '(?P<action>stop|resume|restart)/(?P<id>\d+)/(?:(?P<via>[^/]+)/)?'
+            => 'HarbormasterBuildActionController',
         ),
         'plan/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?'
             => 'HarbormasterPlanListController',
           'edit/(?:(?P<id>\d+)/)?' => 'HarbormasterPlanEditController',
           'order/(?:(?P<id>\d+)/)?' => 'HarbormasterPlanOrderController',
+          'disable/(?P<id>\d+)/' => 'HarbormasterPlanDisableController',
+          'run/(?P<id>\d+)/' => 'HarbormasterPlanRunController',
           '(?P<id>\d+)/' => 'HarbormasterPlanViewController',
         ),
       ),

@@ -5,6 +5,10 @@ final class PhragmentPatchController extends PhragmentController {
   private $aid;
   private $bid;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->aid = idx($data, "aid", 0);
     $this->bid = idx($data, "bid", 0);
@@ -61,7 +65,9 @@ final class PhragmentPatchController extends PhragmentController {
     $patch = PhragmentPatchUtil::calculatePatch($file_a, $file_b);
 
     if ($patch === null) {
-      throw new Exception("Unable to compute patch!");
+      // There are no differences between the two files, so we output
+      // an empty patch.
+      $patch = '';
     }
 
     $a_sequence = 'x';
@@ -74,6 +80,11 @@ final class PhragmentPatchController extends PhragmentController {
       $a_sequence.'.'.
       $version_b->getSequence().'.patch';
 
+    $return = $version_b->getURI();
+    if ($request->getExists('return')) {
+      $return = $request->getStr('return');
+    }
+
     $result = PhabricatorFile::buildFromFileDataOrHash(
       $patch,
       array(
@@ -81,8 +92,13 @@ final class PhragmentPatchController extends PhragmentController {
         'mime-type' => 'text/plain',
         'ttl' => time() + 60 * 60 * 24,
       ));
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $result->attachToObject($viewer, $version_b->getFragmentPHID());
+    unset($unguarded);
+
     return id(new AphrontRedirectResponse())
-      ->setURI($result->getBestURI());
+      ->setURI($result->getDownloadURI($return));
   }
 
 }

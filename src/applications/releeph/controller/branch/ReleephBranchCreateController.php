@@ -68,7 +68,6 @@ final class ReleephBranchCreateController extends ReleephProjectController {
     if ($errors) {
       $error_view = new AphrontErrorView();
       $error_view->setErrors($errors);
-      $error_view->setTitle(pht('Form Errors'));
     }
 
     $project_id = $releeph_project->getID();
@@ -99,9 +98,7 @@ final class ReleephBranchCreateController extends ReleephProjectController {
           ->addCancelButton($project_uri));
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('New Branch')));
+    $crumbs->addTextCrumb(pht('New Branch'));
 
     return $this->buildApplicationPage(
       array(

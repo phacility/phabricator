@@ -111,9 +111,7 @@ final class PhragmentCreateController extends PhragmentController {
             $this->getApplicationURI('browse/'.$parent_path)));
 
     $crumbs = $this->buildApplicationCrumbsWithPath($parents);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Create Fragment')));
+    $crumbs->addTextCrumb(pht('Create Fragment'));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText('Create Fragment')
@@ -123,6 +121,7 @@ final class PhragmentCreateController extends PhragmentController {
     return $this->buildApplicationPage(
       array(
         $crumbs,
+        $this->renderConfigurationWarningIfRequired(),
         $box),
       array(
         'title' => pht('Create Fragment'),

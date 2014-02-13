@@ -51,7 +51,7 @@ final class PhabricatorRepositoryManagementEditWorkflow
     }
 
     $actor = id(new PhabricatorPeopleQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($this->getViewer())
       ->withUsernames(array($username))
       ->executeOne();
 

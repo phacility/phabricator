@@ -178,6 +178,20 @@
   background: #f3f3ff;
 }
 
+.phabricator-remarkup .remarkup-warning {
+  margin: 1em 1.5em;
+  padding: 0.5em 1em;
+  border: 1px solid {$yellow};
+  background: {$lightyellow};
+}
+
+.phabricator-remarkup .remarkup-important {
+  margin: 1em 1.5em;
+  padding: 0.5em 1em;
+  border: 1px solid {$red};
+  background: {$lightred};
+}
+
 .phabricator-remarkup-toc {
   float: right;
   border: 1px solid #d7d7d7;
@@ -402,6 +416,8 @@ div.phabricator-remarkup-dark tt {
 }
 
 div.phabricator-remarkup-dark .remarkup-note,
+div.phabricator-remarkup-dark .remarkup-warning,
+div.phabricator-remarkup-dark .remarkup-important,
 div.phabricator-remarkup-dark table {
   color: #000;
 }

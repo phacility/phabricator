@@ -1,9 +1,8 @@
 <?php
 
 /**
- *
  * @task  status  Method Status
- * @group conduit
+ * @task  pager   Paging Results
  */
 abstract class ConduitAPIMethod
   extends Phobject
@@ -164,6 +163,63 @@ abstract class ConduitAPIMethod
         "same URI to identify the install. Edit your .arcconfig or ".
         "phabricator/conf so they agree on the URI for the install.");
     }
+  }
+
+
+/* -(  Paging Results  )----------------------------------------------------- */
+
+
+  /**
+   * @task pager
+   */
+  protected function getPagerParamTypes() {
+    return array(
+      'before'            => 'optional string',
+      'after'             => 'optional string',
+      'limit'             => 'optional int (default = 100)',
+    );
+  }
+
+
+  /**
+   * @task pager
+   */
+  protected function newPager(ConduitAPIRequest $request) {
+    $limit = $request->getValue('limit', 100);
+    $limit = min(1000, $limit);
+    $limit = max(1, $limit);
+
+    $pager = id(new AphrontCursorPagerView())
+      ->setPageSize($limit);
+
+    $before_id = $request->getValue('before');
+    if ($before_id !== null) {
+      $pager->setBeforeID($before_id);
+    }
+
+    $after_id = $request->getValue('after');
+    if ($after_id !== null) {
+      $pager->setAfterID($after_id);
+    }
+
+    return $pager;
+  }
+
+
+  /**
+   * @task pager
+   */
+  protected function addPagerResults(
+    array $results,
+    AphrontCursorPagerView $pager) {
+
+    $results['cursor'] = array(
+      'limit' => $pager->getPageSize(),
+      'after' => $pager->getNextPageID(),
+      'before' =>$pager->getPrevPageID(),
+    );
+
+    return $results;
   }
 
 

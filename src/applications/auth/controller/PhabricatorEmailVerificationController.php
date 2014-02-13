@@ -82,9 +82,7 @@ final class PhabricatorEmailVerificationController
       ->appendChild($content);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Verify Email')));
+    $crumbs->addTextCrumb(pht('Verify Email'));
 
     return $this->buildApplicationPage(
       array(

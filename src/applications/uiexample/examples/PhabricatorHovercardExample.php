@@ -36,8 +36,8 @@ final class PhabricatorHovercardExample extends PhabricatorUIExample {
       ManiphestPHIDTypeTask::TYPECONST,
       "Improve Mobile Experience for Phabricator");
 
-    $tag = id(new PhabricatorTagView())
-      ->setType(PhabricatorTagView::TYPE_STATE)
+    $tag = id(new PHUITagView())
+      ->setType(PHUITagView::TYPE_STATE)
       ->setName('Closed, Resolved');
     $panel = $this->createPanel("Maniphest Hovercard");
     $panel->appendChild(id(new PhabricatorHovercardView())

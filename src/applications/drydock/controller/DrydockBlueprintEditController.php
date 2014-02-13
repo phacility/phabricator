@@ -1,6 +1,6 @@
 <?php
 
-final class DrydockBlueprintEditController extends DrydockController {
+final class DrydockBlueprintEditController extends DrydockBlueprintController {
 
   private $id;
 
@@ -25,22 +25,65 @@ final class DrydockBlueprintEditController extends DrydockController {
       if (!$blueprint) {
         return new Aphront404Response();
       }
+
+      $impl = $blueprint->getImplementation();
+      $cancel_uri = $this->getApplicationURI('blueprint/'.$this->id.'/');
     } else {
-      $blueprint = new DrydockBlueprint();
+      $this->requireApplicationCapability(
+        DrydockCapabilityCreateBlueprints::CAPABILITY);
+
+      $class = $request->getStr('class');
+
+      $impl = DrydockBlueprintImplementation::getNamedImplementation($class);
+      if (!$impl || !$impl->isEnabled()) {
+        return new Aphront400Response();
+      }
+
+      $blueprint = DrydockBlueprint::initializeNewBlueprint($viewer);
+      $blueprint->setClassName($class);
+      $cancel_uri = $this->getApplicationURI('blueprint/');
     }
+
+    $v_name = $blueprint->getBlueprintName();
+    $e_name = true;
+    $errors = array();
 
     if ($request->isFormPost()) {
       $v_view_policy = $request->getStr('viewPolicy');
       $v_edit_policy = $request->getStr('editPolicy');
+      $v_name = $request->getStr('name');
+      if (!strlen($v_name)) {
+        $e_name = pht('Required');
+        $errors[] = pht('You must name this blueprint.');
+      }
 
-      // TODO: Should we use transactions here?
-      $blueprint->setViewPolicy($v_view_policy);
-      $blueprint->setEditPolicy($v_edit_policy);
+      if (!$errors) {
+        $xactions = array();
 
-      $blueprint->save();
+        $xactions[] = id(new DrydockBlueprintTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+          ->setNewValue($v_view_policy);
 
-      return id(new AphrontRedirectResponse())
-        ->setURI('/drydock/blueprint/');
+        $xactions[] = id(new DrydockBlueprintTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
+          ->setNewValue($v_edit_policy);
+
+        $xactions[] = id(new DrydockBlueprintTransaction())
+          ->setTransactionType(DrydockBlueprintTransaction::TYPE_NAME)
+          ->setNewValue($v_name);
+
+        $editor = id(new DrydockBlueprintEditor())
+          ->setActor($viewer)
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnNoEffect(true);
+
+        $editor->applyTransactions($blueprint, $xactions);
+
+        $id = $blueprint->getID();
+        $save_uri = $this->getApplicationURI("blueprint/{$id}/");
+
+        return id(new AphrontRedirectResponse())->setURI($save_uri);
+      }
     }
 
     $policies = id(new PhabricatorPolicyQuery())
@@ -48,21 +91,19 @@ final class DrydockBlueprintEditController extends DrydockController {
       ->setObject($blueprint)
       ->execute();
 
-    if ($request->isAjax()) {
-      $form = id(new PHUIFormLayoutView())
-        ->setUser($viewer);
-    } else {
-      $form = id(new AphrontFormView())
-        ->setUser($viewer);
-    }
-
-    $form
+    $form = id(new AphrontFormView())
+      ->setUser($viewer)
+      ->addHiddenInput('class', $request->getStr('class'))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setName('className')
-          ->setLabel(pht('Implementation'))
-          ->setValue($blueprint->getClassName())
-          ->setDisabled(true))
+          ->setLabel(pht('Name'))
+          ->setName('name')
+          ->setValue($v_name)
+          ->setError($e_name))
+      ->appendChild(
+        id(new AphrontFormStaticControl())
+          ->setLabel(pht('Blueprint Type'))
+          ->setValue($impl->getBlueprintName()))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setName('viewPolicy')
@@ -78,34 +119,27 @@ final class DrydockBlueprintEditController extends DrydockController {
 
     $crumbs = $this->buildApplicationCrumbs();
 
-    $title = pht('Edit Blueprint');
-    $header = pht('Edit Blueprint %d', $blueprint->getID());
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Blueprint %d', $blueprint->getID())));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Edit')));
-
-    if ($request->isAjax()) {
-      $dialog = id(new AphrontDialogView())
-        ->setUser($viewer)
-        ->setWidth(AphrontDialogView::WIDTH_FORM)
-        ->setTitle($title)
-        ->appendChild($form)
-        ->addSubmitButton(pht('Edit Blueprint'))
-        ->addCancelButton($this->getApplicationURI());
-
-      return id(new AphrontDialogResponse())->setDialog($dialog);
+    if ($blueprint->getID()) {
+      $title = pht('Edit Blueprint');
+      $header = pht('Edit Blueprint %d', $blueprint->getID());
+      $crumbs->addTextCrumb(pht('Blueprint %d', $blueprint->getID()));
+      $crumbs->addTextCrumb(pht('Edit'));
+      $submit = pht('Save Blueprint');
+    } else {
+      $title = pht('New Blueprint');
+      $header = pht('New Blueprint');
+      $crumbs->addTextCrumb(pht('New Blueprint'));
+      $submit = pht('Create Blueprint');
     }
 
     $form->appendChild(
       id(new AphrontFormSubmitControl())
-        ->setValue(pht('Save'))
-        ->addCancelButton($this->getApplicationURI()));
+        ->setValue($submit)
+        ->addCancelButton($cancel_uri));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($header)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return $this->buildApplicationPage(

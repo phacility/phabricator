@@ -4,17 +4,17 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
 
   const MAX_AFFECTED_FILES = 1000;
 
-  protected $comments;
+  protected $commentText;
 
   private $patch;
 
-  public function setComments($comments) {
-    $this->comments = $comments;
+  public function setCommentText($comment_text) {
+    $this->commentText = $comment_text;
     return $this;
   }
 
-  public function getComments() {
-    return $this->comments;
+  public function getCommentText() {
+    return $this->commentText;
   }
 
   public function __construct(
@@ -46,8 +46,8 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
 
     $body = array();
     if (!$this->isFirstMailToRecipients()) {
-      if (strlen($this->getComments())) {
-        $body[] = $this->formatText($this->getComments());
+      if (strlen($this->getCommentText())) {
+        $body[] = $this->formatText($this->getCommentText());
         $body[] = null;
       }
     }

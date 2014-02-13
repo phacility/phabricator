@@ -66,11 +66,6 @@ final class PhabricatorSearchEditController
       }
     }
 
-    if ($errors) {
-      $errors = id(new AphrontErrorView())
-        ->setErrors($errors);
-    }
-
     $form = id(new AphrontFormView())
       ->setUser($user);
 
@@ -94,13 +89,11 @@ final class PhabricatorSearchEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($errors)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title));
+    $crumbs->addTextCrumb($title);
 
     return $this->buildApplicationPage(
       array(

@@ -16,9 +16,6 @@ class AphrontDefaultApplicationConfiguration
 
   public function getURIMap() {
     return $this->getResourceURIMapRules() + array(
-      '/(?:(?P<filter>(?:jump))/)?' =>
-        'PhabricatorDirectoryMainController',
-
       '/typeahead/' => array(
         'common/(?P<type>\w+)/'
           => 'PhabricatorTypeaheadCommonDatasourceController',
@@ -73,7 +70,7 @@ class AphrontDefaultApplicationConfiguration
     return array(
       '/res/' => array(
         '(?:(?P<mtime>[0-9]+)T/)?'.
-        '(?P<package>pkg/)?'.
+        '(?P<library>[^/]+)/'.
         '(?P<hash>[a-f0-9]{8})/'.
         '(?P<path>.+\.(?:css|js|jpg|png|swf|gif))'
           => 'CelerityPhabricatorResourceController',
@@ -107,9 +104,12 @@ class AphrontDefaultApplicationConfiguration
 
     $data += $parser->parseQueryString(idx($_SERVER, 'QUERY_STRING', ''));
 
+    $cookie_prefix = PhabricatorEnv::getEnvConfig('phabricator.cookie-prefix');
+
     $request = new AphrontRequest($this->getHost(), $this->getPath());
     $request->setRequestData($data);
     $request->setApplicationConfiguration($this);
+    $request->setCookiePrefix($cookie_prefix);
 
     return $request;
   }

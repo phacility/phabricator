@@ -41,8 +41,4 @@ final class PhabricatorMacroPHIDTypeMacro extends PhabricatorPHIDType {
     }
   }
 
-  public function canLoadNamedObject($name) {
-    return false;
-  }
-
 }

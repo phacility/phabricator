@@ -7,8 +7,12 @@ final class DrydockWorkingCopyBlueprintImplementation
     return true;
   }
 
+  public function getBlueprintName() {
+    return pht('Working Copy');
+  }
+
   public function getDescription() {
-    return pht('Allocates out working copies of repositories.');
+    return pht('Allows Drydock to check out working copies of repositories.');
   }
 
   protected function canAllocateLease(
@@ -52,6 +56,7 @@ final class DrydockWorkingCopyBlueprintImplementation
         throw new Exception("Unsupported VCS!");
     }
 
+    // TODO: Policy stuff here too.
     $host_lease = id(new DrydockLease())
       ->setResourceType('host')
       ->waitUntilActive();
@@ -63,8 +68,8 @@ final class DrydockWorkingCopyBlueprintImplementation
 
     $cmd = $host_lease->getInterface('command');
     $cmd->execx(
-      'git clone --origin origin %s %s',
-      $repository->getRemoteURI(),
+      'git clone --origin origin %P %s',
+      $repository->getRemoteURIEnvelope(),
       $path);
 
     $this->log(pht('Complete.'));

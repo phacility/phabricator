@@ -198,9 +198,54 @@ final class PhabricatorStartup {
 
 
   /**
+   * Fatal the request completely in response to an exception, sending a plain
+   * text message to the client. Calls @{method:didFatal} internally.
+   *
+   * @param   string    Brief description of the exception context, like
+   *                    `"Rendering Exception"`.
+   * @param   Exception The exception itself.
+   * @param   bool      True if it's okay to show the exception's stack trace
+   *                    to the user. The trace will always be logged.
+   * @return  exit      This method **does not return**.
+   *
    * @task apocalypse
    */
-  public static function didFatal($message) {
+  public static function didEncounterFatalException(
+    $note,
+    Exception $ex,
+    $show_trace) {
+
+    $message = '['.$note.'/'.get_class($ex).'] '.$ex->getMessage();
+
+    $full_message = $message;
+    $full_message .= "\n\n";
+    $full_message .= $ex->getTraceAsString();
+
+    if ($show_trace) {
+      $message = $full_message;
+    }
+
+    self::didFatal($message, $full_message);
+  }
+
+
+  /**
+   * Fatal the request completely, sending a plain text message to the client.
+   *
+   * @param   string  Plain text message to send to the client.
+   * @param   string  Plain text message to send to the error log. If not
+   *                  provided, the client message is used. You can pass a more
+   *                  detailed message here (e.g., with stack traces) to avoid
+   *                  showing it to users.
+   * @return  exit    This method **does not return**.
+   *
+   * @task apocalypse
+   */
+  public static function didFatal($message, $log_message = null) {
+    if ($log_message === null) {
+      $log_message = $message;
+    }
+
     self::endOutputCapture();
     $access_log = self::getGlobal('log.access');
 
@@ -219,7 +264,7 @@ final class PhabricatorStartup {
       $replace = true,
       $http_error = 500);
 
-    error_log($message);
+    error_log($log_message);
     echo $message;
 
     exit(1);
@@ -235,6 +280,11 @@ final class PhabricatorStartup {
   private static function setupPHP() {
     error_reporting(E_ALL | E_STRICT);
     ini_set('memory_limit', -1);
+
+    // If we have libxml, disable the incredibly dangerous entity loader.
+    if (function_exists('libxml_disable_entity_loader')) {
+      libxml_disable_entity_loader(true);
+    }
   }
 
   /**

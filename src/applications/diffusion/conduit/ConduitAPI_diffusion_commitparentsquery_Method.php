@@ -7,12 +7,12 @@ final class ConduitAPI_diffusion_commitparentsquery_Method
   extends ConduitAPI_diffusion_abstractquery_Method {
 
   public function getMethodDescription() {
-    return
-      'Commit parent(s) information for a commit in a repository.';
+    return pht(
+      "Get the commit identifiers for a commit's parent or parents.");
   }
 
   public function defineReturnType() {
-    return 'array';
+    return 'list<string>';
   }
 
   protected function defineCustomParamTypes() {
@@ -22,10 +22,12 @@ final class ConduitAPI_diffusion_commitparentsquery_Method
   }
 
   protected function getResult(ConduitAPIRequest $request) {
-    $drequest = $this->getDiffusionRequest();
+    $repository = $this->getRepository($request);
 
-    $query = DiffusionCommitParentsQuery::newFromDiffusionRequest($drequest);
-    $parents = $query->loadParents();
-    return $parents;
+    return id(new DiffusionLowLevelParentsQuery())
+      ->setRepository($repository)
+      ->withIdentifier($request->getValue('commit'))
+      ->execute();
   }
+
 }

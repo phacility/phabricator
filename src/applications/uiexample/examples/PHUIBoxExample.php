@@ -44,17 +44,17 @@ final class PHUIBoxExample extends PhabricatorUIExample {
       array(
         id(new PHUIBoxView())
           ->appendChild($content1)
-          ->setShadow(true)
+          ->setBorder(true)
           ->addPadding(PHUI::PADDING_SMALL)
           ->addMargin(PHUI::MARGIN_LARGE_BOTTOM),
         id(new PHUIBoxView())
           ->appendChild($content2)
-          ->setShadow(true)
+          ->setBorder(true)
           ->addPadding(PHUI::PADDING_MEDIUM)
           ->addMargin(PHUI::MARGIN_LARGE_BOTTOM),
         id(new PHUIBoxView())
           ->appendChild($content3)
-          ->setShadow(true)
+          ->setBorder(true)
           ->addPadding(PHUI::PADDING_LARGE)
           ->addMargin(PHUI::MARGIN_LARGE_BOTTOM));
 
@@ -85,7 +85,7 @@ final class PHUIBoxExample extends PhabricatorUIExample {
       ->setHeader(pht('Plain Box with space'));
 
     $head3 = id(new PHUIHeaderView())
-      ->setHeader(pht('Shadow Box with space'));
+      ->setHeader(pht('Border Box with space'));
 
     $head4 = id(new PHUIHeaderView())
       ->setHeader(pht('PHUIObjectBoxView'));

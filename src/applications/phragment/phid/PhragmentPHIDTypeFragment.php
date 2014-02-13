@@ -42,8 +42,4 @@ final class PhragmentPHIDTypeFragment
     }
   }
 
-  public function canLoadNamedObject($name) {
-    return false;
-  }
-
 }

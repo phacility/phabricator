@@ -94,8 +94,8 @@ final class DifferentialChangesetDetailView extends AphrontView {
   }
 
   public function render() {
-    require_celerity_resource('differential-changeset-view-css');
-    require_celerity_resource('syntax-highlighting-css');
+    $this->requireResource('differential-changeset-view-css');
+    $this->requireResource('syntax-highlighting-css');
 
     Javelin::initBehavior('phabricator-oncopy', array());
 

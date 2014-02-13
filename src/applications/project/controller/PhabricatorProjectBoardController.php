@@ -19,6 +19,7 @@ final class PhabricatorProjectBoardController
 
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
+      ->needImages(true)
       ->withIDs(array($this->id))
       ->executeOne();
     if (!$project) {
@@ -30,28 +31,21 @@ final class PhabricatorProjectBoardController
       ->withProjectPHIDs(array($project->getPHID()))
       ->execute();
 
-    // TODO: Completely making this part up.
-    $columns[] = id(new PhabricatorProjectColumn())
-      ->setName('Backlog')
-      ->setPHID(0)
-      ->setSequence(0);
+    $columns = mpull($columns, null, 'getSequence');
 
-    $columns[] = id(new PhabricatorProjectColumn())
-      ->setName('Assigned')
-      ->setPHID(1)
-      ->setSequence(1);
+    // If there's no default column, create one now.
+    if (empty($columns[0])) {
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $column = PhabricatorProjectColumn::initializeNewColumn($viewer)
+          ->setSequence(0)
+          ->setProjectPHID($project->getPHID())
+          ->save();
+        $column->attachProject($project);
+        $columns[0] = $column;
+      unset($unguarded);
+    }
 
-    $columns[] = id(new PhabricatorProjectColumn())
-      ->setName('In Progress')
-      ->setPHID(2)
-      ->setSequence(2);
-
-    $columns[] = id(new PhabricatorProjectColumn())
-      ->setName('Completed')
-      ->setPHID(3)
-      ->setSequence(3);
-
-    msort($columns, 'getSequence');
+    ksort($columns);
 
     $tasks = id(new ManiphestTaskQuery())
       ->setViewer($viewer)
@@ -61,50 +55,111 @@ final class PhabricatorProjectBoardController
       ->execute();
     $tasks = mpull($tasks, null, 'getPHID');
 
-    // TODO: This is also made up.
-    $task_map = array();
-    foreach ($tasks as $task) {
-      $task_map[mt_rand(0, 3)][] = $task->getPHID();
+    if ($tasks) {
+      $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_COLUMN;
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(mpull($tasks, 'getPHID'))
+        ->withEdgeTypes(array($edge_type))
+        ->withDestinationPHIDs(mpull($columns, 'getPHID'));
+      $edge_query->execute();
     }
+
+    $task_map = array();
+    $default_phid = $columns[0]->getPHID();
+    foreach ($tasks as $task) {
+      $task_phid = $task->getPHID();
+      $column_phids = $edge_query->getDestinationPHIDs(array($task_phid));
+
+      $column_phid = head($column_phids);
+      $column_phid = nonempty($column_phid, $default_phid);
+
+      $task_map[$column_phid][] = $task_phid;
+    }
+
+    $board_id = celerity_generate_unique_node_id();
 
     $board = id(new PHUIWorkboardView())
       ->setUser($viewer)
-      ->setFluidishLayout(true);
+      ->setFluidishLayout(true)
+      ->setID($board_id);
+
+    $this->initBehavior(
+      'project-boards',
+      array(
+        'boardID' => $board_id,
+        'moveURI' => $this->getApplicationURI('move/'.$project->getID().'/'),
+      ));
 
     foreach ($columns as $column) {
       $panel = id(new PHUIWorkpanelView())
-        ->setHeader($column->getName());
+        ->setHeader($column->getDisplayName())
+        ->setHeaderColor($column->getHeaderColor())
+        ->setEditURI('edit/'.$column->getID().'/');
 
       $cards = id(new PHUIObjectItemListView())
         ->setUser($viewer)
         ->setCards(true)
-        ->setFlush(true);
+        ->setFlush(true)
+        ->setAllowEmptyList(true)
+        ->addSigil('project-column')
+        ->setMetadata(
+          array(
+            'columnPHID' => $column->getPHID(),
+          ));
       $task_phids = idx($task_map, $column->getPHID(), array());
       foreach (array_select_keys($tasks, $task_phids) as $task) {
         $cards->addItem($this->renderTaskCard($task));
       }
       $panel->setCards($cards);
 
+      if (!$task_phids) {
+        $cards->addClass('project-column-empty');
+      }
+
       $board->addPanel($panel);
     }
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(
+      $project->getName(),
+      $this->getApplicationURI('view/'.$project->getID().'/'));
+    $crumbs->addTextCrumb(pht('Board'));
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $project,
+      PhabricatorPolicyCapability::CAN_EDIT);
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($viewer)
       ->addAction(
         id(new PhabricatorActionView())
-          ->setName(pht('Add Column/Milestone/Sprint'))
+          ->setName(pht('Add Column'))
           ->setHref($this->getApplicationURI('board/'.$this->id.'/edit/'))
-          ->setIcon('create'));
+          ->setIcon('create')
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(!$can_edit));
 
     $plist = id(new PHUIPropertyListView());
+
     // TODO: Need this to get actions to render.
-    $plist->addProperty(pht('Ignore'), pht('This Property'));
+    $plist->addProperty(
+      pht('Project Boards'),
+      phutil_tag(
+        'em',
+        array(),
+        pht(
+          'This feature is beta, but should mostly work.')));
     $plist->setActionList($actions);
 
-    $header = id(new PHUIObjectBoxView())
-      ->setHeaderText($project->getName())
+    $header = id(new PHUIHeaderView())
+      ->setHeader($project->getName())
+      ->setUser($viewer)
+      ->setImage($project->getProfileImageURI())
+      ->setPolicyObject($project);
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
       ->addPropertyList($plist);
 
     $board_box = id(new PHUIBoxView())
@@ -114,11 +169,11 @@ final class PhabricatorProjectBoardController
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
+        $box,
         $board_box,
       ),
       array(
-        'title' => pht('Board'),
+        'title' => pht('%s Board', $project->getName()),
         'device' => true,
       ));
   }
@@ -141,6 +196,11 @@ final class PhabricatorProjectBoardController
       ->setHeader($task->getTitle())
       ->setGrippable($can_edit)
       ->setHref('/T'.$task->getID())
+      ->addSigil('project-card')
+      ->setMetadata(
+        array(
+          'objectPHID' => $task->getPHID(),
+        ))
       ->addAction(
         id(new PHUIListItemView())
           ->setName(pht('Edit'))

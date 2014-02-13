@@ -36,7 +36,9 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $need_symbols = false;
     $need_jump_objects = false;
     $need_build_plans = false;
+    $need_task_priority = false;
     $need_macros = false;
+    $need_legalpad_documents = false;
     switch ($this->type) {
       case 'mainsearch':
         $need_users = true;
@@ -98,8 +100,14 @@ final class PhabricatorTypeaheadCommonDatasourceController
       case 'buildplans':
         $need_build_plans = true;
         break;
+      case 'taskpriority':
+        $need_task_priority = true;
+        break;
       case 'macros':
         $need_macros = true;
+        break;
+      case 'legalpaddocuments':
+        $need_legalpad_documents = true;
         break;
     }
 
@@ -239,6 +247,16 @@ final class PhabricatorTypeaheadCommonDatasourceController
       }
     }
 
+    if ($need_task_priority) {
+      $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
+      foreach ($priority_map as $value => $name) {
+        // NOTE: $value is not a phid but is unique. This'll work.
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setPHID($value)
+          ->setName($name);
+      }
+    }
+
     if ($need_macros) {
       $macros = id(new PhabricatorMacroQuery())
         ->setViewer($viewer)
@@ -252,11 +270,23 @@ final class PhabricatorTypeaheadCommonDatasourceController
       }
     }
 
+    if ($need_legalpad_documents) {
+      $documents = id(new LegalpadDocumentQuery())
+        ->setViewer($viewer)
+        ->execute();
+      $documents = mpull($documents, 'getTitle', 'getPHID');
+      foreach ($documents as $phid => $title) {
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setPHID($phid)
+          ->setName($title);
+      }
+    }
+
     if ($need_projs) {
       $projs = id(new PhabricatorProjectQuery())
         ->setViewer($viewer)
         ->withStatus(PhabricatorProjectQuery::STATUS_OPEN)
-        ->needProfiles(true)
+        ->needImages(true)
         ->execute();
       foreach ($projs as $proj) {
         $proj_result = id(new PhabricatorTypeaheadResult())
@@ -265,8 +295,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
           ->setURI('/project/view/'.$proj->getID().'/')
           ->setPHID($proj->getPHID());
 
-        $prof = $proj->getProfile();
-        $proj_result->setImageURI($prof->getProfileImageURI());
+        $proj_result->setImageURI($proj->getProfileImageURI());
 
         $results[] = $proj_result;
       }

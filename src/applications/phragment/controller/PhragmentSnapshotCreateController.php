@@ -21,16 +21,19 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
       return new Aphront404Response();
     }
 
+    PhabricatorPolicyFilter::requireCapability(
+      $viewer,
+      $fragment,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
     $children = id(new PhragmentFragmentQuery())
       ->setViewer($viewer)
       ->needLatestVersion(true)
       ->withLeadingPath($fragment->getPath().'/')
       ->execute();
 
-    $error_view = null;
-
+    $errors = array();
     if ($request->isFormPost()) {
-      $errors = array();
 
       $v_name = $request->getStr('name');
       if (strlen($v_name) === 0) {
@@ -74,10 +77,6 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
             ->setURI('/phragment/snapshot/view/'.$snapshot->getID());
         }
       }
-
-      $error_view = id(new AphrontErrorView())
-        ->setErrors($errors)
-        ->setTitle(pht('Errors while creating snapshot'));
     }
 
     $fragment_sequence = "-";
@@ -149,18 +148,17 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
       ->appendInstructions($container);
 
     $crumbs = $this->buildApplicationCrumbsWithPath($parents);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Create Snapshot')));
+    $crumbs->addTextCrumb(pht('Create Snapshot'));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Create Snapshot of %s', $fragment->getName()))
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
+        $this->renderConfigurationWarningIfRequired(),
         $box),
       array(
         'title' => pht('Create Fragment'),

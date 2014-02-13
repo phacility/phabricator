@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorCacheManagementPurgeWorkflow
-  extends PhabricatorSearchManagementWorkflow {
+  extends PhabricatorCacheManagementWorkflow {
 
   protected function didConstruct() {
     $this

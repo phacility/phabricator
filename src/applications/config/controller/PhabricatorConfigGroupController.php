@@ -28,14 +28,8 @@ final class PhabricatorConfigGroupController
 
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Config'))
-          ->setHref($this->getApplicationURI()))
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($options->getName())
-          ->setHref($this->getApplicationURI()));
+      ->addTextCrumb(pht('Config'), $this->getApplicationURI())
+      ->addTextCrumb($options->getName(), $this->getApplicationURI());
 
     return $this->buildApplicationPage(
       array(

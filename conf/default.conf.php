@@ -299,13 +299,6 @@ return array(
   'metamta.mail-adapter'        =>
     'PhabricatorMailImplementationPHPMailerLiteAdapter',
 
-  // When email is sent, try to hand it off to the MTA immediately instead of
-  // queueing it for delivery by the daemons. If you are running the Phabricator
-  // daemons with "phd start", you should disable this to provide a (sometimes
-  // substantial) performance boost. It's on by default to make setup and
-  // configuration a little easier.
-  'metamta.send-immediately'    => true,
-
   // When email is sent, what format should Phabricator use for user's
   // email addresses? Valid values are:
   //  - 'short' - 'gwashington <gwashington@example.com>'
@@ -549,15 +542,6 @@ return array(
   'metamta.vary-subjects' => true,
 
 // -- Auth ------------------------------------------------------------------ //
-
-  // Maximum number of simultaneous web sessions each user is permitted to have.
-  // Setting this to "1" will prevent a user from logging in on more than one
-  // browser at the same time.
-  'auth.sessions.web'           => 5,
-
-  // Maximum number of simultaneous Conduit sessions each user is permitted
-  // to have.
-  'auth.sessions.conduit'       => 5,
 
   // If true, email addresses must be verified (by clicking a link in an
   // email) before a user can login. By default, verification is optional
@@ -1017,10 +1001,6 @@ return array(
   // of output, but can help debug issues. Daemons launched in debug mode with
   // "phd debug" are always launched in trace mdoe. See also 'phd.verbose'.
   'phd.trace' => false,
-
-  // Path to custom celerity resource map relative to 'phabricator/src'.
-  // See also `scripts/celerity_mapper.php`.
-  'celerity.resource-path' => '__celerity_resource_map__.php',
 
   // This value is an input to the hash function when building resource hashes.
   // It has no security value, but if you accidentally poison user caches (by

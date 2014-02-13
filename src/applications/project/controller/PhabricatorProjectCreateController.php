@@ -12,44 +12,35 @@ final class PhabricatorProjectCreateController
     $this->requireApplicationCapability(
       ProjectCapabilityCreateProjects::CAPABILITY);
 
-    $project = new PhabricatorProject();
-    $project->setAuthorPHID($user->getPHID());
-    $project->attachMemberPHIDs(array());
-    $profile = new PhabricatorProjectProfile();
+    $project = PhabricatorProject::initializeNewProject($user);
 
     $e_name = true;
     $errors = array();
     if ($request->isFormPost()) {
+      $xactions = array();
 
-      try {
-        $xactions = array();
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME)
+        ->setNewValue($request->getStr('name'));
 
-        $xaction = new PhabricatorProjectTransaction();
-        $xaction->setTransactionType(
-          PhabricatorProjectTransaction::TYPE_NAME);
-        $xaction->setNewValue($request->getStr('name'));
-        $xactions[] = $xaction;
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', PhabricatorEdgeConfig::TYPE_PROJ_MEMBER)
+        ->setNewValue(
+          array(
+            '+' => array($user->getPHID() => $user->getPHID()),
+          ));
 
-        $xaction = new PhabricatorProjectTransaction();
-        $xaction->setTransactionType(
-          PhabricatorProjectTransaction::TYPE_MEMBERS);
-        $xaction->setNewValue(array($user->getPHID()));
-        $xactions[] = $xaction;
+      $editor = id(new PhabricatorProjectTransactionEditor())
+        ->setActor($user)
+        ->setContinueOnNoEffect(true)
+        ->setContentSourceFromRequest($request)
+        ->applyTransactions($project, $xactions);
 
-        $editor = new PhabricatorProjectEditor($project);
-        $editor->setActor($user);
-        $editor->applyTransactions($xactions);
-      } catch (PhabricatorProjectNameCollisionException $ex) {
-        $e_name = 'Not Unique';
-        $errors[] = $ex->getMessage();
-      }
-
-      $profile->setBlurb($request->getStr('blurb'));
+      // TODO: Deal with name collision exceptions more gracefully.
 
       if (!$errors) {
         $project->save();
-        $profile->setProjectPHID($project->getPHID());
-        $profile->save();
 
         if ($request->isAjax()) {
           return id(new AphrontAjaxResponse())
@@ -67,7 +58,6 @@ final class PhabricatorProjectCreateController
     $error_view = null;
     if ($errors) {
       $error_view = new AphrontErrorView();
-      $error_view->setTitle(pht('Form Errors'));
       $error_view->setErrors($errors);
     }
 
@@ -84,13 +74,7 @@ final class PhabricatorProjectCreateController
           ->setLabel(pht('Name'))
           ->setName('name')
           ->setValue($project->getName())
-          ->setError($e_name))
-      ->appendChild(
-        id(new AphrontFormTextAreaControl())
-          ->setLabel(pht('Blurb'))
-          ->setName('blurb')
-          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
-          ->setValue($profile->getBlurb()));
+          ->setError($e_name));
 
     if ($request->isAjax()) {
       $dialog = id(new AphrontDialogView())
@@ -104,7 +88,6 @@ final class PhabricatorProjectCreateController
 
       return id(new AphrontDialogResponse())->setDialog($dialog);
     } else {
-
       $form
         ->appendChild(
           id(new AphrontFormSubmitControl())
@@ -112,14 +95,13 @@ final class PhabricatorProjectCreateController
             ->addCancelButton('/project/'));
 
       $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Create Project'))
-          ->setHref($this->getApplicationURI().'create/'));
+      $crumbs->addTextCrumb(
+        pht('Create Project'),
+        $this->getApplicationURI().'create/');
 
       $form_box = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('Create New Project'))
-        ->setFormError($error_view)
+        ->setFormErrors($errors)
         ->setForm($form);
 
       return $this->buildApplicationPage(

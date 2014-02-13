@@ -153,10 +153,6 @@ final class PhabricatorAuthEditController
       $issues = array();
     }
 
-    if ($errors) {
-      $errors = id(new AphrontErrorView())->setErrors($errors);
-    }
-
     if ($is_new) {
       $button = pht('Add Provider');
       $crumb = pht('Add Provider');
@@ -216,8 +212,8 @@ final class PhabricatorAuthEditController
         'existing Phabricator accounts. If you disable this, Phabricator '.
         'accounts will be permanently bound to provider accounts.'));
 
-    $status_tag = id(new PhabricatorTagView())
-      ->setType(PhabricatorTagView::TYPE_STATE);
+    $status_tag = id(new PHUITagView())
+      ->setType(PHUITagView::TYPE_STATE);
     if ($is_new) {
       $status_tag
         ->setName(pht('New Provider'))
@@ -281,9 +277,7 @@ final class PhabricatorAuthEditController
     }
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($crumb));
+    $crumbs->addTextCrumb($crumb);
 
     $xaction_view = null;
     if (!$is_new) {
@@ -304,7 +298,7 @@ final class PhabricatorAuthEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($errors)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return $this->buildApplicationPage(

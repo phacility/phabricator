@@ -31,7 +31,7 @@ final class PHUIHeaderView extends AphrontView {
     return $this;
   }
 
-  public function addTag(PhabricatorTagView $tag) {
+  public function addTag(PHUITagView $tag) {
     $this->tags[] = $tag;
     return $this;
   }

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group legalpad
- */
 final class PhabricatorApplicationLegalpad extends PhabricatorApplication {
 
   public function getBaseURI() {
@@ -29,13 +26,14 @@ final class PhabricatorApplicationLegalpad extends PhabricatorApplication {
     return self::GROUP_COMMUNICATION;
   }
 
-  public function getQuickCreateURI() {
-    return $this->getBaseURI().'create/';
-  }
-
-
   public function isBeta() {
     return true;
+  }
+
+  public function getRemarkupRules() {
+    return array(
+      new LegalpadDocumentRemarkupRule(),
+    );
   }
 
   public function getRoutes() {
@@ -48,9 +46,21 @@ final class PhabricatorApplicationLegalpad extends PhabricatorApplication {
         'edit/(?P<id>\d+)/' => 'LegalpadDocumentEditController',
         'comment/(?P<id>\d+)/' => 'LegalpadDocumentCommentController',
         'view/(?P<id>\d+)/' => 'LegalpadDocumentViewController',
+        'verify/(?P<code>[^/]+)/' =>
+        'LegalpadDocumentSignatureVerificationController',
+        'signatures/(?P<id>\d+)/' => 'LegalpadDocumentSignatureListController',
         'document/' => array(
           'preview/' => 'PhabricatorMarkupPreviewController'),
       ));
+  }
+
+  protected function getCustomCapabilities() {
+    return array(
+      LegalpadCapabilityDefaultView::CAPABILITY => array(
+      ),
+      LegalpadCapabilityDefaultEdit::CAPABILITY => array(
+      ),
+    );
   }
 
 }

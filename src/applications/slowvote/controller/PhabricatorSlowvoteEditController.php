@@ -123,13 +123,6 @@ final class PhabricatorSlowvoteEditController
       }
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = new AphrontErrorView();
-      $error_view->setTitle(pht('Form Errors'));
-      $error_view->setErrors($errors);
-    }
-
     $instructions =
       phutil_tag(
         'p',
@@ -244,13 +237,11 @@ final class PhabricatorSlowvoteEditController
           ->addCancelButton($cancel_uri));
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title));
+    $crumbs->addTextCrumb($title);
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return $this->buildApplicationPage(

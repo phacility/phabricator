@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group search
- */
 final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
   private $uri;
   private $timeout;
@@ -94,14 +91,14 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
     return $doc;
   }
 
-  private function buildSpec(PhabricatorSearchQuery $query) {
+  private function buildSpec(PhabricatorSavedQuery $query) {
     $spec = array();
     $filter = array();
 
-    if ($query->getQuery() != '') {
+    if (strlen($query->getParameter('query'))) {
       $spec[] = array(
         'field' => array(
-          'field.corpus' => $query->getQuery(),
+          'field.corpus' => $query->getParameter('query'),
         ),
       );
     }
@@ -117,17 +114,41 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
       );
     }
 
-    $rel_mapping = array(
-      'author' => PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR,
-      'open' => PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
-      'owner' => PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
-      'subscribers' => PhabricatorSearchRelationship::RELATIONSHIP_SUBSCRIBER,
-      'project' => PhabricatorSearchRelationship::RELATIONSHIP_PROJECT,
-      'repository' => PhabricatorSearchRelationship::RELATIONSHIP_REPOSITORY,
+    $relationship_map = array(
+      PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR =>
+        $query->getParameter('authorPHIDs', array()),
+      PhabricatorSearchRelationship::RELATIONSHIP_OWNER =>
+        $query->getParameter('ownerPHIDs', array()),
+      PhabricatorSearchRelationship::RELATIONSHIP_SUBSCRIBER =>
+        $query->getParameter('subscriberPHIDs', array()),
+      PhabricatorSearchRelationship::RELATIONSHIP_PROJECT =>
+        $query->getParameter('projectPHIDs', array()),
+      PhabricatorSearchRelationship::RELATIONSHIP_REPOSITORY =>
+        $query->getParameter('repositoryPHIDs', array()),
     );
-    foreach ($rel_mapping as $name => $field) {
-      $param = $query->getParameter($name);
-      if (is_array($param)) {
+
+    $statuses = $query->getParameter('statuses', array());
+    $statuses = array_fuse($statuses);
+
+    $rel_open = PhabricatorSearchRelationship::RELATIONSHIP_OPEN;
+    $rel_closed = PhabricatorSearchRelationship::RELATIONSHIP_CLOSED;
+    $rel_unowned = PhabricatorSearchRelationship::RELATIONSHIP_UNOWNED;
+
+    $include_open = !empty($statuses[$rel_open]);
+    $include_closed = !empty($statuses[$rel_closed]);
+
+    if ($include_open && !$include_closed) {
+      $relationship_map[$rel_open] = true;
+    } else if (!$include_open && $include_closed) {
+      $relationship_map[$rel_closed] = true;
+    }
+
+    if ($query->getParameter('withUnowned')) {
+      $relationship_map[$rel_unowned] = true;
+    }
+
+    foreach ($relationship_map as $field => $param) {
+      if (is_array($param) && $param) {
         $should = array();
         foreach ($param as $val) {
           $should[] = array(
@@ -167,7 +188,7 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
       );
     }
 
-    if (!$query->getQuery()) {
+    if (!$query->getParameter('query')) {
       $spec['sort'] = array(
         array('dateCreated' => 'desc'),
       );
@@ -179,17 +200,17 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
     return $spec;
   }
 
-  public function executeSearch(PhabricatorSearchQuery $query) {
-    $type = $query->getParameter('type');
-    if ($type) {
-      $uri = "/phabricator/{$type}/_search";
-    } else {
-      // Don't use '/phabricator/_search' for the case that there is something
-      // else in the index (for example if 'phabricator' is only an alias to
-      // some bigger index).
-      $types = PhabricatorSearchAbstractDocument::getSupportedTypes();
-      $uri = '/phabricator/' . implode(',', array_keys($types)) . '/_search';
+  public function executeSearch(PhabricatorSavedQuery $query) {
+    $types = $query->getParameter('types');
+    if (!$types) {
+      $types = array_keys(
+        PhabricatorSearchApplicationSearchEngine::getIndexableDocumentTypes());
     }
+
+    // Don't use '/phabricator/_search' for the case that there is something
+    // else in the index (for example if 'phabricator' is only an alias to
+    // some bigger index).
+    $uri = '/phabricator/'.implode(',', $types).'/_search';
 
     try {
       $response = $this->executeRequest($uri, $this->buildSpec($query));
@@ -197,11 +218,13 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
       // elasticsearch probably uses Lucene query syntax:
       // http://lucene.apache.org/core/3_6_1/queryparsersyntax.html
       // Try literal search if operator search fails.
-      if (!$query->getQuery()) {
+      if (!strlen($query->getParameter('query'))) {
         throw $ex;
       }
       $query = clone $query;
-      $query->setQuery(addcslashes($query->getQuery(), '+-&|!(){}[]^"~*?:\\'));
+      $query->setQuery(
+        addcslashes(
+          $query->getParameter('query'), '+-&|!(){}[]^"~*?:\\'));
       $response = $this->executeRequest($uri, $this->buildSpec($query));
     }
 

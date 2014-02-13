@@ -4,7 +4,6 @@
 
 .phui-form-view {
   padding: 16px;
-  background: #fff;
 }
 
 .phui-form-view.phui-form-full-width {
@@ -432,4 +431,22 @@ table.aphront-form-control-checkbox-layout th {
   border-bottom: 1px solid {$lightbluetext};
   padding: 16px 0 4px;
   margin-bottom: 4px;
+}
+
+.device-desktop .text-with-submit-control-outer-bounds {
+  position: relative;
+}
+
+.device-desktop .text-with-submit-control-text-bounds {
+  position: absolute;
+  left: 0;
+  right: 184px;
+}
+
+.device-desktop .text-with-submit-control-submit-bounds {
+  text-align: right;
+}
+
+.device-desktop .text-with-submit-control-submit {
+  width: 180px;
 }

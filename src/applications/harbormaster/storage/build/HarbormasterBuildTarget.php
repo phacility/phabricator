@@ -8,6 +8,11 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
   protected $className;
   protected $details;
   protected $variables;
+  protected $targetStatus;
+
+  const STATUS_PENDING = 'target/pending';
+  const STATUS_PASSED = 'target/passed';
+  const STATUS_FAILED = 'target/failed';
 
   private $build = self::ATTACHABLE;
   private $buildStep = self::ATTACHABLE;
@@ -21,6 +26,7 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
       ->setBuildStepPHID($build_step->getPHID())
       ->setClassName($build_step->getClassName())
       ->setDetails($build_step->getDetails())
+      ->setTargetStatus(self::STATUS_PENDING)
       ->setVariables($variables);
   }
 
@@ -93,6 +99,30 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
     $implementation = newv($class, array());
     $implementation->loadSettings($this);
     return $implementation;
+  }
+
+
+/* -(  Status  )------------------------------------------------------------- */
+
+
+  public function isComplete() {
+    switch ($this->getTargetStatus()) {
+      case self::STATUS_PASSED:
+      case self::STATUS_FAILED:
+        return true;
+    }
+
+    return false;
+  }
+
+
+  public function isFailed() {
+    switch ($this->getTargetStatus()) {
+      case self::STATUS_FAILED:
+        return true;
+    }
+
+    return false;
   }
 
 

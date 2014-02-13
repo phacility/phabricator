@@ -15,9 +15,9 @@
  *
  * @group celerity
  */
-function require_celerity_resource($symbol) {
+function require_celerity_resource($symbol, $source_name = 'phabricator') {
   $response = CelerityAPI::getStaticResourceResponse();
-  $response->requireResource($symbol);
+  $response->requireResource($symbol, $source_name);
 }
 
 
@@ -49,13 +49,13 @@ function celerity_generate_unique_node_id() {
  *
  * @group celerity
  */
-function celerity_get_resource_uri($resource) {
-  $map = CelerityResourceMap::getInstance();
+function celerity_get_resource_uri($resource, $source = 'phabricator') {
+  $map = CelerityResourceMap::getNamedInstance($source);
 
-  $info = $map->lookupFileInformation($resource);
-  if ($info) {
-    return $info['uri'];
-  } else {
-    return $resource;
+  $uri = $map->getURIForName($resource);
+  if ($uri) {
+    return $uri;
   }
+
+  return $resource;
 }

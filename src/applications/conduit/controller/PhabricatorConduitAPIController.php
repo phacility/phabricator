@@ -279,28 +279,13 @@ final class PhabricatorConduitAPIController
       );
     }
 
-    $session = queryfx_one(
-      id(new PhabricatorUser())->establishConnection('r'),
-      'SELECT * FROM %T WHERE sessionKey = %s',
-      PhabricatorUser::SESSION_TABLE,
-      PhabricatorHash::digest($session_key));
-    if (!$session) {
-      return array(
-        'ERR-INVALID-SESSION',
-        'Session key is invalid.',
-      );
-    }
+    $user = id(new PhabricatorAuthSessionEngine())
+      ->loadUserForSession(PhabricatorAuthSession::TYPE_CONDUIT, $session_key);
 
-    // TODO: Make sessions timeout.
-    // TODO: When we pull a session, read connectionID from the session table.
-
-    $user = id(new PhabricatorUser())->loadOneWhere(
-      'phid = %s',
-      $session['userPHID']);
     if (!$user) {
       return array(
         'ERR-INVALID-SESSION',
-        'Session is for nonexistent user.',
+        'Session key is invalid.',
       );
     }
 
@@ -380,15 +365,9 @@ final class PhabricatorConduitAPIController
 
     $method_uri = $this->getApplicationURI('method/'.$method.'/');
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($method)
-          ->setHref($method_uri))
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Call')));
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb($method, $method_uri)
+      ->addTextCrumb(pht('Call'));
 
     return $this->buildApplicationPage(
       array(

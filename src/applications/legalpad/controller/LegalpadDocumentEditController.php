@@ -18,13 +18,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
     if (!$this->id) {
       $is_create = true;
 
-      $document = id(new LegalpadDocument())
-        ->setVersions(0)
-        ->setCreatorPHID($user->getPHID())
-        ->setContributorCount(0)
-        ->setRecentContributorPHIDs(array())
-        ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
-        ->setEditPolicy(PhabricatorPolicies::POLICY_USER);
+      $document = LegalpadDocument::initializeNewDocument($user);
       $body = id(new LegalpadDocumentBody())
         ->setCreatorPHID($user->getPHID());
       $document->attachDocumentBody($body);
@@ -37,6 +31,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
       $document = id(new LegalpadDocumentQuery())
         ->setViewer($user)
         ->needDocumentBodies(true)
+        ->needSignatures(true)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -102,11 +97,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
       }
     }
 
-    $error_view = null;
     if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('A Fatal Omission!'))
-        ->setErrors($errors);
       // set these to what was specified in the form on post
       $document->setViewPolicy($can_view);
       $document->setEditPolicy($can_edit);
@@ -151,6 +142,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
         ->setPolicies($policies)
         ->setName('can_edit'));
 
+    $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
     $submit = new AphrontFormSubmitControl();
     if ($is_create) {
       $submit->setValue(pht('Create Document'));
@@ -162,6 +154,17 @@ final class LegalpadDocumentEditController extends LegalpadController {
           $this->getApplicationURI('view/'.$document->getID()));
       $title = pht('Update Document');
       $short = pht('Update');
+      $signatures = $document->getSignatures();
+      if ($signatures) {
+        $form->appendInstructions(pht(
+          'Warning: there are %d signature(s) already for this document. '.
+          'Updating the title or text will invalidate these signatures and '.
+          'users will need to sign again. Proceed carefully.',
+          count($signatures)));
+      }
+      $crumbs->addTextCrumb(
+        $document->getMonogram(),
+        $this->getApplicationURI('view/'.$document->getID()));
     }
 
     $form
@@ -169,13 +172,10 @@ final class LegalpadDocumentEditController extends LegalpadController {
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())->setName($short));
-
+    $crumbs->addTextCrumb($short);
 
     $preview = id(new PHUIRemarkupPreviewPanel())
       ->setHeader(pht('Document Preview'))

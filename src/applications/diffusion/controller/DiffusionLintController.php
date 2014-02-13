@@ -139,9 +139,7 @@ final class DiffusionLintController extends DiffusionController {
     if ($this->diffusionRequest) {
       $title[] = $drequest->getCallsign();
     } else {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('All Lint')));
+      $crumbs->addTextCrumb(pht('All Lint'));
     }
 
     if ($this->diffusionRequest) {

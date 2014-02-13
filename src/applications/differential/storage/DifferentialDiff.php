@@ -2,10 +2,13 @@
 
 final class DifferentialDiff
   extends DifferentialDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    HarbormasterBuildableInterface {
 
   protected $revisionID;
   protected $authorPHID;
+  protected $repositoryPHID;
 
   protected $sourceMachine;
   protected $sourcePath;
@@ -22,7 +25,6 @@ final class DifferentialDiff
   protected $branch;
   protected $bookmark;
 
-  protected $parentRevisionID;
   protected $arcanistProjectPHID;
   protected $creationMethod;
   protected $repositoryUUID;
@@ -221,7 +223,6 @@ final class DifferentialDiff
   public function getDiffDict() {
     $dict = array(
       'id' => $this->getID(),
-      'parent' => $this->getParentRevisionID(),
       'revisionID' => $this->getRevisionID(),
       'dateCreated' => $this->getDateCreated(),
       'dateModified' => $this->getDateModified(),
@@ -336,6 +337,26 @@ final class DifferentialDiff
       return pht(
         'This diff is attached to a revision, and inherits its policies.');
     }
+    return null;
+  }
+
+
+
+/* -(  HarbormasterBuildableInterface  )------------------------------------- */
+
+
+  public function getHarbormasterBuildablePHID() {
+    return $this->getPHID();
+  }
+
+  public function getHarbormasterContainerPHID() {
+    if ($this->getRevisionID()) {
+      $revision = id(new DifferentialRevision())->load($this->getRevisionID());
+      if ($revision) {
+        return $revision->getPHID();
+      }
+    }
+
     return null;
   }
 

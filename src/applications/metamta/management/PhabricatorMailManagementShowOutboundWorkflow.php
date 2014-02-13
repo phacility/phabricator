@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorMailManagementShowOutboundWorkflow
-  extends PhabricatorSearchManagementWorkflow {
+  extends PhabricatorMailManagementWorkflow {
 
   protected function didConstruct() {
     $this
@@ -50,8 +50,6 @@ final class PhabricatorMailManagementShowOutboundWorkflow
       $info[] = pht('PROPERTIES');
       $info[] = pht('ID: %d', $message->getID());
       $info[] = pht('Status: %s', $message->getStatus());
-      $info[] = pht('Retry Count: %s', $message->getRetryCount());
-      $info[] = pht('Next Retry: %s', $message->getNextRetry());
       $info[] = pht('Related PHID: %s', $message->getRelatedPHID());
       $info[] = pht('Message: %s', $message->getMessage());
 

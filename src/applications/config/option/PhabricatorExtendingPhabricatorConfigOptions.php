@@ -28,18 +28,6 @@ final class PhabricatorExtendingPhabricatorConfigOptions
             "occur. Specify a list of classes which extend ".
             "PhabricatorEventListener here."))
         ->addExample('MyEventListener', pht('Valid Setting')),
-      $this->newOption(
-        'celerity.resource-path',
-        'string',
-        '__celerity_resource_map__.php')
-        ->setLocked(true)
-        ->setSummary(
-          pht("Custom celerity resource map."))
-        ->setDescription(
-          pht(
-            "Path to custom celerity resource map relative to ".
-            "'phabricator/src'. See also `scripts/celerity_mapper.php`."))
-        ->addExample('local/my_celerity_map.php', pht('Valid Setting')),
        $this->newOption(
          'aphront.default-application-configuration-class',
          'class',

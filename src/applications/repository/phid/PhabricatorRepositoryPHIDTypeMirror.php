@@ -39,9 +39,4 @@ final class PhabricatorRepositoryPHIDTypeMirror
     }
   }
 
-  public function canLoadNamedObject($name) {
-    return false;
-  }
-
-
 }

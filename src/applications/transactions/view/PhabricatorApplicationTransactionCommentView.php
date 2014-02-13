@@ -181,7 +181,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
 
   private function renderPreviewPanel() {
 
-    $preview = id(new PhabricatorTimelineView())
+    $preview = id(new PHUITimelineView())
       ->setID($this->getPreviewTimelineID());
 
     return phutil_tag(

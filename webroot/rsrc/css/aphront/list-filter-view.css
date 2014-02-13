@@ -3,10 +3,10 @@
  */
 
 .aphront-list-filter-wrap {
-  border-left: 1px solid {$lightgreyborder};
-  border-right: 1px solid {$lightgreyborder};
-  border-bottom: 1px solid {$greyborder};
-  margin: 0 20px;
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
+  margin: 0 16px;
 }
 
 .aphront-list-filter-view {
@@ -22,6 +22,14 @@
   border-left: none;
   border-right: none;
   padding: 12px 0 6px;
+}
+
+/* When a list filter view contains two consecuitive forms, lay them out
+   without much white space in between them so they look more contiugous. At
+   the time of writing, this is used only in the Diffusion repository search
+   UI. */
+.aphront-list-filter-view-content form + form .phui-form-view {
+  margin-top: -18px;
 }
 
 .aphront-list-filter-view-content .phui-form-view .aphront-form-label {

@@ -37,8 +37,4 @@ final class ReleephPHIDTypeProject extends PhabricatorPHIDType {
     }
   }
 
-  public function canLoadNamedObject($name) {
-    return false;
-  }
-
 }

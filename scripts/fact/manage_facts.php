@@ -15,13 +15,8 @@ EOSYNOPSIS
   );
 $args->parseStandardArguments();
 
-$workflows = array(
-  new PhabricatorFactManagementDestroyWorkflow(),
-  new PhabricatorFactManagementAnalyzeWorkflow(),
-  new PhabricatorFactManagementStatusWorkflow(),
-  new PhabricatorFactManagementListWorkflow(),
-  new PhabricatorFactManagementCursorsWorkflow(),
-  new PhutilHelpArgumentWorkflow(),
-);
-
+$workflows = id(new PhutilSymbolLoader())
+  ->setAncestorClass('PhabricatorFactManagementWorkflow')
+  ->loadObjects();
+$workflows[] = new PhutilHelpArgumentWorkflow();
 $args->parseWorkflows($workflows);

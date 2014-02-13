@@ -3,22 +3,35 @@
 final class PhabricatorProject extends PhabricatorProjectDAO
   implements
     PhabricatorFlaggableInterface,
-    PhabricatorPolicyInterface {
+    PhabricatorPolicyInterface,
+    PhabricatorSubscribableInterface,
+    PhabricatorCustomFieldInterface {
 
   protected $name;
   protected $status = PhabricatorProjectStatus::STATUS_ACTIVE;
   protected $authorPHID;
   protected $subprojectPHIDs = array();
   protected $phrictionSlug;
+  protected $profileImagePHID;
 
   protected $viewPolicy;
   protected $editPolicy;
   protected $joinPolicy;
 
-  private $subprojectsNeedUpdate;
   private $memberPHIDs = self::ATTACHABLE;
   private $sparseMembers = self::ATTACHABLE;
-  private $profile = self::ATTACHABLE;
+  private $customFields = self::ATTACHABLE;
+  private $profileImageFile = self::ATTACHABLE;
+
+  public static function initializeNewProject(PhabricatorUser $actor) {
+    return id(new PhabricatorProject())
+      ->setName('')
+      ->setAuthorPHID($actor->getPHID())
+      ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setEditPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setJoinPolicy(PhabricatorPolicies::POLICY_USER)
+      ->attachMemberPHIDs(array());
+  }
 
   public function getCapabilities() {
     return array(
@@ -73,6 +86,9 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   }
 
   public function isUserMember($user_phid) {
+    if ($this->memberPHIDs !== self::ATTACHABLE) {
+      return in_array($user_phid, $this->memberPHIDs);
+    }
     return $this->assertAttachedKey($this->sparseMembers, $user_phid);
   }
 
@@ -96,15 +112,6 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorProjectPHIDTypeProject::TYPECONST);
-  }
-
-  public function getProfile() {
-    return $this->assertAttached($this->profile);
-  }
-
-  public function attachProfile(PhabricatorProjectProfile $profile) {
-    $this->profile = $profile;
-    return $this;
   }
 
   public function attachMemberPHIDs(array $phids) {
@@ -133,5 +140,60 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     $slug = $this->getPhrictionSlug();
     return 'projects/'.$slug;
   }
+
+  public function isArchived() {
+    return ($this->getStatus() == PhabricatorProjectStatus::STATUS_ARCHIVED);
+  }
+
+  public function getProfileImageURI() {
+    return $this->getProfileImageFile()->getBestURI();
+  }
+
+  public function attachProfileImageFile(PhabricatorFile $file) {
+    $this->profileImageFile = $file;
+    return $this;
+  }
+
+  public function getProfileImageFile() {
+    return $this->assertAttached($this->profileImageFile);
+  }
+
+
+/* -(  PhabricatorSubscribableInterface  )----------------------------------- */
+
+
+  public function isAutomaticallySubscribed($phid) {
+    return false;
+  }
+
+  public function shouldShowSubscribersProperty() {
+    return false;
+  }
+
+  public function shouldAllowSubscription($phid) {
+    return $this->isUserMember($phid);
+  }
+
+
+/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+
+
+  public function getCustomFieldSpecificationForRole($role) {
+    return PhabricatorEnv::getEnvConfig('projects.fields');
+  }
+
+  public function getCustomFieldBaseClass() {
+    return 'PhabricatorProjectCustomField';
+  }
+
+  public function getCustomFields() {
+    return $this->assertAttached($this->customFields);
+  }
+
+  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
+    $this->customFields = $fields;
+    return $this;
+  }
+
 
 }

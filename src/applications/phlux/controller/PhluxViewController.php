@@ -25,10 +25,7 @@ final class PhluxViewController extends PhluxController {
 
     $title = $var->getVariableKey();
 
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title)
-        ->setHref($request->getRequestURI()));
+    $crumbs->addTextCrumb($title, $request->getRequestURI());
 
     $header = id(new PHUIHeaderView())
       ->setHeader($title)

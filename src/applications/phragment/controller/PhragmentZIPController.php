@@ -7,6 +7,10 @@ final class PhragmentZIPController extends PhragmentController {
 
   private $snapshotCache;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->dblob = idx($data, "dblob", "");
     $this->snapshot = idx($data, "snapshot", null);
@@ -87,7 +91,9 @@ final class PhragmentZIPController extends PhragmentController {
     }
 
     foreach ($mappings as $path => $file) {
-      $zip->addFromString($path, $file->loadFileData());
+      if ($file !== null) {
+        $zip->addFromString($path, $file->loadFileData());
+      }
     }
     $zip->close();
 
@@ -103,8 +109,18 @@ final class PhragmentZIPController extends PhragmentController {
         'name' => $zip_name,
         'ttl' => time() + 60 * 60 * 24,
       ));
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $file->attachToObject($viewer, $fragment->getPHID());
+    unset($unguarded);
+
+    $return = $fragment->getURI();
+    if ($request->getExists('return')) {
+      $return = $request->getStr('return');
+    }
+
     return id(new AphrontRedirectResponse())
-      ->setURI($file->getBestURI());
+      ->setURI($file->getDownloadURI($return));
   }
 
   /**

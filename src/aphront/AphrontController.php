@@ -9,7 +9,6 @@ abstract class AphrontController extends Phobject {
   private $currentApplication;
   private $delegatingController;
 
-
   public function setDelegatingController(
     AphrontController $delegating_controller) {
     $this->delegatingController = $delegating_controller;
@@ -62,6 +61,26 @@ abstract class AphrontController extends Phobject {
 
   final public function getCurrentApplication() {
     return $this->currentApplication;
+  }
+
+  public function getDefaultResourceSource() {
+    throw new Exception(
+      pht(
+        'A Controller must implement getDefaultResourceSource() before you '.
+        'can invoke requireResource() or initBehavior().'));
+  }
+
+  public function requireResource($symbol) {
+    $response = CelerityAPI::getStaticResourceResponse();
+    $response->requireResource($symbol, $this->getDefaultResourceSource());
+    return $this;
+  }
+
+  public function initBehavior($name, $config = array()) {
+    Javelin::initBehavior(
+      $name,
+      $config,
+      $this->getDefaultResourceSource());
   }
 
 }

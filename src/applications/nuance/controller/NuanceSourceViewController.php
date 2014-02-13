@@ -47,9 +47,7 @@ final class NuanceSourceViewController extends NuanceController {
 
     $title = pht('%s', $source->getName());
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-      ->setName($title));
+    $crumbs->addTextCrumb($title);
 
     $header = $this->buildHeaderView($source);
     $actions = $this->buildActionView($source);

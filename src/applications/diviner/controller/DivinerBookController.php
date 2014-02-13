@@ -27,10 +27,9 @@ final class DivinerBookController extends DivinerController {
 
     $crumbs = $this->buildApplicationCrumbs();
 
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($book->getShortTitle())
-        ->setHref('/book/'.$book->getName().'/'));
+    $crumbs->addTextCrumb(
+      $book->getShortTitle(),
+      '/book/'.$book->getName().'/');
 
     $header = id(new PHUIHeaderView())
       ->setHeader($book->getTitle())

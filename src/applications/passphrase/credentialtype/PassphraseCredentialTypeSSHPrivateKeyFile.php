@@ -25,4 +25,12 @@ final class PassphraseCredentialTypeSSHPrivateKeyFile
     return new AphrontFormTextControl();
   }
 
+  public function isCreateable() {
+    // This credential type exists to support historic repository configuration.
+    // We don't support creating new credentials with this type, since it does
+    // not scale and managing passwords is much more difficult than if we have
+    // the key text.
+    return false;
+  }
+
 }

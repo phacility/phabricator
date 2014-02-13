@@ -56,9 +56,7 @@ final class PhabricatorConfigAllController
 
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($title));
+      ->addTextCrumb($title);
 
     $panel = new AphrontPanelView();
     $panel->appendChild($table);

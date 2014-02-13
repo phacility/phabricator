@@ -193,10 +193,8 @@ final class ConduitAPI_diffusion_diffquery_Method
 
     list($ref, $rev) = $spec;
     return $repository->getRemoteCommandFuture(
-      'cat %s%s@%d',
-      $repository->getRemoteURI(),
-      phutil_escape_uri($ref),
-      $rev);
+      'cat %s',
+      $repository->getSubversionPathURI($ref, $rev));
   }
 
   private function getGitOrMercurialResult(ConduitAPIRequest $request) {

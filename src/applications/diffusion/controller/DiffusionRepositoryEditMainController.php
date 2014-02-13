@@ -231,6 +231,7 @@ final class DiffusionRepositoryEditMainController
         ->setIcon('delete')
         ->setHref(
           $this->getRepositoryControllerURI($repository, 'edit/delete/'))
+        ->setDisabled(true)
         ->setWorkflow(true));
 
     return $view;
@@ -251,6 +252,25 @@ final class DiffusionRepositoryEditMainController
 
     $view->addProperty(pht('Type'), $type);
     $view->addProperty(pht('Callsign'), $repository->getCallsign());
+
+
+    $clone_name = $repository->getDetail('clone-name');
+
+    $view->addProperty(
+      pht('Clone/Checkout As'),
+      $clone_name
+        ? $clone_name.'/'
+        : phutil_tag('em', array(), $repository->getCloneName().'/'));
+
+    $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $repository->getPHID(),
+      PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT);
+    if ($project_phids) {
+      $this->loadHandles($project_phids);
+      $view->addProperty(
+        pht('Projects'),
+        $this->renderHandlesForPHIDs($project_phids));
+    }
 
     $view->addProperty(
       pht('Status'),
@@ -943,7 +963,13 @@ final class DiffusionRepositoryEditMainController
         $percentage = 0;
       }
 
-      $percentage = sprintf('%.1f%%', $percentage);
+      // Cap this at "99.99%", because it's confusing to users when the actual
+      // fraction is "99.996%" and it rounds up to "100.00%".
+      if ($percentage > 99.99) {
+        $percentage = 99.99;
+      }
+
+      $percentage = sprintf('%.2f%%', $percentage);
 
       $view->addItem(
         id(new PHUIStatusItemView())

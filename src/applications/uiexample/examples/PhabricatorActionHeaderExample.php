@@ -189,14 +189,14 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
     $title4 = id(new PHUIHeaderView())
       ->setHeader(pht('With Tags'));
 
-    $tag1 = id(new PhabricatorTagView())
-      ->setType(PhabricatorTagView::TYPE_STATE)
-      ->setBackgroundColor(PhabricatorTagView::COLOR_RED)
+    $tag1 = id(new PHUITagView())
+      ->setType(PHUITagView::TYPE_STATE)
+      ->setBackgroundColor(PHUITagView::COLOR_RED)
       ->setName('Open');
 
-    $tag2 = id(new PhabricatorTagView())
-      ->setType(PhabricatorTagView::TYPE_STATE)
-      ->setBackgroundColor(PhabricatorTagView::COLOR_BLUE)
+    $tag2 = id(new PHUITagView())
+      ->setType(PHUITagView::TYPE_STATE)
+      ->setBackgroundColor(PHUITagView::COLOR_BLUE)
       ->setName('Closed');
 
     $action1 = new PHUIIconView();

@@ -58,7 +58,7 @@ If you've only changed file content things will generally work even if you
 don't, but they might start not working as well in the future if you skip this
 step.
 
-The generated file `src/__celerity_resource_map__.php` causes merge conflicts
+The generated file `resources/celerity/map.php` causes merge conflicts
 quite often. They can be resolved by running the Celerity mapper. You can
 automate this process by running:
 

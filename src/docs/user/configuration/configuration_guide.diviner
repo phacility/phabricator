@@ -204,5 +204,6 @@ Continue by:
   - configuring inbound mail with @{article:Configuring Inbound Email}; or
   - importing repositories with @{article:Diffusion User Guide}; or
   - learning about daemons with @{article:Managing Daemons with phd}; or
-  - configuring backups with @{article:Configuring Backups}; or
+  - configuring backups with
+    @{article:Configuring Backups and Performing Migrations}; or
   - contributing to Phabricator with @{article:Contributor Introduction}.

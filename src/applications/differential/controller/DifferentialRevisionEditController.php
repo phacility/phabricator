@@ -108,13 +108,6 @@ final class DifferentialRevisionEditController extends DifferentialController {
       $form->setAction('/differential/revision/edit/');
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Form Errors'))
-        ->setErrors($errors);
-    }
-
     if ($diff && $revision->getID()) {
       $form
         ->appendChild(
@@ -153,16 +146,14 @@ final class DifferentialRevisionEditController extends DifferentialController {
     if ($revision->getID()) {
       if ($diff) {
         $title = pht('Update Differential Revision');
-        $crumbs->addCrumb(
-          id(new PhabricatorCrumbView())
-            ->setName('D'.$revision->getID())
-            ->setHref('/differential/diff/'.$diff->getID().'/'));
+        $crumbs->addTextCrumb(
+          'D'.$revision->getID(),
+          '/differential/diff/'.$diff->getID().'/');
       } else {
         $title = pht('Edit Differential Revision');
-        $crumbs->addCrumb(
-          id(new PhabricatorCrumbView())
-            ->setName('D'.$revision->getID())
-            ->setHref('/D'.$revision->getID()));
+        $crumbs->addTextCrumb(
+          'D'.$revision->getID(),
+          '/D'.$revision->getID());
       }
     } else {
       $title = pht('Create New Differential Revision');
@@ -170,12 +161,10 @@ final class DifferentialRevisionEditController extends DifferentialController {
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title));
+    $crumbs->addTextCrumb($title);
 
     return $this->buildApplicationPage(
       array(

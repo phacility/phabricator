@@ -301,16 +301,8 @@ final class AphrontCalendarMonthView extends AphrontView {
       $info .= "\n\n".$event->getDescription();
     }
 
-    if ($user->getPHID() == $event->getUserPHID()) {
-      $tag  = 'a';
-      $href = '/calendar/status/edit/'.$event->getEventID().'/';
-    } else {
-      $tag  = 'div';
-      $href = null;
-    }
-
     $text_div = javelin_tag(
-      $tag,
+      'a',
       array(
         'sigil' => 'has-tooltip',
         'meta'  => array(
@@ -318,7 +310,7 @@ final class AphrontCalendarMonthView extends AphrontView {
           'size' => 240,
         ),
         'class' => 'aphront-calendar-event-text',
-        'href'  => $href,
+        'href' => '/calendar/event/view/'.$event->getEventID().'/',
       ),
       phutil_utf8_shorten($event->getName(), 32));
 

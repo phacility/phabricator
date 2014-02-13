@@ -29,6 +29,7 @@ final class PhabricatorSearchConfigOptions
             "your documents in some search engine which does not have ".
             "default support.")),
       $this->newOption('search.elastic.host', 'string', null)
+        ->setLocked(true)
         ->setDescription(pht("Elastic Search host."))
         ->addExample('http://elastic.example.com:9200/', pht('Valid Setting')),
     );

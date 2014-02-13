@@ -32,7 +32,8 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
 
   public function getRemarkupRules() {
     return array(
-      new DiffusionRemarkupRule(),
+      new DiffusionRepositoryRemarkupRule(),
+      new DiffusionCommitRemarkupRule(),
     );
   }
 
@@ -73,11 +74,11 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
             'encoding/' => 'DiffusionRepositoryEditEncodingController',
             'activate/' => 'DiffusionRepositoryEditActivateController',
             'dangerous/' => 'DiffusionRepositoryEditDangerousController',
-            'policy/' => 'DiffusionRepositoryEditPolicyController',
             'branches/' => 'DiffusionRepositoryEditBranchesController',
             'subversion/' => 'DiffusionRepositoryEditSubversionController',
             'actions/' => 'DiffusionRepositoryEditActionsController',
             '(?P<edit>remote)/' => 'DiffusionRepositoryCreateController',
+            '(?P<edit>policy)/' => 'DiffusionRepositoryCreateController',
             'local/' => 'DiffusionRepositoryEditLocalController',
             'delete/' => 'DiffusionRepositoryEditDeleteController',
             'hosting/' => 'DiffusionRepositoryEditHostingController',

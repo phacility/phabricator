@@ -38,8 +38,4 @@ final class ReleephPHIDTypeBranch extends PhabricatorPHIDType {
     }
   }
 
-  public function canLoadNamedObject($name) {
-    return false;
-  }
-
 }

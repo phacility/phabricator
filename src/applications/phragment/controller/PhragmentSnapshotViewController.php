@@ -4,6 +4,10 @@ final class PhragmentSnapshotViewController extends PhragmentController {
 
   private $id;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->id = idx($data, "id", "");
   }
@@ -36,9 +40,7 @@ final class PhragmentSnapshotViewController extends PhragmentController {
     }
 
     $crumbs = $this->buildApplicationCrumbsWithPath($parents);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('"%s" Snapshot', $snapshot->getName())));
+    $crumbs->addTextCrumb(pht('"%s" Snapshot', $snapshot->getName()));
 
     $children = id(new PhragmentSnapshotChildQuery())
       ->setViewer($viewer)
@@ -72,6 +74,7 @@ final class PhragmentSnapshotViewController extends PhragmentController {
     return $this->buildApplicationPage(
       array(
         $crumbs,
+        $this->renderConfigurationWarningIfRequired(),
         $box,
         $list),
       array(
@@ -100,6 +103,11 @@ final class PhragmentSnapshotViewController extends PhragmentController {
       "zip@".$snapshot->getName().
       "/".$snapshot->getPrimaryFragment()->getPath());
 
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $snapshot,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
     $actions = id(new PhabricatorActionListView())
       ->setUser($viewer)
       ->setObject($snapshot)
@@ -107,24 +115,24 @@ final class PhragmentSnapshotViewController extends PhragmentController {
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Download Snapshot as ZIP'))
-        ->setHref($zip_uri)
-        ->setDisabled(false) // TODO: Policy
+        ->setHref($this->isCorrectlyConfigured() ? $zip_uri : null)
+        ->setDisabled(!$this->isCorrectlyConfigured())
         ->setIcon('zip'));
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Delete Snapshot'))
         ->setHref($this->getApplicationURI(
           "snapshot/delete/".$snapshot->getID()."/"))
+        ->setDisabled(!$can_edit)
         ->setWorkflow(true)
-        ->setDisabled(false) // TODO: Policy
         ->setIcon('delete'));
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Promote Another Snapshot to Here'))
         ->setHref($this->getApplicationURI(
           "snapshot/promote/".$snapshot->getID()."/"))
+        ->setDisabled(!$can_edit)
         ->setWorkflow(true)
-        ->setDisabled(false) // TODO: Policy
         ->setIcon('promote'));
 
     $properties = id(new PHUIPropertyListView())

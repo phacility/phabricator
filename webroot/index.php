@@ -3,10 +3,13 @@
 require_once dirname(dirname(__FILE__)).'/support/PhabricatorStartup.php';
 PhabricatorStartup::didStartup();
 
+$show_unexpected_traces = false;
 try {
   PhabricatorStartup::loadCoreLibraries();
 
   PhabricatorEnv::initializeWebEnvironment();
+  $show_unexpected_traces = PhabricatorEnv::getEnvConfig(
+    'phabricator.developer-mode');
 
   // This is the earliest we can get away with this, we need env config first.
   PhabricatorAccessLog::init();
@@ -124,7 +127,10 @@ try {
           $ex,
         ));
     }
-    PhabricatorStartup::didFatal('[Rendering Exception] '.$ex->getMessage());
+    PhabricatorStartup::didEncounterFatalException(
+      'Rendering Exception',
+      $ex,
+      $show_unexpected_traces);
   }
 
   $write_guard->dispose();
@@ -137,6 +143,9 @@ try {
 
   DarkConsoleXHProfPluginAPI::saveProfilerSample($access_log);
 } catch (Exception $ex) {
-  PhabricatorStartup::didFatal("[Exception] ".$ex->getMessage());
+  PhabricatorStartup::didEncounterFatalException(
+    'Core Exception',
+    $ex,
+    $show_unexpected_traces);
 }
 

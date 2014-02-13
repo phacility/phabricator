@@ -74,13 +74,6 @@ final class PhabricatorMailingListsEditController
       }
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Form Errors'))
-        ->setErrors($errors);
-    }
-
     $form = new AphrontFormView();
     $form->setUser($request->getUser());
     if ($list->getID()) {
@@ -117,18 +110,14 @@ final class PhabricatorMailingListsEditController
           ->addCancelButton($this->getApplicationURI()));
 
     if ($list->getID()) {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Edit Mailing List')));
+      $crumbs->addTextCrumb(pht('Edit Mailing List'));
     } else {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Create Mailing List')));
+      $crumbs->addTextCrumb(pht('Create Mailing List'));
     }
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return $this->buildApplicationPage(

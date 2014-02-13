@@ -107,5 +107,52 @@ final class PhabricatorRepositoryTestCase
 
   }
 
+  public function testFilterMercurialDebugOutput() {
+    $map = array(
+      "" => "",
+
+      "quack\n" => "quack\n",
+
+      "ignoring untrusted configuration option x.y = z\nquack\n" =>
+        "quack\n",
+
+      "ignoring untrusted configuration option x.y = z\n".
+      "ignoring untrusted configuration option x.y = z\n".
+      "quack\n" =>
+        "quack\n",
+
+      "ignoring untrusted configuration option x.y = z\n".
+      "ignoring untrusted configuration option x.y = z\n".
+      "ignoring untrusted configuration option x.y = z\n".
+      "quack\n" =>
+        "quack\n",
+
+      "quack\n".
+      "ignoring untrusted configuration option x.y = z\n".
+      "ignoring untrusted configuration option x.y = z\n".
+      "ignoring untrusted configuration option x.y = z\n" =>
+        "quack\n",
+
+      "ignoring untrusted configuration option x.y = z\n".
+      "ignoring untrusted configuration option x.y = z\n".
+      "duck\n".
+      "ignoring untrusted configuration option x.y = z\n".
+      "ignoring untrusted configuration option x.y = z\n".
+      "bread\n".
+      "ignoring untrusted configuration option x.y = z\n".
+      "quack\n" =>
+        "duck\nbread\nquack\n",
+
+      "ignoring untrusted configuration option x.y = z\n".
+      "duckignoring untrusted configuration option x.y = z\n".
+      "quack" =>
+        "duckquack",
+    );
+
+    foreach ($map as $input => $expect) {
+      $actual = PhabricatorRepository::filterMercurialDebugOutput($input);
+      $this->assertEqual($expect, $actual, $input);
+    }
+  }
 
 }

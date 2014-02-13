@@ -58,11 +58,28 @@ try {
     $original_command = getenv('SSH_ORIGINAL_COMMAND');
   }
 
+  $workflows = id(new PhutilSymbolLoader())
+    ->setAncestorClass('PhabricatorSSHWorkflow')
+    ->loadObjects();
+
+  $workflow_names = mpull($workflows, 'getName', 'getName');
+
   // Now, rebuild the original command.
   $original_argv = id(new PhutilShellLexer())
     ->splitArguments($original_command);
   if (!$original_argv) {
-    throw new Exception("No interactive logins.");
+    throw new Exception(
+      pht(
+        "Welcome to Phabricator.\n\n".
+        "You are logged in as %s.\n\n".
+        "You haven't specified a command to run. This means you're requesting ".
+        "an interactive shell, but Phabricator does not provide an ".
+        "interactive shell over SSH.\n\n".
+        "Usually, you should run a command like `git clone` or `hg push` ".
+        "rather than connecting directly with SSH.\n\n".
+        "Supported commands are: %s.",
+        $user->getUsername(),
+        implode(', ', $workflow_names)));
   }
 
   $ssh_log->setData(
@@ -78,15 +95,6 @@ try {
 
   $original_args = new PhutilArgumentParser($original_argv);
 
-  $workflows = array(
-    new ConduitSSHWorkflow(),
-    new DiffusionSSHSubversionServeWorkflow(),
-    new DiffusionSSHMercurialServeWorkflow(),
-    new DiffusionSSHGitUploadPackWorkflow(),
-    new DiffusionSSHGitReceivePackWorkflow(),
-  );
-
-  $workflow_names = mpull($workflows, 'getName', 'getName');
   if (empty($workflow_names[$command])) {
     throw new Exception("Invalid command.");
   }

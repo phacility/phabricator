@@ -6,7 +6,7 @@ final class PassphraseCredentialCreateController extends PassphraseController {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $types = PassphraseCredentialType::getAllTypes();
+    $types = PassphraseCredentialType::getAllCreateableTypes();
     $types = mpull($types, null, 'getCredentialType');
     $types = msort($types, 'getCredentialTypeName');
 
@@ -24,12 +24,6 @@ final class PassphraseCredentialCreateController extends PassphraseController {
         $uri = $this->getApplicationURI('edit/?type='.$type);
         return id(new AphrontRedirectResponse())->setURI($uri);
       }
-    }
-
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setErrors($errors);
     }
 
     $types_control = id(new AphrontFormRadioButtonControl())
@@ -55,13 +49,11 @@ final class PassphraseCredentialCreateController extends PassphraseController {
     $title = pht('New Credential');
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Create')));
+    $crumbs->addTextCrumb(pht('Create'));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Create New Credential'))
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return $this->buildApplicationPage(

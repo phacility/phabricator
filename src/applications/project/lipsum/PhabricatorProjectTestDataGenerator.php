@@ -32,14 +32,10 @@ final class PhabricatorProjectTestDataGenerator
       PhabricatorTransactions::TYPE_JOIN_POLICY,
       PhabricatorPolicies::POLICY_PUBLIC);
 
-    $editor = id(new PhabricatorProjectEditor($project))
+    $editor = id(new PhabricatorProjectTransactionEditor())
       ->setActor($author)
-      ->applyTransactions($this->xactions);
-
-    $profile = id(new PhabricatorProjectProfile())
-      ->setBlurb($this->generateDescription())
-      ->setProjectPHID($project->getPHID())
-      ->save();
+      ->setContentSource(PhabricatorContentSource::newConsoleSource())
+      ->applyTransactions($project, $this->xactions);
 
     return $project->save();
   }

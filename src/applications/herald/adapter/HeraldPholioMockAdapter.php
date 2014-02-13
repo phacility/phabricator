@@ -12,6 +12,11 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
     return 'PhabricatorApplicationPholio';
   }
 
+  public function getAdapterContentDescription() {
+    return pht(
+      'React to mocks being created or updated.');
+  }
+
   public function getObject() {
     return $this->mock;
   }
@@ -36,6 +41,17 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
     return pht('Pholio Mocks');
   }
 
+  public function supportsRuleType($rule_type) {
+    switch ($rule_type) {
+      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
+      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
+        return true;
+      case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
+      default:
+        return false;
+    }
+  }
+
   public function getFields() {
     return array_merge(
       array(
@@ -43,6 +59,7 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
         self::FIELD_BODY,
         self::FIELD_AUTHOR,
         self::FIELD_CC,
+        self::FIELD_IS_NEW_OBJECT,
       ),
       parent::getFields());
   }

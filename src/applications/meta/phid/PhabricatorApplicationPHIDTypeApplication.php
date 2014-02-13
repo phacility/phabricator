@@ -38,8 +38,4 @@ final class PhabricatorApplicationPHIDTypeApplication
     }
   }
 
-  public function canLoadNamedObject($name) {
-    return false;
-  }
-
 }

@@ -109,11 +109,6 @@ final class PhluxEditController extends PhluxController {
       }
     }
 
-    if ($errors) {
-      $errors = id(new AphrontErrorView())
-        ->setErrors($errors);
-    }
-
     $policies = id(new PhabricatorPolicyQuery())
       ->setViewer($user)
       ->setObject($var)
@@ -164,21 +159,15 @@ final class PhluxEditController extends PhluxController {
 
     if ($is_new) {
       $title = pht('Create Variable');
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($title)
-          ->setHref($request->getRequestURI()));
+      $crumbs->addTextCrumb($title, $request->getRequestURI());
     } else {
       $title = pht('Edit %s', $this->key);
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($title)
-          ->setHref($request->getRequestURI()));
+      $crumbs->addTextCrumb($title, $request->getRequestURI());
     }
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormError($errors)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return $this->buildApplicationPage(

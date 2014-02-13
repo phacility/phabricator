@@ -9,6 +9,16 @@ final class DifferentialRevisionCommentListView extends AphrontView {
   private $target;
   private $versusDiffID;
   private $id;
+  private $revision;
+
+  public function setRevision(DifferentialRevision $revision) {
+    $this->revision = $revision;
+    return $this;
+  }
+
+  public function getRevision() {
+    return $this->revision;
+  }
 
   public function setComments(array $comments) {
     assert_instances_of($comments, 'DifferentialComment');
@@ -53,7 +63,7 @@ final class DifferentialRevisionCommentListView extends AphrontView {
 
   public function render() {
 
-    require_celerity_resource('differential-revision-comment-list-css');
+    $this->requireResource('differential-revision-comment-list-css');
 
     $engine = new PhabricatorMarkupEngine();
     $engine->setViewer($this->user);
@@ -86,6 +96,7 @@ final class DifferentialRevisionCommentListView extends AphrontView {
       $view->setInlineComments(idx($inlines, $comment->getID(), array()));
       $view->setChangesets($this->changesets);
       $view->setTargetDiff($this->target);
+      $view->setRevision($this->getRevision());
       $view->setVersusDiffID($this->versusDiffID);
       if ($comment->getAction() == DifferentialAction::ACTION_SUMMARIZE) {
         $view->setAnchorName('summary');
@@ -154,7 +165,7 @@ final class DifferentialRevisionCommentListView extends AphrontView {
     $visible = array_reverse($visible);
 
     if ($hidden) {
-      Javelin::initBehavior(
+      $this->initBehavior(
         'differential-show-all-comments',
         array(
           'markup' => implode("\n", $hidden),

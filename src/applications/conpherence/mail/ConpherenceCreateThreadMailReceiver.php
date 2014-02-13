@@ -53,13 +53,15 @@ final class ConpherenceCreateThreadMailReceiver
     $phids = mpull($users, 'getPHID');
 
     $conpherence = id(new ConpherenceReplyHandler())
-      ->setMailReceiver(new ConpherenceThread())
+      ->setMailReceiver(ConpherenceThread::initializeNewThread($sender))
       ->setMailAddedParticipantPHIDs($phids)
       ->setActor($sender)
       ->setExcludeMailRecipientPHIDs($mail->loadExcludeMailRecipientPHIDs())
       ->processEmail($mail);
 
-    $mail->setRelatedPHID($conpherence->getPHID());
+    if ($conpherence) {
+      $mail->setRelatedPHID($conpherence->getPHID());
+    }
   }
 
 }

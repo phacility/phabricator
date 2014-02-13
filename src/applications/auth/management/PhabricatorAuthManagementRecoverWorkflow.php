@@ -22,7 +22,7 @@ final class PhabricatorAuthManagementRecoverWorkflow
   public function execute(PhutilArgumentParser $args) {
 
     $can_recover = id(new PhabricatorPeopleQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($this->getViewer())
       ->withIsAdmin(true)
       ->execute();
     if (!$can_recover) {
@@ -48,7 +48,7 @@ final class PhabricatorAuthManagementRecoverWorkflow
     $username = head($usernames);
 
     $user = id(new PhabricatorPeopleQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($this->getViewer())
       ->withUsernames(array($username))
       ->executeOne();
 

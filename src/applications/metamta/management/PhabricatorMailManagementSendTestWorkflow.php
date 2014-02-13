@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorMailManagementSendTestWorkflow
-  extends PhabricatorSearchManagementWorkflow {
+  extends PhabricatorMailManagementWorkflow {
 
   protected function didConstruct() {
     $this
@@ -61,7 +61,7 @@ final class PhabricatorMailManagementSendTestWorkflow
 
   public function execute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
-    $viewer = PhabricatorUser::getOmnipotentUser();
+    $viewer = $this->getViewer();
 
     $from = $args->getArg('from');
     if ($from) {

@@ -9,18 +9,22 @@
 }
 
 form.aphront-dialog-view .aphront-error-view {
-  margin: 8px 0;
+  margin: 0 0 12px 0;
 }
 
 .aphront-error-view {
   margin: 16px;
 }
 .aphront-error-view-dialogue {
-  margin: 0px 0px 16px 0px;
+  margin: 0 0 16px 0;
 }
 
 .device-phone .aphront-error-view {
   margin: 8px;
+}
+
+.aphront-error-view .phui-form-view {
+  padding: 0;
 }
 
 .aphront-error-view-body {
@@ -33,8 +37,9 @@ form.aphront-dialog-view .aphront-error-view {
 }
 
 h1.aphront-error-view-head {
-  padding: 10px 10px 0 10px;
+  padding: 12px 8px 0 12px;
   font-weight: bold;
+  font-size: 15px;
   color: {$darkgreytext};
 }
 

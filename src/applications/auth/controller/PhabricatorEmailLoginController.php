@@ -133,9 +133,7 @@ EOBODY;
           ->setError($e_captcha));
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Reset Password')));
+    $crumbs->addTextCrumb(pht('Reset Password'));
 
     $dialog = new AphrontDialogView();
     $dialog->setUser($request->getUser());

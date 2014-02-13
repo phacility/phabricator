@@ -33,7 +33,7 @@ final class PhabricatorAuthManagementRefreshWorkflow
 
   public function execute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
-    $viewer = PhabricatorUser::getOmnipotentUser();
+    $viewer = $this->getViewer();
 
     $query = id(new PhabricatorExternalAccountQuery())
       ->setViewer($viewer);

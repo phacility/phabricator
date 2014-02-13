@@ -41,26 +41,28 @@ final class PhabricatorWorkerTaskDetailController
       $actions = $this->buildActionListView($task);
       $properties = $this->buildPropertyListView($task, $actions);
 
+      $object_box = id(new PHUIObjectBoxView())
+        ->setHeader($header)
+        ->addPropertyList($properties);
+
+
       $retry_head = id(new PHUIHeaderView())
         ->setHeader(pht('Retries'));
 
       $retry_info = $this->buildRetryListView($task);
 
-      $object_box = id(new PHUIObjectBoxView())
-        ->setHeader($header)
-        ->addPropertyList($properties);
+      $retry_box = id(new PHUIObjectBoxView())
+        ->setHeader($retry_head)
+        ->addPropertyList($retry_info);
 
       $content = array(
         $object_box,
-        $retry_head,
-        $retry_info,
+        $retry_box,
       );
     }
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title));
+    $crumbs->addTextCrumb($title);
 
     return $this->buildApplicationPage(
       array(
@@ -119,6 +121,8 @@ final class PhabricatorWorkerTaskDetailController
   private function buildPropertyListView(
     PhabricatorWorkerTask $task,
     PhabricatorActionListView $actions) {
+
+    $viewer = $this->getRequest()->getUser();
 
     $view = new PHUIPropertyListView();
     $view->setActionList($actions);
@@ -193,7 +197,7 @@ final class PhabricatorWorkerTaskDetailController
     $data = id(new PhabricatorWorkerTaskData())->load($task->getDataID());
     $task->setData($data->getData());
     $worker = $task->getWorkerInstance();
-    $data = $worker->renderForDisplay();
+    $data = $worker->renderForDisplay($viewer);
 
     $view->addProperty(
       pht('Data'),

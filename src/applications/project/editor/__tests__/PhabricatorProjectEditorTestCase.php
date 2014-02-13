@@ -21,7 +21,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
 
     $proj = $this->refreshProject($proj, $user, true);
 
-    PhabricatorProjectEditor::applyJoinProject($proj, $user);
+    $this->joinProject($proj, $user);
     $proj->setViewPolicy(PhabricatorPolicies::POLICY_USER);
     $proj->save();
 
@@ -97,9 +97,10 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $xaction->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME);
     $xaction->setNewValue($new_name);
 
-    $editor = new PhabricatorProjectEditor($proj);
+    $editor = new PhabricatorProjectTransactionEditor();
     $editor->setActor($user);
-    $editor->applyTransactions(array($xaction));
+    $editor->setContentSource(PhabricatorContentSource::newConsoleSource());
+    $editor->applyTransactions($proj, array($xaction));
 
     return true;
   }
@@ -123,7 +124,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
       'Arbitrary user not member of project.');
 
     // Join the project.
-    PhabricatorProjectEditor::applyJoinProject($proj, $user);
+    $this->joinProject($proj, $user);
 
     $proj = $this->refreshProject($proj, $user, true);
     $this->assertEqual(true, (bool)$proj);
@@ -135,7 +136,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
 
 
     // Join the project again.
-    PhabricatorProjectEditor::applyJoinProject($proj, $user);
+    $this->joinProject($proj, $user);
 
     $proj = $this->refreshProject($proj, $user, true);
     $this->assertEqual(true, (bool)$proj);
@@ -147,7 +148,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
 
 
     // Leave the project.
-    PhabricatorProjectEditor::applyLeaveProject($proj, $user);
+    $this->leaveProject($proj, $user);
 
     $proj = $this->refreshProject($proj, $user, true);
     $this->assertEqual(true, (bool)$proj);
@@ -159,7 +160,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
 
 
     // Leave the project again.
-    PhabricatorProjectEditor::applyLeaveProject($proj, $user);
+    $this->leaveProject($proj, $user);
 
     $proj = $this->refreshProject($proj, $user, true);
     $this->assertEqual(true, (bool)$proj);
@@ -178,7 +179,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $proj = $this->refreshProject($proj, $user, true);
     $caught = null;
     try {
-      PhabricatorProjectEditor::applyJoinProject($proj, $user);
+      $this->joinProject($proj, $user);
     } catch (Exception $ex) {
       $caught = $ex;
     }
@@ -191,13 +192,13 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $proj->save();
 
     $proj = $this->refreshProject($proj, $user, true);
-    PhabricatorProjectEditor::applyJoinProject($proj, $user);
+    $this->joinProject($proj, $user);
     $proj = $this->refreshProject($proj, $user, true);
     $this->assertEqual(
       true,
       $proj->isUserMember($user->getPHID()),
       'Join allowed with edit permission.');
-    PhabricatorProjectEditor::applyLeaveProject($proj, $user);
+    $this->leaveProject($proj, $user);
 
 
     // If a user can join a project, they can join, even if they can't edit.
@@ -206,7 +207,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $proj->save();
 
     $proj = $this->refreshProject($proj, $user, true);
-    PhabricatorProjectEditor::applyJoinProject($proj, $user);
+    $this->joinProject($proj, $user);
     $proj = $this->refreshProject($proj, $user, true);
     $this->assertEqual(
       true,
@@ -220,7 +221,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $proj->save();
 
     $proj = $this->refreshProject($proj, $user, true);
-    PhabricatorProjectEditor::applyLeaveProject($proj, $user);
+    $this->leaveProject($proj, $user);
     $proj = $this->refreshProject($proj, $user, true);
     $this->assertEqual(
       false,
@@ -271,6 +272,40 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $user->setRealName('Unit Test User '.$rand);
 
     return $user;
+  }
+
+  private function joinProject(
+    PhabricatorProject $project,
+    PhabricatorUser $user) {
+    $this->joinOrLeaveProject($project, $user, '+');
+  }
+
+  private function leaveProject(
+    PhabricatorProject $project,
+    PhabricatorUser $user) {
+    $this->joinOrLeaveProject($project, $user, '-');
+  }
+
+  private function joinOrLeaveProject(
+    PhabricatorProject $project,
+    PhabricatorUser $user,
+    $operation) {
+
+    $spec = array(
+      $operation => array($user->getPHID() => $user->getPHID()),
+    );
+
+    $xactions = array();
+    $xactions[] = id(new PhabricatorProjectTransaction())
+      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+      ->setMetadataValue('edge:type', PhabricatorEdgeConfig::TYPE_PROJ_MEMBER)
+      ->setNewValue($spec);
+
+    $editor = id(new PhabricatorProjectTransactionEditor())
+      ->setActor($user)
+      ->setContentSource(PhabricatorContentSource::newConsoleSource())
+      ->setContinueOnNoEffect(true)
+      ->applyTransactions($project, $xactions);
   }
 
 }

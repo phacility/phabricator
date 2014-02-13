@@ -45,14 +45,35 @@ final class PhabricatorProjectUpdateController
     $project_uri = '/project/view/'.$project->getID().'/';
 
     if ($process_action) {
+
+      $edge_action = null;
       switch ($this->action) {
         case 'join':
-          PhabricatorProjectEditor::applyJoinProject($project, $user);
+          $edge_action = '+';
           break;
         case 'leave':
-          PhabricatorProjectEditor::applyLeaveProject($project, $user);
+          $edge_action = '-';
           break;
       }
+
+      $type_member = PhabricatorEdgeConfig::TYPE_PROJ_MEMBER;
+      $member_spec = array(
+        $edge_action => array($user->getPHID() => $user->getPHID()),
+      );
+
+      $xactions = array();
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $type_member)
+        ->setNewValue($member_spec);
+
+      $editor = id(new PhabricatorProjectTransactionEditor($project))
+        ->setActor($user)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true)
+        ->applyTransactions($project, $xactions);
+
       return id(new AphrontRedirectResponse())->setURI($project_uri);
     }
 

@@ -9,14 +9,17 @@ final class PhabricatorRepositorySearchEngine
     $saved->setParameter('callsigns', $request->getStrList('callsigns'));
     $saved->setParameter('status', $request->getStr('status'));
     $saved->setParameter('order', $request->getStr('order'));
+    $saved->setParameter('hosted', $request->getStr('hosted'));
     $saved->setParameter('types', $request->getArr('types'));
     $saved->setParameter('name', $request->getStr('name'));
+    $saved->setParameter('anyProjectPHIDs', $request->getArr('anyProjects'));
 
     return $saved;
   }
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new PhabricatorRepositoryQuery())
+      ->needProjectPHIDs(true)
       ->needCommitCounts(true)
       ->needMostRecentCommits(true);
 
@@ -39,6 +42,12 @@ final class PhabricatorRepositorySearchEngine
       $query->setOrder(head($this->getOrderValues()));
     }
 
+    $hosted = $saved->getParameter('hosted');
+    $hosted = idx($this->getHostedValues(), $hosted);
+    if ($hosted) {
+      $query->withHosted($hosted);
+    }
+
     $types = $saved->getParameter('types');
     if ($types) {
       $query->withTypes($types);
@@ -47,6 +56,11 @@ final class PhabricatorRepositorySearchEngine
     $name = $saved->getParameter('name');
     if (strlen($name)) {
       $query->withNameContains($name);
+    }
+
+    $any_project_phids = $saved->getParameter('anyProjectPHIDs');
+    if ($any_project_phids) {
+      $query->withAnyProjects($any_project_phids);
     }
 
     return $query;
@@ -60,6 +74,16 @@ final class PhabricatorRepositorySearchEngine
     $types = $saved_query->getParameter('types', array());
     $types = array_fuse($types);
     $name = $saved_query->getParameter('name');
+    $any_project_phids = $saved_query->getParameter('anyProjectPHIDs', array());
+
+    if ($any_project_phids) {
+      $any_project_handles = id(new PhabricatorHandleQuery())
+        ->setViewer($this->requireViewer())
+        ->withPHIDs($any_project_phids)
+        ->execute();
+    } else {
+      $any_project_handles = array();
+    }
 
     $form
       ->appendChild(
@@ -73,11 +97,23 @@ final class PhabricatorRepositorySearchEngine
           ->setLabel(pht('Name Contains'))
           ->setValue($name))
       ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource('/typeahead/common/projects/')
+          ->setName('anyProjects')
+          ->setLabel(pht('In Any Project'))
+          ->setValue($any_project_handles))
+      ->appendChild(
         id(new AphrontFormSelectControl())
           ->setName('status')
           ->setLabel(pht('Status'))
           ->setValue($saved_query->getParameter('status'))
-          ->setOptions($this->getStatusOptions()));
+          ->setOptions($this->getStatusOptions()))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setName('hosted')
+          ->setLabel(pht('Hosted'))
+          ->setValue($saved_query->getParameter('hosted'))
+          ->setOptions($this->getHostedOptions()));
 
     $type_control = id(new AphrontFormCheckboxControl())
       ->setLabel(pht('Types'));
@@ -163,5 +199,20 @@ final class PhabricatorRepositorySearchEngine
     );
   }
 
+  private function getHostedOptions() {
+    return array(
+      '' => pht('Hosted and Remote Repositories'),
+      'phabricator' => pht('Hosted Repositories'),
+      'remote' => pht('Remote Repositories'),
+    );
+  }
+
+  private function getHostedValues() {
+    return array(
+      '' => PhabricatorRepositoryQuery::HOSTED_ALL,
+      'phabricator' => PhabricatorRepositoryQuery::HOSTED_PHABRICATOR,
+      'remote' => PhabricatorRepositoryQuery::HOSTED_REMOTE,
+    );
+  }
 
 }

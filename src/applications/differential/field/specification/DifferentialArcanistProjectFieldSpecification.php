@@ -36,13 +36,6 @@ final class DifferentialArcanistProjectFieldSpecification
   }
 
   public function renderValueForMail($phase) {
-    $status = $this->getRevision()->getStatus();
-
-    if ($status != ArcanistDifferentialRevisionStatus::NEEDS_REVISION &&
-        $status != ArcanistDifferentialRevisionStatus::ACCEPTED) {
-      return null;
-    }
-
     $diff = $this->getRevision()->loadActiveDiff();
     if ($diff) {
       $phid = $diff->getArcanistProjectPHID();

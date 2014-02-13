@@ -32,7 +32,7 @@
   display: inline-block;
 }
 
-.phabricator-action-header-icon-item .phabricator-tag-view {
+.phabricator-action-header-icon-item .phui-tag-view {
   margin: 4px 2px 0;
 }
 
@@ -52,7 +52,7 @@
   text-shadow: 0 -1px 1px rgba(0,0,0,.7);
 }
 
-.phabricator-action-header-icon-list .phabricator-tag-view {
+.phabricator-action-header-icon-list .phui-tag-view {
   font-weight: normal;
 }
 

@@ -35,9 +35,9 @@ final class PhabricatorUserLog extends PhabricatorUserDAO {
   protected $remoteAddr;
   protected $session;
 
-  public static function newLog(
+  public static function initializeNewLog(
     PhabricatorUser $actor = null,
-    PhabricatorUser $user = null,
+    $object_phid,
     $action) {
 
     $log = new PhabricatorUserLog();
@@ -46,15 +46,8 @@ final class PhabricatorUserLog extends PhabricatorUserDAO {
       $log->setActorPHID($actor->getPHID());
     }
 
-    if ($user) {
-      $log->setUserPHID($user->getPHID());
-    } else {
-      $log->setUserPHID('');
-    }
-
-    if ($action) {
-      $log->setAction($action);
-    }
+    $log->setUserPHID((string)$object_phid);
+    $log->setAction($action);
 
     return $log;
   }
@@ -73,7 +66,10 @@ final class PhabricatorUserLog extends PhabricatorUserDAO {
       $this->remoteAddr = idx($_SERVER, 'REMOTE_ADDR', '');
     }
     if (!$this->session) {
-      $this->setSession(idx($_COOKIE, 'phsid'));
+      // TODO: This is not correct if there's a cookie prefix. This object
+      // should take an AphrontRequest.
+      // TODO: Maybe record session kind, or drop this for anonymous sessions?
+      $this->setSession(idx($_COOKIE, PhabricatorCookies::COOKIE_SESSION));
     }
     $this->details['host'] = php_uname('n');
     $this->details['user_agent'] = AphrontRequest::getHTTPHeader('User-Agent');

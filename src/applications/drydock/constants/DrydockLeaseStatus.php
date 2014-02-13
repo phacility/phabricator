@@ -10,16 +10,27 @@ final class DrydockLeaseStatus extends DrydockConstants {
   const STATUS_EXPIRED      = 4;
 
   public static function getNameForStatus($status) {
-    static $map = array(
-      self::STATUS_PENDING    => 'Pending',
-      self::STATUS_ACQUIRING  => 'Acquiring',
-      self::STATUS_ACTIVE     => 'Active',
-      self::STATUS_RELEASED   => 'Released',
-      self::STATUS_BROKEN     => 'Broken',
-      self::STATUS_EXPIRED    => 'Expired',
+    $map = array(
+      self::STATUS_PENDING    => pht('Pending'),
+      self::STATUS_ACQUIRING  => pht('Acquiring'),
+      self::STATUS_ACTIVE     => pht('Active'),
+      self::STATUS_RELEASED   => pht('Released'),
+      self::STATUS_BROKEN     => pht('Broken'),
+      self::STATUS_EXPIRED    => pht('Expired'),
     );
 
-    return idx($map, $status, 'Unknown');
+    return idx($map, $status, pht('Unknown'));
+  }
+
+  public static function getAllStatuses() {
+    return array(
+      self::STATUS_PENDING,
+      self::STATUS_ACQUIRING,
+      self::STATUS_ACTIVE,
+      self::STATUS_RELEASED,
+      self::STATUS_BROKEN,
+      self::STATUS_EXPIRED,
+    );
   }
 
 }

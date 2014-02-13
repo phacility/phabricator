@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
 
   public function getMethodDescription() {
@@ -16,18 +13,20 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
       'sourcePath'                => 'required string',
       'branch'                    => 'required string',
       'bookmark'                  => 'optional string',
-      'sourceControlSystem'       => 'required enum<svn, git>',
+      'sourceControlSystem'       => 'required enum<svn, git, hg>',
       'sourceControlPath'         => 'required string',
       'sourceControlBaseRevision' => 'required string',
-      'parentRevisionID'          => 'optional revisionid',
       'creationMethod'            => 'optional string',
-      'authorPHID'                => 'optional phid',
       'arcanistProject'           => 'optional string',
-      'repositoryUUID'            => 'optional string',
       'lintStatus'                =>
         'required enum<none, skip, okay, warn, fail, postponed>',
       'unitStatus'                =>
         'required enum<none, skip, okay, warn, fail, postponed>',
+      'repositoryPHID'            => 'optional phid',
+
+      'parentRevisionID'          => 'deprecated',
+      'authorPHID'                => 'deprecated',
+      'repositoryUUID'            => 'deprecated',
     );
   }
 
@@ -54,23 +53,23 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
 
     $diff->setBranch($request->getValue('branch'));
     $diff->setCreationMethod($request->getValue('creationMethod'));
-    $diff->setAuthorPHID($request->getValue('authorPHID'));
+    $diff->setAuthorPHID($request->getUser()->getPHID());
     $diff->setBookmark($request->getValue('bookmark'));
 
-    $parent_id = $request->getValue('parentRevisionID');
-    if ($parent_id) {
-      // NOTE: If the viewer can't see the parent revision, just don't set
-      // a parent revision ID. This isn't used for anything meaningful.
-      // TODO: Can we delete this entirely?
-      $parent_rev = id(new DifferentialRevisionQuery())
+    // TODO: Remove this eventually; for now continue writing the UUID. Note
+    // that we'll overwrite it below if we identify a repository, and `arc`
+    // no longer sends it. This stuff is retained for backward compatibility.
+    $diff->setRepositoryUUID($request->getValue('repositoryUUID'));
+
+    $repository_phid = $request->getValue('repositoryPHID');
+    if ($repository_phid) {
+      $repository = id(new PhabricatorRepositoryQuery())
         ->setViewer($request->getUser())
-        ->withIDs(array($parent_id))
-        ->execute();
-      if ($parent_rev) {
-        $parent_rev = head($parent_rev);
-        if (!$parent_rev->isClosed()) {
-          $diff->setParentRevisionID($parent_id);
-        }
+        ->withPHIDs(array($repository_phid))
+        ->executeOne();
+      if ($repository) {
+        $diff->setRepositoryPHID($repository->getPHID());
+        $diff->setRepositoryUUID($repository->getUUID());
       }
     }
 
@@ -96,7 +95,6 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
     }
 
     $diff->setArcanistProjectPHID($project_phid);
-    $diff->setRepositoryUUID($request->getValue('repositoryUUID'));
 
     switch ($request->getValue('lintStatus')) {
       case 'skip':

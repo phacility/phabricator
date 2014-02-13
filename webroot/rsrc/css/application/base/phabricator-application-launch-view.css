@@ -51,28 +51,6 @@ a.application-tile-full.application-tile-create {
   border-right: none;
 }
 
-.application-tile-full + .phabricator-application-launch-create {
-  float: right;
-  width: 12%;
-  height: 52px;
-  position: relative;
-  border-top: 1px solid #000;
-  border-bottom: none;
-  display: inline-block;
-  text-align: center;
-}
-
-.device-desktop a.phabricator-application-launch-create:hover {
-  background-color: #1e2225;
-  color: #fff;
-  text-decoration: none;
-}
-
-.device-desktop a.phabricator-application-launch-container:hover {
-  background-color: #1e2225;
-  text-decoration: none;
-}
-
 .phabricator-application-launch-icon {
   display: block;
   position: absolute;
@@ -82,16 +60,14 @@ a.application-tile-full.application-tile-create {
   height: 28px;
 }
 
-.phabricator-application-create-icon {
-  display: inline-block;
-  margin: 20px auto;
-  width: 14px;
-  height: 14px;
-}
-
 .application-tile-full .phabricator-application-launch-icon {
   top: 12px;
   left: 10px;
+}
+
+.device-desktop a.phabricator-application-launch-container:hover {
+  background-color: #1e2225;
+  text-decoration: none;
 }
 
 .phabricator-application-launch-name {
@@ -174,21 +150,4 @@ a.application-tile-full.application-tile-create {
 .application-tile-full .phabricator-application-launch-attention {
   top: 16px;
   right: 8px;
-}
-
-.application-tile-full .phabricator-application-launch-create {
-  display: inline-block;
-  float: right;
-  background: rgb(0, 122, 255);
-  border-radius: 5px;
-  color: white;
-  font-weight: bold;
-  padding: 1px 6px 2px;
-  border: 2px solid #333;
-  font-size: 11px;
-  box-shadow: 0 0px 2px #000;
-}
-
-.phabricator-application-launch-create {
-  display: none;
 }

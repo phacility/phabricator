@@ -98,10 +98,7 @@ final class PholioMockViewController extends PholioController {
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName('M'.$mock->getID())
-        ->setHref('/M'.$mock->getID()));
+    $crumbs->addTextCrumb('M'.$mock->getID(), '/M'.$mock->getID());
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -221,6 +218,10 @@ final class PholioMockViewController extends PholioController {
     }
 
     $properties->invokeWillRenderEvent();
+
+    $properties->addSectionHeader(
+        pht('Description'),
+        PHUIPropertyListView::ICON_SUMMARY);
 
     $properties->addImageContent(
         $engine->getOutput($mock, PholioMock::MARKUP_FIELD_DESCRIPTION));

@@ -1,6 +1,7 @@
 <?php
 
-final class PhabricatorGitGraphStream {
+final class PhabricatorGitGraphStream
+  extends PhabricatorRepositoryGraphStream {
 
   private $repository;
   private $iterator;

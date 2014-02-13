@@ -1,21 +1,19 @@
 <?php
 
-/**
- * @group search
- */
 final class PhabricatorSearchIndexer {
 
-  public function indexDocumentByPHID($phid) {
-    $doc_indexer_symbols = id(new PhutilSymbolLoader())
-      ->setAncestorClass('PhabricatorSearchDocumentIndexer')
-      ->setConcreteOnly(true)
-      ->setType('class')
-      ->selectAndLoadSymbols();
+  public function queueDocumentForIndexing($phid) {
+    PhabricatorWorker::scheduleTask(
+      'PhabricatorSearchWorker',
+      array(
+        'documentPHID' => $phid,
+      ));
+  }
 
-    $indexers = array();
-    foreach ($doc_indexer_symbols as $symbol) {
-      $indexers[] = newv($symbol['name'], array());
-    }
+  public function indexDocumentByPHID($phid) {
+    $indexers = id(new PhutilSymbolLoader())
+      ->setAncestorClass('PhabricatorSearchDocumentIndexer')
+      ->loadObjects();
 
     foreach ($indexers as $indexer) {
       if ($indexer->shouldIndexDocumentByPHID($phid)) {

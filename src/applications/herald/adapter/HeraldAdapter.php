@@ -8,6 +8,7 @@ abstract class HeraldAdapter {
   const FIELD_TITLE                  = 'title';
   const FIELD_BODY                   = 'body';
   const FIELD_AUTHOR                 = 'author';
+  const FIELD_ASSIGNEE               = 'assignee';
   const FIELD_REVIEWER               = 'reviewer';
   const FIELD_REVIEWERS              = 'reviewers';
   const FIELD_COMMITTER              = 'committer';
@@ -17,7 +18,9 @@ abstract class HeraldAdapter {
   const FIELD_DIFF_CONTENT           = 'diff-content';
   const FIELD_DIFF_ADDED_CONTENT     = 'diff-added-content';
   const FIELD_DIFF_REMOVED_CONTENT   = 'diff-removed-content';
+  const FIELD_DIFF_ENORMOUS          = 'diff-enormous';
   const FIELD_REPOSITORY             = 'repository';
+  const FIELD_REPOSITORY_PROJECTS    = 'repository-projects';
   const FIELD_RULE                   = 'rule';
   const FIELD_AFFECTED_PACKAGE       = 'affected-package';
   const FIELD_AFFECTED_PACKAGE_OWNER = 'affected-package-owner';
@@ -25,6 +28,18 @@ abstract class HeraldAdapter {
   const FIELD_ALWAYS                 = 'always';
   const FIELD_AUTHOR_PROJECTS        = 'authorprojects';
   const FIELD_PROJECTS               = 'projects';
+  const FIELD_PUSHER                 = 'pusher';
+  const FIELD_PUSHER_PROJECTS        = 'pusher-projects';
+  const FIELD_DIFFERENTIAL_REVISION  = 'differential-revision';
+  const FIELD_DIFFERENTIAL_REVIEWERS = 'differential-reviewers';
+  const FIELD_DIFFERENTIAL_CCS       = 'differential-ccs';
+  const FIELD_DIFFERENTIAL_ACCEPTED  = 'differential-accepted';
+  const FIELD_IS_MERGE_COMMIT        = 'is-merge-commit';
+  const FIELD_BRANCHES               = 'branches';
+  const FIELD_AUTHOR_RAW             = 'author-raw';
+  const FIELD_COMMITTER_RAW          = 'committer-raw';
+  const FIELD_IS_NEW_OBJECT          = 'new-object';
+  const FIELD_TASK_PRIORITY          = 'taskpriority';
 
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';
@@ -44,6 +59,10 @@ abstract class HeraldAdapter {
   const CONDITION_NOT_EXISTS      = '!exists';
   const CONDITION_UNCONDITIONALLY = 'unconditionally';
   const CONDITION_REGEXP_PAIR     = 'regexp-pair';
+  const CONDITION_HAS_BIT         = 'bit';
+  const CONDITION_NOT_BIT         = '!bit';
+  const CONDITION_IS_TRUE         = 'true';
+  const CONDITION_IS_FALSE        = 'false';
 
   const ACTION_ADD_CC       = 'addcc';
   const ACTION_REMOVE_CC    = 'remcc';
@@ -56,6 +75,7 @@ abstract class HeraldAdapter {
   const ACTION_ADD_REVIEWERS = 'addreviewers';
   const ACTION_ADD_BLOCKING_REVIEWERS = 'addblockingreviewers';
   const ACTION_APPLY_BUILD_PLANS = 'applybuildplans';
+  const ACTION_BLOCK = 'block';
 
   const VALUE_TEXT            = 'text';
   const VALUE_NONE            = 'none';
@@ -70,8 +90,10 @@ abstract class HeraldAdapter {
   const VALUE_CONTENT_SOURCE  = 'contentsource';
   const VALUE_USER_OR_PROJECT = 'userorproject';
   const VALUE_BUILD_PLAN      = 'buildplan';
+  const VALUE_TASK_PRIORITY   = 'taskpriority';
 
   private $contentSource;
+  private $isNewObject;
 
   public function setContentSource(PhabricatorContentSource $content_source) {
     $this->contentSource = $content_source;
@@ -79,6 +101,18 @@ abstract class HeraldAdapter {
   }
   public function getContentSource() {
     return $this->contentSource;
+  }
+
+  public function getIsNewObject() {
+    if (is_bool($this->isNewObject)) {
+      return $this->isNewObject;
+    }
+
+    throw new Exception(pht('You must setIsNewObject to a boolean first!'));
+  }
+  public function setIsNewObject($new) {
+    $this->isNewObject = (bool) $new;
+    return $this;
   }
 
   abstract public function getPHID();
@@ -92,6 +126,8 @@ abstract class HeraldAdapter {
         return $this->getContentSource()->getSource();
       case self::FIELD_ALWAYS:
         return true;
+      case self::FIELD_IS_NEW_OBJECT:
+        return $this->getIsNewObject();
       default:
         throw new Exception(
           "Unknown field '{$field_name}'!");
@@ -120,8 +156,36 @@ abstract class HeraldAdapter {
   }
 
   abstract public function getAdapterContentName();
+  abstract public function getAdapterContentDescription();
   abstract public function getAdapterApplicationClass();
   abstract public function getObject();
+
+  public function supportsRuleType($rule_type) {
+    return false;
+  }
+
+  public function canTriggerOnObject($object) {
+    return false;
+  }
+
+  public function explainValidTriggerObjects() {
+    return pht('This adapter can not trigger on objects.');
+  }
+
+  public function getTriggerObjectPHIDs() {
+    return array($this->getPHID());
+  }
+
+  public function getAdapterSortKey() {
+    return sprintf(
+      '%08d%s',
+      $this->getAdapterSortOrder(),
+      $this->getAdapterContentName());
+  }
+
+  public function getAdapterSortOrder() {
+    return 1000;
+  }
 
 
 /* -(  Fields  )------------------------------------------------------------- */
@@ -130,6 +194,7 @@ abstract class HeraldAdapter {
   public function getFields() {
     return array(
       self::FIELD_ALWAYS,
+      self::FIELD_RULE,
     );
   }
 
@@ -138,6 +203,7 @@ abstract class HeraldAdapter {
       self::FIELD_TITLE => pht('Title'),
       self::FIELD_BODY => pht('Body'),
       self::FIELD_AUTHOR => pht('Author'),
+      self::FIELD_ASSIGNEE => pht('Assignee'),
       self::FIELD_COMMITTER => pht('Committer'),
       self::FIELD_REVIEWER => pht('Reviewer'),
       self::FIELD_REVIEWERS => pht('Reviewers'),
@@ -147,7 +213,9 @@ abstract class HeraldAdapter {
       self::FIELD_DIFF_CONTENT => pht('Any changed file content'),
       self::FIELD_DIFF_ADDED_CONTENT => pht('Any added file content'),
       self::FIELD_DIFF_REMOVED_CONTENT => pht('Any removed file content'),
+      self::FIELD_DIFF_ENORMOUS => pht('Change is enormous'),
       self::FIELD_REPOSITORY => pht('Repository'),
+      self::FIELD_REPOSITORY_PROJECTS => pht('Repository\'s projects'),
       self::FIELD_RULE => pht('Another Herald rule'),
       self::FIELD_AFFECTED_PACKAGE => pht('Any affected package'),
       self::FIELD_AFFECTED_PACKAGE_OWNER =>
@@ -156,6 +224,19 @@ abstract class HeraldAdapter {
       self::FIELD_ALWAYS => pht('Always'),
       self::FIELD_AUTHOR_PROJECTS => pht("Author's projects"),
       self::FIELD_PROJECTS => pht("Projects"),
+      self::FIELD_PUSHER => pht('Pusher'),
+      self::FIELD_PUSHER_PROJECTS => pht("Pusher's projects"),
+      self::FIELD_DIFFERENTIAL_REVISION => pht('Differential revision'),
+      self::FIELD_DIFFERENTIAL_REVIEWERS => pht('Differential reviewers'),
+      self::FIELD_DIFFERENTIAL_CCS => pht('Differential CCs'),
+      self::FIELD_DIFFERENTIAL_ACCEPTED
+        => pht('Accepted Differential revision'),
+      self::FIELD_IS_MERGE_COMMIT => pht('Commit is a merge'),
+      self::FIELD_BRANCHES => pht('Commit\'s branches'),
+      self::FIELD_AUTHOR_RAW => pht('Raw author name'),
+      self::FIELD_COMMITTER_RAW => pht('Raw committer name'),
+      self::FIELD_IS_NEW_OBJECT => pht('Is newly created?'),
+      self::FIELD_TASK_PRIORITY => pht('Task priority'),
     );
   }
 
@@ -170,6 +251,8 @@ abstract class HeraldAdapter {
       self::CONDITION_IS              => pht('is'),
       self::CONDITION_IS_NOT          => pht('is not'),
       self::CONDITION_IS_ANY          => pht('is any of'),
+      self::CONDITION_IS_TRUE         => pht('is true'),
+      self::CONDITION_IS_FALSE        => pht('is false'),
       self::CONDITION_IS_NOT_ANY      => pht('is not any of'),
       self::CONDITION_INCLUDE_ALL     => pht('include all of'),
       self::CONDITION_INCLUDE_ANY     => pht('include any of'),
@@ -183,6 +266,8 @@ abstract class HeraldAdapter {
       self::CONDITION_NOT_EXISTS      => pht('does not exist'),
       self::CONDITION_UNCONDITIONALLY => '',  // don't show anything!
       self::CONDITION_REGEXP_PAIR     => pht('matches regexp pair'),
+      self::CONDITION_HAS_BIT         => pht('has bit'),
+      self::CONDITION_NOT_BIT         => pht('lacks bit'),
     );
   }
 
@@ -190,6 +275,8 @@ abstract class HeraldAdapter {
     switch ($field) {
       case self::FIELD_TITLE:
       case self::FIELD_BODY:
+      case self::FIELD_COMMITTER_RAW:
+      case self::FIELD_AUTHOR_RAW:
         return array(
           self::CONDITION_CONTAINS,
           self::CONDITION_NOT_CONTAINS,
@@ -200,11 +287,14 @@ abstract class HeraldAdapter {
       case self::FIELD_AUTHOR:
       case self::FIELD_COMMITTER:
       case self::FIELD_REVIEWER:
+      case self::FIELD_PUSHER:
+      case self::FIELD_TASK_PRIORITY:
         return array(
           self::CONDITION_IS_ANY,
           self::CONDITION_IS_NOT_ANY,
         );
       case self::FIELD_REPOSITORY:
+      case self::FIELD_ASSIGNEE:
         return array(
           self::CONDITION_IS_ANY,
           self::CONDITION_IS_NOT_ANY,
@@ -218,6 +308,8 @@ abstract class HeraldAdapter {
       case self::FIELD_PROJECTS:
       case self::FIELD_AFFECTED_PACKAGE:
       case self::FIELD_AFFECTED_PACKAGE_OWNER:
+      case self::FIELD_PUSHER_PROJECTS:
+      case self::FIELD_REPOSITORY_PROJECTS:
         return array(
           self::CONDITION_INCLUDE_ALL,
           self::CONDITION_INCLUDE_ANY,
@@ -226,6 +318,7 @@ abstract class HeraldAdapter {
           self::CONDITION_NOT_EXISTS,
         );
       case self::FIELD_DIFF_FILE:
+      case self::FIELD_BRANCHES:
         return array(
           self::CONDITION_CONTAINS,
           self::CONDITION_REGEXP,
@@ -251,6 +344,33 @@ abstract class HeraldAdapter {
       case self::FIELD_ALWAYS:
         return array(
           self::CONDITION_UNCONDITIONALLY,
+        );
+      case self::FIELD_DIFFERENTIAL_REVIEWERS:
+        return array(
+          self::CONDITION_EXISTS,
+          self::CONDITION_NOT_EXISTS,
+          self::CONDITION_INCLUDE_ALL,
+          self::CONDITION_INCLUDE_ANY,
+          self::CONDITION_INCLUDE_NONE,
+        );
+      case self::FIELD_DIFFERENTIAL_CCS:
+        return array(
+          self::CONDITION_INCLUDE_ALL,
+          self::CONDITION_INCLUDE_ANY,
+          self::CONDITION_INCLUDE_NONE,
+        );
+      case self::FIELD_DIFFERENTIAL_REVISION:
+      case self::FIELD_DIFFERENTIAL_ACCEPTED:
+        return array(
+          self::CONDITION_EXISTS,
+          self::CONDITION_NOT_EXISTS,
+        );
+      case self::FIELD_IS_MERGE_COMMIT:
+      case self::FIELD_DIFF_ENORMOUS:
+      case self::FIELD_IS_NEW_OBJECT:
+        return array(
+          self::CONDITION_IS_TRUE,
+          self::CONDITION_IS_FALSE,
         );
       default:
         throw new Exception(
@@ -322,8 +442,10 @@ abstract class HeraldAdapter {
           array_fuse($field_value),
           $condition_value);
       case self::CONDITION_EXISTS:
+      case self::CONDITION_IS_TRUE:
         return (bool)$field_value;
       case self::CONDITION_NOT_EXISTS:
+      case self::CONDITION_IS_FALSE:
         return !$field_value;
       case self::CONDITION_UNCONDITIONALLY:
         return (bool)$field_value;
@@ -392,6 +514,10 @@ abstract class HeraldAdapter {
           $result = !$result;
         }
         return $result;
+      case self::CONDITION_HAS_BIT:
+        return (($condition_value & $field_value) === $condition_value);
+      case self::CONDITION_NOT_BIT:
+        return (($condition_value & $field_value) !== $condition_value);
       default:
         throw new HeraldInvalidConditionException(
           "Unknown condition '{$condition_type}'.");
@@ -469,6 +595,10 @@ abstract class HeraldAdapter {
       case self::CONDITION_EXISTS:
       case self::CONDITION_NOT_EXISTS:
       case self::CONDITION_UNCONDITIONALLY:
+      case self::CONDITION_HAS_BIT:
+      case self::CONDITION_NOT_BIT:
+      case self::CONDITION_IS_TRUE:
+      case self::CONDITION_IS_FALSE:
         // No explicit validation for these types, although there probably
         // should be in some cases.
         break;
@@ -488,6 +618,7 @@ abstract class HeraldAdapter {
   public function getActionNameMap($rule_type) {
     switch ($rule_type) {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
+      case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
         return array(
           self::ACTION_NOTHING      => pht('Do nothing'),
           self::ACTION_ADD_CC       => pht('Add emails to CC'),
@@ -499,7 +630,8 @@ abstract class HeraldAdapter {
           self::ACTION_ADD_PROJECTS => pht('Add projects'),
           self::ACTION_ADD_REVIEWERS => pht('Add reviewers'),
           self::ACTION_ADD_BLOCKING_REVIEWERS => pht('Add blocking reviewers'),
-          self::ACTION_APPLY_BUILD_PLANS => pht('Apply build plans'),
+          self::ACTION_APPLY_BUILD_PLANS => pht('Run build plans'),
+          self::ACTION_BLOCK => pht('Block change with message'),
         );
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         return array(
@@ -551,6 +683,7 @@ abstract class HeraldAdapter {
             $target = PhabricatorFlagColor::COLOR_BLUE;
           }
           break;
+        case self::ACTION_BLOCK:
         case self::ACTION_NOTHING:
           break;
         default:
@@ -590,6 +723,8 @@ abstract class HeraldAdapter {
         switch ($field) {
           case self::FIELD_REPOSITORY:
             return self::VALUE_REPOSITORY;
+          case self::FIELD_TASK_PRIORITY:
+            return self::VALUE_TASK_PRIORITY;
           default:
             return self::VALUE_USER;
         }
@@ -607,7 +742,9 @@ abstract class HeraldAdapter {
           case self::FIELD_AFFECTED_PACKAGE:
             return self::VALUE_OWNERS_PACKAGE;
           case self::FIELD_AUTHOR_PROJECTS:
+          case self::FIELD_PUSHER_PROJECTS:
           case self::FIELD_PROJECTS:
+          case self::FIELD_REPOSITORY_PROJECTS:
             return self::VALUE_PROJECT;
           case self::FIELD_REVIEWERS:
             return self::VALUE_USER_OR_PROJECT;
@@ -620,6 +757,8 @@ abstract class HeraldAdapter {
       case self::CONDITION_EXISTS:
       case self::CONDITION_NOT_EXISTS:
       case self::CONDITION_UNCONDITIONALLY:
+      case self::CONDITION_IS_TRUE:
+      case self::CONDITION_IS_FALSE:
         return self::VALUE_NONE;
       case self::CONDITION_RULE:
       case self::CONDITION_NOT_RULE:
@@ -658,18 +797,20 @@ abstract class HeraldAdapter {
           return self::VALUE_EMAIL;
         case self::ACTION_NOTHING:
           return self::VALUE_NONE;
-        case self::ACTION_AUDIT:
         case self::ACTION_ADD_PROJECTS:
           return self::VALUE_PROJECT;
         case self::ACTION_FLAG:
           return self::VALUE_FLAG_COLOR;
         case self::ACTION_ASSIGN_TASK:
           return self::VALUE_USER;
+        case self::ACTION_AUDIT:
         case self::ACTION_ADD_REVIEWERS:
         case self::ACTION_ADD_BLOCKING_REVIEWERS:
           return self::VALUE_USER_OR_PROJECT;
         case self::ACTION_APPLY_BUILD_PLANS:
           return self::VALUE_BUILD_PLAN;
+        case self::ACTION_BLOCK:
+          return self::VALUE_TEXT;
         default:
           throw new Exception("Unknown or invalid action '{$action}'.");
       }
@@ -734,6 +875,7 @@ abstract class HeraldAdapter {
       $adapters = id(new PhutilSymbolLoader())
         ->setAncestorClass(__CLASS__)
         ->loadObjects();
+      $adapters = msort($adapters, 'getAdapterSortKey');
     }
     return $adapters;
   }
@@ -766,7 +908,6 @@ abstract class HeraldAdapter {
       $map[$type] = $name;
     }
 
-    asort($map);
     return $map;
   }
 
@@ -807,6 +948,7 @@ abstract class HeraldAdapter {
   private function renderConditionAsText(
     HeraldCondition $condition,
     array $handles) {
+
     $field_type = $condition->getFieldName();
     $field_name = idx($this->getFieldNameMap(), $field_type);
 
@@ -839,11 +981,24 @@ abstract class HeraldAdapter {
     if (!is_array($value)) {
       $value = array($value);
     }
-    foreach ($value as $index => $val) {
-      $handle = idx($handles, $val);
-      if ($handle) {
-        $value[$index] = $handle->renderLink();
-      }
+    switch ($condition->getFieldName()) {
+      case self::FIELD_TASK_PRIORITY:
+        $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
+        foreach ($value as $index => $val) {
+          $name = idx($priority_map, $val);
+          if ($name) {
+            $value[$index] = $name;
+          }
+        }
+        break;
+      default:
+        foreach ($value as $index => $val) {
+          $handle = idx($handles, $val);
+          if ($handle) {
+            $value[$index] = $handle->renderLink();
+          }
+        }
+        break;
     }
     $value = phutil_implode_html(', ', $value);
     return $value;
@@ -858,9 +1013,16 @@ abstract class HeraldAdapter {
       $target = array($target);
     }
     foreach ($target as $index => $val) {
-      $handle = idx($handles, $val);
-      if ($handle) {
-        $target[$index] = $handle->renderLink();
+      switch ($action->getAction()) {
+        case self::ACTION_FLAG:
+          $target[$index] = PhabricatorFlagColor::getColorName($val);
+          break;
+        default:
+          $handle = idx($handles, $val);
+          if ($handle) {
+            $target[$index] = $handle->renderLink();
+          }
+          break;
       }
     }
     $target = phutil_implode_html(', ', $target);
@@ -906,6 +1068,11 @@ abstract class HeraldAdapter {
         }
       }
     }
+
+    if ($rule->isObjectRule()) {
+      $phids[] = $rule->getTriggerObjectPHID();
+    }
+
     return $phids;
   }
 

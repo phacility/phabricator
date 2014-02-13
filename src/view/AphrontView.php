@@ -128,6 +128,23 @@ abstract class AphrontView extends Phobject
     return $children;
   }
 
+  public function getDefaultResourceSource() {
+    return 'phabricator';
+  }
+
+  public function requireResource($symbol) {
+    $response = CelerityAPI::getStaticResourceResponse();
+    $response->requireResource($symbol, $this->getDefaultResourceSource());
+    return $this;
+  }
+
+  public function initBehavior($name, $config = array()) {
+    Javelin::initBehavior(
+      $name,
+      $config,
+      $this->getDefaultResourceSource());
+  }
+
 
 /* -(  Rendering  )---------------------------------------------------------- */
 

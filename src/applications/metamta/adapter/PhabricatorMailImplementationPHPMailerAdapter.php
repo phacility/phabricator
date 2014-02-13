@@ -33,6 +33,7 @@ final class PhabricatorMailImplementationPHPMailerAdapter
 
       $protocol = PhabricatorEnv::getEnvConfig('phpmailer.smtp-protocol');
       if ($protocol) {
+        $protocol = phutil_utf8_strtolower($protocol);
         $this->mailer->SMTPSecure = $protocol;
       }
     } else if ($mailer == 'sendmail') {

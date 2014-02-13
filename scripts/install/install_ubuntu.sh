@@ -43,7 +43,9 @@ echo
 set +x
 
 sudo apt-get -qq update
-sudo apt-get install $GIT mysql-server apache2 php5 php5-mysql php5-gd php5-dev php5-curl php-apc php5-cli dpkg-dev
+sudo apt-get install \
+  $GIT mysql-server apache2 dpkg-dev \
+  php5 php5-mysql php5-gd php5-dev php5-curl php-apc php5-cli php5-json
 
 # Enable mod_rewrite
 sudo a2enmod rewrite

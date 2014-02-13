@@ -2,7 +2,9 @@
 
 echo "Backfilling commit summaries...\n";
 
-$commits = new LiskMigrationIterator(new PhabricatorRepositoryCommit());
+$table = new PhabricatorRepositoryCommit();
+$conn_w = $table->establishConnection('w');
+$commits = new LiskMigrationIterator($table);
 foreach ($commits as $commit) {
   echo 'Filling Commit #'.$commit->getID()."\n";
 
@@ -18,8 +20,12 @@ foreach ($commits as $commit) {
     continue;
   }
 
-  $commit->setSummary($data->getSummary());
-  $commit->save();
+  queryfx(
+    $conn_w,
+    'UPDATE %T SET summary = %s WHERE id = %d',
+    $commit->getTableName(),
+    $data->getSummary(),
+    $commit->getID());
 }
 
 echo "Done.\n";

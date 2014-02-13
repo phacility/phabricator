@@ -6,6 +6,7 @@
  *           javelin-vector
  *           javelin-dom
  *           javelin-uri
+ *           javelin-behavior-device
  */
 
 JX.behavior('aphlict-dropdown', function(config, statics) {
@@ -13,10 +14,15 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
   statics.visible = statics.visible || null;
 
   var dropdown = JX.$(config.dropdownID);
-  var count = JX.$(config.countID);
   var bubble = JX.$(config.bubbleID);
+
+  var count;
+  if (config.countID) {
+    count = JX.$(config.countID);
+  }
+
   var request = null;
-  var dirty = true;
+  var dirty = config.local ? false : true;
 
   function refresh() {
     if (dirty) {
@@ -86,6 +92,10 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
         return;
       }
 
+      if (config.desktop && JX.Device.getDevice() != 'desktop') {
+        return;
+      }
+
       e.kill();
 
       // If a menu is currently open, close it.
@@ -108,16 +118,24 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
       }
 
       var p = JX.$V(bubble);
+      JX.DOM.show(dropdown);
+
       p.y = null;
-      p.x -= 6;
+      if (config.right) {
+        p.x -= (JX.Vector.getDim(dropdown).x - JX.Vector.getDim(bubble).x);
+      } else {
+        p.x -= 6;
+      }
       p.setPos(dropdown);
 
-      JX.DOM.show(dropdown);
       statics.visible = dropdown;
     }
   );
 
   JX.Stratcom.listen('notification-panel-update', null, function() {
+    if (config.local) {
+      return;
+    }
     dirty = true;
     refresh();
   });

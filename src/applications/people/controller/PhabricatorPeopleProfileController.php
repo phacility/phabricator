@@ -71,9 +71,7 @@ final class PhabricatorPeopleProfileController
     $properties = $this->buildPropertyView($user, $actions);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($user->getUsername()));
+    $crumbs->addTextCrumb($user->getUsername());
     $feed = $this->renderUserFeed($user);
 
     $object_box = id(new PHUIObjectBoxView())
@@ -128,7 +126,7 @@ final class PhabricatorPeopleProfileController
     $view = $builder->buildView();
 
     return phutil_tag_div(
-      'profile-feed profile-wrap-responsive',
+      'profile-feed',
       $view->render());
   }
 }

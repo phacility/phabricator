@@ -30,8 +30,8 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
 
   public function render() {
 
-    require_celerity_resource('differential-core-view-css');
-    require_celerity_resource('differential-revision-history-css');
+    $this->requireResource('differential-core-view-css');
+    $this->requireResource('differential-revision-history-css');
 
     $data = array(
       array(

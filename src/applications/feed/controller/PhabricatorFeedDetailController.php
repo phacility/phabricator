@@ -30,9 +30,7 @@ final class PhabricatorFeedDetailController extends PhabricatorFeedController {
     $feed_view = phutil_tag_div('phabricator-feed-frame', $feed_view);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title));
+    $crumbs->addTextCrumb($title);
 
 
     return $this->buildApplicationPage(

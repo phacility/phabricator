@@ -75,6 +75,10 @@ final class DiffusionSubversionWireProtocol extends Phobject {
         }
       } else if ($this->state == 'bytes') {
         $new_data = substr($this->buffer, 0, $this->expectBytes);
+        if (!strlen($new_data)) {
+          // No more bytes available yet, wait for more data.
+          break;
+        }
         $this->buffer = substr($this->buffer, strlen($new_data));
 
         $this->expectBytes -= strlen($new_data);

@@ -163,24 +163,15 @@ final class PhamePostEditController
         'uri'         => '/phame/post/preview/',
       ));
 
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Errors saving post.'))
-        ->setErrors($errors);
-    } else {
-      $error_view = null;
-    }
-
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)
-      ->setFormError($error_view)
+      ->setFormErrors($errors)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($page_title)
-        ->setHref($this->getApplicationURI('/post/view/'.$this->id.'/')));
+    $crumbs->addTextCrumb(
+      $page_title,
+      $this->getApplicationURI('/post/view/'.$this->id.'/'));
 
     $nav = $this->renderSideNavFilterView(null);
     $nav->appendChild(

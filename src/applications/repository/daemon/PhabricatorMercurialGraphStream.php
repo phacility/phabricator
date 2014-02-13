@@ -5,7 +5,8 @@
  * the Mercurial commit graph with one nonblocking invocation of "hg". See
  * @{class:PhabricatorRepositoryPullLocalDaemon}.
  */
-final class PhabricatorMercurialGraphStream {
+final class PhabricatorMercurialGraphStream
+  extends PhabricatorRepositoryGraphStream {
 
   private $repository;
   private $iterator;
@@ -15,11 +16,13 @@ final class PhabricatorMercurialGraphStream {
   private $local          = array();
   private $localParents   = array();
 
-  public function __construct(PhabricatorRepository $repository) {
+  public function __construct(PhabricatorRepository $repository, $commit) {
     $this->repository = $repository;
 
     $future = $repository->getLocalCommandFuture(
-      "log --template '{rev}\1{node}\1{date}\1{parents}\2'");
+      'log --template %s --rev %s',
+      '{rev}\1{node}\1{date}\1{parents}\2',
+      hgsprintf('reverse(ancestors(%s))', $commit));
 
     $this->iterator = new LinesOfALargeExecFuture($future);
     $this->iterator->setDelimiter("\2");

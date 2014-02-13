@@ -72,8 +72,18 @@ final class DiffusionSetPasswordPanel extends PhabricatorSettingsPanel {
           $e_password = pht('Not Unique');
           $e_confirm = pht('Not Unique');
           $errors[] = pht(
-            'This password is not unique. You must use a unique password.');
+            'This password is the same as another password associated '.
+            'with your account. You must use a unique password for '.
+            'VCS access.');
+        } else if (
+          PhabricatorCommonPasswords::isCommonPassword($new_password)) {
+          $e_password = pht('Very Weak');
+          $e_confirm = pht('Very Weak');
+          $errors[] = pht(
+            'This password is extremely weak: it is one of the most common '.
+            'passwords in use. Choose a stronger password.');
         }
+
 
         if (!$errors) {
           $vcspassword->setPassword($envelope, $user);
@@ -85,13 +95,6 @@ final class DiffusionSetPasswordPanel extends PhabricatorSettingsPanel {
     }
 
     $title = pht('Set VCS Password');
-
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Form Errors'))
-        ->setErrors($errors);
-    }
 
     $form = id(new AphrontFormView())
       ->setUser($user)
@@ -165,7 +168,7 @@ final class DiffusionSetPasswordPanel extends PhabricatorSettingsPanel {
     $object_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setForm($form)
-      ->setFormError($error_view);
+      ->setFormErrors($errors);
 
     $remove_form = id(new AphrontFormView())
       ->setUser($user);

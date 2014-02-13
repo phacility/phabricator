@@ -69,21 +69,6 @@ final class PhabricatorSettingsPanelEmailPreferences
         ->setURI($this->getPanelURI('?saved=true'));
     }
 
-    $notice = null;
-    if (!$errors) {
-      if ($request->getStr('saved')) {
-        $notice = new AphrontErrorView();
-        $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-        $notice->setTitle(pht('Changes Saved'));
-        $notice->appendChild(
-          phutil_tag('p', array(), pht('Your changes have been saved.')));
-      }
-    } else {
-      $notice = new AphrontErrorView();
-      $notice->setTitle(pht('Form Errors'));
-      $notice->setErrors($errors);
-    }
-
     $re_prefix_default = PhabricatorEnv::getEnvConfig('metamta.re-prefix')
       ? pht('Enabled')
       : pht('Disabled');
@@ -218,7 +203,8 @@ final class PhabricatorSettingsPanelEmailPreferences
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Email Preferences'))
-      ->setFormError($notice)
+      ->setFormSaved($request->getStr('saved'))
+      ->setFormErrors($errors)
       ->setForm($form);
 
     return id(new AphrontNullView())

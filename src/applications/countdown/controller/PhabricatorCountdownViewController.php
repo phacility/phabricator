@@ -36,9 +36,7 @@ final class PhabricatorCountdownViewController
 
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName("C{$id}"));
+      ->addTextCrumb("C{$id}");
 
     $header = id(new PHUIHeaderView())
       ->setHeader($title)

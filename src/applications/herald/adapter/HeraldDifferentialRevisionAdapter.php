@@ -36,6 +36,24 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
     return pht('Differential Revisions');
   }
 
+  public function getAdapterContentDescription() {
+    return pht(
+      "React to revisions being created or updated.\n".
+      "Revision rules can send email, flag revisions, add reviewers, ".
+      "and run build plans.");
+  }
+
+  public function supportsRuleType($rule_type) {
+    switch ($rule_type) {
+      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
+      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
+        return true;
+      case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
+      default:
+        return false;
+    }
+  }
+
   public function getFields() {
     return array_merge(
       array(
@@ -46,13 +64,14 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
         self::FIELD_REVIEWERS,
         self::FIELD_CC,
         self::FIELD_REPOSITORY,
+        self::FIELD_REPOSITORY_PROJECTS,
         self::FIELD_DIFF_FILE,
         self::FIELD_DIFF_CONTENT,
         self::FIELD_DIFF_ADDED_CONTENT,
         self::FIELD_DIFF_REMOVED_CONTENT,
-        self::FIELD_RULE,
         self::FIELD_AFFECTED_PACKAGE,
         self::FIELD_AFFECTED_PACKAGE_OWNER,
+        self::FIELD_IS_NEW_OBJECT,
       ),
       parent::getFields());
   }
@@ -134,32 +153,36 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
     if ($this->repository === null) {
       $this->repository = false;
 
-      // TODO: (T603) Implement policy stuff in Herald.
       $viewer = PhabricatorUser::getOmnipotentUser();
+      $repository_phid = null;
 
       $revision = $this->revision;
       if ($revision->getRepositoryPHID()) {
-        $repositories = id(new PhabricatorRepositoryQuery())
+        $repository_phid = $revision->getRepositoryPHID();
+      } else {
+        $repository = id(new DifferentialRepositoryLookup())
           ->setViewer($viewer)
-          ->withPHIDs(array($revision->getRepositoryPHID()))
-          ->execute();
-        if ($repositories) {
-          $this->repository = head($repositories);
-          return $this->repository;
+          ->setDiff($this->diff)
+          ->lookupRepository();
+        if ($repository) {
+          // We want to get the projects for this repository too, so run a
+          // full query for it below.
+          $repository_phid = $repository->getPHID();
         }
       }
 
-      $repository = id(new DifferentialRepositoryLookup())
-        ->setViewer($viewer)
-        ->setDiff($this->diff)
-        ->lookupRepository();
-      if ($repository) {
-        $this->repository = $repository;
-        return $this->repository;
+      if ($repository_phid) {
+        $repository = id(new PhabricatorRepositoryQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(array($repository_phid))
+          ->needProjectPHIDs(true)
+          ->executeOne();
+        if ($repository) {
+          $this->repository = $repository;
+        }
       }
-
-      $repository = false;
     }
+
     return $this->repository;
   }
 
@@ -327,6 +350,12 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
           return null;
         }
         return $repository->getPHID();
+      case self::FIELD_REPOSITORY_PROJECTS:
+        $repository = $this->loadRepository();
+        if (!$repository) {
+          return array();
+        }
+        return $repository->getProjectPHIDs();
       case self::FIELD_DIFF_CONTENT:
         return $this->loadContentDictionary();
       case self::FIELD_DIFF_ADDED_CONTENT:

@@ -5,7 +5,8 @@ final class PhabricatorRepositoryCommit
   implements
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
-    PhabricatorTokenReceiverInterface {
+    PhabricatorTokenReceiverInterface,
+    HarbormasterBuildableInterface {
 
   protected $repositoryID;
   protected $phid;
@@ -22,6 +23,8 @@ final class PhabricatorRepositoryCommit
   const IMPORTED_OWNERS = 4;
   const IMPORTED_HERALD = 8;
   const IMPORTED_ALL = 15;
+
+  const IMPORTED_CLOSEABLE = 1024;
 
   private $commitData = self::ATTACHABLE;
   private $audits;
@@ -41,7 +44,7 @@ final class PhabricatorRepositoryCommit
   }
 
   public function isImported() {
-    return ($this->getImportStatus() == self::IMPORTED_ALL);
+    return $this->isPartiallyImported(self::IMPORTED_ALL);
   }
 
   public function writeImportStatusFlag($flag) {
@@ -231,4 +234,17 @@ final class PhabricatorRepositoryCommit
     return id(new PhabricatorRepositoryCommit())
       ->loadFromArray($dict);
   }
+
+
+/* -(  HarbormasterBuildableInterface  )------------------------------------- */
+
+
+  public function getHarbormasterBuildablePHID() {
+    return $this->getPHID();
+  }
+
+  public function getHarbormasterContainerPHID() {
+    return $this->getRepository()->getPHID();
+  }
+
 }

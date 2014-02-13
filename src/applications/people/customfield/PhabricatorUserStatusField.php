@@ -25,7 +25,7 @@ final class PhabricatorUserStatusField
     $user = $this->getObject();
     $viewer = $this->requireViewer();
 
-    $statuses = id(new PhabricatorUserStatus())
+    $statuses = id(new PhabricatorCalendarEvent())
       ->loadCurrentStatuses(array($user->getPHID()));
     if (!$statuses) {
       return pht('Available');

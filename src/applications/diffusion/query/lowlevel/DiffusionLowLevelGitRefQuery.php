@@ -32,7 +32,7 @@ final class DiffusionLowLevelGitRefQuery extends DiffusionLowLevelQuery {
       if ($repository->isWorkingCopyBare()) {
         $prefix = 'refs/heads/';
       } else {
-        $remote = DiffusionBranchInformation::DEFAULT_GIT_REMOTE;
+        $remote = DiffusionGitBranch::DEFAULT_GIT_REMOTE;
         $prefix = 'refs/remotes/'.$remote.'/';
       }
     } else {

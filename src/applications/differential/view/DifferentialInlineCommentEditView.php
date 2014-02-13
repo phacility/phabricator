@@ -104,16 +104,6 @@ final class DifferentialInlineCommentEditView extends AphrontView {
       ),
       pht('Cancel'));
 
-    $formatting = phutil_tag(
-      'a',
-      array(
-        'href' => PhabricatorEnv::getDoclink(
-          'article/Remarkup_Reference.html'),
-        'tabindex' => '-1',
-        'target' => '_blank',
-      ),
-      pht('Formatting Reference'));
-
     $title = phutil_tag(
       'div',
       array(
@@ -134,7 +124,6 @@ final class DifferentialInlineCommentEditView extends AphrontView {
         'class' => 'differential-inline-comment-edit-buttons',
       ),
       array(
-        $formatting,
         $buttons,
         phutil_tag('div', array('style' => 'clear: both'), ''),
       ));

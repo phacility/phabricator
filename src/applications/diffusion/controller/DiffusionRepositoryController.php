@@ -123,13 +123,11 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     if ($readme) {
       $box = new PHUIBoxView();
-      $box->setShadow(true);
       $box->appendChild($readme);
       $box->addPadding(PHUI::PADDING_LARGE);
 
-      $panel = new AphrontPanelView();
-      $panel->setHeader(pht('README'));
-      $panel->setNoBackground();
+      $panel = new PHUIObjectBoxView();
+      $panel->setHeaderText(pht('README'));
       $panel->appendChild($box);
       $content[] = $panel;
     }
@@ -165,63 +163,64 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setUser($user);
     $view->addProperty(pht('Callsign'), $repository->getCallsign());
 
+    $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $repository->getPHID(),
+      PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT);
+    if ($project_phids) {
+      $this->loadHandles($project_phids);
+      $view->addProperty(
+        pht('Projects'),
+        $this->renderHandlesForPHIDs($project_phids));
+    }
+
     if ($repository->isHosted()) {
-      $serve_off = PhabricatorRepository::SERVE_OFF;
-      $callsign = $repository->getCallsign();
-      $repo_path = '/diffusion/'.$callsign.'/';
-
-      $serve_ssh = $repository->getServeOverSSH();
-      if ($serve_ssh !== $serve_off) {
-        $uri = new PhutilURI(PhabricatorEnv::getProductionURI($repo_path));
-
-        if ($repository->isSVN()) {
-          $uri->setProtocol('svn+ssh');
-        } else {
-          $uri->setProtocol('ssh');
-        }
-
-        $ssh_user = PhabricatorEnv::getEnvConfig('diffusion.ssh-user');
-        if ($ssh_user) {
-          $uri->setUser($ssh_user);
-        }
-
-        $uri->setPort(PhabricatorEnv::getEnvConfig('diffusion.ssh-port'));
-
-        $clone_uri = $this->renderCloneURI(
-          $uri,
-          $serve_ssh,
+      $ssh_uri = $repository->getSSHCloneURIObject();
+      if ($ssh_uri) {
+        $clone_uri = $this->renderCloneCommand(
+          $repository,
+          $ssh_uri,
+          $repository->getServeOverSSH(),
           '/settings/panel/ssh/');
 
-        $view->addProperty(pht('Clone URI (SSH)'), $clone_uri);
+        $view->addProperty(
+          $repository->isSVN()
+            ? pht('Checkout (SSH)')
+            : pht('Clone (SSH)'),
+          $clone_uri);
       }
 
-      $serve_http = $repository->getServeOverHTTP();
-      if ($serve_http !== $serve_off) {
-        $http_uri = PhabricatorEnv::getProductionURI($repo_path);
-
-        $clone_uri = $this->renderCloneURI(
+      $http_uri = $repository->getHTTPCloneURIObject();
+      if ($http_uri) {
+        $clone_uri = $this->renderCloneCommand(
+          $repository,
           $http_uri,
-          $serve_http,
+          $repository->getServeOverHTTP(),
           PhabricatorEnv::getEnvConfig('diffusion.allow-http-auth')
             ? '/settings/panel/vcspassword/'
             : null);
 
-        $view->addProperty(pht('Clone URI (HTTP)'), $clone_uri);
+        $view->addProperty(
+          $repository->isSVN()
+            ? pht('Checkout (HTTP)')
+            : pht('Clone (HTTP)'),
+          $clone_uri);
       }
     } else {
       switch ($repository->getVersionControlSystem()) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
           $view->addProperty(
-            pht('Clone URI'),
-            $this->renderCloneURI(
-              $repository->getPublicRemoteURI()));
+            pht('Clone'),
+            $this->renderCloneCommand(
+              $repository,
+              $repository->getPublicCloneURI()));
           break;
         case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
           $view->addProperty(
-            pht('Repository Root'),
-            $this->renderCloneURI(
-              $repository->getPublicRemoteURI()));
+            pht('Checkout'),
+            $this->renderCloneCommand(
+              $repository,
+              $repository->getPublicCloneURI()));
           break;
       }
     }
@@ -253,12 +252,11 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $limit = 15;
 
-    $branches = DiffusionBranchInformation::newFromConduit(
-      $this->callConduitWithDiffusionRequest(
-        'diffusion.branchquery',
-        array(
-          'limit' => $limit + 1,
-        )));
+    $branches = $this->callConduitWithDiffusionRequest(
+      'diffusion.branchquery',
+      array(
+        'limit' => $limit + 1,
+      ));
     if (!$branches) {
       return null;
     }
@@ -266,9 +264,11 @@ final class DiffusionRepositoryController extends DiffusionController {
     $more_branches = (count($branches) > $limit);
     $branches = array_slice($branches, 0, $limit);
 
+    $branches = DiffusionRepositoryRef::loadAllFromDictionaries($branches);
+
     $commits = id(new DiffusionCommitQuery())
       ->setViewer($viewer)
-      ->withIdentifiers(mpull($branches, 'getHeadCommitIdentifier'))
+      ->withIdentifiers(mpull($branches, 'getCommitIdentifier'))
       ->withRepository($drequest->getRepository())
       ->execute();
 
@@ -278,26 +278,29 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setBranches($branches)
       ->setCommits($commits);
 
-    $panel = id(new AphrontPanelView())
-      ->setHeader(pht('Branches'))
-      ->setNoBackground();
+    $panel = new PHUIObjectBoxView();
+    $header = new PHUIHeaderView();
+    $header->setHeader(pht('Branches'));
 
     if ($more_branches) {
-      $panel->setCaption(pht('Showing %d branches.', $limit));
+      $header->setSubHeader(pht('Showing %d branches.', $limit));
     }
 
-    $panel->addButton(
-      phutil_tag(
-        'a',
-        array(
-          'href' => $drequest->generateURI(
+    $icon = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+      ->setSpriteIcon('fork');
+
+    $button = new PHUIButtonView();
+    $button->setText(pht("Show All Branches"));
+    $button->setTag('a');
+    $button->setIcon($icon);
+    $button->setHref($drequest->generateURI(
             array(
               'action' => 'branches',
-            )),
-          'class' => 'grey button',
-        ),
-        pht("Show All Branches \xC2\xBB")));
+            )));
 
+    $header->addActionLink($button);
+    $panel->setHeader($header);
     $panel->appendChild($table);
 
     return $panel;
@@ -347,25 +350,31 @@ final class DiffusionRepositoryController extends DiffusionController {
     $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
-    $panel = id(new AphrontPanelView())
-      ->setHeader(pht('Tags'))
-      ->setNoBackground(true);
+    $panel = new PHUIObjectBoxView();
+    $header = new PHUIHeaderView();
+    $header->setHeader(pht('Tags'));
 
     if ($more_tags) {
-      $panel->setCaption(pht('Showing the %d most recent tags.', $tag_limit));
+      $header->setSubHeader(
+        pht('Showing the %d most recent tags.', $tag_limit));
     }
 
-    $panel->addButton(
-      phutil_tag(
-        'a',
-        array(
-          'href' => $drequest->generateURI(
+    $icon = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+      ->setSpriteIcon('tag');
+
+    $button = new PHUIButtonView();
+    $button->setText(pht("Show All Tags"));
+    $button->setTag('a');
+    $button->setIcon($icon);
+    $button->setHref($drequest->generateURI(
             array(
               'action' => 'tags',
-            )),
-          'class' => 'grey button',
-        ),
-        pht("Show All Tags \xC2\xBB")));
+            )));
+
+    $header->addActionLink($button);
+
+    $panel->setHeader($header);
     $panel->appendChild($view);
 
     return $panel;
@@ -449,22 +458,27 @@ final class DiffusionRepositoryController extends DiffusionController {
     }
 
     $history_table->setIsHead(true);
-
     $callsign = $drequest->getRepository()->getCallsign();
-    $all = phutil_tag(
-      'a',
-      array(
-        'href' => $drequest->generateURI(
-          array(
-            'action' => 'history',
-          )),
-      ),
-      pht('View Full Commit History'));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht("Recent Commits &middot; %s", $all));
+    $icon = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+      ->setSpriteIcon('transcript');
+
+    $button = id(new PHUIButtonView())
+      ->setText(pht('View Full History'))
+      ->setHref($drequest->generateURI(
+        array(
+          'action' => 'history',
+        )))
+      ->setTag('a')
+      ->setIcon($icon);
+
+    $panel = new PHUIObjectBoxView();
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Recent Commits'))
+      ->addActionLink($button);
+    $panel->setHeader($header);
     $panel->appendChild($history_table);
-    $panel->setNoBackground();
 
     return $panel;
   }
@@ -503,19 +517,29 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $browse_uri = $drequest->generateURI(array('action' => 'browse'));
 
-    $browse_panel = new AphrontPanelView();
-    $browse_panel->setHeader(
-      phutil_tag(
-        'a',
-        array('href' => $browse_uri),
-        pht('Browse Repository')));
+    $browse_panel = new PHUIObjectBoxView();
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Repository'));
+
+    $icon = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+      ->setSpriteIcon('data');
+
+    $button = new PHUIButtonView();
+    $button->setText(pht('Browse Repository'));
+    $button->setTag('a');
+    $button->setIcon($icon);
+    $button->setHref($browse_uri);
+
+    $header->addActionLink($button);
+    $browse_panel->setHeader($header);
     $browse_panel->appendChild($browse_table);
-    $browse_panel->setNoBackground();
 
     return $browse_panel;
   }
 
-  private function renderCloneURI(
+  private function renderCloneCommand(
+    PhabricatorRepository $repository,
     $uri,
     $serve_mode = null,
     $manage_uri = null) {
@@ -524,13 +548,33 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     Javelin::initBehavior('select-on-click');
 
+    switch ($repository->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        $command = csprintf(
+          'git clone %R',
+          $uri);
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $command = csprintf(
+          'hg clone %R',
+          $uri);
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $command = csprintf(
+          'svn checkout %R %R',
+          $uri,
+          $repository->getCloneName());
+        break;
+    }
+
     $input = javelin_tag(
       'input',
       array(
         'type' => 'text',
-        'value' => (string)$uri,
+        'value' => (string)$command,
         'class' => 'diffusion-clone-uri',
         'sigil' => 'select-on-click',
+        'readonly' => 'true',
       ));
 
     $extras = array();

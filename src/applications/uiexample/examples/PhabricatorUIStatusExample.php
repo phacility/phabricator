@@ -48,7 +48,7 @@ final class PhabricatorUIStatusExample extends PhabricatorUIExample {
     $out[] = id(new PHUIBoxView())
       ->addMargin(PHUI::MARGIN_LARGE)
       ->addPadding(PHUI::PADDING_LARGE)
-      ->setShadow(true)
+      ->setBorder(true)
       ->appendChild($view);
 
 
@@ -71,7 +71,7 @@ final class PhabricatorUIStatusExample extends PhabricatorUIExample {
     $out[] = id(new PHUIBoxView())
       ->addMargin(PHUI::MARGIN_LARGE)
       ->addPadding(PHUI::PADDING_LARGE)
-      ->setShadow(true)
+      ->setBorder(true)
       ->appendChild($view);
 
     return $out;
