@@ -6,6 +6,10 @@
   padding: 0 16px;
 }
 
+.device-phone .phui-timeline-view {
+  padding: 0;
+}
+
 .phui-timeline-major-event .phui-timeline-group {
   border-left: 1px solid {$lightblueborder};
   border-right: 1px solid {$lightblueborder};
@@ -20,7 +24,7 @@
   margin-left: 65px;
 }
 
-.device-desktop .phui-timeline-spacer {
+.phui-timeline-spacer {
   min-height: 16px;
   border-width: 0 0 0 1px;
   border-style: solid;
@@ -122,8 +126,10 @@
 .device .phui-timeline-event-view {
   min-height: 23px;
   position: relative;
-  margin-left: 3px;
-  margin-right: 3px;
+}
+
+.device-phone .phui-timeline-event-view {
+  margin: 0 4px;
 }
 
 .device .phui-timeline-image {
@@ -176,6 +182,11 @@
   display: inline-block;
   line-height: 16px;
   margin-left: 8px;
+}
+
+.device-phone .phui-timeline-extra {
+  display: block;
+  margin: 0;
 }
 
 .phui-timeline-icon-fill-red {
