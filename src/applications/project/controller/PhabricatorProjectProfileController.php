@@ -49,11 +49,22 @@ final class PhabricatorProjectProfileController
       'phabricator-project-layout',
       array($tasks, $feed));
 
+    $id = $this->id;
+    $icon = id(new PHUIIconView())
+          ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+          ->setSpriteIcon('workboard');
+    $board_btn = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setText(pht('Workboards'))
+        ->setHref($this->getApplicationURI("board/{$id}/"))
+        ->setIcon($icon);
+
     $header = id(new PHUIHeaderView())
       ->setHeader($project->getName())
       ->setUser($user)
       ->setPolicyObject($project)
-      ->setImage($picture);
+      ->setImage($picture)
+      ->addActionLink($board_btn);
 
     if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ACTIVE) {
       $header->setStatus('oh-ok', '', pht('Active'));
@@ -137,8 +148,33 @@ final class PhabricatorProjectProfileController
     $task_list->setTasks($tasks);
     $task_list->setHandles($handles);
 
+    $phid = $project->getPHID();
+    $view_uri = '/maniphest/?statuses[]=0&allProjects[]='.$phid.'#R';
+    $create_uri = '/maniphest/task/create/?projects='.$phid;
+    $icon = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+      ->setSpriteIcon('action-menu');
+    $button_view = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('View All'))
+      ->setHref($view_uri)
+      ->setIcon($icon);
+    $icon_new = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+      ->setSpriteIcon('new');
+    $button_add = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('New Task'))
+      ->setHref($create_uri)
+      ->setIcon($icon_new);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Open Tasks'))
+      ->addActionLink($button_add)
+      ->addActionLink($button_view);
+
     $content = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Open Tasks'))
+      ->setHeader($header)
       ->appendChild($task_list);
 
     return $content;
@@ -231,12 +267,6 @@ final class PhabricatorProjectProfileController
         ->setName(pht('View History'))
         ->setHref($this->getApplicationURI("history/{$id}/"))
         ->setIcon('transcript'));
-
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('View Board (Beta)'))
-        ->setHref($this->getApplicationURI("board/{$id}/"))
-        ->setIcon('project'));
 
     return $view;
   }

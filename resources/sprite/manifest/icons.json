@@ -1171,6 +1171,21 @@
       "rule" : ".icons-warning-white, .device-desktop .phabricator-action-view:hover .icons-warning, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-warning",
       "hash" : "c82e3ce08e31c36315c65ace1c12ce1f"
     },
+    "icons-workboard"                     : {
+      "name" : "icons-workboard",
+      "rule" : ".icons-workboard",
+      "hash" : "6af475e9ee3ae64664d79c8b6104ef1f"
+    },
+    "icons-workboard-grey"                : {
+      "name" : "icons-workboard-grey",
+      "rule" : ".icons-workboard-grey",
+      "hash" : "b690d7ebeb0085c0aa35b27ddd45d619"
+    },
+    "icons-workboard-white"               : {
+      "name" : "icons-workboard-white",
+      "rule" : ".icons-workboard-white, .device-desktop .phabricator-action-view:hover .icons-workboard, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-workboard",
+      "hash" : "fef275c8eab6957ce7e0cf6cc095901f"
+    },
     "icons-world"                         : {
       "name" : "icons-world",
       "rule" : ".icons-world",
