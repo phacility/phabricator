@@ -74,7 +74,7 @@ final class PhabricatorRepositoryListController
     $panel = new AphrontPanelView();
     $panel->setHeader('Repositories');
     if ($is_admin) {
-      $panel->setCreateButton('Create New Repository', '/diffusion/create/');
+      $panel->setCreateButton('Create New Repository', '/diffusion/new/');
     }
     $panel->appendChild($table);
     $panel->setNoBackground();
