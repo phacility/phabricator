@@ -47,19 +47,15 @@
   line-height: 18px;
   min-height: 18px;
   position: relative;
-  color: {$darkbluetext};
+  color: {$bluetext};
 }
 
 .phui-timeline-minor-event .phui-timeline-title {
   padding: 4px 8px 4px 33px;
-  color: {$bluetext};
 }
 
 .phui-timeline-title a {
   font-weight: bold;
-}
-
-.phui-timeline-title a.phui-link-person {
   color: {$darkbluetext};
 }
 
@@ -169,9 +165,16 @@
   left: 6px;
 }
 
-.phui-timeline-extra, .phui-timeline-extra a {
+.phui-timeline-extra,
+.phui-timeline-extra .phabricator-content-source-view {
   font-size: 11px;
   font-weight: normal;
+  color: {$lightbluetext};
+}
+
+.phui-timeline-title .phui-timeline-extra a {
+  font-weight: normal;
+  color: {$bluetext};
 }
 
 .device-desktop .phui-timeline-extra {
@@ -246,9 +249,4 @@
   border-style: solid;
   border-color: #efefef;
   border-width: 1px 0;
-}
-
-.phui-timeline-extra .phabricator-content-source-view,
-.phui-timeline-extra a {
-  color: {$lightbluetext};
 }
