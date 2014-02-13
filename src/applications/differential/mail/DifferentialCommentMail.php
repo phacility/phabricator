@@ -154,6 +154,10 @@ final class DifferentialCommentMail extends DifferentialMail {
     $body[] = null;
 
     foreach ($this->getComments() as $comment) {
+      if ($comment->getAction() == DifferentialTransaction::TYPE_INLINE) {
+        // These have comment content now, but are rendered below.
+        continue;
+      }
       $content = $comment->getContent();
       if (strlen($content)) {
         $body[] = $this->formatText($content);

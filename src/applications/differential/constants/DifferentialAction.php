@@ -122,6 +122,7 @@ final class DifferentialAction {
       self::ACTION_ADDCCS         => 'added CCs to',
       self::ACTION_CLAIM          => 'commandeered',
       self::ACTION_REOPEN         => 'reopened',
+      DifferentialTransaction::TYPE_INLINE => 'commented on',
     );
 
     if (!empty($verbs[$action])) {
