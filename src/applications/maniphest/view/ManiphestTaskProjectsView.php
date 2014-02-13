@@ -15,9 +15,9 @@ final class ManiphestTaskProjectsView extends ManiphestView {
 
   public function render() {
     require_celerity_resource('phabricator-project-tag-css');
+    $max_visible_tags = 4;
 
-
-    $show = array_slice($this->handles, 0, 2);
+    $show = array_slice($this->handles, 0, $max_visible_tags);
 
     $tags = array();
     if ($show) {
@@ -39,7 +39,7 @@ final class ManiphestTaskProjectsView extends ManiphestView {
         pht('No Project'));
     }
 
-    if (count($this->handles) > 2) {
+    if (count($this->handles) > $max_visible_tags) {
       require_celerity_resource('aphront-tooltip-css');
       Javelin::initBehavior('phabricator-tooltips');
 
