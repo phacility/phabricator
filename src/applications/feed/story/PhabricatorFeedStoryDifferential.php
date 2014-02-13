@@ -117,6 +117,14 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
         $one_line = pht('%s reopened revision %s',
         $actor_link, $revision_link);
       break;
+      case DifferentialTransaction::TYPE_INLINE:
+        $one_line = pht('%s added inline comments to %s',
+        $actor_link, $revision_link);
+      break;
+      default:
+        $one_line = pht('%s edited %s',
+        $actor_link, $revision_link);
+      break;
     }
 
     return $one_line;
@@ -200,6 +208,14 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
         $one_line = pht('%s reopened revision %s %s',
           $author_name, $revision_title, $revision_uri);
       break;
+      case DifferentialTransaction::TYPE_INLINE:
+        $one_line = pht('%s added inline comments to %s %s',
+          $author_name, $revision_title, $revision_uri);
+        break;
+      default:
+        $one_line = pht('%s edited %s %s',
+          $author_name, $revision_title, $revision_uri);
+        break;
     }
 
     return $one_line;
@@ -306,6 +322,14 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
         break;
         case DifferentialAction::ACTION_REOPEN:
           $title = pht('%s reopened revision %s',
+          $author_name, $revision_name);
+        break;
+        case DifferentialTransaction::TYPE_INLINE:
+          $title = pht('%s added inline comments to %s',
+          $author_name, $revision_name);
+        break;
+        default:
+          $title = pht('%s edited revision %s',
           $author_name, $revision_name);
         break;
       }
