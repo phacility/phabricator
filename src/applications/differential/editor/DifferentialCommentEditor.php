@@ -561,8 +561,14 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
       ->setRevision($revision);
 
     if ($this->contentSource) {
-      $template->setContentSource($this->contentSource);
+      $content_source = $this->contentSource;
+    } else {
+      $content_source = PhabricatorContentSource::newForSource(
+        PhabricatorContentSource::SOURCE_LEGACY,
+        array());
     }
+
+    $template->setContentSource($content_source);
 
     $comments = array();
 
