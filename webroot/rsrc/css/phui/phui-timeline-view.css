@@ -24,7 +24,7 @@
   margin-left: 65px;
 }
 
-.phui-timeline-spacer {
+.device-desktop .phui-timeline-spacer {
   min-height: 16px;
   border-width: 0 0 0 1px;
   border-style: solid;
