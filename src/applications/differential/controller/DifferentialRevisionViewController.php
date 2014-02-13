@@ -260,7 +260,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $comment_view = $this->buildTransactions(
       $revision,
-      $changesets);
+      $all_changesets);
 
     $wrap_id = celerity_generate_unique_node_id();
     $comment_view = phutil_tag(
