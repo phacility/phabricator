@@ -262,11 +262,19 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $revision,
       $changesets);
 
+    $wrap_id = celerity_generate_unique_node_id();
+    $comment_view = phutil_tag(
+      'div',
+      array(
+        'id' => $wrap_id,
+      ),
+      $comment_view);
+
     if ($arc_project) {
       Javelin::initBehavior(
         'repository-crossreference',
         array(
-          'section' => $comment_view->getID(),
+          'section' => $wrap_id,
           'projects' => $project_phids,
         ));
     }
