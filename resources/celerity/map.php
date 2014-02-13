@@ -406,7 +406,7 @@ return array(
     'rsrc/js/application/search/behavior-reorder-queries.js' => '34397f68',
     'rsrc/js/application/slowvote/behavior-slowvote-embed.js' => 'a51fdb2e',
     'rsrc/js/application/transactions/behavior-transaction-comment-form.js' => '9084a36f',
-    'rsrc/js/application/transactions/behavior-transaction-list.js' => '0dcf1716',
+    'rsrc/js/application/transactions/behavior-transaction-list.js' => '5e3da3ad',
     'rsrc/js/application/uiexample/JavelinViewExample.js' => 'd4a14807',
     'rsrc/js/application/uiexample/ReactorButtonExample.js' => '44524435',
     'rsrc/js/application/uiexample/ReactorCheckboxExample.js' => '7ba325ee',
@@ -599,7 +599,7 @@ return array(
     'javelin-behavior-phabricator-search-typeahead' => 'f6b56f7a',
     'javelin-behavior-phabricator-tooltips' => 'e5dd1c6d',
     'javelin-behavior-phabricator-transaction-comment-form' => '9084a36f',
-    'javelin-behavior-phabricator-transaction-list' => '0dcf1716',
+    'javelin-behavior-phabricator-transaction-list' => '5e3da3ad',
     'javelin-behavior-phabricator-watch-anchor' => '06e05112',
     'javelin-behavior-phame-post-preview' => '61d927ec',
     'javelin-behavior-pholio-mock-edit' => '1e1e8bb0',
@@ -849,14 +849,6 @@ return array(
       0 => 'javelin-view',
       1 => 'javelin-install',
       2 => 'javelin-dom',
-    ),
-    '0dcf1716' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-stratcom',
-      2 => 'javelin-workflow',
-      3 => 'javelin-dom',
-      4 => 'javelin-fx',
     ),
     '0e34ca02' =>
     array(
@@ -1166,6 +1158,14 @@ return array(
       2 => 'javelin-dom',
       3 => 'javelin-stratcom',
       4 => 'javelin-vector',
+    ),
+    '5e3da3ad' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-workflow',
+      3 => 'javelin-dom',
+      4 => 'javelin-fx',
     ),
     '5f004630' =>
     array(
