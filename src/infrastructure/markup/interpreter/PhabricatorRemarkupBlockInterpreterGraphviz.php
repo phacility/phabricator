@@ -13,6 +13,8 @@ final class PhabricatorRemarkupBlockInterpreterGraphviz
         pht('Unable to locate the `dot` binary. Install Graphviz.'));
     }
 
+    $width = $this->parseDimension(idx($argv, 'width'));
+
     $future = id(new ExecFuture('dot -T%s', 'png'))
       ->setTimeout(15)
       ->write(trim($content));
@@ -41,7 +43,19 @@ final class PhabricatorRemarkupBlockInterpreterGraphviz
       'img',
       array(
         'src' => $file->getBestURI(),
+        'width' => nonempty($width, null),
       ));
   }
 
+  // TODO: This is duplicated from PhabricatorRemarkupRuleEmbedFile since they
+  // do not share a base class.
+  private function parseDimension($string) {
+    $string = trim($string);
+
+    if (preg_match('/^(?:\d*\\.)?\d+%?$/', $string)) {
+      return $string;
+    }
+
+    return null;
+  }
 }
