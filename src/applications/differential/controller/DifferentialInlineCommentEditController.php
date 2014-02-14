@@ -60,8 +60,9 @@ final class DifferentialInlineCommentEditController
       return false;
     }
 
-    // Saved comments may not be edited.
-    if ($inline->getCommentID()) {
+    // Saved comments may not be edited, for now, although the schema now
+    // supports it.
+    if (!$inline->isDraft()) {
       return false;
     }
 

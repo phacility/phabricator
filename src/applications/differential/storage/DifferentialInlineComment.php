@@ -167,18 +167,12 @@ final class DifferentialInlineComment
   // the future transaction.
 
   public function setCommentID($id) {
-    $this->proxy->setLegacyCommentID($id);
     $this->proxy->setTransactionPHID(
       PhabricatorPHID::generateNewPHID(
         PhabricatorApplicationTransactionPHIDTypeTransaction::TYPECONST,
         DifferentialPHIDTypeRevision::TYPECONST));
     return $this;
   }
-
-  public function getCommentID() {
-    return $this->proxy->getLegacyCommentID();
-  }
-
 
 /* -(  PhabricatorMarkupInterface Implementation  )-------------------------- */
 
@@ -202,7 +196,7 @@ final class DifferentialInlineComment
 
   public function shouldUseMarkupCache($field) {
     // Only cache submitted comments.
-    return ($this->getID() && $this->getCommentID());
+    return ($this->getID() && !$this->isDraft());
   }
 
 }

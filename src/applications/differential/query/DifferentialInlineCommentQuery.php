@@ -45,11 +45,6 @@ final class DifferentialInlineCommentQuery
     return $this;
   }
 
-  public function withCommentIDs(array $comment_ids) {
-    $this->commentIDs = $comment_ids;
-    return $this;
-  }
-
   public function execute() {
     $table = new DifferentialTransactionComment();
     $conn_r = $table->establishConnection('r');
@@ -153,13 +148,6 @@ final class DifferentialInlineCommentQuery
         $conn_r,
         'authorPHID IN (%Ls) AND transactionPHID IS NULL',
         $this->draftsByAuthors);
-    }
-
-    if ($this->commentIDs) {
-      $where[] = qsprintf(
-        $conn_r,
-        'legacyCommentID IN (%Ld)',
-        $this->commentIDs);
     }
 
     return $this->formatWhereClause($where);
