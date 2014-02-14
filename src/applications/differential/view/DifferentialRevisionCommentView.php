@@ -11,6 +11,16 @@ final class DifferentialRevisionCommentView extends AphrontView {
   private $target;
   private $anchorName;
   private $versusDiffID;
+  private $revision;
+
+  public function setRevision(DifferentialRevision $revision) {
+    $this->revision = $revision;
+    return $this;
+  }
+
+  public function getRevision() {
+    return $this->revision;
+  }
 
   public function setComment($comment) {
     $this->comment = $comment;
@@ -134,7 +144,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
           $diff_link = phutil_tag(
             'a',
             array(
-              'href' => '/D'.$comment->getRevisionID().'?id='.$diff_id,
+              'href' => '/D'.$this->getRevision()->getID().'?id='.$diff_id,
             ),
             'Diff #'.$diff_id);
           $actions[] = pht(
@@ -190,7 +200,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
       $xaction_view->setEpoch($comment->getDateCreated());
       if ($this->anchorName) {
         $anchor_text =
-          'D'.$comment->getRevisionID().
+          'D'.$this->getRevision()->getID().
           '#'.preg_replace('/^comment-/', '', $this->anchorName);
 
         $xaction_view->setAnchor($this->anchorName, $anchor_text);
@@ -279,7 +289,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
           $diff_id = $changeset->getDiffID();
           $item['where'] = '(On Diff #'.$diff_id.')';
           $item['href'] =
-            'D'.$this->comment->getRevisionID().
+            'D'.$this->getRevision()->getID().
             '?id='.$diff_id.
             '#inline-'.$inline->getID();
         }

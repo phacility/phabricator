@@ -206,8 +206,8 @@
 
 .phabricator-main-search-typeahead-result {
   display: block;
-  padding: 1px 4px 1px 38px;
-  background-position: 4px 4px;
+  padding: 6px 12px 6px 46px;
+  background-position: 12px 9px;
   background-size: 25px 25px;
   background-repeat: no-repeat;
 }

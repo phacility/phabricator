@@ -258,20 +258,25 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $revision_detail->setActions($actions);
     $revision_detail->setUser($user);
 
-    $comment_view = new DifferentialRevisionCommentListView();
-    $comment_view->setComments($comments);
-    $comment_view->setHandles($handles);
-    $comment_view->setInlineComments($inlines);
-    $comment_view->setChangesets($all_changesets);
-    $comment_view->setUser($user);
-    $comment_view->setTargetDiff($target);
-    $comment_view->setVersusDiffID($diff_vs);
+    $comment_view = $this->buildTransactions(
+      $revision,
+      $diff_vs ? $diffs[$diff_vs] : $target,
+      $target,
+      $all_changesets);
+
+    $wrap_id = celerity_generate_unique_node_id();
+    $comment_view = phutil_tag(
+      'div',
+      array(
+        'id' => $wrap_id,
+      ),
+      $comment_view);
 
     if ($arc_project) {
       Javelin::initBehavior(
         'repository-crossreference',
         array(
-          'section' => $comment_view->getID(),
+          'section' => $wrap_id,
           'projects' => $project_phids,
         ));
     }
@@ -925,4 +930,38 @@ final class DifferentialRevisionViewController extends DifferentialController {
     return id(new AphrontRedirectResponse())->setURI($file->getBestURI());
 
   }
+
+  private function buildTransactions(
+    DifferentialRevision $revision,
+    DifferentialDiff $left_diff,
+    DifferentialDiff $right_diff,
+    array $changesets) {
+    $viewer = $this->getRequest()->getUser();
+
+    $xactions = id(new DifferentialTransactionQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($revision->getPHID()))
+      ->needComments(true)
+      ->execute();
+
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($viewer);
+
+    $timeline = id(new DifferentialTransactionView())
+      ->setUser($viewer)
+      ->setObjectPHID($revision->getPHID())
+      ->setChangesets($changesets)
+      ->setRevision($revision)
+      ->setLeftDiff($left_diff)
+      ->setRightDiff($right_diff)
+      ->setTransactions($xactions);
+
+    // TODO: Make this work and restore edit links. We need to copy
+    // `revisionPHID` to the new version of the comment. This should be simple,
+    // but can happen post-merge. See T2222.
+    $timeline->setShowEditActions(false);
+
+    return $timeline;
+  }
+
 }

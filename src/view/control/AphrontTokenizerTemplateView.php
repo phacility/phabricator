@@ -12,6 +12,7 @@ final class AphrontTokenizerTemplateView extends AphrontView {
   }
 
   public function setValue(array $value) {
+    assert_instances_of($value, 'PhabricatorObjectHandle');
     $this->value = $value;
     return $this;
   }
@@ -38,7 +39,10 @@ final class AphrontTokenizerTemplateView extends AphrontView {
 
     $tokens = array();
     foreach ($values as $key => $value) {
-      $tokens[] = $this->renderToken($key, $value);
+      $tokens[] = $this->renderToken(
+        $value->getPHID(),
+        $value->getFullName(),
+        $value->getTypeIcon());
     }
 
     $input = javelin_tag(
@@ -66,11 +70,22 @@ final class AphrontTokenizerTemplateView extends AphrontView {
       $content);
   }
 
-  private function renderToken($key, $value) {
+  private function renderToken($key, $value, $icon) {
     $input_name = $this->getName();
     if ($input_name) {
       $input_name .= '[]';
     }
+
+    if ($icon) {
+      $value = array(
+        phutil_tag(
+          'span',
+          array(
+            'class' => 'phui-icon-view sprite-status status-'.$icon,
+          )),
+        $value);
+    }
+
     return phutil_tag(
       'a',
       array(

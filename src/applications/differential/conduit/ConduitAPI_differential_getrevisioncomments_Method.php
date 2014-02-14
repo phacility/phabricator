@@ -1,10 +1,15 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_differential_getrevisioncomments_Method
   extends ConduitAPI_differential_Method {
+
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_DEPRECATED;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht('Obsolete and doomed, see T2222.');
+  }
 
   public function getMethodDescription() {
     return "Retrieve Differential Revision Comments.";
@@ -13,7 +18,7 @@ final class ConduitAPI_differential_getrevisioncomments_Method
   public function defineParamTypes() {
     return array(
       'ids' => 'required list<int>',
-      'inlines' => 'optional bool',
+      'inlines' => 'optional bool (deprecated)',
     );
   }
 
@@ -34,46 +39,36 @@ final class ConduitAPI_differential_getrevisioncomments_Method
       return $results;
     }
 
-    $comments = id(new DifferentialCommentQuery())
-      ->withRevisionIDs($revision_ids)
+    $revisions = id(new DifferentialRevisionQuery())
+      ->setViewer($request->getUser())
+      ->withIDs($revision_ids)
       ->execute();
 
-    $with_inlines = $request->getValue('inlines');
-    if ($with_inlines) {
-      $inlines = id(new DifferentialInlineCommentQuery())
-        ->withRevisionIDs($revision_ids)
-        ->execute();
-      $changesets = array();
-      if ($inlines) {
-        $changesets = id(new DifferentialChangeset())->loadAllWhere(
-          'id IN (%Ld)',
-          array_unique(mpull($inlines, 'getChangesetID')));
-        $inlines = mgroup($inlines, 'getCommentID');
-      }
+    if (!$revisions) {
+      return $results;
     }
 
+    $comments = id(new DifferentialCommentQuery())
+      ->withRevisionPHIDs(mpull($revisions, 'getPHID'))
+      ->execute();
+
+    $revisions = mpull($revisions, null, 'getPHID');
+
     foreach ($comments as $comment) {
-      $revision_id = $comment->getRevisionID();
+      $revision = idx($revisions, $comment->getRevisionPHID());
+      if (!$revision) {
+        continue;
+      }
+
       $result = array(
-        'revisionID'  => $revision_id,
+        'revisionID'  => $revision->getID(),
         'action'      => $comment->getAction(),
         'authorPHID'  => $comment->getAuthorPHID(),
         'dateCreated' => $comment->getDateCreated(),
         'content'     => $comment->getContent(),
       );
 
-      if ($with_inlines) {
-        $result['inlines'] = array();
-        foreach (idx($inlines, $comment->getID(), array()) as $inline) {
-          $changeset = idx($changesets, $inline->getChangesetID());
-          $result['inlines'][] = $this->buildInlineInfoDictionary(
-            $inline,
-            $changeset);
-        }
-        // TODO: Put synthetic inlines without an attached comment somewhere.
-      }
-
-      $results[$revision_id][] = $result;
+      $results[$revision->getID()][] = $result;
     }
 
     return $results;

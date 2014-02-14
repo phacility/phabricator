@@ -16,11 +16,6 @@ class AphrontDefaultApplicationConfiguration
 
   public function getURIMap() {
     return $this->getResourceURIMapRules() + array(
-      '/typeahead/' => array(
-        'common/(?P<type>\w+)/'
-          => 'PhabricatorTypeaheadCommonDatasourceController',
-      ),
-
       '/oauthserver/' => array(
         'auth/'          => 'PhabricatorOAuthServerAuthController',
         'test/'          => 'PhabricatorOAuthServerTestController',

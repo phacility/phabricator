@@ -4,6 +4,18 @@
 
 .phui-timeline-view {
   padding: 0 16px;
+  background-image: url('/rsrc/image/BFCFDA.png');
+  background-repeat: repeat-y;
+  background-position: 94px;
+}
+
+.device-tablet .phui-timeline-view {
+  background-position: 31px;
+}
+
+.device-phone .phui-timeline-view {
+  padding: 0;
+  background-position: 20px;
 }
 
 .phui-timeline-major-event .phui-timeline-group {
@@ -23,15 +35,17 @@
 .device-desktop .phui-timeline-spacer {
   min-height: 16px;
   border-width: 0 0 0 1px;
-  border-style: solid;
-  border-color: {$lightblueborder};
-  margin-left: 78px;
 }
 
 .device-desktop .phui-timeline-wedge {
   border-bottom: 1px solid {$lightblueborder};
   position: absolute;
   width: 12px;
+}
+
+.device-phone .phui-timeline-minor-event,
+.device-tablet .phui-timeline-minor-event {
+  padding-left: 3px;
 }
 
 .phui-timeline-major-event .phui-timeline-content {
@@ -43,19 +57,15 @@
   line-height: 18px;
   min-height: 18px;
   position: relative;
-  color: {$darkbluetext};
+  color: {$bluetext};
 }
 
 .phui-timeline-minor-event .phui-timeline-title {
   padding: 4px 8px 4px 33px;
-  color: {$bluetext};
 }
 
 .phui-timeline-title a {
   font-weight: bold;
-}
-
-.phui-timeline-title a.phui-link-person {
   color: {$darkbluetext};
 }
 
@@ -122,8 +132,10 @@
 .device .phui-timeline-event-view {
   min-height: 23px;
   position: relative;
-  margin-left: 3px;
-  margin-right: 3px;
+}
+
+.device-phone .phui-timeline-event-view {
+  margin: 0 4px;
 }
 
 .device .phui-timeline-image {
@@ -163,9 +175,16 @@
   left: 6px;
 }
 
-.phui-timeline-extra, .phui-timeline-extra a {
+.phui-timeline-extra,
+.phui-timeline-extra .phabricator-content-source-view {
   font-size: 11px;
   font-weight: normal;
+  color: {$lightbluetext};
+}
+
+.phui-timeline-title .phui-timeline-extra a {
+  font-weight: normal;
+  color: {$bluetext};
 }
 
 .device-desktop .phui-timeline-extra {
@@ -176,6 +195,11 @@
   display: inline-block;
   line-height: 16px;
   margin-left: 8px;
+}
+
+.device-phone .phui-timeline-extra {
+  display: block;
+  margin: 0;
 }
 
 .phui-timeline-icon-fill-red {
@@ -237,7 +261,11 @@
   border-width: 1px 0;
 }
 
-.phui-timeline-extra .phabricator-content-source-view,
-.phui-timeline-extra a {
-  color: {$lightbluetext};
+.phui-timeline-older-transactions-are-hidden {
+  background: {$lightyellow};
+  border: 1px solid {$yellow};
+  text-align: center;
+  padding: 12px;
+  color: {$darkgreytext};
+  margin-top: 16px;
 }

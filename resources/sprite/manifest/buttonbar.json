@@ -35,6 +35,11 @@
       "name" : "buttonbar-time",
       "rule" : ".buttonbar-time",
       "hash" : "1355aa26ecd63e76a59352aba95e54ad"
+    },
+    "buttonbar-workboard"     : {
+      "name" : "buttonbar-workboard",
+      "rule" : ".buttonbar-workboard",
+      "hash" : "fab3db9da0a6b14d8517c6c9868b30f7"
     }
   },
   "scales"  : [

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioTransaction extends PhabricatorApplicationTransaction {
 
   public function getApplicationName() {

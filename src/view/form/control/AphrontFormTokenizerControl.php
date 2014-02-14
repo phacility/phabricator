@@ -36,7 +36,6 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
     $values = nonempty($this->getValue(), array());
 
     assert_instances_of($values, 'PhabricatorObjectHandle');
-    $values = mpull($values, 'getFullName', 'getPHID');
 
     if ($this->getID()) {
       $id = $this->getID();
@@ -62,7 +61,8 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
       Javelin::initBehavior('aphront-basic-tokenizer', array(
         'id'          => $id,
         'src'         => $this->datasource,
-        'value'       => $values,
+        'value'       => mpull($values, 'getFullName', 'getPHID'),
+        'icons'       => mpull($values, 'getTypeIcon', 'getPHID'),
         'limit'       => $this->limit,
         'ondemand'    => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
         'username'    => $username,

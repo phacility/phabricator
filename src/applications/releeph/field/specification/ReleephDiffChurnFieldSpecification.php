@@ -24,7 +24,7 @@ final class ReleephDiffChurnFieldSpecification
 
     $diff_rev = $this->getReleephRequest()->loadDifferentialRevision();
     $comments = id(new DifferentialCommentQuery())
-      ->withRevisionIDs(array($diff_rev->getID()))
+      ->withRevisionPHIDs(array($diff_rev->getPHID()))
       ->execute();
 
     $counts = array();

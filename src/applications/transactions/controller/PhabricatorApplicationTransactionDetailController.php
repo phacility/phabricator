@@ -11,23 +11,40 @@ final class PhabricatorApplicationTransactionDetailController
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
     $xaction = id(new PhabricatorObjectQuery())
       ->withPHIDs(array($this->phid))
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->executeOne();
-
     if (!$xaction) {
-      // future proofing for the day visibility of transactions can change
       return new Aphront404Response();
     }
 
-    return id(new PhabricatorApplicationTransactionResponse())
-      ->setViewer($user)
-      ->setTransactions(array($xaction))
-      ->setIsDetailView(true)
-      ->setAnchorOffset($request->getStr('anchor'));
+    $details = $xaction->renderChangeDetails($viewer);
+
+    // Take an educated guess at the URI where the transactions appear so we
+    // can send the cancel button somewhere sensible. This won't always get the
+    // best answer (for example, Diffusion's history is visible on a page other
+    // than the main object view page) but should always get a reasonable one.
+
+    $cancel_uri = '/';
+    $handle = id(new PhabricatorHandleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($xaction->getObjectPHID()))
+      ->executeOne();
+    if ($handle) {
+      $cancel_uri = $handle->getURI();
+    }
+
+    $dialog = id(new AphrontDialogView())
+      ->setUser($viewer)
+      ->setTitle(pht('Change Details'))
+      ->setWidth(AphrontDialogView::WIDTH_FULL)
+      ->appendChild($details)
+      ->addCancelButton($cancel_uri);
+
+    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
 }

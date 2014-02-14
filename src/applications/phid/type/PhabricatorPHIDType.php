@@ -9,6 +9,10 @@ abstract class PhabricatorPHIDType {
     return null;
   }
 
+  public function getTypeIcon() {
+    return null;
+  }
+
   /**
    * Build a @{class:PhabricatorPolicyAwareQuery} to load objects of this type
    * by PHID.

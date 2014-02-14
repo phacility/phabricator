@@ -561,8 +561,14 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
       ->setRevision($revision);
 
     if ($this->contentSource) {
-      $template->setContentSource($this->contentSource);
+      $content_source = $this->contentSource;
+    } else {
+      $content_source = PhabricatorContentSource::newForSource(
+        PhabricatorContentSource::SOURCE_LEGACY,
+        array());
     }
+
+    $template->setContentSource($content_source);
 
     $comments = array();
 
@@ -624,7 +630,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
 
     // If this edit has comments or inline comments, save a transaction for
     // the comment content.
-    if (strlen($this->message) || $inline_comments) {
+    if (strlen($this->message)) {
       $comments[] = id(clone $template)
         ->setAction(DifferentialAction::ACTION_COMMENT)
         ->setContent((string)$this->message);
@@ -633,8 +639,6 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
     foreach ($comments as $comment) {
       $comment->save();
     }
-
-    $last_comment = last($comments);
 
     $changesets = array();
     if ($inline_comments) {
@@ -646,12 +650,13 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
           $load_ids);
       }
       foreach ($inline_comments as $inline) {
-        // For now, attach inlines to the last comment. We'll eventually give
-        // them their own transactions, but this would be fairly gross during
-        // the storage transition and we'll have to do special thing with these
-        // during migration anyway.
-        $inline->setCommentID($last_comment->getID());
-        $inline->save();
+        $inline_xaction_comment = $inline->getTransactionCommentForSave();
+        $inline_xaction_comment->setRevisionPHID($revision->getPHID());
+
+        $comments[] = id(clone $template)
+          ->setAction(DifferentialTransaction::TYPE_INLINE)
+          ->setProxyComment($inline_xaction_comment)
+          ->save();
       }
     }
 
@@ -702,7 +707,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
 
       // NOTE: Don't use this, it will be removed after ApplicationTransactions.
       // For now, it powers inline comment rendering over the Asana brdige.
-      'temporaryCommentID'   => $last_comment->getID(),
+      'temporaryTransactionPHIDs' => mpull($comments, 'getPHID'),
     );
 
     id(new PhabricatorFeedStoryPublisher())

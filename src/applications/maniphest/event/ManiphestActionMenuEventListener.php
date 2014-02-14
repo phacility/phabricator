@@ -20,8 +20,6 @@ final class ManiphestActionMenuEventListener extends PhabricatorEventListener {
     $actions = null;
     if ($object instanceof PhabricatorUser) {
       $actions = $this->renderUserItems($event);
-    } else if ($object instanceof PhabricatorProject) {
-      $actions = $this->renderProjectItems($event);
     }
 
     $this->addActionMenuItems($event, $actions);

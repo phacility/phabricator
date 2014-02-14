@@ -17,6 +17,13 @@ final class PhabricatorObjectHandle
   private $objectName;
   private $policyFiltered;
 
+  public function getTypeIcon() {
+    if ($this->getPHIDType()) {
+      return $this->getPHIDType()->getTypeIcon();
+    }
+    return null;
+  }
+
   public function setPolicyFiltered($policy_filered) {
     $this->policyFiltered = $policy_filered;
     return $this;

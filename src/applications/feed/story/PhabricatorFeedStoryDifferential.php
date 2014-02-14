@@ -117,6 +117,14 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
         $one_line = pht('%s reopened revision %s',
         $actor_link, $revision_link);
       break;
+      case DifferentialTransaction::TYPE_INLINE:
+        $one_line = pht('%s added inline comments to %s',
+        $actor_link, $revision_link);
+      break;
+      default:
+        $one_line = pht('%s edited %s',
+        $actor_link, $revision_link);
+      break;
     }
 
     return $one_line;
@@ -200,6 +208,14 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
         $one_line = pht('%s reopened revision %s %s',
           $author_name, $revision_title, $revision_uri);
       break;
+      case DifferentialTransaction::TYPE_INLINE:
+        $one_line = pht('%s added inline comments to %s %s',
+          $author_name, $revision_title, $revision_uri);
+        break;
+      default:
+        $one_line = pht('%s edited %s %s',
+          $author_name, $revision_title, $revision_uri);
+        break;
     }
 
     return $one_line;
@@ -308,6 +324,14 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
           $title = pht('%s reopened revision %s',
           $author_name, $revision_name);
         break;
+        case DifferentialTransaction::TYPE_INLINE:
+          $title = pht('%s added inline comments to %s',
+          $author_name, $revision_name);
+        break;
+        default:
+          $title = pht('%s edited revision %s',
+          $author_name, $revision_name);
+        break;
       }
     }
 
@@ -319,28 +343,41 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
     }
 
     // Roughly render inlines into the comment.
-    $comment_id = $data->getValue('temporaryCommentID');
-    if ($comment_id) {
-      $inlines = id(new DifferentialInlineCommentQuery())
-        ->withCommentIDs(array($comment_id))
+    $xaction_phids = $data->getValue('temporaryTransactionPHIDs');
+    if ($xaction_phids) {
+      $inlines = id(new DifferentialTransactionQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withPHIDs($xaction_phids)
+        ->needComments(true)
+        ->withTransactionTypes(
+          array(
+            DifferentialTransaction::TYPE_INLINE,
+          ))
         ->execute();
       if ($inlines) {
         $title .= "\n\n";
         $title .= pht('Inline Comments');
         $title .= "\n";
-        $changeset_ids = mpull($inlines, 'getChangesetID');
+
+        $changeset_ids = array();
+        foreach ($inlines as $inline) {
+          $changeset_ids[] = $inline->getComment()->getChangesetID();
+        }
+
         $changesets = id(new DifferentialChangeset())->loadAllWhere(
           'id IN (%Ld)',
           $changeset_ids);
+
         foreach ($inlines as $inline) {
-          $changeset = idx($changesets, $inline->getChangesetID());
+          $comment = $inline->getComment();
+          $changeset = idx($changesets, $comment->getChangesetID());
           if (!$changeset) {
             continue;
           }
 
           $filename = $changeset->getDisplayFilename();
-          $linenumber = $inline->getLineNumber();
-          $inline_text = $engine->markupText($inline->getContent());
+          $linenumber = $comment->getLineNumber();
+          $inline_text = $engine->markupText($comment->getContent());
           $inline_text = rtrim($inline_text);
 
           $title .= "{$filename}:{$linenumber} {$inline_text}\n";

@@ -550,6 +550,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $project_phids = $task->getProjectPHIDs();
     if ($project_phids) {
+      require_celerity_resource('maniphest-task-summary-css');
+
       // If we end up with real-world projects with many hundreds of columns, it
       // might be better to just load all the edges, then load those columns and
       // work backward that way, or denormalize this data more.
@@ -582,9 +584,23 @@ final class ManiphestTaskDetailController extends ManiphestController {
         $columns = idx($column_groups, $project_phid, array());
         $column = head(array_intersect_key($columns, $in_column_phids));
         if ($column) {
-          if (!$column->isDefaultColumn()) {
-            $row[] = pht(' (%s)', $column->getDisplayName());
-          }
+          $column_name = pht('(%s)', $column->getDisplayName());
+          // TODO: This is really hacky but there's no cleaner way to do it
+          // right now, T4022 should give us better tools for this.
+          $column_href = str_replace(
+            'project/view',
+            'project/board',
+            $handle->getURI());
+          $column_link = phutil_tag(
+            'a',
+            array(
+              'href' => $column_href,
+              'class' => 'maniphest-board-link',
+            ),
+            $column_name);
+
+          $row[] = ' ';
+          $row[] = $column_link;
         }
 
         $project_rows[] = phutil_tag('div', array(), $row);

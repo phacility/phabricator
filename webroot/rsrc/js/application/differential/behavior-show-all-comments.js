@@ -1,59 +1,66 @@
 /**
- * @provides javelin-behavior-differential-show-all-comments
+ * @provides javelin-behavior-phabricator-show-all-transactions
  * @requires javelin-behavior
  *           javelin-stratcom
  *           javelin-dom
  */
 
-JX.behavior('differential-show-all-comments', function(config) {
+/**
+ * Automatically show older transactions if the user follows an anchor to a
+ * transaction which is hidden by the "N older changes are hidden." shield.
+ */
+JX.behavior('phabricator-show-all-transactions', function(config) {
 
-  var shown = false;
-  function reveal(node) {
-    if (shown) {
+  var revealed = false;
+
+  function get_hash() {
+    return window.location.hash.replace(/^#/, '');
+  }
+
+  function hash_is_hidden() {
+    var hash = get_hash();
+    for (var ii = 0; ii < config.anchors.length; ii++) {
+      if (config.anchors[ii] == hash) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function reveal() {
+    if (revealed) {
       return false;
     }
-    shown = true;
-    node = node || JX.DOM.find(
-      document.body,
-      'div',
-      'differential-all-comments-container');
-    if (node) {
-      JX.DOM.setContent(node, JX.$H(config.markup));
-    }
+
+    JX.DOM.hide(JX.$(config.hideID));
+    JX.DOM.show(JX.$(config.showID));
+    revealed = true;
+
     return true;
   }
 
-  // Reveal the hidden comments if the user clicks "Show All Comments", or if
-  // there's an anchor in the URL, since we don't want to link to "#comment-3"
-  // and have it collapsed.
-
-  function at_comment_hash() {
-    return window.location.hash && window.location.hash.match(/comment/);
-  }
-
-  if (at_comment_hash()) {
-    reveal();
-  } else {
-    JX.Stratcom.listen(
-      'hashchange',
-      null,
-      function(e) {
-        if (at_comment_hash() && reveal()) {
-          try {
-            var target = JX.$(window.location.hash.replace(/^#/, ''));
-            window.scrollTo(0, target.offsetTop);
-          } catch (ex) {
-          }
+  function check_hash() {
+    if (hash_is_hidden()) {
+      if (reveal()) {
+        try {
+          var target = JX.$(get_hash());
+          JX.DOM.scrollTo(target);
+        } catch (ignored) {
+          // We did our best.
         }
-      });
+      }
+    }
   }
 
-  JX.Stratcom.listen(
+  JX.DOM.listen(
+    JX.$(config.linkID),
     'click',
-    'differential-show-all-comments',
-    function(e) {
-      reveal(e.getNode('differential-all-comments-container'));
+    null,
+    function (e) {
       e.kill();
+      reveal();
     });
 
+  JX.Stratcom.listen('hashchange', null, check_hash);
+  check_hash();
 });

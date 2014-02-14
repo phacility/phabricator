@@ -81,3 +81,7 @@
 .device-phone .maniphest-list-container {
   padding: 20px 4px;
 }
+
+.maniphest-board-link {
+  color: {$bluetext};
+}

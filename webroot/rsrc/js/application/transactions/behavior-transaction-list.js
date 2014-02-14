@@ -109,11 +109,40 @@ JX.behavior('phabricator-transaction-list', function(config) {
 
           var e = JX.DOM.invoke(form, 'willClear');
           if (!e.getPrevented()) {
-            form.reset();
+            var ii;
+            var textareas = JX.DOM.scry(form, 'textarea');
+            for (ii = 0; ii < textareas.length; ii++) {
+              textareas[ii].value = '';
+            }
+
+            var inputs = JX.DOM.scry(form, 'input');
+            for (ii = 0; ii < inputs.length; ii++) {
+            switch (inputs[ii].type) {
+              case 'password':
+              case 'text':
+                inputs[ii].value = '';
+                break;
+              case 'checkbox':
+              case 'radio':
+                inputs[ii].checked = false;
+                break;
+              }
+            }
+
+            var selects = JX.DOM.scry(form, 'select');
+            var jj;
+            for (ii = 0; ii < selects.length; ii++) {
+              if (selects[ii].type == 'select-one') {
+                selects[ii].selectedIndex = 0;
+              } else {
+               for (jj = 0; jj < selects[ii].options.length; jj++) {
+                 selects[ii].options[jj].selected = false;
+               }
+              }
+            }
           }
         })
         .start();
 
     });
-
 });
