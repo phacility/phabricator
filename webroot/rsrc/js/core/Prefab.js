@@ -99,6 +99,16 @@ JX.install('Prefab', {
             return priority_hits[v.id] ? 1 : -1;
           }
 
+          // Sort users ahead of other result types.
+          if (u.priorityType != v.priorityType) {
+            if (u.priorityType == 'user') {
+              return -1;
+            }
+            if (v.priorityType == 'user') {
+              return 1;
+            }
+          }
+
           return cmp(u, v);
         });
       };
@@ -111,7 +121,9 @@ JX.install('Prefab', {
             display: object[0],
             uri: object[1],
             id: object[2],
-            priority: object[3]
+            priority: object[3],
+            priorityType: object[7],
+            icon: object[8]
           };
         });
 
@@ -122,6 +134,24 @@ JX.install('Prefab', {
 
       var tokenizer = new JX.Tokenizer(root);
       tokenizer.setTypeahead(typeahead);
+      tokenizer.setRenderTokenCallback(function(value, key) {
+        var icon = datasource.getResult(key);
+        if (icon) {
+          icon = icon.icon;
+        } else {
+          icon = config.icons[key];
+        }
+
+        if (!icon) {
+          return value;
+        }
+
+        icon = JX.$N(
+          'span',
+          {className: 'phui-icon-view sprite-status status-' + icon});
+
+        return [icon, value];
+      });
 
       if (config.placeholder) {
         tokenizer.setPlaceholder(config.placeholder);

@@ -12,6 +12,10 @@ final class PhabricatorPeoplePHIDTypeUser extends PhabricatorPHIDType {
     return pht('Phabricator User');
   }
 
+  public function getTypeIcon() {
+    return 'policy-all';
+  }
+
   public function newObject() {
     return new PhabricatorUser();
   }

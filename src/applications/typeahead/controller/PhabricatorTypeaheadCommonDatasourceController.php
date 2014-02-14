@@ -208,7 +208,9 @@ final class PhabricatorTypeaheadCommonDatasourceController
           ->setName($user->getFullName())
           ->setURI('/p/'.$user->getUsername())
           ->setPHID($user->getPHID())
-          ->setPriorityString($user->getUsername());
+          ->setPriorityString($user->getUsername())
+          ->setIcon('policy-all')
+          ->setPriorityType('user');
 
         if ($need_rich_data) {
           $display_type = 'User';
@@ -217,7 +219,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
           }
           $result->setDisplayType($display_type);
           $result->setImageURI($handles[$user->getPHID()]->getImageURI());
-          $result->setPriorityType('user');
         }
         $results[] = $result;
       }
@@ -292,7 +293,8 @@ final class PhabricatorTypeaheadCommonDatasourceController
           ->setName($proj->getName())
           ->setDisplayType("Project")
           ->setURI('/project/view/'.$proj->getID().'/')
-          ->setPHID($proj->getPHID());
+          ->setPHID($proj->getPHID())
+          ->setIcon('policy-project');
 
         $proj_result->setImageURI($proj->getProfileImageURI());
 

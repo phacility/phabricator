@@ -74,3 +74,13 @@ a.jx-tokenizer-token:hover {
   text-decoration: none;
   background: #bbcef1;
 }
+
+.jx-tokenizer-token .phui-icon-view {
+  display: inline-block;
+  margin: 2px 4px -2px 0;
+}
+
+.tokenizer-result-type {
+  margin-left: 4px;
+  color: {$lightgreytext};
+}

@@ -10,6 +10,12 @@ final class PhabricatorTypeaheadResult {
   private $displayType;
   private $imageURI;
   private $priorityType;
+  private $icon;
+
+  public function setIcon($icon) {
+    $this->icon = $icon;
+    return $this;
+  }
 
   public function setName($name) {
     $this->name = $name;
@@ -61,6 +67,7 @@ final class PhabricatorTypeaheadResult {
       $this->displayType,
       $this->imageURI ? (string)$this->imageURI : null,
       $this->priorityType,
+      $this->icon,
     );
     while (end($data) === null) {
       array_pop($data);
