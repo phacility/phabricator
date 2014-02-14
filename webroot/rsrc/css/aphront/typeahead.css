@@ -47,3 +47,21 @@ table.jx-typeahead input {
 input.jx-typeahead-placeholder {
   color: {$lightgreytext};
 }
+
+.jx-typeahead-waiting-indicator {
+  position: absolute;
+  right: 8px;
+  top: 2px;
+  width: 24px;
+  height: 24px;
+  background-image: url(/rsrc/image/loading/tokenizer_loading.gif);
+  display: none;
+}
+
+.jx-typeahead-waiting .jx-typeahead-waiting-indicator {
+  display: inline-block;
+}
+
+div.jx-tokenizer-container-focused.jx-typeahead-waiting {
+  border-color: {$lightblueborder};
+}

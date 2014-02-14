@@ -124,6 +124,7 @@ JX.install('Typeahead', {
     _datasource : null,
     _waitingListener : null,
     _readyListener : null,
+    _completeListener : null,
 
     /**
      * Activate your properly configured typeahead. It won't do anything until
@@ -160,15 +161,20 @@ JX.install('Typeahead', {
         this._datasource.unbindFromTypeahead();
         this._waitingListener.remove();
         this._readyListener.remove();
+        this._completeListener.remove();
       }
       this._waitingListener = datasource.listen(
         'waiting',
-        JX.bind(this, this.waitForResults)
-      );
+        JX.bind(this, this.waitForResults));
+
       this._readyListener = datasource.listen(
         'resultsready',
-        JX.bind(this, this.showResults)
-      );
+        JX.bind(this, this.showResults));
+
+      this._completeListener = datasource.listen(
+        'complete',
+        JX.bind(this, this.doneWaitingForResults));
+
       datasource.bindToTypeahead(this);
       this._datasource = datasource;
     },
@@ -187,6 +193,19 @@ JX.install('Typeahead', {
      */
     setInputNode : function(input) {
       this._control = input;
+      return this;
+    },
+
+    /**
+     * Add an arbitrary node to the UI. Phabricator uses this to add a
+     * "waiting" graphic.
+     *
+     * @param node An arbitrary display node for the UI.
+     * @return this
+     * @task config
+     */
+    addUINode : function(node) {
+      JX.DOM.appendContent(this._hardpoint, node);
       return this;
     },
 
@@ -247,18 +266,27 @@ JX.install('Typeahead', {
       this._value = this._control.value;
       this.invoke('change', this._value);
     },
+
     /**
-     * Show a "waiting for results" UI in place of the typeahead's dropdown
-     * suggestion menu. NOTE: currently there's no such UI, lolol.
+     * Show a "waiting for results" UI. We may be showing a partial result set
+     * at this time, if the user is extending a query we already have results
+     * for.
      *
      * @task control
      * @return void
      */
     waitForResults : function() {
-      // TODO: Build some sort of fancy spinner or "..." type UI here to
-      // visually indicate that we're waiting on the server.
-      // Wait on the datasource 'complete' event for hiding the spinner.
-      this.hide();
+      JX.DOM.alterClass(this._hardpoint, 'jx-typeahead-waiting', true);
+    },
+
+    /**
+     * Hide the "waiting for results" UI.
+     *
+     * @task control
+     * @return void
+     */
+    doneWaitingForResults : function() {
+      JX.DOM.alterClass(this._hardpoint, 'jx-typeahead-waiting', false);
     },
 
     /**

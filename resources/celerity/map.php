@@ -7,14 +7,14 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => '044c2f0c',
-    'core.pkg.js' => '0dc59a05',
+    'core.pkg.css' => '1ccefdc6',
+    'core.pkg.js' => 'ee746639',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => '6aef439e',
     'differential.pkg.js' => '322ea941',
     'diffusion.pkg.css' => '3783278d',
     'diffusion.pkg.js' => '7b51e80a',
-    'javelin.pkg.js' => '896bb02e',
+    'javelin.pkg.js' => 'da52b0df',
     'maniphest.pkg.css' => 'f1887d71',
     'maniphest.pkg.js' => '1e8f11af',
     'rsrc/css/aphront/aphront-bars.css' => '231ac33c',
@@ -37,7 +37,7 @@ return array(
     'rsrc/css/aphront/tooltip.css' => '9c90229d',
     'rsrc/css/aphront/transaction.css' => 'ce491938',
     'rsrc/css/aphront/two-column.css' => '16ab3ad2',
-    'rsrc/css/aphront/typeahead.css' => '104a6525',
+    'rsrc/css/aphront/typeahead.css' => 'd24b4228',
     'rsrc/css/application/auth/auth.css' => '1e655982',
     'rsrc/css/application/base/main-menu-view.css' => 'd36e0c11',
     'rsrc/css/application/base/notification-menu.css' => 'fc9a363c',
@@ -207,13 +207,13 @@ return array(
     'rsrc/externals/javelin/lib/__tests__/URI.js' => 'ece3ddb3',
     'rsrc/externals/javelin/lib/__tests__/behavior.js' => 'c1d75ee6',
     'rsrc/externals/javelin/lib/behavior.js' => '8a3ed18b',
-    'rsrc/externals/javelin/lib/control/tokenizer/Tokenizer.js' => 'e7c21fb3',
-    'rsrc/externals/javelin/lib/control/typeahead/Typeahead.js' => 'c22f4c01',
+    'rsrc/externals/javelin/lib/control/tokenizer/Tokenizer.js' => '1c1a6cdf',
+    'rsrc/externals/javelin/lib/control/typeahead/Typeahead.js' => 'd99e27f7',
     'rsrc/externals/javelin/lib/control/typeahead/normalizer/TypeaheadNormalizer.js' => '5f850b5c',
     'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadCompositeSource.js' => 'dbd9cd11',
-    'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadOnDemandSource.js' => '1f595fb0',
+    'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadOnDemandSource.js' => '7383383f',
     'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadPreloadedSource.js' => 'e9b95df3',
-    'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadSource.js' => 'f4412299',
+    'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadSource.js' => '74fe50ac',
     'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadStaticSource.js' => 'c2b8bf64',
     'rsrc/externals/raphael/g.raphael.js' => '40dde778',
     'rsrc/externals/raphael/g.raphael.line.js' => '40da039e',
@@ -287,6 +287,7 @@ return array(
     'rsrc/image/loading/loading_48.gif' => '6a4994c7',
     'rsrc/image/loading/loading_d48.gif' => 'cdcbe900',
     'rsrc/image/loading/loading_w24.gif' => '7662fa2b',
+    'rsrc/image/loading/tokenizer_loading.gif' => '93622511',
     'rsrc/image/main_texture.png' => '29a2c5ad',
     'rsrc/image/menu_texture.png' => '5a17580d',
     'rsrc/image/people/harding.png' => '45aa614e',
@@ -431,7 +432,7 @@ return array(
     'rsrc/js/core/KeyboardShortcutManager.js' => 'ad7a69ca',
     'rsrc/js/core/MultirowRowManager.js' => 'e7076916',
     'rsrc/js/core/Notification.js' => '95944043',
-    'rsrc/js/core/Prefab.js' => '979f864d',
+    'rsrc/js/core/Prefab.js' => '83ee580c',
     'rsrc/js/core/ShapedRequest.js' => 'dfa181a4',
     'rsrc/js/core/TextAreaUtils.js' => 'b3ec3cfc',
     'rsrc/js/core/ToolTip.js' => '0a81ea29',
@@ -492,7 +493,7 @@ return array(
     'aphront-tokenizer-control-css' => '08ea6326',
     'aphront-tooltip-css' => '9c90229d',
     'aphront-two-column-view-css' => '16ab3ad2',
-    'aphront-typeahead-control-css' => '104a6525',
+    'aphront-typeahead-control-css' => 'd24b4228',
     'auth-css' => '1e655982',
     'config-options-css' => '7fedf08b',
     'conpherence-menu-css' => '561348ac',
@@ -641,13 +642,13 @@ return array(
     'javelin-request' => '23f9bb8d',
     'javelin-resource' => '356de121',
     'javelin-stratcom' => 'c293f7b9',
-    'javelin-tokenizer' => 'e7c21fb3',
-    'javelin-typeahead' => 'c22f4c01',
+    'javelin-tokenizer' => '1c1a6cdf',
+    'javelin-typeahead' => 'd99e27f7',
     'javelin-typeahead-composite-source' => 'dbd9cd11',
     'javelin-typeahead-normalizer' => '5f850b5c',
-    'javelin-typeahead-ondemand-source' => '1f595fb0',
+    'javelin-typeahead-ondemand-source' => '7383383f',
     'javelin-typeahead-preloaded-source' => 'e9b95df3',
-    'javelin-typeahead-source' => 'f4412299',
+    'javelin-typeahead-source' => '74fe50ac',
     'javelin-typeahead-static-source' => 'c2b8bf64',
     'javelin-uri' => 'd9a9b862',
     'javelin-util' => '7501647b',
@@ -701,7 +702,7 @@ return array(
     'phabricator-object-list-view-css' => '1a1ea560',
     'phabricator-object-selector-css' => '029a133d',
     'phabricator-phtize' => 'd254d646',
-    'phabricator-prefab' => '979f864d',
+    'phabricator-prefab' => '83ee580c',
     'phabricator-profile-css' => '3a7e04ca',
     'phabricator-project-tag-css' => '095c9404',
     'phabricator-remarkup-css' => 'ca7f2265',
@@ -909,6 +910,13 @@ return array(
       4 => 'javelin-workflow',
       5 => 'phabricator-draggable-list',
     ),
+    '1c1a6cdf' =>
+    array(
+      0 => 'javelin-dom',
+      1 => 'javelin-util',
+      2 => 'javelin-stratcom',
+      3 => 'javelin-install',
+    ),
     '1e1c8a59' =>
     array(
       0 => 'javelin-behavior',
@@ -927,13 +935,6 @@ return array(
       4 => 'phabricator-phtize',
       5 => 'phabricator-drag-and-drop-file-upload',
       6 => 'phabricator-draggable-list',
-    ),
-    '1f595fb0' =>
-    array(
-      0 => 'javelin-install',
-      1 => 'javelin-util',
-      2 => 'javelin-request',
-      3 => 'javelin-typeahead-source',
     ),
     '2290aeef' =>
     array(
@@ -1226,6 +1227,20 @@ return array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
     ),
+    '7383383f' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
+      2 => 'javelin-request',
+      3 => 'javelin-typeahead-source',
+    ),
+    '74fe50ac' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
+      2 => 'javelin-dom',
+      3 => 'javelin-typeahead-normalizer',
+    ),
     '75e50c72' =>
     array(
       0 => 'javelin-behavior',
@@ -1292,6 +1307,19 @@ return array(
       0 => 'javelin-install',
       1 => 'javelin-dom',
       2 => 'javelin-reactor-dom',
+    ),
+    '83ee580c' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
+      2 => 'javelin-dom',
+      3 => 'javelin-typeahead',
+      4 => 'javelin-tokenizer',
+      5 => 'javelin-typeahead-preloaded-source',
+      6 => 'javelin-typeahead-ondemand-source',
+      7 => 'javelin-dom',
+      8 => 'javelin-stratcom',
+      9 => 'javelin-util',
     ),
     '8454ce4f' =>
     array(
@@ -1397,19 +1425,6 @@ return array(
       1 => 'javelin-dom',
       2 => 'javelin-view-visitor',
       3 => 'javelin-util',
-    ),
-    '979f864d' =>
-    array(
-      0 => 'javelin-install',
-      1 => 'javelin-util',
-      2 => 'javelin-dom',
-      3 => 'javelin-typeahead',
-      4 => 'javelin-tokenizer',
-      5 => 'javelin-typeahead-preloaded-source',
-      6 => 'javelin-typeahead-ondemand-source',
-      7 => 'javelin-dom',
-      8 => 'javelin-stratcom',
-      9 => 'javelin-util',
     ),
     '9b9197be' =>
     array(
@@ -1604,13 +1619,6 @@ return array(
       5 => 'javelin-workflow',
       6 => 'javelin-vector',
     ),
-    'c22f4c01' =>
-    array(
-      0 => 'javelin-install',
-      1 => 'javelin-dom',
-      2 => 'javelin-vector',
-      3 => 'javelin-util',
-    ),
     'c293f7b9' =>
     array(
       0 => 'javelin-install',
@@ -1752,6 +1760,13 @@ return array(
       7 => 'phabricator-dropdown-menu',
       8 => 'phabricator-menu-item',
     ),
+    'd99e27f7' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-dom',
+      2 => 'javelin-vector',
+      3 => 'javelin-util',
+    ),
     'd9a9b862' =>
     array(
       0 => 'javelin-install',
@@ -1815,13 +1830,6 @@ return array(
       2 => 'javelin-dom',
       3 => 'javelin-util',
     ),
-    'e7c21fb3' =>
-    array(
-      0 => 'javelin-dom',
-      1 => 'javelin-util',
-      2 => 'javelin-stratcom',
-      3 => 'javelin-install',
-    ),
     'e9b95df3' =>
     array(
       0 => 'javelin-install',
@@ -1873,13 +1881,6 @@ return array(
       1 => 'javelin-behavior',
       2 => 'javelin-vector',
       3 => 'javelin-dom',
-    ),
-    'f4412299' =>
-    array(
-      0 => 'javelin-install',
-      1 => 'javelin-util',
-      2 => 'javelin-dom',
-      3 => 'javelin-typeahead-normalizer',
     ),
     'f6b56f7a' =>
     array(

@@ -36,6 +36,7 @@
 JX.install('Tokenizer', {
   construct : function(containerNode) {
     this._containerNode = containerNode;
+    this._uiNodes = [];
   },
 
   events : [
@@ -63,6 +64,7 @@ JX.install('Tokenizer', {
     _seq : 0,
     _lastvalue : null,
     _placeholder : null,
+    _uinodes : null,
 
     start : function() {
       if (__DEV__) {
@@ -124,6 +126,7 @@ JX.install('Tokenizer', {
       this._root = root;
 
       root.appendChild(focus);
+      JX.DOM.appendContent(root, this._uiNodes);
 
       var typeahead = this._typeahead;
       typeahead.setInputNode(this._focus);
@@ -229,6 +232,12 @@ JX.install('Tokenizer', {
 
     refresh : function() {
       this._redraw(true);
+      return this;
+    },
+
+    addUINode : function(node) {
+      this._uiNodes.push(node);
+      this._typeahead.addUINode(node);
       return this;
     },
 

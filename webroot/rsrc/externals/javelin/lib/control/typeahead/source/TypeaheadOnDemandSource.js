@@ -48,6 +48,19 @@ JX.install('TypeaheadOnDemandSource', {
       if (this.haveData[value]) {
         this.matchResults(value);
       } else {
+        // If we have data for any prefix of the query, send those results
+        // back immediately. This allows "alinc" -> "alinco" to show partial
+        // results without the UI flickering. We'll still show the loading
+        // state, and then can show better results once we get everything
+        // back.
+        for (var ii = value.length - 1; ii > 0; ii--) {
+          var substr = value.substring(0, ii);
+          if (this.haveData[substr]) {
+            this.matchResults(value, false);
+            break;
+          }
+        }
+
         this.waitForResults();
         setTimeout(
           JX.bind(this, this.sendRequest, this.lastChange, value, raw_value),

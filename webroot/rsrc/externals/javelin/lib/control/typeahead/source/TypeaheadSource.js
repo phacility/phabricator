@@ -211,7 +211,7 @@ JX.install('TypeaheadSource', {
     },
 
 
-    matchResults : function(value) {
+    matchResults : function(value, partial) {
 
       // This table keeps track of the number of tokens each potential match
       // has actually matched. When we're done, the real matches are those
@@ -279,7 +279,9 @@ JX.install('TypeaheadSource', {
 
       var nodes = this.renderNodes(value, hits);
       this.invoke('resultsready', nodes);
-      this.invoke('complete');
+      if (!partial) {
+        this.invoke('complete');
+      }
     },
 
     sortHits : function(value, hits) {
