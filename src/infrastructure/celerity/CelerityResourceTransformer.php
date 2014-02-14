@@ -129,7 +129,14 @@ final class CelerityResourceTransformer {
       if ($this->celerityMap) {
         $resource_uri = $this->celerityMap->getURIForName($alternative);
         if ($resource_uri) {
-          $uri = $resource_uri;
+          // Check if we can use a data URI for this resource. If not, just
+          // use a normal Celerity URI.
+          $data_uri = $this->generateDataURI($alternative);
+          if ($data_uri) {
+            $uri = $data_uri;
+          } else {
+            $uri = $resource_uri;
+          }
           break;
         }
       }
@@ -226,4 +233,51 @@ final class CelerityResourceTransformer {
 
     return implode("\n\n", $rules);
   }
+
+
+  /**
+   * Attempt to generate a data URI for a resource. We'll generate a data URI
+   * if the resource is a valid resource of an appropriate type, and is
+   * small enough. Otherwise, this method will return `null` and we'll end up
+   * using a normal URI instead.
+   *
+   * @param string  Resource name to attempt to generate a data URI for.
+   * @return string|null Data URI, or null if we declined to generate one.
+   */
+  private function generateDataURI($resource_name) {
+
+    $ext = last(explode('.', $resource_name));
+    switch ($ext) {
+      case 'png':
+        $type = 'image/png';
+        break;
+      case 'gif':
+        $type = 'image/gif';
+        break;
+      case 'jpg':
+        $type = 'image/jpeg';
+        break;
+      default:
+        return null;
+    }
+
+    // In IE8, 32KB is the maximum supported URI length.
+    $maximum_data_size = (1024 * 32);
+
+    $data = $this->celerityMap->getResourceDataForName($resource_name);
+    if (strlen($data) >= $maximum_data_size) {
+      // If the data is already too large on its own, just bail before
+      // encoding it.
+      return null;
+    }
+
+    $uri = 'data:'.$type.';base64,'.base64_encode($data);
+    if (strlen($uri) >= $maximum_data_size) {
+      return null;
+    }
+
+    return $uri;
+  }
+
+
 }
