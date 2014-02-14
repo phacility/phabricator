@@ -28,7 +28,6 @@ final class PhabricatorProjectSearchIndexer
       PhabricatorProjectPHIDTypeProject::TYPECONST,
       time());
 
-
     // NOTE: This could be more full-featured, but for now we're mostly
     // interested in the side effects of indexing.
 
