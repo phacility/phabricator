@@ -826,6 +826,11 @@ abstract class PhabricatorBaseEnglishTranslation
         'users will need to sign again. Proceed carefully.',
       ),
 
+      '%s older changes(s) are hidden.' => array(
+        '%d older change is hidden.',
+        '%d older changes are hidden.',
+      ),
+
     );
   }
 

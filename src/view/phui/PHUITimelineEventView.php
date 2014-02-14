@@ -15,6 +15,16 @@ final class PHUITimelineEventView extends AphrontView {
   private $transactionPHID;
   private $isPreview;
   private $eventGroup = array();
+  private $hideByDefault;
+
+  public function setHideByDefault($hide_by_default) {
+    $this->hideByDefault = $hide_by_default;
+    return $this;
+  }
+
+  public function getHideByDefault() {
+    return $this->hideByDefault;
+  }
 
   public function setTransactionPHID($transaction_phid) {
     $this->transactionPHID = $transaction_phid;
@@ -78,6 +88,10 @@ final class PHUITimelineEventView extends AphrontView {
   public function setAnchor($anchor) {
     $this->anchor = $anchor;
     return $this;
+  }
+
+  public function getAnchor() {
+    return $this->anchor;
   }
 
   public function setTitle($title) {

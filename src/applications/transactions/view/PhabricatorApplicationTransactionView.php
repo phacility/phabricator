@@ -51,7 +51,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     return $this;
   }
 
-  public function buildEvents() {
+  public function buildEvents($with_hiding = false) {
     $user = $this->getUser();
 
     $anchor = $this->anchorOffset;
@@ -62,11 +62,50 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     $xactions = $this->groupRelatedTransactions($xactions);
     $groups = $this->groupDisplayTransactions($xactions);
 
+    // If the viewer has interacted with this object, we hide things from
+    // before their most recent interaction by default. This tends to make
+    // very long threads much more manageable, because you don't have to
+    // scroll through a lot of history and can focus on just new stuff.
+
+    $show_group = null;
+
+    if ($with_hiding) {
+      // Find the most recent comment by the viewer.
+      $group_keys = array_keys($groups);
+      $group_keys = array_reverse($group_keys);
+
+      // If we would only hide a small number of transactions, don't hide
+      // anything. Just don't examine the last few keys. Also, we always
+      // want to show the most recent pieces of activity, so don't examine
+      // the first few keys either.
+      $group_keys = array_slice($group_keys, 2, -2);
+
+      $type_comment = PhabricatorTransactions::TYPE_COMMENT;
+      foreach ($group_keys as $group_key) {
+        $group = $groups[$group_key];
+        foreach ($group as $xaction) {
+          if ($xaction->getAuthorPHID() == $user->getPHID() &&
+              $xaction->getTransactionType() == $type_comment) {
+            // This is the most recent group where the user commented.
+            $show_group = $group_key;
+            break 2;
+          }
+        }
+      }
+    }
+
     $events = array();
-    foreach ($groups as $group) {
+    $hide_by_default = ($show_group !== null);
+
+    foreach ($groups as $group_key => $group) {
+      if ($hide_by_default && ($show_group === $group_key)) {
+        $hide_by_default = false;
+      }
+
       $group_event = null;
       foreach ($group as $xaction) {
         $event = $this->renderEvent($xaction, $group, $anchor);
+        $event->setHideByDefault($hide_by_default);
         $anchor++;
         if (!$group_event) {
           $group_event = $event;
@@ -75,6 +114,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
         }
       }
       $events[] = $group_event;
+
     }
 
     return $events;
@@ -86,7 +126,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     }
 
     $view = new PHUITimelineView();
-    $events = $this->buildEvents();
+    $events = $this->buildEvents($with_hiding = true);
     foreach ($events as $event) {
       $view->addEvent($event);
     }

@@ -260,3 +260,12 @@
   border-color: #efefef;
   border-width: 1px 0;
 }
+
+.phui-timeline-older-transactions-are-hidden {
+  background: {$lightyellow};
+  border: 1px solid {$yellow};
+  text-align: center;
+  padding: 12px;
+  color: {$darkgreytext};
+  margin-top: 16px;
+}
