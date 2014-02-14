@@ -15,7 +15,7 @@ return array(
     'diffusion.pkg.css' => '3783278d',
     'diffusion.pkg.js' => '7b51e80a',
     'javelin.pkg.js' => '6d430a66',
-    'maniphest.pkg.css' => '6944ad50',
+    'maniphest.pkg.css' => 'f1887d71',
     'maniphest.pkg.js' => '1e8f11af',
     'rsrc/css/aphront/aphront-bars.css' => '231ac33c',
     'rsrc/css/aphront/aphront-notes.css' => '6acadd3f',
@@ -78,7 +78,7 @@ return array(
     'rsrc/css/application/maniphest/batch-editor.css' => '78444bc1',
     'rsrc/css/application/maniphest/report.css' => '6fc16517',
     'rsrc/css/application/maniphest/task-edit.css' => '8e23031b',
-    'rsrc/css/application/maniphest/task-summary.css' => '0cabd9a6',
+    'rsrc/css/application/maniphest/task-summary.css' => '6df1a768',
     'rsrc/css/application/objectselector/object-selector.css' => '029a133d',
     'rsrc/css/application/owners/owners-path-editor.css' => '2f00933b',
     'rsrc/css/application/paste/paste.css' => 'aa1767d1',
@@ -407,7 +407,7 @@ return array(
     'rsrc/js/application/search/behavior-reorder-queries.js' => '34397f68',
     'rsrc/js/application/slowvote/behavior-slowvote-embed.js' => 'a51fdb2e',
     'rsrc/js/application/transactions/behavior-transaction-comment-form.js' => '9084a36f',
-    'rsrc/js/application/transactions/behavior-transaction-list.js' => '5e3da3ad',
+    'rsrc/js/application/transactions/behavior-transaction-list.js' => 'bfb45968',
     'rsrc/js/application/uiexample/JavelinViewExample.js' => 'd4a14807',
     'rsrc/js/application/uiexample/ReactorButtonExample.js' => '44524435',
     'rsrc/js/application/uiexample/ReactorCheckboxExample.js' => '7ba325ee',
@@ -600,7 +600,7 @@ return array(
     'javelin-behavior-phabricator-search-typeahead' => 'f6b56f7a',
     'javelin-behavior-phabricator-tooltips' => 'e5dd1c6d',
     'javelin-behavior-phabricator-transaction-comment-form' => '9084a36f',
-    'javelin-behavior-phabricator-transaction-list' => '5e3da3ad',
+    'javelin-behavior-phabricator-transaction-list' => 'bfb45968',
     'javelin-behavior-phabricator-watch-anchor' => '06e05112',
     'javelin-behavior-phame-post-preview' => '61d927ec',
     'javelin-behavior-pholio-mock-edit' => '1e1e8bb0',
@@ -665,7 +665,7 @@ return array(
     'maniphest-batch-editor' => '78444bc1',
     'maniphest-report-css' => '6fc16517',
     'maniphest-task-edit-css' => '8e23031b',
-    'maniphest-task-summary-css' => '0cabd9a6',
+    'maniphest-task-summary-css' => '6df1a768',
     'multirow-row-manager' => 'e7076916',
     'owners-path-editor' => '46efd18e',
     'owners-path-editor-css' => '2f00933b',
@@ -1160,14 +1160,6 @@ return array(
       3 => 'javelin-stratcom',
       4 => 'javelin-vector',
     ),
-    '5e3da3ad' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-stratcom',
-      2 => 'javelin-workflow',
-      3 => 'javelin-dom',
-      4 => 'javelin-fx',
-    ),
     '5f004630' =>
     array(
       0 => 'javelin-behavior',
@@ -1582,6 +1574,14 @@ return array(
       0 => 'javelin-install',
       1 => 'javelin-dom',
       2 => 'javelin-reactor-dom',
+    ),
+    'bfb45968' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-workflow',
+      3 => 'javelin-dom',
+      4 => 'javelin-fx',
     ),
     'c01153ea' =>
     array(
