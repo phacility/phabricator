@@ -87,6 +87,8 @@ final class PHUITimelineView extends AphrontView {
 
     if ($events) {
       $events = array($spacer, $events, $spacer);
+    } else {
+      $events = array($spacer);
     }
 
     return phutil_tag(
