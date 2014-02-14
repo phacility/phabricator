@@ -14,7 +14,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
   }
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $viewer = $request->getUser();
     $query = $request->getStr('q');
