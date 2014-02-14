@@ -260,6 +260,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $comment_view = $this->buildTransactions(
       $revision,
+      $diff_vs ? $diffs[$diff_vs] : $target,
+      $target,
       $all_changesets);
 
     $wrap_id = celerity_generate_unique_node_id();
@@ -931,6 +933,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
   private function buildTransactions(
     DifferentialRevision $revision,
+    DifferentialDiff $left_diff,
+    DifferentialDiff $right_diff,
     array $changesets) {
     $viewer = $this->getRequest()->getUser();
 
@@ -947,6 +951,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setUser($viewer)
       ->setObjectPHID($revision->getPHID())
       ->setChangesets($changesets)
+      ->setRevision($revision)
+      ->setLeftDiff($left_diff)
+      ->setRightDiff($right_diff)
       ->setTransactions($xactions);
 
     // TODO: Make this work and restore edit links. We need to copy

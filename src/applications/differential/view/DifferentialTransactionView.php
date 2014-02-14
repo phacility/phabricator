@@ -4,6 +4,36 @@ final class DifferentialTransactionView
   extends PhabricatorApplicationTransactionView {
 
   private $changesets;
+  private $revision;
+  private $rightDiff;
+  private $leftDiff;
+
+  public function setLeftDiff(DifferentialDiff $left_diff) {
+    $this->leftDiff = $left_diff;
+    return $this;
+  }
+
+  public function getLeftDiff() {
+    return $this->leftDiff;
+  }
+
+  public function setRightDiff(DifferentialDiff $right_diff) {
+    $this->rightDiff = $right_diff;
+    return $this;
+  }
+
+  public function getRightDiff() {
+    return $this->rightDiff;
+  }
+
+  public function setRevision(DifferentialRevision $revision) {
+    $this->revision = $revision;
+    return $this;
+  }
+
+  public function getRevision() {
+    return $this->revision;
+  }
 
   public function setChangesets(array $changesets) {
     assert_instances_of($changesets, 'DifferentialChangeset');
@@ -100,8 +130,8 @@ final class DifferentialTransactionView
         $by_line = array();
         foreach ($group as $inline) {
           $by_line[] = array(
-            'line' => $inline->getComment()->getLineNumber().','.
-                      $inline->getComment()->getLineLength(),
+            'line' => ((int)$inline->getComment()->getLineNumber() << 16) +
+                      ((int)$inline->getComment()->getLineLength()),
             'inline' => $inline,
           );
         }
@@ -119,7 +149,31 @@ final class DifferentialTransactionView
             'content' => parent::renderTransactionContent($inline),
           );
 
-          // TODO: Fix the where/href stuff for nonlocal inlines.
+          $changeset_diff_id = $changeset->getDiffID();
+          if ($comment->getIsNewFile()) {
+            $visible_diff_id = $this->getRightDiff()->getID();
+          } else {
+            $visible_diff_id = $this->getLeftDiff()->getID();
+          }
+
+          // TODO: We still get one edge case wrong here, when we have a
+          // versus diff and the file didn't exist in the old version. The
+          // comment is visible because we show the left side of the target
+          // diff when there's no corresponding file in the versus diff, but
+          // we incorrectly link it off-page.
+
+          $is_visible = ($changeset_diff_id == $visible_diff_id);
+          if (!$is_visible) {
+            $item['where'] = pht('(On Diff #%d)', $changeset_diff_id);
+
+            $revision_id = $this->getRevision()->getID();
+            $comment_id = $comment->getID();
+
+            $item['href'] =
+              "/D".$revision_id.
+              "?id=".$changeset_diff_id.
+              "#inline-".$comment_id;
+          }
 
           $items[] = $item;
         }
