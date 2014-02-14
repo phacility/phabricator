@@ -95,6 +95,24 @@ JX.install('Prefab', {
             return self_hits[v.id] ? 1 : -1;
           }
 
+          // If one result is open and one is closed, show the open result
+          // first. The "!" tricks here are becaused closed values are display
+          // strings, so the value is either `null` or some truthy string. If
+          // we compare the values directly, we'll apply this rule to two
+          // objects which are both closed but for different reasons, like
+          // "Archived" and "Disabled".
+
+          var u_open = !u.closed;
+          var v_open = !v.closed;
+
+          if (u_open != v_open) {
+            if (u_open) {
+              return -1;
+            } else {
+              return 1;
+            }
+          }
+
           if (priority_hits[u.id] != priority_hits[v.id]) {
             return priority_hits[v.id] ? 1 : -1;
           }
@@ -113,17 +131,47 @@ JX.install('Prefab', {
         });
       };
 
+      var render_icon = function(icon) {
+        return JX.$N(
+          'span',
+          {className: 'phui-icon-view sprite-status status-' + icon});
+      };
+
       datasource.setSortHandler(JX.bind(datasource, sort_handler));
       datasource.setTransformer(
         function(object) {
+          var closed = object[9];
+          var closed_ui;
+          if (closed) {
+            closed_ui = JX.$N(
+              'div',
+              {className: 'tokenizer-closed'},
+              closed);
+          }
+
+          var icon = object[8];
+          var icon_ui;
+          if (icon) {
+            icon_ui = render_icon(icon);
+          }
+
+          var display = JX.$N(
+            'div',
+            {className: 'tokenizer-result'},
+            [icon_ui, object[0], closed_ui]);
+          if (closed) {
+            JX.DOM.alterClass(display, 'tokenizer-result-closed', true);
+          }
+
           return {
             name: object[0],
-            display: object[0],
+            display: display,
             uri: object[1],
             id: object[2],
             priority: object[3],
             priorityType: object[7],
-            icon: object[8]
+            icon: icon,
+            closed: closed
           };
         });
 
@@ -146,9 +194,10 @@ JX.install('Prefab', {
           return value;
         }
 
-        icon = JX.$N(
-          'span',
-          {className: 'phui-icon-view sprite-status status-' + icon});
+        icon = render_icon(icon);
+
+        // TODO: Maybe we should render these closed tags in grey? Figure out
+        // how we're going to use color.
 
         return [icon, value];
       });

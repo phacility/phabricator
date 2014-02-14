@@ -11,6 +11,7 @@ final class PhabricatorTypeaheadResult {
   private $imageURI;
   private $priorityType;
   private $icon;
+  private $closed;
 
   public function setIcon($icon) {
     $this->icon = $icon;
@@ -57,6 +58,11 @@ final class PhabricatorTypeaheadResult {
     return $this;
   }
 
+  public function setClosed($closed) {
+    $this->closed = $closed;
+    return $this;
+  }
+
   public function getWireFormat() {
     $data = array(
       $this->name,
@@ -68,6 +74,7 @@ final class PhabricatorTypeaheadResult {
       $this->imageURI ? (string)$this->imageURI : null,
       $this->priorityType,
       $this->icon,
+      $this->closed,
     );
     while (end($data) === null) {
       array_pop($data);

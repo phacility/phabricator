@@ -24,7 +24,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $need_users = false;
     $need_agents = false;
     $need_applications = false;
-    $need_all_users = false;
     $need_lists = false;
     $need_projs = false;
     $need_repos = false;
@@ -56,25 +55,20 @@ final class PhabricatorTypeaheadCommonDatasourceController
         $need_noproject = true;
         break;
       case 'users':
-        $need_users = true;
-        break;
+      case 'accounts':
       case 'authors':
         $need_users = true;
-        $need_agents = true;
         break;
       case 'mailable':
-        $need_users = true;
-        $need_lists = true;
-        break;
       case 'allmailable':
         $need_users = true;
-        $need_all_users = true;
         $need_lists = true;
         break;
       case 'projects':
         $need_projs = true;
         break;
       case 'usersorprojects':
+      case 'accountsorprojects':
         $need_users = true;
         $need_projs = true;
         break;
@@ -83,15 +77,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
         break;
       case 'packages':
         $need_packages = true;
-        break;
-      case 'accounts':
-        $need_users = true;
-        $need_all_users = true;
-        break;
-      case 'accountsorprojects':
-        $need_users = true;
-        $need_all_users = true;
-        $need_projs = true;
         break;
       case 'arcanistprojects':
         $need_arcanist_projects = true;
@@ -195,13 +180,11 @@ final class PhabricatorTypeaheadCommonDatasourceController
       }
 
       foreach ($users as $user) {
-        if (!$need_all_users) {
-          if (!$need_agents && $user->getIsSystemAgent()) {
-            continue;
-          }
-          if ($user->getIsDisabled()) {
-            continue;
-          }
+        $closed = null;
+        if ($user->getIsDisabled()) {
+          $closed = pht('Disabled');
+        } else if ($user->getIsSystemAgent()) {
+          $closed = pht('System Agent');
         }
 
         $result = id(new PhabricatorTypeaheadResult())
@@ -210,7 +193,8 @@ final class PhabricatorTypeaheadCommonDatasourceController
           ->setPHID($user->getPHID())
           ->setPriorityString($user->getUsername())
           ->setIcon('policy-all')
-          ->setPriorityType('user');
+          ->setPriorityType('user')
+          ->setClosed($closed);
 
         if ($need_rich_data) {
           $display_type = 'User';
@@ -285,16 +269,21 @@ final class PhabricatorTypeaheadCommonDatasourceController
     if ($need_projs) {
       $projs = id(new PhabricatorProjectQuery())
         ->setViewer($viewer)
-        ->withStatus(PhabricatorProjectQuery::STATUS_OPEN)
         ->needImages(true)
         ->execute();
       foreach ($projs as $proj) {
+        $closed = null;
+        if ($proj->isArchived()) {
+          $closed = pht('Archived');
+        }
+
         $proj_result = id(new PhabricatorTypeaheadResult())
           ->setName($proj->getName())
           ->setDisplayType("Project")
           ->setURI('/project/view/'.$proj->getID().'/')
           ->setPHID($proj->getPHID())
-          ->setIcon('policy-project');
+          ->setIcon('policy-project')
+          ->setClosed($closed);
 
         $proj_result->setImageURI($proj->getProfileImageURI());
 
