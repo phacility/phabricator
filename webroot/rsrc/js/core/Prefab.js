@@ -58,7 +58,15 @@ JX.install('Prefab', {
       }
 
       var datasource;
-      if (config.ondemand) {
+
+      // Default to an ondemand source if no alternate configuration is
+      // provided.
+      var ondemand = true;
+      if ('ondemand' in config) {
+        ondemand = config.ondemand;
+      }
+
+      if (ondemand) {
         datasource = new JX.TypeaheadOnDemandSource(config.src);
       } else {
         datasource = new JX.TypeaheadPreloadedSource(config.src);

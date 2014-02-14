@@ -178,6 +178,8 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
         'Mail is now always delivered by the daemons.'),
       'auth.sessions.conduit' => $session_reason,
       'auth.sessions.web' => $session_reason,
+      'tokenizer.ondemand' => pht(
+        'Phabricator now manages typeahead strategies automatically.'),
     );
 
     return $ancient_config;

@@ -64,7 +64,6 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
         'value'       => mpull($values, 'getFullName', 'getPHID'),
         'icons'       => mpull($values, 'getTypeIcon', 'getPHID'),
         'limit'       => $this->limit,
-        'ondemand'    => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
         'username'    => $username,
         'placeholder' => $this->placeholder,
       ));

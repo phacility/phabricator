@@ -8,7 +8,7 @@ return array(
   'names' =>
   array(
     'core.pkg.css' => '044c2f0c',
-    'core.pkg.js' => 'ba6e232d',
+    'core.pkg.js' => '0dc59a05',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => '6aef439e',
     'differential.pkg.js' => '322ea941',
@@ -431,7 +431,7 @@ return array(
     'rsrc/js/core/KeyboardShortcutManager.js' => 'ad7a69ca',
     'rsrc/js/core/MultirowRowManager.js' => 'e7076916',
     'rsrc/js/core/Notification.js' => '95944043',
-    'rsrc/js/core/Prefab.js' => '1e644329',
+    'rsrc/js/core/Prefab.js' => '979f864d',
     'rsrc/js/core/ShapedRequest.js' => 'dfa181a4',
     'rsrc/js/core/TextAreaUtils.js' => 'b3ec3cfc',
     'rsrc/js/core/ToolTip.js' => '0a81ea29',
@@ -701,7 +701,7 @@ return array(
     'phabricator-object-list-view-css' => '1a1ea560',
     'phabricator-object-selector-css' => '029a133d',
     'phabricator-phtize' => 'd254d646',
-    'phabricator-prefab' => '1e644329',
+    'phabricator-prefab' => '979f864d',
     'phabricator-profile-css' => '3a7e04ca',
     'phabricator-project-tag-css' => '095c9404',
     'phabricator-remarkup-css' => 'ca7f2265',
@@ -927,19 +927,6 @@ return array(
       4 => 'phabricator-phtize',
       5 => 'phabricator-drag-and-drop-file-upload',
       6 => 'phabricator-draggable-list',
-    ),
-    '1e644329' =>
-    array(
-      0 => 'javelin-install',
-      1 => 'javelin-util',
-      2 => 'javelin-dom',
-      3 => 'javelin-typeahead',
-      4 => 'javelin-tokenizer',
-      5 => 'javelin-typeahead-preloaded-source',
-      6 => 'javelin-typeahead-ondemand-source',
-      7 => 'javelin-dom',
-      8 => 'javelin-stratcom',
-      9 => 'javelin-util',
     ),
     '1f595fb0' =>
     array(
@@ -1410,6 +1397,19 @@ return array(
       1 => 'javelin-dom',
       2 => 'javelin-view-visitor',
       3 => 'javelin-util',
+    ),
+    '979f864d' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
+      2 => 'javelin-dom',
+      3 => 'javelin-typeahead',
+      4 => 'javelin-tokenizer',
+      5 => 'javelin-typeahead-preloaded-source',
+      6 => 'javelin-typeahead-ondemand-source',
+      7 => 'javelin-dom',
+      8 => 'javelin-stratcom',
+      9 => 'javelin-util',
     ),
     '9b9197be' =>
     array(
