@@ -90,6 +90,11 @@ final class DifferentialAction {
           $title = pht('%s reopened this revision.',
             $author_name);
         break;
+        case DifferentialTransaction::TYPE_INLINE:
+          $title = pht(
+            '%s added an inline comment.',
+            $author_name);
+          break;
         default:
           $title = pht('Ghosts happened to this revision.');
         break;
@@ -117,6 +122,7 @@ final class DifferentialAction {
       self::ACTION_ADDCCS         => 'added CCs to',
       self::ACTION_CLAIM          => 'commandeered',
       self::ACTION_REOPEN         => 'reopened',
+      DifferentialTransaction::TYPE_INLINE => 'commented on',
     );
 
     if (!empty($verbs[$action])) {

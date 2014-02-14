@@ -16,7 +16,7 @@ final class PholioTransactionView
     }
 
     if (($v->getDateCreated() - $u->getDateCreated()) > 60) {
-      // Don't group if transactions happend more than 60s apart.
+      // Don't group if transactions happened more than 60s apart.
       return false;
     }
 

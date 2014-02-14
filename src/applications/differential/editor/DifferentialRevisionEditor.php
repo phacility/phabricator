@@ -701,9 +701,17 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     $template = id(new DifferentialComment())
       ->setAuthorPHID($this->getActorPHID())
       ->setRevision($this->revision);
+
     if ($this->contentSource) {
-      $template->setContentSource($this->contentSource);
+      $content_source = $this->contentSource;
+    } else {
+      $content_source = PhabricatorContentSource::newForSource(
+        PhabricatorContentSource::SOURCE_LEGACY,
+        array());
     }
+
+    $template->setContentSource($content_source);
+
 
     // Write the "update active diff" transaction.
     id(clone $template)
