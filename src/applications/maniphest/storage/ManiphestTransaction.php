@@ -634,6 +634,8 @@ final class ManiphestTransaction
     $old = $this->getOldValue();
     $new = $this->getNewValue();
 
+    require_celerity_resource('differential-changeset-view-css');
+
     $view = id(new PhabricatorApplicationTransactionTextDiffDetailView())
       ->setUser($viewer)
       ->setOldText($old)

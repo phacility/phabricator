@@ -11,12 +11,6 @@ class PhabricatorApplicationTransactionView extends AphrontView {
   private $showEditActions = true;
   private $isPreview;
   private $objectPHID;
-  private $isDetailView;
-
-  public function setIsDetailView($is_detail_view) {
-    $this->isDetailView = $is_detail_view;
-    return $this;
-  }
 
   public function setObjectPHID($object_phid) {
     $this->objectPHID = $object_phid;
@@ -132,59 +126,6 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     $engine->process();
 
     return $engine;
-  }
-
-  private function buildChangeDetails(
-    PhabricatorApplicationTransaction $xaction) {
-
-    Javelin::initBehavior('phabricator-reveal-content');
-
-    $show_id = celerity_generate_unique_node_id();
-    $hide_id = celerity_generate_unique_node_id();
-    $content_id = celerity_generate_unique_node_id();
-
-    $show_more = javelin_tag(
-      'a',
-      array(
-        'href' => '#',
-        'sigil' => 'reveal-content',
-        'mustcapture' => true,
-        'id' => $show_id,
-        'style' => 'display: none',
-        'meta' => array(
-          'hideIDs' => array($show_id),
-          'showIDs' => array($hide_id, $content_id),
-        ),
-      ),
-      pht('(Show Details)'));
-
-    $hide_more = javelin_tag(
-      'a',
-      array(
-        'href' => '#',
-        'sigil' => 'reveal-content',
-        'mustcapture' => true,
-        'id' => $hide_id,
-        'meta' => array(
-          'hideIDs' => array($hide_id, $content_id),
-          'showIDs' => array($show_id),
-        ),
-      ),
-      pht('(Hide Details)'));
-
-    $content = phutil_tag(
-      'div',
-      array(
-        'id'    => $content_id,
-        'class' => 'phui-timeline-change-details',
-      ),
-      $xaction->renderChangeDetails($this->getUser()));
-
-    return array(
-      $show_more,
-      $hide_more,
-      $content,
-    );
   }
 
   private function buildChangeDetailsLink(
@@ -303,16 +244,14 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     if (!$this->shouldSuppressTitle($xaction, $group)) {
       $title = $xaction->getTitle();
       if ($xaction->hasChangeDetails()) {
-        if ($this->isPreview || $this->isDetailView) {
-          $details = $this->buildChangeDetails($xaction);
-        } else {
+        if (!$this->isPreview) {
           $details = $this->buildChangeDetailsLink($xaction);
+          $title = array(
+            $title,
+            ' ',
+            $details,
+          );
         }
-        $title = array(
-          $title,
-          ' ',
-          $details,
-        );
       }
       $event->setTitle($title);
     }

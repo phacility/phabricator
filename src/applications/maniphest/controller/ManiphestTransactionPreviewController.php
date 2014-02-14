@@ -97,7 +97,7 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
         break;
       case ManiphestTransaction::TYPE_STATUS:
         $phids = array();
-        $transaction->setOldvalue($task->getStatus());
+        $transaction->setOldValue($task->getStatus());
         $transaction->setNewValue($value);
         break;
       default:
@@ -126,8 +126,7 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
     $view = id(new PhabricatorApplicationTransactionView())
       ->setUser($user)
       ->setTransactions($transactions)
-      ->setIsPreview(true)
-      ->setIsDetailView(true);
+      ->setIsPreview(true);
 
     return id(new AphrontAjaxResponse())
       ->setContent((string)phutil_implode_html('', $view->buildEvents()));
