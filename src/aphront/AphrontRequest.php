@@ -305,6 +305,11 @@ final class AphrontRequest {
    * @task cookie
    */
   private function getCookieDomainURI() {
+    if (PhabricatorEnv::getEnvConfig('security.require-https') &&
+        !$this->isHTTPS()) {
+      return null;
+    }
+
     $host = $this->getHost();
 
     // If there's no base domain configured, just use whatever the request
