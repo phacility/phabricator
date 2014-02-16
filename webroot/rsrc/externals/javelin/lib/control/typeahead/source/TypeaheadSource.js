@@ -292,7 +292,7 @@ JX.install('TypeaheadSource', {
       this.filterAndSortHits(value, hits);
 
       var nodes = this.renderNodes(value, hits);
-      this.invoke('resultsready', nodes);
+      this.invoke('resultsready', nodes, value);
       if (!partial) {
         this.invoke('complete');
       }

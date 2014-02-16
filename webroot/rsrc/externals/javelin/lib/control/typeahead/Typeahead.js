@@ -230,10 +230,28 @@ JX.install('Typeahead', {
      * in response to events from the datasource you have configured.
      *
      * @task   control
-     * @param  list List of ##<a />## tags to show as suggestions/results.
+     * @param  list     List of ##<a />## tags to show as suggestions/results.
+     * @param  string   The query this result list corresponds to.
      * @return void
      */
-    showResults : function(results) {
+    showResults : function(results, value) {
+      if (value != this._value) {
+        // This result list is for an old query, and no longer represents
+        // the input state of the typeahead.
+
+        // For example, the user may have typed "dog", and then they delete
+        // their query and type "cat", and then the "dog" results arrive from
+        // the source.
+
+        // Another case is that the user made a selection in a tokenizer,
+        // and then results returned. However, the typeahead is now empty, and
+        // we don't want to pop it back open.
+
+        // In all cases, just throw these results away. They are no longer
+        // relevant.
+        return;
+      }
+
       var obj = {show: results};
       var e = this.invoke('show', obj);
 
