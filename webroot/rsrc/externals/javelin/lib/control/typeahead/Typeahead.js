@@ -196,19 +196,6 @@ JX.install('Typeahead', {
       return this;
     },
 
-    /**
-     * Add an arbitrary node to the UI. Phabricator uses this to add a
-     * "waiting" graphic.
-     *
-     * @param node An arbitrary display node for the UI.
-     * @return this
-     * @task config
-     */
-    addUINode : function(node) {
-      JX.DOM.appendContent(this._hardpoint, node);
-      return this;
-    },
-
 
     /**
      * Hide the typeahead's dropdown suggestion menu.

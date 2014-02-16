@@ -255,12 +255,6 @@ JX.install('Prefab', {
         tokenizer.setInitialValue(config.value);
       }
 
-      tokenizer.addUINode(
-        JX.$N(
-          'span',
-          {className: 'jx-typeahead-waiting-indicator'},
-          null));
-
       JX.Stratcom.addData(root, {'tokenizer' : tokenizer});
 
       return {
