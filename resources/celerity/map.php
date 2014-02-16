@@ -19,7 +19,6 @@ return array(
     'maniphest.pkg.js' => '1e8f11af',
     'rsrc/css/aphront/aphront-bars.css' => '231ac33c',
     'rsrc/css/aphront/aphront-notes.css' => '6acadd3f',
-    'rsrc/css/aphront/calendar-view.css' => '166af03d',
     'rsrc/css/aphront/context-bar.css' => '1c3b0529',
     'rsrc/css/aphront/dark-console.css' => '6378ef3d',
     'rsrc/css/aphront/dialog-view.css' => 'dd9db96c',
@@ -126,6 +125,7 @@ return array(
     'rsrc/css/layout/phabricator-source-code-view.css' => '62a99814',
     'rsrc/css/phui/phui-box.css' => '6c21bd6a',
     'rsrc/css/phui/phui-button.css' => '8784a966',
+    'rsrc/css/phui/phui-calendar-month.css' => '3474d15a',
     'rsrc/css/phui/phui-document.css' => '143b2ac8',
     'rsrc/css/phui/phui-feed-story.css' => '3a59c2cf',
     'rsrc/css/phui/phui-form-view.css' => '0efd3326',
@@ -478,7 +478,6 @@ return array(
   'symbols' =>
   array(
     'aphront-bars' => '231ac33c',
-    'aphront-calendar-view-css' => '166af03d',
     'aphront-contextbar-view-css' => '1c3b0529',
     'aphront-dark-console-css' => '6378ef3d',
     'aphront-dialog-view-css' => 'dd9db96c',
@@ -738,6 +737,7 @@ return array(
     'phriction-document-css' => 'b0309d8e',
     'phui-box-css' => '6c21bd6a',
     'phui-button-css' => '8784a966',
+    'phui-calendar-month-css' => '3474d15a',
     'phui-document-view-css' => '143b2ac8',
     'phui-feed-story-css' => '3a59c2cf',
     'phui-form-css' => 'b78ec020',

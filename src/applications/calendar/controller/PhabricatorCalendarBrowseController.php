@@ -27,9 +27,9 @@ final class PhabricatorCalendarBrowseController
       ->execute();
 
     if ($month == $month_d && $year == $year_d) {
-      $month_view = new AphrontCalendarMonthView($month, $year, $day);
+      $month_view = new PHUICalendarMonthView($month, $year, $day);
     } else {
-      $month_view = new AphrontCalendarMonthView($month, $year);
+      $month_view = new PHUICalendarMonthView($month, $year);
     }
 
     $month_view->setBrowseURI($request->getRequestURI());
@@ -62,7 +62,7 @@ final class PhabricatorCalendarBrowseController
     $nav->appendChild(
       array(
         $this->getNoticeView(),
-        phutil_tag('div', array('style' => 'padding: 20px;'), $month_view),
+        $month_view,
       ));
 
     return $this->buildApplicationPage(
