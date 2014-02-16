@@ -79,3 +79,21 @@
 .project-column-empty.drag-target-list {
   background: rgba(255,255,255,.7);
 }
+
+/* - Workpanel Cards -----------------------------------------------------------
+
+  Slight display changes for how cards work in tight spaces
+
+*/
+
+.phui-workpanel-view .phui-object-item-grippable .phui-object-item-frame {
+  padding-left: 0;
+}
+
+.phui-workpanel-view .phui-object-item-grip {
+  display: none;
+}
+
+.phui-workpanel-view .phui-object-item-attribute a {
+  color: {$bluetext};
+}
