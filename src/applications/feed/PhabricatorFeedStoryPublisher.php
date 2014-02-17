@@ -161,16 +161,16 @@ final class PhabricatorFeedStoryPublisher {
   }
 
   private function sendNotification($chrono_key) {
-    $server_uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
 
     $data = array(
       'key' => (string)$chrono_key,
     );
 
-    id(new HTTPSFuture($server_uri, $data))
-      ->setMethod('POST')
-      ->setTimeout(1)
-      ->resolve();
+    try {
+      PhabricatorNotificationClient::postMessage($data);
+    } catch (Exception $ex) {
+      // Ignore, these are not critical.
+    }
   }
 
   /**

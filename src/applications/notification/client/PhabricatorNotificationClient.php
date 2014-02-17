@@ -25,4 +25,13 @@ final class PhabricatorNotificationClient {
     return $status;
   }
 
+  public static function postMessage(array $data) {
+    $server_uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
+
+    id(new HTTPSFuture($server_uri, $data))
+      ->setMethod('POST')
+      ->setTimeout(1)
+      ->resolvex();
+  }
+
 }
