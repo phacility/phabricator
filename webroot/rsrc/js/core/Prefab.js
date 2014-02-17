@@ -43,9 +43,12 @@ JX.install('Prefab', {
      *   - `limit` Optional, token limit.
      *   - `placeholder` Optional, placeholder text.
      *   - `username` Optional, username to sort first (i.e., viewer).
+     *   - `icons` Optional, map of icons.
      *
      */
     buildTokenizer : function(config) {
+      config.icons = config.icons || {};
+
       var root;
 
       try {

@@ -8,7 +8,7 @@ return array(
   'names' =>
   array(
     'core.pkg.css' => '244a9d51',
-    'core.pkg.js' => '5f6c1d14',
+    'core.pkg.js' => '8f7aa2c3',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => '6aef439e',
     'differential.pkg.js' => '322ea941',
@@ -431,7 +431,7 @@ return array(
     'rsrc/js/core/KeyboardShortcutManager.js' => 'ad7a69ca',
     'rsrc/js/core/MultirowRowManager.js' => 'e7076916',
     'rsrc/js/core/Notification.js' => '95944043',
-    'rsrc/js/core/Prefab.js' => '0c73646e',
+    'rsrc/js/core/Prefab.js' => '0326e5d0',
     'rsrc/js/core/ShapedRequest.js' => 'dfa181a4',
     'rsrc/js/core/TextAreaUtils.js' => 'b3ec3cfc',
     'rsrc/js/core/ToolTip.js' => '0a81ea29',
@@ -700,7 +700,7 @@ return array(
     'phabricator-object-list-view-css' => '1a1ea560',
     'phabricator-object-selector-css' => '029a133d',
     'phabricator-phtize' => 'd254d646',
-    'phabricator-prefab' => '0c73646e',
+    'phabricator-prefab' => '0326e5d0',
     'phabricator-profile-css' => '3a7e04ca',
     'phabricator-project-tag-css' => '095c9404',
     'phabricator-remarkup-css' => 'ca7f2265',
@@ -808,6 +808,19 @@ return array(
     array(
       0 => 'aphront-dialog-view-css',
     ),
+    '0326e5d0' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
+      2 => 'javelin-dom',
+      3 => 'javelin-typeahead',
+      4 => 'javelin-tokenizer',
+      5 => 'javelin-typeahead-preloaded-source',
+      6 => 'javelin-typeahead-ondemand-source',
+      7 => 'javelin-dom',
+      8 => 'javelin-stratcom',
+      9 => 'javelin-util',
+    ),
     '03be94fb' =>
     array(
       0 => 'javelin-magical-init',
@@ -858,19 +871,6 @@ return array(
       0 => 'javelin-view',
       1 => 'javelin-install',
       2 => 'javelin-dom',
-    ),
-    '0c73646e' =>
-    array(
-      0 => 'javelin-install',
-      1 => 'javelin-util',
-      2 => 'javelin-dom',
-      3 => 'javelin-typeahead',
-      4 => 'javelin-tokenizer',
-      5 => 'javelin-typeahead-preloaded-source',
-      6 => 'javelin-typeahead-ondemand-source',
-      7 => 'javelin-dom',
-      8 => 'javelin-stratcom',
-      9 => 'javelin-util',
     ),
     '0e34ca02' =>
     array(
