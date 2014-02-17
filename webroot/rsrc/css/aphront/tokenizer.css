@@ -12,7 +12,7 @@ body div.jx-tokenizer {
 body div.jx-tokenizer-container {
   position: relative;
   display: block;
-  padding: 0;
+  padding: 0 0 2px 0;
   min-height: 30px;
   height: auto;
 }
@@ -50,34 +50,36 @@ body input.jx-typeahead-placeholder {
 }
 
 a.jx-tokenizer-x {
-  padding-left: 4px;
+  margin-left: 4px;
+  color: {$bluetext};
 }
 
 a.jx-tokenizer-x:hover {
-  color: #000;
+  color: {$darkbluetext};
   text-decoration: none;
 }
 
 a.jx-tokenizer-token {
   padding: 2px 6px 3px;
-  border:  1px solid #a4bdec;
+  border:  1px solid {$lightblueborder};
   margin: 3px 2px 0 4px;
   background: #dee7f8;
   float: left;
   cursor: pointer;
   border-radius: 3px;
-  color: #333;
+  color: {$darkbluetext};
 
 }
 
 a.jx-tokenizer-token:hover {
   text-decoration: none;
-  background: #bbcef1;
+  border-color: {$blueborder};
+  background: #CDD9F0;
 }
 
 .jx-tokenizer-token .phui-icon-view {
   display: inline-block;
-  margin: 2px 4px -2px 0;
+  margin: 2px 4px -3px 0;
 }
 
 .tokenizer-result {
