@@ -26,7 +26,7 @@ final class DifferentialCustomFieldDependsOnParser
   }
 
   protected function getMonogramPattern() {
-    return 'D\d+';
+    return '[Dd]\d+';
   }
 
 }

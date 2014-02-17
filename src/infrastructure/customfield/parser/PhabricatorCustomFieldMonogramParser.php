@@ -27,7 +27,7 @@ abstract class PhabricatorCustomFieldMonogramParser
       '((?:'.$monogram_pattern.'[,\s]*)+)'.
       $suffix_regex.
       '(?:$|\b)'.
-      '/i';
+      '/';
 
     $matches = null;
     $ok = preg_match_all(
@@ -65,7 +65,7 @@ abstract class PhabricatorCustomFieldMonogramParser
     $maybe_tail = $final ? '' : '\s+';
     $maybe_optional = $optional ? '?' : '';
 
-    return '(?:('.$parts.')'.$maybe_tail.')'.$maybe_optional;
+    return '(?i:('.$parts.')'.$maybe_tail.')'.$maybe_optional;
   }
 
 }

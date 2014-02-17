@@ -27,12 +27,12 @@ final class DifferentialCustomFieldDependsOnParserTestCase
           'offset' => 0,
         ),
       ),
-      'depends on D123, D124' => array(
+      'depends on D123, d124' => array(
         array(
-          'match' => 'depends on D123, D124',
+          'match' => 'depends on D123, d124',
           'prefix' => 'depends on',
           'infix' => '',
-          'monograms' => array('D123', 'D124'),
+          'monograms' => array('D123', 'd124'),
           'suffix' => '',
           'offset' => 0,
         ),
