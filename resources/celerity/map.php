@@ -344,7 +344,7 @@ return array(
     'rsrc/js/application/aphlict/behavior-aphlict-listen.js' => '845731b8',
     'rsrc/js/application/auth/behavior-persona-login.js' => '9414ff18',
     'rsrc/js/application/config/behavior-reorder-fields.js' => '69bb5094',
-    'rsrc/js/application/conpherence/behavior-menu.js' => '872bc8ff',
+    'rsrc/js/application/conpherence/behavior-menu.js' => '7ff0b011',
     'rsrc/js/application/conpherence/behavior-pontificate.js' => '53f6f2dd',
     'rsrc/js/application/conpherence/behavior-widget-pane.js' => 'd8ef8659',
     'rsrc/js/application/countdown/timer.js' => '8454ce4f',
@@ -531,7 +531,7 @@ return array(
     'javelin-behavior-audit-preview' => 'be81801d',
     'javelin-behavior-balanced-payment-form' => '3b3e1664',
     'javelin-behavior-config-reorder-fields' => '69bb5094',
-    'javelin-behavior-conpherence-menu' => '872bc8ff',
+    'javelin-behavior-conpherence-menu' => '7ff0b011',
     'javelin-behavior-conpherence-pontificate' => '53f6f2dd',
     'javelin-behavior-conpherence-widget-pane' => 'd8ef8659',
     'javelin-behavior-countdown-timer' => '8454ce4f',
@@ -1291,6 +1291,18 @@ return array(
       0 => 'javelin-behavior',
       1 => 'javelin-history',
     ),
+    '7ff0b011' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-util',
+      3 => 'javelin-stratcom',
+      4 => 'javelin-workflow',
+      5 => 'javelin-behavior-device',
+      6 => 'javelin-history',
+      7 => 'javelin-vector',
+      8 => 'phabricator-shaped-request',
+    ),
     '828a2eed' =>
     array(
       0 => 'javelin-behavior',
@@ -1347,17 +1359,6 @@ return array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
       2 => 'javelin-stratcom',
-    ),
-    '872bc8ff' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-      2 => 'javelin-util',
-      3 => 'javelin-stratcom',
-      4 => 'javelin-workflow',
-      5 => 'javelin-behavior-device',
-      6 => 'javelin-history',
-      7 => 'javelin-vector',
     ),
     '89889fe7' =>
     array(

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conpherence
- */
 final class ConpherenceViewController extends
   ConpherenceController {
 
@@ -130,9 +127,12 @@ final class ConpherenceViewController extends
 
     $conpherence = $this->getConpherence();
     $user = $this->getRequest()->getUser();
+    $draft = PhabricatorDraft::newFromUserAndKey(
+      $user,
+      $conpherence->getPHID());
     $update_uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
 
-    Javelin::initBehavior('conpherence-pontificate');
+    $this->initBehavior('conpherence-pontificate');
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
     $form =
@@ -145,7 +145,8 @@ final class ConpherenceViewController extends
       ->appendChild(
         id(new PhabricatorRemarkupControl())
         ->setUser($user)
-        ->setName('text'))
+        ->setName('text')
+        ->setValue($draft->getDraft()))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(
