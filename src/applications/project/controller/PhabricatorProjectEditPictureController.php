@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorProjectProfilePictureController
+final class PhabricatorProjectEditPictureController
   extends PhabricatorProjectController {
 
   private $id;
@@ -26,7 +26,8 @@ final class PhabricatorProjectProfilePictureController
       return new Aphront404Response();
     }
 
-    $project_uri = $this->getApplicationURI('view/'.$project->getID().'/');
+    $edit_uri = $this->getApplicationURI('edit/'.$project->getID().'/');
+    $view_uri = $this->getApplicationURI('view/'.$project->getID().'/');
 
     $supported_formats = PhabricatorFile::getTransformableImageFormats();
     $e_file = true;
@@ -93,14 +94,15 @@ final class PhabricatorProjectProfilePictureController
 
         $editor->applyTransactions($project, $xactions);
 
-        return id(new AphrontRedirectResponse())->setURI($project_uri);
+        return id(new AphrontRedirectResponse())->setURI($edit_uri);
       }
     }
 
     $title = pht('Edit Project Picture');
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($project->getName(), $project_uri);
-    $crumbs->addTextCrumb($title);
+    $crumbs->addTextCrumb($project->getName(), $view_uri);
+    $crumbs->addTextCrumb(pht('Edit'), $edit_uri);
+    $crumbs->addTextCrumb(pht('Picture'));
 
     $form = id(new PHUIFormLayoutView())
       ->setUser($viewer);
@@ -244,7 +246,7 @@ final class PhabricatorProjectProfilePictureController
             pht('Supported formats: %s', implode(', ', $supported_formats))))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->addCancelButton($project_uri)
+          ->addCancelButton($edit_uri)
           ->setValue(pht('Upload Picture')));
 
     $form_box = id(new PHUIObjectBoxView())

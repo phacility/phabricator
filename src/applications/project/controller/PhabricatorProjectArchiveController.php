@@ -26,7 +26,7 @@ final class PhabricatorProjectArchiveController
       return new Aphront404Response();
     }
 
-    $view_uri = $this->getApplicationURI('view/'.$project->getID().'/');
+    $edit_uri = $this->getApplicationURI('edit/'.$project->getID().'/');
 
     if ($request->isFormPost()) {
       if ($project->isArchived()) {
@@ -48,7 +48,7 @@ final class PhabricatorProjectArchiveController
         ->setContinueOnMissingFields(true)
         ->applyTransactions($project, $xactions);
 
-      return id(new AphrontRedirectResponse())->setURI($view_uri);
+      return id(new AphrontRedirectResponse())->setURI($edit_uri);
     }
 
     if ($project->isArchived()) {
@@ -65,7 +65,7 @@ final class PhabricatorProjectArchiveController
       ->setUser($viewer)
       ->setTitle($title)
       ->appendChild($body)
-      ->addCancelButton($view_uri)
+      ->addCancelButton($edit_uri)
       ->addSubmitButton($button);
 
     return id(new AphrontDialogResponse())->setDialog($dialog);

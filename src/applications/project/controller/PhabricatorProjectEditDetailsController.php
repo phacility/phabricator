@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorProjectProfileEditController
+final class PhabricatorProjectEditDetailsController
   extends PhabricatorProjectController {
 
   private $id;
@@ -34,6 +34,7 @@ final class PhabricatorProjectProfileEditController
       ->readFieldsFromStorage($project);
 
     $view_uri = $this->getApplicationURI('view/'.$project->getID().'/');
+    $edit_uri = $this->getApplicationURI('edit/'.$project->getID().'/');
 
     $e_name = true;
     $e_edit = null;
@@ -81,7 +82,7 @@ final class PhabricatorProjectProfileEditController
       try {
         $editor->applyTransactions($project, $xactions);
 
-        return id(new AphrontRedirectResponse())->setURI($view_uri);
+        return id(new AphrontRedirectResponse())->setURI($edit_uri);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
 
@@ -119,7 +120,6 @@ final class PhabricatorProjectProfileEditController
         id(new AphrontFormPolicyControl())
           ->setUser($viewer)
           ->setName('can_view')
-          ->setCaption(pht('Members can always view a project.'))
           ->setPolicyObject($project)
           ->setPolicies($policies)
           ->setCapability(PhabricatorPolicyCapability::CAN_VIEW))
@@ -142,7 +142,7 @@ final class PhabricatorProjectProfileEditController
           ->setCapability(PhabricatorPolicyCapability::CAN_JOIN))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->addCancelButton($view_uri)
+          ->addCancelButton($edit_uri)
           ->setValue(pht('Save')));
 
     $form_box = id(new PHUIObjectBoxView())
@@ -152,7 +152,8 @@ final class PhabricatorProjectProfileEditController
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView())
       ->addTextCrumb($project->getName(), $view_uri)
-      ->addTextCrumb(pht('Edit Project'), $this->getApplicationURI());
+      ->addTextCrumb(pht('Edit'), $edit_uri)
+      ->addTextCrumb(pht('Details'));
 
     return $this->buildApplicationPage(
       array(
