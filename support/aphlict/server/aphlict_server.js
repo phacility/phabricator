@@ -192,7 +192,8 @@ var receive_server = http.createServer(function(request, response) {
         'clients.total': generate_id.current_id || 0,
         'messages.in': messages_in,
         'messages.out': messages_out,
-        'log': config.log
+        'log': config.log,
+        'version': 2
       };
 
       response.write(JSON.stringify(status));

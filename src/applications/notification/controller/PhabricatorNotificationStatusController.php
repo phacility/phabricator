@@ -4,23 +4,9 @@ final class PhabricatorNotificationStatusController
   extends PhabricatorNotificationController {
 
   public function processRequest() {
-
-    $uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
-    $uri = new PhutilURI($uri);
-
-    $uri->setPath('/status/');
-
-    $future = id(new HTTPSFuture($uri))
-      ->setTimeout(3);
-
     try {
-      list($body) = $future->resolvex();
-      $body = json_decode($body, true);
-      if (!is_array($body)) {
-        throw new Exception("Expected JSON response from server!");
-      }
-
-      $status = $this->renderServerStatus($body);
+      $status = PhabricatorNotificationClient::getServerStatus();
+      $status = $this->renderServerStatus($status);
     } catch (Exception $ex) {
       $status = new AphrontErrorView();
       $status->setTitle("Notification Server Issue");
