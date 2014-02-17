@@ -47,7 +47,7 @@ abstract class PhabricatorCustomFieldMonogramParser
         'prefix' => $set[1][0],
         'infix' => $set[2][0],
         'monograms' => array_filter(preg_split('/[,\s]+/', $set[3][0])),
-        'suffix' => $set[4][0],
+        'suffix' => idx(idx($set, 4, array()), 0, ''),
         'offset' => $set[0][1],
       );
     }

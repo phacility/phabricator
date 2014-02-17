@@ -44,53 +44,36 @@ abstract class DifferentialFreeformFieldSpecification
       ''              => null,
     );
 
-    $prefix_regex = array();
-    foreach ($prefixes as $prefix => $resolution) {
-      $prefix_regex[] = preg_quote($prefix, '/');
-    }
-    $prefix_regex = implode('|', $prefix_regex);
+    $matches = id(new ManiphestCustomFieldStatusParser())
+      ->parseCorpus($message);
 
-    $suffix_regex = array();
-    foreach ($suffixes as $suffix => $resolution) {
-      $suffix_regex[] = preg_quote($suffix, '/');
-    }
-    $suffix_regex = implode('|', $suffix_regex);
-
-    $matches = null;
-    preg_match_all(
-      "/({$prefix_regex})\s+T(\d+)\s*({$suffix_regex})/i",
-      $message,
-      $matches,
-      PREG_SET_ORDER);
-
-    $tasks_statuses = array();
-    foreach ($matches as $set) {
-      $prefix = strtolower($set[1]);
-      $task_id = (int)$set[2];
-      $suffix = strtolower($set[3]);
+    $task_statuses = array();
+    foreach ($matches as $match) {
+      $prefix = phutil_utf8_strtolower($match['prefix']);
+      $suffix = phutil_utf8_strtolower($match['suffix']);
 
       $status = idx($suffixes, $suffix);
       if (!$status) {
         $status = idx($prefixes, $prefix);
       }
 
-      $tasks_statuses[$task_id] = $status;
+      foreach ($match['monograms'] as $task_monogram) {
+        $task_id = (int)trim($task_monogram, 'tT');
+        $task_statuses[$task_id] = $status;
+      }
     }
 
-    return $tasks_statuses;
+    return $task_statuses;
   }
 
   private function findDependentRevisions($message) {
+    $matches = id(new DifferentialCustomFieldDependsOnParser())
+      ->parseCorpus($message);
+
     $dependents = array();
-
-    $matches = null;
-    preg_match_all(
-      '/\b(?i:depends\s+on):?\s+D(\d+(,\s+D\d++)*)\b/',
-      $message,
-      $matches);
-
-    foreach ($matches[1] as $revisions) {
-      foreach (preg_split('/,\s+D/', $revisions) as $id) {
+    foreach ($matches as $match) {
+      foreach ($match['monograms'] as $monogram) {
+        $id = (int)trim($monogram, 'dD');
         $dependents[$id] = $id;
       }
     }
@@ -99,46 +82,13 @@ abstract class DifferentialFreeformFieldSpecification
   }
 
   public static function findRevertedCommits($message) {
-    $reverts = array();
-    $matches = null;
-
-    // NOTE: Git language is "This reverts commit X."
-    // NOTE: Mercurial language is "Backed out changeset Y".
-
-    $prefixes = array(
-      'revert'        => true,
-      'reverts'       => true,
-      'back\s*out'    => true,
-      'backs\s*out'   => true,
-      'backed\s*out'  => true,
-      'undo'          => true,
-      'undoes'        => true,
-    );
-
-    $optional = array(
-      'commit'        => true,
-      'changeset'     => true,
-      'rev'           => true,
-      'revision'      => true,
-      'change'        => true,
-      'diff'          => true,
-    );
-
-    $pre_re = implode('|', array_keys($prefixes));
-    $opt_re = implode('|', array_keys($optional));
-
-    $matches = null;
-    preg_match_all(
-      '/\b(?i:'.$pre_re.')(?:\s+(?i:'.$opt_re.'))?([rA-Z0-9a-f,\s]+)\b/',
-      $message,
-      $matches);
+    $matches = id(new DifferentialCustomFieldRevertsParser())
+      ->parseCorpus($message);
 
     $result = array();
-    foreach ($matches[1] as $commits) {
-      $commits = preg_split('/[,\s]+/', $commits);
-      $commits = array_filter($commits);
-      foreach ($commits as $commit) {
-        $result[$commit] = $commit;
+    foreach ($matches as $match) {
+      foreach ($match['monograms'] as $monogram) {
+        $result[$monogram] = $monogram;
       }
     }
 
