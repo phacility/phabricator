@@ -14,7 +14,7 @@ return array(
     'differential.pkg.js' => '322ea941',
     'diffusion.pkg.css' => '3783278d',
     'diffusion.pkg.js' => '7b51e80a',
-    'javelin.pkg.js' => 'b771965e',
+    'javelin.pkg.js' => '70ecd3ac',
     'maniphest.pkg.css' => 'f1887d71',
     'maniphest.pkg.js' => '1e8f11af',
     'rsrc/css/aphront/aphront-bars.css' => '231ac33c',
@@ -211,7 +211,7 @@ return array(
     'rsrc/externals/javelin/lib/control/typeahead/Typeahead.js' => 'c54eeefb',
     'rsrc/externals/javelin/lib/control/typeahead/normalizer/TypeaheadNormalizer.js' => '5f850b5c',
     'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadCompositeSource.js' => '0136cec1',
-    'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadOnDemandSource.js' => '7383383f',
+    'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadOnDemandSource.js' => '89889fe7',
     'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadPreloadedSource.js' => 'e9b95df3',
     'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadSource.js' => '62e18640',
     'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadStaticSource.js' => 'c2b8bf64',
@@ -644,7 +644,7 @@ return array(
     'javelin-typeahead' => 'c54eeefb',
     'javelin-typeahead-composite-source' => '0136cec1',
     'javelin-typeahead-normalizer' => '5f850b5c',
-    'javelin-typeahead-ondemand-source' => '7383383f',
+    'javelin-typeahead-ondemand-source' => '89889fe7',
     'javelin-typeahead-preloaded-source' => 'e9b95df3',
     'javelin-typeahead-source' => '62e18640',
     'javelin-typeahead-static-source' => 'c2b8bf64',
@@ -1245,13 +1245,6 @@ return array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
     ),
-    '7383383f' =>
-    array(
-      0 => 'javelin-install',
-      1 => 'javelin-util',
-      2 => 'javelin-request',
-      3 => 'javelin-typeahead-source',
-    ),
     '75e50c72' =>
     array(
       0 => 'javelin-behavior',
@@ -1365,6 +1358,13 @@ return array(
       5 => 'javelin-behavior-device',
       6 => 'javelin-history',
       7 => 'javelin-vector',
+    ),
+    '89889fe7' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
+      2 => 'javelin-request',
+      3 => 'javelin-typeahead-source',
     ),
     '8a3ed18b' =>
     array(
