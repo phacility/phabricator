@@ -9,8 +9,7 @@ final class PhabricatorManiphestTaskTestDataGenerator
           ->loadOneWhere('phid = %s', $authorPHID);
     $task = ManiphestTask::initializeNewTask($author)
       ->setSubPriority($this->generateTaskSubPriority())
-      ->setTitle($this->generateTitle())
-      ->setStatus(ManiphestTaskStatus::STATUS_OPEN);
+      ->setTitle($this->generateTitle());
 
     $content_source = PhabricatorContentSource::newForSource(
       PhabricatorContentSource::SOURCE_UNKNOWN,
@@ -101,7 +100,7 @@ final class PhabricatorManiphestTaskTestDataGenerator
     // Make sure 4/5th of all generated Tasks are open
     $random = rand(0, 4);
     if ($random != 0) {
-      return ManiphestTaskStatus::STATUS_OPEN;
+      return ManiphestTaskStatus::getDefaultStatus();
     } else {
       return array_rand($statuses);
     }

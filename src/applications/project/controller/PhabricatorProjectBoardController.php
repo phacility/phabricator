@@ -51,7 +51,7 @@ final class PhabricatorProjectBoardController
     $tasks = id(new ManiphestTaskQuery())
       ->setViewer($viewer)
       ->withAllProjects(array($project->getPHID()))
-      ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
+      ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
       ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
       ->execute();
     $tasks = mpull($tasks, null, 'getPHID');

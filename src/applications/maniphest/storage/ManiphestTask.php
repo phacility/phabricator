@@ -15,7 +15,7 @@ final class ManiphestTask extends ManiphestDAO
   protected $ownerPHID;
   protected $ccPHIDs = array();
 
-  protected $status = ManiphestTaskStatus::STATUS_OPEN;
+  protected $status;
   protected $priority;
   protected $subpriority = 0;
 
@@ -47,6 +47,7 @@ final class ManiphestTask extends ManiphestDAO
     $edit_policy = $app->getPolicy(ManiphestCapabilityDefaultEdit::CAPABILITY);
 
     return id(new ManiphestTask())
+      ->setStatus(ManiphestTaskStatus::getDefaultStatus())
       ->setPriority(ManiphestTaskPriority::getDefaultPriority())
       ->setAuthorPHID($actor->getPHID())
       ->setViewPolicy($view_policy)

@@ -118,7 +118,7 @@ final class PhabricatorHomeMainController
 
     $task_query = id(new ManiphestTaskQuery())
       ->setViewer($user)
-      ->withStatuses(array(ManiphestTaskStatus::STATUS_OPEN))
+      ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
       ->withPriorities(array($unbreak_now))
       ->setLimit(10);
 
@@ -157,7 +157,7 @@ final class PhabricatorHomeMainController
     if ($projects) {
       $task_query = id(new ManiphestTaskQuery())
         ->setViewer($user)
-        ->withStatuses(array(ManiphestTaskStatus::STATUS_OPEN))
+        ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
         ->withPriorities(array($needs_triage))
         ->withAnyProjects(mpull($projects, 'getPHID'))
         ->setLimit(10);
@@ -250,7 +250,7 @@ final class PhabricatorHomeMainController
 
     $task_query = id(new ManiphestTaskQuery())
       ->setViewer($user)
-      ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
+      ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
       ->setGroupBy(ManiphestTaskQuery::GROUP_PRIORITY)
       ->withOwners(array($user_phid))
       ->setLimit(10);

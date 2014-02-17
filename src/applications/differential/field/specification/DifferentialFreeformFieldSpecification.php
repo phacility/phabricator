@@ -9,40 +9,8 @@ abstract class DifferentialFreeformFieldSpecification
       return array();
     }
 
-    $prefixes = array(
-      'resolve'       => ManiphestTaskStatus::STATUS_CLOSED_RESOLVED,
-      'resolves'      => ManiphestTaskStatus::STATUS_CLOSED_RESOLVED,
-      'resolved'      => ManiphestTaskStatus::STATUS_CLOSED_RESOLVED,
-      'fix'           => ManiphestTaskStatus::STATUS_CLOSED_RESOLVED,
-      'fixes'         => ManiphestTaskStatus::STATUS_CLOSED_RESOLVED,
-      'fixed'         => ManiphestTaskStatus::STATUS_CLOSED_RESOLVED,
-      'wontfix'       => ManiphestTaskStatus::STATUS_CLOSED_WONTFIX,
-      'wontfixes'     => ManiphestTaskStatus::STATUS_CLOSED_WONTFIX,
-      'wontfixed'     => ManiphestTaskStatus::STATUS_CLOSED_WONTFIX,
-      'spite'         => ManiphestTaskStatus::STATUS_CLOSED_SPITE,
-      'spites'        => ManiphestTaskStatus::STATUS_CLOSED_SPITE,
-      'spited'        => ManiphestTaskStatus::STATUS_CLOSED_SPITE,
-      'invalidate'    => ManiphestTaskStatus::STATUS_CLOSED_INVALID,
-      'invaldiates'   => ManiphestTaskStatus::STATUS_CLOSED_INVALID,
-      'invalidated'   => ManiphestTaskStatus::STATUS_CLOSED_INVALID,
-      'close'         => ManiphestTaskStatus::STATUS_CLOSED_RESOLVED,
-      'closes'        => ManiphestTaskStatus::STATUS_CLOSED_RESOLVED,
-      'closed'        => ManiphestTaskStatus::STATUS_CLOSED_RESOLVED,
-      'ref'           => null,
-      'refs'          => null,
-      'references'    => null,
-      'cf.'           => null,
-    );
-
-    $suffixes = array(
-      'as resolved'   => ManiphestTaskStatus::STATUS_CLOSED_RESOLVED,
-      'as fixed'      => ManiphestTaskStatus::STATUS_CLOSED_RESOLVED,
-      'as wontfix'    => ManiphestTaskStatus::STATUS_CLOSED_WONTFIX,
-      'as spite'      => ManiphestTaskStatus::STATUS_CLOSED_SPITE,
-      'out of spite'  => ManiphestTaskStatus::STATUS_CLOSED_SPITE,
-      'as invalid'    => ManiphestTaskStatus::STATUS_CLOSED_INVALID,
-      ''              => null,
-    );
+    $prefixes = ManiphestTaskStatus::getStatusPrefixMap();
+    $suffixes = ManiphestTaskStatus::getStatusSuffixMap();
 
     $matches = id(new ManiphestCustomFieldStatusParser())
       ->parseCorpus($message);
@@ -200,8 +168,8 @@ abstract class DifferentialFreeformFieldSpecification
         continue;
       }
 
-      if ($task->getStatus() != ManiphestTaskStatus::STATUS_OPEN) {
-        // Task is already closed.
+      if ($task->getStatus() == $status) {
+        // Task is already in the specified status, so skip updating it.
         continue;
       }
 

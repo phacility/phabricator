@@ -64,7 +64,7 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
       // and then set the title and description.
       $xaction = clone $template;
       $xaction->setTransactionType(ManiphestTransaction::TYPE_STATUS);
-      $xaction->setNewValue(ManiphestTaskStatus::STATUS_OPEN);
+      $xaction->setNewValue(ManiphestTaskStatus::getDefaultStatus());
       $xactions[] = $xaction;
 
       $task->setAuthorPHID($user->getPHID());
