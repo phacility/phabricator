@@ -112,6 +112,15 @@ final class PhabricatorSettingsPanelPassword
       }
     }
 
+    $hash_envelope = new PhutilOpaqueEnvelope($user->getPasswordHash());
+    if (PhabricatorPasswordHasher::canUpgradeHash($hash_envelope)) {
+      $best_hash = PhabricatorPasswordHasher::getBestHasher();
+      $errors[] = pht(
+        'The strength of your stored password hash can be upgraded. '.
+        'To upgrade, either: log out and log in using your password; or '.
+        'change your password.');
+    }
+
     $len_caption = null;
     if ($min_len) {
       $len_caption = pht('Minimum password length: %d characters.', $min_len);
@@ -146,7 +155,36 @@ final class PhabricatorSettingsPanelPassword
     $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue(pht('Save')));
+          ->setValue(pht('Change Password')));
+
+    if (!strlen($user->getPasswordHash())) {
+      $current_name = pht('None');
+    } else {
+      try {
+        $current_hasher = PhabricatorPasswordHasher::getHasherForHash(
+          new PhutilOpaqueEnvelope($user->getPasswordHash()));
+        $current_name = $current_hasher->getHumanReadableName();
+      } catch (Exception $ex) {
+        $current_name = pht('Unknown');
+      }
+    }
+
+    $form->appendChild(
+      id(new AphrontFormStaticControl())
+        ->setLabel(pht('Current Algorithm'))
+        ->setValue($current_name));
+
+    try {
+      $best_hasher = PhabricatorPasswordHasher::getBestHasher();
+      $best_name = $best_hasher->getHumanReadableName();
+    } catch (Exception $ex) {
+      $best_name = pht('Unknown');
+    }
+
+    $form->appendChild(
+      id(new AphrontFormStaticControl())
+        ->setLabel(pht('Best Available Algorithm'))
+        ->setValue($best_name));
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Change Password'))

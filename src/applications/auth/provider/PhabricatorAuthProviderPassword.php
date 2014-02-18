@@ -264,6 +264,19 @@ final class PhabricatorAuthProviderPassword
             if ($user->comparePassword($envelope)) {
               $account = $this->loadOrCreateAccount($user->getPHID());
               $log_user = $user;
+
+              // If the user's password is stored using a less-than-optimal
+              // hash, upgrade them to the strongest available hash.
+
+              $hash_envelope = new PhutilOpaqueEnvelope(
+                $user->getPasswordHash());
+              if (PhabricatorPasswordHasher::canUpgradeHash($hash_envelope)) {
+                $user->setPassword($envelope);
+
+                $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+                  $user->save();
+                unset($unguarded);
+              }
             }
           }
         }

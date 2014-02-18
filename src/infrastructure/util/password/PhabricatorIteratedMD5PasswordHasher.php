@@ -12,7 +12,7 @@ final class PhabricatorIteratedMD5PasswordHasher
   }
 
   public function getHashLength() {
-    return 40;
+    return 32;
   }
 
   public function canHashPasswords() {

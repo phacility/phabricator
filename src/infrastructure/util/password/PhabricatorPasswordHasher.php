@@ -108,6 +108,28 @@ abstract class PhabricatorPasswordHasher extends Phobject {
   abstract protected function getPasswordHash(PhutilOpaqueEnvelope $envelope);
 
 
+  /**
+   * Verify that a password matches a hash.
+   *
+   * The default implementation checks for equality; if a hasher embeds salt in
+   * hashes it should override this method and perform a salt-aware comparison.
+   *
+   * @param   PhutilOpaqueEnvelope  Password to compare.
+   * @param   PhutilOpaqueEnvelope  Bare password hash.
+   * @return  bool                  True if the passwords match.
+   * @task hasher
+   */
+  protected function verifyPassword(
+    PhutilOpaqueEnvelope $password,
+    PhutilOpaqueEnvelope $hash) {
+
+    $actual_hash = $this->getPasswordHash($password)->openEnvelope();
+    $expect_hash = $hash->openEnvelope();
+
+    return ($actual_hash === $expect_hash);
+  }
+
+
 /* -(  Using Hashers  )------------------------------------------------------ */
 
 
@@ -236,7 +258,7 @@ abstract class PhabricatorPasswordHasher extends Phobject {
    */
   public static function getBestHasher() {
     $hashers = self::getAllUsableHashers();
-    msort($hashers, 'getStrength');
+    $hashers = msort($hashers, 'getStrength');
 
     $hasher = last($hashers);
     if (!$hasher) {
@@ -292,7 +314,7 @@ abstract class PhabricatorPasswordHasher extends Phobject {
    *              the hash strength.
    * @task hashing
    */
-  public static function canHashBeUpgraded(PhutilOpaqueEnvelope $hash) {
+  public static function canUpgradeHash(PhutilOpaqueEnvelope $hash) {
     $current_hasher = self::getHasherForHash($hash);
     $best_hasher = self::getBestHasher();
 
@@ -328,9 +350,9 @@ abstract class PhabricatorPasswordHasher extends Phobject {
     PhutilOpaqueEnvelope $hash) {
 
     $hasher = self::getHasherForHash($hash);
-    $password_hash = $hasher->getPasswordHashForStorage($password);
+    $parts = self::parseHashFromStorage($hash);
 
-    return ($password_hash->openEnvelope() == $hash->openEnvelope());
+    return $hasher->verifyPassword($password, $parts['hash']);
   }
 
 }
