@@ -9,26 +9,38 @@ final class PhabricatorRepositoryVCSPassword extends PhabricatorRepositoryDAO {
   public function setPassword(
     PhutilOpaqueEnvelope $password,
     PhabricatorUser $user) {
-    return $this->setPasswordHash($this->hashPassword($password, $user));
+    $hash_envelope = $this->hashPassword($password, $user);
+    return $this->setPasswordHash($hash_envelope->openEnvelope());
   }
 
   public function comparePassword(
     PhutilOpaqueEnvelope $password,
     PhabricatorUser $user) {
 
-    $hash = $this->hashPassword($password, $user);
-    return ($hash == $this->getPasswordHash());
+    return PhabricatorPasswordHasher::comparePassword(
+      $this->getPasswordHashInput($password, $user),
+      new PhutilOpaqueEnvelope($this->getPasswordHash()));
+  }
+
+  private function getPasswordHashInput(
+    PhutilOpaqueEnvelope $password,
+    PhabricatorUser $user) {
+    if ($user->getPHID() != $this->getUserPHID()) {
+      throw new Exception("User does not match password user PHID!");
+    }
+
+    $raw_input = PhabricatorHash::digestPassword($password, $user->getPHID());
+    return new PhutilOpaqueEnvelope($raw_input);
   }
 
   private function hashPassword(
     PhutilOpaqueEnvelope $password,
     PhabricatorUser $user) {
 
-    if ($user->getPHID() != $this->getUserPHID()) {
-      throw new Exception("User does not match password user PHID!");
-    }
+    $input_envelope = $this->getPasswordHashInput($password, $user);
 
-    return PhabricatorHash::digestPassword($password, $user->getPHID());
+    $best_hasher = PhabricatorPasswordHasher::getBestHasher();
+    return $best_hasher->getPasswordHashForStorage($input_envelope);
   }
 
 }

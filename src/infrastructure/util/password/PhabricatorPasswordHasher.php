@@ -385,4 +385,40 @@ abstract class PhabricatorPasswordHasher extends Phobject {
     return $hasher->verifyPassword($password, $parts['hash']);
   }
 
+
+  /**
+   * Get the human-readable algorithm name for a given hash.
+   *
+   * @param   PhutilOpaqueEnvelope  Storage hash.
+   * @return  string                Human-readable algorithm name.
+   */
+  public static function getCurrentAlgorithmName(PhutilOpaqueEnvelope $hash) {
+    $raw_hash = $hash->openEnvelope();
+    if (!strlen($raw_hash)) {
+      return pht('None');
+    }
+
+    try {
+      $current_hasher = PhabricatorPasswordHasher::getHasherForHash($hash);
+      return $current_hasher->getHumanReadableName();
+    } catch (Exception $ex) {
+      return pht('Unknown');
+    }
+  }
+
+
+  /**
+   * Get the human-readable algorithm name for the best available hash.
+   *
+   * @return  string                Human-readable name for best hash.
+   */
+  public static function getBestAlgorithmName() {
+    try {
+      $best_hasher = PhabricatorPasswordHasher::getBestHasher();
+      return $best_hasher->getHumanReadableName();
+    } catch (Exception $ex) {
+      return pht('Unknown');
+    }
+  }
+
 }
