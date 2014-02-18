@@ -130,6 +130,24 @@ abstract class PhabricatorPasswordHasher extends Phobject {
   }
 
 
+  /**
+   * Check if an existing hash created by this algorithm is upgradeable.
+   *
+   * The default implementation returns `false`. However, hash algorithms which
+   * have (for example) an internal cost function may be able to upgrade an
+   * existing hash to a stronger one with a higher cost.
+   *
+   * @param PhutilOpaqueEnvelope  Bare hash.
+   * @return bool                 True if the hash can be upgraded without
+   *                              changing the algorithm (for example, to a
+   *                              higher cost).
+   * @task hasher
+   */
+  protected function canUpgradeInternalHash(PhutilOpaqueEnvelope $hash) {
+    return false;
+  }
+
+
 /* -(  Using Hashers  )------------------------------------------------------ */
 
 
@@ -318,7 +336,19 @@ abstract class PhabricatorPasswordHasher extends Phobject {
     $current_hasher = self::getHasherForHash($hash);
     $best_hasher = self::getBestHasher();
 
-    return ($current_hasher->getHashName() != $best_hasher->getHashName());
+    if ($current_hasher->getHashName() != $best_hasher->getHashName()) {
+      // If the algorithm isn't the best one, we can upgrade.
+      return true;
+    }
+
+    $info = self::parseHashFromStorage($hash);
+    if ($current_hasher->canUpgradeInternalHash($info['hash'])) {
+      // If the algorithm provides an internal upgrade, we can also upgrade.
+      return true;
+    }
+
+    // Already on the best algorithm with the best settings.
+    return false;
   }
 
 
