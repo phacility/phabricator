@@ -8,6 +8,7 @@
 
 var JX = require('./lib/javelin').JX;
 
+JX.require('lib/AphlictFlashPolicyServer', __dirname);
 JX.require('lib/AphlictListenerList', __dirname);
 JX.require('lib/AphlictLog', __dirname);
 
@@ -64,33 +65,15 @@ var http  = require('http');
 var url = require('url');
 var querystring = require('querystring');
 
-
 process.on('uncaughtException', function (err) {
-  log("\n<<< UNCAUGHT EXCEPTION! >>>\n\n" + err);
+  debug.log("\n<<< UNCAUGHT EXCEPTION! >>>\n\n" + err);
   process.exit(1);
 });
 
-function getFlashPolicy() {
-  return [
-    '<?xml version="1.0"?>',
-    '<!DOCTYPE cross-domain-policy SYSTEM ' +
-      '"http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd">',
-    '<cross-domain-policy>',
-    '<allow-access-from domain="*" to-ports="'+config.port+'"/>',
-    '</cross-domain-policy>'
-  ].join('\n');
-}
-
-net.createServer(function(socket) {
-  socket.write(getFlashPolicy() + '\0');
-  socket.end();
-
-  debug.log('[' + socket.remoteAddress + '] Sent Flash Policy');
-
-  socket.on('error', function (e) {
-    debug.log('Error in policy server: ' + e);
-  });
-}).listen(843);
+var flash_server = new JX.AphlictFlashPolicyServer()
+  .setDebugLog(debug)
+  .setAccessPort(config.port)
+  .start();
 
 
 var send_server = net.createServer(function(socket) {
