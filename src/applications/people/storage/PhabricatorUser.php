@@ -173,8 +173,7 @@ final class PhabricatorUser
 
     return PhabricatorPasswordHasher::comparePassword(
       $this->getPasswordHashInput($envelope),
-      // TODO: For now, we need to add a prefix.
-      new PhutilOpaqueEnvelope('md5:'.$this->getPasswordHash()));
+      new PhutilOpaqueEnvelope($this->getPasswordHash()));
   }
 
   private function getPasswordHashInput(PhutilOpaqueEnvelope $password) {
@@ -188,19 +187,10 @@ final class PhabricatorUser
   }
 
   private function hashPassword(PhutilOpaqueEnvelope $password) {
-
     $hasher = PhabricatorPasswordHasher::getBestHasher();
 
     $input_envelope = $this->getPasswordHashInput($password);
-    $output_envelope = $hasher->getPasswordHashForStorage($input_envelope);
-
-    // TODO: For now, we need to strip the type prefix until we can upgrade
-    // the storage.
-
-    $raw_output = $output_envelope->openEnvelope();
-    $raw_output = substr($raw_output, strlen('md5:'));
-
-    return new PhutilOpaqueEnvelope($raw_output);
+    return $hasher->getPasswordHashForStorage($input_envelope);
   }
 
   const CSRF_CYCLE_FREQUENCY  = 3600;
