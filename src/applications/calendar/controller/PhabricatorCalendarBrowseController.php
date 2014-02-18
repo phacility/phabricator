@@ -57,10 +57,15 @@ final class PhabricatorCalendarBrowseController
       $month_view->addEvent($event);
     }
 
+    $date = new DateTime("{$year}-{$month}-01");
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb($date->format('F Y'));
+
     $nav = $this->buildSideNavView();
     $nav->selectFilter('/');
     $nav->appendChild(
       array(
+        $crumbs,
         $this->getNoticeView(),
         $month_view,
       ));

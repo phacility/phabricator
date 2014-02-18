@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorCalendarEventViewController
-  extends PhabricatorDashboardController {
+  extends PhabricatorCalendarController {
 
   private $id;
 
