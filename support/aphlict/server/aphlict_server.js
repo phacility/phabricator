@@ -6,6 +6,11 @@
  * You can also specify `port`, `admin`, `host` and `log`.
  */
 
+var JX = require('./lib/javelin').JX;
+JX.require('lib/AphlictIDGenerator', __dirname);
+
+var id_generator = new JX.AphlictIDGenerator();
+
 var config = parse_command_line_arguments(process.argv);
 
 function parse_command_line_arguments(argv) {
@@ -108,25 +113,9 @@ function write_json(socket, data) {
 
 var clients = {};
 var current_connections = 0;
-// According to the internet up to 2^53 can
-// be stored in javascript, this is less than that
-var MAX_ID = 9007199254740991;//2^53 -1
-
-// If we get one connections per millisecond this will
-// be fine as long as someone doesn't maintain a
-// connection for longer than 6854793 years.  If
-// you want to write something pretty be my guest
-
-function generate_id() {
-  if (typeof generate_id.current_id == 'undefined' ||
-      generate_id.current_id > MAX_ID) {
-    generate_id.current_id = 0;
-  }
-  return generate_id.current_id++;
-}
 
 var send_server = net.createServer(function(socket) {
-  var client_id = generate_id();
+  var client_id = id_generator.generateNext();
   var client_name = '[' + socket.remoteAddress + '] [#' + client_id + '] ';
 
   clients[client_id] = socket;
@@ -189,11 +178,11 @@ var receive_server = http.createServer(function(request, response) {
       var status = {
         'uptime': (new Date().getTime() - start_time),
         'clients.active': current_connections,
-        'clients.total': generate_id.current_id || 0,
+        'clients.total': id_generator.getTotalCount(),
         'messages.in': messages_in,
         'messages.out': messages_out,
         'log': config.log,
-        'version': 2
+        'version': 3
       };
 
       response.write(JSON.stringify(status));

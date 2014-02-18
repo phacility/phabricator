@@ -2,7 +2,7 @@
 
 final class PhabricatorNotificationClient {
 
-  const EXPECT_VERSION = 2;
+  const EXPECT_VERSION = 3;
 
   public static function getServerStatus() {
     $uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
