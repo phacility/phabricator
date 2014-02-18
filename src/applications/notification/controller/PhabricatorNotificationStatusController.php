@@ -20,10 +20,16 @@ final class PhabricatorNotificationStatusController
         phutil_escape_html_newlines($ex->getMessage())));
     }
 
-    return $this->buildStandardPageResponse(
-      $status,
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Status'));
+
+    return $this->buildApplicationPage(
       array(
-        'title' => 'Aphlict Server Status',
+        $crumbs,
+        $status,
+      ),
+      array(
+        'title' => pht('Notification Server Status'),
       ));
   }
 
@@ -53,10 +59,10 @@ final class PhabricatorNotificationStatusController
         'wide',
       ));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Server Status');
-    $panel->appendChild($table);
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Server Status'))
+      ->appendChild($table);
 
-    return $panel;
+    return $box;
   }
 }
