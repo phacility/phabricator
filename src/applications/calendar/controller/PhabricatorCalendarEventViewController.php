@@ -101,6 +101,11 @@ final class PhabricatorCalendarEventViewController
       pht('Ends'),
       phabricator_datetime($event->getDateTo(), $viewer));
 
+    $properties->addSectionHeader(
+      pht('Description'),
+      PHUIPropertyListView::ICON_SUMMARY);
+    $properties->addTextContent($event->getDescription());
+
     return $properties;
   }
 
