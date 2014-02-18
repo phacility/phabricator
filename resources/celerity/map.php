@@ -170,7 +170,7 @@ return array(
     'rsrc/externals/javelin/core/__tests__/stratcom.js' => 'da194d4b',
     'rsrc/externals/javelin/core/__tests__/util.js' => 'd3b157a9',
     'rsrc/externals/javelin/core/init.js' => 'b88ab49e',
-    'rsrc/externals/javelin/core/init_node.js' => '9fe4895f',
+    'rsrc/externals/javelin/core/init_node.js' => 'd7dde471',
     'rsrc/externals/javelin/core/install.js' => '52a92793',
     'rsrc/externals/javelin/core/util.js' => '7501647b',
     'rsrc/externals/javelin/docs/Base.js' => '3b9ca7eb',

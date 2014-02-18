@@ -27,16 +27,32 @@ JX.require = function(thing, relative) {
   relative = relative || __dirname + '/..';
   var path = relative + '/' + thing + '.js';
   var content = fs.readFileSync(path);
+  var dir = pathModule.dirname(path);
 
-  var sandbox = {
+  var k;
+  var sandbox = {};
+
+  for (k in global) {
+    sandbox[k] = global[k];
+  }
+
+  var extra = {
     JX : this,
     __DEV__ : 0,
-    console : console,
     window : {},
-    require : function (thing) {
-      return require(pathModule.dirname(path) + '/' + thing);
+    __dirname : dir,
+    require : function(thing) {
+      if (thing == 'javelin') {
+        return require(dir + '/' + thing);
+      } else {
+        return require(thing);
+      }
     }
   };
+
+  for (k in extra) {
+    sandbox[k] = extra[k];
+  }
 
   vm.createScript(content, path)
     .runInNewContext(sandbox, path);
