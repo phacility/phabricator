@@ -437,4 +437,8 @@ abstract class PhabricatorAuthProvider {
       $content);
   }
 
+  public function renderConfigurationFooter() {
+    return null;
+  }
+
 }

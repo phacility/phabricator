@@ -276,6 +276,8 @@ final class PhabricatorAuthEditController
       $form->appendRemarkupInstructions($help);
     }
 
+    $footer = $provider->renderConfigurationFooter();
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($crumb);
 
@@ -305,6 +307,7 @@ final class PhabricatorAuthEditController
       array(
         $crumbs,
         $form_box,
+        $footer,
         $xaction_view,
       ),
       array(
