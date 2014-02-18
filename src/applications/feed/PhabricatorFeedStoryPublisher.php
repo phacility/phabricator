@@ -10,6 +10,17 @@ final class PhabricatorFeedStoryPublisher {
   private $primaryObjectPHID;
   private $subscribedPHIDs = array();
   private $mailRecipientPHIDs = array();
+  private $notifyAuthor;
+
+
+  public function setNotifyAuthor($notify_author) {
+    $this->notifyAuthor = $notify_author;
+    return $this;
+  }
+
+  public function getNotifyAuthor() {
+    return $this->notifyAuthor;
+  }
 
   public function setRelatedPHIDs(array $phids) {
     $this->relatedPHIDs = $phids;
@@ -116,9 +127,12 @@ final class PhabricatorFeedStoryPublisher {
 
   private function insertNotifications($chrono_key) {
     $subscribed_phids = $this->subscribedPHIDs;
-    $subscribed_phids = array_diff(
-      $subscribed_phids,
-      array($this->storyAuthorPHID));
+
+    if (!$this->notifyAuthor) {
+      $subscribed_phids = array_diff(
+        $subscribed_phids,
+        array($this->storyAuthorPHID));
+    }
 
     if (!$subscribed_phids) {
       return;

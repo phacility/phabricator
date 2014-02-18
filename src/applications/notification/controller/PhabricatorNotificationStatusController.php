@@ -59,8 +59,23 @@ final class PhabricatorNotificationStatusController
         'wide',
       ));
 
+    $test_icon = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+      ->setSpriteIcon('warning');
+
+    $test_button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setWorkflow(true)
+        ->setText(pht('Send Test Notification'))
+        ->setHref($this->getApplicationURI("test/"))
+        ->setIcon($test_icon);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Notification Server Status'))
+      ->addActionLink($test_button);
+
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Server Status'))
+      ->setHeader($header)
       ->appendChild($table);
 
     return $box;
