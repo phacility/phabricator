@@ -286,6 +286,16 @@
       "rule" : ".status-policy-custom-white, .dropdown-menu-item:hover .status-policy-custom",
       "hash" : "ff8b4cbe21f3b4254f343fffc170ef4b"
     },
+    "status-policy-elist"         : {
+      "name" : "status-policy-elist",
+      "rule" : ".status-policy-elist",
+      "hash" : "da03d710291f394933260dbf43dbc654"
+    },
+    "status-policy-elist-white"   : {
+      "name" : "status-policy-elist-white",
+      "rule" : ".status-policy-elist-white",
+      "hash" : "57e90e9c91fd640e6a778ddc9a2fa015"
+    },
     "status-policy-noone"         : {
       "name" : "status-policy-noone",
       "rule" : ".status-policy-noone",

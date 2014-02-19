@@ -112,9 +112,9 @@ final class PhabricatorUser
     if (!strlen($envelope->openEnvelope())) {
       $this->setPasswordHash('');
     } else {
-      $this->setPasswordSalt(md5(mt_rand()));
+      $this->setPasswordSalt(md5(Filesystem::readRandomBytes(32)));
       $hash = $this->hashPassword($envelope);
-      $this->setPasswordHash($hash);
+      $this->setPasswordHash($hash->openEnvelope());
     }
     return $this;
   }
@@ -170,19 +170,27 @@ final class PhabricatorUser
     if (!strlen($this->getPasswordHash())) {
       return false;
     }
-    $password_hash = $this->hashPassword($envelope);
-    return ($password_hash === $this->getPasswordHash());
+
+    return PhabricatorPasswordHasher::comparePassword(
+      $this->getPasswordHashInput($envelope),
+      new PhutilOpaqueEnvelope($this->getPasswordHash()));
   }
 
-  private function hashPassword(PhutilOpaqueEnvelope $envelope) {
-    $hash = $this->getUsername().
-            $envelope->openEnvelope().
-            $this->getPHID().
-            $this->getPasswordSalt();
-    for ($ii = 0; $ii < 1000; $ii++) {
-      $hash = md5($hash);
-    }
-    return $hash;
+  private function getPasswordHashInput(PhutilOpaqueEnvelope $password) {
+    $input =
+      $this->getUsername().
+      $password->openEnvelope().
+      $this->getPHID().
+      $this->getPasswordSalt();
+
+    return new PhutilOpaqueEnvelope($input);
+  }
+
+  private function hashPassword(PhutilOpaqueEnvelope $password) {
+    $hasher = PhabricatorPasswordHasher::getBestHasher();
+
+    $input_envelope = $this->getPasswordHashInput($password);
+    return $hasher->getPasswordHashForStorage($input_envelope);
   }
 
   const CSRF_CYCLE_FREQUENCY  = 3600;

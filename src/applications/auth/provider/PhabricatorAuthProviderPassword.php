@@ -11,8 +11,91 @@ final class PhabricatorAuthProviderPassword
 
   public function getConfigurationHelp() {
     return pht(
-      'You can select a minimum password length by setting '.
-      '`account.minimum-password-length` in configuration.');
+      "(WARNING) Examine the table below for information on how password ".
+      "hashes will be stored in the database.\n\n".
+      "(NOTE) You can select a minimum password length by setting ".
+      "`account.minimum-password-length` in configuration.");
+  }
+
+  public function renderConfigurationFooter() {
+    $hashers = PhabricatorPasswordHasher::getAllHashers();
+    $hashers = msort($hashers, 'getStrength');
+    $hashers = array_reverse($hashers);
+
+    $yes = phutil_tag(
+      'strong',
+      array(
+        'style' => 'color: #009900',
+      ),
+      pht('Yes'));
+
+    $no = phutil_tag(
+      'strong',
+      array(
+        'style' => 'color: #990000',
+      ),
+      pht('Not Installed'));
+
+    $best_hasher_name = null;
+    try {
+      $best_hasher = PhabricatorPasswordHasher::getBestHasher();
+      $best_hasher_name = $best_hasher->getHashName();
+    } catch (PhabricatorPasswordHasherUnavailableException $ex) {
+      // There are no suitable hashers. The user might be able to enable some,
+      // so we don't want to fatal here. We'll fatal when users try to actually
+      // use this stuff if it isn't fixed before then. Until then, we just
+      // don't highlight a row. In practice, at least one hasher should always
+      // be available.
+    }
+
+    $rows = array();
+    $rowc = array();
+    foreach ($hashers as $hasher) {
+      $is_installed = $hasher->canHashPasswords();
+
+      $rows[] = array(
+        $hasher->getHumanReadableName(),
+        $hasher->getHashName(),
+        $hasher->getHumanReadableStrength(),
+        ($is_installed ? $yes : $no),
+        ($is_installed ? null : $hasher->getInstallInstructions()),
+      );
+      $rowc[] = ($best_hasher_name == $hasher->getHashName())
+        ? 'highlighted'
+        : null;
+    }
+
+    $table = new AphrontTableView($rows);
+    $table->setRowClasses($rowc);
+    $table->setHeaders(
+      array(
+        pht('Algorithm'),
+        pht('Name'),
+        pht('Strength'),
+        pht('Installed'),
+        pht('Install Instructions'),
+      ));
+
+    $table->setColumnClasses(
+      array(
+        '',
+        '',
+        '',
+        '',
+        'wide',
+      ));
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Password Hash Algorithms'))
+      ->setSubheader(
+        pht(
+          'Stronger algorithms are listed first. The highlighted algorithm '.
+          'will be used when storing new hashes. Older hashes will be '.
+          'upgraded to the best algorithm over time.'));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($table);
   }
 
   public function getDescriptionForCreate() {
@@ -181,6 +264,19 @@ final class PhabricatorAuthProviderPassword
             if ($user->comparePassword($envelope)) {
               $account = $this->loadOrCreateAccount($user->getPHID());
               $log_user = $user;
+
+              // If the user's password is stored using a less-than-optimal
+              // hash, upgrade them to the strongest available hash.
+
+              $hash_envelope = new PhutilOpaqueEnvelope(
+                $user->getPasswordHash());
+              if (PhabricatorPasswordHasher::canUpgradeHash($hash_envelope)) {
+                $user->setPassword($envelope);
+
+                $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+                  $user->save();
+                unset($unguarded);
+              }
             }
           }
         }

@@ -34,18 +34,6 @@ final class PhabricatorCalendarEventListController
     return $nav;
   }
 
-  public function buildApplicationCrumbs() {
-    $crumbs = parent::buildApplicationCrumbs();
-
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setIcon('create')
-        ->setName(pht('Create Event'))
-        ->setHref($this->getApplicationURI().'create/'));
-
-    return $crumbs;
-  }
-
   public function renderResultsList(
     array $events,
     PhabricatorSavedQuery $query) {

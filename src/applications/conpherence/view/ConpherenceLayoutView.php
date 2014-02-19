@@ -62,7 +62,7 @@ final class ConpherenceLayoutView extends AphrontView {
       $selected_id = $this->thread->getPHID() . '-nav-item';
       $selected_thread_id = $this->thread->getID();
     }
-    Javelin::initBehavior('conpherence-menu',
+    $this->initBehavior('conpherence-menu',
       array(
         'baseURI' => $this->baseURI,
         'layoutID' => $layout_id,
@@ -74,7 +74,7 @@ final class ConpherenceLayoutView extends AphrontView {
         'hasWidgets' => false,
       ));
 
-    Javelin::initBehavior(
+    $this->initBehavior(
       'conpherence-widget-pane',
       array(
         'widgetBaseUpdateURI' => $this->baseURI . 'update/',

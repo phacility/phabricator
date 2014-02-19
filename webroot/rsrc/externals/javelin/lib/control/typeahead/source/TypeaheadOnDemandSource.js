@@ -46,8 +46,21 @@ JX.install('TypeaheadOnDemandSource', {
       var value = this.normalize(raw_value);
 
       if (this.haveData[value]) {
-        this.matchResults(value);
+        this.matchResults(raw_value);
       } else {
+        // If we have data for any prefix of the query, send those results
+        // back immediately. This allows "alinc" -> "alinco" to show partial
+        // results without the UI flickering. We'll still show the loading
+        // state, and then can show better results once we get everything
+        // back.
+        for (var ii = value.length - 1; ii > 0; ii--) {
+          var substr = value.substring(0, ii);
+          if (this.haveData[substr]) {
+            this.matchResults(raw_value, true);
+            break;
+          }
+        }
+
         this.waitForResults();
         setTimeout(
           JX.bind(this, this.sendRequest, this.lastChange, value, raw_value),
@@ -62,23 +75,27 @@ JX.install('TypeaheadOnDemandSource', {
       }
       var r = new JX.Request(
         this.uri,
-        JX.bind(this, this.ondata, this.lastChange, value));
+        JX.bind(this, this.ondata, this.lastChange, raw_value));
       r.setMethod('GET');
       r.setData(JX.copy(this.getAuxiliaryData(), {q : value, raw: raw_value}));
       r.send();
     },
 
-    ondata : function(when, value, results) {
+    ondata : function(when, raw_value, results) {
       if (results) {
         for (var ii = 0; ii < results.length; ii++) {
           this.addResult(results[ii]);
         }
       }
+
+      var value = this.normalize(raw_value);
       this.haveData[value] = true;
+
       if (when != this.lastChange) {
         return;
       }
-      this.matchResults(value);
+
+      this.matchResults(raw_value);
     }
   }
 });

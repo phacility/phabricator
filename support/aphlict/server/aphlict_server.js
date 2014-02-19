@@ -6,7 +6,22 @@
  * You can also specify `port`, `admin`, `host` and `log`.
  */
 
+var JX = require('./lib/javelin').JX;
+
+JX.require('lib/AphlictFlashPolicyServer', __dirname);
+JX.require('lib/AphlictListenerList', __dirname);
+JX.require('lib/AphlictLog', __dirname);
+
+var debug = new JX.AphlictLog()
+  .addConsole(console);
+
+var clients = new JX.AphlictListenerList();
+
 var config = parse_command_line_arguments(process.argv);
+
+if (config.logfile) {
+  debug.addLogfile(config.logfile);
+}
 
 function parse_command_line_arguments(argv) {
   var config = {
@@ -49,110 +64,42 @@ var net = require('net');
 var http  = require('http');
 var url = require('url');
 var querystring = require('querystring');
-var fs = require('fs');
-
-// set up log file
-var logfile = fs.createWriteStream(
-  config.log,
-  {
-    flags: 'a',
-    encoding: null,
-    mode: 0666
-  });
-
-function log(str) {
-  console.log(str);
-  logfile.write(str + '\n');
-}
 
 process.on('uncaughtException', function (err) {
-  log("\n<<< UNCAUGHT EXCEPTION! >>>\n\n" + err);
+  debug.log("\n<<< UNCAUGHT EXCEPTION! >>>\n\n" + err);
   process.exit(1);
 });
 
-log('----- ' + (new Date()).toLocaleString() + ' -----\n');
+var flash_server = new JX.AphlictFlashPolicyServer()
+  .setDebugLog(debug)
+  .setAccessPort(config.port)
+  .start();
 
-function getFlashPolicy() {
-  return [
-    '<?xml version="1.0"?>',
-    '<!DOCTYPE cross-domain-policy SYSTEM ' +
-      '"http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd">',
-    '<cross-domain-policy>',
-    '<allow-access-from domain="*" to-ports="'+config.port+'"/>',
-    '</cross-domain-policy>'
-  ].join('\n');
-}
-
-net.createServer(function(socket) {
-  socket.write(getFlashPolicy() + '\0');
-  socket.end();
-
-  log('[' + socket.remoteAddress + '] Sent Flash Policy');
-
-  socket.on('error', function (e) {
-    log('Error in policy server: ' + e);
-  });
-}).listen(843);
-
-
-function write_json(socket, data) {
-  var serial = JSON.stringify(data);
-  var length = Buffer.byteLength(serial, 'utf8');
-  length = length.toString();
-  while (length.length < 8) {
-    length = '0' + length;
-  }
-  socket.write(length + serial);
-}
-
-
-var clients = {};
-var current_connections = 0;
-// According to the internet up to 2^53 can
-// be stored in javascript, this is less than that
-var MAX_ID = 9007199254740991;//2^53 -1
-
-// If we get one connections per millisecond this will
-// be fine as long as someone doesn't maintain a
-// connection for longer than 6854793 years.  If
-// you want to write something pretty be my guest
-
-function generate_id() {
-  if (typeof generate_id.current_id == 'undefined' ||
-      generate_id.current_id > MAX_ID) {
-    generate_id.current_id = 0;
-  }
-  return generate_id.current_id++;
-}
 
 var send_server = net.createServer(function(socket) {
-  var client_id = generate_id();
-  var client_name = '[' + socket.remoteAddress + '] [#' + client_id + '] ';
+  var listener = clients.addListener(socket);
 
-  clients[client_id] = socket;
-  current_connections++;
-  log(client_name + 'connected\t\t(' +
-    current_connections + ' current connections)');
+  debug.log('<%s> Connected from %s',
+    listener.getDescription(),
+    socket.remoteAddress);
 
   socket.on('close', function() {
-    delete clients[client_id];
-    current_connections--;
-    log(client_name + 'closed\t\t(' +
-      current_connections + ' current connections)');
+    clients.removeListener(listener);
+    debug.log('<%s> Disconnected', listener.getDescription());
   });
 
   socket.on('timeout', function() {
-    log(client_name + 'timed out!');
+    debug.log('<%s> Timed Out', listener.getDescription());
   });
 
   socket.on('end', function() {
-    log(client_name + 'ended the connection');
-    // node automatically closes half-open connections
+    debug.log('<%s> Ended Connection', listener.getDescription());
   });
 
   socket.on('error', function (e) {
-    log(client_name + 'Uncaught error in send server: ' + e);
+    debug.log('<%s> Error: %s', listener.getDescription(), e);
   });
+
 }).listen(config.port);
 
 
@@ -175,7 +122,7 @@ var receive_server = http.createServer(function(request, response) {
       ++messages_in;
 
       var data = querystring.parse(body);
-      log('notification: ' + JSON.stringify(data));
+      debug.log('notification: ' + JSON.stringify(data));
       broadcast(data);
       response.end();
     });
@@ -188,11 +135,12 @@ var receive_server = http.createServer(function(request, response) {
     request.on('end', function() {
       var status = {
         'uptime': (new Date().getTime() - start_time),
-        'clients.active': current_connections,
-        'clients.total': generate_id.current_id || 0,
+        'clients.active': clients.getActiveListenerCount(),
+        'clients.total': clients.getTotalListenerCount(),
         'messages.in': messages_in,
         'messages.out': messages_out,
-        'log': config.log
+        'log': config.log,
+        'version': 3
       };
 
       response.write(JSON.stringify(status));
@@ -207,15 +155,17 @@ var receive_server = http.createServer(function(request, response) {
 }).listen(config.admin, config.host);
 
 function broadcast(data) {
-  for (var client_id in clients) {
+  var listeners = clients.getListeners();
+  for (var id in listeners) {
+    var listener = listeners[id];
     try {
-      write_json(clients[client_id], data);
+      listener.writeMessage(data);
+
       ++messages_out;
-      log('wrote to client ' + client_id);
+      debug.log('<%s> Wrote Message', listener.getDescription());
     } catch (error) {
-      delete clients[client_id];
-      current_connections--;
-      log('ERROR: could not write to client ' + client_id);
+      clients.removeListener(listener);
+      debug.log('<%s> Write Error: %s', error);
     }
   }
 }
@@ -226,3 +176,4 @@ if (config.user) {
   process.setuid(config.user);
 }
 
+debug.log('Started Server (PID %d)', process.pid);

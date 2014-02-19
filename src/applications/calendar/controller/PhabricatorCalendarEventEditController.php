@@ -166,6 +166,8 @@ final class PhabricatorCalendarEventEditController
     }
     $form->appendChild($submit);
 
+
+
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)
       ->setFormErrors($errors)
@@ -174,8 +176,13 @@ final class PhabricatorCalendarEventEditController
     $nav = $this->buildSideNavView($status);
     $nav->selectFilter($filter);
 
+    $crumbs = $this
+      ->buildApplicationCrumbs()
+      ->addTextCrumb($page_title);
+
     $nav->appendChild(
       array(
+        $crumbs,
         $form_box,
       ));
 

@@ -47,3 +47,7 @@ table.jx-typeahead input {
 input.jx-typeahead-placeholder {
   color: {$lightgreytext};
 }
+
+div.jx-tokenizer-container-focused.jx-typeahead-waiting {
+  border-color: {$lightblueborder};
+}

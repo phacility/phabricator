@@ -43,9 +43,12 @@ JX.install('Prefab', {
      *   - `limit` Optional, token limit.
      *   - `placeholder` Optional, placeholder text.
      *   - `username` Optional, username to sort first (i.e., viewer).
+     *   - `icons` Optional, map of icons.
      *
      */
     buildTokenizer : function(config) {
+      config.icons = config.icons || {};
+
       var root;
 
       try {
@@ -58,7 +61,15 @@ JX.install('Prefab', {
       }
 
       var datasource;
-      if (config.ondemand) {
+
+      // Default to an ondemand source if no alternate configuration is
+      // provided.
+      var ondemand = true;
+      if ('ondemand' in config) {
+        ondemand = config.ondemand;
+      }
+
+      if (ondemand) {
         datasource = new JX.TypeaheadOnDemandSource(config.src);
       } else {
         datasource = new JX.TypeaheadPreloadedSource(config.src);
@@ -138,6 +149,39 @@ JX.install('Prefab', {
       };
 
       datasource.setSortHandler(JX.bind(datasource, sort_handler));
+
+      // Don't show any closed objects until the query is specific enough that
+      // it only selects closed objects. Specifically, if the result list had
+      // any open objects, remove all the closed objects from the list.
+      var filter_handler = function(value, list) {
+        // Look for any open result.
+        var has_open = false;
+        var ii;
+        for (ii = 0; ii < list.length; ii++) {
+          if (!list[ii].closed) {
+            has_open = true;
+            break;
+          }
+        }
+
+        if (!has_open) {
+          // Everything is closed, so just use it as-is.
+          return list;
+        }
+
+        // Otherwise, only display the open results.
+        var results = [];
+        for (ii = 0; ii < list.length; ii++) {
+          if (!list[ii].closed) {
+            results.push(list[ii]);
+          }
+        }
+
+        return results;
+      };
+
+      datasource.setFilterHandler(filter_handler);
+
       datasource.setTransformer(
         function(object) {
           var closed = object[9];

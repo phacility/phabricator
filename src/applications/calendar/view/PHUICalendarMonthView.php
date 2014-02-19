@@ -1,6 +1,6 @@
 <?php
 
-final class AphrontCalendarMonthView extends AphrontView {
+final class PHUICalendarMonthView extends AphrontView {
 
   private $day;
   private $month;
@@ -43,7 +43,7 @@ final class AphrontCalendarMonthView extends AphrontView {
 
     $days = $this->getDatesInMonth();
 
-    require_celerity_resource('aphront-calendar-view-css');
+    require_celerity_resource('phui-calendar-month-css');
 
     $first = reset($days);
     $empty = $first->format('w');
@@ -52,7 +52,7 @@ final class AphrontCalendarMonthView extends AphrontView {
 
     $empty_box = phutil_tag(
       'div',
-      array('class' => 'aphront-calendar-day aphront-calendar-empty'),
+      array('class' => 'phui-calendar-day phui-calendar-empty'),
       '');
 
     for ($ii = 0; $ii < $empty; $ii++) {
@@ -65,15 +65,15 @@ final class AphrontCalendarMonthView extends AphrontView {
       $day_number = $day->format('j');
 
       $holiday = idx($this->holidays, $day->format('Y-m-d'));
-      $class = 'aphront-calendar-day';
+      $class = 'phui-calendar-day';
       $weekday = $day->format('w');
 
       if ($day_number == $this->day) {
-        $class .= ' aphront-calendar-today';
+        $class .= ' phui-calendar-today';
       }
 
       if ($holiday || $weekday == 0 || $weekday == 6) {
-        $class .= ' aphront-calendar-not-work-day';
+        $class .= ' phui-calendar-not-work-day';
       }
 
       $day->setTime(0, 0, 0);
@@ -88,7 +88,7 @@ final class AphrontCalendarMonthView extends AphrontView {
         $show_events = array_fill_keys(
           array_keys($show_events),
           phutil_tag_div(
-            'aphront-calendar-event aphront-calendar-event-empty',
+            'phui-calendar-event phui-calendar-event-empty',
             "\xC2\xA0")); // &nbsp;
       }
 
@@ -112,7 +112,7 @@ final class AphrontCalendarMonthView extends AphrontView {
         $holiday_markup = phutil_tag(
           'div',
           array(
-            'class' => 'aphront-calendar-holiday',
+            'class' => 'phui-calendar-holiday',
             'title' => $name,
           ),
           $name);
@@ -121,7 +121,7 @@ final class AphrontCalendarMonthView extends AphrontView {
       $markup[] = phutil_tag_div(
         $class,
         array(
-          phutil_tag_div('aphront-calendar-date-number', $day_number),
+          phutil_tag_div('phui-calendar-date-number', $day_number),
           $holiday_markup,
           phutil_implode_html("\n", $show_events),
         ));
@@ -134,15 +134,25 @@ final class AphrontCalendarMonthView extends AphrontView {
       while (count($row) < 7) {
         $row[] = $empty_box;
       }
+      $j = 0;
       foreach ($row as $cell) {
-        $cells[] = phutil_tag('td', array(), $cell);
+        if ($j == 0) {
+          $cells[] = phutil_tag(
+            'td',
+            array(
+              'class' => 'phui-calendar-month-weekstart'),
+            $cell);
+        } else {
+          $cells[] = phutil_tag('td', array(), $cell);
+        }
+        $j++;
       }
       $table[] = phutil_tag('tr', array(), $cells);
     }
 
     $header = phutil_tag(
       'tr',
-      array('class' => 'aphront-calendar-day-of-week-header'),
+      array('class' => 'phui-calendar-day-of-week-header'),
       array(
         phutil_tag('th', array(), pht('Sun')),
         phutil_tag('th', array(), pht('Mon')),
@@ -155,52 +165,69 @@ final class AphrontCalendarMonthView extends AphrontView {
 
     $table = phutil_tag(
       'table',
-      array('class' => 'aphront-calendar-view'),
+      array('class' => 'phui-calendar-view'),
       array(
-        $this->renderCalendarHeader($first),
         $header,
         phutil_implode_html("\n", $table),
       ));
 
-    return $table;
+    $box = id(new PHUIObjectBoxView())
+      ->setHeader($this->renderCalendarHeader($first))
+      ->appendChild($table);
+
+    return $box;
   }
 
   private function renderCalendarHeader(DateTime $date) {
-    $colspan = 7;
-    $left_th = '';
-    $right_th = '';
+    $button_bar = null;
 
     // check for a browseURI, which means we need "fancy" prev / next UI
     $uri = $this->getBrowseURI();
     if ($uri) {
-      $colspan = 5;
       $uri = new PhutilURI($uri);
       list($prev_year, $prev_month) = $this->getPrevYearAndMonth();
       $query = array('year' => $prev_year, 'month' => $prev_month);
-      $prev_link = phutil_tag(
-        'a',
-        array('href' => (string) $uri->setQueryParams($query)),
-        "\xE2\x86\x90");
+      $prev_uri = (string) $uri->setQueryParams($query);
 
       list($next_year, $next_month) = $this->getNextYearAndMonth();
       $query = array('year' => $next_year, 'month' => $next_month);
-      $next_link = phutil_tag(
-        'a',
-        array('href' => (string) $uri->setQueryParams($query)),
-        "\xE2\x86\x92");
+      $next_uri = (string) $uri->setQueryParams($query);
 
-      $left_th = phutil_tag('th', array(), $prev_link);
-      $right_th = phutil_tag('th', array(), $next_link);
+      $button_bar = new PHUIButtonBarView();
+
+      $left_icon = id(new PHUIIconView())
+          ->setSpriteSheet(PHUIIconView::SPRITE_BUTTONBAR)
+          ->setSpriteIcon('chevron-left');
+      $left = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setColor(PHUIButtonView::GREY)
+        ->setHref($prev_uri)
+        ->setTitle(pht('Previous Month'))
+        ->setIcon($left_icon);
+
+      $right_icon = id(new PHUIIconView())
+          ->setSpriteSheet(PHUIIconView::SPRITE_BUTTONBAR)
+          ->setSpriteIcon('chevron-right');
+      $right = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setColor(PHUIButtonView::GREY)
+        ->setHref($next_uri)
+        ->setTitle(pht('Next Month'))
+        ->setIcon($right_icon);
+
+      $button_bar->addButton($left);
+      $button_bar->addButton($right);
+
     }
 
-    return phutil_tag(
-      'tr',
-      array('class' => 'aphront-calendar-month-year-header'),
-      array(
-        $left_th,
-        phutil_tag('th', array('colspan' => $colspan), $date->format('F Y')),
-        $right_th,
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader($date->format('F Y'));
+
+    if ($button_bar) {
+      $header->setButtonBar($button_bar);
+    }
+
+    return $header;
   }
 
   private function getNextYearAndMonth() {
@@ -279,16 +306,16 @@ final class AphrontCalendarMonthView extends AphrontView {
     $classes = array();
     $when = array();
 
-    $classes[] = 'aphront-calendar-event';
+    $classes[] = 'phui-calendar-event';
     if ($event_start < $epoch_start) {
-      $classes[] = 'aphront-calendar-event-continues-before';
+      $classes[] = 'phui-calendar-event-continues-before';
       $when[] = 'Started '.phabricator_datetime($event_start, $user);
     } else {
       $when[] = 'Starts at '.phabricator_time($event_start, $user);
     }
 
     if ($event_end > $epoch_end) {
-      $classes[] = 'aphront-calendar-event-continues-after';
+      $classes[] = 'phui-calendar-event-continues-after';
       $when[] = 'Ends '.phabricator_datetime($event_end, $user);
     } else {
       $when[] = 'Ends at '.phabricator_time($event_end, $user);
@@ -309,7 +336,7 @@ final class AphrontCalendarMonthView extends AphrontView {
           'tip'  => $info."\n\n".implode("\n", $when),
           'size' => 240,
         ),
-        'class' => 'aphront-calendar-event-text',
+        'class' => 'phui-calendar-event-text',
         'href' => '/calendar/event/view/'.$event->getEventID().'/',
       ),
       phutil_utf8_shorten($event->getName(), 32));

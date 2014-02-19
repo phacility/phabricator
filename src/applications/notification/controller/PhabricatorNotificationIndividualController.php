@@ -26,7 +26,7 @@ final class PhabricatorNotificationIndividualController
     $response = array(
       'pertinent'         => true,
       'primaryObjectPHID' => head($stories)->getPrimaryObjectPHID(),
-      'content'           => $content,
+      'content'           => hsprintf('%s', $content),
     );
 
     return id(new AphrontAjaxResponse())->setContent($response);

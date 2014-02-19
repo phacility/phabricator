@@ -426,6 +426,18 @@ final class DiffusionServeController extends DiffusionController {
       return null;
     }
 
+    // If the user's password is stored using a less-than-optimal hash, upgrade
+    // them to the strongest available hash.
+
+    $hash_envelope = new PhutilOpaqueEnvelope(
+      $password_entry->getPasswordHash());
+    if (PhabricatorPasswordHasher::canUpgradeHash($hash_envelope)) {
+      $password_entry->setPassword($password, $user);
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $password_entry->save();
+      unset($unguarded);
+    }
+
     return $user;
   }
 

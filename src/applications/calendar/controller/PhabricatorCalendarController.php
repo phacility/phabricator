@@ -9,14 +9,30 @@ abstract class PhabricatorCalendarController extends PhabricatorController {
 
     $nav->addLabel(pht('Calendar'));
     $nav->addFilter('/', pht('View All'));
-    $nav->addFilter('event/create/', pht('New Status'));
+    $nav->addFilter('event/create/', pht('Create Event'));
 
     if ($status && $status->getID()) {
-      $nav->addFilter('event/edit/'.$status->getID().'/', pht('Edit Status'));
+      $nav->addFilter('event/edit/'.$status->getID().'/', pht('Edit Event'));
     }
-    $nav->addFilter('event/', pht('Upcoming Statuses'));
+    $nav->addFilter('event/', pht('Upcoming Events'));
 
     return $nav;
+  }
+
+  public function buildApplicationMenu() {
+    return $this->buildSideNavView()->getMenu();
+  }
+
+  public function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+        ->setName(pht('Create Event'))
+        ->setHref($this->getApplicationURI().'event/create')
+        ->setIcon('create'));
+
+    return $crumbs;
   }
 
 }

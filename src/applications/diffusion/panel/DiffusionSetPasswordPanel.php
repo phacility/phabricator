@@ -165,6 +165,26 @@ final class DiffusionSetPasswordPanel extends PhabricatorSettingsPanel {
       }
     }
 
+    $hash_envelope = new PhutilOpaqueEnvelope($vcspassword->getPasswordHash());
+
+    $form->appendChild(
+      id(new AphrontFormStaticControl())
+        ->setLabel(pht('Current Algorithm'))
+        ->setValue(
+          PhabricatorPasswordHasher::getCurrentAlgorithmName($hash_envelope)));
+
+    $form->appendChild(
+      id(new AphrontFormStaticControl())
+        ->setLabel(pht('Best Available Algorithm'))
+        ->setValue(PhabricatorPasswordHasher::getBestAlgorithmName()));
+
+    if (PhabricatorPasswordHasher::canUpgradeHash($hash_envelope)) {
+      $errors[] = pht(
+        'The strength of your stored VCS password hash can be upgraded. '.
+        'To upgrade, either: use the password to authenticate with a '.
+        'repository; or change your password.');
+    }
+
     $object_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setForm($form)

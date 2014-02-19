@@ -13,6 +13,9 @@ $conn_w = $table->establishConnection('w');
 $search_table = new PhabricatorSearchQuery();
 $search_conn_w = $search_table->establishConnection('w');
 
+// See T1812. This is an old status constant from the time of this migration.
+$old_open_status = 0;
+
 echo "Updating saved Maniphest queries...\n";
 $rows = new LiskRawMigrationIterator($conn_w, 'maniphest_savedquery');
 foreach ($rows as $row) {
@@ -132,12 +135,12 @@ foreach ($rows as $row) {
         if ($include_open xor $include_closed) {
           if ($include_open) {
             $new_data['statuses'] = array(
-              ManiphestTaskStatus::STATUS_OPEN,
+              $old_open_status,
             );
           } else {
             $statuses = array();
             foreach (ManiphestTaskStatus::getTaskStatusMap() as $status => $n) {
-              if ($status != ManiphestTaskStatus::STATUS_OPEN) {
+              if ($status != $old_open_status) {
                 $statuses[] = $status;
               }
             }

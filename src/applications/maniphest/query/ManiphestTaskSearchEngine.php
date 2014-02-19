@@ -384,14 +384,20 @@ final class ManiphestTaskSearchEngine
       case 'assigned':
         return $query
           ->setParameter('assignedPHIDs', array($viewer_phid))
-          ->setParameter('statuses', array(ManiphestTaskStatus::STATUS_OPEN));
+          ->setParameter(
+            'statuses',
+            ManiphestTaskStatus::getOpenStatusConstants());
       case 'subscribed':
         return $query
           ->setParameter('subscriberPHIDs', array($viewer_phid))
-          ->setParameter('statuses', array(ManiphestTaskStatus::STATUS_OPEN));
+          ->setParameter(
+            'statuses',
+            ManiphestTaskStatus::getOpenStatusConstants());
       case 'open':
         return $query
-          ->setParameter('statuses', array(ManiphestTaskStatus::STATUS_OPEN));
+          ->setParameter(
+            'statuses',
+            ManiphestTaskStatus::getOpenStatusConstants());
       case 'authored':
         return $query
           ->setParameter('authorPHIDs', array($viewer_phid))

@@ -63,7 +63,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
       $task->setTitle((string)$request->getValue('title'));
       $task->setDescription((string)$request->getValue('description'));
       $changes[ManiphestTransaction::TYPE_STATUS] =
-        ManiphestTaskStatus::STATUS_OPEN;
+        ManiphestTaskStatus::getDefaultStatus();
     } else {
 
       $comments = $request->getValue('comments');

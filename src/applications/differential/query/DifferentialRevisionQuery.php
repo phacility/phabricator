@@ -36,7 +36,6 @@ final class DifferentialRevisionQuery
   private $responsibles = array();
   private $branches = array();
   private $arcanistProjectPHIDs = array();
-  private $draftRevisions = array();
   private $repositoryPHIDs;
 
   private $order            = 'order-modified';
@@ -58,6 +57,8 @@ final class DifferentialRevisionQuery
   private $needHashes         = false;
   private $needReviewerStatus = false;
   private $needReviewerAuthority;
+  private $needDrafts;
+  private $needFlags;
 
   private $buildingGlobalOrder;
 
@@ -346,6 +347,16 @@ final class DifferentialRevisionQuery
     return $this;
   }
 
+  public function needFlags($need_flags) {
+    $this->needFlags = $need_flags;
+    return $this;
+  }
+
+  public function needDrafts($need_drafts) {
+    $this->needDrafts = $need_drafts;
+    return $this;
+  }
+
 
 /* -(  Query Execution  )---------------------------------------------------- */
 
@@ -464,42 +475,42 @@ final class DifferentialRevisionQuery
     return $revisions;
   }
 
+  protected function didFilterPage(array $revisions) {
+    $viewer = $this->getViewer();
+
+    if ($this->needFlags) {
+      $flags = id(new PhabricatorFlagQuery())
+        ->setViewer($viewer)
+        ->withOwnerPHIDs(array($viewer->getPHID()))
+        ->withObjectPHIDs(mpull($revisions, 'getPHID'))
+        ->execute();
+      $flags = mpull($flags, null, 'getObjectPHID');
+      foreach ($revisions as $revision) {
+        $revision->attachFlag(
+          $viewer,
+          idx($flags, $revision->getPHID()));
+      }
+    }
+
+    if ($this->needDrafts) {
+      $drafts = id(new DifferentialDraft())->loadAllWhere(
+        'authorPHID = %s AND objectPHID IN (%Ls)',
+        $viewer->getPHID(),
+        mpull($revisions, 'getPHID'));
+      $drafts = mgroup($drafts, 'getObjectPHID');
+      foreach ($revisions as $revision) {
+        $revision->attachDrafts(
+          $viewer,
+          idx($drafts, $revision->getPHID(), array()));
+      }
+    }
+
+    return $revisions;
+  }
+
   private function loadData() {
     $table = new DifferentialRevision();
     $conn_r = $table->establishConnection('r');
-
-    if ($this->draftAuthors) {
-      $this->draftRevisions = array();
-
-      $draft_key = 'differential-comment-';
-      $drafts = id(new PhabricatorDraft())->loadAllWhere(
-        'authorPHID IN (%Ls) AND draftKey LIKE %> AND draft != %s',
-        $this->draftAuthors,
-        $draft_key,
-        '');
-      $len = strlen($draft_key);
-      foreach ($drafts as $draft) {
-        $this->draftRevisions[] = substr($draft->getDraftKey(), $len);
-      }
-
-      // TODO: Restore this after drafts are sorted out. It's now very
-      // expensive to get revision IDs.
-
-      /*
-
-      $inlines = id(new DifferentialInlineCommentQuery())
-        ->withDraftsByAuthors($this->draftAuthors)
-        ->execute();
-      foreach ($inlines as $inline) {
-        $this->draftRevisions[] = $inline->getRevisionID();
-      }
-
-      */
-
-      if (!$this->draftRevisions) {
-        return array();
-      }
-    }
 
     $selects = array();
 
@@ -632,6 +643,16 @@ final class DifferentialRevisionQuery
         $this->reviewers);
     }
 
+    if ($this->draftAuthors) {
+      $differential_draft = new DifferentialDraft();
+      $joins[] = qsprintf(
+        $conn_r,
+        'JOIN %T has_draft ON has_draft.objectPHID = r.phid '.
+        'AND has_draft.authorPHID IN (%Ls)',
+        $differential_draft->getTableName(),
+        $this->draftAuthors);
+    }
+
     $joins = implode(' ', $joins);
 
     return $joins;
@@ -663,13 +684,6 @@ final class DifferentialRevisionQuery
         $conn_r,
         'r.authorPHID IN (%Ls)',
         $this->authors);
-    }
-
-    if ($this->draftRevisions) {
-      $where[] = qsprintf(
-        $conn_r,
-        'r.id IN (%Ld)',
-        $this->draftRevisions);
     }
 
     if ($this->revIDs) {

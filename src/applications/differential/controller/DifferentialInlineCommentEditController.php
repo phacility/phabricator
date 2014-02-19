@@ -60,8 +60,9 @@ final class DifferentialInlineCommentEditController
       return false;
     }
 
-    // Saved comments may not be edited.
-    if ($inline->getCommentID()) {
+    // Saved comments may not be edited, for now, although the schema now
+    // supports it.
+    if (!$inline->isDraft()) {
       return false;
     }
 
@@ -73,4 +74,23 @@ final class DifferentialInlineCommentEditController
     return true;
   }
 
+  protected function deleteComment(PhabricatorInlineCommentInterface $inline) {
+    $inline->openTransaction();
+      DifferentialDraft::deleteHasDraft(
+        $inline->getAuthorPHID(),
+        $inline->getRevisionPHID(),
+        $inline->getPHID());
+      $inline->delete();
+    $inline->saveTransaction();
+  }
+
+  protected function saveComment(PhabricatorInlineCommentInterface $inline) {
+    $inline->openTransaction();
+      $inline->save();
+      DifferentialDraft::markHasDraft(
+        $inline->getAuthorPHID(),
+        $inline->getRevisionPHID(),
+        $inline->getPHID());
+    $inline->saveTransaction();
+  }
 }

@@ -48,9 +48,9 @@ final class PhabricatorCalendarEvent
   public function getTerseSummary(PhabricatorUser $viewer) {
     $until = phabricator_date($this->dateTo, $viewer);
     if ($this->status == PhabricatorCalendarEvent::STATUS_SPORADIC) {
-      return 'Sporadic until '.$until;
+      return pht('Sporadic until %s', $until);
     } else {
-      return 'Away until '.$until;
+      return pht('Away until %s', $until);
     }
   }
 

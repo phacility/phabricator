@@ -7,6 +7,8 @@ final class PhabricatorDraft extends PhabricatorDraftDAO {
   protected $draft;
   protected $metadata = array();
 
+  private $deleted = false;
+
   public function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
@@ -23,9 +25,18 @@ final class PhabricatorDraft extends PhabricatorDraftDAO {
         $this->getTableName(),
         $this->authorPHID,
         $this->draftKey);
+      $this->deleted = true;
       return $this;
     }
     return parent::replace();
+  }
+
+  protected function didDelete() {
+    $this->deleted = true;
+  }
+
+  public function isDeleted() {
+    return $this->deleted;
   }
 
   public static function newFromUserAndKey(PhabricatorUser $user, $key) {

@@ -29,6 +29,7 @@ abstract class PhabricatorApplicationTransaction
   private $renderingTarget = self::TARGET_HTML;
   private $transactionGroup = array();
   private $viewer = self::ATTACHABLE;
+  private $object = self::ATTACHABLE;
 
   abstract public function getApplicationTransactionType();
 
@@ -108,6 +109,15 @@ abstract class PhabricatorApplicationTransaction
   public function setCommentNotLoaded($not_loaded) {
     $this->commentNotLoaded = $not_loaded;
     return $this;
+  }
+
+  public function attachObject($object) {
+    $this->object = $object;
+    return $this;
+  }
+
+  public function getObject() {
+    return $this->assertAttached($this->object);
   }
 
 /* -(  Rendering  )---------------------------------------------------------- */
@@ -388,10 +398,7 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $key = $this->getMetadataValue('customfield:key');
         $field = PhabricatorCustomField::getObjectField(
-          // TODO: This is a giant hack, but we currently don't have a way to
-          // get the contextual object and this pathway is only hit by
-          // Maniphest. We should provide a way to get the actual object here.
-          new ManiphestTask(),
+          $this->getObject(),
           PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS,
           $key);
         if ($field) {
@@ -455,10 +462,7 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $key = $this->getMetadataValue('customfield:key');
         $field = PhabricatorCustomField::getObjectField(
-          // TODO: This is a giant hack, but we currently don't have a way to
-          // get the contextual object and this pathway is only hit by
-          // Maniphest. We should provide a way to get the actual object here.
-          new ManiphestTask(),
+          $this->getObject(),
           PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS,
           $key);
         if ($field) {

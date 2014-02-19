@@ -118,7 +118,7 @@ final class PhabricatorHomeMainController
 
     $task_query = id(new ManiphestTaskQuery())
       ->setViewer($user)
-      ->withStatuses(array(ManiphestTaskStatus::STATUS_OPEN))
+      ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
       ->withPriorities(array($unbreak_now))
       ->setLimit(10);
 
@@ -157,7 +157,7 @@ final class PhabricatorHomeMainController
     if ($projects) {
       $task_query = id(new ManiphestTaskQuery())
         ->setViewer($user)
-        ->withStatuses(array(ManiphestTaskStatus::STATUS_OPEN))
+        ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
         ->withPriorities(array($needs_triage))
         ->withAnyProjects(mpull($projects, 'getPHID'))
         ->setLimit(10);
@@ -193,7 +193,9 @@ final class PhabricatorHomeMainController
       ->setViewer($user)
       ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
       ->withResponsibleUsers(array($user_phid))
-      ->needRelationships(true);
+      ->needRelationships(true)
+      ->needFlags(true)
+      ->needDrafts(true);
 
     $revisions = $revision_query->execute();
 
@@ -216,8 +218,7 @@ final class PhabricatorHomeMainController
       ->setHighlightAge(true)
       ->setRevisions(array_merge($blocking, $active))
       ->setFields(DifferentialRevisionListView::getDefaultFields($user))
-      ->setUser($user)
-      ->loadAssets();
+      ->setUser($user);
     $phids = array_merge(
       array($user_phid),
       $revision_view->getRequiredHandlePHIDs());
@@ -250,7 +251,7 @@ final class PhabricatorHomeMainController
 
     $task_query = id(new ManiphestTaskQuery())
       ->setViewer($user)
-      ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
+      ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
       ->setGroupBy(ManiphestTaskQuery::GROUP_PRIORITY)
       ->withOwners(array($user_phid))
       ->setLimit(10);

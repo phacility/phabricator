@@ -28,6 +28,13 @@ final class DifferentialInlineComment
     return $this->proxy;
   }
 
+  public function openTransaction() {
+    $this->proxy->openTransaction();
+  }
+
+  public function saveTransaction() {
+    $this->proxy->saveTransaction();
+  }
 
   public function save() {
     $this->getTransactionCommentForSave()->save();
@@ -43,6 +50,10 @@ final class DifferentialInlineComment
 
   public function getID() {
     return $this->proxy->getID();
+  }
+
+  public function getPHID() {
+    return $this->proxy->getPHID();
   }
 
   public static function newFromModernComment(
@@ -141,6 +152,10 @@ final class DifferentialInlineComment
     return $this;
   }
 
+  public function getRevisionPHID() {
+    return $this->proxy->getRevisionPHID();
+  }
+
   // Although these are purely transitional, they're also *extra* dumb.
 
   public function setRevisionID($revision_id) {
@@ -167,18 +182,12 @@ final class DifferentialInlineComment
   // the future transaction.
 
   public function setCommentID($id) {
-    $this->proxy->setLegacyCommentID($id);
     $this->proxy->setTransactionPHID(
       PhabricatorPHID::generateNewPHID(
         PhabricatorApplicationTransactionPHIDTypeTransaction::TYPECONST,
         DifferentialPHIDTypeRevision::TYPECONST));
     return $this;
   }
-
-  public function getCommentID() {
-    return $this->proxy->getLegacyCommentID();
-  }
-
 
 /* -(  PhabricatorMarkupInterface Implementation  )-------------------------- */
 
@@ -202,7 +211,7 @@ final class DifferentialInlineComment
 
   public function shouldUseMarkupCache($field) {
     // Only cache submitted comments.
-    return ($this->getID() && $this->getCommentID());
+    return ($this->getID() && !$this->isDraft());
   }
 
 }

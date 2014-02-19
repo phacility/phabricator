@@ -38,7 +38,7 @@ final class ManiphestPHIDTypeTask extends PhabricatorPHIDType {
       $handle->setFullName("T{$id}: {$title}");
       $handle->setURI("/T{$id}");
 
-      if ($task->getStatus() != ManiphestTaskStatus::STATUS_OPEN) {
+      if (!ManiphestTaskStatus::isOpenStatus($task->getStatus())) {
         $handle->setStatus(PhabricatorObjectHandleStatus::STATUS_CLOSED);
       }
     }

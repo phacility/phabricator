@@ -4,6 +4,7 @@ final class PhabricatorProjectBoardController
   extends PhabricatorProjectController {
 
   private $id;
+  private $handles;
 
   public function shouldAllowPublic() {
     return true;
@@ -50,7 +51,7 @@ final class PhabricatorProjectBoardController
     $tasks = id(new ManiphestTaskQuery())
       ->setViewer($viewer)
       ->withAllProjects(array($project->getPHID()))
-      ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
+      ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
       ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
       ->execute();
     $tasks = mpull($tasks, null, 'getPHID');
@@ -89,6 +90,8 @@ final class PhabricatorProjectBoardController
         'boardID' => $board_id,
         'moveURI' => $this->getApplicationURI('move/'.$project->getID().'/'),
       ));
+
+    $this->handles = ManiphestTaskListView::loadTaskHandles($viewer, $tasks);
 
     foreach ($columns as $column) {
       $panel = id(new PHUIWorkpanelView())
@@ -181,6 +184,7 @@ final class PhabricatorProjectBoardController
   private function renderTaskCard(ManiphestTask $task) {
     $request = $this->getRequest();
     $viewer = $request->getUser();
+    $handles = $this->handles;
 
     $color_map = ManiphestTaskPriority::getColorMap();
     $bar_color = idx($color_map, $task->getPriority(), 'grey');
@@ -191,23 +195,30 @@ final class PhabricatorProjectBoardController
       $task,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    return id(new PHUIObjectItemView())
-      ->setObjectName('T'.$task->getID())
-      ->setHeader($task->getTitle())
-      ->setGrippable($can_edit)
-      ->setHref('/T'.$task->getID())
-      ->addSigil('project-card')
-      ->setMetadata(
-        array(
-          'objectPHID' => $task->getPHID(),
-        ))
-      ->addAction(
-        id(new PHUIListItemView())
-          ->setName(pht('Edit'))
-          ->setIcon('edit')
-          ->setHref('/maniphest/task/edit/'.$task->getID().'/')
-          ->setWorkflow(true))
-      ->setBarColor($bar_color);
+      $card = id(new PHUIObjectItemView())
+        ->setObjectName('T'.$task->getID())
+        ->setHeader($task->getTitle())
+        ->setGrippable($can_edit)
+        ->setHref('/T'.$task->getID())
+        ->addSigil('project-card')
+        ->setMetadata(
+          array(
+            'objectPHID' => $task->getPHID(),
+          ))
+        ->addAction(
+          id(new PHUIListItemView())
+            ->setName(pht('Edit'))
+            ->setIcon('edit')
+            ->setHref('/maniphest/task/edit/'.$task->getID().'/')
+            ->setWorkflow(true))
+        ->setBarColor($bar_color);
+
+    if ($task->getOwnerPHID()) {
+      $owner = $handles[$task->getOwnerPHID()];
+      $card->addAttribute($owner->renderLink());
+    }
+
+    return $card;
   }
 
 }

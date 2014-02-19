@@ -4,7 +4,6 @@ final class PhabricatorProjectProfileController
   extends PhabricatorProjectController {
 
   private $id;
-  private $page;
 
   public function shouldAllowPublic() {
     return true;
@@ -12,7 +11,6 @@ final class PhabricatorProjectProfileController
 
   public function willProcessRequest(array $data) {
     $this->id = idx($data, 'id');
-    $this->page = idx($data, 'page');
   }
 
   public function processRequest() {
@@ -131,7 +129,7 @@ final class PhabricatorProjectProfileController
     $query = id(new ManiphestTaskQuery())
       ->setViewer($user)
       ->withAnyProjects(array($project->getPHID()))
-      ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
+      ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
       ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
       ->setLimit(10);
     $tasks = $query->execute();
@@ -200,44 +198,15 @@ final class PhabricatorProjectProfileController
       id(new PhabricatorActionView())
         ->setName(pht('Edit Project'))
         ->setIcon('edit')
-        ->setHref($this->getApplicationURI("edit/{$id}/"))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
-
-    if ($project->isArchived()) {
-      $view->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Unarchive Project'))
-          ->setIcon('enable')
-          ->setHref($this->getApplicationURI("archive/{$id}/"))
-          ->setDisabled(!$can_edit)
-          ->setWorkflow(true));
-    } else {
-      $view->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Archive Project'))
-          ->setIcon('disable')
-          ->setHref($this->getApplicationURI("archive/{$id}/"))
-          ->setDisabled(!$can_edit)
-          ->setWorkflow(true));
-    }
+        ->setHref($this->getApplicationURI("edit/{$id}/")));
 
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Members'))
-        ->setIcon('edit')
+        ->setIcon('user')
         ->setHref($this->getApplicationURI("members/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
-
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Edit Picture'))
-        ->setIcon('image')
-        ->setHref($this->getApplicationURI("picture/{$id}/"))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
-
 
     $action = null;
     if (!$project->isUserMember($viewer->getPHID())) {
@@ -262,12 +231,6 @@ final class PhabricatorProjectProfileController
     }
     $view->addAction($action);
 
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('View History'))
-        ->setHref($this->getApplicationURI("history/{$id}/"))
-        ->setIcon('transcript'));
-
     return $view;
   }
 
@@ -283,10 +246,6 @@ final class PhabricatorProjectProfileController
       ->setUser($viewer)
       ->setObject($project)
       ->setActionList($actions);
-
-    $view->addProperty(
-      pht('Created'),
-      phabricator_datetime($project->getDateCreated(), $viewer));
 
     $view->addProperty(
       pht('Members'),

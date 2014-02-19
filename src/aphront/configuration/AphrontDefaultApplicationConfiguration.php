@@ -48,15 +48,6 @@ class AphrontDefaultApplicationConfiguration
         'keyboardshortcut/' => 'PhabricatorHelpKeyboardShortcutController',
       ),
 
-      '/notification/' => array(
-        '(?:(?P<filter>all|unread)/)?'
-          => 'PhabricatorNotificationListController',
-        'panel/' => 'PhabricatorNotificationPanelController',
-        'individual/' => 'PhabricatorNotificationIndividualController',
-        'status/' => 'PhabricatorNotificationStatusController',
-        'clear/' => 'PhabricatorNotificationClearController',
-      ),
-
       '/debug/' => 'PhabricatorDebugController',
     );
   }

@@ -380,7 +380,7 @@ final class ManiphestReportController extends ManiphestController {
 
     $query = id(new ManiphestTaskQuery())
       ->setViewer($user)
-      ->withStatus(ManiphestTaskQuery::STATUS_OPEN);
+      ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants());
 
     $project_phid = $request->getStr('project');
     $project_handle = null;

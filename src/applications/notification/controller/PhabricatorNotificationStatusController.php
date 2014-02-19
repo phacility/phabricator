@@ -4,23 +4,9 @@ final class PhabricatorNotificationStatusController
   extends PhabricatorNotificationController {
 
   public function processRequest() {
-
-    $uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
-    $uri = new PhutilURI($uri);
-
-    $uri->setPath('/status/');
-
-    $future = id(new HTTPSFuture($uri))
-      ->setTimeout(3);
-
     try {
-      list($body) = $future->resolvex();
-      $body = json_decode($body, true);
-      if (!is_array($body)) {
-        throw new Exception("Expected JSON response from server!");
-      }
-
-      $status = $this->renderServerStatus($body);
+      $status = PhabricatorNotificationClient::getServerStatus();
+      $status = $this->renderServerStatus($status);
     } catch (Exception $ex) {
       $status = new AphrontErrorView();
       $status->setTitle("Notification Server Issue");
@@ -34,10 +20,16 @@ final class PhabricatorNotificationStatusController
         phutil_escape_html_newlines($ex->getMessage())));
     }
 
-    return $this->buildStandardPageResponse(
-      $status,
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Status'));
+
+    return $this->buildApplicationPage(
       array(
-        'title' => 'Aphlict Server Status',
+        $crumbs,
+        $status,
+      ),
+      array(
+        'title' => pht('Notification Server Status'),
       ));
   }
 
@@ -67,10 +59,25 @@ final class PhabricatorNotificationStatusController
         'wide',
       ));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Server Status');
-    $panel->appendChild($table);
+    $test_icon = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+      ->setSpriteIcon('warning');
 
-    return $panel;
+    $test_button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setWorkflow(true)
+        ->setText(pht('Send Test Notification'))
+        ->setHref($this->getApplicationURI("test/"))
+        ->setIcon($test_icon);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Notification Server Status'))
+      ->addActionLink($test_button);
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($table);
+
+    return $box;
   }
 }

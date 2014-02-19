@@ -55,6 +55,8 @@ final class DifferentialRevisionSearchEngine
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new DifferentialRevisionQuery())
+      ->needFlags(true)
+      ->needDrafts(true)
       ->needRelationships(true);
 
     $responsible_phids = $saved->getParameter('responsiblePHIDs', array());

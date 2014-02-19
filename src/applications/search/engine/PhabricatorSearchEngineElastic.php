@@ -222,7 +222,8 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
         throw $ex;
       }
       $query = clone $query;
-      $query->setQuery(
+      $query->setParameter(
+        'query',
         addcslashes(
           $query->getParameter('query'), '+-&|!(){}[]^"~*?:\\'));
       $response = $this->executeRequest($uri, $this->buildSpec($query));

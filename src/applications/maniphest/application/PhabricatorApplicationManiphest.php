@@ -73,7 +73,7 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
 
     $query = id(new ManiphestTaskQuery())
       ->setViewer($user)
-      ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
+      ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
       ->withOwners(array($user->getPHID()));
     $count = count($query->execute());
 

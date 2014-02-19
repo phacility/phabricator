@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorCalendarEventViewController
-  extends PhabricatorDashboardController {
+  extends PhabricatorCalendarController {
 
   private $id;
 
@@ -100,6 +100,11 @@ final class PhabricatorCalendarEventViewController
     $properties->addProperty(
       pht('Ends'),
       phabricator_datetime($event->getDateTo(), $viewer));
+
+    $properties->addSectionHeader(
+      pht('Description'),
+      PHUIPropertyListView::ICON_SUMMARY);
+    $properties->addTextContent($event->getDescription());
 
     return $properties;
   }

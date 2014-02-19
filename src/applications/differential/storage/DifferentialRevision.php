@@ -7,7 +7,8 @@ final class DifferentialRevision extends DifferentialDAO
     PhabricatorFlaggableInterface,
     PhrequentTrackableInterface,
     HarbormasterBuildableInterface,
-    PhabricatorSubscribableInterface {
+    PhabricatorSubscribableInterface,
+    PhabricatorCustomFieldInterface {
 
   protected $title = '';
   protected $originalTitle;
@@ -39,6 +40,9 @@ final class DifferentialRevision extends DifferentialDAO
   private $repository = self::ATTACHABLE;
 
   private $reviewerStatus = self::ATTACHABLE;
+  private $customFields = self::ATTACHABLE;
+  private $drafts = array();
+  private $flags = array();
 
   const TABLE_COMMIT          = 'differential_commit';
 
@@ -403,6 +407,26 @@ final class DifferentialRevision extends DifferentialDAO
     return DifferentialRevisionStatus::isClosedStatus($this->getStatus());
   }
 
+  public function getFlag(PhabricatorUser $viewer) {
+    return $this->assertAttachedKey($this->flags, $viewer->getPHID());
+  }
+
+  public function attachFlag(
+    PhabricatorUser $viewer,
+    PhabricatorFlag $flag = null) {
+    $this->flags[$viewer->getPHID()] = $flag;
+    return $this;
+  }
+
+  public function getDrafts(PhabricatorUser $viewer) {
+    return $this->assertAttachedKey($this->drafts, $viewer->getPHID());
+  }
+
+  public function attachDrafts(PhabricatorUser $viewer, array $drafts) {
+    $this->drafts[$viewer->getPHID()] = $drafts;
+    return $this;
+  }
+
 
 /* -(  HarbormasterBuildableInterface  )------------------------------------- */
 
@@ -434,6 +458,31 @@ final class DifferentialRevision extends DifferentialDAO
   public function shouldAllowSubscription($phid) {
     // TODO: For now, Differential has its own stuff.
     return false;
+  }
+
+
+/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+
+
+  public function getCustomFieldSpecificationForRole($role) {
+    return array_fill_keys(
+      array(
+
+      ),
+      array('disabled' => false));
+  }
+
+  public function getCustomFieldBaseClass() {
+    return 'DifferentialCustomField';
+  }
+
+  public function getCustomFields() {
+    return $this->assertAttached($this->customFields);
+  }
+
+  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
+    $this->customFields = $fields;
+    return $this;
   }
 
 }

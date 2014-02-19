@@ -6,6 +6,10 @@ abstract class PhabricatorInlineCommentController
   abstract protected function createComment();
   abstract protected function loadComment($id);
   abstract protected function loadCommentForEdit($id);
+  abstract protected function deleteComment(
+    PhabricatorInlineCommentInterface $inline);
+  abstract protected function saveComment(
+    PhabricatorInlineCommentInterface $inline);
 
   private $changesetID;
   private $isNewFile;
@@ -60,7 +64,7 @@ abstract class PhabricatorInlineCommentController
         $inline = $this->loadCommentForEdit($this->getCommentID());
 
         if ($request->isFormPost()) {
-          $inline->delete();
+          $this->deleteComment($inline);
           return $this->buildEmptyResponse();
         }
 
@@ -86,12 +90,12 @@ abstract class PhabricatorInlineCommentController
         if ($request->isFormPost()) {
           if (strlen($text)) {
             $inline->setContent($text);
-            $inline->save();
+            $this->saveComment($inline);
             return $this->buildRenderedCommentResponse(
               $inline,
               $this->getIsOnRight());
           } else {
-            $inline->delete();
+            $this->deleteComment($inline);
             return $this->buildEmptyResponse();
           }
         }
@@ -122,8 +126,8 @@ abstract class PhabricatorInlineCommentController
           ->setLineNumber($this->getLineNumber())
           ->setLineLength($this->getLineLength())
           ->setIsNewFile($this->getIsNewFile())
-          ->setContent($text)
-          ->save();
+          ->setContent($text);
+        $this->saveComment($inline);
 
         return $this->buildRenderedCommentResponse(
           $inline,

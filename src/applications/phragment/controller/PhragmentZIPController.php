@@ -85,7 +85,10 @@ final class PhragmentZIPController extends PhragmentController {
     $files = mpull($files, null, 'getPHID');
     foreach ($mappings as $path => $file_phid) {
       if (!isset($files[$file_phid])) {
+        // The path is most likely pointing to a deleted fragment, which
+        // hence no longer has a file associated with it.
         unset($mappings[$path]);
+        continue;
       }
       $mappings[$path] = $files[$file_phid];
     }
