@@ -119,12 +119,24 @@ final class DifferentialCommentPreviewController
       $metadata['action'] = $action;
     }
 
-    id(new PhabricatorDraft())
+    $draft_key = 'differential-comment-'.$this->id;
+    $draft = id(new PhabricatorDraft())
       ->setAuthorPHID($viewer->getPHID())
-      ->setDraftKey('differential-comment-'.$this->id)
+      ->setDraftKey($draft_key)
       ->setDraft($request->getStr('content'))
       ->setMetadata($metadata)
       ->replaceOrDelete();
+    if ($draft->isDeleted()) {
+      DifferentialDraft::deleteHasDraft(
+        $viewer->getPHID(),
+        $revision->getPHID(),
+        $draft_key);
+    } else {
+      DifferentialDraft::markHasDraft(
+        $viewer->getPHID(),
+        $revision->getPHID(),
+        $draft_key);
+    }
 
     return id(new AphrontAjaxResponse())
       ->setContent((string)phutil_implode_html('', $view->buildEvents()));

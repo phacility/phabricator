@@ -36,7 +36,6 @@ final class DifferentialRevisionQuery
   private $responsibles = array();
   private $branches = array();
   private $arcanistProjectPHIDs = array();
-  private $draftRevisions = array();
   private $repositoryPHIDs;
 
   private $order            = 'order-modified';
@@ -468,39 +467,6 @@ final class DifferentialRevisionQuery
     $table = new DifferentialRevision();
     $conn_r = $table->establishConnection('r');
 
-    if ($this->draftAuthors) {
-      $this->draftRevisions = array();
-
-      $draft_key = 'differential-comment-';
-      $drafts = id(new PhabricatorDraft())->loadAllWhere(
-        'authorPHID IN (%Ls) AND draftKey LIKE %> AND draft != %s',
-        $this->draftAuthors,
-        $draft_key,
-        '');
-      $len = strlen($draft_key);
-      foreach ($drafts as $draft) {
-        $this->draftRevisions[] = substr($draft->getDraftKey(), $len);
-      }
-
-      // TODO: Restore this after drafts are sorted out. It's now very
-      // expensive to get revision IDs.
-
-      /*
-
-      $inlines = id(new DifferentialInlineCommentQuery())
-        ->withDraftsByAuthors($this->draftAuthors)
-        ->execute();
-      foreach ($inlines as $inline) {
-        $this->draftRevisions[] = $inline->getRevisionID();
-      }
-
-      */
-
-      if (!$this->draftRevisions) {
-        return array();
-      }
-    }
-
     $selects = array();
 
     // NOTE: If the query includes "responsiblePHIDs", we execute it as a
@@ -632,6 +598,16 @@ final class DifferentialRevisionQuery
         $this->reviewers);
     }
 
+    if ($this->draftAuthors) {
+      $differential_draft = new DifferentialDraft();
+      $joins[] = qsprintf(
+        $conn_r,
+        'JOIN %T has_draft ON has_draft.objectPHID = r.phid '.
+        'AND has_draft.authorPHID IN (%Ls)',
+        $differential_draft->getTableName(),
+        $this->draftAuthors);
+    }
+
     $joins = implode(' ', $joins);
 
     return $joins;
@@ -663,13 +639,6 @@ final class DifferentialRevisionQuery
         $conn_r,
         'r.authorPHID IN (%Ls)',
         $this->authors);
-    }
-
-    if ($this->draftRevisions) {
-      $where[] = qsprintf(
-        $conn_r,
-        'r.id IN (%Ld)',
-        $this->draftRevisions);
     }
 
     if ($this->revIDs) {

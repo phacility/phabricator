@@ -28,6 +28,13 @@ final class DifferentialInlineComment
     return $this->proxy;
   }
 
+  public function openTransaction() {
+    $this->proxy->openTransaction();
+  }
+
+  public function saveTransaction() {
+    $this->proxy->saveTransaction();
+  }
 
   public function save() {
     $this->getTransactionCommentForSave()->save();
@@ -43,6 +50,10 @@ final class DifferentialInlineComment
 
   public function getID() {
     return $this->proxy->getID();
+  }
+
+  public function getPHID() {
+    return $this->proxy->getPHID();
   }
 
   public static function newFromModernComment(
@@ -139,6 +150,10 @@ final class DifferentialInlineComment
   public function setRevision(DifferentialRevision $revision) {
     $this->proxy->setRevisionPHID($revision->getPHID());
     return $this;
+  }
+
+  public function getRevisionPHID() {
+    return $this->proxy->getRevisionPHID();
   }
 
   // Although these are purely transitional, they're also *extra* dumb.
