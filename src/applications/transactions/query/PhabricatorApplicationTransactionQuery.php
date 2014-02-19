@@ -120,6 +120,27 @@ abstract class PhabricatorApplicationTransactionQuery
     return $xactions;
   }
 
+  protected function willFilterPage(array $xactions) {
+    $object_phids = array_keys(mpull($xactions, null, 'getObjectPHID'));
+
+    $objects = id(new PhabricatorObjectQuery())
+      ->setViewer($this->getViewer())
+      ->setParentQuery($this)
+      ->withPHIDs($object_phids)
+      ->execute();
+
+    foreach ($xactions as $key => $xaction) {
+      $object_phid = $xaction->getObjectPHID();
+      if (empty($objects[$object_phid])) {
+        unset($xactions[$key]);
+        continue;
+      }
+      $xaction->attachObject($objects[$object_phid]);
+    }
+
+    return $xactions;
+  }
+
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
