@@ -7,7 +7,8 @@ final class DifferentialRevision extends DifferentialDAO
     PhabricatorFlaggableInterface,
     PhrequentTrackableInterface,
     HarbormasterBuildableInterface,
-    PhabricatorSubscribableInterface {
+    PhabricatorSubscribableInterface,
+    PhabricatorCustomFieldInterface {
 
   protected $title = '';
   protected $originalTitle;
@@ -39,6 +40,7 @@ final class DifferentialRevision extends DifferentialDAO
   private $repository = self::ATTACHABLE;
 
   private $reviewerStatus = self::ATTACHABLE;
+  private $customFields = self::ATTACHABLE;
 
   const TABLE_COMMIT          = 'differential_commit';
 
@@ -434,6 +436,31 @@ final class DifferentialRevision extends DifferentialDAO
   public function shouldAllowSubscription($phid) {
     // TODO: For now, Differential has its own stuff.
     return false;
+  }
+
+
+/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+
+
+  public function getCustomFieldSpecificationForRole($role) {
+    return array_fill_keys(
+      array(
+
+      ),
+      array('disabled' => false));
+  }
+
+  public function getCustomFieldBaseClass() {
+    return 'DifferentialCustomField';
+  }
+
+  public function getCustomFields() {
+    return $this->assertAttached($this->customFields);
+  }
+
+  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
+    $this->customFields = $fields;
+    return $this;
   }
 
 }

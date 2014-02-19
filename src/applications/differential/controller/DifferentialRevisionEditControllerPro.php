@@ -1,0 +1,159 @@
+<?php
+
+final class DifferentialRevisionEditControllerPro
+  extends DifferentialController {
+
+  private $id;
+
+  public function willProcessRequest(array $data) {
+    $this->id = idx($data, 'id');
+  }
+
+  public function processRequest() {
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    if (!$this->id) {
+      $this->id = $request->getInt('revisionID');
+    }
+
+    if ($this->id) {
+      $revision = id(new DifferentialRevisionQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($this->id))
+        ->needRelationships(true)
+        ->needReviewerStatus(true)
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
+      if (!$revision) {
+        return new Aphront404Response();
+      }
+    } else {
+      $revision = DifferentialRevision::initializeNewRevision($viewer);
+    }
+
+    $diff_id = $request->getInt('diffID');
+    if ($diff_id) {
+      $diff = id(new DifferentialDiffQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($diff_id))
+        ->executeOne();
+      if (!$diff) {
+        return new Aphront404Response();
+      }
+      if ($diff->getRevisionID()) {
+        // TODO: Redirect?
+        throw new Exception("This diff is already attached to a revision!");
+      }
+    } else {
+      $diff = null;
+    }
+
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $revision,
+      PhabricatorCustomField::ROLE_EDIT);
+    $field_list
+      ->setViewer($viewer)
+      ->readFieldsFromStorage($revision);
+
+    $validation_exception = null;
+    if ($request->isFormPost() && !$request->getStr('viaDiffView')) {
+      $xactions = $field_list->buildFieldTransactionsFromRequest(
+        new DifferentialTransaction(),
+        $request);
+
+      $editor = id(new DifferentialTransactionEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true);
+
+      try {
+        $editor->applyTransactions($revision, $xactions);
+        $revision_uri = '/D'.$revision->getID();
+        return id(new AphrontRedirectResponse())->setURI($revision_uri);
+      } catch (PhabricatorApplicationTransactionValidationException $ex) {
+        $validation_exception = $ex;
+      }
+    }
+
+
+    $form = new AphrontFormView();
+    $form->setUser($request->getUser());
+    if ($diff) {
+      $form->addHiddenInput('diffID', $diff->getID());
+    }
+
+    if ($revision->getID()) {
+      $form->setAction(
+        '/differential/revision/editpro/'.$revision->getID().'/');
+    } else {
+      $form->setAction('/differential/revision/editpro/');
+    }
+
+    if ($diff && $revision->getID()) {
+      $form
+        ->appendChild(
+          id(new AphrontFormTextAreaControl())
+            ->setLabel(pht('Comments'))
+            ->setName('comments')
+            ->setCaption(pht("Explain what's new in this diff."))
+            ->setValue($request->getStr('comments')))
+        ->appendChild(
+          id(new AphrontFormSubmitControl())
+            ->setValue(pht('Save')))
+        ->appendChild(
+          id(new AphrontFormDividerControl()));
+    }
+
+    $field_list->appendFieldsToForm($form);
+
+    $submit = id(new AphrontFormSubmitControl())
+      ->setValue('Save');
+    if ($diff) {
+      $submit->addCancelButton('/differential/diff/'.$diff->getID().'/');
+    } else {
+      $submit->addCancelButton('/D'.$revision->getID());
+    }
+
+    $form->appendChild($submit);
+
+    $crumbs = $this->buildApplicationCrumbs();
+    if ($revision->getID()) {
+      if ($diff) {
+        $title = pht('Update Differential Revision');
+        $crumbs->addTextCrumb(
+          'D'.$revision->getID(),
+          '/differential/diff/'.$diff->getID().'/');
+      } else {
+        $title = pht('Edit Differential Revision');
+        $crumbs->addTextCrumb(
+          'D'.$revision->getID(),
+          '/D'.$revision->getID());
+      }
+    } else {
+      $title = pht('Create New Differential Revision');
+    }
+
+    $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->setValidationException($validation_exception)
+      ->setForm($form);
+
+    $crumbs->addTextCrumb($title);
+
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $form_box,
+      ),
+      array(
+        'title' => $title,
+        'device' => true,
+      ));
+  }
+
+}
