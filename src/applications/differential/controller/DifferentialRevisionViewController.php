@@ -810,6 +810,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
       ->setOrder(DifferentialRevisionQuery::ORDER_PATH_MODIFIED)
       ->setLimit(10)
+      ->needFlags(true)
+      ->needDrafts(true)
       ->needRelationships(true);
 
     foreach ($path_map as $path => $path_id) {
@@ -836,8 +838,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $view = id(new DifferentialRevisionListView())
       ->setRevisions($revisions)
       ->setFields(DifferentialRevisionListView::getDefaultFields($user))
-      ->setUser($user)
-      ->loadAssets();
+      ->setUser($user);
 
     $phids = $view->getRequiredHandlePHIDs();
     $handles = $this->loadViewerHandles($phids);

@@ -41,6 +41,8 @@ final class DifferentialRevision extends DifferentialDAO
 
   private $reviewerStatus = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
+  private $drafts = array();
+  private $flags = array();
 
   const TABLE_COMMIT          = 'differential_commit';
 
@@ -403,6 +405,26 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function isClosed() {
     return DifferentialRevisionStatus::isClosedStatus($this->getStatus());
+  }
+
+  public function getFlag(PhabricatorUser $viewer) {
+    return $this->assertAttachedKey($this->flags, $viewer->getPHID());
+  }
+
+  public function attachFlag(
+    PhabricatorUser $viewer,
+    PhabricatorFlag $flag = null) {
+    $this->flags[$viewer->getPHID()] = $flag;
+    return $this;
+  }
+
+  public function getDrafts(PhabricatorUser $viewer) {
+    return $this->assertAttachedKey($this->drafts, $viewer->getPHID());
+  }
+
+  public function attachDrafts(PhabricatorUser $viewer, array $drafts) {
+    $this->drafts[$viewer->getPHID()] = $drafts;
+    return $this;
   }
 
 

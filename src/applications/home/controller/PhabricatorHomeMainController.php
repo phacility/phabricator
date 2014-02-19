@@ -193,7 +193,9 @@ final class PhabricatorHomeMainController
       ->setViewer($user)
       ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
       ->withResponsibleUsers(array($user_phid))
-      ->needRelationships(true);
+      ->needRelationships(true)
+      ->needFlags(true)
+      ->needDrafts(true);
 
     $revisions = $revision_query->execute();
 
@@ -216,8 +218,7 @@ final class PhabricatorHomeMainController
       ->setHighlightAge(true)
       ->setRevisions(array_merge($blocking, $active))
       ->setFields(DifferentialRevisionListView::getDefaultFields($user))
-      ->setUser($user)
-      ->loadAssets();
+      ->setUser($user);
     $phids = array_merge(
       array($user_phid),
       $revision_view->getRequiredHandlePHIDs());

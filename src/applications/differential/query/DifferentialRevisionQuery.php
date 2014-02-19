@@ -57,6 +57,8 @@ final class DifferentialRevisionQuery
   private $needHashes         = false;
   private $needReviewerStatus = false;
   private $needReviewerAuthority;
+  private $needDrafts;
+  private $needFlags;
 
   private $buildingGlobalOrder;
 
@@ -345,6 +347,16 @@ final class DifferentialRevisionQuery
     return $this;
   }
 
+  public function needFlags($need_flags) {
+    $this->needFlags = $need_flags;
+    return $this;
+  }
+
+  public function needDrafts($need_drafts) {
+    $this->needDrafts = $need_drafts;
+    return $this;
+  }
+
 
 /* -(  Query Execution  )---------------------------------------------------- */
 
@@ -458,6 +470,39 @@ final class DifferentialRevisionQuery
 
     if ($this->needReviewerStatus || $this->needReviewerAuthority) {
       $this->loadReviewers($conn_r, $revisions);
+    }
+
+    return $revisions;
+  }
+
+  protected function didFilterPage(array $revisions) {
+    $viewer = $this->getViewer();
+
+    if ($this->needFlags) {
+      $flags = id(new PhabricatorFlagQuery())
+        ->setViewer($viewer)
+        ->withOwnerPHIDs(array($viewer->getPHID()))
+        ->withObjectPHIDs(mpull($revisions, 'getPHID'))
+        ->execute();
+      $flags = mpull($flags, null, 'getObjectPHID');
+      foreach ($revisions as $revision) {
+        $revision->attachFlag(
+          $viewer,
+          idx($flags, $revision->getPHID()));
+      }
+    }
+
+    if ($this->needDrafts) {
+      $drafts = id(new DifferentialDraft())->loadAllWhere(
+        'authorPHID = %s AND objectPHID IN (%Ls)',
+        $viewer->getPHID(),
+        mpull($revisions, 'getPHID'));
+      $drafts = mgroup($drafts, 'getObjectPHID');
+      foreach ($revisions as $revision) {
+        $revision->attachDrafts(
+          $viewer,
+          idx($drafts, $revision->getPHID(), array()));
+      }
     }
 
     return $revisions;

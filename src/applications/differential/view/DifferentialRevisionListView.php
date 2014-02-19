@@ -6,8 +6,6 @@
 final class DifferentialRevisionListView extends AphrontView {
 
   private $revisions;
-  private $flags = array();
-  private $drafts = array();
   private $handles;
   private $fields;
   private $highlightAge;
@@ -57,30 +55,6 @@ final class DifferentialRevisionListView extends AphrontView {
     return $this;
   }
 
-  public function loadAssets() {
-    $user = $this->user;
-    if (!$user) {
-      throw new Exception("Call setUser() before loadAssets()!");
-    }
-    if ($this->revisions === null) {
-      throw new Exception("Call setRevisions() before loadAssets()!");
-    }
-
-    $this->flags = id(new PhabricatorFlagQuery())
-      ->setViewer($user)
-      ->withOwnerPHIDs(array($user->getPHID()))
-      ->withObjectPHIDs(mpull($this->revisions, 'getPHID'))
-      ->execute();
-
-    $this->drafts = id(new DifferentialRevisionQuery())
-      ->setViewer($user)
-      ->withIDs(mpull($this->revisions, 'getID'))
-      ->withDraftRepliesByAuthors(array($user->getPHID()))
-      ->execute();
-
-    return $this;
-  }
-
   public function render() {
 
     $user = $this->user;
@@ -105,8 +79,6 @@ final class DifferentialRevisionListView extends AphrontView {
     $this->initBehavior('phabricator-tooltips', array());
     $this->requireResource('aphront-tooltip-css');
 
-    $flagged = mpull($this->flags, null, 'getObjectPHID');
-
     foreach ($this->fields as $field) {
       $field->setHandles($this->handles);
     }
@@ -122,8 +94,8 @@ final class DifferentialRevisionListView extends AphrontView {
       $icons = array();
 
       $phid = $revision->getPHID();
-      if (isset($flagged[$phid])) {
-        $flag = $flagged[$phid];
+      $flag = $revision->getFlag($user);
+      if ($flag) {
         $flag_class = PhabricatorFlagColor::getCSSClass($flag->getColor());
         $icons['flag'] = phutil_tag(
           'div',
@@ -132,7 +104,8 @@ final class DifferentialRevisionListView extends AphrontView {
           ),
           '');
       }
-      if (array_key_exists($revision->getID(), $this->drafts)) {
+
+      if ($revision->getDrafts($user)) {
         $icons['draft'] = true;
       }
 
