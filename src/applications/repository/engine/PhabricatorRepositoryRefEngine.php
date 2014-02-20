@@ -191,12 +191,12 @@ final class PhabricatorRepositoryRefEngine
 
     foreach ($cursor_groups as $name => $cursor_group) {
       if (idx($ref_groups, $name) === null) {
-        $this->log(
-          pht(
-            'Ref %s "%s" no longer exists.',
-            $cursor->getRefType(),
-            $cursor->getRefName()));
         foreach ($cursor_group as $cursor) {
+          $this->log(
+            pht(
+              'Ref %s "%s" no longer exists.',
+              $cursor->getRefType(),
+              $cursor->getRefName()));
           $this->markRefDead($cursor);
         }
       }
