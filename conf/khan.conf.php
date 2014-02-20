@@ -6,6 +6,10 @@ return array(
   // Use "https://" if you have SSL. See below for some notes.
   'phabricator.base-uri' => 'http://phabricator.khanacademy.org/',
 
+  // We trust our code-authors to not close an audit unless there's
+  // a good reason.
+  'audit.can-author-close-audit' => true,
+
   // Only allow people at khanacademy.org to register.
   'auth.email-domains' => array(
     'khanacademy.org',
