@@ -333,6 +333,11 @@ abstract class PhabricatorPasswordHasher extends Phobject {
    * @task hashing
    */
   public static function canUpgradeHash(PhutilOpaqueEnvelope $hash) {
+    if (!strlen($hash->openEnvelope())) {
+      throw new Exception(
+        pht('Expected a password hash, received nothing!'));
+    }
+
     $current_hasher = self::getHasherForHash($hash);
     $best_hasher = self::getBestHasher();
 

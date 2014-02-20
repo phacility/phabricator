@@ -178,11 +178,13 @@ final class DiffusionSetPasswordPanel extends PhabricatorSettingsPanel {
         ->setLabel(pht('Best Available Algorithm'))
         ->setValue(PhabricatorPasswordHasher::getBestAlgorithmName()));
 
-    if (PhabricatorPasswordHasher::canUpgradeHash($hash_envelope)) {
-      $errors[] = pht(
-        'The strength of your stored VCS password hash can be upgraded. '.
-        'To upgrade, either: use the password to authenticate with a '.
-        'repository; or change your password.');
+    if (strlen($hash_envelope->openEnvelope())) {
+      if (PhabricatorPasswordHasher::canUpgradeHash($hash_envelope)) {
+        $errors[] = pht(
+          'The strength of your stored VCS password hash can be upgraded. '.
+          'To upgrade, either: use the password to authenticate with a '.
+          'repository; or change your password.');
+      }
     }
 
     $object_box = id(new PHUIObjectBoxView())

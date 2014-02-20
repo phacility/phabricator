@@ -113,11 +113,13 @@ final class PhabricatorSettingsPanelPassword
     }
 
     $hash_envelope = new PhutilOpaqueEnvelope($user->getPasswordHash());
-    if (PhabricatorPasswordHasher::canUpgradeHash($hash_envelope)) {
-      $errors[] = pht(
-        'The strength of your stored password hash can be upgraded. '.
-        'To upgrade, either: log out and log in using your password; or '.
-        'change your password.');
+    if (strlen($hash_envelope->openEnvelope())) {
+      if (PhabricatorPasswordHasher::canUpgradeHash($hash_envelope)) {
+        $errors[] = pht(
+          'The strength of your stored password hash can be upgraded. '.
+          'To upgrade, either: log out and log in using your password; or '.
+          'change your password.');
+      }
     }
 
     $len_caption = null;
