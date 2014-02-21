@@ -30,7 +30,7 @@ final class DifferentialSummaryField
     $this->setValue($request->getStr($this->getFieldKey()));
   }
 
-  public function renderEditControl() {
+  public function renderEditControl(array $handles) {
     return id(new PhabricatorRemarkupControl())
       ->setName($this->getFieldKey())
       ->setValue($this->getValue())

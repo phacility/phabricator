@@ -36,7 +36,7 @@ final class PhabricatorStandardCustomFieldDate
     return $this->setFieldValue($value);
   }
 
-  public function renderEditControl() {
+  public function renderEditControl(array $handles) {
     return $this->newDateControl();
   }
 

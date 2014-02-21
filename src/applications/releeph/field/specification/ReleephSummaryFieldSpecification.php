@@ -19,7 +19,7 @@ final class ReleephSummaryFieldSpecification
 
   private $error = false;
 
-  public function renderEditControl() {
+  public function renderEditControl(array $handles) {
     return id(new AphrontFormTextControl())
       ->setLabel('Summary')
       ->setName('summary')

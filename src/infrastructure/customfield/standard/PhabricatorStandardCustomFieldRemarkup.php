@@ -7,7 +7,7 @@ final class PhabricatorStandardCustomFieldRemarkup
     return 'remarkup';
   }
 
-  public function renderEditControl() {
+  public function renderEditControl(array $handles) {
     return id(new PhabricatorRemarkupControl())
       ->setLabel($this->getFieldName())
       ->setName($this->getFieldKey())

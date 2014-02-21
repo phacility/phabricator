@@ -38,7 +38,7 @@ final class DifferentialTitleField
     return true;
   }
 
-  public function renderEditControl() {
+  public function renderEditControl(array $handles) {
     return id(new AphrontFormTextAreaControl())
       ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
       ->setName($this->getFieldKey())

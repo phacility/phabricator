@@ -468,6 +468,8 @@ final class DifferentialRevision extends DifferentialDAO
     $fields = array(
       new DifferentialTitleField(),
       new DifferentialSummaryField(),
+      new DifferentialTestPlanField(),
+      new DifferentialRepositoryField(),
     );
 
     return array_fill_keys(

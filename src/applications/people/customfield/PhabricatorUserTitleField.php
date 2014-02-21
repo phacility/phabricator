@@ -50,7 +50,7 @@ final class PhabricatorUserTitleField
     $this->value = $request->getStr($this->getFieldKey());
   }
 
-  public function renderEditControl() {
+  public function renderEditControl(array $handles) {
     return id(new AphrontFormTextControl())
       ->setName($this->getFieldKey())
       ->setValue($this->value)

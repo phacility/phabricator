@@ -924,6 +924,15 @@ abstract class PhabricatorCustomField {
     return null;
   }
 
+  public function getApplicationTransactionRequiredHandlePHIDs(
+    PhabricatorApplicationTransaction $xaction) {
+    if ($this->proxy) {
+      return $this->proxy->getApplicationTransactionRequiredHandlePHIDs(
+        $xaction);
+    }
+    return array();
+  }
+
 
 /* -(  Edit View  )---------------------------------------------------------- */
 
@@ -953,9 +962,20 @@ abstract class PhabricatorCustomField {
   /**
    * @task edit
    */
-  public function renderEditControl() {
+  public function getRequiredHandlePHIDsForEdit() {
     if ($this->proxy) {
-      return $this->proxy->renderEditControl();
+      return $this->proxy->getRequiredHandlePHIDsForEdit();
+    }
+    return array();
+  }
+
+
+  /**
+   * @task edit
+   */
+  public function renderEditControl(array $handles) {
+    if ($this->proxy) {
+      return $this->proxy->renderEditControl($handles);
     }
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }

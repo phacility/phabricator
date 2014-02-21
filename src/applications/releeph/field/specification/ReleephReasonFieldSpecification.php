@@ -35,7 +35,7 @@ final class ReleephReasonFieldSpecification
 
   private $error = true;
 
-  public function renderEditControl() {
+  public function renderEditControl(array $handles) {
     return id(new AphrontFormTextAreaControl())
       ->setLabel('Reason')
       ->setName('reason')

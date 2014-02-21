@@ -148,6 +148,13 @@ abstract class PhabricatorApplicationTransaction
 
     $phids[] = array($this->getAuthorPHID());
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $field = $this->getTransactionCustomField();
+        if ($field) {
+          $phids[] = $field->getApplicationTransactionRequiredHandlePHIDs(
+            $this);
+        }
+        break;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         $phids[] = $old;
         $phids[] = $new;

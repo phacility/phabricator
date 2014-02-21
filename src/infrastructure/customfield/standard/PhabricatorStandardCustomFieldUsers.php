@@ -7,17 +7,12 @@ final class PhabricatorStandardCustomFieldUsers
     return 'users';
   }
 
-  public function renderEditControl() {
-    $handles = array();
+  public function renderEditControl(array $handles) {
     $value = $this->getFieldValue();
     if ($value) {
-
-      // TODO: Surface and batch.
-
-      $handles = id(new PhabricatorHandleQuery())
-        ->setViewer($this->getViewer())
-        ->withPHIDs($value)
-        ->execute();
+      $control_value = array_select_keys($handles, $value);
+    } else {
+      $control_value = array();
     }
 
     $control = id(new AphrontFormTokenizerControl())
@@ -25,7 +20,7 @@ final class PhabricatorStandardCustomFieldUsers
       ->setName($this->getFieldKey())
       ->setDatasource('/typeahead/common/accounts/')
       ->setCaption($this->getCaption())
-      ->setValue($handles);
+      ->setValue($control_value);
 
     $limit = $this->getFieldConfigValue('limit');
     if ($limit) {
@@ -48,19 +43,5 @@ final class PhabricatorStandardCustomFieldUsers
       ->setValue($handles);
 
     $form->appendChild($control);
-  }
-
-
-  public function getApplicationTransactionTitle(
-    PhabricatorApplicationTransaction $xaction) {
-    $author_phid = $xaction->getAuthorPHID();
-
-    // TODO: Show added/removed and render handles. We don't have handle
-    // surfacing or batching yet so this is a bit awkward right now.
-
-    return pht(
-      '%s updated %s.',
-      $xaction->renderHandleLink($author_phid),
-      $this->getFieldName());
   }
 }
