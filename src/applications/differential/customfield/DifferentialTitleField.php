@@ -26,34 +26,16 @@ final class DifferentialTitleField
     $revision->setTitle($value);
   }
 
-  public function validateApplicationTransactions(
-    PhabricatorApplicationTransactionEditor $editor,
-    $type,
-    array $xactions) {
-
-    $errors = parent::validateApplicationTransactions(
-      $editor,
-      $type,
-      $xactions);
-
-    $transaction = null;
-    foreach ($xactions as $xaction) {
-      $value = $xaction->getNewValue();
-      if (!strlen($value)) {
-        $error = new PhabricatorApplicationTransactionValidationError(
-          $type,
-          pht('Required'),
-          pht('You must choose a title for this revision.'),
-          $xaction);
-        $error->setIsMissingFieldError(true);
-        $errors[] = $error;
-        $this->setFieldError(pht('Required'));
-      }
-    }
+  protected function getCoreFieldRequiredErrorString() {
+    return pht('You must choose a title for this revision.');
   }
 
   public function readValueFromRequest(AphrontRequest $request) {
     $this->setValue($request->getStr($this->getFieldKey()));
+  }
+
+  protected function isCoreFieldRequired() {
+    return true;
   }
 
   public function renderEditControl() {

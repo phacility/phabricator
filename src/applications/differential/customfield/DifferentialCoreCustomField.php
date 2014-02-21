@@ -18,8 +18,51 @@ abstract class DifferentialCoreCustomField
     DifferentialRevision $revision,
     $value);
 
-  public function isCoreFieldRequired() {
+  protected function isCoreFieldRequired() {
     return false;
+  }
+
+  protected function isCoreFieldValueEmpty($value) {
+    if (is_array($value)) {
+      return !$value;
+    }
+    return !strlen(trim($value));
+  }
+
+  protected function getCoreFieldRequiredErrorString() {
+    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
+  }
+
+  public function validateApplicationTransactions(
+    PhabricatorApplicationTransactionEditor $editor,
+    $type,
+    array $xactions) {
+
+    $this->setFieldError(null);
+
+    $errors = parent::validateApplicationTransactions(
+      $editor,
+      $type,
+      $xactions);
+
+    $transaction = null;
+    foreach ($xactions as $xaction) {
+      $value = $xaction->getNewValue();
+      if ($this->isCoreFieldRequired()) {
+        if ($this->isCoreFieldValueEmpty($value)) {
+          $error = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Required'),
+            $this->getCoreFieldRequiredErrorString(),
+            $xaction);
+          $error->setIsMissingFieldError(true);
+          $errors[] = $error;
+          $this->setFieldError(pht('Required'));
+        }
+      }
+    }
+
+    return $errors;
   }
 
   public function canDisableField() {
