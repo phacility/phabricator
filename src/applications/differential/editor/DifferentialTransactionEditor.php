@@ -6,11 +6,11 @@ final class DifferentialTransactionEditor
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
+    $types[] = PhabricatorTransactions::TYPE_EDGE;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
 /*
-    $types[] = PhabricatorTransactions::TYPE_EDGE;
 
     $types[] = DifferentialTransaction::TYPE_INLINE;
     $types[] = DifferentialTransaction::TYPE_UPDATE;
@@ -59,6 +59,9 @@ final class DifferentialTransactionEditor
         $object->setEditPolicy($xaction->getNewValue());
         return;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
+      case PhabricatorTransactions::TYPE_EDGE:
+        // TODO: When removing reviewers, we may be able to move the revision
+        // to "Accepted".
         return;
     }
 
@@ -74,6 +77,7 @@ final class DifferentialTransactionEditor
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
+      case PhabricatorTransactions::TYPE_EDGE:
         return;
     }
 
@@ -92,7 +96,6 @@ final class DifferentialTransactionEditor
 
     return $errors;
   }
-
 
   protected function requireCapabilities(
     PhabricatorLiskDAO $object,

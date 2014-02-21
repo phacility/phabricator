@@ -46,4 +46,11 @@ final class DifferentialReviewer {
     return $this->authority[$viewer_phid];
   }
 
+  public function getEdgeData() {
+    return array(
+      'status' => $this->status,
+      'diffID' => $this->diffID,
+    );
+  }
+
 }

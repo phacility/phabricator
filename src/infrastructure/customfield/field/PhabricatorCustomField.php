@@ -747,6 +747,17 @@ abstract class PhabricatorCustomField {
   /**
    * @task appxaction
    */
+  public function getApplicationTransactionMetadata() {
+    if ($this->proxy) {
+      return $this->proxy->getApplicationTransactionMetadata();
+    }
+    return array();
+  }
+
+
+  /**
+   * @task appxaction
+   */
   public function getOldValueForApplicationTransactions() {
     if ($this->proxy) {
       return $this->proxy->getOldValueForApplicationTransactions();
