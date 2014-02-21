@@ -1,0 +1,75 @@
+<?php
+
+/**
+ * Base class for Differential fields with storage on the revision object
+ * itself. This mostly wraps reading/writing field values to and from the
+ * object.
+ */
+abstract class DifferentialCoreCustomField
+  extends DifferentialCustomField {
+
+  private $value;
+  private $fieldError;
+
+  abstract protected function readValueFromRevision(
+    DifferentialRevision $revision);
+
+  abstract protected function writeValueToRevision(
+    DifferentialRevision $revision,
+    $value);
+
+  public function isCoreFieldRequired() {
+    return false;
+  }
+
+  public function canDisableField() {
+    return false;
+  }
+
+  public function shouldAppearInApplicationTransactions() {
+    return true;
+  }
+
+  public function shouldAppearInEditView() {
+    return true;
+  }
+
+  protected function didSetObject(PhabricatorCustomFieldInterface $object) {
+    if ($this->isCoreFieldRequired()) {
+      $this->setFieldError(true);
+    }
+    $this->setValue($this->readValueFromRevision($object));
+  }
+
+  public function getOldValueForApplicationTransactions() {
+    return $this->readValueFromRevision($this->getObject());
+  }
+
+  public function getNewValueForApplicationTransactions() {
+    return $this->getValue();
+  }
+
+  public function applyApplicationTransactionInternalEffects(
+    PhabricatorApplicationTransaction $xaction) {
+    $this->writeValueToRevision($this->getObject(), $xaction->getNewValue());
+  }
+
+  public function setFieldError($field_error) {
+    $this->fieldError = $field_error;
+    return $this;
+  }
+
+  public function getFieldError() {
+    return $this->fieldError;
+  }
+
+  public function setValue($value) {
+    $this->value = $value;
+    return $this;
+  }
+
+  public function getValue() {
+    return $this->value;
+  }
+
+}

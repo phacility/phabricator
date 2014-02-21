@@ -465,10 +465,13 @@ final class DifferentialRevision extends DifferentialDAO
 
 
   public function getCustomFieldSpecificationForRole($role) {
-    return array_fill_keys(
-      array(
+    $fields = array(
+      new DifferentialTitleField(),
+      new DifferentialSummaryField(),
+    );
 
-      ),
+    return array_fill_keys(
+      mpull($fields, 'getFieldKey'),
       array('disabled' => false));
   }
 

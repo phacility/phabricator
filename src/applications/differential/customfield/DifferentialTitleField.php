@@ -1,19 +1,7 @@
 <?php
 
 final class DifferentialTitleField
-  extends DifferentialCustomField {
-
-  private $value;
-  private $fieldError = true;
-
-  public function setFieldError($field_error) {
-    $this->fieldError = $field_error;
-    return $this;
-  }
-
-  public function getFieldError() {
-    return $this->fieldError;
-  }
+  extends DifferentialCoreCustomField {
 
   public function getFieldKey() {
     return 'differential:title';
@@ -27,28 +15,15 @@ final class DifferentialTitleField
     return pht('Stores the revision title.');
   }
 
-  public function canDisableField() {
-    return false;
+  protected function readValueFromRevision(
+    DifferentialRevision $revision) {
+    return $revision->getTitle();
   }
 
-  public function shouldAppearInApplicationTransactions() {
-    return true;
-  }
-
-  public function shouldAppearInEditView() {
-    return true;
-  }
-
-  protected function didSetObject(PhabricatorCustomFieldInterface $object) {
-    $this->value = $object->getTitle();
-  }
-
-  public function getOldValueForApplicationTransactions() {
-    return $this->getObject()->getTitle();
-  }
-
-  public function getNewValueForApplicationTransactions() {
-    return $this->value;
+  protected function writeValueToRevision(
+    DifferentialRevision $revision,
+    $value) {
+    $revision->setTitle($value);
   }
 
   public function validateApplicationTransactions(
@@ -77,20 +52,15 @@ final class DifferentialTitleField
     }
   }
 
-  public function applyApplicationTransactionInternalEffects(
-    PhabricatorApplicationTransaction $xaction) {
-    $this->getObject()->setTitle($xaction->getNewValue());
-  }
-
   public function readValueFromRequest(AphrontRequest $request) {
-    $this->value = $request->getStr($this->getFieldKey());
+    $this->setValue($request->getStr($this->getFieldKey()));
   }
 
   public function renderEditControl() {
     return id(new AphrontFormTextAreaControl())
       ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
       ->setName($this->getFieldKey())
-      ->setValue($this->value)
+      ->setValue($this->getValue())
       ->setError($this->getFieldError())
       ->setLabel($this->getFieldName());
   }
@@ -137,6 +107,5 @@ final class DifferentialTitleField
         $xaction->renderHandleLink($object_phid));
     }
   }
-
 
 }
