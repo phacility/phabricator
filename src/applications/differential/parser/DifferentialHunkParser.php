@@ -545,38 +545,31 @@ final class DifferentialHunkParser {
 
   public function makeContextDiff(
     array $hunks,
-    PhabricatorInlineCommentInterface $inline,
+    $is_new,
+    $line_number,
+    $line_length,
     $add_context) {
 
     assert_instances_of($hunks, 'DifferentialHunk');
 
     $context = array();
-    $debug = false;
-    if ($debug) {
-      $context[] = 'Inline: '.$inline->getIsNewFile().' '.
-        $inline->getLineNumber().' '.$inline->getLineLength();
-      foreach ($hunks as $hunk) {
-        $context[] = 'hunk: '.$hunk->getOldOffset().'-'.
-          $hunk->getOldLen().'; '.$hunk->getNewOffset().'-'.$hunk->getNewLen();
-        $context[] = $hunk->getChanges();
-      }
-    }
 
-    if ($inline->getIsNewFile()) {
+    if ($is_new) {
       $prefix = '+';
     } else {
       $prefix = '-';
     }
+
     foreach ($hunks as $hunk) {
-      if ($inline->getIsNewFile()) {
+      if ($is_new) {
         $offset = $hunk->getNewOffset();
         $length = $hunk->getNewLen();
       } else {
         $offset = $hunk->getOldOffset();
         $length = $hunk->getOldLen();
       }
-      $start = $inline->getLineNumber() - $offset;
-      $end = $start + $inline->getLineLength();
+      $start = $line_number - $offset;
+      $end = $start + $line_length;
       // We need to go in if $start == $length, because the last line
       // might be a "\No newline at end of file" marker, which we want
       // to show if the additional context is > 0.

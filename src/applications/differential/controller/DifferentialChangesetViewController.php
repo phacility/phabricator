@@ -356,7 +356,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
       }
       $inline = new DifferentialInlineComment();
       $inline->setChangesetID($changeset->getID());
-      $inline->setIsNewFile(true);
+      $inline->setIsNewFile(1);
       $inline->setSyntheticAuthor('Lint: '.$msg['name']);
       $inline->setLineNumber($msg['line']);
       $inline->setLineLength(0);

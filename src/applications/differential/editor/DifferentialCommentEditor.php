@@ -641,6 +641,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
     }
 
     $changesets = array();
+    $mail_inlines = array();
     if ($inline_comments) {
       $load_ids = mpull($inline_comments, 'getChangesetID');
       if ($load_ids) {
@@ -653,10 +654,13 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
         $inline_xaction_comment = $inline->getTransactionCommentForSave();
         $inline_xaction_comment->setRevisionPHID($revision->getPHID());
 
-        $comments[] = id(clone $template)
+        $inline_xaction = id(clone $template)
           ->setAction(DifferentialTransaction::TYPE_INLINE)
           ->setProxyComment($inline_xaction_comment)
           ->save();
+
+        $comments[] = $inline_xaction;
+        $mail_inlines[] = $inline_xaction->getProxyTransaction();
       }
     }
 
@@ -679,7 +683,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
         $actor_handle,
         $comments,
         $changesets,
-        $inline_comments))
+        $mail_inlines))
         ->setActor($actor)
         ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
         ->setToPHIDs(

@@ -21,4 +21,44 @@ final class DifferentialTransactionComment
     // Only cache submitted comments.
     return ($this->getTransactionPHID() != null);
   }
+
+  public static function sortAndGroupInlines(
+    array $inlines,
+    array $changesets) {
+    assert_instances_of($inlines, 'DifferentialTransaction');
+    assert_instances_of($changesets, 'DifferentialChangeset');
+
+    $changesets = mpull($changesets, null, 'getID');
+    $changesets = msort($changesets, 'getFilename');
+
+    // Group the changesets by file and reorder them by display order.
+    $inline_groups = array();
+    foreach ($inlines as $inline) {
+      $changeset_id = $inline->getComment()->getChangesetID();
+      $inline_groups[$changeset_id][] = $inline;
+    }
+    $inline_groups = array_select_keys($inline_groups, array_keys($changesets));
+
+    foreach ($inline_groups as $changeset_id => $group) {
+      // Sort the group of inlines by line number.
+      $items = array();
+      foreach ($group as $inline) {
+        $comment = $inline->getComment();
+        $num = (int)$comment->getLineNumber();
+        $len = (int)$comment->getLineLength();
+
+        $items[] = array(
+          'inline' => $inline,
+          'sort' => ($num << 16) + $len,
+        );
+      }
+
+      $items = isort($items, 'sort');
+      $items = ipull($items, 'inline');
+      $inline_groups[$changeset_id] = $items;
+    }
+
+    return $inline_groups;
+  }
+
 }

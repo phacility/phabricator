@@ -40,9 +40,6 @@ final class PhabricatorInlineSummaryView extends AphrontView {
         phutil_tag('th', array('colspan' => 3), $group));
 
       foreach ($items as $item) {
-
-        $items = isort($items, 'line');
-
         $line = $item['line'];
         $length = $item['length'];
         if ($length) {
