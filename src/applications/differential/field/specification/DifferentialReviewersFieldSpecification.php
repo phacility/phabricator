@@ -130,8 +130,6 @@ final class DifferentialReviewersFieldSpecification
       return null;
     }
 
-    $project_type = PhabricatorProjectPHIDTypeProject::TYPECONST;
-
     $names = array();
     foreach ($this->reviewers as $phid) {
       $names[] = $this->getHandle($phid)->getObjectName();
