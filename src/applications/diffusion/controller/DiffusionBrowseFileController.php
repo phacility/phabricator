@@ -104,8 +104,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       $view,
       $drequest,
       $show_blame,
-      $show_color,
-      $binary_uri);
+      $show_color);
 
     $properties = $this->buildPropertyView($drequest, $action_list);
     $object_box = id(new PHUIObjectBoxView())
@@ -304,10 +303,12 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       Javelin::initBehavior('load-blame', array('id' => $id));
     }
 
-    $button = $this->createEditButton();
+    $edit = $this->renderEditButton();
+    $file = $this->renderFileButton();
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('File Contents'))
-      ->addActionLink($button);
+      ->addActionLink($edit)
+      ->addActionLink($file);
 
     $corpus = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -320,8 +321,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
     PhabricatorActionListView $view,
     DiffusionRequest $drequest,
     $show_blame,
-    $show_color,
-    $binary_uri) {
+    $show_color) {
 
     $viewer = $this->getRequest()->getUser();
     $base_uri = $this->getRequest()->getRequestURI();
@@ -396,24 +396,10 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
         ->setIcon('warning')
         ->setDisabled(!$href));
 
-    if ($binary_uri) {
-      $view->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Download Raw File'))
-          ->setHref($binary_uri)
-          ->setIcon('download'));
-    } else {
-      $view->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('View Raw File'))
-          ->setHref($base_uri->alter('view', 'raw'))
-          ->setIcon('file'));
-    }
-
     return $view;
   }
 
-  private function createEditButton() {
+  private function renderEditButton() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
@@ -438,6 +424,33 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     return $button;
   }
+
+  private function renderFileButton($file_uri = null) {
+
+    $base_uri = $this->getRequest()->getRequestURI();
+
+    if ($file_uri) {
+      $text = pht('Download Raw File');
+      $href = $file_uri;
+      $icon = 'download';
+    } else {
+      $text = pht('View Raw File');
+      $href = $base_uri->alter('view', 'raw');
+      $icon = 'file';
+    }
+
+    $iconview = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+      ->setSpriteIcon($icon);
+    $button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText($text)
+      ->setHref($href)
+      ->setIcon($iconview);
+
+    return $button;
+  }
+
 
   private function buildDisplayRows(
     array $text_list,
@@ -847,8 +860,13 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
           'src' => $file_uri,
         )));
 
+    $file = $this->renderFileButton($file_uri);
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Image'))
+      ->addActionLink($file);
+
     return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Image'))
+      ->setHeader($header)
       ->addPropertyList($properties);
   }
 
