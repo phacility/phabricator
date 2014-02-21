@@ -20,12 +20,6 @@ final class DifferentialViewPolicyField
     return $revision->getViewPolicy();
   }
 
-  protected function writeValueToRevision(
-    DifferentialRevision $revision,
-    $value) {
-    $revision->setViewPolicy($value);
-  }
-
   public function readValueFromRequest(AphrontRequest $request) {
     $this->setValue($request->getStr($this->getFieldKey()));
   }

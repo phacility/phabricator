@@ -20,12 +20,6 @@ final class DifferentialEditPolicyField
     return $revision->getEditPolicy();
   }
 
-  protected function writeValueToRevision(
-    DifferentialRevision $revision,
-    $value) {
-    $revision->setEditPolicy($value);
-  }
-
   public function readValueFromRequest(AphrontRequest $request) {
     $this->setValue($request->getStr($this->getFieldKey()));
   }

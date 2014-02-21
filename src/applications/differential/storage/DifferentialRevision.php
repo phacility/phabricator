@@ -469,6 +469,7 @@ final class DifferentialRevision extends DifferentialDAO
       new DifferentialTitleField(),
       new DifferentialSummaryField(),
       new DifferentialTestPlanField(),
+      new DifferentialSubscribersField(),
       new DifferentialRepositoryField(),
       new DifferentialViewPolicyField(),
       new DifferentialEditPolicyField(),

@@ -14,9 +14,11 @@ abstract class DifferentialCoreCustomField
   abstract protected function readValueFromRevision(
     DifferentialRevision $revision);
 
-  abstract protected function writeValueToRevision(
+  protected function writeValueToRevision(
     DifferentialRevision $revision,
-    $value);
+    $value) {
+    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
+  }
 
   protected function isCoreFieldRequired() {
     return false;

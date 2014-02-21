@@ -58,6 +58,8 @@ final class DifferentialTransactionEditor
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         $object->setEditPolicy($xaction->getNewValue());
         return;
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -70,6 +72,8 @@ final class DifferentialTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        return;
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return;
     }
 

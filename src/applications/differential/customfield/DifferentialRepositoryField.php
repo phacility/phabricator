@@ -29,7 +29,7 @@ final class DifferentialRepositoryField
   public function readValueFromRequest(AphrontRequest $request) {
     $phids = $request->getArr($this->getFieldKey());
     $first = head($phids);
-    $this->setValue(coalesce($first, null));
+    $this->setValue(nonempty($first, null));
   }
 
   public function getRequiredHandlePHIDsForEdit() {
@@ -41,7 +41,6 @@ final class DifferentialRepositoryField
   }
 
   public function renderEditControl(array $handles) {
-
     if ($this->getValue()) {
       $control_value = array_select_keys($handles, array($this->getValue()));
     } else {
@@ -97,7 +96,6 @@ final class DifferentialRepositoryField
         $xaction->renderHandleLink($author_phid),
         $xaction->renderHandleLink($old));
     }
-
   }
 
   public function getApplicationTransactionTitleForFeed(
