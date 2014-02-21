@@ -208,7 +208,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     if (!$show_color) {
       $style =
-        "margin: 1em 2em; width: 90%; height: 80em; font-family: monospace";
+        "border: none; width: 100%; height: 80em; font-family: monospace";
       if (!$show_blame) {
         $corpus = phutil_tag(
           'textarea',
@@ -301,12 +301,17 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
         ),
         $corpus_table);
 
-      $corpus = id(new PHUIObjectBoxView())
-        ->setHeaderText('File Contents')
-        ->appendChild($corpus);
-
       Javelin::initBehavior('load-blame', array('id' => $id));
     }
+
+    $button = $this->createEditButton();
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('File Contents'))
+      ->addActionLink($button);
+
+    $corpus = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($corpus);
 
     return $corpus;
   }
@@ -348,7 +353,6 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
         ->setIcon($blame_icon)
         ->setUser($viewer)
         ->setRenderAsForm(true));
-
 
     if ($show_color) {
       $highlight_text = pht('Disable Highlighting');
@@ -406,12 +410,10 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
           ->setIcon('file'));
     }
 
-    $view->addAction($this->createEditAction());
-
     return $view;
   }
 
-  private function createEditAction() {
+  private function createEditButton() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
@@ -424,14 +426,17 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
     $callsign = $repository->getCallsign();
     $editor_link = $user->loadEditorLink($path, $line, $callsign);
 
-    $action = id(new PhabricatorActionView())
-      ->setName(pht('Open in Editor'))
-      ->setIcon('edit');
+    $icon_edit = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+      ->setSpriteIcon('edit');
+    $button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Open in Editor'))
+      ->setHref($editor_link)
+      ->setIcon($icon_edit)
+      ->setDisabled(!$editor_link);
 
-    $action->setHref($editor_link);
-    $action->setDisabled(!$editor_link);
-
-    return $action;
+    return $button;
   }
 
   private function buildDisplayRows(
