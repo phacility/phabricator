@@ -459,22 +459,16 @@ final class DifferentialRevisionViewController extends DifferentialController {
   }
 
   private function getRevisionActions(DifferentialRevision $revision) {
-    $user = $this->getRequest()->getUser();
-    $viewer_phid = $user->getPHID();
-    $viewer_is_owner = ($revision->getAuthorPHID() == $viewer_phid);
-    $viewer_is_reviewer = in_array($viewer_phid, $revision->getReviewers());
-    $viewer_is_cc = in_array($viewer_phid, $revision->getCCPHIDs());
-    $logged_in = $this->getRequest()->getUser()->isLoggedIn();
-    $status = $revision->getStatus();
+    $viewer = $this->getRequest()->getUser();
     $revision_id = $revision->getID();
     $revision_phid = $revision->getPHID();
 
-    $links = array();
-
     $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $user,
+      $viewer,
       $revision,
       PhabricatorPolicyCapability::CAN_EDIT);
+
+    $links = array();
 
     $links[] = array(
       'icon'  =>  'edit',
@@ -483,24 +477,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
       'disabled' => !$can_edit,
       'sigil' => $can_edit ? null : 'workflow',
     );
-
-    if (!$viewer_is_owner && !$viewer_is_reviewer) {
-      $action = $viewer_is_cc ? 'rem' : 'add';
-      $links[] = array(
-        'icon'    => $viewer_is_cc ? 'disable' : 'check',
-        'href'    => "/differential/subscribe/{$action}/{$revision_id}/",
-        'name'    => $viewer_is_cc ? pht('Unsubscribe') : pht('Subscribe'),
-        'instant' => $logged_in,
-        'disabled' => !$logged_in,
-        'sigil' => $can_edit ? null : 'workflow',
-      );
-    } else {
-      $links[] = array(
-        'icon'     => 'enable',
-        'name'     => pht('Automatically Subscribed'),
-        'disabled' => true,
-      );
-    }
 
     $this->requireResource('phabricator-object-selector-css');
     $this->requireResource('javelin-behavior-phabricator-object-selector');

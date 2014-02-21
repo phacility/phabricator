@@ -63,8 +63,6 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
               => 'DifferentialInlineCommentEditController',
           ),
         ),
-        'subscribe/(?P<action>add|rem)/(?P<id>[1-9]\d*)/'
-          => 'DifferentialSubscribeController',
         'preview/' => 'PhabricatorMarkupPreviewController',
       ),
     );
