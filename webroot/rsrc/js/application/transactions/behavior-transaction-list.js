@@ -75,19 +75,6 @@ JX.behavior('phabricator-transaction-list', function(config) {
     e.kill();
   });
 
-  JX.DOM.listen(list, 'click', 'transaction-detail', function(e) {
-    if (!e.isNormalClick()) {
-      return;
-    }
-
-    JX.Workflow.newFromLink(e.getTarget())
-      .setData({anchor: e.getData('anchor')})
-      .setHandler(ontransactions)
-      .start();
-
-    e.kill();
-  });
-
   JX.Stratcom.listen(
     ['submit', 'didSyntheticSubmit'],
     'transaction-append',

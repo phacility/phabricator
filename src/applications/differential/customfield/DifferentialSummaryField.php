@@ -64,6 +64,18 @@ final class DifferentialSummaryField
       $xaction->renderHandleLink($object_phid));
   }
 
-  // TODO: Support hasChangeDetails() in CustomFields.
+  public function getApplicationTransactionHasChangeDetails(
+    PhabricatorApplicationTransaction $xaction) {
+    return true;
+  }
+
+  public function getApplicationTransactionChangeDetails(
+    PhabricatorApplicationTransaction $xaction,
+    PhabricatorUser $viewer) {
+    return $xaction->renderTextCorpusChangeDetails(
+      $viewer,
+      $xaction->getOldValue(),
+      $xaction->getNewValue());
+  }
 
 }

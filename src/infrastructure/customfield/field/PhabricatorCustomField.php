@@ -904,6 +904,27 @@ abstract class PhabricatorCustomField {
   }
 
 
+  public function getApplicationTransactionHasChangeDetails(
+    PhabricatorApplicationTransaction $xaction) {
+    if ($this->proxy) {
+      return $this->proxy->getApplicationTransactionHasChangeDetails(
+        $xaction);
+    }
+    return false;
+  }
+
+  public function getApplicationTransactionChangeDetails(
+    PhabricatorApplicationTransaction $xaction,
+    PhabricatorUser $viewer) {
+    if ($this->proxy) {
+      return $this->proxy->getApplicationTransactionChangeDetails(
+        $xaction,
+        $viewer);
+    }
+    return null;
+  }
+
+
 /* -(  Edit View  )---------------------------------------------------------- */
 
 

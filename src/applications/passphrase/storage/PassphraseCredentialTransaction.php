@@ -91,15 +91,10 @@ final class PassphraseCredentialTransaction
   }
 
   public function renderChangeDetails(PhabricatorUser $viewer) {
-    $old = $this->getOldValue();
-    $new = $this->getNewValue();
-
-    $view = id(new PhabricatorApplicationTransactionTextDiffDetailView())
-      ->setUser($viewer)
-      ->setOldText(json_encode($old))
-      ->setNewText(json_encode($new));
-
-    return $view->render();
+    return $this->renderTextCorpusChangeDetails(
+      $viewer,
+      json_encode($this->getOldValue()),
+      json_encode($this->getNewValue()));
   }
 
 

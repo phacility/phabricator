@@ -89,12 +89,10 @@ final class PhabricatorConfigTransaction
       $new_text = PhabricatorConfigJSON::prettyPrintJSON($new['value']);
     }
 
-    $view = id(new PhabricatorApplicationTransactionTextDiffDetailView())
-      ->setUser($viewer)
-      ->setOldText($old_text)
-      ->setNewText($new_text);
-
-    return $view->render();
+    return $this->renderTextCorpusChangeDetails(
+      $viewer,
+      $old_text,
+      $new_text);
   }
 
   public function getColor() {
