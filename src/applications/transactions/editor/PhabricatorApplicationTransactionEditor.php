@@ -738,7 +738,12 @@ abstract class PhabricatorApplicationTransactionEditor
 
       $type = $xaction->getTransactionType();
       if (empty($types[$type])) {
-        throw new Exception("Transaction has unknown type '{$type}'.");
+        throw new Exception(
+          pht(
+            'Transaction has type "%s", but that transaction type is not '.
+            'supported by this editor (%s).',
+            $type,
+            get_class($this)));
       }
     }
 

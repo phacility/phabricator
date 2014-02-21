@@ -202,12 +202,18 @@ final class PhabricatorCustomFieldList extends Phobject {
       $old_value = $field->getOldValueForApplicationTransactions();
 
       $field->readValueFromRequest($request);
+      $transaction_type = $field->getApplicationTransactionType();
 
       $xaction = id(clone $template)
-        ->setTransactionType(PhabricatorTransactions::TYPE_CUSTOMFIELD)
+        ->setTransactionType($transaction_type)
         ->setMetadataValue('customfield:key', $field->getFieldKey())
-        ->setOldValue($old_value)
         ->setNewValue($field->getNewValueForApplicationTransactions());
+
+      if ($transaction_type == PhabricatorTransactions::TYPE_CUSTOMFIELD) {
+        // For TYPE_CUSTOMFIELD transactions only, we provide the old value
+        // as an input.
+        $xaction->setOldValue($old_value);
+      }
 
       $xactions[] = $xaction;
     }

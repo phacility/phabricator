@@ -470,6 +470,8 @@ final class DifferentialRevision extends DifferentialDAO
       new DifferentialSummaryField(),
       new DifferentialTestPlanField(),
       new DifferentialRepositoryField(),
+      new DifferentialViewPolicyField(),
+      new DifferentialEditPolicyField(),
     );
 
     return array_fill_keys(

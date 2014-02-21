@@ -736,6 +736,17 @@ abstract class PhabricatorCustomField {
   /**
    * @task appxaction
    */
+  public function getApplicationTransactionType() {
+    if ($this->proxy) {
+      return $this->proxy->getApplicationTransactionType();
+    }
+    return PhabricatorTransactions::TYPE_CUSTOMFIELD;
+  }
+
+
+  /**
+   * @task appxaction
+   */
   public function getOldValueForApplicationTransactions() {
     if ($this->proxy) {
       return $this->proxy->getOldValueForApplicationTransactions();
