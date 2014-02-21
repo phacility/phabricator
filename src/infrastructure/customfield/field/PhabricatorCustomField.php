@@ -347,6 +347,7 @@ abstract class PhabricatorCustomField {
    * Sets the object this field belongs to.
    *
    * @param PhabricatorCustomFieldInterface The object this field belongs to.
+   * @return this
    * @task context
    */
   final public function setObject(PhabricatorCustomFieldInterface $object) {
@@ -357,6 +358,21 @@ abstract class PhabricatorCustomField {
 
     $this->object = $object;
     $this->didSetObject($object);
+    return $this;
+  }
+
+
+  /**
+   * Read object data into local field storage, if applicable.
+   *
+   * @param PhabricatorCustomFieldInterface The object this field belongs to.
+   * @return this
+   * @task context
+   */
+  public function readValueFromObject(PhabricatorCustomFieldInterface $object) {
+    if ($this->proxy) {
+      $this->proxy->readValueFromObject($object);
+    }
     return $this;
   }
 

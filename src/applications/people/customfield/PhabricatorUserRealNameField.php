@@ -29,7 +29,7 @@ final class PhabricatorUserRealNameField
     return true;
   }
 
-  protected function didSetObject(PhabricatorCustomFieldInterface $object) {
+  public function readValueFromObject(PhabricatorCustomFieldInterface $object) {
     $this->value = $object->getRealName();
   }
 

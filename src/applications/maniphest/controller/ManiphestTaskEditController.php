@@ -158,11 +158,6 @@ final class ManiphestTaskEditController extends ManiphestController {
       $task,
       PhabricatorCustomField::ROLE_EDIT);
     $field_list->setViewer($user);
-
-    foreach ($field_list->getFields() as $field) {
-      $field->setObject($task);
-    }
-
     $field_list->readFieldsFromStorage($task);
 
     $aux_fields = $field_list->getFields();
@@ -389,6 +384,7 @@ final class ManiphestTaskEditController extends ManiphestController {
 
             if ($fields) {
               id(new PhabricatorCustomFieldList($fields))
+                ->setViewer($user)
                 ->readFieldsFromStorage($template_task);
 
               foreach ($fields as $key => $field) {

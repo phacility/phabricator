@@ -47,15 +47,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $field_list = PhabricatorCustomField::getObjectFields(
       $task,
       PhabricatorCustomField::ROLE_VIEW);
-
-    foreach ($field_list->getFields() as $field) {
-      $field->setObject($task);
-      $field->setViewer($user);
-    }
-
-    $field_list->readFieldsFromStorage($task);
-
-    $aux_fields = $field_list->getFields();
+    $field_list
+      ->setViewer($user)
+      ->readFieldsFromStorage($task);
 
     $e_commit = PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT;
     $e_dep_on = PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK;

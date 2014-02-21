@@ -39,6 +39,11 @@ final class PhabricatorCustomFieldList extends Phobject {
   public function readFieldsFromStorage(
     PhabricatorCustomFieldInterface $object) {
 
+    foreach ($this->fields as $field) {
+      $field->setObject($object);
+      $field->readValueFromObject($object);
+    }
+
     $keys = array();
     foreach ($this->fields as $field) {
       if ($field->shouldEnableForRole(PhabricatorCustomField::ROLE_STORAGE)) {
