@@ -47,10 +47,13 @@ final class PhabricatorApplicationHerald extends PhabricatorApplication {
           'HeraldDisableController',
         'history/(?:(?P<id>[1-9]\d*)/)?' => 'HeraldRuleEditHistoryController',
         'test/' => 'HeraldTestConsoleController',
-        'transcript/' => 'HeraldTranscriptListController',
-        'transcript/(?P<id>[1-9]\d*)/(?:(?P<filter>\w+)/)?'
+        'transcript/' => array(
+          '' => 'HeraldTranscriptListController',
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'HeraldTranscriptListController',
+          '(?P<id>[1-9]\d*)/(?:(?P<filter>\w+)/)?'
           => 'HeraldTranscriptController',
-      ),
+        )
+      )
     );
   }
 

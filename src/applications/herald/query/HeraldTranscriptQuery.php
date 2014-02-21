@@ -4,10 +4,16 @@ final class HeraldTranscriptQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
+  private $objectPHIDs;
   private $needPartialRecords;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
+    return $this;
+  }
+
+  public function withObjectPHIDs(array $phids) {
+    $this->objectPHIDs = $phids;
     return $this;
   }
 
@@ -87,6 +93,13 @@ final class HeraldTranscriptQuery
         $conn_r,
         'id IN (%Ld)',
         $this->ids);
+    }
+
+    if ($this->objectPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'objectPHID in (%Ls)',
+        $this->objectPHIDs);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

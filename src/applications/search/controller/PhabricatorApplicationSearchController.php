@@ -281,7 +281,7 @@ final class PhabricatorApplicationSearchController
 
     $crumbs = $parent
       ->buildApplicationCrumbs()
-      ->addTextCrumb(pht("Search"));
+      ->addTextCrumb($title);
 
     $nav->setCrumbs($crumbs);
 

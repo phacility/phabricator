@@ -836,6 +836,7 @@ phutil_register_library_map(array(
     'HeraldTranscriptGarbageCollector' => 'applications/herald/garbagecollector/HeraldTranscriptGarbageCollector.php',
     'HeraldTranscriptListController' => 'applications/herald/controller/HeraldTranscriptListController.php',
     'HeraldTranscriptQuery' => 'applications/herald/query/HeraldTranscriptQuery.php',
+    'HeraldTranscriptSearchEngine' => 'applications/herald/query/HeraldTranscriptSearchEngine.php',
     'HeraldTranscriptTestCase' => 'applications/herald/storage/__tests__/HeraldTranscriptTestCase.php',
     'Javelin' => 'infrastructure/javelin/Javelin.php',
     'JavelinReactorExample' => 'applications/uiexample/examples/JavelinReactorExample.php',
@@ -3455,8 +3456,13 @@ phutil_register_library_map(array(
     ),
     'HeraldTranscriptController' => 'HeraldController',
     'HeraldTranscriptGarbageCollector' => 'PhabricatorGarbageCollector',
-    'HeraldTranscriptListController' => 'HeraldController',
+    'HeraldTranscriptListController' =>
+    array(
+      0 => 'HeraldController',
+      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
+    ),
     'HeraldTranscriptQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'HeraldTranscriptSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'HeraldTranscriptTestCase' => 'PhabricatorTestCase',
     'JavelinReactorExample' => 'PhabricatorUIExample',
     'JavelinUIExample' => 'PhabricatorUIExample',

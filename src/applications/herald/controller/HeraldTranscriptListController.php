@@ -1,19 +1,59 @@
 <?php
 
-final class HeraldTranscriptListController extends HeraldController {
+final class HeraldTranscriptListController extends HeraldController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
+
+  private $queryKey;
+
+  public function buildSideNavView($for_app = false) {
+    $user = $this->getRequest()->getUser();
+
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
+
+    if ($for_app) {
+      $nav->addFilter('new', pht('Create Rule'));
+    }
+
+    id(new HeraldTranscriptSearchEngine())
+      ->setViewer($user)
+      ->addNavigationItems($nav->getMenu());
+
+    $nav->selectFilter(null);
+
+    return $nav;
+  }
+
+  public function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $crumbs->addTextCrumb(
+      pht('Transcripts'),
+      $this->getApplicationURI('transcript/'));
+    return $crumbs;
+  }
+
+  public function willProcessRequest(array $data) {
+    $this->queryKey = idx($data, 'queryKey');
+  }
 
   public function processRequest() {
-
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->queryKey)
+      ->setSearchEngine(new HeraldTranscriptSearchEngine())
+      ->setNavigation($this->buildSideNavView());
 
-    $pager = new AphrontCursorPagerView();
-    $pager->readFromRequest($request);
+    return $this->delegateToController($controller);
+  }
 
-    $transcripts = id(new HeraldTranscriptQuery())
-      ->setViewer($user)
-      ->needPartialRecords(true)
-      ->executeWithCursorPager($pager);
+
+  public function renderResultsList(
+    array $transcripts,
+    PhabricatorSavedQuery $query) {
+    assert_instances_of($transcripts, 'HeraldTranscript');
+
+    $viewer = $this->getRequest()->getUser();
 
     // Render the table.
     $handles = array();
@@ -25,8 +65,8 @@ final class HeraldTranscriptListController extends HeraldController {
     $rows = array();
     foreach ($transcripts as $xscript) {
       $rows[] = array(
-        phabricator_date($xscript->getTime(), $user),
-        phabricator_time($xscript->getTime(), $user),
+        phabricator_date($xscript->getTime(), $viewer),
+        phabricator_time($xscript->getTime(), $viewer),
         $handles[$xscript->getObjectPHID()]->renderLink(),
         $xscript->getDryRun() ? pht('Yes') : '',
         number_format((int)(1000 * $xscript->getDuration())).' ms',
@@ -64,23 +104,10 @@ final class HeraldTranscriptListController extends HeraldController {
     $panel = new AphrontPanelView();
     $panel->setHeader(pht('Herald Transcripts'));
     $panel->appendChild($table);
-    $panel->appendChild($pager);
     $panel->setNoBackground();
 
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('transcript');
-    $nav->appendChild($panel);
+    return $panel;
 
-    $crumbs = id($this->buildApplicationCrumbs())
-      ->addTextCrumb(pht('Transcripts'));
-    $nav->setCrumbs($crumbs);
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => pht('Herald Transcripts'),
-        'device' => true,
-      ));
   }
 
 }
