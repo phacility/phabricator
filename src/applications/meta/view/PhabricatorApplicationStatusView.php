@@ -5,6 +5,7 @@ final class PhabricatorApplicationStatusView extends AphrontView {
   private $count;
   private $text;
   private $type;
+  private $href;
 
   const TYPE_NEEDS_ATTENTION  = 'needs';
   const TYPE_INFO             = 'info';
@@ -37,6 +38,15 @@ final class PhabricatorApplicationStatusView extends AphrontView {
 
   public function getCount() {
     return $this->count;
+  }
+  
+  public function setHref($href) {
+    $this->href = $this->getApplicationURI($href);
+    return $this;
+  }
+  
+  public function getHref() {
+    return $this->href;
   }
 
   public function render() {

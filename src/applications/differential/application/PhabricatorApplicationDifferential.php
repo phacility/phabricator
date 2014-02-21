@@ -104,21 +104,24 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
       ->setText(pht('%d Review(s) Blocking Others', $blocking))
-      ->setCount($blocking);
+      ->setCount($blocking)
+      ->setHref('query/active/');
 
     $active = count($active);
     $type = PhabricatorApplicationStatusView::TYPE_WARNING;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
       ->setText(pht('%d Review(s) Need Attention', $active))
-      ->setCount($active);
+      ->setCount($active)
+      ->setHref('query/active/');
 
     $waiting = count($waiting);
     $type = PhabricatorApplicationStatusView::TYPE_INFO;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
       ->setText(pht('%d Review(s) Waiting on Others', $waiting))
-      ->setCount($waiting);
+      ->setCount($waiting)
+      ->setHref('query/active/');
 
     return $status;
   }

@@ -75,9 +75,10 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
         $count1 = $count2 = '';
         if ($count > 0) {
           $count1 = phutil_tag(
-          'span',
+          $status->getHref() ? 'a' : 'span',
           array(
             'class' => 'phabricator-application-attention-count',
+            'href' => $status->getHref(),
           ),
           $count);
         }
@@ -85,9 +86,10 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
 
         if (!empty($counts[$warning])) {
           $count2 = phutil_tag(
-          'span',
+          $status->getHref() ? 'a' : 'span',
           array(
             'class' => 'phabricator-application-warning-count',
+            'href' => $status->getHref(),
           ),
           $counts[$warning]);
         }
