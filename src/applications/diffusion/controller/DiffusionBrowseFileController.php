@@ -871,15 +871,23 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
   }
 
   private function buildBinaryCorpus($file_uri, $data) {
-    $properties = new PHUIPropertyListView();
 
-    $size = strlen($data);
-    $properties->addTextContent(
-      pht(
-        'This is a binary file. It is %s byte(s) in length.',
-        new PhutilNumber($size)));
+    $size = new PhutilNumber(strlen($data));
+    $text = pht('This is a binary file. It is %s byte(s) in length.', $size);
+    $text = id(new PHUIBoxView())
+      ->addPadding(PHUI::PADDING_LARGE)
+      ->appendChild($text);
 
-    return $properties;
+    $file = $this->renderFileButton($file_uri);
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Details'))
+      ->addActionLink($file);
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($text);
+
+    return $box;
   }
 
   private function buildBeforeResponse($before) {
