@@ -570,6 +570,10 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     // user friendly errors for us, but we omit the courtesy checks on some
     // pathways like administrative scripts for simplicity.
 
+    if (!PhabricatorUserEmail::isValidAddress($email->getAddress())) {
+      throw new Exception(PhabricatorUserEmail::describeValidAddresses());
+    }
+
     if (!PhabricatorUserEmail::isAllowedAddress($email->getAddress())) {
       throw new Exception(PhabricatorUserEmail::describeAllowedAddresses());
     }

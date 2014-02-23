@@ -173,8 +173,11 @@ final class PhabricatorSettingsPanelEmailAddresses
       if (!strlen($email)) {
         $e_email = pht('Required');
         $errors[] = pht('Email is required.');
-      } else if (!PhabricatorUserEmail::isAllowedAddress($email)) {
+      } else if (!PhabricatorUserEmail::isValidAddress($email)) {
         $e_email = pht('Invalid');
+        $errors[] = PhabricatorUserEmail::describeValidAddresses();
+      } else if (!PhabricatorUserEmail::isAllowedAddress($email)) {
+        $e_email = pht('Disallowed');
         $errors[] = PhabricatorUserEmail::describeAllowedAddresses();
       }
 

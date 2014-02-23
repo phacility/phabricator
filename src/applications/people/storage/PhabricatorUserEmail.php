@@ -12,6 +12,8 @@ final class PhabricatorUserEmail extends PhabricatorUserDAO {
   protected $isPrimary;
   protected $verificationCode;
 
+  const MAX_ADDRESS_LENGTH = 128;
+
   public function getVerificationURI() {
     return '/emailverify/'.$this->getVerificationCode().'/';
   }
@@ -30,7 +32,33 @@ final class PhabricatorUserEmail extends PhabricatorUserDAO {
   /**
    * @task restrictions
    */
+  public static function isValidAddress($address) {
+    if (strlen($address) > self::MAX_ADDRESS_LENGTH) {
+      return false;
+    }
+
+    return true;
+  }
+
+
+  /**
+   * @task restrictions
+   */
+  public static function describeValidAddresses() {
+    return pht(
+      'The maximum length of an email address is %d character(s).',
+      new PhutilNumber(self::MAX_ADDRESS_LENGTH));
+  }
+
+
+  /**
+   * @task restrictions
+   */
   public static function isAllowedAddress($address) {
+    if (!self::isValidAddress($address)) {
+      return false;
+    }
+
     $allowed_domains = PhabricatorEnv::getEnvConfig('auth.email-domains');
     if (!$allowed_domains) {
       return true;
