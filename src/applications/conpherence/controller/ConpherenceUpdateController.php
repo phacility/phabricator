@@ -37,6 +37,7 @@ final class ConpherenceUpdateController
     $e_file = array();
     $errors = array();
     $delete_draft = false;
+    $xactions = array();
     if ($request->isFormPost()) {
       $editor = id(new ConpherenceEditor())
         ->setContinueOnNoEffect($request->isContinueRequest())
@@ -59,7 +60,6 @@ final class ConpherenceUpdateController
           $delete_draft = true;
           break;
         case ConpherenceUpdateActions::ADD_PERSON:
-          $xactions = array();
           $person_phids = $request->getArr('add_person');
           if (!empty($person_phids)) {
             $xactions[] = id(new ConpherenceTransaction())
@@ -69,7 +69,6 @@ final class ConpherenceUpdateController
           }
           break;
         case ConpherenceUpdateActions::REMOVE_PERSON:
-          $xactions = array();
           if (!$request->isContinueRequest()) {
             // do nothing; we'll display a confirmation dialogue instead
             break;
@@ -95,7 +94,6 @@ final class ConpherenceUpdateController
             ->setContent($result);
           break;
         case ConpherenceUpdateActions::METADATA:
-          $xactions = array();
           $updated = false;
           // all metadata updates are continue requests
           if (!$request->isContinueRequest()) {
