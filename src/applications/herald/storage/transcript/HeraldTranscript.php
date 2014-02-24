@@ -92,6 +92,12 @@ final class HeraldTranscript extends HeraldDAO
         'conditionTranscripts'  => self::SERIALIZATION_PHP,
         'applyTranscripts'      => self::SERIALIZATION_PHP,
       ),
+      self::CONFIG_BINARY => array(
+        'objectTranscript'      => true,
+        'ruleTranscripts'       => true,
+        'conditionTranscripts'  => true,
+        'applyTranscripts'      => true,
+      ),
     ) + parent::getConfiguration();
   }
 

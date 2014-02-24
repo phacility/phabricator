@@ -12,6 +12,9 @@ final class PhabricatorMarkupCache extends PhabricatorCacheDAO {
         'cacheData' => self::SERIALIZATION_PHP,
         'metadata'  => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_BINARY => array(
+        'cacheData' => true,
+      ),
     ) + parent::getConfiguration();
   }
 
