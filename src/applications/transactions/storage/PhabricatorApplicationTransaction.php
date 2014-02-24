@@ -528,6 +528,19 @@ abstract class PhabricatorApplicationTransaction
     return 1.0;
   }
 
+  public function isCommentTransaction() {
+    if ($this->hasComment()) {
+      return true;
+    }
+
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        return true;
+    }
+
+    return false;
+  }
+
   public function getActionName() {
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_COMMENT:
@@ -605,8 +618,6 @@ abstract class PhabricatorApplicationTransaction
    * @return bool True to display in a group with the other transactions.
    */
   public function shouldDisplayGroupWith(array $group) {
-    $type_comment = PhabricatorTransactions::TYPE_COMMENT;
-
     $this_source = null;
     if ($this->getContentSource()) {
       $this_source = $this->getContentSource()->getSource();
@@ -624,7 +635,7 @@ abstract class PhabricatorApplicationTransaction
       }
 
       // Don't group anything into a group which already has a comment.
-      if ($xaction->getTransactionType() == $type_comment) {
+      if ($xaction->isCommentTransaction()) {
         return false;
       }
 

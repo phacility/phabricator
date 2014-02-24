@@ -1335,12 +1335,7 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_COMMENT:
-        return true;
-      default:
-        return false;
-    }
+    return $xaction->isCommentTransaction();
   }
 
 

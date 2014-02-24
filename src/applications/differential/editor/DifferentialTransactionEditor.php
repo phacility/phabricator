@@ -12,10 +12,10 @@ final class DifferentialTransactionEditor
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
     $types[] = DifferentialTransaction::TYPE_ACTION;
+    $types[] = DifferentialTransaction::TYPE_INLINE;
 
 /*
 
-    $types[] = DifferentialTransaction::TYPE_INLINE;
     $types[] = DifferentialTransaction::TYPE_UPDATE;
 */
 
@@ -33,6 +33,8 @@ final class DifferentialTransactionEditor
         return $object->getEditPolicy();
       case DifferentialTransaction::TYPE_ACTION:
         return null;
+      case DifferentialTransaction::TYPE_INLINE:
+        return null;
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -47,6 +49,8 @@ final class DifferentialTransactionEditor
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case DifferentialTransaction::TYPE_ACTION:
         return $xaction->getNewValue();
+      case DifferentialTransaction::TYPE_INLINE:
+        return null;
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -57,6 +61,8 @@ final class DifferentialTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case DifferentialTransaction::TYPE_INLINE:
+        return $xaction->hasComment();
     }
 
     return parent::transactionHasEffect($object, $xaction);
@@ -76,6 +82,8 @@ final class DifferentialTransactionEditor
         return;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorTransactions::TYPE_COMMENT:
+      case DifferentialTransaction::TYPE_INLINE:
+        return;
       case PhabricatorTransactions::TYPE_EDGE:
         // TODO: When removing reviewers, we may be able to move the revision
         // to "Accepted".
@@ -101,6 +109,7 @@ final class DifferentialTransactionEditor
       case PhabricatorTransactions::TYPE_EDGE:
       case PhabricatorTransactions::TYPE_COMMENT:
       case DifferentialTransaction::TYPE_ACTION:
+      case DifferentialTransaction::TYPE_INLINE:
         return;
     }
 
@@ -118,6 +127,23 @@ final class DifferentialTransactionEditor
     }
 
     return $errors;
+  }
+
+  protected function sortTransactions(array $xactions) {
+    $head = array();
+    $tail = array();
+
+    // Move bare comments to the end, so the actions precede them.
+    foreach ($xactions as $xaction) {
+      $type = $xaction->getTransactionType();
+      if ($type == DifferentialTransaction::TYPE_INLINE) {
+        $tail[] = $xaction;
+      } else {
+        $head[] = $xaction;
+      }
+    }
+
+    return array_values(array_merge($head, $tail));
   }
 
   protected function requireCapabilities(

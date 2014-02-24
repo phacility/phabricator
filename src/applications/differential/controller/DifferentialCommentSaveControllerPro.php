@@ -86,8 +86,30 @@ final class DifferentialCommentSaveControllerPro
         ->setNewValue(array('+' => $reviewer_edges));
     }
 
+    $inline_phids = $this->loadUnsubmittedInlinePHIDs($revision);
+    if ($inline_phids) {
+      $inlines = id(new PhabricatorApplicationTransactionCommentQuery())
+        ->setTemplate(new DifferentialTransactionComment())
+        ->setViewer($viewer)
+        ->withPHIDs($inline_phids)
+        ->execute();
+    } else {
+      $inlines = null;
+    }
+
+    foreach ($inlines as $inline) {
+      $xactions[] = id(new DifferentialTransaction())
+        ->setTransactionType($type_inline)
+        ->attachComment($inline);
+    }
+
+    // NOTE: If there are no other transactions, add an empty comment
+    // transaction so that we'll raise a more user-friendly error message,
+    // to the effect of "you can not post an empty comment".
+    $no_xactions = !$xactions;
+
     $comment = $request->getStr('comment');
-    if (strlen($comment)) {
+    if (strlen($comment) || $no_xactions) {
       $xactions[] = id(new DifferentialTransaction())
         ->setTransactionType($type_comment)
         ->attachComment(
@@ -96,7 +118,6 @@ final class DifferentialCommentSaveControllerPro
             ->setContent($comment));
     }
 
-    // TODO: Inlines!
 
     $editor = id(new DifferentialTransactionEditor())
       ->setActor($viewer)
@@ -114,8 +135,6 @@ final class DifferentialCommentSaveControllerPro
         ->setException($ex);
     }
 
-    // TODO: Diff change detection?
-
     $user = $request->getUser();
     $draft = id(new PhabricatorDraft())->loadOneWhere(
       'authorPHID = %s AND draftKey = %s',
@@ -128,6 +147,32 @@ final class DifferentialCommentSaveControllerPro
 
     return id(new AphrontRedirectResponse())
       ->setURI('/D'.$revision->getID());
+  }
+
+
+  private function loadUnsubmittedInlinePHIDs(DifferentialRevision $revision) {
+    $viewer = $this->getRequest()->getUser();
+
+    // TODO: This probably needs to move somewhere more central as we move
+    // away from DifferentialInlineCommentQuery, but
+    // PhabricatorApplicationTransactionCommentQuery is currently `final` and
+    // I'm not yet decided on how to approach that. For now, just get the PHIDs
+    // and then execute a PHID-based query through the standard stack.
+
+    $table = new DifferentialTransactionComment();
+    $conn_r = $table->establishConnection('r');
+
+    $phids = queryfx_all(
+      $conn_r,
+      'SELECT phid FROM %T
+        WHERE revisionPHID = %s
+          AND authorPHID = %s
+          AND transactionPHID IS NULL',
+      $table->getTableName(),
+      $revision->getPHID(),
+      $viewer->getPHID());
+
+    return ipull($phids, 'phid');
   }
 
 }
