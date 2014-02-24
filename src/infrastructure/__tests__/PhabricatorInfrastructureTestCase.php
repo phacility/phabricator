@@ -77,5 +77,28 @@ final class PhabricatorInfrastructureTestCase
     $this->assertEqual($buf, $read->getBigData());
   }
 
+  public function testRejectMySQLBMPQueries() {
+    $table = new HarbormasterScratchTable();
+    $conn_r = $table->establishConnection('w');
+
+    $snowman = "\xE2\x98\x83";
+    $gclef = "\xF0\x9D\x84\x9E";
+
+    qsprintf($conn_r, 'SELECT %B', $snowman);
+    qsprintf($conn_r, 'SELECT %s', $snowman);
+    qsprintf($conn_r, 'SELECT %B', $gclef);
+
+    $caught = null;
+    try {
+      qsprintf($conn_r, 'SELECT %s', $gclef);
+    } catch (AphrontQueryCharacterSetException $ex) {
+      $caught = $ex;
+    }
+
+    $this->assertEqual(
+      true,
+      ($caught instanceof AphrontQueryCharacterSetException));
+  }
+
 }
 

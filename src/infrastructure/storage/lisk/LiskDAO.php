@@ -171,6 +171,7 @@ abstract class LiskDAO {
   const CONFIG_AUX_PHID             = 'auxiliary-phid';
   const CONFIG_SERIALIZATION        = 'col-serialization';
   const CONFIG_PARTIAL_OBJECTS      = 'partial-objects';
+  const CONFIG_BINARY               = 'binary';
 
   const SERIALIZATION_NONE          = 'id';
   const SERIALIZATION_JSON          = 'json';
@@ -355,6 +356,11 @@ abstract class LiskDAO {
    * by Lisk (use readField and writeField instead), and you should not
    * directly access or assign protected members of your class (use the getters
    * and setters).
+   *
+   * CONFIG_BINARY
+   * You can optionally provide a map of columns to a flag indicating that
+   * they store binary data. These columns will not raise an error when
+   * handling binary writes.
    *
    * @return dictionary  Map of configuration options to values.
    *
@@ -1148,9 +1154,14 @@ abstract class LiskDAO {
     }
 
     $conn = $this->establishConnection('w');
+    $binary = $this->getBinaryColumns();
 
     foreach ($map as $key => $value) {
-      $map[$key] = qsprintf($conn, '%C = %ns', $key, $value);
+      if (!empty($binary[$key])) {
+        $map[$key] = qsprintf($conn, '%C = %nB', $key, $value);
+      } else {
+        $map[$key] = qsprintf($conn, '%C = %ns', $key, $value);
+      }
     }
     $map = implode(', ', $map);
 
@@ -1242,10 +1253,15 @@ abstract class LiskDAO {
     $this->willWriteData($data);
 
     $columns = array_keys($data);
+    $binary = $this->getBinaryColumns();
 
     foreach ($data as $key => $value) {
       try {
-        $data[$key] = qsprintf($conn, '%ns', $value);
+        if (!empty($binary[$key])) {
+          $data[$key] = qsprintf($conn, '%nB', $value);
+        } else {
+          $data[$key] = qsprintf($conn, '%ns', $value);
+        }
       } catch (AphrontQueryParameterException $parameter_exception) {
         throw new PhutilProxyException(
           pht(
@@ -1801,6 +1817,10 @@ abstract class LiskDAO {
       $counter_name);
 
     return $conn_w->getInsertID();
+  }
+
+  private function getBinaryColumns() {
+    return $this->getConfigOption(self::CONFIG_BINARY);
   }
 
 }

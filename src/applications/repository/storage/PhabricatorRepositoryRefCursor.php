@@ -24,6 +24,9 @@ final class PhabricatorRepositoryRefCursor extends PhabricatorRepositoryDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
+      self::CONFIG_BINARY => array(
+        'refNameRaw' => true,
+      ),
     ) + parent::getConfiguration();
   }
 
