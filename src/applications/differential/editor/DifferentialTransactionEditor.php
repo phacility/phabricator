@@ -107,6 +107,57 @@ final class DifferentialTransactionEditor
     return parent::requireCapabilities($object, $xaction);
   }
 
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    $phids = array();
+    $phids[] = $object->getAuthorPHID();
+    foreach ($object->getReviewerStatus() as $reviewer) {
+      $phids[] = $reviewer->getReviewerPHID();
+    }
+    return $phids;
+  }
+
+  protected function getMailSubjectPrefix() {
+    return PhabricatorEnv::getEnvConfig('metamta.differential.subject-prefix');
+  }
+
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    return id(new DifferentialReplyHandler())
+      ->setMailReceiver($object);
+  }
+
+  protected function buildMailTemplate(PhabricatorLiskDAO $object) {
+    $id = $object->getID();
+    $title = $object->getTitle();
+
+    $original_title = $object->getOriginalTitle();
+
+    $subject = "D{$id}: {$title}";
+    $thread_topic = "D{$id}: {$original_title}";
+
+    return id(new PhabricatorMetaMTAMail())
+      ->setSubject($subject)
+      ->addHeader('Thread-Topic', $thread_topic);
+  }
+
+  protected function buildMailBody(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $body = parent::buildMailBody($object, $xactions);
+
+    $body->addTextSection(
+      pht('REVISION DETAIL'),
+      PhabricatorEnv::getProductionURI('/D'.$object->getID()));
+
+    return $body;
+  }
+
   protected function supportsSearch() {
     return true;
   }
