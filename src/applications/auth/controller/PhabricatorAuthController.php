@@ -158,7 +158,7 @@ abstract class PhabricatorAuthController extends PhabricatorController {
     }
 
     if ($account->getUserPHID()) {
-      if ($account->getUserPHID() != $viewer->getUserPHID()) {
+      if ($account->getUserPHID() != $viewer->getPHID()) {
         $response = $this->renderError(
           pht(
             'The account you are attempting to register or link is already '.
