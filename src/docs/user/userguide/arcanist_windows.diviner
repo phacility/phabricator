@@ -96,7 +96,7 @@ instructions if you're having trouble.
   - Copy `php.ini-development` to `php.ini` in that same directory.
   - Open `php.ini` and locate the line `;extension=php_curl.dll`. Remove the
     `;` to activate this extension. Locate the line `; extension_dir = "ext"`
-    and change it to `; extension_dir = "C:\PHP\ext"`, where `C:\PHP` is
+    and change it to `extension_dir = "C:\PHP\ext"`, where `C:\PHP` is
     the directory where you installed PHP.
   - Verify that things work by running `php -i` from your commandline and
     looking for `curl` in the output.
