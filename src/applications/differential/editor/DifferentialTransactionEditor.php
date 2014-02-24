@@ -63,6 +63,26 @@ final class DifferentialTransactionEditor
     switch ($xaction->getTransactionType()) {
       case DifferentialTransaction::TYPE_INLINE:
         return $xaction->hasComment();
+      case DifferentialTransaction::TYPE_ACTION:
+        $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
+        $status_abandoned = ArcanistDifferentialRevisionStatus::ABANDONED;
+        $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
+        $status_revision = ArcanistDifferentialRevisionStatus::NEEDS_REVISION;
+
+        switch ($xaction->getNewValue()) {
+          case DifferentialAction::ACTION_CLOSE:
+            return ($object->getStatus() != $status_closed);
+          case DifferentialAction::ACTION_ABANDON:
+            return ($object->getStatus() != $status_abandoned);
+          case DifferentialAction::ACTION_RECLAIM:
+            return ($object->getStatus() == $status_abandoned);
+          case DifferentialAction::ACTION_REOPEN:
+            return ($object->getStatus() == $status_closed);
+          case DifferentialAction::ACTION_RETHINK:
+            return ($object->getStatus() != $status_revision);
+          case DifferentialAction::ACTION_REQUEST:
+            return ($object->getStatus() != $status_review);
+        }
     }
 
     return parent::transactionHasEffect($object, $xaction);
@@ -89,8 +109,41 @@ final class DifferentialTransactionEditor
         // to "Accepted".
         return;
       case DifferentialTransaction::TYPE_ACTION:
-        // TODO: For now, we're just shipping these through without acting
-        // on them.
+        $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
+        $status_revision = ArcanistDifferentialRevisionStatus::NEEDS_REVISION;
+
+        switch ($xaction->getNewValue()) {
+          case DifferentialAction::ACTION_ABANDON:
+            $object->setStatus(ArcanistDifferentialRevisionStatus::ABANDONED);
+            break;
+          case DifferentialAction::ACTION_RETHINK:
+            $object->setStatus($status_revision);
+            break;
+          case DifferentialAction::ACTION_RECLAIM:
+            $object->setStatus($status_review);
+            // TODO: Update review status?
+            break;
+          case DifferentialAction::ACTION_REOPEN:
+            $object->setStatus($status_review);
+            // TODO: Update review status?
+            break;
+          case DifferentialAction::ACTION_REQUEST:
+            $object->setStatus($status_review);
+            // TODO: Update review status?
+            break;
+          case DifferentialAction::ACTION_CLOSE:
+            if (!$object->getDateCommitted()) {
+              // TODO: Can we remove this? It is probably no longer used by
+              // anything anymore. See also T4434.
+              $object->setDateCommitted(time());
+            }
+            $object->setStatus(ArcanistDifferentialRevisionStatus::CLOSED);
+            break;
+          default:
+            // TODO: For now, we're just shipping the rest of these through
+            // without acting on them.
+            break;
+        }
         return null;
     }
 
@@ -123,10 +176,183 @@ final class DifferentialTransactionEditor
 
     $errors = parent::validateTransaction($object, $type, $xactions);
 
-    switch ($type) {
+    foreach ($xactions as $xaction) {
+      switch ($type) {
+        case DifferentialTransaction::TYPE_ACTION:
+          $error = $this->validateDifferentialAction(
+            $object,
+            $type,
+            $xaction,
+            $xaction->getNewValue());
+          if ($error) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              $error,
+              $xaction);
+          }
+          break;
+      }
     }
 
     return $errors;
+  }
+
+  private function validateDifferentialAction(
+    DifferentialRevision $revision,
+    $type,
+    DifferentialTransaction $xaction,
+    $action) {
+
+    $author_phid = $revision->getAuthorPHID();
+    $actor_phid = $this->getActor()->getPHID();
+    $actor_is_author = ($author_phid == $actor_phid);
+
+    $config_close_key = 'differential.always-allow-close';
+    $always_allow_close = PhabricatorEnv::getEnvConfig($config_close_key);
+
+    $config_reopen_key = 'differential.allow-reopen';
+    $allow_reopen = PhabricatorEnv::getEnvConfig($config_reopen_key);
+
+    $revision_status = $revision->getStatus();
+
+    $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
+    $status_abandoned = ArcanistDifferentialRevisionStatus::ABANDONED;
+    $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
+
+    switch ($action) {
+      case DifferentialAction::ACTION_ABANDON:
+        if (!$actor_is_author) {
+          return pht(
+            "You can not abandon this revision because you do not own it. ".
+            "You can only abandon revisions you own.");
+        }
+
+        if ($revision_status == $status_closed) {
+          return pht(
+            "You can not abandon this revision because it has already been ".
+            "closed.");
+        }
+
+        // NOTE: Abandons of already-abandoned revisions are treated as no-op
+        // instead of invalid. Other abandons are OK.
+
+        break;
+
+      case DifferentialAction::ACTION_RECLAIM:
+        if (!$actor_is_author) {
+          return pht(
+            "You can not reclaim this revision because you do not own ".
+            "it. You can only reclaim revisions you own.");
+        }
+
+        if ($revision_status == $status_closed) {
+          return pht(
+            "You can not reclaim this revision because it has already been ".
+            "closed.");
+        }
+
+        // NOTE: Reclaims of other non-abandoned revisions are treated as no-op
+        // instead of invalid.
+
+        break;
+
+      case DifferentialAction::ACTION_REOPEN:
+        if (!$allow_reopen) {
+          return pht(
+            'The reopen action is not enabled on this Phabricator install. '.
+            'Adjust your configuration to enable it.');
+        }
+
+        // NOTE: If the revision is not closed, this is caught as a no-op
+        // instead of an invalid transaction.
+
+        break;
+
+      case DifferentialAction::ACTION_RETHINK:
+        if (!$actor_is_author) {
+          return pht(
+            "You can not plan changes to this revision because you do not ".
+            "own it. To plan chagnes to a revision, you must be its owner.");
+        }
+
+        switch ($revision_status) {
+          case ArcanistDifferentialRevisionStatus::ACCEPTED:
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
+            // These are OK.
+            break;
+          case ArcanistDifferentialRevisionStatus::ABANDONED:
+            return pht(
+              "You can not plan changes to this revision because it has ".
+              "been abandoned.");
+          case ArcanistDifferentialRevisionStatus::CLOSED:
+            return pht(
+              "You can not plan changes to this revision because it has ".
+              "already been closed.");
+          default:
+            throw new Exception(
+              pht(
+                'Encountered unexpected revision status ("%s") when '.
+                'validating "%s" action.',
+                $revision_status,
+                $action));
+        }
+        break;
+
+      case DifferentialAction::ACTION_REQUEST:
+        if (!$actor_is_author) {
+          return pht(
+            "You can not request review of this revision because you do ".
+            "not own it. To request review of a revision, you must be its ".
+            "owner.");
+        }
+
+        switch ($revision_status) {
+          case ArcanistDifferentialRevisionStatus::ACCEPTED:
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+            // These are OK.
+            break;
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
+            // This will be caught as "no effect" later on.
+            break;
+          case ArcanistDifferentialRevisionStatus::ABANDONED:
+            return pht(
+              "You can not request review of this revision because it has ".
+              "been abandoned. Instead, reclaim it.");
+          case ArcanistDifferentialRevisionStatus::CLOSED:
+            return pht(
+              "You can not request review of this revision because it has ".
+              "already been closed.");
+          default:
+            throw new Exception(
+              pht(
+                'Encountered unexpected revision status ("%s") when '.
+                'validating "%s" action.',
+                $revision_status,
+                $action));
+        }
+        break;
+
+      case DifferentialAction::ACTION_CLOSE:
+
+        // TODO: Permit the daemons to take this action in all cases.
+
+        if (!$actor_is_author && !$always_allow_close) {
+          return pht(
+            "You can not close this revision because you do not own it. To ".
+            "close a revision, you must be its owner.");
+        }
+
+        if ($revision_status != $status_accepted) {
+          return pht(
+            "You can not close this revision because it has not been ".
+            "accepted. You can only close accepted revisions.");
+        }
+        break;
+    }
+
+    return null;
   }
 
   protected function sortTransactions(array $xactions) {

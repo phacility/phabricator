@@ -123,6 +123,27 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
             return pht(
               'Those reviewers are already reviewing this revision.');
         }
+        break;
+      case DifferentialTransaction::TYPE_ACTION:
+        switch ($this->getNewValue()) {
+          case DifferentialAction::ACTION_CLOSE:
+            return pht('This revision is already closed.');
+          case DifferentialAction::ACTION_ABANDON:
+            return pht('This revision has already been abandoned.');
+          case DifferentialAction::ACTION_RECLAIM:
+            return pht(
+              'You can not reclaim this revision because his revision is '.
+              'not abandoned.');
+          case DifferentialAction::ACTION_REOPEN:
+            return pht(
+              'You can not reopen this revision because this revision is '.
+              'not closed.');
+          case DifferentialAction::ACTION_RETHINK:
+            return pht('This revision already requires changes.');
+          case DifferentialAction::ACTION_REQUEST:
+            return pht('Review is already requested for this revision.');
+        }
+        break;
     }
 
     return parent::getNoEffectDescription();
