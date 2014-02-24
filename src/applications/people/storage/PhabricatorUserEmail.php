@@ -37,6 +37,23 @@ final class PhabricatorUserEmail extends PhabricatorUserDAO {
       return false;
     }
 
+    // Very roughly validate that this address isn't so mangled that a
+    // reasonable piece of code might completely misparse it. In particular,
+    // the major risks are:
+    //
+    //   - `PhutilEmailAddress` needs to be able to extract the domain portion
+    //     from it.
+    //   - Reasonable mail adapters should be hard-pressed to interpret one
+    //     address as several addresses.
+    //
+    // To this end, we're roughly verifying that there's some normal text, an
+    // "@" symbol, and then some more normal text.
+
+    $email_regex = '(^[a-z0-9_+.!-]+@[a-z0-9_+:.-]+$)i';
+    if (!preg_match($email_regex, $address)) {
+      return false;
+    }
+
     return true;
   }
 
@@ -46,7 +63,8 @@ final class PhabricatorUserEmail extends PhabricatorUserDAO {
    */
   public static function describeValidAddresses() {
     return pht(
-      'The maximum length of an email address is %d character(s).',
+      "Email addresses should be in the form 'user@domain.com'. The maximum ".
+      "length of an email address is %d character(s).",
       new PhutilNumber(self::MAX_ADDRESS_LENGTH));
   }
 
