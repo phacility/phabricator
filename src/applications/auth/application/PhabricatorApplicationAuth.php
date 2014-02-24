@@ -76,7 +76,8 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
           '(?P<action>enable|disable)/(?P<id>\d+)/' =>
             'PhabricatorAuthDisableController',
         ),
-        'login/(?P<pkey>[^/]+)/' => 'PhabricatorAuthLoginController',
+        'login/(?P<pkey>[^/]+)/(?:(?P<extra>[^/]+)/)?' =>
+          'PhabricatorAuthLoginController',
         'register/(?:(?P<akey>[^/]+)/)?' => 'PhabricatorAuthRegisterController',
         'start/' => 'PhabricatorAuthStartController',
         'validate/' => 'PhabricatorAuthValidateController',
