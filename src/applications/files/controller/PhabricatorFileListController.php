@@ -78,7 +78,8 @@ final class PhabricatorFileListController extends PhabricatorFileController
       $list_view->addItem($item);
     }
 
-    $list_view->appendChild(new PhabricatorGlobalUploadTargetView());
+    $list_view->appendChild(id(new PhabricatorGlobalUploadTargetView())
+      ->setUser($user));
 
     return $list_view;
   }

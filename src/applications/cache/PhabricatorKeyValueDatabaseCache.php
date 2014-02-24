@@ -19,7 +19,7 @@ final class PhabricatorKeyValueDatabaseCache
 
         $sql[] = qsprintf(
           $conn_w,
-          '(%s, %s, %s, %s, %d, %nd)',
+          '(%s, %s, %s, %B, %d, %nd)',
           $hash,
           $key,
           $format,

@@ -5,24 +5,9 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
     $comment = new DifferentialInlineComment();
     return $comment;
   }
-  // $line: 1 based
-  // $length: 0 based (0 meaning 1 line)
-  private function createNewComment($line, $length) {
-    $comment = $this->createComment();
-    $comment->setIsNewFile(true);
-    $comment->setLineNumber($line);
-    $comment->setLineLength($length);
-    return $comment;
-  }
-  // $line: 1 based
-  // $length: 0 based (0 meaning 1 line)
-  private function createOldComment($line, $length) {
-    $comment = $this->createComment();
-    $comment->setIsNewFile(false);
-    $comment->setLineNumber($line);
-    $comment->setLineLength($length);
-    return $comment;
-  }
+
+
+
   private function createHunk($oldOffset, $oldLen, $newOffset, $newLen, $changes) {
     $hunk = new DifferentialHunk();
     $hunk->setOldOffset($oldOffset);
@@ -57,7 +42,9 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
     $hunks = $this->createSingleChange(1, 0, "-a");
     $context = $parser->makeContextDiff(
       $hunks,
-      $this->createOldComment(1, 0),
+      0,
+      1,
+      0,
       0);
     $this->assertEqual("@@ -1,1 @@\n-a", $context);
   }
@@ -67,7 +54,9 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
     $hunks = $this->createSingleChange(0, 1, "+a");
     $context = $parser->makeContextDiff(
       $hunks,
-      $this->createNewComment(1, 0),
+      1,
+      1,
+      0,
       0);
     $this->assertEqual("@@ +1,1 @@\n+a", $context);
   }
@@ -77,7 +66,9 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
     $hunks = $this->createSingleChange(0, 1, "+a");
     $context = $parser->makeContextDiff(
       $hunks,
-      $this->createNewComment(2, 0),
+      1,
+      2,
+      0,
       0);
     $this->assertEqual("", $context);
   }
@@ -89,7 +80,9 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
     );
     $context = $parser->makeContextDiff(
       $hunks,
-      $this->createNewComment(41, 1),
+      1,
+      41,
+      1,
       0);
     $this->assertEqual("@@ -23,1 +42,1 @@\n 1", $context);
   }
@@ -101,7 +94,9 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
     );
     $context = $parser->makeContextDiff(
       $hunks,
-      $this->createNewComment(43, 1),
+      1,
+      43,
+      1,
       0);
     $this->assertEqual("@@ -24,1 +43,1 @@\n 2", $context);
   }
@@ -115,7 +110,9 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
          "+n3\n");
     $context = $parser->makeContextDiff(
       $hunks,
-      $this->createOldComment(1, 1),
+      0,
+      1,
+      1,
       0);
     $this->assertEqual(
         "@@ -1,2 +2,1 @@\n".
@@ -132,7 +129,9 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
          "+n2\n");
     $context = $parser->makeContextDiff(
       $hunks,
-      $this->createNewComment(1, 1),
+      1,
+      1,
+      1,
       0);
     $this->assertEqual(
         "@@ -2,1 +1,2 @@\n".
@@ -148,7 +147,9 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
     // Note that this only works with additional context.
     $context = $parser->makeContextDiff(
       $hunks,
-      $this->createNewComment(2, 0),
+      1,
+      2,
+      0,
       1);
     $this->assertEqual(
         "@@ +1,1 @@\n".
@@ -170,7 +171,9 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
         " e7\n");
     $context = $parser->makeContextDiff(
       $hunks,
-      $this->createNewComment(2, 4),
+      1,
+      2,
+      4,
       0);
     $this->assertEqual(
         "@@ -2,5 +2,5 @@\n".
@@ -197,7 +200,9 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
         " e7\n");
     $context = $parser->makeContextDiff(
       $hunks,
-      $this->createOldComment(2, 4),
+      0,
+      2,
+      4,
       0);
     $this->assertEqual(
         "@@ -2,5 +2,4 @@\n".
@@ -218,7 +223,9 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
          "+n3\n");
     $context = $parser->makeContextDiff(
       $hunks,
-      $this->createOldComment(1, 1),
+      0,
+      1,
+      1,
       1);
     $this->assertEqual(
         "@@ -1,2 +1,2 @@\n".
@@ -236,7 +243,9 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
          "+n2\n");
     $context = $parser->makeContextDiff(
       $hunks,
-      $this->createNewComment(1, 1),
+      1,
+      1,
+      1,
       1);
     $this->assertEqual(
         "@@ -1,3 +1,2 @@\n".

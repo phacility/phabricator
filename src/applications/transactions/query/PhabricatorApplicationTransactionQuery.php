@@ -96,27 +96,6 @@ abstract class PhabricatorApplicationTransactionQuery
       }
     }
 
-    if ($this->needHandles) {
-      $phids = array();
-      foreach ($xactions as $xaction) {
-        $phids[$xaction->getPHID()] = $xaction->getRequiredHandlePHIDs();
-      }
-      $handles = array();
-      $merged = array_mergev($phids);
-      if ($merged) {
-        $handles = id(new PhabricatorHandleQuery())
-          ->setViewer($this->getViewer())
-          ->withPHIDs($merged)
-          ->execute();
-      }
-      foreach ($xactions as $xaction) {
-        $xaction->setHandles(
-          array_select_keys(
-            $handles,
-            $phids[$xaction->getPHID()]));
-      }
-    }
-
     return $xactions;
   }
 
@@ -136,6 +115,31 @@ abstract class PhabricatorApplicationTransactionQuery
         continue;
       }
       $xaction->attachObject($objects[$object_phid]);
+    }
+
+    // NOTE: We have to do this after loading objects, because the objects
+    // may help determine which handles are required (for example, in the case
+    // of custom fields.
+
+    if ($this->needHandles) {
+      $phids = array();
+      foreach ($xactions as $xaction) {
+        $phids[$xaction->getPHID()] = $xaction->getRequiredHandlePHIDs();
+      }
+      $handles = array();
+      $merged = array_mergev($phids);
+      if ($merged) {
+        $handles = id(new PhabricatorHandleQuery())
+          ->setViewer($this->getViewer())
+          ->withPHIDs($merged)
+          ->execute();
+      }
+      foreach ($xactions as $xaction) {
+        $xaction->setHandles(
+          array_select_keys(
+            $handles,
+            $phids[$xaction->getPHID()]));
+      }
     }
 
     return $xactions;

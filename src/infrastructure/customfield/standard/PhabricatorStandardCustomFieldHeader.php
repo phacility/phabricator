@@ -7,7 +7,7 @@ final class PhabricatorStandardCustomFieldHeader
     return 'header';
   }
 
-  public function renderEditControl() {
+  public function renderEditControl(array $handles) {
     $header = phutil_tag(
       'div',
       array(

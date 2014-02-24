@@ -95,4 +95,19 @@ final class PhabricatorStandardCustomFieldInt
     return $errors;
   }
 
+  public function getApplicationTransactionHasEffect(
+    PhabricatorApplicationTransaction $xaction) {
+
+    $old = $xaction->getOldValue();
+    $new = $xaction->getNewValue();
+    if (!strlen($old) && strlen($new)) {
+      return true;
+    } else if (strlen($old) && !strlen($new)) {
+      return true;
+    } else {
+      return ((int)$old !== (int)$new);
+    }
+  }
+
+
 }

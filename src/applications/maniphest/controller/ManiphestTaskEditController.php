@@ -157,12 +157,7 @@ final class ManiphestTaskEditController extends ManiphestController {
     $field_list = PhabricatorCustomField::getObjectFields(
       $task,
       PhabricatorCustomField::ROLE_EDIT);
-
-    foreach ($field_list->getFields() as $field) {
-      $field->setObject($task);
-      $field->setViewer($user);
-    }
-
+    $field_list->setViewer($user);
     $field_list->readFieldsFromStorage($task);
 
     $aux_fields = $field_list->getFields();
@@ -389,6 +384,7 @@ final class ManiphestTaskEditController extends ManiphestController {
 
             if ($fields) {
               id(new PhabricatorCustomFieldList($fields))
+                ->setViewer($user)
                 ->readFieldsFromStorage($template_task);
 
               foreach ($fields as $key => $field) {
@@ -577,10 +573,7 @@ final class ManiphestTaskEditController extends ManiphestController {
             ->setDatasource('/typeahead/common/projects/'));
     }
 
-    foreach ($aux_fields as $aux_field) {
-      $aux_control = $aux_field->renderEditControl();
-      $form->appendChild($aux_control);
-    }
+    $field_list->appendFieldsToForm($form);
 
     require_celerity_resource('aphront-error-view-css');
 

@@ -55,6 +55,15 @@ abstract class PhabricatorAuthProviderOAuth1 extends PhabricatorAuthProvider {
     $response = null;
 
     if ($request->isHTTPPost()) {
+      // Add a CSRF code to the callback URI, which we'll verify when
+      // performing the login.
+
+      $client_code = $this->getAuthCSRFCode($request);
+
+      $callback_uri = $adapter->getCallbackURI();
+      $callback_uri = $callback_uri.$client_code.'/';
+      $adapter->setCallbackURI($callback_uri);
+
       $uri = $adapter->getClientRedirectURI();
       $response = id(new AphrontRedirectResponse())->setURI($uri);
       return array($account, $response);
@@ -69,6 +78,8 @@ abstract class PhabricatorAuthProviderOAuth1 extends PhabricatorAuthProvider {
 
     // NOTE: You can get here via GET, this should probably be a bit more
     // user friendly.
+
+    $this->verifyAuthCSRFCode($request, $controller->getExtraURIData());
 
     $token = $request->getStr('oauth_token');
     $verifier = $request->getStr('oauth_verifier');

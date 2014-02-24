@@ -491,13 +491,7 @@ class PHPMailerLite {
       switch($this->Mailer) {
 
         case 'amazon-ses':
-          $toArr = array();
-          foreach($this->to as $t) {
-            $toArr[] = $this->AddrFormat($t);
-          }
-          $to = implode(', ', $toArr);
           return $this->customMailer->executeSend(
-            "To: ".$to."\n".
             $header.
             $body);
 

@@ -738,7 +738,12 @@ abstract class PhabricatorApplicationTransactionEditor
 
       $type = $xaction->getTransactionType();
       if (empty($types[$type])) {
-        throw new Exception("Transaction has unknown type '{$type}'.");
+        throw new Exception(
+          pht(
+            'Transaction has type "%s", but that transaction type is not '.
+            'supported by this editor (%s).',
+            $type,
+            get_class($this)));
       }
     }
 
@@ -985,21 +990,24 @@ abstract class PhabricatorApplicationTransactionEditor
       }
       $result[$dst_phid] = $this->normalizeEdgeTransactionValue(
         $xaction,
-        $edge);
+        $edge,
+        $dst_phid);
     }
 
     if ($new_set !== null) {
       foreach ($new_set as $dst_phid => $edge) {
         $result[$dst_phid] = $this->normalizeEdgeTransactionValue(
           $xaction,
-          $edge);
+          $edge,
+          $dst_phid);
       }
     }
 
     foreach ($new_add as $dst_phid => $edge) {
       $result[$dst_phid] = $this->normalizeEdgeTransactionValue(
         $xaction,
-        $edge);
+        $edge,
+        $dst_phid);
     }
 
     foreach ($new_rem as $dst_phid => $edge) {
@@ -1027,18 +1035,44 @@ abstract class PhabricatorApplicationTransactionEditor
     }
   }
 
-  protected function normalizeEdgeTransactionValue(
+  private function normalizeEdgeTransactionValue(
     PhabricatorApplicationTransaction $xaction,
-    $edge) {
+    $edge,
+    $dst_phid) {
 
     if (!is_array($edge)) {
-      $edge = array(
-        'dst' => $edge,
-      );
+      if ($edge != $dst_phid) {
+        throw new Exception(
+          pht(
+            'Transaction edge data must either be the edge PHID or an edge '.
+            'specification dictionary.'));
+      }
+      $edge = array();
+    } else {
+      foreach ($edge as $key => $value) {
+        switch ($key) {
+          case 'src':
+          case 'dst':
+          case 'type':
+          case 'data':
+          case 'dateCreated':
+          case 'dateModified':
+          case 'seq':
+          case 'dataID':
+            break;
+          default:
+            throw new Exception(
+              pht(
+                'Transaction edge specification contains unexpected key '.
+                '"%s".',
+                $key));
+        }
+      }
     }
 
-    $edge_type = $xaction->getMetadataValue('edge:type');
+    $edge['dst'] = $dst_phid;
 
+    $edge_type = $xaction->getMetadataValue('edge:type');
     if (empty($edge['type'])) {
       $edge['type'] = $edge_type;
     } else {

@@ -75,8 +75,10 @@ final class PhabricatorHomeMainController
       $this->minipanels,
     );
 
+    $user = $this->getRequest()->getUser();
     $nav->appendChild($content);
-    $nav->appendChild(new PhabricatorGlobalUploadTargetView());
+    $nav->appendChild(id(new PhabricatorGlobalUploadTargetView())
+      ->setUser($user));
 
     return $this->buildApplicationPage(
       $nav,

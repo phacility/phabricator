@@ -29,7 +29,7 @@ final class PhabricatorUserTitleField
     return true;
   }
 
-  protected function didSetObject(PhabricatorCustomFieldInterface $object) {
+  public function readValueFromObject(PhabricatorCustomFieldInterface $object) {
     $this->value = $object->loadUserProfile()->getTitle();
   }
 
@@ -50,7 +50,7 @@ final class PhabricatorUserTitleField
     $this->value = $request->getStr($this->getFieldKey());
   }
 
-  public function renderEditControl() {
+  public function renderEditControl(array $handles) {
     return id(new AphrontFormTextControl())
       ->setName($this->getFieldKey())
       ->setValue($this->value)

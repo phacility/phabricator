@@ -59,6 +59,9 @@ final class PhabricatorRepositoryPushLog
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_TIMESTAMPS => false,
+      self::CONFIG_BINARY => array(
+        'refNameRaw' => true,
+      ),
     ) + parent::getConfiguration();
   }
 

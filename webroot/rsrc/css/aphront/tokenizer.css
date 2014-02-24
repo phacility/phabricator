@@ -68,7 +68,7 @@ a.jx-tokenizer-token {
   cursor: pointer;
   border-radius: 3px;
   color: {$darkbluetext};
-
+  min-height: 16px;
 }
 
 a.jx-tokenizer-token:hover {

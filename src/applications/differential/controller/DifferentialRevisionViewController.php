@@ -132,38 +132,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $aux_field->setHandles(array_select_keys($handles, $aux_phids[$key]));
     }
 
-    $reviewer_warning = null;
-    if ($revision->getStatus() ==
-        ArcanistDifferentialRevisionStatus::NEEDS_REVIEW) {
-      $has_live_reviewer = false;
-      foreach ($revision->getReviewers() as $reviewer) {
-        if (!$handles[$reviewer]->isDisabled()) {
-          $has_live_reviewer = true;
-          break;
-        }
-      }
-      if (!$has_live_reviewer) {
-        $reviewer_warning = new AphrontErrorView();
-        $reviewer_warning->setSeverity(AphrontErrorView::SEVERITY_WARNING);
-        $reviewer_warning->setTitle(pht('No Active Reviewers'));
-        if ($revision->getReviewers()) {
-          $reviewer_warning->appendChild(
-            phutil_tag(
-              'p',
-              array(),
-              pht('All specified reviewers are disabled and this revision '.
-                  'needs review. You may want to add some new reviewers.')));
-        } else {
-          $reviewer_warning->appendChild(
-            phutil_tag(
-              'p',
-              array(),
-              pht('This revision has no specified reviewers and needs '.
-                  'review. You may want to add some reviewers.')));
-        }
-      }
-    }
-
     $request_uri = $request->getRequestURI();
 
     $limit = 100;
@@ -257,6 +225,13 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $revision_detail->setActions($actions);
     $revision_detail->setUser($user);
+
+    $revision_detail_box = $revision_detail->render();
+
+    $revision_warnings = $this->buildRevisionWarnings($revision, $handles);
+    if ($revision_warnings) {
+      $revision_detail_box->setErrorView($revision_warnings);
+    }
 
     $comment_view = $this->buildTransactions(
       $revision,
@@ -420,9 +395,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setNavigationMarker(true);
 
     $content = array(
-      $reviewer_warning,
       $top_anchor,
-      $revision_detail,
+      $revision_detail_box,
       $page_pane,
     );
 
@@ -459,22 +433,16 @@ final class DifferentialRevisionViewController extends DifferentialController {
   }
 
   private function getRevisionActions(DifferentialRevision $revision) {
-    $user = $this->getRequest()->getUser();
-    $viewer_phid = $user->getPHID();
-    $viewer_is_owner = ($revision->getAuthorPHID() == $viewer_phid);
-    $viewer_is_reviewer = in_array($viewer_phid, $revision->getReviewers());
-    $viewer_is_cc = in_array($viewer_phid, $revision->getCCPHIDs());
-    $logged_in = $this->getRequest()->getUser()->isLoggedIn();
-    $status = $revision->getStatus();
+    $viewer = $this->getRequest()->getUser();
     $revision_id = $revision->getID();
     $revision_phid = $revision->getPHID();
 
-    $links = array();
-
     $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $user,
+      $viewer,
       $revision,
       PhabricatorPolicyCapability::CAN_EDIT);
+
+    $links = array();
 
     $links[] = array(
       'icon'  =>  'edit',
@@ -483,24 +451,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
       'disabled' => !$can_edit,
       'sigil' => $can_edit ? null : 'workflow',
     );
-
-    if (!$viewer_is_owner && !$viewer_is_reviewer) {
-      $action = $viewer_is_cc ? 'rem' : 'add';
-      $links[] = array(
-        'icon'    => $viewer_is_cc ? 'disable' : 'check',
-        'href'    => "/differential/subscribe/{$action}/{$revision_id}/",
-        'name'    => $viewer_is_cc ? pht('Unsubscribe') : pht('Subscribe'),
-        'instant' => $logged_in,
-        'disabled' => !$logged_in,
-        'sigil' => $can_edit ? null : 'workflow',
-      );
-    } else {
-      $links[] = array(
-        'icon'     => 'enable',
-        'name'     => pht('Automatically Subscribed'),
-        'disabled' => true,
-      );
-    }
 
     $this->requireResource('phabricator-object-selector-css');
     $this->requireResource('javelin-behavior-phabricator-object-selector');
@@ -963,6 +913,36 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $timeline->setShowEditActions(false);
 
     return $timeline;
+  }
+
+  private function buildRevisionWarnings(
+    DifferentialRevision $revision,
+    array $handles) {
+
+    $status_needs_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
+    if ($revision->getStatus() != $status_needs_review) {
+      return;
+    }
+
+    foreach ($revision->getReviewers() as $reviewer) {
+      if (!$handles[$reviewer]->isDisabled()) {
+        return;
+      }
+    }
+
+    $warnings = array();
+    if ($revision->getReviewers()) {
+      $warnings[] = pht(
+        'This revision needs review, but all specified reviewers are '.
+        'disabled or inactive.');
+    } else {
+      $warnings[] = pht(
+        'This revision needs review, but there are no reviewers specified.');
+    }
+
+    return id(new AphrontErrorView())
+      ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+      ->setErrors($warnings);
   }
 
 }

@@ -175,11 +175,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
       'a',
       array(
         'href' => '/transactions/detail/'.$xaction->getPHID().'/',
-        'sigil' => 'transaction-detail',
-        'mustcapture' => true,
-        'meta' => array(
-          'anchor' => $this->anchorOffset,
-        ),
+        'sigil' => 'workflow',
       ),
       pht('(Show Details)'));
   }

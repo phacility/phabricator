@@ -347,6 +347,7 @@ abstract class PhabricatorCustomField {
    * Sets the object this field belongs to.
    *
    * @param PhabricatorCustomFieldInterface The object this field belongs to.
+   * @return this
    * @task context
    */
   final public function setObject(PhabricatorCustomFieldInterface $object) {
@@ -357,6 +358,21 @@ abstract class PhabricatorCustomField {
 
     $this->object = $object;
     $this->didSetObject($object);
+    return $this;
+  }
+
+
+  /**
+   * Read object data into local field storage, if applicable.
+   *
+   * @param PhabricatorCustomFieldInterface The object this field belongs to.
+   * @return this
+   * @task context
+   */
+  public function readValueFromObject(PhabricatorCustomFieldInterface $object) {
+    if ($this->proxy) {
+      $this->proxy->readValueFromObject($object);
+    }
     return $this;
   }
 
@@ -736,6 +752,28 @@ abstract class PhabricatorCustomField {
   /**
    * @task appxaction
    */
+  public function getApplicationTransactionType() {
+    if ($this->proxy) {
+      return $this->proxy->getApplicationTransactionType();
+    }
+    return PhabricatorTransactions::TYPE_CUSTOMFIELD;
+  }
+
+
+  /**
+   * @task appxaction
+   */
+  public function getApplicationTransactionMetadata() {
+    if ($this->proxy) {
+      return $this->proxy->getApplicationTransactionMetadata();
+    }
+    return array();
+  }
+
+
+  /**
+   * @task appxaction
+   */
   public function getOldValueForApplicationTransactions() {
     if ($this->proxy) {
       return $this->proxy->getOldValueForApplicationTransactions();
@@ -904,6 +942,36 @@ abstract class PhabricatorCustomField {
   }
 
 
+  public function getApplicationTransactionHasChangeDetails(
+    PhabricatorApplicationTransaction $xaction) {
+    if ($this->proxy) {
+      return $this->proxy->getApplicationTransactionHasChangeDetails(
+        $xaction);
+    }
+    return false;
+  }
+
+  public function getApplicationTransactionChangeDetails(
+    PhabricatorApplicationTransaction $xaction,
+    PhabricatorUser $viewer) {
+    if ($this->proxy) {
+      return $this->proxy->getApplicationTransactionChangeDetails(
+        $xaction,
+        $viewer);
+    }
+    return null;
+  }
+
+  public function getApplicationTransactionRequiredHandlePHIDs(
+    PhabricatorApplicationTransaction $xaction) {
+    if ($this->proxy) {
+      return $this->proxy->getApplicationTransactionRequiredHandlePHIDs(
+        $xaction);
+    }
+    return array();
+  }
+
+
 /* -(  Edit View  )---------------------------------------------------------- */
 
 
@@ -932,9 +1000,20 @@ abstract class PhabricatorCustomField {
   /**
    * @task edit
    */
-  public function renderEditControl() {
+  public function getRequiredHandlePHIDsForEdit() {
     if ($this->proxy) {
-      return $this->proxy->renderEditControl();
+      return $this->proxy->getRequiredHandlePHIDsForEdit();
+    }
+    return array();
+  }
+
+
+  /**
+   * @task edit
+   */
+  public function renderEditControl(array $handles) {
+    if ($this->proxy) {
+      return $this->proxy->renderEditControl($handles);
     }
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }

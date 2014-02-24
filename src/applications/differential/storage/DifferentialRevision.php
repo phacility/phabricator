@@ -444,20 +444,41 @@ final class DifferentialRevision extends DifferentialDAO
 
 
   public function isAutomaticallySubscribed($phid) {
-    // TODO: Reviewers are also automatically subscribed, but that data may
-    // not always be loaded, so be conservative for now. All the editing code
-    // has checks around this already.
-    return ($phid == $this->getAuthorPHID());
+    if ($phid == $this->getAuthorPHID()) {
+      return true;
+    }
+
+    // TODO: This only happens when adding or removing CCs, and is safe from a
+    // policy perspective, but the subscription pathway should have some
+    // opportunity to load this data properly. For now, this is the only case
+    // where implicit subscription is not an intrinsic property of the object.
+    if ($this->reviewerStatus == self::ATTACHABLE) {
+      $reviewers = id(new DifferentialRevisionQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withPHIDs(array($this->getPHID()))
+        ->needReviewerStatus(true)
+        ->executeOne()
+        ->getReviewerStatus();
+    } else {
+      $reviewers = $this->getReviewerStatus();
+    }
+
+    foreach ($reviewers as $reviewer) {
+      if ($reviewer->getReviewerPHID() == $phid) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   public function shouldShowSubscribersProperty() {
-    // TODO: For now, Differential has its own stuff.
+    // TODO: Differential does its own thing for now.
     return false;
   }
 
   public function shouldAllowSubscription($phid) {
-    // TODO: For now, Differential has its own stuff.
-    return false;
+    return true;
   }
 
 
@@ -465,10 +486,19 @@ final class DifferentialRevision extends DifferentialDAO
 
 
   public function getCustomFieldSpecificationForRole($role) {
-    return array_fill_keys(
-      array(
+    $fields = array(
+      new DifferentialTitleField(),
+      new DifferentialSummaryField(),
+      new DifferentialTestPlanField(),
+      new DifferentialReviewersField(),
+      new DifferentialSubscribersField(),
+      new DifferentialRepositoryField(),
+      new DifferentialViewPolicyField(),
+      new DifferentialEditPolicyField(),
+    );
 
-      ),
+    return array_fill_keys(
+      mpull($fields, 'getFieldKey'),
       array('disabled' => false));
   }
 

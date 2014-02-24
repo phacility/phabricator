@@ -6,10 +6,11 @@ final class DifferentialTransactionEditor
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
-/*
     $types[] = PhabricatorTransactions::TYPE_EDGE;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
+
+/*
 
     $types[] = DifferentialTransaction::TYPE_INLINE;
     $types[] = DifferentialTransaction::TYPE_UPDATE;
@@ -24,6 +25,10 @@ final class DifferentialTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        return $object->getViewPolicy();
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        return $object->getEditPolicy();
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -34,6 +39,9 @@ final class DifferentialTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        return $xaction->getNewValue();
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -44,6 +52,17 @@ final class DifferentialTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        $object->setViewPolicy($xaction->getNewValue());
+        return;
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        $object->setEditPolicy($xaction->getNewValue());
+        return;
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
+      case PhabricatorTransactions::TYPE_EDGE:
+        // TODO: When removing reviewers, we may be able to move the revision
+        // to "Accepted".
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -54,6 +73,12 @@ final class DifferentialTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        return;
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
+      case PhabricatorTransactions::TYPE_EDGE:
+        return;
     }
 
     return parent::applyCustomExternalTransaction($object, $xaction);
@@ -71,7 +96,6 @@ final class DifferentialTransactionEditor
 
     return $errors;
   }
-
 
   protected function requireCapabilities(
     PhabricatorLiskDAO $object,

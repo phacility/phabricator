@@ -104,8 +104,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       $view,
       $drequest,
       $show_blame,
-      $show_color,
-      $binary_uri);
+      $show_color);
 
     $properties = $this->buildPropertyView($drequest, $action_list);
     $object_box = id(new PHUIObjectBoxView())
@@ -208,7 +207,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     if (!$show_color) {
       $style =
-        "margin: 1em 2em; width: 90%; height: 80em; font-family: monospace";
+        "border: none; width: 100%; height: 80em; font-family: monospace";
       if (!$show_blame) {
         $corpus = phutil_tag(
           'textarea',
@@ -301,12 +300,19 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
         ),
         $corpus_table);
 
-      $corpus = id(new PHUIObjectBoxView())
-        ->setHeaderText('File Contents')
-        ->appendChild($corpus);
-
       Javelin::initBehavior('load-blame', array('id' => $id));
     }
+
+    $edit = $this->renderEditButton();
+    $file = $this->renderFileButton();
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('File Contents'))
+      ->addActionLink($edit)
+      ->addActionLink($file);
+
+    $corpus = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($corpus);
 
     return $corpus;
   }
@@ -315,8 +321,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
     PhabricatorActionListView $view,
     DiffusionRequest $drequest,
     $show_blame,
-    $show_color,
-    $binary_uri) {
+    $show_color) {
 
     $viewer = $this->getRequest()->getUser();
     $base_uri = $this->getRequest()->getRequestURI();
@@ -348,7 +353,6 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
         ->setIcon($blame_icon)
         ->setUser($viewer)
         ->setRenderAsForm(true));
-
 
     if ($show_color) {
       $highlight_text = pht('Disable Highlighting');
@@ -392,26 +396,10 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
         ->setIcon('warning')
         ->setDisabled(!$href));
 
-    if ($binary_uri) {
-      $view->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Download Raw File'))
-          ->setHref($binary_uri)
-          ->setIcon('download'));
-    } else {
-      $view->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('View Raw File'))
-          ->setHref($base_uri->alter('view', 'raw'))
-          ->setIcon('file'));
-    }
-
-    $view->addAction($this->createEditAction());
-
     return $view;
   }
 
-  private function createEditAction() {
+  private function renderEditButton() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
@@ -424,15 +412,45 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
     $callsign = $repository->getCallsign();
     $editor_link = $user->loadEditorLink($path, $line, $callsign);
 
-    $action = id(new PhabricatorActionView())
-      ->setName(pht('Open in Editor'))
-      ->setIcon('edit');
+    $icon_edit = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+      ->setSpriteIcon('edit');
+    $button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Open in Editor'))
+      ->setHref($editor_link)
+      ->setIcon($icon_edit)
+      ->setDisabled(!$editor_link);
 
-    $action->setHref($editor_link);
-    $action->setDisabled(!$editor_link);
-
-    return $action;
+    return $button;
   }
+
+  private function renderFileButton($file_uri = null) {
+
+    $base_uri = $this->getRequest()->getRequestURI();
+
+    if ($file_uri) {
+      $text = pht('Download Raw File');
+      $href = $file_uri;
+      $icon = 'download';
+    } else {
+      $text = pht('View Raw File');
+      $href = $base_uri->alter('view', 'raw');
+      $icon = 'file';
+    }
+
+    $iconview = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+      ->setSpriteIcon($icon);
+    $button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText($text)
+      ->setHref($href)
+      ->setIcon($iconview);
+
+    return $button;
+  }
+
 
   private function buildDisplayRows(
     array $text_list,
@@ -842,21 +860,34 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
           'src' => $file_uri,
         )));
 
+    $file = $this->renderFileButton($file_uri);
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Image'))
+      ->addActionLink($file);
+
     return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Image'))
+      ->setHeader($header)
       ->addPropertyList($properties);
   }
 
   private function buildBinaryCorpus($file_uri, $data) {
-    $properties = new PHUIPropertyListView();
 
-    $size = strlen($data);
-    $properties->addTextContent(
-      pht(
-        'This is a binary file. It is %s byte(s) in length.',
-        new PhutilNumber($size)));
+    $size = new PhutilNumber(strlen($data));
+    $text = pht('This is a binary file. It is %s byte(s) in length.', $size);
+    $text = id(new PHUIBoxView())
+      ->addPadding(PHUI::PADDING_LARGE)
+      ->appendChild($text);
 
-    return $properties;
+    $file = $this->renderFileButton($file_uri);
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Details'))
+      ->addActionLink($file);
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($text);
+
+    return $box;
   }
 
   private function buildBeforeResponse($before) {

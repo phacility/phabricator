@@ -148,6 +148,13 @@ abstract class PhabricatorApplicationTransaction
 
     $phids[] = array($this->getAuthorPHID());
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $field = $this->getTransactionCustomField();
+        if ($field) {
+          $phids[] = $field->getApplicationTransactionRequiredHandlePHIDs(
+            $this);
+        }
+        break;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         $phids[] = $old;
         $phids[] = $new;
@@ -179,7 +186,11 @@ abstract class PhabricatorApplicationTransaction
   public function getHandle($phid) {
     if (empty($this->handles[$phid])) {
       throw new Exception(
-        "Transaction requires a handle ('{$phid}') it did not load.");
+        pht(
+          'Transaction ("%s") requires a handle ("%s") that it did not '.
+          'load.',
+          $this->getPHID(),
+          $phid));
     }
     return $this->handles[$phid];
   }
@@ -247,6 +258,29 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function getColor() {
+    return null;
+  }
+
+  protected function getTransactionCustomField() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $key = $this->getMetadataValue('customfield:key');
+        if (!$key) {
+          return null;
+        }
+
+        $field = PhabricatorCustomField::getObjectField(
+          $this->getObject(),
+          PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS,
+          $key);
+        if (!$field) {
+          return null;
+        }
+
+        $field->setViewer($this->getViewer());
+        return $field;
+    }
+
     return null;
   }
 
@@ -396,13 +430,8 @@ abstract class PhabricatorApplicationTransaction
         }
 
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
-        $key = $this->getMetadataValue('customfield:key');
-        $field = PhabricatorCustomField::getObjectField(
-          $this->getObject(),
-          PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS,
-          $key);
+        $field = $this->getTransactionCustomField();
         if ($field) {
-          $field->setViewer($this->getViewer());
           return $field->getApplicationTransactionTitle($this);
         } else {
           return pht(
@@ -460,13 +489,8 @@ abstract class PhabricatorApplicationTransaction
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
-        $key = $this->getMetadataValue('customfield:key');
-        $field = PhabricatorCustomField::getObjectField(
-          $this->getObject(),
-          PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS,
-          $key);
+        $field = $this->getTransactionCustomField();
         if ($field) {
-          $field->setViewer($this->getViewer());
           return $field->getApplicationTransactionTitleForFeed($this, $story);
         } else {
           return pht(
@@ -524,11 +548,43 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function hasChangeDetails() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $field = $this->getTransactionCustomField();
+        if ($field) {
+          return $field->getApplicationTransactionHasChangeDetails($this);
+        }
+        break;
+    }
     return false;
   }
 
   public function renderChangeDetails(PhabricatorUser $viewer) {
-    return null;
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $field = $this->getTransactionCustomField();
+        if ($field) {
+          return $field->getApplicationTransactionChangeDetails($this, $viewer);
+        }
+        break;
+    }
+
+    return $this->renderTextCorpusChangeDetails();
+  }
+
+  public function renderTextCorpusChangeDetails(
+    PhabricatorUser $viewer,
+    $old,
+    $new) {
+
+    require_celerity_resource('differential-changeset-view-css');
+
+    $view = id(new PhabricatorApplicationTransactionTextDiffDetailView())
+      ->setUser($viewer)
+      ->setOldText($old)
+      ->setNewText($new);
+
+    return $view->render();
   }
 
   public function attachTransactionGroup(array $group) {

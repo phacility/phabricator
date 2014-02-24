@@ -260,6 +260,7 @@ final class DifferentialComment
 
   public function setProxyComment(DifferentialTransactionComment $proxy) {
     $this->proxyComment = $proxy;
+    $this->proxy->attachComment($proxy);
     return $this;
   }
 
@@ -349,6 +350,10 @@ final class DifferentialComment
   public function delete() {
     $this->proxy->delete();
     return $this;
+  }
+
+  public function getProxyTransaction() {
+    return $this->proxy;
   }
 
 }

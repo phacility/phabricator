@@ -112,32 +112,11 @@ final class DifferentialTransactionView
       $inline_view = new PhabricatorInlineSummaryView();
 
       $changesets = $this->getChangesets();
-      $changesets = mpull($changesets, null, 'getID');
 
-      // Group the changesets by file and reorder them by display order.
-      $inline_groups = array();
-      foreach ($inlines as $inline) {
-        $inline_groups[$inline->getComment()->getChangesetID()][] = $inline;
-      }
-
-      $changsets = msort($changesets, 'getFilename');
-      $inline_groups = array_select_keys(
-        $inline_groups,
-        array_keys($changesets));
-
+      $inline_groups = DifferentialTransactionComment::sortAndGroupInlines(
+        $inlines,
+        $changesets);
       foreach ($inline_groups as $changeset_id => $group) {
-        // Sort the group of inlines by line number.
-        $by_line = array();
-        foreach ($group as $inline) {
-          $by_line[] = array(
-            'line' => ((int)$inline->getComment()->getLineNumber() << 16) +
-                      ((int)$inline->getComment()->getLineLength()),
-            'inline' => $inline,
-          );
-        }
-        $by_line = isort($by_line, 'line');
-        $group = ipull($by_line, 'inline');
-
         $changeset = $changesets[$changeset_id];
         $items = array();
         foreach ($group as $inline) {

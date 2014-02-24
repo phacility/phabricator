@@ -90,7 +90,7 @@ final class DifferentialCCsFieldSpecification
     foreach ($this->ccs as $phid) {
       $handle = $this->getHandle($phid);
       if ($handle->isComplete()) {
-        $names[] = $handle->getName();
+        $names[] = $handle->getObjectName();
       }
     }
     return implode(', ', $names);

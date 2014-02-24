@@ -389,7 +389,7 @@ abstract class DifferentialMail extends PhabricatorMail {
   }
 
   public function setInlineComments(array $inline_comments) {
-    assert_instances_of($inline_comments, 'PhabricatorInlineCommentInterface');
+    assert_instances_of($inline_comments, 'DifferentialTransaction');
     $this->inlineComments = $inline_comments;
     return $this;
   }

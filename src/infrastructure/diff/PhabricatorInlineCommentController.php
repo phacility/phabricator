@@ -173,7 +173,7 @@ abstract class PhabricatorInlineCommentController
     // application identifier for the changeset. In Diffusion, it's a Path ID.
     $this->changesetID    = $request->getInt('changeset');
 
-    $this->isNewFile      = $request->getBool('is_new');
+    $this->isNewFile      = (int)$request->getBool('is_new');
     $this->isOnRight      = $request->getBool('on_right');
     $this->lineNumber     = $request->getInt('number');
     $this->lineLength     = $request->getInt('length');

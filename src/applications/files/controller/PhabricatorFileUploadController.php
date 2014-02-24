@@ -65,6 +65,7 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
     $title = pht('Upload File');
 
     $global_upload = id(new PhabricatorGlobalUploadTargetView())
+      ->setUser($user)
       ->setShowIfSupportedID($support_id);
 
     $form_box = id(new PHUIObjectBoxView())

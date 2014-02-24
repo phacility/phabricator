@@ -1,19 +1,7 @@
 <?php
 
 final class DifferentialTitleField
-  extends DifferentialCustomField {
-
-  private $value;
-  private $fieldError = true;
-
-  public function setFieldError($field_error) {
-    $this->fieldError = $field_error;
-    return $this;
-  }
-
-  public function getFieldError() {
-    return $this->fieldError;
-  }
+  extends DifferentialCoreCustomField {
 
   public function getFieldKey() {
     return 'differential:title';
@@ -27,70 +15,34 @@ final class DifferentialTitleField
     return pht('Stores the revision title.');
   }
 
-  public function canDisableField() {
-    return false;
+  protected function readValueFromRevision(
+    DifferentialRevision $revision) {
+    return $revision->getTitle();
   }
 
-  public function shouldAppearInApplicationTransactions() {
-    return true;
+  protected function writeValueToRevision(
+    DifferentialRevision $revision,
+    $value) {
+    $revision->setTitle($value);
   }
 
-  public function shouldAppearInEditView() {
-    return true;
-  }
-
-  protected function didSetObject(PhabricatorCustomFieldInterface $object) {
-    $this->value = $object->getTitle();
-  }
-
-  public function getOldValueForApplicationTransactions() {
-    return $this->getObject()->getTitle();
-  }
-
-  public function getNewValueForApplicationTransactions() {
-    return $this->value;
-  }
-
-  public function validateApplicationTransactions(
-    PhabricatorApplicationTransactionEditor $editor,
-    $type,
-    array $xactions) {
-
-    $errors = parent::validateApplicationTransactions(
-      $editor,
-      $type,
-      $xactions);
-
-    $transaction = null;
-    foreach ($xactions as $xaction) {
-      $value = $xaction->getNewValue();
-      if (!strlen($value)) {
-        $error = new PhabricatorApplicationTransactionValidationError(
-          $type,
-          pht('Required'),
-          pht('You must choose a title for this revision.'),
-          $xaction);
-        $error->setIsMissingFieldError(true);
-        $errors[] = $error;
-        $this->setFieldError(pht('Required'));
-      }
-    }
-  }
-
-  public function applyApplicationTransactionInternalEffects(
-    PhabricatorApplicationTransaction $xaction) {
-    $this->getObject()->setTitle($xaction->getNewValue());
+  protected function getCoreFieldRequiredErrorString() {
+    return pht('You must choose a title for this revision.');
   }
 
   public function readValueFromRequest(AphrontRequest $request) {
-    $this->value = $request->getStr($this->getFieldKey());
+    $this->setValue($request->getStr($this->getFieldKey()));
   }
 
-  public function renderEditControl() {
+  protected function isCoreFieldRequired() {
+    return true;
+  }
+
+  public function renderEditControl(array $handles) {
     return id(new AphrontFormTextAreaControl())
       ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
       ->setName($this->getFieldKey())
-      ->setValue($this->value)
+      ->setValue($this->getValue())
       ->setError($this->getFieldError())
       ->setLabel($this->getFieldName());
   }
@@ -137,6 +89,5 @@ final class DifferentialTitleField
         $xaction->renderHandleLink($object_phid));
     }
   }
-
 
 }

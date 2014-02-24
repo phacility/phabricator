@@ -25,7 +25,7 @@ final class DifferentialCommentMail extends DifferentialMail {
 
     assert_instances_of($comments, 'DifferentialComment');
     assert_instances_of($changesets, 'DifferentialChangeset');
-    assert_instances_of($inline_comments, 'PhabricatorInlineCommentInterface');
+    assert_instances_of($inline_comments, 'DifferentialTransaction');
 
     $this->setRevision($revision);
     $this->setActorHandle($actor);
@@ -153,12 +153,12 @@ final class DifferentialCommentMail extends DifferentialMail {
 
     $body[] = null;
 
-    foreach ($this->getComments() as $comment) {
-      if ($comment->getAction() == DifferentialTransaction::TYPE_INLINE) {
+    foreach ($this->getComments() as $dcomment) {
+      if ($dcomment->getAction() == DifferentialTransaction::TYPE_INLINE) {
         // These have comment content now, but are rendered below.
         continue;
       }
-      $content = $comment->getContent();
+      $content = $dcomment->getContent();
       if (strlen($content)) {
         $body[] = $this->formatText($content);
         $body[] = null;
@@ -171,48 +171,58 @@ final class DifferentialCommentMail extends DifferentialMail {
       $body[] = null;
     }
 
+    $context_key = 'metamta.differential.unified-comment-context';
+    $show_context = PhabricatorEnv::getEnvConfig($context_key);
+
     $inlines = $this->getInlineComments();
     if ($inlines) {
       $body[] = 'INLINE COMMENTS';
       $changesets = $this->getChangesets();
       $hunk_parser = new DifferentialHunkParser();
 
-      if (PhabricatorEnv::getEnvConfig(
-            'metamta.differential.unified-comment-context')) {
+      if ($show_context) {
         foreach ($changesets as $changeset) {
           $changeset->attachHunks($changeset->loadHunks());
         }
       }
-      foreach ($inlines as $inline) {
-        $changeset = $changesets[$inline->getChangesetID()];
+
+      $inline_groups = DifferentialTransactionComment::sortAndGroupInlines(
+        $inlines,
+        $changesets);
+      foreach ($inline_groups as $changeset_id => $group) {
+        $changeset = $changesets[$changeset_id];
         if (!$changeset) {
-          throw new Exception('Changeset missing!');
+          continue;
         }
-        $file = $changeset->getFilename();
-        $start = $inline->getLineNumber();
-        $len = $inline->getLineLength();
-        if ($len) {
-          $range = $start.'-'.($start + $len);
-        } else {
-          $range = $start;
-        }
+        foreach ($group as $inline) {
+          $comment = $inline->getComment();
+          $file = $changeset->getFilename();
+          $start = $comment->getLineNumber();
+          $len = $comment->getLineLength();
+          if ($len) {
+            $range = $start.'-'.($start + $len);
+          } else {
+            $range = $start;
+          }
 
-        $inline_content = $inline->getContent();
+          $inline_content = $comment->getContent();
 
-        if (!PhabricatorEnv::getEnvConfig(
-              'metamta.differential.unified-comment-context')) {
-          $body[] = $this->formatText("{$file}:{$range} {$inline_content}");
-        } else {
-          $body[] = "================";
-          $body[] = "Comment at: " . $file . ":" . $range;
-          $body[] = $hunk_parser->makeContextDiff(
-            $changeset->getHunks(),
-            $inline,
-            1);
-          $body[] = "----------------";
+          if (!$show_context) {
+            $body[] = $this->formatText("{$file}:{$range} {$inline_content}");
+          } else {
+            $body[] = "================";
+            $body[] = "Comment at: " . $file . ":" . $range;
+            $body[] = $hunk_parser->makeContextDiff(
+              $changeset->getHunks(),
+              $comment->getIsNewFile(),
+              $comment->getLineNumber(),
+              $comment->getLineLength(),
+              1);
+            $body[] = "----------------";
 
-          $body[] = $inline_content;
-          $body[] = null;
+            $body[] = $inline_content;
+            $body[] = null;
+          }
         }
       }
       $body[] = null;
