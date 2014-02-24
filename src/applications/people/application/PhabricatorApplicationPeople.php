@@ -3,7 +3,7 @@
 final class PhabricatorApplicationPeople extends PhabricatorApplication {
 
   public function getShortDescription() {
-    return 'User Accounts';
+    return pht('User Accounts');
   }
 
   public function getBaseURI() {
@@ -53,6 +53,8 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
       ),
       '/p/(?P<username>[\w._-]+)/'
         => 'PhabricatorPeopleProfileController',
+      '/p/(?P<username>[\w._-]+)/calendar/'
+        => 'PhabricatorPeopleCalendarController',
     );
   }
 

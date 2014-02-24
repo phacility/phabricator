@@ -51,8 +51,6 @@ final class ConduitAPI_user_addstatus_Method extends ConduitAPI_user_Method {
         ->save();
     } catch (PhabricatorCalendarEventInvalidEpochException $e) {
       throw new ConduitException('ERR-BAD-EPOCH');
-    } catch (PhabricatorCalendarEventOverlapException $e) {
-      throw new ConduitException('ERR-OVERLAP');
     }
   }
 

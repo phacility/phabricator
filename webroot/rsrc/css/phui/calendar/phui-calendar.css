@@ -1,0 +1,107 @@
+/**
+ * @provides phui-calendar-css
+ */
+
+.phui-calendar-red a {
+  color: {$red};
+}
+
+.phui-calendar-orange a {
+  color: {$orange};
+}
+
+.phui-calendar-yellow a {
+  color: {$yellow};
+}
+
+.phui-calendar-green a {
+  color: {$green}
+}
+
+.phui-calendar-blue a {
+  color: {$blue};
+}
+
+.phui-calendar-sky a {
+  color: {$sky};
+}
+
+.phui-calendar-indigo a {
+  color: {$indigo};
+}
+
+.phui-calendar-violet a {
+  color: {$violet};
+}
+
+.phui-calendar-bg-red {
+  background-color: {$lightred};
+}
+
+.phui-calendar-bg-orange {
+  background-color: {$lightorange};
+}
+
+.phui-calendar-bg-yellow {
+  background-color: {$lightyellow};
+}
+
+.phui-calendar-bg-green {
+  background-color: {$lightgreen}
+}
+
+.phui-calendar-bg-blue {
+  background-color: {$lightblue};
+}
+
+.phui-calendar-bg-sky {
+  background-color: {$lightsky};
+}
+
+.phui-calendar-bg-indigo {
+  background-color: {$lightindigo};
+}
+
+.phui-calendar-bg-violet {
+  background-color: {$lightviolet};
+}
+
+.phui-calendar-red .phui-calendar-list-dot {
+  background-color: {$red};
+  border-color: {$red};
+}
+
+.phui-calendar-orange .phui-calendar-list-dot {
+  background-color: {$orange};
+  border-color: {$orange};
+}
+
+.phui-calendar-yellow .phui-calendar-list-dot {
+  background-color: {$orange};
+  border-color: {$orange};
+}
+
+.phui-calendar-green .phui-calendar-list-dot {
+  background-color: {$green};
+  border-color: {$green};
+}
+
+.phui-calendar-blue .phui-calendar-list-dot {
+  background-color: {$blue};
+  border-color: {$blue};
+}
+
+.phui-calendar-sky .phui-calendar-list-dot {
+  background-color: {$sky};
+  border-color: {$sky};
+}
+
+.phui-calendar-indigo .phui-calendar-list-dot {
+  background-color: {$indigo};
+  border-color: {$indigo};
+}
+
+.phui-calendar-violet .phui-calendar-list-dot {
+  background-color: {$violet};
+  border-color: {$violet};
+}
