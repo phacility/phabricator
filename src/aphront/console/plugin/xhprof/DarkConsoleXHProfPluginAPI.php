@@ -144,7 +144,7 @@ final class DarkConsoleXHProfPluginAPI {
     }
 
     $data = xhprof_disable();
-    $data = serialize($data);
+    $data = @json_encode($data);
     self::$profilerRunning = false;
 
     // Since these happen on GET we can't do guarded writes. These also
