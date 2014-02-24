@@ -6,15 +6,17 @@ final class DifferentialTransactionEditor
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
+    $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_EDGE;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
+
+    $types[] = DifferentialTransaction::TYPE_ACTION;
 
 /*
 
     $types[] = DifferentialTransaction::TYPE_INLINE;
     $types[] = DifferentialTransaction::TYPE_UPDATE;
-    $types[] = DifferentialTransaction::TYPE_ACTION;
 */
 
     return $types;
@@ -29,6 +31,8 @@ final class DifferentialTransactionEditor
         return $object->getViewPolicy();
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return $object->getEditPolicy();
+      case DifferentialTransaction::TYPE_ACTION:
+        return null;
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -41,11 +45,23 @@ final class DifferentialTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
+      case DifferentialTransaction::TYPE_ACTION:
         return $xaction->getNewValue();
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);
   }
+
+  protected function transactionHasEffect(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+    }
+
+    return parent::transactionHasEffect($object, $xaction);
+  }
+
 
   protected function applyCustomInternalTransaction(
     PhabricatorLiskDAO $object,
@@ -59,10 +75,15 @@ final class DifferentialTransactionEditor
         $object->setEditPolicy($xaction->getNewValue());
         return;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
+      case PhabricatorTransactions::TYPE_COMMENT:
       case PhabricatorTransactions::TYPE_EDGE:
         // TODO: When removing reviewers, we may be able to move the revision
         // to "Accepted".
         return;
+      case DifferentialTransaction::TYPE_ACTION:
+        // TODO: For now, we're just shipping these through without acting
+        // on them.
+        return null;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -78,6 +99,8 @@ final class DifferentialTransactionEditor
         return;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorTransactions::TYPE_EDGE:
+      case PhabricatorTransactions::TYPE_COMMENT:
+      case DifferentialTransaction::TYPE_ACTION:
         return;
     }
 

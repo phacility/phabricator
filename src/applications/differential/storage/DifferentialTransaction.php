@@ -115,4 +115,18 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
     return parent::getColor();
   }
 
+  public function getNoEffectDescription() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_EDGE:
+        switch ($this->getMetadataValue('edge:type')) {
+          case PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER:
+            return pht(
+              'Those reviewers are already reviewing this revision.');
+        }
+    }
+
+    return parent::getNoEffectDescription();
+  }
+
+
 }

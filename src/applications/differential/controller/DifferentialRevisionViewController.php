@@ -342,7 +342,15 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $comment_form->setRevision($revision);
       $comment_form->setAuxFields($aux_fields);
       $comment_form->setActions($this->getRevisionCommentActions($revision));
-      $comment_form->setActionURI('/differential/comment/save/');
+
+      $action_uri = '/differential/comment/save/';
+      if (false) {
+        // TODO: Temporary for testing the new comment workflow.
+        $action_uri = $this->getApplicationURI(
+          'comment/savepro/'.$revision->getID().'/');
+      }
+
+      $comment_form->setActionURI($action_uri);
       $comment_form->setUser($user);
       $comment_form->setDraft($draft);
       $comment_form->setReviewers(mpull($reviewers, 'getFullName', 'getPHID'));

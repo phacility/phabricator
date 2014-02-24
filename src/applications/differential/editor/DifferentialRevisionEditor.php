@@ -539,34 +539,6 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
       ->queueDocumentForIndexing($revision->getPHID());
   }
 
-  public static function addCCAndUpdateRevision(
-    $revision,
-    $phid,
-    PhabricatorUser $actor) {
-
-    self::addCC($revision, $phid, $actor->getPHID());
-
-    $type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_UNSUBSCRIBER;
-    id(new PhabricatorEdgeEditor())
-      ->setActor($actor)
-      ->removeEdge($revision->getPHID(), $type, $phid)
-      ->save();
-  }
-
-  public static function removeCCAndUpdateRevision(
-    $revision,
-    $phid,
-    PhabricatorUser $actor) {
-
-    self::removeCC($revision, $phid, $actor->getPHID());
-
-    $type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_UNSUBSCRIBER;
-    id(new PhabricatorEdgeEditor())
-      ->setActor($actor)
-      ->addEdge($revision->getPHID(), $type, $phid)
-      ->save();
-  }
-
   public static function addCC(
     DifferentialRevision $revision,
     $phid,
@@ -576,18 +548,6 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
       $revision->getCCPHIDs(),
       $rem = array(),
       $add = array($phid),
-      $reason);
-  }
-
-  public static function removeCC(
-    DifferentialRevision $revision,
-    $phid,
-    $reason) {
-    return self::alterCCs(
-      $revision,
-      $revision->getCCPHIDs(),
-      $rem = array($phid),
-      $add = array(),
       $reason);
   }
 

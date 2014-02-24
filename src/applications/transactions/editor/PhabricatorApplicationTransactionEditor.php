@@ -164,6 +164,8 @@ abstract class PhabricatorApplicationTransactionEditor
         // NOTE: Custom fields have their old value pre-populated when they are
         // built by PhabricatorCustomFieldList.
         return $xaction->getOldValue();
+      case PhabricatorTransactions::TYPE_COMMENT:
+        return null;
       default:
         return $this->getCustomTransactionOldValue($object, $xaction);
     }
@@ -184,6 +186,8 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->getNewValueFromApplicationTransactions($xaction);
+      case PhabricatorTransactions::TYPE_COMMENT:
+        return null;
       default:
         return $this->getCustomTransactionNewValue($object, $xaction);
     }
