@@ -71,6 +71,22 @@ final class AphrontCalendarEventView extends AphrontView {
     }
   }
 
+  public function getAllDay() {
+    $time = (60 * 60 * 22);
+    if (($this->getEpochEnd() - $this->getEpochStart()) >= $time) {
+      return true;
+    }
+    return false;
+  }
+
+  public function getMultiDay() {
+    $nextday = strtotime('12:00 AM Tomorrow', $this->getEpochStart());
+    if ($this->getEpochEnd() > $nextday) {
+      return true;
+    }
+    return false;
+  }
+
   public function render() {
     throw new Exception("Events are only rendered indirectly.");
   }

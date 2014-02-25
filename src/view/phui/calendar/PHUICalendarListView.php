@@ -32,16 +32,12 @@ final class PHUICalendarListView extends AphrontTagView {
 
     $events = msort($this->events, 'getEpochStart');
 
-    // All Day Event (well, 23 hours, 59 minutes worth)
-    $timespan = ((3600 * 24) - 60);
-
     $singletons = array();
     $allday = false;
     foreach ($events as $event) {
       $color = $event->getColor();
 
-      $length = ($event->getEpochEnd() - $event->getEpochStart());
-      if ($length >= $timespan) {
+      if ($event->getAllDay()) {
         $timelabel = pht('All Day');
       } else {
         $timelabel = phabricator_time(
@@ -99,10 +95,7 @@ final class PHUICalendarListView extends AphrontTagView {
 
     Javelin::initBehavior('phabricator-tooltips');
 
-    // Multiple Days
-    $timespan = ((3600 * 24) + 60);
-    $length = ($event->getEpochEnd() - $event->getEpochStart());
-    if ($length >= $timespan) {
+    if ($event->getMultiDay()) {
       $tip = pht('%s, Until: %s', $event->getName(),
         phabricator_date($event->getEpochEnd(), $this->getUser()));
     } else {
