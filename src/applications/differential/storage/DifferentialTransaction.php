@@ -147,6 +147,10 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
             return pht(
               'You can not resign from this revision because you are not '.
               'a reviewer.');
+          case DifferentialAction::ACTION_CLAIM:
+            return pht(
+              'You can not commandeer this revision because you already own '.
+              'it.');
         }
         break;
     }

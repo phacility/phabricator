@@ -90,6 +90,9 @@ final class DifferentialTransactionEditor
               }
             }
             return false;
+          case DifferentialAction::ACTION_CLAIM:
+            $actor_phid = $this->getActor()->getPHID();
+            return ($actor_phid != $object->getAuthorPHID());
         }
     }
 
@@ -145,6 +148,9 @@ final class DifferentialTransactionEditor
           case DifferentialAction::ACTION_CLOSE:
             $object->setStatus(ArcanistDifferentialRevisionStatus::CLOSED);
             break;
+          case DifferentialAction::ACTION_CLAIM:
+            $object->setAuthorPHID($this->getActor()->getPHID());
+            break;
           default:
             // TODO: For now, we're just shipping the rest of these through
             // without acting on them.
@@ -163,14 +169,47 @@ final class DifferentialTransactionEditor
     $results = parent::expandTransaction($object, $xaction);
     switch ($xaction->getTransactionType()) {
       case DifferentialTransaction::TYPE_ACTION:
+
+        $actor_phid = $this->getActor()->getPHID();
+        $type_edge = PhabricatorTransactions::TYPE_EDGE;
+        $edge_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
+
         switch ($xaction->getNewValue()) {
+          case DifferentialAction::ACTION_CLAIM:
+            // If the user is commandeering, add the previous owner as a
+            // reviewer and remove the actor.
+
+            $edits = array(
+              '-' => array(
+                $actor_phid => $actor_phid,
+              ),
+            );
+
+            $owner_phid = $object->getAuthorPHID();
+            if ($owner_phid) {
+              $reviewer = new DifferentialReviewer(
+                $owner_phid,
+                array(
+                  'status' => DifferentialReviewerStatus::STATUS_ADDED,
+                ));
+
+              $edits['+'] = array(
+                $owner_phid => array(
+                  'data' => $reviewer->getEdgeData(),
+                ),
+              );
+            }
+
+            $results[] = id(new DifferentialTransaction())
+              ->setTransactionType($type_edge)
+              ->setMetadataValue('edge:type', $edge_reviewer)
+              ->setIgnoreOnNoEffect(true)
+              ->setNewValue($edits);
+
+            break;
           case DifferentialAction::ACTION_RESIGN:
             // If the user is resigning, add a separate reviewer edit
             // transaction which removes them as a reviewer.
-
-            $actor_phid = $this->getActor()->getPHID();
-            $type_edge = PhabricatorTransactions::TYPE_EDGE;
-            $edge_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
 
             $results[] = id(new DifferentialTransaction())
               ->setTransactionType($type_edge)
@@ -265,6 +304,17 @@ final class DifferentialTransactionEditor
       case DifferentialAction::ACTION_RESIGN:
         // You can always resign from a revision if you're a reviewer. If you
         // aren't, this is a no-op rather than invalid.
+        break;
+
+      case DifferentialAction::ACTION_CLAIM:
+        // You can claim a revision if you're not the owner. If you are, this
+        // is a no-op rather than invalid.
+
+        if ($revision_status == $status_closed) {
+          return pht(
+            "You can not commandeer this revision because it has already been ".
+            "closed.");
+        }
         break;
 
       case DifferentialAction::ACTION_ABANDON:
