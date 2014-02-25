@@ -8,6 +8,7 @@ final class PassphraseCredentialTransaction
   const TYPE_USERNAME = 'passphrase:username';
   const TYPE_SECRET_ID = 'passphrase:secretID';
   const TYPE_DESTROY = 'passphrase:destroy';
+  const TYPE_LOOKEDATSECRET = 'passphrase:lookedAtSecret';
 
   public function getApplicationName() {
     return 'passphrase';
@@ -28,6 +29,8 @@ final class PassphraseCredentialTransaction
         return ($old === null);
       case self::TYPE_USERNAME:
         return !strlen($old);
+      case self::TYPE_LOOKEDATSECRET:
+        return false;
     }
     return parent::shouldHide();
   }
@@ -77,6 +80,10 @@ final class PassphraseCredentialTransaction
         return pht(
           '%s destroyed this credential.',
           $this->renderHandleLink($author_phid));
+      case self::TYPE_LOOKEDATSECRET:
+        return pht(
+          '%s examined the secret plaintext for this credential.',
+          $this->renderHandleLink($author_phid));
     }
 
     return parent::getTitle();
@@ -96,6 +103,5 @@ final class PassphraseCredentialTransaction
       json_encode($this->getOldValue()),
       json_encode($this->getNewValue()));
   }
-
 
 }

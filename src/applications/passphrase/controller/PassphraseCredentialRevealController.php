@@ -35,6 +35,7 @@ final class PassphraseCredentialRevealController
           ->appendChild(
             id(new AphrontFormTextAreaControl())
               ->setLabel(pht('Plaintext'))
+              ->setReadOnly(true)
               ->setValue($credential->getSecret()->openEnvelope()));
       } else {
         $body = pht('This credential has no associated secret.');
@@ -45,6 +46,17 @@ final class PassphraseCredentialRevealController
         ->setTitle(pht('Credential Secret'))
         ->appendChild($body)
         ->addCancelButton($view_uri, pht('Done'));
+
+      $type_secret = PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET;
+      $xactions = array(id(new PassphraseCredentialTransaction())
+        ->setTransactionType($type_secret)
+        ->setNewValue(true));
+
+      $editor = id(new PassphraseCredentialTransactionEditor())
+        ->setActor($viewer)
+        ->setContinueOnNoEffect(true)
+        ->setContentSourceFromRequest($request)
+        ->applyTransactions($credential, $xactions);
 
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
