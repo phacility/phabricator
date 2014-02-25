@@ -141,51 +141,71 @@ final class PhabricatorPeopleProfileController
   }
 
   private function renderUserCalendar(PhabricatorUser $user) {
-    $now = time();
-    $year = phabricator_format_local_time($now, $user, 'Y');
-    $month = phabricator_format_local_time($now, $user, 'm');
-    $day = phabricator_format_local_time($now, $user, 'j');
+    $viewer = $this->getRequest()->getUser();
+    $epochs = CalendarTimeUtil::getCalendarEventEpochs(
+      $viewer,
+      'today',
+       7);
+    $start_epoch = $epochs['start_epoch'];
+    $end_epoch = $epochs['end_epoch'];
     $statuses = id(new PhabricatorCalendarEventQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withInvitedPHIDs(array($user->getPHID()))
-      ->withDateRange(
-        strtotime("{$year}-{$month}-{$day}"),
-        strtotime("{$year}-{$month}-{$day} +7 days"))
+      ->withDateRange($start_epoch, $end_epoch)
       ->execute();
 
+    $timestamps = CalendarTimeUtil::getCalendarWeekTimestamps(
+      $viewer);
+    $today = $timestamps['today'];
+    $epoch_stamps = $timestamps['epoch_stamps'];
     $events = array();
-    foreach ($statuses as $status) {
-      $event = new AphrontCalendarEventView();
-      $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
 
-      $status_text = $status->getHumanStatus();
-      $event->setUserPHID($status->getUserPHID());
-      $event->setName($status_text);
-      $event->setDescription($status->getDescription());
-      $event->setEventID($status->getID());
-      $key = date('Y-m-d', $event->getEpochStart());
-      $events[$key][] = $event;
-      // Populate multiday events
-      // Better means?
-      $next_day = strtotime("{$key} +1 day");
-      if ($event->getEpochEnd() >= $next_day) {
-        $nextkey = date('Y-m-d', $next_day);
-        $events[$nextkey][] = $event;
+    foreach ($epoch_stamps as $day) {
+      $epoch_start = $day->format('U');
+      $next_day = clone $day;
+      $next_day->modify('+1 day');
+      $epoch_end = $next_day->format('U');
+
+      foreach ($statuses as $status) {
+        if ($status->getDateFrom() >= $epoch_end) {
+          // This list is sorted, so we can stop looking.
+          break;
+        }
+
+        $event = new AphrontCalendarEventView();
+        $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
+
+        $status_text = $status->getHumanStatus();
+        $event->setUserPHID($status->getUserPHID());
+        $event->setName($status_text);
+        $event->setDescription($status->getDescription());
+        $event->setEventID($status->getID());
+        $key = date('Y-m-d', $event->getEpochStart());
+        $events[$epoch_start][] = $event;
+        // check if this is a multi day event...!
+        $day_iterator = clone $day;
+        while (true) {
+          $day_iterator->modify('+ 1 day');
+          $day_iterator_end = $day_iterator->format('U');
+          if ($event->getEpochEnd() > $day_iterator_end) {
+            $events[$day_iterator_end][]  = $event;
+          } else {
+            break;
+          }
+        }
       }
     }
 
-    $i = 0;
     $week = array();
-    for ($i = 0;$i <= 6;$i++) {
-      $datetime = strtotime("{$year}-{$month}-{$day} +{$i} days");
-      $headertext = phabricator_format_local_time($datetime, $user, 'l, M d');
-      $this_day = date('Y-m-d', $datetime);
+    foreach ($epoch_stamps as $day) {
+      $epoch = $day->format('U');
+      $headertext = phabricator_format_local_time($epoch, $user, 'l, M d');
 
       $list = new PHUICalendarListView();
-      $list->setUser($user);
+      $list->setUser($viewer);
       $list->showBlankState(true);
-      if (isset($events[$this_day])) {
-        foreach ($events[$this_day] as $event) {
+      if (isset($events[$epoch])) {
+        foreach ($events[$epoch] as $event) {
           $list->addEvent($event);
         }
       }
