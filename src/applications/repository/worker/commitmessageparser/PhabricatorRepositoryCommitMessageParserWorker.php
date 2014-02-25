@@ -117,7 +117,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
           $diff = $this->attachToRevision($revision, $actor_phid);
 
-          $revision->setDateCommitted($commit->getEpoch());
           $editor = new DifferentialCommentEditor(
             $revision,
             DifferentialAction::ACTION_CLOSE);

@@ -143,11 +143,6 @@ final class DifferentialTransactionEditor
             // TODO: Update review status?
             break;
           case DifferentialAction::ACTION_CLOSE:
-            if (!$object->getDateCommitted()) {
-              // TODO: Can we remove this? It is probably no longer used by
-              // anything anymore. See also T4434.
-              $object->setDateCommitted(time());
-            }
             $object->setStatus(ArcanistDifferentialRevisionStatus::CLOSED);
             break;
           default:

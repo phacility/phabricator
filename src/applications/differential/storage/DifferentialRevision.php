@@ -20,8 +20,6 @@ final class DifferentialRevision extends DifferentialDAO
   protected $authorPHID;
   protected $lastReviewerPHID;
 
-  protected $dateCommitted;
-
   protected $lineCount = 0;
   protected $attached = array();
 
