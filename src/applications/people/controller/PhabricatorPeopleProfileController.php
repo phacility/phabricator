@@ -167,9 +167,11 @@ final class PhabricatorPeopleProfileController
       $epoch_end = $next_day->format('U');
 
       foreach ($statuses as $status) {
+        if ($status->getDateTo() < $epoch_start) {
+          continue;
+        }
         if ($status->getDateFrom() >= $epoch_end) {
-          // This list is sorted, so we can stop looking.
-          break;
+          continue;
         }
 
         $event = new AphrontCalendarEventView();
@@ -180,19 +182,7 @@ final class PhabricatorPeopleProfileController
         $event->setName($status_text);
         $event->setDescription($status->getDescription());
         $event->setEventID($status->getID());
-        $key = date('Y-m-d', $event->getEpochStart());
         $events[$epoch_start][] = $event;
-        // check if this is a multi day event...!
-        $day_iterator = clone $day;
-        while (true) {
-          $day_iterator->modify('+ 1 day');
-          $day_iterator_end = $day_iterator->format('U');
-          if ($event->getEpochEnd() > $day_iterator_end) {
-            $events[$day_iterator_end][]  = $event;
-          } else {
-            break;
-          }
-        }
       }
     }
 
