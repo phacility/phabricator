@@ -104,6 +104,8 @@ final class LegalpadDocumentEditor
 
       $object->save();
     }
+
+    return $xactions;
   }
 
   protected function mergeTransactions(

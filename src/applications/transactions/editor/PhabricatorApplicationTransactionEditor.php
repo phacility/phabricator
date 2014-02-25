@@ -377,9 +377,36 @@ abstract class PhabricatorApplicationTransactionEditor
       "implementation!");
   }
 
+  /**
+   * Fill in a transaction's common values, like author and content source.
+   */
+  protected function populateTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $actor = $this->getActor();
+
+    // TODO: This needs to be more sophisticated once we have meta-policies.
+    $xaction->setViewPolicy(PhabricatorPolicies::POLICY_PUBLIC);
+    $xaction->setEditPolicy($actor->getPHID());
+
+    $xaction->setAuthorPHID($actor->getPHID());
+    $xaction->setContentSource($this->getContentSource());
+    $xaction->attachViewer($actor);
+    $xaction->attachObject($object);
+
+    if ($object->getPHID()) {
+      $xaction->setObjectPHID($object->getPHID());
+    }
+
+    return $xaction;
+  }
+
+
   protected function applyFinalEffects(
     PhabricatorLiskDAO $object,
     array $xactions) {
+    return $xactions;
   }
 
   public function setContentSource(PhabricatorContentSource $content_source) {
@@ -421,14 +448,7 @@ abstract class PhabricatorApplicationTransactionEditor
     $xactions = $this->combineTransactions($xactions);
 
     foreach ($xactions as $xaction) {
-      // TODO: This needs to be more sophisticated once we have meta-policies.
-      $xaction->setViewPolicy(PhabricatorPolicies::POLICY_PUBLIC);
-      $xaction->setEditPolicy($actor->getPHID());
-
-      $xaction->setAuthorPHID($actor->getPHID());
-      $xaction->setContentSource($this->getContentSource());
-      $xaction->attachViewer($this->getActor());
-      $xaction->attachObject($object);
+      $xaction = $this->populateTransaction($object, $xaction);
     }
 
     $is_preview = $this->getIsPreview();
@@ -557,7 +577,7 @@ abstract class PhabricatorApplicationTransactionEditor
         $this->applyHeraldRules($object, $xactions);
       }
 
-      $this->applyFinalEffects($object, $xactions);
+      $xactions = $this->applyFinalEffects($object, $xactions);
 
       if ($read_locking) {
         $object->endReadLocking();

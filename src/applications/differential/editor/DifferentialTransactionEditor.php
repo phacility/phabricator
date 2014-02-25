@@ -13,6 +13,7 @@ final class DifferentialTransactionEditor
 
     $types[] = DifferentialTransaction::TYPE_ACTION;
     $types[] = DifferentialTransaction::TYPE_INLINE;
+    $types[] = DifferentialTransaction::TYPE_STATUS;
 
 /*
 
@@ -145,7 +146,6 @@ final class DifferentialTransactionEditor
       case DifferentialTransaction::TYPE_INLINE:
         return;
       case PhabricatorTransactions::TYPE_EDGE:
-        // TODO: Update review status.
         return;
       case DifferentialTransaction::TYPE_ACTION:
         $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
@@ -166,15 +166,12 @@ final class DifferentialTransactionEditor
             return;
           case DifferentialAction::ACTION_RECLAIM:
             $object->setStatus($status_review);
-            // TODO: Update review status?
             return;
           case DifferentialAction::ACTION_REOPEN:
             $object->setStatus($status_review);
-            // TODO: Update review status?
             return;
           case DifferentialAction::ACTION_REQUEST:
             $object->setStatus($status_review);
-            // TODO: Update review status?
             return;
           case DifferentialAction::ACTION_CLOSE:
             $object->setStatus(ArcanistDifferentialRevisionStatus::CLOSED);
@@ -314,6 +311,98 @@ final class DifferentialTransactionEditor
 
     return parent::applyCustomExternalTransaction($object, $xaction);
   }
+
+  protected function applyFinalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
+    $status_revision = ArcanistDifferentialRevisionStatus::NEEDS_REVISION;
+    $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
+
+    $old_status = $object->getStatus();
+    switch ($old_status) {
+      case $status_accepted:
+      case $status_revision:
+      case $status_review:
+        // Load the most up-to-date version of the revision and its reviewers,
+        // so we don't need to try to deduce the state of reviewers by examining
+        // all the changes made by the transactions.
+        $new_revision = id(new DifferentialRevisionQuery())
+          ->setViewer($this->getActor())
+          ->needReviewerStatus(true)
+          ->withIDs(array($object->getID()))
+          ->executeOne();
+        if (!$new_revision) {
+          throw new Exception(
+            pht('Failed to load revision from transaction finalization.'));
+        }
+
+        // Try to move a revision to "accepted". We look for:
+        //
+        //   - at least one accepting reviewer who is a user; and
+        //   - no rejects; and
+        //   - no blocking reviewers.
+
+        $has_accepting_user = false;
+        $has_rejecting_reviewer = false;
+        $has_blocking_reviewer = false;
+        foreach ($new_revision->getReviewerStatus() as $reviewer) {
+          $reviewer_status = $reviewer->getStatus();
+          switch ($reviewer_status) {
+            case DifferentialReviewerStatus::STATUS_REJECTED:
+              $has_rejecting_reviewer = true;
+              break;
+            case DifferentialReviewerStatus::STATUS_BLOCKING:
+              $has_blocking_reviewer = true;
+              break;
+            case DifferentialReviewerStatus::STATUS_ACCEPTED:
+              if ($reviewer->isUser()) {
+                $has_accepting_user = true;
+              }
+              break;
+          }
+        }
+
+        $new_status = null;
+        if ($has_accepting_user &&
+            !$has_rejecting_reviewer &&
+            !$has_blocking_reviewer) {
+          $new_status = $status_accepted;
+        } else if ($has_rejecting_reviewer) {
+          // This isn't accepted, and there's at least one rejecting reviewer,
+          // so the revision needs changes. This usually happens after a
+          // "reject".
+          $new_status = $status_revision;
+        } else if ($old_status == $status_accepted) {
+          // This revision was accepted, but it no longer satisfies the
+          // conditions for acceptance. This usually happens after an accepting
+          // reviewer resigns or is removed.
+          $new_status = $status_review;
+        }
+
+        if ($new_status !== null && $new_status != $old_status) {
+          $xaction = id(new DifferentialTransaction())
+            ->setTransactionType(DifferentialTransaction::TYPE_STATUS)
+            ->setOldValue($old_status)
+            ->setNewValue($new_status);
+
+          $xaction = $this->populateTransaction($object, $xaction)->save();
+
+          $xactions[] = $xaction;
+
+          $object->setStatus($new_status)->save();
+        }
+        break;
+      default:
+        // Revisions can't transition out of other statuses (like closed or
+        // abandoned) as a side effect of reviewer status changes.
+        break;
+    }
+
+    return $xactions;
+  }
+
 
   protected function validateTransaction(
     PhabricatorLiskDAO $object,

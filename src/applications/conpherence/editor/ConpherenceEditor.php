@@ -304,6 +304,8 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
       }
       $participant->save();
     }
+
+    return $xactions;
   }
 
   protected function mergeTransactions(
