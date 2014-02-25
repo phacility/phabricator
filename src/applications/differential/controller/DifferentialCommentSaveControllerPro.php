@@ -94,7 +94,7 @@ final class DifferentialCommentSaveControllerPro
         ->withPHIDs($inline_phids)
         ->execute();
     } else {
-      $inlines = null;
+      $inlines = array();
     }
 
     foreach ($inlines as $inline) {

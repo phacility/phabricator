@@ -121,7 +121,8 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
         switch ($this->getMetadataValue('edge:type')) {
           case PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER:
             return pht(
-              'Those reviewers are already reviewing this revision.');
+              'The reviewers you are trying to add are already reviewing '.
+              'this revision.');
         }
         break;
       case DifferentialTransaction::TYPE_ACTION:
@@ -142,6 +143,10 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
             return pht('This revision already requires changes.');
           case DifferentialAction::ACTION_REQUEST:
             return pht('Review is already requested for this revision.');
+          case DifferentialAction::ACTION_RESIGN:
+            return pht(
+              'You can not resign from this revision because you are not '.
+              'a reviewer.');
         }
         break;
     }

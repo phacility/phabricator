@@ -82,6 +82,14 @@ final class DifferentialTransactionEditor
             return ($object->getStatus() != $status_revision);
           case DifferentialAction::ACTION_REQUEST:
             return ($object->getStatus() != $status_review);
+          case DifferentialAction::ACTION_RESIGN:
+            $actor_phid = $this->getActor()->getPHID();
+            foreach ($object->getReviewerStatus() as $reviewer) {
+              if ($reviewer->getReviewerPHID() == $actor_phid) {
+                return true;
+              }
+            }
+            return false;
         }
     }
 
@@ -113,6 +121,9 @@ final class DifferentialTransactionEditor
         $status_revision = ArcanistDifferentialRevisionStatus::NEEDS_REVISION;
 
         switch ($xaction->getNewValue()) {
+          case DifferentialAction::ACTION_RESIGN:
+            // TODO: Update review status?
+            break;
           case DifferentialAction::ACTION_ABANDON:
             $object->setStatus(ArcanistDifferentialRevisionStatus::ABANDONED);
             break;
@@ -148,6 +159,41 @@ final class DifferentialTransactionEditor
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
+  }
+
+  protected function expandTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $results = parent::expandTransaction($object, $xaction);
+    switch ($xaction->getTransactionType()) {
+      case DifferentialTransaction::TYPE_ACTION:
+        switch ($xaction->getNewValue()) {
+          case DifferentialAction::ACTION_RESIGN:
+            // If the user is resigning, add a separate reviewer edit
+            // transaction which removes them as a reviewer.
+
+            $actor_phid = $this->getActor()->getPHID();
+            $type_edge = PhabricatorTransactions::TYPE_EDGE;
+            $edge_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
+
+            $results[] = id(new DifferentialTransaction())
+              ->setTransactionType($type_edge)
+              ->setMetadataValue('edge:type', $edge_reviewer)
+              ->setIgnoreOnNoEffect(true)
+              ->setNewValue(
+                array(
+                  '-' => array(
+                    $actor_phid => $actor_phid,
+                  ),
+                ));
+
+            break;
+        }
+      break;
+    }
+
+    return $results;
   }
 
   protected function applyCustomExternalTransaction(
@@ -221,6 +267,11 @@ final class DifferentialTransactionEditor
     $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
 
     switch ($action) {
+      case DifferentialAction::ACTION_RESIGN:
+        // You can always resign from a revision if you're a reviewer. If you
+        // aren't, this is a no-op rather than invalid.
+        break;
+
       case DifferentialAction::ACTION_ABANDON:
         if (!$actor_is_author) {
           return pht(

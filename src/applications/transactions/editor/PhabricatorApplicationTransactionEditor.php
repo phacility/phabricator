@@ -417,6 +417,7 @@ abstract class PhabricatorApplicationTransactionEditor
       $xactions[] = $mention_xaction;
     }
 
+    $xactions = $this->expandTransactions($object, $xactions);
     $xactions = $this->combineTransactions($xactions);
 
     foreach ($xactions as $xaction) {
@@ -853,6 +854,30 @@ abstract class PhabricatorApplicationTransactionEditor
     return null;
   }
 
+  /**
+   * Optionally expand transactions which imply other effects. For example,
+   * resigning from a revision in Differential implies removing yourself as
+   * a reviewer.
+   */
+  private function expandTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $results = array();
+    foreach ($xactions as $xaction) {
+      foreach ($this->expandTransaction($object, $xaction) as $expanded) {
+        $results[] = $expanded;
+      }
+    }
+
+    return $results;
+  }
+
+  protected function expandTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+    return array($xaction);
+  }
 
   /**
    * Attempt to combine similar transactions into a smaller number of total
@@ -911,6 +936,12 @@ abstract class PhabricatorApplicationTransactionEditor
       $result[$key] = array_merge($value, idx($result, $key, array()));
     }
     $u->setNewValue($result);
+
+    // When combining an "ignore" transaction with a normal transaction, make
+    // sure we don't propagate the "ignore" flag.
+    if (!$v->getIgnoreOnNoEffect()) {
+      $u->setIgnoreOnNoEffect(false);
+    }
 
     return $u;
   }
@@ -1128,6 +1159,8 @@ abstract class PhabricatorApplicationTransactionEditor
         if ($xaction->getTransactionType() != $type_comment) {
           $any_effect = true;
         }
+      } else if ($xaction->getIgnoreOnNoEffect()) {
+        unset($xactions[$key]);
       } else {
         $no_effect[$key] = $xaction;
       }

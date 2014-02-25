@@ -31,6 +31,24 @@ abstract class PhabricatorApplicationTransaction
   private $viewer = self::ATTACHABLE;
   private $object = self::ATTACHABLE;
 
+  private $ignoreOnNoEffect;
+
+
+  /**
+   * Flag this transaction as a pure side-effect which should be ignored when
+   * applying transactions if it has no effect, even if transaction application
+   * would normally fail. This both provides users with better error messages
+   * and allows transactions to perform optional side effects.
+   */
+  public function setIgnoreOnNoEffect($ignore) {
+    $this->ignoreOnNoEffect = $ignore;
+    return $this;
+  }
+
+  public function getIgnoreOnNoEffect() {
+    return $this->ignoreOnNoEffect;
+  }
+
   abstract public function getApplicationTransactionType();
 
   private function getApplicationObjectTypeName() {

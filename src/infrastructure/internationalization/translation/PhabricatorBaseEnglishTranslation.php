@@ -215,6 +215,26 @@ abstract class PhabricatorBaseEnglishTranslation
         'Actions With No Effect',
       ),
 
+      'Some of your %d action(s) have no effect:' => array(
+        'One of your actions has no effect:',
+        'Some of your actions have no effect:',
+      ),
+
+      'Apply remaining %d action(s)?' => array(
+        'Apply remaining action?',
+        'Apply remaining actions?',
+      ),
+
+      'Apply %d Other Action(s)' => array(
+        'Apply Remaining Action',
+        'Apply Remaining Actions',
+      ),
+
+      'The %d action(s) you are taking have no effect:' => array(
+        'The action you are taking has no effect:',
+        'The actions you are taking have no effect:',
+      ),
+
       '%s edited post(s), added %d: %s; removed %d: %s.' =>
         '%s edited posts, added: %3$s; removed: %5$s',
 
