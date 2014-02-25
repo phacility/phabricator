@@ -5,15 +5,8 @@ final class PHUICalendarListView extends AphrontTagView {
   private $events = array();
   private $blankState;
 
-  protected $user;
-
   public function addEvent(AphrontCalendarEventView $event) {
     $this->events[] = $event;
-    return $this;
-  }
-
-  public function setUser($user) {
-    $this->user = $user;
     return $this;
   }
 
@@ -51,7 +44,9 @@ final class PHUICalendarListView extends AphrontTagView {
       if ($length >= $timespan) {
         $timelabel = pht('All Day');
       } else {
-        $timelabel = phabricator_time($event->getEpochStart(), $this->user);
+        $timelabel = phabricator_time(
+          $event->getEpochStart(),
+          $this->getUser());
       }
 
       $dot = phutil_tag(
@@ -109,10 +104,10 @@ final class PHUICalendarListView extends AphrontTagView {
     $length = ($event->getEpochEnd() - $event->getEpochStart());
     if ($length >= $timespan) {
       $tip = pht('%s, Until: %s', $event->getName(),
-        phabricator_date($event->getEpochEnd(), $this->user));
+        phabricator_date($event->getEpochEnd(), $this->getUser()));
     } else {
       $tip = pht('%s, Until: %s', $event->getName(),
-        phabricator_time($event->getEpochEnd(), $this->user));
+        phabricator_time($event->getEpochEnd(), $this->getUser()));
     }
 
     $description = $event->getDescription();
