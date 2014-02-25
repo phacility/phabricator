@@ -69,7 +69,36 @@ final class DifferentialTransactionEditor
         $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
         $status_revision = ArcanistDifferentialRevisionStatus::NEEDS_REVISION;
 
-        switch ($xaction->getNewValue()) {
+        $action_type = $xaction->getNewValue();
+        switch ($action_type) {
+          case DifferentialAction::ACTION_ACCEPT:
+          case DifferentialAction::ACTION_REJECT:
+            if ($action_type == DifferentialAction::ACTION_ACCEPT) {
+              $new_status = DifferentialReviewerStatus::STATUS_ACCEPTED;
+            } else {
+              $new_status = DifferentialReviewerStatus::STATUS_REJECTED;
+            }
+
+            $actor = $this->getActor();
+            $actor_phid = $actor->getPHID();
+
+            // These transactions can cause effects in to ways: by altering the
+            // status of an existing reviewer; or by adding the actor as a new
+            // reviewer.
+
+            $will_add_reviewer = true;
+            foreach ($object->getReviewerStatus() as $reviewer) {
+              if ($reviewer->hasAuthority($actor)) {
+                if ($reviewer->getStatus() != $new_status) {
+                  return true;
+                }
+              }
+              if ($reviewer->getReviewerPHID() == $actor_phid) {
+                $will_add_reviwer = false;
+              }
+            }
+
+            return $will_add_reviewer;
           case DifferentialAction::ACTION_CLOSE:
             return ($object->getStatus() != $status_closed);
           case DifferentialAction::ACTION_ABANDON:
@@ -116,8 +145,7 @@ final class DifferentialTransactionEditor
       case DifferentialTransaction::TYPE_INLINE:
         return;
       case PhabricatorTransactions::TYPE_EDGE:
-        // TODO: When removing reviewers, we may be able to move the revision
-        // to "Accepted".
+        // TODO: Update review status.
         return;
       case DifferentialTransaction::TYPE_ACTION:
         $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
@@ -125,38 +153,37 @@ final class DifferentialTransactionEditor
 
         switch ($xaction->getNewValue()) {
           case DifferentialAction::ACTION_RESIGN:
-            // TODO: Update review status?
-            break;
+          case DifferentialAction::ACTION_ACCEPT:
+          case DifferentialAction::ACTION_REJECT:
+            // These have no direct effects, and affect review status only
+            // indirectly by altering reviewers with TYPE_EDGE transactions.
+            return;
           case DifferentialAction::ACTION_ABANDON:
             $object->setStatus(ArcanistDifferentialRevisionStatus::ABANDONED);
-            break;
+            return;
           case DifferentialAction::ACTION_RETHINK:
             $object->setStatus($status_revision);
-            break;
+            return;
           case DifferentialAction::ACTION_RECLAIM:
             $object->setStatus($status_review);
             // TODO: Update review status?
-            break;
+            return;
           case DifferentialAction::ACTION_REOPEN:
             $object->setStatus($status_review);
             // TODO: Update review status?
-            break;
+            return;
           case DifferentialAction::ACTION_REQUEST:
             $object->setStatus($status_review);
             // TODO: Update review status?
-            break;
+            return;
           case DifferentialAction::ACTION_CLOSE:
             $object->setStatus(ArcanistDifferentialRevisionStatus::CLOSED);
-            break;
+            return;
           case DifferentialAction::ACTION_CLAIM:
             $object->setAuthorPHID($this->getActor()->getPHID());
-            break;
-          default:
-            // TODO: For now, we're just shipping the rest of these through
-            // without acting on them.
-            break;
+            return;
         }
-        return null;
+        break;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -168,13 +195,52 @@ final class DifferentialTransactionEditor
 
     $results = parent::expandTransaction($object, $xaction);
     switch ($xaction->getTransactionType()) {
+      // TODO: If the user comments and is a reviewer, we should upgrade their
+      // edge metadata to STATUS_COMMENTED.
+
       case DifferentialTransaction::TYPE_ACTION:
 
-        $actor_phid = $this->getActor()->getPHID();
+        $actor = $this->getActor();
+        $actor_phid = $actor->getPHID();
         $type_edge = PhabricatorTransactions::TYPE_EDGE;
         $edge_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
+        $action_type = $xaction->getNewValue();
 
-        switch ($xaction->getNewValue()) {
+        switch ($action_type) {
+          case DifferentialAction::ACTION_ACCEPT:
+          case DifferentialAction::ACTION_REJECT:
+            if ($action_type == DifferentialAction::ACTION_ACCEPT) {
+              $data = array(
+                'status' => DifferentialReviewerStatus::STATUS_ACCEPTED,
+              );
+            } else {
+              $data = array(
+                'status' => DifferentialReviewerStatus::STATUS_REJECTED,
+              );
+            }
+
+            $edits = array();
+
+            foreach ($object->getReviewerStatus() as $reviewer) {
+              if ($reviewer->hasAuthority($actor)) {
+                $edits[$reviewer->getReviewerPHID()] = array(
+                  'data' => $data,
+                );
+              }
+            }
+
+            // Also either update or add the actor themselves as a reviewer.
+            $edits[$actor_phid] = array(
+              'data' => $data,
+            );
+
+            $results[] = id(new DifferentialTransaction())
+              ->setTransactionType($type_edge)
+              ->setMetadataValue('edge:type', $edge_reviewer)
+              ->setIgnoreOnNoEffect(true)
+              ->setNewValue(array('+' => $edits));
+            break;
+
           case DifferentialAction::ACTION_CLAIM:
             // If the user is commandeering, add the previous owner as a
             // reviewer and remove the actor.
@@ -294,6 +360,9 @@ final class DifferentialTransactionEditor
     $config_reopen_key = 'differential.allow-reopen';
     $allow_reopen = PhabricatorEnv::getEnvConfig($config_reopen_key);
 
+    $config_self_accept_key = 'differential.allow-self-accept';
+    $allow_self_accept = PhabricatorEnv::getEnvConfig($config_self_accept_key);
+
     $revision_status = $revision->getStatus();
 
     $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
@@ -301,6 +370,44 @@ final class DifferentialTransactionEditor
     $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
 
     switch ($action) {
+      case DifferentialAction::ACTION_ACCEPT:
+        if ($actor_is_author && !$allow_self_accept) {
+          return pht(
+            'You can not accept this revision because you are the owner.');
+        }
+
+        if ($revision_status == $status_abandoned) {
+          return pht(
+            'You can not accept this revision because it has been '.
+            'abandoned.');
+        }
+
+        if ($revision_status == $status_closed) {
+          return pht(
+            'You can not accept this revision because it has already been '.
+            'closed.');
+        }
+        break;
+
+      case DifferentialAction::ACTION_REJECT:
+        if ($actor_is_author) {
+          return pht(
+            'You can not request changes to your own revision.');
+        }
+
+        if ($revision_status == $status_abandoned) {
+          return pht(
+            'You can not request changes to this revision because it has been '.
+            'abandoned.');
+        }
+
+        if ($revision_status == $status_closed) {
+          return pht(
+            'You can not request changes to this revision because it has '.
+            'already been closed.');
+        }
+        break;
+
       case DifferentialAction::ACTION_RESIGN:
         // You can always resign from a revision if you're a reviewer. If you
         // aren't, this is a no-op rather than invalid.

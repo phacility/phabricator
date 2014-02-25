@@ -151,6 +151,12 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
             return pht(
               'You can not commandeer this revision because you already own '.
               'it.');
+          case DifferentialAction::ACTION_ACCEPT:
+            return pht(
+              'You have already accepted this revision.');
+          case DifferentialAction::ACTION_REJECT:
+            return pht(
+              'You have already requested changes to this revision.');
         }
         break;
     }

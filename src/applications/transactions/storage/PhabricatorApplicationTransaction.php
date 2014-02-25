@@ -438,13 +438,17 @@ abstract class PhabricatorApplicationTransaction
             $this->renderHandleLink($author_phid),
             count($add),
             $this->renderHandleList($add));
-        } else {
+        } else if ($rem) {
           $string = PhabricatorEdgeConfig::getRemoveStringForEdgeType($type);
           return pht(
             $string,
             $this->renderHandleLink($author_phid),
             count($rem),
             $this->renderHandleList($rem));
+        } else {
+          return pht(
+            '%s edited edge metadata.',
+            $this->renderHandleLink($author_phid));
         }
 
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:

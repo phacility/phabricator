@@ -21,6 +21,7 @@ final class DifferentialCommentSaveControllerPro
       ->setViewer($viewer)
       ->withIDs(array($this->id))
       ->needReviewerStatus(true)
+      ->needReviewerAuthority(true)
       ->executeOne();
     if (!$revision) {
       return new Aphront404Response();
