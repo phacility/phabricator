@@ -318,8 +318,20 @@ abstract class PhabricatorApplicationTransaction
     return false;
   }
 
-  public function shouldHideForMail() {
+  public function shouldHideForMail(array $xactions) {
     return $this->shouldHide();
+  }
+
+  public function getTitleForMail() {
+    return id(clone $this)->setRenderingTarget('text')->getTitle();
+  }
+
+  public function getBodyForMail() {
+    $comment = $this->getComment();
+    if ($comment && strlen($comment->getContent())) {
+      return $comment->getContent();
+    }
+    return null;
   }
 
   public function getNoEffectDescription() {

@@ -1592,13 +1592,18 @@ abstract class PhabricatorApplicationTransactionEditor
     $comments = array();
 
     foreach ($xactions as $xaction) {
-      if ($xaction->shouldHideForMail()) {
+      if ($xaction->shouldHideForMail($xactions)) {
         continue;
       }
-      $headers[] = id(clone $xaction)->setRenderingTarget('text')->getTitle();
-      $comment = $xaction->getComment();
-      if ($comment && strlen($comment->getContent())) {
-        $comments[] = $comment->getContent();
+
+      $header = $xaction->getTitleForMail();
+      if ($header !== null) {
+        $headers[] = $header;
+      }
+
+      $comment = $xaction->getBodyForMail();
+      if ($comment !== null) {
+        $comments[] = $comment;
       }
     }
 

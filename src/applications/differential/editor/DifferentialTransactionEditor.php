@@ -776,9 +776,25 @@ final class DifferentialTransactionEditor
 
     $body = parent::buildMailBody($object, $xactions);
 
+    $type_inline = DifferentialTransaction::TYPE_INLINE;
+
+    $inlines = array();
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() == $type_inline) {
+        $inlines[] = $xaction;
+      }
+    }
+
+    if ($inlines) {
+      $body->addTextSection(
+        pht('INLINE COMMENTS'),
+        $this->renderInlineCommentsForMail($object, $inlines));
+    }
+
     $body->addTextSection(
       pht('REVISION DETAIL'),
       PhabricatorEnv::getProductionURI('/D'.$object->getID()));
+
 
     return $body;
   }
@@ -796,5 +812,77 @@ final class DifferentialTransactionEditor
 
     return parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
   }
+
+  private function renderInlineCommentsForMail(
+    PhabricatorLiskDAO $object,
+    array $inlines) {
+
+    $context_key = 'metamta.differential.unified-comment-context';
+    $show_context = PhabricatorEnv::getEnvConfig($context_key);
+
+    $changeset_ids = array();
+    foreach ($inlines as $inline) {
+      $id = $inline->getComment()->getChangesetID();
+      $changeset_ids[$id] = $id;
+    }
+
+    // TODO: We should write a proper Query class for this eventually.
+    $changesets = id(new DifferentialChangeset())->loadAllWhere(
+      'id IN (%Ld)',
+      $changeset_ids);
+    if ($show_context) {
+      $hunk_parser = new DifferentialHunkParser();
+      foreach ($changesets as $changeset) {
+        $changeset->attachHunks($changeset->loadHunks());
+      }
+    }
+
+    $inline_groups = DifferentialTransactionComment::sortAndGroupInlines(
+      $inlines,
+      $changesets);
+
+    $result = array();
+    foreach ($inline_groups as $changeset_id => $group) {
+      $changeset = idx($changesets, $changeset_id);
+      if (!$changeset) {
+        continue;
+      }
+
+      foreach ($group as $inline) {
+        $comment = $inline->getComment();
+        $file = $changeset->getFilename();
+        $start = $comment->getLineNumber();
+        $len = $comment->getLineLength();
+        if ($len) {
+          $range = $start.'-'.($start + $len);
+        } else {
+          $range = $start;
+        }
+
+        $inline_content = $comment->getContent();
+
+        if (!$show_context) {
+          $result[] = "{$file}:{$range} {$inline_content}";
+        } else {
+          $result[] = "================";
+          $result[] = "Comment at: " . $file . ":" . $range;
+          $result[] = $hunk_parser->makeContextDiff(
+            $changeset->getHunks(),
+            $comment->getIsNewFile(),
+            $comment->getLineNumber(),
+            $comment->getLineLength(),
+            1);
+          $result[] = "----------------";
+
+          $result[] = $inline_content;
+          $result[] = null;
+        }
+      }
+    }
+
+    return implode("\n", $result);
+  }
+
+
 
 }
