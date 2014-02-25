@@ -190,17 +190,46 @@ final class DifferentialTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
+    $actor = $this->getActor();
+    $actor_phid = $actor->getPHID();
+    $type_edge = PhabricatorTransactions::TYPE_EDGE;
+    $edge_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
+
     $results = parent::expandTransaction($object, $xaction);
     switch ($xaction->getTransactionType()) {
-      // TODO: If the user comments and is a reviewer, we should upgrade their
-      // edge metadata to STATUS_COMMENTED.
+      case PhabricatorTransactions::TYPE_COMMENT:
+        // When a user leaves a comment, upgrade their reviewer status from
+        // "added" to "commented" if they're also a reviewer. We may further
+        // upgrade this based on other actions in the transaction group.
+
+        $status_added = DifferentialReviewerStatus::STATUS_ADDED;
+        $status_commented = DifferentialReviewerStatus::STATUS_COMMENTED;
+
+        $data = array(
+          'status' => $status_commented,
+        );
+
+        $edits = array();
+        foreach ($object->getReviewerStatus() as $reviewer) {
+          if ($reviewer->getReviewerPHID() == $actor_phid) {
+            if ($reviewer->getStatus() == $status_added) {
+              $edits[$actor_phid] = array(
+                'data' => $data,
+              );
+            }
+          }
+        }
+
+        if ($edits) {
+          $results[] = id(new DifferentialTransaction())
+            ->setTransactionType($type_edge)
+            ->setMetadataValue('edge:type', $edge_reviewer)
+            ->setIgnoreOnNoEffect(true)
+            ->setNewValue(array('+' => $edits));
+        }
+        break;
 
       case DifferentialTransaction::TYPE_ACTION:
-
-        $actor = $this->getActor();
-        $actor_phid = $actor->getPHID();
-        $type_edge = PhabricatorTransactions::TYPE_EDGE;
-        $edge_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
         $action_type = $xaction->getNewValue();
 
         switch ($action_type) {
@@ -311,6 +340,35 @@ final class DifferentialTransactionEditor
 
     return parent::applyCustomExternalTransaction($object, $xaction);
   }
+
+  protected function mergeEdgeData($type, array $u, array $v) {
+    $result = parent::mergeEdgeData($type, $u, $v);
+
+    switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER:
+        // When the same reviewer has their status updated by multiple
+        // transactions, we want the strongest status to win. An example of
+        // this is when a user adds a comment and also accepts a revision which
+        // they are a reviewer on. The comment creates a "commented" status,
+        // while the accept creates an "accepted" status. Since accept is
+        // stronger, it should win and persist.
+
+        $u_status = idx($u, 'status');
+        $v_status = idx($v, 'status');
+        $u_str = DifferentialReviewerStatus::getStatusStrength($u_status);
+        $v_str = DifferentialReviewerStatus::getStatusStrength($v_status);
+        if ($u_str > $v_str) {
+          $result['status'] = $u_status;
+        } else {
+          $result['status'] = $v_status;
+        }
+        break;
+    }
+
+    return $result;
+  }
+
+
 
   protected function applyFinalEffects(
     PhabricatorLiskDAO $object,

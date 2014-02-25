@@ -953,7 +953,50 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $result = $u->getNewValue();
     foreach ($v->getNewValue() as $key => $value) {
-      $result[$key] = array_merge($value, idx($result, $key, array()));
+      if ($u->getTransactionType() == PhabricatorTransactions::TYPE_EDGE) {
+        if (empty($result[$key])) {
+          $result[$key] = $value;
+        } else {
+          // We're merging two lists of edge adds, sets, or removes. Merge
+          // them by merging individual PHIDs within them.
+          $merged = $result[$key];
+
+          foreach ($value as $dst => $v_spec) {
+            if (empty($merged[$dst])) {
+              $merged[$dst] = $v_spec;
+            } else {
+              // Two transactions are trying to perform the same operation on
+              // the same edge. Normalize the edge data and then merge it. This
+              // allows transactions to specify how data merges execute in a
+              // precise way.
+
+              $u_spec = $merged[$dst];
+
+              if (!is_array($u_spec)) {
+                $u_spec = array('dst' => $u_spec);
+              }
+              if (!is_array($v_spec)) {
+                $v_spec = array('dst' => $v_spec);
+              }
+
+              $ux_data = idx($u_spec, 'data', array());
+              $vx_data = idx($v_spec, 'data', array());
+
+              $merged_data = $this->mergeEdgeData(
+                $u->getMetadataValue('edge:type'),
+                $ux_data,
+                $vx_data);
+
+              $u_spec['data'] = $merged_data;
+              $merged[$dst] = $u_spec;
+            }
+          }
+
+          $result[$key] = $merged;
+        }
+      } else {
+        $result[$key] = array_merge($value, idx($result, $key, array()));
+      }
     }
     $u->setNewValue($result);
 
@@ -964,6 +1007,10 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     return $u;
+  }
+
+  protected function mergeEdgeData($type, array $u, array $v) {
+    return $v + $u;
   }
 
   protected function getPHIDTransactionNewValue(
