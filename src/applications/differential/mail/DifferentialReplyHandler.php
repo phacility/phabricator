@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * NOTE: Do not extend this!
+ *
+ * @concrete-extensible
+ */
 class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
 
   private $receivedMail;
