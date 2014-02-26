@@ -52,7 +52,7 @@ final class PhabricatorCustomFieldList extends Phobject {
     }
 
     if (!$keys) {
-      return;
+      return $this;
     }
 
     // NOTE: We assume all fields share the same storage. This isn't guaranteed
@@ -79,6 +79,8 @@ final class PhabricatorCustomFieldList extends Phobject {
         $field->setValueFromStorage(null);
       }
     }
+
+    return $this;
   }
 
   public function appendFieldsToForm(AphrontFormView $form) {
@@ -303,5 +305,20 @@ final class PhabricatorCustomFieldList extends Phobject {
 
     $any_index->saveTransaction();
   }
+
+  public function updateAbstractDocument(
+    PhabricatorSearchAbstractDocument $document) {
+
+    $role = PhabricatorCustomField::ROLE_GLOBALSEARCH;
+    foreach ($this->getFields() as $field) {
+      if (!$field->shouldEnableForRole($role)) {
+        continue;
+      }
+      $field->updateAbstractDocument($document);
+    }
+
+    return $document;
+  }
+
 
 }

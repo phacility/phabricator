@@ -17,9 +17,6 @@ final class PhabricatorProjectSearchIndexer
     $doc->setDocumentCreated($project->getDateCreated());
     $doc->setDocumentModified($project->getDateModified());
 
-    $this->indexSubscribers($doc);
-    $this->indexCustomFields($doc, $project);
-
     $doc->addRelationship(
       $project->isArchived()
         ? PhabricatorSearchRelationship::RELATIONSHIP_CLOSED

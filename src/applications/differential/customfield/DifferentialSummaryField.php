@@ -78,4 +78,15 @@ final class DifferentialSummaryField
       $xaction->getNewValue());
   }
 
+  public function shouldAppearInGlobalSearch() {
+    return true;
+  }
+
+  public function updateAbstractDocument(
+    PhabricatorSearchAbstractDocument $document) {
+    if (strlen($this->getValue())) {
+      $document->addField('body', $this->getValue());
+    }
+  }
+
 }

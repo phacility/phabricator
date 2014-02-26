@@ -1,16 +1,17 @@
 <?php
 
 /**
- * @task apps       Building Applications with Custom Fields
- * @task core       Core Properties and Field Identity
- * @task proxy      Field Proxies
- * @task context    Contextual Data
- * @task storage    Field Storage
- * @task appsearch  Integration with ApplicationSearch
- * @task appxaction Integration with ApplicationTransactions
- * @task edit       Integration with edit views
- * @task view       Integration with property views
- * @task list       Integration with list views
+ * @task apps         Building Applications with Custom Fields
+ * @task core         Core Properties and Field Identity
+ * @task proxy        Field Proxies
+ * @task context      Contextual Data
+ * @task storage      Field Storage
+ * @task edit         Integration with Edit Views
+ * @task view         Integration with Property Views
+ * @task list         Integration with List views
+ * @task appsearch    Integration with ApplicationSearch
+ * @task appxaction   Integration with ApplicationTransactions
+ * @task globalsearch Integration with Global Search
  */
 abstract class PhabricatorCustomField {
 
@@ -25,6 +26,7 @@ abstract class PhabricatorCustomField {
   const ROLE_EDIT                     = 'edit';
   const ROLE_VIEW                     = 'view';
   const ROLE_LIST                     = 'list';
+  const ROLE_GLOBALSEARCH             = 'GlobalSearch';
 
 
 /* -(  Building Applications with Custom Fields  )--------------------------- */
@@ -253,6 +255,8 @@ abstract class PhabricatorCustomField {
         return $this->shouldAppearInPropertyView();
       case self::ROLE_LIST:
         return $this->shouldAppearInListView();
+      case self::ROLE_GLOBALSEARCH:
+        return $this->shouldAppearInGlobalSearch();
       case self::ROLE_DEFAULT:
         return true;
       default:
@@ -1088,6 +1092,32 @@ abstract class PhabricatorCustomField {
       return $this->proxy->renderOnListItem($view);
     }
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
+  }
+
+
+/* -(  Global Search  )------------------------------------------------------ */
+
+
+  /**
+   * @task globalsearch
+   */
+  public function shouldAppearInGlobalSearch() {
+    if ($this->proxy) {
+      return $this->proxy->shouldAppearInGlobalSearch();
+    }
+    return false;
+  }
+
+
+  /**
+   * @task globalsearch
+   */
+  public function updateAbstractDocument(
+    PhabricatorSearchAbstractDocument $document) {
+    if ($this->proxy) {
+      return $this->proxy->updateAbstractDocument($document);
+    }
+    return $document;
   }
 
 
