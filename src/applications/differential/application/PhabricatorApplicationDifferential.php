@@ -132,4 +132,3 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
   }
 
 }
-

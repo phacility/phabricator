@@ -1123,6 +1123,3 @@ ALTER TABLE `{$NAMESPACE}_xhpastview`.`xhpastview_parsetree`
   MODIFY `authorPHID` varchar(64) COLLATE utf8_bin,
   MODIFY `input` longtext COLLATE utf8_bin NOT NULL,
   MODIFY `stdout` longtext COLLATE utf8_bin NOT NULL;
-
-
-

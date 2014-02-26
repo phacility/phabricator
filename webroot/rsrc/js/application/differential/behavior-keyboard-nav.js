@@ -274,4 +274,3 @@ JX.behavior('differential-keyboard-navigation', function(config) {
   }
 
 });
-

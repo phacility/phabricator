@@ -349,4 +349,3 @@ class PhabricatorApplicationTransactionView extends AphrontView {
   }
 
 }
-

@@ -111,4 +111,3 @@ JX.install('PhabricatorFileUpload', {
   }
 
 });
-

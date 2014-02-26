@@ -39,4 +39,3 @@ final class ConpherenceHovercardEventListener extends PhabricatorEventListener {
   }
 
 }
-

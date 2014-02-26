@@ -50,4 +50,3 @@ JX.behavior('countdown-timer', function(config) {
   }
 
 });
-

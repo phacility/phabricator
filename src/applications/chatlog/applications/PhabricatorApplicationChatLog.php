@@ -38,4 +38,3 @@ final class PhabricatorApplicationChatLog extends PhabricatorApplication {
   }
 
 }
-

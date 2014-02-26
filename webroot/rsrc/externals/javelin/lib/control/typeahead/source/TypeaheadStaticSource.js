@@ -35,6 +35,3 @@ JX.install('TypeaheadStaticSource', {
     }
   }
 });
-
-
-

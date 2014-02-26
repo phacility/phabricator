@@ -45,4 +45,3 @@ JX.behavior('differential-add-reviewers-and-ccs', function(config) {
       }
     });
 });
-

@@ -155,4 +155,3 @@ final class PhabricatorMailImplementationSendGridAdapter
   }
 
 }
-

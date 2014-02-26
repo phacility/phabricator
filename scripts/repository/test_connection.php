@@ -3,4 +3,3 @@
 
 echo "This script is obsolete. Use `bin/repository` to manage repositories.\n";
 exit(1);
-

@@ -35,4 +35,3 @@ final class PhabricatorApplicationTest extends PhabricatorApplication {
   }
 
 }
-

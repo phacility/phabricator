@@ -39,4 +39,3 @@ JX.behavior('search-reorder-queries', function(config) {
   });
 
 });
-

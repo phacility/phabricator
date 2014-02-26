@@ -29,8 +29,3 @@ final class PhabricatorExampleEventListener extends PhabricatorEventListener {
   }
 
 }
-
-
-
-
-

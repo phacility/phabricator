@@ -83,4 +83,3 @@ as possible, i.e. **not** at the top of your Controller. The idea is that you
 should @{function:require_celerity_resource} a resource only if you are actually
 using it on a specific rendering of the page, not just because some views of the
 page might require it.
-

@@ -1,5 +1,3 @@
-
-
 create table {$NAMESPACE}_worker.worker_task (
   id int unsigned not null auto_increment primary key,
   taskClass varchar(255) not null,

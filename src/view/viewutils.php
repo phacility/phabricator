@@ -277,4 +277,3 @@ function phabricator_format_units_generic(
 
   return $num_string;
 }
-

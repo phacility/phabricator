@@ -70,4 +70,3 @@ final class PhabricatorApplicationNuance extends PhabricatorApplication {
   }
 
 }
-

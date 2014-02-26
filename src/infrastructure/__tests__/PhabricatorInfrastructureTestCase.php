@@ -101,4 +101,3 @@ final class PhabricatorInfrastructureTestCase
   }
 
 }
-

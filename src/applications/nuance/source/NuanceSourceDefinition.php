@@ -260,4 +260,3 @@ abstract class NuanceSourceDefinition extends Phobject {
 
   abstract public function renderListView();
 }
-

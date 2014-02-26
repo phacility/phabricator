@@ -62,4 +62,3 @@ the field. These options are available:
     "Create Another Similar Task". Some fields from the original task are copied
     into the new task, while others are not; by default, fields are not copied.
     If you want this field to be copied, specify `true` for the `copy` property.
-

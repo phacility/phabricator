@@ -26,7 +26,7 @@ final class PhabricatorSearchAttachController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $handle = id(New PhabricatorHandleQuery())
+    $handle = id(new PhabricatorHandleQuery())
       ->setViewer($user)
       ->withPHIDs(array($this->phid))
       ->executeOne();

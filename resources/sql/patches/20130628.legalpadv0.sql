@@ -101,4 +101,3 @@ CREATE TABLE {$NAMESPACE}_legalpad.legalpad_transaction_comment (
   UNIQUE KEY `key_draft` (authorPHID, documentID, transactionPHID)
 
 ) ENGINE=InnoDB, COLLATE utf8_general_ci;
-

@@ -34,5 +34,3 @@ CREATE TABLE {$NAMESPACE}_diviner.diviner_liveatom (
   atomData LONGTEXT NOT NULL COLLATE utf8_bin,
   UNIQUE KEY (symbolPHID)
 ) ENGINE=InnoDB, DEFAULT CHARSET = utf8;
-
-

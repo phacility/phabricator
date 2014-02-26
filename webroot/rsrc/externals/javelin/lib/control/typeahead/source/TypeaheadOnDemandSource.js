@@ -99,5 +99,3 @@ JX.install('TypeaheadOnDemandSource', {
     }
   }
 });
-
-

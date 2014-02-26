@@ -72,4 +72,3 @@ final class PhabricatorApplicationDiviner extends PhabricatorApplication {
 
 
 }
-

@@ -179,4 +179,3 @@ The two major downsides to the behavior design appear to be:
     have more than just glue code, and should have been refactored into a
     real class some time ago. This is a pretty high-level drawback and is
     manageable through awareness of the risk and code review.
-

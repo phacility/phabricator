@@ -195,4 +195,3 @@ Continue by:
     @{article:Arcanist User Guide: Customizing Existing Linters}; or
   - learning how to add new linters and lint engines with
     @{article:Arcanist User Guide: Customizing Lint, Unit Tests and Workflows}.
-

@@ -43,4 +43,3 @@ final class AuditActionMenuEventListener extends PhabricatorEventListener {
   }
 
 }
-

@@ -143,4 +143,3 @@ JX.install('MultirowRowManager', {
     _removeSigil : "tools-multirow-row-manager-row-remove"
   }
 });
-

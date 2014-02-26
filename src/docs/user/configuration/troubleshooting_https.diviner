@@ -10,7 +10,7 @@ particularly if you're receiving a "There was an error negotiating the SSL
 connection." error, this document may be able to help you diagnose and resolve
 the problem.
 
-Connection negotation can fail for several reasons. The major ones are:
+Connection negotiation can fail for several reasons. The major ones are:
 
   - You have not added the the Certificate Authority as a trusted authority
     (this is the most common problem, and usually the issue for self-signed

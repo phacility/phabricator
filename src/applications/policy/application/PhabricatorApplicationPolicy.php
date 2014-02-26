@@ -21,4 +21,3 @@ final class PhabricatorApplicationPolicy extends PhabricatorApplication {
   }
 
 }
-

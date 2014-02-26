@@ -86,4 +86,3 @@ JX.behavior('line-chart', function(config) {
   });
 
 });
-

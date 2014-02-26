@@ -19,5 +19,3 @@ CREATE TABLE {$NAMESPACE}_user.user_transaction (
   KEY `key_object` (objectPHID)
 
 ) ENGINE=InnoDB, COLLATE utf8_general_ci;
-
-

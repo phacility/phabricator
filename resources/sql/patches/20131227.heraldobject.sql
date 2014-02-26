@@ -3,4 +3,3 @@ ALTER TABLE {$NAMESPACE}_herald.herald_rule
 
 ALTER TABLE {$NAMESPACE}_herald.herald_rule
   ADD KEY `key_trigger` (triggerObjectPHID);
-

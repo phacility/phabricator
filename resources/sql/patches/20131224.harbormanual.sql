@@ -3,4 +3,3 @@ ALTER TABLE {$NAMESPACE}_harbormaster.harbormaster_buildable
 
 ALTER TABLE {$NAMESPACE}_harbormaster.harbormaster_buildable
   ADD KEY `key_manual` (isManualBuildable);
-

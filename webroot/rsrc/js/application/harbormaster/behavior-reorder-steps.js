@@ -39,4 +39,3 @@ JX.behavior('harbormaster-reorder-steps', function(config) {
   });
 
 });
-

@@ -62,4 +62,3 @@ JX.behavior('doorkeeper-tag', function(config, statics) {
 
   JX.onload(load);
 });
-

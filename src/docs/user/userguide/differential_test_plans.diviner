@@ -63,5 +63,3 @@ you are writing; they are adapted from Facebook's internal documentation.
   - **Static Resources:** Will your change cause the application to serve more
     JS or CSS? Can you use less JS/CSS, or reuse more?
   - **Browsers:** Have you tested your change in multiple browsers?
-
-

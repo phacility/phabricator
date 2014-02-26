@@ -68,5 +68,3 @@ abstract class PhabricatorPolicyCapability extends Phobject {
   }
 
 }
-
-

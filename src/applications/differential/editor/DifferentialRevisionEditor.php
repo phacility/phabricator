@@ -994,4 +994,3 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
   }
 
 }
-

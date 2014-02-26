@@ -293,4 +293,3 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
     return phutil_implode_html("\n", $results);
   }
 }
-

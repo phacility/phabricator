@@ -179,5 +179,3 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
   }
 
 }
-
-

@@ -1,5 +1,3 @@
-
-
 create table {$NAMESPACE}_daemon.daemon_log (
   id int unsigned not null auto_increment primary key,
   daemon varchar(255) not null,

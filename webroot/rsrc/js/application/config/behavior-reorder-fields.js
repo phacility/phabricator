@@ -55,4 +55,3 @@ JX.behavior('config-reorder-fields', function(config) {
   };
 
 });
-

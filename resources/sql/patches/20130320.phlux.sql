@@ -29,4 +29,3 @@ CREATE TABLE {$NAMESPACE}_phlux.phlux_transaction (
   UNIQUE KEY `key_phid` (phid),
   KEY `key_object` (objectPHID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-

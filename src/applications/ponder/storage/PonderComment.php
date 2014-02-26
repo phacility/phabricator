@@ -38,4 +38,3 @@ final class PonderComment extends PonderDAO
     return self::MARKUP_FIELD_CONTENT;
   }
 }
-

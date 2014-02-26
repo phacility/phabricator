@@ -160,4 +160,3 @@ abstract class PhabricatorBotBaseStreamingProtocolAdapter
 
   abstract protected function processMessage($raw_object);
 }
-

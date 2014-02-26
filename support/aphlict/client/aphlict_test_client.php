@@ -53,4 +53,3 @@ while (true) {
   $message = $proto_channel->waitForMessage();
   $console->writeOut($json->encodeFormatted($message));
 }
-

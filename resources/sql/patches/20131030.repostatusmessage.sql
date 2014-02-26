@@ -7,4 +7,3 @@ CREATE TABLE {$NAMESPACE}_repository.repository_statusmessage (
   epoch INT UNSIGNED NOT NULL,
   UNIQUE KEY (repositoryID, statusType)
 ) ENGINE=InnoDB, CHARSET utf8;
-

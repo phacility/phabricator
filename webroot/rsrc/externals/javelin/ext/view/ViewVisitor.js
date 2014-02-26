@@ -33,4 +33,3 @@ JX.install('ViewVisitor', {
     }
   }
 });
-

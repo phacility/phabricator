@@ -316,4 +316,3 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
   }
 
 }
-

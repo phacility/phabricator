@@ -59,4 +59,3 @@ final class PhabricatorApplicationPhrequent extends PhabricatorApplication {
   }
 
 }
-

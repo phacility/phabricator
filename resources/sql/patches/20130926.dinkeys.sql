@@ -12,4 +12,3 @@ ALTER TABLE {$NAMESPACE}_differential.differential_transaction_comment
 
 ALTER TABLE {$NAMESPACE}_differential.differential_transaction_comment
   ADD KEY `key_legacy` (legacyCommentID);
-

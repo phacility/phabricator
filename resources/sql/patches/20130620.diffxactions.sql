@@ -48,4 +48,3 @@ CREATE TABLE {$NAMESPACE}_differential.differential_transaction_comment (
   UNIQUE KEY `key_draft` (authorPHID, revisionPHID, transactionPHID)
 
 ) ENGINE=InnoDB, COLLATE utf8_general_ci;
-

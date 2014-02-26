@@ -22,4 +22,3 @@ JX.behavior('launch-icon-composer', function(config) {
     });
 
 });
-

@@ -1,4 +1,3 @@
-
 create table {$NAMESPACE}_project.project (
   id int unsigned not null auto_increment primary key,
   name varchar(255) not null,
@@ -28,4 +27,3 @@ create table {$NAMESPACE}_project.project_affiliation (
   dateCreated int unsigned not null,
   dateModified int unsigned not null
 );
-  
