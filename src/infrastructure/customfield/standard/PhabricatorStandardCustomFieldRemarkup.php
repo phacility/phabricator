@@ -19,7 +19,7 @@ final class PhabricatorStandardCustomFieldRemarkup
     return 'block';
   }
 
-  public function renderPropertyViewValue() {
+  public function renderPropertyViewValue(array $handles) {
     $value = $this->getFieldValue();
 
     if (!strlen($value)) {

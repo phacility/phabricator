@@ -149,9 +149,25 @@ final class PhabricatorCustomFieldList extends Phobject {
 
     $add_header = null;
 
-    foreach ($fields as $field) {
+    $phids = array();
+    foreach ($fields as $key => $field) {
+      $phids[$key] = $field->getRequiredHandlePHIDsForPropertyView();
+    }
+
+    $all_phids = array_mergev($phids);
+    if ($all_phids) {
+      $handles = id(new PhabricatorHandleQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($all_phids)
+        ->execute();
+    } else {
+      $handles = array();
+    }
+
+    foreach ($fields as $key => $field) {
+      $field_handles = array_select_keys($handles, $phids[$key]);
       $label = $field->renderPropertyViewLabel();
-      $value = $field->renderPropertyViewValue();
+      $value = $field->renderPropertyViewValue($field_handles);
       if ($value !== null) {
         switch ($field->getStyleForPropertyView()) {
           case 'header':

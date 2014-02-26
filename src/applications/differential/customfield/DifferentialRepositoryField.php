@@ -123,4 +123,24 @@ final class DifferentialRepositoryField
     }
   }
 
+  public function shouldAppearInPropertyView() {
+    return true;
+  }
+
+  public function renderPropertyViewLabel() {
+    return $this->getFieldName();
+  }
+
+  public function getRequiredHandlePHIDsForPropertyView() {
+    $repository_phid = $this->getObject()->getRepositoryPHID();
+    if ($repository_phid) {
+      return array($repository_phid);
+    }
+    return array();
+  }
+
+  public function renderPropertyViewValue(array $handles) {
+    return $this->renderHandleList($handles);
+  }
+
 }

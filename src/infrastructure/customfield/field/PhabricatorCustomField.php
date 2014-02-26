@@ -1051,9 +1051,9 @@ abstract class PhabricatorCustomField {
   /**
    * @task view
    */
-  public function renderPropertyViewValue() {
+  public function renderPropertyViewValue(array $handles) {
     if ($this->proxy) {
-      return $this->proxy->renderPropertyViewValue();
+      return $this->proxy->renderPropertyViewValue($handles);
     }
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
@@ -1067,6 +1067,17 @@ abstract class PhabricatorCustomField {
       return $this->proxy->getStyleForPropertyView();
     }
     return 'property';
+  }
+
+
+  /**
+   * @task view
+   */
+  public function getRequiredHandlePHIDsForPropertyView() {
+    if ($this->proxy) {
+      return $this->proxy->getRequiredHandlePHIDsForPropertyView();
+    }
+    return array();
   }
 
 

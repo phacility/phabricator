@@ -21,7 +21,7 @@ final class PhabricatorUserSinceField
     return true;
   }
 
-  public function renderPropertyViewValue() {
+  public function renderPropertyViewValue(array $handles) {
     $absolute = phabricator_datetime(
       $this->getObject()->getDateCreated(),
       $this->getViewer());

@@ -26,7 +26,7 @@ final class PhabricatorStandardCustomFieldHeader
     return 'header';
   }
 
-  public function renderPropertyViewValue() {
+  public function renderPropertyViewValue(array $handles) {
     return $this->getFieldName();
   }
 

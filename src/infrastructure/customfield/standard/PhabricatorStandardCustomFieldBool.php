@@ -83,7 +83,7 @@ final class PhabricatorStandardCustomFieldBool
         (bool)$this->getFieldValue());
   }
 
-  public function renderPropertyViewValue() {
+  public function renderPropertyViewValue(array $handles) {
     $value = $this->getFieldValue();
     if ($value) {
       return $this->getString('view.yes', pht('Yes'));

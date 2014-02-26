@@ -21,7 +21,7 @@ final class PhabricatorUserStatusField
     return true;
   }
 
-  public function renderPropertyViewValue() {
+  public function renderPropertyViewValue(array $handles) {
     $user = $this->getObject();
     $viewer = $this->requireViewer();
 

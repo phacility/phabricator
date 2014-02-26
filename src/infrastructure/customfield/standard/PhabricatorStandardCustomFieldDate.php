@@ -48,7 +48,7 @@ final class PhabricatorStandardCustomFieldDate
     $this->setFieldValue($value);
   }
 
-  public function renderPropertyViewValue() {
+  public function renderPropertyViewValue(array $handles) {
     $value = $this->getFieldValue();
     if (!$value) {
       return null;
