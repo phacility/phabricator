@@ -903,9 +903,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->needComments(true)
       ->execute();
 
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer);
-
     $timeline = id(new DifferentialTransactionView())
       ->setUser($viewer)
       ->setObjectPHID($revision->getPHID())
