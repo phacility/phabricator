@@ -707,14 +707,14 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
 
     $revision = $this->revision;
 
-    $fields = id(new DifferentialAuxiliaryField())->loadAllWhere(
-      'revisionPHID = %s AND name IN (%Ls)',
-      $revision->getPHID(),
-      array_keys($aux_map));
-    $fields = mpull($fields, null, 'getName');
+    $fields = id(new DifferentialCustomFieldStorage())->loadAllWhere(
+      'objectPHID = %s',
+      $revision->getPHID());
+    $fields = mpull($fields, null, 'getFieldIndex');
 
     foreach ($aux_map as $key => $val) {
-      $obj = idx($fields, $key);
+      $index = PhabricatorHash::digestForIndex($key);
+      $obj = idx($fields, $index);
       if (!strlen($val)) {
         // If the new value is empty, just delete the old row if one exists and
         // don't add a new row if it doesn't.
@@ -723,9 +723,9 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
         }
       } else {
         if (!$obj) {
-          $obj = new DifferentialAuxiliaryField();
-          $obj->setRevisionPHID($revision->getPHID());
-          $obj->setName($key);
+          $obj = new DifferentialCustomFieldStorage();
+          $obj->setObjectPHID($revision->getPHID());
+          $obj->setFieldIndex($index);
         }
 
         if ($obj->getValue() !== $val) {

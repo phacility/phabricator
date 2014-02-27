@@ -1,20 +1,6 @@
 <?php
 
-final class DifferentialAuxiliaryField extends DifferentialDAO {
-
-  protected $revisionPHID;
-  protected $name;
-  protected $value;
-
-  public function setName($name) {
-    if (strlen($name) > 32) {
-      throw new Exception(
-        "Tried to set name '{$name}' for a Differential auxiliary field; ".
-        "auxiliary field names must be no longer than 32 characters.");
-    }
-    $this->name = $name;
-    return $this;
-  }
+final class DifferentialAuxiliaryField {
 
   public static function loadFromStorage(
     DifferentialRevision $revision,
@@ -24,11 +10,20 @@ final class DifferentialAuxiliaryField extends DifferentialDAO {
     $storage_keys = array_filter(mpull($aux_fields, 'getStorageKey'));
     $field_data = array();
     if ($storage_keys) {
-      $field_data = id(new DifferentialAuxiliaryField())->loadAllWhere(
-        'revisionPHID = %s AND name IN (%Ls)',
+      $index_map = array();
+      foreach ($storage_keys as $key) {
+        $index_map[PhabricatorHash::digestForIndex($key)] = $key;
+      }
+
+      $index_data = id(new DifferentialCustomFieldStorage())->loadAllWhere(
+        'objectPHID = %s AND fieldIndex IN (%Ls)',
         $revision->getPHID(),
-        $storage_keys);
-      $field_data = mpull($field_data, 'getValue', 'getName');
+        array_keys($index_map));
+      $index_data = mpull($index_data, 'getFieldValue', 'getFieldIndex');
+
+      foreach ($index_data as $index => $data) {
+        $field_data[$index_map[$index]] = $data;
+      }
     }
 
     foreach ($aux_fields as $aux_field) {

@@ -2891,7 +2891,6 @@ phutil_register_library_map(array(
     'DifferentialAuditorsFieldSpecification' => 'DifferentialFieldSpecification',
     'DifferentialAuthorField' => 'DifferentialCustomField',
     'DifferentialAuthorFieldSpecification' => 'DifferentialFieldSpecification',
-    'DifferentialAuxiliaryField' => 'DifferentialDAO',
     'DifferentialBlameRevisionFieldSpecification' => 'DifferentialFieldSpecification',
     'DifferentialBranchFieldSpecification' => 'DifferentialFieldSpecification',
     'DifferentialCCWelcomeMail' => 'DifferentialReviewRequestMail',

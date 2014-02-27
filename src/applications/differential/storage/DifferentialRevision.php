@@ -209,13 +209,6 @@ final class DifferentialRevision extends DifferentialDAO
         $inline->delete();
       }
 
-      $fields = id(new DifferentialAuxiliaryField())->loadAllWhere(
-        'revisionPHID = %s',
-        $this->getPHID());
-      foreach ($fields as $field) {
-        $field->delete();
-      }
-
       // we have to do paths a little differentally as they do not have
       // an id or phid column for delete() to act on
       $dummy_path = new DifferentialAffectedPath();
