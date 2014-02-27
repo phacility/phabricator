@@ -1806,6 +1806,8 @@ abstract class PhabricatorApplicationTransactionEditor
         "integration for ApplicationTransactions.");
     }
 
+    $field->setViewer($this->getActor());
+
     return $field;
   }
 
