@@ -180,6 +180,8 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
       'auth.sessions.web' => $session_reason,
       'tokenizer.ondemand' => pht(
         'Phabricator now manages typeahead strategies automatically.'),
+      'differential.revision-custom-detail-renderer' => pht(
+        'Obsolete; use standard rendering events instead.'),
     );
 
     return $ancient_config;

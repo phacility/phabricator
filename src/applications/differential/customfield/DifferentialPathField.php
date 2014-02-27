@@ -15,6 +15,10 @@ final class DifferentialPathField
     return pht('Shows the local path where the diff came from.');
   }
 
+  public function shouldDisableByDefault() {
+    return true;
+  }
+
   public function shouldAppearInPropertyView() {
     return true;
   }

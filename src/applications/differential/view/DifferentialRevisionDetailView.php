@@ -4,7 +4,7 @@ final class DifferentialRevisionDetailView extends AphrontView {
 
   private $revision;
   private $actions;
-  private $auxiliaryFields = array();
+  private $customFields;
   private $diff;
   private $uri;
 
@@ -37,9 +37,8 @@ final class DifferentialRevisionDetailView extends AphrontView {
     return $this->actions;
   }
 
-  public function setAuxiliaryFields(array $fields) {
-    assert_instances_of($fields, 'DifferentialFieldSpecification');
-    $this->auxiliaryFields = $fields;
+  public function setCustomFields(PhabricatorCustomFieldList $list) {
+    $this->customFields = $list;
     return $this;
   }
 
@@ -57,15 +56,7 @@ final class DifferentialRevisionDetailView extends AphrontView {
       ->setObject($revision)
       ->setObjectURI($this->getURI());
     foreach ($this->getActions() as $action) {
-      $obj = id(new PhabricatorActionView())
-        ->setIcon(idx($action, 'icon', 'edit'))
-        ->setName($action['name'])
-        ->setHref(idx($action, 'href'))
-        ->setWorkflow(idx($action, 'sigil') == 'workflow')
-        ->setRenderAsForm(!empty($action['instant']))
-        ->setUser($user)
-        ->setDisabled(idx($action, 'disabled', false));
-      $actions->addAction($obj);
+      $actions->addAction($action);
     }
 
     $properties = id(new PHUIPropertyListView())
@@ -102,42 +93,15 @@ final class DifferentialRevisionDetailView extends AphrontView {
       $properties->addProperty(pht('Next Step'), $next_step);
     }
 
-    foreach ($this->auxiliaryFields as $field) {
-      $value = $field->renderValueForRevisionView();
-      if ($value !== null) {
-        $label = rtrim($field->renderLabelForRevisionView(), ':');
-        $properties->addProperty($label, $value);
-      }
-    }
     $properties->setHasKeyboardShortcuts(true);
     $properties->setActionList($actions);
 
-    $properties->invokeWillRenderEvent();
-
-    if (strlen($revision->getSummary())) {
-      $properties->addSectionHeader(
-        pht('Summary'),
-        PHUIPropertyListView::ICON_SUMMARY);
-      $properties->addTextContent(
-        PhabricatorMarkupEngine::renderOneObject(
-          id(new PhabricatorMarkupOneOff())
-            ->setPreserveLinebreaks(true)
-            ->setContent($revision->getSummary()),
-          'default',
-          $user));
-    }
-
-    if (strlen($revision->getTestPlan())) {
-      $properties->addSectionHeader(
-        pht('Test Plan'),
-        PHUIPropertyListView::ICON_TESTPLAN);
-      $properties->addTextContent(
-        PhabricatorMarkupEngine::renderOneObject(
-          id(new PhabricatorMarkupOneOff())
-            ->setPreserveLinebreaks(true)
-            ->setContent($revision->getTestPlan()),
-          'default',
-          $user));
+    $field_list = $this->customFields;
+    if ($field_list) {
+      $field_list->appendFieldsToPropertyList(
+        $revision,
+        $user,
+        $properties);
     }
 
     $object_box = id(new PHUIObjectBoxView())

@@ -15,6 +15,10 @@ final class DifferentialRevertPlanField
     return pht('Instructions for reverting/undoing this change.');
   }
 
+  public function shouldDisableByDefault() {
+    return true;
+  }
+
   public function shouldAppearInPropertyView() {
     return true;
   }

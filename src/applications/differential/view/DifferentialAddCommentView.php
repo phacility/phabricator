@@ -6,18 +6,11 @@ final class DifferentialAddCommentView extends AphrontView {
   private $actions;
   private $actionURI;
   private $draft;
-  private $auxFields;
   private $reviewers = array();
   private $ccs = array();
 
   public function setRevision($revision) {
     $this->revision = $revision;
-    return $this;
-  }
-
-  public function setAuxFields(array $aux_fields) {
-    assert_instances_of($aux_fields, 'DifferentialFieldSpecification');
-    $this->auxFields = $aux_fields;
     return $this;
   }
 
@@ -136,7 +129,7 @@ final class DifferentialAddCommentView extends AphrontView {
       ));
 
     $diff = $revision->loadActiveDiff();
-    $warnings = mpull($this->auxFields, 'renderWarningBoxForRevisionAccept');
+    $warnings = array();
 
     Javelin::initBehavior(
       'differential-accept-with-errors',

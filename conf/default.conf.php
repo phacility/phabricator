@@ -787,8 +787,6 @@ return array(
 
 // -- Differential ---------------------------------------------------------- //
 
-  'differential.revision-custom-detail-renderer'  => null,
-
   // List of file regexps where whitespace is meaningful and should not
   // use 'ignore-all' by default
   'differential.whitespace-matters' => array(
