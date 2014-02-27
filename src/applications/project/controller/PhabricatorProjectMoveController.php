@@ -72,8 +72,31 @@ final class PhabricatorProjectMoveController
       $column_phid,
       $edge_phids);
 
-    // TODO: We also need to deal with priorities, so far this only gets stuff
-    // in the correct column.
+    if ($after_phid) {
+      $after_task = id(new ManiphestTaskQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($after_phid))
+        ->requireCapabilities(array(PhabricatorPolicyCapability::CAN_EDIT))
+        ->executeOne();
+      if (!$after_task) {
+        return new Aphront404Response();
+      }
+      $after_pri = $after_task->getPriority();
+      $after_sub = $after_task->getSubpriority();
+
+      $xactions = array(id(new ManiphestTransaction())
+        ->setTransactionType(ManiphestTransaction::TYPE_SUBPRIORITY)
+        ->setNewValue(array(
+          'newPriority' => $after_pri,
+          'newSubpriorityBase' => $after_sub)));
+      $editor = id(new ManiphestTransactionEditor())
+        ->setActor($viewer)
+        ->setContinueOnMissingFields(true)
+        ->setContinueOnNoEffect(true)
+        ->setContentSourceFromRequest($request);
+
+      $editor->applyTransactions($object, $xactions);
+    }
 
     return id(new AphrontAjaxResponse())->setContent(array());
   }

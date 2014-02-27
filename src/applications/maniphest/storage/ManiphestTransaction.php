@@ -12,6 +12,7 @@ final class ManiphestTransaction
   const TYPE_PRIORITY = 'priority';
   const TYPE_EDGE = 'edge';
   const TYPE_ATTACH = 'attach';
+  const TYPE_SUBPRIORITY = 'subpriority';
 
   public function getApplicationName() {
     return 'maniphest';
@@ -85,6 +86,8 @@ final class ManiphestTransaction
           return false;
         }
         break;
+      case self::TYPE_SUBPRIORITY:
+        return true;
     }
 
     return false;
