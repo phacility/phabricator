@@ -60,7 +60,6 @@ final class ConduitAPI_differential_close_Method
     $editor->save();
 
     $revision->setStatus(ArcanistDifferentialRevisionStatus::CLOSED);
-    $revision->setDateCommitted(time());
     $revision->save();
 
     return;

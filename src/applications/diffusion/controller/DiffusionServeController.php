@@ -601,4 +601,3 @@ final class DiffusionServeController extends DiffusionController {
   }
 
 }
-

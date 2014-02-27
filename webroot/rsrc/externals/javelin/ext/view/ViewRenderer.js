@@ -17,4 +17,3 @@ JX.install('ViewRenderer', {
     }
   }
 });
-

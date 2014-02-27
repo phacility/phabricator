@@ -14,6 +14,7 @@ final class PassphraseCredentialTransactionEditor
     $types[] = PassphraseCredentialTransaction::TYPE_USERNAME;
     $types[] = PassphraseCredentialTransaction::TYPE_SECRET_ID;
     $types[] = PassphraseCredentialTransaction::TYPE_DESTROY;
+    $types[] = PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET;
 
     return $types;
   }
@@ -35,6 +36,8 @@ final class PassphraseCredentialTransactionEditor
         return $object->getSecretID();
       case PassphraseCredentialTransaction::TYPE_DESTROY:
         return $object->getIsDestroyed();
+      case PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET:
+        return null;
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -49,6 +52,7 @@ final class PassphraseCredentialTransactionEditor
       case PassphraseCredentialTransaction::TYPE_USERNAME:
       case PassphraseCredentialTransaction::TYPE_SECRET_ID:
       case PassphraseCredentialTransaction::TYPE_DESTROY:
+      case PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET:
         return $xaction->getNewValue();
     }
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -92,6 +96,8 @@ final class PassphraseCredentialTransactionEditor
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         $object->setEditPolicy($xaction->getNewValue());
         return;
+      case PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET:
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -107,6 +113,7 @@ final class PassphraseCredentialTransactionEditor
       case PassphraseCredentialTransaction::TYPE_USERNAME:
       case PassphraseCredentialTransaction::TYPE_SECRET_ID:
       case PassphraseCredentialTransaction::TYPE_DESTROY:
+      case PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return;

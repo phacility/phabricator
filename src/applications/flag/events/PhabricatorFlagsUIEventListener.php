@@ -59,4 +59,3 @@ final class PhabricatorFlagsUIEventListener extends PhabricatorEventListener {
   }
 
 }
-

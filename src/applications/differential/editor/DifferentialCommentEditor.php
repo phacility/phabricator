@@ -409,10 +409,6 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
           }
         }
 
-        if (!$revision->getDateCommitted()) {
-          $revision->setDateCommitted(time());
-        }
-
         $revision->setStatus(ArcanistDifferentialRevisionStatus::CLOSED);
         break;
 

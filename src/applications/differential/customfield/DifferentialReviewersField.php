@@ -81,4 +81,41 @@ final class DifferentialReviewersField
     );
   }
 
+  public function shouldAppearInPropertyView() {
+    return true;
+  }
+
+  public function renderPropertyViewLabel() {
+    return $this->getFieldName();
+  }
+
+  public function getRequiredHandlePHIDsForPropertyView() {
+    return mpull($this->getUserReviewers(), 'getReviewerPHID');
+  }
+
+  public function renderPropertyViewValue(array $handles) {
+    $reviewers = $this->getUserReviewers();
+    if (!$reviewers) {
+      return phutil_tag('em', array(), pht('None'));
+    }
+
+    $view = id(new DifferentialReviewersView())
+      ->setUser($this->getViewer())
+      ->setReviewers($reviewers)
+      ->setHandles($handles);
+
+    // TODO: Active diff stuff.
+
+    return $view;
+  }
+
+  private function getUserReviewers() {
+    $reviewers = array();
+    foreach ($this->getObject()->getReviewerStatus() as $reviewer) {
+      if ($reviewer->isUser()) {
+        $reviewers[] = $reviewer;
+      }
+    }
+    return $reviewers;
+  }
 }

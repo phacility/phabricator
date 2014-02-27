@@ -102,4 +102,3 @@ final class PonderAnswerTransaction
   }
 
 }
-

@@ -149,23 +149,23 @@ class PhabricatorApplicationTransactionView extends AphrontView {
   }
 
   protected function getOrBuildEngine() {
-    if ($this->engine) {
-      return $this->engine;
-    }
+    if (!$this->engine) {
+      $field = PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT;
 
-    $field = PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT;
-
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($this->getUser());
-    foreach ($this->transactions as $xaction) {
-      if (!$xaction->hasComment()) {
-        continue;
+      $engine = id(new PhabricatorMarkupEngine())
+        ->setViewer($this->getUser());
+      foreach ($this->transactions as $xaction) {
+        if (!$xaction->hasComment()) {
+          continue;
+        }
+        $engine->addObject($xaction->getComment(), $field);
       }
-      $engine->addObject($xaction->getComment(), $field);
-    }
-    $engine->process();
+      $engine->process();
 
-    return $engine;
+      $this->engine = $engine;
+    }
+
+    return $this->engine;
   }
 
   private function buildChangeDetailsLink(
@@ -349,4 +349,3 @@ class PhabricatorApplicationTransactionView extends AphrontView {
   }
 
 }
-

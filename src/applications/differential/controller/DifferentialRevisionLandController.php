@@ -151,4 +151,3 @@ final class DifferentialRevisionLandController extends DifferentialController {
     return $lock;
   }
 }
-

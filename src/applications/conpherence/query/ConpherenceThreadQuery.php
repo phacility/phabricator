@@ -217,7 +217,7 @@ final class ConpherenceThreadQuery
     $participant_phids = array_mergev($participant_phids);
     $file_phids = array_mergev($file_phids);
 
-    $epochs = ConpherenceTimeUtil::getCalendarEventEpochs(
+    $epochs = CalendarTimeUtil::getCalendarEventEpochs(
       $this->getViewer());
     $start_epoch = $epochs['start_epoch'];
     $end_epoch = $epochs['end_epoch'];

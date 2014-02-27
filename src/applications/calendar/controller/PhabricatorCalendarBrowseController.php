@@ -39,6 +39,24 @@ final class PhabricatorCalendarBrowseController
     $phids = mpull($statuses, 'getUserPHID');
     $handles = $this->loadViewerHandles($phids);
 
+    /* Assign Colors */
+    $unique = array_unique($phids);
+    $allblue = false;
+    $calcolors = CalendarColors::getColors();
+    if (count($unique) > count($calcolors)) {
+      $allblue = true;
+    }
+    $i = 0;
+    $eventcolor = array();
+    foreach ($unique as $phid) {
+      if ($allblue) {
+        $eventcolor[$phid] = CalendarColors::COLOR_SKY;
+      } else {
+        $eventcolor[$phid] = $calcolors[$i];
+      }
+      $i++;
+    }
+
     foreach ($statuses as $status) {
       $event = new AphrontCalendarEventView();
       $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
@@ -46,14 +64,10 @@ final class PhabricatorCalendarBrowseController
       $name_text = $handles[$status->getUserPHID()]->getName();
       $status_text = $status->getHumanStatus();
       $event->setUserPHID($status->getUserPHID());
-      $event->setName("{$name_text} ({$status_text})");
-      $details = '';
-      if ($status->getDescription()) {
-        $details = "\n\n".rtrim($status->getDescription());
-      }
-      $event->setDescription(
-        $status->getTerseSummary($user).$details);
+      $event->setDescription(pht('%s (%s)', $name_text, $status_text));
+      $event->setName($status_text);
       $event->setEventID($status->getID());
+      $event->setColor($eventcolor[$status->getUserPHID()]);
       $month_view->addEvent($event);
     }
 

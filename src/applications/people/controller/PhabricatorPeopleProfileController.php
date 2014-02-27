@@ -73,6 +73,16 @@ final class PhabricatorPeopleProfileController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($user->getUsername());
     $feed = $this->renderUserFeed($user);
+    $calendar = $this->renderUserCalendar($user);
+    $activity = phutil_tag(
+      'div',
+      array(
+        'class' => 'profile-activity-view grouped'
+      ),
+      array(
+        $calendar,
+        $feed
+      ));
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -82,7 +92,7 @@ final class PhabricatorPeopleProfileController
       array(
         $crumbs,
         $object_box,
-        $feed,
+        $activity,
       ),
       array(
         'title' => $user->getUsername(),
@@ -128,5 +138,83 @@ final class PhabricatorPeopleProfileController
     return phutil_tag_div(
       'profile-feed',
       $view->render());
+  }
+
+  private function renderUserCalendar(PhabricatorUser $user) {
+    $viewer = $this->getRequest()->getUser();
+    $epochs = CalendarTimeUtil::getCalendarEventEpochs(
+      $viewer,
+      'today',
+       7);
+    $start_epoch = $epochs['start_epoch'];
+    $end_epoch = $epochs['end_epoch'];
+    $statuses = id(new PhabricatorCalendarEventQuery())
+      ->setViewer($viewer)
+      ->withInvitedPHIDs(array($user->getPHID()))
+      ->withDateRange($start_epoch, $end_epoch)
+      ->execute();
+
+    $timestamps = CalendarTimeUtil::getCalendarWeekTimestamps(
+      $viewer);
+    $today = $timestamps['today'];
+    $epoch_stamps = $timestamps['epoch_stamps'];
+    $events = array();
+
+    foreach ($epoch_stamps as $day) {
+      $epoch_start = $day->format('U');
+      $next_day = clone $day;
+      $next_day->modify('+1 day');
+      $epoch_end = $next_day->format('U');
+
+      foreach ($statuses as $status) {
+        if ($status->getDateTo() < $epoch_start) {
+          continue;
+        }
+        if ($status->getDateFrom() >= $epoch_end) {
+          continue;
+        }
+
+        $event = new AphrontCalendarEventView();
+        $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
+
+        $status_text = $status->getHumanStatus();
+        $event->setUserPHID($status->getUserPHID());
+        $event->setName($status_text);
+        $event->setDescription($status->getDescription());
+        $event->setEventID($status->getID());
+        $events[$epoch_start][] = $event;
+      }
+    }
+
+    $week = array();
+    foreach ($epoch_stamps as $day) {
+      $epoch = $day->format('U');
+      $headertext = phabricator_format_local_time($epoch, $user, 'l, M d');
+
+      $list = new PHUICalendarListView();
+      $list->setUser($viewer);
+      $list->showBlankState(true);
+      if (isset($events[$epoch])) {
+        foreach ($events[$epoch] as $event) {
+          $list->addEvent($event);
+        }
+      }
+
+      $header = phutil_tag(
+        'a',
+        array(
+          'href' => $this->getRequest()->getRequestURI().'calendar/'
+        ),
+        $headertext);
+
+      $calendar = new PHUICalendarWidgetView();
+      $calendar->setHeader($header);
+      $calendar->setCalendarList($list);
+      $week[] = $calendar;
+    }
+
+    return phutil_tag_div(
+      'profile-calendar',
+      $week);
   }
 }

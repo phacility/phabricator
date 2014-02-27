@@ -73,7 +73,7 @@ final class PhabricatorStandardCustomFieldSelect
       ->setOptions($this->getOptions());
   }
 
-  public function renderPropertyViewValue() {
+  public function renderPropertyViewValue(array $handles) {
     if (!strlen($this->getFieldValue())) {
       return null;
     }

@@ -61,7 +61,7 @@ final class PhabricatorUserBlurbField
     return null;
   }
 
-  public function renderPropertyViewValue() {
+  public function renderPropertyViewValue(array $handles) {
     $blurb = $this->getObject()->loadUserProfile()->getBlurb();
     if (!strlen($blurb)) {
       return null;

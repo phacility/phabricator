@@ -81,12 +81,16 @@ final class AphrontFormView extends AphrontView {
         $this->getUser()));
   }
 
-  public function render() {
-
-    require_celerity_resource('phui-form-view-css');
-    $layout = id (new PHUIFormLayoutView())
+  public function buildLayoutView() {
+    return id(new PHUIFormLayoutView())
       ->appendChild($this->renderDataInputs())
       ->appendChild($this->renderChildren());
+  }
+
+  public function render() {
+    require_celerity_resource('phui-form-view-css');
+
+    $layout = $this->buildLayoutView();
 
     if (!$this->user) {
       throw new Exception(pht('You must pass the user to AphrontFormView.'));

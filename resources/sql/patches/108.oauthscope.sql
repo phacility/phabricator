@@ -3,4 +3,3 @@ ALTER TABLE `{$NAMESPACE}_oauth_server`.`oauth_server_oauthclientauthorization`
 
 ALTER TABLE `{$NAMESPACE}_oauth_server`.`oauth_server_oauthserveraccesstoken`
   DROP `dateExpires`;
-

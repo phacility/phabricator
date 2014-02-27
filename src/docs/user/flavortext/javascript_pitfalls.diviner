@@ -85,4 +85,3 @@ worst strictly wrong.
 **Never use** ##new Number()##, ##new String()## or ##new Boolean()## unless
 your Javascript is God Tier and you are absolutely sure you know what you are
 doing.
-

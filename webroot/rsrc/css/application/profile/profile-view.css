@@ -4,8 +4,7 @@
 
 .device-desktop .profile-feed,
 .device-tablet .profile-feed {
-  max-width: 640px;
-  padding: 12px 16px;
+  padding: 0 16px 16px 0;
 }
 
 .device-phone .profile-feed {
@@ -15,4 +14,27 @@
 .profile-feed .phabricator-action-header-title {
   font-size: 16px;
   margin-bottom: 5px;
+}
+
+.profile-activity-view {
+  padding-top: 16px;
+}
+
+.profile-activity-view .profile-calendar {
+  float: left;
+  margin: 0 16px;
+}
+
+.profile-activity-view .profile-feed {
+  margin-left: 332px;
+}
+
+.device-phone .profile-activity-view .profile-calendar {
+  float: none;
+  margin: 0;
+}
+
+.device-phone .profile-activity-view .profile-feed {
+  float: none;
+  margin: 0 8px;
 }

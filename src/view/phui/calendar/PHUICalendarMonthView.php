@@ -8,6 +8,7 @@ final class PHUICalendarMonthView extends AphrontView {
   private $holidays = array();
   private $events   = array();
   private $browseURI;
+  private $image;
 
   public function setBrowseURI($browse_uri) {
     $this->browseURI = $browse_uri;
@@ -19,6 +20,11 @@ final class PHUICalendarMonthView extends AphrontView {
 
   public function addEvent(AphrontCalendarEventView $event) {
     $this->events[] = $event;
+    return $this;
+  }
+
+  public function setImage($uri) {
+    $this->image = $uri;
     return $this;
   }
 
@@ -92,6 +98,7 @@ final class PHUICalendarMonthView extends AphrontView {
             "\xC2\xA0")); // &nbsp;
       }
 
+      $list_events = array();
       foreach ($events as $event) {
         if ($event->getEpochStart() >= $epoch_end) {
           // This list is sorted, so we can stop looking.
@@ -99,11 +106,14 @@ final class PHUICalendarMonthView extends AphrontView {
         }
         if ($event->getEpochStart() < $epoch_end &&
             $event->getEpochEnd() > $epoch_start) {
-          $show_events[$event->getUserPHID()] = $this->renderEvent(
-            $event,
-            $epoch_start,
-            $epoch_end);
+          $list_events[] = $event;
         }
+      }
+
+      $list = new PHUICalendarListView();
+      $list->setUser($this->user);
+      foreach ($list_events as $item) {
+        $list->addEvent($item);
       }
 
       $holiday_markup = null;
@@ -123,7 +133,7 @@ final class PHUICalendarMonthView extends AphrontView {
         array(
           phutil_tag_div('phui-calendar-date-number', $day_number),
           $holiday_markup,
-          phutil_implode_html("\n", $show_events),
+          $list,
         ));
     }
 
@@ -227,6 +237,10 @@ final class PHUICalendarMonthView extends AphrontView {
       $header->setButtonBar($button_bar);
     }
 
+    if ($this->image) {
+      $header->setImage($this->image);
+    }
+
     return $header;
   }
 
@@ -291,62 +305,6 @@ final class PHUICalendarMonthView extends AphrontView {
     }
 
     return $days;
-  }
-
-  private function renderEvent(
-    AphrontCalendarEventView $event,
-    $epoch_start,
-    $epoch_end) {
-
-    $user = $this->user;
-
-    $event_start = $event->getEpochStart();
-    $event_end   = $event->getEpochEnd();
-
-    $classes = array();
-    $when = array();
-
-    $classes[] = 'phui-calendar-event';
-    if ($event_start < $epoch_start) {
-      $classes[] = 'phui-calendar-event-continues-before';
-      $when[] = 'Started '.phabricator_datetime($event_start, $user);
-    } else {
-      $when[] = 'Starts at '.phabricator_time($event_start, $user);
-    }
-
-    if ($event_end > $epoch_end) {
-      $classes[] = 'phui-calendar-event-continues-after';
-      $when[] = 'Ends '.phabricator_datetime($event_end, $user);
-    } else {
-      $when[] = 'Ends at '.phabricator_time($event_end, $user);
-    }
-
-    Javelin::initBehavior('phabricator-tooltips');
-
-    $info = $event->getName();
-    if ($event->getDescription()) {
-      $info .= "\n\n".$event->getDescription();
-    }
-
-    $text_div = javelin_tag(
-      'a',
-      array(
-        'sigil' => 'has-tooltip',
-        'meta'  => array(
-          'tip'  => $info."\n\n".implode("\n", $when),
-          'size' => 240,
-        ),
-        'class' => 'phui-calendar-event-text',
-        'href' => '/calendar/event/view/'.$event->getEventID().'/',
-      ),
-      phutil_utf8_shorten($event->getName(), 32));
-
-    return javelin_tag(
-      'div',
-      array(
-        'class' => implode(' ', $classes),
-      ),
-      $text_div);
   }
 
 }

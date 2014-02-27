@@ -140,4 +140,3 @@ JX.behavior('diffusion-commit-graph', function(config) {
 
 
 });
-

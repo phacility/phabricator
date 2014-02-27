@@ -78,4 +78,3 @@ final class PhabricatorApplicationAudit extends PhabricatorApplication {
   }
 
 }
-

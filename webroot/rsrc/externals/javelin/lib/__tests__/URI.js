@@ -300,4 +300,3 @@ describe('Javelin URI', function() {
   });
 
 });
-

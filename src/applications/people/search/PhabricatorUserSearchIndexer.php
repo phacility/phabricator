@@ -25,8 +25,6 @@ final class PhabricatorUserSearchIndexer
       PhabricatorPeoplePHIDTypeUser::TYPECONST,
       time());
 
-    $this->indexCustomFields($doc, $user);
-
     return $doc;
   }
 }

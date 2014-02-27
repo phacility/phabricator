@@ -73,4 +73,3 @@ final class DiffusionHovercardEventListener extends PhabricatorEventListener {
   }
 
 }
-

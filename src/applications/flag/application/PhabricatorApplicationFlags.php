@@ -58,4 +58,3 @@ final class PhabricatorApplicationFlags extends PhabricatorApplication {
   }
 
 }
-

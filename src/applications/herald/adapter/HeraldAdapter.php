@@ -1077,4 +1077,3 @@ abstract class HeraldAdapter {
   }
 
 }
-

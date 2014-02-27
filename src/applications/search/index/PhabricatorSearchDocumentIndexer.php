@@ -37,6 +37,19 @@ abstract class PhabricatorSearchDocumentIndexer {
     try {
       $document = $this->buildAbstractDocumentByPHID($phid);
 
+      $object = $this->loadDocumentByPHID($phid);
+
+      // Automatically rebuild CustomField indexes if the object uses custom
+      // fields.
+      if ($object instanceof PhabricatorCustomFieldInterface) {
+        $this->indexCustomFields($document, $object);
+      }
+
+      // Automatically rebuild subscriber indexes if the object is subscribable.
+      if ($object instanceof PhabricatorSubscribableInterface) {
+        $this->indexSubscribers($document);
+      }
+
       $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
       try {
         $engine->reindexAbstractDocument($document);
@@ -107,7 +120,7 @@ abstract class PhabricatorSearchDocumentIndexer {
   }
 
   protected function indexCustomFields(
-    PhabricatorSearchAbstractDocument $doc,
+    PhabricatorSearchAbstractDocument $document,
     PhabricatorCustomFieldInterface $object) {
 
     // Rebuild the ApplicationSearch indexes. These are internal and not part of
@@ -116,17 +129,16 @@ abstract class PhabricatorSearchDocumentIndexer {
 
     $field_list = PhabricatorCustomField::getObjectFields(
       $object,
-      PhabricatorCustomField::ROLE_APPLICATIONSEARCH);
+      PhabricatorCustomField::ROLE_DEFAULT);
 
     $field_list->setViewer($this->getViewer());
     $field_list->readFieldsFromStorage($object);
+
+    // Rebuild ApplicationSearch indexes.
     $field_list->rebuildIndexes($object);
 
-    // We could also allow fields to provide fulltext content, and index it
-    // here on the document. No one has asked for this yet, though, and the
-    // existing "search" key isn't a good fit to interpret to mean we should
-    // index stuff here, since it can be set on a lot of fields which don't
-    // contain anything resembling fulltext.
+    // Rebuild global search indexes.
+    $field_list->updateAbstractDocument($document);
   }
 
   private function dispatchDidUpdateIndexEvent(

@@ -113,6 +113,8 @@ final class PhabricatorPasteEditor
         $this->getActor(),
         $object->getPHID());
     }
+
+    return $xactions;
   }
 
 

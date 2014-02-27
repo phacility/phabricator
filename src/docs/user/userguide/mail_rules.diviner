@@ -79,4 +79,3 @@ The headers Phabricator adds to mail are:
   - ##X-Herald-Rules##: this is attached to some mail and shows Herald rule
     IDs which have triggered for the object. You can use this to sort or
     categorize mail that has triggered specific rules.
-

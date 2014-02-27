@@ -21,4 +21,3 @@ final class PhabricatorSetupCheckImagemagick extends PhabricatorSetupCheck {
     }
   }
 }
-

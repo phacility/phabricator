@@ -148,4 +148,3 @@ try {
     $ex,
     $show_unexpected_traces);
 }
-

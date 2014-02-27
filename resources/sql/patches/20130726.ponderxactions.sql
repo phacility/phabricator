@@ -79,4 +79,3 @@ CREATE TABLE {$NAMESPACE}_ponder.ponder_answertransaction_comment (
   UNIQUE KEY `key_version` (transactionPHID, commentVersion)
 
 ) ENGINE=InnoDB, COLLATE utf8_general_ci;
-

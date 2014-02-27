@@ -2,7 +2,7 @@
  * @provides phui-object-box-css
  */
 
-.phui-object-box.phui-object-box-flush {
+div.phui-object-box.phui-object-box-flush {
   margin-top: 0;
 }
 
@@ -29,9 +29,5 @@
 }
 
 .device-phone .phui-object-box {
-  margin-top: 0;
-}
-
-.device-phone .phui-object-box + .phui-object-box {
-  border-top: none;
+  margin: 8px 8px 0 8px;
 }

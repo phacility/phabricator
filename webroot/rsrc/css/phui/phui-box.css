@@ -7,10 +7,3 @@
   border-bottom: 1px solid {$blueborder};
   background-color: #fff;
 }
-
-.device-phone .phui-box {
-  border-left: none;
-  border-right: none;
-  margin-left: 0;
-  margin-right: 0;
-}

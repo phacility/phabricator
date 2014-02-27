@@ -52,7 +52,7 @@ final class PhabricatorCustomFieldList extends Phobject {
     }
 
     if (!$keys) {
-      return;
+      return $this;
     }
 
     // NOTE: We assume all fields share the same storage. This isn't guaranteed
@@ -79,6 +79,8 @@ final class PhabricatorCustomFieldList extends Phobject {
         $field->setValueFromStorage(null);
       }
     }
+
+    return $this;
   }
 
   public function appendFieldsToForm(AphrontFormView $form) {
@@ -147,9 +149,25 @@ final class PhabricatorCustomFieldList extends Phobject {
 
     $add_header = null;
 
-    foreach ($fields as $field) {
+    $phids = array();
+    foreach ($fields as $key => $field) {
+      $phids[$key] = $field->getRequiredHandlePHIDsForPropertyView();
+    }
+
+    $all_phids = array_mergev($phids);
+    if ($all_phids) {
+      $handles = id(new PhabricatorHandleQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($all_phids)
+        ->execute();
+    } else {
+      $handles = array();
+    }
+
+    foreach ($fields as $key => $field) {
+      $field_handles = array_select_keys($handles, $phids[$key]);
       $label = $field->renderPropertyViewLabel();
-      $value = $field->renderPropertyViewValue();
+      $value = $field->renderPropertyViewValue($field_handles);
       if ($value !== null) {
         switch ($field->getStyleForPropertyView()) {
           case 'header':
@@ -181,9 +199,10 @@ final class PhabricatorCustomFieldList extends Phobject {
             $view->addProperty($label, $value);
             break;
           case 'block':
+            $icon = $field->getIconForPropertyView();
             $view->invokeWillRenderEvent();
             if ($label !== null) {
-              $view->addSectionHeader($label);
+              $view->addSectionHeader($label, $icon);
             }
             $view->addTextContent($value);
             break;
@@ -303,5 +322,20 @@ final class PhabricatorCustomFieldList extends Phobject {
 
     $any_index->saveTransaction();
   }
+
+  public function updateAbstractDocument(
+    PhabricatorSearchAbstractDocument $document) {
+
+    $role = PhabricatorCustomField::ROLE_GLOBALSEARCH;
+    foreach ($this->getFields() as $field) {
+      if (!$field->shouldEnableForRole($role)) {
+        continue;
+      }
+      $field->updateAbstractDocument($document);
+    }
+
+    return $document;
+  }
+
 
 }

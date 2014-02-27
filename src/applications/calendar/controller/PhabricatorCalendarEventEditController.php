@@ -73,9 +73,6 @@ final class PhabricatorCalendarEventEditController
           ->save();
       } catch (PhabricatorCalendarEventInvalidEpochException $e) {
         $errors[] = pht('Start must be before end.');
-      } catch (PhabricatorCalendarEventOverlapException $e) {
-        $errors[] = pht('There is already a status within the specified '.
-                    'timeframe. Edit or delete this existing status.');
       }
 
       if (!$errors) {

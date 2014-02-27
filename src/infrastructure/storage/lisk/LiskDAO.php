@@ -183,12 +183,12 @@ abstract class LiskDAO {
 
   const COUNTER_TABLE_NAME          = 'lisk_counter';
 
-  private $__dirtyFields            = array();
-  private $__missingFields          = array();
-  private static $processIsolationLevel       = 0;
-  private static $transactionIsolationLevel   = 0;
+  private $dirtyFields                      = array();
+  private $missingFields                    = array();
+  private static $processIsolationLevel     = 0;
+  private static $transactionIsolationLevel = 0;
 
-  private $__ephemeral = false;
+  private $ephemeral = false;
 
   private static $connections       = array();
 
@@ -550,7 +550,7 @@ abstract class LiskDAO {
       $columns[] = $this->getIDKey();
 
       $properties = $this->getProperties();
-      $this->__missingFields = array_diff_key(
+      $this->missingFields = array_diff_key(
         array_flip($properties),
         array_flip($columns));
     }
@@ -1074,12 +1074,12 @@ abstract class LiskDAO {
    * storage.
    */
   public function makeEphemeral() {
-    $this->__ephemeral = true;
+    $this->ephemeral = true;
     return $this;
   }
 
   private function isEphemeralCheck() {
-    if ($this->__ephemeral) {
+    if ($this->ephemeral) {
       throw new LiskEphemeralObjectException();
     }
   }
@@ -1144,7 +1144,7 @@ abstract class LiskDAO {
     $this->willSaveObject();
     $data = $this->getPropertyValues();
     if ($this->getConfigOption(self::CONFIG_PARTIAL_OBJECTS)) {
-      $data = array_intersect_key($data, $this->__dirtyFields);
+      $data = array_intersect_key($data, $this->dirtyFields);
     }
     $this->willWriteData($data);
 
@@ -1690,9 +1690,9 @@ abstract class LiskDAO {
    * @task util
    */
   private function resetDirtyFields() {
-    $this->__dirtyFields = array();
+    $this->dirtyFields = array();
     if ($this->getConfigOption(self::CONFIG_TIMESTAMPS)) {
-      $this->__dirtyFields['dateModified'] = true;
+      $this->dirtyFields['dateModified'] = true;
     }
   }
 
@@ -1741,7 +1741,7 @@ abstract class LiskDAO {
         $dispatch_map[$method] = $property;
       }
 
-      if ($partial && isset($this->__missingFields[$property])) {
+      if ($partial && isset($this->missingFields[$property])) {
         throw new Exception("Cannot get field that wasn't loaded: {$property}");
       }
 
@@ -1764,8 +1764,8 @@ abstract class LiskDAO {
       }
       if ($partial) {
         // Accept writes to fields that weren't initially loaded
-        unset($this->__missingFields[$property]);
-        $this->__dirtyFields[$property] = true;
+        unset($this->missingFields[$property]);
+        $this->dirtyFields[$property] = true;
       }
 
       $this->writeField($property, $args[0]);

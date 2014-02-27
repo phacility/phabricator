@@ -31,6 +31,24 @@ abstract class PhabricatorApplicationTransaction
   private $viewer = self::ATTACHABLE;
   private $object = self::ATTACHABLE;
 
+  private $ignoreOnNoEffect;
+
+
+  /**
+   * Flag this transaction as a pure side-effect which should be ignored when
+   * applying transactions if it has no effect, even if transaction application
+   * would normally fail. This both provides users with better error messages
+   * and allows transactions to perform optional side effects.
+   */
+  public function setIgnoreOnNoEffect($ignore) {
+    $this->ignoreOnNoEffect = $ignore;
+    return $this;
+  }
+
+  public function getIgnoreOnNoEffect() {
+    return $this->ignoreOnNoEffect;
+  }
+
   abstract public function getApplicationTransactionType();
 
   private function getApplicationObjectTypeName() {
@@ -300,8 +318,20 @@ abstract class PhabricatorApplicationTransaction
     return false;
   }
 
-  public function shouldHideForMail() {
+  public function shouldHideForMail(array $xactions) {
     return $this->shouldHide();
+  }
+
+  public function getTitleForMail() {
+    return id(clone $this)->setRenderingTarget('text')->getTitle();
+  }
+
+  public function getBodyForMail() {
+    $comment = $this->getComment();
+    if ($comment && strlen($comment->getContent())) {
+      return $comment->getContent();
+    }
+    return null;
   }
 
   public function getNoEffectDescription() {
@@ -420,13 +450,17 @@ abstract class PhabricatorApplicationTransaction
             $this->renderHandleLink($author_phid),
             count($add),
             $this->renderHandleList($add));
-        } else {
+        } else if ($rem) {
           $string = PhabricatorEdgeConfig::getRemoveStringForEdgeType($type);
           return pht(
             $string,
             $this->renderHandleLink($author_phid),
             count($rem),
             $this->renderHandleList($rem));
+        } else {
+          return pht(
+            '%s edited edge metadata.',
+            $this->renderHandleLink($author_phid));
         }
 
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
@@ -528,6 +562,19 @@ abstract class PhabricatorApplicationTransaction
     return 1.0;
   }
 
+  public function isCommentTransaction() {
+    if ($this->hasComment()) {
+      return true;
+    }
+
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        return true;
+    }
+
+    return false;
+  }
+
   public function getActionName() {
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_COMMENT:
@@ -605,8 +652,6 @@ abstract class PhabricatorApplicationTransaction
    * @return bool True to display in a group with the other transactions.
    */
   public function shouldDisplayGroupWith(array $group) {
-    $type_comment = PhabricatorTransactions::TYPE_COMMENT;
-
     $this_source = null;
     if ($this->getContentSource()) {
       $this_source = $this->getContentSource()->getSource();
@@ -624,7 +669,7 @@ abstract class PhabricatorApplicationTransaction
       }
 
       // Don't group anything into a group which already has a comment.
-      if ($xaction->getTransactionType() == $type_comment) {
+      if ($xaction->isCommentTransaction()) {
         return false;
       }
 

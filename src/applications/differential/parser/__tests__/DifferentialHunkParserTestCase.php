@@ -280,4 +280,3 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
   }
 
 }
-

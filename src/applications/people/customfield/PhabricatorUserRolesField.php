@@ -21,7 +21,7 @@ final class PhabricatorUserRolesField
     return true;
   }
 
-  public function renderPropertyViewValue() {
+  public function renderPropertyViewValue(array $handles) {
     $user = $this->getObject();
 
     $roles = array();

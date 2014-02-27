@@ -78,4 +78,44 @@ final class DifferentialSummaryField
       $xaction->getNewValue());
   }
 
+  public function shouldAppearInGlobalSearch() {
+    return true;
+  }
+
+  public function updateAbstractDocument(
+    PhabricatorSearchAbstractDocument $document) {
+    if (strlen($this->getValue())) {
+      $document->addField('body', $this->getValue());
+    }
+  }
+
+  public function shouldAppearInPropertyView() {
+    return true;
+  }
+
+  public function renderPropertyViewLabel() {
+    return $this->getFieldName();
+  }
+
+  public function getStyleForPropertyView() {
+    return 'block';
+  }
+
+  public function getIconForPropertyView() {
+    return PHUIPropertyListView::ICON_SUMMARY;
+  }
+
+  public function renderPropertyViewValue(array $handles) {
+    if (!strlen($this->getValue())) {
+      return null;
+    }
+
+    return PhabricatorMarkupEngine::renderOneObject(
+      id(new PhabricatorMarkupOneOff())
+        ->setPreserveLinebreaks(true)
+        ->setContent($this->getValue()),
+      'default',
+      $this->getViewer());
+  }
+
 }

@@ -3,4 +3,3 @@ ALTER TABLE {$NAMESPACE}_worker.worker_activetask
 
 ALTER TABLE {$NAMESPACE}_worker.worker_activetask
   ADD KEY `key_failuretime` (`failureTime`);
-

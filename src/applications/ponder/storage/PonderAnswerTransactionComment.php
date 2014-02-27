@@ -8,4 +8,3 @@ final class PonderAnswerTransactionComment
   }
 
 }
-

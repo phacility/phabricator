@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * NOTE: Do not extend this!
+ *
+ * @concrete-extensible
+ */
 class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
 
   private $receivedMail;
@@ -114,7 +119,10 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
 
     switch ($command) {
       case 'unsubscribe':
-        $this->unsubscribeUser($this->getMailReceiver(), $actor);
+        id(new PhabricatorSubscriptionsEditor())
+          ->setObject($this->getMailReceiver())
+          ->unsubscribe(array($actor->getPHID()))
+          ->save();
         // TODO: Send the user a confirmation email?
         return null;
     }
@@ -161,17 +169,5 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
       throw $ex;
     }
   }
-
-  private function unsubscribeUser(
-    DifferentialRevision $revision,
-    PhabricatorUser $user) {
-
-    $revision->loadRelationships();
-    DifferentialRevisionEditor::removeCCAndUpdateRevision(
-      $revision,
-      $user->getPHID(),
-      $user);
-  }
-
 
 }

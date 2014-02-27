@@ -20,8 +20,6 @@ final class DifferentialRevision extends DifferentialDAO
   protected $authorPHID;
   protected $lastReviewerPHID;
 
-  protected $dateCommitted;
-
   protected $lineCount = 0;
   protected $attached = array();
 
@@ -73,6 +71,11 @@ final class DifferentialRevision extends DifferentialDAO
         'unsubscribed'  => self::SERIALIZATION_JSON,
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function getMonogram() {
+    $id = $this->getID();
+    return "D{$id}";
   }
 
   public function setTitle($title) {
@@ -209,13 +212,6 @@ final class DifferentialRevision extends DifferentialDAO
         ->execute();
       foreach ($inlines as $inline) {
         $inline->delete();
-      }
-
-      $fields = id(new DifferentialAuxiliaryField())->loadAllWhere(
-        'revisionPHID = %s',
-        $this->getPHID());
-      foreach ($fields as $field) {
-        $field->delete();
       }
 
       // we have to do paths a little differentally as they do not have

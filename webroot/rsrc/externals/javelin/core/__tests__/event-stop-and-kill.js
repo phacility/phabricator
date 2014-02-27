@@ -33,7 +33,3 @@ describe('Event Stop/Kill', function() {
     expect(target.getStopped()).toBe(true);
   });
 });
-
-
-
-

@@ -80,4 +80,3 @@ final class PhabricatorRepositoryCommitSearchIndexer
     return $doc;
   }
 }
-

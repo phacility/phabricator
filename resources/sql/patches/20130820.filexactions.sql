@@ -39,4 +39,3 @@ CREATE TABLE {$NAMESPACE}_file.file_transaction_comment (
   UNIQUE KEY `key_draft` (authorPHID, transactionPHID)
 
 ) ENGINE=InnoDB, COLLATE utf8_general_ci;
-

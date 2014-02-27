@@ -33,4 +33,3 @@ JX.behavior('maniphest-transaction-controls', function(config) {
     });
 
 });
-

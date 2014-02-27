@@ -28,4 +28,3 @@ final class DarkConsoleEventPluginAPI extends PhabricatorEventListener {
   }
 
 }
-

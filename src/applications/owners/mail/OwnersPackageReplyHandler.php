@@ -28,5 +28,3 @@ final class OwnersPackageReplyHandler extends PhabricatorMailReplyHandler {
     return;
   }
 }
-
-

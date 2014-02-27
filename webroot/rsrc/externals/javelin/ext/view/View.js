@@ -189,4 +189,3 @@ JX.install('View', {
     }
   }
 });
-

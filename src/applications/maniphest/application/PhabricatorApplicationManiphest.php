@@ -124,4 +124,3 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
   }
 
 }
-

@@ -96,4 +96,3 @@ A few features in Herald are particularly complicated:
   than "all" vs "any" allows, or have a common set of conditions which you want
   to share between several rules. If a rule is only being used as a group of
   conditions, you can set the action to "Do Nothing".
-

@@ -1,4 +1,3 @@
-
 CREATE TABLE {$NAMESPACE}_chatlog.chatlog_channel (
   id INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
   serviceName VARCHAR(64) COLLATE utf8_bin NOT NULL,

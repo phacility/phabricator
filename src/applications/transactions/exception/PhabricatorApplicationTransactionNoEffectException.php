@@ -12,6 +12,7 @@ final class PhabricatorApplicationTransactionNoEffectException
 
     $this->transactions = $transactions;
     $this->anyEffect = $any_effect;
+    $this->hasComment = $has_comment;
 
     $message = array();
     $message[] = 'Transactions have no effect:';

@@ -43,4 +43,3 @@ final class PhabricatorApplicationApplications extends PhabricatorApplication {
   }
 
 }
-

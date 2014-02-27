@@ -46,8 +46,6 @@ final class PonderSearchIndexer
       new PonderAnswerTransactionQuery(),
       mpull($answers, 'getPHID'));
 
-    $this->indexSubscribers($doc);
-
     return $doc;
   }
 }

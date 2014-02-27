@@ -19,4 +19,3 @@ $workflows = id(new PhutilSymbolLoader())
   ->loadObjects();
 $workflows[] = new PhutilHelpArgumentWorkflow();
 $args->parseWorkflows($workflows);
-

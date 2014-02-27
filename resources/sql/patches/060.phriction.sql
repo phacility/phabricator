@@ -1,5 +1,3 @@
-
-
 CREATE TABLE {$NAMESPACE}_phriction.phriction_document (
   id INT UNSIGNED NOT NULL,
   phid VARCHAR(64) BINARY NOT NULL,

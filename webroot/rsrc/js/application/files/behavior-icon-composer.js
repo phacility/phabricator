@@ -73,4 +73,3 @@ JX.behavior('icon-composer', function(config) {
   redraw();
 
 });
-

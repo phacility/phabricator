@@ -92,4 +92,45 @@ final class DifferentialTestPlanField
       $xaction->getNewValue());
   }
 
+
+  public function shouldAppearInGlobalSearch() {
+    return true;
+  }
+
+  public function updateAbstractDocument(
+    PhabricatorSearchAbstractDocument $document) {
+    if (strlen($this->getValue())) {
+      $document->addField('plan', $this->getValue());
+    }
+  }
+
+  public function shouldAppearInPropertyView() {
+    return true;
+  }
+
+  public function renderPropertyViewLabel() {
+    return $this->getFieldName();
+  }
+
+  public function getStyleForPropertyView() {
+    return 'block';
+  }
+
+  public function getIconForPropertyView() {
+    return PHUIPropertyListView::ICON_TESTPLAN;
+  }
+
+  public function renderPropertyViewValue(array $handles) {
+    if (!strlen($this->getValue())) {
+      return null;
+    }
+
+    return PhabricatorMarkupEngine::renderOneObject(
+      id(new PhabricatorMarkupOneOff())
+        ->setPreserveLinebreaks(true)
+        ->setContent($this->getValue()),
+      'default',
+      $this->getViewer());
+  }
+
 }

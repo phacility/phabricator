@@ -65,4 +65,3 @@ final class PhabricatorApplicationPhragment extends PhabricatorApplication {
   }
 
 }
-

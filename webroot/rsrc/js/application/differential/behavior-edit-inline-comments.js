@@ -267,4 +267,3 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     });
 
 });
-

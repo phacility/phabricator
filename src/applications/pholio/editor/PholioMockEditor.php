@@ -275,6 +275,8 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
       $image->setMockID($object->getID());
       $image->save();
     }
+
+    return $xactions;
   }
 
   protected function mergeTransactions(

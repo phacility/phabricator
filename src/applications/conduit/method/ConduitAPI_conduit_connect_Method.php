@@ -61,6 +61,9 @@ final class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
     $client = $request->getValue('client');
     $client_version = (int)$request->getValue('clientVersion');
     $client_description = (string)$request->getValue('clientDescription');
+    // TODO: This should be character-oriented, not display-oriented.
+    // See T3307.
+    $client_description = phutil_utf8_shorten($client_description, 255);
     $username = (string)$request->getValue('user');
 
     // Log the connection, regardless of the outcome of checks below.

@@ -15,4 +15,3 @@ ALTER TABLE `{$NAMESPACE}_phame`.`phame_blog`
 
 UPDATE `{$NAMESPACE}_phame`.`phame_blog` SET joinPolicy = 'users'
   WHERE joinPolicy IS NULL;
-

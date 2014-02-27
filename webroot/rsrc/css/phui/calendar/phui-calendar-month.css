@@ -23,6 +23,7 @@ table.phui-calendar-view td {
 
 table.phui-calendar-view td div.phui-calendar-day {
   min-height: 125px;
+  position: relative;
 }
 
 .phui-calendar-holiday {
@@ -43,12 +44,14 @@ table.phui-calendar-view td.phui-calendar-month-weekstart {
   border-color: {$thinblueborder};
   border-style: solid;
   border-width: 0 0 1px 1px;
-  float: right;
+  position: absolute;
   background: #ffffff;
   width: 16px;
   height: 16px;
   text-align: center;
-  margin-bottom: 3px;
+  top: 0;
+  right: 0;
+  z-index: 10;
 }
 
 .phui-calendar-not-work-day {
@@ -63,40 +66,36 @@ table.phui-calendar-view td.phui-calendar-month-weekstart {
   background-color: {$greybackground};
 }
 
-.phui-calendar-event {
-  clear: both;
-  background: {$sky};
-  font-size: 11px;
-  margin: 2px 0;
-  border-radius: 3px;
-  padding: 3px 5%;
-  width: 90%;
-  overflow: hidden;
-}
-
-.phui-calendar-event a:link {
-  color: #fff;
-}
-
 .phui-calendar-event-empty {
   border-color: transparent;
   background: transparent;
 }
 
-.phui-calendar-event-text {
-  color: #fff;
-  overflow: hidden;
-  white-space: nowrap;
+.phui-calendar-view .phui-calendar-list {
+  padding: 8px;
 }
 
-.phui-calendar-event-continues-before {
-  border-top-left-radius: 0px;
-  border-bottom-left-radius: 0px;
-  border-left-width: 0px;
+.phui-calendar-view .phui-calendar-list li:first-child {
+  margin-right: 16px;
 }
 
-.phui-calendar-event-continues-after {
-  border-top-right-radius: 0px;
-  border-bottom-right-radius: 0px;
-  border-right-width: 0px;
+.phui-calendar-view .phui-calendar-list-dot {
+  width: 3px;
+  height: 3px;
+  margin-right: 4px;
+  border-radius: 10px;
+  position: absolute;
+  top: 5px;
+  left: 0;
+}
+
+.phui-calendar-view .phui-calendar-list-title {
+  width: auto;
+  margin-left: 10px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.phui-calendar-view .phui-calendar-list-time {
+  display: none;
 }

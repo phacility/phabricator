@@ -110,4 +110,3 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
   }
 
 }
-

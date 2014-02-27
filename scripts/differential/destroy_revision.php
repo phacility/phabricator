@@ -49,4 +49,3 @@ if (!$ok) {
 
 $revision->delete();
 echo "OK, destroyed revision.\n";
-

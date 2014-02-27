@@ -26,4 +26,3 @@ final class PhabricatorApplicationSubscriptions extends PhabricatorApplication {
   }
 
 }
-

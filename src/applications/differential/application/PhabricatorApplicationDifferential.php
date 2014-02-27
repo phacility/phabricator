@@ -56,6 +56,7 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
         'comment/' => array(
           'preview/(?P<id>[1-9]\d*)/' => 'DifferentialCommentPreviewController',
           'save/' => 'DifferentialCommentSaveController',
+          'savepro/(?P<id>[1-9]\d*)/' => 'DifferentialCommentSaveControllerPro',
           'inline/' => array(
             'preview/(?P<id>[1-9]\d*)/'
               => 'DifferentialInlineCommentPreviewController',
@@ -131,4 +132,3 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
   }
 
 }
-

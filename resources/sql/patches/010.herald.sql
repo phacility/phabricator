@@ -1,5 +1,3 @@
-
-
 CREATE TABLE {$NAMESPACE}_herald.herald_action (
   id int unsigned not null auto_increment primary key,
   ruleID int unsigned not null,

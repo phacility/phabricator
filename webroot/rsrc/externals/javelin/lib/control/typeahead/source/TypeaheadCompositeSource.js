@@ -75,4 +75,3 @@ JX.install('TypeaheadCompositeSource', {
     }
   }
 });
-

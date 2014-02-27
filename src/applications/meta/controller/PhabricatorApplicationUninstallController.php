@@ -90,4 +90,3 @@ final class PhabricatorApplicationUninstallController
   }
 
 }
-

@@ -247,6 +247,11 @@ final class PhabricatorRepositoryRefEngine
             '{node}\n',
             hgsprintf('%s', $new_head));
         }
+
+        $stdout = trim($stdout);
+        if (!strlen($stdout)) {
+          return array();
+        }
         return phutil_split_lines($stdout, $retain_newlines = false);
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         if ($all_closing_heads) {
@@ -260,6 +265,11 @@ final class PhabricatorRepositoryRefEngine
             'log --format=%s %s',
             '%H',
             $new_head);
+        }
+
+        $stdout = trim($stdout);
+        if (!strlen($stdout)) {
+          return array();
         }
         return phutil_split_lines($stdout, $retain_newlines = false);
       default:

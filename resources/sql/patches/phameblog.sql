@@ -28,4 +28,3 @@ CREATE TABLE {$NAMESPACE}_phame.edgedata (
 
 ALTER TABLE {$NAMESPACE}_phame.phame_post
   ADD KEY `instancePosts` (`visibility`, `datePublished`, `id`);
-

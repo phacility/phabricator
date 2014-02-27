@@ -67,4 +67,3 @@ final class PhabricatorApplicationPhriction extends PhabricatorApplication {
   }
 
 }
-

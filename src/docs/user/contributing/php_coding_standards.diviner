@@ -167,4 +167,3 @@ diffs which add elements to the array affect only one line.
       return $this->favoriteFood;
     }
   }
-

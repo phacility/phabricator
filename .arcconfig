@@ -1,11 +1,9 @@
 {
-  "project_id" : "phabricator",
-  "conduit_uri" : "https://secure.phabricator.com/api/",
+  "project.name" : "phabricator",
+  "phabricator.uri" : "https://secure.phabricator.com/",
   "lint.engine" : "PhabricatorLintEngine",
   "unit.engine" : "PhutilUnitTestEngine",
-  "phutil_libraries" : {
-    "phabricator" : "src/"
-  },
+  "load" : ["src/"],
   "lint.xhpast.naminghook" : "PhabricatorSymbolNameLinter",
   "lint.jshint.config" : "support/jshint/jshintconfig"
 }

@@ -164,6 +164,8 @@ abstract class PhabricatorApplicationTransactionEditor
         // NOTE: Custom fields have their old value pre-populated when they are
         // built by PhabricatorCustomFieldList.
         return $xaction->getOldValue();
+      case PhabricatorTransactions::TYPE_COMMENT:
+        return null;
       default:
         return $this->getCustomTransactionOldValue($object, $xaction);
     }
@@ -184,6 +186,8 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->getNewValueFromApplicationTransactions($xaction);
+      case PhabricatorTransactions::TYPE_COMMENT:
+        return null;
       default:
         return $this->getCustomTransactionNewValue($object, $xaction);
     }
@@ -373,9 +377,36 @@ abstract class PhabricatorApplicationTransactionEditor
       "implementation!");
   }
 
+  /**
+   * Fill in a transaction's common values, like author and content source.
+   */
+  protected function populateTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $actor = $this->getActor();
+
+    // TODO: This needs to be more sophisticated once we have meta-policies.
+    $xaction->setViewPolicy(PhabricatorPolicies::POLICY_PUBLIC);
+    $xaction->setEditPolicy($actor->getPHID());
+
+    $xaction->setAuthorPHID($actor->getPHID());
+    $xaction->setContentSource($this->getContentSource());
+    $xaction->attachViewer($actor);
+    $xaction->attachObject($object);
+
+    if ($object->getPHID()) {
+      $xaction->setObjectPHID($object->getPHID());
+    }
+
+    return $xaction;
+  }
+
+
   protected function applyFinalEffects(
     PhabricatorLiskDAO $object,
     array $xactions) {
+    return $xactions;
   }
 
   public function setContentSource(PhabricatorContentSource $content_source) {
@@ -413,17 +444,11 @@ abstract class PhabricatorApplicationTransactionEditor
       $xactions[] = $mention_xaction;
     }
 
+    $xactions = $this->expandTransactions($object, $xactions);
     $xactions = $this->combineTransactions($xactions);
 
     foreach ($xactions as $xaction) {
-      // TODO: This needs to be more sophisticated once we have meta-policies.
-      $xaction->setViewPolicy(PhabricatorPolicies::POLICY_PUBLIC);
-      $xaction->setEditPolicy($actor->getPHID());
-
-      $xaction->setAuthorPHID($actor->getPHID());
-      $xaction->setContentSource($this->getContentSource());
-      $xaction->attachViewer($this->getActor());
-      $xaction->attachObject($object);
+      $xaction = $this->populateTransaction($object, $xaction);
     }
 
     $is_preview = $this->getIsPreview();
@@ -552,7 +577,7 @@ abstract class PhabricatorApplicationTransactionEditor
         $this->applyHeraldRules($object, $xactions);
       }
 
-      $this->applyFinalEffects($object, $xactions);
+      $xactions = $this->applyFinalEffects($object, $xactions);
 
       if ($read_locking) {
         $object->endReadLocking();
@@ -849,6 +874,30 @@ abstract class PhabricatorApplicationTransactionEditor
     return null;
   }
 
+  /**
+   * Optionally expand transactions which imply other effects. For example,
+   * resigning from a revision in Differential implies removing yourself as
+   * a reviewer.
+   */
+  private function expandTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $results = array();
+    foreach ($xactions as $xaction) {
+      foreach ($this->expandTransaction($object, $xaction) as $expanded) {
+        $results[] = $expanded;
+      }
+    }
+
+    return $results;
+  }
+
+  protected function expandTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+    return array($xaction);
+  }
 
   /**
    * Attempt to combine similar transactions into a smaller number of total
@@ -904,11 +953,64 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $result = $u->getNewValue();
     foreach ($v->getNewValue() as $key => $value) {
-      $result[$key] = array_merge($value, idx($result, $key, array()));
+      if ($u->getTransactionType() == PhabricatorTransactions::TYPE_EDGE) {
+        if (empty($result[$key])) {
+          $result[$key] = $value;
+        } else {
+          // We're merging two lists of edge adds, sets, or removes. Merge
+          // them by merging individual PHIDs within them.
+          $merged = $result[$key];
+
+          foreach ($value as $dst => $v_spec) {
+            if (empty($merged[$dst])) {
+              $merged[$dst] = $v_spec;
+            } else {
+              // Two transactions are trying to perform the same operation on
+              // the same edge. Normalize the edge data and then merge it. This
+              // allows transactions to specify how data merges execute in a
+              // precise way.
+
+              $u_spec = $merged[$dst];
+
+              if (!is_array($u_spec)) {
+                $u_spec = array('dst' => $u_spec);
+              }
+              if (!is_array($v_spec)) {
+                $v_spec = array('dst' => $v_spec);
+              }
+
+              $ux_data = idx($u_spec, 'data', array());
+              $vx_data = idx($v_spec, 'data', array());
+
+              $merged_data = $this->mergeEdgeData(
+                $u->getMetadataValue('edge:type'),
+                $ux_data,
+                $vx_data);
+
+              $u_spec['data'] = $merged_data;
+              $merged[$dst] = $u_spec;
+            }
+          }
+
+          $result[$key] = $merged;
+        }
+      } else {
+        $result[$key] = array_merge($value, idx($result, $key, array()));
+      }
     }
     $u->setNewValue($result);
 
+    // When combining an "ignore" transaction with a normal transaction, make
+    // sure we don't propagate the "ignore" flag.
+    if (!$v->getIgnoreOnNoEffect()) {
+      $u->setIgnoreOnNoEffect(false);
+    }
+
     return $u;
+  }
+
+  protected function mergeEdgeData($type, array $u, array $v) {
+    return $v + $u;
   }
 
   protected function getPHIDTransactionNewValue(
@@ -1124,6 +1226,8 @@ abstract class PhabricatorApplicationTransactionEditor
         if ($xaction->getTransactionType() != $type_comment) {
           $any_effect = true;
         }
+      } else if ($xaction->getIgnoreOnNoEffect()) {
+        unset($xactions[$key]);
       } else {
         $no_effect[$key] = $xaction;
       }
@@ -1331,12 +1435,7 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_COMMENT:
-        return true;
-      default:
-        return false;
-    }
+    return $xaction->isCommentTransaction();
   }
 
 
@@ -1493,13 +1592,18 @@ abstract class PhabricatorApplicationTransactionEditor
     $comments = array();
 
     foreach ($xactions as $xaction) {
-      if ($xaction->shouldHideForMail()) {
+      if ($xaction->shouldHideForMail($xactions)) {
         continue;
       }
-      $headers[] = id(clone $xaction)->setRenderingTarget('text')->getTitle();
-      $comment = $xaction->getComment();
-      if ($comment && strlen($comment->getContent())) {
-        $comments[] = $comment->getContent();
+
+      $header = $xaction->getTitleForMail();
+      if ($header !== null) {
+        $headers[] = $header;
+      }
+
+      $comment = $xaction->getBodyForMail();
+      if ($comment !== null) {
+        $comments[] = $comment;
       }
     }
 

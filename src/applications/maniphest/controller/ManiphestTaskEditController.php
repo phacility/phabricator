@@ -460,14 +460,10 @@ final class ManiphestTaskEditController extends ManiphestController {
 
     $project_tokenizer_id = celerity_generate_unique_node_id();
 
-    if ($request->isAjax()) {
-      $form = new PHUIFormLayoutView();
-    } else {
-      $form = new AphrontFormView();
-      $form
-        ->setUser($user)
-        ->addHiddenInput('template', $template_id);
-    }
+    $form = new AphrontFormView();
+    $form
+      ->setUser($user)
+      ->addHiddenInput('template', $template_id);
 
     if ($parent_task) {
       $form
@@ -627,7 +623,7 @@ final class ManiphestTaskEditController extends ManiphestController {
         ->appendChild(
           array(
             $error_view,
-            $form,
+            $form->buildLayoutView(),
           ))
         ->addCancelButton($cancel_uri)
         ->addSubmitButton($button_name);

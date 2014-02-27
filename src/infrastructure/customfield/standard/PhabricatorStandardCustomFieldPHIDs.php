@@ -68,18 +68,19 @@ abstract class PhabricatorStandardCustomFieldPHIDs
     return array();
   }
 
-  public function renderPropertyViewValue() {
+  public function getRequiredHandlePHIDsForProperyView() {
+    $value = $this->getFieldValue();
+    if ($value) {
+      return $value;
+    }
+    return array();
+  }
+
+  public function renderPropertyViewValue(array $handles) {
     $value = $this->getFieldValue();
     if (!$value) {
       return null;
     }
-
-    // TODO: Surface and batch this.
-
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->getViewer())
-      ->withPHIDs($value)
-      ->execute();
 
     $handles = mpull($handles, 'renderLink');
     $handles = phutil_implode_html(', ', $handles);

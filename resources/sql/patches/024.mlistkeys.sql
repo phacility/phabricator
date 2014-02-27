@@ -3,4 +3,3 @@ ALTER TABLE {$NAMESPACE}_metamta.metamta_mailinglist
 
 ALTER TABLE {$NAMESPACE}_metamta.metamta_mailinglist
   ADD UNIQUE KEY (name);
-

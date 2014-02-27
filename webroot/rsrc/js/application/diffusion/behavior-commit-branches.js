@@ -16,4 +16,3 @@ JX.behavior('diffusion-commit-branches', function(config) {
   }
 
 });
-

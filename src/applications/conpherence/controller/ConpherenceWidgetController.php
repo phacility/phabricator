@@ -200,7 +200,7 @@ final class ConpherenceWidgetController extends
     $content = array();
     $layout = id(new AphrontMultiColumnView())
       ->setFluidLayout(true);
-    $timestamps = ConpherenceTimeUtil::getCalendarWidgetTimestamps($user);
+    $timestamps = CalendarTimeUtil::getCalendarWidgetTimestamps($user);
     $today = $timestamps['today'];
     $epoch_stamps = $timestamps['epoch_stamps'];
     $one_day = 24 * 60 * 60;

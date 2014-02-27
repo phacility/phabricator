@@ -8,6 +8,7 @@ final class AphrontCalendarEventView extends AphrontView {
   private $epochEnd;
   private $description;
   private $eventID;
+  private $color;
 
   public function setEventID($event_id) {
     $this->eventID = $event_id;
@@ -56,6 +57,34 @@ final class AphrontCalendarEventView extends AphrontView {
 
   public function getDescription() {
     return $this->description;
+  }
+
+  public function setColor($color) {
+    $this->color = $color;
+    return $this;
+  }
+  public function getColor() {
+    if ($this->color) {
+      return $this->color;
+    } else {
+      return CalendarColors::COLOR_SKY;
+    }
+  }
+
+  public function getAllDay() {
+    $time = (60 * 60 * 22);
+    if (($this->getEpochEnd() - $this->getEpochStart()) >= $time) {
+      return true;
+    }
+    return false;
+  }
+
+  public function getMultiDay() {
+    $nextday = strtotime('12:00 AM Tomorrow', $this->getEpochStart());
+    if ($this->getEpochEnd() > $nextday) {
+      return true;
+    }
+    return false;
   }
 
   public function render() {

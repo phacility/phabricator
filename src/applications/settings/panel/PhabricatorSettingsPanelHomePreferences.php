@@ -216,4 +216,3 @@ final class PhabricatorSettingsPanelHomePreferences
     return array($header, $error_view, $form);
   }
 }
-

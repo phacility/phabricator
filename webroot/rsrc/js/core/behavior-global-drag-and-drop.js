@@ -65,4 +65,3 @@ JX.behavior('global-drag-and-drop', function(config) {
 
   drop.start();
 });
-

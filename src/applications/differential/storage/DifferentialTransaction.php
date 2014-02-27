@@ -5,6 +5,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
   const TYPE_INLINE = 'differential:inline';
   const TYPE_UPDATE = 'differential:update';
   const TYPE_ACTION = 'differential:action';
+  const TYPE_STATUS = 'differential:status';
 
   public function getApplicationName() {
     return 'differential';
@@ -17,6 +18,58 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
   public function getApplicationTransactionCommentObject() {
     return new DifferentialTransactionComment();
   }
+
+  public function shouldHide() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_EDGE:
+        $old = $this->getOldValue();
+        $new = $this->getNewValue();
+        $add = array_diff_key($new, $old);
+        $rem = array_diff_key($old, $new);
+
+        // Hide metadata-only edge transactions. These correspond to users
+        // accepting or rejecting revisions, but the change is always explicit
+        // because of the TYPE_ACTION transaction. Rendering these transactions
+        // just creates clutter.
+
+        if (!$add && !$rem) {
+          return true;
+        }
+        break;
+    }
+
+    return false;
+  }
+
+  public function shouldHideForMail(array $xactions) {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_INLINE:
+        // Hide inlines when rendering mail transactions if any other
+        // transaction type exists.
+        foreach ($xactions as $xaction) {
+          if ($xaction->getTransactionType() != self::TYPE_INLINE) {
+            return true;
+          }
+        }
+
+        // If only inline transactions exist, we just render the first one.
+        return ($this !== head($xactions));
+    }
+
+    return $this->shouldHide();
+  }
+
+  public function getBodyForMail() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_INLINE:
+        // Don't render inlines into the mail body; they render into a special
+        // section immediately after the body instead.
+        return null;
+    }
+
+    return parent::getBodyForMail();
+  }
+
 
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
@@ -45,6 +98,18 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
         }
       case self::TYPE_ACTION:
         return DifferentialAction::getBasicStoryText($new, $author_handle);
+      case self::TYPE_STATUS:
+        switch ($this->getNewValue()) {
+          case ArcanistDifferentialRevisionStatus::ACCEPTED:
+            return pht(
+              'This revision is now accepted and ready to land.');
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+            return pht(
+              'This revision now requires changes to proceed.');
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
+            return pht(
+              'This revision now requires review to proceed.');
+        }
     }
 
     return parent::getTitle();
@@ -56,6 +121,16 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
         return 'comment';
       case self::TYPE_UPDATE:
         return 'refresh';
+      case self::TYPE_STATUS:
+        switch ($this->getNewValue()) {
+          case ArcanistDifferentialRevisionStatus::ACCEPTED:
+            return 'enable';
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+            return 'delete';
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
+            return 'refresh';
+        }
+        break;
       case self::TYPE_ACTION:
         switch ($this->getNewValue()) {
           case DifferentialAction::ACTION_CLOSE:
@@ -82,10 +157,41 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
     return parent::getIcon();
   }
 
+  public function shouldDisplayGroupWith(array $group) {
+
+    // Never group status changes with other types of actions, they're indirect
+    // and don't make sense when combined with direct actions.
+
+    $type_status = self::TYPE_STATUS;
+
+    if ($this->getTransactionType() == $type_status) {
+      return false;
+    }
+
+    foreach ($group as $xaction) {
+      if ($xaction->getTransactionType() == $type_status) {
+        return false;
+      }
+    }
+
+    return parent::shouldDisplayGroupWith($group);
+  }
+
+
   public function getColor() {
     switch ($this->getTransactionType()) {
       case self::TYPE_UPDATE:
         return PhabricatorTransactions::COLOR_SKY;
+      case self::TYPE_STATUS:
+        switch ($this->getNewValue()) {
+          case ArcanistDifferentialRevisionStatus::ACCEPTED:
+            return PhabricatorTransactions::COLOR_GREEN;
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+            return PhabricatorTransactions::COLOR_RED;
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
+            return PhabricatorTransactions::COLOR_ORANGE;
+        }
+        break;
       case self::TYPE_ACTION:
         switch ($this->getNewValue()) {
           case DifferentialAction::ACTION_CLOSE:
@@ -114,5 +220,55 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
 
     return parent::getColor();
   }
+
+  public function getNoEffectDescription() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_EDGE:
+        switch ($this->getMetadataValue('edge:type')) {
+          case PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER:
+            return pht(
+              'The reviewers you are trying to add are already reviewing '.
+              'this revision.');
+        }
+        break;
+      case DifferentialTransaction::TYPE_ACTION:
+        switch ($this->getNewValue()) {
+          case DifferentialAction::ACTION_CLOSE:
+            return pht('This revision is already closed.');
+          case DifferentialAction::ACTION_ABANDON:
+            return pht('This revision has already been abandoned.');
+          case DifferentialAction::ACTION_RECLAIM:
+            return pht(
+              'You can not reclaim this revision because his revision is '.
+              'not abandoned.');
+          case DifferentialAction::ACTION_REOPEN:
+            return pht(
+              'You can not reopen this revision because this revision is '.
+              'not closed.');
+          case DifferentialAction::ACTION_RETHINK:
+            return pht('This revision already requires changes.');
+          case DifferentialAction::ACTION_REQUEST:
+            return pht('Review is already requested for this revision.');
+          case DifferentialAction::ACTION_RESIGN:
+            return pht(
+              'You can not resign from this revision because you are not '.
+              'a reviewer.');
+          case DifferentialAction::ACTION_CLAIM:
+            return pht(
+              'You can not commandeer this revision because you already own '.
+              'it.');
+          case DifferentialAction::ACTION_ACCEPT:
+            return pht(
+              'You have already accepted this revision.');
+          case DifferentialAction::ACTION_REJECT:
+            return pht(
+              'You have already requested changes to this revision.');
+        }
+        break;
+    }
+
+    return parent::getNoEffectDescription();
+  }
+
 
 }
