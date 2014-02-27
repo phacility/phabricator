@@ -174,6 +174,28 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $field_list->setViewer($user);
     $field_list->readFieldsFromStorage($revision);
 
+
+    // TODO: This should be in a DiffQuery or similar.
+    $need_props = array();
+    foreach ($field_list->getFields() as $field) {
+      foreach ($field->getRequiredDiffPropertiesForRevisionView() as $prop) {
+        $need_props[$prop] = $prop;
+      }
+    }
+
+    if ($need_props) {
+      $prop_diff = $revision->getActiveDiff();
+      $load_props = id(new DifferentialDiffProperty())->loadAllWhere(
+        'diffID = %d AND name IN (%Ls)',
+        $prop_diff->getID(),
+        $need_props);
+      $load_props = mpull($load_props, 'getData', 'getName');
+      foreach ($need_props as $need) {
+        $prop_diff->attachProperty($need, idx($load_props, $need));
+      }
+    }
+
+
     $revision_detail = id(new DifferentialRevisionDetailView())
       ->setUser($user)
       ->setRevision($revision)
