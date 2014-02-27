@@ -199,9 +199,10 @@ final class PhabricatorCustomFieldList extends Phobject {
             $view->addProperty($label, $value);
             break;
           case 'block':
+            $icon = $field->getIconForPropertyView();
             $view->invokeWillRenderEvent();
             if ($label !== null) {
-              $view->addSectionHeader($label);
+              $view->addSectionHeader($label, $icon);
             }
             $view->addTextContent($value);
             break;

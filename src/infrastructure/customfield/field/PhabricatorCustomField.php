@@ -278,6 +278,10 @@ abstract class PhabricatorCustomField {
     return true;
   }
 
+  public function shouldDisableByDefault() {
+    return false;
+  }
+
 
   /**
    * Return an index string which uniquely identifies this field.
@@ -1067,6 +1071,17 @@ abstract class PhabricatorCustomField {
       return $this->proxy->getStyleForPropertyView();
     }
     return 'property';
+  }
+
+
+  /**
+   * @task view
+   */
+  public function getIconForPropertyView() {
+    if ($this->proxy) {
+      return $this->proxy->getIconForPropertyView();
+    }
+    return null;
   }
 
 

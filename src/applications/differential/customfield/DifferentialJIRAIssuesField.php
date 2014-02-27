@@ -1,14 +1,19 @@
 <?php
 
 final class DifferentialJIRAIssuesField
-  extends DifferentialCustomField {
-
-  // TODO: This field needs to actually read storage!
-  private $value = null;
-
+  extends DifferentialStoredCustomField {
 
   public function getFieldKey() {
-    return 'differential:jira-issues';
+    return 'phabricator:jira-issues';
+  }
+
+  public function getValueForStorage() {
+    return json_encode($this->getValue());
+  }
+
+  public function setValueFromStorage($value) {
+    $this->setValue(json_decode($value, true));
+    return $this;
   }
 
   public function getFieldName() {
@@ -46,8 +51,8 @@ final class DifferentialJIRAIssuesField
     $provider = PhabricatorAuthProviderOAuth1JIRA::getJIRAProvider();
 
     $refs = array();
-    if ($this->value) {
-      foreach ($this->value as $jira_key) {
+    if ($this->getValue()) {
+      foreach ($this->getValue() as $jira_key) {
         $refs[] = id(new DoorkeeperObjectRef())
           ->setApplicationType(DoorkeeperBridgeJIRA::APPTYPE_JIRA)
           ->setApplicationDomain($provider->getProviderDomain())
@@ -66,11 +71,13 @@ final class DifferentialJIRAIssuesField
     }
 
     $xobjs = id(new DoorkeeperExternalObjectQuery())
-      ->setViewer($this->getUser())
+      ->setViewer($this->getViewer())
       ->withObjectKeys(mpull($refs, 'getObjectKey'))
       ->execute();
 
     return $xobjs;
   }
+
+  // TODO: Implement edit; this field is readonly for now.
 
 }

@@ -1,29 +1,74 @@
 <?php
 
-final class DifferentialSummaryField
-  extends DifferentialCoreCustomField {
+final class DifferentialRevertPlanField
+  extends DifferentialStoredCustomField {
 
   public function getFieldKey() {
-    return 'differential:summary';
+    return 'phabricator:revert-plan';
   }
 
   public function getFieldName() {
-    return pht('Summary');
+    return pht('Revert Plan');
   }
 
   public function getFieldDescription() {
-    return pht('Stores a summary of the revision.');
+    return pht('Instructions for reverting/undoing this change.');
   }
 
-  protected function readValueFromRevision(
-    DifferentialRevision $revision) {
-    return $revision->getSummary();
+  public function shouldAppearInPropertyView() {
+    return true;
   }
 
-  protected function writeValueToRevision(
-    DifferentialRevision $revision,
-    $value) {
-    $revision->setSummary($value);
+  public function renderPropertyViewLabel() {
+    return $this->getFieldName();
+  }
+
+  public function getStyleForPropertyView() {
+    return 'block';
+  }
+
+  public function getIconForPropertyView() {
+    return PHUIPropertyListView::ICON_TESTPLAN;
+  }
+
+  public function renderPropertyViewValue(array $handles) {
+    if (!strlen($this->getValue())) {
+      return null;
+    }
+
+    return PhabricatorMarkupEngine::renderOneObject(
+      id(new PhabricatorMarkupOneOff())
+        ->setPreserveLinebreaks(true)
+        ->setContent($this->getValue()),
+      'default',
+      $this->getViewer());
+  }
+
+  public function shouldAppearInGlobalSearch() {
+    return true;
+  }
+
+  public function updateAbstractDocument(
+    PhabricatorSearchAbstractDocument $document) {
+    if (strlen($this->getValue())) {
+      $document->addField('rvrt', $this->getValue());
+    }
+  }
+
+  public function shouldAppearInEditView() {
+    return true;
+  }
+
+  public function shouldAppearInApplicationTransactions() {
+    return true;
+  }
+
+  public function getOldValueForApplicationTransactions() {
+    return $this->getValue();
+  }
+
+  public function getNewValueForApplicationTransactions() {
+    return $this->getValue();
   }
 
   public function readValueFromRequest(AphrontRequest $request) {
@@ -34,7 +79,6 @@ final class DifferentialSummaryField
     return id(new PhabricatorRemarkupControl())
       ->setName($this->getFieldKey())
       ->setValue($this->getValue())
-      ->setError($this->getFieldError())
       ->setLabel($this->getFieldName());
   }
 
@@ -45,7 +89,7 @@ final class DifferentialSummaryField
     $new = $xaction->getNewValue();
 
     return pht(
-      '%s updated the summary for this revision.',
+      '%s updated the revert plan for this revision.',
       $xaction->renderHandleLink($author_phid));
   }
 
@@ -59,7 +103,7 @@ final class DifferentialSummaryField
     $new = $xaction->getNewValue();
 
     return pht(
-      '%s updated the summary for %s.',
+      '%s updated the revert plan for %s.',
       $xaction->renderHandleLink($author_phid),
       $xaction->renderHandleLink($object_phid));
   }
@@ -76,46 +120,6 @@ final class DifferentialSummaryField
       $viewer,
       $xaction->getOldValue(),
       $xaction->getNewValue());
-  }
-
-  public function shouldAppearInGlobalSearch() {
-    return true;
-  }
-
-  public function updateAbstractDocument(
-    PhabricatorSearchAbstractDocument $document) {
-    if (strlen($this->getValue())) {
-      $document->addField('body', $this->getValue());
-    }
-  }
-
-  public function shouldAppearInPropertyView() {
-    return true;
-  }
-
-  public function renderPropertyViewLabel() {
-    return $this->getFieldName();
-  }
-
-  public function getStyleForPropertyView() {
-    return 'block';
-  }
-
-  public function getIconForPropertyView() {
-    return PHUIPropertyListView::ICON_SUMMARY;
-  }
-
-  public function renderPropertyViewValue(array $handles) {
-    if (!strlen($this->getValue())) {
-      return null;
-    }
-
-    return PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())
-        ->setPreserveLinebreaks(true)
-        ->setContent($this->getValue()),
-      'default',
-      $this->getViewer());
   }
 
 }

@@ -73,6 +73,11 @@ final class DifferentialRevision extends DifferentialDAO
     ) + parent::getConfiguration();
   }
 
+  public function getMonogram() {
+    $id = $this->getID();
+    return "D{$id}";
+  }
+
   public function setTitle($title) {
     $this->title = $title;
     if (!$this->getID()) {
