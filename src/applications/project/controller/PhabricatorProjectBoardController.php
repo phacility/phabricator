@@ -96,8 +96,10 @@ final class PhabricatorProjectBoardController
     foreach ($columns as $column) {
       $panel = id(new PHUIWorkpanelView())
         ->setHeader($column->getDisplayName())
-        ->setHeaderColor($column->getHeaderColor())
-        ->setEditURI('edit/'.$column->getID().'/');
+        ->setHeaderColor($column->getHeaderColor());
+      if (!$column->isDefaultColumn()) {
+        $panel->setEditURI('edit/'.$column->getID().'/');
+      }
 
       $cards = id(new PHUIObjectItemListView())
         ->setUser($viewer)

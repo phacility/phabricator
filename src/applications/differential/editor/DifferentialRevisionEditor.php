@@ -728,8 +728,8 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
           $obj->setFieldIndex($index);
         }
 
-        if ($obj->getValue() !== $val) {
-          $obj->setValue($val);
+        if ($obj->getFieldValue() !== $val) {
+          $obj->setFieldValue($val);
           $obj->save();
         }
       }

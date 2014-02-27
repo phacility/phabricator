@@ -16,6 +16,7 @@ final class ManiphestTransactionEditor
     $types[] = ManiphestTransaction::TYPE_PROJECTS;
     $types[] = ManiphestTransaction::TYPE_ATTACH;
     $types[] = ManiphestTransaction::TYPE_EDGE;
+    $types[] = ManiphestTransaction::TYPE_SUBPRIORITY;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -58,6 +59,8 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_EDGE:
         // These are pre-populated.
         return $xaction->getOldValue();
+      case ManiphestTransaction::TYPE_SUBPRIORITY:
+        return $object->getSubpriority();
     }
 
   }
@@ -79,6 +82,7 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_DESCRIPTION:
       case ManiphestTransaction::TYPE_ATTACH:
       case ManiphestTransaction::TYPE_EDGE:
+      case ManiphestTransaction::TYPE_SUBPRIORITY:
         return $xaction->getNewValue();
     }
   }
@@ -101,7 +105,6 @@ final class ManiphestTransactionEditor
 
     return parent::transactionHasEffect($object, $xaction);
   }
-
 
   protected function applyCustomInternalTransaction(
     PhabricatorLiskDAO $object,
@@ -147,8 +150,37 @@ final class ManiphestTransactionEditor
         // These are a weird, funky mess and are already being applied by the
         // time we reach this.
         return;
+      case ManiphestTransaction::TYPE_SUBPRIORITY:
+        $data = $xaction->getNewValue();
+        $new_sub = $this->getNextSubpriority(
+          $data['newPriority'],
+          $data['newSubpriorityBase']);
+        $object->setSubpriority($new_sub);
+        return;
     }
 
+  }
+
+  protected function expandTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $xactions = parent::expandTransaction($object, $xaction);
+    switch ($xaction->getTransactionType()) {
+      case ManiphestTransaction::TYPE_SUBPRIORITY:
+        $data = $xaction->getNewValue();
+        $new_pri = $data['newPriority'];
+        if ($new_pri != $object->getPriority()) {
+          $xactions[] = id(new ManiphestTransaction())
+            ->setTransactionType(ManiphestTransaction::TYPE_PRIORITY)
+            ->setNewValue($new_pri);
+        }
+        break;
+      default:
+        break;
+    }
+
+    return $xactions;
   }
 
   protected function applyCustomExternalTransaction(
@@ -159,7 +191,19 @@ final class ManiphestTransactionEditor
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return true;
+    $should_mail = true;
+    if (count($xactions) == 1) {
+      $xaction = head($xactions);
+      switch ($xaction->getTransactionType()) {
+        case ManiphestTransaction::TYPE_SUBPRIORITY:
+          $should_mail = false;
+          break;
+        default:
+          $should_mail = true;
+          break;
+      }
+    }
+    return $should_mail;
   }
 
   protected function getMailSubjectPrefix() {
@@ -305,10 +349,7 @@ final class ManiphestTransactionEditor
   }
 
 
-  public static function getNextSubpriority($pri, $sub) {
-
-    // TODO: T603 Figure out what the policies here should be once this gets
-    // cleaned up.
+  private function getNextSubpriority($pri, $sub) {
 
     if ($sub === null) {
       $next = id(new ManiphestTask())->loadOneWhere(

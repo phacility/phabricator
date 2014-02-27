@@ -53,15 +53,20 @@ final class PHUIWorkpanelView extends AphrontTagView {
           $footer_tag);
     }
 
-    $header_edit = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS)
-      ->setSpriteIcon('settings-grey')
-      ->setHref($this->editURI);
+    $header_edit = null;
+    if ($this->editURI) {
+      $header_edit = id(new PHUIIconView())
+        ->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS)
+        ->setSpriteIcon('settings-grey')
+        ->setHref($this->editURI);
+    }
 
     $header = id(new PhabricatorActionHeaderView())
       ->setHeaderTitle($this->header)
-      ->setHeaderColor($this->headerColor)
-      ->addAction($header_edit);
+      ->setHeaderColor($this->headerColor);
+    if ($header_edit) {
+      $header->addAction($header_edit);
+    }
 
     $body = phutil_tag(
       'div',
