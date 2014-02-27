@@ -55,8 +55,7 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
           => 'DifferentialRevisionLandController',
         'comment/' => array(
           'preview/(?P<id>[1-9]\d*)/' => 'DifferentialCommentPreviewController',
-          'save/' => 'DifferentialCommentSaveController',
-          'savepro/(?P<id>[1-9]\d*)/' => 'DifferentialCommentSaveControllerPro',
+          'save/(?P<id>[1-9]\d*)/' => 'DifferentialCommentSaveController',
           'inline/' => array(
             'preview/(?P<id>[1-9]\d*)/'
               => 'DifferentialInlineCommentPreviewController',

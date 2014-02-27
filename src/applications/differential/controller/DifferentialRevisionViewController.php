@@ -339,13 +339,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
       // TODO: Restore the ability for fields to add accept warnings.
 
       $comment_form->setActions($this->getRevisionCommentActions($revision));
-
-      $action_uri = '/differential/comment/save/';
-      if (false) {
-        // TODO: Temporary for testing the new comment workflow.
-        $action_uri = $this->getApplicationURI(
-          'comment/savepro/'.$revision->getID().'/');
-      }
+      $action_uri = $this->getApplicationURI(
+        'comment/save/'.$revision->getID().'/');
 
       $comment_form->setActionURI($action_uri);
       $comment_form->setUser($user);
