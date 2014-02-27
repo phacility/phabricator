@@ -755,6 +755,12 @@ final class DifferentialTransactionEditor
     return PhabricatorEnv::getEnvConfig('metamta.differential.subject-prefix');
   }
 
+  protected function getMailThreadID(PhabricatorLiskDAO $object) {
+    // This is nonstandard, but retains threading with older messages.
+    $phid = $object->getPHID();
+    return "differential-rev-{$phid}-req";
+  }
+
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {
     return id(new DifferentialReplyHandler())
       ->setMailReceiver($object);
