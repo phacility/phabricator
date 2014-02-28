@@ -36,7 +36,10 @@ final class DiffusionRepositoryEditBasicController
       $v_name = $request->getStr('name');
       $v_desc = $request->getStr('description');
       $v_projects = $request->getArr('projectPHIDs');
-      $v_clone_name = $request->getStr('cloneName');
+
+      if ($repository->isHosted()) {
+        $v_clone_name = $request->getStr('cloneName');
+      }
 
       if (!strlen($v_name)) {
         $e_name = pht('Required');
@@ -99,16 +102,22 @@ final class DiffusionRepositoryEditBasicController
           ->setName('name')
           ->setLabel(pht('Name'))
           ->setValue($v_name)
-          ->setError($e_name))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setName('cloneName')
-          ->setLabel(pht('Clone/Checkout As'))
-          ->setValue($v_clone_name)
-          ->setCaption(
-            pht(
-              'Optional directory name to use when cloning or checking out '.
-              'this repository.')))
+          ->setError($e_name));
+
+    if ($repository->isHosted()) {
+      $form
+        ->appendChild(
+          id(new AphrontFormTextControl())
+            ->setName('cloneName')
+            ->setLabel(pht('Clone/Checkout As'))
+            ->setValue($v_clone_name)
+            ->setCaption(
+              pht(
+                'Optional directory name to use when cloning or checking out '.
+                'this repository.')));
+    }
+
+    $form
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setName('description')

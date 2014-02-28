@@ -90,6 +90,19 @@ final class PhabricatorRepositoryURITestCase
     $this->assertEqual('git@example.com:path.git',
       $repo->getRemoteURIEnvelope()->openEnvelope());
 
+    // Test SVN "Import Only" paths.
+
+    $repo->setDetail('remote-uri', 'http://example.com/');
+    $repo->setVersionControlSystem($svn);
+    $repo->setDetail('svn-subpath', 'projects/example/');
+
+    $this->assertEqual('http://example.com/', $repo->getRemoteURI());
+    $this->assertEqual(
+      'http://example.com/projects/example/',
+      $repo->getPublicCloneURI());
+    $this->assertEqual('http://example.com/',
+      $repo->getRemoteURIEnvelope()->openEnvelope());
+
   }
 
 }
