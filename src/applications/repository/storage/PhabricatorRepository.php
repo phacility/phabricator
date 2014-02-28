@@ -592,6 +592,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return false;
     }
 
+    if (!$this->shouldTrackBranch($branch)) {
+      return false;
+    }
+
     return $this->isBranchInFilter($branch, 'close-commits-filter');
   }
 
