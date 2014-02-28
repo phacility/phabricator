@@ -706,7 +706,7 @@ final class DifferentialTransactionEditor
   }
 
   protected function sortTransactions(array $xactions) {
-    $xactions = parent::sortTransactions();
+    $xactions = parent::sortTransactions($xactions);
 
     $head = array();
     $tail = array();
