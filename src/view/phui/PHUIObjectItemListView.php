@@ -107,9 +107,15 @@ final class PHUIObjectItemListView extends AphrontTagView {
       $items = null;
     } else {
       $string = nonempty($this->noDataString, pht('No data.'));
-      $items = id(new AphrontErrorView())
+      $string = id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_NODATA)
         ->appendChild($string);
+      $items = phutil_tag(
+        'li',
+        array(
+          'class' => 'phui-object-item-empty'),
+        $string);
+
     }
 
     $pager = null;

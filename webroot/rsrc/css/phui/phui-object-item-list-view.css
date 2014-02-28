@@ -29,7 +29,8 @@
 }
 
 .phui-object-item-list-view .aphront-error-view {
-  margin: 0;
+  margin: 4px 0 8px 0;
+  color: {$bluetext};
 }
 
 .phui-object-item {
@@ -413,11 +414,6 @@
 
 .phui-object-item-selected {
   background: {$lightblue};
-}
-
-.phui-object-list-flush .aphront-error-view {
-  margin: 0;
-  background: #fff;
 }
 
 
