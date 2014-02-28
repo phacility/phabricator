@@ -469,8 +469,7 @@ final class DifferentialRevision extends DifferentialDAO
   }
 
   public function shouldShowSubscribersProperty() {
-    // TODO: Differential does its own thing for now.
-    return false;
+    return true;
   }
 
   public function shouldAllowSubscription($phid) {
@@ -483,19 +482,42 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function getCustomFieldSpecificationForRole($role) {
     $fields = array(
+      new DifferentialAuthorField(),
+
       new DifferentialTitleField(),
       new DifferentialSummaryField(),
       new DifferentialTestPlanField(),
       new DifferentialReviewersField(),
+      new DifferentialProjectReviewersField(),
       new DifferentialSubscribersField(),
       new DifferentialRepositoryField(),
       new DifferentialViewPolicyField(),
       new DifferentialEditPolicyField(),
+
+      new DifferentialDependsOnField(),
+      new DifferentialDependenciesField(),
+      new DifferentialManiphestTasksField(),
+      new DifferentialCommitsField(),
+
+      new DifferentialJIRAIssuesField(),
+      new DifferentialAsanaRepresentationField(),
+
+      new DifferentialBlameRevisionField(),
+      new DifferentialPathField(),
+      new DifferentialHostField(),
+      new DifferentialRevertPlanField(),
+
+      new DifferentialApplyPatchField(),
     );
 
-    return array_fill_keys(
-      mpull($fields, 'getFieldKey'),
-      array('disabled' => false));
+    $result = array();
+    foreach ($fields as $field) {
+      $result[$field->getFieldKey()] = array(
+        'disabled' => $field->shouldDisableByDefault(),
+      );
+    }
+
+    return $result;
   }
 
   public function getCustomFieldBaseClass() {

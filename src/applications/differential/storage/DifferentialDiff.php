@@ -35,6 +35,7 @@ final class DifferentialDiff
   private $changesets = self::ATTACHABLE;
   private $arcanistProject = self::ATTACHABLE;
   private $revision = self::ATTACHABLE;
+  private $properties = array();
 
   public function getConfiguration() {
     return array(
@@ -304,6 +305,15 @@ final class DifferentialDiff
   public function attachRevision(DifferentialRevision $revision = null) {
     $this->revision = $revision;
     return $this;
+  }
+
+  public function attachProperty($key, $value) {
+    $this->properties[$key] = $value;
+    return $this;
+  }
+
+  public function getProperty($key) {
+    return $this->assertAttachedKey($this->properties, $key);
   }
 
 

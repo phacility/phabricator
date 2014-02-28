@@ -72,14 +72,14 @@ abstract class PhabricatorInlineCommentController
         $dialog->setUser($user);
         $dialog->setSubmitURI($request->getRequestURI());
 
-        $dialog->setTitle('Really delete this comment?');
+        $dialog->setTitle(pht('Really delete this comment?'));
         $dialog->addHiddenInput('id', $this->getCommentID());
         $dialog->addHiddenInput('op', 'delete');
         $dialog->appendChild(
           phutil_tag('p', array(), pht('Delete this inline comment?')));
 
         $dialog->addCancelButton('#');
-        $dialog->addSubmitButton('Delete');
+        $dialog->addSubmitButton(pht('Delete'));
 
         return id(new AphrontDialogResponse())->setDialog($dialog);
       case 'edit':
@@ -101,7 +101,7 @@ abstract class PhabricatorInlineCommentController
         }
 
         $edit_dialog = $this->buildEditDialog();
-        $edit_dialog->setTitle('Edit Inline Comment');
+        $edit_dialog->setTitle(pht('Edit Inline Comment'));
 
         $edit_dialog->addHiddenInput('id', $this->getCommentID());
         $edit_dialog->addHiddenInput('op', 'edit');
@@ -139,13 +139,13 @@ abstract class PhabricatorInlineCommentController
         if ($this->getOperation() == 'reply') {
           $inline = $this->loadComment($this->getCommentID());
 
-          $edit_dialog->setTitle('Reply to Inline Comment');
+          $edit_dialog->setTitle(pht('Reply to Inline Comment'));
           $changeset = $inline->getChangesetID();
           $is_new = $inline->getIsNewFile();
           $number = $inline->getLineNumber();
           $length = $inline->getLineLength();
         } else {
-          $edit_dialog->setTitle('New Inline Comment');
+          $edit_dialog->setTitle(pht('New Inline Comment'));
           $changeset = $this->getChangesetID();
           $is_new = $this->getIsNewFile();
           $number = $this->getLineNumber();

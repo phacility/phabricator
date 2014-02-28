@@ -15,6 +15,10 @@ final class DifferentialBlameRevisionField
     return pht('Stores a reference to what this fixes.');
   }
 
+  public function shouldDisableByDefault() {
+    return true;
+  }
+
   public function shouldAppearInPropertyView() {
     return true;
   }

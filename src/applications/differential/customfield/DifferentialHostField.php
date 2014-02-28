@@ -15,6 +15,10 @@ final class DifferentialHostField
     return pht('Shows the local host where the diff came from.');
   }
 
+  public function shouldDisableByDefault() {
+    return true;
+  }
+
   public function shouldAppearInPropertyView() {
     return true;
   }

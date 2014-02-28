@@ -14,12 +14,6 @@ final class PhabricatorDifferentialConfigOptions
   public function getOptions() {
     return array(
       $this->newOption(
-        'differential.revision-custom-detail-renderer',
-        'class',
-        null)
-        ->setBaseClass('DifferentialRevisionDetailRenderer')
-        ->setDescription(pht("Custom revision detail renderer.")),
-      $this->newOption(
         'differential.whitespace-matters',
         'list<regex>',
         array(

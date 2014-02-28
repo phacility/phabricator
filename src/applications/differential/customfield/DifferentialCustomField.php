@@ -3,6 +3,10 @@
 abstract class DifferentialCustomField
   extends PhabricatorCustomField {
 
+  public function getRequiredDiffPropertiesForRevisionView() {
+    return array();
+  }
+
   protected function renderHandleList(array $handles) {
     if (!$handles) {
       return null;

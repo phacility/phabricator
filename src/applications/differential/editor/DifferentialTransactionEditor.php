@@ -732,6 +732,10 @@ final class DifferentialTransactionEditor
     return parent::requireCapabilities($object, $xaction);
   }
 
+  protected function supportsFeed() {
+    return true;
+  }
+
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -749,6 +753,12 @@ final class DifferentialTransactionEditor
 
   protected function getMailSubjectPrefix() {
     return PhabricatorEnv::getEnvConfig('metamta.differential.subject-prefix');
+  }
+
+  protected function getMailThreadID(PhabricatorLiskDAO $object) {
+    // This is nonstandard, but retains threading with older messages.
+    $phid = $object->getPHID();
+    return "differential-rev-{$phid}-req";
   }
 
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {

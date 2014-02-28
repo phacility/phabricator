@@ -115,6 +115,101 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
     return parent::getTitle();
   }
 
+  public function getTitleForFeed(PhabricatorFeedStory $story) {
+    $author_phid = $this->getAuthorPHID();
+    $object_phid = $this->getObjectPHID();
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    $author_link = $this->renderHandleLink($author_phid);
+    $object_link = $this->renderHandleLink($object_phid);
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_INLINE:
+        return pht(
+          '%s added inline comments to %s.',
+          $author_link,
+          $object_link);
+      case self::TYPE_UPDATE:
+        return pht(
+          '%s updated the diff for %s.',
+          $author_link,
+          $object_link);
+      case self::TYPE_ACTION:
+        switch ($new) {
+          case DifferentialAction::ACTION_ACCEPT:
+            return pht(
+              '%s accepted %s.',
+              $author_link,
+              $object_link);
+          case DifferentialAction::ACTION_REJECT:
+            return pht(
+              '%s requested changes to %s.',
+              $author_link,
+              $object_link);
+          case DifferentialAction::ACTION_RETHINK:
+            return pht(
+              '%s planned changes to %s.',
+              $author_link,
+              $object_link);
+          case DifferentialAction::ACTION_ABANDON:
+            return pht(
+              '%s abandoned %s.',
+              $author_link,
+              $object_link);
+          case DifferentialAction::ACTION_CLOSE:
+            return pht(
+              '%s closed %s.',
+              $author_link,
+              $object_link);
+          case DifferentialAction::ACTION_REQUEST:
+            return pht(
+              '%s requested review of %s.',
+              $author_link,
+              $object_link);
+          case DifferentialAction::ACTION_RECLAIM:
+            return pht(
+              '%s reclaimed %s.',
+              $author_link,
+              $object_link);
+          case DifferentialAction::ACTION_RESIGN:
+            return pht(
+              '%s resigned from %s.',
+              $author_link,
+              $object_link);
+          case DifferentialAction::ACTION_CLAIM:
+            return pht(
+              '%s commandeered %s.',
+              $author_link,
+              $object_link);
+          case DifferentialAction::ACTION_REOPEN:
+            return pht(
+              '%s reopened %s.',
+              $author_link,
+              $object_link);
+        }
+        break;
+      case self::TYPE_STATUS:
+        switch ($this->getNewValue()) {
+          case ArcanistDifferentialRevisionStatus::ACCEPTED:
+            return pht(
+              '%s is now accepted and ready to land.',
+              $object_link);
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+            return pht(
+              '%s now requires changes to proceed.',
+              $object_link);
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
+            return pht(
+              '%s now requires review to proceed.',
+              $object_link);
+        }
+    }
+
+    return parent::getTitleForFeed($story);
+  }
+
   public function getIcon() {
     switch ($this->getTransactionType()) {
       case self::TYPE_INLINE:
