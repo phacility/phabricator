@@ -138,6 +138,30 @@ abstract class PhabricatorApplicationTransaction
     return $this->assertAttached($this->object);
   }
 
+  public function getRemarkupBlocks() {
+    $blocks = array();
+
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $field = $this->getTransactionCustomField();
+        if ($field) {
+          $custom_blocks = $field->getApplicationTransactionRemarkupBlocks(
+            $this);
+          foreach ($custom_blocks as $custom_block) {
+            $blocks[] = $custom_block;
+          }
+        }
+        break;
+    }
+
+    if ($this->getComment()) {
+      $blocks[] = $this->getComment()->getContent();
+    }
+
+    return $blocks;
+  }
+
+
 /* -(  Rendering  )---------------------------------------------------------- */
 
   public function setRenderingTarget($rendering_target) {

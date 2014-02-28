@@ -706,10 +706,11 @@ final class DifferentialTransactionEditor
   }
 
   protected function sortTransactions(array $xactions) {
+    $xactions = parent::sortTransactions();
+
     $head = array();
     $tail = array();
 
-    // Move bare comments to the end, so the actions precede them.
     foreach ($xactions as $xaction) {
       $type = $xaction->getTransactionType();
       if ($type == DifferentialTransaction::TYPE_INLINE) {
@@ -821,6 +822,78 @@ final class DifferentialTransactionEditor
     }
 
     return parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
+  }
+
+  protected function expandCustomRemarkupBlockTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions,
+    $blocks,
+    PhutilMarkupEngine $engine) {
+
+
+    $flat_blocks = array_mergev($blocks);
+    $huge_block = implode("\n\n", $flat_blocks);
+
+    $task_map = array();
+    $task_refs = id(new ManiphestCustomFieldStatusParser())
+      ->parseCorpus($huge_block);
+    foreach ($task_refs as $match) {
+      foreach ($match['monograms'] as $monogram) {
+        $task_id = (int)trim($monogram, 'tT');
+        $task_map[$task_id] = true;
+      }
+    }
+
+    $rev_map = array();
+    $rev_refs = id(new DifferentialCustomFieldDependsOnParser())
+      ->parseCorpus($huge_block);
+    foreach ($rev_refs as $match) {
+      foreach ($match['monograms'] as $monogram) {
+        $rev_id = (int)trim($monogram, 'dD');
+        $rev_map[$rev_id] = true;
+      }
+    }
+
+    $edges = array();
+
+    if ($task_map) {
+      $tasks = id(new ManiphestTaskQuery())
+        ->setViewer($this->getActor())
+        ->withIDs(array_keys($task_map))
+        ->execute();
+
+      if ($tasks) {
+        $edge_related = PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK;
+        $edges[$edge_related] = mpull($tasks, 'getPHID', 'getPHID');
+      }
+    }
+
+    if ($rev_map) {
+      $revs = id(new DifferentialRevisionQuery())
+        ->setViewer($this->getActor())
+        ->withIDs(array_keys($rev_map))
+        ->execute();
+      $rev_phids = mpull($revs, 'getPHID', 'getPHID');
+
+      // NOTE: Skip any write attempts if a user cleverly implies a revision
+      // depends upon itself.
+      unset($rev_phids[$object->getPHID()]);
+
+      if ($revs) {
+        $edge_depends = PhabricatorEdgeConfig::TYPE_DREV_DEPENDS_ON_DREV;
+        $edges[$edge_depends] = $rev_phids;
+      }
+    }
+
+    $result = array();
+    foreach ($edges as $type => $specs) {
+      $result[] = id(new DifferentialTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $type)
+        ->setNewValue(array('+' => $specs));
+    }
+
+    return $result;
   }
 
   private function renderInlineCommentsForMail(

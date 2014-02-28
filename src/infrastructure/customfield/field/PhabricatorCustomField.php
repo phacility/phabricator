@@ -851,6 +851,18 @@ abstract class PhabricatorCustomField {
   /**
    * @task appxaction
    */
+  public function getApplicationTransactionRemarkupBlocks(
+    PhabricatorApplicationTransaction $xaction) {
+    if ($this->proxy) {
+      return $this->proxy->getApplicationTransactionRemarkupBlocks($xaction);
+    }
+    return array();
+  }
+
+
+  /**
+   * @task appxaction
+   */
   public function applyApplicationTransactionExternalEffects(
     PhabricatorApplicationTransaction $xaction) {
     if ($this->proxy) {

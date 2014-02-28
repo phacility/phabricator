@@ -435,16 +435,15 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $actor = $this->requireActor();
 
-    $this->loadSubscribers($object);
-
-    $xactions = $this->applyImplicitCC($object, $xactions);
-
-    $mention_xaction = $this->buildMentionTransaction($object, $xactions);
-    if ($mention_xaction) {
-      $xactions[] = $mention_xaction;
+    // NOTE: Some transaction expansion requires that the edited object be
+    // attached.
+    foreach ($xactions as $xaction) {
+      $xaction->attachObject($object);
+      $xaction->attachViewer($actor);
     }
 
     $xactions = $this->expandTransactions($object, $xactions);
+    $xactions = $this->expandSupportTransactions($object, $xactions);
     $xactions = $this->combineTransactions($xactions);
 
     foreach ($xactions as $xaction) {
@@ -802,18 +801,14 @@ abstract class PhabricatorApplicationTransactionEditor
 
   private function buildMentionTransaction(
     PhabricatorLiskDAO $object,
-    array $xactions) {
+    array $xactions,
+    array $blocks) {
 
     if (!($object instanceof PhabricatorSubscribableInterface)) {
       return null;
     }
 
-    $texts = array();
-    foreach ($xactions as $xaction) {
-      $texts[] = $this->getRemarkupBlocksFromTransaction($xaction);
-    }
-    $texts = array_mergev($texts);
-
+    $texts = array_mergev($blocks);
     $phids = PhabricatorMarkupEngine::extractPHIDsFromMentions($texts);
 
     $this->mentionedPHIDs = $phids;
@@ -845,11 +840,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
   protected function getRemarkupBlocksFromTransaction(
     PhabricatorApplicationTransaction $transaction) {
-    $texts = array();
-    if ($transaction->getComment()) {
-      $texts[] = $transaction->getComment()->getContent();
-    }
-    return $texts;
+    return $transaction->getRemarkupBlocks();
   }
 
   protected function mergeTransactions(
@@ -898,6 +889,64 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
     return array($xaction);
   }
+
+
+  private function expandSupportTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    $this->loadSubscribers($object);
+
+    $xactions = $this->applyImplicitCC($object, $xactions);
+
+    $blocks = array();
+    foreach ($xactions as $key => $xaction) {
+      $blocks[$key] = $this->getRemarkupBlocksFromTransaction($xaction);
+    }
+
+    $mention_xaction = $this->buildMentionTransaction(
+      $object,
+      $xactions,
+      $blocks);
+    if ($mention_xaction) {
+      $xactions[] = $mention_xaction;
+    }
+
+    // TODO: For now, this is just a placeholder.
+    $engine = PhabricatorMarkupEngine::getEngine('extract');
+
+    $block_xactions = $this->expandRemarkupBlockTransactions(
+      $object,
+      $xactions,
+      $blocks,
+      $engine);
+
+    foreach ($block_xactions as $xaction) {
+      $xactions[] = $xaction;
+    }
+
+    return $xactions;
+  }
+
+  private function expandRemarkupBlockTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions,
+    $blocks,
+    PhutilMarkupEngine $engine) {
+    return $this->expandCustomRemarkupBlockTransactions(
+      $object,
+      $xactions,
+      $blocks,
+      $engine);
+  }
+
+  protected function expandCustomRemarkupBlockTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions,
+    $blocks,
+    PhutilMarkupEngine $engine) {
+    return array();
+  }
+
 
   /**
    * Attempt to combine similar transactions into a smaller number of total
@@ -1829,7 +1878,6 @@ abstract class PhabricatorApplicationTransactionEditor
       $blocks[] = $this->getRemarkupBlocksFromTransaction($xaction);
     }
     $blocks = array_mergev($blocks);
-
 
     $phids = array();
     if ($blocks) {
