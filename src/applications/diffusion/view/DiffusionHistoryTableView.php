@@ -127,6 +127,18 @@ final class DiffusionHistoryTableView extends DiffusionView {
         $change = phutil_tag('em', array(), "Importing\xE2\x80\xA6");
       }
 
+        // get audit request to display state
+        $audit_requests = id(new PhabricatorAuditQuery())
+            ->withCommitPHIDs(array($commit->getPHID()))
+            ->execute();
+
+        $audit_state = NULL;
+        if (is_array($audit_requests)) {
+          foreach ($audit_requests AS $audit) {
+            $audit_state = $audit->getAuditStatus();
+          }
+        }
+
       $rows[] = array(
         $this->linkBrowse(
           $drequest->getPath(),
@@ -140,6 +152,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
         ($commit ?
           self::linkRevision(idx($this->revisions, $commit->getPHID())) :
           null),
+        AphrontTableView::renderAuditStatus($audit_state),
         $change,
         $date,
         $time,
@@ -156,6 +169,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
         '',
         pht('Commit'),
         pht('Revision'),
+        pht('Audit'),
         pht('Change'),
         pht('Date'),
         pht('Time'),
@@ -168,6 +182,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
         'threads',
         'n',
         'n',
+        '',
         '',
         '',
         'right',
