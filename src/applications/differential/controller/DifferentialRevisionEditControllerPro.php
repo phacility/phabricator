@@ -23,6 +23,7 @@ final class DifferentialRevisionEditControllerPro
         ->withIDs(array($this->id))
         ->needRelationships(true)
         ->needReviewerStatus(true)
+        ->needActiveDiffs(true)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -34,6 +35,7 @@ final class DifferentialRevisionEditControllerPro
       }
     } else {
       $revision = DifferentialRevision::initializeNewRevision($viewer);
+      $revision->attachReviewerStatus(array());
     }
 
     $diff_id = $request->getInt('diffID');
@@ -53,6 +55,15 @@ final class DifferentialRevisionEditControllerPro
       $diff = null;
     }
 
+    if (!$diff) {
+      if (!$revision->getID()) {
+        throw new Exception(
+          pht('You can not create a new revision without a diff!'));
+      }
+    } else {
+      // TODO: It would be nice to show the diff being attached in the UI.
+    }
+
     $field_list = PhabricatorCustomField::getObjectFields(
       $revision,
       PhabricatorCustomField::ROLE_EDIT);
@@ -65,6 +76,21 @@ final class DifferentialRevisionEditControllerPro
       $xactions = $field_list->buildFieldTransactionsFromRequest(
         new DifferentialTransaction(),
         $request);
+
+      if ($diff) {
+        $xactions[] = id(new DifferentialTransaction())
+          ->setTransactionType(DifferentialTransaction::TYPE_UPDATE)
+          ->setNewValue($diff->getPHID());
+      }
+
+      $comments = $request->getStr('comments');
+      if (strlen($comments)) {
+        $xactions[] = id(new DifferentialTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+          ->attachComment(
+            id(new DifferentialTransactionComment())
+              ->setContent($comments));
+      }
 
       $editor = id(new DifferentialTransactionEditor())
         ->setActor($viewer)

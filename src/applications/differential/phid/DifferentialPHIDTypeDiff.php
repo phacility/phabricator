@@ -35,6 +35,7 @@ final class DifferentialPHIDTypeDiff extends PhabricatorPHIDType {
       $id = $diff->getID();
 
       $handle->setName(pht('Diff %d', $id));
+      $handle->setURI("/differential/diff/{$id}/");
     }
   }
 

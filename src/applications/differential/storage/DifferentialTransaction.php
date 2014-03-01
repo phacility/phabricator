@@ -70,6 +70,22 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
     return parent::getBodyForMail();
   }
 
+  public function getRequiredHandlePHIDs() {
+    $phids = parent::getRequiredHandlePHIDs();
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_UPDATE:
+        if ($new) {
+          $phids[] = $new;
+        }
+        break;
+    }
+
+    return $phids;
+  }
 
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
@@ -87,10 +103,16 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
         if ($new) {
           // TODO: Migrate to PHIDs and use handles here?
           // TODO: Link this?
-          return pht(
-            '%s updated this revision to Diff #%d.',
-            $author_handle,
-            $new);
+          if (phid_get_type($new) == 'DIFF') {
+            return pht(
+              '%s updated this revision to %s.',
+              $author_handle,
+              $this->renderHandleLink($new));
+          } else {
+            return pht(
+              '%s updated this revision.',
+              $author_handle);
+          }
         } else {
           return pht(
             '%s updated this revision.',

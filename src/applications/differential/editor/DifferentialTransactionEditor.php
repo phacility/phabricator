@@ -14,11 +14,7 @@ final class DifferentialTransactionEditor
     $types[] = DifferentialTransaction::TYPE_ACTION;
     $types[] = DifferentialTransaction::TYPE_INLINE;
     $types[] = DifferentialTransaction::TYPE_STATUS;
-
-/*
-
     $types[] = DifferentialTransaction::TYPE_UPDATE;
-*/
 
     return $types;
   }
@@ -36,6 +32,12 @@ final class DifferentialTransactionEditor
         return null;
       case DifferentialTransaction::TYPE_INLINE:
         return null;
+      case DifferentialTransaction::TYPE_UPDATE:
+        if ($this->getIsNewObject()) {
+          return null;
+        } else {
+          return $object->getActiveDiff()->getPHID();
+        }
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -49,6 +51,7 @@ final class DifferentialTransactionEditor
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case DifferentialTransaction::TYPE_ACTION:
+      case DifferentialTransaction::TYPE_UPDATE:
         return $xaction->getNewValue();
       case DifferentialTransaction::TYPE_INLINE:
         return null;
@@ -146,6 +149,9 @@ final class DifferentialTransactionEditor
       case DifferentialTransaction::TYPE_INLINE:
         return;
       case PhabricatorTransactions::TYPE_EDGE:
+        return;
+      case DifferentialTransaction::TYPE_UPDATE:
+        // TODO: Update the `diffPHID` once we add that.
         return;
       case DifferentialTransaction::TYPE_ACTION:
         $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
@@ -336,6 +342,29 @@ final class DifferentialTransactionEditor
       case DifferentialTransaction::TYPE_ACTION:
       case DifferentialTransaction::TYPE_INLINE:
         return;
+      case DifferentialTransaction::TYPE_UPDATE:
+        // Now that we're inside the transaction, do a final check.
+        $diff = $this->loadDiff($xaction->getNewValue());
+
+        // TODO: It would be slightly cleaner to just revalidate this
+        // transaction somehow using the same validation code, but that's
+        // not easy to do at the moment.
+
+        if (!$diff) {
+          throw new Exception(pht('Diff does not exist!'));
+        } else {
+          $revision_id = $diff->getRevisionID();
+          if ($revision_id && ($revision_id != $object->getID())) {
+            throw new Exception(
+              pht(
+                'Diff is already attached to another revision. You lost '.
+                'a race?'));
+          }
+        }
+
+        $diff->setRevisionID($object->getID());
+        $diff->save();
+        return;
     }
 
     return parent::applyCustomExternalTransaction($object, $xaction);
@@ -471,6 +500,25 @@ final class DifferentialTransactionEditor
 
     foreach ($xactions as $xaction) {
       switch ($type) {
+        case DifferentialTransaction::TYPE_UPDATE:
+          $diff = $this->loadDiff($xaction->getNewValue());
+          if (!$diff) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht('The specified diff does not exist.'),
+              $xaction);
+          } else if (($diff->getRevisionID()) &&
+            ($diff->getRevisionID() != $object->getID())) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'You can not update this revision to the specified diff, '.
+                'because the diff is already attached to another revision.'),
+              $xaction);
+          }
+          break;
         case DifferentialTransaction::TYPE_ACTION:
           $error = $this->validateDifferentialAction(
             $object,
@@ -966,6 +1014,12 @@ final class DifferentialTransactionEditor
     return implode("\n", $result);
   }
 
+  private function loadDiff($phid) {
+    return id(new DifferentialDiffQuery())
+      ->withPHIDs(array($phid))
+      ->setViewer($this->getActor())
+      ->executeOne();
+  }
 
 
 }

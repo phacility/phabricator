@@ -881,11 +881,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setRightDiff($right_diff)
       ->setTransactions($xactions);
 
-    // TODO: Make this work and restore edit links. We need to copy
-    // `revisionPHID` to the new version of the comment. This should be simple,
-    // but can happen post-merge. See T2222.
-    $timeline->setShowEditActions(false);
-
     return $timeline;
   }
 
