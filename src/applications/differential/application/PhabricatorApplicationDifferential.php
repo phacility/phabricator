@@ -49,8 +49,6 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
         'changeset/' => 'DifferentialChangesetViewController',
         'revision/edit/(?:(?P<id>[1-9]\d*)/)?'
           => 'DifferentialRevisionEditController',
-        'revision/editpro/(?:(?P<id>[1-9]\d*)/)?'
-          => 'DifferentialRevisionEditControllerPro',
         'revision/land/(?:(?P<id>[1-9]\d*))/(?P<strategy>[^/]+)/'
           => 'DifferentialRevisionLandController',
         'comment/' => array(
