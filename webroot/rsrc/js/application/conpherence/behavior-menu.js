@@ -530,16 +530,21 @@ JX.behavior('conpherence-menu', function(config) {
 
   var onkeydownDraft = function (e) {
     var form = e.getNode('tag:form');
-    var uri = config.baseURI + 'update/' + _thread.selected + '/';
-    var draftRequest = new JX.PhabricatorShapedRequest(
-      uri,
-      JX.bag,
-      function () {
-        var data = JX.DOM.convertFormToDictionary(form);
-        data.action = 'draft';
-        return data;
-      });
-    draftRequest.start();
+    var data = e.getNodeData('tag:form');
+
+    if (!data.preview) {
+      var uri = config.baseURI + 'update/' + _thread.selected + '/';
+      data.preview = new JX.PhabricatorShapedRequest(
+        uri,
+        JX.bag,
+        function () {
+          var data = JX.DOM.convertFormToDictionary(form);
+          data.action = 'draft';
+          return data;
+        });
+    }
+
+    data.preview.trigger();
   };
 
   JX.Stratcom.listen(

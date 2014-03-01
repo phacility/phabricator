@@ -348,7 +348,7 @@ return array(
     'rsrc/js/application/aphlict/behavior-aphlict-listen.js' => '845731b8',
     'rsrc/js/application/auth/behavior-persona-login.js' => '9414ff18',
     'rsrc/js/application/config/behavior-reorder-fields.js' => '938aed89',
-    'rsrc/js/application/conpherence/behavior-menu.js' => '7ff0b011',
+    'rsrc/js/application/conpherence/behavior-menu.js' => '7ee23816',
     'rsrc/js/application/conpherence/behavior-pontificate.js' => '53f6f2dd',
     'rsrc/js/application/conpherence/behavior-widget-pane.js' => 'd8ef8659',
     'rsrc/js/application/countdown/timer.js' => '889c96f3',
@@ -535,7 +535,7 @@ return array(
     'javelin-behavior-audit-preview' => 'be81801d',
     'javelin-behavior-balanced-payment-form' => '3b3e1664',
     'javelin-behavior-config-reorder-fields' => '938aed89',
-    'javelin-behavior-conpherence-menu' => '7ff0b011',
+    'javelin-behavior-conpherence-menu' => '7ee23816',
     'javelin-behavior-conpherence-pontificate' => '53f6f2dd',
     'javelin-behavior-conpherence-widget-pane' => 'd8ef8659',
     'javelin-behavior-countdown-timer' => '889c96f3',
@@ -1225,6 +1225,13 @@ return array(
       2 => 'javelin-util',
       3 => 'phabricator-shaped-request',
     ),
+    '62e18640' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
+      2 => 'javelin-dom',
+      3 => 'javelin-typeahead-normalizer',
+    ),
     '6453c869' =>
     array(
       0 => 'javelin-install',
@@ -1257,13 +1264,6 @@ return array(
     array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
-    ),
-    '62e18640' =>
-    array(
-      0 => 'javelin-install',
-      1 => 'javelin-util',
-      2 => 'javelin-dom',
-      3 => 'javelin-typeahead-normalizer',
     ),
     '75903ee1' =>
     array(
@@ -1313,12 +1313,7 @@ return array(
       0 => 'herald-rule-editor',
       1 => 'javelin-behavior',
     ),
-    '7ee2b591' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-history',
-    ),
-    '7ff0b011' =>
+    '7ee23816' =>
     array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
@@ -1329,6 +1324,11 @@ return array(
       6 => 'javelin-history',
       7 => 'javelin-vector',
       8 => 'phabricator-shaped-request',
+    ),
+    '7ee2b591' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-history',
     ),
     '82947dda' =>
     array(

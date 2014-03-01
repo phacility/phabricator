@@ -51,7 +51,7 @@ final class ConpherenceUpdateController
             $conpherence->getPHID());
           $draft->setDraft($request->getStr('text'));
           $draft->replaceOrDelete();
-          break;
+          return new AphrontAjaxResponse();
         case ConpherenceUpdateActions::MESSAGE:
           $message = $request->getStr('text');
           $xactions = $editor->generateTransactionsFromText(
