@@ -364,6 +364,10 @@ final class DifferentialTransactionEditor
 
         $diff->setRevisionID($object->getID());
         $diff->save();
+
+        $object->setLineCount($diff->getLineCount());
+        $object->setRepositoryPHID($diff->getRepositoryPHID());
+
         return;
     }
 
