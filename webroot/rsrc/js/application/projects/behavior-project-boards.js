@@ -28,9 +28,12 @@ JX.behavior('project-boards', function(config) {
 
     var data = {
       objectPHID: JX.Stratcom.getData(item).objectPHID,
-      columnPHID: JX.Stratcom.getData(list.getRootNode()).columnPHID,
-      afterPHID: after && JX.Stratcom.getData(after).objectPHID
+      columnPHID: JX.Stratcom.getData(list.getRootNode()).columnPHID
     };
+
+    if (after) {
+      data.afterPHID = JX.Stratcom.getData(after).objectPHID;
+    }
 
     var workflow = new JX.Workflow(config.moveURI, data)
       .setHandler(function(response) {

@@ -49,6 +49,14 @@ abstract class PhabricatorApplicationTransaction
     return $this->ignoreOnNoEffect;
   }
 
+  public function shouldGenerateOldValue() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        return false;
+    }
+    return true;
+  }
+
   abstract public function getApplicationTransactionType();
 
   private function getApplicationObjectTypeName() {

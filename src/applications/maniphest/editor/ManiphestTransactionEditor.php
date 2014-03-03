@@ -17,6 +17,7 @@ final class ManiphestTransactionEditor
     $types[] = ManiphestTransaction::TYPE_ATTACH;
     $types[] = ManiphestTransaction::TYPE_EDGE;
     $types[] = ManiphestTransaction::TYPE_SUBPRIORITY;
+    $types[] = ManiphestTransaction::TYPE_PROJECT_COLUMN;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -57,6 +58,7 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_ATTACH:
         return $object->getAttached();
       case ManiphestTransaction::TYPE_EDGE:
+      case ManiphestTransaction::TYPE_PROJECT_COLUMN:
         // These are pre-populated.
         return $xaction->getOldValue();
       case ManiphestTransaction::TYPE_SUBPRIORITY:
@@ -83,6 +85,7 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_ATTACH:
       case ManiphestTransaction::TYPE_EDGE:
       case ManiphestTransaction::TYPE_SUBPRIORITY:
+      case ManiphestTransaction::TYPE_PROJECT_COLUMN:
         return $xaction->getNewValue();
     }
   }
@@ -100,6 +103,12 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_CCS:
         sort($old);
         sort($new);
+        return ($old !== $new);
+      case ManiphestTransaction::TYPE_PROJECT_COLUMN:
+        $new_column_phids = $new['columnPHIDs'];
+        $old_column_phids = $old['columnPHIDs'];
+        sort($new_column_phids);
+        sort($old_column_phids);
         return ($old !== $new);
     }
 
@@ -157,6 +166,9 @@ final class ManiphestTransactionEditor
           $data['newSubpriorityBase']);
         $object->setSubpriority($new_sub);
         return;
+      case ManiphestTransaction::TYPE_PROJECT_COLUMN:
+        // these do external (edge) updates
+        return;
     }
 
   }
@@ -186,11 +198,59 @@ final class ManiphestTransactionEditor
   protected function applyCustomExternalTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case ManiphestTransaction::TYPE_PROJECT_COLUMN:
+        $new = $xaction->getNewValue();
+        $old = $xaction->getOldValue();
+        $src = $object->getPHID();
+        $dst = head($new['columnPHIDs']);
+        $edges = $old['columnPHIDs'];
+        $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_COLUMN;
+        // NOTE: Normally, we expect only one edge to exist, but this works in
+        // a general way so it will repair any stray edges.
+        $remove = array();
+        $edge_missing = true;
+        foreach ($edges as $phid) {
+          if ($phid == $dst) {
+            $edge_missing = false;
+          } else {
+            $remove[] = $phid;
+          }
+        }
+
+        $add = array();
+        if ($edge_missing) {
+          $add[] = $dst;
+        }
+
+        // This should never happen because of the code in
+        // transactionHasEffect, but keep it for maximum conservativeness
+        if (!$add && !$remove) {
+          return;
+        }
+
+        $editor = id(new PhabricatorEdgeEditor())
+          ->setActor($this->getActor())
+          ->setSuppressEvents(true);
+
+        foreach ($add as $phid) {
+          $editor->addEdge($src, $edge_type, $phid);
+        }
+        foreach ($remove as $phid) {
+          $editor->removeEdge($src, $edge_type, $phid);
+        }
+        $editor->save();
+        break;
+      default:
+        break;
+    }
   }
 
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
+
     $should_mail = true;
     if (count($xactions) == 1) {
       $xaction = head($xactions);
