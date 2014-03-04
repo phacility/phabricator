@@ -659,8 +659,9 @@ final class ManiphestTransaction
         $project_phid = $new['projectPHID'];
         $column_phid = head($new['columnPHIDs']);
         return pht(
-          '%s moved this task to %s on the %s workboard.',
+          '%s moved %s to %s on the %s workboard.',
           $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid),
           $this->renderHandleLink($column_phid),
           $this->renderHandleLink($project_phid));
        break;
