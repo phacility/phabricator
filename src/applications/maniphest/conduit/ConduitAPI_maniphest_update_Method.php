@@ -49,9 +49,8 @@ final class ConduitAPI_maniphest_update_Method
     $params = $request->getAllParameters();
     unset($params['id']);
     unset($params['phid']);
-    $params = call_user_func_array('coalesce', $params);
 
-    if (!$params) {
+    if (call_user_func_array('coalesce', $params) === null) {
       throw new ConduitException('ERR-NO-EFFECT');
     }
 
