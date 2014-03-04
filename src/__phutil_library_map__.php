@@ -2475,6 +2475,7 @@ phutil_register_library_map(array(
     'PonderVote' => 'applications/ponder/constants/PonderVote.php',
     'PonderVoteEditor' => 'applications/ponder/editor/PonderVoteEditor.php',
     'PonderVoteSaveController' => 'applications/ponder/controller/PonderVoteSaveController.php',
+    'ProjectBoardTaskCard' => 'applications/project/view/ProjectBoardTaskCard.php',
     'ProjectCapabilityCreateProjects' => 'applications/project/capability/ProjectCapabilityCreateProjects.php',
     'ProjectRemarkupRule' => 'applications/project/remarkup/ProjectRemarkupRule.php',
     'PublishFragmentBuildStepImplementation' => 'applications/harbormaster/step/PublishFragmentBuildStepImplementation.php',

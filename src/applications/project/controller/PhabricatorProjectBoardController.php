@@ -55,11 +55,12 @@ final class PhabricatorProjectBoardController
       ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
       ->execute();
     $tasks = mpull($tasks, null, 'getPHID');
+    $task_phids = array_keys($tasks);
 
-    if ($tasks) {
+    if ($task_phids) {
       $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_COLUMN;
       $edge_query = id(new PhabricatorEdgeQuery())
-        ->withSourcePHIDs(mpull($tasks, 'getPHID'))
+        ->withSourcePHIDs($task_phids)
         ->withEdgeTypes(array($edge_type))
         ->withDestinationPHIDs(mpull($columns, 'getPHID'));
       $edge_query->execute();
@@ -76,6 +77,11 @@ final class PhabricatorProjectBoardController
 
       $task_map[$column_phid][] = $task_phid;
     }
+
+    $task_can_edit_map = id(new PhabricatorPolicyFilter())
+      ->setViewer($viewer)
+      ->requireCapabilities(array(PhabricatorPolicyCapability::CAN_EDIT))
+      ->apply($tasks);
 
     $board_id = celerity_generate_unique_node_id();
 
@@ -113,7 +119,17 @@ final class PhabricatorProjectBoardController
           ));
       $task_phids = idx($task_map, $column->getPHID(), array());
       foreach (array_select_keys($tasks, $task_phids) as $task) {
-        $cards->addItem($this->renderTaskCard($task));
+        $owner = null;
+        if ($task->getOwnerPHID()) {
+          $owner = $this->handles[$task->getOwnerPHID()];
+        }
+        $can_edit = idx($task_can_edit_map, $task->getPHID(), false);
+        $cards->addItem(id(new ProjectBoardTaskCard())
+          ->setViewer($viewer)
+          ->setTask($task)
+          ->setOwner($owner)
+          ->setCanEdit($can_edit)
+          ->getItem());
       }
       $panel->setCards($cards);
 
@@ -181,46 +197,6 @@ final class PhabricatorProjectBoardController
         'title' => pht('%s Board', $project->getName()),
         'device' => true,
       ));
-  }
-
-  private function renderTaskCard(ManiphestTask $task) {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-    $handles = $this->handles;
-
-    $color_map = ManiphestTaskPriority::getColorMap();
-    $bar_color = idx($color_map, $task->getPriority(), 'grey');
-
-    // TODO: Batch this earlier on.
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $task,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
-      $card = id(new PHUIObjectItemView())
-        ->setObjectName('T'.$task->getID())
-        ->setHeader($task->getTitle())
-        ->setGrippable($can_edit)
-        ->setHref('/T'.$task->getID())
-        ->addSigil('project-card')
-        ->setMetadata(
-          array(
-            'objectPHID' => $task->getPHID(),
-          ))
-        ->addAction(
-          id(new PHUIListItemView())
-            ->setName(pht('Edit'))
-            ->setIcon('edit')
-            ->setHref('/maniphest/task/edit/'.$task->getID().'/')
-            ->setWorkflow(true))
-        ->setBarColor($bar_color);
-
-    if ($task->getOwnerPHID()) {
-      $owner = $handles[$task->getOwnerPHID()];
-      $card->addAttribute($owner->renderLink());
-    }
-
-    return $card;
   }
 
 }

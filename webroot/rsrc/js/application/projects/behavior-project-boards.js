@@ -66,4 +66,21 @@ JX.behavior('project-boards', function(config) {
     lists[ii].setGroup(lists);
   }
 
+  var onedit = function(card, r) {
+    var nodes = JX.$H(r.tasks).getFragment().firstChild;
+    var new_card = JX.$H(r.tasks);
+    JX.DOM.replace(card, new_card);
+  };
+
+  JX.Stratcom.listen(
+    'click',
+    ['edit-project-card'],
+    function(e) {
+      e.kill();
+      var card = e.getNode('project-card');
+      new JX.Workflow(e.getNode('tag:a').href, { 'response_type' : 'card' })
+        .setHandler(JX.bind(null, onedit, card))
+        .start();
+    });
+
 });

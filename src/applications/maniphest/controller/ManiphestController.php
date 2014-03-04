@@ -66,5 +66,4 @@ abstract class ManiphestController extends PhabricatorController {
     return $view;
   }
 
-
 }

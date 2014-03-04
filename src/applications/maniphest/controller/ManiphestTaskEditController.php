@@ -12,6 +12,7 @@ final class ManiphestTaskEditController extends ManiphestController {
 
     $request = $this->getRequest();
     $user = $request->getUser();
+    $response_type = $request->getStr('response_type', 'task');
 
     $can_edit_assign = $this->hasApplicationCapability(
       ManiphestCapabilityEditAssign::CAPABILITY);
@@ -335,9 +336,30 @@ final class ManiphestTaskEditController extends ManiphestController {
         }
 
         if ($request->isAjax()) {
+          switch ($response_type) {
+            case 'card':
+              $owner = null;
+              if ($task->getOwnerPHID()) {
+                $owner = id(new PhabricatorHandleQuery())
+                  ->setViewer($user)
+                  ->withPHIDs(array($task->getOwnerPHID()))
+                  ->executeOne();
+              }
+              $tasks = id(new ProjectBoardTaskCard())
+                ->setViewer($user)
+                ->setTask($task)
+                ->setOwner($owner)
+                ->setCanEdit(true)
+                ->getItem();
+              break;
+            case 'task':
+            default:
+              $tasks = $this->renderSingleTask($task);
+              break;
+          }
           return id(new AphrontAjaxResponse())->setContent(
             array(
-              'tasks' => $this->renderSingleTask($task),
+              'tasks' => $tasks,
             ));
         }
 
@@ -463,7 +485,8 @@ final class ManiphestTaskEditController extends ManiphestController {
     $form = new AphrontFormView();
     $form
       ->setUser($user)
-      ->addHiddenInput('template', $template_id);
+      ->addHiddenInput('template', $template_id)
+      ->addHiddenInput('response_type', $response_type);
 
     if ($parent_task) {
       $form
