@@ -401,7 +401,7 @@ return array(
     'rsrc/js/application/policy/behavior-policy-control.js' => 'c01153ea',
     'rsrc/js/application/policy/behavior-policy-rule-editor.js' => '263aeb8c',
     'rsrc/js/application/ponder/behavior-votebox.js' => '327dbe61',
-    'rsrc/js/application/projects/behavior-project-boards.js' => '1b9facd8',
+    'rsrc/js/application/projects/behavior-project-boards.js' => 'cbdc9b22',
     'rsrc/js/application/projects/behavior-project-create.js' => '065227cc',
     'rsrc/js/application/releeph/releeph-preview-branch.js' => '9eb2cedb',
     'rsrc/js/application/releeph/releeph-request-state-change.js' => 'fe7fc914',
@@ -610,7 +610,7 @@ return array(
     'javelin-behavior-policy-control' => 'c01153ea',
     'javelin-behavior-policy-rule-editor' => '263aeb8c',
     'javelin-behavior-ponder-votebox' => '327dbe61',
-    'javelin-behavior-project-boards' => '1b9facd8',
+    'javelin-behavior-project-boards' => 'cbdc9b22',
     'javelin-behavior-project-create' => '065227cc',
     'javelin-behavior-refresh-csrf' => 'c4b31646',
     'javelin-behavior-releeph-preview-branch' => '9eb2cedb',
@@ -937,15 +937,6 @@ return array(
       1 => 'javelin-util',
       2 => 'phabricator-keyboard-shortcut-manager',
     ),
-    '1b9facd8' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-      2 => 'javelin-util',
-      3 => 'javelin-stratcom',
-      4 => 'javelin-workflow',
-      5 => 'phabricator-draggable-list',
-    ),
     '1e1c8a59' =>
     array(
       0 => 'javelin-behavior',
@@ -1225,13 +1216,6 @@ return array(
       2 => 'javelin-util',
       3 => 'phabricator-shaped-request',
     ),
-    '62e18640' =>
-    array(
-      0 => 'javelin-install',
-      1 => 'javelin-util',
-      2 => 'javelin-dom',
-      3 => 'javelin-typeahead-normalizer',
-    ),
     '6453c869' =>
     array(
       0 => 'javelin-install',
@@ -1264,6 +1248,13 @@ return array(
     array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
+    ),
+    '62e18640' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
+      2 => 'javelin-dom',
+      3 => 'javelin-typeahead-normalizer',
     ),
     '75903ee1' =>
     array(
@@ -1697,6 +1688,15 @@ return array(
       1 => 'javelin-dom',
       2 => 'javelin-stratcom',
       3 => 'phabricator-phtize',
+    ),
+    'cbdc9b22' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-util',
+      3 => 'javelin-stratcom',
+      4 => 'javelin-workflow',
+      5 => 'phabricator-draggable-list',
     ),
     'cd9e7094' =>
     array(

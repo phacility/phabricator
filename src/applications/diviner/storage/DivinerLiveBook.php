@@ -38,6 +38,10 @@ final class DivinerLiveBook extends DivinerDAO
     return $this->getConfig('short', $this->getTitle());
   }
 
+  public function getPreface() {
+    return $this->getConfig('preface');
+  }
+
   public function getGroupName($group) {
     $groups = $this->getConfig('groups');
     $spec = idx($groups, $group, array());

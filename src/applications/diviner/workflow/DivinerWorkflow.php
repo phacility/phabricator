@@ -37,6 +37,7 @@ abstract class DivinerWorkflow extends PhabricatorManagementWorkflow {
         'name' => 'string',
         'title' => 'optional string',
         'short' => 'optional string',
+        'preface' => 'optional string',
         'root' => 'optional string',
         'uri.source' => 'optional string',
         'rules' => 'optional map<regex, string>',
