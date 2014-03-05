@@ -437,6 +437,7 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     // be able to put the revision into "accepted".
     switch ($revision->getStatus()) {
       case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+      case ArcanistDifferentialRevisionStatus::CHANGES_PLANNED:
       case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
         $revision = self::updateAcceptedStatus(
           $this->getActor(),

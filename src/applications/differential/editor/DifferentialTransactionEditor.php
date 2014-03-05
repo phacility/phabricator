@@ -72,6 +72,7 @@ final class DifferentialTransactionEditor
         $status_abandoned = ArcanistDifferentialRevisionStatus::ABANDONED;
         $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
         $status_revision = ArcanistDifferentialRevisionStatus::NEEDS_REVISION;
+        $status_plan = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
 
         $action_type = $xaction->getNewValue();
         switch ($action_type) {
@@ -86,7 +87,7 @@ final class DifferentialTransactionEditor
             $actor = $this->getActor();
             $actor_phid = $actor->getPHID();
 
-            // These transactions can cause effects in to ways: by altering the
+            // These transactions can cause effects in two ways: by altering the
             // status of an existing reviewer; or by adding the actor as a new
             // reviewer.
 
@@ -112,7 +113,7 @@ final class DifferentialTransactionEditor
           case DifferentialAction::ACTION_REOPEN:
             return ($object->getStatus() == $status_closed);
           case DifferentialAction::ACTION_RETHINK:
-            return ($object->getStatus() != $status_revision);
+            return ($object->getStatus() != $status_plan);
           case DifferentialAction::ACTION_REQUEST:
             return ($object->getStatus() != $status_review);
           case DifferentialAction::ACTION_RESIGN:
@@ -139,6 +140,7 @@ final class DifferentialTransactionEditor
 
     $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
     $status_revision = ArcanistDifferentialRevisionStatus::NEEDS_REVISION;
+    $status_plan = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
@@ -169,7 +171,7 @@ final class DifferentialTransactionEditor
             $object->setStatus(ArcanistDifferentialRevisionStatus::ABANDONED);
             return;
           case DifferentialAction::ACTION_RETHINK:
-            $object->setStatus($status_revision);
+            $object->setStatus($status_plan);
             return;
           case DifferentialAction::ACTION_RECLAIM:
             $object->setStatus($status_review);
@@ -714,7 +716,7 @@ final class DifferentialTransactionEditor
         if (!$actor_is_author) {
           return pht(
             "You can not plan changes to this revision because you do not ".
-            "own it. To plan chagnes to a revision, you must be its owner.");
+            "own it. To plan changes to a revision, you must be its owner.");
         }
 
         switch ($revision_status) {
@@ -722,6 +724,9 @@ final class DifferentialTransactionEditor
           case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
           case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
             // These are OK.
+            break;
+          case ArcanistDifferentialRevisionStatus::CHANGES_PLANNED:
+            // Let this through, it's a no-op.
             break;
           case ArcanistDifferentialRevisionStatus::ABANDONED:
             return pht(
@@ -752,6 +757,7 @@ final class DifferentialTransactionEditor
         switch ($revision_status) {
           case ArcanistDifferentialRevisionStatus::ACCEPTED:
           case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+          case ArcanistDifferentialRevisionStatus::CHANGES_PLANNED:
             // These are OK.
             break;
           case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:

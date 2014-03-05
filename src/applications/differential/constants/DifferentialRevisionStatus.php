@@ -21,11 +21,15 @@ final class DifferentialRevisionStatus {
         self::COLOR_STATUS_DEFAULT,
       ArcanistDifferentialRevisionStatus::NEEDS_REVISION =>
         self::COLOR_STATUS_RED,
+      ArcanistDifferentialRevisionStatus::CHANGES_PLANNED =>
+        self::COLOR_STATUS_RED,
       ArcanistDifferentialRevisionStatus::ACCEPTED       =>
         self::COLOR_STATUS_GREEN,
       ArcanistDifferentialRevisionStatus::CLOSED         =>
         self::COLOR_STATUS_DARK,
       ArcanistDifferentialRevisionStatus::ABANDONED      =>
+        self::COLOR_STATUS_DARK,
+      ArcanistDifferentialRevisionStatus::IN_PREPARATION =>
         self::COLOR_STATUS_DARK,
     );
     return idx($map, $status, $default);
@@ -39,12 +43,16 @@ final class DifferentialRevisionStatus {
         'oh-open',
       ArcanistDifferentialRevisionStatus::NEEDS_REVISION =>
         'oh-open-red',
+      ArcanistDifferentialRevisionStatus::CHANGES_PLANNED =>
+        'oh-open-red',
       ArcanistDifferentialRevisionStatus::ACCEPTED       =>
         'oh-open-green',
       ArcanistDifferentialRevisionStatus::CLOSED         =>
         'oh-closed-dark',
       ArcanistDifferentialRevisionStatus::ABANDONED      =>
         'oh-closed-dark',
+      ArcanistDifferentialRevisionStatus::IN_PREPARATION =>
+        'question-blue',
     );
     return idx($map, $status, $default);
   }
@@ -92,9 +100,11 @@ final class DifferentialRevisionStatus {
     return array(
       ArcanistDifferentialRevisionStatus::NEEDS_REVIEW,
       ArcanistDifferentialRevisionStatus::NEEDS_REVISION,
+      ArcanistDifferentialRevisionStatus::CHANGES_PLANNED,
       ArcanistDifferentialRevisionStatus::ACCEPTED,
       ArcanistDifferentialRevisionStatus::CLOSED,
       ArcanistDifferentialRevisionStatus::ABANDONED,
+      ArcanistDifferentialRevisionStatus::IN_PREPARATION,
     );
   }
 
