@@ -81,7 +81,8 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
       ->setText(pht('%s Assigned Task(s)', new PhutilNumber($count)))
-      ->setCount($count);
+      ->setCount($count)
+      ->setHref('query/assigned/');
 
     return $status;
   }

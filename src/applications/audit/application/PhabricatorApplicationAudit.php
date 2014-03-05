@@ -59,7 +59,8 @@ final class PhabricatorApplicationAudit extends PhabricatorApplication {
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
       ->setText(pht('%d Problem Commit(s)', $count))
-      ->setCount($count);
+      ->setCount($count)
+      ->setHref('audit/view/active/');
 
     $audits = id(new PhabricatorAuditQuery())
       ->withAuditorPHIDs($phids)
@@ -72,7 +73,8 @@ final class PhabricatorApplicationAudit extends PhabricatorApplication {
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
       ->setText(pht('%d Commit(s) Awaiting Audit', $count))
-      ->setCount($count);
+      ->setCount($count)
+      ->setHref('audit/view/active/');
 
     return $status;
   }

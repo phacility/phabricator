@@ -119,13 +119,13 @@ a.application-tile-full.application-tile-create {
   background-color: {$blue};
   border-radius: 10px;
   color: white;
-  font-weight: bold;
   padding: 1px 6px 2px;
   border: 1px solid #333;
   font-size: 11px;
 }
 
 .phabricator-application-warning-count {
+  color: white;
   padding: 6px;
 }
 
