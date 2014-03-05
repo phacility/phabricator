@@ -1,5 +1,5 @@
 @title Javascript Object and Array
-@group flavortext
+@group javascript
 
 This document describes the behaviors of Object and Array in Javascript, and
 a specific approach to their use which produces basically reasonable language

@@ -16,7 +16,9 @@
     "(^scripts/)",
     "(^support/)",
     "(^resources/)",
-    "(^src/docs/user/)"
+    "(^src/docs/user/)",
+    "(^src/docs/flavor/)",
+    "(^src/docs/contributor/)"
   ],
   "groups" : {
     "arcanist" : {

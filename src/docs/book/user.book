@@ -15,7 +15,9 @@
     "(^scripts/)",
     "(^support/)",
     "(^resources/)",
-    "(^src/docs/tech/)"
+    "(^src/docs/tech/)",
+    "(^src/docs/flavor/)",
+    "(^src/docs/contributor/)"
   ],
   "groups" : {
     "intro" : {

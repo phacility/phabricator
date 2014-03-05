@@ -1,5 +1,5 @@
 @title Javascript Pitfalls
-@group flavortext
+@group javascript
 
 This document discusses pitfalls and flaws in the Javascript language, and how
 to avoid, work around, or at least understand them.
