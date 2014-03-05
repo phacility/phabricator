@@ -1634,6 +1634,21 @@ abstract class PhabricatorApplicationTransactionEditor
       ->setIsBulk(true)
       ->setBody($body->render());
 
+    $herald_xscript = $this->getHeraldTranscript();
+    if ($herald_xscript) {
+      $herald_header = $herald_xscript->getXHeraldRulesHeader();
+      $herald_header = HeraldTranscript::saveXHeraldRulesHeader(
+        $object->getPHID(),
+        $herald_header);
+    } else {
+      $herald_header = HeraldTranscript::loadXHeraldRulesHeader(
+        $object->getPHID());
+    }
+
+    if ($herald_header) {
+      $template->addHeader('X-Herald-Rules', $herald_header);
+    }
+
     if ($this->getParentMessageID()) {
       $template->setParentMessageID($this->getParentMessageID());
     }

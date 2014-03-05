@@ -3,6 +3,8 @@
 final class DifferentialTransactionEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  private $heraldEmailPHIDs;
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
@@ -851,6 +853,18 @@ final class DifferentialTransactionEditor
     return $phids;
   }
 
+  protected function getMailCC(PhabricatorLiskDAO $object) {
+    $phids = parent::getMailCC($object);
+
+    if ($this->heraldEmailPHIDs) {
+      foreach ($this->heraldEmailPHIDs as $phid) {
+        $phids[] = $phid;
+      }
+    }
+
+    return $phids;
+  }
+
   protected function getMailSubjectPrefix() {
     return PhabricatorEnv::getEnvConfig('metamta.differential.subject-prefix');
   }
@@ -1072,5 +1086,128 @@ final class DifferentialTransactionEditor
       ->executeOne();
   }
 
+/* -(  Herald Integration  )------------------------------------------------- */
+
+  protected function shouldApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    if ($this->getIsNewObject()) {
+      return true;
+    }
+
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case DifferentialTransaction::TYPE_UPDATE:
+          return true;
+      }
+    }
+
+    return parent::shouldApplyHeraldRules($object, $xactions);
+  }
+
+  protected function buildHeraldAdapter(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $unsubscribed_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $object->getPHID(),
+      PhabricatorEdgeConfig::TYPE_OBJECT_HAS_UNSUBSCRIBER);
+
+    $subscribed_phids = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $object->getPHID());
+
+    $revision = id(new DifferentialRevisionQuery())
+      ->setViewer($this->getActor())
+      ->withPHIDs(array($object->getPHID()))
+      ->needActiveDiffs(true)
+      ->needReviewerStatus(true)
+      ->executeOne();
+    if (!$revision) {
+      throw new Exception(
+        pht(
+          'Failed to load revision for Herald adapter construction!'));
+    }
+
+    $adapter = HeraldDifferentialRevisionAdapter::newLegacyAdapter(
+      $object,
+      $object->getActiveDiff());
+
+    $reviewers = $revision->getReviewerStatus();
+    $reviewer_phids = mpull($reviewers, 'getReviewerPHID');
+
+    $adapter->setExplicitCCs($subscribed_phids);
+    $adapter->setExplicitReviewers($reviewer_phids);
+    $adapter->setForbiddenCCs($unsubscribed_phids);
+
+    $adapter->setIsNewObject($this->getIsNewObject());
+
+    return $adapter;
+  }
+
+  protected function didApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    HeraldAdapter $adapter,
+    HeraldTranscript $transcript) {
+
+    $xactions = array();
+
+    // Build a transaction to adjust CCs.
+    $ccs = array(
+      '+' => array_keys($adapter->getCCsAddedByHerald()),
+      '-' => array_keys($adapter->getCCsRemovedByHerald()),
+    );
+    $value = array();
+    foreach ($ccs as $type => $phids) {
+      foreach ($phids as $phid) {
+        $value[$type][$phid] = $phid;
+      }
+    }
+
+    if ($value) {
+      $xactions[] = id(new DifferentialTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+        ->setNewValue($value);
+    }
+
+    // Build a transaction to adjust reviewers.
+    $reviewers = array(
+      DifferentialReviewerStatus::STATUS_ADDED =>
+        array_keys($adapter->getReviewersAddedByHerald()),
+      DifferentialReviewerStatus::STATUS_BLOCKING =>
+        array_keys($adapter->getBlockingReviewersAddedByHerald()),
+    );
+
+    $value = array();
+    foreach ($reviewers as $status => $phids) {
+      foreach ($phids as $phid) {
+        $value['+'][$phid] = array(
+          'data' => array(
+            'status' => $status,
+          ),
+        );
+      }
+    }
+
+    if ($value) {
+      $edge_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
+
+      $xactions[] = id(new DifferentialTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $edge_reviewer)
+        ->setNewValue($value);
+    }
+
+    // Save extra email PHIDs for later.
+    $this->heraldEmailPHIDs = $adapter->getEmailPHIDsAddedByHerald();
+
+    // Apply build plans.
+    HarbormasterBuildable::applyBuildPlans(
+      $adapter->getDiff(),
+      $adapter->getPHID(),
+      $adapter->getBuildPlans());
+
+    return $xactions;
+  }
 
 }

@@ -28,6 +28,10 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
     return $this->revision;
   }
 
+  public function getDiff() {
+    return $this->diff;
+  }
+
   public function getAdapterContentType() {
     return 'differential';
   }
