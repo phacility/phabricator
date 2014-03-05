@@ -30,6 +30,7 @@ abstract class PhabricatorApplicationTransaction
   private $transactionGroup = array();
   private $viewer = self::ATTACHABLE;
   private $object = self::ATTACHABLE;
+  private $oldValueHasBeenSet = false;
 
   private $ignoreOnNoEffect;
 
@@ -167,6 +168,16 @@ abstract class PhabricatorApplicationTransaction
     }
 
     return $blocks;
+  }
+
+  public function setOldValue($value) {
+    $this->oldValueHasBeenSet = true;
+    $this->writeField('oldValue', $value);
+    return $this;
+  }
+
+  public function hasOldValue() {
+    return $this->oldValueHasBeenSet;
   }
 
 

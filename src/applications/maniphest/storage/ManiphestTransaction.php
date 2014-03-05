@@ -28,17 +28,13 @@ final class ManiphestTransaction
   }
 
   public function shouldGenerateOldValue() {
-    $generate = true;
     switch ($this->getTransactionType()) {
       case self::TYPE_PROJECT_COLUMN:
       case self::TYPE_EDGE:
-        $generate = false;
-        break;
-      default:
-        $generate = true;
-        break;
+        return false;
     }
-    return $generate;
+
+    return parent::shouldGenerateOldValue();
   }
 
   public function getRequiredHandlePHIDs() {

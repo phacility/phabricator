@@ -122,8 +122,11 @@ abstract class PhabricatorApplicationTransactionEditor
   private function adjustTransactionValues(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
-    $old = $this->getTransactionOldValue($object, $xaction);
-    $xaction->setOldValue($old);
+
+    if ($xaction->shouldGenerateOldValue()) {
+      $old = $this->getTransactionOldValue($object, $xaction);
+      $xaction->setOldValue($old);
+    }
 
     $new = $this->getTransactionNewValue($object, $xaction);
     $xaction->setNewValue($new);
@@ -723,37 +726,61 @@ abstract class PhabricatorApplicationTransactionEditor
     assert_instances_of($xactions, 'PhabricatorApplicationTransaction');
     foreach ($xactions as $xaction) {
       if ($xaction->getPHID() || $xaction->getID()) {
-        throw new Exception(
-          "You can not apply transactions which already have IDs/PHIDs!");
+        throw new PhabricatorApplicationTransactionStructureException(
+          $xaction,
+          pht(
+            "You can not apply transactions which already have IDs/PHIDs!"));
       }
       if ($xaction->getObjectPHID()) {
-        throw new Exception(
-          "You can not apply transactions which already have objectPHIDs!");
+        throw new PhabricatorApplicationTransactionStructureException(
+          $xaction,
+          pht(
+            "You can not apply transactions which already have objectPHIDs!"));
       }
       if ($xaction->getAuthorPHID()) {
-        throw new Exception(
-          "You can not apply transactions which already have authorPHIDs!");
+        throw new PhabricatorApplicationTransactionStructureException(
+          $xaction,
+          pht(
+            'You can not apply transactions which already have authorPHIDs!'));
       }
       if ($xaction->getCommentPHID()) {
-        throw new Exception(
-          "You can not apply transactions which already have commentPHIDs!");
+        throw new PhabricatorApplicationTransactionStructureException(
+          $xaction,
+          pht(
+            'You can not apply transactions which already have '.
+            'commentPHIDs!'));
       }
       if ($xaction->getCommentVersion() !== 0) {
-        throw new Exception(
-          "You can not apply transactions which already have commentVersions!");
+        throw new PhabricatorApplicationTransactionStructureException(
+          $xaction,
+          pht(
+            'You can not apply transactions which already have '.
+            'commentVersions!'));
       }
 
-      if (!$xaction->shouldGenerateOldValue()) {
-        if ($xaction->getOldValue() === null) {
-          throw new Exception(
-            'You can not apply transactions which should already have '.
-            'oldValue but do not!');
-        }
+      $expect_value = !$xaction->shouldGenerateOldValue();
+      $has_value = $xaction->hasOldValue();
+
+      if ($expect_value && !$has_value) {
+        throw new PhabricatorApplicationTransactionStructureException(
+          $xaction,
+          pht(
+            'This transaction is supposed to have an oldValue set, but '.
+            'it does not!'));
+      }
+
+      if ($has_value && !$expect_value) {
+        throw new PhabricatorApplicationTransactionStructureException(
+          $xaction,
+          pht(
+            'This transaction should generate its oldValue automatically, '.
+            'but has already had one set!'));
       }
 
       $type = $xaction->getTransactionType();
       if (empty($types[$type])) {
-        throw new Exception(
+        throw new PhabricatorApplicationTransactionStructureException(
+          $xaction,
           pht(
             'Transaction has type "%s", but that transaction type is not '.
             'supported by this editor (%s).',
