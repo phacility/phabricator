@@ -30,7 +30,7 @@ final class DivinerAtomizeWorkflow extends DivinerWorkflow {
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $this->readBookConfiguration($args);
+    $this->readBookConfiguration($args->getArg('book'));
 
     $console = PhutilConsole::getConsole();
 

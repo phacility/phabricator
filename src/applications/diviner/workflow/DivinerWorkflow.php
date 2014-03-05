@@ -17,8 +17,7 @@ abstract class DivinerWorkflow extends PhabricatorManagementWorkflow {
     return $this->config;
   }
 
-  protected function readBookConfiguration(PhutilArgumentParser $args) {
-    $book_path = $args->getArg('book');
+  protected function readBookConfiguration($book_path) {
     if ($book_path === null) {
       throw new PhutilArgumentUsageException(
         "Specify a Diviner book configuration file with --book.");
