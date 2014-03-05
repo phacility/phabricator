@@ -18,8 +18,10 @@ JX.behavior('project-boards', function(config) {
     JX.DOM.alterClass(node, 'project-column-empty', !this.findItems().length);
   }
 
-  function onresponse(response) {
-
+  function onresponse(response, item, list) {
+    list.unlock();
+    JX.DOM.alterClass(item, 'drag-sending', false);
+    JX.DOM.replace(item, JX.$H(response.task));
   }
 
   function ondrop(list, item, after, from) {
@@ -37,10 +39,7 @@ JX.behavior('project-boards', function(config) {
 
     var workflow = new JX.Workflow(config.moveURI, data)
       .setHandler(function(response) {
-        onresponse(response);
-        list.unlock();
-
-        JX.DOM.alterClass(item, 'drag-sending', false);
+        onresponse(response, item, list);
       });
 
     workflow.start();

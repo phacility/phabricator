@@ -109,7 +109,7 @@ final class ManiphestTransaction
         return true;
     }
 
-    return false;
+    return parent::shouldHide();
   }
 
   public function getActionStrength() {

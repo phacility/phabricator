@@ -156,7 +156,9 @@ final class PhabricatorMacroEditor
     return PhabricatorEnv::getEnvConfig('metamta.macro.subject-prefix');
   }
 
-  protected function supportsFeed() {
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
     return true;
   }
 }

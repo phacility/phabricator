@@ -597,7 +597,7 @@ abstract class PhabricatorApplicationTransactionEditor
         ->queueDocumentForIndexing($object->getPHID());
     }
 
-    if ($this->supportsFeed()) {
+    if ($this->shouldPublishFeedStory($object, $xactions)) {
       $mailed = array();
       if ($mail) {
         $mailed = $mail->buildRecipientList();
@@ -1664,7 +1664,9 @@ abstract class PhabricatorApplicationTransactionEditor
   /**
    * @task feed
    */
-  protected function supportsFeed() {
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
     return false;
   }
 
@@ -1729,6 +1731,7 @@ abstract class PhabricatorApplicationTransactionEditor
     array $xactions,
     array $mailed_phids) {
 
+    $xactions = mfilter($xactions, 'shouldHideForFeed', true);
     $related_phids = $this->getFeedRelatedPHIDs($object, $xactions);
     $subscribed_phids = $this->getFeedNotifyPHIDs($object, $xactions);
 

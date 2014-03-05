@@ -354,6 +354,10 @@ abstract class PhabricatorApplicationTransaction
     return $this->shouldHide();
   }
 
+  public function shouldHideForFeed() {
+    return $this->shouldHide();
+  }
+
   public function getTitleForMail() {
     return id(clone $this)->setRenderingTarget('text')->getTitle();
   }

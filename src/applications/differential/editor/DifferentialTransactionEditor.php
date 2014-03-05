@@ -785,7 +785,9 @@ final class DifferentialTransactionEditor
     return parent::requireCapabilities($object, $xaction);
   }
 
-  protected function supportsFeed() {
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
     return true;
   }
 

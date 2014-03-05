@@ -251,19 +251,8 @@ final class ManiphestTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $should_mail = true;
-    if (count($xactions) == 1) {
-      $xaction = head($xactions);
-      switch ($xaction->getTransactionType()) {
-        case ManiphestTransaction::TYPE_SUBPRIORITY:
-          $should_mail = false;
-          break;
-        default:
-          $should_mail = true;
-          break;
-      }
-    }
-    return $should_mail;
+    $xactions = mfilter($xactions, 'shouldHide', true);
+    return $xactions;
   }
 
   protected function getMailSubjectPrefix() {
@@ -318,8 +307,10 @@ final class ManiphestTransactionEditor
     return $body;
   }
 
-  protected function supportsFeed() {
-    return true;
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return $this->shouldSendMail($object, $xactions);
   }
 
   protected function supportsSearch() {

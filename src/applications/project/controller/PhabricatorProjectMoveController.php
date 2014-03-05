@@ -105,7 +105,22 @@ final class PhabricatorProjectMoveController
 
     $editor->applyTransactions($object, $xactions);
 
-    return id(new AphrontAjaxResponse())->setContent(array());
-  }
+    $owner = null;
+    if ($object->getOwnerPHID()) {
+      $owner = id(new PhabricatorHandleQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($object->getOwnerPHID()))
+        ->executeOne();
+    }
+    $card = id(new ProjectBoardTaskCard())
+      ->setViewer($viewer)
+      ->setTask($object)
+      ->setOwner($owner)
+      ->setCanEdit(true)
+      ->getItem();
+
+    return id(new AphrontAjaxResponse())->setContent(
+      array('task' => $card));
+ }
 
 }
