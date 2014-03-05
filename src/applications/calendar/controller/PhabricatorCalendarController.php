@@ -8,7 +8,8 @@ abstract class PhabricatorCalendarController extends PhabricatorController {
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
     $nav->addLabel(pht('Calendar'));
-    $nav->addFilter('/', pht('View All'));
+    $nav->addFilter('/', pht('My Events'));
+    $nav->addFilter('all/', pht('View All'));
     $nav->addFilter('event/create/', pht('Create Event'));
 
     if ($status && $status->getID()) {

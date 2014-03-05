@@ -1,12 +1,13 @@
 <?php
 
-final class PhabricatorCalendarBrowseController
+final class PhabricatorCalendarViewController
   extends PhabricatorCalendarController {
 
   public function processRequest() {
+    $user = $this->getRequest()->getUser();
+
     $now     = time();
     $request = $this->getRequest();
-    $user    = $request->getUser();
     $year_d  = phabricator_format_local_time($now, $user, 'Y');
     $year    = $request->getInt('year', $year_d);
     $month_d = phabricator_format_local_time($now, $user, 'm');
@@ -21,6 +22,7 @@ final class PhabricatorCalendarBrowseController
 
     $statuses = id(new PhabricatorCalendarEventQuery())
       ->setViewer($user)
+      ->withInvitedPHIDs(array($user->getPHID()))
       ->withDateRange(
         strtotime("{$year}-{$month}-01"),
         strtotime("{$year}-{$month}-01 next month"))
@@ -39,48 +41,27 @@ final class PhabricatorCalendarBrowseController
     $phids = mpull($statuses, 'getUserPHID');
     $handles = $this->loadViewerHandles($phids);
 
-    /* Assign Colors */
-    $unique = array_unique($phids);
-    $allblue = false;
-    $calcolors = CalendarColors::getColors();
-    if (count($unique) > count($calcolors)) {
-      $allblue = true;
-    }
-    $i = 0;
-    $eventcolor = array();
-    foreach ($unique as $phid) {
-      if ($allblue) {
-        $eventcolor[$phid] = CalendarColors::COLOR_SKY;
-      } else {
-        $eventcolor[$phid] = $calcolors[$i];
-      }
-      $i++;
-    }
-
     foreach ($statuses as $status) {
       $event = new AphrontCalendarEventView();
       $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
-
-      $name_text = $handles[$status->getUserPHID()]->getName();
-      $status_text = $status->getHumanStatus();
       $event->setUserPHID($status->getUserPHID());
-      $event->setDescription(pht('%s (%s)', $name_text, $status_text));
-      $event->setName($status_text);
+      $event->setName($status->getHumanStatus());
+      $event->setDescription($status->getDescription());
       $event->setEventID($status->getID());
-      $event->setColor($eventcolor[$status->getUserPHID()]);
       $month_view->addEvent($event);
     }
 
     $date = new DateTime("{$year}-{$month}-01");
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('All Events'));
+    $crumbs->addTextCrumb(pht('My Events'));
     $crumbs->addTextCrumb($date->format('F Y'));
 
     $nav = $this->buildSideNavView();
-    $nav->selectFilter('all/');
+    $nav->selectFilter('/');
     $nav->appendChild(
       array(
         $crumbs,
+        $this->getNoticeView(),
         $month_view,
       ));
 
@@ -90,6 +71,27 @@ final class PhabricatorCalendarBrowseController
         'title' => pht('Calendar'),
         'device' => true,
       ));
+  }
+
+  private function getNoticeView() {
+    $request = $this->getRequest();
+    $view    = null;
+
+    if ($request->getExists('created')) {
+      $view = id(new AphrontErrorView())
+        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+        ->setTitle(pht('Successfully created your status.'));
+    } else if ($request->getExists('updated')) {
+      $view = id(new AphrontErrorView())
+        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+        ->setTitle(pht('Successfully updated your status.'));
+    } else if ($request->getExists('deleted')) {
+      $view = id(new AphrontErrorView())
+        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+        ->setTitle(pht('Successfully deleted your status.'));
+    }
+
+    return $view;
   }
 
 }
