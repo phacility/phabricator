@@ -109,6 +109,10 @@ final class DivinerAtomRef {
     return $this->title;
   }
 
+  public function getTitleSlug() {
+    return self::normalizeTitleString($this->getTitle());
+  }
+
   public function toDictionary() {
     return array(
       'book'    => $this->getBook(),
@@ -144,6 +148,7 @@ final class DivinerAtomRef {
     $obj->index = idx($dict, 'index');
     $obj->summary = idx($dict, 'summary');
     $obj->title = idx($dict, 'title');
+
     return $obj;
   }
 
@@ -191,6 +196,11 @@ final class DivinerAtomRef {
     );
 
     return idx($alternates, $str, $str);
+  }
+
+  public static function normalizeTitleString($str) {
+    $str = self::normalizeString($str);
+    return phutil_utf8_strtolower($str);
   }
 
 }

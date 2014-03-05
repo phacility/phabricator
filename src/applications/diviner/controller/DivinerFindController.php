@@ -24,14 +24,7 @@ final class DivinerFindController extends DivinerController {
     }
 
     $query = id(new DivinerAtomQuery())
-      ->setViewer($viewer)
-      ->withNames(
-        array(
-          $request->getStr('name'),
-          // TODO: This could probably be more smartly normalized in the DB,
-          // but just fake it for now.
-          phutil_utf8_strtolower($request->getStr('name')),
-        ));
+      ->setViewer($viewer);
 
     if ($book) {
       $query->withBookPHIDs(array($book->getPHID()));
@@ -47,7 +40,23 @@ final class DivinerFindController extends DivinerController {
       $query->withTypes(array($type));
     }
 
-    $atoms = $query->execute();
+    $name_query = clone $query;
+
+    $name_query->withNames(
+      array(
+        $request->getStr('name'),
+        // TODO: This could probably be more smartly normalized in the DB,
+        // but just fake it for now.
+        phutil_utf8_strtolower($request->getStr('name')),
+      ));
+
+    $atoms = $name_query->execute();
+
+    if (!$atoms) {
+      $title_query = clone $query;
+      $title_query->withTitles(array($request->getStr('name')));
+      $atoms = $title_query->execute();
+    }
 
     if (!$atoms) {
       return new Aphront404Response();

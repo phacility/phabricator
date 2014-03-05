@@ -197,6 +197,7 @@ final class DivinerAtom {
     }
 
     $parts = array(
+      $this->getBook(),
       $this->getType(),
       $this->getName(),
       $this->getFile(),

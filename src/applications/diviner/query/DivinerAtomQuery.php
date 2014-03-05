@@ -13,6 +13,7 @@ final class DivinerAtomQuery
   private $includeUndocumentable;
   private $includeGhosts;
   private $nodeHashes;
+  private $titles;
 
   private $needAtoms;
   private $needExtends;
@@ -55,6 +56,11 @@ final class DivinerAtomQuery
 
   public function withNodeHashes(array $hashes) {
     $this->nodeHashes = $hashes;
+    return $this;
+  }
+
+  public function withTitles($titles) {
+    $this->titles = $titles;
     return $this;
   }
 
@@ -285,6 +291,20 @@ final class DivinerAtomQuery
         $conn_r,
         'name IN (%Ls)',
         $this->names);
+    }
+
+    if ($this->titles) {
+      $hashes = array();
+      foreach ($this->titles as $title) {
+        $slug = DivinerAtomRef::normalizeTitleString($title);
+        $hash = PhabricatorHash::digestForIndex($slug);
+        $hashes[] = $hash;
+      }
+
+      $where[] = qsprintf(
+        $conn_r,
+        'titleSlugHash in (%Ls)',
+        $hashes);
     }
 
     if ($this->contexts) {
