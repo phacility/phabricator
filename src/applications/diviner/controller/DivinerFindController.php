@@ -11,6 +11,7 @@ final class DivinerFindController extends DivinerController {
     $viewer = $request->getUser();
 
     $book_name = $request->getStr('book');
+    $query_text = $request->getStr('name');
 
     $book = null;
     if ($book_name) {
@@ -44,22 +45,33 @@ final class DivinerFindController extends DivinerController {
 
     $name_query->withNames(
       array(
-        $request->getStr('name'),
+        $query_text,
         // TODO: This could probably be more smartly normalized in the DB,
         // but just fake it for now.
-        phutil_utf8_strtolower($request->getStr('name')),
+        phutil_utf8_strtolower($query_text),
       ));
 
     $atoms = $name_query->execute();
 
     if (!$atoms) {
       $title_query = clone $query;
-      $title_query->withTitles(array($request->getStr('name')));
+      $title_query->withTitles(array($query_text));
       $atoms = $title_query->execute();
     }
 
+    $not_found_uri = $this->getApplicationURI();
+
     if (!$atoms) {
-      return new Aphront404Response();
+      $dialog = id(new AphrontDialogView())
+        ->setUser($viewer)
+        ->setTitle(pht('Documentation Not Found'))
+        ->appendChild(
+          pht(
+            'Unable to find the specified documentation. You may have '.
+            'followed a bad or outdated link.'))
+        ->addCancelButton($not_found_uri, pht('Read More Documentation'));
+
+      return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
     if (count($atoms) == 1 && $request->getBool('jump')) {
@@ -72,7 +84,7 @@ final class DivinerFindController extends DivinerController {
     return $this->buildApplicationPage(
       $list,
       array(
-        'title' => 'derp',
+        'title' => array(pht('Find'), pht('"%s"', $query_text)),
         'device' => true,
       ));
   }
