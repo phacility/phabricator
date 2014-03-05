@@ -137,6 +137,9 @@ final class DifferentialTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
+    $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
+    $status_revision = ArcanistDifferentialRevisionStatus::NEEDS_REVISION;
+
     switch ($xaction->getTransactionType()) {
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
         $object->setViewPolicy($xaction->getNewValue());
@@ -151,12 +154,10 @@ final class DifferentialTransactionEditor
       case PhabricatorTransactions::TYPE_EDGE:
         return;
       case DifferentialTransaction::TYPE_UPDATE:
+        $object->setStatus($status_review);
         // TODO: Update the `diffPHID` once we add that.
         return;
       case DifferentialTransaction::TYPE_ACTION:
-        $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
-        $status_revision = ArcanistDifferentialRevisionStatus::NEEDS_REVISION;
-
         switch ($xaction->getNewValue()) {
           case DifferentialAction::ACTION_RESIGN:
           case DifferentialAction::ACTION_ACCEPT:
@@ -203,6 +204,38 @@ final class DifferentialTransactionEditor
 
     $results = parent::expandTransaction($object, $xaction);
     switch ($xaction->getTransactionType()) {
+      case DifferentialTransaction::TYPE_UPDATE:
+        $new_accept = DifferentialReviewerStatus::STATUS_ACCEPTED;
+        $new_reject = DifferentialReviewerStatus::STATUS_REJECTED;
+        $old_accept = DifferentialReviewerStatus::STATUS_ACCEPTED_OLDER;
+        $old_reject = DifferentialReviewerStatus::STATUS_REJECTED_OLDER;
+
+        // When a revision is updated, change all "reject" to "rejected older
+        // revision". This means we won't immediately push the update back into
+        // "needs review", but outstanding rejects will still block it from
+        // moving to "accepted".
+        $edits = array();
+        foreach ($object->getReviewerStatus() as $reviewer) {
+          if ($reviewer->getStatus() == $new_reject) {
+            $edits[$reviewer->getReviewerPHID()] = array(
+              'data' => array(
+                'status' => $old_reject,
+              ),
+            );
+          }
+
+          // TODO: If sticky accept is off, do a similar update for accepts.
+        }
+
+        if ($edits) {
+          $results[] = id(new DifferentialTransaction())
+            ->setTransactionType($type_edge)
+            ->setMetadataValue('edge:type', $edge_reviewer)
+            ->setIgnoreOnNoEffect(true)
+            ->setNewValue(array('+' => $edits));
+        }
+        break;
+
       case PhabricatorTransactions::TYPE_COMMENT:
         // When a user leaves a comment, upgrade their reviewer status from
         // "added" to "commented" if they're also a reviewer. We may further
@@ -433,16 +466,21 @@ final class DifferentialTransactionEditor
         //
         //   - at least one accepting reviewer who is a user; and
         //   - no rejects; and
+        //   - no rejects of older diffs; and
         //   - no blocking reviewers.
 
         $has_accepting_user = false;
         $has_rejecting_reviewer = false;
+        $has_rejecting_older_reviewer = false;
         $has_blocking_reviewer = false;
         foreach ($new_revision->getReviewerStatus() as $reviewer) {
           $reviewer_status = $reviewer->getStatus();
           switch ($reviewer_status) {
             case DifferentialReviewerStatus::STATUS_REJECTED:
               $has_rejecting_reviewer = true;
+              break;
+            case DifferentialReviewerStatus::STATUS_REJECTED_OLDER:
+              $has_rejecting_older_reviewer = true;
               break;
             case DifferentialReviewerStatus::STATUS_BLOCKING:
               $has_blocking_reviewer = true;
@@ -458,6 +496,7 @@ final class DifferentialTransactionEditor
         $new_status = null;
         if ($has_accepting_user &&
             !$has_rejecting_reviewer &&
+            !$has_rejecting_older_reviewer &&
             !$has_blocking_reviewer) {
           $new_status = $status_accepted;
         } else if ($has_rejecting_reviewer) {

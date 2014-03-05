@@ -58,6 +58,12 @@ final class DifferentialReviewersView extends AphrontView {
           }
           break;
 
+        case DifferentialReviewerStatus::STATUS_ACCEPTED_OLDER:
+          $item->setIcon(
+            'accept-dark',
+            pht('Accepted Prior Diff'));
+          break;
+
         case DifferentialReviewerStatus::STATUS_REJECTED:
           if ($is_current) {
             $item->setIcon(
@@ -68,6 +74,12 @@ final class DifferentialReviewersView extends AphrontView {
               'reject-dark',
               pht('Requested Changes to Prior Diff'));
           }
+          break;
+
+        case DifferentialReviewerStatus::STATUS_REJECTED_OLDER:
+          $item->setIcon(
+            'reject-dark',
+            pht('Rejected Prior Diff'));
           break;
 
         case DifferentialReviewerStatus::STATUS_COMMENTED:

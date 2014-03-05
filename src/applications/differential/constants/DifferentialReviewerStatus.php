@@ -7,6 +7,8 @@ final class DifferentialReviewerStatus {
   const STATUS_ACCEPTED = 'accepted';
   const STATUS_REJECTED = 'rejected';
   const STATUS_COMMENTED = 'commented';
+  const STATUS_ACCEPTED_OLDER = 'accepted-older';
+  const STATUS_REJECTED_OLDER = 'rejected-older';
 
   /**
    * Returns the relative strength of a status, used to pick a winner when a
@@ -27,8 +29,11 @@ final class DifferentialReviewerStatus {
 
       self::STATUS_BLOCKING   => 3,
 
-      self::STATUS_ACCEPTED   => 4,
-      self::STATUS_REJECTED   => 4,
+      self::STATUS_ACCEPTED_OLDER   => 4,
+      self::STATUS_REJECTED_OLDER   => 4,
+
+      self::STATUS_ACCEPTED   => 5,
+      self::STATUS_REJECTED   => 5,
     );
 
     return idx($map, $constant, 0);
