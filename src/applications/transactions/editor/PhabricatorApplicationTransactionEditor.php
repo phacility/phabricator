@@ -23,6 +23,20 @@ abstract class PhabricatorApplicationTransactionEditor
   private $subscribers;
 
   private $isPreview;
+  private $isHeraldEditor;
+  private $actingAsPHID;
+
+  public function setActingAsPHID($acting_as_phid) {
+    $this->actingAsPHID = $acting_as_phid;
+    return $this;
+  }
+
+  public function getActingAsPHID() {
+    if ($this->actingAsPHID) {
+      return $this->actingAsPHID;
+    }
+    return $this->getActor()->getPHID();
+  }
 
   /**
    * When the editor tries to apply transactions that have no effect, should
@@ -103,6 +117,15 @@ abstract class PhabricatorApplicationTransactionEditor
 
   public function getIsPreview() {
     return $this->isPreview;
+  }
+
+  public function setIsHeraldEditor($is_herald_editor) {
+    $this->isHeraldEditor = $is_herald_editor;
+    return $this;
+  }
+
+  public function getIsHeraldEditor() {
+    return $this->isHeraldEditor;
   }
 
   public function getTransactionTypes() {
@@ -391,9 +414,14 @@ abstract class PhabricatorApplicationTransactionEditor
 
     // TODO: This needs to be more sophisticated once we have meta-policies.
     $xaction->setViewPolicy(PhabricatorPolicies::POLICY_PUBLIC);
-    $xaction->setEditPolicy($actor->getPHID());
 
-    $xaction->setAuthorPHID($actor->getPHID());
+    if ($actor->isOmnipotent()) {
+      $xaction->setEditPolicy(PhabricatorPolicies::POLICY_NOONE);
+    } else {
+      $xaction->setEditPolicy($actor->getPHID());
+    }
+
+    $xaction->setAuthorPHID($this->getActingAsPHID());
     $xaction->setContentSource($this->getContentSource());
     $xaction->attachViewer($actor);
     $xaction->attachObject($object);
@@ -575,10 +603,6 @@ abstract class PhabricatorApplicationTransactionEditor
         $this->applyExternalEffects($object, $xaction);
       }
 
-      if ($this->supportsHerald()) {
-        $this->applyHeraldRules($object, $xactions);
-      }
-
       $xactions = $this->applyFinalEffects($object, $xactions);
 
       if ($read_locking) {
@@ -587,6 +611,63 @@ abstract class PhabricatorApplicationTransactionEditor
       }
 
     $object->saveTransaction();
+
+    // Now that we've completely applied the core transaction set, try to apply
+    // Herald rules. Herald rules are allowed to either take direct actions on
+    // the database (like writing flags), or take indirect actions (like saving
+    // some targets for CC when we generate mail a little later), or return
+    // transactions which we'll apply normally using another Editor.
+
+    // First, check if *this* is a sub-editor which is itself applying Herald
+    // rules: if it is, stop working and return so we don't descend into
+    // madness.
+
+    // Otherwise, we're not a Herald editor, so process Herald rules (possibly
+    // using a Herald editor to apply resulting transactions) and then send out
+    // mail, notifications, and feed updates about everything.
+
+    if ($this->getIsHeraldEditor()) {
+      // We are the Herald editor, so stop work here and return the updated
+      // transactions.
+      return $xactions;
+    } else if ($this->shouldApplyHeraldRules($object, $xactions)) {
+      // We are not the Herald editor, so try to apply Herald rules.
+      $herald_xactions = $this->applyHeraldRules($object, $xactions);
+
+      if ($herald_xactions) {
+        // NOTE: We're acting as the omnipotent user because rules deal with
+        // their own policy issues. We use a synthetic author PHID (the
+        // Herald application) as the author of record, so that transactions
+        // will render in a reasonable way ("Herald assigned this task ...").
+        $herald_actor = PhabricatorUser::getOmnipotentUser();
+        $herald_phid = id(new PhabricatorApplicationHerald())->getPHID();
+
+        // TODO: It would be nice to give transactions a more specific source
+        // which points at the rule which generated them. You can figure this
+        // out from transcripts, but it would be cleaner if you didn't have to.
+
+        $herald_source = PhabricatorContentSource::newForSource(
+          PhabricatorContentSource::SOURCE_HERALD,
+          array());
+
+        $herald_editor = newv(get_class($this), array())
+          ->setContinueOnNoEffect(true)
+          ->setContinueOnMissingFields(true)
+          ->setParentMessageID($this->getParentMessageID())
+          ->setIsHeraldEditor(true)
+          ->setActor($herald_actor)
+          ->setActingAsPHID($herald_phid)
+          ->setContentSource($herald_source);
+
+        $herald_xactions = $herald_editor->applyTransactions(
+          $object,
+          $herald_xactions);
+
+        // Merge the new transactions into the transaction list: we want to
+        // send email and publish feed stories about them, too.
+        $xactions = array_merge($xactions, $herald_xactions);
+      }
+    }
 
     $this->loadHandles($xactions);
 
@@ -1792,7 +1873,9 @@ abstract class PhabricatorApplicationTransactionEditor
 /* -(  Herald Integration )-------------------------------------------------- */
 
 
-  protected function supportsHerald() {
+  protected function shouldApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
     return false;
   }
 
@@ -1832,14 +1915,14 @@ abstract class PhabricatorApplicationTransactionEditor
     $this->setHeraldAdapter($adapter);
     $this->setHeraldTranscript($xscript);
 
-    $this->didApplyHeraldRules($object, $adapter, $xscript);
+    return $this->didApplyHeraldRules($object, $adapter, $xscript);
   }
 
   protected function didApplyHeraldRules(
     PhabricatorLiskDAO $object,
     HeraldAdapter $adapter,
     HeraldTranscript $transcript) {
-
+    return array();
   }
 
 

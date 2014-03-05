@@ -317,7 +317,9 @@ final class ManiphestTransactionEditor
     return true;
   }
 
-  protected function supportsHerald() {
+  protected function shouldApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
     return true;
   }
 
@@ -334,18 +336,15 @@ final class ManiphestTransactionEditor
     HeraldAdapter $adapter,
     HeraldTranscript $transcript) {
 
+    // TODO: Convert these to transactions. The way Maniphest deals with these
+    // transactions is currently unconventional and messy.
+
     $save_again = false;
     $cc_phids = $adapter->getCcPHIDs();
     if ($cc_phids) {
       $existing_cc = $object->getCCPHIDs();
       $new_cc = array_unique(array_merge($cc_phids, $existing_cc));
       $object->setCCPHIDs($new_cc);
-      $save_again = true;
-    }
-
-    $assign_phid = $adapter->getAssignPHID();
-    if ($assign_phid) {
-      $object->setOwnerPHID($assign_phid);
       $save_again = true;
     }
 
@@ -361,6 +360,17 @@ final class ManiphestTransactionEditor
     if ($save_again) {
       $object->save();
     }
+
+    $xactions = array();
+
+    $assign_phid = $adapter->getAssignPHID();
+    if ($assign_phid) {
+      $xactions[] = id(new ManiphestTransaction())
+        ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
+        ->setNewValue($assign_phid);
+    }
+
+    return $xactions;
   }
 
   protected function requireCapabilities(
