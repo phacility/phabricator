@@ -642,11 +642,11 @@ phutil_register_library_map(array(
     'DivinerFileAtomizer' => 'applications/diviner/atomizer/DivinerFileAtomizer.php',
     'DivinerFindController' => 'applications/diviner/controller/DivinerFindController.php',
     'DivinerGenerateWorkflow' => 'applications/diviner/workflow/DivinerGenerateWorkflow.php',
-    'DivinerLegacyController' => 'applications/diviner/controller/DivinerLegacyController.php',
     'DivinerLiveAtom' => 'applications/diviner/storage/DivinerLiveAtom.php',
     'DivinerLiveBook' => 'applications/diviner/storage/DivinerLiveBook.php',
     'DivinerLivePublisher' => 'applications/diviner/publisher/DivinerLivePublisher.php',
     'DivinerLiveSymbol' => 'applications/diviner/storage/DivinerLiveSymbol.php',
+    'DivinerMainController' => 'applications/diviner/controller/DivinerMainController.php',
     'DivinerPHIDTypeAtom' => 'applications/diviner/phid/DivinerPHIDTypeAtom.php',
     'DivinerPHIDTypeBook' => 'applications/diviner/phid/DivinerPHIDTypeBook.php',
     'DivinerPHPAtomizer' => 'applications/diviner/atomizer/DivinerPHPAtomizer.php',
@@ -3207,7 +3207,6 @@ phutil_register_library_map(array(
     'DivinerFileAtomizer' => 'DivinerAtomizer',
     'DivinerFindController' => 'DivinerController',
     'DivinerGenerateWorkflow' => 'DivinerWorkflow',
-    'DivinerLegacyController' => 'DivinerController',
     'DivinerLiveAtom' => 'DivinerDAO',
     'DivinerLiveBook' =>
     array(
@@ -3221,6 +3220,7 @@ phutil_register_library_map(array(
       1 => 'PhabricatorPolicyInterface',
       2 => 'PhabricatorMarkupInterface',
     ),
+    'DivinerMainController' => 'DivinerController',
     'DivinerPHIDTypeAtom' => 'PhabricatorPHIDType',
     'DivinerPHIDTypeBook' => 'PhabricatorPHIDType',
     'DivinerPHPAtomizer' => 'DivinerAtomizer',
