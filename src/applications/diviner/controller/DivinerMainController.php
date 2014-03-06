@@ -2,6 +2,10 @@
 
 final class DivinerMainController extends DivinerController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
     $viewer = $request->getUser();

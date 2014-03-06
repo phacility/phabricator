@@ -57,7 +57,7 @@ final class DivinerLiveBook extends DivinerDAO
   }
 
   public function getPolicy($capability) {
-    return $this->viewPolicy;
+    return PhabricatorPolicies::getMostOpenPolicy();
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
