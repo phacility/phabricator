@@ -2,6 +2,7 @@
   "name" : "phabricator",
   "title" : "Phabricator User Documentation",
   "short" : "Phabricator User Docs",
+  "preface" : "Instructions for installing, configuring, and using Phabricator.",
   "root" : "../../../",
   "uri.source" :
     "https://secure.phabricator.com/diffusion/P/browse/master/%f$%l",
@@ -14,7 +15,9 @@
     "(^scripts/)",
     "(^support/)",
     "(^resources/)",
-    "(^src/docs/tech/)"
+    "(^src/docs/tech/)",
+    "(^src/docs/flavor/)",
+    "(^src/docs/contributor/)"
   ],
   "groups" : {
     "intro" : {

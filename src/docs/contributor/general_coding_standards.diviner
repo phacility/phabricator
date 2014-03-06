@@ -1,5 +1,5 @@
 @title General Coding Standards
-@group contrib
+@group standards
 
 This document is a general coding standard for contributing to Phabricator,
 Arcanist, libphutil and Diviner.

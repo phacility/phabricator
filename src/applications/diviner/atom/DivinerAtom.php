@@ -197,6 +197,7 @@ final class DivinerAtom {
     }
 
     $parts = array(
+      $this->getBook(),
       $this->getType(),
       $this->getName(),
       $this->getFile(),
@@ -400,6 +401,17 @@ final class DivinerAtom {
         phlog("Need translation for '{$type}'.");
         return pht('This %s is not documented.', $type);
     }
+  }
+
+  public static function getAllTypes() {
+    return array(
+      self::TYPE_FILE,
+      self::TYPE_FUNCTION,
+      self::TYPE_CLASS,
+      self::TYPE_ARTICLE,
+      self::TYPE_METHOD,
+      self::TYPE_INTERFACE,
+    );
   }
 
   public static function getAtomTypeNameString($type) {

@@ -30,6 +30,7 @@ abstract class PhabricatorApplicationTransaction
   private $transactionGroup = array();
   private $viewer = self::ATTACHABLE;
   private $object = self::ATTACHABLE;
+  private $oldValueHasBeenSet = false;
 
   private $ignoreOnNoEffect;
 
@@ -47,6 +48,14 @@ abstract class PhabricatorApplicationTransaction
 
   public function getIgnoreOnNoEffect() {
     return $this->ignoreOnNoEffect;
+  }
+
+  public function shouldGenerateOldValue() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        return false;
+    }
+    return true;
   }
 
   abstract public function getApplicationTransactionType();
@@ -137,6 +146,40 @@ abstract class PhabricatorApplicationTransaction
   public function getObject() {
     return $this->assertAttached($this->object);
   }
+
+  public function getRemarkupBlocks() {
+    $blocks = array();
+
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $field = $this->getTransactionCustomField();
+        if ($field) {
+          $custom_blocks = $field->getApplicationTransactionRemarkupBlocks(
+            $this);
+          foreach ($custom_blocks as $custom_block) {
+            $blocks[] = $custom_block;
+          }
+        }
+        break;
+    }
+
+    if ($this->getComment()) {
+      $blocks[] = $this->getComment()->getContent();
+    }
+
+    return $blocks;
+  }
+
+  public function setOldValue($value) {
+    $this->oldValueHasBeenSet = true;
+    $this->writeField('oldValue', $value);
+    return $this;
+  }
+
+  public function hasOldValue() {
+    return $this->oldValueHasBeenSet;
+  }
+
 
 /* -(  Rendering  )---------------------------------------------------------- */
 
@@ -319,6 +362,10 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function shouldHideForMail(array $xactions) {
+    return $this->shouldHide();
+  }
+
+  public function shouldHideForFeed() {
     return $this->shouldHide();
   }
 

@@ -560,10 +560,16 @@ final class DiffusionRepositoryController extends DiffusionController {
           $uri);
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        $command = csprintf(
-          'svn checkout %R %R',
-          $uri,
-          $repository->getCloneName());
+        if ($repository->isHosted()) {
+          $command = csprintf(
+            'svn checkout %R %R',
+            $uri,
+            $repository->getCloneName());
+        } else {
+          $command = csprintf(
+            'svn checkout %R',
+            $uri);
+        }
         break;
     }
 

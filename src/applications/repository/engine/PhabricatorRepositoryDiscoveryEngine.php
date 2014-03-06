@@ -12,6 +12,8 @@ final class PhabricatorRepositoryDiscoveryEngine
 
   private $repairMode;
   private $commitCache = array();
+  private $workingSet = array();
+
   const MAX_COMMIT_CACHE_SIZE = 2048;
 
 
@@ -49,6 +51,9 @@ final class PhabricatorRepositoryDiscoveryEngine
       default:
         throw new Exception("Unknown VCS '{$vcs}'!");
     }
+
+    // Clear the working set cache.
+    $this->workingSet = array();
 
     // Record discovered commits and mark them in the cache.
     foreach ($refs as $ref) {
@@ -113,10 +118,14 @@ final class PhabricatorRepositoryDiscoveryEngine
 
       $this->log(pht("Looking for new commits."));
 
-      $refs[] = $this->discoverStreamAncestry(
+      $branch_refs = $this->discoverStreamAncestry(
         new PhabricatorGitGraphStream($repository, $commit),
         $commit,
         $repository->shouldAutocloseBranch($name));
+
+      $this->didDiscoverRefs($branch_refs);
+
+      $refs[] = $branch_refs;
     }
 
     return array_mergev($refs);
@@ -289,6 +298,8 @@ final class PhabricatorRepositoryDiscoveryEngine
     }
     $refs = array_reverse($refs);
 
+    $this->didDiscoverRefs($refs);
+
     return $refs;
   }
 
@@ -363,10 +374,14 @@ final class PhabricatorRepositoryDiscoveryEngine
 
       $this->log(pht("Looking for new commits."));
 
-      $refs[] = $this->discoverStreamAncestry(
+      $branch_refs = $this->discoverStreamAncestry(
         new PhabricatorMercurialGraphStream($repository, $commit),
         $commit,
         $close_immediately = true);
+
+      $this->didDiscoverRefs($branch_refs);
+
+      $refs[] = $branch_refs;
     }
 
     return array_mergev($refs);
@@ -444,6 +459,10 @@ final class PhabricatorRepositoryDiscoveryEngine
 
   private function isKnownCommit($identifier) {
     if (isset($this->commitCache[$identifier])) {
+      return true;
+    }
+
+    if (isset($this->workingSet[$identifier])) {
       return true;
     }
 
@@ -560,6 +579,12 @@ final class PhabricatorRepositoryDiscoveryEngine
       // more than once when looking at history, or because of races or
       // data inconsistency or cosmic radiation; in any case, we're still
       // in a good state if we ignore the failure.
+    }
+  }
+
+  private function didDiscoverRefs(array $refs) {
+    foreach ($refs as $ref) {
+      $this->workingSet[$ref->getIdentifier()] = true;
     }
   }
 

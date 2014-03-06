@@ -1,5 +1,5 @@
 @title PHP Coding Standards
-@group contrib
+@group standards
 
 This document describes PHP coding standards for Phabricator and related projects (like Arcanist and libphutil).
 

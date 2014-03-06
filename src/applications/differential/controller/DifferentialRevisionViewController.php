@@ -523,6 +523,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
           $actions[DifferentialAction::ACTION_RETHINK] = true;
           break;
         case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+        case ArcanistDifferentialRevisionStatus::CHANGES_PLANNED:
           $actions[DifferentialAction::ACTION_ACCEPT] = $allow_self_accept;
           $actions[DifferentialAction::ACTION_ABANDON] = true;
           $actions[DifferentialAction::ACTION_REQUEST] = true;
@@ -547,6 +548,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
           $actions[DifferentialAction::ACTION_RESIGN] = $viewer_is_reviewer;
           break;
         case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+        case ArcanistDifferentialRevisionStatus::CHANGES_PLANNED:
           $actions[DifferentialAction::ACTION_ACCEPT] = true;
           $actions[DifferentialAction::ACTION_REJECT] = !$viewer_has_rejected;
           $actions[DifferentialAction::ACTION_RESIGN] = $viewer_is_reviewer;
@@ -880,11 +882,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setLeftDiff($left_diff)
       ->setRightDiff($right_diff)
       ->setTransactions($xactions);
-
-    // TODO: Make this work and restore edit links. We need to copy
-    // `revisionPHID` to the new version of the comment. This should be simple,
-    // but can happen post-merge. See T2222.
-    $timeline->setShowEditActions(false);
 
     return $timeline;
   }

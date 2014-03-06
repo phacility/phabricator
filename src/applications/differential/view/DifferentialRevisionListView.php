@@ -182,6 +182,7 @@ final class DifferentialRevisionListView extends AphrontView {
         case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
           break;
         case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+        case ArcanistDifferentialRevisionStatus::CHANGES_PLANNED:
           $item->setBarColor('red');
           break;
         case ArcanistDifferentialRevisionStatus::ACCEPTED:

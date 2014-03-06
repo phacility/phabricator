@@ -13,6 +13,8 @@ final class DivinerAtomQuery
   private $includeUndocumentable;
   private $includeGhosts;
   private $nodeHashes;
+  private $titles;
+  private $nameContains;
 
   private $needAtoms;
   private $needExtends;
@@ -55,6 +57,16 @@ final class DivinerAtomQuery
 
   public function withNodeHashes(array $hashes) {
     $this->nodeHashes = $hashes;
+    return $this;
+  }
+
+  public function withTitles($titles) {
+    $this->titles = $titles;
+    return $this;
+  }
+
+  public function withNameContains($text) {
+    $this->nameContains = $text;
     return $this;
   }
 
@@ -287,6 +299,20 @@ final class DivinerAtomQuery
         $this->names);
     }
 
+    if ($this->titles) {
+      $hashes = array();
+      foreach ($this->titles as $title) {
+        $slug = DivinerAtomRef::normalizeTitleString($title);
+        $hash = PhabricatorHash::digestForIndex($slug);
+        $hashes[] = $hash;
+      }
+
+      $where[] = qsprintf(
+        $conn_r,
+        'titleSlugHash in (%Ls)',
+        $hashes);
+    }
+
     if ($this->contexts) {
       $with_null = false;
       $contexts = $this->contexts;
@@ -339,6 +365,17 @@ final class DivinerAtomQuery
         $conn_r,
         'nodeHash IN (%Ls)',
         $this->nodeHashes);
+    }
+
+    if ($this->nameContains) {
+      // NOTE: This CONVERT() call makes queries case-insensitive, since the
+      // column has binary collation. Eventually, this should move into
+      // fulltext.
+
+      $where[] = qsprintf(
+        $conn_r,
+        'CONVERT(name USING utf8) LIKE %~',
+        $this->nameContains);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

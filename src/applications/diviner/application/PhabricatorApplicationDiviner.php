@@ -21,11 +21,10 @@ final class PhabricatorApplicationDiviner extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/diviner/' => array(
-        '' => 'DivinerLegacyController',
+        '' => 'DivinerMainController',
         'query/((?<key>[^/]+)/)?' => 'DivinerAtomListController',
         'find/' => 'DivinerFindController',
       ),
-      '/docs/(?P<keyword>[^/]+)/' => 'DivinerJumpController',
       '/book/(?P<book>[^/]+)/' => 'DivinerBookController',
       '/book/'.
         '(?P<book>[^/]+)/'.

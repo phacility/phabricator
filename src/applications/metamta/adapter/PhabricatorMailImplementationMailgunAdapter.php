@@ -99,6 +99,11 @@ final class PhabricatorMailImplementationMailgunAdapter
       $params['cc'] = $this->params['ccs'];
     }
 
+    foreach (idx($this->params, 'headers', array()) as $header) {
+      list($name, $value) = $header;
+      $params['h:'.$name] = $value;
+    }
+
     $future = new HTTPSFuture(
       "https://api:{$key}@api.mailgun.net/v2/{$domain}/messages",
       $params);

@@ -70,6 +70,85 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
     return parent::getBodyForMail();
   }
 
+  public function getRequiredHandlePHIDs() {
+    $phids = parent::getRequiredHandlePHIDs();
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_UPDATE:
+        if ($new) {
+          $phids[] = $new;
+        }
+        break;
+    }
+
+    return $phids;
+  }
+
+  public function getActionName() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_INLINE:
+        return pht('Commented On');
+      case self::TYPE_UPDATE:
+        return pht('Updated');
+      case self::TYPE_ACTION:
+        $map = array(
+          DifferentialAction::ACTION_ACCEPT => pht('Accepted'),
+          DifferentialAction::ACTION_REJECT => pht('Requested Changes To'),
+          DifferentialAction::ACTION_RETHINK => pht('Planned Changes To'),
+          DifferentialAction::ACTION_ABANDON => pht('Abandoned'),
+          DifferentialAction::ACTION_CLOSE => pht('Closed'),
+          DifferentialAction::ACTION_REQUEST => pht('Requested A Review Of'),
+          DifferentialAction::ACTION_RESIGN => pht('Resigned From'),
+          DifferentialAction::ACTION_ADDREVIEWERS => pht('Added Reviewers'),
+          DifferentialAction::ACTION_CLAIM => pht('Commandeered'),
+          DifferentialAction::ACTION_REOPEN => pht('Reopened'),
+        );
+        $name = idx($map, $this->getNewValue());
+        if ($name !== null) {
+          return $name;
+        }
+        break;
+    }
+
+    return parent::getActionName();
+  }
+
+  public function getMailTags() {
+    $tags = array();
+
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS;
+        $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_CC;
+        break;
+      case self::TYPE_ACTION:
+        switch ($this->getNewValue()) {
+          case DifferentialAction::ACTION_CLOSE:
+            $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_CLOSED;
+            break;
+        }
+        break;
+      case PhabricatorTransactions::TYPE_EDGE:
+        switch ($this->getMetadataValue('edge:type')) {
+          case PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER:
+            $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEWERS;
+            break;
+        }
+        break;
+      case PhabricatorTransactions::TYPE_COMMENT:
+      case self::TYPE_INLINE:
+        $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMENT;
+        break;
+    }
+
+    if (!$tags) {
+      $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_OTHER;
+    }
+
+    return $tags;
+  }
 
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
@@ -87,10 +166,16 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
         if ($new) {
           // TODO: Migrate to PHIDs and use handles here?
           // TODO: Link this?
-          return pht(
-            '%s updated this revision to Diff #%d.',
-            $author_handle,
-            $new);
+          if (phid_get_type($new) == 'DIFF') {
+            return pht(
+              '%s updated this revision to %s.',
+              $author_handle,
+              $this->renderHandleLink($new));
+          } else {
+            return pht(
+              '%s updated this revision.',
+              $author_handle);
+          }
         } else {
           return pht(
             '%s updated this revision.',

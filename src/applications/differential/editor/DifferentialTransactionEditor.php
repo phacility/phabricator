@@ -3,6 +3,8 @@
 final class DifferentialTransactionEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  private $heraldEmailPHIDs;
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
@@ -14,11 +16,7 @@ final class DifferentialTransactionEditor
     $types[] = DifferentialTransaction::TYPE_ACTION;
     $types[] = DifferentialTransaction::TYPE_INLINE;
     $types[] = DifferentialTransaction::TYPE_STATUS;
-
-/*
-
     $types[] = DifferentialTransaction::TYPE_UPDATE;
-*/
 
     return $types;
   }
@@ -36,6 +34,12 @@ final class DifferentialTransactionEditor
         return null;
       case DifferentialTransaction::TYPE_INLINE:
         return null;
+      case DifferentialTransaction::TYPE_UPDATE:
+        if ($this->getIsNewObject()) {
+          return null;
+        } else {
+          return $object->getActiveDiff()->getPHID();
+        }
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -49,6 +53,7 @@ final class DifferentialTransactionEditor
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case DifferentialTransaction::TYPE_ACTION:
+      case DifferentialTransaction::TYPE_UPDATE:
         return $xaction->getNewValue();
       case DifferentialTransaction::TYPE_INLINE:
         return null;
@@ -69,6 +74,7 @@ final class DifferentialTransactionEditor
         $status_abandoned = ArcanistDifferentialRevisionStatus::ABANDONED;
         $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
         $status_revision = ArcanistDifferentialRevisionStatus::NEEDS_REVISION;
+        $status_plan = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
 
         $action_type = $xaction->getNewValue();
         switch ($action_type) {
@@ -83,7 +89,7 @@ final class DifferentialTransactionEditor
             $actor = $this->getActor();
             $actor_phid = $actor->getPHID();
 
-            // These transactions can cause effects in to ways: by altering the
+            // These transactions can cause effects in two ways: by altering the
             // status of an existing reviewer; or by adding the actor as a new
             // reviewer.
 
@@ -109,7 +115,7 @@ final class DifferentialTransactionEditor
           case DifferentialAction::ACTION_REOPEN:
             return ($object->getStatus() == $status_closed);
           case DifferentialAction::ACTION_RETHINK:
-            return ($object->getStatus() != $status_revision);
+            return ($object->getStatus() != $status_plan);
           case DifferentialAction::ACTION_REQUEST:
             return ($object->getStatus() != $status_review);
           case DifferentialAction::ACTION_RESIGN:
@@ -134,6 +140,10 @@ final class DifferentialTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
+    $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
+    $status_revision = ArcanistDifferentialRevisionStatus::NEEDS_REVISION;
+    $status_plan = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
+
     switch ($xaction->getTransactionType()) {
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
         $object->setViewPolicy($xaction->getNewValue());
@@ -147,10 +157,11 @@ final class DifferentialTransactionEditor
         return;
       case PhabricatorTransactions::TYPE_EDGE:
         return;
+      case DifferentialTransaction::TYPE_UPDATE:
+        $object->setStatus($status_review);
+        // TODO: Update the `diffPHID` once we add that.
+        return;
       case DifferentialTransaction::TYPE_ACTION:
-        $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
-        $status_revision = ArcanistDifferentialRevisionStatus::NEEDS_REVISION;
-
         switch ($xaction->getNewValue()) {
           case DifferentialAction::ACTION_RESIGN:
           case DifferentialAction::ACTION_ACCEPT:
@@ -162,7 +173,7 @@ final class DifferentialTransactionEditor
             $object->setStatus(ArcanistDifferentialRevisionStatus::ABANDONED);
             return;
           case DifferentialAction::ACTION_RETHINK:
-            $object->setStatus($status_revision);
+            $object->setStatus($status_plan);
             return;
           case DifferentialAction::ACTION_RECLAIM:
             $object->setStatus($status_review);
@@ -197,6 +208,38 @@ final class DifferentialTransactionEditor
 
     $results = parent::expandTransaction($object, $xaction);
     switch ($xaction->getTransactionType()) {
+      case DifferentialTransaction::TYPE_UPDATE:
+        $new_accept = DifferentialReviewerStatus::STATUS_ACCEPTED;
+        $new_reject = DifferentialReviewerStatus::STATUS_REJECTED;
+        $old_accept = DifferentialReviewerStatus::STATUS_ACCEPTED_OLDER;
+        $old_reject = DifferentialReviewerStatus::STATUS_REJECTED_OLDER;
+
+        // When a revision is updated, change all "reject" to "rejected older
+        // revision". This means we won't immediately push the update back into
+        // "needs review", but outstanding rejects will still block it from
+        // moving to "accepted".
+        $edits = array();
+        foreach ($object->getReviewerStatus() as $reviewer) {
+          if ($reviewer->getStatus() == $new_reject) {
+            $edits[$reviewer->getReviewerPHID()] = array(
+              'data' => array(
+                'status' => $old_reject,
+              ),
+            );
+          }
+
+          // TODO: If sticky accept is off, do a similar update for accepts.
+        }
+
+        if ($edits) {
+          $results[] = id(new DifferentialTransaction())
+            ->setTransactionType($type_edge)
+            ->setMetadataValue('edge:type', $edge_reviewer)
+            ->setIgnoreOnNoEffect(true)
+            ->setNewValue(array('+' => $edits));
+        }
+        break;
+
       case PhabricatorTransactions::TYPE_COMMENT:
         // When a user leaves a comment, upgrade their reviewer status from
         // "added" to "commented" if they're also a reviewer. We may further
@@ -336,6 +379,33 @@ final class DifferentialTransactionEditor
       case DifferentialTransaction::TYPE_ACTION:
       case DifferentialTransaction::TYPE_INLINE:
         return;
+      case DifferentialTransaction::TYPE_UPDATE:
+        // Now that we're inside the transaction, do a final check.
+        $diff = $this->loadDiff($xaction->getNewValue());
+
+        // TODO: It would be slightly cleaner to just revalidate this
+        // transaction somehow using the same validation code, but that's
+        // not easy to do at the moment.
+
+        if (!$diff) {
+          throw new Exception(pht('Diff does not exist!'));
+        } else {
+          $revision_id = $diff->getRevisionID();
+          if ($revision_id && ($revision_id != $object->getID())) {
+            throw new Exception(
+              pht(
+                'Diff is already attached to another revision. You lost '.
+                'a race?'));
+          }
+        }
+
+        $diff->setRevisionID($object->getID());
+        $diff->save();
+
+        $object->setLineCount($diff->getLineCount());
+        $object->setRepositoryPHID($diff->getRepositoryPHID());
+
+        return;
     }
 
     return parent::applyCustomExternalTransaction($object, $xaction);
@@ -400,16 +470,21 @@ final class DifferentialTransactionEditor
         //
         //   - at least one accepting reviewer who is a user; and
         //   - no rejects; and
+        //   - no rejects of older diffs; and
         //   - no blocking reviewers.
 
         $has_accepting_user = false;
         $has_rejecting_reviewer = false;
+        $has_rejecting_older_reviewer = false;
         $has_blocking_reviewer = false;
         foreach ($new_revision->getReviewerStatus() as $reviewer) {
           $reviewer_status = $reviewer->getStatus();
           switch ($reviewer_status) {
             case DifferentialReviewerStatus::STATUS_REJECTED:
               $has_rejecting_reviewer = true;
+              break;
+            case DifferentialReviewerStatus::STATUS_REJECTED_OLDER:
+              $has_rejecting_older_reviewer = true;
               break;
             case DifferentialReviewerStatus::STATUS_BLOCKING:
               $has_blocking_reviewer = true;
@@ -425,6 +500,7 @@ final class DifferentialTransactionEditor
         $new_status = null;
         if ($has_accepting_user &&
             !$has_rejecting_reviewer &&
+            !$has_rejecting_older_reviewer &&
             !$has_blocking_reviewer) {
           $new_status = $status_accepted;
         } else if ($has_rejecting_reviewer) {
@@ -471,6 +547,25 @@ final class DifferentialTransactionEditor
 
     foreach ($xactions as $xaction) {
       switch ($type) {
+        case DifferentialTransaction::TYPE_UPDATE:
+          $diff = $this->loadDiff($xaction->getNewValue());
+          if (!$diff) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht('The specified diff does not exist.'),
+              $xaction);
+          } else if (($diff->getRevisionID()) &&
+            ($diff->getRevisionID() != $object->getID())) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'You can not update this revision to the specified diff, '.
+                'because the diff is already attached to another revision.'),
+              $xaction);
+          }
+          break;
         case DifferentialTransaction::TYPE_ACTION:
           $error = $this->validateDifferentialAction(
             $object,
@@ -623,7 +718,7 @@ final class DifferentialTransactionEditor
         if (!$actor_is_author) {
           return pht(
             "You can not plan changes to this revision because you do not ".
-            "own it. To plan chagnes to a revision, you must be its owner.");
+            "own it. To plan changes to a revision, you must be its owner.");
         }
 
         switch ($revision_status) {
@@ -631,6 +726,9 @@ final class DifferentialTransactionEditor
           case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
           case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
             // These are OK.
+            break;
+          case ArcanistDifferentialRevisionStatus::CHANGES_PLANNED:
+            // Let this through, it's a no-op.
             break;
           case ArcanistDifferentialRevisionStatus::ABANDONED:
             return pht(
@@ -661,6 +759,7 @@ final class DifferentialTransactionEditor
         switch ($revision_status) {
           case ArcanistDifferentialRevisionStatus::ACCEPTED:
           case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+          case ArcanistDifferentialRevisionStatus::CHANGES_PLANNED:
             // These are OK.
             break;
           case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
@@ -706,10 +805,11 @@ final class DifferentialTransactionEditor
   }
 
   protected function sortTransactions(array $xactions) {
+    $xactions = parent::sortTransactions($xactions);
+
     $head = array();
     $tail = array();
 
-    // Move bare comments to the end, so the actions precede them.
     foreach ($xactions as $xaction) {
       $type = $xaction->getTransactionType();
       if ($type == DifferentialTransaction::TYPE_INLINE) {
@@ -732,7 +832,9 @@ final class DifferentialTransactionEditor
     return parent::requireCapabilities($object, $xaction);
   }
 
-  protected function supportsFeed() {
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
     return true;
   }
 
@@ -748,6 +850,18 @@ final class DifferentialTransactionEditor
     foreach ($object->getReviewerStatus() as $reviewer) {
       $phids[] = $reviewer->getReviewerPHID();
     }
+    return $phids;
+  }
+
+  protected function getMailCC(PhabricatorLiskDAO $object) {
+    $phids = parent::getMailCC($object);
+
+    if ($this->heraldEmailPHIDs) {
+      foreach ($this->heraldEmailPHIDs as $phid) {
+        $phids[] = $phid;
+      }
+    }
+
     return $phids;
   }
 
@@ -823,6 +937,78 @@ final class DifferentialTransactionEditor
     return parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
   }
 
+  protected function expandCustomRemarkupBlockTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions,
+    $blocks,
+    PhutilMarkupEngine $engine) {
+
+
+    $flat_blocks = array_mergev($blocks);
+    $huge_block = implode("\n\n", $flat_blocks);
+
+    $task_map = array();
+    $task_refs = id(new ManiphestCustomFieldStatusParser())
+      ->parseCorpus($huge_block);
+    foreach ($task_refs as $match) {
+      foreach ($match['monograms'] as $monogram) {
+        $task_id = (int)trim($monogram, 'tT');
+        $task_map[$task_id] = true;
+      }
+    }
+
+    $rev_map = array();
+    $rev_refs = id(new DifferentialCustomFieldDependsOnParser())
+      ->parseCorpus($huge_block);
+    foreach ($rev_refs as $match) {
+      foreach ($match['monograms'] as $monogram) {
+        $rev_id = (int)trim($monogram, 'dD');
+        $rev_map[$rev_id] = true;
+      }
+    }
+
+    $edges = array();
+
+    if ($task_map) {
+      $tasks = id(new ManiphestTaskQuery())
+        ->setViewer($this->getActor())
+        ->withIDs(array_keys($task_map))
+        ->execute();
+
+      if ($tasks) {
+        $edge_related = PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK;
+        $edges[$edge_related] = mpull($tasks, 'getPHID', 'getPHID');
+      }
+    }
+
+    if ($rev_map) {
+      $revs = id(new DifferentialRevisionQuery())
+        ->setViewer($this->getActor())
+        ->withIDs(array_keys($rev_map))
+        ->execute();
+      $rev_phids = mpull($revs, 'getPHID', 'getPHID');
+
+      // NOTE: Skip any write attempts if a user cleverly implies a revision
+      // depends upon itself.
+      unset($rev_phids[$object->getPHID()]);
+
+      if ($revs) {
+        $edge_depends = PhabricatorEdgeConfig::TYPE_DREV_DEPENDS_ON_DREV;
+        $edges[$edge_depends] = $rev_phids;
+      }
+    }
+
+    $result = array();
+    foreach ($edges as $type => $specs) {
+      $result[] = id(new DifferentialTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $type)
+        ->setNewValue(array('+' => $specs));
+    }
+
+    return $result;
+  }
+
   private function renderInlineCommentsForMail(
     PhabricatorLiskDAO $object,
     array $inlines) {
@@ -893,6 +1079,135 @@ final class DifferentialTransactionEditor
     return implode("\n", $result);
   }
 
+  private function loadDiff($phid) {
+    return id(new DifferentialDiffQuery())
+      ->withPHIDs(array($phid))
+      ->setViewer($this->getActor())
+      ->executeOne();
+  }
 
+/* -(  Herald Integration  )------------------------------------------------- */
+
+  protected function shouldApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    if ($this->getIsNewObject()) {
+      return true;
+    }
+
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case DifferentialTransaction::TYPE_UPDATE:
+          return true;
+      }
+    }
+
+    return parent::shouldApplyHeraldRules($object, $xactions);
+  }
+
+  protected function buildHeraldAdapter(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $unsubscribed_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $object->getPHID(),
+      PhabricatorEdgeConfig::TYPE_OBJECT_HAS_UNSUBSCRIBER);
+
+    $subscribed_phids = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $object->getPHID());
+
+    $revision = id(new DifferentialRevisionQuery())
+      ->setViewer($this->getActor())
+      ->withPHIDs(array($object->getPHID()))
+      ->needActiveDiffs(true)
+      ->needReviewerStatus(true)
+      ->executeOne();
+    if (!$revision) {
+      throw new Exception(
+        pht(
+          'Failed to load revision for Herald adapter construction!'));
+    }
+
+    $adapter = HeraldDifferentialRevisionAdapter::newLegacyAdapter(
+      $object,
+      $object->getActiveDiff());
+
+    $reviewers = $revision->getReviewerStatus();
+    $reviewer_phids = mpull($reviewers, 'getReviewerPHID');
+
+    $adapter->setExplicitCCs($subscribed_phids);
+    $adapter->setExplicitReviewers($reviewer_phids);
+    $adapter->setForbiddenCCs($unsubscribed_phids);
+
+    $adapter->setIsNewObject($this->getIsNewObject());
+
+    return $adapter;
+  }
+
+  protected function didApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    HeraldAdapter $adapter,
+    HeraldTranscript $transcript) {
+
+    $xactions = array();
+
+    // Build a transaction to adjust CCs.
+    $ccs = array(
+      '+' => array_keys($adapter->getCCsAddedByHerald()),
+      '-' => array_keys($adapter->getCCsRemovedByHerald()),
+    );
+    $value = array();
+    foreach ($ccs as $type => $phids) {
+      foreach ($phids as $phid) {
+        $value[$type][$phid] = $phid;
+      }
+    }
+
+    if ($value) {
+      $xactions[] = id(new DifferentialTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+        ->setNewValue($value);
+    }
+
+    // Build a transaction to adjust reviewers.
+    $reviewers = array(
+      DifferentialReviewerStatus::STATUS_ADDED =>
+        array_keys($adapter->getReviewersAddedByHerald()),
+      DifferentialReviewerStatus::STATUS_BLOCKING =>
+        array_keys($adapter->getBlockingReviewersAddedByHerald()),
+    );
+
+    $value = array();
+    foreach ($reviewers as $status => $phids) {
+      foreach ($phids as $phid) {
+        $value['+'][$phid] = array(
+          'data' => array(
+            'status' => $status,
+          ),
+        );
+      }
+    }
+
+    if ($value) {
+      $edge_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
+
+      $xactions[] = id(new DifferentialTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $edge_reviewer)
+        ->setNewValue($value);
+    }
+
+    // Save extra email PHIDs for later.
+    $this->heraldEmailPHIDs = $adapter->getEmailPHIDsAddedByHerald();
+
+    // Apply build plans.
+    HarbormasterBuildable::applyBuildPlans(
+      $adapter->getDiff(),
+      $adapter->getPHID(),
+      $adapter->getBuildPlans());
+
+    return $xactions;
+  }
 
 }

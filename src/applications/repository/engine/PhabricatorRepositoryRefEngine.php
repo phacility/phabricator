@@ -304,8 +304,9 @@ final class PhabricatorRepositoryRefEngine
     $all_commits = queryfx_all(
       $conn_w,
       'SELECT id, commitIdentifier, importStatus FROM %T
-        WHERE commitIdentifier IN (%Ls)',
+        WHERE repositoryID = %d AND commitIdentifier IN (%Ls)',
       $commit_table->getTableName(),
+      $repository->getID(),
       $identifiers);
 
     $closeable_flag = PhabricatorRepositoryCommit::IMPORTED_CLOSEABLE;

@@ -118,4 +118,9 @@ final class DifferentialSummaryField
       $this->getViewer());
   }
 
+  public function getApplicationTransactionRemarkupBlocks(
+    PhabricatorApplicationTransaction $xaction) {
+    return array($xaction->getNewValue());
+  }
+
 }

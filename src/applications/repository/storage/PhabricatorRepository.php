@@ -592,6 +592,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return false;
     }
 
+    if (!$this->shouldTrackBranch($branch)) {
+      return false;
+    }
+
     return $this->isBranchInFilter($branch, 'close-commits-filter');
   }
 
@@ -785,7 +789,28 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
    */
   public function getCloneURIObject() {
     if (!$this->isHosted()) {
-      return $this->getRemoteURIObject();
+      if ($this->isSVN()) {
+        // Make sure we pick up the "Import Only" path for Subversion, so
+        // the user clones the repository starting at the correct path, not
+        // from the root.
+        $base_uri = $this->getSubversionBaseURI();
+        $base_uri = new PhutilURI($base_uri);
+        $path = $base_uri->getPath();
+        if (!$path) {
+          $path = '/';
+        }
+
+        // If the trailing "@" is not required to escape the URI, strip it for
+        // readability.
+        if (!preg_match('/@.*@/', $path)) {
+          $path = rtrim($path, '@');
+        }
+
+        $base_uri->setPath($path);
+        return $base_uri;
+      } else {
+        return $this->getRemoteURIObject();
+      }
     }
 
     // Choose the best URI: pick a read/write URI over a URI which is not

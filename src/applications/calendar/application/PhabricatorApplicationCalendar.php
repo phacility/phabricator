@@ -35,7 +35,8 @@ final class PhabricatorApplicationCalendar extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/calendar/' => array(
-        '' => 'PhabricatorCalendarBrowseController',
+        '' => 'PhabricatorCalendarViewController',
+        'all/' => 'PhabricatorCalendarBrowseController',
         'event/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?' =>
             'PhabricatorCalendarEventListController',

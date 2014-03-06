@@ -183,7 +183,9 @@ final class LegalpadDocumentEditor
   }
 
 
-  protected function supportsFeed() {
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
     return false;
   }
 

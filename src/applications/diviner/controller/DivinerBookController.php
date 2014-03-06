@@ -83,17 +83,26 @@ final class DivinerBookController extends DivinerController {
   }
 
   private function buildPropertyList(DivinerLiveBook $book) {
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getRequest()->getUser();
     $view = id(new PHUIPropertyListView())
-      ->setUser($user);
+      ->setUser($viewer);
 
     $policies = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $user,
+      $viewer,
       $book);
 
     $view->addProperty(
       pht('Updated'),
-      phabricator_datetime($book->getDateModified(), $user));
+      phabricator_datetime($book->getDateModified(), $viewer));
+
+    $preface = $book->getPreface();
+    if (strlen($preface)) {
+      $view->addTextContent(
+        PhabricatorMarkupEngine::renderOneObject(
+          id(new PhabricatorMarkupOneOff())->setContent($preface),
+          'default',
+          $viewer));
+    }
 
     return $view;
   }

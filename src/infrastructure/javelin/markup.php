@@ -11,13 +11,17 @@ function javelin_tag(
     foreach ($attributes as $k => $v) {
       switch ($k) {
         case 'sigil':
-          $attributes['data-sigil'] = $v;
+          if ($v !== null) {
+            $attributes['data-sigil'] = $v;
+          }
           unset($attributes[$k]);
           break;
         case 'meta':
-          $response = CelerityAPI::getStaticResourceResponse();
-          $id = $response->addMetadata($v);
-          $attributes['data-meta'] = $id;
+          if ($v !== null) {
+            $response = CelerityAPI::getStaticResourceResponse();
+            $id = $response->addMetadata($v);
+            $attributes['data-meta'] = $id;
+          }
           unset($attributes[$k]);
           break;
         case 'mustcapture':

@@ -256,11 +256,13 @@ final class DiffusionRepositoryEditMainController
 
     $clone_name = $repository->getDetail('clone-name');
 
-    $view->addProperty(
-      pht('Clone/Checkout As'),
-      $clone_name
-        ? $clone_name.'/'
-        : phutil_tag('em', array(), $repository->getCloneName().'/'));
+    if ($repository->isHosted()) {
+      $view->addProperty(
+        pht('Clone/Checkout As'),
+        $clone_name
+          ? $clone_name.'/'
+          : phutil_tag('em', array(), $repository->getCloneName().'/'));
+    }
 
     $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $repository->getPHID(),

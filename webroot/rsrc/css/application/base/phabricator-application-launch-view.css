@@ -98,13 +98,9 @@ a.application-tile-full.application-tile-create {
 .phabricator-application-beta {
   position: absolute;
   top: 4px;
-  border-radius: 10px;
-  color: white;
-  font-weight: bold;
-  padding: 1px 6px 2px;
-  border: 2px solid #333;
+  left: 4px;
+  color: #fff;
   font-size: 11px;
-  box-shadow: 0 0px 2px #000;
 }
 
 .phabricator-application-launch-attention {
@@ -120,7 +116,7 @@ a.application-tile-full.application-tile-create {
 }
 
 .phabricator-application-attention-count {
-  background-color: rgb(0, 122, 255);
+  background-color: {$blue};
   border-radius: 10px;
   color: white;
   font-weight: bold;
@@ -140,11 +136,6 @@ a.application-tile-full.application-tile-create {
 .phabricator-application-launch-attention {
   right: 4px;
   background-color: rgb(119, 119, 119);
-}
-
-.phabricator-application-beta {
-  left: 4px;
-  background-color: rgb(109, 92, 41);
 }
 
 .application-tile-full .phabricator-application-launch-attention {

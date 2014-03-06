@@ -13,6 +13,7 @@ final class DivinerLiveSymbol extends DivinerDAO
   protected $nodeHash;
 
   protected $title;
+  protected $titleSlugHash;
   protected $groupName;
   protected $summary;
   protected $isDocumentable = 0;
@@ -105,6 +106,18 @@ final class DivinerLiveSymbol extends DivinerDAO
     return $title;
   }
 
+  public function setTitle($value) {
+    $this->writeField('title', $value);
+    if (strlen($value)) {
+      $slug = DivinerAtomRef::normalizeTitleString($value);
+      $hash = PhabricatorHash::digestForIndex($slug);
+      $this->titleSlugHash = $hash;
+    } else {
+      $this->titleSlugHash = null;
+    }
+    return $this;
+  }
+
   public function attachExtends(array $extends) {
     assert_instances_of($extends, 'DivinerLiveSymbol');
     $this->extends = $extends;
@@ -174,7 +187,7 @@ final class DivinerLiveSymbol extends DivinerDAO
 
 
   public function shouldUseMarkupCache($field) {
-    return false;
+    return true;
   }
 
 }

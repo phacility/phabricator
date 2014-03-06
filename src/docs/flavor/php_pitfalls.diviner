@@ -1,5 +1,5 @@
 @title PHP Pitfalls
-@group flavortext
+@group php
 
 This document discusses difficult traps and pitfalls in PHP, and how to avoid,
 work around, or at least understand them.

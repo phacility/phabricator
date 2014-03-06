@@ -12,6 +12,7 @@ final class ManiphestTaskEditController extends ManiphestController {
 
     $request = $this->getRequest();
     $user = $request->getUser();
+    $response_type = $request->getStr('responseType', 'task');
 
     $can_edit_assign = $this->hasApplicationCapability(
       ManiphestCapabilityEditAssign::CAPABILITY);
@@ -241,8 +242,28 @@ final class ManiphestTaskEditController extends ManiphestController {
         $changes[ManiphestTransaction::TYPE_CCS] = $request->getArr('cc');
 
         if ($can_edit_projects) {
+          $projects = $request->getArr('projects');
           $changes[ManiphestTransaction::TYPE_PROJECTS] =
-            $request->getArr('projects');
+            $projects;
+          $column_phid = $request->getStr('columnPHID');
+          // allow for putting a task in a project column at creation -only-
+          if (!$task->getID() && $column_phid && $projects) {
+            $column = id(new PhabricatorProjectColumnQuery())
+              ->setViewer($user)
+              ->withProjectPHIDs($projects)
+              ->withPHIDs(array($column_phid))
+              ->executeOne();
+            if ($column) {
+              $changes[ManiphestTransaction::TYPE_PROJECT_COLUMN] =
+                array(
+                  'new' => array(
+                    'projectPHID' => $column->getProjectPHID(),
+                    'columnPHIDs' => array($column_phid)),
+                  'old' => array(
+                    'projectPHID' => $column->getProjectPHID(),
+                    'columnPHIDs' => array()));
+            }
+          }
         }
 
         if ($can_edit_policies) {
@@ -266,7 +287,12 @@ final class ManiphestTaskEditController extends ManiphestController {
         foreach ($changes as $type => $value) {
           $transaction = clone $template;
           $transaction->setTransactionType($type);
-          $transaction->setNewValue($value);
+          if ($type == ManiphestTransaction::TYPE_PROJECT_COLUMN) {
+            $transaction->setNewValue($value['new']);
+            $transaction->setOldValue($value['old']);
+          } else {
+            $transaction->setNewValue($value);
+          }
           $transactions[] = $transaction;
         }
 
@@ -335,9 +361,87 @@ final class ManiphestTaskEditController extends ManiphestController {
         }
 
         if ($request->isAjax()) {
+          switch ($response_type) {
+            case 'card':
+              $owner = null;
+              if ($task->getOwnerPHID()) {
+                $owner = id(new PhabricatorHandleQuery())
+                  ->setViewer($user)
+                  ->withPHIDs(array($task->getOwnerPHID()))
+                  ->executeOne();
+              }
+              $tasks = id(new ProjectBoardTaskCard())
+                ->setViewer($user)
+                ->setTask($task)
+                ->setOwner($owner)
+                ->setCanEdit(true)
+                ->getItem();
+              $column_phid = $request->getStr('columnPHID');
+              $column = id(new PhabricatorProjectColumnQuery())
+                ->setViewer($user)
+                ->withPHIDs(array($column_phid))
+                ->executeOne();
+              if ($column->isDefaultColumn()) {
+                $column_tasks = array();
+                $potential_col_tasks = id(new ManiphestTaskQuery())
+                  ->setViewer($user)
+                  ->withAllProjects(array($column->getProjectPHID()))
+                  ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
+                  ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
+                  ->execute();
+                $potential_col_tasks = mpull(
+                  $potential_col_tasks,
+                  null,
+                  'getPHID');
+                $potential_task_phids = array_keys($potential_col_tasks);
+                if ($potential_task_phids) {
+                  $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_COLUMN;
+                  $edge_query = id(new PhabricatorEdgeQuery())
+                    ->withSourcePHIDs($potential_task_phids)
+                    ->withEdgeTypes(array($edge_type));
+                  $edges = $edge_query->execute();
+                  foreach ($potential_col_tasks as $task_phid => $curr_task) {
+                    $curr_column_phids = $edges[$task_phid][$edge_type];
+                    $curr_column_phid = head_key($curr_column_phids);
+                    if (!$curr_column_phid ||
+                        $curr_column_phid == $column_phid) {
+                      $column_tasks[] = $curr_task;
+                    }
+                  }
+                }
+              } else {
+                $column_task_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+                  $column_phid,
+                  PhabricatorEdgeConfig::TYPE_COLUMN_HAS_OBJECT);
+                $column_tasks = id(new ManiphestTaskQuery())
+                  ->setViewer($user)
+                  ->withPHIDs($column_task_phids)
+                  ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
+                  ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
+                  ->execute();
+              }
+              $column_task_phids = mpull($column_tasks, 'getPHID');
+              $task_phid = $task->getPHID();
+              $after_phid = null;
+              foreach ($column_task_phids as $phid) {
+                if ($phid == $task_phid) {
+                  break;
+                }
+                $after_phid = $phid;
+              }
+              $data = array(
+                'insertAfterPHID' => $after_phid);
+              break;
+            case 'task':
+            default:
+              $tasks = $this->renderSingleTask($task);
+              $data = array();
+              break;
+          }
           return id(new AphrontAjaxResponse())->setContent(
             array(
-              'tasks' => $this->renderSingleTask($task),
+              'tasks' => $tasks,
+              'data' => $data,
             ));
         }
 
@@ -463,7 +567,9 @@ final class ManiphestTaskEditController extends ManiphestController {
     $form = new AphrontFormView();
     $form
       ->setUser($user)
-      ->addHiddenInput('template', $template_id);
+      ->addHiddenInput('template', $template_id)
+      ->addHiddenInput('responseType', $response_type)
+      ->addHiddenInput('columnPHID', $request->getStr('columnPHID'));
 
     if ($parent_task) {
       $form

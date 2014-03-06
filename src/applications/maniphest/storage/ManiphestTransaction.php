@@ -13,6 +13,7 @@ final class ManiphestTransaction
   const TYPE_EDGE = 'edge';
   const TYPE_ATTACH = 'attach';
   const TYPE_SUBPRIORITY = 'subpriority';
+  const TYPE_PROJECT_COLUMN = 'projectcolumn';
 
   public function getApplicationName() {
     return 'maniphest';
@@ -24,6 +25,16 @@ final class ManiphestTransaction
 
   public function getApplicationTransactionCommentObject() {
     return new ManiphestTransactionComment();
+  }
+
+  public function shouldGenerateOldValue() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_PROJECT_COLUMN:
+      case self::TYPE_EDGE:
+        return false;
+    }
+
+    return parent::shouldGenerateOldValue();
   }
 
   public function getRequiredHandlePHIDs() {
@@ -50,6 +61,10 @@ final class ManiphestTransaction
             nonempty($old, array()),
             nonempty($new, array()),
           ));
+        break;
+      case self::TYPE_PROJECT_COLUMN:
+        $phids[] = $new['projectPHID'];
+        $phids[] = head($new['columnPHIDs']);
         break;
       case self::TYPE_EDGE:
         $phids = array_mergev(
@@ -90,7 +105,7 @@ final class ManiphestTransaction
         return true;
     }
 
-    return false;
+    return parent::shouldHide();
   }
 
   public function getActionStrength() {
@@ -188,6 +203,9 @@ final class ManiphestTransaction
       case self::TYPE_PROJECTS:
         return pht('Changed Projects');
 
+      case self::TYPE_PROJECT_COLUMN:
+        return pht('Changed Project Column');
+
       case self::TYPE_PRIORITY:
         if ($old == ManiphestTaskPriority::getDefaultPriority()) {
           return pht('Triaged');
@@ -236,6 +254,9 @@ final class ManiphestTransaction
 
       case self::TYPE_PROJECTS:
         return 'project';
+
+      case self::TYPE_PROJECT_COLUMN:
+        return 'workboard';
 
       case self::TYPE_PRIORITY:
         if ($old == ManiphestTaskPriority::getDefaultPriority()) {
@@ -427,6 +448,16 @@ final class ManiphestTransaction
             count($removed),
             $this->renderHandleList($removed));
         }
+
+      case self::TYPE_PROJECT_COLUMN:
+        $project_phid = $new['projectPHID'];
+        $column_phid = head($new['columnPHIDs']);
+        return pht(
+          '%s moved this task to %s on the %s workboard.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($column_phid),
+          $this->renderHandleLink($project_phid));
+       break;
 
 
     }
@@ -620,6 +651,16 @@ final class ManiphestTransaction
             $this->renderHandleList($removed));
         }
 
+      case self::TYPE_PROJECT_COLUMN:
+        $project_phid = $new['projectPHID'];
+        $column_phid = head($new['columnPHIDs']);
+        return pht(
+          '%s moved %s to %s on the %s workboard.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid),
+          $this->renderHandleLink($column_phid),
+          $this->renderHandleLink($project_phid));
+       break;
     }
 
     return parent::getTitleForFeed($story);

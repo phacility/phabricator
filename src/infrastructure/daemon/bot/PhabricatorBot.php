@@ -45,6 +45,11 @@ final class PhabricatorBot extends PhabricatorDaemon {
       $this->handlers[] = $obj;
     }
 
+    $ca_bundle = idx($config, 'https.cabundle');
+    if ($ca_bundle) {
+      HTTPSFuture::setGlobalCABundleFromPath($ca_bundle);
+    }
+
     $conduit_uri = idx($config, 'conduit.uri');
     if ($conduit_uri) {
       $conduit_user = idx($config, 'conduit.user');

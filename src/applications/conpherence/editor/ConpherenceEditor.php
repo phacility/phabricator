@@ -400,7 +400,9 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     return PhabricatorEnv::getEnvConfig('metamta.conpherence.subject-prefix');
   }
 
-  protected function supportsFeed() {
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
     return false;
   }
 
