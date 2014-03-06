@@ -75,6 +75,12 @@ final class PHUIDocumentView extends AphrontTagView {
       require_celerity_resource('phui-fontkit-css');
     }
 
+    switch ($this->fontKit) {
+      case self::FONT_SOURCE_SANS:
+        require_celerity_resource('font-source-sans-pro');
+        break;
+    }
+
     $classes = array();
     $classes[] = 'phui-document-view';
     if ($this->offset) {

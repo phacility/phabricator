@@ -92,7 +92,6 @@ final class DivinerBookController extends DivinerController {
       array(
         'title' => $book->getTitle(),
         'device' => true,
-        'fonts' => true,
       ));
   }
 
