@@ -61,7 +61,7 @@ class AphrontDefaultApplicationConfiguration
         '(?:(?P<mtime>[0-9]+)T/)?'.
         '(?P<library>[^/]+)/'.
         '(?P<hash>[a-f0-9]{8})/'.
-        '(?P<path>.+\.(?:css|js|jpg|png|swf|gif))'
+        '(?P<path>.+\.(?:css|js|jpg|png|swf|gif|woff))'
           => 'CelerityPhabricatorResourceController',
       ),
     );

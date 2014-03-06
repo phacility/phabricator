@@ -38,6 +38,7 @@ final class DivinerBookController extends DivinerController {
 
     $document = new PHUIDocumentView();
     $document->setHeader($header);
+    $document->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS);
 
     $properties = $this->buildPropertyList($book);
 
@@ -68,7 +69,19 @@ final class DivinerBookController extends DivinerController {
       $section->addContent($this->renderAtomList($atoms));
       $out[] = $section;
     }
+
+    $preface = $book->getPreface();
+    $preface_view = null;
+    if (strlen($preface)) {
+      $preface_view =
+        PhabricatorMarkupEngine::renderOneObject(
+          id(new PhabricatorMarkupOneOff())->setContent($preface),
+          'default',
+          $viewer);
+    }
+
     $document->appendChild($properties);
+    $document->appendChild($preface_view);
     $document->appendChild($out);
 
     return $this->buildApplicationPage(
@@ -79,6 +92,7 @@ final class DivinerBookController extends DivinerController {
       array(
         'title' => $book->getTitle(),
         'device' => true,
+        'fonts' => true,
       ));
   }
 
@@ -94,15 +108,6 @@ final class DivinerBookController extends DivinerController {
     $view->addProperty(
       pht('Updated'),
       phabricator_datetime($book->getDateModified(), $viewer));
-
-    $preface = $book->getPreface();
-    if (strlen($preface)) {
-      $view->addTextContent(
-        PhabricatorMarkupEngine::renderOneObject(
-          id(new PhabricatorMarkupOneOff())->setContent($preface),
-          'default',
-          $viewer));
-    }
 
     return $view;
   }

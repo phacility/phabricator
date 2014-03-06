@@ -12,6 +12,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   private $glyph;
   private $menuContent;
   private $showChrome = true;
+  private $extraFonts;
   private $disableConsole;
   private $pageObjects = array();
   private $applicationMenu;
@@ -55,6 +56,15 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
   public function getShowChrome() {
     return $this->showChrome;
+  }
+
+  public function setExtraFonts($extra) {
+    $this->extraFonts = $extra;
+    return $this;
+  }
+
+  public function getExtraFonts() {
+    return $this->extraFonts;
   }
 
   public function appendPageObjects(array $objs) {
@@ -233,8 +243,16 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     $response = CelerityAPI::getStaticResourceResponse();
 
+    $fonts = null;
+    if ($this->getExtraFonts()) {
+      $fonts = hsprintf("<link
+        href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700'
+        rel='stylesheet'
+        type='text/css'>");
+    }
+
     return hsprintf(
-      '%s<style type="text/css">'.
+      '%s%s<style type="text/css">'.
       '.PhabricatorMonospaced, '.
       '.phabricator-remarkup .remarkup-code-block { font: %s; } '.
       '.platform-windows .PhabricatorMonospaced, '.
@@ -242,6 +260,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         '.remarkup-code-block { font: %s; }'.
       '</style>%s',
       parent::getHead(),
+      $fonts,
       phutil_safe_html($monospaced),
       phutil_safe_html($monospaced_win),
       $response->renderSingleResource('javelin-magical-init', 'phabricator'));

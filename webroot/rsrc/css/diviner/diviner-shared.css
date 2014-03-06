@@ -15,10 +15,6 @@
   margin: 0 8px 16px;
 }
 
-a.diviner-atom-signature-name {
-  color: {$violet};
-}
-
 .diviner-table-header {
   padding: 4px 16px;
   background-color: {$greybackground};
@@ -71,6 +67,8 @@ a.diviner-atom-signature-name {
 
 body .diviner-document-section .phui-header-view {
   width: 100%;
+  font-size: 20px;
+  font-weight: 400;
 }
 
 .phui-property-list-view + .diviner-document-section {
@@ -92,7 +90,8 @@ body .diviner-document-section .phui-header-view {
 }
 
 .diviner-list .diviner-atom-signature {
-  color: {$greytext};
+  color: {$violet};
+  margin-left: -16px;
 }
 
 .diviner-list a {
@@ -120,9 +119,13 @@ body .diviner-document-section .phui-header-view {
   padding-top: 0;
 }
 
+.diviner-list {
+  padding-left: 12px;
+}
+
 .diviner-list li {
-  line-height: 18px;
-  padding-bottom: 4px;
+  line-height: 20px;
+  padding-bottom: 12px;
 }
 
 /* - Book Index ----------------------------------------------------------------
@@ -133,8 +136,8 @@ body .diviner-document-section .phui-header-view {
 
 .diviner-book-item {
   display: block;
-  padding: 4px 16px;
-  margin: 0 -16px;
+  padding: 6px 16px;
+  margin: 4px -16px;
 }
 
 .diviner-book-item:hover {
@@ -142,11 +145,13 @@ body .diviner-document-section .phui-header-view {
 }
 
 .device-desktop .diviner-book-item:hover {
-  background-color: {$lightgreybackground};
+  background-color: #F5EEFF;
 }
 
 .diviner-book-item-title {
-  font-weight: bold;
+  font-weight: 700;
+  font-size: 16px;
+  color: {$darkbluetext};
 }
 
 .diviner-book-item-type {
@@ -156,6 +161,6 @@ body .diviner-document-section .phui-header-view {
 
 .diviner-book-item-subtitle {
   display: block;
-  line-height: 18px;
-  color: {$lightbluetext};
+  line-height: 20px;
+  color: {$lightgreytext};
 }

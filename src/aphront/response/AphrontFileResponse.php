@@ -10,6 +10,12 @@ final class AphrontFileResponse extends AphrontResponse {
   private $download;
   private $rangeMin;
   private $rangeMax;
+  private $allowOrigins = array();
+
+  public function addAllowOrigin($origin) {
+    $this->allowOrigins[] = $origin;
+    return $this;
+  }
 
   public function setDownload($download) {
     $download = preg_replace('/[^A-Za-z0-9_.-]/', '_', $download);
@@ -74,6 +80,12 @@ final class AphrontFileResponse extends AphrontResponse {
         'Content-Disposition',
         'attachment; filename='.$filename,
       );
+    }
+
+    if ($this->allowOrigins) {
+      $headers[] = array(
+        'Access-Control-Allow-Origin',
+        implode(',', $this->allowOrigins));
     }
 
     $headers = array_merge(parent::getHeaders(), $headers);

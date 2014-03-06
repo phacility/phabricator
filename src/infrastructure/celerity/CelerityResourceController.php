@@ -70,6 +70,17 @@ abstract class CelerityResourceController extends PhabricatorController {
     $response = new AphrontFileResponse();
     $response->setContent($data);
     $response->setMimeType($type_map[$type]);
+
+    // NOTE: This is a piece of magic required to make WOFF fonts work in
+    // Firefox. Possibly we should generalize this.
+    if ($type == 'woff') {
+      // We could be more tailored here, but it's not currently trivial to
+      // generate a comprehensive list of valid origins (an install may have
+      // arbitrarily many Phame blogs, for example), and we lose nothing by
+      // allowing access from anywhere.
+      $response->addAllowOrigin("*");
+    }
+
     return $this->makeResponseCacheable($response);
   }
 
@@ -81,6 +92,7 @@ abstract class CelerityResourceController extends PhabricatorController {
       'gif' => 'image/gif',
       'jpg' => 'image/jpg',
       'swf' => 'application/x-shockwave-flash',
+      'woff' => 'font/woff',
     );
   }
 
