@@ -199,6 +199,10 @@ final class DivinerAtomRef {
   }
 
   public static function normalizeTitleString($str) {
+    // Remove colons from titles. This is mostly to accommodate legacy rules
+    // from the old Diviner, which generated a significant number of article
+    // URIs without colons present in the titles.
+    $str = str_replace(':', '', $str);
     $str = self::normalizeString($str);
     return phutil_utf8_strtolower($str);
   }

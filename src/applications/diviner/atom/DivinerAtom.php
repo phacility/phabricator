@@ -403,6 +403,17 @@ final class DivinerAtom {
     }
   }
 
+  public static function getAllTypes() {
+    return array(
+      self::TYPE_FILE,
+      self::TYPE_FUNCTION,
+      self::TYPE_CLASS,
+      self::TYPE_ARTICLE,
+      self::TYPE_METHOD,
+      self::TYPE_INTERFACE,
+    );
+  }
+
   public static function getAtomTypeNameString($type) {
     switch ($type) {
       case self::TYPE_FILE:
