@@ -94,7 +94,9 @@ final class PhabricatorProjectBoardController
       'project-boards',
       array(
         'boardID' => $board_id,
+        'projectPHID' => $project->getPHID(),
         'moveURI' => $this->getApplicationURI('move/'.$project->getID().'/'),
+        'createURI' => '/maniphest/task/create/',
       ));
 
     $this->handles = ManiphestTaskListView::loadTaskHandles($viewer, $tasks);
@@ -106,6 +108,13 @@ final class PhabricatorProjectBoardController
       if (!$column->isDefaultColumn()) {
         $panel->setEditURI('edit/'.$column->getID().'/');
       }
+      $panel->setHeaderAction(id(new PHUIIconView())
+        ->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS)
+        ->setSpriteIcon('new-grey')
+        ->setHref('/maniphest/task/create/')
+        ->addSigil('column-add-task')
+        ->setMetadata(
+          array('columnPHID' => $column->getPHID())));
 
       $cards = id(new PHUIObjectItemListView())
         ->setUser($viewer)

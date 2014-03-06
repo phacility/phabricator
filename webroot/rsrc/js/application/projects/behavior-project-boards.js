@@ -65,10 +65,31 @@ JX.behavior('project-boards', function(config) {
     lists[ii].setGroup(lists);
   }
 
-  var onedit = function(card, r) {
-    var nodes = JX.$H(r.tasks).getFragment().firstChild;
+  var onedit = function(card, column, r) {
     var new_card = JX.$H(r.tasks);
-    JX.DOM.replace(card, new_card);
+    var items = finditems(column);
+    var insert_after = r.data.insertAfterPHID;
+    if (!insert_after) {
+      JX.DOM.prependContent(column, new_card);
+      if (card) {
+        JX.DOM.remove(card);
+      }
+      return;
+    }
+    var ii;
+    var item;
+    var item_phid;
+    for (ii = 0; ii< items.length; ii++) {
+      item = items[ii];
+      item_phid = JX.Stratcom.getData(item).objectPHID;
+      if (item_phid == insert_after) {
+        JX.DOM.replace(item, [item, new_card]);
+        if (card) {
+          JX.DOM.remove(card);
+        }
+        return;
+      }
+    }
   };
 
   JX.Stratcom.listen(
@@ -77,9 +98,36 @@ JX.behavior('project-boards', function(config) {
     function(e) {
       e.kill();
       var card = e.getNode('project-card');
-      new JX.Workflow(e.getNode('tag:a').href, { 'response_type' : 'card' })
-        .setHandler(JX.bind(null, onedit, card))
-        .start();
+      var column = e.getNode('project-column');
+      var request_data = {
+        'responseType' : 'card',
+        'columnPHID'   : JX.Stratcom.getData(column).columnPHID };
+      new JX.Workflow(e.getNode('tag:a').href, request_data)
+      .setHandler(JX.bind(null, onedit, card, column))
+      .start();
     });
 
+  JX.Stratcom.listen(
+    'click',
+    ['column-add-task'],
+    function (e) {
+      e.kill();
+      var column_phid = e.getNodeData('column-add-task').columnPHID;
+      var request_data = {
+        'responseType' : 'card',
+        'columnPHID'   : column_phid,
+        'projects'     : config.projectPHID };
+      var cols = JX.DOM.scry(JX.$(config.boardID), 'ul', 'project-column');
+      var ii;
+      var column;
+      for (ii = 0; ii < cols.length; ii++) {
+        if (JX.Stratcom.getData(cols[ii]).columnPHID == column_phid) {
+          column = cols[ii];
+          break;
+        }
+      }
+      new JX.Workflow(config.createURI, request_data)
+      .setHandler(JX.bind(null, onedit, null, column))
+      .start();
+    });
 });
