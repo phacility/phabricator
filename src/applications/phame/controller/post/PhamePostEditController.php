@@ -36,6 +36,11 @@ final class PhamePostEditController
       $blog = id(new PhameBlogQuery())
         ->setViewer($user)
         ->withIDs(array($request->getInt('blog')))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_JOIN,
+          ))
         ->executeOne();
       if (!$blog) {
         return new Aphront404Response();
