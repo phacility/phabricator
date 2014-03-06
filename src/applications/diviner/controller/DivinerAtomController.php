@@ -460,6 +460,8 @@ final class DivinerAtomController extends DivinerController {
       case DivinerAtom::TYPE_METHOD:
       case DivinerAtom::TYPE_FUNCTION:
         break;
+      case DivinerAtom::TYPE_ARTICLE:
+        return $symbol->getTitle();
       default:
         return null;
     }
