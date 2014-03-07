@@ -54,6 +54,7 @@ final class LiskIsolationTestCase extends PhabricatorTestCase {
       // Expected, pass.
     }
 
+    $this->assertEqual(true, true);
   }
 
   public function testMagicMethods() {

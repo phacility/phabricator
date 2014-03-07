@@ -15,6 +15,8 @@ final class PhabricatorUserEditorTestCase extends PhabricatorTestCase {
     $this->registerUser(
       'PhabricatorUserEditorTestCaseOK',
       'PhabricatorUserEditorTestCase@example.com');
+
+    $this->assertEqual(true, true);
   }
 
   public function testRegistrationEmailInvalid() {

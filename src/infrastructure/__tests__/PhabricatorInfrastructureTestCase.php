@@ -16,6 +16,7 @@ final class PhabricatorInfrastructureTestCase
    */
   public function testEverythingImplemented() {
     id(new PhutilSymbolLoader())->selectAndLoadSymbols();
+    $this->assertEqual(true, true);
   }
 
   public function testApplicationsInstalled() {

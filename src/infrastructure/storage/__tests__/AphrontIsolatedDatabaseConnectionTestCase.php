@@ -17,6 +17,8 @@ final class AphrontIsolatedDatabaseConnectionTestCase
     queryfx(
       $this->newIsolatedConnection(),
       'INSERT INVALID SYNTAX');
+
+    $this->assertEqual(true, true);
   }
 
   public function testInsertGeneratesID() {
@@ -39,6 +41,8 @@ final class AphrontIsolatedDatabaseConnectionTestCase
   public function testDeletePermitted() {
     $conn = $this->newIsolatedConnection();
     queryfx($conn, 'DELETE');
+
+    $this->assertEqual(true, true);
   }
 
   public function testTransactionStack() {
