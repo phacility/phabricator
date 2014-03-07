@@ -134,6 +134,8 @@ final class PhabricatorAuditListView extends AphrontView {
       $status_color =
         PhabricatorAuditStatusConstants::getStatusColor($status_code);
 
+      $author_name = $commit->getCommitData()->getAuthorName();
+
       $auditor_handle = $this->getHandle($audit->getAuditorPHID());
       $item = id(new PHUIObjectItemView())
           ->setObjectName($commit_name)
@@ -142,6 +144,7 @@ final class PhabricatorAuditListView extends AphrontView {
           ->setBarColor($status_color)
           ->addAttribute($status_text)
           ->addAttribute($reasons)
+          ->addAttribute(pht('Author: %s', $author_name))
           ->addIcon('none', $committed)
           ->addByline(pht('Auditor: %s', $auditor_handle->renderLink()));
 
