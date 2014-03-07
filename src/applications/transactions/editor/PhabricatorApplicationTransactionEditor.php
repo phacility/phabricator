@@ -450,6 +450,16 @@ abstract class PhabricatorApplicationTransactionEditor
       PhabricatorContentSource::newFromRequest($request));
   }
 
+  public function setContentSourceFromConduitRequest(
+    ConduitAPIRequest $request) {
+
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_CONDUIT,
+      array());
+
+    return $this->setContentSource($content_source);
+  }
+
   public function getContentSource() {
     return $this->contentSource;
   }

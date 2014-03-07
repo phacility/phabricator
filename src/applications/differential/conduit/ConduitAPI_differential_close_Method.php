@@ -1,13 +1,10 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_differential_close_Method
-  extends ConduitAPIMethod {
+  extends ConduitAPI_differential_Method {
 
   public function getMethodDescription() {
-    return "Close a Differential revision.";
+    return pht("Close a Differential revision.");
   }
 
   public function defineParamTypes() {
@@ -27,40 +24,34 @@ final class ConduitAPI_differential_close_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
+    $viewer = $request->getUser();
     $id = $request->getValue('revisionID');
 
     $revision = id(new DifferentialRevisionQuery())
       ->withIDs(array($id))
-      ->setViewer($request->getUser())
-      ->needRelationships(true)
+      ->setViewer($viewer)
       ->needReviewerStatus(true)
       ->executeOne();
     if (!$revision) {
       throw new ConduitException('ERR_NOT_FOUND');
     }
 
-    if ($revision->getStatus() == ArcanistDifferentialRevisionStatus::CLOSED) {
-      // This can occur if someone runs 'close-revision' and hits a race, or
-      // they have a remote hook installed but don't have the
-      // 'remote_hook_installed' flag set, or similar. In any case, just treat
-      // it as a no-op rather than adding another "X closed this revision"
-      // message to the revision comments.
-      return;
-    }
+    $xactions = array();
+    $xactions[] = id(new DifferentialTransaction())
+      ->setTransactionType(DifferentialTransaction::TYPE_ACTION)
+      ->setNewValue(DifferentialAction::ACTION_CLOSE);
 
     $content_source = PhabricatorContentSource::newForSource(
       PhabricatorContentSource::SOURCE_CONDUIT,
       array());
 
-    $editor = new DifferentialCommentEditor(
-      $revision,
-      DifferentialAction::ACTION_CLOSE);
-    $editor->setContentSource($content_source);
-    $editor->setActor($request->getUser());
-    $editor->save();
+    $editor = id(new DifferentialTransactionEditor())
+      ->setActor($viewer)
+      ->setContentSourceFromConduitRequest($request)
+      ->setContinueOnMissingFields(true)
+      ->setContinueOnNoEffect(true);
 
-    $revision->setStatus(ArcanistDifferentialRevisionStatus::CLOSED);
-    $revision->save();
+    $editor->applyTransactions($revision, $xactions);
 
     return;
   }
