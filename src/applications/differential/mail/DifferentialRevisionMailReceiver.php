@@ -18,6 +18,7 @@ final class DifferentialRevisionMailReceiver
     $results = id(new DifferentialRevisionQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
+      ->needReviewerStatus(true)
       ->execute();
 
     return head($results);
