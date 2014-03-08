@@ -356,6 +356,11 @@ abstract class PhabricatorApplicationTransaction
           return false;
         }
         break;
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $field = $this->getTransactionCustomField();
+        if ($field) {
+          return $field->shouldHideInApplicationTransactions($this);
+        }
     }
 
     return false;

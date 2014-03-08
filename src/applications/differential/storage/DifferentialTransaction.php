@@ -20,10 +20,23 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
   }
 
   public function shouldHide() {
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
     switch ($this->getTransactionType()) {
+      case self::TYPE_UPDATE:
+        // Older versions of this transaction have an ID for the new value,
+        // and/or do not record the old value. Only hide the transaction if
+        // the new value is a PHID, indicating that this is a newer style
+        // transaction.
+        if ($old === null) {
+          if (phid_get_type($new) == DifferentialPHIDTypeDiff::TYPECONST) {
+            return true;
+          }
+        }
+        break;
+
       case PhabricatorTransactions::TYPE_EDGE:
-        $old = $this->getOldValue();
-        $new = $this->getNewValue();
         $add = array_diff_key($new, $old);
         $rem = array_diff_key($old, $new);
 
@@ -38,7 +51,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
         break;
     }
 
-    return false;
+    return parent::shouldHide();
   }
 
   public function shouldHideForMail(array $xactions) {

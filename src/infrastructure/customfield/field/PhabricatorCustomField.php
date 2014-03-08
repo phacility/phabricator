@@ -991,6 +991,14 @@ abstract class PhabricatorCustomField {
     return array();
   }
 
+  public function shouldHideInApplicationTransactions(
+    PhabricatorApplicationTransaction $xaction) {
+    if ($this->proxy) {
+      return $this->proxy->shouldHideInApplicationTransactions($xaction);
+    }
+    return false;
+  }
+
 
 /* -(  Edit View  )---------------------------------------------------------- */
 

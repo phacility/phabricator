@@ -21,6 +21,9 @@ final class DifferentialSummaryField
 
   protected function readValueFromRevision(
     DifferentialRevision $revision) {
+    if (!$revision->getID()) {
+      return null;
+    }
     return $revision->getSummary();
   }
 
@@ -80,6 +83,11 @@ final class DifferentialSummaryField
       $viewer,
       $xaction->getOldValue(),
       $xaction->getNewValue());
+  }
+
+  public function shouldHideInApplicationTransactions(
+    PhabricatorApplicationTransaction $xaction) {
+    return ($xaction->getOldValue() === null);
   }
 
   public function shouldAppearInGlobalSearch() {

@@ -1,13 +1,10 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_differential_createrevision_Method
-  extends ConduitAPIMethod {
+  extends ConduitAPI_differential_Method {
 
   public function getMethodDescription() {
-    return "Create a new Differential revision.";
+    return pht("Create a new Differential revision.");
   }
 
   public function defineParamTypes() {
@@ -31,20 +28,25 @@ final class ConduitAPI_differential_createrevision_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $fields = $request->getValue('fields');
+    $viewer = $request->getUser();
 
     $diff = id(new DifferentialDiffQuery())
-      ->setViewer($request->getUser())
+      ->setViewer($viewer)
       ->withIDs(array($request->getValue('diffid')))
       ->executeOne();
     if (!$diff) {
       throw new ConduitException('ERR_BAD_DIFF');
     }
 
-    $revision = DifferentialRevisionEditor::newRevisionFromConduitWithDiff(
-      $fields,
+    $revision = DifferentialRevision::initializeNewRevision($viewer);
+    $revision->attachReviewerStatus(array());
+
+    $this->applyFieldEdit(
+      $request,
+      $revision,
       $diff,
-      $request->getUser());
+      $request->getValue('fields', array()),
+      $message = null);
 
     return array(
       'revisionid'  => $revision->getID(),

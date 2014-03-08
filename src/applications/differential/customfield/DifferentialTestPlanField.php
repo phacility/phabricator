@@ -21,6 +21,9 @@ final class DifferentialTestPlanField
 
   protected function readValueFromRevision(
     DifferentialRevision $revision) {
+    if (!$revision->getID()) {
+      return null;
+    }
     return $revision->getTestPlan();
   }
 
@@ -96,6 +99,10 @@ final class DifferentialTestPlanField
       $xaction->getNewValue());
   }
 
+  public function shouldHideInApplicationTransactions(
+    PhabricatorApplicationTransaction $xaction) {
+    return ($xaction->getOldValue() === null);
+  }
 
   public function shouldAppearInGlobalSearch() {
     return true;
