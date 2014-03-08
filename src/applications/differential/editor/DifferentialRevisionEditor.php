@@ -153,14 +153,6 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     return !$this->getRevision()->getID();
   }
 
-  /**
-   * A silent update does not trigger Herald rules or send emails. This is used
-   * for auto-amends at commit time.
-   */
-  public function setSilentUpdate($silent) {
-    $this->silentUpdate = $silent;
-    return $this;
-  }
 
   public function save() {
     $revision = $this->getRevision();
@@ -540,18 +532,6 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
       ->queueDocumentForIndexing($revision->getPHID());
   }
 
-  public static function addCC(
-    DifferentialRevision $revision,
-    $phid,
-    $reason) {
-    return self::alterCCs(
-      $revision,
-      $revision->getCCPHIDs(),
-      $rem = array(),
-      $add = array($phid),
-      $reason);
-  }
-
   protected static function alterCCs(
     DifferentialRevision $revision,
     array $stable_phids,
@@ -629,33 +609,6 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     }
 
     $editor->save();
-  }
-
-  public static function updateReviewerStatus(
-    DifferentialRevision $revision,
-    PhabricatorUser $actor,
-    $reviewer_phid,
-    $status) {
-
-    $options = array(
-      'data' => array(
-        'status' => $status
-      )
-    );
-
-    $active_diff = $revision->loadActiveDiff();
-    if ($active_diff) {
-      $options['data']['diff'] = $active_diff->getID();
-    }
-
-    id(new PhabricatorEdgeEditor())
-      ->setActor($actor)
-      ->addEdge(
-        $revision->getPHID(),
-        PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER,
-        $reviewer_phid,
-        $options)
-      ->save();
   }
 
   private function createComment() {
