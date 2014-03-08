@@ -15,6 +15,10 @@ final class DifferentialAuthorField
     return pht('Stores the revision author.');
   }
 
+  public function canDisableField() {
+    return false;
+  }
+
   public function shouldAppearInPropertyView() {
     return true;
   }

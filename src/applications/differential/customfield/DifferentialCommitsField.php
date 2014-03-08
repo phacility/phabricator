@@ -11,6 +11,10 @@ final class DifferentialCommitsField
     return pht('Commits');
   }
 
+  public function canDisableField() {
+    return false;
+  }
+
   public function getFieldDescription() {
     return pht('Shows associated commits.');
   }

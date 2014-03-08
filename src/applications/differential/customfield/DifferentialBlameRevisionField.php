@@ -107,7 +107,7 @@ final class DifferentialBlameRevisionField
     );
   }
 
-  public function renderCommitMessageValue() {
+  public function renderCommitMessageValue(array $handles) {
     return $this->getValue();
   }
 

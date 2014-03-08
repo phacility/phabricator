@@ -19,6 +19,10 @@ final class DifferentialProjectReviewersField
     return true;
   }
 
+  public function canDisableField() {
+    return false;
+  }
+
   public function renderPropertyViewLabel() {
     return $this->getFieldName();
   }

@@ -32,6 +32,10 @@ final class DifferentialAuditorsField
     return true;
   }
 
+  public function canDisableField() {
+    return false;
+  }
+
   public function getRequiredHandlePHIDsForCommitMessage() {
     return nonempty($this->getValue(), array());
   }

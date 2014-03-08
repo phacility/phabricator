@@ -4,6 +4,10 @@ final class DifferentialRevisionIDField
   extends DifferentialCustomField {
 
   public function getFieldKey() {
+    return 'differential:revision-id';
+  }
+
+  public function getFieldKeyForConduit() {
     return 'revisionID';
   }
 

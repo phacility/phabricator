@@ -11,6 +11,10 @@ final class DifferentialManiphestTasksField
     return 'maniphestTaskPHIDs';
   }
 
+  public function canDisableField() {
+    return false;
+  }
+
   public function getFieldName() {
     return pht('Maniphest Tasks');
   }

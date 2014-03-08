@@ -11,6 +11,10 @@ final class DifferentialDependsOnField
     return pht('Depends On');
   }
 
+  public function canDisableField() {
+    return false;
+  }
+
   public function getFieldDescription() {
     return pht('Lists revisions this one depends on.');
   }

@@ -13,6 +13,10 @@ final class DifferentialJIRAIssuesField
     return 'jira.issues';
   }
 
+  public function canDisableField() {
+    return false;
+  }
+
   public function getValueForStorage() {
     return json_encode($this->getValue());
   }

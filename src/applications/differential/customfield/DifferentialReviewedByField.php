@@ -27,6 +27,10 @@ final class DifferentialReviewedByField
     return false;
   }
 
+  public function canDisableField() {
+    return true;
+  }
+
   protected function readValueFromRevision(
     DifferentialRevision $revision) {
 

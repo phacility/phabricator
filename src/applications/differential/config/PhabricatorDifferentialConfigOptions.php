@@ -12,7 +12,60 @@ final class PhabricatorDifferentialConfigOptions
   }
 
   public function getOptions() {
+    $custom_field_type = 'custom:PhabricatorCustomFieldConfigOptionType';
+
+    $fields = array(
+      new DifferentialTitleField(),
+      new DifferentialSummaryField(),
+      new DifferentialTestPlanField(),
+      new DifferentialAuthorField(),
+      new DifferentialReviewersField(),
+      new DifferentialProjectReviewersField(),
+      new DifferentialReviewedByField(),
+      new DifferentialSubscribersField(),
+      new DifferentialRepositoryField(),
+      new DifferentialLintField(),
+      new DifferentialUnitField(),
+      new DifferentialViewPolicyField(),
+      new DifferentialEditPolicyField(),
+
+      new DifferentialDependsOnField(),
+      new DifferentialDependenciesField(),
+      new DifferentialManiphestTasksField(),
+      new DifferentialCommitsField(),
+
+      new DifferentialJIRAIssuesField(),
+      new DifferentialAsanaRepresentationField(),
+
+      new DifferentialBlameRevisionField(),
+      new DifferentialPathField(),
+      new DifferentialHostField(),
+      new DifferentialRevertPlanField(),
+
+      new DifferentialApplyPatchField(),
+
+      new DifferentialRevisionIDField(),
+    );
+
+    $default_fields = array();
+    foreach ($fields as $field) {
+      $default_fields[$field->getFieldKey()] = array(
+        'disabled' => $field->shouldDisableByDefault(),
+      );
+    }
+
     return array(
+      $this->newOption(
+        'differential.fields',
+        $custom_field_type,
+        $default_fields)
+        ->setCustomData(
+          id(new DifferentialRevision())->getCustomFieldBaseClass())
+        ->setDescription(
+          pht(
+            "Select and reorder revision fields.\n\n".
+            "NOTE: This feature is under active development and subject ".
+            "to change.")),
       $this->newOption(
         'differential.whitespace-matters',
         'list<regex>',

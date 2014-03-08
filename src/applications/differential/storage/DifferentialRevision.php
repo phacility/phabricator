@@ -481,43 +481,7 @@ final class DifferentialRevision extends DifferentialDAO
 
 
   public function getCustomFieldSpecificationForRole($role) {
-    $fields = array(
-      new DifferentialAuthorField(),
-
-      new DifferentialTitleField(),
-      new DifferentialSummaryField(),
-      new DifferentialTestPlanField(),
-      new DifferentialReviewersField(),
-      new DifferentialProjectReviewersField(),
-      new DifferentialSubscribersField(),
-      new DifferentialRepositoryField(),
-      new DifferentialViewPolicyField(),
-      new DifferentialEditPolicyField(),
-
-      new DifferentialDependsOnField(),
-      new DifferentialDependenciesField(),
-      new DifferentialManiphestTasksField(),
-      new DifferentialCommitsField(),
-
-      new DifferentialJIRAIssuesField(),
-      new DifferentialAsanaRepresentationField(),
-
-      new DifferentialBlameRevisionField(),
-      new DifferentialPathField(),
-      new DifferentialHostField(),
-      new DifferentialRevertPlanField(),
-
-      new DifferentialApplyPatchField(),
-    );
-
-    $result = array();
-    foreach ($fields as $field) {
-      $result[$field->getFieldKey()] = array(
-        'disabled' => $field->shouldDisableByDefault(),
-      );
-    }
-
-    return $result;
+    return PhabricatorEnv::getEnvConfig('differential.fields');
   }
 
   public function getCustomFieldBaseClass() {
