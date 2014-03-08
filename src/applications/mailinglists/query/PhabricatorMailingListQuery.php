@@ -5,6 +5,8 @@ final class PhabricatorMailingListQuery
 
   private $phids;
   private $ids;
+  private $emails;
+  private $names;
 
   public function withIDs($ids) {
     $this->ids = $ids;
@@ -13,6 +15,16 @@ final class PhabricatorMailingListQuery
 
   public function withPHIDs($phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  public function withEmails(array $emails) {
+    $this->emails = $emails;
+    return $this;
+  }
+
+  public function withNames(array $names) {
+    $this->names = $names;
     return $this;
   }
 
@@ -46,6 +58,20 @@ final class PhabricatorMailingListQuery
         $conn_r,
         'phid IN (%Ls)',
         $this->phids);
+    }
+
+    if ($this->names) {
+      $where[] = qsprintf(
+        $conn_r,
+        'name IN (%Ls)',
+        $this->names);
+    }
+
+    if ($this->emails) {
+      $where[] = qsprintf(
+        $conn_r,
+        'email IN (%Ls)',
+        $this->emails);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

@@ -37,4 +37,35 @@ final class PhabricatorMailingListPHIDTypeList extends PhabricatorPHIDType {
     }
   }
 
+  public function canLoadNamedObject($name) {
+    return preg_match('/^.+@.+/', $name);
+  }
+
+  public function loadNamedObjects(
+    PhabricatorObjectQuery $query,
+    array $names) {
+
+    $id_map = array();
+    foreach ($names as $name) {
+      // Maybe normalize these some day?
+      $id = $name;
+      $id_map[$id][] = $name;
+    }
+
+    $objects = id(new PhabricatorMailingListQuery())
+      ->setViewer($query->getViewer())
+      ->withEmails(array_keys($id_map))
+      ->execute();
+
+    $results = array();
+    foreach ($objects as $id => $object) {
+      $email = $object->getEmail();
+      foreach (idx($id_map, $email, array()) as $name) {
+        $results[$name] = $object;
+      }
+    }
+
+    return $results;
+  }
+
 }
