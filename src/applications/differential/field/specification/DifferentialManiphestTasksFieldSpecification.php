@@ -127,32 +127,4 @@ final class DifferentialManiphestTasksFieldSpecification
     return $task_phids;
   }
 
-  public function renderValueForMail($phase) {
-    if ($phase == DifferentialMailPhase::COMMENT) {
-      return null;
-    }
-
-    if (!$this->maniphestTasks) {
-      return null;
-    }
-
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->getUser())
-      ->withPHIDs($this->maniphestTasks)
-      ->execute();
-    $body = array();
-    $body[] = 'MANIPHEST TASKS';
-    foreach ($handles as $handle) {
-      $body[] = '  '.PhabricatorEnv::getProductionURI($handle->getURI());
-    }
-    return implode("\n", $body);
-  }
-
-  public function getCommitMessageTips() {
-    return array(
-      'Use "Fixes T123" in your summary to mark that the current '.
-      'revision completes a given task.'
-      );
-  }
-
 }

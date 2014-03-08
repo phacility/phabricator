@@ -35,18 +35,4 @@ final class DifferentialArcanistProjectFieldSpecification
     return $diff->getArcanistProjectPHID();
   }
 
-  public function renderValueForMail($phase) {
-    $diff = $this->getRevision()->loadActiveDiff();
-    if ($diff) {
-      $phid = $diff->getArcanistProjectPHID();
-      if ($phid) {
-        $handle = id(new PhabricatorHandleQuery())
-          ->setViewer($this->getUser())
-          ->withPHIDs(array($phid))
-          ->executeOne();
-        return "ARCANIST PROJECT\n  ".$handle->getName();
-      }
-    }
-  }
-
 }

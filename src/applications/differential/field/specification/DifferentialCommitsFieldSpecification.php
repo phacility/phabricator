@@ -34,30 +34,4 @@ final class DifferentialCommitsFieldSpecification
     return $revision->getCommitPHIDs();
   }
 
-  public function renderValueForMail($phase) {
-    $revision = $this->getRevision();
-
-    if ($revision->getStatus() != ArcanistDifferentialRevisionStatus::CLOSED) {
-      return null;
-    }
-
-    $phids = $revision->loadCommitPHIDs();
-    if (!$phids) {
-      return null;
-    }
-
-    $body = array();
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->getUser())
-      ->withPHIDs($phids)
-      ->execute();
-    $body[] = pht('COMMIT(S)', count($handles));
-
-    foreach ($handles as $handle) {
-      $body[] = '  '.PhabricatorEnv::getProductionURI($handle->getURI());
-    }
-
-    return implode("\n", $body);
-  }
-
 }

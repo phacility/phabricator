@@ -96,25 +96,4 @@ final class DifferentialRevisionIDFieldSpecification
     return 'D'.$revision->getID();
   }
 
-  public function renderValueForMail($phase) {
-    $body = array();
-    $body[] = 'REVISION DETAIL';
-    $body[] = '  '.PhabricatorEnv::getProductionURI('/D'.$this->id);
-
-    if ($phase == DifferentialMailPhase::UPDATE) {
-      $diffs = id(new DifferentialDiff())->loadAllWhere(
-        'revisionID = %d ORDER BY id DESC LIMIT 2',
-        $this->id);
-      if (count($diffs) == 2) {
-        list($new, $old) = array_values(mpull($diffs, 'getID'));
-        $body[] = null;
-        $body[] = 'CHANGE SINCE LAST DIFF';
-        $body[] = '  '.PhabricatorEnv::getProductionURI(
-          "/D{$this->id}?vs={$old}&id={$new}#toc");
-      }
-    }
-
-    return implode("\n", $body);
-  }
-
 }

@@ -1662,6 +1662,10 @@ abstract class PhabricatorApplicationTransactionEditor
       ->setIsBulk(true)
       ->setBody($body->render());
 
+    foreach ($body->getAttachments() as $attachment) {
+      $template->addAttachment($attachment);
+    }
+
     $herald_xscript = $this->getHeraldTranscript();
     if ($herald_xscript) {
       $herald_header = $herald_xscript->getXHeraldRulesHeader();

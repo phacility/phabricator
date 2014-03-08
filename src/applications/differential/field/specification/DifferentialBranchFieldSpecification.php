@@ -31,16 +31,4 @@ final class DifferentialBranchFieldSpecification
     return $this->getBranchOrBookmarkDescription($diff);
   }
 
-  public function renderValueForMail($phase) {
-    $diff = $this->getRevision()->loadActiveDiff();
-    if ($diff) {
-      $description = $this->getBranchOrBookmarkDescription($diff);
-      if ($description) {
-        return "BRANCH\n  {$description}";
-      }
-    }
-
-    return null;
-  }
-
 }

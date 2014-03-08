@@ -1019,6 +1019,46 @@ final class DifferentialTransactionEditor
       pht('REVISION DETAIL'),
       PhabricatorEnv::getProductionURI('/D'.$object->getID()));
 
+    $update_xaction = null;
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case DifferentialTransaction::TYPE_UPDATE:
+          $update_xaction = $xaction;
+          break;
+      }
+    }
+
+    if ($update_xaction) {
+      $diff = $this->loadDiff($update_xaction->getNewValue(), true);
+
+      $body->addTextSection(
+        pht('AFFECTED FILES'),
+        $this->renderAffectedFilesForMail($diff));
+
+      $config_key_inline = 'metamta.differential.inline-patches';
+      $config_inline = PhabricatorEnv::getEnvConfig($config_key_inline);
+
+      $config_key_attach = 'metamta.differential.attach-patches';
+      $config_attach = PhabricatorEnv::getEnvConfig($config_key_attach);
+
+      if ($config_inline || $config_attach) {
+        $patch = $this->renderPatchForMail($diff);
+        $lines = count(phutil_split_lines($patch));
+
+        if ($config_inline && ($lines <= $config_inline)) {
+          $body->addTextSection(
+            pht('CHANGE DETAILS'),
+            $patch);
+        }
+
+        if ($config_attach) {
+          $name = pht('D%s.%s.patch', $object->getID(), $diff->getID());
+          $mime_type = 'text/x-patch; charset=utf-8';
+          $body->addAttachment(
+            new PhabricatorMetaMTAAttachment($patch, $name, $mime_type));
+        }
+      }
+    }
 
     return $body;
   }
@@ -1489,6 +1529,32 @@ final class DifferentialTransactionEditor
         ArcanistDifferentialRevisionHash::TABLE_NAME,
         implode(', ', $sql));
     }
+  }
+
+  private function renderAffectedFilesForMail(DifferentialDiff $diff) {
+    $changesets = $diff->getChangesets();
+
+    $filenames = mpull($changesets, 'getDisplayFilename');
+    sort($filenames);
+
+    $count = count($filenames);
+    $max = 250;
+    if ($count > $max) {
+      $filenames = array_slice($filenames, 0, $max);
+      $filenames[] = pht('(%d more files...)', ($count - $max));
+    }
+
+    return implode("\n", $filenames);
+  }
+
+  private function renderPatchForMail(DifferentialDiff $diff) {
+    $format = PhabricatorEnv::getEnvConfig('metamta.differential.patch-format');
+
+    return id(new DifferentialRawDiffRenderer())
+      ->setViewer($this->getActor())
+      ->setFormat($format)
+      ->setChangesets($diff->getChangesets())
+      ->buildPatch();
   }
 
 }

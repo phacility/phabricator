@@ -148,6 +148,14 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
             break;
         }
         break;
+      case self::TYPE_UPDATE:
+        $old = $this->getOldValue();
+        if ($old === null) {
+          $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEW_REQUEST;
+        } else {
+          $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_UPDATED;
+        }
+        break;
       case PhabricatorTransactions::TYPE_EDGE:
         switch ($this->getMetadataValue('edge:type')) {
           case PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER:
@@ -183,8 +191,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
       case self::TYPE_UPDATE:
         if ($new) {
           // TODO: Migrate to PHIDs and use handles here?
-          // TODO: Link this?
-          if (phid_get_type($new) == 'DIFF') {
+          if (phid_get_type($new) == DifferentialPHIDTypeDiff::TYPECONST) {
             return pht(
               '%s updated this revision to %s.',
               $author_handle,
