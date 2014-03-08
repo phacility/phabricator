@@ -896,6 +896,22 @@ final class DifferentialTransactionEditor
     return $phids;
   }
 
+  protected function getMailAction(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    $action = parent::getMailAction($object, $xactions);
+
+    $strongest = $this->getStrongestAction($object, $xactions);
+    switch ($strongest->getTransactionType()) {
+      case DifferentialTransaction::TYPE_UPDATE:
+        $count = new PhutilNumber($object->getLineCount());
+        $action = pht('%s, %s line(s)', $action, $count);
+        break;
+    }
+
+    return $action;
+  }
+
   protected function getMailSubjectPrefix() {
     return PhabricatorEnv::getEnvConfig('metamta.differential.subject-prefix');
   }

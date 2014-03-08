@@ -105,7 +105,12 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
       case self::TYPE_INLINE:
         return pht('Commented On');
       case self::TYPE_UPDATE:
-        return pht('Updated');
+        $old = $this->getOldValue();
+        if ($old === null) {
+          return pht('Request');
+        } else {
+          return pht('Updated');
+        }
       case self::TYPE_ACTION:
         $map = array(
           DifferentialAction::ACTION_ACCEPT => pht('Accepted'),

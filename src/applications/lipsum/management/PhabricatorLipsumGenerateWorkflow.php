@@ -6,7 +6,7 @@ final class PhabricatorLipsumGenerateWorkflow
   protected function didConstruct() {
     $this
       ->setName('generate')
-      ->setExamples('**generate** __key__')
+      ->setExamples('**generate**')
       ->setSynopsis('Generate some lipsum.')
       ->setArguments(
         array(
@@ -62,20 +62,16 @@ final class PhabricatorLipsumGenerateWorkflow
     while (true) {
       $type = $supported_types[array_rand($supported_types)];
       $admin = $this->getViewer();
-      try {
-        $taskgen = newv($type, array());
-        $object = $taskgen->generate();
-        $handle = id(new PhabricatorHandleQuery())
-          ->setViewer($admin)
-          ->withPHIDs(array($object->getPHID()))
-          ->executeOne();
-        echo "Generated ".$handle->getTypeName().": ".
-          $handle->getFullName()."\n";
-      } catch (PhutilMissingSymbolException $ex) {
-        throw new PhutilArgumentUsageException(
-        "Cannot generate content of type ".$type.
-        " because the class does not exist.");
-      }
+
+      $taskgen = newv($type, array());
+      $object = $taskgen->generate();
+      $handle = id(new PhabricatorHandleQuery())
+        ->setViewer($admin)
+        ->withPHIDs(array($object->getPHID()))
+        ->executeOne();
+      echo "Generated ".$handle->getTypeName().": ".
+        $handle->getFullName()."\n";
+
       usleep(200000);
     }
   }

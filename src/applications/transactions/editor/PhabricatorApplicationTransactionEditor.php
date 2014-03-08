@@ -1649,8 +1649,7 @@ abstract class PhabricatorApplicationTransactionEditor
     $body = $this->buildMailBody($object, $xactions);
 
     $mail_tags = $this->getMailTags($object, $xactions);
-
-    $action = $this->getStrongestAction($object, $xactions)->getActionName();
+    $action = $this->getMailAction($object, $xactions);
 
     $template
       ->setFrom($this->requireActor()->getPHID())
@@ -1743,6 +1742,15 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     return array_mergev($tags);
+  }
+
+  /**
+   * @task mail
+   */
+  protected function getMailAction(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return $this->getStrongestAction($object, $xactions)->getActionName();
   }
 
 
