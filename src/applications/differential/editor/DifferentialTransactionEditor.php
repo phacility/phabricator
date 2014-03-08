@@ -1170,8 +1170,8 @@ final class DifferentialTransactionEditor
     }
 
     $adapter = HeraldDifferentialRevisionAdapter::newLegacyAdapter(
-      $object,
-      $object->getActiveDiff());
+      $revision,
+      $revision->getActiveDiff());
 
     $reviewers = $revision->getReviewerStatus();
     $reviewer_phids = mpull($reviewers, 'getReviewerPHID');
