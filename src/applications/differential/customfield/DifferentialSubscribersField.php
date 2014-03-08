@@ -7,6 +7,10 @@ final class DifferentialSubscribersField
     return 'differential:subscribers';
   }
 
+  public function getFieldKeyForConduit() {
+    return 'ccPHIDs';
+  }
+
   public function getFieldName() {
     return pht('Subscribers');
   }
@@ -17,6 +21,10 @@ final class DifferentialSubscribersField
 
   protected function readValueFromRevision(
     DifferentialRevision $revision) {
+    if (!$revision->getPHID()) {
+      return array();
+    }
+
     return PhabricatorSubscribersQuery::loadSubscribersForPHID(
       $revision->getPHID());
   }
@@ -44,6 +52,45 @@ final class DifferentialSubscribersField
 
   public function getApplicationTransactionType() {
     return PhabricatorTransactions::TYPE_SUBSCRIBERS;
+  }
+
+  public function shouldAppearInCommitMessage() {
+    return true;
+  }
+
+  public function shouldAllowEditInCommitMessage() {
+    return true;
+  }
+
+  public function shouldAppearInCommitMessageTemplate() {
+    return true;
+  }
+
+  public function getCommitMessageLabels() {
+    return array(
+      'CC',
+      'CCs',
+      'Subscriber',
+      'Subscribers',
+    );
+  }
+
+  public function parseValueFromCommitMessage($value) {
+    return $this->parseObjectList(
+      $value,
+      array(
+        PhabricatorPeoplePHIDTypeUser::TYPECONST,
+        PhabricatorProjectPHIDTypeProject::TYPECONST,
+        PhabricatorMailingListPHIDTypeList::TYPECONST,
+      ));
+  }
+
+  public function getRequiredHandlePHIDsForCommitMessage() {
+    return $this->getValue();
+  }
+
+  public function renderCommitMessageValue(array $handles) {
+    return $this->renderObjectList($handles);
   }
 
 }

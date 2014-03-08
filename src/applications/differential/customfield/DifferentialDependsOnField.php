@@ -33,4 +33,12 @@ final class DifferentialDependsOnField
     return $this->renderHandleList($handles);
   }
 
+  public function getProTips() {
+    return array(
+      pht(
+        'Create a dependendency between revisions by writing '.
+        '"Depends on D123" in your summary.'),
+    );
+  }
+
 }

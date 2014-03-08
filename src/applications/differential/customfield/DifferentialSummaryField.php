@@ -7,6 +7,10 @@ final class DifferentialSummaryField
     return 'differential:summary';
   }
 
+  public function getFieldKeyForConduit() {
+    return 'summary';
+  }
+
   public function getFieldName() {
     return pht('Summary');
   }
@@ -121,6 +125,18 @@ final class DifferentialSummaryField
   public function getApplicationTransactionRemarkupBlocks(
     PhabricatorApplicationTransaction $xaction) {
     return array($xaction->getNewValue());
+  }
+
+  public function shouldAppearInCommitMessage() {
+    return true;
+  }
+
+  public function shouldAppearInCommitMessageTemplate() {
+    return true;
+  }
+
+  public function shouldOverwriteWhenCommitMessageIsEdited() {
+    return true;
   }
 
 }

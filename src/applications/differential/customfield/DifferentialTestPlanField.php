@@ -7,6 +7,10 @@ final class DifferentialTestPlanField
     return 'differential:test-plan';
   }
 
+  public function getFieldKeyForConduit() {
+    return 'testPlan';
+  }
+
   public function getFieldName() {
     return pht('Test Plan');
   }
@@ -36,7 +40,7 @@ final class DifferentialTestPlanField
 
   protected function getCoreFieldRequiredErrorString() {
     return pht(
-      'You must provide a test plan: describe the actions you performed '.
+      'You must provide a test plan. Describe the actions you performed '.
       'to verify the behvaior of this change.');
   }
 
@@ -137,5 +141,34 @@ final class DifferentialTestPlanField
     PhabricatorApplicationTransaction $xaction) {
     return array($xaction->getNewValue());
   }
+
+  public function shouldAppearInCommitMessage() {
+    return true;
+  }
+
+  public function shouldAppearInCommitMessageTemplate() {
+    return true;
+  }
+
+  public function shouldOverwriteWhenCommitMessageIsEdited() {
+    return true;
+  }
+
+  public function getCommitMessageLabels() {
+    return array(
+      'Test Plan',
+      'Testplan',
+      'Tested',
+      'Tests',
+    );
+  }
+
+  public function validateCommitMessageValue($value) {
+    if (!strlen($value) && $this->isCoreFieldRequired()) {
+      throw new DifferentialFieldValidationException(
+        $this->getCoreFieldRequiredErrorString());
+    }
+  }
+
 
 }

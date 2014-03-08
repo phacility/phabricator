@@ -7,6 +7,10 @@ final class DifferentialReviewersField
     return 'differential:reviewers';
   }
 
+  public function getFieldKeyForConduit() {
+    return 'reviewerPHIDs';
+  }
+
   public function getFieldName() {
     return pht('Reviewers');
   }
@@ -118,4 +122,47 @@ final class DifferentialReviewersField
     }
     return $reviewers;
   }
+
+  public function shouldAppearInCommitMessage() {
+    return true;
+  }
+
+  public function shouldAppearInCommitMessageTemplate() {
+    return true;
+  }
+
+  public function getCommitMessageLabels() {
+    return array(
+      'Reviewer',
+      'Reviewers',
+    );
+  }
+
+  public function parseValueFromCommitMessage($value) {
+    return $this->parseObjectList(
+      $value,
+      array(
+        PhabricatorPeoplePHIDTypeUser::TYPECONST,
+        PhabricatorProjectPHIDTypeProject::TYPECONST,
+      ));
+  }
+
+  public function getRequiredHandlePHIDsForCommitMessage() {
+    return mpull($this->getValue(), 'getReviewerPHID');
+  }
+
+  public function readValueFromCommitMessage($value) {
+    $reviewers = array();
+    foreach ($value as $phid) {
+      $reviewers[] = new DifferentialReviewer($phid, array());
+    }
+    $this->setValue($reviewers);
+
+    return $this;
+  }
+
+  public function renderCommitMessageValue(array $handles) {
+    return $this->renderObjectList($handles);
+  }
+
 }
