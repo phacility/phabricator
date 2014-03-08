@@ -276,27 +276,25 @@ final class DifferentialTransactionEditor
         $maniphest = 'PhabricatorApplicationManiphest';
         if (PhabricatorApplication::isClassInstalled($maniphest)) {
           $diff = $this->loadDiff($xaction->getNewValue());
-          if ($diff) {
-            $branch = $diff->getBranch();
+          $branch = $diff->getBranch();
 
-            // No "$", to allow for branches like T123_demo.
-            $match = null;
-            if (preg_match('/^T(\d+)/i', $branch, $match)) {
-              $task_id = $match[1];
-              $tasks = id(new ManiphestTaskQuery())
-                ->setViewer($this->getActor())
-                ->withIDs(array($task_id))
-                ->execute();
-              if ($tasks) {
-                $task = head($tasks);
-                $task_phid = $task->getPHID();
+          // No "$", to allow for branches like T123_demo.
+          $match = null;
+          if (preg_match('/^T(\d+)/i', $branch, $match)) {
+            $task_id = $match[1];
+            $tasks = id(new ManiphestTaskQuery())
+              ->setViewer($this->getActor())
+              ->withIDs(array($task_id))
+              ->execute();
+            if ($tasks) {
+              $task = head($tasks);
+              $task_phid = $task->getPHID();
 
-                $results[] = id(new DifferentialTransaction())
-                  ->setTransactionType($type_edge)
-                  ->setMetadataValue('edge:type', $edge_ref_task)
-                  ->setIgnoreOnNoEffect(true)
-                  ->setNewValue(array('+' => array($task_phid => $task_phid)));
-              }
+              $results[] = id(new DifferentialTransaction())
+                ->setTransactionType($type_edge)
+                ->setMetadataValue('edge:type', $edge_ref_task)
+                ->setIgnoreOnNoEffect(true)
+                ->setNewValue(array('+' => array($task_phid => $task_phid)));
             }
           }
         }
@@ -505,6 +503,20 @@ final class DifferentialTransactionEditor
   protected function applyFinalEffects(
     PhabricatorLiskDAO $object,
     array $xactions) {
+
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case DifferentialTransaction::TYPE_UPDATE:
+          $diff = $this->loadDiff($xaction->getNewValue(), true);
+
+          // Update these denormalized index tables when we attach a new
+          // diff to a revision.
+
+          $this->updateRevisionHashTable($object, $diff);
+          $this->updateAffectedPathTable($object, $diff);
+          break;
+      }
+    }
 
     $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
     $status_revision = ArcanistDifferentialRevisionStatus::NEEDS_REVISION;
@@ -1167,11 +1179,16 @@ final class DifferentialTransactionEditor
     return implode("\n", $result);
   }
 
-  private function loadDiff($phid) {
-    return id(new DifferentialDiffQuery())
+  private function loadDiff($phid, $need_changesets = false) {
+    $query = id(new DifferentialDiffQuery())
       ->withPHIDs(array($phid))
-      ->setViewer($this->getActor())
-      ->executeOne();
+      ->setViewer($this->getActor());
+
+    if ($need_changesets) {
+      $query->needChangesets(true);
+    }
+
+    return $query->executeOne();
   }
 
 /* -(  Herald Integration  )------------------------------------------------- */
@@ -1298,6 +1315,180 @@ final class DifferentialTransactionEditor
       $adapter->getBuildPlans());
 
     return $xactions;
+  }
+
+  /**
+   * Update the table which links Differential revisions to paths they affect,
+   * so Diffusion can efficiently find pending revisions for a given file.
+   */
+  private function updateAffectedPathTable(
+    DifferentialRevision $revision,
+    DifferentialDiff $diff) {
+
+    $changesets = $diff->getChangesets();
+
+    // TODO: This all needs to be modernized.
+
+    $project = $diff->loadArcanistProject();
+    if (!$project) {
+      // Probably an old revision from before projects.
+      return;
+    }
+
+    $repository = $project->loadRepository();
+    if (!$repository) {
+      // Probably no project <-> repository link, or the repository where the
+      // project lives is untracked.
+      return;
+    }
+
+    $path_prefix = null;
+
+    $local_root = $diff->getSourceControlPath();
+    if ($local_root) {
+      // We're in a working copy which supports subdirectory checkouts (e.g.,
+      // SVN) so we need to figure out what prefix we should add to each path
+      // (e.g., trunk/projects/example/) to get the absolute path from the
+      // root of the repository. DVCS systems like Git and Mercurial are not
+      // affected.
+
+      // Normalize both paths and check if the repository root is a prefix of
+      // the local root. If so, throw it away. Note that this correctly handles
+      // the case where the remote path is "/".
+      $local_root = id(new PhutilURI($local_root))->getPath();
+      $local_root = rtrim($local_root, '/');
+
+      $repo_root = id(new PhutilURI($repository->getRemoteURI()))->getPath();
+      $repo_root = rtrim($repo_root, '/');
+
+      if (!strncmp($repo_root, $local_root, strlen($repo_root))) {
+        $path_prefix = substr($local_root, strlen($repo_root));
+      }
+    }
+
+    $paths = array();
+    foreach ($changesets as $changeset) {
+      $paths[] = $path_prefix.'/'.$changeset->getFilename();
+    }
+
+    // Mark this as also touching all parent paths, so you can see all pending
+    // changes to any file within a directory.
+    $all_paths = array();
+    foreach ($paths as $local) {
+      foreach (DiffusionPathIDQuery::expandPathToRoot($local) as $path) {
+        $all_paths[$path] = true;
+      }
+    }
+    $all_paths = array_keys($all_paths);
+
+    $path_ids =
+      PhabricatorRepositoryCommitChangeParserWorker::lookupOrCreatePaths(
+        $all_paths);
+
+    $table = new DifferentialAffectedPath();
+    $conn_w = $table->establishConnection('w');
+
+    $sql = array();
+    foreach ($path_ids as $path_id) {
+      $sql[] = qsprintf(
+        $conn_w,
+        '(%d, %d, %d, %d)',
+        $repository->getID(),
+        $path_id,
+        time(),
+        $revision->getID());
+    }
+
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE revisionID = %d',
+      $table->getTableName(),
+      $revision->getID());
+    foreach (array_chunk($sql, 256) as $chunk) {
+      queryfx(
+        $conn_w,
+        'INSERT INTO %T (repositoryID, pathID, epoch, revisionID) VALUES %Q',
+        $table->getTableName(),
+        implode(', ', $chunk));
+    }
+  }
+
+
+  /**
+   * Update the table connecting revisions to DVCS local hashes, so we can
+   * identify revisions by commit/tree hashes.
+   */
+  private function updateRevisionHashTable(
+    DifferentialRevision $revision,
+    DifferentialDiff $diff) {
+
+    $vcs = $diff->getSourceControlSystem();
+    if ($vcs == DifferentialRevisionControlSystem::SVN) {
+      // Subversion has no local commit or tree hash information, so we don't
+      // have to do anything.
+      return;
+    }
+
+    $property = id(new DifferentialDiffProperty())->loadOneWhere(
+      'diffID = %d AND name = %s',
+      $diff->getID(),
+      'local:commits');
+    if (!$property) {
+      return;
+    }
+
+    $hashes = array();
+
+    $data = $property->getData();
+    switch ($vcs) {
+      case DifferentialRevisionControlSystem::GIT:
+        foreach ($data as $commit) {
+          $hashes[] = array(
+            ArcanistDifferentialRevisionHash::HASH_GIT_COMMIT,
+            $commit['commit'],
+          );
+          $hashes[] = array(
+            ArcanistDifferentialRevisionHash::HASH_GIT_TREE,
+            $commit['tree'],
+          );
+        }
+        break;
+      case DifferentialRevisionControlSystem::MERCURIAL:
+        foreach ($data as $commit) {
+          $hashes[] = array(
+            ArcanistDifferentialRevisionHash::HASH_MERCURIAL_COMMIT,
+            $commit['rev'],
+          );
+        }
+        break;
+    }
+
+    $conn_w = $revision->establishConnection('w');
+
+    $sql = array();
+    foreach ($hashes as $info) {
+      list($type, $hash) = $info;
+      $sql[] = qsprintf(
+        $conn_w,
+        '(%d, %s, %s)',
+        $revision->getID(),
+        $type,
+        $hash);
+    }
+
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE revisionID = %d',
+      ArcanistDifferentialRevisionHash::TABLE_NAME,
+      $revision->getID());
+
+    if ($sql) {
+      queryfx(
+        $conn_w,
+        'INSERT INTO %T (revisionID, type, hash) VALUES %Q',
+        ArcanistDifferentialRevisionHash::TABLE_NAME,
+        implode(', ', $sql));
+    }
   }
 
 }
