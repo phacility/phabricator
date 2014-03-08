@@ -941,7 +941,8 @@ return array(
   // task will be created for each uri that posts the story data to the uri.
   // Daemons automagically retry failures 100 times, waiting $fail_count * 60s
   // between each subsequent failure. Be sure to keep the daemon console
-  // (/daemon/) open while developing and testing your end points.
+  // (/daemon/) open while developing and testing your end points. You may need
+  // to restart your daemons to start sending http requests.
   //
   // NOTE: URIs are not validated, the URI must return http status 200 within
   // 30 seconds, and no permission checks are performed.
