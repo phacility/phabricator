@@ -47,11 +47,4 @@ final class DifferentialDependsOnFieldSpecification
     return 'phabricator:depends-on';
   }
 
-  public function getCommitMessageTips() {
-    return array(
-      'Use "Depends on D123" in your summary to mark '.
-      'a dependency between revisions.'
-      );
-  }
-
 }

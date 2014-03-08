@@ -43,10 +43,4 @@ final class DifferentialBranchFieldSpecification
     return null;
   }
 
-  public function getCommitMessageTips() {
-    return array(
-      'Name branch "T123" to attach the diff to a task.',
-    );
-  }
-
 }

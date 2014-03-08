@@ -643,9 +643,6 @@ abstract class DifferentialFieldSpecification {
     return;
   }
 
-  public function getCommitMessageTips() {
-      return array();
-  }
 
 
 /* -(  Loading Additional Data  )-------------------------------------------- */
