@@ -54,6 +54,11 @@ body .phui-header-shell.phui-bleed-header
   right: 0;
 }
 
+.phui-document-view .phui-header-view .phui-header-action-links {
+  right: 8px;
+  top: 12px;
+}
+
 .device-phone .phui-header-action-link .phui-button-text {
   visibility: hidden;
   width: 0;
