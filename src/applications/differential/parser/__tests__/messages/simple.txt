@@ -1,0 +1,12 @@
+fix bug
+
+it had a bug but I fixed it
+~~~~~~~~~~
+{}
+~~~~~~~~~~
+{
+  "title": "fix bug",
+  "summary": "it had a bug but I fixed it"
+}
+~~~~~~~~~~
+[]
