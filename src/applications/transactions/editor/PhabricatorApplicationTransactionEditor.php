@@ -1496,6 +1496,7 @@ abstract class PhabricatorApplicationTransactionEditor
         $field_list = PhabricatorCustomField::getObjectFields(
           $object,
           PhabricatorCustomField::ROLE_EDIT);
+        $field_list->setViewer($this->getActor());
 
         $role_xactions = PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS;
         foreach ($field_list->getFields() as $field) {

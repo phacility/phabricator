@@ -1,7 +1,7 @@
 <?php
 
 final class DifferentialManiphestTasksField
-  extends DifferentialCustomField {
+  extends DifferentialCoreCustomField {
 
   public function getFieldKey() {
     return 'differential:maniphest-tasks';
@@ -12,6 +12,10 @@ final class DifferentialManiphestTasksField
   }
 
   public function canDisableField() {
+    return false;
+  }
+
+  public function shouldAppearInEditView() {
     return false;
   }
 
@@ -31,14 +35,37 @@ final class DifferentialManiphestTasksField
     return $this->getFieldName();
   }
 
-  public function getRequiredHandlePHIDsForPropertyView() {
-    if (!$this->getObject()->getPHID()) {
+  public function readValueFromRevision(DifferentialRevision $revision) {
+    if (!$revision->getPHID()) {
       return array();
     }
 
     return PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $this->getObject()->getPHID(),
+      $revision->getPHID(),
       PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK);
+  }
+
+  public function getApplicationTransactionType() {
+    return PhabricatorTransactions::TYPE_EDGE;
+  }
+
+  public function getApplicationTransactionMetadata() {
+    return array(
+      'edge:type' => PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK,
+    );
+  }
+
+  public function getNewValueForApplicationTransactions() {
+    $edges = array();
+    foreach ($this->getValue() as $phid) {
+      $edges[$phid] = $phid;
+    }
+
+    return array('=' => $edges);
+  }
+
+  public function getRequiredHandlePHIDsForPropertyView() {
+    return $this->getValue();
   }
 
   public function renderPropertyViewValue(array $handles) {
