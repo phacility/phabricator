@@ -42,10 +42,6 @@ final class DifferentialTestPlanFieldSpecification
     return true;
   }
 
-  public function willWriteRevision(DifferentialRevisionEditor $editor) {
-    $this->getRevision()->setTestPlan($this->plan);
-  }
-
   public function validateField() {
     if ($this->isRequired()) {
       if (!strlen($this->plan)) {

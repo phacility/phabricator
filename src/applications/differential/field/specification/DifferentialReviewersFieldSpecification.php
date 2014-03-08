@@ -100,10 +100,6 @@ final class DifferentialReviewersFieldSpecification
       ->setError($this->error);
   }
 
-  public function willWriteRevision(DifferentialRevisionEditor $editor) {
-    $editor->setReviewers($this->reviewers);
-  }
-
   public function shouldAppearOnCommitMessage() {
     return true;
   }

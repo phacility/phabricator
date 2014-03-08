@@ -226,7 +226,9 @@ final class DifferentialTransactionEditor
     $actor = $this->getActor();
     $actor_phid = $actor->getPHID();
     $type_edge = PhabricatorTransactions::TYPE_EDGE;
+
     $edge_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
+    $edge_ref_task = PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK;
 
     $results = parent::expandTransaction($object, $xaction);
     switch ($xaction->getTransactionType()) {
@@ -265,6 +267,38 @@ final class DifferentialTransactionEditor
             ->setMetadataValue('edge:type', $edge_reviewer)
             ->setIgnoreOnNoEffect(true)
             ->setNewValue(array('+' => $edits));
+        }
+
+        // When a revision is updated and the diff comes from a branch named
+        // "T123" or similar, automatically associate the commit with the
+        // task that the branch names.
+
+        $maniphest = 'PhabricatorApplicationManiphest';
+        if (PhabricatorApplication::isClassInstalled($maniphest)) {
+          $diff = $this->loadDiff($xaction->getNewValue());
+          if ($diff) {
+            $branch = $diff->getBranch();
+
+            // No "$", to allow for branches like T123_demo.
+            $match = null;
+            if (preg_match('/^T(\d+)/i', $branch, $match)) {
+              $task_id = $match[1];
+              $tasks = id(new ManiphestTaskQuery())
+                ->setViewer($this->getActor())
+                ->withIDs(array($task_id))
+                ->execute();
+              if ($tasks) {
+                $task = head($tasks);
+                $task_phid = $task->getPHID();
+
+                $results[] = id(new DifferentialTransaction())
+                  ->setTransactionType($type_edge)
+                  ->setMetadataValue('edge:type', $edge_ref_task)
+                  ->setIgnoreOnNoEffect(true)
+                  ->setNewValue(array('+' => array($task_phid => $task_phid)));
+              }
+            }
+          }
         }
         break;
 
@@ -905,7 +939,7 @@ final class DifferentialTransactionEditor
     switch ($strongest->getTransactionType()) {
       case DifferentialTransaction::TYPE_UPDATE:
         $count = new PhutilNumber($object->getLineCount());
-        $action = pht('%s, %s line(s)', $action, $count);
+        $action = pht('%s, %d line(s)', $action, $count);
         break;
     }
 

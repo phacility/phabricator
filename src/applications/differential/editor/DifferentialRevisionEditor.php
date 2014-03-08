@@ -161,8 +161,6 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
 
     $revision->loadRelationships();
 
-    $this->willWriteRevision();
-
     if ($this->reviewers === null) {
       $this->reviewers = $revision->getReviewers();
     }
@@ -437,8 +435,6 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
         break;
     }
 
-    $this->didWriteRevision();
-
     $event_data = array(
       'revision_id'          => $revision->getID(),
       'revision_phid'        => $revision->getPHID(),
@@ -688,42 +684,6 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
         }
       }
     }
-  }
-
-  private function willWriteRevision() {
-    foreach ($this->auxiliaryFields as $aux_field) {
-      $aux_field->willWriteRevision($this);
-    }
-
-    $this->dispatchEvent(
-      PhabricatorEventType::TYPE_DIFFERENTIAL_WILLEDITREVISION);
-  }
-
-  private function didWriteRevision() {
-    foreach ($this->auxiliaryFields as $aux_field) {
-      $aux_field->didWriteRevision($this);
-    }
-
-    $this->dispatchEvent(
-      PhabricatorEventType::TYPE_DIFFERENTIAL_DIDEDITREVISION);
-  }
-
-  private function dispatchEvent($type) {
-    $event = new PhabricatorEvent(
-      $type,
-      array(
-        'revision'      => $this->revision,
-        'new'           => $this->isCreate,
-      ));
-
-    $event->setUser($this->getActor());
-
-    $request = $this->getAphrontRequestForEventDispatch();
-    if ($request) {
-      $event->setAphrontRequest($request);
-    }
-
-    PhutilEventEngine::dispatchEvent($event);
   }
 
   /**

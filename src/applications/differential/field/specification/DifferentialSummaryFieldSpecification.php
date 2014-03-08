@@ -38,10 +38,6 @@ final class DifferentialSummaryFieldSpecification
     return true;
   }
 
-  public function willWriteRevision(DifferentialRevisionEditor $editor) {
-    $this->getRevision()->setSummary($this->summary);
-  }
-
   public function shouldAppearOnCommitMessage() {
     return true;
   }

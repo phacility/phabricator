@@ -43,34 +43,6 @@ final class DifferentialManiphestTasksFieldSpecification
       PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK);
   }
 
-  /**
-   * Attach the revision to the task(s) and the task(s) to the revision.
-   *
-   * @return void
-   */
-  public function didWriteRevision(DifferentialRevisionEditor $editor) {
-    $revision = $editor->getRevision();
-    $revision_phid = $revision->getPHID();
-    $edge_type = PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK;
-
-    $old_phids = $this->oldManiphestTasks;
-    $add_phids = $this->maniphestTasks;
-    $rem_phids = array_diff($old_phids, $add_phids);
-
-    $edge_editor = id(new PhabricatorEdgeEditor())
-      ->setActor($this->getUser());
-
-    foreach ($add_phids as $phid) {
-      $edge_editor->addEdge($revision_phid, $edge_type, $phid);
-    }
-
-    foreach ($rem_phids as $phid) {
-      $edge_editor->removeEdge($revision_phid, $edge_type, $phid);
-    }
-
-    $edge_editor->save();
-  }
-
   protected function didSetRevision() {
     $this->maniphestTasks = $this->getManiphestTaskPHIDs();
     $this->oldManiphestTasks = $this->maniphestTasks;

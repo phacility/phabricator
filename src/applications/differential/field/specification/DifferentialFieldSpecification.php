@@ -192,38 +192,6 @@ abstract class DifferentialFieldSpecification {
     return false;
   }
 
-  /**
-   * Hook for applying revision changes via the editor. Normally, you should
-   * not implement this, but a number of builtin fields use the revision object
-   * itself as storage. If you need to do something similar for whatever reason,
-   * this method gives you an opportunity to interact with the editor or
-   * revision before changes are saved (for example, you can write the field's
-   * value into some property of the revision).
-   *
-   * @param DifferentialRevisionEditor  Active editor which is applying changes
-   *                                    to the revision.
-   * @return void
-   * @task edit
-   */
-  public function willWriteRevision(DifferentialRevisionEditor $editor) {
-    return;
-  }
-
-  /**
-   * Hook after an edit operation has completed. This allows you to update
-   * link tables or do other write operations which should happen after the
-   * revision is saved. Normally you don't need to implement this.
-   *
-   *
-   * @param DifferentialRevisionEditor  Active editor which has just applied
-   *                                    changes to the revision.
-   * @return void
-   * @task edit
-   */
-  public function didWriteRevision(DifferentialRevisionEditor $editor) {
-    return;
-  }
-
 
 /* -(  Extending the Revision View Interface  )------------------------------ */
 

@@ -167,29 +167,4 @@ final class DifferentialJIRAIssuesFieldSpecification
     return $xobjs;
   }
 
-  public function didWriteRevision(DifferentialRevisionEditor $editor) {
-    $revision = $editor->getRevision();
-    $revision_phid = $revision->getPHID();
-
-    $edge_type = PhabricatorEdgeConfig::TYPE_PHOB_HAS_JIRAISSUE;
-    $edge_dsts = mpull($this->loadDoorkeeperExternalObjects(), 'getPHID');
-
-    $edges = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $revision_phid,
-      $edge_type);
-
-    $editor = id(new PhabricatorEdgeEditor())
-      ->setActor($this->getUser());
-
-    foreach (array_diff($edges, $edge_dsts) as $rem_edge) {
-      $editor->removeEdge($revision_phid, $edge_type, $rem_edge);
-    }
-
-    foreach (array_diff($edge_dsts, $edges) as $add_edge) {
-      $editor->addEdge($revision_phid, $edge_type, $add_edge);
-    }
-
-    $editor->save();
-  }
-
 }

@@ -35,8 +35,4 @@ final class DifferentialViewPolicyFieldSpecification
       ->setName('viewPolicy');
   }
 
-  public function willWriteRevision(DifferentialRevisionEditor $editor) {
-    $this->getRevision()->setViewPolicy($this->value);
-  }
-
 }

@@ -63,34 +63,6 @@ abstract class DifferentialFreeformFieldSpecification
     return $result;
   }
 
-  public function didWriteRevision(DifferentialRevisionEditor $editor) {
-    $message = $this->renderValueForCommitMessage(false);
-
-    $tasks = $this->findMentionedTasks($message);
-    if ($tasks) {
-      $tasks = id(new ManiphestTaskQuery())
-        ->setViewer($editor->getActor())
-        ->withIDs(array_keys($tasks))
-        ->execute();
-      $this->saveFieldEdges(
-        $editor->getRevision(),
-        PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK,
-        mpull($tasks, 'getPHID'));
-    }
-
-    $dependents = $this->findDependentRevisions($message);
-    if ($dependents) {
-      $dependents = id(new DifferentialRevisionQuery())
-        ->setViewer($editor->getActor())
-        ->withIDs($dependents)
-        ->execute();
-      $this->saveFieldEdges(
-        $editor->getRevision(),
-        PhabricatorEdgeConfig::TYPE_DREV_DEPENDS_ON_DREV,
-        mpull($dependents, 'getPHID'));
-    }
-  }
-
   private function saveFieldEdges(
     DifferentialRevision $revision,
     $edge_type,

@@ -60,10 +60,6 @@ final class DifferentialCCsFieldSpecification
       ->setValue($cc_map);
   }
 
-  public function willWriteRevision(DifferentialRevisionEditor $editor) {
-    $editor->setCCPHIDs($this->ccs);
-  }
-
   public function shouldAppearOnCommitMessage() {
     return true;
   }

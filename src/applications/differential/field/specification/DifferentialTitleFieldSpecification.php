@@ -33,10 +33,6 @@ final class DifferentialTitleFieldSpecification
     return true;
   }
 
-  public function willWriteRevision(DifferentialRevisionEditor $editor) {
-    $this->getRevision()->setTitle($this->title);
-  }
-
   public function validateField() {
     if (!strlen($this->title)) {
       $this->error = 'Required';

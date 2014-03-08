@@ -41,8 +41,4 @@ final class DifferentialRepositoryFieldSpecification
       ->setValue($value);
   }
 
-  public function willWriteRevision(DifferentialRevisionEditor $editor) {
-    $this->getRevision()->setRepositoryPHID($this->value);
-  }
-
 }
