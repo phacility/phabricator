@@ -77,12 +77,6 @@ final class PhabricatorDifferentialConfigOptions
           pht(
             "List of file regexps where whitespace is meaningful and should ".
             "not use 'ignore-all' by default")),
-      $this->newOption(
-        'differential.field-selector',
-        'class',
-        'DifferentialDefaultFieldSelector')
-        ->setBaseClass('DifferentialFieldSelector')
-        ->setDescription(pht('Field selector class')),
       $this->newOption('differential.require-test-plan-field', 'bool', true)
         ->setBoolOptions(
           array(

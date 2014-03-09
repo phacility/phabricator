@@ -189,6 +189,7 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
         'Obsolete; use standard rendering events instead.'),
       'differential.show-host-field' => $differential_field_reason,
       'differential.show-test-plan-field' => $differential_field_reason,
+      'differential.field-selector' => $differential_field_reason,
     );
 
     return $ancient_config;

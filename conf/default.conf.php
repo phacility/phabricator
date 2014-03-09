@@ -794,8 +794,6 @@ return array(
     '/\.l?hs$/',
   ),
 
-  'differential.field-selector' => 'DifferentialDefaultFieldSelector',
-
   // Differential has a required "Test Plan" field by default. You can make it
   // optional by setting this to false. You can also completely remove it above,
   // if you prefer.
