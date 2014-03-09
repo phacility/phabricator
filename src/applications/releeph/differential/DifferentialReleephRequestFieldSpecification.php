@@ -16,8 +16,9 @@
  * button.)
  *
  */
-final class DifferentialReleephRequestFieldSpecification
-  extends DifferentialFieldSpecification {
+final class DifferentialReleephRequestFieldSpecification {
+
+  // TODO: This class is essentially dead right now, see T2222.
 
   const ACTION_PICKS    = 'picks';
   const ACTION_REVERTS  = 'reverts';
