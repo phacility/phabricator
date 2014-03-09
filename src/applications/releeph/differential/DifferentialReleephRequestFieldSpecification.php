@@ -243,6 +243,8 @@ final class DifferentialReleephRequestFieldSpecification
                                  PhabricatorRepositoryCommit $commit,
                                  PhabricatorRepositoryCommitData $data) {
 
+    // NOTE: This is currently dead code. See T2222.
+
     $releeph_requests = $this->loadReleephRequests();
 
     if (!$releeph_requests) {

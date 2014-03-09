@@ -85,10 +85,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         ->needReviewerStatus(true)
         ->needActiveDiffs(true);
 
-      // TODO: Remove this once we swap to new CustomFields. This is only
-      // required by the old FieldSpecifications, lower on in this worker.
-      $revision_query->needRelationships(true);
-
       $revision = $revision_query->executeOne();
 
       if ($revision) {
@@ -200,21 +196,9 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     }
 
     if ($should_autoclose) {
-      // TODO: When this is moved to CustomFields, remove the additional
-      // call above in query construction.
-      $fields = DifferentialFieldSelector::newSelector()
-        ->getFieldSpecifications();
-      foreach ($fields as $key => $field) {
-        if (!$field->shouldAppearOnCommitMessage()) {
-          continue;
-        }
-        $field->setUser($user);
-        $value = idx($field_values, $field->getCommitMessageKey());
-        $field->setValueFromParsedCommitMessage($value);
-        if ($revision) {
-          $field->setRevision($revision);
-        }
-        $field->didParseCommit($repository, $commit, $data);
+      // TODO: This isn't as general as it could be.
+      if ($user->getPHID()) {
+        $this->closeTasks($user, $repository, $commit, $message);
       }
     }
 
@@ -416,6 +400,111 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       ->withCommit($commit)
       ->withName($user_name)
       ->execute();
+  }
+
+  private function closeTasks(
+    PhabricatorUser $actor,
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit,
+    $message) {
+
+    $maniphest = 'PhabricatorApplicationManiphest';
+    if (!PhabricatorApplication::isClassInstalled($maniphest)) {
+      return;
+    }
+
+    $prefixes = ManiphestTaskStatus::getStatusPrefixMap();
+    $suffixes = ManiphestTaskStatus::getStatusSuffixMap();
+
+    $matches = id(new ManiphestCustomFieldStatusParser())
+      ->parseCorpus($message);
+
+    $task_statuses = array();
+    foreach ($matches as $match) {
+      $prefix = phutil_utf8_strtolower($match['prefix']);
+      $suffix = phutil_utf8_strtolower($match['suffix']);
+
+      $status = idx($suffixes, $suffix);
+      if (!$status) {
+        $status = idx($prefixes, $prefix);
+      }
+
+      foreach ($match['monograms'] as $task_monogram) {
+        $task_id = (int)trim($task_monogram, 'tT');
+        $task_statuses[$task_id] = $status;
+      }
+    }
+
+    if (!$task_statuses) {
+      return;
+    }
+
+    $tasks = id(new ManiphestTaskQuery())
+      ->setViewer($actor)
+      ->withIDs(array_keys($task_statuses))
+      ->execute();
+
+    foreach ($tasks as $task_id => $task) {
+      $xactions = array();
+
+      // TODO: Swap this for a real edge transaction once the weirdness in
+      // Maniphest edges is sorted out. Currently, Maniphest reacts to an edge
+      // edit on this edge.
+      id(new PhabricatorEdgeEditor())
+        ->setActor($actor)
+        ->addEdge(
+          $task->getPHID(),
+          PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT,
+          $commit->getPHID())
+        ->save();
+
+      /* TODO: Do this instead of the above.
+
+      $xactions[] = id(new ManiphestTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $edge_task_has_commit)
+        ->setNewValue(
+          array(
+            '+' => array(
+              $commit->getPHID() => $commit->getPHID(),
+            ),
+          ));
+      */
+
+      $status = $task_statuses[$task_id];
+      if ($status) {
+        if ($task->getStatus() != $status) {
+          $xactions[] = id(new ManiphestTransaction())
+            ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
+            ->setNewValue($status);
+
+          $commit_name = $repository->formatCommitName(
+            $commit->getCommitIdentifier());
+
+          $status_message = pht(
+            'Closed by commit %s.',
+            $commit_name);
+
+          $xactions[] = id(new ManiphestTransaction())
+            ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+            ->attachComment(
+              id(new ManiphestTransactionComment())
+                ->setContent($status_message));
+        }
+      }
+
+      $content_source = PhabricatorContentSource::newForSource(
+        PhabricatorContentSource::SOURCE_DAEMON,
+        array());
+
+      $editor = id(new ManiphestTransactionEditor())
+        ->setActor($actor)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true)
+        ->setContentSource($content_source);
+
+      $editor->applyTransactions($task, $xactions);
+    }
   }
 
 }
