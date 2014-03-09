@@ -9,7 +9,7 @@ final class DifferentialTestPlanFieldSpecification
   private $error = false;
 
   public function shouldAppearOnEdit() {
-    return PhabricatorEnv::getEnvConfig('differential.show-test-plan-field');
+    return false;
   }
 
   protected function didSetRevision() {
@@ -53,7 +53,7 @@ final class DifferentialTestPlanFieldSpecification
   }
 
   public function shouldAppearOnCommitMessage() {
-    return PhabricatorEnv::getEnvConfig('differential.show-test-plan-field');
+    return false;
   }
 
   public function getCommitMessageKey() {
