@@ -32,6 +32,7 @@ final class ConduitAPI_differential_getrevisioncomments_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
+    $viewer = $request->getUser();
     $results = array();
     $revision_ids = $request->getValue('ids');
 
@@ -40,7 +41,7 @@ final class ConduitAPI_differential_getrevisioncomments_Method
     }
 
     $revisions = id(new DifferentialRevisionQuery())
-      ->setViewer($request->getUser())
+      ->setViewer($viewer)
       ->withIDs($revision_ids)
       ->execute();
 
@@ -48,24 +49,36 @@ final class ConduitAPI_differential_getrevisioncomments_Method
       return $results;
     }
 
-    $comments = id(new DifferentialCommentQuery())
-      ->withRevisionPHIDs(mpull($revisions, 'getPHID'))
+    $xactions = id(new DifferentialTransactionQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(mpull($revisions, 'getPHID'))
       ->execute();
 
     $revisions = mpull($revisions, null, 'getPHID');
 
-    foreach ($comments as $comment) {
-      $revision = idx($revisions, $comment->getRevisionPHID());
+    foreach ($xactions as $xaction) {
+      $revision = idx($revisions, $xaction->getObjectPHID());
       if (!$revision) {
         continue;
       }
 
+      $type = $xaction->getTransactionType();
+      if ($type == DifferentialTransaction::TYPE_ACTION) {
+        $action = $xaction->getNewValue();
+      } else if ($type == PhabricatorTransactions::TYPE_COMMENT) {
+        $action = 'comment';
+      } else {
+        $action = 'none';
+      }
+
       $result = array(
         'revisionID'  => $revision->getID(),
-        'action'      => $comment->getAction(),
-        'authorPHID'  => $comment->getAuthorPHID(),
-        'dateCreated' => $comment->getDateCreated(),
-        'content'     => $comment->getContent(),
+        'action'      => $action,
+        'authorPHID'  => $xaction->getAuthorPHID(),
+        'dateCreated' => $xaction->getDateCreated(),
+        'content'     => ($xaction->hasComment()
+          ? $xaction->getComment()->getContent()
+          : null),
       );
 
       $results[$revision->getID()][] = $result;

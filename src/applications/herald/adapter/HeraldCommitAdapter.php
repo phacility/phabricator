@@ -442,14 +442,14 @@ final class HeraldCommitAdapter extends HeraldAdapter {
         if (!$revision) {
           return null;
         }
-        // after a revision is accepted, it can be closed (say via arc land)
-        // so use this function to figure out if it was accepted at one point
-        // *and* not later rejected...  what a function!
-        $reviewed_by = $revision->loadReviewedBy();
-        if (!$reviewed_by) {
-          return null;
+
+        switch ($revision->getStatus()) {
+          case ArcanistDifferentialRevisionStatus::ACCEPTED:
+          case ArcanistDifferentialRevisionStatus::CLOSED:
+            return $revision->getPHID();
         }
-        return $revision->getPHID();
+
+        return null;
       case self::FIELD_DIFFERENTIAL_REVIEWERS:
         $revision = $this->loadDifferentialRevision();
         if (!$revision) {

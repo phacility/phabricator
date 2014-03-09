@@ -84,8 +84,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $target_manual->getID());
     $props = mpull($props, 'getData', 'getName');
 
-    $comments = $revision->loadComments();
-
     $all_changesets = $changesets;
     $inlines = $this->loadInlineComments(
       $revision,
@@ -98,14 +96,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       array(
         $revision->getAuthorPHID(),
         $user->getPHID(),
-      ),
-      mpull($comments, 'getAuthorPHID'));
-
-    foreach ($comments as $comment) {
-      foreach ($comment->getRequiredHandlePHIDs() as $phid) {
-        $object_phids[] = $phid;
-      }
-    }
+      ));
 
     foreach ($revision->getAttached() as $type => $phids) {
       foreach ($phids as $phid => $info) {

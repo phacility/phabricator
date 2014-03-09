@@ -23,23 +23,32 @@ final class ReleephDiffChurnFieldSpecification
     }
 
     $diff_rev = $this->getReleephRequest()->loadDifferentialRevision();
-    $comments = id(new DifferentialCommentQuery())
-      ->withRevisionPHIDs(array($diff_rev->getPHID()))
+
+    $xactions = id(new DifferentialTransactionQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withObjectPHIDs(array($diff_rev->getPHID()))
       ->execute();
 
-    $counts = array();
-    foreach ($comments as $comment) {
-      $action = $comment->getAction();
-      if (!isset($counts[$action])) {
-        $counts[$action] = 0;
+    $rejections = 0;
+    $comments = 0;
+    $updates = 0;
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorTransactions::TYPE_COMMENT:
+          $comments++;
+          break;
+        case DifferentialTransaction::TYPE_UPDATE:
+          $updates++;
+          break;
+        case DifferentialTransaction::TYPE_ACTION:
+          switch ($xaction->getNewValue()) {
+            case DifferentialAction::ACTION_REJECT:
+              $rejections++;
+              break;
+          }
+          break;
       }
-      $counts[$action] += 1;
     }
-
-    // 'none' action just means a plain comment
-    $comments   = idx($counts, 'none',     0);
-    $rejections = idx($counts, 'reject',   0);
-    $updates    = idx($counts, 'update',   0);
 
     $points =
       self::REJECTIONS_WEIGHT * $rejections +
