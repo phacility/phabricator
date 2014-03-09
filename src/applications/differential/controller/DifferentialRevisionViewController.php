@@ -766,7 +766,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $view = id(new DifferentialRevisionListView())
       ->setRevisions($revisions)
-      ->setFields(DifferentialRevisionListView::getDefaultFields($user))
       ->setUser($user);
 
     $phids = $view->getRequiredHandlePHIDs();

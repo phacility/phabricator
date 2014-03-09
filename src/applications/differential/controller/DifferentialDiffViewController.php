@@ -94,35 +94,10 @@ final class DifferentialDiffViewController extends DifferentialController {
       $diff->getID());
     $props = mpull($props, 'getData', 'getName');
 
-    $aux_fields = DifferentialFieldSelector::newSelector()
-      ->getFieldSpecifications();
-    foreach ($aux_fields as $key => $aux_field) {
-      if (!$aux_field->shouldAppearOnDiffView()) {
-        unset($aux_fields[$key]);
-      } else {
-        $aux_field->setUser($this->getRequest()->getUser());
-      }
-    }
-
-    $dict = array();
-    foreach ($aux_fields as $key => $aux_field) {
-      $aux_field->setDiff($diff);
-      $aux_field->setManualDiff($diff);
-      $aux_field->setDiffProperties($props);
-      $value = $aux_field->renderValueForDiffView();
-      if (strlen($value)) {
-        $label = rtrim($aux_field->renderLabelForDiffView(), ':');
-        $dict[$label] = $value;
-      }
-    }
-
     $property_head = id(new PHUIHeaderView())
       ->setHeader(pht('Properties'));
 
     $property_view = new PHUIPropertyListView();
-    foreach ($dict as $key => $value) {
-      $property_view->addProperty($key, $value);
-    }
 
     $changesets = $diff->loadChangesets();
     $changesets = msort($changesets, 'getSortKey');
