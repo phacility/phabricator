@@ -270,10 +270,16 @@ final class PhabricatorRepositoryCommitHeraldWorker
       return array();
     }
 
-    $phids = DifferentialFieldSpecification::parseCommitMessageObjectList(
-      $matches[1],
-      $include_mailables = false,
-      $allow_partial = true);
+    $phids = id(new PhabricatorObjectListQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setAllowPartialResults(true)
+      ->setAllowedTypes(
+        array(
+          PhabricatorPeoplePHIDTypeUser::TYPECONST,
+          PhabricatorProjectPHIDTypeProject::TYPECONST,
+        ))
+      ->setObjectList($matches[1])
+      ->execute();
 
     if (!$phids) {
       return array();
