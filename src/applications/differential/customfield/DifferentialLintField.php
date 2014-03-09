@@ -233,4 +233,25 @@ final class DifferentialLintField
 
     return "Show Full Lint Results (".implode(', ', $show).")";
   }
+
+  public function getWarningsForDetailView() {
+    $status = $this->getObject()->getActiveDiff()->getLintStatus();
+    if ($status < DifferentialLintStatus::LINT_WARN) {
+      return array();
+    }
+
+    $warnings = array();
+    if ($status == DifferentialLintStatus::LINT_SKIP) {
+      $warnings[] = pht(
+        'Lint was skipped when generating these changes.');
+    } else if ($status == DifferentialLintStatus::LINT_POSTPONED) {
+      $warnings[] = pht(
+        'Background linting has not finished executing on these changes.');
+    } else {
+      $warnings[] = pht('These changes have lint problems.');
+    }
+
+    return $warnings;
+  }
+
 }

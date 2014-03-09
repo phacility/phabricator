@@ -138,7 +138,6 @@ return array(
     'javelin-behavior-differential-populate',
     'javelin-behavior-differential-show-more',
     'javelin-behavior-differential-diff-radios',
-    'javelin-behavior-differential-accept-with-errors',
     'javelin-behavior-differential-comment-jump',
     'javelin-behavior-differential-add-reviewers-and-ccs',
     'javelin-behavior-differential-keyboard-navigation',

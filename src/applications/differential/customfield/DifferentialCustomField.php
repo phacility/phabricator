@@ -76,6 +76,12 @@ abstract class DifferentialCustomField
     return implode(', ', $out);
   }
 
+  public function getWarningsForDetailView() {
+    if ($this->getProxy()) {
+      return $this->getProxy()->getWarningsForDetailView();
+    }
+    return array();
+  }
 
 /* -(  Integration with Commit Messages  )----------------------------------- */
 

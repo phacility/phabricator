@@ -336,6 +336,19 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $comment_form = new DifferentialAddCommentView();
       $comment_form->setRevision($revision);
 
+      $review_warnings = array();
+      foreach ($field_list->getFields() as $field) {
+        $review_warnings[] = $field->getWarningsForDetailView();
+      }
+      $review_warnings = array_mergev($review_warnings);
+
+      if ($review_warnings) {
+        $review_warnings_panel = id(new AphrontErrorView())
+          ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+          ->setErrors($review_warnings);
+        $comment_form->setErrorView($review_warnings_panel);
+      }
+
       // TODO: Restore the ability for fields to add accept warnings.
 
       $comment_form->setActions($this->getRevisionCommentActions($revision));
