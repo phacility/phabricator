@@ -65,14 +65,6 @@ final class DifferentialJIRAIssuesFieldSpecification
     return phutil_implode_html(phutil_tag('br'), $links);
   }
 
-  public function shouldAppearOnConduitView() {
-    return true;
-  }
-
-  public function getValueForConduit() {
-    return $this->value;
-  }
-
   public function shouldAppearOnCommitMessage() {
     return true;
   }

@@ -44,4 +44,8 @@ abstract class DifferentialStoredCustomField
     return $this;
   }
 
+  public function getConduitDictionaryValue() {
+    return $this->getValue();
+  }
+
 }

@@ -111,4 +111,8 @@ final class DifferentialBlameRevisionField
     return $this->getValue();
   }
 
+  public function shouldAppearInConduitDictionary() {
+    return true;
+  }
+
 }

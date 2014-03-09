@@ -50,14 +50,6 @@ final class DifferentialRevertPlanFieldSpecification
     return $this->value;
   }
 
-  public function shouldAppearOnConduitView() {
-    return true;
-  }
-
-  public function getValueForConduit() {
-    return $this->value;
-  }
-
   public function shouldAppearOnCommitMessage() {
     return true;
   }

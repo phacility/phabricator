@@ -27,6 +27,7 @@ abstract class PhabricatorCustomField {
   const ROLE_VIEW                     = 'view';
   const ROLE_LIST                     = 'list';
   const ROLE_GLOBALSEARCH             = 'GlobalSearch';
+  const ROLE_CONDUIT                  = 'conduit';
 
 
 /* -(  Building Applications with Custom Fields  )--------------------------- */
@@ -257,6 +258,8 @@ abstract class PhabricatorCustomField {
         return $this->shouldAppearInListView();
       case self::ROLE_GLOBALSEARCH:
         return $this->shouldAppearInGlobalSearch();
+      case self::ROLE_CONDUIT:
+        return $this->shouldAppearInConduitDictionary();
       case self::ROLE_DEFAULT:
         return true;
       default:
@@ -1164,6 +1167,31 @@ abstract class PhabricatorCustomField {
       return $this->proxy->updateAbstractDocument($document);
     }
     return $document;
+  }
+
+
+/* -(  Conduit  )------------------------------------------------------------ */
+
+
+  /**
+   * @task conduit
+   */
+  public function shouldAppearInConduitDictionary() {
+    if ($this->proxy) {
+      return $this->proxy->shouldAppearInConduitDictionary();
+    }
+    return false;
+  }
+
+
+  /**
+   * @task conduit
+   */
+  public function getConduitDictionaryValue() {
+    if ($this->proxy) {
+      return $this->proxy->getConduitDictionaryValue();
+    }
+    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
 
 

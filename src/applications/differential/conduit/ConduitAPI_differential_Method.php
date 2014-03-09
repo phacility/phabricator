@@ -148,4 +148,30 @@ abstract class ConduitAPI_differential_Method extends ConduitAPIMethod {
     $editor->applyTransactions($revision, $xactions);
   }
 
+  protected function loadCustomFieldsForRevisions(
+    PhabricatorUser $viewer,
+    array $revisions) {
+    assert_instances_of($revisions, 'DifferentialRevision');
+
+    $results = array();
+    foreach ($revisions as $revision) {
+      // TODO: This is inefficient and issues a query for each object.
+      $field_list = PhabricatorCustomField::getObjectFields(
+        $revision,
+        PhabricatorCustomField::ROLE_CONDUIT);
+
+      $field_list
+        ->setViewer($viewer)
+        ->readFieldsFromStorage($revision);
+
+      foreach ($field_list->getFields() as $field) {
+        $field_key = $field->getFieldKeyForConduit();
+        $value = $field->getConduitDictionaryValue();
+        $results[$revision->getPHID()][$field_key] = $value;
+      }
+    }
+
+    return $results;
+  }
+
 }

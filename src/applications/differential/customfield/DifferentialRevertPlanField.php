@@ -143,4 +143,8 @@ final class DifferentialRevertPlanField
     return $this->getValue();
   }
 
+  public function shouldAppearInConduitDictionary() {
+    return true;
+  }
+
 }

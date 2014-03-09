@@ -7,6 +7,10 @@ final class DifferentialDependsOnField
     return 'differential:depends-on';
   }
 
+  public function getFieldKeyForConduit() {
+    return 'phabricator:depends-on';
+  }
+
   public function getFieldName() {
     return pht('Depends On');
   }
@@ -43,6 +47,16 @@ final class DifferentialDependsOnField
         'Create a dependendency between revisions by writing '.
         '"Depends on D123" in your summary.'),
     );
+  }
+
+  public function shouldAppearInConduitDictionary() {
+    return true;
+  }
+
+  public function getConduitDictionaryValue() {
+    return PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $this->getObject()->getPHID(),
+      PhabricatorEdgeConfig::TYPE_DREV_DEPENDS_ON_DREV);
   }
 
 }

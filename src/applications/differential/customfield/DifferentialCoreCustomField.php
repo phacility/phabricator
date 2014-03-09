@@ -126,4 +126,8 @@ abstract class DifferentialCoreCustomField
     return $this->getValue();
   }
 
+  public function getConduitDictionaryValue() {
+    return $this->getValue();
+  }
+
 }

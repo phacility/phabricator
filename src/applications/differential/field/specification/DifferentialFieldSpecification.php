@@ -13,7 +13,6 @@
  * @task view Extending the Revision View Interface
  * @task list Extending the Revision List Interface
  * @task mail Extending the E-mail Interface
- * @task conduit Extending the Conduit View Interface
  * @task commit Extending Commit Messages
  * @task load Loading Additional Data
  * @task context Contextual Data
@@ -382,35 +381,6 @@ abstract class DifferentialFieldSpecification {
    */
   public function renderValueForDiffView() {
     throw new DifferentialFieldSpecificationIncompleteException($this);
-  }
-
-
-/* -(  Extending the Conduit Interface  )------------------------------------ */
-
-
-  /**
-   * @task conduit
-   */
-  public function shouldAppearOnConduitView() {
-    return false;
-  }
-
-  /**
-   * @task conduit
-   */
-  public function getValueForConduit() {
-    throw new DifferentialFieldSpecificationIncompleteException($this);
-  }
-
-  /**
-   * @task conduit
-   */
-  public function getKeyForConduit() {
-    $key = $this->getStorageKey();
-    if ($key === null) {
-      throw new DifferentialFieldSpecificationIncompleteException($this);
-    }
-    return $key;
   }
 
 /* -(  Extending the Search Interface  )------------------------------------ */

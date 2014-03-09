@@ -1,10 +1,7 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_differential_query_Method
-  extends ConduitAPIMethod {
+  extends ConduitAPI_differential_Method {
 
   public function getMethodDescription() {
     return "Query Differential revisions which match certain criteria.";
@@ -191,6 +188,10 @@ final class ConduitAPI_differential_query_Method
 
     $revisions = $query->execute();
 
+    $field_data = $this->loadCustomFieldsForRevisions(
+      $request->getUser(),
+      $revisions);
+
     $results = array();
     foreach ($revisions as $revision) {
       $diff = $revision->getActiveDiff();
@@ -199,11 +200,11 @@ final class ConduitAPI_differential_query_Method
       }
 
       $id = $revision->getID();
-      $auxiliary_fields = $this->loadAuxiliaryFields(
-                                 $revision, $request->getUser());
+      $phid = $revision->getPHID();
+
       $result = array(
         'id'                  => $id,
-        'phid'                => $revision->getPHID(),
+        'phid'                => $phid,
         'title'               => $revision->getTitle(),
         'uri'                 => PhabricatorEnv::getProductionURI('/D'.$id),
         'dateCreated'         => $revision->getDateCreated(),
@@ -222,7 +223,7 @@ final class ConduitAPI_differential_query_Method
         'reviewers'           => array_values($revision->getReviewers()),
         'ccs'                 => array_values($revision->getCCPHIDs()),
         'hashes'              => $revision->getHashes(),
-        'auxiliary'           => $auxiliary_fields,
+        'auxiliary'           => idx($field_data, $phid, array()),
         'arcanistProjectPHID' => $diff->getArcanistProjectPHID()
       );
 
@@ -236,25 +237,6 @@ final class ConduitAPI_differential_query_Method
     }
 
     return $results;
-  }
-
-  private function loadAuxiliaryFields(
-    DifferentialRevision $revision,
-    PhabricatorUser $user) {
-    $aux_fields = DifferentialFieldSelector::newSelector()
-      ->getFieldSpecifications();
-    foreach ($aux_fields as $key => $aux_field) {
-      $aux_field->setUser($user);
-      if (!$aux_field->shouldAppearOnConduitView()) {
-        unset($aux_fields[$key]);
-      }
-    }
-
-    $aux_fields = DifferentialAuxiliaryField::loadFromStorage(
-      $revision,
-      $aux_fields);
-
-    return mpull($aux_fields, 'getValueForConduit', 'getKeyForConduit');
   }
 
 }

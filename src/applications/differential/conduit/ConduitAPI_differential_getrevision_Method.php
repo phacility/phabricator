@@ -1,10 +1,7 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_differential_getrevision_Method
-  extends ConduitAPIMethod {
+  extends ConduitAPI_differential_Method {
 
   public function getMethodStatus() {
     return self::METHOD_STATUS_DEPRECATED;
@@ -73,9 +70,9 @@ final class ConduitAPI_differential_getrevision_Method
       );
     }
 
-    $auxiliary_fields = $this->loadAuxiliaryFields(
-      $revision,
-      $request->getUser());
+    $field_data = $this->loadCustomFieldsForRevisions(
+      $request->getUser(),
+      array($revision));
 
     $dict = array(
       'id' => $revision->getID(),
@@ -93,29 +90,10 @@ final class ConduitAPI_differential_getrevision_Method
       'reviewerPHIDs' => $reviewer_phids,
       'diffs' => $diff_dicts,
       'commits' => $commit_dicts,
-      'auxiliary' => $auxiliary_fields,
+      'auxiliary' => idx($field_data, $revision->getPHID(), array())
     );
 
     return $dict;
-  }
-
-  private function loadAuxiliaryFields(
-    DifferentialRevision $revision,
-    PhabricatorUser $user) {
-    $aux_fields = DifferentialFieldSelector::newSelector()
-      ->getFieldSpecifications();
-    foreach ($aux_fields as $key => $aux_field) {
-      $aux_field->setUser($user);
-      if (!$aux_field->shouldAppearOnConduitView()) {
-        unset($aux_fields[$key]);
-      }
-    }
-
-    $aux_fields = DifferentialAuxiliaryField::loadFromStorage(
-      $revision,
-      $aux_fields);
-
-    return mpull($aux_fields, 'getValueForConduit', 'getKeyForConduit');
   }
 
 }

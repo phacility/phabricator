@@ -268,4 +268,8 @@ final class DifferentialJIRAIssuesField
     return implode(', ', $value);
   }
 
+  public function shouldAppearInConduitDictionary() {
+    return true;
+  }
+
 }
