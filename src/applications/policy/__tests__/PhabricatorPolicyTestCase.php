@@ -220,8 +220,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
       if (!$class) {
         continue;
       }
-      $this->assertEqual(
-        true,
+      $this->assertTrue(
         (bool)PhabricatorApplication::getByClass($class),
         "Application class '{$class}' for query '{$qclass}'");
     }
@@ -284,8 +283,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
           $result,
           "{$description} with user {$spec} should succeed.");
       } else {
-        $this->assertEqual(
-          true,
+        $this->assertTrue(
           $caught instanceof PhabricatorPolicyException,
           "{$description} with user {$spec} should fail.");
       }

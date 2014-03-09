@@ -4,7 +4,7 @@ final class PhabricatorAphrontViewTestCase extends PhabricatorTestCase {
 
   public function testHasChildren() {
     $view = new AphrontNullView();
-    $this->assertEqual(false, $view->hasChildren());
+    $this->assertFalse($view->hasChildren());
 
     $values = array(
       null,
@@ -15,11 +15,11 @@ final class PhabricatorAphrontViewTestCase extends PhabricatorTestCase {
 
     foreach ($values as $value) {
       $view->appendChild($value);
-      $this->assertEqual(false, $view->hasChildren());
+      $this->assertFalse($view->hasChildren());
     }
 
     $view->appendChild("!");
-    $this->assertEqual(true, $view->hasChildren());
+    $this->assertTrue($view->hasChildren());
   }
 
 }

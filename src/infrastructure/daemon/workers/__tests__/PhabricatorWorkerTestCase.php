@@ -76,10 +76,8 @@ final class PhabricatorWorkerTestCase extends PhabricatorTestCase {
         'doWork' => 'fail-temporary',
       ));
 
-    $this->assertEqual(false, $task->isArchived());
-    $this->assertEqual(
-      true,
-      ($task->getExecutionException() instanceof Exception));
+    $this->assertFalse($task->isArchived());
+    $this->assertTrue($task->getExecutionException() instanceof Exception);
   }
 
   public function testTooManyTaskFailures() {
@@ -92,43 +90,35 @@ final class PhabricatorWorkerTestCase extends PhabricatorTestCase {
       ));
 
     // Temporary...
-    $this->assertEqual(false, $task->isArchived());
-    $this->assertEqual(
-      true,
-      ($task->getExecutionException() instanceof Exception));
+    $this->assertFalse($task->isArchived());
+    $this->assertTrue($task->getExecutionException() instanceof Exception);
     $this->assertEqual(1, $task->getFailureCount());
 
     // Temporary...
     $task = $this->expectNextLease($task);
     $task = $task->executeTask();
-    $this->assertEqual(false, $task->isArchived());
-    $this->assertEqual(
-      true,
-      ($task->getExecutionException() instanceof Exception));
+    $this->assertFalse($task->isArchived());
+    $this->assertTrue($task->getExecutionException() instanceof Exception);
     $this->assertEqual(2, $task->getFailureCount());
 
     // Temporary...
     $task = $this->expectNextLease($task);
     $task = $task->executeTask();
-    $this->assertEqual(false, $task->isArchived());
-    $this->assertEqual(
-      true,
-      ($task->getExecutionException() instanceof Exception));
+    $this->assertFalse($task->isArchived());
+    $this->assertTrue($task->getExecutionException() instanceof Exception);
     $this->assertEqual(3, $task->getFailureCount());
 
     // Temporary...
     $task = $this->expectNextLease($task);
     $task = $task->executeTask();
-    $this->assertEqual(false, $task->isArchived());
-    $this->assertEqual(
-      true,
-      ($task->getExecutionException() instanceof Exception));
+    $this->assertFalse($task->isArchived());
+    $this->assertTrue($task->getExecutionException() instanceof Exception);
     $this->assertEqual(4, $task->getFailureCount());
 
     // Permanent.
     $task = $this->expectNextLease($task);
     $task = $task->executeTask();
-    $this->assertEqual(true, $task->isArchived());
+    $this->assertTrue($task->isArchived());
     $this->assertEqual(
       PhabricatorWorkerArchiveTask::RESULT_FAILURE,
       $task->getResult());
@@ -151,7 +141,7 @@ final class PhabricatorWorkerTestCase extends PhabricatorTestCase {
         'getRequiredLeaseTime'    => 1000000,
       ));
 
-    $this->assertEqual(true, ($task->getLeaseExpires() - time()) > 1000);
+    $this->assertTrue(($task->getLeaseExpires() - time()) > 1000);
   }
 
   public function testLeasedIsOldestFirst() {

@@ -23,7 +23,7 @@ final class PHUIListViewTestCase extends PhabricatorTestCase {
     } catch (Exception $ex) {
       $caught = $ex;
     }
-    $this->assertEqual(true, $caught instanceof Exception);
+    $this->assertTrue($caught instanceof Exception);
 
     $menu->addMenuItemAfter('a', $this->newLink('test2'));
     $menu->addMenuItemAfter(null, $this->newLink('test3'));
@@ -52,7 +52,7 @@ final class PHUIListViewTestCase extends PhabricatorTestCase {
     } catch (Exception $ex) {
       $caught = $ex;
     }
-    $this->assertEqual(true, $caught instanceof Exception);
+    $this->assertTrue($caught instanceof Exception);
 
     $menu->addMenuItemBefore('b', $this->newLink('test2'));
     $menu->addMenuItemBefore(null, $this->newLink('test3'));
@@ -83,7 +83,7 @@ final class PHUIListViewTestCase extends PhabricatorTestCase {
     } catch (Exception $ex) {
       $caught = $ex;
     }
-    $this->assertEqual(true, $caught instanceof Exception);
+    $this->assertTrue($caught instanceof Exception);
 
     $menu->addMenuItemToLabel('fruit', $this->newLink('apple'));
     $menu->addMenuItemToLabel('fruit', $this->newLink('banana'));

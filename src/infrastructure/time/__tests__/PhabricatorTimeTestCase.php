@@ -6,15 +6,11 @@ final class PhabricatorTimeTestCase extends PhabricatorTestCase {
     $t = 1370202281;
     $time = PhabricatorTime::pushTime($t, 'UTC');
 
-    $this->assertEqual(
-      true,
-      (PhabricatorTime::getNow() === $t));
+    $this->assertTrue(PhabricatorTime::getNow() === $t);
 
     unset($time);
 
-    $this->assertEqual(
-      false,
-      (PhabricatorTime::getNow() === $t));
+    $this->assertFalse(PhabricatorTime::getNow() === $t);
   }
 
   public function testParseLocalTime() {

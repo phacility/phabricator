@@ -11,7 +11,7 @@ final class DiffusionSSHMercurialWireTestCase
       $raw = explode("\n~~~~~~~~~~\n", $raw, 2);
       $this->assertEqual(2, count($raw));
       $expect = json_decode($raw[1], true);
-      $this->assertEqual(true, is_array($expect), $file);
+      $this->assertTrue(is_array($expect), $file);
 
       $this->assertParserResult($expect, $raw[0], $file);
     }
@@ -49,8 +49,7 @@ final class DiffusionSSHMercurialWireTestCase
       $caught = $ex;
     }
 
-    $this->assertEqual(
-      true,
+    $this->assertTrue(
       ($caught instanceof Exception),
       "No extra messages for '{$file}'.");
   }

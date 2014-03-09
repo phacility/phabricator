@@ -13,8 +13,8 @@ final class LiskIsolationTestCase extends PhabricatorTestCase {
     $id = $dao->getID();
     $phid = $dao->getPHID();
 
-    $this->assertEqual(true, (bool)$id, 'Expect ID generated.');
-    $this->assertEqual(true, (bool)$phid, 'Expect PHID generated.');
+    $this->assertTrue((bool)$id, 'Expect ID generated.');
+    $this->assertTrue((bool)$phid, 'Expect PHID generated.');
 
     $dao->save(); // Effects update
 
@@ -54,7 +54,7 @@ final class LiskIsolationTestCase extends PhabricatorTestCase {
       // Expected, pass.
     }
 
-    $this->assertEqual(true, true);
+    $this->assertTrue(true);
   }
 
   public function testMagicMethods() {
@@ -82,8 +82,7 @@ final class LiskIsolationTestCase extends PhabricatorTestCase {
     } catch (Exception $thrown) {
       $ex = $thrown;
     }
-    $this->assertEqual(
-      true,
+    $this->assertTrue(
       (bool)$ex,
       'Typoing "get" should throw.');
 
@@ -93,8 +92,7 @@ final class LiskIsolationTestCase extends PhabricatorTestCase {
     } catch (Exception $thrown) {
       $ex = $thrown;
     }
-    $this->assertEqual(
-      true,
+    $this->assertTrue(
       (bool)$ex,
       'Typoing "set" should throw.');
 
@@ -104,8 +102,7 @@ final class LiskIsolationTestCase extends PhabricatorTestCase {
     } catch (Exception $thrown) {
       $ex = $thrown;
     }
-    $this->assertEqual(
-      true,
+    $this->assertTrue(
       (bool)$ex,
       'Made up method should throw.');
   }

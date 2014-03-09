@@ -16,7 +16,7 @@ final class PhabricatorUserEditorTestCase extends PhabricatorTestCase {
       'PhabricatorUserEditorTestCaseOK',
       'PhabricatorUserEditorTestCase@example.com');
 
-    $this->assertEqual(true, true);
+    $this->assertTrue(true);
   }
 
   public function testRegistrationEmailInvalid() {
@@ -34,7 +34,7 @@ final class PhabricatorUserEditorTestCase extends PhabricatorTestCase {
       $caught = $ex;
     }
 
-    $this->assertEqual(true, ($caught instanceof Exception));
+    $this->assertTrue($caught instanceof Exception);
   }
 
   public function testRegistrationEmailDomain() {
@@ -50,7 +50,7 @@ final class PhabricatorUserEditorTestCase extends PhabricatorTestCase {
       $caught = $ex;
     }
 
-    $this->assertEqual(true, ($caught instanceof Exception));
+    $this->assertTrue($caught instanceof Exception);
   }
 
   private function registerUser($username, $email) {

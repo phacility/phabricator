@@ -22,8 +22,7 @@ final class PhortunePaymentProviderTestCase extends PhabricatorTestCase {
       $caught = $ex;
     }
 
-    $this->assertEqual(
-      true,
+    $this->assertTrue(
       ($caught instanceof PhortuneNoPaymentProviderException),
       'No provider should accept hugs; they are not a currency.');
   }
@@ -42,8 +41,7 @@ final class PhortunePaymentProviderTestCase extends PhabricatorTestCase {
       $caught = $ex;
     }
 
-    $this->assertEqual(
-      true,
+    $this->assertTrue(
       ($caught instanceof PhortuneMultiplePaymentProvidersException),
       'Expect exception when more than one provider handles a payment method.');
   }

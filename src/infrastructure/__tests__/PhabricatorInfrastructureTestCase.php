@@ -16,7 +16,7 @@ final class PhabricatorInfrastructureTestCase
    */
   public function testEverythingImplemented() {
     id(new PhutilSymbolLoader())->selectAndLoadSymbols();
-    $this->assertEqual(true, true);
+    $this->assertTrue(true);
   }
 
   public function testApplicationsInstalled() {
@@ -66,7 +66,7 @@ final class PhabricatorInfrastructureTestCase
     }
 
     $this->assertEqual(194431, strlen($buf));
-    $this->assertEqual(true, phutil_is_utf8_with_only_bmp_characters($buf));
+    $this->assertTrue(phutil_is_utf8_with_only_bmp_characters($buf));
 
     $write = id(new HarbormasterScratchTable())
       ->setData('all.utf8.bmp')
@@ -96,9 +96,7 @@ final class PhabricatorInfrastructureTestCase
       $caught = $ex;
     }
 
-    $this->assertEqual(
-      true,
-      ($caught instanceof AphrontQueryCharacterSetException));
+    $this->assertTrue($caught instanceof AphrontQueryCharacterSetException);
   }
 
 }

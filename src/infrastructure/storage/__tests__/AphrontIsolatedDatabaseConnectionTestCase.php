@@ -18,7 +18,7 @@ final class AphrontIsolatedDatabaseConnectionTestCase
       $this->newIsolatedConnection(),
       'INSERT INVALID SYNTAX');
 
-    $this->assertEqual(true, true);
+    $this->assertTrue(true);
   }
 
   public function testInsertGeneratesID() {
@@ -30,10 +30,9 @@ final class AphrontIsolatedDatabaseConnectionTestCase
     queryfx($conn, 'INSERT');
     $id2 = $conn->getInsertID();
 
-    $this->assertEqual(true, (bool)$id1, 'ID1 exists.');
-    $this->assertEqual(true, (bool)$id2, 'ID2 exists.');
-    $this->assertEqual(
-      true,
+    $this->assertTrue((bool)$id1, 'ID1 exists.');
+    $this->assertTrue((bool)$id2, 'ID2 exists.');
+    $this->assertTrue(
       $id1 != $id2,
       "IDs '{$id1}' and '{$id2}' are distinct.");
   }
@@ -42,7 +41,7 @@ final class AphrontIsolatedDatabaseConnectionTestCase
     $conn = $this->newIsolatedConnection();
     queryfx($conn, 'DELETE');
 
-    $this->assertEqual(true, true);
+    $this->assertTrue(true);
   }
 
   public function testTransactionStack() {

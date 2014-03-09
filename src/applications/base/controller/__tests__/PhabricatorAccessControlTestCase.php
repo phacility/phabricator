@@ -256,8 +256,7 @@ final class PhabricatorAccessControlTestCase
         $result = $ex;
       }
 
-      $this->assertEqual(
-        true,
+      $this->assertTrue(
         ($result === null),
         "Expect user '{$uname}' to be allowed access to '{$label}'.");
     }
@@ -272,8 +271,7 @@ final class PhabricatorAccessControlTestCase
         $result = $ex;
       }
 
-      $this->assertEqual(
-        false,
+      $this->assertFalse(
         ($result === null),
         "Expect user '{$uname}' to be denied access to '{$label}'.");
     }

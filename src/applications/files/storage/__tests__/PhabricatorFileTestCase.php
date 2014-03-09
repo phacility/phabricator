@@ -56,7 +56,7 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
     $first_handle = $first_file->getStorageHandle();
     $second_handle = $second_file->getStorageHandle();
 
-    $this->assertEqual(true, ($first_handle != $second_handle));
+    $this->assertTrue($first_handle != $second_handle);
   }
 
 
@@ -107,7 +107,7 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
       $caught = $ex;
     }
 
-    $this->assertEqual(true, $caught instanceof Exception);
+    $this->assertTrue($caught instanceof Exception);
   }
 
   public function testFileStorageDeleteSharedHandle() {

@@ -11,8 +11,7 @@ final class PhabricatorPasswordHasherTestCase extends PhabricatorTestCase {
       $caught = $ex;
     }
 
-    $this->assertEqual(
-      true,
+    $this->assertTrue(
       ($caught instanceof Exception),
       pht('Exception on unparseable hash format.'));
 
@@ -24,8 +23,7 @@ final class PhabricatorPasswordHasherTestCase extends PhabricatorTestCase {
       $caught = $ex;
     }
 
-    $this->assertEqual(
-      true,
+    $this->assertTrue(
       ($caught instanceof PhabricatorPasswordHasherUnavailableException),
       pht('Fictional hasher unavailable.'));
   }

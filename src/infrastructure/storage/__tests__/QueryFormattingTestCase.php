@@ -23,9 +23,8 @@ final class QueryFormattingTestCase extends PhabricatorTestCase {
     } catch (Exception $ex) {
       $raised = $ex;
     }
-    $this->assertEqual(
+    $this->assertTrue(
       (bool)$raised,
-      true,
       'qsprintf should raise exception for invalid %d conversion.');
 
     $this->assertEqual(

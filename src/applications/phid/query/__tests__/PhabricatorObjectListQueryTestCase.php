@@ -36,7 +36,7 @@ final class PhabricatorObjectListQueryTestCase extends PhabricatorTestCase {
     } catch (Exception $ex) {
       $caught = $ex;
     }
-    $this->assertEqual(true, ($caught instanceof Exception));
+    $this->assertTrue($caught instanceof Exception);
 
 
     // Expect failure when loading an invalid object.
@@ -46,7 +46,7 @@ final class PhabricatorObjectListQueryTestCase extends PhabricatorTestCase {
     } catch (Exception $ex) {
       $caught = $ex;
     }
-    $this->assertEqual(true, ($caught instanceof Exception));
+    $this->assertTrue($caught instanceof Exception);
 
 
     // Expect failure when loading ANY invalid object, by default.
@@ -56,7 +56,7 @@ final class PhabricatorObjectListQueryTestCase extends PhabricatorTestCase {
     } catch (Exception $ex) {
       $caught = $ex;
     }
-    $this->assertEqual(true, ($caught instanceof Exception));
+    $this->assertTrue($caught instanceof Exception);
 
 
     // With partial results, this should load the valid user.
