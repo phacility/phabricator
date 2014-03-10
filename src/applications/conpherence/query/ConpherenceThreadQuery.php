@@ -129,12 +129,20 @@ final class ConpherenceThreadQuery
     $participants = id(new ConpherenceParticipant())
       ->loadAllWhere('conpherencePHID IN (%Ls)', array_keys($conpherences));
     $map = mgroup($participants, 'getConpherencePHID');
-    foreach ($map as $conpherence_phid => $conpherence_participants) {
-      $current_conpherence = $conpherences[$conpherence_phid];
+
+    foreach ($conpherences as $current_conpherence) {
+      $conpherence_phid = $current_conpherence->getPHID();
+
+      $conpherence_participants = idx(
+        $map,
+        $conpherence_phid,
+        array());
+
       $conpherence_participants = mpull(
         $conpherence_participants,
         null,
         'getParticipantPHID');
+
       $current_conpherence->attachParticipants($conpherence_participants);
       $current_conpherence->attachHandles(array());
     }
@@ -183,13 +191,13 @@ final class ConpherenceThreadQuery
     $transactions = $query->execute();
     $transactions = mgroup($transactions, 'getObjectPHID');
     foreach ($conpherences as $phid => $conpherence) {
-      $current_transactions = $transactions[$phid];
+      $current_transactions = idx($transactions, $phid, array());
       $handles = array();
       foreach ($current_transactions as $transaction) {
         $handles += $transaction->getHandles();
       }
       $conpherence->attachHandles($conpherence->getHandles() + $handles);
-      $conpherence->attachTransactions($transactions[$phid]);
+      $conpherence->attachTransactions($current_transactions);
     }
     return $this;
   }
