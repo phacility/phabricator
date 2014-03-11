@@ -74,7 +74,12 @@ final class DivinerLiveSymbol extends DivinerDAO
   }
 
   public function getSortKey() {
-    return $this->getTitle();
+    // Sort articles before other types of content. Then, sort atoms in a
+    // case-insensitive way.
+    return sprintf(
+      '%c:%s',
+      ($this->getType() == DivinerAtom::TYPE_ARTICLE ? '0' : '1'),
+      phutil_utf8_strtolower($this->getTitle()));
   }
 
   public function save() {

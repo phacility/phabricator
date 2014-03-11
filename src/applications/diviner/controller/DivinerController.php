@@ -29,8 +29,18 @@ abstract class DivinerController extends PhabricatorController {
 
     $list = array();
     foreach ($symbols as $symbol) {
+
+      switch ($symbol->getType()) {
+        case DivinerAtom::TYPE_FUNCTION:
+          $title = $symbol->getTitle().'()';
+          break;
+        default:
+          $title = $symbol->getTitle();
+          break;
+      }
+
       $item = id(new DivinerBookItemView())
-        ->setTitle($symbol->getTitle())
+        ->setTitle($title)
         ->setHref($symbol->getURI())
         ->setSubtitle($symbol->getSummary())
         ->setType(DivinerAtom::getAtomTypeNameString(

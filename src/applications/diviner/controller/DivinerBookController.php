@@ -46,6 +46,7 @@ final class DivinerBookController extends DivinerController {
       ->setViewer($viewer)
       ->withBookPHIDs(array($book->getPHID()))
       ->execute();
+
     $atoms = msort($atoms, 'getSortKey');
 
     $group_spec = $book->getConfig('groups');
@@ -64,8 +65,11 @@ final class DivinerBookController extends DivinerController {
     $out = array();
     foreach ($groups as $group => $atoms) {
       $group_name = $book->getGroupName($group);
+      if (!strlen($group_name)) {
+        $group_name = pht('Free Radicals');
+      }
       $section = id(new DivinerSectionView())
-          ->setHeader($group_name);
+        ->setHeader($group_name);
       $section->addContent($this->renderAtomList($atoms));
       $out[] = $section;
     }
