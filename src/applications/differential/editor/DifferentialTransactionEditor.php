@@ -504,6 +504,25 @@ final class DifferentialTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
+    // Load the most up-to-date version of the revision and its reviewers,
+    // so we don't need to try to deduce the state of reviewers by examining
+    // all the changes made by the transactions. Then, update the reviewers
+    // on the object to make sure we're acting on the current reviewer set
+    // (and, for example, sending mail to the right people).
+
+    $new_revision = id(new DifferentialRevisionQuery())
+      ->setViewer($this->getActor())
+      ->needReviewerStatus(true)
+      ->withIDs(array($object->getID()))
+      ->executeOne();
+    if (!$new_revision) {
+      throw new Exception(
+        pht('Failed to load revision from transaction finalization.'));
+    }
+
+    $object->attachReviewerStatus($new_revision->getReviewerStatus());
+
+
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
         case DifferentialTransaction::TYPE_UPDATE:
@@ -527,19 +546,6 @@ final class DifferentialTransactionEditor
       case $status_accepted:
       case $status_revision:
       case $status_review:
-        // Load the most up-to-date version of the revision and its reviewers,
-        // so we don't need to try to deduce the state of reviewers by examining
-        // all the changes made by the transactions.
-        $new_revision = id(new DifferentialRevisionQuery())
-          ->setViewer($this->getActor())
-          ->needReviewerStatus(true)
-          ->withIDs(array($object->getID()))
-          ->executeOne();
-        if (!$new_revision) {
-          throw new Exception(
-            pht('Failed to load revision from transaction finalization.'));
-        }
-
         // Try to move a revision to "accepted". We look for:
         //
         //   - at least one accepting reviewer who is a user; and
@@ -551,7 +557,7 @@ final class DifferentialTransactionEditor
         $has_rejecting_reviewer = false;
         $has_rejecting_older_reviewer = false;
         $has_blocking_reviewer = false;
-        foreach ($new_revision->getReviewerStatus() as $reviewer) {
+        foreach ($object->getReviewerStatus() as $reviewer) {
           $reviewer_status = $reviewer->getStatus();
           switch ($reviewer_status) {
             case DifferentialReviewerStatus::STATUS_REJECTED:

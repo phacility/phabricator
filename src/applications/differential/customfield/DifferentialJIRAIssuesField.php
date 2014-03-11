@@ -13,6 +13,10 @@ final class DifferentialJIRAIssuesField
     return 'jira.issues';
   }
 
+  public function isFieldEnabled() {
+    return (bool)PhabricatorAuthProviderOAuth1JIRA::getJIRAProvider();
+  }
+
   public function canDisableField() {
     return false;
   }
