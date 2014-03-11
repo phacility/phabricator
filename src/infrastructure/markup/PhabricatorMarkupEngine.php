@@ -352,6 +352,7 @@ final class PhabricatorMarkupEngine {
    */
   public static function newDiffusionMarkupEngine(array $options = array()) {
     return self::newMarkupEngine(array(
+      'header.generate-toc' => true,
     ));
   }
 
