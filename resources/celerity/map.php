@@ -380,7 +380,7 @@ return array(
     'rsrc/js/application/files/behavior-icon-composer.js' => '8ef9ab58',
     'rsrc/js/application/files/behavior-launch-icon-composer.js' => '48086888',
     'rsrc/js/application/harbormaster/behavior-reorder-steps.js' => '957a7fde',
-    'rsrc/js/application/herald/HeraldRuleEditor.js' => '4f31d692',
+    'rsrc/js/application/herald/HeraldRuleEditor.js' => '4173dbd8',
     'rsrc/js/application/herald/PathTypeahead.js' => 'f7fc67ec',
     'rsrc/js/application/herald/herald-rule-editor.js' => '7ebaeed3',
     'rsrc/js/application/maniphest/behavior-batch-editor.js' => '391457d7',
@@ -523,7 +523,7 @@ return array(
     'font-source-sans-pro' => '225851dd',
     'global-drag-and-drop-css' => '697324ad',
     'herald-css' => '59d48f01',
-    'herald-rule-editor' => '4f31d692',
+    'herald-rule-editor' => '4173dbd8',
     'herald-test-css' => '2b7d0f54',
     'inline-comment-summary-css' => '14a91639',
     'javelin-aphlict' => '493665ee',
@@ -1088,6 +1088,19 @@ return array(
       0 => 'javelin-install',
       1 => 'javelin-event',
     ),
+    '4173dbd8' =>
+    array(
+      0 => 'multirow-row-manager',
+      1 => 'javelin-install',
+      2 => 'javelin-typeahead',
+      3 => 'javelin-util',
+      4 => 'javelin-dom',
+      5 => 'javelin-tokenizer',
+      6 => 'javelin-typeahead-preloaded-source',
+      7 => 'javelin-stratcom',
+      8 => 'javelin-json',
+      9 => 'phabricator-prefab',
+    ),
     '441f2137' =>
     array(
       0 => 'javelin-behavior',
@@ -1120,19 +1133,6 @@ return array(
       0 => 'javelin-install',
       1 => 'javelin-dom',
       2 => 'javelin-reactor-dom',
-    ),
-    '4f31d692' =>
-    array(
-      0 => 'multirow-row-manager',
-      1 => 'javelin-install',
-      2 => 'javelin-typeahead',
-      3 => 'javelin-util',
-      4 => 'javelin-dom',
-      5 => 'javelin-tokenizer',
-      6 => 'javelin-typeahead-preloaded-source',
-      7 => 'javelin-stratcom',
-      8 => 'javelin-json',
-      9 => 'phabricator-prefab',
     ),
     '4f344388' =>
     array(

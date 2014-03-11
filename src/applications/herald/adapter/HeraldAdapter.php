@@ -40,6 +40,7 @@ abstract class HeraldAdapter {
   const FIELD_COMMITTER_RAW          = 'committer-raw';
   const FIELD_IS_NEW_OBJECT          = 'new-object';
   const FIELD_TASK_PRIORITY          = 'taskpriority';
+  const FIELD_ARCANIST_PROJECT       = 'arcanist-project';
 
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';
@@ -91,6 +92,7 @@ abstract class HeraldAdapter {
   const VALUE_USER_OR_PROJECT = 'userorproject';
   const VALUE_BUILD_PLAN      = 'buildplan';
   const VALUE_TASK_PRIORITY   = 'taskpriority';
+  const VALUE_ARCANIST_PROJECT = 'arcanistprojects';
 
   private $contentSource;
   private $isNewObject;
@@ -237,6 +239,7 @@ abstract class HeraldAdapter {
       self::FIELD_COMMITTER_RAW => pht('Raw committer name'),
       self::FIELD_IS_NEW_OBJECT => pht('Is newly created?'),
       self::FIELD_TASK_PRIORITY => pht('Task priority'),
+      self::FIELD_ARCANIST_PROJECT => pht('Arcanist Project'),
     );
   }
 
@@ -289,6 +292,7 @@ abstract class HeraldAdapter {
       case self::FIELD_REVIEWER:
       case self::FIELD_PUSHER:
       case self::FIELD_TASK_PRIORITY:
+      case self::FIELD_ARCANIST_PROJECT:
         return array(
           self::CONDITION_IS_ANY,
           self::CONDITION_IS_NOT_ANY,
@@ -725,6 +729,8 @@ abstract class HeraldAdapter {
             return self::VALUE_REPOSITORY;
           case self::FIELD_TASK_PRIORITY:
             return self::VALUE_TASK_PRIORITY;
+          case self::FIELD_ARCANIST_PROJECT:
+            return self::VALUE_ARCANIST_PROJECT;
           default:
             return self::VALUE_USER;
         }

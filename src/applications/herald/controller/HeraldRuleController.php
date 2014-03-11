@@ -593,6 +593,7 @@ final class HeraldRuleController extends HeraldController {
         'userorproject' => '/typeahead/common/accountsorprojects/',
         'buildplan'     => '/typeahead/common/buildplans/',
         'taskpriority'  => '/typeahead/common/taskpriority/',
+        'arcanistprojects' => '/typeahead/common/arcanistprojects/',
       ),
       'markup' => $template,
     );

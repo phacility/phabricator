@@ -223,6 +223,7 @@ JX.install('HeraldRuleEditor', {
         case 'userorproject':
         case 'buildplan':
         case 'taskpriority':
+        case 'arcanistprojects':
           var tokenizer = this._newTokenizer(type);
           input = tokenizer[0];
           get_fn = tokenizer[1];
