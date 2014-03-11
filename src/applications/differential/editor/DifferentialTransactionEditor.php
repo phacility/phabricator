@@ -4,6 +4,26 @@ final class DifferentialTransactionEditor
   extends PhabricatorApplicationTransactionEditor {
 
   private $heraldEmailPHIDs;
+  private $changedPriorToCommitURI;
+  private $isCloseByCommit;
+
+  public function setIsCloseByCommit($is_close_by_commit) {
+    $this->isCloseByCommit = $is_close_by_commit;
+    return $this;
+  }
+
+  public function getIsCloseByCommit() {
+    return $this->isCloseByCommit;
+  }
+
+  public function setChangedPriorToCommitURI($uri) {
+    $this->changedPriorToCommitURI = $uri;
+    return $this;
+  }
+
+  public function getChangedPriorToCommitURI() {
+    return $this->changedPriorToCommitURI;
+  }
 
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
@@ -158,7 +178,9 @@ final class DifferentialTransactionEditor
       case PhabricatorTransactions::TYPE_EDGE:
         return;
       case DifferentialTransaction::TYPE_UPDATE:
-        $object->setStatus($status_review);
+        if (!$this->getIsCloseByCommit()) {
+          $object->setStatus($status_review);
+        }
         // TODO: Update the `diffPHID` once we add that.
         return;
       case DifferentialTransaction::TYPE_ACTION:
@@ -209,6 +231,12 @@ final class DifferentialTransactionEditor
     $results = parent::expandTransaction($object, $xaction);
     switch ($xaction->getTransactionType()) {
       case DifferentialTransaction::TYPE_UPDATE:
+        if ($this->getIsCloseByCommit()) {
+          // Don't bother with any of this if this update is a side effect of
+          // commit detection.
+          break;
+        }
+
         $new_accept = DifferentialReviewerStatus::STATUS_ACCEPTED;
         $new_reject = DifferentialReviewerStatus::STATUS_REJECTED;
         $old_accept = DifferentialReviewerStatus::STATUS_ACCEPTED_OLDER;
@@ -784,19 +812,22 @@ final class DifferentialTransactionEditor
         break;
 
       case DifferentialAction::ACTION_CLOSE:
+        // We force revisions closed when we discover a corresponding commit.
+        // In this case, revisions are allowed to transition to closed from
+        // any state. This is an automated action taken by the daemons.
 
-        // TODO: Permit the daemons to take this action in all cases.
+        if (!$this->getIsCloseByCommit()) {
+          if (!$actor_is_author && !$always_allow_close) {
+            return pht(
+              "You can not close this revision because you do not own it. To ".
+              "close a revision, you must be its owner.");
+          }
 
-        if (!$actor_is_author && !$always_allow_close) {
-          return pht(
-            "You can not close this revision because you do not own it. To ".
-            "close a revision, you must be its owner.");
-        }
-
-        if ($revision_status != $status_accepted) {
-          return pht(
-            "You can not close this revision because it has not been ".
-            "accepted. You can only close accepted revisions.");
+          if ($revision_status != $status_accepted) {
+            return pht(
+              "You can not close this revision because it has not been ".
+              "accepted. You can only close accepted revisions.");
+          }
         }
         break;
     }
@@ -907,6 +938,13 @@ final class DifferentialTransactionEditor
       if ($xaction->getTransactionType() == $type_inline) {
         $inlines[] = $xaction;
       }
+    }
+
+    $changed_uri = $this->getChangedPriorToCommitURI();
+    if ($changed_uri) {
+      $body->addTextSection(
+        pht('CHANGED PRIOR TO COMMIT'),
+        $changed_uri);
     }
 
     if ($inlines) {
@@ -1099,7 +1137,9 @@ final class DifferentialTransactionEditor
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
         case DifferentialTransaction::TYPE_UPDATE:
-          return true;
+          if (!$this->getIsCloseByCommit()) {
+            return true;
+          }
       }
     }
 
@@ -1130,8 +1170,8 @@ final class DifferentialTransactionEditor
     }
 
     $adapter = HeraldDifferentialRevisionAdapter::newLegacyAdapter(
-      $object,
-      $object->getActiveDiff());
+      $revision,
+      $revision->getActiveDiff());
 
     $reviewers = $revision->getReviewerStatus();
     $reviewer_phids = mpull($reviewers, 'getReviewerPHID');

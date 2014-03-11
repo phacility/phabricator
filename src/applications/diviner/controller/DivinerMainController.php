@@ -33,23 +33,27 @@ final class DivinerMainController extends DivinerController {
 
     $document = new PHUIDocumentView();
     $document->setHeader($header);
+    $document->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS);
 
     if ($books) {
-      $list = id(new PHUIObjectItemListView())
-        ->setUser($viewer)
-        ->setPlain(true);
-
       $books = msort($books, 'getTitle');
+      $list = array();
       foreach ($books as $book) {
-        $item = id(new PHUIObjectItemView())
+        $item = id(new DivinerBookItemView())
+          ->setTitle($book->getTitle())
           ->setHref('/book/'.$book->getName().'/')
-          ->setHeader($book->getTitle())
-          ->addAttribute($book->getPreface());
-
-        $list->addItem($item);
+          ->setSubtitle($book->getPreface());
+        $list[] = $item;
       }
+      $list = id(new PHUIBoxView())
+        ->addPadding(PHUI::PADDING_LARGE_LEFT)
+        ->addPadding(PHUI::PADDING_LARGE_RIGHT)
+        ->addPadding(PHUI::PADDING_SMALL_TOP)
+        ->addPadding(PHUI::PADDING_SMALL_BOTTOM)
+        ->appendChild($list);
 
       $document->appendChild($list);
+
     } else {
       $text = pht(
         "(NOTE) **Looking for Phabricator documentation?** If you're looking ".
@@ -84,6 +88,7 @@ final class DivinerMainController extends DivinerController {
       array(
         'title' => pht('Documentation Books'),
         'device' => true,
+        'fonts' => true,
       ));
   }
 }

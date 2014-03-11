@@ -77,11 +77,10 @@
   .phui-header-shell.phui-header-no-backgound
   .phui-header-view {
  padding: 8px 0 4px;
- font-size: 14px;
+ font-size: 15px;
 }
 
 .phui-document-content .phui-header-view {
-  padding: 16px;
   color: {$bluetext};
   text-shadow: 0 1px 2px #fff;
 }

@@ -136,6 +136,21 @@ final class PhameBlog extends PhameDAO
     return self::$requestBlog;
   }
 
+  public function getLiveURI(PhamePost $post = null) {
+    if ($this->getDomain()) {
+      $base = new PhutilURI('http://'.$this->getDomain().'/');
+    } else {
+      $base = '/phame/live/'.$this->getID().'/';
+      $base = PhabricatorEnv::getURI($base);
+    }
+
+    if ($post) {
+      $base .= '/post/'.$post->getPhameTitle();
+    }
+
+    return $base;
+  }
+
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 

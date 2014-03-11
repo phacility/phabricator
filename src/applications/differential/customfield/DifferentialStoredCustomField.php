@@ -39,4 +39,9 @@ abstract class DifferentialStoredCustomField
     return $this;
   }
 
+  public function setValueFromApplicationTransactions($value) {
+    $this->setValue($value);
+    return $this;
+  }
+
 }

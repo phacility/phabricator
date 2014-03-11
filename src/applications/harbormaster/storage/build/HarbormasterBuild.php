@@ -113,6 +113,8 @@ final class HarbormasterBuild extends HarbormasterDAO
     $log_source,
     $log_type) {
 
+    $log_source = phutil_utf8_shorten($log_source, 250);
+
     $log = HarbormasterBuildLog::initializeNewBuildLog($build_target)
       ->setLogSource($log_source)
       ->setLogType($log_type)

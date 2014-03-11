@@ -38,6 +38,7 @@ final class DivinerBookController extends DivinerController {
 
     $document = new PHUIDocumentView();
     $document->setHeader($header);
+    $document->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS);
 
     $properties = $this->buildPropertyList($book);
 
@@ -45,6 +46,7 @@ final class DivinerBookController extends DivinerController {
       ->setViewer($viewer)
       ->withBookPHIDs(array($book->getPHID()))
       ->execute();
+
     $atoms = msort($atoms, 'getSortKey');
 
     $group_spec = $book->getConfig('groups');
@@ -63,12 +65,27 @@ final class DivinerBookController extends DivinerController {
     $out = array();
     foreach ($groups as $group => $atoms) {
       $group_name = $book->getGroupName($group);
+      if (!strlen($group_name)) {
+        $group_name = pht('Free Radicals');
+      }
       $section = id(new DivinerSectionView())
-          ->setHeader($group_name);
+        ->setHeader($group_name);
       $section->addContent($this->renderAtomList($atoms));
       $out[] = $section;
     }
+
+    $preface = $book->getPreface();
+    $preface_view = null;
+    if (strlen($preface)) {
+      $preface_view =
+        PhabricatorMarkupEngine::renderOneObject(
+          id(new PhabricatorMarkupOneOff())->setContent($preface),
+          'default',
+          $viewer);
+    }
+
     $document->appendChild($properties);
+    $document->appendChild($preface_view);
     $document->appendChild($out);
 
     return $this->buildApplicationPage(
@@ -94,15 +111,6 @@ final class DivinerBookController extends DivinerController {
     $view->addProperty(
       pht('Updated'),
       phabricator_datetime($book->getDateModified(), $viewer));
-
-    $preface = $book->getPreface();
-    if (strlen($preface)) {
-      $view->addTextContent(
-        PhabricatorMarkupEngine::renderOneObject(
-          id(new PhabricatorMarkupOneOff())->setContent($preface),
-          'default',
-          $viewer));
-    }
 
     return $view;
   }

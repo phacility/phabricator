@@ -783,8 +783,7 @@ abstract class DifferentialFieldSpecification {
     return $this->parseCommitMessageObjectList(
       $value,
       $mailables = false,
-      $allow_partial = false,
-      $projects = true);
+      $allow_partial = false);
   }
 
   /**
@@ -814,89 +813,21 @@ abstract class DifferentialFieldSpecification {
     $include_mailables,
     $allow_partial = false) {
 
-    $value = array_unique(array_filter(preg_split('/[\s,]+/', $value)));
-    if (!$value) {
-      return array();
+    $types = array(
+      PhabricatorPeoplePHIDTypeUser::TYPECONST,
+      PhabricatorProjectPHIDTypeProject::TYPECONST,
+    );
+
+    if ($include_mailables) {
+      $types[] = PhabricatorMailingListPHIDTypeList::TYPECONST;
     }
 
-    $object_map = array();
-
-    $project_names = array();
-    $other_names = array();
-    foreach ($value as $item) {
-      if (preg_match('/^#/', $item)) {
-        $project_names[$item] = ltrim(phutil_utf8_strtolower($item), '#').'/';
-      } else {
-        $other_names[] = $item;
-      }
-    }
-
-    if ($project_names) {
-      // TODO: (T603) This should probably be policy-aware, although maybe not,
-      // since we generally don't want to destroy data and it doesn't leak
-      // anything?
-      $projects = id(new PhabricatorProjectQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withPhrictionSlugs($project_names)
-        ->execute();
-
-      $reverse_map = array_flip($project_names);
-      foreach ($projects as $project) {
-        $reverse_key = $project->getPhrictionSlug();
-        if (isset($reverse_map[$reverse_key])) {
-          $object_map[$reverse_map[$reverse_key]] = $project->getPHID();
-        }
-      }
-    }
-
-    if ($other_names) {
-      $users = id(new PhabricatorUser())->loadAllWhere(
-        '(username IN (%Ls))',
-        $other_names);
-
-      $user_map = mpull($users, 'getPHID', 'getUsername');
-      foreach ($user_map as $username => $phid) {
-        // Usernames may have uppercase letters in them. Put both names in the
-        // map so we can try the original case first, so that username *always*
-        // works in weird edge cases where some other mailable object collides.
-        $object_map[$username] = $phid;
-        $object_map[strtolower($username)] = $phid;
-      }
-
-      if ($include_mailables) {
-        $mailables = id(new PhabricatorMetaMTAMailingList())->loadAllWhere(
-          '(email IN (%Ls)) OR (name IN (%Ls))',
-          $other_names,
-          $other_names);
-        $object_map += mpull($mailables, 'getPHID', 'getName');
-        $object_map += mpull($mailables, 'getPHID', 'getEmail');
-      }
-    }
-
-    $invalid = array();
-    $results = array();
-    foreach ($value as $name) {
-      if (empty($object_map[$name])) {
-        if (empty($object_map[phutil_utf8_strtolower($name)])) {
-          $invalid[] = $name;
-        } else {
-          $results[] = $object_map[phutil_utf8_strtolower($name)];
-        }
-      } else {
-        $results[] = $object_map[$name];
-      }
-    }
-
-    if ($invalid && !$allow_partial) {
-      $invalid = implode(', ', $invalid);
-      $what = $include_mailables
-        ? "users and mailing lists"
-        : "users";
-      throw new DifferentialFieldParseException(
-        "Commit message references nonexistent {$what}: {$invalid}.");
-    }
-
-    return array_unique($results);
+    return id(new PhabricatorObjectListQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setAllowPartialResults($allow_partial)
+      ->setAllowedTypes($types)
+      ->setObjectList($value)
+      ->execute();
   }
 
 

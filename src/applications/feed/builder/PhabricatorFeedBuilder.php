@@ -57,8 +57,21 @@ final class PhabricatorFeedBuilder {
         $null_view->appendChild($header);
       }
 
-      $view = $story->renderView();
-      $view->setUser($user);
+      try {
+        $view = $story->renderView();
+        $view->setUser($user);
+        $view = $view->render();
+      } catch (Exception $ex) {
+        // If rendering failed for any reason, don't fail the entire feed,
+        // just this one story.
+        $view = id(new PHUIFeedStoryView())
+          ->setUser($user)
+          ->setChronologicalKey($story->getChronologicalKey())
+          ->setEpoch($story->getEpoch())
+          ->setTitle(
+            pht('Feed Story Failed to Render (%s)', get_class($story)))
+          ->appendChild(pht('%s: %s', get_class($ex), $ex->getMessage()));
+      }
 
       $null_view->appendChild($view);
     }

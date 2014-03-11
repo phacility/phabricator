@@ -80,6 +80,7 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
     $need_approval = id(new PhabricatorPeopleQuery())
       ->setViewer($user)
       ->withIsApproved(false)
+      ->withIsDisabled(false)
       ->execute();
 
     if (!$need_approval) {

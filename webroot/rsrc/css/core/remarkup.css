@@ -7,7 +7,7 @@
 }
 
 .phabricator-remarkup p {
-  margin: 0 0 1em;
+  margin: 0 0 12px;
 }
 
 .phabricator-remarkup p:last-child {
@@ -15,37 +15,43 @@
 }
 
 .phabricator-remarkup .remarkup-code-block {
-  margin: 1em 2em;
+  margin: 12px;
   white-space: pre;
   font-family: "Monaco", monospace;
   font-size: 10px;
 }
 
 .phabricator-remarkup .remarkup-code-header {
-  padding: .25em 1em;
-  background: #edead7;
-  color: {$darkgreytext};
+  padding: 6px 8px;
+  background: {$lightyellow};
+  color: rgba(0,0,0,.75);
+  font-weight: bold;
+  display: inline-block;
+  border-top: 1px solid {$yellow};
+  border-left: 1px solid {$yellow};
+  border-right: 1px solid {$yellow};
+  margin-bottom: -1px;
 }
 
 .phabricator-remarkup .remarkup-code-block pre {
-  background: #fdfae7;
-  border: 1px solid #f5e178;
+  background: {$lightyellow};
+  border: 1px solid {$yellow};
   display: block;
   color: #000000;
   overflow: auto;
-  padding: .5em 1em;
+  padding: 8px;
   font-family: "Monaco", monospace;
 }
 
 .phabricator-remarkup pre.remarkup-counterexample {
-  border: 1px solid #aa0000;
-  background-color: #ffaaaa;
+  border: 1px solid {$red};
+  background-color: {$lightred};
 }
 
 .phabricator-remarkup tt {
   color: #333333;
   background: #ebebeb;
-  padding: 0 .25em;
+  padding: 0 4px;
   white-space: pre-wrap;
 }
 
@@ -57,19 +63,19 @@
 
 .phabricator-remarkup ul {
   list-style: disc;
-  margin: 1em 0 1em 3em;
+  margin: 12px 0 12px 30px;
 }
 
 .phabricator-remarkup ol {
   list-style: decimal;
-  margin: 1em 0 1em 3em;
+  margin: 12px 0 12px 30px;
 }
 
 .phabricator-remarkup ul ol,
 .phabricator-remarkup ul ul,
 .phabricator-remarkup ol ol,
 .phabricator-remarkup ol ul {
-  margin: .25em 0 .25em 2em;
+  margin: 4px 0 4px 24px;
 }
 
 .phabricator-remarkup li.phantom-item,
@@ -98,45 +104,45 @@
 .phabricator-remarkup h1 {
   font-size: 1.625em;
   line-height: 1.625em;
-  margin: .8em 0;
+  margin: 8px 0;
 }
 
 .phabricator-remarkup h2 {
   font-size: 1.5em;
   line-height: 1.5em;
-  margin: .75em 0;
+  margin: 8px 0;
 }
 
 .phabricator-remarkup h3 {
   font-size: 1.375em;
   line-height: 1.375em;
-  margin: .69em 0;
+  margin: 8px 0;
 }
 
 .phabricator-remarkup h4 {
   font-size: 1.25em;
   line-height: 1.25em;
-  margin: .63em 0;
+  margin: 8px 0;
 }
 
 .phabricator-remarkup h5 {
   font-size: 1.125em;
   line-height: 1.125em;
-  margin: .56em 0;
+  margin: 4px 0;
 }
 
 .phabricator-remarkup h6 {
   font-size: 1em;
   line-height: 1em;
-  margin: .5em 0;
+  margin: 4px 0;
 }
 
 .phabricator-remarkup blockquote {
-  border-left: 1px solid #AAAAAA;
-  color:       #333333;
+  border-left: 3px solid {$lightbluetext};
+  color: {$bluetext};
   font-style:  italic;
-  margin:      .5em 0em;
-  padding:     .25em 1em;
+  margin: 0 0 12px;
+  padding: 4px 8px;
 }
 
 .phabricator-remarkup blockquote em {
@@ -172,39 +178,40 @@
 }
 
 .phabricator-remarkup .remarkup-note {
-  margin: 1em 1.5em;
-  padding: 0.5em 1em;
-  border: 1px solid #ddddff;
-  background: #f3f3ff;
+  margin: 12px 24px;
+  padding: 8px;
+  border: 1px solid {$blue};
+  background: {$lightblue};
 }
 
 .phabricator-remarkup .remarkup-warning {
-  margin: 1em 1.5em;
-  padding: 0.5em 1em;
+  margin: 12px 24px;
+  padding: 8px;
   border: 1px solid {$yellow};
   background: {$lightyellow};
 }
 
 .phabricator-remarkup .remarkup-important {
-  margin: 1em 1.5em;
-  padding: 0.5em 1em;
+  margin: 12px 24px;
+  padding: 8px;
   border: 1px solid {$red};
   background: {$lightred};
 }
 
 .phabricator-remarkup-toc {
   float: right;
-  border: 1px solid #d7d7d7;
-  background: #f7f7f7;
-  padding: 4px 12px;
+  border: 1px solid {$lightblueborder};
+  background: {$lightgreybackground};
+  padding: 8px;
   width: 180px;
-  margin: 0 0 5px 10px;
+  margin: 0 0 4px 8px;
 }
 
 .phabricator-remarkup-toc-header {
-  font-size: 11px;
-  color: {$greytext};
-  border-bottom: 1px solid #d7d7d7;
+  font-size: 12px;
+  line-height: 12px;
+  color: {$darkbluetext};
+  font-weight: bold;
   margin-bottom: 4px;
 }
 
@@ -259,10 +266,10 @@
 }
 
 .phabricator-remarkup table.remarkup-table {
-  border-collapse:  separate;
-  border-spacing:   1px;
-  background:       #d3d3d3;
-  margin:           1em;
+  border-collapse: separate;
+  border-spacing: 1px;
+  background: #d3d3d3;
+  margin: 12px 0;
 }
 
 .phabricator-remarkup table.remarkup-table th {
@@ -401,27 +408,4 @@
 .phabricator-image-macro-hero {
   margin: auto;
   max-width: 95%;
-}
-
-/* phabricator-remarkup-dark assumes a dark backround with light text,
-   so here are custom rules to override remarkup defaults. */
-
-div.phabricator-remarkup-dark blockquote {
-  color: {$lightgreytext};
-}
-
-div.phabricator-remarkup-dark tt {
-  color: #EEE;
-  background: {$darkgreytext};
-}
-
-div.phabricator-remarkup-dark .remarkup-note,
-div.phabricator-remarkup-dark .remarkup-warning,
-div.phabricator-remarkup-dark .remarkup-important,
-div.phabricator-remarkup-dark table {
-  color: #000;
-}
-
-div.phabricator-remarkup-dark hr {
-  border-color: #555;
 }

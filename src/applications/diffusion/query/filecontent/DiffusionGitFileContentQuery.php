@@ -32,6 +32,10 @@ final class DiffusionGitFileContentQuery extends DiffusionFileContentQuery {
   }
 
   protected function tokenizeLine($line) {
+    return self::match($line);
+  }
+
+  public static function match($line) {
     $m = array();
     // sample lines:
     //
@@ -41,7 +45,7 @@ final class DiffusionGitFileContentQuery extends DiffusionFileContentQuery {
     // 8220d5d54f6d5d5552a636576cbe9c35f15b65b2
     //                       (Andrew Gallagher       2010-12-03      324)
     //                             // Add the lines for trailing context
-    preg_match('/^\s*?(\S+?)\s*\(\s*([^)]*)\s+\d{4}-\d{2}-\d{2}\s+\d+\)(.*)?$/',
+    preg_match('/^\s*?(\S+?)\s*\(\s*(.*?)\s+\d{4}-\d{2}-\d{2}\s+\d+\)(.*)?$/',
                $line, $m);
     $rev_id = $m[1];
     $author = $m[2];

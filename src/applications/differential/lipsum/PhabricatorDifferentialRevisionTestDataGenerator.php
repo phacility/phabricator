@@ -19,18 +19,10 @@ final class PhabricatorDifferentialRevisionTestDataGenerator
     $editor->addDiff($diff, $this->generateDescription());
     $editor->setAuxiliaryFields($aux_fields);
     $editor->save();
-    // Add Reviewers
-    $editor2 = new DifferentialCommentEditor($revision,
-      DifferentialAction::ACTION_ADDREVIEWERS);
-    $editor2->setActor($author);
-    $editor2->setAddedReviewers($this->getCCPHIDs());
-    $editor2->save();
-    // Add CCs
-    $editor3 = new DifferentialCommentEditor($revision,
-      DifferentialAction::ACTION_ADDCCS);
-    $editor3->setActor($author);
-    $editor3->setAddedCCs($this->getCCPHIDs());
-    $editor3->save();
+
+    // TODO: After T2222, it would be nice to revisit this and expand the
+    // functionality.
+
     return $revision->save();
   }
 

@@ -89,7 +89,8 @@ final class ConduitAPI_differential_parsecommitmessage_Method
     foreach ($aux_fields as $key => $aux_field) {
       $labels = $aux_field->getSupportedCommitMessageLabels();
       foreach ($labels as $label) {
-        $normal_label = strtolower($label);
+        $normal_label = DifferentialCommitMessageParser::normalizeFieldLabel(
+          $label);
         if (!empty($label_map[$normal_label])) {
           $previous = $label_map[$normal_label];
           throw new Exception(
@@ -102,106 +103,20 @@ final class ConduitAPI_differential_parsecommitmessage_Method
     return $label_map;
   }
 
-  private function buildLabelRegexp(array $label_map) {
-    $field_labels = array_keys($label_map);
-    foreach ($field_labels as $key => $label) {
-      $field_labels[$key] = preg_quote($label, '/');
-    }
-    $field_labels = implode('|', $field_labels);
-
-    $field_pattern = '/^(?P<field>'.$field_labels.'):(?P<text>.*)$/i';
-
-    return $field_pattern;
-  }
 
   private function parseCommitMessage($corpus, array $label_map) {
-    $label_regexp = $this->buildLabelRegexp($label_map);
+    $parser = id(new DifferentialCommitMessageParser())
+      ->setLabelMap($label_map)
+      ->setTitleKey('title')
+      ->setSummaryKey('summary');
 
-    // Note, deliberately not populating $seen with 'title' because it is
-    // optional to include the 'Title:' label. We're doing a little special
-    // casing to consume the first line as the title regardless of whether you
-    // label it as such or not.
-    $field = 'title';
+    $result = $parser->parseCorpus($corpus);
 
-    $seen = array();
-    $lines = explode("\n", trim($corpus));
-    $field_map = array();
-    foreach ($lines as $key => $line) {
-      $match = null;
-      if (preg_match($label_regexp, $line, $match)) {
-        $lines[$key] = trim($match['text']);
-        $field = $label_map[strtolower($match['field'])];
-        if (!empty($seen[$field])) {
-          $this->errors[] = "Field '{$field}' occurs twice in commit message!";
-        }
-        $seen[$field] = true;
-      }
-      $field_map[$key] = $field;
+    foreach ($parser->getErrors() as $error) {
+      $this->errors[] = $error;
     }
 
-    $fields = array();
-    foreach ($lines as $key => $line) {
-      $fields[$field_map[$key]][] = $line;
-    }
-
-    // This is a piece of special-cased magic which allows you to omit the
-    // field labels for "title" and "summary". If the user enters a large block
-    // of text at the beginning of the commit message with an empty line in it,
-    // treat everything before the blank line as "title" and everything after
-    // as "summary".
-    if (isset($fields['title']) && empty($fields['summary'])) {
-      $lines = $fields['title'];
-      for ($ii = 0; $ii < count($lines); $ii++) {
-        if (strlen(trim($lines[$ii])) == 0) {
-          break;
-        }
-      }
-      if ($ii != count($lines)) {
-        $fields['title'] = array_slice($lines, 0, $ii);
-        $fields['summary'] = array_slice($lines, $ii);
-      }
-    }
-
-    // Implode all the lines back into chunks of text.
-    foreach ($fields as $name => $lines) {
-      $data = rtrim(implode("\n", $lines));
-      $data = ltrim($data, "\n");
-      $fields[$name] = $data;
-    }
-
-    // This is another piece of special-cased magic which allows you to
-    // enter a ridiculously long title, or just type a big block of stream
-    // of consciousness text, and have some sort of reasonable result conjured
-    // from it.
-    if (isset($fields['title'])) {
-      $terminal = '...';
-      $title = $fields['title'];
-      $short = phutil_utf8_shorten($title, 250, $terminal);
-      if ($short != $title) {
-
-        // If we shortened the title, split the rest into the summary, so
-        // we end up with a title like:
-        //
-        //    Title title tile title title...
-        //
-        // ...and a summary like:
-        //
-        //    ...title title title.
-        //
-        //    Summary summary summary summary.
-
-        $summary = idx($fields, 'summary', '');
-        $offset = strlen($short) - strlen($terminal);
-        $remainder = ltrim(substr($fields['title'], $offset));
-        $summary = '...'.$remainder."\n\n".$summary;
-        $summary = rtrim($summary, "\n");
-
-        $fields['title'] = $short;
-        $fields['summary'] = $summary;
-      }
-    }
-
-    return $fields;
+    return $result;
   }
 
 

@@ -57,14 +57,14 @@ final class PhabricatorPolicyDataTestCase extends PhabricatorTestCase {
       $task,
       PhabricatorPolicyCapability::CAN_VIEW);
 
-    $this->assertEqual(true, $can_a_view);
+    $this->assertTrue($can_a_view);
 
     $can_b_view = PhabricatorPolicyFilter::hasCapability(
       $user_b,
       $task,
       PhabricatorPolicyCapability::CAN_VIEW);
 
-    $this->assertEqual(false, $can_b_view);
+    $this->assertFalse($can_b_view);
   }
 
   public function testCustomPolicyRuleAdministrators() {
@@ -93,14 +93,14 @@ final class PhabricatorPolicyDataTestCase extends PhabricatorTestCase {
       $task,
       PhabricatorPolicyCapability::CAN_VIEW);
 
-    $this->assertEqual(true, $can_a_view);
+    $this->assertTrue($can_a_view);
 
     $can_b_view = PhabricatorPolicyFilter::hasCapability(
       $user_b,
       $task,
       PhabricatorPolicyCapability::CAN_VIEW);
 
-    $this->assertEqual(false, $can_b_view);
+    $this->assertFalse($can_b_view);
   }
 
   public function testCustomPolicyRuleLunarPhase() {
@@ -128,7 +128,7 @@ final class PhabricatorPolicyDataTestCase extends PhabricatorTestCase {
         $user_a,
         $task,
         PhabricatorPolicyCapability::CAN_VIEW);
-      $this->assertEqual(true, $can_a_view);
+      $this->assertTrue($can_a_view);
 
     unset($time_a);
 
@@ -139,7 +139,7 @@ final class PhabricatorPolicyDataTestCase extends PhabricatorTestCase {
         $user_a,
         $task,
         PhabricatorPolicyCapability::CAN_VIEW);
-      $this->assertEqual(false, $can_a_view);
+      $this->assertFalse($can_a_view);
 
     unset($time_b);
   }

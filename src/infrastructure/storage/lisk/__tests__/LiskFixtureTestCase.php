@@ -65,8 +65,7 @@ final class LiskFixtureTestCase extends PhabricatorTestCase {
 
       $obj->killTransaction();
 
-      $this->assertEqual(
-        true,
+      $this->assertTrue(
         ($loaded !== null),
         "Reads inside transactions should have transaction visibility.");
 
@@ -91,8 +90,8 @@ final class LiskFixtureTestCase extends PhabricatorTestCase {
     $this->assertEqual(null, $load->load('cow'));
     $this->assertEqual(null, $load->load($id."cow"));
 
-    $this->assertEqual(true, (bool)$load->load((int)$id));
-    $this->assertEqual(true, (bool)$load->load((string)$id));
+    $this->assertTrue((bool)$load->load((int)$id));
+    $this->assertTrue((bool)$load->load((string)$id));
   }
 
   public function testCounters() {

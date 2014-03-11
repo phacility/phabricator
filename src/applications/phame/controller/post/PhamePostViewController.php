@@ -141,14 +141,13 @@ final class PhamePostViewController extends PhameController {
 
     $blog = $post->getBlog();
     $can_view_live = $blog && !$post->isDraft();
-    $must_use_form = $blog && $blog->getDomain();
 
     if ($can_view_live) {
-      $live_uri = 'live/'.$blog->getID().'/post/'.$post->getPhameTitle();
+      $live_uri = $blog->getLiveURI($post);
     } else {
       $live_uri = 'post/notlive/'.$post->getID().'/';
+      $live_uri = $this->getApplicationURI($live_uri);
     }
-    $live_uri = $this->getApplicationURI($live_uri);
 
     $actions->addAction(
       id(new PhabricatorActionView())
@@ -156,7 +155,6 @@ final class PhamePostViewController extends PhameController {
         ->setIcon('world')
         ->setHref($live_uri)
         ->setName(pht('View Live'))
-        ->setRenderAsForm($must_use_form)
         ->setDisabled(!$can_view_live)
         ->setWorkflow(!$can_view_live));
 

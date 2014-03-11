@@ -7,7 +7,7 @@ final class ConduitCallTestCase extends PhabricatorTestCase {
     $call->setForceLocal(true);
     $result = $call->execute();
 
-    $this->assertEqual(false, empty($result));
+    $this->assertFalse(empty($result));
   }
 
   public function testConduitAuth() {
@@ -21,8 +21,7 @@ final class ConduitCallTestCase extends PhabricatorTestCase {
       $caught = $ex;
     }
 
-    $this->assertEqual(
-      true,
+    $this->assertTrue(
       ($caught instanceof ConduitException),
       "user.whoami should require authentication");
   }

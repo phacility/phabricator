@@ -86,7 +86,7 @@ final class PhortuneCurrencyTestCase extends PhabricatorTestCase {
       } catch (Exception $ex) {
         $caught = $ex;
       }
-      $this->assertEqual(true, ($caught instanceof Exception), "{$input}");
+      $this->assertTrue($caught instanceof Exception, "{$input}");
     }
   }
 

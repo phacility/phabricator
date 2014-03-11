@@ -7,6 +7,7 @@
 }
 
 .phabricator-hovercard-wrapper {
+  float: left;
   border-radius: 5px;
   width: 400px;
   padding: 6px;
@@ -14,10 +15,13 @@
 }
 
 .device-phone .phabricator-hovercard-wrapper {
+  float: left;
   width: 300px;
 }
 
 .phabricator-hovercard-container {
+  float: left;
+  width: 100%;
   border: 1px solid {$greytext};
 }
 
@@ -27,9 +31,16 @@
 }
 
 .phabricator-hovercard-body {
-  padding: 8px;
+  float: left;
+  width: 100%;
+  padding: 8px 0px 8px 0px;
   background-color: white;
   color: {$darkgreytext};
+}
+
+.phabricator-hovercard-body-header,
+.phabricator-hovercard-body-item {
+  margin: 0px 0px 0px 8px;
 }
 
 .phabricator-hovercard-body-header {
@@ -38,11 +49,21 @@
   color: {$darkgreytext};
 }
 
+.phabricator-hovercard-body .phabricator-hovercard-body-image {
+  clear: left;
+  float: left;
+  width: 58px;
+}
+
+.phabricator-hovercard-body .phabricator-hovercard-body-details {
+  clear: right;
+  float: left;
+  width: 342px;
+}
+
 .phabricator-hovercard-body .profile-header-picture-frame {
   float: left;
-  margin: 0;
-  margin-right: 10px;
-  margin-bottom: 5px;
+  margin: 0px 8px 0px 8px;
   width: 50px;
   height: 50px;
   background-position: center;
@@ -50,6 +71,8 @@
 }
 
 .phabricator-hovercard-tail {
+  width: 396px;
+  float: left;
   padding: 3px 2px;
   background-color: #eeeeee;
   border-bottom-left-radius: 2px;

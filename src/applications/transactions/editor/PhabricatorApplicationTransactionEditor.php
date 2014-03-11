@@ -25,6 +25,7 @@ abstract class PhabricatorApplicationTransactionEditor
   private $isPreview;
   private $isHeraldEditor;
   private $actingAsPHID;
+  private $disableEmail;
 
   public function setActingAsPHID($acting_as_phid) {
     $this->actingAsPHID = $acting_as_phid;
@@ -126,6 +127,21 @@ abstract class PhabricatorApplicationTransactionEditor
 
   public function getIsHeraldEditor() {
     return $this->isHeraldEditor;
+  }
+
+  /**
+   * Prevent this editor from generating email when applying transactions.
+   *
+   * @param bool  True to disable email.
+   * @return this
+   */
+  public function setDisableEmail($disable_email) {
+    $this->disableEmail = $disable_email;
+    return $this;
+  }
+
+  public function getDisableEmail() {
+    return $this->disableEmail;
   }
 
   public function getTransactionTypes() {
@@ -450,6 +466,16 @@ abstract class PhabricatorApplicationTransactionEditor
       PhabricatorContentSource::newFromRequest($request));
   }
 
+  public function setContentSourceFromConduitRequest(
+    ConduitAPIRequest $request) {
+
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_CONDUIT,
+      array());
+
+    return $this->setContentSource($content_source);
+  }
+
   public function getContentSource() {
     return $this->contentSource;
   }
@@ -672,8 +698,10 @@ abstract class PhabricatorApplicationTransactionEditor
     $this->loadHandles($xactions);
 
     $mail = null;
-    if ($this->shouldSendMail($object, $xactions)) {
-      $mail = $this->sendMail($object, $xactions);
+    if (!$this->getDisableEmail()) {
+      if ($this->shouldSendMail($object, $xactions)) {
+        $mail = $this->sendMail($object, $xactions);
+      }
     }
 
     if ($this->supportsSearch()) {

@@ -33,8 +33,7 @@ final class PhabricatorRepositoryTestCase
     $repo = new PhabricatorRepository();
     $repo->setVersionControlSystem($git);
 
-    $this->assertEqual(
-      true,
+    $this->assertTrue(
       $repo->shouldTrackBranch('imaginary'),
       'Track all branches by default.');
 
@@ -44,13 +43,11 @@ final class PhabricatorRepositoryTestCase
         'master' => true,
       ));
 
-    $this->assertEqual(
-      true,
+    $this->assertTrue(
       $repo->shouldTrackBranch('master'),
       'Track listed branches.');
 
-    $this->assertEqual(
-      false,
+    $this->assertFalse(
       $repo->shouldTrackBranch('imaginary'),
       'Do not track unlisted branches.');
   }

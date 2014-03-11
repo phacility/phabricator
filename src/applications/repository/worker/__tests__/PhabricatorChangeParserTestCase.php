@@ -1072,8 +1072,7 @@ final class PhabricatorChangeParserTestCase
       $caught = $ex;
     }
 
-    $this->assertEqual(
-      false,
+    $this->assertFalse(
       ($caught instanceof Exception),
       pht('Natural SVN root should work properly.'));
 
@@ -1097,8 +1096,7 @@ final class PhabricatorChangeParserTestCase
       $caught = $ex;
     }
 
-    $this->assertEqual(
-      true,
+    $this->assertTrue(
       ($caught instanceof Exception),
       pht('Artificial SVN root should fail.'));
   }
@@ -1136,8 +1134,7 @@ final class PhabricatorChangeParserTestCase
 
     $commits = mpull($commits, null, 'getCommitIdentifier');
 
-    $this->assertEqual(
-      true,
+    $this->assertTrue(
       isset($commits['2']),
       'Expect rCHE2 to exist as a foreign stub.');
 
