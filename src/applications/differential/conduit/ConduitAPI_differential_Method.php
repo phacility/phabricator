@@ -80,11 +80,7 @@ abstract class ConduitAPI_differential_Method extends ConduitAPIMethod {
 
       $role = PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS;
       if (!$field->shouldEnableForRole($role)) {
-        throw new Exception(
-          pht(
-            'Request attempts to update field "%s", but that field can not '.
-            'perform transactional updates.',
-            $key));
+        continue;
       }
 
       // TODO: This is fairly similar to PhabricatorCustomField's
