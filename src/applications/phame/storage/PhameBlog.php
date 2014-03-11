@@ -68,27 +68,42 @@ final class PhameBlog extends PhameDAO
    * @return string
    */
   public function validateCustomDomain($custom_domain) {
-    $example_domain = '(e.g. blog.example.com)';
-    $valid          = '';
+    $example_domain = 'blog.example.com';
 
     // note this "uri" should be pretty busted given the desired input
     // so just use it to test if there's a protocol specified
     $uri = new PhutilURI($custom_domain);
     if ($uri->getProtocol()) {
-      return 'Do not specify a protocol, just the domain. '.$example_domain;
+      return pht(
+        'The custom domain should not include a protocol. Just provide '.
+        'the bare domain name (for example, "%s").',
+        $example_domain);
+    }
+
+    if ($uri->getPort()) {
+      return pht(
+        'The custom domain should not include a port number. Just provide '.
+        'the bare domain name (for example, "%s").',
+        $example_domain);
     }
 
     if (strpos($custom_domain, '/') !== false) {
-      return 'Do not specify a path, just the domain. '.$example_domain;
+      return pht(
+        'The custom domain should not specify a path (hosting a Phame '.
+        'blog at a path is currently not supported). Instead, just provide '.
+        'the bare domain name (for example, "%s").',
+        $example_domain);
     }
 
     if (strpos($custom_domain, '.') === false) {
-      return 'Custom domain must contain at least one dot (.) because '.
-        'some browsers fail to set cookies on domains such as '.
-        'http://example. '.$example_domain;
+      return pht(
+        'The custom domain should contain at least one dot (.) because '.
+        'some browsers fail to set cookies on domains without a dot. Instead, '.
+        'use a normal looking domain name like "%s".',
+        $example_domain);
     }
 
-    return $valid;
+    return null;
   }
 
   public function getBloggerPHIDs() {
