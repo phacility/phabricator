@@ -1410,7 +1410,7 @@ final class DifferentialTransactionEditor
 
     // Apply build plans.
     HarbormasterBuildable::applyBuildPlans(
-      $adapter->getDiff(),
+      $adapter->getDiff()->getPHID(),
       $adapter->getPHID(),
       $adapter->getBuildPlans());
 
