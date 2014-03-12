@@ -41,6 +41,7 @@ abstract class HeraldAdapter {
   const FIELD_IS_NEW_OBJECT          = 'new-object';
   const FIELD_TASK_PRIORITY          = 'taskpriority';
   const FIELD_ARCANIST_PROJECT       = 'arcanist-project';
+  const FIELD_PUSHER_IS_COMMITTER    = 'pusher-is-committer';
 
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';
@@ -240,6 +241,7 @@ abstract class HeraldAdapter {
       self::FIELD_IS_NEW_OBJECT => pht('Is newly created?'),
       self::FIELD_TASK_PRIORITY => pht('Task priority'),
       self::FIELD_ARCANIST_PROJECT => pht('Arcanist Project'),
+      self::FIELD_PUSHER_IS_COMMITTER => pht('Pusher same as committer'),
     );
   }
 
@@ -287,8 +289,6 @@ abstract class HeraldAdapter {
           self::CONDITION_IS_NOT,
           self::CONDITION_REGEXP,
         );
-      case self::FIELD_AUTHOR:
-      case self::FIELD_COMMITTER:
       case self::FIELD_REVIEWER:
       case self::FIELD_PUSHER:
       case self::FIELD_TASK_PRIORITY:
@@ -299,6 +299,8 @@ abstract class HeraldAdapter {
         );
       case self::FIELD_REPOSITORY:
       case self::FIELD_ASSIGNEE:
+      case self::FIELD_AUTHOR:
+      case self::FIELD_COMMITTER:
         return array(
           self::CONDITION_IS_ANY,
           self::CONDITION_IS_NOT_ANY,
@@ -372,6 +374,7 @@ abstract class HeraldAdapter {
       case self::FIELD_IS_MERGE_COMMIT:
       case self::FIELD_DIFF_ENORMOUS:
       case self::FIELD_IS_NEW_OBJECT:
+      case self::FIELD_PUSHER_IS_COMMITTER:
         return array(
           self::CONDITION_IS_TRUE,
           self::CONDITION_IS_FALSE,
