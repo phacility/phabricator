@@ -167,9 +167,14 @@ final class PhabricatorRepositoryCommitHeraldWorker
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->readFieldsFromStorage($commit);
     foreach ($field_list->getFields() as $field) {
-      $field->buildApplicationTransactionMailBody(
-        new DifferentialTransaction(), // Bogus object to satisfy typehint.
-        $body);
+      try {
+        $field->buildApplicationTransactionMailBody(
+          new DifferentialTransaction(), // Bogus object to satisfy typehint.
+          $body);
+      } catch (Exception $ex) {
+        // Log the exception and continue.
+        phlog($ex);
+      }
     }
 
     $body->addTextSection(pht('DIFFERENTIAL REVISION'), $differential);
