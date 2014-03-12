@@ -131,6 +131,7 @@ final class AphrontDialogView extends AphrontView {
         array(
           'name' => '__submit__',
           'sigil' => '__default__',
+          'type' => 'submit',
         ),
         $this->submitButton);
     }
