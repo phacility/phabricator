@@ -9,6 +9,13 @@ final class PhabricatorAuthOldOAuthRedirectController
     return false;
   }
 
+  public function shouldAllowRestrictedParameter($parameter_name) {
+    if ($parameter_name == 'code') {
+      return true;
+    }
+    return parent::shouldAllowRestrictedParameter($parameter_name);
+  }
+
   public function willProcessRequest(array $data) {
     $this->provider = $data['provider'];
   }
