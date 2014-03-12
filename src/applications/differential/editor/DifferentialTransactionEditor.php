@@ -178,7 +178,9 @@ final class DifferentialTransactionEditor
       case PhabricatorTransactions::TYPE_EDGE:
         return;
       case DifferentialTransaction::TYPE_UPDATE:
-        if (!$this->getIsCloseByCommit()) {
+        if (!$this->getIsCloseByCommit() &&
+            (($object->getStatus() == $status_revision) ||
+             ($object->getStatus() == $status_plan))) {
           $object->setStatus($status_review);
         }
         // TODO: Update the `diffPHID` once we add that.
@@ -600,7 +602,7 @@ final class DifferentialTransactionEditor
           $new_status = $status_review;
         }
 
-        if ($new_status !== null && $new_status != $old_status) {
+        if ($new_status !== null && ($new_status != $old_status)) {
           $xaction = id(new DifferentialTransaction())
             ->setTransactionType(DifferentialTransaction::TYPE_STATUS)
             ->setOldValue($old_status)
@@ -1379,6 +1381,9 @@ final class DifferentialTransactionEditor
         array_keys($adapter->getBlockingReviewersAddedByHerald()),
     );
 
+    $old_reviewers = $object->getReviewerStatus();
+    $old_reviewers = mpull($old_reviewers, null, 'getReviewerPHID');
+
     $value = array();
     foreach ($reviewers as $status => $phids) {
       foreach ($phids as $phid) {
@@ -1386,6 +1391,23 @@ final class DifferentialTransactionEditor
           // Don't try to add the revision's author as a reviewer, since this
           // isn't valid and doesn't make sense.
           continue;
+        }
+
+        // If the target is already a reviewer, don't try to change anything
+        // if their current status is at least as strong as the new status.
+        // For example, don't downgrade an "Accepted" to a "Blocking Reviewer".
+        $old_reviewer = idx($old_reviewers, $phid);
+        if ($old_reviewer) {
+          $old_status = $old_reviewer->getStatus();
+
+          $old_strength = DifferentialReviewerStatus::getStatusStrength(
+            $old_status);
+          $new_strength = DifferentialReviewerStatus::getStatusStrength(
+            $status);
+
+          if ($new_strength <= $old_strength) {
+            continue;
+          }
         }
 
         $value['+'][$phid] = array(
