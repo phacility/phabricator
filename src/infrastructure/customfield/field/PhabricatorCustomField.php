@@ -1002,6 +1002,23 @@ abstract class PhabricatorCustomField {
     return false;
   }
 
+  /**
+   * TODO: this is only used by Diffusion right now and everything is completely
+   * faked since Diffusion doesn't use ApplicationTransactions yet. This should
+   * get fleshed out as we have more use cases.
+   *
+   * @task appxaction
+   */
+  public function buildApplicationTransactionMailBody(
+    PhabricatorApplicationTransaction $xaction,
+    PhabricatorMetaMTAMailBody $body) {
+    if ($this->proxy) {
+      return $this->proxy->buildApplicationTransactionMailBody($xaction, $body);
+    }
+    return;
+  }
+
+
 
 /* -(  Edit View  )---------------------------------------------------------- */
 
@@ -1193,6 +1210,5 @@ abstract class PhabricatorCustomField {
     }
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
-
 
 }

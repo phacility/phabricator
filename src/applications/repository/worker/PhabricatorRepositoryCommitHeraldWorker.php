@@ -24,6 +24,8 @@ final class PhabricatorRepositoryCommitHeraldWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
+    $commit->attachRepository($repository);
+
     // Don't take any actions on an importing repository. Principally, this
     // avoids generating thousands of audits or emails when you import an
     // established repository on an existing install.
@@ -155,6 +157,21 @@ final class PhabricatorRepositoryCommitHeraldWorker
     $body = new PhabricatorMetaMTAMailBody();
     $body->addRawSection($description);
     $body->addTextSection(pht('DETAILS'), $commit_uri);
+
+    // TODO: This should be integrated properly once we move to
+    // ApplicationTransactions.
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $commit,
+      PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS);
+    $field_list
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->readFieldsFromStorage($commit);
+    foreach ($field_list->getFields() as $field) {
+      $field->buildApplicationTransactionMailBody(
+        new DifferentialTransaction(), // Bogus object to satisfy typehint.
+        $body);
+    }
+
     $body->addTextSection(pht('DIFFERENTIAL REVISION'), $differential);
     $body->addTextSection(pht('AFFECTED FILES'), $files);
     $body->addReplySection($reply_handler->getReplyHandlerInstructions());

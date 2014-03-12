@@ -6,7 +6,8 @@ final class PhabricatorRepositoryCommit
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
     PhabricatorTokenReceiverInterface,
-    HarbormasterBuildableInterface {
+    HarbormasterBuildableInterface,
+    PhabricatorCustomFieldInterface {
 
   protected $repositoryID;
   protected $phid;
@@ -29,6 +30,7 @@ final class PhabricatorRepositoryCommit
   private $commitData = self::ATTACHABLE;
   private $audits;
   private $repository = self::ATTACHABLE;
+  private $customFields = self::ATTACHABLE;
 
   public function attachRepository(PhabricatorRepository $repository) {
     $this->repository = $repository;
@@ -245,6 +247,29 @@ final class PhabricatorRepositoryCommit
 
   public function getHarbormasterContainerPHID() {
     return $this->getRepository()->getPHID();
+  }
+
+
+/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+
+
+  public function getCustomFieldSpecificationForRole($role) {
+    // TODO: We could make this configurable eventually, but just use the
+    // defaults for now.
+    return array();
+  }
+
+  public function getCustomFieldBaseClass() {
+    return 'PhabricatorCommitCustomField';
+  }
+
+  public function getCustomFields() {
+    return $this->assertAttached($this->customFields);
+  }
+
+  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
+    $this->customFields = $fields;
+    return $this;
   }
 
 }
