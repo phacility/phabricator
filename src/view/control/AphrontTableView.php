@@ -153,8 +153,8 @@ final class AphrontTableView extends AphrontView {
           $classes[] = $col_classes[$col_num];
         }
 
-        if (empty($device_visiblity[$col_num])) {
-          $classes[] = 'aphront-table-nodevice';
+        if (empty($device_visibility[$col_num])) {
+          $classes[] = 'aphront-table-view-nodevice';
         }
 
         if ($sort_values[$col_num] !== null) {
@@ -251,6 +251,9 @@ final class AphrontTableView extends AphrontView {
             continue;
           }
           $class = $col_classes[$col_num];
+          if (empty($device_visibility[$col_num])) {
+            $class = trim($class.' aphront-table-view-nodevice');
+          }
           if (!empty($this->cellClasses[$row_num][$col_num])) {
             $class = trim($class.' '.$this->cellClasses[$row_num][$col_num]);
           }
