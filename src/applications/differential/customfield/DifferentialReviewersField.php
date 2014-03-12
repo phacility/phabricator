@@ -152,10 +152,22 @@ final class DifferentialReviewersField
   }
 
   public function readValueFromCommitMessage($value) {
+    $current_reviewers = $this->getObject()->getReviewerStatus();
+    $current_reviewers = mpull($current_reviewers, null, 'getReviewerPHID');
+
     $reviewers = array();
     foreach ($value as $phid) {
-      $reviewers[] = new DifferentialReviewer($phid, array());
+      $reviewer = idx($current_reviewers, $phid);
+      if ($reviewer) {
+        $reviewers[] = $reviewer;
+      } else {
+        $data = array(
+          'status' => DifferentialReviewerStatus::STATUS_ADDED,
+        );
+        $reviewers[] = new DifferentialReviewer($phid, $data);
+      }
     }
+
     $this->setValue($reviewers);
 
     return $this;
