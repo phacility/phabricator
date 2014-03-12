@@ -46,6 +46,16 @@ $holidays = array(
   '2017-11-10' => "Veterans Day",
   '2017-11-23' => "Thanksgiving Day",
   '2017-12-25' => "Christmas Day",
+  '2018-01-01' => "New Year's Day",
+  '2018-01-15' => "Birthday of Martin Luther King, Jr.",
+  '2018-02-19' => "Washington's Birthday",
+  '2018-05-28' => "Memorial Day",
+  '2018-07-04' => "Independence Day",
+  '2018-09-03' => "Labor Day",
+  '2018-10-08' => "Columbus Day",
+  '2018-11-12' => "Veterans Day",
+  '2018-11-22' => "Thanksgiving Day",
+  '2018-12-25' => "Christmas Day",
 );
 
 $table = new PhabricatorCalendarHoliday();
