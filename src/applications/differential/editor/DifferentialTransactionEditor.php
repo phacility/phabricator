@@ -999,6 +999,12 @@ final class DifferentialTransactionEditor
 
     $body = parent::buildMailBody($object, $xactions);
 
+    if ($this->getIsNewObject()) {
+      $body->addTextSection(
+        pht('REVISION SUMMARY'),
+        $object->getSummary());
+    }
+
     $type_inline = DifferentialTransaction::TYPE_INLINE;
 
     $inlines = array();
