@@ -2,6 +2,18 @@
 
 final class DifferentialTransaction extends PhabricatorApplicationTransaction {
 
+  private $isCommandeerSideEffect;
+
+
+  public function setIsCommandeerSideEffect($is_side_effect) {
+    $this->isCommandeerSideEffect = $is_side_effect;
+    return $this;
+  }
+
+  public function getIsCommandeerSideEffect() {
+    return $this->isCommandeerSideEffect;
+  }
+
   const TYPE_INLINE = 'differential:inline';
   const TYPE_UPDATE = 'differential:update';
   const TYPE_ACTION = 'differential:action';

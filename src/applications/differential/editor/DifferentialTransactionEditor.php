@@ -395,10 +395,15 @@ final class DifferentialTransactionEditor
               );
             }
 
+            // NOTE: We're setting setIsCommandeerSideEffect() on this because
+            // normally you can't add a revision's author as a reviewer, but
+            // this action swaps them after validation executes.
+
             $results[] = id(new DifferentialTransaction())
               ->setTransactionType($type_edge)
               ->setMetadataValue('edge:type', $edge_reviewer)
               ->setIgnoreOnNoEffect(true)
+              ->setIsCommandeerSideEffect(true)
               ->setNewValue($edits);
 
             break;
@@ -625,8 +630,45 @@ final class DifferentialTransactionEditor
 
     $errors = parent::validateTransaction($object, $type, $xactions);
 
+    $config_self_accept_key = 'differential.allow-self-accept';
+    $allow_self_accept = PhabricatorEnv::getEnvConfig($config_self_accept_key);
+
     foreach ($xactions as $xaction) {
       switch ($type) {
+        case PhabricatorTransactions::TYPE_EDGE:
+          switch ($xaction->getMetadataValue('edge:type')) {
+            case PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER:
+
+              // Prevent the author from becoming a reviewer.
+
+              // NOTE: This is pretty gross, but this restriction is unusual.
+              // If we end up with too much more of this, we should try to clean
+              // this up -- maybe by moving validation to after transactions
+              // are adjusted (so we can just examine the final value) or adding
+              // a second phase there?
+
+              $author_phid = $object->getAuthorPHID();
+              $new = $xaction->getNewValue();
+
+              $add = idx($new, '+', array());
+              $eq = idx($new, '=', array());
+              $phids = array_keys($add + $eq);
+
+              foreach ($phids as $phid) {
+                if (($phid == $author_phid) &&
+                    !$allow_self_accept &&
+                    !$xaction->getIsCommandeerSideEffect()) {
+                  $errors[] =
+                    new PhabricatorApplicationTransactionValidationError(
+                      $type,
+                      pht('Invalid'),
+                      pht('The author of a revision can not be a reviewer.'),
+                      $xaction);
+                }
+              }
+              break;
+          }
+          break;
         case DifferentialTransaction::TYPE_UPDATE:
           $diff = $this->loadDiff($xaction->getNewValue());
           if (!$diff) {
@@ -1340,6 +1382,12 @@ final class DifferentialTransactionEditor
     $value = array();
     foreach ($reviewers as $status => $phids) {
       foreach ($phids as $phid) {
+        if ($phid == $object->getAuthorPHID()) {
+          // Don't try to add the revision's author as a reviewer, since this
+          // isn't valid and doesn't make sense.
+          continue;
+        }
+
         $value['+'][$phid] = array(
           'data' => array(
             'status' => $status,

@@ -177,4 +177,19 @@ final class DifferentialReviewersField
     return $this->renderObjectList($handles);
   }
 
+  public function validateCommitMessageValue($value) {
+    $author_phid = $this->getObject()->getAuthorPHID();
+
+    $config_self_accept_key = 'differential.allow-self-accept';
+    $allow_self_accept = PhabricatorEnv::getEnvConfig($config_self_accept_key);
+
+    foreach ($value as $phid) {
+      if (($phid == $author_phid) && !$allow_self_accept) {
+        throw new DifferentialFieldValidationException(
+          pht('The author of a revision can not be a reviewer.'));
+      }
+    }
+  }
+
+
 }
