@@ -8,7 +8,7 @@ return array(
   'names' =>
   array(
     'core.pkg.css' => 'c650ab0d',
-    'core.pkg.js' => 'b7bdab05',
+    'core.pkg.js' => '264721e1',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => 'd1b3a605',
     'differential.pkg.js' => '11a5b750',
@@ -474,7 +474,7 @@ return array(
     'rsrc/js/core/behavior-select-on-click.js' => '0e34ca02',
     'rsrc/js/core/behavior-toggle-class.js' => 'a82a7769',
     'rsrc/js/core/behavior-tokenizer.js' => 'b3a4b884',
-    'rsrc/js/core/behavior-tooltip.js' => 'e5dd1c6d',
+    'rsrc/js/core/behavior-tooltip.js' => '48db4145',
     'rsrc/js/core/behavior-watch-anchor.js' => '06e05112',
     'rsrc/js/core/behavior-workflow.js' => '82947dda',
     'rsrc/js/core/phtize.js' => 'd254d646',
@@ -602,7 +602,7 @@ return array(
     'javelin-behavior-phabricator-reveal-content' => '8f24abfc',
     'javelin-behavior-phabricator-search-typeahead' => 'f6b56f7a',
     'javelin-behavior-phabricator-show-all-transactions' => '7c273581',
-    'javelin-behavior-phabricator-tooltips' => 'e5dd1c6d',
+    'javelin-behavior-phabricator-tooltips' => '48db4145',
     'javelin-behavior-phabricator-transaction-comment-form' => '9084a36f',
     'javelin-behavior-phabricator-transaction-list' => '3c918aa8',
     'javelin-behavior-phabricator-watch-anchor' => '06e05112',
@@ -1116,6 +1116,13 @@ return array(
       4 => 'javelin-util',
       5 => 'phabricator-prefab',
     ),
+    '48db4145' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-behavior-device',
+      2 => 'javelin-stratcom',
+      3 => 'phabricator-tooltip',
+    ),
     '493665ee' =>
     array(
       0 => 'javelin-install',
@@ -1229,6 +1236,11 @@ return array(
       2 => 'javelin-util',
       3 => 'phabricator-shaped-request',
     ),
+    '7319e029' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+    ),
     '62e18640' =>
     array(
       0 => 'javelin-install',
@@ -1263,11 +1275,6 @@ return array(
       0 => 'javelin-behavior',
       1 => 'javelin-stratcom',
       2 => 'javelin-dom',
-    ),
-    '7319e029' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
     ),
     '75903ee1' =>
     array(
@@ -1835,13 +1842,6 @@ return array(
       1 => 'javelin-dom',
       2 => 'javelin-view-visitor',
       3 => 'javelin-util',
-    ),
-    'e5dd1c6d' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-behavior-device',
-      2 => 'javelin-stratcom',
-      3 => 'phabricator-tooltip',
     ),
     'e7c21fb3' =>
     array(
