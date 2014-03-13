@@ -33,6 +33,10 @@ final class PhabricatorRepositoryCommitHeraldWorker
       return;
     }
 
+    if ($repository->getDetail('herald-disabled')) {
+      return;
+    }
+
     $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
       'commitID = %d',
       $commit->getID());
@@ -74,11 +78,6 @@ final class PhabricatorRepositoryCommitHeraldWorker
       $adapter->getBuildPlans());
 
     $explicit_auditors = $this->createAuditsFromCommitMessage($commit, $data);
-
-    if ($repository->getDetail('herald-disabled')) {
-      // This just means "disable email"; audits are (mostly) idempotent.
-      return;
-    }
 
     $this->publishFeedStory($repository, $commit, $data);
 

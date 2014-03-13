@@ -7,6 +7,10 @@ final class PhabricatorRepositoryCommitOwnersWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
+    if ($repository->getDetail('herald-disabled')) {
+      return;
+    }
+
     $affected_paths = PhabricatorOwnerPathQuery::loadAffectedPaths(
       $repository,
       $commit,
