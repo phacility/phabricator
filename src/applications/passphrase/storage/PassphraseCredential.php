@@ -25,6 +25,10 @@ final class PassphraseCredential extends PassphraseDAO
       ->setEditPolicy($actor->getPHID());
   }
 
+  public function getMonogram() {
+    return 'K'.$this->getID();
+  }
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
