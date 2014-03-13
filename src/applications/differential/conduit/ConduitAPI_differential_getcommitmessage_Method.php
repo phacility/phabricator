@@ -65,11 +65,9 @@ final class ConduitAPI_differential_getcommitmessage_Method
       foreach ($fields as $field => $value) {
         $custom_field = idx($field_map, $field);
         if (!$custom_field) {
-          throw new Exception(
-            pht(
-              'Commit message includes field "%s", but this field does not '.
-              'correspond to a known field.',
-              $field));
+          // Just ignore this, these workflows don't make strong distictions
+          // about field editability on the client side.
+          continue;
         }
         if ($is_create ||
             $custom_field->shouldOverwriteWhenCommitMessageIsEdited()) {
