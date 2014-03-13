@@ -14,7 +14,7 @@ return array(
     'differential.pkg.js' => '11a5b750',
     'diffusion.pkg.css' => '3783278d',
     'diffusion.pkg.js' => '5b4010f4',
-    'javelin.pkg.js' => '5b0f988e',
+    'javelin.pkg.js' => '65fa3049',
     'maniphest.pkg.css' => 'f1887d71',
     'maniphest.pkg.js' => '2fe8af22',
     'rsrc/css/aphront/aphront-bars.css' => '231ac33c',
@@ -208,7 +208,7 @@ return array(
     'rsrc/externals/javelin/lib/Resource.js' => '356de121',
     'rsrc/externals/javelin/lib/URI.js' => 'd9a9b862',
     'rsrc/externals/javelin/lib/Vector.js' => '403a3dce',
-    'rsrc/externals/javelin/lib/Workflow.js' => 'd16edeae',
+    'rsrc/externals/javelin/lib/Workflow.js' => 'f28bf201',
     'rsrc/externals/javelin/lib/__tests__/Cookie.js' => '5ed109e8',
     'rsrc/externals/javelin/lib/__tests__/DOM.js' => 'c984504b',
     'rsrc/externals/javelin/lib/__tests__/JSON.js' => '2295d074',
@@ -663,7 +663,7 @@ return array(
     'javelin-view-interpreter' => '0c33c1a0',
     'javelin-view-renderer' => '6c2b09a2',
     'javelin-view-visitor' => 'efe49472',
-    'javelin-workflow' => 'd16edeae',
+    'javelin-workflow' => 'f28bf201',
     'legalpad-document-css' => 'cd275275',
     'lightbox-attachment-css' => '7acac05d',
     'maniphest-batch-editor' => '8f380ebc',
@@ -1742,17 +1742,6 @@ return array(
       4 => 'javelin-fx',
       5 => 'javelin-util',
     ),
-    'd16edeae' =>
-    array(
-      0 => 'javelin-stratcom',
-      1 => 'javelin-request',
-      2 => 'javelin-dom',
-      3 => 'javelin-vector',
-      4 => 'javelin-install',
-      5 => 'javelin-util',
-      6 => 'javelin-mask',
-      7 => 'javelin-uri',
-    ),
     'd254d646' =>
     array(
       0 => 'javelin-util',
@@ -1879,6 +1868,17 @@ return array(
       3 => 'javelin-install',
       4 => 'javelin-request',
       5 => 'javelin-workflow',
+    ),
+    'f28bf201' =>
+    array(
+      0 => 'javelin-stratcom',
+      1 => 'javelin-request',
+      2 => 'javelin-dom',
+      3 => 'javelin-vector',
+      4 => 'javelin-install',
+      5 => 'javelin-util',
+      6 => 'javelin-mask',
+      7 => 'javelin-uri',
     ),
     'f42bb8c6' =>
     array(

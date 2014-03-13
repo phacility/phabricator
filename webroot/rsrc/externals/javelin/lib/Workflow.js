@@ -88,14 +88,21 @@ JX.install('Workflow', {
         return;
       }
 
-      event.prevent();
-
       // Get the button (which is sometimes actually another tag, like an <a />)
       // which triggered the event. In particular, this makes sure we get the
       // right node if there is a <button> with an <img /> inside it or
       // or something similar.
       var t = event.getNode('jx-workflow-button') ||
               event.getNode('tag:button');
+
+      // If this button disables workflow (normally, because it is a file
+      // download button) let the event through without modification.
+      if (JX.Stratcom.getData(t).disableWorkflow) {
+        return;
+      }
+
+      event.prevent();
+
       if (t.name == '__cancel__' || t.name == '__close__') {
         JX.Workflow._pop();
       } else {

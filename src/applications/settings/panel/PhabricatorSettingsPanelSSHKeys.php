@@ -23,6 +23,11 @@ final class PhabricatorSettingsPanelSSHKeys
 
     $user = $request->getUser();
 
+    $generate = $request->getStr('generate');
+    if ($generate) {
+      return $this->processGenerate($request);
+    }
+
     $edit = $request->getStr('edit');
     $delete = $request->getStr('delete');
     if (!$edit && !$delete) {
@@ -220,18 +225,36 @@ final class PhabricatorSettingsPanelSSHKeys
     $panel = new PHUIObjectBoxView();
     $header = new PHUIHeaderView();
 
-    $icon = id(new PHUIIconView())
-          ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-          ->setSpriteIcon('new');
+    $upload_icon = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+      ->setSpriteIcon('upload');
+    $upload_button = id(new PHUIButtonView())
+      ->setText(pht('Upload Public Key'))
+      ->setHref($this->getPanelURI('?edit=true'))
+      ->setTag('a')
+      ->setIcon($upload_icon);
 
-    $button = new PHUIButtonView();
-    $button->setText(pht('Add New Public Key'));
-    $button->setHref($this->getPanelURI('?edit=true'));
-    $button->setTag('a');
-    $button->setIcon($icon);
+    try {
+      PhabricatorSSHKeyGenerator::assertCanGenerateKeypair();
+      $can_generate = true;
+    } catch (Exception $ex) {
+      $can_generate = false;
+    }
+
+    $generate_icon = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+      ->setSpriteIcon('lock');
+    $generate_button = id(new PHUIButtonView())
+      ->setText(pht('Generate Keypair'))
+      ->setHref($this->getPanelURI('?generate=true'))
+      ->setTag('a')
+      ->setWorkflow(true)
+      ->setDisabled(!$can_generate)
+      ->setIcon($generate_icon);
 
     $header->setHeader(pht('SSH Public Keys'));
-    $header->addActionLink($button);
+    $header->addActionLink($generate_button);
+    $header->addActionLink($upload_button);
 
     $panel->setHeader($header);
     $panel->appendChild($table);
@@ -263,6 +286,86 @@ final class PhabricatorSettingsPanelSSHKeys
         $name)))
       ->addSubmitButton(pht('Delete Public Key'))
       ->addCancelButton($this->getPanelURI());
+
+    return id(new AphrontDialogResponse())
+      ->setDialog($dialog);
+  }
+
+  private function processGenerate(
+    AphrontRequest $request) {
+    $viewer = $request->getUser();
+
+    if ($request->isFormPost()) {
+      $keys = PhabricatorSSHKeyGenerator::generateKeypair();
+      list($public_key, $private_key) = $keys;
+
+      $file = PhabricatorFile::buildFromFileDataOrHash(
+        $private_key,
+        array(
+          'name' => 'id_rsa_phabricator.key',
+          'ttl' => time() + (60 * 10),
+          'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
+        ));
+
+      $key = id(new PhabricatorUserSSHKey())
+        ->setUserPHID($viewer->getPHID())
+        ->setName('id_rsa_phabricator')
+        ->setKeyType('rsa')
+        ->setKeyBody($public_key)
+        ->setKeyHash(md5($public_key))
+        ->setKeyComment(pht('Generated Key'))
+        ->save();
+
+      // NOTE: We're disabling workflow on submit so the download works. We're
+      // disabling workflow on cancel so the page reloads, showing the new
+      // key.
+
+      $dialog = id(new AphrontDialogView())
+        ->setTitle(pht('Download Private Key'))
+        ->setUser($viewer)
+        ->setDisableWorkflowOnCancel(true)
+        ->setDisableWorkflowOnSubmit(true)
+        ->setSubmitURI($file->getDownloadURI())
+        ->appendParagraph(
+          pht(
+            'Successfully generated a new keypair.'))
+        ->appendParagraph(
+          pht(
+            'The public key has been associated with your Phabricator '.
+            'account. Use the button below to download the private key.'))
+        ->appendParagraph(
+          pht(
+            'After you download the private key, it will be destroyed. '.
+            'You will not be able to retrieve it if you lose your copy.'))
+        ->addSubmitButton(pht('Download Private Key'))
+        ->addCancelButton($this->getPanelURI(), pht('Done'));
+
+      return id(new AphrontDialogResponse())
+        ->setDialog($dialog);
+    }
+
+    $dialog = id(new AphrontDialogView())
+      ->setUser($viewer)
+      ->addCancelButton($this->getPanelURI());
+
+    try {
+      PhabricatorSSHKeyGenerator::assertCanGenerateKeypair();
+      $dialog
+        ->addHiddenInput('generate', true)
+        ->setTitle(pht('Generate New Keypair'))
+        ->appendParagraph(
+          pht(
+            "This will generate an SSH keypair, associate the public key ".
+            "with your account, and let you download the private key."))
+        ->appendParagraph(
+          pht(
+            "Phabricator will not retain a copy of the private key."))
+        ->addSubmitButton(pht('Generate Keypair'));
+    } catch (Exception $ex) {
+      $dialog
+        ->setTitle(pht('Unable to Generate Keys'))
+        ->appendParagraph($ex->getMessage());
+    }
 
     return id(new AphrontDialogResponse())
       ->setDialog($dialog);
