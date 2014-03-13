@@ -114,7 +114,7 @@ final class PhabricatorAuthProviderOAuth1JIRA
     if (!strlen($values[$key_name])) {
       $errors[] = pht('JIRA instance name is required.');
       $issues[$key_name] = pht('Required');
-    } else if (!preg_match('/^[a-z0-9.]+$/', $values[$key_name])) {
+    } else if (!preg_match('/^[a-z0-9.]+\z/', $values[$key_name])) {
       $errors[] = pht(
         'JIRA instance name must contain only lowercase letters, digits, and '.
         'period.');

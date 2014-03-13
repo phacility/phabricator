@@ -79,7 +79,7 @@ final class ConduitAPI_repository_create_Method
     $repository->setName($request->getValue('name'));
 
     $callsign = $request->getValue('callsign');
-    if (!preg_match('/^[A-Z]+$/', $callsign)) {
+    if (!preg_match('/^[A-Z]+\z/', $callsign)) {
       throw new ConduitException('ERR-BAD-CALLSIGN');
     }
     $repository->setCallsign($callsign);

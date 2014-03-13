@@ -48,7 +48,7 @@ final class PhluxEditController extends PhluxController {
         if (!strlen($key)) {
           $errors[] = pht('Variable key is required.');
           $e_key = pht('Required');
-        } else if (!preg_match('/^[a-z0-9.-]+$/', $key)) {
+        } else if (!preg_match('/^[a-z0-9.-]+\z/', $key)) {
           $errors[] = pht(
             'Variable key "%s" must contain only lowercase letters, digits, '.
             'period, and hyphen.',

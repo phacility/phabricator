@@ -233,7 +233,7 @@ final class DiffusionSSHSubversionServeWorkflow
       rtrim($repository->getLocalPath(), '/'),
       $path);
 
-    if (preg_match('(^/diffusion/[A-Z]+/$)', $path)) {
+    if (preg_match('(^/diffusion/[A-Z]+/\z)', $path)) {
       $path = rtrim($path, '/');
     }
 
