@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_diffusion_tagsquery_Method
   extends ConduitAPI_diffusion_abstractquery_Method {
 
@@ -38,12 +35,14 @@ final class ConduitAPI_diffusion_tagsquery_Method
 
     $all_tags = $this->loadGitTagList();
     $all_tags = mpull($all_tags, null, 'getName');
+
     if ($name_filter !== null) {
       $all_tags = array_intersect_key($all_tags, array_fuse($name_filter));
     }
     if ($commit_filter !== null) {
-      $all_tags = array_intersect_key($all_tags, array_fuse($commit_filter));
+      $all_tags = array_intersect_key($all_tags, $commit_filter);
     }
+
     $tags = array_values($all_tags);
 
     $offset = $request->getValue('offset');
@@ -149,6 +148,16 @@ final class ConduitAPI_diffusion_tagsquery_Method
     }
 
     return $tags;
+  }
+
+  protected function getMercurialResult(ConduitAPIRequest $request) {
+    // For now, we don't support Mercurial tags via API.
+    return array();
+  }
+
+  protected function getSVNResult(ConduitAPIRequest $request) {
+    // Subversion has no meaningful concept of tags.
+    return array();
   }
 
 }

@@ -42,10 +42,10 @@ foreach ($rows as $row) {
     $metadata = array();
   }
 
-  $key_cc = DifferentialComment::METADATA_ADDED_CCS;
-  $key_add_rev = DifferentialComment::METADATA_ADDED_REVIEWERS;
-  $key_rem_rev = DifferentialComment::METADATA_REMOVED_REVIEWERS;
-  $key_diff_id = DifferentialComment::METADATA_DIFF_ID;
+  $key_cc = 'added-ccs';
+  $key_add_rev = 'added-reviewers';
+  $key_rem_rev = 'removed-reviewers';
+  $key_diff_id = 'diff-id';
 
   $xactions = array();
 

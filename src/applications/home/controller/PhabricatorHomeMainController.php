@@ -219,7 +219,6 @@ final class PhabricatorHomeMainController
     $revision_view = id(new DifferentialRevisionListView())
       ->setHighlightAge(true)
       ->setRevisions(array_merge($blocking, $active))
-      ->setFields(DifferentialRevisionListView::getDefaultFields($user))
       ->setUser($user);
     $phids = array_merge(
       array($user_phid),

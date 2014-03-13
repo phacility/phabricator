@@ -50,6 +50,23 @@ abstract class PassphraseCredentialType extends Phobject {
   }
 
 
+  public function didInitializeNewCredential(
+    PhabricatorUser $actor,
+    PassphraseCredential $credential) {
+    return $credential;
+  }
+
+  public function hasPublicKey() {
+    return false;
+  }
+
+  public function getPublicKey(
+    PhabricatorUser $viewer,
+    PassphraseCredential $credential) {
+    return null;
+  }
+
+
 /* -(  Passwords  )---------------------------------------------------------- */
 
 

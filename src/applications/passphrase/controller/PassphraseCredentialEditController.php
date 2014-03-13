@@ -53,6 +53,10 @@ final class PassphraseCredentialEditController extends PassphraseController {
 
       // Prefill username if provided.
       $credential->setUsername($request->getStr('username'));
+
+      if (!$request->getStr('isInitialized')) {
+        $type->didInitializeNewCredential($viewer, $credential);
+      }
     }
 
     $errors = array();
@@ -68,6 +72,16 @@ final class PassphraseCredentialEditController extends PassphraseController {
     $bullet = "\xE2\x80\xA2";
 
     $v_secret = $credential->getSecretID() ? str_repeat($bullet, 32) : null;
+    if ($is_new && ($v_secret === null)) {
+      // If we're creating a new credential, the credential type may have
+      // populated the secret for us (for example, generated an SSH key). In
+      // this case,
+      try {
+        $v_secret = $credential->getSecret()->openEnvelope();
+      } catch (Exception $ex) {
+        // Ignore this.
+      }
+    }
 
     $validation_exception = null;
     $errors = array();
@@ -197,14 +211,9 @@ final class PassphraseCredentialEditController extends PassphraseController {
 
     $secret_control = $type->newSecretControl();
 
-    if ($request->isAjax()) {
-      $form = new PHUIFormLayoutView();
-    } else {
-      $form = id(new AphrontFormView())
-        ->setUser($viewer);
-    }
-
-    $form
+    $form = id(new AphrontFormView())
+      ->setUser($viewer)
+      ->addHiddenInput('isInitialized', true)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('name')
@@ -273,14 +282,16 @@ final class PassphraseCredentialEditController extends PassphraseController {
     }
 
     if ($request->isAjax()) {
-      $errors = id(new AphrontErrorView())->setErrors($errors);
+      if ($errors) {
+        $errors = id(new AphrontErrorView())->setErrors($errors);
+      }
 
       $dialog = id(new AphrontDialogView())
         ->setUser($viewer)
         ->setWidth(AphrontDialogView::WIDTH_FORM)
         ->setTitle($title)
         ->appendChild($errors)
-        ->appendChild($form)
+        ->appendChild($form->buildLayoutView())
         ->addSubmitButton(pht('Create Credential'))
         ->addCancelButton($this->getApplicationURI());
 

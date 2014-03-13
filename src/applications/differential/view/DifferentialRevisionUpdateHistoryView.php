@@ -61,14 +61,15 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
     $disable = false;
     $radios = array();
     $last_base = null;
+    $rowc = array();
     foreach ($data as $row) {
 
       $diff = $row['obj'];
       $name = $row['name'];
       $id   = $row['id'];
 
-      $old_class = null;
-      $new_class = null;
+      $old_class = false;
+      $new_class = false;
 
       if ($id) {
         $new_checked = ($this->selectedDiffID == $id);
@@ -82,9 +83,15 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
             'sigil' => 'differential-new-radio',
           ));
         if ($new_checked) {
-          $new_class = " revhistory-new-now";
+          $new_class = true;
           $disable = true;
         }
+        $new = phutil_tag(
+          'div',
+          array(
+            'class' => 'differential-update-history-radio',
+          ),
+          $new);
       } else {
         $new = null;
       }
@@ -104,8 +111,14 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
           ));
         $radios[] = $uniq;
         if ($old_checked) {
-          $old_class = " revhistory-old-now";
+          $old_class = true;
         }
+        $old = phutil_tag(
+          'div',
+          array(
+            'class' => 'differential-update-history-radio',
+          ),
+          $old);
       } else {
         $old = null;
       }
@@ -118,19 +131,25 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
         $age = null;
       }
 
-      if (++$idx % 2) {
-        $class = 'alt';
-      } else {
-        $class = null;
-      }
-
-      $lint_attrs = array('class' => 'revhistory-star');
-      $unit_attrs = array('class' => 'revhistory-star');
       if ($diff) {
         $lint = self::renderDiffLintStar($row['obj']);
+        $lint = phutil_tag(
+          'div',
+          array(
+            'class' => 'lintunit-star',
+            'title' => self::getDiffLintMessage($diff),
+          ),
+          $lint);
+
         $unit = self::renderDiffUnitStar($row['obj']);
-        $lint_attrs['title'] = self::getDiffLintMessage($diff);
-        $unit_attrs['title'] = self::getDiffUnitMessage($diff);
+        $unit = phutil_tag(
+          'div',
+          array(
+            'class' => 'lintunit-star',
+            'title' => self::getDiffUnitMessage($diff),
+          ),
+          $unit);
+
         $base = $this->renderBaseRevision($diff);
       } else {
         $lint = null;
@@ -145,22 +164,31 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
 
       $id_link = phutil_tag(
         'a',
-        array('href' => '/differential/diff/'.$id.'/'),
-        $id);
-      $rows[] = phutil_tag(
-        'tr',
-        array('class' => $class),
         array(
-          phutil_tag('td', array('class' => 'revhistory-name'), $name),
-          phutil_tag('td', array('class' => 'revhistory-id'), $id_link),
-          phutil_tag('td', array('class' => 'revhistory-base'), $base),
-          phutil_tag('td', array('class' => 'revhistory-desc'), $desc),
-          phutil_tag('td', array('class' => 'revhistory-age'), $age),
-          phutil_tag('td', $lint_attrs, $lint),
-          phutil_tag('td', $unit_attrs, $unit),
-          phutil_tag('td', array('class' => 'revhistory-old'.$old_class), $old),
-          phutil_tag('td', array('class' => 'revhistory-new'.$new_class), $new),
-        ));
+          'href' => '/differential/diff/'.$id.'/',
+        ),
+        $id);
+
+      $rows[] = array(
+        $name,
+        $id_link,
+        $base,
+        $desc,
+        $age,
+        $lint,
+        $unit,
+        $old,
+        $new,
+      );
+
+      $classes = array();
+      if ($old_class) {
+        $classes[] = 'differential-update-history-old-now';
+      }
+      if ($new_class) {
+        $classes[] = 'differential-update-history-new-now';
+      }
+      $rowc[] = nonempty(implode(' ', $classes), null);
     }
 
     Javelin::initBehavior(
@@ -190,35 +218,74 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
     }
     $select = phutil_tag('select', array('name' => 'whitespace'), $options);
 
-    array_unshift($rows, phutil_tag('tr', array(), array(
-      phutil_tag('th', array(), pht('Diff')),
-      phutil_tag('th', array(), pht('ID')),
-      phutil_tag('th', array(), pht('Base')),
-      phutil_tag('th', array(), pht('Description')),
-      phutil_tag('th', array(), pht('Created')),
-      phutil_tag('th', array(), pht('Lint')),
-      phutil_tag('th', array(), pht('Unit')),
-    )));
 
-    $label = pht('Whitespace Changes: %s', $select);
+    $table = id(new AphrontTableView($rows));
+    $table->setHeaders(
+      array(
+        pht('Diff'),
+        pht('ID'),
+        pht('Base'),
+        pht('Description'),
+        pht('Created'),
+        pht('Lint'),
+        pht('Unit'),
+        '',
+        '',
+      ));
+    $table->setColumnClasses(
+      array(
+        'pri',
+        '',
+        '',
+        'wide',
+        'date',
+        'center',
+        'center',
+        'center differential-update-history-old',
+        'center differential-update-history-new',
+      ));
+    $table->setRowClasses($rowc);
+    $table->setDeviceVisibility(
+      array(
+        true,
+        true,
+        false,
+        true,
+        false,
+        false,
+        false,
+        true,
+        true,
+      ));
 
-    $content = phutil_tag_div(
-      'differential-revision-history differential-panel',
-      phutil_tag(
-        'form',
-        array('action' => '#toc'),
+    $show_diff = phutil_tag(
+      'div',
+      array(
+        'class' => 'differential-update-history-footer',
+      ),
+      array(
         phutil_tag(
-          'table',
-          array('class' => 'differential-revision-history-table'), array(
-            phutil_implode_html("\n", $rows),
-            phutil_tag('tr', array(), phutil_tag(
-              'td',
-              array('colspan' => 9, 'class' => 'diff-differ-submit'),
-              array(
-                phutil_tag('label', array(), $label),
-                phutil_tag('button', array(), pht('Show Diff')),
-              )))
-          ))));
+          'label',
+          array(),
+          array(
+            pht('Whitespace Changes:'),
+            $select,
+          )),
+        phutil_tag(
+          'button',
+          array(),
+          pht('Show Diff')),
+      ));
+
+    $content = phabricator_form(
+      $this->getUser(),
+      array(
+        'action' => '#toc',
+      ),
+      array(
+        $table,
+        $show_diff,
+      ));
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Revision Update History'))

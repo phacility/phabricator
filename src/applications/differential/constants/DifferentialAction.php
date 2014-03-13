@@ -102,36 +102,6 @@ final class DifferentialAction {
     return $title;
   }
 
-  /* legacy, for just mail now */
-  public static function getActionPastTenseVerb($action) {
-    $verbs = array(
-      self::ACTION_COMMENT        => 'commented on',
-      self::ACTION_ACCEPT         => 'accepted',
-      self::ACTION_REJECT         => 'requested changes to',
-      self::ACTION_RETHINK        => 'planned changes to',
-      self::ACTION_ABANDON        => 'abandoned',
-      self::ACTION_CLOSE          => 'closed',
-      self::ACTION_REQUEST        => 'requested a review of',
-      self::ACTION_RECLAIM        => 'reclaimed',
-      self::ACTION_UPDATE         => 'updated',
-      self::ACTION_RESIGN         => 'resigned from',
-      self::ACTION_SUMMARIZE      => 'summarized',
-      self::ACTION_TESTPLAN       => 'explained the test plan for',
-      self::ACTION_CREATE         => 'created',
-      self::ACTION_ADDREVIEWERS   => 'added reviewers to',
-      self::ACTION_ADDCCS         => 'added CCs to',
-      self::ACTION_CLAIM          => 'commandeered',
-      self::ACTION_REOPEN         => 'reopened',
-      DifferentialTransaction::TYPE_INLINE => 'commented on',
-    );
-
-    if (!empty($verbs[$action])) {
-      return $verbs[$action];
-    } else {
-      return 'brazenly "'.$action.'ed"';
-    }
-  }
-
   public static function getActionVerb($action) {
     $verbs = array(
       self::ACTION_COMMENT        => pht('Comment'),

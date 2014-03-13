@@ -84,8 +84,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $target_manual->getID());
     $props = mpull($props, 'getData', 'getName');
 
-    $comments = $revision->loadComments();
-
     $all_changesets = $changesets;
     $inlines = $this->loadInlineComments(
       $revision,
@@ -98,14 +96,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       array(
         $revision->getAuthorPHID(),
         $user->getPHID(),
-      ),
-      mpull($comments, 'getAuthorPHID'));
-
-    foreach ($comments as $comment) {
-      foreach ($comment->getRequiredHandlePHIDs() as $phid) {
-        $object_phids[] = $phid;
-      }
-    }
+      ));
 
     foreach ($revision->getAttached() as $type => $phids) {
       foreach ($phids as $phid => $info) {
@@ -335,6 +326,19 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
       $comment_form = new DifferentialAddCommentView();
       $comment_form->setRevision($revision);
+
+      $review_warnings = array();
+      foreach ($field_list->getFields() as $field) {
+        $review_warnings[] = $field->getWarningsForDetailView();
+      }
+      $review_warnings = array_mergev($review_warnings);
+
+      if ($review_warnings) {
+        $review_warnings_panel = id(new AphrontErrorView())
+          ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+          ->setErrors($review_warnings);
+        $comment_form->setErrorView($review_warnings_panel);
+      }
 
       // TODO: Restore the ability for fields to add accept warnings.
 
@@ -766,7 +770,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $view = id(new DifferentialRevisionListView())
       ->setRevisions($revisions)
-      ->setFields(DifferentialRevisionListView::getDefaultFields($user))
       ->setUser($user);
 
     $phids = $view->getRequiredHandlePHIDs();

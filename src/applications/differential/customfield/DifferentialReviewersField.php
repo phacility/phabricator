@@ -7,6 +7,10 @@ final class DifferentialReviewersField
     return 'differential:reviewers';
   }
 
+  public function getFieldKeyForConduit() {
+    return 'reviewerPHIDs';
+  }
+
   public function getFieldName() {
     return pht('Reviewers');
   }
@@ -118,4 +122,74 @@ final class DifferentialReviewersField
     }
     return $reviewers;
   }
+
+  public function shouldAppearInCommitMessage() {
+    return true;
+  }
+
+  public function shouldAppearInCommitMessageTemplate() {
+    return true;
+  }
+
+  public function getCommitMessageLabels() {
+    return array(
+      'Reviewer',
+      'Reviewers',
+    );
+  }
+
+  public function parseValueFromCommitMessage($value) {
+    return $this->parseObjectList(
+      $value,
+      array(
+        PhabricatorPeoplePHIDTypeUser::TYPECONST,
+        PhabricatorProjectPHIDTypeProject::TYPECONST,
+      ));
+  }
+
+  public function getRequiredHandlePHIDsForCommitMessage() {
+    return mpull($this->getValue(), 'getReviewerPHID');
+  }
+
+  public function readValueFromCommitMessage($value) {
+    $current_reviewers = $this->getObject()->getReviewerStatus();
+    $current_reviewers = mpull($current_reviewers, null, 'getReviewerPHID');
+
+    $reviewers = array();
+    foreach ($value as $phid) {
+      $reviewer = idx($current_reviewers, $phid);
+      if ($reviewer) {
+        $reviewers[] = $reviewer;
+      } else {
+        $data = array(
+          'status' => DifferentialReviewerStatus::STATUS_ADDED,
+        );
+        $reviewers[] = new DifferentialReviewer($phid, $data);
+      }
+    }
+
+    $this->setValue($reviewers);
+
+    return $this;
+  }
+
+  public function renderCommitMessageValue(array $handles) {
+    return $this->renderObjectList($handles);
+  }
+
+  public function validateCommitMessageValue($value) {
+    $author_phid = $this->getObject()->getAuthorPHID();
+
+    $config_self_accept_key = 'differential.allow-self-accept';
+    $allow_self_accept = PhabricatorEnv::getEnvConfig($config_self_accept_key);
+
+    foreach ($value as $phid) {
+      if (($phid == $author_phid) && !$allow_self_accept) {
+        throw new DifferentialFieldValidationException(
+          pht('The author of a revision can not be a reviewer.'));
+      }
+    }
+  }
+
+
 }

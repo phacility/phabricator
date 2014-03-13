@@ -144,6 +144,7 @@ th.aphront-table-view-sortable-selected {
 
 .aphront-table-view td.pri {
   font-weight: bold;
+  color: {$darkbluetext};
 }
 
 .aphront-table-view td.wide {
@@ -229,6 +230,17 @@ span.single-display-line-content {
 .aphront-table-view td.radio {
   text-align: center;
   padding: 2px 4px 0px;
+}
+
+.aphront-table-view th.center,
+.aphront-table-view td.center {
+  text-align: center;
+}
+
+.device .aphront-table-view td + td.center,
+.device .aphront-table-view th + th.center {
+  padding-left: 3px;
+  padding-right: 3px;
 }
 
 .device-desktop .aphront-table-view-device {

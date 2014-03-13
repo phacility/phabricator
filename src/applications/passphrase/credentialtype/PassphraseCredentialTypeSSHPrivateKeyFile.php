@@ -33,4 +33,9 @@ final class PassphraseCredentialTypeSSHPrivateKeyFile
     return false;
   }
 
+  public function hasPublicKey() {
+    // These have public keys, but they'd be cumbersome to extract.
+    return true;
+  }
+
 }

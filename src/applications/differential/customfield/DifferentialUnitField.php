@@ -203,4 +203,24 @@ final class DifferentialUnitField
     return "Show Full Unit Results (".implode(', ', $show).")";
   }
 
+  public function getWarningsForDetailView() {
+    $status = $this->getObject()->getActiveDiff()->getUnitStatus();
+
+    $warnings = array();
+    if ($status < DifferentialUnitStatus::UNIT_WARN) {
+      // Don't show any warnings.
+    } else if ($status == DifferentialUnitStatus::UNIT_POSTPONED) {
+      $warnings[] = pht(
+        'Background tests have not finished executing on these changes.');
+    } else if ($status == DifferentialUnitStatus::UNIT_SKIP) {
+      $warnings[] = pht(
+        'Unit tests were skipped when generating these changes.');
+    } else {
+      $warnings[] = pht('These changes have unit test problems.');
+    }
+
+    return $warnings;
+  }
+
+
 }

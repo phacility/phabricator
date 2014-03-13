@@ -95,23 +95,11 @@ final class ConduitAPI_phame_queryposts_Method extends ConduitAPI_phame_Method {
       $query->setLimit($limit);
     }
 
-    $blogs = $query->execute();
+    $posts = $query->execute();
 
     $results = array();
-    foreach ($blogs as $blog) {
-      $results[] = array(
-        'id'            => $blog->getID(),
-        'phid'          => $blog->getPHID(),
-        'blogPHID'      => $blog->getBlogPHID(),
-        'bloggerPHID'   => $blog->getBloggerPHID(),
-        'viewURI'       => $blog->getViewURI(),
-        'title'         => $blog->getTitle(),
-        'phameTitle'    => $blog->getPhameTitle(),
-        'body'          => $blog->getBody(),
-        'summary'       => PhabricatorMarkupEngine::summarize($blog->getBody()),
-        'datePublished' => $blog->getDatePublished(),
-        'published'     => !$blog->isDraft(),
-      );
+    foreach ($posts as $post) {
+      $results[] = $post->toDictionary();
     }
 
     return $results;

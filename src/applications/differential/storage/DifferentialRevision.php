@@ -160,15 +160,6 @@ final class DifferentialRevision extends DifferentialDAO
       DifferentialPHIDTypeRevision::TYPECONST);
   }
 
-  public function loadComments() {
-    if (!$this->getID()) {
-      return array();
-    }
-    return id(new DifferentialCommentQuery())
-      ->withRevisionPHIDs(array($this->getPHID()))
-      ->execute();
-  }
-
   public function loadActiveDiff() {
     return id(new DifferentialDiff())->loadOneWhere(
       'revisionID = %d ORDER BY id DESC LIMIT 1',
@@ -199,13 +190,6 @@ final class DifferentialRevision extends DifferentialDAO
         'DELETE FROM %T WHERE revisionID = %d',
         self::TABLE_COMMIT,
         $this->getID());
-
-      $comments = id(new DifferentialCommentQuery())
-        ->withRevisionPHIDs(array($this->getPHID()))
-        ->execute();
-      foreach ($comments as $comment) {
-        $comment->delete();
-      }
 
       $inlines = id(new DifferentialInlineCommentQuery())
         ->withRevisionIDs(array($this->getID()))
@@ -293,27 +277,6 @@ final class DifferentialRevision extends DifferentialDAO
       return head($this->getReviewers());
     }
     return $last;
-  }
-
-  public function loadReviewedBy() {
-    $reviewer = null;
-
-    if ($this->status == ArcanistDifferentialRevisionStatus::ACCEPTED ||
-        $this->status == ArcanistDifferentialRevisionStatus::CLOSED) {
-      $comments = $this->loadComments();
-      foreach ($comments as $comment) {
-        $action = $comment->getAction();
-        if ($action == DifferentialAction::ACTION_ACCEPT) {
-          $reviewer = $comment->getAuthorPHID();
-        } else if ($action == DifferentialAction::ACTION_REJECT ||
-                   $action == DifferentialAction::ACTION_ABANDON ||
-                   $action == DifferentialAction::ACTION_RETHINK) {
-          $reviewer = null;
-        }
-      }
-    }
-
-    return $reviewer;
   }
 
   public function getHashes() {
@@ -481,43 +444,7 @@ final class DifferentialRevision extends DifferentialDAO
 
 
   public function getCustomFieldSpecificationForRole($role) {
-    $fields = array(
-      new DifferentialAuthorField(),
-
-      new DifferentialTitleField(),
-      new DifferentialSummaryField(),
-      new DifferentialTestPlanField(),
-      new DifferentialReviewersField(),
-      new DifferentialProjectReviewersField(),
-      new DifferentialSubscribersField(),
-      new DifferentialRepositoryField(),
-      new DifferentialViewPolicyField(),
-      new DifferentialEditPolicyField(),
-
-      new DifferentialDependsOnField(),
-      new DifferentialDependenciesField(),
-      new DifferentialManiphestTasksField(),
-      new DifferentialCommitsField(),
-
-      new DifferentialJIRAIssuesField(),
-      new DifferentialAsanaRepresentationField(),
-
-      new DifferentialBlameRevisionField(),
-      new DifferentialPathField(),
-      new DifferentialHostField(),
-      new DifferentialRevertPlanField(),
-
-      new DifferentialApplyPatchField(),
-    );
-
-    $result = array();
-    foreach ($fields as $field) {
-      $result[$field->getFieldKey()] = array(
-        'disabled' => $field->shouldDisableByDefault(),
-      );
-    }
-
-    return $result;
+    return PhabricatorEnv::getEnvConfig('differential.fields');
   }
 
   public function getCustomFieldBaseClass() {

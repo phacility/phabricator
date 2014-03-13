@@ -11,6 +11,10 @@ final class DifferentialAsanaRepresentationField
     return pht('In Asana');
   }
 
+  public function canDisableField() {
+    return false;
+  }
+
   public function getFieldDescription() {
     return pht('Shows revision representation in Asana.');
   }

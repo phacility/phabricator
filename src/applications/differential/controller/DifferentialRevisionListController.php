@@ -30,8 +30,7 @@ final class DifferentialRevisionListController extends DifferentialController
 
     $user = $this->getRequest()->getUser();
     $template = id(new DifferentialRevisionListView())
-      ->setUser($user)
-      ->setFields(DifferentialRevisionListView::getDefaultFields($user));
+      ->setUser($user);
 
     $views = array();
     if ($query->getQueryKey() == 'active') {

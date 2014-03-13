@@ -1496,6 +1496,7 @@ abstract class PhabricatorApplicationTransactionEditor
         $field_list = PhabricatorCustomField::getObjectFields(
           $object,
           PhabricatorCustomField::ROLE_EDIT);
+        $field_list->setViewer($this->getActor());
 
         $role_xactions = PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS;
         foreach ($field_list->getFields() as $field) {
@@ -1648,8 +1649,7 @@ abstract class PhabricatorApplicationTransactionEditor
     $body = $this->buildMailBody($object, $xactions);
 
     $mail_tags = $this->getMailTags($object, $xactions);
-
-    $action = $this->getStrongestAction($object, $xactions)->getActionName();
+    $action = $this->getMailAction($object, $xactions);
 
     $template
       ->setFrom($this->requireActor()->getPHID())
@@ -1661,6 +1661,10 @@ abstract class PhabricatorApplicationTransactionEditor
       ->setMailTags($mail_tags)
       ->setIsBulk(true)
       ->setBody($body->render());
+
+    foreach ($body->getAttachments() as $attachment) {
+      $template->addAttachment($attachment);
+    }
 
     $herald_xscript = $this->getHeraldTranscript();
     if ($herald_xscript) {
@@ -1742,6 +1746,15 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     return array_mergev($tags);
+  }
+
+  /**
+   * @task mail
+   */
+  protected function getMailAction(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return $this->getStrongestAction($object, $xactions)->getActionName();
   }
 
 

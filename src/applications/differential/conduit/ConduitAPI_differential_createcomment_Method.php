@@ -37,6 +37,7 @@ final class ConduitAPI_differential_createcomment_Method
       ->setViewer($viewer)
       ->withIDs(array($request->getValue('revision_id')))
       ->needReviewerStatus(true)
+      ->needReviewerAuthority(true)
       ->executeOne();
     if (!$revision) {
       throw new ConduitException('ERR_BAD_REVISION');
@@ -45,7 +46,7 @@ final class ConduitAPI_differential_createcomment_Method
     $xactions = array();
 
     $action = $request->getValue('action');
-    if ($action && ($action != 'comment')) {
+    if ($action && ($action != 'comment') && ($action != 'none')) {
       $xactions[] = id(new DifferentialTransaction())
         ->setTransactionType(DifferentialTransaction::TYPE_ACTION)
         ->setNewValue($action);

@@ -7,7 +7,6 @@ final class DifferentialRevisionListView extends AphrontView {
 
   private $revisions;
   private $handles;
-  private $fields;
   private $highlightAge;
   private $header;
   private $noDataString;
@@ -19,12 +18,6 @@ final class DifferentialRevisionListView extends AphrontView {
 
   public function setHeader($header) {
     $this->header = $header;
-    return $this;
-  }
-
-  public function setFields(array $fields) {
-    assert_instances_of($fields, 'DifferentialFieldSpecification');
-    $this->fields = $fields;
     return $this;
   }
 
@@ -41,10 +34,12 @@ final class DifferentialRevisionListView extends AphrontView {
 
   public function getRequiredHandlePHIDs() {
     $phids = array();
-    foreach ($this->fields as $field) {
-      foreach ($this->revisions as $revision) {
-        $phids[] = $field->getRequiredHandlePHIDsForRevisionList($revision);
-      }
+    foreach ($this->revisions as $revision) {
+      $phids[] = array($revision->getAuthorPHID());
+
+      // TODO: Switch to getReviewerStatus(), but not all callers pass us
+      // revisions with this data loaded.
+      $phids[] = $revision->getReviewers();
     }
     return array_mergev($phids);
   }
@@ -79,10 +74,6 @@ final class DifferentialRevisionListView extends AphrontView {
     $this->initBehavior('phabricator-tooltips', array());
     $this->requireResource('aphront-tooltip-css');
 
-    foreach ($this->fields as $field) {
-      $field->setHandles($this->handles);
-    }
-
     $list = new PHUIObjectItemListView();
     $list->setCards(true);
 
@@ -90,7 +81,6 @@ final class DifferentialRevisionListView extends AphrontView {
       $item = id(new PHUIObjectItemView())
         ->setUser($user);
 
-      $rev_fields = array();
       $icons = array();
 
       $phid = $revision->getPHID();
@@ -116,21 +106,12 @@ final class DifferentialRevisionListView extends AphrontView {
                   $this->highlightAge &&
                   !$revision->isClosed();
 
-      $object_age = PHUIObjectItemView::AGE_FRESH;
-      foreach ($this->fields as $field) {
-        if ($show_age) {
-          if ($field instanceof DifferentialDateModifiedFieldSpecification) {
-            if ($stale && $modified < $stale) {
-              $object_age = PHUIObjectItemView::AGE_OLD;
-            } else if ($fresh && $modified < $fresh) {
-              $object_age = PHUIObjectItemView::AGE_STALE;
-            }
-          }
-        }
-
-        $rev_header = $field->renderHeaderForRevisionList();
-        $rev_fields[$rev_header] = $field
-          ->renderValueForRevisionList($revision);
+      if ($stale && $modified < $stale) {
+        $object_age = PHUIObjectItemView::AGE_OLD;
+      } else if ($fresh && $modified < $fresh) {
+        $object_age = PHUIObjectItemView::AGE_STALE;
+      } else {
+        $object_age = PHUIObjectItemView::AGE_FRESH;
       }
 
       $status_name =
@@ -163,20 +144,19 @@ final class DifferentialRevisionListView extends AphrontView {
       $author_handle = $this->handles[$revision->getAuthorPHID()];
       $item->addByline(pht('Author: %s', $author_handle->renderLink()));
 
-      // Reviewers
-      $item->addAttribute(pht('Reviewers: %s', $rev_fields['Reviewers']));
-
-      $item->setEpoch($revision->getDateModified(), $object_age);
-
-      // First remove the fields we already have
-      $count = 7;
-      $rev_fields = array_slice($rev_fields, $count);
-
-      // Then add each one of them
-      // TODO: Add render-to-foot-icon support
-      foreach ($rev_fields as $header => $field) {
-        $item->addAttribute(pht('%s: %s', $header, $field));
+      $reviewers = array();
+      // TODO: As above, this should be based on `getReviewerStatus()`.
+      foreach ($revision->getReviewers() as $reviewer) {
+        $reviewers[] = $this->handles[$reviewer]->renderLink();
       }
+      if (!$reviewers) {
+        $reviewers = phutil_tag('em', array(), pht('None'));
+      } else {
+        $reviewers = phutil_implode_html(', ', $reviewers);
+      }
+
+      $item->addAttribute(pht('Reviewers: %s', $reviewers));
+      $item->setEpoch($revision->getDateModified(), $object_age);
 
       switch ($status) {
         case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
@@ -203,25 +183,6 @@ final class DifferentialRevisionListView extends AphrontView {
     $list->setNoDataString($this->noDataString);
 
     return $list;
-  }
-
-  public static function getDefaultFields(PhabricatorUser $user) {
-    $selector = DifferentialFieldSelector::newSelector();
-    $fields = $selector->getFieldSpecifications();
-    foreach ($fields as $key => $field) {
-      $field->setUser($user);
-      if (!$field->shouldAppearOnRevisionList()) {
-        unset($fields[$key]);
-      }
-    }
-
-    if (!$fields) {
-      throw new Exception(
-        "Phabricator configuration has no fields that appear on the list ".
-        "interface!");
-    }
-
-    return $selector->sortFieldsForRevisionList($fields);
   }
 
 }

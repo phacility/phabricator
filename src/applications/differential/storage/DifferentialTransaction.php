@@ -2,6 +2,18 @@
 
 final class DifferentialTransaction extends PhabricatorApplicationTransaction {
 
+  private $isCommandeerSideEffect;
+
+
+  public function setIsCommandeerSideEffect($is_side_effect) {
+    $this->isCommandeerSideEffect = $is_side_effect;
+    return $this;
+  }
+
+  public function getIsCommandeerSideEffect() {
+    return $this->isCommandeerSideEffect;
+  }
+
   const TYPE_INLINE = 'differential:inline';
   const TYPE_UPDATE = 'differential:update';
   const TYPE_ACTION = 'differential:action';
@@ -20,10 +32,23 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
   }
 
   public function shouldHide() {
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
     switch ($this->getTransactionType()) {
+      case self::TYPE_UPDATE:
+        // Older versions of this transaction have an ID for the new value,
+        // and/or do not record the old value. Only hide the transaction if
+        // the new value is a PHID, indicating that this is a newer style
+        // transaction.
+        if ($old === null) {
+          if (phid_get_type($new) == DifferentialPHIDTypeDiff::TYPECONST) {
+            return true;
+          }
+        }
+        break;
+
       case PhabricatorTransactions::TYPE_EDGE:
-        $old = $this->getOldValue();
-        $new = $this->getNewValue();
         $add = array_diff_key($new, $old);
         $rem = array_diff_key($old, $new);
 
@@ -38,7 +63,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
         break;
     }
 
-    return false;
+    return parent::shouldHide();
   }
 
   public function shouldHideForMail(array $xactions) {
@@ -92,7 +117,12 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
       case self::TYPE_INLINE:
         return pht('Commented On');
       case self::TYPE_UPDATE:
-        return pht('Updated');
+        $old = $this->getOldValue();
+        if ($old === null) {
+          return pht('Request');
+        } else {
+          return pht('Updated');
+        }
       case self::TYPE_ACTION:
         $map = array(
           DifferentialAction::ACTION_ACCEPT => pht('Accepted'),
@@ -130,6 +160,14 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
             break;
         }
         break;
+      case self::TYPE_UPDATE:
+        $old = $this->getOldValue();
+        if ($old === null) {
+          $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEW_REQUEST;
+        } else {
+          $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_UPDATED;
+        }
+        break;
       case PhabricatorTransactions::TYPE_EDGE:
         switch ($this->getMetadataValue('edge:type')) {
           case PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER:
@@ -165,8 +203,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
       case self::TYPE_UPDATE:
         if ($new) {
           // TODO: Migrate to PHIDs and use handles here?
-          // TODO: Link this?
-          if (phid_get_type($new) == 'DIFF') {
+          if (phid_get_type($new) == DifferentialPHIDTypeDiff::TYPECONST) {
             return pht(
               '%s updated this revision to %s.',
               $author_handle,

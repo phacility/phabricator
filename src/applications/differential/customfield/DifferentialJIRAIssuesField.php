@@ -9,6 +9,18 @@ final class DifferentialJIRAIssuesField
     return 'phabricator:jira-issues';
   }
 
+  public function getFieldKeyForConduit() {
+    return 'jira.issues';
+  }
+
+  public function isFieldEnabled() {
+    return (bool)PhabricatorAuthProviderOAuth1JIRA::getJIRAProvider();
+  }
+
+  public function canDisableField() {
+    return false;
+  }
+
   public function getValueForStorage() {
     return json_encode($this->getValue());
   }
@@ -230,6 +242,38 @@ final class DifferentialJIRAIssuesField
     }
 
     $editor->save();
+  }
+
+  public function shouldAppearInCommitMessage() {
+    return true;
+  }
+
+  public function shouldAppearInCommitMessageTemplate() {
+    return true;
+  }
+
+  public function getCommitMessageLabels() {
+    return array(
+      'JIRA',
+      'JIRA Issues',
+      'JIRA Issue',
+    );
+  }
+
+  public function parseValueFromCommitMessage($value) {
+    return preg_split('/[\s,]+/', $value, $limit = -1, PREG_SPLIT_NO_EMPTY);
+  }
+
+  public function renderCommitMessageValue(array $handles) {
+    $value = $this->getValue();
+    if (!$value) {
+      return null;
+    }
+    return implode(', ', $value);
+  }
+
+  public function shouldAppearInConduitDictionary() {
+    return true;
   }
 
 }

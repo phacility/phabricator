@@ -7,6 +7,10 @@ final class PhabricatorRepositoryCommitOwnersWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
+    if ($repository->getDetail('herald-disabled')) {
+      return;
+    }
+
     $affected_paths = PhabricatorOwnerPathQuery::loadAffectedPaths(
       $repository,
       $commit,
@@ -100,15 +104,10 @@ final class PhabricatorRepositoryCommitOwnersWorker
       $revision = id(new DifferentialRevision())->load($revision_id);
       if ($revision) {
         $revision_author_phid = $revision->getAuthorPHID();
-        $revision_reviewedby_phid = $revision->loadReviewedBy();
         $commit_reviewedby_phid = $data->getCommitDetail('reviewerPHID');
         if ($revision_author_phid !== $commit_author_phid) {
           $reasons[] = "Author Not Matching with Revision";
         }
-        if ($revision_reviewedby_phid !== $commit_reviewedby_phid) {
-          $reasons[] = "ReviewedBy Not Matching with Revision";
-        }
-
       } else {
         $reasons[] = "Revision Not Found";
       }

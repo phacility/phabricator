@@ -16,8 +16,9 @@
  * button.)
  *
  */
-final class DifferentialReleephRequestFieldSpecification
-  extends DifferentialFieldSpecification {
+final class DifferentialReleephRequestFieldSpecification {
+
+  // TODO: This class is essentially dead right now, see T2222.
 
   const ACTION_PICKS    = 'picks';
   const ACTION_REVERTS  = 'reverts';
@@ -242,6 +243,8 @@ final class DifferentialReleephRequestFieldSpecification
   public function didParseCommit(PhabricatorRepository $repo,
                                  PhabricatorRepositoryCommit $commit,
                                  PhabricatorRepositoryCommitData $data) {
+
+    // NOTE: This is currently dead code. See T2222.
 
     $releeph_requests = $this->loadReleephRequests();
 

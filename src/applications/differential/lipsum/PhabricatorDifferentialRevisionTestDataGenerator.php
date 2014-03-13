@@ -6,24 +6,34 @@ final class PhabricatorDifferentialRevisionTestDataGenerator
   public function generate() {
     $author = $this->loadPhabrictorUser();
     $authorPHID = $author->getPHID();
+
     $revision = DifferentialRevision::initializeNewRevision($author);
+    $revision->attachReviewerStatus(array());
+    $revision->attachActiveDiff(null);
+
+    // This could be a bit richer and more formal than it is.
     $revision->setTitle($this->generateTitle());
     $revision->setSummary($this->generateDescription());
     $revision->setTestPlan($this->generateDescription());
-    $revision->loadRelationships();
-    $aux_fields = $this->loadAuxiliaryFields($author, $revision);
+
     $diff = $this->generateDiff($author);
-    // Add Diff
-    $editor = new DifferentialRevisionEditor($revision);
-    $editor->setActor($author);
-    $editor->addDiff($diff, $this->generateDescription());
-    $editor->setAuxiliaryFields($aux_fields);
-    $editor->save();
 
-    // TODO: After T2222, it would be nice to revisit this and expand the
-    // functionality.
+    $xactions = array();
 
-    return $revision->save();
+    $xactions[] = id(new DifferentialTransaction())
+      ->setTransactionType(DifferentialTransaction::TYPE_UPDATE)
+      ->setNewValue($diff->getPHID());
+
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_LIPSUM,
+      array());
+
+    id(new DifferentialTransactionEditor())
+      ->setActor($author)
+      ->setContentSource($content_source)
+      ->applyTransactions($revision, $xactions);
+
+    return $revision;
   }
 
   public function getCCPHIDs() {
@@ -90,22 +100,6 @@ final class PhabricatorDifferentialRevisionTestDataGenerator
       }
     }
     return implode($newcode2, "\n");
-  }
-
-  private function loadAuxiliaryFields($user, DifferentialRevision $revision) {
-    $aux_fields = DifferentialFieldSelector::newSelector()
-      ->getFieldSpecifications();
-    foreach ($aux_fields as $key => $aux_field) {
-      $aux_field->setRevision($revision);
-      if (!$aux_field->shouldAppearOnEdit()) {
-        unset($aux_fields[$key]);
-      } else {
-        $aux_field->setUser($user);
-      }
-    }
-    return DifferentialAuxiliaryField::loadFromStorage(
-      $revision,
-      $aux_fields);
   }
 
 }

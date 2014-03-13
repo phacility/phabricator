@@ -15,7 +15,13 @@ final class AphrontDialogView extends AphrontView {
   private $footers = array();
   private $isStandalone;
   private $method = 'POST';
+  private $disableWorkflowOnSubmit;
+  private $disableWorkflowOnCancel;
+  private $width      = 'default';
 
+  const WIDTH_DEFAULT = 'default';
+  const WIDTH_FORM    = 'form';
+  const WIDTH_FULL    = 'full';
 
   public function setMethod($method) {
     $this->method = $method;
@@ -30,11 +36,6 @@ final class AphrontDialogView extends AphrontView {
   public function getIsStandalone() {
     return $this->isStandalone;
   }
-
-  private $width      = 'default';
-  const WIDTH_DEFAULT = 'default';
-  const WIDTH_FORM    = 'form';
-  const WIDTH_FULL    = 'full';
 
   public function setSubmitURI($uri) {
     $this->submitURI = $uri;
@@ -121,21 +122,51 @@ final class AphrontDialogView extends AphrontView {
         $paragraph));
   }
 
+  public function setDisableWorkflowOnSubmit($disable_workflow_on_submit) {
+    $this->disableWorkflowOnSubmit = $disable_workflow_on_submit;
+    return $this;
+  }
+
+  public function getDisableWorkflowOnSubmit() {
+    return $this->disableWorkflowOnSubmit;
+  }
+
+  public function setDisableWorkflowOnCancel($disable_workflow_on_cancel) {
+    $this->disableWorkflowOnCancel = $disable_workflow_on_cancel;
+    return $this;
+  }
+
+  public function getDisableWorkflowOnCancel() {
+    return $this->disableWorkflowOnCancel;
+  }
+
   final public function render() {
     require_celerity_resource('aphront-dialog-view-css');
 
     $buttons = array();
     if ($this->submitButton) {
+      $meta = array();
+      if ($this->disableWorkflowOnSubmit) {
+        $meta['disableWorkflow'] = true;
+      }
+
       $buttons[] = javelin_tag(
         'button',
         array(
           'name' => '__submit__',
           'sigil' => '__default__',
+          'type' => 'submit',
+          'meta' => $meta,
         ),
         $this->submitButton);
     }
 
     if ($this->cancelURI) {
+      $meta = array();
+      if ($this->disableWorkflowOnCancel) {
+        $meta['disableWorkflow'] = true;
+      }
+
       $buttons[] = javelin_tag(
         'a',
         array(
@@ -143,6 +174,7 @@ final class AphrontDialogView extends AphrontView {
           'class' => 'button grey',
           'name'  => '__cancel__',
           'sigil' => 'jx-workflow-button',
+          'meta' => $meta,
         ),
         $this->cancelText);
     }

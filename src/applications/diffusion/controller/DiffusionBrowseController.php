@@ -211,7 +211,6 @@ abstract class DiffusionBrowseController extends DiffusionController {
 
     $view = id(new DifferentialRevisionListView())
       ->setRevisions($revisions)
-      ->setFields(DifferentialRevisionListView::getDefaultFields($user))
       ->setUser($user);
 
     $phids = $view->getRequiredHandlePHIDs();

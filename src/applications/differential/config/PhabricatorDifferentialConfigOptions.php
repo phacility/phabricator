@@ -12,7 +12,60 @@ final class PhabricatorDifferentialConfigOptions
   }
 
   public function getOptions() {
+    $custom_field_type = 'custom:PhabricatorCustomFieldConfigOptionType';
+
+    $fields = array(
+      new DifferentialTitleField(),
+      new DifferentialSummaryField(),
+      new DifferentialTestPlanField(),
+      new DifferentialAuthorField(),
+      new DifferentialReviewersField(),
+      new DifferentialProjectReviewersField(),
+      new DifferentialReviewedByField(),
+      new DifferentialSubscribersField(),
+      new DifferentialRepositoryField(),
+      new DifferentialLintField(),
+      new DifferentialUnitField(),
+      new DifferentialViewPolicyField(),
+      new DifferentialEditPolicyField(),
+
+      new DifferentialDependsOnField(),
+      new DifferentialDependenciesField(),
+      new DifferentialManiphestTasksField(),
+      new DifferentialCommitsField(),
+
+      new DifferentialJIRAIssuesField(),
+      new DifferentialAsanaRepresentationField(),
+
+      new DifferentialBlameRevisionField(),
+      new DifferentialPathField(),
+      new DifferentialHostField(),
+      new DifferentialRevertPlanField(),
+
+      new DifferentialApplyPatchField(),
+
+      new DifferentialRevisionIDField(),
+    );
+
+    $default_fields = array();
+    foreach ($fields as $field) {
+      $default_fields[$field->getFieldKey()] = array(
+        'disabled' => $field->shouldDisableByDefault(),
+      );
+    }
+
     return array(
+      $this->newOption(
+        'differential.fields',
+        $custom_field_type,
+        $default_fields)
+        ->setCustomData(
+          id(new DifferentialRevision())->getCustomFieldBaseClass())
+        ->setDescription(
+          pht(
+            "Select and reorder revision fields.\n\n".
+            "NOTE: This feature is under active development and subject ".
+            "to change.")),
       $this->newOption(
         'differential.whitespace-matters',
         'list<regex>',
@@ -24,43 +77,6 @@ final class PhabricatorDifferentialConfigOptions
           pht(
             "List of file regexps where whitespace is meaningful and should ".
             "not use 'ignore-all' by default")),
-      $this->newOption(
-        'differential.field-selector',
-        'class',
-        'DifferentialDefaultFieldSelector')
-        ->setBaseClass('DifferentialFieldSelector')
-        ->setDescription(pht('Field selector class')),
-      $this->newOption('differential.show-host-field', 'bool', false)
-        ->setBoolOptions(
-          array(
-            pht('Show "Host" Fields'),
-            pht('Hide "Host" Fields'),
-          ))
-        ->setSummary(pht('Show or hide the "Host" and "Path" fields.'))
-        ->setDescription(
-          pht(
-            'Differential can show "Host" and "Path" fields on revisions, '.
-            'with information about the machine and working directory where '.
-            'the change came from. These fields are disabled by default '.
-            'because they may occasionally have sensitive information, but '.
-            'they can be useful if you work in an environment with shared '.
-            'development machines. You can set this option to true to enable '.
-            'these fields.')),
-      $this->newOption('differential.show-test-plan-field', 'bool', true)
-        ->setBoolOptions(
-          array(
-            pht('Show "Test Plan" Field'),
-            pht('Hide "Test Plan" Field'),
-          ))
-        ->setSummary(pht('Show or hide the "Test Plan" field.'))
-        ->setDescription(
-          pht(
-            'Differential has a required "Test Plan" field by default, which '.
-            'requires authors to fill out information about how they verified '.
-            'the correctness of their changes when they send code for review. '.
-            'If you would prefer not to use this field, you can disable it '.
-            'here. You can also make it optional (instead of required) by '.
-            'setting {{differential.require-test-plan-field}}.')),
       $this->newOption('differential.require-test-plan-field', 'bool', true)
         ->setBoolOptions(
           array(

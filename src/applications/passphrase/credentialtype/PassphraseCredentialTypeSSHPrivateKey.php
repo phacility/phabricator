@@ -9,4 +9,20 @@ abstract class PassphraseCredentialTypeSSHPrivateKey
     return self::PROVIDES_TYPE;
   }
 
+  public function hasPublicKey() {
+    return true;
+  }
+
+  public function getPublicKey(
+    PhabricatorUser $viewer,
+    PassphraseCredential $credential) {
+
+    $key = PassphraseSSHKey::loadFromPHID($credential->getPHID(), $viewer);
+    $file = $key->getKeyfileEnvelope();
+
+    list($stdout) = execx('ssh-keygen -y -f %P', $file);
+
+    return $stdout;
+  }
+
 }

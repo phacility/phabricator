@@ -7,6 +7,10 @@ final class DifferentialBlameRevisionField
     return 'phabricator:blame-revision';
   }
 
+  public function getFieldKeyForConduit() {
+    return 'blameRevision';
+  }
+
   public function getFieldName() {
     return pht('Blame Revision');
   }
@@ -82,6 +86,33 @@ final class DifferentialBlameRevisionField
       '%s updated the blame revision for %s.',
       $xaction->renderHandleLink($author_phid),
       $xaction->renderHandleLink($object_phid));
+  }
+
+  public function shouldAppearInCommitMessage() {
+    return true;
+  }
+
+  public function shouldAllowEditInCommitMessage() {
+    return true;
+  }
+
+  public function shouldOverwriteWhenCommitMessageIsEdited() {
+    return true;
+  }
+
+  public function getCommitMessageLabels() {
+    return array(
+      'Blame Revision',
+      'Blame Rev',
+    );
+  }
+
+  public function renderCommitMessageValue(array $handles) {
+    return $this->getValue();
+  }
+
+  public function shouldAppearInConduitDictionary() {
+    return true;
   }
 
 }

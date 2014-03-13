@@ -150,6 +150,11 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
       'Sessions now expire and are garbage collected rather than having an '.
       'arbitrary concurrency limit.');
 
+    $differential_field_reason = pht(
+      'All Differential fields are now managed through the configuration '.
+      'option "%s". Use that option to configure which fields are shown.',
+      'differential.fields');
+
     $ancient_config += array(
       'phid.external-loaders' =>
         pht(
@@ -182,6 +187,9 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
         'Phabricator now manages typeahead strategies automatically.'),
       'differential.revision-custom-detail-renderer' => pht(
         'Obsolete; use standard rendering events instead.'),
+      'differential.show-host-field' => $differential_field_reason,
+      'differential.show-test-plan-field' => $differential_field_reason,
+      'differential.field-selector' => $differential_field_reason,
     );
 
     return $ancient_config;

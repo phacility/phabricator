@@ -7,6 +7,10 @@ final class DifferentialRevertPlanField
     return 'phabricator:revert-plan';
   }
 
+  public function getFieldKeyForConduit() {
+    return 'revertPlan';
+  }
+
   public function getFieldName() {
     return pht('Revert Plan');
   }
@@ -129,6 +133,18 @@ final class DifferentialRevertPlanField
   public function getApplicationTransactionRemarkupBlocks(
     PhabricatorApplicationTransaction $xaction) {
     return array($xaction->getNewValue());
+  }
+
+  public function shouldAppearInCommitMessage() {
+    return true;
+  }
+
+  public function renderCommitMessageValue(array $handles) {
+    return $this->getValue();
+  }
+
+  public function shouldAppearInConduitDictionary() {
+    return true;
   }
 
 }

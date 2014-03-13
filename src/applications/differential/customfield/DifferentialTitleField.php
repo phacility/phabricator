@@ -7,12 +7,20 @@ final class DifferentialTitleField
     return 'differential:title';
   }
 
+  public function getFieldKeyForConduit() {
+    return 'title';
+  }
+
   public function getFieldName() {
     return pht('Title');
   }
 
   public function getFieldDescription() {
     return pht('Stores the revision title.');
+  }
+
+  public static function getDefaultTitle() {
+    return pht('<<Replace this line with your Revision Title>>');
   }
 
   protected function readValueFromRevision(
@@ -87,6 +95,31 @@ final class DifferentialTitleField
         '%s created %s.',
         $xaction->renderHandleLink($author_phid),
         $xaction->renderHandleLink($object_phid));
+    }
+  }
+
+  public function shouldAppearInCommitMessage() {
+    return true;
+  }
+
+  public function shouldOverwriteWhenCommitMessageIsEdited() {
+    return true;
+  }
+
+  public function validateCommitMessageValue($value) {
+    if (!strlen($value)) {
+      throw new DifferentialFieldValidationException(
+        pht(
+          "You must provide a revision title in the first line ".
+          "of your commit message."));
+    }
+
+    if (preg_match('/^<<.*>>$/', $value)) {
+      throw new DifferentialFieldValidationException(
+        pht(
+          'Replace the line "%s" with a human-readable revision title which '.
+          'describes the changes you are making.',
+          self::getDefaultTitle()));
     }
   }
 

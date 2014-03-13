@@ -7,6 +7,10 @@ final class DifferentialSummaryField
     return 'differential:summary';
   }
 
+  public function getFieldKeyForConduit() {
+    return 'summary';
+  }
+
   public function getFieldName() {
     return pht('Summary');
   }
@@ -17,6 +21,9 @@ final class DifferentialSummaryField
 
   protected function readValueFromRevision(
     DifferentialRevision $revision) {
+    if (!$revision->getID()) {
+      return null;
+    }
     return $revision->getSummary();
   }
 
@@ -78,6 +85,11 @@ final class DifferentialSummaryField
       $xaction->getNewValue());
   }
 
+  public function shouldHideInApplicationTransactions(
+    PhabricatorApplicationTransaction $xaction) {
+    return ($xaction->getOldValue() === null);
+  }
+
   public function shouldAppearInGlobalSearch() {
     return true;
   }
@@ -121,6 +133,18 @@ final class DifferentialSummaryField
   public function getApplicationTransactionRemarkupBlocks(
     PhabricatorApplicationTransaction $xaction) {
     return array($xaction->getNewValue());
+  }
+
+  public function shouldAppearInCommitMessage() {
+    return true;
+  }
+
+  public function shouldAppearInCommitMessageTemplate() {
+    return true;
+  }
+
+  public function shouldOverwriteWhenCommitMessageIsEdited() {
+    return true;
   }
 
 }

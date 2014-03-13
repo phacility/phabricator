@@ -24,10 +24,16 @@ final class PhabricatorRepositoryCommitHeraldWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
+    $commit->attachRepository($repository);
+
     // Don't take any actions on an importing repository. Principally, this
     // avoids generating thousands of audits or emails when you import an
     // established repository on an existing install.
     if ($repository->isImporting()) {
+      return;
+    }
+
+    if ($repository->getDetail('herald-disabled')) {
       return;
     }
 
@@ -72,11 +78,6 @@ final class PhabricatorRepositoryCommitHeraldWorker
       $adapter->getBuildPlans());
 
     $explicit_auditors = $this->createAuditsFromCommitMessage($commit, $data);
-
-    if ($repository->getDetail('herald-disabled')) {
-      // This just means "disable email"; audits are (mostly) idempotent.
-      return;
-    }
 
     $this->publishFeedStory($repository, $commit, $data);
 
@@ -155,6 +156,26 @@ final class PhabricatorRepositoryCommitHeraldWorker
     $body = new PhabricatorMetaMTAMailBody();
     $body->addRawSection($description);
     $body->addTextSection(pht('DETAILS'), $commit_uri);
+
+    // TODO: This should be integrated properly once we move to
+    // ApplicationTransactions.
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $commit,
+      PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS);
+    $field_list
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->readFieldsFromStorage($commit);
+    foreach ($field_list->getFields() as $field) {
+      try {
+        $field->buildApplicationTransactionMailBody(
+          new DifferentialTransaction(), // Bogus object to satisfy typehint.
+          $body);
+      } catch (Exception $ex) {
+        // Log the exception and continue.
+        phlog($ex);
+      }
+    }
+
     $body->addTextSection(pht('DIFFERENTIAL REVISION'), $differential);
     $body->addTextSection(pht('AFFECTED FILES'), $files);
     $body->addReplySection($reply_handler->getReplyHandlerInstructions());
@@ -270,10 +291,16 @@ final class PhabricatorRepositoryCommitHeraldWorker
       return array();
     }
 
-    $phids = DifferentialFieldSpecification::parseCommitMessageObjectList(
-      $matches[1],
-      $include_mailables = false,
-      $allow_partial = true);
+    $phids = id(new PhabricatorObjectListQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setAllowPartialResults(true)
+      ->setAllowedTypes(
+        array(
+          PhabricatorPeoplePHIDTypeUser::TYPECONST,
+          PhabricatorProjectPHIDTypeProject::TYPECONST,
+        ))
+      ->setObjectList($matches[1])
+      ->execute();
 
     if (!$phids) {
       return array();

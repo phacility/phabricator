@@ -24,9 +24,13 @@ abstract class PhabricatorController extends AphrontController {
     return PhabricatorUserEmail::isEmailVerificationRequired();
   }
 
-  public function willBeginExecution() {
+  public function shouldAllowRestrictedParameter($parameter_name) {
+    return false;
+  }
 
+  public function willBeginExecution() {
     $request = $this->getRequest();
+
     if ($request->getUser()) {
       // NOTE: Unit tests can set a user explicitly. Normal requests are not
       // permitted to do this.
@@ -82,6 +86,26 @@ abstract class PhabricatorController extends AphrontController {
          PhabricatorEnv::getEnvConfig('darkconsole.always-on')) {
         $console = new DarkConsoleCore();
         $request->getApplicationConfiguration()->setConsole($console);
+      }
+    }
+
+    // NOTE: We want to set up the user first so we can render a real page
+    // here, but fire this before any real logic.
+    $restricted = array(
+      'code',
+    );
+    foreach ($restricted as $parameter) {
+      if ($request->getExists($parameter)) {
+        if (!$this->shouldAllowRestrictedParameter($parameter)) {
+          throw new Exception(
+            pht(
+              'Request includes restricted parameter "%s", but this '.
+              'controller ("%s") does not whitelist it. Refusing to '.
+              'serve this request because it might be part of a redirection '.
+              'attack.',
+              $parameter,
+              get_class($this)));
+        }
       }
     }
 

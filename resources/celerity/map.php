@@ -7,14 +7,14 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => 'c650ab0d',
-    'core.pkg.js' => 'b7bdab05',
+    'core.pkg.css' => '4b8e980c',
+    'core.pkg.js' => '264721e1',
     'darkconsole.pkg.js' => 'ca8671ce',
-    'differential.pkg.css' => 'd1b3a605',
-    'differential.pkg.js' => 'e0d3b0da',
+    'differential.pkg.css' => 'cb97e095',
+    'differential.pkg.js' => '11a5b750',
     'diffusion.pkg.css' => '3783278d',
     'diffusion.pkg.js' => '5b4010f4',
-    'javelin.pkg.js' => '5b0f988e',
+    'javelin.pkg.js' => '65fa3049',
     'maniphest.pkg.css' => 'f1887d71',
     'maniphest.pkg.js' => '2fe8af22',
     'rsrc/css/aphront/aphront-bars.css' => '231ac33c',
@@ -31,7 +31,7 @@ return array(
     'rsrc/css/aphront/panel-view.css' => '5846dfa2',
     'rsrc/css/aphront/phabricator-nav-view.css' => '80e60fc1',
     'rsrc/css/aphront/request-failure-view.css' => 'da14df31',
-    'rsrc/css/aphront/table-view.css' => '92a719ca',
+    'rsrc/css/aphront/table-view.css' => 'de599000',
     'rsrc/css/aphront/tokenizer.css' => '36903077',
     'rsrc/css/aphront/tooltip.css' => '9c90229d',
     'rsrc/css/aphront/transaction.css' => 'ce491938',
@@ -60,7 +60,7 @@ return array(
     'rsrc/css/application/differential/local-commits-view.css' => '19649019',
     'rsrc/css/application/differential/results-table.css' => '239924f9',
     'rsrc/css/application/differential/revision-comment.css' => '48186045',
-    'rsrc/css/application/differential/revision-history.css' => 'f37aee8f',
+    'rsrc/css/application/differential/revision-history.css' => '0e8eb855',
     'rsrc/css/application/differential/revision-list.css' => 'f3c47d33',
     'rsrc/css/application/differential/table-of-contents.css' => '19566f76',
     'rsrc/css/application/diffusion/commit-view.css' => '92d1e8f9',
@@ -208,7 +208,7 @@ return array(
     'rsrc/externals/javelin/lib/Resource.js' => '356de121',
     'rsrc/externals/javelin/lib/URI.js' => 'd9a9b862',
     'rsrc/externals/javelin/lib/Vector.js' => '403a3dce',
-    'rsrc/externals/javelin/lib/Workflow.js' => 'd16edeae',
+    'rsrc/externals/javelin/lib/Workflow.js' => 'f28bf201',
     'rsrc/externals/javelin/lib/__tests__/Cookie.js' => '5ed109e8',
     'rsrc/externals/javelin/lib/__tests__/DOM.js' => 'c984504b',
     'rsrc/externals/javelin/lib/__tests__/JSON.js' => '2295d074',
@@ -357,7 +357,6 @@ return array(
     'rsrc/js/application/conpherence/behavior-widget-pane.js' => 'd8ef8659',
     'rsrc/js/application/countdown/timer.js' => '889c96f3',
     'rsrc/js/application/differential/DifferentialInlineCommentEditor.js' => 'f2441746',
-    'rsrc/js/application/differential/behavior-accept-with-errors.js' => 'e12c760a',
     'rsrc/js/application/differential/behavior-add-reviewers-and-ccs.js' => '533a187b',
     'rsrc/js/application/differential/behavior-comment-jump.js' => '71755c79',
     'rsrc/js/application/differential/behavior-comment-preview.js' => '127f2018',
@@ -381,7 +380,7 @@ return array(
     'rsrc/js/application/files/behavior-icon-composer.js' => '8ef9ab58',
     'rsrc/js/application/files/behavior-launch-icon-composer.js' => '48086888',
     'rsrc/js/application/harbormaster/behavior-reorder-steps.js' => '957a7fde',
-    'rsrc/js/application/herald/HeraldRuleEditor.js' => '4f31d692',
+    'rsrc/js/application/herald/HeraldRuleEditor.js' => '4173dbd8',
     'rsrc/js/application/herald/PathTypeahead.js' => 'f7fc67ec',
     'rsrc/js/application/herald/herald-rule-editor.js' => '7ebaeed3',
     'rsrc/js/application/maniphest/behavior-batch-editor.js' => '391457d7',
@@ -475,7 +474,7 @@ return array(
     'rsrc/js/core/behavior-select-on-click.js' => '0e34ca02',
     'rsrc/js/core/behavior-toggle-class.js' => 'a82a7769',
     'rsrc/js/core/behavior-tokenizer.js' => 'b3a4b884',
-    'rsrc/js/core/behavior-tooltip.js' => 'e5dd1c6d',
+    'rsrc/js/core/behavior-tooltip.js' => '48db4145',
     'rsrc/js/core/behavior-watch-anchor.js' => '06e05112',
     'rsrc/js/core/behavior-workflow.js' => '82947dda',
     'rsrc/js/core/phtize.js' => 'd254d646',
@@ -495,7 +494,7 @@ return array(
     'aphront-pager-view-css' => '2e3539af',
     'aphront-panel-view-css' => '5846dfa2',
     'aphront-request-failure-view-css' => 'da14df31',
-    'aphront-table-view-css' => '92a719ca',
+    'aphront-table-view-css' => 'de599000',
     'aphront-tokenizer-control-css' => '36903077',
     'aphront-tooltip-css' => '9c90229d',
     'aphront-two-column-view-css' => '16ab3ad2',
@@ -514,7 +513,7 @@ return array(
     'differential-results-table-css' => '239924f9',
     'differential-revision-add-comment-css' => 'c478bcaa',
     'differential-revision-comment-css' => '48186045',
-    'differential-revision-history-css' => 'f37aee8f',
+    'differential-revision-history-css' => '0e8eb855',
     'differential-revision-list-css' => 'f3c47d33',
     'differential-table-of-contents-css' => '19566f76',
     'diffusion-commit-view-css' => '92d1e8f9',
@@ -524,7 +523,7 @@ return array(
     'font-source-sans-pro' => '225851dd',
     'global-drag-and-drop-css' => '697324ad',
     'herald-css' => '59d48f01',
-    'herald-rule-editor' => '4f31d692',
+    'herald-rule-editor' => '4173dbd8',
     'herald-test-css' => '2b7d0f54',
     'inline-comment-summary-css' => '14a91639',
     'javelin-aphlict' => '493665ee',
@@ -546,7 +545,6 @@ return array(
     'javelin-behavior-countdown-timer' => '889c96f3',
     'javelin-behavior-dark-console' => 'e9fdb5e5',
     'javelin-behavior-device' => '03d6ed07',
-    'javelin-behavior-differential-accept-with-errors' => 'e12c760a',
     'javelin-behavior-differential-add-reviewers-and-ccs' => '533a187b',
     'javelin-behavior-differential-comment-jump' => '71755c79',
     'javelin-behavior-differential-diff-radios' => 'e1ff79b1',
@@ -604,7 +602,7 @@ return array(
     'javelin-behavior-phabricator-reveal-content' => '8f24abfc',
     'javelin-behavior-phabricator-search-typeahead' => 'f6b56f7a',
     'javelin-behavior-phabricator-show-all-transactions' => '7c273581',
-    'javelin-behavior-phabricator-tooltips' => 'e5dd1c6d',
+    'javelin-behavior-phabricator-tooltips' => '48db4145',
     'javelin-behavior-phabricator-transaction-comment-form' => '9084a36f',
     'javelin-behavior-phabricator-transaction-list' => '3c918aa8',
     'javelin-behavior-phabricator-watch-anchor' => '06e05112',
@@ -665,7 +663,7 @@ return array(
     'javelin-view-interpreter' => '0c33c1a0',
     'javelin-view-renderer' => '6c2b09a2',
     'javelin-view-visitor' => 'efe49472',
-    'javelin-workflow' => 'd16edeae',
+    'javelin-workflow' => 'f28bf201',
     'legalpad-document-css' => 'cd275275',
     'lightbox-attachment-css' => '7acac05d',
     'maniphest-batch-editor' => '8f380ebc',
@@ -1090,6 +1088,19 @@ return array(
       0 => 'javelin-install',
       1 => 'javelin-event',
     ),
+    '4173dbd8' =>
+    array(
+      0 => 'multirow-row-manager',
+      1 => 'javelin-install',
+      2 => 'javelin-typeahead',
+      3 => 'javelin-util',
+      4 => 'javelin-dom',
+      5 => 'javelin-tokenizer',
+      6 => 'javelin-typeahead-preloaded-source',
+      7 => 'javelin-stratcom',
+      8 => 'javelin-json',
+      9 => 'phabricator-prefab',
+    ),
     '441f2137' =>
     array(
       0 => 'javelin-behavior',
@@ -1104,6 +1115,13 @@ return array(
       3 => 'javelin-dom',
       4 => 'javelin-util',
       5 => 'phabricator-prefab',
+    ),
+    '48db4145' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-behavior-device',
+      2 => 'javelin-stratcom',
+      3 => 'phabricator-tooltip',
     ),
     '493665ee' =>
     array(
@@ -1122,19 +1140,6 @@ return array(
       0 => 'javelin-install',
       1 => 'javelin-dom',
       2 => 'javelin-reactor-dom',
-    ),
-    '4f31d692' =>
-    array(
-      0 => 'multirow-row-manager',
-      1 => 'javelin-install',
-      2 => 'javelin-typeahead',
-      3 => 'javelin-util',
-      4 => 'javelin-dom',
-      5 => 'javelin-tokenizer',
-      6 => 'javelin-typeahead-preloaded-source',
-      7 => 'javelin-stratcom',
-      8 => 'javelin-json',
-      9 => 'phabricator-prefab',
     ),
     '4f344388' =>
     array(
@@ -1231,6 +1236,11 @@ return array(
       2 => 'javelin-util',
       3 => 'phabricator-shaped-request',
     ),
+    '7319e029' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+    ),
     '62e18640' =>
     array(
       0 => 'javelin-install',
@@ -1265,11 +1275,6 @@ return array(
       0 => 'javelin-behavior',
       1 => 'javelin-stratcom',
       2 => 'javelin-dom',
-    ),
-    '7319e029' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
     ),
     '75903ee1' =>
     array(
@@ -1737,17 +1742,6 @@ return array(
       4 => 'javelin-fx',
       5 => 'javelin-util',
     ),
-    'd16edeae' =>
-    array(
-      0 => 'javelin-stratcom',
-      1 => 'javelin-request',
-      2 => 'javelin-dom',
-      3 => 'javelin-vector',
-      4 => 'javelin-install',
-      5 => 'javelin-util',
-      6 => 'javelin-mask',
-      7 => 'javelin-uri',
-    ),
     'd254d646' =>
     array(
       0 => 'javelin-util',
@@ -1817,11 +1811,6 @@ return array(
       1 => 'javelin-util',
       2 => 'javelin-request',
     ),
-    'e12c760a' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-    ),
     'e1ff79b1' =>
     array(
       0 => 'javelin-behavior',
@@ -1842,13 +1831,6 @@ return array(
       1 => 'javelin-dom',
       2 => 'javelin-view-visitor',
       3 => 'javelin-util',
-    ),
-    'e5dd1c6d' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-behavior-device',
-      2 => 'javelin-stratcom',
-      3 => 'phabricator-tooltip',
     ),
     'e7c21fb3' =>
     array(
@@ -1886,6 +1868,17 @@ return array(
       3 => 'javelin-install',
       4 => 'javelin-request',
       5 => 'javelin-workflow',
+    ),
+    'f28bf201' =>
+    array(
+      0 => 'javelin-stratcom',
+      1 => 'javelin-request',
+      2 => 'javelin-dom',
+      3 => 'javelin-vector',
+      4 => 'javelin-install',
+      5 => 'javelin-util',
+      6 => 'javelin-mask',
+      7 => 'javelin-uri',
     ),
     'f42bb8c6' =>
     array(
@@ -2140,18 +2133,17 @@ return array(
       4 => 'javelin-behavior-differential-populate',
       5 => 'javelin-behavior-differential-show-more',
       6 => 'javelin-behavior-differential-diff-radios',
-      7 => 'javelin-behavior-differential-accept-with-errors',
-      8 => 'javelin-behavior-differential-comment-jump',
-      9 => 'javelin-behavior-differential-add-reviewers-and-ccs',
-      10 => 'javelin-behavior-differential-keyboard-navigation',
-      11 => 'javelin-behavior-aphront-drag-and-drop-textarea',
-      12 => 'javelin-behavior-phabricator-object-selector',
-      13 => 'javelin-behavior-repository-crossreference',
-      14 => 'javelin-behavior-load-blame',
-      15 => 'differential-inline-comment-editor',
-      16 => 'javelin-behavior-differential-dropdown-menus',
-      17 => 'javelin-behavior-differential-toggle-files',
-      18 => 'javelin-behavior-differential-user-select',
+      7 => 'javelin-behavior-differential-comment-jump',
+      8 => 'javelin-behavior-differential-add-reviewers-and-ccs',
+      9 => 'javelin-behavior-differential-keyboard-navigation',
+      10 => 'javelin-behavior-aphront-drag-and-drop-textarea',
+      11 => 'javelin-behavior-phabricator-object-selector',
+      12 => 'javelin-behavior-repository-crossreference',
+      13 => 'javelin-behavior-load-blame',
+      14 => 'differential-inline-comment-editor',
+      15 => 'javelin-behavior-differential-dropdown-menus',
+      16 => 'javelin-behavior-differential-toggle-files',
+      17 => 'javelin-behavior-differential-user-select',
     ),
     'diffusion.pkg.css' =>
     array(

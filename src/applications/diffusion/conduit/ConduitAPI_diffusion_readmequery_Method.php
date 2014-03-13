@@ -8,8 +8,8 @@ final class ConduitAPI_diffusion_readmequery_Method
 
   public function getMethodDescription() {
     return
-      'Retrieve any "readme" that can be found for a set of paths in '.
-      'repository.';
+      pht('Retrieve any "readme" that can be found for a set of paths in '.
+          'repository.');
   }
 
   public function defineReturnType() {
@@ -89,6 +89,17 @@ final class ConduitAPI_diffusion_readmequery_Method
       $engine = PhabricatorMarkupEngine::newDiffusionMarkupEngine();
       $engine->setConfig('viewer', $request->getUser());
       $readme_content = $engine->markupText($readme_content);
+      $toc = PhutilRemarkupEngineRemarkupHeaderBlockRule::renderTableOfContents(
+        $engine);
+      if ($toc) {
+        $toc = phutil_tag_div('phabricator-remarkup-toc', array(
+          phutil_tag_div(
+            'phabricator-remarkup-toc-header',
+            pht('Table of Contents')),
+          $toc,
+        ));
+        $readme_content = array($toc, $readme_content);
+      }
 
       $class = 'phabricator-remarkup';
     }

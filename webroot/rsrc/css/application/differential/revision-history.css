@@ -2,77 +2,60 @@
  * @provides differential-revision-history-css
  */
 
-.differential-revision-history-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 1px;
-}
-
-.differential-revision-history-table th,
-.differential-revision-history-table td {
-  color: {$darkbluetext};
-  padding: 4px 8px;
-}
-
-.differential-revision-history-table td {
-  white-space: nowrap;
-}
-
-.differential-revision-history-table tr.alt {
-  background: {$greybackground};
-}
-
-.differential-revision-history-table td.revhistory-desc {
-  width: 100%;
-  white-space: normal;
-}
-
-.differential-revision-history-table td.revhistory-name {
-  font-weight: bold;
-}
-
-.differential-revision-history-table td.revhistory-age {
+.differential-update-history-footer {
   text-align: right;
+  vertical-align: middle;
+  padding: 4px 8px;
+  border-top: 1px solid {$lightblueborder};
+  background: {$lightbluebackground};
 }
 
-.differential-revision-history-table td.revhistory-old,
-.differential-revision-history-table td.revhistory-new {
-  padding: 0 16px;
-  text-align: center;
+.differential-update-history-footer label {
+  margin-right: 12px;
+  color: {$greytext};
 }
 
-.differential-revision-history-table td.revhistory-old {
+.differential-update-history-footer select {
+  margin-left: 8px;
+}
+
+.device .differential-update-history-footer label {
+  display: block;
+  margin-right: 0;
+  margin-bottom: 4px;
+}
+
+.differential-update-history-radio {
+  padding: 0 8px;
+}
+
+.aphront-table-view td.differential-update-history-old {
   background: #f9d0d0;
 }
 
-.differential-revision-history-table td.revhistory-old-now {
-  background: #ffaaaa;
-}
-
-.differential-revision-history-table td.revhistory-new {
+.aphront-table-view td.differential-update-history-new {
   background: #d0ffd0;
 }
 
-.differential-revision-history-table td.revhistory-new-now {
+.aphront-table-view
+  .differential-update-history-old-now
+  td.differential-update-history-old,
+.aphront-table-view
+  .alt-differential-update-history-old-now
+  td.differential-update-history-old {
+  background: #ffaaaa;
+}
+
+.aphront-table-view
+  .differential-update-history-new-now
+  td.differential-update-history-new,
+.aphront-table-view
+  .alt-differential-update-history-new-now
+  td.differential-update-history-new {
   background: #aaffaa;
 }
 
-.differential-revision-history-table td.revhistory-star {
+.lintunit-star {
   text-align: center;
-}
-
-.differential-revision-history-table td.diff-differ-submit {
-  text-align: right;
-  border-bottom: none;
-  padding: 8px 0 4px 0;
-}
-
-.differential-revision-history-table td.diff-differ-submit button {
-  margin-left: 12px;
-}
-
-.differential-revision-history-table td.diff-differ-submit label {
-  font-weight: bold;
-  padding-right: 4px;
-  color: {$darkgreytext};
+  padding: 0 16px;
 }

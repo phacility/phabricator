@@ -44,7 +44,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
     $crumbs->addTextCrumb('K'.$credential->getID());
 
     $header = $this->buildHeaderView($credential);
-    $actions = $this->buildActionView($credential);
+    $actions = $this->buildActionView($credential, $type);
     $properties = $this->buildPropertyView($credential, $type, $actions);
 
     $box = id(new PHUIObjectBoxView())
@@ -78,7 +78,9 @@ final class PassphraseCredentialViewController extends PassphraseController {
     return $header;
   }
 
-  private function buildActionView(PassphraseCredential $credential) {
+  private function buildActionView(
+    PassphraseCredential $credential,
+    PassphraseCredentialType $type) {
     $viewer = $this->getRequest()->getUser();
 
     $id = $credential->getID();
@@ -116,6 +118,15 @@ final class PassphraseCredentialViewController extends PassphraseController {
           ->setHref($this->getApplicationURI("reveal/{$id}/"))
           ->setDisabled(!$can_edit)
           ->setWorkflow(true));
+
+      if ($type->hasPublicKey()) {
+        $actions->addAction(
+          id(new PhabricatorActionView())
+            ->setName(pht('Show Public Key'))
+            ->setIcon('download-alt')
+            ->setHref($this->getApplicationURI("public/{$id}/"))
+            ->setWorkflow(true));
+      }
     }
 
 

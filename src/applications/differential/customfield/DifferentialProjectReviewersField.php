@@ -19,6 +19,10 @@ final class DifferentialProjectReviewersField
     return true;
   }
 
+  public function canDisableField() {
+    return false;
+  }
+
   public function renderPropertyViewLabel() {
     return $this->getFieldName();
   }
@@ -52,4 +56,13 @@ final class DifferentialProjectReviewersField
     }
     return $reviewers;
   }
+
+  public function getProTips() {
+    return array(
+      pht(
+        'You can add a project as a subscriber or reviewer by writing '.
+        '"#projectname" in the appropriate field.'),
+    );
+  }
+
 }

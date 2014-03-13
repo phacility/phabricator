@@ -15,10 +15,10 @@ final class PassphraseSSHKey extends PassphraseAbstractKey {
   public function getKeyfileEnvelope() {
     $credential = $this->requireCredential();
 
-    $text_type = PassphraseCredentialTypeSSHPrivateKeyText::CREDENTIAL_TYPE;
-    if ($credential->getCredentialType() == $text_type) {
-      // If the credential stores key text, write it out to a temporary file
-      // so we can pass it to `ssh`.
+    $file_type = PassphraseCredentialTypeSSHPrivateKeyFile::CREDENTIAL_TYPE;
+    if ($credential->getCredentialType() != $file_type) {
+      // If the credential does not store a file, write the key txt out to a
+      // temporary file so we can pass it to `ssh`.
       if (!$this->keyFile) {
         $temporary_file = new TempFile('passphrase-ssh-key');
 

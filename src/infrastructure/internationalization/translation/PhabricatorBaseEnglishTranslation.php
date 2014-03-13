@@ -851,6 +851,11 @@ abstract class PhabricatorBaseEnglishTranslation
         '%d older changes are hidden.',
       ),
 
+      '%s, %d line(s)' => array(
+        '%s, %d line',
+        '%s, %d lines',
+      ),
+
     );
   }
 

@@ -46,12 +46,7 @@ final class PhamePostEditController
         return new Aphront404Response();
       }
 
-      $post = id(new PhamePost())
-        ->setBloggerPHID($user->getPHID())
-        ->setBlogPHID($blog->getPHID())
-        ->setBlog($blog)
-        ->setDatePublished(0)
-        ->setVisibility(PhamePost::VISIBILITY_DRAFT);
+      $post = PhamePost::initializePost($user, $blog);
       $cancel_uri = $this->getApplicationURI('/blog/view/'.$blog->getID().'/');
 
       $submit_button = pht('Save Draft');

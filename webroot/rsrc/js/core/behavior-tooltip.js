@@ -31,14 +31,18 @@ JX.behavior('phabricator-tooltips', function(config) {
         data.tip);
     });
 
+  function wipe(e) {
+    JX.Tooltip.hide();
+  }
+
+  // Hide tips when any key is pressed. This prevents tips from ending up locked
+  // on screen if you make a keypress which removes the underlying node (for
+  // example, submitting an inline comment in Differential). See T4586.
+  JX.Stratcom.listen('keydown', null, wipe);
+
   // When we leave the page, hide any visible tooltips. If we don't do this,
   // clicking a link with a tooltip and then hitting "back" will give you a
   // phantom tooltip.
-  JX.Stratcom.listen(
-    'unload',
-    null,
-    function(e) {
-      JX.Tooltip.hide();
-    });
+  JX.Stratcom.listen('unload', null, wipe);
 
 });
