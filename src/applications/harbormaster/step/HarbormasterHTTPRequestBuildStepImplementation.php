@@ -16,7 +16,7 @@ final class HarbormasterHTTPRequestBuildStepImplementation
 
     $uri = new PhutilURI($settings['uri']);
     $domain = $uri->getDomain();
-    return pht('Make an HTTP request to %s', $domain);
+    return pht('Make an HTTP %s request to %s', $settings['method'], $domain);
   }
 
   public function execute(
@@ -34,8 +34,13 @@ final class HarbormasterHTTPRequestBuildStepImplementation
     $log_body = $build->createLog($build_target, $uri, 'http-body');
     $start = $log_body->start();
 
+    $method = 'POST';
+    if ($settings['method'] !== '') {
+      $method = $settings['method'];
+    }
+
     list($status, $body, $headers) = id(new HTTPSFuture($uri))
-      ->setMethod('POST')
+      ->setMethod($method)
       ->setTimeout(60)
       ->resolve();
 
@@ -54,6 +59,12 @@ final class HarbormasterHTTPRequestBuildStepImplementation
       return false;
     }
 
+    if ($settings['method'] === null || $settings['method'] != '' &&
+        !in_array ($settings['method'],
+                    array('GET', 'PUT', 'DELETE', 'POST'))) {
+      return false;
+    }
+
     return true;
   }
 
@@ -62,6 +73,12 @@ final class HarbormasterHTTPRequestBuildStepImplementation
       'uri' => array(
         'name' => 'URI',
         'description' => pht('The URI to request.'),
+        'type' => BuildStepImplementation::SETTING_TYPE_STRING,
+      ),
+      'method' => array(
+        'name' => 'Method',
+        'description' =>
+          pht('Request type. Should be GET, POST, PUT, or DELETE.'),
         'type' => BuildStepImplementation::SETTING_TYPE_STRING,
       ),
     );
