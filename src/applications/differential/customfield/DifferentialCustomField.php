@@ -51,11 +51,15 @@ abstract class DifferentialCustomField
     return array();
   }
 
-  protected function parseObjectList($value, array $types) {
+  protected function parseObjectList(
+    $value,
+    array $types,
+    $allow_partial = false) {
     return id(new PhabricatorObjectListQuery())
       ->setViewer($this->getViewer())
       ->setAllowedTypes($types)
       ->setObjectList($value)
+      ->setAllowPartialResults($allow_partial)
       ->execute();
   }
 

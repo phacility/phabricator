@@ -51,6 +51,16 @@ final class DifferentialReviewedByField
     return true;
   }
 
+  public function parseValueFromCommitMessage($value) {
+    return $this->parseObjectList(
+      $value,
+      array(
+        PhabricatorPeoplePHIDTypeUser::TYPECONST,
+        PhabricatorProjectPHIDTypeProject::TYPECONST,
+      ),
+      $allow_partial = true);
+  }
+
   public function getRequiredHandlePHIDsForCommitMessage() {
     return $this->getValue();
   }
