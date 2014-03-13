@@ -211,14 +211,8 @@ final class PassphraseCredentialEditController extends PassphraseController {
 
     $secret_control = $type->newSecretControl();
 
-    if ($request->isAjax()) {
-      $form = new PHUIFormLayoutView();
-    } else {
-      $form = id(new AphrontFormView())
-        ->setUser($viewer);
-    }
-
-    $form
+    $form = id(new AphrontFormView())
+      ->setUser($viewer)
       ->addHiddenInput('isInitialized', true)
       ->appendChild(
         id(new AphrontFormTextControl())
@@ -288,14 +282,16 @@ final class PassphraseCredentialEditController extends PassphraseController {
     }
 
     if ($request->isAjax()) {
-      $errors = id(new AphrontErrorView())->setErrors($errors);
+      if ($errors) {
+        $errors = id(new AphrontErrorView())->setErrors($errors);
+      }
 
       $dialog = id(new AphrontDialogView())
         ->setUser($viewer)
         ->setWidth(AphrontDialogView::WIDTH_FORM)
         ->setTitle($title)
         ->appendChild($errors)
-        ->appendChild($form)
+        ->appendChild($form->buildLayoutView())
         ->addSubmitButton(pht('Create Credential'))
         ->addCancelButton($this->getApplicationURI());
 
