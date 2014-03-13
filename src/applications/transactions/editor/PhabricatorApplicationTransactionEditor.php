@@ -897,29 +897,39 @@ abstract class PhabricatorApplicationTransactionEditor
             get_class($this)));
       }
     }
-
-    // The actor must have permission to view and edit the object.
-
-    $actor = $this->requireActor();
-
-    PhabricatorPolicyFilter::requireCapability(
-      $actor,
-      $object,
-      PhabricatorPolicyCapability::CAN_VIEW);
   }
 
   protected function requireCapabilities(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        // You must have the edit capability to alter the edit policy of an
-        // object. For other default transaction types, we don't enforce
-        // anything for the moment.
+    if ($this->getIsNewObject()) {
+      return;
+    }
 
+    $actor = $this->requireActor();
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
         PhabricatorPolicyFilter::requireCapability(
-          $this->requireActor(),
+          $actor,
+          $object,
+          PhabricatorPolicyCapability::CAN_VIEW);
+        break;
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        PhabricatorPolicyFilter::requireCapability(
+          $actor,
+          $object,
+          PhabricatorPolicyCapability::CAN_EDIT);
+        break;
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        PhabricatorPolicyFilter::requireCapability(
+          $actor,
+          $object,
+          PhabricatorPolicyCapability::CAN_EDIT);
+        break;
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
+        PhabricatorPolicyFilter::requireCapability(
+          $actor,
           $object,
           PhabricatorPolicyCapability::CAN_EDIT);
         break;
@@ -1464,28 +1474,19 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $errors = array();
     switch ($type) {
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        $errors[] = $this->validatePolicyTransaction(
+          $object,
+          $xactions,
+          $type,
+          PhabricatorPolicyCapability::CAN_VIEW);
+        break;
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        // Make sure the user isn't editing away their ability to edit this
-        // object.
-        foreach ($xactions as $xaction) {
-          try {
-            PhabricatorPolicyFilter::requireCapabilityWithForcedPolicy(
-              $this->requireActor(),
-              $object,
-              PhabricatorPolicyCapability::CAN_EDIT,
-              $xaction->getNewValue());
-          } catch (PhabricatorPolicyException $ex) {
-            $errors[] = array(
-              new PhabricatorApplicationTransactionValidationError(
-                $type,
-                pht('Invalid'),
-                pht(
-                  'You can not select this edit policy, because you would '.
-                  'no longer be able to edit the object.'),
-                $xaction),
-            );
-          }
-        }
+        $errors[] = $this->validatePolicyTransaction(
+          $object,
+          $xactions,
+          $type,
+          PhabricatorPolicyCapability::CAN_EDIT);
         break;
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $groups = array();
@@ -1514,6 +1515,70 @@ abstract class PhabricatorApplicationTransactionEditor
     return array_mergev($errors);
   }
 
+  private function validatePolicyTransaction(
+    PhabricatorLiskDAO $object,
+    array $xactions,
+    $transaction_type,
+    $capability) {
+
+    $actor = $this->requireActor();
+    $errors = array();
+    // Note $this->xactions is necessary; $xactions is $this->xactions of
+    // $transaction_type
+    $policy_object = $this->adjustObjectForPolicyChecks(
+      $object,
+      $this->xactions);
+
+    // Make sure the user isn't editing away their ability to $capability this
+    // object.
+    foreach ($xactions as $xaction) {
+      try {
+        PhabricatorPolicyFilter::requireCapabilityWithForcedPolicy(
+          $actor,
+          $policy_object,
+          $capability,
+          $xaction->getNewValue());
+      } catch (PhabricatorPolicyException $ex) {
+        $errors[] = new PhabricatorApplicationTransactionValidationError(
+          $transaction_type,
+          pht('Invalid'),
+          pht(
+            'You can not select this %s policy, because you would no longer '.
+            'be able to %s the object.',
+            $capability,
+            $capability),
+          $xaction);
+      }
+    }
+
+    if ($this->getIsNewObject()) {
+      if (!$xactions) {
+        $has_capability = PhabricatorPolicyFilter::hasCapability(
+          $actor,
+          $policy_object,
+          $capability);
+        if (!$has_capability) {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $transaction_type,
+            pht('Invalid'),
+            pht('The selected %s policy excludes you. Choose a %s policy '.
+                'which allows you to %s the object.',
+            $capability,
+            $capability,
+            $capability));
+        }
+      }
+    }
+
+    return $errors;
+  }
+
+  protected function adjustObjectForPolicyChecks(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    return clone $object;
+  }
 
   /**
    * Check for a missing text field.
