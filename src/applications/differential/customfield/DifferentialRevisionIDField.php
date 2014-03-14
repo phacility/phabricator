@@ -3,6 +3,8 @@
 final class DifferentialRevisionIDField
   extends DifferentialCustomField {
 
+  private $revisionID;
+
   public function getFieldKey() {
     return 'differential:revision-id';
   }
@@ -29,16 +31,20 @@ final class DifferentialRevisionIDField
     return true;
   }
 
-  public function shouldAllowEditInCommitMessage() {
-    return false;
-  }
-
   public function parseValueFromCommitMessage($value) {
     return self::parseRevisionIDFromURI($value);
   }
 
   public function renderCommitMessageValue(array $handles) {
-    return PhabricatorEnv::getProductionURI('/D'.$this->getObject()->getID());
+    $id = coalesce($this->revisionID, $this->getObject()->getID());
+    if (!$id) {
+      return null;
+    }
+    return PhabricatorEnv::getProductionURI('/D'.$id);
+  }
+
+  public function readValueFromCommitMessage($value) {
+    $this->revisionID = $value;
   }
 
   private static function parseRevisionIDFromURI($uri) {

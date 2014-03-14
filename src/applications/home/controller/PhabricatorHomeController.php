@@ -24,6 +24,7 @@ abstract class PhabricatorHomeController extends PhabricatorController {
     $applications = id(new PhabricatorApplicationQuery())
       ->setViewer($user)
       ->withInstalled(true)
+      ->withUnlisted(false)
       ->execute();
 
     foreach ($applications as $key => $application) {

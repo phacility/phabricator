@@ -113,14 +113,13 @@ final class PhabricatorSubscriptionsUIEventListener
         ->setViewer($user)
         ->withPHIDs($subscribers)
         ->execute();
-      $sub_view = array();
-      foreach ($subscribers as $subscriber) {
-        $sub_view[] = $handles[$subscriber]->renderLink();
-      }
-      $sub_view = phutil_implode_html(', ', $sub_view);
     } else {
-      $sub_view = phutil_tag('em', array(), pht('None'));
+      $handles = array();
     }
+    $sub_view = id(new SubscriptionListStringBuilder())
+      ->setObjectPHID($object->getPHID())
+      ->setHandles($handles)
+      ->buildPropertyString();
 
     $view = $event->getValue('view');
     $view->addProperty(pht('Subscribers'), $sub_view);

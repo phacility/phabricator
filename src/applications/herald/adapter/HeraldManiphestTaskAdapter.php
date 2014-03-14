@@ -1,14 +1,16 @@
 <?php
 
-/**
- * @group herald
- */
 final class HeraldManiphestTaskAdapter extends HeraldAdapter {
 
   private $task;
   private $ccPHIDs = array();
   private $assignPHID;
   private $projectPHIDs = array();
+  private $emailPHIDs = array();
+
+  public function getEmailPHIDs() {
+    return $this->emailPHIDs;
+  }
 
   public function getAdapterApplicationClass() {
     return 'PhabricatorApplicationManiphest';
@@ -98,6 +100,7 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
         return array(
           self::ACTION_ADD_CC,
+          self::ACTION_EMAIL,
           self::ACTION_ASSIGN_TASK,
           self::ACTION_ADD_PROJECTS,
           self::ACTION_NOTHING,
@@ -105,6 +108,7 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         return array(
           self::ACTION_ADD_CC,
+          self::ACTION_EMAIL,
           self::ACTION_FLAG,
           self::ACTION_ASSIGN_TASK,
           self::ACTION_NOTHING,
@@ -161,7 +165,16 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
           $result[] = new HeraldApplyTranscript(
             $effect,
             true,
-            pht('Added address to cc list.'));
+            pht('Added addresses to cc list.'));
+          break;
+        case self::ACTION_EMAIL:
+          foreach ($effect->getTarget() as $phid) {
+            $this->emailPHIDs[] = $phid;
+          }
+          $result[] = new HeraldApplyTranscript(
+            $effect,
+            true,
+            pht('Added addresses to email list.'));
           break;
         case self::ACTION_FLAG:
           $result[] = parent::applyFlagEffect(
