@@ -30,6 +30,7 @@ final class PhabricatorAuthStartController
     // it and warn the user they may need to nuke their cookies.
 
     $session_token = $request->getCookie(PhabricatorCookies::COOKIE_SESSION);
+
     if (strlen($session_token)) {
       $kind = PhabricatorAuthSessionEngine::getSessionKindFromToken(
         $session_token);
@@ -87,10 +88,7 @@ final class PhabricatorAuthStartController
 
     if (!$request->isFormPost()) {
       PhabricatorCookies::setNextURICookie($request, $next_uri);
-
-      $request->setCookie(
-        PhabricatorCookies::COOKIE_CLIENTID,
-        Filesystem::readRandomCharacters(16));
+      PhabricatorCookies::setClientIDCookie($request);
     }
 
     $not_buttons = array();

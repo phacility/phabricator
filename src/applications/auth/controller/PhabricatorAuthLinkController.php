@@ -79,9 +79,7 @@ final class PhabricatorAuthLinkController
 
     $panel_uri = '/settings/panel/external/';
 
-    $request->setCookie(
-      PhabricatorCookies::COOKIE_CLIENTID,
-      Filesystem::readRandomCharacters(16));
+    PhabricatorCookies::setClientIDCookie($request);
 
     switch ($this->action) {
       case 'link':

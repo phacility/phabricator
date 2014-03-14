@@ -181,7 +181,7 @@ final class PhabricatorAuthLoginController
       $account->save();
     unset($unguarded);
 
-    $this->getRequest()->setCookie(
+    $this->getRequest()->setTemporaryCookie(
       PhabricatorCookies::COOKIE_REGISTRATION,
       $registration_key);
 
