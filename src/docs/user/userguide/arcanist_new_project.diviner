@@ -3,40 +3,58 @@
 
 Explains how to configure Arcanist projects with `.arcconfig` files.
 
+= Overview =
+
+In most cases, you should be able to use `arc` without specifically configuring
+your project for it. If you want to adjust `arc` behaviors, you can create a
+`.arcconfig` file in your project to provide project-specific settings.
+
 = .arcconfig Basics =
 
-An ##.arcconfig## file is a JSON file which you check into your project's root.
+An `.arcconfig` file is a JSON file which you check into your project's root.
 
-Arcanist uses ##.arcconfig## files to determine a number of things about project
-configuration. For instance, these are some of the things it figures out from
-##.arcconfig##:
+Arcanist uses `.arcconfig` files to customize a number of things about its
+behavior. The first thing you're likely to want to configure is the URI
+for your Phabricator install. A simple, valid file looks something like this:
 
-  - where the logical root directory of a project is;
-  - which server Arcanist should send diffs to for code review; and
-  - which lint rules should be applied.
-
-A simple, valid file looks something like this:
-
+  name=.arcconfig
   {
-    "project_id" : "some_project_name",
-    "conduit_uri" : "https://phabricator.example.com/"
+    "phabricator.uri" : "https://phabricator.example.com/"
   }
 
-Here's what these options mean:
-
-  - **project_id**: a human-readable string identifying the project
-  - **conduit_uri**: the URI for the Phabricator installation that Arcanist
-    should send diffs to for review. Be mindful about "http" vs "https".
-
-For an exhaustive list of available options, see below.
+For details on available options, see below.
 
 NOTE: You should commit your `.arcconfig` file! It contains project
 configuration, not user configuration.
 
 = Advanced .arcconfig =
 
+Common options are:
+
+  - **phabricator.uri**: the URI for the Phabricator install that `arc` should
+    connect to when run in this project. This option was previously called
+    `conduit_uri`.
+  - **repository.callsign**: The callsign of this repository in Diffusion.
+    Normally, `arc` can detect this automatically, but if it can't figure it out
+    you can specify it explicitly. Use `arc which` to understand the detection
+    process.
+  - **history.immutable**: Configures `arc` to use workflows which never rewrite
+    history in the working copy. By default, `arc` will perform some rewriting
+    of unpublished history (amending commit messages, squash merging) on some
+    workflows in Git. The distinctions are covered in detail below.
+
 Other options include:
 
+  - **load**: list of additional Phutil libraries to load at startup.
+    See below for details about path resolution, or see
+    @{article:libphutil Libraries User Guide} for a general introduction to
+    libphutil libraries.
+  - **project.name**: name an "Arcanist Project" to associate this working
+    copy (Git, Mercurial) or directory (SVN) with. Previously, this was a
+    required option, but `arc` can now usually operate without it in Git and
+    Mercurial. This option was previously called `project_id`.
+  - **https.cabundle**: specifies the path to an alternate certificate bundle
+    for use when making HTTPS connections.
   - **lint.engine**: the name of a subclass of
     @{class@arcanist:ArcanistLintEngine}, which should be used to apply lint
     rules to this project. See @{article:Arcanist User Guide: Lint}.
@@ -44,15 +62,21 @@ Other options include:
     @{class@arcanist:ArcanistBaseUnitTestEngine}, which should be used to apply
     unit test rules to this project. See
     @{article:Arcanist User Guide: Customizing Lint, Unit Tests and Workflows}.
-  - **arcanist_configuration**: the name of a subclass of
-    @{class@arcanist:ArcanistConfiguration} which can add new command flags for
-    this project or provide entirely new commands.
-  - **history.immutable**: controls how `arc diff` and some other commands
-    behave in Git and Mercurial. See below.
-  - **load**: list of additional Phutil libraries to load at startup.
-    See below for details about path resolution, or see
-    @{article:libphutil Libraries User Guide} for a general introduction to
-    libphutil libraries.
+
+These options are supported, but their use is discouraged:
+
+  - **http.basicauth.user**: specify an HTTP basic auth username for use when
+    connecting to Phabricator.
+  - **http.basicauth.pass**: specify an HTTP basic auth password for use when
+    connecting to Phabricator.
+  - **https.blindly-trust-domains**: a list of domains to trust blindly over
+    HTTPS, even if their certificates are invalid. This is a brute force
+    solution to certificate validity problems, and is discouraged. Instead,
+    use valid certificates.
+
+For a complete list of options, run `arc set-config --show`. Although all
+options can be set in `.arcconfig`, some options (like `editor`) usually do not
+make sense to set here because they're likely to vary from user to user.
 
 = History Mutability =
 
