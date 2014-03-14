@@ -59,29 +59,22 @@ final class PhabricatorSettingsPanelHomePreferences
 
     $output = array();
 
-    $applications = PhabricatorApplication::getAllInstalledApplications();
+    $app_groups = mgroup($apps, 'getApplicationGroup');
+    $app_groups = array_select_keys($app_groups, array_keys($group_map));
 
-    $applications = mgroup($applications, 'getApplicationGroup');
-
-    $applications = array_select_keys(
-    $applications,
-    array_keys($group_map));
-
-    foreach ($applications as $group => $apps) {
+    foreach ($app_groups as $group => $apps) {
       $group_name = $group_map[$group];
       $rows = array();
 
       foreach ($apps as $app) {
         if (!$app->shouldAppearInLaunchView()) {
-        continue;
+          continue;
         }
 
         $default = $app->getDefaultTileDisplay($user);
         if ($default == PhabricatorApplication::TILE_INVISIBLE) {
           continue;
         }
-
-
 
         $default_name = PhabricatorApplication::getTileDisplayName($default);
 

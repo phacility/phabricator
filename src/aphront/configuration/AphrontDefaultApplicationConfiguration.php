@@ -23,15 +23,9 @@ class AphrontDefaultApplicationConfiguration
         '' => 'DarkConsoleController',
         'data/(?P<key>[^/]+)/' => 'DarkConsoleDataController',
       ),
-
-      '/status/' => 'PhabricatorStatusController',
-
-
       '/help/' => array(
         'keyboardshortcut/' => 'PhabricatorHelpKeyboardShortcutController',
       ),
-
-      '/debug/' => 'PhabricatorDebugController',
     );
   }
 
