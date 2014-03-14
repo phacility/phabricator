@@ -49,7 +49,7 @@ final class PhabricatorUserEmail extends PhabricatorUserDAO {
     // To this end, we're roughly verifying that there's some normal text, an
     // "@" symbol, and then some more normal text.
 
-    $email_regex = '(^[a-z0-9_+.!-]+@[a-z0-9_+:.-]+$)i';
+    $email_regex = '(^[a-z0-9_+.!-]+@[a-z0-9_+:.-]+\z)i';
     if (!preg_match($email_regex, $address)) {
       return false;
     }

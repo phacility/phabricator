@@ -41,7 +41,7 @@ final class ConduitAPI_diffusion_getcommits_Method
     $commits = array_fill_keys($commits, array());
     foreach ($commits as $name => $info) {
       $matches = null;
-      if (!preg_match('/^r([A-Z]+)([0-9a-f]+)$/', $name, $matches)) {
+      if (!preg_match('/^r([A-Z]+)([0-9a-f]+)\z/', $name, $matches)) {
         $results[$name] = array(
           'error' => 'ERR-UNPARSEABLE',
         );

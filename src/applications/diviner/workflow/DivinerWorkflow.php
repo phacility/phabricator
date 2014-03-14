@@ -52,7 +52,7 @@ abstract class DivinerWorkflow extends PhabricatorManagementWorkflow {
     }
     $book['root'] = Filesystem::resolvePath($book['root'], $full_path);
 
-    if (!preg_match('/^[a-z][a-z-]*$/', $book['name'])) {
+    if (!preg_match('/^[a-z][a-z-]*\z/', $book['name'])) {
       $name = $book['name'];
       throw new PhutilArgumentUsageException(
         "Book configuration '{$book_path}' has name '{$name}', but book names ".

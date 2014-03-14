@@ -409,6 +409,23 @@ final class ManiphestTransactionEditor
     }
   }
 
+  protected function adjustObjectForPolicyChecks(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $copy = parent::adjustObjectForPolicyChecks($object, $xactions);
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case ManiphestTransaction::TYPE_OWNER:
+          $copy->setOwnerPHID($xaction->getNewValue());
+          break;
+        default:
+          continue;
+      }
+    }
+
+    return $copy;
+  }
 
   private function getNextSubpriority($pri, $sub) {
 

@@ -27,6 +27,13 @@ final class PhabricatorUserEmailTestCase extends PhabricatorTestCase {
       '@@' => false,
       '@' => false,
       'user@' => false,
+
+      "user@domain.com\n" => false,
+      "user@\ndomain.com" => false,
+      "\nuser@domain.com" => false,
+      "user@domain.com\r" => false,
+      "user@\rdomain.com" => false,
+      "\ruser@domain.com" => false,
     );
 
     foreach ($tests as $input => $expect) {

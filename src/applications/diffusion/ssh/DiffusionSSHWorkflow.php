@@ -54,7 +54,7 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
   protected function loadRepository($path) {
     $viewer = $this->getUser();
 
-    $regex = '@^/?diffusion/(?P<callsign>[A-Z]+)(?:/|$)@';
+    $regex = '@^/?diffusion/(?P<callsign>[A-Z]+)(?:/|\z)@';
     $matches = null;
     if (!preg_match($regex, $path, $matches)) {
       throw new Exception(

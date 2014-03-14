@@ -4,9 +4,15 @@ final class PHUITimelineView extends AphrontView {
 
   private $events = array();
   private $id;
+  private $shouldTerminate = false;
 
   public function setID($id) {
     $this->id = $id;
+    return $this;
+  }
+
+  public function setShouldTerminate($term) {
+    $this->shouldTerminate = $term;
     return $this;
   }
 
@@ -91,6 +97,10 @@ final class PHUITimelineView extends AphrontView {
       $events = array($spacer);
     }
 
+    if ($this->shouldTerminate) {
+      $events[] = self::renderEnder(true);
+    }
+
     return phutil_tag(
       'div',
       array(
@@ -109,4 +119,15 @@ final class PHUITimelineView extends AphrontView {
       ),
       '');
   }
+
+  public static function renderEnder() {
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-timeline-event-view '.
+                   'the-worlds-end',
+      ),
+      '');
+  }
+
 }

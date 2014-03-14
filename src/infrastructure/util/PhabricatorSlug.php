@@ -10,6 +10,24 @@ final class PhabricatorSlug {
     $slug = preg_replace('@_+@', '_', $slug);
     $slug = trim($slug, '_');
 
+    // Specifically rewrite these slugs. It's OK to have a slug like "a..b",
+    // but not a slug which is only "..".
+
+    // NOTE: These are explicitly not pht()'d, because they should be stable
+    // across languages.
+
+    $replace = array(
+      '.'   => 'dot',
+      '..'  => 'dotdot',
+    );
+
+    foreach ($replace as $pattern => $replacement) {
+      $pattern = preg_quote($pattern, '@');
+      $slug = preg_replace(
+        '@(^|/)'.$pattern.'(\z|/)@',
+        '\1'.$replacement.'\2', $slug);
+    }
+
     return $slug.'/';
   }
 

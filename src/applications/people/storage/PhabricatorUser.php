@@ -610,7 +610,7 @@ EOBODY;
       return false;
     }
 
-    return (bool)preg_match('/^[a-zA-Z0-9._-]*[a-zA-Z0-9_-]$/', $username);
+    return (bool)preg_match('/^[a-zA-Z0-9._-]*[a-zA-Z0-9_-]\z/', $username);
   }
 
   public static function getDefaultProfileImageURI() {

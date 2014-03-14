@@ -365,7 +365,7 @@ final class DiffusionRepositoryCreateController
       $c_call->setError(pht('Required'));
       $page->addPageError(
         pht('You must choose a callsign for this repository.'));
-    } else if (!preg_match('/^[A-Z]+$/', $v_call)) {
+    } else if (!preg_match('/^[A-Z]+\z/', $v_call)) {
       $c_call->setError(pht('Invalid'));
       $page->addPageError(
         pht('The callsign must contain only UPPERCASE letters.'));

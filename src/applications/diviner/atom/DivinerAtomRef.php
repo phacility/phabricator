@@ -43,7 +43,7 @@ final class DivinerAtomRef {
 
   public function setName($name) {
     $normal_name = self::normalizeString($name);
-    if (preg_match('/^@[0-9]+$/', $normal_name)) {
+    if (preg_match('/^@[0-9]+\z/', $normal_name)) {
       throw new Exception(
         "Atom names must not be in the form '/@\d+/'. This pattern is ".
         "reserved for disambiguating atoms with similar names.");

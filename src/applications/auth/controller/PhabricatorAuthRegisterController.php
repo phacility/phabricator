@@ -57,8 +57,13 @@ final class PhabricatorAuthRegisterController
 
     $default_username = $account->getUsername();
     $default_realname = $account->getRealName();
+
     $default_email = $account->getEmail();
-    if ($default_email) {
+    if (!PhabricatorUserEmail::isValidAddress($default_email)) {
+      $default_email = null;
+    }
+
+    if ($default_email !== null) {
       // If the account source provided an email, but it's not allowed by
       // the configuration, roadblock the user. Previously, we let the user
       // pick a valid email address instead, but this does not align well with
@@ -84,7 +89,7 @@ final class PhabricatorAuthRegisterController
       // TODO: See T3340.
       // TODO: See T3472.
 
-      if ($default_email) {
+      if ($default_email !== null) {
         $same_email = id(new PhabricatorUserEmail())->loadOneWhere(
           'address = %s',
           $default_email);
