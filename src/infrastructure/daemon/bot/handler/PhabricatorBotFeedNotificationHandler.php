@@ -11,14 +11,16 @@ final class PhabricatorBotFeedNotificationHandler
   private $startupDelay = 30;
   private $lastSeenChronoKey = 0;
 
+  private $typesNeedURI = array('DREV', 'TASK');
+
   private function shouldShowStory($story) {
-    $story_class = $story['class'];
+    $story_objectphid = $story['objectPHID'];
     $story_text = $story['text'];
 
     $show = $this->getConfig('notification.types');
 
     if ($show) {
-      $obj_type = str_replace('PhabricatorFeedStory', '', $story_class);
+      $obj_type = phid_get_type($story_objectphid);
       if (!in_array(strtolower($obj_type), $show)) {
         return false;
       }
@@ -62,6 +64,8 @@ final class PhabricatorBotFeedNotificationHandler
                      'closed',
                      'raised',
                      'committed',
+                     'abandoned',
+                     'reclaimed',
                      'reopened',
                      'deleted'
                    );
@@ -148,6 +152,18 @@ final class PhabricatorBotFeedNotificationHandler
           continue;
         }
 
+        $message = $story['text'];
+
+        $story_object_type = phid_get_type($story['objectPHID']);
+        if (in_array($story_object_type, $this->typesNeedURI)) {
+          $objects = $this->getConduit()->callMethodSynchronous(
+            'phid.lookup',
+            array(
+              'names' => array($story['objectPHID']),
+            ));
+          $message .= ' '.$objects[$story['objectPHID']]['uri'];
+        }
+
         $channels = $this->getConfig('join');
         foreach ($channels as $channel_name) {
 
@@ -158,7 +174,7 @@ final class PhabricatorBotFeedNotificationHandler
             id(new PhabricatorBotMessage())
             ->setCommand('MESSAGE')
             ->setTarget($channel)
-            ->setBody($story['text']));
+            ->setBody($message));
         }
       }
     }
