@@ -289,6 +289,18 @@ abstract class PhabricatorApplicationTransaction
     }
   }
 
+  private function renderSubscriberList(array $phids, $change_type) {
+    if ($this->getRenderingTarget() == self::TARGET_TEXT) {
+      return $this->renderHandleList($phids);
+    } else {
+      $handles = array_select_keys($this->getHandles(), $phids);
+      return id(new SubscriptionListStringBuilder())
+        ->setHandles($handles)
+        ->setObjectPHID($this->getPHID())
+        ->buildTransactionString($change_type);
+    }
+  }
+
   public function renderPolicyName($phid) {
     $policy = PhabricatorPolicy::newFromPolicyAndHandle(
       $phid,
@@ -455,21 +467,21 @@ abstract class PhabricatorApplicationTransaction
             '%s edited subscriber(s), added %d: %s; removed %d: %s.',
             $this->renderHandleLink($author_phid),
             count($add),
-            $this->renderHandleList($add),
+            $this->renderSubscriberList($add, 'add'),
             count($rem),
-            $this->renderHandleList($rem));
+            $this->renderSubscriberList($rem, 'rem'));
         } else if ($add) {
           return pht(
             '%s added %d subscriber(s): %s.',
             $this->renderHandleLink($author_phid),
             count($add),
-            $this->renderHandleList($add));
+            $this->renderSubscriberList($add, 'add'));
         } else if ($rem) {
           return pht(
             '%s removed %d subscriber(s): %s.',
             $this->renderHandleLink($author_phid),
             count($rem),
-            $this->renderHandleList($rem));
+            $this->renderSubscriberList($rem, 'rem'));
         } else {
           // This is used when rendering previews, before the user actually
           // selects any CCs.
