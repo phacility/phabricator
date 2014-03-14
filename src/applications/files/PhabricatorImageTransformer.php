@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @task enormous Detecting Enormous Images
+ * @task save     Saving Image Data
+ */
 final class PhabricatorImageTransformer {
 
   public function executeMemeTransform(
@@ -231,6 +235,7 @@ final class PhabricatorImageTransformer {
 
     return $scale;
   }
+
   private function generatePreview(PhabricatorFile $file, $size) {
     $data = $file->loadFileData();
     $src = imagecreatefromstring($data);
@@ -392,45 +397,7 @@ final class PhabricatorImageTransformer {
     );
   }
 
-  public static function saveImageDataInAnyFormat($data, $preferred_mime = '') {
-    switch ($preferred_mime) {
-      case 'image/gif': // Gif doesn't support true color
-        ob_start();
-        imagegif($data);
-        return ob_get_clean();
-        break;
-      case 'image/png':
-        if (function_exists('imagepng')) {
-          ob_start();
-          imagepng($data, null, 9);
-          return ob_get_clean();
-        }
-        break;
-    }
-
-    $img = null;
-
-    if (function_exists('imagejpeg')) {
-      ob_start();
-      imagejpeg($data);
-      $img = ob_get_clean();
-    } else if (function_exists('imagepng')) {
-      ob_start();
-      imagepng($data, null, 9);
-      $img = ob_get_clean();
-    } else if (function_exists('imagegif')) {
-      ob_start();
-      imagegif($data);
-      $img = ob_get_clean();
-    } else {
-      throw new Exception("No image generation functions exist!");
-    }
-
-    return $img;
-  }
-
   private function applyScaleWithImagemagick(PhabricatorFile $file, $dx, $dy) {
-
     $img_type = $file->getMimeType();
     $imagemagick = PhabricatorEnv::getEnvConfig('files.enable-imagemagick');
 
@@ -444,6 +411,10 @@ final class PhabricatorImageTransformer {
     $x = imagesx($src);
     $y = imagesy($src);
 
+    if (self::isEnormousGIF($x, $y)) {
+      return null;
+    }
+
     $scale = min(($dx / $x), ($dy / $y), 1);
 
     $sdx = $scale * $x;
@@ -454,17 +425,19 @@ final class PhabricatorImageTransformer {
 
     $resized = new TempFile();
 
-    list($err) = exec_manual(
-                 'convert %s -coalesce -resize %sX%s\! %s'
-                  , $input, $sdx, $sdy, $resized);
+    $future = new ExecFuture(
+      'convert %s -coalesce -resize %sX%s%s %s',
+      $input,
+      $sdx,
+      $sdy,
+      '!',
+      $resized);
 
-    if (!$err) {
-      $new_data = Filesystem::readFile($resized);
-      return $new_data;
-    } else {
-      return null;
-    }
+    // Don't spend more than 10 seconds resizing; just fail if it takes longer
+    // than that.
+    $future->setTimeout(10)->resolvex();
 
+    return Filesystem::readFile($resized);
   }
 
   private function applyMemeWithImagemagick(
@@ -475,14 +448,19 @@ final class PhabricatorImageTransformer {
     $img_type) {
 
     $output = new TempFile();
-
-    execx('convert %s -coalesce +adjoin %s_%%09d',
+    $future = new ExecFuture(
+      'convert %s -coalesce +adjoin %s_%s',
       $input,
-      $input);
+      $input,
+      '%09d');
+    $future->setTimeout(10)->resolvex();
 
+    $output_files = array();
     for ($ii = 0; $ii < $count; $ii++) {
       $frame_name = sprintf('%s_%09d', $input, $ii);
       $output_name = sprintf('%s_%09d', $output, $ii);
+
+      $output_files[] = $output_name;
 
       $frame_data = Filesystem::readFile($frame_name);
       $memed_frame_data = $this->applyMemeTo(
@@ -493,9 +471,186 @@ final class PhabricatorImageTransformer {
       Filesystem::writeFile($output_name, $memed_frame_data);
     }
 
-    execx('convert -loop 0 %s_* %s', $output, $output);
+    $future = new ExecFuture('convert -loop 0 %Ls %s', $output_files, $output);
+    $future->setTimeout(10)->resolvex();
 
     return Filesystem::readFile($output);
   }
+
+/* -(  Detecting Enormous Files  )------------------------------------------- */
+
+
+  /**
+   * Determine if an image is enormous (too large to transform).
+   *
+   * Attackers can perform a denial of service attack by uploading highly
+   * compressible images with enormous dimensions but a very small filesize.
+   * Transforming them (e.g., into thumbnails) may consume huge quantities of
+   * memory and CPU relative to the resources required to transmit the file.
+   *
+   * In general, we respond to these images by declining to transform them, and
+   * using a default thumbnail instead.
+   *
+   * @param int Width of the image, in pixels.
+   * @param int Height of the image, in pixels.
+   * @return bool True if this image is enormous (too large to transform).
+   * @task enormous
+   */
+  public static function isEnormousImage($x, $y) {
+    // This is just a sanity check, but if we don't have valid dimensions we
+    // shouldn't be trying to transform the file.
+    if (($x <= 0) || ($y <= 0)) {
+      return true;
+    }
+
+    return ($x * $y) > (4096 * 4096);
+  }
+
+
+  /**
+   * Determine if a GIF is enormous (too large to transform).
+   *
+   * For discussion, see @{method:isEnormousImage}. We need to be more
+   * careful about GIFs, because they can also have a large number of frames
+   * despite having a very small filesize. We're more conservative about
+   * calling GIFs enormous than about calling images in general enormous.
+   *
+   * @param int Width of the GIF, in pixels.
+   * @param int Height of the GIF, in pixels.
+   * @return bool True if this image is enormous (too large to transform).
+   * @task enormous
+   */
+  public static function isEnormousGIF($x, $y) {
+    if (self::isEnormousImage($x, $y)) {
+      return true;
+    }
+
+    return ($x * $y) > (800 * 800);
+  }
+
+
+/* -(  Saving Image Data  )-------------------------------------------------- */
+
+
+  /**
+   * Save an image resource to a string representation suitable for storage or
+   * transmission as an image file.
+   *
+   * Optionally, you can specify a preferred MIME type like `"image/png"`.
+   * Generally, you should specify the MIME type of the original file if you're
+   * applying file transformations. The MIME type may not be honored if
+   * Phabricator can not encode images in the given format (based on available
+   * extensions), but can save images in another format.
+   *
+   * @param   resource  GD image resource.
+   * @param   string?   Optionally, preferred mime type.
+   * @return  string    Bytes of an image file.
+   * @task save
+   */
+  public static function saveImageDataInAnyFormat($data, $preferred_mime = '') {
+    $preferred = null;
+    switch ($preferred_mime) {
+      case 'image/gif':
+        $preferred = self::saveImageDataAsGIF($data);
+        break;
+      case 'image/png':
+        $preferred = self::saveImageDataAsPNG($data);
+        break;
+    }
+
+    if ($preferred !== null) {
+      return $preferred;
+    }
+
+    $data = self::saveImageDataAsJPG($data);
+    if ($data !== null) {
+      return $data;
+    }
+
+    $data = self::saveImageDataAsPNG($data);
+    if ($data !== null) {
+      return $data;
+    }
+
+    $data = self::saveImageDataAsGIF($data);
+    if ($data !== null) {
+      return $data;
+    }
+
+    throw new Exception(pht('Failed to save image data into any format.'));
+  }
+
+
+  /**
+   * Save an image in PNG format, returning the file data as a string.
+   *
+   * @param resource      GD image resource.
+   * @return string|null  PNG file as a string, or null on failure.
+   * @task save
+   */
+  private static function saveImageDataAsPNG($image) {
+    if (!function_exists('imagepng')) {
+      return null;
+    }
+
+    ob_start();
+    $result = imagepng($image, null, 9);
+    $output = ob_get_clean();
+
+    if (!$result) {
+      return null;
+    }
+
+    return $output;
+  }
+
+
+  /**
+   * Save an image in GIF format, returning the file data as a string.
+   *
+   * @param resource      GD image resource.
+   * @return string|null  GIF file as a string, or null on failure.
+   * @task save
+   */
+  private static function saveImageDataAsGIF($image) {
+    if (!function_exists('imagegif')) {
+      return null;
+    }
+
+    ob_start();
+    $result = imagegif($image);
+    $output = ob_get_clean();
+
+    if (!$result) {
+      return null;
+    }
+
+    return $output;
+  }
+
+
+  /**
+   * Save an image in JPG format, returning the file data as a string.
+   *
+   * @param resource      GD image resource.
+   * @return string|null  JPG file as a string, or null on failure.
+   * @task save
+   */
+  private static function saveImageDataAsJPG($image) {
+    if (!function_exists('imagejpeg')) {
+      return null;
+    }
+
+    ob_start();
+    $result = imagejpeg($image);
+    $output = ob_get_clean();
+
+    if (!$result) {
+      return null;
+    }
+
+    return $output;
+  }
+
 
 }
