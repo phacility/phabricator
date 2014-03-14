@@ -15,19 +15,15 @@ final class PhabricatorApplicationOAuthServer extends PhabricatorApplication {
   }
 
   public function getTitleGlyph() {
-    return "~";
+    return "\xE2\x99\x86";
   }
 
   public function getFlavorText() {
-    return pht('yerps');
+    return pht('Login with Phabricator');
   }
 
   public function getApplicationGroup() {
     return self::GROUP_UTILITIES;
-  }
-
-  public function canUninstall() {
-    return false;
   }
 
   public function isBeta() {
