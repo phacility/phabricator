@@ -1,0 +1,41 @@
+@title Reporting Security Vulnerabilities
+@group intro
+
+Describes how to report security vulnerabilities in Phabricator.
+
+= Overview =
+
+Phabricator runs a disclosure and award program through
+[[ https://www.hackerone.com/ | HackerOne ]]. This program is the best way to
+submit security issues to us, and awards responsible disclosure of
+vulnerabilities with cash bounties. You can find our project page
+here:
+
+(NOTE) https://hackerone.com/phabricator
+
+The project page has detailed information about the scope of the program and
+how to participate.
+
+We have a 24 hour response timeline, and are usually able to respond to (and,
+very often, fix) issues more quickly than that.
+
+= Other Channels =
+
+You can also contact us on another channel if you prefer. See
+@{article:Give Feedback! Get Support!} for a list of ways to get in touch
+with us.
+
+= Getting Notified =
+
+When we fix significant security vulnerabilities, we currently publish
+information:
+
+  - on our [[ https://www.facebook.com/phabricator | Facebook Page ]];
+  - on our [[ https://twitter.com/phabricator | Twitter Feed ]];
+  - and on IRC (`#phabricator` on FreeNode).
+
+If you'd prefer to receive information on other channels, let us know.
+
+General information about security is reported monthly in the
+[[ http://phabricator.org/changelog/ | Changelog ]]. This includes low impact
+issues, reports we did not act on, and other details.
