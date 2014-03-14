@@ -11,6 +11,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
   private $showEditActions = true;
   private $isPreview;
   private $objectPHID;
+  private $shouldTerminate = false;
 
   public function setObjectPHID($object_phid) {
     $this->objectPHID = $object_phid;
@@ -48,6 +49,11 @@ class PhabricatorApplicationTransactionView extends AphrontView {
   public function setTransactions(array $transactions) {
     assert_instances_of($transactions, 'PhabricatorApplicationTransaction');
     $this->transactions = $transactions;
+    return $this;
+  }
+
+  public function setShouldTerminate($term) {
+    $this->shouldTerminate = $term;
     return $this;
   }
 
@@ -126,6 +132,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     }
 
     $view = new PHUITimelineView();
+    $view->setShouldTerminate($this->shouldTerminate);
     $events = $this->buildEvents($with_hiding = true);
     foreach ($events as $event) {
       $view->addEvent($event);

@@ -55,6 +55,7 @@ final class PhabricatorProjectEditMainController
     $timeline = id(new PhabricatorApplicationTransactionView())
       ->setUser($viewer)
       ->setObjectPHID($project->getPHID())
+      ->setShouldTerminate(true)
       ->setTransactions($xactions);
 
     return $this->buildApplicationPage(

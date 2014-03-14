@@ -34,7 +34,14 @@
 
 .device-desktop .phui-timeline-spacer {
   min-height: 16px;
-  border-width: 0 0 0 1px;
+}
+
+.device-desktop .phui-timeline-event-view.the-worlds-end {
+  background: {$lightblueborder};
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  margin-left: 74px;
 }
 
 .device-desktop .phui-timeline-wedge {
@@ -267,5 +274,4 @@
   text-align: center;
   padding: 12px;
   color: {$darkgreytext};
-  margin-top: 16px;
 }
