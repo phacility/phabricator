@@ -121,6 +121,7 @@ final class ConduitAPI_feed_query_Method
               'epoch' => $story_data->getEpoch(),
               'authorPHID' => $story_data->getAuthorPHID(),
               'chronologicalKey' => $story_data->getChronologicalKey(),
+              'objectPHID' => $story->getPrimaryObjectPHID(),
               'text' => $story->renderText()
             );
           break;
