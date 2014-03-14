@@ -200,14 +200,18 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     $engine = $this->getOrBuildEngine();
     $comment = $xaction->getComment();
 
-    if ($xaction->hasComment()) {
+    if ($comment) {
       if ($comment->getIsDeleted()) {
         return phutil_tag(
           'em',
           array(),
           pht('This comment has been deleted.'));
-      } else {
+      } else if ($xaction->hasComment()) {
         return $engine->getOutput($comment, $field);
+      } else {
+        // This is an empty, non-deleted comment. Usually this happens when
+        // rendering previews.
+        return null;
       }
     }
 
