@@ -128,13 +128,13 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
             $actor);
 
           if ($committer_name && ($committer_name != $author_name)) {
-            $message = pht(
+            $revision_update_comment = pht(
               'Closed by commit %s (authored by %s, committed by %s).',
               $commit_name,
               $author_name,
               $committer_name);
           } else {
-            $message = pht(
+            $revision_update_comment = pht(
               'Closed by commit %s (authored by %s).',
               $commit_name,
               $author_name);
@@ -170,7 +170,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
             ->setIgnoreOnNoEffect(true)
             ->attachComment(
               id(new DifferentialTransactionComment())
-                ->setContent($message));
+                ->setContent($revision_update_comment));
 
           $content_source = PhabricatorContentSource::newForSource(
             PhabricatorContentSource::SOURCE_DAEMON,
