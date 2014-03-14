@@ -541,6 +541,11 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
+      '%d other(s)' => array(
+        '1 other',
+        '%d others',
+      ),
+
       '%s edited subscriber(s), added %d: %s; removed %d: %s.' =>
         '%s edited subscribers, added: %3$s; removed: %5$s',
 
