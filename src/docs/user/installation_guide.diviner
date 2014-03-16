@@ -22,8 +22,12 @@ You will need **a computer**. Options include:
     you should not install Phabricator on these devices. Instead, install it on
     a normal computer.
 
-You will need an **operating system** which is **not Windows**. Phabricator runs
-on most operating systems which are not Windows.
+To install the Phabricator server software, you will need an **operating
+system** on your normal computer which is **not Windows**. Note that **the
+command line interface //does// work on Windows**, and **you can //use//
+Phabricator from any operating system with a web browser**. However, the server
+software does not run on Windows. It does run on most other operating systems,
+so choose one of these instead:
 
   - **Linux**: Most installs use Linux.
   - **Mac OS X**: Mac OS X is an acceptable flavor of Linux.
@@ -33,9 +37,6 @@ on most operating systems which are not Windows.
   - **Solaris, etc.**: Other systems which look like Linux and quack like Linux
     will generally work fine, although we may suffer a reduced ability to
     support and resolve issues on unusual operating systems.
-
-NOTE: The command line interface to Phabricator, "Arcanist", //does// work on
-Windows. For instructions, see @{article:Arcanist User Guide: Windows}.
 
 Beyond an operating system, you will need **a webserver**.
 
