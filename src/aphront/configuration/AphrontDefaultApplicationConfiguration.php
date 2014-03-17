@@ -23,9 +23,6 @@ class AphrontDefaultApplicationConfiguration
         '' => 'DarkConsoleController',
         'data/(?P<key>[^/]+)/' => 'DarkConsoleDataController',
       ),
-      '/help/' => array(
-        'keyboardshortcut/' => 'PhabricatorHelpKeyboardShortcutController',
-      ),
     );
   }
 
