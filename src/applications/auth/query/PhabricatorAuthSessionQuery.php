@@ -3,6 +3,7 @@
 final class PhabricatorAuthSessionQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
+  private $ids;
   private $identityPHIDs;
   private $sessionKeys;
   private $sessionTypes;
@@ -19,6 +20,11 @@ final class PhabricatorAuthSessionQuery
 
   public function withSessionTypes(array $types) {
     $this->sessionTypes = $types;
+    return $this;
+  }
+
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
     return $this;
   }
 
@@ -61,6 +67,13 @@ final class PhabricatorAuthSessionQuery
 
   protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
+
+    if ($this->ids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'id IN (%Ld)',
+        $this->ids);
+    }
 
     if ($this->identityPHIDs) {
       $where[] = qsprintf(
