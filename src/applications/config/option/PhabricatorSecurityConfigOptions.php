@@ -12,8 +12,7 @@ final class PhabricatorSecurityConfigOptions
   }
 
   public function getOptions() {
-    $support_href = PhabricatorEnv::getDoclink(
-      'article/feedback.html');
+    $support_href = PhabricatorEnv::getDoclink('Give Feedback! Get Support!');
 
     return array(
       $this->newOption('security.alternate-file-domain', 'string', null)

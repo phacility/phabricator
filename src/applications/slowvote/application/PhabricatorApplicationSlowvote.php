@@ -19,7 +19,7 @@ final class PhabricatorApplicationSlowvote extends PhabricatorApplication {
   }
 
   public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('article/Slowvote_User_Guide.html');
+    return PhabricatorEnv::getDoclink('Slowvote User Guide');
   }
 
   public function getFlavorText() {

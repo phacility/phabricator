@@ -84,8 +84,7 @@ final class PholioInlineCommentSaveView extends AphrontView {
     $formatting = phutil_tag(
       'a',
       array(
-        'href' => PhabricatorEnv::getDoclink(
-          'article/Remarkup_Reference.html'),
+        'href' => PhabricatorEnv::getDoclink('Remarkup Reference'),
         'tabindex' => '-1',
         'target' => '_blank',
       ),

@@ -19,7 +19,7 @@ final class PhabricatorApplicationPhame extends PhabricatorApplication {
   }
 
   public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('article/Phame_User_Guide.html');
+    return PhabricatorEnv::getDoclink('Phame User Guide');
   }
 
   public function getApplicationGroup() {

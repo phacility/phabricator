@@ -19,7 +19,7 @@ final class PhabricatorApplicationOwners extends PhabricatorApplication {
   }
 
   public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('article/Owners_Tool_User_Guide.html');
+    return PhabricatorEnv::getDoclink('Owners Tool User Guide');
   }
 
   public function getFlavorText() {

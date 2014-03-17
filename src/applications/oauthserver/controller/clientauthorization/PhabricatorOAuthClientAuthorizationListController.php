@@ -47,7 +47,7 @@ extends PhabricatorOAuthClientAuthorizationBaseController {
       $updated = phabricator_datetime($authorization->getDateModified(),
         $current_user);
       $scope_doc_href = PhabricatorEnv::getDoclink(
-        'article/Using_the_Phabricator_OAuth_Server.html#scopes');
+        'Using the Phabricator OAuth Server');
       $row = array(
         phutil_tag(
           'a',

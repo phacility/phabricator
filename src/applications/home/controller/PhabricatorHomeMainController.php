@@ -324,7 +324,7 @@ final class PhabricatorHomeMainController
 
     require_celerity_resource('phabricator-jump-nav');
 
-    $doc_href = PhabricatorEnv::getDocLink('article/Jump_Nav_User_Guide.html');
+    $doc_href = PhabricatorEnv::getDocLink('Jump Nav User Guide');
     $doc_link = phutil_tag(
       'a',
       array(

@@ -336,8 +336,12 @@ final class PhabricatorEnv {
    *
    * @task read
    */
-  public static function getDoclink($resource) {
-    return 'http://www.phabricator.com/docs/phabricator/'.$resource;
+  public static function getDoclink($resource, $type = 'article') {
+    $uri = new PhutilURI('https://secure.phabricator.com/diviner/find/');
+    $uri->setQueryParam('name', $resource);
+    $uri->setQueryParam('type', $type);
+    $uri->setQueryParam('jump', true);
+    return (string)$uri;
   }
 
 
