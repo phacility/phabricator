@@ -709,5 +709,20 @@ final class ManiphestTransaction
     return $tags;
   }
 
+  public function getNoEffectDescription() {
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_STATUS:
+        return pht('The task already has the selected status.');
+      case self::TYPE_OWNER:
+        return pht('The task already has the selected owner.');
+      case self::TYPE_PROJECTS:
+        return pht('The task is already associated with those projects.');
+      case self::TYPE_PRIORITY:
+        return pht('The task already has the selected priority.');
+    }
+
+    return parent::getNoEffectDescription();
+  }
 
 }

@@ -287,12 +287,26 @@ final class AphrontRequest {
 
   final public function getCookie($name, $default = null) {
     $name = $this->getPrefixedCookieName($name);
-    return idx($_COOKIE, $name, $default);
+    $value = idx($_COOKIE, $name, $default);
+
+    // Internally, PHP deletes cookies by setting them to the value 'deleted'
+    // with an expiration date in the past.
+
+    // At least in Safari, the browser may send this cookie anyway in some
+    // circumstances. After logging out, the 302'd GET to /login/ consistently
+    // includes deleted cookies on my local install. If a cookie value is
+    // literally 'deleted', pretend it does not exist.
+
+    if ($value === 'deleted') {
+      return null;
+    }
+
+    return $value;
   }
 
   final public function clearCookie($name) {
     $name = $this->getPrefixedCookieName($name);
-    $this->setCookie($name, '', time() - (60 * 60 * 24 * 30));
+    $this->setCookieWithExpiration($name, '', time() - (60 * 60 * 24 * 30));
     unset($_COOKIE[$name]);
   }
 
@@ -348,7 +362,51 @@ final class AphrontRequest {
     return (bool)$this->getCookieDomainURI();
   }
 
-  final public function setCookie($name, $value, $expire = null) {
+
+  /**
+   * Set a cookie which does not expire for a long time.
+   *
+   * To set a temporary cookie, see @{method:setTemporaryCookie}.
+   *
+   * @param string  Cookie name.
+   * @param string  Cookie value.
+   * @return this
+   * @task cookie
+   */
+  final public function setCookie($name, $value) {
+    $far_future = time() + (60 * 60 * 24 * 365 * 5);
+    return $this->setCookieWithExpiration($name, $value, $far_future);
+  }
+
+
+  /**
+   * Set a cookie which expires soon.
+   *
+   * To set a durable cookie, see @{method:setCookie}.
+   *
+   * @param string  Cookie name.
+   * @param string  Cookie value.
+   * @return this
+   * @task cookie
+   */
+  final public function setTemporaryCookie($name, $value) {
+    return $this->setCookieWithExpiration($name, $value, 0);
+  }
+
+
+  /**
+   * Set a cookie with a given expiration policy.
+   *
+   * @param string  Cookie name.
+   * @param string  Cookie value.
+   * @param int     Epoch timestamp for cookie expiration.
+   * @return this
+   * @task cookie
+   */
+  final private function setCookieWithExpiration(
+    $name,
+    $value,
+    $expire) {
 
     $is_secure = false;
 
@@ -370,10 +428,6 @@ final class AphrontRequest {
 
     $base_domain = $base_domain_uri->getDomain();
     $is_secure = ($base_domain_uri->getProtocol() == 'https');
-
-    if ($expire === null) {
-      $expire = time() + (60 * 60 * 24 * 365 * 5);
-    }
 
     $name = $this->getPrefixedCookieName($name);
 

@@ -1,17 +1,10 @@
 <?php
 
-/**
- * @group maniphest
- */
 final class ManiphestTransactionSaveController extends ManiphestController {
 
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
-
-    // TODO: T603 This doesn't require CAN_EDIT because non-editors can still
-    // leave comments, probably? For now, this just nondisruptive. Smooth this
-    // out once policies are more clear.
 
     $task = id(new ManiphestTaskQuery())
       ->setViewer($user)
@@ -20,6 +13,8 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     if (!$task) {
       return new Aphront404Response();
     }
+
+    $task_uri = '/'.$task->getMonogram();
 
     $transactions = array();
 
@@ -135,14 +130,6 @@ final class ManiphestTransactionSaveController extends ManiphestController {
       $transactions[] = $transaction;
     }
 
-    if ($request->getStr('comments')) {
-      $transactions[] = id(new ManiphestTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
-        ->attachComment(
-          id(new ManiphestTransactionComment())
-            ->setContent($request->getStr('comments')));
-    }
-
     // When you interact with a task, we add you to the CC list so you get
     // further updates, and possibly assign the task to you if you took an
     // ownership action (closing it) but it's currently unowned. We also move
@@ -208,6 +195,15 @@ final class ManiphestTransactionSaveController extends ManiphestController {
       $transactions[] = $cc_transaction;
     }
 
+    $comments = $request->getStr('comments');
+    if (strlen($comments) || !$transactions) {
+      $transactions[] = id(new ManiphestTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+        ->attachComment(
+          id(new ManiphestTransactionComment())
+            ->setContent($comments));
+    }
+
     $event = new PhabricatorEvent(
       PhabricatorEventType::TYPE_MANIPHEST_WILLEDITTASK,
       array(
@@ -226,7 +222,15 @@ final class ManiphestTransactionSaveController extends ManiphestController {
       ->setActor($user)
       ->setContentSourceFromRequest($request)
       ->setContinueOnMissingFields(true)
-      ->applyTransactions($task, $transactions);
+      ->setContinueOnNoEffect($request->isContinueRequest());
+
+    try {
+      $editor->applyTransactions($task, $transactions);
+    } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
+      return id(new PhabricatorApplicationTransactionNoEffectResponse())
+        ->setCancelURI($task_uri)
+        ->setException($ex);
+    }
 
     $draft = id(new PhabricatorDraft())->loadOneWhere(
       'authorPHID = %s AND draftKey = %s',
@@ -247,8 +251,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     $event->setAphrontRequest($request);
     PhutilEventEngine::dispatchEvent($event);
 
-    return id(new AphrontRedirectResponse())
-      ->setURI('/T'.$task->getID());
+    return id(new AphrontRedirectResponse())->setURI($task_uri);
   }
 
 }

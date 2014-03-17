@@ -24,13 +24,29 @@ final class SubscriptionListStringBuilder {
     return $this->objectPHID;
   }
 
+  public function buildTransactionString($change_type) {
+    $handles = $this->getHandles();
+    if (!$handles) {
+      return;
+    }
+    $list_uri = '/subscriptions/transaction/'.
+                $change_type.'/'.
+                $this->getObjectPHID().'/';
+    return $this->buildString($list_uri);
+  }
+
   public function buildPropertyString() {
-    $phid = $this->getObjectPHID();
     $handles = $this->getHandles();
 
     if (!$handles) {
       return phutil_tag('em', array(), pht('None'));
     }
+    $list_uri = '/subscriptions/list/'.$this->getObjectPHID().'/';
+    return $this->buildString($list_uri);
+  }
+
+  private function buildString($list_uri) {
+    $handles = $this->getHandles();
 
     $html = array();
     $show_count = 3;
@@ -53,7 +69,7 @@ final class SubscriptionListStringBuilder {
     $args[] = javelin_tag(
       'a',
       array(
-        'href' => '/subscriptions/list/'.$phid.'/',
+        'href' => $list_uri,
         'sigil' => 'workflow'
       ),
       $not_shown_txt);

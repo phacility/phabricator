@@ -74,10 +74,6 @@ abstract class PhabricatorApplication
     return empty($uninstalled[get_class($this)]);
   }
 
-  public static function isClassInstalled($class) {
-    return self::getByClass($class)->isInstalled();
-  }
-
   public function isBeta() {
     return false;
   }
@@ -288,6 +284,7 @@ abstract class PhabricatorApplication
 
 /* -(  Application Management  )--------------------------------------------- */
 
+
   public static function getByClass($class_name) {
     $selected = null;
     $applications = PhabricatorApplication::getAllApplications();
@@ -342,6 +339,48 @@ abstract class PhabricatorApplication
     }
 
     return $apps;
+  }
+
+
+  /**
+   * Determine if an application is installed, by application class name.
+   *
+   * To check if an application is installed //and// available to a particular
+   * viewer, user @{method:isClassInstalledForViewer}.
+   *
+   * @param string  Application class name.
+   * @return bool   True if the class is installed.
+   * @task meta
+   */
+  public static function isClassInstalled($class) {
+    return self::getByClass($class)->isInstalled();
+  }
+
+
+  /**
+   * Determine if an application is installed and available to a viewer, by
+   * application class name.
+   *
+   * To check if an application is installed at all, use
+   * @{method:isClassInstalled}.
+   *
+   * @param string Application class name.
+   * @param PhabricatorUser Viewing user.
+   * @return bool True if the class is installed for the viewer.
+   * @task meta
+   */
+  public static function isClassInstalledForViewer(
+    $class,
+    PhabricatorUser $viewer) {
+
+    if (!self::isClassInstalled($class)) {
+      return false;
+    }
+
+    return PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      self::getByClass($class),
+      PhabricatorPolicyCapability::CAN_VIEW);
   }
 
 

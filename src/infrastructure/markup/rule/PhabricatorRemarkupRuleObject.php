@@ -42,17 +42,10 @@ abstract class PhabricatorRemarkupRuleObject
   protected function renderObjectRef($object, $handle, $anchor, $id) {
     $href = $handle->getURI();
     $text = $this->getObjectNamePrefix().$id;
+
     if ($anchor) {
-      $matches = null;
-      if (preg_match('@^(?:comment-)?(\d{1,7})$@', $anchor, $matches)) {
-        // Maximum length is 7 because 12345678 could be a file hash in
-        // Differential.
-        $href = $href.'#comment-'.$matches[1];
-        $text = $text.'#'.$matches[1];
-      } else {
-        $href = $href.'#'.$anchor;
-        $text = $text.'#'.$anchor;
-      }
+      $href = $href.'#'.$anchor;
+      $text = $text.'#'.$anchor;
     }
 
     if ($this->getEngine()->isTextMode()) {

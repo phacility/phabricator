@@ -4,7 +4,8 @@
  * Consolidates Phabricator application cookies, including registration
  * and session management.
  *
- * @task next Next URI Cookie
+ * @task clientid   Client ID Cookie
+ * @task next       Next URI Cookie
  */
 final class PhabricatorCookies extends Phobject {
 
@@ -48,6 +49,33 @@ final class PhabricatorCookies extends Phobject {
   const COOKIE_NEXTURI        = 'next_uri';
 
 
+/* -(  Client ID Cookie  )--------------------------------------------------- */
+
+
+  /**
+   * Set the client ID cookie. This is a random cookie used like a CSRF value
+   * during authentication workflows.
+   *
+   * @param AphrontRequest  Request to modify.
+   * @return void
+   * @task clientid
+   */
+  public static function setClientIDCookie(AphrontRequest $request) {
+
+    // NOTE: See T3471 for some discussion. Some browsers and browser extensions
+    // can make duplicate requests, so we overwrite this cookie only if it is
+    // not present in the request. The cookie lifetime is limited by making it
+    // temporary and clearing it when users log out.
+
+    $value = $request->getCookie(self::COOKIE_CLIENTID);
+    if (!strlen($value)) {
+      $request->setTemporaryCookie(
+        self::COOKIE_CLIENTID,
+        Filesystem::readRandomCharacters(16));
+    }
+  }
+
+
 /* -(  Next URI Cookie  )---------------------------------------------------- */
 
 
@@ -83,7 +111,7 @@ final class PhabricatorCookies extends Phobject {
     }
 
     $new_value = time().','.$next_uri;
-    $request->setCookie(self::COOKIE_NEXTURI, $new_value);
+    $request->setTemporaryCookie(self::COOKIE_NEXTURI, $new_value);
   }
 
 
