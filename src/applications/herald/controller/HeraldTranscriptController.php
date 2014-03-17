@@ -297,7 +297,9 @@ final class HeraldTranscriptController extends HeraldController {
         default:
           if ($target) {
             foreach ($target as $k => $phid) {
-              $target[$k] = $handles[$phid]->getName();
+              if (isset($handles[$phid])) {
+                $target[$k] = $handles[$phid]->getName();
+              }
             }
             $target = implode("\n", $target);
           } else {
