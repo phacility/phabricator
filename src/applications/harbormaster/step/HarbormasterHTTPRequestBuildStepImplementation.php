@@ -59,10 +59,18 @@ final class HarbormasterHTTPRequestBuildStepImplementation
       return false;
     }
 
-    if ($settings['method'] === null || $settings['method'] != '' &&
-        !in_array ($settings['method'],
-                    array('GET', 'PUT', 'DELETE', 'POST'))) {
-      return false;
+    $methods = array(
+      'GET' => true,
+      'POST' => true,
+      'DELETE' => true,
+      'PUT' => true,
+    );
+
+    $method = idx($settings, 'method');
+    if (strlen($method)) {
+      if (empty($methods[$method])) {
+        return false;
+      }
     }
 
     return true;
