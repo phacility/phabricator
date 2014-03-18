@@ -20,15 +20,13 @@ final class PhabricatorOAuthClientAuthorizationQuery
     $table  = new PhabricatorOAuthClientAuthorization();
     $conn_r = $table->establishConnection('r');
 
-    $where_clause = $this->buildWhereClause($conn_r);
-    $limit_clause = $this->buildLimitClause($conn_r);
-
     $data = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T auth %Q %Q',
+      'SELECT * FROM %T auth %Q %Q %Q',
       $table->getTableName(),
-      $where_clause,
-      $limit_clause);
+      $this->buildWhereClause($conn_r),
+      $this->buildOrderClause($conn_r),
+      $this->buildLimitClause($conn_r));
 
     return $table->loadAllFromArray($data);
   }

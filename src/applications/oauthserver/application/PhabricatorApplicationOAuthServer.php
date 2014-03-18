@@ -33,12 +33,12 @@ final class PhabricatorApplicationOAuthServer extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/oauthserver/' => array(
-        '' => 'PhabricatorOAuthServerConsoleController',
+        '(?:query/(?P<queryKey>[^/]+)/)?'
+          => 'PhabricatorOAuthClientListController',
         'auth/'          => 'PhabricatorOAuthServerAuthController',
         'test/'          => 'PhabricatorOAuthServerTestController',
         'token/'         => 'PhabricatorOAuthServerTokenController',
         'client/' => array(
-          ''                        => 'PhabricatorOAuthClientListController',
           'create/'                 => 'PhabricatorOAuthClientEditController',
           'delete/(?P<phid>[^/]+)/' => 'PhabricatorOAuthClientDeleteController',
           'edit/(?P<phid>[^/]+)/'   => 'PhabricatorOAuthClientEditController',

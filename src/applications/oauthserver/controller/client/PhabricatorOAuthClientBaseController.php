@@ -21,4 +21,20 @@ abstract class PhabricatorOAuthClientBaseController
   public function willProcessRequest(array $data) {
     $this->setClientPHID(idx($data, 'phid'));
   }
+
+  public function buildSideNavView($for_app = false) {
+    $user = $this->getRequest()->getUser();
+
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
+
+    id(new PhabricatorOAuthServerClientSearchEngine())
+      ->setViewer($user)
+      ->addNavigationItems($nav->getMenu());
+
+    $nav->selectFilter(null);
+
+    return $nav;
+  }
+
 }
