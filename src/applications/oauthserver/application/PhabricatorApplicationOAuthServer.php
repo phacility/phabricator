@@ -48,4 +48,12 @@ final class PhabricatorApplicationOAuthServer extends PhabricatorApplication {
     );
   }
 
+  protected function getCustomCapabilities() {
+    return array(
+      PhabricatorOAuthServerCapabilityCreateClients::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+    );
+  }
+
 }

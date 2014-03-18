@@ -1,15 +1,14 @@
 <?php
 
-/**
- * @group oauthserver
- */
 abstract class PhabricatorOAuthClientBaseController
-extends PhabricatorOAuthServerController {
+  extends PhabricatorOAuthServerController {
 
   private $clientPHID;
+
   protected function getClientPHID() {
     return $this->clientPHID;
   }
+
   private function setClientPHID($phid) {
     $this->clientPHID = $phid;
     return $this;

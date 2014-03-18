@@ -1718,6 +1718,7 @@ phutil_register_library_map(array(
     'PhabricatorOAuthServerAuthController' => 'applications/oauthserver/controller/PhabricatorOAuthServerAuthController.php',
     'PhabricatorOAuthServerAuthorizationCode' => 'applications/oauthserver/storage/PhabricatorOAuthServerAuthorizationCode.php',
     'PhabricatorOAuthServerAuthorizationsSettingsPanel' => 'applications/oauthserver/panel/PhabricatorOAuthServerAuthorizationsSettingsPanel.php',
+    'PhabricatorOAuthServerCapabilityCreateClients' => 'applications/oauthserver/capability/PhabricatorOAuthServerCapabilityCreateClients.php',
     'PhabricatorOAuthServerClient' => 'applications/oauthserver/storage/PhabricatorOAuthServerClient.php',
     'PhabricatorOAuthServerClientQuery' => 'applications/oauthserver/query/PhabricatorOAuthServerClientQuery.php',
     'PhabricatorOAuthServerConsoleController' => 'applications/oauthserver/controller/PhabricatorOAuthServerConsoleController.php',
@@ -4471,6 +4472,7 @@ phutil_register_library_map(array(
     'PhabricatorOAuthServerAuthController' => 'PhabricatorAuthController',
     'PhabricatorOAuthServerAuthorizationCode' => 'PhabricatorOAuthServerDAO',
     'PhabricatorOAuthServerAuthorizationsSettingsPanel' => 'PhabricatorSettingsPanel',
+    'PhabricatorOAuthServerCapabilityCreateClients' => 'PhabricatorPolicyCapability',
     'PhabricatorOAuthServerClient' =>
     array(
       0 => 'PhabricatorOAuthServerDAO',

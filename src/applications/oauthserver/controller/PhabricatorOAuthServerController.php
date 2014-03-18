@@ -1,7 +1,7 @@
 <?php
 
 abstract class PhabricatorOAuthServerController
-extends PhabricatorController {
+  extends PhabricatorController {
 
   public function buildStandardPageResponse($view, array $data) {
     $user = $this->getRequest()->getUser();
