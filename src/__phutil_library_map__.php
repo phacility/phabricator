@@ -4465,7 +4465,11 @@ phutil_register_library_map(array(
     'PhabricatorOAuthClientBaseController' => 'PhabricatorOAuthServerController',
     'PhabricatorOAuthClientDeleteController' => 'PhabricatorOAuthClientBaseController',
     'PhabricatorOAuthClientEditController' => 'PhabricatorOAuthClientBaseController',
-    'PhabricatorOAuthClientListController' => 'PhabricatorOAuthClientBaseController',
+    'PhabricatorOAuthClientListController' =>
+    array(
+      0 => 'PhabricatorOAuthClientBaseController',
+      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
+    ),
     'PhabricatorOAuthClientViewController' => 'PhabricatorOAuthClientBaseController',
     'PhabricatorOAuthResponse' => 'AphrontResponse',
     'PhabricatorOAuthServerAccessToken' => 'PhabricatorOAuthServerDAO',

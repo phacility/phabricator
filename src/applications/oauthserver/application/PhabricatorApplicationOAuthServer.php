@@ -36,7 +36,7 @@ final class PhabricatorApplicationOAuthServer extends PhabricatorApplication {
         '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'PhabricatorOAuthClientListController',
         'auth/'          => 'PhabricatorOAuthServerAuthController',
-        'test/'          => 'PhabricatorOAuthServerTestController',
+        'test/(?P<id>\d+)/' => 'PhabricatorOAuthServerTestController',
         'token/'         => 'PhabricatorOAuthServerTokenController',
         'client/' => array(
           'create/'                 => 'PhabricatorOAuthClientEditController',

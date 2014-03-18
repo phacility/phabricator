@@ -1,47 +1,42 @@
 <?php
 
-/**
- * @group oauthserver
- */
 final class PhabricatorOAuthClientDeleteController
-extends PhabricatorOAuthClientBaseController {
+  extends PhabricatorOAuthClientBaseController {
 
   public function processRequest() {
-    $phid          = $this->getClientPHID();
-    $title         = 'Delete OAuth Client';
-    $request       = $this->getRequest();
-    $current_user  = $request->getUser();
-    $client = id(new PhabricatorOAuthServerClient())
-      ->loadOneWhere('phid = %s',
-                     $phid);
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
 
-    if (empty($client)) {
+    $client = id(new PhabricatorOAuthServerClientQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($this->getClientPHID()))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
+    if (!$client) {
       return new Aphront404Response();
-    }
-    if ($client->getCreatorPHID() != $current_user->getPHID()) {
-      $message = 'Access denied to client with phid '.$phid.'. '.
-                 'Only the user who created the client has permission to '.
-                 'delete the client.';
-      return id(new Aphront403Response())
-        ->setForbiddenText($message);
     }
 
     if ($request->isFormPost()) {
       $client->delete();
-      return id(new AphrontRedirectResponse())
-        ->setURI('/oauthserver/client/?deleted=1');
+      $app_uri = $this->getApplicationURI();
+      return id(new AphrontRedirectResponse())->setURI($app_uri);
     }
 
-    $title .= ' '.$client->getName();
+    $dialog = id(new AphrontDialogView())
+      ->setUser($viewer)
+      ->setTitle(pht('Delete OAuth Application?'))
+      ->appendParagraph(
+        pht(
+          'Really delete the OAuth application %s?',
+          phutil_tag('strong', array(), $client->getName())))
+      ->addCancelButton($client->getViewURI())
+      ->addSubmitButton(pht('Delete Application'));
 
-    $dialog = new AphrontDialogView();
-    $dialog->setUser($current_user);
-    $dialog->setTitle($title);
-    $dialog->appendChild(phutil_tag('p', array(), pht(
-      'Are you sure you want to delete this client?')));
-    $dialog->addSubmitButton();
-    $dialog->addCancelButton($client->getEditURI());
     return id(new AphrontDialogResponse())->setDialog($dialog);
-
   }
+
 }

@@ -1,109 +1,121 @@
 <?php
 
-/**
- * @group oauthserver
- */
 final class PhabricatorOAuthClientViewController
-extends PhabricatorOAuthClientBaseController {
-
-  protected function getFilter() {
-    return 'client/view/'.$this->getClientPHID();
-  }
-
-  protected function getExtraClientFilters() {
-    return array(
-      array('url'   => $this->getFilter(),
-            'label' => 'View Client')
-      );
-  }
+  extends PhabricatorOAuthClientBaseController {
 
   public function processRequest() {
-    $request       = $this->getRequest();
-    $current_user  = $request->getUser();
-    $error         = null;
-    $phid          = $this->getClientPHID();
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
 
-    $client = id(new PhabricatorOAuthServerClient())
-      ->loadOneWhere('phid = %s',
-                     $phid);
-    $title  = 'View OAuth Client';
-
-    // validate the client
-    if (empty($client)) {
-      $message = 'No client found with id '.$phid.'.';
-      return $this->buildStandardPageResponse(
-        $this->buildErrorView($message),
-        array('title' => $title));
+    $client = id(new PhabricatorOAuthServerClientQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($this->getClientPHID()))
+      ->executeOne();
+    if (!$client) {
+      return new Aphront404Response();
     }
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader($title);
+    $header = $this->buildHeaderView($client);
+    $actions = $this->buildActionView($client);
+    $properties = $this->buildPropertyListView($client);
+    $properties->setActionList($actions);
 
-    $form = id(new AphrontFormView())
-      ->setUser($current_user)
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-        ->setLabel('Name')
-        ->setValue($client->getName()))
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-        ->setLabel('ID')
-        ->setValue($phid));
-    if ($current_user->getPHID() == $client->getCreatorPHID()) {
-      $form
-        ->appendChild(
-          id(new AphrontFormStaticControl())
-          ->setLabel('Secret')
-          ->setValue($client->getSecret()));
-    }
-    $form
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-        ->setLabel('Redirect URI')
-        ->setValue($client->getRedirectURI()));
-    $created = phabricator_datetime($client->getDateCreated(),
-                                    $current_user);
-    $updated = phabricator_datetime($client->getDateModified(),
-                                    $current_user);
-    $form
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-        ->setLabel('Created')
-        ->setValue($created))
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-        ->setLabel('Last Updated')
-        ->setValue($updated));
-    $panel->appendChild($form);
-    $admin_panel = null;
-    if ($client->getCreatorPHID() == $current_user->getPHID()) {
-      $edit_button = phutil_tag(
-        'a',
-        array(
-          'href'  => $client->getEditURI(),
-          'class' => 'grey button',
-        ),
-        'Edit OAuth Client');
-      $panel->addButton($edit_button);
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb($client->getName());
 
-      $create_authorization_form = id(new AphrontFormView())
-        ->setUser($current_user)
-        ->addHiddenInput('action', 'testclientauthorization')
-        ->addHiddenInput('client_phid', $phid)
-        ->setAction('/oauthserver/test/')
-        ->appendChild(
-          id(new AphrontFormSubmitControl())
-          ->setValue('Create Scopeless Test Authorization'));
-      $admin_panel = id(new AphrontPanelView())
-        ->setHeader('Admin Tools')
-        ->appendChild($create_authorization_form);
-    }
+    $box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->addPropertyList($properties);
 
-    return $this->buildStandardPageResponse(
-      array($error,
-            $panel,
-            $admin_panel
-    ),
-    array('title' => $title));
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $box,
+      ),
+      array(
+        'title' => pht('OAuth Application: %s', $client->getName()),
+        'device' => true,
+      ));
+  }
+
+  private function buildHeaderView(PhabricatorOAuthServerClient $client) {
+    $viewer = $this->getRequest()->getUser();
+
+    $header = id(new PHUIHeaderView())
+      ->setUser($viewer)
+      ->setHeader(pht('OAuth Application: %s', $client->getName()))
+      ->setPolicyObject($client);
+
+    return $header;
+  }
+
+  private function buildActionView(PhabricatorOAuthServerClient $client) {
+    $viewer = $this->getRequest()->getUser();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $client,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $authorization = id(new PhabricatorOAuthClientAuthorizationQuery())
+      ->setViewer($viewer)
+      ->withUserPHIDs(array($viewer->getPHID()))
+      ->withClientPHIDs(array($client->getPHID()))
+      ->executeOne();
+    $is_authorized = (bool)$authorization;
+
+    $view = id(new PhabricatorActionListView())
+      ->setUser($viewer);
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Application'))
+        ->setIcon('edit')
+        ->setWorkflow(!$can_edit)
+        ->setDisabled(!$can_edit)
+        ->setHref($client->getEditURI()));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Delete Application'))
+        ->setIcon('delete')
+        ->setWorkflow(true)
+        ->setDisabled(!$can_edit)
+        ->setHref($client->getDeleteURI()));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Create Test Authorization'))
+        ->setIcon('wrench')
+        ->setWorkflow(true)
+        ->setDisabled($is_authorized)
+        ->setHref($this->getApplicationURI('test/'.$client->getID().'/')));
+
+    return $view;
+  }
+
+  private function buildPropertyListView(PhabricatorOAuthServerClient $client) {
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer);
+
+    $view->addProperty(
+      pht('Client ID'),
+      $client->getPHID());
+
+    $view->addProperty(
+      pht('Client Secret'),
+      $client->getSecret());
+
+    $view->addProperty(
+      pht('Redirect URI'),
+      $client->getRedirectURI());
+
+    $view->addProperty(
+      pht('Created'),
+      phabricator_datetime($client->getDateCreated(), $viewer));
+
+    return $view;
   }
 }
