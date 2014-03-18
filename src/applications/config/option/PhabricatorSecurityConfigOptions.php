@@ -12,6 +12,8 @@ final class PhabricatorSecurityConfigOptions
   }
 
   public function getOptions() {
+    $support_href = PhabricatorEnv::getDoclink('Give Feedback! Get Support!');
+
     return array(
       $this->newOption('security.alternate-file-domain', 'string', null)
         ->setSummary(pht("Alternate domain to serve files from."))
@@ -125,6 +127,41 @@ final class PhabricatorSecurityConfigOptions
             "javascript:// URIs."))
         ->addExample(
           '{"http": true, "https": true"}', pht('Valid Setting'))
+        ->setLocked(true),
+      $this->newOption(
+        'uri.allowed-editor-protocols',
+        'set',
+        array(
+          'http' => true,
+          'https' => true,
+
+          // This handler is installed by Textmate.
+          'txmt' => true,
+
+          // This handler is for MacVim.
+          'mvim' => true,
+
+          // Unofficial handler for Vim.
+          'vim' => true,
+
+          // Unofficial handler for Sublime.
+          'subl' => true,
+
+          // Unofficial handler for Emacs.
+          'emacs' => true,
+
+          // This isn't a standard handler installed by an application, but
+          // is a reasonable name for a user-installed handler.
+          'editor' => true,
+        ))
+        ->setSummary(pht('Whitelists editor protocols for "Open in Editor".'))
+        ->setDescription(
+          pht(
+            "Users can configure a URI pattern to open files in a text ".
+            "editor. The URI must use a protocol on this whitelist.\n\n".
+            "(If you use an editor which defines a protocol not on this ".
+            "list, [[ %s | let us know ]] and we'll update the defaults.)",
+            $support_href))
         ->setLocked(true),
        $this->newOption(
          'celerity.resource-hash',

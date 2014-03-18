@@ -1,130 +1,65 @@
 <?php
 
-/**
- * @group oauthserver
- */
 final class PhabricatorOAuthClientListController
-extends PhabricatorOAuthClientBaseController {
+  extends PhabricatorOAuthClientBaseController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
 
-  public function getFilter() {
-    return 'client';
+  private $queryKey;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
+
+  public function willProcessRequest(array $data) {
+    $this->queryKey = idx($data, 'queryKey');
   }
 
   public function processRequest() {
-    $title        = 'OAuth Clients';
-    $request      = $this->getRequest();
-    $current_user = $request->getUser();
-    $offset       = $request->getInt('offset', 0);
-    $page_size    = 100;
-    $pager        = new AphrontPagerView();
-    $request_uri  = $request->getRequestURI();
-    $pager->setURI($request_uri, 'offset');
-    $pager->setPageSize($page_size);
-    $pager->setOffset($offset);
+    $request = $this->getRequest();
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->queryKey)
+      ->setSearchEngine(new PhabricatorOAuthServerClientSearchEngine())
+      ->setNavigation($this->buildSideNavView());
 
-    $query = new PhabricatorOAuthServerClientQuery();
-    $query->withCreatorPHIDs(array($current_user->getPHID()));
-    $clients = $query->executeWithOffsetPager($pager);
+    return $this->delegateToController($controller);
+  }
 
-    $rows      = array();
-    $rowc      = array();
-    $highlight = $this->getHighlightPHIDs();
+  public function renderResultsList(
+    array $clients,
+    PhabricatorSavedQuery $query) {
+    assert_instances_of($clients, 'PhabricatorOauthServerClient');
+
+    $viewer = $this->getRequest()->getUser();
+    $this->loadHandles(mpull($clients, 'getCreatorPHID'));
+
+    $list = id(new PHUIObjectItemListView())
+      ->setUser($viewer);
     foreach ($clients as $client) {
-      $row = array(
-        phutil_tag(
-          'a',
-          array(
-            'href' => $client->getViewURI(),
-          ),
-          $client->getName()),
-        $client->getPHID(),
-        $client->getSecret(),
-        phutil_tag(
-          'a',
-          array(
-            'href' => $client->getRedirectURI(),
-          ),
-          $client->getRedirectURI()),
-        phutil_tag(
-          'a',
-          array(
-            'class' => 'small button grey',
-            'href'  => $client->getEditURI(),
-          ),
-          'Edit'),
-      );
+      $creator = $this->getHandle($client->getCreatorPHID());
 
-      $rows[] = $row;
-      if (isset($highlight[$client->getPHID()])) {
-        $rowc[] = 'highlighted';
-      } else {
-        $rowc[] = '';
-      }
+      $item = id(new PHUIObjectItemView())
+        ->setObjectName(pht('Application %d', $client->getID()))
+        ->setHeader($client->getName())
+        ->setHref($client->getViewURI())
+        ->setObject($client)
+        ->addByline(pht('Creator: %s', $creator->renderLink()));
+
+      $list->addItem($item);
     }
 
-    $panel = $this->buildClientList($rows, $rowc, $title);
-
-    return $this->buildStandardPageResponse(
-      array(
-        $this->getNoticeView(),
-        $panel->appendChild($pager)
-      ),
-      array('title' => $title));
+    return $list;
   }
 
-  private function buildClientList($rows, $rowc, $title) {
-    $table = new AphrontTableView($rows);
-    $table->setRowClasses($rowc);
-    $table->setHeaders(
-      array(
-        'Client',
-        'ID',
-        'Secret',
-        'Redirect URI',
-        '',
-      ));
-    $table->setColumnClasses(
-      array(
-        '',
-        '',
-        '',
-        '',
-        'action',
-      ));
-    if (empty($rows)) {
-      $table->setNoDataString(
-        'You have not created any clients for this OAuthServer.');
-    }
+  public function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
 
-    $panel = new AphrontPanelView();
-    $panel->appendChild($table);
-    $panel->setHeader($title);
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+        ->setHref($this->getApplicationURI('client/create/'))
+        ->setName(pht('Create Application'))
+        ->setIcon('create'));
 
-    return $panel;
+    return $crumbs;
   }
 
-  private function getNoticeView() {
-    $edited  = $this->getRequest()->getStr('edited');
-    $new     = $this->getRequest()->getStr('new');
-    $deleted = $this->getRequest()->getBool('deleted');
-    if ($edited) {
-      $title  = 'Successfully edited client with id '.$edited.'.';
-    } else if ($new) {
-      $title = 'Successfully created client with id '.$new.'.';
-    } else if ($deleted) {
-      $title = 'Successfully deleted client.';
-    } else {
-      $title = null;
-    }
-
-    if ($title) {
-      $view   = new AphrontErrorView();
-      $view->setTitle($title);
-      $view->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-    } else {
-      $view = null;
-    }
-
-    return $view;
-  }
 }

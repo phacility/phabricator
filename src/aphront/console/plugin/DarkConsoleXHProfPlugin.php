@@ -43,7 +43,7 @@ final class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
     $profile_uri = $data['profileURI'];
 
     if (!DarkConsoleXHProfPluginAPI::isProfilerAvailable()) {
-      $href = PhabricatorEnv::getDoclink('article/Installation_Guide.html');
+      $href = PhabricatorEnv::getDoclink('Installation Guide');
       $install_guide = phutil_tag(
         'a',
         array(

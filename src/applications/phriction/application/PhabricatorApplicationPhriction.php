@@ -15,7 +15,7 @@ final class PhabricatorApplicationPhriction extends PhabricatorApplication {
   }
 
   public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('article/Phriction_User_Guide.html');
+    return PhabricatorEnv::getDoclink('Phriction User Guide');
   }
 
   public function getTitleGlyph() {

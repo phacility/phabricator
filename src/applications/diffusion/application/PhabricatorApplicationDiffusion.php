@@ -15,7 +15,7 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
   }
 
   public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('article/Diffusion_User_Guide.html');
+    return PhabricatorEnv::getDoclink('Diffusion User Guide');
   }
 
   public function getFactObjectsForAnalysis() {

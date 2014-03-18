@@ -107,7 +107,7 @@ Phabricator handles text encodings.
 EOT
     ,
     PhabricatorEnv::getDoclink(
-      'article/User_Guide_UTF-8_and_Character_Encoding.html'));
+      'User Guide: UTF-8 and Character Encoding'));
   }
 
 }

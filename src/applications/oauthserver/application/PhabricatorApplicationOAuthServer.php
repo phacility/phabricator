@@ -33,24 +33,25 @@ final class PhabricatorApplicationOAuthServer extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/oauthserver/' => array(
-        '' => 'PhabricatorOAuthServerConsoleController',
+        '(?:query/(?P<queryKey>[^/]+)/)?'
+          => 'PhabricatorOAuthClientListController',
         'auth/'          => 'PhabricatorOAuthServerAuthController',
         'test/'          => 'PhabricatorOAuthServerTestController',
         'token/'         => 'PhabricatorOAuthServerTokenController',
-        'clientauthorization/' => array(
-          '' => 'PhabricatorOAuthClientAuthorizationListController',
-          'delete/(?P<phid>[^/]+)/' =>
-            'PhabricatorOAuthClientAuthorizationDeleteController',
-          'edit/(?P<phid>[^/]+)/' =>
-            'PhabricatorOAuthClientAuthorizationEditController',
-        ),
         'client/' => array(
-          ''                        => 'PhabricatorOAuthClientListController',
           'create/'                 => 'PhabricatorOAuthClientEditController',
           'delete/(?P<phid>[^/]+)/' => 'PhabricatorOAuthClientDeleteController',
           'edit/(?P<phid>[^/]+)/'   => 'PhabricatorOAuthClientEditController',
           'view/(?P<phid>[^/]+)/'   => 'PhabricatorOAuthClientViewController',
         ),
+      ),
+    );
+  }
+
+  protected function getCustomCapabilities() {
+    return array(
+      PhabricatorOAuthServerCapabilityCreateClients::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),
     );
   }

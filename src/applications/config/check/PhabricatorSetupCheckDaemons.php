@@ -13,7 +13,7 @@ final class PhabricatorSetupCheckDaemons extends PhabricatorSetupCheck {
 
     if (!$task_daemon) {
       $doc_href = PhabricatorEnv::getDocLink(
-        'article/Managing_Daemons_with_phd.html');
+        'Managing Daemons with phd');
 
       $summary = pht(
         'You must start the Phabricator daemons to send email, rebuild '.

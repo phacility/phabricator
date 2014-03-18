@@ -41,8 +41,7 @@ final class DifferentialDiffCreateController extends DifferentialController {
     }
 
     $form = new AphrontFormView();
-    $arcanist_href = PhabricatorEnv::getDoclink(
-      'article/Arcanist_User_Guide.html');
+    $arcanist_href = PhabricatorEnv::getDoclink('Arcanist User Guide');
     $arcanist_link = phutil_tag(
       'a',
       array(

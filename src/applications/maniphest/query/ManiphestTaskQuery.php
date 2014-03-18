@@ -22,6 +22,8 @@ final class ManiphestTaskQuery
   private $includeNoProject    = null;
   private $dateCreatedAfter;
   private $dateCreatedBefore;
+  private $dateModifiedAfter;
+  private $dateModifiedBefore;
 
   private $fullTextSearch   = '';
 
@@ -153,6 +155,16 @@ final class ManiphestTaskQuery
     return $this;
   }
 
+  public function withDateModifiedBefore($date_modified_before) {
+    $this->dateModifiedBefore = $date_modified_before;
+    return $this;
+  }
+
+  public function withDateModifiedAfter($date_modified_after) {
+    $this->dateModifiedAfter = $date_modified_after;
+    return $this;
+  }
+
   public function loadPage() {
 
     // TODO: (T603) It is possible for a user to find the PHID of a project
@@ -191,6 +203,20 @@ final class ManiphestTaskQuery
         $conn,
         'dateCreated <= %d',
         $this->dateCreatedBefore);
+    }
+
+    if ($this->dateModifiedAfter) {
+      $where[] = qsprintf(
+        $conn,
+        'dateModified >= %d',
+        $this->dateModifiedAfter);
+    }
+
+    if ($this->dateModifiedBefore) {
+      $where[] = qsprintf(
+        $conn,
+        'dateModified <= %d',
+        $this->dateModifiedBefore);
     }
 
     $where[] = $this->buildPagingClause($conn);

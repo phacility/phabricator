@@ -769,8 +769,8 @@ final class DiffusionRepositoryEditMainController
       }
     }
 
-    $doc_href = PhabricatorEnv::getDocLink(
-      'article/Managing_Daemons_with_phd.html');
+    $doc_href = PhabricatorEnv::getDocLink('Managing Daemons with phd');
+
     $daemon_instructions = pht(
       'Use %s to start daemons. See %s.',
       phutil_tag('tt', array(), 'bin/phd start'),

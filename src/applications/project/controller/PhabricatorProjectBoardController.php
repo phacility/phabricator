@@ -30,6 +30,7 @@ final class PhabricatorProjectBoardController
     $columns = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
       ->withProjectPHIDs(array($project->getPHID()))
+      ->withStatuses(array(PhabricatorProjectColumn::STATUS_ACTIVE))
       ->execute();
 
     $columns = mpull($columns, null, 'getSequence');
@@ -167,6 +168,13 @@ final class PhabricatorProjectBoardController
           ->setName(pht('Add Column'))
           ->setHref($this->getApplicationURI('board/'.$this->id.'/edit/'))
           ->setIcon('create')
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(!$can_edit))
+      ->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Delete Column'))
+          ->setHref($this->getApplicationURI('board/'.$this->id.'/delete/'))
+          ->setIcon('delete')
           ->setDisabled(!$can_edit)
           ->setWorkflow(!$can_edit));
 

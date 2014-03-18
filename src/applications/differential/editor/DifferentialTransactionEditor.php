@@ -225,6 +225,8 @@ final class DifferentialTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
+    $results = parent::expandTransaction($object, $xaction);
+
     $actor = $this->getActor();
     $actor_phid = $actor->getPHID();
     $type_edge = PhabricatorTransactions::TYPE_EDGE;
@@ -232,43 +234,68 @@ final class DifferentialTransactionEditor
     $edge_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
     $edge_ref_task = PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK;
 
-    $results = parent::expandTransaction($object, $xaction);
+    $downgrade_rejects = false;
+    if ($this->getIsCloseByCommit()) {
+      // Never downgrade reviewers when we're closing a revision after a
+      // commit.
+    } else {
+      switch ($xaction->getTransactionType()) {
+        case DifferentialTransaction::TYPE_UPDATE:
+          $downgrade_rejects = true;
+          break;
+        case DifferentialTransaction::TYPE_ACTION:
+          switch ($xaction->getNewValue()) {
+            case DifferentialAction::ACTION_REQUEST:
+              $downgrade_rejects = true;
+              break;
+          }
+          break;
+      }
+    }
+
+    $new_accept = DifferentialReviewerStatus::STATUS_ACCEPTED;
+    $new_reject = DifferentialReviewerStatus::STATUS_REJECTED;
+    $old_accept = DifferentialReviewerStatus::STATUS_ACCEPTED_OLDER;
+    $old_reject = DifferentialReviewerStatus::STATUS_REJECTED_OLDER;
+
+    if ($downgrade_rejects) {
+      // When a revision is updated, change all "reject" to "rejected older
+      // revision". This means we won't immediately push the update back into
+      // "needs review", but outstanding rejects will still block it from
+      // moving to "accepted".
+
+      // We also do this for "Request Review", even though the diff is not
+      // updated directly. Essentially, this acts like an update which doesn't
+      // actually change the diff text.
+
+      $edits = array();
+      foreach ($object->getReviewerStatus() as $reviewer) {
+        if ($reviewer->getStatus() == $new_reject) {
+          $edits[$reviewer->getReviewerPHID()] = array(
+            'data' => array(
+              'status' => $old_reject,
+            ),
+          );
+        }
+
+        // TODO: If sticky accept is off, do a similar update for accepts.
+      }
+
+      if ($edits) {
+        $results[] = id(new DifferentialTransaction())
+          ->setTransactionType($type_edge)
+          ->setMetadataValue('edge:type', $edge_reviewer)
+          ->setIgnoreOnNoEffect(true)
+          ->setNewValue(array('+' => $edits));
+      }
+    }
+
     switch ($xaction->getTransactionType()) {
       case DifferentialTransaction::TYPE_UPDATE:
         if ($this->getIsCloseByCommit()) {
           // Don't bother with any of this if this update is a side effect of
           // commit detection.
           break;
-        }
-
-        $new_accept = DifferentialReviewerStatus::STATUS_ACCEPTED;
-        $new_reject = DifferentialReviewerStatus::STATUS_REJECTED;
-        $old_accept = DifferentialReviewerStatus::STATUS_ACCEPTED_OLDER;
-        $old_reject = DifferentialReviewerStatus::STATUS_REJECTED_OLDER;
-
-        // When a revision is updated, change all "reject" to "rejected older
-        // revision". This means we won't immediately push the update back into
-        // "needs review", but outstanding rejects will still block it from
-        // moving to "accepted".
-        $edits = array();
-        foreach ($object->getReviewerStatus() as $reviewer) {
-          if ($reviewer->getStatus() == $new_reject) {
-            $edits[$reviewer->getReviewerPHID()] = array(
-              'data' => array(
-                'status' => $old_reject,
-              ),
-            );
-          }
-
-          // TODO: If sticky accept is off, do a similar update for accepts.
-        }
-
-        if ($edits) {
-          $results[] = id(new DifferentialTransaction())
-            ->setTransactionType($type_edge)
-            ->setMetadataValue('edge:type', $edge_reviewer)
-            ->setIgnoreOnNoEffect(true)
-            ->setNewValue(array('+' => $edits));
         }
 
         // When a revision is updated and the diff comes from a branch named
@@ -528,7 +555,6 @@ final class DifferentialTransactionEditor
     }
 
     $object->attachReviewerStatus($new_revision->getReviewerStatus());
-
 
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {

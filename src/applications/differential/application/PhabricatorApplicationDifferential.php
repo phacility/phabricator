@@ -15,7 +15,7 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
   }
 
   public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('article/Differential_User_Guide.html');
+    return PhabricatorEnv::getDoclink('Differential User Guide');
   }
 
   public function getFactObjectsForAnalysis() {

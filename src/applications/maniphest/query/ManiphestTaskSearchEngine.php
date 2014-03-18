@@ -64,6 +64,8 @@ final class ManiphestTaskSearchEngine
 
     $saved->setParameter('createdStart', $request->getStr('createdStart'));
     $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
+    $saved->setParameter('modifiedStart', $request->getStr('modifiedStart'));
+    $saved->setParameter('modifiedEnd', $request->getStr('modifiedEnd'));
 
     $limit = $request->getInt('limit');
     if ($limit > 0) {
@@ -168,6 +170,17 @@ final class ManiphestTaskSearchEngine
 
     if ($end) {
       $query->withDateCreatedBefore($end);
+    }
+
+    $mod_start = $this->parseDateTime($saved->getParameter('modifiedStart'));
+    $mod_end = $this->parseDateTime($saved->getParameter('modifiedEnd'));
+
+    if ($mod_start) {
+      $query->withDateModifiedAfter($mod_start);
+    }
+
+    if ($mod_end) {
+      $query->withDateModifiedBefore($mod_end);
     }
 
     $this->applyCustomFieldsToQuery($query, $saved);
@@ -343,6 +356,14 @@ final class ManiphestTaskSearchEngine
       pht('Created After'),
       'createdEnd',
       pht('Created Before'));
+
+    $this->buildDateRange(
+      $form,
+      $saved,
+      'modifiedStart',
+      pht('Updated After'),
+      'modifiedEnd',
+      pht('Updated Before'));
 
     $form
       ->appendChild(

@@ -441,14 +441,26 @@ final class PhabricatorUser
       }
     }
 
-    if ($editor) {
-      return strtr($editor, array(
-        '%%' => '%',
-        '%f' => phutil_escape_uri($path),
-        '%l' => phutil_escape_uri($line),
-        '%r' => phutil_escape_uri($callsign),
-      ));
+    if (!strlen($editor)) {
+      return null;
     }
+
+    $uri = strtr($editor, array(
+      '%%' => '%',
+      '%f' => phutil_escape_uri($path),
+      '%l' => phutil_escape_uri($line),
+      '%r' => phutil_escape_uri($callsign),
+    ));
+
+    // The resulting URI must have an allowed protocol. Otherwise, we'll return
+    // a link to an error page explaining the misconfiguration.
+
+    $ok = PhabricatorHelpEditorProtocolController::hasAllowedProtocol($uri);
+    if (!$ok) {
+      return '/help/editorprotocol/';
+    }
+
+    return (string)$uri;
   }
 
   public function getAlternateCSRFString() {

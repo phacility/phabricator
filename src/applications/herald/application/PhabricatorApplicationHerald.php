@@ -19,7 +19,7 @@ final class PhabricatorApplicationHerald extends PhabricatorApplication {
   }
 
   public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('article/Herald_User_Guide.html');
+    return PhabricatorEnv::getDoclink('Herald User Guide');
   }
 
   public function getFlavorText() {

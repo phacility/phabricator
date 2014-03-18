@@ -27,7 +27,7 @@ final class DiffusionRepositoryNewController
     }
 
     $doc_href = PhabricatorEnv::getDoclink(
-      'article/Diffusion_User_Guide_Repository_Hosting.html');
+      'Diffusion User Guide: Repository Hosting');
 
     $doc_link = phutil_tag(
       'a',

@@ -4,7 +4,7 @@ final class PhabricatorJumpNavHandler {
 
   public static function getJumpResponse(PhabricatorUser $viewer, $jump) {
     $jump = trim($jump);
-    $help_href = PhabricatorEnv::getDocLink('article/Jump_Nav_User_Guide.html');
+    $help_href = PhabricatorEnv::getDocLink('Jump Nav User Guide');
 
     $patterns = array(
       '/^help/i'                  => 'uri:'.$help_href,
