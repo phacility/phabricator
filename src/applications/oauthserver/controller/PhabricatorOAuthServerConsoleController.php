@@ -12,14 +12,6 @@ final class PhabricatorOAuthServerConsoleController
 
     $menu->addItem(
       id(new PHUIObjectItemView())
-        ->setHeader(pht('Authorizations'))
-        ->setHref($this->getApplicationURI('clientauthorization/'))
-        ->addAttribute(
-          pht(
-            'Review your authorizations.')));
-
-    $menu->addItem(
-      id(new PHUIObjectItemView())
         ->setHeader(pht('Applications'))
         ->setHref($this->getApplicationURI('client/'))
         ->addAttribute(

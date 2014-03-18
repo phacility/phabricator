@@ -12,9 +12,6 @@ extends PhabricatorController {
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI('/oauthserver/'));
-    $nav->addLabel('Client Authorizations');
-    $nav->addFilter('clientauthorization',
-                    'My Authorizations');
     $nav->addLabel('Clients');
     $nav->addFilter('client/create',
                     'Create Client');

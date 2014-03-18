@@ -37,13 +37,6 @@ final class PhabricatorApplicationOAuthServer extends PhabricatorApplication {
         'auth/'          => 'PhabricatorOAuthServerAuthController',
         'test/'          => 'PhabricatorOAuthServerTestController',
         'token/'         => 'PhabricatorOAuthServerTokenController',
-        'clientauthorization/' => array(
-          '' => 'PhabricatorOAuthClientAuthorizationListController',
-          'delete/(?P<phid>[^/]+)/' =>
-            'PhabricatorOAuthClientAuthorizationDeleteController',
-          'edit/(?P<phid>[^/]+)/' =>
-            'PhabricatorOAuthClientAuthorizationEditController',
-        ),
         'client/' => array(
           ''                        => 'PhabricatorOAuthClientListController',
           'create/'                 => 'PhabricatorOAuthClientEditController',

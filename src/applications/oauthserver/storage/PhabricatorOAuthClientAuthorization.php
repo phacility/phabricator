@@ -8,13 +8,7 @@ final class PhabricatorOAuthClientAuthorization
   protected $clientPHID;
   protected $scope;
 
-  public function getEditURI() {
-    return '/oauthserver/clientauthorization/edit/'.$this->getPHID().'/';
-  }
-
-  public function getDeleteURI() {
-    return '/oauthserver/clientauthorization/delete/'.$this->getPHID().'/';
-  }
+  private $client = self::ATTACHABLE;
 
   public function getScopeString() {
     $scope = $this->getScope();
@@ -37,6 +31,14 @@ final class PhabricatorOAuthClientAuthorization
       PhabricatorOAuthServerPHIDTypeClientAuthorization::TYPECONST);
   }
 
+  public function getClient() {
+    return $this->assertAttached($this->client);
+  }
+
+  public function attachClient(PhabricatorOAuthServerClient $client) {
+    $this->client = $client;
+    return $this;
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

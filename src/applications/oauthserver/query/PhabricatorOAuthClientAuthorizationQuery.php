@@ -33,6 +33,27 @@ final class PhabricatorOAuthClientAuthorizationQuery
     return $table->loadAllFromArray($data);
   }
 
+  public function willFilterPage(array $authorizations) {
+    $client_phids = mpull($authorizations, 'getClientPHID');
+
+    $clients = id(new PhabricatorOAuthServerClientQuery())
+      ->setViewer($this->getViewer())
+      ->setParentQuery($this)
+      ->withPHIDs($client_phids)
+      ->execute();
+    $clients = mpull($clients, null, 'getPHID');
+
+    foreach ($authorizations as $key => $authorization) {
+      $client = idx($clients, $authorization->getClientPHID());
+      if (!$client) {
+        unset($authorizations[$key]);
+      }
+      $authorization->attachClient($client);
+    }
+
+    return $authorizations;
+  }
+
   private function buildWhereClause($conn_r) {
     $where = array();
 
