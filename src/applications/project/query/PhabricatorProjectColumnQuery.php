@@ -6,6 +6,7 @@ final class PhabricatorProjectColumnQuery
   private $ids;
   private $phids;
   private $projectPHIDs;
+  private $statuses;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -19,6 +20,11 @@ final class PhabricatorProjectColumnQuery
 
   public function withProjectPHIDs(array $project_phids) {
     $this->projectPHIDs = $project_phids;
+    return $this;
+  }
+
+  public function withStatuses(array $status) {
+    $this->statuses = $status;
     return $this;
   }
 
@@ -85,6 +91,13 @@ final class PhabricatorProjectColumnQuery
         $conn_r,
         'projectPHID IN (%Ls)',
         $this->projectPHIDs);
+    }
+
+    if ($this->statuses !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'status IN (%Ld)',
+        $this->statuses);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

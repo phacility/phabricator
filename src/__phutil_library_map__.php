@@ -1843,6 +1843,7 @@ phutil_register_library_map(array(
     'PhabricatorProject' => 'applications/project/storage/PhabricatorProject.php',
     'PhabricatorProjectArchiveController' => 'applications/project/controller/PhabricatorProjectArchiveController.php',
     'PhabricatorProjectBoardController' => 'applications/project/controller/PhabricatorProjectBoardController.php',
+    'PhabricatorProjectBoardDeleteController' => 'applications/project/controller/PhabricatorProjectBoardDeleteController.php',
     'PhabricatorProjectBoardEditController' => 'applications/project/controller/PhabricatorProjectBoardEditController.php',
     'PhabricatorProjectColumn' => 'applications/project/storage/PhabricatorProjectColumn.php',
     'PhabricatorProjectColumnQuery' => 'applications/project/query/PhabricatorProjectColumnQuery.php',
@@ -4609,6 +4610,7 @@ phutil_register_library_map(array(
     ),
     'PhabricatorProjectArchiveController' => 'PhabricatorProjectController',
     'PhabricatorProjectBoardController' => 'PhabricatorProjectController',
+    'PhabricatorProjectBoardDeleteController' => 'PhabricatorProjectController',
     'PhabricatorProjectBoardEditController' => 'PhabricatorProjectController',
     'PhabricatorProjectColumn' =>
     array(

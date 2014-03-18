@@ -4,7 +4,11 @@ final class PhabricatorProjectColumn
   extends PhabricatorProjectDAO
   implements PhabricatorPolicyInterface {
 
+  const STATUS_ACTIVE = 0;
+  const STATUS_DELETED = 1;
+
   protected $name;
+  protected $status;
   protected $projectPHID;
   protected $sequence;
 
@@ -12,7 +16,8 @@ final class PhabricatorProjectColumn
 
   public static function initializeNewColumn(PhabricatorUser $user) {
     return id(new PhabricatorProjectColumn())
-      ->setName('');
+      ->setName('')
+      ->setStatus(self::STATUS_ACTIVE);
   }
 
   public function getConfiguration() {
