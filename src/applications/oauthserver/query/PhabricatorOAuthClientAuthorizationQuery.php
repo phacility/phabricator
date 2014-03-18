@@ -5,6 +5,7 @@ final class PhabricatorOAuthClientAuthorizationQuery
 
   private $phids;
   private $userPHIDs;
+  private $clientPHIDs;
 
   public function witHPHIDs(array $phids) {
     $this->phids = $phids;
@@ -13,6 +14,11 @@ final class PhabricatorOAuthClientAuthorizationQuery
 
   public function withUserPHIDs(array $phids) {
     $this->userPHIDs = $phids;
+    return $this;
+  }
+
+  public function withClientPHIDs(array $phids) {
+    $this->clientPHIDs = $phids;
     return $this;
   }
 
@@ -45,6 +51,7 @@ final class PhabricatorOAuthClientAuthorizationQuery
       $client = idx($clients, $authorization->getClientPHID());
       if (!$client) {
         unset($authorizations[$key]);
+        continue;
       }
       $authorization->attachClient($client);
     }
@@ -67,6 +74,13 @@ final class PhabricatorOAuthClientAuthorizationQuery
         $conn_r,
         'userPHID IN (%Ls)',
         $this->userPHIDs);
+    }
+
+    if ($this->clientPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'clientPHID IN (%Ls)',
+        $this->clientPHIDs);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

@@ -695,6 +695,11 @@ abstract class PhabricatorApplicationTransactionEditor
       }
     }
 
+    // Before sending mail or publishing feed stories, reload the object
+    // subscribers to pick up changes caused by Herald (or by other side effects
+    // in various transaction phases).
+    $this->loadSubscribers($object);
+
     $this->loadHandles($xactions);
 
     $mail = null;

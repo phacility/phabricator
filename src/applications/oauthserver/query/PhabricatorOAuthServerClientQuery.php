@@ -3,8 +3,14 @@
 final class PhabricatorOAuthServerClientQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
+  private $ids;
   private $phids;
   private $creatorPHIDs;
+
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
+    return $this;
+  }
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
@@ -34,6 +40,13 @@ final class PhabricatorOAuthServerClientQuery
 
   private function buildWhereClause($conn_r) {
     $where = array();
+
+    if ($this->ids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'id IN (%Ld)',
+        $this->ids);
+    }
 
     if ($this->phids) {
       $where[] = qsprintf(
