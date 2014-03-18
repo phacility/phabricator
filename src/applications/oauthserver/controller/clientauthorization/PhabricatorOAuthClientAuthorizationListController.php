@@ -22,8 +22,9 @@ extends PhabricatorOAuthClientAuthorizationBaseController {
     $pager->setPageSize($page_size);
     $pager->setOffset($offset);
 
-    $query = new PhabricatorOAuthClientAuthorizationQuery();
-    $query->withUserPHIDs(array($current_user->getPHID()));
+    $query = id(new PhabricatorOAuthClientAuthorizationQuery())
+      ->setViewer($current_user)
+      ->withUserPHIDs(array($current_user->getPHID()));
     $authorizations = $query->executeWithOffsetPager($pager);
 
     $client_authorizations = mpull($authorizations, null, 'getClientPHID');

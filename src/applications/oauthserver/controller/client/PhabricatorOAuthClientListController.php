@@ -22,8 +22,9 @@ extends PhabricatorOAuthClientBaseController {
     $pager->setPageSize($page_size);
     $pager->setOffset($offset);
 
-    $query = new PhabricatorOAuthServerClientQuery();
-    $query->withCreatorPHIDs(array($current_user->getPHID()));
+    $query = id(new PhabricatorOAuthServerClientQuery())
+      ->setViewer($current_user)
+      ->withCreatorPHIDs(array($current_user->getPHID()));
     $clients = $query->executeWithOffsetPager($pager);
 
     $rows      = array();

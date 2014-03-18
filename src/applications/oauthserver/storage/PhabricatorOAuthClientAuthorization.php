@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @group oauthserver
- */
 final class PhabricatorOAuthClientAuthorization
-extends PhabricatorOAuthServerDAO {
+  extends PhabricatorOAuthServerDAO
+  implements PhabricatorPolicyInterface {
 
-  protected $id;
-  protected $phid;
   protected $userPHID;
   protected $clientPHID;
   protected $scope;
@@ -38,6 +34,32 @@ extends PhabricatorOAuthServerDAO {
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_OASA);
+      PhabricatorOAuthServerPHIDTypeClientAuthorization::TYPECONST);
   }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::POLICY_NOONE;
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return ($viewer->getPHID() == $this->getUserPHID());
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return pht('Authorizations can only be viewed by the authorizing user.');
+  }
+
 }

@@ -1,18 +1,22 @@
 <?php
 
 final class PhabricatorOAuthClientAuthorizationQuery
-extends PhabricatorOffsetPagedQuery {
+  extends PhabricatorCursorPagedPolicyAwareQuery {
+
+  private $phids;
   private $userPHIDs;
+
+  public function witHPHIDs(array $phids) {
+    $this->phids = $phids;
+    return $this;
+  }
 
   public function withUserPHIDs(array $phids) {
     $this->userPHIDs = $phids;
     return $this;
   }
-  private function getUserPHIDs() {
-    return $this->userPHIDs;
-  }
 
-  public function execute() {
+  public function loadPage() {
     $table  = new PhabricatorOAuthClientAuthorization();
     $conn_r = $table->establishConnection('r');
 
@@ -32,13 +36,27 @@ extends PhabricatorOffsetPagedQuery {
   private function buildWhereClause($conn_r) {
     $where = array();
 
-    if ($this->getUserPHIDs()) {
+    if ($this->phids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'phid IN (%Ls)',
+        $this->phids);
+    }
+
+    if ($this->userPHIDs) {
       $where[] = qsprintf(
         $conn_r,
         'userPHID IN (%Ls)',
-        $this->getUserPHIDs());
+        $this->userPHIDs);
     }
+
+    $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
   }
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationOAuthServer';
+  }
+
 }
