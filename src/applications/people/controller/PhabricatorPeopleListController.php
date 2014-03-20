@@ -53,16 +53,14 @@ final class PhabricatorPeopleListController extends PhabricatorPeopleController
         $email = pht('Unverified');
       }
 
-      $user_handle = new PhabricatorObjectHandle();
-      $user_handle->setImageURI($user->loadProfileImageURI());
-
       $item = new PHUIObjectItemView();
       $item->setHeader($user->getFullName())
         ->setHref('/p/'.$user->getUsername().'/')
         ->addAttribute(hsprintf('%s %s',
             phabricator_date($user->getDateCreated(), $viewer),
             phabricator_time($user->getDateCreated(), $viewer)))
-        ->addAttribute($email);
+        ->addAttribute($email)
+        ->setImageURI($user->getProfileImageURI());
 
       if ($user->getIsDisabled()) {
         $item->addIcon('disable', pht('Disabled'));

@@ -26,7 +26,8 @@ final class PhabricatorPeopleSearchEngine
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new PhabricatorPeopleQuery())
-      ->needPrimaryEmail(true);
+      ->needPrimaryEmail(true)
+      ->needProfileImage(true);
 
     $usernames = $saved->getParameter('usernames', array());
     if ($usernames) {

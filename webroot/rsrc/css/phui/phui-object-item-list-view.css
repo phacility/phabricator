@@ -572,7 +572,7 @@
 .phui-object-item-image {
   width: 50px;
   height: 50px;
-  margin: 4px 4px 4px 8px;
+  margin: 4px 4px 4px 4px;
   position: absolute;
   background-color: {$lightbluebackground};
 }
@@ -582,5 +582,5 @@
 }
 
 .phui-object-item-with-image .phui-object-item-content-box {
-  margin-left: 58px;
+  margin-left: 54px;
 }
