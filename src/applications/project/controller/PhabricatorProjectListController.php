@@ -37,13 +37,13 @@ final class PhabricatorProjectListController
 
       $item = id(new PHUIObjectItemView())
         ->setHeader($project->getName())
-        ->setHref($this->getApplicationURI("view/{$id}/"));
+        ->setHref($this->getApplicationURI("view/{$id}/"))
+        ->setImageURI($project->getProfileImageURI());
 
       if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ARCHIVED) {
         $item->addIcon('delete-grey', pht('Archived'));
         $item->setDisabled(true);
       }
-
 
       $list->addItem($item);
     }
