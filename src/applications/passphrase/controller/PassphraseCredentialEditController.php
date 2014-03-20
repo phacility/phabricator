@@ -272,6 +272,7 @@ final class PassphraseCredentialEditController extends PassphraseController {
       $title = pht('Create Credential');
       $header = pht('Create New Credential');
       $crumbs->addTextCrumb(pht('Create'));
+      $cancel_uri = $this->getApplicationURI();
     } else {
       $title = pht('Edit Credential');
       $header = pht('Edit Credential %s', 'K'.$credential->getID());
@@ -279,6 +280,7 @@ final class PassphraseCredentialEditController extends PassphraseController {
         'K'.$credential->getID(),
         '/K'.$credential->getID());
       $crumbs->addTextCrumb(pht('Edit'));
+      $cancel_uri = '/K'.$credential->getID();
     }
 
     if ($request->isAjax()) {
@@ -293,7 +295,7 @@ final class PassphraseCredentialEditController extends PassphraseController {
         ->appendChild($errors)
         ->appendChild($form->buildLayoutView())
         ->addSubmitButton(pht('Create Credential'))
-        ->addCancelButton($this->getApplicationURI());
+        ->addCancelButton($cancel_uri);
 
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
@@ -301,7 +303,7 @@ final class PassphraseCredentialEditController extends PassphraseController {
     $form->appendChild(
       id(new AphrontFormSubmitControl())
         ->setValue(pht('Save'))
-        ->addCancelButton($this->getApplicationURI()));
+        ->addCancelButton($cancel_uri));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($header)
