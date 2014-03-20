@@ -52,8 +52,9 @@ final class PhabricatorSecurityConfigOptions
             "want (to any other string), but doing so will break existing ".
             "sessions and CSRF tokens.")),
       $this->newOption('security.require-https', 'bool', false)
+        ->setLocked(true)
         ->setSummary(
-          pht("Force users to connect via https instead of http."))
+          pht("Force users to connect via HTTPS instead of HTTP."))
         ->setDescription(
           pht(
             "If the web server responds to both HTTP and HTTPS requests but ".
@@ -67,15 +68,13 @@ final class PhabricatorSecurityConfigOptions
             "balancer which terminates HTTPS connections and you can not ".
             "reasonably configure more granular behavior there.\n\n".
 
-            "NOTE: Phabricator determines if a request is HTTPS or not by ".
-            "examining the PHP \$_SERVER['HTTPS'] variable. If you run ".
+            "IMPORTANT: Phabricator determines if a request is HTTPS or not ".
+            "by examining the PHP \$_SERVER['HTTPS'] variable. If you run ".
             "Apache/mod_php this will probably be set correctly for you ".
             "automatically, but if you run Phabricator as CGI/FCGI (e.g., ".
             "through nginx or lighttpd), you need to configure your web ".
             "server so that it passes the value correctly based on the ".
-            "connection type. Alternatively, you can add a PHP snippet to ".
-            "the top of this configuration file to directly set ".
-            "\$_SERVER['HTTPS'] to the correct value."))
+            "connection type."))
         ->setBoolOptions(
           array(
             pht('Force HTTPS'),
