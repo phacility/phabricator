@@ -76,8 +76,6 @@ final class PhabricatorProjectMembersEditController
     $header_name = pht('Edit Members');
     $title = pht('Edit Members');
 
-    $list = $this->renderMemberList($handles);
-
     $form = new AphrontFormView();
     $form
       ->setUser($user)
@@ -90,15 +88,8 @@ final class PhabricatorProjectMembersEditController
         id(new AphrontFormSubmitControl())
           ->addCancelButton('/project/view/'.$project->getID().'/')
           ->setValue(pht('Add Members')));
-    $faux_form = id(new AphrontFormView())
-      ->setUser($user)
-      ->appendChild(
-        id(new AphrontFormInsetView())
-          ->appendChild($list));
 
-    $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Current Members (%d)', count($handles)))
-      ->setForm($faux_form);
+    $member_list = $this->renderMemberList($project, $handles);
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
@@ -114,7 +105,7 @@ final class PhabricatorProjectMembersEditController
       array(
         $crumbs,
         $form_box,
-        $box,
+        $member_list,
       ),
       array(
         'title' => $title,
@@ -122,38 +113,33 @@ final class PhabricatorProjectMembersEditController
       ));
   }
 
-  private function renderMemberList(array $handles) {
+  private function renderMemberList(
+    PhabricatorProject $project,
+    array $handles) {
+
     $request = $this->getRequest();
-    $user = $request->getUser();
-    $list = id(new PhabricatorObjectListView())
-      ->setHandles($handles);
+    $viewer = $request->getUser();
+
+    $list = id(new PHUIObjectItemListView())
+      ->setNoDataString(pht('This project does not have any members.'));
 
     foreach ($handles as $handle) {
-      $hidden_input = phutil_tag(
-        'input',
-        array(
-          'type' => 'hidden',
-          'name' => 'remove',
-          'value' => $handle->getPHID(),
-        ),
-        '');
+      $remove_uri = $this->getApplicationURI(
+        '/members/'.$project->getID().'/remove/?phid='.$handle->getPHID());
 
-      $button = javelin_tag(
-        'button',
-        array(
-          'class' => 'grey',
-        ),
-        pht('Remove'));
+      $item = id(new PHUIObjectItemView())
+        ->setHeader($handle->getFullName())
+        ->setHref($handle->getURI())
+        ->setImageURI($handle->getImageURI());
 
-      $list->addButton(
-        $handle,
-        phabricator_form(
-          $user,
-          array(
-            'method' => 'POST',
-            'action' => $request->getRequestURI(),
-          ),
-          array($hidden_input, $button)));
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setIcon('delete')
+          ->setName(pht('Remove'))
+          ->setHref($remove_uri)
+          ->setWorkflow(true));
+
+      $list->addItem($item);
     }
 
     return $list;
