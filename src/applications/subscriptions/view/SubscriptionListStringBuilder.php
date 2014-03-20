@@ -48,25 +48,24 @@ final class SubscriptionListStringBuilder {
   private function buildString($list_uri) {
     $handles = $this->getHandles();
 
-    $html = array();
+    // Always show this many subscribers.
     $show_count = 3;
     $subscribers_count = count($handles);
-    if ($subscribers_count <= $show_count) {
+
+    // It looks a bit silly to render "a, b, c, and 1 other", since we could
+    // have just put that other subscriber there in place of the "1 other"
+    // link. Instead, render "a, b, c, d" in this case, and then when we get one
+    // more render "a, b, c, and 2 others".
+    if ($subscribers_count <= ($show_count + 1)) {
       return phutil_implode_html(', ', mpull($handles, 'renderLink'));
     }
 
-    $args = array('%s, %s, %s, and %s');
-    $shown = 0;
-    foreach ($handles as $handle) {
-      $shown++;
-      if ($shown > $show_count) {
-        break;
-      }
-      $args[] = $handle->renderLink();
-    }
+    $show = array_slice($handles, 0, $show_count);
+    $show = array_values($show);
+
     $not_shown_count = $subscribers_count - $show_count;
     $not_shown_txt = pht('%d other(s)', $not_shown_count);
-    $args[] = javelin_tag(
+    $not_shown_link = javelin_tag(
       'a',
       array(
         'href' => $list_uri,
@@ -74,7 +73,12 @@ final class SubscriptionListStringBuilder {
       ),
       $not_shown_txt);
 
-    return call_user_func_array('pht', $args);
+    return pht(
+      '%s, %s, %s and %s',
+      $show[0]->renderLink(),
+      $show[1]->renderLink(),
+      $show[2]->renderLink(),
+      $not_shown_link);
   }
 
 }

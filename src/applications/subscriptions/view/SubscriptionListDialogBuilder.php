@@ -56,7 +56,7 @@ final class SubscriptionListDialogBuilder {
       ->setClass('subscriber-list-dialog')
       ->setTitle($this->getTitle())
       ->appendChild($this->buildBody($this->getViewer(), $handles))
-      ->addCancelButton($object_handle->getURI(), pht('Dismiss'));
+      ->addCancelButton($object_handle->getURI(), pht('Close'));
   }
 
   private function buildBody(PhabricatorUser $viewer, array $handles) {
@@ -64,11 +64,15 @@ final class SubscriptionListDialogBuilder {
     $list = id(new PHUIObjectItemListView())
       ->setUser($viewer);
     foreach ($handles as $handle) {
-      // TODO - include $handle image - T4400
       $item = id(new PHUIObjectItemView())
         ->setHeader($handle->getFullName())
         ->setHref($handle->getURI())
         ->setDisabled($handle->isDisabled());
+
+      if ($handle->getImageURI()) {
+        $item->setImageURI($handle->getImageURI());
+      }
+
       $list->addItem($item);
     }
 
