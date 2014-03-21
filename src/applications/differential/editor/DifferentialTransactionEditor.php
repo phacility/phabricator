@@ -498,6 +498,7 @@ final class DifferentialTransactionEditor
 
         $object->setLineCount($diff->getLineCount());
         $object->setRepositoryPHID($diff->getRepositoryPHID());
+        $object->setArcanistProjectPHID($diff->getArcanistProjectPHID());
 
         return;
     }

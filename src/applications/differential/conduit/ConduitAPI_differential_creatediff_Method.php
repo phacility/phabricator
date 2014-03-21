@@ -40,6 +40,7 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
   }
 
   protected function execute(ConduitAPIRequest $request) {
+    $viewer = $request->getUser();
     $change_data = $request->getValue('changes');
 
     $changes = array();
@@ -53,7 +54,7 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
 
     $diff->setBranch($request->getValue('branch'));
     $diff->setCreationMethod($request->getValue('creationMethod'));
-    $diff->setAuthorPHID($request->getUser()->getPHID());
+    $diff->setAuthorPHID($viewer->getPHID());
     $diff->setBookmark($request->getValue('bookmark'));
 
     // TODO: Remove this eventually; for now continue writing the UUID. Note
@@ -64,7 +65,7 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
     $repository_phid = $request->getValue('repositoryPHID');
     if ($repository_phid) {
       $repository = id(new PhabricatorRepositoryQuery())
-        ->setViewer($request->getUser())
+        ->setViewer($viewer)
         ->withPHIDs(array($repository_phid))
         ->executeOne();
       if ($repository) {
@@ -141,6 +142,22 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
     }
 
     $diff->save();
+
+    // If we didn't get an explicit `repositoryPHID` (which means the client is
+    // old, or couldn't figure out which repository the working copy belongs
+    // to), apply heuristics to try to figure it out.
+
+    if (!$repository_phid) {
+      $repository = id(new DifferentialRepositoryLookup())
+        ->setDiff($diff)
+        ->setViewer($viewer)
+        ->lookupRepository();
+      if ($repository) {
+        $diff->setRepositoryPHID($repository->getPHID());
+        $diff->setRepositoryUUID($repository->getUUID());
+        $diff->save();
+      }
+    }
 
     $path = '/differential/diff/'.$diff->getID().'/';
     $uri = PhabricatorEnv::getURI($path);

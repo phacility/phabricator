@@ -157,28 +157,10 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
   public function loadRepository() {
     if ($this->repository === null) {
       $this->repository = false;
-
-      $viewer = PhabricatorUser::getOmnipotentUser();
-      $repository_phid = null;
-
-      $revision = $this->revision;
-      if ($revision->getRepositoryPHID()) {
-        $repository_phid = $revision->getRepositoryPHID();
-      } else {
-        $repository = id(new DifferentialRepositoryLookup())
-          ->setViewer($viewer)
-          ->setDiff($this->diff)
-          ->lookupRepository();
-        if ($repository) {
-          // We want to get the projects for this repository too, so run a
-          // full query for it below.
-          $repository_phid = $repository->getPHID();
-        }
-      }
-
+      $repository_phid = $this->getObject()->getRepositoryPHID();
       if ($repository_phid) {
         $repository = id(new PhabricatorRepositoryQuery())
-          ->setViewer($viewer)
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
           ->withPHIDs(array($repository_phid))
           ->needProjectPHIDs(true)
           ->executeOne();
