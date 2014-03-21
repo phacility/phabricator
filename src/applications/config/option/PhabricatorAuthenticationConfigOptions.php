@@ -90,6 +90,48 @@ final class PhabricatorAuthenticationConfigOptions
             "synchronize account information from some other authoritative ".
             "system, you can disable this to ensure information remains ".
             "consistent across both systems.")),
+      $this->newOption('account.editable-username', 'bool', true)
+        ->setBoolOptions(
+          array(
+            pht("Allow editing"),
+            pht("Prevent editing")
+          ))
+        ->setSummary(
+          pht(
+            "Determines whether or not account username irnformation is ".
+            "editable."))
+        ->setDescription(
+          pht(
+            "Is account username editable? This can be overridden by ".
+            "account.editable")),
+      $this->newOption('account.editable-realname', 'bool', true)
+        ->setBoolOptions(
+          array(
+            pht("Allow editing"),
+            pht("Prevent editing")
+          ))
+        ->setSummary(
+          pht(
+            "Determines whether or not account realname irnformation is ".
+            "editable."))
+        ->setDescription(
+          pht(
+            "Is account realname editable? This can be overridden by ".
+            "account.editable")),
+      $this->newOption('account.editable-email', 'bool', true)
+        ->setBoolOptions(
+          array(
+            pht("Allow editing"),
+            pht("Prevent editing")
+          ))
+        ->setSummary(
+          pht(
+            "Determines whether or not account email irnformation is ".
+            "editable."))
+        ->setDescription(
+          pht(
+            "Is account email editable? This can be overridden by ".
+            "account.editable")),
       $this->newOption('account.minimum-password-length', 'int', 8)
         ->setSummary(pht("Minimum password length."))
         ->setDescription(
