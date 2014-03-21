@@ -3,6 +3,7 @@
 final class AphrontDialogView extends AphrontView {
 
   private $title;
+  private $shortTitle;
   private $submitButton;
   private $cancelURI;
   private $cancelText = 'Cancel';
@@ -49,6 +50,15 @@ final class AphrontDialogView extends AphrontView {
 
   public function getTitle() {
     return $this->title;
+  }
+
+  public function setShortTitle($short_title) {
+    $this->shortTitle = $short_title;
+    return $this;
+  }
+
+  public function getShortTitle() {
+    return $this->shortTitle;
   }
 
   public function addSubmitButton($text = null) {

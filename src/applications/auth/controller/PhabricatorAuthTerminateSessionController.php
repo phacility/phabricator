@@ -36,8 +36,7 @@ final class PhabricatorAuthTerminateSessionController
     $panel_uri = '/settings/panel/sessions/';
 
     if (!$sessions) {
-      $dialog = id(new AphrontDialogView())
-        ->setUser($viewer)
+      return $this->newDialog()
         ->setTitle(pht('No Matching Sessions'))
         ->appendParagraph(
           pht('There are no matching sessions to terminate.'))
@@ -46,8 +45,6 @@ final class PhabricatorAuthTerminateSessionController
             '(You can not terminate your current login session. To '.
             'terminate it, log out.)'))
         ->addCancelButton($panel_uri);
-
-      return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
     if ($request->isDialogFormPost()) {
@@ -59,24 +56,24 @@ final class PhabricatorAuthTerminateSessionController
 
     if ($is_all) {
       $title = pht('Terminate Sessions?');
+      $short = pht('Terminate Sessions');
       $body = pht(
         'Really terminate all sessions? (Your current login session will '.
         'not be terminated.)');
     } else {
       $title = pht('Terminate Session?');
+      $short = pht('Terminate Session');
       $body = pht(
         'Really terminate session %s?',
         phutil_tag('strong', array(), substr($session->getSessionKey(), 0, 6)));
     }
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    return $this->newDialog()
       ->setTitle($title)
+      ->setShortTitle($short)
       ->appendParagraph($body)
       ->addSubmitButton(pht('Terminate'))
       ->addCancelButton($panel_uri);
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
 
