@@ -99,13 +99,20 @@ final class PhabricatorAuthRegisterController
       }
     }
 
+    $canEditUsername = PhabricatorEnv::getEnvConfig(
+                                         'account.editable-username');
+    $canEditRealname = PhabricatorEnv::getEnvConfig(
+                                         'account.editable-realname');
+    $canEditEmail = PhabricatorEnv::getEnvConfig(
+                                      'account.editable-email');
+
     $profile = id(new PhabricatorRegistrationProfile())
       ->setDefaultUsername($default_username)
       ->setDefaultEmail($default_email)
       ->setDefaultRealName($default_realname)
-      ->setCanEditUsername(true)
-      ->setCanEditEmail(($default_email === null))
-      ->setCanEditRealName(true)
+      ->setCanEditUsername($canEditUsername)
+      ->setCanEditEmail(($default_email === null) || $canEditEmail)
+      ->setCanEditRealName($canEditRealname)
       ->setShouldVerifyEmail(false);
 
     $event_type = PhabricatorEventType::TYPE_AUTH_WILLREGISTERUSER;
@@ -381,6 +388,12 @@ final class PhabricatorAuthRegisterController
           ->setValue($value_email)
           ->setCaption(PhabricatorUserEmail::describeAllowedAddresses())
           ->setError($e_email));
+    } else {
+      $form->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel(pht('Email'))
+          ->setValue($value_email)
+          ->setError($e_email));
     }
 
     if ($can_edit_realname) {
@@ -388,6 +401,12 @@ final class PhabricatorAuthRegisterController
         id(new AphrontFormTextControl())
           ->setLabel(pht('Real Name'))
           ->setName('realName')
+          ->setValue($value_realname)
+          ->setError($e_realname));
+    } else {
+      $form->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel(pht('Real name'))
           ->setValue($value_realname)
           ->setError($e_realname));
     }
