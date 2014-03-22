@@ -7,7 +7,7 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => '5b87dcb0',
+    'core.pkg.css' => '4877abce',
     'core.pkg.js' => '264721e1',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => 'cb97e095',
@@ -137,7 +137,7 @@ return array(
     'rsrc/css/phui/phui-header-view.css' => '5b79f0ef',
     'rsrc/css/phui/phui-icon.css' => '7a5771a9',
     'rsrc/css/phui/phui-info-panel.css' => '27ea50a1',
-    'rsrc/css/phui/phui-list.css' => '2edb76cf',
+    'rsrc/css/phui/phui-list.css' => 'ef8035b6',
     'rsrc/css/phui/phui-object-box.css' => 'ce92d8ec',
     'rsrc/css/phui/phui-object-item-list-view.css' => 'bde610d2',
     'rsrc/css/phui/phui-pinboard-view.css' => '4b346c2a',
@@ -752,7 +752,7 @@ return array(
     'phui-header-view-css' => '5b79f0ef',
     'phui-icon-view-css' => '7a5771a9',
     'phui-info-panel-css' => '27ea50a1',
-    'phui-list-view-css' => '2edb76cf',
+    'phui-list-view-css' => 'ef8035b6',
     'phui-object-box-css' => 'ce92d8ec',
     'phui-object-item-list-view-css' => 'bde610d2',
     'phui-pinboard-view-css' => '4b346c2a',
