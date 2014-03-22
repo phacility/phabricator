@@ -652,7 +652,7 @@ EOBODY;
   }
 
   public function loadProfileImageURI() {
-    if ($this->profileImage && $this->profileImage !== self::ATTACHABLE) {
+    if ($this->profileImage && ($this->profileImage !== self::ATTACHABLE)) {
       return $this->profileImage;
     }
 
@@ -664,13 +664,11 @@ EOBODY;
       $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $src_phid);
       if ($file) {
         $this->profileImage = $file->getBestURI();
+        return $this->profileImage;
       }
     }
 
-    if (!$this->profileImage) {
-      $this->profileImage = self::getDefaultProfileImageURI();
-    }
-
+    $this->profileImage = self::getDefaultProfileImageURI();
     return $this->profileImage;
   }
 
