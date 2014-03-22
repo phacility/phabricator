@@ -204,7 +204,6 @@ final class LegalpadDocumentSignController extends LegalpadController {
     PhabricatorMarkupEngine $engine,
     LegalpadDocumentBody $body) {
 
-    $this->requireResource('legalpad-document-css');
     return id(new PHUIDocumentView())
       ->addClass('legalpad')
       ->setHeader($header)
