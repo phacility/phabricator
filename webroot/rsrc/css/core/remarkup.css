@@ -198,6 +198,11 @@
   background: {$lightred};
 }
 
+.phabricator-remarkup .remarkup-note-word {
+  font-weight: bold;
+  color: {$darkbluetext};
+}
+
 .phabricator-remarkup-toc {
   float: right;
   border: 1px solid {$lightblueborder};
