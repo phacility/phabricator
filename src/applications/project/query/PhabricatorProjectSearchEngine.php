@@ -21,7 +21,8 @@ final class PhabricatorProjectSearchEngine
   }
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhabricatorProjectQuery());
+    $query = id(new PhabricatorProjectQuery())
+      ->needImages(true);
 
     $member_phids = $saved->getParameter('memberPHIDs', array());
     if ($member_phids && is_array($member_phids)) {

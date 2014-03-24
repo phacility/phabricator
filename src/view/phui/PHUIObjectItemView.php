@@ -18,6 +18,7 @@ final class PHUIObjectItemView extends AphrontTagView {
   private $actions = array();
   private $headIcons = array();
   private $disabled;
+  private $imageURI;
 
   const AGE_FRESH = 'fresh';
   const AGE_STALE = 'stale';
@@ -95,6 +96,15 @@ final class PHUIObjectItemView extends AphrontTagView {
   public function addByline($byline) {
     $this->bylines[] = $byline;
     return $this;
+  }
+
+  public function setImageURI($image_uri) {
+    $this->imageURI = $image_uri;
+    return $this;
+  }
+
+  public function getImageURI() {
+    return $this->imageURI;
   }
 
   public function setEpoch($epoch, $age = self::AGE_FRESH) {
@@ -239,6 +249,10 @@ final class PHUIObjectItemView extends AphrontTagView {
 
     if ($this->getGrippable()) {
       $item_classes[] = 'phui-object-item-grippable';
+    }
+
+    if ($this->getImageuRI()) {
+      $item_classes[] = 'phui-object-item-with-image';
     }
 
     return array(
@@ -469,6 +483,17 @@ final class PHUIObjectItemView extends AphrontTagView {
         $foot,
       ));
 
+    $image = null;
+    if ($this->getImageURI()) {
+      $image = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-object-item-image',
+          'style' => 'background-image: url('.$this->getImageURI().')',
+        ),
+        '');
+    }
+
     $box = phutil_tag(
       'div',
       array(
@@ -505,6 +530,7 @@ final class PHUIObjectItemView extends AphrontTagView {
       ),
       array(
         $actions,
+        $image,
         $box,
       ));
   }

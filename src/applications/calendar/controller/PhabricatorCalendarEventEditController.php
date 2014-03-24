@@ -47,6 +47,9 @@ final class PhabricatorCalendarEventEditController
             PhabricatorPolicyCapability::CAN_EDIT,
           ))
         ->executeOne();
+      if (!$status) {
+        return new Aphront404Response();
+      }
 
       $end_time->setValue($status->getDateTo());
       $start_time->setValue($status->getDateFrom());

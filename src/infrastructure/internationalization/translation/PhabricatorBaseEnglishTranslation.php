@@ -762,7 +762,7 @@ abstract class PhabricatorBaseEnglishTranslation
       '%s added %d dependencie(s): %s.' => array(
         array(
           '%s added a dependency: %3$s',
-          '%s added a dependencies: %3$s',
+          '%s added dependencies: %3$s',
         ),
       ),
 

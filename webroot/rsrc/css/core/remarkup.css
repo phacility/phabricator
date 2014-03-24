@@ -178,24 +178,29 @@
 }
 
 .phabricator-remarkup .remarkup-note {
-  margin: 12px 24px;
-  padding: 8px;
-  border: 1px solid {$blue};
+  margin: 16px 0;
+  padding: 12px;
+  border-left: 3px solid {$blue};
   background: {$lightblue};
 }
 
 .phabricator-remarkup .remarkup-warning {
-  margin: 12px 24px;
-  padding: 8px;
-  border: 1px solid {$yellow};
+  margin: 16px 0;
+  padding: 12px;
+  border-left: 3px solid {$yellow};
   background: {$lightyellow};
 }
 
 .phabricator-remarkup .remarkup-important {
-  margin: 12px 24px;
-  padding: 8px;
-  border: 1px solid {$red};
+  margin: 16px 0;
+  padding: 12px;
+  border-left: 3px solid {$red};
   background: {$lightred};
+}
+
+.phabricator-remarkup .remarkup-note-word {
+  font-weight: bold;
+  color: {$darkbluetext};
 }
 
 .phabricator-remarkup-toc {

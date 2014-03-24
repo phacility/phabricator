@@ -32,7 +32,7 @@ final class PhabricatorUser
   protected $isEmailVerified = 0;
   protected $isApproved = 0;
 
-  private $profileImage = null;
+  private $profileImage = self::ATTACHABLE;
   private $profile = null;
   private $status = self::ATTACHABLE;
   private $preferences = null;
@@ -647,8 +647,12 @@ EOBODY;
     return $this;
   }
 
+  public function getProfileImageURI() {
+    return $this->assertAttached($this->profileImage);
+  }
+
   public function loadProfileImageURI() {
-    if ($this->profileImage) {
+    if ($this->profileImage && ($this->profileImage !== self::ATTACHABLE)) {
       return $this->profileImage;
     }
 
@@ -660,13 +664,11 @@ EOBODY;
       $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $src_phid);
       if ($file) {
         $this->profileImage = $file->getBestURI();
+        return $this->profileImage;
       }
     }
 
-    if (!$this->profileImage) {
-      $this->profileImage = self::getDefaultProfileImageURI();
-    }
-
+    $this->profileImage = self::getDefaultProfileImageURI();
     return $this->profileImage;
   }
 

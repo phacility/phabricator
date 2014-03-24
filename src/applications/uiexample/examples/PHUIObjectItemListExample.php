@@ -332,6 +332,34 @@ final class PHUIObjectItemListExample extends PhabricatorUIExample {
 
     $out[] = array($head, $list);
 
+
+    $head = id(new PHUIHeaderView())
+      ->setHeader(pht('Images'));
+
+    $list = new PHUIObjectItemListView();
+
+    $default_profile = PhabricatorFile::loadBuiltin($user, 'profile.png');
+    $default_project = PhabricatorFile::loadBuiltin($user, 'project.png');
+
+    $list->addItem(
+      id(new PHUIObjectItemView())
+        ->setImageURI($default_profile->getViewURI())
+        ->setHeader(pht('Default User Profile Image'))
+        ->setBarColor('violet')
+        ->addAction(
+          id(new PHUIListItemView())
+            ->setHref('#')
+            ->setIcon('create')));
+
+    $list->addItem(
+      id(new PHUIObjectItemView())
+        ->setImageURI($default_project->getViewURI())
+        ->setHeader(pht('Default Project Profile Image'))
+        ->setGrippable(true)
+        ->addAttribute(pht('This is the default project profile image.')));
+
+    $out[] = array($head, $list);
+
     return $out;
   }
 }

@@ -44,6 +44,8 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
           'PhabricatorProjectArchiveController',
         'members/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectMembersEditController',
+        'members/(?P<id>[1-9]\d*)/remove/'
+          => 'PhabricatorProjectMembersRemoveController',
         'view/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectProfileController',
         'picture/(?P<id>[1-9]\d*)/' =>

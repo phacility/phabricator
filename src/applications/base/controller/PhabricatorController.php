@@ -258,6 +258,11 @@ abstract class PhabricatorController extends AphrontController {
   }
 
   public function didProcessRequest($response) {
+    // If a bare DialogView is returned, wrap it in a DialogResponse.
+    if ($response instanceof AphrontDialogView) {
+      $response = id(new AphrontDialogResponse())->setDialog($response);
+    }
+
     $request = $this->getRequest();
     $response->setRequest($request);
 
@@ -278,17 +283,28 @@ abstract class PhabricatorController extends AphrontController {
 
     if ($response instanceof AphrontDialogResponse) {
       if (!$request->isAjax()) {
-        $view = new PhabricatorStandardPageView();
-        $view->setRequest($request);
-        $view->setController($this);
-        $view->appendChild(phutil_tag(
-          'div',
-          array('style' => 'padding: 2em 0;'),
-          $response->buildResponseString()));
-        $page_response = new AphrontWebpageResponse();
-        $page_response->setContent($view->render());
-        $page_response->setHTTPResponseCode($response->getHTTPResponseCode());
-        return $page_response;
+        $dialog = $response->getDialog();
+
+        $title = $dialog->getTitle();
+        $short = $dialog->getShortTitle();
+
+        $crumbs = $this->buildApplicationCrumbs();
+        $crumbs->addTextCrumb(coalesce($short, $title));
+
+        $page_content = array(
+          $crumbs,
+          $response->buildResponseString(),
+        );
+
+        $view = id(new PhabricatorStandardPageView())
+          ->setRequest($request)
+          ->setController($this)
+          ->setTitle($title)
+          ->appendChild($page_content);
+
+        $response = id(new AphrontWebpageResponse())
+          ->setContent($view->render())
+          ->setHTTPResponseCode($response->getHTTPResponseCode());
       } else {
         $response->getDialog()->setIsStandalone(true);
 
@@ -306,6 +322,7 @@ abstract class PhabricatorController extends AphrontController {
             ));
       }
     }
+
     return $response;
   }
 
@@ -447,5 +464,19 @@ abstract class PhabricatorController extends AphrontController {
     return 'phabricator';
   }
 
+
+  /**
+   * Create a new @{class:AphrontDialogView} with defaults filled in.
+   *
+   * @return AphrontDialogView New dialog.
+   */
+  protected function newDialog() {
+    $submit_uri = new PhutilURI($this->getRequest()->getRequestURI());
+    $submit_uri = $submit_uri->getPath();
+
+    return id(new AphrontDialogView())
+      ->setUser($this->getRequest()->getUser())
+      ->setSubmitURI($submit_uri);
+  }
 
 }
