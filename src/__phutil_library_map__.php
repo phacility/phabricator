@@ -189,6 +189,8 @@ phutil_register_library_map(array(
     'ConduitAPI_flag_delete_Method' => 'applications/flag/conduit/ConduitAPI_flag_delete_Method.php',
     'ConduitAPI_flag_edit_Method' => 'applications/flag/conduit/ConduitAPI_flag_edit_Method.php',
     'ConduitAPI_flag_query_Method' => 'applications/flag/conduit/ConduitAPI_flag_query_Method.php',
+    'ConduitAPI_harbormaster_Method' => 'applications/harbormaster/conduit/ConduitAPI_harbormaster_Method.php',
+    'ConduitAPI_harbormaster_sendmessage_Method' => 'applications/harbormaster/conduit/ConduitAPI_harbormaster_sendmessage_Method.php',
     'ConduitAPI_macro_Method' => 'applications/macro/conduit/ConduitAPI_macro_Method.php',
     'ConduitAPI_macro_creatememe_Method' => 'applications/macro/conduit/ConduitAPI_macro_creatememe_Method.php',
     'ConduitAPI_macro_query_Method' => 'applications/macro/conduit/ConduitAPI_macro_query_Method.php',
@@ -701,6 +703,8 @@ phutil_register_library_map(array(
     'HarbormasterBuildItemQuery' => 'applications/harbormaster/query/HarbormasterBuildItemQuery.php',
     'HarbormasterBuildLog' => 'applications/harbormaster/storage/build/HarbormasterBuildLog.php',
     'HarbormasterBuildLogQuery' => 'applications/harbormaster/query/HarbormasterBuildLogQuery.php',
+    'HarbormasterBuildMessage' => 'applications/harbormaster/storage/HarbormasterBuildMessage.php',
+    'HarbormasterBuildMessageQuery' => 'applications/harbormaster/query/HarbormasterBuildMessageQuery.php',
     'HarbormasterBuildPlan' => 'applications/harbormaster/storage/configuration/HarbormasterBuildPlan.php',
     'HarbormasterBuildPlanEditor' => 'applications/harbormaster/editor/HarbormasterBuildPlanEditor.php',
     'HarbormasterBuildPlanQuery' => 'applications/harbormaster/query/HarbormasterBuildPlanQuery.php',
@@ -2743,6 +2747,8 @@ phutil_register_library_map(array(
     'ConduitAPI_flag_delete_Method' => 'ConduitAPI_flag_Method',
     'ConduitAPI_flag_edit_Method' => 'ConduitAPI_flag_Method',
     'ConduitAPI_flag_query_Method' => 'ConduitAPI_flag_Method',
+    'ConduitAPI_harbormaster_Method' => 'ConduitAPIMethod',
+    'ConduitAPI_harbormaster_sendmessage_Method' => 'ConduitAPI_harbormaster_Method',
     'ConduitAPI_macro_Method' => 'ConduitAPIMethod',
     'ConduitAPI_macro_creatememe_Method' => 'ConduitAPI_macro_Method',
     'ConduitAPI_macro_query_Method' => 'ConduitAPI_macro_Method',
@@ -3297,6 +3303,12 @@ phutil_register_library_map(array(
       1 => 'PhabricatorPolicyInterface',
     ),
     'HarbormasterBuildLogQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'HarbormasterBuildMessage' =>
+    array(
+      0 => 'HarbormasterDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
+    'HarbormasterBuildMessageQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'HarbormasterBuildPlan' =>
     array(
       0 => 'HarbormasterDAO',

@@ -73,6 +73,10 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
     return $this;
   }
 
+  public function getVariables() {
+    return parent::getVariables() + $this->getBuildTargetVariables();
+  }
+
   public function getVariable($key, $default = null) {
     return idx($this->variables, $key, $default);
   }
@@ -91,6 +95,12 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
     }
 
     return $this->implementation;
+  }
+
+  private function getBuildTargetVariables() {
+    return array(
+      'target.phid' => $this->getPHID(),
+    );
   }
 
 

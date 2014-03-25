@@ -168,7 +168,8 @@ final class HarbormasterBuild extends HarbormasterDAO
       'repository.vcs' => null,
       'repository.uri' => null,
       'step.timestamp' => null,
-      'build.id' => null);
+      'build.id' => null,
+    );
 
     $buildable = $this->getBuildable();
     $object = $buildable->getBuildableObject();
@@ -210,7 +211,9 @@ final class HarbormasterBuild extends HarbormasterDAO
       'repository.uri' =>
         pht('The URI to clone or checkout the repository from.'),
       'step.timestamp' => pht('The current UNIX timestamp.'),
-      'build.id' => pht('The ID of the current build.'));
+      'build.id' => pht('The ID of the current build.'),
+      'target.phid' => pht('The PHID of the current build target.'),
+    );
   }
 
   public function isComplete() {

@@ -55,6 +55,17 @@ final class HarbormasterBuildViewController
       ->withBuildPHIDs(array($build->getPHID()))
       ->execute();
 
+
+    if ($build_targets) {
+      $messages = id(new HarbormasterBuildMessageQuery())
+        ->setViewer($viewer)
+        ->withBuildTargetPHIDs(mpull($build_targets, 'getPHID'))
+        ->execute();
+      $messages = mgroup($messages, 'getBuildTargetPHID');
+    } else {
+      $messages = array();
+    }
+
     $targets = array();
     foreach ($build_targets as $build_target) {
       $header = id(new PHUIHeaderView())
@@ -84,6 +95,9 @@ final class HarbormasterBuildViewController
       $targets[] = id(new PHUIObjectBoxView())
         ->setHeader($header)
         ->addPropertyList($properties);
+
+      $build_messages = idx($messages, $build_target->getPHID(), array());
+      $targets[] = $this->buildMessages($build_messages);
 
       $targets[] = $this->buildArtifacts($build_target);
       $targets[] = $this->buildLog($build, $build_target);
@@ -315,5 +329,56 @@ final class HarbormasterBuildViewController
         return pht('Unknown');
     }
   }
+
+  private function buildMessages(array $messages) {
+    $viewer = $this->getRequest()->getUser();
+
+    if ($messages) {
+      $handles = id(new PhabricatorHandleQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(mpull($messages, 'getAuthorPHID'))
+        ->execute();
+    } else {
+      $handles = array();
+    }
+
+    $rows = array();
+    foreach ($messages as $message) {
+      $rows[] = array(
+        $message->getID(),
+        $handles[$message->getAuthorPHID()]->renderLink(),
+        $message->getType(),
+        $message->getIsConsumed() ? pht('Consumed') : null,
+        phabricator_datetime($message->getDateCreated(), $viewer),
+      );
+    }
+
+    $table = new AphrontTableView($rows);
+    $table->setNoDataString(pht('No messages for this build target.'));
+    $table->setHeaders(
+      array(
+        pht('ID'),
+        pht('From'),
+        pht('Type'),
+        pht('Consumed'),
+        pht('Received'),
+      ));
+    $table->setColumnClasses(
+      array(
+        '',
+        '',
+        'wide',
+        '',
+        'date',
+      ));
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Build Target Messages'))
+      ->appendChild($table);
+
+    return $box;
+  }
+
+
 
 }
