@@ -4,9 +4,13 @@ final class HarbormasterStepEditController
   extends HarbormasterController {
 
   private $id;
+  private $planID;
+  private $className;
 
   public function willProcessRequest(array $data) {
     $this->id = idx($data, 'id');
+    $this->planID = idx($data, 'plan');
+    $this->className = idx($data, 'class');
   }
 
   public function processRequest() {
@@ -16,15 +20,40 @@ final class HarbormasterStepEditController
     $this->requireApplicationCapability(
       HarbormasterCapabilityManagePlans::CAPABILITY);
 
-    $step = id(new HarbormasterBuildStepQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($this->id))
-      ->executeOne();
-    if (!$step) {
-      return new Aphront404Response();
+    if ($this->id) {
+      $step = id(new HarbormasterBuildStepQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($this->id))
+        ->executeOne();
+      if (!$step) {
+        return new Aphront404Response();
+      }
+      $plan = $step->getBuildPlan();
+
+      $is_new = false;
+    } else {
+      $plan = id(new HarbormasterBuildPlanQuery())
+          ->setViewer($viewer)
+          ->withIDs(array($this->planID))
+          ->executeOne();
+      if (!$plan) {
+        return new Aphront404Response();
+      }
+
+      $impl = HarbormasterBuildStepImplementation::getImplementation(
+        $this->className);
+      if (!$impl) {
+        return new Aphront404Response();
+      }
+
+      $step = HarbormasterBuildStep::initializeNewStep($viewer)
+        ->setBuildPlanPHID($plan->getPHID())
+        ->setClassName($this->className);
+
+      $is_new = true;
     }
 
-    $plan = $step->getBuildPlan();
+    $plan_uri = $this->getApplicationURI('plan/'.$plan->getID().'/');
 
     $implementation = $step->getStepImplementation();
 
@@ -47,10 +76,16 @@ final class HarbormasterStepEditController
         ->setContinueOnNoEffect(true)
         ->setContentSourceFromRequest($request);
 
+      if ($is_new) {
+        // This is okay, but a little iffy. We should move it inside the editor
+        // if we create plans elsewhere.
+        $steps = $plan->loadOrderedBuildSteps();
+        $step->setSequence(count($steps) + 1);
+      }
+
       try {
         $editor->applyTransactions($step, $xactions);
-        return id(new AphrontRedirectResponse())
-          ->setURI($this->getApplicationURI('plan/'.$plan->getID().'/'));
+        return id(new AphrontRedirectResponse())->setURI($plan_uri);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
       }
@@ -61,36 +96,47 @@ final class HarbormasterStepEditController
 
     $field_list->appendFieldsToForm($form);
 
+    if ($is_new) {
+      $submit = pht('Create Build Step');
+      $header = pht('New Step: %s', $implementation->getName());
+      $crumb = pht('Add Step');
+    } else {
+      $submit = pht('Save Build Step');
+      $header = pht('Edit Step: %s', $implementation->getName());
+      $crumb = pht('Edit Step');
+    }
+
     $form->appendChild(
       id(new AphrontFormSubmitControl())
-        ->setValue(pht('Save Build Step'))
-        ->addCancelButton(
-          $this->getApplicationURI('plan/'.$plan->getID().'/')));
+        ->setValue($submit)
+        ->addCancelButton($plan_uri));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText('Edit Step: '.$implementation->getName())
+      ->setHeaderText($header)
       ->setValidationException($validation_exception)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
     $id = $plan->getID();
-    $crumbs->addTextCrumb(
-      pht("Plan %d", $id),
-      $this->getApplicationURI("plan/{$id}/"));
-    $crumbs->addTextCrumb(pht('Edit Step'));
+    $crumbs->addTextCrumb(pht('Plan %d', $id), $plan_uri);
+    $crumbs->addTextCrumb($crumb);
 
     $variables = $this->renderBuildVariablesTable();
 
-    $xactions = id(new HarbormasterBuildStepTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($step->getPHID()))
-      ->execute();
+    if ($is_new) {
+      $xaction_view = null;
+    } else {
+      $xactions = id(new HarbormasterBuildStepTransactionQuery())
+        ->setViewer($viewer)
+        ->withObjectPHIDs(array($step->getPHID()))
+        ->execute();
 
-    $xaction_view = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($step->getPHID())
-      ->setTransactions($xactions)
-      ->setShouldTerminate(true);
+      $xaction_view = id(new PhabricatorApplicationTransactionView())
+        ->setUser($viewer)
+        ->setObjectPHID($step->getPHID())
+        ->setTransactions($xactions)
+        ->setShouldTerminate(true);
+    }
 
     return $this->buildApplicationPage(
       array(

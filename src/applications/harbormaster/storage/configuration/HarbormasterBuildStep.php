@@ -14,6 +14,10 @@ final class HarbormasterBuildStep extends HarbormasterDAO
   private $customFields = self::ATTACHABLE;
   private $implementation;
 
+  public static function initializeNewStep(PhabricatorUser $actor) {
+    return id(new HarbormasterBuildStep());
+  }
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
