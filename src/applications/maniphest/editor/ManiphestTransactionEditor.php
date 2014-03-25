@@ -40,7 +40,7 @@ final class ManiphestTransactionEditor
         if ($this->getIsNewObject()) {
           return null;
         }
-        return (int)$object->getStatus();
+        return $object->getStatus();
       case ManiphestTransaction::TYPE_TITLE:
         if ($this->getIsNewObject()) {
           return null;
@@ -75,13 +75,13 @@ final class ManiphestTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case ManiphestTransaction::TYPE_PRIORITY:
-      case ManiphestTransaction::TYPE_STATUS:
         return (int)$xaction->getNewValue();
       case ManiphestTransaction::TYPE_CCS:
       case ManiphestTransaction::TYPE_PROJECTS:
         return array_values(array_unique($xaction->getNewValue()));
       case ManiphestTransaction::TYPE_OWNER:
         return nonempty($xaction->getNewValue(), null);
+      case ManiphestTransaction::TYPE_STATUS:
       case ManiphestTransaction::TYPE_TITLE:
       case ManiphestTransaction::TYPE_DESCRIPTION:
       case ManiphestTransaction::TYPE_ATTACH:

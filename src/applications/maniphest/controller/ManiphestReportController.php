@@ -660,7 +660,6 @@ final class ManiphestReportController extends ManiphestController {
 
     $open_status_list = array();
     foreach (ManiphestTaskStatus::getOpenStatusConstants() as $constant) {
-      $open_status_list[] = json_encode((int)$constant);
       $open_status_list[] = json_encode((string)$constant);
     }
 

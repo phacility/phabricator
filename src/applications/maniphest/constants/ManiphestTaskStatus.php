@@ -2,12 +2,12 @@
 
 final class ManiphestTaskStatus extends ManiphestConstants {
 
-  const STATUS_OPEN               = 0;
-  const STATUS_CLOSED_RESOLVED    = 1;
-  const STATUS_CLOSED_WONTFIX     = 2;
-  const STATUS_CLOSED_INVALID     = 3;
-  const STATUS_CLOSED_DUPLICATE   = 4;
-  const STATUS_CLOSED_SPITE       = 5;
+  const STATUS_OPEN               = 'open';
+  const STATUS_CLOSED_RESOLVED    = 'resolved';
+  const STATUS_CLOSED_WONTFIX     = 'wontfix';
+  const STATUS_CLOSED_INVALID     = 'invalid';
+  const STATUS_CLOSED_DUPLICATE   = 'duplicate';
+  const STATUS_CLOSED_SPITE       = 'spite';
 
   const SPECIAL_DEFAULT     = 'default';
   const SPECIAL_CLOSED      = 'closed';

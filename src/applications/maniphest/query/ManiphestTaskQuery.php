@@ -351,12 +351,12 @@ final class ManiphestTaskQuery
       case self::STATUS_OPEN:
         return qsprintf(
           $conn,
-          'status IN (%Ld)',
+          'status IN (%Ls)',
           ManiphestTaskStatus::getOpenStatusConstants());
       case self::STATUS_CLOSED:
         return qsprintf(
           $conn,
-          'status IN (%Ld)',
+          'status IN (%Ls)',
           ManiphestTaskStatus::getClosedStatusConstants());
       default:
         $constant = idx($map, $this->status);
@@ -365,7 +365,7 @@ final class ManiphestTaskQuery
         }
         return qsprintf(
           $conn,
-          'status = %d',
+          'status = %s',
           $constant);
     }
   }
@@ -374,7 +374,7 @@ final class ManiphestTaskQuery
     if ($this->statuses) {
       return qsprintf(
         $conn,
-        'status IN (%Ld)',
+        'status IN (%Ls)',
         $this->statuses);
     }
     return null;
@@ -826,8 +826,8 @@ final class ManiphestTaskQuery
       case self::GROUP_STATUS:
         $columns[] = array(
           'name' => 'task.status',
-          'value' => (int)$group_id,
-          'type' => 'int',
+          'value' => $group_id,
+          'type' => 'string',
         );
         break;
       case self::GROUP_PROJECT:
