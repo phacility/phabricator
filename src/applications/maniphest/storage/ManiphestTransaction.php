@@ -143,7 +143,12 @@ final class ManiphestTransaction
         if ($color !== null) {
           return $color;
         }
-        break;
+
+        if (ManiphestTaskStatus::isOpenStatus($new)) {
+          return 'green';
+        } else {
+          return 'black';
+        }
 
       case self::TYPE_PRIORITY:
         if ($old == ManiphestTaskPriority::getDefaultPriority()) {
