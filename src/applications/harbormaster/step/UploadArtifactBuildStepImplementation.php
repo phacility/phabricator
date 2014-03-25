@@ -51,13 +51,6 @@ final class UploadArtifactBuildStepImplementation
     $artifact->save();
   }
 
-  public function getArtifactMappings() {
-    $settings = $this->getSettings();
-
-    return array(
-      $settings['name'] => HarbormasterBuildArtifact::TYPE_FILE);
-  }
-
   public function validateSettings() {
     $settings = $this->getSettings();
 
@@ -75,6 +68,26 @@ final class UploadArtifactBuildStepImplementation
     // TODO: Check if the host artifact is provided by previous build steps.
 
     return true;
+  }
+
+  public function getArtifactInputs() {
+    return array(
+      array(
+        'name' => pht('Upload From Host'),
+        'key' => $this->getSetting('hostartifact'),
+        'type' => HarbormasterBuildArtifact::TYPE_HOST,
+      ),
+    );
+  }
+
+  public function getArtifactOutputs() {
+    return array(
+      array(
+        'name' => pht('Uploaded File'),
+        'key' => $this->getSetting('name'),
+        'type' => HarbormasterBuildArtifact::TYPE_FILE,
+      ),
+    );
   }
 
   public function getSettingDefinitions() {

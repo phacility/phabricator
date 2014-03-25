@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group search
- */
 final class HarbormasterPlanOrderController extends HarbormasterController {
 
   private $id;
@@ -46,36 +43,8 @@ final class HarbormasterPlanOrderController extends HarbormasterController {
       $reordered_steps[] = $step;
     }
 
-    // We must ensure that steps with artifacts become invalid if they are
-    // placed before the steps that produce them.
-    foreach ($reordered_steps as $step) {
-      $implementation = $step->getStepImplementation();
-      $settings = $implementation->getSettings();
-      foreach ($implementation->getSettingDefinitions() as $name => $opt) {
-        switch ($opt['type']) {
-          case BuildStepImplementation::SETTING_TYPE_ARTIFACT:
-            $value = $settings[$name];
-            $filter = $opt['artifact_type'];
-            $available_artifacts =
-              BuildStepImplementation::getAvailableArtifacts(
-                $plan,
-                $reordered_steps,
-                $step,
-                $filter);
-            $artifact_found = false;
-            foreach ($available_artifacts as $key => $type) {
-              if ($key === $value) {
-                $artifact_found = true;
-              }
-            }
-            if (!$artifact_found) {
-              $step->setDetail($name, null);
-            }
-            break;
-        }
-        $step->save();
-      }
-    }
+    // NOTE: Reordering steps may invalidate artifacts. This is fine; the UI
+    // will show that there are ordering issues.
 
     // Force the page to re-render.
     return id(new AphrontRedirectResponse());

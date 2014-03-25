@@ -90,6 +90,16 @@ final class CommandBuildStepImplementation
     return true;
   }
 
+  public function getArtifactInputs() {
+    return array(
+      array(
+        'name'  => pht('Run on Host'),
+        'key'   => $this->getSetting('hostartifact'),
+        'type'  => HarbormasterBuildArtifact::TYPE_HOST,
+      ),
+    );
+  }
+
   public function getSettingDefinitions() {
     return array(
       'command' => array(

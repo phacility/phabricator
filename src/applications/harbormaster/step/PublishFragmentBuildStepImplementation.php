@@ -73,6 +73,16 @@ final class PublishFragmentBuildStepImplementation
     return true;
   }
 
+  public function getArtifactInputs() {
+    return array(
+      array(
+        'name' => pht('Publishes File'),
+        'key' => $this->getSetting('artifact'),
+        'type' => HarbormasterBuildArtifact::TYPE_FILE,
+      ),
+    );
+  }
+
   public function getSettingDefinitions() {
     return array(
       'path' => array(

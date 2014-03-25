@@ -51,13 +51,6 @@ final class LeaseHostBuildStepImplementation
     $artifact->save();
   }
 
-  public function getArtifactMappings() {
-    $settings = $this->getSettings();
-
-    return array(
-      $settings['name'] => HarbormasterBuildArtifact::TYPE_HOST);
-  }
-
   public function validateSettings() {
     $settings = $this->getSettings();
 
@@ -69,6 +62,16 @@ final class LeaseHostBuildStepImplementation
     }
 
     return true;
+  }
+
+  public function getArtifactOutputs() {
+    return array(
+      array(
+        'name' => pht('Leased Host'),
+        'key' => $this->getSetting('name'),
+        'type' => HarbormasterBuildArtifact::TYPE_HOST,
+      ),
+    );
   }
 
   public function getSettingDefinitions() {

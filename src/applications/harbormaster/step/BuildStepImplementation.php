@@ -50,6 +50,10 @@ abstract class BuildStepImplementation {
     return $this->settings;
   }
 
+  public function getSetting($key, $default = null) {
+    return idx($this->settings, $key, $default);
+  }
+
   /**
    * Validate the current settings of this build step.
    */
@@ -103,7 +107,11 @@ abstract class BuildStepImplementation {
    *
    * @return array The mappings of artifact names to their types.
    */
-  public function getArtifactMappings() {
+  public function getArtifactInputs() {
+    return array();
+  }
+
+  public function getArtifactOutputs() {
     return array();
   }
 
@@ -141,9 +149,10 @@ abstract class BuildStepImplementation {
       $previous_implementations[] = $build_step->getStepImplementation();
     }
 
-    $artifact_arrays = mpull($previous_implementations, 'getArtifactMappings');
+    $artifact_arrays = mpull($previous_implementations, 'getArtifactOutputs');
     $artifacts = array();
     foreach ($artifact_arrays as $array) {
+      $array = ipull($array, 'type', 'key');
       foreach ($array as $name => $type) {
         if ($type !== $artifact_type && $artifact_type !== null) {
           continue;

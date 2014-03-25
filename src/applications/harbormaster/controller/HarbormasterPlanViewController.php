@@ -50,7 +50,16 @@ final class HarbormasterPlanViewController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht("Plan %d", $id));
 
-    $step_list = $this->buildStepList($plan);
+    list($step_list, $has_any_conflicts) = $this->buildStepList($plan);
+
+    if ($has_any_conflicts) {
+      $box->setFormErrors(
+        array(
+          pht(
+            'This build plan has conflicts in one or more build steps. '.
+            'Examine the step list and resolve the listed errors.'),
+        ));
+    }
 
     return $this->buildApplicationPage(
       array(
@@ -91,6 +100,8 @@ final class HarbormasterPlanViewController
         'listID' => $list_id,
         'orderURI' => '/harbormaster/plan/order/'.$plan->getID().'/',
       ));
+
+    $has_any_conflicts = false;
     foreach ($steps as $step) {
       $implementation = null;
       try {
@@ -121,27 +132,14 @@ final class HarbormasterPlanViewController
         ->setObjectName("Step ".$i++)
         ->setHeader($implementation->getName());
 
-      if (!$implementation->validateSettings()) {
-        $item
-          ->setBarColor('red')
-          ->addAttribute(pht('This step is not configured correctly.'));
-      } else {
-        $item->addAttribute($implementation->getDescription());
-      }
+      $item->addAttribute($implementation->getDescription());
+
+      $step_id = $step->getID();
+      $edit_uri = $this->getApplicationURI("step/edit/{$step_id}/");
+      $delete_uri = $this->getApplicationURI("step/delete/{$step_id}/");
 
       if ($can_edit) {
-        $edit_uri = $this->getApplicationURI("step/edit/".$step->getID()."/");
-        $item
-          ->setHref($edit_uri)
-          ->addAction(
-            id(new PHUIListItemView())
-              ->setIcon('delete')
-              ->addSigil('harbormaster-build-step-delete')
-              ->setWorkflow(true)
-              ->setRenderNameAsTooltip(true)
-              ->setName(pht("Delete"))
-              ->setHref(
-                $this->getApplicationURI("step/delete/".$step->getID()."/")));
+        $item->setHref($edit_uri);
         $item->setGrippable(true);
         $item->addSigil('build-step');
         $item->setMetadata(
@@ -150,10 +148,60 @@ final class HarbormasterPlanViewController
           ));
       }
 
+      $item
+        ->setHref($edit_uri)
+        ->addAction(
+          id(new PHUIListItemView())
+            ->setIcon('delete')
+            ->addSigil('harbormaster-build-step-delete')
+            ->setWorkflow(true)
+            ->setDisabled(!$can_edit)
+            ->setHref(
+              $this->getApplicationURI("step/delete/".$step->getID()."/")));
+
+      $inputs = $step->getStepImplementation()->getArtifactInputs();
+      $outputs = $step->getStepImplementation()->getArtifactOutputs();
+
+      $has_conflicts = false;
+      if ($inputs || $outputs) {
+        $available_artifacts = BuildStepImplementation::loadAvailableArtifacts(
+          $plan,
+          $step,
+          null);
+
+        list($inputs_ui, $has_conflicts) = $this->buildArtifactList(
+            $inputs,
+            'in',
+            pht('Input Artifacts'),
+            $available_artifacts);
+
+        list($outputs_ui) = $this->buildArtifactList(
+            $outputs,
+            'out',
+            pht('Output Artifacts'),
+            array());
+
+        $item->appendChild(
+          phutil_tag(
+            'div',
+            array(
+              'class' => 'harbormaster-artifact-io',
+            ),
+            array(
+              $inputs_ui,
+              $outputs_ui,
+            )));
+      }
+
+      if ($has_conflicts) {
+        $has_any_conflicts = true;
+        $item->setBarColor('red');
+      }
+
       $step_list->addItem($item);
     }
 
-    return $step_list;
+    return array($step_list, $has_any_conflicts);
   }
 
   private function buildActionList(HarbormasterBuildPlan $plan) {
@@ -231,6 +279,104 @@ final class HarbormasterPlanViewController
       pht('Created'),
       phabricator_datetime($plan->getDateCreated(), $viewer));
 
+  }
+
+  private function buildArtifactList(
+    array $artifacts,
+    $kind,
+    $name,
+    array $available_artifacts) {
+    $has_conflicts = false;
+
+    if (!$artifacts) {
+      return array(null, $has_conflicts);
+    }
+
+
+    $this->requireResource('harbormaster-css');
+
+    $header = phutil_tag(
+      'div',
+      array(
+        'class' => 'harbormaster-artifact-summary-header',
+      ),
+      $name);
+
+    $is_input = ($kind == 'in');
+
+    $list = new PHUIStatusListView();
+    foreach ($artifacts as $artifact) {
+      $error = null;
+
+      $key = idx($artifact, 'key');
+      if (!strlen($key)) {
+        $bound = phutil_tag('em', array(), pht('(null)'));
+        if ($is_input) {
+          // This is an unbound input. For now, all inputs are always required.
+          $icon = 'warning-red';
+          $icon_label = pht('Required Input');
+          $has_conflicts = true;
+          $error = pht('This input is required, but not configured.');
+        } else {
+          // This is an unnamed output. Outputs do not necessarily need to be
+          // named.
+          $icon = 'open';
+          $icon_label = pht('Unused Output');
+        }
+      } else {
+        $bound = phutil_tag('strong', array(), $key);
+        if ($is_input) {
+          if (isset($available_artifacts[$key])) {
+            if ($available_artifacts[$key] == idx($artifact, 'type')) {
+              $icon = 'accept-green';
+              $icon_label = pht('Valid Input');
+            } else {
+              $icon = 'warning-red';
+              $icon_label = pht('Bad Input Type');
+              $has_conflicts = true;
+              $error = pht(
+                'This input is bound to the wrong artifact type. It is bound '.
+                'to a "%s" artifact, but should be bound to a "%s" artifact.',
+                $available_artifacts[$key],
+                idx($artifact, 'type'));
+            }
+          } else {
+            $icon = 'question-red';
+            $icon_label = pht('Unknown Input');
+            $has_conflicts = true;
+            $error = pht(
+              'This input is bound to an artifact ("%s") which does not exist '.
+              'at this stage in the build process.',
+              $key);
+          }
+        } else {
+          $icon = 'down-green';
+          $icon_label = pht('Valid Output');
+        }
+      }
+
+      if ($error) {
+        $note = array(
+          phutil_tag('strong', array(), pht('ERROR:')),
+          ' ',
+          $error);
+      } else {
+        $note = $bound;
+      }
+
+      $list->addItem(
+        id(new PHUIStatusItemView())
+          ->setIcon($icon, $icon_label)
+          ->setTarget($artifact['name'])
+          ->setNote($note));
+    }
+
+    $ui = array(
+      $header,
+      $list,
+    );
+
+    return array($ui, $has_conflicts);
   }
 
 }
