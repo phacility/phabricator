@@ -28,14 +28,11 @@ final class HarbormasterPlanViewController
       ->withObjectPHIDs(array($plan->getPHID()))
       ->execute();
 
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer);
-
     $xaction_view = id(new PhabricatorApplicationTransactionView())
       ->setUser($viewer)
       ->setObjectPHID($plan->getPHID())
       ->setTransactions($xactions)
-      ->setMarkupEngine($engine);
+      ->setShouldTerminate(true);
 
     $title = pht("Plan %d", $id);
 
@@ -85,6 +82,8 @@ final class HarbormasterPlanViewController
     $i = 1;
     $step_list = id(new PHUIObjectItemListView())
       ->setUser($viewer)
+      ->setNoDataString(
+        pht('This build plan does not have any build steps yet.'))
       ->setID($list_id);
     Javelin::initBehavior(
       'harbormaster-reorder-steps',
@@ -100,7 +99,7 @@ final class HarbormasterPlanViewController
         // We can't initialize the implementation.  This might be because
         // it's been renamed or no longer exists.
         $item = id(new PHUIObjectItemView())
-          ->setObjectName("Step ".$i++)
+          ->setObjectName(pht('Step %d', $i++))
           ->setHeader(pht('Unknown Implementation'))
           ->setBarColor('red')
           ->addAttribute(pht(
