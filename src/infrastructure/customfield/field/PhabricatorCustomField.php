@@ -1063,6 +1063,17 @@ abstract class PhabricatorCustomField {
   /**
    * @task edit
    */
+  public function getInstructionsForEdit() {
+    if ($this->proxy) {
+      return $this->proxy->getInstructionsForEdit();
+    }
+    return null;
+  }
+
+
+  /**
+   * @task edit
+   */
   public function renderEditControl(array $handles) {
     if ($this->proxy) {
       return $this->proxy->renderEditControl($handles);

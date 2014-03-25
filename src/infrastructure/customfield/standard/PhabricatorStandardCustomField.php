@@ -211,6 +211,10 @@ abstract class PhabricatorStandardCustomField
     $this->setFieldValue($value);
   }
 
+  public function getInstructionsForEdit() {
+    return $this->getFieldConfigValue('instructions');
+  }
+
   public function renderEditControl(array $handles) {
     return id(new AphrontFormTextControl())
       ->setName($this->getFieldKey())
