@@ -98,4 +98,63 @@ final class PassphraseCredentialControl extends AphrontFormControl {
       ));
   }
 
+  /**
+   * Verify that a given actor has permission to use all of the credentials
+   * in a list of credential transactions.
+   *
+   * In general, the rule here is:
+   *
+   *   - If you're editing an object and it uses a credential you can't use,
+   *     that's fine as long as you don't change the credential.
+   *   - If you do change the credential, the new credential must be one you
+   *     can use.
+   *
+   * @param PhabricatorUser The acting user.
+   * @param list<PhabricatorApplicationTransaction> List of credential altering
+   *        transactions.
+   * @return bool True if the transactions are valid.
+   */
+  public static function validateTransactions(
+    PhabricatorUser $actor,
+    array $xactions) {
+
+    $new_phids = array();
+    foreach ($xactions as $xaction) {
+      $new = $xaction->getNewValue();
+      if (!$new) {
+        // Removing a credential, so this is OK.
+        continue;
+      }
+
+      $old = $xaction->getOldValue();
+      if ($old == $new) {
+        // This is a no-op transaction, so this is also OK.
+        continue;
+      }
+
+      // Otherwise, we need to check this credential.
+      $new_phids[] = $new;
+    }
+
+    if (!$new_phids) {
+      // No new credentials being set, so this is fine.
+      return true;
+    }
+
+    $usable_credentials = id(new PassphraseCredentialQuery())
+      ->setViewer($actor)
+      ->withPHIDs($new_phids)
+      ->execute();
+    $usable_credentials = mpull($usable_credentials, null, 'getPHID');
+
+    foreach ($new_phids as $phid) {
+      if (empty($usable_credentials[$phid])) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+
 }
