@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group maniphest
- */
 final class ManiphestTaskStatus extends ManiphestConstants {
 
   const STATUS_OPEN               = 0;
@@ -23,7 +20,7 @@ final class ManiphestTaskStatus extends ManiphestConstants {
     $duplicate = pht('Duplicate');
     $spite = pht('Spite');
 
-    return array(
+    $statuses = array(
       self::STATUS_OPEN                 => $open,
       self::STATUS_CLOSED_RESOLVED      => $resolved,
       self::STATUS_CLOSED_WONTFIX       => $wontfix,
@@ -31,6 +28,17 @@ final class ManiphestTaskStatus extends ManiphestConstants {
       self::STATUS_CLOSED_DUPLICATE     => $duplicate,
       self::STATUS_CLOSED_SPITE         => $spite,
     );
+
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+    if (!$is_serious) {
+      $statuses[self::STATUS_CLOSED_SPITE] = pht('Spite');
+    }
+
+    return $statuses;
+  }
+
+  public static function getTaskStatusName($status) {
+    return idx(self::getTaskStatusMap(), $status, pht('Unknown Status'));
   }
 
   public static function getTaskStatusFullName($status) {
@@ -103,10 +111,24 @@ final class ManiphestTaskStatus extends ManiphestConstants {
     return self::STATUS_OPEN;
   }
 
+  public static function getDefaultClosedStatus() {
+    return self::STATUS_CLOSED_RESOLVED;
+  }
+
+  public static function getDuplicateStatus() {
+    return self::STATUS_CLOSED_DUPLICATE;
+  }
+
   public static function getOpenStatusConstants() {
     return array(
       self::STATUS_OPEN,
     );
+  }
+
+  public static function getClosedStatusConstants() {
+    $all = array_keys(self::getTaskStatusMap());
+    $open = self::getOpenStatusConstants();
+    return array_diff($all, $open);
   }
 
   public static function isOpenStatus($status) {
@@ -117,6 +139,35 @@ final class ManiphestTaskStatus extends ManiphestConstants {
     }
     return false;
   }
+
+  public static function isClosedStatus($status) {
+    return !self::isOpenStatus($status);
+  }
+
+  public static function getStatusActionName($status) {
+    switch ($status) {
+      case self::STATUS_CLOSED_SPITE:
+        return pht('Spited');
+    }
+    return null;
+  }
+
+  public static function getStatusColor($status) {
+    if (self::isOpenStatus($status)) {
+      return 'green';
+    }
+    return 'black';
+  }
+
+  public static function getStatusIcon($status) {
+    switch ($status) {
+      case ManiphestTaskStatus::STATUS_CLOSED_SPITE:
+        return 'dislike';
+      case ManiphestTaskStatus::STATUS_CLOSED_DUPLICATE:
+        return 'delete';
+    }
+  }
+
 
   public static function getStatusPrefixMap() {
     return array(

@@ -31,9 +31,9 @@ final class ManiphestSearchIndexer
       $task->getDateCreated());
 
     $doc->addRelationship(
-      (ManiphestTaskStatus::isOpenStatus($task->getStatus()))
-        ? PhabricatorSearchRelationship::RELATIONSHIP_OPEN
-        : PhabricatorSearchRelationship::RELATIONSHIP_CLOSED,
+      $task->isClosed()
+        ? PhabricatorSearchRelationship::RELATIONSHIP_CLOSED
+        : PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
       $task->getPHID(),
       ManiphestPHIDTypeTask::TYPECONST,
       time());

@@ -178,7 +178,7 @@ final class PhabricatorSearchAttachController
 
       $close_task = id(new ManiphestTransaction())
         ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
-        ->setNewValue(ManiphestTaskStatus::STATUS_CLOSED_DUPLICATE);
+        ->setNewValue(ManiphestTaskStatus::getDuplicateStatus());
 
       $merge_comment = id(new ManiphestTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)

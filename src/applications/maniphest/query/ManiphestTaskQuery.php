@@ -349,9 +349,15 @@ final class ManiphestTaskQuery
       case self::STATUS_ANY:
         return null;
       case self::STATUS_OPEN:
-        return 'status = 0';
+        return qsprintf(
+          $conn,
+          'status IN (%Ld)',
+          ManiphestTaskStatus::getOpenStatusConstants());
       case self::STATUS_CLOSED:
-        return 'status > 0';
+        return qsprintf(
+          $conn,
+          'status IN (%Ld)',
+          ManiphestTaskStatus::getClosedStatusConstants());
       default:
         $constant = idx($map, $this->status);
         if (!$constant) {
