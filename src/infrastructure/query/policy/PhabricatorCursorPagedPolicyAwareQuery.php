@@ -285,16 +285,17 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
 
   /**
-   * Constrain the query with an ApplicationSearch index. This adds a constraint
-   * which requires objects to have one or more corresponding rows in the index
-   * with one of the given values. Combined with appropriate indexes, it can
-   * build the most common types of queries, like:
+   * Constrain the query with an ApplicationSearch index, requiring field values
+   * contain at least one of the values in a set.
+   *
+   * This constraint can build the most common types of queries, like:
    *
    *   - Find users with shirt sizes "X" or "XL".
    *   - Find shoes with size "13".
    *
    * @param PhabricatorCustomFieldIndexStorage Table where the index is stored.
    * @param string|list<string> One or more values to filter by.
+   * @return this
    * @task appsearch
    */
   public function withApplicationSearchContainsConstraint(
@@ -307,6 +308,51 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       'table' => $index->getTableName(),
       'index' => $index->getIndexKey(),
       'value' => $value,
+    );
+
+    return $this;
+  }
+
+
+  /**
+   * Constrain the query with an ApplicationSearch index, requiring values
+   * exist in a given range.
+   *
+   * This constraint is useful for expressing date ranges:
+   *
+   *   - Find events between July 1st and July 7th.
+   *
+   * The ends of the range are inclusive, so a `$min` of `3` and a `$max` of
+   * `5` will match fields with values `3`, `4`, or `5`. Providing `null` for
+   * either end of the range will leave that end of the constraint open.
+   *
+   * @param PhabricatorCustomFieldIndexStorage Table where the index is stored.
+   * @param int|null Minimum permissible value, inclusive.
+   * @param int|null Maximum permissible value, inclusive.
+   * @return this
+   * @task appsearch
+   */
+  public function withApplicationSearchRangeConstraint(
+    PhabricatorCustomFieldIndexStorage $index,
+    $min,
+    $max) {
+
+    $index_type = $index->getIndexValueType();
+    if ($index_type != 'int') {
+      throw new Exception(
+        pht(
+          'Attempting to apply a range constraint to a field with index type '.
+          '"%s", expected type "%s".',
+          $index_type,
+          'int'));
+    }
+
+    $this->applicationSearchConstraints[] = array(
+      'type' => $index->getIndexValueType(),
+      'cond' => 'range',
+      'table' => $index->getTableName(),
+      'index' => $index->getIndexKey(),
+      'value' => array($min, $max),
     );
 
     return $this;
@@ -339,16 +385,29 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     foreach ($this->applicationSearchConstraints as $constraint) {
       $type = $constraint['type'];
       $value = $constraint['value'];
+      $cond = $constraint['cond'];
 
-      switch ($type) {
-        case 'string':
-        case 'int':
-          if (count((array)$value) > 1) {
-            return true;
+      switch ($cond) {
+        case '=':
+          switch ($type) {
+            case 'string':
+            case 'int':
+              if (count((array)$value) > 1) {
+                return true;
+              }
+              break;
+            default:
+              throw new Exception(pht('Unknown index type "%s"!', $type));
           }
           break;
+        case 'range':
+          // NOTE: It's possible to write a custom field where multiple rows
+          // match a range constraint, but we don't currently ship any in the
+          // upstream and I can't immediately come up with cases where this
+          // would make sense.
+          break;
         default:
-          throw new Exception("Unknown constraint type '{$type}!");
+          throw new Exception(pht('Unknown constraint condition "%s"!', $cond));
       }
     }
 
@@ -395,44 +454,84 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $index = $constraint['index'];
       $cond = $constraint['cond'];
       $phid_column = $this->getApplicationSearchObjectPHIDColumn();
-      if ($cond !== '=') {
-        throw new Exception("Unknown constraint condition '{$cond}'!");
-      }
+      switch ($cond) {
+        case '=':
+          $type = $constraint['type'];
+          switch ($type) {
+            case 'string':
+              $constraint_clause = qsprintf(
+                $conn_r,
+                '%T.indexValue IN (%Ls)',
+                $alias,
+                (array)$constraint['value']);
+              break;
+            case 'int':
+              $constraint_clause = qsprintf(
+                $conn_r,
+                '%T.indexValue IN (%Ld)',
+                $alias,
+                (array)$constraint['value']);
+              break;
+            default:
+              throw new Exception(pht('Unknown index type "%s"!', $type));
+          }
 
-      $type = $constraint['type'];
-      switch ($type) {
-        case 'string':
           $joins[] = qsprintf(
             $conn_r,
             'JOIN %T %T ON %T.objectPHID = %Q
               AND %T.indexKey = %s
-              AND %T.indexValue IN (%Ls)',
+              AND (%Q)',
             $table,
             $alias,
             $alias,
             $phid_column,
             $alias,
             $index,
-            $alias,
-            (array)$constraint['value']);
+            $constraint_clause);
           break;
-        case 'int':
+        case 'range':
+          list($min, $max) = $constraint['value'];
+          if (($min === null) && ($max === null)) {
+            // If there's no actual range constraint, just move on.
+            break;
+          }
+
+          if ($min === null) {
+            $constraint_clause = qsprintf(
+              $conn_r,
+              '%T.indexValue <= %d',
+              $alias,
+              $max);
+          } else if ($max === null) {
+            $constraint_clause = qsprintf(
+              $conn_r,
+              '%T.indexValue >= %d',
+              $alias,
+              $min);
+          } else {
+            $constraint_clause = qsprintf(
+              $conn_r,
+              '%T.indexValue BETWEEN %d AND %d',
+              $alias,
+              $min,
+              $max);
+          }
+
           $joins[] = qsprintf(
             $conn_r,
             'JOIN %T %T ON %T.objectPHID = %Q
               AND %T.indexKey = %s
-              AND %T.indexValue IN (%Ld)',
+              AND (%Q)',
             $table,
             $alias,
             $alias,
             $phid_column,
             $alias,
             $index,
-            $alias,
-            (array)$constraint['value']);
+            $constraint_clause);
           break;
         default:
-          throw new Exception("Unknown constraint type '{$type}'!");
+          throw new Exception(pht('Unknown constraint condition "%s"!', $cond));
       }
     }
 

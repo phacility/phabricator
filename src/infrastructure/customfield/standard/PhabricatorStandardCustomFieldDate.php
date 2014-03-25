@@ -81,9 +81,73 @@ final class PhabricatorStandardCustomFieldDate
     return $control;
   }
 
-  // TODO: Support ApplicationSearch for these fields. We build indexes above,
-  // but don't provide a UI for searching. To do so, we need a reasonable date
-  // range control and the ability to add a range constraint.
+  public function readApplicationSearchValueFromRequest(
+    PhabricatorApplicationSearchEngine $engine,
+    AphrontRequest $request) {
+
+    $key = $this->getFieldKey();
+
+    return array(
+      'min' => $request->getStr($key.'.min'),
+      'max' => $request->getStr($key.'.max'),
+    );
+  }
+
+  public function applyApplicationSearchConstraintToQuery(
+    PhabricatorApplicationSearchEngine $engine,
+    PhabricatorCursorPagedPolicyAwareQuery $query,
+    $value) {
+
+    $viewer = $this->getViewer();
+
+    if (!is_array($value)) {
+      $value = array();
+    }
+
+    $min_str = idx($value, 'min', '');
+    if (strlen($min_str)) {
+      $min = PhabricatorTime::parseLocalTime($min_str, $viewer);
+    } else {
+      $min = null;
+    }
+
+    $max_str = idx($value, 'max', '');
+    if (strlen($max_str)) {
+      $max = PhabricatorTime::parseLocalTime($max_str, $viewer);
+    } else {
+      $max = null;
+    }
+
+    if (($min !== null) || ($max !== null)) {
+      $query->withApplicationSearchRangeConstraint(
+        $this->newNumericIndex(null),
+        $min,
+        $max);
+    }
+  }
+
+  public function appendToApplicationSearchForm(
+    PhabricatorApplicationSearchEngine $engine,
+    AphrontFormView $form,
+    $value,
+    array $handles) {
+
+    if (!is_array($value)) {
+      $value = array();
+    }
+
+    $form
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel(pht('%s After', $this->getFieldName()))
+          ->setName($this->getFieldKey().'.min')
+          ->setValue(idx($value, 'min', '')))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel(pht('%s Before', $this->getFieldName()))
+          ->setName($this->getFieldKey().'.max')
+          ->setValue(idx($value, 'max', '')));
+  }
 
   public function getApplicationTransactionTitle(
     PhabricatorApplicationTransaction $xaction) {
