@@ -183,6 +183,13 @@ final class DifferentialTransactionEditor
              ($object->getStatus() == $status_plan))) {
           $object->setStatus($status_review);
         }
+
+        $diff = $this->requireDiff($xaction->getNewValue());
+
+        $object->setLineCount($diff->getLineCount());
+        $object->setRepositoryPHID($diff->getRepositoryPHID());
+        $object->setArcanistProjectPHID($diff->getArcanistProjectPHID());
+
         // TODO: Update the `diffPHID` once we add that.
         return;
       case DifferentialTransaction::TYPE_ACTION:
@@ -304,7 +311,7 @@ final class DifferentialTransactionEditor
 
         $maniphest = 'PhabricatorApplicationManiphest';
         if (PhabricatorApplication::isClassInstalled($maniphest)) {
-          $diff = $this->loadDiff($xaction->getNewValue());
+          $diff = $this->requireDiff($xaction->getNewValue());
           $branch = $diff->getBranch();
 
           // No "$", to allow for branches like T123_demo.
@@ -475,31 +482,22 @@ final class DifferentialTransactionEditor
         return;
       case DifferentialTransaction::TYPE_UPDATE:
         // Now that we're inside the transaction, do a final check.
-        $diff = $this->loadDiff($xaction->getNewValue());
+        $diff = $this->requireDiff($xaction->getNewValue());
 
         // TODO: It would be slightly cleaner to just revalidate this
         // transaction somehow using the same validation code, but that's
         // not easy to do at the moment.
 
-        if (!$diff) {
-          throw new Exception(pht('Diff does not exist!'));
-        } else {
-          $revision_id = $diff->getRevisionID();
-          if ($revision_id && ($revision_id != $object->getID())) {
-            throw new Exception(
-              pht(
-                'Diff is already attached to another revision. You lost '.
-                'a race?'));
-          }
+        $revision_id = $diff->getRevisionID();
+        if ($revision_id && ($revision_id != $object->getID())) {
+          throw new Exception(
+            pht(
+              'Diff is already attached to another revision. You lost '.
+              'a race?'));
         }
 
         $diff->setRevisionID($object->getID());
         $diff->save();
-
-        $object->setLineCount($diff->getLineCount());
-        $object->setRepositoryPHID($diff->getRepositoryPHID());
-        $object->setArcanistProjectPHID($diff->getArcanistProjectPHID());
-
         return;
     }
 
@@ -560,7 +558,7 @@ final class DifferentialTransactionEditor
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
         case DifferentialTransaction::TYPE_UPDATE:
-          $diff = $this->loadDiff($xaction->getNewValue(), true);
+          $diff = $this->requireDiff($xaction->getNewValue(), true);
 
           // Update these denormalized index tables when we attach a new
           // diff to a revision.
@@ -1122,7 +1120,7 @@ final class DifferentialTransactionEditor
     }
 
     if ($update_xaction) {
-      $diff = $this->loadDiff($update_xaction->getNewValue(), true);
+      $diff = $this->requireDiff($update_xaction->getNewValue(), true);
 
       $body->addTextSection(
         pht('AFFECTED FILES'),
@@ -1322,6 +1320,15 @@ final class DifferentialTransactionEditor
     }
 
     return $query->executeOne();
+  }
+
+  private function requireDiff($phid, $need_changesets = false) {
+    $diff = $this->loadDiff($phid, $need_changesets);
+    if (!$diff) {
+      throw new Exception(pht('Diff "%s" does not exist!', $phid));
+    }
+
+    return $diff;
   }
 
 /* -(  Herald Integration  )------------------------------------------------- */
