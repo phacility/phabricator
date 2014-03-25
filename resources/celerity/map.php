@@ -382,7 +382,7 @@ return array(
     'rsrc/js/application/herald/HeraldRuleEditor.js' => '4173dbd8',
     'rsrc/js/application/herald/PathTypeahead.js' => 'f7fc67ec',
     'rsrc/js/application/herald/herald-rule-editor.js' => '7ebaeed3',
-    'rsrc/js/application/maniphest/behavior-batch-editor.js' => '391457d7',
+    'rsrc/js/application/maniphest/behavior-batch-editor.js' => 'fe80fb6d',
     'rsrc/js/application/maniphest/behavior-batch-selector.js' => 'ead554ec',
     'rsrc/js/application/maniphest/behavior-line-chart.js' => '64ef2fd2',
     'rsrc/js/application/maniphest/behavior-list-edit.js' => 'cf76cfd5',
@@ -573,7 +573,7 @@ return array(
     'javelin-behavior-lightbox-attachments' => '3aa45ad9',
     'javelin-behavior-line-chart' => '64ef2fd2',
     'javelin-behavior-load-blame' => '42126667',
-    'javelin-behavior-maniphest-batch-editor' => '391457d7',
+    'javelin-behavior-maniphest-batch-editor' => 'fe80fb6d',
     'javelin-behavior-maniphest-batch-selector' => 'ead554ec',
     'javelin-behavior-maniphest-list-editor' => 'cf76cfd5',
     'javelin-behavior-maniphest-subpriority-editor' => '84845b5b',
@@ -1049,15 +1049,6 @@ return array(
       3 => 'javelin-dom',
       4 => 'phabricator-draggable-list',
     ),
-    '391457d7' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-      2 => 'javelin-util',
-      3 => 'phabricator-prefab',
-      4 => 'multirow-row-manager',
-      5 => 'javelin-json',
-    ),
     '3aa45ad9' =>
     array(
       0 => 'javelin-behavior',
@@ -1234,11 +1225,6 @@ return array(
       2 => 'javelin-util',
       3 => 'phabricator-shaped-request',
     ),
-    '7319e029' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-    ),
     '62e18640' =>
     array(
       0 => 'javelin-install',
@@ -1273,6 +1259,11 @@ return array(
       0 => 'javelin-behavior',
       1 => 'javelin-stratcom',
       2 => 'javelin-dom',
+    ),
+    '7319e029' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
     ),
     '75903ee1' =>
     array(
@@ -1971,6 +1962,15 @@ return array(
       3 => 'javelin-request',
       4 => 'phabricator-keyboard-shortcut',
       5 => 'phabricator-notification',
+    ),
+    'fe80fb6d' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-util',
+      3 => 'phabricator-prefab',
+      4 => 'multirow-row-manager',
+      5 => 'javelin-json',
     ),
     28497740 =>
     array(
