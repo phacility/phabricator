@@ -2,16 +2,9 @@
 
 abstract class BuildStepImplementation {
 
-  private $settings;
-
-  const SETTING_TYPE_STRING = 'string';
-  const SETTING_TYPE_INTEGER = 'integer';
-  const SETTING_TYPE_BOOLEAN = 'boolean';
-  const SETTING_TYPE_ARTIFACT = 'artifact';
-
   public static function getImplementations() {
     $symbols = id(new PhutilSymbolLoader())
-      ->setAncestorClass("BuildStepImplementation")
+      ->setAncestorClass('BuildStepImplementation')
       ->setConcreteOnly(true)
       ->selectAndLoadSymbols();
     return ipull($symbols, 'name');
@@ -33,7 +26,7 @@ abstract class BuildStepImplementation {
    * The description of the implementation, based on the current settings.
    */
   public function getDescription() {
-    return '';
+    return $this->getGenericDescription();
   }
 
   /**
@@ -55,43 +48,12 @@ abstract class BuildStepImplementation {
   }
 
   /**
-   * Validate the current settings of this build step.
-   */
-  public function validateSettings() {
-    return true;
-  }
-
-  /**
    * Loads the settings for this build step implementation from a build
    * step or target.
    */
   public final function loadSettings($build_object) {
-    $this->settings = array();
-    $this->validateSettingDefinitions();
-    foreach ($this->getSettingDefinitions() as $name => $opt) {
-      $this->settings[$name] = $build_object->getDetail($name);
-    }
-    return $this->settings;
-  }
-
-  /**
-   * Validates that the setting definitions for this implementation are valid.
-   */
-  public final function validateSettingDefinitions() {
-    foreach ($this->getSettingDefinitions() as $name => $opt) {
-      if (!isset($opt['type'])) {
-        throw new Exception(
-          'Setting definition \''.$name.
-          '\' is missing type requirement.');
-      }
-    }
-  }
-
-  /**
-   * Return an array of settings for this step implementation.
-   */
-  public function getSettingDefinitions() {
-    return array();
+    $this->settings = $build_object->getDetails();
+    return $this;
   }
 
   /**
@@ -195,6 +157,10 @@ abstract class BuildStepImplementation {
     $pattern = preg_replace($regexp, '%s', $pattern);
 
     return call_user_func($function, $pattern, $argv);
+  }
+
+  public function getFieldSpecifications() {
+    return array();
   }
 
 }

@@ -34,10 +34,7 @@ final class HarbormasterHTTPRequestBuildStepImplementation
     $log_body = $build->createLog($build_target, $uri, 'http-body');
     $start = $log_body->start();
 
-    $method = 'POST';
-    if ($settings['method'] !== '') {
-      $method = $settings['method'];
-    }
+    $method = nonempty(idx($settings, 'method'), 'POST');
 
     list($status, $body, $headers) = id(new HTTPSFuture($uri))
       ->setMethod($method)
@@ -52,42 +49,17 @@ final class HarbormasterHTTPRequestBuildStepImplementation
     }
   }
 
-  public function validateSettings() {
-    $settings = $this->getSettings();
-
-    if ($settings['uri'] === null || !is_string($settings['uri'])) {
-      return false;
-    }
-
-    $methods = array(
-      'GET' => true,
-      'POST' => true,
-      'DELETE' => true,
-      'PUT' => true,
-    );
-
-    $method = idx($settings, 'method');
-    if (strlen($method)) {
-      if (empty($methods[$method])) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  public function getSettingDefinitions() {
+  public function getFieldSpecifications() {
     return array(
       'uri' => array(
-        'name' => 'URI',
-        'description' => pht('The URI to request.'),
-        'type' => BuildStepImplementation::SETTING_TYPE_STRING,
+        'name' => pht('URI'),
+        'type' => 'text',
+        'required' => true,
       ),
       'method' => array(
-        'name' => 'Method',
-        'description' =>
-          pht('Request type. Should be GET, POST, PUT, or DELETE.'),
-        'type' => BuildStepImplementation::SETTING_TYPE_STRING,
+        'name' => pht('HTTP Method'),
+        'type' => 'select',
+        'options' => array_fuse(array('POST', 'GET', 'PUT', 'DELETE')),
       ),
     );
   }

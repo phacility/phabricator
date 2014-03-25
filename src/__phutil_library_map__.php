@@ -712,7 +712,12 @@ phutil_register_library_map(array(
     'HarbormasterBuildPlanTransactionQuery' => 'applications/harbormaster/query/HarbormasterBuildPlanTransactionQuery.php',
     'HarbormasterBuildQuery' => 'applications/harbormaster/query/HarbormasterBuildQuery.php',
     'HarbormasterBuildStep' => 'applications/harbormaster/storage/configuration/HarbormasterBuildStep.php',
+    'HarbormasterBuildStepCoreCustomField' => 'applications/harbormaster/customfield/HarbormasterBuildStepCoreCustomField.php',
+    'HarbormasterBuildStepCustomField' => 'applications/harbormaster/customfield/HarbormasterBuildStepCustomField.php',
+    'HarbormasterBuildStepEditor' => 'applications/harbormaster/editor/HarbormasterBuildStepEditor.php',
     'HarbormasterBuildStepQuery' => 'applications/harbormaster/query/HarbormasterBuildStepQuery.php',
+    'HarbormasterBuildStepTransaction' => 'applications/harbormaster/storage/configuration/HarbormasterBuildStepTransaction.php',
+    'HarbormasterBuildStepTransactionQuery' => 'applications/harbormaster/query/HarbormasterBuildStepTransactionQuery.php',
     'HarbormasterBuildTarget' => 'applications/harbormaster/storage/build/HarbormasterBuildTarget.php',
     'HarbormasterBuildTargetQuery' => 'applications/harbormaster/query/HarbormasterBuildTargetQuery.php',
     'HarbormasterBuildViewController' => 'applications/harbormaster/controller/HarbormasterBuildViewController.php',
@@ -3310,8 +3315,18 @@ phutil_register_library_map(array(
     array(
       0 => 'HarbormasterDAO',
       1 => 'PhabricatorPolicyInterface',
+      2 => 'PhabricatorCustomFieldInterface',
     ),
+    'HarbormasterBuildStepCoreCustomField' =>
+    array(
+      0 => 'HarbormasterBuildStepCustomField',
+      1 => 'PhabricatorStandardCustomFieldInterface',
+    ),
+    'HarbormasterBuildStepCustomField' => 'PhabricatorCustomField',
+    'HarbormasterBuildStepEditor' => 'PhabricatorApplicationTransactionEditor',
     'HarbormasterBuildStepQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'HarbormasterBuildStepTransaction' => 'PhabricatorApplicationTransaction',
+    'HarbormasterBuildStepTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'HarbormasterBuildTarget' =>
     array(
       0 => 'HarbormasterDAO',

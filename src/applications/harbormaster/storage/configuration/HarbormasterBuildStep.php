@@ -1,7 +1,9 @@
 <?php
 
 final class HarbormasterBuildStep extends HarbormasterDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorCustomFieldInterface {
 
   protected $buildPlanPHID;
   protected $className;
@@ -9,6 +11,7 @@ final class HarbormasterBuildStep extends HarbormasterDAO
   protected $sequence;
 
   private $buildPlan = self::ATTACHABLE;
+  private $customFields = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -83,4 +86,25 @@ final class HarbormasterBuildStep extends HarbormasterDAO
   public function describeAutomaticCapability($capability) {
     return pht('A build step has the same policies as its build plan.');
   }
+
+/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+
+  public function getCustomFieldSpecificationForRole($role) {
+    return array();
+  }
+
+  public function getCustomFieldBaseClass() {
+    return 'HarbormasterBuildStepCustomField';
+  }
+
+  public function getCustomFields() {
+    return $this->assertAttached($this->customFields);
+  }
+
+  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
+    $this->customFields = $fields;
+    return $this;
+  }
+
+
 }

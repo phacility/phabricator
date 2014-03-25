@@ -25,24 +25,15 @@ final class SleepBuildStepImplementation extends BuildStepImplementation {
     sleep($settings['seconds']);
   }
 
-  public function validateSettings() {
-    $settings = $this->getSettings();
-
-    if ($settings['seconds'] === null) {
-      return false;
-    }
-    if (!is_int($settings['seconds'])) {
-      return false;
-    }
-    return true;
-  }
-
-  public function getSettingDefinitions() {
+  public function getFieldSpecifications() {
     return array(
       'seconds' => array(
-        'name' => 'Seconds',
-        'description' => 'The number of seconds to sleep for.',
-        'type' => BuildStepImplementation::SETTING_TYPE_INTEGER));
+        'name' => pht('Seconds'),
+        'type' => 'int',
+        'required' => true,
+        'caption' => pht('The number of seconds to sleep for.'),
+      ),
+    );
   }
 
 }

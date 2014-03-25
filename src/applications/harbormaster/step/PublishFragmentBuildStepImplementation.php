@@ -57,22 +57,6 @@ final class PublishFragmentBuildStepImplementation
     }
   }
 
-  public function validateSettings() {
-    $settings = $this->getSettings();
-
-    if ($settings['path'] === null || !is_string($settings['path'])) {
-      return false;
-    }
-    if ($settings['artifact'] === null ||
-      !is_string($settings['artifact'])) {
-      return false;
-    }
-
-    // TODO: Check if the file artifact is provided by previous build steps.
-
-    return true;
-  }
-
   public function getArtifactInputs() {
     return array(
       array(
@@ -83,19 +67,19 @@ final class PublishFragmentBuildStepImplementation
     );
   }
 
-  public function getSettingDefinitions() {
+  public function getFieldSpecifications() {
     return array(
       'path' => array(
-        'name' => 'Path',
-        'description' =>
-          'The path of the fragment that will be published.',
-        'type' => BuildStepImplementation::SETTING_TYPE_STRING),
+        'name' => pht('Path'),
+        'type' => 'text',
+        'required' => true,
+      ),
       'artifact' => array(
-        'name' => 'File Artifact',
-        'description' =>
-          'The file artifact that will be published to Phragment.',
-        'type' => BuildStepImplementation::SETTING_TYPE_ARTIFACT,
-        'artifact_type' => HarbormasterBuildArtifact::TYPE_FILE));
+        'name' => pht('File Artifact'),
+        'type' => 'text',
+        'required' => true,
+      ),
+    );
   }
 
 }

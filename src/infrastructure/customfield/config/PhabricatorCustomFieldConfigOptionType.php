@@ -43,9 +43,14 @@ final class PhabricatorCustomFieldConfigOptionType
     foreach ($faux_spec as $key => $spec) {
       unset($faux_spec[$key]['disabled']);
     }
+
+    // TODO: We might need to build a real object here eventually.
+    $faux_object = null;
+
     $fields = PhabricatorCustomField::buildFieldList(
       $field_base_class,
-      $faux_spec);
+      $faux_spec,
+      $faux_object);
 
     $list_id = celerity_generate_unique_node_id();
     $input_id = celerity_generate_unique_node_id();

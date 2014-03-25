@@ -37,14 +37,9 @@ final class HarbormasterTargetWorker extends HarbormasterWorker {
 
     try {
       $implementation = $target->getImplementation();
-      if (!$implementation->validateSettings()) {
-        $target->setTargetStatus(HarbormasterBuildTarget::STATUS_FAILED);
-        $target->save();
-      } else {
-        $implementation->execute($build, $target);
-        $target->setTargetStatus(HarbormasterBuildTarget::STATUS_PASSED);
-        $target->save();
-      }
+      $implementation->execute($build, $target);
+      $target->setTargetStatus(HarbormasterBuildTarget::STATUS_PASSED);
+      $target->save();
     } catch (Exception $ex) {
       phlog($ex);
 

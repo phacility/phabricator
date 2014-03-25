@@ -27,85 +27,39 @@ final class HarbormasterStepEditController
     $plan = $step->getBuildPlan();
 
     $implementation = $step->getStepImplementation();
-    $implementation->validateSettingDefinitions();
-    $settings = $implementation->getSettings();
+
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $step,
+      PhabricatorCustomField::ROLE_EDIT);
+    $field_list
+      ->setViewer($viewer)
+      ->readFieldsFromStorage($step);
 
     $errors = array();
+    $validation_exception = null;
     if ($request->isFormPost()) {
-      foreach ($implementation->getSettingDefinitions() as $name => $opt) {
-        $readable_name = $this->getReadableName($name, $opt);
-        $value = $this->getValueFromRequest($request, $name, $opt['type']);
+      $xactions = $field_list->buildFieldTransactionsFromRequest(
+        new HarbormasterBuildStepTransaction(),
+        $request);
 
-        // TODO: This won't catch any validation issues unless the field
-        // is missing completely.  How should we check if the user is
-        // required to enter an integer?
-        if ($value === null) {
-          $errors[] = $readable_name.' is not valid.';
-        } else {
-          $step->setDetail($name, $value);
-        }
-      }
+      $editor = id(new HarbormasterBuildStepEditor())
+        ->setActor($viewer)
+        ->setContinueOnNoEffect(true)
+        ->setContentSourceFromRequest($request);
 
-      if (!$errors) {
-        $step->save();
+      try {
+        $editor->applyTransactions($step, $xactions);
         return id(new AphrontRedirectResponse())
           ->setURI($this->getApplicationURI('plan/'.$plan->getID().'/'));
+      } catch (PhabricatorApplicationTransactionValidationException $ex) {
+        $validation_exception = $ex;
       }
     }
 
     $form = id(new AphrontFormView())
       ->setUser($viewer);
 
-    // We need to render out all of the fields for the settings that
-    // the implementation has.
-    foreach ($implementation->getSettingDefinitions() as $name => $opt) {
-      if ($request->isFormPost()) {
-        $value = $this->getValueFromRequest($request, $name, $opt['type']);
-      } else {
-        $value = $settings[$name];
-      }
-
-      switch ($opt['type']) {
-        case BuildStepImplementation::SETTING_TYPE_STRING:
-        case BuildStepImplementation::SETTING_TYPE_INTEGER:
-          $control = id(new AphrontFormTextControl())
-            ->setLabel($this->getReadableName($name, $opt))
-            ->setName($name)
-            ->setValue($value);
-          break;
-        case BuildStepImplementation::SETTING_TYPE_BOOLEAN:
-          $control = id(new AphrontFormCheckboxControl())
-            ->setLabel($this->getReadableName($name, $opt))
-            ->setName($name)
-            ->setValue($value);
-          break;
-        case BuildStepImplementation::SETTING_TYPE_ARTIFACT:
-          $filter = $opt['artifact_type'];
-          $available_artifacts =
-            BuildStepImplementation::loadAvailableArtifacts(
-              $plan,
-              $step,
-              $filter);
-          $options = array();
-          foreach ($available_artifacts as $key => $type) {
-            $options[$key] = $key;
-          }
-          $control = id(new AphrontFormSelectControl())
-            ->setLabel($this->getReadableName($name, $opt))
-            ->setName($name)
-            ->setValue($value)
-            ->setOptions($options);
-          break;
-        default:
-          throw new Exception("Unable to render field with unknown type.");
-      }
-
-      if (isset($opt['description'])) {
-        $control->setCaption($opt['description']);
-      }
-
-      $form->appendChild($control);
-    }
+    $field_list->appendFieldsToForm($form);
 
     $form->appendChild(
       id(new AphrontFormSubmitControl())
@@ -115,7 +69,7 @@ final class HarbormasterStepEditController
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText('Edit Step: '.$implementation->getName())
-      ->setValidationException(null)
+      ->setValidationException($validation_exception)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
@@ -127,41 +81,28 @@ final class HarbormasterStepEditController
 
     $variables = $this->renderBuildVariablesTable();
 
+    $xactions = id(new HarbormasterBuildStepTransactionQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($step->getPHID()))
+      ->execute();
+
+    $xaction_view = id(new PhabricatorApplicationTransactionView())
+      ->setUser($viewer)
+      ->setObjectPHID($step->getPHID())
+      ->setTransactions($xactions)
+      ->setShouldTerminate(true);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $box,
         $variables,
+        $xaction_view,
       ),
       array(
         'title' => $implementation->getName(),
         'device' => true,
       ));
-  }
-
-  public function getReadableName($name, $opt) {
-    $readable_name = $name;
-    if (isset($opt['name'])) {
-      $readable_name = $opt['name'];
-    }
-    return $readable_name;
-  }
-
-  public function getValueFromRequest(AphrontRequest $request, $name, $type) {
-    switch ($type) {
-      case BuildStepImplementation::SETTING_TYPE_STRING:
-      case BuildStepImplementation::SETTING_TYPE_ARTIFACT:
-        return $request->getStr($name);
-        break;
-      case BuildStepImplementation::SETTING_TYPE_INTEGER:
-        return $request->getInt($name);
-        break;
-      case BuildStepImplementation::SETTING_TYPE_BOOLEAN:
-        return $request->getBool($name);
-        break;
-      default:
-        throw new Exception("Unsupported setting type '".$type."'.");
-    }
   }
 
   private function renderBuildVariablesTable() {

@@ -51,19 +51,6 @@ final class LeaseHostBuildStepImplementation
     $artifact->save();
   }
 
-  public function validateSettings() {
-    $settings = $this->getSettings();
-
-    if ($settings['name'] === null || !is_string($settings['name'])) {
-      return false;
-    }
-    if ($settings['platform'] === null || !is_string($settings['platform'])) {
-      return false;
-    }
-
-    return true;
-  }
-
   public function getArtifactOutputs() {
     return array(
       array(
@@ -74,17 +61,19 @@ final class LeaseHostBuildStepImplementation
     );
   }
 
-  public function getSettingDefinitions() {
+  public function getFieldSpecifications() {
     return array(
       'name' => array(
-        'name' => 'Artifact Name',
-        'description' =>
-          'The name of the artifact to reference in future build steps.',
-        'type' => BuildStepImplementation::SETTING_TYPE_STRING),
+        'name' => pht('Artifact Name'),
+        'type' => 'text',
+        'required' => true,
+      ),
       'platform' => array(
-        'name' => 'Platform',
-        'description' => 'The platform of the host.',
-        'type' => BuildStepImplementation::SETTING_TYPE_STRING));
+        'name' => pht('Platform'),
+        'type' => 'text',
+        'required' => true,
+      ),
+    );
   }
 
 }
