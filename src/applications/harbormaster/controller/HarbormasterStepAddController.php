@@ -26,7 +26,8 @@ final class HarbormasterStepAddController
       throw new Exception("Build plan not found!");
     }
 
-    $implementations = BuildStepImplementation::getImplementations();
+    $implementations =
+      HarbormasterBuildStepImplementation::getImplementations();
 
     $cancel_uri = $this->getApplicationURI('plan/'.$plan->getID().'/');
 

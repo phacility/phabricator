@@ -164,10 +164,11 @@ final class HarbormasterPlanViewController
 
       $has_conflicts = false;
       if ($inputs || $outputs) {
-        $available_artifacts = BuildStepImplementation::loadAvailableArtifacts(
-          $plan,
-          $step,
-          null);
+        $available_artifacts =
+          HarbormasterBuildStepImplementation::loadAvailableArtifacts(
+            $plan,
+            $step,
+            null);
 
         list($inputs_ui, $has_conflicts) = $this->buildArtifactList(
             $inputs,

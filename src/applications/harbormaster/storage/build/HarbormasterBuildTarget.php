@@ -88,7 +88,8 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
 
     static $implementations = null;
     if ($implementations === null) {
-      $implementations = BuildStepImplementation::getImplementations();
+      $implementations =
+        HarbormasterBuildStepImplementation::getImplementations();
     }
 
     $class = $this->className;

@@ -1,7 +1,7 @@
 <?php
 
 final class CommandBuildStepImplementation
-  extends BuildStepImplementation {
+  extends HarbormasterBuildStepImplementation {
 
   public function getName() {
     return pht('Run Command');

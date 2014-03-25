@@ -1,7 +1,7 @@
 <?php
 
 final class WaitForPreviousBuildStepImplementation
-  extends BuildStepImplementation {
+  extends HarbormasterBuildStepImplementation {
 
   public function getName() {
     return pht('Wait for Previous Commits to Build');

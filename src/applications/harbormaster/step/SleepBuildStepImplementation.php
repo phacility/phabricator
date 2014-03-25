@@ -1,6 +1,7 @@
 <?php
 
-final class SleepBuildStepImplementation extends BuildStepImplementation {
+final class SleepBuildStepImplementation
+  extends HarbormasterBuildStepImplementation {
 
   public function getName() {
     return pht('Sleep');

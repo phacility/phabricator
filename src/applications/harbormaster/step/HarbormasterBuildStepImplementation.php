@@ -1,10 +1,10 @@
 <?php
 
-abstract class BuildStepImplementation {
+abstract class HarbormasterBuildStepImplementation {
 
   public static function getImplementations() {
     $symbols = id(new PhutilSymbolLoader())
-      ->setAncestorClass('BuildStepImplementation')
+      ->setAncestorClass('HarbormasterBuildStepImplementation')
       ->setConcreteOnly(true)
       ->selectAndLoadSymbols();
     return ipull($symbols, 'name');

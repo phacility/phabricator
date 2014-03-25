@@ -1,7 +1,7 @@
 <?php
 
 final class PublishFragmentBuildStepImplementation
-  extends BuildStepImplementation {
+  extends HarbormasterBuildStepImplementation {
 
   public function getName() {
     return pht('Publish Fragment');

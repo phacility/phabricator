@@ -1,7 +1,7 @@
 <?php
 
 final class LeaseHostBuildStepImplementation
-  extends BuildStepImplementation {
+  extends HarbormasterBuildStepImplementation {
 
   public function getName() {
     return pht('Lease Host');

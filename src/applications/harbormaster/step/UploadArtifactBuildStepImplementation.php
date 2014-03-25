@@ -1,7 +1,7 @@
 <?php
 
 final class UploadArtifactBuildStepImplementation
-  extends BuildStepImplementation {
+  extends HarbormasterBuildStepImplementation {
 
   public function getName() {
     return pht('Upload Artifact');
