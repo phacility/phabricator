@@ -238,10 +238,16 @@ final class DifferentialTransactionEditor
     $actor_phid = $actor->getPHID();
     $type_edge = PhabricatorTransactions::TYPE_EDGE;
 
+    $status_plan = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
+
     $edge_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
     $edge_ref_task = PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK;
 
+    $is_sticky_accept = PhabricatorEnv::getEnvConfig(
+      'differential.sticky-accept');
+
     $downgrade_rejects = false;
+    $downgrade_accepts = false;
     if ($this->getIsCloseByCommit()) {
       // Never downgrade reviewers when we're closing a revision after a
       // commit.
@@ -249,11 +255,23 @@ final class DifferentialTransactionEditor
       switch ($xaction->getTransactionType()) {
         case DifferentialTransaction::TYPE_UPDATE:
           $downgrade_rejects = true;
+          if (!$is_sticky_accept) {
+            // If "sticky accept" is disabled, also downgrade the accepts.
+            $downgrade_accepts = true;
+          }
           break;
         case DifferentialTransaction::TYPE_ACTION:
           switch ($xaction->getNewValue()) {
             case DifferentialAction::ACTION_REQUEST:
               $downgrade_rejects = true;
+              if ((!$is_sticky_accept) ||
+                  ($object->getStatus() != $status_plan)) {
+                // If the old state isn't "changes planned", downgrade the
+                // accepts. This exception allows an accepted revision to
+                // go through Plan Changes -> Request Review to return to
+                // "accepted" if the author didn't update the revision.
+                $downgrade_accepts = true;
+              }
               break;
           }
           break;
@@ -265,7 +283,7 @@ final class DifferentialTransactionEditor
     $old_accept = DifferentialReviewerStatus::STATUS_ACCEPTED_OLDER;
     $old_reject = DifferentialReviewerStatus::STATUS_REJECTED_OLDER;
 
-    if ($downgrade_rejects) {
+    if ($downgrade_rejects || $downgrade_accepts) {
       // When a revision is updated, change all "reject" to "rejected older
       // revision". This means we won't immediately push the update back into
       // "needs review", but outstanding rejects will still block it from
@@ -277,15 +295,25 @@ final class DifferentialTransactionEditor
 
       $edits = array();
       foreach ($object->getReviewerStatus() as $reviewer) {
-        if ($reviewer->getStatus() == $new_reject) {
-          $edits[$reviewer->getReviewerPHID()] = array(
-            'data' => array(
-              'status' => $old_reject,
-            ),
-          );
+        if ($downgrade_rejects) {
+          if ($reviewer->getStatus() == $new_reject) {
+            $edits[$reviewer->getReviewerPHID()] = array(
+              'data' => array(
+                'status' => $old_reject,
+              ),
+            );
+          }
         }
 
-        // TODO: If sticky accept is off, do a similar update for accepts.
+        if ($downgrade_accepts) {
+          if ($reviewer->getStatus() == $new_accept) {
+            $edits[$reviewer->getReviewerPHID()] = array(
+              'data' => array(
+                'status' => $old_accept,
+              ),
+            );
+          }
+        }
       }
 
       if ($edits) {
