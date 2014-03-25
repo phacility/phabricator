@@ -9,9 +9,6 @@ final class ManiphestTaskStatus extends ManiphestConstants {
   const STATUS_CLOSED_DUPLICATE   = 4;
   const STATUS_CLOSED_SPITE       = 5;
 
-  const COLOR_STATUS_OPEN = 'status';
-  const COLOR_STATUS_CLOSED = 'status-dark';
-
   public static function getTaskStatusMap() {
     $open = pht('Open');
     $resolved = pht('Resolved');
@@ -60,39 +57,18 @@ final class ManiphestTaskStatus extends ManiphestConstants {
     return idx($map, $status, '???');
   }
 
-  public static function getTaskStatusColor($status) {
-    $default = self::COLOR_STATUS_OPEN;
-
-    $map = array(
-      self::STATUS_OPEN             => self::COLOR_STATUS_OPEN,
-      self::STATUS_CLOSED_RESOLVED  => self::COLOR_STATUS_CLOSED,
-      self::STATUS_CLOSED_WONTFIX   => self::COLOR_STATUS_CLOSED,
-      self::STATUS_CLOSED_INVALID   => self::COLOR_STATUS_CLOSED,
-      self::STATUS_CLOSED_DUPLICATE => self::COLOR_STATUS_CLOSED,
-      self::STATUS_CLOSED_SPITE     => self::COLOR_STATUS_CLOSED,
-    );
-    return idx($map, $status, $default);
-  }
-
-  public static function getIcon($status) {
-    $default = 'oh-open';
-    $map = array(
-      self::STATUS_OPEN             => 'oh-open',
-      self::STATUS_CLOSED_RESOLVED  => 'oh-closed-dark',
-      self::STATUS_CLOSED_WONTFIX   => 'oh-closed-dark',
-      self::STATUS_CLOSED_INVALID   => 'oh-closed-dark',
-      self::STATUS_CLOSED_DUPLICATE => 'oh-closed-dark',
-      self::STATUS_CLOSED_SPITE     => 'oh-closed-dark',
-    );
-    return idx($map, $status, $default);
-  }
-
   public static function renderFullDescription($status) {
-    $color = self::getTaskStatusColor($status);
+    if (self::isOpenStatus($status)) {
+      $color = 'status';
+      $icon = 'oh-open';
+    } else {
+      $color = 'status-dark';
+      $icon = 'oh-closed-dark';
+    }
 
     $img = id(new PHUIIconView())
       ->setSpriteSheet(PHUIIconView::SPRITE_STATUS)
-      ->setSpriteIcon(self::getIcon($status));
+      ->setSpriteIcon($icon);
 
     $tag = phutil_tag(
       'span',
