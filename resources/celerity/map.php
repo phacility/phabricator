@@ -7,8 +7,8 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => '5e574aa1',
-    'core.pkg.js' => '264721e1',
+    'core.pkg.css' => '6d16f22a',
+    'core.pkg.js' => 'd3fecc57',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => 'cb97e095',
     'differential.pkg.js' => '11a5b750',
@@ -132,7 +132,7 @@ return array(
     'rsrc/css/phui/phui-document.css' => '10f59385',
     'rsrc/css/phui/phui-feed-story.css' => '3a59c2cf',
     'rsrc/css/phui/phui-fontkit.css' => 'de84aa4a',
-    'rsrc/css/phui/phui-form-view.css' => '0efd3326',
+    'rsrc/css/phui/phui-form-view.css' => '867463b4',
     'rsrc/css/phui/phui-form.css' => 'b78ec020',
     'rsrc/css/phui/phui-header-view.css' => '5b79f0ef',
     'rsrc/css/phui/phui-icon.css' => '7a5771a9',
@@ -475,7 +475,7 @@ return array(
     'rsrc/js/core/behavior-tokenizer.js' => 'b3a4b884',
     'rsrc/js/core/behavior-tooltip.js' => '48db4145',
     'rsrc/js/core/behavior-watch-anchor.js' => '06e05112',
-    'rsrc/js/core/behavior-workflow.js' => '82947dda',
+    'rsrc/js/core/behavior-workflow.js' => 'fee00761',
     'rsrc/js/core/phtize.js' => 'd254d646',
     'rsrc/js/phui/behavior-phui-object-box-tabs.js' => 'a3e2244e',
     'rsrc/swf/aphlict.swf' => 'abac967d',
@@ -627,7 +627,7 @@ return array(
     'javelin-behavior-test-payment-form' => 'b3e5ee60',
     'javelin-behavior-toggle-class' => 'a82a7769',
     'javelin-behavior-view-placeholder' => '2fa810fc',
-    'javelin-behavior-workflow' => '82947dda',
+    'javelin-behavior-workflow' => 'fee00761',
     'javelin-color' => '7e41274a',
     'javelin-cookie' => '6b3dcf44',
     'javelin-dom' => '5054855f',
@@ -748,7 +748,7 @@ return array(
     'phui-feed-story-css' => '3a59c2cf',
     'phui-fontkit-css' => 'de84aa4a',
     'phui-form-css' => 'b78ec020',
-    'phui-form-view-css' => '0efd3326',
+    'phui-form-view-css' => '867463b4',
     'phui-header-view-css' => '5b79f0ef',
     'phui-icon-view-css' => '7a5771a9',
     'phui-info-panel-css' => '27ea50a1',
@@ -1329,13 +1329,6 @@ return array(
     array(
       0 => 'javelin-behavior',
       1 => 'javelin-history',
-    ),
-    '82947dda' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-stratcom',
-      2 => 'javelin-workflow',
-      3 => 'javelin-dom',
     ),
     '82f568cd' =>
     array(
@@ -1971,6 +1964,13 @@ return array(
       3 => 'phabricator-prefab',
       4 => 'multirow-row-manager',
       5 => 'javelin-json',
+    ),
+    'fee00761' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-workflow',
+      3 => 'javelin-dom',
     ),
     28497740 =>
     array(

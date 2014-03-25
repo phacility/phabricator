@@ -208,6 +208,29 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
+    $submit_text = $is_serious
+      ? pht('Submit')
+      : pht('Avast!');
+
+    $close_text = $is_serious
+      ? pht('Close Task')
+      : pht('Scuttle Task');
+
+    $submit_control = id(new PHUIFormMultiSubmitControl());
+    if (!$task->isClosed()) {
+      $close_image = id(new PHUIIconView())
+          ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+          ->setSpriteIcon('check');
+      $submit_control->addButtonView(
+        id(new PHUIButtonView())
+          ->setColor(PHUIButtonView::GREY)
+          ->setIcon($close_image)
+          ->setText($close_text)
+          ->setName('scuttle')
+          ->addSigil('alternate-submit-button'));
+    }
+    $submit_control->addSubmitButton($submit_text);
+
     $comment_form = new AphrontFormView();
     $comment_form
       ->setUser($user)
@@ -273,9 +296,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setValue($draft_text)
           ->setID('transaction-comments')
           ->setUser($user))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue($is_serious ? pht('Submit') : pht('Avast!')));
+      ->appendChild($submit_control);
 
     $control_map = array(
       ManiphestTransaction::TYPE_STATUS   => 'resolution',

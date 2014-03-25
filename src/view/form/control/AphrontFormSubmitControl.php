@@ -2,7 +2,7 @@
 
 final class AphrontFormSubmitControl extends AphrontFormControl {
 
-  protected $cancelButton;
+  private $cancelButton;
 
   public function addCancelButton($href, $label = null) {
     if (!$label) {
@@ -35,7 +35,11 @@ final class AphrontFormSubmitControl extends AphrontFormControl {
         ),
         $this->getValue());
     }
-    return hsprintf('%s%s', $submit_button, $this->cancelButton);
+
+    return array(
+      $submit_button,
+      $this->cancelButton,
+    );
   }
 
 }

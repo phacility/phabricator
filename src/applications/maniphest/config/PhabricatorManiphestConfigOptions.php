@@ -149,8 +149,9 @@ The keys you can provide in a specification are:
     - `default` This is the default status for newly created tasks. You must
       designate one status as default, and it must be an open status.
     - `closed` This is the default status for closed tasks (for example, tasks
-      closed via the "!close" action in email). You must designate one status
-      as the default closed status, and it must be a closed status.
+      closed via the "!close" action in email or via the quick close button in
+      Maniphest). You must designate one status as the default closed status,
+      and it must be a closed status.
     - `duplicate` This is the status used when tasks are merged into one
       another as duplicates. You must designate one status for duplicates,
       and it must be a closed status.

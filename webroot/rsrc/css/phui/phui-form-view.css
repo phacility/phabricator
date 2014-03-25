@@ -108,9 +108,10 @@
 }
 
 .phui-form-control-multi-submit input,
+.phui-form-control-multi-submit button,
 .phui-form-control-multi-submit a {
   float: right;
-  margin: 0.5em 0 0em 2%;
+  margin: 4px 0 0 8px;
   width: auto;
 }
 

@@ -8,6 +8,22 @@
 
 JX.behavior('workflow', function() {
 
+  // If a user clicks an alternate submit button, make sure it gets marshalled
+  // into the workflow.
+  JX.Stratcom.listen(
+    'click',
+    ['workflow', 'tag:form', 'alternate-submit-button'],
+    function(e) {
+      e.prevent();
+
+      var target = e.getNode('alternate-submit-button');
+      var form = e.getNode('tag:form');
+      var button = {};
+      button[target.name] = target.value || true;
+
+      JX.DOM.invoke(form, 'didSyntheticSubmit', {extra: button});
+    });
+
   // Listen for both real and synthetic submit events.
   JX.Stratcom.listen(
     ['submit', 'didSyntheticSubmit'],
@@ -17,11 +33,14 @@ JX.behavior('workflow', function() {
         return;
       }
 
+      var data = e.getData();
+      var extra = (data && data.extra) || {};
+
       // NOTE: We activate workflow if any parent node has the "workflow" sigil,
       // not just the <form /> itself.
 
       e.prevent();
-      JX.Workflow.newFromForm(e.getNode('tag:form')).start();
+      JX.Workflow.newFromForm(e.getNode('tag:form'), extra).start();
     });
 
   JX.Stratcom.listen(
