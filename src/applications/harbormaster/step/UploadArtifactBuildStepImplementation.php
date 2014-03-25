@@ -1,7 +1,7 @@
 <?php
 
 final class UploadArtifactBuildStepImplementation
-  extends VariableBuildStepImplementation {
+  extends BuildStepImplementation {
 
   public function getName() {
     return pht('Upload Artifact');

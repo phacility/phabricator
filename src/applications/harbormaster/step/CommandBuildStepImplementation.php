@@ -1,7 +1,7 @@
 <?php
 
 final class CommandBuildStepImplementation
-  extends VariableBuildStepImplementation {
+  extends BuildStepImplementation {
 
   public function getName() {
     return pht('Run Command');

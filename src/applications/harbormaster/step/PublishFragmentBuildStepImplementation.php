@@ -1,7 +1,7 @@
 <?php
 
 final class PublishFragmentBuildStepImplementation
-  extends VariableBuildStepImplementation {
+  extends BuildStepImplementation {
 
   public function getName() {
     return pht('Publish Fragment');

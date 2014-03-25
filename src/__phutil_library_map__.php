@@ -2537,7 +2537,6 @@ phutil_register_library_map(array(
     'SubscriptionListDialogBuilder' => 'applications/subscriptions/view/SubscriptionListDialogBuilder.php',
     'SubscriptionListStringBuilder' => 'applications/subscriptions/view/SubscriptionListStringBuilder.php',
     'UploadArtifactBuildStepImplementation' => 'applications/harbormaster/step/UploadArtifactBuildStepImplementation.php',
-    'VariableBuildStepImplementation' => 'applications/harbormaster/step/VariableBuildStepImplementation.php',
     'WaitForPreviousBuildStepImplementation' => 'applications/harbormaster/step/WaitForPreviousBuildStepImplementation.php',
   ),
   'function' =>
@@ -2659,7 +2658,7 @@ phutil_register_library_map(array(
     'CelerityResourceGraph' => 'AbstractDirectedGraph',
     'CelerityResourceTransformerTestCase' => 'PhabricatorTestCase',
     'CelerityResourcesOnDisk' => 'CelerityPhysicalResources',
-    'CommandBuildStepImplementation' => 'VariableBuildStepImplementation',
+    'CommandBuildStepImplementation' => 'BuildStepImplementation',
     'ConduitAPIMethod' =>
     array(
       0 => 'Phobject',
@@ -3339,7 +3338,7 @@ phutil_register_library_map(array(
     'HarbormasterCapabilityManagePlans' => 'PhabricatorPolicyCapability',
     'HarbormasterController' => 'PhabricatorController',
     'HarbormasterDAO' => 'PhabricatorLiskDAO',
-    'HarbormasterHTTPRequestBuildStepImplementation' => 'VariableBuildStepImplementation',
+    'HarbormasterHTTPRequestBuildStepImplementation' => 'BuildStepImplementation',
     'HarbormasterManagementBuildWorkflow' => 'HarbormasterManagementWorkflow',
     'HarbormasterManagementWorkflow' => 'PhabricatorManagementWorkflow',
     'HarbormasterObject' => 'HarbormasterDAO',
@@ -5384,7 +5383,7 @@ phutil_register_library_map(array(
     'PonderVoteSaveController' => 'PonderController',
     'ProjectCapabilityCreateProjects' => 'PhabricatorPolicyCapability',
     'ProjectRemarkupRule' => 'PhabricatorRemarkupRuleObject',
-    'PublishFragmentBuildStepImplementation' => 'VariableBuildStepImplementation',
+    'PublishFragmentBuildStepImplementation' => 'BuildStepImplementation',
     'QueryFormattingTestCase' => 'PhabricatorTestCase',
     'ReleephAuthorFieldSpecification' => 'ReleephFieldSpecification',
     'ReleephBranch' =>
@@ -5491,8 +5490,7 @@ phutil_register_library_map(array(
     'SleepBuildStepImplementation' => 'BuildStepImplementation',
     'SlowvoteEmbedView' => 'AphrontView',
     'SlowvoteRemarkupRule' => 'PhabricatorRemarkupRuleObject',
-    'UploadArtifactBuildStepImplementation' => 'VariableBuildStepImplementation',
-    'VariableBuildStepImplementation' => 'BuildStepImplementation',
+    'UploadArtifactBuildStepImplementation' => 'BuildStepImplementation',
     'WaitForPreviousBuildStepImplementation' => 'BuildStepImplementation',
   ),
 ));

@@ -1,7 +1,7 @@
 <?php
 
 final class HarbormasterHTTPRequestBuildStepImplementation
-  extends VariableBuildStepImplementation {
+  extends BuildStepImplementation {
 
   public function getName() {
     return pht('Make HTTP Request');

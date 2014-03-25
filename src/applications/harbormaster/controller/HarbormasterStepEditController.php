@@ -24,13 +24,7 @@ final class HarbormasterStepEditController
       return new Aphront404Response();
     }
 
-    $plan = id(new HarbormasterBuildPlanQuery())
-      ->setViewer($viewer)
-      ->withPHIDs(array($step->getBuildPlanPHID()))
-      ->executeOne();
-    if (!$plan) {
-      return new Aphront404Response();
-    }
+    $plan = $step->getBuildPlan();
 
     $implementation = $step->getStepImplementation();
     $implementation->validateSettingDefinitions();
@@ -52,9 +46,8 @@ final class HarbormasterStepEditController
         }
       }
 
-      if (count($errors) === 0) {
+      if (!$errors) {
         $step->save();
-
         return id(new AphrontRedirectResponse())
           ->setURI($this->getApplicationURI('plan/'.$plan->getID().'/'));
       }
@@ -62,11 +55,6 @@ final class HarbormasterStepEditController
 
     $form = id(new AphrontFormView())
       ->setUser($viewer);
-
-    $instructions = $implementation->getSettingRemarkupInstructions();
-    if ($instructions !== null) {
-      $form->appendRemarkupInstructions($instructions);
-    }
 
     // We need to render out all of the fields for the settings that
     // the implementation has.
@@ -121,7 +109,7 @@ final class HarbormasterStepEditController
 
     $form->appendChild(
       id(new AphrontFormSubmitControl())
-        ->setValue(pht('Save Step Configuration'))
+        ->setValue(pht('Save Build Step'))
         ->addCancelButton(
           $this->getApplicationURI('plan/'.$plan->getID().'/')));
 
@@ -137,10 +125,13 @@ final class HarbormasterStepEditController
       $this->getApplicationURI("plan/{$id}/"));
     $crumbs->addTextCrumb(pht('Edit Step'));
 
+    $variables = $this->renderBuildVariablesTable();
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $box,
+        $variables,
       ),
       array(
         'title' => $implementation->getName(),
@@ -172,5 +163,32 @@ final class HarbormasterStepEditController
         throw new Exception("Unsupported setting type '".$type."'.");
     }
   }
+
+  private function renderBuildVariablesTable() {
+    $viewer = $this->getRequest()->getUser();
+
+    $variables = HarbormasterBuild::getAvailableBuildVariables();
+    ksort($variables);
+
+    $rows = array();
+    $rows[] = pht(
+      'The following variables can be used in most fields. To reference '.
+      'a variable, use `${name}` in a field.');
+    $rows[] = pht('| Variable | Description |');
+    $rows[] = '|---|---|';
+    foreach ($variables as $name => $description) {
+      $rows[] = '| `'.$name.'` | '.$description.' |';
+    }
+    $rows = implode("\n", $rows);
+
+    $form = id(new AphrontFormView())
+      ->setUser($viewer)
+      ->appendRemarkupInstructions($rows);
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Build Variables'))
+      ->appendChild($form);
+  }
+
 
 }
