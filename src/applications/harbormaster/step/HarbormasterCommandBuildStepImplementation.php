@@ -1,6 +1,6 @@
 <?php
 
-final class CommandBuildStepImplementation
+final class HarbormasterCommandBuildStepImplementation
   extends HarbormasterBuildStepImplementation {
 
   public function getName() {

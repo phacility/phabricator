@@ -1,6 +1,6 @@
 <?php
 
-final class PublishFragmentBuildStepImplementation
+final class HarbormasterPublishFragmentBuildStepImplementation
   extends HarbormasterBuildStepImplementation {
 
   public function getName() {

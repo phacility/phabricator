@@ -1,6 +1,6 @@
 <?php
 
-final class LeaseHostBuildStepImplementation
+final class HarbormasterLeaseHostBuildStepImplementation
   extends HarbormasterBuildStepImplementation {
 
   public function getName() {

@@ -1,6 +1,6 @@
 <?php
 
-final class UploadArtifactBuildStepImplementation
+final class HarbormasterUploadArtifactBuildStepImplementation
   extends HarbormasterBuildStepImplementation {
 
   public function getName() {

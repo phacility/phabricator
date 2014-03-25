@@ -1,6 +1,6 @@
 <?php
 
-final class WaitForPreviousBuildStepImplementation
+final class HarbormasterWaitForPreviousBuildStepImplementation
   extends HarbormasterBuildStepImplementation {
 
   public function getName() {
