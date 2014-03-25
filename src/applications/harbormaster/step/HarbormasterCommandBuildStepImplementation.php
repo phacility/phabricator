@@ -12,12 +12,10 @@ final class HarbormasterCommandBuildStepImplementation
   }
 
   public function getDescription() {
-    $settings = $this->getSettings();
-
     return pht(
-      'Run \'%s\' on \'%s\'.',
-      $settings['command'],
-      $settings['hostartifact']);
+      'Run command %s on host %s.',
+      $this->formatSettingForDescription('command'),
+      $this->formatSettingForDescription('hostartifact'));
   }
 
   public function execute(

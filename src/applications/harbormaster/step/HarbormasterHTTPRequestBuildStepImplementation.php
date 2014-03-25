@@ -12,11 +12,16 @@ final class HarbormasterHTTPRequestBuildStepImplementation
   }
 
   public function getDescription() {
-    $settings = $this->getSettings();
+    $domain = null;
+    $uri = $this->getSetting('uri');
+    if ($uri) {
+      $domain = id(new PhutilURI($uri))->getDomain();
+    }
 
-    $uri = new PhutilURI($settings['uri']);
-    $domain = $uri->getDomain();
-    return pht('Make an HTTP %s request to %s', $settings['method'], $domain);
+    return pht(
+      'Make an HTTP %s request to %s.',
+      $this->formatSettingForDescription('method', 'POST'),
+      $this->formatValueForDescription($domain));
   }
 
   public function execute(

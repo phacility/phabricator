@@ -11,16 +11,6 @@ final class HarbormasterLeaseHostBuildStepImplementation
     return pht('Obtain a lease on a Drydock host for performing builds.');
   }
 
-  public function getDescription() {
-    $settings = $this->getSettings();
-
-    return pht(
-      'Obtain a lease on a Drydock host whose platform is \'%s\' and store '.
-      'the resulting lease in a host artifact called \'%s\'.',
-      $settings['platform'],
-      $settings['name']);
-  }
-
   public function execute(
     HarbormasterBuild $build,
     HarbormasterBuildTarget $build_target) {

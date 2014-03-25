@@ -11,10 +11,6 @@ final class HarbormasterThrowExceptionBuildStep
     return pht('Throw an exception.');
   }
 
-  public function getDescription() {
-    return pht('Throw an exception.');
-  }
-
   public function execute(
     HarbormasterBuild $build,
     HarbormasterBuildTarget $build_target) {

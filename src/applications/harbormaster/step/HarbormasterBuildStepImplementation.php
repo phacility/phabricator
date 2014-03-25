@@ -3,11 +3,32 @@
 abstract class HarbormasterBuildStepImplementation {
 
   public static function getImplementations() {
-    $symbols = id(new PhutilSymbolLoader())
+    return id(new PhutilSymbolLoader())
       ->setAncestorClass('HarbormasterBuildStepImplementation')
-      ->setConcreteOnly(true)
-      ->selectAndLoadSymbols();
-    return ipull($symbols, 'name');
+      ->loadObjects();
+  }
+
+  public static function getImplementation($class) {
+    $base = idx(self::getImplementations(), $class);
+
+    if ($base) {
+      return (clone $base);
+    }
+
+    return null;
+  }
+
+  public static function requireImplementation($class) {
+    if (!$class) {
+      throw new Exception(pht('No implementation is specified!'));
+    }
+
+    $implementation = self::getImplementation($class);
+    if (!$implementation) {
+      throw new Exception(pht('No such implementation "%s" exists!', $class));
+    }
+
+    return $implementation;
   }
 
   /**
@@ -161,6 +182,18 @@ abstract class HarbormasterBuildStepImplementation {
 
   public function getFieldSpecifications() {
     return array();
+  }
+
+  protected function formatSettingForDescription($key, $default = null) {
+    return $this->formatValueForDescription($this->getSetting($key, $default));
+  }
+
+  protected function formatValueForDescription($value) {
+    if (strlen($value)) {
+      return phutil_tag('strong', array(), $value);
+    } else {
+      return phutil_tag('em', array(), pht('(null)'));
+    }
   }
 
 }

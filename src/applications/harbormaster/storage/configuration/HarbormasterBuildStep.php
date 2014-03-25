@@ -12,6 +12,7 @@ final class HarbormasterBuildStep extends HarbormasterDAO
 
   private $buildPlan = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
+  private $implementation;
 
   public function getConfiguration() {
     return array(
@@ -46,24 +47,14 @@ final class HarbormasterBuildStep extends HarbormasterDAO
   }
 
   public function getStepImplementation() {
-    if ($this->className === null) {
-      throw new Exception("No implementation set for the given step.");
+    if ($this->implementation === null) {
+      $obj = HarbormasterBuildStepImplementation::requireImplementation(
+        $this->className);
+      $obj->loadSettings($this);
+      $this->implementation = $obj;
     }
 
-    static $implementations = null;
-    if ($implementations === null) {
-      $implementations =
-        HarbormasterBuildStepImplementation::getImplementations();
-    }
-
-    $class = $this->className;
-    if (!in_array($class, $implementations)) {
-      throw new Exception(
-        "Class name '".$class."' does not extend BuildStepImplementation.");
-    }
-    $implementation = newv($class, array());
-    $implementation->loadSettings($this);
-    return $implementation;
+    return $this->implementation;
   }
 
 

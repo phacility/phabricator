@@ -12,9 +12,9 @@ final class HarbormasterSleepBuildStepImplementation
   }
 
   public function getDescription() {
-    $settings = $this->getSettings();
-
-    return pht('Sleep for %s seconds.', $settings['seconds']);
+    return pht(
+      'Sleep for %s seconds.',
+      $this->formatSettingForDescription('seconds'));
   }
 
   public function execute(

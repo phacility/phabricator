@@ -13,12 +13,6 @@ final class HarbormasterWaitForPreviousBuildStepImplementation
       'before continuing.');
   }
 
-  public function getDescription() {
-    return pht(
-      'Wait for previous commits to finish building the current plan '.
-      'before continuing.');
-  }
-
   public function execute(
     HarbormasterBuild $build,
     HarbormasterBuildTarget $build_target) {

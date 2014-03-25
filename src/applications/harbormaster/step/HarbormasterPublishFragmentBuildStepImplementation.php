@@ -12,12 +12,10 @@ final class HarbormasterPublishFragmentBuildStepImplementation
   }
 
   public function getDescription() {
-    $settings = $this->getSettings();
-
     return pht(
-      'Publish file artifact \'%s\' to the fragment path \'%s\'.',
-      $settings['artifact'],
-      $settings['path']);
+      'Publish file artifact %s as fragment %s.',
+      $this->formatSettingForDescription('artifact'),
+      $this->formatSettingForDescription('path'));
   }
 
   public function execute(

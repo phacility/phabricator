@@ -4,20 +4,18 @@ final class HarbormasterUploadArtifactBuildStepImplementation
   extends HarbormasterBuildStepImplementation {
 
   public function getName() {
-    return pht('Upload Artifact');
+    return pht('Upload File');
   }
 
   public function getGenericDescription() {
-    return pht('Upload an artifact from a Drydock host to Phabricator.');
+    return pht('Upload a file from a host to Phabricator.');
   }
 
   public function getDescription() {
-    $settings = $this->getSettings();
-
     return pht(
-      'Upload artifact located at \'%s\' on \'%s\'.',
-      $settings['path'],
-      $settings['hostartifact']);
+      'Upload %s from %s.',
+      $this->formatSettingForDescription('path'),
+      $this->formatSettingForDescription('hostartifact'));
   }
 
   public function execute(

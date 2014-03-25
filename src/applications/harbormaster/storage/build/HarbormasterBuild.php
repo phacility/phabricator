@@ -9,6 +9,7 @@ final class HarbormasterBuild extends HarbormasterDAO
 
   private $buildable = self::ATTACHABLE;
   private $buildPlan = self::ATTACHABLE;
+  private $buildTargets = self::ATTACHABLE;
   private $unprocessedCommands = self::ATTACHABLE;
 
   /**
@@ -100,6 +101,15 @@ final class HarbormasterBuild extends HarbormasterDAO
 
   public function getBuildPlan() {
     return $this->assertAttached($this->buildPlan);
+  }
+
+  public function getBuildTargets() {
+    return $this->assertAttached($this->buildTargets);
+  }
+
+  public function attachBuildTargets(array $targets) {
+    $this->buildTargets = $targets;
+    return $this;
   }
 
   public function isBuilding() {
