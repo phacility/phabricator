@@ -520,6 +520,8 @@ phutil_register_library_map(array(
     'DiffusionPathQuery' => 'applications/diffusion/query/DiffusionPathQuery.php',
     'DiffusionPathQueryTestCase' => 'applications/diffusion/query/pathid/__tests__/DiffusionPathQueryTestCase.php',
     'DiffusionPathValidateController' => 'applications/diffusion/controller/DiffusionPathValidateController.php',
+    'DiffusionPushEventViewController' => 'applications/diffusion/controller/DiffusionPushEventViewController.php',
+    'DiffusionPushLogController' => 'applications/diffusion/controller/DiffusionPushLogController.php',
     'DiffusionPushLogListController' => 'applications/diffusion/controller/DiffusionPushLogListController.php',
     'DiffusionQuery' => 'applications/diffusion/query/DiffusionQuery.php',
     'DiffusionRawDiffQuery' => 'applications/diffusion/query/rawdiff/DiffusionRawDiffQuery.php',
@@ -3070,9 +3072,11 @@ phutil_register_library_map(array(
     'DiffusionPathCompleteController' => 'DiffusionController',
     'DiffusionPathQueryTestCase' => 'PhabricatorTestCase',
     'DiffusionPathValidateController' => 'DiffusionController',
+    'DiffusionPushEventViewController' => 'DiffusionPushLogController',
+    'DiffusionPushLogController' => 'DiffusionController',
     'DiffusionPushLogListController' =>
     array(
-      0 => 'DiffusionController',
+      0 => 'DiffusionPushLogController',
       1 => 'PhabricatorApplicationSearchResultsControllerInterface',
     ),
     'DiffusionQuery' => 'PhabricatorQuery',

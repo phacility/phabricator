@@ -7,6 +7,7 @@ final class PhabricatorRepositoryPushEventQuery
   private $phids;
   private $repositoryPHIDs;
   private $pusherPHIDs;
+  private $needLogs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -25,6 +26,11 @@ final class PhabricatorRepositoryPushEventQuery
 
   public function withPusherPHIDs(array $pusher_phids) {
     $this->pusherPHIDs = $pusher_phids;
+    return $this;
+  }
+
+  public function needLogs($need_logs) {
+    $this->needLogs = $need_logs;
     return $this;
   }
 
@@ -63,6 +69,24 @@ final class PhabricatorRepositoryPushEventQuery
     return $events;
   }
 
+  public function didFilterPage(array $events) {
+    $phids = mpull($events, 'getPHID');
+
+    if ($this->needLogs) {
+      $logs = id(new PhabricatorRepositoryPushLogQuery())
+        ->setParentQuery($this)
+        ->setViewer($this->getViewer())
+        ->withPushEventPHIDs($phids)
+        ->execute();
+      $logs = mgroup($logs, 'getPushEventPHID');
+      foreach ($events as $key => $event) {
+        $event_logs = idx($logs, $event->getPHID(), array());
+        $event->attachLogs($event_logs);
+      }
+    }
+
+    return $events;
+  }
 
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();

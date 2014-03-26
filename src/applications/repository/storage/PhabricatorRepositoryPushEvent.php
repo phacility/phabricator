@@ -17,6 +17,7 @@ final class PhabricatorRepositoryPushEvent
   protected $rejectDetails;
 
   private $repository = self::ATTACHABLE;
+  private $logs = self::ATTACHABLE;
 
   public static function initializeNewEvent(PhabricatorUser $viewer) {
     return id(new PhabricatorRepositoryPushEvent())
@@ -42,6 +43,15 @@ final class PhabricatorRepositoryPushEvent
 
   public function getRepository() {
     return $this->assertAttached($this->repository);
+  }
+
+  public function attachLogs(array $logs) {
+    $this->logs = $logs;
+    return $this;
+  }
+
+  public function getLogs() {
+    return $this->assertAttached($this->logs);
   }
 
 

@@ -9,6 +9,7 @@ final class PhabricatorRepositoryPushLogQuery
   private $pusherPHIDs;
   private $refTypes;
   private $newRefs;
+  private $pushEventPHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -40,6 +41,11 @@ final class PhabricatorRepositoryPushLogQuery
     return $this;
   }
 
+  public function withPushEventPHIDs(array $phids) {
+    $this->pushEventPHIDs = $phids;
+    return $this;
+  }
+
   protected function loadPage() {
     $table = new PhabricatorRepositoryPushLog();
     $conn_r = $table->establishConnection('r');
@@ -57,7 +63,8 @@ final class PhabricatorRepositoryPushLogQuery
 
   public function willFilterPage(array $logs) {
     $event_phids = mpull($logs, 'getPushEventPHID');
-    $events = id(new PhabricatorRepositoryPushEventQuery())
+    $events = id(new PhabricatorObjectQuery())
+      ->setParentQuery($this)
       ->setViewer($this->getViewer())
       ->withPHIDs($event_phids)
       ->execute();
@@ -105,6 +112,13 @@ final class PhabricatorRepositoryPushLogQuery
         $conn_r,
         'pusherPHID in (%Ls)',
         $this->pusherPHIDs);
+    }
+
+    if ($this->pushEventPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'pushEventPHID in (%Ls)',
+        $this->pushEventPHIDs);
     }
 
     if ($this->refTypes) {
