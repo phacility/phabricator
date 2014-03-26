@@ -11,6 +11,10 @@
   padding: 12px 0;
 }
 
+.device-phone .phabricator-project-layout .profile-feed {
+  padding: 12px 8px;
+}
+
 .profile-feed .phabricator-action-header-title {
   font-size: 16px;
   margin-bottom: 5px;
@@ -37,4 +41,9 @@
 .device-phone .profile-activity-view .profile-feed {
   float: none;
   margin: 0 8px;
+}
+
+.device-desktop .phabricator-project-layout .profile-feed,
+.device-tablet .phabricator-project-layout .profile-feed {
+  padding: 16px;
 }
