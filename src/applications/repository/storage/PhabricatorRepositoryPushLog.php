@@ -33,9 +33,7 @@ final class PhabricatorRepositoryPushLog
   protected $repositoryPHID;
   protected $epoch;
   protected $pusherPHID;
-  protected $remoteAddress;
-  protected $remoteProtocol;
-  protected $transactionKey;
+  protected $pushEventPHID;
   protected $refType;
   protected $refNameHash;
   protected $refNameRaw;
@@ -44,11 +42,9 @@ final class PhabricatorRepositoryPushLog
   protected $refNew;
   protected $mergeBase;
   protected $changeFlags;
-  protected $rejectCode;
-  protected $rejectDetails;
 
   private $dangerousChangeDescription = self::ATTACHABLE;
-  private $repository = self::ATTACHABLE;
+  private $pushEvent = self::ATTACHABLE;
 
   public static function initializeNewLog(PhabricatorUser $viewer) {
     return id(new PhabricatorRepositoryPushLog())
@@ -70,13 +66,17 @@ final class PhabricatorRepositoryPushLog
       PhabricatorRepositoryPHIDTypePushLog::TYPECONST);
   }
 
-  public function attachRepository(PhabricatorRepository $repository) {
-    $this->repository = $repository;
+  public function getRepository() {
+    return $this->getPushEvent()->getRepository();
+  }
+
+  public function attachPushEvent(PhabricatorRepositoryPushEvent $push_event) {
+    $this->pushEvent = $push_event;
     return $this;
   }
 
-  public function getRepository() {
-    return $this->assertAttached($this->repository);
+  public function getPushEvent() {
+    return $this->assertAttached($this->pushEvent);
   }
 
   public function getRefName() {
@@ -131,11 +131,11 @@ final class PhabricatorRepositoryPushLog
   }
 
   public function getPolicy($capability) {
-    return $this->getRepository()->getPolicy($capability);
+    return $this->getPushEvent()->getPolicy($capability);
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return $this->getRepository()->hasAutomaticCapability($capability, $viewer);
+    return $this->getPushEvent()->hasAutomaticCapability($capability, $viewer);
   }
 
   public function describeAutomaticCapability($capability) {

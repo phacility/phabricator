@@ -1,14 +1,12 @@
 <?php
 
-final class PhabricatorRepositoryPushLogQuery
+final class PhabricatorRepositoryPushEventQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
   private $phids;
   private $repositoryPHIDs;
   private $pusherPHIDs;
-  private $refTypes;
-  private $newRefs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -30,18 +28,8 @@ final class PhabricatorRepositoryPushLogQuery
     return $this;
   }
 
-  public function withRefTypes(array $ref_types) {
-    $this->refTypes = $ref_types;
-    return $this;
-  }
-
-  public function withNewRefs(array $new_refs) {
-    $this->newRefs = $new_refs;
-    return $this;
-  }
-
   protected function loadPage() {
-    $table = new PhabricatorRepositoryPushLog();
+    $table = new PhabricatorRepositoryPushEvent();
     $conn_r = $table->establishConnection('r');
 
     $data = queryfx_all(
@@ -55,24 +43,24 @@ final class PhabricatorRepositoryPushLogQuery
     return $table->loadAllFromArray($data);
   }
 
-  public function willFilterPage(array $logs) {
-    $event_phids = mpull($logs, 'getPushEventPHID');
-    $events = id(new PhabricatorRepositoryPushEventQuery())
+  public function willFilterPage(array $events) {
+    $repository_phids = mpull($events, 'getRepositoryPHID');
+    $repositories = id(new PhabricatorRepositoryQuery())
       ->setViewer($this->getViewer())
-      ->withPHIDs($event_phids)
+      ->withPHIDs($repository_phids)
       ->execute();
-    $events = mpull($events, null, 'getPHID');
+    $repositories = mpull($repositories, null, 'getPHID');
 
-    foreach ($logs as $key => $log) {
-      $event = idx($events, $log->getPushEventPHID());
-      if (!$event) {
-        unset($logs[$key]);
+    foreach ($events as $key => $event) {
+      $phid = $event->getRepositoryPHID();
+      if (empty($repositories[$phid])) {
+        unset($events[$key]);
         continue;
       }
-      $log->attachPushEvent($event);
+      $event->attachRepository($repositories[$phid]);
     }
 
-    return $logs;
+    return $events;
   }
 
 
@@ -105,20 +93,6 @@ final class PhabricatorRepositoryPushLogQuery
         $conn_r,
         'pusherPHID in (%Ls)',
         $this->pusherPHIDs);
-    }
-
-    if ($this->refTypes) {
-      $where[] = qsprintf(
-        $conn_r,
-        'refType IN (%Ls)',
-        $this->refTypes);
-    }
-
-    if ($this->newRefs) {
-      $where[] = qsprintf(
-        $conn_r,
-        'refNew IN (%Ls)',
-        $this->newRefs);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

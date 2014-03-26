@@ -52,7 +52,7 @@ final class DiffusionPushLogListController extends DiffusionController
       // Reveal this if it's valid and the user can edit the repository.
       $remote_addr = '-';
       if (isset($editable_repos[$log->getRepositoryPHID()])) {
-        $remote_long = $log->getRemoteAddress();
+        $remote_long = $log->getPushEvent()->getRemoteAddress();
         if ($remote_long) {
           $remote_addr = long2ip($remote_long);
         }
@@ -60,6 +60,7 @@ final class DiffusionPushLogListController extends DiffusionController
 
       $callsign = $log->getRepository()->getCallsign();
       $rows[] = array(
+        $log->getPushEvent()->getID(),
         phutil_tag(
           'a',
           array(
@@ -68,7 +69,7 @@ final class DiffusionPushLogListController extends DiffusionController
           $callsign),
         $this->getHandle($log->getPusherPHID())->renderLink(),
         $remote_addr,
-        $log->getRemoteProtocol(),
+        $log->getPushEvent()->getRemoteProtocol(),
         $log->getRefType(),
         $log->getRefName(),
         phutil_tag(
@@ -86,7 +87,7 @@ final class DiffusionPushLogListController extends DiffusionController
 
         // TODO: Make these human-readable.
         $log->getChangeFlags(),
-        $log->getRejectCode(),
+        $log->getPushEvent()->getRejectCode(),
         phabricator_datetime($log->getEpoch(), $viewer),
       );
     }
@@ -94,6 +95,7 @@ final class DiffusionPushLogListController extends DiffusionController
     $table = id(new AphrontTableView($rows))
       ->setHeaders(
         array(
+          pht('Push'),
           pht('Repository'),
           pht('Pusher'),
           pht('From'),
@@ -108,6 +110,7 @@ final class DiffusionPushLogListController extends DiffusionController
         ))
       ->setColumnClasses(
         array(
+          '',
           '',
           '',
           '',

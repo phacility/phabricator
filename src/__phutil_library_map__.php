@@ -1958,11 +1958,14 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryPHIDTypeArcanistProject' => 'applications/repository/phid/PhabricatorRepositoryPHIDTypeArcanistProject.php',
     'PhabricatorRepositoryPHIDTypeCommit' => 'applications/repository/phid/PhabricatorRepositoryPHIDTypeCommit.php',
     'PhabricatorRepositoryPHIDTypeMirror' => 'applications/repository/phid/PhabricatorRepositoryPHIDTypeMirror.php',
+    'PhabricatorRepositoryPHIDTypePushEvent' => 'applications/repository/phid/PhabricatorRepositoryPHIDTypePushEvent.php',
     'PhabricatorRepositoryPHIDTypePushLog' => 'applications/repository/phid/PhabricatorRepositoryPHIDTypePushLog.php',
     'PhabricatorRepositoryPHIDTypeRepository' => 'applications/repository/phid/PhabricatorRepositoryPHIDTypeRepository.php',
     'PhabricatorRepositoryParsedChange' => 'applications/repository/data/PhabricatorRepositoryParsedChange.php',
     'PhabricatorRepositoryPullEngine' => 'applications/repository/engine/PhabricatorRepositoryPullEngine.php',
     'PhabricatorRepositoryPullLocalDaemon' => 'applications/repository/daemon/PhabricatorRepositoryPullLocalDaemon.php',
+    'PhabricatorRepositoryPushEvent' => 'applications/repository/storage/PhabricatorRepositoryPushEvent.php',
+    'PhabricatorRepositoryPushEventQuery' => 'applications/repository/query/PhabricatorRepositoryPushEventQuery.php',
     'PhabricatorRepositoryPushLog' => 'applications/repository/storage/PhabricatorRepositoryPushLog.php',
     'PhabricatorRepositoryPushLogQuery' => 'applications/repository/query/PhabricatorRepositoryPushLogQuery.php',
     'PhabricatorRepositoryPushLogSearchEngine' => 'applications/repository/query/PhabricatorRepositoryPushLogSearchEngine.php',
@@ -4792,11 +4795,18 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryPHIDTypeArcanistProject' => 'PhabricatorPHIDType',
     'PhabricatorRepositoryPHIDTypeCommit' => 'PhabricatorPHIDType',
     'PhabricatorRepositoryPHIDTypeMirror' => 'PhabricatorPHIDType',
+    'PhabricatorRepositoryPHIDTypePushEvent' => 'PhabricatorPHIDType',
     'PhabricatorRepositoryPHIDTypePushLog' => 'PhabricatorPHIDType',
     'PhabricatorRepositoryPHIDTypeRepository' => 'PhabricatorPHIDType',
     'PhabricatorRepositoryParsedChange' => 'Phobject',
     'PhabricatorRepositoryPullEngine' => 'PhabricatorRepositoryEngine',
     'PhabricatorRepositoryPullLocalDaemon' => 'PhabricatorDaemon',
+    'PhabricatorRepositoryPushEvent' =>
+    array(
+      0 => 'PhabricatorRepositoryDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
+    'PhabricatorRepositoryPushEventQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorRepositoryPushLog' =>
     array(
       0 => 'PhabricatorRepositoryDAO',
