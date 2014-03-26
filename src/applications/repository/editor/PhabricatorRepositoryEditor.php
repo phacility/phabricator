@@ -318,7 +318,7 @@ final class PhabricatorRepositoryEditor
     $errors = parent::validateTransaction($object, $type, $xactions);
 
     switch ($type) {
-      case self::TYPE_CREDENTIAL:
+      case PhabricatorRepositoryTransaction::TYPE_CREDENTIAL:
         $ok = PassphraseCredentialControl::validateTransactions(
           $this->getActor(),
           $xactions);
