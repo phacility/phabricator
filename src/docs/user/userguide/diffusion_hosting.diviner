@@ -9,9 +9,6 @@ Phabricator can host repositories and provide authenticated read and write
 access to them over HTTP and SSH. This document describes how to configure
 repository hosting.
 
-NOTE: This feature is new and has some rough edges. Let us know if you run into
-issues (see @{article:Give Feedback! Get Support!}).
-
 = Understanding Supported Protocols =
 
 Phabricator supports hosting over these protocols:
@@ -53,7 +50,10 @@ machine Phabricator runs on, not Phabricator user accounts.
 The system accounts are:
 
   - The user the daemons run as. We'll call this `daemon-user`. For more
-    information on the daemons, see @{article:Managing Daemons with phd}.
+    information on the daemons, see @{article:Managing Daemons with phd}. This
+    user is the only user which will interact with the repositories directly.
+    Other accounts will `sudo` to this account in order to perform VCS
+    operations.
   - The user the webserver runs as. We'll call this `www-user`. If you do not
     plan to make repositories available over HTTP, you do not need to perform
     any special configuration for this user.
@@ -91,15 +91,44 @@ not use.
 Adding these commands to `sudoers` will allow the daemon and webserver users to
 write to repositories as the daemon user.
 
-Finally, once you've configured `sudoers`, set `phd.user` to the `daemon-user`:
+Before saving and closing `/etc/sudoers`, look for this line:
+
+  Defaults    requiretty
+
+If it's present, comment it out by putting a `#` at the beginning of the line.
+With this option enabled, VCS SSH sessions won't be able to use `sudo`.
+
+If you're planning to use SSH, you should also edit `/etc/passwd` and
+`/etc/shadow` to make sure the `vcs-user` account is set up correctly.
+
+  - Open `/etc/shadow` and find the line for the `vcs-user` account.
+    - The second field (which is the password field) must not be set to
+      `!!`. This value will prevent login. If it is set to `!!`, edit it
+      and set it to `NP` ("no password") instead.
+  - Open `/etc/passwd` and find the line for the `vcs-user` account.
+    - The last field (which is the login shell) must be set to a real shell.
+      If it is set to something like `/bin/false`, then `sshd` will not be able
+      to execute commands. Instead, you should set it to a real shell, like
+      `/bin/sh`.
+
+Finally, once you've configured `/etc/sudoers`, `/etc/shadow` and `/etc/passwd`,
+set `phd.user` to the `daemon-user`:
 
   phabricator/ $ ./bin/config set phd.user daemon-user
+
+If you're using a `vcs-user`, you should also configure that here:
+
+  phabricator/ $ ./bin/config set diffusion.ssh-user vcs-user
 
 = Configuring HTTP =
 
 If you plan to use authenticated HTTP, you need to set
 `diffusion.allow-http-auth` in Config. If you don't plan to use HTTP, or plan to
 use only anonymous HTTP, you can leave this setting disabled.
+
+If you plan to use authenticated HTTP, you'll also need to configure a VCS
+password in "Settings" -> "VCS Password". This is a different password than
+your main Phabricator password primarily for security reasons.
 
 Otherwise, if you've configured system accounts above, you're all set. No
 additional server configuration is required to make HTTP work.
@@ -111,7 +140,7 @@ works:
 
   - You'll move the normal `sshd` daemon to another port, like `222`. When
     connecting to the machine to administrate it, you'll use this alternate
-    port.
+    port to get a normal login shell.
   - You'll run a highly restricted `sshd` on port 22, with a special locked-down
     configuration that uses Phabricator to authorize users and execute commands.
   - The `sshd` on port 22 **MUST** be 6.2 or newer, because Phabricator relies
@@ -128,7 +157,7 @@ automatically repairs configuration unless stopped.
 
 To smoke-test a configuration, just start another `sshd` using the `-f` flag:
 
-  sudo sshd -f /path/to/config_file.edited
+  sudo /path/to/sshd -f /path/to/config_file.edited
 
 You can then connect and make sure the edited config file is valid before
 replacing your primary configuration file.
@@ -177,12 +206,13 @@ If you don't do this, `sshd` will refuse to execute the hook.
 `phabricator/resources/sshd/sshd_config.phabricator.example` to somewhere like
 `/etc/ssh/sshd_config.phabricator`.
 
-Open the file and edit the `AuthorizedKeysCommand` and
-`AuthorizedKeysCommandUser` settings to be correct for your system.
+Open the file and edit the `AuthorizedKeysCommand`,
+`AuthorizedKeysCommandUser`, and `AllowUsers` settings to be correct for your
+system.
 
 **Start SSHD**: Now, start the Phabricator `sshd`:
 
-  sudo sshd -f /path/to/sshd_config.phabricator
+  sudo /path/to/sshd -f /path/to/sshd_config.phabricator
 
 If you did everything correctly, you should be able to run this:
 
@@ -193,7 +223,8 @@ If you did everything correctly, you should be able to run this:
   {"result":"orbital","error_code":null,"error_info":null}
 
 (If you get an authentication error, make sure you added your public key in
-**Settings > SSH Public Keys**.)
+**Settings > SSH Public Keys**.) If you're having trouble, check the
+troubleshooting section below.
 
 = Authentication Over HTTP =
 
@@ -205,3 +236,130 @@ is enabled.
 
 To authenticate over SSH, users should add **SSH Public Keys** in the
 **Settings** screen.
+
+= Cloning a Repository =
+
+If you've already set up a hosted repository, you can try cloning it now. To
+do this, browse to the repository's main screen in Diffusion. You should see
+clone commands at the top of the page.
+
+To clone the repository, just run the appropriate command.
+
+If you don't see the commands or running them doesn't work, see below for tips
+on troubleshooting.
+
+= Troubleshooting HTTP =
+
+Some general tips for troubleshooting problems with HTTP:
+
+  - Make sure `diffusion.allow-http-auth` is enabled in your Phabricator config.
+  - Make sure HTTP serving is enabled for the repository you're trying to clone.
+    You can find this in "Edit Repository" -> "Hosting".
+  - Make sure you've configured a VCS password. This is separate from your main
+    account password. You can configure this in "Settings" -> "VCS Password".
+  - Make sure the main repository screen in Diffusion shows a clone/checkout
+    command for HTTP. If it doesn't, something above isn't set up correctly:
+    double-check your configuration. You should see a `svn checkout http://...`,
+    `git clone http://...` or `hg clone http://...` command. Run that command
+    verbatim to clone the repository.
+
+If you're using Git, using `GIT_CURL_VERBOSE` may help assess login failures.
+To do so, specify it on the command line before the `git clone` command, like
+this:
+
+  $ GIT_CURL_VERBOSE=1 git clone ...
+
+This will make `git` print out a lot more information. Particularly, the line
+with the HTTP response is likely to be useful:
+
+  < HTTP/1.1 403 Invalid credentials.
+
+In many cases, this can give you more information about what's wrong.
+
+= Troubleshooting SSH =
+
+Some general tips for troubleshooting problems with SSH:
+
+  - Check that you've configured `diffusion.ssh-user`.
+  - Check that you've configured `phd.user`.
+  - Make sure SSH serving is enabled for the repository you're trying to clone.
+    You can find this in "Edit Repository" -> "Hosting".
+  - Make sure you've added an SSH public key to your account. You can do this
+    in "Settings" -> "SSH Keys".
+  - Make sure the main repository screen in Diffusion shows a clone/checkout
+    command for SSH. If it doesn't, something above isn't set up correctly.
+    You should see an `svn checkout svn+ssh://...`, `git clone ssh://...` or
+    `hg clone ssh://...` command. Run that command verbatim to clone the
+    repository.
+
+To troubleshoot SSH setup: connect to the server with `ssh`, without running
+a command. You may need to use the `-T` flag. You should see a message like
+this one:
+
+  $ ssh -T dweller@secure.phabricator.com
+  phabricator-ssh-exec: Welcome to Phabricator.
+
+  You are logged in as alincoln.
+
+  You haven't specified a command to run. This means you're requesting an
+  interactive shell, but Phabricator does not provide an interactive shell over
+  SSH.
+
+  Usually, you should run a command like `git clone` or `hg push` rather than
+  connecting directly with SSH.
+
+  Supported commands are: conduit, git-receive-pack, git-upload-pack, hg,
+  svnserve.
+
+If you see this message, all your SSH stuff is configured correctly. **If you
+get a login shell instead, you've missed some major setup step: review the
+documentation above.** If you get some other sort of error, double check these
+settings:
+
+  - You're connecting as the `vcs-user`.
+  - The `vcs-user` has `NP` in `/etc/shadow`.
+  - The `vcs-user` has `/bin/sh` or some other valid shell in `/etc/passwd`.
+  - Your SSH key is correct, and you've added it to Phabricator in the Settings
+    panel.
+
+If you can get this far, but can't execute VCS commands like `git clone`, there
+is probably an issue with your `sudoers` configuration. Check:
+
+  - Your `sudoers` file is set up as instructed above.
+  - You've commented out `Defaults requiretty` in `sudoers`.
+  - You don't have multiple copies of the VCS binaries (like `git-upload-pack`)
+    on your system. You may have granted sudo access to one, while the VCS user
+    is trying to run a different one.
+  - You've configured `phd.user`.
+  - The `phd.user` has read and write access to the repositories.
+
+It may also be helpful to run `sshd` in debug mode:
+
+ $ /path/to/sshd -d -d -d -f /path/to/sshd_config.phabricator
+
+This will run it in the foreground and emit a large amount of debugging
+information.
+
+Finally, you can usually test that `sudoers` is configured correctly by
+doing something like this:
+
+  $ su vcs-user
+  $ sudo -E -n -u daemon-user -- /path/to/some/vcs-binary --help
+
+That will try to run the binary via `sudo` in a manner similar to the way that
+Phabricator will run it. This can give you better error messages about issues
+with `sudoers` configuration.
+
+= Miscellaneous Troubleshooting =
+
+  - If you're getting an error about `svnlook` not being found, add the path
+    where `svnlook` is located to the Phabricator configuration
+    `environment.append-paths` (even if it already appears in PATH). This issue
+    is caused by SVN wiping the environment (including PATH) when invoking
+    commit hooks.
+
+= Next Steps =
+
+Once hosted repositories are set up:
+
+  - learn about commit hooks with @{Diffusion User Guide: Commit Hooks}.
