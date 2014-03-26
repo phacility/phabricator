@@ -44,6 +44,10 @@ final class PhabricatorProjectColumn
     return ($this->getSequence() == 0);
   }
 
+  public function isDeleted() {
+    return ($this->getStatus() == self::STATUS_DELETED);
+  }
+
   public function getDisplayName() {
     if ($this->isDefaultColumn()) {
       return pht('Backlog');
