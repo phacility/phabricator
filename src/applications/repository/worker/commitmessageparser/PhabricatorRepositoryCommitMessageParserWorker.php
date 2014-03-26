@@ -241,7 +241,9 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
     // TODO: Support adds, deletes and moves under SVN.
     if (strlen($raw_diff)) {
-      $changes = id(new ArcanistDiffParser())->parseDiff($raw_diff);
+      $changes = id(new ArcanistDiffParser())->setDetectBinaryFiles(true)
+        ->setTryEncoding($this->repository->getDetail('encoding', 'UTF-8'))
+        ->parseDiff($raw_diff);
     } else {
       // This is an empty diff, maybe made with `git commit --allow-empty`.
       // NOTE: These diffs have the same tree hash as their ancestors, so
