@@ -1971,6 +1971,8 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryPushLog' => 'applications/repository/storage/PhabricatorRepositoryPushLog.php',
     'PhabricatorRepositoryPushLogQuery' => 'applications/repository/query/PhabricatorRepositoryPushLogQuery.php',
     'PhabricatorRepositoryPushLogSearchEngine' => 'applications/repository/query/PhabricatorRepositoryPushLogSearchEngine.php',
+    'PhabricatorRepositoryPushMailWorker' => 'applications/repository/worker/PhabricatorRepositoryPushMailWorker.php',
+    'PhabricatorRepositoryPushReplyHandler' => 'applications/repository/mail/PhabricatorRepositoryPushReplyHandler.php',
     'PhabricatorRepositoryQuery' => 'applications/repository/query/PhabricatorRepositoryQuery.php',
     'PhabricatorRepositoryRefCursor' => 'applications/repository/storage/PhabricatorRepositoryRefCursor.php',
     'PhabricatorRepositoryRefCursorQuery' => 'applications/repository/query/PhabricatorRepositoryRefCursorQuery.php',
@@ -4818,6 +4820,8 @@ phutil_register_library_map(array(
     ),
     'PhabricatorRepositoryPushLogQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorRepositoryPushLogSearchEngine' => 'PhabricatorApplicationSearchEngine',
+    'PhabricatorRepositoryPushMailWorker' => 'PhabricatorWorker',
+    'PhabricatorRepositoryPushReplyHandler' => 'PhabricatorMailReplyHandler',
     'PhabricatorRepositoryQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorRepositoryRefCursor' =>
     array(

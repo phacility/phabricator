@@ -32,6 +32,7 @@ final class DiffusionCommitHookEngine extends Phobject {
   private $heraldViewerProjects;
   private $rejectCode = PhabricatorRepositoryPushLog::REJECT_BROKEN;
   private $rejectDetails;
+  private $emailPHIDs = array();
 
 
 /* -(  Config  )------------------------------------------------------------- */
@@ -172,6 +173,23 @@ final class DiffusionCommitHookEngine extends Phobject {
       throw $caught;
     }
 
+    if ($this->emailPHIDs) {
+      // If Herald rules triggered email to users, queue a worker to send the
+      // mail. We do this out-of-process so that we block pushes as briefly
+      // as possible.
+
+      // (We do need to pull some commit info here because the commit objects
+      // may not exist yet when this worker runs, which could be immediately.)
+
+      PhabricatorWorker::scheduleTask(
+        'PhabricatorRepositoryPushMailWorker',
+        array(
+          'eventPHID' => $event->getPHID(),
+          'emailPHIDs' => array_values($this->emailPHIDs),
+          'info' => $this->loadCommitInfoForWorker($all_updates),
+        ));
+    }
+
     return 0;
   }
 
@@ -281,6 +299,11 @@ final class DiffusionCommitHookEngine extends Phobject {
       $effects = $engine->applyRules($rules, $adapter);
       $engine->applyEffects($effects, $adapter, $rules);
       $xscript = $engine->getTranscript();
+
+      // Store any PHIDs we want to send email to for later.
+      foreach ($adapter->getEmailPHIDs() as $email_phid) {
+        $this->emailPHIDs[$email_phid] = $email_phid;
+      }
 
       if ($blocking_effect === null) {
         foreach ($effects as $effect) {
@@ -982,6 +1005,7 @@ final class DiffusionCommitHookEngine extends Phobject {
     return PhabricatorRepositoryPushLog::initializeNewLog($this->getViewer())
       ->setPHID($phid)
       ->setRepositoryPHID($this->getRepository()->getPHID())
+      ->attachRepository($this->getRepository())
       ->setEpoch(time());
   }
 
@@ -1091,5 +1115,26 @@ final class DiffusionCommitHookEngine extends Phobject {
     }
   }
 
+  private function loadCommitInfoForWorker(array $all_updates) {
+    $type_commit = PhabricatorRepositoryPushLog::REFTYPE_COMMIT;
+
+    $map = array();
+    foreach ($all_updates as $update) {
+      if ($update->getRefType() != $type_commit) {
+        continue;
+      }
+      $map[$update->getRefNew()] = array();
+    }
+
+    foreach ($map as $identifier => $info) {
+      $ref = $this->loadCommitRefForCommit($identifier);
+      $map[$identifier] += array(
+        'summary'  => $ref->getSummary(),
+        'branches' => $this->loadBranches($identifier),
+      );
+    }
+
+    return $map;
+  }
 
 }

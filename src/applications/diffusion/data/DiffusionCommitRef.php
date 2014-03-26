@@ -74,6 +74,11 @@ final class DiffusionCommitRef extends Phobject {
     return $this->formatUser($this->committerName, $this->committerEmail);
   }
 
+  public function getSummary() {
+    return PhabricatorRepositoryCommitData::summarizeCommitMessage(
+      $this->getMessage());
+  }
+
   private function formatUser($name, $email) {
     if (strlen($name) && strlen($email)) {
       return "{$name} <{$email}>";
