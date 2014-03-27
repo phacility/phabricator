@@ -61,7 +61,7 @@
 }
 
 .phui-timeline-title {
-  line-height: 18px;
+  line-height: 17px;
   min-height: 18px;
   position: relative;
   color: {$bluetext};
@@ -123,6 +123,30 @@
 
 .phui-timeline-title-with-icon {
   padding-left: 38px;
+}
+
+.phui-timeline-token {
+  display: inline-block;
+}
+
+.phui-timeline-token.strikethrough {
+  position: relative;
+}
+
+.phui-timeline-token.strikethrough:before {
+  position: absolute;
+  content: "";
+  left: 0;
+  top: 50%;
+  right: 0;
+  border-top: 3px solid;
+  border-color: {$darkbluetext};
+
+  -webkit-transform:rotate(-40deg);
+  -moz-transform:rotate(-40deg);
+  -ms-transform:rotate(-40deg);
+  -o-transform:rotate(-40deg);
+  transform:rotate(-40deg);
 }
 
 .phui-timeline-major-event .phui-timeline-content
