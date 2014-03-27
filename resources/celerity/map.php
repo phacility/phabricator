@@ -404,7 +404,7 @@ return array(
     'rsrc/js/application/policy/behavior-policy-control.js' => 'c01153ea',
     'rsrc/js/application/policy/behavior-policy-rule-editor.js' => '263aeb8c',
     'rsrc/js/application/ponder/behavior-votebox.js' => '327dbe61',
-    'rsrc/js/application/projects/behavior-project-boards.js' => '04c59172',
+    'rsrc/js/application/projects/behavior-project-boards.js' => 'd8e135db',
     'rsrc/js/application/projects/behavior-project-create.js' => '065227cc',
     'rsrc/js/application/releeph/releeph-preview-branch.js' => '9eb2cedb',
     'rsrc/js/application/releeph/releeph-request-state-change.js' => 'fe7fc914',
@@ -614,7 +614,7 @@ return array(
     'javelin-behavior-policy-control' => 'c01153ea',
     'javelin-behavior-policy-rule-editor' => '263aeb8c',
     'javelin-behavior-ponder-votebox' => '327dbe61',
-    'javelin-behavior-project-boards' => '04c59172',
+    'javelin-behavior-project-boards' => 'd8e135db',
     'javelin-behavior-project-create' => '065227cc',
     'javelin-behavior-refresh-csrf' => 'c4b31646',
     'javelin-behavior-releeph-preview-branch' => '9eb2cedb',
@@ -842,15 +842,6 @@ return array(
       2 => 'javelin-dom',
       3 => 'javelin-vector',
       4 => 'javelin-install',
-    ),
-    '04c59172' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-      2 => 'javelin-util',
-      3 => 'javelin-stratcom',
-      4 => 'javelin-workflow',
-      5 => 'phabricator-draggable-list',
     ),
     '065227cc' =>
     array(
@@ -1751,6 +1742,15 @@ return array(
       2 => 'javelin-json',
       3 => 'javelin-dom',
       4 => 'phabricator-keyboard-shortcut',
+    ),
+    'd8e135db' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-util',
+      3 => 'javelin-stratcom',
+      4 => 'javelin-workflow',
+      5 => 'phabricator-draggable-list',
     ),
     'd8ef8659' =>
     array(
