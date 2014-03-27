@@ -9,6 +9,7 @@ final class PhabricatorRepositoryPushLogQuery
   private $pusherPHIDs;
   private $refTypes;
   private $newRefs;
+  private $pushEventPHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -40,6 +41,11 @@ final class PhabricatorRepositoryPushLogQuery
     return $this;
   }
 
+  public function withPushEventPHIDs(array $phids) {
+    $this->pushEventPHIDs = $phids;
+    return $this;
+  }
+
   protected function loadPage() {
     $table = new PhabricatorRepositoryPushLog();
     $conn_r = $table->establishConnection('r');
@@ -56,24 +62,21 @@ final class PhabricatorRepositoryPushLogQuery
   }
 
   public function willFilterPage(array $logs) {
-    $repository_phids = mpull($logs, 'getRepositoryPHID');
-    if ($repository_phids) {
-      $repositories = id(new PhabricatorRepositoryQuery())
-        ->setViewer($this->getViewer())
-        ->withPHIDs($repository_phids)
-        ->execute();
-      $repositories = mpull($repositories, null, 'getPHID');
-    } else {
-      $repositories = array();
-    }
+    $event_phids = mpull($logs, 'getPushEventPHID');
+    $events = id(new PhabricatorObjectQuery())
+      ->setParentQuery($this)
+      ->setViewer($this->getViewer())
+      ->withPHIDs($event_phids)
+      ->execute();
+    $events = mpull($events, null, 'getPHID');
 
     foreach ($logs as $key => $log) {
-      $phid = $log->getRepositoryPHID();
-      if (empty($repositories[$phid])) {
+      $event = idx($events, $log->getPushEventPHID());
+      if (!$event) {
         unset($logs[$key]);
         continue;
       }
-      $log->attachRepository($repositories[$phid]);
+      $log->attachPushEvent($event);
     }
 
     return $logs;
@@ -109,6 +112,13 @@ final class PhabricatorRepositoryPushLogQuery
         $conn_r,
         'pusherPHID in (%Ls)',
         $this->pusherPHIDs);
+    }
+
+    if ($this->pushEventPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'pushEventPHID in (%Ls)',
+        $this->pushEventPHIDs);
     }
 
     if ($this->refTypes) {

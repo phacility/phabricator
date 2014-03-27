@@ -51,12 +51,14 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
         'picture/(?P<id>[1-9]\d*)/' =>
           'PhabricatorProjectEditPictureController',
         'create/' => 'PhabricatorProjectCreateController',
-        'board/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectBoardController',
+        'board/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectBoardViewController',
         'move/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectMoveController',
         'board/(?P<projectID>[1-9]\d*)/edit/(?:(?P<id>\d+)/)?'
           => 'PhabricatorProjectBoardEditController',
         'board/(?P<projectID>[1-9]\d*)/delete/(?:(?P<id>\d+)/)?'
           => 'PhabricatorProjectBoardDeleteController',
+        'board/(?P<projectID>[1-9]\d*)/column/(?:(?P<id>\d+)/)?'
+          => 'PhabricatorProjectColumnDetailController',
         'update/(?P<id>[1-9]\d*)/(?P<action>[^/]+)/'
           => 'PhabricatorProjectUpdateController',
         'history/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectHistoryController',

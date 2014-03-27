@@ -1,17 +1,13 @@
 <?php
 
 final class HarbormasterThrowExceptionBuildStep
-  extends BuildStepImplementation {
+  extends HarbormasterBuildStepImplementation {
 
   public function getName() {
     return pht('Throw Exception');
   }
 
   public function getGenericDescription() {
-    return pht('Throw an exception.');
-  }
-
-  public function getDescription() {
     return pht('Throw an exception.');
   }
 

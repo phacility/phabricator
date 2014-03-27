@@ -101,6 +101,8 @@ When defining custom fields using a configuration option like
   - **default**: Default field value.
   - **strings**: Allows you to override specific strings based on the field
     type. See below.
+  - **instructions**: Optional block of remarkup text which will appear
+    above the control when rendered on the edit view.
 
 The `strings` value supports different strings per control type. They are:
 
@@ -118,6 +120,14 @@ In **Maniphest**:
     "Create Another Similar Task". Some fields from the original task are copied
     into the new task, while others are not; by default, fields are not copied.
     If you want this field to be copied, specify `true` for the `copy` property.
+
+Internally, Phabricator implements some additional custom field types and
+options. These are not intended for general use and are subject to abrupt
+change, but are documented here for completeness:
+
+  - **Credentials**: Controls with type `credential` allow selection of a
+    Passphrase credential which provides `credential.provides`, and creation
+    of credentials of `credential.type`.
 
 = Advanced Custom Fields =
 

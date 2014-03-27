@@ -5,22 +5,25 @@ Common questions about Differential.
 
 = Why does an "accepted" revision remain accepted when it is updated? =
 
-When a revision author updates an "accepted" revision in Differential, the
-state remains "accepted". This can be confusing if you expect the revision to
-change to "needs review" when it is updated.
+You can configure this behavior with `differential.sticky-accept`.
 
-This behavior is intentional, to encourage authors to update revisions when they
-make minor changes after a revision is accepted. For example, a reviewer may
-accept a change with a comment like this:
+When a revision author updates an "Accepted" revision in Differential, the
+state remains "Accepted". This can be confusing if you expect the revision to
+change to "Needs Review" when it is updated.
+
+Although this behavior is configurable, we think stickiness is a good behavior:
+stickiness encourage authors to update revisions when they make minor changes
+after a revision is accepted. For example, a reviewer may accept a change with a
+comment like this:
 
 > Looks great, but can you add some documentation for the foo() function
 > before you land it? I also caught a couple typos, see inlines.
 
-If updating the revision reverted the status to "needs review", the author
+If updating the revision reverted the status to "Needs Review", the author
 is discouraged from updating the revision when they make minor changes because
 they'll have to wait for their reviewer to have a chance to look at it again.
 
-Instead, the "accept" state is sticky to encourage them to update the revision
+Instead, the "Accepted" state is sticky to encourage them to update the revision
 with a comment like:
 
 > - Added docs.
@@ -41,10 +44,12 @@ get an accept), solve the problem socially by telling them to stop being jerks.
 Unless you've configured additional layers of enforcement, there's nothing
 stopping them from silently changing the code before pushing it, anyway.
 
+
 = How can I enable syntax highlighting? =
 
 You need to install and configure **Pygments** to highlight anything else than
-PHP. Consult the configuration file for instructions.
+PHP. See the `pygments.enabled` configuration setting.
+
 
 = What do the whitespace options mean? =
 
@@ -61,10 +66,15 @@ Most of these are pretty straightforward, but "Ignore Most" is not:
     setting.
   - **Ignore All**: Ignore all whitespace changes in all files.
 
-= What does the very light green and red backgrounds mean? =
 
-Differential uses these colors to mark changes coming from rebase - they are
+= What do the very light green and red backgrounds mean? =
+
+Differential uses these colors to mark changes coming from rebase: they are
 part of the diff but they were not added or removed by the author. They can
-appear in diff of diffs against different bases. See
-[[ https://secure.phabricator.com/D3324?vs=6468&id=6513#toc | D3324 ]] for
-example.
+appear in diff of diffs against different bases.
+
+= Next Steps =
+
+Continue by:
+
+  - returning to the @{article:Differential User Guide}.

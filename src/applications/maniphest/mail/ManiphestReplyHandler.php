@@ -82,7 +82,7 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
       switch ($command) {
         case 'close':
           $ttype = ManiphestTransaction::TYPE_STATUS;
-          $new_value = ManiphestTaskStatus::STATUS_CLOSED_RESOLVED;
+          $new_value = ManiphestTaskStatus::getDefaultClosedStatus();
           break;
         case 'claim':
           $ttype = ManiphestTransaction::TYPE_OWNER;

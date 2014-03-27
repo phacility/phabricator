@@ -3,6 +3,7 @@
 abstract class PhabricatorStandardCustomField
   extends PhabricatorCustomField {
 
+  private $rawKey;
   private $fieldKey;
   private $fieldName;
   private $fieldValue;
@@ -40,6 +41,7 @@ abstract class PhabricatorStandardCustomField
 
       $template = clone $template;
       $standard = id(clone $types[$type])
+        ->setRawStandardFieldKey($key)
         ->setFieldKey($full_key)
         ->setFieldConfig($value)
         ->setApplicationField($template);
@@ -142,6 +144,15 @@ abstract class PhabricatorStandardCustomField
     return $this->required;
   }
 
+  public function setRawStandardFieldKey($raw_key) {
+    $this->rawKey = $raw_key;
+    return $this;
+  }
+
+  public function getRawStandardFieldKey() {
+    return $this->rawKey;
+  }
+
 
 /* -(  PhabricatorCustomField  )--------------------------------------------- */
 
@@ -198,6 +209,10 @@ abstract class PhabricatorStandardCustomField
       $value = null;
     }
     $this->setFieldValue($value);
+  }
+
+  public function getInstructionsForEdit() {
+    return $this->getFieldConfigValue('instructions');
   }
 
   public function renderEditControl(array $handles) {

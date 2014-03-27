@@ -60,7 +60,10 @@ abstract class PhabricatorCustomField {
           "object of class '{$obj_class}'.");
       }
 
-      $fields = PhabricatorCustomField::buildFieldList($base_class, $spec);
+      $fields = PhabricatorCustomField::buildFieldList(
+        $base_class,
+        $spec,
+        $object);
 
       foreach ($fields as $key => $field) {
         if (!$field->shouldEnableForRole($role)) {
@@ -97,7 +100,7 @@ abstract class PhabricatorCustomField {
   /**
    * @task apps
    */
-  public static function buildFieldList($base_class, array $spec) {
+  public static function buildFieldList($base_class, array $spec, $object) {
     $field_objects = id(new PhutilSymbolLoader())
       ->setAncestorClass($base_class)
       ->loadObjects();
@@ -106,7 +109,7 @@ abstract class PhabricatorCustomField {
     $from_map = array();
     foreach ($field_objects as $field_object) {
       $current_class = get_class($field_object);
-      foreach ($field_object->createFields() as $field) {
+      foreach ($field_object->createFields($object) as $field) {
         $key = $field->getFieldKey();
         if (isset($fields[$key])) {
           $original_class = $from_map[$key];
@@ -200,10 +203,11 @@ abstract class PhabricatorCustomField {
    * For general implementations, the general field implementation can return
    * multiple field instances here.
    *
+   * @param object The object to create fields for.
    * @return list<PhabricatorCustomField> List of fields.
    * @task core
    */
-  public function createFields() {
+  public function createFields($object) {
     return array($this);
   }
 
@@ -239,9 +243,9 @@ abstract class PhabricatorCustomField {
    * @task core
    */
   public function shouldEnableForRole($role) {
-    if ($this->proxy) {
-      return $this->proxy->shouldEnableForRole($role);
-    }
+
+    // NOTE: All of these calls proxy individually, so we don't need to
+    // proxy this call as a whole.
 
     switch ($role) {
       case self::ROLE_APPLICATIONTRANSACTIONS:
@@ -1053,6 +1057,17 @@ abstract class PhabricatorCustomField {
       return $this->proxy->getRequiredHandlePHIDsForEdit();
     }
     return array();
+  }
+
+
+  /**
+   * @task edit
+   */
+  public function getInstructionsForEdit() {
+    if ($this->proxy) {
+      return $this->proxy->getInstructionsForEdit();
+    }
+    return null;
   }
 
 

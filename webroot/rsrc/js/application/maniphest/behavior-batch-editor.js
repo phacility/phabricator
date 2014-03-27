@@ -24,7 +24,7 @@ JX.behavior('maniphest-batch-editor', function(config) {
         'add_project': 'Add Projects',
         'remove_project' : 'Remove Projects',
         'priority': 'Change Priority',
-        'status': 'Open / Close',
+        'status': 'Change Status',
         'add_comment': 'Comment',
         'assign': 'Assign',
         'add_ccs' : 'Add CCs',

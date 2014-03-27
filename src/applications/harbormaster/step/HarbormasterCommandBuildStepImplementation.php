@@ -1,7 +1,7 @@
 <?php
 
-final class CommandBuildStepImplementation
-  extends VariableBuildStepImplementation {
+final class HarbormasterCommandBuildStepImplementation
+  extends HarbormasterBuildStepImplementation {
 
   public function getName() {
     return pht('Run Command');
@@ -12,12 +12,10 @@ final class CommandBuildStepImplementation
   }
 
   public function getDescription() {
-    $settings = $this->getSettings();
-
     return pht(
-      'Run \'%s\' on \'%s\'.',
-      $settings['command'],
-      $settings['hostartifact']);
+      'Run command %s on host %s.',
+      $this->formatSettingForDescription('command'),
+      $this->formatSettingForDescription('hostartifact'));
   }
 
   public function execute(
@@ -74,35 +72,29 @@ final class CommandBuildStepImplementation
     }
   }
 
-  public function validateSettings() {
-    $settings = $this->getSettings();
-
-    if ($settings['command'] === null || !is_string($settings['command'])) {
-      return false;
-    }
-    if ($settings['hostartifact'] === null ||
-      !is_string($settings['hostartifact'])) {
-      return false;
-    }
-
-    // TODO: Check if the host artifact is provided by previous build steps.
-
-    return true;
+  public function getArtifactInputs() {
+    return array(
+      array(
+        'name'  => pht('Run on Host'),
+        'key'   => $this->getSetting('hostartifact'),
+        'type'  => HarbormasterBuildArtifact::TYPE_HOST,
+      ),
+    );
   }
 
-  public function getSettingDefinitions() {
+  public function getFieldSpecifications() {
     return array(
       'command' => array(
-        'name' => 'Command',
-        'description' => 'The command to execute on the remote machine.',
-        'type' => BuildStepImplementation::SETTING_TYPE_STRING),
+        'name' => pht('Command'),
+        'type' => 'text',
+        'required' => true,
+      ),
       'hostartifact' => array(
-        'name' => 'Host Artifact',
-        'description' =>
-          'The host artifact that determines what machine the command '.
-          'will run on.',
-        'type' => BuildStepImplementation::SETTING_TYPE_ARTIFACT,
-        'artifact_type' => HarbormasterBuildArtifact::TYPE_HOST));
+        'name' => pht('Host'),
+        'type' => 'text',
+        'required' => true,
+      ),
+    );
   }
 
 }

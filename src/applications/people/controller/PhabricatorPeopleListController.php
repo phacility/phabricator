@@ -62,6 +62,10 @@ final class PhabricatorPeopleListController extends PhabricatorPeopleController
         ->addAttribute($email)
         ->setImageURI($user->getProfileImageURI());
 
+      if ($is_approval && $primary_email) {
+        $item->addAttribute($primary_email->getAddress());
+      }
+
       if ($user->getIsDisabled()) {
         $item->addIcon('disable', pht('Disabled'));
       }

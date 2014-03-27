@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group maniphest
- */
 abstract class ManiphestView extends AphrontView {
 
   public static function renderTagForTask(ManiphestTask $task) {

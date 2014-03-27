@@ -8,6 +8,7 @@ final class HarbormasterBuildQuery
   private $buildStatuses;
   private $buildablePHIDs;
   private $buildPlanPHIDs;
+  private $needBuildTargets;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -31,6 +32,11 @@ final class HarbormasterBuildQuery
 
   public function withBuildPlanPHIDs(array $build_plan_phids) {
     $this->buildPlanPHIDs = $build_plan_phids;
+    return $this;
+  }
+
+  public function needBuildTargets($need_targets) {
+    $this->needBuildTargets = $need_targets;
     return $this;
   }
 
@@ -100,6 +106,24 @@ final class HarbormasterBuildQuery
     foreach ($page as $build) {
       $unprocessed_commands = idx($commands, $build->getPHID(), array());
       $build->attachUnprocessedCommands($unprocessed_commands);
+    }
+
+    if ($this->needBuildTargets) {
+      $targets = id(new HarbormasterBuildTargetQuery())
+        ->setViewer($this->getViewer())
+        ->setParentQuery($this)
+        ->withBuildPHIDs($build_phids)
+        ->execute();
+
+      // TODO: Some day, when targets have dependencies, we should toposort
+      // these. For now, just put them into chronological order.
+      $targets = array_reverse($targets);
+
+      $targets = mgroup($targets, 'getBuildPHID');
+      foreach ($page as $build) {
+        $build_targets = idx($targets, $build->getPHID(), array());
+        $build->attachBuildTargets($build_targets);
+      }
     }
 
     return $page;

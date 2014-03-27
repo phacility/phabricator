@@ -3,7 +3,7 @@
 final class PhabricatorProjectDescriptionField
   extends PhabricatorProjectStandardCustomField {
 
-  public function createFields() {
+  public function createFields($object) {
     return PhabricatorStandardCustomField::buildStandardFields(
       $this,
       array(

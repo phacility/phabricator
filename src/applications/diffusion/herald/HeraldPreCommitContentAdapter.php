@@ -18,7 +18,7 @@ final class HeraldPreCommitContentAdapter extends HeraldPreCommitAdapter {
   public function getAdapterContentDescription() {
     return pht(
       "React to commits being pushed to hosted repositories.\n".
-      "Hook rules can block changes.");
+      "Hook rules can block changes and send push summary mail.");
   }
 
   public function getFields() {

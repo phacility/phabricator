@@ -111,8 +111,13 @@ final class ManiphestReportController extends ManiphestController {
       $oldv = trim($row['oldValue'], '"');
       $newv = trim($row['newValue'], '"');
 
-      $old_is_open = ($oldv === (string)ManiphestTaskStatus::STATUS_OPEN);
-      $new_is_open = ($newv === (string)ManiphestTaskStatus::STATUS_OPEN);
+      if ($oldv == 'null') {
+        $old_is_open = false;
+      } else {
+        $old_is_open = ManiphestTaskStatus::isOpenStatus($oldv);
+      }
+
+      $new_is_open = ManiphestTaskStatus::isOpenStatus($newv);
 
       $is_open  = ($new_is_open && !$old_is_open);
       $is_close = ($old_is_open && !$new_is_open);
@@ -650,24 +655,26 @@ final class ManiphestReportController extends ManiphestController {
     $xtable = new ManiphestTransaction();
     $conn_r = $table->establishConnection('r');
 
+    // TODO: Gross. This table is not meant to be queried like this. Build
+    // real stats tables.
+
+    $open_status_list = array();
+    foreach (ManiphestTaskStatus::getOpenStatusConstants() as $constant) {
+      $open_status_list[] = json_encode((string)$constant);
+    }
+
     $tasks = queryfx_all(
       $conn_r,
       'SELECT t.* FROM %T t JOIN %T x ON x.objectPHID = t.phid
         WHERE t.status != 0
-        AND x.oldValue IN (null, %s, %s)
-        AND x.newValue NOT IN (%s, %s)
+        AND x.oldValue IN (null, %Ls)
+        AND x.newValue NOT IN (%Ls)
         AND t.dateModified >= %d
         AND x.dateCreated >= %d',
       $table->getTableName(),
       $xtable->getTableName(),
-
-      // TODO: Gross. This table is not meant to be queried like this. Build
-      // real stats tables.
-      json_encode((int)ManiphestTaskStatus::STATUS_OPEN),
-      json_encode((string)ManiphestTaskStatus::STATUS_OPEN),
-      json_encode((int)ManiphestTaskStatus::STATUS_OPEN),
-      json_encode((string)ManiphestTaskStatus::STATUS_OPEN),
-
+      $open_status_list,
+      $open_status_list,
       $window_epoch,
       $window_epoch);
 

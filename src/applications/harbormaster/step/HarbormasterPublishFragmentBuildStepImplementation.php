@@ -1,7 +1,7 @@
 <?php
 
-final class PublishFragmentBuildStepImplementation
-  extends VariableBuildStepImplementation {
+final class HarbormasterPublishFragmentBuildStepImplementation
+  extends HarbormasterBuildStepImplementation {
 
   public function getName() {
     return pht('Publish Fragment');
@@ -12,12 +12,10 @@ final class PublishFragmentBuildStepImplementation
   }
 
   public function getDescription() {
-    $settings = $this->getSettings();
-
     return pht(
-      'Publish file artifact \'%s\' to the fragment path \'%s\'.',
-      $settings['artifact'],
-      $settings['path']);
+      'Publish file artifact %s as fragment %s.',
+      $this->formatSettingForDescription('artifact'),
+      $this->formatSettingForDescription('path'));
   }
 
   public function execute(
@@ -57,35 +55,29 @@ final class PublishFragmentBuildStepImplementation
     }
   }
 
-  public function validateSettings() {
-    $settings = $this->getSettings();
-
-    if ($settings['path'] === null || !is_string($settings['path'])) {
-      return false;
-    }
-    if ($settings['artifact'] === null ||
-      !is_string($settings['artifact'])) {
-      return false;
-    }
-
-    // TODO: Check if the file artifact is provided by previous build steps.
-
-    return true;
+  public function getArtifactInputs() {
+    return array(
+      array(
+        'name' => pht('Publishes File'),
+        'key' => $this->getSetting('artifact'),
+        'type' => HarbormasterBuildArtifact::TYPE_FILE,
+      ),
+    );
   }
 
-  public function getSettingDefinitions() {
+  public function getFieldSpecifications() {
     return array(
       'path' => array(
-        'name' => 'Path',
-        'description' =>
-          'The path of the fragment that will be published.',
-        'type' => BuildStepImplementation::SETTING_TYPE_STRING),
+        'name' => pht('Path'),
+        'type' => 'text',
+        'required' => true,
+      ),
       'artifact' => array(
-        'name' => 'File Artifact',
-        'description' =>
-          'The file artifact that will be published to Phragment.',
-        'type' => BuildStepImplementation::SETTING_TYPE_ARTIFACT,
-        'artifact_type' => HarbormasterBuildArtifact::TYPE_FILE));
+        'name' => pht('File Artifact'),
+        'type' => 'text',
+        'required' => true,
+      ),
+    );
   }
 
 }

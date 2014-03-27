@@ -511,6 +511,7 @@ abstract class PhabricatorApplicationSearchEngine {
         $fields = PhabricatorCustomField::getObjectFields(
           $object,
           PhabricatorCustomField::ROLE_APPLICATIONSEARCH);
+        $fields->setViewer($this->requireViewer());
       } else {
         $fields = null;
       }

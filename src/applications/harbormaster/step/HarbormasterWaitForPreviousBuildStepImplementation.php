@@ -1,19 +1,13 @@
 <?php
 
-final class WaitForPreviousBuildStepImplementation
-  extends BuildStepImplementation {
+final class HarbormasterWaitForPreviousBuildStepImplementation
+  extends HarbormasterBuildStepImplementation {
 
   public function getName() {
     return pht('Wait for Previous Commits to Build');
   }
 
   public function getGenericDescription() {
-    return pht(
-      'Wait for previous commits to finish building the current plan '.
-      'before continuing.');
-  }
-
-  public function getDescription() {
     return pht(
       'Wait for previous commits to finish building the current plan '.
       'before continuing.');

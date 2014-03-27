@@ -9,6 +9,7 @@ final class HarbormasterBuild extends HarbormasterDAO
 
   private $buildable = self::ATTACHABLE;
   private $buildPlan = self::ATTACHABLE;
+  private $buildTargets = self::ATTACHABLE;
   private $unprocessedCommands = self::ATTACHABLE;
 
   /**
@@ -102,6 +103,15 @@ final class HarbormasterBuild extends HarbormasterDAO
     return $this->assertAttached($this->buildPlan);
   }
 
+  public function getBuildTargets() {
+    return $this->assertAttached($this->buildTargets);
+  }
+
+  public function attachBuildTargets(array $targets) {
+    $this->buildTargets = $targets;
+    return $this;
+  }
+
   public function isBuilding() {
     return $this->getBuildStatus() === self::STATUS_PENDING ||
       $this->getBuildStatus() === self::STATUS_WAITING ||
@@ -158,7 +168,8 @@ final class HarbormasterBuild extends HarbormasterDAO
       'repository.vcs' => null,
       'repository.uri' => null,
       'step.timestamp' => null,
-      'build.id' => null);
+      'build.id' => null,
+    );
 
     $buildable = $this->getBuildable();
     $object = $buildable->getBuildableObject();
@@ -200,7 +211,9 @@ final class HarbormasterBuild extends HarbormasterDAO
       'repository.uri' =>
         pht('The URI to clone or checkout the repository from.'),
       'step.timestamp' => pht('The current UNIX timestamp.'),
-      'build.id' => pht('The ID of the current build.'));
+      'build.id' => pht('The ID of the current build.'),
+      'target.phid' => pht('The PHID of the current build target.'),
+    );
   }
 
   public function isComplete() {

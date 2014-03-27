@@ -183,6 +183,13 @@ final class DifferentialTransactionEditor
              ($object->getStatus() == $status_plan))) {
           $object->setStatus($status_review);
         }
+
+        $diff = $this->requireDiff($xaction->getNewValue());
+
+        $object->setLineCount($diff->getLineCount());
+        $object->setRepositoryPHID($diff->getRepositoryPHID());
+        $object->setArcanistProjectPHID($diff->getArcanistProjectPHID());
+
         // TODO: Update the `diffPHID` once we add that.
         return;
       case DifferentialTransaction::TYPE_ACTION:
@@ -231,10 +238,16 @@ final class DifferentialTransactionEditor
     $actor_phid = $actor->getPHID();
     $type_edge = PhabricatorTransactions::TYPE_EDGE;
 
+    $status_plan = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
+
     $edge_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
     $edge_ref_task = PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK;
 
+    $is_sticky_accept = PhabricatorEnv::getEnvConfig(
+      'differential.sticky-accept');
+
     $downgrade_rejects = false;
+    $downgrade_accepts = false;
     if ($this->getIsCloseByCommit()) {
       // Never downgrade reviewers when we're closing a revision after a
       // commit.
@@ -242,11 +255,23 @@ final class DifferentialTransactionEditor
       switch ($xaction->getTransactionType()) {
         case DifferentialTransaction::TYPE_UPDATE:
           $downgrade_rejects = true;
+          if (!$is_sticky_accept) {
+            // If "sticky accept" is disabled, also downgrade the accepts.
+            $downgrade_accepts = true;
+          }
           break;
         case DifferentialTransaction::TYPE_ACTION:
           switch ($xaction->getNewValue()) {
             case DifferentialAction::ACTION_REQUEST:
               $downgrade_rejects = true;
+              if ((!$is_sticky_accept) ||
+                  ($object->getStatus() != $status_plan)) {
+                // If the old state isn't "changes planned", downgrade the
+                // accepts. This exception allows an accepted revision to
+                // go through Plan Changes -> Request Review to return to
+                // "accepted" if the author didn't update the revision.
+                $downgrade_accepts = true;
+              }
               break;
           }
           break;
@@ -258,7 +283,7 @@ final class DifferentialTransactionEditor
     $old_accept = DifferentialReviewerStatus::STATUS_ACCEPTED_OLDER;
     $old_reject = DifferentialReviewerStatus::STATUS_REJECTED_OLDER;
 
-    if ($downgrade_rejects) {
+    if ($downgrade_rejects || $downgrade_accepts) {
       // When a revision is updated, change all "reject" to "rejected older
       // revision". This means we won't immediately push the update back into
       // "needs review", but outstanding rejects will still block it from
@@ -270,15 +295,25 @@ final class DifferentialTransactionEditor
 
       $edits = array();
       foreach ($object->getReviewerStatus() as $reviewer) {
-        if ($reviewer->getStatus() == $new_reject) {
-          $edits[$reviewer->getReviewerPHID()] = array(
-            'data' => array(
-              'status' => $old_reject,
-            ),
-          );
+        if ($downgrade_rejects) {
+          if ($reviewer->getStatus() == $new_reject) {
+            $edits[$reviewer->getReviewerPHID()] = array(
+              'data' => array(
+                'status' => $old_reject,
+              ),
+            );
+          }
         }
 
-        // TODO: If sticky accept is off, do a similar update for accepts.
+        if ($downgrade_accepts) {
+          if ($reviewer->getStatus() == $new_accept) {
+            $edits[$reviewer->getReviewerPHID()] = array(
+              'data' => array(
+                'status' => $old_accept,
+              ),
+            );
+          }
+        }
       }
 
       if ($edits) {
@@ -304,7 +339,7 @@ final class DifferentialTransactionEditor
 
         $maniphest = 'PhabricatorApplicationManiphest';
         if (PhabricatorApplication::isClassInstalled($maniphest)) {
-          $diff = $this->loadDiff($xaction->getNewValue());
+          $diff = $this->requireDiff($xaction->getNewValue());
           $branch = $diff->getBranch();
 
           // No "$", to allow for branches like T123_demo.
@@ -475,31 +510,22 @@ final class DifferentialTransactionEditor
         return;
       case DifferentialTransaction::TYPE_UPDATE:
         // Now that we're inside the transaction, do a final check.
-        $diff = $this->loadDiff($xaction->getNewValue());
+        $diff = $this->requireDiff($xaction->getNewValue());
 
         // TODO: It would be slightly cleaner to just revalidate this
         // transaction somehow using the same validation code, but that's
         // not easy to do at the moment.
 
-        if (!$diff) {
-          throw new Exception(pht('Diff does not exist!'));
-        } else {
-          $revision_id = $diff->getRevisionID();
-          if ($revision_id && ($revision_id != $object->getID())) {
-            throw new Exception(
-              pht(
-                'Diff is already attached to another revision. You lost '.
-                'a race?'));
-          }
+        $revision_id = $diff->getRevisionID();
+        if ($revision_id && ($revision_id != $object->getID())) {
+          throw new Exception(
+            pht(
+              'Diff is already attached to another revision. You lost '.
+              'a race?'));
         }
 
         $diff->setRevisionID($object->getID());
         $diff->save();
-
-        $object->setLineCount($diff->getLineCount());
-        $object->setRepositoryPHID($diff->getRepositoryPHID());
-        $object->setArcanistProjectPHID($diff->getArcanistProjectPHID());
-
         return;
     }
 
@@ -560,7 +586,7 @@ final class DifferentialTransactionEditor
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
         case DifferentialTransaction::TYPE_UPDATE:
-          $diff = $this->loadDiff($xaction->getNewValue(), true);
+          $diff = $this->requireDiff($xaction->getNewValue(), true);
 
           // Update these denormalized index tables when we attach a new
           // diff to a revision.
@@ -1122,7 +1148,7 @@ final class DifferentialTransactionEditor
     }
 
     if ($update_xaction) {
-      $diff = $this->loadDiff($update_xaction->getNewValue(), true);
+      $diff = $this->requireDiff($update_xaction->getNewValue(), true);
 
       $body->addTextSection(
         pht('AFFECTED FILES'),
@@ -1322,6 +1348,15 @@ final class DifferentialTransactionEditor
     }
 
     return $query->executeOne();
+  }
+
+  private function requireDiff($phid, $need_changesets = false) {
+    $diff = $this->loadDiff($phid, $need_changesets);
+    if (!$diff) {
+      throw new Exception(pht('Diff "%s" does not exist!', $phid));
+    }
+
+    return $diff;
   }
 
 /* -(  Herald Integration  )------------------------------------------------- */

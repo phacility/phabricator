@@ -310,4 +310,33 @@ final class PhabricatorRepositoryEditor
     }
   }
 
+  protected function validateTransaction(
+    PhabricatorLiskDAO $object,
+    $type,
+    array $xactions) {
+
+    $errors = parent::validateTransaction($object, $type, $xactions);
+
+    switch ($type) {
+      case PhabricatorRepositoryTransaction::TYPE_CREDENTIAL:
+        $ok = PassphraseCredentialControl::validateTransactions(
+          $this->getActor(),
+          $xactions);
+        if (!$ok) {
+          foreach ($xactions as $xaction) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'The selected credential does not exist, or you do not have '.
+                'permission to use it.'),
+              $xaction);
+          }
+        }
+        break;
+    }
+
+    return $errors;
+  }
+
 }

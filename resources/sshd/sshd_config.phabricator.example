@@ -3,8 +3,9 @@
 
 # NOTE: Edit these to the correct values for your setup.
 
-AuthorizedKeysCommand /etc/phabricator-ssh-hook.sh
+AuthorizedKeysCommand /usr/libexec/phabricator-ssh-hook.sh
 AuthorizedKeysCommandUser vcs-user
+AllowUsers vcs-user
 
 # You may need to tweak these options, but mostly they just turn off everything
 # dangerous.

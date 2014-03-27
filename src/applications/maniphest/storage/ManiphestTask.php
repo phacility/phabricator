@@ -156,6 +156,9 @@ final class ManiphestTask extends ManiphestDAO
     return $result;
   }
 
+  public function isClosed() {
+    return ManiphestTaskStatus::isClosedStatus($this->getStatus());
+  }
 
 
 /* -(  Markup Interface  )--------------------------------------------------- */
@@ -246,6 +249,7 @@ final class ManiphestTask extends ManiphestDAO
 
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
 
   public function getUsersToNotifyOfTokenGiven() {
     // Sort of ambiguous who this was intended for; just let them both know.

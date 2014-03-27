@@ -102,7 +102,6 @@ final class PhabricatorConfigEditController
     $error_view = null;
     if ($errors) {
       $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('You broke everything!'))
         ->setErrors($errors);
     } else if ($option->getHidden()) {
       $msg = pht(

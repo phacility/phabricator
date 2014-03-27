@@ -861,6 +861,20 @@ abstract class PhabricatorBaseEnglishTranslation
         '%s, %d lines',
       ),
 
+      '%s pushed %d commit(s) to %s.' => array(
+        array(
+          array(
+            '%s pushed a commit to %3$s.',
+            '%s pushed %d commits to %s.',
+          ),
+        ),
+      ),
+
+      '%s commit(s)' => array(
+        '1 commit',
+        '%s commits',
+      ),
+
     );
   }
 

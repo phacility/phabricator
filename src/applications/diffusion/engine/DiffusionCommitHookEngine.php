@@ -30,6 +30,9 @@ final class DiffusionCommitHookEngine extends Phobject {
   private $gitCommits = array();
 
   private $heraldViewerProjects;
+  private $rejectCode = PhabricatorRepositoryPushLog::REJECT_BROKEN;
+  private $rejectDetails;
+  private $emailPHIDs = array();
 
 
 /* -(  Config  )------------------------------------------------------------- */
@@ -60,14 +63,6 @@ final class DiffusionCommitHookEngine extends Phobject {
     $remote_address = max(0, ip2long($remote_address));
     $remote_address = nonempty($remote_address, null);
     return $remote_address;
-  }
-
-  private function getTransactionKey() {
-    if (!$this->transactionKey) {
-      $entropy = Filesystem::readRandomBytes(64);
-      $this->transactionKey = PhabricatorHash::digestForIndex($entropy);
-    }
-    return $this->transactionKey;
   }
 
   public function setSubversionTransactionInfo($transaction, $repository) {
@@ -137,10 +132,7 @@ final class DiffusionCommitHookEngine extends Phobject {
       } catch (DiffusionCommitHookRejectException $ex) {
         // If we're rejecting dangerous changes, flag everything that we've
         // seen as rejected so it's clear that none of it was accepted.
-        foreach ($all_updates as $update) {
-          $update->setRejectCode(
-            PhabricatorRepositoryPushLog::REJECT_DANGEROUS);
-        }
+        $this->rejectCode = PhabricatorRepositoryPushLog::REJECT_DANGEROUS;
         throw $ex;
       }
 
@@ -156,9 +148,7 @@ final class DiffusionCommitHookEngine extends Phobject {
 
       // If we make it this far, we're accepting these changes. Mark all the
       // logs as accepted.
-      foreach ($all_updates as $update) {
-        $update->setRejectCode(PhabricatorRepositoryPushLog::REJECT_ACCEPT);
-      }
+      $this->rejectCode = PhabricatorRepositoryPushLog::REJECT_ACCEPT;
     } catch (Exception $ex) {
       // We'll throw this again in a minute, but we want to save all the logs
       // first.
@@ -166,12 +156,38 @@ final class DiffusionCommitHookEngine extends Phobject {
     }
 
     // Save all the logs no matter what the outcome was.
-    foreach ($all_updates as $update) {
-      $update->save();
-    }
+    $event = $this->newPushEvent();
+
+    $event->setRejectCode($this->rejectCode);
+    $event->setRejectDetails($this->rejectDetails);
+
+    $event->openTransaction();
+      $event->save();
+      foreach ($all_updates as $update) {
+        $update->setPushEventPHID($event->getPHID());
+        $update->save();
+      }
+    $event->saveTransaction();
 
     if ($caught) {
       throw $caught;
+    }
+
+    if ($this->emailPHIDs) {
+      // If Herald rules triggered email to users, queue a worker to send the
+      // mail. We do this out-of-process so that we block pushes as briefly
+      // as possible.
+
+      // (We do need to pull some commit info here because the commit objects
+      // may not exist yet when this worker runs, which could be immediately.)
+
+      PhabricatorWorker::scheduleTask(
+        'PhabricatorRepositoryPushMailWorker',
+        array(
+          'eventPHID' => $event->getPHID(),
+          'emailPHIDs' => array_values($this->emailPHIDs),
+          'info' => $this->loadCommitInfoForWorker($all_updates),
+        ));
     }
 
     return 0;
@@ -284,6 +300,11 @@ final class DiffusionCommitHookEngine extends Phobject {
       $engine->applyEffects($effects, $adapter, $rules);
       $xscript = $engine->getTranscript();
 
+      // Store any PHIDs we want to send email to for later.
+      foreach ($adapter->getEmailPHIDs() as $email_phid) {
+        $this->emailPHIDs[$email_phid] = $email_phid;
+      }
+
       if ($blocking_effect === null) {
         foreach ($effects as $effect) {
           if ($effect->getAction() == HeraldAdapter::ACTION_BLOCK) {
@@ -296,10 +317,8 @@ final class DiffusionCommitHookEngine extends Phobject {
     }
 
     if ($blocking_effect) {
-      foreach ($all_updates as $update) {
-        $update->setRejectCode(PhabricatorRepositoryPushLog::REJECT_HERALD);
-        $update->setRejectDetails($blocking_effect->getRulePHID());
-      }
+      $this->rejectCode = PhabricatorRepositoryPushLog::REJECT_HERALD;
+      $this->rejectDetails = $blocking_effect->getRulePHID();
 
       $message = $blocking_effect->getTarget();
       if (!strlen($message)) {
@@ -596,12 +615,8 @@ final class DiffusionCommitHookEngine extends Phobject {
           continue;
         }
 
-        // Mark everything as rejected by this hook.
-        foreach ($updates as $update) {
-          $update->setRejectCode(
-            PhabricatorRepositoryPushLog::REJECT_EXTERNAL);
-          $update->setRejectDetails(basename($hook));
-        }
+        $this->rejectCode = PhabricatorRepositoryPushLog::REJECT_EXTERNAL;
+        $this->rejectDetails = basename($hook);
 
         throw new DiffusionCommitHookRejectException(
           pht(
@@ -983,24 +998,24 @@ final class DiffusionCommitHookEngine extends Phobject {
 
 
   private function newPushLog() {
-    // NOTE: By default, we create these with REJECT_BROKEN as the reject
-    // code. This indicates a broken hook, and covers the case where we
-    // encounter some unexpected exception and consequently reject the changes.
-
     // NOTE: We generate PHIDs up front so the Herald transcripts can pick them
     // up.
     $phid = id(new PhabricatorRepositoryPushLog())->generatePHID();
 
     return PhabricatorRepositoryPushLog::initializeNewLog($this->getViewer())
       ->setPHID($phid)
-      ->attachRepository($this->getRepository())
       ->setRepositoryPHID($this->getRepository()->getPHID())
-      ->setEpoch(time())
+      ->attachRepository($this->getRepository())
+      ->setEpoch(time());
+  }
+
+  private function newPushEvent() {
+    $viewer = $this->getViewer();
+    return PhabricatorRepositoryPushEvent::initializeNewEvent($viewer)
+      ->setRepositoryPHID($this->getRepository()->getPHID())
       ->setRemoteAddress($this->getRemoteAddressForLog())
       ->setRemoteProtocol($this->getRemoteProtocol())
-      ->setTransactionKey($this->getTransactionKey())
-      ->setRejectCode(PhabricatorRepositoryPushLog::REJECT_BROKEN)
-      ->setRejectDetails(null);
+      ->setEpoch(time());
   }
 
   public function loadChangesetsForCommit($identifier) {
@@ -1100,5 +1115,26 @@ final class DiffusionCommitHookEngine extends Phobject {
     }
   }
 
+  private function loadCommitInfoForWorker(array $all_updates) {
+    $type_commit = PhabricatorRepositoryPushLog::REFTYPE_COMMIT;
+
+    $map = array();
+    foreach ($all_updates as $update) {
+      if ($update->getRefType() != $type_commit) {
+        continue;
+      }
+      $map[$update->getRefNew()] = array();
+    }
+
+    foreach ($map as $identifier => $info) {
+      $ref = $this->loadCommitRefForCommit($identifier);
+      $map[$identifier] += array(
+        'summary'  => $ref->getSummary(),
+        'branches' => $this->loadBranches($identifier),
+      );
+    }
+
+    return $map;
+  }
 
 }

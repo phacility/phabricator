@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorProjectBoardDeleteController
-  extends PhabricatorProjectController {
+  extends PhabricatorProjectBoardController {
 
   private $id;
   private $projectID;
@@ -14,7 +14,6 @@ final class PhabricatorProjectBoardDeleteController
   public function processRequest() {
     $request = $this->getRequest();
     $viewer = $request->getUser();
-
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
       ->requireCapabilities(
@@ -28,89 +27,89 @@ final class PhabricatorProjectBoardDeleteController
     if (!$project) {
       return new Aphront404Response();
     }
+    $this->setProject($project);
 
-    $columns = id(new PhabricatorProjectColumnQuery())
+    $column = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
-      ->withProjectPHIDs(array($project->getPHID()))
-      ->withStatuses(array(PhabricatorProjectColumn::STATUS_ACTIVE))
+      ->withIDs(array($this->id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT))
-      ->execute();
-
-    if (!$columns) {
+      ->executeOne();
+    if (!$column) {
       return new Aphront404Response();
     }
 
-    $columns = mpull($columns, null, 'getSequence');
-    $columns = mfilter($columns, 'isDefaultColumn', true);
-    ksort($columns);
-    $options = mpull($columns, 'getName', 'getPHID');
-
-    $view_uri = $this->getApplicationURI('/board/'.$this->projectID.'/');
     $error_view = null;
-    if ($request->isFormPost()) {
-      $columns = mpull($columns, null, 'getPHID');
-      $column_phid = $request->getStr('columnPHID');
-      $column = $columns[$column_phid];
+    $column_phid = $column->getPHID();
+    $has_task_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $column_phid,
+      PhabricatorEdgeConfig::TYPE_COLUMN_HAS_OBJECT);
 
-      $has_task_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-        $column_phid,
-        PhabricatorEdgeConfig::TYPE_COLUMN_HAS_OBJECT);
-
-      if ($has_task_phids) {
-        $error_view = id(new AphrontErrorView())
-          ->setTitle(pht('Column has Tasks!'))
-          ->setErrors(array(pht('A column can not be deleted if it has tasks '.
-                                'in it. Please remove the tasks and try '.
-                                'again.')));
+    if ($has_task_phids) {
+      $error_view = id(new AphrontErrorView())
+        ->setTitle(pht('Column has Tasks!'));
+      if ($column->isDeleted()) {
+        $error_view->setErrors(array(pht(
+          'A column can not be activated if it has tasks '.
+          'in it. Please remove the tasks and try again.')));
       } else {
-        $column->setStatus(PhabricatorProjectColumn::STATUS_DELETED);
-        $column->save();
-
-        return id(new AphrontRedirectResponse())->setURI($view_uri);
+        $error_view->setErrors(array(pht(
+          'A column can not be deleted if it has tasks '.
+          'in it. Please remove the tasks and try again.')));
       }
     }
 
-    $form = id(new AphrontFormView())
-      ->setUser($viewer)
-      ->appendChild($error_view)
-      ->appendChild(id(new AphrontFormSelectControl())
-        ->setName('columnPHID')
-        ->setValue(head_key($options))
-        ->setOptions($options)
-        ->setLabel(pht('Column')));
+    $view_uri = $this->getApplicationURI(
+      '/board/'.$this->projectID.'/column/'.$this->id.'/');
 
-    $title = pht('Delete Column');
+    if ($request->isFormPost() && !$error_view) {
+      if ($column->isDeleted()) {
+        $new_status = PhabricatorProjectColumn::STATUS_ACTIVE;
+      } else {
+        $new_status = PhabricatorProjectColumn::STATUS_DELETED;
+      }
+
+      $type_status = PhabricatorProjectColumnTransaction::TYPE_STATUS;
+      $xactions = array(id(new PhabricatorProjectColumnTransaction())
+        ->setTransactionType($type_status)
+        ->setNewValue($new_status));
+
+      $editor = id(new PhabricatorProjectColumnTransactionEditor())
+        ->setActor($viewer)
+        ->setContinueOnNoEffect(true)
+        ->setContentSourceFromRequest($request)
+        ->applyTransactions($column, $xactions);
+
+      return id(new AphrontRedirectResponse())->setURI($view_uri);
+    }
+
+    if ($column->isDeleted()) {
+      $title = pht('Activate Column');
+    } else {
+      $title = pht('Delete Column');
+    }
     $submit = $title;
+    if ($error_view) {
+      $body = $error_view;
+    } else if ($column->isDeleted()) {
+      $body = pht('Are you sure you want to activate this column?');
+    } else {
+      $body = pht('Are you sure you want to delete this column?');
+    }
 
-    $form->appendChild(
-      id(new AphrontFormSubmitControl())
-        ->setValue($submit)
-        ->addCancelButton($view_uri));
+    $dialog = id(new AphrontDialogView())
+      ->setUser($viewer)
+      ->setWidth(AphrontDialogView::WIDTH_FORM)
+      ->setTitle($title)
+      ->appendChild($body)
+      ->setDisableWorkflowOnCancel(true)
+      ->addSubmitButton($title)
+      ->addCancelButton($view_uri);
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(
-      $project->getName(),
-      $this->getApplicationURI('view/'.$project->getID().'/'));
-    $crumbs->addTextCrumb(
-      pht('Board'),
-      $this->getApplicationURI('board/'.$project->getID().'/'));
-    $crumbs->addTextCrumb($title);
+    return id(new AphrontDialogResponse())
+      ->setDialog($dialog);
 
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
-      ->setForm($form);
-
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-      ),
-      array(
-        'title' => $title,
-        'device' => true,
-      ));
   }
 }

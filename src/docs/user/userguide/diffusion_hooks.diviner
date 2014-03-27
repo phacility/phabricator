@@ -1,0 +1,52 @@
+@title Diffusion User Guide: Commit Hooks
+@group userguide
+
+Guide to commit hooks in hosted repositories.
+
+= Overview =
+
+Phabricator installs pre-receive/pre-commit hooks in hosted repositories
+automatically. They enforce a few rules automatically (like preventing
+dangerous changes unless a repository is configured to allow them). They can
+also enforce more complex rules via Herald, using the "Commit Hook:
+Branches/Tags/Bookmarks" and "Commit Hook: Commit Content" rule types.
+
+Herald rules are flexible, and can express many of the most common hooks that
+are often installed on repositories (like protecting branches, restricting
+access to repositories, and requiring review).
+
+However, if Herald isn't powerful enough to enforce everything you want to
+check, you can install additional custom hooks. These work mostly like normal
+hooks, but with a few differences.
+
+= Installing Custom Hooks =
+
+With hosted repositories, you can install hooks by dropping them into the
+relevant directory of the repository on disk:
+
+  - **SVN** Put hooks in `hooks/pre-commit-phabricator.d/`.
+  - **Git** Put hooks in `hooks/pre-receive-phabricator.d/`.
+  - **Mercurial** Phabricator does not currently support custom hooks in
+    Mercurial.
+
+These hooks act like normal `pre-commit` or `pre-receive` hooks:
+
+  - Executables in these directories will be run one at a time, in alphabetical
+    order.
+  - They'll be passed the arguments and environment that normal hooks are
+    passed.
+  - They should emit output and return codes like normal hooks do.
+  - These hooks will run only after all the Herald rules have passed and
+    Phabricator is otherwise ready to accept the commit or push.
+
+These additional variables will be available in the environment, in addition
+to the variables the VCS normally provides:
+
+  - `PHABRICATOR_REPOSITORY` The callsign of the repository the hook is
+    executing for.
+  - `PHABRICATOR_USER` The Phabricator username that the session is
+    authenticated under.
+  - `PHABRICATOR_REMOTE_ADDRESS` The connection's remote address (that is,
+    the IP address of whoever is pushing or committing).
+  - `PHABRICATOR_REMOTE_PROTOCOL` The protocol the connection is using (for
+    example, "ssh" or "http").

@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorProjectBoardEditController
-  extends PhabricatorProjectController {
+  extends PhabricatorProjectBoardController {
 
   private $id;
   private $projectID;
@@ -28,6 +28,7 @@ final class PhabricatorProjectBoardEditController
     if (!$project) {
       return new Aphront404Response();
     }
+    $this->setProject($project);
 
     $is_new = ($this->id ? false : true);
 
@@ -48,21 +49,18 @@ final class PhabricatorProjectBoardEditController
       $column = PhabricatorProjectColumn::initializeNewColumn($viewer);
     }
 
-    $errors = array();
-    $e_name = true;
-    $error_view = null;
-    $view_uri = $this->getApplicationURI('/board/'.$this->projectID.'/');
+    $e_name = null;
+    $validation_exception = null;
+    $base_uri = '/board/'.$this->projectID.'/';
+    if ($is_new) {
+      // we want to go back to the board
+      $view_uri = $this->getApplicationURI($base_uri);
+    } else {
+      $view_uri = $this->getApplicationURI($base_uri.'column/'.$this->id.'/');
+    }
 
     if ($request->isFormPost()) {
       $new_name = $request->getStr('name');
-      $column->setName($new_name);
-
-      if (!strlen($column->getName())) {
-        $errors[] = pht('Column name is required.');
-        $e_name = pht('Required');
-      } else {
-        $e_name = null;
-      }
 
       if ($is_new) {
         $column->setProjectPHID($project->getPHID());
@@ -81,9 +79,21 @@ final class PhabricatorProjectBoardEditController
         $column->setSequence($new_sequence);
       }
 
-      if (!$errors) {
-        $column->save();
+      $type_name = PhabricatorProjectColumnTransaction::TYPE_NAME;
+      $xactions = array(id(new PhabricatorProjectColumnTransaction())
+        ->setTransactionType($type_name)
+        ->setNewValue($new_name));
+
+      try {
+        $editor = id(new PhabricatorProjectColumnTransactionEditor())
+          ->setActor($viewer)
+          ->setContinueOnNoEffect(true)
+          ->setContentSourceFromRequest($request)
+          ->applyTransactions($column, $xactions);
         return id(new AphrontRedirectResponse())->setURI($view_uri);
+      } catch (PhabricatorApplicationTransactionValidationException $ex) {
+        $e_name = $ex->getShortMessage($type_name);
+        $validation_exception = $ex;
       }
     }
 
@@ -113,16 +123,13 @@ final class PhabricatorProjectBoardEditController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(
-      $project->getName(),
-      $this->getApplicationURI('view/'.$project->getID().'/'));
-    $crumbs->addTextCrumb(
       pht('Board'),
       $this->getApplicationURI('board/'.$project->getID().'/'));
     $crumbs->addTextCrumb($title);
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormErrors($errors)
+      ->setValidationException($validation_exception)
       ->setForm($form);
 
     return $this->buildApplicationPage(

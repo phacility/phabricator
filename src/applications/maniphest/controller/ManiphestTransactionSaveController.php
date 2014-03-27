@@ -130,6 +130,18 @@ final class ManiphestTransactionSaveController extends ManiphestController {
       $transactions[] = $transaction;
     }
 
+    $resolution = $request->getStr('resolution');
+    $did_scuttle = false;
+    if ($action !== ManiphestTransaction::TYPE_STATUS) {
+      if ($request->getStr('scuttle')) {
+        $transactions[] = id(new ManiphestTransaction())
+          ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
+          ->setNewValue(ManiphestTaskStatus::getDefaultClosedStatus());
+        $did_scuttle = true;
+        $resolution = ManiphestTaskStatus::getDefaultClosedStatus();
+      }
+    }
+
     // When you interact with a task, we add you to the CC list so you get
     // further updates, and possibly assign the task to you if you took an
     // ownership action (closing it) but it's currently unowned. We also move
@@ -137,31 +149,28 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     // and create side-effect transactions for them.
 
     $implicitly_claimed = false;
-    switch ($action) {
-      case ManiphestTransaction::TYPE_OWNER:
-        if ($task->getOwnerPHID() == $transaction->getNewValue()) {
-          // If this is actually no-op, don't generate the side effect.
-          break;
-        }
-        // Otherwise, when a task is reassigned, move the previous owner to CC.
-        $added_ccs[] = $task->getOwnerPHID();
+    if ($action == ManiphestTransaction::TYPE_OWNER) {
+      if ($task->getOwnerPHID() == $transaction->getNewValue()) {
+        // If this is actually no-op, don't generate the side effect.
         break;
-      case ManiphestTransaction::TYPE_STATUS:
-        if (!$task->getOwnerPHID() &&
-            $request->getStr('resolution') !=
-            ManiphestTaskStatus::STATUS_OPEN) {
-          // Closing an unassigned task. Assign the user as the owner of
-          // this task.
-          $assign = new ManiphestTransaction();
-          $assign->setTransactionType(ManiphestTransaction::TYPE_OWNER);
-          $assign->setNewValue($user->getPHID());
-          $transactions[] = $assign;
-
-          $implicitly_claimed = true;
-        }
-        break;
+      }
+      // Otherwise, when a task is reassigned, move the previous owner to CC.
+      $added_ccs[] = $task->getOwnerPHID();
     }
 
+    if ($did_scuttle || ($action == ManiphestTransaction::TYPE_STATUS)) {
+      if (!$task->getOwnerPHID() &&
+          ManiphestTaskStatus::isClosedStatus($resolution)) {
+        // Closing an unassigned task. Assign the user as the owner of
+        // this task.
+        $assign = new ManiphestTransaction();
+        $assign->setTransactionType(ManiphestTransaction::TYPE_OWNER);
+        $assign->setNewValue($user->getPHID());
+        $transactions[] = $assign;
+
+        $implicitly_claimed = true;
+      }
+    }
 
     $user_owns_task = false;
     if ($implicitly_claimed) {
