@@ -32,7 +32,10 @@ final class ManiphestActionMenuEventListener extends PhabricatorEventListener {
 
     $user = $event->getValue('object');
     $phid = $user->getPHID();
-    $view_uri = '/maniphest/?statuses[]=0&assigned='.$phid.'#R';
+    $view_uri = sprintf(
+      '/maniphest/?statuses[]=%s&assigned=%s#R',
+      implode(',', ManiphestTaskStatus::getOpenStatusConstants()),
+      $phid);
 
     return id(new PhabricatorActionView())
       ->setIcon('maniphest-dark')
