@@ -109,7 +109,7 @@ a.application-tile-full {
 
 .phabricator-application-attention-count {
   background-color: #1e2225;
-  color: {$sky};
+  color: {$yellow};
   border-radius: 2px;
   padding: 1px 6px 2px;
 }
