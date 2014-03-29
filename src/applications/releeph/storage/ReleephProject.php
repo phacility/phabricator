@@ -116,21 +116,6 @@ final class ReleephProject extends ReleephDAO
     return new ReleephDefaultFieldSelector();
   }
 
-  /**
-   * Wrapper to setIsActive() that logs who deactivated a project
-   */
-  public function deactivate(PhabricatorUser $actor) {
-    return $this
-      ->setIsActive(0)
-      ->setDetail('last_deactivated_user', $actor->getPHID())
-      ->setDetail('last_deactivated_time', time());
-  }
-
-  // Hide this from the public
-  private function setIsActive($v) {
-    return parent::setIsActive($v);
-  }
-
   private function getBannedNames() {
     return array(
       'branch', // no one's tried this... yet!

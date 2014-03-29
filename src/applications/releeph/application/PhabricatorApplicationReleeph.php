@@ -42,7 +42,7 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
             'edit/' => 'ReleephProjectEditController',
             'cutbranch/' => 'ReleephBranchCreateController',
             'action/(?P<action>.+)/' => 'ReleephProductActionController',
-            'history/' => 'ReleephProjectHistoryController',
+            'history/' => 'ReleephProductHistoryController',
           ),
         ),
         'branch/' => array(

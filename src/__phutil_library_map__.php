@@ -2516,13 +2516,14 @@ phutil_register_library_map(array(
     'ReleephPHIDTypeRequest' => 'applications/releeph/phid/ReleephPHIDTypeRequest.php',
     'ReleephProductActionController' => 'applications/releeph/controller/project/ReleephProductActionController.php',
     'ReleephProductController' => 'applications/releeph/controller/project/ReleephProductController.php',
+    'ReleephProductEditor' => 'applications/releeph/editor/ReleephProductEditor.php',
+    'ReleephProductHistoryController' => 'applications/releeph/controller/project/ReleephProductHistoryController.php',
     'ReleephProductTransaction' => 'applications/releeph/storage/ReleephProductTransaction.php',
     'ReleephProductTransactionQuery' => 'applications/releeph/query/ReleephProductTransactionQuery.php',
     'ReleephProject' => 'applications/releeph/storage/ReleephProject.php',
     'ReleephProjectController' => 'applications/releeph/controller/ReleephProjectController.php',
     'ReleephProjectCreateController' => 'applications/releeph/controller/project/ReleephProjectCreateController.php',
     'ReleephProjectEditController' => 'applications/releeph/controller/project/ReleephProjectEditController.php',
-    'ReleephProjectHistoryController' => 'applications/releeph/controller/project/ReleephProjectHistoryController.php',
     'ReleephProjectListController' => 'applications/releeph/controller/project/ReleephProjectListController.php',
     'ReleephProjectQuery' => 'applications/releeph/query/ReleephProjectQuery.php',
     'ReleephProjectSearchEngine' => 'applications/releeph/query/ReleephProjectSearchEngine.php',
@@ -5490,6 +5491,8 @@ phutil_register_library_map(array(
     'ReleephPHIDTypeRequest' => 'PhabricatorPHIDType',
     'ReleephProductActionController' => 'ReleephProductController',
     'ReleephProductController' => 'ReleephController',
+    'ReleephProductEditor' => 'PhabricatorApplicationTransactionEditor',
+    'ReleephProductHistoryController' => 'ReleephProductController',
     'ReleephProductTransaction' => 'PhabricatorApplicationTransaction',
     'ReleephProductTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'ReleephProject' =>
@@ -5500,7 +5503,6 @@ phutil_register_library_map(array(
     'ReleephProjectController' => 'ReleephController',
     'ReleephProjectCreateController' => 'ReleephProjectController',
     'ReleephProjectEditController' => 'ReleephProjectController',
-    'ReleephProjectHistoryController' => 'ReleephProductController',
     'ReleephProjectListController' =>
     array(
       0 => 'ReleephController',

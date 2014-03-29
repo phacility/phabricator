@@ -42,11 +42,26 @@ final class ReleephProductActionController extends ReleephProductController {
     }
 
     if ($request->isFormPost()) {
+      $type_active = ReleephProductTransaction::TYPE_ACTIVE;
+
+      $xactions = array();
       if ($action == 'activate') {
-        $product->setIsActive(1)->save();
+        $xactions[] = id(new ReleephProductTransaction())
+          ->setTransactionType($type_active)
+          ->setNewValue(1);
       } else {
-        $product->deactivate($viewer)->save();
+        $xactions[] = id(new ReleephProductTransaction())
+          ->setTransactionType($type_active)
+          ->setNewValue(0);
       }
+
+      $editor = id(new ReleephProductEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true);
+
+      $editor->applyTransactions($product, $xactions);
 
       return id(new AphrontRedirectResponse())->setURI($product_uri);
     }

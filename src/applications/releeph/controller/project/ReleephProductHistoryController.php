@@ -1,6 +1,6 @@
 <?php
 
-final class ReleephProjectHistoryController extends ReleephProductController {
+final class ReleephProductHistoryController extends ReleephProductController {
 
   private $id;
 
@@ -29,7 +29,8 @@ final class ReleephProjectHistoryController extends ReleephProductController {
     $timeline = id(new PhabricatorApplicationTransactionView())
       ->setUser($viewer)
       ->setObjectPHID($product->getPHID())
-      ->setTransactions($xactions);
+      ->setTransactions($xactions)
+      ->setShouldTerminate(true);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('History'));
