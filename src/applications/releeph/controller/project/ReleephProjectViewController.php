@@ -177,13 +177,6 @@ final class ReleephProjectViewController extends ReleephProjectController
       PhabricatorPolicyCapability::CAN_EDIT);
 
     $edit_uri = $this->getApplicationURI("project/{$id}/edit/");
-
-    $deactivate_uri = "project/{$id}/action/deactivate/";
-    $deactivate_uri = $this->getApplicationURI($deactivate_uri);
-
-    $reactivate_uri = "project/{$id}/action/activate/";
-    $reactivate_uri = $this->getApplicationURI($reactivate_uri);
-
     $history_uri = $this->getApplicationURI("project/{$id}/history/");
 
     $actions->addAction(
@@ -195,24 +188,22 @@ final class ReleephProjectViewController extends ReleephProjectController
         ->setWorkflow(!$can_edit));
 
     if ($project->getIsActive()) {
-      $actions->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Deactivate Project'))
-          ->setHref($deactivate_uri)
-          ->setIcon('delete')
-          ->setDisabled(!$can_edit)
-          ->setWorkflow(true));
+      $status_name = pht('Deactivate Product');
+      $status_href = "project/{$id}/action/deactivate/";
+      $status_icon = 'delete';
     } else {
-      $actions->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Reactivate Project'))
-          ->setHref($reactivate_uri)
-          ->setIcon('new')
-          ->setUser($viewer)
-          ->setRenderAsForm(true)
-          ->setDisabled(!$can_edit)
-          ->setWorkflow(true));
+      $status_name = pht('Reactivate Product');
+      $status_href = "project/{$id}/action/activate/";
+      $status_icon = 'new';
     }
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setName($status_name)
+        ->setHref($this->getApplicationURI($status_href))
+        ->setIcon($status_icon)
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true));
 
     $actions->addAction(
       id(new PhabricatorActionView())
