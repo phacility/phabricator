@@ -271,16 +271,12 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
 
     $query = new PhabricatorAuditQuery();
 
-    $use_pager = ($this->filter != 'active');
+    $pager = new AphrontPagerView();
+    $pager->setURI($request->getRequestURI(), 'offset');
+    $pager->setOffset($request->getInt('offset'));
 
-    if ($use_pager) {
-      $pager = new AphrontPagerView();
-      $pager->setURI($request->getRequestURI(), 'offset');
-      $pager->setOffset($request->getInt('offset'));
-
-      $query->setOffset($pager->getOffset());
-      $query->setLimit($pager->getPageSize() + 1);
-    }
+    $query->setOffset($pager->getOffset());
+    $query->setLimit($pager->getPageSize() + 1);
 
     $awaiting = null;
 
@@ -375,9 +371,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     $query->needCommitData(true);
 
     $audits = $query->execute();
-    if ($use_pager) {
-      $audits = $pager->sliceResults($audits);
-    }
+    $audits = $pager->sliceResults($audits);
 
     $view = new PhabricatorAuditListView();
     $view->setAudits($audits);
@@ -394,9 +388,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     $panel->appendChild($view);
     $panel->setNoBackground();
 
-    if ($use_pager) {
-      $panel->appendChild($pager);
-    }
+    $panel->appendChild($pager);
 
     return $panel;
   }
@@ -408,16 +400,12 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     $query->needCommitData(true);
     $query->needAudits(true);
 
-    $use_pager = ($this->filter != 'active');
+    $pager = new AphrontPagerView();
+    $pager->setURI($request->getRequestURI(), 'offset');
+    $pager->setOffset($request->getInt('offset'));
 
-    if ($use_pager) {
-      $pager = new AphrontPagerView();
-      $pager->setURI($request->getRequestURI(), 'offset');
-      $pager->setOffset($request->getInt('offset'));
-
-      $query->setOffset($pager->getOffset());
-      $query->setLimit($pager->getPageSize() + 1);
-    }
+    $query->setOffset($pager->getOffset());
+    $query->setLimit($pager->getPageSize() + 1);
 
     switch ($this->filter) {
       case 'active':
@@ -471,10 +459,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     }
 
     $commits = $query->execute();
-
-    if ($use_pager) {
-      $commits = $pager->sliceResults($commits);
-    }
+    $commits = $pager->sliceResults($commits);
 
     $view = new PhabricatorAuditCommitListView();
     $view->setUser($request->getUser());
@@ -490,9 +475,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     $panel->appendChild($view);
     $panel->setNoBackground();
 
-    if ($use_pager) {
-      $panel->appendChild($pager);
-    }
+    $panel->appendChild($pager);
 
     return $panel;
   }
