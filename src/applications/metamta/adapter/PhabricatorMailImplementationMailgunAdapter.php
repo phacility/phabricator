@@ -18,10 +18,7 @@ final class PhabricatorMailImplementationMailgunAdapter
     if (empty($this->params['reply-to'])) {
       $this->params['reply-to'] = array();
     }
-    $this->params['reply-to'][] = array(
-      'email' => $email,
-      'name'  => $name,
-    );
+    $this->params['reply-to'][] = "{$name} <{$email}>";
     return $this;
   }
 
@@ -92,7 +89,7 @@ final class PhabricatorMailImplementationMailgunAdapter
 
     if (idx($this->params, 'reply-to')) {
       $replyto = $this->params['reply-to'];
-      $params['h:reply-to'] = $replyto;
+      $params['h:reply-to'] = implode(', ', $replyto);
     }
 
     if (idx($this->params, 'ccs')) {
