@@ -7,23 +7,17 @@ final class ReleephRequestorFieldSpecification
     return 'requestor';
   }
 
-  public function bulkLoad(array $releeph_requests) {
-    $phids = mpull($releeph_requests, 'getRequestUserPHID');
-    ReleephUserView::getNewInstance()
-      ->setUser($this->getUser())
-      ->setReleephProject($this->getReleephProject())
-      ->load($phids);
-  }
-
   public function getName() {
     return 'Requestor';
   }
 
   public function renderValueForHeaderView() {
     $phid = $this->getReleephRequest()->getRequestUserPHID();
-    return ReleephUserView::getNewInstance()
-      ->setRenderUserPHID($phid)
-      ->render();
+    $handle = id(new PhabricatorHandleQuery())
+      ->setViewer($this->getUser())
+      ->withPHIDs(array($phid))
+      ->executeOne();
+    return $handle->renderLink();
   }
 
   public function shouldAppearOnCommitMessage() {
