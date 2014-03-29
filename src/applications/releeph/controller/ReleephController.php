@@ -22,10 +22,10 @@ abstract class ReleephController extends PhabricatorController {
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
     if ($for_app) {
-      $nav->addFilter('project/create/', pht('Create Project'));
+      $nav->addFilter('project/create/', pht('Create Product'));
     }
 
-    id(new ReleephProjectSearchEngine())
+    id(new ReleephProductSearchEngine())
       ->setViewer($user)
       ->addNavigationItems($nav->getMenu());
 

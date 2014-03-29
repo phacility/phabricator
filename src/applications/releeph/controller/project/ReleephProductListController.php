@@ -1,6 +1,6 @@
 <?php
 
-final class ReleephProjectListController extends ReleephController
+final class ReleephProductListController extends ReleephController
   implements PhabricatorApplicationSearchResultsControllerInterface {
 
   private $queryKey;
@@ -17,34 +17,34 @@ final class ReleephProjectListController extends ReleephController
     $request = $this->getRequest();
     $controller = id(new PhabricatorApplicationSearchController($request))
       ->setQueryKey($this->queryKey)
-      ->setSearchEngine(new ReleephProjectSearchEngine())
+      ->setSearchEngine(new ReleephProductSearchEngine())
       ->setNavigation($this->buildSideNavView());
 
     return $this->delegateToController($controller);
   }
 
   public function renderResultsList(
-    array $projects,
+    array $products,
     PhabricatorSavedQuery $query) {
-    assert_instances_of($projects, 'ReleephProject');
+    assert_instances_of($products, 'ReleephProject');
     $viewer = $this->getRequest()->getUser();
 
     $list = id(new PHUIObjectItemListView())
       ->setUser($viewer);
 
-    foreach ($projects as $project) {
-      $id = $project->getID();
+    foreach ($products as $product) {
+      $id = $product->getID();
 
       $item = id(new PHUIObjectItemView())
-        ->setHeader($project->getName())
+        ->setHeader($product->getName())
         ->setHref($this->getApplicationURI("project/{$id}/"));
 
-      if (!$project->getIsActive()) {
+      if (!$product->getIsActive()) {
         $item->setDisabled(true);
         $item->addIcon('none', pht('Inactive'));
       }
 
-      $repo = $project->getRepository();
+      $repo = $product->getRepository();
       $item->addAttribute(
         phutil_tag(
           'a',
@@ -53,7 +53,7 @@ final class ReleephProjectListController extends ReleephController
           ),
           'r'.$repo->getCallsign()));
 
-      $arc = $project->loadArcanistProject();
+      $arc = $product->loadArcanistProject();
       if ($arc) {
         $item->addAttribute($arc->getName());
       }
@@ -69,7 +69,7 @@ final class ReleephProjectListController extends ReleephController
 
     $crumbs->addAction(
       id(new PHUIListItemView())
-        ->setName(pht('Create Project'))
+        ->setName(pht('Create Product'))
         ->setHref($this->getApplicationURI('project/create/'))
         ->setIcon('create'));
 
