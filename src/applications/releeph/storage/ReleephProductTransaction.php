@@ -1,6 +1,6 @@
 <?php
 
-final class ReleephProjectTransaction
+final class ReleephProductTransaction
   extends PhabricatorApplicationTransaction {
 
   public function getApplicationName() {

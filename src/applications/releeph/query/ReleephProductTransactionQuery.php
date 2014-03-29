@@ -1,10 +1,10 @@
 <?php
 
-final class ReleephProjectTransactionQuery
+final class ReleephProductTransactionQuery
   extends PhabricatorApplicationTransactionQuery {
 
   public function getTemplateApplicationTransaction() {
-    return new ReleephProjectTransaction();
+    return new ReleephProductTransaction();
   }
 
 }

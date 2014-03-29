@@ -2516,6 +2516,8 @@ phutil_register_library_map(array(
     'ReleephPHIDTypeRequest' => 'applications/releeph/phid/ReleephPHIDTypeRequest.php',
     'ReleephProductActionController' => 'applications/releeph/controller/project/ReleephProductActionController.php',
     'ReleephProductController' => 'applications/releeph/controller/project/ReleephProductController.php',
+    'ReleephProductTransaction' => 'applications/releeph/storage/ReleephProductTransaction.php',
+    'ReleephProductTransactionQuery' => 'applications/releeph/query/ReleephProductTransactionQuery.php',
     'ReleephProject' => 'applications/releeph/storage/ReleephProject.php',
     'ReleephProjectController' => 'applications/releeph/controller/ReleephProjectController.php',
     'ReleephProjectCreateController' => 'applications/releeph/controller/project/ReleephProjectCreateController.php',
@@ -2524,8 +2526,6 @@ phutil_register_library_map(array(
     'ReleephProjectListController' => 'applications/releeph/controller/project/ReleephProjectListController.php',
     'ReleephProjectQuery' => 'applications/releeph/query/ReleephProjectQuery.php',
     'ReleephProjectSearchEngine' => 'applications/releeph/query/ReleephProjectSearchEngine.php',
-    'ReleephProjectTransaction' => 'applications/releeph/storage/ReleephProjectTransaction.php',
-    'ReleephProjectTransactionQuery' => 'applications/releeph/query/ReleephProjectTransactionQuery.php',
     'ReleephProjectViewController' => 'applications/releeph/controller/project/ReleephProjectViewController.php',
     'ReleephReasonFieldSpecification' => 'applications/releeph/field/specification/ReleephReasonFieldSpecification.php',
     'ReleephRequest' => 'applications/releeph/storage/ReleephRequest.php',
@@ -5490,6 +5490,8 @@ phutil_register_library_map(array(
     'ReleephPHIDTypeRequest' => 'PhabricatorPHIDType',
     'ReleephProductActionController' => 'ReleephProductController',
     'ReleephProductController' => 'ReleephController',
+    'ReleephProductTransaction' => 'PhabricatorApplicationTransaction',
+    'ReleephProductTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'ReleephProject' =>
     array(
       0 => 'ReleephDAO',
@@ -5498,7 +5500,7 @@ phutil_register_library_map(array(
     'ReleephProjectController' => 'ReleephController',
     'ReleephProjectCreateController' => 'ReleephProjectController',
     'ReleephProjectEditController' => 'ReleephProjectController',
-    'ReleephProjectHistoryController' => 'ReleephProjectController',
+    'ReleephProjectHistoryController' => 'ReleephProductController',
     'ReleephProjectListController' =>
     array(
       0 => 'ReleephController',
@@ -5506,8 +5508,6 @@ phutil_register_library_map(array(
     ),
     'ReleephProjectQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'ReleephProjectSearchEngine' => 'PhabricatorApplicationSearchEngine',
-    'ReleephProjectTransaction' => 'PhabricatorApplicationTransaction',
-    'ReleephProjectTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'ReleephProjectViewController' =>
     array(
       0 => 'ReleephProjectController',

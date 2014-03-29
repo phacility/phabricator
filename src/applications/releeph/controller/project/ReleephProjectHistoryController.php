@@ -1,34 +1,34 @@
 <?php
 
-final class ReleephProjectHistoryController extends ReleephProjectController {
+final class ReleephProjectHistoryController extends ReleephProductController {
 
   private $id;
 
   public function willProcessRequest(array $data) {
     $this->id = $data['projectID'];
-    parent::willProcessRequest($data);
   }
 
   public function processRequest() {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $project = id(new ReleephProjectQuery())
+    $product = id(new ReleephProjectQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->id))
       ->executeOne();
-    if (!$project) {
+    if (!$product) {
       return new Aphront404Response();
     }
+    $this->setProduct($product);
 
-    $xactions = id(new ReleephProjectTransactionQuery())
+    $xactions = id(new ReleephProductTransactionQuery())
       ->setViewer($viewer)
-      ->withObjectPHIDs(array($project->getPHID()))
+      ->withObjectPHIDs(array($product->getPHID()))
       ->execute();
 
     $timeline = id(new PhabricatorApplicationTransactionView())
       ->setUser($viewer)
-      ->setObjectPHID($project->getPHID())
+      ->setObjectPHID($product->getPHID())
       ->setTransactions($xactions);
 
     $crumbs = $this->buildApplicationCrumbs();
@@ -40,7 +40,7 @@ final class ReleephProjectHistoryController extends ReleephProjectController {
         $timeline,
       ),
       array(
-        'title' => pht('Project History'),
+        'title' => pht('Product History'),
         'device' => true,
       ));
   }
