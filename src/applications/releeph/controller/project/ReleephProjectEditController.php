@@ -22,8 +22,6 @@ final class ReleephProjectEditController extends ReleephProjectController {
     }
     $pick_failure_instructions = $request->getStr('pickFailureInstructions',
       $this->getReleephProject()->getDetail('pick_failure_instructions'));
-    $commit_author = $request->getStr('commitWithAuthor',
-      $this->getReleephProject()->getDetail('commitWithAuthor'));
     $test_paths = $request->getStr('testPaths');
     if ($test_paths !== null) {
       $test_paths = array_filter(explode("\n", $test_paths));
@@ -72,7 +70,6 @@ final class ReleephProjectEditController extends ReleephProjectController {
         ->setDetail('pushers', $pusher_phids)
         ->setDetail('pick_failure_instructions', $pick_failure_instructions)
         ->setDetail('branchTemplate', $branch_template)
-        ->setDetail('commitWithAuthor', $commit_author)
         ->setDetail('testPaths', $test_paths);
 
       $fake_commit_handle =
@@ -188,8 +185,6 @@ final class ReleephProjectEditController extends ReleephProjectController {
           ->setDatasource('/typeahead/common/users/')
           ->setValue($pusher_handles));
 
-    $commit_author_inset = $this->buildCommitAuthorInset($commit_author);
-
     // Build the Template inset
     $help_markup = PhabricatorMarkupEngine::renderOneObject(
       id(new PhabricatorMarkupOneOff())->setContent($this->getBranchHelpText()),
@@ -224,7 +219,6 @@ final class ReleephProjectEditController extends ReleephProjectController {
       ->setUser($request->getUser())
       ->appendChild($basic_inset)
       ->appendChild($pushers_inset)
-      ->appendChild($commit_author_inset)
       ->appendChild($template_inset);
 
     $form
@@ -241,80 +235,6 @@ final class ReleephProjectEditController extends ReleephProjectController {
     return $this->buildStandardPageResponse(
       array($error_view, $panel),
       array('title' => pht('Edit Releeph Project')));
-  }
-
-  private function buildCommitAuthorInset($current) {
-    $vcs_type = $this->getReleephProject()
-      ->loadPhabricatorRepository()
-      ->getVersionControlSystem();
-
-    switch ($vcs_type) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        break;
-
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        return;
-        break;
-    }
-
-    $vcs_name = PhabricatorRepositoryType::getNameForRepositoryType($vcs_type);
-
-    // pht?
-    $help_markup = hsprintf(<<<EOTEXT
-When your project's release engineers run <tt>arc releeph</tt>, they will be
-listed as the <strong>committer</strong> of the code committed to release
-branches.
-
-%s allows you to specify a separate author when committing code.  Some
-tools use the author of a commit (rather than the committer) when they need to
-notify someone about a build or test failure.
-
-Releeph can use one of the following to set the <strong>author</strong> of the
-commits it makes:
-EOTEXT
-    , $vcs_name);
-
-    $trunk = $this->getReleephProject()->getTrunkBranch();
-
-    $options = array(
-      array(
-        'value'   => ReleephProject::COMMIT_AUTHOR_FROM_DIFF,
-        'label'   => pht('Original Author'),
-        'caption' =>
-          pht('The author of the original commit in: %s.', $trunk),
-      ),
-      array(
-        'value'   => ReleephProject::COMMIT_AUTHOR_REQUESTOR,
-        'label'   => pht('Requestor'),
-        'caption' =>
-          pht('The person who requested that this code go into the release.'),
-      ),
-      array(
-        'value'   => ReleephProject::COMMIT_AUTHOR_NONE,
-        'label'   => pht('None'),
-        'caption' =>
-          pht('Only record the default committer information.'),
-      ),
-    );
-
-    if (!$current) {
-      $current = ReleephProject::COMMIT_AUTHOR_FROM_DIFF;
-    }
-
-    $control = id(new AphrontFormRadioButtonControl())
-      ->setLabel(pht('Author'))
-      ->setName('commitWithAuthor')
-      ->setValue($current);
-
-    foreach ($options as $dict) {
-      $control->addButton($dict['value'], $dict['label'], $dict['caption']);
-    }
-
-    return id(new AphrontFormInsetView())
-      ->setTitle(pht('Authors'))
-      ->appendChild($help_markup)
-      ->appendChild($control);
   }
 
   private function getBranchHelpText() {

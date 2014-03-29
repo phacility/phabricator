@@ -6,10 +6,6 @@ final class ReleephProject extends ReleephDAO
   const DEFAULT_BRANCH_NAMESPACE = 'releeph-releases';
   const SYSTEM_AGENT_USERNAME_PREFIX = 'releeph-agent-';
 
-  const COMMIT_AUTHOR_NONE      = 'commit-author-none';
-  const COMMIT_AUTHOR_FROM_DIFF = 'commit-author-is-from-diff';
-  const COMMIT_AUTHOR_REQUESTOR = 'commit-author-is-requestor';
-
   protected $name;
 
   // Specifying the place to pick from is a requirement for svn, though not
