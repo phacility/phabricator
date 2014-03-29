@@ -1,43 +1,61 @@
 <?php
 
-final class ReleephProjectEditController extends ReleephProjectController {
+final class ReleephProductEditController extends ReleephProductController {
+
+  private $productID;
+
+  public function willProcessRequest(array $data) {
+    $this->productID = $data['projectID'];
+  }
 
   public function processRequest() {
     $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $product = id(new ReleephProjectQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->productID))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
+    if (!$product) {
+      return new Aphront404Response();
+    }
+    $this->setProduct($product);
 
     $e_name = true;
     $e_trunk_branch = true;
     $e_branch_template = false;
     $errors = array();
 
-    $project_name = $request->getStr('name',
-      $this->getReleephProject()->getName());
+    $product_name = $request->getStr('name', $product->getName());
 
-    $trunk_branch = $request->getStr('trunkBranch',
-      $this->getReleephProject()->getTrunkBranch());
+    $trunk_branch = $request->getStr('trunkBranch', $product->getTrunkBranch());
     $branch_template = $request->getStr('branchTemplate');
     if ($branch_template === null) {
-      $branch_template =
-        $this->getReleephProject()->getDetail('branchTemplate');
+      $branch_template = $product->getDetail('branchTemplate');
     }
     $pick_failure_instructions = $request->getStr('pickFailureInstructions',
-      $this->getReleephProject()->getDetail('pick_failure_instructions'));
+      $product->getDetail('pick_failure_instructions'));
     $test_paths = $request->getStr('testPaths');
     if ($test_paths !== null) {
       $test_paths = array_filter(explode("\n", $test_paths));
     } else {
-      $test_paths = $this->getReleephProject()->getDetail('testPaths', array());
+      $test_paths = $product->getDetail('testPaths', array());
     }
 
-    $arc_project_id = $this->getReleephProject()->getArcanistProjectID();
+    $arc_project_id = $product->getArcanistProjectID();
 
     if ($request->isFormPost()) {
       $pusher_phids = $request->getArr('pushers');
 
-      if (!$project_name) {
+      if (!$product_name) {
         $e_name = pht('Required');
         $errors[] =
-          pht('Your releeph project should have a simple descriptive name');
+          pht('Your releeph product should have a simple descriptive name.');
       }
 
       if (!$trunk_branch) {
@@ -46,14 +64,14 @@ final class ReleephProjectEditController extends ReleephProjectController {
           pht('You must specify which branch you will be picking from.');
       }
 
-      $other_releeph_projects = id(new ReleephProject())
-        ->loadAllWhere('id <> %d', $this->getReleephProject()->getID());
-      $other_releeph_project_names = mpull($other_releeph_projects,
+      $other_releeph_products = id(new ReleephProject())
+        ->loadAllWhere('id != %d', $product->getID());
+      $other_releeph_product_names = mpull($other_releeph_products,
         'getName', 'getID');
 
-      if (in_array($project_name, $other_releeph_project_names)) {
-        $errors[] = pht("Releeph project name %s is already taken",
-          $project_name);
+      if (in_array($product_name, $other_releeph_product_names)) {
+        $errors[] = pht("Releeph product name %s is already taken",
+          $product_name);
       }
 
       foreach ($test_paths as $test_path) {
@@ -65,7 +83,7 @@ final class ReleephProjectEditController extends ReleephProjectController {
         }
       }
 
-      $project = $this->getReleephProject()
+      $product
         ->setTrunkBranch($trunk_branch)
         ->setDetail('pushers', $pusher_phids)
         ->setDetail('pick_failure_instructions', $pick_failure_instructions)
@@ -78,7 +96,7 @@ final class ReleephProjectEditController extends ReleephProjectController {
       if ($branch_template) {
         list($branch_name, $template_errors) = id(new ReleephBranchTemplate())
           ->setCommitHandle($fake_commit_handle)
-          ->setReleephProjectName($project_name)
+          ->setReleephProjectName($product_name)
           ->interpolate($branch_template);
 
         if ($template_errors) {
@@ -90,29 +108,15 @@ final class ReleephProjectEditController extends ReleephProjectController {
       }
 
       if (!$errors) {
-        $project->save();
+        $product->save();
 
-        return id(new AphrontRedirectResponse())
-          ->setURI('/releeph/project/');
+        return id(new AphrontRedirectResponse())->setURI($product->getURI());
       }
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = new AphrontErrorView();
-      $error_view->setErrors($errors);
-    }
-
-    $projects = mpull(
-      id(new PhabricatorProject())->loadAll(),
-      'getName',
-      'getID');
-
-    $projects[0] = '-'; // no project associated, that's ok
-
     $pusher_phids = $request->getArr(
       'pushers',
-      $this->getReleephProject()->getDetail('pushers', array()));
+      $product->getDetail('pushers', array()));
 
     $handles = id(new PhabricatorHandleQuery())
       ->setViewer($request->getUser())
@@ -121,33 +125,32 @@ final class ReleephProjectEditController extends ReleephProjectController {
 
     $pusher_handles = array_select_keys($handles, $pusher_phids);
 
-    $basic_inset = id(new AphrontFormInsetView())
-      ->setTitle(pht('Basics'))
+    $form = id(new AphrontFormView())
+      ->setUser($request->getUser())
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name'))
           ->setName('name')
-          ->setValue($project_name)
+          ->setValue($product_name)
           ->setError($e_name)
           ->setCaption(pht('A name like "Thrift" but not "Thrift releases".')))
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel(pht('Repository'))
           ->setValue(
-              $this
-                ->getReleephProject()
-                ->loadPhabricatorRepository()
-                ->getName()))
+            $product
+              ->loadPhabricatorRepository()
+              ->getName()))
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel(pht('Arc Project'))
           ->setValue(
-              $this->getReleephProject()->loadArcanistProject()->getName()))
+            $product->loadArcanistProject()->getName()))
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel(pht('Releeph Project PHID'))
           ->setValue(
-              $this->getReleephProject()->getPHID()))
+            $product->getPHID()))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Trunk'))
@@ -172,29 +175,10 @@ final class ReleephProjectEditController extends ReleephProjectController {
             'in this project. One string per line. '.
             'Examples: \'__tests__\', \'/javatests/\'...')));
 
-    $pushers_inset = id(new AphrontFormInsetView())
-      ->setTitle(pht('Pushers'))
-      ->appendChild(
-        pht('Pushers are allowed to approve Releeph requests to be committed. '.
-        'to this project\'s branches.  If you leave this blank then anyone '.
-        'is allowed to approve requests.'))
-      ->appendChild(
-        id(new AphrontFormTokenizerControl())
-          ->setLabel(pht('Pushers'))
-          ->setName('pushers')
-          ->setDatasource('/typeahead/common/users/')
-          ->setValue($pusher_handles));
-
-    // Build the Template inset
-    $help_markup = PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())->setContent($this->getBranchHelpText()),
-      'default',
-      $request->getUser());
-
     $branch_template_input = id(new AphrontFormTextControl())
       ->setName('branchTemplate')
       ->setValue($branch_template)
-      ->setLabel('Template')
+      ->setLabel('Branch Template')
       ->setError($e_branch_template)
       ->setCaption(
         pht("Leave this blank to use your installation's default."));
@@ -204,22 +188,18 @@ final class ReleephProjectEditController extends ReleephProjectController {
       ->addControl('template', $branch_template_input)
       ->addStatic('arcProjectID', $arc_project_id)
       ->addStatic('isSymbolic', false)
-      ->addStatic('projectName', $this->getReleephProject()->getName());
+      ->addStatic('projectName', $product->getName());
 
-    $template_inset = id(new AphrontFormInsetView())
-      ->setTitle(pht('Branch Cutting'))
+    $form
       ->appendChild(
-        pht('Provide a pattern for creating new branches.'))
+        id(new AphrontFormTokenizerControl())
+          ->setLabel(pht('Pushers'))
+          ->setName('pushers')
+          ->setDatasource('/typeahead/common/users/')
+          ->setValue($pusher_handles))
       ->appendChild($branch_template_input)
       ->appendChild($branch_template_preview)
-      ->appendChild($help_markup);
-
-    // Build the form
-    $form = id(new AphrontFormView())
-      ->setUser($request->getUser())
-      ->appendChild($basic_inset)
-      ->appendChild($pushers_inset)
-      ->appendChild($template_inset);
+      ->appendRemarkupInstructions($this->getBranchHelpText());
 
     $form
       ->appendChild(
@@ -227,14 +207,23 @@ final class ReleephProjectEditController extends ReleephProjectController {
           ->addCancelButton('/releeph/project/')
           ->setValue(pht('Save')));
 
-    $panel = id(new AphrontPanelView())
-      ->setHeader(pht('Edit Releeph Project'))
-      ->appendChild($form)
-      ->setWidth(AphrontPanelView::WIDTH_FORM);
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Edit Releeph Product'))
+      ->setFormErrors($errors)
+      ->appendChild($form);
+
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Edit Product'));
 
     return $this->buildStandardPageResponse(
-      array($error_view, $panel),
-      array('title' => pht('Edit Releeph Project')));
+      array(
+        $crumbs,
+        $box,
+      ),
+      array(
+        'title' => pht('Edit Releeph Product'),
+        'device' => true,
+      ));
   }
 
   private function getBranchHelpText() {
@@ -244,7 +233,7 @@ final class ReleephProjectEditController extends ReleephProjectController {
 
 | Code  | Meaning
 | ----- | -------
-| `%P`  | The name of your project, with spaces changed to "-".
+| `%P`  | The name of your product, with spaces changed to "-".
 | `%p`  | Like %P, but all lowercase.
 | `%Y`  | The four digit year associated with the branch date.
 | `%m`  | The two digit month.
@@ -263,7 +252,7 @@ Use a directory to separate your release branches from other branches:
   releases/%Y-%M-%d-%v
   => releases/2012-30-16-rHERGE32cd512a52b7
 
-Include a second hierarchy if you share your repository with other projects:
+Include a second hierarchy if you share your repository with other products:
 
   lang=none
   releases/%P/%p-release-%Y%m%d-%V
