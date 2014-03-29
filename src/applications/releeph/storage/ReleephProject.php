@@ -68,10 +68,6 @@ final class ReleephProject extends ReleephDAO
         $this->name,
         implode(', ', $banned_names)));
     }
-
-    if (!$this->getDetail('releaseCounter')) {
-      $this->setDetail('releaseCounter', 0);
-    }
   }
 
   public function loadArcanistProject() {
@@ -118,25 +114,6 @@ final class ReleephProject extends ReleephDAO
       new PhabricatorRepository(),
       'phid',
       'getRepositoryPHID');
-  }
-
-  public function getCurrentReleaseNumber() {
-    $current_release_numbers = array();
-
-    // From the project...
-    $current_release_numbers[] = $this->getDetail('releaseCounter', 0);
-
-    // From any branches...
-    $branches = id(new ReleephBranch())->loadAllWhere(
-      'releephProjectID = %d', $this->getID());
-    if ($branches) {
-      $release_numbers = array();
-      foreach ($branches as $branch) {
-        $current_release_numbers[] = $branch->getDetail('releaseNumber', 0);
-      }
-    }
-
-    return max($current_release_numbers);
   }
 
   public function getReleephFieldSelector() {

@@ -31,10 +31,6 @@ final class ReleephProjectEditController extends ReleephProjectController {
       $test_paths = $this->getReleephProject()->getDetail('testPaths', array());
     }
 
-    $release_counter = $request->getInt(
-      'releaseCounter',
-      $this->getReleephProject()->getCurrentReleaseNumber());
-
     $arc_project_id = $this->getReleephProject()->getArcanistProjectID();
 
     if ($request->isFormPost()) {
@@ -50,10 +46,6 @@ final class ReleephProjectEditController extends ReleephProjectController {
         $e_trunk_branch = pht('Required');
         $errors[] =
           pht('You must specify which branch you will be picking from.');
-      }
-
-      if ($release_counter && !is_int($release_counter)) {
-        $errors[] = pht("Release counter must be a positive integer!");
       }
 
       $other_releeph_projects = id(new ReleephProject())
@@ -82,10 +74,6 @@ final class ReleephProjectEditController extends ReleephProjectController {
         ->setDetail('branchTemplate', $branch_template)
         ->setDetail('commitWithAuthor', $commit_author)
         ->setDetail('testPaths', $test_paths);
-
-      if ($release_counter) {
-        $project->setDetail('releaseCounter', $release_counter);
-      }
 
       $fake_commit_handle =
         ReleephBranchTemplate::getFakeCommitHandleFor($arc_project_id);
@@ -169,13 +157,6 @@ final class ReleephProjectEditController extends ReleephProjectController {
           ->setValue($trunk_branch)
           ->setName('trunkBranch')
           ->setError($e_trunk_branch))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('Release counter'))
-          ->setValue($release_counter)
-          ->setName('releaseCounter')
-          ->setCaption(
-            pht("Used by the command line branch cutter's %%N field")))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel(pht('Pick Instructions'))
