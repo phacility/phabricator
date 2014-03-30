@@ -15,7 +15,7 @@
 
 .device-phone .phui-timeline-view {
   padding: 0;
-  background-position: 20px;
+  background-position: 24px;
 }
 
 .phui-timeline-major-event .phui-timeline-group {
@@ -166,7 +166,7 @@
 }
 
 .device-phone .phui-timeline-event-view {
-  margin: 0 4px;
+  margin: 0 8px;
 }
 
 .device .phui-timeline-image {
@@ -298,4 +298,8 @@
   text-align: center;
   padding: 12px;
   color: {$darkgreytext};
+}
+
+.device-phone .phui-timeline-older-transactions-are-hidden {
+  margin: 0 8px;
 }
