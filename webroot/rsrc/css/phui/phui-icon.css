@@ -28,6 +28,8 @@
 .phui-icon-view.sprite-tokens {
   height: 16px;
   width: 16px;
+  display: inline-block;
+  vertical-align: top;
 }
 
 .phui-icon-view.sprite-payments {

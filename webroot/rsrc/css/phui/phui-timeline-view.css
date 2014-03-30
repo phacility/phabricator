@@ -125,8 +125,8 @@
   padding-left: 38px;
 }
 
-.phui-timeline-token {
-  display: inline-block;
+.phui-timeline-view .phui-icon-view.phui-timeline-token {
+  vertical-align: middle;
 }
 
 .phui-timeline-token.strikethrough {

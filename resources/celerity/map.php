@@ -7,7 +7,7 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => '044e0f3e',
+    'core.pkg.css' => 'fb144113',
     'core.pkg.js' => 'd3fecc57',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => 'cb97e095',
@@ -109,7 +109,7 @@ return array(
     'rsrc/css/application/settings/settings.css' => 'ea8f5915',
     'rsrc/css/application/slowvote/slowvote.css' => '266df6a1',
     'rsrc/css/application/subscriptions/subscribers-list.css' => '5bb30c78',
-    'rsrc/css/application/tokens/tokens.css' => 'fb286311',
+    'rsrc/css/application/tokens/tokens.css' => '5f7bca25',
     'rsrc/css/application/uiexample/example.css' => '4741b891',
     'rsrc/css/core/core.css' => 'da26ddb2',
     'rsrc/css/core/remarkup.css' => '0923dbd6',
@@ -136,7 +136,7 @@ return array(
     'rsrc/css/phui/phui-form-view.css' => '867463b4',
     'rsrc/css/phui/phui-form.css' => 'b78ec020',
     'rsrc/css/phui/phui-header-view.css' => '5b79f0ef',
-    'rsrc/css/phui/phui-icon.css' => '7a5771a9',
+    'rsrc/css/phui/phui-icon.css' => '59b9e5b5',
     'rsrc/css/phui/phui-info-panel.css' => '27ea50a1',
     'rsrc/css/phui/phui-list.css' => 'ef8035b6',
     'rsrc/css/phui/phui-object-box.css' => 'ce92d8ec',
@@ -148,7 +148,7 @@ return array(
     'rsrc/css/phui/phui-status.css' => '2f562399',
     'rsrc/css/phui/phui-tag-view.css' => '295d81c4',
     'rsrc/css/phui/phui-text.css' => '23e9b4b7',
-    'rsrc/css/phui/phui-timeline-view.css' => 'e4365976',
+    'rsrc/css/phui/phui-timeline-view.css' => '7dcd5354',
     'rsrc/css/phui/phui-workboard-view.css' => 'bf70dd2e',
     'rsrc/css/phui/phui-workpanel-view.css' => '97b69459',
     'rsrc/css/sprite-actions.css' => '969ad0e5',
@@ -752,7 +752,7 @@ return array(
     'phui-form-css' => 'b78ec020',
     'phui-form-view-css' => '867463b4',
     'phui-header-view-css' => '5b79f0ef',
-    'phui-icon-view-css' => '7a5771a9',
+    'phui-icon-view-css' => '59b9e5b5',
     'phui-info-panel-css' => '27ea50a1',
     'phui-list-view-css' => 'ef8035b6',
     'phui-object-box-css' => 'ce92d8ec',
@@ -764,7 +764,7 @@ return array(
     'phui-status-list-view-css' => '2f562399',
     'phui-tag-view-css' => '295d81c4',
     'phui-text-css' => '23e9b4b7',
-    'phui-timeline-view-css' => 'e4365976',
+    'phui-timeline-view-css' => '7dcd5354',
     'phui-workboard-view-css' => 'bf70dd2e',
     'phui-workpanel-view-css' => '97b69459',
     'policy-css' => '957ea14c',
@@ -805,7 +805,7 @@ return array(
     'sprite-tokens-css' => '1706b943',
     'subscribers-list-css' => '5bb30c78',
     'syntax-highlighting-css' => '3c18c1cb',
-    'tokens-css' => 'fb286311',
+    'tokens-css' => '5f7bca25',
   ),
   'requires' =>
   array(
