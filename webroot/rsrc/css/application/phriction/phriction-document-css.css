@@ -62,7 +62,6 @@
 
 .phriction-history-nav-table {
   width: 100%;
-  margin-bottom: 20px;
 }
 
 .phriction-history-nav-table td {
@@ -71,7 +70,8 @@
 }
 
 .phriction-history-nav-table td {
-  padding: 8px 16px;
+  padding: 0 12px 12px;
+  background-color: #E5E8EE;
 }
 
 .phriction-history-nav-table td.nav-next {
