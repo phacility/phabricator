@@ -29,13 +29,18 @@ connection will fail (this defends the connection from an eavesdropping attack
 called "man in the middle"). Normally, you purchase a certificate from a known
 authority and clients have a list of trusted authorities.
 
-You can self-sign a certificate by creating your own CA, but clients will not trust it by default. They need to add the CA as a trusted authority.
+You can self-sign a certificate by creating your own CA, but clients will not
+trust it by default. They need to add the CA as a trusted authority.
 
 For instructions on adding CAs, see `libphutil/resources/ssl/README`.
 
-Although it is possible to accept certificates that aren't signed by trusted
-CAs, this is not currently supported because it compromises the ability of SSL
-to protect the connection against eavesdropping.
+If you'd prefer that `arc` not verify the identity of the server whatsoever, you
+can use the `https.blindly-trust-domains` setting. This will make it
+dramatically easier for adversaries to perform certain types of attacks, and is
+**strongly discouraged**:
+
+  $ arc set-config https.blindly-trust-domains '["example.com"]'
+
 
 = Domain Problems =
 
@@ -71,4 +76,5 @@ an error in `SSL23_GET_SERVER_HELLO` with `reason(1112)`, like this:
 is an Apache server that does not explicitly name the Phabricator domain as a
 valid VirtualHost.
 
-This error occurs only for some versions of the OpenSSL client library (from v0.9.8r or earlier until 1.0.0), so only some users may experience it.
+This error occurs only for some versions of the OpenSSL client library
+(from v0.9.8r or earlier until 1.0.0), so only some users may experience it.

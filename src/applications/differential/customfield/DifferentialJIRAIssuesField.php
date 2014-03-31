@@ -264,6 +264,13 @@ final class DifferentialJIRAIssuesField
     return preg_split('/[\s,]+/', $value, $limit = -1, PREG_SPLIT_NO_EMPTY);
   }
 
+  public function readValueFromCommitMessage($value) {
+    $this->setValue($value);
+    return $this;
+  }
+
+
+
   public function renderCommitMessageValue(array $handles) {
     $value = $this->getValue();
     if (!$value) {
@@ -275,5 +282,6 @@ final class DifferentialJIRAIssuesField
   public function shouldAppearInConduitDictionary() {
     return true;
   }
+
 
 }

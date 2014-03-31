@@ -37,7 +37,7 @@ final class PhabricatorApplicationFlags extends PhabricatorApplication {
       ->execute();
 
     $count = count($flags);
-    $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
+    $type = PhabricatorApplicationStatusView::TYPE_WARNING;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
       ->setText(pht('%d Flagged Object(s)', $count))

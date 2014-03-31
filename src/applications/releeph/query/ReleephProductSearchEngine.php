@@ -1,6 +1,6 @@
 <?php
 
-final class ReleephProjectSearchEngine
+final class ReleephProductSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
@@ -31,7 +31,7 @@ final class ReleephProjectSearchEngine
     $form->appendChild(
       id(new AphrontFormSelectControl())
         ->setName('active')
-        ->setLabel(pht('Show Projects'))
+        ->setLabel(pht('Show Products'))
         ->setValue($saved_query->getParameter('active'))
         ->setOptions($this->getActiveOptions()));
 
@@ -68,9 +68,9 @@ final class ReleephProjectSearchEngine
 
   private function getActiveOptions() {
     return array(
-      'all'       => pht('Active and Inactive Projects'),
-      'active'    => pht('Active Projects'),
-      'inactive'  => pht('Inactive Projects'),
+      'all'       => pht('Active and Inactive Products'),
+      'active'    => pht('Active Prodcuts'),
+      'inactive'  => pht('Inactive Products'),
     );
   }
 

@@ -15,7 +15,7 @@
 
 .device-phone .phui-timeline-view {
   padding: 0;
-  background-position: 20px;
+  background-position: 24px;
 }
 
 .phui-timeline-major-event .phui-timeline-group {
@@ -125,6 +125,30 @@
   padding-left: 38px;
 }
 
+.phui-timeline-view .phui-icon-view.phui-timeline-token {
+  vertical-align: middle;
+}
+
+.phui-timeline-token.strikethrough {
+  position: relative;
+}
+
+.phui-timeline-token.strikethrough:before {
+  position: absolute;
+  content: "";
+  left: 0;
+  top: 50%;
+  right: 0;
+  border-top: 3px solid;
+  border-color: {$darkbluetext};
+
+  -webkit-transform:rotate(-40deg);
+  -moz-transform:rotate(-40deg);
+  -ms-transform:rotate(-40deg);
+  -o-transform:rotate(-40deg);
+  transform:rotate(-40deg);
+}
+
 .phui-timeline-major-event .phui-timeline-content
   .phui-timeline-core-content {
   padding: 16px 12px;
@@ -142,7 +166,7 @@
 }
 
 .device-phone .phui-timeline-event-view {
-  margin: 0 4px;
+  margin: 0 8px;
 }
 
 .device .phui-timeline-image {
@@ -274,4 +298,8 @@
   text-align: center;
   padding: 12px;
   color: {$darkgreytext};
+}
+
+.device-phone .phui-timeline-older-transactions-are-hidden {
+  margin: 0 8px;
 }

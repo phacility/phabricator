@@ -106,11 +106,6 @@
   overflow: hidden;
 }
 
-.device-desktop .phui-document-content .phabricator-action-list-view {
-  margin: 10px 10px 0 0;
-  background: {$lightgreybackground};
-}
-
 .device-phone .phui-document-content .phabricator-action-list-view {
   margin: 0;
   border-bottom: 1px solid #c0c5d1;
@@ -127,16 +122,12 @@
 
 .device-desktop .phui-document-content .phabricator-action-list-view {
   position: absolute;
-  top: 50px;
-  right: -172px;
+  top: 16px;
+  right: -160px;
   float: none;
-  background: #fff;
   border-radius: 0;
   box-shadow: none;
   border: none;
-  border-top: 1px solid {$thinblueborder};
-  border-bottom: 1px solid {$thinblueborder};
-  border-right: 1px solid {$thinblueborder};
   width: 160px;
 }
 
@@ -150,7 +141,7 @@
 }
 
 .device-desktop .phui-document-offset {
-  padding-right: 160px;
+  padding-right: 120px;
 }
 
 .phui-document-view .phui-property-list-view {

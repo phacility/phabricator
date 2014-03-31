@@ -148,7 +148,10 @@ final class PhabricatorHomeMainController
         'Nothing appears to be critically broken right now.');
     }
 
-    $href = '/maniphest/?statuses[]=0&priorities[]='.$unbreak_now.'#R';
+    $href = sprintf(
+      '/maniphest/?statuses[]=%s&priorities[]=%s#R',
+      implode(',', ManiphestTaskStatus::getOpenStatusConstants()),
+      $unbreak_now);
     $title = pht('Unbreak Now!');
     $panel = new AphrontPanelView();
     $panel->setHeader($this->renderSectionHeader($title, $href));
@@ -193,8 +196,11 @@ final class PhabricatorHomeMainController
     }
 
     $title = pht('Needs Triage');
-    $href = '/maniphest/?statuses[]=0&priorities[]='.$needs_triage.
-                    '&userProjects[]='.$user->getPHID().'#R';
+    $href = sprintf(
+      '/maniphest/?statuses[]=%s&priorities[]=%s&userProjects[]=%s#R',
+      implode(',', ManiphestTaskStatus::getOpenStatusConstants()),
+      $needs_triage,
+      $user->getPHID());
     $panel = new AphrontPanelView();
     $panel->setHeader($this->renderSectionHeader($title, $href));
     $panel->appendChild($this->buildTaskListView($tasks));

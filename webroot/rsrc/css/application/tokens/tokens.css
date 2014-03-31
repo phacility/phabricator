@@ -4,12 +4,12 @@
 
 button.token-button {
   background: #f7f7f7;
-  border: 1px solid #a1a5a9;
+  border: 1px solid {$lightblueborder};
   position: relative;
   width: 16px;
   height: 16px;
   padding: 12px;
-  margin: 6px;
+  margin: 4px;
   text-shadow: none;
   box-shadow: none;
   box-sizing: content-box;
@@ -17,8 +17,4 @@ button.token-button {
 
 .token-grid {
   text-align: center;
-}
-
-.phui-icon-view.sprite-tokens {
-  display: inline-block;
 }

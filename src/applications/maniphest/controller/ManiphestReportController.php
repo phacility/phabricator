@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group maniphest
- */
 final class ManiphestReportController extends ManiphestController {
 
   private $view;

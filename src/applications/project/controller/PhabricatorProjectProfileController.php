@@ -147,7 +147,10 @@ final class PhabricatorProjectProfileController
     $task_list->setHandles($handles);
 
     $phid = $project->getPHID();
-    $view_uri = '/maniphest/?statuses[]=0&allProjects[]='.$phid.'#R';
+    $view_uri = sprintf(
+      '/maniphest/?statuses[]=%s&allProjects[]=%s#R',
+      implode(',', ManiphestTaskStatus::getOpenStatusConstants()),
+      $phid);
     $create_uri = '/maniphest/task/create/?projects='.$phid;
     $icon = id(new PHUIIconView())
       ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)

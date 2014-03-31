@@ -429,6 +429,8 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     $email_to = array();
     $email_cc = array();
 
+    $email_to[$comment->getActorPHID()] = true;
+
     $author_phid = $data->getCommitDetail('authorPHID');
     if ($author_phid) {
       $email_to[$author_phid] = true;

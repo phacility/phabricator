@@ -16,6 +16,8 @@ final class PHUITimelineEventView extends AphrontView {
   private $isPreview;
   private $eventGroup = array();
   private $hideByDefault;
+  private $token;
+  private $tokenRemoved;
 
   public function setHideByDefault($hide_by_default) {
     $this->hideByDefault = $hide_by_default;
@@ -114,6 +116,12 @@ final class PHUITimelineEventView extends AphrontView {
     return $this;
   }
 
+  public function setToken($token, $removed=false) {
+    $this->token = $token;
+    $this->tokenRemoved = $removed;
+    return $this;
+  }
+
   public function getEventGroup() {
     return array_merge(array($this), $this->eventGroup);
   }
@@ -178,12 +186,23 @@ final class PHUITimelineEventView extends AphrontView {
             ''));
       }
 
+      $token = null;
+      if ($this->token) {
+        $token = id(new PHUIIconView())
+          ->addClass('phui-timeline-token')
+          ->setSpriteSheet(PHUIIconView::SPRITE_TOKENS)
+          ->setSpriteIcon($this->token);
+        if ($this->tokenRemoved) {
+          $token->addClass('strikethrough');
+        }
+      }
+
       $title = phutil_tag(
         'div',
         array(
           'class' => implode(' ', $title_classes),
         ),
-        array($icon, $title, $extra));
+        array($icon, $token, $title, $extra));
     }
 
     return $title;

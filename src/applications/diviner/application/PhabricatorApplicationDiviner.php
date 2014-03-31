@@ -45,29 +45,4 @@ final class PhabricatorApplicationDiviner extends PhabricatorApplication {
     );
   }
 
-  public function buildMainMenuItems(
-    PhabricatorUser $user,
-    PhabricatorController $controller = null) {
-
-    $items = array();
-
-    $application = null;
-    if ($controller) {
-      $application = $controller->getCurrentApplication();
-    }
-
-    if ($application && $application->getHelpURI()) {
-      $item = id(new PHUIListItemView())
-        ->setName(pht('%s Help', $application->getName()))
-        ->addClass('core-menu-item')
-        ->setIcon('info-sm')
-        ->setOrder(200)
-        ->setHref($application->getHelpURI());
-      $items[] = $item;
-    }
-
-    return $items;
-  }
-
-
 }

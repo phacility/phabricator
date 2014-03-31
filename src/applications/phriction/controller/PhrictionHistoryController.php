@@ -42,6 +42,8 @@ final class PhrictionHistoryController
     $handles = $this->loadViewerHandles($author_phids);
 
     $list = new PHUIObjectItemListView();
+    $list->setCards(true);
+    $list->setFlush(true);
 
     foreach ($history as $content) {
 

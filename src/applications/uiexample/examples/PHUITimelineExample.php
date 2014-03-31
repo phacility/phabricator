@@ -29,17 +29,27 @@ final class PHUITimelineExample extends PhabricatorUIExample {
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
+      ->setIcon('love')
       ->setTitle('A minor event.');
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
+      ->setIcon('comment')
       ->appendChild('A major event with no title.');
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
+      ->setIcon('dislike')
       ->setTitle('Another minor event.');
 
     $events[] = id(new PHUITimelineEventView())
+      ->setIcon('like')
+      ->setToken('medal-1')
+      ->setUserHandle($handle);
+
+    $events[] = id(new PHUITimelineEventView())
+      ->setIcon('dislike')
+      ->setToken('medal-1', true)
       ->setUserHandle($handle);
 
     $events[] = id(new PHUITimelineEventView())
@@ -51,30 +61,39 @@ final class PHUITimelineExample extends PhabricatorUIExample {
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
+      ->setIcon('love')
+      ->setTitle('Minor Red Event')
+      ->setColor(PhabricatorTransactions::COLOR_RED);
+
+    $events[] = id(new PHUITimelineEventView())
+      ->setIcon('like')
+      ->setUserHandle($handle)
+      ->setTitle('Minor Not-Red Event')
+      ->setColor(PhabricatorTransactions::COLOR_GREEN);
+
+    $events[] = id(new PHUITimelineEventView())
+      ->setUserHandle($handle)
+      ->setIcon('love')
       ->setTitle('Minor Red Event')
       ->setColor(PhabricatorTransactions::COLOR_RED);
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
-      ->setTitle('Minor Not-Red Event');
+      ->setIcon('dislike')
+      ->setTitle('Minor Not-Red Event')
+      ->setColor(PhabricatorTransactions::COLOR_BLACK);
+
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
-      ->setTitle('Minor Red Event')
-      ->setColor(PhabricatorTransactions::COLOR_RED);
-
-    $events[] = id(new PHUITimelineEventView())
-      ->setUserHandle($handle)
-      ->setTitle('Minor Not-Red Event');
-
-    $events[] = id(new PHUITimelineEventView())
-      ->setUserHandle($handle)
+      ->setIcon('tag')
       ->setTitle('Major Green Event')
       ->appendChild('This event is green!')
       ->setColor(PhabricatorTransactions::COLOR_GREEN);
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
+      ->setIcon('tag')
       ->setTitle(str_repeat('Long Text Title ', 64))
       ->appendChild(str_repeat('Long Text Body ', 64))
       ->setColor(PhabricatorTransactions::COLOR_ORANGE);

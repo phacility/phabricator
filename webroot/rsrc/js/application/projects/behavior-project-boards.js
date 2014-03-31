@@ -28,13 +28,40 @@ JX.behavior('project-boards', function(config) {
     list.lock();
     JX.DOM.alterClass(item, 'drag-sending', true);
 
+    var item_phid = JX.Stratcom.getData(item).objectPHID;
     var data = {
-      objectPHID: JX.Stratcom.getData(item).objectPHID,
+      objectPHID: item_phid,
       columnPHID: JX.Stratcom.getData(list.getRootNode()).columnPHID
     };
 
+    var after_phid = null;
+    var items = finditems(list.getRootNode());
     if (after) {
-      data.afterPHID = JX.Stratcom.getData(after).objectPHID;
+      after_phid = JX.Stratcom.getData(after).objectPHID;
+      data.afterPHID = after_phid;
+    }
+    var ii;
+    var ii_item;
+    var ii_item_phid;
+    var ii_prev_item_phid = null;
+    var before_phid = null;
+    for (ii = 0; ii < items.length; ii++) {
+      ii_item = items[ii];
+      ii_item_phid = JX.Stratcom.getData(ii_item).objectPHID;
+      if (ii_item_phid == item_phid) {
+        // skip the item we just dropped
+        continue;
+      }
+      // note this handles when there is no after phid - we are at the top of
+      // the list - quite nicely
+      if (ii_prev_item_phid == after_phid) {
+        before_phid = ii_item_phid;
+        break;
+      }
+      ii_prev_item_phid = ii_item_phid;
+    }
+    if (before_phid) {
+      data.beforePHID = before_phid;
     }
 
     var workflow = new JX.Workflow(config.moveURI, data)

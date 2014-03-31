@@ -180,7 +180,7 @@ final class PhrictionDiffController
 
 
     $output = hsprintf(
-      '<br><div class="phriction-document-history-diff">'.
+      '<div class="phriction-document-history-diff">'.
         '%s%s'.
         '<table class="phriction-revert-table">'.
           '<tr><td>%s</td><td>%s</td>'.
@@ -257,6 +257,7 @@ final class PhrictionDiffController
     $handles = $this->loadViewerHandles($phids);
 
     $list = new PHUIObjectItemListView();
+    $list->setCards(true);
     $list->setFlush(true);
 
     $first = true;

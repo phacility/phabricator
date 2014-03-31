@@ -127,27 +127,14 @@ final class ConduitAPI_releephwork_nextrequest_Method
       $diff_name = $handles[$diff_phid]->getName();
     }
 
-    // Calculate the new-author information (if any)
-    $new_author = null;
     $new_author_phid = null;
-    switch ($project->getDetail('commitWithAuthor')) {
-      case ReleephProject::COMMIT_AUTHOR_NONE:
-        break;
-
-      case ReleephProject::COMMIT_AUTHOR_FROM_DIFF:
-        if ($diff_rev) {
-          $new_author_phid = $diff_rev->getAuthorPHID();
-        } else {
-          $pr_commit = $releeph_request->loadPhabricatorRepositoryCommit();
-          if ($pr_commit) {
-            $new_author_phid = $pr_commit->getAuthorPHID();
-          }
-        }
-        break;
-
-      case ReleephProject::COMMIT_AUTHOR_REQUESTOR:
-        $new_author_phid = $releeph_request->getRequestUserPHID();
-        break;
+    if ($diff_rev) {
+      $new_author_phid = $diff_rev->getAuthorPHID();
+    } else {
+      $pr_commit = $releeph_request->loadPhabricatorRepositoryCommit();
+      if ($pr_commit) {
+        $new_author_phid = $pr_commit->getAuthorPHID();
+      }
     }
 
     return array(

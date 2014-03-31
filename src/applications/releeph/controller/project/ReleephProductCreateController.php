@@ -1,6 +1,6 @@
 <?php
 
-final class ReleephProjectCreateController extends ReleephProjectController {
+final class ReleephProductCreateController extends ReleephProjectController {
 
   public function processRequest() {
     $request = $this->getRequest();
@@ -18,7 +18,7 @@ final class ReleephProjectCreateController extends ReleephProjectController {
       if (!$name) {
         $e_name = pht('Required');
         $errors[] = pht(
-          'Your Releeph project should have a simple descriptive name.');
+          'Your product should have a simple, descriptive name.');
       }
 
       if (!$trunk_branch) {
@@ -31,7 +31,7 @@ final class ReleephProjectCreateController extends ReleephProjectController {
       $pr_repository = $arc_project->loadRepository();
 
       if (!$errors) {
-        $releeph_project = id(new ReleephProject())
+        $releeph_product = id(new ReleephProject())
           ->setName($name)
           ->setTrunkBranch($trunk_branch)
           ->setRepositoryPHID($pr_repository->getPHID())
@@ -40,21 +40,20 @@ final class ReleephProjectCreateController extends ReleephProjectController {
           ->setIsActive(1);
 
         try {
-          $releeph_project->save();
+          $releeph_product->save();
 
           return id(new AphrontRedirectResponse())
-            ->setURI($releeph_project->getURI());
+            ->setURI($releeph_product->getURI());
         } catch (AphrontQueryDuplicateKeyException $ex) {
           $e_name = pht('Not Unique');
-          $errors[] = pht(
-            'Another project already uses this name.');
+          $errors[] = pht('Another product already uses this name.');
         }
       }
     }
 
     $arc_project_options = $this->getArcProjectSelectOptions($arc_projects);
 
-    $project_name_input = id(new AphrontFormTextControl())
+    $product_name_input = id(new AphrontFormTextControl())
       ->setLabel(pht('Name'))
       ->setDisableAutocomplete(true)
       ->setName('name')
@@ -79,14 +78,14 @@ final class ReleephProjectCreateController extends ReleephProjectController {
 
     $branch_name_preview = id(new ReleephBranchPreviewView())
       ->setLabel(pht('Example Branch'))
-      ->addControl('projectName', $project_name_input)
+      ->addControl('projectName', $product_name_input)
       ->addControl('arcProjectID', $arc_project_input)
       ->addStatic('template', '')
       ->addStatic('isSymbolic', false);
 
     $form = id(new AphrontFormView())
       ->setUser($request->getUser())
-      ->appendChild($project_name_input)
+      ->appendChild($product_name_input)
       ->appendChild($arc_project_input)
       ->appendChild(
         id(new AphrontFormTextControl())
@@ -100,15 +99,15 @@ final class ReleephProjectCreateController extends ReleephProjectController {
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton('/releeph/project/')
-          ->setValue(pht('Create')));
+          ->setValue(pht('Create Release Product')));
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Create New Project'))
+      ->setHeaderText(pht('Create New Product'))
       ->setFormErrors($errors)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('New Project'));
+    $crumbs->addTextCrumb(pht('New Product'));
 
     return $this->buildApplicationPage(
       array(
@@ -116,7 +115,7 @@ final class ReleephProjectCreateController extends ReleephProjectController {
         $form_box,
       ),
       array(
-        'title' => pht('Create New Project'),
+        'title' => pht('Create New Product'),
         'device' => true,
       ));
   }

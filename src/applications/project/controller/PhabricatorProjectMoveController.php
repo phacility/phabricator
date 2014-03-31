@@ -16,6 +16,7 @@ final class PhabricatorProjectMoveController
     $column_phid = $request->getStr('columnPHID');
     $object_phid = $request->getStr('objectPHID');
     $after_phid = $request->getStr('afterPHID');
+    $before_phid = $request->getStr('beforePHID');
 
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
@@ -78,24 +79,58 @@ final class PhabricatorProjectMoveController
         'columnPHIDs' => $edge_phids,
         'projectPHID' => $column->getProjectPHID()));
 
+    $task_phids = array();
     if ($after_phid) {
-      $after_task = id(new ManiphestTaskQuery())
+      $task_phids[] = $after_phid;
+    }
+    if ($before_phid) {
+      $task_phids[] = $before_phid;
+    }
+    if ($task_phids) {
+      $tasks = id(new ManiphestTaskQuery())
         ->setViewer($viewer)
-        ->withPHIDs(array($after_phid))
+        ->withPHIDs($task_phids)
         ->requireCapabilities(array(PhabricatorPolicyCapability::CAN_EDIT))
-        ->executeOne();
-      if (!$after_task) {
+        ->execute();
+      if (count($tasks) != count($task_phids)) {
         return new Aphront404Response();
       }
-      $after_pri = $after_task->getPriority();
-      $after_sub = $after_task->getSubpriority();
+      $tasks = mpull($tasks, null, 'getPHID');
 
-      $xactions[] = id(new ManiphestTransaction())
-        ->setTransactionType(ManiphestTransaction::TYPE_SUBPRIORITY)
-        ->setNewValue(array(
-          'newPriority' => $after_pri,
-          'newSubpriorityBase' => $after_sub));
-    }
+      $a_task = idx($tasks, $after_phid);
+      $b_task = idx($tasks, $before_phid);
+
+      if ($a_task &&
+         (($a_task->getPriority() < $object->getPriority()) ||
+          ($a_task->getPriority() == $object->getPriority() &&
+           $a_task->getSubpriority() >= $object->getSubpriority()))) {
+
+        $after_pri = $a_task->getPriority();
+        $after_sub = $a_task->getSubpriority();
+
+        $xactions[] = id(new ManiphestTransaction())
+          ->setTransactionType(ManiphestTransaction::TYPE_SUBPRIORITY)
+          ->setNewValue(array(
+            'newPriority' => $after_pri,
+            'newSubpriorityBase' => $after_sub,
+            'direction' => '>'));
+
+       } else if ($b_task &&
+                 (($b_task->getPriority() > $object->getPriority()) ||
+                  ($b_task->getPriority() == $object->getPriority() &&
+                   $b_task->getSubpriority() <= $object->getSubpriority()))) {
+
+        $before_pri = $b_task->getPriority();
+        $before_sub = $b_task->getSubpriority();
+
+        $xactions[] = id(new ManiphestTransaction())
+          ->setTransactionType(ManiphestTransaction::TYPE_SUBPRIORITY)
+          ->setNewValue(array(
+            'newPriority' => $before_pri,
+            'newSubpriorityBase' => $before_sub,
+            'direction' => '<'));
+      }
+   }
 
     $editor = id(new ManiphestTransactionEditor())
       ->setActor($viewer)

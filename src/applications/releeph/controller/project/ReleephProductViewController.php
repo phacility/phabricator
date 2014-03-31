@@ -1,8 +1,9 @@
 <?php
 
-final class ReleephProjectViewController extends ReleephProjectController
+final class ReleephProductViewController extends ReleephProductController
   implements PhabricatorApplicationSearchResultsControllerInterface {
 
+  private $productID;
   private $queryKey;
 
   public function shouldAllowPublic() {
@@ -10,18 +11,29 @@ final class ReleephProjectViewController extends ReleephProjectController
   }
 
   public function willProcessRequest(array $data) {
-    parent::willProcessRequest($data);
+    $this->productID = idx($data, 'projectID');
     $this->queryKey = idx($data, 'queryKey');
   }
 
   public function processRequest() {
     $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $product = id(new ReleephProjectQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->productID))
+      ->executeOne();
+    if (!$product) {
+      return new Aphront404Response();
+    }
+    $this->setProduct($product);
+
     $controller = id(new PhabricatorApplicationSearchController($request))
       ->setQueryKey($this->queryKey)
       ->setPreface($this->renderPreface())
       ->setSearchEngine(
         id(new ReleephBranchSearchEngine())
-          ->setProjectID($this->getReleephProject()->getID()))
+          ->setProjectID($product->getID()))
       ->setNavigation($this->buildSideNavView());
 
     return $this->delegateToController($controller);
@@ -34,8 +46,8 @@ final class ReleephProjectViewController extends ReleephProjectController
 
     $viewer = $this->getRequest()->getUser();
 
-    $projects = mpull($branches, 'getProject');
-    $repo_phids = mpull($projects, 'getRepositoryPHID');
+    $products = mpull($branches, 'getProject');
+    $repo_phids = mpull($products, 'getRepositoryPHID');
 
     $repos = id(new PhabricatorRepositoryQuery())
       ->setViewer($viewer)
@@ -116,18 +128,19 @@ final class ReleephProjectViewController extends ReleephProjectController
   }
 
   public function buildSideNavView($for_app = false) {
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getRequest()->getUser();
+    $product = $this->getProduct();
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
     if ($for_app) {
-      $nav->addFilter('project/create/', pht('Create Project'));
+      $nav->addFilter('project/create/', pht('Create Product'));
     }
 
     id(new ReleephBranchSearchEngine())
-      ->setProjectID($this->getReleephProject()->getID())
-      ->setViewer($user)
+      ->setProjectID($product->getID())
+      ->setViewer($viewer)
       ->addNavigationItems($nav->getMenu());
 
     $nav->selectFilter(null);
@@ -138,81 +151,73 @@ final class ReleephProjectViewController extends ReleephProjectController
   public function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
-    $project = $this->getReleephProject();
-
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setHref($project->getURI('cutbranch'))
-        ->setName(pht('Cut New Branch'))
-        ->setIcon('create'));
+    $product = $this->getProduct();
+    if ($product) {
+      $crumbs->addAction(
+        id(new PHUIListItemView())
+          ->setHref($product->getURI('cutbranch/'))
+          ->setName(pht('Cut New Branch'))
+          ->setIcon('create'));
+    }
 
     return $crumbs;
   }
 
   private function renderPreface() {
-    $project = $this->getReleephProject();
     $viewer = $this->getRequest()->getUser();
+    $product = $this->getProduct();
 
-    $id = $project->getID();
+    $id = $product->getID();
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($project->getName());
+      ->setHeader($product->getName())
+      ->setUser($viewer)
+      ->setPolicyObject($product);
 
-    if (!$project->getIsActive()) {
-      $header->addTag(
-        id(new PHUITagView())
-          ->setType(PHUITagView::TYPE_STATE)
-          ->setBackgroundColor(PHUITagView::COLOR_BLACK)
-          ->setName(pht('Deactivated')));
+    if ($product->getIsActive()) {
+      $header->setStatus('oh-ok', '', pht('Active'));
+    } else {
+      $header->setStatus('policy-noone', '', pht('Inactive'));
     }
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($project)
+      ->setObject($product)
       ->setObjectURI($this->getRequest()->getRequestURI());
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
-      $project,
+      $product,
       PhabricatorPolicyCapability::CAN_EDIT);
 
     $edit_uri = $this->getApplicationURI("project/{$id}/edit/");
-
-    $deactivate_uri = "project/{$id}/action/deactivate/";
-    $deactivate_uri = $this->getApplicationURI($deactivate_uri);
-
-    $reactivate_uri = "project/{$id}/action/activate/";
-    $reactivate_uri = $this->getApplicationURI($reactivate_uri);
-
     $history_uri = $this->getApplicationURI("project/{$id}/history/");
 
     $actions->addAction(
       id(new PhabricatorActionView())
-        ->setName(pht('Edit Project'))
+        ->setName(pht('Edit Product'))
         ->setHref($edit_uri)
         ->setIcon('edit')
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-    if ($project->getIsActive()) {
-      $actions->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Deactivate Project'))
-          ->setHref($deactivate_uri)
-          ->setIcon('delete')
-          ->setDisabled(!$can_edit)
-          ->setWorkflow(true));
+    if ($product->getIsActive()) {
+      $status_name = pht('Deactivate Product');
+      $status_href = "project/{$id}/action/deactivate/";
+      $status_icon = 'delete';
     } else {
-      $actions->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Reactivate Project'))
-          ->setHref($reactivate_uri)
-          ->setIcon('new')
-          ->setUser($viewer)
-          ->setRenderAsForm(true)
-          ->setDisabled(!$can_edit)
-          ->setWorkflow(true));
+      $status_name = pht('Reactivate Product');
+      $status_href = "project/{$id}/action/activate/";
+      $status_icon = 'new';
     }
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setName($status_name)
+        ->setHref($this->getApplicationURI($status_href))
+        ->setIcon($status_icon)
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true));
 
     $actions->addAction(
       id(new PhabricatorActionView())
@@ -222,15 +227,15 @@ final class ReleephProjectViewController extends ReleephProjectController
 
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setObject($project);
+      ->setObject($product);
 
     $properties->addProperty(
       pht('Repository'),
-      $project->getRepository()->getName());
+      $product->getRepository()->getName());
 
     $properties->setActionList($actions);
 
-    $pushers = $project->getPushers();
+    $pushers = $product->getPushers();
     if ($pushers) {
       $this->loadHandles($pushers);
       $properties->addProperty(

@@ -6,10 +6,6 @@ final class ReleephProject extends ReleephDAO
   const DEFAULT_BRANCH_NAMESPACE = 'releeph-releases';
   const SYSTEM_AGENT_USERNAME_PREFIX = 'releeph-agent-';
 
-  const COMMIT_AUTHOR_NONE      = 'commit-author-none';
-  const COMMIT_AUTHOR_FROM_DIFF = 'commit-author-is-from-diff';
-  const COMMIT_AUTHOR_REQUESTOR = 'commit-author-is-requestor';
-
   protected $name;
 
   // Specifying the place to pick from is a requirement for svn, though not
@@ -68,10 +64,6 @@ final class ReleephProject extends ReleephDAO
         $this->name,
         implode(', ', $banned_names)));
     }
-
-    if (!$this->getDetail('releaseCounter')) {
-      $this->setDetail('releaseCounter', 0);
-    }
   }
 
   public function loadArcanistProject() {
@@ -120,42 +112,8 @@ final class ReleephProject extends ReleephDAO
       'getRepositoryPHID');
   }
 
-  public function getCurrentReleaseNumber() {
-    $current_release_numbers = array();
-
-    // From the project...
-    $current_release_numbers[] = $this->getDetail('releaseCounter', 0);
-
-    // From any branches...
-    $branches = id(new ReleephBranch())->loadAllWhere(
-      'releephProjectID = %d', $this->getID());
-    if ($branches) {
-      $release_numbers = array();
-      foreach ($branches as $branch) {
-        $current_release_numbers[] = $branch->getDetail('releaseNumber', 0);
-      }
-    }
-
-    return max($current_release_numbers);
-  }
-
   public function getReleephFieldSelector() {
     return new ReleephDefaultFieldSelector();
-  }
-
-  /**
-   * Wrapper to setIsActive() that logs who deactivated a project
-   */
-  public function deactivate(PhabricatorUser $actor) {
-    return $this
-      ->setIsActive(0)
-      ->setDetail('last_deactivated_user', $actor->getPHID())
-      ->setDetail('last_deactivated_time', time());
-  }
-
-  // Hide this from the public
-  private function setIsActive($v) {
-    return parent::setIsActive($v);
   }
 
   private function getBannedNames() {
