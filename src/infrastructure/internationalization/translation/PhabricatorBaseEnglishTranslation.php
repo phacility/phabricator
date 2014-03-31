@@ -863,10 +863,8 @@ abstract class PhabricatorBaseEnglishTranslation
 
       '%s pushed %d commit(s) to %s.' => array(
         array(
-          array(
-            '%s pushed a commit to %3$s.',
-            '%s pushed %d commits to %s.',
-          ),
+          '%s pushed a commit to %3$s.',
+          '%s pushed %d commits to %s.',
         ),
       ),
 
@@ -874,6 +872,23 @@ abstract class PhabricatorBaseEnglishTranslation
         '1 commit',
         '%s commits',
       ),
+
+      '%s removed %d JIRA issue(s): %s.' => array(
+        array(
+          '%s removed a JIRA issue: %3$s.',
+          '%s removed JIRA issues: %3$s.',
+        ),
+      ),
+
+      '%s added %d JIRA issue(s): %s.' => array(
+        array(
+          '%s added a JIRA issue: %3$s.',
+          '%s added JIRA issues: %3$s.',
+        ),
+      ),
+
+      '%s updated JIRA issue(s): added %d %s; removed %d %s.' =>
+        '%s updated JIRA issues: added %3$s; removed %5$s.',
 
     );
   }
