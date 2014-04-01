@@ -587,6 +587,7 @@ final class DifferentialTransactionEditor
     $new_revision = id(new DifferentialRevisionQuery())
       ->setViewer($this->getActor())
       ->needReviewerStatus(true)
+      ->needActiveDiffs(true)
       ->withIDs(array($object->getID()))
       ->executeOne();
     if (!$new_revision) {
@@ -595,6 +596,7 @@ final class DifferentialTransactionEditor
     }
 
     $object->attachReviewerStatus($new_revision->getReviewerStatus());
+    $object->attachActiveDiff($new_revision->getActiveDiff());
 
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
