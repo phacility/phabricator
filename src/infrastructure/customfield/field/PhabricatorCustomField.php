@@ -11,6 +11,7 @@
  * @task list         Integration with List views
  * @task appsearch    Integration with ApplicationSearch
  * @task appxaction   Integration with ApplicationTransactions
+ * @task xactionmail  Integration with Transaction Mail
  * @task globalsearch Integration with Global Search
  */
 abstract class PhabricatorCustomField {
@@ -20,6 +21,7 @@ abstract class PhabricatorCustomField {
   private $proxy;
 
   const ROLE_APPLICATIONTRANSACTIONS  = 'ApplicationTransactions';
+  const ROLE_TRANSACTIONMAIL          = 'ApplicationTransactions.mail';
   const ROLE_APPLICATIONSEARCH        = 'ApplicationSearch';
   const ROLE_STORAGE                  = 'storage';
   const ROLE_DEFAULT                  = 'default';
@@ -264,6 +266,8 @@ abstract class PhabricatorCustomField {
         return $this->shouldAppearInGlobalSearch();
       case self::ROLE_CONDUIT:
         return $this->shouldAppearInConduitDictionary();
+      case self::ROLE_TRANSACTIONMAIL:
+        return $this->shouldAppearInTransactionMail();
       case self::ROLE_DEFAULT:
         return true;
       default:
@@ -1022,6 +1026,33 @@ abstract class PhabricatorCustomField {
     return;
   }
 
+
+/* -(  Transaction Mail  )--------------------------------------------------- */
+
+
+  /**
+   * @task xactionmail
+   */
+  public function shouldAppearInTransactionMail() {
+    if ($this->proxy) {
+      return $this->proxy->shouldAppearInTransactionMail();
+    }
+    return false;
+  }
+
+
+  /**
+   * @task xactionmail
+   */
+  public function updateTransactionMailBody(
+    PhabricatorMetaMTAMailBody $body,
+    PhabricatorApplicationTransactionEditor $editor,
+    array $xactions) {
+    if ($this->proxy) {
+      return $this->proxy->updateTransactionMailBody($body, $editor, $xactions);
+    }
+    return;
+  }
 
 
 /* -(  Edit View  )---------------------------------------------------------- */

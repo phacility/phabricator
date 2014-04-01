@@ -50,5 +50,30 @@ final class DifferentialBranchField
     );
   }
 
+  public function shouldAppearInTransactionMail() {
+    return true;
+  }
+
+  public function updateTransactionMailBody(
+    PhabricatorMetaMTAMailBody $body,
+    PhabricatorApplicationTransactionEditor $editor,
+    array $xactions) {
+
+    $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
+
+    // Show the "BRANCH" section only if there's a new diff or the revision
+    // is "Accepted".
+    if ((!$editor->getDiffUpdateTransaction($xactions)) &&
+        ($this->getObject()->getStatus() != $status_accepted)) {
+      return;
+    }
+
+    $branch = $this->getBranchDescription($this->getObject()->getActiveDiff());
+    if ($branch === null) {
+      return;
+    }
+
+    $body->addTextSection(pht('BRANCH'), $branch);
+  }
 
 }

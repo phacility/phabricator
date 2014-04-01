@@ -37,6 +37,9 @@ final class PhabricatorDifferentialConfigOptions
       new DifferentialJIRAIssuesField(),
       new DifferentialAsanaRepresentationField(),
 
+      new DifferentialChangesSinceLastUpdateField(),
+      new DifferentialBranchField(),
+
       new DifferentialBlameRevisionField(),
       new DifferentialPathField(),
       new DifferentialHostField(),
