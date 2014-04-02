@@ -41,10 +41,19 @@ class AphrontRedirectResponse extends AphrontResponse {
 
   public function buildResponseString() {
     if ($this->shouldStopForDebugging()) {
-      $user = new PhabricatorUser();
+      $request = $this->getRequest();
+      if ($request) {
+        $user = $request->getUser();
+      }
+      if (!isset($user)) {
+        $user = new PhabricatorUser();
+        // This fake user needs to be able to generate a CSRF token.
+        $session_key = Filesystem::readRandomCharacters(40);
+        $user->attachAlternateCSRFString(PhabricatorHash::digest($session_key));
+      }
 
       $view = new PhabricatorStandardPageView();
-      $view->setRequest($this->getRequest());
+      $view->setRequest($request);
       $view->setApplicationName('Debug');
       $view->setTitle('Stopped on Redirect');
 
