@@ -44,6 +44,7 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
         'approve/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleApproveController',
         'disable/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleDisableController',
         'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleDeleteController',
+        'rename/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleRenameController',
         'edit/(?:(?P<id>[1-9]\d*)/(?:(?P<view>\w+)/)?)?'
           => 'PhabricatorPeopleEditController',
         'ldap/' => 'PhabricatorPeopleLdapController',

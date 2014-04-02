@@ -34,7 +34,7 @@ final class PhabricatorPeopleDeleteController
     if ($request->isFormPost()) {
       $v_username = $request->getStr('username');
 
-      if (!$v_username) {
+      if (!strlen($v_username)) {
         $errors[] = pht(
           'You must type the username to confirm that you want to delete '.
           'this user account.');

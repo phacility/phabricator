@@ -39,9 +39,8 @@ final class PhabricatorPeopleEditController
     $nav->addFilter('cert', pht('Conduit Certificate'));
     $nav->addFilter('profile',
       pht('View Profile'), '/p/'.$user->getUsername().'/');
-    $nav->addLabel(pht('Special'));
-    $nav->addFilter('rename', pht('Change Username'));
     if ($user->getIsSystemAgent()) {
+      $nav->addLabel(pht('Special'));
       $nav->addFilter('picture', pht('Set Account Picture'));
     }
 
@@ -71,9 +70,6 @@ final class PhabricatorPeopleEditController
         break;
       case 'cert':
         $response = $this->processCertificateRequest($user);
-        break;
-      case 'rename':
-        $response = $this->processRenameRequest($user);
         break;
       case 'picture':
         $response = $this->processSetAccountPicture($user);
@@ -475,95 +471,6 @@ final class PhabricatorPeopleEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setForm($form);
-
-    return array($form_box);
-  }
-
-  private function processRenameRequest(PhabricatorUser $user) {
-    $request = $this->getRequest();
-    $admin = $request->getUser();
-
-    $e_username = true;
-    $username = $user->getUsername();
-
-    $errors = array();
-    if ($request->isFormPost()) {
-
-      $username = $request->getStr('username');
-      if (!strlen($username)) {
-        $e_username = pht('Required');
-        $errors[] = pht('New username is required.');
-      } else if ($username == $user->getUsername()) {
-        $e_username = pht('Invalid');
-        $errors[] = pht('New username must be different from old username.');
-      } else if (!PhabricatorUser::validateUsername($username)) {
-        $e_username = pht('Invalid');
-        $errors[] = PhabricatorUser::describeValidUsername();
-      }
-
-      if (!$errors) {
-        try {
-
-          id(new PhabricatorUserEditor())
-            ->setActor($admin)
-            ->changeUsername($user, $username);
-
-          return id(new AphrontRedirectResponse())
-            ->setURI($request->getRequestURI()->alter('saved', true));
-        } catch (AphrontQueryDuplicateKeyException $ex) {
-          $e_username = pht('Not Unique');
-          $errors[] = pht('Another user already has that username.');
-        }
-      }
-    }
-
-    $inst1 = pht('Be careful when renaming users!');
-    $inst2 = pht('The old username will no longer be tied to the user, so '.
-          'anything which uses it (like old commit messages) will no longer '.
-          'associate correctly. And if you give a user a username which some '.
-          'other user used to have, username lookups will begin returning '.
-          'the wrong user.');
-    $inst3 = pht('It is generally safe to rename newly created users (and '.
-          'test users and so on), but less safe to rename established users '.
-          'and unsafe to reissue a username.');
-    $inst4 = pht('Users who rely on password auth will need to reset their '.
-          'passwordafter their username is changed (their username is part '.
-          'of the salt in the password hash). They will receive an email '.
-          'with instructions on how to do this.');
-
-    $form = new AphrontFormView();
-    $form
-      ->setUser($admin)
-      ->setAction($request->getRequestURI())
-      ->appendChild(hsprintf(
-        '<p class="aphront-form-instructions">'.
-          '<strong>%s</strong> '.
-          '%s'.
-        '</p>'.
-        '<p class="aphront-form-instructions">'.
-          '%s'.
-        '</p>'.
-        '<p class="aphront-form-instructions">'.
-          '%s'.
-        '</p>', $inst1, $inst2, $inst3, $inst4))
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel(pht('Old Username'))
-          ->setValue($user->getUsername()))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('New Username'))
-          ->setValue($username)
-          ->setName('username')
-          ->setError($e_username))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue(pht('Change Username')));
-
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Change Username'))
-      ->setFormErrors($errors)
       ->setForm($form);
 
     return array($form_box);
