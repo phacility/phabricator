@@ -36,7 +36,7 @@ final class PhabricatorPeopleProfileEditController
       $user,
       PhabricatorCustomField::ROLE_EDIT);
     $field_list
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->readFieldsFromStorage($user);
 
     $validation_exception = null;
@@ -76,7 +76,7 @@ final class PhabricatorPeopleProfileEditController
           ->setValue(pht('Save Profile')));
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Edit Your Profile'))
+      ->setHeaderText(pht('Edit Profile'))
       ->setValidationException($validation_exception)
       ->setForm($form);
 

@@ -42,7 +42,10 @@ final class PhabricatorPeopleProfileController
       ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
-    $can_edit = ($user->getPHID() == $viewer->getPHID());
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $user,
+      PhabricatorPolicyCapability::CAN_EDIT);
 
     $actions->addAction(
       id(new PhabricatorActionView())

@@ -739,7 +739,11 @@ EOBODY;
       case PhabricatorPolicyCapability::CAN_VIEW:
         return PhabricatorPolicies::POLICY_PUBLIC;
       case PhabricatorPolicyCapability::CAN_EDIT:
-        return PhabricatorPolicies::POLICY_NOONE;
+        if ($this->getIsSystemAgent()) {
+          return PhabricatorPolicies::POLICY_ADMIN;
+        } else {
+          return PhabricatorPolicies::POLICY_NOONE;
+        }
     }
   }
 
