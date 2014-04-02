@@ -3,6 +3,10 @@
 final class PhabricatorSettingsPanelSSHKeys
   extends PhabricatorSettingsPanel {
 
+  public function isEditableByAdministrators() {
+    return true;
+  }
+
   public function getPanelKey() {
     return 'ssh';
   }
@@ -20,8 +24,8 @@ final class PhabricatorSettingsPanelSSHKeys
   }
 
   public function processRequest(AphrontRequest $request) {
-
-    $user = $request->getUser();
+    $viewer = $request->getUser();
+    $user = $this->getUser();
 
     $generate = $request->getStr('generate');
     if ($generate) {
@@ -37,7 +41,7 @@ final class PhabricatorSettingsPanelSSHKeys
     $id = nonempty($edit, $delete);
 
     if ($id && is_numeric($id)) {
-      // NOTE: Prevent editing/deleting of keys you don't own.
+      // NOTE: This prevents editing/deleting of keys not owned by the user.
       $key = id(new PhabricatorUserSSHKey())->loadOneWhere(
         'userPHID = %s AND id = %d',
         $user->getPHID(),
@@ -142,7 +146,7 @@ final class PhabricatorSettingsPanelSSHKeys
     }
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->addHiddenInput('edit', $is_new ? 'true' : $key->getID())
       ->appendChild(
         id(new AphrontFormTextControl())
@@ -170,8 +174,8 @@ final class PhabricatorSettingsPanelSSHKeys
   }
 
   private function renderKeyListView(AphrontRequest $request) {
-
-    $user = $request->getUser();
+    $user = $this->getUser();
+    $viewer = $request->getUser();
 
     $keys = id(new PhabricatorUserSSHKey())->loadAllWhere(
       'userPHID = %s',
@@ -188,8 +192,8 @@ final class PhabricatorSettingsPanelSSHKeys
           $key->getName()),
         $key->getKeyComment(),
         $key->getKeyType(),
-        phabricator_date($key->getDateCreated(), $user),
-        phabricator_time($key->getDateCreated(), $user),
+        phabricator_date($key->getDateCreated(), $viewer),
+        phabricator_time($key->getDateCreated(), $viewer),
         javelin_tag(
           'a',
           array(
@@ -266,7 +270,8 @@ final class PhabricatorSettingsPanelSSHKeys
     AphrontRequest $request,
     PhabricatorUserSSHKey $key) {
 
-    $user = $request->getUser();
+    $viewer = $request->getUser();
+    $user = $this->getUser();
 
     $name = phutil_tag('strong', array(), $key->getName());
 
@@ -277,7 +282,7 @@ final class PhabricatorSettingsPanelSSHKeys
     }
 
     $dialog = id(new AphrontDialogView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->addHiddenInput('delete', $key->getID())
       ->setTitle(pht('Really delete SSH Public Key?'))
       ->appendChild(phutil_tag('p', array(), pht(
@@ -291,9 +296,11 @@ final class PhabricatorSettingsPanelSSHKeys
       ->setDialog($dialog);
   }
 
-  private function processGenerate(
-    AphrontRequest $request) {
+  private function processGenerate(AphrontRequest $request) {
+    $user = $this->getUser();
     $viewer = $request->getUser();
+
+    $is_self = ($user->getPHID() == $viewer->getPHID());
 
     if ($request->isFormPost()) {
       $keys = PhabricatorSSHKeyGenerator::generateKeypair();
@@ -308,7 +315,7 @@ final class PhabricatorSettingsPanelSSHKeys
         ));
 
       $key = id(new PhabricatorUserSSHKey())
-        ->setUserPHID($viewer->getPHID())
+        ->setUserPHID($user->getPHID())
         ->setName('id_rsa_phabricator')
         ->setKeyType('rsa')
         ->setKeyBody($public_key)
@@ -320,6 +327,17 @@ final class PhabricatorSettingsPanelSSHKeys
       // disabling workflow on cancel so the page reloads, showing the new
       // key.
 
+      if ($is_self) {
+        $what_happened = pht(
+          'The public key has been associated with your Phabricator '.
+          'account. Use the button below to download the private key.');
+      } else {
+        $what_happened = pht(
+          'The public key has been associated with the %s account. '.
+          'Use the button below to download the private key.',
+          phutil_tag('strong', array(), $user->getUsername()));
+      }
+
       $dialog = id(new AphrontDialogView())
         ->setTitle(pht('Download Private Key'))
         ->setUser($viewer)
@@ -329,10 +347,7 @@ final class PhabricatorSettingsPanelSSHKeys
         ->appendParagraph(
           pht(
             'Successfully generated a new keypair.'))
-        ->appendParagraph(
-          pht(
-            'The public key has been associated with your Phabricator '.
-            'account. Use the button below to download the private key.'))
+        ->appendParagraph($what_happened)
         ->appendParagraph(
           pht(
             'After you download the private key, it will be destroyed. '.
@@ -350,13 +365,22 @@ final class PhabricatorSettingsPanelSSHKeys
 
     try {
       PhabricatorSSHKeyGenerator::assertCanGenerateKeypair();
+
+      if ($is_self) {
+        $explain = pht(
+          'This will generate an SSH keypair, associate the public key '.
+          'with your account, and let you download the private key.');
+      } else {
+        $explain = pht(
+          'This will generate an SSH keypair, associate the public key with '.
+          'the %s account, and let you download the private key.',
+          phutil_tag('strong', array(), $user->getUsername()));
+      }
+
       $dialog
         ->addHiddenInput('generate', true)
         ->setTitle(pht('Generate New Keypair'))
-        ->appendParagraph(
-          pht(
-            "This will generate an SSH keypair, associate the public key ".
-            "with your account, and let you download the private key."))
+        ->appendParagraph($explain)
         ->appendParagraph(
           pht(
             "Phabricator will not retain a copy of the private key."))

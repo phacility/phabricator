@@ -3,12 +3,16 @@
 final class PhabricatorSettingsPanelConduit
   extends PhabricatorSettingsPanel {
 
+  public function isEditableByAdministrators() {
+    return true;
+  }
+
   public function getPanelKey() {
     return 'conduit';
   }
 
   public function getPanelName() {
-    return pht('Conduit');
+    return pht('Conduit Certificate');
   }
 
   public function getPanelGroup() {
@@ -16,12 +20,13 @@ final class PhabricatorSettingsPanelConduit
   }
 
   public function processRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $user = $this->getUser();
+    $viewer = $request->getUser();
 
     if ($request->isFormPost()) {
       if (!$request->isDialogFormPost()) {
         $dialog = new AphrontDialogView();
-        $dialog->setUser($user);
+        $dialog->setUser($viewer);
         $dialog->setTitle(pht('Really regenerate session?'));
         $dialog->setSubmitURI($this->getPanelURI());
         $dialog->addSubmitButton(pht('Regenerate'));
@@ -69,7 +74,7 @@ final class PhabricatorSettingsPanelConduit
 
     $cert_form = new AphrontFormView();
     $cert_form
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendChild(phutil_tag(
         'p',
         array('class' => 'aphront-form-instructions'),
@@ -93,7 +98,7 @@ final class PhabricatorSettingsPanelConduit
 
     $regen_form = new AphrontFormView();
     $regen_form
-      ->setUser($user)
+      ->setUser($viewer)
       ->setAction($this->getPanelURI())
       ->setWorkflow(true)
       ->appendChild(phutil_tag(

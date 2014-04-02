@@ -35,7 +35,6 @@ final class PhabricatorPeopleEditController
     $nav->setBaseURI(new PhutilURI($base_uri));
     $nav->addLabel(pht('User Information'));
     $nav->addFilter('basic', pht('Basic Information'));
-    $nav->addFilter('cert', pht('Conduit Certificate'));
     $nav->addFilter('profile',
       pht('View Profile'), '/p/'.$user->getUsername().'/');
 
@@ -59,9 +58,6 @@ final class PhabricatorPeopleEditController
     switch ($view) {
       case 'basic':
         $response = $this->processBasicRequest($user);
-        break;
-      case 'cert':
-        $response = $this->processCertificateRequest($user);
         break;
       default:
         return new Aphront404Response();
@@ -322,47 +318,6 @@ final class PhabricatorPeopleEditController
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setFormErrors($errors)
-      ->setForm($form);
-
-    return array($form_box);
-  }
-
-  private function processCertificateRequest($user) {
-    $request = $this->getRequest();
-    $admin = $request->getUser();
-
-    $inst = pht('You can use this certificate '.
-        'to write scripts or bots which interface with Phabricator over '.
-        'Conduit.');
-    $form = new AphrontFormView();
-    $form
-      ->setUser($admin)
-      ->setAction($request->getRequestURI())
-      ->appendChild(
-        phutil_tag('p', array('class' => 'aphront-form-instructions'), $inst));
-
-    if ($user->getIsSystemAgent()) {
-      $form
-        ->appendChild(
-          id(new AphrontFormTextControl())
-            ->setLabel(pht('Username'))
-            ->setValue($user->getUsername()))
-        ->appendChild(
-          id(new AphrontFormTextAreaControl())
-            ->setLabel(pht('Certificate'))
-            ->setValue($user->getConduitCertificate()));
-    } else {
-      $form->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel(pht('Certificate'))
-          ->setValue(
-            pht('You may only view the certificates of System Agents.')));
-    }
-
-    $title = pht('Conduit Certificate');
-
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
       ->setForm($form);
 
     return array($form_box);

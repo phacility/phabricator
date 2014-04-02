@@ -64,6 +64,14 @@ final class PhabricatorPeopleProfileController
         ->setWorkflow(!$can_edit));
 
     if ($viewer->getIsAdmin()) {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon('wrench')
+          ->setName(pht('Edit Settings'))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(!$can_edit)
+          ->setHref('/settings/'.$user->getID().'/'));
+
       if ($user->getIsAdmin()) {
         $empower_icon = 'lower-priority';
         $empower_name = pht('Remove Administrator');

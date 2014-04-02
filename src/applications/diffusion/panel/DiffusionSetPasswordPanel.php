@@ -2,6 +2,10 @@
 
 final class DiffusionSetPasswordPanel extends PhabricatorSettingsPanel {
 
+  public function isEditableByAdministrators() {
+    return true;
+  }
+
   public function getPanelKey() {
     return 'vcspassword';
   }
@@ -19,7 +23,8 @@ final class DiffusionSetPasswordPanel extends PhabricatorSettingsPanel {
   }
 
   public function processRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $request->getUser();
+    $user = $this->getUser();
 
     $vcspassword = id(new PhabricatorRepositoryVCSPassword())
       ->loadOneWhere(
@@ -68,7 +73,12 @@ final class DiffusionSetPasswordPanel extends PhabricatorSettingsPanel {
           $e_password = pht('Does Not Match');
           $e_confirm = pht('Does Not Match');
           $errors[] = pht('Password and confirmation do not match.');
-        } else if ($user->comparePassword($envelope)) {
+        } else if ($viewer->comparePassword($envelope)) {
+          // NOTE: The above test is against $viewer (not $user), so that the
+          // error message below makes sense in the case that the two are
+          // different, and because an admin reusing their own password is bad,
+          // while system agents generally do not have passwords anyway.
+
           $e_password = pht('Not Unique');
           $e_confirm = pht('Not Unique');
           $errors[] = pht(
@@ -97,7 +107,7 @@ final class DiffusionSetPasswordPanel extends PhabricatorSettingsPanel {
     $title = pht('Set VCS Password');
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendRemarkupInstructions(
         pht(
           'To access repositories hosted by Phabricator over HTTP, you must '.
@@ -193,7 +203,7 @@ final class DiffusionSetPasswordPanel extends PhabricatorSettingsPanel {
       ->setFormErrors($errors);
 
     $remove_form = id(new AphrontFormView())
-      ->setUser($user);
+      ->setUser($viewer);
 
     if ($vcspassword->getID()) {
       $remove_form
