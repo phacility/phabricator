@@ -6,6 +6,7 @@ final class DoorkeeperImportEngine extends Phobject {
   private $refs = array();
   private $phids = array();
   private $localOnly;
+  private $throwOnMissingLink;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -33,6 +34,16 @@ final class DoorkeeperImportEngine extends Phobject {
 
   public function needLocalOnly($local_only) {
     $this->localOnly = $local_only;
+    return $this;
+  }
+
+
+  /**
+   * Configure behavior if remote refs can not be retrieved because an
+   * authentication link is missing.
+   */
+  public function setThrowOnMissingLink($throw) {
+    $this->throwOnMissingLink = $throw;
     return $this;
   }
 
@@ -86,6 +97,7 @@ final class DoorkeeperImportEngine extends Phobject {
           unset($bridges[$key]);
         }
         $bridge->setViewer($viewer);
+        $bridge->setThrowOnMissingLink($this->throwOnMissingLink);
       }
 
       $working_set = $refs;

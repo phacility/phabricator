@@ -40,7 +40,7 @@ final class DoorkeeperBridgeAsana extends DoorkeeperBridge {
       ->execute();
 
     if (!$accounts) {
-      return;
+      return $this->didFailOnMissingLink();
     }
 
     // TODO: If the user has several linked Asana accounts, we just pick the

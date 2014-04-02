@@ -116,11 +116,11 @@ final class DifferentialJIRAIssuesField
   }
 
   public function getOldValueForApplicationTransactions() {
-    return nonempty($this->getValue(), array());
+    return array_unique(nonempty($this->getValue(), array()));
   }
 
   public function getNewValueForApplicationTransactions() {
-    return nonempty($this->getValue(), array());
+    return array_unique(nonempty($this->getValue(), array()));
   }
 
   public function validateApplicationTransactions(
@@ -137,12 +137,36 @@ final class DifferentialJIRAIssuesField
 
     $transaction = null;
     foreach ($xactions as $xaction) {
-      $value = $xaction->getNewValue();
+      $old = $xaction->getOldValue();
+      $new = $xaction->getNewValue();
 
-      $refs = id(new DoorkeeperImportEngine())
-        ->setViewer($this->getViewer())
-        ->setRefs($this->buildDoorkeeperRefs($value))
-        ->execute();
+      $add = array_diff($new, $old);
+      if (!$add) {
+        continue;
+      }
+
+      // Only check that the actor can see newly added JIRA refs. You're
+      // allowed to remove refs or make no-op changes even if you aren't
+      // linked to JIRA.
+
+      try {
+        $refs = id(new DoorkeeperImportEngine())
+          ->setViewer($this->getViewer())
+          ->setRefs($this->buildDoorkeeperRefs($add))
+          ->setThrowOnMissingLink(true)
+          ->execute();
+      } catch (DoorkeeperMissingLinkException $ex) {
+        $this->error = pht('Not Linked');
+        $errors[] = new PhabricatorApplicationTransactionValidationError(
+          $type,
+          pht('Not Linked'),
+          pht(
+            'You can not add JIRA issues (%s) to this revision because your '.
+            'Phabricator account is not linked to a JIRA account.',
+            implode(', ', $add)),
+          $xaction);
+        continue;
+      }
 
       $bad = array();
       foreach ($refs as $ref) {
@@ -155,7 +179,7 @@ final class DifferentialJIRAIssuesField
         $bad = implode(', ', $bad);
         $this->error = pht('Invalid');
 
-        $error = new PhabricatorApplicationTransactionValidationError(
+        $errors[] = new PhabricatorApplicationTransactionValidationError(
           $type,
           pht('Invalid'),
           pht(
@@ -163,7 +187,6 @@ final class DifferentialJIRAIssuesField
             "you may not have permission to view them: %s",
             $bad),
           $xaction);
-        $errors[] = $error;
       }
     }
 
