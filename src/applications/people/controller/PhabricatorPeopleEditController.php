@@ -44,7 +44,6 @@ final class PhabricatorPeopleEditController
     if ($user->getIsSystemAgent()) {
       $nav->addFilter('picture', pht('Set Account Picture'));
     }
-    $nav->addFilter('delete', pht('Delete User'));
 
     if (!$user->getID()) {
       $this->view = 'basic';
@@ -78,9 +77,6 @@ final class PhabricatorPeopleEditController
         break;
       case 'picture':
         $response = $this->processSetAccountPicture($user);
-        break;
-      case 'delete':
-        $response = $this->processDeleteRequest($user);
         break;
       default:
         return new Aphront404Response();
@@ -567,91 +563,6 @@ final class PhabricatorPeopleEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Change Username'))
-      ->setFormErrors($errors)
-      ->setForm($form);
-
-    return array($form_box);
-  }
-
-  private function processDeleteRequest(PhabricatorUser $user) {
-    $request = $this->getRequest();
-    $admin = $request->getUser();
-
-    $far1 = pht('As you stare into the gaping maw of the abyss, something '.
-        'hold you back.');
-    $far2 = pht('You can not delete your own account.');
-
-    if ($user->getPHID() == $admin->getPHID()) {
-      $error = new AphrontErrorView();
-      $error->setTitle(pht('You Shall Journey No Farther'));
-      $error->appendChild(hsprintf(
-        '<p>%s</p><p>%s</p>', $far1, $far2));
-      return $error;
-    }
-
-    $e_username = true;
-    $username = null;
-
-    $errors = array();
-    if ($request->isFormPost()) {
-
-      $username = $request->getStr('username');
-      if (!strlen($username)) {
-        $e_username = pht('Required');
-        $errors[] = pht('You must type the username to confirm deletion.');
-      } else if ($username != $user->getUsername()) {
-        $e_username = pht('Invalid');
-        $errors[] = pht('You must type the username correctly.');
-      }
-
-      if (!$errors) {
-        id(new PhabricatorUserEditor())
-          ->setActor($admin)
-          ->deleteUser($user);
-
-        return id(new AphrontRedirectResponse())->setURI('/people/');
-      }
-    }
-
-    $str1 = pht('Be careful when deleting users!');
-    $str2 = pht('If this user interacted with anything, it is generally '.
-        'better to disable them, not delete them. If you delete them, it will '.
-        'no longer be possible to search for their objects, for example, '.
-        'and you will lose other information about their history. Disabling '.
-        'them instead will prevent them from logging in but not destroy '.
-        'any of their data.');
-    $str3 = pht('It is generally safe to delete newly created users (and '.
-          'test users and so on), but less safe to delete established users. '.
-          'If possible, disable them instead.');
-
-    $form = new AphrontFormView();
-    $form
-      ->setUser($admin)
-      ->setAction($request->getRequestURI())
-      ->appendChild(hsprintf(
-        '<p class="aphront-form-instructions">'.
-          '<strong>%s</strong> %s'.
-        '</p>'.
-        '<p class="aphront-form-instructions">'.
-          '%s'.
-        '</p>', $str1, $str2, $str3))
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel(pht('Username'))
-          ->setValue($user->getUsername()))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('Confirm'))
-          ->setValue($username)
-          ->setName('username')
-          ->setCaption(pht("Type the username again to confirm deletion."))
-          ->setError($e_username))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue(pht('Delete User')));
-
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Delete User'))
       ->setFormErrors($errors)
       ->setForm($form);
 

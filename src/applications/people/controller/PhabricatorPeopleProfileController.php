@@ -63,6 +63,14 @@ final class PhabricatorPeopleProfileController
     if ($viewer->getIsAdmin()) {
       $actions->addAction(
         id(new PhabricatorActionView())
+          ->setIcon('delete')
+          ->setName(pht('Delete User'))
+          ->setDisabled(($user->getPHID() == $viewer->getPHID()))
+          ->setWorkflow(true)
+          ->setHref($this->getApplicationURI('delete/'.$user->getID().'/')));
+
+      $actions->addAction(
+        id(new PhabricatorActionView())
           ->setIcon('blame')
           ->setName(pht('Administrate User'))
           ->setHref($this->getApplicationURI('edit/'.$user->getID().'/')));
