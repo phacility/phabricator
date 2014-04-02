@@ -121,9 +121,10 @@ final class PhabricatorPeopleProfileController
 
       $actions->addAction(
         id(new PhabricatorActionView())
-          ->setIcon('blame')
-          ->setName(pht('Administrate User'))
-          ->setHref($this->getApplicationURI('edit/'.$user->getID().'/')));
+          ->setIcon('message')
+          ->setName(pht('Send Welcome Email'))
+          ->setWorkflow(true)
+          ->setHref($this->getApplicationURI('welcome/'.$user->getID().'/')));
     }
 
     $properties = $this->buildPropertyView($user, $actions);

@@ -21,7 +21,7 @@ final class PhabricatorPeopleEmpowerController
       return new Aphront404Response();
     }
 
-    $profile_uri = '/p/'.$user->getUsername();
+    $profile_uri = '/p/'.$user->getUsername().'/';
 
     if ($user->getPHID() == $admin->getPHID()) {
       return $this->newDialog()

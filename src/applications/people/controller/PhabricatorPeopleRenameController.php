@@ -21,7 +21,7 @@ final class PhabricatorPeopleRenameController
       return new Aphront404Response();
     }
 
-    $profile_uri = '/p/'.$user->getUsername();
+    $profile_uri = '/p/'.$user->getUsername().'/';
 
     $errors = array();
 
@@ -75,8 +75,12 @@ final class PhabricatorPeopleRenameController
     $inst4 = pht(
       'Users who rely on password authentication will need to reset their '.
       'password after their username is changed (their username is part of '.
-      'the salt in the password hash). They will receive an email with '.
-      'instructions on how to do this.');
+      'the salt in the password hash).');
+
+    $inst5 = pht(
+      'The user will receive an email notifying them that you changed their '.
+      'username, with instructions for logging in and resetting their '.
+      'password if necessary.');
 
     $form = id(new AphrontFormView())
       ->setUser($admin)
@@ -103,6 +107,7 @@ final class PhabricatorPeopleRenameController
       ->appendParagraph($inst2)
       ->appendParagraph($inst3)
       ->appendParagraph($inst4)
+      ->appendParagraph($inst5)
       ->appendParagraph(null)
       ->appendChild($form->buildLayoutView())
       ->addSubmitButton(pht('Rename User'))

@@ -51,7 +51,6 @@ final class PhabricatorSettingsMainController
 
     $key = $nav->selectFilter($this->key, head($panels)->getPanelKey());
 
-
     $panel = $panels[$key];
     $panel->setUser($this->getUser());
     $panel->setViewer($viewer);

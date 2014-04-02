@@ -3,83 +3,31 @@
 final class PhabricatorPeopleEditController
   extends PhabricatorPeopleController {
 
-  private $id;
-  private $view;
-
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-    $this->view = idx($data, 'view');
-  }
-
   public function processRequest() {
 
     $request = $this->getRequest();
     $admin = $request->getUser();
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
-    if ($this->id) {
-      $user = id(new PhabricatorUser())->load($this->id);
-      if (!$user) {
-        return new Aphront404Response();
-      }
-      $base_uri = '/people/edit/'.$user->getID().'/';
-      $crumbs->addTextCrumb(pht('Edit User'), '/people/edit/');
-      $crumbs->addTextCrumb($user->getFullName(), $base_uri);
-    } else {
-      $user = new PhabricatorUser();
-      $base_uri = '/people/edit/';
-      $crumbs->addTextCrumb(pht('Create New User'), $base_uri);
-    }
 
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI($base_uri));
-    $nav->addLabel(pht('User Information'));
-    $nav->addFilter('basic', pht('Basic Information'));
-    $nav->addFilter('profile',
-      pht('View Profile'), '/p/'.$user->getUsername().'/');
-
-    if (!$user->getID()) {
-      $this->view = 'basic';
-    }
-
-    $view = $nav->selectFilter($this->view, 'basic');
+    $user = new PhabricatorUser();
+    $base_uri = '/people/edit/';
+    $crumbs->addTextCrumb(pht('Create New User'), $base_uri);
 
     $content = array();
 
-    if ($request->getStr('saved')) {
-      $notice = new AphrontErrorView();
-      $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-      $notice->setTitle(pht('Changes Saved'));
-      $notice->appendChild(
-        phutil_tag('p', array(), pht('Your changes were saved.')));
-      $content[] = $notice;
-    }
-
-    switch ($view) {
-      case 'basic':
-        $response = $this->processBasicRequest($user);
-        break;
-      default:
-        return new Aphront404Response();
-    }
-
+    $response = $this->processBasicRequest($user);
     if ($response instanceof AphrontResponse) {
       return $response;
     }
 
     $content[] = $response;
 
-    if ($user->getID()) {
-      $nav->appendChild($content);
-    } else {
-      $nav = $this->buildSideNavView();
-      $nav->selectFilter('edit');
-      $nav->appendChild($content);
-    }
-
-    $nav->setCrumbs($crumbs);
     return $this->buildApplicationPage(
-      $nav,
+      array(
+        $crumbs,
+        $content,
+      ),
       array(
         'title' => pht('Edit User'),
         'device' => true,
@@ -102,23 +50,20 @@ final class PhabricatorPeopleEditController
     $request = $this->getRequest();
     if ($request->isFormPost()) {
       $welcome_checked = $request->getInt('welcome');
-      $is_new = !$user->getID();
 
-      if ($is_new) {
-        $user->setUsername($request->getStr('username'));
+      $user->setUsername($request->getStr('username'));
 
-        $new_email = $request->getStr('email');
-        if (!strlen($new_email)) {
-          $errors[] = pht('Email is required.');
-          $e_email = pht('Required');
-        } else if (!PhabricatorUserEmail::isAllowedAddress($new_email)) {
-          $e_email = pht('Invalid');
-          $errors[] = PhabricatorUserEmail::describeAllowedAddresses();
-        } else {
-          $e_email = null;
-        }
-
+      $new_email = $request->getStr('email');
+      if (!strlen($new_email)) {
+        $errors[] = pht('Email is required.');
+        $e_email = pht('Required');
+      } else if (!PhabricatorUserEmail::isAllowedAddress($new_email)) {
+        $e_email = pht('Invalid');
+        $errors[] = PhabricatorUserEmail::describeAllowedAddresses();
+      } else {
+        $e_email = null;
       }
+
       $user->setRealName($request->getStr('realname'));
 
       if (!strlen($user->getUsername())) {
@@ -141,28 +86,21 @@ final class PhabricatorPeopleEditController
       if (!$errors) {
         try {
 
-          if (!$is_new) {
+          $email = id(new PhabricatorUserEmail())
+            ->setAddress($new_email)
+            ->setIsVerified(0);
+
+          // Automatically approve the user, since an admin is creating them.
+          $user->setIsApproved(1);
+
+          id(new PhabricatorUserEditor())
+            ->setActor($admin)
+            ->createNewUser($user, $email);
+
+          if ($request->getStr('role') == 'agent') {
             id(new PhabricatorUserEditor())
               ->setActor($admin)
-              ->updateUser($user);
-          } else {
-            $email = id(new PhabricatorUserEmail())
-              ->setAddress($new_email)
-              ->setIsVerified(0);
-
-            // Automatically approve the user, since an admin is creating them.
-            $user->setIsApproved(1);
-
-            id(new PhabricatorUserEditor())
-              ->setActor($admin)
-              ->createNewUser($user, $email);
-
-            if ($request->getStr('role') == 'agent') {
-              id(new PhabricatorUserEditor())
-                ->setActor($admin)
-                ->makeSystemAgentUser($user, true);
-            }
-
+              ->makeSystemAgentUser($user, true);
           }
 
           if ($welcome_checked) {
@@ -170,7 +108,7 @@ final class PhabricatorPeopleEditController
           }
 
           $response = id(new AphrontRedirectResponse())
-            ->setURI('/people/edit/'.$user->getID().'/?saved=true');
+            ->setURI('/p/'.$user->getUsername().'/');
           return $response;
         } catch (AphrontQueryDuplicateKeyException $ex) {
           $errors[] = pht('Username and email must be unique.');
@@ -193,17 +131,9 @@ final class PhabricatorPeopleEditController
 
     $form = new AphrontFormView();
     $form->setUser($admin);
-    if ($user->getID()) {
-      $form->setAction('/people/edit/'.$user->getID().'/');
-    } else {
-      $form->setAction('/people/edit/');
-    }
+    $form->setAction('/people/edit/');
 
-    if ($user->getID()) {
-      $is_immutable = true;
-    } else {
-      $is_immutable = false;
-    }
+    $is_immutable = false;
 
     $form
       ->appendChild(
@@ -220,100 +150,46 @@ final class PhabricatorPeopleEditController
           ->setValue($user->getRealName())
           ->setError($e_realname));
 
-    if (!$user->getID()) {
-      $form->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('Email'))
-          ->setName('email')
-          ->setDisabled($is_immutable)
-          ->setValue($new_email)
-          ->setCaption(PhabricatorUserEmail::describeAllowedAddresses())
-          ->setError($e_email));
-    } else {
-      $email = $user->loadPrimaryEmail();
-      if ($email) {
-        $status = $email->getIsVerified() ?
-          pht('Verified') : pht('Unverified');
-      } else {
-        $status = pht('No Email Address');
-      }
-
-      $form->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel(pht('Email'))
-          ->setValue($status));
-
-      $form->appendChild(
-        id(new AphrontFormCheckboxControl())
-        ->addCheckbox(
-          'welcome',
-          1,
-          pht('Re-send "Welcome to Phabricator" email.'),
-          false));
-
-    }
+    $form->appendChild(
+      id(new AphrontFormTextControl())
+        ->setLabel(pht('Email'))
+        ->setName('email')
+        ->setDisabled($is_immutable)
+        ->setValue($new_email)
+        ->setCaption(PhabricatorUserEmail::describeAllowedAddresses())
+        ->setError($e_email));
 
     $form->appendChild($this->getRoleInstructions());
 
-    if (!$user->getID()) {
-      $form
-        ->appendChild(
-          id(new AphrontFormSelectControl())
-            ->setLabel(pht('Role'))
-            ->setName('role')
-            ->setValue('user')
-            ->setOptions(
-              array(
-                'user'  => pht('Normal User'),
-                'agent' => pht('System Agent'),
-              ))
-            ->setCaption(
-              pht('You can create a "system agent" account for bots, '.
-              'scripts, etc.')))
-        ->appendChild(
-          id(new AphrontFormCheckboxControl())
-            ->addCheckbox(
-              'welcome',
-              1,
-              pht('Send "Welcome to Phabricator" email.'),
-              $welcome_checked));
-    } else {
-      $roles = array();
-
-      if ($user->getIsSystemAgent()) {
-        $roles[] = pht('System Agent');
-      }
-      if ($user->getIsAdmin()) {
-        $roles[] = pht('Admin');
-      }
-      if ($user->getIsDisabled()) {
-        $roles[] = pht('Disabled');
-      }
-      if (!$user->getIsApproved()) {
-        $roles[] = pht('Not Approved');
-      }
-      if (!$roles) {
-        $roles[] = pht('Normal User');
-      }
-
-      $roles = implode(', ', $roles);
-
-      $form->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel(pht('Roles'))
-          ->setValue($roles));
-    }
+    $form
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Role'))
+          ->setName('role')
+          ->setValue('user')
+          ->setOptions(
+            array(
+              'user'  => pht('Normal User'),
+              'agent' => pht('System Agent'),
+            ))
+          ->setCaption(
+            pht('You can create a "system agent" account for bots, '.
+            'scripts, etc.')))
+      ->appendChild(
+        id(new AphrontFormCheckboxControl())
+          ->addCheckbox(
+            'welcome',
+            1,
+            pht('Send "Welcome to Phabricator" email.'),
+            $welcome_checked));
 
     $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
+          ->addCancelButton($this->getApplicationURI())
           ->setValue(pht('Save')));
 
-    if ($user->getID()) {
-      $title = pht('Edit User');
-    } else {
-      $title = pht('Create New User');
-    }
+    $title = pht('Create New User');
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)

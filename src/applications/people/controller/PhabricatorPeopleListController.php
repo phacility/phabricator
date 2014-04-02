@@ -99,11 +99,6 @@ final class PhabricatorPeopleListController extends PhabricatorPeopleController
               ->setName(pht('Approve'))
               ->setWorkflow(true)
               ->setHref($this->getApplicationURI('approve/'.$user_id.'/')));
-        } else {
-          $item->addAction(
-            id(new PHUIListItemView())
-              ->setIcon('edit')
-              ->setHref($this->getApplicationURI('edit/'.$user_id.'/')));
         }
       }
 
