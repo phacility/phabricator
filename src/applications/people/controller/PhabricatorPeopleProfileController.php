@@ -64,12 +64,44 @@ final class PhabricatorPeopleProfileController
         ->setWorkflow(!$can_edit));
 
     if ($viewer->getIsAdmin()) {
+      if ($user->getIsAdmin()) {
+        $empower_icon = 'lower-priority';
+        $empower_name = pht('Remove Administrator');
+      } else {
+        $empower_icon = 'raise-priority';
+        $empower_name = pht('Make Administrator');
+      }
+
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon($empower_icon)
+          ->setName($empower_name)
+          ->setDisabled(($user->getPHID() == $viewer->getPHID()))
+          ->setWorkflow(true)
+          ->setHref($this->getApplicationURI('empower/'.$user->getID().'/')));
+
       $actions->addAction(
         id(new PhabricatorActionView())
           ->setIcon('tag')
           ->setName(pht('Change Username'))
           ->setWorkflow(true)
           ->setHref($this->getApplicationURI('rename/'.$user->getID().'/')));
+
+      if ($user->getIsDisabled()) {
+        $disable_icon = 'enable';
+        $disable_name = pht('Enable User');
+      } else {
+        $disable_icon = 'disable';
+        $disable_name = pht('Disable User');
+      }
+
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon($disable_icon)
+          ->setName($disable_name)
+          ->setDisabled(($user->getPHID() == $viewer->getPHID()))
+          ->setWorkflow(true)
+          ->setHref($this->getApplicationURI('disable/'.$user->getID().'/')));
 
       $actions->addAction(
         id(new PhabricatorActionView())

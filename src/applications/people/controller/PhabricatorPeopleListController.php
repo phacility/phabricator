@@ -92,7 +92,7 @@ final class PhabricatorPeopleListController extends PhabricatorPeopleController
               ->setIcon('disable')
               ->setName(pht('Disable'))
               ->setWorkflow(true)
-              ->setHref($this->getApplicationURI('disable/'.$user_id.'/')));
+              ->setHref($this->getApplicationURI('disapprove/'.$user_id.'/')));
           $item->addAction(
             id(new PHUIListItemView())
               ->setIcon('like')

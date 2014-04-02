@@ -1808,6 +1808,7 @@ phutil_register_library_map(array(
     'PhabricatorPeopleDeleteController' => 'applications/people/controller/PhabricatorPeopleDeleteController.php',
     'PhabricatorPeopleDisableController' => 'applications/people/controller/PhabricatorPeopleDisableController.php',
     'PhabricatorPeopleEditController' => 'applications/people/controller/PhabricatorPeopleEditController.php',
+    'PhabricatorPeopleEmpowerController' => 'applications/people/controller/PhabricatorPeopleEmpowerController.php',
     'PhabricatorPeopleHovercardEventListener' => 'applications/people/event/PhabricatorPeopleHovercardEventListener.php',
     'PhabricatorPeopleLdapController' => 'applications/people/controller/PhabricatorPeopleLdapController.php',
     'PhabricatorPeopleListController' => 'applications/people/controller/PhabricatorPeopleListController.php',
@@ -4613,6 +4614,7 @@ phutil_register_library_map(array(
     'PhabricatorPeopleDeleteController' => 'PhabricatorPeopleController',
     'PhabricatorPeopleDisableController' => 'PhabricatorPeopleController',
     'PhabricatorPeopleEditController' => 'PhabricatorPeopleController',
+    'PhabricatorPeopleEmpowerController' => 'PhabricatorPeopleController',
     'PhabricatorPeopleHovercardEventListener' => 'PhabricatorEventListener',
     'PhabricatorPeopleLdapController' => 'PhabricatorPeopleController',
     'PhabricatorPeopleListController' =>

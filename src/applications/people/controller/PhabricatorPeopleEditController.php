@@ -35,7 +35,6 @@ final class PhabricatorPeopleEditController
     $nav->setBaseURI(new PhutilURI($base_uri));
     $nav->addLabel(pht('User Information'));
     $nav->addFilter('basic', pht('Basic Information'));
-    $nav->addFilter('role', pht('Edit Roles'));
     $nav->addFilter('cert', pht('Conduit Certificate'));
     $nav->addFilter('profile',
       pht('View Profile'), '/p/'.$user->getUsername().'/');
@@ -60,9 +59,6 @@ final class PhabricatorPeopleEditController
     switch ($view) {
       case 'basic':
         $response = $this->processBasicRequest($user);
-        break;
-      case 'role':
-        $response = $this->processRoleRequest($user);
         break;
       case 'cert':
         $response = $this->processCertificateRequest($user);
@@ -322,103 +318,6 @@ final class PhabricatorPeopleEditController
     } else {
       $title = pht('Create New User');
     }
-
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
-      ->setFormErrors($errors)
-      ->setForm($form);
-
-    return array($form_box);
-  }
-
-  private function processRoleRequest(PhabricatorUser $user) {
-    $request = $this->getRequest();
-    $admin = $request->getUser();
-
-    $is_self = ($user->getID() == $admin->getID());
-
-    $errors = array();
-
-    if ($request->isFormPost()) {
-
-      $log_template = PhabricatorUserLog::initializeNewLog(
-        $admin,
-        $user->getPHID(),
-        null);
-
-      $logs = array();
-
-      if ($is_self) {
-        $errors[] = pht("You can not edit your own role.");
-      } else {
-        $new_admin = (bool)$request->getBool('is_admin');
-        $old_admin = (bool)$user->getIsAdmin();
-        if ($new_admin != $old_admin) {
-          id(new PhabricatorUserEditor())
-            ->setActor($admin)
-            ->makeAdminUser($user, $new_admin);
-        }
-
-        $new_disabled = (bool)$request->getBool('is_disabled');
-        $old_disabled = (bool)$user->getIsDisabled();
-        if ($new_disabled != $old_disabled) {
-          id(new PhabricatorUserEditor())
-            ->setActor($admin)
-            ->disableUser($user, $new_disabled);
-        }
-      }
-
-      if (!$errors) {
-        return id(new AphrontRedirectResponse())
-          ->setURI($request->getRequestURI()->alter('saved', 'true'));
-      }
-    }
-
-    $form = id(new AphrontFormView())
-      ->setUser($admin)
-      ->setAction($request->getRequestURI()->alter('saved', null));
-
-    if ($is_self) {
-      $inst = pht('NOTE: You can not edit your own role.');
-      $form->appendChild(
-        phutil_tag('p', array('class' => 'aphront-form-instructions'), $inst));
-    }
-
-    $form
-      ->appendChild($this->getRoleInstructions())
-      ->appendChild(
-        id(new AphrontFormCheckboxControl())
-          ->addCheckbox(
-            'is_admin',
-            1,
-            pht('Administrator'),
-            $user->getIsAdmin())
-          ->setDisabled($is_self))
-      ->appendChild(
-        id(new AphrontFormCheckboxControl())
-          ->addCheckbox(
-            'is_disabled',
-            1,
-            pht('Disabled'),
-            $user->getIsDisabled())
-          ->setDisabled($is_self))
-      ->appendChild(
-        id(new AphrontFormCheckboxControl())
-          ->addCheckbox(
-            'is_agent',
-            1,
-            pht('System Agent (Bot/Script User)'),
-            $user->getIsSystemAgent())
-          ->setDisabled(true));
-
-    if (!$is_self) {
-      $form
-        ->appendChild(
-          id(new AphrontFormSubmitControl())
-            ->setValue(pht('Edit Role')));
-    }
-
-    $title = pht('Edit Role');
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)

@@ -42,7 +42,11 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
         '(query/(?P<key>[^/]+)/)?' => 'PhabricatorPeopleListController',
         'logs/' => 'PhabricatorPeopleLogsController',
         'approve/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleApproveController',
-        'disable/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleDisableController',
+        '(?P<via>disapprove)/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorPeopleDisableController',
+        '(?P<via>disable)/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorPeopleDisableController',
+        'empower/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleEmpowerController',
         'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleDeleteController',
         'rename/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleRenameController',
         'edit/(?:(?P<id>[1-9]\d*)/(?:(?P<view>\w+)/)?)?'
