@@ -1,42 +1,30 @@
 <?php
 
-final class PhabricatorPeopleEditController
+final class PhabricatorPeopleNewController
   extends PhabricatorPeopleController {
 
-  public function processRequest() {
+  private $type;
 
-    $request = $this->getRequest();
-    $admin = $request->getUser();
-
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
-
-    $user = new PhabricatorUser();
-    $base_uri = '/people/edit/';
-    $crumbs->addTextCrumb(pht('Create New User'), $base_uri);
-
-    $content = array();
-
-    $response = $this->processBasicRequest($user);
-    if ($response instanceof AphrontResponse) {
-      return $response;
-    }
-
-    $content[] = $response;
-
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $content,
-      ),
-      array(
-        'title' => pht('Edit User'),
-        'device' => true,
-      ));
+  public function willProcessRequest(array $data) {
+    $this->type = $data['type'];
   }
 
-  private function processBasicRequest(PhabricatorUser $user) {
+  public function processRequest() {
     $request = $this->getRequest();
     $admin = $request->getUser();
+
+    switch ($this->type) {
+      case 'standard':
+        $is_bot = false;
+        break;
+      case 'bot':
+        $is_bot = true;
+        break;
+      default:
+        return new Aphront404Response();
+    }
+
+    $user = new PhabricatorUser();
 
     $e_username = true;
     $e_realname = true;
@@ -93,17 +81,22 @@ final class PhabricatorPeopleEditController
           // Automatically approve the user, since an admin is creating them.
           $user->setIsApproved(1);
 
+          // If the user is a bot, approve their email too.
+          if ($is_bot) {
+            $email->setIsVerified(1);
+          }
+
           id(new PhabricatorUserEditor())
             ->setActor($admin)
             ->createNewUser($user, $email);
 
-          if ($request->getStr('role') == 'agent') {
+          if ($is_bot) {
             id(new PhabricatorUserEditor())
               ->setActor($admin)
               ->makeSystemAgentUser($user, true);
           }
 
-          if ($welcome_checked) {
+          if ($welcome_checked && !$is_bot) {
             $user->sendWelcomeEmail($admin);
           }
 
@@ -129,11 +122,18 @@ final class PhabricatorPeopleEditController
       }
     }
 
-    $form = new AphrontFormView();
-    $form->setUser($admin);
-    $form->setAction('/people/edit/');
+    $form = id(new AphrontFormView())
+      ->setUser($admin);
 
-    $is_immutable = false;
+    if ($is_bot) {
+      $form->appendRemarkupInstructions(
+        pht(
+          'You are creating a new **bot/script** user account.'));
+    } else {
+      $form->appendRemarkupInstructions(
+        pht(
+          'You are creating a new **standard** user account.'));
+    }
 
     $form
       ->appendChild(
@@ -141,53 +141,63 @@ final class PhabricatorPeopleEditController
           ->setLabel(pht('Username'))
           ->setName('username')
           ->setValue($user->getUsername())
-          ->setError($e_username)
-          ->setDisabled($is_immutable))
+          ->setError($e_username))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Real Name'))
           ->setName('realname')
           ->setValue($user->getRealName())
-          ->setError($e_realname));
-
-    $form->appendChild(
-      id(new AphrontFormTextControl())
-        ->setLabel(pht('Email'))
-        ->setName('email')
-        ->setDisabled($is_immutable)
-        ->setValue($new_email)
-        ->setCaption(PhabricatorUserEmail::describeAllowedAddresses())
-        ->setError($e_email));
-
-    $form->appendChild($this->getRoleInstructions());
-
-    $form
+          ->setError($e_realname))
       ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Role'))
-          ->setName('role')
-          ->setValue('user')
-          ->setOptions(
-            array(
-              'user'  => pht('Normal User'),
-              'agent' => pht('System Agent'),
-            ))
-          ->setCaption(
-            pht('You can create a "system agent" account for bots, '.
-            'scripts, etc.')))
-      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel(pht('Email'))
+          ->setName('email')
+          ->setValue($new_email)
+          ->setCaption(PhabricatorUserEmail::describeAllowedAddresses())
+          ->setError($e_email));
+
+    if (!$is_bot) {
+      $form->appendChild(
         id(new AphrontFormCheckboxControl())
           ->addCheckbox(
             'welcome',
             1,
-            pht('Send "Welcome to Phabricator" email.'),
+            pht('Send "Welcome to Phabricator" email with login instructions.'),
             $welcome_checked));
+    }
 
     $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($this->getApplicationURI())
-          ->setValue(pht('Save')));
+          ->setValue(pht('Create User')));
+
+    if ($is_bot) {
+      $form
+        ->appendChild(id(new AphrontFormDividerControl()))
+        ->appendRemarkupInstructions(
+          pht(
+            '**Why do bot/script accounts need an email address?**'.
+            "\n\n".
+            'Although bots do not normally receive email from Phabricator, '.
+            'they can interact with other systems which require an email '.
+            'address. Examples include:'.
+            "\n\n".
+            "  - If the account takes actions which //send// email, we need ".
+            "    an address to use in the //From// header.\n".
+            "  - If the account creates commits, Git and Mercurial require ".
+            "    an email address for authorship.\n".
+            "  - If you send email //to// Phabricator on behalf of the ".
+            "    account, the address can identify the sender.\n".
+            "  - Some internal authentication functions depend on accounts ".
+            "    having an email address.\n".
+            "\n\n".
+            "The address will automatically be verified, so you do not need ".
+            "to be able to receive mail at this address, and can enter some ".
+            "invalid or nonexistent (but correctly formatted) address like ".
+            "`bot@yourcompany.com` if you prefer."));
+    }
+
 
     $title = pht('Create New User');
 
@@ -196,23 +206,18 @@ final class PhabricatorPeopleEditController
       ->setFormErrors($errors)
       ->setForm($form);
 
-    return array($form_box);
-  }
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb($title);
 
-  private function getRoleInstructions() {
-    $roles_link = phutil_tag(
-      'a',
+    return $this->buildApplicationPage(
       array(
-        'href'   => PhabricatorEnv::getDoclink(
-          'article/User_Guide_Account_Roles.html'),
-        'target' => '_blank',
+        $crumbs,
+        $form_box,
       ),
-      pht('User Guide: Account Roles'));
-
-    return phutil_tag(
-      'p',
-      array('class' => 'aphront-form-instructions'),
-      pht('For a detailed explanation of account roles, see %s.', $roles_link));
+      array(
+        'title' => $title,
+        'device' => true,
+      ));
   }
 
 }

@@ -50,7 +50,8 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
         'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleDeleteController',
         'rename/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleRenameController',
         'welcome/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleWelcomeController',
-        'edit/' => 'PhabricatorPeopleEditController',
+        'create/' => 'PhabricatorPeopleCreateController',
+        'new/(?P<type>[^/]+)/' => 'PhabricatorPeopleNewController',
         'ldap/' => 'PhabricatorPeopleLdapController',
         'editprofile/(?P<id>[1-9]\d*)/' =>
           'PhabricatorPeopleProfileEditController',
@@ -139,5 +140,21 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
 
     return $items;
   }
+
+
+  public function getQuickCreateItems(PhabricatorUser $viewer) {
+    $items = array();
+
+    if ($viewer->getIsAdmin()) {
+      $item = id(new PHUIListItemView())
+        ->setName(pht('User Account'))
+        ->setAppIcon('people-dark')
+        ->setHref($this->getBaseURI().'create/');
+      $items[] = $item;
+    }
+
+    return $items;
+  }
+
 
 }
