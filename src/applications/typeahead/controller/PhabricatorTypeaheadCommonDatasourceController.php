@@ -185,7 +185,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
         if ($user->getIsDisabled()) {
           $closed = pht('Disabled');
         } else if ($user->getIsSystemAgent()) {
-          $closed = pht('System Agent');
+          $closed = pht('Bot/Script');
         }
 
         $result = id(new PhabricatorTypeaheadResult())

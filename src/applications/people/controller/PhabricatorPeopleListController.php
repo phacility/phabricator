@@ -81,7 +81,7 @@ final class PhabricatorPeopleListController extends PhabricatorPeopleController
       }
 
       if ($user->getIsSystemAgent()) {
-        $item->addIcon('computer', pht('System Agent'));
+        $item->addIcon('computer', pht('Bot/Script'));
       }
 
       if ($viewer->getIsAdmin()) {
