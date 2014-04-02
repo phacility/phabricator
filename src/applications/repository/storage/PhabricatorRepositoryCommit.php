@@ -130,6 +130,13 @@ final class PhabricatorRepositoryCommit
     return $this->getEpoch();
   }
 
+  public function getURI() {
+    $repository = $this->getRepository();
+    $callsign = $repository->getCallsign();
+    $commit_identifier = $this->getCommitIdentifier();
+    return '/r'.$callsign.$commit_identifier;
+  }
+
   /**
    * Synchronize a commit's overall audit status with the individual audit
    * triggers.

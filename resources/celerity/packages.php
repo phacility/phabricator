@@ -126,7 +126,6 @@ return array(
     'differential-revision-add-comment-css',
     'phabricator-object-selector-css',
     'phabricator-content-source-view-css',
-    'differential-local-commits-view-css',
     'inline-comment-summary-css',
   ),
   'differential.pkg.js' => array(

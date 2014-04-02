@@ -6,6 +6,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
   private $selectedVersusDiffID;
   private $selectedDiffID;
   private $selectedWhitespace;
+  private $commitsForLinks = array();
 
   public function setDiffs(array $diffs) {
     assert_instances_of($diffs, 'DifferentialDiff');
@@ -25,6 +26,12 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
 
   public function setSelectedWhitespace($whitespace) {
     $this->selectedWhitespace = $whitespace;
+    return $this;
+  }
+
+  public function setCommitsForLinks(array $commits) {
+    assert_instances_of($commits, 'PhabricatorRepositoryCommit');
+    $this->commitsForLinks = $commits;
     return $this;
   }
 
@@ -378,20 +385,38 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       case 'git':
         $base = $diff->getSourceControlBaseRevision();
         if (strpos($base, '@') === false) {
-          return substr($base, 0, 7);
+          $label = substr($base, 0, 7);
         } else {
           // The diff is from git-svn
           $base = explode('@', $base);
           $base = last($base);
-          return $base;
+          $label = $base;
         }
+        break;
       case 'svn':
         $base = $diff->getSourceControlBaseRevision();
         $base = explode('@', $base);
         $base = last($base);
-        return $base;
+        $label = $base;
+        break;
       default:
-        return null;
+        $label = null;
+        break;
     }
+    $link = null;
+    if ($label) {
+      $commit_for_link = idx(
+        $this->commitsForLinks,
+        $diff->getSourceControlBaseRevision());
+      if ($commit_for_link) {
+        $link = phutil_tag(
+          'a',
+          array('href' => $commit_for_link->getURI()),
+          $label);
+      } else {
+        $link = $label;
+      }
+    }
+    return $link;
   }
 }

@@ -3,9 +3,16 @@
 final class DifferentialLocalCommitsView extends AphrontView {
 
   private $localCommits;
+  private $commitsForLinks = array();
 
   public function setLocalCommits($local_commits) {
     $this->localCommits = $local_commits;
+    return $this;
+  }
+
+  public function setCommitsForLinks(array $commits) {
+    assert_instances_of($commits, 'PhabricatorRepositoryCommit');
+    $this->commitsForLinks = $commits;
     return $this;
   }
 
@@ -20,8 +27,6 @@ final class DifferentialLocalCommitsView extends AphrontView {
       return null;
     }
 
-    $this->requireResource('differential-local-commits-view-css');
-
     $has_tree = false;
     $has_local = false;
 
@@ -35,36 +40,23 @@ final class DifferentialLocalCommitsView extends AphrontView {
     }
 
     $rows = array();
-    $highlight = true;
     foreach ($local as $commit) {
-      if ($highlight) {
-        $class = 'alt';
-        $highlight = false;
-      } else {
-        $class = '';
-        $highlight = true;
-      }
-
-
       $row = array();
       if (idx($commit, 'commit')) {
-        $commit_hash = self::formatCommit($commit['commit']);
+        $commit_link = $this->buildCommitLink($commit['commit']);
       } else if (isset($commit['rev'])) {
-        $commit_hash = self::formatCommit($commit['rev']);
+        $commit_link = $this->buildCommitLink($commit['rev']);
       } else {
-        $commit_hash = null;
+        $commit_link = null;
       }
-      $row[] = phutil_tag('td', array(), $commit_hash);
+      $row[] = $commit_link;
 
       if ($has_tree) {
-        $tree = idx($commit, 'tree');
-        $tree = self::formatCommit($tree);
-        $row[] = phutil_tag('td', array(), $tree);
+        $row[] = $this->buildCommitLink($commit['tree']);
       }
 
       if ($has_local) {
-        $local_rev = idx($commit, 'local', null);
-        $row[] = phutil_tag('td', array(), $local_rev);
+        $row[] = $this->buildCommitLink($commit['local']);
       }
 
       $parents = idx($commit, 'parents', array());
@@ -72,15 +64,15 @@ final class DifferentialLocalCommitsView extends AphrontView {
         if (is_array($parent)) {
           $parent = idx($parent, 'rev');
         }
-        $parents[$k] = self::formatCommit($parent);
+        $parents[$k] = $this->buildCommitLink($parent);
       }
       $parents = phutil_implode_html(phutil_tag('br'), $parents);
-      $row[] = phutil_tag('td', array(), $parents);
+      $row[] = $parents;
 
       $author = nonempty(
         idx($commit, 'user'),
         idx($commit, 'author'));
-      $row[] = phutil_tag('td', array(), $author);
+      $row[] = $author;
 
       $message = idx($commit, 'message');
 
@@ -94,12 +86,7 @@ final class DifferentialLocalCommitsView extends AphrontView {
         $view->setMore(phutil_escape_html_newlines($message));
       }
 
-      $row[] = phutil_tag(
-        'td',
-        array(
-          'class' => 'summary',
-        ),
-        $view->render());
+      $row[] = $view->render();
 
       $date = nonempty(
         idx($commit, 'date'),
@@ -107,39 +94,60 @@ final class DifferentialLocalCommitsView extends AphrontView {
       if ($date) {
         $date = phabricator_datetime($date, $user);
       }
-      $row[] = phutil_tag('td', array(), $date);
+      $row[] = $date;
 
-      $rows[] = phutil_tag('tr', array('class' => $class), $row);
+      $rows[] = $row;
     }
 
-
-    $headers = array();
-    $headers[] = phutil_tag('th', array(), pht('Commit'));
+    $column_classes = array('');
     if ($has_tree) {
-      $headers[] = phutil_tag('th', array(), pht('Tree'));
+      $column_classes[] = '';
     }
     if ($has_local) {
-      $headers[] = phutil_tag('th', array(), pht('Local'));
+      $column_classes[] = '';
     }
-    $headers[] = phutil_tag('th', array(), pht('Parents'));
-    $headers[] = phutil_tag('th', array(), pht('Author'));
-    $headers[] = phutil_tag('th', array(), pht('Summary'));
-    $headers[] = phutil_tag('th', array(), pht('Date'));
-
-    $headers = phutil_tag('tr', array(), $headers);
-
-    $content = phutil_tag_div('differential-panel', phutil_tag(
-      'table',
-      array('class' => 'differential-local-commits-table'),
-      array($headers, phutil_implode_html("\n", $rows))));
+    $column_classes[] = '';
+    $column_classes[] = '';
+    $column_classes[] = 'wide';
+    $column_classes[] = 'date';
+    $table = id(new AphrontTableView($rows))
+      ->setColumnClasses($column_classes);
+    $headers = array();
+    $headers[] = pht('Commit');
+    if ($has_tree) {
+      $headers[] = pht('Tree');
+    }
+    if ($has_local) {
+      $headers[] = pht('Local');
+    }
+    $headers[] = pht('Parents');
+    $headers[] = pht('Author');
+    $headers[] = pht('Summary');
+    $headers[] = pht('Date');
+    $table->setHeaders($headers);
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Local Commits'))
-      ->appendChild($content);
+      ->appendChild($table);
   }
 
   private static function formatCommit($commit) {
     return substr($commit, 0, 12);
+  }
+
+  private function buildCommitLink($hash) {
+    $commit_for_link = idx($this->commitsForLinks, $hash);
+    $commit_hash = self::formatCommit($hash);
+    if ($commit_for_link) {
+      $link = phutil_tag(
+        'a',
+        array(
+          'href' => $commit_for_link->getURI()),
+        $commit_hash);
+    } else {
+      $link = $commit_hash;
+    }
+    return $link;
   }
 
 }
