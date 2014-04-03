@@ -8,7 +8,7 @@ return array(
   'names' =>
   array(
     'core.pkg.css' => 'fb144113',
-    'core.pkg.js' => 'd3fecc57',
+    'core.pkg.js' => 'e39d336b',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => 'cc216438',
     'differential.pkg.js' => '11a5b750',
@@ -463,7 +463,7 @@ return array(
     'rsrc/js/core/behavior-line-linker.js' => 'bc778103',
     'rsrc/js/core/behavior-more.js' => '9b9197be',
     'rsrc/js/core/behavior-object-selector.js' => 'b4eef37b',
-    'rsrc/js/core/behavior-oncopy.js' => 'dab9253e',
+    'rsrc/js/core/behavior-oncopy.js' => 'c3e218fe',
     'rsrc/js/core/behavior-phabricator-nav.js' => 'b5842a5e',
     'rsrc/js/core/behavior-phabricator-remarkup-assist.js' => 'c021950a',
     'rsrc/js/core/behavior-refresh-csrf.js' => 'c4b31646',
@@ -596,7 +596,7 @@ return array(
     'javelin-behavior-phabricator-nav' => 'b5842a5e',
     'javelin-behavior-phabricator-notification-example' => 'c51a6616',
     'javelin-behavior-phabricator-object-selector' => 'b4eef37b',
-    'javelin-behavior-phabricator-oncopy' => 'dab9253e',
+    'javelin-behavior-phabricator-oncopy' => 'c3e218fe',
     'javelin-behavior-phabricator-remarkup-assist' => 'c021950a',
     'javelin-behavior-phabricator-reveal-content' => '8f24abfc',
     'javelin-behavior-phabricator-search-typeahead' => 'f6b56f7a',
@@ -1634,6 +1634,11 @@ return array(
       2 => 'javelin-util',
       3 => 'javelin-magical-init',
     ),
+    'c3e218fe' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+    ),
     'c4b31646' =>
     array(
       0 => 'javelin-request',
@@ -1767,11 +1772,6 @@ return array(
       0 => 'javelin-install',
       1 => 'javelin-util',
       2 => 'javelin-stratcom',
-    ),
-    'dab9253e' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
     ),
     'dd7e8ef5' =>
     array(
