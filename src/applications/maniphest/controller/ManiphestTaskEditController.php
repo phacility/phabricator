@@ -45,6 +45,11 @@ final class ManiphestTaskEditController extends ManiphestController {
     } else {
       $task = ManiphestTask::initializeNewTask($user);
 
+      // We currently do not allow you to set the task status when creating
+      // a new task, although now that statuses are custom it might make
+      // sense.
+      $can_edit_status = false;
+
       // These allow task creation with defaults.
       if (!$request->isFormPost()) {
         $task->setTitle($request->getStr('title'));
@@ -178,8 +183,13 @@ final class ManiphestTaskEditController extends ManiphestController {
 
       $changes[ManiphestTransaction::TYPE_TITLE] = $new_title;
       $changes[ManiphestTransaction::TYPE_DESCRIPTION] = $new_desc;
+
       if ($can_edit_status) {
         $changes[ManiphestTransaction::TYPE_STATUS] = $new_status;
+      } else if (!$task->getID()) {
+        // Create an initial status transaction for the burndown chart.
+        // TODO: We can probably remove this once Facts comes online.
+        $changes[ManiphestTransaction::TYPE_STATUS] = $task->getStatus();
       }
 
       $owner_tokenizer = $request->getArr('assigned_to');
@@ -589,10 +599,7 @@ final class ManiphestTaskEditController extends ManiphestController {
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
           ->setValue($task->getTitle()));
 
-    if ($task->getID() && $can_edit_status) {
-      // Only show this in "edit" mode, not "create" mode, since creating a
-      // non-open task is kind of silly and it would just clutter up the
-      // "create" interface.
+    if ($can_edit_status) {
       $form
         ->appendChild(
           id(new AphrontFormSelectControl())
