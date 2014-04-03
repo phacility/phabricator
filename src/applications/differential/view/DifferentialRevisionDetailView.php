@@ -7,6 +7,7 @@ final class DifferentialRevisionDetailView extends AphrontView {
   private $customFields;
   private $diff;
   private $uri;
+  private $actionList;
 
   public function setURI($uri) {
     $this->uri = $uri;
@@ -35,6 +36,15 @@ final class DifferentialRevisionDetailView extends AphrontView {
   }
   private function getActions() {
     return $this->actions;
+  }
+
+  public function setActionList(PhabricatorActionListView $list) {
+    $this->actionList = $list;
+    return $this;
+  }
+
+  public function getActionList() {
+    return $this->actionList;
   }
 
   public function setCustomFields(PhabricatorCustomFieldList $list) {
@@ -95,6 +105,7 @@ final class DifferentialRevisionDetailView extends AphrontView {
 
     $properties->setHasKeyboardShortcuts(true);
     $properties->setActionList($actions);
+    $this->setActionList($actions);
 
     $field_list = $this->customFields;
     if ($field_list) {
