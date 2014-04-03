@@ -111,6 +111,23 @@ class AphrontDefaultApplicationConfiguration
       $user = new PhabricatorUser();
     }
 
+    if ($ex instanceof PhabricatorSystemActionRateLimitException) {
+      $error_view = id(new AphrontErrorView())
+        ->setErrors(array(pht('You are being rate limited.')));
+
+      $dialog = id(new AphrontDialogView())
+        ->setTitle(pht('Slow Down!'))
+        ->setUser($user)
+        ->appendChild($error_view)
+        ->appendParagraph($ex->getMessage())
+        ->appendParagraph($ex->getRateExplanation())
+        ->addCancelButton('/', pht('Okaaaaaaaaaaaaaay...'));
+
+      $response = new AphrontDialogResponse();
+      $response->setDialog($dialog);
+      return $response;
+    }
+
     if ($ex instanceof PhabricatorPolicyException) {
 
       if (!$user->isLoggedIn()) {
