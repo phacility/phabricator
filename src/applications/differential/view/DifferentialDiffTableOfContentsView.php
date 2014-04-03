@@ -122,7 +122,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
 
       $line_count = $changeset->getAffectedLineCount();
       if ($line_count == 0) {
-        $lines = null;
+        $lines = '';
       } else {
         $lines = ' '.pht('(%d line(s))', $line_count);
       }
@@ -135,7 +135,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
       }
       $pchar =
         ($changeset->getOldProperties() === $changeset->getNewProperties())
-          ? null
+          ? ''
           : phutil_tag('span', array('title' => pht('Properties Changed')), 'M')
         ;
 
@@ -150,33 +150,32 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
             'id' => 'differential-mcoverage-'.md5($fname),
             'class' => 'differential-mcoverage-loading',
           ),
-          (isset($this->visibleChangesets[$id]) ? 'Loading...' : '?'));
+          (isset($this->visibleChangesets[$id]) ?
+            pht('Loading...') : pht('?')));
       }
 
-      $rows[] = phutil_tag('tr', array(), array(
-        phutil_tag(
-          'td',
-          array('class' => 'differential-toc-char', 'title' => $chartitle),
-          $char),
-        phutil_tag('td', array('class' => 'differential-toc-prop'), $pchar),
-        phutil_tag('td', array('class' => 'differential-toc-ftype'), $desc),
-        phutil_tag(
-          'td',
-          array('class' => 'differential-toc-file'),
-          array($link, $lines)),
-        phutil_tag('td', array('class' => 'differential-toc-cov'), $cov),
-        phutil_tag('td', array('class' => 'differential-toc-mcov'), $mcov),
-      ));
       if ($meta) {
-        $rows[] = phutil_tag('tr', array(), array(
-          phutil_tag('td', array('colspan' => 3)),
-          phutil_tag('td', array('class' => 'differential-toc-meta'), $meta),
-        ));
+        $meta = phutil_tag(
+          'div',
+          array(
+            'class' => 'differential-toc-meta'
+          ),
+          $meta);
       }
+
       if ($this->diff && $this->repository) {
         $paths[] =
           $changeset->getAbsoluteRepositoryPath($this->repository, $this->diff);
       }
+
+      $rows[] = array(
+        $char,
+        $pchar,
+        $desc,
+        array($link, $lines, $meta),
+        $cov,
+        $mcov
+      );
     }
 
     $editor_link = null;
@@ -206,37 +205,53 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
         ),
         pht('Show All Context'));
 
-    $buttons = phutil_tag('tr', array(),
-      phutil_tag('td', array('colspan' => 7),
-        array($editor_link, $reveal_link)));
+    $buttons = phutil_tag(
+      'div',
+      array(
+        'class' => 'differential-toc-buttons grouped'
+      ),
+      array(
+        $editor_link,
+        $reveal_link
+      ));
 
-    $content = hsprintf(
-      '%s'.
-      '<div class="differential-toc differential-panel">'.
-        '<table>'.
-          '<tr>'.
-            '<th></th>'.
-            '<th></th>'.
-            '<th></th>'.
-            '<th>Path</th>'.
-            '<th class="differential-toc-cov">%s</th>'.
-            '<th class="differential-toc-mcov">%s</th>'.
-          '</tr>'.
-          '%s%s'.
-        '</table>'.
-      '</div>',
-      id(new PhabricatorAnchorView())
+    $table = id(new AphrontTableView($rows));
+    $table->setHeaders(
+      array(
+        '',
+        '',
+        '',
+        pht('Path'),
+        pht('Coverage (All)'),
+        pht('Coverage (Touched)'),
+      ));
+    $table->setColumnClasses(
+      array(
+        'differential-toc-char center',
+        'differential-toc-prop center',
+        'differential-toc-ftype center',
+        'differential-toc-file wide',
+        'differential-toc-cov',
+        'differential-toc-cov',
+      ));
+    $table->setDeviceVisibility(
+      array(
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+      ));
+    $anchor = id(new PhabricatorAnchorView())
         ->setAnchorName('toc')
-        ->setNavigationMarker(true)
-        ->render(),
-      pht('Coverage (All)'),
-      pht('Coverage (Touched)'),
-      phutil_implode_html("\n", $rows),
-      $buttons);
+        ->setNavigationMarker(true);
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Table of Contents'))
-      ->appendChild($content);
+      ->appendChild($anchor)
+      ->appendChild($table)
+      ->appendChild($buttons);
   }
 
   private function renderRename($display_file, $other_file, $arrow) {

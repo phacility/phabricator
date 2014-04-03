@@ -32,7 +32,6 @@ final class PhabricatorRepositoryPHIDTypeCommit extends PhabricatorPHIDType {
     foreach ($handles as $phid => $handle) {
       $commit = $objects[$phid];
       $repository = $commit->getRepository();
-      $callsign = $repository->getCallsign();
       $commit_identifier = $commit->getCommitIdentifier();
 
       $name = $repository->formatCommitName($commit_identifier);
@@ -45,7 +44,7 @@ final class PhabricatorRepositoryPHIDTypeCommit extends PhabricatorPHIDType {
 
       $handle->setName($name);
       $handle->setFullName($full_name);
-      $handle->setURI('/r'.$callsign.$commit_identifier);
+      $handle->setURI($commit->getURI());
       $handle->setTimestamp($commit->getEpoch());
     }
   }

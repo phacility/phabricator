@@ -103,7 +103,7 @@ abstract class PhabricatorApplicationTransactionEditor
     return $this->parentMessageID;
   }
 
-  protected function getIsNewObject() {
+  public function getIsNewObject() {
     return $this->isNewObject;
   }
 
@@ -1886,6 +1886,21 @@ abstract class PhabricatorApplicationTransactionEditor
 
     foreach ($comments as $comment) {
       $body->addRawSection($comment);
+    }
+
+    if ($object instanceof PhabricatorCustomFieldInterface) {
+      $field_list = PhabricatorCustomField::getObjectFields(
+        $object,
+        PhabricatorCustomField::ROLE_TRANSACTIONMAIL);
+      $field_list->setViewer($this->getActor());
+      $field_list->readFieldsFromStorage($object);
+
+      foreach ($field_list->getFields() as $field) {
+        $field->updateTransactionMailBody(
+          $body,
+          $this,
+          $xactions);
+      }
     }
 
     return $body;

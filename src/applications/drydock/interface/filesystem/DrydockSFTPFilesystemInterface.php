@@ -46,7 +46,9 @@ final class DrydockSFTPFilesystemInterface extends DrydockFilesystemInterface {
 
   public function saveFile($path, $name) {
     $data = $this->readFile($path);
-    $file = PhabricatorFile::newFromFileData($data);
+    $file = PhabricatorFile::newFromFileData(
+      $data,
+      array('name' => $name));
     $file->setName($name);
     $file->save();
     return $file;

@@ -42,7 +42,10 @@ final class PhabricatorPeopleProfileController
       ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
-    $can_edit = ($user->getPHID() == $viewer->getPHID());
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $user,
+      PhabricatorPolicyCapability::CAN_EDIT);
 
     $actions->addAction(
       id(new PhabricatorActionView())
@@ -63,9 +66,65 @@ final class PhabricatorPeopleProfileController
     if ($viewer->getIsAdmin()) {
       $actions->addAction(
         id(new PhabricatorActionView())
-          ->setIcon('blame')
-          ->setName(pht('Administrate User'))
-          ->setHref($this->getApplicationURI('edit/'.$user->getID().'/')));
+          ->setIcon('wrench')
+          ->setName(pht('Edit Settings'))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(!$can_edit)
+          ->setHref('/settings/'.$user->getID().'/'));
+
+      if ($user->getIsAdmin()) {
+        $empower_icon = 'lower-priority';
+        $empower_name = pht('Remove Administrator');
+      } else {
+        $empower_icon = 'raise-priority';
+        $empower_name = pht('Make Administrator');
+      }
+
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon($empower_icon)
+          ->setName($empower_name)
+          ->setDisabled(($user->getPHID() == $viewer->getPHID()))
+          ->setWorkflow(true)
+          ->setHref($this->getApplicationURI('empower/'.$user->getID().'/')));
+
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon('tag')
+          ->setName(pht('Change Username'))
+          ->setWorkflow(true)
+          ->setHref($this->getApplicationURI('rename/'.$user->getID().'/')));
+
+      if ($user->getIsDisabled()) {
+        $disable_icon = 'enable';
+        $disable_name = pht('Enable User');
+      } else {
+        $disable_icon = 'disable';
+        $disable_name = pht('Disable User');
+      }
+
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon($disable_icon)
+          ->setName($disable_name)
+          ->setDisabled(($user->getPHID() == $viewer->getPHID()))
+          ->setWorkflow(true)
+          ->setHref($this->getApplicationURI('disable/'.$user->getID().'/')));
+
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon('delete')
+          ->setName(pht('Delete User'))
+          ->setDisabled(($user->getPHID() == $viewer->getPHID()))
+          ->setWorkflow(true)
+          ->setHref($this->getApplicationURI('delete/'.$user->getID().'/')));
+
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon('message')
+          ->setName(pht('Send Welcome Email'))
+          ->setWorkflow(true)
+          ->setHref($this->getApplicationURI('welcome/'.$user->getID().'/')));
     }
 
     $properties = $this->buildPropertyView($user, $actions);

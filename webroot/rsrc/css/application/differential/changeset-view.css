@@ -9,15 +9,37 @@
   overflow-x: auto;
 }
 
+.device-phone .differential-changeset {
+  overflow-x: scroll;
+}
+
 .differential-diff {
   background: #fff;
   width: 100%;
+  min-width: 780px;
   border-top: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$lightblueborder};
+  table-layout: fixed;
+}
+
+.differential-diff col.num {
+  width: 45px;
+}
+
+.differential-diff col.left,
+.differential-diff col.right {
+  width: 49.25%;
+}
+
+.differential-diff col.copy {
+  width: 0.5%;
+}
+
+.differential-diff col.cov {
+  width: 1%;
 }
 
 .differential-diff td {
-  min-width: 320px;
   /*
     Disable ligatures in Firefox. Firefox 3 has fancypants ligature support, but
     it gets applied to monospaced fonts, which sucks because it means that the
@@ -31,6 +53,7 @@
   letter-spacing:     0.0083334px;
   vertical-align:     top;
   white-space:        pre-wrap;
+  word-wrap:          break-word;
   padding:            0 8px 1px;
   line-height:        16px;
 }
@@ -38,9 +61,6 @@
 .differential-diff th {
   text-align:         right;
   padding:            2px 6px 0px 0px;
-  width:              4%;
-  min-width:          45px;
-  max-width:          4%;
   vertical-align:     top;
   background:         {$lightbluebackground};
   color:              {$bluetext};
@@ -54,21 +74,6 @@
   -webkit-user-select:  none;
   -ms-user-select:      none;
   user-select:          none;
-}
-.differential-diff td.left {
-  width: 45%;
-}
-
-.differential-diff td.right,
-.differential-diff td.right1 {
-  width: 43.5%;
-}
-
-.differential-diff td.right2 {
-  width: 44.5%;
-}
-.differential-diff td.right3 {
-  width: 45%;
 }
 
 .differential-changeset-immutable .differential-diff th {
@@ -122,8 +127,6 @@
 }
 
 .differential-diff td.cov {
-  min-width: 1%;
-  width: 1%;
   padding: 0;
 }
 
@@ -220,6 +223,12 @@ td.cov-X {
 .differential-changeset h1 {
   font-size: 15px;
   padding: 2px 0 12px 12px;
+  line-height: 18px;
+}
+
+.device-phone .differential-changeset h1 {
+  word-break: break-word;
+  margin-right: 8px;
 }
 
 .differential-reticle {
@@ -242,6 +251,7 @@ td.cov-X {
   width:              100%;
   -moz-box-sizing:    border-box;
   -webkit-box-sizing: border-box;
+  box-sizing:         border-box;
   overflow:           hidden;
   white-space:        normal;
 }
@@ -299,6 +309,11 @@ td.cov-X {
 .differential-changeset-buttons {
   float: right;
   margin-right: 16px;
+}
+
+.device-phone .differential-changeset-buttons {
+  float: none;
+  margin: 0 0 8px 4px;
 }
 
 .differential-changeset-buttons a.button {
@@ -454,4 +469,8 @@ tr.differential-inline-loading {
   display: inline-block;
   margin: 0 4px 2px 0;
   vertical-align: middle;
+}
+
+.device-phone .differential-file-icon-header .phui-icon-view {
+  display: none;
 }

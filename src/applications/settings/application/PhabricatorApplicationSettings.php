@@ -21,7 +21,8 @@ final class PhabricatorApplicationSettings extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/settings/' => array(
-        '(?:panel/(?P<key>[^/]+)/)?' => 'PhabricatorSettingsMainController',
+        '(?:(?P<id>\d+)/)?(?:panel/(?P<key>[^/]+)/)?'
+          => 'PhabricatorSettingsMainController',
         'adjust/' => 'PhabricatorSettingsAdjustController',
       ),
     );

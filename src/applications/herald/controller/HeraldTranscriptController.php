@@ -112,7 +112,15 @@ final class HeraldTranscriptController extends HeraldController {
   }
 
   protected function renderConditionTestValue($condition, $handles) {
-    $value = $condition->getTestValue();
+    switch ($condition->getFieldName()) {
+      case HeraldAdapter::FIELD_RULE:
+        $value = array($condition->getTestValue());
+        break;
+      default:
+        $value = $condition->getTestValue();
+        break;
+    }
+
     if (!is_scalar($value) && $value !== null) {
       foreach ($value as $key => $phid) {
         $handle = idx($handles, $phid);
@@ -191,16 +199,23 @@ final class HeraldTranscriptController extends HeraldController {
         $condition_xscripts);
     }
     foreach ($condition_xscripts as $condition_xscript) {
-      $value = $condition_xscript->getTestValue();
-      // TODO: Also total hacks.
-      if (is_array($value)) {
-        foreach ($value as $phid) {
-          if ($phid) { // TODO: Probably need to make sure this "looks like" a
-                       // PHID or decrease the level of hacks here; this used
-                       // to be an is_numeric() check in Facebook land.
-            $phids[] = $phid;
+      switch ($condition_xscript->getFieldName()) {
+        case HeraldAdapter::FIELD_RULE:
+          $phids[] = $condition_xscript->getTestValue();
+          break;
+        default:
+          $value = $condition_xscript->getTestValue();
+          // TODO: Also total hacks.
+          if (is_array($value)) {
+            foreach ($value as $phid) {
+              if ($phid) { // TODO: Probably need to make sure this
+                // "looks like" a PHID or decrease the level of hacks here;
+                // this used to be an is_numeric() check in Facebook land.
+                $phids[] = $phid;
+              }
+            }
           }
-        }
+          break;
       }
     }
 

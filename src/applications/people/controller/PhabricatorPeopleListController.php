@@ -81,7 +81,7 @@ final class PhabricatorPeopleListController extends PhabricatorPeopleController
       }
 
       if ($user->getIsSystemAgent()) {
-        $item->addIcon('computer', pht('System Agent'));
+        $item->addIcon('computer', pht('Bot/Script'));
       }
 
       if ($viewer->getIsAdmin()) {
@@ -92,18 +92,13 @@ final class PhabricatorPeopleListController extends PhabricatorPeopleController
               ->setIcon('disable')
               ->setName(pht('Disable'))
               ->setWorkflow(true)
-              ->setHref($this->getApplicationURI('disable/'.$user_id.'/')));
+              ->setHref($this->getApplicationURI('disapprove/'.$user_id.'/')));
           $item->addAction(
             id(new PHUIListItemView())
               ->setIcon('like')
               ->setName(pht('Approve'))
               ->setWorkflow(true)
               ->setHref($this->getApplicationURI('approve/'.$user_id.'/')));
-        } else {
-          $item->addAction(
-            id(new PHUIListItemView())
-              ->setIcon('edit')
-              ->setHref($this->getApplicationURI('edit/'.$user_id.'/')));
         }
       }
 

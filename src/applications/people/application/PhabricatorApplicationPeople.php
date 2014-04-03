@@ -42,9 +42,16 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
         '(query/(?P<key>[^/]+)/)?' => 'PhabricatorPeopleListController',
         'logs/' => 'PhabricatorPeopleLogsController',
         'approve/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleApproveController',
-        'disable/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleDisableController',
-        'edit/(?:(?P<id>[1-9]\d*)/(?:(?P<view>\w+)/)?)?'
-          => 'PhabricatorPeopleEditController',
+        '(?P<via>disapprove)/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorPeopleDisableController',
+        '(?P<via>disable)/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorPeopleDisableController',
+        'empower/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleEmpowerController',
+        'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleDeleteController',
+        'rename/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleRenameController',
+        'welcome/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleWelcomeController',
+        'create/' => 'PhabricatorPeopleCreateController',
+        'new/(?P<type>[^/]+)/' => 'PhabricatorPeopleNewController',
         'ldap/' => 'PhabricatorPeopleLdapController',
         'editprofile/(?P<id>[1-9]\d*)/' =>
           'PhabricatorPeopleProfileEditController',
@@ -133,5 +140,21 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
 
     return $items;
   }
+
+
+  public function getQuickCreateItems(PhabricatorUser $viewer) {
+    $items = array();
+
+    if ($viewer->getIsAdmin()) {
+      $item = id(new PHUIListItemView())
+        ->setName(pht('User Account'))
+        ->setAppIcon('people-dark')
+        ->setHref($this->getBaseURI().'create/');
+      $items[] = $item;
+    }
+
+    return $items;
+  }
+
 
 }

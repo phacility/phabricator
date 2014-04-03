@@ -92,9 +92,9 @@ final class ManiphestTransaction
 
   public function shouldHide() {
     switch ($this->getTransactionType()) {
-      case self::TYPE_TITLE:
       case self::TYPE_DESCRIPTION:
       case self::TYPE_PRIORITY:
+      case self::TYPE_STATUS:
         if ($this->getOldValue() === null) {
           return true;
         } else {
@@ -110,6 +110,8 @@ final class ManiphestTransaction
 
   public function getActionStrength() {
     switch ($this->getTransactionType()) {
+      case self::TYPE_TITLE:
+        return 1.4;
       case self::TYPE_STATUS:
         return 1.3;
       case self::TYPE_OWNER:
@@ -170,13 +172,13 @@ final class ManiphestTransaction
 
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
-        return pht('Retitled');
-
-      case self::TYPE_STATUS:
         if ($old === null) {
           return pht('Created');
         }
 
+        return pht('Retitled');
+
+      case self::TYPE_STATUS:
         $action = ManiphestTaskStatus::getStatusActionName($new);
         if ($action) {
           return $action;
@@ -245,13 +247,13 @@ final class ManiphestTransaction
         return 'meta-mta';
 
       case self::TYPE_TITLE:
-        return 'edit';
-
-      case self::TYPE_STATUS:
         if ($old === null) {
           return 'create';
         }
 
+        return 'edit';
+
+      case self::TYPE_STATUS:
         $action = ManiphestTaskStatus::getStatusIcon($new);
         if ($action !== null) {
           return $action;
@@ -301,6 +303,11 @@ final class ManiphestTransaction
 
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
+        if ($old === null) {
+          return pht(
+            '%s created this task.',
+            $this->renderHandleLink($author_phid));
+        }
         return pht(
           '%s changed the title from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
@@ -313,12 +320,6 @@ final class ManiphestTransaction
           $this->renderHandleLink($author_phid));
 
       case self::TYPE_STATUS:
-        if ($old === null) {
-          return pht(
-            '%s created this task.',
-            $this->renderHandleLink($author_phid));
-        }
-
         $old_closed = ManiphestTaskStatus::isClosedStatus($old);
         $new_closed = ManiphestTaskStatus::isClosedStatus($new);
 
@@ -493,6 +494,13 @@ final class ManiphestTransaction
 
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
+        if ($old === null) {
+          return pht(
+            '%s created %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        }
+
         return pht(
           '%s renamed %s from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
@@ -507,13 +515,6 @@ final class ManiphestTransaction
           $this->renderHandleLink($object_phid));
 
       case self::TYPE_STATUS:
-        if ($old === null) {
-          return pht(
-            '%s created %s.',
-            $this->renderHandleLink($author_phid),
-            $this->renderHandleLink($object_phid));
-        }
-
         $old_closed = ManiphestTaskStatus::isClosedStatus($old);
         $new_closed = ManiphestTaskStatus::isClosedStatus($new);
 

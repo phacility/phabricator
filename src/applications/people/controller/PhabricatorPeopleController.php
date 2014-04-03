@@ -41,7 +41,7 @@ abstract class PhabricatorPeopleController extends PhabricatorController {
       $crumbs->addAction(
         id(new PHUIListItemView())
           ->setName(pht('Create New User'))
-          ->setHref($this->getApplicationURI('edit'))
+          ->setHref($this->getApplicationURI('create/'))
           ->setIcon('create'));
     }
 

@@ -177,5 +177,26 @@ final class DifferentialTestPlanField
     }
   }
 
+  public function shouldAppearInTransactionMail() {
+    return true;
+  }
+
+  public function updateTransactionMailBody(
+    PhabricatorMetaMTAMailBody $body,
+    PhabricatorApplicationTransactionEditor $editor,
+    array $xactions) {
+
+    if (!$editor->getIsNewObject()) {
+      return;
+    }
+
+    $test_plan = $this->getValue();
+    if (!strlen(trim($test_plan))) {
+      return;
+    }
+
+    $body->addTextSection(pht('TEST PLAN'), $test_plan);
+  }
+
 
 }

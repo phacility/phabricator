@@ -108,7 +108,7 @@ final class PhabricatorPeopleSearchEngine
           ->addCheckbox(
             'isAdmin',
             1,
-            pht('Show only Administrators.'),
+            pht('Show only administrators.'),
             $is_admin)
           ->addCheckbox(
             'isDisabled',
@@ -118,7 +118,7 @@ final class PhabricatorPeopleSearchEngine
           ->addCheckbox(
             'isSystemAgent',
             1,
-            pht('Show only System Agents.'),
+            pht('Show only bots.'),
             $is_system_agent)
           ->addCheckbox(
             'needsApproval',

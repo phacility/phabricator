@@ -23,6 +23,7 @@ final class PhabricatorSettingsPanelHomePreferences
 
     $apps = id(new PhabricatorApplicationQuery())
       ->setViewer($user)
+      ->withInstalled(true)
       ->withUnlisted(false)
       ->execute();
 

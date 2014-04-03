@@ -3,26 +3,40 @@
  */
 
 .differential-toc-meta {
-  color: {$greytext};
-  padding-left: 12px;
+  color: {$lightgreytext};
+  padding-top: 2px;
 }
 
-.differential-toc-char,
-.differential-toc-prop {
-  width: 16px;
-  text-align: center;
+table.aphront-table-view td.differential-toc-char {
+  padding-right: 0;
   font-weight: bold;
   color: {$darkbluetext};
 }
 
-.differential-toc-ftype {
-  padding: 0 4px;
-  text-align: center;
-  color: {$greytext};
+table.aphront-table-view td.differential-toc-prop {
+  padding-left: 0;
+  padding-right: 0;
+  font-weight: bold;
+  color: {$darkbluetext};
+}
+
+table.aphront-table-view td.differential-toc-ftype {
+  padding-left: 0;
+  font-weight: bold;
+  color: {$darkbluetext};
 }
 
 .differential-toc-file {
-  color: {$greytext};
+  color: {$lightgreytext};
+}
+
+.device-phone .differential-toc-file {
+  word-break: break-word;
+}
+
+.differential-toc-cov {
+  color: {$darkbluetext};
+  font-weight: bold;
 }
 
 .differential-toc-reveal-all,
@@ -36,43 +50,21 @@
 }
 
 .diff-star-okay {
-  color: #ff9700;
+  color: {$orange};
 }
 
 /* TODO: 'warn' and 'fail' are both red, but we can't make 'warn' yellow since
    'okay' is a "gold star". */
 .diff-star-warn {
-  color: #aa0000;
+  color: {$red};
 }
 
 .diff-star-fail {
-  color: #aa0000;
+  color: {$red};
 }
 
 .diff-star-skip {
-  color: #ff00aa;
-}
-
-.differential-toc table {
-  width: 100%;
-}
-
-.differential-toc table td.differential-toc-cov,
-.differential-toc table td.differential-toc-mcov {
-  width: 120px;
-  text-align: right;
-  padding-right: 6px;
-}
-
-.differential-toc table th {
-  color: {$darkbluetext};
-  padding: 0 4px 4px 0;
-  white-space: nowrap;
-}
-
-.differential-toc table th.differential-toc-cov,
-.differential-toc table th.differential-toc-mcov {
-  text-align: right;
+  color: {$indigo};
 }
 
 .differential-toc table td em {
@@ -85,4 +77,9 @@
 
 .differential-mcoverage-loading {
   color: {$lightgreytext};
+}
+
+.differential-toc-buttons {
+  border-top: 1px solid {$thinblueborder};
+  padding: 8px;
 }

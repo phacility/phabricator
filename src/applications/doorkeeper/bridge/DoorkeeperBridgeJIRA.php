@@ -34,7 +34,7 @@ final class DoorkeeperBridgeJIRA extends DoorkeeperBridge {
       ->execute();
 
     if (!$accounts) {
-      return;
+      return $this->didFailOnMissingLink();
     }
 
     // TODO: When we support multiple JIRA instances, we need to disambiguate

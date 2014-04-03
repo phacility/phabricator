@@ -7,6 +7,17 @@ final class DifferentialChangesetTwoUpRenderer
     return false;
   }
 
+  private function renderColgroup() {
+    return phutil_tag('colgroup', array(), array(
+      phutil_tag('col', array('class' => 'num')),
+      phutil_tag('col', array('class' => 'left')),
+      phutil_tag('col', array('class' => 'num')),
+      phutil_tag('col', array('class' => 'copy')),
+      phutil_tag('col', array('class' => 'right')),
+      phutil_tag('col', array('class' => 'cov')),
+    ));
+  }
+
   public function renderTextChange(
     $range_start,
     $range_len,
@@ -31,6 +42,8 @@ final class DifferentialChangesetTwoUpRenderer
     }
 
     $html = array();
+    $html[] = $this->renderColgroup();
+
     $old_lines = $this->getOldLines();
     $new_lines = $this->getNewLines();
     $gaps = $this->getGaps();
@@ -184,7 +197,7 @@ final class DifferentialChangesetTwoUpRenderer
       }
 
       $o_num = null;
-      $o_classes = 'left';
+      $o_classes = '';
       $o_text = null;
       if (isset($old_lines[$ii])) {
         $o_num  = $old_lines[$ii]['line'];
@@ -192,14 +205,15 @@ final class DifferentialChangesetTwoUpRenderer
         if ($old_lines[$ii]['type']) {
           if ($old_lines[$ii]['type'] == '\\') {
             $o_text = $old_lines[$ii]['text'];
-            $o_classes .= ' comment';
+            $o_class = 'comment';
           } else if ($original_left && !isset($highlight_old[$o_num])) {
-            $o_classes .= ' old-rebase';
+            $o_class = 'old-rebase';
           } else if (empty($new_lines[$ii])) {
-            $o_classes .= ' old old-full';
+            $o_class = 'old old-full';
           } else {
-            $o_classes .= ' old';
+            $o_class = 'old';
           }
+          $o_classes = $o_class;
         }
       }
 
@@ -265,7 +279,6 @@ final class DifferentialChangesetTwoUpRenderer
           }
         }
       }
-      $n_classes .= ' right'.$n_colspan;
 
       if (isset($hunk_starts[$o_num])) {
         $html[] = $context_not_available;
@@ -283,10 +296,11 @@ final class DifferentialChangesetTwoUpRenderer
         $n_id = null;
       }
 
-      // NOTE: This is a unicode zero-width space, which we use as a hint
-      // when intercepting 'copy' events to make sure sensible text ends
-      // up on the clipboard. See the 'phabricator-oncopy' behavior.
-      $zero_space = "\xE2\x80\x8B";
+      // NOTE: This is a unicode 'word joiner' (essentially a non-breaking
+      // zero-width space), which we use as a hint when intercepting 'copy'
+      // events to make sure sensible text ends up on the clipboard.
+      // See the 'phabricator-oncopy' behavior.
+      $zero_space = "\xE2\x81\xA0";
 
       // NOTE: The Javascript is sensitive to whitespace changes in this
       // block!
@@ -326,9 +340,9 @@ final class DifferentialChangesetTwoUpRenderer
           }
           $html[] = phutil_tag('tr', array('class' => 'inline'), array(
             phutil_tag('th', array()),
-            phutil_tag('td', array('class' => 'left'), $comment_html),
+            phutil_tag('td', array(), $comment_html),
             phutil_tag('th', array()),
-            phutil_tag('td', array('colspan' => 3, 'class' => 'right3'), $new),
+            phutil_tag('td', array('colspan' => 3), $new),
           ));
         }
       }
@@ -338,11 +352,11 @@ final class DifferentialChangesetTwoUpRenderer
                                                      $on_right = true);
           $html[] = phutil_tag('tr', array('class' => 'inline'), array(
             phutil_tag('th', array()),
-            phutil_tag('td', array('class' => 'left')),
+            phutil_tag('td', array()),
             phutil_tag('th', array()),
             phutil_tag(
               'td',
-              array('colspan' => 3, 'class' => 'right3'),
+              array('colspan' => 3),
               $comment_html),
           ));
         }
@@ -391,9 +405,9 @@ final class DifferentialChangesetTwoUpRenderer
         $comment_html = $this->renderInlineComment($comment, $on_right = false);
         $html_old[] = phutil_tag('tr', array('class' => 'inline'), array(
           phutil_tag('th', array()),
-          phutil_tag('td', array('class' => 'left'), $comment_html),
+          phutil_tag('td', array(), $comment_html),
           phutil_tag('th', array()),
-          phutil_tag('td', array('colspan' => 3, 'class' => 'right3')),
+          phutil_tag('td', array('colspan' => 3)),
         ));
       }
     }
@@ -402,11 +416,11 @@ final class DifferentialChangesetTwoUpRenderer
         $comment_html = $this->renderInlineComment($comment, $on_right = true);
         $html_new[] = phutil_tag('tr', array('class' => 'inline'), array(
           phutil_tag('th', array()),
-          phutil_tag('td', array('class' => 'left')),
+          phutil_tag('td', array()),
           phutil_tag('th', array()),
           phutil_tag(
             'td',
-            array('colspan' => 3, 'class' => 'right3'),
+            array('colspan' => 3),
             $comment_html),
         ));
       }
@@ -424,12 +438,15 @@ final class DifferentialChangesetTwoUpRenderer
       $th_new = phutil_tag('th', array('id' => "C{$id}OL1"), 1);
     }
 
-    $output = hsprintf(
+    $output = array();
+    $output[] = $this->renderColgroup();
+
+    $output[] = hsprintf(
       '<tr class="differential-image-diff">'.
         '%s'.
-        '<td class="left differential-old-image">%s</td>'.
+        '<td class="differential-old-image">%s</td>'.
         '%s'.
-        '<td class="right3 differential-new-image" colspan="3">%s</td>'.
+        '<td class="differential-new-image" colspan="3">%s</td>'.
       '</tr>'.
       '%s'.
       '%s',

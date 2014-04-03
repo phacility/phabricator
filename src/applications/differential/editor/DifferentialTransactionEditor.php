@@ -7,6 +7,18 @@ final class DifferentialTransactionEditor
   private $changedPriorToCommitURI;
   private $isCloseByCommit;
 
+  public function getDiffUpdateTransaction(array $xactions) {
+    $type_update = DifferentialTransaction::TYPE_UPDATE;
+
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() == $type_update) {
+        return $xaction;
+      }
+    }
+
+    return null;
+  }
+
   public function setIsCloseByCommit($is_close_by_commit) {
     $this->isCloseByCommit = $is_close_by_commit;
     return $this;
@@ -189,6 +201,7 @@ final class DifferentialTransactionEditor
         $object->setLineCount($diff->getLineCount());
         $object->setRepositoryPHID($diff->getRepositoryPHID());
         $object->setArcanistProjectPHID($diff->getArcanistProjectPHID());
+        $object->attachActiveDiff($diff);
 
         // TODO: Update the `diffPHID` once we add that.
         return;
@@ -574,6 +587,7 @@ final class DifferentialTransactionEditor
     $new_revision = id(new DifferentialRevisionQuery())
       ->setViewer($this->getActor())
       ->needReviewerStatus(true)
+      ->needActiveDiffs(true)
       ->withIDs(array($object->getID()))
       ->executeOne();
     if (!$new_revision) {
@@ -582,6 +596,7 @@ final class DifferentialTransactionEditor
     }
 
     $object->attachReviewerStatus($new_revision->getReviewerStatus());
+    $object->attachActiveDiff($new_revision->getActiveDiff());
 
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
@@ -1095,22 +1110,6 @@ final class DifferentialTransactionEditor
     array $xactions) {
 
     $body = parent::buildMailBody($object, $xactions);
-
-    if ($this->getIsNewObject()) {
-      $summary = $object->getSummary();
-      if (strlen(trim($summary))) {
-        $body->addTextSection(
-          pht('REVISION SUMMARY'),
-          $summary);
-      }
-
-      $test_plan = $object->getTestPlan();
-      if (strlen(trim($test_plan))) {
-        $body->addTextSection(
-          pht('TEST PLAN'),
-          $test_plan);
-      }
-    }
 
     $type_inline = DifferentialTransaction::TYPE_INLINE;
 
