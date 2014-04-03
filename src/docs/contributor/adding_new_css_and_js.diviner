@@ -52,7 +52,7 @@ Then rebuild the Celerity map (see the next section).
 When you add, move or remove a file, or change the contents of existing JS or
 CSS file, you should rebuild the Celerity map:
 
-  phabricator/ $ ./scripts/celerity_mapper.php ./webroot
+  phabricator/ $ ./bin/celerity map
 
 If you've only changed file content things will generally work even if you
 don't, but they might start not working as well in the future if you skip this
