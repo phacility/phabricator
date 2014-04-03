@@ -19,6 +19,7 @@ final class AphrontDialogView extends AphrontView {
   private $disableWorkflowOnSubmit;
   private $disableWorkflowOnCancel;
   private $width      = 'default';
+  private $errors;
 
   const WIDTH_DEFAULT = 'default';
   const WIDTH_FORM    = 'form';
@@ -31,6 +32,11 @@ final class AphrontDialogView extends AphrontView {
 
   public function setIsStandalone($is_standalone) {
     $this->isStandalone = $is_standalone;
+    return $this;
+  }
+
+  public function setErrors(array $errors) {
+    $this->errors = $errors;
     return $this;
   }
 
@@ -251,6 +257,12 @@ final class AphrontDialogView extends AphrontView {
     }
 
     $children = $this->renderChildren();
+
+    if ($this->errors) {
+      $children = array(
+        id(new AphrontErrorView())->setErrors($this->errors),
+        $children);
+    }
 
     $header = new PhabricatorActionHeaderView();
     $header->setHeaderTitle($this->title);

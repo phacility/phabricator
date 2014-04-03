@@ -15,7 +15,7 @@ final class PhabricatorSystemActionEngine extends Phobject {
         foreach ($blocked as $actor => $actor_score) {
           throw new PhabricatorSystemActionRateLimitException(
             $action,
-            $actor_score + ($score / self::getWindow()));
+            $actor_score);
         }
       }
     }
@@ -25,14 +25,17 @@ final class PhabricatorSystemActionEngine extends Phobject {
 
   public static function loadBlockedActors(
     array $actors,
-    PhabricatorSystemAction $action) {
+    PhabricatorSystemAction $action,
+    $score) {
 
     $scores = self::loadScores($actors, $action);
+    $window = self::getWindow();
 
     $blocked = array();
-    foreach ($scores as $actor => $score) {
-      if ($action->shouldBlockActor($actor, $score)) {
-        $blocked[$actor] = $score;
+    foreach ($scores as $actor => $actor_score) {
+      $actor_score = $actor_score + ($score / $window);
+      if ($action->shouldBlockActor($actor, $actor_score)) {
+        $blocked[$actor] = $actor_score;
       }
     }
 

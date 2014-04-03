@@ -112,13 +112,10 @@ class AphrontDefaultApplicationConfiguration
     }
 
     if ($ex instanceof PhabricatorSystemActionRateLimitException) {
-      $error_view = id(new AphrontErrorView())
-        ->setErrors(array(pht('You are being rate limited.')));
-
       $dialog = id(new AphrontDialogView())
         ->setTitle(pht('Slow Down!'))
         ->setUser($user)
-        ->appendChild($error_view)
+        ->setErrors(array(pht('You are being rate limited.')))
         ->appendParagraph($ex->getMessage())
         ->appendParagraph($ex->getRateExplanation())
         ->addCancelButton('/', pht('Okaaaaaaaaaaaaaay...'));
