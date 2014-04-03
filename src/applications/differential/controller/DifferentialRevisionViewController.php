@@ -447,6 +447,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       array(
         'title' => $object_id.' '.$revision->getTitle(),
         'pageObjects' => array($revision->getPHID()),
+        'device' => true,
       ));
   }
 
