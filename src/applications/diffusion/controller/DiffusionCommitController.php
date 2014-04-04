@@ -778,9 +778,9 @@ final class DiffusionCommitController extends DiffusionController {
         'dynamic' => array(
           'add-auditors-tokenizer' => array(
             'actions' => array('add_auditors' => 1),
-            'src' => '/typeahead/common/users/',
+            'src' => '/typeahead/common/usersorprojects/',
             'row' => 'add-auditors',
-            'placeholder' => pht('Type a user name...'),
+            'placeholder' => pht('Type a user or project name...'),
           ),
           'add-ccs-tokenizer' => array(
             'actions' => array('add_ccs' => 1),
