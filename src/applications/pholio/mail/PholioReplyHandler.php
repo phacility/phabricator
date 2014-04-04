@@ -29,7 +29,7 @@ final class PholioReplyHandler extends PhabricatorMailReplyHandler {
     if ($this->supportsReplies()) {
       // TODO: Implement.
       return null;
-      return "Reply to comment.";
+      return pht("Reply to comment.");
     } else {
       return null;
     }

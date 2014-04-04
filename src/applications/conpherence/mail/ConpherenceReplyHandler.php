@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conpherence
- */
 final class ConpherenceReplyHandler extends PhabricatorMailReplyHandler {
 
   private $mailAddedParticipantPHIDs;
