@@ -424,6 +424,15 @@ final class HeraldRuleController extends HeraldController {
     $fields = $adapter->getFields();
     $field_map = array_select_keys($all_fields, $fields);
 
+    // Populate any fields which exist in the rule but which we don't know the
+    // names of, so that saving a rule without touching anything doesn't change
+    // it.
+    foreach ($rule->getConditions() as $condition) {
+      if (empty($field_map[$condition->getFieldName()])) {
+        $field_map[$condition->getFieldName()] = pht('<Unknown Field>');
+      }
+    }
+
     $actions = $adapter->getActions($rule->getRuleType());
     $action_map = array_select_keys($all_actions, $actions);
 

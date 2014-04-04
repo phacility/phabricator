@@ -44,4 +44,9 @@ final class PhabricatorStandardCustomFieldUsers
 
     $form->appendChild($control);
   }
+
+  public function getHeraldFieldValueType($condition) {
+    return HeraldAdapter::VALUE_USER;
+  }
+
 }

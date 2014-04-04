@@ -205,4 +205,9 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
     }
     return $result;
   }
+
+  protected function getCustomFieldTemplateObject() {
+    return new ManiphestTask();
+  }
+
 }
