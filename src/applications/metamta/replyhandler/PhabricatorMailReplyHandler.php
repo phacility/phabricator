@@ -46,81 +46,38 @@ abstract class PhabricatorMailReplyHandler {
     PhabricatorMetaMTAReceivedMail $mail);
 
   public function processEmail(PhabricatorMetaMTAReceivedMail $mail) {
-    $error = $this->sanityCheckEmail($mail);
-
-    if ($error) {
-      if ($this->shouldSendErrorEmail($mail)) {
-        $this->sendErrorEmail($error, $mail);
-      }
-      return null;
-    }
+    $this->dropEmptyMail($mail);
 
     return $this->receiveEmail($mail);
   }
 
-  private function sanityCheckEmail(PhabricatorMetaMTAReceivedMail $mail) {
-    $body        = $mail->getCleanTextBody();
+  private function dropEmptyMail(PhabricatorMetaMTAReceivedMail $mail) {
+    $body = $mail->getCleanTextBody();
     $attachments = $mail->getAttachments();
 
-    if (empty($body) && empty($attachments)) {
-      return 'Empty email body. Email should begin with an !action and / or '.
-             'text to comment. Inline replies and signatures are ignored.';
+    if (strlen($body) || $attachments) {
+      return;
     }
 
-    return null;
-  }
+     // Only send an error email if the user is talking to just Phabricator.
+     // We can assume if there is only one "To" address it is a Phabricator
+     // address since this code is running and everything.
+    $is_direct_mail = (count($mail->getToAddresses()) == 1) &&
+                      (count($mail->getCCAddresses()) == 0);
 
-  /**
-   * Only send an error email if the user is talking to just Phabricator. We
-   * can assume if there is only one To address it is a Phabricator address
-   * since this code is running and everything.
-   */
-  private function shouldSendErrorEmail(PhabricatorMetaMTAReceivedMail $mail) {
-    return (count($mail->getToAddresses()) == 1) &&
-           (count($mail->getCCAddresses()) == 0);
-  }
-
-  private function sendErrorEmail($error,
-                                  PhabricatorMetaMTAReceivedMail $mail) {
-    $template = new PhabricatorMetaMTAMail();
-    $template->setSubject('Exception: unable to process your mail request');
-    $template->setBody($this->buildErrorMailBody($error, $mail));
-    $template->setRelatedPHID($mail->getRelatedPHID());
-    $phid = $this->getActor()->getPHID();
-    $handle = id(new PhabricatorHandleQuery())
-      ->setViewer($this->getActor())
-      ->withPHIDs(array($phid))
-      ->executeOne();
-    $tos = array($phid => $handle);
-    $mails = $this->multiplexMail($template, $tos, array());
-
-    foreach ($mails as $email) {
-      $email->saveAndSend();
+    if ($is_direct_mail) {
+      $status_code = MetaMTAReceivedMailStatus::STATUS_EMPTY;
+    } else {
+      $status_code = MetaMTAReceivedMailStatus::STATUS_EMPTY_IGNORED;
     }
 
-    return true;
-  }
-
-  private function buildErrorMailBody($error,
-                                      PhabricatorMetaMTAReceivedMail $mail) {
-    $original_body = $mail->getRawTextBody();
-
-    $main_body = <<<EOBODY
-Your request failed because an error was encoutered while processing it:
-
-  ERROR: {$error}
-
-  -- Original Body -------------------------------------------------------------
-
-  {$original_body}
-
-EOBODY;
-
-    $body = new PhabricatorMetaMTAMailBody();
-    $body->addRawSection($main_body);
-    $body->addReplySection($this->getReplyHandlerInstructions());
-
-    return $body->render();
+    throw new PhabricatorMetaMTAReceivedMailProcessingException(
+      $status_code,
+      pht(
+        'Your message does not contain any body text or attachments, so '.
+        'Phabricator can not do anything useful with it. Make sure comment '.
+        'text appears at the top of your message: quoted replies, inline '.
+        'text, and signatures are discarded and ignored.'));
   }
 
   public function supportsPrivateReplies() {

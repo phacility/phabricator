@@ -108,6 +108,9 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
           // Don't send an error email back in these cases, since they're
           // very unlikely to be the sender's fault.
           break;
+        case MetaMTAReceivedMailStatus::STATUS_EMPTY_IGNORED:
+          // This error is explicitly ignored.
+          break;
         default:
           $this->sendExceptionMail($ex);
           break;

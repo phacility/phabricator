@@ -15,6 +15,8 @@ final class MetaMTAReceivedMailStatus
   const STATUS_NO_SUCH_OBJECT       = 'err:not-found';
   const STATUS_HASH_MISMATCH        = 'err:bad-hash';
   const STATUS_UNHANDLED_EXCEPTION  = 'err:exception';
+  const STATUS_EMPTY                = 'err:empty';
+  const STATUS_EMPTY_IGNORED        = 'err:empty-ignored';
 
   public static function getHumanReadableName($status) {
     $map = array(
@@ -30,6 +32,8 @@ final class MetaMTAReceivedMailStatus
       self::STATUS_NO_SUCH_OBJECT => pht('No Such Object'),
       self::STATUS_HASH_MISMATCH => pht('Bad Address'),
       self::STATUS_UNHANDLED_EXCEPTION => pht('Unhandled Exception'),
+      self::STATUS_EMPTY => pht('Empty Mail'),
+      self::STATUS_EMPTY_IGNORED => pht('Ignored Empty Mail'),
     );
 
     return idx($map, $status, pht('Processing Exception'));
