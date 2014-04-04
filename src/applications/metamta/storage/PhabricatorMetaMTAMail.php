@@ -363,7 +363,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
               PhabricatorEnv::getEnvConfig('metamta.can-send-as-user');
 
             if ($can_send_as_user) {
-              $mailer->setFrom($actor_email);
+              $mailer->setFrom($actor_email, $actor_name);
             } else {
               $from_email = coalesce($actor_email, $default_from);
               $from_name = coalesce($actor_name, pht('Phabricator'));
