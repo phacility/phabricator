@@ -146,9 +146,12 @@ class PhabricatorApplicationTransactionView extends AphrontView {
       Javelin::initBehavior(
         'phabricator-transaction-list',
         array(
-          'listID'      => $list_id,
-          'objectPHID'  => $this->getObjectPHID(),
-          'nextAnchor'  => $this->anchorOffset + count($events),
+          'listID'          => $list_id,
+          'objectPHID'      => $this->getObjectPHID(),
+          'nextAnchor'      => $this->anchorOffset + count($events),
+          'historyLink'     => '/transactions/history/',
+          'historyLinkText' => pht('Edited'),
+          'linkDelimiter'   => PHUITimelineEventView::DELIMITER,
         ));
     }
 
@@ -202,12 +205,22 @@ class PhabricatorApplicationTransactionView extends AphrontView {
 
     if ($comment) {
       if ($comment->getIsDeleted()) {
-        return phutil_tag(
-          'em',
-          array(),
+        return javelin_tag(
+          'span',
+          array(
+            'class' => 'comment-deleted',
+            'sigil' => 'transaction-comment',
+            'meta'  => array('phid' => $comment->getTransactionPHID()),
+          ),
           pht('This comment has been deleted.'));
       } else if ($xaction->hasComment()) {
-        return $engine->getOutput($comment, $field);
+        return javelin_tag(
+          'span',
+          array(
+            'sigil' => 'transaction-comment',
+            'meta'  => array('phid' => $comment->getTransactionPHID()),
+          ),
+          $engine->getOutput($comment, $field));
       } else {
         // This is an empty, non-deleted comment. Usually this happens when
         // rendering previews.
@@ -333,9 +346,9 @@ class PhabricatorApplicationTransactionView extends AphrontView {
       }
     }
 
-    $content = $this->renderTransactionContent($xaction);
-    if ($content) {
-      $event->appendChild($content);
+    $comment = $this->renderTransactionContent($xaction);
+    if ($comment) {
+      $event->appendChild($comment);
     }
 
     return $event;

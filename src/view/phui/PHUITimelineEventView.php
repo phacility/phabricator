@@ -2,6 +2,8 @@
 
 final class PHUITimelineEventView extends AphrontView {
 
+  const DELIMITER = " \xC2\xB7 ";
+
   private $userHandle;
   private $title;
   private $icon;
@@ -146,12 +148,13 @@ final class PHUITimelineEventView extends AphrontView {
       }
       $extra = array_reverse($extra);
       $extra = array_mergev($extra);
-      $extra = phutil_tag(
+      $extra = javelin_tag(
         'span',
         array(
+          'sigil' => 'timeline-extra',
           'class' => 'phui-timeline-extra',
         ),
-        phutil_implode_html(" \xC2\xB7 ", $extra));
+        phutil_implode_html(self::DELIMITER, $extra));
     } else {
       $extra = null;
     }
@@ -342,7 +345,7 @@ final class PHUITimelineEventView extends AphrontView {
           'a',
           array(
             'href'  => '/transactions/history/'.$xaction_phid.'/',
-            'sigil' => 'workflow',
+            'sigil' => 'workflow transaction-edit-history',
           ),
           pht('Edited'));
       }

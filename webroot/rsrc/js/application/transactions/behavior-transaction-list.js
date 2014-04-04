@@ -5,6 +5,7 @@
  *           javelin-workflow
  *           javelin-dom
  *           javelin-fx
+ *           javelin-util
  */
 
 JX.behavior('phabricator-transaction-list', function(config) {
@@ -62,14 +63,49 @@ JX.behavior('phabricator-transaction-list', function(config) {
     }
   }
 
+  function edittransaction(transaction, response) {
+    // NOTE: this is for 1 transaction only
+    for (var phid in response.xactions) {
+      var new_node = JX.$H(response.xactions[phid]).getFragment().firstChild;
+      var new_comment = JX.DOM.find(new_node, 'span', 'transaction-comment');
+      var old_comments = JX.DOM.scry(
+        transaction,
+        'span',
+        'transaction-comment');
+      var old_comment = old_comments[0];
+      JX.DOM.replace(old_comment, new_comment);
+      var edit_history = JX.DOM.scry(
+          transaction,
+          'a',
+          'transaction-edit-history');
+      if (!edit_history.length) {
+        var transaction_phid = JX.Stratcom.getData(new_comment).phid;
+        var history_link = JX.$N(
+          'a',
+          { sigil : 'transaction-edit-history',
+            href  : config.historyLink + transaction_phid + '/' },
+          config.historyLinkText);
+        JX.Stratcom.addSigil(history_link, 'workflow');
+        var timeline_extra = JX.DOM.find(transaction, 'span', 'timeline-extra');
+        var old_content = JX.$H(timeline_extra.innerHTML);
+        JX.DOM.setContent(
+          timeline_extra,
+          [history_link, config.linkDelimiter, old_content]);
+      }
+      new JX.FX(transaction).setDuration(500).start({opacity: [0, 1]});
+    }
+  }
+
   JX.DOM.listen(list, 'click', 'transaction-edit', function(e) {
     if (!e.isNormalClick()) {
       return;
     }
 
+    var transaction = e.getNode('transaction');
+
     JX.Workflow.newFromLink(e.getTarget())
       .setData({anchor: e.getNodeData('transaction').anchor})
-      .setHandler(ontransactions)
+      .setHandler(JX.bind(null, edittransaction, transaction))
       .start();
 
     e.kill();
