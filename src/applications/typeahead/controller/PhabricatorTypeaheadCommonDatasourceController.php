@@ -73,6 +73,11 @@ final class PhabricatorTypeaheadCommonDatasourceController
         $need_users = true;
         $need_projs = true;
         break;
+      case 'usersprojectsorpackages':
+        $need_users = true;
+        $need_projs = true;
+        $need_packages = true;
+        break;
       case 'repositories':
         $need_repos = true;
         break;
@@ -309,6 +314,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
       $packages = id(new PhabricatorOwnersPackage())->loadAll();
       foreach ($packages as $package) {
         $results[] = id(new PhabricatorTypeaheadResult())
+          ->setIcon('pl-testplan')
           ->setName($package->getName())
           ->setURI('/owners/package/'.$package->getID().'/')
           ->setPHID($package->getPHID());
