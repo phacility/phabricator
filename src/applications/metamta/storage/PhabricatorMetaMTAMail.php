@@ -222,6 +222,15 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
+  public function setIsErrorEmail($is_error) {
+    $this->setParam('is-error', $is_error);
+    return $this;
+  }
+
+  public function getIsErrorEmail() {
+    return $this->getParam('is-error', false);
+  }
+
   public function getWorkerTaskID() {
     return $this->getParam('worker-task');
   }
@@ -549,6 +558,19 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         return $this->save();
       }
 
+      if ($this->getIsErrorEmail()) {
+        $all_recipients = array_merge($add_to, $add_cc);
+        if ($this->shouldRateLimitMail($all_recipients)) {
+          $this->setStatus(self::STATUS_VOID);
+          $this->setMessage(
+            pht(
+              'This is an error email, but one or more recipients have '.
+              'exceeded the error email rate limit. Declining to deliver '.
+              'message.'));
+          return $this->save();
+        }
+      }
+
       $mailer->addHeader('X-Phabricator-Sent-This-Message', 'Yes');
       $mailer->addHeader('X-Mail-Transport-Agent', 'MetaMTA');
 
@@ -837,6 +859,18 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     }
 
     return $actors;
+  }
+
+  private function shouldRateLimitMail(array $all_recipients) {
+    try {
+      PhabricatorSystemActionEngine::willTakeAction(
+        $all_recipients,
+        new PhabricatorMetaMTAErrorMailAction(),
+        1);
+      return false;
+    } catch (PhabricatorSystemActionRateLimitException $ex) {
+      return true;
+    }
   }
 
 

@@ -20,7 +20,9 @@ final class PhabricatorSystemActionEngine extends Phobject {
       }
     }
 
-    self::recordAction($actors, $action, $score);
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      self::recordAction($actors, $action, $score);
+    unset($unguarded);
   }
 
   public static function loadBlockedActors(

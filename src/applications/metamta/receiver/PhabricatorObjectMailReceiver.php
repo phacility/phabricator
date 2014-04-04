@@ -55,6 +55,7 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
     parent::validateSender($mail, $sender);
 
     $parts = $this->matchObjectAddressInMail($mail);
+    $pattern = $parts['pattern'];
 
     try {
       $object = $this->loadObjectFromMail($mail, $sender);
@@ -62,8 +63,9 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
       throw new PhabricatorMetaMTAReceivedMailProcessingException(
         MetaMTAReceivedMailStatus::STATUS_POLICY_PROBLEM,
         pht(
-          "This mail is addressed to an object you are not permitted ".
-          "to see: %s",
+          'This mail is addressed to an object ("%s") you do not have '.
+          'permission to see: %s',
+          $pattern,
           $policy_exception->getMessage()));
     }
 
@@ -71,9 +73,9 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
       throw new PhabricatorMetaMTAReceivedMailProcessingException(
         MetaMTAReceivedMailStatus::STATUS_NO_SUCH_OBJECT,
         pht(
-          "This mail is addressed to an object ('%s'), but that object ".
-          "does not exist.",
-          $parts['pattern']));
+          'This mail is addressed to an object ("%s"), but that object '.
+          'does not exist.',
+          $pattern));
     }
 
     $sender_identifier = $parts['sender'];
@@ -83,8 +85,12 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
         throw new PhabricatorMetaMTAReceivedMailProcessingException(
           MetaMTAReceivedMailStatus::STATUS_NO_PUBLIC_MAIL,
           pht(
-            "This mail is addressed to an object's public address, but ".
-            "public replies are not enabled (`metamta.public-replies`)."));
+            'This mail is addressed to the public email address of an object '.
+            '("%s"), but public replies are not enabled on this Phabricator '.
+            'install. An administrator may have recently disabled this '.
+            'setting, or you may have replied to an old message. Try '.
+            'replying to a more recent message instead.',
+            $pattern));
       }
       $check_phid = $object->getPHID();
     } else {
@@ -92,9 +98,12 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
         throw new PhabricatorMetaMTAReceivedMailProcessingException(
           MetaMTAReceivedMailStatus::STATUS_USER_MISMATCH,
           pht(
-            "This mail is addressed to an object's private address, but ".
-            "the sending user and the private address owner are not the ".
-            "same user."));
+            'This mail is addressed to the private email address of an object '.
+            '("%s"), but you are not the user who is authorized to use the '.
+            'address you sent mail to. Each private address is unique to the '.
+            'user who received the original mail. Try replying to a message '.
+            'which was sent directly to you instead.',
+            $pattern));
       }
       $check_phid = $sender->getPHID();
     }
@@ -105,8 +114,10 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
       throw new PhabricatorMetaMTAReceivedMailProcessingException(
         MetaMTAReceivedMailStatus::STATUS_HASH_MISMATCH,
         pht(
-          "The hash in this object's address does not match the expected ".
-          "value."));
+          'This mail is addressed to an object ("%s"), but the address is '.
+          'not correct (the security hash is wrong). Check that the address '.
+          'is correct.',
+          $pattern));
     }
   }
 

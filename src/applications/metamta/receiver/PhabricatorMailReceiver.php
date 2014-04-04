@@ -19,12 +19,32 @@ abstract class PhabricatorMailReceiver {
     PhabricatorMetaMTAReceivedMail $mail,
     PhabricatorUser $sender) {
 
-    if (!$sender->isUserActivated()) {
+    $failure_reason = null;
+    if ($sender->getIsDisabled()) {
+      $failure_reason = pht(
+        'Your account (%s) is disabled, so you can not interact with '.
+        'Phabricator over email.',
+        $sender->getUsername());
+    } else if ($sender->getIsStandardUser()) {
+      if (!$sender->getIsApproved()) {
+        $failure_reason = pht(
+          'Your account (%s) has not been approved yet. You can not interact '.
+          'with Phabricator over email until your account is approved.',
+          $sender->getUsername());
+      } else if (PhabricatorUserEmail::isEmailVerificationRequired() &&
+               !$sender->getIsEmailVerified()) {
+        $failure_reason = pht(
+          'You have not verified the email address for your account (%s). '.
+          'You must verify your email address before you can interact '.
+          'with Phabricator over email.',
+          $sender->getUsername());
+      }
+    }
+
+    if ($failure_reason) {
       throw new PhabricatorMetaMTAReceivedMailProcessingException(
         MetaMTAReceivedMailStatus::STATUS_DISABLED_SENDER,
-        pht(
-          "Sender '%s' does not have an activated user account.",
-          $sender->getUsername()));
+        $failure_reason);
     }
   }
 
@@ -46,33 +66,34 @@ abstract class PhabricatorMailReceiver {
       return $user;
     } else {
       $reasons[] = pht(
-        "The email was sent from '%s', but this address does not correspond ".
-        "to any user account.",
+        'This email was sent from "%s", but that address is not recognized by '.
+        'Phabricator and does not correspond to any known user account.',
         $raw_from);
     }
 
     // If we missed on "From", try "Reply-To" if we're configured for it.
-    $reply_to_key = 'metamta.insecure-auth-with-reply-to';
-    $allow_reply_to = PhabricatorEnv::getEnvConfig($reply_to_key);
-    if ($allow_reply_to) {
-      $raw_reply_to = $mail->getHeader('Reply-To');
-      $reply_to = self::getRawAddress($raw_reply_to);
+    $raw_reply_to = $mail->getHeader('Reply-To');
+    if (strlen($raw_reply_to)) {
+      $reply_to_key = 'metamta.insecure-auth-with-reply-to';
+      $allow_reply_to = PhabricatorEnv::getEnvConfig($reply_to_key);
+      if ($allow_reply_to) {
+        $reply_to = self::getRawAddress($raw_reply_to);
 
-      $user = PhabricatorUser::loadOneWithEmailAddress($reply_to);
-      if ($user) {
-        return $user;
+        $user = PhabricatorUser::loadOneWithEmailAddress($reply_to);
+        if ($user) {
+          return $user;
+        } else {
+          $reasons[] = pht(
+            'Phabricator is configured to authenticate users using the '.
+            '"Reply-To" header, but the reply address ("%s") on this '.
+            'message does not correspond to any known user account.',
+            $raw_reply_to);
+        }
       } else {
         $reasons[] = pht(
-          "Phabricator is configured to try to authenticate users using ".
-          "'Reply-To', but the reply to address ('%s') does not correspond ".
-          "to any user account.",
-          $raw_reply_to);
+          '(Phabricator is not configured to authenticate users using the '.
+          '"Reply-To" header, so it was ignored.)');
       }
-    } else {
-      $reasons[] = pht(
-        "Phabricator is not configured to authenticate users using ".
-        "'Reply-To' (`metamta.insecure-auth-with-reply-to`), so the ".
-        "'Reply-To' header was not examined.");
     }
 
     // If we don't know who this user is, load or create an external user
@@ -82,7 +103,7 @@ abstract class PhabricatorMailReceiver {
     if ($allow_email_users) {
       $from_obj = new PhutilEmailAddress($from);
       $xuser = id(new PhabricatorExternalAccountQuery())
-        ->setViewer($user)
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
         ->withAccountTypes(array('email'))
         ->withAccountDomains(array($from_obj->getDomainName(), 'self'))
         ->withAccountIDs(array($from_obj->getAddress()))
@@ -90,15 +111,19 @@ abstract class PhabricatorMailReceiver {
       return $xuser->getPhabricatorUser();
     } else {
       $reasons[] = pht(
-        "Phabricator is not configured to allow unknown external users to ".
-        "send mail to the system using just an email address ".
-        "(`phabricator.allow-email-users`), so an implicit external acount ".
-        "could not be created.");
+        'Phabricator is also not configured to allow unknown external users '.
+        'to send mail to the system using just an email address.');
+      $reasons[] = pht(
+        'To interact with Phabricator, add this address ("%s") to your '.
+        'account.',
+        $raw_from);
     }
+
+    $reasons = implode("\n\n", $reasons);
 
     throw new PhabricatorMetaMTAReceivedMailProcessingException(
       MetaMTAReceivedMailStatus::STATUS_UNKNOWN_SENDER,
-      pht('Unknown sender: %s', implode(' ', $reasons)));
+      $reasons);
   }
 
   /**
