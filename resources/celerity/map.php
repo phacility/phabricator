@@ -7,7 +7,7 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => '1f7a202d',
+    'core.pkg.css' => 'ab5dd633',
     'core.pkg.js' => '57d0e1c4',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => '9578e86b',
@@ -128,7 +128,7 @@ return array(
     'rsrc/css/phui/calendar/phui-calendar-month.css' => '5e762971',
     'rsrc/css/phui/calendar/phui-calendar.css' => '5e1ad989',
     'rsrc/css/phui/phui-box.css' => 'a36cf3a5',
-    'rsrc/css/phui/phui-button.css' => '8784a966',
+    'rsrc/css/phui/phui-button.css' => '653ac588',
     'rsrc/css/phui/phui-document.css' => '3b078dc0',
     'rsrc/css/phui/phui-feed-story.css' => '3a59c2cf',
     'rsrc/css/phui/phui-fontkit.css' => 'de84aa4a',
@@ -739,7 +739,7 @@ return array(
     'phrequent-css' => 'ffc185ad',
     'phriction-document-css' => '7d7f0071',
     'phui-box-css' => 'a36cf3a5',
-    'phui-button-css' => '8784a966',
+    'phui-button-css' => '653ac588',
     'phui-calendar-css' => '5e1ad989',
     'phui-calendar-day-css' => 'de035c8a',
     'phui-calendar-list-css' => 'c1d0ca59',
