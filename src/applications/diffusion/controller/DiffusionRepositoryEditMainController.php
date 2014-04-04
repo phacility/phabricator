@@ -694,6 +694,7 @@ final class DiffusionRepositoryEditMainController
     }
 
     $binaries = array();
+    $svnlook_check = false;
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $binaries[] = 'git';
@@ -715,6 +716,8 @@ final class DiffusionRepositoryEditMainController
           case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
             $binaries[] = 'svnserve';
             $binaries[] = 'svnadmin';
+            $binaries[] = 'svnlook';
+            $svnlook_check = true;
             break;
           case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
             $binaries[] = 'hg';
@@ -730,6 +733,8 @@ final class DiffusionRepositoryEditMainController
           case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
             $binaries[] = 'svnserve';
             $binaries[] = 'svnadmin';
+            $binaries[] = 'svnlook';
+            $svnlook_check = true;
             break;
           case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
             $binaries[] = 'hg';
@@ -742,14 +747,6 @@ final class DiffusionRepositoryEditMainController
     foreach ($binaries as $binary) {
       $where = Filesystem::resolveBinary($binary);
       if (!$where) {
-        $config_href = '/config/edit/environment.append-paths/';
-        $config_link = phutil_tag(
-          'a',
-          array(
-            'href' => $config_href,
-          ),
-          'environment.append-paths');
-
         $view->addItem(
           id(new PHUIStatusItemView())
             ->setIcon('warning-red')
@@ -758,7 +755,7 @@ final class DiffusionRepositoryEditMainController
             ->setNote(pht(
               "Unable to find this binary in the webserver's PATH. You may ".
               "need to configure %s.",
-              $config_link)));
+              $this->getEnvConfigLink())));
       } else {
         $view->addItem(
           id(new PHUIStatusItemView())
@@ -766,6 +763,36 @@ final class DiffusionRepositoryEditMainController
             ->setTarget(
               pht('Found Binary %s', phutil_tag('tt', array(), $binary)))
             ->setNote(phutil_tag('tt', array(), $where)));
+      }
+    }
+
+    // This gets checked generically above. However, for svn commit hooks, we
+    // need this to be in environment.append-paths because subversion strips
+    // PATH.
+    if ($svnlook_check) {
+      $where = Filesystem::resolveBinary('svnlook');
+      if ($where) {
+        $path = substr($where, 0, strlen($where) - strlen('svnlook'));
+        $dirs = PhabricatorEnv::getEnvConfig('environment.append-paths');
+        $in_path = false;
+        foreach ($dirs as $dir) {
+          if (Filesystem::isDescendant($path, $dir)) {
+            $in_path = true;
+            break;
+          }
+        }
+        if (!$in_path) {
+          $view->addItem(
+            id(new PHUIStatusItemView())
+            ->setIcon('warning-red')
+            ->setTarget(
+              pht('Missing Binary %s', phutil_tag('tt', array(), $binary)))
+            ->setNote(pht(
+                'Unable to find this binary in `environment.append-paths`. '.
+                'You need to configure %s and include %s.',
+                $this->getEnvConfigLink(),
+                $path)));
+        }
       }
     }
 
@@ -1078,5 +1105,14 @@ final class DiffusionRepositoryEditMainController
     return $mirror_list;
   }
 
+  private function getEnvConfigLink() {
+    $config_href = '/config/edit/environment.append-paths/';
+    return phutil_tag(
+      'a',
+      array(
+        'href' => $config_href,
+      ),
+      'environment.append-paths');
+  }
 
 }
