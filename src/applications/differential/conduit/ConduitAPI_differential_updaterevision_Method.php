@@ -1,13 +1,10 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_differential_updaterevision_Method
-  extends ConduitAPIMethod {
+  extends ConduitAPI_differential_Method {
 
   public function getMethodDescription() {
-    return "Update a Differential revision.";
+    return pht("Update a Differential revision.");
   }
 
   public function defineParamTypes() {
@@ -33,37 +30,41 @@ final class ConduitAPI_differential_updaterevision_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $diff = id(new DifferentialDiff())->load($request->getValue('diffid'));
+    $viewer = $request->getUser();
+
+    $diff = id(new DifferentialDiffQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($request->getValue('diffid')))
+      ->executeOne();
     if (!$diff) {
       throw new ConduitException('ERR_BAD_DIFF');
     }
 
-    $revision = id(new DifferentialRevision())->load($request->getValue('id'));
+    $revision = id(new DifferentialRevisionQuery())
+      ->setViewer($request->getUser())
+      ->withIDs(array($request->getValue('id')))
+      ->needReviewerStatus(true)
+      ->needActiveDiffs(true)
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
     if (!$revision) {
       throw new ConduitException('ERR_BAD_REVISION');
-    }
-
-    if ($request->getUser()->getPHID() !== $revision->getAuthorPHID()) {
-      throw new ConduitException('ERR_WRONG_USER');
     }
 
     if ($revision->getStatus() == ArcanistDifferentialRevisionStatus::CLOSED) {
       throw new ConduitException('ERR_CLOSED');
     }
 
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_CONDUIT,
-      array());
-
-    $editor = new DifferentialRevisionEditor(
-      $revision);
-    $editor->setActor($request->getUser());
-    $editor->setContentSource($content_source);
-    $fields = $request->getValue('fields');
-    $editor->copyFieldsFromConduit($fields);
-
-    $editor->addDiff($diff, $request->getValue('message'));
-    $editor->save();
+    $this->applyFieldEdit(
+      $request,
+      $revision,
+      $diff,
+      $request->getValue('fields', array()),
+      $request->getValue('message'));
 
     return array(
       'revisionid'  => $revision->getID(),

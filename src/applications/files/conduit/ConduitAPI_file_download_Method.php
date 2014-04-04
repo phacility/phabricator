@@ -29,9 +29,10 @@ final class ConduitAPI_file_download_Method
   protected function execute(ConduitAPIRequest $request) {
     $phid = $request->getValue('phid');
 
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'phid = %s',
-      $phid);
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($request->getUser())
+      ->withPHIDs(array($phid))
+      ->executeOne();
     if (!$file) {
       throw new ConduitException('ERR-BAD-PHID');
     }

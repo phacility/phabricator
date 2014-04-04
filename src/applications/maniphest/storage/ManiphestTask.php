@@ -1,31 +1,31 @@
 <?php
 
-/**
- * @group maniphest
- */
 final class ManiphestTask extends ManiphestDAO
   implements
     PhabricatorMarkupInterface,
     PhabricatorPolicyInterface,
     PhabricatorTokenReceiverInterface,
-    PhrequentTrackableInterface {
+    PhabricatorFlaggableInterface,
+    PhrequentTrackableInterface,
+    PhabricatorCustomFieldInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
 
-  protected $phid;
   protected $authorPHID;
   protected $ownerPHID;
   protected $ccPHIDs = array();
 
   protected $status;
   protected $priority;
-  protected $subpriority;
+  protected $subpriority = 0;
 
-  protected $title;
-  protected $originalTitle;
-  protected $description;
+  protected $title = '';
+  protected $originalTitle = '';
+  protected $description = '';
   protected $originalEmailSource;
   protected $mailKey;
+  protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
+  protected $editPolicy = PhabricatorPolicies::POLICY_USER;
 
   protected $attached = array();
   protected $projectPHIDs = array();
@@ -34,8 +34,25 @@ final class ManiphestTask extends ManiphestDAO
 
   protected $ownerOrdering;
 
-  private $auxiliaryAttributes;
-  private $auxiliaryDirty = array();
+  private $groupByProjectPHID = self::ATTACHABLE;
+  private $customFields = self::ATTACHABLE;
+
+  public static function initializeNewTask(PhabricatorUser $actor) {
+    $app = id(new PhabricatorApplicationQuery())
+      ->setViewer($actor)
+      ->withClasses(array('PhabricatorApplicationManiphest'))
+      ->executeOne();
+
+    $view_policy = $app->getPolicy(ManiphestCapabilityDefaultView::CAPABILITY);
+    $edit_policy = $app->getPolicy(ManiphestCapabilityDefaultEdit::CAPABILITY);
+
+    return id(new ManiphestTask())
+      ->setStatus(ManiphestTaskStatus::getDefaultStatus())
+      ->setPriority(ManiphestTaskPriority::getDefaultPriority())
+      ->setAuthorPHID($actor->getPHID())
+      ->setViewPolicy($view_policy)
+      ->setEditPolicy($edit_policy);
+  }
 
   public function getConfiguration() {
     return array(
@@ -65,8 +82,7 @@ final class ManiphestTask extends ManiphestDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_TASK);
+    return PhabricatorPHID::generateNewPHID(ManiphestPHIDTypeTask::TYPECONST);
   }
 
   public function getCCPHIDs() {
@@ -90,24 +106,8 @@ final class ManiphestTask extends ManiphestDAO
   }
 
   public function setOwnerPHID($phid) {
-    $this->ownerPHID = $phid;
+    $this->ownerPHID = nonempty($phid, null);
     $this->subscribersNeedUpdate = true;
-    return $this;
-  }
-
-  public function getAuxiliaryAttribute($key, $default = null) {
-    if ($this->auxiliaryAttributes === null) {
-      throw new Exception("Attach auxiliary attributes before getting them!");
-    }
-    return idx($this->auxiliaryAttributes, $key, $default);
-  }
-
-  public function setAuxiliaryAttribute($key, $val) {
-    if ($this->auxiliaryAttributes === null) {
-      throw new Exception("Attach auxiliary attributes before setting them!");
-    }
-    $this->auxiliaryAttributes[$key] = $val;
-    $this->auxiliaryDirty[$key] = true;
     return $this;
   }
 
@@ -119,29 +119,17 @@ final class ManiphestTask extends ManiphestDAO
     return $this;
   }
 
-  public function attachAuxiliaryAttributes(array $attrs) {
-    if ($this->auxiliaryDirty) {
-      throw new Exception(
-        "This object has dirty attributes, you can not attach new attributes ".
-        "without writing or discarding the dirty attributes.");
-    }
-    $this->auxiliaryAttributes = $attrs;
+  public function getMonogram() {
+    return 'T'.$this->getID();
+  }
+
+  public function attachGroupByProjectPHID($phid) {
+    $this->groupByProjectPHID = $phid;
     return $this;
   }
 
-  public function loadAndAttachAuxiliaryAttributes() {
-    if (!$this->getPHID()) {
-      $this->auxiliaryAttributes = array();
-      return $this;
-    }
-
-    $storage = id(new ManiphestTaskAuxiliaryStorage())->loadAllWhere(
-      'taskPHID = %s',
-      $this->getPHID());
-
-    $this->auxiliaryAttributes = mpull($storage, 'getValue', 'getName');
-
-    return $this;
+  public function getGroupByProjectPHID() {
+    return $this->assertAttached($this->groupByProjectPHID);
   }
 
   public function save() {
@@ -165,58 +153,11 @@ final class ManiphestTask extends ManiphestDAO
       $this->subscribersNeedUpdate = false;
     }
 
-    if ($this->auxiliaryDirty) {
-      $this->writeAuxiliaryUpdates();
-      $this->auxiliaryDirty = array();
-    }
-
     return $result;
   }
 
-  private function writeAuxiliaryUpdates() {
-    $table = new ManiphestTaskAuxiliaryStorage();
-    $conn_w = $table->establishConnection('w');
-    $update = array();
-    $remove = array();
-
-    foreach ($this->auxiliaryDirty as $key => $dirty) {
-      $value = $this->getAuxiliaryAttribute($key);
-      if ($value === null) {
-        $remove[$key] = true;
-      } else {
-        $update[$key] = $value;
-      }
-    }
-
-    if ($remove) {
-      queryfx(
-        $conn_w,
-        'DELETE FROM %T WHERE taskPHID = %s AND name IN (%Ls)',
-        $table->getTableName(),
-        $this->getPHID(),
-        array_keys($remove));
-    }
-
-    if ($update) {
-      $sql = array();
-      foreach ($update as $key => $val) {
-        $sql[] = qsprintf(
-          $conn_w,
-          '(%s, %s, %s, %d, %d)',
-          $this->getPHID(),
-          $key,
-          $val,
-          time(),
-          time());
-      }
-      queryfx(
-        $conn_w,
-        'INSERT INTO %T (taskPHID, name, value, dateCreated, dateModified)
-          VALUES %Q ON DUPLICATE KEY
-          UPDATE value = VALUES(value), dateModified = VALUES(dateModified)',
-        $table->getTableName(),
-        implode(', ', $sql));
-    }
+  public function isClosed() {
+    return ManiphestTaskStatus::isClosedStatus($this->getStatus());
   }
 
 
@@ -279,15 +220,36 @@ final class ManiphestTask extends ManiphestDAO
   }
 
   public function getPolicy($capability) {
-    return PhabricatorPolicies::POLICY_USER;
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return $this->getViewPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return $this->getEditPolicy();
+    }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $user) {
+
+    // The owner of a task can always view and edit it.
+    $owner_phid = $this->getOwnerPHID();
+    if ($owner_phid) {
+      $user_phid = $user->getPHID();
+      if ($user_phid == $owner_phid) {
+        return true;
+      }
+    }
+
     return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return pht(
+      'The owner of a task can always view and edit it.');
   }
 
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
 
   public function getUsersToNotifyOfTokenGiven() {
     // Sort of ambiguous who this was intended for; just let them both know.
@@ -297,6 +259,27 @@ final class ManiphestTask extends ManiphestDAO
           $this->getAuthorPHID(),
           $this->getOwnerPHID(),
         )));
+  }
+
+
+/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+
+
+  public function getCustomFieldSpecificationForRole($role) {
+    return PhabricatorEnv::getEnvConfig('maniphest.fields');
+  }
+
+  public function getCustomFieldBaseClass() {
+    return 'ManiphestCustomField';
+  }
+
+  public function getCustomFields() {
+    return $this->assertAttached($this->customFields);
+  }
+
+  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
+    $this->customFields = $fields;
+    return $this;
   }
 
 }

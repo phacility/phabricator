@@ -13,11 +13,11 @@ final class PhluxListController extends PhluxController {
 
     $vars = $query->executeWithCursorPager($pager);
 
-    $view = new PhabricatorObjectItemListView();
+    $view = new PHUIObjectItemListView();
     foreach ($vars as $var) {
       $key = $var->getVariableKey();
 
-      $item = new PhabricatorObjectItemView();
+      $item = new PHUIObjectItemView();
       $item->setHeader($key);
       $item->setHref($this->getApplicationURI('/view/'.$key.'/'));
       $item->addIcon(
@@ -31,10 +31,7 @@ final class PhluxListController extends PhluxController {
 
     $title = pht('Variable List');
 
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title)
-        ->setHref($this->getApplicationURI()));
+    $crumbs->addTextCrumb($title, $this->getApplicationURI());
 
     return $this->buildApplicationPage(
       array(
@@ -45,7 +42,6 @@ final class PhluxListController extends PhluxController {
       array(
         'title'  => $title,
         'device' => true,
-        'dust'   => true,
       ));
   }
 

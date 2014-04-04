@@ -20,13 +20,14 @@ final class PhabricatorSettingsPanelDisplayPreferences
     $preferences = $user->loadPreferences();
 
     $pref_monospaced   = PhabricatorUserPreferences::PREFERENCE_MONOSPACED;
-    $pref_dark_console = PhabricatorUserPreferences::PREFERENCE_DARK_CONSOLE;
     $pref_editor       = PhabricatorUserPreferences::PREFERENCE_EDITOR;
     $pref_multiedit    = PhabricatorUserPreferences::PREFERENCE_MULTIEDIT;
     $pref_titles       = PhabricatorUserPreferences::PREFERENCE_TITLES;
     $pref_monospaced_textareas =
       PhabricatorUserPreferences::PREFERENCE_MONOSPACED_TEXTAREAS;
 
+    $errors = array();
+    $e_editor = null;
     if ($request->isFormPost()) {
       $monospaced = $request->getStr($pref_monospaced);
 
@@ -42,13 +43,36 @@ final class PhabricatorSettingsPanelDisplayPreferences
       $preferences->setPreference(
         $pref_monospaced_textareas,
         $request->getStr($pref_monospaced_textareas));
-      $preferences->setPreference(
-        $pref_dark_console,
-        $request->getBool($pref_dark_console));
 
-      $preferences->save();
-      return id(new AphrontRedirectResponse())
-        ->setURI($this->getPanelURI('?saved=true'));
+      $editor_pattern = $preferences->getPreference($pref_editor);
+      if (strlen($editor_pattern)) {
+        $ok = PhabricatorHelpEditorProtocolController::hasAllowedProtocol(
+          $editor_pattern);
+        if (!$ok) {
+          $allowed_key = 'uri.allowed-editor-protocols';
+          $allowed_protocols = PhabricatorEnv::getEnvConfig($allowed_key);
+
+          $proto_names = array();
+          foreach (array_keys($allowed_protocols) as $protocol) {
+            $proto_names[] = $protocol.'://';
+          }
+
+          $errors[] = pht(
+            'Editor link has an invalid or missing protocol. You must '.
+            'use a whitelisted editor protocol from this list: %s. To '.
+            'add protocols, update %s.',
+            implode(', ', $proto_names),
+            phutil_tag('tt', array(), $allowed_key));
+
+          $e_editor = pht('Invalid');
+        }
+      }
+
+      if (!$errors) {
+        $preferences->save();
+        return id(new AphrontRedirectResponse())
+          ->setURI($this->getPanelURI('?saved=true'));
+      }
     }
 
     $example_string = <<<EXAMPLE
@@ -62,7 +86,7 @@ EXAMPLE;
       'a',
       array(
         'href' => PhabricatorEnv::getDoclink(
-          'article/User_Guide_Configuring_an_External_Editor.html'),
+          'User Guide: Configuring an External Editor'),
       ),
       pht('User Guide: Configuring an External Editor'));
 
@@ -73,15 +97,11 @@ EXAMPLE;
     if (!$pref_monospaced_textareas_value) {
       $pref_monospaced_textareas_value = 'disabled';
     }
-    $pref_dark_console_value = $preferences->getPreference($pref_dark_console);
-    if (!$pref_dark_console_value) {
-        $pref_dark_console_value = 0;
-    }
 
     $editor_instructions = pht('Link to edit files in external editor. '.
       '%%f is replaced by filename, %%l by line number, %%r by repository '.
       'callsign, %%%% by literal %%. For documentation, see: %s',
-      hsprintf('%s', $editor_doc_link));
+      $editor_doc_link);
 
     $form = id(new AphrontFormView())
       ->setUser($user)
@@ -103,8 +123,8 @@ EXAMPLE;
         id(new AphrontFormTextControl())
         ->setLabel(pht('Editor Link'))
         ->setName($pref_editor)
-        // How to pht()
         ->setCaption($editor_instructions)
+        ->setError($e_editor)
         ->setValue($preferences->getPreference($pref_editor)))
       ->appendChild(
         id(new AphrontFormSelectControl())
@@ -141,38 +161,18 @@ EXAMPLE;
           pht('Show all textareas using the monospaced font defined above.'))
         ->addButton('disabled', pht('Disabled'), null));
 
-    if (PhabricatorEnv::getEnvConfig('darkconsole.enabled')) {
-      $form->appendChild(
-        id(new AphrontFormRadioButtonControl())
-        ->setLabel(pht('Dark Console'))
-        ->setName($pref_dark_console)
-        ->setValue($pref_dark_console_value ?
-            $pref_dark_console_value : 0)
-        ->addButton(1, pht('Enabled'),
-          pht('Enabling and using the built-in debugging console.'))
-        ->addButton(0, pht('Disabled'), null));
-    }
-
     $form->appendChild(
       id(new AphrontFormSubmitControl())
         ->setValue(pht('Save Preferences')));
 
-    $header = new PhabricatorHeaderView();
-    $header->setHeader(pht('Display Preferences'));
-
-    $error_view = null;
-    if ($request->getStr('saved') === 'true') {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Preferences Saved'))
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setErrors(array(pht('Your preferences have been saved.')));
-    }
+    $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Display Preferences'))
+      ->setFormErrors($errors)
+      ->setFormSaved($request->getStr('saved') === 'true')
+      ->setForm($form);
 
     return array(
-      $error_view,
-      $header,
-      $form,
+      $form_box,
     );
   }
 }
-

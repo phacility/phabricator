@@ -14,19 +14,27 @@ final class PhabricatorTokenGivenFeedStory
     return $phids;
   }
 
+  public function getRequiredObjectPHIDs() {
+    $phids = array();
+    $phids[] = $this->getValue('tokenPHID');
+    return $phids;
+  }
+
   public function renderView() {
-    $view = new PHUIFeedStoryView();
+    $view = $this->newStoryView();
     $view->setAppIcon('token-dark');
-    $view->setViewed($this->getHasViewed());
     $author_phid = $this->getValue('authorPHID');
 
     $href = $this->getHandle($this->getPrimaryObjectPHID())->getURI();
     $view->setHref($href);
 
+    $token = $this->getObject($this->getValue('tokenPHID'));
+
     $title = pht(
-      '%s awarded %s a token.',
+      '%s awarded %s a %s token.',
       $this->linkTo($this->getValue('authorPHID')),
-      $this->linkTo($this->getValue('objectPHID')));
+      $this->linkTo($this->getValue('objectPHID')),
+      $token->getName());
 
     $view->setTitle($title);
     $view->setImage($this->getHandle($author_phid)->getImageURI());
@@ -36,7 +44,11 @@ final class PhabricatorTokenGivenFeedStory
 
   public function renderText() {
     // TODO: This is grotesque; the feed notification handler relies on it.
-    return strip_tags($this->renderView()->render());
+    return htmlspecialchars_decode(
+      strip_tags(
+        hsprintf(
+          '%s',
+          $this->renderView()->render())));
   }
 
 }

@@ -17,7 +17,6 @@ final class PhabricatorUIListFilterExample extends PhabricatorUIExample {
     $filter = new AphrontListFilterView();
 
     $form = new AphrontFormView();
-    $form->setNoShading(true);
     $form->setUser($this->getRequest()->getUser());
     $form
       ->appendChild(

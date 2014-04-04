@@ -57,7 +57,7 @@ final class DivinerRemarkupRuleSymbol extends PhutilRemarkupRule {
       $ref['name'] = $name;
     }
 
-    $ref['title'] = $title;
+    $ref['title'] = nonempty($title, $name);
 
     foreach ($ref as $key => $value) {
       if ($value === '') {
@@ -86,7 +86,7 @@ final class DivinerRemarkupRuleSymbol extends PhutilRemarkupRule {
 
     foreach ($data as $token => $ref_dict) {
       $ref = DivinerAtomRef::newFromDictionary($ref_dict);
-      $title = nonempty($ref->getTitle(), $ref->getName());
+      $title = $ref->getTitle();
 
       $href = null;
       if ($renderer) {
@@ -104,7 +104,25 @@ final class DivinerRemarkupRuleSymbol extends PhutilRemarkupRule {
         // link to Diviner and let it sort things out.
 
         $href = id(new PhutilURI('/diviner/find/'))
-          ->setQueryParams($ref_dict + array('jump' => true));
+          ->setQueryParams(
+            array(
+              'book' => $ref->getBook(),
+              'name' => $ref->getName(),
+              'type' => $ref->getType(),
+              'context' => $ref->getContext(),
+              'jump' => true,
+            ));
+      }
+
+      // TODO: This probably is not the best place to do this. Move it somewhere
+      // better when it becomes more clear where it should actually go.
+      if ($ref) {
+        switch ($ref->getType()) {
+          case 'function':
+          case 'method':
+            $title = $title.'()';
+            break;
+        }
       }
 
       if ($this->getEngine()->isTextMode()) {

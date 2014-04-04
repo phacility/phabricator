@@ -1,6 +1,7 @@
 #!/usr/bin/env php
 <?php
 
+
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
@@ -23,6 +24,13 @@ $args->parse(
       'name'      => 'ignore-errors',
       'help'      => 'If a line can\'t be parsed, ignore that line and '.
                      'continue instead of exiting.',
+    ),
+    array(
+      'name'      => 'max-transaction',
+      'param'     => 'num-syms',
+      'default'  => '100000',
+      'help'      => 'Maximum number of symbols that should '.
+                     'be part of a single transaction',
     ),
     array(
       'name'      => 'more',
@@ -53,6 +61,67 @@ $input = file_get_contents('php://stdin');
 $input = trim($input);
 $input = explode("\n", $input);
 
+
+function commit_symbols ($syms, $project, $no_purge) {
+  echo "Looking up path IDs...\n";
+  $path_map =
+    PhabricatorRepositoryCommitChangeParserWorker::lookupOrCreatePaths(
+           ipull($syms, 'path'));
+
+  $symbol = new PhabricatorRepositorySymbol();
+  $conn_w = $symbol->establishConnection('w');
+
+  echo "Preparing queries...\n";
+  $sql = array();
+  foreach ($syms as $dict) {
+    $sql[] = qsprintf(
+                      $conn_w,
+                      '(%d, %s, %s, %s, %s, %d, %d)',
+                      $project->getID(),
+                      $dict['ctxt'],
+                      $dict['name'],
+                      $dict['type'],
+                      $dict['lang'],
+                      $dict['line'],
+                      $path_map[$dict['path']]);
+  }
+
+  if (!$no_purge) {
+    echo "Purging old syms...\n";
+    queryfx($conn_w,
+            'DELETE FROM %T WHERE arcanistProjectID = %d',
+            $symbol->getTableName(),
+            $project->getID());
+  }
+
+  echo "Loading ".number_format(count($sql))." syms...\n";
+  foreach (array_chunk($sql, 128) as $chunk) {
+    queryfx($conn_w,
+            'INSERT INTO %T
+      (arcanistProjectID, symbolContext, symbolName, symbolType,
+        symbolLanguage, lineNumber, pathID) VALUES %Q',
+            $symbol->getTableName(),
+            implode(', ', $chunk));
+  }
+
+}
+
+function check_string_value($value, $field_name, $line_no, $max_length) {
+   if (strlen($value) > $max_length) {
+      throw new Exception(
+        "{$field_name} '{$value}' defined on line #{$line_no} is too long, ".
+        "maximum {$field_name} length is {$max_length} characters.");
+    }
+
+    if (!phutil_is_utf8_with_only_bmp_characters($value)) {
+      throw new Exception(
+        "{$field_name} '{$value}' defined on line #{$line_no} is not a valid ".
+        "UTF-8 string, ".
+        "it should contain only UTF-8 characters.");
+    }
+}
+
+$no_purge = $args->getArg('no-purge');
 $symbols = array();
 foreach ($input as $key => $line) {
   try {
@@ -83,31 +152,13 @@ foreach ($input as $key => $line) {
     $line_number = $matches['line'];
     $path        = $matches['path'];
 
-    if (strlen($context) > 128) {
-      throw new Exception(
-        "Symbol context '{$context}' defined on line #{$line_no} is too long, ".
-        "maximum symbol context length is 128 characters.");
-    }
+    check_string_value($context, 'Symbol context', $line_no, 128);
+    check_string_value($name, 'Symbol name', $line_no, 128);
+    check_string_value($type, 'Symbol type', $line_no, 12);
+    check_string_value($lang, 'Symbol language', $line_no, 32);
+    check_string_value($path, 'Path', $line_no, 512);
 
-    if (strlen($name) > 128) {
-      throw new Exception(
-        "Symbol name '{$name}' defined on line #{$line_no} is too long, ".
-        "maximum symbol name length is 128 characters.");
-    }
-
-    if (strlen($type) > 12) {
-      throw new Exception(
-        "Symbol type '{$type}' defined on line #{$line_no} is too long, ".
-        "maximum symbol type length is 12 characters.");
-    }
-
-    if (strlen($lang) > 32) {
-      throw new Exception(
-        "Symbol language '{$lang}' defined on line #{$line_no} is too long, ".
-        "maximum symbol language length is 32 characters.");
-    }
-
-    if (!strlen($path) || $path[0] != 0) {
+    if (!strlen($path) || $path[0] != '/') {
       throw new Exception(
         "Path '{$path}' defined on line #{$line_no} is invalid. Paths should ".
         "begin with '/' and specify a path from the root of the project, like ".
@@ -129,48 +180,26 @@ foreach ($input as $key => $line) {
       throw $e;
     }
   }
+
+  if (count ($symbols) >= $args->getArg('max-transaction')) {
+      try {
+        echo "Committing {$args->getArg('max-transaction')} symbols....\n";
+        commit_symbols($symbols, $project, $no_purge);
+        $no_purge = true;
+        unset($symbols);
+        $symbols = array();
+      } catch (Exception $e) {
+        if ($args->getArg('ignore-errors')) {
+          continue;
+        } else {
+          throw $e;
+        }
+      }
+  }
 }
 
-echo "Looking up path IDs...\n";
-$path_map = PhabricatorRepositoryCommitChangeParserWorker::lookupOrCreatePaths(
-  ipull($symbols, 'path'));
-
-$symbol = new PhabricatorRepositorySymbol();
-$conn_w = $symbol->establishConnection('w');
-
-echo "Preparing queries...\n";
-$sql = array();
-foreach ($symbols as $dict) {
-  $sql[] = qsprintf(
-    $conn_w,
-    '(%d, %s, %s, %s, %s, %d, %d)',
-    $project->getID(),
-    $dict['ctxt'],
-    $dict['name'],
-    $dict['type'],
-    $dict['lang'],
-    $dict['line'],
-    $path_map[$dict['path']]);
-}
-
-if (!$args->getArg('no-purge')) {
-  echo "Purging old symbols...\n";
-  queryfx(
-    $conn_w,
-    'DELETE FROM %T WHERE arcanistProjectID = %d',
-    $symbol->getTableName(),
-    $project->getID());
-}
-
-echo "Loading ".number_format(count($sql))." symbols...\n";
-foreach (array_chunk($sql, 128) as $chunk) {
-  queryfx(
-    $conn_w,
-    'INSERT INTO %T
-      (arcanistProjectID, symbolContext, symbolName, symbolType,
-        symbolLanguage, lineNumber, pathID) VALUES %Q',
-    $symbol->getTableName(),
-    implode(', ', $chunk));
+if (count($symbols)) {
+  commit_symbols($symbols, $project, $no_purge);
 }
 
 echo "Done.\n";

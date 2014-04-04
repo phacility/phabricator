@@ -21,6 +21,8 @@ final class DiffusionHistoryTableView extends DiffusionView {
         $commit_phids[] = $item->getCommit()->getPHID();
       }
     }
+
+    // TODO: Get rid of this.
     $this->revisions = id(new DifferentialRevision())
       ->loadIDsByCommitPHIDs($commit_phids);
     return $this;
@@ -110,8 +112,12 @@ final class DiffusionHistoryTableView extends DiffusionView {
         $author = hsprintf('%s/%s', $author, $committer);
       }
 
+      // We can show details once the message and change have been imported.
+      $partial_import = PhabricatorRepositoryCommit::IMPORTED_MESSAGE |
+                        PhabricatorRepositoryCommit::IMPORTED_CHANGE;
+
       $commit = $history->getCommit();
-      if ($commit && !$commit->getIsUnparsed() && $data) {
+      if ($commit && $commit->isPartiallyImported($partial_import) && $data) {
         $change = $this->linkChange(
           $history->getChangeType(),
           $history->getFileType(),

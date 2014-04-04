@@ -3,7 +3,7 @@
  */
 
 .differential-comment-list {
-  margin: 0 2em 3.6em 2em;
+  margin: 0 16px;
 }
 
 .differential-comment-list .phabricator-transaction-content {
@@ -26,18 +26,25 @@
   left: 0;
   overflow: auto;
   max-height: 375px;
+  margin: 0;
 
   box-shadow: 0 0 4px #000;
   -webkit-box-shadow: 0 0 4px #000;
   -moz-box-shadow: 0 0 4px #000;
 }
 
+.differential-haunt-mode-1 .differential-add-comment-panel .phui-box,
+.differential-haunt-mode-2 .differential-add-comment-panel .phui-box {
+  margin: 0;
+  border-width: 0;
+}
+
 .differential-haunt-mode-2 .differential-add-comment-panel {
   max-height: 75%;
 }
 
-.differential-haunt-mode-1 .differential-add-comment-panel h1,
-.differential-haunt-mode-2 .differential-add-comment-panel h1 {
+.differential-haunt-mode-1 .differential-add-comment-panel .phui-header-shell,
+.differential-haunt-mode-2 .differential-add-comment-panel .phui-header-shell {
   display: none;
 }
 

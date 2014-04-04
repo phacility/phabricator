@@ -87,12 +87,11 @@ abstract class PhabricatorMailReplyHandler {
     $template->setBody($this->buildErrorMailBody($error, $mail));
     $template->setRelatedPHID($mail->getRelatedPHID());
     $phid = $this->getActor()->getPHID();
-    $tos = array(
-      $phid => PhabricatorObjectHandleData::loadOneHandle(
-        $phid,
-        // TODO: This could be cleaner (T603).
-        PhabricatorUser::getOmnipotentUser()),
-    );
+    $handle = id(new PhabricatorHandleQuery())
+      ->setViewer($this->getActor())
+      ->withPHIDs(array($phid))
+      ->executeOne();
+    $tos = array($phid => $handle);
     $mails = $this->multiplexMail($template, $tos, array());
 
     foreach ($mails as $email) {
@@ -199,6 +198,15 @@ EOBODY;
       }
     }
 
+    // TODO: This is pretty messy. We should really be doing all of this
+    // multiplexing in the task queue, but that requires significant rewriting
+    // in the general case. ApplicationTransactions can do it fairly easily,
+    // but other mail sites currently can not, so we need to support this
+    // junky version until they catch up and we can swap things over.
+
+    $to_handles = $this->expandRecipientHandles($to_handles);
+    $cc_handles = $this->expandRecipientHandles($cc_handles);
+
     $tos = mpull($to_handles, null, 'getPHID');
     $ccs = mpull($cc_handles, null, 'getPHID');
 
@@ -220,6 +228,8 @@ EOBODY;
     $body .= $this->getRecipientsSummary($to_handles, $cc_handles);
 
     foreach ($recipients as $phid => $recipient) {
+
+
       $mail = clone $mail_template;
       if (isset($to_handles[$phid])) {
         $mail->addTos(array($phid));
@@ -280,14 +290,21 @@ EOBODY;
     PhabricatorObjectHandle $handle,
     $prefix) {
 
-    if ($handle->getType() != PhabricatorPHIDConstants::PHID_TYPE_USER) {
+    if ($handle->getType() != PhabricatorPeoplePHIDTypeUser::TYPECONST) {
       // You must be a real user to get a private reply handler address.
       return null;
     }
 
-    $user = head(id(new PhabricatorPeopleQuery())
-      ->withPhids(array($handle->getPHID()))
-      ->execute());
+    $user = id(new PhabricatorPeopleQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs(array($handle->getPHID()))
+      ->executeOne();
+
+    if (!$user) {
+      // This may happen if a user was subscribed to something, and was then
+      // deleted.
+      return null;
+    }
 
     $receiver = $this->getMailReceiver();
     $receiver_id = $receiver->getID();
@@ -301,7 +318,7 @@ EOBODY;
     return $this->getSingleReplyHandlerPrefix($address);
   }
 
-  final protected function enhanceBodyWithAttachments(
+ final protected function enhanceBodyWithAttachments(
     $body,
     array $attachments,
     $format = '- {F%d, layout=link}') {
@@ -309,6 +326,7 @@ EOBODY;
       return $body;
     }
 
+    // TODO: (T603) What's the policy here?
     $files = id(new PhabricatorFile())
       ->loadAllWhere('phid in (%Ls)', $attachments);
 
@@ -323,6 +341,34 @@ EOBODY;
     }
 
     return rtrim($body);
+  }
+
+  private function expandRecipientHandles(array $handles) {
+    if (!$handles) {
+      return array();
+    }
+
+    $phids = mpull($handles, 'getPHID');
+    $map = id(new PhabricatorMetaMTAMemberQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs($phids)
+      ->execute();
+
+    $results = array();
+    foreach ($phids as $phid) {
+      if (isset($map[$phid])) {
+        foreach ($map[$phid] as $expanded_phid) {
+          $results[$expanded_phid] = $expanded_phid;
+        }
+      } else {
+        $results[$phid] = $phid;
+      }
+    }
+
+    return id(new PhabricatorHandleQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs($results)
+      ->execute();
   }
 
 }

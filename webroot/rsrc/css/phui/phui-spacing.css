@@ -1,0 +1,131 @@
+/**
+ * @provides phui-spacing-css
+ */
+
+.pl {
+  padding: 16px;
+}
+
+.pm {
+  padding: 8px;
+}
+
+.ps {
+  padding: 4px;
+}
+
+.ml {
+  margin: 16px;
+}
+
+.mm {
+  margin: 8px;
+}
+
+.ms {
+  margin: 4px;
+}
+
+/* left */
+
+.pll {
+  padding-left: 16px;
+}
+
+.pml {
+  padding-left: 8px
+}
+
+.psl {
+  padding-left: 4px;
+}
+
+.mll {
+  margin-left: 16px;
+}
+
+.mml {
+  margin-left: 8px;
+}
+
+.msl {
+  margin-left: 4px;
+}
+
+/* Right */
+
+.plr {
+  padding-right: 16px;
+}
+
+.pmr {
+  padding-right: 8px;
+}
+
+.psr {
+  padding-right: 4px;
+}
+
+.mlr {
+  margin-right: 16px;
+}
+
+.mmr {
+  margin-right: 8px;
+}
+
+.msr {
+  margin-right: 4px;
+}
+
+/* Bottom */
+
+.plb {
+  padding-bottom: 16px;
+}
+
+.pmb {
+  padding-bottom: 8px;
+}
+
+.psb {
+  padding-bottom: 4px;
+}
+
+.mlb {
+  margin-bottom: 16px;
+}
+
+.mmb {
+  margin-bottom: 8px;
+}
+
+.msb {
+  margin-bottom: 4px;
+}
+
+/* Top */
+
+.plt {
+  padding-top: 16px;
+}
+
+.pmt {
+  padding-top: 8px;
+}
+
+.pst {
+  padding-top: 4px;
+}
+
+.mlt {
+  margin-top: 16px;
+}
+
+.mmt {
+  margin-top: 8px;
+}
+
+.mst {
+  margin-top: 4px;
+}

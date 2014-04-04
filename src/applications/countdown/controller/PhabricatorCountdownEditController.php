@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group countdown
+ */
 final class PhabricatorCountdownEditController
   extends PhabricatorCountdownController {
 
@@ -12,77 +15,87 @@ final class PhabricatorCountdownEditController
 
     $request = $this->getRequest();
     $user = $request->getUser();
-    $action_label = pht('Create Countdown');
 
     if ($this->id) {
-      $timer = id(new PhabricatorCountdown())->load($this->id);
-      // If no timer is found
-      if (!$timer) {
+      $page_title = pht('Edit Countdown');
+      $countdown = id(new PhabricatorCountdownQuery())
+        ->setViewer($user)
+        ->withIDs(array($this->id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
+      if (!$countdown) {
         return new Aphront404Response();
       }
-
-      if (($timer->getAuthorPHID() != $user->getPHID())
-          && $user->getIsAdmin() == false) {
-        return new Aphront403Response();
-      }
-
-      $action_label = pht('Update Countdown');
     } else {
-      $timer = new PhabricatorCountdown();
-      $timer->setEpoch(time());
+      $page_title = pht('Create Countdown');
+      $countdown = PhabricatorCountdown::initializeNewCountdown($user);
     }
 
-    $error_view = null;
-    $e_text = null;
+    $e_text = true;
+    $e_epoch = null;
 
+    $errors = array();
     if ($request->isFormPost()) {
-      $errors = array();
       $title = $request->getStr('title');
       $epoch = $request->getStr('epoch');
+      $view_policy = $request->getStr('viewPolicy');
 
       $e_text = null;
       if (!strlen($title)) {
         $e_text = pht('Required');
-        $errors[] = pht('You must give it a name.');
+        $errors[] = pht('You must give the countdown a name.');
       }
 
-      // If the user types something like "5 PM", convert it to a timestamp
-      // using their local time, not the server time.
-      $timezone = new DateTimeZone($user->getTimezoneIdentifier());
-
-      try {
-        $date = new DateTime($epoch, $timezone);
-        $timestamp = $date->format('U');
-      } catch (Exception $e) {
-        $errors[] = pht('You entered an incorrect date. You can enter date'.
-          ' like \'2011-06-26 13:33:37\' to create an event at'.
-          ' 13:33:37 on the 26th of June 2011.');
-        $timestamp = null;
+      if (strlen($epoch)) {
+        $timestamp = PhabricatorTime::parseLocalTime($epoch, $user);
+        if (!$timestamp) {
+          $errors[] = pht(
+            'You entered an incorrect date. You can enter date '.
+            'like \'2011-06-26 13:33:37\' to create an event at '.
+            '13:33:37 on the 26th of June 2011.');
+        }
+      } else {
+        $e_epoch = pht('Required');
+        $errors[] = pht('You must specify the end date for a countdown.');
       }
-
-      $timer->setTitle($title);
-      $timer->setEpoch($timestamp);
 
       if (!count($errors)) {
-        $timer->setAuthorPHID($user->getPHID());
-        $timer->save();
+        $countdown->setTitle($title);
+        $countdown->setEpoch($timestamp);
+        $countdown->setViewPolicy($view_policy);
+        $countdown->save();
         return id(new AphrontRedirectResponse())
-          ->setURI('/countdown/'.$timer->getID().'/');
-      } else {
-        $error_view = id(new AphrontErrorView())
-          ->setErrors($errors)
-          ->setTitle(pht('It\'s not The Final Countdown (du nu nuuu nun)' .
-            ' until you fix these problem'));
+          ->setURI('/countdown/'.$countdown->getID().'/');
       }
     }
 
-    if ($timer->getEpoch()) {
-      $display_epoch = phabricator_datetime(
-        $timer->getEpoch(),
-        $user);
+    if ($countdown->getEpoch()) {
+      $display_epoch = phabricator_datetime($countdown->getEpoch(), $user);
     } else {
       $display_epoch = $request->getStr('epoch');
     }
+
+    $crumbs = $this->buildApplicationCrumbs();
+
+    $cancel_uri = '/countdown/';
+    if ($countdown->getID()) {
+      $cancel_uri = '/countdown/'.$countdown->getID().'/';
+      $crumbs->addTextCrumb('C'.$countdown->getID(), $cancel_uri);
+      $crumbs->addTextCrumb(pht('Edit'));
+      $submit_label = pht('Save Changes');
+    } else {
+      $crumbs->addTextCrumb(pht('Create Countdown'));
+      $submit_label = pht('Create Countdown');
+    }
+
+    $policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($user)
+      ->setObject($countdown)
+      ->execute();
 
     $form = id(new AphrontFormView())
       ->setUser($user)
@@ -90,42 +103,42 @@ final class PhabricatorCountdownEditController
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Title'))
-          ->setValue($timer->getTitle())
-          ->setName('title'))
+          ->setValue($countdown->getTitle())
+          ->setName('title')
+          ->setError($e_text))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel(pht('End date'))
+          ->setLabel(pht('End Date'))
           ->setValue($display_epoch)
           ->setName('epoch')
+          ->setError($e_epoch)
           ->setCaption(pht('Examples: '.
             '2011-12-25 or 3 hours or '.
             'June 8 2011, 5 PM.')))
       ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setUser($user)
+          ->setName('viewPolicy')
+          ->setPolicyObject($countdown)
+          ->setPolicies($policies)
+          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW))
+      ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->addCancelButton('/countdown/')
-          ->setValue($action_label));
+          ->addCancelButton($cancel_uri)
+          ->setValue($submit_label));
 
-    $panel = id(new AphrontPanelView())
-      ->setWidth(AphrontPanelView::WIDTH_FORM)
-      ->setHeader($action_label)
-      ->setNoBackground()
-      ->appendChild($form);
-
-    $crumbs = $this
-      ->buildApplicationCrumbs()
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($action_label)
-          ->setHref($this->getApplicationURI('edit/')));
+    $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText($page_title)
+      ->setFormErrors($errors)
+      ->setForm($form);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $error_view,
-        $panel,
+        $form_box,
       ),
       array(
-        'title' => pht('Edit Countdown'),
+        'title' => $page_title,
         'device' => true,
       ));
   }

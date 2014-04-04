@@ -8,7 +8,8 @@
  * @task  meta  Application Management
  * @group apps
  */
-abstract class PhabricatorApplication {
+abstract class PhabricatorApplication
+  implements PhabricatorPolicyInterface {
 
   const GROUP_CORE            = 'core';
   const GROUP_COMMUNICATION   = 'communication';
@@ -49,7 +50,6 @@ abstract class PhabricatorApplication {
 
 /* -(  Application Information  )-------------------------------------------- */
 
-
   public function getName() {
     return substr(get_class($this), strlen('PhabricatorApplication'));
   }
@@ -74,12 +74,40 @@ abstract class PhabricatorApplication {
     return empty($uninstalled[get_class($this)]);
   }
 
-  public static function isClassInstalled($class) {
-    return self::getByClass($class)->isInstalled();
-  }
-
   public function isBeta() {
     return false;
+  }
+
+  /**
+   * Return true if this application should not appear in application lists in
+   * the UI. Primarily intended for unit test applications or other
+   * pseudo-applications.
+   *
+   * @return bool True to remove application from UI lists.
+   */
+  public function isUnlisted() {
+    return false;
+  }
+
+  /**
+   * Returns true if an application is first-party (developed by Phacility)
+   * and false otherwise.
+   *
+   * @return bool True if this application is developed by Phacility.
+   */
+  final public function isFirstParty() {
+    $where = id(new ReflectionClass($this))->getFileName();
+    $root = phutil_get_library_root('phabricator');
+
+    if (!Filesystem::isDescendant($where, $root)) {
+      return false;
+    }
+
+    if (Filesystem::isDescendant($where, $root.'/extensions')) {
+      return false;
+    }
+
+    return true;
   }
 
   public function canUninstall() {
@@ -96,6 +124,10 @@ abstract class PhabricatorApplication {
 
   public function getBaseURI() {
     return null;
+  }
+
+  public function getApplicationURI($path = '') {
+    return $this->getBaseURI().ltrim($path, '/');
   }
 
   public function getIconURI() {
@@ -212,7 +244,7 @@ abstract class PhabricatorApplication {
    * @param  PhabricatorUser    The viewing user.
    * @param  AphrontController  The current controller. May be null for special
    *                            pages like 404, exception handlers, etc.
-   * @return list<PhabricatorMainMenuIconView> List of menu items.
+   * @return list<PHUIListItemView> List of menu items.
    * @task ui
    */
   public function buildMainMenuItems(
@@ -223,18 +255,35 @@ abstract class PhabricatorApplication {
 
 
   /**
-   * On the Phabricator homepage sidebar, this function returns the URL for
-   * a quick create X link which is displayed in the wide button only.
+   * Build extra items for the main menu. Generally, this is used to render
+   * static dropdowns.
    *
-   * @return string
+   * @param  PhabricatorUser    The viewing user.
+   * @param  AphrontController  The current controller. May be null for special
+   *                            pages like 404, exception handlers, etc.
+   * @return view               List of menu items.
    * @task ui
    */
-  public function getQuickCreateURI() {
-    return null;
+  public function buildMainMenuExtraNodes(
+    PhabricatorUser $viewer,
+    PhabricatorController $controller = null) {
+    return array();
+  }
+
+
+  /**
+   * Build items for the "quick create" menu.
+   *
+   * @param   PhabricatorUser         The viewing user.
+   * @return  list<PHUIListItemView>  List of menu items.
+   */
+  public function getQuickCreateItems(PhabricatorUser $viewer) {
+    return array();
   }
 
 
 /* -(  Application Management  )--------------------------------------------- */
+
 
   public static function getByClass($class_name) {
     $selected = null;
@@ -266,12 +315,14 @@ abstract class PhabricatorApplication {
       // ensures their event handlers register in application order.
       $apps = msort($apps, 'getApplicationOrder');
       $apps = mgroup($apps, 'getApplicationGroup');
-      $apps = array_select_keys($apps, self::getApplicationGroups()) + $apps;
+
+      $group_order = array_keys(self::getApplicationGroups());
+      $apps = array_select_keys($apps, $group_order) + $apps;
+
       $apps = array_mergev($apps);
 
       $applications = $apps;
     }
-
 
     return $applications;
   }
@@ -290,5 +341,166 @@ abstract class PhabricatorApplication {
     return $apps;
   }
 
-}
 
+  /**
+   * Determine if an application is installed, by application class name.
+   *
+   * To check if an application is installed //and// available to a particular
+   * viewer, user @{method:isClassInstalledForViewer}.
+   *
+   * @param string  Application class name.
+   * @return bool   True if the class is installed.
+   * @task meta
+   */
+  public static function isClassInstalled($class) {
+    return self::getByClass($class)->isInstalled();
+  }
+
+
+  /**
+   * Determine if an application is installed and available to a viewer, by
+   * application class name.
+   *
+   * To check if an application is installed at all, use
+   * @{method:isClassInstalled}.
+   *
+   * @param string Application class name.
+   * @param PhabricatorUser Viewing user.
+   * @return bool True if the class is installed for the viewer.
+   * @task meta
+   */
+  public static function isClassInstalledForViewer(
+    $class,
+    PhabricatorUser $viewer) {
+
+    if (!self::isClassInstalled($class)) {
+      return false;
+    }
+
+    return PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      self::getByClass($class),
+      PhabricatorPolicyCapability::CAN_VIEW);
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array_merge(
+      array(
+        PhabricatorPolicyCapability::CAN_VIEW,
+        PhabricatorPolicyCapability::CAN_EDIT,
+      ),
+      array_keys($this->getCustomCapabilities()));
+  }
+
+  public function getPolicy($capability) {
+    $default = $this->getCustomPolicySetting($capability);
+    if ($default) {
+      return $default;
+    }
+
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::getMostOpenPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return PhabricatorPolicies::POLICY_ADMIN;
+      default:
+        $spec = $this->getCustomCapabilitySpecification($capability);
+        return idx($spec, 'default', PhabricatorPolicies::POLICY_USER);
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
+
+/* -(  Policies  )----------------------------------------------------------- */
+
+  protected function getCustomCapabilities() {
+    return array();
+  }
+
+  private function getCustomPolicySetting($capability) {
+    if (!$this->isCapabilityEditable($capability)) {
+      return null;
+    }
+
+    $config = PhabricatorEnv::getEnvConfig('phabricator.application-settings');
+
+    $app = idx($config, $this->getPHID());
+    if (!$app) {
+      return null;
+    }
+
+    $policy = idx($app, 'policy');
+    if (!$policy) {
+      return null;
+    }
+
+    return idx($policy, $capability);
+  }
+
+
+  private function getCustomCapabilitySpecification($capability) {
+    $custom = $this->getCustomCapabilities();
+    if (!isset($custom[$capability])) {
+      throw new Exception("Unknown capability '{$capability}'!");
+    }
+    return $custom[$capability];
+  }
+
+  public function getCapabilityLabel($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return pht('Can Use Application');
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return pht('Can Configure Application');
+    }
+
+    $capobj = PhabricatorPolicyCapability::getCapabilityByKey($capability);
+    if ($capobj) {
+      return $capobj->getCapabilityName();
+    }
+
+    return null;
+  }
+
+  public function isCapabilityEditable($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return $this->canUninstall();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return false;
+      default:
+        $spec = $this->getCustomCapabilitySpecification($capability);
+        return idx($spec, 'edit', true);
+    }
+  }
+
+  public function getCapabilityCaption($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        if (!$this->canUninstall()) {
+          return pht(
+            'This application is required for Phabricator to operate, so all '.
+            'users must have access to it.');
+        } else {
+          return null;
+        }
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return null;
+      default:
+        $spec = $this->getCustomCapabilitySpecification($capability);
+        return idx($spec, 'caption');
+    }
+  }
+
+}

@@ -3,16 +3,9 @@
 final class PhabricatorRepositoryMercurialCommitChangeParserWorker
   extends PhabricatorRepositoryCommitChangeParserWorker {
 
-  protected function parseCommit(
+  protected function parseCommitChanges(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
-
-    $full_name = 'r'.$repository->getCallsign().$commit->getCommitIdentifier();
-    echo "Parsing {$full_name}...\n";
-    if ($this->isBadCommit($full_name)) {
-      echo "This commit is marked bad!\n";
-      return;
-    }
 
     list($stdout) = $repository->execxLocalCommand(
       'status -C --change %s',
@@ -270,45 +263,21 @@ final class PhabricatorRepositoryMercurialCommitChangeParserWorker
       }
     }
 
-    $conn_w = $repository->establishConnection('w');
-
-    $changes_sql = array();
+    $results = array();
     foreach ($changes as $change) {
-      $values = array(
-        (int)$change['repositoryID'],
-        (int)$change['pathID'],
-        (int)$change['commitID'],
-        $change['targetPathID']
-          ? (int)$change['targetPathID']
-          : 'null',
-        $change['targetCommitID']
-          ? (int)$change['targetCommitID']
-          : 'null',
-        (int)$change['changeType'],
-        (int)$change['fileType'],
-        (int)$change['isDirect'],
-        (int)$change['commitSequence'],
-      );
-      $changes_sql[] = '('.implode(', ', $values).')';
+      $result = id(new PhabricatorRepositoryParsedChange())
+        ->setPathID($change['pathID'])
+        ->setTargetPathID($change['targetPathID'])
+        ->setTargetCommitID($change['targetCommitID'])
+        ->setChangeType($change['changeType'])
+        ->setFileType($change['fileType'])
+        ->setIsDirect($change['isDirect'])
+        ->setCommitSequence($change['commitSequence']);
+
+      $results[] = $result;
     }
 
-    queryfx(
-      $conn_w,
-      'DELETE FROM %T WHERE commitID = %d',
-      PhabricatorRepository::TABLE_PATHCHANGE,
-      $commit->getID());
-    foreach (array_chunk($changes_sql, 256) as $sql_chunk) {
-      queryfx(
-        $conn_w,
-        'INSERT INTO %T
-          (repositoryID, pathID, commitID, targetPathID, targetCommitID,
-            changeType, fileType, isDirect, commitSequence)
-          VALUES %Q',
-        PhabricatorRepository::TABLE_PATHCHANGE,
-        implode(', ', $sql_chunk));
-    }
-
-    $this->finishParse();
+    return $results;
   }
 
   private function mercurialPathExists(

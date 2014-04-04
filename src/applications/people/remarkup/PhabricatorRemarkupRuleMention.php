@@ -71,11 +71,12 @@ final class PhabricatorRemarkupRuleMention
     $usernames = array_keys($metadata);
 
     $users = id(new PhabricatorPeopleQuery())
+      ->setViewer($this->getEngine()->getConfig('viewer'))
       ->withUsernames($usernames)
       ->execute();
 
     if ($users) {
-      $user_statuses = id(new PhabricatorUserStatus())
+      $user_statuses = id(new PhabricatorCalendarEvent())
         ->loadCurrentStatuses(mpull($users, 'getPHID'));
       $user_statuses = mpull($user_statuses, null, 'getUserPHID');
     } else {
@@ -100,22 +101,22 @@ final class PhabricatorRemarkupRuleMention
         $user = $actual_users[$username];
         Javelin::initBehavior('phabricator-hovercards');
 
-        $tag = id(new PhabricatorTagView())
-          ->setType(PhabricatorTagView::TYPE_PERSON)
+        $tag = id(new PHUITagView())
+          ->setType(PHUITagView::TYPE_PERSON)
           ->setPHID($user->getPHID())
           ->setName('@'.$user->getUserName())
           ->setHref('/p/'.$user->getUserName().'/');
 
-        if ($user->getIsDisabled()) {
-          $tag->setDotColor(PhabricatorTagView::COLOR_GREY);
+        if (!$user->isUserActivated()) {
+          $tag->setDotColor(PHUITagView::COLOR_GREY);
         } else {
           $status = idx($user_statuses, $user->getPHID());
           if ($status) {
             $status = $status->getStatus();
-            if ($status == PhabricatorUserStatus::STATUS_AWAY) {
-              $tag->setDotColor(PhabricatorTagView::COLOR_RED);
-            } else if ($status == PhabricatorUserStatus::STATUS_AWAY) {
-              $tag->setDotColor(PhabricatorTagView::COLOR_ORANGE);
+            if ($status == PhabricatorCalendarEvent::STATUS_AWAY) {
+              $tag->setDotColor(PHUITagView::COLOR_RED);
+            } else if ($status == PhabricatorCalendarEvent::STATUS_AWAY) {
+              $tag->setDotColor(PHUITagView::COLOR_ORANGE);
             }
           }
         }

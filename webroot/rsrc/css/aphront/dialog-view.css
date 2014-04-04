@@ -3,27 +3,34 @@
  */
 
 .aphront-dialog-view {
-  width: 480px;
-  margin: auto;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.5);
+  width: 540px;
+  margin: 32px auto 16px;
+  border: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25),
+              inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .device-phone .aphront-dialog-view {
-  width: 300px;
+  margin: 16px;
+  width: auto;
+}
+
+.aphront-dialog-view-standalone {
+  margin: auto;
 }
 
 .aphront-dialog-head .phabricator-action-header {
-  border-bottom: 1px solid #d4dadf;
-  padding: 5px 15px;
+  border-bottom: 1px solid {$lightblueborder};
+  padding: 4px 16px;
   white-space: nowrap;
-  border-top-left-radius: 6px;
-  border-top-right-radius: 6px;
 }
 
 .aphront-dialog-head .phabricator-action-header
   .phabricator-action-header-title {
   font-size: 15px;
+  color: {$bluetext};
+  text-shadow: 0 1px 2px #fff;
 }
 
 .aphront-dialog-view-width-form {
@@ -36,25 +43,26 @@
 
 .aphront-dialog-body {
   background: #ffffff;
-  padding: 20px 15px;
+  padding: 16px;
   border: none;
-  overflow: hidden;
 }
 
 .aphront-dialog-tail {
   border: none;
-  background: #fff;
-  padding: 8px 10px;
+  background: {$lightgreybackground};
+  padding: 8px 16px;
   border-top: 1px solid #d4dadf;
-  border-bottom-left-radius: 6px;
-  border-bottom-right-radius: 6px;
-  text-align: right;
+}
+
+.aphront-dialog-foot {
+  padding: 6px 0;
+  float: left;
 }
 
 .aphront-dialog-tail button,
 .aphront-dialog-tail a.button {
   float: right;
-  margin-left: .5em;
+  margin-left: 8px;
 }
 
 .jx-client-dialog {
@@ -63,13 +71,13 @@
 }
 
 .jx-mask {
-  opacity:    .37;
-  background: #222;
-  position:   fixed;
-  top:        0;
-  left:       0;
-  right:      0;
-  bottom:     0;
+  opacity: .75;
+  background: #fff;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .jx-dark-mask {
@@ -94,7 +102,7 @@
 
 .aphront-exception-dialog .exception-trace-header {
   font-size: 11px;
-  color: #666666;
+  color: {$greytext};
   border-bottom: 1px solid #aaaaaa;
   padding-bottom: .5em;
   margin-bottom: .5em;
@@ -102,4 +110,21 @@
 
 .aphront-access-dialog {
   width: 50%;
+}
+
+.aphront-dialog-view ul {
+  margin: 12px 24px;
+  list-style: circle;
+}
+
+.aphront-policy-rejection {
+  font-weight: bold;
+}
+
+.aphront-capability-details {
+  margin: 20px 0 4px;
+}
+
+.aphront-dialog-view-paragraph + .aphront-dialog-view-paragraph {
+  margin-top: 16px;
 }

@@ -1,0 +1,120 @@
+@title Using the Phabricator OAuth Server
+@group developer
+
+How to use the Phabricator OAuth Server.
+
+= Overview =
+
+Phabricator includes an OAuth Server which supports the
+##Authorization Code Grant## flow as described in the OAuth 2.0
+specification:
+
+http://tools.ietf.org/html/draft-ietf-oauth-v2-23
+
+This functionality can allow clients to integrate with a given
+Phabricator instance in a secure way with granular data access.
+For example, Phabricator can be used as a central identity store for any
+clients that implement OAuth 2.0.
+
+= Vocabulary =
+
+- **Access token** - a token which allows a client to ask for data on
+behalf of a resource owner. A given client will only be able to access
+data included in the scope(s) the resource owner authorized that client for.
+- **Authorization code** - a short-lived code which allows an authenticated
+client to ask for an access token on behalf of some resource owner.
+- **Client** - this is the application or system asking for data from the
+OAuth Server on behalf of the resource owner.
+- **Resource owner** - this is the user the client and OAuth Server are
+concerned with on a given request.
+- **Scope** - this defines a specific piece of granular data a client can
+or can not access on behalf of a user. For example, if authorized for the
+"whoami" scope on behalf of a given resource owner, the client can get the
+results of Conduit.whoami for that resource owner when authenticated with
+a valid access token.
+
+= Setup - Creating a Client =
+
+# Visit https://phabricator.example.com/oauthserver/client/create/
+# Fill out the form
+# Profit
+
+= Obtaining an Authorization Code =
+
+POST or GET https://phabricator.example.com/oauthserver/auth/ with the
+following parameters:
+
+- Required - **client_id** - the id of the newly registered client.
+- Required - **response_type** - the desired type of authorization code
+response. Only code is supported at this time.
+- Optional - **redirect_uri** - override the redirect_uri the client
+registered. This redirect_uri must have the same fully-qualified domain
+and have at least the same query parameters as the redirect_uri the client
+registered, as well as have no fragments.
+- Optional - **scope** - specify what scope(s) the client needs access to
+in a space-delimited list.
+- Optional - **state** - an opaque value the client can send to the server
+for programmatic excellence. Some clients use this value to implement XSRF
+protection or for debugging purposes.
+
+If done correctly and the resource owner has not yet authorized the client
+for the desired scope, then the resource owner will be presented with an
+interface to authorize the client for the desired scope. The OAuth Server
+will redirect to the pertinent redirect_uri with an authorization code or
+an error indicating the resource owner did not authorize the client, depending.
+
+If done correctly and the resource owner has already authorized the client for
+the desired scope, then the OAuth Server will redirect to the pertinent
+redirect_uri with a valid authorization code.
+
+If there is an error, the OAuth Server will return a descriptive error
+message. This error will be presented to the resource owner on the
+Phabricator domain if there is reason to believe there is something fishy
+with the client. For example, if there is an issue with the redirect_uri.
+Otherwise, the OAuth Server will redirect to the pertinent redirect_uri
+and include the pertinent error information.
+
+= Obtaining an Access Token =
+
+POST or GET https://phabricator.example.com/oauthserver/token/
+with the following parameters:
+
+- Required - **client_id** - the id of the client
+- Required - **client_secret** - the secret of the client.
+This is used to authenticate the client.
+- Required - **code** - the authorization code obtained earlier.
+- Required - **grant_type** - the desired type of access grant.
+Only token is supported at this time.
+- Optional - **redirect_uri** - should be the exact same redirect_uri as
+the redirect_uri specified to obtain the authorization code. If no
+redirect_uri was specified to obtain the authorization code then this
+should not be specified.
+
+If done correctly, the OAuth Server will redirect to the pertinent
+redirect_uri with an access token.
+
+If there is an error, the OAuth Server will return a descriptive error
+message.
+
+= Using an Access Token =
+
+Simply include a query param with the key of "access_token" and the value
+as the earlier obtained access token. For example:
+
+  https://phabricator.example.com/api/user.whoami?access_token=ykc7ly7vtibj334oga4fnfbuvnwz4ocp
+
+If the token has expired or is otherwise invalid, the client will receive
+an error indicating as such. In these cases, the client should re-initiate
+the entire ##Authorization Code Grant## flow.
+
+NOTE: See "Scopes" section below for more information on what data is
+currently exposed through the OAuth Server.
+
+= Scopes =
+
+There are only two scopes supported at this time.
+
+- **offline_access** - allows an access token to work indefinitely without
+expiring.
+- **whoami** - allows the client to access the results of Conduit.whoami on
+behalf of the resource owner.

@@ -1,31 +1,49 @@
 <?php
 
-final class PhabricatorPeopleListController
-  extends PhabricatorPeopleController {
+final class PhabricatorPeopleListController extends PhabricatorPeopleController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
+
+  private $key;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
+
+  public function shouldRequireAdmin() {
+    return false;
+  }
+
+  public function willProcessRequest(array $data) {
+    $this->key = idx($data, 'key');
+  }
 
   public function processRequest() {
     $request = $this->getRequest();
     $viewer = $request->getUser();
-    $is_admin = $viewer->getIsAdmin();
 
-    $user = new PhabricatorUser();
+    $this->requireApplicationCapability(
+      PeopleCapabilityBrowseUserDirectory::CAPABILITY);
 
-    $count = queryfx_one(
-      $user->establishConnection('r'),
-      'SELECT COUNT(*) N FROM %T',
-      $user->getTableName());
-    $count = idx($count, 'N', 0);
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->key)
+      ->setSearchEngine(new PhabricatorPeopleSearchEngine())
+      ->setNavigation($this->buildSideNavView());
 
-    $pager = new AphrontPagerView();
-    $pager->setOffset($request->getInt('page', 0));
-    $pager->setCount($count);
-    $pager->setURI($request->getRequestURI(), 'page');
+    return $this->delegateToController($controller);
+  }
 
-    $users = id(new PhabricatorPeopleQuery())
-      ->needPrimaryEmail(true)
-      ->executeWithOffsetPager($pager);
+  public function renderResultsList(
+    array $users,
+    PhabricatorSavedQuery $query) {
 
-    $list = new PhabricatorObjectItemListView();
+    assert_instances_of($users, 'PhabricatorUser');
+
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $list = new PHUIObjectItemListView();
+
+    $is_approval = ($query->getQueryKey() == 'approval');
 
     foreach ($users as $user) {
       $primary_email = $user->loadPrimaryEmail();
@@ -35,19 +53,27 @@ final class PhabricatorPeopleListController
         $email = pht('Unverified');
       }
 
-      $user_handle = new PhabricatorObjectHandle();
-      $user_handle->setImageURI($user->loadProfileImageURI());
-
-      $item = new PhabricatorObjectItemView();
+      $item = new PHUIObjectItemView();
       $item->setHeader($user->getFullName())
-        ->setHref('/people/edit/'.$user->getID().'/')
+        ->setHref('/p/'.$user->getUsername().'/')
         ->addAttribute(hsprintf('%s %s',
             phabricator_date($user->getDateCreated(), $viewer),
             phabricator_time($user->getDateCreated(), $viewer)))
-        ->addAttribute($email);
+        ->addAttribute($email)
+        ->setImageURI($user->getProfileImageURI());
+
+      if ($is_approval && $primary_email) {
+        $item->addAttribute($primary_email->getAddress());
+      }
 
       if ($user->getIsDisabled()) {
         $item->addIcon('disable', pht('Disabled'));
+      }
+
+      if (!$is_approval) {
+        if (!$user->getIsApproved()) {
+          $item->addIcon('perflab-grey', pht('Needs Approval'));
+        }
       }
 
       if ($user->getIsAdmin()) {
@@ -55,34 +81,30 @@ final class PhabricatorPeopleListController
       }
 
       if ($user->getIsSystemAgent()) {
-        $item->addIcon('computer', pht('System Agent'));
+        $item->addIcon('computer', pht('Bot/Script'));
+      }
+
+      if ($viewer->getIsAdmin()) {
+        $user_id = $user->getID();
+        if ($is_approval) {
+          $item->addAction(
+            id(new PHUIListItemView())
+              ->setIcon('disable')
+              ->setName(pht('Disable'))
+              ->setWorkflow(true)
+              ->setHref($this->getApplicationURI('disapprove/'.$user_id.'/')));
+          $item->addAction(
+            id(new PHUIListItemView())
+              ->setIcon('like')
+              ->setName(pht('Approve'))
+              ->setWorkflow(true)
+              ->setHref($this->getApplicationURI('approve/'.$user_id.'/')));
+        }
       }
 
       $list->addItem($item);
     }
 
-    $header = new PhabricatorHeaderView();
-    $header->setHeader(pht('People (%d)', number_format($count)));
-
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('User Directory'))
-          ->setHref('/people/'));
-
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('people');
-    $nav->appendChild($header);
-    $nav->appendChild($list);
-    $nav->appendChild($pager);
-    $nav->setCrumbs($crumbs);
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title'  => pht('People'),
-        'device' => true,
-        'dust'   => true,
-      ));
+    return $list;
   }
 }

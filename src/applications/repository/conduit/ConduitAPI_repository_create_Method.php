@@ -27,11 +27,7 @@ final class ConduitAPI_repository_create_Method
       'encoding'            => 'optional string',
       'tracking'            => 'optional bool',
       'uri'                 => 'optional string',
-      'sshUser'             => 'optional string',
-      'sshKey'              => 'optional string',
-      'sshKeyFile'          => 'optional string',
-      'httpUser'            => 'optional string',
-      'httpPassword'        => 'optional string',
+      'credentialPHID'      => 'optional string',
       'localPath'           => 'optional string',
       'svnSubpath'          => 'optional string',
       'branchFilter'        => 'optional list<string>',
@@ -62,19 +58,28 @@ final class ConduitAPI_repository_create_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    if (!$request->getUser()->getIsAdmin()) {
-      throw new ConduitException('ERR-PERMISSIONS');
-    }
+    $application = id(new PhabricatorApplicationQuery())
+      ->setViewer($request->getUser())
+      ->withClasses(array('PhabricatorApplicationDiffusion'))
+      ->executeOne();
+
+    PhabricatorPolicyFilter::requireCapability(
+      $request->getUser(),
+      $application,
+      DiffusionCapabilityCreateRepositories::CAPABILITY);
 
     // TODO: This has some duplication with (and lacks some of the validation
     // of) the web workflow; refactor things so they can share more code as this
-    // stabilizes.
+    // stabilizes. Specifically, this should move to transactions since they
+    // work properly now.
 
-    $repository = new PhabricatorRepository();
+    $repository = PhabricatorRepository::initializeNewRepository(
+      $request->getUser());
+
     $repository->setName($request->getValue('name'));
 
     $callsign = $request->getValue('callsign');
-    if (!preg_match('/[A-Z]+$/', $callsign)) {
+    if (!preg_match('/^[A-Z]+\z/', $callsign)) {
       throw new ConduitException('ERR-BAD-CALLSIGN');
     }
     $repository->setCallsign($callsign);
@@ -91,6 +96,8 @@ final class ConduitAPI_repository_create_Method
     }
     $repository->setVersionControlSystem($map[$vcs]);
 
+    $repository->setCredentialPHID($request->getValue('credentialPHID'));
+
     $details = array(
       'encoding'          => $request->getValue('encoding'),
       'description'       => $request->getValue('description'),
@@ -105,9 +112,6 @@ final class ConduitAPI_repository_create_Method
         true),
       'pull-frequency'    => $request->getValue('pullFrequency'),
       'default-branch'    => $request->getValue('defaultBranch'),
-      'ssh-login'         => $request->getValue('sshUser'),
-      'ssh-key'           => $request->getValue('sshKey'),
-      'ssh-keyfile'       => $request->getValue('sshKeyFile'),
       'herald-disabled'   => !$request->getValue('heraldEnabled', true),
       'svn-subpath'       => $request->getValue('svnSubpath'),
       'disable-autoclose' => !$request->getValue('autocloseEnabled', true),

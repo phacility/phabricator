@@ -8,6 +8,14 @@
 class AphrontRedirectResponse extends AphrontResponse {
 
   private $uri;
+  private $stackWhenCreated;
+
+  public function __construct() {
+    if ($this->shouldStopForDebugging()) {
+      // If we're going to stop, capture the stack so we can print it out.
+      $this->stackWhenCreated = id(new Exception())->getTrace();
+    }
+  }
 
   public function setURI($uri) {
     $this->uri = $uri;
@@ -33,29 +41,44 @@ class AphrontRedirectResponse extends AphrontResponse {
 
   public function buildResponseString() {
     if ($this->shouldStopForDebugging()) {
+      $user = new PhabricatorUser();
+
       $view = new PhabricatorStandardPageView();
       $view->setRequest($this->getRequest());
       $view->setApplicationName('Debug');
       $view->setTitle('Stopped on Redirect');
 
-      $error = new AphrontErrorView();
-      $error->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-      $error->setTitle('Stopped on Redirect');
+      $dialog = new AphrontDialogView();
+      $dialog->setUser($user);
+      $dialog->setTitle('Stopped on Redirect');
 
-      $link = phutil_tag(
-        'a',
-        array(
-          'href' => $this->getURI(),
-        ),
-        'Continue to: '.$this->getURI());
+      $dialog->appendParagraph(
+        pht(
+          'You were stopped here because %s is set in your configuration.',
+          phutil_tag('tt', array(), 'debug.stop-on-redirect')));
 
-      $error->appendChild(hsprintf(
-        '<p>You were stopped here because <tt>debug.stop-on-redirect</tt> '.
-        'is set in your configuration.</p>'.
-        '<p>%s</p>',
-        $link));
+      $dialog->appendParagraph(
+        pht(
+          'You are being redirected to: %s',
+          phutil_tag('tt', array(), $this->getURI())));
 
-      $view->appendChild($error);
+      $dialog->addCancelButton($this->getURI(), pht('Continue'));
+
+      $dialog->appendChild(phutil_tag('br'));
+
+      $dialog->appendChild(
+        id(new AphrontStackTraceView())
+          ->setUser($user)
+          ->setTrace($this->stackWhenCreated));
+
+      $dialog->setIsStandalone(true);
+      $dialog->setWidth(AphrontDialogView::WIDTH_FULL);
+
+      $box = id(new PHUIBoxView())
+        ->addMargin(PHUI::MARGIN_LARGE)
+        ->appendChild($dialog);
+
+      $view->appendChild($box);
 
       return $view->render();
     }

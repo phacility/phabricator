@@ -7,7 +7,7 @@ final class PhabricatorTokenGiven extends PhabricatorTokenDAO
   protected $objectPHID;
   protected $tokenPHID;
 
-  private $object;
+  private $object = self::ATTACHABLE;
 
   public function attachObject(PhabricatorTokenReceiverInterface $object) {
     $this->object = $object;
@@ -15,10 +15,7 @@ final class PhabricatorTokenGiven extends PhabricatorTokenDAO
   }
 
   public function getObject() {
-    if ($this->object === null) {
-      throw new Exception("Call attachObject() before getObject()!");
-    }
-    return $this->object;
+    return $this->assertAttached($this->object);
   }
 
   public function getCapabilities() {
@@ -50,5 +47,18 @@ final class PhabricatorTokenGiven extends PhabricatorTokenDAO
         return false;
     }
   }
+
+  public function describeAutomaticCapability($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return pht(
+          'A token inherits the policies of the object it is awarded to.');
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return pht(
+          'The user who gave a token can always edit it.');
+    }
+    return null;
+  }
+
 
 }

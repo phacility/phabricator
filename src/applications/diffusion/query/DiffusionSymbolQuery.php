@@ -265,6 +265,7 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
     $repo_ids = array_filter($repo_ids);
 
     if ($repo_ids) {
+      // TODO: (T603) Provide a viewer here.
       $repos = id(new PhabricatorRepository())->loadAllWhere(
         'id IN (%Ld)',
         $repo_ids);

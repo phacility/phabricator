@@ -57,7 +57,7 @@ JX.behavior('differential-dropdown-menus', function(config) {
 
     var visible_item = new JX.PhabricatorMenuItem('', function () {
       JX.Stratcom.invoke('differential-toggle-file', null, {
-        diff: JX.DOM.scry(JX.$(data.containerID), 'table', 'differential-diff'),
+        diff: JX.DOM.scry(JX.$(data.containerID), 'table', 'differential-diff')
       });
     });
     menu.addItem(visible_item);
@@ -79,7 +79,8 @@ JX.behavior('differential-dropdown-menus', function(config) {
     if (data.editor) {
       menu.addItem(new JX.PhabricatorMenuItem(
         pht('Open in Editor'),
-        JX.bind(null, location.assign, data.editor), // Open in the same window.
+        // Open in the same window.
+        JX.bind(location, location.assign, data.editor),
         data.editor));
     }
 

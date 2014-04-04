@@ -21,40 +21,101 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       return new Aphront404Response();
     }
 
-    $this->loadHandles(array($file->getAuthorPHID()));
     $phid = $file->getPHID();
-    $header = id(new PhabricatorHeaderView())
+    $xactions = id(new PhabricatorFileTransactionQuery())
+      ->setViewer($user)
+      ->withObjectPHIDs(array($phid))
+      ->execute();
+
+    $handle_phids = array_merge(
+      array($file->getAuthorPHID()),
+      $file->getObjectPHIDs());
+
+    $this->loadHandles($handle_phids);
+    $header = id(new PHUIHeaderView())
+      ->setUser($user)
+      ->setPolicyObject($file)
       ->setHeader($file->getName());
 
     $ttl = $file->getTTL();
     if ($ttl !== null) {
-      $ttl_tag = id(new PhabricatorTagView())
-        ->setType(PhabricatorTagView::TYPE_OBJECT)
+      $ttl_tag = id(new PHUITagView())
+        ->setType(PHUITagView::TYPE_OBJECT)
         ->setName(pht("Temporary"));
       $header->addTag($ttl_tag);
     }
 
     $actions = $this->buildActionView($file);
-    $properties = $this->buildPropertyView($file);
-
+    $timeline = $this->buildTransactionView($file, $xactions);
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName('F'.$file->getID())
-        ->setHref($this->getApplicationURI("/info/{$phid}/")));
+    $crumbs->addTextCrumb(
+      'F'.$file->getID(),
+      $this->getApplicationURI("/info/{$phid}/"));
+
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header);
+
+    $this->buildPropertyViews($object_box, $file, $actions);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
-        $actions,
-        $properties,
+        $object_box,
+        $timeline
       ),
       array(
         'title' => $file->getName(),
         'device'  => true,
+        'pageObjects' => array($file->getPHID()),
       ));
+  }
+
+  private function buildTransactionView(
+    PhabricatorFile $file,
+    array $xactions) {
+
+    $user = $this->getRequest()->getUser();
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($user);
+    foreach ($xactions as $xaction) {
+      if ($xaction->getComment()) {
+        $engine->addObject(
+          $xaction->getComment(),
+          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
+      }
+    }
+    $engine->process();
+
+    $timeline = id(new PhabricatorApplicationTransactionView())
+      ->setUser($user)
+      ->setObjectPHID($file->getPHID())
+      ->setTransactions($xactions)
+      ->setMarkupEngine($engine);
+
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+
+    $add_comment_header = $is_serious
+      ? pht('Add Comment')
+      : pht('Question File Integrity');
+
+    $submit_button_name = $is_serious
+      ? pht('Add Comment')
+      : pht('Debate the Bits');
+
+    $draft = PhabricatorDraft::newFromUserAndKey($user, $file->getPHID());
+
+    $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
+      ->setUser($user)
+      ->setObjectPHID($file->getPHID())
+      ->setDraft($draft)
+      ->setHeaderText($add_comment_header)
+      ->setAction($this->getApplicationURI('/comment/'.$file->getID().'/'))
+      ->setSubmitButtonName($submit_button_name);
+
+    return array(
+      $timeline,
+      $add_comment_form);
   }
 
   private function buildActionView(PhabricatorFile $file) {
@@ -65,6 +126,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
     $view = id(new PhabricatorActionListView())
       ->setUser($user)
+      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($file);
 
     if ($file->isViewableInBrowser()) {
@@ -94,62 +156,88 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     return $view;
   }
 
-  private function buildPropertyView(PhabricatorFile $file) {
+  private function buildPropertyViews(
+    PHUIObjectBoxView $box,
+    PhabricatorFile $file,
+    PhabricatorActionListView $actions) {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $view = id(new PhabricatorPropertyListView());
+
+    $properties = id(new PHUIPropertyListView());
+    $properties->setActionList($actions);
+    $box->addPropertyList($properties, pht('Details'));
 
     if ($file->getAuthorPHID()) {
-      $view->addProperty(
+      $properties->addProperty(
         pht('Author'),
         $this->getHandle($file->getAuthorPHID())->renderLink());
     }
 
-    $view->addProperty(
+    $properties->addProperty(
       pht('Created'),
       phabricator_datetime($file->getDateCreated(), $user));
 
-    $view->addProperty(
+
+    $finfo = id(new PHUIPropertyListView());
+    $box->addPropertyList($finfo, pht('File Info'));
+
+    $finfo->addProperty(
       pht('Size'),
       phabricator_format_bytes($file->getByteSize()));
 
-    $view->addSectionHeader(pht('Technical Details'));
-
-    $view->addProperty(
+    $finfo->addProperty(
       pht('Mime Type'),
       $file->getMimeType());
 
-    $view->addProperty(
+    $width = $file->getImageWidth();
+    if ($width) {
+      $finfo->addProperty(
+        pht('Width'),
+        pht('%s px', new PhutilNumber($width)));
+    }
+
+    $height = $file->getImageHeight();
+    if ($height) {
+      $finfo->addProperty(
+        pht('Height'),
+        pht('%s px', new PhutilNumber($height)));
+    }
+
+
+    $storage_properties = new PHUIPropertyListView();
+    $box->addPropertyList($storage_properties, pht('Storage'));
+
+    $storage_properties->addProperty(
       pht('Engine'),
       $file->getStorageEngine());
 
-    $view->addProperty(
+    $storage_properties->addProperty(
       pht('Format'),
       $file->getStorageFormat());
 
-    $view->addProperty(
+    $storage_properties->addProperty(
       pht('Handle'),
       $file->getStorageHandle());
 
-    $metadata = $file->getMetadata();
-    if (!empty($metadata)) {
-      $view->addSectionHeader(pht('Metadata'));
 
-      foreach ($metadata as $key => $value) {
-        $view->addProperty(
-          PhabricatorFile::getMetadataName($key),
-          $value);
-      }
+    $phids = $file->getObjectPHIDs();
+    if ($phids) {
+      $attached = new PHUIPropertyListView();
+      $box->addPropertyList($attached, pht('Attached'));
+
+      $attached->addProperty(
+        pht('Attached To'),
+        $this->renderHandlesForPHIDs($phids));
     }
 
-    if ($file->isViewableImage()) {
 
+    if ($file->isViewableImage()) {
       $image = phutil_tag(
         'img',
         array(
           'src' => $file->getViewURI(),
-          'class' => 'phabricator-property-list-image',
+          'class' => 'phui-property-list-image',
         ));
 
       $linked_image = phutil_tag(
@@ -159,10 +247,28 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
         ),
         $image);
 
-      $view->addImageContent($linked_image);
-    }
+      $media = id(new PHUIPropertyListView())
+        ->addImageContent($linked_image);
 
-    return $view;
+      $box->addPropertyList($media);
+    } else if ($file->isAudio()) {
+      $audio = phutil_tag(
+        'audio',
+        array(
+          'controls' => 'controls',
+          'class' => 'phui-property-list-audio',
+        ),
+        phutil_tag(
+          'source',
+          array(
+            'src' => $file->getViewURI(),
+            'type' => $file->getMimeType(),
+          )));
+      $media = id(new PHUIPropertyListView())
+        ->addImageContent($audio);
+
+      $box->addPropertyList($media);
+    }
   }
 
 }

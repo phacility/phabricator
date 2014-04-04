@@ -6,11 +6,6 @@ final class ReleephProject extends ReleephDAO
   const DEFAULT_BRANCH_NAMESPACE = 'releeph-releases';
   const SYSTEM_AGENT_USERNAME_PREFIX = 'releeph-agent-';
 
-  const COMMIT_AUTHOR_NONE      = 'commit-author-none';
-  const COMMIT_AUTHOR_FROM_DIFF = 'commit-author-is-from-diff';
-  const COMMIT_AUTHOR_REQUESTOR = 'commit-author-is-requestor';
-
-  protected $phid;
   protected $name;
 
   // Specifying the place to pick from is a requirement for svn, though not
@@ -18,14 +13,14 @@ final class ReleephProject extends ReleephDAO
   // been picked and which haven't.
   protected $trunkBranch;
 
-  protected $repositoryID;
   protected $repositoryPHID;
   protected $isActive;
   protected $createdByUserPHID;
   protected $arcanistProjectID;
-  protected $projectID;
 
   protected $details = array();
+
+  private $repository = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -37,8 +32,7 @@ final class ReleephProject extends ReleephDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      ReleephPHIDConstants::PHID_TYPE_REPR);
+    return PhabricatorPHID::generateNewPHID(ReleephPHIDTypeProject::TYPECONST);
   }
 
   public function getDetail($key, $default = null) {
@@ -51,7 +45,7 @@ final class ReleephProject extends ReleephDAO
       $this->getID(),
       $path
     );
-    return PhabricatorEnv::getProductionURI(implode('/', $components));
+    return implode('/', $components);
   }
 
   public function setDetail($key, $value) {
@@ -70,17 +64,6 @@ final class ReleephProject extends ReleephDAO
         $this->name,
         implode(', ', $banned_names)));
     }
-
-    if (!$this->getDetail('releaseCounter')) {
-      $this->setDetail('releaseCounter', 0);
-    }
-  }
-
-  public function loadPhabricatorProject() {
-    if ($id = $this->getProjectID()) {
-      return id(new PhabricatorProject())->load($id);
-    }
-    return id(new PhabricatorProject())->makeEphemeral(); // dummy
   }
 
   public function loadArcanistProject() {
@@ -112,59 +95,25 @@ final class ReleephProject extends ReleephDAO
     }
   }
 
+  public function attachRepository(PhabricatorRepository $repository) {
+    $this->repository = $repository;
+    return $this;
+  }
+
+  public function getRepository() {
+    return $this->assertAttached($this->repository);
+  }
+
+  // TODO: Remove once everything uses ProjectQuery. Also, T603.
   public function loadPhabricatorRepository() {
     return $this->loadOneRelative(
       new PhabricatorRepository(),
-      'id',
-      'getRepositoryID');
-  }
-
-  public function getCurrentReleaseNumber() {
-    $current_release_numbers = array();
-
-    // From the project...
-    $current_release_numbers[] = $this->getDetail('releaseCounter', 0);
-
-    // From any branches...
-    $branches = id(new ReleephBranch())->loadAllWhere(
-      'releephProjectID = %d', $this->getID());
-    if ($branches) {
-      $release_numbers = array();
-      foreach ($branches as $branch) {
-        $current_release_numbers[] = $branch->getDetail('releaseNumber', 0);
-      }
-    }
-
-    return max($current_release_numbers);
+      'phid',
+      'getRepositoryPHID');
   }
 
   public function getReleephFieldSelector() {
-    $class = $this->getDetail('field_selector');
-    if (!$class) {
-      $key = 'releeph.field-selector';
-      $class = PhabricatorEnv::getEnvConfig($key);
-    }
-
-    if ($class) {
-      return newv($class, array());
-    } else {
-      return new ReleephDefaultFieldSelector();
-    }
-  }
-
-  /**
-   * Wrapper to setIsActive() that logs who deactivated a project
-   */
-  public function deactivate(PhabricatorUser $actor) {
-    return $this
-      ->setIsActive(0)
-      ->setDetail('last_deactivated_user', $actor->getPHID())
-      ->setDetail('last_deactivated_time', time());
-  }
-
-  // Hide this from the public
-  private function setIsActive($v) {
-    return parent::setIsActive($v);
+    return new ReleephDefaultFieldSelector();
   }
 
   private function getBannedNames() {
@@ -189,6 +138,7 @@ final class ReleephProject extends ReleephDAO
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
@@ -199,5 +149,10 @@ final class ReleephProject extends ReleephDAO
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return false;
   }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
 
 }

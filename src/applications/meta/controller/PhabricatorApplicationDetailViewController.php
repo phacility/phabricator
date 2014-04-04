@@ -13,8 +13,10 @@ final class PhabricatorApplicationDetailViewController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $selected = PhabricatorApplication::getByClass($this->application);
-
+    $selected = id(new PhabricatorApplicationQuery())
+      ->setViewer($user)
+      ->withClasses(array($this->application))
+      ->executeOne();
     if (!$selected) {
       return new Aphront404Response();
     }
@@ -22,44 +24,30 @@ final class PhabricatorApplicationDetailViewController
     $title = $selected->getName();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Applications'))
-        ->setHref($this->getApplicationURI()));
+    $crumbs->addTextCrumb($selected->getName());
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($title);
-
-    $status_tag = id(new PhabricatorTagView())
-            ->setType(PhabricatorTagView::TYPE_STATE);
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setUser($user)
+      ->setPolicyObject($selected);
 
     if ($selected->isInstalled()) {
-      $status_tag->setName(pht('Installed'));
-      $status_tag->setBackgroundColor(PhabricatorTagView::COLOR_GREEN);
+      $header->setStatus('oh-ok', null, pht('Installed'));
     } else {
-      $status_tag->setName(pht('Uninstalled'));
-      $status_tag->setBackgroundColor(PhabricatorTagView::COLOR_RED);
+      $header->setStatus('policy-noone', null, pht('Uninstalled'));
     }
 
-    if ($selected->isBeta()) {
-      $beta_tag = id(new PhabricatorTagView())
-              ->setType(PhabricatorTagView::TYPE_STATE)
-              ->setName(pht('Beta'))
-              ->setBackgroundColor(PhabricatorTagView::COLOR_GREY);
-      $header->addTag($beta_tag);
-    }
-
-    $header->addTag($status_tag);
-
-    $properties = $this->buildPropertyView($selected);
     $actions = $this->buildActionView($user, $selected);
+    $properties = $this->buildPropertyView($selected, $actions);
+
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->addPropertyList($properties);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
-        $actions,
-        $properties,
+        $object_box,
       ),
       array(
         'title' => $title,
@@ -67,36 +55,78 @@ final class PhabricatorApplicationDetailViewController
       ));
   }
 
-  private function buildPropertyView(PhabricatorApplication $selected) {
-    $properties = id(new PhabricatorPropertyListView())
-              ->addProperty(
-                pht('Description'), $selected->getShortDescription());
+  private function buildPropertyView(
+    PhabricatorApplication $application,
+    PhabricatorActionListView $actions) {
+
+    $viewer = $this->getRequest()->getUser();
+
+    $properties = id(new PHUIPropertyListView())
+      ->addProperty(pht('Description'), $application->getShortDescription());
+    $properties->setActionList($actions);
+
+    if ($application->isBeta()) {
+      $properties->addProperty(
+        pht('Release'),
+        pht('Beta'));
+    }
+
+    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
+      $viewer,
+      $application);
+
+    $properties->addSectionHeader(pht('Policies'));
+
+    foreach ($application->getCapabilities() as $capability) {
+      $properties->addProperty(
+        $application->getCapabilityLabel($capability),
+        idx($descriptions, $capability));
+    }
 
     return $properties;
   }
 
   private function buildActionView(
-    PhabricatorUser $user, PhabricatorApplication $selected) {
+    PhabricatorUser $user,
+    PhabricatorApplication $selected) {
 
     $view = id(new PhabricatorActionListView())
-          ->setUser($user);
+      ->setUser($user)
+      ->setObjectURI($this->getRequest()->getRequestURI());
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $user,
+      $selected,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $edit_uri = $this->getApplicationURI('edit/'.get_class($selected).'/');
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Policies'))
+        ->setIcon('edit')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit)
+        ->setHref($edit_uri));
 
     if ($selected->canUninstall()) {
       if ($selected->isInstalled()) {
         $view->addAction(
-               id(new PhabricatorActionView())
-               ->setName(pht('Uninstall'))
-               ->setIcon('delete')
-               ->setWorkflow(true)
-               ->setHref(
-                $this->getApplicationURI(get_class($selected).'/uninstall/')));
+          id(new PhabricatorActionView())
+            ->setName(pht('Uninstall'))
+            ->setIcon('delete')
+            ->setDisabled(!$can_edit)
+            ->setWorkflow(true)
+            ->setHref(
+              $this->getApplicationURI(get_class($selected).'/uninstall/')));
       } else {
         $action = id(new PhabricatorActionView())
           ->setName(pht('Install'))
           ->setIcon('new')
+          ->setDisabled(!$can_edit)
           ->setWorkflow(true)
           ->setHref(
-           $this->getApplicationURI(get_class($selected).'/install/'));
+             $this->getApplicationURI(get_class($selected).'/install/'));
 
         $beta_enabled = PhabricatorEnv::getEnvConfig(
           'phabricator.show-beta-applications');
@@ -108,14 +138,15 @@ final class PhabricatorApplicationDetailViewController
       }
     } else {
       $view->addAction(
-             id(new PhabricatorActionView())
-             ->setName(pht('Uninstall'))
-             ->setIcon('delete')
-             ->setWorkflow(true)
-             ->setDisabled(true)
-             ->setHref(
-               $this->getApplicationURI(get_class($selected).'/uninstall/')));
+        id(new PhabricatorActionView())
+          ->setName(pht('Uninstall'))
+          ->setIcon('delete')
+          ->setWorkflow(true)
+          ->setDisabled(true)
+          ->setHref(
+            $this->getApplicationURI(get_class($selected).'/uninstall/')));
     }
+
     return $view;
   }
 

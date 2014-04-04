@@ -60,33 +60,23 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
       ->appendChild($instructions);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Upload'))
-        ->setHref($request->getRequestURI()));
+    $crumbs->addTextCrumb(pht('Upload'), $request->getRequestURI());
 
     $title = pht('Upload File');
 
-    if ($errors) {
-      $errors = id(new AphrontErrorView())
-        ->setTitle(pht('Form Errors'))
-        ->setErrors($errors);
-    }
-
     $global_upload = id(new PhabricatorGlobalUploadTargetView())
+      ->setUser($user)
       ->setShowIfSupportedID($support_id);
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('New File Upload'));
-    $panel->setNoBackground();
-    $panel->appendChild($form);
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->setFormErrors($errors)
+      ->setForm($form);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $errors,
-        $panel,
+        $form_box,
         $global_upload,
       ),
       array(
@@ -104,7 +94,7 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
     }
 
     $doc_href = PhabricatorEnv::getDocLink(
-      'article/Configuring_File_Upload_Limits.html');
+      'Configuring File Upload Limits');
     $doc_link = phutil_tag(
       'a',
       array(

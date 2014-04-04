@@ -2,8 +2,8 @@
 
 final class DifferentialChangesetViewController extends DifferentialController {
 
-  public function shouldRequireLogin() {
-    return !$this->allowsAnonymousAccess();
+  public function shouldAllowPublic() {
+    return true;
   }
 
   public function processRequest() {
@@ -27,6 +27,17 @@ final class DifferentialChangesetViewController extends DifferentialController {
     if (!$changeset) {
       return new Aphront404Response();
     }
+
+    // TODO: (T603) Make Changeset policy-aware. For now, just fake it
+    // by making sure we can see the diff.
+    $diff = id(new DifferentialDiffQuery())
+      ->setViewer($request->getUser())
+      ->withIDs(array($changeset->getDiffID()))
+      ->executeOne();
+    if (!$diff) {
+      return new Aphront404Response();
+    }
+
 
     $view = $request->getStr('view');
     if ($view) {
@@ -253,7 +264,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
       ),
       $detail->render()));
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       array(
         $panel
       ),
@@ -268,15 +279,16 @@ final class DifferentialChangesetViewController extends DifferentialController {
       return;
     }
 
-    return id(new DifferentialInlineComment())->loadAllWhere(
-      'changesetID IN (%Ld) AND (commentID IS NOT NULL OR authorPHID = %s)',
-      $changeset_ids,
-      $author_phid);
+    return id(new DifferentialInlineCommentQuery())
+      ->withViewerAndChangesetIDs($author_phid, $changeset_ids)
+      ->execute();
   }
 
   private function buildRawFileResponse(
     DifferentialChangeset $changeset,
     $is_new) {
+
+    $viewer = $this->getRequest()->getUser();
 
     if ($is_new) {
       $key = 'raw:new:phid';
@@ -289,9 +301,13 @@ final class DifferentialChangesetViewController extends DifferentialController {
     $file = null;
     $phid = idx($metadata, $key);
     if ($phid) {
-      $file = id(new PhabricatorFile())->loadOneWhere(
-        'phid = %s',
-        $phid);
+      $file = id(new PhabricatorFileQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($phid))
+        ->execute();
+      if ($file) {
+        $file = head($file);
+      }
     }
 
     if (!$file) {
@@ -340,7 +356,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
       }
       $inline = new DifferentialInlineComment();
       $inline->setChangesetID($changeset->getID());
-      $inline->setIsNewFile(true);
+      $inline->setIsNewFile(1);
       $inline->setSyntheticAuthor('Lint: '.$msg['name']);
       $inline->setLineNumber($msg['line']);
       $inline->setLineLength(0);

@@ -26,23 +26,28 @@ final class ConduitAPI_releephwork_getbranch_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $branch = id(new ReleephBranch())
-      ->loadOneWhere('phid = %s', $request->getValue('branchPHID'));
+    $branch = id(new ReleephBranchQuery())
+      ->setViewer($request->getUser())
+      ->withPHIDs(array($request->getValue('branchPHID')))
+      ->needCutPointCommits(true)
+      ->executeOne();
 
     $cut_phid = $branch->getCutPointCommitPHID();
     $phids = array($cut_phid);
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($request->getUser())
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
 
-    $project = $branch->loadReleephProject();
-    $repo = $project->loadPhabricatorRepository();
+    $project = $branch->getProject();
+    $repo = $project->getRepository();
+    $commit = $branch->getCutPointCommit();
 
     return array(
       'branchName'      => $branch->getName(),
       'branchPHID'      => $branch->getPHID(),
       'vcsType'         => $repo->getVersionControlSystem(),
-      'cutCommitID'     => $branch->getCutPointCommitIdentifier(),
+      'cutCommitID'     => $commit->getCommitIdentifier(),
       'cutCommitName'   => $handles[$cut_phid]->getName(),
       'creatorPHID'     => $branch->getCreatedByUserPHID(),
       'trunk'           => $project->getTrunkBranch(),

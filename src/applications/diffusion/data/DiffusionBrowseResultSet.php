@@ -14,7 +14,6 @@ final class DiffusionBrowseResultSet {
   private $reasonForEmptyResultSet;
   private $existedAtCommit;
   private $deletedAtCommit;
-  private $readmeContent;
 
   public function setPaths(array $paths) {
     assert_instances_of($paths, 'DiffusionRepositoryPath');
@@ -57,27 +56,23 @@ final class DiffusionBrowseResultSet {
     return $this->deletedAtCommit;
   }
 
-  public function setReadmeContent($readme_content) {
-    $this->readmeContent = $readme_content;
-    return $this;
-  }
-  public function getReadmeContent() {
-    return $this->readmeContent;
-  }
-
   public function toDictionary() {
-    $paths = $this->getPaths();
-    if ($paths) {
-      $paths = mpull($paths, 'toDictionary');
-    }
+    $paths = $this->getPathDicts();
 
     return array(
       'paths' => $paths,
       'isValidResults' => $this->isValidResults(),
       'reasonForEmptyResultSet' => $this->getReasonForEmptyResultSet(),
       'existedAtCommit' => $this->getExistedAtCommit(),
-      'deletedAtCommit' => $this->getDeletedAtCommit(),
-      'readmeContent' => $this->getReadmeContent());
+      'deletedAtCommit' => $this->getDeletedAtCommit());
+  }
+
+  public function getPathDicts() {
+    $paths = $this->getPaths();
+    if ($paths) {
+      return mpull($paths, 'toDictionary');
+    }
+    return array();
   }
 
   public static function newFromConduit(array $data) {
@@ -91,7 +86,6 @@ final class DiffusionBrowseResultSet {
       ->setIsValidResults($data['isValidResults'])
       ->setReasonForEmptyResultSet($data['reasonForEmptyResultSet'])
       ->setExistedAtCommit($data['existedAtCommit'])
-      ->setDeletedAtCommit($data['deletedAtCommit'])
-      ->setReadmeContent($data['readmeContent']);
+      ->setDeletedAtCommit($data['deletedAtCommit']);
   }
 }

@@ -11,10 +11,33 @@ final class PhabricatorMacroQuery
   private $authors;
   private $names;
   private $nameLike;
+  private $dateCreatedAfter;
+  private $dateCreatedBefore;
+  private $flagColor;
 
   private $status = 'status-any';
   const STATUS_ANY = 'status-any';
   const STATUS_ACTIVE = 'status-active';
+  const STATUS_DISABLED = 'status-disabled';
+
+  public static function getStatusOptions() {
+    return array(
+      self::STATUS_ACTIVE   => pht('Active Macros'),
+      self::STATUS_DISABLED => pht('Disabled Macros'),
+      self::STATUS_ANY      => pht('Active and Disabled Macros'),
+    );
+  }
+
+  public static function getFlagColorsOptions() {
+
+    $options = array('-1' => pht('(No Filtering)'));
+
+    foreach (PhabricatorFlagColor::getColorNameMap() as $color => $name) {
+      $options[$color] = $name;
+    }
+
+    return $options;
+  }
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -46,34 +69,34 @@ final class PhabricatorMacroQuery
     return $this;
   }
 
+  public function withDateCreatedBefore($date_created_before) {
+    $this->dateCreatedBefore = $date_created_before;
+    return $this;
+  }
+
+  public function withDateCreatedAfter($date_created_after) {
+    $this->dateCreatedAfter = $date_created_after;
+    return $this;
+  }
+
+  public function withFlagColor($flag_color) {
+    $this->flagColor = $flag_color;
+    return $this;
+  }
+
   protected function loadPage() {
     $macro_table = new PhabricatorFileImageMacro();
     $conn = $macro_table->establishConnection('r');
 
     $rows = queryfx_all(
       $conn,
-      'SELECT m.* FROM %T m %Q %Q %Q %Q',
+      'SELECT m.* FROM %T m %Q %Q %Q',
       $macro_table->getTableName(),
-      $this->buildJoinClause($conn),
       $this->buildWhereClause($conn),
       $this->buildOrderClause($conn),
       $this->buildLimitClause($conn));
 
     return $macro_table->loadAllFromArray($rows);
-  }
-
-  protected function buildJoinClause(AphrontDatabaseConnection $conn) {
-    $joins = array();
-
-    if ($this->authors) {
-      $file_table = new PhabricatorFile();
-      $joins[] = qsprintf(
-        $conn,
-        'JOIN %T f ON m.filePHID = f.phid',
-        $file_table->getTableName());
-    }
-
-    return implode(' ', $joins);
   }
 
   protected function buildWhereClause(AphrontDatabaseConnection $conn) {
@@ -96,7 +119,7 @@ final class PhabricatorMacroQuery
     if ($this->authors) {
       $where[] = qsprintf(
         $conn,
-        'f.authorPHID IN (%Ls)',
+        'm.authorPHID IN (%Ls)',
         $this->authors);
     }
 
@@ -114,10 +137,53 @@ final class PhabricatorMacroQuery
         $this->names);
     }
 
-    if ($this->status == self::STATUS_ACTIVE) {
+    switch ($this->status) {
+      case self::STATUS_ACTIVE:
+        $where[] = qsprintf(
+          $conn,
+          'm.isDisabled = 0');
+        break;
+      case self::STATUS_DISABLED:
+        $where[] = qsprintf(
+          $conn,
+          'm.isDisabled = 1');
+        break;
+      case self::STATUS_ANY:
+        break;
+      default:
+        throw new Exception("Unknown status '{$this->status}'!");
+    }
+
+    if ($this->dateCreatedAfter) {
       $where[] = qsprintf(
         $conn,
-        'm.isDisabled = 0');
+        'm.dateCreated >= %d',
+        $this->dateCreatedAfter);
+    }
+
+    if ($this->dateCreatedBefore) {
+      $where[] = qsprintf(
+        $conn,
+        'm.dateCreated <= %d',
+        $this->dateCreatedBefore);
+    }
+
+    if ($this->flagColor != '-1' && $this->flagColor !== null) {
+      $flags = id(new PhabricatorFlagQuery())
+        ->withOwnerPHIDs(array($this->getViewer()->getPHID()))
+        ->withTypes(array(PhabricatorMacroPHIDTypeMacro::TYPECONST))
+        ->withColors(array($this->flagColor))
+        ->setViewer($this->getViewer())
+        ->execute();
+
+      if (empty($flags)) {
+        throw new PhabricatorEmptyQueryException('No matching flags.');
+      } else {
+        $where[] = qsprintf(
+          $conn,
+          'm.phid IN (%Ls)',
+          mpull($flags, 'getObjectPHID'));
+      }
     }
 
     $where[] = $this->buildPagingClause($conn);
@@ -125,14 +191,11 @@ final class PhabricatorMacroQuery
     return $this->formatWhereClause($where);
   }
 
-  protected function willFilterPage(array $macros) {
-    if (!$macros) {
-      return array();
-    }
-
+  protected function didFilterPage(array $macros) {
     $file_phids = mpull($macros, 'getFilePHID');
     $files = id(new PhabricatorFileQuery())
       ->setViewer($this->getViewer())
+      ->setParentQuery($this)
       ->withPHIDs($file_phids)
       ->execute();
     $files = mpull($files, null, 'getPHID');
@@ -151,6 +214,10 @@ final class PhabricatorMacroQuery
 
   protected function getPagingColumn() {
     return 'm.id';
+  }
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationMacro';
   }
 
 }

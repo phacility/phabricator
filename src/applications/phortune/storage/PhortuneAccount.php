@@ -12,7 +12,7 @@ final class PhortuneAccount extends PhortuneDAO
   protected $name;
   protected $balanceInCents = 0;
 
-  private $memberPHIDs;
+  private $memberPHIDs = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -26,10 +26,7 @@ final class PhortuneAccount extends PhortuneDAO
   }
 
   public function getMemberPHIDs() {
-    if ($this->memberPHIDs === null) {
-      throw new Exception("Call attachMemberPHIDs() before getMemberPHIDs()!");
-    }
-    return $this->memberPHIDs;
+    return $this->assertAttached($this->memberPHIDs);
   }
 
   public function attachMemberPHIDs(array $phids) {
@@ -49,12 +46,22 @@ final class PhortuneAccount extends PhortuneDAO
   }
 
   public function getPolicy($capability) {
-    return false;
+    if ($this->getPHID() === null) {
+      // Allow a user to create an account for themselves.
+      return PhabricatorPolicies::POLICY_USER;
+    } else {
+      return PhabricatorPolicies::POLICY_NOONE;
+    }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     $members = array_fuse($this->getMemberPHIDs());
     return isset($members[$viewer->getPHID()]);
   }
+
+  public function describeAutomaticCapability($capability) {
+    return pht('Members of an account can always view and edit it.');
+  }
+
 
 }

@@ -2,8 +2,6 @@
 
 abstract class CelerityResourceController extends PhabricatorController {
 
-  abstract protected function getRootDirectory();
-
   protected function buildResourceTransformer() {
     return null;
   }
@@ -16,9 +14,7 @@ abstract class CelerityResourceController extends PhabricatorController {
     return false;
   }
 
-  private function getDiskPath($to_resource = null) {
-    return $this->getRootDirectory().$to_resource;
-  }
+  abstract public function getCelerityResourceMap();
 
   protected function serveResource($path, $package_hash = null) {
     // Sanity checking to keep this from exposing anything sensitive, since it
@@ -41,18 +37,18 @@ abstract class CelerityResourceController extends PhabricatorController {
       return $this->makeResponseCacheable(new Aphront304Response());
     }
 
-    if ($package_hash) {
-      $map = CelerityResourceMap::getInstance();
-      $paths = $map->resolvePackage($package_hash);
-      if (!$paths) {
+    $map = $this->getCelerityResourceMap();
+
+    if ($map->isPackageResource($path)) {
+      $resource_names = $map->getResourceNamesForPackageName($path);
+      if (!$resource_names) {
         return new Aphront404Response();
       }
 
       try {
         $data = array();
-        foreach ($paths as $package_path) {
-          $disk_path = $this->getDiskPath($package_path);
-          $data[] = Filesystem::readFile($disk_path);
+        foreach ($resource_names as $resource_name) {
+          $data[] = $map->getResourceDataForName($resource_name);
         }
         $data = implode("\n\n", $data);
       } catch (Exception $ex) {
@@ -60,8 +56,7 @@ abstract class CelerityResourceController extends PhabricatorController {
       }
     } else {
       try {
-        $disk_path = $this->getDiskPath($path);
-        $data = Filesystem::readFile($disk_path);
+        $data = $map->getResourceDataForName($path);
       } catch (Exception $ex) {
         return new Aphront404Response();
       }
@@ -75,6 +70,17 @@ abstract class CelerityResourceController extends PhabricatorController {
     $response = new AphrontFileResponse();
     $response->setContent($data);
     $response->setMimeType($type_map[$type]);
+
+    // NOTE: This is a piece of magic required to make WOFF fonts work in
+    // Firefox. Possibly we should generalize this.
+    if ($type == 'woff') {
+      // We could be more tailored here, but it's not currently trivial to
+      // generate a comprehensive list of valid origins (an install may have
+      // arbitrarily many Phame blogs, for example), and we lose nothing by
+      // allowing access from anywhere.
+      $response->addAllowOrigin("*");
+    }
+
     return $this->makeResponseCacheable($response);
   }
 
@@ -84,8 +90,9 @@ abstract class CelerityResourceController extends PhabricatorController {
       'js'  => 'text/javascript; charset=utf-8',
       'png' => 'image/png',
       'gif' => 'image/gif',
-      'jpg' => 'image/jpg',
+      'jpg' => 'image/jpeg',
       'swf' => 'application/x-shockwave-flash',
+      'woff' => 'font/woff',
     );
   }
 

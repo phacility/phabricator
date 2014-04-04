@@ -1,0 +1,82 @@
+/**
+ * @provides phui-pinboard-view-css
+ */
+
+.phui-pinboard-view {
+  padding: 8px 0 16px 16px;
+  overflow: hidden;
+  margin: 12px 0;
+}
+
+.device-phone .phui-pinboard-view {
+  padding: 0;
+}
+
+.phui-pinboard-item-view {
+  margin: 0 12px 16px 0;
+  background: #ffffff;
+  border-radius: 3px;
+  border: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
+  float: left;
+  width: 288px;
+  text-align: left;
+}
+
+.device-desktop .phui-pinboard-item-view:hover {
+  cursor: pointer;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.30);
+}
+
+/* On phones, show a single column of items. */
+.device-phone .phui-pinboard-item-view {
+  float: none;
+  margin: 0 auto 16px;
+}
+
+.phui-pinboard-item-header {
+  padding: 4px 8px;
+  display: block;
+  font-weight: bold;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  border-bottom: 1px solid {$lightblueborder};
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.phui-pinboard-item-header a {
+  color: {$bluetext};
+}
+
+.phui-pinboard-item-image-link {
+  padding: 8px 4px;
+  display: block;
+}
+
+.phui-pinboard-item-content {
+  padding: 0 8px 4px;
+  overflow: hidden;
+  color: {$greytext};
+  font-size: 11px;
+}
+
+.phui-pinboard-item-count {
+  float: left;
+  margin-left: 8px;
+}
+
+.phui-pinboard-icons {
+  padding: 0 8px 8px 0;
+  color: {$darkbluetext};
+  border-bottom: 1px solid {$lightblueborder};
+  margin-bottom: 5px;
+  overflow: hidden;
+}
+
+.phui-pinboard-icon {
+  height: 14px;
+  width: 14px;
+  float: left;
+  padding-left: 2px;
+}

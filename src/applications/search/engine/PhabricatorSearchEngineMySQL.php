@@ -142,7 +142,7 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
     return $adoc;
   }
 
-  public function executeSearch(PhabricatorSearchQuery $query) {
+  public function executeSearch(PhabricatorSavedQuery $query) {
 
     $where = array();
     $join  = array();
@@ -156,7 +156,7 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
 
     $conn_r = $dao_doc->establishConnection('r');
 
-    $q = $query->getQuery();
+    $q = $query->getParameter('query');
 
     if (strlen($q)) {
      $join[] = qsprintf(
@@ -179,7 +179,7 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
         $q);
 
       $field = $query->getParameter('field');
-      if ($field/* && $field != AdjutantQuery::FIELD_ALL*/) {
+      if ($field) {
         $where[] = qsprintf(
           $conn_r,
           'field.field = %s',
@@ -192,49 +192,74 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
       $where[] = qsprintf($conn_r, 'document.phid != %s', $exclude);
     }
 
-    if ($query->getParameter('type')) {
+    $types = $query->getParameter('types');
+    if ($types) {
       if (strlen($q)) {
-        // TODO: verify that this column actually does something useful in query
-        // plans once we have nontrivial amounts of data.
         $where[] = qsprintf(
           $conn_r,
-          'field.phidType = %s',
-          $query->getParameter('type'));
+          'field.phidType IN (%Ls)',
+          $types);
       }
       $where[] = qsprintf(
         $conn_r,
-        'document.documentType = %s',
-        $query->getParameter('type'));
+        'document.documentType IN (%Ls)',
+        $types);
     }
 
     $join[] = $this->joinRelationship(
       $conn_r,
       $query,
-      'author',
+      'authorPHIDs',
       PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR);
 
-    $join[] = $this->joinRelationship(
-      $conn_r,
-      $query,
-      'open',
-      PhabricatorSearchRelationship::RELATIONSHIP_OPEN);
+    $statuses = $query->getParameter('statuses', array());
+    $statuses = array_fuse($statuses);
+    $open_rel = PhabricatorSearchRelationship::RELATIONSHIP_OPEN;
+    $closed_rel = PhabricatorSearchRelationship::RELATIONSHIP_CLOSED;
+    $include_open = !empty($statuses[$open_rel]);
+    $include_closed = !empty($statuses[$closed_rel]);
+
+    if ($include_open && !$include_closed) {
+      $join[] = $this->joinRelationship(
+        $conn_r,
+        $query,
+        'statuses',
+        $open_rel,
+        true);
+    } else if ($include_closed && !$include_open) {
+      $join[] = $this->joinRelationship(
+        $conn_r,
+        $query,
+        'statuses',
+        $closed_rel,
+        true);
+    }
+
+    if ($query->getParameter('withUnowned')) {
+      $join[] = $this->joinRelationship(
+        $conn_r,
+        $query,
+        'withUnowned',
+        PhabricatorSearchRelationship::RELATIONSHIP_UNOWNED,
+        true);
+    } else {
+      $join[] = $this->joinRelationship(
+        $conn_r,
+        $query,
+        'ownerPHIDs',
+        PhabricatorSearchRelationship::RELATIONSHIP_OWNER);
+    }
 
     $join[] = $this->joinRelationship(
       $conn_r,
       $query,
-      'owner',
-      PhabricatorSearchRelationship::RELATIONSHIP_OWNER);
-
-    $join[] = $this->joinRelationship(
-      $conn_r,
-      $query,
-      'subscribers',
+      'subscriberPHIDs',
       PhabricatorSearchRelationship::RELATIONSHIP_SUBSCRIBER);
 
     $join[] = $this->joinRelationship(
       $conn_r,
       $query,
-      'project',
+      'projectPHIDs',
       PhabricatorSearchRelationship::RELATIONSHIP_PROJECT);
 
     $join[] = $this->joinRelationship(
@@ -281,21 +306,10 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
 
   protected function joinRelationship(
     AphrontDatabaseConnection $conn,
-    PhabricatorSearchQuery $query,
+    PhabricatorSavedQuery $query,
     $field,
-    $type) {
-
-    $phids = $query->getParameter($field, array());
-    if (!$phids) {
-      return null;
-    }
-
-    $is_existence = false;
-    switch ($type) {
-      case PhabricatorSearchRelationship::RELATIONSHIP_OPEN:
-        $is_existence = true;
-        break;
-    }
+    $type,
+    $is_existence = false) {
 
     $sql = qsprintf(
       $conn,
@@ -307,6 +321,10 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
       $type);
 
     if (!$is_existence) {
+      $phids = $query->getParameter($field, array());
+      if (!$phids) {
+        return null;
+      }
       $sql .= qsprintf(
         $conn,
         ' AND %C.relatedPHID in (%Ls)',

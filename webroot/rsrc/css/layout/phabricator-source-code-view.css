@@ -3,13 +3,23 @@
  */
 
 .phabricator-source-code-container {
+  background: #ffffff;
   overflow-x: auto;
   overflow-y: hidden;
+}
+
+.phabricator-source-code-view tr:first-child * {
+  padding-top: 8px;
+}
+
+.phabricator-source-code-view tr:last-child * {
+  padding-bottom: 8px;
 }
 
 .phabricator-source-code {
   white-space: pre-wrap;
   padding: 2px 8px 1px;
+  width: 100%;
 }
 
 .phabricator-source-line {

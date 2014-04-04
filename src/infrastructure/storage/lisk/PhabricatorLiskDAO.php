@@ -1,60 +1,13 @@
 <?php
 
 /**
- * @task edges  Managing Edges
  * @task config Configuring Storage
  */
 abstract class PhabricatorLiskDAO extends LiskDAO {
 
-  private $edges = array();
   private static $namespaceStack = array();
 
-
-/* -(  Managing Edges  )----------------------------------------------------- */
-
-
-  /**
-   * @task edges
-   */
-  public function attachEdges(array $edges) {
-    foreach ($edges as $type => $type_edges) {
-      $this->edges[$type] = $type_edges;
-    }
-    return $this;
-  }
-
-
-  /**
-   * @task edges
-   */
-  public function getEdges($type) {
-    $edges = idx($this->edges, $type);
-    if ($edges === null) {
-      throw new Exception("Call attachEdges() before getEdges()!");
-    }
-    return $edges;
-  }
-
-
-  /**
-   * @task edges
-   */
-  public function loadRelativeEdges($type) {
-    if (!$this->getInSet()) {
-      id(new LiskDAOSet())->addToSet($this);
-    }
-    $this->getInSet()->loadRelativeEdges($type);
-    return $this->getEdges($type);
-  }
-
-
-  /**
-   * @task edges
-   */
-  public function getEdgePHIDs($type) {
-    return ipull($this->getEdges($type), 'dst');
-  }
-
+  const ATTACHABLE = "<attachable>";
 
 /* -(  Configuring Storage  )------------------------------------------------ */
 
@@ -110,6 +63,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
           'user'      => $conf->getUser(),
           'pass'      => $conf->getPassword(),
           'host'      => $conf->getHost(),
+          'port'      => $conf->getPort(),
           'database'  => $conf->getDatabase(),
           'retries'   => 3,
         ),
@@ -204,6 +158,42 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
     }
 
     return $result;
+  }
+
+  protected function assertAttached($property) {
+    if ($property === self::ATTACHABLE) {
+      throw new PhabricatorDataNotAttachedException($this);
+    }
+    return $property;
+  }
+
+  protected function assertAttachedKey($value, $key) {
+    $this->assertAttached($value);
+    if (!array_key_exists($key, $value)) {
+      throw new PhabricatorDataNotAttachedException($this);
+    }
+    return $value[$key];
+  }
+
+  protected function detectEncodingForStorage($string) {
+    return phutil_is_utf8($string) ? 'utf8' : null;
+  }
+
+  protected function getUTF8StringFromStorage($string, $encoding) {
+    if ($encoding == 'utf8') {
+      return $string;
+    }
+    return phutil_utf8ize($string);
+  }
+
+  public function delete() {
+
+    // TODO: We should make some reasonable effort to destroy related
+    // infrastructure objects here, like edges, transactions, custom field
+    // storage, flags, Phrequent tracking, tokens, etc. This doesn't need to
+    // be exhaustive, but we can get a lot of it pretty easily.
+
+    return parent::delete();
   }
 
 }

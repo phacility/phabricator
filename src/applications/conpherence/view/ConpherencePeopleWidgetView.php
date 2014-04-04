@@ -12,52 +12,6 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
     $participants = $conpherence->getParticipants();
     $handles = $conpherence->getHandles();
 
-    // ye olde add people widget
-    $add_widget = phabricator_form(
-      $user,
-      array(
-        'method' => 'POST',
-        'action' => $this->getUpdateURI(),
-        'sigil' => 'add-person',
-        'meta' => array(
-          'action' => 'add_person'
-        )
-      ),
-      array(
-        id(new AphrontFormTokenizerControl())
-        ->setPlaceholder(pht('Add a person...'))
-        ->setName('add_person')
-        ->setUser($user)
-        ->setDatasource('/typeahead/common/users/')
-        ->setLimit(1),
-        phutil_tag(
-          'button',
-          array(
-            'type' => 'submit',
-            'class' => 'people-add-button',
-          ),
-          pht('Add'))
-      ));
-    $header = phutil_tag(
-      'div',
-      array(
-        'class' => 'people-widget-header'
-      ),
-      array(
-        phutil_tag(
-          'div',
-          array(
-            'class' => 'add-people-widget',
-          ),
-          $add_widget),
-        phutil_tag(
-          'div',
-          array(
-            'class' => 'divider'
-          ),
-          '')
-      ));
-
     $body = array();
     // future proof by using participants to iterate through handles;
     // we may have non-people handles sooner or later
@@ -75,17 +29,12 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
               'action' => 'remove_person',
             )
           ),
-          phutil_tag(
-            'span',
-            array(
-              'class' => 'icon'
-            ),
-            'x'));
+          hsprintf('<span class="close-icon">&times;</span>'));
       }
       $body[] = phutil_tag(
         'div',
         array(
-          'class' => 'person-entry'
+          'class' => 'person-entry grouped'
         ),
         array(
           phutil_tag(
@@ -103,6 +52,6 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
           $remove_html));
     }
 
-    return array($header, $body);
+    return $body;
   }
 }

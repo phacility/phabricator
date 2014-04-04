@@ -15,16 +15,15 @@ final class AphrontContextBarView extends AphrontView {
 
     require_celerity_resource('aphront-contextbar-view-css');
 
-    return hsprintf(
-      '<div class="aphront-contextbar-view">'.
-        '<div class="aphront-contextbar-core">'.
-          '<div class="aphront-contextbar-buttons">%s</div>'.
-          '<div class="aphront-contextbar-content">%s</div>'.
-        '</div>'.
-        '<div style="clear: both;"></div>'.
-      '</div>',
-      $view->render(),
-      $this->renderChildren());
+    return phutil_tag_div(
+      'aphront-contextbar-view',
+      array(
+        phutil_tag_div('aphront-contextbar-core', array(
+          phutil_tag_div('aphront-contextbar-buttons', $view->render()),
+          phutil_tag_div('aphront-contextbar-content', $this->renderChildren()),
+        )),
+        phutil_tag('div', array('style' => 'clear: both;')),
+      ));
   }
 
 }

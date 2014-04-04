@@ -1,0 +1,38 @@
+/**
+ * @provides phui-fontkit-css
+ */
+
+.phui-font-source-sans {
+  font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.phui-font-source-sans .phabricator-remarkup h2 {
+  padding: 8px 24px 8px 0;
+  border-bottom: 1px solid {$thinblueborder};
+  font-size: 20px;
+  font-weight: 400;
+  color: {$bluetext};
+  margin: 0 0 16px;
+}
+
+.phui-font-source-sans .phabricator-remarkup tt {
+  font-size: 13px;
+  padding: 1px 3px 2px;
+}
+
+.phui-font-source-sans .phui-property-list-section {
+  border-bottom: 1px solid {$thinblueborder};
+  margin-bottom: 8px;
+  background: {$lightgreybackground};
+}
+
+.phui-font-source-sans .phui-property-list-container {
+  padding-bottom: 6px;
+}
+
+.phui-font-source-sans a {
+  color: {$blue};
+}

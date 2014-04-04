@@ -12,39 +12,72 @@ final class PhabricatorRepositoryCommitHeraldWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
+    $result = $this->applyHeraldRules($repository, $commit);
+
+    $commit->writeImportStatusFlag(
+      PhabricatorRepositoryCommit::IMPORTED_HERALD);
+
+    return $result;
+  }
+
+  private function applyHeraldRules(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit) {
+
+    $commit->attachRepository($repository);
+
+    // Don't take any actions on an importing repository. Principally, this
+    // avoids generating thousands of audits or emails when you import an
+    // established repository on an existing install.
+    if ($repository->isImporting()) {
+      return;
+    }
+
+    if ($repository->getDetail('herald-disabled')) {
+      return;
+    }
+
     $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
       'commitID = %d',
       $commit->getID());
 
     if (!$data) {
-      // TODO: Permanent failure.
-      return;
+      throw new PhabricatorWorkerPermanentFailureException(
+        pht(
+          'Unable to load commit data. The data for this task is invalid '.
+          'or no longer exists.'));
     }
 
-    $rules = HeraldRule::loadAllByContentTypeWithFullData(
-      HeraldContentTypeConfig::CONTENT_TYPE_COMMIT,
-      $commit->getPHID());
+    $adapter = id(new HeraldCommitAdapter())
+      ->setCommit($commit);
 
-    $adapter = new HeraldCommitAdapter(
-      $repository,
-      $commit,
-      $data);
+    $rules = id(new HeraldRuleQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withContentTypes(array($adapter->getAdapterContentType()))
+      ->withDisabled(false)
+      ->needConditionsAndActions(true)
+      ->needAppliedToPHIDs(array($adapter->getPHID()))
+      ->needValidateAuthors(true)
+      ->execute();
+
     $engine = new HeraldEngine();
 
     $effects = $engine->applyRules($rules, $adapter);
     $engine->applyEffects($effects, $adapter, $rules);
+    $xscript = $engine->getTranscript();
 
     $audit_phids = $adapter->getAuditMap();
-    if ($audit_phids) {
-      $this->createAudits($commit, $audit_phids, $rules);
+    $cc_phids = $adapter->getAddCCMap();
+    if ($audit_phids || $cc_phids) {
+      $this->createAudits($commit, $audit_phids, $cc_phids, $rules);
     }
+
+    HarbormasterBuildable::applyBuildPlans(
+      $commit->getPHID(),
+      $repository->getPHID(),
+      $adapter->getBuildPlans());
 
     $explicit_auditors = $this->createAuditsFromCommitMessage($commit, $data);
-
-    if ($repository->getDetail('herald-disabled')) {
-      // This just means "disable email"; audits are (mostly) idempotent.
-      return;
-    }
 
     $this->publishFeedStory($repository, $commit, $data);
 
@@ -53,12 +86,11 @@ final class PhabricatorRepositoryCommitHeraldWorker
     $email_phids = array_unique(
       array_merge(
         $explicit_auditors,
+        array_keys($cc_phids),
         $herald_targets));
     if (!$email_phids) {
       return;
     }
-
-    $xscript = $engine->getTranscript();
 
     $revision = $adapter->loadDifferentialRevision();
     if ($revision) {
@@ -77,9 +109,10 @@ final class PhabricatorRepositoryCommitHeraldWorker
         $commit->getPHID(),
       ));
 
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
 
     $commit_handle = $handles[$commit->getPHID()];
     $commit_name = $commit_handle->getName();
@@ -111,7 +144,6 @@ final class PhabricatorRepositoryCommitHeraldWorker
 
     $xscript_id = $xscript->getID();
 
-    $manage_uri = '/herald/view/commits/';
     $why_uri = '/herald/transcript/'.$xscript_id.'/';
 
     $reply_handler = PhabricatorAuditCommentEditor::newReplyHandlerForCommit(
@@ -124,10 +156,30 @@ final class PhabricatorRepositoryCommitHeraldWorker
     $body = new PhabricatorMetaMTAMailBody();
     $body->addRawSection($description);
     $body->addTextSection(pht('DETAILS'), $commit_uri);
+
+    // TODO: This should be integrated properly once we move to
+    // ApplicationTransactions.
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $commit,
+      PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS);
+    $field_list
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->readFieldsFromStorage($commit);
+    foreach ($field_list->getFields() as $field) {
+      try {
+        $field->buildApplicationTransactionMailBody(
+          new DifferentialTransaction(), // Bogus object to satisfy typehint.
+          $body);
+      } catch (Exception $ex) {
+        // Log the exception and continue.
+        phlog($ex);
+      }
+    }
+
     $body->addTextSection(pht('DIFFERENTIAL REVISION'), $differential);
     $body->addTextSection(pht('AFFECTED FILES'), $files);
     $body->addReplySection($reply_handler->getReplyHandlerInstructions());
-    $body->addHeraldSection($manage_uri, $why_uri);
+    $body->addHeraldSection($why_uri);
     $body->addRawSection($inline_patch_text);
     $body = $body->render();
 
@@ -157,9 +209,10 @@ final class PhabricatorRepositoryCommitHeraldWorker
 
     $mails = $reply_handler->multiplexMail(
       $template,
-      id(new PhabricatorObjectHandleData($email_phids))
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->loadHandles(),
+      id(new PhabricatorHandleQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs($email_phids)
+      ->execute(),
       array());
 
     foreach ($mails as $mail) {
@@ -170,6 +223,7 @@ final class PhabricatorRepositoryCommitHeraldWorker
   private function createAudits(
     PhabricatorRepositoryCommit $commit,
     array $map,
+    array $ccmap,
     array $rules) {
     assert_instances_of($rules, 'HeraldRule');
 
@@ -179,26 +233,42 @@ final class PhabricatorRepositoryCommitHeraldWorker
     $requests = mpull($requests, null, 'getAuditorPHID');
 
     $rules = mpull($rules, null, 'getID');
-    foreach ($map as $phid => $rule_ids) {
-      $request = idx($requests, $phid);
-      if ($request) {
-        continue;
-      }
-      $reasons = array();
-      foreach ($rule_ids as $id) {
-        $rule_name = '?';
-        if ($rules[$id]) {
-          $rule_name = $rules[$id]->getName();
-        }
-        $reasons[] = 'Herald Rule #'.$id.' "'.$rule_name.'" Triggered Audit';
-      }
 
-      $request = new PhabricatorRepositoryAuditRequest();
-      $request->setCommitPHID($commit->getPHID());
-      $request->setAuditorPHID($phid);
-      $request->setAuditStatus(PhabricatorAuditStatusConstants::AUDIT_REQUIRED);
-      $request->setAuditReasons($reasons);
-      $request->save();
+    $maps = array(
+      PhabricatorAuditStatusConstants::AUDIT_REQUIRED => $map,
+      PhabricatorAuditStatusConstants::CC => $ccmap,
+    );
+
+    foreach ($maps as $status => $map) {
+      foreach ($map as $phid => $rule_ids) {
+        $request = idx($requests, $phid);
+        if ($request) {
+          continue;
+        }
+        $reasons = array();
+        foreach ($rule_ids as $id) {
+          $rule_name = '?';
+          if ($rules[$id]) {
+            $rule_name = $rules[$id]->getName();
+          }
+          if ($status == PhabricatorAuditStatusConstants::AUDIT_REQUIRED) {
+            $reasons[] = pht(
+              '%s Triggered Audit',
+              "H{$id} {$rule_name}");
+          } else {
+            $reasons[] = pht(
+              '%s Triggered CC',
+              "H{$id} {$rule_name}");
+          }
+        }
+
+        $request = new PhabricatorRepositoryAuditRequest();
+        $request->setCommitPHID($commit->getPHID());
+        $request->setAuditorPHID($phid);
+        $request->setAuditStatus($status);
+        $request->setAuditReasons($reasons);
+        $request->save();
+      }
     }
 
     $commit->updateAuditStatus($requests);
@@ -221,10 +291,16 @@ final class PhabricatorRepositoryCommitHeraldWorker
       return array();
     }
 
-    $phids = DifferentialFieldSpecification::parseCommitMessageObjectList(
-      $matches[1],
-      $include_mailables = false,
-      $allow_partial = true);
+    $phids = id(new PhabricatorObjectListQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setAllowPartialResults(true)
+      ->setAllowedTypes(
+        array(
+          PhabricatorPeoplePHIDTypeUser::TYPECONST,
+          PhabricatorProjectPHIDTypeProject::TYPECONST,
+        ))
+      ->setObjectList($matches[1])
+      ->execute();
 
     if (!$phids) {
       return array();

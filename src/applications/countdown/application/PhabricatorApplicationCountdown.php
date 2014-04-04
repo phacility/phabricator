@@ -26,10 +26,16 @@ final class PhabricatorApplicationCountdown extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
+  public function getRemarkupRules() {
+    return array(
+      new PhabricatorCountdownRemarkupRule(),
+    );
+  }
+
   public function getRoutes() {
     return array(
       '/countdown/' => array(
-        ''
+        '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'PhabricatorCountdownListController',
         '(?P<id>[1-9]\d*)/'
           => 'PhabricatorCountdownViewController',
@@ -37,6 +43,14 @@ final class PhabricatorApplicationCountdown extends PhabricatorApplication {
           => 'PhabricatorCountdownEditController',
         'delete/(?P<id>[1-9]\d*)/'
           => 'PhabricatorCountdownDeleteController'
+      ),
+    );
+  }
+
+  public function getCustomCapabilities() {
+    return array(
+      PhabricatorCountdownCapabilityDefaultView::CAPABILITY => array(
+        'caption' => pht('Default view policy for new countdowns.'),
       ),
     );
   }

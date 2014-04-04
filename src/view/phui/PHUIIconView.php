@@ -8,6 +8,10 @@ final class PHUIIconView extends AphrontTagView {
   const SPRITE_TOKENS = 'tokens';
   const SPRITE_PAYMENTS = 'payments';
   const SPRITE_ICONS = 'icons';
+  const SPRITE_LOGIN = 'login';
+  const SPRITE_STATUS = 'status';
+  const SPRITE_PROJECTS = 'projects';
+  const SPRITE_BUTTONBAR = 'buttonbar';
 
   const HEAD_SMALL = 'phuihead-small';
   const HEAD_MEDIUM = 'phuihead-medium';
@@ -75,4 +79,13 @@ final class PHUIIconView extends AphrontTagView {
       'class' => $classes,
     );
   }
+
+  public static function getSheetManifest($sheet) {
+    $root = dirname(phutil_get_library_root('phabricator'));
+    $path = $root.'/resources/sprite/manifest/'.$sheet.'.json';
+    $data = Filesystem::readFile($path);
+    return idx(json_decode($data, true), 'sprites');
+  }
+
+
 }

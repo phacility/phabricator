@@ -11,8 +11,6 @@ final class ConpherenceThreadQuery
   private $phids;
   private $ids;
   private $needWidgetData;
-  private $needHeaderPics;
-  private $needOrigPics;
   private $needTransactions;
   private $needParticipantCache;
   private $needFilePHIDs;
@@ -27,16 +25,6 @@ final class ConpherenceThreadQuery
 
   public function needParticipantCache($participant_cache) {
     $this->needParticipantCache = $participant_cache;
-    return $this;
-  }
-
-  public function needOrigPics($need_orig_pics) {
-    $this->needOrigPics = $need_orig_pics;
-    return $this;
-  }
-
-  public function needHeaderPics($need_header_pics) {
-    $this->needHeaderPics = $need_header_pics;
     return $this;
   }
 
@@ -110,12 +98,6 @@ final class ConpherenceThreadQuery
       if ($this->needWidgetData) {
         $this->loadWidgetData($conpherences);
       }
-      if ($this->needOrigPics) {
-        $this->loadOrigPics($conpherences);
-      }
-      if ($this->needHeaderPics) {
-        $this->loadHeaderPics($conpherences);
-      }
     }
 
     return $conpherences;
@@ -147,12 +129,20 @@ final class ConpherenceThreadQuery
     $participants = id(new ConpherenceParticipant())
       ->loadAllWhere('conpherencePHID IN (%Ls)', array_keys($conpherences));
     $map = mgroup($participants, 'getConpherencePHID');
-    foreach ($map as $conpherence_phid => $conpherence_participants) {
-      $current_conpherence = $conpherences[$conpherence_phid];
+
+    foreach ($conpherences as $current_conpherence) {
+      $conpherence_phid = $current_conpherence->getPHID();
+
+      $conpherence_participants = idx(
+        $map,
+        $conpherence_phid,
+        array());
+
       $conpherence_participants = mpull(
         $conpherence_participants,
         null,
         'getParticipantPHID');
+
       $current_conpherence->attachParticipants($conpherence_participants);
       $current_conpherence->attachHandles(array());
     }
@@ -170,9 +160,10 @@ final class ConpherenceThreadQuery
         $conpherence->$method();
     }
     $flat_phids = array_mergev($handle_phids);
-    $handles = id(new PhabricatorObjectHandleData($flat_phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->getViewer())
-      ->loadHandles();
+      ->withPHIDs($flat_phids)
+      ->execute();
     foreach ($handle_phids as $conpherence_phid => $phids) {
       $conpherence = $conpherences[$conpherence_phid];
       $conpherence->attachHandles(array_select_keys($handles, $phids));
@@ -200,13 +191,13 @@ final class ConpherenceThreadQuery
     $transactions = $query->execute();
     $transactions = mgroup($transactions, 'getObjectPHID');
     foreach ($conpherences as $phid => $conpherence) {
-      $current_transactions = $transactions[$phid];
+      $current_transactions = idx($transactions, $phid, array());
       $handles = array();
       foreach ($current_transactions as $transaction) {
         $handles += $transaction->getHandles();
       }
       $conpherence->attachHandles($conpherence->getHandles() + $handles);
-      $conpherence->attachTransactions($transactions[$phid]);
+      $conpherence->attachTransactions($current_transactions);
     }
     return $this;
   }
@@ -234,22 +225,16 @@ final class ConpherenceThreadQuery
     $participant_phids = array_mergev($participant_phids);
     $file_phids = array_mergev($file_phids);
 
-    // statuses of everyone currently in the conpherence
-    // for a rolling one week window
-    $start_of_week = phabricator_format_local_time(
-      strtotime('last monday', strtotime('tomorrow')),
-      $this->getViewer(),
-      'U');
-    $end_of_week = phabricator_format_local_time(
-      strtotime('last monday +1 week', strtotime('tomorrow')),
-      $this->getViewer(),
-      'U');
-    $statuses = id(new PhabricatorUserStatus())
-      ->loadAllWhere(
-        'userPHID in (%Ls) AND dateTo >= %d AND dateFrom <= %d',
-        $participant_phids,
-        $start_of_week,
-        $end_of_week);
+    $epochs = CalendarTimeUtil::getCalendarEventEpochs(
+      $this->getViewer());
+    $start_epoch = $epochs['start_epoch'];
+    $end_epoch = $epochs['end_epoch'];
+    $statuses = id(new PhabricatorCalendarEventQuery())
+      ->setViewer($this->getViewer())
+      ->withInvitedPHIDs($participant_phids)
+      ->withDateRange($start_epoch, $end_epoch)
+      ->execute();
+
     $statuses = mgroup($statuses, 'getUserPHID');
 
     // attached files
@@ -263,9 +248,10 @@ final class ConpherenceThreadQuery
         ->execute();
       $files = mpull($files, null, 'getPHID');
       $file_author_phids = mpull($files, 'getAuthorPHID', 'getPHID');
-      $authors = id(new PhabricatorObjectHandleData($file_author_phids))
+      $authors = id(new PhabricatorHandleQuery())
         ->setViewer($this->getViewer())
-        ->loadHandles();
+        ->withPHIDs($file_author_phids)
+        ->execute();
       $authors = mpull($authors, null, 'getPHID');
     }
 
@@ -304,42 +290,8 @@ final class ConpherenceThreadQuery
     return $this;
   }
 
-  private function loadOrigPics(array $conpherences) {
-    return $this->loadPics(
-      $conpherences,
-      ConpherenceImageData::SIZE_ORIG);
-  }
-
-  private function loadHeaderPics(array $conpherences) {
-    return $this->loadPics(
-      $conpherences,
-      ConpherenceImageData::SIZE_HEAD);
-  }
-
-  private function loadPics(array $conpherences, $size) {
-    $conpherence_pic_phids = array();
-    foreach ($conpherences as $conpherence) {
-      $phid = $conpherence->getImagePHID($size);
-      if ($phid) {
-        $conpherence_pic_phids[$conpherence->getPHID()] = $phid;
-      }
-    }
-
-    if (!$conpherence_pic_phids) {
-      return $this;
-    }
-
-    $files = id(new PhabricatorFileQuery())
-      ->setViewer($this->getViewer())
-      ->withPHIDs($conpherence_pic_phids)
-      ->execute();
-    $files = mpull($files, null, 'getPHID');
-
-    foreach ($conpherence_pic_phids as $conpherence_phid => $pic_phid) {
-      $conpherences[$conpherence_phid]->setImage($files[$pic_phid], $size);
-    }
-
-    return $this;
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationConpherence';
   }
 
 }

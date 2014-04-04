@@ -1,0 +1,188 @@
+@title Recommendations on Branching
+@group review
+
+Project recommendations on how to organize branches.
+
+This document discusses organizing branches in your remote/origin for feature
+development and release management, not the use of local branches in Git or
+queues or bookmarks in Mercurial.
+
+This document is purely advisory. Phabricator works with a variety of branching
+strategies, and diverging from the recommendations in this document
+will not impact your ability to use it for code review and source management.
+
+= Overview =
+
+This document describes a branching strategy used by Facebook and Phabricator to
+develop software. It scales well and removes the pain associated with most
+branching strategies. This strategy is most applicable to web applications, and
+may be less applicable to other types of software. The basics are:
+
+  - Never put feature branches in the remote/origin/trunk.
+  - Control access to new features with runtime configuration, not branching.
+
+The next sections describe these points in more detail, explaining why you
+should consider abandoning feature branches and how to build runtime access
+controls for features.
+
+= Feature Branches =
+
+Suppose you are developing a new feature, like a way for users to "poke" each
+other. A traditional strategy is to create a branch for this feature in the
+remote (say, "poke_branch"), develop the feature on the branch over some period
+of time (say, a week or a month), and then merge the entire branch back into
+master/default/trunk when the feature is complete.
+
+This strategy has some drawbacks:
+
+  - You have to merge. Merging can be painful and error prone, especially if the
+    feature takes a long time to develop. Reducing merge pain means spending
+    time merging master into the branch regularly. As branches fall further
+    out of sync, merge pain/risk tends to increase.
+  - This strategy generally aggregates risk into a single high-risk merge event
+    at the end of development. It does this both explicitly (all the code lands
+    at once) and more subtly: since commits on the branch aren't going live any
+    time soon, it's easy to hold them to a lower bar of quality.
+  - When you have multiple feature branches, it's impossible to test
+    interactions between the features until they are merged.
+  - You generally can't A/B test code in feature branches, can't roll it out to
+    a small percentage of users, and can't easily turn it on for just employees
+    since it's in a separate branch.
+
+Of course, it also has some advantages:
+
+  - If the new feature replaces an older feature, the changes can delete the
+    older feature outright, or at least transition from the old feature to the
+    new feature fairly rapidly.
+  - The chance that this code will impact production before the merge is nearly
+    zero (it normally requires substantial human error). This is the major
+    reason to do it at all.
+
+Instead, consider abandoning all use of feature branching. The advantages are
+straightforward:
+
+  - You don't have to do merges.
+  - Risk is generally spread out more evenly into a large number of very small
+    risks created as each commit lands.
+  - You can test interactions between features in development easily.
+  - You can A/B test and do controlled rollouts easily.
+
+But it has some tradeoffs:
+
+  - If a new feature replaces an older feature, both have to exist in the same
+    codebase for a while. But even with feature branching, you generally have to
+    do almost all this work anyway to avoid situations where you flip a switch
+    and can't undo it.
+  - You need an effective way to control access to features so they don't launch
+    before they're ready. Even with this, there is a small risk a feature may
+    launch or leak because of a smaller human error than would be required with
+    feature branching. However, for most applications, this isn't a big deal.
+
+This second point is a must-have, but entirely tractable. The next section
+describes how to build it, so you can stop doing feature branching and never
+deal with the pain and risk of merging again.
+
+= Controlling Access to Features =
+
+Controlling access to features is straightforward: build some kind of runtime
+configuration which defines which features are visible, based on the tier
+(e.g., development, testing or production?) code is deployed on, the logged in
+user, global configuration, random buckets, A/B test groups, or whatever else.
+Your code should end up looking something like this:
+
+  if (is_feature_launched('poke')) {
+    show_poke();
+  }
+
+Behind that is some code which knows about the 'poke' feature and can go lookup
+configuration to determine if it should be visible or not. Facebook has a very
+sophisticated system for this (called GateKeeper) which also integrates with A/B
+tests, allows you to define complicated business rules, etc.
+
+You don't need this in the beginning. Before GateKeeper, Facebook used a much
+simpler system (called Sitevars) to handle this. Here are some resources
+describing similar systems:
+
+  - There's a high-level overview of Facebook's system in this 2011 tech talk:
+    [[http://techcrunch.com/2011/05/30/facebook-source-code/ | Facebook Push
+      Tech Talk]].
+  - Flickr described their similar system in a 2009 blog post here:
+    [[http://code.flickr.com/blog/2009/12/02/flipping-out/ | Flickr Feature
+      Flags and Feature Flippers]].
+  - Disqus described their similar system in a 2010 blog post here:
+    [[http://blog.disqus.com/post/789540337/partial-deployment-with-feature-switches |
+      Disqus Feature Switches]].
+  - Forrst describes their similar system in a 2010 blog post here:
+    [[http://blog.forrst.com/post/782356699/how-we-deploy-new-features-on-forrst |
+      Forrst Buckets]].
+  - Martin Fowler discusses these systems in a 2010 blog post here:
+    [[http://martinfowler.com/bliki/FeatureToggle.html |
+      Martin Fowler's FeatureToggle]].
+  - Phabricator just adds config options but defaults them to off. When
+    developing, we turn them on locally. Once a feature is ready, we default it
+    on. We have a vastly less context to deal with than most projects, however,
+    and sometimes get away with simply not linking new features in the UI until
+    they mature (it's open source anyway so there's no value in hiding things).
+
+When building this system there are a few things to avoid, mostly related to not
+letting the complexity of this system grow too wildly:
+
+  - Facebook initially made it very easy to turn things on to everyone by
+    accident in GateKeeper. Don't do this. The UI should make it obvious when
+    you're turning something on or off, and default to off.
+  - Since GateKeeper is essentially a runtime business rules engine, it was
+    heavily abused to effectively execute code living in a database. Avoid this
+    through simpler design or a policy of sanity.
+  - Facebook allowed GateKeeper rules to depend on other GateKeeper rules
+    (for example, 'new_profile_tour' is launched if 'new_profile' is launched)
+    but did not perform cycle detection, and then sat on a bug describing
+    how to introduce a cycle and bring the site down for a very long time,
+    until someone introduced a cycle and brought the site down. If you implement
+    dependencies, implement cycle detection.
+  - Facebook implemented some very expensive GateKeeper conditions and was
+    spending 100+ ms per page running complex rulesets to do launch checks for a
+    number of months in 2009. Keep an eye on how expensive your checks are.
+
+That said, not all complexity is bad:
+
+  - Allowing features to have states like "3%" instead of just "on" or "off"
+    allows you to roll out features gradually and watch for trouble (e.g.,
+    services collapsing from load).
+  - Building a control panel where you hit "Save" and all production servers
+    immediately reflect the change allows you to quickly turn things off if
+    there are problems.
+  - If you perform A/B testing, integrating A/B tests with feature rollouts
+    is probably a natural fit.
+  - Allowing new features to be launched to all employees before they're
+    launched to the world is a great way to get feedback and keep everyone
+    in the loop.
+
+Adopting runtime feature controls increases the risk of features leaking (or
+even launching) before they're ready. This is generally a small risk which is
+probably reasonable for most projects to accept, although it might be
+unacceptable for some projects. There are some ways you can mitigate this
+risk:
+
+  - Essentially every launch/leak at Facebook was because someone turned on
+    a feature by accident when they didn't mean to. The control panel made this
+    very easy: features defaulted to "on", and if you tried to do something
+    common like remove yourself from the test group for a feature you could
+    easily launch it to the whole world. Design the UI defensively so that it
+    is hard to turn features on to everyone and/or obvious when a feature is
+    launching and this shouldn't be a problem.
+  - The rest were through CSS or JS changes that mentioned new features being
+    shipped to the client as part of static resource packaging or because
+    the code was just added to existing files. If this is a risk you're
+    concerned about, consider integration with static resource management.
+
+In general, you can start with a very simple system and expand it as it makes
+sense. Even a simple system can let you move away from feature branches.
+
+= Next Steps =
+
+Continue by:
+
+  - reading recommendations on structuring revision control with
+    @{article:Recommendations on Revision Control}; or
+  - reading recommendations on structuring changes with
+    @{article:Writing Reviewable Code}.

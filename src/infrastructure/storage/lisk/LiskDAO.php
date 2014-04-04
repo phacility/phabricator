@@ -171,6 +171,7 @@ abstract class LiskDAO {
   const CONFIG_AUX_PHID             = 'auxiliary-phid';
   const CONFIG_SERIALIZATION        = 'col-serialization';
   const CONFIG_PARTIAL_OBJECTS      = 'partial-objects';
+  const CONFIG_BINARY               = 'binary';
 
   const SERIALIZATION_NONE          = 'id';
   const SERIALIZATION_JSON          = 'json';
@@ -182,12 +183,12 @@ abstract class LiskDAO {
 
   const COUNTER_TABLE_NAME          = 'lisk_counter';
 
-  private $__dirtyFields            = array();
-  private $__missingFields          = array();
-  private static $processIsolationLevel       = 0;
-  private static $transactionIsolationLevel   = 0;
+  private $dirtyFields                      = array();
+  private $missingFields                    = array();
+  private static $processIsolationLevel     = 0;
+  private static $transactionIsolationLevel = 0;
 
-  private $__ephemeral = false;
+  private $ephemeral = false;
 
   private static $connections       = array();
 
@@ -355,6 +356,11 @@ abstract class LiskDAO {
    * by Lisk (use readField and writeField instead), and you should not
    * directly access or assign protected members of your class (use the getters
    * and setters).
+   *
+   * CONFIG_BINARY
+   * You can optionally provide a map of columns to a flag indicating that
+   * they store binary data. These columns will not raise an error when
+   * handling binary writes.
    *
    * @return dictionary  Map of configuration options to values.
    *
@@ -544,7 +550,7 @@ abstract class LiskDAO {
       $columns[] = $this->getIDKey();
 
       $properties = $this->getProperties();
-      $this->__missingFields = array_diff_key(
+      $this->missingFields = array_diff_key(
         array_flip($properties),
         array_flip($columns));
     }
@@ -775,7 +781,7 @@ abstract class LiskDAO {
    * row in retrieving other rows. Example of a correct usage:
    *
    *   $status = $author->loadOneRelative(
-   *     new PhabricatorUserStatus(),
+   *     new PhabricatorCalendarEvent(),
    *     'userPHID',
    *     'getPHID',
    *     '(UNIX_TIMESTAMP() BETWEEN dateFrom AND dateTo)');
@@ -889,6 +895,11 @@ abstract class LiskDAO {
       $id_key = $this->getIDKeyForUse();
     }
     return $this->$id_key;
+  }
+
+
+  public function getPHID() {
+    return $this->phid;
   }
 
 
@@ -1063,12 +1074,12 @@ abstract class LiskDAO {
    * storage.
    */
   public function makeEphemeral() {
-    $this->__ephemeral = true;
+    $this->ephemeral = true;
     return $this;
   }
 
   private function isEphemeralCheck() {
-    if ($this->__ephemeral) {
+    if ($this->ephemeral) {
       throw new LiskEphemeralObjectException();
     }
   }
@@ -1133,7 +1144,7 @@ abstract class LiskDAO {
     $this->willSaveObject();
     $data = $this->getPropertyValues();
     if ($this->getConfigOption(self::CONFIG_PARTIAL_OBJECTS)) {
-      $data = array_intersect_key($data, $this->__dirtyFields);
+      $data = array_intersect_key($data, $this->dirtyFields);
     }
     $this->willWriteData($data);
 
@@ -1143,9 +1154,14 @@ abstract class LiskDAO {
     }
 
     $conn = $this->establishConnection('w');
+    $binary = $this->getBinaryColumns();
 
     foreach ($map as $key => $value) {
-      $map[$key] = qsprintf($conn, '%C = %ns', $key, $value);
+      if (!empty($binary[$key])) {
+        $map[$key] = qsprintf($conn, '%C = %nB', $key, $value);
+      } else {
+        $map[$key] = qsprintf($conn, '%C = %ns', $key, $value);
+      }
     }
     $map = implode(', ', $map);
 
@@ -1237,9 +1253,24 @@ abstract class LiskDAO {
     $this->willWriteData($data);
 
     $columns = array_keys($data);
+    $binary = $this->getBinaryColumns();
 
     foreach ($data as $key => $value) {
-      $data[$key] = qsprintf($conn, '%ns', $value);
+      try {
+        if (!empty($binary[$key])) {
+          $data[$key] = qsprintf($conn, '%nB', $value);
+        } else {
+          $data[$key] = qsprintf($conn, '%ns', $value);
+        }
+      } catch (AphrontQueryParameterException $parameter_exception) {
+        throw new PhutilProxyException(
+          pht(
+            "Unable to insert or update object of class %s, field '%s' ".
+            "has a nonscalar value.",
+            get_class($this),
+            $key),
+          $parameter_exception);
+      }
     }
     $data = implode(', ', $data);
 
@@ -1659,9 +1690,9 @@ abstract class LiskDAO {
    * @task util
    */
   private function resetDirtyFields() {
-    $this->__dirtyFields = array();
+    $this->dirtyFields = array();
     if ($this->getConfigOption(self::CONFIG_TIMESTAMPS)) {
-      $this->__dirtyFields['dateModified'] = true;
+      $this->dirtyFields['dateModified'] = true;
     }
   }
 
@@ -1710,7 +1741,7 @@ abstract class LiskDAO {
         $dispatch_map[$method] = $property;
       }
 
-      if ($partial && isset($this->__missingFields[$property])) {
+      if ($partial && isset($this->missingFields[$property])) {
         throw new Exception("Cannot get field that wasn't loaded: {$property}");
       }
 
@@ -1733,8 +1764,8 @@ abstract class LiskDAO {
       }
       if ($partial) {
         // Accept writes to fields that weren't initially loaded
-        unset($this->__missingFields[$property]);
-        $this->__dirtyFields[$property] = true;
+        unset($this->missingFields[$property]);
+        $this->dirtyFields[$property] = true;
       }
 
       $this->writeField($property, $args[0]);
@@ -1786,6 +1817,10 @@ abstract class LiskDAO {
       $counter_name);
 
     return $conn_w->getInsertID();
+  }
+
+  private function getBinaryColumns() {
+    return $this->getConfigOption(self::CONFIG_BINARY);
   }
 
 }

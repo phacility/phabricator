@@ -1,9 +1,7 @@
 <?php
 
-final class HeraldTranscript extends HeraldDAO {
-
-  protected $id;
-  protected $phid;
+final class HeraldTranscript extends HeraldDAO
+  implements PhabricatorPolicyInterface {
 
   protected $objectTranscript;
   protected $ruleTranscripts = array();
@@ -94,6 +92,12 @@ final class HeraldTranscript extends HeraldDAO {
         'conditionTranscripts'  => self::SERIALIZATION_PHP,
         'applyTranscripts'      => self::SERIALIZATION_PHP,
       ),
+      self::CONFIG_BINARY => array(
+        'objectTranscript'      => true,
+        'ruleTranscripts'       => true,
+        'conditionTranscripts'  => true,
+        'applyTranscripts'      => true,
+      ),
     ) + parent::getConfiguration();
   }
 
@@ -165,5 +169,31 @@ final class HeraldTranscript extends HeraldDAO {
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID('HLXS');
   }
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::POLICY_USER;
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return pht(
+      'To view a transcript, you must be able to view the object the '.
+      'transcript is about.');
+  }
+
 
 }

@@ -6,6 +6,7 @@ abstract class DiffusionRawDiffQuery extends DiffusionQuery {
   private $timeout;
   private $linesOfContext = 65535;
   private $againstCommit;
+  private $byteLimit;
 
   final public static function newFromDiffusionRequest(
     DiffusionRequest $request) {
@@ -25,6 +26,15 @@ abstract class DiffusionRawDiffQuery extends DiffusionQuery {
     return $this->timeout;
   }
 
+  public function setByteLimit($byte_limit) {
+    $this->byteLimit = $byte_limit;
+    return $this;
+  }
+
+  public function getByteLimit() {
+    return $this->byteLimit;
+  }
+
   final public function setLinesOfContext($lines_of_context) {
     $this->linesOfContext = $lines_of_context;
     return $this;
@@ -41,6 +51,17 @@ abstract class DiffusionRawDiffQuery extends DiffusionQuery {
 
   final public function getAgainstCommit() {
     return $this->againstCommit;
+  }
+
+  protected function configureFuture(ExecFuture $future) {
+    if ($this->getTimeout()) {
+      $future->setTimeout($this->getTimeout());
+    }
+
+    if ($this->getByteLimit()) {
+      $future->setStdoutSizeLimit($this->getByteLimit());
+      $future->setStderrSizeLimit($this->getByteLimit());
+    }
   }
 
 }

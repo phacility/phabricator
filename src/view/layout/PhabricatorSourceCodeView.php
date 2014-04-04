@@ -4,7 +4,9 @@ final class PhabricatorSourceCodeView extends AphrontView {
 
   private $lines;
   private $limit;
+  private $uri;
   private $highlights = array();
+  private $canClickHighlight = true;
 
   public function setLimit($limit) {
     $this->limit = $limit;
@@ -16,8 +18,18 @@ final class PhabricatorSourceCodeView extends AphrontView {
     return $this;
   }
 
-  public function setHighlights(array $highlights) {
-    $this->highlights = array_fuse($highlights);
+  public function setURI(PhutilURI $uri) {
+    $this->uri = $uri;
+    return $this;
+  }
+
+  public function setHighlights(array $array) {
+    $this->highlights = array_fuse($array);
+    return $this;
+  }
+
+  public function disableHighlightOnClick() {
+    $this->canClickHighlight = false;
     return $this;
   }
 
@@ -26,10 +38,14 @@ final class PhabricatorSourceCodeView extends AphrontView {
     require_celerity_resource('syntax-highlighting-css');
 
     Javelin::initBehavior('phabricator-oncopy', array());
+    if ($this->canClickHighlight) {
+      Javelin::initBehavior('phabricator-line-linker');
+    }
 
     $line_number = 1;
 
     $rows = array();
+
     foreach ($this->lines as $line) {
       $hit_limit = $this->limit &&
                    ($line_number == $this->limit) &&
@@ -45,7 +61,8 @@ final class PhabricatorSourceCodeView extends AphrontView {
           pht('...'));
       } else {
         $content_number = $line_number;
-        $content_line = hsprintf("\xE2\x80\x8B%s", $line);
+        // NOTE: See phabricator-oncopy behavior.
+        $content_line = hsprintf("\xE2\x81\xA0%s", $line);
       }
 
       $row_attributes = array();
@@ -53,16 +70,40 @@ final class PhabricatorSourceCodeView extends AphrontView {
         $row_attributes['class'] = 'phabricator-source-highlight';
       }
 
-      // TODO: Provide nice links.
+      if ($this->canClickHighlight) {
+        $line_uri = $this->uri . "$" . $line_number;
+        $line_href = (string) new PhutilURI($line_uri);
+
+        $tag_number = javelin_tag(
+          'a',
+          array(
+               'href' => $line_href
+          ),
+          $line_number);
+      } else {
+        $tag_number = javelin_tag(
+          'span',
+          array(),
+          $line_number);
+      }
 
       $rows[] = phutil_tag(
         'tr',
         $row_attributes,
-        hsprintf(
-          '<th class="phabricator-source-line">%s</th>'.
-          '<td class="phabricator-source-code">%s</td>',
-          $content_number,
-          $content_line));
+        array(
+          javelin_tag(
+            'th',
+            array(
+              'class' => 'phabricator-source-line',
+              'sigil' => 'phabricator-source-line'
+            ),
+            $tag_number),
+          phutil_tag(
+            'td',
+            array(
+              'class' => 'phabricator-source-code'
+            ),
+            $content_line)));
 
       if ($hit_limit) {
         break;
@@ -76,15 +117,13 @@ final class PhabricatorSourceCodeView extends AphrontView {
     $classes[] = 'remarkup-code';
     $classes[] = 'PhabricatorMonospaced';
 
-    return phutil_tag(
-      'div',
-      array(
-        'class' => 'phabricator-source-code-container',
-      ),
-      phutil_tag(
+    return phutil_tag_div(
+      'phabricator-source-code-container',
+      javelin_tag(
         'table',
         array(
           'class' => implode(' ', $classes),
+          'sigil' => 'phabricator-source'
         ),
         phutil_implode_html('', $rows)));
   }

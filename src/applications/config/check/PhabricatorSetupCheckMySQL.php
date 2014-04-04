@@ -25,30 +25,39 @@ final class PhabricatorSetupCheckMySQL extends PhabricatorSetupCheck {
         ->setMessage($message);
     }
 
-    if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
-      $mode_string = queryfx_one($conn_raw, "SELECT @@sql_mode");
-      $modes = explode(',', $mode_string['@@sql_mode']);
-      if (!in_array('STRICT_ALL_TABLES', $modes)) {
-        $summary = pht(
-          "MySQL is not in strict mode, but should be for Phabricator ".
-          "development.");
+    $mode_string = queryfx_one($conn_raw, "SELECT @@sql_mode");
+    $modes = explode(',', $mode_string['@@sql_mode']);
+    if (!in_array('STRICT_ALL_TABLES', $modes)) {
+      $summary = pht(
+        "MySQL is not in strict mode, but using strict mode is strongly ".
+        "encouraged.");
 
-        $message = pht(
-          "This install is in developer mode, but the global sql_mode is not ".
-          "set to 'STRICT_ALL_TABLES'. It is recommended that you set this ".
-          "mode while developing Phabricator. Strict mode will promote some ".
-          "query warnings to errors, and ensure you don't miss them during ".
-          "development. You can find more information about this mode (and ".
-          "how to configure it) in the MySQL manual.");
+      $message = pht(
+        "On your MySQL instance, the global sql_mode is not set to ".
+        "'STRICT_ALL_TABLES'. It is strongly encouraged that you enable this ".
+        "mode when running Phabricator.\n\n".
+        "By default, MySQL will fail silently and continue when certain ".
+        "error conditions occur. Sometimes contuining does the wrong thing. ".
+        "For example, inserting too much data into a column will cause ".
+        "silent truncation (and thus data loss) instead of failing in an ".
+        "obvious way that we can fix. These behaviors can also create ".
+        "security risks. Enabling strict mode raises an explicit error ".
+        "instead and prevents this entire class of problem from doing any ".
+        "damage.\n\n".
+        "You can find more information about this mode (and how to configure ".
+        "it) in the MySQL manual. Usually, it is sufficient to add this to ".
+        "your 'my.cnf' file:\n\n".
+        "%s\n".
+        "(Note that if you run other applications against the same database, ".
+        "they may not work in strict mode. Be careful about enabling it in ".
+        "these cases.)",
+        phutil_tag('pre', array(), 'sql-mode=STRICT_ALL_TABLES'));
 
-        $this->newIssue('mysql.mode')
-          ->setName(pht('MySQL STRICT_ALL_TABLES Mode Not Set'))
-          ->addRelatedPhabricatorConfig('phabricator.developer-mode')
-          ->setSummary($summary)
-          ->setMessage($message);
-      }
+      $this->newIssue('mysql.mode')
+        ->setName(pht('MySQL STRICT_ALL_TABLES Mode Not Set'))
+        ->setSummary($summary)
+        ->setMessage($message);
     }
-
   }
 
 }

@@ -6,9 +6,11 @@ final class AphrontMultiColumnView extends AphrontView {
   const GUTTER_MEDIUM = 'mmr';
   const GUTTER_LARGE = 'mlr';
 
-  private $column = array();
+  private $columns = array();
   private $fluidLayout = false;
+  private $fluidishLayout = false;
   private $gutter;
+  private $border;
 
   public function addColumn($column) {
     $this->columns[] = $column;
@@ -20,8 +22,19 @@ final class AphrontMultiColumnView extends AphrontView {
     return $this;
   }
 
+  public function setFluidishLayout($layout) {
+    $this->fluidLayout = true;
+    $this->fluidishLayout = $layout;
+    return $this;
+  }
+
   public function setGutter($gutter) {
     $this->gutter = $gutter;
+    return $this;
+  }
+
+  public function setBorder($border) {
+    $this->border = $border;
     return $this;
   }
 
@@ -41,6 +54,8 @@ final class AphrontMultiColumnView extends AphrontView {
     $columns = array();
     $column_class = array();
     $column_class[] = 'aphront-multi-column-column';
+    $outer_class = array();
+    $outer_class[] = 'aphront-multi-column-column-outer';
     if ($this->gutter) {
       $column_class[] = $this->gutter;
     }
@@ -48,6 +63,7 @@ final class AphrontMultiColumnView extends AphrontView {
     foreach ($this->columns as $column) {
       if (++$i === count($this->columns)) {
         $column_class[] = 'aphront-multi-column-column-last';
+        $outer_class[] = 'aphront-multi-colum-column-outer-last';
       }
       $column_inner = phutil_tag(
         'div',
@@ -58,7 +74,7 @@ final class AphrontMultiColumnView extends AphrontView {
       $columns[] = phutil_tag(
         'div',
           array(
-          'class' => 'aphront-multi-column-column-outer'
+          'class' => implode(' ', $outer_class)
           ),
         $column_inner);
     }
@@ -76,6 +92,9 @@ final class AphrontMultiColumnView extends AphrontView {
     $classes[] = 'aphront-multi-column-outer';
     if ($this->fluidLayout) {
       $classes[] = 'aphront-multi-column-fluid';
+      if ($this->fluidishLayout) {
+        $classes[] = 'aphront-multi-column-fluidish';
+      }
     } else {
       $classes[] = 'aphront-multi-column-fixed';
     }
@@ -86,6 +105,14 @@ final class AphrontMultiColumnView extends AphrontView {
           'class' => implode(' ', $classes)
         ),
         $view);
+
+    if ($this->border) {
+      $board = id(new PHUIBoxView())
+        ->setBorder(true)
+        ->appendChild($board)
+        ->addPadding(PHUI::PADDING_MEDIUM_TOP)
+        ->addPadding(PHUI::PADDING_MEDIUM_BOTTOM);
+    }
 
     return phutil_tag(
       'div',

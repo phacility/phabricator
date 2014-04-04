@@ -10,13 +10,20 @@ final class PhabricatorMailingListsEditController
   }
 
   public function processRequest() {
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
 
     if ($this->id) {
-      $list = id(new PhabricatorMetaMTAMailingList())->load($this->id);
+      $page_title = pht('Edit Mailing List');
+      $list = id(new PhabricatorMailingListQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($this->id))
+        ->executeOne();
       if (!$list) {
         return new Aphront404Response();
       }
     } else {
+      $page_title = pht('Create Mailing List');
       $list = new PhabricatorMetaMTAMailingList();
     }
 
@@ -25,9 +32,8 @@ final class PhabricatorMailingListsEditController
     $e_name = true;
     $errors = array();
 
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
+    $crumbs = $this->buildApplicationCrumbs();
 
-    $request = $this->getRequest();
     if ($request->isFormPost()) {
       $list->setName($request->getStr('name'));
       $list->setEmail($request->getStr('email'));
@@ -68,13 +74,6 @@ final class PhabricatorMailingListsEditController
       }
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Form Errors'))
-        ->setErrors($errors);
-    }
-
     $form = new AphrontFormView();
     $form->setUser($request->getUser());
     if ($list->getID()) {
@@ -106,36 +105,29 @@ final class PhabricatorMailingListsEditController
           ->setCaption(pht('Optional link to mailing list archives or info.'))
           ->setValue($list->getURI()))
       ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel('PHID')
-          ->setValue(nonempty($list->getPHID(), '-')))
-      ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save'))
           ->addCancelButton($this->getApplicationURI()));
 
     if ($list->getID()) {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Edit Mailing List'))
-          ->setHref($this->getApplicationURI('/edit/'.$list->getID().'/')));
+      $crumbs->addTextCrumb(pht('Edit Mailing List'));
     } else {
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Create Mailing List'))
-          ->setHref($this->getApplicationURI('/edit/')));
+      $crumbs->addTextCrumb(pht('Create Mailing List'));
     }
+
+    $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText($page_title)
+      ->setFormErrors($errors)
+      ->setForm($form);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $error_view,
-        $form,
+        $form_box,
       ),
       array(
-        'title' => pht('Edit Mailing List'),
+        'title' => $page_title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

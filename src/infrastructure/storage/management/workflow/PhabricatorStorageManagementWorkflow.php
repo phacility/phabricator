@@ -1,7 +1,7 @@
 <?php
 
 abstract class PhabricatorStorageManagementWorkflow
-  extends PhutilArgumentWorkflow {
+  extends PhabricatorManagementWorkflow {
 
   private $patches;
   private $api;
@@ -23,10 +23,6 @@ abstract class PhabricatorStorageManagementWorkflow
 
   final public function getAPI() {
     return $this->api;
-  }
-
-  public function isExecutable() {
-    return true;
   }
 
 }

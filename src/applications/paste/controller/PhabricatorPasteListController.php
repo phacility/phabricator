@@ -1,100 +1,34 @@
 <?php
 
-final class PhabricatorPasteListController extends PhabricatorPasteController {
+/**
+ * @group paste
+ */
+final class PhabricatorPasteListController extends PhabricatorPasteController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
 
-  public function shouldRequireLogin() {
-    return false;
-  }
-
-  private $filter;
   private $queryKey;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
-    $this->filter = idx($data, 'filter');
     $this->queryKey = idx($data, 'queryKey');
   }
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->queryKey)
+      ->setSearchEngine(new PhabricatorPasteSearchEngine())
+      ->setNavigation($this->buildSideNavView());
 
-    if ($request->isFormPost()) {
-      $saved = id(new PhabricatorPasteSearchEngine())
-        ->buildSavedQueryFromRequest($request);
-      if (count($saved->getParameter('authorPHIDs')) == 0) {
-        return id(new AphrontRedirectResponse())
-          ->setURI('/paste/filter/advanced/');
-      }
-      return id(new AphrontRedirectResponse())
-        ->setURI('/paste/query/'.$saved->getQueryKey().'/');
-    }
-
-    $nav = $this->buildSideNavView($this->filter);
-    $filter = $nav->getSelectedFilter();
-
-    $saved_query = new PhabricatorSavedQuery();
-    $engine = id(new PhabricatorPasteSearchEngine())
-      ->setPasteSearchFilter($filter)
-      ->setPasteSearchUser($request->getUser());
-
-    if ($this->queryKey !== null) {
-      $saved_query = id(new PhabricatorSavedQuery())->loadOneWhere(
-        'queryKey = %s',
-        $this->queryKey);
-
-      if (!$saved_query) {
-        return new Aphront404Response();
-      }
-
-      $query = id(new PhabricatorPasteSearchEngine())
-        ->buildQueryFromSavedQuery($saved_query);
-    } else {
-      $saved_query = $engine->buildSavedQueryFromRequest($request);
-      $query = $engine->buildQueryFromSavedQuery($saved_query);
-    }
-
-    $pager = new AphrontCursorPagerView();
-    $pager->readFromRequest($request);
-    $pastes = $query->setViewer($request->getUser())
-      ->needContent(true)
-      ->executeWithCursorPager($pager);
-
-    $list = $this->buildPasteList($pastes);
-    $list->setPager($pager);
-    $list->setNoDataString(pht("No results found for this query."));
-
-    if ($this->queryKey !== null || $filter == "advanced") {
-      $form = $engine->buildSearchForm($saved_query);
-      $nav->appendChild(
-        array(
-          $form
-        ));
-    }
-
-    $nav->appendChild(
-      array(
-        $list,
-      ));
-
-    $crumbs = $this
-      ->buildApplicationCrumbs($nav)
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht("Pastes"))
-          ->setHref($this->getApplicationURI('filter/'.$filter.'/')));
-
-    $nav->setCrumbs($crumbs);
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => pht("Pastes"),
-        'device' => true,
-        'dust' => true,
-      ));
+    return $this->delegateToController($controller);
   }
 
-  private function buildPasteList(array $pastes) {
+  public function renderResultsList(
+    array $pastes,
+    PhabricatorSavedQuery $query) {
     assert_instances_of($pastes, 'PhabricatorPaste');
 
     $user = $this->getRequest()->getUser();
@@ -103,7 +37,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
 
     $lang_map = PhabricatorEnv::getEnvConfig('pygments.dropdown-choices');
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     $list->setUser($user);
     foreach ($pastes as $paste) {
       $created = phabricator_date($paste->getDateCreated(), $user);
@@ -124,7 +58,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
 
       $title = nonempty($paste->getTitle(), pht('(An Untitled Masterwork)'));
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setObjectName('P'.$paste->getID())
         ->setHeader($title)
         ->setHref('/P'.$paste->getID())

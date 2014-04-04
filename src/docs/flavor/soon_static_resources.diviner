@@ -1,0 +1,126 @@
+@title Things You Should Do Soon: Static Resources
+@group sundry
+
+Over time, you'll write more JS and CSS and eventually need to put systems in
+place to manage it.
+
+This is part of @{article:Things You Should Do Soon}, which describes
+architectural problems in web applications which you should begin to consider
+before you encounter them.
+
+= Manage Dependencies Automatically =
+
+The naive way to add static resources to a page is to include them at the top
+of the page, before rendering begins, by enumerating filenames. Facebook used to
+work like that:
+
+  COUNTEREXAMPLE
+  <?php
+
+  require_js('js/base.js');
+  require_js('js/utils.js');
+  require_js('js/ajax.js');
+  require_js('js/dialog.js');
+  // ...
+
+This was okay for a while but had become unmanageable by 2007. Because
+dependencies were managed completely manually and you had to explicitly list
+every file you needed in the right order, everyone copy-pasted a giant block
+of this stuff into every page. The major problem this created was that each page
+pulled in way too much JS, which slowed down frontend performance.
+
+We moved to a system (called //Haste//) which declared JS dependencies in the
+files using a docblock-like header:
+
+  /**
+   * @provides dialog
+   * @requires utils ajax base
+   */
+
+We annotated files manually, although theoretically you could use static
+analysis instead (we couldn't realistically do that, our JS was pretty
+unstructured). This allowed us to pull in the entire dependency chain of
+component with one call:
+
+  require_static('dialog');
+
+...instead of copy-pasting every dependency.
+
+
+= Include When Used =
+
+The other part of this problem was that all the resources were required at the
+top of the page instead of when they were actually used. This meant two things:
+
+  - you needed to include every resource that //could ever// appear on a page;
+  - if you were adding something new to 2+ pages, you had a strong incentive to
+    put it in base.js.
+
+So every page pulled in a bunch of silly stuff like the CAPTCHA code (because
+there was one obscure workflow involving unverified users which could
+theoretically show any user a CAPTCHA on any page) and every random thing anyone
+had stuck in base.js.
+
+We moved to a system where JS and CSS tags were output **after** page rendering
+had run instead (they still appeared at the top of the page, they were just
+prepended rather than appended before being output to the browser -- there are
+some complexities here, but they are beyond the immediate scope), so
+require_static() could appear anywhere in the code. Then we moved all the
+require_static() calls to be proximate to their use sites (so dialog rendering
+code would pull in dialog-related CSS and JS, for example, not any page which
+might need a dialog), and split base.js into a bunch of smaller files.
+
+
+= Packaging =
+
+The biggest frontend performance killer in most cases is the raw number of HTTP
+requests, and the biggest hammer for addressing it is to package related JS
+and CSS into larger files, so you send down all the core JS code in one big file
+instead of a lot of smaller ones. Once the other groundwork is in place, this is
+a relatively easy change. We started with manual package definitions and
+eventually moved to automatic generation based on production data.
+
+
+= Caches and Serving Content =
+
+In the simplest implementation of static resources, you write out a raw JS tag
+with something like ##src="/js/base.js"##. This will break disastrously as you
+scale, because clients will be running with stale versions of resources. There
+are bunch of subtle problems (especially once you have a CDN), but the big one
+is that if a user is browsing your site as you push/deploy, their client will
+not make requests for the resources they already have in cache, so even if your
+servers respond correctly to If-None-Match (ETags) and If-Modified-Since
+(Expires) the site will appear completely broken to everyone who was using it
+when you push a breaking change to static resources.
+
+The best way to solve this problem is to version your resources in the URI,
+so each version of a resource has a unique URI:
+
+  rsrc/af04d14/js/base.js
+
+When you push, users will receive pages which reference the new URI so their
+browsers will retrieve it.
+
+**But**, there's a big problem, once you have a bunch of web frontends:
+
+While you're pushing, a user may make a request which is handled by a server
+running the new version of the code, which delivers a page with a new resource
+URI. Their browser then makes a request for the new resource, but that request
+is routed to a server which has not been pushed yet, which delivers an old
+version of the resource. They now have a poisoned cache: old resource data for
+a new resource URI.
+
+You can do a lot of clever things to solve this, but the solution we chose at
+Facebook was to serve resources out of a database instead of off disk. Before a
+push begins, new resources are written to the database so that every server is
+able to satisfy both old and new resource requests.
+
+This also made it relatively easy to do processing steps (like stripping
+comments and whitespace) in one place, and just insert a minified/processed
+version of CSS and JS into the database.
+
+= Reference Implementation: Celerity =
+
+Some of the ideas discussed here are implemented in Phabricator's //Celerity//
+system, which is essentially a simplified version of the //Haste// system used
+by Facebook.

@@ -8,6 +8,14 @@ final class AphrontFileResponse extends AphrontResponse {
   private $content;
   private $mimeType;
   private $download;
+  private $rangeMin;
+  private $rangeMax;
+  private $allowOrigins = array();
+
+  public function addAllowOrigin($origin) {
+    $this->allowOrigins[] = $origin;
+    return $this;
+  }
 
   public function setDownload($download) {
     $download = preg_replace('/[^A-Za-z0-9_.-]/', '_', $download);
@@ -37,13 +45,32 @@ final class AphrontFileResponse extends AphrontResponse {
   }
 
   public function buildResponseString() {
-    return $this->content;
+    if ($this->rangeMin || $this->rangeMax) {
+      $length = ($this->rangeMax - $this->rangeMin) + 1;
+      return substr($this->content, $this->rangeMin, $length);
+    } else {
+      return $this->content;
+    }
+  }
+
+  public function setRange($min, $max) {
+    $this->rangeMin = $min;
+    $this->rangeMax = $max;
+    return $this;
   }
 
   public function getHeaders() {
     $headers = array(
       array('Content-Type', $this->getMimeType()),
+      array('Content-Length', strlen($this->buildResponseString())),
     );
+
+    if ($this->rangeMin || $this->rangeMax) {
+      $len = strlen($this->content);
+      $min = $this->rangeMin;
+      $max = $this->rangeMax;
+      $headers[] = array('Content-Range', "bytes {$min}-{$max}/{$len}");
+    }
 
     if (strlen($this->getDownload())) {
       $headers[] = array('X-Download-Options', 'noopen');
@@ -53,6 +80,12 @@ final class AphrontFileResponse extends AphrontResponse {
         'Content-Disposition',
         'attachment; filename='.$filename,
       );
+    }
+
+    if ($this->allowOrigins) {
+      $headers[] = array(
+        'Access-Control-Allow-Origin',
+        implode(',', $this->allowOrigins));
     }
 
     $headers = array_merge(parent::getHeaders(), $headers);

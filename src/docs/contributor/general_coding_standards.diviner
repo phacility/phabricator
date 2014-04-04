@@ -1,0 +1,147 @@
+@title General Coding Standards
+@group standards
+
+This document is a general coding standard for contributing to Phabricator,
+Arcanist, libphutil and Diviner.
+
+= Overview =
+
+This document contains practices and guidelines which apply across languages.
+Contributors should follow these guidelines. These guidelines are not
+hard-and-fast but should be followed unless there is a compelling reason to
+deviate from them.
+
+= Code Complexity =
+
+  - Prefer to write simple code which is easy to understand. The simplest code
+    is not necessarily the smallest, and some changes which make code larger
+    (such as decomposing complex expressions and choosing more descriptive
+    names) may also make it simpler. Be willing to make size tradeoffs in favor
+    of simplicity.
+  - Prefer simple methods and functions which take a small number of parameters.
+    Avoid methods and functions which are long and complex, or take an
+    innumerable host of parameters. When possible, decompose monolithic, complex
+    methods into several focused, simpler ones.
+  - Avoid putting many ideas on a single line of code.
+
+For example, avoid this kind of code:
+
+  COUNTEREXAMPLE
+  $category_map = array_combine(
+    $dates,
+    array_map(create_function('$z', 'return date("F Y", $z);'), $dates));
+
+Expressing this complex transformation more simply produces more readable code:
+
+  $category_map = array();
+  foreach ($dates as $date) {
+    $category_map[$date] = date('F Y', $date);
+  }
+
+And, obviously, don't do this sort of thing:
+
+  COUNTEREXAMPLE
+  if ($val = $some->complicatedConstruct() && !!~blarg_blarg_blarg() & $flags
+        ? HOPE_YOU_MEMORIZED == $all_the_lexical_binding_powers : <<<'Q'
+  ${hahaha}
+  Q
+  );
+
+
+= Performance =
+
+  - Prefer to write efficient code.
+  - Strongly prefer to drive optimization decisions with hard data. Avoid
+    optimizing based on intuition or rumor if you can not support it with
+    concrete measurements.
+  - Prefer to optimize code which is slow and runs often. Optimizing code which
+    is fast and runs rarely is usually a waste of time, and can even be harmful
+    if it makes that code more difficult to understand or maintain. You can
+    determine if code is fast or slow by measuring it.
+  - Reject performance discussions that aren't rooted in concrete data.
+
+In Phabricator, you can usually use the builtin XHProf profiling to quickly
+gather concrete performance data.
+
+
+= Naming Things =
+
+  - Follow language-specific conventions.
+  - Name things unambiguously.
+  - Choose descriptive names.
+  - Avoid nonstandard abbreviations (common abbreviations like ID, URI and HTTP are fine).
+  - Spell words correctly.
+  - Use correct grammar.
+
+For example, avoid these sorts of naming choices:
+
+  COUNTEREXAMPLE
+  $PIE->GET_FLAVOR();       //  Unconventional.
+  $thing->doStuff();        //  Ambiguous.
+  $list->empty();           //  Ambiguous -- is it isEmpty() or makeEmpty()?
+  $e = 3;                   //  Not descriptive.
+  $this->updtHndlr();       //  Nonstandard abbreviation.
+  $this->chackSpulls();     //  Misspelling, ungrammatical.
+
+Prefer these:
+
+  $pie->getFlavor();        //  Conventional.
+  $pie->bake();             //  Unambiguous.
+  $list->isEmpty();         //  Unambiguous.
+  $list->makeEmpty();       //  Unambiguous.
+  $edge_count = 3;          //  Descriptive.
+  $this->updateHandler();   //  No nonstandard abbreviations.
+  $this->getID();           //  Standard abbreviation.
+  $this->checkSpelling();   //  Correct spelling and grammar.
+
+
+= Error Handling =
+
+  - Strongly prefer to detect errors.
+  - Strongly prefer to fail fast and loudly. The maximum cost of script
+    termination is known, bounded, and fairly small. The maximum cost of
+    continuing script execution when errors have occurred is unknown and
+    unbounded. This also makes APIs much easier to use and problems far easier
+    to debug.
+
+When you ignore errors, defer error handling, or degrade the severity of errors
+by treating them as warnings and then dismissing them, you risk dangerous
+behavior which may be difficult to troubleshoot:
+
+  COUNTEREXAMPLE
+  exec('echo '.$data.' > file.bak');                //  Bad!
+  do_something_dangerous();
+
+  exec('echo '.$data.' > file.bak', $out, $err);    //  Also bad!
+  if ($err) {
+    debug_rlog("Unable to copy file!");
+  }
+  do_something_dangerous();
+
+Instead, fail loudly:
+
+  exec('echo '.$data.' > file.bak', $out, $err);    //  Better
+  if ($err) {
+    throw new Exception("Unable to copy file!");
+  }
+  do_something_dangerous();
+
+But the best approach is to use or write an API which simplifies condition
+handling and makes it easier to get right than wrong:
+
+  execx('echo %s > file.bak', $data);               //  Good
+  do_something_dangerous();
+
+  Filesystem::writeFile('file.bak', $data);         //  Best
+  do_something_dangerous();
+
+See @{article@libphutil:Command Execution} for details on the APIs used in this
+example.
+
+= Documentation, Comments and Formatting =
+
+  - Prefer to remove code by deleting it over removing it by commenting it out.
+    It shall live forever in source control, and can be retrieved therefrom if
+    it is ever again called upon.
+  - In source code, use only ASCII printable characters plus space and linefeed.
+    Do not use UTF-8 or other multibyte encodings.

@@ -131,4 +131,21 @@ final class AphrontRequestTestCase extends PhabricatorTestCase {
     }
   }
 
+  public function testGetHTTPHeader() {
+    $server_data = array(
+      'HTTP_ACCEPT_ENCODING' => 'duck/quack',
+      'CONTENT_TYPE' => 'cow/moo',
+    );
+
+    $this->assertEqual(
+      'duck/quack',
+      AphrontRequest::getHTTPHeader('AcCePt-EncOdING', null, $server_data));
+    $this->assertEqual(
+      'cow/moo',
+      AphrontRequest::getHTTPHeader('cONTent-TyPE', null, $server_data));
+    $this->assertEqual(
+      null,
+      AphrontRequest::getHTTPHeader('Pie-Flavor', null, $server_data));
+  }
+
 }

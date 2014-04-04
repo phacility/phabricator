@@ -7,6 +7,10 @@ final class DiffusionCommitQuery
   private $identifiers;
   private $phids;
   private $defaultRepository;
+  private $identifierMap;
+  private $repositoryIDs;
+
+  private $needCommitData;
 
   /**
    * Load commits by partial or full identifiers, e.g. "rXab82393", "rX1234",
@@ -33,6 +37,11 @@ final class DiffusionCommitQuery
     return $this;
   }
 
+  public function withRepositoryIDs(array $repository_ids) {
+    $this->repositoryIDs = $repository_ids;
+    return $this;
+  }
+
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -41,6 +50,36 @@ final class DiffusionCommitQuery
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
     return $this;
+  }
+
+
+  /**
+   * Look up commits in a specific repository. This is a shorthand for calling
+   * @{method:withDefaultRepository} and @{method:withRepositoryIDs}.
+   */
+  public function withRepository(PhabricatorRepository $repository) {
+    $this->withDefaultRepository($repository);
+    $this->withRepositoryIDs(array($repository->getID()));
+    return $this;
+  }
+
+  public function needCommitData($need) {
+    $this->needCommitData = $need;
+    return $this;
+  }
+
+  public function getIdentifierMap() {
+    if ($this->identifierMap === null) {
+      throw new Exception(
+        "You must execute() the query before accessing the identifier map.");
+    }
+    return $this->identifierMap;
+  }
+
+  protected function willExecute() {
+    if ($this->identifierMap === null) {
+      $this->identifierMap = array();
+    }
   }
 
   protected function loadPage() {
@@ -58,11 +97,7 @@ final class DiffusionCommitQuery
     return $table->loadAllFromArray($data);
   }
 
-  public function willFilterPage(array $commits) {
-    if (!$commits) {
-      return array();
-    }
-
+  protected function willFilterPage(array $commits) {
     $repository_ids = mpull($commits, 'getRepositoryID', 'getRepositoryID');
     $repos = id(new PhabricatorRepositoryQuery())
       ->setViewer($this->getViewer())
@@ -75,6 +110,63 @@ final class DiffusionCommitQuery
         $commit->attachRepository($repo);
       } else {
         unset($commits[$key]);
+      }
+    }
+
+    if ($this->identifiers !== null) {
+      $ids = array_fuse($this->identifiers);
+      $min_qualified = PhabricatorRepository::MINIMUM_QUALIFIED_HASH;
+
+      $result = array();
+      foreach ($commits as $commit) {
+        $prefix = 'r'.$commit->getRepository()->getCallsign();
+        $suffix = $commit->getCommitIdentifier();
+
+        if ($commit->getRepository()->isSVN()) {
+          if (isset($ids[$prefix.$suffix])) {
+            $result[$prefix.$suffix][] = $commit;
+          }
+        } else {
+          // This awkward contruction is so we can link the commits up in O(N)
+          // time instead of O(N^2).
+          for ($ii = $min_qualified; $ii <= strlen($suffix); $ii++) {
+            $part = substr($suffix, 0, $ii);
+            if (isset($ids[$prefix.$part])) {
+              $result[$prefix.$part][] = $commit;
+            }
+            if (isset($ids[$part])) {
+              $result[$part][] = $commit;
+            }
+          }
+        }
+      }
+
+      foreach ($result as $identifier => $matching_commits) {
+        if (count($matching_commits) == 1) {
+          $result[$identifier] = head($matching_commits);
+        } else {
+          // This reference is ambiguous (it matches more than one commit) so
+          // don't link it
+          unset($result[$identifier]);
+        }
+      }
+
+      $this->identifierMap += $result;
+    }
+
+    return $commits;
+  }
+
+  protected function didFilterPage(array $commits) {
+
+    if ($this->needCommitData) {
+      $data = id(new PhabricatorRepositoryCommitData())->loadAllWhere(
+        'commitID in (%Ld)',
+        mpull($commits, 'getID'));
+      $data = mpull($data, null, 'getCommitID');
+      foreach ($commits as $commit) {
+        $commit_data = idx($data, $commit->getID());
+        $commit->attachCommitData($commit_data);
       }
     }
 
@@ -144,9 +236,12 @@ final class DiffusionCommitQuery
             }
             $sql[] = qsprintf(
               $conn_r,
-              '(repositoryID = %d AND commitIdentifier = %d)',
+              '(repositoryID = %d AND commitIdentifier = %s)',
               $repo->getID(),
-              $ref['identifier']);
+              // NOTE: Because the 'commitIdentifier' column is a string, MySQL
+              // ignores the index if we hand it an integer. Hand it a string.
+              // See T3377.
+              (int)$ref['identifier']);
           } else {
             if (strlen($ref['identifier']) < $min_qualified) {
               continue;
@@ -164,7 +259,8 @@ final class DiffusionCommitQuery
         // If we discarded all possible identifiers (e.g., they all referenced
         // bogus repositories or were all too short), make sure the query finds
         // nothing.
-        throw new PhabricatorEmptyQueryException('No commit identifiers.');
+        throw new PhabricatorEmptyQueryException(
+          pht('No commit identifiers.'));
       }
 
       $where[] = '('.implode(' OR ', $sql).')';
@@ -184,7 +280,30 @@ final class DiffusionCommitQuery
         $this->phids);
     }
 
+    if ($this->repositoryIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'repositoryID IN (%Ld)',
+        $this->repositoryIDs);
+    }
+
+    $where[] = $this->buildPagingClause($conn_r);
+
     return $this->formatWhereClause($where);
+  }
+
+  public function didFilterResults(array $filtered) {
+    if ($this->identifierMap) {
+      foreach ($this->identifierMap as $name => $commit) {
+        if (isset($filtered[$commit->getPHID()])) {
+          unset($this->identifierMap[$name]);
+        }
+      }
+    }
+  }
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationDiffusion';
   }
 
 }

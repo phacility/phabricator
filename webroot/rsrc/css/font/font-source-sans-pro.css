@@ -1,0 +1,23 @@
+/**
+ * @provides font-source-sans-pro
+ */
+
+@font-face {
+  font-family: 'Source Sans Pro';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Source Sans Pro'),
+       local('SourceSansPro-Regular'),
+       url(/rsrc/externals/font/SourceSansPro.woff)
+       format('woff');
+}
+
+@font-face {
+  font-family: 'Source Sans Pro';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Source Sans Pro Bold'),
+       local('SourceSansPro-Bold'),
+       url(/rsrc/externals/font/SourceSansProBold.woff)
+       format('woff');
+}

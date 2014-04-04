@@ -73,13 +73,49 @@ final class PhabricatorDiffusionConfigOptions
           'URL of external bug tracker used by Diffusion. %s will be '.
             'substituted by the bug ID.',
           '%BUGID%')),
-      $this->newOption('bugtraq.logregex', 'list<string>', array())
-        ->addExample(array('\B#([1-9]\d*)\b'), pht('Issue #123'))
-        ->addExample(array('(?<!#)\b(T[1-9]\d*)\b'), pht('Task T123'))
+      $this->newOption('bugtraq.logregex', 'list<regex>', array())
+        ->addExample(array('/\B#([1-9]\d*)\b/'), pht('Issue #123'))
+        ->addExample(
+          array('/[Ii]ssues?:?(\s*,?\s*#\d+)+/', '/(\d+)/'),
+          pht('Issue #123, #456'))
+        ->addExample(array('/(?<!#)\b(T[1-9]\d*)\b/'), pht('Task T123'))
+        ->addExample('/[A-Z]{2,}-\d+/', pht('JIRA-1234'))
         ->setDescription(pht(
           'Regular expression to link external bug tracker. See '.
             'http://tortoisesvn.net/docs/release/TortoiseSVN_en/'.
             'tsvn-dug-bugtracker.html for further explanation.')),
+      $this->newOption('diffusion.allow-http-auth', 'bool', false)
+        ->setBoolOptions(
+          array(
+            pht('Allow HTTP Basic Auth'),
+            pht('Disable HTTP Basic Auth'),
+          ))
+        ->setSummary(pht('Enable HTTP Basic Auth for repositories.'))
+        ->setDescription(
+          pht(
+            "Phabricator can serve repositories over HTTP, using HTTP basic ".
+            "auth.\n\n".
+            "Because HTTP basic auth is less secure than SSH auth, it is ".
+            "disabled by default. You can enable it here if you'd like to use ".
+            "it anyway. There's nothing fundamentally insecure about it as ".
+            "long as Phabricator uses HTTPS, but it presents a much lower ".
+            "barrier to attackers than SSH does.\n\n".
+            "Consider using SSH for authenticated access to repositories ".
+            "instead of HTTP.")),
+      $this->newOption('diffusion.ssh-user', 'string', null)
+        ->setSummary(pht('Login username for SSH connections to repositories.'))
+        ->setDescription(
+          pht(
+            'When constructing clone URIs to show to users, Diffusion will '.
+            'fill in this login username. If you have configured a VCS user '.
+            'like `git`, you should provide it here.')),
+      $this->newOption('diffusion.ssh-port', 'int', null)
+        ->setSummary(pht('Port for SSH connections to repositories.'))
+        ->setDescription(
+          pht(
+            'When constructing clone URIs to show to users, Diffusion by '.
+            'default will not display a port assuming the default for your '.
+            'VCS. Explicitly declare when running on a non-standard port.')),
     );
   }
 

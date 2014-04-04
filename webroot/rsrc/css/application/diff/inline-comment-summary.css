@@ -6,7 +6,7 @@
   margin: .75em 0 .5em;
   font-size: 11px;
   border-bottom: 1px solid #dddddd;
-  color: #666666;
+  color: {$greytext};
 }
 
 .phabricator-inline-summary-table {
@@ -15,7 +15,7 @@
 
 .phabricator-inline-summary-table th {
   padding: 6px 0px;
-  color: #444444;
+  color: {$darkgreytext};
 }
 
 .phabricator-inline-summary-table td  {
@@ -29,7 +29,7 @@
 }
 
 .phabricator-inline-summary-table td.inline-which-diff {
-  color: #666666;
+  color: {$greytext};
   width: 120px;
 }
 

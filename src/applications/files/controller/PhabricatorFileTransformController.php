@@ -7,19 +7,26 @@ final class PhabricatorFileTransformController
   private $phid;
   private $key;
 
+  public function shouldRequireLogin() {
+    return false;
+  }
+
   public function willProcessRequest(array $data) {
     $this->transform = $data['transform'];
     $this->phid      = $data['phid'];
     $this->key       = $data['key'];
   }
 
-  public function shouldRequireLogin() {
-    return false;
-  }
-
   public function processRequest() {
+    $viewer = $this->getRequest()->getUser();
 
-    $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $this->phid);
+    // NOTE: This is a public/CDN endpoint, and permission to see files is
+    // controlled by knowing the secret key, not by authentication.
+
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs(array($this->phid))
+      ->executeOne();
     if (!$file) {
       return new Aphront404Response();
     }
@@ -49,6 +56,9 @@ final class PhabricatorFileTransformController
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 
     switch ($this->transform) {
+      case 'thumb-profile':
+        $xformed_file = $this->executeThumbTransform($file, 50, 50);
+        break;
       case 'thumb-280x210':
         $xformed_file = $this->executeThumbTransform($file, 280, 210);
         break;
@@ -122,20 +132,17 @@ final class PhabricatorFileTransformController
   private function buildTransformedFileResponse(
     PhabricatorTransformedFile $xform) {
 
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'phid = %s',
-      $xform->getTransformedPHID());
-    if ($file) {
-      $uri = $file->getBestURI();
-    } else {
-      $bad_phid = $xform->getTransformedPHID();
-      throw new Exception(
-        "Unable to load file with phid {$bad_phid}."
-      );
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs(array($xform->getTransformedPHID()))
+      ->executeOne();
+    if (!$file) {
+      return new Aphront404Response();
     }
 
     // TODO: We could just delegate to the file view controller instead,
     // which would save the client a roundtrip, but is slightly more complex.
+    $uri = $file->getBestURI();
     return id(new AphrontRedirectResponse())->setURI($uri);
   }
 

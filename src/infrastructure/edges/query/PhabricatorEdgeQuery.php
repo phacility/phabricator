@@ -26,6 +26,10 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
   private $edgeTypes;
   private $resultSet;
 
+  const ORDER_OLDEST_FIRST = 'order:oldest';
+  const ORDER_NEWEST_FIRST = 'order:newest';
+  private $order = self::ORDER_NEWEST_FIRST;
+
   private $needEdgeData;
 
 
@@ -70,6 +74,20 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
    */
   public function withEdgeTypes(array $types) {
     $this->edgeTypes = $types;
+    return $this;
+  }
+
+
+  /**
+   * Configure the order edge results are returned in.
+   *
+   * @param const Order constant.
+   * @return this
+   *
+   * @task config
+   */
+  public function setOrder($order) {
+    $this->order = $order;
     return $this;
   }
 
@@ -150,8 +168,7 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
     $result = array();
 
     // When a query specifies types, make sure we return data for all queried
-    // types. This is mostly to make sure PhabricatorLiskDAO->attachEdges()
-    // gets some data, so that getEdges() doesn't throw later.
+    // types.
     if ($this->edgeTypes) {
       foreach ($this->sourcePHIDs as $phid) {
         foreach ($this->edgeTypes as $type) {
@@ -189,7 +206,7 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
           }
         }
         foreach ($edges as $key => $edge) {
-          $edges[$key]['data'] = idx($data_map, $edge['dataID']);
+          $edges[$key]['data'] = idx($data_map, $edge['dataID'], array());
         }
       }
 
@@ -220,9 +237,10 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
    *
    *   // Gets all of the destinations.
    *   $all_phids = $query->getDestinationPHIDs();
-   *   $handles = id(new PhabricatorObjectHandleData($all_phids))
+   *   $handles = id(new PhabricatorHandleQuery())
    *     ->setViewer($viewer)
-   *     ->loadHandles();
+   *     ->withPHIDs($all_phids)
+   *     ->execute();
    *
    *   foreach ($objects as $object) {
    *     // Get all of the destinations for the given object.
@@ -303,7 +321,11 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
    * @task internal
    */
   private function buildOrderClause($conn_r) {
-    return 'ORDER BY edge.dateCreated DESC, edge.seq ASC';
+    if ($this->order == self::ORDER_NEWEST_FIRST) {
+      return 'ORDER BY edge.dateCreated DESC, edge.seq DESC';
+    } else {
+      return 'ORDER BY edge.dateCreated ASC, edge.seq ASC';
+    }
   }
 
 }

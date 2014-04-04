@@ -11,6 +11,14 @@ abstract class AphrontFormControl extends AphrontView {
   private $id;
   private $controlID;
   private $controlStyle;
+  private $formPage;
+  private $required;
+  private $hidden;
+
+  public function setHidden($hidden) {
+    $this->hidden = $hidden;
+    return $this;
+  }
 
   public function setID($id) {
     $this->id = $id;
@@ -84,6 +92,60 @@ abstract class AphrontFormControl extends AphrontView {
     return $this->value;
   }
 
+  public function isValid() {
+    if ($this->error && $this->error !== true) {
+      return false;
+    }
+
+    if ($this->isRequired() && $this->isEmpty()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function isRequired() {
+    return $this->required;
+  }
+
+  public function isEmpty() {
+    return !strlen($this->getValue());
+  }
+
+  public function getSerializedValue() {
+    return $this->getValue();
+  }
+
+  public function readSerializedValue($value) {
+    $this->setValue($value);
+    return $this;
+  }
+
+  public function readValueFromRequest(AphrontRequest $request) {
+    $this->setValue($request->getStr($this->getName()));
+    return $this;
+  }
+
+  public function readValueFromDictionary(array $dictionary) {
+    $this->setValue(idx($dictionary, $this->getName()));
+    return $this;
+  }
+
+  public function setFormPage(PHUIFormPageView $page) {
+    if ($this->formPage) {
+      throw new Exception("This control is already a member of a page!");
+    }
+    $this->formPage = $page;
+    return $this;
+  }
+
+  public function getFormPage() {
+    if ($this->formPage === null) {
+      throw new Exception("This control does not have a page!");
+    }
+    return $this->formPage;
+  }
+
   public function setDisabled($disabled) {
     $this->disabled = $disabled;
     return $this;
@@ -148,12 +210,21 @@ abstract class AphrontFormControl extends AphrontView {
       $caption = null;
     }
 
+    $classes = array();
+    $classes[] = 'aphront-form-control';
+    $classes[] = $custom_class;
+
+    $style = $this->controlStyle;
+    if ($this->hidden) {
+      $style = 'display: none; '.$style;
+    }
+
     return phutil_tag(
       'div',
       array(
-        'class' => "aphront-form-control {$custom_class}",
+        'class' => implode(' ', $classes),
         'id' => $this->controlID,
-        'style' => $this->controlStyle,
+        'style' => $style,
       ),
       array(
         $label,

@@ -1,0 +1,60 @@
+@title Phabricator Project History
+@group lore
+
+A riveting tale of adventure. In this document, I refer to worldly and
+sophisticated engineer Evan Priestley as "I", which is only natural as I am he.
+
+This document is mostly just paragraph after paragraph of self-aggrandizement.
+
+= In The Beginning =
+
+I wrote the original version of Differential in one night at a Facebook
+Hackathon in April or May 2007, along with Luke Shepard. I joined the company in
+April and code review was already an established and mostly-mandatory part of
+the culture, but it happened over email and was inefficient and hard to keep
+track of. I remember feeling like I was spending a lot of time waiting for code
+review to happen, which was a major motivator for building the tool.
+
+The original name of the tool was "Diffcamp". Some time earlier there had been
+an attempt to create a project management tool that was a sort of hybrid between
+Trac and Basecamp called "Traccamp". Since we were writing the code review tool
+at the height of the brief popularity Traccamp enjoyed, we integrated and called
+the new tool Diffcamp even though it had no relation to Basecamp. Traccamp fell
+by the wayside shortly thereafter and was eventually removed.
+
+However, Diffcamp didn't share its fate. We spent some more time working on it
+and got good enough to win hearts and minds over emailing diffs around and was
+soon the de facto method of code review at Facebook.
+
+= The Long Bloat =
+
+For the next two and a half years, Diffcamp grew mostly organically and gained a
+number of features like inline commenting, CLI support and git support (Facebook
+was 100% SVN in early 2007 but 90%+ of Engineers worked primarily in git with
+SVN bridging by 2010). As these patches were contributed pretty much randomly,
+it also gained a lot of performance problems, usability issues, and bugs.
+
+Through 2007 and 2008 I worked mostly on frontend and support infrastructure;
+among other things, I wrote a static resource management system called Haste. In
+2009 I worked on the Facebook Lite site, where I built the Javelin Javascript
+library and an MVC-flavored framework called Alite.
+
+But by early 2010, Diffcamp was in pretty bad shape. Two years of having random
+features grafted onto it without real direction had left it slow and difficult
+to use. Internal feedback on the tool was pretty negative, with a lot of
+complaints about performance and stability. The internal XTools team had made
+inroads at fixing these problems in late 2009, but they were stretched thin and
+the tool had become a sprawling landscape of architectural and implementation
+problems.
+
+= Differential =
+
+I joined the new Dev Tools team around February 2010 and took over Diffcamp. I
+renamed it to Differential, moved it to a new Alite-based infrastructure with
+Javelin, and started making it somewhat less terrible. I eventually wrote
+Diffusion and build Herald to replace a very difficult-to-use predecessor. These
+tools were less negatively received than the older versions. By December 2010 I
+started open sourcing them; Haste became //Celerity// and Alite became
+//Aphront//. I wrote Maniphest to track open issues with the project in January
+or February and we open sourced Phabricator in late April, shortly after I left
+Facebook.

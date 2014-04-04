@@ -21,7 +21,12 @@ final class PhabricatorSettingsPanelHomePreferences
 
     require_celerity_resource('phabricator-settings-css');
 
-    $apps = PhabricatorApplication::getAllInstalledApplications();
+    $apps = id(new PhabricatorApplicationQuery())
+      ->setViewer($user)
+      ->withInstalled(true)
+      ->withUnlisted(false)
+      ->execute();
+
     $pref_tiles = PhabricatorUserPreferences::PREFERENCE_APP_TILES;
     $tiles = $preferences->getPreference($pref_tiles, array());
 
@@ -48,40 +53,29 @@ final class PhabricatorSettingsPanelHomePreferences
         ->setURI($this->getPanelURI('?saved=true'));
     }
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader(pht('Home Page Preferences'));
-
     $form = id(new AphrontFormView())
-      ->setFlexible(true)
       ->setUser($user);
 
     $group_map = PhabricatorApplication::getApplicationGroups();
 
     $output = array();
 
-    $applications = PhabricatorApplication::getAllInstalledApplications();
+    $app_groups = mgroup($apps, 'getApplicationGroup');
+    $app_groups = array_select_keys($app_groups, array_keys($group_map));
 
-    $applications = mgroup($applications, 'getApplicationGroup');
-
-    $applications = array_select_keys(
-    $applications,
-    array_keys($group_map));
-
-    foreach ($applications as $group => $apps) {
+    foreach ($app_groups as $group => $apps) {
       $group_name = $group_map[$group];
       $rows = array();
 
       foreach ($apps as $app) {
         if (!$app->shouldAppearInLaunchView()) {
-        continue;
+          continue;
         }
 
         $default = $app->getDefaultTileDisplay($user);
         if ($default == PhabricatorApplication::TILE_INVISIBLE) {
           continue;
         }
-
-
 
         $default_name = PhabricatorApplication::getTileDisplayName($default);
 
@@ -140,9 +134,10 @@ final class PhabricatorSettingsPanelHomePreferences
             'checked' => $full_radio_button_status,
           ));
 
+        $desc = $app->getShortDescription();
         $app_column = hsprintf(
-                        "<strong>%s</strong><br /><em> Default: %s</em>"
-                        , $app->getName(), $default_name);
+                        "<strong>%s</strong><br/ >%s, <em>Default: %s</em>",
+                        $app->getName(), $desc, $default_name);
 
         $rows[] = array(
           $app_column,
@@ -179,22 +174,23 @@ final class PhabricatorSettingsPanelHomePreferences
           ));
 
 
-      $panel = id(new AphrontPanelView())
-                 ->setHeader($group_name)
-                 ->addClass('phabricator-settings-panelview')
-                 ->appendChild($table)
-                 ->setNoBackground();
-
+      $panel = id(new PHUIObjectBoxView())
+        ->setHeaderText($group_name)
+        ->appendChild($table);
 
       $output[] = $panel;
-
     }
 
-    $form
-      ->appendChild($output)
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue(pht('Save Preferences')));
+    $save_button =
+      id(new AphrontFormSubmitControl())
+        ->setValue(pht('Save Preferences'));
+
+    $output[] = id(new PHUIBoxView())
+      ->addPadding(PHUI::PADDING_LARGE)
+      ->addClass('phabricator-settings-homepagetable-button')
+      ->appendChild($save_button);
+
+    $form->appendChild($output);
 
     $error_view = null;
     if ($request->getStr('saved') === 'true') {
@@ -204,11 +200,13 @@ final class PhabricatorSettingsPanelHomePreferences
         ->setErrors(array(pht('Your preferences have been saved.')));
     }
 
-    return array(
-      $header,
-      $error_view,
-      $form,
-    );
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Home Page Preferences'));
+
+    $form = id(new PHUIBoxView())
+      ->addClass('phabricator-settings-homepagetable-wrap')
+      ->appendChild($form);
+
+    return array($header, $error_view, $form);
   }
 }
-

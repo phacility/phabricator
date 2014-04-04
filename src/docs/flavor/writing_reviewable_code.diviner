@@ -1,0 +1,163 @@
+@title Writing Reviewable Code
+@group review
+
+Project recommendations on how to structure changes.
+
+This document is purely advisory. Phabricator works with a variety of revision
+control strategies, and diverging from the recommendations in this document
+will not impact your ability to use it for code review and source management.
+
+= Overview =
+
+This document describes a strategy for structuring changes used successfully at
+Facebook and in Phabricator. In essence:
+
+  - Each commit should be as small as possible, but no smaller.
+  - The smallest a commit can be is a single cohesive idea: don't make commits
+    so small that they are meaningless on their own.
+  - There should be a one-to-one mapping between ideas and commits:
+    each commit should build one idea, and each idea should be implemented by
+    one commit.
+  - Turn large commits into small commits by dividing large problems into
+    smaller problems and solving the small problems one at a time.
+  - Write sensible commit messages.
+
+= Many Small Commits =
+
+Small, simple commits are generally better than large, complex commits. They are
+easier to understand, easier to test, and easier to review. The complexity of
+understanding, testing and reviewing a change often increases faster than its
+size: ten 200-line changes each doing one thing are often far easier to
+understand than one 2,000 line change doing ten things. Splitting a change which
+does many things into smaller changes which each do only one thing can decrease
+the total complexity associated with accomplishing the same goal.
+
+Each commit should do one thing. Generally, this means that you should separate
+distinct changes into different commits when developing. For example, if you're
+developing a feature and run into a preexisting bug, stash or checkpoint your
+change, check out a clean HEAD/tip, fix the bug in one change, and then
+merge/rebase your new feature on top of your bugfix so that you have two
+changes, each with one idea ("add feature x", "fix a bug in y"), not one change
+with two ideas ("add feature x and fix a bug in y").
+
+(In Git, you can do this easily with local feature branches and commands like
+`git rebase`, `git rebase -i`, and `git stash`, or with merges. In Mercurial,
+you can use bookmarks or the queues extension. In SVN, there are few builtin
+tools, but you can use multiple working copies or treat Differential like a
+stash you access with `arc patch`.)
+
+Even changes like fixing style problems should ideally be separated: they're
+accomplishing a different goal. And it is far easier to review one 300-line
+change which "converts tabs to spaces" plus one 30-line change which "implements
+feature z" than one 330-line change which "implements feature z and also
+converts a bunch of tabs to spaces".
+
+Similarly, break related but complex changes into smaller, simpler components.
+Here's a ridiculous analogy: if you're adding a new house, don't make one
+5,000-line change which adds the whole house in one fell sweep. Split it apart
+into smaller steps which are each easy to understand: start with the foundation,
+then build the frame, etc. If you decided to dig the foundation with a shovel or
+build the frame out of cardboard, it's both easier to miss and harder to correct
+if the decisions are buried in 5,000 lines of interior design and landscaping.
+Do it one piece at a time, providing enough context that the larger problem
+can be understood but accomplishing no more with each step than you need to in
+order for it to stand on its own.
+
+The minimum size of a change should be a complete implementation of the simplest
+subproblem which works on its own and expresses an entire idea, not just part
+of an idea. You could mechanically split a 1,000-line change into ten 100-line
+changes by choosing lines at random, but none of the individual changes would
+make any sense and you would increase the collective complexity. The real goal
+is for each change to have minimal complexity, line size is just a proxy that is
+often well-correlated with complexity.
+
+We generally follow these practices in Phabricator. The median change size for
+Phabricator is 35 lines.
+
+See @{article:Differential User Guide: Large Changes} for information about
+reviewing big checkins.
+
+= Write Sensible Commit Messages =
+
+There are lots of resources for this on the internet. All of them say pretty much
+the same thing; this one does too.
+
+The single most important thing is: **commit messages should explain //why// you
+are making the change**.
+
+Differential attempts to encourage the construction of sensible commit messages,
+but can only enforce structure, not content. Structurally, commit messages
+should probably:
+
+  - Have a title, briefly describing the change in one line.
+  - Have a summary, describing the change in more detail.
+  - Maybe have some other fields.
+
+The content is far more important than the structure. In particular, the summary
+should explain //why// you're making the change and //why// you're choosing the
+implementation you're choosing. The //what// of the change is generally
+well-explained by the change itself. For example, this is obviously an awful
+commit message:
+
+  COUNTEREXAMPLE
+  fix a bug
+
+But this one is almost as bad:
+
+  COUNTEREXAMPLE
+  Allow dots in usernames
+
+  Change the regexps so usernames can have dots in them.
+
+This is better than nothing but just summarizes information which can be
+inferred from the text of the diff. Instead, you should provide context and
+explain why you're making the change you're making, and why it's the right one:
+
+  lang=txt
+  Allow dots in usernames to support Google and LDAP auth
+
+  To prevent nonsense, usernames are currently restricted to A-Z0-9. Now that
+  we have Google and LDAP auth, a couple of installs want to allow "." too
+  since they have schemes like "abraham.lincoln@mycompany.com" (see Tnnn). There
+  are no technical reasons not to do this, so I opened up the regexps a bit.
+
+  We could mostly open this up more but I figured I'd wait until someone asks
+  before allowing "ke$ha", etc., because I personally find such names
+  distasteful and offensive.
+
+This information can not be extracted from the change itself, and is much more
+useful for the reviewer and for anyone trying to understand the change after the
+fact.
+
+An easy way to explain //why// is to reference other objects
+(bugs/issues/revisions) which motivate the change.
+
+Differential also includes a "Test Plan" field which is required by default.
+There is a detailed description of this field in @{article:Differential User
+Guide: Test Plans}. You can make it optional or disable it in the configuration,
+but consider adopting it. Having this information can be particularly helpful
+for reviewers.
+
+Some things that people sometimes feel strongly about but which are probably not
+really all that important in commit messages include:
+
+  - If/where text is wrapped.
+  - Maximum length of the title.
+  - Whether there should be a period or not in the title.
+  - Use of voice/tense, e.g. "fix"/"add" vs "fixes"/"adds".
+  - Other sorts of pedantry not related to getting the context and
+    reasons //why// a change is happening into the commit message.
+  - Although maybe the spelling and grammar shouldn't be egregiously bad?
+
+Phabricator does not have guidelines for this stuff. You can obviously set
+guidelines at your organization if you prefer, but getting the //why// into the
+message is the most important part.
+
+= Next Steps =
+
+Continue by:
+
+  - reading recommendations on structuring revision control with
+    @{article:Recommendations on Revision Control}; or
+  - reading recommendations on structuring branches with
+    @{article:Recommendations on Branching}.

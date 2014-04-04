@@ -13,10 +13,15 @@
   border-radius: 3px;
 }
 
+.phabricator-notification .phabricator-notification-date {
+  margin-left: 8px;
+  color: {$lightgreytext};
+}
+
 .phabricator-notification-menu-loading {
   text-align: center;
   padding: 10px 0;
-  color: #888888;
+  color: {$lightgreytext};
 }
 
 .device-desktop .phabricator-notification-menu,
@@ -38,11 +43,14 @@
 
 .phabricator-notification {
   padding: 6px;
+}
+
+.phabricator-notification-menu .phabricator-notification {
   cursor: pointer;
 }
 
-.device-desktop .phabricator-notification:hover {
-  background: #f4f6f9;
+.device-desktop .phabricator-notification-menu .phabricator-notification:hover {
+  background: #e6ebf5;
 }
 
 .phabricator-notification + .phabricator-notification {
@@ -50,16 +58,13 @@
 }
 
 .no-notifications {
-  color: #999999;
-}
-
-.phabricator-notification-list {
-  font-size: 11px;
+  color: {$lightgreytext};
 }
 
 .phabricator-notification-list .phabricator-notification-unread,
 .phabricator-notification-menu .phabricator-notification-unread {
-  background: #aacfef;
+  background: #eceff5;
+  border-color: #e3e8f0;
 }
 
 .phabricator-notification-header {

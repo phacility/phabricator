@@ -2,10 +2,14 @@
 
 final class DiffusionTagListController extends DiffusionController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function processRequest() {
     $drequest = $this->getDiffusionRequest();
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
     $repository = $drequest->getRepository();
 
@@ -18,7 +22,7 @@ final class DiffusionTagListController extends DiffusionController {
       'offset' => $pager->getOffset());
     if ($drequest->getRawCommit()) {
       $is_commit = true;
-      $params['commit'] = $request->getCommit();
+      $params['commit'] = $drequest->getRawCommit();
     } else {
       $is_commit = false;
     }
@@ -38,25 +42,22 @@ final class DiffusionTagListController extends DiffusionController {
 
     $content = null;
     if (!$tags) {
-      $content = new AphrontErrorView();
-      $content->setTitle(pht('No Tags'));
-      if ($is_commit) {
-        $content->appendChild(pht('This commit has no tags.'));
-      } else {
-        $content->appendChild(pht('This repository has no tags.'));
-      }
-      $content->setSeverity(AphrontErrorView::SEVERITY_NODATA);
+      $content = $this->renderStatusMessage(
+        pht('No Tags'),
+        $is_commit
+          ? pht('This commit has no tags.')
+          : pht('This repository has no tags.'));
     } else {
-      $commits = id(new PhabricatorAuditCommitQuery())
-        ->withIdentifiers(
-          $drequest->getRepository()->getID(),
-          mpull($tags, 'getCommitIdentifier'))
+      $commits = id(new DiffusionCommitQuery())
+        ->setViewer($viewer)
+        ->withRepository($repository)
+        ->withIdentifiers(mpull($tags, 'getCommitIdentifier'))
         ->needCommitData(true)
         ->execute();
 
       $view = id(new DiffusionTagListView())
         ->setTags($tags)
-        ->setUser($user)
+        ->setUser($viewer)
         ->setCommits($commits)
         ->setDiffusionRequest($drequest);
 
@@ -65,25 +66,27 @@ final class DiffusionTagListController extends DiffusionController {
       $view->setHandles($handles);
 
       $panel = id(new AphrontPanelView())
-        ->setHeader(pht('Tags'))
+        ->setNoBackground(true)
         ->appendChild($view)
         ->appendChild($pager);
 
       $content = $panel;
     }
 
-    return $this->buildStandardPageResponse(
+    $crumbs = $this->buildCrumbs(
       array(
-        $this->buildCrumbs(
-          array(
-            'tags'    => true,
-            'commit'  => $drequest->getRawCommit(),
-          )),
+        'tags' => true,
+        'commit' => $drequest->getRawCommit(),
+      ));
+
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
         $content,
       ),
       array(
         'title' => array(
-          'Tags',
+          pht('Tags'),
           $repository->getCallsign().' Repository',
         ),
       ));

@@ -7,7 +7,15 @@ final class ConduitAPI_diffusion_getcommits_Method
   extends ConduitAPI_diffusion_Method {
 
   public function getMethodDescription() {
-    return "Retrieve Diffusion commit information.";
+    return pht('Retrieve Diffusion commit information.');
+  }
+
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_DEPRECATED;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht('Obsoleted by diffusion.querycommits.');
   }
 
   public function defineParamTypes() {
@@ -33,7 +41,7 @@ final class ConduitAPI_diffusion_getcommits_Method
     $commits = array_fill_keys($commits, array());
     foreach ($commits as $name => $info) {
       $matches = null;
-      if (!preg_match('/^r([A-Z]+)([0-9a-f]+)$/', $name, $matches)) {
+      if (!preg_match('/^r([A-Z]+)([0-9a-f]+)\z/', $name, $matches)) {
         $results[$name] = array(
           'error' => 'ERR-UNPARSEABLE',
         );
@@ -52,9 +60,10 @@ final class ConduitAPI_diffusion_getcommits_Method
 
     $callsigns = ipull($commits, 'callsign');
     $callsigns = array_unique($callsigns);
-    $repos = id(new PhabricatorRepository())->loadAllWhere(
-      'callsign IN (%Ls)',
-      $callsigns);
+    $repos = id(new PhabricatorRepositoryQuery())
+      ->setViewer($request->getUser())
+      ->withCallsigns($callsigns)
+      ->execute();
     $repos = mpull($repos, null, 'getCallsign');
 
     foreach ($commits as $name => $info) {
@@ -128,6 +137,7 @@ final class ConduitAPI_diffusion_getcommits_Method
 
     $commits = $this->addRepositoryCommitDataInformation($commits);
     $commits = $this->addDifferentialInformation($commits);
+    $commits = $this->addManiphestInformation($commits);
 
     foreach ($commits as $name => $commit) {
       $results[$name] = $commit;
@@ -232,6 +242,10 @@ final class ConduitAPI_diffusion_getcommits_Method
   private function addDifferentialInformation(array $commits) {
     $commit_phids = ipull($commits, 'commitPHID');
 
+    // TODO: (T603) This should be policy checked, either by moving to
+    // DifferentialRevisionQuery or by doing a followup query to make sure
+    // the matched objects are visible.
+
     $rev_conn_r = id(new DifferentialRevision())->establishConnection('r');
     $revs = queryfx_all(
       $rev_conn_r,
@@ -251,6 +265,33 @@ final class ConduitAPI_diffusion_getcommits_Method
           'differentialRevisionPHID'  => $rev['phid'],
         );
       }
+    }
+
+    return $commits;
+  }
+
+  /**
+   * Enhances the commits list with Maniphest information.
+   */
+  private function addManiphestInformation(array $commits) {
+    $task_type = PhabricatorEdgeConfig::TYPE_COMMIT_HAS_TASK;
+
+    $commit_phids = ipull($commits, 'commitPHID');
+
+    $edge_query = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs($commit_phids)
+      ->withEdgeTypes(array($task_type));
+
+    $edges = $edge_query->execute();
+
+    foreach ($commits as $name => $commit) {
+      $task_phids = $edge_query->getDestinationPHIDs(
+        array($commit['commitPHID']),
+        array($task_type));
+
+      $commits[$name] += array(
+        'taskPHIDs' => $task_phids,
+      );
     }
 
     return $commits;

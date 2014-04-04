@@ -19,7 +19,7 @@ final class PhabricatorApplicationSlowvote extends PhabricatorApplication {
   }
 
   public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('article/Slowvote_User_Guide.html');
+    return PhabricatorEnv::getDoclink('Slowvote User Guide');
   }
 
   public function getFlavorText() {
@@ -40,9 +40,20 @@ final class PhabricatorApplicationSlowvote extends PhabricatorApplication {
     return array(
       '/V(?P<id>[1-9]\d*)' => 'PhabricatorSlowvotePollController',
       '/vote/' => array(
-        '(?:view/(?P<view>\w+)/)?' => 'PhabricatorSlowvoteListController',
-        'create/' => 'PhabricatorSlowvoteCreateController',
+        '(?:query/(?P<queryKey>[^/]+)/)?'
+          => 'PhabricatorSlowvoteListController',
+        'create/' => 'PhabricatorSlowvoteEditController',
+        'edit/(?P<id>[1-9]\d*)/' => 'PhabricatorSlowvoteEditController',
         '(?P<id>[1-9]\d*)/' => 'PhabricatorSlowvoteVoteController',
+        'comment/(?P<id>[1-9]\d*)/' => 'PhabricatorSlowvoteCommentController',
+      ),
+    );
+  }
+
+  public function getCustomCapabilities() {
+    return array(
+      PhabricatorSlowvoteCapabilityDefaultView::CAPABILITY => array(
+        'caption' => pht('Default view policy for new polls.'),
       ),
     );
   }

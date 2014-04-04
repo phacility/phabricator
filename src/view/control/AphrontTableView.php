@@ -153,8 +153,8 @@ final class AphrontTableView extends AphrontView {
           $classes[] = $col_classes[$col_num];
         }
 
-        if (empty($device_visiblity[$col_num])) {
-          $classes[] = 'aphront-table-nodevice';
+        if (empty($device_visibility[$col_num])) {
+          $classes[] = 'aphront-table-view-nodevice';
         }
 
         if ($sort_values[$col_num] !== null) {
@@ -251,6 +251,9 @@ final class AphrontTableView extends AphrontView {
             continue;
           }
           $class = $col_classes[$col_num];
+          if (empty($device_visibility[$col_num])) {
+            $class = trim($class.' aphront-table-view-nodevice');
+          }
           if (!empty($this->cellClasses[$row_num][$col_num])) {
             $class = trim($class.' '.$this->cellClasses[$row_num][$col_num]);
           }
@@ -272,10 +275,13 @@ final class AphrontTableView extends AphrontView {
       }
     } else {
       $colspan = max(count(array_filter($visibility)), 1);
-      $table[] = hsprintf(
-        '<tr class="no-data"><td colspan="%s">%s</td></tr>',
-        $colspan,
-        coalesce($this->noDataString, pht('No data available.')));
+      $table[] = phutil_tag(
+        'tr',
+        array('class' => 'no-data'),
+        phutil_tag(
+          'td',
+          array('colspan' => $colspan),
+          coalesce($this->noDataString, pht('No data available.'))));
     }
 
     $table_class = 'aphront-table-view';
@@ -287,7 +293,7 @@ final class AphrontTableView extends AphrontView {
     }
 
     $html = phutil_tag('table', array('class' => $table_class), $table);
-    return hsprintf('<div class="aphront-table-wrap">%s</div>', $html);
+    return phutil_tag_div('aphront-table-wrap', $html);
   }
 
   public static function renderSingleDisplayLine($line) {
@@ -317,4 +323,3 @@ final class AphrontTableView extends AphrontView {
 
 
 }
-

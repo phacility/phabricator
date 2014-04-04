@@ -100,13 +100,27 @@ final class PHUIIconExample extends PhabricatorUIExample {
           ->setSpriteIcon($token);
     }
 
+    $logins = array(
+      'Asana',
+      'Dropbox',
+      'Google',
+      'Github');
+    $loginview = array();
+    foreach ($logins as $login) {
+      $loginview[] =
+        id(new PHUIIconView())
+          ->setSpriteSheet(PHUIIconView::SPRITE_LOGIN)
+          ->setSpriteIcon($login)
+          ->addClass(PHUI::MARGIN_SMALL_RIGHT);
+    }
+
     $layout1 =
       array(
         id(new PHUIBoxView())
           ->appendChild($actionview)
           ->addMargin(PHUI::MARGIN_MEDIUM)
           ->addPadding(PHUI::PADDING_SMALL)
-          ->setShadow(true));
+          ->setBorder(true));
 
     $layout2 =
       array(
@@ -114,7 +128,7 @@ final class PHUIIconExample extends PhabricatorUIExample {
           ->appendChild(array($person1, $person2, $person3))
           ->addMargin(PHUI::MARGIN_MEDIUM)
           ->addPadding(PHUI::PADDING_SMALL)
-          ->setShadow(true));
+          ->setBorder(true));
 
     $layout2a =
       array(
@@ -122,7 +136,7 @@ final class PHUIIconExample extends PhabricatorUIExample {
           ->appendChild(array($person4, $person5, $person6))
           ->addMargin(PHUI::MARGIN_MEDIUM)
           ->addPadding(PHUI::PADDING_SMALL)
-          ->setShadow(true));
+          ->setBorder(true));
 
     $layout3 =
       array(
@@ -130,7 +144,7 @@ final class PHUIIconExample extends PhabricatorUIExample {
           ->appendChild($tokenview)
           ->addMargin(PHUI::MARGIN_MEDIUM)
           ->addPadding(PHUI::PADDING_SMALL)
-          ->setShadow(true));
+          ->setBorder(true));
 
     $layout4 =
       array(
@@ -138,19 +152,30 @@ final class PHUIIconExample extends PhabricatorUIExample {
           ->appendChild(array($card1, $card2, $card3, $card4, $card5))
           ->addMargin(PHUI::MARGIN_MEDIUM)
           ->addPadding(PHUI::PADDING_MEDIUM)
-          ->setShadow(true));
+          ->setBorder(true));
 
-    $head1 = id(new PhabricatorHeaderView())
+    $layout5 =
+      array(
+        id(new PHUIBoxView())
+          ->appendChild($loginview)
+          ->addMargin(PHUI::MARGIN_MEDIUM)
+          ->addPadding(PHUI::PADDING_MEDIUM)
+          ->setBorder(true));
+
+    $head1 = id(new PHUIHeaderView())
       ->setHeader(pht('Action Icons!'));
 
-    $head2 = id(new PhabricatorHeaderView())
+    $head2 = id(new PHUIHeaderView())
       ->setHeader(pht('People!'));
 
-    $head3 = id(new PhabricatorHeaderView())
+    $head3 = id(new PHUIHeaderView())
       ->setHeader(pht('Tokens'));
 
-    $head4 = id(new PhabricatorHeaderView())
+    $head4 = id(new PHUIHeaderView())
       ->setHeader(pht('Payments'));
+
+    $head5 = id(new PHUIHeaderView())
+      ->setHeader(pht('Authentication'));
 
     $wrap1 = id(new PHUIBoxView())
       ->appendChild($layout1)
@@ -168,6 +193,10 @@ final class PHUIIconExample extends PhabricatorUIExample {
       ->appendChild($layout4)
       ->addMargin(PHUI::MARGIN_LARGE);
 
+    $wrap5 = id(new PHUIBoxView())
+      ->appendChild($layout5)
+      ->addMargin(PHUI::MARGIN_LARGE);
+
     return phutil_tag(
       'div',
         array(
@@ -181,7 +210,9 @@ final class PHUIIconExample extends PhabricatorUIExample {
           $head3,
           $wrap3,
           $head4,
-          $wrap4
+          $wrap4,
+          $head5,
+          $wrap5
         ));
         }
 }

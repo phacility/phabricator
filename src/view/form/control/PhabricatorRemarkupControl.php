@@ -27,7 +27,19 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
         'uri'             => '/file/dropupload/',
       ));
 
-    Javelin::initBehavior('phabricator-remarkup-assist', array());
+    Javelin::initBehavior(
+      'phabricator-remarkup-assist',
+      array(
+        'pht' => array(
+          'bold text' => pht('bold text'),
+          'italic text' => pht('italic text'),
+          'monospaced text' => pht('monospaced text'),
+          'List Item' => pht('List Item'),
+          'data' => pht('data'),
+          'name' => pht('name'),
+          'URL' => pht('URL'),
+        ),
+      ));
     Javelin::initBehavior('phabricator-tooltips', array());
 
     $actions = array(
@@ -39,6 +51,9 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       ),
       'tt'    => array(
         'tip' => pht('Monospaced'),
+      ),
+      'link'  => array(
+        'tip' => pht('Link'),
       ),
       array(
         'spacer' => true,
@@ -54,8 +69,12 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       ),
       'table' => array(
         'tip' => pht('Table'),
-      )
+      ),
+      'image' => array(
+        'tip' => pht('Upload File'),
+      ),
     );
+
     if (!$this->disableMacro and function_exists('imagettftext')) {
       $actions[] = array(
         'spacer' => true,
@@ -68,8 +87,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
     $actions['help'] = array(
         'tip' => pht('Help'),
         'align' => 'right',
-        'href'  => PhabricatorEnv::getDoclink(
-          'article/Remarkup_Reference.html'),
+        'href'  => PhabricatorEnv::getDoclink('Remarkup Reference'),
       );
 
     $actions[] = array(
@@ -77,22 +95,10 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       'align' => 'right',
     );
 
-    $is_serious = PhabricatorEnv::getEnvConfig(
-      'phabricator.serious-business');
-
-    $actions['order'] = array(
-      'tip' => $is_serious
-        ? pht('Fullscreen Mode')
-        : pht('Order Mode'),
+    $actions['fullscreen'] = array(
+      'tip' => pht('Fullscreen Mode'),
       'align' => 'right',
     );
-
-    if (!$is_serious) {
-      $actions['chaos'] = array(
-        'tip' => pht('Chaos Mode'),
-        'align' => 'right',
-      );
-    }
 
     $buttons = array();
     foreach ($actions as $action => $spec) {

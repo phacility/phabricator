@@ -8,6 +8,7 @@
 abstract class PhabricatorWorker {
 
   private $data;
+  private static $runAllTasksInProcess = false;
 
 
 /* -(  Configuring Retries and Failures  )----------------------------------- */
@@ -58,7 +59,6 @@ abstract class PhabricatorWorker {
    *                                  retries, or to examine the execution
    *                                  exception if you want to react to
    *                                  different failures in different ways.
-   * @param   Exception               The exception which caused the failure.
    * @return  int|null                Number of seconds to wait between retries,
    *                                  or null for a default retry period
    *                                  (currently 60 seconds).
@@ -85,10 +85,29 @@ abstract class PhabricatorWorker {
   }
 
   final public static function scheduleTask($task_class, $data) {
-    return id(new PhabricatorWorkerActiveTask())
+    $task = id(new PhabricatorWorkerActiveTask())
       ->setTaskClass($task_class)
-      ->setData($data)
-      ->save();
+      ->setData($data);
+
+    if (self::$runAllTasksInProcess) {
+      // Do the work in-process.
+      $worker = newv($task_class, array($data));
+      $worker->doWork();
+
+      // Now, save a task row and immediately archive it so we can return an
+      // object with a valid ID.
+      $task->openTransaction();
+        $task->save();
+        $archived = $task->archiveTask(
+          PhabricatorWorkerArchiveTask::RESULT_SUCCESS,
+          0);
+      $task->saveTransaction();
+
+      return $archived;
+    } else {
+      $task->save();
+      return $task;
+    }
   }
 
 
@@ -100,6 +119,10 @@ abstract class PhabricatorWorker {
    * @return void
    */
   final public static function waitForTasks(array $task_ids) {
+    if (!$task_ids) {
+      return;
+    }
+
     $task_table = new PhabricatorWorkerActiveTask();
 
     $waiting = array_fuse($task_ids);
@@ -144,14 +167,31 @@ abstract class PhabricatorWorker {
 
     foreach ($tasks as $task) {
       if ($task->getResult() != PhabricatorWorkerArchiveTask::RESULT_SUCCESS) {
-        throw new Exception("Task ".$task->getID()." failed!");
+        throw new Exception(
+          pht("Task %d failed!", $task->getID()));
       }
     }
   }
 
-  public function renderForDisplay() {
+  public function renderForDisplay(PhabricatorUser $viewer) {
     $data = PhutilReadableSerializer::printableValue($this->data);
     return phutil_tag('pre', array(), $data);
+  }
+
+  /**
+   * Set this flag to execute scheduled tasks synchronously, in the same
+   * process. This is useful for debugging, and otherwise dramatically worse
+   * in every way imaginable.
+   */
+  public static function setRunAllTasksInProcess($all) {
+    self::$runAllTasksInProcess = $all;
+  }
+
+  protected function log($pattern /* $args */) {
+    $console = PhutilConsole::getConsole();
+    $argv = func_get_args();
+    call_user_func_array(array($console, 'writeLog'), $argv);
+    return $this;
   }
 
 }

@@ -139,18 +139,56 @@ final class PhabricatorChatLogChannelLogController
           $message));
     }
 
+    $links = array();
+
+    $first_uri = $pager->getFirstPageURI();
+    if ($first_uri) {
+      $links[] = phutil_tag(
+        'a',
+        array(
+          'href' => $first_uri,
+        ),
+        "\xC2\xAB ". pht("Newest"));
+    }
+
+    $prev_uri = $pager->getPrevPageURI();
+    if ($prev_uri) {
+      $links[] = phutil_tag(
+        'a',
+        array(
+          'href' => $prev_uri,
+        ),
+        "\xE2\x80\xB9 " . pht("Newer"));
+    }
+
+    $next_uri = $pager->getNextPageURI();
+    if ($next_uri) {
+      $links[] = phutil_tag(
+        'a',
+        array(
+          'href' => $next_uri,
+        ),
+        pht("Older") . " \xE2\x80\xBA");
+    }
+
+    $pager_top = phutil_tag(
+      'div',
+      array('class' => 'phabricator-chat-log-pager-top'),
+      $links);
+
+    $pager_bottom = phutil_tag(
+      'div',
+      array('class' => 'phabricator-chat-log-pager-bottom'),
+      $links);
+
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($channel->getChannelName())
-          ->setHref($uri));
+      ->addTextCrumb($channel->getChannelName(), $uri);
 
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setMethod('GET')
       ->setAction($uri)
-      ->setNoShading(true)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Date'))
@@ -177,24 +215,48 @@ final class PhabricatorChatLogChannelLogController
         ),
         $table);
 
+    $jump_link = phutil_tag(
+      'a',
+        array(
+          'href' => '#latest'
+        ),
+        pht("Jump to Bottom") . " \xE2\x96\xBE");
+
+    $jump = phutil_tag(
+      'div',
+        array(
+          'class' => 'phabricator-chat-log-jump'
+        ),
+        $jump_link);
+
+    $jump_target = phutil_tag(
+      'div',
+        array(
+          'id' => 'latest'
+        ));
+
     $content = phutil_tag(
       'div',
         array(
           'class' => 'phabricator-chat-log-wrap'
         ),
-        $log);
+        array(
+          $jump,
+          $pager_top,
+          $log,
+          $jump_target,
+          $pager_bottom,
+        ));
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $filter,
         $content,
-        $pager,
       ),
       array(
         'title' => pht('Channel Log'),
         'device' => true,
-        'dust' => true,
       ));
   }
 
@@ -232,13 +294,7 @@ final class PhabricatorChatLogChannelLogController
       );
 
     } else if ($at_date) {
-      $timezone = new DateTimeZone($user->getTimezoneIdentifier());
-      try {
-        $date = new DateTime($at_date, $timezone);
-        $timestamp = $date->format('U');
-      } catch (Exception $e) {
-        $timestamp = null;
-      }
+      $timestamp = PhabricatorTime::parseLocalTime($at_date, $user);
 
       if ($timestamp) {
         $context_logs = $query

@@ -1,0 +1,19 @@
+/**
+ * @provides harbormaster-css
+ */
+
+.harbormaster-artifact-io {
+  margin: 0 0 0 8px;
+  padding: 4px 8px;
+  border-width: 1px 0 0 1px;
+  border-style: solid;
+  box-shadow: inset 2px 2px 1px rgba(0, 0, 0, 0.075);
+  background: {$lightbluebackground};
+  border-color: {$lightblueborder};
+}
+
+.harbormaster-artifact-summary-header {
+  font-weight: bold;
+  margin-bottom: 2px;
+  color: {$darkbluetext};
+}

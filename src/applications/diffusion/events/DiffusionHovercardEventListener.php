@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionHovercardEventListener extends PhutilEventListener {
+final class DiffusionHovercardEventListener extends PhabricatorEventListener {
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERHOVERCARD);
@@ -38,9 +38,10 @@ final class DiffusionHovercardEventListener extends PhutilEventListener {
       $author,
     ));
 
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($viewer)
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
 
     if ($author) {
       $author = $handles[$author]->renderLink();
@@ -72,4 +73,3 @@ final class DiffusionHovercardEventListener extends PhutilEventListener {
   }
 
 }
-

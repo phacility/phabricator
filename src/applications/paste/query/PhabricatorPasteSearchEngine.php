@@ -1,108 +1,129 @@
 <?php
 
 /**
- * Provides search functionality for the paste application.
- *
- * @group search
+ * @group paste
  */
 final class PhabricatorPasteSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
-  protected $filter;
-  protected $user;
-
-  /**
-   * Create a saved query object from the request.
-   *
-   * @param AphrontRequest The search request.
-   * @return The saved query that is built.
-   */
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
-
     $saved = new PhabricatorSavedQuery();
+    $saved->setParameter(
+      'authorPHIDs',
+      $this->readUsersFromRequest($request, 'authors'));
 
-    if ($this->filter == "my") {
-      $user = $request->getUser();
-      $saved->setParameter('authorPHIDs', array($user->getPHID()));
-    } else {
-      $data = $request->getRequestData();
-      if (array_key_exists('set_users', $data)) {
-        $saved->setParameter('authorPHIDs', $data['set_users']);
-      }
+    $languages = $request->getStrList('languages');
+    if ($request->getBool('noLanguage')) {
+      $languages[] = null;
     }
+    $saved->setParameter('languages', $languages);
 
-    try {
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $saved->save();
-      unset($unguarded);
-    } catch (AphrontQueryDuplicateKeyException $ex) {
-      // Ignore, this is just a repeated search.
-    }
+    $saved->setParameter('createdStart', $request->getStr('createdStart'));
+    $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
 
     return $saved;
   }
 
-  /**
-   * Executes the saved query.
-   *
-   * @param PhabricatorSavedQuery
-   * @return The result of the query.
-   */
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new PhabricatorPasteQuery())
-      ->withIDs($saved->getParameter('ids', array()))
-      ->withPHIDs($saved->getParameter('phids', array()))
+      ->needContent(true)
       ->withAuthorPHIDs($saved->getParameter('authorPHIDs', array()))
-      ->withParentPHIDs($saved->getParameter('parentPHIDs', array()));
+      ->withLanguages($saved->getParameter('languages', array()));
+
+    $start = $this->parseDateTime($saved->getParameter('createdStart'));
+    $end = $this->parseDateTime($saved->getParameter('createdEnd'));
+
+    if ($start) {
+      $query->withDateCreatedAfter($start);
+    }
+
+    if ($end) {
+      $query->withDateCreatedBefore($end);
+    }
 
     return $query;
   }
 
-  /**
-   * Builds the search form using the request.
-   *
-   * @param PhabricatorSavedQuery The query to populate the form with.
-   * @return AphrontFormView The built form.
-   */
-  public function buildSearchForm(PhabricatorSavedQuery $saved_query) {
+  public function buildSearchForm(
+    AphrontFormView $form,
+    PhabricatorSavedQuery $saved_query) {
     $phids = $saved_query->getParameter('authorPHIDs', array());
-    $handles = id(new PhabricatorObjectHandleData($phids))
-      ->setViewer($this->user)
-      ->loadHandles();
-    $users_searched = mpull($handles, 'getFullName', 'getPHID');
+    $author_handles = id(new PhabricatorHandleQuery())
+      ->setViewer($this->requireViewer())
+      ->withPHIDs($phids)
+      ->execute();
 
-    $form = id(new AphrontFormView())
-      ->setUser($this->user);
+    $languages = $saved_query->getParameter('languages', array());
+    $no_language = false;
+    foreach ($languages as $key => $language) {
+      if ($language === null) {
+        $no_language = true;
+        unset($languages[$key]);
+        continue;
+      }
+    }
 
-    $form->appendChild(
-      id(new AphrontFormTokenizerControl())
-        ->setDatasource('/typeahead/common/searchowner/')
-        ->setName('set_users')
-        ->setLabel(pht('Users'))
-        ->setValue($users_searched));
+    $form
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource('/typeahead/common/users/')
+          ->setName('authors')
+          ->setLabel(pht('Authors'))
+          ->setValue($author_handles))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName('languages')
+          ->setLabel(pht('Languages'))
+          ->setValue(implode(', ', $languages)))
+      ->appendChild(
+        id(new AphrontFormCheckboxControl())
+          ->addCheckbox(
+            'noLanguage',
+            1,
+            pht('Find Pastes with no specified language.'),
+            $no_language));
 
-    $form->appendChild(
-      id(new AphrontFormSubmitControl())
-      ->setValue(pht('Filter Pastes'))
-      ->addCancelButton(
-        '/search/name/'.$saved_query->getQueryKey().'/',
-        pht('Save Custom Query...')));
+    $this->buildDateRange(
+      $form,
+      $saved_query,
+      'createdStart',
+      pht('Created After'),
+      'createdEnd',
+      pht('Created Before'));
 
-    return $form;
   }
 
-  public function setPasteSearchFilter($filter) {
-    $this->filter = $filter;
-    return $this;
+  protected function getURI($path) {
+    return '/paste/'.$path;
   }
 
-  public function getPasteSearchFilter() {
-    return $this->filter;
+  public function getBuiltinQueryNames() {
+    $names = array(
+      'all' => pht('All Pastes'),
+    );
+
+    if ($this->requireViewer()->isLoggedIn()) {
+      $names['authored'] = pht('Authored');
+    }
+
+    return $names;
   }
 
-  public function setPasteSearchUser($user) {
-    $this->user = $user;
-    return $this;
+  public function buildSavedQueryFromBuiltin($query_key) {
+
+    $query = $this->newSavedQuery();
+    $query->setQueryKey($query_key);
+
+    switch ($query_key) {
+      case 'all':
+        return $query;
+      case 'authored':
+        return $query->setParameter(
+          'authorPHIDs',
+          array($this->requireViewer()->getPHID()));
+    }
+
+    return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
 }

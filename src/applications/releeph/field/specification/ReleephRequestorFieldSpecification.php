@@ -3,12 +3,8 @@
 final class ReleephRequestorFieldSpecification
   extends ReleephFieldSpecification {
 
-  public function bulkLoad(array $releeph_requests) {
-    $phids = mpull($releeph_requests, 'getRequestUserPHID');
-    ReleephUserView::getNewInstance()
-      ->setUser($this->getUser())
-      ->setReleephProject($this->getReleephProject())
-      ->load($phids);
+  public function getFieldKey() {
+    return 'requestor';
   }
 
   public function getName() {
@@ -17,23 +13,11 @@ final class ReleephRequestorFieldSpecification
 
   public function renderValueForHeaderView() {
     $phid = $this->getReleephRequest()->getRequestUserPHID();
-    return ReleephUserView::getNewInstance()
-      ->setRenderUserPHID($phid)
-      ->render();
-  }
-
-  public function hasSelectablePHIDs() {
-    return true;
-  }
-
-  public function getSelectTokenizerDatasource() {
-    return '/typeahead/common/users/';
-  }
-
-  public function getSelectablePHIDs() {
-    return array(
-      $this->getReleephRequest()->getRequestUserPHID(),
-    );
+    $handle = id(new PhabricatorHandleQuery())
+      ->setViewer($this->getUser())
+      ->withPHIDs(array($phid))
+      ->executeOne();
+    return $handle->renderLink();
   }
 
   public function shouldAppearOnCommitMessage() {
@@ -50,10 +34,11 @@ final class ReleephRequestorFieldSpecification
 
   public function renderValueForCommitMessage() {
     $phid = $this->getReleephRequest()->getRequestUserPHID();
-    $handles = id(new PhabricatorObjectHandleData(array($phid)))
+    $handle = id(new PhabricatorHandleQuery())
       ->setViewer($this->getUser())
-      ->loadHandles();
-    return $handles[$phid]->getName();
+      ->withPHIDs(array($phid))
+      ->executeOne();
+    return $handle->getName();
   }
 
 }

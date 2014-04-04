@@ -5,7 +5,7 @@ abstract class HeraldController extends PhabricatorController {
   public function buildStandardPageResponse($view, array $data) {
     $page = $this->buildStandardPageView();
 
-    $page->setApplicationName('Herald');
+    $page->setApplicationName(pht('Herald'));
     $page->setBaseURI('/herald/');
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x98\xBF");
@@ -16,35 +16,43 @@ abstract class HeraldController extends PhabricatorController {
     return $response->setContent($page->render());
   }
 
-  protected function renderNav() {
-    $nav = id(new AphrontSideNavFilterView())
-      ->setBaseURI(new PhutilURI('/herald/'))
-      ->addLabel('My Rules')
-      ->addFilter('new', 'Create Rule');
+  public function buildApplicationMenu() {
+    return $this->buildSideNavView(true)->getMenu();
+  }
 
-    $rules_map = HeraldContentTypeConfig::getContentTypeMap();
-    foreach ($rules_map as $key => $value) {
-      $nav->addFilter("view/{$key}/personal", $value);
+  public function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+        ->setName(pht('Create Herald Rule'))
+        ->setHref($this->getApplicationURI('new/'))
+        ->setIcon('create'));
+
+    return $crumbs;
+  }
+
+  public function buildSideNavView($for_app = false) {
+    $user = $this->getRequest()->getUser();
+
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
+
+    if ($for_app) {
+      $nav->addFilter('new', pht('Create Rule'));
     }
 
-    $nav->addLabel('Global Rules');
-
-    foreach ($rules_map as $key => $value) {
-      $nav->addFilter("view/{$key}/global", $value);
-    }
+    id(new HeraldRuleSearchEngine())
+      ->setViewer($user)
+      ->addNavigationItems($nav->getMenu());
 
     $nav
-      ->addLabel('Utilities')
-      ->addFilter('test',       'Test Console')
-      ->addFilter('transcript', 'Transcripts')
-      ->addFilter('history',    'Edit Log');
+      ->addLabel(pht('Utilities'))
+      ->addFilter('test',       pht('Test Console'))
+      ->addFilter('transcript', pht('Transcripts'))
+      ->addFilter('history',    pht('Edit Log'));
 
-    if ($this->getRequest()->getUser()->getIsAdmin()) {
-      $nav->addLabel('Admin');
-      foreach ($rules_map as $key => $value) {
-        $nav->addFilter("view/{$key}/all", $value);
-      }
-    }
+    $nav->selectFilter(null);
 
     return $nav;
   }

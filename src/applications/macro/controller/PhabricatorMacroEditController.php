@@ -11,17 +11,15 @@ final class PhabricatorMacroEditController
 
   public function processRequest() {
 
+    $this->requireApplicationCapability(
+      PhabricatorMacroCapabilityManage::CAPABILITY);
+
     $request = $this->getRequest();
     $user = $request->getUser();
 
     if ($this->id) {
       $macro = id(new PhabricatorMacroQuery())
         ->setViewer($user)
-        ->requireCapabilities(
-          array(
-            PhabricatorPolicyCapability::CAN_VIEW,
-            PhabricatorPolicyCapability::CAN_EDIT,
-          ))
         ->withIDs(array($this->id))
         ->executeOne();
       if (!$macro) {
@@ -29,11 +27,12 @@ final class PhabricatorMacroEditController
       }
     } else {
       $macro = new PhabricatorFileImageMacro();
+      $macro->setAuthorPHID($user->getPHID());
     }
 
     $errors = array();
     $e_name = true;
-    $e_file = pht('Provide a URL or a file');
+    $e_file = null;
     $file = null;
     $can_fetch = PhabricatorEnv::getEnvConfig('security.allow-outbound-http');
 
@@ -49,7 +48,7 @@ final class PhabricatorMacroEditController
         if (!strlen($macro->getName())) {
           $errors[] = pht('Macro name is required.');
           $e_name = pht('Required');
-        } else if (!preg_match('/^[a-z0-9:_-]{3,}$/', $macro->getName())) {
+        } else if (!preg_match('/^[a-z0-9:_-]{3,}\z/', $macro->getName())) {
           $errors[] = pht(
             'Macro must be at least three characters long and contain only '.
             'lowercase letters, digits, hyphens, colons and underscores.');
@@ -66,6 +65,7 @@ final class PhabricatorMacroEditController
           array(
             'name' => $request->getStr('name'),
             'authorPHID' => $user->getPHID(),
+            'isExplicitUpload' => true,
           ));
       } else if ($request->getStr('url')) {
         try {
@@ -74,14 +74,16 @@ final class PhabricatorMacroEditController
             array(
               'name' => $request->getStr('name'),
               'authorPHID' => $user->getPHID(),
+              'isExplicitUpload' => true,
             ));
         } catch (Exception $ex) {
           $errors[] = pht('Could not fetch URL: %s', $ex->getMessage());
         }
       } else if ($request->getStr('phid')) {
-        $file = id(new PhabricatorFile())->loadOneWhere(
-          'phid = %s',
-          $request->getStr('phid'));
+        $file = id(new PhabricatorFileQuery())
+          ->setViewer($user)
+          ->withPHIDs(array($request->getStr('phid')))
+          ->executeOne();
       }
 
       if ($file) {
@@ -97,6 +99,7 @@ final class PhabricatorMacroEditController
 
       if (!$macro->getID() && !$file) {
         $errors[] = pht('You must upload an image to create a macro.');
+        $e_file = pht('Required');
       }
 
       if (!$errors) {
@@ -118,12 +121,7 @@ final class PhabricatorMacroEditController
           $editor = id(new PhabricatorMacroEditor())
             ->setActor($user)
             ->setContinueOnNoEffect(true)
-            ->setContentSource(
-              PhabricatorContentSource::newForSource(
-                PhabricatorContentSource::SOURCE_WEB,
-                array(
-                  'ip' => $request->getRemoteAddr(),
-                )));
+            ->setContentSourceFromRequest($request);
 
           $xactions = $editor->applyTransactions($original, $xactions);
 
@@ -135,14 +133,6 @@ final class PhabricatorMacroEditController
           $e_name = pht('Duplicate');
         }
       }
-    }
-
-    if ($errors) {
-      $error_view = new AphrontErrorView();
-      $error_view->setTitle(pht('Form Errors'));
-      $error_view->setErrors($errors);
-    } else {
-      $error_view = null;
     }
 
     $current_file = null;
@@ -219,39 +209,28 @@ final class PhabricatorMacroEditController
 
     if ($macro->getID()) {
       $title = pht('Edit Image Macro');
-      $crumb = pht('Edit');
+      $crumb = pht('Edit Macro');
 
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setHref($view_uri)
-          ->setName(pht('Macro "%s"', $macro->getName())));
+      $crumbs->addTextCrumb(pht('Macro "%s"', $macro->getName()), $view_uri);
     } else {
       $title = pht('Create Image Macro');
-      $crumb = pht('Create');
+      $crumb = pht('Create Macro');
     }
 
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setHref($request->getRequestURI())
-        ->setName($crumb));
+    $crumbs->addTextCrumb($crumb, $request->getRequestURI());
 
     $upload = null;
     if ($macro->getID()) {
-      $upload_header = id(new PhabricatorHeaderView())
-        ->setHeader(pht('Upload New File'));
-
       $upload_form = id(new AphrontFormView())
-        ->setFlexible(true)
         ->setEncType('multipart/form-data')
         ->setUser($request->getUser());
 
       if ($can_fetch) {
-        $upload_form
-          ->appendChild(
-            id(new AphrontFormTextControl())
-              ->setLabel(pht('URL'))
-              ->setName('url')
-              ->setValue($request->getStr('url')));
+        $upload_form->appendChild(
+          id(new AphrontFormTextControl())
+            ->setLabel(pht('URL'))
+            ->setName('url')
+            ->setValue($request->getStr('url')));
       }
 
       $upload_form
@@ -263,20 +242,20 @@ final class PhabricatorMacroEditController
           id(new AphrontFormSubmitControl())
             ->setValue(pht('Upload File')));
 
-      $upload = array($upload_header, $upload_form);
+      $upload = id(new PHUIObjectBoxView())
+        ->setHeaderText(pht('Upload New File'))
+        ->setForm($upload_form);
     }
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Create New Macro'));
-    $panel->setNoBackground();
-    $panel->appendChild($form);
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->setFormErrors($errors)
+      ->setForm($form);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $error_view,
-        $panel,
+        $form_box,
         $upload,
       ),
       array(

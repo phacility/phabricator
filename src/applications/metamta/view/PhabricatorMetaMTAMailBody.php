@@ -10,6 +10,7 @@
 final class PhabricatorMetaMTAMailBody {
 
   private $sections = array();
+  private $attachments = array();
 
 
 /* -(  Composition  )-------------------------------------------------------- */
@@ -50,19 +51,15 @@ final class PhabricatorMetaMTAMailBody {
   /**
    * Add a Herald section with a rule management URI and a transcript URI.
    *
-   * @param string URI to rule management.
    * @param string URI to rule transcripts.
    * @return this
    * @task compose
    */
-  public function addHeraldSection($rules_uri, $xscript_uri) {
+  public function addHeraldSection($xscript_uri) {
     if (!PhabricatorEnv::getEnvConfig('metamta.herald.show-hints')) {
       return $this;
     }
 
-    $this->addTextSection(
-      pht('MANAGE HERALD RULES'),
-      PhabricatorEnv::getProductionURI($rules_uri));
     $this->addTextSection(
       pht('WHY DID I GET THIS EMAIL?'),
       PhabricatorEnv::getProductionURI($xscript_uri));
@@ -92,6 +89,19 @@ final class PhabricatorMetaMTAMailBody {
   }
 
 
+  /**
+   * Add an attachment.
+   *
+   * @param PhabricatorMetaMTAAttachment Attachment.
+   * @return this
+   * @task compose
+   */
+  public function addAttachment(PhabricatorMetaMTAAttachment $attachment) {
+    $this->attachments[] = $attachment;
+    return $this;
+  }
+
+
 /* -(  Rendering  )---------------------------------------------------------- */
 
 
@@ -103,6 +113,17 @@ final class PhabricatorMetaMTAMailBody {
    */
   public function render() {
     return implode("\n\n", $this->sections)."\n";
+  }
+
+
+  /**
+   * Retrieve attachments.
+   *
+   * @return list<PhabricatorMetaMTAAttachment> Attachments.
+   * @task render
+   */
+  public function getAttachments() {
+    return $this->attachments;
   }
 
 

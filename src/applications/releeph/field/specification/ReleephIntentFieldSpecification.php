@@ -3,6 +3,10 @@
 final class ReleephIntentFieldSpecification
   extends ReleephFieldSpecification {
 
+  public function getFieldKey() {
+    return 'intent';
+  }
+
   public function getName() {
     return 'Intent';
   }
@@ -45,9 +49,10 @@ final class ReleephIntentFieldSpecification
     $pusher_phids = $this->getReleephProject()->getPushers();
 
     $phids = array_unique($pusher_phids + array_keys($intents));
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->getUser())
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
 
     $tokens = array();
     foreach ($phids as $phid) {

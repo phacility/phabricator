@@ -7,7 +7,7 @@
 }
 
 .phabricator-remarkup p {
-  margin: 0 0 1em;
+  margin: 0 0 12px;
 }
 
 .phabricator-remarkup p:last-child {
@@ -15,37 +15,43 @@
 }
 
 .phabricator-remarkup .remarkup-code-block {
-  margin: 1em 2em;
+  margin: 12px;
   white-space: pre;
   font-family: "Monaco", monospace;
   font-size: 10px;
 }
 
 .phabricator-remarkup .remarkup-code-header {
-  padding: .25em 1em;
-  background: #edead7;
-  color: #444444;
+  padding: 6px 8px;
+  background: {$lightyellow};
+  color: rgba(0,0,0,.75);
+  font-weight: bold;
+  display: inline-block;
+  border-top: 1px solid {$yellow};
+  border-left: 1px solid {$yellow};
+  border-right: 1px solid {$yellow};
+  margin-bottom: -1px;
 }
 
 .phabricator-remarkup .remarkup-code-block pre {
-  background: #fdfae7;
-  border: 1px solid #f5e178;
+  background: {$lightyellow};
+  border: 1px solid {$yellow};
   display: block;
   color: #000000;
   overflow: auto;
-  padding: .5em 1em;
+  padding: 8px;
   font-family: "Monaco", monospace;
 }
 
 .phabricator-remarkup pre.remarkup-counterexample {
-  border: 1px solid #aa0000;
-  background-color: #ffaaaa;
+  border: 1px solid {$red};
+  background-color: {$lightred};
 }
 
 .phabricator-remarkup tt {
   color: #333333;
   background: #ebebeb;
-  padding: 0 .25em;
+  padding: 0 4px;
   white-space: pre-wrap;
 }
 
@@ -57,19 +63,19 @@
 
 .phabricator-remarkup ul {
   list-style: disc;
-  margin: 1em 0 1em 3em;
+  margin: 12px 0 12px 30px;
 }
 
 .phabricator-remarkup ol {
   list-style: decimal;
-  margin: 1em 0 1em 3em;
+  margin: 12px 0 12px 30px;
 }
 
 .phabricator-remarkup ul ol,
 .phabricator-remarkup ul ul,
 .phabricator-remarkup ol ol,
 .phabricator-remarkup ol ul {
-  margin: .25em 0 .25em 2em;
+  margin: 4px 0 4px 24px;
 }
 
 .phabricator-remarkup li.phantom-item,
@@ -98,45 +104,45 @@
 .phabricator-remarkup h1 {
   font-size: 1.625em;
   line-height: 1.625em;
-  margin: .8em 0;
+  margin: 8px 0;
 }
 
 .phabricator-remarkup h2 {
   font-size: 1.5em;
   line-height: 1.5em;
-  margin: .75em 0;
+  margin: 8px 0;
 }
 
 .phabricator-remarkup h3 {
   font-size: 1.375em;
   line-height: 1.375em;
-  margin: .69em 0;
+  margin: 8px 0;
 }
 
 .phabricator-remarkup h4 {
   font-size: 1.25em;
   line-height: 1.25em;
-  margin: .63em 0;
+  margin: 8px 0;
 }
 
 .phabricator-remarkup h5 {
   font-size: 1.125em;
   line-height: 1.125em;
-  margin: .56em 0;
+  margin: 4px 0;
 }
 
 .phabricator-remarkup h6 {
   font-size: 1em;
   line-height: 1em;
-  margin: .5em 0;
+  margin: 4px 0;
 }
 
 .phabricator-remarkup blockquote {
-  border-left: 1px solid #AAAAAA;
-  color:       #333333;
+  border-left: 3px solid {$lightbluetext};
+  color: {$bluetext};
   font-style:  italic;
-  margin:      .5em 0em;
-  padding:     .25em 1em;
+  margin: 0 0 12px;
+  padding: 4px 8px;
 }
 
 .phabricator-remarkup blockquote em {
@@ -146,6 +152,13 @@
 .phabricator-remarkup img.remarkup-proxy-image {
   max-width: 640px;
   max-height: 640px;
+}
+
+.phabricator-remarkup audio {
+  display: block;
+  margin: 16px auto;
+  min-width: 240px;
+  width: 50%;
 }
 
 .phabricator-remarkup-mention-exists {
@@ -158,31 +171,52 @@
   background: #dddddd;
 }
 
+.phui-remarkup-preview .phabricator-remarkup-mention-unknown,
 .aphront-panel-preview .phabricator-remarkup-mention-unknown {
   font-weight: bold;
   background: #ffaaaa;
 }
 
 .phabricator-remarkup .remarkup-note {
-  margin: 1em 1.5em;
-  padding: 0.5em 1em;
-  border: 1px solid #ddddff;
-  background: #f3f3ff;
+  margin: 16px 0;
+  padding: 12px;
+  border-left: 3px solid {$blue};
+  background: {$lightblue};
+}
+
+.phabricator-remarkup .remarkup-warning {
+  margin: 16px 0;
+  padding: 12px;
+  border-left: 3px solid {$yellow};
+  background: {$lightyellow};
+}
+
+.phabricator-remarkup .remarkup-important {
+  margin: 16px 0;
+  padding: 12px;
+  border-left: 3px solid {$red};
+  background: {$lightred};
+}
+
+.phabricator-remarkup .remarkup-note-word {
+  font-weight: bold;
+  color: {$darkbluetext};
 }
 
 .phabricator-remarkup-toc {
   float: right;
-  border: 1px solid #d7d7d7;
-  background: #f7f7f7;
-  padding: 4px 12px;
+  border: 1px solid {$lightblueborder};
+  background: {$lightgreybackground};
+  padding: 8px;
   width: 180px;
-  margin: 0 0 5px 10px;
+  margin: 0 0 4px 8px;
 }
 
 .phabricator-remarkup-toc-header {
-  font-size: 11px;
-  color: #777;
-  border-bottom: 1px solid #d7d7d7;
+  font-size: 12px;
+  line-height: 12px;
+  color: {$darkbluetext};
+  font-weight: bold;
   margin-bottom: 4px;
 }
 
@@ -237,10 +271,10 @@
 }
 
 .phabricator-remarkup table.remarkup-table {
-  border-collapse:  separate;
-  border-spacing:   1px;
-  background:       #d3d3d3;
-  margin:           1em;
+  border-collapse: separate;
+  border-spacing: 1px;
+  background: #d3d3d3;
+  margin: 12px 0;
 }
 
 .phabricator-remarkup table.remarkup-table th {
@@ -254,12 +288,11 @@
   padding: 3px 6px;
 }
 
-
 .remarkup-assist-textarea {
-  border-left-color: #96A6C5;
-  border-right-color: #96A6C5;
-  border-bottom-color: #96A6C5;
-  border-top-color: #c9d4e9;
+  border-left-color: {$blueborder};
+  border-right-color: {$blueborder};
+  border-bottom-color: {$blueborder};
+  border-top-color: {$lightblueborder};
   border-radius: 0;
 
   /* Prevent Safari and Chrome users from dragging the textarea any wider,
@@ -277,11 +310,11 @@
 
   border-width: 1px 1px 0;
   border-style: solid;
-  border-top-color: #96A6C5;
-  border-left-color: #96A6C5;
-  border-right-color: #96A6C5;
+  border-top-color: {$blueborder};
+  border-left-color: {$blueborder};
+  border-right-color: {$blueborder};
 
-  background: #f5f5f5;
+  background: {$lightbluebackground};
   overflow: hidden;
 }
 
@@ -322,6 +355,20 @@
   border-right: 1px solid #cccccc;
 }
 
+.remarkup-interpreter-error {
+  padding: 8px;
+  border: 1px solid {$red};
+  background-color: {$lightred};
+}
+
+.remarkup-cowsay {
+  white-space: pre-wrap;
+}
+
+.remarkup-figlet {
+  white-space: pre-wrap;
+}
+
 .remarkup-assist {
   display: block;
   width: 14px;
@@ -338,7 +385,12 @@
   opacity: 1.0;
 }
 
-.remarkup-control-order-mode {
+.remarkup-assist-textarea {
+  box-shadow: none;
+  -webkit-box-shadow: none;
+}
+
+.remarkup-control-fullscreen-mode {
   position: fixed;
   top: -1px;
   bottom: -1px;
@@ -346,7 +398,7 @@
   right: -1px;
 }
 
-.remarkup-control-order-mode textarea.remarkup-assist-textarea {
+.remarkup-control-fullscreen-mode textarea.remarkup-assist-textarea {
   position: absolute;
   top: 26px;
   left: 0;
@@ -358,103 +410,7 @@
   outline: none;
 }
 
-.remarkup-control-chaos-mode textarea.remarkup-assist-textarea {
-  position: relative;
-}
-
-.remarkup-control-chaos-mode.remarkup-control-chaos-mode-0
-  textarea.remarkup-assist-textarea {
-  background-image: url(/rsrc/image/checker_light.png);
-}
-
-.remarkup-control-chaos-mode.remarkup-control-chaos-mode-1
-  textarea.remarkup-assist-textarea {
-  font-family: "Comic Sans", "Comic Sans MS";
-}
-
-.remarkup-control-chaos-mode.remarkup-control-chaos-mode-2
-  textarea.remarkup-assist-textarea {
-  left: -6px;
-}
-
-.remarkup-control-chaos-mode.remarkup-control-chaos-mode-3
-  textarea.remarkup-assist-textarea {
-  top: -4px;
-}
-
-.remarkup-control-chaos-mode.remarkup-control-chaos-mode-4
-  textarea.remarkup-assist-textarea {
-  direction: rtl;
-}
-
-.remarkup-control-chaos-mode.remarkup-control-chaos-mode-5
-  textarea.remarkup-assist-textarea {
-  border: 8px ridge #666666;
-}
-
-.remarkup-control-chaos-mode.remarkup-control-chaos-mode-6
-  textarea.remarkup-assist-textarea {
-  opacity: 0.5;
-}
-
-.remarkup-control-chaos-mode.remarkup-control-chaos-mode-7
-  textarea.remarkup-assist-textarea {
-  border-radius: 24px;
-}
-
-.remarkup-control-chaos-mode.remarkup-control-chaos-mode-8
-  textarea.remarkup-assist-textarea {
-  font-weight: bold;
-}
-
-.remarkup-control-chaos-mode.remarkup-control-chaos-mode-9
-  textarea.remarkup-assist-textarea {
-  font-variant: small-caps;
-}
-
-.remarkup-control-chaos-mode.remarkup-control-chaos-mode-10
-  textarea.remarkup-assist-textarea {
-  text-transform: uppercase;
-}
-
-.remarkup-control-chaos-mode.remarkup-control-chaos-mode-11
-  textarea.remarkup-assist-textarea {
-  letter-spacing: 6px;
-}
-
-.remarkup-control-chaos-mode.remarkup-control-chaos-mode-12
-  textarea.remarkup-assist-textarea {
-  font-size: 16px;
-}
-
-.remarkup-control-chaos-mode.remarkup-control-chaos-mode-13
-  textarea.remarkup-assist-textarea {
-  transform: rotate(3deg);
-  -webkit-transform: rotate(3deg);
-}
-
 .phabricator-image-macro-hero {
   margin: auto;
   max-width: 95%;
-}
-
-/* phabricator-remarkup-dark assumes a dark backround with light text,
-   so here are custom rules to override remarkup defaults. */
-
-div.phabricator-remarkup-dark blockquote {
-  color: #999;
-}
-
-div.phabricator-remarkup-dark tt {
-  color: #EEE;
-  background: #444;
-}
-
-div.phabricator-remarkup-dark .remarkup-note,
-div.phabricator-remarkup-dark table {
-  color: #000;
-}
-
-div.phabricator-remarkup-dark hr {
-  border-color: #555;
 }

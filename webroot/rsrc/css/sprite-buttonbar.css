@@ -1,0 +1,51 @@
+/**
+ * @provides sprite-buttonbar-css
+ * @generated
+ */
+
+.sprite-buttonbar {
+  background-image: url(/rsrc/image/sprite-buttonbar.png);
+  background-repeat: no-repeat;
+}
+
+@media
+only screen and (min-device-pixel-ratio: 1.5),
+only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+  .sprite-buttonbar {
+    background-image: url(/rsrc/image/sprite-buttonbar-X2.png);
+    background-size: 45px 45px;
+  }
+}
+
+
+.buttonbar-calendar {
+  background-position: 0px 0px;
+}
+
+.buttonbar-chevron-left {
+  background-position: -15px 0px;
+}
+
+.buttonbar-chevron-right {
+  background-position: -30px 0px;
+}
+
+.buttonbar-cog {
+  background-position: 0px -15px;
+}
+
+.buttonbar-home {
+  background-position: -15px -15px;
+}
+
+.buttonbar-pencil {
+  background-position: -30px -15px;
+}
+
+.buttonbar-time {
+  background-position: 0px -30px;
+}
+
+.buttonbar-workboard {
+  background-position: -15px -30px;
+}

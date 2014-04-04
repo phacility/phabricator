@@ -1,9 +1,8 @@
 /**
  * @provides javelin-resource
- * @requires javelin-magical-init
- *           javelin-stratcom
- *           javelin-util
+ * @requires javelin-util
  *           javelin-uri
+ *           javelin-install
  *
  * @javelin
  */

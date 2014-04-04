@@ -1,19 +1,23 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_user_find_Method
   extends ConduitAPI_user_Method {
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_DEPRECATED;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht('Obsoleted by "user.query".');
+  }
+
   public function getMethodDescription() {
-    return "Find user PHIDs which correspond to provided user aliases. ".
-           "Returns NULL for aliases which do have any corresponding PHIDs.";
+    return pht('Lookup PHIDs by username. Obsoleted by "user.query".');
   }
 
   public function defineParamTypes() {
     return array(
-      'aliases' => 'required nonempty list<string>'
+      'aliases' => 'required list<string>'
     );
   }
 
@@ -27,9 +31,10 @@ final class ConduitAPI_user_find_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $users = id(new PhabricatorUser())->loadAllWhere(
-      'username in (%Ls)',
-      $request->getValue('aliases'));
+    $users = id(new PhabricatorPeopleQuery())
+      ->setViewer($request->getUser())
+      ->withUsernames($request->getValue('aliases', array()))
+      ->execute();
 
     return mpull($users, 'getPHID', 'getUsername');
   }

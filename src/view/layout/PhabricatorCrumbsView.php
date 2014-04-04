@@ -10,12 +10,28 @@ final class PhabricatorCrumbsView extends AphrontView {
     return false;
   }
 
+
+  /**
+   * Convenience method for adding a simple crumb with just text, or text and
+   * a link.
+   *
+   * @param string  Text of the crumb.
+   * @param string? Optional href for the crumb.
+   * @return this
+   */
+  public function addTextCrumb($text, $href = null) {
+    return $this->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($text)
+        ->setHref($href));
+  }
+
   public function addCrumb(PhabricatorCrumbView $crumb) {
     $this->crumbs[] = $crumb;
     return $this;
   }
 
-  public function addAction(PhabricatorMenuItemView $action) {
+  public function addAction(PHUIListItemView $action) {
     $this->actions[] = $action;
     return $this;
   }
@@ -35,10 +51,15 @@ final class PhabricatorCrumbsView extends AphrontView {
       foreach ($this->actions as $action) {
         $icon = null;
         if ($action->getIcon()) {
+          $icon_name = $action->getIcon();
+          if ($action->getDisabled()) {
+            $icon_name .= '-grey';
+          }
+
           $icon = phutil_tag(
             'span',
             array(
-              'class' => 'sprite-icons icons-'.$action->getIcon(),
+              'class' => 'sprite-icons icons-'.$icon_name,
             ),
             '');
         }
@@ -47,15 +68,26 @@ final class PhabricatorCrumbsView extends AphrontView {
             array(
               'class' => 'phabricator-crumbs-action-name'
             ),
-          $action->getName()
-        );
+          $action->getName());
+
+        $action_sigils = $action->getSigils();
+        if ($action->getWorkflow()) {
+          $action_sigils[] = 'workflow';
+        }
+        $action_classes = $action->getClasses();
+        $action_classes[] = 'phabricator-crumbs-action';
+
+        if ($action->getDisabled()) {
+          $action_classes[] = 'phabricator-crumbs-action-disabled';
+        }
 
         $actions[] = javelin_tag(
           'a',
           array(
             'href' => $action->getHref(),
-            'class' => 'phabricator-crumbs-action',
-            'sigil' => $action->getWorkflow() ? 'workflow' : null,
+            'class' => implode(' ', $action_classes),
+            'sigil' => implode(' ', $action_sigils),
+            'style' => $action->getStyle()
           ),
           array(
             $icon,

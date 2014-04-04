@@ -7,12 +7,16 @@ final class PhabricatorRepositoryManagementDeleteWorkflow
     $this
       ->setName('delete')
       ->setExamples('**delete** __repository__ ...')
-      ->setSynopsis('Delete __repository__, named by callsign or PHID.')
+      ->setSynopsis('Delete __repository__, named by callsign.')
       ->setArguments(
         array(
           array(
             'name'        => 'verbose',
             'help'        => 'Show additional debugging information.',
+          ),
+          array(
+            'name'        => 'force',
+            'help'        => 'Do not prompt for confirmation.',
           ),
           array(
             'name'        => 'repos',
@@ -22,18 +26,33 @@ final class PhabricatorRepositoryManagementDeleteWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $names = $args->getArg('repos');
-    $repos = PhabricatorRepository::loadAllByPHIDOrCallsign($names);
+    $repos = $this->loadRepositories($args, 'repos');
 
     if (!$repos) {
       throw new PhutilArgumentUsageException(
-        "Specify one or more repositories to delete, by callsign or PHID.");
+        "Specify one or more repositories to delete, by callsign.");
     }
 
     $console = PhutilConsole::getConsole();
+
+    if (!$args->getArg('force')) {
+      $console->writeOut("%s\n\n", pht('These repositories will be deleted:'));
+
+      foreach ($repos as $repo) {
+        $console->writeOut(
+          "  %s %s\n",
+          'r'.$repo->getCallsign(),
+          $repo->getName());
+      }
+
+      $prompt = pht('Permanently delete these repositories?');
+      if (!$console->confirm($prompt)) {
+        return 1;
+      }
+    }
+
     foreach ($repos as $repo) {
       $console->writeOut("Deleting '%s'...\n", $repo->getCallsign());
-
       $repo->delete();
     }
 

@@ -23,7 +23,7 @@ final class PhortuneProductViewController extends PhortuneController {
 
     $title = pht('Product: %s', $product->getProductName());
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($product->getProductName());
 
     $account = $this->loadActiveAccount($user);
@@ -34,6 +34,7 @@ final class PhortuneProductViewController extends PhortuneController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($user)
+      ->setObjectURI($request->getRequestURI())
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Edit Product'))
@@ -49,17 +50,16 @@ final class PhortuneProductViewController extends PhortuneController {
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Products'))
-        ->setHref($this->getApplicationURI('product/')));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('#%d', $product->getID()))
-        ->setHref($request->getRequestURI()));
+    $crumbs->addTextCrumb(
+      pht('Products'),
+      $this->getApplicationURI('product/'));
+    $crumbs->addTextCrumb(
+      pht('#%d', $product->getID()),
+      $request->getRequestURI());
 
-    $properties = id(new PhabricatorPropertyListView())
+    $properties = id(new PHUIPropertyListView())
       ->setUser($user)
+      ->setActionList($actions)
       ->addProperty(pht('Type'), $product->getTypeName())
       ->addProperty(
         pht('Price'),
@@ -76,21 +76,23 @@ final class PhortuneProductViewController extends PhortuneController {
 
     $xaction_view = id(new PhabricatorApplicationTransactionView())
       ->setUser($user)
+      ->setObjectPHID($product->getPHID())
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
+
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->addPropertyList($properties);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
-        $actions,
-        $properties,
+        $object_box,
         $xaction_view,
       ),
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

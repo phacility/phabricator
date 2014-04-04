@@ -11,31 +11,25 @@ final class SlowvoteRemarkupRule
   }
 
   protected function loadObjects(array $ids) {
-    $polls = array(id(new PhabricatorSlowvotePoll())->load(head($ids)));
+    $viewer = $this->getEngine()->getConfig('viewer');
 
-    return id(new PhabricatorSlowvotePoll())
-      ->loadAllWhere('id IN (%Ld)', $ids);
+    return id(new PhabricatorSlowvoteQuery())
+      ->setViewer($viewer)
+      ->withIDs($ids)
+      ->needOptions(true)
+      ->needChoices(true)
+      ->needViewerChoices(true)
+      ->execute();
   }
 
   protected function renderObjectEmbed($object, $handle, $options) {
     $viewer = $this->getEngine()->getConfig('viewer');
 
-    $options = id(new PhabricatorSlowvoteOption())->loadAllWhere(
-      'pollID = %d',
-      $object->getID());
-    $choices = id(new PhabricatorSlowvoteChoice())->loadAllWhere(
-      'pollID = %d',
-      $object->getID());
-    $choices_by_user = mgroup($choices, 'getAuthorPHID');
-
-    $viewer_choices = idx($choices_by_user, $viewer->getPHID(), array());
-
     $embed = id(new SlowvoteEmbedView())
-      ->setPoll($object)
-      ->setOptions($options)
-      ->setViewerChoices($viewer_choices);
+      ->setUser($viewer)
+      ->setPoll($object);
 
-    return $embed->render();
+    return $embed;
   }
 
 }

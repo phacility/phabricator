@@ -2,6 +2,7 @@
  * @provides pholio-css
  */
 .pholio-mock-image-container {
+  margin-top: 16px;
   background-color: #282828;
   text-align: center;
   vertical-align: middle;
@@ -124,7 +125,7 @@
 }
 
 .pholio-image-description {
-  color: #777777;
+  color: {$greytext};
 }
 
 .pholio-image-title {
@@ -160,8 +161,7 @@
 }
 
 .pholio-mock-embed-footer {
-  margin: 2px;
-  color: #aaa;
+  margin: 2px 0;
 }
 
 .pholio-mock-embed-icons {
@@ -191,8 +191,8 @@
   padding-bottom: 2px;
 }
 
-.pholio-transaction-inline-comment p {
+.pholio-transaction-inline-comment div {
   display: table-cell;
   vertical-align: middle;
-  padding-bottom: 2px;
+  padding-left: 8px;
 }

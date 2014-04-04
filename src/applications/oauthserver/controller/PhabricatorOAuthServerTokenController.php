@@ -10,6 +10,13 @@ extends PhabricatorAuthController {
     return false;
   }
 
+  public function shouldAllowRestrictedParameter($parameter_name) {
+    if ($parameter_name == 'code') {
+      return true;
+    }
+    return parent::shouldAllowRestrictedParameter($parameter_name);
+  }
+
   public function processRequest() {
     $request       = $this->getRequest();
     $grant_type    = $request->getStr('grant_type');

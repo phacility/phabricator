@@ -8,7 +8,7 @@ final class PhabricatorBotMacroHandler extends PhabricatorBotHandler {
   private $macros;
   private $regexp;
 
-  private $next   = 0;
+  private $next = 0;
 
   private function init() {
     if ($this->macros === false) {
@@ -22,18 +22,21 @@ final class PhabricatorBotMacroHandler extends PhabricatorBotHandler {
     $macros = $this->getConduit()->callMethodSynchronous(
       'macro.query',
       array());
-    // bail if we have no macros
-    if (empty($macros)) {
+
+    // If we have no macros, cache `false` (meaning "no macros") and return
+    // immediately.
+    if (!$macros) {
+      $this->macros = false;
       return false;
     }
-    $this->macros = $macros;
 
     $regexp = array();
-    foreach ($this->macros as $macro_name => $macro) {
+    foreach ($macros as $macro_name => $macro) {
       $regexp[] = preg_quote($macro_name, '/');
     }
     $regexp = '/('.implode('|', $regexp).')/';
 
+    $this->macros = $macros;
     $this->regexp = $regexp;
 
     return true;

@@ -8,7 +8,7 @@
  *
  * @task event
  */
-final class ConpherenceHovercardEventListener extends PhutilEventListener {
+final class ConpherenceHovercardEventListener extends PhabricatorEventListener {
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERHOVERCARD);
@@ -39,4 +39,3 @@ final class ConpherenceHovercardEventListener extends PhutilEventListener {
   }
 
 }
-

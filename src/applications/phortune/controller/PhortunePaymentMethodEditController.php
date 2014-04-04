@@ -155,18 +155,12 @@ final class PhortunePaymentMethodEditController
     $request = $this->getRequest();
 
     $title = pht('Add Payment Method');
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($title);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Account'))
-        ->setHref($account_uri));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Payment Methods'))
-        ->setHref($request->getRequestURI()));
+    $crumbs->addTextCrumb(pht('Account'), $account_uri);
+    $crumbs->addTextCrumb(pht('Payment Methods'), $request->getRequestURI());
 
     return $this->buildApplicationPage(
       array(
@@ -177,7 +171,6 @@ final class PhortunePaymentMethodEditController
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

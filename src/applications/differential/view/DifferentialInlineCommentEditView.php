@@ -60,17 +60,21 @@ final class DifferentialInlineCommentEditView extends AphrontView {
         $this->renderBody(),
       ));
 
-    return hsprintf(
-      '<table>'.
-        '<tr class="inline-comment-splint">'.
-          '<th></th>'.
-          '<td class="left">%s</td>'.
-          '<th></th>'.
-          '<td colspan="3" class="right3">%s</td>'.
-        '</tr>'.
-      '</table>',
-      $this->onRight ? null : $content,
-      $this->onRight ? $content : null);
+    return phutil_tag('table', array(), phutil_tag(
+      'tr',
+      array('class' => 'inline-comment-splint'),
+      array(
+        phutil_tag('th', array()),
+        phutil_tag(
+          'td',
+          array('class' => 'left'),
+          $this->onRight ? null : $content),
+        phutil_tag('th', array()),
+        phutil_tag(
+          'td',
+          array('colspan' => 3, 'class' => 'right3'),
+          $this->onRight ? $content : null),
+      )));
   }
 
   private function renderInputs() {
@@ -91,7 +95,7 @@ final class DifferentialInlineCommentEditView extends AphrontView {
   private function renderBody() {
     $buttons = array();
 
-    $buttons[] = phutil_tag('button', array(), 'Ready');
+    $buttons[] = phutil_tag('button', array(), pht('Ready'));
     $buttons[] = javelin_tag(
       'button',
       array(
@@ -99,16 +103,6 @@ final class DifferentialInlineCommentEditView extends AphrontView {
         'class' => 'grey',
       ),
       pht('Cancel'));
-
-    $formatting = phutil_tag(
-      'a',
-      array(
-        'href' => PhabricatorEnv::getDoclink(
-          'article/Remarkup_Reference.html'),
-        'tabindex' => '-1',
-        'target' => '_blank',
-      ),
-      pht('Formatting Reference'));
 
     $title = phutil_tag(
       'div',
@@ -130,7 +124,6 @@ final class DifferentialInlineCommentEditView extends AphrontView {
         'class' => 'differential-inline-comment-edit-buttons',
       ),
       array(
-        $formatting,
         $buttons,
         phutil_tag('div', array('style' => 'clear: both'), ''),
       ));

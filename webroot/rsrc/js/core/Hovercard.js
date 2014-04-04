@@ -86,12 +86,12 @@ JX.install('Hovercard', {
       // TODO: Fix southern graceful align
       var margin = 20;
       // We can't shift left by ~$margin or more here due to Pholio, Phriction
-      var x = parseInt(p.x) - margin / 2;
-      var y = parseInt(p.y - n.y) - margin;
+      var x = parseInt(p.x, 10) - margin / 2;
+      var y = parseInt(p.y - n.y, 10) - margin;
 
       // If more in the center, we can safely center
       if (x > (n.x / 2) + margin) {
-        x = parseInt(p.x - (n.x / 2) + d.x);
+        x = parseInt(p.x - (n.x / 2) + d.x, 10);
       }
 
       // Temporarily disabled, since it gives weird results (you can only see

@@ -1,9 +1,10 @@
 <?php
 
 final class ReleephRequest extends ReleephDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorCustomFieldInterface {
 
-  protected $phid;
   protected $branchID;
   protected $requestUserPHID;
   protected $details = array();
@@ -20,7 +21,9 @@ final class ReleephRequest extends ReleephDAO
   protected $commitPHID;
 
   // Pre-populated handles that we'll bulk load in ReleephBranch
-  private $handles;
+  private $handles = self::ATTACHABLE;
+  private $customFields = self::ATTACHABLE;
+
 
 
 /* -(  Constants and helper methods  )--------------------------------------- */
@@ -52,6 +55,10 @@ final class ReleephRequest extends ReleephDAO
    */
   public function getPusherIntent() {
     $project = $this->loadReleephProject();
+    if (!$project) {
+      return null;
+    }
+
     if (!$project->getPushers()) {
       return self::INTENT_WANT;
     }
@@ -125,7 +132,7 @@ final class ReleephRequest extends ReleephDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      ReleephPHIDConstants::PHID_TYPE_RERQ);
+      ReleephPHIDTypeRequest::TYPECONST);
   }
 
   public function save() {
@@ -144,11 +151,7 @@ final class ReleephRequest extends ReleephDAO
   }
 
   public function getHandles() {
-    if (!$this->handles) {
-      throw new Exception(
-        "You must call ReleephBranch::populateReleephRequestHandles() first");
-    }
-    return $this->handles;
+    return $this->assertAttached($this->handles);
   }
 
   public function getDetail($key, $default = null) {
@@ -207,13 +210,15 @@ final class ReleephRequest extends ReleephDAO
   }
 
   public function loadRequestCommitDiffPHID() {
+    $phids = array();
     $commit = $this->loadPhabricatorRepositoryCommit();
     if ($commit) {
-      $edges = $this
-        ->loadPhabricatorRepositoryCommit()
-        ->loadRelativeEdges(PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV);
-      return head(array_keys($edges));
+      $phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $commit->getPHID(),
+        PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV);
     }
+
+    return head($phids);
   }
 
 
@@ -227,15 +232,10 @@ final class ReleephRequest extends ReleephDAO
   }
 
   public function loadReleephProject() {
-    return $this->loadReleephBranch()->loadReleephProject();
-  }
-
-  public function loadEvents() {
-    return $this->loadRelatives(
-      new ReleephRequestEvent(),
-      'releephRequestID',
-      'getID',
-      '(1 = 1) ORDER BY dateCreated, id');
+    $branch = $this->loadReleephBranch();
+    if ($branch) {
+      return $branch->loadReleephProject();
+    }
   }
 
   public function loadPhabricatorRepositoryCommit() {
@@ -254,6 +254,7 @@ final class ReleephRequest extends ReleephDAO
     }
   }
 
+  // TODO: (T603) Get rid of all this one-off ad-hoc loading.
   public function loadDifferentialRevision() {
     $diff_phid = $this->loadRequestCommitDiffPHID();
     if (!$diff_phid) {
@@ -292,11 +293,14 @@ final class ReleephRequest extends ReleephDAO
     return parent::setUserIntents($ar);
   }
 
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
 
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
@@ -307,5 +311,32 @@ final class ReleephRequest extends ReleephDAO
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return false;
   }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
+
+
+/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+
+
+  public function getCustomFieldSpecificationForRole($role) {
+    return PhabricatorEnv::getEnvConfig('releeph.fields');
+  }
+
+  public function getCustomFieldBaseClass() {
+    return 'ReleephFieldSpecification';
+  }
+
+  public function getCustomFields() {
+    return $this->assertAttached($this->customFields);
+  }
+
+  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
+    $this->customFields = $fields;
+    return $this;
+  }
+
 
 }

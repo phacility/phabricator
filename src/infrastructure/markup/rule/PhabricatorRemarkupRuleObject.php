@@ -11,6 +11,11 @@ abstract class PhabricatorRemarkupRuleObject
   abstract protected function getObjectNamePrefix();
   abstract protected function loadObjects(array $ids);
 
+  protected function getObjectNamePrefixBeginsWithWordCharacter() {
+    $prefix = $this->getObjectNamePrefix();
+    return preg_match('/^\w/', $prefix);
+  }
+
   protected function getObjectIDPattern() {
     return '[1-9]\d*';
   }
@@ -21,11 +26,11 @@ abstract class PhabricatorRemarkupRuleObject
 
   protected function loadHandles(array $objects) {
     $phids = mpull($objects, 'getPHID');
-    $query = new PhabricatorObjectHandleData($phids);
 
-    $viewer = $this->getEngine()->getConfig('viewer');
-    $query->setViewer($viewer);
-    $handles = $query->loadHandles();
+    $handles = id(new PhabricatorHandleQuery($phids))
+      ->withPHIDs($phids)
+      ->setViewer($this->getEngine()->getConfig('viewer'))
+      ->execute();
 
     $result = array();
     foreach ($objects as $id => $object) {
@@ -37,17 +42,10 @@ abstract class PhabricatorRemarkupRuleObject
   protected function renderObjectRef($object, $handle, $anchor, $id) {
     $href = $handle->getURI();
     $text = $this->getObjectNamePrefix().$id;
+
     if ($anchor) {
-      $matches = null;
-      if (preg_match('@^(?:comment-)?(\d{1,7})$@', $anchor, $matches)) {
-        // Maximum length is 7 because 12345678 could be a file hash in
-        // Differential.
-        $href = $href.'#comment-'.$matches[1];
-        $text = $text.'#'.$matches[1];
-      } else {
-        $href = $href.'#'.$anchor;
-        $text = $text.'#'.$anchor;
-      }
+      $href = $href.'#'.$anchor;
+      $text = $text.'#'.$anchor;
     }
 
     if ($this->getEngine()->isTextMode()) {
@@ -80,10 +78,10 @@ abstract class PhabricatorRemarkupRuleObject
   }
 
   protected function renderHovertag($name, $href, array $attr = array()) {
-    return id(new PhabricatorTagView())
+    return id(new PHUITagView())
       ->setName($name)
       ->setHref($href)
-      ->setType(PhabricatorTagView::TYPE_OBJECT)
+      ->setType(PHUITagView::TYPE_OBJECT)
       ->setPHID(idx($attr, 'phid'))
       ->setClosed(idx($attr, 'closed'))
       ->render();
@@ -99,11 +97,23 @@ abstract class PhabricatorRemarkupRuleObject
       array($this, 'markupObjectEmbed'),
       $text);
 
+    // If the prefix starts with a word character (like "D"), we want to
+    // require a word boundary so that we don't match "XD1" as "D1". If the
+    // prefix does not start with a word character, we want to require no word
+    // boundary for the same reasons. Test if the prefix starts with a word
+    // character.
+    if ($this->getObjectNamePrefixBeginsWithWordCharacter()) {
+      $boundary = '\\b';
+    } else {
+      $boundary = '\\B';
+    }
+
     // NOTE: The "(?<!#)" prevents us from linking "#abcdef" or similar. The
     // "\b" allows us to link "(abcdef)" or similar without linking things
     // in the middle of words.
+
     $text = preg_replace_callback(
-      '@(?<!#)\b'.$prefix.'('.$id.')(?:#([-\w\d]+))?\b@',
+      '((?<!#)'.$boundary.$prefix.'('.$id.')(?:#([-\w\d]+))?\b)',
       array($this, 'markupObjectReference'),
       $text);
 

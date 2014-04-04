@@ -25,7 +25,8 @@ final class PhabricatorApplicationMailingLists extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/mailinglists/' => array(
-        '' => 'PhabricatorMailingListsListController',
+        '(?:query/(?P<queryKey>[^/]+)/)?'
+          => 'PhabricatorMailingListsListController',
         'edit/(?:(?P<id>[1-9]\d*)/)?'
           => 'PhabricatorMailingListsEditController',
       ),

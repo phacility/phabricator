@@ -10,6 +10,8 @@ final class PhabricatorMacroEditor
     $types[] = PhabricatorMacroTransactionType::TYPE_NAME;
     $types[] = PhabricatorMacroTransactionType::TYPE_DISABLED;
     $types[] = PhabricatorMacroTransactionType::TYPE_FILE;
+    $types[] = PhabricatorMacroTransactionType::TYPE_AUDIO;
+    $types[] = PhabricatorMacroTransactionType::TYPE_AUDIO_BEHAVIOR;
 
     return $types;
   }
@@ -25,6 +27,10 @@ final class PhabricatorMacroEditor
         return $object->getIsDisabled();
       case PhabricatorMacroTransactionType::TYPE_FILE:
         return $object->getFilePHID();
+      case PhabricatorMacroTransactionType::TYPE_AUDIO:
+        return $object->getAudioPHID();
+      case PhabricatorMacroTransactionType::TYPE_AUDIO_BEHAVIOR:
+        return $object->getAudioBehavior();
     }
   }
 
@@ -36,6 +42,8 @@ final class PhabricatorMacroEditor
       case PhabricatorMacroTransactionType::TYPE_NAME:
       case PhabricatorMacroTransactionType::TYPE_DISABLED:
       case PhabricatorMacroTransactionType::TYPE_FILE:
+      case PhabricatorMacroTransactionType::TYPE_AUDIO:
+      case PhabricatorMacroTransactionType::TYPE_AUDIO_BEHAVIOR:
         return $xaction->getNewValue();
     }
   }
@@ -54,6 +62,12 @@ final class PhabricatorMacroEditor
       case PhabricatorMacroTransactionType::TYPE_FILE:
         $object->setFilePHID($xaction->getNewValue());
         break;
+      case PhabricatorMacroTransactionType::TYPE_AUDIO:
+        $object->setAudioPHID($xaction->getNewValue());
+        break;
+      case PhabricatorMacroTransactionType::TYPE_AUDIO_BEHAVIOR:
+        $object->setAudioBehavior($xaction->getNewValue());
+        break;
     }
   }
 
@@ -61,6 +75,18 @@ final class PhabricatorMacroEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     return;
+  }
+
+  protected function extractFilePHIDsFromCustomTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorMacroTransactionType::TYPE_FILE:
+        return array($xaction->getNewValue());
+    }
+
+    return array();
   }
 
   protected function mergeTransactions(
@@ -72,13 +98,25 @@ final class PhabricatorMacroEditor
       case PhabricatorMacroTransactionType::TYPE_NAME:
       case PhabricatorMacroTransactionType::TYPE_DISABLED:
       case PhabricatorMacroTransactionType::TYPE_FILE:
+      case PhabricatorMacroTransactionType::TYPE_AUDIO:
+      case PhabricatorMacroTransactionType::TYPE_AUDIO_BEHAVIOR:
         return $v;
     }
 
     return parent::mergeTransactions($u, $v);
   }
 
-  protected function supportsMail() {
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorMacroTransactionType::TYPE_NAME;
+          return ($xaction->getOldValue() !== null);
+        default:
+          break;
+      }
+    }
     return true;
   }
 
@@ -118,7 +156,9 @@ final class PhabricatorMacroEditor
     return PhabricatorEnv::getEnvConfig('metamta.macro.subject-prefix');
   }
 
-  protected function supportsFeed() {
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
     return true;
   }
 }

@@ -23,9 +23,8 @@ final class QueryFormattingTestCase extends PhabricatorTestCase {
     } catch (Exception $ex) {
       $raised = $ex;
     }
-    $this->assertEqual(
+    $this->assertTrue(
       (bool)$raised,
-      true,
       'qsprintf should raise exception for invalid %d conversion.');
 
     $this->assertEqual(
@@ -35,6 +34,23 @@ final class QueryFormattingTestCase extends PhabricatorTestCase {
     $this->assertEqual(
       'NULL',
       qsprintf($conn_r, '%ns', null));
+
+    $this->assertEqual(
+      "'<S>', '<S>'",
+      qsprintf($conn_r, '%Ls', array('x', 'y')));
+
+    $this->assertEqual(
+      "'<B>'",
+      qsprintf($conn_r, '%B', null));
+
+    $this->assertEqual(
+      "NULL",
+      qsprintf($conn_r, '%nB', null));
+
+    $this->assertEqual(
+      "'<B>', '<B>'",
+      qsprintf($conn_r, '%LB', array('x', 'y')));
   }
+
 
 }

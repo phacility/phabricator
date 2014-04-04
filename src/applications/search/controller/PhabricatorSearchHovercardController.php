@@ -12,10 +12,14 @@ final class PhabricatorSearchHovercardController
 
     $phids = $request->getArr('phids');
 
-    $handle_data = new PhabricatorObjectHandleData($phids);
-    $handle_data->setViewer($user);
-    $handles = $handle_data->loadHandles();
-    $objects = $handle_data->loadObjects();
+    $handles = id(new PhabricatorHandleQuery())
+      ->setViewer($user)
+      ->withPHIDs($phids)
+      ->execute();
+    $objects = id(new PhabricatorObjectQuery())
+      ->setViewer($user)
+      ->withPHIDs($phids)
+      ->execute();
 
     $cards = array();
 
@@ -52,7 +56,6 @@ final class PhabricatorSearchHovercardController
       return $this->buildApplicationPage(
         $cards,
         array(
-          'dust' => true,
         ));
     } else {
       return id(new AphrontAjaxResponse())->setContent(

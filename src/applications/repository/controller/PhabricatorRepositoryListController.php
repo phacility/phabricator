@@ -3,17 +3,15 @@
 final class PhabricatorRepositoryListController
   extends PhabricatorRepositoryController {
 
-  public function shouldRequireAdmin() {
-    return false;
-  }
-
   public function processRequest() {
 
     $request = $this->getRequest();
     $user = $request->getUser();
     $is_admin = $user->getIsAdmin();
 
-    $repos = id(new PhabricatorRepository())->loadAll();
+    $repos = id(new PhabricatorRepositoryQuery())
+      ->setViewer($user)
+      ->execute();
     $repos = msort($repos, 'getName');
 
     $rows = array();
@@ -40,17 +38,9 @@ final class PhabricatorRepositoryListController
           'a',
           array(
             'class' => 'button small grey',
-            'href'  => '/repository/edit/'.$repo->getID().'/',
+            'href'  => '/diffusion/'.$repo->getCallsign().'/edit/',
           ),
           'Edit'),
-        javelin_tag(
-          'a',
-          array(
-            'class' => 'button small grey',
-            'href'  => '/repository/delete/'.$repo->getID().'/',
-            'sigil' => 'workflow',
-          ),
-          'Delete'),
       );
     }
 
@@ -62,7 +52,6 @@ final class PhabricatorRepositoryListController
         'Type',
         'Diffusion',
         '',
-        ''
       ));
     $table->setColumnClasses(
       array(
@@ -70,7 +59,6 @@ final class PhabricatorRepositoryListController
         'wide',
         null,
         null,
-        'action',
         'action',
       ));
 
@@ -81,13 +69,12 @@ final class PhabricatorRepositoryListController
         true,
         true,
         $is_admin,
-        $is_admin,
       ));
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Repositories');
     if ($is_admin) {
-      $panel->setCreateButton('Create New Repository', '/repository/create/');
+      $panel->setCreateButton('Create New Repository', '/diffusion/new/');
     }
     $panel->appendChild($table);
     $panel->setNoBackground();
@@ -156,7 +143,6 @@ final class PhabricatorRepositoryListController
 
     return $this->buildStandardPageResponse(
       array(
-        $this->renderDaemonNotice(),
         $panel,
         $project_panel,
       ),

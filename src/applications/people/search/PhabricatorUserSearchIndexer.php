@@ -12,21 +12,18 @@ final class PhabricatorUserSearchIndexer
 
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($user->getPHID());
-    $doc->setDocumentType(PhabricatorPHIDConstants::PHID_TYPE_USER);
+    $doc->setDocumentType(PhabricatorPeoplePHIDTypeUser::TYPECONST);
     $doc->setDocumentTitle($user->getUserName().' ('.$user->getRealName().')');
     $doc->setDocumentCreated($user->getDateCreated());
     $doc->setDocumentModified($user->getDateModified());
 
-    // TODO: Index the blurbs from their profile or something? Probably not
-    // actually useful...
-
-    if (!$user->getIsDisabled()) {
-      $doc->addRelationship(
-        PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
-        $user->getPHID(),
-        PhabricatorPHIDConstants::PHID_TYPE_USER,
-        time());
-    }
+    $doc->addRelationship(
+      $user->isUserActivated()
+        ? PhabricatorSearchRelationship::RELATIONSHIP_OPEN
+        : PhabricatorSearchRelationship::RELATIONSHIP_CLOSED,
+      $user->getPHID(),
+      PhabricatorPeoplePHIDTypeUser::TYPECONST,
+      time());
 
     return $doc;
   }

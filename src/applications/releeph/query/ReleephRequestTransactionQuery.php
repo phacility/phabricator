@@ -3,7 +3,7 @@
 final class ReleephRequestTransactionQuery
   extends PhabricatorApplicationTransactionQuery {
 
-  protected function getTemplateApplicationTransaction() {
+  public function getTemplateApplicationTransaction() {
     return new ReleephRequestTransaction();
   }
 

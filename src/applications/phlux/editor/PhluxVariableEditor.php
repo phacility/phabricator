@@ -62,6 +62,8 @@ final class PhluxVariableEditor
     switch ($xaction->getTransactionType()) {
       case PhluxTransaction::TYPE_EDIT_KEY:
       case PhluxTransaction::TYPE_EDIT_VALUE:
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return;
     }
     return parent::applyCustomExternalTransaction($object, $xaction);

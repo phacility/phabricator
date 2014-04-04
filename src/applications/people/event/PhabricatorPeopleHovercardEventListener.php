@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorPeopleHovercardEventListener
-  extends PhutilEventListener {
+  extends PhabricatorEventListener {
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERHOVERCARD);
@@ -33,29 +33,27 @@ final class PhabricatorPeopleHovercardEventListener
       nonempty($profile->getTitle(),
         pht('No title was found befitting of this rare specimen'))));
 
-    $hovercard->addField(pht('User since'),
-      phabricator_date($user->getDateCreated(), $user));
-
     if ($user->getIsDisabled()) {
-      $hovercard->addTag(id(new PhabricatorTagView())
-        ->setBackgroundColor(PhabricatorTagView::COLOR_BLACK)
-        ->setName(pht('Disabled'))
-        ->setType(PhabricatorTagView::TYPE_STATE));
+      $hovercard->addField(pht('Account'), pht('Disabled'));
+    } else if (!$user->isUserActivated()) {
+      $hovercard->addField(pht('Account'), pht('Not Activated'));
     } else {
-      $statuses = id(new PhabricatorUserStatus())->loadCurrentStatuses(
+      $statuses = id(new PhabricatorCalendarEvent())->loadCurrentStatuses(
         array($user->getPHID()));
       if ($statuses) {
         $current_status = reset($statuses);
+        $dateto = phabricator_datetime($current_status->getDateTo(), $user);
         $hovercard->addField(pht('Status'),
           $current_status->getDescription());
-        $hovercard->addTag(id(new PhabricatorTagView())
-          ->setName($current_status->getHumanStatus())
-          ->setBackgroundColor(PhabricatorTagView::COLOR_BLUE)
-          ->setType(PhabricatorTagView::TYPE_STATE));
+        $hovercard->addField(pht('Until'),
+          $dateto);
       } else {
         $hovercard->addField(pht('Status'), pht('Available'));
       }
     }
+
+    $hovercard->addField(pht('User since'),
+      phabricator_date($user->getDateCreated(), $user));
 
     if ($profile->getBlurb()) {
       $hovercard->addField(pht('Blurb'),

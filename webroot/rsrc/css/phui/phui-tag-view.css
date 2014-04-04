@@ -1,0 +1,137 @@
+/**
+ * @provides phui-tag-view-css
+ */
+
+.phui-tag-view {
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+  position: relative;
+}
+
+a.phui-tag-view:hover {
+  text-decoration: none;
+}
+
+.phui-tag-state-closed .phui-tag-core {
+  text-decoration: line-through;
+}
+
+.phui-tag-core {
+  color: inherit;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  padding: 0 4px;
+}
+
+.phui-tag-type-state .phui-tag-core {
+  padding: 1px 6px;
+}
+
+.phui-tag-view .phui-icon-view {
+  position: absolute;
+  display: inline-block;
+  top: 1px;
+  left: 5px;
+}
+
+.phui-tag-icon-view .phui-tag-core {
+  padding-left: 22px;
+}
+
+.phui-tag-dot {
+  position: relative;
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 4px;
+  top: -1px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+}
+
+.phui-tag-type-state {
+  color: #ffffff;
+  text-shadow: rgba(100, 100, 100, 0.40) 0px -1px 1px;
+}
+
+.phui-tag-type-object,
+a.phui-tag-type-object,
+a.phui-tag-type-object:link {
+  color: #000000;
+}
+
+.phui-tag-type-person {
+  white-space: nowrap;
+  color: #19558d;
+}
+
+.phui-tag-color-red {
+  background-color: {$red};
+  border-color: {$red};
+}
+
+.phui-tag-color-orange {
+  background-color: {$orange};
+  border-color: {$orange};
+}
+
+.phui-tag-color-yellow {
+  background-color: {$yellow};
+  border-color: {$yellow};
+}
+
+.phui-tag-color-blue {
+  background-color: {$blue};
+  border-color: {$blue};
+}
+
+.phui-tag-color-indigo {
+  background-color: {$indigo};
+  border-color: {$indigo};
+}
+
+.phui-tag-color-green {
+  background-color: {$green};
+  border-color: {$green};
+}
+
+.phui-tag-color-violet {
+  background-color: {$violet};
+  border-color: {$violet};
+}
+
+.phui-tag-color-black {
+  background-color: #333333;
+  border-color: #333333;
+}
+
+.phui-tag-color-grey {
+  background-color: {$lightgreytext};
+  border-color: {$lightgreytext};
+}
+
+.phui-tag-color-white {
+  background-color: #f7f7f7;
+  border-color: #f7f7f7;
+}
+
+.phui-tag-color-object {
+  background-color: #e7e7e7;
+  border-color: #e7e7e7;
+}
+
+.phui-tag-color-person {
+  background-color: #f1f7ff;
+  border-color: #f1f7ff;
+}
+
+a.phui-tag-view:hover
+  .phui-tag-core.phui-tag-color-person {
+  border-color: #d9ebfd;
+}
+
+a.phui-tag-view:hover
+  .phui-tag-core.phui-tag-color-object {
+  border-color: #d7d7d7;
+}

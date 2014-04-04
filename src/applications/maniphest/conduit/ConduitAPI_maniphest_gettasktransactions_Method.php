@@ -33,21 +33,40 @@ final class ConduitAPI_maniphest_gettasktransactions_Method
       return $results;
     }
 
-    $transactions = id(new ManiphestTransaction())->loadAllWhere(
-      'taskID IN (%Ld) ORDER BY id ASC',
-      $task_ids);
+    $tasks = id(new ManiphestTaskQuery())
+      ->setViewer($request->getUser())
+      ->withIDs($task_ids)
+      ->execute();
+    $tasks = mpull($tasks, null, 'getPHID');
+
+    $transactions = array();
+    if ($tasks) {
+      $transactions = id(new ManiphestTransactionQuery())
+        ->setViewer($request->getUser())
+        ->withObjectPHIDs(mpull($tasks, 'getPHID'))
+        ->needComments(true)
+        ->execute();
+    }
 
     foreach ($transactions as $transaction) {
-      $task_id = $transaction->getTaskID();
-      if (!array_key_exists($task_id, $results)) {
-        $results[$task_id] = array();
+      $task_phid = $transaction->getObjectPHID();
+      if (empty($tasks[$task_phid])) {
+        continue;
       }
+
+      $task_id = $tasks[$task_phid]->getID();
+
+      $comments = null;
+      if ($transaction->hasComment()) {
+        $comments = $transaction->getComment()->getContent();
+      }
+
       $results[$task_id][] = array(
         'taskID'  => $task_id,
         'transactionType'  => $transaction->getTransactionType(),
         'oldValue'  => $transaction->getOldValue(),
         'newValue'  => $transaction->getNewValue(),
-        'comments'      => $transaction->getComments(),
+        'comments'      => $comments,
         'authorPHID'  => $transaction->getAuthorPHID(),
         'dateCreated' => $transaction->getDateCreated(),
       );

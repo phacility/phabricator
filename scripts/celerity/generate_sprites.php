@@ -36,8 +36,13 @@ $sheets = array(
   'apps-large' => $generator->buildAppsLargeSheet(),
   'payments' => $generator->buildPaymentsSheet(),
   'tokens' => $generator->buildTokenSheet(),
+  'buttonbar' => $generator->buildButtonBarSheet(),
   'docs' => $generator->buildDocsSheet(),
   'gradient' => $generator->buildGradientSheet(),
+  'main-header' => $generator->buildMainHeaderSheet(),
+  'login' => $generator->buildLoginSheet(),
+  'status' => $generator->buildStatusSheet(),
+  'projects' => $generator->buildProjectsSheet(),
 );
 
 list($err) = exec_manual('optipng');
@@ -51,6 +56,9 @@ if ($err) {
 }
 
 foreach ($sheets as $name => $sheet) {
+
+  $sheet->setBasePath($root);
+
   $manifest_path = $root.'/resources/sprite/manifest/'.$name.'.json';
   if (!$args->getArg('force')) {
     if (Filesystem::pathExists($manifest_path)) {

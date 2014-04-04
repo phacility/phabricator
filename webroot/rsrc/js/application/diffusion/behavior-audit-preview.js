@@ -21,7 +21,7 @@ JX.behavior('audit-preview', function(config) {
       action: action.value,
       content: content.value
     };
-  }
+  };
 
   var request = new JX.PhabricatorShapedRequest(config.uri, callback, getdata);
   var trigger = JX.bind(request, request.trigger);

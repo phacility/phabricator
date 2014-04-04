@@ -1,7 +1,9 @@
 <?php
 
 final class PhluxVariable extends PhluxDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorFlaggableInterface,
+    PhabricatorPolicyInterface {
 
   protected $variableKey;
   protected $variableValue;
@@ -18,8 +20,7 @@ final class PhluxVariable extends PhluxDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_PVAR);
+    return PhabricatorPHID::generateNewPHID(PhluxPHIDTypeVariable::TYPECONST);
   }
 
 
@@ -44,6 +45,10 @@ final class PhluxVariable extends PhluxDAO
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
   }
 
 }

@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group countdown
+ */
 final class PhabricatorCountdownViewController
   extends PhabricatorCountdownController {
 
@@ -14,77 +17,104 @@ final class PhabricatorCountdownViewController
 
     $request = $this->getRequest();
     $user = $request->getUser();
-    $timer = id(new PhabricatorCountdown())->load($this->id);
-    if (!$timer) {
+
+    $countdown = id(new PhabricatorCountdownQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->executeOne();
+    if (!$countdown) {
       return new Aphront404Response();
     }
 
-    require_celerity_resource('phabricator-countdown-css');
+    $countdown_view = id(new PhabricatorCountdownView())
+      ->setUser($user)
+      ->setCountdown($countdown)
+      ->setHeadless(true);
 
-    $chrome_visible = $request->getBool('chrome', true);
-    $chrome_new = $chrome_visible ? false : null;
-    $chrome_link = phutil_tag(
-      'a',
-      array(
-        'href' => $request->getRequestURI()->alter('chrome', $chrome_new),
-        'class' => 'phabricator-timer-chrome-link',
-      ),
-      $chrome_visible ? pht('Disable Chrome') : pht('Enable Chrome'));
-
-    $container = celerity_generate_unique_node_id();
-    $content = hsprintf(
-      '<div class="phabricator-timer" id="%s">
-        <h1 class="phabricator-timer-header">%s &middot; %s</h1>
-        <div class="phabricator-timer-pane">
-          <table class="phabricator-timer-table">
-            <tr>
-              <th>%s</th>
-              <th>%s</th>
-              <th>%s</th>
-              <th>%s</th>
-            </tr>
-            <tr>%s%s%s%s</tr>
-          </table>
-        </div>
-        %s
-      </div>',
-      $container,
-      $timer->getTitle(),
-      phabricator_datetime($timer->getEpoch(), $user),
-      pht('Days'),
-      pht('Hours'),
-      pht('Minutes'),
-      pht('Seconds'),
-      javelin_tag('td', array('sigil' => 'phabricator-timer-days'), ''),
-      javelin_tag('td', array('sigil' => 'phabricator-timer-hours'), ''),
-      javelin_tag('td', array('sigil' => 'phabricator-timer-minutes'), ''),
-      javelin_tag('td', array('sigil' => 'phabricator-timer-seconds'), ''),
-      $chrome_link);
-
-    Javelin::initBehavior('countdown-timer', array(
-      'timestamp' => $timer->getEpoch(),
-      'container' => $container,
-    ));
-
-    $panel = $content;
+    $id = $countdown->getID();
+    $title = $countdown->getTitle();
 
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($timer->getTitle())
-          ->setHref($this->getApplicationURI($this->id.'/')));
+      ->addTextCrumb("C{$id}");
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setUser($user)
+      ->setPolicyObject($countdown);
+
+    $actions = $this->buildActionListView($countdown);
+    $properties = $this->buildPropertyListView($countdown, $actions);
+
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->addPropertyList($properties);
+
+    $content = array(
+      $crumbs,
+      $object_box,
+      $countdown_view,
+    );
 
     return $this->buildApplicationPage(
+      $content,
       array(
-        ($chrome_visible ? $crumbs : ''),
-        $panel,
-      ),
-      array(
-        'title' => pht('Countdown: %s', $timer->getTitle()),
-        'chrome' => $chrome_visible,
+        'title' => $title,
         'device' => true,
       ));
+  }
+
+  private function buildActionListView(PhabricatorCountdown $countdown) {
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $id = $countdown->getID();
+
+    $view = id(new PhabricatorActionListView())
+      ->setUser($viewer);
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $countdown,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('edit')
+        ->setName(pht('Edit Countdown'))
+        ->setHref($this->getApplicationURI("edit/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('delete')
+        ->setName(pht('Delete Countdown'))
+        ->setHref($this->getApplicationURI("delete/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true));
+
+    return $view;
+  }
+
+  private function buildPropertyListView(
+    PhabricatorCountdown $countdown,
+    PhabricatorActionListView $actions) {
+
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $this->loadHandles(array($countdown->getAuthorPHID()));
+
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setActionList($actions);
+
+    $view->addProperty(
+      pht('Author'),
+      $this->getHandle($countdown->getAuthorPHID())->renderLink());
+
+    return $view;
   }
 
 }

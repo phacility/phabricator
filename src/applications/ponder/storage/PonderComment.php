@@ -20,7 +20,7 @@ final class PonderComment extends PonderDAO
   }
 
   public function newMarkupEngine($field) {
-    return PhabricatorMarkupEngine::newPonderMarkupEngine();
+    return PhabricatorMarkupEngine::getEngine();
   }
 
   public function didMarkupText(
@@ -38,4 +38,3 @@ final class PonderComment extends PonderDAO
     return self::MARKUP_FIELD_CONTENT;
   }
 }
-

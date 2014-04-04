@@ -64,7 +64,7 @@ JX.behavior('line-chart', function(config) {
         if (config.x[0][ii] > this.axis) {
           break;
         }
-        yvalue = format(config.y[yy][ii], (config.yformat || [])[yy]);
+        yvalue = format(config.y[yy][ii], config.yformat);
       }
 
       var xvalue = format(this.axis, config.xformat);
@@ -86,4 +86,3 @@ JX.behavior('line-chart', function(config) {
   });
 
 });
-

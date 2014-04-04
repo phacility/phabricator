@@ -14,7 +14,7 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
     return '/releeph/';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'releeph';
   }
 
@@ -33,16 +33,16 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
     return array(
       '/RQ(?P<requestID>[1-9]\d*)' => 'ReleephRequestViewController',
       '/releeph/' => array(
-        '' => 'ReleephProjectListController',
+        '' => 'ReleephProductListController',
         'project/' => array(
-          '(?:(?P<filter>active|inactive)/)?' => 'ReleephProjectListController',
-          'create/' => 'ReleephProjectCreateController',
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'ReleephProductListController',
+          'create/' => 'ReleephProductCreateController',
           '(?P<projectID>[1-9]\d*)/' => array(
-            '' => 'ReleephProjectViewController',
-            'closedbranches/' => 'ReleephProjectViewController',
-            'edit/' => 'ReleephProjectEditController',
+            '(?:query/(?P<queryKey>[^/]+)/)?' => 'ReleephProductViewController',
+            'edit/' => 'ReleephProductEditController',
             'cutbranch/' => 'ReleephBranchCreateController',
-            'action/(?P<action>.+)/' => 'ReleephProjectActionController',
+            'action/(?P<action>.+)/' => 'ReleephProductActionController',
+            'history/' => 'ReleephProductHistoryController',
           ),
         ),
         'branch/' => array(
@@ -51,10 +51,10 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
           '(?P<action>close|re-open)/(?P<branchID>[1-9]\d*)/' =>
             'ReleephBranchAccessController',
           'preview/' => 'ReleephBranchNamePreviewController',
-
-          // Left in, just in case the by-name stuff fails!
-          '(?P<branchID>[^/]+)/' =>
-            'ReleephBranchViewController',
+          '(?P<branchID>[^/]+)/' => array(
+            'history/' => 'ReleephBranchHistoryController',
+            '(?:query/(?P<queryKey>[^/]+)/)?' => 'ReleephBranchViewController',
+          ),
         ),
         'request/' => array(
           '(?P<requestID>[1-9]\d*)/' => 'ReleephRequestViewController',
@@ -75,7 +75,7 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
 
         // Branch navigation made pretty, as it's the most common:
         '(?P<projectName>[^/]+)/(?P<branchName>[^/]+)/' => array(
-          ''              => 'ReleephBranchViewController',
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'ReleephBranchViewController',
           'edit/'         => 'ReleephBranchEditController',
           'request/'      => 'ReleephRequestEditController',
           '(?P<action>close|re-open)/' => 'ReleephBranchAccessController',

@@ -10,22 +10,22 @@ final class PhabricatorXHProfProfileController
   }
 
   public function processRequest() {
+    $request = $this->getRequest();
 
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'phid = %s',
-      $this->phid);
-
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($request->getUser())
+      ->withPHIDs(array($this->phid))
+      ->executeOne();
     if (!$file) {
       return new Aphront404Response();
     }
 
     $data = $file->loadFileData();
-    $data = unserialize($data);
+    $data = @json_decode($data, true);
     if (!$data) {
       throw new Exception("Failed to unserialize XHProf profile!");
     }
 
-    $request = $this->getRequest();
     $symbol = $request->getStr('symbol');
 
     $is_framed = $request->getBool('frame');

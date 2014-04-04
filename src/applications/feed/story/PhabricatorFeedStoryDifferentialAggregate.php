@@ -54,10 +54,8 @@ final class PhabricatorFeedStoryDifferentialAggregate
         break;
     }
 
-    $view = new PHUIFeedStoryView();
+    $view = $this->newStoryView();
     $view->setAppIcon('differential-dark');
-    $view->setEpoch($this->getEpoch());
-    $view->setViewed($this->getHasViewed());
     $view->setTitle($title);
 
     $href = $this->getHandle($data->getValue('revision_phid'))->getURI();

@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group file
+ */
 final class PhabricatorFileQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
@@ -8,6 +11,9 @@ final class PhabricatorFileQuery
   private $authorPHIDs;
   private $explicitUploads;
   private $transforms;
+  private $dateCreatedAfter;
+  private $dateCreatedBefore;
+  private $contentHashes;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -21,6 +27,21 @@ final class PhabricatorFileQuery
 
   public function withAuthorPHIDs(array $phids) {
     $this->authorPHIDs = $phids;
+    return $this;
+  }
+
+  public function withDateCreatedBefore($date_created_before) {
+    $this->dateCreatedBefore = $date_created_before;
+    return $this;
+  }
+
+  public function withDateCreatedAfter($date_created_after) {
+    $this->dateCreatedAfter = $date_created_after;
+    return $this;
+  }
+
+  public function withContentHashes(array $content_hashes) {
+    $this->contentHashes = $content_hashes;
     return $this;
   }
 
@@ -89,7 +110,50 @@ final class PhabricatorFileQuery
       $this->buildOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
 
-    return $table->loadAllFromArray($data);
+    $files = $table->loadAllFromArray($data);
+
+    if (!$files) {
+      return $files;
+    }
+
+    // We need to load attached objects to perform policy checks for files.
+    // First, load the edges.
+
+    $edge_type = PhabricatorEdgeConfig::TYPE_FILE_HAS_OBJECT;
+    $phids = mpull($files, 'getPHID');
+    $edges = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs($phids)
+      ->withEdgeTypes(array($edge_type))
+      ->execute();
+
+    $object_phids = array();
+    foreach ($files as $file) {
+      $phids = array_keys($edges[$file->getPHID()][$edge_type]);
+      $file->attachObjectPHIDs($phids);
+      foreach ($phids as $phid) {
+        $object_phids[$phid] = true;
+      }
+    }
+    $object_phids = array_keys($object_phids);
+
+    // Now, load the objects.
+
+    $objects = array();
+    if ($object_phids) {
+      $objects = id(new PhabricatorObjectQuery())
+        ->setParentQuery($this)
+        ->setViewer($this->getViewer())
+        ->withPHIDs($object_phids)
+        ->execute();
+      $objects = mpull($objects, null, 'getPHID');
+    }
+
+    foreach ($files as $file) {
+      $file_objects = array_select_keys($objects, $file->getObjectPHIDs());
+      $file->attachObjects($file_objects);
+    }
+
+    return $files;
   }
 
   private function buildJoinClause(AphrontDatabaseConnection $conn_r) {
@@ -156,11 +220,37 @@ final class PhabricatorFileQuery
       $where[] = qsprintf($conn_r, '(%Q)', implode(') OR (', $clauses));
     }
 
+    if ($this->dateCreatedAfter) {
+      $where[] = qsprintf(
+        $conn_r,
+        'f.dateCreated >= %d',
+        $this->dateCreatedAfter);
+    }
+
+    if ($this->dateCreatedBefore) {
+      $where[] = qsprintf(
+        $conn_r,
+        'f.dateCreated <= %d',
+        $this->dateCreatedBefore);
+    }
+
+    if ($this->contentHashes) {
+      $where[] = qsprintf(
+        $conn_r,
+        'f.contentHash IN (%Ls)',
+        $this->contentHashes);
+    }
+
     return $this->formatWhereClause($where);
   }
 
   protected function getPagingColumn() {
     return 'f.id';
+  }
+
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationFiles';
   }
 
 }

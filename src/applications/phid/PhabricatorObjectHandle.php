@@ -1,6 +1,7 @@
 <?php
 
-final class PhabricatorObjectHandle {
+final class PhabricatorObjectHandle
+  implements PhabricatorPolicyInterface {
 
   private $uri;
   private $phid;
@@ -13,6 +14,36 @@ final class PhabricatorObjectHandle {
   private $status = PhabricatorObjectHandleStatus::STATUS_OPEN;
   private $complete;
   private $disabled;
+  private $objectName;
+  private $policyFiltered;
+
+  public function getTypeIcon() {
+    if ($this->getPHIDType()) {
+      return $this->getPHIDType()->getTypeIcon();
+    }
+    return null;
+  }
+
+  public function setPolicyFiltered($policy_filered) {
+    $this->policyFiltered = $policy_filered;
+    return $this;
+  }
+
+  public function getPolicyFiltered() {
+    return $this->policyFiltered;
+  }
+
+  public function setObjectName($object_name) {
+    $this->objectName = $object_name;
+    return $this;
+  }
+
+  public function getObjectName() {
+    if (!$this->objectName) {
+      return $this->getName();
+    }
+    return $this->objectName;
+  }
 
   public function setURI($uri) {
     $this->uri = $uri;
@@ -38,6 +69,13 @@ final class PhabricatorObjectHandle {
   }
 
   public function getName() {
+    if ($this->name === null) {
+      if ($this->getPolicyFiltered()) {
+        return pht('Restricted %s', $this->getTypeName());
+      } else {
+        return pht('Unknown Object (%s)', $this->getTypeName());
+      }
+    }
     return $this->name;
   }
 
@@ -61,12 +99,12 @@ final class PhabricatorObjectHandle {
     }
     return $this->getName();
   }
-  
+
   public function setTitle($title) {
     $this->title = $title;
     return $this;
   }
-  
+
   public function getTitle() {
     return $this->title;
   }
@@ -99,24 +137,11 @@ final class PhabricatorObjectHandle {
   }
 
   public function getTypeName() {
-    static $map = array(
-      PhabricatorPHIDConstants::PHID_TYPE_USER => 'User',
-      PhabricatorPHIDConstants::PHID_TYPE_TASK => 'Task',
-      PhabricatorPHIDConstants::PHID_TYPE_DREV => 'Revision',
-      PhabricatorPHIDConstants::PHID_TYPE_CMIT => 'Commit',
-      PhabricatorPHIDConstants::PHID_TYPE_WIKI => 'Phriction Document',
-      PhabricatorPHIDConstants::PHID_TYPE_MCRO => 'Image Macro',
-      PhabricatorPHIDConstants::PHID_TYPE_MOCK => 'Pholio Mock',
-      PhabricatorPHIDConstants::PHID_TYPE_FILE => 'File',
-      PhabricatorPHIDConstants::PHID_TYPE_BLOG => 'Blog',
-      PhabricatorPHIDConstants::PHID_TYPE_POST => 'Post',
-      PhabricatorPHIDConstants::PHID_TYPE_QUES => 'Question',
-      PhabricatorPHIDConstants::PHID_TYPE_PVAR => 'Variable',
-      PhabricatorPHIDConstants::PHID_TYPE_PSTE => 'Paste',
-      PhabricatorPHIDConstants::PHID_TYPE_PROJ => 'Project',
-    );
+    if ($this->getPHIDType()) {
+      return $this->getPHIDType()->getTypeName();
+    }
 
-    return idx($map, $this->getType(), $this->getType());
+    return $this->getType();
   }
 
 
@@ -139,7 +164,7 @@ final class PhabricatorObjectHandle {
    * completely loaded (e.g., the type or data for the PHID could not be
    * identified or located).
    *
-   * Basically, @{class:PhabricatorObjectHandleData} gives you back a handle for
+   * Basically, @{class:PhabricatorHandleQuery} gives you back a handle for
    * any PHID you give it, but it gives you a complete handle only for valid
    * PHIDs.
    *
@@ -181,32 +206,46 @@ final class PhabricatorObjectHandle {
     if ($name === null) {
       $name = $this->getLinkName();
     }
-    $class = null;
+    $classes = array();
+    $classes[] = 'phui-handle';
     $title = $this->title;
 
     if ($this->status != PhabricatorObjectHandleStatus::STATUS_OPEN) {
-      $class .= ' handle-status-'.$this->status;
+      $classes[] = 'handle-status-'.$this->status;
       $title = $title ? $title : $this->status;
     }
 
     if ($this->disabled) {
-      $class .= ' handle-disabled';
-      $title = 'disabled'; // Overwrite status.
+      $classes[] = 'handle-disabled';
+      $title = pht('Disabled'); // Overwrite status.
+    }
+
+    if ($this->getType() == PhabricatorPeoplePHIDTypeUser::TYPECONST) {
+      $classes[] = 'phui-link-person';
+    }
+
+    $uri = $this->getURI();
+
+    $icon = null;
+    if ($this->getPolicyFiltered()) {
+      $icon = id(new PHUIIconView())
+        ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+        ->setSpriteIcon('lock-grey');
     }
 
     return phutil_tag(
-      'a',
+      $uri ? 'a' : 'span',
       array(
-        'href'  => $this->getURI(),
-        'class' => $class,
+        'href'  => $uri,
+        'class' => implode(' ', $classes),
         'title' => $title,
       ),
-      $name);
+      array($icon, $name));
   }
 
   public function getLinkName() {
     switch ($this->getType()) {
-      case PhabricatorPHIDConstants::PHID_TYPE_USER:
+      case PhabricatorPeoplePHIDTypeUser::TYPECONST:
         $name = $this->getName();
         break;
       default:
@@ -214,6 +253,35 @@ final class PhabricatorObjectHandle {
         break;
     }
     return $name;
+  }
+
+  protected function getPHIDType() {
+    $types = PhabricatorPHIDType::getAllTypes();
+    return idx($types, $this->getType());
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::POLICY_PUBLIC;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    // NOTE: Handles are always visible, they just don't get populated with
+    // data if the user can't see the underlying object.
+    return true;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
   }
 
 }

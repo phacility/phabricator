@@ -163,6 +163,11 @@ JX.install('HeraldRuleEditor', {
       JX.DOM.setContent(condition_cell, condition_select);
 
       this._onconditionchange(r);
+
+      var condition_name = this._config.conditions[row_id][1];
+      if (condition_name == 'unconditionally') {
+        JX.DOM.hide(condition_select);
+      }
     },
     _onconditionchange : function(r) {
       var target = JX.DOM.find(r, 'select', 'condition-select');
@@ -215,6 +220,10 @@ JX.install('HeraldRuleEditor', {
         case 'tag':
         case 'package':
         case 'project':
+        case 'userorproject':
+        case 'buildplan':
+        case 'taskpriority':
+        case 'arcanistprojects':
           var tokenizer = this._newTokenizer(type);
           input = tokenizer[0];
           get_fn = tokenizer[1];
@@ -225,11 +234,14 @@ JX.install('HeraldRuleEditor', {
           get_fn = JX.bag;
           set_fn = JX.bag;
           break;
+        case 'contentsource':
         case 'flagcolor':
-          input = this._renderSelect(this._config.template.colors);
+        case 'value-ref-type':
+        case 'value-ref-change':
+          input = this._renderSelect(this._config.select[type].options);
           get_fn = function() { return input.value; };
           set_fn = function(v) { input.value = v; };
-          set_fn(this._config.template.defaultColor);
+          set_fn(this._config.select[type]['default']);
           break;
         default:
           input = JX.$N('input', {type: 'text'});

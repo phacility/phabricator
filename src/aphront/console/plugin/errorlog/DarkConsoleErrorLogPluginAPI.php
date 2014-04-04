@@ -76,4 +76,3 @@ final class DarkConsoleErrorLogPluginAPI {
   }
 
 }
-

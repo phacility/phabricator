@@ -7,4 +7,19 @@ final class PhabricatorPolicies extends PhabricatorPolicyConstants {
   const POLICY_ADMIN    = 'admin';
   const POLICY_NOONE    = 'no-one';
 
+  /**
+   * Returns the most public policy this install's configuration permits.
+   * This is either "public" (if available) or "all users" (if not).
+   *
+   * @return const Most open working policy constant.
+   */
+  public static function getMostOpenPolicy() {
+    if (PhabricatorEnv::getEnvConfig('policy.allow-public')) {
+      return PhabricatorPolicies::POLICY_PUBLIC;
+    } else {
+      return PhabricatorPolicies::POLICY_USER;
+    }
+  }
+
+
 }

@@ -1,0 +1,87 @@
+@title Javascript Pitfalls
+@group javascript
+
+This document discusses pitfalls and flaws in the Javascript language, and how
+to avoid, work around, or at least understand them.
+
+= Implicit Semicolons =
+
+Javascript tries to insert semicolons if you forgot them. This is a pretty
+horrible idea. Notably, it can mask syntax errors by transforming subexpressions
+on their own lines into statements with no effect:
+
+  lang=js
+  string = "Here is a fairly long string that does not fit on one "
+           "line. Note that I forgot the string concatenation operators "
+           "so this will compile and execute with the wrong behavior. ";
+
+Here's what ECMA262 says about this:
+
+  When, as the program is parsed ..., a token ... is encountered that is not
+  allowed by any production of the grammar, then a semicolon is automatically
+  inserted before the offending token if one or more of the following conditions
+  is true: ...
+
+To protect yourself against this "feature", don't use it. Always explicitly
+insert semicolons after each statement. You should also prefer to break lines in
+places where insertion of a semicolon would not make the unparseable parseable,
+usually after operators.
+
+= ##with## is Bad News =
+
+##with## is a pretty bad feature, for this reason among others:
+
+  with (object) {
+    property = 3; // Might be on object, might be on window: who knows.
+  }
+
+Avoid ##with##.
+
+= ##arguments## is not an Array =
+
+You can convert ##arguments## to an array using JX.$A() or similar. Note that
+you can pass  ##arguments## to Function.prototype.apply() without converting it.
+
+= Object, Array, and iteration are needlessly hard =
+
+There is essentially only one reasonable, consistent way to use these primitives
+but it is not obvious. Navigate these troubled waters with
+@{article:Javascript Object and Array}.
+
+= typeof null == "object" =
+
+This statement is true in Javascript:
+
+  typeof null == 'object'
+
+This is pretty much a bug in the language that can never be fixed now.
+
+= Number, String, and Boolean objects =
+
+Like Java, Javascript has primitive versions of number, string, and boolean,
+and object versions. In Java, there's some argument for this distinction. In
+Javascript, it's pretty much completely worthless and the behavior of these
+objects is wrong. String and Boolean in particular are essentially unusable:
+
+  lang=js
+  "pancake" == "pancake";                         // true
+  new String("pancake") == new String("pancake"); // false
+
+  var b = new Boolean(false);
+  b;        // Shows 'false' in console.
+  !b;       // ALSO shows 'false' in console.
+  !b == b;  // So this is true!
+  !!b == !b // Negate both sides and it's false! FUCK!
+
+  if (b) {
+    // Better fucking believe this will get executed.
+  }
+
+There is no advantage to using the object forms (the primitive forms behave like
+objects and can have methods and properties, and inherit from Array.prototype,
+Number.prototype, etc.) and their logical behavior is at best absurd and at
+worst strictly wrong.
+
+**Never use** ##new Number()##, ##new String()## or ##new Boolean()## unless
+your Javascript is God Tier and you are absolutely sure you know what you are
+doing.

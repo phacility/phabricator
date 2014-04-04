@@ -103,14 +103,32 @@ final class DifferentialChangesetListView extends AphrontView {
   }
 
   public function render() {
-    require_celerity_resource('differential-changeset-view-css');
+    $this->requireResource('differential-changeset-view-css');
 
     $changesets = $this->changesets;
 
-    Javelin::initBehavior('differential-toggle-files', array());
+    Javelin::initBehavior('differential-toggle-files', array(
+      'pht' => array(
+        'undo' => pht('Undo'),
+        'collapsed' => pht('This file content has been collapsed.'))
+      ));
     Javelin::initBehavior(
       'differential-dropdown-menus',
-      array());
+      array(
+        'pht' => array(
+          'Open in Editor' => pht('Open in Editor'),
+          'Show Entire File' => pht('Show Entire File'),
+          'Entire File Shown' => pht('Entire File Shown'),
+          "Can't Toggle Unloaded File" => pht("Can't Toggle Unloaded File"),
+          'Expand File' => pht('Expand File'),
+          'Collapse File' => pht('Collapse File'),
+          'Browse in Diffusion' => pht('Browse in Diffusion'),
+          'View Standalone' => pht('View Standalone'),
+          'Show Raw File (Left)' => pht('Show Raw File (Left)'),
+          'Show Raw File (Right)' => pht('Show Raw File (Right)'),
+          'Configure Editor' => pht('Configure Editor'),
+        ),
+      ));
 
     $output = array();
     $mapping = array();
@@ -165,20 +183,20 @@ final class DifferentialChangesetListView extends AphrontView {
       $output[] = $detail->render();
     }
 
-    require_celerity_resource('aphront-tooltip-css');
+    $this->requireResource('aphront-tooltip-css');
 
-    Javelin::initBehavior('differential-populate', array(
+    $this->initBehavior('differential-populate', array(
       'registry'    => $mapping,
       'whitespace'  => $this->whitespace,
       'uri'         => $this->renderURI,
     ));
 
-    Javelin::initBehavior('differential-show-more', array(
+    $this->initBehavior('differential-show-more', array(
       'uri' => $this->renderURI,
       'whitespace' => $this->whitespace,
     ));
 
-    Javelin::initBehavior('differential-comment-jump', array());
+    $this->initBehavior('differential-comment-jump', array());
 
     if ($this->inlineURI) {
       $undo_templates = $this->renderUndoTemplates();
@@ -190,18 +208,22 @@ final class DifferentialChangesetListView extends AphrontView {
       ));
     }
 
-    return array(
-      id(new PhabricatorHeaderView())
-        ->setHeader($this->getTitle())
-        ->render(),
-      phutil_tag(
-        'div',
-        array(
-          'class' => 'differential-review-stage',
-          'id'    => 'differential-review-stage',
-        ),
-        $output),
-    );
+    $header = id(new PHUIHeaderView())
+      ->setHeader($this->getTitle());
+
+    $content = phutil_tag(
+      'div',
+      array(
+        'class' => 'differential-review-stage',
+        'id'    => 'differential-review-stage',
+      ),
+      $output);
+
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($content);
+
+    return $object_box;
   }
 
   /**
@@ -224,19 +246,21 @@ final class DifferentialChangesetListView extends AphrontView {
       array('Changes discarded. ', $link));
 
     return array(
-      'l' => hsprintf(
-        '<table><tr>'.
-          '<th></th><td>%s</td>'.
-          '<th></th><td colspan="3"></td>'.
-        '</tr></table>',
-        $div),
+      'l' => phutil_tag('table', array(),
+        phutil_tag('tr', array(), array(
+          phutil_tag('th', array()),
+          phutil_tag('td', array(), $div),
+          phutil_tag('th', array()),
+          phutil_tag('td', array('colspan' => 3)),
+        ))),
 
-      'r' => hsprintf(
-        '<table><tr>'.
-          '<th></th><td></td>'.
-          '<th></th><td colspan="3">%s</td>'.
-        '</tr></table>',
-        $div),
+      'r' => phutil_tag('table', array(),
+        phutil_tag('tr', array(), array(
+          phutil_tag('th', array()),
+          phutil_tag('td', array()),
+          phutil_tag('th', array()),
+          phutil_tag('td', array('colspan' => 3), $div),
+        ))),
     );
   }
 
@@ -307,17 +331,18 @@ final class DifferentialChangesetListView extends AphrontView {
     }
 
     $meta['containerID'] = $detail->getID();
+    $caret = phutil_tag('span', array('class' => 'caret'), '');
 
     return javelin_tag(
       'a',
       array(
-        'class'   => 'button small grey',
+        'class'   => 'button grey small dropdown',
         'meta'    => $meta,
         'href'    => idx($meta, 'detailURI', '#'),
         'target'  => '_blank',
         'sigil'   => 'differential-view-options',
       ),
-      pht("View Options \xE2\x96\xBC"));
+      array(pht('View Options'), $caret));
   }
 
 }

@@ -48,7 +48,7 @@ final class PhluxEditController extends PhluxController {
         if (!strlen($key)) {
           $errors[] = pht('Variable key is required.');
           $e_key = pht('Required');
-        } else if (!preg_match('/^[a-z0-9.-]+$/', $key)) {
+        } else if (!preg_match('/^[a-z0-9.-]+\z/', $key)) {
           $errors[] = pht(
             'Variable key "%s" must contain only lowercase letters, digits, '.
             'period, and hyphen.',
@@ -69,12 +69,7 @@ final class PhluxEditController extends PhluxController {
         $editor = id(new PhluxVariableEditor())
           ->setActor($user)
           ->setContinueOnNoEffect(true)
-          ->setContentSource(
-            PhabricatorContentSource::newForSource(
-              PhabricatorContentSource::SOURCE_WEB,
-              array(
-                'ip' => $request->getRemoteAddr(),
-              )));
+          ->setContentSourceFromRequest($request);
 
         $xactions = array();
         $xactions[] = id(new PhluxTransaction())
@@ -112,11 +107,6 @@ final class PhluxEditController extends PhluxController {
       } else {
         $display_value = json_encode($value);
       }
-    }
-
-    if ($errors) {
-      $errors = id(new AphrontErrorView())
-        ->setErrors($errors);
     }
 
     $policies = id(new PhabricatorPolicyQuery())
@@ -169,32 +159,25 @@ final class PhluxEditController extends PhluxController {
 
     if ($is_new) {
       $title = pht('Create Variable');
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($title)
-          ->setHref($request->getRequestURI()));
+      $crumbs->addTextCrumb($title, $request->getRequestURI());
     } else {
       $title = pht('Edit %s', $this->key);
-      $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($title)
-          ->setHref($request->getRequestURI()));
+      $crumbs->addTextCrumb($title, $request->getRequestURI());
     }
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($title);
+    $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->setFormErrors($errors)
+      ->setForm($form);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
-        $errors,
-        $form,
+        $form_box,
       ),
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

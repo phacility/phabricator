@@ -6,6 +6,10 @@ final class ReleephSeverityFieldSpecification
   const HOTFIX  = 'HOTFIX';
   const RELEASE = 'RELEASE';
 
+  public function getFieldKey() {
+    return 'severity';
+  }
+
   public function getName() {
     return 'Severity';
   }

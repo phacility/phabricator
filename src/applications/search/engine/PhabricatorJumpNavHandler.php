@@ -1,10 +1,10 @@
 <?php
 
 final class PhabricatorJumpNavHandler {
-  public static function jumpPostResponse($jump) {
+
+  public static function getJumpResponse(PhabricatorUser $viewer, $jump) {
     $jump = trim($jump);
-    $help_href = PhabricatorEnv::getDocLink(
-      'article/Jump_Nav_User_Guide.html');
+    $help_href = PhabricatorEnv::getDocLink('Jump Nav User Guide');
 
     $patterns = array(
       '/^help/i'                  => 'uri:'.$help_href,
@@ -15,17 +15,12 @@ final class PhabricatorJumpNavHandler {
       '/^t$/i'                    => 'uri:/maniphest/',
       '/^p$/i'                    => 'uri:/project/',
       '/^u$/i'                    => 'uri:/people/',
-      '/^r([A-Z]+)$/'             => 'repository',
-      '/^r([A-Z]+)(\S+)$/'        => 'commit',
-      '/^d(\d+)$/i'               => 'revision',
-      '/^t(\d+)$/i'               => 'task',
-      '/^p(\d+)$/i'               => 'paste',
       '/^p\s+(.+)$/i'             => 'project',
       '/^u\s+(\S+)$/i'            => 'user',
       '/^task:\s*(.+)/i'          => 'create-task',
       '/^(?:s|symbol)\s+(\S+)/i'  => 'find-symbol',
+      '/^r\s+(.+)$/i'             => 'find-repository',
     );
-
 
     foreach ($patterns as $pattern => $effect) {
       $matches = null;
@@ -35,24 +30,9 @@ final class PhabricatorJumpNavHandler {
             ->setURI(substr($effect, 4));
         } else {
           switch ($effect) {
-            case 'repository':
-              return id(new AphrontRedirectResponse())
-                ->setURI('/diffusion/'.$matches[1].'/');
-            case 'commit':
-              return id(new AphrontRedirectResponse())
-                ->setURI('/'.$matches[0]);
-            case 'revision':
-              return id(new AphrontRedirectResponse())
-                ->setURI('/D'.$matches[1]);
-            case 'task':
-              return id(new AphrontRedirectResponse())
-                ->setURI('/T'.$matches[1]);
             case 'user':
               return id(new AphrontRedirectResponse())
                 ->setURI('/p/'.$matches[1].'/');
-            case 'paste':
-              return id(new AphrontRedirectResponse())
-                ->setURI('/P'.$matches[1]);
             case 'project':
               $project = self::findCloselyNamedProject($matches[1]);
               if ($project) {
@@ -72,6 +52,20 @@ final class PhabricatorJumpNavHandler {
               }
               return id(new AphrontRedirectResponse())
                 ->setURI("/diffusion/symbol/$symbol/?jump=true$context");
+            case 'find-repository':
+              $name = $matches[1];
+              $repositories = id(new PhabricatorRepositoryQuery())
+                ->setViewer($viewer)
+                ->withNameContains($name)
+                ->execute();
+              if (count($repositories) == 1) {
+                // Just one match, jump to repository.
+                $uri = '/diffusion/'.head($repositories)->getCallsign().'/';
+              } else {
+                // More than one match, jump to search.
+                $uri = urisprintf('/diffusion/?order=name&name=%s', $name);
+              }
+              return id(new AphrontRedirectResponse())->setURI($uri);
             case 'create-task':
               return id(new AphrontRedirectResponse())
                 ->setURI('/maniphest/task/create/?title='
@@ -81,6 +75,21 @@ final class PhabricatorJumpNavHandler {
           }
         }
       }
+    }
+
+    // If none of the patterns matched, look for an object by name.
+    $objects = id(new PhabricatorObjectQuery())
+      ->setViewer($viewer)
+      ->withNames(array($jump))
+      ->execute();
+
+    if (count($objects) == 1) {
+      $handle = id(new PhabricatorHandleQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(mpull($objects, 'getPHID'))
+        ->executeOne();
+
+      return id(new AphrontRedirectResponse())->setURI($handle->getURI());
     }
 
     return null;

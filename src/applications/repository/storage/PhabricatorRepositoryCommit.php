@@ -2,8 +2,12 @@
 
 final class PhabricatorRepositoryCommit
   extends PhabricatorRepositoryDAO
-  implements PhabricatorPolicyInterface,
-    PhabricatorTokenReceiverInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorFlaggableInterface,
+    PhabricatorTokenReceiverInterface,
+    HarbormasterBuildableInterface,
+    PhabricatorCustomFieldInterface {
 
   protected $repositoryID;
   protected $phid;
@@ -13,11 +17,20 @@ final class PhabricatorRepositoryCommit
   protected $authorPHID;
   protected $auditStatus = PhabricatorAuditCommitStatusConstants::NONE;
   protected $summary = '';
+  protected $importStatus = 0;
 
-  private $commitData;
+  const IMPORTED_MESSAGE = 1;
+  const IMPORTED_CHANGE = 2;
+  const IMPORTED_OWNERS = 4;
+  const IMPORTED_HERALD = 8;
+  const IMPORTED_ALL = 15;
+
+  const IMPORTED_CLOSEABLE = 1024;
+
+  private $commitData = self::ATTACHABLE;
   private $audits;
-  private $isUnparsed;
-  private $repository;
+  private $repository = self::ATTACHABLE;
+  private $customFields = self::ATTACHABLE;
 
   public function attachRepository(PhabricatorRepository $repository) {
     $this->repository = $repository;
@@ -25,19 +38,25 @@ final class PhabricatorRepositoryCommit
   }
 
   public function getRepository() {
-    if ($this->repository === null) {
-      throw new Exception("Call attachRepository() before getRepository()!");
-    }
-    return $this->repository;
+    return $this->assertAttached($this->repository);
   }
 
-  public function setIsUnparsed($is_unparsed) {
-    $this->isUnparsed = $is_unparsed;
+  public function isPartiallyImported($mask) {
+    return (($mask & $this->getImportStatus()) == $mask);
+  }
+
+  public function isImported() {
+    return $this->isPartiallyImported(self::IMPORTED_ALL);
+  }
+
+  public function writeImportStatusFlag($flag) {
+    queryfx(
+      $this->establishConnection('w'),
+      'UPDATE %T SET importStatus = (importStatus | %d) WHERE id = %d',
+      $this->getTableName(),
+      $flag,
+      $this->getID());
     return $this;
-  }
-
-  public function getIsUnparsed() {
-    return $this->isUnparsed;
   }
 
   public function getConfiguration() {
@@ -49,7 +68,7 @@ final class PhabricatorRepositoryCommit
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_CMIT);
+      PhabricatorRepositoryPHIDTypeCommit::TYPECONST);
   }
 
   public function loadCommitData() {
@@ -61,16 +80,14 @@ final class PhabricatorRepositoryCommit
       $this->getID());
   }
 
-  public function attachCommitData(PhabricatorRepositoryCommitData $data) {
+  public function attachCommitData(
+    PhabricatorRepositoryCommitData $data = null) {
     $this->commitData = $data;
     return $this;
   }
 
   public function getCommitData() {
-    if (!$this->commitData) {
-      throw new Exception("Attach commit data with attachCommitData() first!");
-    }
-    return $this->commitData;
+    return $this->assertAttached($this->commitData);
   }
 
   public function attachAudits(array $audits) {
@@ -111,6 +128,13 @@ final class PhabricatorRepositoryCommit
   public function getDateCreated() {
     // This is primarily to make analysis of commits with the Fact engine work.
     return $this->getEpoch();
+  }
+
+  public function getURI() {
+    $repository = $this->getRepository();
+    $callsign = $repository->getCallsign();
+    $commit_identifier = $this->getCommitIdentifier();
+    return '/r'.$callsign.$commit_identifier;
   }
 
   /**
@@ -161,16 +185,30 @@ final class PhabricatorRepositoryCommit
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
   public function getPolicy($capability) {
-    return $this->getRepository()->getPolicy($capability);
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return $this->getRepository()->getPolicy($capability);
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        // TODO: (T603) Who should be able to edit a commit? For now, retain
+        // the existing policy.
+        return PhabricatorPolicies::POLICY_USER;
+    }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return $this->getRepository()->hasAutomaticCapability($capability, $viewer);
   }
+
+  public function describeAutomaticCapability($capability) {
+    return pht(
+      'Commits inherit the policies of the repository they belong to.');
+  }
+
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 
@@ -196,11 +234,49 @@ final class PhabricatorRepositoryCommit
       'mailKey' => $this->getMailKey(),
       'authorPHID' => $this->getAuthorPHID(),
       'auditStatus' => $this->getAuditStatus(),
-      'summary' => $this->getSummary());
+      'summary' => $this->getSummary(),
+      'importStatus' => $this->getImportStatus(),
+    );
   }
 
   public static function newFromDictionary(array $dict) {
     return id(new PhabricatorRepositoryCommit())
       ->loadFromArray($dict);
   }
+
+
+/* -(  HarbormasterBuildableInterface  )------------------------------------- */
+
+
+  public function getHarbormasterBuildablePHID() {
+    return $this->getPHID();
+  }
+
+  public function getHarbormasterContainerPHID() {
+    return $this->getRepository()->getPHID();
+  }
+
+
+/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+
+
+  public function getCustomFieldSpecificationForRole($role) {
+    // TODO: We could make this configurable eventually, but just use the
+    // defaults for now.
+    return array();
+  }
+
+  public function getCustomFieldBaseClass() {
+    return 'PhabricatorCommitCustomField';
+  }
+
+  public function getCustomFields() {
+    return $this->assertAttached($this->customFields);
+  }
+
+  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
+    $this->customFields = $fields;
+    return $this;
+  }
+
 }

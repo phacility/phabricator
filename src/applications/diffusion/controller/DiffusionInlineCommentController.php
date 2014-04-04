@@ -76,4 +76,12 @@ final class DiffusionInlineCommentController
     return true;
   }
 
+  protected function deleteComment(PhabricatorInlineCommentInterface $inline) {
+    return $inline->delete();
+  }
+
+  protected function saveComment(PhabricatorInlineCommentInterface $inline) {
+    return $inline->save();
+  }
+
 }

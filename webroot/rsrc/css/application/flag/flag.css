@@ -7,7 +7,7 @@
   background: transparent 0 0 no-repeat;
 }
 
-.phabricator-object-item .phabricator-flag-icon {
+.phui-object-item .phabricator-flag-icon {
   float: left;
   margin: 2px;
   margin-right: 8px;
@@ -54,4 +54,30 @@
 
 .phabricator-flag-ghost {
   background-image: url(/rsrc/image/icon/fatcow/flag_ghost.png);
+}
+
+.phabricator-flag-select-control .phabricator-flag-select-label {
+  border: 1px solid #aaaaaa;
+  width: 48px;
+  height: 24px;
+  border-radius: 4px;
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  margin: 0 4px 4px 0;
+}
+
+.phabricator-flag-select-control .phabricator-flag-select-checkbox {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  width: auto;
+}
+
+.phabricator-flag-select-control .phui-icon-view {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 4px;
+  left: 24px;
 }

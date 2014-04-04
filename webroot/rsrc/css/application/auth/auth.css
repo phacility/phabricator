@@ -1,0 +1,42 @@
+/**
+ * @provides auth-css
+ */
+
+.phabricator-login-buttons {
+  max-width: 508px;
+  margin: 16px auto;
+}
+
+.phabricator-login-buttons .phabricator-login-button .button {
+  width: 246px;
+}
+
+.device-desktop .phabricator-login-buttons .aphront-multi-column-column-last {
+  text-align: right;
+}
+
+.device .phabricator-login-buttons {
+  text-align: center;
+}
+
+.phabricator-link-button {
+  text-align: center;
+}
+
+.auth-account-view {
+  background-color: #fff;
+  border: 1px solid {$lightblueborder};
+  background-repeat: no-repeat;
+  background-position: 4px 4px;
+  padding: 4px 4px 4px 62px;
+  min-height: 50px;
+  border-radius: 2px;
+}
+
+.auth-account-view-name {
+  font-weight: bold;
+}
+
+.auth-account-view-provider-name {
+  color: {$lightgreytext};
+}

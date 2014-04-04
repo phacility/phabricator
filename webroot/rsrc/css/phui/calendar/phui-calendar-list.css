@@ -1,0 +1,64 @@
+/**
+ * @provides phui-calendar-list-css
+ */
+
+.phui-calendar-list-container {
+  width: 300px;
+}
+
+.device-phone .phui-calendar-list-container {
+  width: auto;
+}
+
+.phui-calendar-list-container .phui-object-box {
+  border-bottom: none;
+  margin: 0;
+}
+
+.phui-calendar-list-container:last-child .phui-object-box {
+  border-bottom: 1px solid {$blueborder};
+}
+
+.phui-calendar-list-container .phui-object-box .phui-header-shell h1 {
+  padding: 6px 0;
+}
+
+.phui-calendar-list {
+  padding: 16px 12px;
+}
+
+.phui-calendar-list-item {
+  position: relative;
+}
+
+.phui-calendar-list-dot {
+  position: relative;
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-right: 6px;
+  top: -5px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+}
+
+.phui-calendar-list-title {
+  width: 200px;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.phui-calendar-list-item .phui-calendar-list-time {
+  position: absolute;
+  width: 60px;
+  right: 0;
+  top: 0;
+  color: {$lightgreytext};
+  text-align: right;
+}
+
+.phui-calendar-list-item-empty {
+  color: {$lightgreytext};
+}

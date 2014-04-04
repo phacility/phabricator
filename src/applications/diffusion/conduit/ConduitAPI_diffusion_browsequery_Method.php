@@ -21,95 +21,12 @@ final class ConduitAPI_diffusion_browsequery_Method
       'path' => 'optional string',
       'commit' => 'optional string',
       'needValidityOnly' => 'optional bool',
-      'renderReadme' => 'optional bool',
     );
   }
 
   protected function getResult(ConduitAPIRequest $request) {
     $result = parent::getResult($request);
-    if ($request->getValue('renderReadme', false)) {
-      $readme = $this->renderReadme($request, $result);
-    }
     return $result->toDictionary();
-  }
-
-  final private function renderReadme(
-    ConduitAPIRequest $request,
-    DiffusionBrowseResultSet $result) {
-    $drequest = $this->getDiffusionRequest();
-
-    $readme = null;
-    foreach ($result->getPaths() as $result_path) {
-      $file_type = $result_path->getFileType();
-      if (($file_type != ArcanistDiffChangeType::FILE_NORMAL) &&
-          ($file_type != ArcanistDiffChangeType::FILE_TEXT)) {
-        // Skip directories, etc.
-        continue;
-      }
-
-      $path = $result_path->getPath();
-
-      if (preg_match('/^readme(|\.txt|\.remarkup|\.rainbow|\.md)$/i', $path)) {
-        $readme = $result_path;
-        break;
-      }
-    }
-
-    if (!$readme) {
-      return null;
-    }
-
-    $readme_request = DiffusionRequest::newFromDictionary(
-      array(
-        'user' => $request->getUser(),
-        'repository' => $drequest->getRepository(),
-        'commit' => $drequest->getStableCommitName(),
-        'path' => $readme->getFullPath(),
-      ));
-
-    $file_content = DiffusionFileContent::newFromConduit(
-      DiffusionQuery::callConduitWithDiffusionRequest(
-        $request->getUser(),
-        $readme_request,
-        'diffusion.filecontentquery',
-        array(
-          'commit' => $drequest->getStableCommitName(),
-          'path' => $readme->getFullPath(),
-          'needsBlame' => false,
-        )));
-    $readme_content = $file_content->getCorpus();
-
-    if (preg_match('/\\.txt$/', $readme->getPath())) {
-      $readme_content = phutil_escape_html_newlines($readme_content);
-
-      $class = null;
-    } else if (preg_match('/\\.rainbow$/', $readme->getPath())) {
-      $highlighter = new PhutilRainbowSyntaxHighlighter();
-      $readme_content = $highlighter
-        ->getHighlightFuture($readme_content)
-        ->resolve();
-      $readme_content = phutil_escape_html_newlines($readme_content);
-
-      require_celerity_resource('syntax-highlighting-css');
-      $class = 'remarkup-code';
-    } else {
-      // Markup extensionless files as remarkup so we get links and such.
-      $engine = PhabricatorMarkupEngine::newDiffusionMarkupEngine();
-      $engine->setConfig('viewer', $request->getUser());
-      $readme_content = $engine->markupText($readme_content);
-
-      $class = 'phabricator-remarkup';
-    }
-
-    $readme_content = phutil_tag(
-      'div',
-      array(
-        'class' => $class,
-      ),
-      $readme_content);
-
-    $result->setReadmeContent($readme_content);
-    return $result;
   }
 
   protected function getGitResult(ConduitAPIRequest $request) {
@@ -183,10 +100,22 @@ final class ConduitAPI_diffusion_browsequery_Method
 
     $results = array();
     foreach (explode("\0", rtrim($stdout)) as $line) {
-
       // NOTE: Limit to 5 components so we parse filenames with spaces in them
       // correctly.
-      list($mode, $type, $hash, $size, $name) = preg_split('/\s+/', $line, 5);
+      // NOTE: The output uses a mixture of tabs and one-or-more spaces to
+      // delimit fields.
+      $parts = preg_split('/\s+/', $line, 5);
+      if (count($parts) < 5) {
+        throw new Exception(
+          pht(
+            'Expected "<mode> <type> <hash> <size>\t<name>", for ls-tree of '.
+            '"%s:%s", got: %s',
+            $commit,
+            $path,
+            $line));
+      }
+
+      list($mode, $type, $hash, $size, $name) = $parts;
 
       $path_result = new DiffusionRepositoryPath();
 
@@ -268,25 +197,18 @@ final class ConduitAPI_diffusion_browsequery_Method
     $commit = $request->getValue('commit');
     $result = $this->getEmptyResultSet();
 
-    // TODO: This is a really really awful mess but Mercurial doesn't offer
-    // an equivalent of "git ls-files -- directory". If it's any comfort, this
-    // is what "hgweb" does too, see:
-    //
-    //   http://selenic.com/repo/hg/file/91dc8878f888/mercurial/hgweb/webcommands.py#l320
-    //
-    // derp derp derp derp
-    //
-    // Anyway, figure out what's in this path by applying massive amounts
-    // of brute force.
+    $match_against = trim($path, '/');
+
+    $prefix = trim('./'.$match_against, '/');
 
     list($entire_manifest) = $repository->execxLocalCommand(
-      'manifest --rev %s',
-      $commit);
-    $entire_manifest = explode("\n", $entire_manifest);
+      'locate --print0 --rev %s -I %s',
+      hgsprintf('%s', $commit),
+      $prefix);
+    $entire_manifest = explode("\0", $entire_manifest);
 
     $results = array();
 
-    $match_against = trim($path, '/');
     $match_len = strlen($match_against);
 
     // For the root, don't trim. For other paths, trim the "/" after we match.

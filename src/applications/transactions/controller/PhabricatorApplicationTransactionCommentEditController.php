@@ -13,15 +13,12 @@ final class PhabricatorApplicationTransactionCommentEditController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $xactions = id(new PhabricatorObjectHandleData(array($this->phid)))
+    $xaction = id(new PhabricatorObjectQuery())
+      ->withPHIDs(array($this->phid))
       ->setViewer($user)
-      ->loadObjects();
-    $xaction = idx($xactions, $this->phid);
+      ->executeOne();
 
     if (!$xaction) {
-      // TODO: This may also mean you don't have permission to edit the object,
-      // but we can't make that distinction via PhabricatorObjectHandleData
-      // at the moment.
       return new Aphront404Response();
     }
 
@@ -32,11 +29,10 @@ final class PhabricatorApplicationTransactionCommentEditController
     }
 
     $obj_phid = $xaction->getObjectPHID();
-    $obj_handle = PhabricatorObjectHandleData::loadOneHandle($obj_phid, $user);
-    if (!$obj_handle) {
-      // Require the corresponding object exist and be visible to the user.
-      return new Aphront404Response();
-    }
+    $obj_handle = id(new PhabricatorHandleQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($obj_phid))
+      ->executeOne();
 
     if ($request->isDialogFormPost()) {
       $text = $request->getStr('text');
@@ -49,12 +45,7 @@ final class PhabricatorApplicationTransactionCommentEditController
 
       $editor = id(new PhabricatorApplicationTransactionCommentEditor())
         ->setActor($user)
-        ->setContentSource(
-          $content_source = PhabricatorContentSource::newForSource(
-            PhabricatorContentSource::SOURCE_WEB,
-            array(
-              'ip' => $request->getRemoteAddr(),
-            )))
+        ->setContentSource(PhabricatorContentSource::newFromRequest($request))
         ->applyEdit($xaction, $comment);
 
       if ($request->isAjax()) {
@@ -74,9 +65,12 @@ final class PhabricatorApplicationTransactionCommentEditController
     $dialog
       ->addHiddenInput('anchor', $request->getStr('anchor'))
       ->appendChild(
-        id(new PhabricatorRemarkupControl())
+        id(new PHUIFormLayoutView())
+        ->setFullWidth(true)
+        ->appendChild(
+          id(new PhabricatorRemarkupControl())
           ->setName('text')
-          ->setValue($xaction->getComment()->getContent()));
+          ->setValue($xaction->getComment()->getContent())));
 
     $dialog
       ->addSubmitButton(pht('Edit Comment'))

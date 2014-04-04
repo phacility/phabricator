@@ -32,27 +32,37 @@ final class PhabricatorApplicationCalendar extends PhabricatorApplication {
     return true;
   }
 
-  public function getQuickCreateURI() {
-    return $this->getBaseURI().'status/create/';
-  }
-
   public function getRoutes() {
     return array(
       '/calendar/' => array(
-        '' => 'PhabricatorCalendarBrowseController',
-        'status/' => array(
-          '' => 'PhabricatorCalendarViewStatusController',
+        '' => 'PhabricatorCalendarViewController',
+        'all/' => 'PhabricatorCalendarBrowseController',
+        'event/' => array(
+          '(?:query/(?P<queryKey>[^/]+)/)?' =>
+            'PhabricatorCalendarEventListController',
           'create/' =>
-            'PhabricatorCalendarEditStatusController',
-          'delete/(?P<id>[1-9]\d*)/' =>
-            'PhabricatorCalendarDeleteStatusController',
+            'PhabricatorCalendarEventEditController',
           'edit/(?P<id>[1-9]\d*)/' =>
-            'PhabricatorCalendarEditStatusController',
-          'view/(?P<phid>[^/]+)/' =>
-            'PhabricatorCalendarViewStatusController',
+            'PhabricatorCalendarEventEditController',
+          'delete/(?P<id>[1-9]\d*)/' =>
+            'PhabricatorCalendarEventDeleteController',
+          'view/(?P<id>[1-9]\d*)/' =>
+            'PhabricatorCalendarEventViewController',
         ),
       ),
     );
+  }
+
+  public function getQuickCreateItems(PhabricatorUser $viewer) {
+    $items = array();
+
+    $item = id(new PHUIListItemView())
+      ->setName(pht('Calendar Event'))
+      ->setAppIcon('calendar-dark')
+      ->setHref($this->getBaseURI().'event/create/');
+    $items[] = $item;
+
+    return $items;
   }
 
 }

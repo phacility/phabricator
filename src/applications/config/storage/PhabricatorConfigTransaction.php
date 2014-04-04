@@ -10,17 +10,12 @@ final class PhabricatorConfigTransaction
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorPHIDConstants::PHID_TYPE_CONF;
+    return PhabricatorConfigPHIDTypeConfig::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {
     return null;
   }
-
-  public function getApplicationObjectTypeName() {
-    return pht('config');
-  }
-
 
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
@@ -94,12 +89,10 @@ final class PhabricatorConfigTransaction
       $new_text = PhabricatorConfigJSON::prettyPrintJSON($new['value']);
     }
 
-    $view = id(new PhabricatorApplicationTransactionTextDiffDetailView())
-      ->setUser($viewer)
-      ->setOldText($old_text)
-      ->setNewText($new_text);
-
-    return $view->render();
+    return $this->renderTextCorpusChangeDetails(
+      $viewer,
+      $old_text,
+      $new_text);
   }
 
   public function getColor() {
@@ -123,4 +116,3 @@ final class PhabricatorConfigTransaction
   }
 
 }
-

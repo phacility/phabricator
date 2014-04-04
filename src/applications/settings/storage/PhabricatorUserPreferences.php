@@ -8,6 +8,7 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
   const PREFERENCE_MULTIEDIT            = 'multiedit';
   const PREFERENCE_TITLES               = 'titles';
   const PREFERENCE_MONOSPACED_TEXTAREAS = 'monospaced-textareas';
+  const PREFERENCE_TIME_FORMAT          = 'time-format';
 
   const PREFERENCE_RE_PREFIX            = 're-prefix';
   const PREFERENCE_NO_SELF_MAIL         = 'self-mail';
@@ -17,7 +18,8 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
   const PREFERENCE_SEARCHBAR_JUMP       = 'searchbar-jump';
   const PREFERENCE_SEARCH_SHORTCUT      = 'search-shortcut';
 
-  const PREFERENCE_DIFFUSION_VIEW       = 'diffusion-view';
+  const PREFERENCE_DIFFUSION_BLAME      = 'diffusion-blame';
+  const PREFERENCE_DIFFUSION_COLOR      = 'diffusion-color';
 
   const PREFERENCE_NAV_COLLAPSED        = 'nav-collapsed';
   const PREFERENCE_NAV_WIDTH            = 'nav-width';

@@ -1,0 +1,364 @@
+/**
+ * @provides phui-button-css
+ */
+
+
+button,
+a.button {
+  font: 13px/1.231 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+button,
+a.button,
+a.button:visited,
+input[type="submit"] {
+  background-color: #3477ad;
+  color: white;
+  text-shadow: 0 -1px rgba(0,0,0,0.75);
+  border: 1px solid #19558D;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 13px;
+  display: inline-block;
+  padding: 3px 10px 4px;
+  text-align: center;
+  white-space: nowrap;
+  border-radius: 3px;
+  background-image: linear-gradient(to bottom, #3b86c4, #2b628f);
+  background-image: -webkit-linear-gradient(top, #3b86c4, #2b628f);
+}
+
+/* Buttons with images (full size only) */
+button.icon,
+a.icon,
+a.icon:visited {
+  padding-left: 0;
+  position: relative;
+  text-indent: 29px;
+}
+
+button.black,
+a.black,
+a.black:visited {
+  background-color: #383838;
+  background-image: linear-gradient(to bottom, #505d65, #2d373c);
+  background-image: -webkit-linear-gradient(top, #505d65, #2d373c);
+  border: 1px solid {$darkgreytext};
+  border-bottom-color: #000;
+}
+
+button.green,
+a.green,
+a.green:visited {
+  background-color: #348e20;
+  background-image: linear-gradient(to bottom, #4e9b33, #158009);
+  background-image: -webkit-linear-gradient(top, #4e9b33, #158009);
+  border: 1px solid #3b6e22;
+  border-bottom-color: #2c5a15;
+}
+
+button.grey,
+input[type="submit"].grey,
+a.grey,
+a.grey:visited {
+  background-color: {$lightgreybackground};
+  background-image: linear-gradient(to bottom, #ffffff, #e6e6e6);
+  background-image: -webkit-linear-gradient(top, #ffffff, #e6e6e6);
+  border-color: {$lightgreyborder};
+  color: {$darkgreytext};
+  border-bottom-color: {$greyborder};
+  text-shadow: none;
+}
+
+button.simple,
+input[type="submit"].simple,
+a.simple,
+a.simple:visited {
+  background-color: transparent;
+  background-image: none;
+  border: 1px solid transparent;
+  color: {$bluetext};
+  text-shadow: 0 1px #fff;
+}
+
+a.disabled,
+button.disabled,
+button[disabled] {
+  filter:alpha(opacity=50);
+  -moz-opacity: 0.5;
+  -khtml-opacity: 0.5;
+  opacity: 0.5;
+}
+
+body button:active,
+body a.button:active {
+  box-shadow: inset 0 0 8px rgba(0,0,0,.6);
+}
+
+button.grey:active,
+a.grey:active,
+button.grey_active,
+a.button.dropdown-open {
+  background-color: #7d7d7d;
+  box-shadow: inset 0 0 4px rgba(0,0,0,.2);
+}
+
+a.dropdown-open {
+  color: {$greytext};
+}
+
+a.button:hover,
+button:hover {
+  text-decoration: none;
+  box-shadow: inset 0 0 5px rgba(0,0,0,.4);
+}
+
+a.button.simple:hover,
+button.simple:hover {
+  background-color: #fff;
+  border: 1px solid {$lightgreyborder};
+  background-image: none;
+  border-bottom: 1px solid {$greyborder};
+  text-shadow: none;
+  box-shadow: none;
+}
+
+a.button.grey:hover,
+button.grey:hover {
+  text-decoration: none;
+  box-shadow: inset 0 0 4px rgba(0,0,0,.2);
+}
+
+body a.button.disabled:hover,
+body button.disabled:hover,
+body a.button.disabled:active,
+body button.disabled:active {
+  box-shadow: none;
+}
+
+button.small,
+a.small,
+a.small:visited {
+  padding: 2px 7px;
+  height: auto;
+  font-size: 11px;
+  line-height: 16px;
+}
+
+button.link {
+  display: inline;
+  border: none;
+  background: transparent;
+  font-weight: normal;
+  padding: 0;
+  margin: 0;
+  font-size: inherit;
+  border-bottom: none;
+  text-decoration: none;
+  text-shadow: none;
+  color: #19558D;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+
+button.link:hover {
+  text-decoration: underline;
+}
+
+.dropdown-menu-frame {
+  position: absolute;
+  width: 240px;
+  background: #fff;
+  margin-top: -1px;
+  padding: 5px 0;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.3);
+  border: 1px solid {$lightgreyborder};
+  border-bottom-color: {$greyborder};
+}
+
+.dropdown-menu-frame .dropdown-menu-item {
+  display: block;
+  padding: 2px 10px;
+  clear: both;
+  line-height: 20px;
+  color: {$darkgreytext};
+  white-space: nowrap;
+}
+
+.dropdown-menu-frame .dropdown-menu-item-disabled {
+  color: {$lightgreytext};
+}
+
+.dropdown-menu-frame .phui-icon-view {
+  display: inline-block;
+  padding: 0;
+  margin: 2px 6px -2px 4px;
+}
+
+a.policy-control {
+  width: 240px;
+  text-align: left;
+}
+
+a.policy-control .caret {
+  float: right;
+}
+
+a.policy-control span.phui-icon-view {
+  /* NOTE: Nudge these icons a little bit. Should this be for all
+     dropdown buttons? */
+  top: 4px;
+  left: 7px;
+}
+
+.dropdown-menu-frame .dropdown-menu-item-selected {
+  background: {$lightblue};
+}
+
+.dropdown-menu-frame a:hover {
+  background: #005588;
+  background-image: linear-gradient(to bottom, #3b86c4, #2b628f);
+  background-image: -webkit-linear-gradient(top, #3b86c4, #2b628f);
+  color: white;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+a.toggle {
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #555;
+  text-decoration: none;
+  white-space: nowrap;
+  vertical-align: baseline;
+  background-color: {$lightgreybackground};
+  margin: 0 6px 0 0;
+  border-radius: 3px;
+  box-shadow: inset 0 0 3px rgba(0,0,0,.4);
+}
+
+a.toggle:hover {
+  background-color: #14568e;
+  color: #fff
+}
+
+a.toggle-selected {
+  background-color: #14568e;
+  color: #fff
+}
+
+a.toggle-fixed {
+  cursor: default;
+}
+
+.caret {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  vertical-align: top;
+  border-top: 5px solid #fff;
+  border-right: 5px solid transparent;
+  border-left: 5px solid transparent;
+  content: "";
+}
+
+.caret-right {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  vertical-align: middle;
+  border-left: 7px solid {$greytext};
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  content: "";
+  margin-bottom: 4px;
+}
+
+.caret-left {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  vertical-align: middle;
+  border-right: 7px solid {$greytext};
+  border-bottom: 5px solid transparent;
+  border-top: 5px solid transparent;
+  content: "";
+  margin-bottom: 4px;
+}
+
+.dropdown .caret {
+  margin-top: 7px;
+  margin-left: 4px;
+}
+
+.small.dropdown .caret {
+  margin-top: 6px;
+}
+
+.grey.dropdown .caret {
+  border-top-color: #000;
+}
+
+/* Icons */
+.button.has-icon {
+  position: relative;
+}
+
+.button .phui-icon-view {
+  display: inline-block;
+  position: absolute;
+  top: 5px;
+  left: 8px;
+}
+
+.button.has-icon .phui-button-text {
+  margin-left: 16px;
+}
+
+/* Login Buttons */
+
+.button.big.has-icon {
+  padding: 6px 20px 6px 12px;
+  border-radius: 4px;
+  text-align: left;
+}
+
+.button.big.has-icon .phui-button-text {
+  margin-left: 36px;
+  font-size: 14px;
+  display: block;
+}
+
+.button.big.has-icon .phui-button-subtext {
+  color: {$lightgreytext};
+  font-size: 12px;
+  line-height: 15px;
+  font-weight: normal;
+}
+
+/* PHUI Button Bar */
+
+.phui-button-bar a.button {
+  display: inline-block;
+  height: 16px;
+  width: 12px;
+}
+
+.phui-button-bar .phui-button-bar-first {
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+
+.phui-button-bar .phui-button-bar-middle {
+  border-radius: 0;
+  border-left: none;
+}
+
+.phui-button-bar .phui-button-bar-last {
+  border-left: none;
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
+}

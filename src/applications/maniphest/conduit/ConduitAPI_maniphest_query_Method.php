@@ -65,14 +65,16 @@ class ConduitAPI_maniphest_query_Method
   protected function execute(ConduitAPIRequest $request) {
     $query = new ManiphestTaskQuery();
 
+    $query->setViewer($request->getUser());
+
     $task_ids = $request->getValue('ids');
     if ($task_ids) {
-      $query->withTaskIDs($task_ids);
+      $query->withIDs($task_ids);
     }
 
     $task_phids = $request->getValue('phids');
     if ($task_phids) {
-      $query->withTaskPHIDs($task_phids);
+      $query->withPHIDs($task_phids);
     }
 
     $owners = $request->getValue('ownerPHIDs');

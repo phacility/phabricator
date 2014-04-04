@@ -10,49 +10,106 @@ final class DifferentialCommentPreviewController
   }
 
   public function processRequest() {
-
     $request = $this->getRequest();
+    $viewer = $request->getUser();
 
-    $author_phid = $request->getUser()->getPHID();
+    $revision = id(new DifferentialRevisionQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->id))
+      ->executeOne();
+    if (!$revision) {
+      return new Aphront404Response();
+    }
+
+    $type_comment = PhabricatorTransactions::TYPE_COMMENT;
+    $type_action = DifferentialTransaction::TYPE_ACTION;
+    $type_edge = PhabricatorTransactions::TYPE_EDGE;
+    $type_subscribers = PhabricatorTransactions::TYPE_SUBSCRIBERS;
+
+    $xactions = array();
 
     $action = $request->getStr('action');
+    switch ($action) {
+      case DifferentialAction::ACTION_COMMENT:
+      case DifferentialAction::ACTION_ADDREVIEWERS:
+      case DifferentialAction::ACTION_ADDCCS:
+        break;
+      default:
+        $xactions[] = id(new DifferentialTransaction())
+          ->setTransactionType($type_action)
+          ->setNewValue($action);
+        break;
+    }
 
-
-    $comment = new DifferentialComment();
-    $comment->setContent($request->getStr('content'));
-    $comment->setAction($action);
-    $comment->setAuthorPHID($author_phid);
-
-    $handles = array($author_phid);
+    $edge_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
 
     $reviewers = $request->getStrList('reviewers');
     if (DifferentialAction::allowReviewers($action) && $reviewers) {
-      $comment->setMetadata(array(
-        DifferentialComment::METADATA_ADDED_REVIEWERS => $reviewers));
-      $handles = array_merge($handles, $reviewers);
+      $faux_edges = array();
+      foreach ($reviewers as $phid) {
+        $faux_edges[$phid] = array(
+          'src' => $revision->getPHID(),
+          'type' => $edge_reviewer,
+          'dst' => $phid,
+        );
+      }
+
+      $xactions[] = id(new DifferentialTransaction())
+        ->setTransactionType($type_edge)
+        ->setMetadataValue('edge:type', $edge_reviewer)
+        ->setOldValue(array())
+        ->setNewValue($faux_edges);
     }
 
     $ccs = $request->getStrList('ccs');
-    if ($action == DifferentialAction::ACTION_ADDCCS && $ccs) {
-      $comment->setMetadata(array(
-        DifferentialComment::METADATA_ADDED_CCS => $ccs));
-      $handles = array_merge($handles, $ccs);
+    if ($ccs) {
+      $xactions[] = id(new DifferentialTransaction())
+        ->setTransactionType($type_subscribers)
+        ->setOldValue(array())
+        ->setNewValue(array_fuse($ccs));
     }
 
-    $handles = $this->loadViewerHandles($handles);
+    // Add a comment transaction if there's nothing, so we'll generate a
+    // nonempty result.
+    if (strlen($request->getStr('content')) || !$xactions) {
+      $xactions[] = id(new DifferentialTransaction())
+        ->setTransactionType($type_comment)
+        ->attachComment(
+          id(new ManiphestTransactionComment())
+            ->setContent($request->getStr('content')));
+    }
+
+    foreach ($xactions as $xaction) {
+      $xaction->setAuthorPHID($viewer->getPHID());
+    }
 
     $engine = new PhabricatorMarkupEngine();
     $engine->setViewer($request->getUser());
-    $engine->addObject($comment, DifferentialComment::MARKUP_FIELD_BODY);
+    foreach ($xactions as $xaction) {
+      if ($xaction->hasComment()) {
+        $engine->addObject(
+          $xaction->getComment(),
+          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
+      }
+    }
     $engine->process();
 
-    $view = new DifferentialRevisionCommentView();
-    $view->setUser($request->getUser());
-    $view->setComment($comment);
-    $view->setHandles($handles);
-    $view->setMarkupEngine($engine);
-    $view->setPreview(true);
-    $view->setTargetDiff(null);
+    $phids = mpull($xactions, 'getRequiredHandlePHIDs');
+    $phids = array_mergev($phids);
+
+    $handles = id(new PhabricatorHandleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs($phids)
+      ->execute();
+
+    foreach ($xactions as $xaction) {
+      $xaction->setHandles($handles);
+    }
+
+    $view = id(new DifferentialTransactionView())
+      ->setUser($viewer)
+      ->setTransactions($xactions)
+      ->setIsPreview(true);
 
     $metadata = array(
       'reviewers' => $reviewers,
@@ -62,15 +119,27 @@ final class DifferentialCommentPreviewController
       $metadata['action'] = $action;
     }
 
-    id(new PhabricatorDraft())
-      ->setAuthorPHID($author_phid)
-      ->setDraftKey('differential-comment-'.$this->id)
-      ->setDraft($comment->getContent())
+    $draft_key = 'differential-comment-'.$this->id;
+    $draft = id(new PhabricatorDraft())
+      ->setAuthorPHID($viewer->getPHID())
+      ->setDraftKey($draft_key)
+      ->setDraft($request->getStr('content'))
       ->setMetadata($metadata)
       ->replaceOrDelete();
+    if ($draft->isDeleted()) {
+      DifferentialDraft::deleteHasDraft(
+        $viewer->getPHID(),
+        $revision->getPHID(),
+        $draft_key);
+    } else {
+      DifferentialDraft::markHasDraft(
+        $viewer->getPHID(),
+        $revision->getPHID(),
+        $draft_key);
+    }
 
     return id(new AphrontAjaxResponse())
-      ->setContent($view->render());
+      ->setContent((string)phutil_implode_html('', $view->buildEvents()));
   }
 
 }

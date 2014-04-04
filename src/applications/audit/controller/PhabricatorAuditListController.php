@@ -2,7 +2,6 @@
 
 final class PhabricatorAuditListController extends PhabricatorAuditController {
 
-  private $filter;
   private $name;
   private $filterStatus;
 
@@ -13,8 +12,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
 
   public function processRequest() {
     $request = $this->getRequest();
-
-    $nav = $this->buildNavAndSelectFilter();
+    $nav = $this->buildSideNavView();
 
     if ($request->isFormPost()) {
       // If the list filter is POST'ed, redirect to GET so the page can be
@@ -75,34 +73,12 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
       $nav->appendChild($panel);
     }
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav,
       array(
         'title' => pht('Audits'),
+        'device' => true,
       ));
-  }
-
-  private function buildNavAndSelectFilter() {
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI('/audit/view/'));
-    $nav->addLabel(pht('Active'));
-    $nav->addFilter('active', pht('Need Attention'));
-
-    $nav->addLabel(pht('Audits'));
-    $nav->addFilter('audits', pht('All'));
-    $nav->addFilter('user', pht('By User'));
-    $nav->addFilter('project', pht('By Project'));
-    $nav->addFilter('package', pht('By Package'));
-    $nav->addFilter('repository', pht('By Repository'));
-
-    $nav->addLabel(pht('Commits'));
-    $nav->addFilter('commits', pht('All'));
-    $nav->addFilter('author', pht('By Author'));
-    $nav->addFilter('packagecommits', pht('By Package'));
-
-    $this->filter = $nav->selectFilter($this->filter, 'active');
-
-    return $nav;
   }
 
   private function buildListFilters(PhabricatorObjectHandle $handle = null) {
@@ -163,9 +139,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
 
       $tok_value = null;
       if ($handle) {
-        $tok_value = array(
-          $handle->getPHID() => $handle->getFullName(),
-        );
+        $tok_value = array($handle);
       }
 
       $form->appendChild(
@@ -235,27 +209,29 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
   }
 
   private function validateHandle(PhabricatorObjectHandle $handle) {
+    $type = $handle->getType();
+
     switch ($this->filter) {
       case 'active':
       case 'user':
       case 'author':
-        if ($handle->getType() !== PhabricatorPHIDConstants::PHID_TYPE_USER) {
+        if ($type !== PhabricatorPeoplePHIDTypeUser::TYPECONST) {
           throw new Exception("PHID must be a user PHID!");
         }
         break;
       case 'package':
       case 'packagecommits':
-        if ($handle->getType() !== PhabricatorPHIDConstants::PHID_TYPE_OPKG) {
+        if ($type !== PhabricatorOwnersPHIDTypePackage::TYPECONST) {
           throw new Exception("PHID must be a package PHID!");
         }
         break;
       case 'project':
-        if ($handle->getType() !== PhabricatorPHIDConstants::PHID_TYPE_PROJ) {
+        if ($type !== PhabricatorProjectPHIDTypeProject::TYPECONST) {
           throw new Exception("PHID must be a project PHID!");
         }
         break;
       case 'repository':
-        if ($handle->getType() !== PhabricatorPHIDConstants::PHID_TYPE_REPO) {
+        if ($type !== PhabricatorRepositoryPHIDTypeRepository::TYPECONST) {
           throw new Exception("PHID must be a repository PHID!");
         }
         break;
@@ -295,16 +271,12 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
 
     $query = new PhabricatorAuditQuery();
 
-    $use_pager = ($this->filter != 'active');
+    $pager = new AphrontPagerView();
+    $pager->setURI($request->getRequestURI(), 'offset');
+    $pager->setOffset($request->getInt('offset'));
 
-    if ($use_pager) {
-      $pager = new AphrontPagerView();
-      $pager->setURI($request->getRequestURI(), 'offset');
-      $pager->setOffset($request->getInt('offset'));
-
-      $query->setOffset($pager->getOffset());
-      $query->setLimit($pager->getPageSize() + 1);
-    }
+    $query->setOffset($pager->getOffset());
+    $query->setLimit($pager->getPageSize() + 1);
 
     $awaiting = null;
 
@@ -399,9 +371,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     $query->needCommitData(true);
 
     $audits = $query->execute();
-    if ($use_pager) {
-      $audits = $pager->sliceResults($audits);
-    }
+    $audits = $pager->sliceResults($audits);
 
     $view = new PhabricatorAuditListView();
     $view->setAudits($audits);
@@ -418,9 +388,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     $panel->appendChild($view);
     $panel->setNoBackground();
 
-    if ($use_pager) {
-      $panel->appendChild($pager);
-    }
+    $panel->appendChild($pager);
 
     return $panel;
   }
@@ -432,16 +400,12 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     $query->needCommitData(true);
     $query->needAudits(true);
 
-    $use_pager = ($this->filter != 'active');
+    $pager = new AphrontPagerView();
+    $pager->setURI($request->getRequestURI(), 'offset');
+    $pager->setOffset($request->getInt('offset'));
 
-    if ($use_pager) {
-      $pager = new AphrontPagerView();
-      $pager->setURI($request->getRequestURI(), 'offset');
-      $pager->setOffset($request->getInt('offset'));
-
-      $query->setOffset($pager->getOffset());
-      $query->setLimit($pager->getPageSize() + 1);
-    }
+    $query->setOffset($pager->getOffset());
+    $query->setLimit($pager->getPageSize() + 1);
 
     switch ($this->filter) {
       case 'active':
@@ -495,10 +459,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     }
 
     $commits = $query->execute();
-
-    if ($use_pager) {
-      $commits = $pager->sliceResults($commits);
-    }
+    $commits = $pager->sliceResults($commits);
 
     $view = new PhabricatorAuditCommitListView();
     $view->setUser($request->getUser());
@@ -514,9 +475,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     $panel->appendChild($view);
     $panel->setNoBackground();
 
-    if ($use_pager) {
-      $panel->appendChild($pager);
-    }
+    $panel->appendChild($pager);
 
     return $panel;
   }

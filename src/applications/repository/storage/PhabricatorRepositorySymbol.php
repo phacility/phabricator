@@ -18,9 +18,9 @@ final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
   protected $pathID;
   protected $lineNumber;
 
-  private $path = false;
-  private $arcanistProject = false;
-  private $repository = false;
+  private $path = self::ATTACHABLE;
+  private $arcanistProject = self::ATTACHABLE;
+  private $repository = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -51,10 +51,7 @@ final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
   }
 
   public function getPath() {
-    if ($this->path === false) {
-      throw new Exception('Call attachPath() before getPath()!');
-    }
-    return $this->path;
+    return $this->assertAttached($this->path);
   }
 
   public function attachPath($path) {
@@ -63,10 +60,7 @@ final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
   }
 
   public function getRepository() {
-    if ($this->repository === false) {
-      throw new Exception('Call attachRepository() before getRepository()!');
-    }
-    return $this->repository;
+    return $this->assertAttached($this->repository);
   }
 
   public function attachRepository($repository) {
@@ -75,11 +69,7 @@ final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
   }
 
   public function getArcanistProject() {
-    if ($this->arcanistProject === false) {
-      throw new Exception(
-        'Call attachArcanistProject() before getArcanistProject()!');
-    }
-    return $this->arcanistProject;
+    return $this->assertAttached($this->arcanistProject);
   }
 
   public function attachArcanistProject($project) {

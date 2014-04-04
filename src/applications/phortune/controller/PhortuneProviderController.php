@@ -52,7 +52,6 @@ final class PhortuneProviderController extends PhortuneController {
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

@@ -40,11 +40,8 @@ final class CeleritySpriteGenerator {
         if ($color == 'white') {
           $tcss[] = '.device-desktop .phabricator-action-view:hover '.
             '.icons-'.$icon;
-          if ($icon == 'new') {
-            // Hover state for the "+" icons on homepage tiles.
-            $tcss[] = '.phabricator-application-launch-create:hover '.
-                      '.phabricator-application-create-icon.icons-new-grey';
-          }
+          $tcss[] = '.device-desktop .phui-list-sidenav '.
+            '.phui-list-item-href:hover .icons-'.$icon;
         }
 
         $sprite->setTargetCSS(implode(', ', $tcss));
@@ -64,10 +61,8 @@ final class CeleritySpriteGenerator {
       // Strip 'text_' from these file names.
       $class_name = substr($icon, 5);
 
-      if ($class_name == 'order_off') {
-        $tcss = '.remarkup-control-order-mode .remarkup-assist-order';
-      } else if ($class_name == 'chaos_off') {
-        $tcss = '.remarkup-control-chaos-mode .remarkup-assist-chaos';
+      if ($class_name == 'fullscreen_off') {
+        $tcss = '.remarkup-control-fullscreen-mode .remarkup-assist-fullscreen';
       } else {
         $tcss = '.remarkup-assist-'.$class_name;
       }
@@ -240,6 +235,16 @@ final class CeleritySpriteGenerator {
         'y' => 24,
         'css' => '.menu-icon-search-blue',
       ),
+      'new' => array(
+        'x' => 24,
+        'y' => 24,
+        'css' => '.menu-icon-new',
+      ),
+      'new_blue' => array(
+        'x' => 24,
+        'y' => 24,
+        'css' => '.menu-icon-new-blue',
+      ),
       'app' => array(
         'x' => 24,
         'y' => 24,
@@ -251,8 +256,8 @@ final class CeleritySpriteGenerator {
         'css' => '.menu-icon-app-blue',
       ),
       'logo' => array(
-        'x' => 139,
-        'y' => 25,
+        'x' => 149,
+        'y' => 26,
         'css' => '.phabricator-main-menu-logo-image',
       ),
       'conf-off' => array(
@@ -307,24 +312,94 @@ final class CeleritySpriteGenerator {
   }
 
   public function buildTokenSheet() {
-    $tokens = $this->getDirectoryList('tokens_1x');
-
+    $icons = $this->getDirectoryList('tokens_1x');
+    $scales = array(
+      '1x' => 1,
+      '2x' => 2,
+    );
     $template = id(new PhutilSprite())
       ->setSourceSize(16, 16);
 
     $sprites = array();
-    foreach ($tokens as $token) {
-      $path = $this->getPath('tokens_1x/'.$token.'.png');
-
+    $prefix = 'tokens_';
+    foreach ($icons as $icon) {
       $sprite = id(clone $template)
-        ->setName('tokens-'.$token)
-        ->setTargetCSS('.tokens-'.$token)
-        ->setSourceFile($path, 1);
+        ->setName('tokens-'.$icon)
+        ->setTargetCSS('.tokens-'.$icon);
 
+      foreach ($scales as $scale_key => $scale) {
+        $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
+        $sprite->setSourceFile($path, $scale);
+      }
       $sprites[] = $sprite;
     }
 
-    $sheet = $this->buildSheet('tokens', false);
+    $sheet = $this->buildSheet('tokens', true);
+    $sheet->setScales($scales);
+    foreach ($sprites as $sprite) {
+      $sheet->addSprite($sprite);
+    }
+
+    return $sheet;
+  }
+
+  public function buildButtonBarSheet() {
+    $icons = $this->getDirectoryList('button_bar_1x');
+    $scales = array(
+      '1x' => 1,
+      '2x' => 2,
+    );
+    $template = id(new PhutilSprite())
+      ->setSourceSize(14, 14);
+
+    $sprites = array();
+    $prefix = 'button_bar_';
+    foreach ($icons as $icon) {
+      $sprite = id(clone $template)
+        ->setName('buttonbar-'.$icon)
+        ->setTargetCSS('.buttonbar-'.$icon);
+
+      foreach ($scales as $scale_key => $scale) {
+        $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
+        $sprite->setSourceFile($path, $scale);
+      }
+      $sprites[] = $sprite;
+    }
+
+    $sheet = $this->buildSheet('buttonbar', true);
+    $sheet->setScales($scales);
+    foreach ($sprites as $sprite) {
+      $sheet->addSprite($sprite);
+    }
+
+    return $sheet;
+  }
+
+  public function buildProjectsSheet() {
+    $icons = $this->getDirectoryList('projects_1x');
+    $scales = array(
+      '1x' => 1,
+      '2x' => 2,
+    );
+    $template = id(new PhutilSprite())
+      ->setSourceSize(50, 50);
+
+    $sprites = array();
+    $prefix = 'projects-';
+    foreach ($icons as $icon) {
+      $sprite = id(clone $template)
+        ->setName($prefix.$icon)
+        ->setTargetCSS('.'.$prefix.$icon);
+
+      foreach ($scales as $scale_key => $scale) {
+        $path = $this->getPath('projects_'.$scale_key.'/'.$icon.'.png');
+        $sprite->setSourceFile($path, $scale);
+      }
+      $sprites[] = $sprite;
+    }
+
+    $sheet = $this->buildSheet('projects', true);
+    $sheet->setScales($scales);
     foreach ($sprites as $sprite) {
       $sheet->addSprite($sprite);
     }
@@ -440,6 +515,87 @@ final class CeleritySpriteGenerator {
     return $sheet;
   }
 
+  public function buildLoginSheet() {
+    $icons = $this->getDirectoryList('login_1x');
+    $scales = array(
+      '1x' => 1,
+      '2x' => 2,
+    );
+    $template = id(new PhutilSprite())
+      ->setSourceSize(34, 34);
+
+    $sprites = array();
+    $prefix = 'login_';
+    foreach ($icons as $icon) {
+      $sprite = id(clone $template)
+        ->setName('login-'.$icon)
+        ->setTargetCSS('.login-'.$icon);
+
+      foreach ($scales as $scale_key => $scale) {
+        $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
+        $sprite->setSourceFile($path, $scale);
+      }
+      $sprites[] = $sprite;
+    }
+
+    $sheet = $this->buildSheet('login', true);
+    $sheet->setScales($scales);
+    foreach ($sprites as $sprite) {
+      $sheet->addSprite($sprite);
+    }
+
+    return $sheet;
+  }
+
+  public function buildStatusSheet() {
+    $icons = $this->getDirectoryList('status_1x');
+    $scales = array(
+      '1x' => 1,
+      '2x' => 2,
+    );
+    $template = id(new PhutilSprite())
+      ->setSourceSize(14, 14);
+
+    $sprites = array();
+    $prefix = 'status_';
+    $extra_css = array(
+      'policy-custom-white' =>
+        ', .dropdown-menu-item:hover .status-policy-custom',
+      'policy-all-white' =>
+        ', .dropdown-menu-item:hover .status-policy-all',
+      'policy-unknown-white' =>
+        ', .dropdown-menu-item:hover .status-policy-unknown',
+      'policy-admin-white' =>
+        ', .dropdown-menu-item:hover .status-policy-admin',
+      'policy-public-white' =>
+        ', .dropdown-menu-item:hover .status-policy-public',
+      'policy-project-white' =>
+        ', .dropdown-menu-item:hover .status-policy-project',
+      'policy-noone-white' =>
+        ', .dropdown-menu-item:hover .status-policy-noone',
+    );
+
+    foreach ($icons as $icon) {
+      $sprite = id(clone $template)
+        ->setName('status-'.$icon)
+        ->setTargetCSS('.status-'.$icon.idx($extra_css, $icon));
+
+      foreach ($scales as $scale_key => $scale) {
+        $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
+        $sprite->setSourceFile($path, $scale);
+      }
+      $sprites[] = $sprite;
+    }
+
+    $sheet = $this->buildSheet('status', true);
+    $sheet->setScales($scales);
+    foreach ($sprites as $sprite) {
+      $sheet->addSprite($sprite);
+    }
+
+    return $sheet;
+  }
+
   public function buildGradientSheet() {
     $gradients = $this->getDirectoryList('gradients');
 
@@ -455,13 +611,14 @@ final class CeleritySpriteGenerator {
       'yellow-header'   => 70,
       'grey-header'     => 70,
       'dark-grey-header' => 70,
+      'lightblue-header' => 240,
     );
 
     $extra_css = array(
       'dark-menu-label' =>
-        ', .phabricator-dark-menu .phabricator-menu-item-type-label',
+        ', .phabricator-dark-menu .phui-list-item-type-label',
       'menu-label' =>
-        ', .phabricator-side-menu .phabricator-menu-item-type-label',
+        ', .phabricator-side-menu .phui-list-item-type-label',
     );
 
     $sprites = array();
@@ -481,14 +638,41 @@ final class CeleritySpriteGenerator {
       'gradient',
       false,
       PhutilSpriteSheet::TYPE_REPEAT_X,
-      ', .phabricator-dark-menu .phabricator-menu-item-type-label, '.
-      '.phabricator-side-menu .phabricator-menu-item-type-label');
+      ', .phabricator-dark-menu .phui-list-item-type-label, '.
+      '.phabricator-side-menu .phui-list-item-type-label');
     foreach ($sprites as $sprite) {
       $sheet->addSprite($sprite);
     }
 
     return $sheet;
   }
+
+  public function buildMainHeaderSheet() {
+    $gradients = $this->getDirectoryList('main_header');
+    $template = new PhutilSprite();
+
+    $sprites = array();
+    foreach ($gradients as $gradient) {
+      $path = $this->getPath('main_header/'.$gradient.'.png');
+      $sprite = id(clone $template)
+        ->setName('main-header-'.$gradient)
+        ->setSourceFile($path)
+        ->setTargetCSS('.main-header-'.$gradient);
+      $sprite->setSourceSize(6, 44);
+      $sprites[] = $sprite;
+    }
+
+    $sheet = $this->buildSheet('main-header',
+      false,
+      PhutilSpriteSheet::TYPE_REPEAT_X);
+
+    foreach ($sprites as $sprite) {
+      $sheet->addSprite($sprite);
+    }
+
+    return $sheet;
+  }
+
 
   public function buildAppsSheet() {
     return $this->buildAppsSheetVariant(1);
@@ -516,6 +700,7 @@ final class CeleritySpriteGenerator {
 
       $colors = array(
         'dark'  => 'dark',
+        'white' => 'white',
       );
     } else if ($variant == 2) {
       $scales = array(
@@ -531,6 +716,7 @@ final class CeleritySpriteGenerator {
         'light' => 'lb',
         'dark'  => 'dark',
         'blue'  => 'blue',
+        'white' => 'white',
       );
     } else {
       $scales = array(
@@ -566,6 +752,10 @@ final class CeleritySpriteGenerator {
         $css = '.apps-'.$app.'-'.$color.$variant_short;
         if ($color == 'blue' && $variant_name == 'apps-large') {
           $css .= ', .phabricator-crumb-view:hover .apps-'.$app.'-dark-large';
+        }
+
+        if ($color == 'white' && $variant == 1) {
+          $css .= ', .phui-list-item-href:hover .apps-'.$app.'-dark';
         }
 
         $sprite = id(clone $template)
@@ -673,5 +863,3 @@ EOCSS
     return $sheet;
   }
 }
-
-

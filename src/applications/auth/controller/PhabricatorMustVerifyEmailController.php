@@ -19,7 +19,7 @@ final class PhabricatorMustVerifyEmailController
 
     $email = $user->loadPrimaryEmail();
 
-    if ($email->getIsVerified()) {
+    if ($user->getIsEmailVerified()) {
       return id(new AphrontRedirectResponse())->setURI('/');
     }
 
@@ -31,42 +31,33 @@ final class PhabricatorMustVerifyEmailController
       $sent = new AphrontErrorView();
       $sent->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
       $sent->setTitle(pht('Email Sent'));
-      $sent->appendChild(phutil_tag(
-        'p',
-        array(),
+      $sent->appendChild(
         pht(
           'Another verification email was sent to %s.',
-          phutil_tag('strong', array(), $email_address))));
+          phutil_tag('strong', array(), $email_address)));
     }
 
-    $error_view = new AphrontRequestFailureView();
-    $error_view->setHeader(pht('Check Your Email'));
-    $error_view->appendChild(phutil_tag('p', array(), pht(
-      'You must verify your email address to login. You should have a new '.
-      'email message from Phabricator with verification instructions in your '.
-      'inbox (%s).', phutil_tag('strong', array(), $email_address))));
-    $error_view->appendChild(phutil_tag('p', array(), pht(
-      'If you did not receive an email, you can click the button below '.
-      'to try sending another one.')));
-    $error_view->appendChild(hsprintf(
-      '<div class="aphront-failure-continue">%s</div>',
-      phabricator_form(
-        $user,
-        array(
-          'action' => '/login/mustverify/',
-          'method' => 'POST',
-        ),
-        phutil_tag(
-          'button',
-          array(
-          ),
-          pht('Send Another Email')))));
+    $must_verify = pht(
+      'You must verify your email address to login. You should have a '.
+      'new email message from Phabricator with verification instructions '.
+      'in your inbox (%s).',
+      phutil_tag('strong', array(), $email_address));
 
+    $send_again = pht(
+      'If you did not receive an email, you can click the button below '.
+      'to try sending another one.');
+
+    $dialog = id(new AphrontDialogView())
+      ->setUser($user)
+      ->setTitle(pht('Check Your Email'))
+      ->appendParagraph($must_verify)
+      ->appendParagraph($send_again)
+      ->addSubmitButton(pht('Send Another Email'));
 
     return $this->buildApplicationPage(
       array(
         $sent,
-        $error_view,
+        $dialog,
       ),
       array(
         'title' => pht('Must Verify Email'),

@@ -3,7 +3,7 @@
 final class PhabricatorMacroTransactionQuery
   extends PhabricatorApplicationTransactionQuery {
 
-  protected function getTemplateApplicationTransaction() {
+  public function getTemplateApplicationTransaction() {
     return new PhabricatorMacroTransaction();
   }
 

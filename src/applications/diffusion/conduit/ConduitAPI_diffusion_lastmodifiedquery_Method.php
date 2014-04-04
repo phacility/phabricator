@@ -55,12 +55,19 @@ final class ConduitAPI_diffusion_lastmodifiedquery_Method
 
     $path = $drequest->getPath();
 
-    $history_query = DiffusionHistoryQuery::newFromDiffusionRequest(
-      $drequest);
-    $history_query->setLimit(1);
-    $history_query->needChildChanges(true);
-    $history_query->needDirectChanges(true);
-    $history_array = $history_query->loadHistory();
+    $history_result = DiffusionQuery::callConduitWithDiffusionRequest(
+      $request->getUser(),
+      $drequest,
+      'diffusion.historyquery',
+      array(
+        'commit' => $drequest->getCommit(),
+        'path' => $path,
+        'limit' => 1,
+        'offset' => 0,
+        'needDirectChanges' => true,
+        'needChildChanges' => true));
+    $history_array = DiffusionPathChange::newFromConduit(
+      $history_result['pathChanges']);
 
     if (!$history_array) {
       return array(array(), array());
@@ -80,7 +87,7 @@ final class ConduitAPI_diffusion_lastmodifiedquery_Method
     list($hash) = $repository->execxLocalCommand(
       'log --template %s --limit 1 --removed --rev %s -- %s',
       '{node}',
-      hgsprintf('reverse(%s::%s)', '0', $drequest->getCommit()),
+      hgsprintf('reverse(ancestors(%s))',  $drequest->getCommit()),
       nonempty(ltrim($path, '/'), '.'));
 
     return $this->loadDataFromHash($hash);

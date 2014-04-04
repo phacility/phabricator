@@ -1,0 +1,51 @@
+{
+  "version" : 1,
+  "sprites" : {
+    "buttonbar-calendar"      : {
+      "name" : "buttonbar-calendar",
+      "rule" : ".buttonbar-calendar",
+      "hash" : "51aed380faf290dab35d736a92d15aba"
+    },
+    "buttonbar-chevron-left"  : {
+      "name" : "buttonbar-chevron-left",
+      "rule" : ".buttonbar-chevron-left",
+      "hash" : "24e52c724c85eb313e19ecd222be73b5"
+    },
+    "buttonbar-chevron-right" : {
+      "name" : "buttonbar-chevron-right",
+      "rule" : ".buttonbar-chevron-right",
+      "hash" : "9bbe40f752ee650646021b348b2971a9"
+    },
+    "buttonbar-cog"           : {
+      "name" : "buttonbar-cog",
+      "rule" : ".buttonbar-cog",
+      "hash" : "1c816c27b8d7b6bffe5e32ba716e5930"
+    },
+    "buttonbar-home"          : {
+      "name" : "buttonbar-home",
+      "rule" : ".buttonbar-home",
+      "hash" : "3ab3bfd5bf3c1ba0a422c200a70578d5"
+    },
+    "buttonbar-pencil"        : {
+      "name" : "buttonbar-pencil",
+      "rule" : ".buttonbar-pencil",
+      "hash" : "17d42be118aa21bc154b3f7da3faf7cb"
+    },
+    "buttonbar-time"          : {
+      "name" : "buttonbar-time",
+      "rule" : ".buttonbar-time",
+      "hash" : "1355aa26ecd63e76a59352aba95e54ad"
+    },
+    "buttonbar-workboard"     : {
+      "name" : "buttonbar-workboard",
+      "rule" : ".buttonbar-workboard",
+      "hash" : "fab3db9da0a6b14d8517c6c9868b30f7"
+    }
+  },
+  "scales"  : [
+    1,
+    2
+  ],
+  "header"  : "\/**\n * @provides sprite-buttonbar-css\n * @generated\n *\/\n\n.sprite-buttonbar {\n  background-image: url(\/rsrc\/image\/sprite-buttonbar.png);\n  background-repeat: no-repeat;\n}\n\n@media\nonly screen and (min-device-pixel-ratio: 1.5),\nonly screen and (-webkit-min-device-pixel-ratio: 1.5) {\n  .sprite-buttonbar {\n    background-image: url(\/rsrc\/image\/sprite-buttonbar-X2.png);\n    background-size: {X}px {Y}px;\n  }\n}\n",
+  "type"    : "standard"
+}

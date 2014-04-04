@@ -19,7 +19,9 @@ final class PhabricatorRepositoryArcanistProjectEditController
       return new Aphront404Response();
     }
 
-    $repositories = id(new PhabricatorRepository())->loadAll();
+    $repositories = id(new PhabricatorRepositoryQuery())
+      ->setViewer($user)
+      ->execute();
     $repos = array(
       0 => 'None',
     );
@@ -28,6 +30,8 @@ final class PhabricatorRepositoryArcanistProjectEditController
       $name = $repository->getname();
       $repos[$repository->getID()] = "r{$callsign} ({$name})";
     }
+    // note "None" will still be first thanks to 'r' prefix
+    asort($repos);
 
     if ($request->isFormPost()) {
 
@@ -55,10 +59,10 @@ final class PhabricatorRepositoryArcanistProjectEditController
     }
 
     if ($project->getSymbolIndexProjects()) {
-      $uses = id(new PhabricatorRepositoryArcanistProject())->loadAllWhere(
-        'phid in (%Ls)',
-        $project->getSymbolIndexProjects());
-      $uses = mpull($uses, 'getName', 'getPHID');
+      $uses = id(new PhabricatorHandleQuery())
+        ->setViewer($user)
+        ->withPHIDs($project->getSymbolIndexProjects())
+        ->execute();
     } else {
       $uses = array();
     }
@@ -83,8 +87,9 @@ final class PhabricatorRepositoryArcanistProjectEditController
         id(new AphrontFormTextControl())
           ->setLabel('Indexed Languages')
           ->setName('symbolIndexLanguages')
-          ->setCaption(
-            hsprintf('Separate with commas, for example: <tt>php, py</tt>'))
+          ->setCaption(pht(
+            'Separate with commas, for example: %s',
+            phutil_tag('tt', array(), 'php, py')))
           ->setValue($langs))
       ->appendChild(
         id(new AphrontFormTokenizerControl())

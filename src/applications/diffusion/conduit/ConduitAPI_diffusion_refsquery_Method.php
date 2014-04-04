@@ -35,7 +35,7 @@ final class ConduitAPI_diffusion_refsquery_Method
     // similar to (remote/one, remote/two, remote/three)
     $refs = trim($stdout, "() \n");
     if (!$refs) {
-      return null;
+      return array();
     }
     $refs = explode(',', $refs);
     $refs = array_map('trim', $refs);

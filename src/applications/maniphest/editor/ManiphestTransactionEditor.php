@@ -1,476 +1,496 @@
 <?php
 
-/**
- * @group maniphest
- */
-final class ManiphestTransactionEditor extends PhabricatorEditor {
+final class ManiphestTransactionEditor
+  extends PhabricatorApplicationTransactionEditor {
 
-  private $parentMessageID;
-  private $auxiliaryFields = array();
+  private $heraldEmailPHIDs = array();
 
-  public function setAuxiliaryFields(array $fields) {
-    assert_instances_of($fields, 'ManiphestAuxiliaryFieldSpecification');
-    $this->auxiliaryFields = $fields;
-    return $this;
+  public function getTransactionTypes() {
+    $types = parent::getTransactionTypes();
+
+    $types[] = PhabricatorTransactions::TYPE_COMMENT;
+    $types[] = ManiphestTransaction::TYPE_PRIORITY;
+    $types[] = ManiphestTransaction::TYPE_STATUS;
+    $types[] = ManiphestTransaction::TYPE_TITLE;
+    $types[] = ManiphestTransaction::TYPE_DESCRIPTION;
+    $types[] = ManiphestTransaction::TYPE_OWNER;
+    $types[] = ManiphestTransaction::TYPE_CCS;
+    $types[] = ManiphestTransaction::TYPE_PROJECTS;
+    $types[] = ManiphestTransaction::TYPE_ATTACH;
+    $types[] = ManiphestTransaction::TYPE_EDGE;
+    $types[] = ManiphestTransaction::TYPE_SUBPRIORITY;
+    $types[] = ManiphestTransaction::TYPE_PROJECT_COLUMN;
+    $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
+    $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
+
+    return $types;
   }
 
-  public function setParentMessageID($parent_message_id) {
-    $this->parentMessageID = $parent_message_id;
-    return $this;
+  protected function getCustomTransactionOldValue(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case ManiphestTransaction::TYPE_PRIORITY:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
+        return (int)$object->getPriority();
+      case ManiphestTransaction::TYPE_STATUS:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
+        return $object->getStatus();
+      case ManiphestTransaction::TYPE_TITLE:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
+        return $object->getTitle();
+      case ManiphestTransaction::TYPE_DESCRIPTION:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
+        return $object->getDescription();
+      case ManiphestTransaction::TYPE_OWNER:
+        return nonempty($object->getOwnerPHID(), null);
+      case ManiphestTransaction::TYPE_CCS:
+        return array_values(array_unique($object->getCCPHIDs()));
+      case ManiphestTransaction::TYPE_PROJECTS:
+        return array_values(array_unique($object->getProjectPHIDs()));
+      case ManiphestTransaction::TYPE_ATTACH:
+        return $object->getAttached();
+      case ManiphestTransaction::TYPE_EDGE:
+      case ManiphestTransaction::TYPE_PROJECT_COLUMN:
+        // These are pre-populated.
+        return $xaction->getOldValue();
+      case ManiphestTransaction::TYPE_SUBPRIORITY:
+        return $object->getSubpriority();
+    }
+
   }
 
-  public function applyTransactions(ManiphestTask $task, array $transactions) {
-    assert_instances_of($transactions, 'ManiphestTransaction');
+  protected function getCustomTransactionNewValue(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
 
-    $email_cc = $task->getCCPHIDs();
+    switch ($xaction->getTransactionType()) {
+      case ManiphestTransaction::TYPE_PRIORITY:
+        return (int)$xaction->getNewValue();
+      case ManiphestTransaction::TYPE_CCS:
+      case ManiphestTransaction::TYPE_PROJECTS:
+        return array_values(array_unique($xaction->getNewValue()));
+      case ManiphestTransaction::TYPE_OWNER:
+        return nonempty($xaction->getNewValue(), null);
+      case ManiphestTransaction::TYPE_STATUS:
+      case ManiphestTransaction::TYPE_TITLE:
+      case ManiphestTransaction::TYPE_DESCRIPTION:
+      case ManiphestTransaction::TYPE_ATTACH:
+      case ManiphestTransaction::TYPE_EDGE:
+      case ManiphestTransaction::TYPE_SUBPRIORITY:
+      case ManiphestTransaction::TYPE_PROJECT_COLUMN:
+        return $xaction->getNewValue();
+    }
+  }
 
-    $email_to = array();
-    $email_to[] = $task->getOwnerPHID();
 
-    $pri_changed = $this->isCreate($transactions);
+  protected function transactionHasEffect(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
 
-    foreach ($transactions as $key => $transaction) {
-      $type = $transaction->getTransactionType();
-      $new = $transaction->getNewValue();
-      $email_to[] = $transaction->getAuthorPHID();
+    $old = $xaction->getOldValue();
+    $new = $xaction->getNewValue();
 
-      $value_is_phid_set = false;
+    switch ($xaction->getTransactionType()) {
+      case ManiphestTransaction::TYPE_PROJECTS:
+      case ManiphestTransaction::TYPE_CCS:
+        sort($old);
+        sort($new);
+        return ($old !== $new);
+      case ManiphestTransaction::TYPE_PROJECT_COLUMN:
+        $new_column_phids = $new['columnPHIDs'];
+        $old_column_phids = $old['columnPHIDs'];
+        sort($new_column_phids);
+        sort($old_column_phids);
+        return ($old !== $new);
+    }
 
-      switch ($type) {
-        case ManiphestTransactionType::TYPE_NONE:
-          $old = null;
-          break;
-        case ManiphestTransactionType::TYPE_STATUS:
-          $old = $task->getStatus();
-          break;
-        case ManiphestTransactionType::TYPE_OWNER:
-          $old = $task->getOwnerPHID();
-          break;
-        case ManiphestTransactionType::TYPE_CCS:
-          $old = $task->getCCPHIDs();
-          $value_is_phid_set = true;
-          break;
-        case ManiphestTransactionType::TYPE_PRIORITY:
-          $old = $task->getPriority();
-          break;
-        case ManiphestTransactionType::TYPE_EDGE:
-          $old = $transaction->getOldValue();
-          break;
-        case ManiphestTransactionType::TYPE_ATTACH:
-          $old = $task->getAttached();
-          break;
-        case ManiphestTransactionType::TYPE_TITLE:
-          $old = $task->getTitle();
-          break;
-        case ManiphestTransactionType::TYPE_DESCRIPTION:
-          $old = $task->getDescription();
-          break;
-        case ManiphestTransactionType::TYPE_PROJECTS:
-          $old = $task->getProjectPHIDs();
-          $value_is_phid_set = true;
-          break;
-        case ManiphestTransactionType::TYPE_AUXILIARY:
-          $aux_key = $transaction->getMetadataValue('aux:key');
-          if (!$aux_key) {
-            throw new Exception(
-              "Expected 'aux:key' metadata on TYPE_AUXILIARY transaction.");
-          }
-          $old = $task->getAuxiliaryAttribute($aux_key);
-          break;
-        default:
-          throw new Exception('Unknown action type.');
-      }
+    return parent::transactionHasEffect($object, $xaction);
+  }
 
-      $old_cmp = $old;
-      $new_cmp = $new;
-      if ($value_is_phid_set) {
+  protected function applyCustomInternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
 
-        // Normalize the old and new values if they are PHID sets so we don't
-        // get any no-op transactions where the values differ only by keys,
-        // order, duplicates, etc.
+    switch ($xaction->getTransactionType()) {
+      case ManiphestTransaction::TYPE_PRIORITY:
+        return $object->setPriority($xaction->getNewValue());
+      case ManiphestTransaction::TYPE_STATUS:
+        return $object->setStatus($xaction->getNewValue());
+      case ManiphestTransaction::TYPE_TITLE:
+        return $object->setTitle($xaction->getNewValue());
+      case ManiphestTransaction::TYPE_DESCRIPTION:
+        return $object->setDescription($xaction->getNewValue());
+      case ManiphestTransaction::TYPE_OWNER:
+        $phid = $xaction->getNewValue();
 
-        if (is_array($old)) {
-          $old = array_filter($old);
-          $old = array_unique($old);
-          sort($old);
-          $old = array_values($old);
-          $old_cmp = $old;
+        // Update the "ownerOrdering" column to contain the full name of the
+        // owner, if the task is assigned.
+
+        $handle = null;
+        if ($phid) {
+          $handle = id(new PhabricatorHandleQuery())
+            ->setViewer($this->getActor())
+            ->withPHIDs(array($phid))
+            ->executeOne();
         }
 
-        if (is_array($new)) {
-          $new = array_filter($new);
-          $new = array_unique($new);
-          $transaction->setNewValue($new);
-
-          $new_cmp = $new;
-          sort($new_cmp);
-          $new_cmp = array_values($new_cmp);
-        }
-      }
-
-      if (($old !== null) && ($old_cmp == $new_cmp)) {
-        if (count($transactions) > 1 && !$transaction->hasComments()) {
-          // If we have at least one other transaction and this one isn't
-          // doing anything and doesn't have any comments, just throw it
-          // away.
-          unset($transactions[$key]);
-          continue;
+        if ($handle) {
+          $object->setOwnerOrdering($handle->getName());
         } else {
-          $transaction->setOldValue(null);
-          $transaction->setNewValue(null);
-          $transaction->setTransactionType(ManiphestTransactionType::TYPE_NONE);
-        }
-      } else {
-        switch ($type) {
-          case ManiphestTransactionType::TYPE_NONE:
-            break;
-          case ManiphestTransactionType::TYPE_STATUS:
-            $task->setStatus($new);
-            break;
-          case ManiphestTransactionType::TYPE_OWNER:
-            if ($new) {
-              $handles = id(new PhabricatorObjectHandleData(array($new)))
-                ->setViewer($this->getActor())
-                ->loadHandles();
-              $task->setOwnerOrdering($handles[$new]->getName());
-            } else {
-              $task->setOwnerOrdering(null);
-            }
-            $task->setOwnerPHID($new);
-            break;
-          case ManiphestTransactionType::TYPE_CCS:
-            $task->setCCPHIDs($new);
-            break;
-          case ManiphestTransactionType::TYPE_PRIORITY:
-            $task->setPriority($new);
-            $pri_changed = true;
-            break;
-          case ManiphestTransactionType::TYPE_ATTACH:
-            $task->setAttached($new);
-            break;
-          case ManiphestTransactionType::TYPE_TITLE:
-            $task->setTitle($new);
-            break;
-          case ManiphestTransactionType::TYPE_DESCRIPTION:
-            $task->setDescription($new);
-            break;
-          case ManiphestTransactionType::TYPE_PROJECTS:
-            $task->setProjectPHIDs($new);
-            break;
-          case ManiphestTransactionType::TYPE_AUXILIARY:
-            $aux_key = $transaction->getMetadataValue('aux:key');
-            $task->setAuxiliaryAttribute($aux_key, $new);
-            break;
-          case ManiphestTransactionType::TYPE_EDGE:
-            // Edge edits are accomplished through PhabricatorEdgeEditor, which
-            // has authority.
-            break;
-          default:
-            throw new Exception('Unknown action type.');
+          $object->setOwnerOrdering(null);
         }
 
-        $transaction->setOldValue($old);
-        $transaction->setNewValue($new);
-      }
-
+        return $object->setOwnerPHID($phid);
+      case ManiphestTransaction::TYPE_CCS:
+        return $object->setCCPHIDs($xaction->getNewValue());
+      case ManiphestTransaction::TYPE_PROJECTS:
+        return $object->setProjectPHIDs($xaction->getNewValue());
+      case ManiphestTransaction::TYPE_ATTACH:
+        return $object->setAttached($xaction->getNewValue());
+      case ManiphestTransaction::TYPE_EDGE:
+        // These are a weird, funky mess and are already being applied by the
+        // time we reach this.
+        return;
+      case ManiphestTransaction::TYPE_SUBPRIORITY:
+        $data = $xaction->getNewValue();
+        $new_sub = $this->getNextSubpriority(
+          $data['newPriority'],
+          $data['newSubpriorityBase'],
+          $data['direction']);
+        $object->setSubpriority($new_sub);
+        return;
+      case ManiphestTransaction::TYPE_PROJECT_COLUMN:
+        // these do external (edge) updates
+        return;
     }
 
-    if ($pri_changed) {
-      $subpriority = ManiphestTransactionEditor::getNextSubpriority(
-        $task->getPriority(),
-        null);
-      $task->setSubpriority($subpriority);
-    }
-
-    $task->save();
-    foreach ($transactions as $transaction) {
-      $transaction->setTaskID($task->getID());
-      $transaction->save();
-    }
-
-    $email_to[] = $task->getOwnerPHID();
-    $email_cc = array_merge(
-      $email_cc,
-      $task->getCCPHIDs());
-
-    $mail = $this->sendEmail($task, $transactions, $email_to, $email_cc);
-
-    $this->publishFeedStory(
-      $task,
-      $transactions,
-      $mail->buildRecipientList());
-
-    id(new PhabricatorSearchIndexer())
-      ->indexDocumentByPHID($task->getPHID());
   }
 
-  protected function getSubjectPrefix() {
+  protected function expandTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $xactions = parent::expandTransaction($object, $xaction);
+    switch ($xaction->getTransactionType()) {
+      case ManiphestTransaction::TYPE_SUBPRIORITY:
+        $data = $xaction->getNewValue();
+        $new_pri = $data['newPriority'];
+        if ($new_pri != $object->getPriority()) {
+          $xactions[] = id(new ManiphestTransaction())
+            ->setTransactionType(ManiphestTransaction::TYPE_PRIORITY)
+            ->setNewValue($new_pri);
+        }
+        break;
+      default:
+        break;
+    }
+
+    return $xactions;
+  }
+
+  protected function applyCustomExternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case ManiphestTransaction::TYPE_PROJECT_COLUMN:
+        $new = $xaction->getNewValue();
+        $old = $xaction->getOldValue();
+        $src = $object->getPHID();
+        $dst = head($new['columnPHIDs']);
+        $edges = $old['columnPHIDs'];
+        $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_COLUMN;
+        // NOTE: Normally, we expect only one edge to exist, but this works in
+        // a general way so it will repair any stray edges.
+        $remove = array();
+        $edge_missing = true;
+        foreach ($edges as $phid) {
+          if ($phid == $dst) {
+            $edge_missing = false;
+          } else {
+            $remove[] = $phid;
+          }
+        }
+
+        $add = array();
+        if ($edge_missing) {
+          $add[] = $dst;
+        }
+
+        // This should never happen because of the code in
+        // transactionHasEffect, but keep it for maximum conservativeness
+        if (!$add && !$remove) {
+          return;
+        }
+
+        $editor = id(new PhabricatorEdgeEditor())
+          ->setActor($this->getActor())
+          ->setSuppressEvents(true);
+
+        foreach ($add as $phid) {
+          $editor->addEdge($src, $edge_type, $phid);
+        }
+        foreach ($remove as $phid) {
+          $editor->removeEdge($src, $edge_type, $phid);
+        }
+        $editor->save();
+        break;
+      default:
+        break;
+    }
+  }
+
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $xactions = mfilter($xactions, 'shouldHide', true);
+    return $xactions;
+  }
+
+  protected function getMailSubjectPrefix() {
     return PhabricatorEnv::getEnvConfig('metamta.maniphest.subject-prefix');
   }
 
-  private function sendEmail($task, $transactions, $email_to, $email_cc) {
-    $email_to = array_filter(array_unique($email_to));
-    $email_cc = array_filter(array_unique($email_cc));
+  protected function getMailThreadID(PhabricatorLiskDAO $object) {
+    return 'maniphest-task-'.$object->getPHID();
+  }
 
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    return array(
+      $object->getOwnerPHID(),
+      $this->requireActor()->getPHID(),
+    );
+  }
+
+  protected function getMailCC(PhabricatorLiskDAO $object) {
     $phids = array();
-    foreach ($transactions as $transaction) {
-      foreach ($transaction->extractPHIDs() as $phid) {
-        $phids[$phid] = true;
-      }
-    }
-    foreach ($email_to as $phid) {
-      $phids[$phid] = true;
-    }
-    foreach ($email_cc as $phid) {
-      $phids[$phid] = true;
-    }
-    $phids = array_keys($phids);
 
-    $handles = id(new PhabricatorObjectHandleData($phids))
-      ->setViewer($this->getActor())
-      ->loadHandles();
-
-    $view = new ManiphestTransactionDetailView();
-    $view->setTransactionGroup($transactions);
-    $view->setHandles($handles);
-    $view->setAuxiliaryFields($this->auxiliaryFields);
-    list($action, $main_body) = $view->renderForEmail($with_date = false);
-
-    $is_create = $this->isCreate($transactions);
-
-    $task_uri = PhabricatorEnv::getProductionURI('/T'.$task->getID());
-
-    $reply_handler = $this->buildReplyHandler($task);
-
-    $body = new PhabricatorMetaMTAMailBody();
-    $body->addRawSection($main_body);
-    if ($is_create) {
-      $body->addTextSection(pht('TASK DESCRIPTION'), $task->getDescription());
-    }
-    $body->addTextSection(pht('TASK DETAIL'), $task_uri);
-    $body->addReplySection($reply_handler->getReplyHandlerInstructions());
-
-    $thread_id = 'maniphest-task-'.$task->getPHID();
-    $task_id = $task->getID();
-    $title = $task->getTitle();
-
-    $mailtags = $this->getMailTags($transactions);
-
-    $template = id(new PhabricatorMetaMTAMail())
-      ->setSubject("T{$task_id}: {$title}")
-      ->setSubjectPrefix($this->getSubjectPrefix())
-      ->setVarySubjectPrefix("[{$action}]")
-      ->setFrom($transaction->getAuthorPHID())
-      ->setParentMessageID($this->parentMessageID)
-      ->addHeader('Thread-Topic', "T{$task_id}: ".$task->getOriginalTitle())
-      ->setThreadID($thread_id, $is_create)
-      ->setRelatedPHID($task->getPHID())
-      ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
-      ->setIsBulk(true)
-      ->setMailTags($mailtags)
-      ->setBody($body->render());
-
-    $mails = $reply_handler->multiplexMail(
-      $template,
-      array_select_keys($handles, $email_to),
-      array_select_keys($handles, $email_cc));
-
-    foreach ($mails as $mail) {
-      $mail->saveAndSend();
+    foreach ($object->getCCPHIDs() as $phid) {
+      $phids[] = $phid;
     }
 
-    $template->addTos($email_to);
-    $template->addCCs($email_cc);
-    return $template;
+    foreach ($this->heraldEmailPHIDs as $phid) {
+      $phids[] = $phid;
+    }
+
+    return $phids;
   }
 
-  public function buildReplyHandler(ManiphestTask $task) {
-    $handler_object = PhabricatorEnv::newObjectFromConfig(
-      'metamta.maniphest.reply-handler');
-    $handler_object->setMailReceiver($task);
-
-    return $handler_object;
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    return id(new ManiphestReplyHandler())
+      ->setMailReceiver($object);
   }
 
-  private function publishFeedStory(
-    ManiphestTask $task,
-    array $transactions,
-    array $mailed_phids) {
-    assert_instances_of($transactions, 'ManiphestTransaction');
+  protected function buildMailTemplate(PhabricatorLiskDAO $object) {
+    $id = $object->getID();
+    $title = $object->getTitle();
 
-    $actions = array(ManiphestAction::ACTION_UPDATE);
-    $comments = null;
-    foreach ($transactions as $transaction) {
-      if ($transaction->hasComments()) {
-        $comments = $transaction->getComments();
-      }
-      $type = $transaction->getTransactionType();
-      switch ($type) {
-        case ManiphestTransactionType::TYPE_OWNER:
-          $actions[] = ManiphestAction::ACTION_ASSIGN;
-          break;
-        case ManiphestTransactionType::TYPE_STATUS:
-          if ($task->getStatus() != ManiphestTaskStatus::STATUS_OPEN) {
-            $actions[] = ManiphestAction::ACTION_CLOSE;
-          } else if ($this->isCreate($transactions)) {
-            $actions[] = ManiphestAction::ACTION_CREATE;
-          } else {
-            $actions[] = ManiphestAction::ACTION_REOPEN;
-          }
-          break;
-        default:
-          $actions[] = $type;
-          break;
-      }
+    return id(new PhabricatorMetaMTAMail())
+      ->setSubject("T{$id}: {$title}")
+      ->addHeader('Thread-Topic', "T{$id}: ".$object->getOriginalTitle());
+  }
+
+  protected function buildMailBody(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $body = parent::buildMailBody($object, $xactions);
+
+    if ($this->getIsNewObject()) {
+      $body->addTextSection(
+        pht('TASK DESCRIPTION'),
+        $object->getDescription());
     }
 
-    $action_type = ManiphestAction::selectStrongestAction($actions);
-    $owner_phid = $task->getOwnerPHID();
-    $actor_phid = head($transactions)->getAuthorPHID();
-    $author_phid = $task->getAuthorPHID();
+    $body->addTextSection(
+      pht('TASK DETAIL'),
+      PhabricatorEnv::getProductionURI('/T'.$object->getID()));
 
-    id(new PhabricatorFeedStoryPublisher())
-      ->setStoryType('PhabricatorFeedStoryManiphest')
-      ->setStoryData(array(
-        'taskPHID'        => $task->getPHID(),
-        'transactionIDs'  => mpull($transactions, 'getID'),
-        'ownerPHID'       => $owner_phid,
-        'action'          => $action_type,
-        'comments'        => $comments,
-        'description'     => $task->getDescription(),
-      ))
-      ->setStoryTime(time())
-      ->setStoryAuthorPHID($actor_phid)
-      ->setRelatedPHIDs(
-        array_merge(
-          array_filter(
-            array(
-              $task->getPHID(),
-              $author_phid,
-              $actor_phid,
-              $owner_phid,
-            )),
-          $task->getProjectPHIDs()))
-      ->setPrimaryObjectPHID($task->getPHID())
-      ->setSubscribedPHIDs(
-        array_merge(
-          array_filter(
-            array(
-              $author_phid,
-              $owner_phid,
-              $actor_phid)),
-          $task->getCCPHIDs()))
-      ->setMailRecipientPHIDs($mailed_phids)
-      ->publish();
+    return $body;
   }
 
-  private function isCreate(array $transactions) {
-    assert_instances_of($transactions, 'ManiphestTransaction');
-    $is_create = false;
-    foreach ($transactions as $transaction) {
-      $type = $transaction->getTransactionType();
-      if (($type == ManiphestTransactionType::TYPE_STATUS) &&
-          ($transaction->getOldValue() === null) &&
-          ($transaction->getNewValue() == ManiphestTaskStatus::STATUS_OPEN)) {
-        $is_create = true;
-      }
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return $this->shouldSendMail($object, $xactions);
+  }
+
+  protected function supportsSearch() {
+    return true;
+  }
+
+  protected function shouldApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
+  protected function buildHeraldAdapter(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    return id(new HeraldManiphestTaskAdapter())
+      ->setTask($object);
+  }
+
+  protected function didApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    HeraldAdapter $adapter,
+    HeraldTranscript $transcript) {
+
+    // TODO: Convert these to transactions. The way Maniphest deals with these
+    // transactions is currently unconventional and messy.
+
+    $save_again = false;
+    $cc_phids = $adapter->getCcPHIDs();
+    if ($cc_phids) {
+      $existing_cc = $object->getCCPHIDs();
+      $new_cc = array_unique(array_merge($cc_phids, $existing_cc));
+      $object->setCCPHIDs($new_cc);
+      $save_again = true;
     }
-    return $is_create;
+
+    $project_phids = $adapter->getProjectPHIDs();
+    if ($project_phids) {
+      $existing_projects = $object->getProjectPHIDs();
+      $new_projects = array_unique(
+        array_merge($project_phids, $existing_projects));
+      $object->setProjectPHIDs($new_projects);
+      $save_again = true;
+    }
+
+    if ($save_again) {
+      $object->save();
+    }
+
+    $this->heraldEmailPHIDs = $adapter->getEmailPHIDs();
+
+    $xactions = array();
+
+    $assign_phid = $adapter->getAssignPHID();
+    if ($assign_phid) {
+      $xactions[] = id(new ManiphestTransaction())
+        ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
+        ->setNewValue($assign_phid);
+    }
+
+    return $xactions;
   }
 
-  private function getMailTags(array $transactions) {
-    assert_instances_of($transactions, 'ManiphestTransaction');
+  protected function requireCapabilities(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
 
-    $tags = array();
-    foreach ($transactions as $xaction) {
+    parent::requireCapabilities($object, $xaction);
+
+    $app_capability_map = array(
+      ManiphestTransaction::TYPE_PRIORITY =>
+        ManiphestCapabilityEditPriority::CAPABILITY,
+      ManiphestTransaction::TYPE_STATUS =>
+        ManiphestCapabilityEditStatus::CAPABILITY,
+      ManiphestTransaction::TYPE_PROJECTS =>
+        ManiphestCapabilityEditProjects::CAPABILITY,
+      ManiphestTransaction::TYPE_OWNER =>
+        ManiphestCapabilityEditAssign::CAPABILITY,
+      PhabricatorTransactions::TYPE_EDIT_POLICY =>
+        ManiphestCapabilityEditPolicies::CAPABILITY,
+      PhabricatorTransactions::TYPE_VIEW_POLICY =>
+        ManiphestCapabilityEditPolicies::CAPABILITY,
+    );
+
+    $transaction_type = $xaction->getTransactionType();
+    $app_capability = idx($app_capability_map, $transaction_type);
+
+    if ($app_capability) {
+      $app = id(new PhabricatorApplicationQuery())
+        ->setViewer($this->getActor())
+        ->withClasses(array('PhabricatorApplicationManiphest'))
+        ->executeOne();
+      PhabricatorPolicyFilter::requireCapability(
+        $this->getActor(),
+        $app,
+        $app_capability);
+    }
+  }
+
+  protected function adjustObjectForPolicyChecks(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $copy = parent::adjustObjectForPolicyChecks($object, $xactions);
+    foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case ManiphestTransactionType::TYPE_STATUS:
-          $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_STATUS;
-          break;
-        case ManiphestTransactionType::TYPE_OWNER:
-          $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_OWNER;
-          break;
-        case ManiphestTransactionType::TYPE_CCS:
-          $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_CC;
-          break;
-        case ManiphestTransactionType::TYPE_PROJECTS:
-          $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_PROJECTS;
-          break;
-        case ManiphestTransactionType::TYPE_PRIORITY:
-          $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_PRIORITY;
-          break;
-        case ManiphestTransactionType::TYPE_NONE:
-          // this is a comment which we will check separately below for
-          // content
+        case ManiphestTransaction::TYPE_OWNER:
+          $copy->setOwnerPHID($xaction->getNewValue());
           break;
         default:
-          $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_OTHER;
-          break;
-      }
-
-      if ($xaction->hasComments()) {
-        $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_COMMENT;
+          continue;
       }
     }
 
-    return array_unique($tags);
+    return $copy;
   }
 
-  public static function getNextSubpriority($pri, $sub) {
+  private function getNextSubpriority($pri, $sub, $dir = '>') {
+
+    switch ($dir) {
+      case '>':
+        $order = 'ASC';
+        break;
+      case '<':
+        $order = 'DESC';
+        break;
+      default:
+        throw new Exception('$dir must be ">" or "<".');
+        break;
+    }
+
+    if ($sub === null) {
+      $base = 0;
+    } else {
+      $base = $sub;
+    }
 
     if ($sub === null) {
       $next = id(new ManiphestTask())->loadOneWhere(
-        'priority = %d ORDER BY subpriority ASC LIMIT 1',
-        $pri);
+        'priority = %d ORDER BY subpriority %Q LIMIT 1',
+        $pri,
+        $order);
       if ($next) {
-        return $next->getSubpriority() - ((double)(2 << 16));
+        if ($dir == '>') {
+          return $next->getSubpriority() - ((double)(2 << 16));
+        } else {
+          return $next->getSubpriority() + ((double)(2 << 16));
+        }
       }
     } else {
       $next = id(new ManiphestTask())->loadOneWhere(
-        'priority = %d AND subpriority > %s ORDER BY subpriority ASC LIMIT 1',
+        'priority = %d AND subpriority %Q %f ORDER BY subpriority %Q LIMIT 1',
         $pri,
-        $sub);
+        $dir,
+        $sub,
+        $order);
       if ($next) {
         return ($sub + $next->getSubpriority()) / 2;
       }
     }
 
-    return (double)(2 << 32);
+    if ($dir == '>') {
+      return $base + (double)(2 << 32);
+    } else {
+      return $base - (double)(2 << 32);
+    }
   }
 
-  public static function addCC(
-    ManiphestTask $task,
-    PhabricatorUser $user) {
-    $current_ccs = $task->getCCPHIDs();
-    $new_ccs = array_merge($current_ccs, array($user->getPHID()));
-
-    $transaction = new ManiphestTransaction();
-    $transaction->setTaskID($task->getID());
-    $transaction->setAuthorPHID($user->getPHID());
-    $transaction->setTransactionType(ManiphestTransactionType::TYPE_CCS);
-    $transaction->setNewValue(array_unique($new_ccs));
-    $transaction->setOldValue($current_ccs);
-
-    id(new ManiphestTransactionEditor())
-      ->setActor($user)
-      ->applyTransactions($task, array($transaction));
-  }
-
-  public static function removeCC(
-    ManiphestTask $task,
-    PhabricatorUser $user) {
-    $current_ccs = $task->getCCPHIDs();
-    $new_ccs = array_diff($current_ccs, array($user->getPHID()));
-
-    $transaction = new ManiphestTransaction();
-    $transaction->setTaskID($task->getID());
-    $transaction->setAuthorPHID($user->getPHID());
-    $transaction->setTransactionType(ManiphestTransactionType::TYPE_CCS);
-    $transaction->setNewValue(array_unique($new_ccs));
-    $transaction->setOldValue($current_ccs);
-
-    id(new ManiphestTransactionEditor())
-      ->setActor($user)
-      ->applyTransactions($task, array($transaction));
-  }
 }

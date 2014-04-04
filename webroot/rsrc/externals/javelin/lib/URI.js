@@ -54,7 +54,7 @@ JX.install('URI', {
     _defaultQuerySerializer : function(obj) {
       var kv_pairs = [];
       for (var key in obj) {
-        if (obj[key] != null) {
+        if (obj[key] !== null) {
           var value = encodeURIComponent(obj[key]);
           kv_pairs.push(encodeURIComponent(key) + (value ? '=' + value : ''));
         }

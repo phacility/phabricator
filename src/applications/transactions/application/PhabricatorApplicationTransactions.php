@@ -17,9 +17,10 @@ final class PhabricatorApplicationTransactions extends PhabricatorApplication {
           => 'PhabricatorApplicationTransactionCommentEditController',
         'history/(?<phid>[^/]+)/'
           => 'PhabricatorApplicationTransactionCommentHistoryController',
+        'detail/(?<phid>[^/]+)/'
+          => 'PhabricatorApplicationTransactionDetailController',
       ),
     );
   }
 
 }
-

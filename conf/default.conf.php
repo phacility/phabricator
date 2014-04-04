@@ -170,10 +170,11 @@ return array(
   // The password to use when connecting to MySQL.
   'mysql.pass' => '',
 
-  // The MySQL server to connect to. If you want to connect to a different
-  // port than the default (which is 3306), specify it in the hostname
-  // (e.g., db.example.com:1234).
+  // The MySQL server to connect to.
   'mysql.host' => 'localhost',
+
+  // If you want to connect to a different port than the default (which is 3306)
+  'mysql.port' => null,
 
   // Phabricator supports PHP extensions MySQL and MySQLi. It is possible to
   // implement also other access mechanism (e.g. PDO_MySQL). The class must
@@ -285,6 +286,10 @@ return array(
   //      mostly never arrive.
   'metamta.can-send-as-user'    => false,
 
+  // Limit the maximum size of the body of an email generated for a diff
+  // (in bytes).
+  'metamta.email-body-limit'    => 524288,
+
   // Adapter class to use to transmit mail to the MTA. The default uses
   // PHPMailerLite, which will invoke "sendmail". This is appropriate
   // if sendmail actually works on your host, but if you haven't configured mail
@@ -293,13 +298,6 @@ return array(
   // the documentation for details.
   'metamta.mail-adapter'        =>
     'PhabricatorMailImplementationPHPMailerLiteAdapter',
-
-  // When email is sent, try to hand it off to the MTA immediately instead of
-  // queueing it for delivery by the daemons. If you are running the Phabricator
-  // daemons with "phd start", you should disable this to provide a (sometimes
-  // substantial) performance boost. It's on by default to make setup and
-  // configuration a little easier.
-  'metamta.send-immediately'    => true,
 
   // When email is sent, what format should Phabricator use for user's
   // email addresses? Valid values are:
@@ -510,10 +508,6 @@ return array(
   // address will be stored in an 'From Email' field on the task.
   'metamta.maniphest.default-public-author' => null,
 
-  // You can disable the Herald hints in email if users prefer smaller messages.
-  // These are the links under the headers "MANAGE HERALD RULES" and
-  // "WHY DID I GET THIS EMAIL?". If you set this to true, they will not appear
-  // in any mail. Users can still navigate to the links via the web interface.
   'metamta.herald.show-hints' => true,
 
   // You can disable the hints under "REPLY HANDLER ACTIONS" if users prefer
@@ -548,27 +542,6 @@ return array(
   'metamta.vary-subjects' => true,
 
 // -- Auth ------------------------------------------------------------------ //
-
-  // Can users login with a username/password, or by following the link from
-  // a password reset email? You can disable this and configure one or more
-  // OAuth providers instead.
-  'auth.password-auth-enabled'  => true,
-
-  // Maximum number of simultaneous web sessions each user is permitted to have.
-  // Setting this to "1" will prevent a user from logging in on more than one
-  // browser at the same time.
-  'auth.sessions.web'           => 5,
-
-  // Maximum number of simultaneous Conduit sessions each user is permitted
-  // to have.
-  'auth.sessions.conduit'       => 5,
-
-  // Set this true to enable the Settings -> SSH Public Keys panel, which will
-  // allow users to associated SSH public keys with their accounts. This is only
-  // really useful if you're setting up services over SSH and want to use
-  // Phabricator for authentication; in most situations you can leave this
-  // disabled.
-  'auth.sshkeys.enabled'        => false,
 
   // If true, email addresses must be verified (by clicking a link in an
   // email) before a user can login. By default, verification is optional
@@ -610,162 +583,6 @@ return array(
   // When users set or reset a password, it must have at least this many
   // characters.
   'account.minimum-password-length'  => 8,
-
-
-// -- Facebook OAuth -------------------------------------------------------- //
-
-  // Can users use Facebook credentials to login to Phabricator?
-  'facebook.auth-enabled'       => false,
-
-  // Can users use Facebook credentials to create new Phabricator accounts?
-  'facebook.registration-enabled' => true,
-
-  // Are Facebook accounts permanently linked to Phabricator accounts, or can
-  // the user unlink them?
-  'facebook.auth-permanent'     => false,
-
-  // The Facebook "Application ID" to use for Facebook API access.
-  'facebook.application-id'     => null,
-
-  // The Facebook "Application Secret" to use for Facebook API access.
-  'facebook.application-secret' => null,
-
-  // Should Phabricator reject requests made by users with
-  // Secure Browsing disabled?
-  'facebook.require-https-auth' => false,
-
-// -- GitHub OAuth ---------------------------------------------------------- //
-
-  // Can users use GitHub credentials to login to Phabricator?
-  'github.auth-enabled'         => false,
-
-  // Can users use GitHub credentials to create new Phabricator accounts?
-  'github.registration-enabled' => true,
-
-  // Are GitHub accounts permanently linked to Phabricator accounts, or can
-  // the user unlink them?
-  'github.auth-permanent'       => false,
-
-  // The GitHub "Client ID" to use for GitHub API access.
-  'github.application-id'       => null,
-
-  // The GitHub "Secret" to use for GitHub API access.
-  'github.application-secret'   => null,
-
-
-// -- Google OAuth ---------------------------------------------------------- //
-
-  // Can users use Google credentials to login to Phabricator?
-  'google.auth-enabled'         => false,
-
-  // Can users use Google credentials to create new Phabricator accounts?
-  'google.registration-enabled' => true,
-
-  // Are Google accounts permanently linked to Phabricator accounts, or can
-  // the user unlink them?
-  'google.auth-permanent'       => false,
-
-  // The Google "Client ID" to use for Google API access.
-  'google.application-id'       => null,
-
-  // The Google "Client Secret" to use for Google API access.
-  'google.application-secret'   => null,
-
-// -- LDAP Auth ----------------------------------------------------- //
-  // Enable ldap auth
-  'ldap.auth-enabled'         => false,
-
-  // The LDAP server hostname
-  'ldap.hostname' => null,
-
-  // The LDAP server port
-  'ldap.port' => 389,
-
-  // The LDAP base domain name
-  'ldap.base_dn' => null,
-
-  // The attribute to be regarded as 'username'. Has to be unique
-  'ldap.search_attribute' => null,
-
-  // Perform a search to find a user
-  // Many LDAP installations do not have the username in the dn, if this is
-  // true for you set this to true and configure the username_attribute below
-  'ldap.search-first'         => false,
-
-  // The attribute to search for if you have to search for a user
-  'ldap.username-attribute' => null,
-
-  // The attribute(s) to be regarded as 'real name'.
-  // If more then one attribute is supplied the values of the attributes in
-  // the array will be joined
-  'ldap.real_name_attributes' => array(),
-
-  // A domain name to use when authenticating against Active Directory
-  // (e.g. 'example.com')
-  'ldap.activedirectory_domain' => null,
-
-  // The LDAP version
-  'ldap.version' => 3,
-
-  // LDAP Referrals Option
-  // Whether referrals should be followed by the client
-  // Should be set to 0 if you use Windows 2003 AD
-  'ldap.referrals' => true,
-
-  // The anonymous user name to use before searching a user.
-  // Many LDAP installations require login even before searching a user, set
-  // this option to enable it.
-  'ldap.anonymous-user-name'     => null,
-
-  // The password of the LDAP anonymous user.
-  'ldap.anonymous-user-password' => null,
-
-  // Whether to use STARTTLS
-  'ldap.start-tls' => false,
-
-
-// -- Disqus OAuth ---------------------------------------------------------- //
-
-  // Can users use Disqus credentials to login to Phabricator?
-  'disqus.auth-enabled'         => false,
-
-  // Can users use Disqus credentials to create new Phabricator accounts?
-  'disqus.registration-enabled' => true,
-
-  // Are Disqus accounts permanently linked to Phabricator accounts, or can
-  // the user unlink them?
-  'disqus.auth-permanent'       => false,
-
-  // The Disqus "Client ID" to use for Disqus API access.
-  'disqus.application-id'       => null,
-
-  // The Disqus "Client Secret" to use for Disqus API access.
-  'disqus.application-secret'   => null,
-
-
-// -- Phabricator OAuth ----------------------------------------------------- //
-
-  // Meta-town -- Phabricator is itself an OAuth Provider
-  // TODO -- T887 -- make this support multiple Phabricator instances!
-
-  // The URI of the Phabricator instance to use as an OAuth server.
-  'phabricator.oauth-uri'            => null,
-
-  // Can users use Phabricator credentials to login to Phabricator?
-  'phabricator.auth-enabled'         => false,
-
-  // Can users use Phabricator credentials to create new Phabricator accounts?
-  'phabricator.registration-enabled' => true,
-
-  // Are Phabricator accounts permanently linked to Phabricator accounts, or can
-  // the user unlink them?
-  'phabricator.auth-permanent'       => false,
-
-  // The Phabricator "Client ID" to use for Phabricator API access.
-  'phabricator.application-id'       => null,
-
-  // The Phabricator "Client Secret" to use for Phabricator API access.
-  'phabricator.application-secret'   => null,
 
 
 // -- Recaptcha ------------------------------------------------------------- //
@@ -820,21 +637,6 @@ return array(
     'http'  => true,
     'https' => true,
   ),
-
-  // Tokenizers are UI controls which let the user select other users, email
-  // addresses, project names, etc., by typing the first few letters and having
-  // the control autocomplete from a list. They can load their data in two ways:
-  // either in a big chunk up front, or as the user types. By default, the data
-  // is loaded in a big chunk. This is simpler and performs better for small
-  // datasets. However, if you have a very large number of users or projects,
-  // (in the ballpark of more than a thousand), loading all that data may become
-  // slow enough that it's worthwhile to query on demand instead. This makes
-  // the typeahead slightly less responsive but overall performance will be much
-  // better if you have a ton of stuff. You can figure out which setting is
-  // best for your install by changing this setting and then playing with a
-  // user tokenizer (like the user selectors in Maniphest or Differential) and
-  // seeing which setting loads faster and feels better.
-  'tokenizer.ondemand'          => false,
 
   // By default, Phabricator includes some silly nonsense in the UI, such as
   // a submit button called "Clowncopterize" in Differential and a call to
@@ -985,38 +787,12 @@ return array(
 
 // -- Differential ---------------------------------------------------------- //
 
-  'differential.revision-custom-detail-renderer'  => null,
-
-  // Array for custom remarkup rules. The array should have a list of
-  // class names of classes that extend PhutilRemarkupRule
-  'differential.custom-remarkup-rules' => null,
-
-  // Array for custom remarkup block rules. The array should have a list of
-  // class names of classes that extend PhutilRemarkupEngineBlockRule
-  'differential.custom-remarkup-block-rules' => null,
-
   // List of file regexps where whitespace is meaningful and should not
   // use 'ignore-all' by default
   'differential.whitespace-matters' => array(
     '/\.py$/',
     '/\.l?hs$/',
   ),
-
-  'differential.field-selector' => 'DifferentialDefaultFieldSelector',
-
-  // Differential can show "Host" and "Path" fields on revisions, with
-  // information about the machine and working directory where the
-  // change came from. These fields are disabled by default because they may
-  // occasionally have sensitive information; you can set this to true to
-  // enable them.
-  'differential.show-host-field'  => false,
-
-  // Differential has a required "Test Plan" field by default, which requires
-  // authors to fill out information about how they verified the correctness of
-  // their changes when sending code for review. If you'd prefer not to use
-  // this field, you can disable it here. You can also make it optional
-  // (instead of required) below.
-  'differential.show-test-plan-field' => true,
 
   // Differential has a required "Test Plan" field by default. You can make it
   // optional by setting this to false. You can also completely remove it above,
@@ -1029,11 +805,6 @@ return array(
   // and, socially, email "!accept" is kind of sketchy and implies revisions may
   // not actually be receiving thorough review.
   'differential.enable-email-accept' => false,
-
-  // If you set this to true, users won't need to login to view differential
-  // revisions.  Anonymous users will have read-only access and won't be able to
-  // interact with the revisions.
-  'differential.anonymous-access' => false,
 
   // List of file regexps that should be treated as if they are generated by
   // an automatic process, and thus get hidden by default in differential.
@@ -1084,14 +855,6 @@ return array(
   'repository.default-local-path' => null,
 
 // -- Maniphest ------------------------------------------------------------- //
-
-  // Array of custom fields for Maniphest tasks. For details on adding custom
-  // fields to Maniphest, see "Maniphest User Guide: Adding Custom Fields".
-  'maniphest.custom-fields' => array(),
-
-  // Class which drives custom field construction. See "Maniphest User Guide:
-  // Adding Custom Fields" in the documentation for more information.
-  'maniphest.custom-task-extensions-class' => 'ManiphestDefaultTaskExtensions',
 
   // What should the default task priority be in create flows?
   // See the constants in @{class:ManiphestTaskPriority} for valid values.
@@ -1162,7 +925,8 @@ return array(
   // task will be created for each uri that posts the story data to the uri.
   // Daemons automagically retry failures 100 times, waiting $fail_count * 60s
   // between each subsequent failure. Be sure to keep the daemon console
-  // (/daemon/) open while developing and testing your end points.
+  // (/daemon/) open while developing and testing your end points. You may need
+  // to restart your daemons to start sending http requests.
   //
   // NOTE: URIs are not validated, the URI must return http status 200 within
   // 30 seconds, and no permission checks are performed.
@@ -1183,10 +947,6 @@ return array(
 
   'aphront.default-application-configuration-class' =>
     'AphrontDefaultApplicationConfiguration',
-
-  'controller.oauth-registration' =>
-    'PhabricatorOAuthDefaultRegistrationController',
-
 
   // Directory that phd (the Phabricator daemon control script) should use to
   // track running daemons.
@@ -1209,10 +969,6 @@ return array(
   // of output, but can help debug issues. Daemons launched in debug mode with
   // "phd debug" are always launched in trace mdoe. See also 'phd.verbose'.
   'phd.trace' => false,
-
-  // Path to custom celerity resource map relative to 'phabricator/src'.
-  // See also `scripts/celerity_mapper.php`.
-  'celerity.resource-path' => '__celerity_resource_map__.php',
 
   // This value is an input to the hash function when building resource hashes.
   // It has no security value, but if you accidentally poison user caches (by

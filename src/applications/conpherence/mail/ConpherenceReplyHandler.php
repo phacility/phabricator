@@ -69,7 +69,6 @@ final class ConpherenceReplyHandler extends PhabricatorMailReplyHandler {
       ->setParentMessageID($mail->getMessageID());
 
     $body = $mail->getCleanTextBody();
-    $body = trim($body);
     $file_phids = $mail->getAttachments();
     $body = $this->enhanceBodyWithAttachments(
       $body,

@@ -13,4 +13,3 @@ foreach ($tasks as $task) {
   echo '.';
 }
 echo "\nDone.\n";
-

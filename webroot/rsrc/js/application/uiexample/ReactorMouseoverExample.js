@@ -1,8 +1,6 @@
 /**
  * @provides phabricator-uiexample-reactor-mouseover
  * @requires javelin-install
- *           javelin-view
- *           javelin-util
  *           javelin-dom
  *           javelin-reactor-dom
  */

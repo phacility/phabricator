@@ -38,11 +38,11 @@ final class ConduitAPI_phid_info_Method
 
     $phid = $request->getValue('phid');
 
-    $handles = id(new PhabricatorObjectHandleData(array($phid)))
+    $handle = id(new PhabricatorHandleQuery())
       ->setViewer($request->getUser())
-      ->loadHandles();
+      ->withPHIDs(array($phid))
+      ->executeOne();
 
-    $handle = $handles[$phid];
     if (!$handle->isComplete()) {
       throw new ConduitException('ERR-BAD-PHID');
     }

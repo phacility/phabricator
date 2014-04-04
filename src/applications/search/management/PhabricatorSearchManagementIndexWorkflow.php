@@ -28,13 +28,8 @@ final class PhabricatorSearchManagementIndexWorkflow
           array(
             'name' => 'background',
             'help' => 'Instead of indexing in this process, queue tasks for '.
-                      'the daemons. This is better if you are indexing a lot '.
-                      'of stuff, but less helpful for debugging.',
-          ),
-          array(
-            'name' => 'foreground',
-            'help' => 'Index in this process, even if there are many objects '.
-                      'to index. This is helpful for debugging.',
+                      'the daemons. This can improve performance, but makes '.
+                      'it more difficult to debug search indexing.',
           ),
           array(
             'name'      => 'objects',
@@ -50,7 +45,6 @@ final class PhabricatorSearchManagementIndexWorkflow
     $is_type = $args->getArg('type');
 
     $obj_names = $args->getArg('objects');
-
 
     if ($obj_names && ($is_all || $is_type)) {
       throw new PhutilArgumentUsageException(
@@ -72,37 +66,51 @@ final class PhabricatorSearchManagementIndexWorkflow
         "Nothing to index!");
     }
 
+    if ($args->getArg('background')) {
+      $is_background = true;
+    } else {
+      PhabricatorWorker::setRunAllTasksInProcess(true);
+      $is_background = false;
+    }
+
     $groups = phid_group_by_type($phids);
     foreach ($groups as $group_type => $group) {
       $console->writeOut(
+        "%s\n",
         pht(
           "Indexing %d object(s) of type %s.",
           count($group),
-          $group_type)."\n");
+          $group_type));
     }
 
     $indexer = new PhabricatorSearchIndexer();
     foreach ($phids as $phid) {
-      $indexer->indexDocumentByPHID($phid);
-      $console->writeOut(pht("Indexing '%s'...\n", $phid));
+      if ($is_background) {
+        $console->writeOut("%s\n", pht("Queueing '%s'...", $phid));
+      } else {
+        $console->writeOut("%s\n", pht("Indexing '%s'...", $phid));
+      }
+      $indexer->queueDocumentForIndexing($phid);
     }
 
     $console->writeOut("Done.\n");
   }
 
   private function loadPHIDsByNames(array $names) {
-    $phids = array();
+    $query = id(new PhabricatorObjectQuery())
+      ->setViewer($this->getViewer())
+      ->withNames($names);
+    $query->execute();
+    $objects = $query->getNamedResults();
+
     foreach ($names as $name) {
-      $phid = PhabricatorPHID::fromObjectName(
-        $name,
-        PhabricatorUser::getOmnipotentUser());
-      if (!$phid) {
+      if (empty($objects[$name])) {
         throw new PhutilArgumentUsageException(
           "'{$name}' is not the name of a known object.");
       }
-      $phids[] = $phid;
     }
-    return $phids;
+
+    return mpull($objects, 'getPHID');
   }
 
   private function loadPHIDsByTypes($type) {
@@ -122,7 +130,7 @@ final class PhabricatorSearchManagementIndexWorkflow
       $indexer_phid = $indexer->getIndexableObject()->generatePHID();
       $indexer_type = phid_get_type($indexer_phid);
 
-      if ($type && ($indexer_type != $type)) {
+      if ($type && strcasecmp($indexer_type, $type)) {
         continue;
       }
 

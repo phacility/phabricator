@@ -19,4 +19,3 @@ JX.behavior('diffusion-pull-lastmodified', function(config) {
   }
 
 });
-

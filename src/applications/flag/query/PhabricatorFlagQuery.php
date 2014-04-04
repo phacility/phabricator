@@ -1,28 +1,19 @@
 <?php
 
-final class PhabricatorFlagQuery {
+final class PhabricatorFlagQuery
+  extends PhabricatorCursorPagedPolicyAwareQuery {
+
+  const GROUP_COLOR = 'color';
+  const GROUP_NONE  = 'none';
 
   private $ownerPHIDs;
   private $types;
   private $objectPHIDs;
-
-  private $limit;
-  private $offset;
+  private $colors;
+  private $groupBy = self::GROUP_NONE;
 
   private $needHandles;
   private $needObjects;
-  private $viewer;
-
-  private $order     = 'order-id';
-  const ORDER_ID     = 'order-id';
-  const ORDER_COLOR  = 'order-color';
-  const ORDER_OBJECT = 'order-object';
-  const ORDER_REASON = 'order-reason';
-
-  public function setViewer($viewer) {
-    $this->viewer = $viewer;
-    return $this;
-  }
 
   public function withOwnerPHIDs(array $owner_phids) {
     $this->ownerPHIDs = $owner_phids;
@@ -39,8 +30,18 @@ final class PhabricatorFlagQuery {
     return $this;
   }
 
-  public function withOrder($order) {
-    $this->order = $order;
+  public function withColors(array $colors) {
+    $this->colors = $colors;
+    return $this;
+  }
+
+  /**
+   * Note this is done in php and not in mySQL, which means its inappropriate
+   * for large datasets. Pragmatically, this is fine for user flags which are
+   * typically well under 100 flags per user.
+   */
+  public function setGroupBy($group) {
+    $this->groupBy = $group;
     return $this;
   }
 
@@ -54,75 +55,76 @@ final class PhabricatorFlagQuery {
     return $this;
   }
 
-  public function setLimit($limit) {
-    $this->limit = $limit;
-    return $this;
-  }
-
-  public function setOffset($offset) {
-    $this->offset = $offset;
-    return $this;
-  }
-
   public static function loadUserFlag(PhabricatorUser $user, $object_phid) {
     // Specifying the type in the query allows us to use a key.
-    return id(new PhabricatorFlag())->loadOneWhere(
-      'ownerPHID = %s AND type = %s AND objectPHID = %s',
-      $user->getPHID(),
-      phid_get_type($object_phid),
-      $object_phid);
+    return id(new PhabricatorFlagQuery())
+      ->setViewer($user)
+      ->withOwnerPHIDs(array($user->getPHID()))
+      ->withTypes(array(phid_get_type($object_phid)))
+      ->withObjectPHIDs(array($object_phid))
+      ->executeOne();
   }
 
 
-  public function execute() {
+  public function loadPage() {
     $table = new PhabricatorFlag();
     $conn_r = $table->establishConnection('r');
-
-    $where = $this->buildWhereClause($conn_r);
-    $limit = $this->buildLimitClause($conn_r);
-    $order = $this->buildOrderClause($conn_r);
 
     $data = queryfx_all(
       $conn_r,
       'SELECT * FROM %T flag %Q %Q %Q',
       $table->getTableName(),
-      $where,
-      $order,
-      $limit);
+      $this->buildWhereClause($conn_r),
+      $this->buildOrderClause($conn_r),
+      $this->buildLimitClause($conn_r));
 
-    $flags = $table->loadAllFromArray($data);
+    return $table->loadAllFromArray($data);
+  }
 
-    if ($this->needHandles || $this->needObjects) {
-      $phids = ipull($data, 'objectPHID');
-      $query = new PhabricatorObjectHandleData($phids);
-      $query->setViewer($this->viewer);
+  public function willFilterPage(array $flags) {
 
-      if ($this->needHandles) {
-        $handles = $query->loadHandles();
-        foreach ($flags as $flag) {
-          $handle = idx($handles, $flag->getObjectPHID());
-          if ($handle) {
-            $flag->attachHandle($handle);
-          }
+    if ($this->needObjects) {
+      $objects = id(new PhabricatorObjectQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs(mpull($flags, 'getObjectPHID'))
+        ->execute();
+      $objects = mpull($objects, null, 'getPHID');
+      foreach ($flags as $key => $flag) {
+        $object = idx($objects, $flag->getObjectPHID());
+        if ($object) {
+          $flags[$key]->attachObject($object);
+        } else {
+          unset($flags[$key]);
         }
       }
+    }
 
-      if ($this->needObjects) {
-        $objects = $query->loadObjects();
-        foreach ($flags as $flag) {
-          $object = idx($objects, $flag->getObjectPHID());
-          if ($object) {
-            $flag->attachObject($object);
-          }
-        }
+    if ($this->needHandles) {
+      $handles = id(new PhabricatorHandleQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs(mpull($flags, 'getObjectPHID'))
+        ->execute();
+
+      foreach ($flags as $flag) {
+        $flag->attachHandle($handles[$flag->getObjectPHID()]);
       }
+    }
+
+    switch ($this->groupBy) {
+      case self::GROUP_COLOR:
+        $flags = msort($flags, 'getColor');
+        break;
+      case self::GROUP_NONE:
+        break;
+      default:
+        throw new Exception("Unknown groupBy parameter: $this->groupBy");
+        break;
     }
 
     return $flags;
   }
 
   private function buildWhereClause($conn_r) {
-
     $where = array();
 
     if ($this->ownerPHIDs) {
@@ -146,49 +148,21 @@ final class PhabricatorFlagQuery {
         $this->objectPHIDs);
     }
 
-    if ($where) {
-      return 'WHERE ('.implode(') AND (', $where).')';
-    } else {
-      return '';
+    if ($this->colors) {
+      $where[] = qsprintf(
+        $conn_r,
+        'flag.color IN (%Ld)',
+        $this->colors);
     }
+
+    $where[] = $this->buildPagingClause($conn_r);
+
+    return $this->formatWhereClause($where);
   }
 
-  private function buildOrderClause($conn_r) {
-    return qsprintf($conn_r,
-      'ORDER BY %Q',
-      $this->getOrderColumn($conn_r));
-  }
 
-  private function getOrderColumn($conn_r) {
-    switch ($this->order) {
-      case self::ORDER_ID:
-        return 'id DESC';
-        break;
-      case self::ORDER_COLOR:
-        return 'color ASC';
-        break;
-      case self::ORDER_OBJECT:
-        return 'type DESC';
-        break;
-      case self::ORDER_REASON:
-        return 'reasonPHID DESC';
-        break;
-      default:
-        throw new Exception("Unknown order {$this->order}!");
-        break;
-    }
-  }
-
-  private function buildLimitClause($conn_r) {
-    if ($this->limit && $this->offset) {
-      return qsprintf($conn_r, 'LIMIT %d, %d', $this->offset, $this->limit);
-    } else if ($this->limit) {
-      return qsprintf($conn_r, 'LIMIT %d', $this->limit);
-    } else if ($this->offset) {
-      return qsprintf($conn_r, 'LIMIT %d, %d', $this->offset, PHP_INT_MAX);
-    } else {
-      return '';
-    }
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationFlags';
   }
 
 }

@@ -1,0 +1,402 @@
+@title Events User Guide: Installing Event Listeners
+@group userguide
+
+Using Phabricator event listeners to customize behavior.
+
+= Overview =
+
+Phabricator and Arcanist allow you to install custom runtime event listeners
+which can react to certain things happening (like a Maniphest Task being edited
+or a user creating a new Differential Revision) and run custom code to perform
+logging, synchronize with other systems, or modify workflows.
+
+These listeners are PHP classes which you install beside Phabricator or
+Arcanist, and which Phabricator loads at runtime and runs in-process. They
+require somewhat more effort upfront than simple configuration switches, but are
+the most direct and powerful way to respond to events.
+
+= Installing Event Listeners (Phabicator) =
+
+To install event listeners in Phabricator, follow these steps:
+
+  - Write a listener class which extends @{class@libphutil:PhutilEventListener}.
+  - Add it to a libphutil library, or create a new library (for instructions,
+    see @{article:libphutil Libraries User Guide}.
+  - Configure Phabricator to load the library by adding it to `load-libraries`
+    in the Phabricator config.
+  - Configure Phabricator to install the event listener by adding the class
+    name to `events.listeners` in the Phabricator config.
+
+You can verify your listener is registered in the "Events" tab of DarkConsole.
+It should appear at the top under "Registered Event Listeners". You can also
+see any events the page emitted there. For details on DarkConsole, see
+@{article:Using DarkConsole}.
+
+= Installing Event Listeners (Arcanist) =
+
+To install event listeners in Arcanist, follow these steps:
+
+  - Write a listener class which extends @{class@libphutil:PhutilEventListener}.
+  - Add it to a libphutil library, or create a new library (for instructions,
+    see @{article:libphutil Libraries User Guide}.
+  - Configure Phabricator to load the library by adding it to `load`
+    in the Arcanist config (e.g., `.arcconfig`, or user/global config).
+  - Configure Arcanist to install the event listener by adding the class
+    name to `events.listeners` in the Arcanist config.
+
+You can verify your listener is registered by running any `arc` command with
+`--trace`. You should see output indicating your class was registered as an
+event listener.
+
+= Example Listener =
+
+Phabricator includes an example event listener,
+@{class:PhabricatorExampleEventListener}, which may be useful as a starting
+point in developing your own listeners. This listener listens for a test
+event that is emitted by the script `scripts/util/emit_test_event.php`.
+
+If you run this script normally, it should output something like this:
+
+  $ ./scripts/util/emit_test_event.php
+  Emitting event...
+  Done.
+
+This is because there are no listeners for the event, so nothing reacts to it
+when it is emitted. You can add the example listener by either adding it to
+your `events.listeners` configuration or with the `--listen` command-line flag:
+
+  $ ./scripts/util/emit_test_event.php --listen PhabricatorExampleEventListener
+  Installing 'PhabricatorExampleEventListener'...
+  Emitting event...
+  PhabricatorExampleEventListener got test event at 1341344566
+  Done.
+
+This time, the listener was installed and had its callback invoked when the
+test event was emitted.
+
+= Available Events =
+
+You can find a list of all Phabricator events in @{class:PhabricatorEventType}.
+
+== All Events ==
+
+The special constant `PhutilEventType::TYPE_ALL` will let you listen for all
+events. Normally, you want to listen only to specific events, but if you're
+writing a generic handler you can listen to all events with this constant
+rather than by enumerating each event.
+
+== Arcanist Events ==
+
+Arcanist event constants are listed in @{class@arcanist:ArcanistEventType}.
+
+All Arcanist events have this data available:
+
+  - `workflow` The active @{class@arcanist:ArcanistBaseWorkflow}.
+
+== Arcanist: Commit: Will Commit SVN ==
+
+The constant for this event is `ArcanistEventType::TYPE_COMMIT_WILLCOMMITSVN`.
+
+This event is dispatched before an `svn commit` occurs and allows you to
+modify the commit message. Data available on this event:
+
+  - `message` The text of the message.
+
+== Arcanist: Diff: Will Build Message ==
+
+The constant for this event is `ArcanistEventType::TYPE_DIFF_WILLBUILDMESSAGE`.
+
+This event is dispatched before an editable message is presented to the user,
+and allows you to, e.g., fill in default values for fields. Data available
+on this event:
+
+  - `fields` A map of field values to be compiled into a message.
+
+== Arcanist: Diff: Was Created ==
+
+The constant for this event is `ArcanistEventType::TYPE_DIFF_WASCREATED`.
+
+This event is dispatched after a diff is created. It is currently only useful
+for collecting timing information. No data is available on this event.
+
+== Arcanist: Revision: Will Create Revision ==
+
+The constant for this event is
+`ArcanistEventType::TYPE_REVISION_WILLCREATEREVISION`.
+
+This event is dispatched before a revision is created. It allows you to modify
+fields to, e.g., edit revision titles. Data available on this event:
+
+  - `specification` Parameters that will be used to invoke the
+    `differential.createrevision` Conduit call.
+
+== Controller: Check Request ==
+
+The constant for this event is
+`PhabricatorEventType::TYPE_CONTROLLER_CHECKREQUEST`.
+
+This event is dispatched when controller is about to begin execution. It is
+meant for checking if the user is allowed to use the application at the moment.
+It can check if the user has performed too many operations recently, if his IP
+address is allowed or if the servers are overloaded to process the request.
+Data available on this event:
+
+- `request` Object of class @{class:AphrontRequest}.
+- `controller` Class name of the current controller.
+
+You can delegate the execution to another controller by modifying `controller`.
+
+== Maniphest: Will Edit Task ==
+
+The constant for this event is
+`PhabricatorEventType::TYPE_MANIPHEST_WILLEDITTASK`.
+
+This event is dispatched before a task is edited, and allows you to respond to
+or alter the edit. Data available on this event:
+
+  - ##task## The @{class:ManiphestTask} being edited.
+  - ##transactions## The list of edits (objects of class
+    @{class:ManiphestTransaction}) being applied.
+  - ##new## A boolean indicating if this task is being created.
+  - ##mail## If this edit originates from email, the
+    @{class:PhabricatorMetaMTAReceivedMail} object.
+
+This is similar to the next event (did edit task) but occurs before the edit
+begins.
+
+== Maniphest: Did Edit Task ==
+
+The constant for this event is
+`PhabricatorEventType::TYPE_MANIPHEST_DIDEDITTASK`.
+
+This event is dispatched after a task is edited, and allows you to react to the
+edit. Data available on this event:
+
+  - ##task## The @{class:ManiphestTask} that was edited.
+  - ##transactions## The list of edits (objects of class
+    @{class:ManiphestTransaction}) that were applied.
+  - ##new## A boolean indicating if this task was newly created.
+  - ##mail## If this edit originates from email, the
+    @{class:PhabricatorMetaMTAReceivedMail} object.
+
+This is similar to the previous event (will edit task) but occurs after the
+edit completes.
+
+== Differential: Will Send Mail ==
+
+The constant for this event is
+`PhabricatorEventType::TYPE_DIFFERENTIAL_WILLSENDMAIL`
+
+This event is dispatched before Differential sends an email, and allows you to
+edit the message that will be sent.  Data available on this event:
+
+  - ##mail## The @{class:PhabricatorMetaMTAMail} being edited.
+
+== Differential: Will Mark Generated ==
+
+The constant for this event is
+`PhabricatorEventType::TYPE_DIFFERENTIAL_WILLMARKGENERATED`.
+
+This event is dispatched before Differential decides if a file is generated (and
+doesn't need to be reviewed) or not.  Data available on this event:
+
+  - ##corpus## Body of the file.
+  - ##is_generated## Boolean indicating if this file should be treated as
+    generated.
+
+== Differential: Will Edit Revision ==
+
+The constant for this event is
+`PhabricatorEventType::TYPE_DIFFERENTIAL_WILLEDITREVISION`.
+
+This event is dispatched before a revision is edited, and allows you to
+respond to or alter the edit. Data available on this event:
+
+  - ##revision## The @{class:DifferentialRevision} being edited.
+  - ##new## A boolean indicating if this revision is being created.
+
+This is similar to the next event (did edit revision) but occurs before the edit
+begins.
+
+== Differential: Did Edit Revision ==
+
+The constant for this event is
+`PhabricatorEventType::TYPE_DIFFERENTIAL_DIDEDITREVISION`.
+
+This event is dispatched after a revision is edited, and allows you to
+react to the edit. Data available on this event:
+
+  - ##revision## The @{class:DifferentialRevision} being edited.
+  - ##new## A boolean indicating if this revision is being created.
+
+This is similar to the previous event (will edit revision) but occurs after the
+edit completes.
+
+== Diffusion: Did Discover Commit ==
+
+The constant for this event is
+`PhabricatorEventType::TYPE_DIFFUSION_DIDDISCOVERCOMMIT`.
+
+This event is dispatched when the daemons discover a commit for the first time.
+This event happens very early in the pipeline, and not all commit information
+will be available yet. Data available on this event:
+
+  - `commit` The @{class:PhabricatorRepositoryCommit} that was discovered.
+  - `repository` The @{class:PhabricatorRepository} the commit was discovered
+    in.
+
+== Diffusion: Lookup User ==
+
+The constant for this event is
+`PhabricatorEventType::TYPE_DIFFUSION_LOOKUPUSER`.
+
+This event is dispatched when the daemons are trying to link a commit to a
+Phabricator user account. You can listen for it to improve the accuracy of
+associating users with their commits.
+
+By default, Phabricator will try to find matches based on usernames, real names,
+or email addresses, but this can result in incorrect matches (e.g., if you have
+several employees with the same name) or failures to match (e.g., if someone
+changed their email address). Listening for this event allows you to intercept
+the lookup and supplement the results from another datasource.
+
+Data available on this event:
+
+  - `commit` The @{class:PhabricatorRepositoryCommit} that data is being looked
+    up for.
+  - `query` The author or committer string being looked up. This will usually
+    be something like "Abraham Lincoln <alincoln@logcabin.example.com>", but
+    comes from the commit metadata so it may not be well-formatted.
+  - `result` The current result from the lookup (Phabricator's best guess at
+    the user PHID of the user named in the "query"). To substitute the result
+    with a different result, replace this with the correct PHID in your event
+    listener.
+
+Using @{class@libphutil:PhutilEmailAddress} may be helpful in parsing the query.
+
+== Edge: Will Edit Edges ==
+
+NOTE: Edge events are low-level events deep in the core. It is more difficult to
+correct implement listeners for these events than for higher-level events.
+
+The constant for this event is
+`PhabricatorEventType::TYPE_EDGE_WILLEDITEDGES`.
+
+This event is dispatched before @{class:PhabricatorEdgeEditor} makes an edge
+edit.
+
+  - `id` An identifier for this edit operation.
+  - `add` A list of dictionaries, each representing a new edge.
+  - `rem` A list of dictionaries, each representing a removed edge.
+
+This is similar to the next event (did edit edges) but occurs before the
+edit begins.
+
+== Edge: Did Edit Edges ==
+
+The constant for this event is
+`PhabricatorEventType::TYPE_EDGE_DIDEDITEDGES`.
+
+This event is dispatched after @{class:PhabricatorEdgeEditor} makes an edge
+edit, but before it commits the transactions. Data available on this event:
+
+  - `id` An identifier for this edit operation. This is the same ID as
+    the one included in the corresponding "will edit edges" event.
+  - `add` A list of dictionaries, each representing a new edge.
+  - `rem` A list of dictionaries, each representing a removed edge.
+
+This is similar to the previous event (will edit edges) but occurs after the
+edit completes.
+
+== Search: Did Update Index ==
+
+The constant for this event is
+`PhabricatorEventType::TYPE_SEARCH_DIDUPDATEINDEX`.
+
+This event is dispatched from the Search application's indexing engine, after
+it indexes a document. It allows you to publish search-like indexes into other
+systems.
+
+Note that this event happens after the update is fully complete: you can not
+prevent or modify the update. Further, the event may fire significantly later
+in real time than the update, as indexing may occur in the background. You
+should use other events if you need guarantees about when the event executes.
+
+Finally, this event may fire more than once for a single update. For example,
+if the search indexes are rebuilt, this event will fire on objects which have
+not actually changed.
+
+So, good use cases for event listeners are:
+
+  - Updating secondary search indexes.
+
+Bad use cases are:
+
+  - Editing the object or document.
+  - Anything with side effects, like sending email.
+
+Data available on this event:
+
+  - `phid` The PHID of the updated object.
+  - `object` The object which was updated (like a @{class:ManiphesTask}).
+  - `document` The @{class:PhabricatorSearchAbstractDocument} which was indexed.
+    This contains an abstract representation of the object, and may be useful
+    in populating secondary indexes because it provides a uniform API.
+
+== Test: Did Run Test ==
+
+The constant for this event is
+`PhabricatorEventType::TYPE_TEST_DIDRUNTEST`.
+
+This is a test event for testing event listeners. See above for details.
+
+== UI: Did Render Actions ==
+
+The constant for this event is
+`PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS`.
+
+This event is dispatched after a @{class:PhabricatorActionListView} is built by
+the UI. It allows you to add new actions that your application may provide, like
+"Fax this Object". Data available on this event:
+
+  - `object` The object which actions are being rendered for.
+  - `actions` The current list of available actions.
+
+NOTE: This event is unstable and subject to change.
+
+= Debugging Listeners =
+
+If you're having problems with your listener, try these steps:
+
+  - If you're getting an error about Phabricator being unable to find the
+    listener class, make sure you've added it to a libphutil library and
+    configured Phabricator to load the library with `load-libraries`.
+  - Make sure the listener is registered. It should appear in the "Events" tab
+    of DarkConsole. If it's not there, you may have forgotten to add it to
+    `events.listeners`.
+  - Make sure it calls `listen()` on the right events in its `register()`
+    method. If you don't listen for the events you're interested in, you
+    won't get a callback.
+  - Make sure the events you're listening for are actually happening. If they
+    occur on a normal page they should appear in the "Events" tab of
+    DarkConsole. If they occur on a POST, you could add a `phlog()`
+    to the source code near the event and check your error log to make sure the
+    code ran.
+  - You can check if your callback is getting invoked by adding `phlog()` with
+    a message and checking the error log.
+  - You can try listening to `PhutilEventType::TYPE_ALL` instead of a specific
+    event type to get all events, to narrow down whether problems are caused
+    by the types of events you're listening to.
+  - You can edit the `emit_test_event.php` script to emit other types of
+    events instead, to test that your listener reacts to them properly. You
+    might have to use fake data, but this gives you an easy way to test the
+    at least the basics.
+  - For scripts, you can run under `--trace` to see which events are emitted
+    and how many handlers are listening to each event.
+
+= Next Steps =
+
+Continue by:
+
+  - taking a look at @{class:PhabricatorExampleEventListener}; or
+  - building a library with @{article:libphutil Libraries User Guide}.

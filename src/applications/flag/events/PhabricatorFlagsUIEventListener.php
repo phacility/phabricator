@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorFlagsUIEventListener extends PhutilEventListener {
+final class PhabricatorFlagsUIEventListener extends PhabricatorEventListener {
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS);
@@ -24,6 +24,14 @@ final class PhabricatorFlagsUIEventListener extends PhutilEventListener {
       return;
     }
 
+    if (!($object instanceof PhabricatorFlaggableInterface)) {
+      return;
+    }
+
+    if (!$this->canUseApplication($event->getUser())) {
+      return null;
+    }
+
     $flag = PhabricatorFlagQuery::loadUserFlag($user, $object->getPHID());
 
     if ($flag) {
@@ -38,7 +46,7 @@ final class PhabricatorFlagsUIEventListener extends PhutilEventListener {
         ->setWorkflow(true)
         ->setHref('/flag/edit/'.$object->getPHID().'/')
         ->setName(pht('Flag For Later'))
-        ->setIcon('flag-ghost');
+        ->setIcon('flag');
 
       if (!$user->isLoggedIn()) {
         $flag_action->setDisabled(true);
@@ -51,4 +59,3 @@ final class PhabricatorFlagsUIEventListener extends PhutilEventListener {
   }
 
 }
-

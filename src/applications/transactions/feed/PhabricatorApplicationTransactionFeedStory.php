@@ -11,16 +11,19 @@ class PhabricatorApplicationTransactionFeedStory
   }
 
   public function getRequiredObjectPHIDs() {
-    return array(
-      $this->getPrimaryTransactionPHID(),
-    );
+    return $this->getValue('transactionPHIDs');
   }
 
   public function getRequiredHandlePHIDs() {
     $phids = array();
-    $phids[] = array($this->getValue('objectPHID'));
-    $phids[] = $this->getPrimaryTransaction()->getRequiredHandlePHIDs();
-    return array_mergev($phids);
+    $phids[] = $this->getValue('objectPHID');
+    foreach ($this->getValue('transactionPHIDs') as $xaction_phid) {
+      $xaction = $this->getObject($xaction_phid);
+      foreach ($xaction->getRequiredHandlePHIDs() as $handle_phid) {
+        $phids[] = $handle_phid;
+      }
+    }
+    return $phids;
   }
 
   protected function getPrimaryTransactionPHID() {
@@ -32,24 +35,42 @@ class PhabricatorApplicationTransactionFeedStory
   }
 
   public function renderView() {
-    $view = new PHUIFeedStoryView();
-    $view->setViewed($this->getHasViewed());
+    $view = $this->newStoryView();
 
-    $href = $this->getHandle($this->getPrimaryObjectPHID())->getURI();
-    $view->setHref($view);
+    $handle = $this->getHandle($this->getPrimaryObjectPHID());
+    $view->setHref($handle->getURI());
+
+    $view->setAppIconFromPHID($handle->getPHID());
 
     $xaction_phids = $this->getValue('transactionPHIDs');
-    $xaction = $this->getObject(head($xaction_phids));
+    $xaction = $this->getPrimaryTransaction();
 
     $xaction->setHandles($this->getHandles());
-    $view->setTitle($xaction->getTitleForFeed());
+    $view->setTitle($xaction->getTitleForFeed($this));
+
+    foreach ($xaction_phids as $xaction_phid) {
+      $secondary_xaction = $this->getObject($xaction_phid);
+      $secondary_xaction->setHandles($this->getHandles());
+
+      $body = $secondary_xaction->getBodyForFeed($this);
+      if (nonempty($body)) {
+        $view->appendChild($body);
+      }
+    }
+
+    $view->setImage(
+      $this->getHandle($xaction->getAuthorPHID())->getImageURI());
 
     return $view;
   }
 
   public function renderText() {
     // TODO: This is grotesque; the feed notification handler relies on it.
-    return strip_tags($this->renderView()->render());
+    return htmlspecialchars_decode(
+      strip_tags(
+        hsprintf(
+          '%s',
+          $this->renderView()->render())));
   }
 
 }

@@ -73,4 +73,8 @@ final class PhortuneProduct extends PhortuneDAO
     return false;
   }
 
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
 }

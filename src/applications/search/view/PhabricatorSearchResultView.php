@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group search
- */
 final class PhabricatorSearchResultView extends AphrontView {
 
   private $handle;
@@ -14,7 +11,7 @@ final class PhabricatorSearchResultView extends AphrontView {
     return $this;
   }
 
-  public function setQuery(PhabricatorSearchQuery $query) {
+  public function setQuery(PhabricatorSavedQuery $query) {
     $this->query = $query;
     return $this;
   }
@@ -53,7 +50,10 @@ final class PhabricatorSearchResultView extends AphrontView {
         '');
     }
 
-    $object_name = $handle->getFullName();
+    $title = $this->emboldenQuery($handle->getFullName());
+    if ($handle->getStatus() == PhabricatorObjectHandleStatus::STATUS_CLOSED) {
+      $title = phutil_tag('del', array(), $title);
+    }
 
     return hsprintf(
       '<div class="phabricator-search-result">'.
@@ -71,7 +71,7 @@ final class PhabricatorSearchResultView extends AphrontView {
           'class' => 'result-name',
           'href' => $handle->getURI(),
         ),
-        $this->emboldenQuery($object_name)),
+        $title),
       $type_name,
       $link);
   }
@@ -81,7 +81,7 @@ final class PhabricatorSearchResultView extends AphrontView {
       return $str;
     }
 
-    $query = $this->query->getQuery();
+    $query = $this->query->getParameter('query');
 
     $quoted_regexp = '/"([^"]*)"/';
     $matches = array(1 => array());

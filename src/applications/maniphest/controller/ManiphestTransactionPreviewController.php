@@ -18,7 +18,10 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
 
     $comments = $request->getStr('comments');
 
-    $task = id(new ManiphestTask())->load($this->id);
+    $task = id(new ManiphestTaskQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$task) {
       return new Aphront404Response();
     }
@@ -33,18 +36,23 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
 
     $transaction = new ManiphestTransaction();
     $transaction->setAuthorPHID($user->getPHID());
-    $transaction->setComments($comments);
     $transaction->setTransactionType($action);
+
+    // This should really be split into a separate transaction, but it should
+    // all come out in the wash once we fully move to modern stuff.
+    $transaction->attachComment(
+      id(new ManiphestTransactionComment())
+        ->setContent($comments));
 
     $value = $request->getStr('value');
     // grab phids for handles and set transaction values based on action and
     // value (empty or control-specific format) coming in from the wire
     switch ($action) {
-      case ManiphestTransactionType::TYPE_PRIORITY:
+      case ManiphestTransaction::TYPE_PRIORITY:
         $transaction->setOldValue($task->getPriority());
         $transaction->setNewValue($value);
         break;
-      case ManiphestTransactionType::TYPE_OWNER:
+      case ManiphestTransaction::TYPE_OWNER:
         if ($value) {
           $value = current(json_decode($value));
           $phids = array($value);
@@ -53,35 +61,44 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
         }
         $transaction->setNewValue($value);
         break;
-      case ManiphestTransactionType::TYPE_CCS:
+      case ManiphestTransaction::TYPE_CCS:
         if ($value) {
           $value = json_decode($value);
-          $phids = $value;
-          foreach ($task->getCCPHIDs() as $cc_phid) {
-            $phids[] = $cc_phid;
-            $value[] = $cc_phid;
-          }
-          $transaction->setNewValue($value);
-        } else {
-          $phids = array();
-          $transaction->setNewValue(array());
         }
+        if (!$value) {
+          $value = array();
+        }
+        $phids = $value;
+
+        foreach ($task->getCCPHIDs() as $cc_phid) {
+          $phids[] = $cc_phid;
+          $value[] = $cc_phid;
+        }
+
         $transaction->setOldValue($task->getCCPHIDs());
+        $transaction->setNewValue($value);
         break;
-      case ManiphestTransactionType::TYPE_PROJECTS:
+      case ManiphestTransaction::TYPE_PROJECTS:
         if ($value) {
           $value = json_decode($value);
-          $phids = $value;
-          foreach ($task->getProjectPHIDs() as $project_phid) {
-            $phids[] = $project_phid;
-            $value[] = $project_phid;
-          }
-          $transaction->setNewValue($value);
-        } else {
-          $phids = array();
-          $transaction->setNewValue(array());
         }
+        if (!$value) {
+          $value = array();
+        }
+
+        $phids = $value;
+        foreach ($task->getProjectPHIDs() as $project_phid) {
+          $phids[] = $project_phid;
+          $value[] = $project_phid;
+        }
+
         $transaction->setOldValue($task->getProjectPHIDs());
+        $transaction->setNewValue($value);
+        break;
+      case ManiphestTransaction::TYPE_STATUS:
+        $phids = array();
+        $transaction->setOldValue($task->getStatus());
+        $transaction->setNewValue($value);
         break;
       default:
         $phids = array();
@@ -92,23 +109,27 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
 
     $handles = $this->loadViewerHandles($phids);
 
-    $transactions   = array();
+    $transactions = array();
     $transactions[] = $transaction;
 
     $engine = new PhabricatorMarkupEngine();
     $engine->setViewer($user);
-    $engine->addObject($transaction, ManiphestTransaction::MARKUP_FIELD_BODY);
+    if ($transaction->hasComment()) {
+      $engine->addObject(
+        $transaction->getComment(),
+        PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
+    }
     $engine->process();
 
-    $transaction_view = new ManiphestTransactionListView();
-    $transaction_view->setTransactions($transactions);
-    $transaction_view->setHandles($handles);
-    $transaction_view->setUser($user);
-    $transaction_view->setMarkupEngine($engine);
-    $transaction_view->setPreview(true);
+    $transaction->setHandles($handles);
+
+    $view = id(new PhabricatorApplicationTransactionView())
+      ->setUser($user)
+      ->setTransactions($transactions)
+      ->setIsPreview(true);
 
     return id(new AphrontAjaxResponse())
-      ->setContent($transaction_view->render());
+      ->setContent((string)phutil_implode_html('', $view->buildEvents()));
   }
 
 }

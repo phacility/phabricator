@@ -13,7 +13,10 @@ final class PhabricatorFlagEditController extends PhabricatorFlagController {
     $user = $request->getUser();
 
     $phid = $this->phid;
-    $handle = PhabricatorObjectHandleData::loadOneHandle($phid, $user);
+    $handle = id(new PhabricatorHandleQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($phid))
+      ->executeOne();
 
     if (!$handle->isComplete()) {
       return new Aphront404Response();
@@ -46,7 +49,7 @@ final class PhabricatorFlagEditController extends PhabricatorFlagController {
 
     require_celerity_resource('phabricator-flag-css');
 
-    $form = new AphrontFormLayoutView();
+    $form = new PHUIFormLayoutView();
 
     $is_new = !$flag->getID();
 
@@ -82,7 +85,7 @@ final class PhabricatorFlagEditController extends PhabricatorFlagController {
 
     $dialog->addCancelButton($handle->getURI());
     $dialog->addSubmitButton(
-      $is_new ? pht("Flag %s") : pht('Save'));
+      $is_new ? pht("Create Flag") : pht('Save'));
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }

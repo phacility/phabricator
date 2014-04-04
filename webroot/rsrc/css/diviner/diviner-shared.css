@@ -1,0 +1,166 @@
+/**
+ * @provides diviner-shared-css
+ */
+
+.diviner-monospace {
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.diviner-table-view {
+  margin: 0 16px 24px;
+}
+
+.device-phone .diviner-table-view {
+  margin: 0 8px 16px;
+}
+
+.diviner-table-header {
+  padding: 4px 16px;
+  background-color: {$greybackground};
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
+  border-top: 1px solid {$lightblueborder};
+  display: inline-block;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  font-weight: bold;
+  color: {$bluetext};
+}
+
+.diviner-return-table-view,
+.diviner-parameter-table-view {
+  width: 100%;
+  background: {$lightgreybackground};
+  border: 1px solid {$lightblueborder};
+}
+
+.diviner-return-table-type,
+.diviner-parameter-table-type {
+  padding: 6px 8px 6px 12px;
+  white-space: nowrap;
+  text-align: right;
+  color: {$bluetext};
+  width: 20%;
+}
+
+.diviner-parameter-table-name {
+  padding: 6px 8px;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.diviner-return-table-docs,
+.diviner-parameter-table-docs {
+  padding: 6px 12px 6px 8px;
+  width: 80%;
+  background-color: #fff;
+}
+
+.diviner-document-section {
+  padding: 0 0 16px 0;
+}
+
+.device-phone .diviner-document-section {
+  padding: 0 8px 16px 0;
+}
+
+body .diviner-document-section .phui-header-view {
+  width: 100%;
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.phui-property-list-view + .diviner-document-section {
+  margin-top: -1px;
+}
+
+.diviner-message-not-documented {
+  color: {$lightgreytext};
+  font-style: italic;
+  margin: 16px;
+}
+
+.diviner-atom-signature {
+  font-weight: normal;
+}
+
+.diviner-atom-signature-name {
+  font-weight: bold;
+}
+
+.diviner-list .diviner-atom-signature {
+  color: {$violet};
+  margin-left: -16px;
+}
+
+.diviner-list a {
+  font-weight: bold;
+}
+
+.diviner-method-implementation-header {
+  color: {$greytext};
+  margin-bottom: -8px;
+}
+
+.diviner-method-implementation-inherited {
+  color: {$darkgreytext};
+}
+
+.diviner-method-implementation-inherited .diviner-method-implementation-header {
+  color: {$lightgreytext};
+}
+
+/**
+ * Fix excessive padding between method headers and method documentation for
+ * methods with no inherited context.
+ */
+.diviner-document-section .phui-header-shell + .phabricator-remarkup {
+  padding-top: 0;
+}
+
+.diviner-list {
+  padding-left: 12px;
+}
+
+.diviner-list li {
+  line-height: 20px;
+  padding-bottom: 12px;
+}
+
+/* - Book Index ----------------------------------------------------------------
+
+  How big lists of book indexes get displayed
+
+*/
+
+.diviner-book-item {
+  display: block;
+  padding: 6px 16px;
+  margin: 4px -16px;
+}
+
+.diviner-book-item:hover {
+  text-decoration: none;
+}
+
+.device-desktop .diviner-book-item:hover {
+  background-color: #F5EEFF;
+}
+
+.diviner-book-item-title {
+  font-weight: 700;
+  font-size: 16px;
+  color: {$darkbluetext};
+}
+
+.diviner-book-item-type {
+  color: {$lightgreytext};
+  padding-left: 8px
+}
+
+.diviner-book-item-subtitle {
+  display: block;
+  line-height: 20px;
+  color: {$lightgreytext};
+}

@@ -7,7 +7,7 @@ abstract class PhabricatorNotificationController
 
     $page = $this->buildStandardPageView();
 
-    $page->setApplicationName('Notification');
+    $page->setApplicationName(pht('Notification'));
     $page->setBaseURI('/notification/');
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph('!');

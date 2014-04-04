@@ -1,0 +1,17 @@
+fix bug
+
+color: red
+color: blue
+~~~~~~~~~~
+{
+  "color": "color"
+}
+~~~~~~~~~~
+{
+  "title": "fix bug",
+  "color": "red\nblue"
+}
+~~~~~~~~~~
+[
+  "Field \"color\" occurs twice in commit message!"
+]

@@ -113,7 +113,7 @@ final class PhabricatorLocalDiskFileStorageEngine
     // Make sure there's no funny business going on here. Users normally have
     // no ability to affect the content of handles, but double-check that
     // we're only accessing local storage just in case.
-    if (!preg_match('@^[a-f0-9]{2}/[a-f0-9]{2}/[a-f0-9]{28}$@', $handle)) {
+    if (!preg_match('@^[a-f0-9]{2}/[a-f0-9]{2}/[a-f0-9]{28}\z@', $handle)) {
       throw new Exception(
         "Local disk filesystem handle '{$handle}' is malformed!");
     }

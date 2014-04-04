@@ -18,6 +18,10 @@ final class PhabricatorApplicationSearch extends PhabricatorApplication {
     return pht('Find stuff in big piles.');
   }
 
+  public function getIconName() {
+    return 'search';
+  }
+
   public function shouldAppearInLaunchView() {
     return false;
   }
@@ -25,8 +29,7 @@ final class PhabricatorApplicationSearch extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/search/' => array(
-        '' => 'PhabricatorSearchController',
-        '(?P<key>[^/]+)/' => 'PhabricatorSearchController',
+        '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhabricatorSearchController',
         'attach/(?P<phid>[^/]+)/(?P<type>\w+)/(?:(?P<action>\w+)/)?'
           => 'PhabricatorSearchAttachController',
         'select/(?P<type>\w+)/'
@@ -34,7 +37,10 @@ final class PhabricatorApplicationSearch extends PhabricatorApplication {
         'index/(?P<phid>[^/]+)/' => 'PhabricatorSearchIndexController',
         'hovercard/(?P<mode>retrieve|test)/' =>
           'PhabricatorSearchHovercardController',
-        'name/(?P<queryKey>\w+)/' => 'PhabricatorSearchNameController',
+        'edit/(?P<queryKey>[^/]+)/' => 'PhabricatorSearchEditController',
+        'delete/(?P<queryKey>[^/]+)/(?P<engine>[^/]+)/'
+          => 'PhabricatorSearchDeleteController',
+        'order/(?P<engine>[^/]+)/' => 'PhabricatorSearchOrderController',
         ),
     );
   }

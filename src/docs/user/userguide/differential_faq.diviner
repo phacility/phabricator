@@ -1,0 +1,80 @@
+@title Differential User Guide: FAQ
+@group userguide
+
+Common questions about Differential.
+
+= Why does an "accepted" revision remain accepted when it is updated? =
+
+You can configure this behavior with `differential.sticky-accept`.
+
+When a revision author updates an "Accepted" revision in Differential, the
+state remains "Accepted". This can be confusing if you expect the revision to
+change to "Needs Review" when it is updated.
+
+Although this behavior is configurable, we think stickiness is a good behavior:
+stickiness encourage authors to update revisions when they make minor changes
+after a revision is accepted. For example, a reviewer may accept a change with a
+comment like this:
+
+> Looks great, but can you add some documentation for the foo() function
+> before you land it? I also caught a couple typos, see inlines.
+
+If updating the revision reverted the status to "Needs Review", the author
+is discouraged from updating the revision when they make minor changes because
+they'll have to wait for their reviewer to have a chance to look at it again.
+
+Instead, the "Accepted" state is sticky to encourage them to update the revision
+with a comment like:
+
+> - Added docs.
+> - Fixed typos.
+
+This makes it much easier for the reviewer to go double-check those changes
+later if they want, and the update tells them that the author acknowledged their
+suggestions even if they don't bother to go double-check them.
+
+If an author makes significant changes and wants to get them looked at, they can
+always "request review" of an accepted revision, with a comment like:
+
+> When I was testing my typo fix, I realized I actually had a bug, so I had to
+> make some more changes to the bar() implementation -- can you look them over?
+
+If authors are being jerks about this (making sweeping changes as soon as they
+get an accept), solve the problem socially by telling them to stop being jerks.
+Unless you've configured additional layers of enforcement, there's nothing
+stopping them from silently changing the code before pushing it, anyway.
+
+
+= How can I enable syntax highlighting? =
+
+You need to install and configure **Pygments** to highlight anything else than
+PHP. See the `pygments.enabled` configuration setting.
+
+
+= What do the whitespace options mean? =
+
+Most of these are pretty straightforward, but "Ignore Most" is not:
+
+  - **Show All**: Show all whitespace.
+  - **Ignore Trailing**: Ignore changes which only affect trailing whitespace.
+  - **Ignore Most**: Ignore changes which only affect leading or trailing
+    whitespace (but not whitespace changes between non-whitespace characters)
+    in files which are not marked as having significant whitespace.
+    In those files, show whitespace changes. By default, Python (.py) and
+    Haskell (.lhs, .hs) are marked as having significant whitespace, but this
+    can be changed in the `differential.whitespace-matters` configuration
+    setting.
+  - **Ignore All**: Ignore all whitespace changes in all files.
+
+
+= What do the very light green and red backgrounds mean? =
+
+Differential uses these colors to mark changes coming from rebase: they are
+part of the diff but they were not added or removed by the author. They can
+appear in diff of diffs against different bases.
+
+= Next Steps =
+
+Continue by:
+
+  - returning to the @{article:Differential User Guide}.

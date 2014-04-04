@@ -32,22 +32,27 @@ final class PhamePostViewController extends PhameController {
         $post->getBloggerPHID(),
       ));
     $actions = $this->renderActions($post, $user);
-    $properties = $this->renderProperties($post, $user);
+    $properties = $this->renderProperties($post, $user, $actions);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($post->getTitle())
-        ->setHref($this->getApplicationURI('post/view/'.$post->getID().'/')));
+    $crumbs->addTextCrumb(
+      $post->getTitle(),
+      $this->getApplicationURI('post/view/'.$post->getID().'/'));
 
     $nav->appendChild($crumbs);
-    $nav->appendChild(
-      id(new PhabricatorHeaderView())
-        ->setHeader($post->getTitle()));
+
+    $header = id(new PHUIHeaderView())
+        ->setHeader($post->getTitle())
+        ->setUser($user)
+        ->setPolicyObject($post);
+
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->addPropertyList($properties);
 
     if ($post->isDraft()) {
-      $nav->appendChild(
+      $object_box->appendChild(
         id(new AphrontErrorView())
           ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
           ->setTitle(pht('Draft Post'))
@@ -57,7 +62,7 @@ final class PhamePostViewController extends PhameController {
     }
 
     if (!$post->getBlog()) {
-      $nav->appendChild(
+      $object_box->appendChild(
         id(new AphrontErrorView())
           ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
           ->setTitle(pht('Not On A Blog'))
@@ -68,8 +73,7 @@ final class PhamePostViewController extends PhameController {
 
     $nav->appendChild(
       array(
-        $actions,
-        $properties,
+        $object_box,
       ));
 
     return $this->buildApplicationPage(
@@ -77,7 +81,6 @@ final class PhamePostViewController extends PhameController {
       array(
         'title' => $post->getTitle(),
         'device' => true,
-        'dust' => true,
       ));
   }
 
@@ -87,6 +90,7 @@ final class PhamePostViewController extends PhameController {
 
     $actions = id(new PhabricatorActionListView())
       ->setObject($post)
+      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($user);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
@@ -139,11 +143,11 @@ final class PhamePostViewController extends PhameController {
     $can_view_live = $blog && !$post->isDraft();
 
     if ($can_view_live) {
-      $live_uri = 'live/'.$blog->getID().'/post/'.$post->getPhameTitle();
+      $live_uri = $blog->getLiveURI($post);
     } else {
       $live_uri = 'post/notlive/'.$post->getID().'/';
+      $live_uri = $this->getApplicationURI($live_uri);
     }
-    $live_uri = $this->getApplicationURI($live_uri);
 
     $actions->addAction(
       id(new PhabricatorActionView())
@@ -151,7 +155,6 @@ final class PhamePostViewController extends PhameController {
         ->setIcon('world')
         ->setHref($live_uri)
         ->setName(pht('View Live'))
-        ->setRenderAsForm(true)
         ->setDisabled(!$can_view_live)
         ->setWorkflow(!$can_view_live));
 
@@ -160,15 +163,13 @@ final class PhamePostViewController extends PhameController {
 
   private function renderProperties(
     PhamePost $post,
-    PhabricatorUser $user) {
+    PhabricatorUser $user,
+    PhabricatorActionListView $actions) {
 
-    $properties = id(new PhabricatorPropertyListView())
+    $properties = id(new PHUIPropertyListView())
       ->setUser($user)
-      ->setObject($post);
-
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $user,
-      $post);
+      ->setObject($post)
+      ->setActionList($actions);
 
     $properties->addProperty(
       pht('Blog'),
@@ -179,10 +180,6 @@ final class PhamePostViewController extends PhameController {
     $properties->addProperty(
       pht('Blogger'),
       $this->getHandle($post->getBloggerPHID())->renderLink());
-
-    $properties->addProperty(
-      pht('Visible To'),
-      $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
 
     $properties->addProperty(
       pht('Published'),

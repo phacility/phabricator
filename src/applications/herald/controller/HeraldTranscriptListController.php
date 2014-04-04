@@ -1,82 +1,94 @@
 <?php
 
-final class HeraldTranscriptListController extends HeraldController {
+final class HeraldTranscriptListController extends HeraldController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
 
-  public function processRequest() {
+  private $queryKey;
 
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function buildSideNavView($for_app = false) {
+    $user = $this->getRequest()->getUser();
 
-    // Get one page of data together with the pager.
-    // Pull these objects manually since the serialized fields are gigantic.
-    $transcript = new HeraldTranscript();
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    $conn_r = $transcript->establishConnection('r');
-    $phid = $request->getStr('phid');
-    $where_clause = '';
-    if ($phid) {
-      $where_clause = qsprintf(
-        $conn_r,
-        'WHERE objectPHID = %s',
-        $phid);
+    if ($for_app) {
+      $nav->addFilter('new', pht('Create Rule'));
     }
 
-    $pager = new AphrontPagerView();
-    $pager->setOffset($request->getInt('offset'));
-    $pager->setURI($request->getRequestURI(), 'offset');
+    id(new HeraldTranscriptSearchEngine())
+      ->setViewer($user)
+      ->addNavigationItems($nav->getMenu());
 
-    $limit_clause = qsprintf(
-      $conn_r,
-      'LIMIT %d, %d',
-      $pager->getOffset(),
-      $pager->getPageSize() + 1);
+    $nav->selectFilter(null);
 
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT id, objectPHID, time, duration, dryRun FROM %T
-        %Q
-        ORDER BY id DESC
-        %Q',
-      $transcript->getTableName(),
-      $where_clause,
-      $limit_clause);
+    return $nav;
+  }
 
-    $data = $pager->sliceResults($data);
+  public function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $crumbs->addTextCrumb(
+      pht('Transcripts'),
+      $this->getApplicationURI('transcript/'));
+    return $crumbs;
+  }
+
+  public function willProcessRequest(array $data) {
+    $this->queryKey = idx($data, 'queryKey');
+  }
+
+  public function processRequest() {
+    $request = $this->getRequest();
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->queryKey)
+      ->setSearchEngine(new HeraldTranscriptSearchEngine())
+      ->setNavigation($this->buildSideNavView());
+
+    return $this->delegateToController($controller);
+  }
+
+
+  public function renderResultsList(
+    array $transcripts,
+    PhabricatorSavedQuery $query) {
+    assert_instances_of($transcripts, 'HeraldTranscript');
+
+    $viewer = $this->getRequest()->getUser();
 
     // Render the table.
     $handles = array();
-    if ($data) {
-      $phids = ipull($data, 'objectPHID', 'objectPHID');
+    if ($transcripts) {
+      $phids = mpull($transcripts, 'getObjectPHID', 'getObjectPHID');
       $handles = $this->loadViewerHandles($phids);
     }
 
     $rows = array();
-    foreach ($data as $xscript) {
+    foreach ($transcripts as $xscript) {
       $rows[] = array(
-        phabricator_date($xscript['time'], $user),
-        phabricator_time($xscript['time'], $user),
-        $handles[$xscript['objectPHID']]->renderLink(),
-        $xscript['dryRun'] ? 'Yes' : '',
-        number_format((int)(1000 * $xscript['duration'])).' ms',
+        phabricator_date($xscript->getTime(), $viewer),
+        phabricator_time($xscript->getTime(), $viewer),
+        $handles[$xscript->getObjectPHID()]->renderLink(),
+        $xscript->getDryRun() ? pht('Yes') : '',
+        number_format((int)(1000 * $xscript->getDuration())).' ms',
         phutil_tag(
           'a',
           array(
-            'href' => '/herald/transcript/'.$xscript['id'].'/',
+            'href' => '/herald/transcript/'.$xscript->getID().'/',
             'class' => 'button small grey',
           ),
-          'View Transcript'),
+          pht('View Transcript')),
       );
     }
 
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Date',
-        'Time',
-        'Object',
-        'Dry Run',
-        'Duration',
-        'View',
+        pht('Date'),
+        pht('Time'),
+        pht('Object'),
+        pht('Dry Run'),
+        pht('Duration'),
+        pht('View'),
       ));
     $table->setColumnClasses(
       array(
@@ -92,24 +104,10 @@ final class HeraldTranscriptListController extends HeraldController {
     $panel = new AphrontPanelView();
     $panel->setHeader(pht('Herald Transcripts'));
     $panel->appendChild($table);
-    $panel->appendChild($pager);
     $panel->setNoBackground();
 
-    $nav = $this->renderNav();
-    $nav->selectFilter('transcript');
-    $nav->appendChild($panel);
+    return $panel;
 
-    $crumbs = id($this->buildApplicationCrumbs())
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Transcripts')));
-    $nav->setCrumbs($crumbs);
-
-    return $this->buildStandardPageResponse(
-      $nav,
-      array(
-        'title' => 'Herald Transcripts',
-      ));
   }
 
 }

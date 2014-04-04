@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group conduit
+ */
 abstract class ConduitAPI_file_Method extends ConduitAPIMethod {
 
   public function getApplication() {

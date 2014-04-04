@@ -3,6 +3,10 @@
 final class PhabricatorHelpKeyboardShortcutController
   extends PhabricatorHelpController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
@@ -18,7 +22,7 @@ final class PhabricatorHelpKeyboardShortcutController
     // terribly discoverable.
     $keys[] = array(
       'keys'        => array('esc'),
-      'description' => 'Close any dialog, including this one.',
+      'description' => pht('Close any dialog, including this one.'),
     );
 
     $stroke_map = array(
@@ -55,9 +59,9 @@ final class PhabricatorHelpKeyboardShortcutController
 
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
-      ->setTitle('Keyboard Shortcuts')
+      ->setTitle(pht('Keyboard Shortcuts'))
       ->appendChild($table)
-      ->addCancelButton('#', 'Close');
+      ->addCancelButton('#', pht('Close'));
 
     return id(new AphrontDialogResponse())
       ->setDialog($dialog);

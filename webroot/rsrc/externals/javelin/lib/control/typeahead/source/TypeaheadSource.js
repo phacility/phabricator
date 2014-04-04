@@ -109,7 +109,21 @@ JX.install('TypeaheadSource', {
      *
      * @param function
      */
-    sortHandler : null
+    sortHandler : null,
+
+    /**
+     * Optional function which is used to filter results before display. Inputs
+     * are the input string and a list of matches. The function should
+     * return a list of matches to display. This is the minimum useful
+     * implementation:
+     *
+     *   function(value, list) {
+     *     return list;
+     *   }
+     *
+     * @param function
+     */
+    filterHandler : null
 
   },
 
@@ -185,7 +199,9 @@ JX.install('TypeaheadSource', {
       this._raw[obj.id] = obj;
       var t = this.tokenize(obj.tokenizable || obj.name);
       for (var jj = 0; jj < t.length; ++jj) {
-        this._lookup[t[jj]] = this._lookup[t[jj]] || [];
+        if (!this._lookup.hasOwnProperty(t[jj])) {
+          this._lookup[t[jj]] = [];
+        }
         this._lookup[t[jj]].push(obj.id);
       }
     },
@@ -209,7 +225,7 @@ JX.install('TypeaheadSource', {
     },
 
 
-    matchResults : function(value) {
+    matchResults : function(value, partial) {
 
       // This table keeps track of the number of tokens each potential match
       // has actually matched. When we're done, the real matches are those
@@ -273,33 +289,42 @@ JX.install('TypeaheadSource', {
         }
       }
 
-      this.sortHits(value, hits);
+      this.filterAndSortHits(value, hits);
 
       var nodes = this.renderNodes(value, hits);
-      this.invoke('resultsready', nodes);
-      this.invoke('complete');
+      this.invoke('resultsready', nodes, value);
+      if (!partial) {
+        this.invoke('complete');
+      }
     },
 
-    sortHits : function(value, hits) {
+    filterAndSortHits : function(value, hits) {
       var objs = [];
-      for (var ii = 0; ii < hits.length; ii++) {
+      var ii;
+      for (ii = 0; ii < hits.length; ii++) {
         objs.push(this._raw[hits[ii]]);
       }
 
-       var default_comparator = function(u, v) {
+      var default_comparator = function(u, v) {
          var key_u = u.sort || u.name;
          var key_v = v.sort || v.name;
          return key_u.localeCompare(key_v);
       };
 
-      var handler = this.getSortHandler() || function(value, list, cmp) {
+      var filter_handler = this.getFilterHandler() || function(value, list) {
+        return list;
+      };
+
+      objs = filter_handler(value, objs);
+
+      var sort_handler = this.getSortHandler() || function(value, list, cmp) {
         list.sort(cmp);
       };
 
-      handler(value, objs, default_comparator);
+      sort_handler(value, objs, default_comparator);
 
       hits.splice(0, hits.length);
-      for (var ii = 0; ii < objs.length; ii++) {
+      for (ii = 0; ii < objs.length; ii++) {
         hits.push(objs[ii].id);
       }
     },

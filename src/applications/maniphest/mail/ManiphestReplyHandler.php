@@ -27,8 +27,8 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
 
   public function getReplyHandlerInstructions() {
     if ($this->supportsReplies()) {
-      return "Reply to comment or attach files, or !close, !claim, or ".
-             "!unsubscribe.";
+      return "Reply to comment or attach files, or !close, !claim, ".
+             "!unsubscribe or !assign <username>.";
     } else {
       return null;
     }
@@ -45,8 +45,8 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
 
     $user = $this->getActor();
 
-    $body = $mail->getCleanTextBody();
-    $body = trim($body);
+    $body_data = $mail->parseBody();
+    $body = $body_data['body'];
     $body = $this->enhanceBodyWithAttachments($body, $mail->getAttachments());
 
     $xactions = array();
@@ -57,16 +57,14 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
       ));
 
     $template = new ManiphestTransaction();
-    $template->setContentSource($content_source);
-    $template->setAuthorPHID($user->getPHID());
 
     $is_unsub = false;
     if ($is_new_task) {
       // If this is a new task, create a "User created this task." transaction
       // and then set the title and description.
       $xaction = clone $template;
-      $xaction->setTransactionType(ManiphestTransactionType::TYPE_STATUS);
-      $xaction->setNewValue(ManiphestTaskStatus::STATUS_OPEN);
+      $xaction->setTransactionType(ManiphestTransaction::TYPE_STATUS);
+      $xaction->setNewValue(ManiphestTaskStatus::getDefaultStatus());
       $xactions[] = $xaction;
 
       $task->setAuthorPHID($user->getPHID());
@@ -75,33 +73,41 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
       $task->setPriority(ManiphestTaskPriority::getDefaultPriority());
 
     } else {
-      $lines = explode("\n", trim($body));
-      $first_line = head($lines);
 
-      $command = null;
-      $matches = null;
-      if (preg_match('/^!(\w+)/', $first_line, $matches)) {
-        $lines = array_slice($lines, 1);
-        $body = implode("\n", $lines);
-        $body = trim($body);
+      $command = $body_data['command'];
+      $command_value = $body_data['command_value'];
 
-        $command = $matches[1];
-      }
-
-      $ttype = ManiphestTransactionType::TYPE_NONE;
+      $ttype = PhabricatorTransactions::TYPE_COMMENT;
       $new_value = null;
       switch ($command) {
         case 'close':
-          $ttype = ManiphestTransactionType::TYPE_STATUS;
-          $new_value = ManiphestTaskStatus::STATUS_CLOSED_RESOLVED;
+          $ttype = ManiphestTransaction::TYPE_STATUS;
+          $new_value = ManiphestTaskStatus::getDefaultClosedStatus();
           break;
         case 'claim':
-          $ttype = ManiphestTransactionType::TYPE_OWNER;
+          $ttype = ManiphestTransaction::TYPE_OWNER;
           $new_value = $user->getPHID();
+          break;
+        case 'assign':
+          $ttype = ManiphestTransaction::TYPE_OWNER;
+          if ($command_value) {
+            $assign_users = id(new PhabricatorPeopleQuery())
+              ->setViewer($user)
+              ->withUsernames(array($command_value))
+              ->execute();
+            if ($assign_users) {
+              $assign_user = head($assign_users);
+              $new_value = $assign_user->getPHID();
+            }
+          }
+          // assign to the user by default
+          if (!$new_value) {
+            $new_value = $user->getPHID();
+          }
           break;
         case 'unsubscribe':
           $is_unsub = true;
-          $ttype = ManiphestTransactionType::TYPE_CCS;
+          $ttype = ManiphestTransaction::TYPE_CCS;
           $ccs = $task->getCCPHIDs();
           foreach ($ccs as $k => $phid) {
             if ($phid == $user->getPHID()) {
@@ -112,12 +118,22 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
           break;
       }
 
-      $xaction = clone $template;
-      $xaction->setTransactionType($ttype);
-      $xaction->setNewValue($new_value);
-      $xaction->setComments($body);
+      if ($ttype != PhabricatorTransactions::TYPE_COMMENT) {
+        $xaction = clone $template;
+        $xaction->setTransactionType($ttype);
+        $xaction->setNewValue($new_value);
+        $xactions[] = $xaction;
+      }
 
-      $xactions[] = $xaction;
+      if (strlen($body)) {
+        $xaction = clone $template;
+        $xaction->setTransactionType(PhabricatorTransactions::TYPE_COMMENT);
+        $xaction->attachComment(
+          id(new ManiphestTransactionComment())
+            ->setContent($body));
+        $xactions[] = $xaction;
+      }
+
     }
 
     $ccs = $mail->loadCCPHIDs();
@@ -130,7 +146,7 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
 
     if (array_diff($new_ccs, $old_ccs)) {
       $cc_xaction = clone $template;
-      $cc_xaction->setTransactionType(ManiphestTransactionType::TYPE_CCS);
+      $cc_xaction->setTransactionType(ManiphestTransaction::TYPE_CCS);
       $cc_xaction->setNewValue($new_ccs);
       $xactions[] = $cc_xaction;
     }
@@ -149,13 +165,14 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
     $task = $event->getValue('task');
     $xactions = $event->getValue('transactions');
 
-
-    $editor = new ManiphestTransactionEditor();
-    $editor->setActor($user);
-    $editor->setParentMessageID($mail->getMessageID());
-    $editor->setExcludeMailRecipientPHIDs(
-      $this->getExcludeMailRecipientPHIDs());
-    $editor->applyTransactions($task, $xactions);
+    $editor = id(new ManiphestTransactionEditor())
+      ->setActor($user)
+      ->setParentMessageID($mail->getMessageID())
+      ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true)
+      ->setContentSource($content_source)
+      ->applyTransactions($task, $xactions);
 
     $event = new PhabricatorEvent(
       PhabricatorEventType::TYPE_MANIPHEST_DIDEDITTASK,

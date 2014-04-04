@@ -8,6 +8,12 @@ abstract class DivinerPublisher {
   private $renderer;
   private $config;
   private $symbolReverseMap;
+  private $dropCaches;
+
+  public function setDropCaches($drop_caches) {
+    $this->dropCaches = $drop_caches;
+    return $this;
+  }
 
   public function setRenderer(DivinerRenderer $renderer) {
     $renderer->setPublisher($this);
@@ -26,6 +32,10 @@ abstract class DivinerPublisher {
 
   public function getConfig($key, $default = null) {
     return idx($this->config, $key, $default);
+  }
+
+  public function getConfigurationData() {
+    return $this->config;
   }
 
   public function setAtomCache(DivinerAtomCache $cache) {
@@ -86,7 +96,7 @@ abstract class DivinerPublisher {
   protected function getAtomSimilarIndex(DivinerAtom $atom) {
     $atoms = $this->getSimilarAtoms($atom);
     if (count($atoms) == 1) {
-      return null;
+      return 0;
     }
 
     $index = 1;
@@ -109,21 +119,30 @@ abstract class DivinerPublisher {
   final public function publishAtoms(array $hashes) {
     $existing = $this->loadAllPublishedHashes();
 
-    $existing_map = array_fill_keys($existing, true);
-    $hashes_map = array_fill_keys($hashes, true);
+    if ($this->dropCaches) {
+      $deleted = $existing;
+      $created = $hashes;
+    } else {
+      $existing_map = array_fill_keys($existing, true);
+      $hashes_map = array_fill_keys($hashes, true);
 
-    $deleted = array_diff_key($existing_map, $hashes_map);
-    $created = array_diff_key($hashes_map, $existing_map);
+      $deleted = array_diff_key($existing_map, $hashes_map);
+      $created = array_diff_key($hashes_map, $existing_map);
+
+      $deleted = array_keys($deleted);
+      $created = array_keys($created);
+    }
 
     echo pht('Deleting %d documents.', count($deleted))."\n";
-    $this->deleteDocumentsByHash(array_keys($deleted));
+    $this->deleteDocumentsByHash($deleted);
 
     echo pht('Creating %d documents.', count($created))."\n";
-    $this->createDocumentsByHash(array_keys($created));
+    $this->createDocumentsByHash($created);
   }
 
   protected function shouldGenerateDocumentForAtom(DivinerAtom $atom) {
     switch ($atom->getType()) {
+      case DivinerAtom::TYPE_METHOD:
       case DivinerAtom::TYPE_FILE:
         return false;
       case DivinerAtom::TYPE_ARTICLE:

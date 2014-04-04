@@ -18,6 +18,7 @@ final class PhabricatorStartup {
   private static $startTime;
   private static $globals = array();
   private static $capturingOutput;
+  private static $rawInput;
 
 
 /* -(  Accessing Request Information  )-------------------------------------- */
@@ -58,7 +59,15 @@ final class PhabricatorStartup {
     if (!array_key_exists($key, self::$globals)) {
       return $default;
     }
+
     return self::$globals[$key];
+  }
+
+  /**
+   * @task info
+   */
+  public static function getRawInput() {
+    return self::$rawInput;
   }
 
 
@@ -84,11 +93,15 @@ final class PhabricatorStartup {
     self::setupPHP();
     self::verifyPHP();
 
+    self::normalizeInput();
+
     self::verifyRewriteRules();
 
     self::detectPostMaxSizeTriggered();
 
     self::beginOutputCapture();
+
+    self::$rawInput = (string)file_get_contents('php://input');
   }
 
 
@@ -185,9 +198,54 @@ final class PhabricatorStartup {
 
 
   /**
+   * Fatal the request completely in response to an exception, sending a plain
+   * text message to the client. Calls @{method:didFatal} internally.
+   *
+   * @param   string    Brief description of the exception context, like
+   *                    `"Rendering Exception"`.
+   * @param   Exception The exception itself.
+   * @param   bool      True if it's okay to show the exception's stack trace
+   *                    to the user. The trace will always be logged.
+   * @return  exit      This method **does not return**.
+   *
    * @task apocalypse
    */
-  public static function didFatal($message) {
+  public static function didEncounterFatalException(
+    $note,
+    Exception $ex,
+    $show_trace) {
+
+    $message = '['.$note.'/'.get_class($ex).'] '.$ex->getMessage();
+
+    $full_message = $message;
+    $full_message .= "\n\n";
+    $full_message .= $ex->getTraceAsString();
+
+    if ($show_trace) {
+      $message = $full_message;
+    }
+
+    self::didFatal($message, $full_message);
+  }
+
+
+  /**
+   * Fatal the request completely, sending a plain text message to the client.
+   *
+   * @param   string  Plain text message to send to the client.
+   * @param   string  Plain text message to send to the error log. If not
+   *                  provided, the client message is used. You can pass a more
+   *                  detailed message here (e.g., with stack traces) to avoid
+   *                  showing it to users.
+   * @return  exit    This method **does not return**.
+   *
+   * @task apocalypse
+   */
+  public static function didFatal($message, $log_message = null) {
+    if ($log_message === null) {
+      $log_message = $message;
+    }
+
     self::endOutputCapture();
     $access_log = self::getGlobal('log.access');
 
@@ -206,7 +264,7 @@ final class PhabricatorStartup {
       $replace = true,
       $http_error = 500);
 
-    error_log($message);
+    error_log($log_message);
     echo $message;
 
     exit(1);
@@ -217,16 +275,80 @@ final class PhabricatorStartup {
 
 
   /**
-   * @task valiation
+   * @task validation
    */
   private static function setupPHP() {
     error_reporting(E_ALL | E_STRICT);
     ini_set('memory_limit', -1);
+
+    // If we have libxml, disable the incredibly dangerous entity loader.
+    if (function_exists('libxml_disable_entity_loader')) {
+      libxml_disable_entity_loader(true);
+    }
   }
 
+  /**
+   * @task validation
+   */
+  private static function normalizeInput() {
+    // Replace superglobals with unfiltered versions, disrespect php.ini (we
+    // filter ourselves)
+    $filter = array(INPUT_GET, INPUT_POST,
+      INPUT_SERVER, INPUT_ENV, INPUT_COOKIE);
+    foreach ($filter as $type) {
+      $filtered = filter_input_array($type, FILTER_UNSAFE_RAW);
+      if (!is_array($filtered)) {
+        continue;
+      }
+      switch ($type) {
+        case INPUT_SERVER:
+          $_SERVER = array_merge($_SERVER, $filtered);
+          break;
+        case INPUT_GET:
+          $_GET = array_merge($_GET, $filtered);
+          break;
+        case INPUT_COOKIE:
+          $_COOKIE = array_merge($_COOKIE, $filtered);
+          break;
+        case INPUT_POST:
+          $_POST = array_merge($_POST, $filtered);
+          break;
+        case INPUT_ENV;
+          $_ENV = array_merge($_ENV, $filtered);
+          break;
+      }
+    }
+
+    // rebuild $_REQUEST, respecting order declared in ini files
+    $order = ini_get('request_order');
+    if (!$order) {
+      $order = ini_get('variables_order');
+    }
+    if (!$order) {
+      // $_REQUEST will be empty, leave it alone
+      return;
+    }
+    $_REQUEST = array();
+    for ($i = 0; $i < strlen($order); $i++) {
+      switch ($order[$i]) {
+        case 'G':
+          $_REQUEST = array_merge($_REQUEST, $_GET);
+          break;
+        case 'P':
+          $_REQUEST = array_merge($_REQUEST, $_POST);
+          break;
+        case 'C':
+          $_REQUEST = array_merge($_REQUEST, $_COOKIE);
+          break;
+        default:
+          // $_ENV and $_SERVER never go into $_REQUEST
+          break;
+      }
+    }
+  }
 
   /**
-   * @task valiation
+   * @task validation
    */
   private static function verifyPHP() {
     $required_version = '5.2.3';
@@ -244,11 +366,27 @@ final class PhabricatorStartup {
         "disable it to run Phabricator. Consult the PHP manual for ".
         "instructions.");
     }
+
+    if (extension_loaded('apc')) {
+      $apc_version = phpversion('apc');
+      $known_bad = array(
+        '3.1.14' => true,
+        '3.1.15' => true,
+        '3.1.15-dev' => true,
+      );
+      if (isset($known_bad[$apc_version])) {
+        self::didFatal(
+          "You have APC {$apc_version} installed. This version of APC is ".
+          "known to be bad, and does not work with Phabricator (it will ".
+          "cause Phabricator to fatal unrecoverably with nonsense errors). ".
+          "Downgrade to version 3.1.13.");
+      }
+    }
   }
 
 
   /**
-   * @task valiation
+   * @task validation
    */
   private static function verifyRewriteRules() {
     if (isset($_REQUEST['__path__']) && strlen($_REQUEST['__path__'])) {
@@ -278,11 +416,12 @@ final class PhabricatorStartup {
 
 
   /**
-   * @task valiation
+   * @task validation
    */
   private static function validateGlobal($key) {
     static $globals = array(
       'log.access' => true,
+      'csrf.salt'  => true,
     );
 
     if (empty($globals[$key])) {

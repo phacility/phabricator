@@ -24,12 +24,10 @@ final class ReleephBranchEditor extends PhabricatorEditor {
       $template = ReleephBranchTemplate::getRequiredDefaultTemplate();
     }
 
-    $cut_point_handle = head(
-      id(new PhabricatorObjectHandleData(array($cut_point->getPHID())))
-        // We'll assume that whoever found the $cut_point has passed privacy
-        // checks.
-        ->setViewer($this->requireActor())
-        ->loadHandles());
+    $cut_point_handle = id(new PhabricatorHandleQuery())
+      ->setViewer($this->requireActor())
+      ->withPHIDs(array($cut_point->getPHID()))
+      ->executeOne();
 
     list($name, $errors) = id(new ReleephBranchTemplate())
       ->setCommitHandle($cut_point_handle)
@@ -46,7 +44,6 @@ final class ReleephBranchEditor extends PhabricatorEditor {
       ->setBasename($basename)
       ->setReleephProjectID($this->releephProject->getID())
       ->setCreatedByUserPHID($this->requireActor()->getPHID())
-      ->setCutPointCommitIdentifier($cut_point->getCommitIdentifier())
       ->setCutPointCommitPHID($cut_point->getPHID())
       ->setIsActive(1)
       ->setDetail('branchDate', $branch_date)
@@ -72,13 +69,6 @@ final class ReleephBranchEditor extends PhabricatorEditor {
         ->save();
     }
 
-    id(new ReleephEvent())
-      ->setType(ReleephEvent::TYPE_BRANCH_CREATE)
-      ->setActorPHID($this->requireActor()->getPHID())
-      ->setReleephProjectID($this->releephProject->getID())
-      ->setReleephBranchID($branch->getID())
-      ->save();
-
     $table->saveTransaction();
     return $branch;
   }
@@ -86,21 +76,10 @@ final class ReleephBranchEditor extends PhabricatorEditor {
   // aka "close" and "reopen"
   public function changeBranchAccess($is_active) {
     $branch = $this->releephBranch;
-    $branch->openTransaction();
 
     $branch
       ->setIsActive((int)$is_active)
       ->save();
-
-    id(new ReleephEvent())
-      ->setType(ReleephEvent::TYPE_BRANCH_ACCESS)
-      ->setActorPHID($this->requireActor()->getPHID())
-      ->setReleephProjectID($branch->getReleephProjectID())
-      ->setReleephBranchID($branch->getID())
-      ->setDetail('isActive', $is_active)
-      ->save();
-
-    $branch->saveTransaction();
   }
 
 }

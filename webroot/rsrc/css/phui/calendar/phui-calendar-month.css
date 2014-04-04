@@ -1,0 +1,101 @@
+/**
+ * @provides phui-calendar-month-css
+ */
+
+.phui-calendar-view {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+tr.phui-calendar-day-of-week-header th {
+  text-align: center;
+  font-size: 11px;
+  padding: 3px;
+  color: {$lightbluetext};
+  background: {$lightgreybackground};
+}
+
+table.phui-calendar-view td {
+  border: 1px solid #dfdfdf;
+  width: 14.2857%; /* This is one seventh, approximately. */
+}
+
+table.phui-calendar-view td div.phui-calendar-day {
+  min-height: 125px;
+  position: relative;
+}
+
+.phui-calendar-holiday {
+  color: {$greytext};
+  padding: .5em;
+  max-height: 1em;
+  overflow: hidden;
+}
+
+table.phui-calendar-view td.phui-calendar-month-weekstart {
+  border-left: none;
+}
+
+.phui-calendar-date-number {
+  font-weight: normal;
+  color: {$lightgreytext};
+  padding: 4px;
+  border-color: {$thinblueborder};
+  border-style: solid;
+  border-width: 0 0 1px 1px;
+  position: absolute;
+  background: #ffffff;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  top: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.phui-calendar-not-work-day {
+  background-color: {$lightgreybackground};
+}
+
+.phui-calendar-today {
+  background-color: {$lightgreen};
+}
+
+.phui-calendar-empty {
+  background-color: {$greybackground};
+}
+
+.phui-calendar-event-empty {
+  border-color: transparent;
+  background: transparent;
+}
+
+.phui-calendar-view .phui-calendar-list {
+  padding: 8px;
+}
+
+.phui-calendar-view .phui-calendar-list li:first-child {
+  margin-right: 16px;
+}
+
+.phui-calendar-view .phui-calendar-list-dot {
+  width: 3px;
+  height: 3px;
+  margin-right: 4px;
+  border-radius: 10px;
+  position: absolute;
+  top: 5px;
+  left: 0;
+}
+
+.phui-calendar-view .phui-calendar-list-title {
+  width: auto;
+  margin-left: 10px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.phui-calendar-view .phui-calendar-list-time {
+  display: none;
+}

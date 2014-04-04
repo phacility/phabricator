@@ -28,13 +28,10 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     );
   }
 
-  public function getQuickCreateURI() {
-    return $this->getBaseURI().'task/create/';
-  }
-
   public function getEventListeners() {
     return array(
-      new ManiphestPeopleMenuEventListener(),
+      new ManiphestNameIndexEventListener(),
+      new ManiphestActionMenuEventListener(),
       new ManiphestHovercardEventListener(),
     );
   }
@@ -49,17 +46,14 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     return array(
       '/T(?P<id>[1-9]\d*)' => 'ManiphestTaskDetailController',
       '/maniphest/' => array(
-        '' => 'ManiphestTaskListController',
-        'view/(?P<view>\w+)/' => 'ManiphestTaskListController',
+        '(?:query/(?P<queryKey>[^/]+)/)?' => 'ManiphestTaskListController',
         'report/(?:(?P<view>\w+)/)?' => 'ManiphestReportController',
         'batch/' => 'ManiphestBatchEditController',
         'task/' => array(
           'create/' => 'ManiphestTaskEditController',
           'edit/(?P<id>[1-9]\d*)/' => 'ManiphestTaskEditController',
-          'descriptionchange/(?:(?P<id>[1-9]\d*)/)?' =>
-            'ManiphestTaskDescriptionChangeController',
           'descriptionpreview/' =>
-            'ManiphestTaskDescriptionPreviewController',
+            'PhabricatorMarkupPreviewController',
         ),
         'transaction/' => array(
           'save/' => 'ManiphestTransactionSaveController',
@@ -68,13 +62,8 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
         ),
         'export/(?P<key>[^/]+)/' => 'ManiphestExportController',
         'subpriority/' => 'ManiphestSubpriorityController',
-        'custom/' => array(
-          '' => 'ManiphestSavedQueryListController',
-          'edit/(?:(?P<id>[1-9]\d*)/)?' => 'ManiphestSavedQueryEditController',
-          'delete/(?P<id>[1-9]\d*)/'   => 'ManiphestSavedQueryDeleteController',
-        ),
         'subscribe/(?P<action>add|rem)/(?P<id>[1-9]\d*)/'
-        => 'ManiphestSubscribeController',
+          => 'ManiphestSubscribeController',
       ),
     );
   }
@@ -83,35 +72,55 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     $status = array();
 
     $query = id(new ManiphestTaskQuery())
-      ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
-      ->withPriority(ManiphestTaskPriority::PRIORITY_UNBREAK_NOW)
-      ->setLimit(1)
-      ->setCalculateRows(true);
-    $query->execute();
+      ->setViewer($user)
+      ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
+      ->withOwners(array($user->getPHID()));
+    $count = count($query->execute());
 
-    $count = $query->getRowCount();
-    $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
-    $status[] = id(new PhabricatorApplicationStatusView())
-      ->setType($type)
-      ->setText(pht('%d Unbreak Now Task(s)!', $count))
-      ->setCount($count);
-
-    $query = id(new ManiphestTaskQuery())
-      ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
-      ->withOwners(array($user->getPHID()))
-      ->setLimit(1)
-      ->setCalculateRows(true);
-    $query->execute();
-
-    $count = $query->getRowCount();
     $type = PhabricatorApplicationStatusView::TYPE_WARNING;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
-      ->setText(pht('%d Assigned Task(s)', $count))
+      ->setText(pht('%s Assigned Task(s)', new PhutilNumber($count)))
       ->setCount($count);
 
     return $status;
   }
 
-}
+  public function getQuickCreateItems(PhabricatorUser $viewer) {
+    $items = array();
 
+    $item = id(new PHUIListItemView())
+      ->setName(pht('Maniphest Task'))
+      ->setAppIcon('maniphest-dark')
+      ->setHref($this->getBaseURI().'task/create/');
+    $items[] = $item;
+
+    return $items;
+  }
+
+  protected function getCustomCapabilities() {
+    return array(
+      ManiphestCapabilityDefaultView::CAPABILITY => array(
+        'caption' => pht(
+          'Default view policy for newly created tasks.'),
+      ),
+      ManiphestCapabilityDefaultEdit::CAPABILITY => array(
+        'caption' => pht(
+          'Default edit policy for newly created tasks.'),
+      ),
+      ManiphestCapabilityEditStatus::CAPABILITY => array(
+      ),
+      ManiphestCapabilityEditAssign::CAPABILITY => array(
+      ),
+      ManiphestCapabilityEditPolicies::CAPABILITY => array(
+      ),
+      ManiphestCapabilityEditPriority::CAPABILITY => array(
+      ),
+      ManiphestCapabilityEditProjects::CAPABILITY => array(
+      ),
+      ManiphestCapabilityBulkEdit::CAPABILITY => array(
+      ),
+    );
+  }
+
+}

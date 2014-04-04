@@ -1,0 +1,173 @@
+@title Installation Guide
+@group intro
+
+This document contains basic install instructions to get Phabricator up and
+running.
+
+= Installation Requirements =
+
+You will need **a computer**. Options include:
+
+  - **A Normal Computer**: This is strongly recommended. Many installs use a VM
+    in EC2. Phabricator installs properly and works well on a normal computer.
+  - **A Shared Host**: This may work, but is not recommended. Many shared
+    hosting environments have restrictions which prevent some of Phabricator's
+    features from working. Consider using a normal computer instead.
+  - **A SAN Appliance, Network Router, Gaming Console, Raspberry Pi, etc.**:
+    Although you may be able to install Phabricator on specialized hardware, it
+    is unlikely to work well and will be difficult for us to support. Strongly
+    consider using a normal computer instead.
+  - **A Toaster, Car, Firearm, Thermostat, etc.**: Yes, many modern devices now
+    have embedded computing capability. We live in interesting times. However,
+    you should not install Phabricator on these devices. Instead, install it on
+    a normal computer.
+
+To install the Phabricator server software, you will need an **operating
+system** on your normal computer which is **not Windows**. Note that **the
+command line interface //does// work on Windows**, and **you can //use//
+Phabricator from any operating system with a web browser**. However, the server
+software does not run on Windows. It does run on most other operating systems,
+so choose one of these instead:
+
+  - **Linux**: Most installs use Linux.
+  - **Mac OS X**: Mac OS X is an acceptable flavor of Linux.
+  - **FreeBSD**: While FreeBSD is certainly not a flavor of Linux, it is a fine
+    operating system possessed of many desirable qualities, and Phabricator will
+    install and run properly on FreeBSD.
+  - **Solaris, etc.**: Other systems which look like Linux and quack like Linux
+    will generally work fine, although we may suffer a reduced ability to
+    support and resolve issues on unusual operating systems.
+
+Beyond an operating system, you will need **a webserver**.
+
+  - **Apache**: Many installs use Apache + `mod_php`.
+  - **nginx**: Many installs use nginx + `php-fpm`.
+  - **lighttpd**: `lighttpd` is less popular than Apache or nginx, but it
+    works fine.
+  - **Other**: Other webservers which can run PHP are also likely to work fine,
+    although these installation instructions will not cover how to set them up.
+  - **PHP Builtin Server**: You can use the builtin PHP webserver for
+    development or testing, although it should not be used in production.
+
+You will also need:
+
+  - **MySQL**: You need MySQL.
+  - **PHP**: You need PHP 5.2 or newer.
+
+You'll probably also need a **domain name**. In particular, you should read this
+note:
+
+NOTE: Phabricator must be installed on an entire domain. You can not install it
+to a path on an existing domain, like `example.com/phabricator/`. Instead,
+install it to an entire domain or subdomain, like `phabricator.example.com`.
+
+= Installing Required Components =
+
+If you are installing on Ubuntu or an RedHat derivative, there are install
+scripts available which should handle most of the things discussed in this
+document for you:
+
+  - **RedHat Derivatives**:
+    <http://www.phabricator.com/rsrc/install/install_rhel-derivs.sh>
+  - **Ubuntu**: <http://www.phabricator.com/rsrc/install/install_ubuntu.sh>
+
+If those work for you, you can skip directly to the
+@{article:Configuration Guide}. These scripts are also available in the
+##scripts/install## directory in the project itself.
+
+Otherwise, here's a general description of what you need to install:
+
+  - git (usually called "git" in package management systems)
+  - Apache (usually "httpd" or "apache2") (or nginx)
+  - MySQL Server (usually "mysqld" or "mysql-server")
+  - PHP (usually "php")
+  - Required PHP extensions: mbstring, iconv, mysql (or mysqli), curl, pcntl
+    (these might be something like "php-mysql" or "php5-mysql")
+  - Optional PHP extensions: gd, apc (special instructions for APC are available
+    below if you have difficulty installing it), xhprof (instructions below,
+    you only need this if you are developing Phabricator)
+
+If you already have LAMP setup, you've probably already got everything you need.
+It may also be helpful to refer to the install scripts above, even if they don't
+work for your system.
+
+Now that you have all that stuff installed, grab Phabricator and its
+dependencies:
+
+  $ cd somewhere/ # pick some install directory
+  somewhere/ $ git clone git://github.com/facebook/libphutil.git
+  somewhere/ $ git clone git://github.com/facebook/arcanist.git
+  somewhere/ $ git clone git://github.com/facebook/phabricator.git
+
+= Installing APC (Optional) =
+
+Like everything else written in PHP, Phabricator will run much faster with APC
+installed. You likely need to install "pcre-devel" first:
+
+  sudo yum install pcre-devel
+
+Then you have two options. Either install via PECL (try this first):
+
+  sudo yum install php-pear
+  sudo pecl install apc
+
+**If that doesn't work**, grab the package from PECL directly and follow the
+build instructions there:
+
+  http://pecl.php.net/package/APC
+
+Installing APC is optional but **strongly recommended**, especially on
+production hosts.
+
+Once APC is installed, test that it is available by running:
+
+  php -i | grep apc
+
+If it doesn't show up, add:
+
+  extension=apc.so
+
+..to "/etc/php.d/apc.ini" or the "php.ini" file indicated by "php -i".
+
+= Installing XHProf (Optional) =
+
+XHProf is a PHP profiling tool. You don't need to install it unless you are
+developing Phabricator and making performance changes.
+
+You can install xhprof with:
+
+  $ pecl install xhprof
+
+If you have a PEAR version prior to 1.9.3, you may run into a `phpize` failure.
+If so, you can download the source and build it with:
+
+  $ cd extension/
+  $ phpize
+  $ ./configure
+  $ make
+  $ sudo make install
+
+You may also need to add "##extension=xhprof.so##" to your php.ini.
+
+See <https://bugs.php.net/bug.php?id=59747> for more information.
+
+= Updating Phabricator =
+
+Since Phabricator is under active development, you should update frequently. To
+update Phabricator:
+
+  - Stop the webserver (including `php-fpm`, if you use it).
+  - Run `git pull` in `libphutil/`, `arcanist/` and `phabricator/`.
+  - Run `phabricator/bin/storage upgrade`.
+  - Restart the webserver (and `php-fpm`, if you stopped it earlier).
+
+For more details, see @{article:Configuration Guide}. You can use a script
+similar to this one to automate the process:
+
+  http://www.phabricator.com/rsrc/install/update_phabricator.sh
+
+= Next Steps =
+
+Continue by:
+
+  - configuring Phabricator with the @{article:Configuration Guide}.

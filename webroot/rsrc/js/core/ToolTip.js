@@ -54,20 +54,20 @@ JX.install('Tooltip', {
 
       switch (align) {
         case 'N':
-          node.style.left = parseInt(p.x - ((n.x - d.x) / 2)) + 'px';
-          node.style.top  = parseInt(p.y - n.y) + 'px';
+          node.style.left = parseInt(p.x - ((n.x - d.x) / 2), 10) + 'px';
+          node.style.top  = parseInt(p.y - n.y, 10) + 'px';
           break;
         case 'E':
-          node.style.left = parseInt(p.x + d.x) + 'px';
-          node.style.top  = parseInt(p.y - ((n.y - d.y) / 2)) + 'px';
+          node.style.left = parseInt(p.x + d.x, 10) + 'px';
+          node.style.top  = parseInt(p.y - ((n.y - d.y) / 2), 10) + 'px';
           break;
         case 'S':
-          node.style.left = parseInt(p.x - ((n.x - d.x) / 2)) + 'px';
-          node.style.top  = parseInt(p.y + d.y + 5) + 'px';
+          node.style.left = parseInt(p.x - ((n.x - d.x) / 2), 10) + 'px';
+          node.style.top  = parseInt(p.y + d.y + 5, 10) + 'px';
           break;
         case 'W':
-          node.style.left = parseInt(p.x - n.x - 5) + 'px';
-          node.style.top  = parseInt(p.y - ((n.y - d.y) / 2)) + 'px';
+          node.style.left = parseInt(p.x - n.x - 5, 10) + 'px';
+          node.style.top  = parseInt(p.y - ((n.y - d.y) / 2), 10) + 'px';
           break;
       }
     },

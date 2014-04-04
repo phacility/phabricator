@@ -31,7 +31,7 @@ final class AphrontMySQLDatabaseConnectionTestCase
       } catch (AphrontQueryConnectionLostException $ex) {
         $caught = $ex;
       }
-      $this->assertEqual(true, $caught instanceof Exception);
+      $this->assertTrue($caught instanceof Exception);
   }
 
 }

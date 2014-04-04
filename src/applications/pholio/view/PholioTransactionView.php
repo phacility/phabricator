@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group pholio
+ */
 final class PholioTransactionView
   extends PhabricatorApplicationTransactionView {
 
@@ -13,7 +16,7 @@ final class PholioTransactionView
     }
 
     if (($v->getDateCreated() - $u->getDateCreated()) > 60) {
-      // Don't group if transactions happend more than 60s apart.
+      // Don't group if transactions happened more than 60s apart.
       return false;
     }
 
@@ -96,7 +99,7 @@ final class PholioTransactionView
       ),
       $thumb);
 
-    $inline_comment = hsprintf('<p>%s</p>', $comment->getContent());
+    $inline_comment = parent::renderTransactionContent($inline);
 
     return phutil_tag(
       'div',

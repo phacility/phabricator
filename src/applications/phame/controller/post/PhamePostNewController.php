@@ -69,10 +69,7 @@ final class PhamePostNewController extends PhameController {
     $nav->selectFilter('post/new');
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($title)
-        ->setHref($view_uri));
+    $crumbs->addTextCrumb($title, $view_uri);
     $nav->appendChild($crumbs);
 
     if (!$blogs) {
@@ -94,7 +91,6 @@ final class PhamePostNewController extends PhameController {
 
       $form = id(new AphrontFormView())
         ->setUser($user)
-        ->setFlexible(true)
         ->appendChild(
           id(new AphrontFormSelectControl())
             ->setLabel(pht('Blog'))
@@ -117,7 +113,12 @@ final class PhamePostNewController extends PhameController {
               ->setValue(pht('Continue')));
       }
 
-      $nav->appendChild($form);
+
+      $form_box = id(new PHUIObjectBoxView())
+        ->setHeaderText($title)
+        ->setForm($form);
+
+      $nav->appendChild($form_box);
     }
 
     return $this->buildApplicationPage(
@@ -125,7 +126,6 @@ final class PhamePostNewController extends PhameController {
       array(
         'title'   => $title,
         'device'  => true,
-        'dust' => true,
       ));
   }
 }

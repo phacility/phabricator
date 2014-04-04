@@ -2,31 +2,34 @@
 
 abstract class PhabricatorMailingListsController extends PhabricatorController {
 
-  public function buildSideNavView($filter = null, $for_app = false) {
+  public function buildSideNavView($for_app = false) {
     $user = $this->getRequest()->getUser();
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    $nav->addLabel(pht('Mailing Lists'));
-    $nav->addFilter('/', pht('All Lists'));
-    $nav->selectFilter($filter, '/');
     if ($for_app) {
-      $nav->addFilter('edit/', pht('Create List'));
+      $nav->addFilter('edit', pht('Create List'));
     }
+
+    id(new PhabricatorMailingListSearchEngine())
+      ->setViewer($user)
+      ->addNavigationItems($nav->getMenu());
+
+    $nav->selectFilter(null);
 
     return $nav;
   }
 
   public function buildApplicationMenu() {
-    return $this->buildSideNavView(null, true)->getMenu();
+    return $this->buildSideNavView(true)->getMenu();
   }
 
   public function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $crumbs->addAction(
-      id(new PhabricatorMenuItemView())
+      id(new PHUIListItemView())
         ->setName(pht('Create List'))
         ->setHref($this->getApplicationURI('edit/'))
         ->setIcon('create'));

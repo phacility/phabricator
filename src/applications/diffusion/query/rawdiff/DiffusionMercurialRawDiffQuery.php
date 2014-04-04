@@ -3,25 +3,8 @@
 final class DiffusionMercurialRawDiffQuery extends DiffusionRawDiffQuery {
 
   protected function executeQuery() {
-    $raw_diff = $this->executeRawDiffCommand();
-
-    // the only legitimate case here is if we are looking at the first commit
-    // in the repository. no parents means first commit.
-    if (!$raw_diff) {
-      $drequest = $this->getRequest();
-      $parent_query =
-        DiffusionCommitParentsQuery::newFromDiffusionRequest($drequest);
-      $parents = $parent_query->loadParents();
-      if ($parents === array()) {
-        // mercurial likes the string null here
-        $this->setAgainstCommit('null');
-        $raw_diff = $this->executeRawDiffCommand();
-      }
-    }
-
-    return $raw_diff;
+    return $this->executeRawDiffCommand();
   }
-
 
   protected function executeRawDiffCommand() {
     $drequest = $this->getRequest();
@@ -34,19 +17,20 @@ final class DiffusionMercurialRawDiffQuery extends DiffusionRawDiffQuery {
 
     $against = $this->getAgainstCommit();
     if ($against === null) {
-      $against = $commit.'^';
+      // If `$commit` has no parents (usually because it's the first commit
+      // in the repository), we want to diff against `null`. This revset will
+      // do that for us automatically.
+      $against = '('.$commit.'^ or null)';
     }
 
     $future = $repository->getLocalCommandFuture(
-      'diff -U %d --git --rev %s:%s -- %s',
+      'diff -U %d --git --rev %s --rev %s -- %s',
       $this->getLinesOfContext(),
       $against,
       $commit,
       $path);
 
-    if ($this->getTimeout()) {
-      $future->setTimeout($this->getTimeout());
-    }
+    $this->configureFuture($future);
 
     list($raw_diff) = $future->resolvex();
 

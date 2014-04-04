@@ -33,8 +33,10 @@ final class PhameBlogViewController extends PhameController {
 
     $nav = $this->renderSideNavFilterView(null);
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($blog->getName());
+    $header = id(new PHUIHeaderView())
+      ->setHeader($blog->getName())
+      ->setUser($user)
+      ->setPolicyObject($blog);
 
     $handle_phids = array_merge(
       mpull($posts, 'getBloggerPHID'),
@@ -42,24 +44,30 @@ final class PhameBlogViewController extends PhameController {
     $this->loadHandles($handle_phids);
 
     $actions = $this->renderActions($blog, $user);
-    $properties = $this->renderProperties($blog, $user);
+    $properties = $this->renderProperties($blog, $user, $actions);
     $post_list = $this->renderPostList(
       $posts,
       $user,
       pht('This blog has no visible posts.'));
 
+    require_celerity_resource('phame-css');
+    $post_list = id(new PHUIBoxView())
+      ->addPadding(PHUI::PADDING_LARGE)
+      ->addClass('phame-post-list')
+      ->appendChild($post_list);
+
+
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($blog->getName())
-        ->setHref($this->getApplicationURI()));
+    $crumbs->addTextCrumb($blog->getName(), $this->getApplicationURI());
+
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->addPropertyList($properties);
 
     $nav->appendChild(
       array(
         $crumbs,
-        $header,
-        $actions,
-        $properties,
+        $object_box,
         $post_list,
       ));
 
@@ -68,15 +76,19 @@ final class PhameBlogViewController extends PhameController {
       array(
         'device' => true,
         'title' => $blog->getName(),
-        'dust' => true,
       ));
   }
 
-  private function renderProperties(PhameBlog $blog, PhabricatorUser $user) {
+  private function renderProperties(
+    PhameBlog $blog,
+    PhabricatorUser $user,
+    PhabricatorActionListView $actions) {
+
     require_celerity_resource('aphront-tooltip-css');
     Javelin::initBehavior('phabricator-tooltips');
 
-    $properties = new PhabricatorPropertyListView();
+    $properties = new PHUIPropertyListView();
+    $properties->setActionList($actions);
 
     $properties->addProperty(
       pht('Skin'),
@@ -106,10 +118,6 @@ final class PhameBlogViewController extends PhameController {
       $blog);
 
     $properties->addProperty(
-      pht('Visible To'),
-      $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
-
-    $properties->addProperty(
       pht('Editable By'),
       $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
 
@@ -137,6 +145,7 @@ final class PhameBlogViewController extends PhameController {
 
     $actions = id(new PhabricatorActionListView())
       ->setObject($blog)
+      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($user);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
@@ -161,8 +170,7 @@ final class PhameBlogViewController extends PhameController {
       id(new PhabricatorActionView())
         ->setUser($user)
         ->setIcon('world')
-        ->setHref($this->getApplicationURI('live/'.$blog->getID().'/'))
-        ->setRenderAsForm(true)
+        ->setHref($blog->getLiveURI())
         ->setName(pht('View Live')));
 
     $actions->addAction(

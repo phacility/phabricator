@@ -13,7 +13,9 @@ final class PhabricatorRepositoryManagementListWorkflow
   public function execute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
 
-    $repos = id(new PhabricatorRepository())->loadAll();
+    $repos = id(new PhabricatorRepositoryQuery())
+      ->setViewer($this->getViewer())
+      ->execute();
     if ($repos) {
       foreach ($repos as $repo) {
         $console->writeOut("%s\n", $repo->getCallsign());

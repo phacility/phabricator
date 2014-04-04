@@ -1,38 +1,39 @@
 <?php
 
-final class FeedPublisherWorker extends PhabricatorWorker {
+final class FeedPublisherWorker extends FeedPushWorker {
 
   protected function doWork() {
-    $task_data  = $this->getTaskData();
-    $chrono_key = $task_data['chrono_key'];
-    $uri        = $task_data['uri'];
+    $story = $this->loadFeedStory();
 
-    $story = id(new PhabricatorFeedStoryData())
-      ->loadOneWhere('chronologicalKey = %s', $chrono_key);
-
-    if (!$story) {
-      throw new PhabricatorWorkerPermanentFailureException(
-        'Feed story was deleted.'
-      );
+    $uris = PhabricatorEnv::getEnvConfig('feed.http-hooks');
+    foreach ($uris as $uri) {
+      PhabricatorWorker::scheduleTask(
+        'FeedPublisherHTTPWorker',
+        array(
+          'key' => $story->getChronologicalKey(),
+          'uri' => $uri,
+        ));
     }
 
-    $data = array(
-      'storyID'         => $story->getID(),
-      'storyType'       => $story->getStoryType(),
-      'storyData'       => $story->getStoryData(),
-      'storyAuthorPHID' => $story->getAuthorPHID(),
-      'epoch'           => $story->getEpoch(),
+    $argv = array(
+      array(),
     );
 
-    id(new HTTPFuture($uri, $data))
-      ->setMethod('POST')
-      ->setTimeout(30)
-      ->resolvex();
-
+    // Find and schedule all the enabled Doorkeeper publishers.
+    $doorkeeper_workers = id(new PhutilSymbolLoader())
+      ->setAncestorClass('DoorkeeperFeedWorker')
+      ->loadObjects($argv);
+    foreach ($doorkeeper_workers as $worker) {
+      if (!$worker->isEnabled()) {
+        continue;
+      }
+      PhabricatorWorker::scheduleTask(
+        get_class($worker),
+        array(
+          'key' => $story->getChronologicalKey(),
+        ));
+    }
   }
 
-  public function getWaitBeforeRetry(PhabricatorWorkerTask $task) {
-    return max($task->getFailureCount(), 1) * 60;
-  }
 
 }

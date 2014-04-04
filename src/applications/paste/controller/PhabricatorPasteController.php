@@ -1,43 +1,38 @@
 <?php
 
+/**
+ * @group paste
+ */
 abstract class PhabricatorPasteController extends PhabricatorController {
 
-  public function buildSideNavView($filter = null, $for_app = false) {
+  public function buildSideNavView($for_app = false) {
     $user = $this->getRequest()->getUser();
 
     $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI($this->getApplicationURI('filter/')));
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
     if ($for_app) {
-      $nav->addFilter('', pht('Create Paste'),
-        $this->getApplicationURI('/create/'));
+      $nav->addFilter('create', pht('Create Paste'));
     }
 
-    $nav->addLabel(pht('Filters'));
-    $nav->addFilter('all', pht('All Pastes'));
-    if ($user->isLoggedIn()) {
-      $nav->addFilter('my', pht('My Pastes'));
-    }
+    id(new PhabricatorPasteSearchEngine())
+      ->setViewer($user)
+      ->addNavigationItems($nav->getMenu());
 
-    $nav->addLabel(pht('Search'));
-    $nav->addFilter('advanced', pht('Advanced Search'));
-    $nav->addFilter('', pht('Saved Queries'),
-      $this->getApplicationURI('/savedqueries/'));
-
-    $nav->selectFilter($filter, 'all');
+    $nav->selectFilter(null);
 
     return $nav;
   }
 
   public function buildApplicationMenu() {
-    return $this->buildSideNavView(null, true)->getMenu();
+    return $this->buildSideNavView(true)->getMenu();
   }
 
   public function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $crumbs->addAction(
-      id(new PhabricatorMenuItemView())
+      id(new PHUIListItemView())
         ->setName(pht('Create Paste'))
         ->setHref($this->getApplicationURI('create/'))
         ->setIcon('create'));
@@ -47,13 +42,16 @@ abstract class PhabricatorPasteController extends PhabricatorController {
 
   public function buildSourceCodeView(
     PhabricatorPaste $paste,
-    $max_lines = null) {
+    $max_lines = null,
+    $highlights = array()) {
 
     $lines = phutil_split_lines($paste->getContent());
 
     return id(new PhabricatorSourceCodeView())
       ->setLimit($max_lines)
-      ->setLines($lines);
+      ->setLines($lines)
+      ->setHighlights($highlights)
+      ->setURI(new PhutilURI($paste->getURI()));
   }
 
 }

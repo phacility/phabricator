@@ -2,38 +2,12 @@
  * @provides phabricator-action-list-view-css
  */
 
-.phabricator-action-list-view {
-  background: #ffffff;
-}
-
 .device-desktop .phabricator-action-list-view {
-  border: 1px solid #c0c5d1;
-  padding: .5em 0;
-
-  float: right;
-  margin-top: 0px;
-  margin-right: 1%;
-  width: 20%;
-  border-radius: 3px;
   font-size: 12px;
-
-  box-shadow: 0 0 1px 1px rgba(192, 197, 209, 0.5);
-}
-
-.device-desktop .phabricator-header-shell + .phabricator-action-list-view {
-  margin-top: -28px;
-}
-
-.device .phabricator-header-shell + .phabricator-action-list-view {
-  margin-top: -1px;
 }
 
 .device .phabricator-action-list-view {
-  border-top: 1px solid #dcdcdc;
-  padding: .5em 0;
-}
-
-.device .phabricator-action-list-view {
+  padding: 4px 0;
   display: none;
 }
 
@@ -45,6 +19,8 @@
 .device .phabricator-action-view-item {
   font-size: 14px;
   line-height: 22px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid {$thinblueborder};
 }
 
 .phabricator-action-view {
@@ -60,7 +36,6 @@
   padding: 0;
   margin: 0;
   font-weight: normal;
-  color: #3b5998;
   width: 100%;
   text-align: left;
   text-shadow: none;
@@ -74,11 +49,11 @@
 
 .phabricator-action-view button.phabricator-action-view-item,
 .phabricator-action-view-item {
-  padding: 1px 0 1px 34px;
-  line-height: 20px;
+  padding: 2px 4px 2px 28px;
+  line-height: 18px;
   display: block;
-  font-size: 12px;
   text-decoration: none;
+  color: {$darkgreytext};
 }
 
 .phabricator-action-view-icon {
@@ -86,18 +61,22 @@
   height: 14px;
   position: absolute;
   top: 5px;
-  left: 13px;
+  left: 9px;
 }
 
 .device-desktop .phabricator-action-view:hover .phabricator-action-view-item {
   text-decoration: none;
-  background-color: #3875d7;
+  background-color: {$blue};
   color: #ffffff;
 }
 
 .phabricator-action-view-disabled .phabricator-action-view-item,
 .phabricator-action-view-disabled button.phabricator-action-view-item {
-  color: #888888;
+  color: {$lightgreytext};
+}
+
+.phabricator-action-view button[disabled] {
+  opacity: 1.0;
 }
 
 .device-desktop .phabricator-action-view-disabled:hover
@@ -105,5 +84,5 @@
 .device-desktop .phabricator-action-view-disabled:hover
   button.phabricator-action-view-item {
   background-color: #dfdfdf;
-  color: #888888;
+  color: {$lightgreytext};
 }

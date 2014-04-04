@@ -43,7 +43,7 @@ final class DivinerAtomRef {
 
   public function setName($name) {
     $normal_name = self::normalizeString($name);
-    if (preg_match('/^@[0-9]+$/', $normal_name)) {
+    if (preg_match('/^@[0-9]+\z/', $normal_name)) {
       throw new Exception(
         "Atom names must not be in the form '/@\d+/'. This pattern is ".
         "reserved for disambiguating atoms with similar names.");
@@ -109,6 +109,10 @@ final class DivinerAtomRef {
     return $this->title;
   }
 
+  public function getTitleSlug() {
+    return self::normalizeTitleString($this->getTitle());
+  }
+
   public function toDictionary() {
     return array(
       'book'    => $this->getBook(),
@@ -144,6 +148,7 @@ final class DivinerAtomRef {
     $obj->index = idx($dict, 'index');
     $obj->summary = idx($dict, 'summary');
     $obj->title = idx($dict, 'title');
+
     return $obj;
   }
 
@@ -191,6 +196,15 @@ final class DivinerAtomRef {
     );
 
     return idx($alternates, $str, $str);
+  }
+
+  public static function normalizeTitleString($str) {
+    // Remove colons from titles. This is mostly to accommodate legacy rules
+    // from the old Diviner, which generated a significant number of article
+    // URIs without colons present in the titles.
+    $str = str_replace(':', '', $str);
+    $str = self::normalizeString($str);
+    return phutil_utf8_strtolower($str);
   }
 
 }

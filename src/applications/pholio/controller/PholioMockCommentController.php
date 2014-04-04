@@ -37,12 +37,6 @@ final class PholioMockCommentController extends PholioController {
 
     $comment = $request->getStr('comment');
 
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_WEB,
-      array(
-        'ip' => $request->getRemoteAddr(),
-      ));
-
     $xactions = array();
 
     $inline_comments = id(new PholioTransactionComment())->loadAllWhere(
@@ -66,7 +60,7 @@ final class PholioMockCommentController extends PholioController {
 
     $editor = id(new PholioMockEditor())
       ->setActor($user)
-      ->setContentSource($content_source)
+      ->setContentSourceFromRequest($request)
       ->setContinueOnNoEffect($request->isContinueRequest())
       ->setIsPreview($is_preview);
 

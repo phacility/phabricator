@@ -13,7 +13,8 @@ JX.behavior('differential-feedback-preview', function(config) {
   var action = JX.$(config.action);
   var content = JX.$(config.content);
   var previewTokenizers = {};
-  for (var field in config.previewTokenizers) {
+  var field;
+  for (field in config.previewTokenizers) {
     var tokenizer = JX.$(config.previewTokenizers[field]);
     previewTokenizers[field] = JX.Stratcom.getData(tokenizer).tokenizer;
   }
@@ -46,7 +47,7 @@ JX.behavior('differential-feedback-preview', function(config) {
 
   JX.DOM.listen(content, 'keydown', null, trigger);
   JX.DOM.listen(action,  'change',  null, trigger);
-  for (var field in previewTokenizers) {
+  for (field in previewTokenizers) {
     previewTokenizers[field].listen('change', trigger);
   }
 

@@ -7,11 +7,27 @@ abstract class ConpherenceController extends PhabricatorController {
   private $conpherences;
 
   public function buildApplicationMenu() {
-    $nav = new PhabricatorMenuView();
+    $nav = new PHUIListView();
 
     $nav->newLink(
       pht('New Message'),
       $this->getApplicationURI('new/'));
+
+    $nav->addMenuItem(
+      id(new PHUIListItemView())
+      ->setName(pht('Add Participants'))
+      ->setType(PHUIListItemView::TYPE_LINK)
+      ->setHref('#')
+      ->addSigil('conpherence-widget-adder')
+      ->setMetadata(array('widget' => 'widgets-people')));
+
+    $nav->addMenuItem(
+      id(new PHUIListItemView())
+      ->setName(pht('New Calendar Item'))
+      ->setType(PHUIListItemView::TYPE_LINK)
+      ->setHref('/calendar/event/create/')
+      ->addSigil('conpherence-widget-adder')
+      ->setMetadata(array('widget' => 'widgets-calendar')));
 
     return $nav;
   }
@@ -21,63 +37,45 @@ abstract class ConpherenceController extends PhabricatorController {
 
     $crumbs
       ->addAction(
-        id(new PhabricatorMenuItemView())
-          ->setName(pht('New Message'))
-          ->setHref($this->getApplicationURI('new/'))
-          ->setIcon('create'))
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Conpherence')));
-
+        id(new PHUIListItemView())
+        ->setName(pht('New Message'))
+        ->setHref($this->getApplicationURI('new/'))
+        ->setIcon('create')
+        ->setWorkflow(true))
+      ->addAction(
+        id(new PHUIListItemView())
+        ->setName(pht('Thread'))
+        ->setHref('#')
+        ->setIcon('action-menu')
+        ->setStyle('display: none;')
+        ->addClass('device-widgets-selector')
+        ->addSigil('device-widgets-selector'));
     return $crumbs;
   }
 
   protected function buildHeaderPaneContent(ConpherenceThread $conpherence) {
-    $user = $this->getRequest()->getUser();
-    $display_data = $conpherence->getDisplayData(
-      $user,
-      ConpherenceImageData::SIZE_HEAD);
-    $edit_href = $this->getApplicationURI('update/'.$conpherence->getID().'/');
-    $class_mod = $display_data['image_class'];
+    $crumbs = $this->buildApplicationCrumbs();
+    if ($conpherence->getTitle()) {
+      $title = $conpherence->getTitle();
+    } else {
+      $title = pht('[No Title]');
+    }
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+      ->setName($title)
+      ->setHref($this->getApplicationURI('update/'.$conpherence->getID().'/'))
+      ->setWorkflow(true));
 
-    return array(
-      phutil_tag(
-        'div',
-        array(
-          'class' => 'upload-photo'
-        ),
-        pht('Drop photo here to change this Conpherence photo.')),
-      javelin_tag(
-        'a',
-        array(
-          'class' => 'edit',
-          'href' => $edit_href,
-          'sigil' => 'conpherence-edit-metadata',
-          'meta' => array(
-            'action' => 'metadata'
-          )
-        ),
-        ''),
-      phutil_tag(
-        'div',
-        array(
-          'class' => $class_mod.'header-image',
-          'style' => 'background-image: url('.$display_data['image'].');'
-        ),
-        ''),
-      phutil_tag(
-        'div',
-        array(
-          'class' => $class_mod.'title',
-        ),
-        $display_data['title']),
-      phutil_tag(
-        'div',
-        array(
-          'class' => $class_mod.'subtitle',
-        ),
-        $display_data['subtitle']),
-    );
+    return hsprintf(
+      '%s',
+      array(
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'header-loading-mask'
+          ),
+          ''),
+        $crumbs));
   }
 
   protected function renderConpherenceTransactions(
@@ -110,13 +108,41 @@ abstract class ConpherenceController extends PhabricatorController {
       }
     }
     $engine->process();
+    // we're going to insert a dummy date marker transaction for breaks
+    // between days. some setup required!
+    $previous_transaction = null;
+    $date_marker_transaction = id(new ConpherenceTransaction())
+      ->setTransactionType(ConpherenceTransactionType::TYPE_DATE_MARKER)
+      ->makeEphemeral();
+    $date_marker_transaction_view = id(new ConpherenceTransactionView())
+      ->setUser($user)
+      ->setConpherenceTransaction($date_marker_transaction)
+      ->setHandles($handles)
+      ->setMarkupEngine($engine);
     foreach ($transactions as $transaction) {
+      if ($previous_transaction) {
+        $previous_day = phabricator_format_local_time(
+          $previous_transaction->getDateCreated(),
+          $user,
+          'Ymd');
+        $current_day = phabricator_format_local_time(
+          $transaction->getDateCreated(),
+          $user,
+          'Ymd');
+        // date marker transaction time!
+        if ($previous_day != $current_day) {
+          $date_marker_transaction->setDateCreated(
+            $transaction->getDateCreated());
+          $rendered_transactions[] = $date_marker_transaction_view->render();
+        }
+      }
       $rendered_transactions[] = id(new ConpherenceTransactionView())
         ->setUser($user)
         ->setConpherenceTransaction($transaction)
         ->setHandles($handles)
         ->setMarkupEngine($engine)
         ->render();
+      $previous_transaction = $transaction;
     }
     $latest_transaction_id = $transaction->getID();
 

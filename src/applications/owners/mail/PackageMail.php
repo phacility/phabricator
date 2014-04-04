@@ -80,9 +80,10 @@ abstract class PackageMail extends PhabricatorMail {
       $this->mailTo,
       array($package->getActorPHID()),
       array_keys($this->paths));
-    $this->handles = id(new PhabricatorObjectHandleData($phids))
+    $this->handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->getActor())
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
   }
 
   final protected function renderSummarySection() {

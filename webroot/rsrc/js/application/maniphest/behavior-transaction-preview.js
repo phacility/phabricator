@@ -48,7 +48,7 @@ JX.behavior('maniphest-transaction-preview', function(config) {
       action : selected,
       value : value || ''
     };
-  }
+  };
 
   var request = new JX.PhabricatorShapedRequest(config.uri, callback, getdata);
   var trigger = JX.bind(request, request.trigger);

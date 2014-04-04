@@ -69,6 +69,19 @@ h2 {
   margin: 0 0 1em;
 }
 
+.phame-post tt {
+  color: #333333;
+  background: #ebebeb;
+  padding: 0 .25em;
+  white-space: pre-wrap;
+}
+
+.phame-post .remarkup-code-block pre {
+  overflow: auto;
+  padding: 10px 10px;
+  border: 1px solid #dfdfdf;
+  background-color: #f8f8f8;
+}
 
 .fb-comments,
 .fb-comments span,

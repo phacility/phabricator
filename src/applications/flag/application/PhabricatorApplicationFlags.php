@@ -20,6 +20,10 @@ final class PhabricatorApplicationFlags extends PhabricatorApplication {
     );
   }
 
+  public function getTitleGlyph() {
+    return "\xE2\x9A\x90";
+  }
+
   public function getApplicationGroup() {
     return self::GROUP_ORGANIZATION;
   }
@@ -33,7 +37,7 @@ final class PhabricatorApplicationFlags extends PhabricatorApplication {
       ->execute();
 
     $count = count($flags);
-    $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
+    $type = PhabricatorApplicationStatusView::TYPE_WARNING;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
       ->setText(pht('%d Flagged Object(s)', $count))
@@ -45,7 +49,7 @@ final class PhabricatorApplicationFlags extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/flag/' => array(
-        '' => 'PhabricatorFlagListController',
+        '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhabricatorFlagListController',
         'view/(?P<view>[^/]+)/' => 'PhabricatorFlagListController',
         'edit/(?P<phid>[^/]+)/' => 'PhabricatorFlagEditController',
         'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorFlagDeleteController',
@@ -54,4 +58,3 @@ final class PhabricatorApplicationFlags extends PhabricatorApplication {
   }
 
 }
-

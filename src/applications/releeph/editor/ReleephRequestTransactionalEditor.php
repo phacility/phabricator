@@ -155,7 +155,9 @@ final class ReleephRequestTransactionalEditor
     return parent::filterTransactions($object, $xactions);
   }
 
-  protected function supportsMail() {
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
     return true;
   }
 
@@ -265,7 +267,7 @@ final class ReleephRequestTransactionalEditor
     $body->addTextSection(
       pht('RELEEPH BRANCH'),
       $project_and_branch."\n".
-      $releeph_branch->getURI());
+      PhabricatorEnv::getProductionURI($releeph_branch->getURI()));
 
     return $body;
   }

@@ -7,6 +7,7 @@ abstract class DivinerAtomizer {
 
   private $book;
   private $fileName;
+  private $atomContext;
 
   /**
    * If you make a significant change to an atomizer, you can bump this
@@ -16,9 +17,33 @@ abstract class DivinerAtomizer {
     return 1;
   }
 
-  final public function atomize($file_name, $file_data) {
+  final public function atomize($file_name, $file_data, array $context) {
     $this->fileName = $file_name;
-    return $this->executeAtomize($file_name, $file_data);
+    $this->atomContext = $context;
+    $atoms = $this->executeAtomize($file_name, $file_data);
+
+    // Promote the "@group" special to a property. If there's no "@group" on
+    // an atom but the file it's in matches a group pattern, associate it with
+    // the right group.
+    foreach ($atoms as $atom) {
+      $group = null;
+      try {
+        $group = $atom->getDocblockMetaValue('group');
+      } catch (Exception $ex) {
+        // There's no docblock metadata.
+      }
+
+      // If there's no group, but the file matches a group, use that group.
+      if ($group === null && isset($context['group'])) {
+        $group = $context['group'];
+      }
+
+      if ($group !== null) {
+        $atom->setProperty('group', $group);
+      }
+    }
+
+    return $atoms;
   }
 
   abstract protected function executeAtomize($file_name, $file_data);

@@ -12,7 +12,7 @@ JX.behavior('maniphest-transaction-controls', function(config) {
   for (var k in config.tokenizers) {
     var tconfig = config.tokenizers[k];
     tokenizers[k] = JX.Prefab.buildTokenizer(tconfig).tokenizer;
-    tokenizers[k].start()
+    tokenizers[k].start();
   }
 
   JX.DOM.listen(
@@ -33,4 +33,3 @@ JX.behavior('maniphest-transaction-controls', function(config) {
     });
 
 });
-

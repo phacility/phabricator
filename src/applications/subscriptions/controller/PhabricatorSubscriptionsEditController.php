@@ -32,17 +32,15 @@ final class PhabricatorSubscriptionsEditController
     $user = $request->getUser();
     $phid = $this->phid;
 
-    // TODO: This is a policy test because `loadObjects()` is not currently
-    // policy-aware. Once it is, we can collapse this.
-    $handle = PhabricatorObjectHandleData::loadOneHandle($phid, $user);
-    if (!$handle->isComplete()) {
-      return new Aphront404Response();
-    }
-
-    $objects = id(new PhabricatorObjectHandleData(array($phid)))
+    $handle = id(new PhabricatorHandleQuery())
       ->setViewer($user)
-      ->loadObjects();
-    $object = idx($objects, $phid);
+      ->withPHIDs(array($phid))
+      ->executeOne();
+
+    $object = id(new PhabricatorObjectQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($phid))
+      ->executeOne();
 
     if (!($object instanceof PhabricatorSubscribableInterface)) {
       return $this->buildErrorResponse(
@@ -55,6 +53,13 @@ final class PhabricatorSubscriptionsEditController
       return $this->buildErrorResponse(
         pht('Automatically Subscribed'),
         pht('You are automatically subscribed to this object.'),
+        $handle->getURI());
+    }
+
+    if (!$object->shouldAllowSubscription($user->getPHID())) {
+      return $this->buildErrorResponse(
+        pht('You Can Not Subscribe'),
+        pht('You can not subscribe to this object.'),
         $handle->getURI());
     }
 
@@ -76,12 +81,7 @@ final class PhabricatorSubscriptionsEditController
       $editor = id($object->getApplicationTransactionEditor())
         ->setActor($user)
         ->setContinueOnNoEffect(true)
-        ->setContentSource(
-          PhabricatorContentSource::newForSource(
-            PhabricatorContentSource::SOURCE_WEB,
-            array(
-              'ip' => $request->getRemoteAddr(),
-            )));
+        ->setContentSourceFromRequest($request);
 
       $editor->applyTransactions($object, array($xaction));
     } else {

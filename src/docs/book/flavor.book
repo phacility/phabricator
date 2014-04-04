@@ -1,0 +1,42 @@
+{
+  "name" : "phabflavor",
+  "title" : "Phabricator Flavor Text",
+  "short" : "Flavor Text",
+  "preface" : "Recommendations, lore, and dark rituals.",
+  "root" : "../../../",
+  "uri.source" :
+    "https://secure.phabricator.com/diffusion/P/browse/master/%f$%l",
+  "rules" : {
+    "(\\.diviner$)" : "DivinerArticleAtomizer"
+  },
+  "exclude" : [
+    "(^externals/)",
+    "(^webroot/rsrc/externals/)",
+    "(^scripts/)",
+    "(^support/)",
+    "(^resources/)",
+    "(^src/docs/user/)",
+    "(^src/docs/tech/)",
+    "(^src/docs/contributor/)"
+  ],
+  "groups" : {
+    "overview" : {
+      "name" : "Overview"
+    },
+    "review" : {
+      "name" : "Revision Control and Code Review"
+    },
+    "sundry" : {
+      "name" : "Sundries"
+    },
+    "lore" : {
+      "name" : "Phabricator Lore"
+    },
+    "php" : {
+      "name" : "PHP"
+    },
+    "javascript" : {
+      "name" : "Javascript"
+    }
+  }
+}

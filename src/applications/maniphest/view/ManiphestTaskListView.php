@@ -35,22 +35,19 @@ final class ManiphestTaskListView extends ManiphestView {
   public function render() {
     $handles = $this->handles;
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     $list->setCards(true);
     $list->setFlush(true);
 
     $status_map = ManiphestTaskStatus::getTaskStatusMap();
-    $color_map = array(
-      ManiphestTaskPriority::PRIORITY_UNBREAK_NOW => 'magenta',
-      ManiphestTaskPriority::PRIORITY_TRIAGE => 'violet',
-      ManiphestTaskPriority::PRIORITY_HIGH => 'red',
-      ManiphestTaskPriority::PRIORITY_NORMAL => 'orange',
-      ManiphestTaskPriority::PRIORITY_LOW => 'yellow',
-      ManiphestTaskPriority::PRIORITY_WISH => 'sky',
-    );
+    $color_map = ManiphestTaskPriority::getColorMap();
+
+    if ($this->showBatchControls) {
+      Javelin::initBehavior('maniphest-list-editor');
+    }
 
     foreach ($this->tasks as $task) {
-      $item = new PhabricatorObjectItemView();
+      $item = new PHUIObjectItemView();
       $item->setObjectName('T'.$task->getID());
       $item->setHeader($task->getTitle());
       $item->setHref('/T'.$task->getID());
@@ -61,12 +58,8 @@ final class ManiphestTaskListView extends ManiphestView {
       }
 
       $status = $task->getStatus();
-      if ($status != ManiphestTaskStatus::STATUS_OPEN) {
-        $item->addFootIcon(
-          ($status == ManiphestTaskStatus::STATUS_CLOSED_RESOLVED)
-            ? 'enable-white'
-            : 'delete-white',
-          idx($status_map, $status, 'Unknown'));
+      if ($task->isClosed()) {
+        $item->setDisabled(true);
       }
 
       $item->setBarColor(idx($color_map, $task->getPriority(), 'grey'));
@@ -82,25 +75,57 @@ final class ManiphestTaskListView extends ManiphestView {
         $item->addSigil('maniphest-task');
       }
 
-      if ($task->getProjectPHIDs()) {
-        $projects_view = new ManiphestTaskProjectsView();
-        $projects_view->setHandles(
-          array_select_keys(
-            $handles,
-            $task->getProjectPHIDs()));
+      $projects_view = new ManiphestTaskProjectsView();
+      $projects_view->setHandles(
+        array_select_keys(
+          $handles,
+          $task->getProjectPHIDs()));
 
-        $item->addAttribute($projects_view);
-      }
+      $item->addAttribute($projects_view);
 
       $item->setMetadata(
         array(
           'taskID' => $task->getID(),
         ));
 
+      if ($this->showBatchControls) {
+        $item->addAction(
+          id(new PHUIListItemView())
+            ->setIcon('edit')
+            ->addSigil('maniphest-edit-task')
+            ->setHref('/maniphest/task/edit/'.$task->getID().'/'));
+      }
+
       $list->addItem($item);
     }
 
     return $list;
+  }
+
+  public static function loadTaskHandles(
+    PhabricatorUser $viewer,
+    array $tasks) {
+    assert_instances_of($tasks, 'ManiphestTask');
+
+    $phids = array();
+    foreach ($tasks as $task) {
+      $assigned_phid = $task->getOwnerPHID();
+      if ($assigned_phid) {
+        $phids[] = $assigned_phid;
+      }
+      foreach ($task->getProjectPHIDs() as $project_phid) {
+        $phids[] = $project_phid;
+      }
+    }
+
+    if (!$phids) {
+      return array();
+    }
+
+    return id(new PhabricatorHandleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs($phids)
+      ->execute();
   }
 
 }

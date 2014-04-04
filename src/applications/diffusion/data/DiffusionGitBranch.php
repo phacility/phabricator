@@ -2,6 +2,8 @@
 
 final class DiffusionGitBranch {
 
+  const DEFAULT_GIT_REMOTE = 'origin';
+
   /**
    * Parse the output of 'git branch -r --verbose --no-abbrev' or similar into
    * a map. For instance:
@@ -70,4 +72,31 @@ final class DiffusionGitBranch {
 
     return $map;
   }
+
+  /**
+   * As above, but with no `-r`. Used for bare repositories.
+   */
+  public static function parseLocalBranchOutput($stdout) {
+    $map = array();
+
+    $lines = array_filter(explode("\n", $stdout));
+    $regex = '/^[* ]*(\(no branch\)|\S+)\s+([a-z0-9]{40})/';
+    foreach ($lines as $line) {
+      $matches = null;
+      if (!preg_match($regex, $line, $matches)) {
+        throw new Exception("Failed to parse {$line}!");
+      }
+
+      $branch = $matches[1];
+      $branch_head = $matches[2];
+      if ($branch == '(no branch)') {
+        continue;
+      }
+
+      $map[$branch] = $branch_head;
+    }
+
+    return $map;
+  }
+
 }

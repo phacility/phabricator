@@ -15,7 +15,13 @@ final class DifferentialInlineCommentEditController
     $revision_id = $this->revisionID;
     $changeset_id = $this->getChangesetID();
 
-    if (!id(new DifferentialRevision())->load($revision_id)) {
+    $viewer = $this->getRequest()->getUser();
+    $revision = id(new DifferentialRevisionQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($revision_id))
+      ->executeOne();
+
+    if (!$revision) {
       throw new Exception("Invalid revision ID!");
     }
 
@@ -24,12 +30,14 @@ final class DifferentialInlineCommentEditController
     }
 
     return id(new DifferentialInlineComment())
-      ->setRevisionID($revision_id)
+      ->setRevision($revision)
       ->setChangesetID($changeset_id);
   }
 
   protected function loadComment($id) {
-    return id(new DifferentialInlineComment())->load($id);
+    return id(new DifferentialInlineCommentQuery())
+      ->withIDs(array($id))
+      ->executeOne();
   }
 
   protected function loadCommentForEdit($id) {
@@ -52,8 +60,9 @@ final class DifferentialInlineCommentEditController
       return false;
     }
 
-    // Saved comments may not be edited.
-    if ($inline->getCommentID()) {
+    // Saved comments may not be edited, for now, although the schema now
+    // supports it.
+    if (!$inline->isDraft()) {
       return false;
     }
 
@@ -65,4 +74,23 @@ final class DifferentialInlineCommentEditController
     return true;
   }
 
+  protected function deleteComment(PhabricatorInlineCommentInterface $inline) {
+    $inline->openTransaction();
+      DifferentialDraft::deleteHasDraft(
+        $inline->getAuthorPHID(),
+        $inline->getRevisionPHID(),
+        $inline->getPHID());
+      $inline->delete();
+    $inline->saveTransaction();
+  }
+
+  protected function saveComment(PhabricatorInlineCommentInterface $inline) {
+    $inline->openTransaction();
+      $inline->save();
+      DifferentialDraft::markHasDraft(
+        $inline->getAuthorPHID(),
+        $inline->getRevisionPHID(),
+        $inline->getPHID());
+    $inline->saveTransaction();
+  }
 }

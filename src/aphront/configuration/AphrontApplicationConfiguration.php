@@ -56,18 +56,6 @@ abstract class AphrontApplicationConfiguration {
   public function willBuildRequest() {
   }
 
-  /**
-   * Hook for synchronizing account information from OAuth workflows.
-   *
-   * @task hook
-   */
-  public function willAuthenticateUserWithOAuth(
-    PhabricatorUser $user,
-    PhabricatorUserOAuthInfo $oauth_info,
-    PhabricatorOAuthProvider $provider) {
-    return;
-  }
-
 
 /* -(  URI Routing  )-------------------------------------------------------- */
 
@@ -106,25 +94,42 @@ abstract class AphrontApplicationConfiguration {
 
     if (PhabricatorEnv::getEnvConfig('security.require-https')) {
       if (!$request->isHTTPS()) {
-        $uri = $request->getRequestURI();
-        $uri->setDomain($request->getHost());
-        $uri->setProtocol('https');
-        return $this->buildRedirectController($uri);
+        $https_uri = $request->getRequestURI();
+        $https_uri->setDomain($request->getHost());
+        $https_uri->setProtocol('https');
+        return $this->buildRedirectController($https_uri);
       }
     }
 
-    $path     = $request->getPath();
-    $host     = $request->getHost();
-    $base_uri = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
-    $prod_uri = PhabricatorEnv::getEnvConfig('phabricator.production-uri');
-    $file_uri = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
+    $path         = $request->getPath();
+    $host         = $request->getHost();
+    $base_uri     = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
+    $prod_uri     = PhabricatorEnv::getEnvConfig('phabricator.production-uri');
+    $file_uri     = PhabricatorEnv::getEnvConfig(
+      'security.alternate-file-domain');
+    $conduit_uris = PhabricatorEnv::getEnvConfig('conduit.servers');
+    $allowed_uris = PhabricatorEnv::getEnvConfig('phabricator.allowed-uris');
+
+    $uris = array_merge(
+      array(
+        $base_uri,
+        $prod_uri,
+        $file_uri,
+      ),
+      $conduit_uris,
+      $allowed_uris);
+
+    $host_match = false;
+    foreach ($uris as $uri) {
+      if ($host === id(new PhutilURI($uri))->getDomain()) {
+        $host_match = true;
+        break;
+      }
+    }
 
     // NOTE: If the base URI isn't defined yet, don't activate alternate
     // domains.
-    if ($base_uri &&
-        $host != id(new PhutilURI($base_uri))->getDomain() &&
-        $host != id(new PhutilURI($prod_uri))->getDomain() &&
-        $host != id(new PhutilURI($file_uri))->getDomain()) {
+    if ($base_uri && !$host_match) {
 
       try {
         $blog = id(new PhameBlogQuery())
@@ -166,8 +171,8 @@ abstract class AphrontApplicationConfiguration {
         // will be a GET without parameters.
 
         if ($controller && !$request->isHTTPPost()) {
-          $uri = $request->getRequestURI()->setPath($path.'/');
-          return $this->buildRedirectController($uri);
+          $slash_uri = $request->getRequestURI()->setPath($path.'/');
+          return $this->buildRedirectController($slash_uri);
         }
       }
       return $this->build404Controller();

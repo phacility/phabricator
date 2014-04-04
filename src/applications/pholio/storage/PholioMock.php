@@ -1,14 +1,12 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioMock extends PholioDAO
   implements
     PhabricatorMarkupInterface,
     PhabricatorPolicyInterface,
     PhabricatorSubscribableInterface,
     PhabricatorTokenReceiverInterface,
+    PhabricatorFlaggableInterface,
     PhabricatorApplicationTransactionInterface {
 
   const MARKUP_FIELD_DESCRIPTION  = 'markup:description';
@@ -22,9 +20,24 @@ final class PholioMock extends PholioDAO
   protected $coverPHID;
   protected $mailKey;
 
-  private $images;
-  private $coverFile;
-  private $tokenCount;
+  private $images = self::ATTACHABLE;
+  private $allImages = self::ATTACHABLE;
+  private $coverFile = self::ATTACHABLE;
+  private $tokenCount = self::ATTACHABLE;
+
+  public static function initializeNewMock(PhabricatorUser $actor) {
+    $app = id(new PhabricatorApplicationQuery())
+      ->setViewer($actor)
+      ->withClasses(array('PhabricatorApplicationPholio'))
+      ->executeOne();
+
+    $view_policy = $app->getPolicy(PholioCapabilityDefaultView::CAPABILITY);
+
+    return id(new PholioMock())
+      ->setAuthorPHID($actor->getPHID())
+      ->attachImages(array())
+      ->setViewPolicy($view_policy);
+  }
 
   public function getConfiguration() {
     return array(
@@ -43,6 +56,9 @@ final class PholioMock extends PholioDAO
     return parent::save();
   }
 
+  /**
+   * These should be the images currently associated with the Mock.
+   */
   public function attachImages(array $images) {
     assert_instances_of($images, 'PholioImage');
     $this->images = $images;
@@ -50,10 +66,23 @@ final class PholioMock extends PholioDAO
   }
 
   public function getImages() {
-    if ($this->images === null) {
-      throw new Exception("Call attachImages() before getImages()!");
-    }
+    $this->assertAttached($this->images);
     return $this->images;
+  }
+
+  /**
+   * These should be *all* images associated with the Mock. This includes
+   * images which have been removed and / or replaced from the Mock.
+   */
+  public function attachAllImages(array $images) {
+    assert_instances_of($images, 'PholioImage');
+    $this->allImages = $images;
+    return $this;
+  }
+
+  public function getAllImages() {
+    $this->assertAttached($this->images);
+    return $this->allImages;
   }
 
   public function attachCoverFile(PhabricatorFile $file) {
@@ -62,16 +91,12 @@ final class PholioMock extends PholioDAO
   }
 
   public function getCoverFile() {
-    if ($this->coverFile === null) {
-      throw new Exception("Call attachCoverFile() before getCoverFile()!");
-    }
+    $this->assertAttached($this->coverFile);
     return $this->coverFile;
   }
 
   public function getTokenCount() {
-    if ($this->tokenCount === null) {
-      throw new Exception("Call attachTokenCount() before getTokenCount()!");
-    }
+    $this->assertAttached($this->tokenCount);
     return $this->tokenCount;
   }
 
@@ -80,12 +105,44 @@ final class PholioMock extends PholioDAO
     return $this;
   }
 
+  public function getImageHistorySet($image_id) {
+    $images = $this->getAllImages();
+    $images = mpull($images, null, 'getID');
+    $selected_image = $images[$image_id];
+
+    $replace_map = mpull($images, null, 'getReplacesImagePHID');
+    $phid_map = mpull($images, null, 'getPHID');
+
+    // find the earliest image
+    $image = $selected_image;
+    while (isset($phid_map[$image->getReplacesImagePHID()])) {
+      $image = $phid_map[$image->getReplacesImagePHID()];
+    }
+
+    // now build history moving forward
+    $history = array($image->getID() => $image);
+    while (isset($replace_map[$image->getPHID()])) {
+      $image = $replace_map[$image->getPHID()];
+      $history[$image->getID()] = $image;
+    }
+
+    return $history;
+  }
+
 
 /* -(  PhabricatorSubscribableInterface Implementation  )-------------------- */
 
 
   public function isAutomaticallySubscribed($phid) {
     return ($this->authorPHID == $phid);
+  }
+
+  public function shouldShowSubscribersProperty() {
+    return true;
+  }
+
+  public function shouldAllowSubscription($phid) {
+    return true;
   }
 
 
@@ -110,6 +167,10 @@ final class PholioMock extends PholioDAO
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return ($viewer->getPHID() == $this->getAuthorPHID());
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return pht("A mock's owner can always view and edit it.");
   }
 
 

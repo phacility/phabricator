@@ -19,9 +19,10 @@ final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
     $data = $this->getStoryData();
 
     $author_phid = $data->getAuthorPHID();
+    $author_link = $this->linkTo($author_phid);
     $document_phid = $data->getValue('phid');
 
-    $view = new PHUIFeedStoryView();
+    $view = $this->newStoryView();
     $view->setAppIcon('phriction-dark');
 
     $action = $data->getValue('action');
@@ -38,7 +39,7 @@ final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
           $from_handle = $this->getHandle($from_phid);
           $view->setTitle(pht(
             '%s moved the document %s from %s to %s.',
-            $this->linkTo($author_phid),
+            $author_link,
             $document_handle->renderLink(),
             phutil_tag(
               'a',
@@ -58,22 +59,26 @@ final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
       default:
         $view->setTitle(pht(
           '%s %s the document %s.',
-          $this->linkTo($author_phid),
+          $author_link,
           $verb,
           $this->linkTo($document_phid)));
         break;
     }
 
-    $view->setEpoch($data->getEpoch());
     $view->setImage($this->getHandle($author_phid)->getImageURI());
-    $content = $this->renderSummary($data->getValue('content'));
-    $view->appendChild($content);
+    switch ($action) {
+      case PhrictionActionConstants::ACTION_CREATE:
+        $content = $this->renderSummary($data->getValue('content'));
+        $view->appendChild($content);
+        break;
+      }
 
     return $view;
   }
 
   public function renderText() {
-    $author_name = $this->getHandle($this->getAuthorPHID())->getLinkName();
+    $author_handle = $this->getHandle($this->getAuthorPHID());
+    $author_name = $author_handle->getName();
 
     $document_handle = $this->getHandle($this->getPrimaryObjectPHID());
     $document_title = $document_handle->getLinkName();

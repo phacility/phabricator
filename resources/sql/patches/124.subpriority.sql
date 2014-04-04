@@ -7,5 +7,3 @@ ALTER TABLE {$NAMESPACE}_maniphest.maniphest_task
 /* Seed the subpriority column with reasonable values that keep order stable. */
 UPDATE {$NAMESPACE}_maniphest.maniphest_task
   SET subpriority = (UNIX_TIMESTAMP() - dateModified);
-
-

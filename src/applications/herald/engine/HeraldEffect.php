@@ -2,14 +2,15 @@
 
 final class HeraldEffect {
 
-  protected $objectPHID;
-  protected $action;
-  protected $target;
+  private $objectPHID;
+  private $action;
+  private $target;
 
-  protected $ruleID;
-  protected $effector;
+  private $ruleID;
+  private $rulePHID;
+  private $effector;
 
-  protected $reason;
+  private $reason;
 
   public function setObjectPHID($object_phid) {
     $this->objectPHID = $object_phid;
@@ -47,6 +48,15 @@ final class HeraldEffect {
     return $this->ruleID;
   }
 
+  public function setRulePHID($rule_phid) {
+    $this->rulePHID = $rule_phid;
+    return $this;
+  }
+
+  public function getRulePHID() {
+    return $this->rulePHID;
+  }
+
   public function setEffector($effector) {
     $this->effector = $effector;
     return $this;
@@ -66,4 +76,3 @@ final class HeraldEffect {
   }
 
 }
-

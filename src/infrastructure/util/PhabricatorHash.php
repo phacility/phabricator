@@ -9,14 +9,35 @@ final class PhabricatorHash {
    * @param   string  Input string.
    * @return  string  32-byte hexidecimal SHA1+HMAC hash.
    */
-  public static function digest($string) {
-    $key = PhabricatorEnv::getEnvConfig('security.hmac-key');
+  public static function digest($string, $key = null) {
+    if ($key === null) {
+      $key = PhabricatorEnv::getEnvConfig('security.hmac-key');
+    }
+
     if (!$key) {
       throw new Exception(
         "Set a 'security.hmac-key' in your Phabricator configuration!");
     }
 
     return hash_hmac('sha1', $string, $key);
+  }
+
+
+  /**
+   * Digest a string into a password hash. This is similar to @{method:digest},
+   * but requires a salt and iterates the hash to increase cost.
+   */
+  public static function digestPassword(PhutilOpaqueEnvelope $envelope, $salt) {
+    $result = $envelope->openEnvelope();
+    if (!$result) {
+      throw new Exception("Trying to digest empty password!");
+    }
+
+    for ($ii = 0; $ii < 1000; $ii++) {
+      $result = PhabricatorHash::digest($result, $salt);
+    }
+
+    return $result;
   }
 
 

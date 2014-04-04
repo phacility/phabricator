@@ -3,7 +3,7 @@
 final class PhabricatorApplicationPeople extends PhabricatorApplication {
 
   public function getShortDescription() {
-    return 'User Accounts';
+    return pht('User Accounts');
   }
 
   public function getBaseURI() {
@@ -23,7 +23,7 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
   }
 
   public function getApplicationGroup() {
-    return self::GROUP_ADMIN;
+    return self::GROUP_ORGANIZATION;
   }
 
   public function canUninstall() {
@@ -39,17 +39,71 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/people/' => array(
-        '' => 'PhabricatorPeopleListController',
+        '(query/(?P<key>[^/]+)/)?' => 'PhabricatorPeopleListController',
         'logs/' => 'PhabricatorPeopleLogsController',
-        'edit/(?:(?P<id>[1-9]\d*)/(?:(?P<view>\w+)/)?)?'
-          => 'PhabricatorPeopleEditController',
+        'approve/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleApproveController',
+        '(?P<via>disapprove)/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorPeopleDisableController',
+        '(?P<via>disable)/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorPeopleDisableController',
+        'empower/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleEmpowerController',
+        'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleDeleteController',
+        'rename/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleRenameController',
+        'welcome/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleWelcomeController',
+        'create/' => 'PhabricatorPeopleCreateController',
+        'new/(?P<type>[^/]+)/' => 'PhabricatorPeopleNewController',
         'ldap/' => 'PhabricatorPeopleLdapController',
+        'editprofile/(?P<id>[1-9]\d*)/' =>
+          'PhabricatorPeopleProfileEditController',
+        'picture/(?P<id>[1-9]\d*)/' =>
+          'PhabricatorPeopleProfilePictureController',
       ),
-      '/p/(?P<username>[\w._-]+)/(?:(?P<page>\w+)/)?'
+      '/p/(?P<username>[\w._-]+)/'
         => 'PhabricatorPeopleProfileController',
-      '/emailverify/(?P<code>[^/]+)/' =>
-        'PhabricatorEmailVerificationController',
+      '/p/(?P<username>[\w._-]+)/calendar/'
+        => 'PhabricatorPeopleCalendarController',
     );
+  }
+
+  public function getRemarkupRules() {
+    return array(
+      new PhabricatorRemarkupRuleMention(),
+    );
+  }
+
+
+  protected function getCustomCapabilities() {
+    return array(
+      PeopleCapabilityBrowseUserDirectory::CAPABILITY => array(
+      ),
+    );
+  }
+
+  public function loadStatus(PhabricatorUser $user) {
+    if (!$user->getIsAdmin()) {
+      return array();
+    }
+
+    $need_approval = id(new PhabricatorPeopleQuery())
+      ->setViewer($user)
+      ->withIsApproved(false)
+      ->withIsDisabled(false)
+      ->execute();
+
+    if (!$need_approval) {
+      return array();
+    }
+
+    $status = array();
+
+    $count = count($need_approval);
+    $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
+    $status[] = id(new PhabricatorApplicationStatusView())
+      ->setType($type)
+      ->setText(pht('%d User(s) Need Approval', $count))
+      ->setCount($count);
+
+    return $status;
   }
 
   public function buildMainMenuItems(
@@ -58,13 +112,14 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
 
     $items = array();
 
-    if ($user->isLoggedIn()) {
+    if ($user->isLoggedIn() && $user->isUserActivated()) {
       $image = $user->loadProfileImageURI();
 
-      $item = new PhabricatorMenuItemView();
-      $item->setName($user->getUsername());
-      $item->setHref('/p/'.$user->getUsername().'/');
-      $item->addClass('phabricator-core-menu-item');
+      $item = id(new PHUIListItemView())
+        ->setName($user->getUsername())
+        ->setHref('/p/'.$user->getUsername().'/')
+        ->addClass('core-menu-item')
+        ->setOrder(100);
 
       $classes = array(
         'phabricator-core-menu-icon',
@@ -85,5 +140,21 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
 
     return $items;
   }
+
+
+  public function getQuickCreateItems(PhabricatorUser $viewer) {
+    $items = array();
+
+    if ($viewer->getIsAdmin()) {
+      $item = id(new PHUIListItemView())
+        ->setName(pht('User Account'))
+        ->setAppIcon('people-dark')
+        ->setHref($this->getBaseURI().'create/');
+      $items[] = $item;
+    }
+
+    return $items;
+  }
+
 
 }

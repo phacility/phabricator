@@ -3,6 +3,10 @@
 final class ReleephDiffMessageFieldSpecification
   extends ReleephFieldSpecification {
 
+  public function getFieldKey() {
+    return 'commit:message';
+  }
+
   public function getName() {
     return 'Message';
   }

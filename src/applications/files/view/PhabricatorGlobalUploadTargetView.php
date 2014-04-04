@@ -14,6 +14,11 @@ final class PhabricatorGlobalUploadTargetView extends AphrontView {
   }
 
   public function render() {
+    $viewer = $this->getUser();
+    if (!$viewer->isLoggedIn()) {
+      return null;
+    }
+
     $instructions_id = celerity_generate_unique_node_id();
 
     require_celerity_resource('global-drag-and-drop-css');
@@ -22,7 +27,7 @@ final class PhabricatorGlobalUploadTargetView extends AphrontView {
       'ifSupported'   => $this->showIfSupportedID,
       'instructions'  => $instructions_id,
       'uploadURI'     => '/file/dropupload/',
-      'browseURI'     => '/file/filter/my/',
+      'browseURI'     => '/file/query/authored/',
     ));
 
     return phutil_tag(

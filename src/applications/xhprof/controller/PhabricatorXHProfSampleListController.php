@@ -48,11 +48,11 @@ final class PhabricatorXHProfSampleListController
     $samples = $pager->sliceResults($samples);
     $pager->setURI($request->getRequestURI(), 'page');
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     foreach ($samples as $sample) {
       $file_phid = $sample->getFilePHID();
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setObjectName($sample->getID())
         ->setHeader($sample->getRequestPath())
         ->setHref($this->getApplicationURI('profile/'.$file_phid.'/'))
@@ -86,7 +86,6 @@ final class PhabricatorXHProfSampleListController
       array(
         'title' => pht('XHProf Samples'),
         'device' => true,
-        'dust' => true,
       ));
 
   }

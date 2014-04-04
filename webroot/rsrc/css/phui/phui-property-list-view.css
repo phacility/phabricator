@@ -1,0 +1,175 @@
+/**
+ * @provides phui-property-list-view-css
+ */
+
+.phui-property-list-view {
+  background-color: #fff;
+}
+
+.phui-property-list-view .keyboard-shortcuts-available {
+  float: right;
+  height: 16px;
+  margin: 12px 10px -28px 0px;
+  padding: 0px 20px 0px 0px;
+  vertical-align: middle;
+  color: {$greytext};
+  text-align: right;
+  font-size: 11px;
+  background:
+    url('/rsrc/image/icon/fatcow/key_question.png') right center no-repeat;
+}
+
+.device .keyboard-shortcuts-available {
+  display: none;
+}
+
+.phui-property-group-noninitial,
+.phui-property-list-section-noninitial {
+  border-color: {$thinblueborder};
+  border-style: solid;
+  border-width: 1px 0 0;
+}
+
+.device-desktop .phui-property-list-container {
+  padding: 12px 0 12px 0;
+  width: 100%;
+}
+
+.device .phui-property-list-container {
+  padding: 12px 0 4px 0;
+}
+
+.phui-property-list-key {
+  color: {$bluetext};
+  font-weight: bold;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.device-desktop .phui-property-list-key {
+  width: 18%;
+  margin-left: 1%;
+  text-align: right;
+  float: left;
+  clear: left;
+  margin-bottom: 4px;
+}
+
+.device .phui-property-list-key {
+  padding-left: 8px;
+}
+
+.phui-property-list-value {
+  color: {$darkgreytext};
+  line-height: 17px;
+}
+
+.device-desktop .phui-property-list-value {
+  width: 78%;
+  margin-left: 1%;
+  float: left;
+  margin-bottom: 4px;
+}
+
+.device .phui-property-list-value {
+  padding-left: 16px;
+  margin-bottom: 8px;
+}
+
+.phui-property-list-section-header {
+  color: {$bluetext};
+  padding: 12px 16px 0px;
+  text-transform: uppercase;
+  font-weight: 700;
+  border-color: {$thinblueborder};
+  border-style: solid;
+  border-width: 1px 0 0;
+}
+
+.phui-property-list-section-noninitial .phui-property-list-section-header {
+  border-top: none;
+}
+
+.device .phui-property-list-section-header {
+  padding-left: 8px;
+}
+
+.phui-property-list-section-header-icon .sprite-status {
+  display: inline-block;
+  margin: -2px 4px -2px 0;
+}
+
+.phui-property-list-text-content {
+  padding: 12px 16px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.device .phui-property-list-text-content {
+  padding: 8px;
+}
+
+/* In the common case where we immediately follow a header, move back up 30px
+   so we snuggle next to the header. */
+.device-desktop .phui-header-view
+  + .phabricator-action-list-view {
+  margin-top: -30px;
+}
+
+.device-desktop .phui-header-view
+  + .phabricator-action-list-view
+  + .phui-property-list-view {
+  margin-top: 0px;
+}
+
+
+.phui-property-list-image {
+  margin: auto;
+  max-width: 95%;
+}
+
+.phui-property-list-audio {
+  display: block;
+  margin: 16px auto;
+  width: 50%;
+  min-width: 240px;
+}
+
+/* When tags appear in property lists, give them a little more vertical
+   spacing. */
+.phui-property-list-view .phui-tag-view {
+  margin: 2px 0;
+}
+
+.phui-property-list-properties-wrap {
+  float: left;
+  width: 78%;
+}
+
+.device .phui-property-list-properties-wrap {
+  width: auto;
+  border: none;
+}
+
+.phui-property-list-actions {
+  width: 20%;
+  float: right;
+  margin-right: 12px;
+  border-left: 1px solid {$thinblueborder};
+}
+
+.device .phui-property-list-actions {
+  float: none;
+  width: auto;
+  margin: -12px 0 12px 0;
+}
+
+.phui-property-list-image-content img {
+  margin: 20px auto;
+  background: url('/rsrc/image/checker_light.png');
+  border: 1px solid {$lightblueborder};
+}
+
+.device-desktop .phui-property-list-image-content img:hover {
+  background: url('/rsrc/image/checker_dark.png');
+}

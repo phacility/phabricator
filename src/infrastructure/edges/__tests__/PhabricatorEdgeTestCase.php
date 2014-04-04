@@ -32,9 +32,7 @@ final class PhabricatorEdgeTestCase extends PhabricatorTestCase {
       $caught = $ex;
     }
 
-    $this->assertEqual(
-      true,
-      $caught instanceof Exception);
+    $this->assertTrue($caught instanceof Exception);
 
 
     // The first edit should go through (no cycle), bu the second one should
@@ -56,9 +54,7 @@ final class PhabricatorEdgeTestCase extends PhabricatorTestCase {
       $caught = $ex;
     }
 
-    $this->assertEqual(
-      true,
-      $caught instanceof Exception);
+    $this->assertTrue($caught instanceof Exception);
   }
 
 

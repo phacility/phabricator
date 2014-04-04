@@ -12,35 +12,66 @@ final class PhabricatorDifferentialConfigOptions
   }
 
   public function getOptions() {
+    $custom_field_type = 'custom:PhabricatorCustomFieldConfigOptionType';
+
+    $fields = array(
+      new DifferentialTitleField(),
+      new DifferentialSummaryField(),
+      new DifferentialTestPlanField(),
+      new DifferentialAuthorField(),
+      new DifferentialReviewersField(),
+      new DifferentialProjectReviewersField(),
+      new DifferentialReviewedByField(),
+      new DifferentialSubscribersField(),
+      new DifferentialRepositoryField(),
+      new DifferentialLintField(),
+      new DifferentialUnitField(),
+      new DifferentialViewPolicyField(),
+      new DifferentialEditPolicyField(),
+
+      new DifferentialDependsOnField(),
+      new DifferentialDependenciesField(),
+      new DifferentialManiphestTasksField(),
+      new DifferentialCommitsField(),
+
+      new DifferentialJIRAIssuesField(),
+      new DifferentialAsanaRepresentationField(),
+
+      new DifferentialChangesSinceLastUpdateField(),
+      new DifferentialBranchField(),
+
+      new DifferentialBlameRevisionField(),
+      new DifferentialPathField(),
+      new DifferentialHostField(),
+      new DifferentialRevertPlanField(),
+
+      new DifferentialApplyPatchField(),
+
+      new DifferentialRevisionIDField(),
+    );
+
+    $default_fields = array();
+    foreach ($fields as $field) {
+      $default_fields[$field->getFieldKey()] = array(
+        'disabled' => $field->shouldDisableByDefault(),
+      );
+    }
+
     return array(
       $this->newOption(
-        'differential.revision-custom-detail-renderer',
-        'class',
-        null)
-        ->setBaseClass('DifferentialRevisionDetailRenderer')
-        ->setDescription(pht("Custom revision detail renderer.")),
-      $this->newOption(
-        'differential.custom-remarkup-rules',
-        'list<string>',
-        array())
-        ->setSummary(pht('Custom remarkup rules.'))
+        'differential.fields',
+        $custom_field_type,
+        $default_fields)
+        ->setCustomData(
+          id(new DifferentialRevision())->getCustomFieldBaseClass())
         ->setDescription(
           pht(
-            "Array for custom remarkup rules. The array should have a list ".
-            "of class names of classes that extend PhutilRemarkupRule")),
-      $this->newOption(
-        'differential.custom-remarkup-block-rules',
-        'list<string>',
-        array())
-        ->setSummary(pht('Custom remarkup block rules.'))
-        ->setDescription(
-          pht(
-            "Array for custom remarkup block rules. The array should have a ".
-            "list of class names of classes that extend ".
-            "PhutilRemarkupEngineBlockRule")),
+            "Select and reorder revision fields.\n\n".
+            "NOTE: This feature is under active development and subject ".
+            "to change.")),
       $this->newOption(
         'differential.whitespace-matters',
-        'list<string>',
+        'list<regex>',
         array(
           '/\.py$/',
           '/\.l?hs$/',
@@ -49,43 +80,6 @@ final class PhabricatorDifferentialConfigOptions
           pht(
             "List of file regexps where whitespace is meaningful and should ".
             "not use 'ignore-all' by default")),
-      $this->newOption(
-        'differential.field-selector',
-        'class',
-        'DifferentialDefaultFieldSelector')
-        ->setBaseClass('DifferentialFieldSelector')
-        ->setDescription(pht('Field selector class')),
-      $this->newOption('differential.show-host-field', 'bool', false)
-        ->setBoolOptions(
-          array(
-            pht('Show "Host" Fields'),
-            pht('Hide "Host" Fields'),
-          ))
-        ->setSummary(pht('Show or hide the "Host" and "Path" fields.'))
-        ->setDescription(
-          pht(
-            'Differential can show "Host" and "Path" fields on revisions, '.
-            'with information about the machine and working directory where '.
-            'the change came from. These fields are disabled by default '.
-            'because they may occasionally have sensitive information, but '.
-            'they can be useful if you work in an environment with shared '.
-            'development machines. You can set this option to true to enable '.
-            'these fields.')),
-      $this->newOption('differential.show-test-plan-field', 'bool', true)
-        ->setBoolOptions(
-          array(
-            pht('Show "Test Plan" Field'),
-            pht('Hide "Test Plan" Field'),
-          ))
-        ->setSummary(pht('Show or hide the "Test Plan" field.'))
-        ->setDescription(
-          pht(
-            'Differential has a required "Test Plan" field by default, which '.
-            'requires authors to fill out information about how they verified '.
-            'the correctness of their changes when they send code for review. '.
-            'If you would prefer not to use this field, you can disable it '.
-            'here. You can also make it optional (instead of required) by '.
-            'setting {{differential.require-test-plan-field}}.')),
       $this->newOption('differential.require-test-plan-field', 'bool', true)
         ->setBoolOptions(
           array(
@@ -115,26 +109,33 @@ final class PhabricatorDifferentialConfigOptions
             'sketchy and implies the revision may not actually be receiving '.
             'thorough review. You can enable "!accept" by setting this '.
             'option to true.')),
-      $this->newOption('differential.anonymous-access', 'bool', false)
-        ->setBoolOptions(
-          array(
-            pht('Allow guests to view revisions'),
-            pht('Require authentication to view revisions'),
-          ))
-        ->setSummary(pht('Anonymous access to Differential revisions.'))
-        ->setDescription(
-          pht(
-            "If you set this to true, users won't need to login to view ".
-            "Differential revisions. Anonymous users will have read-only ".
-            "access and won't be able to interact with the revisions.")),
-      $this->newOption('differential.generated-paths', 'list<string>', array())
+      $this->newOption('differential.generated-paths', 'list<regex>', array())
         ->setSummary(pht("File regexps to treat as automatically generated."))
         ->setDescription(
           pht(
             "List of file regexps that should be treated as if they are ".
             "generated by an automatic process, and thus get hidden by ".
             "default in differential."))
-        ->addExample('["/config\.h$/", "#/autobuilt/#"]', pht("Valid Setting")),
+        ->addExample("/config\.h$/\n#/autobuilt/#", pht("Valid Setting")),
+      $this->newOption('differential.sticky-accept', 'bool', true)
+        ->setBoolOptions(
+          array(
+            pht("Accepts persist across updates"),
+            pht("Accepts are reset by updates"),
+          ))
+        ->setSummary(
+          pht("Should updating an accepted revision require re-review?"))
+        ->setDescription(
+          pht(
+            'Normally, when revisions that have been "Accepted" are updated, '.
+            'they remain "Accepted". This allows reviewers to suggest minor '.
+            'alterations when accepting, and encourages authors to update '.
+            'if they make minor changes in response to this feedback.'.
+            "\n\n".
+            'If you want updates to always require re-review, you can disable '.
+            'the "stickiness" of the "Accepted" status with this option. '.
+            'This may make the process for minor changes much more burdensome '.
+            'to both authors and reviewers.')),
       $this->newOption('differential.allow-self-accept', 'bool', false)
         ->setBoolOptions(
           array(
@@ -177,6 +178,26 @@ final class PhabricatorDifferentialConfigOptions
               "is accidentally closed or if a developer changes his or her ".
               "mind after closing a revision.  If it is false, reopening ".
               "is not allowed.")),
+      $this->newOption('differential.close-on-accept', 'bool', false)
+        ->setBoolOptions(
+          array(
+            pht('Treat Accepted Revisions as "Closed"'),
+            pht('Treat Accepted Revisions as "Open"'),
+          ))
+        ->setSummary(pht('Allows "Accepted" to act as a closed status.'))
+        ->setDescription(
+          pht(
+            'Normally, Differential revisions remain on the dashboard when '.
+            'they are "Accepted", and the author then commits the changes '.
+            'to "Close" the revision and move it off the dashboard.'.
+            "\n\n".
+            'If you have an unusual workflow where Differential is used for '.
+            'post-commit review (normally called "Audit", elsewhere in '.
+            'Phabricator), you can set this flag to treat the "Accepted" '.
+            'state as a "Closed" state and end the review workflow early.'.
+            "\n\n".
+            'This sort of workflow is very unusual. Very few installs should '.
+            'need to change this option.')),
       $this->newOption('differential.days-fresh', 'int', 1)
         ->setSummary(
           pht(

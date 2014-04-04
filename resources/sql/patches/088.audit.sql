@@ -1,5 +1,3 @@
-
-
 ALTER TABLE {$NAMESPACE}_owners.owners_packagecommitrelationship
   ADD COLUMN `auditStatus` varchar(64) NOT NULL,
   ADD COLUMN `auditReasons` longtext NOT NULL,

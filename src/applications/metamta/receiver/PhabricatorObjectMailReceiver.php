@@ -120,7 +120,7 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
   }
 
   private function matchObjectAddressInMail(
-    PhabricatorMetaMTAReceivedmail $mail) {
+    PhabricatorMetaMTAReceivedMail $mail) {
 
     foreach ($mail->getToAddresses() as $address) {
       $parts = $this->matchObjectAddress($address);
@@ -156,7 +156,7 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
         '(?P<sender>\w+)'.
         '\\+'.
         '(?P<hash>[a-f0-9]{16})'.
-      '$)U';
+      '$)Ui';
 
     return $regexp;
   }
@@ -166,7 +166,9 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
     PhabricatorUser $sender) {
     $parts = $this->matchObjectAddressInMail($mail);
 
-    return $this->loadObject($parts['pattern'], $sender);
+    return $this->loadObject(
+      phutil_utf8_strtoupper($parts['pattern']),
+      $sender);
   }
 
   public static function computeMailHash($mail_key, $phid) {

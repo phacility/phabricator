@@ -4,12 +4,18 @@ final class AphrontFormRadioButtonControl extends AphrontFormControl {
 
   private $buttons = array();
 
-  public function addButton($value, $label, $caption, $class = null) {
+  public function addButton(
+    $value,
+    $label,
+    $caption,
+    $class = null,
+    $disabled = false) {
     $this->buttons[] = array(
       'value'   => $value,
       'label'   => $label,
       'caption' => $caption,
       'class' => $class,
+      'disabled' => $disabled,
     );
     return $this;
   }
@@ -32,7 +38,9 @@ final class AphrontFormRadioButtonControl extends AphrontFormControl {
           'checked' => ($button['value'] == $this->getValue())
             ? 'checked'
             : null,
-          'disabled' => $this->getDisabled() ? 'disabled' : null,
+          'disabled' => ($this->getDisabled() || $button['disabled'])
+            ? 'disabled'
+            : null,
         ));
       $label = phutil_tag(
         'label',
@@ -42,16 +50,16 @@ final class AphrontFormRadioButtonControl extends AphrontFormControl {
         ),
         $button['label']);
 
-      if (strlen($button['caption'])) {
-        $label = hsprintf(
-          '%s<div class="aphront-form-radio-caption">%s</div>',
+      if ($button['caption']) {
+        $label = array(
           $label,
-          $button['caption']);
+          phutil_tag_div('aphront-form-radio-caption', $button['caption']),
+        );
       }
-      $rows[] = hsprintf(
-        '<tr><td>%s</td><th>%s</th></tr>',
-        $radio,
-        $label);
+      $rows[] = phutil_tag('tr', array(), array(
+        phutil_tag('td', array(), $radio),
+        phutil_tag('th', array(), $label),
+      ));
     }
 
     return phutil_tag(

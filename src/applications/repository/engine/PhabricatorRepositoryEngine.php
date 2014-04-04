@@ -47,6 +47,11 @@ abstract class PhabricatorRepositoryEngine {
   }
 
 
+  public function getViewer() {
+    return PhabricatorUser::getOmnipotentUser();
+  }
+
+
   /**
    * @task internal
    */
@@ -54,7 +59,8 @@ abstract class PhabricatorRepositoryEngine {
     if ($this->getVerbose()) {
       $console = PhutilConsole::getConsole();
       $argv = func_get_args();
-      call_user_func_array(array($console, 'writeLog'), $argv);
+      array_unshift($argv, "%s\n");
+      call_user_func_array(array($console, 'writeOut'), $argv);
     }
     return $this;
   }

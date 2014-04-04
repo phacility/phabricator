@@ -38,14 +38,25 @@ final class DarkConsoleRequestPlugin extends DarkConsolePlugin {
 
     $sections = array_merge($sections, $data);
 
+    $mask = array(
+      'HTTP_COOKIE' => true,
+      'HTTP_X_PHABRICATOR_CSRF' => true,
+    );
+
     $out = array();
     foreach ($sections as $header => $map) {
       $rows = array();
       foreach ($map as $key => $value) {
-        $rows[] = array(
-          $key,
-          (is_array($value) ? json_encode($value) : $value),
-        );
+        if (isset($mask[$key])) {
+          $rows[] = array(
+            $key,
+            phutil_tag('em', array(), '(Masked)'));
+        } else {
+          $rows[] = array(
+            $key,
+            (is_array($value) ? json_encode($value) : $value),
+          );
+        }
       }
 
       $table = new AphrontTableView($rows);

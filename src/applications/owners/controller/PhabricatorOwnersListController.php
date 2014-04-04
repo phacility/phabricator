@@ -21,8 +21,10 @@ final class PhabricatorOwnersListController
 
     $repository_phid = '';
     if ($request->getStr('repository') != '') {
-      $repository_phid = id(new PhabricatorRepository())
-        ->loadOneWhere('callsign = %s', $request->getStr('repository'))
+      $repository_phid = id(new PhabricatorRepositoryQuery())
+        ->setViewer($user)
+        ->withCallsigns(array($request->getStr('repository')))
+        ->executeOne()
         ->getPHID();
     }
 
@@ -92,8 +94,8 @@ final class PhabricatorOwnersListController
           $having);
         $packages = $package->loadAllFromArray($data);
 
-        $header = 'Search Results';
-        $nodata = 'No packages match your query.';
+        $header = pht('Search Results');
+        $nodata = pht('No packages match your query.');
         break;
       case 'owned':
         $data = queryfx_all(
@@ -105,8 +107,8 @@ final class PhabricatorOwnersListController
           $user->getPHID());
         $packages = $package->loadAllFromArray($data);
 
-        $header = 'Owned Packages';
-        $nodata = 'No owned packages';
+        $header = pht('Owned Packages');
+        $nodata = pht('No owned packages');
         break;
       case 'projects':
         $projects = id(new PhabricatorProjectQuery())
@@ -128,14 +130,14 @@ final class PhabricatorOwnersListController
         }
         $packages = $package->loadAllFromArray($data);
 
-        $header = 'Owned Packages';
-        $nodata = 'No owned packages';
+        $header = pht('Owned Packages');
+        $nodata = pht('No owned packages');
         break;
       case 'all':
         $packages = $package->loadAll();
 
-        $header = 'All Packages';
-        $nodata = 'There are no defined packages.';
+        $header = pht('All Packages');
+        $nodata = pht('There are no defined packages.');
         break;
     }
 
@@ -151,14 +153,14 @@ final class PhabricatorOwnersListController
       $phids = $request->getArr('owner');
       $phid = reset($phids);
       $handles = $this->loadViewerHandles(array($phid));
-      $owners_search_value = array(
-        $phid => $handles[$phid]->getFullName(),
-      );
+      $owners_search_value = array($handles[$phid]);
     }
 
-    $callsigns = array('' => '(Any Repository)');
-    $repositories = id(new PhabricatorRepository())
-      ->loadAllWhere('1 = 1 ORDER BY callsign');
+    $callsigns = array('' => pht('(Any Repository)'));
+    $repositories = id(new PhabricatorRepositoryQuery())
+      ->setViewer($user)
+      ->setOrder(PhabricatorRepositoryQuery::ORDER_CALLSIGN)
+      ->execute();
     foreach ($repositories as $repository) {
       $callsigns[$repository->getCallsign()] =
         $repository->getCallsign().': '.$repository->getName();
@@ -171,39 +173,43 @@ final class PhabricatorOwnersListController
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('name')
-          ->setLabel('Name')
+          ->setLabel(pht('Name'))
           ->setValue($request->getStr('name')))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/usersorprojects/')
           ->setLimit(1)
           ->setName('owner')
-          ->setLabel('Owner')
+          ->setLabel(pht('Owner'))
           ->setValue($owners_search_value))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setName('repository')
-          ->setLabel('Repository')
+          ->setLabel(pht('Repository'))
           ->setOptions($callsigns)
           ->setValue($request->getStr('repository')))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('path')
-          ->setLabel('Path')
+          ->setLabel(pht('Path'))
           ->setValue($request->getStr('path')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Search for Packages'));
+          ->setValue(pht('Search for Packages')));
 
     $filter->appendChild($form);
 
-    return $this->buildStandardPageResponse(
+    $nav = $this->buildSideNavView();
+    $nav->appendChild($filter);
+    $nav->appendChild($content);
+
+    return $this->buildApplicationPage(
       array(
-        $filter,
-        $content,
+        $nav,
       ),
       array(
-        'title' => 'Package Index',
+        'title' => pht('Package Index'),
+        'device' => true,
       ));
   }
 
@@ -234,9 +240,10 @@ final class PhabricatorOwnersListController
       }
 
       if ($repository_phids) {
-        $repositories = id(new PhabricatorRepository())->loadAllWhere(
-          'phid in (%Ls)',
-          array_keys($repository_phids));
+        $repositories = id(new PhabricatorRepositoryQuery())
+          ->setViewer($this->getRequest()->getUser())
+          ->withPHIDs(array_keys($repository_phids))
+          ->execute();
       } else {
         $repositories = array();
       }
@@ -304,17 +311,17 @@ final class PhabricatorOwnersListController
           array(
             'href' => '/audit/view/packagecommits/?phid='.$package->getPHID(),
           ),
-          'Related Commits')
+          pht('Related Commits'))
       );
     }
 
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Name',
-        'Owners',
-        'Paths',
-        'Related Commits',
+        pht('Name'),
+        pht('Owners'),
+        pht('Paths'),
+        pht('Related Commits'),
       ));
     $table->setColumnClasses(
       array(
@@ -334,7 +341,7 @@ final class PhabricatorOwnersListController
 
   protected function getExtraPackageViews(AphrontSideNavFilterView $view) {
     if ($this->view == 'search') {
-      $view->addFilter('view/search', 'Search Results');
+      $view->addFilter('view/search', pht('Search Results'));
     }
   }
 }

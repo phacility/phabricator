@@ -70,13 +70,21 @@ JX.behavior('fancy-datepicker', function(config) {
     root = null;
   };
 
+  var ontoggle = function(e) {
+    var box = e.getTarget();
+    root = e.getNode('phabricator-date-control');
+    JX.Stratcom.getData(root).disabled = !box.checked;
+    redraw_inputs();
+  };
+
   var get_inputs = function() {
     return {
       y: JX.DOM.find(root, 'select', 'year-input'),
       m: JX.DOM.find(root, 'select', 'month-input'),
-      d: JX.DOM.find(root, 'select', 'day-input')
+      d: JX.DOM.find(root, 'select', 'day-input'),
+      t: JX.DOM.find(root, 'input', 'time-input')
     };
-  }
+  };
 
   var read_date = function() {
     var i = get_inputs();
@@ -97,8 +105,25 @@ JX.behavior('fancy-datepicker', function(config) {
       picker.firstChild,
       [
         render_month(),
-        render_day(),
+        render_day()
       ]);
+  };
+
+  var redraw_inputs = function() {
+    var inputs = get_inputs();
+    var disabled = JX.Stratcom.getData(root).disabled;
+    for (var k in inputs) {
+      if (disabled) {
+        inputs[k].setAttribute('disabled', 'disabled');
+      } else {
+        inputs[k].removeAttribute('disabled');
+      }
+    }
+
+    var box = JX.DOM.scry(root, 'input', 'calendar-enable');
+    if (box.length) {
+      box[0].checked = !disabled;
+    }
   };
 
   // Render a cell for the date picker.
@@ -114,7 +139,7 @@ JX.behavior('fancy-datepicker', function(config) {
     }
 
     return JX.$N('td', {meta: {value: value}, className: class_name}, label);
-  }
+  };
 
 
   // Render the top bar which allows you to pick a month and year.
@@ -152,7 +177,8 @@ JX.behavior('fancy-datepicker', function(config) {
     // First, render the weekday names.
     var weekdays = 'SMTWTFS';
     var weekday_names = [];
-    for (var ii = 0; ii < weekdays.length; ii++) {
+    var ii;
+    for (ii = 0; ii < weekdays.length; ii++) {
       weekday_names.push(cell(weekdays.charAt(ii), null, false, 'day-name'));
     }
     weeks.push(JX.$N('tr', {}, weekday_names));
@@ -168,7 +194,7 @@ JX.behavior('fancy-datepicker', function(config) {
 
     var today = new Date();
 
-    for (var ii = 1; ii <= 31; ii++) {
+    for (ii = 1; ii <= 31; ii++) {
       var date = new Date(value_y, value_m - 1, ii);
       if (date.getMonth() != (value_m - 1)) {
         // We've spilled over into the next month, so stop rendering.
@@ -183,7 +209,7 @@ JX.behavior('fancy-datepicker', function(config) {
       if (is_today) {
         classes.push('today');
       }
-      if (date.getDay() == 0 || date.getDay() == 6) {
+      if (date.getDay() === 0 || date.getDay() == 6) {
         classes.push('weekend');
       }
 
@@ -191,7 +217,7 @@ JX.behavior('fancy-datepicker', function(config) {
     }
 
     // Slice the days into weeks.
-    for (var ii = 0; ii < days.length; ii += 7) {
+    for (ii = 0; ii < days.length; ii += 7) {
       weeks.push(JX.$N('tr', {}, days.slice(ii, ii + 7)));
     }
 
@@ -200,6 +226,7 @@ JX.behavior('fancy-datepicker', function(config) {
 
 
   JX.Stratcom.listen('click', 'calendar-button', onopen);
+  JX.Stratcom.listen('change', 'calendar-enable', ontoggle);
 
   JX.Stratcom.listen(
     'click',
@@ -216,7 +243,7 @@ JX.behavior('fancy-datepicker', function(config) {
       switch (p[0]) {
         case 'm':
           // User clicked left or right month selection buttons.
-          value_m = value_m + parseInt(p[1]);
+          value_m = value_m + parseInt(p[1], 10);
           if (value_m > 12) {
             value_m -= 12;
             value_y++;
@@ -227,7 +254,7 @@ JX.behavior('fancy-datepicker', function(config) {
           break;
         case 'd':
           // User clicked a day.
-          value_d = parseInt(p[1]);
+          value_d = parseInt(p[1], 10);
           write_date();
 
           // Wait a moment to close the selector so they can see the effect
@@ -235,6 +262,10 @@ JX.behavior('fancy-datepicker', function(config) {
           setTimeout(JX.bind(null, onclose, e), 150);
           break;
       }
+
+      // Enable the control.
+      JX.Stratcom.getData(root).disabled = false;
+      redraw_inputs();
 
       render();
     });

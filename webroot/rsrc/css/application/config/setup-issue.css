@@ -4,20 +4,22 @@
 
 
 .setup-issue-background {
-  background-color: #edecef;
-  padding: 1em 0;
+  padding: 12px 0;
+}
+
+.setup-issue-shell {
+  max-width: 760px;
+  margin: 16px auto;
 }
 
 .setup-issue {
-  border: 1px solid #35393d;
-  margin: 15px auto;
-  max-width: 760px;
-  background: #ffffff;
-  box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.25);
+  background: #fff;
+  border: 1px solid #BFCFDA;
+  border-bottom: 1px solid #8C98B8;
 }
 
 .setup-issue p {
-  margin: 1em 0;
+  margin: 12px 0;
 }
 
 .setup-issue table {
@@ -50,7 +52,7 @@
 }
 
 .setup-issue tt {
-  color: #666666;
+  color: #74777D;
 }
 
 .setup-issue em {
@@ -58,40 +60,57 @@
 }
 
 .setup-issue-instructions {
-  font-size: 15px;
-  padding: 20px;
-  line-height: 1.4em;
-  background: #efefef;
-  border-bottom: 1px solid #bfbfbf;
+  font-size: 14px;
+  padding: 12px 0;
+  line-height: 20px;
+  background: #fff;
+  border-bottom: 1px solid #BFCFDA;
+  margin: 0 12px;
 }
 
 .setup-fatal .setup-issue-instructions {
-  background: #ffdfdf;
+  color: #c0392b;
+  background: #f4dddb;
+  padding: 12px;
+  margin: 0 0 12px;
+  border-bottom: 1px solid #c0392b;
 }
 
 .setup-issue-name {
-  padding: 15px;
-  background: #35393d;
-  color: #ffffff;
+  color: #6B748C;
+  text-shadow: 0 1px #fff;
+  padding: 16px 12px;
+  border-bottom: 1px solid #BFCFDA;
   font-size: 15px;
   font-weight: bold;
+  background-image: url(/rsrc/image/lightblue-header.png);
+  background-repeat: repeat-x;
 }
 
 .setup-issue-next {
-  padding: 15px;
-  background: #35393d;
+  padding: 12px;
+  border-top: 1px solid #BFCFDA;
+  background: #daeaf3;
   text-align: center;
-  font-size: 16px;
-  color: #ffffff;
+  font-size: 15px;
+  color: #2980b9;
+  margin-top: 12px;
 }
 
 .setup-issue-config {
-  margin: 15px 0;
-  padding: 0 20px;
+  padding: 0 12px;
+  background: #fff;
 }
 
 .setup-issue ul {
   width: 90%;
   margin: 1em auto;
   list-style: circle;
+}
+
+.setup-issue-debug {
+  margin-top: 8px;
+  padding: 4px;
+  text-align: right;
+  color: #74777D;
 }

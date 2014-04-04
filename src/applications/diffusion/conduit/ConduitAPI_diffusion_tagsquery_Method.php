@@ -1,14 +1,10 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_diffusion_tagsquery_Method
   extends ConduitAPI_diffusion_abstractquery_Method {
 
   public function getMethodDescription() {
-    return
-      'Find tags for a given commit or list tags in the repository.';
+    return pht('Retrieve information about tags in a repository.');
   }
 
   public function defineReturnType() {
@@ -17,7 +13,9 @@ final class ConduitAPI_diffusion_tagsquery_Method
 
   protected function defineCustomParamTypes() {
     return array(
+      'names' => 'optional list<string>',
       'commit' => 'optional string',
+      'needMessages' => 'optional bool',
       'offset' => 'optional int',
       'limit' => 'optional int',
     );
@@ -26,13 +24,73 @@ final class ConduitAPI_diffusion_tagsquery_Method
   protected function getGitResult(ConduitAPIRequest $request) {
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
-    $commit = $drequest->getCommit();
+    $commit = $drequest->getRawCommit();
+
+    $commit_filter = null;
+    if ($commit) {
+      $commit_filter = $this->loadTagNamesForCommit($commit);
+    }
+
+    $name_filter = $request->getValue('names', null);
+
+    $all_tags = $this->loadGitTagList();
+    $all_tags = mpull($all_tags, null, 'getName');
+
+    if ($name_filter !== null) {
+      $all_tags = array_intersect_key($all_tags, array_fuse($name_filter));
+    }
+    if ($commit_filter !== null) {
+      $all_tags = array_intersect_key($all_tags, $commit_filter);
+    }
+
+    $tags = array_values($all_tags);
+
     $offset = $request->getValue('offset');
     $limit = $request->getValue('limit');
-
-    if (!$commit) {
-      return $this->loadGitTagList($offset, $limit);
+    if ($offset) {
+      $tags = array_slice($tags, $offset);
     }
+
+    if ($limit) {
+      $tags = array_slice($tags, 0, $limit);
+    }
+
+    if ($request->getValue('needMessages')) {
+      $this->loadMessagesForTags($all_tags);
+    }
+
+    return mpull($tags, 'toDictionary');
+  }
+
+  private function loadGitTagList() {
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
+
+    $refs = id(new DiffusionLowLevelGitRefQuery())
+      ->setRepository($repository)
+      ->withIsTag(true)
+      ->execute();
+
+    $tags = array();
+    foreach ($refs as $ref) {
+      $fields = $ref->getRawFields();
+      $tag = id(new DiffusionRepositoryTag())
+        ->setAuthor($fields['author'])
+        ->setEpoch($fields['epoch'])
+        ->setCommitIdentifier($ref->getCommitIdentifier())
+        ->setName($ref->getShortName())
+        ->setDescription($fields['subject'])
+        ->setType('git/'.$fields['objecttype']);
+
+      $tags[] = $tag;
+    }
+
+    return $tags;
+  }
+
+  private function loadTagNamesForCommit($commit) {
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
 
     list($err, $stdout) = $repository->execLocalCommand(
       'tag -l --contains %s',
@@ -43,7 +101,7 @@ final class ConduitAPI_diffusion_tagsquery_Method
       return array();
     }
 
-    $stdout = trim($stdout);
+    $stdout = rtrim($stdout, "\n");
     if (!strlen($stdout)) {
       return array();
     }
@@ -51,82 +109,55 @@ final class ConduitAPI_diffusion_tagsquery_Method
     $tag_names = explode("\n", $stdout);
     $tag_names = array_fill_keys($tag_names, true);
 
-    $tags = $this->loadGitTagList($offset = 0, $limit = 0, $serialize = false);
-
-    $result = array();
-    foreach ($tags as $tag) {
-      if (isset($tag_names[$tag->getName()])) {
-        $result[] = $tag->toDictionary();
-      }
-    }
-
-    if ($offset) {
-      $result = array_slice($result, $offset);
-    }
-    if ($limit) {
-      $result = array_slice($result, 0, $limit);
-    }
-
-    return $result;
+    return $tag_names;
   }
 
-  private function loadGitTagList($offset, $limit, $serialize=true) {
+  private function loadMessagesForTags(array $tags) {
+    assert_instances_of($tags, 'DiffusionRepositoryTag');
+
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    $count = $offset + $limit;
-
-    list($stdout) = $repository->execxLocalCommand(
-      'for-each-ref %C --sort=-creatordate --format=%s refs/tags',
-      $count ? '--count='.(int)$count : null,
-      '%(objectname) %(objecttype) %(refname) %(*objectname) %(*objecttype) '.
-        '%(subject)%01%(creator)');
-
-    $stdout = trim($stdout);
-    if (!strlen($stdout)) {
-      return array();
+    $futures = array();
+    foreach ($tags as $key => $tag) {
+      $futures[$key] = $repository->getLocalCommandFuture(
+        'cat-file tag %s',
+        $tag->getName());
     }
 
-    $tags = array();
-    foreach (explode("\n", $stdout) as $line) {
-      list($info, $creator) = explode("\1", $line);
-      list(
-        $objectname,
-        $objecttype,
-        $refname,
-        $refobjectname,
-        $refobjecttype,
-        $description) = explode(' ', $info, 6);
+    Futures($futures)->resolveAll();
 
-      $matches = null;
-      if (!preg_match('/^(.*) ([0-9]+) ([0-9+-]+)$/', $creator, $matches)) {
-        // It's possible a tag doesn't have a creator (tagger)
-        $author = null;
-        $epoch = null;
+    foreach ($tags as $key => $tag) {
+      $future = $futures[$key];
+      list($err, $stdout) = $future->resolve();
+
+      $message = null;
+      if ($err) {
+        // Not all tags are actually "tag" objects: a "tag" object is only
+        // created if you provide a message or sign the tag. Tags created with
+        // `git tag x [commit]` are "lightweight tags" and `git cat-file tag`
+        // will fail on them. This is fine: they don't have messages.
       } else {
-        $author = $matches[1];
-        $epoch  = $matches[2];
+        $parts = explode("\n\n", $stdout, 2);
+        if (count($parts) == 2) {
+          $message = last($parts);
+        }
       }
 
-      $tag = new DiffusionRepositoryTag();
-      $tag->setAuthor($author);
-      $tag->setEpoch($epoch);
-      $tag->setCommitIdentifier(nonempty($refobjectname, $objectname));
-      $tag->setName(preg_replace('@^refs/tags/@', '', $refname));
-      $tag->setDescription($description);
-      $tag->setType('git/'.$objecttype);
-
-      $tags[] = $tag;
+      $tag->attachMessage($message);
     }
 
-    if ($offset) {
-      $tags = array_slice($tags, $offset);
-    }
-
-    if ($serialize) {
-      $tags = mpull($tags, 'toDictionary');
-    }
     return $tags;
+  }
+
+  protected function getMercurialResult(ConduitAPIRequest $request) {
+    // For now, we don't support Mercurial tags via API.
+    return array();
+  }
+
+  protected function getSVNResult(ConduitAPIRequest $request) {
+    // Subversion has no meaningful concept of tags.
+    return array();
   }
 
 }

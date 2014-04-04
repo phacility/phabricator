@@ -2,10 +2,6 @@
  * @provides phabricator-standard-page-view
  */
 
-.phabricator-standard-page {
-  background: #ffffff;
-}
-
 .phabricator-anchor-view,
 .phabricator-anchor-navigation-marker {
   position: absolute;
@@ -25,7 +21,7 @@
 
 .keyboard-shortcut-help th {
   white-space: nowrap;
-  color: #666666;
+  color: {$greytext};
 }
 
 .keyboard-shortcut-help kbd {
@@ -67,7 +63,7 @@ a.handle-status-closed:hover {
 a.handle-disabled,
 a.handle-status-away,
 a.handle-status-sporadic {
-  padding-left: 12px;
+  padding-left: 11px;
   background-repeat: no-repeat;
   background-position: -4px center;
 }
@@ -96,6 +92,11 @@ a.handle-disabled {
 
 .setup-warning-callout {
   position: relative;
-  padding: 0.75em 1em;
-  background: #ffffbb;
+  padding: 8px 16px;
+  background: {$lightyellow};
+}
+
+.phui-handle .phui-icon-view {
+  display: inline-block;
+  margin: 2px 2px -2px 0;
 }

@@ -17,18 +17,15 @@ final class PonderAddAnswerView extends AphrontView {
   }
 
   public function render() {
-    require_celerity_resource('ponder-core-view-css');
-
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
     $question = $this->question;
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader('Add Answer');
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Add Answer'));
 
     $form = new AphrontFormView();
     $form
-      ->setFlexible(true)
       ->setUser($this->user)
       ->setAction($this->actionURI)
       ->setWorkflow(true)
@@ -36,39 +33,18 @@ final class PonderAddAnswerView extends AphrontView {
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setName('answer')
-          ->setLabel('Answer')
+          ->setLabel(pht('Answer'))
           ->setError(true)
           ->setID('answer-content')
           ->setUser($this->user))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue($is_serious ? 'Submit' : 'Make it so'));
+          ->setValue($is_serious ?
+            pht('Add Answer') :
+            pht('Bequeath Wisdom')));
 
-    $preview = hsprintf(
-      '<div class="aphront-panel-flush">'.
-        '<div id="answer-preview">'.
-          '<span class="aphront-panel-preview-loading-text">'.
-            'Loading answer preview...'.
-          '</span>'.
-        '</div>'.
-      '</div>');
-
-    Javelin::initBehavior(
-      'ponder-feedback-preview',
-      array(
-        'uri'         => '/ponder/answer/preview/',
-        'content'     => 'answer-content',
-        'preview'     => 'answer-preview',
-        'question_id' => $question->getID()
-      ));
-
-    return id(new AphrontNullView())
-      ->appendChild(
-        array(
-          $header,
-          $form,
-          $preview,
-        ))
-      ->render();
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($form);
   }
 }

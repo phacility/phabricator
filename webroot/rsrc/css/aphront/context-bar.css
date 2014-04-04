@@ -3,29 +3,43 @@
  */
 
 .aphront-contextbar-view {
-  background: #efefef;
-  padding: 6px 2em;
-  border-bottom: 1px solid #dfdfdf;
+  background: #fff;
+  padding: 8px 16px;
+  border-bottom: 1px solid {$lightblueborder};
 }
 
-.aphront-contextbar-core {
+.device-phone .aphront-contextbar-view {
+  padding: 12px 8px;
 }
 
 .aphront-contextbar-content {
   padding-top: 5px;
   font-size: 13px;
-  color: #666666;
+  color: {$bluetext};
 }
 
 .aphront-contextbar-buttons {
   float: right;
 }
 
+.device-phone .aphront-contextbar-buttons {
+  float: none;
+}
+
 .aphront-contextbar-buttons label {
   font-weight: bold;
-  color: #666666;
+  color: {$bluetext};
+}
+
+.device-phone .aphront-contextbar-buttons label {
+  display: block;
+  margin-bottom: 4px;
 }
 
 .aphront-contextbar-buttons a {
-  margin: 0 0 0 .5em;
+  margin: 0 0 0 8px;
+}
+
+.device-phone .aphront-contextbar-buttons a {
+  margin: 0 8px 0 0;
 }

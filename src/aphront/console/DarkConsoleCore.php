@@ -58,7 +58,7 @@ final class DarkConsoleCore {
         'name'  => $plugin->getName(),
         'color' => $plugin->getColor(),
       );
-      $data[$class] = $plugin->getData();
+      $data[$class] = $this->sanitizeForJSON($plugin->getData());
     }
 
     $storage = array(
@@ -74,9 +74,18 @@ final class DarkConsoleCore {
     $cache = new PhutilKeyValueCacheProfiler($cache);
     $cache->setProfiler(PhutilServiceProfiler::getInstance());
 
+    // This encoding may fail if there are, e.g., database queries which
+    // include binary data. It would be a little cleaner to try to strip these,
+    // but just do something non-broken here if we end up with unrepresentable
+    // data.
+    $json = @json_encode($storage);
+    if (!$json) {
+      $json = '{}';
+    }
+
     $cache->setKeys(
       array(
-        'darkconsole:'.$key => json_encode($storage),
+        'darkconsole:'.$key => $json,
       ),
       $ttl = (60 * 60 * 6));
 
@@ -107,5 +116,22 @@ final class DarkConsoleCore {
       '');
   }
 
-}
+  /**
+   * Sometimes, tab data includes binary information (like INSERT queries which
+   * write file data into the database). To successfully JSON encode it, we
+   * need to convert it to UTF-8.
+   */
+  private function sanitizeForJSON($data) {
+    if (is_object($data)) {
+      return '<object:'.get_class($data).'>';
+    } else if (is_array($data)) {
+      foreach ($data as $key => $value) {
+        $data[$key] = $this->sanitizeForJSON($value);
+      }
+      return $data;
+    } else {
+      return phutil_utf8ize($data);
+    }
+  }
 
+}

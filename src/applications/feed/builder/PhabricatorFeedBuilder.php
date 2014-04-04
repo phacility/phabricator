@@ -4,6 +4,7 @@ final class PhabricatorFeedBuilder {
 
   private $stories;
   private $framed;
+  private $hovercards = false;
 
   public function __construct(array $stories) {
     assert_instances_of($stories, 'PhabricatorFeedStory');
@@ -17,6 +18,11 @@ final class PhabricatorFeedBuilder {
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
+    return $this;
+  }
+
+  public function setShowHovercards($hover) {
+    $this->hovercards = $hover;
     return $this;
   }
 
@@ -35,13 +41,14 @@ final class PhabricatorFeedBuilder {
     $last_date = null;
     foreach ($stories as $story) {
       $story->setFramed($this->framed);
+      $story->setHovercard($this->hovercards);
 
       $date = ucfirst(phabricator_relative_date($story->getEpoch(), $user));
 
       if ($date !== $last_date) {
         if ($last_date !== null) {
-          $null_view->appendChild(hsprintf(
-            '<div class="phabricator-feed-story-date-separator"></div>'));
+          $null_view->appendChild(
+            phutil_tag_div('phabricator-feed-story-date-separator'));
         }
         $last_date = $date;
         $header = new PhabricatorActionHeaderView();
@@ -50,8 +57,21 @@ final class PhabricatorFeedBuilder {
         $null_view->appendChild($header);
       }
 
-      $view = $story->renderView();
-      $view->setUser($user);
+      try {
+        $view = $story->renderView();
+        $view->setUser($user);
+        $view = $view->render();
+      } catch (Exception $ex) {
+        // If rendering failed for any reason, don't fail the entire feed,
+        // just this one story.
+        $view = id(new PHUIFeedStoryView())
+          ->setUser($user)
+          ->setChronologicalKey($story->getChronologicalKey())
+          ->setEpoch($story->getEpoch())
+          ->setTitle(
+            pht('Feed Story Failed to Render (%s)', get_class($story)))
+          ->appendChild(pht('%s: %s', get_class($ex), $ex->getMessage()));
+      }
 
       $null_view->appendChild($view);
     }

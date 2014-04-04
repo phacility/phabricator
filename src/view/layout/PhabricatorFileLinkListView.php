@@ -34,4 +34,3 @@ final class PhabricatorFileLinkListView extends AphrontView {
     return phutil_implode_html(phutil_tag('br'), $file_links);
   }
 }
-

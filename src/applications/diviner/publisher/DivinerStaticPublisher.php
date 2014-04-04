@@ -53,7 +53,6 @@ final class DivinerStaticPublisher extends DivinerPublisher {
       }
 
       $cache->removeAtomPathsFromCache($hash);
-      $cache->deleteRenderCache($hash);
       $cache->deleteAtomFromIndex($hash);
     }
   }

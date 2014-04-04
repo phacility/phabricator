@@ -34,9 +34,14 @@ final class PholioInlineThumbController extends PholioController {
       return new Aphront404Response();
     }
 
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'phid = %s',
-      $image->getFilePHID());
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($user)
+      ->witHPHIDs(array($image->getFilePHID()))
+      ->executeOne();
+
+    if (!$file) {
+      return new Aphront404Response();
+    }
 
     return id(new AphrontRedirectResponse())->setURI($file->getThumb60x45URI());
   }

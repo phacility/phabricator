@@ -9,5 +9,6 @@
 final class HarbormasterScratchTable extends HarbormasterDAO {
 
   protected $data;
+  protected $bigData;
 
 }

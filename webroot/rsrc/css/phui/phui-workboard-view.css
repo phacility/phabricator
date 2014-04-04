@@ -1,0 +1,69 @@
+/**
+ * @provides phui-workboard-view-css
+ */
+
+.phui-workboard-view {
+  width: 100%;
+}
+
+.phui-workboard-view-shadow {
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.phui-workboard-view-shadow::-webkit-scrollbar {
+  height: 12px;
+}
+
+.phui-workboard-view-shadow::-webkit-scrollbar-thumb {
+  background: {$lightbluetext};
+  border-radius: 10px;
+}
+
+.phui-workboard-action-list {
+  width: 60px;
+  float: left;
+  min-height: 60px;
+  border-radius: 5px;
+  margin-right: 8px;
+  background: {$lightbluebackground};
+  border: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
+}
+
+.device-phone .phui-workboard-action-list {
+  width: 100%;
+  float: none;
+  display: block;
+  overflow: hidden;
+  border: none;
+  background: none;
+  border-radius: none;
+  min-height: 0;
+}
+
+.phui-workboard-action-list li:first-child {
+  padding-top: 5px;
+}
+
+.device-phone .phui-workboard-action-list li {
+  display: inline;
+  float: left;
+  margin: 0;
+  padding: 0 0 8px 0;
+}
+
+.phui-workboard-action-list .phui-icon-view {
+  display: inline-block;
+  vertical-align: top;
+  width: 50px;
+  height: 50px;
+  margin: 0 4px 5px 5px;
+}
+
+.device-phone .phui-workboard-action-list .phui-icon-view {
+  background-size: 35px;
+  height: 35px;
+  width: 35px;
+  margin: 0 3px;
+}

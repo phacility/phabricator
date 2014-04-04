@@ -160,9 +160,7 @@ final class PhortuneAccountBuyController
           $user);
       }
 
-      $provider_form = id(new AphrontFormLayoutView())
-        ->setPadded(true)
-        ->setBackgroundShading(true);
+      $provider_form = new PHUIFormLayoutView();
       $provider_form->appendChild(
         id(new AphrontFormMarkupControl())
           ->setLabel('Pay With')
@@ -179,7 +177,6 @@ final class PhortuneAccountBuyController
       array(
         'title'   => $title,
         'device'  => true,
-        'dust'    => true,
       ));
 
   }

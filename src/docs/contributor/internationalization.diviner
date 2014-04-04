@@ -1,0 +1,64 @@
+@title Internationalization
+@group developer
+
+What is required from developers to get Phabricator translatable.
+
+= API =
+
+Translator API is provided by libphutil. It gives us
+@{class@libphutil:PhutilTranslator} class and global @{function@libphutil:pht}
+function built on top of it.
+
+Developers are supposed to call @{function@libphutil:pht} on all strings that
+require translation.
+
+Phabricator provides translations for this translator through
+@{class:PhabricatorTranslation} class.
+
+= Adding a New Translation =
+
+Adding a translation which uses the same language rules as some already existing
+translation is relatively simple: Just extend @{class:PhabricatorTranslation}
+and you will be able to specify this class in the global configuration
+'translation.provider' and users will be able to select it in their preferences.
+
+= Adding a New Language =
+
+Adding a language involves all steps as adding a translation plus specifying the
+language rules in @{method@libphutil:PhutilTranslator::chooseVariant}.
+
+= Singular and Plural =
+
+Different languages have various rules for using singular and plural. All you
+need to do is to call @{function@libphutil:pht} with a text that is suitable for
+both forms. Example:
+
+  pht('%d beer(s)', $count);
+
+Translators will translate this text for all different forms the language uses:
+
+  // English translation
+  array('%d beer', '%d beers');
+
+  // Czech translation
+  array('%d pivo', '%d piva', '%d piv');
+
+The ugly identifier passed to @{function@libphutil:pht} will remain in the text
+only if the translation doesn't exist.
+
+= Male and Female =
+
+Different languages use different words for talking about males, females and
+unknown genders. Callsites have to call @{function@libphutil:pht} passing
+@{class:PhabricatorUser} (or other implementation of
+@{interface@libphutil:PhutilPerson}) if talking about the user. Example:
+
+  pht('%s wrote', $actor);
+
+Translators will create this translations:
+
+  // English translation
+  '%s wrote';
+
+  // Czech translation
+  array('%s napsal', '%s napsala');

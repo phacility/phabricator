@@ -13,7 +13,7 @@ div.aphront-note div.title {
   padding: 0.2em 0.5em 0.2em;
   background: #ffd;
   border-bottom: 1px solid #ccc;
-  color: #888;
+  color: {$lightgreytext};
   font-size: smaller;
 }
 

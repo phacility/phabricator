@@ -6,15 +6,18 @@
 final class DifferentialRevisionListView extends AphrontView {
 
   private $revisions;
-  private $flags = array();
-  private $drafts = array();
   private $handles;
-  private $fields;
   private $highlightAge;
+  private $header;
+  private $noDataString;
 
-  public function setFields(array $fields) {
-    assert_instances_of($fields, 'DifferentialFieldSpecification');
-    $this->fields = $fields;
+  public function setNoDataString($no_data_string) {
+    $this->noDataString = $no_data_string;
+    return $this;
+  }
+
+  public function setHeader($header) {
+    $this->header = $header;
     return $this;
   }
 
@@ -31,10 +34,12 @@ final class DifferentialRevisionListView extends AphrontView {
 
   public function getRequiredHandlePHIDs() {
     $phids = array();
-    foreach ($this->fields as $field) {
-      foreach ($this->revisions as $revision) {
-        $phids[] = $field->getRequiredHandlePHIDsForRevisionList($revision);
-      }
+    foreach ($this->revisions as $revision) {
+      $phids[] = array($revision->getAuthorPHID());
+
+      // TODO: Switch to getReviewerStatus(), but not all callers pass us
+      // revisions with this data loaded.
+      $phids[] = $revision->getReviewers();
     }
     return array_mergev($phids);
   }
@@ -45,29 +50,6 @@ final class DifferentialRevisionListView extends AphrontView {
     return $this;
   }
 
-  public function loadAssets() {
-    $user = $this->user;
-    if (!$user) {
-      throw new Exception("Call setUser() before loadAssets()!");
-    }
-    if ($this->revisions === null) {
-      throw new Exception("Call setRevisions() before loadAssets()!");
-    }
-
-    $this->flags = id(new PhabricatorFlagQuery())
-      ->setViewer($user)
-      ->withOwnerPHIDs(array($user->getPHID()))
-      ->withObjectPHIDs(mpull($this->revisions, 'getPHID'))
-      ->execute();
-
-    $this->drafts = id(new DifferentialRevisionQuery())
-      ->withIDs(mpull($this->revisions, 'getID'))
-      ->withDraftRepliesByAuthors(array($user->getPHID()))
-      ->execute();
-
-    return $this;
-  }
-
   public function render() {
 
     $user = $this->user;
@@ -75,133 +57,132 @@ final class DifferentialRevisionListView extends AphrontView {
       throw new Exception("Call setUser() before render()!");
     }
 
-    $fresh = null;
-    $stale = null;
-
-    if ($this->highlightAge) {
-      $fresh = PhabricatorEnv::getEnvConfig('differential.days-fresh');
-      if ($fresh) {
-        $fresh = PhabricatorCalendarHoliday::getNthBusinessDay(
-          time(),
-          -$fresh);
-      }
-
-      $stale = PhabricatorEnv::getEnvConfig('differential.days-stale');
-      if ($stale) {
-        $stale = PhabricatorCalendarHoliday::getNthBusinessDay(
-          time(),
-          -$stale);
-      }
+    $fresh = PhabricatorEnv::getEnvConfig('differential.days-fresh');
+    if ($fresh) {
+      $fresh = PhabricatorCalendarHoliday::getNthBusinessDay(
+        time(),
+        -$fresh);
     }
 
-    Javelin::initBehavior('phabricator-tooltips', array());
-    require_celerity_resource('aphront-tooltip-css');
-
-    $flagged = mpull($this->flags, null, 'getObjectPHID');
-
-    foreach ($this->fields as $field) {
-      $field->setUser($this->user);
-      $field->setHandles($this->handles);
+    $stale = PhabricatorEnv::getEnvConfig('differential.days-stale');
+    if ($stale) {
+      $stale = PhabricatorCalendarHoliday::getNthBusinessDay(
+        time(),
+        -$stale);
     }
 
-    $cell_classes = array();
-    $rows = array();
+    $this->initBehavior('phabricator-tooltips', array());
+    $this->requireResource('aphront-tooltip-css');
+
+    $list = new PHUIObjectItemListView();
+    $list->setCards(true);
+
     foreach ($this->revisions as $revision) {
+      $item = id(new PHUIObjectItemView())
+        ->setUser($user);
+
+      $icons = array();
+
       $phid = $revision->getPHID();
-      $flag = '';
-      if (isset($flagged[$phid])) {
-        $class = PhabricatorFlagColor::getCSSClass($flagged[$phid]->getColor());
-        $note = $flagged[$phid]->getNote();
-        $flag = javelin_tag(
+      $flag = $revision->getFlag($user);
+      if ($flag) {
+        $flag_class = PhabricatorFlagColor::getCSSClass($flag->getColor());
+        $icons['flag'] = phutil_tag(
           'div',
-          $note ? array(
-            'class' => 'phabricator-flag-icon '.$class,
-            'sigil' => 'has-tooltip',
-            'meta'  => array(
-              'tip'   => $note,
-              'align' => 'N',
-              'size'  => 240,
-            ),
-          ) : array(
-            'class' => 'phabricator-flag-icon '.$class,
+          array(
+            'class' => 'phabricator-flag-icon '.$flag_class,
           ),
           '');
-
-      } else if (array_key_exists($revision->getID(), $this->drafts)) {
-        $src = '/rsrc/image/icon/fatcow/page_white_edit.png';
-        $flag = hsprintf(
-          '<a href="%s">%s</a>',
-          '/D'.$revision->getID().'#comment-preview',
-          phutil_tag(
-            'img',
-            array(
-              'src' => celerity_get_resource_uri($src),
-              'width' => 16,
-              'height' => 16,
-              'alt' => 'Draft',
-              'title' => pht('Draft Comment'),
-            )));
       }
 
-      $row = array($flag);
+      if ($revision->getDrafts($user)) {
+        $icons['draft'] = true;
+      }
 
       $modified = $revision->getDateModified();
 
-      foreach ($this->fields as $field) {
-        if (($fresh || $stale) &&
-            $field instanceof DifferentialDateModifiedFieldSpecification) {
-          if ($stale && $modified < $stale) {
-            $class = 'revision-age-old';
-          } else if ($fresh && $modified < $fresh) {
-            $class = 'revision-age-stale';
-          } else {
-            $class = 'revision-age-fresh';
-          }
-          $cell_classes[count($rows)][count($row)] = $class;
-        }
+      $status = $revision->getStatus();
+      $show_age = ($fresh || $stale) &&
+                  $this->highlightAge &&
+                  !$revision->isClosed();
 
-        $row[] = $field->renderValueForRevisionList($revision);
+      if ($stale && $modified < $stale) {
+        $object_age = PHUIObjectItemView::AGE_OLD;
+      } else if ($fresh && $modified < $fresh) {
+        $object_age = PHUIObjectItemView::AGE_STALE;
+      } else {
+        $object_age = PHUIObjectItemView::AGE_FRESH;
       }
 
-      $rows[] = $row;
-    }
+      $status_name =
+        ArcanistDifferentialRevisionStatus::getNameForRevisionStatus($status);
 
-    $headers = array('');
-    $classes = array('');
-    foreach ($this->fields as $field) {
-      $headers[] = $field->renderHeaderForRevisionList();
-      $classes[] = $field->getColumnClassForRevisionList();
-    }
-
-    $table = new AphrontTableView($rows);
-    $table->setHeaders($headers);
-    $table->setColumnClasses($classes);
-    $table->setCellClasses($cell_classes);
-
-    $table->setNoDataString(pht('No revisions found.'));
-
-    require_celerity_resource('differential-revision-history-css');
-
-    return $table->render();
-  }
-
-  public static function getDefaultFields(PhabricatorUser $user) {
-    $selector = DifferentialFieldSelector::newSelector();
-    $fields = $selector->getFieldSpecifications();
-    foreach ($fields as $key => $field) {
-      $field->setUser($user);
-      if (!$field->shouldAppearOnRevisionList()) {
-        unset($fields[$key]);
+      if (isset($icons['flag'])) {
+        $item->addHeadIcon($icons['flag']);
       }
+
+      $item->setObjectName('D'.$revision->getID());
+      $item->setHeader(phutil_tag('a',
+        array('href' => '/D'.$revision->getID()),
+        $revision->getTitle()));
+
+      if (isset($icons['draft'])) {
+        $draft = id(new PHUIIconView())
+          ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+          ->setSpriteIcon('file-grey')
+          ->addSigil('has-tooltip')
+          ->setMetadata(
+            array(
+              'tip' => pht('Unsubmitted Comments'),
+            ));
+        $item->addAttribute($draft);
+      }
+
+      $item->addAttribute($status_name);
+
+      // Author
+      $author_handle = $this->handles[$revision->getAuthorPHID()];
+      $item->addByline(pht('Author: %s', $author_handle->renderLink()));
+
+      $reviewers = array();
+      // TODO: As above, this should be based on `getReviewerStatus()`.
+      foreach ($revision->getReviewers() as $reviewer) {
+        $reviewers[] = $this->handles[$reviewer]->renderLink();
+      }
+      if (!$reviewers) {
+        $reviewers = phutil_tag('em', array(), pht('None'));
+      } else {
+        $reviewers = phutil_implode_html(', ', $reviewers);
+      }
+
+      $item->addAttribute(pht('Reviewers: %s', $reviewers));
+      $item->setEpoch($revision->getDateModified(), $object_age);
+
+      switch ($status) {
+        case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
+          break;
+        case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+        case ArcanistDifferentialRevisionStatus::CHANGES_PLANNED:
+          $item->setBarColor('red');
+          break;
+        case ArcanistDifferentialRevisionStatus::ACCEPTED:
+          $item->setBarColor('green');
+          break;
+        case ArcanistDifferentialRevisionStatus::CLOSED:
+          $item->setDisabled(true);
+          break;
+        case ArcanistDifferentialRevisionStatus::ABANDONED:
+          $item->setBarColor('black');
+          break;
+      }
+
+      $list->addItem($item);
     }
 
-    if (!$fields) {
-      throw new Exception(
-        "Phabricator configuration has no fields that appear on the list ".
-        "interface!");
-    }
+    $list->setHeader($this->header);
+    $list->setNoDataString($this->noDataString);
 
-    return $selector->sortFieldsForRevisionList($fields);
+    return $list;
   }
 
 }

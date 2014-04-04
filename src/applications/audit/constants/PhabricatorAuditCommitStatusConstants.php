@@ -9,12 +9,12 @@ final class PhabricatorAuditCommitStatusConstants {
   const FULLY_AUDITED       = 4;
 
   public static function getStatusNameMap() {
-    static $map = array(
-      self::NONE                => 'None',
-      self::NEEDS_AUDIT         => 'Audit Required',
-      self::CONCERN_RAISED      => 'Concern Raised',
-      self::PARTIALLY_AUDITED   => 'Partially Audited',
-      self::FULLY_AUDITED       => 'Audited',
+    $map = array(
+      self::NONE                => pht('None'),
+      self::NEEDS_AUDIT         => pht('Audit Required'),
+      self::CONCERN_RAISED      => pht('Concern Raised'),
+      self::PARTIALLY_AUDITED   => pht('Partially Audited'),
+      self::FULLY_AUDITED       => pht('Audited'),
     );
 
     return $map;
@@ -29,6 +29,25 @@ final class PhabricatorAuditCommitStatusConstants {
       self::CONCERN_RAISED,
       self::NEEDS_AUDIT,
     );
+  }
+
+  public static function getStatusColor($code) {
+    switch ($code) {
+      case self::CONCERN_RAISED:
+        $color = 'red';
+        break;
+      case self::NEEDS_AUDIT:
+      case self::PARTIALLY_AUDITED:
+        $color = 'orange';
+        break;
+      case self::FULLY_AUDITED:
+        $color = 'green';
+        break;
+      default:
+        $color = null;
+        break;
+    }
+    return $color;
   }
 
 }

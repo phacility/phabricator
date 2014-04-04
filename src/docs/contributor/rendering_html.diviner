@@ -1,0 +1,182 @@
+@title Rendering HTML
+@group developer
+
+Rendering HTML in the Phabricator environment.
+
+= Overview =
+
+Phabricator attempts to prevent XSS by treating strings as default-unsafe when
+rendering. This means that if you try to build HTML through string
+concatenation, it won't work: the string will be escaped by the rendering
+pipeline, and the browser will treat it as plain text, not HTML.
+
+This document describes the right way to build HTML components so they are safe
+from XSS and render correctly. Broadly:
+
+  - Use @{function@libphutil:phutil_tag} (and @{function:javelin_tag}) to build
+    tags.
+  - Use @{function@libphutil:hsprintf} where @{function@libphutil:phutil_tag}
+    is awkward.
+  - Combine elements with arrays, not string concatenation.
+  - @{class:AphrontView} subclasses should return a
+    @{class@libphutil:PhutilSafeHTML} object from their `render()` method.
+  - @{class:AphrontView} subclasses act like tags when rendering.
+  - @{function:pht} has some special rules.
+  - There are some other things that you should be aware of.
+
+See below for discussion.
+
+= Building Tags: phutil_tag() =
+
+Build HTML tags with @{function@libphutil:phutil_tag}. For example:
+
+  phutil_tag(
+    'div',
+    array(
+      'class' => 'some-class',
+    ),
+    $content);
+
+@{function@libphutil:phutil_tag} will properly escape the content and all the
+attributes, and return a @{class@libphutil:PhutilSafeHTML} object. The rendering
+pipeline knows that this object represents a properly escaped HTML tag. This
+allows @{function@libphutil:phutil_tag} to render tags with other tags as
+content correctly (without double-escaping):
+
+  phutil_tag(
+    'div',
+    array(),
+    phutil_tag(
+      'strong',
+      array(),
+      $content));
+
+In Phabricator, the @{function:javelin_tag} function is similar to
+@{function@libphutil:phutil_tag}, but provides special handling for the
+`sigil` and `meta` attributes.
+
+= Building Blocks: hsprintf() =
+
+Sometimes, @{function@libphutil:phutil_tag} can be particularly awkward to
+use. You can use @{function@libphutil:hsprintf} to build larger and more
+complex blocks of HTML, when @{function@libphutil:phutil_tag} is a poor fit.
+@{function:hsprintf} has `sprintf()` semantics, but `%s` escapes HTML:
+
+  // Safely build fragments or unwieldy blocks.
+  hsprintf(
+    '<div id="%s">',
+    $div_id);
+
+@{function:hsprintf} can be especially useful when:
+
+  - You need to build a block with a lot of tags, like a table with rows and
+    cells.
+  - You need to build part of a tag (usually you should avoid this, but if you
+    do need to, @{function@libphutil:phutil_tag} can not do it).
+
+Note that it is unsafe to provide any user-controlled data to the first
+parameter of @{function@libphutil:hsprintf} (the `sprintf()`-style pattern).
+
+Like @{function@libphutil:phutil_tag}, this function returns a
+@{class@libphutil:PhutilSafeHTML} object.
+
+= Composing Tags =
+
+When you are building a view which combines smaller components, like a section
+with a header and a body:
+
+  $header = phutil_tag('h1', ...);
+  $body = phutil_tag('p', ...);
+
+...you should NOT use string concatenation:
+
+  COUNTEREXAMPLE
+  // Not dangerous, but does the wrong thing.
+  phutil_tag('div', array(), $header.$body);
+
+Instead, use an array:
+
+  // Render a tag containing other tags safely.
+  phutil_tag('div', array(), array($header, $body));
+
+If you concatenate @{class@libphutil:PhutilSafeHTML} objects, they revert to
+normal strings and are no longer marked as properly escaped tags.
+
+(In the future, these objects may stop converting to strings, but for now they
+must to maintain backward compatibility.)
+
+If you need to build a list of items with some element in between each of them
+(like a middot, comma, or vertical bar) you can use
+@{function:phutil_implode_html}:
+
+  // Render links with commas between them.
+  phutil_tag(
+    'div',
+    array(),
+    phutil_implode_html(', ', $list_of_links));
+
+= AphrontView Classes =
+
+Subclasses of @{class:AphrontView} in Phabricator should return a
+@{class@libphutil:PhutilSafeHTML} object. The easiest way to do this is to
+return `phutil_tag()` or `javelin_tag()`:
+
+  return phutil_tag('div', ...);
+
+You can use an @{class:AphrontView} subclass like you would a tag:
+
+  phutil_tag('div', array(), $view);
+
+= Internationalization: pht() =
+
+The @{function:pht} function has some special rules. If any input to
+@{function:pht} is a @{class@libphutil:PhutilSafeHTML} object, @{function:pht}
+returns a @{class@libphutil:PhutilSafeHTML} object itself. Otherwise, it returns
+normal text.
+
+This is generally safe because translations are not permitted to have more tags
+than the original text did (so if the original text had no tags, translations
+can not add any).
+
+Normally, this just means that @{function:pht} does the right thing and behaves
+like you would expect, but it is worth being aware of.
+
+= Special Cases =
+
+NOTE: This section describes dangerous methods which can bypass XSS protections.
+If possible, do not use them.
+
+You can build @{class@libphutil:PhutilSafeHTML} out of a string explicitly by
+calling @{function:phutil_safe_html} on it. This is **dangerous**, because if
+you are wrong and the string is not actually safe, you have introduced an XSS
+vulnerability. Consequently, you should avoid calling this if possible.
+
+You can use @{function@libphutil:phutil_escape_html_newlines} to escape HTML
+while converting newlines to `<br />`. You should not need to explicitly use
+@{function@libphutil:phutil_escape_html} anywhere.
+
+If you need to apply a string function (such as `trim()`) to safe HTML, use
+@{method@libphutil:PhutilSafeHTML::applyFunction}.
+
+If you need to extract the content of a @{class@libphutil:PhutilSafeHTML}
+object, you should call `getHTMLContent()`, not cast it to a string. Eventually,
+we would like to remove the string cast entirely.
+
+Functions @{function@libphutil:phutil_tag} and @{function@libphutil:hsprintf}
+are not safe if you pass the user input for the tag or attribute name. All the
+following examples are dangerous:
+
+  counterexample
+  phutil_tag($evil);
+
+  phutil_tag('span', array($evil => $evil2));
+
+  phutil_tag('span', array('onmouseover' => $evil));
+
+  // Use PhutilURI to check if $evil is valid HTTP link.
+  hsprintf('<a href="%s">', $evil);
+
+  hsprintf('<%s>%s</%s>', $evil, $evil2, $evil);
+
+  // We have a lint rule disallowing this.
+  hsprintf($evil);

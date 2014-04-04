@@ -1,11 +1,12 @@
 <?php
 
 /**
- *
  * @task  status  Method Status
- * @group conduit
+ * @task  pager   Paging Results
  */
-abstract class ConduitAPIMethod {
+abstract class ConduitAPIMethod
+  extends Phobject
+  implements PhabricatorPolicyInterface {
 
   const METHOD_STATUS_STABLE      = 'stable';
   const METHOD_STATUS_UNSTABLE    = 'unstable';
@@ -19,6 +20,14 @@ abstract class ConduitAPIMethod {
 
   public function __construct() {
 
+  }
+
+  /**
+   * This is mostly for compatibility with
+   * @{class:PhabricatorCursorPagedPolicyAwareQuery}.
+   */
+  public function getID() {
+    return $this->getAPIMethodName();
   }
 
   /**
@@ -62,6 +71,29 @@ abstract class ConduitAPIMethod {
     return self::getAPIMethodNameFromClassName(get_class($this));
   }
 
+  /**
+   * Return a key which sorts methods by application name, then method status,
+   * then method name.
+   */
+  public function getSortOrder() {
+    $name = $this->getAPIMethodName();
+
+    $map = array(
+      ConduitAPIMethod::METHOD_STATUS_STABLE      => 0,
+      ConduitAPIMethod::METHOD_STATUS_UNSTABLE    => 1,
+      ConduitAPIMethod::METHOD_STATUS_DEPRECATED  => 2,
+    );
+    $ord = idx($map, $this->getMethodStatus(), 0);
+
+    list($head, $tail) = explode('.', $name, 2);
+
+    return "{$head}.{$ord}.{$tail}";
+  }
+
+  public function getApplicationName() {
+    return head(explode('.', $this->getAPIMethodName(), 2));
+  }
+
   public static function getClassNameFromAPIMethodName($method_name) {
     $method_fragment = str_replace('.', '_', $method_name);
     return 'ConduitAPI_'.$method_fragment.'_Method';
@@ -69,6 +101,10 @@ abstract class ConduitAPIMethod {
 
   public function shouldRequireAuthentication() {
     return true;
+  }
+
+  public function shouldAllowPublic() {
+    return false;
   }
 
   public function shouldAllowUnguardedWrites() {
@@ -127,6 +163,102 @@ abstract class ConduitAPIMethod {
         "same URI to identify the install. Edit your .arcconfig or ".
         "phabricator/conf so they agree on the URI for the install.");
     }
+  }
+
+
+/* -(  Paging Results  )----------------------------------------------------- */
+
+
+  /**
+   * @task pager
+   */
+  protected function getPagerParamTypes() {
+    return array(
+      'before'            => 'optional string',
+      'after'             => 'optional string',
+      'limit'             => 'optional int (default = 100)',
+    );
+  }
+
+
+  /**
+   * @task pager
+   */
+  protected function newPager(ConduitAPIRequest $request) {
+    $limit = $request->getValue('limit', 100);
+    $limit = min(1000, $limit);
+    $limit = max(1, $limit);
+
+    $pager = id(new AphrontCursorPagerView())
+      ->setPageSize($limit);
+
+    $before_id = $request->getValue('before');
+    if ($before_id !== null) {
+      $pager->setBeforeID($before_id);
+    }
+
+    $after_id = $request->getValue('after');
+    if ($after_id !== null) {
+      $pager->setAfterID($after_id);
+    }
+
+    return $pager;
+  }
+
+
+  /**
+   * @task pager
+   */
+  protected function addPagerResults(
+    array $results,
+    AphrontCursorPagerView $pager) {
+
+    $results['cursor'] = array(
+      'limit' => $pager->getPageSize(),
+      'after' => $pager->getNextPageID(),
+      'before' =>$pager->getPrevPageID(),
+    );
+
+    return $results;
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getPHID() {
+    return null;
+  }
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    // Application methods get application visibility; other methods get open
+    // visibility.
+
+    $application = $this->getApplication();
+    if ($application) {
+      return $application->getPolicy($capability);
+    }
+
+    return PhabricatorPolicies::getMostOpenPolicy();
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    if (!$this->shouldRequireAuthentication()) {
+      // Make unauthenticated methods univerally visible.
+      return true;
+    }
+
+    return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
   }
 
 }

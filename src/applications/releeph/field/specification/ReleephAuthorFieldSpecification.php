@@ -5,6 +5,10 @@ final class ReleephAuthorFieldSpecification
 
   private static $authorMap = array();
 
+  public function getFieldKey() {
+    return 'author';
+  }
+
   public function bulkLoad(array $releeph_requests) {
     foreach ($releeph_requests as $releeph_request) {
       $commit = $releeph_request->loadPhabricatorRepositoryCommit();
@@ -13,11 +17,6 @@ final class ReleephAuthorFieldSpecification
         self::$authorMap[$releeph_request->getPHID()] = $author_phid;
       }
     }
-
-    ReleephUserView::getNewInstance()
-      ->setUser($this->getUser())
-      ->setReleephProject($this->getReleephProject())
-      ->load(self::$authorMap);
   }
 
   public function getName() {
@@ -28,9 +27,11 @@ final class ReleephAuthorFieldSpecification
     $rr = $this->getReleephRequest();
     $author_phid = idx(self::$authorMap, $rr->getPHID());
     if ($author_phid) {
-      return ReleephUserView::getNewInstance()
-        ->setRenderUserPHID($author_phid)
-        ->render();
+      $handle = id(new PhabricatorHandleQuery())
+        ->setViewer($this->getUser())
+        ->withPHIDs(array($author_phid))
+        ->executeOne();
+      return $handle->renderLink();
     } else {
       return 'Unknown Author';
     }

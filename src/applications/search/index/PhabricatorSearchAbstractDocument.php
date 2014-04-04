@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group search
- */
 final class PhabricatorSearchAbstractDocument {
 
   private $phid;
@@ -12,17 +9,6 @@ final class PhabricatorSearchAbstractDocument {
   private $documentModified;
   private $fields = array();
   private $relationships = array();
-
-  public static function getSupportedTypes() {
-    return array(
-      PhabricatorPHIDConstants::PHID_TYPE_DREV => 'Differential Revisions',
-      PhabricatorPHIDConstants::PHID_TYPE_CMIT => 'Repository Commits',
-      PhabricatorPHIDConstants::PHID_TYPE_TASK => 'Maniphest Tasks',
-      PhabricatorPHIDConstants::PHID_TYPE_WIKI => 'Phriction Documents',
-      PhabricatorPHIDConstants::PHID_TYPE_USER => 'Phabricator Users',
-      PhabricatorPHIDConstants::PHID_TYPE_QUES => 'Ponder Questions',
-    );
-  }
 
   public function setPHID($phid) {
     $this->phid = $phid;

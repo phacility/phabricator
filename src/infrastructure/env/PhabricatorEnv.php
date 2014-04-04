@@ -108,6 +108,10 @@ final class PhabricatorEnv {
     }
     putenv('PATH='.$env_path);
 
+    // Write this back into $_ENV, too, so ExecFuture picks it up when creating
+    // subprocess environments.
+    $_ENV['PATH'] = $env_path;
+
     PhabricatorEventEngine::initialize();
 
     $translation = PhabricatorEnv::newObjectFromConfig('translation.provider');
@@ -248,6 +252,23 @@ final class PhabricatorEnv {
 
 
   /**
+   * Get the current configuration setting for a given key. If the key
+   * does not exist, return a default value instead of throwing. This is
+   * primarily useful for migrations involving keys which are slated for
+   * removal.
+   *
+   * @task read
+   */
+  public static function getEnvConfigIfExists($key, $default = null) {
+    try {
+      return self::getEnvConfig($key);
+    } catch (Exception $ex) {
+      return $default;
+    }
+  }
+
+
+  /**
    * Get the fully-qualified URI for a path.
    *
    * @task read
@@ -278,6 +299,21 @@ final class PhabricatorEnv {
     return rtrim($production_domain, '/').$path;
   }
 
+  public static function getAllowedURIs($path) {
+    $uri = new PhutilURI($path);
+    if ($uri->getDomain()) {
+      return $path;
+    }
+
+    $allowed_uris = self::getEnvConfig('phabricator.allowed-uris');
+    $return = array();
+    foreach ($allowed_uris as $allowed_uri) {
+      $return[] = rtrim($allowed_uri, '/').$path;
+    }
+
+    return $return;
+  }
+
 
   /**
    * Get the fully-qualified production URI for a static resource path.
@@ -300,8 +336,12 @@ final class PhabricatorEnv {
    *
    * @task read
    */
-  public static function getDoclink($resource) {
-    return 'http://www.phabricator.com/docs/phabricator/'.$resource;
+  public static function getDoclink($resource, $type = 'article') {
+    $uri = new PhutilURI('https://secure.phabricator.com/diviner/find/');
+    $uri->setQueryParam('name', $resource);
+    $uri->setQueryParam('type', $type);
+    $uri->setQueryParam('jump', true);
+    return (string)$uri;
   }
 
 
@@ -496,6 +536,8 @@ final class PhabricatorEnv {
     foreach ($tmp as $source) {
       self::$sourceStack->pushSource($source);
     }
+
+    self::dropConfigCache();
   }
 
   private static function dropConfigCache() {

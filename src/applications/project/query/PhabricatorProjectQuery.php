@@ -7,6 +7,7 @@ final class PhabricatorProjectQuery
   private $phids;
   private $memberPHIDs;
   private $slugs;
+  private $names;
 
   private $status       = 'status-any';
   const STATUS_ANY      = 'status-any';
@@ -16,6 +17,7 @@ final class PhabricatorProjectQuery
   const STATUS_ARCHIVED = 'status-archived';
 
   private $needMembers;
+  private $needImages;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -42,8 +44,18 @@ final class PhabricatorProjectQuery
     return $this;
   }
 
+  public function withNames(array $names) {
+    $this->names = $names;
+    return $this;
+  }
+
   public function needMembers($need_members) {
     $this->needMembers = $need_members;
+    return $this;
+  }
+
+  public function needImages($need_images) {
+    $this->needImages = $need_images;
     return $this;
   }
 
@@ -113,6 +125,34 @@ final class PhabricatorProjectQuery
     return $projects;
   }
 
+  protected function didFilterPage(array $projects) {
+    if ($this->needImages) {
+      $default = null;
+
+      $file_phids = mpull($projects, 'getProfileImagePHID');
+      $files = id(new PhabricatorFileQuery())
+        ->setParentQuery($this)
+        ->setViewer($this->getViewer())
+        ->withPHIDs($file_phids)
+        ->execute();
+      $files = mpull($files, null, 'getPHID');
+      foreach ($projects as $project) {
+        $file = idx($files, $project->getProfileImagePHID());
+        if (!$file) {
+          if (!$default) {
+            $default = PhabricatorFile::loadBuiltin(
+              $this->getViewer(),
+              'project.png');
+          }
+          $file = $default;
+        }
+        $project->attachProfileImageFile($file);
+      }
+    }
+
+    return $projects;
+  }
+
   private function buildWhereClause($conn_r) {
     $where = array();
 
@@ -168,6 +208,13 @@ final class PhabricatorProjectQuery
         $this->slugs);
     }
 
+    if ($this->names) {
+      $where[] = qsprintf(
+        $conn_r,
+        'name IN (%Ls)',
+        $this->names);
+    }
+
     $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
@@ -177,7 +224,7 @@ final class PhabricatorProjectQuery
     if ($this->memberPHIDs) {
       return 'GROUP BY p.id';
     } else {
-      return '';
+      return $this->buildApplicationSearchGroupClause($conn_r);
     }
   }
 
@@ -201,7 +248,18 @@ final class PhabricatorProjectQuery
         PhabricatorEdgeConfig::TYPE_PROJ_MEMBER);
     }
 
+    $joins[] = $this->buildApplicationSearchJoinClause($conn_r);
+
     return implode(' ', $joins);
+  }
+
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationProject';
+  }
+
+  protected function getApplicationSearchObjectPHIDColumn() {
+    return 'p.phid';
   }
 
 }

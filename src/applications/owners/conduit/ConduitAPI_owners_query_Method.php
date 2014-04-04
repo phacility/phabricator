@@ -44,8 +44,8 @@ final class ConduitAPI_owners_query_Method
 
   protected static function queryByOwner($owner) {
     $is_valid_phid =
-      phid_get_type($owner) == PhabricatorPHIDConstants::PHID_TYPE_USER ||
-      phid_get_type($owner) == PhabricatorPHIDConstants::PHID_TYPE_PROJ;
+      phid_get_type($owner) == PhabricatorPeoplePHIDTypeUser::TYPECONST ||
+      phid_get_type($owner) == PhabricatorProjectPHIDTypeProject::TYPECONST;
 
     if (!$is_valid_phid) {
       throw id(new ConduitException('ERR-INVALID-PARAMETER'))
@@ -65,11 +65,17 @@ final class ConduitAPI_owners_query_Method
     return $packages;
   }
 
-  private static function queryByPath($repo_callsign, $path) {
-    $repository = id(new PhabricatorRepository())->loadOneWhere('callsign = %s',
-      $repo_callsign);
+  private static function queryByPath(
+    PhabricatorUser $viewer,
+    $repo_callsign,
+    $path) {
 
-    if (empty($repository)) {
+    $repository = id(new PhabricatorRepositoryQuery())
+      ->setViewer($viewer)
+      ->withCallsigns(array($repo_callsign))
+      ->executeOne();
+
+    if (!$repository) {
       throw id(new ConduitException('ERR_REP_NOT_FOUND'))
         ->setErrorDescription(
           'Repository callsign '.$repo_callsign.' not recognized');
@@ -144,7 +150,7 @@ final class ConduitAPI_owners_query_Method
       $packages = self::queryByOwner($owner);
 
     } else if ($is_path_query) {
-      $packages = self::queryByPath($repo, $path);
+      $packages = self::queryByPath($request->getUser(), $repo, $path);
     }
 
     return self::buildPackageInformationDictionaries($packages);

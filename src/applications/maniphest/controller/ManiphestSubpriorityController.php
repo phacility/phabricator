@@ -13,13 +13,24 @@ final class ManiphestSubpriorityController extends ManiphestController {
       return new Aphront403Response();
     }
 
-    $task = id(new ManiphestTask())->load($request->getInt('task'));
+    $task = id(new ManiphestTaskQuery())
+      ->setViewer($user)
+      ->withIDs(array($request->getInt('task')))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
     if (!$task) {
       return new Aphront404Response();
     }
 
     if ($request->getInt('after')) {
-      $after_task = id(new ManiphestTask())->load($request->getInt('after'));
+      $after_task = id(new ManiphestTaskQuery())
+        ->setViewer($user)
+        ->withIDs(array($request->getInt('after')))
+        ->executeOne();
       if (!$after_task) {
         return new Aphront404Response();
       }
@@ -30,46 +41,23 @@ final class ManiphestSubpriorityController extends ManiphestController {
       $after_sub = null;
     }
 
-    $new_sub = ManiphestTransactionEditor::getNextSubpriority(
-      $after_pri,
-      $after_sub);
+    $xactions = array(id(new ManiphestTransaction())
+      ->setTransactionType(ManiphestTransaction::TYPE_SUBPRIORITY)
+      ->setNewValue(array(
+        'newPriority' => $after_pri,
+        'newSubpriorityBase' => $after_sub,
+        'direction' => '>')));
+    $editor = id(new ManiphestTransactionEditor())
+      ->setActor($user)
+      ->setContinueOnMissingFields(true)
+      ->setContinueOnNoEffect(true)
+      ->setContentSourceFromRequest($request);
 
-    if ($after_pri != $task->getPriority()) {
-      $xaction = new ManiphestTransaction();
-      $xaction->setAuthorPHID($request->getUser()->getPHID());
-
-      // TODO: Content source?
-
-      $xaction->setTransactionType(ManiphestTransactionType::TYPE_PRIORITY);
-      $xaction->setNewValue($after_pri);
-
-      $editor = new ManiphestTransactionEditor();
-      $editor->setActor($request->getUser());
-      $editor->applyTransactions($task, array($xaction));
-    }
-
-    $task->setSubpriority($new_sub);
-    $task->save();
-
-    $phids = $task->getProjectPHIDs();
-    if ($task->getOwnerPHID()) {
-      $phids[] = $task->getOwnerPHID();
-    }
-
-    $handles = id(new PhabricatorObjectHandleData($phids))
-      ->setViewer($user)
-      ->loadHandles();
-
-    $view = id(new ManiphestTaskListView())
-      ->setUser($user)
-      ->setShowSubpriorityControls(true)
-      ->setShowBatchControls(true)
-      ->setHandles($handles)
-      ->setTasks(array($task));
+    $editor->applyTransactions($task, $xactions);
 
     return id(new AphrontAjaxResponse())->setContent(
       array(
-        'tasks' => $view,
+        'tasks' => $this->renderSingleTask($task),
       ));
   }
 

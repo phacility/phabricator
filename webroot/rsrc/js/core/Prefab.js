@@ -43,11 +43,16 @@ JX.install('Prefab', {
      *   - `limit` Optional, token limit.
      *   - `placeholder` Optional, placeholder text.
      *   - `username` Optional, username to sort first (i.e., viewer).
+     *   - `icons` Optional, map of icons.
      *
      */
     buildTokenizer : function(config) {
+      config.icons = config.icons || {};
+
+      var root;
+
       try {
-        var root = config.root || JX.$(config.id);
+        root = config.root || JX.$(config.id);
       } catch (ex) {
         // If the root element does not exist, just return without building
         // anything. This happens in some cases -- like Conpherence -- where we
@@ -56,7 +61,15 @@ JX.install('Prefab', {
       }
 
       var datasource;
-      if (config.ondemand) {
+
+      // Default to an ondemand source if no alternate configuration is
+      // provided.
+      var ondemand = true;
+      if ('ondemand' in config) {
+        ondemand = config.ondemand;
+      }
+
+      if (ondemand) {
         datasource = new JX.TypeaheadOnDemandSource(config.src);
       } else {
         datasource = new JX.TypeaheadPreloadedSource(config.src);
@@ -93,23 +106,116 @@ JX.install('Prefab', {
             return self_hits[v.id] ? 1 : -1;
           }
 
+          // If one result is open and one is closed, show the open result
+          // first. The "!" tricks here are becaused closed values are display
+          // strings, so the value is either `null` or some truthy string. If
+          // we compare the values directly, we'll apply this rule to two
+          // objects which are both closed but for different reasons, like
+          // "Archived" and "Disabled".
+
+          var u_open = !u.closed;
+          var v_open = !v.closed;
+
+          if (u_open != v_open) {
+            if (u_open) {
+              return -1;
+            } else {
+              return 1;
+            }
+          }
+
           if (priority_hits[u.id] != priority_hits[v.id]) {
             return priority_hits[v.id] ? 1 : -1;
+          }
+
+          // Sort users ahead of other result types.
+          if (u.priorityType != v.priorityType) {
+            if (u.priorityType == 'user') {
+              return -1;
+            }
+            if (v.priorityType == 'user') {
+              return 1;
+            }
           }
 
           return cmp(u, v);
         });
       };
 
+      var render_icon = function(icon) {
+        return JX.$N(
+          'span',
+          {className: 'phui-icon-view sprite-status status-' + icon});
+      };
+
       datasource.setSortHandler(JX.bind(datasource, sort_handler));
+
+      // Don't show any closed objects until the query is specific enough that
+      // it only selects closed objects. Specifically, if the result list had
+      // any open objects, remove all the closed objects from the list.
+      var filter_handler = function(value, list) {
+        // Look for any open result.
+        var has_open = false;
+        var ii;
+        for (ii = 0; ii < list.length; ii++) {
+          if (!list[ii].closed) {
+            has_open = true;
+            break;
+          }
+        }
+
+        if (!has_open) {
+          // Everything is closed, so just use it as-is.
+          return list;
+        }
+
+        // Otherwise, only display the open results.
+        var results = [];
+        for (ii = 0; ii < list.length; ii++) {
+          if (!list[ii].closed) {
+            results.push(list[ii]);
+          }
+        }
+
+        return results;
+      };
+
+      datasource.setFilterHandler(filter_handler);
+
       datasource.setTransformer(
         function(object) {
+          var closed = object[9];
+          var closed_ui;
+          if (closed) {
+            closed_ui = JX.$N(
+              'div',
+              {className: 'tokenizer-closed'},
+              closed);
+          }
+
+          var icon = object[8];
+          var icon_ui;
+          if (icon) {
+            icon_ui = render_icon(icon);
+          }
+
+          var display = JX.$N(
+            'div',
+            {className: 'tokenizer-result'},
+            [icon_ui, object[0], closed_ui]);
+          if (closed) {
+            JX.DOM.alterClass(display, 'tokenizer-result-closed', true);
+          }
+
           return {
             name: object[0],
-            display: object[0],
+            display: display,
             uri: object[1],
             id: object[2],
-            priority: object[3]
+            priority: object[3],
+            priorityType: object[7],
+            icon: icon,
+            closed: closed
           };
         });
 
@@ -120,6 +226,25 @@ JX.install('Prefab', {
 
       var tokenizer = new JX.Tokenizer(root);
       tokenizer.setTypeahead(typeahead);
+      tokenizer.setRenderTokenCallback(function(value, key) {
+        var icon = datasource.getResult(key);
+        if (icon) {
+          icon = icon.icon;
+        } else {
+          icon = config.icons[key];
+        }
+
+        if (!icon) {
+          return value;
+        }
+
+        icon = render_icon(icon);
+
+        // TODO: Maybe we should render these closed tags in grey? Figure out
+        // how we're going to use color.
+
+        return [icon, value];
+      });
 
       if (config.placeholder) {
         tokenizer.setPlaceholder(config.placeholder);

@@ -47,6 +47,11 @@ abstract class PhabricatorApplicationTransactionComment
     return $this;
   }
 
+  public function setContentSourceFromRequest(AphrontRequest $request) {
+    return $this->setContentSource(
+      PhabricatorContentSource::newFromRequest($request));
+  }
+
   public function getContentSource() {
     return PhabricatorContentSource::newFromSerialized($this->contentSource);
   }
@@ -106,6 +111,11 @@ abstract class PhabricatorApplicationTransactionComment
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return ($viewer->getPHID() == $this->getAuthorPHID());
+  }
+
+  public function describeAutomaticCapability($capability) {
+    // TODO: (T603) Policies are murky.
+    return null;
   }
 
 }

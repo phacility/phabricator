@@ -3,7 +3,7 @@
 final class PhabricatorRepositorySvnCommitChangeParserWorker
   extends PhabricatorRepositoryCommitChangeParserWorker {
 
-  protected function parseCommit(
+  protected function parseCommitChanges(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
@@ -24,21 +24,12 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
     // recursive paths were affected if it was moved or copied. This is very
     // complicated and has many special cases.
 
-    $uri = $repository->getDetail('remote-uri');
+    $uri = $repository->getSubversionPathURI();
     $svn_commit = $commit->getCommitIdentifier();
-
-    $callsign = $repository->getCallsign();
-    $full_name = 'r'.$callsign.$svn_commit;
-    echo "Parsing {$full_name}...\n";
-
-    if ($this->isBadCommit($full_name)) {
-      echo "This commit is marked bad!\n";
-      return;
-    }
 
     // Pull the top-level path changes out of "svn log". This is pretty
     // straightforward; just parse the XML log.
-    $log = $this->getSVNLogXMLObject($uri, $svn_commit, $verbose = true);
+    $log = $this->getSVNLogXMLObject($repository, $uri, $svn_commit);
 
     $entry = $log->logentry[0];
 
@@ -46,7 +37,7 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
       // TODO: Explicitly mark this commit as broken elsewhere? This isn't
       // supposed to happen but we have some cases like rE27 and rG935 in the
       // Facebook repositories where things got all clowned up.
-      return;
+      return array();
     }
 
     $raw_paths = array();
@@ -73,6 +64,7 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
           $deleted_paths[$path] = $raw_info;
           break;
         case 'A':
+        case 'R':
           $add_paths[$path] = $raw_info;
           break;
       }
@@ -365,58 +357,50 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
     $path_map = $this->lookupOrCreatePaths($lookup_paths);
     $commit_map = $this->lookupSvnCommits($repository, $lookup_commits);
 
-    $this->writeChanges($repository, $commit, $effects, $path_map, $commit_map);
     $this->writeBrowse($repository, $commit, $effects, $path_map);
 
-    $this->finishParse();
+    return $this->buildChanges(
+      $repository,
+      $commit,
+      $effects,
+      $path_map,
+      $commit_map);
   }
 
-  private function writeChanges(
+  private function buildChanges(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit,
     array $effects,
     array $path_map,
     array $commit_map) {
 
-    $conn_w = $repository->establishConnection('w');
-
-    $sql = array();
+    $results = array();
     foreach ($effects as $effect) {
-      $sql[] = qsprintf(
-        $conn_w,
-        '(%d, %d, %d, %nd, %nd, %d, %d, %d, %d)',
-        $repository->getID(),
-        $path_map[$effect['rawPath']],
-        $commit->getID(),
-        $effect['rawTargetPath']
-          ? $path_map[$effect['rawTargetPath']]
-          : null,
-        $effect['rawTargetCommit']
-          ? $commit_map[$effect['rawTargetCommit']]
-          : null,
-        $effect['changeType'],
-        $effect['fileType'],
-        $effect['rawDirect']
-          ? 1
-          : 0,
-        $commit->getCommitIdentifier());
+      $path_id = $path_map[$effect['rawPath']];
+
+      $target_path_id = null;
+      if ($effect['rawTargetPath']) {
+        $target_path_id = $path_map[$effect['rawTargetPath']];
+      }
+
+      $target_commit_id = null;
+      if ($effect['rawTargetCommit']) {
+        $target_commit_id = $commit_map[$effect['rawTargetCommit']];
+      }
+
+      $result = id(new PhabricatorRepositoryParsedChange())
+        ->setPathID($path_id)
+        ->setTargetPathID($target_path_id)
+        ->setTargetCommitID($target_commit_id)
+        ->setChangeType($effect['changeType'])
+        ->setFileType($effect['fileType'])
+        ->setIsDirect($effect['rawDirect'])
+        ->setCommitSequence($commit->getCommitIdentifier());
+
+      $results[] = $result;
     }
 
-    queryfx(
-      $conn_w,
-      'DELETE FROM %T WHERE commitID = %d',
-      PhabricatorRepository::TABLE_PATHCHANGE,
-      $commit->getID());
-    foreach (array_chunk($sql, 512) as $sql_chunk) {
-      queryfx(
-        $conn_w,
-        'INSERT INTO %T
-          (repositoryID, pathID, commitID, targetPathID, targetCommitID,
-            changeType, fileType, isDirect, commitSequence)
-          VALUES %Q',
-        PhabricatorRepository::TABLE_PATHCHANGE,
-        implode(', ', $sql_chunk));
-    }
+    return $results;
   }
 
   private function writeBrowse(
@@ -498,7 +482,7 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
     $commit_data = queryfx_all(
       $commit_table->establishConnection('w'),
       'SELECT id, commitIdentifier FROM %T
-        WHERE repositoryID = %d AND commitIdentifier in (%Ld)',
+        WHERE repositoryID = %d AND commitIdentifier in (%Ls)',
       $commit_table->getTableName(),
       $repository->getID(),
       $commits);
@@ -525,11 +509,15 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
           "Missing commits ({$need}) in a SVN repository which is not ".
           "configured for subdirectory-only parsing!");
       }
+
       foreach ($need as $foreign_commit) {
         $commit = new PhabricatorRepositoryCommit();
         $commit->setRepositoryID($repository->getID());
         $commit->setCommitIdentifier($foreign_commit);
         $commit->setEpoch(0);
+        // Mark this commit as imported so it doesn't prevent the repository
+        // from transitioning into the "Imported" state.
+        $commit->setImportStatus(PhabricatorRepositoryCommit::IMPORTED_ALL);
         $commit->save();
 
         $data = new PhabricatorRepositoryCommitData();
@@ -571,7 +559,7 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
     array $paths) {
 
     $result_map = array();
-    $repository_uri = $repository->getDetail('remote-uri');
+    $repository_uri = $repository->getSubversionPathURI();
 
     if (isset($paths['/'])) {
       $result_map['/'] = DifferentialChangeType::FILE_DIRECTORY;
@@ -582,9 +570,10 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
     $path_mapping = array();
     foreach ($paths as $path => $lookup) {
       $parent = dirname($lookup['rawPath']);
-      $parent = ltrim($parent, '/');
-      $parent = $this->encodeSVNPath($parent);
-      $parent = $repository_uri.$parent.'@'.$lookup['rawCommit'];
+      $parent = $repository->getSubversionPathURI(
+        $parent,
+        $lookup['rawCommit']);
+
       $parent = escapeshellarg($parent);
       $parents[$parent] = true;
       $path_mapping[$parent][] = dirname($path);
@@ -636,12 +625,6 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
     return $result_map;
   }
 
-  private function encodeSVNPath($path) {
-    $path = rawurlencode($path);
-    $path = str_replace('%2F', '/', $path);
-    return $path;
-  }
-
   private function getFileTypeFromSVNKind($kind) {
     $kind = (string)$kind;
     switch ($kind) {
@@ -658,9 +641,9 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
 
     $path = $info['rawPath'];
     $rev  = $info['rawCommit'];
-    $path = $this->encodeSVNPath($path);
 
-    $hashkey = md5($repository->getDetail('remote-uri').$path.'@'.$rev);
+    $path_uri = $repository->getSubversionPathURI($path, $rev);
+    $hashkey = md5($path_uri);
 
     // This method is quite horrible. The underlying challenge is that some
     // commits in the Facebook repository are enormous, taking multiple hours
@@ -674,10 +657,8 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
     if (!Filesystem::pathExists($cache_loc)) {
       $tmp = new TempFile();
       $repository->execxRemoteCommand(
-        '--xml ls -R %s%s@%d > %s',
-        $repository->getDetail('remote-uri'),
-        $path,
-        $rev,
+        '--xml ls -R %s > %s',
+        $path_uri,
         $tmp);
       execx(
         'mv %s %s',
@@ -784,6 +765,22 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
       $parents[] = '/'.implode('/', $parts);
     }
     return $parents;
+  }
+
+  private function getSVNLogXMLObject(
+    PhabricatorRepository $repository,
+    $uri,
+    $revision) {
+    list($xml) = $repository->execxRemoteCommand(
+      'log --xml --verbose --limit 1 %s@%d',
+      $uri,
+      $revision);
+
+    // Subversion may send us back commit messages which won't parse because
+    // they have non UTF-8 garbage in them. Slam them into valid UTF-8.
+    $xml = phutil_utf8ize($xml);
+
+    return new SimpleXMLElement($xml);
   }
 
 }

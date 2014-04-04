@@ -3,12 +3,16 @@
 final class PhabricatorSettingsPanelConduit
   extends PhabricatorSettingsPanel {
 
+  public function isEditableByAdministrators() {
+    return true;
+  }
+
   public function getPanelKey() {
     return 'conduit';
   }
 
   public function getPanelName() {
-    return pht('Conduit');
+    return pht('Conduit Certificate');
   }
 
   public function getPanelGroup() {
@@ -16,12 +20,13 @@ final class PhabricatorSettingsPanelConduit
   }
 
   public function processRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $user = $this->getUser();
+    $viewer = $request->getUser();
 
     if ($request->isFormPost()) {
       if (!$request->isDialogFormPost()) {
         $dialog = new AphrontDialogView();
-        $dialog->setUser($user);
+        $dialog->setUser($viewer);
         $dialog->setTitle(pht('Really regenerate session?'));
         $dialog->setSubmitURI($this->getPanelURI());
         $dialog->addSubmitButton(pht('Regenerate'));
@@ -34,13 +39,14 @@ final class PhabricatorSettingsPanelConduit
           ->setDialog($dialog);
       }
 
-      $conn = $user->establishConnection('w');
-      queryfx(
-        $conn,
-        'DELETE FROM %T WHERE userPHID = %s AND type LIKE %>',
-        PhabricatorUser::SESSION_TABLE,
-        $user->getPHID(),
-        'conduit');
+      $sessions = id(new PhabricatorAuthSessionQuery())
+        ->setViewer($user)
+        ->withIdentityPHIDs(array($user->getPHID()))
+        ->withSessionTypes(array(PhabricatorAuthSession::TYPE_CONDUIT))
+        ->execute();
+      foreach ($sessions as $session) {
+        $session->delete();
+      }
 
       // This implicitly regenerates the certificate.
       $user->setConduitCertificate(null);
@@ -64,45 +70,52 @@ final class PhabricatorSettingsPanelConduit
       $notice = null;
     }
 
+    Javelin::initBehavior('select-on-click');
+
     $cert_form = new AphrontFormView();
     $cert_form
-      ->setUser($user)
-      ->appendChild(hsprintf(
-        '<p class="aphront-form-instructions">%s</p>',
+      ->setUser($viewer)
+      ->appendChild(phutil_tag(
+        'p',
+        array('class' => 'aphront-form-instructions'),
         pht('This certificate allows you to authenticate over Conduit, '.
           'the Phabricator API. Normally, you just run %s to install it.',
-          hsprintf('<tt>%s</tt>', 'arc install-certificate'))))
+          phutil_tag('tt', array(), 'arc install-certificate'))))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel(pht('Certificate'))
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_SHORT)
+          ->setReadonly(true)
+          ->setSigil('select-on-click')
           ->setValue($user->getConduitCertificate()));
 
-    $header1 = new PhabricatorHeaderView();
-    $header1->setHeader(pht('Arcanist Certificate'));
+    $cert_form = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Arcanist Certificate'))
+      ->setForm($cert_form);
 
     $regen_instruction = pht('You can regenerate this certificate, which '.
       'will invalidate the old certificate and create a new one.');
 
     $regen_form = new AphrontFormView();
     $regen_form
-      ->setUser($user)
+      ->setUser($viewer)
       ->setAction($this->getPanelURI())
       ->setWorkflow(true)
-      ->appendChild(hsprintf(
-        '<p class="aphront-form-instructions">%s</p>', $regen_instruction))
+      ->appendChild(phutil_tag(
+        'p',
+        array('class' => 'aphront-form-instructions'),
+        $regen_instruction))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Regenerate Certificate')));
 
-    $header = new PhabricatorHeaderView();
-    $header->setHeader(pht('Regenerate Certificate'));
+    $regen_form = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Regenerate Certificate'))
+      ->setForm($regen_form);
 
     return array(
       $notice,
-      $header1,
       $cert_form,
-      $header,
       $regen_form,
     );
   }

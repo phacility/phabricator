@@ -4,6 +4,29 @@
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
+$table = new PhabricatorUser();
+$any_user = queryfx_one(
+  $table->establishConnection('r'),
+  'SELECT * FROM %T LIMIT 1',
+  $table->getTableName());
+$is_first_user = (!$any_user);
+
+if ($is_first_user) {
+  echo pht(
+    "WARNING\n\n".
+    "You're about to create the first account on this install. Normally, you ".
+    "should use the web interface to create the first account, not this ".
+    "script.\n\n".
+    "If you use the web interface, it will drop you into a nice UI workflow ".
+    "which gives you more help setting up your install. If you create an ".
+    "account with this script instead, you will skip the setup help and you ".
+    "will not be able to access it later.");
+  if (!phutil_console_confirm(pht("Skip easy setup and create account?"))) {
+    echo pht("Cancelled.")."\n";
+    exit(1);
+  }
+}
+
 echo "Enter a username to create a new account or edit an existing account.";
 
 $username = phutil_console_prompt("Enter a username:");
@@ -100,7 +123,7 @@ if (strlen($password)) {
 
 $is_system_agent = $user->getIsSystemAgent();
 $set_system_agent = phutil_console_confirm(
-  'Should this user be a system agent?',
+  'Is this user a bot/script?',
   $default_no = !$is_system_agent);
 
 $verify_email = null;
@@ -113,8 +136,7 @@ if (!$is_new) {
   if (!$verify_email->getIsVerified()) {
     $set_verified = phutil_console_confirm(
       'Should the primary email address be verified?',
-      $default_no = true
-    );
+      $default_no = true);
   } else {
     // already verified so let's not make a fuss
     $verify_email = null;
@@ -141,7 +163,7 @@ printf($tpl, 'Password', null,
 
 printf(
   $tpl,
-  'System Agent',
+  'Bot/Script',
   $original->getIsSystemAgent() ? 'Y' : 'N',
   $set_system_agent ? 'Y' : 'N');
 
@@ -179,9 +201,13 @@ $user->openTransaction();
       ->setAddress($create_email)
       ->setIsVerified(1);
 
+    // Unconditionally approve new accounts created from the CLI.
+    $user->setIsApproved(1);
+
     $editor->createNewUser($user, $email);
   } else {
     if ($verify_email) {
+      $user->setIsEmailVerified(1);
       $verify_email->setIsVerified($set_verified ? 1 : 0);
     }
     $editor->updateUser($user, $verify_email);

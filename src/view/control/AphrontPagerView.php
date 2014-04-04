@@ -47,6 +47,17 @@ final class AphrontPagerView extends AphrontView {
     return $this;
   }
 
+  final public function readFromRequest(AphrontRequest $request) {
+    $this->uri = $request->getRequestURI();
+    $this->pagingParameter = 'offset';
+    $this->offset = $request->getInt($this->pagingParameter);
+    return $this;
+  }
+
+  final public function willShowPagingControls() {
+    return $this->hasMorePages;
+  }
+
   final public function setSurroundingPages($pages) {
     $this->surroundingPages = max(0, $pages);
     return $this;

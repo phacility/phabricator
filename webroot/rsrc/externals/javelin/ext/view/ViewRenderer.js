@@ -1,6 +1,7 @@
 /**
  * @provides javelin-view-renderer
  * @requires javelin-install
+ *           javelin-util
  */
 
 JX.install('ViewRenderer', {
@@ -16,4 +17,3 @@ JX.install('ViewRenderer', {
     }
   }
 });
-

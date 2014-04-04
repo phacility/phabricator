@@ -19,31 +19,31 @@
 
 /* Colors */
 .phui-text-red {
-  color: #E41C2B;
+  color: {$red};
 }
 
 .phui-text-orange {
-  color: #EA921D;
+  color: {$orange};
 }
 
 .phui-text-yellow {
-  color: #EABB1D;
+  color: {$yellow};
 }
 
 .phui-text-green {
-  color: #2FC118
+  color: {$green}
 }
 
 .phui-text-blue {
-  color: #1D5998;
+  color: {$blue};
 }
 
 .phui-text-indigo {
-  color: #BD1772;
+  color: {$indigo};
 }
 
 .phui-text-violet {
-  color: #701A9C;
+  color: {$violet};
 }
 
 .phui-text-white {

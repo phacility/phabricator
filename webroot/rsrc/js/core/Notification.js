@@ -188,4 +188,3 @@ JX.install('Notification', {
   }
 
 });
-

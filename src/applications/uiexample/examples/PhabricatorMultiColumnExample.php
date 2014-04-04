@@ -12,6 +12,8 @@ final class PhabricatorMultiColumnExample extends PhabricatorUIExample {
   }
 
   public function renderExample() {
+    $request = $this->getRequest();
+    $user = $request->getUser();
 
     $column1 = phutil_tag(
       'div',
@@ -29,14 +31,14 @@ final class PhabricatorMultiColumnExample extends PhabricatorUIExample {
         ),
         'Army of Darkness');
 
-    $head1 = id(new PhabricatorHeaderView())
+    $head1 = id(new PHUIHeaderView())
       ->setHeader(pht('2 Column Fixed'));
     $layout1 = id(new AphrontMultiColumnView())
       ->addColumn($column1)
       ->addColumn($column2)
       ->setGutter(AphrontMultiColumnView::GUTTER_MEDIUM);
 
-    $head2 = id(new PhabricatorHeaderView())
+    $head2 = id(new PHUIHeaderView())
       ->setHeader(pht('2 Column Fluid'));
     $layout2 = id(new AphrontMultiColumnView())
       ->addColumn($column1)
@@ -44,7 +46,7 @@ final class PhabricatorMultiColumnExample extends PhabricatorUIExample {
       ->setFluidLayout(true)
       ->setGutter(AphrontMultiColumnView::GUTTER_MEDIUM);
 
-    $head3 = id(new PhabricatorHeaderView())
+    $head3 = id(new PHUIHeaderView())
       ->setHeader(pht('4 Column Fixed'));
     $layout3 = id(new AphrontMultiColumnView())
       ->addColumn($column1)
@@ -53,7 +55,7 @@ final class PhabricatorMultiColumnExample extends PhabricatorUIExample {
       ->addColumn($column2)
       ->setGutter(AphrontMultiColumnView::GUTTER_SMALL);
 
-    $head4 = id(new PhabricatorHeaderView())
+    $head4 = id(new PHUIHeaderView())
       ->setHeader(pht('4 Column Fluid'));
     $layout4 = id(new AphrontMultiColumnView())
       ->addColumn($column1)
@@ -63,17 +65,102 @@ final class PhabricatorMultiColumnExample extends PhabricatorUIExample {
       ->setFluidLayout(true)
       ->setGutter(AphrontMultiColumnView::GUTTER_SMALL);
 
-    $head5 = id(new PhabricatorHeaderView())
+    $sunday = hsprintf('<strong>Sunday</strong><br /><br />Watch Football'.
+      '<br />Code<br />Eat<br />Sleep');
+
+    $monday = hsprintf('<strong>Monday</strong><br /><br />Code'.
+      '<br />Eat<br />Sleep');
+
+    $tuesday = hsprintf('<strong>Tuesday</strong><br />'.
+      '<br />Code<br />Eat<br />Sleep');
+
+    $wednesday = hsprintf('<strong>Wednesday</strong><br /><br />Code'.
+      '<br />Eat<br />Sleep');
+
+    $thursday = hsprintf('<strong>Thursday</strong><br />'.
+      '<br />Code<br />Eat<br />Sleep');
+
+    $friday = hsprintf('<strong>Friday</strong><br /><br />Code'.
+      '<br />Eat<br />Sleep');
+
+    $saturday = hsprintf('<strong>Saturday</strong><br /><br />StarCraft II'.
+      '<br />All<br />Damn<br />Day');
+
+    $head5 = id(new PHUIHeaderView())
       ->setHeader(pht('7 Column Fluid'));
     $layout5 = id(new AphrontMultiColumnView())
-      ->addColumn('Sunday')
-      ->addColumn('Monday')
-      ->addColumn('Tuesday')
-      ->addColumn('Wednesday')
-      ->addColumn('Thursday')
-      ->addColumn('Friday')
-      ->addColumn('Saturday')
-      ->setFluidLayout(true);
+      ->addColumn($sunday)
+      ->addColumn($monday)
+      ->addColumn($tuesday)
+      ->addColumn($wednesday)
+      ->addColumn($thursday)
+      ->addColumn($friday)
+      ->addColumn($saturday)
+      ->setFluidLayout(true)
+      ->setBorder(true);
+
+    $shipping = id(new PHUIFormLayoutView())
+      ->setUser($user)
+      ->setFullWidth(true)
+      ->appendChild(
+        id(new AphrontFormTextControl())
+        ->setLabel('Name')
+        ->setDisableAutocomplete(true)
+        ->setSigil('name-input'))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+        ->setLabel('Address')
+        ->setDisableAutocomplete(true)
+        ->setSigil('address-input'))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+        ->setLabel('City/State')
+        ->setDisableAutocomplete(true)
+        ->setSigil('city-input'))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+        ->setLabel('Country')
+        ->setDisableAutocomplete(true)
+        ->setSigil('country-input'))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+        ->setLabel('Postal Code')
+        ->setDisableAutocomplete(true)
+        ->setSigil('postal-input'));
+
+    $cc = id(new PHUIFormLayoutView())
+      ->setUser($user)
+      ->setFullWidth(true)
+      ->appendChild(
+        id(new AphrontFormTextControl())
+        ->setLabel('Card Number')
+        ->setDisableAutocomplete(true)
+        ->setSigil('number-input')
+        ->setError(''))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+        ->setLabel('CVC')
+        ->setDisableAutocomplete(true)
+        ->setSigil('cvc-input')
+        ->setError(''))
+      ->appendChild(
+        id(new PhortuneMonthYearExpiryControl())
+        ->setLabel('Expiration')
+        ->setUser($user)
+        ->setError(''));
+
+    $shipping_title = pht('Shipping Address');
+    $billing_title = pht('Billing Address');
+    $cc_title = pht('Payment Information');
+
+    $head6 = id(new PHUIHeaderView())
+      ->setHeader(pht('Let\'s Go Shopping'));
+    $layout6 = id(new AphrontMultiColumnView())
+      ->addColumn(hsprintf('<h1>%s</h1>%s', $shipping_title, $shipping))
+      ->addColumn(hsprintf('<h1>%s</h1>%s', $billing_title, $shipping))
+      ->addColumn(hsprintf('<h1>%s</h1>%s', $cc_title, $cc))
+      ->setFluidLayout(true)
+      ->setBorder(true);
 
     $wrap1 = phutil_tag(
       'div',
@@ -110,6 +197,13 @@ final class PhabricatorMultiColumnExample extends PhabricatorUIExample {
         ),
         $layout5);
 
+    $wrap6 = phutil_tag(
+      'div',
+        array(
+          'class' => 'ml'
+        ),
+        $layout6);
+
     return phutil_tag(
       'div',
         array(),
@@ -123,7 +217,9 @@ final class PhabricatorMultiColumnExample extends PhabricatorUIExample {
           $head4,
           $wrap4,
           $head5,
-          $wrap5
+          $wrap5,
+          $head6,
+          $wrap6
         ));
   }
 }

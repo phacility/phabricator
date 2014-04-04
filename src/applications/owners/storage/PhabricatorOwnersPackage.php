@@ -3,7 +3,6 @@
 final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
   implements PhabricatorPolicyInterface {
 
-  protected $phid;
   protected $name;
   protected $originalName;
   protected $auditingEnabled;
@@ -28,6 +27,10 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
   }
 
   public function getConfiguration() {
@@ -297,6 +300,8 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
 
       $cur_paths = mgroup($cur_paths, 'getRepositoryPHID', 'getPath');
       foreach ($new_paths as $repository_phid => $paths) {
+        // TODO: (T603) Thread policy stuff in here.
+
         // get repository object for path validation
         $repository = id(new PhabricatorRepository())->loadOneWhere(
           'phid = %s',

@@ -6,6 +6,9 @@ final class DifferentialDiffCreateController extends DifferentialController {
 
     $request = $this->getRequest();
 
+    $errors = array();
+    $e_diff = null;
+    $e_file = null;
     if ($request->isFormPost()) {
       $diff = null;
 
@@ -15,22 +18,30 @@ final class DifferentialDiffCreateController extends DifferentialController {
         $diff = $request->getStr('diff');
       }
 
-      $call = new ConduitCall(
-        'differential.createrawdiff',
-        array(
-          'diff' => $diff,
-          ));
-      $call->setUser($request->getUser());
-      $result = $call->execute();
+      if (!strlen($diff)) {
+        $errors[] = pht(
+          "You can not create an empty diff. Copy/paste a diff, or upload a ".
+          "diff file.");
+        $e_diff = pht('Required');
+        $e_file = pht('Required');
+      }
 
-      $path = id(new PhutilURI($result['uri']))->getPath();
-      return id(new AphrontRedirectResponse())->setURI($path);
+      if (!$errors) {
+        $call = new ConduitCall(
+          'differential.createrawdiff',
+          array(
+            'diff' => $diff,
+            ));
+        $call->setUser($request->getUser());
+        $result = $call->execute();
+
+        $path = id(new PhutilURI($result['uri']))->getPath();
+        return id(new AphrontRedirectResponse())->setURI($path);
+      }
     }
 
     $form = new AphrontFormView();
-    $form->setFlexible(true);
-    $arcanist_href = PhabricatorEnv::getDoclink(
-      'article/Arcanist_User_Guide.html');
+    $arcanist_href = PhabricatorEnv::getDoclink('Arcanist User Guide');
     $arcanist_link = phutil_tag(
       'a',
       array(
@@ -38,47 +49,54 @@ final class DifferentialDiffCreateController extends DifferentialController {
         'target' => '_blank',
       ),
       'Arcanist');
+
+    $cancel_uri = $this->getApplicationURI();
+
     $form
       ->setAction('/differential/diff/create/')
       ->setEncType('multipart/form-data')
       ->setUser($request->getUser())
-      ->appendChild(hsprintf(
-        '<p class="aphront-form-instructions">%s</p>',
+      ->appendInstructions(
         pht(
           'The best way to create a Differential diff is by using %s, but you '.
-            'can also just paste a diff (e.g., from %s or %s) into this box '.
-            'or upload it as a file if you really want.',
+          'can also just paste a diff (for example, from %s, %s or %s) into '.
+          'this box, or upload a diff file.',
           $arcanist_link,
           phutil_tag('tt', array(), 'svn diff'),
-          phutil_tag('tt', array(), 'git diff'))))
+          phutil_tag('tt', array(), 'git diff'),
+          phutil_tag('tt', array(), 'hg diff --git')))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel(pht('Raw Diff'))
           ->setName('diff')
-          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL))
+          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
+          ->setError($e_diff))
       ->appendChild(
         id(new AphrontFormFileControl())
-          ->setLabel(pht('Raw Diff from file'))
-          ->setName('diff-file'))
+          ->setLabel(pht('Raw Diff From File'))
+          ->setName('diff-file')
+          ->setError($e_file))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue(pht("Create Diff \xC2\xBB")));
+          ->addCancelButton($cancel_uri)
+          ->setValue(pht("Create Diff")));
+
+    $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Create New Diff'))
+      ->setForm($form)
+      ->setFormErrors($errors);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Create Diff'))
-        ->setHref('/differential/diff/create/'));
+    $crumbs->addTextCrumb(pht('Create Diff'));
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $form
+        $form_box,
       ),
       array(
         'title' => pht('Create Diff'),
         'device' => true,
-        'dust' => true,
       ));
   }
 

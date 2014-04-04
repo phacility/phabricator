@@ -1,0 +1,586 @@
+/**
+ * @provides phui-object-item-list-view-css
+ */
+
+.phui-object-item-list-view {
+  padding: 8px 6px;
+}
+
+.device-desktop .phui-object-item-list-view {
+  padding: 16px;
+}
+
+.phui-object-item-list-view + .phui-object-item-list-view {
+  padding-top: 0;
+}
+
+.phui-object-item-list-view.phui-object-list-flush {
+  padding: 0;
+}
+
+.phui-object-box .phui-object-item-list-view.phui-object-list-flush {
+  padding: 8px 12px 4px 12px;
+  background-color: #E5E8EE;
+}
+
+.device-phone .phui-object-box
+  .phui-object-item-list-view.phui-object-list-flush {
+  padding: 4px;
+}
+
+.phui-object-item-list-view .aphront-error-view {
+  margin: 4px 0 8px 0;
+  color: {$bluetext};
+}
+
+.phui-object-item {
+  background: #ffffff;
+  border-style: solid;
+  border-color: {$lightgreyborder};
+  border-width: 0 0 0 4px;
+  margin: 5px 0;
+  overflow: hidden;
+}
+
+.phui-object-item .phui-icon-view {
+  display: inline-block;
+}
+
+.phui-object-item-frame {
+  border-style: solid;
+  border-color: {$lightgreyborder};
+  border-bottom-color: {$greyborder};
+  border-width: 1px 1px 1px 0;
+  overflow: hidden;
+  position: relative;
+  min-height: 29px;
+}
+
+.phui-object-list-cards .phui-object-item-frame {
+  border-bottom-right-radius: 3px;
+  border-top-right-radius: 3px;
+}
+
+.device-desktop .phui-object-item {
+  margin: 0 0 5px 0;
+}
+
+.phui-object-item-name {
+  display: inline-block;
+  font-weight: bold;
+  padding: 6px 8px 0;
+  white-space: nowrap;
+}
+
+.phui-object-item-link {
+  display: inline-block;
+}
+
+.phui-object-item-objname {
+  color: {$darkgreytext};
+  cursor: text;
+}
+
+.phui-object-item-content {
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.phui-object-item-grippable {
+  cursor: move;
+}
+
+.phui-object-item-grip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 17px;
+  background: url('/rsrc/image/texture/grip.png') center center no-repeat;
+}
+
+.phui-object-item-grippable .phui-object-item-frame {
+  padding-left: 11px;
+}
+
+.phui-object-item-list-header {
+  padding: 0 0 8px 0;
+  color: {$darkgreytext};
+}
+
+/* - Item Actions --------------------------------------------------------------
+
+  Action buttons, like "Edit" and "Delete".
+
+*/
+
+.phui-object-item-actions {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  vertical-align: middle;
+  text-align: right;
+  border-left: 1px solid {$lightgreyborder};
+}
+
+.phui-object-item-actions .phui-list-item-view {
+  float: right;
+  height: 100%;
+  width: 24px;
+  display: inline-block;
+  position: relative;
+}
+
+.phui-object-item-actions .phui-list-item-view +
+.phui-list-item-view {
+  border-right: 1px solid #d6d6e9;
+}
+
+.phui-object-item-actions .phui-list-item-href {
+  display: inline-block;
+  position: relative;
+  width: 24px;
+  height: 100%;
+}
+
+.phui-object-item-actions .phui-list-item-href:hover {
+  background: #e9e9f9;
+}
+
+.phui-object-item-actions .phui-list-item-icon {
+  width: 14px;
+  height: 14px;
+  position: absolute;
+  display: block;
+  top: 50%;
+  margin-top: -7px;
+  left: 5px;
+}
+
+.phui-object-item-actions .phui-list-item-name {
+  display: none;
+}
+
+.phui-object-item-with-1-actions .phui-object-item-content-box {
+  margin-right: 24px;
+  overflow: hidden;
+}
+
+.phui-object-item-with-2-actions .phui-object-item-content-box {
+  margin-right: 48px;
+  overflow: hidden;
+}
+
+.phui-object-item-with-3-actions .phui-object-item-content-box {
+  margin-right: 72px;
+  overflow: hidden;
+}
+
+
+/* - Stackable List ------------------------------------------------------------
+
+  Tighter, stacking list.
+
+*/
+
+.phui-object-item-list-view.phui-object-list-stackable
+  .phui-object-item {
+  margin: -1px 0 0 0;
+}
+
+.phui-object-list-stackable .phui-object-item {
+  border-left-width: 1px;
+}
+
+.device-desktop .phui-object-list-stackable
+  .phui-object-item:hover {
+  background: #e9ecf5;
+}
+
+/* - Subhead -------------------------------------------------------------------
+
+  Descriptive Text or Links under the main header, before attributes.
+
+*/
+
+.phui-object-item-subhead {
+  color: {$greytext};
+  padding: 0 8px 6px;
+}
+
+
+/* - Attribute List ------------------------------------------------------------
+
+  Object attributes, commonly used to render created date, etc.
+
+*/
+
+.phui-object-item-attributes {
+  padding: 0 8px 6px;
+}
+
+.phui-object-item-attribute {
+  display: inline;
+  color: {$greytext};
+}
+
+.phui-object-item-attribute-spacer {
+  padding: 0 4px;
+}
+
+
+/* - Icons ---------------------------------------------------------------------
+
+  Icons, which show object state. On mobile, they are rendered without labels
+  to save space.
+
+*/
+
+.phui-object-icon-pane {
+  float: right;
+  margin-top: 6px;
+}
+
+.device .phui-object-item-no-icon-images .phui-object-icon-pane {
+  display: none;
+}
+
+.phui-object-item-with-handle-icons .phui-object-item-icons {
+  padding-bottom: 30px;
+}
+
+.phui-object-item-icons {
+  float: right;
+  padding: 0 10px;
+}
+
+/* NOTE: The main content is an "overflow: hidden" div which we give a right
+   margin so it doesn't overlap the icons. The margin is slightly larger than
+   the width + padding of the icon div, so the icons have some space even if
+   the content is wider than available space. */
+
+.device-desktop .phui-object-icon-pane {
+  width: 120px;
+}
+
+.device-desktop .phui-object-item-with-icons
+  .phui-object-item-content,
+.device-desktop .phui-object-item-with-handle-icons
+  .phui-object-item-content {
+  margin-right: 132px;
+}
+
+.device .phui-object-item-icons {
+  width: 18px;
+}
+
+.device .phui-object-item-with-icons .phui-object-item-content,
+.device .phui-object-item-with-handle-icons
+  .phui-object-item-content {
+  margin-right: 30px;
+}
+
+.device .phui-object-item-icon-label,
+.device .phui-object-item-icon-none {
+  display: none;
+}
+
+.phui-object-item-icon {
+  vertical-align: middle;
+  position: relative;
+  font-size: 11px;
+  color: {$greytext};
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+
+  min-height: 18px;
+  line-height: 18px;
+}
+
+/*
+ * Items with icon 'none' still have on mobile, thus creating a weird vertical
+ * margin for elements which follow
+ */
+.device-phone .phui-object-item-icon-none {
+  display: none;
+}
+
+.device-desktop .phui-object-item-icon {
+  padding-right: 18px;
+}
+
+.device-desktop .phui-object-item-icon-none {
+  padding-right: 0;
+}
+
+.phui-object-item-icon-image {
+  position: absolute;
+  right: 0;
+  top: 2px;
+  width: 14px;
+  height: 14px;
+}
+
+
+/* - Bar Colors ----------------------------------------------------------------
+
+  Colors for the left-hand border bars, used to indicate object status or other
+  attributes.
+
+*/
+
+.phui-object-item-bar-color-red {
+  border-left-color: {$red};
+}
+
+.phui-object-item-bar-color-orange {
+  border-left-color: {$orange};
+}
+
+.phui-object-item-bar-color-yellow {
+  border-left-color: {$yellow};
+}
+
+.phui-object-item-bar-color-green {
+  border-left-color: {$green};
+}
+
+.phui-object-item-bar-color-sky {
+  border-left-color: {$sky};
+}
+
+.phui-object-item-bar-color-blue {
+  border-left-color: {$blue};
+}
+
+.phui-object-item-bar-color-indigo {
+  border-left-color: {$indigo};
+}
+
+.phui-object-item-bar-color-violet {
+  border-left-color: {$violet};
+}
+
+.phui-object-item-bar-color-grey {
+  border-left-color: #bdc3c7;
+}
+
+.phui-object-item-bar-color-black {
+  border-left-color: #333333;
+}
+
+/* - Disabled ------------------------------------------------------------------
+
+  Disabled/inactive objects.
+
+*/
+
+.phui-object-item-disabled {
+  border-left-color: #d7d7d7;
+}
+
+.phui-object-item-disabled .phui-object-item-link,
+.phui-object-item-disabled .phui-object-item-link a {
+  color: {$lightgreytext};
+}
+
+.phui-object-item-disabled .phui-object-item-frame {
+  border-color: #d7d7d7;
+}
+
+.phui-object-item-disabled .phui-object-item-objname {
+  color: {$greytext};
+  text-decoration: line-through;
+}
+
+
+/* - Effects -------------------------------------------------------------------
+
+  Effects like highlighted items.
+
+*/
+
+.phui-object-item-highlighted {
+  background: {$lightyellow};
+}
+
+.phui-object-list-cards
+ .phui-object-item.phui-object-item-highlighted {
+  background-image: linear-gradient(to bottom, rgb(253, 255, 221), rgb(243, 245, 206));
+  background-image: -webkit-linear-gradient(top, rgb(253, 255, 221), rgb(243, 245, 206));
+}
+
+.phui-object-item-selected {
+  background: {$lightblue};
+}
+
+
+/* - Foot Icons ----------------------------------------------------------------
+
+  Object counts shown in the footer.
+
+*/
+
+.phui-object-item-foot-icons {
+  margin-left: 10px;
+  bottom: 0;
+  position: absolute;
+}
+
+.phui-object-item-with-foot-icons .phui-object-item-content {
+  padding-bottom: 22px;
+}
+
+.phui-object-item-foot-icon {
+  display: inline-block;
+  background: #909090;
+  color: #ffffff;
+  font-weight: bold;
+  margin-right: 3px;
+  padding: 1px 4px 0 22px;
+  height: 19px;
+  vertical-align: middle;
+  position: relative;
+}
+
+.phui-object-item-foot-icon .sprite-icons {
+  width: 14px;
+  height: 14px;
+  position: absolute;
+  left: 4px;
+  top: 3px;
+}
+
+
+/* - Handle Icons --------------------------------------------------------------
+
+  Shows owners, reviewers, etc., using profile picture icons.
+
+*/
+
+.phui-object-item-handle-icons {
+  height: 28px;
+  margin-right: 10px;
+  bottom: 0;
+  right: 0;
+  text-align: right;
+  position: absolute;
+}
+
+.phui-object-item-handle-icon {
+  margin: 1px;
+  width: 28px;
+  height: 28px;
+  display: inline-block;
+  background-size: 28px 28px;
+  background-repeat: no-repeat;
+}
+
+
+/* - Bylines -------------------------------------------------------------------
+
+  Shows owners, authors, reviewers, etc., in text.
+
+*/
+
+.phui-object-item-bylines {
+  float: right;
+  clear: right;
+  padding: 0 10px;
+  margin: 5px 0;
+  font-size: 11px;
+  color: {$greytext};
+  white-space: nowrap;
+  overflow: hidden;
+  text-align: right;
+}
+
+/* - Card List -----------------------------------------------------------------
+
+  Rounded card list.
+
+*/
+
+/* Hard to sprite since we can't have other sprites appearing in tall cells */
+.phui-object-list-cards .phui-object-item {
+  border-radius: 3px;
+  border-left-width: 6px;
+  background: #f0f0f0 url('/rsrc/image/texture/card-gradient.png') repeat-x;
+  margin-bottom: 4px;
+}
+
+.phui-object-list-cards .phui-object-item-frame {
+  min-height: 50px;
+}
+
+.phui-object-list-cards .phui-object-item-selected {
+  background: #bfdcff;
+}
+
+.phui-object-list-cards .phui-object-item-selected
+  .phui-object-item-frame {
+  border-color: #99ccff;
+}
+
+
+/* - Draggable List ------------------------------------------------------------
+
+  These classes are applied by and/or provided for use with JX.DraggableList.
+
+*/
+
+.drag-ghost {
+  position: relative;
+  border: 1px dashed #fff;
+  background: rgba(255,255,255,.5);
+  margin-bottom: 4px;
+  border-radius: 3px;
+}
+
+.drag-dragging {
+  position: relative;
+  opacity: 0.9;
+}
+
+.drag-sending {
+  opacity: 0.75;
+}
+
+/* - Plain ---------------------------------------------------------------------
+
+  Remove all border styles, just a list of objects
+
+*/
+
+.phui-object-list-plain .phui-object-item {
+  background: transparent;
+}
+
+.phui-object-list-plain .phui-object-item,
+.phui-object-list-plain .phui-object-item-frame {
+  border: none;
+}
+
+.phui-object-list-plain .phui-object-item-attributes,
+.phui-object-list-plain .phui-object-item-name {
+  padding-left: 0;
+  padding-top: 0;
+}
+
+.phui-object-item-image {
+  width: 50px;
+  height: 50px;
+  margin: 4px 4px 4px 4px;
+  position: absolute;
+  background-color: {$lightbluebackground};
+}
+
+.phui-object-item-with-image .phui-object-item-frame {
+  min-height: 58px;
+}
+
+.phui-object-item-with-image .phui-object-item-content-box {
+  margin-left: 54px;
+}

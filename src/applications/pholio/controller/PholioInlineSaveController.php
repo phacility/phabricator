@@ -42,14 +42,7 @@ final class PholioInlineSaveController extends PholioController {
       $draft->setAuthorPHID($user->getPHID());
       $draft->setEditPolicy($user->getPHID());
       $draft->setViewPolicy(PhabricatorPolicies::POLICY_PUBLIC);
-
-      $content_source = PhabricatorContentSource::newForSource(
-        PhabricatorContentSource::SOURCE_WEB,
-        array(
-          'ip' => $request->getRemoteAddr(),
-        ));
-
-      $draft->setContentSource($content_source);
+      $draft->setContentSourceFromRequest($request);
 
       $draft->setWidth($request->getInt('endX') - $request->getInt('startX'));
       $draft->setHeight($request->getInt('endY') - $request->getInt('startY'));

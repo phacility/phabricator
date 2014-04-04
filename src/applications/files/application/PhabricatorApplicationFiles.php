@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group file
+ */
 final class PhabricatorApplicationFiles extends PhabricatorApplication {
 
   public function getBaseURI() {
@@ -26,22 +29,26 @@ final class PhabricatorApplicationFiles extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
-  public function getQuickCreateURI() {
-    return $this->getBaseURI().'upload/';
-  }
-
   public function canUninstall() {
     return false;
   }
+
+  public function getRemarkupRules() {
+    return array(
+      new PhabricatorRemarkupRuleEmbedFile(),
+    );
+  }
+
 
   public function getRoutes() {
     return array(
       '/F(?P<id>[1-9]\d*)' => 'PhabricatorFileShortcutController',
       '/file/' => array(
-        '' => 'PhabricatorFileListController',
-        'filter/(?P<filter>\w+)/' => 'PhabricatorFileListController',
+        '(query/(?P<key>[^/]+)/)?' => 'PhabricatorFileListController',
         'upload/' => 'PhabricatorFileUploadController',
         'dropupload/' => 'PhabricatorFileDropUploadController',
+        'compose/' => 'PhabricatorFileComposeController',
+        'comment/(?P<id>[1-9]\d*)/' => 'PhabricatorFileCommentController',
         'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorFileDeleteController',
         'info/(?P<phid>[^/]+)/' => 'PhabricatorFileInfoController',
         'data/(?P<key>[^/]+)/(?P<phid>[^/]+)/.*'
@@ -49,6 +56,8 @@ final class PhabricatorApplicationFiles extends PhabricatorApplication {
         'proxy/' => 'PhabricatorFileProxyController',
         'xform/(?P<transform>[^/]+)/(?P<phid>[^/]+)/(?P<key>[^/]+)/'
           => 'PhabricatorFileTransformController',
+        'uploaddialog/' => 'PhabricatorFileUploadDialogController',
+        'download/(?P<phid>[^/]+)/' => 'PhabricatorFileDialogController',
       ),
     );
   }

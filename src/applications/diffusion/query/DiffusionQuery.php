@@ -53,8 +53,13 @@ abstract class DiffusionQuery extends PhabricatorQuery {
     $repository = $drequest->getRepository();
 
     $core_params = array(
-      'callsign' => $repository->getCallsign()
+      'callsign' => $repository->getCallsign(),
     );
+
+    if ($drequest->getBranch() !== null) {
+      $core_params['branch'] = $drequest->getBranch();
+    }
+
     $params = $params + $core_params;
 
     return id(new ConduitCall(
@@ -75,7 +80,9 @@ abstract class DiffusionQuery extends PhabricatorQuery {
 /* -(  Query Utilities  )---------------------------------------------------- */
 
 
-  final protected function loadCommitsByIdentifiers(array $identifiers) {
+  final public static function loadCommitsByIdentifiers(
+    array $identifiers,
+    DiffusionRequest $drequest) {
     if (!$identifiers) {
       return array();
     }
@@ -83,7 +90,6 @@ abstract class DiffusionQuery extends PhabricatorQuery {
     $commits = array();
     $commit_data = array();
 
-    $drequest = $this->getRequest();
     $repository = $drequest->getRepository();
 
     $commits = id(new PhabricatorRepositoryCommit())->loadAllWhere(
@@ -93,8 +99,8 @@ abstract class DiffusionQuery extends PhabricatorQuery {
     $commits = mpull($commits, null, 'getCommitIdentifier');
 
     // Build empty commit objects for every commit, so we can show unparsed
-    // commits in history views as "unparsed" instead of not showing them. This
-    // makes the process of importing and parsing commits much clearer to the
+    // commits in history views (as "Importing") instead of not showing them.
+    // This makes the process of importing and parsing commits clearer to the
     // user.
 
     $commit_list = array();
@@ -104,7 +110,6 @@ abstract class DiffusionQuery extends PhabricatorQuery {
         $commit_obj = new PhabricatorRepositoryCommit();
         $commit_obj->setRepositoryID($repository->getID());
         $commit_obj->setCommitIdentifier($identifier);
-        $commit_obj->setIsUnparsed(true);
         $commit_obj->makeEphemeral();
       }
       $commit_list[$identifier] = $commit_obj;
@@ -131,14 +136,16 @@ abstract class DiffusionQuery extends PhabricatorQuery {
     return $commits;
   }
 
-  final protected function loadHistoryForCommitIdentifiers(array $identifiers) {
+  final public static function loadHistoryForCommitIdentifiers(
+    array $identifiers,
+    DiffusionRequest $drequest) {
+
     if (!$identifiers) {
       return array();
     }
 
-    $drequest = $this->getRequest();
     $repository = $drequest->getRepository();
-    $commits = self::loadCommitsByIdentifiers($identifiers);
+    $commits = self::loadCommitsByIdentifiers($identifiers, $drequest);
 
     if (!$commits) {
       return array();

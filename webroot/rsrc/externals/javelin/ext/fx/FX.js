@@ -87,6 +87,9 @@ JX.install('FX', {
       this._interval = setInterval(
         JX.bind(this, this._tween),
         Math.round(1000 / this.getFps()));
+
+      // Immediately update to the initial values.
+      this._tween();
     },
 
     _tween: function() {

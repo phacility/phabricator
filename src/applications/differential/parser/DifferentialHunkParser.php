@@ -545,38 +545,31 @@ final class DifferentialHunkParser {
 
   public function makeContextDiff(
     array $hunks,
-    PhabricatorInlineCommentInterface $inline,
+    $is_new,
+    $line_number,
+    $line_length,
     $add_context) {
 
     assert_instances_of($hunks, 'DifferentialHunk');
 
     $context = array();
-    $debug = false;
-    if ($debug) {
-      $context[] = 'Inline: '.$inline->getIsNewFile().' '.
-        $inline->getLineNumber().' '.$inline->getLineLength();
-      foreach ($hunks as $hunk) {
-        $context[] = 'hunk: '.$hunk->getOldOffset().'-'.
-          $hunk->getOldLen().'; '.$hunk->getNewOffset().'-'.$hunk->getNewLen();
-        $context[] = $hunk->getChanges();
-      }
-    }
 
-    if ($inline->getIsNewFile()) {
+    if ($is_new) {
       $prefix = '+';
     } else {
       $prefix = '-';
     }
+
     foreach ($hunks as $hunk) {
-      if ($inline->getIsNewFile()) {
+      if ($is_new) {
         $offset = $hunk->getNewOffset();
         $length = $hunk->getNewLen();
       } else {
         $offset = $hunk->getOldOffset();
         $length = $hunk->getOldLen();
       }
-      $start = $inline->getLineNumber() - $offset;
-      $end = $start + $inline->getLineLength();
+      $start = $line_number - $offset;
+      $end = $start + $line_length;
       // We need to go in if $start == $length, because the last line
       // might be a "\No newline at end of file" marker, which we want
       // to show if the additional context is > 0.
@@ -585,8 +578,8 @@ final class DifferentialHunkParser {
         $end = $end + $add_context;
         $hunk_content = array();
         $hunk_pos = array( "-" => 0, "+" => 0 );
-        $hunk_offset = array( "-" => NULL, "+" => NULL );
-        $hunk_last = array( "-" => NULL, "+" => NULL );
+        $hunk_offset = array( "-" => null, "+" => null );
+        $hunk_last = array( "-" => null, "+" => null );
         foreach (explode("\n", $hunk->getChanges()) as $line) {
           $in_common = strncmp($line, " ", 1) === 0;
           $in_old = strncmp($line, "-", 1) === 0 || $in_common;
@@ -598,13 +591,13 @@ final class DifferentialHunkParser {
               if (!$skip || ($hunk_pos[$prefix] != $start &&
                 $hunk_pos[$prefix] != $end)) {
                   if ($in_old) {
-                    if ($hunk_offset["-"] === NULL) {
+                    if ($hunk_offset["-"] === null) {
                       $hunk_offset["-"] = $hunk_pos["-"];
                     }
                     $hunk_last["-"] = $hunk_pos["-"];
                   }
                   if ($in_new) {
-                    if ($hunk_offset["+"] === NULL) {
+                    if ($hunk_offset["+"] === null) {
                       $hunk_offset["+"] = $hunk_pos["+"];
                     }
                     $hunk_last["+"] = $hunk_pos["+"];
@@ -617,13 +610,13 @@ final class DifferentialHunkParser {
             if ($in_new) { ++$hunk_pos["+"]; }
           }
         }
-        if ($hunk_offset["-"] !== NULL || $hunk_offset["+"] !== NULL) {
+        if ($hunk_offset["-"] !== null || $hunk_offset["+"] !== null) {
           $header = "@@";
-          if ($hunk_offset["-"] !== NULL) {
+          if ($hunk_offset["-"] !== null) {
             $header .= " -" . ($hunk->getOldOffset() + $hunk_offset["-"]) .
               "," . ($hunk_last["-"] - $hunk_offset["-"] + 1);
           }
-          if ($hunk_offset["+"] !== NULL) {
+          if ($hunk_offset["+"] !== null) {
             $header .= " +" . ($hunk->getNewOffset() + $hunk_offset["+"]) .
               "," . ($hunk_last["+"] - $hunk_offset["+"] + 1);
           }

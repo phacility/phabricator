@@ -13,10 +13,14 @@ final class ConduitCall {
   private $method;
   private $request;
   private $user;
+  private $servers;
+  private $forceLocal;
 
   public function __construct($method, array $params) {
-    $this->method = $method;
-    $this->handler = $this->buildMethodHandler($method);
+    $this->method     = $method;
+    $this->handler    = $this->buildMethodHandler($method);
+    $this->servers    = PhabricatorEnv::getEnvConfig('conduit.servers');
+    $this->forceLocal = false;
 
     $invalid_params = array_diff_key(
       $params,
@@ -25,6 +29,16 @@ final class ConduitCall {
       throw new ConduitException(
         "Method '{$method}' doesn't define these parameters: '" .
         implode("', '", array_keys($invalid_params)) . "'.");
+    }
+
+    if ($this->servers) {
+      $current_host = AphrontRequest::getHTTPHeader('HOST');
+      foreach ($this->servers as $server) {
+        if ($current_host === id(new PhutilURI($server))->getDomain()) {
+          $this->forceLocal = true;
+          break;
+        }
+      }
     }
 
     $this->request = new ConduitAPIRequest($params);
@@ -37,6 +51,15 @@ final class ConduitCall {
 
   public function getUser() {
     return $this->user;
+  }
+
+  public function setForceLocal($force_local) {
+    $this->forceLocal = $force_local;
+    return $this;
+  }
+
+  public function shouldForceLocal() {
+    return $this->forceLocal;
   }
 
   public function shouldRequireAuthentication() {
@@ -56,15 +79,93 @@ final class ConduitCall {
   }
 
   public function execute() {
-    if (!$this->getUser()) {
-      if ($this->shouldRequireAuthentication()) {
-        throw new ConduitException("ERR-INVALID-AUTH");
-      }
-    } else {
-      $this->request->setUser($this->getUser());
+    $profiler = PhutilServiceProfiler::getInstance();
+    $call_id = $profiler->beginServiceCall(
+      array(
+        'type' => 'conduit',
+        'method' => $this->method,
+      ));
+
+    try {
+      $result = $this->executeMethod();
+    } catch (Exception $ex) {
+      $profiler->endServiceCall($call_id, array());
+      throw $ex;
     }
 
-    return $this->handler->executeMethod($this->request);
+    $profiler->endServiceCall($call_id, array());
+    return $result;
+  }
+
+  private function executeMethod() {
+    $user = $this->getUser();
+    if (!$user) {
+      $user = new PhabricatorUser();
+    }
+
+    $this->request->setUser($user);
+
+    if (!$this->shouldRequireAuthentication()) {
+      // No auth requirement here.
+    } else {
+
+      $allow_public = $this->handler->shouldAllowPublic() &&
+                      PhabricatorEnv::getEnvConfig('policy.allow-public');
+      if (!$allow_public) {
+        if (!$user->isLoggedIn() && !$user->isOmnipotent()) {
+          // TODO: As per below, this should get centralized and cleaned up.
+          throw new ConduitException("ERR-INVALID-AUTH");
+        }
+      }
+
+      // TODO: This would be slightly cleaner by just using a Query, but the
+      // Conduit auth workflow requires the Call and User be built separately.
+      // Just do it this way for the moment.
+      $application = $this->handler->getApplication();
+      if ($application) {
+        $can_view = PhabricatorPolicyFilter::hasCapability(
+          $user,
+          $application,
+          PhabricatorPolicyCapability::CAN_VIEW);
+
+        if (!$can_view) {
+          throw new ConduitException(
+            pht(
+              "You do not have access to the application which provides this ".
+              "API method."));
+        }
+      }
+    }
+
+    if (!$this->shouldForceLocal() && $this->servers) {
+      $server = $this->pickRandomServer($this->servers);
+      $client = new ConduitClient($server);
+      $params = $this->request->getAllParameters();
+
+      $params["__conduit__"]["isProxied"] = true;
+
+      if ($this->handler->shouldRequireAuthentication()) {
+        $client->callMethodSynchronous(
+        'conduit.connect',
+        array(
+             'client'            => 'PhabricatorConduit',
+             'clientVersion'     => '1.0',
+             'user'              => $this->getUser()->getUserName(),
+             'certificate'       => $this->getUser()->getConduitCertificate(),
+             '__conduit__'       => $params["__conduit__"],
+        ));
+      }
+
+      return $client->callMethodSynchronous(
+        $this->method,
+        $params);
+    } else {
+      return $this->handler->executeMethod($this->request);
+    }
+  }
+
+  protected function pickRandomServer($servers) {
+    return $servers[array_rand($servers)];
   }
 
   protected function buildMethodHandler($method) {

@@ -16,15 +16,11 @@ final class ReleephRequestTransaction
   }
 
   public function getApplicationTransactionType() {
-    return ReleephPHIDConstants::PHID_TYPE_RERQ;
+    return ReleephPHIDTypeRequest::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {
     return new ReleephRequestTransactionComment();
-  }
-
-  public function getApplicationObjectTypeName() {
-    return pht('releeph request');
   }
 
   public function hasChangeDetails() {

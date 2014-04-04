@@ -32,7 +32,7 @@
       return;
     }
     holding_queues[name] = [];
-    JX[name] = function() { holding_queues[name].push(arguments); }
+    JX[name] = function() { holding_queues[name].push(arguments); };
   }
 
   JX.flushHoldingQueue = function(name, fn) {
@@ -40,7 +40,7 @@
       fn.apply(null, holding_queues[name][ii]);
     }
     holding_queues[name] = {};
-  }
+  };
 
   makeHoldingQueue('install');
   makeHoldingQueue('behavior');
@@ -67,13 +67,15 @@
       for (var ii = 0; ii < local_queue.length; ++ii) {
         var evt = local_queue[ii];
 
-        //  Sometimes IE gives us events which throw when ".type" is accessed;
-        //  just ignore them since we can't meaningfully dispatch them. TODO:
-        //  figure out where these are coming from.
+        // Sometimes IE gives us events which throw when ".type" is accessed;
+        // just ignore them since we can't meaningfully dispatch them. TODO:
+        // figure out where these are coming from.
         try { var test = evt.type; } catch (x) { continue; }
 
         if (!loaded && evt.type == 'domready') {
-          document.body && (document.body.id = null);
+          // NOTE: Firefox interprets "document.body.id = null" as the string
+          // literal "null".
+          document.body && (document.body.id = '');
           loaded = true;
           for (var jj = 0; jj < onload.length; jj++) {
             onload[jj]();
@@ -107,7 +109,7 @@
         return false;
       }
     }
-  }
+  };
 
   JX.enableDispatch = function(target, type) {
     if (__DEV__) {
@@ -165,7 +167,8 @@
     }
   }
 
-  for (var ii = 0; ii < document_events.length; ++ii) {
+  var ii;
+  for (ii = 0; ii < document_events.length; ++ii) {
     JX.enableDispatch(root, document_events[ii]);
   }
 
@@ -182,7 +185,7 @@
   ];
 
 
-  for (var ii = 0; ii < window_events.length; ++ii) {
+  for (ii = 0; ii < window_events.length; ++ii) {
     JX.enableDispatch(window, window_events[ii]);
   }
 
@@ -212,7 +215,7 @@
       '<script' +
       ' defer="defer"' +
       ' onreadystatechange="' + ready + '"' +
-      '><\/sc' + 'ript\>');
+      '><\/sc' + 'ript' + '>');
   }
 
   JX.onload = function(func) {
@@ -221,5 +224,6 @@
     } else {
       onload.push(func);
     }
-  }
+  };
+
 })();

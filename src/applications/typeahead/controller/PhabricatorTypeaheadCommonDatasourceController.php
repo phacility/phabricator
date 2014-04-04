@@ -5,21 +5,25 @@ final class PhabricatorTypeaheadCommonDatasourceController
 
   private $type;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->type = $data['type'];
   }
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $viewer = $request->getUser();
     $query = $request->getStr('q');
+    $raw_query = $request->getStr('raw');
 
     $need_rich_data = false;
 
     $need_users = false;
+    $need_agents = false;
     $need_applications = false;
-    $need_all_users = false;
     $need_lists = false;
     $need_projs = false;
     $need_repos = false;
@@ -28,12 +32,19 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $need_arcanist_projects = false;
     $need_noproject = false;
     $need_symbols = false;
+    $need_jump_objects = false;
+    $need_build_plans = false;
+    $need_task_priority = false;
+    $need_macros = false;
+    $need_legalpad_documents = false;
     switch ($this->type) {
       case 'mainsearch':
         $need_users = true;
         $need_applications = true;
         $need_rich_data = true;
         $need_symbols = true;
+        $need_projs = true;
+        $need_jump_objects = true;
         break;
       case 'searchowner':
         $need_users = true;
@@ -44,21 +55,21 @@ final class PhabricatorTypeaheadCommonDatasourceController
         $need_noproject = true;
         break;
       case 'users':
+      case 'accounts':
+      case 'authors':
         $need_users = true;
         break;
       case 'mailable':
-        $need_users = true;
-        $need_lists = true;
-        break;
       case 'allmailable':
         $need_users = true;
-        $need_all_users = true;
         $need_lists = true;
+        $need_projs = true;
         break;
       case 'projects':
         $need_projs = true;
         break;
       case 'usersorprojects':
+      case 'accountsorprojects':
         $need_users = true;
         $need_projs = true;
         break;
@@ -68,12 +79,20 @@ final class PhabricatorTypeaheadCommonDatasourceController
       case 'packages':
         $need_packages = true;
         break;
-      case 'accounts':
-        $need_users = true;
-        $need_all_users = true;
-        break;
       case 'arcanistprojects':
         $need_arcanist_projects = true;
+        break;
+      case 'buildplans':
+        $need_build_plans = true;
+        break;
+      case 'taskpriority':
+        $need_task_priority = true;
+        break;
+      case 'macros':
+        $need_macros = true;
+        break;
+      case 'legalpaddocuments':
+        $need_legalpad_documents = true;
         break;
     }
 
@@ -90,6 +109,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
         ->setName('noproject (No Project)')
         ->setPHID(ManiphestTaskOwner::PROJECT_NO_PROJECT);
     }
+
 
     if ($need_users) {
       $columns = array(
@@ -161,20 +181,21 @@ final class PhabricatorTypeaheadCommonDatasourceController
       }
 
       foreach ($users as $user) {
-        if (!$need_all_users) {
-          if ($user->getIsSystemAgent()) {
-            continue;
-          }
-          if ($user->getIsDisabled()) {
-            continue;
-          }
+        $closed = null;
+        if ($user->getIsDisabled()) {
+          $closed = pht('Disabled');
+        } else if ($user->getIsSystemAgent()) {
+          $closed = pht('Bot/Script');
         }
 
         $result = id(new PhabricatorTypeaheadResult())
           ->setName($user->getFullName())
           ->setURI('/p/'.$user->getUsername())
           ->setPHID($user->getPHID())
-          ->setPriorityString($user->getUsername());
+          ->setPriorityString($user->getUsername())
+          ->setIcon('policy-all')
+          ->setPriorityType('user')
+          ->setClosed($closed);
 
         if ($need_rich_data) {
           $display_type = 'User';
@@ -183,14 +204,15 @@ final class PhabricatorTypeaheadCommonDatasourceController
           }
           $result->setDisplayType($display_type);
           $result->setImageURI($handles[$user->getPHID()]->getImageURI());
-          $result->setPriorityType('user');
         }
         $results[] = $result;
       }
     }
 
     if ($need_lists) {
-      $lists = id(new PhabricatorMetaMTAMailingList())->loadAll();
+      $lists = id(new PhabricatorMailingListQuery())
+        ->setViewer($viewer)
+        ->execute();
       foreach ($lists as $list) {
         $results[] = id(new PhabricatorTypeaheadResult())
           ->setName($list->getName())
@@ -199,21 +221,81 @@ final class PhabricatorTypeaheadCommonDatasourceController
       }
     }
 
+    if ($need_build_plans) {
+      $plans = id(new HarbormasterBuildPlanQuery())
+        ->setViewer($viewer)
+        ->execute();
+      foreach ($plans as $plan) {
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setName($plan->getName())
+          ->setPHID($plan->getPHID());
+      }
+    }
+
+    if ($need_task_priority) {
+      $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
+      foreach ($priority_map as $value => $name) {
+        // NOTE: $value is not a phid but is unique. This'll work.
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setPHID($value)
+          ->setName($name);
+      }
+    }
+
+    if ($need_macros) {
+      $macros = id(new PhabricatorMacroQuery())
+        ->setViewer($viewer)
+        ->withStatus(PhabricatorMacroQuery::STATUS_ACTIVE)
+        ->execute();
+      $macros = mpull($macros, 'getName', 'getPHID');
+      foreach ($macros as $phid => $name) {
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setPHID($phid)
+          ->setName($name);
+      }
+    }
+
+    if ($need_legalpad_documents) {
+      $documents = id(new LegalpadDocumentQuery())
+        ->setViewer($viewer)
+        ->execute();
+      $documents = mpull($documents, 'getTitle', 'getPHID');
+      foreach ($documents as $phid => $title) {
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setPHID($phid)
+          ->setName($title);
+      }
+    }
+
     if ($need_projs) {
       $projs = id(new PhabricatorProjectQuery())
         ->setViewer($viewer)
-        ->withStatus(PhabricatorProjectQuery::STATUS_OPEN)
+        ->needImages(true)
         ->execute();
       foreach ($projs as $proj) {
-        $results[] = id(new PhabricatorTypeaheadResult())
+        $closed = null;
+        if ($proj->isArchived()) {
+          $closed = pht('Archived');
+        }
+
+        $proj_result = id(new PhabricatorTypeaheadResult())
           ->setName($proj->getName())
+          ->setDisplayType("Project")
           ->setURI('/project/view/'.$proj->getID().'/')
-          ->setPHID($proj->getPHID());
+          ->setPHID($proj->getPHID())
+          ->setIcon('policy-project')
+          ->setClosed($closed);
+
+        $proj_result->setImageURI($proj->getProfileImageURI());
+
+        $results[] = $proj_result;
       }
     }
 
     if ($need_repos) {
-      $repos = id(new PhabricatorRepository())->loadAll();
+      $repos = id(new PhabricatorRepositoryQuery())
+        ->setViewer($viewer)
+        ->execute();
       foreach ($repos as $repo) {
         $results[] = id(new PhabricatorTypeaheadResult())
           ->setName('r'.$repo->getCallsign().' ('.$repo->getName().')')
@@ -284,6 +366,28 @@ final class PhabricatorTypeaheadCommonDatasourceController
           ->setDisplayName($name)
           ->setDisplayType(strtoupper($lang).' '.ucwords($type).' ('.$proj.')')
           ->setPriorityType('symb');
+      }
+    }
+
+    if ($need_jump_objects) {
+      $objects = id(new PhabricatorObjectQuery())
+        ->setViewer($viewer)
+        ->withNames(array($raw_query))
+        ->execute();
+      if ($objects) {
+        $handles = id(new PhabricatorHandleQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(mpull($objects, 'getPHID'))
+          ->execute();
+        $handle = head($handles);
+        if ($handle) {
+          $results[] = id(new PhabricatorTypeaheadResult())
+            ->setName($handle->getFullName())
+            ->setDisplayType($handle->getTypeName())
+            ->setURI($handle->getURI())
+            ->setPHID($handle->getPHID())
+            ->setPriorityType('jump');
+        }
       }
     }
 

@@ -6,13 +6,19 @@ final class DiffusionExternalController extends DiffusionController {
     // Don't build a DiffusionRequest.
   }
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
 
     $uri = $request->getStr('uri');
     $id  = $request->getStr('id');
 
-    $repositories = id(new PhabricatorRepository())->loadAll();
+    $repositories = id(new PhabricatorRepositoryQuery())
+      ->setViewer($request->getUser())
+      ->execute();
 
     if ($uri) {
       $uri_path = id(new PhutilURI($uri))->getPath();
@@ -27,7 +33,7 @@ final class DiffusionExternalController extends DiffusionController {
         if ($remote_uri->getPath() == $uri_path) {
           $matches[$key] = 1;
         }
-        if ($repository->getPublicRemoteURI() == $uri) {
+        if ($repository->getPublicCloneURI() == $uri) {
           $matches[$key] = 2;
         }
         if ($repository->getRemoteURI() == $uri) {
@@ -131,7 +137,6 @@ final class DiffusionExternalController extends DiffusionController {
       array(
         'title' => pht('Unresolvable External'),
         'device' => true,
-        'dust' => true,
       ));
   }
 

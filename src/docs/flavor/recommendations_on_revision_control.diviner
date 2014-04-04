@@ -1,0 +1,92 @@
+@title Recommendations on Revision Control
+@group review
+
+Project recommendations on how to organize revision control.
+
+This document is purely advisory. Phabricator works with a variety of revision
+control strategies, and diverging from the recommendations in this document
+will not impact your ability to use it for code review and source management.
+
+This is my (epriestley's) personal take on the issue and not necessarily
+representative of the views of the Phabricator team as a whole.
+
+= Overview =
+
+There are a few ways to use SVN, a few ways to use Mercurial, and many many many
+ways to use Git. Particularly with Git, every project does things differently,
+and all these approaches are valid for small projects. When projects scale,
+strategies which enforce **one idea is one commit** are better.
+
+= One Idea is One Commit =
+
+Choose a strategy where **one idea is one commit** in the authoritative
+master/remote version of the repository. Specifically, this means that an entire
+conceptual changeset ("add a foo widget") is represented in the remote as
+exactly one commit (in some form), not a sequence of checkpoint commits.
+
+  - In SVN, this means don't ##commit## until after an idea has been completely
+    written. All reasonable SVN workflows naturally enforce this.
+  - In Git, this means squashing checkpoint commits as you go (with ##git commit
+    --amend##) or before pushing (with ##git rebase -i## or ##git merge
+    --squash##), or having a strict policy where your master/trunk contains only
+    merge commits and each is a merge between the old master and a branch which
+    represents a single idea. Although this preserves the checkpoint commits
+    along the branches, you can view master alone as a series of single-idea
+    commits.
+  - In Mercurial, you can use the "queues" extension before 2.2 or `--amend`
+    after Mercurial 2.2, or wait to commit until a change is complete (like
+    SVN), although the latter is not recommended. Without extensions, older
+    versions of Mercurial do not support liberal mutability doctrines (so you
+    can't ever combine checkpoint commits) and do not let you build a default
+    out of only merge commits, so it is not possible to have an authoritative
+    repository where one commit represents one idea in any real sense.
+
+= Why This Matters =
+
+A strategy where **one idea is one commit** has no real advantage over any other
+strategy until your repository hits a velocity where it becomes critical. In
+particular:
+
+  - Essentially all operations against the master/remote repository are about
+    ideas, not commits. When one idea is many commits, everything you do is more
+    complicated because you need to figure out which commits represent an idea
+    ("the foo widget is broken, what do I need to revert?") or what idea is
+    ultimately represented by a commit ("commit af3291029 makes no sense, what
+    goal is this change trying to accomplish?").
+  - Release engineering is greatly simplified. Release engineers can pick or
+    drop ideas easily when each idea corresponds to one commit. When an idea
+    is several commits, it becomes easier to accidentally pick or drop half of
+    an idea and end up in a state which is virtually guaranteed to be wrong.
+  - Automated testing is greatly simplified. If each idea is one commit, you
+    can run automated tests against every commit and test failures indicate a
+    serious problem. If each idea is many commits, most of those commits
+    represent a known broken state of the codebase (e.g., a checkpoint with a
+    syntax error which was fixed in the next checkpoint, or with a
+    half-implemented idea).
+  - Understanding changes is greatly simplified. You can bisect to a break and
+    identify the entire idea trivially, without fishing forward and backward in
+    the log to identify the extents of the idea. And you can be confident in
+    what you need to revert to remove the entire idea.
+  - There is no clear value in having checkpoint commits (some of which are
+    guaranteed to be known broken versions of the repository) persist into the
+    remote. Consider a theoretical VCS which automatically creates a checkpoint
+    commit for every keystroke. This VCS would obviously be unusable. But many
+    checkpoint commits aren't much different, and conceptually represent some
+    relatively arbitrary point in the sequence of keystrokes that went into
+    writing a larger idea. Get rid of them or create an abstraction layer (merge
+    commits) which allows you to ignore them when you are trying to understand
+    the repository in terms of ideas (which is almost always).
+
+All of these become problems only at scale. Facebook pushes dozens of ideas
+every day and thousands on a weekly basis, and could not do this (at least, not
+without more people or more errors) without choosing a repository strategy where
+**one idea is one commit**.
+
+= Next Steps =
+
+Continue by:
+
+  - reading recommendations on structuring branches with
+    @{article:Recommendations on Branching}; or
+  - reading recommendations on structuring changes with
+    @{article:Writing Reviewable Code}.

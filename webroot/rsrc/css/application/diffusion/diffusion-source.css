@@ -3,26 +3,23 @@
  */
 
 .diffusion-source {
-  margin: 1em 0 2em;
   width: 100%;
   font-family: "Monaco", Consolas, monospace;
   font-size: 10px;
+  background: #fff;
 }
 
-.diffusion-source tr.highlighted {
+.diffusion-source tr.phabricator-source-highlight {
   background: #ffff00;
 }
 
 .diffusion-source th {
-  text-align:         right;
-  vertical-align:     top;
-  background:         #eeeeee;
-  color:              #888888;
-  border-style:       solid;
-  border-width:       0px 1px;
-  border-color:       #eeeeee #999999 #eeeeee #dddddd;
-  font-family:        "Verdana";
-  font-size:          11px;
+  text-align: right;
+  vertical-align: top;
+  background: {$lightgreybackground};
+  color: {$bluetext};
+  border-right: 1px solid {$thinblueborder};
+  font-size: 11px;
 }
 
 .diffusion-source td {
@@ -40,41 +37,42 @@
 }
 
 .diffusion-blame-link,
-.diffusion-rev-link,
-.diffusion-author-link {
+.diffusion-rev-link {
   white-space: nowrap;
 }
 
 .diffusion-blame-link {
-  min-width: 25px;
+  min-width: 28px;
 }
 
-.diffusion-rev-link {
-  min-width: 90px;
-}
-
-.diffusion-author-link {
-  min-width: 120px;
+.diffusion-source th.diffusion-rev-link {
+  text-align: left;
+  min-width: 130px;
 }
 
 .diffusion-blame-link a,
 .diffusion-rev-link a,
-.diffusion-author-link a,
 .diffusion-line-link a {
-  font-weight:  bold;
+  color: {$darkbluetext};
 }
 
 .diffusion-rev-link a,
-.diffusion-author-link span,
-.diffusion-author-link a {
-  margin:       0 8px;
+.diffusion-rev-link span {
+  margin: 2px 8px 0;
+  display: inline-block;
+}
+
+.diffusion-rev-link span {
+  margin-right: -4px;
+  margin-left: -4px;
+  color: {$lightgreytext};
 }
 
 .diffusion-blame-link a,
 .diffusion-line-link a {
   /* Give the user a larger click target. */
-  display:      block;
-  padding:      2px 8px;
+  display: block;
+  padding: 2px 8px;
 }
 
 .diffusion-line-link {

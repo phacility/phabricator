@@ -3,6 +3,10 @@
 final class ReleephCommitMessageFieldSpecification
   extends ReleephFieldSpecification {
 
+  public function getFieldKey() {
+    return 'commit:apply';
+  }
+
   public function getName() {
     return '__only_for_commit_message!';
   }

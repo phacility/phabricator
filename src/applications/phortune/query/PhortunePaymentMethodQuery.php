@@ -47,10 +47,6 @@ final class PhortunePaymentMethodQuery
   }
 
   protected function willFilterPage(array $methods) {
-    if (!$methods) {
-      return array();
-    }
-
     $accounts = id(new PhortuneAccountQuery())
       ->setViewer($this->getViewer())
       ->withPHIDs(mpull($methods, 'getAccountPHID'))
@@ -112,6 +108,11 @@ final class PhortunePaymentMethodQuery
     $where[] = $this->buildPagingClause($conn);
 
     return $this->formatWhereClause($where);
+  }
+
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationPhortune';
   }
 
 }

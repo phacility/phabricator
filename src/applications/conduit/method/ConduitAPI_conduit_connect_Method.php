@@ -61,6 +61,9 @@ final class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
     $client = $request->getValue('client');
     $client_version = (int)$request->getValue('clientVersion');
     $client_description = (string)$request->getValue('clientDescription');
+    // TODO: This should be character-oriented, not display-oriented.
+    // See T3307.
+    $client_description = phutil_utf8_shorten($client_description, 255);
     $username = (string)$request->getValue('user');
 
     // Log the connection, regardless of the outcome of checks below.
@@ -117,14 +120,35 @@ final class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
 
     $session_key = null;
     if ($token && $signature) {
-      if (abs($token - time()) > 60 * 15) {
-        throw new ConduitException('ERR-INVALID-TOKEN');
+      $threshold = 60 * 15;
+      $now = time();
+      if (abs($token - $now) > $threshold) {
+        throw id(new ConduitException('ERR-INVALID-TOKEN'))
+          ->setErrorDescription(
+            pht(
+              "The request you submitted is signed with a timestamp, but that ".
+              "timestamp is not within %s of the current time. The ".
+              "signed timestamp is %s (%s), and the current server time is ".
+              "%s (%s). This is a difference of %s seconds, but the ".
+              "timestamp must differ from the server time by no more than ".
+              "%s seconds. Your client or server clock may not be set ".
+              "correctly.",
+              phabricator_format_relative_time($threshold),
+              $token,
+              date('r', $token),
+              $now,
+              date('r', $now),
+              ($token - $now),
+              $threshold));
       }
       $valid = sha1($token.$user->getConduitCertificate());
       if ($valid != $signature) {
         throw new ConduitException('ERR-INVALID-CERTIFICATE');
       }
-      $session_key = $user->establishSession('conduit');
+      $session_key = id(new PhabricatorAuthSessionEngine())
+        ->establishSession(
+          PhabricatorAuthSession::TYPE_CONDUIT,
+          $user->getPHID());
     } else {
       throw new ConduitException('ERR-NO-CERTIFICATE');
     }

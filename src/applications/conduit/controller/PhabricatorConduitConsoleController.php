@@ -15,18 +15,19 @@ final class PhabricatorConduitConsoleController
   public function processRequest() {
 
     $request = $this->getRequest();
+    $viewer = $request->getUser();
 
-    $methods = $this->getAllMethods();
-    if (empty($methods[$this->method])) {
+    $method = id(new PhabricatorConduitMethodQuery())
+      ->setViewer($viewer)
+      ->withMethods(array($this->method))
+      ->executeOne();
+
+    if (!$method) {
       return new Aphront404Response();
     }
-    $this->setFilter('method/'.$this->method);
 
-    $method_class = $methods[$this->method];
-    $method_object = newv($method_class, array());
-
-    $status = $method_object->getMethodStatus();
-    $reason = $method_object->getMethodStatusDescription();
+    $status = $method->getMethodStatus();
+    $reason = $method->getMethodStatusDescription();
 
     $status_view = null;
     if ($status != ConduitAPIMethod::METHOD_STATUS_STABLE) {
@@ -49,7 +50,7 @@ final class PhabricatorConduitConsoleController
       }
     }
 
-    $error_types = $method_object->defineErrorTypes();
+    $error_types = $method->defineErrorTypes();
     if ($error_types) {
       $error_description = array();
       foreach ($error_types as $error => $meaning) {
@@ -71,11 +72,11 @@ final class PhabricatorConduitConsoleController
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('Description')
-          ->setValue($method_object->getMethodDescription()))
+          ->setValue($method->getMethodDescription()))
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('Returns')
-          ->setValue($method_object->defineReturnType()))
+          ->setValue($method->defineReturnType()))
       ->appendChild(
         id(new AphrontFormMarkupControl())
           ->setLabel('Errors')
@@ -85,7 +86,7 @@ final class PhabricatorConduitConsoleController
         '<strong>JSON</strong>. For instance, to enter a list, type: '.
         '<tt>["apple", "banana", "cherry"]</tt>'));
 
-    $params = $method_object->defineParamTypes();
+    $params = $method->defineParamTypes();
     foreach ($params as $param => $desc) {
       $form->appendChild(
         id(new AphrontFormTextControl())
@@ -106,30 +107,29 @@ final class PhabricatorConduitConsoleController
             )))
       ->appendChild(
         id(new AphrontFormSubmitControl())
+          ->addCancelButton($this->getApplicationURI())
           ->setValue('Call Method'));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Conduit API: '.$this->method);
-    $panel->appendChild($form);
-    $panel->setWidth(AphrontPanelView::WIDTH_FULL);
+    $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText($method->getAPIMethodName())
+      ->setForm($form);
 
-    return $this->buildStandardPageResponse(
+    if ($status_view) {
+      $form_box->setErrorView($status_view);
+    }
+
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb($method->getAPIMethodName());
+
+    return $this->buildApplicationPage(
       array(
-        $status_view,
-        $panel,
+        $crumbs,
+        $form_box,
       ),
       array(
-        'title' => 'Conduit Console - '.$this->method,
+        'title' => $method->getAPIMethodName(),
+        'device' => true,
       ));
   }
 
-  private function getAllMethods() {
-    $classes = $this->getAllMethodImplementationClasses();
-    $methods = array();
-    foreach ($classes as $class) {
-      $name = ConduitAPIMethod::getAPIMethodNameFromClassName($class);
-      $methods[$name] = $class;
-    }
-    return $methods;
-  }
 }

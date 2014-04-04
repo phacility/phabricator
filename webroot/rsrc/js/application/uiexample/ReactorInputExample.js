@@ -1,9 +1,6 @@
 /**
  * @provides phabricator-uiexample-reactor-input
  * @requires javelin-install
- *           javelin-view
- *           javelin-util
- *           javelin-dom
  *           javelin-reactor-dom
  *           javelin-view-html
  *           javelin-view-interpreter

@@ -30,7 +30,10 @@ final class ConduitAPI_differential_getcommitpaths_Method
   protected function execute(ConduitAPIRequest $request) {
     $id = $request->getValue('revision_id');
 
-    $revision = id(new DifferentialRevision())->load($id);
+    $revision = id(new DifferentialRevisionQuery())
+      ->setViewer($request->getUser())
+      ->withIDs(array($id))
+      ->executeOne();
     if (!$revision) {
       throw new ConduitException('ERR_NOT_FOUND');
     }

@@ -6,16 +6,6 @@ require_once $root.'/scripts/__init_script__.php';
 
 // http://www.opm.gov/operating_status_schedules/fedhol/
 $holidays = array(
-  '2013-01-01' => "New Year's Day",
-  '2013-01-21' => "Birthday of Martin Luther King, Jr.",
-  '2013-02-18' => "Washington's Birthday",
-  '2013-05-27' => "Memorial Day",
-  '2013-07-04' => "Independence Day",
-  '2013-09-02' => "Labor Day",
-  '2013-10-14' => "Columbus Day",
-  '2013-11-11' => "Veterans Day",
-  '2013-11-28' => "Thanksgiving Day",
-  '2013-12-25' => "Christmas Day",
   '2014-01-01' => "New Year's Day",
   '2014-01-20' => "Birthday of Martin Luther King, Jr.",
   '2014-02-17' => "Washington's Birthday",
@@ -46,6 +36,16 @@ $holidays = array(
   '2016-11-11' => "Veterans Day",
   '2016-11-24' => "Thanksgiving Day",
   '2016-12-26' => "Christmas Day",
+  '2017-01-02' => "New Year's Day",
+  '2017-01-16' => "Birthday of Martin Luther King, Jr.",
+  '2017-02-10' => "Washington's Birthday",
+  '2017-05-29' => "Memorial Day",
+  '2017-07-04' => "Independence Day",
+  '2017-09-04' => "Labor Day",
+  '2017-10-09' => "Columbus Day",
+  '2017-11-10' => "Veterans Day",
+  '2017-11-23' => "Thanksgiving Day",
+  '2017-12-25' => "Christmas Day",
 );
 
 $table = new PhabricatorCalendarHoliday();

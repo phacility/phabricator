@@ -38,10 +38,10 @@ final class AphrontFormCheckboxControl extends AphrontFormControl {
           'for' => $id,
         ),
         $box['label']);
-      $rows[] = hsprintf(
-        '<tr><td>%s</td><th>%s</th></tr>',
-        $checkbox,
-        $label);
+      $rows[] = phutil_tag('tr', array(), array(
+        phutil_tag('td', array(), $checkbox),
+        phutil_tag('th', array(), $label)
+      ));
     }
     return phutil_tag(
       'table',

@@ -157,7 +157,7 @@ JX.behavior('lightbox-attachments', function (config) {
     img.onload = function() {
       JX.DOM.alterClass(img, 'loading', false);
       JX.Busy.done();
-    }
+    };
 
     img.src = img_uri;
   }

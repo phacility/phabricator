@@ -21,7 +21,8 @@ final class PhabricatorApplicationSettings extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/settings/' => array(
-        '(?:panel/(?P<key>[^/]+)/)?' => 'PhabricatorSettingsMainController',
+        '(?:(?P<id>\d+)/)?(?:panel/(?P<key>[^/]+)/)?'
+          => 'PhabricatorSettingsMainController',
         'adjust/' => 'PhabricatorSettingsAdjustController',
       ),
     );
@@ -37,14 +38,15 @@ final class PhabricatorApplicationSettings extends PhabricatorApplication {
 
     $items = array();
 
-    if ($user->isLoggedIn()) {
+    if ($user->isLoggedIn() && $user->isUserActivated()) {
       $selected = ($controller instanceof PhabricatorSettingsMainController);
-      $item = new PhabricatorMenuItemView();
-      $item->setName(pht('Settings'));
-      $item->setIcon('settings');
-      $item->addClass('phabricator-core-menu-item');
-      $item->setSelected($selected);
-      $item->setHref('/settings/');
+      $item = id(new PHUIListItemView())
+        ->setName(pht('Settings'))
+        ->setIcon('settings-sm')
+        ->addClass('core-menu-item')
+        ->setSelected($selected)
+        ->setHref('/settings/')
+        ->setOrder(400);
       $items[] = $item;
     }
 

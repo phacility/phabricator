@@ -39,10 +39,6 @@ final class PhortuneAccountQuery
   }
 
   protected function willFilterPage(array $accounts) {
-    if (!$accounts) {
-      return array();
-    }
-
     $query = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(mpull($accounts, 'getPHID'))
       ->withEdgeTypes(array(PhabricatorEdgeConfig::TYPE_ACCOUNT_HAS_MEMBER));
@@ -97,6 +93,11 @@ final class PhortuneAccountQuery
     }
 
     return implode(' ', $joins);
+  }
+
+
+  public function getQueryApplicationClass() {
+    return 'PhabricatorApplicationPhortune';
   }
 
 }

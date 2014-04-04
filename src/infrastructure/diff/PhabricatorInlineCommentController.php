@@ -6,6 +6,10 @@ abstract class PhabricatorInlineCommentController
   abstract protected function createComment();
   abstract protected function loadComment($id);
   abstract protected function loadCommentForEdit($id);
+  abstract protected function deleteComment(
+    PhabricatorInlineCommentInterface $inline);
+  abstract protected function saveComment(
+    PhabricatorInlineCommentInterface $inline);
 
   private $changesetID;
   private $isNewFile;
@@ -60,7 +64,7 @@ abstract class PhabricatorInlineCommentController
         $inline = $this->loadCommentForEdit($this->getCommentID());
 
         if ($request->isFormPost()) {
-          $inline->delete();
+          $this->deleteComment($inline);
           return $this->buildEmptyResponse();
         }
 
@@ -68,13 +72,14 @@ abstract class PhabricatorInlineCommentController
         $dialog->setUser($user);
         $dialog->setSubmitURI($request->getRequestURI());
 
-        $dialog->setTitle('Really delete this comment?');
+        $dialog->setTitle(pht('Really delete this comment?'));
         $dialog->addHiddenInput('id', $this->getCommentID());
         $dialog->addHiddenInput('op', 'delete');
-        $dialog->appendChild(hsprintf('<p>Delete this inline comment?</p>'));
+        $dialog->appendChild(
+          phutil_tag('p', array(), pht('Delete this inline comment?')));
 
         $dialog->addCancelButton('#');
-        $dialog->addSubmitButton('Delete');
+        $dialog->addSubmitButton(pht('Delete'));
 
         return id(new AphrontDialogResponse())->setDialog($dialog);
       case 'edit':
@@ -85,18 +90,18 @@ abstract class PhabricatorInlineCommentController
         if ($request->isFormPost()) {
           if (strlen($text)) {
             $inline->setContent($text);
-            $inline->save();
+            $this->saveComment($inline);
             return $this->buildRenderedCommentResponse(
               $inline,
               $this->getIsOnRight());
           } else {
-            $inline->delete();
+            $this->deleteComment($inline);
             return $this->buildEmptyResponse();
           }
         }
 
         $edit_dialog = $this->buildEditDialog();
-        $edit_dialog->setTitle('Edit Inline Comment');
+        $edit_dialog->setTitle(pht('Edit Inline Comment'));
 
         $edit_dialog->addHiddenInput('id', $this->getCommentID());
         $edit_dialog->addHiddenInput('op', 'edit');
@@ -121,8 +126,8 @@ abstract class PhabricatorInlineCommentController
           ->setLineNumber($this->getLineNumber())
           ->setLineLength($this->getLineLength())
           ->setIsNewFile($this->getIsNewFile())
-          ->setContent($text)
-          ->save();
+          ->setContent($text);
+        $this->saveComment($inline);
 
         return $this->buildRenderedCommentResponse(
           $inline,
@@ -134,13 +139,13 @@ abstract class PhabricatorInlineCommentController
         if ($this->getOperation() == 'reply') {
           $inline = $this->loadComment($this->getCommentID());
 
-          $edit_dialog->setTitle('Reply to Inline Comment');
+          $edit_dialog->setTitle(pht('Reply to Inline Comment'));
           $changeset = $inline->getChangesetID();
           $is_new = $inline->getIsNewFile();
           $number = $inline->getLineNumber();
           $length = $inline->getLineLength();
         } else {
-          $edit_dialog->setTitle('New Inline Comment');
+          $edit_dialog->setTitle(pht('New Inline Comment'));
           $changeset = $this->getChangesetID();
           $is_new = $this->getIsNewFile();
           $number = $this->getLineNumber();
@@ -168,7 +173,7 @@ abstract class PhabricatorInlineCommentController
     // application identifier for the changeset. In Diffusion, it's a Path ID.
     $this->changesetID    = $request->getInt('changeset');
 
-    $this->isNewFile      = $request->getBool('is_new');
+    $this->isNewFile      = (int)$request->getBool('is_new');
     $this->isOnRight      = $request->getBool('on_right');
     $this->lineNumber     = $request->getInt('number');
     $this->lineLength     = $request->getInt('length');
@@ -234,14 +239,11 @@ abstract class PhabricatorInlineCommentController
   }
 
   private function renderTextArea($text) {
-    return javelin_tag(
-      'textarea',
-      array(
-        'class' => 'differential-inline-comment-edit-textarea',
-        'sigil' => 'differential-inline-comment-edit-textarea',
-        'name' => 'text',
-      ),
-      $text);
+    return id(new PhabricatorRemarkupControl())
+      ->setUser($this->getRequest()->getUser())
+      ->setSigil('differential-inline-comment-edit-textarea')
+      ->setName('text')
+      ->setValue($text);
   }
 
 }

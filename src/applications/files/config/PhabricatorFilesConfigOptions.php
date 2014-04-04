@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group file
+ */
 final class PhabricatorFilesConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
@@ -26,6 +29,10 @@ final class PhabricatorFilesConfigOptions
       'image/x-ico'               => 'image/x-icon',
       'image/x-icon'              => 'image/x-icon',
       'image/vnd.microsoft.icon'  => 'image/x-icon',
+
+      'audio/x-wav'     => 'audio/x-wav',
+      'application/ogg' => 'application/ogg',
+      'audio/mpeg'      => 'audio/mpeg',
     );
 
     $image_default = array(
@@ -36,6 +43,12 @@ final class PhabricatorFilesConfigOptions
       'image/x-ico'               => true,
       'image/x-icon'              => true,
       'image/vnd.microsoft.icon'  => true,
+    );
+
+    $audio_default = array(
+      'audio/x-wav'     => true,
+      'application/ogg' => true,
+      'audio/mpeg'      => true,
     );
 
     // largely lifted from http://en.wikipedia.org/wiki/Internet_media_type
@@ -79,7 +92,7 @@ final class PhabricatorFilesConfigOptions
             'browsers tend to freak out when viewing enormous binary files.'.
             "\n\n".
             'The keys in this map are vieweable MIME types; the values are '.
-            'the MIME type sthey are delivered as when they are viewed in '.
+            'the MIME types they are delivered as when they are viewed in '.
             'the browser.')),
       $this->newOption('files.image-mime-types', 'set', $image_default)
         ->setSummary(pht('Configure which MIME types are images.'))
@@ -87,6 +100,12 @@ final class PhabricatorFilesConfigOptions
           pht(
             'List of MIME types which can be used as the `src` for an '.
             '`<img />` tag.')),
+      $this->newOption('files.audio-mime-types', 'set', $audio_default)
+        ->setSummary(pht('Configure which MIME types are audio.'))
+        ->setDescription(
+          pht(
+            'List of MIME types which can be used to render an '.
+            '`<audio />` tag.')),
       $this->newOption('files.icon-mime-types', 'wild', $icon_default)
         ->setSummary(pht('Configure which MIME types map to which icons.'))
         ->setDescription(
@@ -143,17 +162,27 @@ final class PhabricatorFilesConfigOptions
             "used to render text like 'Maximum file size: 10MB' on ".
             "interfaces where users can upload files, and files larger than ".
             "this size will be rejected. \n\n".
-            "Specify this limit in bytes, or using a 'K', 'M', or 'G' ".
-            "suffix.\n\n".
-            "NOTE: Setting this to a large size is **NOT** sufficient to ".
+            "NOTE: **Setting this to a large size is NOT sufficient to ".
             "allow users to upload large files. You must also configure a ".
-            "number of other settings. To configure file upload limits, ".
+            "number of other settings.** To configure file upload limits, ".
             "consult the article 'Configuring File Upload Limits' in the ".
             "documentation. Once you've configured some limit across all ".
             "levels of the server, you can set this limit to an appropriate ".
             "value and the UI will then reflect the actual configured ".
-            "limit."))
-        ->addExample('10M', pht("Valid setting.")),
+            "limit.\n\n".
+            "Specify this limit in bytes, or using a 'K', 'M', or 'G' ".
+            "suffix."))
+        ->addExample('10M', pht("Allow Uploads 10MB or Smaller")),
+     $this->newOption(
+        'metamta.files.public-create-email',
+        'string',
+        null)
+        ->setDescription(pht('Allow uploaded files via email.')),
+     $this->newOption(
+        'metamta.files.subject-prefix',
+        'string',
+        '[File]')
+        ->setDescription(pht('Subject prefix for paste email.')),
      $this->newOption('files.enable-imagemagick', 'bool', false)
        ->setBoolOptions(
          array(

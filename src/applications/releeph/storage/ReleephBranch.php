@@ -1,8 +1,8 @@
 <?php
 
-final class ReleephBranch extends ReleephDAO {
+final class ReleephBranch extends ReleephDAO
+  implements PhabricatorPolicyInterface {
 
-  protected $phid;
   protected $releephProjectID;
   protected $isActive;
   protected $createdByUserPHID;
@@ -16,10 +16,12 @@ final class ReleephBranch extends ReleephDAO {
   protected $symbolicName;
 
   // Where to cut the branch
-  protected $cutPointCommitIdentifier;
   protected $cutPointCommitPHID;
 
   protected $details = array();
+
+  private $project = self::ATTACHABLE;
+  private $cutPointCommit = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -31,8 +33,7 @@ final class ReleephBranch extends ReleephDAO {
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      ReleephPHIDConstants::PHID_TYPE_REBR);
+    return PhabricatorPHID::generateNewPHID(ReleephPHIDTypeBranch::TYPECONST);
   }
 
   public function getDetail($key, $default = null) {
@@ -98,7 +99,7 @@ final class ReleephBranch extends ReleephDAO {
       rawurlencode($this->getBasename()),
       $path
     );
-    return PhabricatorEnv::getProductionURI(implode('/', $components));
+    return implode('/', $components);
   }
 
   public function loadReleephProject() {
@@ -128,9 +129,10 @@ final class ReleephBranch extends ReleephDAO {
         $phids_to_phetch[] = $rr->loadRequestCommitDiffPHID();
       }
     }
-    $handles = id(new PhabricatorObjectHandleData($phids_to_phetch))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($user)
-      ->loadHandles();
+      ->withPHIDs($phids_to_phetch)
+      ->execute();
     return $handles;
   }
 
@@ -150,5 +152,45 @@ final class ReleephBranch extends ReleephDAO {
   public function isActive() {
     return $this->getIsActive();
   }
+
+  public function attachProject(ReleephProject $project) {
+    $this->project = $project;
+    return $this;
+  }
+
+  public function getProject() {
+    return $this->assertAttached($this->project);
+  }
+
+  public function attachCutPointCommit(
+    PhabricatorRepositoryCommit $commit = null) {
+    $this->cutPointCommit = $commit;
+    return $this;
+  }
+
+  public function getCutPointCommit() {
+    return $this->assertAttached($this->cutPointCommit);
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return $this->getProject()->getCapabilities();
+  }
+
+  public function getPolicy($capability) {
+    return $this->getProject()->getPolicy($capability);
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return $this->getProject()->hasAutomaticCapability($capability, $viewer);
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
 
 }

@@ -1,10 +1,36 @@
 <?php
 
+/**
+ * @group pholio
+ */
 final class PholioMockImagesView extends AphrontView {
 
   private $mock;
   private $imageID;
   private $requestURI;
+  private $commentFormID;
+  private $viewMode = 'normal';
+
+  /**
+   * Supports normal (/MX, /MX/Y/) and history (/pholio/image/history/Y/)
+   * modes. The former has handy dandy commenting functionality and the
+   * latter does not.
+   */
+  public function setViewMode($view_mode) {
+    $this->viewMode = $view_mode;
+    return $this;
+  }
+  public function getViewMode() {
+    return $this->viewMode;
+  }
+
+  public function setCommentFormID($comment_form_id) {
+    $this->commentFormID = $comment_form_id;
+    return $this;
+  }
+  public function getCommentFormID() {
+    return $this->commentFormID;
+  }
 
   public function setRequestURI(PhutilURI $request_uri) {
     $this->requestURI = $request_uri;
@@ -54,15 +80,17 @@ final class PholioMockImagesView extends AphrontView {
       $x = idx($metadata, PhabricatorFile::METADATA_IMAGE_WIDTH);
       $y = idx($metadata, PhabricatorFile::METADATA_IMAGE_HEIGHT);
 
+      $history_uri = '/pholio/image/history/'.$image->getID().'/';
       $images[] = array(
-        'id'      => $image->getID(),
-        'fullURI' => $image->getFile()->getBestURI(),
-        'pageURI' => '/M'.$mock->getID().'/'.$image->getID().'/',
-        'width'   => $x,
-        'height'  => $y,
-        'title'   => $file->getName(),
-        'desc'    => 'Lorem ipsum dolor sit amet: there is no way to set any '.
-                     'descriptive text yet; were there, it would appear here.',
+        'id' => $image->getID(),
+        'fullURI' => $file->getBestURI(),
+        'pageURI' => $this->getImagePageURI($image, $mock),
+        'historyURI' => $history_uri,
+        'width' => $x,
+        'height' => $y,
+        'title' => $image->getName(),
+        'desc' => $image->getDescription(),
+        'isObsolete' => (bool) $image->getIsObsolete(),
       );
     }
 
@@ -72,10 +100,12 @@ final class PholioMockImagesView extends AphrontView {
       'mockID' => $mock->getID(),
       'panelID' => $panel_id,
       'viewportID' => $viewport_id,
+      'commentFormID' => $this->getCommentFormID(),
       'images' => $images,
       'selectedID' => $selected_id,
       'loggedIn' => $this->getUser()->isLoggedIn(),
-      'logInLink' => (string) $login_uri
+      'logInLink' => (string) $login_uri,
+      'viewMode' => $this->getViewMode()
     );
     Javelin::initBehavior('pholio-mock-view', $config);
 
@@ -133,7 +163,7 @@ final class PholioMockImagesView extends AphrontView {
           array(
             'sigil' => 'mock-thumbnail',
             'class' => 'pholio-mock-carousel-thumb-item',
-            'href' => '/M'.$mock->getID().'/'.$image->getID().'/',
+            'href' => $this->getImagePageURI($image, $mock),
             'meta' => array(
               'imageID' => $image->getID(),
             ),
@@ -159,5 +189,14 @@ final class PholioMockImagesView extends AphrontView {
       array($mock_wrapper, $carousel_holder, $inline_comments_holder));
 
     return $mockview;
+  }
+
+  private function getImagePageURI(PholioImage $image, PholioMock $mock) {
+    if ($this->getViewMode() == 'normal') {
+      $uri = '/M'.$mock->getID().'/'.$image->getID().'/';
+    } else {
+      $uri = '/pholio/image/history/'.$image->getID().'/';
+    }
+    return $uri;
   }
 }

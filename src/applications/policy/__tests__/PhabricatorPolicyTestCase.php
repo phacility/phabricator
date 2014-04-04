@@ -82,7 +82,6 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
         'admin'   => false,
       ),
       'No One Policy');
-
   }
 
 
@@ -173,6 +172,90 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
 
 
   /**
+   * Test that invalid policies reject viewers of all types.
+   */
+  public function testRejectInvalidPolicy() {
+    $invalid_policy = "the duck goes quack";
+    $object = $this->buildObject($invalid_policy);
+
+    $this->expectVisibility(
+      $object = $this->buildObject($invalid_policy),
+      array(
+        'public'  => false,
+        'user'    => false,
+        'admin'   => false,
+      ),
+      'Invalid Policy');
+  }
+
+
+  /**
+   * An omnipotent user should be able to see even objects with invalid
+   * policies.
+   */
+  public function testInvalidPolicyVisibleByOmnipotentUser() {
+    $invalid_policy = "the cow goes moo";
+    $object = $this->buildObject($invalid_policy);
+
+    $results = array(
+      $object,
+    );
+
+    $query = new PhabricatorPolicyAwareTestQuery();
+    $query->setResults($results);
+    $query->setViewer(PhabricatorUser::getOmnipotentUser());
+
+    $this->assertEqual(
+      1,
+      count($query->execute()));
+  }
+
+  public function testAllQueriesBelongToActualApplications() {
+    $queries = id(new PhutilSymbolLoader())
+      ->setAncestorClass('PhabricatorPolicyAwareQuery')
+      ->loadObjects();
+
+    foreach ($queries as $qclass => $query) {
+      $class = $query->getQueryApplicationClass();
+      if (!$class) {
+        continue;
+      }
+      $this->assertTrue(
+        (bool)PhabricatorApplication::getByClass($class),
+        "Application class '{$class}' for query '{$qclass}'");
+    }
+  }
+
+  public function testMultipleCapabilities() {
+    $object = new PhabricatorPolicyTestObject();
+    $object->setCapabilities(
+      array(
+        PhabricatorPolicyCapability::CAN_VIEW,
+        PhabricatorPolicyCapability::CAN_EDIT,
+      ));
+    $object->setPolicies(
+      array(
+        PhabricatorPolicyCapability::CAN_VIEW
+          => PhabricatorPolicies::POLICY_USER,
+        PhabricatorPolicyCapability::CAN_EDIT
+          => PhabricatorPolicies::POLICY_NOONE,
+      ));
+
+    $filter = new PhabricatorPolicyFilter();
+    $filter->requireCapabilities(
+      array(
+        PhabricatorPolicyCapability::CAN_VIEW,
+        PhabricatorPolicyCapability::CAN_EDIT,
+      ));
+    $filter->setViewer($this->buildUser('user'));
+
+    $result = $filter->apply(array($object));
+
+    $this->assertEqual(array(), $result);
+  }
+
+
+  /**
    * Test an object for visibility across multiple user specifications.
    */
   private function expectVisibility(
@@ -200,8 +283,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
           $result,
           "{$description} with user {$spec} should succeed.");
       } else {
-        $this->assertEqual(
-          true,
+        $this->assertTrue(
           $caught instanceof PhabricatorPolicyException,
           "{$description} with user {$spec} should fail.");
       }

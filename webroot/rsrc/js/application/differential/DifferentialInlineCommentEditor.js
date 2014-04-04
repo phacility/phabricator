@@ -79,7 +79,7 @@ JX.install('DifferentialInlineCommentEditor', {
       JX.DOM.alterClass(row, 'differential-inline-loading', is_loading);
     },
     _didContinueWorkflow : function(response) {
-      var drawn = this._draw(JX.$N('div', JX.$H(response)));
+      var drawn = this._draw(JX.$H(response).getNode());
 
       var op = this.getOperation();
       if (op == 'edit') {
@@ -131,7 +131,7 @@ JX.install('DifferentialInlineCommentEditor', {
       // We don't get any markup back if the user deletes a comment, or saves
       // an empty comment (which effects a delete).
       if (response.markup) {
-        this._draw(JX.$N('div', JX.$H(response.markup)));
+        this._draw(JX.$H(response.markup).getNode());
       }
 
       // These operations remove the old row (edit adds a new row first).
@@ -162,8 +162,9 @@ JX.install('DifferentialInlineCommentEditor', {
         return;
       }
 
+      var textarea;
       try {
-        var textarea = JX.DOM.find(
+        textarea = JX.DOM.find(
           document.body, // TODO: use getDialogRootNode() when available
           'textarea',
           'differential-inline-comment-edit-textarea');
@@ -180,17 +181,16 @@ JX.install('DifferentialInlineCommentEditor', {
 
       // If the user hasn't edited the text (i.e., no change from original for
       // 'edit' or no text at all), don't offer them an undo.
-      if (text == this.getOriginalText() || text == '') {
+      if (text == this.getOriginalText() || text === '') {
         return;
       }
 
       // Save the text so we can 'undo' back to it.
       this._undoText = text;
 
-      var template = this.getOnRight()
-        ? this.getTemplates().r
-        : this.getTemplates().l;
-      template = JX.$N('div', JX.$H(template));
+      var templates = this.getTemplates();
+      var template = this.getOnRight() ? templates.r : templates.l;
+      template = JX.$H(template).getNode();
 
       // NOTE: Operation order matters here; we can't remove anything until
       // after we draw the new rows because _draw uses the old rows to figure

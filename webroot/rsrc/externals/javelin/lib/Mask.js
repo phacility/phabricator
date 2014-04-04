@@ -71,7 +71,7 @@ JX.install('Mask', {
         document.body.appendChild(self._mask);
       }
 
-      self._adjustType(mask_type)
+      self._adjustType(mask_type);
       JX.Mask._stack.push(mask_type);
     },
 

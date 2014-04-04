@@ -4,20 +4,17 @@
  * Amazon S3 file storage engine. This engine scales well but is relatively
  * high-latency since data has to be pulled off S3.
  *
- * @task impl       Implementation
- * @task internal   Internals
- * @group filestorage
+ * @task internal Internals
  */
 final class PhabricatorS3FileStorageEngine
   extends PhabricatorFileStorageEngine {
+
 
 /* -(  Implementation  )----------------------------------------------------- */
 
 
   /**
-   * This engine identifies as "amazon-s3".
-   *
-   * @task impl
+   * This engine identifies as `amazon-s3`.
    */
   public function getEngineIdentifier() {
     return 'amazon-s3';
@@ -25,8 +22,7 @@ final class PhabricatorS3FileStorageEngine
 
 
   /**
-   * Write file data into S3.
-   * @task impl
+   * Writes file data into Amazon S3.
    */
   public function writeFile($data, array $params) {
     $s3 = $this->newS3API();
@@ -55,8 +51,7 @@ final class PhabricatorS3FileStorageEngine
 
 
   /**
-   * Load a stored blob from S3.
-   * @task impl
+   * Load a stored blob from Amazon S3.
    */
   public function readFile($handle) {
     $result = $this->newS3API()->getObject(
@@ -74,8 +69,7 @@ final class PhabricatorS3FileStorageEngine
 
 
   /**
-   * Delete a blob from S3.
-   * @task impl
+   * Delete a blob from Amazon S3.
    */
   public function deleteFile($handle) {
     AphrontWriteGuard::willWrite();

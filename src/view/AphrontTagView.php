@@ -14,7 +14,6 @@ abstract class AphrontTagView extends AphrontView {
   private $mustCapture;
   private $workflow;
 
-
   public function setWorkflow($workflow) {
     $this->workflow = $workflow;
     return $this;
@@ -65,8 +64,8 @@ abstract class AphrontTagView extends AphrontView {
     return $this;
   }
 
-  public function getClass() {
-    return $this->class;
+  public function getClasses() {
+    return $this->classes;
   }
 
   public function setID($id) {
@@ -123,7 +122,7 @@ abstract class AphrontTagView extends AphrontView {
     $tag_view_attributes = array(
       'id' => $this->id,
 
-      'class' => $this->classes ? implode(' ', $this->classes) : null,
+      'class' => implode(' ', $this->classes),
       'style' => $this->style,
 
       'meta' => $this->metadata,

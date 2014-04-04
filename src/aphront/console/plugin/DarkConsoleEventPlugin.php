@@ -42,10 +42,10 @@ final class DarkConsoleEventPlugin extends DarkConsolePlugin {
 
     $out = array();
 
-    $out[] = hsprintf(
-      '<div class="dark-console-panel-header">'.
-        '<h1>Registered Event Listeners</h1>'.
-      '</div>');
+    $out[] = phutil_tag(
+      'div',
+      array('class' => 'dark-console-panel-header'),
+      phutil_tag('h1', array(), pht('Registered Event Listeners')));
 
     $rows = array();
     foreach ($data['listeners'] as $listener) {
@@ -66,10 +66,10 @@ final class DarkConsoleEventPlugin extends DarkConsolePlugin {
 
     $out[] = $table->render();
 
-    $out[] = hsprintf(
-      '<div class="dark-console-panel-header">'.
-        '<h1>Event Log</h1>'.
-      '</div>');
+    $out[] = phutil_tag(
+      'div',
+      array('class' => 'dark-console-panel-header'),
+      phutil_tag('h1', array(), pht('Event Log')));
 
     $rows = array();
     foreach ($data['events'] as $event) {

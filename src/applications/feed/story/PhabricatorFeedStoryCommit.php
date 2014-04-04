@@ -37,23 +37,22 @@ final class PhabricatorFeedStoryCommit extends PhabricatorFeedStory {
     }
 
     if ($author) {
-      $title = hsprintf(
+      $title = pht(
         "%s committed %s (authored by %s)",
         $committer,
         $commit,
         $author);
     } else {
-      $title = hsprintf(
+      $title = pht(
         "%s committed %s",
         $committer,
         $commit);
     }
 
-    $view = new PHUIFeedStoryView();
+    $view = $this->newStoryView();
     $view->setAppIcon('differential-dark');
 
     $view->setTitle($title);
-    $view->setEpoch($data->getEpoch());
 
     if ($data->getValue('authorPHID')) {
       $view->setImage($this->getHandle($data->getAuthorPHID())->getImageURI());

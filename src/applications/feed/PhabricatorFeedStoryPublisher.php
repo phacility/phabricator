@@ -10,6 +10,17 @@ final class PhabricatorFeedStoryPublisher {
   private $primaryObjectPHID;
   private $subscribedPHIDs = array();
   private $mailRecipientPHIDs = array();
+  private $notifyAuthor;
+
+
+  public function setNotifyAuthor($notify_author) {
+    $this->notifyAuthor = $notify_author;
+    return $this;
+  }
+
+  public function getNotifyAuthor() {
+    return $this->notifyAuthor;
+  }
 
   public function setRelatedPHIDs(array $phids) {
     $this->relatedPHIDs = $phids;
@@ -105,21 +116,23 @@ final class PhabricatorFeedStoryPublisher {
       $this->sendNotification($chrono_key);
     }
 
-    $uris = PhabricatorEnv::getEnvConfig('feed.http-hooks');
-    foreach ($uris as $uri) {
-      $task = PhabricatorWorker::scheduleTask(
-        'FeedPublisherWorker',
-        array('chrono_key' => $chrono_key, 'uri' => $uri));
-    }
+    PhabricatorWorker::scheduleTask(
+      'FeedPublisherWorker',
+      array(
+        'key' => $chrono_key,
+      ));
 
     return $story;
   }
 
   private function insertNotifications($chrono_key) {
     $subscribed_phids = $this->subscribedPHIDs;
-    $subscribed_phids = array_diff(
-      $subscribed_phids,
-      array($this->storyAuthorPHID));
+
+    if (!$this->notifyAuthor) {
+      $subscribed_phids = array_diff(
+        $subscribed_phids,
+        array($this->storyAuthorPHID));
+    }
 
     if (!$subscribed_phids) {
       return;
@@ -162,16 +175,16 @@ final class PhabricatorFeedStoryPublisher {
   }
 
   private function sendNotification($chrono_key) {
-    $server_uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
 
     $data = array(
       'key' => (string)$chrono_key,
     );
 
-    id(new HTTPSFuture($server_uri, $data))
-      ->setMethod('POST')
-      ->setTimeout(1)
-      ->resolve();
+    try {
+      PhabricatorNotificationClient::postMessage($data);
+    } catch (Exception $ex) {
+      // Ignore, these are not critical.
+    }
   }
 
   /**

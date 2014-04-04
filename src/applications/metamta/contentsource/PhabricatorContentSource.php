@@ -9,6 +9,11 @@ final class PhabricatorContentSource {
   const SOURCE_MOBILE   = 'mobile';
   const SOURCE_TABLET   = 'tablet';
   const SOURCE_FAX      = 'fax';
+  const SOURCE_CONSOLE  = 'console';
+  const SOURCE_HERALD   = 'herald';
+  const SOURCE_LEGACY   = 'legacy';
+  const SOURCE_DAEMON   = 'daemon';
+  const SOURCE_LIPSUM   = 'lipsum';
 
   private $source;
   private $params = array();
@@ -36,6 +41,43 @@ final class PhabricatorContentSource {
     $obj->params = idx($dict, 'params', array());
 
     return $obj;
+  }
+
+  public static function newConsoleSource() {
+    return self::newForSource(
+      PhabricatorContentSource::SOURCE_CONSOLE,
+      array());
+  }
+
+  public static function newFromRequest(AphrontRequest $request) {
+    return self::newForSource(
+      PhabricatorContentSource::SOURCE_WEB,
+      array(
+        'ip' => $request->getRemoteAddr(),
+      ));
+  }
+
+  public static function newFromConduitRequest(ConduitAPIRequest $request) {
+    return self::newForSource(
+      PhabricatorContentSource::SOURCE_CONDUIT,
+      array());
+  }
+
+  public static function getSourceNameMap() {
+    return array(
+      self::SOURCE_WEB      => pht('Web'),
+      self::SOURCE_EMAIL    => pht('Email'),
+      self::SOURCE_CONDUIT  => pht('Conduit'),
+      self::SOURCE_MOBILE   => pht('Mobile'),
+      self::SOURCE_TABLET   => pht('Tablet'),
+      self::SOURCE_FAX      => pht('Fax'),
+      self::SOURCE_CONSOLE  => pht('Console'),
+      self::SOURCE_LEGACY   => pht('Legacy'),
+      self::SOURCE_HERALD   => pht('Herald'),
+      self::SOURCE_DAEMON   => pht('Daemons'),
+      self::SOURCE_LIPSUM   => pht('Lipsum'),
+      self::SOURCE_UNKNOWN  => pht('Old World'),
+    );
   }
 
   public function serialize() {

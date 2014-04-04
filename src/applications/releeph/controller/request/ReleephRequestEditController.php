@@ -1,6 +1,6 @@
 <?php
 
-final class ReleephRequestEditController extends ReleephController {
+final class ReleephRequestEditController extends ReleephProjectController {
 
   private $id;
 
@@ -21,7 +21,15 @@ final class ReleephRequestEditController extends ReleephController {
 
     // Load the RQ we're editing, or create a new one
     if ($this->id) {
-      $rq = id(new ReleephRequest())->load($this->id);
+      $rq = id(new ReleephRequestQuery())
+        ->setViewer($user)
+        ->withIDs(array($this->id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
       $is_edit = true;
     } else {
       $is_edit = false;
@@ -40,6 +48,18 @@ final class ReleephRequestEditController extends ReleephController {
         ->setReleephBranch($releeph_branch)
         ->setReleephRequest($rq);
     }
+
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $rq,
+      PhabricatorCustomField::ROLE_EDIT);
+    foreach ($field_list->getFields() as $field) {
+      $field
+        ->setReleephProject($releeph_project)
+        ->setReleephBranch($releeph_branch)
+        ->setReleephRequest($rq);
+    }
+    $field_list->readFieldsFromStorage($rq);
+
 
     // <aidehua> epriestley: Is it common to pass around a referer URL to
     // return from whence one came? [...]
@@ -118,6 +138,12 @@ final class ReleephRequestEditController extends ReleephController {
         }
       }
 
+      // TODO: This should happen implicitly while building transactions
+      // instead.
+      foreach ($field_list->getFields() as $field) {
+        $field->readValueFromRequest($request);
+      }
+
       if (!$errors) {
         foreach ($fields as $field) {
           if ($field->isEditable()) {
@@ -140,12 +166,7 @@ final class ReleephRequestEditController extends ReleephController {
         $editor = id(new ReleephRequestTransactionalEditor())
           ->setActor($user)
           ->setContinueOnNoEffect(true)
-          ->setContentSource(
-            PhabricatorContentSource::newForSource(
-              PhabricatorContentSource::SOURCE_WEB,
-              array(
-                'ip' => $request->getRemoteAddr(),
-              )));
+          ->setContentSourceFromRequest($request);
         $editor->applyTransactions($rq, $xactions);
         return id(new AphrontRedirectResponse())->setURI($origin_uri);
       }
@@ -183,7 +204,6 @@ final class ReleephRequestEditController extends ReleephController {
     if ($errors) {
       $error_view = new AphrontErrorView();
       $error_view->setErrors($errors);
-      $error_view->setTitle('Form Errors');
     }
 
     $form = id(new AphrontFormView())
@@ -207,7 +227,10 @@ final class ReleephRequestEditController extends ReleephController {
       $origin = null;
       $diff_rev_id = $request->getStr('D');
       if ($diff_rev_id) {
-        $diff_rev = id(new DifferentialRevision())->load($diff_rev_id);
+        $diff_rev = id(new DifferentialRevisionQuery())
+          ->setViewer($user)
+          ->withIDs(array($diff_rev_id))
+          ->executeOne();
         $origin = '/D'.$diff_rev->getID();
         $title = sprintf(
           'D%d: %s',
@@ -240,35 +263,37 @@ final class ReleephRequestEditController extends ReleephController {
       }
     }
 
-    // Fields
-    foreach ($fields as $field) {
-      if ($field->isEditable()) {
-        $control = $field->renderEditControl($request);
-        $form->appendChild($control);
-      }
-    }
+    $field_list->appendFieldsToForm($form);
+
+    $crumbs = $this->buildApplicationCrumbs();
 
     if ($is_edit) {
       $title = pht('Edit Releeph Request');
       $submit_name = pht('Save');
+
+      $crumbs->addTextCrumb('RQ'.$rq->getID(), '/RQ'.$rq->getID());
+      $crumbs->addTextCrumb(pht('Edit'));
+
     } else {
       $title = pht('Create Releeph Request');
       $submit_name = pht('Create');
+      $crumbs->addTextCrumb(pht('New Request'));
     }
 
-    $form
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->addCancelButton($origin_uri, 'Cancel')
-          ->setValue($submit_name));
+    $form->appendChild(
+      id(new AphrontFormSubmitControl())
+        ->addCancelButton($origin_uri, 'Cancel')
+        ->setValue($submit_name));
 
-    $panel = id(new AphrontPanelView())
-      ->setHeader($title)
-      ->setWidth(AphrontPanelView::WIDTH_FORM)
-      ->appendChild($form);
-
-    return $this->buildStandardPageResponse(
-      array($notice_view, $error_view, $panel),
-      array('title', $title));
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $notice_view,
+        $error_view,
+        $form,
+      ),
+      array(
+        'title' => $title,
+      ));
   }
 }

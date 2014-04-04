@@ -175,7 +175,13 @@ JX.behavior('differential-edit-inline-comments', function(config) {
           var change = e.getNodeData('differential-changeset');
 
           var id_part  = data.on_right ? change.right : change.left;
-          var th = e.getNode('tag:td').previousSibling;
+
+          // NOTE: We can't just look for 'tag:td' because the event might be
+          // inside a table which is inside an inline comment.
+          var comment = e.getNode('differential-inline-comment');
+          var td = JX.DOM.findAbove(comment, 'td');
+          var th = td.previousSibling;
+
           var new_part = isNewFile(th) ? 'N' : 'O';
           var prefix = 'C' + id_part + new_part + 'L';
 
@@ -197,7 +203,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
 
     var node = e.getNode('differential-inline-comment');
     handle_inline_action(node, op);
-  }
+  };
 
   var handle_inline_action = function(node, op) {
     var data = JX.Stratcom.getData(node);
@@ -243,7 +249,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       .start();
 
     set_link_state(true);
-  }
+  };
 
   for (var op in {'edit' : 1, 'delete' : 1, 'reply' : 1}) {
     JX.Stratcom.listen(
@@ -261,4 +267,3 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     });
 
 });
-

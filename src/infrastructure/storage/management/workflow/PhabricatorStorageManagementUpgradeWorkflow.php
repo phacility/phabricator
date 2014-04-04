@@ -107,7 +107,7 @@ final class PhabricatorStorageManagementUpgradeWorkflow
     }
 
     $applied = $api->getAppliedPatches();
-    $applied = array_fill_keys($applied, true);
+    $applied = array_fuse($applied);
 
     $skip_mark = false;
     if ($apply_only) {

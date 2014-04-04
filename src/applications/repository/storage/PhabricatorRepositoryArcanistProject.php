@@ -1,14 +1,19 @@
 <?php
 
+/**
+ * @group repository
+ */
 final class PhabricatorRepositoryArcanistProject
-  extends PhabricatorRepositoryDAO {
+  extends PhabricatorRepositoryDAO
+  implements PhabricatorPolicyInterface {
 
   protected $name;
-  protected $phid;
   protected $repositoryID;
 
   protected $symbolIndexLanguages = array();
   protected $symbolIndexProjects  = array();
+
+  private $repository = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -22,9 +27,11 @@ final class PhabricatorRepositoryArcanistProject
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID('APRJ');
+    return PhabricatorPHID::generateNewPHID(
+      PhabricatorRepositoryPHIDTypeArcanistProject::TYPECONST);
   }
 
+  // TODO: Remove. Also, T603.
   public function loadRepository() {
     if (!$this->getRepositoryID()) {
       return null;
@@ -44,6 +51,43 @@ final class PhabricatorRepositoryArcanistProject
       $result = parent::delete();
     $this->saveTransaction();
     return $result;
+  }
+
+  public function getRepository() {
+    return $this->assertAttached($this->repository);
+  }
+
+  public function attachRepository(PhabricatorRepository $repository = null) {
+    $this->repository = $repository;
+    return $this;
+  }
+
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::POLICY_USER;
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return PhabricatorPolicies::POLICY_ADMIN;
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
   }
 
 }

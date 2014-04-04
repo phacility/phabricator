@@ -9,102 +9,55 @@ final class ConpherenceNewController extends ConpherenceController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $conpherence = id(new ConpherenceThread())
-      ->attachParticipants(array())
-      ->attachFilePHIDs(array())
-      ->setMessageCount(0);
     $title = pht('New Message');
     $participants = array();
+    $participant_prefill = null;
     $message = '';
-    $files = array();
-    $errors = array();
     $e_participants = null;
     $e_message = null;
 
     // this comes from ajax requests from all over. should be a single phid.
-    $participant_prefill = $request->getStr('participant');
-    if ($participant_prefill) {
-      $participants[] = $participant_prefill;
-    }
 
     if ($request->isFormPost()) {
       $participants = $request->getArr('participants');
-      if (empty($participants)) {
-        $e_participants = true;
-        $errors[] = pht('You must specify participants.');
-      } else {
-        $participants[] = $user->getPHID();
-        $participants = array_unique($participants);
-        $conpherence->setRecentParticipantPHIDs(
-          array_slice($participants, 0, 10));
-      }
-
       $message = $request->getStr('message');
-      if (empty($message)) {
-        $e_message = true;
-        $errors[] = pht('You must write a message.');
-      }
+      list($error_codes, $conpherence) = ConpherenceEditor::createConpherence(
+        $user,
+        $participants,
+        $conpherence_title = null,
+        $message,
+        PhabricatorContentSource::newFromRequest($request));
 
-      $file_phids =
-        PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
-          array($message));
-      if ($file_phids) {
-        $files = id(new PhabricatorFileQuery())
-          ->setViewer($user)
-          ->withPHIDs($file_phids)
-          ->execute();
-      }
-
-      if (!$errors) {
-        $conpherence->openTransaction();
-        $conpherence->save();
-        $xactions = array();
-        $xactions[] = id(new ConpherenceTransaction())
-          ->setTransactionType(ConpherenceTransactionType::TYPE_PARTICIPANTS)
-          ->setNewValue(array('+' => $participants));
-        if ($files) {
-          $xactions[] = id(new ConpherenceTransaction())
-            ->setTransactionType(ConpherenceTransactionType::TYPE_FILES)
-            ->setNewValue(array('+' => mpull($files, 'getPHID')));
+      if ($error_codes) {
+        foreach ($error_codes as $error_code) {
+          switch ($error_code) {
+            case ConpherenceEditor::ERROR_EMPTY_MESSAGE:
+              $e_message = true;
+              break;
+            case ConpherenceEditor::ERROR_EMPTY_PARTICIPANTS:
+              $e_participants = true;
+              break;
+          }
         }
-        $xactions[] = id(new ConpherenceTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
-          ->attachComment(
-            id(new ConpherenceTransactionComment())
-            ->setContent($message)
-            ->setConpherencePHID($conpherence->getPHID()));
-        $content_source = PhabricatorContentSource::newForSource(
-          PhabricatorContentSource::SOURCE_WEB,
-          array(
-            'ip' => $request->getRemoteAddr()
-          ));
-        id(new ConpherenceEditor())
-          ->setContentSource($content_source)
-          ->setContinueOnNoEffect(true)
-          ->setActor($user)
-          ->applyTransactions($conpherence, $xactions);
-
-        $conpherence->saveTransaction();
-
+      } else {
         $uri = $this->getApplicationURI($conpherence->getID());
         return id(new AphrontRedirectResponse())
           ->setURI($uri);
       }
+    } else {
+      $participant_prefill = $request->getStr('participant');
+      if ($participant_prefill) {
+        $participants[] = $participant_prefill;
+      }
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Conpherence Errors'))
-        ->setErrors($errors);
-    }
 
     $participant_handles = array();
     if ($participants) {
-      $handles = id(new PhabricatorObjectHandleData($participants))
+      $participant_handles = id(new PhabricatorHandleQuery())
         ->setViewer($user)
-        ->loadHandles();
-      $participant_handles = mpull($handles, 'getFullName', 'getPHID');
+        ->withPHIDs($participants)
+        ->execute();
     }
 
     $submit_uri = $this->getApplicationURI('new/');
@@ -113,7 +66,7 @@ final class ConpherenceNewController extends ConpherenceController {
     // TODO - we can get a better cancel_uri once we get better at crazy
     // ajax jonx T2086
     if ($participant_prefill) {
-      $handle = $handles[$participant_prefill];
+      $handle = $participant_handles[$participant_prefill];
       $cancel_uri = $handle->getURI();
     }
 
@@ -124,7 +77,7 @@ final class ConpherenceNewController extends ConpherenceController {
       ->addCancelButton($cancel_uri)
       ->addSubmitButton(pht('Send Message'));
 
-    $form = id(new AphrontFormLayoutView())
+    $form = id(new PHUIFormLayoutView())
       ->setUser($user)
       ->setFullWidth(true)
       ->appendChild(

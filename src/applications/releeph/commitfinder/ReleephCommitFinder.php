@@ -23,6 +23,7 @@ final class ReleephCommitFinder {
     $matches = array();
     if (preg_match('/^D([1-9]\d*)$/', $partial_string, $matches)) {
       $diff_id = $matches[1];
+      // TOOD: (T603) This is all slated for annihilation.
       $diff_rev = id(new DifferentialRevision())->load($diff_id);
       if (!$diff_rev) {
         throw new ReleephCommitFinderException(

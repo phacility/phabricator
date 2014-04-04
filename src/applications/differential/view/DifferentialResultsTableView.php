@@ -97,10 +97,10 @@ final class DifferentialResultsTableView extends AphrontView {
         ),
         phutil_tag('th', array('colspan' => 2), $hide_more));
 
-      Javelin::initBehavior('differential-show-field-details');
+      $this->initBehavior('differential-show-field-details');
     }
 
-    require_celerity_resource('differential-results-table-css');
+    $this->requireResource('differential-results-table-css');
 
     return javelin_tag(
       'table',

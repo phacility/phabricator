@@ -10,9 +10,10 @@ final class DiffusionPathCompleteController extends DiffusionController {
     $request = $this->getRequest();
 
     $repository_phid = $request->getStr('repositoryPHID');
-    $repository = id(new PhabricatorRepository())->loadOneWhere(
-      'phid = %s',
-      $repository_phid);
+    $repository = id(new PhabricatorRepositoryQuery())
+      ->setViewer($request->getUser())
+      ->withPHIDs(array($repository_phid))
+      ->executeOne();
     if (!$repository) {
       return new Aphront400Response();
     }

@@ -1,6 +1,5 @@
 .DS_Store
 ._*
-/webroot/rsrc/custom
 .#*
 *#
 *~
@@ -36,3 +35,6 @@
 
 # Users can link binaries here
 /support/bin/*
+
+# User extensions
+/src/extensions/*

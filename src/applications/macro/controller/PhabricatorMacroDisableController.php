@@ -10,16 +10,15 @@ final class PhabricatorMacroDisableController
   }
 
   public function processRequest() {
+
+    $this->requireApplicationCapability(
+      PhabricatorMacroCapabilityManage::CAPABILITY);
+
     $request = $this->getRequest();
     $user = $request->getUser();
 
     $macro = id(new PhabricatorMacroQuery())
       ->setViewer($user)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
       ->withIDs(array($this->id))
       ->executeOne();
     if (!$macro) {
@@ -35,12 +34,7 @@ final class PhabricatorMacroDisableController
 
       $editor = id(new PhabricatorMacroEditor())
         ->setActor($user)
-        ->setContentSource(
-          PhabricatorContentSource::newForSource(
-            PhabricatorContentSource::SOURCE_WEB,
-            array(
-              'ip' => $request->getRemoteAddr(),
-            )));
+        ->setContentSourceFromRequest($request);
 
       $xactions = $editor->applyTransactions($macro, array($xaction));
 

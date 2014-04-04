@@ -1,7 +1,7 @@
 <?php
 
 final class PhrequentUIEventListener
-  extends PhutilEventListener {
+  extends PhabricatorEventListener {
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS);
@@ -33,12 +33,15 @@ final class PhrequentUIEventListener
       return;
     }
 
+    if (!$this->canUseApplication($event->getUser())) {
+      return;
+    }
+
     $tracking = PhrequentUserTimeQuery::isUserTrackingObject(
       $user,
       $object->getPHID());
     if (!$tracking) {
       $track_action = id(new PhabricatorActionView())
-        ->setUser($user)
         ->setName(pht('Start Tracking Time'))
         ->setIcon('history')
         ->setWorkflow(true)
@@ -46,7 +49,6 @@ final class PhrequentUIEventListener
         ->setHref('/phrequent/track/start/'.$object->getPHID().'/');
     } else {
       $track_action = id(new PhabricatorActionView())
-        ->setUser($user)
         ->setName(pht('Stop Tracking Time'))
         ->setIcon('history')
         ->setWorkflow(true)
@@ -58,14 +60,12 @@ final class PhrequentUIEventListener
       $track_action->setDisabled(true);
     }
 
-    $actions = $event->getValue('actions');
-    $actions[] = $track_action;
-    $event->setValue('actions', $actions);
+    $this->addActionMenuItems($event, $track_action);
   }
 
-  private function handlePropertyEvent($event) {
-    $user = $event->getUser();
-    $object = $event->getValue('object');
+  private function handlePropertyEvent($ui_event) {
+    $user = $ui_event->getUser();
+    $object = $ui_event->getValue('object');
 
     if (!$object || !$object->getPHID()) {
       // No object, or the object has no PHID yet..
@@ -77,51 +77,68 @@ final class PhrequentUIEventListener
       return;
     }
 
-    $depth = false;
-
-    $stack = PhrequentUserTimeQuery::loadUserStack($user);
-    if ($stack) {
-      $stack = array_values($stack);
-      for ($ii = 0; $ii < count($stack); $ii++) {
-        if ($stack[$ii]->getObjectPHID() == $object->getPHID()) {
-          $depth = ($ii + 1);
-          break;
-        }
-      }
-    }
-
-    $time_spent = PhrequentUserTimeQuery::getTotalTimeSpentOnObject(
-      $object->getPHID());
-
-    if (!$depth && !$time_spent) {
+    if (!$this->canUseApplication($ui_event->getUser())) {
       return;
     }
 
-    require_celerity_resource('phrequent-css');
+    $events = id(new PhrequentUserTimeQuery())
+      ->setViewer($user)
+      ->withObjectPHIDs(array($object->getPHID()))
+      ->needPreemptingEvents(true)
+      ->execute();
+    $event_groups = mgroup($events, 'getUserPHID');
 
-    $property = array();
-    if ($depth == 1) {
-      $property[] = phutil_tag(
-        'div',
-        array(
-          'class' => 'phrequent-tracking-property phrequent-active',
-        ),
-        pht('Currently Tracking'));
-    } else if ($depth > 1) {
-      $property[] = phutil_tag(
-        'div',
-        array(
-          'class' => 'phrequent-tracking-property phrequent-on-stack',
-        ),
-        pht('On Stack'));
+    if (!$events) {
+      return;
     }
 
-    if ($time_spent) {
-      $property[] = phabricator_format_relative_time_detailed($time_spent);
+    $handles = id(new PhabricatorHandleQuery())
+      ->setViewer($user)
+      ->withPHIDs(array_keys($event_groups))
+      ->execute();
+
+    $status_view = new PHUIStatusListView();
+
+    foreach ($event_groups as $user_phid => $event_group) {
+      $item = new PHUIStatusItemView();
+      $item->setTarget($handles[$user_phid]->renderLink());
+
+      $state = 'stopped';
+      foreach ($event_group as $event) {
+        if ($event->getDateEnded() === null) {
+          if ($event->isPreempted()) {
+            $state = 'suspended';
+          } else {
+            $state = 'active';
+            break;
+          }
+        }
+      }
+
+      switch ($state) {
+        case 'active':
+          $item->setIcon('time-green', pht('Working Now'));
+          break;
+        case 'suspended':
+          $item->setIcon('time-yellow', pht('Interrupted'));
+          break;
+        case 'stopped':
+          $item->setIcon('time-orange', pht('Not Working Now'));
+          break;
+      }
+
+      $block = new PhrequentTimeBlock($event_group);
+      $item->setNote(
+        phabricator_format_relative_time(
+          $block->getTimeSpentOnObject(
+            $object->getPHID(),
+            time())));
+
+      $status_view->addItem($item);
     }
 
-    $view = $event->getValue('view');
-    $view->addProperty(pht('Time Spent'), $property);
+    $view = $ui_event->getValue('view');
+    $view->addProperty(pht('Time Spent'), $status_view);
   }
 
 }

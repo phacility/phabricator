@@ -1,0 +1,69 @@
+@title Configuring Accounts and Registration
+@group config
+
+Describes how to configure user access to Phabricator.
+
+= Overview =
+
+Phabricator supports a number of login systems. You can enable or disable these
+systems to configure who can register for and access your install, and how users
+with existing accounts can login.
+
+Methods of logging in are called **Authentication Providers**. For example,
+there is a "Username/Password" authentication provider available, which allows
+users to log in with a traditional username and password. Other providers
+support logging in with other credentials. For example:
+
+  - **Username/Password:** Users use a username and password to log in or
+    register.
+  - **LDAP:** Users use LDAP credentials to log in or register.
+  - **OAuth:** Users use accounts on a supported OAuth2 provider (like
+    GitHub, Facebook, or Google) to log in or register.
+  - **Other Providers:** More providers are available, and Phabricator
+    can be extended with custom providers. See the "Auth" application for
+    a list of available providers.
+
+By default, no providers are enabled. You must use the "Auth" application to
+add one or more providers after you complete the installation process.
+
+After you add a provider, you can link it to existing accounts (for example,
+associate an existing Phabricator account with a GitHub OAuth account) or users
+can use it to register new accounts (assuming you enable these options).
+
+= Recovering Administrator Accounts =
+
+If you accidentally lock yourself out of Phabricator, you can use the `bin/auth`
+script to recover access to an administrator account. To recover access, run:
+
+  phabricator/ $ ./bin/auth recover <username>
+
+...where `<username>` is the admin account username you want to recover access
+to. This will give you a link which will log you in as the specified
+administrative user.
+
+= Managing Accounts with the Web Console =
+
+To manage accounts from the web, login as an administrator account and go to
+##/people/## or click "People" on the homepage. Provided you're an admin,
+you'll see options to create or edit accounts.
+
+= Manually Creating New Accounts =
+
+There are two ways to manually create new accounts: via the web UI using
+the "People" application (this is easiest), or via the CLI using the
+`accountadmin` binary (this has a few more options).
+
+To use the CLI script, run:
+
+  phabricator/ $ ./bin/accountadmin
+
+Some options (like setting passwords and changing certain account flags) are
+only available from the CLI. You can also use this script to make a user
+an administrator (if you accidentally remove your admin flag) or create an
+administrative account.
+
+= Next Steps =
+
+Continue by:
+
+  - returning to the @{article:Configuration Guide}.

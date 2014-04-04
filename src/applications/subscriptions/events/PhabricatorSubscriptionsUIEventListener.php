@@ -1,17 +1,21 @@
 <?php
 
 final class PhabricatorSubscriptionsUIEventListener
-  extends PhutilEventListener {
+  extends PhabricatorEventListener {
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS);
+    $this->listen(PhabricatorEventType::TYPE_UI_WILLRENDERPROPERTIES);
   }
 
   public function handleEvent(PhutilEvent $event) {
     switch ($event->getType()) {
       case PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS:
         $this->handleActionEvent($event);
-      break;
+        break;
+      case PhabricatorEventType::TYPE_UI_WILLRENDERPROPERTIES:
+        $this->handlePropertyEvent($event);
+        break;
     }
   }
 
@@ -29,15 +33,19 @@ final class PhabricatorSubscriptionsUIEventListener
       return;
     }
 
+    if (!$object->shouldAllowSubscription($user->getPHID())) {
+      // This object doesn't allow the viewer to subscribe.
+      return;
+    }
+
     if ($object->isAutomaticallySubscribed($user->getPHID())) {
       $sub_action = id(new PhabricatorActionView())
         ->setWorkflow(true)
-        ->setUser($user)
         ->setDisabled(true)
         ->setRenderAsForm(true)
         ->setHref('/subscriptions/add/'.$object->getPHID().'/')
-        ->setName('Automatically Subscribed')
-        ->setIcon('subscribe-auto');
+        ->setName(pht('Automatically Subscribed'))
+        ->setIcon('enable');
     } else {
       $subscribed = false;
       if ($user->isLoggedIn()) {
@@ -55,20 +63,18 @@ final class PhabricatorSubscriptionsUIEventListener
 
       if ($subscribed) {
         $sub_action = id(new PhabricatorActionView())
-          ->setUser($user)
           ->setWorkflow(true)
           ->setRenderAsForm(true)
           ->setHref('/subscriptions/delete/'.$object->getPHID().'/')
-          ->setName('Unsubscribe')
-          ->setIcon('subscribe-delete');
+          ->setName(pht('Unsubscribe'))
+          ->setIcon('disable');
       } else {
         $sub_action = id(new PhabricatorActionView())
-          ->setUser($user)
           ->setWorkflow(true)
           ->setRenderAsForm(true)
           ->setHref('/subscriptions/add/'.$object->getPHID().'/')
-          ->setName('Subscribe')
-          ->setIcon('subscribe-add');
+          ->setName(pht('Subscribe'))
+          ->setIcon('check');
       }
 
       if (!$user->isLoggedIn()) {
@@ -79,6 +85,44 @@ final class PhabricatorSubscriptionsUIEventListener
     $actions = $event->getValue('actions');
     $actions[] = $sub_action;
     $event->setValue('actions', $actions);
+  }
+
+  private function handlePropertyEvent($event) {
+    $user = $event->getUser();
+    $object = $event->getValue('object');
+
+    if (!$object || !$object->getPHID()) {
+      // No object, or the object has no PHID yet..
+      return;
+    }
+
+    if (!($object instanceof PhabricatorSubscribableInterface)) {
+      // This object isn't subscribable.
+      return;
+    }
+
+    if (!$object->shouldShowSubscribersProperty()) {
+      // This object doesn't render subscribers in its property list.
+      return;
+    }
+
+    $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $object->getPHID());
+    if ($subscribers) {
+      $handles = id(new PhabricatorHandleQuery())
+        ->setViewer($user)
+        ->withPHIDs($subscribers)
+        ->execute();
+    } else {
+      $handles = array();
+    }
+    $sub_view = id(new SubscriptionListStringBuilder())
+      ->setObjectPHID($object->getPHID())
+      ->setHandles($handles)
+      ->buildPropertyString();
+
+    $view = $event->getValue('view');
+    $view->addProperty(pht('Subscribers'), $sub_view);
   }
 
 }

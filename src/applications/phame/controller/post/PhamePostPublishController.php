@@ -37,12 +37,8 @@ final class PhamePostPublishController extends PhameController {
       return id(new AphrontRedirectResponse())->setURI($view_uri);
     }
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader(pht('Preview Post'));
-
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Publish Post'))
@@ -50,18 +46,18 @@ final class PhamePostPublishController extends PhameController {
 
     $frame = $this->renderPreviewFrame($post);
 
+    $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Preview Post'))
+      ->setForm($form);
+
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Preview'))
-        ->setHref($view_uri));
+    $crumbs->addTextCrumb(pht('Preview'), $view_uri);
 
     $nav = $this->renderSideNavFilterView(null);
     $nav->appendChild(
       array(
         $crumbs,
-        $header,
-        $form,
+        $form_box,
         $frame,
       ));
 

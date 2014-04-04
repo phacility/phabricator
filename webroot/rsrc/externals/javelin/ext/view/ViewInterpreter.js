@@ -42,7 +42,7 @@
  * @provides javelin-view-interpreter
  * @requires javelin-view
  *           javelin-install
- *
+ *           javelin-dom
  */
 
 JX.install('ViewInterpreter', {
@@ -65,7 +65,7 @@ JX.install('ViewInterpreter', {
         result.addChildren(children);
 
         return result;
-      }
+      };
     }
   }
 });

@@ -15,68 +15,56 @@ final class HeraldTestConsoleController extends HeraldController {
     $errors = array();
     if ($request->isFormPost()) {
       if (!$object_name) {
-        $e_name = 'Required';
-        $errors[] = 'An object name is required.';
+        $e_name = pht('Required');
+        $errors[] = pht('An object name is required.');
       }
 
       if (!$errors) {
-        $matches = null;
-        $object = null;
-        if (preg_match('/^D(\d+)$/', $object_name, $matches)) {
-          $object = id(new DifferentialRevision())->load($matches[1]);
-          if (!$object) {
-            $e_name = 'Invalid';
-            $errors[] = 'No Differential Revision with that ID exists.';
-          }
-        } else if (preg_match('/^r([A-Z]+)(\w+)$/', $object_name, $matches)) {
-          $repo = id(new PhabricatorRepository())->loadOneWhere(
-            'callsign = %s',
-            $matches[1]);
-          if (!$repo) {
-            $e_name = 'Invalid';
-            $errors[] = 'There is no repository with the callsign '.
-                        $matches[1].'.';
-          }
-          $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-            'repositoryID = %d AND commitIdentifier = %s',
-            $repo->getID(),
-            $matches[2]);
-          if (!$commit) {
-            $e_name = 'Invalid';
-            $errors[] = 'There is no commit with that identifier.';
-          }
-          $object = $commit;
-        } else {
-          $e_name = 'Invalid';
-          $errors[] = 'This object name is not recognized.';
+        $object = id(new PhabricatorObjectQuery())
+          ->setViewer($user)
+          ->withNames(array($object_name))
+          ->executeOne();
+
+        if (!$object) {
+          $e_name = pht('Invalid');
+          $errors[] = pht('No object exists with that name.');
         }
 
         if (!$errors) {
+
+          // TODO: Let the adapters claim objects instead.
+
           if ($object instanceof DifferentialRevision) {
-            $adapter = new HeraldDifferentialRevisionAdapter(
+            $adapter = HeraldDifferentialRevisionAdapter::newLegacyAdapter(
               $object,
               $object->loadActiveDiff());
           } else if ($object instanceof PhabricatorRepositoryCommit) {
-            $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
-              'commitID = %d',
-              $object->getID());
-            $adapter = new HeraldCommitAdapter(
-              $repo,
-              $object,
-              $data);
+            $adapter = id(new HeraldCommitAdapter())
+              ->setCommit($object);
+          } else if ($object instanceof ManiphestTask) {
+            $adapter = id(new HeraldManiphestTaskAdapter())
+              ->setTask($object);
+          } else if ($object instanceof PholioMock) {
+            $adapter = id(new HeraldPholioMockAdapter())
+              ->setMock($object);
           } else {
             throw new Exception("Can not build adapter for object!");
           }
 
-          $rules = HeraldRule::loadAllByContentTypeWithFullData(
-            $adapter->getHeraldTypeName(),
-            $object->getPHID());
+          $rules = id(new HeraldRuleQuery())
+            ->setViewer($user)
+            ->withContentTypes(array($adapter->getAdapterContentType()))
+            ->withDisabled(false)
+            ->needConditionsAndActions(true)
+            ->needAppliedToPHIDs(array($object->getPHID()))
+            ->needValidateAuthors(true)
+            ->execute();
 
-          $engine = new HeraldEngine();
+          $engine = id(new HeraldEngine())
+            ->setDryRun(true);
+
           $effects = $engine->applyRules($rules, $adapter);
-
-          $dry_run = new HeraldDryRunAdapter();
-          $engine->applyEffects($effects, $dry_run, $rules);
+          $engine->applyEffects($effects, $adapter, $rules);
 
           $xscript = $engine->getTranscript();
 
@@ -86,21 +74,13 @@ final class HeraldTestConsoleController extends HeraldController {
       }
     }
 
-    if ($errors) {
-      $error_view = new AphrontErrorView();
-      $error_view->setTitle('Form Errors');
-      $error_view->setErrors($errors);
-    } else {
-      $error_view = null;
-    }
-
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->appendChild(hsprintf(
-        '<p class="aphront-form-instructions">Enter an object to test rules '.
-        'for, like a Diffusion commit (e.g., <tt>rX123</tt>) or a '.
-        'Differential revision (e.g., <tt>D123</tt>). You will be shown the '.
-        'results of a dry run on the object.</p>'))
+      ->appendRemarkupInstructions(
+        pht(
+        'Enter an object to test rules for, like a Diffusion commit (e.g., '.
+        '`rX123`) or a Differential revision (e.g., `D123`). You will be '.
+        'shown the results of a dry run on the object.'))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Object Name'))
@@ -111,29 +91,23 @@ final class HeraldTestConsoleController extends HeraldController {
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Test Rules')));
 
-    $nav = $this->renderNav();
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Herald Test Console'))
+      ->setFormErrors($errors)
+      ->setForm($form);
+
+    $nav = $this->buildSideNavView();
     $nav->selectFilter('test');
-    $nav->appendChild(
-      array(
-        $error_view,
-        $form,
-      ));
+    $nav->appendChild($box);
 
     $crumbs = id($this->buildApplicationCrumbs())
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Transcripts'))
-          ->setHref($this->getApplicationURI('/transcript/')))
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Test Console')));
+      ->addTextCrumb(pht('Test Console'));
     $nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(
       $nav,
       array(
         'title' => pht('Test Console'),
-        'dust' => true,
         'device' => true,
       ));
   }

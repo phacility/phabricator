@@ -33,4 +33,8 @@ final class PhabricatorPolicyAwareTestQuery
     $this->offset += count($page);
   }
 
+  public function getQueryApplicationClass() {
+    return null;
+  }
+
 }

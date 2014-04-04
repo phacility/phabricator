@@ -39,4 +39,3 @@ JX.behavior('aphront-drag-and-drop-textarea', function(config) {
   }
 
 });
-

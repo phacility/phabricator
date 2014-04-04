@@ -15,12 +15,12 @@ final class PhabricatorApplicationAudit extends PhabricatorApplication {
   }
 
   public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('article/Audit_User_Guide.html');
+    return PhabricatorEnv::getDoclink('Audit User Guide');
   }
 
   public function getEventListeners() {
     return array(
-      new AuditPeopleMenuEventListener()
+      new AuditActionMenuEventListener()
     );
   }
 
@@ -78,4 +78,3 @@ final class PhabricatorApplicationAudit extends PhabricatorApplication {
   }
 
 }
-

@@ -6,7 +6,7 @@ final class PhortuneCart extends PhortuneDAO {
   protected $ownerPHID;
   protected $metadata;
 
-  private $purchases;
+  private $purchases = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -33,10 +33,7 @@ final class PhortuneCart extends PhortuneDAO {
   }
 
   public function getPurchases() {
-    if ($this->purchases === null) {
-      throw new Exception("Purchases not attached to cart!");
-    }
-    return $this->purchases;
+    return $this->assertAttached($this->purchases);
   }
 
 }

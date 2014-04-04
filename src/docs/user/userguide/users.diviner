@@ -1,0 +1,75 @@
+@title User Guide: Account Roles
+@group userguide
+
+Describes account roles like "Administrator", "Disabled" and "Bot".
+
+= Overview =
+
+When you create a user account, you can set roles like "Administrator",
+"Disabled" or "Bot". This document explains what these roles mean.
+
+= Administrators =
+
+**Administrators** are normal users with a few extra capabilities. Their primary
+role is to keep things running smoothly, and they are not all-powerful. In
+Phabricator, administrators are more like //janitors//.
+
+Administrators can create, delete, enable, disable, and approve user accounts.
+Various applications have a few other capabilities which are reserved for
+administrators by default, but these can be changed to provide access to more
+or fewer users.
+
+Administrators are **not** in complete control of the system. Administrators
+**can not** login as other users or act on behalf of other users. They can not
+destroy data or make changes without leaving an audit trail. Administrators also
+can not bypass object privacy policies.
+
+Limiting the power of administrators means that administrators can't abuse
+their power (they have very little power to abuse), a malicious administrator
+can't do much damage, and an attacker who compromises an administrator account
+is limited in what they can accomplish.
+
+NOTE: Administrators currently //can// act on behalf of other users via Conduit.
+This will be locked down at some point.
+
+= Bot/Script Accounts =
+
+**Bot/Script** accounts are accounts for bots and scripts which need to
+interface with the system, but are not regular users. Generally, when you write
+scripts that use Conduit (like the IRC bot), you should create a Bot/Script
+account for them.
+
+These accounts were previously called "System Agents", but were renamed to make
+things more clear.
+
+The **Bot/Script** role for an account can not be changed after the account is
+created. This prevents administrators form changing a normal user into a bot,
+retrieving their Conduit certificate, and then changing them back (which
+would allow administrators to gain other users' credentials).
+
+**Bot/Script** accounts differ from normal accounts in that:
+
+  - administrators can access them, edit settings, and retrieve credentials;
+  - they do not receive email;
+  - they appear with lower precedence in the UI when selecting users, with
+    a "Bot" note (because i t usually does not make sense to, for example,
+    assign a task to a bot).
+
+= Disabled Users =
+
+**Disabled Users** are accounts that are no longer active. Generally, when
+someone leaves a project (e.g., leaves your company, or their internship or
+contract ends) you should disable their account to terminate their access to the
+system. Disabled users:
+
+  - can not login;
+  - can not access Conduit;
+  - do not receive email; and
+  - appear with lower precedence in the UI when selecting users, with a
+    "Disabled" note (because it usually does not make sense to, for example,
+    assign a task to a disabled user).
+
+While users can also be deleted, it is strongly recommended that you disable
+them instead if they interacted with any objects in the system. If you delete a
+user entirely, you won't be able to find things they used to own or restore
+their data later if they rejoin the project.

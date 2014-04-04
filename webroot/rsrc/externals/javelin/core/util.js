@@ -48,15 +48,8 @@ JX.$E = function(message) {
  *
  * @group util
  */
-JX.$A = function(mysterious_arraylike_object) {
-  // NOTE: This avoids the Array.slice() trick because some bizarre COM object
-  // I dug up somewhere was freaking out when I tried to do it and it made me
-  // very upset, so do not replace this with Array.slice() cleverness.
-  var r = [];
-  for (var ii = 0; ii < mysterious_arraylike_object.length; ii++) {
-    r.push(mysterious_arraylike_object[ii]);
-  }
-  return r;
+JX.$A = function(object) {
+  return Array.prototype.slice.call(object);
 };
 
 
@@ -247,7 +240,7 @@ JX.bind = function(context, func, more) {
 
   return function() {
     return func.apply(context || window, bound.concat(JX.$A(arguments)));
-  }
+  };
 };
 
 
@@ -320,7 +313,7 @@ if (__DEV__) {
    */
   JX.log = function(message) {
     window.console.log(message);
-  }
+  };
 
   window.alert = (function(native_alert) {
     var recent_alerts = [];
@@ -349,7 +342,7 @@ if (__DEV__) {
         native_alert(msg);
       }
       in_alert = false;
-    }
+    };
   })(window.alert);
 }
 

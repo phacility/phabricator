@@ -15,6 +15,10 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
       return;
     }
 
+    if ($option->isCustomType()) {
+      return $option->getCustomObject()->validateOption($option, $value);
+    }
+
     switch ($option->getType()) {
       case 'bool':
         if ($value !== true &&
@@ -74,6 +78,34 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
           }
         }
         break;
+      case 'list<regex>':
+        $valid = true;
+        if (!is_array($value)) {
+          throw new PhabricatorConfigValidationException(
+            pht(
+              "Option '%s' must be a list of regular expressions, but value ".
+              "is not an array.",
+              $option->getKey()));
+        }
+        if ($value && array_keys($value) != range(0, count($value) - 1)) {
+          throw new PhabricatorConfigValidationException(
+            pht(
+              "Option '%s' must be a list of regular expressions, but the ".
+              "value is a map with unnatural keys.",
+              $option->getKey()));
+        }
+        foreach ($value as $v) {
+          $ok = @preg_match($v, '');
+          if ($ok === false) {
+            throw new PhabricatorConfigValidationException(
+              pht(
+                "Option '%s' must be a list of regular expressions, but the ".
+                "value '%s' is not a valid regular expression.",
+                $option->getKey(),
+                $v));
+          }
+        }
+        break;
       case 'list<string>':
         $valid = true;
         if (!is_array($value)) {
@@ -113,6 +145,22 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
     $value) {
     // Hook for subclasses to do complex validation.
     return;
+  }
+
+  /**
+   * Hook to render additional hints based on, e.g., the viewing user, request,
+   * or other context. For example, this is used to show workspace IDs when
+   * configuring `asana.workspace-id`.
+   *
+   * @param   PhabricatorConfigOption   Option being rendered.
+   * @param   AphrontRequest            Active request.
+   * @return  wild                      Additional contextual description
+   *                                    information.
+   */
+  public function renderContextualDescription(
+    PhabricatorConfigOption $option,
+    AphrontRequest $request) {
+    return null;
   }
 
   public function getKey() {

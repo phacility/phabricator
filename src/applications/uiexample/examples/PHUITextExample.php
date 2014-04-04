@@ -70,10 +70,10 @@ final class PHUITextExample extends PhabricatorUIExample {
 
     $layout1 = id(new PHUIBoxView())
       ->appendChild($content)
-            ->setShadow(true)
+            ->setBorder(true)
       ->addPadding(PHUI::PADDING_MEDIUM);
 
-    $head1 = id(new PhabricatorHeaderView())
+    $head1 = id(new PHUIHeaderView())
       ->setHeader(pht('Basic Colors'));
 
     $wrap1 = id(new PHUIBoxView())
@@ -82,10 +82,10 @@ final class PHUITextExample extends PhabricatorUIExample {
 
     $layout2 = id(new PHUIBoxView())
       ->appendChild($content2)
-      ->setShadow(true)
+      ->setBorder(true)
       ->addPadding(PHUI::PADDING_MEDIUM);
 
-    $head2 = id(new PhabricatorHeaderView())
+    $head2 = id(new PHUIHeaderView())
       ->setHeader(pht('Basic Transforms'));
 
     $wrap2 = id(new PHUIBoxView())

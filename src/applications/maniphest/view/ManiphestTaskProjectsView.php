@@ -15,22 +15,31 @@ final class ManiphestTaskProjectsView extends ManiphestView {
 
   public function render() {
     require_celerity_resource('phabricator-project-tag-css');
+    $max_visible_tags = 4;
 
-
-    $show = array_slice($this->handles, 0, 2);
+    $show = array_slice($this->handles, 0, $max_visible_tags);
 
     $tags = array();
-    foreach ($show as $handle) {
+    if ($show) {
+      foreach ($show as $handle) {
+        $tags[] = phutil_tag(
+          'a',
+          array(
+            'href'  => $handle->getURI(),
+            'class' => 'phabricator-project-tag',
+          ),
+          phutil_utf8_shorten($handle->getName(), 24));
+      }
+    } else {
       $tags[] = phutil_tag(
-        'a',
+        'span',
         array(
-          'href'  => $handle->getURI(),
-          'class' => 'phabricator-project-tag',
+          'class' => 'phabricator-project-tag phabricator-project-tag-grey',
         ),
-        phutil_utf8_shorten($handle->getName(), 24));
+        pht('No Project'));
     }
 
-    if (count($this->handles) > 2) {
+    if (count($this->handles) > $max_visible_tags) {
       require_celerity_resource('aphront-tooltip-css');
       Javelin::initBehavior('phabricator-tooltips');
 

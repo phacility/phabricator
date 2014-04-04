@@ -6,11 +6,12 @@ abstract class PhabricatorApplicationTransactionQuery
   private $phids;
   private $objectPHIDs;
   private $authorPHIDs;
+  private $transactionTypes;
 
   private $needComments = true;
   private $needHandles  = true;
 
-  abstract protected function getTemplateApplicationTransaction();
+  abstract public function getTemplateApplicationTransaction();
 
   protected function buildMoreWhereClauses(AphrontDatabaseConnection $conn_r) {
     return array();
@@ -32,6 +33,11 @@ abstract class PhabricatorApplicationTransactionQuery
 
   public function withAuthorPHIDs(array $author_phids) {
     $this->authorPHIDs = $author_phids;
+    return $this;
+  }
+
+  public function withTransactionTypes(array $transaction_types) {
+    $this->transactionTypes = $transaction_types;
     return $this;
   }
 
@@ -58,6 +64,10 @@ abstract class PhabricatorApplicationTransactionQuery
       $this->buildLimitClause($conn_r));
 
     $xactions = $table->loadAllFromArray($data);
+
+    foreach ($xactions as $xaction) {
+      $xaction->attachViewer($this->getViewer());
+    }
 
     if ($this->needComments) {
       $comment_phids = array_filter(mpull($xactions, 'getCommentPHID'));
@@ -86,6 +96,31 @@ abstract class PhabricatorApplicationTransactionQuery
       }
     }
 
+    return $xactions;
+  }
+
+  protected function willFilterPage(array $xactions) {
+    $object_phids = array_keys(mpull($xactions, null, 'getObjectPHID'));
+
+    $objects = id(new PhabricatorObjectQuery())
+      ->setViewer($this->getViewer())
+      ->setParentQuery($this)
+      ->withPHIDs($object_phids)
+      ->execute();
+
+    foreach ($xactions as $key => $xaction) {
+      $object_phid = $xaction->getObjectPHID();
+      if (empty($objects[$object_phid])) {
+        unset($xactions[$key]);
+        continue;
+      }
+      $xaction->attachObject($objects[$object_phid]);
+    }
+
+    // NOTE: We have to do this after loading objects, because the objects
+    // may help determine which handles are required (for example, in the case
+    // of custom fields.
+
     if ($this->needHandles) {
       $phids = array();
       foreach ($xactions as $xaction) {
@@ -94,9 +129,10 @@ abstract class PhabricatorApplicationTransactionQuery
       $handles = array();
       $merged = array_mergev($phids);
       if ($merged) {
-        $handles = id(new PhabricatorObjectHandleData($merged))
+        $handles = id(new PhabricatorHandleQuery())
           ->setViewer($this->getViewer())
-          ->loadHandles();
+          ->withPHIDs($merged)
+          ->execute();
       }
       foreach ($xactions as $xaction) {
         $xaction->setHandles(
@@ -133,6 +169,13 @@ abstract class PhabricatorApplicationTransactionQuery
         $this->authorPHIDs);
     }
 
+    if ($this->transactionTypes) {
+      $where[] = qsprintf(
+        $conn_r,
+        'transactionType IN (%Ls)',
+        $this->transactionTypes);
+    }
+
     foreach ($this->buildMoreWhereClauses($conn_r) as $clause) {
       $where[] = $clause;
     }
@@ -140,6 +183,12 @@ abstract class PhabricatorApplicationTransactionQuery
     $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
+  }
+
+
+  public function getQueryApplicationClass() {
+    // TODO: Sort this out?
+    return null;
   }
 
 }

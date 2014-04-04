@@ -51,6 +51,18 @@ final class PhabricatorPhortuneConfigOptions
         ->setHidden(true)
         ->setDescription(
           pht('PayPal API signature.')),
+      $this->newOption('phortune.wepay.client-id', 'string', null)
+        ->setLocked(true)
+        ->setDescription(pht('WePay application ID.')),
+      $this->newOption('phortune.wepay.client-secret', 'string', null)
+        ->setHidden(true)
+        ->setDescription(pht('WePay application secret.')),
+      $this->newOption('phortune.wepay.access-token', 'string', null)
+        ->setHidden(true)
+        ->setDescription(pht('WePay access token.')),
+      $this->newOption('phortune.wepay.account-id', 'string', null)
+        ->setHidden(true)
+        ->setDescription(pht('WePay account ID.')),
     );
   }
 

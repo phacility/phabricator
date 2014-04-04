@@ -213,7 +213,7 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
     $document->attachContent($new_content);
 
     id(new PhabricatorSearchIndexer())
-      ->indexDocumentByPHID($document->getPHID());
+      ->queueDocumentForIndexing($document->getPHID());
 
     // Stub out empty parent documents if they don't exist
     $ancestral_slugs = PhabricatorSlug::getAncestry($document->getSlug());
@@ -240,9 +240,11 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
     $project_phid = null;
     $slug = $document->getSlug();
     if (PhrictionDocument::isProjectSlug($slug)) {
-      $project = id(new PhabricatorProject())->loadOneWhere(
-        'phrictionSlug = %s',
-        PhrictionDocument::getProjectSlugIdentifier($slug));
+      $project = id(new PhabricatorProjectQuery())
+        ->setViewer($this->requireActor())
+        ->withPhrictionSlugs(array(
+          PhrictionDocument::getProjectSlugIdentifier($slug)))
+        ->executeOne();
       if ($project) {
         $project_phid = $project->getPHID();
       }
@@ -286,6 +288,22 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
     return $this;
   }
 
+  private function getChangeTypeDescription($const, $title) {
+    $map = array(
+      PhrictionChangeType::CHANGE_EDIT =>
+        pht("Phriction Document %s was edited.", $title),
+      PhrictionChangeType::CHANGE_DELETE =>
+        pht("Phriction Document %s was deleted.", $title),
+      PhrictionChangeType::CHANGE_MOVE_HERE =>
+        pht("Phriction Document %s was moved here.", $title),
+      PhrictionChangeType::CHANGE_MOVE_AWAY =>
+        pht("Phriction Document %s was moved away.", $title),
+      PhrictionChangeType::CHANGE_STUB =>
+        pht("Phriction Document %s was created through child.", $title),
+    );
+    return idx($map, $const, pht('Something magical occurred.'));
+  }
+
   private function sendMailToSubscribers(array $subscribers, $old_content) {
     if (!$subscribers) {
       return;
@@ -304,14 +322,9 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
 
     $old_title = $old_content->getTitle();
     $title = $content->getTitle();
-
-    // TODO: Currently, this produces something like
-    // Phriction Document Xyz was Edit
-    // I'm too lazy to build my own action string everywhere
-    // Plus, it does not have pht() anyway
+    $name = $this->getChangeTypeDescription($content->getChangeType(), $title);
     $action = PhrictionChangeType::getChangeTypeLabel(
       $content->getChangeType());
-    $name = pht("Phriction Document %s was %s", $title, $action);
 
     $body = array($name);
     // Content may have changed, you never know

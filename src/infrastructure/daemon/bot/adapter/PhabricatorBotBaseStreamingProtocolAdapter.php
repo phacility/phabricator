@@ -131,7 +131,7 @@ abstract class PhabricatorBotBaseStreamingProtocolAdapter
     return false;
   }
 
-  protected function performPost($endpoint, $data = Null) {
+  protected function performPost($endpoint, $data = null) {
     $uri = new PhutilURI($this->server);
     $uri->setPath($endpoint);
 
@@ -160,4 +160,3 @@ abstract class PhabricatorBotBaseStreamingProtocolAdapter
 
   abstract protected function processMessage($raw_object);
 }
-

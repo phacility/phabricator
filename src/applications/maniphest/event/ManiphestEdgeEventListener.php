@@ -7,7 +7,7 @@
  *
  * @group maniphest
  */
-final class ManiphestEdgeEventListener extends PhutilEventListener {
+final class ManiphestEdgeEventListener extends PhabricatorEventListener {
 
   private $edges = array();
   private $tasks = array();
@@ -36,6 +36,9 @@ final class ManiphestEdgeEventListener extends PhutilEventListener {
     $edges = $this->loadAllEdges($event);
     $tasks = array();
     if ($edges) {
+      // TODO: T603 This should probably all get nuked. Until then, this isn't
+      // realllllly a policy issue since callers are (or should be) doing
+      // policy checks anyway.
       $tasks = id(new ManiphestTask())->loadAllWhere(
         'phid IN (%Ls)',
         array_keys($edges));
@@ -55,9 +58,16 @@ final class ManiphestEdgeEventListener extends PhutilEventListener {
     unset($this->edges[$id]);
     unset($this->tasks[$id]);
 
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_LEGACY,
+      array());
+
     $new_edges = $this->loadAllEdges($event);
-    $editor = new ManiphestTransactionEditor();
-    $editor->setActor($event->getUser());
+    $editor = id(new ManiphestTransactionEditor())
+      ->setActor($event->getUser())
+      ->setContentSource($content_source)
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true);
 
     foreach ($tasks as $phid => $task) {
       $xactions = array();
@@ -75,11 +85,10 @@ final class ManiphestEdgeEventListener extends PhutilEventListener {
         }
 
         $xactions[] = id(new ManiphestTransaction())
-          ->setTransactionType(ManiphestTransactionType::TYPE_EDGE)
+          ->setTransactionType(ManiphestTransaction::TYPE_EDGE)
           ->setOldValue($old_type)
           ->setNewValue($new_type)
-          ->setMetadataValue('edge:type', $type)
-          ->setAuthorPHID($event->getUser()->getPHID());
+          ->setMetadataValue('edge:type', $type);
       }
 
       if ($xactions) {
@@ -101,7 +110,7 @@ final class ManiphestEdgeEventListener extends PhutilEventListener {
     $add_edges = $event->getValue('add');
     $rem_edges = $event->getValue('rem');
 
-    $type_task = PhabricatorPHIDConstants::PHID_TYPE_TASK;
+    $type_task = ManiphestPHIDTypeTask::TYPECONST;
 
     $all_edges = array_merge($add_edges, $rem_edges);
     $all_edges = $this->filterEdgesBySourceType($all_edges, $type_task);

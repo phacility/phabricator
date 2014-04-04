@@ -12,15 +12,11 @@ final class PhabricatorMacroTransaction
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorPHIDConstants::PHID_TYPE_MCRO;
+    return PhabricatorMacroPHIDTypeMacro::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {
     return new PhabricatorMacroTransactionComment();
-  }
-
-  public function getApplicationObjectTypeName() {
-    return pht('macro');
   }
 
   public function getRequiredHandlePHIDs() {
@@ -31,6 +27,7 @@ final class PhabricatorMacroTransaction
 
     switch ($this->getTransactionType()) {
       case PhabricatorMacroTransactionType::TYPE_FILE:
+      case PhabricatorMacroTransactionType::TYPE_AUDIO:
         if ($old !== null) {
           $phids[] = $old;
         }
@@ -78,6 +75,37 @@ final class PhabricatorMacroTransaction
             $this->renderHandleLink($author_phid));
         }
         break;
+
+      case PhabricatorMacroTransactionType::TYPE_AUDIO:
+        if (!$old) {
+          return pht(
+            '%s attached audio: %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($new));
+        } else {
+          return pht(
+            '%s changed the audio for this macro from %s to %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($old),
+            $this->renderHandleLink($new));
+        }
+
+      case PhabricatorMacroTransactionType::TYPE_AUDIO_BEHAVIOR:
+        switch ($new) {
+          case PhabricatorFileImageMacro::AUDIO_BEHAVIOR_ONCE:
+            return pht(
+              '%s set the audio to play once.',
+              $this->renderHandleLink($author_phid));
+          case PhabricatorFileImageMacro::AUDIO_BEHAVIOR_LOOP:
+            return pht(
+              '%s set the audio to loop.',
+              $this->renderHandleLink($author_phid));
+          default:
+            return pht(
+              '%s disabled the audio for this macro.',
+              $this->renderHandleLink($author_phid));
+        }
+
       case PhabricatorMacroTransactionType::TYPE_FILE:
         if ($old === null) {
           return pht(
@@ -96,7 +124,7 @@ final class PhabricatorMacroTransaction
     return parent::getTitle();
   }
 
-  public function getTitleForFeed() {
+  public function getTitleForFeed(PhabricatorFeedStory $story) {
     $author_phid = $this->getAuthorPHID();
     $object_phid = $this->getObjectPHID();
 
@@ -135,9 +163,45 @@ final class PhabricatorMacroTransaction
             $this->renderHandleLink($author_phid),
             $this->renderHandleLink($object_phid));
         }
+
+      case PhabricatorMacroTransactionType::TYPE_AUDIO:
+        if (!$old) {
+          return pht(
+            '%s attached audio to %s: %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            $this->renderHandleLink($new));
+        } else {
+          return pht(
+            '%s changed the audio for %s from %s to %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            $this->renderHandleLink($old),
+            $this->renderHandleLink($new));
+        }
+
+      case PhabricatorMacroTransactionType::TYPE_AUDIO_BEHAVIOR:
+        switch ($new) {
+          case PhabricatorFileImageMacro::AUDIO_BEHAVIOR_ONCE:
+            return pht(
+              '%s set the audio for %s to play once.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid));
+          case PhabricatorFileImageMacro::AUDIO_BEHAVIOR_LOOP:
+            return pht(
+              '%s set the audio for %s to loop.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid));
+          default:
+            return pht(
+              '%s disabled the audio for %s.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid));
+        }
+
     }
 
-    return parent::getTitleForFeed();
+    return parent::getTitleForFeed($story);
   }
 
   public function getActionName() {
@@ -163,6 +227,13 @@ final class PhabricatorMacroTransaction
         } else {
           return pht('Edited Image');
         }
+
+      case PhabricatorMacroTransactionType::TYPE_AUDIO:
+        return pht('Audio');
+
+      case PhabricatorMacroTransactionType::TYPE_AUDIO_BEHAVIOR:
+        return pht('Audio Behavior');
+
     }
 
     return parent::getActionName();
@@ -197,6 +268,8 @@ final class PhabricatorMacroTransaction
         } else {
           return 'undo';
         }
+      case PhabricatorMacroTransactionType::TYPE_AUDIO:
+        return 'herald';
     }
 
     return parent::getIcon();
@@ -228,4 +301,3 @@ final class PhabricatorMacroTransaction
 
 
 }
-

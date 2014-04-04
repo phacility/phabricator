@@ -49,11 +49,11 @@ final class PhabricatorIRCProtocolAdapter
     }
 
     $this->socket = $socket;
-    $this->write("USER {$user} 0 * :{$user}");
     if ($pass) {
       $this->write("PASS {$pass}");
     }
     $this->write("NICK {$nick}");
+    $this->write("USER {$user} 0 * :{$user}");
   }
 
   public function getNextMessages($poll_frequency) {

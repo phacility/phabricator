@@ -11,11 +11,10 @@ final class PhabricatorFeedStoryStatus extends PhabricatorFeedStory {
 
     $author_phid = $data->getAuthorPHID();
 
-    $view = new PHUIFeedStoryView();
+    $view = $this->newStoryView();
     $view->setAppIcon('calendar-dark');
 
     $view->setTitle($this->linkTo($author_phid));
-    $view->setEpoch($data->getEpoch());
     $view->setImage($this->getHandle($author_phid)->getImageURI());
 
     $content = $this->renderSummary($data->getValue('content'), $len = null);
@@ -29,7 +28,7 @@ final class PhabricatorFeedStoryStatus extends PhabricatorFeedStory {
     $author_name = $author_handle->getLinkName();
     $author_uri = PhabricatorEnv::getURI($author_handle->getURI());
 
-    $text = pht('% supdated their status %s', $author_name, $author_uri);
+    $text = pht('% updated their status %s', $author_name, $author_uri);
 
     return $text;
   }

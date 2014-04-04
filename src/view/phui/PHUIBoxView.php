@@ -4,7 +4,7 @@ final class PHUIBoxView extends AphrontTagView {
 
   private $margin = array();
   private $padding = array();
-  private $shadow = false;
+  private $border = false;
 
   public function addMargin($margin) {
     $this->margin[] = $margin;
@@ -16,42 +16,32 @@ final class PHUIBoxView extends AphrontTagView {
     return $this;
   }
 
-  public function setShadow($shadow) {
-    $this->shadow = $shadow;
+  public function setBorder($border) {
+    $this->border = $border;
     return $this;
   }
 
-  public function getTagContent() {
-
+  protected function getTagAttributes() {
     require_celerity_resource('phui-box-css');
-
     $outer_classes = array();
     $outer_classes[] = 'phui-box';
-    if ($this->shadow) {
-      $outer_classes[] = 'phui-box-shadow';
+    if ($this->border) {
+      $outer_classes[] = 'phui-box-border';
     }
     foreach ($this->margin as $margin) {
       $outer_classes[] = $margin;
     }
-
-    $inner_classes = array();
-    $inner_classes[] = 'phui-box-inner';
     foreach ($this->padding as $padding) {
-      $inner_classes[] = $padding;
+      $outer_classes[] = $padding;
     }
+    return array('class' => $outer_classes);
+  }
 
-    $inner = phutil_tag(
-      'div',
-        array(
-          'class' => implode(' ', $inner_classes)
-        ),
-        $this->renderChildren());
+  public function getTagName() {
+    return 'div';
+  }
 
-    return phutil_tag(
-      'div',
-        array(
-          'class' => implode(' ', $outer_classes)
-        ),
-        $inner);
+  public function getTagContent() {
+    return $this->renderChildren();
   }
 }

@@ -1,0 +1,33 @@
+{
+  "name" : "phabcontrib",
+  "title" : "Phabricator Contributor Documentation",
+  "short" : "Phabricator Contributor Docs",
+  "preface" : "Information for Phabricator contributors.",
+  "root" : "../../../",
+  "uri.source" :
+    "https://secure.phabricator.com/diffusion/P/browse/master/%f$%l",
+  "rules" : {
+    "(\\.diviner$)" : "DivinerArticleAtomizer"
+  },
+  "exclude" : [
+    "(^externals/)",
+    "(^webroot/rsrc/externals/)",
+    "(^scripts/)",
+    "(^support/)",
+    "(^resources/)",
+    "(^src/docs/user/)",
+    "(^src/docs/tech/)",
+    "(^src/docs/flavor/)"
+  ],
+  "groups" : {
+    "contrib" : {
+      "name" : "Contributor Overview"
+    },
+    "standards" : {
+      "name" : "Coding Standards"
+    },
+    "developer" : {
+      "name" : "Developer Guides"
+    }
+  }
+}

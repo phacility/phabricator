@@ -7,15 +7,16 @@ final class ConduitAPI_differential_createcomment_Method
   extends ConduitAPIMethod {
 
   public function getMethodDescription() {
-    return "Add a comment to a Differential revision.";
+    return pht("Add a comment to a Differential revision.");
   }
 
   public function defineParamTypes() {
     return array(
-      'revision_id' => 'required revisionid',
-      'message'     => 'optional string',
-      'action'      => 'optional string',
-      'silent'      => 'optional bool',
+      'revision_id'    => 'required revisionid',
+      'message'        => 'optional string',
+      'action'         => 'optional string',
+      'silent'         => 'optional bool',
+      'attach_inlines' => 'optional bool',
     );
   }
 
@@ -30,29 +31,56 @@ final class ConduitAPI_differential_createcomment_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $revision = id(new DifferentialRevision())->load(
-      $request->getValue('revision_id'));
+    $viewer = $request->getUser();
+
+    $revision = id(new DifferentialRevisionQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($request->getValue('revision_id')))
+      ->needReviewerStatus(true)
+      ->needReviewerAuthority(true)
+      ->executeOne();
     if (!$revision) {
       throw new ConduitException('ERR_BAD_REVISION');
     }
 
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_CONDUIT,
-      array());
+    $xactions = array();
 
     $action = $request->getValue('action');
-    if (!$action) {
-      $action = 'none';
+    if ($action && ($action != 'comment') && ($action != 'none')) {
+      $xactions[] = id(new DifferentialTransaction())
+        ->setTransactionType(DifferentialTransaction::TYPE_ACTION)
+        ->setNewValue($action);
     }
 
-    $editor = new DifferentialCommentEditor(
-      $revision,
-      $action);
-    $editor->setActor($request->getUser());
-    $editor->setContentSource($content_source);
-    $editor->setMessage($request->getValue('message'));
-    $editor->setNoEmail($request->getValue('silent'));
-    $editor->save();
+    $content = $request->getValue('message');
+    if (strlen($content)) {
+      $xactions[] = id(new DifferentialTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+        ->attachComment(
+          id(new DifferentialTransactionComment())
+            ->setContent($content));
+    }
+
+    if ($request->getValue('attach_inlines')) {
+      $type_inline = DifferentialTransaction::TYPE_INLINE;
+      $inlines = DifferentialTransactionQuery::loadUnsubmittedInlineComments(
+        $viewer,
+        $revision);
+      foreach ($inlines as $inline) {
+        $xactions[] = id(new DifferentialTransaction())
+          ->setTransactionType($type_inline)
+          ->attachComment($inline);
+      }
+    }
+
+    $editor = id(new DifferentialTransactionEditor())
+      ->setActor($viewer)
+      ->setDisableEmail($request->getValue('silent'))
+      ->setContentSourceFromConduitRequest($request)
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true);
+
+    $editor->applyTransactions($revision, $xactions);
 
     return array(
       'revisionid'  => $revision->getID(),

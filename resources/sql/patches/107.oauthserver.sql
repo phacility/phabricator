@@ -1,5 +1,3 @@
-
-
 CREATE TABLE `{$NAMESPACE}_oauth_server`.`oauth_server_oauthserverclient` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `phid` varchar(64) BINARY NOT NULL,
@@ -48,4 +46,3 @@ CREATE TABLE `{$NAMESPACE}_oauth_server`.`oauth_server_oauthserveraccesstoken` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `token` (`token`)
 ) ENGINE=InnoDB;
-

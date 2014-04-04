@@ -2,20 +2,10 @@
 
 abstract class DrydockController extends PhabricatorController {
 
-  final protected function buildSideNav($selected) {
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI('/drydock/'));
-    $nav->addFilter('resource', 'Resources');
-    $nav->addFilter('lease',    'Leases');
-    $nav->addFilter('log',      'Logs');
-
-    $nav->selectFilter($selected, 'resource');
-
-    return $nav;
-  }
+  abstract function buildSideNavView();
 
   public function buildApplicationMenu() {
-    return $this->buildSideNav(null)->getMenu();
+    return $this->buildSideNavView()->getMenu();
   }
 
   protected function buildLogTableView(array $logs) {
@@ -79,11 +69,12 @@ abstract class DrydockController extends PhabricatorController {
   protected function buildLeaseListView(array $leases) {
     assert_instances_of($leases, 'DrydockLease');
 
-    $user = $this->getRequest()->getUser();
-    $view = new PhabricatorObjectItemListView();
+    $viewer = $this->getRequest()->getUser();
+    $view = new PHUIObjectItemListView();
 
     foreach ($leases as $lease) {
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
+        ->setUser($viewer)
         ->setHeader($lease->getLeaseName())
         ->setHref($this->getApplicationURI('/lease/'.$lease->getID().'/'));
 
@@ -106,9 +97,7 @@ abstract class DrydockController extends PhabricatorController {
 
       $status = DrydockLeaseStatus::getNameForStatus($lease->getStatus());
       $item->addAttribute($status);
-
-      $date_created = phabricator_date($lease->getDateCreated(), $user);
-      $item->addAttribute(pht('Created on %s', $date_created));
+      $item->setEpoch($lease->getDateCreated());
 
       if ($lease->isActive()) {
         $item->setBarColor('green');
@@ -126,12 +115,12 @@ abstract class DrydockController extends PhabricatorController {
     assert_instances_of($resources, 'DrydockResource');
 
     $user = $this->getRequest()->getUser();
-    $view = new PhabricatorObjectItemListView();
+    $view = new PHUIObjectItemListView();
 
     foreach ($resources as $resource) {
       $name = pht('Resource %d', $resource->getID()).': '.$resource->getName();
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setHref($this->getApplicationURI('/resource/'.$resource->getID().'/'))
         ->setHeader($name);
 

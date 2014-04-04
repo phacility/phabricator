@@ -13,10 +13,10 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
   private $data;
   private $hasViewed;
   private $framed;
+  private $hovercard = false;
 
   private $handles  = array();
   private $objects  = array();
-
 
 /* -(  Loading Stories  )---------------------------------------------------- */
 
@@ -71,9 +71,10 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
       $object_phids += $phids;
     }
 
-    $objects = id(new PhabricatorObjectHandleData(array_keys($object_phids)))
+    $objects = id(new PhabricatorObjectQuery())
       ->setViewer($viewer)
-      ->loadObjects();
+      ->withPHIDs(array_keys($object_phids))
+      ->execute();
 
     foreach ($key_phids as $key => $phids) {
       if (!$phids) {
@@ -102,9 +103,10 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
       $handle_phids += $key_phids[$key];
     }
 
-    $handles = id(new PhabricatorObjectHandleData(array_keys($handle_phids)))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($viewer)
-      ->loadHandles();
+      ->withPHIDs(array_keys($handle_phids))
+      ->execute();
 
     foreach ($key_phids as $key => $phids) {
       if (!$phids) {
@@ -115,6 +117,11 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
     }
 
     return $stories;
+  }
+
+  public function setHovercard($hover) {
+    $this->hovercard = $hover;
+    return $this;
   }
 
   public function setObjects(array $objects) {
@@ -233,11 +240,19 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
     // NOTE: We render our own link here to customize the styling and add
     // the '_top' target for framed feeds.
 
-    return phutil_tag(
+    $class = null;
+    if ($handle->getType() == PhabricatorPeoplePHIDTypeUser::TYPECONST) {
+      $class = 'phui-link-person';
+    }
+
+    return javelin_tag(
       'a',
       array(
         'href'    => $handle->getURI(),
         'target'  => $this->framed ? '_top' : null,
+        'sigil'   => $this->hovercard ? 'hovercard' : null,
+        'meta'    => $this->hovercard ? array('hoverPHID' => $phid) : null,
+        'class'   => $class,
       ),
       $handle->getLinkName());
   }
@@ -258,9 +273,19 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
     return array();
   }
 
+  protected function newStoryView() {
+    return id(new PHUIFeedStoryView())
+      ->setChronologicalKey($this->getChronologicalKey())
+      ->setEpoch($this->getEpoch())
+      ->setViewed($this->getHasViewed());
+  }
+
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 
+  public function getPHID() {
+    return null;
+  }
 
   /**
    * @task policy
@@ -300,6 +325,10 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
    */
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
   }
 
 }

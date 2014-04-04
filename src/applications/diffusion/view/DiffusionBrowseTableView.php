@@ -74,12 +74,12 @@ final class DiffusionBrowseTableView extends DiffusionView {
 
     $lint = self::loadLintMessagesCount($drequest);
     if ($lint !== null) {
-      $return['lint'] = hsprintf(
-        '<a href="%s">%s</a>',
-        $drequest->generateURI(array(
+      $return['lint'] = phutil_tag(
+        'a',
+        array('href' => $drequest->generateURI(array(
           'action' => 'lint',
           'lint' => null,
-        )),
+        ))),
         number_format($lint));
     }
 

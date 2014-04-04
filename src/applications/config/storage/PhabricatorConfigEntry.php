@@ -1,9 +1,8 @@
 <?php
 
-final class PhabricatorConfigEntry extends PhabricatorConfigEntryDAO {
+final class PhabricatorConfigEntry extends PhabricatorConfigEntryDAO
+  implements PhabricatorPolicyInterface {
 
-  protected $id;
-  protected $phid;
   protected $namespace;
   protected $configKey;
   protected $value;
@@ -20,23 +19,46 @@ final class PhabricatorConfigEntry extends PhabricatorConfigEntryDAO {
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_CONF);
+      PhabricatorConfigPHIDTypeConfig::TYPECONST);
   }
 
   public static function loadConfigEntry($key) {
     $config_entry = id(new PhabricatorConfigEntry())
-                 ->loadOneWhere(
-                   'configKey = %s AND namespace = %s',
-                    $key,
-                   'default');
+      ->loadOneWhere(
+        'configKey = %s AND namespace = %s',
+        $key,
+        'default');
 
     if (!$config_entry) {
       $config_entry = id(new PhabricatorConfigEntry())
-                   ->setConfigKey($key)
-                   ->setNamespace('default');
+        ->setConfigKey($key)
+        ->setNamespace('default');
     }
 
     return $config_entry;
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::POLICY_ADMIN;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
   }
 
 }

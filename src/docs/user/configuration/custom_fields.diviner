@@ -1,0 +1,197 @@
+@title Configuring Custom Fields
+@group config
+
+How to add custom fields to applications which support them.
+
+= Overview =
+
+Several Phabricator applications allow the configuration of custom fields. These
+fields allow you to add more information to objects, and in some cases reorder
+or remove builtin fields.
+
+For example, you could use custom fields to add an "Estimated Hours" field to
+tasks, a "Lead" field to projects, or a "T-Shirt Size" field to users.
+
+These applications currently support custom fields:
+
+| Application | Support |
+|-------------|---------|
+| Maniphest | Full Support |
+| Projects | Full Support |
+| People | Full Support |
+| Differential | Partial Support |
+| Diffusion | Limited Support |
+
+Custom fields can appear in many interfaces and support search, editing, and
+other features.
+
+= Basic Custom Fields =
+
+To get started with custom fields, you can use configuration to select and
+reorder fields and to add new simple fields.
+
+If you don't need complicated display controls or sophisticated validation,
+these simple fields should cover most use cases. They allow you to attach
+things like strings, numbers, and dropdown menus to objects.
+
+The relevant configuration settings are:
+
+| Application | Add Fields | Select Fields |
+|-------------|------------|---------------|
+| Maniphest | `maniphest.custom-field-definitions` | `maniphest.fields` |
+| Projects | `projects.custom-field-definitions` | `projects.fields` |
+| People | `user.custom-field-definitions` | `user.fields` |
+| Differential | Planned | `differential.fields` |
+| Diffusion | Planned | Planned |
+
+When adding fields, you'll specify a JSON blob like this (for example, as the
+value of `maniphest.custom-field-definitions`):
+
+  {
+    "mycompany:estimated-hours": {
+      "name": "Estimated Hours",
+      "type": "int",
+      "caption": "Estimated number of hours this will take.",
+      "required": true
+    },
+    "mycompany:actual-hours": {
+      "name": "Actual Hours",
+      "type": "int",
+      "caption": "Actual number of hours this took."
+    },
+    "mycompany:favorite-dinosaur": {
+      "name": "Favorite Dinosaur",
+      "type": "text"
+    }
+  }
+
+The fields will then appear in the other config option for the application
+(for example, in `maniphest.fields`) and you can enable, disable, or reorder
+them.
+
+For details on how to define a field, see the next section.
+
+= Custom Field Configuration =
+
+When defining custom fields using a configuration option like
+`maniphest.custom-field-definitions`, these options are available:
+
+  - **name**: Display label for the field on the edit and detail interfaces.
+  - **description**: Optional text shown when managing the field.
+  - **type**: Field type. The supported field types are:
+    - **int**: An integer, rendered as a text field.
+    - **text**: A string, rendered as a text field.
+    - **bool**: A boolean value, rendered as a checkbox.
+    - **select**: Allows the user to select from several options, rendered
+      as a dropdown.
+    - **remarkup**: A text area which allows the user to enter markup.
+    - **users**: A typeahead which allows multiple users to be input.
+    - **date**: A date/time picker.
+    - **header**: Renders a visual divider which you can use to group fields.
+  - **edit**: Show this field on the application's edit interface (this
+    defaults to `true`).
+  - **view**: Show this field on the application's view interface (this
+    defaults to `true`).
+  - **search**: Show this field on the application's search interface, allowing
+    users to filter objects by the field value.
+  - **caption**: A caption to display underneath the field (optional).
+  - **required**: True if the user should be required to provide a value.
+  - **options**: If type is set to **select**, provide options for the dropdown
+    as a dictionary.
+  - **default**: Default field value.
+  - **strings**: Allows you to override specific strings based on the field
+    type. See below.
+  - **instructions**: Optional block of remarkup text which will appear
+    above the control when rendered on the edit view.
+
+The `strings` value supports different strings per control type. They are:
+
+  - **bool**
+    - **edit.checkbox** Text for the edit interface, no default.
+    - **view.yes** Text for the view interface, defaults to "Yes".
+    - **search.default** Text for the search interface, defaults to "(Any)".
+    - **search.require** Text for the search interface, defaults to "Require".
+
+Some applications have specific options which only work in that application.
+
+In **Maniphest**:
+
+  - **copy**: When a user creates a task, the UI gives them an option to
+    "Create Another Similar Task". Some fields from the original task are copied
+    into the new task, while others are not; by default, fields are not copied.
+    If you want this field to be copied, specify `true` for the `copy` property.
+
+Internally, Phabricator implements some additional custom field types and
+options. These are not intended for general use and are subject to abrupt
+change, but are documented here for completeness:
+
+  - **Credentials**: Controls with type `credential` allow selection of a
+    Passphrase credential which provides `credential.provides`, and creation
+    of credentials of `credential.type`.
+
+= Advanced Custom Fields =
+
+If you want custom fields to have advanced behaviors (sophisticated rendering,
+advanced validation, complicated controls, interaction with other systems, etc),
+you can write a custom field as an extension and add it to Phabricator.
+
+NOTE: This API is somewhat new and fairly large. You should expect that there
+will be occasional changes to the API requiring minor updates in your code.
+
+To do this, extend the appropriate `CustomField` class for the application you
+want to add a field to:
+
+| Application | Extend  |
+|-------------|---------|
+| Maniphest | @{class:ManiphestCustomField} |
+| Projects | @{class:PhabricatorProjectCustomField} |
+| People | @{class:PhabricatorUserCustomField} |
+| Differential | @{class:DifferentialCustomField} |
+| Diffusion | @{class:PhabricatorCommitCustomField} |
+
+The easiest way to get started is to drop your subclass into
+`phabricator/src/extensions/`, which should make it immediately available in the
+UI (if you use APC, you may need to restart your webserver). For example, this
+is a simple template which adds a custom field to Maniphest:
+
+  name=ExampleManiphestCustomField.php
+  <?php
+
+  final class ExampleCustomField extends ManiphestCustomField {
+
+    public function getFieldKey() {
+      return 'example:test';
+    }
+
+    public function shouldAppearInPropertyView() {
+      return true;
+    }
+
+    public function renderPropertyViewLabel() {
+      return pht('Example Custom Field');
+    }
+
+    public function renderPropertyViewValue(array $handles) {
+      return phutil_tag(
+        'h1',
+        array(
+          'style' => 'color: #ff00ff',
+        ),
+        pht('It worked!'));
+    }
+
+  }
+
+Broadly, you can then add features by overriding more methods and implementing
+them. Many of the native fields are implemented on the custom field
+architecture, and it may be useful to look at them. For details on available
+integrations, see the base class for your application and
+@{class:PhabricatorCustomField}.
+
+= Next Steps =
+
+Continue by:
+
+  - learning more about extending Phabricator with custom code in
+    @{article:libphutil Libraries User Guide};
+  - or returning to the @{article: Configuration Guide}.

@@ -13,6 +13,7 @@ interface DatabaseConfigurationProvider {
   public function getUser();
   public function getPassword();
   public function getHost();
+  public function getPort();
   public function getDatabase();
 
 }

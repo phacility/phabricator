@@ -19,16 +19,13 @@ abstract class PhabricatorMailReceiver {
     PhabricatorMetaMTAReceivedMail $mail,
     PhabricatorUser $sender) {
 
-    if ($sender->getIsDisabled()) {
+    if (!$sender->isUserActivated()) {
       throw new PhabricatorMetaMTAReceivedMailProcessingException(
         MetaMTAReceivedMailStatus::STATUS_DISABLED_SENDER,
         pht(
-          "Sender '%s' has a disabled user account.",
+          "Sender '%s' does not have an activated user account.",
           $sender->getUsername()));
     }
-
-
-    return;
   }
 
   /**
@@ -83,17 +80,13 @@ abstract class PhabricatorMailReceiver {
     $email_key = 'phabricator.allow-email-users';
     $allow_email_users = PhabricatorEnv::getEnvConfig($email_key);
     if ($allow_email_users) {
-      $xuser = id(new PhabricatorExternalAccount())->loadOneWhere(
-        'accountType = %s AND accountDomain IS NULL and accountID = %s',
-        'email',
-        $from);
-      if (!$xuser) {
-        $xuser = id(new PhabricatorExternalAccount())
-          ->setAccountID($from)
-          ->setAccountType('email')
-          ->setDisplayName($from)
-          ->save();
-      }
+      $from_obj = new PhutilEmailAddress($from);
+      $xuser = id(new PhabricatorExternalAccountQuery())
+        ->setViewer($user)
+        ->withAccountTypes(array('email'))
+        ->withAccountDomains(array($from_obj->getDomainName(), 'self'))
+        ->withAccountIDs(array($from_obj->getAddress()))
+        ->loadOneOrCreate();
       return $xuser->getPhabricatorUser();
     } else {
       $reasons[] = pht(

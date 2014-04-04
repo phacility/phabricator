@@ -14,12 +14,6 @@ final class PhabricatorFilesManagementRebuildWorkflow
             'help'      => 'Update all files.',
           ),
           array(
-            'name'      => 'id',
-            'wildcard'  => true,
-            'help'      => 'Update the given file. You can specify this flag '.
-                           'multiple times.',
-          ),
-          array(
             'name'      => 'dry-run',
             'help'      => 'Show what would be updated.',
           ),
@@ -31,37 +25,18 @@ final class PhabricatorFilesManagementRebuildWorkflow
             'name'      => 'rebuild-dimensions',
             'help'      => 'Rebuild image dimension information.',
           ),
+          array(
+            'name'      => 'names',
+            'wildcard'  => true,
+          ),
         ));
   }
 
   public function execute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
 
-    if ($args->getArg('all')) {
-      if ($args->getArg('id')) {
-        throw new PhutilArgumentUsageException(
-          "Specify either a list of files or `--all`, but not both.");
-      }
-      $iterator = new LiskMigrationIterator(new PhabricatorFile());
-    } else if ($args->getArg('id')) {
-      $iterator = array();
-
-      foreach ($args->getArg('id') as $id) {
-        $id = trim($id);
-
-        $id = preg_replace('/^F/i', '', $id);
-        if (ctype_digit($id)) {
-          $file = id(new PhabricatorFile())->loadOneWhere(
-            'id = %d',
-            $id);
-          if (!$file) {
-            throw new PhutilArgumentUsageException(
-              "No file exists with ID '{$id}'.");
-          }
-        }
-        $iterator[] = $file;
-      }
-    } else {
+    $iterator = $this->buildIterator($args);
+    if (!$iterator) {
       throw new PhutilArgumentUsageException(
         "Either specify a list of files to update, or use `--all` ".
         "to update all files.");

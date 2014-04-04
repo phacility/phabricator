@@ -12,6 +12,10 @@ final class AphrontDialogResponse extends AphrontResponse {
     return $this;
   }
 
+  public function getDialog() {
+    return $this->dialog;
+  }
+
   public function buildResponseString() {
     return $this->dialog->render();
   }

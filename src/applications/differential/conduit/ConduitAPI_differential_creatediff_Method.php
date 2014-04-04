@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
 
   public function getMethodDescription() {
@@ -16,18 +13,20 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
       'sourcePath'                => 'required string',
       'branch'                    => 'required string',
       'bookmark'                  => 'optional string',
-      'sourceControlSystem'       => 'required enum<svn, git>',
+      'sourceControlSystem'       => 'required enum<svn, git, hg>',
       'sourceControlPath'         => 'required string',
       'sourceControlBaseRevision' => 'required string',
-      'parentRevisionID'          => 'optional revisionid',
       'creationMethod'            => 'optional string',
-      'authorPHID'                => 'optional phid',
       'arcanistProject'           => 'optional string',
-      'repositoryUUID'            => 'optional string',
       'lintStatus'                =>
         'required enum<none, skip, okay, warn, fail, postponed>',
       'unitStatus'                =>
         'required enum<none, skip, okay, warn, fail, postponed>',
+      'repositoryPHID'            => 'optional phid',
+
+      'parentRevisionID'          => 'deprecated',
+      'authorPHID'                => 'deprecated',
+      'repositoryUUID'            => 'deprecated',
     );
   }
 
@@ -41,6 +40,7 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
   }
 
   protected function execute(ConduitAPIRequest $request) {
+    $viewer = $request->getUser();
     $change_data = $request->getValue('changes');
 
     $changes = array();
@@ -54,17 +54,23 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
 
     $diff->setBranch($request->getValue('branch'));
     $diff->setCreationMethod($request->getValue('creationMethod'));
-    $diff->setAuthorPHID($request->getValue('authorPHID'));
+    $diff->setAuthorPHID($viewer->getPHID());
     $diff->setBookmark($request->getValue('bookmark'));
 
-    $parent_id = $request->getValue('parentRevisionID');
-    if ($parent_id) {
-      $parent_rev = id(new DifferentialRevision())->load($parent_id);
-      if ($parent_rev) {
-        if ($parent_rev->getStatus() !=
-            ArcanistDifferentialRevisionStatus::CLOSED) {
-          $diff->setParentRevisionID($parent_id);
-        }
+    // TODO: Remove this eventually; for now continue writing the UUID. Note
+    // that we'll overwrite it below if we identify a repository, and `arc`
+    // no longer sends it. This stuff is retained for backward compatibility.
+    $diff->setRepositoryUUID($request->getValue('repositoryUUID'));
+
+    $repository_phid = $request->getValue('repositoryPHID');
+    if ($repository_phid) {
+      $repository = id(new PhabricatorRepositoryQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($repository_phid))
+        ->executeOne();
+      if ($repository) {
+        $diff->setRepositoryPHID($repository->getPHID());
+        $diff->setRepositoryUUID($repository->getUUID());
       }
     }
 
@@ -90,7 +96,6 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
     }
 
     $diff->setArcanistProjectPHID($project_phid);
-    $diff->setRepositoryUUID($request->getValue('repositoryUUID'));
 
     switch ($request->getValue('lintStatus')) {
       case 'skip':
@@ -137,6 +142,22 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
     }
 
     $diff->save();
+
+    // If we didn't get an explicit `repositoryPHID` (which means the client is
+    // old, or couldn't figure out which repository the working copy belongs
+    // to), apply heuristics to try to figure it out.
+
+    if (!$repository_phid) {
+      $repository = id(new DifferentialRepositoryLookup())
+        ->setDiff($diff)
+        ->setViewer($viewer)
+        ->lookupRepository();
+      if ($repository) {
+        $diff->setRepositoryPHID($repository->getPHID());
+        $diff->setRepositoryUUID($repository->getUUID());
+        $diff->save();
+      }
+    }
 
     $path = '/differential/diff/'.$diff->getID().'/';
     $uri = PhabricatorEnv::getURI($path);

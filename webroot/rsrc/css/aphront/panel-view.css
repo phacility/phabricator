@@ -4,15 +4,15 @@
 
 
 .aphront-panel-view {
-  background: #f3f3f3;
+  background: {$lightgreybackground};
   border: 1px solid #c0c0c0;
   border-width: 1px 0 0;
-  padding: 1em 2em;
-  margin: 20px 20px 40px 20px;
+  padding: 8px 16px;
+  margin: 20px 16px 32px 16px;
 }
 
 .device-phone .aphront-panel-view {
-  margin: 20px 10px 40px 10px;
+  margin: 20px 8px 40px 8px;
 }
 
 .aphront-unpadded-panel-view {
@@ -32,29 +32,33 @@
 .aphront-panel-view h1 {
   font-size: 16px;
   font-weight: bold;
-  color: #555;
+  color: {$darkbluetext};
   text-shadow: 0 1px 1px #fff;
   padding: 4px 0 0 0;
 }
 
+.aphront-panel-view h1 a {
+  color: {$darkbluetext};
+  text-decoration: none;
+}
+
+.aphront-panel-view h1 a:hover {
+  text-decoration: underline;
+}
+
 .aphront-panel-plain h1 {
-  padding: 0 0 4px 0;
+  padding: 0;
 }
 
 .aphront-panel-view-caption {
   font-size: 11px;
-  color: #666666;
-  margin-top: -0.1em;
-  margin-bottom: 0.75em;
+  color: {$greytext};
+  margin-top: 4px;
+  margin-bottom: 4px;
 }
 
 .aphront-panel-view-buttons {
   float: right;
-}
-
-.aphront-panel-view p.aphront-panel-instructions {
-  margin: .5em 2em .75em;
-  font-size: 13px;
 }
 
 .device-desktop .aphront-panel-width-form {
@@ -75,16 +79,14 @@
   border-radius: 3px;
 }
 
-.aphront-panel-accent .aphront-form-view {
-  background: #f7f7f7;
+.aphront-panel-accent .phui-form-view {
+  background: {$lightgreybackground};
   border: 1px solid #c4c4c0;
   border-radius: 3px;
 }
 
 .aphront-panel-preview {
-  background: #fbfbfb;
-  border-bottom: 1px solid #aaaaaa;
-  padding: 15px 20px;
+  padding: 16px;
 }
 
 .device-phone .aphront-panel-preview {
@@ -100,7 +102,7 @@
 }
 
 .aphront-panel-preview-loading-text {
-  color: #666666;
+  color: {$greytext};
 }
 
 .aphront-panel-flush {
@@ -112,7 +114,7 @@
   border-color: #669966;
 }
 
-.aphront-panel-view-drag-and-drop .aphront-form-view {
+.aphront-panel-view-drag-and-drop .phui-form-view {
   background: #ccffcc;
   border-color: #669966;
 }
@@ -120,12 +122,12 @@
 .aphront-mini-panel-view {
   background: #fff;
   padding: 10px;
-  margin: 5px 20px;
-  border: 1px solid #e6e6e6;
+  margin: 4px 16px;
+  border: 1px solid {$lightgreyborder};
+  border-bottom: 1px solid {$greyborder};
 }
 
 .aphront-mini-panel-view p {
   font-size: 12px;
-  color: #666666;
+  color: {$greytext};
 }
-

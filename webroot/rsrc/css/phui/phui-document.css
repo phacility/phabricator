@@ -1,0 +1,149 @@
+/**
+ * @provides phui-document-view-css
+ */
+
+.phui-document-view {
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.device-desktop .phui-document-view {
+  border: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
+  max-width: 960px;
+  margin: 16px auto;
+}
+
+.device-desktop .phui-document-view.phui-offset-view {
+  max-width: 800px;
+}
+
+.phui-document-sidenav {
+  position:absolute;
+  width: 200px;
+  text-overflow: ellipsis;
+  top: 0;
+  right: 0;
+}
+
+.device-phone .phui-document-sidenav {
+  position: static;
+  width: auto;
+  border-top: 1px solid #d7d7d7;
+  border-bottom: 1px solid #d7d7d7;
+}
+
+.device-phone .phui-sidenav-view .phui-document-inner {
+ margin: 0;
+}
+
+.phui-sidenav-view .phui-document-inner {
+  margin-right: 200px;
+  border-right: 1px solid #e7e7e7;
+  background: #fff;
+}
+
+.phui-document-bookname {
+  padding: 8px 16px;
+  color: #9ca5b5;
+  background-color: #fff;
+  border-bottom: 1px solid {$lightblueborder};
+}
+
+.device-phone .phui-document-bookname {
+  padding: 8px;
+}
+
+.phui-document-bookname .bookname {
+  float: left;
+}
+
+.phui-document-bookname .bookdescription {
+  float: right;
+}
+
+.phui-document-content .phui-header-shell {
+  border-top: none;
+  border-bottom: 1px solid {$lightblueborder};
+}
+
+.phui-document-content
+  .phui-header-shell.phui-header-no-backgound {
+  border-bottom: 1px solid {$thinblueborder};
+  margin: 0 0 16px 0;
+}
+
+.phui-document-content
+  .phui-header-shell.phui-header-no-backgound
+  .phui-header-view {
+ padding: 8px 0 4px;
+ font-size: 15px;
+}
+
+.phui-document-content .phui-header-view {
+  color: {$bluetext};
+  text-shadow: 0 1px 2px #fff;
+}
+
+.phui-document-content .phui-property-list-container {
+  border-color: #dde8ef;
+}
+
+.phui-document-content .phui-property-list-view {
+  border: none;
+  box-shadow: none;
+  margin: 0;
+  background-color: #f6f7f8;
+}
+
+.phui-document-content {
+  min-height: 240px;
+  background: #fff;
+
+  /* NOTE: This fixes margins, not floats, and can not be replaced with
+     the ".group" class. See T3150.
+  */
+  overflow: hidden;
+}
+
+.device-phone .phui-document-content .phabricator-action-list-view {
+  margin: 0;
+  border-bottom: 1px solid #c0c5d1;
+  background: {$lightgreybackground};
+}
+
+.phui-document-content .phabricator-remarkup {
+  padding: 16px;
+}
+
+.device-phone .phui-document-content .phabricator-remarkup {
+  padding: 8px;
+}
+
+.device-desktop .phui-document-content .phabricator-action-list-view {
+  position: absolute;
+  top: 16px;
+  right: -160px;
+  float: none;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+  width: 160px;
+}
+
+.device-phone .phui-document-content .phabricator-remarkup-toc {
+  width: 120px;
+}
+
+.phui-document-content .phabricator-remarkup .remarkup-code-block {
+  clear: both;
+  margin: 16px 0;
+}
+
+.device-desktop .phui-document-offset {
+  padding-right: 120px;
+}
+
+.phui-document-view .phui-property-list-view {
+  border-bottom: 1px solid {$thinblueborder};
+}

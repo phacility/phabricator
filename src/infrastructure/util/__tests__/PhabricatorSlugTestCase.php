@@ -17,6 +17,16 @@ final class PhabricatorSlugTestCase extends PhabricatorTestCase {
       "T\x00O\x00D\x00O"  => "t_o_d_o/",
       'x#%&+=\\?<> y'     => 'x_y/',
       "\xE2\x98\x83"      => "\xE2\x98\x83/",
+      '..'                => 'dotdot/',
+      '../'               => 'dotdot/',
+      '/../'              => 'dotdot/',
+      'a/b'               => 'a/b/',
+      'a//b'              => 'a/b/',
+      'a/../b/'           => 'a/dotdot/b/',
+      '/../a'             => 'dotdot/a/',
+      '../a'              => 'dotdot/a/',
+      'a/..'              => 'a/dotdot/',
+      'a/../'             => 'a/dotdot/',
     );
 
     foreach ($slugs as $slug => $normal) {

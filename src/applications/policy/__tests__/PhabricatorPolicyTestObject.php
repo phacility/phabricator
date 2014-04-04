@@ -10,6 +10,10 @@ final class PhabricatorPolicyTestObject
   private $policies               = array();
   private $automaticCapabilities  = array();
 
+  public function getPHID() {
+    return null;
+  }
+
   public function getCapabilities() {
     return $this->capabilities;
   }
@@ -36,6 +40,10 @@ final class PhabricatorPolicyTestObject
   public function setAutomaticCapabilities(array $auto_map) {
     $this->automaticCapabilities = $auto_map;
     return $this;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
   }
 
 }

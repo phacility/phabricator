@@ -10,15 +10,11 @@ final class PhluxTransaction extends PhabricatorApplicationTransaction {
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorPHIDConstants::PHID_TYPE_PVAR;
+    return PhluxPHIDTypeVariable::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {
     return null;
-  }
-
-  public function getApplicationObjectTypeName() {
-    return pht('variable');
   }
 
   public function getTitle() {
@@ -47,15 +43,10 @@ final class PhluxTransaction extends PhabricatorApplicationTransaction {
   }
 
   public function renderChangeDetails(PhabricatorUser $viewer) {
-    $old = $this->getOldValue();
-    $new = $this->getNewValue();
-
-    $view = id(new PhabricatorApplicationTransactionTextDiffDetailView())
-      ->setUser($viewer)
-      ->setOldText(json_encode($old))
-      ->setNewText(json_encode($new));
-
-    return $view->render();
+    return $this->renderTextCorpusChangeDetails(
+      $viewer,
+      json_encode($this->getOldValue()),
+      json_encode($this->getNewValue()));
   }
 
 

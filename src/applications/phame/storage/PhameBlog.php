@@ -10,8 +10,6 @@ final class PhameBlog extends PhameDAO
 
   const SKIN_DEFAULT = 'oblivious';
 
-  protected $id;
-  protected $phid;
   protected $name;
   protected $description;
   protected $domain;
@@ -21,8 +19,8 @@ final class PhameBlog extends PhameDAO
   protected $editPolicy;
   protected $joinPolicy;
 
-  private $bloggerPHIDs;
-  private $bloggers;
+  private $bloggerPHIDs = self::ATTACHABLE;
+  private $bloggers = self::ATTACHABLE;
 
   static private $requestBlog;
 
@@ -37,7 +35,7 @@ final class PhameBlog extends PhameDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_BLOG);
+      PhabricatorPhamePHIDTypeBlog::TYPECONST);
   }
 
   public function getSkinRenderer(AphrontRequest $request) {
@@ -70,74 +68,46 @@ final class PhameBlog extends PhameDAO
    * @return string
    */
   public function validateCustomDomain($custom_domain) {
-    $example_domain = '(e.g. blog.example.com)';
-    $valid          = '';
+    $example_domain = 'blog.example.com';
 
     // note this "uri" should be pretty busted given the desired input
     // so just use it to test if there's a protocol specified
     $uri = new PhutilURI($custom_domain);
     if ($uri->getProtocol()) {
-      return 'Do not specify a protocol, just the domain. '.$example_domain;
+      return pht(
+        'The custom domain should not include a protocol. Just provide '.
+        'the bare domain name (for example, "%s").',
+        $example_domain);
+    }
+
+    if ($uri->getPort()) {
+      return pht(
+        'The custom domain should not include a port number. Just provide '.
+        'the bare domain name (for example, "%s").',
+        $example_domain);
     }
 
     if (strpos($custom_domain, '/') !== false) {
-      return 'Do not specify a path, just the domain. '.$example_domain;
+      return pht(
+        'The custom domain should not specify a path (hosting a Phame '.
+        'blog at a path is currently not supported). Instead, just provide '.
+        'the bare domain name (for example, "%s").',
+        $example_domain);
     }
 
     if (strpos($custom_domain, '.') === false) {
-      return 'Custom domain must contain at least one dot (.) because '.
-        'some browsers fail to set cookies on domains such as '.
-        'http://example. '.$example_domain;
+      return pht(
+        'The custom domain should contain at least one dot (.) because '.
+        'some browsers fail to set cookies on domains without a dot. Instead, '.
+        'use a normal looking domain name like "%s".',
+        $example_domain);
     }
 
-    return $valid;
-  }
-
-  public function loadBloggerPHIDs() {
-    if (!$this->getPHID()) {
-      return $this;
-    }
-
-    if ($this->bloggerPHIDs) {
-      return $this;
-    }
-
-    $this->bloggerPHIDs = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $this->getPHID(),
-      PhabricatorEdgeConfig::TYPE_BLOG_HAS_BLOGGER);
-
-    return $this;
+    return null;
   }
 
   public function getBloggerPHIDs() {
-    if ($this->bloggerPHIDs === null) {
-      throw new Exception(
-        'You must loadBloggerPHIDs before you can getBloggerPHIDs!'
-      );
-    }
-
-    return $this->bloggerPHIDs;
-  }
-
-  public function loadBloggers() {
-    if ($this->bloggers) {
-      return $this->bloggers;
-    }
-
-    $blogger_phids = $this->loadBloggerPHIDs()->getBloggerPHIDs();
-
-    if (empty($blogger_phids)) {
-      return array();
-    }
-
-    $bloggers = id(new PhabricatorObjectHandleData($blogger_phids))
-      // TODO: This should be Query-based (T603).
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->loadHandles();
-
-    $this->attachBloggers($bloggers);
-
-    return $this;
+    return $this->assertAttached($this->bloggerPHIDs);
   }
 
   public function attachBloggers(array $bloggers) {
@@ -149,13 +119,7 @@ final class PhameBlog extends PhameDAO
   }
 
   public function getBloggers() {
-    if ($this->bloggers === null) {
-      throw new Exception(
-        'You must loadBloggers or attachBloggers before you can getBloggers!'
-      );
-    }
-
-    return $this->bloggers;
+    return $this->assertAttached($this->bloggers);
   }
 
   public function getSkin() {
@@ -185,6 +149,21 @@ final class PhameBlog extends PhameDAO
 
   public static function getRequestBlog() {
     return self::$requestBlog;
+  }
+
+  public function getLiveURI(PhamePost $post = null) {
+    if ($this->getDomain()) {
+      $base = new PhutilURI('http://'.$this->getDomain().'/');
+    } else {
+      $base = '/phame/live/'.$this->getID().'/';
+      $base = PhabricatorEnv::getURI($base);
+    }
+
+    if ($post) {
+      $base .= '/post/'.$post->getPhameTitle();
+    }
+
+    return $base;
   }
 
 
@@ -234,6 +213,20 @@ final class PhameBlog extends PhameDAO
     }
 
     return false;
+  }
+
+
+  public function describeAutomaticCapability($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return pht(
+          'Users who can edit or post on a blog can always view it.');
+      case PhabricatorPolicyCapability::CAN_JOIN:
+        return pht(
+          'Users who can edit a blog can always post on it.');
+    }
+
+    return null;
   }
 
 

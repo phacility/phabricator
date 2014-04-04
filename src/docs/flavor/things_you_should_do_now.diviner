@@ -1,0 +1,138 @@
+@title Things You Should Do Now
+@group sundry
+
+Describes things you should do now when building software, because the cost to
+do them increases over time and eventually becomes prohibitive or impossible.
+
+
+= Overview =
+
+If you're building a hot new web startup, there are a lot of decisions to make
+about what to focus on. Most things you'll build will take about the same amount
+of time to build regardless of what order you build them in, but there are a few
+technical things which become vastly more expensive to fix later.
+
+If you don't do these things early in development, they'll become very hard or
+impossible to do later. This is basically a list of things that would have saved
+Facebook huge amounts of time and effort down the road if someone had spent
+a tiny amount of time on them earlier in the development process.
+
+See also @{article:Things You Should Do Soon} for things that scale less
+drastically over time.
+
+
+= Start IDs At a Gigantic Number =
+
+If you're using integer IDs to identify data or objects, **don't** start your
+IDs at 1. Start them at a huge number (e.g., 2^33) so that no object ID will
+ever appear in any other role in your application (like a count, a natural
+index, a byte size, a timestamp, etc). This takes about 5 seconds if you do it
+before you launch and rules out a huge class of nasty bugs for all time. It
+becomes incredibly difficult as soon as you have production data.
+
+The kind of bug that this causes is accidental use of some other value as an ID:
+
+  COUNTEREXAMPLE
+  // Load the user's friends, returns a map of friend_id => true
+  $friend_ids = user_get_friends($user_id);
+
+  // Get the first 8 friends.
+  $first_few_friends = array_slice($friend_ids, 0, 8);
+
+  // Render those friends.
+  render_user_friends($user_id, array_keys($first_few_friends));
+
+Because array_slice() in PHP discards array indices and renumbers them, this
+doesn't render the user's first 8 friends but the users with IDs 0 through 7,
+e.g. Mark Zuckerberg (ID 4) and Dustin Moskovitz (ID 6). If you have IDs in this
+range, sooner or later something that isn't an ID will get treated like an ID
+and the operation will be valid and cause unexpected behavior. This is
+completely avoidable if you start your IDs at a gigantic number.
+
+
+= Only Store Valid UTF-8 =
+
+For the most part, you can ignore UTF-8 and unicode until later. However, there
+is one aspect of unicode you should address now: store only valid UTF-8 strings.
+
+Assuming you're storing data internally as UTF-8 (this is almost certainly the
+right choice and definitely the right choice if you have no idea how unicode
+works), you just need to sanitize all the data coming into your application and
+make sure it's valid UTF-8.
+
+If your application emits invalid UTF-8, other systems (like browsers) will
+break in unexpected and interesting ways. You will eventually be forced to
+ensure you emit only valid UTF-8 to avoid these problems. If you haven't
+sanitized your data, you'll basically have two options:
+
+  - do a huge migration on literally all of your data to sanitize it; or
+  - forever sanitize all data on its way out on the read pathways.
+
+As of 2011 Facebook is in the second group, and spends several milliseconds of
+CPU time sanitizing every display string on its way to the browser, which
+multiplies out to hundreds of servers worth of CPUs sitting in a datacenter
+paying the price for the invalid UTF-8 in the databases.
+
+You can likely learn enough about unicode to be confident in an implementation
+which addresses this problem within a few hours. You don't need to learn
+everything, just the basics. Your language probably already has a function which
+does the sanitizing for you.
+
+
+= Never Design a Blacklist-Based Security System =
+
+When you have an alternative, don't design security systems which are default
+permit, blacklist-based, or otherwise attempt to enumerate badness. When
+Facebook launched Platform, it launched with a blacklist-based CSS filter, which
+basically tried to enumerate all the "bad" parts of CSS and filter them out.
+This was a poor design choice and lead to basically infinite security holes for
+all time.
+
+It is very difficult to enumerate badness in a complex system and badness is
+often a moving target. Instead of trying to do this, design whitelist-based
+security systems where you list allowed things and reject anything you don't
+understand. Assume things are bad until you verify that they're OK.
+
+It's tempting to design blacklist-based systems because they're easier to write
+and accept more inputs. In the case of the CSS filter, the product goal was for
+users to just be able to use CSS normally and feel like this system was no
+different from systems they were familiar with. A whitelist-based system would
+reject some valid, safe inputs and create product friction.
+
+But this is a much better world than the alternative, where the blacklist-based
+system fails to reject some dangerous inputs and creates //security holes//. It
+//also// creates product friction because when you fix those holes you break
+existing uses, and that backward-compatibility friction makes it very difficult
+to move the system from a blacklist to a whitelist. So you're basically in
+trouble no matter what you do, and have a bunch of security holes you need to
+unbreak immediately, so you won't even have time to feel sorry for yourself.
+
+Designing blacklist-based security is one of the worst now-vs-future tradeoffs
+you can make. See also "The Six Dumbest Ideas in Computer Security":
+
+http://www.ranum.com/security/computer_security/
+
+
+= Fail Very Loudly when SQL Syntax Errors Occur in Production =
+
+This doesn't apply if you aren't using SQL, but if you are: detect when a query
+fails because of a syntax error (in MySQL, it is error 1064). If the failure
+happened in production, fail in the loudest way possible. (I implemented this in
+2008 at Facebook and had it just email me and a few other people directly. The
+system was eventually refined.)
+
+This basically creates a high-signal stream that tells you where you have SQL
+injection holes in your application. It will have some false positives and could
+theoretically have false negatives, but at Facebook it was pretty high signal
+considering how important the signal is.
+
+Of course, the real solution here is to not have SQL injection holes in your
+application, ever. As far as I'm aware, this system correctly detected the one
+SQL injection hole we had from mid-2008 until I left in 2011, which was in a
+hackathon project on an underisolated semi-production tier and didn't use the
+query escaping system the rest of the application does.
+
+Hopefully, whatever language you're writing in has good query libraries that
+can handle escaping for you. If so, use them. If you're using PHP and don't have
+a solution in place yet, the Phabricator implementation of qsprintf() is similar
+to Facebook's system and was successful there.

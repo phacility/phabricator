@@ -33,39 +33,56 @@ final class PhabricatorWorkerTaskDetailController
     } else {
       $title = pht('Task %d', $task->getID());
 
-      $header = id(new PhabricatorHeaderView())
+      $header = id(new PHUIHeaderView())
         ->setHeader(pht('Task %d (%s)',
           $task->getID(),
           $task->getTaskClass()));
 
-      $actions    = $this->buildActionListView($task);
-      $properties = $this->buildPropertyListView($task);
+      $actions = $this->buildActionListView($task);
+      $properties = $this->buildPropertyListView($task, $actions);
+
+      $object_box = id(new PHUIObjectBoxView())
+        ->setHeader($header)
+        ->addPropertyList($properties);
+
+
+      $retry_head = id(new PHUIHeaderView())
+        ->setHeader(pht('Retries'));
+
+      $retry_info = $this->buildRetryListView($task);
+
+      $retry_box = id(new PHUIObjectBoxView())
+        ->setHeader($retry_head)
+        ->addPropertyList($retry_info);
 
       $content = array(
-        $header,
-        $actions,
-        $properties,
+        $object_box,
+        $retry_box,
       );
     }
 
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('');
-    $nav->appendChild($content);
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb($title);
 
     return $this->buildApplicationPage(
-      $nav,
+      array(
+        $crumbs,
+        $content,
+      ),
       array(
         'title' => $title,
+        'device' => true,
       ));
   }
 
   private function buildActionListView(PhabricatorWorkerTask $task) {
-    $user = $this->getRequest()->getUser();
-
-    $view = new PhabricatorActionListView();
-    $view->setUser($user);
-
+    $request = $this->getRequest();
+    $user = $request->getUser();
     $id = $task->getID();
+
+    $view = id(new PhabricatorActionListView())
+      ->setUser($user)
+      ->setObjectURI($request->getRequestURI());
 
     if ($task->isArchived()) {
       $result_success = PhabricatorWorkerArchiveTask::RESULT_SUCCESS;
@@ -101,8 +118,14 @@ final class PhabricatorWorkerTaskDetailController
     return $view;
   }
 
-  private function buildPropertyListView(PhabricatorWorkerTask $task) {
-    $view = new PhabricatorPropertyListView();
+  private function buildPropertyListView(
+    PhabricatorWorkerTask $task,
+    PhabricatorActionListView $actions) {
+
+    $viewer = $this->getRequest()->getUser();
+
+    $view = new PHUIPropertyListView();
+    $view->setActionList($actions);
 
     if ($task->isArchived()) {
       switch ($task->getResult()) {
@@ -161,10 +184,6 @@ final class PhabricatorWorkerTaskDetailController
       pht('Lease Expires'),
       $expires);
 
-    $view->addProperty(
-      pht('Failure Count'),
-      $task->getFailureCount());
-
     if ($task->isArchived()) {
       $duration = number_format($task->getDuration()).' us';
     } else {
@@ -178,11 +197,70 @@ final class PhabricatorWorkerTaskDetailController
     $data = id(new PhabricatorWorkerTaskData())->load($task->getDataID());
     $task->setData($data->getData());
     $worker = $task->getWorkerInstance();
-    $data = $worker->renderForDisplay();
+    $data = $worker->renderForDisplay($viewer);
 
     $view->addProperty(
       pht('Data'),
       $data);
+
+    return $view;
+  }
+
+  private function buildRetryListView(PhabricatorWorkerTask $task) {
+    $view = new PHUIPropertyListView();
+
+    $data = id(new PhabricatorWorkerTaskData())->load($task->getDataID());
+    $task->setData($data->getData());
+    $worker = $task->getWorkerInstance();
+
+    $view->addProperty(
+      pht('Failure Count'),
+      $task->getFailureCount());
+
+    $retry_count = $worker->getMaximumRetryCount();
+    if ($retry_count === null) {
+      $max_retries = phutil_tag('em', array(), pht('Retries Forever'));
+      $retry_count = INF;
+    } else {
+      $max_retries = $retry_count;
+    }
+
+    $view->addProperty(
+      pht('Maximum Retries'),
+      $max_retries);
+
+    $projection = clone $task;
+    $projection->makeEphemeral();
+
+    $next = array();
+    for ($ii = $task->getFailureCount(); $ii < $retry_count; $ii++) {
+      $projection->setFailureCount($ii);
+      $next[] = $worker->getWaitBeforeRetry($projection);
+      if (count($next) > 10) {
+        break;
+      }
+    }
+
+    if ($next) {
+      $cumulative = 0;
+      foreach ($next as $key => $duration) {
+        if ($duration === null) {
+          $duration = 60;
+        }
+        $cumulative += $duration;
+        $next[$key] = phabricator_format_relative_time($cumulative);
+      }
+      if ($ii != $retry_count) {
+        $next[] = '...';
+      }
+      $retries_in = implode(', ', $next);
+    } else {
+      $retries_in = pht('No More Retries');
+    }
+
+    $view->addProperty(
+      pht('Retries After'),
+      $retries_in);
 
     return $view;
   }

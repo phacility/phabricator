@@ -12,7 +12,6 @@
 
 .phabricator-main-menu {
   background: #2d3236;
-  background-image: url(/rsrc/image/main_texture.png);
   background-repeat: repeat-x;
   position: relative;
   box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.25);
@@ -21,6 +20,7 @@
 
 .device-desktop .phabricator-main-menu {
   height: 44px;
+  padding-right: 4px;
 }
 
 .phabricator-main-menu a:hover {
@@ -41,7 +41,7 @@
 
 .phabricator-main-menu-logo {
   display: inline-block;
-  width: 139px;
+  width: 149px;
   height: 44px;
   float: left;
   margin-right: 6px;
@@ -49,14 +49,10 @@
   padding-left: 6px;
 }
 
-.device-desktop .phabricator-main-menu-logo:hover {
-  background-color: #1e2225;
-}
-
-.phabricator-main-menu-logo-image {
+.menu-logo-image {
   position: absolute;
-  width: 139px;
-  height: 25px;
+  width: 149px;
+  height: 26px;
   top: 9px;
 }
 
@@ -103,8 +99,12 @@
   width: 220px;
 }
 
+.device .phabricator-main-menu-search {
+  height: 40px;
+}
+
 .phabricator-main-menu-search-container {
-  padding: 10px 0;
+  padding: 9px 0 10px 0;
   position: relative;
   height: 24px;
   margin: 0 8px;
@@ -126,7 +126,7 @@
 }
 
 .device .phabricator-main-menu-search-container {
-  padding: 0;
+  padding: 4px 0;
 }
 
 .phabricator-main-menu .phabricator-main-menu-search input {
@@ -135,18 +135,23 @@
   box-shadow: none;
   transition: none;
 
-  color: #999;
+  color: {$lightgreytext};
   width: 100%;
   right: 0;
   position: absolute;
   font-size: 13px;
   border: 1px solid #333;
   border-radius: 12px;
-  background-color: #555;
+  background-color: #222;
+  opacity: .8;
   height: 26px;
   line-height: 12px;
   box-shadow: 0px 1px 1px rgba(128, 128, 128, 0.25);
   padding: 6px 32px 6px 10px;
+}
+
+.phabricator-main-menu.main-header-dark .phabricator-main-menu-search input {
+  background-color: #555;
 }
 
 .device .phabricator-main-menu-search input {
@@ -157,6 +162,7 @@
 
 .phabricator-main-menu .phabricator-main-menu-search input:focus {
   background: #fff;
+  opacity: 1;
   color: #333;
   border-color: #e7e7e7;
   box-shadow: none;
@@ -165,13 +171,13 @@
 }
 
 .phabricator-main-menu-search input.jx-typeahead-placeholder {
-  color: #999;
+  color: #fff;
 }
 
 .phabricator-main-menu-search button {
   position: absolute;
   color: transparent;
-  background: transparent 5px 6px url(/rsrc/image/search.png) no-repeat;
+  background: transparent 5px 6px url(/rsrc/image/search-white.png) no-repeat;
   border: none;
   outline: none;
   box-shadow: none;
@@ -180,12 +186,12 @@
 
   height: 20px;
   width: 20px;
-  top: 11px;
+  top: 10px;
   right: 6px;
 }
 
 .device .phabricator-main-menu-search button {
-  top: 3px;
+  top: 7px;
 }
 
 .phabricator-main-menu-search-target div.jx-typeahead-results {
@@ -200,8 +206,8 @@
 
 .phabricator-main-search-typeahead-result {
   display: block;
-  padding: 1px 4px 1px 38px;
-  background-position: 4px 4px;
+  padding: 6px 12px 6px 46px;
+  background-position: 12px 9px;
   background-size: 25px 25px;
   background-repeat: no-repeat;
 }
@@ -214,9 +220,14 @@
 }
 
 .phabricator-main-search-typeahead-result .result-type {
-  color: #888;
+  color: {$lightgreytext};
   font-size: 11px;
   font-weight: normal;
+}
+
+.device .phabricator-application-menu-expanded.phabricator-search-menu-expanded
+ .phabricator-search-menu {
+  padding: 0;
 }
 
 
@@ -230,10 +241,10 @@
   display: inline-block;
   border-radius: 15px;
   float: left;
-  background: rgba(0,0,0,.2);
+  background: rgba(0,0,0,.5);
   height: 20px;
   padding: 2px 10px 3px 8px;
-  margin-top: 9px;
+  margin-top: 10px;
 }
 
 .phabricator-main-menu-alert-icon,
@@ -274,27 +285,20 @@
 */
 
 .device .phabricator-dark-menu,
-.device .phabricator-dark-menu a.phabricator-menu-item-type-link {
+.device .phabricator-dark-menu a.phui-list-item-href {
   color: #fff;
-
 }
 
-.device .phabricator-dark-menu .phabricator-menu-item-type-label {
+.device .phabricator-dark-menu .phui-list-item-type-label {
   text-transform: uppercase;
   font-size: 12px;
   background-color: #151719;
-  padding: 0 0 0 12px;
-  height: 25px;
+  padding: 5px 0;
+  display: block;
   font-weight: bold;
 }
 
-.device .phabricator-dark-menu .phabricator-menu-item-type-label
-  .phabricator-menu-item-name {
-  display: block;
-  padding: 6px 0 0;
-}
-
-.device .phabricator-dark-menu .phabricator-menu-item-type-link {
+.device .phabricator-dark-menu .phui-list-item-href {
   border-width: 1px 0;
   border-style: solid;
   border-color: #34373b transparent #282c2d;
@@ -320,7 +324,6 @@
 
 .device-desktop .phabricator-search-menu {
   float: right;
-  margin-right: 116px;
 }
 
 .device .phabricator-search-menu-expanded .phabricator-search-menu {
@@ -328,54 +331,55 @@
   padding-top: 44px;
 }
 
-.device .phabricator-dark-menu .phabricator-menu-item-type-link {
+.device .phabricator-dark-menu .phui-list-item-type-link {
   font-size: 15px;
   min-height: 30px;
   line-height: 28px;
 }
 
-.device .phabricator-menu-item-type-link
-  .phabricator-core-menu-icon + .phabricator-menu-item-name {
-  margin-left: 36px;
+.device .phui-list-item-type-link
+  .phabricator-core-menu-icon + .phui-list-item-name {
+  margin-left: 30px;
 }
 
 .device-desktop .phabricator-application-menu {
-  position: absolute;
-  right: 0;
-  top: 0;
-  vertical-align: top;
+  float: right;
 }
 
-.device-desktop .phabricator-application-menu a.phabricator-menu-item-view,
-.device-desktop .phabricator-application-menu .phabricator-menu-item-name {
+.device-desktop .phabricator-application-menu .phui-list-item-view,
+.device-desktop .phabricator-application-menu .phui-list-item-name  {
   display: none;
 }
 
-.device-desktop .phabricator-application-menu
-  a.phabricator-menu-item-view.phabricator-core-menu-item {
+.device-desktop .phabricator-application-menu .phui-list-item-view.core-menu-item {
   display: block;
 }
 
-.device-desktop .phabricator-application-menu
-  a.phabricator-menu-item-view.phabricator-core-menu-item:hover {
-  background-color: #1e2225;
+.device-desktop .main-header-dark .phabricator-application-menu
+ .core-menu-item.phui-list-item-view:hover,
+.device-desktop .main-header-dark .phabricator-main-menu-logo:hover {
+  background-color: rgba(0,0,0,.6);
 }
 
-.device-desktop .phabricator-application-menu .phabricator-menu-item-view {
-  display: block;
+.device-desktop .phabricator-application-menu
+ .core-menu-item.phui-list-item-view:hover,
+.device-desktop .phabricator-main-menu-logo:hover {
+  background-color: rgba(0,0,0,.3);
+  box-shadow: inset 0 5px 10px rgba(0,0,0,0.5);
+  border-radius: 3px;
+}
+
+.device-desktop .phabricator-application-menu .phui-list-item-view {
   float: left;
   position: relative;
-  min-width: 40px;
-  height: 44px;
-}
-
-.device-desktop .phabricator-application-menu .phabricator-core-item-device {
-  display: none;
+  min-width: 36px;
+  height: 36px;
+  margin-top: 4px;
 }
 
 .device-desktop .phabricator-core-menu-icon {
-  top: 9px;
-  left: 6px;
+  top: 5px;
+  left: 4px;
 }
 
 .device .phabricator-core-menu-icon {
@@ -389,6 +393,17 @@
   height: 28px;
 }
 
+.phabricator-main-menu-dropdown {
+  position: absolute;
+  background: #fff;
+  top: 38px;
+  padding: 2px;
+  border: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
+  box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+
 /* - Application Menu ----------------------------------------------------------
 
   Styles unique to the application menu (right button on mobile).
@@ -401,10 +416,18 @@
 }
 
 .device .phabricator-application-menu,
-.device-desktop .phabricator-dark-menu .phabricator-menu-item-type-label {
+.device-desktop .phabricator-dark-menu .phui-list-item-type-label {
   display: none;
 }
 
-.phabricator-application-menu .phabricator-menu-item-name {
+.phabricator-application-menu .phui-list-item-name {
   padding-left: 12px;
+}
+
+
+/* - Print ---------------------------------------------------------------------
+*/
+
+!print .phabricator-main-menu {
+  display: none;
 }

@@ -12,10 +12,9 @@ extends PhabricatorInlineCommentPreviewController {
   protected function loadInlineComments() {
     $user = $this->getRequest()->getUser();
 
-    $inlines = id(new DifferentialInlineComment())->loadAllWhere(
-      'authorPHID = %s AND revisionID = %d AND commentID IS NULL',
-      $user->getPHID(),
-      $this->revisionID);
+    $inlines = id(new DifferentialInlineCommentQuery())
+      ->withDraftComments($user->getPHID(), $this->revisionID)
+      ->execute();
 
     return $inlines;
   }

@@ -21,19 +21,15 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
 
     $proj = $this->refreshProject($proj, $user, true);
 
-    PhabricatorProjectEditor::applyJoinProject($proj, $user);
+    $this->joinProject($proj, $user);
     $proj->setViewPolicy(PhabricatorPolicies::POLICY_USER);
     $proj->save();
 
     $can_view = PhabricatorPolicyCapability::CAN_VIEW;
 
     // When the view policy is set to "users", any user can see the project.
-    $this->assertEqual(
-      true,
-      (bool)$this->refreshProject($proj, $user));
-    $this->assertEqual(
-      true,
-      (bool)$this->refreshProject($proj, $user2));
+    $this->assertTrue((bool)$this->refreshProject($proj, $user));
+    $this->assertTrue((bool)$this->refreshProject($proj, $user2));
 
 
     // When the view policy is set to "no one", members can still see the
@@ -41,12 +37,8 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $proj->setViewPolicy(PhabricatorPolicies::POLICY_NOONE);
     $proj->save();
 
-    $this->assertEqual(
-      true,
-      (bool)$this->refreshProject($proj, $user));
-    $this->assertEqual(
-      false,
-      (bool)$this->refreshProject($proj, $user2));
+    $this->assertTrue((bool)$this->refreshProject($proj, $user));
+    $this->assertFalse((bool)$this->refreshProject($proj, $user2));
   }
 
   public function testEditProject() {
@@ -66,9 +58,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $proj->setEditPolicy(PhabricatorPolicies::POLICY_USER);
     $proj->save();
 
-    $this->assertEqual(
-      true,
-      $this->attemptProjectEdit($proj, $user));
+    $this->assertTrue($this->attemptProjectEdit($proj, $user));
 
 
     // When edit policy is set to "no one", no one can edit.
@@ -81,7 +71,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     } catch (Exception $ex) {
       $caught = $ex;
     }
-    $this->assertEqual(true, ($caught instanceof Exception));
+    $this->assertTrue($caught instanceof Exception);
   }
 
   private function attemptProjectEdit(
@@ -94,12 +84,13 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $new_name = $proj->getName().' '.mt_rand();
 
     $xaction = new PhabricatorProjectTransaction();
-    $xaction->setTransactionType(PhabricatorProjectTransactionType::TYPE_NAME);
+    $xaction->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME);
     $xaction->setNewValue($new_name);
 
-    $editor = new PhabricatorProjectEditor($proj);
+    $editor = new PhabricatorProjectTransactionEditor();
     $editor->setActor($user);
-    $editor->applyTransactions(array($xaction));
+    $editor->setContentSource(PhabricatorContentSource::newConsoleSource());
+    $editor->applyTransactions($proj, array($xaction));
 
     return true;
   }
@@ -112,60 +103,54 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $proj->save();
 
     $proj = $this->refreshProject($proj, $user, true);
-    $this->assertEqual(
-      true,
+    $this->assertTrue(
       (bool)$proj,
       'Assumption that projects are default visible to any user when created.');
 
-    $this->assertEqual(
-      false,
+    $this->assertFalse(
       $proj->isUserMember($user->getPHID()),
       'Arbitrary user not member of project.');
 
     // Join the project.
-    PhabricatorProjectEditor::applyJoinProject($proj, $user);
+    $this->joinProject($proj, $user);
 
     $proj = $this->refreshProject($proj, $user, true);
-    $this->assertEqual(true, (bool)$proj);
+    $this->assertTrue((bool)$proj);
 
-    $this->assertEqual(
-      true,
+    $this->assertTrue(
       $proj->isUserMember($user->getPHID()),
       'Join works.');
 
 
     // Join the project again.
-    PhabricatorProjectEditor::applyJoinProject($proj, $user);
+    $this->joinProject($proj, $user);
 
     $proj = $this->refreshProject($proj, $user, true);
-    $this->assertEqual(true, (bool)$proj);
+    $this->assertTrue((bool)$proj);
 
-    $this->assertEqual(
-      true,
+    $this->assertTrue(
       $proj->isUserMember($user->getPHID()),
       'Joining an already-joined project is a no-op.');
 
 
     // Leave the project.
-    PhabricatorProjectEditor::applyLeaveProject($proj, $user);
+    $this->leaveProject($proj, $user);
 
     $proj = $this->refreshProject($proj, $user, true);
-    $this->assertEqual(true, (bool)$proj);
+    $this->assertTrue((bool)$proj);
 
-    $this->assertEqual(
-      false,
+    $this->assertFalse(
       $proj->isUserMember($user->getPHID()),
       'Leave works.');
 
 
     // Leave the project again.
-    PhabricatorProjectEditor::applyLeaveProject($proj, $user);
+    $this->leaveProject($proj, $user);
 
     $proj = $this->refreshProject($proj, $user, true);
-    $this->assertEqual(true, (bool)$proj);
+    $this->assertTrue((bool)$proj);
 
-    $this->assertEqual(
-      false,
+    $this->assertFalse(
       $proj->isUserMember($user->getPHID()),
       'Leaving an already-left project is a no-op.');
 
@@ -178,11 +163,11 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $proj = $this->refreshProject($proj, $user, true);
     $caught = null;
     try {
-      PhabricatorProjectEditor::applyJoinProject($proj, $user);
+      $this->joinProject($proj, $user);
     } catch (Exception $ex) {
       $caught = $ex;
     }
-    $this->assertEqual(true, ($ex instanceof Exception));
+    $this->assertTrue($ex instanceof Exception);
 
 
     // If a user can edit a project, they can join.
@@ -191,13 +176,12 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $proj->save();
 
     $proj = $this->refreshProject($proj, $user, true);
-    PhabricatorProjectEditor::applyJoinProject($proj, $user);
+    $this->joinProject($proj, $user);
     $proj = $this->refreshProject($proj, $user, true);
-    $this->assertEqual(
-      true,
+    $this->assertTrue(
       $proj->isUserMember($user->getPHID()),
       'Join allowed with edit permission.');
-    PhabricatorProjectEditor::applyLeaveProject($proj, $user);
+    $this->leaveProject($proj, $user);
 
 
     // If a user can join a project, they can join, even if they can't edit.
@@ -206,10 +190,9 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $proj->save();
 
     $proj = $this->refreshProject($proj, $user, true);
-    PhabricatorProjectEditor::applyJoinProject($proj, $user);
+    $this->joinProject($proj, $user);
     $proj = $this->refreshProject($proj, $user, true);
-    $this->assertEqual(
-      true,
+    $this->assertTrue(
       $proj->isUserMember($user->getPHID()),
       'Join allowed with join permission.');
 
@@ -220,10 +203,9 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $proj->save();
 
     $proj = $this->refreshProject($proj, $user, true);
-    PhabricatorProjectEditor::applyLeaveProject($proj, $user);
+    $this->leaveProject($proj, $user);
     $proj = $this->refreshProject($proj, $user, true);
-    $this->assertEqual(
-      false,
+    $this->assertFalse(
       $proj->isUserMember($user->getPHID()),
       'Leave allowed without any permission.');
   }
@@ -271,6 +253,40 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $user->setRealName('Unit Test User '.$rand);
 
     return $user;
+  }
+
+  private function joinProject(
+    PhabricatorProject $project,
+    PhabricatorUser $user) {
+    $this->joinOrLeaveProject($project, $user, '+');
+  }
+
+  private function leaveProject(
+    PhabricatorProject $project,
+    PhabricatorUser $user) {
+    $this->joinOrLeaveProject($project, $user, '-');
+  }
+
+  private function joinOrLeaveProject(
+    PhabricatorProject $project,
+    PhabricatorUser $user,
+    $operation) {
+
+    $spec = array(
+      $operation => array($user->getPHID() => $user->getPHID()),
+    );
+
+    $xactions = array();
+    $xactions[] = id(new PhabricatorProjectTransaction())
+      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+      ->setMetadataValue('edge:type', PhabricatorEdgeConfig::TYPE_PROJ_MEMBER)
+      ->setNewValue($spec);
+
+    $editor = id(new PhabricatorProjectTransactionEditor())
+      ->setActor($user)
+      ->setContentSource(PhabricatorContentSource::newConsoleSource())
+      ->setContinueOnNoEffect(true)
+      ->applyTransactions($project, $xactions);
   }
 
 }

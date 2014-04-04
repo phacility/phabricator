@@ -116,7 +116,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       ),
       $issue->getName());
 
-    return phutil_tag(
+    $issue = phutil_tag(
       'div',
       array(
         'class' => 'setup-issue',
@@ -125,6 +125,23 @@ final class PhabricatorSetupIssueView extends AphrontView {
         $name,
         $description,
         $next,
+      ));
+
+    $debug_info = phutil_tag(
+      'div',
+      array(
+        'class' => 'setup-issue-debug',
+      ),
+      pht('Host: %s', php_uname('n')));
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'setup-issue-shell',
+      ),
+      array(
+        $issue,
+        $debug_info,
       ));
   }
 
@@ -177,7 +194,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
     } else {
       $update = array();
       foreach ($configs as $config) {
-        if (!idx($options, $config) || $options[$config]->getLocked()) {
+        if (idx($options, $config) && $options[$config]->getLocked()) {
           continue;
         }
         $link = phutil_tag(
@@ -301,9 +318,14 @@ final class PhabricatorSetupIssueView extends AphrontView {
       array(),
       pht(
         'You can find more information about PHP configuration values in the '.
-        '<a href="%s">PHP Documentation</a>.',
-        'http://php.net/manual/ini.list.php',
-        hsprintf('')));
+        '%s.',
+        phutil_tag(
+          'a',
+          array(
+            'href' => 'http://php.net/manual/ini.list.php',
+            'target' => '_blank',
+          ),
+          pht('PHP Documentation'))));
 
     $info[] = phutil_tag(
       'p',

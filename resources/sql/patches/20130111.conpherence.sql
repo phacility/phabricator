@@ -1,4 +1,3 @@
-
 CREATE TABLE {$NAMESPACE}_conpherence.conpherence_thread (
   id INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
   phid VARCHAR(64) NOT NULL COLLATE utf8_bin,
@@ -80,4 +79,3 @@ CREATE TABLE {$NAMESPACE}_conpherence.conpherence_transaction_comment (
   UNIQUE KEY `key_draft` (authorPHID, conpherencePHID, transactionPHID)
 
 ) ENGINE=InnoDB, COLLATE utf8_general_ci;
-

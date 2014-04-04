@@ -2,47 +2,91 @@
  * @provides aphront-list-filter-view-css
  */
 
-.aphront-filter-table-wrapper {
-  border-left: 1px solid #e7e7e7;
-  border-right: 1px solid #e7e7e7;
-  border-bottom: 1px solid #c0c5d1;
-  margin: 0 20px;
-}
-
-.device-phone .aphront-filter-table-wrapper {
-  margin: 0;
-  padding: 0;
-  background: #fff;
+.aphront-list-filter-wrap {
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
+  margin: 0 16px;
 }
 
 .aphront-list-filter-view {
   background: #fff;
-  width: 100%;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  padding: 0;
 }
 
-.aphront-list-filter-view-controls {
-  width: 100%;
+.device-phone .aphront-list-filter-wrap {
+  margin: 0 -2px;
 }
 
-.aphront-list-filter-view-controls .aphront-form-view {
+.aphront-list-filter-view-content .phui-form-view {
   border-left: none;
   border-right: none;
   padding: 12px 0 6px;
 }
 
-.aphront-list-filter-view-controls .aphront-form-view .aphront-form-label {
+/* When a list filter view contains two consecuitive forms, lay them out
+   without much white space in between them so they look more contiugous. At
+   the time of writing, this is used only in the Diffusion repository search
+   UI. */
+.aphront-list-filter-view-content form + form .phui-form-view {
+  margin-top: -18px;
+}
+
+.aphront-list-filter-view-content .phui-form-view .aphront-form-label {
   width: 12%;
 }
 
-.aphront-list-filter-view-controls .aphront-form-view .aphront-form-input {
+.aphront-list-filter-view-content .phui-form-view .aphront-form-input {
   width: 70%;
   margin-left: 13%;
   margin-right: 17%;
 }
 
-.device-phone .aphront-list-filter-view-controls .aphront-form-view .aphront-form-input {
+.device-phone .aphront-list-filter-view-content .phui-form-view
+  .aphront-form-input {
   width: 98%;
-  margin-left: 0%;
-  margin-right: 0%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.aphront-list-filter-view-collapsible .aphront-list-filter-view-content {
+  border-top: 1px solid #e7e7e7;
+}
+
+.aphront-list-filter-reveal {
+  margin-left: 13%;
+  margin-right: 18%;
+  padding: 8px 0;
+  overflow: hidden;
+  text-align: center;
+}
+
+.device .aphront-list-filter-reveal {
+  width: 98%;
+  margin: auto;
+  padding: 8px;
+}
+
+.aphront-list-filter-reveal a {
+  font-weight: bold;
+  float: right;
+}
+
+.device .aphront-list-filter-reveal a {
+  margin: 4px 0;
+  float: left;
+}
+
+.aphront-list-filter-description {
+  margin-right: 25%;
+  float: left;
+  text-align: left;
+  line-height: 25px;
+  color: {$greytext};
+}
+
+.device .aphront-list-filter-description {
+  float: none;
+  text-align: left;
+  margin-right: 0;
 }

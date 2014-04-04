@@ -19,10 +19,6 @@ final class PhortuneProductTransaction
     return null;
   }
 
-  public function getApplicationObjectTypeName() {
-    return pht('product');
-  }
-
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
 

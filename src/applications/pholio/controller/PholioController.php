@@ -5,17 +5,21 @@
  */
 abstract class PholioController extends PhabricatorController {
 
-  public function buildSideNav($filter = null, $for_app = false) {
+  public function buildSideNavView($for_app = false) {
+    $user = $this->getRequest()->getUser();
+
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    $nav->addLabel('Mocks');
-    $nav->addFilter('view/all', pht('All Mocks'));
-    $nav->addFilter('view/my', pht('My Mocks'));
+    id(new PholioMockSearchEngine())
+      ->setViewer($user)
+      ->addNavigationItems($nav->getMenu());
 
     if ($for_app) {
       $nav->addFilter('new/', pht('Create Mock'));
     }
+
+    $nav->selectFilter(null);
 
     return $nav;
   }
@@ -24,7 +28,7 @@ abstract class PholioController extends PhabricatorController {
     $crumbs = parent::buildApplicationCrumbs();
 
     $crumbs->addAction(
-      id(new PhabricatorMenuItemView())
+      id(new PHUIListItemView())
         ->setName(pht('Create Mock'))
         ->setHref($this->getApplicationURI('new/'))
         ->setIcon('create'));
@@ -33,7 +37,7 @@ abstract class PholioController extends PhabricatorController {
   }
 
   public function buildApplicationMenu() {
-    return $this->buildSideNav(null, true)->getMenu();
+    return $this->buildSideNavView(true)->getMenu();
   }
 
 

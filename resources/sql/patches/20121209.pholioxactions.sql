@@ -48,4 +48,3 @@ CREATE TABLE {$NAMESPACE}_pholio.pholio_transaction_comment (
   UNIQUE KEY `key_draft` (authorPHID, mockID, transactionPHID)
 
 ) ENGINE=InnoDB, COLLATE utf8_general_ci;
-

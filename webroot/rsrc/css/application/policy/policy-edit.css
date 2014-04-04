@@ -1,0 +1,32 @@
+/**
+ * @provides policy-edit-css
+ */
+
+.policy-rules-table {
+  width: 100%;
+}
+
+.policy-rules-table td {
+  padding: 4px;
+  width: 32px;
+  vertical-align: middle;
+}
+
+.policy-rules-table td.action-cell {
+  width: 120px;
+}
+
+.policy-rules-table td.rule-cell {
+  width: 180px;
+}
+
+.policy-rules-table td.value-cell {
+  width: auto;
+  padding-right: 12px;
+}
+
+.policy-rules-table td.action-cell select,
+.policy-rules-table td.rule-cell select,
+.policy-rules-table td input {
+  width: 100%;
+}

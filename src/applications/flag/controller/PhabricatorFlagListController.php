@@ -1,132 +1,78 @@
 <?php
 
-final class PhabricatorFlagListController extends PhabricatorFlagController {
+final class PhabricatorFlagListController extends PhabricatorFlagController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
+
+  private $queryKey;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
+
+  public function willProcessRequest(array $data) {
+    $this->queryKey = idx($data, 'queryKey');
+  }
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
-    $flag_order = $request->getStr('o', 'n');
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->queryKey)
+      ->setSearchEngine(new PhabricatorFlagSearchEngine())
+      ->setNavigation($this->buildSideNavView());
 
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI('/flag/view/'));
-    $nav->addLabel(pht('Flags'));
-    $nav->addFilter('all', pht('Your Flags'));
-    $nav->selectFilter('all', 'all');
+    return $this->delegateToController($controller);
+  }
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(id(new PhabricatorCrumbView)
-      ->setName(pht('Flags'))
-      ->setHref($request->getRequestURI()));
-    $nav->setCrumbs($crumbs);
+  public function renderResultsList(
+    array $flags,
+    PhabricatorSavedQuery $query) {
+    assert_instances_of($flags, 'PhabricatorFlag');
 
-    $filter_form = new AphrontFormView();
-    $filter_form->setNoShading(true);
-    $filter_form->setUser($user);
-    $filter_form->appendChild(
-      id(new AphrontFormToggleButtonsControl())
-        ->setName('o')
-        ->setLabel(pht('Sort Order'))
-        ->setBaseURI($request->getRequestURI(), 'o')
-        ->setValue($flag_order)
-        ->setButtons(
-          array(
-            'n'   => pht('Date'),
-            'c'   => pht('Color'),
-            'o'   => pht('Object Type'),
-          )));
+    $viewer = $this->getRequest()->getUser();
 
-    $filter = new AphrontListFilterView();
-    $filter->appendChild($filter_form);
-    $nav->appendChild($filter);
+    $list = id(new PHUIObjectItemListView())
+      ->setUser($viewer);
+    foreach ($flags as $flag) {
+      $id = $flag->getID();
+      $phid = $flag->getObjectPHID();
 
-    $query = new PhabricatorFlagQuery();
-    $query->withOwnerPHIDs(array($user->getPHID()));
-    $query->setViewer($user);
-    $query->needHandles(true);
+      $class = PhabricatorFlagColor::getCSSClass($flag->getColor());
 
-    switch ($flag_order) {
-      //   'r'
-      //   'a'
-      case 'n':
-        $order = PhabricatorFlagQuery::ORDER_ID;
-        break;
-      case 'c':
-        $order = PhabricatorFlagQuery::ORDER_COLOR;
-        break;
-      case 'o':
-        $order = PhabricatorFlagQuery::ORDER_OBJECT;
-        break;
-      default:
-        throw new Exception("Unknown order!");
-    }
-    $query->withOrder($order);
+      $flag_icon = phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-flag-icon '.$class,
+        ),
+        '');
 
-    $flags = $query->execute();
+      $item = id(new PHUIObjectItemView())
+        ->addHeadIcon($flag_icon)
+        ->setHeader($flag->getHandle()->renderLink());
 
-    $views = array();
-    if ($flag_order == 'n') {
-      $view = new PhabricatorFlagListView();
-      $view->setFlags($flags);
-      $view->setUser($user);
-      $view->setFlush(true);
-      $views[] = array(
-        'view'  => $view,
-      );
-    } else {
-      switch ($flag_order) {
-        case 'c':
-          $flags_tmp = mgroup($flags, 'getColor');
-          $flags = array();
-          foreach ($flags_tmp as $color => $flag_group) {
-            $title = pht('%s Flags',
-              PhabricatorFlagColor::getColorName($color));
-            $flags[$title] = $flag_group;
-          }
-          break;
-        case 'o':
-          $flags_tmp = mgroup($flags, 'getType');
-          $flags = array();
-          foreach ($flags_tmp as $color => $flag_group) {
-            // Appending an 's' to fake plurals
-            $title = head($flag_group)->getHandle()->getTypeName() . 's';
-            $flags[$title] = $flag_group;
-          }
-          break;
-        default:
-          throw new Exception("Unknown order!");
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setIcon('edit')
+          ->setHref($this->getApplicationURI("edit/{$phid}/"))
+          ->setWorkflow(true));
+
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setIcon('delete')
+          ->setHref($this->getApplicationURI("delete/{$id}/"))
+          ->setWorkflow(true));
+
+      if ($flag->getNote()) {
+        $item->addAttribute($flag->getNote());
       }
 
-      foreach ($flags as $group_title => $flag_group) {
-        $view = new PhabricatorFlagListView();
-        $view->setFlags($flag_group);
-        $view->setUser($user);
-        $view->setFlush(true);
-        $views[] = array(
-          'title' => pht('%s (%d)', $group_title, count($flag_group)),
-          'view'  => $view,
-        );
-      }
+      $item->addIcon(
+        'none',
+        phabricator_datetime($flag->getDateCreated(), $viewer));
+
+      $list->addItem($item);
     }
 
-    foreach ($views as $view) {
-      $panel = new AphrontPanelView();
-      $panel->setNoBackground();
-
-      $title = idx($view, 'title');
-      if ($title) {
-        $panel->setHeader($title);
-      }
-      $panel->appendChild($view['view']);
-      $nav->appendChild($panel);
-    }
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => pht('Flags'),
-        'device' => true,
-        'dust'  => true,
-      ));
+    return $list;
   }
 
 }
