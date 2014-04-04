@@ -44,12 +44,13 @@ final class DifferentialTransactionComment
       $items = array();
       foreach ($group as $inline) {
         $comment = $inline->getComment();
-        $num = (int)$comment->getLineNumber();
-        $len = (int)$comment->getLineLength();
+        $num = $comment->getLineNumber();
+        $len = $comment->getLineLength();
+        $id = $comment->getID();
 
         $items[] = array(
           'inline' => $inline,
-          'sort' => ($num << 16) + $len,
+          'sort' => sprintf('~%010d%010d%010d', $num, $len, $id),
         );
       }
 
