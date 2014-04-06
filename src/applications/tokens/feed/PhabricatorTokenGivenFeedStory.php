@@ -48,7 +48,7 @@ final class PhabricatorTokenGivenFeedStory
       strip_tags(
         hsprintf(
           '%s',
-          $this->renderView()->render())));
+          $this->renderView()->getTitle())));
   }
 
 }

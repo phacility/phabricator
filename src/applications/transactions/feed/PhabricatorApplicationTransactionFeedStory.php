@@ -70,7 +70,7 @@ class PhabricatorApplicationTransactionFeedStory
       strip_tags(
         hsprintf(
           '%s',
-          $this->renderView()->render())));
+          $this->renderView()->getTitle())));
   }
 
 }
