@@ -297,6 +297,16 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       $description = pht('%s: %s', get_class($ex), $ex->getMessage());
     }
 
+    // TODO: Since headers don't necessarily have unique names, this may not
+    // really be all the headers. It would be nice to pass the raw headers
+    // through from the upper layers where possible.
+
+    $headers = array();
+    foreach ($this->headers as $key => $value) {
+      $headers[] = pht('%s: %s', $key, $value);
+    }
+    $headers = implode("\n", $headers);
+
     $body = pht(<<<EOBODY
 Your email to Phabricator was not processed, because an error occurred while
 trying to handle it:
@@ -307,10 +317,15 @@ trying to handle it:
 
 %s
 
+-- Original Message Headers --------------------------------------------------
+
+%s
+
 EOBODY
 ,
       wordwrap($description, 78),
-      $this->getRawTextBody());
+      $this->getRawTextBody(),
+      $headers);
 
     $mail = id(new PhabricatorMetaMTAMail())
       ->setIsErrorEmail(true)
