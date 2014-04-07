@@ -138,7 +138,10 @@ final class DifferentialRevisionListView extends AphrontView {
         $item->addAttribute($draft);
       }
 
-      $item->addAttribute($status_name);
+      /* Most things 'Need Review', so accept it's the default */
+      if ($status != ArcanistDifferentialRevisionStatus::NEEDS_REVIEW) {
+        $item->addAttribute($status_name);
+      }
 
       // Author
       $author_handle = $this->handles[$revision->getAuthorPHID()];

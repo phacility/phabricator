@@ -169,25 +169,7 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
       $editor->setContentSource($content_source);
     }
 
-    try {
-      $editor->applyTransactions($this->getMailReceiver(), $xactions);
-    } catch (Exception $ex) {
-      if ($this->receivedMail) {
-        $error_body = $this->receivedMail->getRawTextBody();
-      } else {
-        $error_body = $body;
-      }
-      $exception_mail = new DifferentialExceptionMail(
-        $this->getMailReceiver(),
-        $ex,
-        $error_body);
-
-      $exception_mail->setActor($this->getActor());
-      $exception_mail->setToPHIDs(array($this->getActor()->getPHID()));
-      $exception_mail->send();
-
-      throw $ex;
-    }
+    $editor->applyTransactions($this->getMailReceiver(), $xactions);
   }
 
 }

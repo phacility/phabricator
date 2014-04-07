@@ -171,6 +171,11 @@ final class PhabricatorSettingsPanelEmailAddresses
         return id(new AphrontReloadResponse())->setURI($uri);
       }
 
+      PhabricatorSystemActionEngine::willTakeAction(
+        array($user->getPHID()),
+        new PhabricatorSettingsAddEmailAction(),
+        1);
+
       if (!strlen($email)) {
         $e_email = pht('Required');
         $errors[] = pht('Email is required.');

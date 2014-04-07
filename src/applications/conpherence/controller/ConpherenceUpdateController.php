@@ -156,8 +156,6 @@ final class ConpherenceUpdateController
 
     if ($errors) {
       $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Errors editing conpherence.'))
-        ->setInsideDialogue(true)
         ->setErrors($errors);
     }
 

@@ -52,10 +52,8 @@ final class PhabricatorProjectPHIDTypeProject extends PhabricatorPHIDType {
   }
 
   public static function getProjectMonogramPatternFragment() {
-    // NOTE: This explicitly does not match strings which contain only
-    // digits, because digit strings like "#123" are used to reference tasks at
-    // Facebook and are somewhat conventional in general.
-    return '[^\s.!,:;{}#]*[^\s\d.!,:;{}#]+[^\s.!,:;{}#]*';
+    // NOTE: See some discussion in ProjectRemarkupRule.
+    return '[^\s,#]+';
   }
 
   public function canLoadNamedObject($name) {

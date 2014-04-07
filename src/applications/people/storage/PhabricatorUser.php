@@ -90,6 +90,18 @@ final class PhabricatorUser
     return true;
   }
 
+  /**
+   * Returns `true` if this is a standard user who is logged in. Returns `false`
+   * for logged out, anonymous, or external users.
+   *
+   * @return bool `true` if the user is a standard user who is logged in with
+   *              a normal session.
+   */
+  public function getIsStandardUser() {
+    $type_user = PhabricatorPeoplePHIDTypeUser::TYPECONST;
+    return $this->getPHID() && (phid_get_type($this->getPHID()) == $type_user);
+  }
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,

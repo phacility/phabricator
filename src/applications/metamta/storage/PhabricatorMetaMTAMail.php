@@ -222,6 +222,15 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
+  public function setIsErrorEmail($is_error) {
+    $this->setParam('is-error', $is_error);
+    return $this;
+  }
+
+  public function getIsErrorEmail() {
+    return $this->getParam('is-error', false);
+  }
+
   public function getWorkerTaskID() {
     return $this->getParam('worker-task');
   }
@@ -363,7 +372,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
               PhabricatorEnv::getEnvConfig('metamta.can-send-as-user');
 
             if ($can_send_as_user) {
-              $mailer->setFrom($actor_email);
+              $mailer->setFrom($actor_email, $actor_name);
             } else {
               $from_email = coalesce($actor_email, $default_from);
               $from_name = coalesce($actor_name, pht('Phabricator'));
@@ -547,6 +556,19 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
           "Message has no valid recipients: all To/Cc are disabled, invalid, ".
           "or configured not to receive this mail.");
         return $this->save();
+      }
+
+      if ($this->getIsErrorEmail()) {
+        $all_recipients = array_merge($add_to, $add_cc);
+        if ($this->shouldRateLimitMail($all_recipients)) {
+          $this->setStatus(self::STATUS_VOID);
+          $this->setMessage(
+            pht(
+              'This is an error email, but one or more recipients have '.
+              'exceeded the error email rate limit. Declining to deliver '.
+              'message.'));
+          return $this->save();
+        }
       }
 
       $mailer->addHeader('X-Phabricator-Sent-This-Message', 'Yes');
@@ -837,6 +859,18 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     }
 
     return $actors;
+  }
+
+  private function shouldRateLimitMail(array $all_recipients) {
+    try {
+      PhabricatorSystemActionEngine::willTakeAction(
+        $all_recipients,
+        new PhabricatorMetaMTAErrorMailAction(),
+        1);
+      return false;
+    } catch (PhabricatorSystemActionRateLimitException $ex) {
+      return true;
+    }
   }
 
 

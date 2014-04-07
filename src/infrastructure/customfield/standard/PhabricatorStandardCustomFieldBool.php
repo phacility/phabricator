@@ -111,5 +111,15 @@ final class PhabricatorStandardCustomFieldBool
     }
   }
 
+  public function shouldAppearInHerald() {
+    return true;
+  }
+
+  public function getHeraldFieldConditions() {
+    return array(
+      HeraldAdapter::CONDITION_IS_TRUE,
+      HeraldAdapter::CONDITION_IS_FALSE,
+    );
+  }
 
 }

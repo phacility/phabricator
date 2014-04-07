@@ -217,9 +217,7 @@ a.policy-control span.phui-icon-view {
 }
 
 .dropdown-menu-frame a:hover {
-  background: #005588;
-  background-image: linear-gradient(to bottom, #3b86c4, #2b628f);
-  background-image: -webkit-linear-gradient(top, #3b86c4, #2b628f);
+  background: {$blue};
   color: white;
   cursor: pointer;
   text-decoration: none;

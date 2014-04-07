@@ -27,8 +27,9 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
 
   public function getReplyHandlerInstructions() {
     if ($this->supportsReplies()) {
-      return "Reply to comment or attach files, or !close, !claim, ".
-             "!unsubscribe or !assign <username>.";
+      return pht(
+        "Reply to comment or attach files, or !close, !claim, ".
+        "!unsubscribe or !assign <username>.");
     } else {
       return null;
     }

@@ -13,6 +13,7 @@ final class FeedPublisherHTTPWorker extends FeedPushWorker {
       'storyType'       => $data->getStoryType(),
       'storyData'       => $data->getStoryData(),
       'storyAuthorPHID' => $data->getAuthorPHID(),
+      'storyText'       => $story->renderText(),
       'epoch'           => $data->getEpoch(),
     );
 

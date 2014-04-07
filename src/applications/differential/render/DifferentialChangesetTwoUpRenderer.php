@@ -7,17 +7,6 @@ final class DifferentialChangesetTwoUpRenderer
     return false;
   }
 
-  private function renderColgroup() {
-    return phutil_tag('colgroup', array(), array(
-      phutil_tag('col', array('class' => 'num')),
-      phutil_tag('col', array('class' => 'left')),
-      phutil_tag('col', array('class' => 'num')),
-      phutil_tag('col', array('class' => 'copy')),
-      phutil_tag('col', array('class' => 'right')),
-      phutil_tag('col', array('class' => 'cov')),
-    ));
-  }
-
   public function renderTextChange(
     $range_start,
     $range_len,
@@ -42,7 +31,6 @@ final class DifferentialChangesetTwoUpRenderer
     }
 
     $html = array();
-    $html[] = $this->renderColgroup();
 
     $old_lines = $this->getOldLines();
     $new_lines = $this->getNewLines();
@@ -438,10 +426,7 @@ final class DifferentialChangesetTwoUpRenderer
       $th_new = phutil_tag('th', array('id' => "C{$id}OL1"), 1);
     }
 
-    $output = array();
-    $output[] = $this->renderColgroup();
-
-    $output[] = hsprintf(
+    $output = hsprintf(
       '<tr class="differential-image-diff">'.
         '%s'.
         '<td class="differential-old-image">%s</td>'.

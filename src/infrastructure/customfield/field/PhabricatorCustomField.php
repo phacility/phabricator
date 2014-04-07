@@ -13,6 +13,7 @@
  * @task appxaction   Integration with ApplicationTransactions
  * @task xactionmail  Integration with Transaction Mail
  * @task globalsearch Integration with Global Search
+ * @task herald       Integration with Herald
  */
 abstract class PhabricatorCustomField {
 
@@ -30,6 +31,7 @@ abstract class PhabricatorCustomField {
   const ROLE_LIST                     = 'list';
   const ROLE_GLOBALSEARCH             = 'GlobalSearch';
   const ROLE_CONDUIT                  = 'conduit';
+  const ROLE_HERALD                   = 'herald';
 
 
 /* -(  Building Applications with Custom Fields  )--------------------------- */
@@ -268,6 +270,8 @@ abstract class PhabricatorCustomField {
         return $this->shouldAppearInConduitDictionary();
       case self::ROLE_TRANSACTIONMAIL:
         return $this->shouldAppearInTransactionMail();
+      case self::ROLE_HERALD:
+        return $this->shouldAppearInHerald();
       case self::ROLE_DEFAULT:
         return true;
       default:
@@ -1256,5 +1260,81 @@ abstract class PhabricatorCustomField {
     }
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
+
+
+/* -(  Herald  )------------------------------------------------------------- */
+
+
+  /**
+   * Return `true` to make this field available in Herald.
+   *
+   * @return bool True to expose the field in Herald.
+   * @task herald
+   */
+  public function shouldAppearInHerald() {
+    if ($this->proxy) {
+      return $this->proxy->shouldAppearInHerald();
+    }
+    return false;
+  }
+
+
+  /**
+   * Get the name of the field in Herald. By default, this uses the
+   * normal field name.
+   *
+   * @return string Herald field name.
+   * @task herald
+   */
+  public function getHeraldFieldName() {
+    if ($this->proxy) {
+      return $this->proxy->getHeraldFieldName();
+    }
+    return $this->getFieldName();
+  }
+
+
+  /**
+   * Get the field value for evaluation by Herald.
+   *
+   * @return wild Field value.
+   * @task herald
+   */
+  public function getHeraldFieldValue() {
+    if ($this->proxy) {
+      return $this->proxy->getHeraldFieldValue();
+    }
+    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
+  }
+
+
+  /**
+   * Get the available conditions for this field in Herald.
+   *
+   * @return list<const> List of Herald condition constants.
+   * @task herald
+   */
+  public function getHeraldFieldConditions() {
+    if ($this->proxy) {
+      return $this->proxy->getHeraldFieldConditions();
+    }
+    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
+  }
+
+
+  /**
+   * Get the Herald value type for the given condition.
+   *
+   * @param   const       Herald condition constant.
+   * @return  const|null  Herald value type, or null to use the default.
+   * @task herald
+   */
+  public function getHeraldFieldValueType($condition) {
+    if ($this->proxy) {
+      return $this->proxy->getHeraldFieldValueType($condition);
+    }
+    return null;
+  }
+
 
 }

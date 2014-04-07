@@ -382,5 +382,8 @@ abstract class PhabricatorStandardCustomField
     }
   }
 
+  public function getHeraldFieldValue() {
+    return $this->getFieldValue();
+  }
 
 }

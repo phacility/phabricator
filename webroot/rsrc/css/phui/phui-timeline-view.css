@@ -160,6 +160,10 @@
   overflow-x: auto;
 }
 
+.phui-timeline-core-content .comment-deleted {
+  font-style: italic;
+}
+
 .device .phui-timeline-event-view {
   min-height: 23px;
   position: relative;
