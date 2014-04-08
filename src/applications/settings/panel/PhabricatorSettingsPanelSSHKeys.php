@@ -70,48 +70,19 @@ final class PhabricatorSettingsPanelSSHKeys
         $errors[] = pht('You must provide an SSH Public Key.');
         $e_key = pht('Required');
       } else {
-        $parts = str_replace("\n", '', trim($entire_key));
-        $parts = preg_split('/\s+/', $parts);
-        if (count($parts) == 2) {
-          $parts[] = ''; // Add an empty comment part.
-        } else if (count($parts) == 3) {
-          // This is the expected case.
-        } else {
-          if (preg_match('/private\s*key/i', $entire_key)) {
-            // Try to give the user a better error message if it looks like
-            // they uploaded a private key.
-            $e_key = pht('Invalid');
-            $errors[] = pht('Provide your public key, not your private key!');
-          } else {
-            $e_key = pht('Invalid');
-            $errors[] = pht('Provided public key is not properly formatted.');
-          }
-        }
 
-        if (!$errors) {
-          list($type, $body, $comment) = $parts;
+        try {
+          list($type, $body, $comment) = self::parsePublicKey($entire_key);
 
-          $recognized_keys = array(
-            'ssh-dsa',
-            'ssh-dss',
-            'ssh-rsa',
-            'ecdsa-sha2-nistp256',
-            'ecdsa-sha2-nistp384',
-            'ecdsa-sha2-nistp521',
-          );
+          $key->setKeyType($type);
+          $key->setKeyBody($body);
+          $key->setKeyHash(md5($body));
+          $key->setKeyComment($comment);
 
-          if (!in_array($type, $recognized_keys)) {
-            $e_key = pht('Invalid');
-            $type_list = implode(', ', $recognized_keys);
-            $errors[] = pht('Public key should be one of: %s', $type_list);
-          } else {
-            $key->setKeyType($type);
-            $key->setKeyBody($body);
-            $key->setKeyHash(md5($body));
-            $key->setKeyComment($comment);
-
-            $e_key = null;
-          }
+          $e_key = null;
+        } catch (Exception $ex) {
+          $e_key = pht('Invalid');
+          $errors[] = $ex->getMessage();
         }
       }
 
@@ -314,13 +285,15 @@ final class PhabricatorSettingsPanelSSHKeys
           'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
         ));
 
+      list($type, $body, $comment) = self::parsePublicKey($public_key);
+
       $key = id(new PhabricatorUserSSHKey())
         ->setUserPHID($user->getPHID())
         ->setName('id_rsa_phabricator')
-        ->setKeyType('rsa')
-        ->setKeyBody($public_key)
-        ->setKeyHash(md5($public_key))
-        ->setKeyComment(pht('Generated Key'))
+        ->setKeyType($type)
+        ->setKeyBody($body)
+        ->setKeyHash(md5($body))
+        ->setKeyComment(pht('Generated'))
         ->save();
 
       // NOTE: We're disabling workflow on submit so the download works. We're
@@ -393,6 +366,48 @@ final class PhabricatorSettingsPanelSSHKeys
 
     return id(new AphrontDialogResponse())
       ->setDialog($dialog);
+  }
+
+  private static function parsePublicKey($entire_key) {
+    $parts = str_replace("\n", '', trim($entire_key));
+    $parts = preg_split('/\s+/', $parts);
+
+    if (count($parts) == 2) {
+      $parts[] = ''; // Add an empty comment part.
+    } else if (count($parts) == 3) {
+      // This is the expected case.
+    } else {
+      if (preg_match('/private\s*key/i', $entire_key)) {
+        // Try to give the user a better error message if it looks like
+        // they uploaded a private key.
+        throw new Exception(
+          pht('Provide your public key, not your private key!'));
+      } else {
+        throw new Exception(
+          pht('Provided public key is not properly formatted.'));
+      }
+    }
+
+    list($type, $body, $comment) = $parts;
+
+    $recognized_keys = array(
+      'ssh-dsa',
+      'ssh-dss',
+      'ssh-rsa',
+      'ecdsa-sha2-nistp256',
+      'ecdsa-sha2-nistp384',
+      'ecdsa-sha2-nistp521',
+    );
+
+    if (!in_array($type, $recognized_keys)) {
+      $type_list = implode(', ', $recognized_keys);
+      throw new Exception(
+        pht(
+          'Public key type should be one of: %s',
+          $type_list));
+    }
+
+    return array($type, $body, $comment);
   }
 
 }
