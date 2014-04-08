@@ -544,9 +544,9 @@ abstract class HeraldAdapter {
         }
         return $result;
       case self::CONDITION_HAS_BIT:
-        return (($condition_value & $field_value) === $condition_value);
+        return (($condition_value & $field_value) === (int) $condition_value);
       case self::CONDITION_NOT_BIT:
-        return (($condition_value & $field_value) !== $condition_value);
+        return (($condition_value & $field_value) !== (int) $condition_value);
       default:
         throw new HeraldInvalidConditionException(
           "Unknown condition '{$condition_type}'.");
@@ -1034,6 +1034,16 @@ abstract class HeraldAdapter {
         $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
         foreach ($value as $index => $val) {
           $name = idx($priority_map, $val);
+          if ($name) {
+            $value[$index] = $name;
+          }
+        }
+        break;
+      case HeraldPreCommitRefAdapter::FIELD_REF_CHANGE:
+        $change_map =
+          PhabricatorRepositoryPushLog::getHeraldChangeflagConditionOptions();
+        foreach ($value as $index => $val) {
+          $name = idx($change_map, $val);
           if ($name) {
             $value[$index] = $name;
           }

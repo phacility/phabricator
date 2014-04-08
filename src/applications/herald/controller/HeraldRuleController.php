@@ -463,6 +463,8 @@ final class HeraldRuleController extends HeraldController {
        $rule->getRuleType());
     }
 
+    $changeflag_options =
+      PhabricatorRepositoryPushLog::getHeraldChangeflagConditionOptions();
     Javelin::initBehavior(
       'herald-rule-editor',
       array(
@@ -490,16 +492,7 @@ final class HeraldRuleController extends HeraldController {
             'default' => PhabricatorRepositoryPushLog::REFTYPE_BRANCH,
           ),
           HeraldPreCommitRefAdapter::VALUE_REF_CHANGE => array(
-            'options' => array(
-              PhabricatorRepositoryPushLog::CHANGEFLAG_ADD =>
-                pht('change creates ref'),
-              PhabricatorRepositoryPushLog::CHANGEFLAG_DELETE =>
-                pht('change deletes ref'),
-              PhabricatorRepositoryPushLog::CHANGEFLAG_REWRITE =>
-                pht('change rewrites ref'),
-              PhabricatorRepositoryPushLog::CHANGEFLAG_DANGEROUS =>
-                pht('dangerous change'),
-            ),
+            'options' => $changeflag_options,
             'default' => PhabricatorRepositoryPushLog::CHANGEFLAG_ADD,
           ),
         ),
