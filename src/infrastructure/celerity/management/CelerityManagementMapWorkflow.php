@@ -196,7 +196,7 @@ final class CelerityManagementMapWorkflow
    *
    * @param string Resource name.
    * @param string Resource data.
-   * @return pair<string|null, list<string>|nul> The `@provides` symbol and the
+   * @return pair<string|null, list<string>|null> The `@provides` symbol and the
    *    list of `@requires` symbols. If the resource is not part of the
    *    dependency graph, both are null.
    */

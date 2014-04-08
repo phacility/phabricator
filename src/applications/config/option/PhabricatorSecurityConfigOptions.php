@@ -124,8 +124,7 @@ final class PhabricatorSecurityConfigOptions
             "automatically linked if the protocol appears in this set. This ".
             "whitelist is primarily to prevent security issues like ".
             "javascript:// URIs."))
-        ->addExample(
-          '{"http": true, "https": true"}', pht('Valid Setting'))
+        ->addExample("http\nhttps", pht('Valid Setting'))
         ->setLocked(true),
       $this->newOption(
         'uri.allowed-editor-protocols',

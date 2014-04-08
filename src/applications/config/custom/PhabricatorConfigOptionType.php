@@ -20,8 +20,16 @@ abstract class PhabricatorConfigOptionType {
 
   public function getDisplayValue(
     PhabricatorConfigOption $option,
-    PhabricatorConfigEntry $entry) {
-    return $entry->getValue();
+    PhabricatorConfigEntry $entry,
+    $value) {
+
+    if (is_array($value)) {
+      $json = new PhutilJSON();
+      return $json->encodeFormatted($value);
+    } else {
+      return $value;
+    }
+
   }
 
   public function renderControl(
