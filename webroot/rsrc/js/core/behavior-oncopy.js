@@ -16,7 +16,7 @@
  */
 JX.behavior('phabricator-oncopy', function() {
 
-  var zws = "\u2060"; // Unicode Word Joiner (Non-Breaking Zero-Width Space)
+  var zws = "\u200B"; // Unicode Zero-Width Space
 
   JX.enableDispatch(document.body, 'copy');
   JX.Stratcom.listen(

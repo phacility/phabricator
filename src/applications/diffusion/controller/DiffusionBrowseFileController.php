@@ -789,7 +789,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
           $anchor_text,
 
           // NOTE: See phabricator-oncopy behavior.
-          "\xE2\x81\xA0",
+          "\xE2\x80\x8B",
 
           // TODO: [HTML] Not ideal.
           phutil_safe_html(str_replace("\t", '  ', $line['data'])),

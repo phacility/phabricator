@@ -59,6 +59,11 @@
   line-height:        16px;
 }
 
+.differential-diff td .zwsp {
+  position: absolute;
+  width: 0;
+}
+
 .differential-diff th {
   text-align:         right;
   padding:            2px 6px 0px 0px;
