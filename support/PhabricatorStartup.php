@@ -41,7 +41,11 @@ final class PhabricatorStartup {
   private static $globals = array();
   private static $capturingOutput;
   private static $rawInput;
-  private static $maximumRate = 1000;
+
+  // TODO: For now, disable rate limiting entirely by default. We need to
+  // iterate on it a bit for Conduit, some of the specific score levels, and
+  // to deal with NAT'd offices.
+  private static $maximumRate = 0;
 
 
 /* -(  Accessing Request Information  )-------------------------------------- */
