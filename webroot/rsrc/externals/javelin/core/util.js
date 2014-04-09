@@ -49,7 +49,13 @@ JX.$E = function(message) {
  * @group util
  */
 JX.$A = function(object) {
-  return Array.prototype.slice.call(object);
+  // IE8 throws "JScript object expected" when trying to call
+  // Array.prototype.slice on a NodeList, so just copy items one by one here.
+  var r = [];
+  for (var ii = 0; ii < object.length; ii++) {
+    r.push(object[ii]);
+  }
+  return r;
 };
 
 
