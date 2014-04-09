@@ -1,13 +1,13 @@
 <?php
 
 final class PhabricatorAuthProviderOAuthGitHub
-  extends PhabricatorAuthProviderOAuth {
+  extends PhabricatorAuthProviderOAuth2 {
 
   public function getProviderName() {
     return pht('GitHub');
   }
 
-  public function getConfigurationHelp() {
+  protected function getProviderConfigurationHelp() {
     $uri = PhabricatorEnv::getProductionURI('/');
     $callback_uri = PhabricatorEnv::getURI($this->getLoginURI());
 

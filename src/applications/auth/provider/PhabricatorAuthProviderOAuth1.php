@@ -1,6 +1,7 @@
 <?php
 
-abstract class PhabricatorAuthProviderOAuth1 extends PhabricatorAuthProvider {
+abstract class PhabricatorAuthProviderOAuth1
+  extends PhabricatorAuthProviderOAuth {
 
   protected $adapter;
 
@@ -8,19 +9,12 @@ abstract class PhabricatorAuthProviderOAuth1 extends PhabricatorAuthProvider {
   const PROPERTY_CONSUMER_SECRET = 'oauth1:consumer:secret';
   const PROPERTY_PRIVATE_KEY = 'oauth1:private:key';
 
-  abstract protected function newOAuthAdapter();
-
-  public function getDescriptionForCreate() {
-    return pht('Configure %s OAuth.', $this->getProviderName());
+  protected function getIDKey() {
+    return self::PROPERTY_CONSUMER_KEY;
   }
 
-  public function getAdapter() {
-    if (!$this->adapter) {
-      $adapter = $this->newOAuthAdapter();
-      $this->adapter = $adapter;
-      $this->configureAdapter($adapter);
-    }
-    return $this->adapter;
+  protected function getSecretKey() {
+    return self::PROPERTY_CONSUMER_SECRET;
   }
 
   protected function configureAdapter(PhutilAuthAdapterOAuth1 $adapter) {
@@ -32,10 +26,6 @@ abstract class PhabricatorAuthProviderOAuth1 extends PhabricatorAuthProvider {
     }
     $adapter->setCallbackURI(PhabricatorEnv::getURI($this->getLoginURI()));
     return $adapter;
-  }
-
-  public function isLoginFormAButton() {
-    return true;
   }
 
   protected function renderLoginForm(AphrontRequest $request, $mode) {
@@ -117,52 +107,18 @@ abstract class PhabricatorAuthProviderOAuth1 extends PhabricatorAuthProvider {
     return array($this->loadOrCreateAccount($account_id), $response);
   }
 
-  public function readFormValuesFromProvider() {
-    $config = $this->getProviderConfig();
-    $id = $config->getProperty(self::PROPERTY_CONSUMER_KEY);
-    $secret = $config->getProperty(self::PROPERTY_CONSUMER_SECRET);
-
-    return array(
-      self::PROPERTY_CONSUMER_KEY => $id,
-      self::PROPERTY_CONSUMER_SECRET => $secret,
-    );
-  }
-
-  public function readFormValuesFromRequest(AphrontRequest $request) {
-    return array(
-      self::PROPERTY_CONSUMER_KEY
-        => $request->getStr(self::PROPERTY_CONSUMER_KEY),
-      self::PROPERTY_CONSUMER_SECRET
-        => $request->getStr(self::PROPERTY_CONSUMER_SECRET),
-    );
-  }
-
   public function processEditForm(
     AphrontRequest $request,
     array $values) {
-    $errors = array();
-    $issues = array();
 
     $key_ckey = self::PROPERTY_CONSUMER_KEY;
     $key_csecret = self::PROPERTY_CONSUMER_SECRET;
 
-    if (!strlen($values[$key_ckey])) {
-      $errors[] = pht('Consumer key is required.');
-      $issues[$key_ckey] = pht('Required');
-    }
-
-    if (!strlen($values[$key_csecret])) {
-      $errors[] = pht('Consumer secret is required.');
-      $issues[$key_csecret] = pht('Required');
-    }
-
-    // If the user has not changed the secret, don't update it (that is,
-    // don't cause a bunch of "****" to be written to the database).
-    if (preg_match('/^[*]+$/', $values[$key_csecret])) {
-      unset($values[$key_csecret]);
-    }
-
-    return array($errors, $issues, $values);
+    return $this->processOAuthEditForm(
+      $request,
+      $values,
+      pht('Consumer key is required.'),
+      pht('Consumer secret is required.'));
   }
 
   public function extendEditForm(
@@ -171,31 +127,13 @@ abstract class PhabricatorAuthProviderOAuth1 extends PhabricatorAuthProvider {
     array $values,
     array $issues) {
 
-    $key_id = self::PROPERTY_CONSUMER_KEY;
-    $key_secret = self::PROPERTY_CONSUMER_SECRET;
-
-    $v_id = $values[$key_id];
-    $v_secret = $values[$key_secret];
-    if ($v_secret) {
-      $v_secret = str_repeat('*', strlen($v_secret));
-    }
-
-    $e_id = idx($issues, $key_id, $request->isFormPost() ? null : true);
-    $e_secret = idx($issues, $key_secret, $request->isFormPost() ? null : true);
-
-    $form
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('OAuth Consumer Key'))
-          ->setName($key_id)
-          ->setValue($v_id)
-          ->setError($e_id))
-      ->appendChild(
-        id(new AphrontFormPasswordControl())
-          ->setLabel(pht('OAuth Consumer Secret'))
-          ->setName($key_secret)
-          ->setValue($v_secret)
-          ->setError($e_secret));
+    return $this->extendOAuthEditForm(
+      $request,
+      $form,
+      $values,
+      $issues,
+      pht('OAuth Consumer Key'),
+      pht('OAuth Consumer Secret'));
   }
 
   public function renderConfigPropertyTransactionTitle(
@@ -238,11 +176,6 @@ abstract class PhabricatorAuthProviderOAuth1 extends PhabricatorAuthProvider {
     return parent::renderConfigPropertyTransactionTitle($xaction);
   }
 
-  protected function willSaveAccount(PhabricatorExternalAccount $account) {
-    parent::willSaveAccount($account);
-    $this->synchronizeOAuthAccount($account);
-  }
-
   protected function synchronizeOAuthAccount(
     PhabricatorExternalAccount $account) {
     $adapter = $this->getAdapter();
@@ -263,6 +196,5 @@ abstract class PhabricatorAuthProviderOAuth1 extends PhabricatorAuthProvider {
 
     parent::willRenderLinkedAccount($viewer, $item, $account);
   }
-
 
 }

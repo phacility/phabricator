@@ -1,13 +1,13 @@
 <?php
 
 final class PhabricatorAuthProviderOAuthAsana
-  extends PhabricatorAuthProviderOAuth {
+  extends PhabricatorAuthProviderOAuth2 {
 
   public function getProviderName() {
     return pht('Asana');
   }
 
-  public function getConfigurationHelp() {
+  protected function getProviderConfigurationHelp() {
     $app_uri = PhabricatorEnv::getProductionURI('/');
     $login_uri = PhabricatorEnv::getURI($this->getLoginURI());
 
