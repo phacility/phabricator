@@ -260,6 +260,9 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
         'ownerPHID'    => $task->getOwnerPHID(),
         'ccPHIDs'      => $task->getCCPHIDs(),
         'status'       => $task->getStatus(),
+        'statusName'   => ManiphestTaskStatus::getTaskStatusName(
+          $task->getStatus()),
+        'isClosed'     => $task->isClosed(),
         'priority'     => ManiphestTaskPriority::getTaskPriorityName(
           $task->getPriority()),
         'title'        => $task->getTitle(),
