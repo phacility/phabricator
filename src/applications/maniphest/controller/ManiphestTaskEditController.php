@@ -57,33 +57,17 @@ final class ManiphestTaskEditController extends ManiphestController {
         if ($can_edit_projects) {
           $projects = $request->getStr('projects');
           if ($projects) {
-            $tokens = explode(';', $projects);
+            $tokens = $request->getStrList('projects');
 
-            $slug_map = id(new PhabricatorProjectQuery())
-              ->setViewer($user)
-              ->withPhrictionSlugs($tokens)
-              ->execute();
+            foreach ($tokens as $key => $token) {
+              $tokens[$key] = '#'.$token;
+            }
 
-            $name_map = id(new PhabricatorProjectQuery())
+            $default_projects = id(new PhabricatorObjectQuery())
               ->setViewer($user)
               ->withNames($tokens)
               ->execute();
-
-            $phid_map = id(new PhabricatorProjectQuery())
-              ->setViewer($user)
-              ->withPHIDs($tokens)
-              ->execute();
-
-            $all_map = mpull($slug_map, null, 'getPhrictionSlug') +
-              mpull($name_map, null, 'getName') +
-              mpull($phid_map, null, 'getPHID');
-
-            $default_projects = array();
-            foreach ($tokens as $token) {
-              if (isset($all_map[$token])) {
-                $default_projects[] = $all_map[$token]->getPHID();
-              }
-            }
+            $default_projects = mpull($default_projects, 'getPHID');
 
             if ($default_projects) {
               $task->setProjectPHIDs($default_projects);
