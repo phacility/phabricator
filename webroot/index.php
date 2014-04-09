@@ -1,6 +1,14 @@
 <?php
 
-require_once dirname(dirname(__FILE__)).'/support/PhabricatorStartup.php';
+$phabricator_root = dirname(dirname(__FILE__));
+require_once $phabricator_root.'/support/PhabricatorStartup.php';
+
+// If the preamble script exists, load it.
+$preamble_path = $phabricator_root.'/support/preamble.php';
+if (file_exists($preamble_path)) {
+  require_once $preamble_path;
+}
+
 PhabricatorStartup::didStartup();
 
 $show_unexpected_traces = false;
@@ -142,6 +150,23 @@ try {
     ));
 
   DarkConsoleXHProfPluginAPI::saveProfilerSample($access_log);
+
+  // Add points to the rate limits for this request.
+  if (isset($_SERVER['REMOTE_ADDR'])) {
+    $user_ip = $_SERVER['REMOTE_ADDR'];
+
+    // The base score for a request allows users to make 30 requests per
+    // minute.
+    $score = (1000 / 30);
+
+    // If the user was logged in, let them make more requests.
+    if ($request->getUser() && $request->getUser()->getPHID()) {
+      $score = $score / 5;
+    }
+
+    PhabricatorStartup::addRateLimitScore($user_ip, $score);
+  }
+
 } catch (Exception $ex) {
   PhabricatorStartup::didEncounterFatalException(
     'Core Exception',
