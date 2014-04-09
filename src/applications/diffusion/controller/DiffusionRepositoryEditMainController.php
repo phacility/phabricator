@@ -269,10 +269,13 @@ final class DiffusionRepositoryEditMainController
       PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT);
     if ($project_phids) {
       $this->loadHandles($project_phids);
-      $view->addProperty(
-        pht('Projects'),
-        $this->renderHandlesForPHIDs($project_phids));
+      $project_text = $this->renderHandlesForPHIDs($project_phids);
+    } else {
+      $project_text = phutil_tag('em', array(), pht('None'));
     }
+    $view->addProperty(
+      pht('Projects'),
+      $project_text);
 
     $view->addProperty(
       pht('Status'),
