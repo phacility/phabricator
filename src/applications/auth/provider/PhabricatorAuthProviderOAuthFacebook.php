@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorAuthProviderOAuthFacebook
-  extends PhabricatorAuthProviderOAuth {
+  extends PhabricatorAuthProviderOAuth2 {
 
   const KEY_REQUIRE_SECURE = 'oauth:facebook:require-secure';
 
@@ -9,7 +9,7 @@ final class PhabricatorAuthProviderOAuthFacebook
     return pht('Facebook');
   }
 
-  public function getConfigurationHelp() {
+  protected function getProviderConfigurationHelp() {
     $uri = PhabricatorEnv::getProductionURI($this->getLoginURI());
     return pht(
       'To configure Facebook OAuth, create a new Facebook Application here:'.

@@ -265,6 +265,8 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
         'isClosed'     => $task->isClosed(),
         'priority'     => ManiphestTaskPriority::getTaskPriorityName(
           $task->getPriority()),
+        'priorityColor' => ManiphestTaskPriority::getTaskPriorityColor(
+          $task->getPriority()),
         'title'        => $task->getTitle(),
         'description'  => $task->getDescription(),
         'projectPHIDs' => $task->getProjectPHIDs(),

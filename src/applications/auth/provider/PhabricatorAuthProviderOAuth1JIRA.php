@@ -16,6 +16,10 @@ final class PhabricatorAuthProviderOAuth1JIRA
   }
 
   public function getConfigurationHelp() {
+    return $this->getProviderConfigurationHelp();
+  }
+
+  protected function getProviderConfigurationHelp() {
     if ($this->isSetup()) {
       return pht(
         "**Step 1 of 2**: Provide the name and URI for your JIRA install.\n\n".

@@ -1,13 +1,13 @@
 <?php
 
 final class PhabricatorAuthProviderOAuthDisqus
-  extends PhabricatorAuthProviderOAuth {
+  extends PhabricatorAuthProviderOAuth2 {
 
   public function getProviderName() {
     return pht('Disqus');
   }
 
-  public function getConfigurationHelp() {
+  protected function getProviderConfigurationHelp() {
     $login_uri = PhabricatorEnv::getURI($this->getLoginURI());
 
     return pht(
