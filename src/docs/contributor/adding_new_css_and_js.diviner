@@ -9,10 +9,13 @@ Phabricator uses a system called **Celerity** to manage static resources. If you
 are a current or former Facebook employee, Celerity is based on the Haste system
 used at Facebook and generally behaves similarly.
 
+This document is intended for Phabricator developers and contributors. This
+process will not work correctly for third-party code, plugins, or extensions.
+
 = Adding a New File =
 
 To add a new CSS or JS file, create it in an appropriate location in
-##webroot/rsrc/css/## or ##webroot/rsrc/js/## inside your ##phabricator/##
+`webroot/rsrc/css/` or `webroot/rsrc/js/` inside your `phabricator/`
 directory.
 
 Each file must ##@provides## itself as a component, declared in a header
@@ -30,7 +33,7 @@ comment:
 Note that this comment must be a Javadoc-style comment, not just any comment.
 
 If your component depends on other components (which is common in JS but
-rare and inadvisable in CSS), declare then with ##@requires##:
+rare and inadvisable in CSS), declare then with `@requires`:
 
   LANG=js
   /**
@@ -83,3 +86,12 @@ as possible, i.e. **not** at the top of your Controller. The idea is that you
 should @{function:require_celerity_resource} a resource only if you are actually
 using it on a specific rendering of the page, not just because some views of the
 page might require it.
+
+= Next Steps =
+
+Continue by:
+
+  - reading about Javascript-specific guidelines in @{article:Javascript Coding
+    Standards}; or
+  - reading about CSS-specific guidelines and features in @{article:CSS Coding
+    Standards}.

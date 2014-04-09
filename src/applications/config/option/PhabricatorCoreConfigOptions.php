@@ -59,8 +59,8 @@ final class PhabricatorCoreConfigOptions
               "won't work. The major use case for this is moving installs ".
               "across domains."))
         ->addExample(
-          '["http://phabricator2.example.com/", '.
-            '"http://phabricator3.example.com/"]',
+          "http://phabricator2.example.com/\n".
+          "http://phabricator3.example.com/",
           pht('Valid Setting')),
       $this->newOption('phabricator.timezone', 'string', null)
         ->setSummary(

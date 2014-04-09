@@ -284,11 +284,10 @@ final class DifferentialChangesetTwoUpRenderer
         $n_id = null;
       }
 
-      // NOTE: This is a unicode 'word joiner' (essentially a non-breaking
-      // zero-width space), which we use as a hint when intercepting 'copy'
-      // events to make sure sensible text ends up on the clipboard.
-      // See the 'phabricator-oncopy' behavior.
-      $zero_space = "\xE2\x81\xA0";
+      // NOTE: This is a unicode zero-width space, which we use as a hint when
+      // intercepting 'copy' events to make sure sensible text ends up on the
+      // clipboard. See the 'phabricator-oncopy' behavior.
+      $zero_space = "\xE2\x80\x8B";
 
       // NOTE: The Javascript is sensitive to whitespace changes in this
       // block!
@@ -301,7 +300,10 @@ final class DifferentialChangesetTwoUpRenderer
         phutil_tag(
           'td',
           array('class' => $n_classes, 'colspan' => $n_colspan),
-          array($zero_space, $n_text)),
+          array(
+            phutil_tag('span', array('class' => 'zwsp'), $zero_space),
+            $n_text
+          )),
         $n_cov,
       ));
 

@@ -51,6 +51,7 @@ final class PhabricatorAuthProviderLDAP
           $conf->getProperty(self::KEY_REFERRALS))
         ->setLDAPStartTLS(
           $conf->getProperty(self::KEY_START_TLS))
+        ->setAlwaysSearch($conf->getProperty(self::KEY_ALWAYS_SEARCH))
         ->setAnonymousUsername(
           $conf->getProperty(self::KEY_ANONYMOUS_USERNAME))
         ->setAnonymousPassword(
@@ -194,6 +195,7 @@ final class PhabricatorAuthProviderLDAP
   const KEY_START_TLS               = 'ldap:start-tls';
   const KEY_ANONYMOUS_USERNAME      = 'ldap:anoynmous-username';
   const KEY_ANONYMOUS_PASSWORD      = 'ldap:anonymous-password';
+  const KEY_ALWAYS_SEARCH           = 'ldap:always-search';
   const KEY_ACTIVEDIRECTORY_DOMAIN  = 'ldap:activedirectory-domain';
 
   private function getPropertyKeys() {
@@ -206,6 +208,7 @@ final class PhabricatorAuthProviderLDAP
       self::KEY_PORT => pht('LDAP Port'),
       self::KEY_DISTINGUISHED_NAME => pht('Base Distinguished Name'),
       self::KEY_SEARCH_ATTRIBUTES => pht('Search Attributes'),
+      self::KEY_ALWAYS_SEARCH => pht('Always Search'),
       self::KEY_ANONYMOUS_USERNAME => pht('Anonymous Username'),
       self::KEY_ANONYMOUS_PASSWORD => pht('Anonymous Password'),
       self::KEY_USERNAME_ATTRIBUTE => pht('Username Attribute'),
@@ -276,10 +279,8 @@ final class PhabricatorAuthProviderLDAP
         pht('Follow referrals. Disable this for Windows AD 2003.'),
       self::KEY_START_TLS =>
         pht('Start TLS after binding to the LDAP server.'),
-      self::KEY_ANONYMOUS_USERNAME =>
-        pht('Username to bind with before searching.'),
-      self::KEY_ANONYMOUS_PASSWORD =>
-        pht('Password to bind with before searching.'),
+      self::KEY_ALWAYS_SEARCH =>
+        pht('Always bind and search, even without a username and password.'),
     );
 
     $types = array(
@@ -288,6 +289,7 @@ final class PhabricatorAuthProviderLDAP
       self::KEY_SEARCH_ATTRIBUTES   => 'textarea',
       self::KEY_REALNAME_ATTRIBUTES => 'list',
       self::KEY_ANONYMOUS_PASSWORD  => 'password',
+      self::KEY_ALWAYS_SEARCH       => 'checkbox',
     );
 
     $instructions = array(
@@ -308,15 +310,16 @@ final class PhabricatorAuthProviderLDAP
         "  - Your LDAP server is configured in some other way that prevents ".
         "    direct binding from working correctly.\n\n".
         "**To bind directly**, enter the LDAP attribute corresponding to the ".
-        "login name into this box. Often, this is something like `sn` or ".
-        "`uid`. This is the simplest configuration, but will only work if the ".
-        "username is part of the distinguished name, and won't let you apply ".
-        "complex restrictions to logins.\n\n".
+        "login name into the **Search Attributes** box below. Often, this is ".
+        "something like `sn` or `uid`. This is the simplest configuration, ".
+        "but will only work if the username is part of the distinguished ".
+        "name, and won't let you apply complex restrictions to logins.\n\n".
         "  lang=text,name=Simple Direct Binding\n".
         "  sn\n\n".
         "**To search first**, provide an anonymous username and password ".
-        "below, then enter one or more search queries into this field, one ".
-        "per line. After binding, these queries will be used to identify the ".
+        "below (or check the **Always Search** checkbox), then enter one ".
+        "or more search queries into this field, one per line. ".
+        "After binding, these queries will be used to identify the ".
         "record associated with the login name the user typed.\n\n".
         "Searches will be tried in order until a matching record is found. ".
         "Each query can be a simple attribute name (like `sn` or `mail`), ".
@@ -333,7 +336,7 @@ final class PhabricatorAuthProviderLDAP
         "  mail\n".
         "  sn\n\n".
         "If your LDAP directory is more complex, or you want to perform ".
-        "sophisticated filtering, you can use one or more queries. Depending ".
+        "sophisticated filtering, you can use more complex queries. Depending ".
         "on your directory structure, this example might allow users to login ".
         "with either their email address or username, but only if they're in ".
         "specific departments:\n\n".
@@ -342,6 +345,10 @@ final class PhabricatorAuthProviderLDAP
         "  (&(sn=\${login})(|(departmentNumber=1)(departmentNumber=2)))\n\n".
         "All of the attribute names used here are just examples: your LDAP ".
         "server may use different attribute names."),
+      self::KEY_ALWAYS_SEARCH => pht(
+        "To search for an LDAP record before authenticating, either check ".
+        "the **Always Search** checkbox or enter an anonymous ".
+        "username and password to use to perform the search."),
       self::KEY_USERNAME_ATTRIBUTE => pht(
         "Optionally, specify a username attribute to use to prefill usernames ".
         "when registering a new account. This is purely cosmetic and does not ".

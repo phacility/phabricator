@@ -34,18 +34,6 @@ abstract class PhabricatorConfigJSONOptionType
     return array($e_value, $errors, $storage_value, $display_value);
   }
 
-  public function getDisplayValue(
-    PhabricatorConfigOption $option,
-    PhabricatorConfigEntry $entry) {
-    $value = $entry->getValue();
-    if (!$value) {
-      return '';
-    }
-
-    $json = new PhutilJSON();
-    return $json->encodeFormatted($value);
-  }
-
   public function renderControl(
     PhabricatorConfigOption $option,
     $display_value,

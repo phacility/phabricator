@@ -120,7 +120,7 @@ foreach ($config_map as $provider_class => $spec) {
           => 'ldap.port',
         PhabricatorAuthProviderLDAP::KEY_DISTINGUISHED_NAME
           => 'ldap.base_dn',
-        PhabricatorAuthProviderLDAP::KEY_SEARCH_ATTRIBUTE
+        PhabricatorAuthProviderLDAP::KEY_SEARCH_ATTRIBUTES
           => 'ldap.search_attribute',
         PhabricatorAuthProviderLDAP::KEY_USERNAME_ATTRIBUTE
           => 'ldap.username-attribute',
@@ -136,7 +136,9 @@ foreach ($config_map as $provider_class => $spec) {
           => 'ldap.anonymous-user-name',
         PhabricatorAuthProviderLDAP::KEY_ANONYMOUS_PASSWORD
           => 'ldap.anonymous-user-password',
-        PhabricatorAuthProviderLDAP::KEY_SEARCH_FIRST
+        // Update the old "search first" setting to the newer but similar
+        // "always search" setting.
+        PhabricatorAuthProviderLDAP::KEY_ALWAYS_SEARCH
           => 'ldap.search-first',
         PhabricatorAuthProviderLDAP::KEY_ACTIVEDIRECTORY_DOMAIN
           => 'ldap.activedirectory_domain',

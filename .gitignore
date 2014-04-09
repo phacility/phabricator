@@ -33,6 +33,9 @@
 # User-accessible hook for adhoc debugging scripts
 /support/debug.php
 
+# User-accessible hook for adhoc startup code
+/support/preamble.php
+
 # Users can link binaries here
 /support/bin/*
 
