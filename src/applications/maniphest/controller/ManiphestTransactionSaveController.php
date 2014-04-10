@@ -152,10 +152,10 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     if ($action == ManiphestTransaction::TYPE_OWNER) {
       if ($task->getOwnerPHID() == $transaction->getNewValue()) {
         // If this is actually no-op, don't generate the side effect.
-        break;
+      } else {
+        // Otherwise, when a task is reassigned, move the previous owner to CC.
+        $added_ccs[] = $task->getOwnerPHID();
       }
-      // Otherwise, when a task is reassigned, move the previous owner to CC.
-      $added_ccs[] = $task->getOwnerPHID();
     }
 
     if ($did_scuttle || ($action == ManiphestTransaction::TYPE_STATUS)) {
