@@ -980,7 +980,7 @@ return array(
 
   // Minify static resources by removing whitespace and comments. You should
   // enable this in production, but disable it in development.
-  'celerity.minify' => false,
+  'celerity.minify' => true,
 
   // You can respond to various application events by installing listeners,
   // which will receive callbacks when interesting things occur. Specify a list
