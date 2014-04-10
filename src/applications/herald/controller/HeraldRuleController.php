@@ -496,7 +496,7 @@ final class HeraldRuleController extends HeraldController {
             'default' => PhabricatorRepositoryPushLog::CHANGEFLAG_ADD,
           ),
         ),
-        'template' => $this->buildTokenizerTemplates() + array(
+        'template' => $this->buildTokenizerTemplates($handles) + array(
           'rules' => $all_rules,
         ),
         'author' => array($rule->getAuthorPHID() =>
@@ -581,7 +581,7 @@ final class HeraldRuleController extends HeraldController {
   }
 
 
-  protected function buildTokenizerTemplates() {
+  protected function buildTokenizerTemplates(array $handles) {
     $template = new AphrontTokenizerTemplateView();
     $template = $template->render();
 
@@ -597,6 +597,8 @@ final class HeraldRuleController extends HeraldController {
         'taskpriority'  => '/typeahead/common/taskpriority/',
         'arcanistprojects' => '/typeahead/common/arcanistprojects/',
       ),
+      'username' => $this->getRequest()->getUser()->getUserName(),
+      'icons' => mpull($handles, 'getTypeIcon', 'getPHID'),
       'markup' => $template,
     );
   }

@@ -1,11 +1,8 @@
 /**
  * @requires multirow-row-manager
  *           javelin-install
- *           javelin-typeahead
  *           javelin-util
  *           javelin-dom
- *           javelin-tokenizer
- *           javelin-typeahead-preloaded-source
  *           javelin-stratcom
  *           javelin-json
  *           phabricator-prefab
@@ -284,25 +281,24 @@ JX.install('HeraldRuleEditor', {
       template = template.firstChild;
       template.id = '';
 
-      var datasource = new JX.TypeaheadPreloadedSource(
-        this._config.template.source[type]);
+      var tokenizerConfig = {
+        root : template,
+        src : this._config.template.source[type],
+        icons : this._config.template.icons,
+        username : this._config.username
+      };
 
-      var typeahead = new JX.Typeahead(template);
-      typeahead.setDatasource(datasource);
-
-      var tokenizer = new JX.Tokenizer(template);
-      tokenizer.setLimit(limit);
-      tokenizer.setTypeahead(typeahead);
-      tokenizer.start();
+      var build = JX.Prefab.buildTokenizer(tokenizerConfig);
+      build.tokenizer.start();
 
       return [
         template,
         function() {
-          return tokenizer.getTokens();
+          return build.tokenizer.getTokens();
         },
         function(map) {
           for (var k in map) {
-            tokenizer.addToken(k, map[k]);
+            build.tokenizer.addToken(k, map[k]);
           }
         }];
     },
