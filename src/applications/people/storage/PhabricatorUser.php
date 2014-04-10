@@ -32,6 +32,8 @@ final class PhabricatorUser
   protected $isEmailVerified = 0;
   protected $isApproved = 0;
 
+  protected $accountSecret;
+
   private $profileImage = self::ATTACHABLE;
   private $profile = null;
   private $status = self::ATTACHABLE;
@@ -157,6 +159,11 @@ final class PhabricatorUser
     if (!$this->getConduitCertificate()) {
       $this->setConduitCertificate($this->generateConduitCertificate());
     }
+
+    if (!strlen($this->getAccountSecret())) {
+      $this->setAccountSecret(Filesystem::readRandomCharacters(64));
+    }
+
     $result = parent::save();
 
     if ($this->profile) {
@@ -305,7 +312,7 @@ final class PhabricatorUser
 
   private function generateToken($epoch, $frequency, $key, $len) {
     if ($this->getPHID()) {
-      $vec = $this->getPHID().$this->getPasswordHash();
+      $vec = $this->getPHID().$this->getAccountSecret();
     } else {
       $vec = $this->getAlternateCSRFString();
     }
