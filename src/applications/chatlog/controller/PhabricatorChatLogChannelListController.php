@@ -3,6 +3,10 @@
 final class PhabricatorChatLogChannelListController
   extends PhabricatorChatLogController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
