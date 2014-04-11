@@ -193,11 +193,18 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $commit_hashes[] = idx($local_commit, 'local');
     }
     $commit_hashes = array_unique(array_filter($commit_hashes));
-    $commits_for_links = id(new DiffusionCommitQuery())
-      ->setViewer($user)
-      ->withIdentifiers($commit_hashes)
-      ->execute();
-    $commits_for_links = mpull($commits_for_links, null, 'getCommitIdentifier');
+    if ($commit_hashes) {
+      $commits_for_links = id(new DiffusionCommitQuery())
+        ->setViewer($user)
+        ->withIdentifiers($commit_hashes)
+        ->execute();
+      $commits_for_links = mpull(
+        $commits_for_links,
+        null,
+        'getCommitIdentifier');
+    } else {
+      $commit_for_links = array();
+    }
 
     $revision_detail = id(new DifferentialRevisionDetailView())
       ->setUser($user)
