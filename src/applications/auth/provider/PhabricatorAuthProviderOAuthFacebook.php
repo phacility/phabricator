@@ -122,7 +122,7 @@ final class PhabricatorAuthProviderOAuthFacebook
     }
 
     return $fb_provider->getProviderConfig()->getProperty(
-      PhabricatorAuthProviderOAuth::PROPERTY_APP_ID);
+      self::PROPERTY_APP_ID);
   }
 
 }
