@@ -203,7 +203,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
         null,
         'getCommitIdentifier');
     } else {
-      $commit_for_links = array();
+      $commits_for_links = array();
     }
 
     $revision_detail = id(new DifferentialRevisionDetailView())
