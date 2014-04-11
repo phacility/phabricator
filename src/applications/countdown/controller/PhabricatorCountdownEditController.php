@@ -15,6 +15,11 @@ final class PhabricatorCountdownEditController
 
     $request = $this->getRequest();
     $user = $request->getUser();
+    $epoch_control = id(new AphrontFormDateControl())
+      ->setUser($user)
+      ->setName('epoch')
+      ->setLabel(pht('End Date'))
+      ->setInitialTime(AphrontFormDateControl::TIME_END_OF_DAY);
 
     if ($this->id) {
       $page_title = pht('Edit Countdown');
@@ -34,14 +39,13 @@ final class PhabricatorCountdownEditController
       $page_title = pht('Create Countdown');
       $countdown = PhabricatorCountdown::initializeNewCountdown($user);
     }
+    $epoch_control->setValue($countdown->getEpoch());
 
     $e_text = true;
-    $e_epoch = null;
-
     $errors = array();
     if ($request->isFormPost()) {
       $title = $request->getStr('title');
-      $epoch = $request->getStr('epoch');
+      $epoch = $epoch_control->readValueFromRequest($request);
       $view_policy = $request->getStr('viewPolicy');
 
       $e_text = null;
@@ -49,23 +53,13 @@ final class PhabricatorCountdownEditController
         $e_text = pht('Required');
         $errors[] = pht('You must give the countdown a name.');
       }
-
-      if (strlen($epoch)) {
-        $timestamp = PhabricatorTime::parseLocalTime($epoch, $user);
-        if (!$timestamp) {
-          $errors[] = pht(
-            'You entered an incorrect date. You can enter date '.
-            'like \'2011-06-26 13:33:37\' to create an event at '.
-            '13:33:37 on the 26th of June 2011.');
-        }
-      } else {
-        $e_epoch = pht('Required');
-        $errors[] = pht('You must specify the end date for a countdown.');
+      if (!$epoch) {
+        $errors[] = pht('You must give the countdown a valid end date.');
       }
 
       if (!count($errors)) {
         $countdown->setTitle($title);
-        $countdown->setEpoch($timestamp);
+        $countdown->setEpoch($epoch);
         $countdown->setViewPolicy($view_policy);
         $countdown->save();
         return id(new AphrontRedirectResponse())
@@ -106,15 +100,7 @@ final class PhabricatorCountdownEditController
           ->setValue($countdown->getTitle())
           ->setName('title')
           ->setError($e_text))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('End Date'))
-          ->setValue($display_epoch)
-          ->setName('epoch')
-          ->setError($e_epoch)
-          ->setCaption(pht('Examples: '.
-            '2011-12-25 or 3 hours or '.
-            'June 8 2011, 5 PM.')))
+      ->appendChild($epoch_control)
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setUser($user)

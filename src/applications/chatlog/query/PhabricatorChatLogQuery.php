@@ -33,6 +33,28 @@ final class PhabricatorChatLogQuery
     return $logs;
   }
 
+  public function willFilterPage(array $events) {
+    $channel_ids = mpull($events, 'getChannelID', 'getChannelID');
+
+    $channels = id(new PhabricatorChatLogChannelQuery())
+      ->setViewer($this->getViewer())
+      ->withIDs($channel_ids)
+      ->execute();
+    $channels = mpull($channels, null, 'getID');
+
+    foreach ($events as $key => $event) {
+      $channel = idx($channels, $event->getChannelID());
+      if (!$channel) {
+        unset($events[$key]);
+        continue;
+      }
+
+      $event->attachChannel($channel);
+    }
+
+    return $events;
+  }
+
   private function buildWhereClause($conn_r) {
     $where = array();
 
