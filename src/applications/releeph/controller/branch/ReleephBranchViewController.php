@@ -1,22 +1,32 @@
 <?php
 
-final class ReleephBranchViewController extends ReleephProjectController
+final class ReleephBranchViewController extends ReleephBranchController
   implements PhabricatorApplicationSearchResultsControllerInterface {
 
   private $queryKey;
+  private $branchID;
 
   public function shouldAllowPublic() {
     return true;
   }
 
   public function willProcessRequest(array $data) {
-    parent::willProcessRequest($data);
+    $this->branchID = $data['branchID'];
     $this->queryKey = idx($data, 'queryKey');
   }
 
-
   public function processRequest() {
     $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $branch = id(new ReleephBranchQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->branchID))
+      ->executeOne();
+    if (!$branch) {
+      return new Aphront404Response();
+    }
+    $this->setBranch($branch);
 
     $controller = id(new PhabricatorApplicationSearchController($request))
       ->setPreface($this->renderPreface())
@@ -34,11 +44,10 @@ final class ReleephBranchViewController extends ReleephProjectController
     assert_instances_of($requests, 'ReleephRequest');
     $viewer = $this->getRequest()->getUser();
 
-    $releeph_branch = $this->getReleephBranch();
-    $releeph_project = $this->getReleephProject();
+    $branch = $this->getBranch();
 
-    // TODO: Really gross.
-    $releeph_branch->populateReleephRequestHandles(
+    // TODO: Really really gross.
+    $branch->populateReleephRequestHandles(
       $viewer,
       $requests);
 
@@ -46,8 +55,8 @@ final class ReleephBranchViewController extends ReleephProjectController
       ->setOriginType('branch')
       ->setUser($viewer)
       ->setAphrontRequest($this->getRequest())
-      ->setReleephProject($releeph_project)
-      ->setReleephBranch($releeph_branch)
+      ->setReleephProject($branch->getProduct())
+      ->setReleephBranch($branch)
       ->setReleephRequests($requests);
 
     return $list;
@@ -59,7 +68,6 @@ final class ReleephBranchViewController extends ReleephProjectController
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-
     $this->getSearchEngine()->addNavigationItems($nav->getMenu());
 
     $nav->selectFilter(null);
@@ -68,45 +76,43 @@ final class ReleephBranchViewController extends ReleephProjectController
   }
 
   private function getSearchEngine() {
-    $branch = $this->getReleephBranch();
+    $branch = $this->getBranch();
     return id(new ReleephRequestSearchEngine())
       ->setBranch($branch)
-      ->setBaseURI($branch->getURI())
+      ->setBaseURI($this->getApplicationURI('branch/'.$branch->getID().'/'))
       ->setViewer($this->getRequest()->getUser());
   }
 
   public function buildApplicationCrumbs() {
-    $releeph_branch = $this->getReleephBranch();
-
     $crumbs = parent::buildApplicationCrumbs();
 
-    if ($releeph_branch->isActive()) {
-      $create_uri = $releeph_branch->getURI('request/');
-      $crumbs->addAction(
-        id(new PHUIListItemView())
-          ->setHref($create_uri)
-          ->setName(pht('Request Pick'))
-          ->setIcon('create'));
-    }
+    $branch = $this->getBranch();
+    $create_uri = $branch->getURI('request/');
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+        ->setHref($create_uri)
+        ->setName(pht('New Pull Request'))
+        ->setIcon('create')
+        ->setDisabled(!$branch->isActive()));
 
     return $crumbs;
   }
 
   private function renderPreface() {
-    $branch = $this->getReleephBranch();
     $viewer = $this->getRequest()->getUser();
 
+    $branch = $this->getBranch();
     $id = $branch->getID();
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($branch->getDisplayName());
+      ->setHeader($branch->getDisplayName())
+      ->setUser($viewer)
+      ->setPolicyObject($branch);
 
-    if (!$branch->getIsActive()) {
-      $header->addTag(
-        id(new PHUITagView())
-          ->setType(PHUITagView::TYPE_STATE)
-          ->setBackgroundColor(PHUITagView::COLOR_BLACK)
-          ->setName(pht('Closed')));
+    if ($branch->getIsActive()) {
+      $header->setStatus('oh-ok', '', pht('Active'));
+    } else {
+      $header->setStatus('policy-noone', '', pht('Closed'));
     }
 
     $actions = id(new PhabricatorActionListView())
@@ -119,11 +125,9 @@ final class ReleephBranchViewController extends ReleephProjectController
       $branch,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $edit_uri = $branch->getURI('edit/');
-    $close_uri = $branch->getURI('close/');
-    $reopen_uri = $branch->getURI('re-open/');
-
-    $id = $branch->getID();
+    $edit_uri = $this->getApplicationURI("branch/edit/{$id}/");
+    $close_uri = $this->getApplicationURI("branch/close/{$id}/");
+    $reopen_uri = $this->getApplicationURI("branch/re-open/{$id}/");
     $history_uri = $this->getApplicationURI("branch/{$id}/history/");
 
     $actions->addAction(
@@ -149,7 +153,6 @@ final class ReleephBranchViewController extends ReleephProjectController
           ->setHref($reopen_uri)
           ->setIcon('new')
           ->setUser($viewer)
-          ->setRenderAsForm(true)
           ->setDisabled(!$can_edit)
           ->setWorkflow(true));
     }

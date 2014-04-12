@@ -162,6 +162,10 @@ final class ReleephBranch extends ReleephDAO
     return $this->assertAttached($this->project);
   }
 
+  public function getProduct() {
+    return $this->getProject();
+  }
+
   public function attachCutPointCommit(
     PhabricatorRepositoryCommit $commit = null) {
     $this->cutPointCommit = $commit;

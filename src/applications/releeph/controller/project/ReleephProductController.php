@@ -13,10 +13,6 @@ abstract class ReleephProductController extends ReleephController {
     return $this->product;
   }
 
-  protected function getProductViewURI(ReleephProject $product) {
-    return $this->getApplicationURI('project/'.$product->getID().'/');
-  }
-
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 

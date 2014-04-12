@@ -1,59 +1,81 @@
 <?php
 
-final class ReleephBranchAccessController extends ReleephProjectController {
+final class ReleephBranchAccessController extends ReleephBranchController {
 
   private $action;
+  private $branchID;
 
   public function willProcessRequest(array $data) {
     $this->action = $data['action'];
-    parent::willProcessRequest($data);
+    $this->branchID = $data['branchID'];
   }
 
   public function processRequest() {
-    $branch = $this->getReleephBranch();
     $request = $this->getRequest();
+    $viewer = $request->getUser();
 
-    $done_uri = $branch->getURI();
+    $branch = id(new ReleephBranchQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->branchID))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
+    if (!$branch) {
+      return new Aphront404Response();
+    }
+    $this->setBranch($branch);
 
-    switch ($this->action) {
+    $action = $this->action;
+    switch ($action) {
       case 'close':
-        $is_active = false;
-        $title_text = pht('Close Branch');
-        $body_text = pht(
-          'Really close the branch "%s"?',
-          $branch->getBasename());
-        $button_text = pht('Close Branch');
-        break;
       case 're-open':
-        $is_active = true;
-        $title_text = pht('Reopen Branch');
-        $body_text = pht(
-          'Really reopen the branch "%s"?',
-          $branch->getBasename());
-        $button_text = pht('Reopen Branch');
         break;
       default:
-        throw new Exception("Unknown action '{$this->action}'!");
-        break;
+        return new Aphront404Response();
     }
 
-    if ($request->isDialogFormPost()) {
+    $branch_uri = $this->getBranchViewURI($branch);
+    if ($request->isFormPost()) {
+
+      if ($action == 're-open') {
+        $is_active = 1;
+      } else {
+        $is_active = 0;
+      }
+
       id(new ReleephBranchEditor())
         ->setActor($request->getUser())
         ->setReleephBranch($branch)
-        ->changeBranchAccess($is_active ? 1 : 0);
+        ->changeBranchAccess($is_active);
 
-      return id(new AphrontReloadResponse())->setURI($done_uri);
+      return id(new AphrontReloadResponse())->setURI($branch_uri);
     }
 
-    $dialog = new AphrontDialogView();
-    $dialog
-      ->setUser($request->getUser())
+    if ($action == 'close') {
+      $title_text = pht('Really Close Branch?');
+      $short = pht('Close Branch');
+      $body_text = pht(
+        'Really close the branch "%s"?',
+        phutil_tag('strong', array(), $branch->getBasename()));
+      $button_text = pht('Close Branch');
+    } else {
+      $title_text = pht('Really Reopen Branch?');
+      $short = pht('Reopen Branch');
+      $body_text = pht(
+        'Really reopen the branch "%s"?',
+        phutil_tag('strong', array(), $branch->getBasename()));
+      $button_text = pht('Reopen Branch');
+    }
+
+    return $this->newDialog()
       ->setTitle($title_text)
+      ->setShortTitle($short)
       ->appendChild($body_text)
       ->addSubmitButton($button_text)
-      ->addCancelButton($done_uri);
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
+      ->addCancelButton($branch_uri);
   }
+
 }
