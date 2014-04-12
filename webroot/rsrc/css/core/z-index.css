@@ -125,10 +125,6 @@ div.jx-typeahead-results {
   z-index: 16;
 }
 
-.jx-tooltip-container {
-  z-index: 18;
-}
-
 .pholio-device-lightbox {
   z-index: 20;
 }
@@ -143,4 +139,8 @@ div.jx-typeahead-results {
 
 .remarkup-control-fullscreen-mode {
   z-index: 50;
+}
+
+.jx-tooltip-container {
+  z-index: 51;
 }
