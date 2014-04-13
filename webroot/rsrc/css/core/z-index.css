@@ -38,6 +38,10 @@
   z-index: 3;
 }
 
+.phabricator-crumbs-view {
+  z-index: 3;
+}
+
 .phabricator-nav-local {
   z-index: 4;
 }
@@ -67,8 +71,8 @@
   z-index: 5;
 }
 
-.phabricator-crumbs-view {
-  z-index: 3;
+.phui-calendar-date-number  {
+  z-index: 5;
 }
 
 .phabricator-main-menu {
