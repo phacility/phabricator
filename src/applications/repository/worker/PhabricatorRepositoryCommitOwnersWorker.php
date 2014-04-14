@@ -3,6 +3,11 @@
 final class PhabricatorRepositoryCommitOwnersWorker
   extends PhabricatorRepositoryCommitParserWorker {
 
+  public function getRequiredLeaseTime() {
+    // Commit owner parser may take a while to process for huge commits.
+    return 60 * 60;
+  }
+
   protected function parseCommit(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
