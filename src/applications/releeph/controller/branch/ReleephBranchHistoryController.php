@@ -1,12 +1,15 @@
 <?php
 
-final class ReleephBranchHistoryController extends ReleephProjectController {
+final class ReleephBranchHistoryController extends ReleephBranchController {
 
-  private $id;
+  private $branchID;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
 
   public function willProcessRequest(array $data) {
-    $this->id = $data['branchID'];
-    parent::willProcessRequest($data);
+    $this->branchID = $data['branchID'];
   }
 
   public function processRequest() {
@@ -15,11 +18,12 @@ final class ReleephBranchHistoryController extends ReleephProjectController {
 
     $branch = id(new ReleephBranchQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($this->branchID))
       ->executeOne();
     if (!$branch) {
       return new Aphront404Response();
     }
+    $this->setBranch($branch);
 
     $xactions = id(new ReleephBranchTransactionQuery())
       ->setViewer($viewer)
@@ -29,7 +33,8 @@ final class ReleephBranchHistoryController extends ReleephProjectController {
     $timeline = id(new PhabricatorApplicationTransactionView())
       ->setUser($viewer)
       ->setObjectPHID($branch->getPHID())
-      ->setTransactions($xactions);
+      ->setTransactions($xactions)
+      ->setShouldTerminate(true);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('History'));

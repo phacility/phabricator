@@ -99,7 +99,7 @@ final class ReleephProductViewController extends ReleephProductController
 
       $item = id(new PHUIObjectItemView())
         ->setHeader($branch->getDisplayName())
-        ->setHref($branch->getURI())
+        ->setHref($this->getApplicationURI('branch/'.$branch->getID().'/'))
         ->addAttribute($branch_link);
 
       if (!$branch->getIsActive()) {

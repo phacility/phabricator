@@ -1030,11 +1030,11 @@ final class DifferentialRevisionQuery
 
     $viewer = $this->getViewer();
     $viewer_phid = $viewer->getPHID();
+    $allow_key = 'differential.allow-self-accept';
+    $allow_self = PhabricatorEnv::getEnvConfig($allow_key);
 
     // Figure out which of these reviewers the viewer has authority to act as.
     if ($this->needReviewerAuthority && $viewer_phid) {
-      $allow_key = 'differential.allow-self-accept';
-      $allow_self = PhabricatorEnv::getEnvConfig($allow_key);
       $authority = $this->loadReviewerAuthority(
         $revisions,
         $edges,
@@ -1072,7 +1072,6 @@ final class DifferentialRevisionQuery
   }
 
 
-
   public static function splitResponsible(array $revisions, array $user_phids) {
     $blocking = array();
     $active = array();
@@ -1087,6 +1086,11 @@ final class DifferentialRevisionQuery
       $filter_is_author = in_array($revision->getAuthorPHID(), $user_phids);
       if (!$revision->getReviewers()) {
         $needs_review = false;
+        $author_is_reviewer = false;
+      } else {
+        $author_is_reviewer = in_array(
+          $revision->getAuthorPHID(),
+          $revision->getReviewers());
       }
 
       // If exactly one of "needs review" and "the user is the author" is
@@ -1098,6 +1102,11 @@ final class DifferentialRevisionQuery
         } else {
           $active[] = $revision;
         }
+      // User is author **and** reviewer. An exotic but configurable workflow.
+      // User needs to act on it double.
+      } else if ($needs_review && $author_is_reviewer) {
+        array_unshift($blocking, $revision);
+        $active[] = $revision;
       } else {
         $waiting[] = $revision;
       }
