@@ -58,7 +58,7 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
           '(?P<action>close|re-open)/(?P<branchID>[1-9]\d*)/' =>
             'ReleephBranchAccessController',
           'preview/' => 'ReleephBranchNamePreviewController',
-          '(?P<branchID>[^/]+)/' => array(
+          '(?P<branchID>[1-9]\d*)/' => array(
             'history/' => 'ReleephBranchHistoryController',
             '(?:query/(?P<queryKey>[^/]+)/)?' => 'ReleephBranchViewController',
           ),

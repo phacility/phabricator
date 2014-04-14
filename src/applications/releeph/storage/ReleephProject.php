@@ -53,19 +53,6 @@ final class ReleephProject extends ReleephDAO
     return $this;
   }
 
-  public function willSaveObject() {
-    // Do this first, to generate the PHID
-    parent::willSaveObject();
-
-    $banned_names = $this->getBannedNames();
-    if (in_array($this->name, $banned_names)) {
-      throw new Exception(sprintf(
-        "The name '%s' is in the list of banned project names!",
-        $this->name,
-        implode(', ', $banned_names)));
-    }
-  }
-
   public function loadArcanistProject() {
     return $this->loadOneRelative(
       new PhabricatorRepositoryArcanistProject(),
@@ -114,12 +101,6 @@ final class ReleephProject extends ReleephDAO
 
   public function getReleephFieldSelector() {
     return new ReleephDefaultFieldSelector();
-  }
-
-  private function getBannedNames() {
-    return array(
-      'branch', // no one's tried this... yet!
-    );
   }
 
   public function isTestFile($filename) {
