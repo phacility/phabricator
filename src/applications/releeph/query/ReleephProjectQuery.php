@@ -8,6 +8,7 @@ final class ReleephProjectQuery
   private $phids;
 
   private $needRepositories;
+  private $needArcanistProjects;
 
   private $order    = 'order-id';
   const ORDER_ID    = 'order-id';
@@ -30,6 +31,11 @@ final class ReleephProjectQuery
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  public function needArcanistProjects($need) {
+    $this->needArcanistProjects = $need;
     return $this;
   }
 
@@ -70,6 +76,29 @@ final class ReleephProjectQuery
 
     return $projects;
   }
+
+  public function didFilterPage(array $products) {
+
+    if ($this->needArcanistProjects) {
+      $project_ids = array_filter(mpull($products, 'getArcanistProjectID'));
+      if ($project_ids) {
+        $projects = id(new PhabricatorRepositoryArcanistProject())
+          ->loadAllWhere('id IN (%Ld)', $project_ids);
+        $projects = mpull($projects, null, 'getID');
+      } else {
+        $projects = array();
+      }
+
+      foreach ($products as $product) {
+        $project_id = $product->getArcanistProjectID();
+        $project = idx($projects, $project_id);
+        $product->attachArcanistProject($project);
+      }
+    }
+
+    return $products;
+  }
+
 
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();

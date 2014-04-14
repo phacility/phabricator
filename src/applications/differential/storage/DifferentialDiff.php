@@ -95,27 +95,6 @@ final class DifferentialDiff
     return $name;
   }
 
-  public function loadArcanistProject() {
-    if (!$this->getArcanistProjectPHID()) {
-      return null;
-    }
-    return id(new PhabricatorRepositoryArcanistProject())->loadOneWhere(
-      'phid = %s',
-      $this->getArcanistProjectPHID());
-  }
-
-  public function getBackingVersionControlSystem() {
-    $arcanist_project = $this->loadArcanistProject();
-    if (!$arcanist_project) {
-      return null;
-    }
-    $repository = $arcanist_project->loadRepository();
-    if (!$repository) {
-      return null;
-    }
-    return $repository->getVersionControlSystem();
-  }
-
   public function save() {
     $this->openTransaction();
       $ret = parent::save();
