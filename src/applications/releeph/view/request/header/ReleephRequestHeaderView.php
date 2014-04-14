@@ -8,7 +8,6 @@ final class ReleephRequestHeaderView extends AphrontView {
   private $releephRequest;
   private $releephBranch;
   private $releephProject;
-  private $originType;
   private $fieldGroups;
 
   public function setAphrontRequest(AphrontRequest $request) {
@@ -31,19 +30,9 @@ final class ReleephRequestHeaderView extends AphrontView {
     return $this;
   }
 
-  public function setOriginType($origin) {
-    // For the Edit controller
-    $this->originType = $origin;
-    return $this;
-  }
-
   public function setReleephFieldGroups(array $field_groups) {
     $this->fieldGroups = $field_groups;
     return $this;
-  }
-
-  protected function getOrigin() {
-    return $this->originType;
   }
 
   public function render() {
@@ -262,8 +251,7 @@ final class ReleephRequestHeaderView extends AphrontView {
     $right_buttons[] = phutil_tag(
       'a',
       array(
-        'href' => '/releeph/request/edit/'.$this->releephRequest->getID().
-                  '?origin='.$this->originType,
+        'href' => '/releeph/request/edit/'.$this->releephRequest->getID().'/',
         'class' => 'small blue button',
       ),
       'Edit');

@@ -118,6 +118,21 @@ final class ReleephRequestQuery
       }
     }
 
+    $branch_ids = array_unique(mpull($requests, 'getBranchID'));
+    $branches = id(new ReleephBranchQuery())
+      ->withIDs($branch_ids)
+      ->setViewer($this->getViewer())
+      ->execute();
+    $branches = mpull($branches, null, 'getID');
+    foreach ($requests as $key => $request) {
+      $branch = idx($branches, $request->getBranchID());
+      if (!$branch) {
+        unset($requests[$key]);
+        continue;
+      }
+      $request->attachBranch($branch);
+    }
+
     return $requests;
   }
 

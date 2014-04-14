@@ -1,7 +1,9 @@
 <?php
 
+// TODO: After T2222, this is likely unreachable?
+
 final class ReleephRequestDifferentialCreateController
-  extends ReleephProjectController {
+  extends ReleephController {
 
   private $revisionID;
   private $revision;

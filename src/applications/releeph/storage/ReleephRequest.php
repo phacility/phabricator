@@ -22,7 +22,9 @@ final class ReleephRequest extends ReleephDAO
 
   // Pre-populated handles that we'll bulk load in ReleephBranch
   private $handles = self::ATTACHABLE;
+
   private $customFields = self::ATTACHABLE;
+  private $branch = self::ATTACHABLE;
 
 
 
@@ -87,6 +89,19 @@ final class ReleephRequest extends ReleephDAO
 
   public function getStatus() {
     return $this->calculateStatus();
+  }
+
+  public function getMonogram() {
+    return 'Y'.$this->getID();
+  }
+
+  public function getBranch() {
+    return $this->assertAttached($this->branch);
+  }
+
+  public function attachBranch(ReleephBranch $branch) {
+    $this->branch = $branch;
+    return $this;
   }
 
   private function calculateStatus() {
@@ -305,15 +320,17 @@ final class ReleephRequest extends ReleephDAO
   }
 
   public function getPolicy($capability) {
-    return PhabricatorPolicies::POLICY_USER;
+    return $this->getBranch()->getPolicy($capability);
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return false;
+    return $this->getBranch()->hasAutomaticCapability($capability, $viewer);
   }
 
   public function describeAutomaticCapability($capability) {
-    return null;
+    return pht(
+      'Pull requests have the same policies as the branches they are '.
+      'requested against.');
   }
 
 

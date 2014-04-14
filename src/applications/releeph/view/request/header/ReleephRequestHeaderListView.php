@@ -3,7 +3,6 @@
 final class ReleephRequestHeaderListView
   extends AphrontView {
 
-  private $originType;
   private $releephProject;
   private $releephBranch;
   private $releephRequests;
@@ -11,11 +10,6 @@ final class ReleephRequestHeaderListView
   private $reload = false;
 
   private $errors = array();
-
-  public function setOriginType($origin) {
-    $this->originType = $origin;
-    return $this;
-  }
 
   public function setReleephProject(ReleephProject $rp) {
     $this->releephProject = $rp;
@@ -113,7 +107,6 @@ final class ReleephRequestHeaderListView
       $views[] = id(new ReleephRequestHeaderView())
         ->setUser($this->user)
         ->setAphrontRequest($this->aphrontRequest)
-        ->setOriginType($this->originType)
         ->setReleephProject($this->releephProject)
         ->setReleephBranch($this->releephBranch)
         ->setReleephRequest($releeph_request)

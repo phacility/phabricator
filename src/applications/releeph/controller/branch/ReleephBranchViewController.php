@@ -52,7 +52,6 @@ final class ReleephBranchViewController extends ReleephBranchController
       $requests);
 
     $list = id(new ReleephRequestHeaderListView())
-      ->setOriginType('branch')
       ->setUser($viewer)
       ->setAphrontRequest($this->getRequest())
       ->setReleephProject($branch->getProduct())
@@ -87,10 +86,10 @@ final class ReleephBranchViewController extends ReleephBranchController
     $crumbs = parent::buildApplicationCrumbs();
 
     $branch = $this->getBranch();
-    $create_uri = $branch->getURI('request/');
+
     $crumbs->addAction(
       id(new PHUIListItemView())
-        ->setHref($create_uri)
+        ->setHref($this->getApplicationURI('branch/pull/'.$branch->getID().'/'))
         ->setName(pht('New Pull Request'))
         ->setIcon('create')
         ->setDisabled(!$branch->isActive()));
