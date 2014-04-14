@@ -380,6 +380,7 @@ phutil_register_library_map(array(
     'DifferentialHunk' => 'applications/differential/storage/DifferentialHunk.php',
     'DifferentialHunkParser' => 'applications/differential/parser/DifferentialHunkParser.php',
     'DifferentialHunkParserTestCase' => 'applications/differential/parser/__tests__/DifferentialHunkParserTestCase.php',
+    'DifferentialHunkQuery' => 'applications/differential/query/DifferentialHunkQuery.php',
     'DifferentialHunkTestCase' => 'applications/differential/storage/__tests__/DifferentialHunkTestCase.php',
     'DifferentialInlineComment' => 'applications/differential/storage/DifferentialInlineComment.php',
     'DifferentialInlineCommentEditController' => 'applications/differential/controller/DifferentialInlineCommentEditController.php',
@@ -2958,8 +2959,13 @@ phutil_register_library_map(array(
     'DifferentialGitSVNIDField' => 'DifferentialCustomField',
     'DifferentialHostField' => 'DifferentialCustomField',
     'DifferentialHovercardEventListener' => 'PhabricatorEventListener',
-    'DifferentialHunk' => 'DifferentialDAO',
+    'DifferentialHunk' =>
+    array(
+      0 => 'DifferentialDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
     'DifferentialHunkParserTestCase' => 'PhabricatorTestCase',
+    'DifferentialHunkQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'DifferentialHunkTestCase' => 'ArcanistPhutilTestCase',
     'DifferentialInlineComment' => 'PhabricatorInlineCommentInterface',
     'DifferentialInlineCommentEditController' => 'PhabricatorInlineCommentController',

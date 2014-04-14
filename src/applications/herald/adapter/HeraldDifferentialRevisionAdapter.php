@@ -19,6 +19,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
   protected $repository;
   protected $affectedPackages;
   protected $changesets;
+  private $haveHunks;
 
   public function getAdapterApplicationClass() {
     return 'PhabricatorApplicationDifferential';
@@ -180,6 +181,22 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
     return $this->changesets;
   }
 
+  private function loadChangesetsWithHunks() {
+    $changesets = $this->loadChangesets();
+
+    if ($changesets && !$this->haveHunks) {
+      $this->haveHunks = true;
+
+      id(new DifferentialHunkQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withChangesets($changesets)
+        ->needAttachToChangesets(true)
+        ->execute();
+    }
+
+    return $changesets;
+  }
+
   protected function loadAffectedPaths() {
     $changesets = $this->loadChangesets();
 
@@ -219,24 +236,16 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
   }
 
   private function loadContentWithMask($mask) {
-    $changesets = $this->loadChangesets();
-
-    $hunks = array();
-    if ($changesets) {
-      $hunks = id(new DifferentialHunk())->loadAllWhere(
-        'changesetID in (%Ld)',
-        mpull($changesets, 'getID'));
-    }
+    $changesets = $this->loadChangesetsWithHunks();
 
     $dict = array();
-    $hunks = mgroup($hunks, 'getChangesetID');
-    $changesets = mpull($changesets, null, 'getID');
-    foreach ($changesets as $id => $changeset) {
-      $path = $this->getAbsoluteRepositoryPathForChangeset($changeset);
+    foreach ($changesets as $changeset) {
       $content = array();
-      foreach (idx($hunks, $id, array()) as $hunk) {
+      foreach ($changeset->getHunks() as $hunk) {
         $content[] = $hunk->getContentWithMask($mask);
       }
+
+      $path = $this->getAbsoluteRepositoryPathForChangeset($changeset);
       $dict[$path] = implode("\n", $content);
     }
 
