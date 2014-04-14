@@ -9,6 +9,10 @@ final class DifferentialHunk extends DifferentialDAO {
   protected $newOffset;
   protected $newLen;
 
+  const FLAG_LINES_ADDED     = 1;
+  const FLAG_LINES_REMOVED   = 2;
+  const FLAG_LINES_STABLE    = 4;
+
   public function getAddedLines() {
     return $this->makeContent($include = '+');
   }
@@ -27,6 +31,26 @@ final class DifferentialHunk extends DifferentialDAO {
 
   public function makeChanges() {
     return implode('', $this->makeContent($include = '-+'));
+  }
+
+  public function getContentWithMask($mask) {
+    $include = array();
+
+    if (($mask & self::FLAG_LINES_ADDED)) {
+      $include[] = '+';
+    }
+
+    if (($mask & self::FLAG_LINES_REMOVED)) {
+      $include[] = '-';
+    }
+
+    if (($mask & self::FLAG_LINES_STABLE)) {
+      $include[] = ' ';
+    }
+
+    $include = implode('', $include);
+
+    return implode('', $this->makeContent($include));
   }
 
   final private function makeContent($include) {

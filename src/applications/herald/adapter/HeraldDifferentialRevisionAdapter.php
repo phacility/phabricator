@@ -204,56 +204,21 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
   }
 
   protected function loadContentDictionary() {
-    $changesets = $this->loadChangesets();
-
-    $hunks = array();
-    if ($changesets) {
-      $hunks = id(new DifferentialHunk())->loadAllWhere(
-        'changesetID in (%Ld)',
-        mpull($changesets, 'getID'));
-    }
-
-    $dict = array();
-    $hunks = mgroup($hunks, 'getChangesetID');
-    $changesets = mpull($changesets, null, 'getID');
-    foreach ($changesets as $id => $changeset) {
-      $path = $this->getAbsoluteRepositoryPathForChangeset($changeset);
-      $content = array();
-      foreach (idx($hunks, $id, array()) as $hunk) {
-        $content[] = $hunk->makeChanges();
-      }
-      $dict[$path] = implode("\n", $content);
-    }
-
-    return $dict;
+    $add_lines = DifferentialHunk::FLAG_LINES_ADDED;
+    $rem_lines = DifferentialHunk::FLAG_LINES_REMOVED;
+    $mask = ($add_lines | $rem_lines);
+    return $this->loadContentWithMask($mask);
   }
 
   protected function loadAddedContentDictionary() {
-    $changesets = $this->loadChangesets();
-
-    $hunks = array();
-    if ($changesets) {
-      $hunks = id(new DifferentialHunk())->loadAllWhere(
-        'changesetID in (%Ld)',
-        mpull($changesets, 'getID'));
-    }
-
-    $dict = array();
-    $hunks = mgroup($hunks, 'getChangesetID');
-    $changesets = mpull($changesets, null, 'getID');
-    foreach ($changesets as $id => $changeset) {
-      $path = $this->getAbsoluteRepositoryPathForChangeset($changeset);
-      $content = array();
-      foreach (idx($hunks, $id, array()) as $hunk) {
-        $content[] = implode('', $hunk->getAddedLines());
-      }
-      $dict[$path] = implode("\n", $content);
-    }
-
-    return $dict;
+    return $this->loadContentWithMask(DifferentialHunk::FLAG_LINES_ADDED);
   }
 
   protected function loadRemovedContentDictionary() {
+    return $this->loadContentWithMask(DifferentialHunk::FLAG_LINES_REMOVED);
+  }
+
+  private function loadContentWithMask($mask) {
     $changesets = $this->loadChangesets();
 
     $hunks = array();
@@ -270,7 +235,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
       $path = $this->getAbsoluteRepositoryPathForChangeset($changeset);
       $content = array();
       foreach (idx($hunks, $id, array()) as $hunk) {
-        $content[] = implode('', $hunk->getRemovedLines());
+        $content[] = $hunk->getContentWithMask($mask);
       }
       $dict[$path] = implode("\n", $content);
     }
