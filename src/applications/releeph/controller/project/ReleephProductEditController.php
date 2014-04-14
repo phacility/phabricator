@@ -139,9 +139,7 @@ final class ReleephProductEditController extends ReleephProductController {
         id(new AphrontFormStaticControl())
           ->setLabel(pht('Repository'))
           ->setValue(
-            $product
-              ->loadPhabricatorRepository()
-              ->getName()))
+            $product->getRepository()->getName()))
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel(pht('Arc Project'))

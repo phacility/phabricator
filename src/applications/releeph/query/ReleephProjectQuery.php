@@ -7,7 +7,6 @@ final class ReleephProjectQuery
   private $ids;
   private $phids;
 
-  private $needRepositories;
   private $needArcanistProjects;
 
   private $order    = 'order-id';
