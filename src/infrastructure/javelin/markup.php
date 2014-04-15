@@ -49,25 +49,26 @@ function phabricator_form(PhabricatorUser $user, $attributes, $content) {
   $is_absolute_uri = preg_match('#^(https?:|//)#', $http_action);
 
   if ($is_post) {
-    if ($is_absolute_uri) {
-      $is_dev = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
-      if ($is_dev) {
-        $form_domain = id(new PhutilURI($http_action))
-          ->getDomain();
-        $host_domain = id(new PhutilURI(PhabricatorEnv::getURI('/')))
-          ->getDomain();
 
-        if (strtolower($form_domain) == strtolower($host_domain)) {
-          throw new Exception(
-            pht(
-              "You are building a <form /> that submits to Phabricator, but ".
-              "has an absolute URI in its 'action' attribute ('%s'). To avoid ".
-              "leaking CSRF tokens, Phabricator does not add CSRF information ".
-              "to forms with absolute URIs. Instead, use a relative URI.",
-              $http_action));
-        }
-      }
-    } else {
+    // NOTE: We only include CSRF tokens if a URI is a local URI on the same
+    // domain. This is an important security feature and prevents forms which
+    // submit to foreign sites from leaking CSRF tokens.
+
+    // In some cases, we may construct a fully-qualified local URI. For example,
+    // we can construct these for download links, depending on configuration.
+
+    // These forms do not receive CSRF tokens, even though they safely could.
+    // This can be confusing, if you're developing for Phabricator and
+    // manage to construct a local form with a fully-qualified URI, since it
+    // won't get CSRF tokens and you'll get an exception at the other end of
+    // the request which is a bit disconnected from the actual root cause.
+
+    // However, this is rare, and there are reasonable cases where this
+    // construction occurs legitimately, and the simplest fix is to omit CSRF
+    // tokens for these URIs in all cases. The error message you receive also
+    // gives you some hints as to this potential source of error.
+
+    if (!$is_absolute_uri) {
       $body[] = phutil_tag(
         'input',
         array(

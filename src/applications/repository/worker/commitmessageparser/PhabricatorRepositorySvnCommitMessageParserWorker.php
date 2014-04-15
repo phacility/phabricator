@@ -15,7 +15,7 @@ final class PhabricatorRepositorySvnCommitMessageParserWorker
     $this->updateCommitData($ref);
 
     if ($this->shouldQueueFollowupTasks()) {
-      PhabricatorWorker::scheduleTask(
+      $this->queueTask(
         'PhabricatorRepositorySvnCommitChangeParserWorker',
         array(
           'commitID' => $commit->getID(),

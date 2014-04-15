@@ -53,7 +53,7 @@ final class ReleephProductListController extends ReleephController
           ),
           'r'.$repo->getCallsign()));
 
-      $arc = $product->loadArcanistProject();
+      $arc = $product->getArcanistProject();
       if ($arc) {
         $item->addAttribute($arc->getName());
       }

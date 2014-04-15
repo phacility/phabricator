@@ -21,6 +21,7 @@ final class ReleephProject extends ReleephDAO
   protected $details = array();
 
   private $repository = self::ATTACHABLE;
+  private $arcanistProject = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -53,24 +54,14 @@ final class ReleephProject extends ReleephDAO
     return $this;
   }
 
-  public function willSaveObject() {
-    // Do this first, to generate the PHID
-    parent::willSaveObject();
-
-    $banned_names = $this->getBannedNames();
-    if (in_array($this->name, $banned_names)) {
-      throw new Exception(sprintf(
-        "The name '%s' is in the list of banned project names!",
-        $this->name,
-        implode(', ', $banned_names)));
-    }
+  public function getArcanistProject() {
+    return $this->assertAttached($this->arcanistProject);
   }
 
-  public function loadArcanistProject() {
-    return $this->loadOneRelative(
-      new PhabricatorRepositoryArcanistProject(),
-      'id',
-      'getArcanistProjectID');
+  public function attachArcanistProject(
+    PhabricatorRepositoryArcanistProject $arcanist_project = null) {
+    $this->arcanistProject = $arcanist_project;
+    return $this;
   }
 
   public function getPushers() {
@@ -114,12 +105,6 @@ final class ReleephProject extends ReleephDAO
 
   public function getReleephFieldSelector() {
     return new ReleephDefaultFieldSelector();
-  }
-
-  private function getBannedNames() {
-    return array(
-      'branch', // no one's tried this... yet!
-    );
   }
 
   public function isTestFile($filename) {

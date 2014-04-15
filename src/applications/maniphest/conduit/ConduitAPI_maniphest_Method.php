@@ -38,7 +38,6 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
       'ccPHIDs'       => 'optional list<phid>',
       'priority'      => 'optional int',
       'projectPHIDs'  => 'optional list<phid>',
-      'filePHIDs'     => 'optional list<phid>',
       'auxiliary'     => 'optional dict',
     );
 
@@ -124,18 +123,6 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
                               PhabricatorProjectPHIDTypeProject::TYPECONST,
                               'projectPHIDS');
       $changes[ManiphestTransaction::TYPE_PROJECTS] = $project_phids;
-    }
-
-    $file_phids = $request->getValue('filePHIDs');
-    if ($file_phids !== null) {
-      $this->validatePHIDList($file_phids,
-                              PhabricatorFilePHIDTypeFile::TYPECONST,
-                              'filePHIDS');
-      $file_map = array_fill_keys($file_phids, true);
-      $attached = $task->getAttached();
-      $attached[PhabricatorFilePHIDTypeFile::TYPECONST] = $file_map;
-
-      $changes[ManiphestTransaction::TYPE_ATTACH] = $attached;
     }
 
     $template = new ManiphestTransaction();

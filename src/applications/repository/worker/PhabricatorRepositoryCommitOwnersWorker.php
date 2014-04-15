@@ -13,7 +13,7 @@ final class PhabricatorRepositoryCommitOwnersWorker
       PhabricatorRepositoryCommit::IMPORTED_OWNERS);
 
     if ($this->shouldQueueFollowupTasks()) {
-      PhabricatorWorker::scheduleTask(
+      $this->queueTask(
         'PhabricatorRepositoryCommitHeraldWorker',
         array(
           'commitID' => $commit->getID(),

@@ -5,7 +5,7 @@ final class PhabricatorRepositoryCommitHeraldWorker
 
   public function getRequiredLeaseTime() {
     // Herald rules may take a long time to process.
-    return 4 * 60 * 60;
+    return phutil_units('4 hours in seconds');
   }
 
   public function parseCommit(

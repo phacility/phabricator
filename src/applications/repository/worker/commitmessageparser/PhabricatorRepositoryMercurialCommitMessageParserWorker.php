@@ -15,7 +15,7 @@ final class PhabricatorRepositoryMercurialCommitMessageParserWorker
     $this->updateCommitData($ref);
 
     if ($this->shouldQueueFollowupTasks()) {
-      PhabricatorWorker::scheduleTask(
+      $this->queueTask(
         'PhabricatorRepositoryMercurialCommitChangeParserWorker',
         array(
           'commitID' => $commit->getID(),

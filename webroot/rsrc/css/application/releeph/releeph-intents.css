@@ -17,11 +17,11 @@
 }
 
 .releeph-intents .arrow.want {
-  background-image: url('/rsrc/custom/image/icon/tango/go-next.png');
+  /* TODO: Icon. */
 }
 
 .releeph-intents .arrow.pass {
-  background-image: url('/rsrc/custom/image/icon/tango/go-previous-gray.png');
+  /* TODO: Icon. */
 }
 
 .releeph-intents a {

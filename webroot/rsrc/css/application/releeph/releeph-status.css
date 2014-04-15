@@ -22,5 +22,6 @@
   padding-left: 22px;
   background-repeat: no-repeat;
   background-size: 16px auto;
-  background-image: url(/rsrc/custom/image/releeph/releeph_warning.png);
+
+  /* TODO: This had a background that's still at Facebook? */
 }

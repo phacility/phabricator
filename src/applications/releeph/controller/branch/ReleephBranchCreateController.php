@@ -31,11 +31,10 @@ final class ReleephBranchCreateController extends ReleephProductController {
     $symbolic_name = $request->getStr('symbolicName');
 
     if (!$cut_point) {
-      $repository = $product->loadPhabricatorRepository();
+      $repository = $product->getRepository();
       switch ($repository->getVersionControlSystem()) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
           break;
-
         case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
           $cut_point = $product->getTrunkBranch();
           break;
@@ -79,8 +78,10 @@ final class ReleephBranchCreateController extends ReleephProductController {
             $branch_date,
             $symbolic_name);
 
+        $branch_uri = $this->getApplicationURI('branch/'.$branch->getID());
+
         return id(new AphrontRedirectResponse())
-          ->setURI($branch->getURI());
+          ->setURI($branch_uri);
       }
     }
 

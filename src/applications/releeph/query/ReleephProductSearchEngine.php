@@ -13,7 +13,8 @@ final class ReleephProductSearchEngine
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new ReleephProjectQuery())
-      ->setOrder(ReleephProjectQuery::ORDER_NAME);
+      ->setOrder(ReleephProjectQuery::ORDER_NAME)
+      ->needArcanistProjects(true);
 
     $active = $saved->getParameter('active');
     $value = idx($this->getActiveValues(), $active);

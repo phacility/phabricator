@@ -1,22 +1,34 @@
 <?php
 
 final class ReleephRequestCommentController
-  extends ReleephProjectController {
+  extends ReleephRequestController {
+
+  private $requestID;
+
+  public function willProcessRequest(array $data) {
+    $this->requestID = $data['requestID'];
+  }
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $rq = $this->getReleephRequest();
+    $viewer = $request->getUser();
 
     if (!$request->isFormPost()) {
       return new Aphront400Response();
     }
 
+    $pull = id(new ReleephRequestQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->requestID))
+      ->executeOne();
+    if (!$pull) {
+      return new Aphront404Response();
+    }
+
     $is_preview = $request->isPreviewRequest();
     $draft = PhabricatorDraft::buildFromRequest($request);
 
-    $view_uri = $this->getApplicationURI('/RQ'.$rq->getID());
+    $view_uri = $this->getApplicationURI('/'.$pull->getMonogram());
 
     $xactions = array();
     $xactions[] = id(new ReleephRequestTransaction())
@@ -26,13 +38,13 @@ final class ReleephRequestCommentController
           ->setContent($request->getStr('comment')));
 
     $editor = id(new ReleephRequestTransactionalEditor())
-      ->setActor($user)
+      ->setActor($viewer)
       ->setContinueOnNoEffect($request->isContinueRequest())
       ->setContentSourceFromRequest($request)
       ->setIsPreview($is_preview);
 
     try {
-      $xactions = $editor->applyTransactions($rq, $xactions);
+      $xactions = $editor->applyTransactions($pull, $xactions);
     } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
       return id(new PhabricatorApplicationTransactionNoEffectResponse())
         ->setCancelURI($view_uri)
@@ -45,7 +57,7 @@ final class ReleephRequestCommentController
 
     if ($request->isAjax()) {
       return id(new PhabricatorApplicationTransactionResponse())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->setTransactions($xactions)
         ->setIsPreview($is_preview)
         ->setAnchorOffset($request->getStr('anchor'));

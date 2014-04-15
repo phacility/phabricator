@@ -155,7 +155,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ManiphestTransaction::TYPE_OWNER      => pht('Reassign / Claim'),
       ManiphestTransaction::TYPE_CCS        => pht('Add CCs'),
       ManiphestTransaction::TYPE_PRIORITY   => pht('Change Priority'),
-      ManiphestTransaction::TYPE_ATTACH     => pht('Upload File'),
       ManiphestTransaction::TYPE_PROJECTS   => pht('Associate Projects'),
     );
 
@@ -304,7 +303,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ManiphestTransaction::TYPE_CCS      => 'ccs',
       ManiphestTransaction::TYPE_PRIORITY => 'priority',
       ManiphestTransaction::TYPE_PROJECTS => 'projects',
-      ManiphestTransaction::TYPE_ATTACH   => 'file',
     );
 
     $tokenizer_map = array(

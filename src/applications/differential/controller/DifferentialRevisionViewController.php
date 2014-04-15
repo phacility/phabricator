@@ -33,6 +33,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $diffs = id(new DifferentialDiffQuery())
       ->setViewer($request->getUser())
       ->withRevisionIDs(array($this->revisionID))
+      ->needArcanistProjects(true)
       ->execute();
     $diffs = array_reverse($diffs, $preserve_keys = true);
 
@@ -61,8 +62,18 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $diff_vs = null;
     }
 
-    $arc_project = $target->loadArcanistProject();
-    $repository = ($arc_project ? $arc_project->loadRepository() : null);
+    $repository = null;
+    $repository_phid = $target->getRepositoryPHID();
+    if ($repository_phid) {
+      if ($repository_phid == $revision->getRepositoryPHID()) {
+        $repository = $revision->getRepository();
+      } else {
+        $repository = id(new PhabricatorRepositoryQuery())
+          ->setViewer($user)
+          ->withPHIDs(array($repository_phid))
+          ->executeOne();
+      }
+    }
 
     list($changesets, $vs_map, $vs_changesets, $rendering_references) =
       $this->loadChangesetsAndVsMap(
@@ -219,6 +230,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       'whitespace',
       DifferentialChangesetParser::WHITESPACE_IGNORE_ALL);
 
+    $arc_project = $target->getArcanistProject();
     if ($arc_project) {
       list($symbol_indexes, $project_phids) = $this->buildSymbolIndexes(
         $arc_project,

@@ -1,6 +1,7 @@
 <?php
 
-final class DifferentialHunk extends DifferentialDAO {
+final class DifferentialHunk extends DifferentialDAO
+  implements PhabricatorPolicyInterface {
 
   protected $changesetID;
   protected $changes;
@@ -8,6 +9,12 @@ final class DifferentialHunk extends DifferentialDAO {
   protected $oldLen;
   protected $newOffset;
   protected $newLen;
+
+  private $changeset;
+
+  const FLAG_LINES_ADDED     = 1;
+  const FLAG_LINES_REMOVED   = 2;
+  const FLAG_LINES_STABLE    = 4;
 
   public function getAddedLines() {
     return $this->makeContent($include = '+');
@@ -27,6 +34,26 @@ final class DifferentialHunk extends DifferentialDAO {
 
   public function makeChanges() {
     return implode('', $this->makeContent($include = '-+'));
+  }
+
+  public function getContentWithMask($mask) {
+    $include = array();
+
+    if (($mask & self::FLAG_LINES_ADDED)) {
+      $include[] = '+';
+    }
+
+    if (($mask & self::FLAG_LINES_REMOVED)) {
+      $include[] = '-';
+    }
+
+    if (($mask & self::FLAG_LINES_STABLE)) {
+      $include[] = ' ';
+    }
+
+    $include = implode('', $include);
+
+    return implode('', $this->makeContent($include));
   }
 
   final private function makeContent($include) {
@@ -75,6 +102,37 @@ final class DifferentialHunk extends DifferentialDAO {
     }
 
     return $results;
+  }
+
+  public function getChangeset() {
+    return $this->assertAttached($this->changeset);
+  }
+
+  public function attachChangeset(DifferentialChangeset $changeset) {
+    $this->changeset = $changeset;
+    return $this;
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return $this->getChangeset()->getPolicy($capability);
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return $this->getChangeset()->hasAutomaticCapability($capability, $viewer);
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
   }
 
 }
