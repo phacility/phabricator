@@ -8,7 +8,7 @@ final class HarbormasterTargetWorker extends HarbormasterWorker {
   public function getRequiredLeaseTime() {
     // This worker performs actual build work, which may involve a long wait
     // on external systems.
-    return 60 * 60 * 24;
+    return phutil_units('24 hours in seconds');
   }
 
   private function loadBuildTarget() {
