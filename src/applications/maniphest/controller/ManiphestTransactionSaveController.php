@@ -20,55 +20,6 @@ final class ManiphestTransactionSaveController extends ManiphestController {
 
     $action = $request->getStr('action');
 
-    // If we have drag-and-dropped files, attach them first in a separate
-    // transaction. These can come in on any transaction type, which is why we
-    // handle them separately.
-    $files = array();
-
-    // Look for drag-and-drop uploads first.
-    $file_phids = $request->getArr('files');
-    if ($file_phids) {
-      $files = id(new PhabricatorFileQuery())
-        ->setViewer($user)
-        ->withPHIDs(array($file_phids))
-        ->execute();
-    }
-
-    // This means "attach a file" even though we store other types of data
-    // as 'attached'.
-    if ($action == ManiphestTransaction::TYPE_ATTACH) {
-      if (!empty($_FILES['file'])) {
-        $err = idx($_FILES['file'], 'error');
-        if ($err != UPLOAD_ERR_NO_FILE) {
-          $file = PhabricatorFile::newFromPHPUpload(
-            $_FILES['file'],
-            array(
-              'authorPHID' => $user->getPHID(),
-            ));
-          $files[] = $file;
-        }
-      }
-    }
-
-    // If we had explicit or drag-and-drop files, create a transaction
-    // for those before we deal with whatever else might have happened.
-    $file_transaction = null;
-    if ($files) {
-      $files = mpull($files, 'getPHID', 'getPHID');
-      $new = $task->getAttached();
-      foreach ($files as $phid) {
-        if (empty($new[PhabricatorFilePHIDTypeFile::TYPECONST])) {
-          $new[PhabricatorFilePHIDTypeFile::TYPECONST] = array();
-        }
-        $new[PhabricatorFilePHIDTypeFile::TYPECONST][$phid] = array();
-      }
-      $transaction = new ManiphestTransaction();
-      $transaction
-        ->setTransactionType(ManiphestTransaction::TYPE_ATTACH);
-      $transaction->setNewValue($new);
-      $transactions[] = $transaction;
-    }
-
     // Compute new CCs added by @mentions. Several things can cause CCs to
     // be added as side effects: mentions, explicit CCs, users who aren't
     // CC'd interacting with the task, and ownership changes. We build up a
@@ -113,10 +64,6 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         break;
       case ManiphestTransaction::TYPE_PRIORITY:
         $transaction->setNewValue($request->getInt('priority'));
-        break;
-      case ManiphestTransaction::TYPE_ATTACH:
-        // Nuke this, we created it above.
-        $transaction = null;
         break;
       case PhabricatorTransactions::TYPE_COMMENT:
         // Nuke this, we're going to create it below.

@@ -11,9 +11,12 @@ final class ManiphestTransaction
   const TYPE_PROJECTS = 'projects';
   const TYPE_PRIORITY = 'priority';
   const TYPE_EDGE = 'edge';
-  const TYPE_ATTACH = 'attach';
   const TYPE_SUBPRIORITY = 'subpriority';
   const TYPE_PROJECT_COLUMN = 'projectcolumn';
+
+  // NOTE: this type is deprecated. Keep it around for legacy installs
+  // so any transactions render correctly.
+  const TYPE_ATTACH = 'attach';
 
   public function getApplicationName() {
     return 'maniphest';
