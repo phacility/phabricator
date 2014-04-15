@@ -210,7 +210,7 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
       $remove = array();
       foreach ($package_paths as $package_path) {
         if ($package_path['excluded']) {
-          $remove += $relevant_paths[$package_path['path']];
+          $remove += idx($relevant_paths, $package_path['path'], array());
           unset($relevant_paths[$package_path['path']]);
         }
       }
