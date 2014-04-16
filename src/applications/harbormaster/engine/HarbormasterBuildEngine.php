@@ -127,6 +127,9 @@ final class HarbormasterBuildEngine extends Phobject {
       ->setViewer($this->getViewer())
       ->withBuildPHIDs(array($build->getPHID()))
       ->execute();
+
+    $this->updateWaitingTargets($targets);
+
     $targets = mgroup($targets, 'getBuildStepPHID');
 
     $steps = id(new HarbormasterBuildStepQuery())
@@ -134,15 +137,35 @@ final class HarbormasterBuildEngine extends Phobject {
       ->withBuildPlanPHIDs(array($build->getBuildPlan()->getPHID()))
       ->execute();
 
-    // Identify steps which are complete.
+    // Identify steps which are in various states.
 
+    $queued = array();
+    $underway = array();
+    $waiting = array();
     $complete = array();
     $failed = array();
-    $waiting = array();
     foreach ($steps as $step) {
       $step_targets = idx($targets, $step->getPHID(), array());
 
       if ($step_targets) {
+        $is_queued = false;
+
+        $is_underway = false;
+        foreach ($step_targets as $target) {
+          if ($target->isUnderway()) {
+            $is_underway = true;
+            break;
+          }
+        }
+
+        $is_waiting = false;
+        foreach ($step_targets as $target) {
+          if ($target->isWaiting()) {
+            $is_waiting = true;
+            break;
+          }
+        }
+
         $is_complete = true;
         foreach ($step_targets as $target) {
           if (!$target->isComplete()) {
@@ -158,12 +181,24 @@ final class HarbormasterBuildEngine extends Phobject {
             break;
           }
         }
-
-        $is_waiting = false;
       } else {
+        $is_queued = true;
+        $is_underway = false;
+        $is_waiting = false;
         $is_complete = false;
         $is_failed = false;
-        $is_waiting = true;
+      }
+
+      if ($is_queued) {
+        $queued[$step->getPHID()] = true;
+      }
+
+      if ($is_underway) {
+        $underway[$step->getPHID()] = true;
+      }
+
+      if ($is_waiting) {
+        $waiting[$step->getPHID()] = true;
       }
 
       if ($is_complete) {
@@ -172,10 +207,6 @@ final class HarbormasterBuildEngine extends Phobject {
 
       if ($is_failed) {
         $failed[$step->getPHID()] = true;
-      }
-
-      if ($is_waiting) {
-        $waiting[$step->getPHID()] = true;
       }
     }
 
@@ -209,7 +240,7 @@ final class HarbormasterBuildEngine extends Phobject {
         $dependencies = array();
       }
 
-      if (isset($waiting[$step->getPHID()])) {
+      if (isset($queued[$step->getPHID()])) {
         $can_run = true;
         foreach ($dependencies as $dependency) {
           if (empty($complete[$dependency->getPHID()])) {
@@ -226,9 +257,9 @@ final class HarbormasterBuildEngine extends Phobject {
       $previous_step = $step;
     }
 
-    if (!$runnable) {
+    if (!$runnable && !$waiting && !$underway) {
       // TODO: This means the build is deadlocked, probably? It should not
-      // normally be possible, but we should communicate it more clearly.
+      // normally be possible yet, but we should communicate it more clearly.
       $build->setBuildStatus(HarbormasterBuild::STATUS_FAILED);
       $build->save();
       return;
@@ -242,6 +273,60 @@ final class HarbormasterBuildEngine extends Phobject {
       $target->save();
 
       $this->queueNewBuildTarget($target);
+    }
+
+  }
+
+
+  /**
+   * Process messages which were sent to these targets, kicking applicable
+   * targets out of "Waiting" and into either "Passed" or "Failed".
+   *
+   * @param list<HarbormasterBuildTarget> List of targets to process.
+   * @return void
+   */
+  private function updateWaitingTargets(array $targets) {
+    assert_instances_of($targets, 'HarbormasterBuildTarget');
+
+    // We only care about messages for targets which are actually in a waiting
+    // state.
+    $waiting_targets = array();
+    foreach ($targets as $target) {
+      if ($target->isWaiting()) {
+        $waiting_targets[$target->getPHID()] = $target;
+      }
+    }
+
+    if (!$waiting_targets) {
+      return;
+    }
+
+    $messages = id(new HarbormasterBuildMessageQuery())
+      ->setViewer($this->getViewer())
+      ->withBuildTargetPHIDs(array_keys($waiting_targets))
+      ->withConsumed(false)
+      ->execute();
+
+    foreach ($messages as $message) {
+      $target = $waiting_targets[$message->getBuildTargetPHID()];
+
+      $new_status = null;
+      switch ($message->getType()) {
+        case 'pass':
+          $new_status = HarbormasterBuildTarget::STATUS_PASSED;
+          break;
+        case 'fail':
+          $new_status = HarbormasterBuildTarget::STATUS_FAILED;
+          break;
+      }
+
+      if ($new_status !== null) {
+        $message->setIsConsumed(true);
+        $message->save();
+
+        $target->setTargetStatus($new_status);
+        $target->save();
+      }
     }
   }
 

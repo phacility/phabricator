@@ -99,4 +99,8 @@ final class HarbormasterHTTPRequestBuildStepImplementation
     );
   }
 
+  public function supportsWaitForMessage() {
+    return true;
+  }
+
 }

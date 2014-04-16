@@ -43,6 +43,13 @@ final class ConduitAPI_harbormaster_sendmessage_Method
       ->setType($message_type)
       ->save();
 
+    // If the build has completely paused because all steps are blocked on
+    // waiting targets, this will resume it.
+    id(new HarbormasterBuildEngine())
+      ->setViewer($viewer)
+      ->setBuild($build_target->getBuild())
+      ->continueBuild();
+
     return null;
   }
 
