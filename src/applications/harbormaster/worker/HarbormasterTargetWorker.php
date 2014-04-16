@@ -52,6 +52,10 @@ final class HarbormasterTargetWorker extends HarbormasterWorker {
 
       $target->setTargetStatus($next_status);
       $target->save();
+    } catch (PhabricatorWorkerYieldException $ex) {
+      // If the target wants to yield, let that escape without further
+      // processing. We'll resume after the task retries.
+      throw $ex;
     } catch (Exception $ex) {
       phlog($ex);
 

@@ -132,35 +132,35 @@ final class HarbormasterBuildQuery
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'phid in (%Ls)',
         $this->phids);
     }
 
-    if ($this->buildStatuses) {
+    if ($this->buildStatuses !== null) {
       $where[] = qsprintf(
         $conn_r,
         'buildStatus in (%Ls)',
         $this->buildStatuses);
     }
 
-    if ($this->buildablePHIDs) {
+    if ($this->buildablePHIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
         'buildablePHID IN (%Ls)',
         $this->buildablePHIDs);
     }
 
-    if ($this->buildPlanPHIDs) {
+    if ($this->buildPlanPHIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
         'buildPlanPHID IN (%Ls)',
