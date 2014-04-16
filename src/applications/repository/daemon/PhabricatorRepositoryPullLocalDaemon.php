@@ -29,8 +29,6 @@
 final class PhabricatorRepositoryPullLocalDaemon
   extends PhabricatorDaemon {
 
-  private $discoveryEngines = array();
-
 
 /* -(  Pulling Repositories  )----------------------------------------------- */
 
@@ -122,49 +120,28 @@ final class PhabricatorRepositoryPullLocalDaemon
         try {
           $this->log("Updating repository '{$callsign}'.");
 
-          id(new PhabricatorRepositoryPullEngine())
-            ->setRepository($repository)
-            ->pullRepository();
+          $bin_dir = dirname(phutil_get_library_root('phabricator')).'/bin';
+          $flags = array();
+          if ($no_discovery) {
+            $flags[] = '--no-discovery';
+          }
 
-          if (!$no_discovery) {
-            // TODO: It would be nice to discover only if we pulled something,
-            // but this isn't totally trivial. It's slightly more complicated
-            // with hosted repositories, too.
+          list($stdout, $stderr) = execx(
+            '%s/repository update %Ls -- %s',
+            $bin_dir,
+            $flags,
+            $callsign);
 
-            $lock_name = get_class($this).':'.$callsign;
-            $lock = PhabricatorGlobalLock::newLock($lock_name);
-            $lock->lock();
-
-            try {
-              $repository->writeStatusMessage(
-                PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
-                null);
-              $this->discoverRepository($repository);
-              $this->updateRepositoryRefs($repository);
-              $this->mirrorRepository($repository);
-              $repository->writeStatusMessage(
-                PhabricatorRepositoryStatusMessage::TYPE_FETCH,
-                PhabricatorRepositoryStatusMessage::CODE_OKAY);
-            } catch (Exception $ex) {
-              $repository->writeStatusMessage(
-                PhabricatorRepositoryStatusMessage::TYPE_FETCH,
-                PhabricatorRepositoryStatusMessage::CODE_ERROR,
-                array(
-                  'message' => pht(
-                    'Error updating working copy: %s', $ex->getMessage()),
-                ));
-              $lock->unlock();
-              throw $ex;
-            }
-
-            $lock->unlock();
+          if (strlen($stderr)) {
+            $stderr_msg = pht(
+              'Unexpected output while updating the %s repository: %s',
+              $callsign,
+              $stderr);
+            phlog($stderr_msg);
           }
 
           $sleep_for = $repository->getDetail('pull-frequency', $min_sleep);
           $retry_after[$id] = time() + $sleep_for;
-        } catch (PhutilLockException $ex) {
-          $retry_after[$id] = time() + $min_sleep;
-          $this->log("Failed to acquire lock.");
         } catch (Exception $ex) {
           $retry_after[$id] = time() + $min_sleep;
 
@@ -222,87 +199,6 @@ final class PhabricatorRepositoryPullLocalDaemon
     }
 
     return $repos;
-  }
-
-  public function discoverRepository(PhabricatorRepository $repository) {
-    $refs = $this->getDiscoveryEngine($repository)
-      ->discoverCommits();
-
-    $this->checkIfRepositoryIsFullyImported($repository);
-
-    return (bool)count($refs);
-  }
-
-  private function mirrorRepository(PhabricatorRepository $repository) {
-    try {
-      id(new PhabricatorRepositoryMirrorEngine())
-        ->setRepository($repository)
-        ->pushToMirrors();
-    } catch (Exception $ex) {
-      // TODO: We should report these into the UI properly, but for
-      // now just complain. These errors are much less severe than
-      // pull errors.
-      $proxy = new PhutilProxyException(
-        pht(
-          'Error while pushing "%s" repository to mirrors.',
-          $repository->getCallsign()),
-        $ex);
-      phlog($proxy);
-    }
-  }
-
-  private function updateRepositoryRefs(PhabricatorRepository $repository) {
-    id(new PhabricatorRepositoryRefEngine())
-      ->setRepository($repository)
-      ->updateRefs();
-  }
-
-  private function getDiscoveryEngine(PhabricatorRepository $repository) {
-    $id = $repository->getID();
-    if (empty($this->discoveryEngines[$id])) {
-      $engine = id(new PhabricatorRepositoryDiscoveryEngine())
-        ->setRepository($repository)
-        ->setVerbose($this->getVerbose());
-
-      $this->discoveryEngines[$id] = $engine;
-    }
-    return $this->discoveryEngines[$id];
-  }
-
-  private function checkIfRepositoryIsFullyImported(
-    PhabricatorRepository $repository) {
-
-    // Check if the repository has the "Importing" flag set. We want to clear
-    // the flag if we can.
-    $importing = $repository->getDetail('importing');
-    if (!$importing) {
-      // This repository isn't marked as "Importing", so we're done.
-      return;
-    }
-
-    // Look for any commit which hasn't imported.
-    $unparsed_commit = queryfx_one(
-      $repository->establishConnection('r'),
-      'SELECT * FROM %T WHERE repositoryID = %d AND (importStatus & %d) != %d
-        LIMIT 1',
-      id(new PhabricatorRepositoryCommit())->getTableName(),
-      $repository->getID(),
-      PhabricatorRepositoryCommit::IMPORTED_ALL,
-      PhabricatorRepositoryCommit::IMPORTED_ALL);
-    if ($unparsed_commit) {
-      // We found a commit which still needs to import, so we can't clear the
-      // flag.
-      return;
-    }
-
-    // Clear the "importing" flag.
-    $repository->openTransaction();
-      $repository->beginReadLocking();
-        $repository = $repository->reload();
-        $repository->setDetail('importing', false);
-        $repository->save();
-      $repository->endReadLocking();
-    $repository->saveTransaction();
   }
 
 }
