@@ -9,6 +9,16 @@ final class HarbormasterBuildEngine extends Phobject {
   private $build;
   private $viewer;
   private $newBuildTargets = array();
+  private $forceBuildableUpdate;
+
+  public function setForceBuildableUpdate($force_buildable_update) {
+    $this->forceBuildableUpdate = $force_buildable_update;
+    return $this;
+  }
+
+  public function shouldForceBuildableUpdate() {
+    return $this->forceBuildableUpdate;
+  }
 
   public function queueNewBuildTarget(HarbormasterBuildTarget $target) {
     $this->newBuildTargets[] = $target;
@@ -44,6 +54,7 @@ final class HarbormasterBuildEngine extends Phobject {
     $lock = PhabricatorGlobalLock::newLock($lock_key)->lock(15);
 
     $build->reload();
+    $old_status = $build->getBuildStatus();
 
     try {
       $this->updateBuild($build);
@@ -68,6 +79,13 @@ final class HarbormasterBuildEngine extends Phobject {
         array(
           'targetID' => $target->getID(),
         ));
+    }
+
+    // If the build changed status, we might need to update the overall status
+    // on the buildable.
+    $new_status = $build->getBuildStatus();
+    if ($new_status != $old_status || $this->shouldForceBuildableUpdate()) {
+      $this->updateBuildable($build->getBuildable());
     }
   }
 
@@ -328,6 +346,55 @@ final class HarbormasterBuildEngine extends Phobject {
         $target->save();
       }
     }
+  }
+
+
+  /**
+   * Update the overall status of the buildable this build is attached to.
+   *
+   * After a build changes state (for example, passes or fails) it may affect
+   * the overall state of the associated buildable. Compute the new aggregate
+   * state and save it on the buildable.
+   *
+   * @param   HarbormasterBuild The buildable to update.
+   * @return  void
+   */
+  private function updateBuildable(HarbormasterBuildable $buildable) {
+    $lock_key = 'harbormaster.buildable:'.$buildable->getID();
+    $lock = PhabricatorGlobalLock::newLock($lock_key)->lock(15);
+
+    $buildable = id(new HarbormasterBuildableQuery())
+      ->setViewer($this->getViewer())
+      ->withIDs(array($buildable->getID()))
+      ->needBuilds(true)
+      ->executeOne();
+
+    $all_pass = true;
+    $any_fail = false;
+    foreach ($buildable->getBuilds() as $build) {
+      if ($build->getBuildStatus() != HarbormasterBuild::STATUS_PASSED) {
+        $all_pass = false;
+      }
+      if ($build->getBuildStatus() == HarbormasterBuild::STATUS_FAILED ||
+          $build->getBuildStatus() == HarbormasterBuild::STATUS_ERROR) {
+        $any_fail = true;
+      }
+    }
+
+    if ($any_fail) {
+      $new_status = HarbormasterBuildable::STATUS_FAILED;
+    } else if ($all_pass) {
+      $new_status = HarbormasterBuildable::STATUS_PASSED;
+    } else {
+      $new_status = HarbormasterBuildable::STATUS_BUILDING;
+    }
+
+    if ($buildable->getBuildableStatus() != $new_status) {
+      $buildable->setBuildableStatus($new_status);
+      $buildable->save();
+    }
+
+    $lock->unlock();
   }
 
 }

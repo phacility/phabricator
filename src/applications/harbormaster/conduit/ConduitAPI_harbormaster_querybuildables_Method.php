@@ -64,11 +64,16 @@ final class ConduitAPI_harbormaster_querybuildables_Method
     foreach ($buildables as $buildable) {
       $monogram = $buildable->getMonogram();
 
+      $status = $buildable->getBuildableStatus();
+      $status_name = HarbormasterBuildable::getBuildableStatusName($status);
+
       $data[] = array(
         'id' => $buildable->getID(),
         'phid' => $buildable->getPHID(),
         'monogram' => $monogram,
         'uri' => PhabricatorEnv::getProductionURI('/'.$monogram),
+        'buildableStatus' => $status,
+        'buildableStatusName' => $status_name,
         'buildablePHID' => $buildable->getBuildablePHID(),
         'containerPHID' => $buildable->getContainerPHID(),
         'isManualBuildable' => (bool)$buildable->getIsManualBuildable(),

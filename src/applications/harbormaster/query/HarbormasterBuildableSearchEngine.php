@@ -52,8 +52,7 @@ final class HarbormasterBuildableSearchEngine
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new HarbormasterBuildableQuery())
       ->needContainerHandles(true)
-      ->needBuildableHandles(true)
-      ->needBuilds(true);
+      ->needBuildableHandles(true);
 
     $container_phids = $saved->getParameter('containerPHIDs', array());
     if ($container_phids) {

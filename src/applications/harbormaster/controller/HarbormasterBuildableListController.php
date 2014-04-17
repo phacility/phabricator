@@ -54,28 +54,13 @@ final class HarbormasterBuildableListController
 
       $list->addItem($item);
 
-
-
-      // TODO: This is proof-of-concept for getting meaningful status
-      // information into this list, and should get an improvement pass
-      // once we're a little farther along.
-
-      $all_pass = true;
-      $any_fail = false;
-      foreach ($buildable->getBuilds() as $build) {
-        if ($build->getBuildStatus() != HarbormasterBuild::STATUS_PASSED) {
-          $all_pass = false;
-        }
-        if ($build->getBuildStatus() == HarbormasterBuild::STATUS_FAILED ||
-            $build->getBuildStatus() == HarbormasterBuild::STATUS_ERROR) {
-          $any_fail = true;
-        }
-      }
-
-      if ($any_fail) {
-        $item->setBarColor('red');
-      } else if ($all_pass) {
-        $item->setBarColor('green');
+      switch ($buildable->getBuildableStatus()) {
+        case HarbormasterBuildable::STATUS_PASSED:
+          $item->setBarColor('green');
+          break;
+        case HarbormasterBuildable::STATUS_FAILED:
+          $item->setBarColor('red');
+          break;
       }
     }
 
