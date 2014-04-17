@@ -95,7 +95,14 @@ final class ConduitAPI_feed_query_Method
 
         $data = null;
 
-        $view = $story->renderView();
+        try {
+          $view = $story->renderView();
+        } catch (Exception $ex) {
+          // When stories fail to render, just fail that story.
+          phlog($ex);
+          continue;
+        }
+
         $view->setEpoch($story->getEpoch());
         $view->setUser($user);
 
