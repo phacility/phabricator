@@ -360,11 +360,13 @@ final class HarbormasterBuildEngine extends Phobject {
    * @return  void
    */
   private function updateBuildable(HarbormasterBuildable $buildable) {
+    $viewer = $this->getViewer();
+
     $lock_key = 'harbormaster.buildable:'.$buildable->getID();
     $lock = PhabricatorGlobalLock::newLock($lock_key)->lock(15);
 
     $buildable = id(new HarbormasterBuildableQuery())
-      ->setViewer($this->getViewer())
+      ->setViewer($viewer)
       ->withIDs(array($buildable->getID()))
       ->needBuilds(true)
       ->executeOne();
@@ -389,12 +391,62 @@ final class HarbormasterBuildEngine extends Phobject {
       $new_status = HarbormasterBuildable::STATUS_BUILDING;
     }
 
-    if ($buildable->getBuildableStatus() != $new_status) {
+    $old_status = $buildable->getBuildableStatus();
+    $did_update = ($old_status != $new_status);
+    if ($did_update) {
       $buildable->setBuildableStatus($new_status);
       $buildable->save();
     }
 
     $lock->unlock();
+
+    // If we changed the buildable status, try to post a transaction to the
+    // object about it. We can safely do this outside of the locked region.
+
+    // NOTE: We only post transactions for automatic buildables, not for
+    // manual ones: manual builds are test builds, whoever is doing tests
+    // can look at the results themselves, and other users generally don't
+    // care about the outcome.
+
+    if ($did_update && !$buildable->getIsManualBuildable()) {
+
+      $object = id(new PhabricatorObjectQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($buildable->getBuildablePHID()))
+        ->executeOne();
+
+      if ($object instanceof PhabricatorApplicationTransactionInterface) {
+        $template = $object->getApplicationTransactionTemplate();
+        if ($template) {
+          $template
+            ->setTransactionType(PhabricatorTransactions::TYPE_BUILDABLE)
+            ->setMetadataValue(
+              'harbormaster:buildablePHID',
+              $buildable->getPHID())
+            ->setOldValue($old_status)
+            ->setNewValue($new_status);
+
+          $harbormaster_phid = id(new PhabricatorApplicationHarbormaster())
+            ->getPHID();
+
+          $daemon_source = PhabricatorContentSource::newForSource(
+            PhabricatorContentSource::SOURCE_DAEMON,
+            array());
+
+          $editor = $object->getApplicationTransactionEditor()
+            ->setActor($viewer)
+            ->setActingAsPHID($harbormaster_phid)
+            ->setContentSource($daemon_source)
+            ->setContinueOnNoEffect(true)
+            ->setContinueOnMissingFields(true);
+
+          $editor->applyTransactions(
+            $object->getApplicationTransactionObject(),
+            array($template));
+        }
+      }
+    }
+
   }
 
 }

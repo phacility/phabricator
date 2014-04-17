@@ -292,19 +292,32 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this->save();
   }
 
-  protected function didWriteData() {
-    parent::didWriteData();
+  public function save() {
+    if ($this->getID()) {
+      return parent::save();
+    }
 
-    if (!$this->getWorkerTaskID()) {
+    // NOTE: When mail is sent from CLI scripts that run tasks in-process, we
+    // may re-enter this method from within scheduleTask(). The implementation
+    // is intended to avoid anything awkward if we end up reentering this
+    // method.
+
+    $this->openTransaction();
+      // Save to generate a task ID.
+      parent::save();
+
+      // Queue a task to send this mail.
       $mailer_task = PhabricatorWorker::scheduleTask(
         'PhabricatorMetaMTAWorker',
         $this->getID());
 
+      // Save again to update the task ID.
       $this->setWorkerTaskID($mailer_task->getID());
-      $this->save();
-    }
-  }
+      $result = parent::save();
+    $this->saveTransaction();
 
+    return $result;
+  }
 
   public function buildDefaultMailer() {
     return PhabricatorEnv::newObjectFromConfig('metamta.mail-adapter');

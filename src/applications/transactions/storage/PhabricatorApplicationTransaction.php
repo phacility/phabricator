@@ -52,6 +52,8 @@ abstract class PhabricatorApplicationTransaction
 
   public function shouldGenerateOldValue() {
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+        return false;
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         return false;
     }
@@ -234,6 +236,12 @@ abstract class PhabricatorApplicationTransaction
           $phids[] = array($new);
         }
         break;
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+        $phid = $this->getMetadataValue('harbormaster:buildablePHID');
+        if ($phid) {
+          $phids[] = array($phid);
+        }
+        break;
     }
 
     return array_mergev($phids);
@@ -325,12 +333,24 @@ abstract class PhabricatorApplicationTransaction
         return 'lock';
       case PhabricatorTransactions::TYPE_EDGE:
         return 'link';
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+        return 'wrench';
     }
 
     return 'edit';
   }
 
   public function getColor() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+        switch ($this->getNewValue()) {
+          case HarbormasterBuildable::STATUS_PASSED:
+            return 'green';
+          case HarbormasterBuildable::STATUS_FAILED:
+            return 'red';
+        }
+        break;
+    }
     return null;
   }
 
@@ -379,6 +399,17 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function shouldHideForMail(array $xactions) {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+        switch ($this->getNewValue()) {
+          case HarbormasterBuildable::STATUS_PASSED:
+            // For now, just never send mail when builds pass. We might let
+            // you customize this later, but in most cases this is probably
+            // completely uninteresting.
+            return true;
+        }
+    }
+
     return $this->shouldHide();
   }
 
@@ -537,6 +568,24 @@ abstract class PhabricatorApplicationTransaction
             $this->renderHandleLink($author_phid));
         }
 
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+        switch ($this->getNewValue()) {
+          case HarbormasterBuildable::STATUS_PASSED:
+            return pht(
+              '%s completed building %s.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink(
+                $this->getMetadataValue('harbormaster:buildablePHID')));
+          case HarbormasterBuildable::STATUS_FAILED:
+            return pht(
+              '%s failed to build %s!',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink(
+                $this->getMetadataValue('harbormaster:buildablePHID')));
+          default:
+            return null;
+        }
+
       default:
         return pht(
           '%s edited this %s.',
@@ -596,6 +645,25 @@ abstract class PhabricatorApplicationTransaction
             $this->renderHandleLink($author_phid),
             $this->renderHandleLink($object_phid));
         }
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+        switch ($this->getNewValue()) {
+          case HarbormasterBuildable::STATUS_PASSED:
+            return pht(
+              '%s completed building %s for %s.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink(
+                $this->getMetadataValue('harbormaster:buildablePHID')),
+              $this->renderHandleLink($object_phid));
+          case HarbormasterBuildable::STATUS_FAILED:
+            return pht(
+              '%s failed to build %s for %s.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink(
+                $this->getMetadataValue('harbormaster:buildablePHID')),
+              $this->renderHandleLink($object_phid));
+          default:
+            return null;
+        }
 
     }
 
@@ -649,6 +717,15 @@ abstract class PhabricatorApplicationTransaction
         return pht('Changed Policy');
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return pht('Changed Subscribers');
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+        switch ($this->getNewValue()) {
+          case HarbormasterBuildable::STATUS_PASSED:
+            return pht('Build Passed');
+          case HarbormasterBuildable::STATUS_FAILED:
+            return pht('Build Failed');
+          default:
+            return pht('Build Status');
+        }
       default:
         return pht('Updated');
     }
