@@ -169,40 +169,32 @@ final class HarbormasterBuildableViewController
         ->setHeader($build->getName())
         ->setHref($view_uri);
 
-      switch ($build->getBuildStatus()) {
+      $status = $build->getBuildStatus();
+      switch ($status) {
         case HarbormasterBuild::STATUS_INACTIVE:
           $item->setBarColor('grey');
-          $item->addAttribute(pht('Inactive'));
           break;
         case HarbormasterBuild::STATUS_PENDING:
           $item->setBarColor('blue');
-          $item->addAttribute(pht('Pending'));
-          break;
-        case HarbormasterBuild::STATUS_WAITING:
-          $item->setBarColor('violet');
-          $item->addAttribute(pht('Waiting'));
           break;
         case HarbormasterBuild::STATUS_BUILDING:
           $item->setBarColor('yellow');
-          $item->addAttribute(pht('Building'));
           break;
         case HarbormasterBuild::STATUS_PASSED:
           $item->setBarColor('green');
-          $item->addAttribute(pht('Passed'));
           break;
         case HarbormasterBuild::STATUS_FAILED:
           $item->setBarColor('red');
-          $item->addAttribute(pht('Failed'));
           break;
         case HarbormasterBuild::STATUS_ERROR:
           $item->setBarColor('red');
-          $item->addAttribute(pht('Unexpected Error'));
           break;
         case HarbormasterBuild::STATUS_STOPPED:
           $item->setBarColor('black');
-          $item->addAttribute(pht('Stopped'));
           break;
       }
+
+      $item->addAttribute(HarbormasterBuild::getBuildStatusName($status));
 
       if ($build->isRestarting()) {
         $item->addIcon('backward', pht('Restarting'));
