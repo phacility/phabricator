@@ -8,7 +8,8 @@ final class DifferentialRevision extends DifferentialDAO
     PhrequentTrackableInterface,
     HarbormasterBuildableInterface,
     PhabricatorSubscribableInterface,
-    PhabricatorCustomFieldInterface {
+    PhabricatorCustomFieldInterface,
+    PhabricatorApplicationTransactionInterface {
 
   protected $title = '';
   protected $originalTitle;
@@ -458,6 +459,22 @@ final class DifferentialRevision extends DifferentialDAO
   public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
     $this->customFields = $fields;
     return $this;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new DifferentialTransactionEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new DifferentialTransaction();
   }
 
 }

@@ -68,6 +68,10 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
   }
 
   public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
     return new PhabricatorMacroTransaction();
   }
 
