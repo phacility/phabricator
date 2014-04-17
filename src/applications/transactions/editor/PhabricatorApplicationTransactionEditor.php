@@ -661,6 +661,11 @@ abstract class PhabricatorApplicationTransactionEditor
       $herald_xactions = $this->applyHeraldRules($object, $xactions);
 
       if ($herald_xactions) {
+        $xscript_id = $this->getHeraldTranscript()->getID();
+        foreach ($herald_xactions as $herald_xaction) {
+          $herald_xaction->setMetadataValue('herald:transcriptID', $xscript_id);
+        }
+
         // NOTE: We're acting as the omnipotent user because rules deal with
         // their own policy issues. We use a synthetic author PHID (the
         // Herald application) as the author of record, so that transactions

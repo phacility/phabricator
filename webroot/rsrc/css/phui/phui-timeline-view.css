@@ -307,3 +307,9 @@
 .device-phone .phui-timeline-older-transactions-are-hidden {
   margin: 0 8px;
 }
+
+
+.phui-timeline-title .phui-timeline-extra-information a {
+  font-weight: normal;
+  color: {$bluetext};
+}

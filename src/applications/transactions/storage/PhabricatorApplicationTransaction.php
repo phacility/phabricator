@@ -757,6 +757,21 @@ abstract class PhabricatorApplicationTransaction
     return true;
   }
 
+  public function renderExtraInformationLink() {
+    $herald_xscript_id = $this->getMetadataValue('herald:transcriptID');
+
+    if ($herald_xscript_id) {
+      return phutil_tag(
+        'a',
+        array(
+          'href' => '/herald/transcript/'.$herald_xscript_id.'/',
+        ),
+        pht('View Herald Transcript'));
+    }
+
+    return null;
+  }
+
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 
