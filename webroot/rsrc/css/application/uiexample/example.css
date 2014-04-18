@@ -39,9 +39,21 @@
 }
 
 .jxui-blue-background {
-  background: blue;
+  background: {$blue};
 }
 
 .jxui-red-border {
-  border-color: red;
+  border-color: {$red};
+}
+
+.phui-icon-view.phui-halfling-name {
+  display: inline-block;
+  width: 140px;
+  padding-bottom: 8px;
+  white-space: nowrap;
+}
+
+.phui-icon-view.phui-halfling-color {
+  display: block;
+  padding-bottom: 8px;
 }

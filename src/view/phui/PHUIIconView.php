@@ -19,8 +19,11 @@ final class PHUIIconView extends AphrontTagView {
   private $href = null;
   private $image;
   private $headSize = null;
+
   private $spriteIcon;
   private $spriteSheet;
+  private $halfling;
+  private $halflingColor;
 
   public function setHref($href) {
     $this->href = $href;
@@ -47,6 +50,12 @@ final class PHUIIconView extends AphrontTagView {
     return $this;
   }
 
+  public function setHalfling($hf, $color=null) {
+    $this->halfling = $hf;
+    $this->halflingColor = $color;
+    return $this;
+  }
+
   public function getTagName() {
     $tag = 'span';
     if ($this->href) {
@@ -66,6 +75,13 @@ final class PHUIIconView extends AphrontTagView {
       require_celerity_resource('sprite-'.$this->spriteSheet.'-css');
       $classes[] = 'sprite-'.$this->spriteSheet;
       $classes[] = $this->spriteSheet.'-'.$this->spriteIcon;
+    } elseif ($this->halfling) {
+      require_celerity_resource('font-glyphicons-halflings');
+      $classes[] = 'halflings';
+      $classes[] = $this->halfling;
+      if ($this->halflingColor) {
+        $classes[] = $this->halflingColor;
+      }
     } else {
       if ($this->headSize) {
         $classes[] = $this->headSize;
