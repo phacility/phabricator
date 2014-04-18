@@ -33,21 +33,28 @@ final class ReleephRequestViewController
     // TODO: Break this 1:1 stuff?
     $branch = $pull->getBranch();
 
-    // TODO: Very gross.
-    $branch->populateReleephRequestHandles(
-      $viewer,
-      array($pull));
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $pull,
+      PhabricatorCustomField::ROLE_VIEW);
 
-    $rq_view = id(new ReleephRequestHeaderListView())
-        ->setReleephProject($branch->getProduct())
-        ->setReleephBranch($branch)
-        ->setReleephRequests(array($pull))
-        ->setUser($viewer)
-        ->setAphrontRequest($request)
-        ->setReloadOnStateChange(true);
+    $field_list
+      ->setViewer($viewer)
+      ->readFieldsFromStorage($pull);
 
+    // TODO: This should be more modern and general.
     $engine = id(new PhabricatorMarkupEngine())
       ->setViewer($viewer);
+    foreach ($field_list->getFields() as $field) {
+      if ($field->shouldMarkup()) {
+        $field->setMarkupEngine($engine);
+      }
+    }
+    $engine->process();
+
+    $pull_box = id(new ReleephRequestView())
+      ->setUser($viewer)
+      ->setCustomFields($field_list)
+      ->setPullRequest($pull);
 
     $xactions = id(new ReleephRequestTransactionQuery())
       ->setViewer($viewer)
@@ -85,12 +92,15 @@ final class ReleephRequestViewController
     return $this->buildStandardPageResponse(
       array(
         $crumbs,
-        $rq_view,
+        $pull_box,
         $timeline,
         $add_comment_form,
       ),
       array(
-        'title' => $title
+        'title' => $title,
+        'device' => true,
       ));
   }
+
+
 }

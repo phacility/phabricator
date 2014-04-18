@@ -13,6 +13,30 @@ abstract class ReleephFieldSpecification
     return $this;
   }
 
+  public function shouldAppearInPropertyView() {
+    return true;
+  }
+
+  public function renderPropertyViewLabel() {
+    return $this->getName();
+  }
+
+  public function renderPropertyViewValue(array $handles) {
+    $value = $this->renderValueForHeaderView();
+    if ($value === '') {
+      return null;
+    }
+    return $value;
+  }
+
+  public function slowlyLoadHandle($phid) {
+    // TODO: Remove this, it's transitional as fields modernize.
+    return id(new PhabricatorHandleQuery())
+      ->withPHIDs(array($phid))
+      ->setViewer($this->getUser())
+      ->executeOne();
+  }
+
   abstract public function getName();
 
 /* -(  Storage  )------------------------------------------------------------ */
@@ -148,18 +172,30 @@ abstract class ReleephFieldSpecification
   }
 
   final public function getReleephProject() {
+    if (!$this->releephProject) {
+      return $this->getReleephBranch()->getProduct();
+    }
     return $this->releephProject;
   }
 
   final public function getReleephBranch() {
+    if (!$this->releephBranch) {
+      return $this->getReleephRequest()->getBranch();
+    }
     return $this->releephBranch;
   }
 
   final public function getReleephRequest() {
+    if (!$this->releephRequest) {
+      return $this->getObject();
+    }
     return $this->releephRequest;
   }
 
   final public function getUser() {
+    if (!$this->user) {
+      return $this->getViewer();
+    }
     return $this->user;
   }
 

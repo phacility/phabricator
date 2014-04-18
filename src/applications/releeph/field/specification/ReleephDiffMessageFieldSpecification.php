@@ -15,18 +15,17 @@ final class ReleephDiffMessageFieldSpecification
     return null;
   }
 
+  public function getStyleForPropertyView() {
+    return 'block';
+  }
+
   public function renderValueForHeaderView() {
-    $markup = phutil_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phabricator-remarkup',
       ),
       $this->getMarkupEngineOutput());
-
-    return id(new AphrontNoteView())
-      ->setTitle('Commit Message')
-      ->appendChild($markup)
-      ->render();
   }
 
   public function shouldMarkup() {

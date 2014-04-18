@@ -24,17 +24,23 @@ final class ReleephAuthorFieldSpecification
   }
 
   public function renderValueForHeaderView() {
-    $rr = $this->getReleephRequest();
-    $author_phid = idx(self::$authorMap, $rr->getPHID());
-    if ($author_phid) {
-      $handle = id(new PhabricatorHandleQuery())
-        ->setViewer($this->getUser())
-        ->withPHIDs(array($author_phid))
-        ->executeOne();
-      return $handle->renderLink();
-    } else {
-      return 'Unknown Author';
+    $pull = $this->getReleephRequest();
+    $commit = $pull->loadPhabricatorRepositoryCommit();
+    if (!$commit) {
+      return null;
     }
+
+    $author_phid = $commit->getAuthorPHID();
+    if (!$author_phid) {
+      return null;
+    }
+
+    $handle = id(new PhabricatorHandleQuery())
+      ->setViewer($this->getUser())
+      ->withPHIDs(array($author_phid))
+      ->executeOne();
+
+    return $handle->renderLink();
   }
 
 }

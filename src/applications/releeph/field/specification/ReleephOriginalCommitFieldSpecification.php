@@ -12,9 +12,8 @@ final class ReleephOriginalCommitFieldSpecification
   }
 
   public function renderValueForHeaderView() {
-    $rr = $this->getReleephRequest();
-    $handles = $rr->getHandles();
-    return $handles[$rr->getRequestCommitPHID()]->renderLink();
+    $pull = $this->getReleephRequest();
+    return $this->slowlyLoadHandle($pull->getRequestCommitPHID())->renderLink();
   }
 
 }

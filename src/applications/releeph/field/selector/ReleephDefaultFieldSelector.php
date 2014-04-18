@@ -37,7 +37,6 @@ final class ReleephDefaultFieldSelector extends ReleephFieldSelector {
         new ReleephFacebookSeverityFieldSpecification(),
         new ReleephOriginalCommitFieldSpecification(),
         new ReleephDiffMessageFieldSpecification(),
-        new ReleephStatusFieldSpecification(),
         new ReleephIntentFieldSpecification(),
         new ReleephBranchCommitFieldSpecification(),
         new ReleephDiffSizeFieldSpecification(),
@@ -57,97 +56,11 @@ final class ReleephDefaultFieldSelector extends ReleephFieldSelector {
         new ReleephSeverityFieldSpecification(),
         new ReleephOriginalCommitFieldSpecification(),
         new ReleephDiffMessageFieldSpecification(),
-        new ReleephStatusFieldSpecification(),
         new ReleephIntentFieldSpecification(),
         new ReleephBranchCommitFieldSpecification(),
         new ReleephDiffSizeFieldSpecification(),
         new ReleephDiffChurnFieldSpecification(),
       );
-    }
-  }
-
-  public function arrangeFieldsForHeaderView(array $fields) {
-    if (self::isFacebook()) {
-      return array(
-        // Top group
-        array(
-          'left' => self::selectFields($fields, array(
-            'ReleephAuthorFieldSpecification',
-            'ReleephRevisionFieldSpecification',
-            'ReleephOriginalCommitFieldSpecification',
-            'ReleephDiffSizeFieldSpecification',
-            'ReleephDiffChurnFieldSpecification',
-            'ReleephDependsOnFieldSpecification',
-            'ReleephFacebookTasksFieldSpecification',
-          )),
-          'right' => self::selectFields($fields, array(
-            'ReleephRequestorFieldSpecification',
-            'ReleephFacebookKarmaFieldSpecification',
-            'ReleephFacebookSeverityFieldSpecification',
-            'ReleephFacebookTagFieldSpecification',
-            'ReleephStatusFieldSpecification',
-            'ReleephIntentFieldSpecification',
-            'ReleephBranchCommitFieldSpecification',
-          ))
-        ),
-
-        // Bottom group
-        array(
-          'left' => self::selectFields($fields, array(
-            'ReleephDiffMessageFieldSpecification',
-          )),
-          'right' => self::selectFields($fields, array(
-            'ReleephReasonFieldSpecification',
-          ))
-        )
-      );
-    } else {
-      return array(
-        // Top group
-        array(
-          'left' => self::selectFields($fields, array(
-            'ReleephAuthorFieldSpecification',
-            'ReleephRevisionFieldSpecification',
-            'ReleephOriginalCommitFieldSpecification',
-            'ReleephDiffSizeFieldSpecification',
-            'ReleephDiffChurnFieldSpecification',
-          )),
-          'right' => self::selectFields($fields, array(
-            'ReleephRequestorFieldSpecification',
-            'ReleephSeverityFieldSpecification',
-            'ReleephStatusFieldSpecification',
-            'ReleephIntentFieldSpecification',
-            'ReleephBranchCommitFieldSpecification',
-          ))
-        ),
-
-        // Bottom group
-        array(
-          'left' => self::selectFields($fields, array(
-            'ReleephDiffMessageFieldSpecification',
-          )),
-          'right' => self::selectFields($fields, array(
-            'ReleephReasonFieldSpecification',
-          ))
-        )
-      );
-    }
-  }
-
-  public function arrangeFieldsForSelectForm(array $fields) {
-    if (self::isFacebook()) {
-      return self::selectFields($fields, array(
-        'ReleephStatusFieldSpecification',
-        'ReleephFacebookSeverityFieldSpecification',
-        'ReleephRequestorFieldSpecification',
-        'ReleephFacebookTagFieldSpecification',
-      ));
-    } else {
-      return self::selectFields($fields, array(
-        'ReleephStatusFieldSpecification',
-        'ReleephSeverityFieldSpecification',
-        'ReleephRequestorFieldSpecification',
-      ));
     }
   }
 

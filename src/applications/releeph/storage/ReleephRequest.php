@@ -187,38 +187,21 @@ final class ReleephRequest extends ReleephDAO
     return $reason;
   }
 
-  public function getSummary() {
-    /**
-     * Instead, you can use:
-     *  - getDetail('summary')    // the actual user-chosen summary
-     *  - getSummaryForDisplay()  // falls back to the original commit title
-     *
-     * Or for the fastidious:
-     *  - id(new ReleephSummaryFieldSpecification())
-     *      ->setReleephRequest($rr)
-     *      ->getValue()          // programmatic equivalent to getDetail()
-     */
-    throw new Exception(
-      "getSummary() has been deprecated!");
-  }
-
   /**
    * Allow a null summary, and fall back to the title of the commit.
    */
   public function getSummaryForDisplay() {
     $summary = $this->getDetail('summary');
 
-    if (!$summary) {
-      $pr_commit_data = $this->loadPhabricatorRepositoryCommitData();
-      if ($pr_commit_data) {
-        $message_lines = explode("\n", $pr_commit_data->getCommitMessage());
-        $message_lines = array_filter($message_lines);
-        $summary = head($message_lines);
+    if (!strlen($summary)) {
+      $commit = $this->loadPhabricatorRepositoryCommit();
+      if ($commit) {
+        $summary = $commit->getSummary();
       }
     }
 
-    if (!$summary) {
-      $summary = '(no summary given and commit message empty or unparsed)';
+    if (!strlen($summary)) {
+      $summary = pht('None');
     }
 
     return $summary;

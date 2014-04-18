@@ -14,20 +14,19 @@ final class PhabricatorApplicationReleephConfigOptions
   public function getOptions() {
 
     $default_fields = array(
-      new ReleephCommitMessageFieldSpecification(),
       new ReleephSummaryFieldSpecification(),
+      new ReleephRequestorFieldSpecification(),
+      new ReleephSeverityFieldSpecification(),
+      new ReleephIntentFieldSpecification(),
       new ReleephReasonFieldSpecification(),
       new ReleephAuthorFieldSpecification(),
       new ReleephRevisionFieldSpecification(),
-      new ReleephRequestorFieldSpecification(),
-      new ReleephSeverityFieldSpecification(),
       new ReleephOriginalCommitFieldSpecification(),
-      new ReleephDiffMessageFieldSpecification(),
-      new ReleephStatusFieldSpecification(),
-      new ReleephIntentFieldSpecification(),
       new ReleephBranchCommitFieldSpecification(),
       new ReleephDiffSizeFieldSpecification(),
       new ReleephDiffChurnFieldSpecification(),
+      new ReleephDiffMessageFieldSpecification(),
+      new ReleephCommitMessageFieldSpecification(),
     );
 
     $default = array();

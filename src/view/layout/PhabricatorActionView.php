@@ -11,6 +11,7 @@ final class PhabricatorActionView extends AphrontView {
   private $renderAsForm;
   private $download;
   private $objectURI;
+  private $sigils = array();
 
   public function setObjectURI($object_uri) {
     $this->objectURI = $object_uri;
@@ -31,6 +32,11 @@ final class PhabricatorActionView extends AphrontView {
 
   public function setHref($href) {
     $this->href = $href;
+    return $this;
+  }
+
+  public function addSigil($sigil) {
+    $this->sigils[] = $sigil;
     return $this;
   }
 
@@ -98,6 +104,21 @@ final class PhabricatorActionView extends AphrontView {
     }
 
     if ($this->href) {
+
+      $sigils = array();
+      if ($this->workflow) {
+        $sigils[] = 'workflow';
+      }
+      if ($this->download) {
+        $sigils[] = 'download';
+      }
+
+      if ($this->sigils) {
+        $sigils = array_merge($sigils, $this->sigils);
+      }
+
+      $sigils = $sigils ? implode(' ', $sigils) : null;
+
       if ($this->renderAsForm) {
         if (!$this->user) {
           throw new Exception(
@@ -111,20 +132,12 @@ final class PhabricatorActionView extends AphrontView {
           ),
           $this->name);
 
-        $sigils = array();
-        if ($this->workflow) {
-          $sigils[] = 'workflow';
-        }
-        if ($this->download) {
-          $sigils[] = 'download';
-        }
-
         $item = phabricator_form(
           $this->user,
           array(
             'action'    => $this->getHref(),
             'method'    => 'POST',
-            'sigil'     => implode(' ', $sigils),
+            'sigil'     => $sigils,
           ),
           $item);
       } else {
@@ -133,7 +146,7 @@ final class PhabricatorActionView extends AphrontView {
           array(
             'href'  => $this->getHref(),
             'class' => 'phabricator-action-view-item',
-            'sigil' => $this->workflow ? 'workflow' : null,
+            'sigil' => $sigils,
           ),
           $this->name);
       }
