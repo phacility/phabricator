@@ -164,10 +164,6 @@ final class PhabricatorSlowvotePollController
       ? pht('Add Comment')
       : pht('Enter Deliberations');
 
-    $submit_button_name = $is_serious
-      ? pht('Add Comment')
-      : pht('Perhaps');
-
     $draft = PhabricatorDraft::newFromUserAndKey($viewer, $poll->getPHID());
 
     return id(new PhabricatorApplicationTransactionCommentView())
@@ -176,7 +172,7 @@ final class PhabricatorSlowvotePollController
       ->setDraft($draft)
       ->setHeaderText($add_comment_header)
       ->setAction($this->getApplicationURI('/comment/'.$poll->getID().'/'))
-      ->setSubmitButtonName($submit_button_name);
+      ->setSubmitButtonName(pht('Add Comment'));
 
   }
 

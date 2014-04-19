@@ -112,11 +112,11 @@ final class PhabricatorCoreConfigOptions
           pht("Should Phabricator be serious?"))
         ->setDescription(
           pht(
-            "By default, Phabricator includes some silly nonsense in the UI, ".
-            "such as a submit button called 'Clowncopterize' in Differential ".
-            "and a call to 'Leap Into Action'. If you'd prefer more ".
-            "traditional UI strings like 'Submit', you can set this flag to ".
-            "disable most of the jokes and easter eggs.")),
+            'By default, Phabricator includes some flavor text in the UI, '.
+            'like a prompt to "Weigh In" rather than "Add Comment" in '.
+            'Maniphest. If you\'d prefer more traditional UI strings like '.
+            '"Add Comment", you can set this flag to disable most of the '.
+            'extra flavor.')),
        $this->newOption('environment.append-paths', 'list<string>', $paths)
         ->setSummary(
           pht("These paths get appended to your \$PATH envrionment variable."))

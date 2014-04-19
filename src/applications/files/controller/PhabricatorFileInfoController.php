@@ -99,10 +99,6 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       ? pht('Add Comment')
       : pht('Question File Integrity');
 
-    $submit_button_name = $is_serious
-      ? pht('Add Comment')
-      : pht('Debate the Bits');
-
     $draft = PhabricatorDraft::newFromUserAndKey($user, $file->getPHID());
 
     $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
@@ -111,7 +107,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       ->setDraft($draft)
       ->setHeaderText($add_comment_header)
       ->setAction($this->getApplicationURI('/comment/'.$file->getID().'/'))
-      ->setSubmitButtonName($submit_button_name);
+      ->setSubmitButtonName(pht('Add Comment'));
 
     return array(
       $timeline,

@@ -118,10 +118,6 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ? pht('Add Comment')
       : pht('Debate Paste Accuracy');
 
-    $submit_button_name = $is_serious
-      ? pht('Add Comment')
-      : pht('Pity the Fool');
-
     $draft = PhabricatorDraft::newFromUserAndKey($user, $paste->getPHID());
 
     $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
@@ -130,7 +126,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ->setDraft($draft)
       ->setHeaderText($add_comment_header)
       ->setAction($this->getApplicationURI('/comment/'.$paste->getID().'/'))
-      ->setSubmitButtonName($submit_button_name);
+      ->setSubmitButtonName(pht('Add Comment'));
 
     return $this->buildApplicationPage(
       array(

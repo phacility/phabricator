@@ -205,16 +205,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $draft_text = null;
     }
 
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-
-    $submit_text = $is_serious
-      ? pht('Submit')
-      : pht('Avast!');
-
-    $close_text = $is_serious
-      ? pht('Close Task')
-      : pht('Scuttle Task');
-
     $submit_control = id(new PHUIFormMultiSubmitControl());
     if (!$task->isClosed()) {
       $close_image = id(new PHUIIconView())
@@ -224,11 +214,11 @@ final class ManiphestTaskDetailController extends ManiphestController {
         id(new PHUIButtonView())
           ->setColor(PHUIButtonView::GREY)
           ->setIcon($close_image)
-          ->setText($close_text)
+          ->setText(pht('Close Task'))
           ->setName('scuttle')
           ->addSigil('alternate-submit-button'));
     }
-    $submit_control->addSubmitButton($submit_text);
+    $submit_control->addSubmitButton(pht('Submit'));
 
     $comment_form = new AphrontFormView();
     $comment_form
@@ -343,6 +333,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ));
     }
 
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
     $comment_header = $is_serious
       ? pht('Add Comment')
       : pht('Weigh In');

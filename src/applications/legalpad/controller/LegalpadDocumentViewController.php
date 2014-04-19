@@ -210,17 +210,13 @@ final class LegalpadDocumentViewController extends LegalpadController {
       ? pht('Add Comment')
       : pht('Debate Legislation');
 
-    $button_name = $is_serious
-      ? pht('Add Comment')
-      : pht('Commence Filibuster');
-
     $form = id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($user)
       ->setObjectPHID($document->getPHID())
       ->setFormID($comment_form_id)
       ->setHeaderText($title)
       ->setDraft($draft)
-      ->setSubmitButtonName($button_name)
+      ->setSubmitButtonName(pht('Add Comment'))
       ->setAction($this->getApplicationURI('/comment/'.$document->getID().'/'))
       ->setRequestURI($this->getRequest()->getRequestURI());
 

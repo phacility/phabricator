@@ -638,13 +638,6 @@ return array(
     'https' => true,
   ),
 
-  // By default, Phabricator includes some silly nonsense in the UI, such as
-  // a submit button called "Clowncopterize" in Differential and a call to
-  // "Leap Into Action". If you'd prefer more traditional UI strings like
-  // "Submit", you can set this flag to disable most of the jokes and easter
-  // eggs.
-  'phabricator.serious-business' => false,
-
   // Should Phabricator show beta applications on the homepage
   'phabricator.show-beta-applications' => false,
 

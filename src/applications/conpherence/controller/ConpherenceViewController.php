@@ -133,7 +133,6 @@ final class ConpherenceViewController extends
     $update_uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
 
     $this->initBehavior('conpherence-pontificate');
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
     $form =
       id(new AphrontFormView())
@@ -149,10 +148,7 @@ final class ConpherenceViewController extends
         ->setValue($draft->getDraft()))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue(
-            $is_serious
-              ? pht('Send')
-              : pht('Pontificate')))
+          ->setValue(pht('Send Message')))
       ->appendChild(
         javelin_tag(
           'input',
