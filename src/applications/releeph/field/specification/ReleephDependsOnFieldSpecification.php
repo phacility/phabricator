@@ -10,25 +10,12 @@ final class ReleephDependsOnFieldSpecification
     return pht('Depends On');
   }
 
+  public function getRequiredHandlePHIDsForPropertyView() {
+    return $this->getDependentRevisionPHIDs();
+  }
+
   public function renderPropertyViewValue(array $handles) {
-    $revision_phids = $this->getDependentRevisionPHIDs();
-    if (!$revision_phids) {
-      return null;
-    }
-
-    $links = array();
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->getUser())
-      ->withPHIDs($revision_phids)
-      ->execute();
-    foreach ($revision_phids as $revision_phid) {
-      $links[] = id(clone $handles[$revision_phid])
-        // Hack to remove the strike-through rendering of diff links
-        ->setStatus(null)
-        ->renderLink();
-    }
-
-    return phutil_implode_html(phutil_tag('br'), $links);
+    return $this->renderHandleList($handles);
   }
 
   private function getDependentRevisionPHIDs() {
@@ -36,7 +23,7 @@ final class ReleephDependsOnFieldSpecification
       ->getReleephRequest()
       ->loadDifferentialRevision();
     if (!$revision) {
-      return null;
+      return array();
     }
 
     return PhabricatorEdgeQuery::loadDestinationPHIDs(

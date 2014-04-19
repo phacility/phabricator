@@ -11,26 +11,19 @@ final class ReleephRevisionFieldSpecification
     return 'Revision';
   }
 
-  public function renderPropertyViewValue(array $handles) {
-    $phid = $this
-      ->getReleephRequest()
-      ->loadRequestCommitDiffPHID();
-    if (!$phid) {
-      return null;
+  public function getRequiredHandlePHIDsForPropertyView() {
+    $phids = array();
+
+    $phid = $this->getReleephRequest()->loadRequestCommitDiffPHID();
+    if ($phid) {
+      $phids[] = $phid;
     }
 
-    $handles = $this->getReleephRequest()->getHandles();
-    $handle = $handles[$phid];
-    $link = $handle
-      // Hack to remove the strike-through rendering of diff links
-      ->setStatus(null)
-      ->renderLink();
-    return phutil_tag(
-      'div',
-      array(
-        'class' => 'releeph-header-text-truncated',
-      ),
-      $link);
+    return $phids;
+  }
+
+  public function renderPropertyViewValue(array $handles) {
+    return $this->renderHandleList($handles);
   }
 
 }

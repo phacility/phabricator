@@ -5,6 +5,7 @@
  * @task core         Core Properties and Field Identity
  * @task proxy        Field Proxies
  * @task context      Contextual Data
+ * @task render       Rendering Utilities
  * @task storage      Field Storage
  * @task edit         Integration with Edit Views
  * @task view         Integration with Property Views
@@ -464,6 +465,26 @@ abstract class PhabricatorCustomField {
       throw new PhabricatorCustomFieldDataNotAvailableException($this);
     }
     return $this->viewer;
+  }
+
+
+/* -(  Rendering Utilities  )------------------------------------------------ */
+
+
+  /**
+   * @task render
+   */
+  protected function renderHandleList(array $handles) {
+    if (!$handles) {
+      return null;
+    }
+
+    $out = array();
+    foreach ($handles as $handle) {
+      $out[] = $handle->renderLink();
+    }
+
+    return phutil_implode_html(phutil_tag('br'), $out);
   }
 
 

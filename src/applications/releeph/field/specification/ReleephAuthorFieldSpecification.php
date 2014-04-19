@@ -11,24 +11,23 @@ final class ReleephAuthorFieldSpecification
     return 'Author';
   }
 
-  public function renderPropertyViewValue(array $handles) {
+  public function getRequiredHandlePHIDsForPropertyView() {
     $pull = $this->getReleephRequest();
     $commit = $pull->loadPhabricatorRepositoryCommit();
     if (!$commit) {
-      return null;
+      return array();
     }
 
     $author_phid = $commit->getAuthorPHID();
     if (!$author_phid) {
-      return null;
+      return array();
     }
 
-    $handle = id(new PhabricatorHandleQuery())
-      ->setViewer($this->getUser())
-      ->withPHIDs(array($author_phid))
-      ->executeOne();
+    return array($author_phid);
+  }
 
-    return $handle->renderLink();
+  public function renderPropertyViewValue(array $handles) {
+    return $this->renderHandleList($handles);
   }
 
 }

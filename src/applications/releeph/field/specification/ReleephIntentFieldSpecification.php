@@ -11,6 +11,12 @@ final class ReleephIntentFieldSpecification
     return 'Intent';
   }
 
+  public function getRequiredHandlePHIDsForPropertyView() {
+    $pull = $this->getReleephRequest();
+    $intents = $pull->getUserIntents();
+    return array_keys($intents);
+  }
+
   public function renderPropertyViewValue(array $handles) {
     $pull = $this->getReleephRequest();
 
@@ -19,16 +25,6 @@ final class ReleephIntentFieldSpecification
 
     if (!$intents) {
       return null;
-    }
-
-    $user_phids = array_keys($intents);
-    if ($user_phids) {
-      $handles = id(new PhabricatorHandleQuery())
-        ->withPHIDs($user_phids)
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->execute();
-    } else {
-      $handles = array();
     }
 
     $pushers = array();

@@ -11,9 +11,15 @@ final class ReleephOriginalCommitFieldSpecification
     return 'Commit';
   }
 
+  public function getRequiredHandlePHIDsForPropertyView() {
+    return array(
+      $this->getReleephRequest()->getRequestCommitPHID(),
+    );
+  }
+
+
   public function renderPropertyViewValue(array $handles) {
-    $pull = $this->getReleephRequest();
-    return $this->slowlyLoadHandle($pull->getRequestCommitPHID())->renderLink();
+    return $this->renderHandleList($handles);
   }
 
 }

@@ -30,14 +30,6 @@ abstract class ReleephFieldSpecification
     return $value;
   }
 
-  public function slowlyLoadHandle($phid) {
-    // TODO: Remove this, it's transitional as fields modernize.
-    return id(new PhabricatorHandleQuery())
-      ->withPHIDs(array($phid))
-      ->setViewer($this->getUser())
-      ->executeOne();
-  }
-
   abstract public function getName();
 
 /* -(  Storage  )------------------------------------------------------------ */

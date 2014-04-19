@@ -18,7 +18,7 @@ final class ReleephDiffSizeFieldSpecification
   public function renderPropertyViewValue(array $handles) {
     $diff_rev = $this->getReleephRequest()->loadDifferentialRevision();
     if (!$diff_rev) {
-      return '';
+      return null;
     }
 
     $diffs = $diff_rev->loadRelatives(
