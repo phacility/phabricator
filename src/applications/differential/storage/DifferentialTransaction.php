@@ -81,7 +81,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
         return ($this !== head($xactions));
     }
 
-    return $this->shouldHide();
+    return parent::shouldHideForMail($xactions);
   }
 
   public function getBodyForMail() {

@@ -1721,6 +1721,21 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
+    // Check if any of the transactions are visible. If we don't have any
+    // visible transactions, don't send the mail.
+
+    $any_visible = false;
+    foreach ($xactions as $xaction) {
+      if (!$xaction->shouldHideForMail($xactions)) {
+        $any_visible = true;
+        break;
+      }
+    }
+
+    if (!$any_visible) {
+      return;
+    }
+
     $email_to = array_filter(array_unique($this->getMailTo($object)));
     $email_cc = array_filter(array_unique($this->getMailCC($object)));
 
