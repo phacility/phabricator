@@ -19,15 +19,11 @@ final class ReleephReasonFieldSpecification
     return 'block';
   }
 
-  public function renderLabelForHeaderView() {
-    return null;
-  }
-
   public function getIconForPropertyView() {
     return PHUIPropertyListView::ICON_SUMMARY;
   }
 
-  public function renderValueForHeaderView() {
+  public function renderPropertyViewValue(array $handles) {
     return phutil_tag(
       'div',
       array(

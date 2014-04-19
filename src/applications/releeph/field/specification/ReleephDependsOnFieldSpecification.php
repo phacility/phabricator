@@ -10,7 +10,7 @@ final class ReleephDependsOnFieldSpecification
     return pht('Depends On');
   }
 
-  public function renderValueForHeaderView() {
+  public function renderPropertyViewValue(array $handles) {
     $revision_phids = $this->getDependentRevisionPHIDs();
     if (!$revision_phids) {
       return null;

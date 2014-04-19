@@ -11,7 +11,7 @@ final class ReleephRequestorFieldSpecification
     return 'Requestor';
   }
 
-  public function renderValueForHeaderView() {
+  public function renderPropertyViewValue(array $handles) {
     $phid = $this->getReleephRequest()->getRequestUserPHID();
     $handle = id(new PhabricatorHandleQuery())
       ->setViewer($this->getUser())

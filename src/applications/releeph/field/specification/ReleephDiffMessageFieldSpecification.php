@@ -11,15 +11,11 @@ final class ReleephDiffMessageFieldSpecification
     return 'Message';
   }
 
-  public function renderLabelForHeaderView() {
-    return null;
-  }
-
   public function getStyleForPropertyView() {
     return 'block';
   }
 
-  public function renderValueForHeaderView() {
+  public function renderPropertyViewValue(array $handles) {
     return phutil_tag(
       'div',
       array(

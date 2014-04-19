@@ -22,7 +22,8 @@ abstract class ReleephFieldSpecification
   }
 
   public function renderPropertyViewValue(array $handles) {
-    $value = $this->renderValueForHeaderView();
+    $key = $this->getRequiredStorageKey();
+    $value = $this->getReleephRequest()->getDetail($key);
     if ($value === '') {
       return null;
     }
@@ -99,22 +100,6 @@ abstract class ReleephFieldSpecification
     $value) {
 
     return $value;
-  }
-
-
-/* -(  Header View  )-------------------------------------------------------- */
-
-  /**
-   * Return a label for use in rendering the fields table.  If you return null,
-   * the renderLabelForHeaderView data will span both columns.
-   */
-  public function renderLabelForHeaderView() {
-    return $this->getName();
-  }
-
-  public function renderValueForHeaderView() {
-    $key = $this->getRequiredStorageKey();
-    return $this->getReleephRequest()->getDetail($key);
   }
 
 
@@ -197,12 +182,6 @@ abstract class ReleephFieldSpecification
       return $this->getViewer();
     }
     return $this->user;
-  }
-
-
-/* -(  Bulk loading  )------------------------------------------------------- */
-
-  public function bulkLoad(array $releeph_requests) {
   }
 
 /* -(  Commit Messages  )---------------------------------------------------- */

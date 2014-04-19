@@ -11,7 +11,7 @@ final class ReleephIntentFieldSpecification
     return 'Intent';
   }
 
-  public function renderValueForHeaderView() {
+  public function renderPropertyViewValue(array $handles) {
     $pull = $this->getReleephRequest();
 
     $intents = $pull->getUserIntents();

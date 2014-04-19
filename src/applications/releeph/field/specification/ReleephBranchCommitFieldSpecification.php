@@ -11,7 +11,7 @@ final class ReleephBranchCommitFieldSpecification
     return 'Commit';
   }
 
-  public function renderValueForHeaderView() {
+  public function renderPropertyViewValue(array $handles) {
     $rr = $this->getReleephRequest();
     if (!$rr->getInBranch()) {
       return null;

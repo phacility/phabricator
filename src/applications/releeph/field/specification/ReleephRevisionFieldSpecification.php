@@ -11,7 +11,7 @@ final class ReleephRevisionFieldSpecification
     return 'Revision';
   }
 
-  public function renderValueForHeaderView() {
+  public function renderPropertyViewValue(array $handles) {
     $phid = $this
       ->getReleephRequest()
       ->loadRequestCommitDiffPHID();

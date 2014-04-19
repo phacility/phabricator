@@ -16,7 +16,7 @@ final class ReleephDiffChurnFieldSpecification
     return 'Churn';
   }
 
-  public function renderValueForHeaderView() {
+  public function renderPropertyViewValue(array $handles) {
     $diff_rev = $this->getReleephRequest()->loadDifferentialRevision();
     if (!$diff_rev) {
       return null;
