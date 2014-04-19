@@ -46,14 +46,14 @@
   border-color: {$red};
 }
 
-.phui-icon-view.phui-halfling-name {
+.phui-example-icon-name {
   display: inline-block;
-  width: 140px;
+  width: 160px;
   padding-bottom: 8px;
   white-space: nowrap;
 }
 
-.phui-icon-view.phui-halfling-color {
+.phui-icon-view.phui-example-icon-transform {
   display: block;
   padding-bottom: 8px;
 }
