@@ -33,7 +33,7 @@ final class ReleephProject extends ReleephDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(ReleephPHIDTypeProject::TYPECONST);
+    return PhabricatorPHID::generateNewPHID(ReleephPHIDTypeProduct::TYPECONST);
   }
 
   public function getDetail($key, $default = null) {

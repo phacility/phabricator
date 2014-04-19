@@ -10,7 +10,7 @@ final class ReleephProductTransaction
   }
 
   public function getApplicationTransactionType() {
-    return ReleephPHIDTypeProject::TYPECONST;
+    return ReleephPHIDTypeProduct::TYPECONST;
   }
 
   public function getColor() {
