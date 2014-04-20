@@ -3,15 +3,15 @@
 final class ReleephBranchSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
-  private $projectID;
+  private $product;
 
-  public function setProjectID($project_id) {
-    $this->projectID = $project_id;
+  public function setProduct(ReleephProject $product) {
+    $this->product = $product;
     return $this;
   }
 
-  public function getProjectID() {
-    return $this->projectID;
+  public function getProduct() {
+    return $this->product;
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
@@ -25,7 +25,7 @@ final class ReleephBranchSearchEngine
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new ReleephBranchQuery())
       ->needCutPointCommits(true)
-      ->withProjectIDs(array($this->getProjectID()));
+      ->withProductPHIDs(array($this->getProduct()->getPHID()));
 
     $active = $saved->getParameter('active');
     $value = idx($this->getActiveValues(), $active);
@@ -49,7 +49,7 @@ final class ReleephBranchSearchEngine
   }
 
   protected function getURI($path) {
-    return '/releeph/project/'.$this->getProjectID().'/'.$path;
+    return '/releeph/product/'.$this->getProduct()->getID().'/'.$path;
   }
 
   public function getBuiltinQueryNames() {

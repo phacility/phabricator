@@ -6,6 +6,7 @@ final class ReleephProductQuery
   private $active;
   private $ids;
   private $phids;
+  private $repositoryPHIDs;
 
   private $needArcanistProjects;
 
@@ -30,6 +31,11 @@ final class ReleephProductQuery
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  public function withRepositoryPHIDs(array $repository_phids) {
+    $this->repositoryPHIDs = $repository_phids;
     return $this;
   }
 
@@ -109,18 +115,25 @@ final class ReleephProductQuery
         (int)$this->active);
     }
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'id IN (%Ls)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'phid IN (%Ls)',
         $this->phids);
+    }
+
+    if ($this->repositoryPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'repositoryPHID IN (%Ls)',
+        $this->repositoryPHIDs);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

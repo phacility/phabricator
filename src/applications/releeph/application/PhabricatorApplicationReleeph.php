@@ -40,7 +40,7 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
 
       '/releeph/' => array(
         '' => 'ReleephProductListController',
-        'project/' => array(
+        '(?:product|project)/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'ReleephProductListController',
           'create/' => 'ReleephProductCreateController',
           '(?P<projectID>[1-9]\d*)/' => array(

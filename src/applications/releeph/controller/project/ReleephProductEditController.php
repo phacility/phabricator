@@ -203,7 +203,7 @@ final class ReleephProductEditController extends ReleephProductController {
     $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->addCancelButton('/releeph/project/')
+          ->addCancelButton('/releeph/product/')
           ->setValue(pht('Save')));
 
     $box = id(new PHUIObjectBoxView())
