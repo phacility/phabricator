@@ -109,15 +109,6 @@ final class ReleephRequestEditController extends ReleephBranchController {
             $errors[] = $e->getMessage();
           }
 
-          $pr_commit_data = null;
-          if (!$errors) {
-            $pr_commit_data = $pr_commit->loadCommitData();
-            if (!$pr_commit_data) {
-              $e_request_identifier = 'Not parsed yet';
-              $errors[] = "The requested commit hasn't been parsed yet.";
-            }
-          }
-
           if (!$errors) {
             $object_phid = $finder->getRequestedObjectPHID();
             if (!$object_phid) {

@@ -17,6 +17,7 @@ final class ConduitAPI_diffusion_querycommits_Method
       'phids'             => 'optional list<phid>',
       'names'             => 'optional list<string>',
       'repositoryPHID'    => 'optional phid',
+      'needMessages'      => 'optional bool',
     ) + $this->getPagerParamTypes();
   }
 
@@ -25,8 +26,14 @@ final class ConduitAPI_diffusion_querycommits_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
+    $need_messages = $request->getValue('needMessages');
+
     $query = id(new DiffusionCommitQuery())
       ->setViewer($request->getUser());
+
+    if ($need_messages) {
+      $query->needCommitData(true);
+    }
 
     $repository_phid = $request->getValue('repositoryPHID');
     if ($repository_phid) {
@@ -67,7 +74,7 @@ final class ConduitAPI_diffusion_querycommits_Method
       $uri = '/r'.$callsign.$identifier;
       $uri = PhabricatorEnv::getProductionURI($uri);
 
-      $data[$commit->getPHID()] = array(
+      $dict = array(
         'id' => $commit->getID(),
         'phid' => $commit->getPHID(),
         'repositoryPHID' => $commit->getRepository()->getPHID(),
@@ -75,7 +82,19 @@ final class ConduitAPI_diffusion_querycommits_Method
         'epoch' => $commit->getEpoch(),
         'uri' => $uri,
         'isImporting' => !$commit->isImported(),
+        'summary' => $commit->getSummary(),
       );
+
+      if ($need_messages) {
+        $commit_data = $commit->getCommitData();
+        if ($commit_data) {
+          $dict['message'] = $commit_data->getCommitMessage();
+        } else {
+          $dict['message'] = null;
+        }
+      }
+
+      $data[$commit->getPHID()] = $dict;
     }
 
     $result = array(
