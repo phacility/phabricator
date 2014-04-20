@@ -52,7 +52,7 @@ final class PhabricatorRepositoryPushLog
       ->setPusherPHID($viewer->getPHID());
   }
 
-  public static function getHeraldChangeflagConditionOptions() {
+  public static function getHeraldChangeFlagConditionOptions() {
     return array(
       PhabricatorRepositoryPushLog::CHANGEFLAG_ADD =>
         pht('change creates ref'),

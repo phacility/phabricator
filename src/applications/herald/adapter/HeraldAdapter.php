@@ -1041,7 +1041,7 @@ abstract class HeraldAdapter {
         break;
       case HeraldPreCommitRefAdapter::FIELD_REF_CHANGE:
         $change_map =
-          PhabricatorRepositoryPushLog::getHeraldChangeflagConditionOptions();
+          PhabricatorRepositoryPushLog::getHeraldChangeFlagConditionOptions();
         foreach ($value as $index => $val) {
           $name = idx($change_map, $val);
           if ($name) {
