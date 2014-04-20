@@ -16,10 +16,11 @@ final class ReleephDiffSizeFieldSpecification
   }
 
   public function renderPropertyViewValue(array $handles) {
-    $diff_rev = $this->getReleephRequest()->loadDifferentialRevision();
-    if (!$diff_rev) {
+    $requested_object = $this->getObject()->getRequestedObject();
+    if (!($requested_object instanceof DifferentialRevision)) {
       return null;
     }
+    $diff_rev = $requested_object;
 
     $diffs = $diff_rev->loadRelatives(
       new DifferentialDiff(),

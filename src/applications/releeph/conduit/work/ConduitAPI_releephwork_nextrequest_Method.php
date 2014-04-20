@@ -116,7 +116,14 @@ final class ConduitAPI_releephwork_nextrequest_Method
 
     $diff_phid = null;
     $diff_rev_id = null;
-    $diff_rev = $releeph_request->loadDifferentialRevision();
+
+    $requested_object = $releeph_request->getRequestedObject();
+    if ($requested_object instanceof DifferentialRevision) {
+      $diff_rev = $requested_object;
+    } else {
+      $diff_rev = null;
+    }
+
     if ($diff_rev) {
       $diff_phid = $diff_rev->getPHID();
       $phids[] = $diff_phid;

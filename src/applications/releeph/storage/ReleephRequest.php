@@ -30,6 +30,7 @@ final class ReleephRequest extends ReleephDAO
 
   private $customFields = self::ATTACHABLE;
   private $branch = self::ATTACHABLE;
+  private $requestedObject = self::ATTACHABLE;
 
 
 /* -(  Constants and helper methods  )--------------------------------------- */
@@ -102,6 +103,15 @@ final class ReleephRequest extends ReleephDAO
 
   public function attachBranch(ReleephBranch $branch) {
     $this->branch = $branch;
+    return $this;
+  }
+
+  public function getRequestedObject() {
+    return $this->assertAttached($this->requestedObject);
+  }
+
+  public function attachRequestedObject($object) {
+    $this->requestedObject = $object;
     return $this;
   }
 
@@ -214,19 +224,6 @@ final class ReleephRequest extends ReleephDAO
     return $summary;
   }
 
-  public function loadRequestCommitDiffPHID() {
-    $phids = array();
-    $commit = $this->loadPhabricatorRepositoryCommit();
-    if ($commit) {
-      $phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-        $commit->getPHID(),
-        PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV);
-    }
-
-    return head($phids);
-  }
-
-
 /* -(  Loading external objects  )------------------------------------------- */
 
   public function loadPhabricatorRepositoryCommit() {
@@ -243,18 +240,6 @@ final class ReleephRequest extends ReleephDAO
         new PhabricatorRepositoryCommitData(),
         'commitID');
     }
-  }
-
-  // TODO: (T603) Get rid of all this one-off ad-hoc loading.
-  public function loadDifferentialRevision() {
-    $diff_phid = $this->loadRequestCommitDiffPHID();
-    if (!$diff_phid) {
-      return null;
-    }
-    return $this->loadOneRelative(
-        new DifferentialRevision(),
-        'phid',
-        'loadRequestCommitDiffPHID');
   }
 
 

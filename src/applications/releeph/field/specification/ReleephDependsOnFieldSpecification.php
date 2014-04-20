@@ -19,12 +19,12 @@ final class ReleephDependsOnFieldSpecification
   }
 
   private function getDependentRevisionPHIDs() {
-    $revision = $this
-      ->getReleephRequest()
-      ->loadDifferentialRevision();
-    if (!$revision) {
+    $requested_object = $this->getObject()->getRequestedObjectPHID();
+    if (!($requested_object instanceof DifferentialRevision)) {
       return array();
     }
+
+    $revision = $requested_object;
 
     return PhabricatorEdgeQuery::loadDestinationPHIDs(
       $revision->getPHID(),

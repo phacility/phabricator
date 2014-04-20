@@ -12,14 +12,14 @@ final class ReleephRevisionFieldSpecification
   }
 
   public function getRequiredHandlePHIDsForPropertyView() {
-    $phids = array();
-
-    $phid = $this->getReleephRequest()->loadRequestCommitDiffPHID();
-    if ($phid) {
-      $phids[] = $phid;
+    $requested_object = $this->getObject()->getRequestedObjectPHID();
+    if (!($requested_object instanceof DifferentialRevision)) {
+      return array();
     }
 
-    return $phids;
+    return array(
+      $requested_object->getPHID(),
+    );
   }
 
   public function renderPropertyViewValue(array $handles) {
