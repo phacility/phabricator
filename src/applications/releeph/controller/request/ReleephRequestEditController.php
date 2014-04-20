@@ -178,8 +178,19 @@ final class ReleephRequestEditController extends ReleephBranchController {
       }
     }
 
-    $branch->populateReleephRequestHandles($viewer, array($pull));
-    $handles = $pull->getHandles();
+    $handle_phids = array(
+      $pull->getRequestUserPHID(),
+      $pull->getRequestCommitPHID(),
+    );
+    $handle_phids = array_filter($handle_phids);
+    if ($handle_phids) {
+      $handles = id(new PhabricatorHandleQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($handle_phids)
+        ->execute();
+    } else {
+      $handles = array();
+    }
 
     $age_string = '';
     if ($is_edit) {

@@ -11,24 +11,18 @@ final class ReleephBranchCommitFieldSpecification
     return 'Commit';
   }
 
+  public function getRequiredHandlePHIDsForPropertyView() {
+    $pull = $this->getReleephRequest();
+
+    if ($pull->getCommitPHID()) {
+      return array($pull->getCommitPHID());
+    }
+
+    return array();
+  }
+
   public function renderPropertyViewValue(array $handles) {
-    $rr = $this->getReleephRequest();
-    if (!$rr->getInBranch()) {
-      return null;
-    }
-
-    $c_phid = $rr->getCommitPHID();
-    $c_id = $rr->getCommitIdentifier();
-
-    if ($c_phid) {
-      $handles = $rr->getHandles();
-      $val = $handles[$c_phid]->renderLink();
-    } else if ($c_id) {
-      $val = $c_id;
-    } else {
-      $val = '???';
-    }
-    return $val;
+    return $this->renderHandleList($handles);
   }
 
 }

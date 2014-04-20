@@ -18,8 +18,8 @@ final class ConduitAPI_releephwork_nextrequest_Method
 
   public function defineParamTypes() {
     return array(
-      'branchPHID'  => 'required int',
-      'seen'        => 'required list<string, bool>',
+      'branchPHID'  => 'required phid',
+      'seen'        => 'required map<string, bool>',
     );
   }
 
@@ -35,6 +35,7 @@ final class ConduitAPI_releephwork_nextrequest_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
+    $viewer = $request->getUser();
     $seen = $request->getValue('seen');
 
     $branch = id(new ReleephBranch())
@@ -45,7 +46,11 @@ final class ConduitAPI_releephwork_nextrequest_Method
     $needs_pick = array();
     $needs_revert = array();
 
-    $releeph_requests = $branch->loadReleephRequests($request->getUser());
+    // Load every request ever made for this branch...?!!!
+    $releeph_requests = id(new ReleephRequestQuery())
+      ->setViewer($viewer)
+      ->withBranchIDs(array($branch->getID()))
+      ->execute();
 
     foreach ($releeph_requests as $candidate) {
       $phid = $candidate->getPHID();

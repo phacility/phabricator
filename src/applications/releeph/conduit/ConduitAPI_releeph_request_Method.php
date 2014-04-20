@@ -28,6 +28,12 @@ final class ConduitAPI_releeph_request_Method
 
   protected function execute(ConduitAPIRequest $request) {
     $user = $request->getUser();
+
+    $viewer_handle = id(new PhabricatorHandleQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($user->getPHID()))
+      ->executeOne();
+
     $branch_phid = $request->getValue('branchPHID');
     $releeph_branch = id(new ReleephBranch())
       ->loadOneWhere('phid = %s', $branch_phid);
@@ -131,15 +137,7 @@ final class ConduitAPI_releeph_request_Method
         $editor->applyTransactions($releeph_request, $xactions);
       }
 
-      $releeph_branch->populateReleephRequestHandles(
-        $user,
-        array($releeph_request));
-      $rq_handles = $releeph_request->getHandles();
-      $requestor_phid = $releeph_request->getRequestUserPHID();
-      $requestor = $rq_handles[$requestor_phid]->getName();
-
-      $url = PhabricatorEnv::getProductionURI('/RQ'.$releeph_request->getID());
-
+      $url = PhabricatorEnv::getProductionURI('/Y'.$releeph_request->getID());
       $results[$thing] = array(
         'thing'         => $thing,
         'branch'        => $releeph_branch->getDisplayNameWithDetail(),
@@ -147,7 +145,7 @@ final class ConduitAPI_releeph_request_Method
         'commitID'      => $commit->getCommitIdentifier(),
         'url'           => $url,
         'requestID'     => $releeph_request->getID(),
-        'requestor'     => $requestor,
+        'requestor'     => $viewer_handle->getName(),
         'requestTime'   => $releeph_request->getDateCreated(),
         'existing'      => $existing_releeph_request !== null,
       );

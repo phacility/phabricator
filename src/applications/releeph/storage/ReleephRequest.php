@@ -20,12 +20,8 @@ final class ReleephRequest extends ReleephDAO
   protected $commitIdentifier;
   protected $commitPHID;
 
-  // Pre-populated handles that we'll bulk load in ReleephBranch
-  private $handles = self::ATTACHABLE;
-
   private $customFields = self::ATTACHABLE;
   private $branch = self::ATTACHABLE;
-
 
 
 /* -(  Constants and helper methods  )--------------------------------------- */
@@ -160,14 +156,6 @@ final class ReleephRequest extends ReleephDAO
 
 /* -(  Helpful accessors )--------------------------------------------------- */
 
-  public function setHandles($handles) {
-    $this->handles = $handles;
-    return $this;
-  }
-
-  public function getHandles() {
-    return $this->assertAttached($this->handles);
-  }
 
   public function getDetail($key, $default = null) {
     return idx($this->getDetails(), $key, $default);
