@@ -52,18 +52,15 @@ final class ReleephRequest extends ReleephDAO
    * passes on this request.
    */
   public function getPusherIntent() {
-    $project = $this->loadReleephProject();
-    if (!$project) {
-      return null;
-    }
+    $product = $this->getBranch()->getProduct();
 
-    if (!$project->getPushers()) {
+    if (!$product->getPushers()) {
       return self::INTENT_WANT;
     }
 
     $found_pusher_want = false;
     foreach ($this->userIntents as $phid => $intent) {
-      if ($project->isAuthoritativePHID($phid)) {
+      if ($product->isAuthoritativePHID($phid)) {
         if ($intent == self::INTENT_PASS) {
           return self::INTENT_PASS;
         }
@@ -209,20 +206,6 @@ final class ReleephRequest extends ReleephDAO
 
 
 /* -(  Loading external objects  )------------------------------------------- */
-
-  public function loadReleephBranch() {
-    return $this->loadOneRelative(
-      new ReleephBranch(),
-      'id',
-      'getBranchID');
-  }
-
-  public function loadReleephProject() {
-    $branch = $this->loadReleephBranch();
-    if ($branch) {
-      return $branch->loadReleephProject();
-    }
-  }
 
   public function loadPhabricatorRepositoryCommit() {
     return $this->loadOneRelative(

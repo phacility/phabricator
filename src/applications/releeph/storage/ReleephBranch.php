@@ -94,19 +94,11 @@ final class ReleephBranch extends ReleephDAO
 
   public function getURI($path = null) {
     $components = array(
-      '/releeph',
-      rawurlencode($this->loadReleephProject()->getName()),
-      rawurlencode($this->getBasename()),
-      $path
+      '/releeph/branch',
+      $this->getID(),
+      $path,
     );
     return implode('/', $components);
-  }
-
-  public function loadReleephProject() {
-    return $this->loadOneRelative(
-      new ReleephProject(),
-      'id',
-      'getReleephProjectID');
   }
 
   public function isActive() {

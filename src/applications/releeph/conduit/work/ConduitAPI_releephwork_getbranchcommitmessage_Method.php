@@ -26,10 +26,14 @@ final class ConduitAPI_releephwork_getbranchcommitmessage_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $branch = id(new ReleephBranch())
-      ->loadOneWhere('phid = %s', $request->getValue('branchPHID'));
+    $viewer = $request->getUser();
 
-    $project = $branch->loadReleephProject();
+    $branch = id(new ReleephBranchQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($request->getValue('branchPHID')))
+      ->executeOne();
+
+    $project = $branch->getProduct();
 
     $creator_phid = $branch->getCreatedByUserPHID();
     $cut_phid = $branch->getCutPointCommitPHID();

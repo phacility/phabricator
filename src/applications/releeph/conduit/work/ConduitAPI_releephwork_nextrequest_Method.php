@@ -38,10 +38,12 @@ final class ConduitAPI_releephwork_nextrequest_Method
     $viewer = $request->getUser();
     $seen = $request->getValue('seen');
 
-    $branch = id(new ReleephBranch())
-      ->loadOneWhere('phid = %s', $request->getValue('branchPHID'));
+    $branch = id(new ReleephBranchQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($request->getValue('branchPHID')))
+      ->executeOne();
 
-    $project = $branch->loadReleephProject();
+    $project = $branch->getProduct();
 
     $needs_pick = array();
     $needs_revert = array();

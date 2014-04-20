@@ -42,7 +42,7 @@ final class ReleephProject extends ReleephDAO
 
   public function getURI($path = null) {
     $components = array(
-      '/releeph/project',
+      '/releeph/product',
       $this->getID(),
       $path
     );

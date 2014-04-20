@@ -10,7 +10,7 @@ final class ConduitAPI_releeph_request_Method
   public function defineParamTypes() {
     return array(
       'branchPHID'  => 'required string',
-      'things'      => 'required string',
+      'things'      => 'required list<string>',
       'fields'      => 'dict<string, string>',
     );
   }
@@ -35,15 +35,17 @@ final class ConduitAPI_releeph_request_Method
       ->executeOne();
 
     $branch_phid = $request->getValue('branchPHID');
-    $releeph_branch = id(new ReleephBranch())
-      ->loadOneWhere('phid = %s', $branch_phid);
+    $releeph_branch = id(new ReleephBranchQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($branch_phid))
+      ->executeOne();
 
     if (!$releeph_branch) {
       throw id(new ConduitException("ERR_BRANCH"))->setErrorDescription(
         "No ReleephBranch found with PHID {$branch_phid}!");
     }
 
-    $releeph_project = $releeph_branch->loadReleephProject();
+    $releeph_project = $releeph_branch->getProduct();
 
     // Find the requested commit identifiers
     $requested_commits = array();

@@ -89,18 +89,6 @@ final class ReleephRequestQuery
 
   public function willFilterPage(array $requests) {
 
-    // TODO: These should be serviced by the query, but are not currently
-    // denormalized anywhere. For now, filter them here instead.
-
-    $keep_status = array_fuse($this->getKeepStatusConstants());
-    if ($keep_status) {
-      foreach ($requests as $key => $request) {
-        if (empty($keep_status[$request->getStatus()])) {
-          unset($requests[$key]);
-        }
-      }
-    }
-
     if ($this->severities) {
       $severities = array_fuse($this->severities);
       foreach ($requests as $key => $request) {
@@ -131,6 +119,20 @@ final class ReleephRequestQuery
         continue;
       }
       $request->attachBranch($branch);
+    }
+
+    // TODO: These should be serviced by the query, but are not currently
+    // denormalized anywhere. For now, filter them here instead. Note that
+    // we must perform this filtering *after* querying and attaching branches,
+    // because request status depends on the product.
+
+    $keep_status = array_fuse($this->getKeepStatusConstants());
+    if ($keep_status) {
+      foreach ($requests as $key => $request) {
+        if (empty($keep_status[$request->getStatus()])) {
+          unset($requests[$key]);
+        }
+      }
     }
 
     return $requests;
