@@ -252,7 +252,7 @@ final class ReleephRequestEditController extends ReleephBranchController {
               ->setValue($title));
       } else {
         $origin = $branch->getURI();
-        $repo = $product->loadPhabricatorRepository();
+        $repo = $product->getRepository();
         $branch_cut_point = id(new PhabricatorRepositoryCommit())
           ->loadOneWhere(
               'phid = %s',
