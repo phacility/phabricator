@@ -49,6 +49,7 @@ final class ConduitAPI_releeph_request_Method
 
     // Find the requested commit identifiers
     $requested_commits = array();
+    $requested_object_phids = array();
     $things = $request->getValue('things');
     $finder = id(new ReleephCommitFinder())
       ->setUser($user)
@@ -56,6 +57,11 @@ final class ConduitAPI_releeph_request_Method
     foreach ($things as $thing) {
       try {
         $requested_commits[$thing] = $finder->fromPartial($thing);
+        $object_phid = $finder->getRequestedObjectPHID();
+        if (!$object_phid) {
+          $object_phid = $requested_commits[$thing]->getPHID();
+        }
+        $requested_object_phids[$thing] = $object_phid;
       } catch (ReleephCommitFinderException $ex) {
         throw id(new ConduitException('ERR_NO_MATCHES'))
           ->setErrorDescription($ex->getMessage());
@@ -99,7 +105,8 @@ final class ConduitAPI_releeph_request_Method
         $releeph_request = id(new ReleephRequest())
           ->setRequestUserPHID($user->getPHID())
           ->setBranchID($releeph_branch->getID())
-          ->setInBranch(0);
+          ->setInBranch(0)
+          ->setRequestedObjectPHID($requested_object_phids[$thing]);
 
         $xactions = array();
 

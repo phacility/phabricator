@@ -43,7 +43,8 @@ final class ReleephRequestEditController extends ReleephBranchController {
       $pull = id(new ReleephRequest())
         ->setRequestUserPHID($viewer->getPHID())
         ->setBranchID($branch->getID())
-        ->setInBranch(0);
+        ->setInBranch(0)
+        ->attachBranch($branch);
 
       $is_edit = false;
     }
@@ -115,6 +116,15 @@ final class ReleephRequestEditController extends ReleephBranchController {
               $e_request_identifier = 'Not parsed yet';
               $errors[] = "The requested commit hasn't been parsed yet.";
             }
+          }
+
+          if (!$errors) {
+            $object_phid = $finder->getRequestedObjectPHID();
+            if (!$object_phid) {
+              $object_phid = $pr_commit->getPHID();
+            }
+
+            $pull->setRequestedObjectPHID($object_phid);
           }
         }
 

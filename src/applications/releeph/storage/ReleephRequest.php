@@ -13,12 +13,20 @@ final class ReleephRequest extends ReleephDAO
   protected $pickStatus;
   protected $mailKey;
 
+  /**
+   * The object which is being requested. Normally this is a commit, but it
+   * might also be a revision. In the future, it could be a repository branch
+   * or an external object (like a GitHub pull request).
+   */
+  protected $requestedObjectPHID;
+
   // Information about the thing being requested
   protected $requestCommitPHID;
 
   // Information about the last commit to the releeph branch
   protected $commitIdentifier;
   protected $commitPHID;
+
 
   private $customFields = self::ATTACHABLE;
   private $branch = self::ATTACHABLE;
@@ -161,6 +169,20 @@ final class ReleephRequest extends ReleephDAO
   public function setDetail($key, $value) {
     $this->details[$key] = $value;
     return $this;
+  }
+
+
+  /**
+   * Get the commit PHIDs this request is requesting.
+   *
+   * NOTE: For now, this always returns one PHID.
+   *
+   * @return list<phid> Commit PHIDs requested by this request.
+   */
+  public function getCommitPHIDs() {
+    return array(
+      $this->requestCommitPHID,
+    );
   }
 
   public function getReason() {
