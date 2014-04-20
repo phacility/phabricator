@@ -12,7 +12,7 @@ final class ReleephProductEditController extends ReleephProductController {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $product = id(new ReleephProjectQuery())
+    $product = id(new ReleephProductQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->productID))
       ->needArcanistProjects(true)

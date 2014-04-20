@@ -20,7 +20,7 @@ final class ReleephPHIDTypeProduct extends PhabricatorPHIDType {
     PhabricatorObjectQuery $query,
     array $phids) {
 
-    return id(new ReleephProjectQuery())
+    return id(new ReleephProductQuery())
       ->withPHIDs($phids);
   }
 

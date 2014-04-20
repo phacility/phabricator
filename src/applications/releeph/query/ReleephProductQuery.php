@@ -1,6 +1,6 @@
 <?php
 
-final class ReleephProjectQuery
+final class ReleephProductQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $active;

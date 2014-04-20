@@ -56,7 +56,7 @@ final class ReleephBranchQuery
   public function willFilterPage(array $branches) {
     $project_ids = mpull($branches, 'getReleephProjectID');
 
-    $projects = id(new ReleephProjectQuery())
+    $projects = id(new ReleephProductQuery())
       ->withIDs($project_ids)
       ->setViewer($this->getViewer())
       ->execute();

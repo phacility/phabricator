@@ -24,7 +24,7 @@ final class ConduitAPI_releeph_getbranches_Method
   protected function execute(ConduitAPIRequest $request) {
     $results = array();
 
-    $projects = id(new ReleephProjectQuery())
+    $projects = id(new ReleephProductQuery())
       ->setViewer($request->getUser())
       ->withActive(1)
       ->execute();
