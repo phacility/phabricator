@@ -3,9 +3,21 @@
 final class PhabricatorTokenGivenEditor
   extends PhabricatorEditor {
 
+  private $contentSource;
+
+  public function setContentSource(PhabricatorContentSource $content_source) {
+    $this->contentSource = $content_source;
+    return $this;
+  }
+
+  public function getContentSource() {
+    return $this->contentSource;
+  }
+
   public function addToken($object_phid, $token_phid) {
     $token = $this->validateToken($token_phid);
     $object = $this->validateObject($object_phid);
+    $current_token = $this->loadCurrentToken($object);
 
     $actor = $this->requireActor();
 
@@ -16,7 +28,9 @@ final class PhabricatorTokenGivenEditor
 
     $token_given->openTransaction();
 
-      $this->executeDeleteToken($object);
+      if ($current_token) {
+        $this->executeDeleteToken($object, $current_token);
+      }
 
       $token_given->save();
 
@@ -28,6 +42,16 @@ final class PhabricatorTokenGivenEditor
         $object->getPHID());
 
     $token_given->saveTransaction();
+
+    $current_token_phid = null;
+    if ($current_token) {
+      $current_token_phid = $current_token->getTokenPHID();
+    }
+
+    $this->publishTransaction(
+      $object,
+      $current_token_phid,
+      $token->getPHID());
 
     $subscribed_phids = $object->getUsersToNotifyOfTokenGiven();
     if ($subscribed_phids) {
@@ -57,22 +81,23 @@ final class PhabricatorTokenGivenEditor
 
   public function deleteToken($object_phid) {
     $object = $this->validateObject($object_phid);
-    return $this->executeDeleteToken($object);
-  }
-
-  private function executeDeleteToken($object) {
-    $actor = $this->requireActor();
-
-    $token_given = id(new PhabricatorTokenGiven())->loadOneWhere(
-      'authorPHID = %s AND objectPHID = %s',
-      $actor->getPHID(),
-      $object->getPHID());
+    $token_given = $this->loadCurrentToken($object);
     if (!$token_given) {
       return;
     }
 
-    $token_given->openTransaction();
+    $this->executeDeleteToken($object, $token_given);
+    $this->publishTransaction(
+      $object,
+      $token_given->getTokenPHID(),
+      null);
+  }
 
+  private function executeDeleteToken(
+    PhabricatorTokenReceiverInterface $object,
+    PhabricatorTokenGiven $token_given) {
+
+    $token_given->openTransaction();
       $token_given->delete();
 
       queryfx(
@@ -81,21 +106,20 @@ final class PhabricatorTokenGivenEditor
           ON DUPLICATE KEY UPDATE tokenCount = tokenCount - 1',
         id(new PhabricatorTokenCount())->getTableName(),
         $object->getPHID());
-
     $token_given->saveTransaction();
   }
 
   private function validateToken($token_phid) {
-    $tokens = id(new PhabricatorTokenQuery())
+    $token = id(new PhabricatorTokenQuery())
       ->setViewer($this->requireActor())
       ->withPHIDs(array($token_phid))
-      ->execute();
+      ->executeOne();
 
-    if (empty($tokens)) {
-      throw new Exception("No such token!");
+    if (!$token) {
+      throw new Exception(pht('No such token "%s"!', $token_phid));
     }
 
-    return head($tokens);
+    return $token;
   }
 
   private function validateObject($object_phid) {
@@ -105,10 +129,46 @@ final class PhabricatorTokenGivenEditor
       ->executeOne();
 
     if (!$object) {
-      throw new Exception("No such object!");
+      throw new Exception(pht('No such object "%s"!', $object_phid));
     }
 
     return $object;
+  }
+
+  private function loadCurrentToken(PhabricatorTokenReceiverInterface $object) {
+    return id(new PhabricatorTokenGiven())->loadOneWhere(
+      'authorPHID = %s AND objectPHID = %s',
+      $this->requireActor()->getPHID(),
+      $object->getPHID());
+  }
+
+
+  private function publishTransaction(
+    PhabricatorTokenReceiverInterface $object,
+    $old_token_phid,
+    $new_token_phid) {
+
+    if (!($object instanceof PhabricatorApplicationTransactionInterface)) {
+      return;
+    }
+
+    $actor = $this->requireActor();
+
+    $xactions = array();
+    $xactions[] = id($object->getApplicationTransactionTemplate())
+      ->setTransactionType(PhabricatorTransactions::TYPE_TOKEN)
+      ->setOldValue($old_token_phid)
+      ->setNewValue($new_token_phid);
+
+    $editor = $object->getApplicationTransactionEditor()
+      ->setActor($actor)
+      ->setContentSource($this->getContentSource())
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true);
+
+    $editor->applyTransactions(
+      $object->getApplicationTransactionObject(),
+      $xactions);
   }
 
 }

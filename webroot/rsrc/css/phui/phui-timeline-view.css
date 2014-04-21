@@ -127,6 +127,7 @@
 
 .phui-timeline-view .phui-icon-view.phui-timeline-token {
   vertical-align: middle;
+  margin-right: 4px;
 }
 
 .phui-timeline-token.strikethrough {

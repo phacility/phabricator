@@ -53,7 +53,7 @@ abstract class PhabricatorApplicationTransaction
   public function shouldGenerateOldValue() {
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_BUILDABLE:
-        return false;
+      case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         return false;
     }
@@ -236,6 +236,8 @@ abstract class PhabricatorApplicationTransaction
           $phids[] = array($new);
         }
         break;
+      case PhabricatorTransactions::TYPE_TOKEN:
+        break;
       case PhabricatorTransactions::TYPE_BUILDABLE:
         $phid = $this->getMetadataValue('harbormaster:buildablePHID');
         if ($phid) {
@@ -335,9 +337,31 @@ abstract class PhabricatorApplicationTransaction
         return 'link';
       case PhabricatorTransactions::TYPE_BUILDABLE:
         return 'wrench';
+      case PhabricatorTransactions::TYPE_TOKEN:
+        if ($this->getNewValue()) {
+          return 'like';
+        } else {
+          return 'dislike';
+        }
     }
 
     return 'edit';
+  }
+
+  public function getToken() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_TOKEN:
+        $old = $this->getOldValue();
+        $new = $this->getNewValue();
+        if ($new) {
+          $icon = substr($new, 10);
+        } else {
+          $icon = substr($old, 10);
+        }
+        return array($icon, !$this->getNewValue());
+    }
+
+    return array(null, null);
   }
 
   public function getColor() {
@@ -400,6 +424,8 @@ abstract class PhabricatorApplicationTransaction
 
   public function shouldHideForMail(array $xactions) {
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_TOKEN:
+        return true;
       case PhabricatorTransactions::TYPE_BUILDABLE:
         switch ($this->getNewValue()) {
           case HarbormasterBuildable::STATUS_PASSED:
@@ -414,6 +440,11 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function shouldHideForFeed() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_TOKEN:
+        return true;
+    }
+
     return $this->shouldHide();
   }
 
@@ -565,6 +596,21 @@ abstract class PhabricatorApplicationTransaction
         } else {
           return pht(
             '%s edited a custom field.',
+            $this->renderHandleLink($author_phid));
+        }
+
+      case PhabricatorTransactions::TYPE_TOKEN:
+        if ($old && $new) {
+          return pht(
+            '%s updated a token.',
+            $this->renderHandleLink($author_phid));
+        } else if ($old) {
+          return pht(
+            '%s rescinded a token.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s awarded a token.',
             $this->renderHandleLink($author_phid));
         }
 

@@ -36,3 +36,23 @@ interface PhabricatorApplicationTransactionInterface {
   public function getApplicationTransactionTemplate();
 
 }
+
+// TEMPLATE IMPLEMENTATION /////////////////////////////////////////////////////
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+/*
+
+  public function getApplicationTransactionEditor() {
+    return new <<<???>>>Editor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new <<<???>>>Transaction();
+  }
+
+*/

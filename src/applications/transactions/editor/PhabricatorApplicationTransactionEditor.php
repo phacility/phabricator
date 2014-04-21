@@ -159,6 +159,10 @@ abstract class PhabricatorApplicationTransactionEditor
       $types[] = PhabricatorTransactions::TYPE_BUILDABLE;
     }
 
+    if ($this->object instanceof PhabricatorTokenReceiverInterface) {
+      $types[] = PhabricatorTransactions::TYPE_TOKEN;
+    }
+
     return $types;
   }
 
@@ -227,6 +231,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
       case PhabricatorTransactions::TYPE_BUILDABLE:
+      case PhabricatorTransactions::TYPE_TOKEN:
         return $xaction->getNewValue();
       case PhabricatorTransactions::TYPE_EDGE:
         return $this->getEdgeTransactionNewValue($xaction);
@@ -317,6 +322,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorTransactions::TYPE_BUILDABLE:
+      case PhabricatorTransactions::TYPE_TOKEN:
         return;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
         $object->setViewPolicy($xaction->getNewValue());
@@ -337,6 +343,7 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
       case PhabricatorTransactions::TYPE_BUILDABLE:
+      case PhabricatorTransactions::TYPE_TOKEN:
         return;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         $subeditor = id(new PhabricatorSubscriptionsEditor())

@@ -317,6 +317,11 @@ class PhabricatorApplicationTransactionView extends AphrontView {
       ->setIcon($xaction->getIcon())
       ->setColor($xaction->getColor());
 
+    list($token, $token_removed) = $xaction->getToken();
+    if ($token) {
+      $event->setToken($token, $token_removed);
+    }
+
     if (!$this->shouldSuppressTitle($xaction, $group)) {
       $title = $xaction->getTitle();
       if ($xaction->hasChangeDetails()) {
