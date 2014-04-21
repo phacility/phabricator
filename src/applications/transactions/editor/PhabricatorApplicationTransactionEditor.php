@@ -2022,6 +2022,11 @@ abstract class PhabricatorApplicationTransactionEditor
     array $mailed_phids) {
 
     $xactions = mfilter($xactions, 'shouldHideForFeed', true);
+
+    if (!$xactions) {
+      return;
+    }
+
     $related_phids = $this->getFeedRelatedPHIDs($object, $xactions);
     $subscribed_phids = $this->getFeedNotifyPHIDs($object, $xactions);
 
