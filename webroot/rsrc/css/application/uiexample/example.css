@@ -13,14 +13,6 @@
   font-weight: bold;
 }
 
-.phabricator-ui-example-header {
-  margin: 1em 2em 2em;
-}
-
-.phabricator-ui-example-description {
-  margin: 1em 0;
-}
-
 .jxui-example-container {
   padding: 2em;
   margin: 4em auto;
