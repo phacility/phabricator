@@ -1,13 +1,14 @@
 <?php
 
-/**
- * @group conduit
- */
 final class PhabricatorConduitListController
   extends PhabricatorConduitController
   implements PhabricatorApplicationSearchResultsControllerInterface {
 
   private $queryKey;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
 
   public function willProcessRequest(array $data) {
     $this->queryKey = idx($data, 'queryKey');

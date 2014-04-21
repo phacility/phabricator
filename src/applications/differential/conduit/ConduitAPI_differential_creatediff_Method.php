@@ -1,6 +1,7 @@
 <?php
 
-final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
+final class ConduitAPI_differential_creatediff_Method
+  extends ConduitAPI_differential_Method {
 
   public function getMethodDescription() {
     return "Create a new Differential diff.";

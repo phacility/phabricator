@@ -1,7 +1,7 @@
 <?php
 
 final class ConduitAPI_differential_getcommitmessage_Method
-  extends ConduitAPIMethod {
+  extends ConduitAPI_differential_Method {
 
   public function getMethodDescription() {
     return "Retrieve Differential commit messages or message templates.";

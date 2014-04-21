@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 abstract class ConduitAPI_user_Method extends ConduitAPIMethod {
 
   public function getApplication() {

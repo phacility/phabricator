@@ -1,16 +1,19 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_user_removestatus_Method extends ConduitAPI_user_Method {
 
   public function getMethodStatus() {
-    return self::METHOD_STATUS_UNSTABLE;
+    return self::METHOD_STATUS_DEPRECATED;
   }
 
   public function getMethodDescription() {
-    return "Delete status information of the logged-in user.";
+    return pht("Delete status information of the logged-in user.");
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'Statuses are becoming full-fledged events as part of the '.
+      'Calendar application.');
   }
 
   public function defineParamTypes() {

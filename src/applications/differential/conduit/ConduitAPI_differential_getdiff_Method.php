@@ -1,10 +1,7 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_differential_getdiff_Method
-  extends ConduitAPIMethod {
+  extends ConduitAPI_differential_Method {
 
   public function shouldAllowPublic() {
     return true;
