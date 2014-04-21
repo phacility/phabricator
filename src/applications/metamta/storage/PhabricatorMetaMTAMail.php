@@ -231,15 +231,6 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this->getParam('is-error', false);
   }
 
-  public function getWorkerTaskID() {
-    return $this->getParam('worker-task');
-  }
-
-  public function setWorkerTaskID($id) {
-    $this->setParam('worker-task', $id);
-    return $this;
-  }
-
   public function getToPHIDs() {
     return $this->getParam('to', array());
   }
@@ -304,16 +295,13 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
     $this->openTransaction();
       // Save to generate a task ID.
-      parent::save();
+      $result = parent::save();
 
       // Queue a task to send this mail.
       $mailer_task = PhabricatorWorker::scheduleTask(
         'PhabricatorMetaMTAWorker',
         $this->getID());
 
-      // Save again to update the task ID.
-      $this->setWorkerTaskID($mailer_task->getID());
-      $result = parent::save();
     $this->saveTransaction();
 
     return $result;
@@ -624,30 +612,41 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         $mailer->addCCs($add_cc);
       }
     } catch (Exception $ex) {
-      $this->setStatus(self::STATUS_FAIL);
-      $this->setMessage($ex->getMessage());
-      return $this->save();
+      $this
+        ->setStatus(self::STATUS_FAIL)
+        ->setMessage($ex->getMessage())
+        ->save();
+
+      throw $ex;
     }
 
     try {
       $ok = $mailer->send();
-      $error = null;
-    } catch (PhabricatorMetaMTAPermanentFailureException $ex) {
-      $this->setStatus(self::STATUS_FAIL);
-      $this->setMessage($ex->getMessage());
-      return $this->save();
-    } catch (Exception $ex) {
-      $ok = false;
-      $error = $ex->getMessage()."\n".$ex->getTraceAsString();
-    }
+      if (!$ok) {
+        // TODO: At some point, we should clean this up and make all mailers
+        // throw.
+        throw new Exception(
+          pht('Mail adapter encountered an unexpected, unspecified failure.'));
+      }
 
-    if (!$ok) {
-      $this->setMessage($error);
-    } else {
       $this->setStatus(self::STATUS_SENT);
-    }
+      $this->save();
 
-    return $this->save();
+      return $this;
+    } catch (PhabricatorMetaMTAPermanentFailureException $ex) {
+      $this
+        ->setStatus(self::STATUS_FAIL)
+        ->setMessage($ex->getMessage())
+        ->save();
+
+      throw $ex;
+    } catch (Exception $ex) {
+      $this
+        ->setMessage($ex->getMessage()."\n".$ex->getTraceAsString())
+        ->save();
+
+      throw $ex;
+    }
   }
 
   public static function getReadableStatus($status_code) {

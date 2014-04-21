@@ -30,7 +30,11 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
 
     $mailer = new PhabricatorMailImplementationTestAdapter();
     $mailer->setFailTemporarily(true);
-    $mail->sendNow($force = true, $mailer);
+    try {
+      $mail->sendNow($force = true, $mailer);
+    } catch (Exception $ex) {
+      // Ignore.
+    }
     $this->assertEqual(
       PhabricatorMetaMTAMail::STATUS_QUEUE,
       $mail->getStatus());
@@ -42,7 +46,11 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
 
     $mailer = new PhabricatorMailImplementationTestAdapter();
     $mailer->setFailPermanently(true);
-    $mail->sendNow($force = true, $mailer);
+    try {
+      $mail->sendNow($force = true, $mailer);
+    } catch (Exception $ex) {
+      // Ignore.
+    }
     $this->assertEqual(
       PhabricatorMetaMTAMail::STATUS_FAIL,
       $mail->getStatus());
