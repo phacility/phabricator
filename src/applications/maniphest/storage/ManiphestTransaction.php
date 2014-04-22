@@ -263,7 +263,7 @@ final class ManiphestTransaction
         }
 
         if (ManiphestTaskStatus::isClosedStatus($new)) {
-          return 'fa-check-square-o';
+          return 'fa-check';
         } else {
           return 'fa-pencil';
         }
@@ -280,7 +280,6 @@ final class ManiphestTransaction
       case self::TYPE_PRIORITY:
         if ($old == ManiphestTaskPriority::getDefaultPriority()) {
           return 'fa-arrow-right';
-          return pht('Triaged');
         } else if ($old > $new) {
           return 'fa-arrow-down';
         } else {

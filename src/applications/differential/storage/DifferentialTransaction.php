@@ -351,11 +351,11 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
       case self::TYPE_ACTION:
         switch ($this->getNewValue()) {
           case DifferentialAction::ACTION_CLOSE:
-            return 'fa-check-square-o';
-          case DifferentialAction::ACTION_ACCEPT:
             return 'fa-check';
+          case DifferentialAction::ACTION_ACCEPT:
+            return 'fa-check-circle';
           case DifferentialAction::ACTION_REJECT:
-            return 'fa-times';
+            return 'fa-times-circle';
           case DifferentialAction::ACTION_ABANDON:
             return 'fa-plane';
           case DifferentialAction::ACTION_RETHINK:

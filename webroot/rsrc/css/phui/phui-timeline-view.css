@@ -190,23 +190,19 @@
   background-color: {$lightblueborder};
   top: 0;
   left: 0;
+  text-align: center;
 }
 
-.phui-timeline-icon {
-  position: absolute;
-  left: 9px;
-  top: -5px;
+.phui-icon-view.phui-timeline-icon:before {
+  position: relative;
+  top: 4px;
+  margin: 0;
 }
 
 .phui-timeline-minor-event .phui-timeline-icon-fill {
   height: 26px;
   width: 26px;
   border-radius: 3px;
-}
-
-.phui-timeline-minor-event .phui-timeline-icon {
-  top: -5px;
-  left: 7px;
 }
 
 .phui-timeline-extra,
