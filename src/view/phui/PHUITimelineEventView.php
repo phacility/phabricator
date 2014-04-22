@@ -175,18 +175,16 @@ final class PHUITimelineEventView extends AphrontView {
           $fill_classes[] = 'phui-timeline-icon-fill-'.$this->color;
         }
 
+        $icon = id(new PHUIIconView())
+          ->setIconFont($this->icon.' white')
+          ->addClass('phui-timeline-icon');
+
         $icon = phutil_tag(
           'span',
           array(
             'class' => implode(' ', $fill_classes),
           ),
-          phutil_tag(
-            'span',
-            array(
-              'class' => 'phui-timeline-icon sprite-icons '.
-                         'icons-'.$this->icon.'-white',
-            ),
-            ''));
+          $icon);
       }
 
       $token = null;

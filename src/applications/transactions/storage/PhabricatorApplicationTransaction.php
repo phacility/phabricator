@@ -326,26 +326,26 @@ abstract class PhabricatorApplicationTransaction
   public function getIcon() {
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_COMMENT:
-        return 'comment';
+        return 'fa-comment';
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-        return 'message';
+        return 'fa-envelope';
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
-        return 'lock';
+        return 'fa-lock';
       case PhabricatorTransactions::TYPE_EDGE:
-        return 'link';
+        return 'fa-link';
       case PhabricatorTransactions::TYPE_BUILDABLE:
-        return 'wrench';
+        return 'fa-wrench';
       case PhabricatorTransactions::TYPE_TOKEN:
         if ($this->getNewValue()) {
-          return 'like';
+          return 'fa-thumbs-o-up';
         } else {
-          return 'dislike';
+          return 'fa-thumbs-o-down';
         }
     }
 
-    return 'edit';
+    return 'fa-pencil';
   }
 
   public function getToken() {

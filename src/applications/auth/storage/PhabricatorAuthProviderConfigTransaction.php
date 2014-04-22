@@ -41,9 +41,9 @@ final class PhabricatorAuthProviderConfigTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_ENABLE:
         if ($new) {
-          return 'new';
+          return 'fa-play';
         } else {
-          return 'delete';
+          return 'fa-pause';
         }
     }
 

@@ -37,9 +37,9 @@ final class ReleephProductTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_ACTIVE:
         if ($new) {
-          return 'edit';
+          return 'fa-pencil';
         } else {
-          return 'delete';
+          return 'fa-times';
         }
         break;
     }

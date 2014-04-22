@@ -57,9 +57,9 @@ final class HeraldRuleTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_DISABLE:
         if ($new) {
-          return 'disable';
+          return 'fa-pause';
         } else {
-          return 'enable';
+          return 'fa-play';
         }
     }
 

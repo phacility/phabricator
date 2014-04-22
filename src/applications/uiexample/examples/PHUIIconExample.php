@@ -423,15 +423,14 @@ final class PHUIIconExample extends PhabricatorUIExample {
     foreach ($colors as $color) {
       $cicons[] = id(new PHUIIconView())
         ->addClass('phui-example-icon-transform')
-        ->setFontAwesome('fa-tag '.$color)
+        ->setIconFont('fa-tag '.$color)
         ->setText(pht('fa-tag %s', $color));
     }
     $ficons = array();
     foreach ($fas as $fa) {
-
       $ficons[] = id(new PHUIIconView())
         ->addClass('phui-example-icon-name')
-        ->setFontAwesome($fa)
+        ->setIconFont($fa)
         ->setText($fa);
     }
 

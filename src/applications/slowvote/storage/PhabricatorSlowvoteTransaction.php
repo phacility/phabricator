@@ -85,10 +85,16 @@ final class PhabricatorSlowvoteTransaction
 
     switch ($this->getTransactionType()) {
       case PhabricatorSlowvoteTransaction::TYPE_QUESTION:
+        if ($old === null) {
+          return 'fa-plus';
+        } else {
+          return 'fa-pencil';
+        }
       case PhabricatorSlowvoteTransaction::TYPE_DESCRIPTION:
       case PhabricatorSlowvoteTransaction::TYPE_RESPONSES:
+        return 'fa-pencil';
       case PhabricatorSlowvoteTransaction::TYPE_SHUFFLE:
-        return 'edit';
+        return 'fa-refresh';
     }
 
     return parent::getIcon();

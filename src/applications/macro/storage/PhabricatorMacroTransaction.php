@@ -255,21 +255,21 @@ final class PhabricatorMacroTransaction
 
     switch ($this->getTransactionType()) {
       case PhabricatorMacroTransactionType::TYPE_NAME:
-        return 'edit';
+        return 'fa-pencil';
       case PhabricatorMacroTransactionType::TYPE_FILE:
         if ($old === null) {
-          return 'create';
+          return 'fa-plus';
         } else {
-          return 'edit';
+          return 'fa-pencil';
         }
       case PhabricatorMacroTransactionType::TYPE_DISABLED:
         if ($new) {
-          return 'delete';
+          return 'fa-times';
         } else {
-          return 'undo';
+          return 'fa-undo';
         }
       case PhabricatorMacroTransactionType::TYPE_AUDIO:
-        return 'herald';
+        return 'fa-headphones';
     }
 
     return parent::getIcon();

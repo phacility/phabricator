@@ -37,7 +37,7 @@ final class HarbormasterBuildStepTransaction
 
     switch ($this->getTransactionType()) {
       case self::TYPE_CREATE:
-        return 'create';
+        return 'fa-plus';
     }
 
     return parent::getIcon();

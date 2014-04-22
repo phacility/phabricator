@@ -44,11 +44,11 @@ final class PhabricatorPasteTransaction
   public function getIcon() {
     switch ($this->getTransactionType()) {
       case self::TYPE_CREATE:
-        return 'create';
+        return 'fa-plus';
         break;
       case self::TYPE_TITLE:
       case self::TYPE_LANGUAGE:
-        return 'edit';
+        return 'fa-pencil';
         break;
     }
     return parent::getIcon();
