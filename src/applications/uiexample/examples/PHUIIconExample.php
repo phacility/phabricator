@@ -10,211 +10,6 @@ final class PHUIIconExample extends PhabricatorUIExample {
     return 'Easily render icons or images with links and sprites.';
   }
 
-  private function listHalflings() {
-    return array (
-      'gh-glass',
-      'gh-music',
-      'gh-search',
-      'gh-envelope',
-      'gh-heart',
-      'gh-star',
-      'gh-star-empty',
-      'gh-user',
-      'gh-film',
-      'gh-th-large',
-      'gh-th',
-      'gh-th-list',
-      'gh-ok',
-      'gh-remove',
-      'gh-zoom-in',
-      'gh-zoom-out',
-      'gh-off',
-      'gh-signal',
-      'gh-cog',
-      'gh-trash',
-      'gh-home',
-      'gh-file',
-      'gh-time',
-      'gh-road',
-      'gh-download-alt',
-      'gh-download',
-      'gh-upload',
-      'gh-inbox',
-      'gh-play-circle',
-      'gh-repeat',
-      'gh-refresh',
-      'gh-list-alt',
-      'gh-lock',
-      'gh-flag',
-      'gh-headphones',
-      'gh-volume-off',
-      'gh-volume-down',
-      'gh-volume-up',
-      'gh-qrcode',
-      'gh-barcode',
-      'gh-tag',
-      'gh-tags',
-      'gh-book',
-      'gh-bookmark',
-      'gh-print',
-      'gh-camera',
-      'gh-font',
-      'gh-bold',
-      'gh-italic',
-      'gh-text-height',
-      'gh-text-width',
-      'gh-align-left',
-      'gh-align-center',
-      'gh-align-right',
-      'gh-align-justify',
-      'gh-list',
-      'gh-indent-left',
-      'gh-indent-right',
-      'gh-facetime-video',
-      'gh-picture',
-      'gh-pencil',
-      'gh-map-marker',
-      'gh-adjust',
-      'gh-tint',
-      'gh-edit',
-      'gh-share',
-      'gh-check',
-      'gh-move',
-      'gh-step-backward',
-      'gh-fast-backward',
-      'gh-backward',
-      'gh-play',
-      'gh-pause',
-      'gh-stop',
-      'gh-forward',
-      'gh-fast-forward',
-      'gh-step-forward',
-      'gh-eject',
-      'gh-chevron-left',
-      'gh-chevron-right',
-      'gh-plus-sign',
-      'gh-minus-sign',
-      'gh-remove-sign',
-      'gh-ok-sign',
-      'gh-question-sign',
-      'gh-info-sign',
-      'gh-screenshot',
-      'gh-remove-circle',
-      'gh-ok-circle',
-      'gh-ban-circle',
-      'gh-arrow-left',
-      'gh-arrow-right',
-      'gh-arrow-up',
-      'gh-arrow-down',
-      'gh-share-alt',
-      'gh-resize-full',
-      'gh-resize-small',
-      'gh-plus',
-      'gh-minus',
-      'gh-asterisk',
-      'gh-exclamation-sign',
-      'gh-gift',
-      'gh-leaf',
-      'gh-fire',
-      'gh-eye-open',
-      'gh-eye-close',
-      'gh-warning-sign',
-      'gh-plane',
-      'gh-calendar',
-      'gh-random',
-      'gh-comments',
-      'gh-magnet',
-      'gh-chevron-up',
-      'gh-chevron-down',
-      'gh-retweet',
-      'gh-shopping-cart',
-      'gh-folder-close',
-      'gh-folder-open',
-      'gh-resize-vertical',
-      'gh-resize-horizontal',
-      'gh-hdd',
-      'gh-bullhorn',
-      'gh-bell',
-      'gh-certificate',
-      'gh-thumbs-up',
-      'gh-thumbs-down',
-      'gh-hand-right',
-      'gh-hand-left',
-      'gh-hand-top',
-      'gh-hand-down',
-      'gh-circle-arrow-right',
-      'gh-circle-arrow-left',
-      'gh-circle-arrow-top',
-      'gh-circle-arrow-down',
-      'gh-globe',
-      'gh-wrench',
-      'gh-tasks',
-      'gh-filter',
-      'gh-briefcase',
-      'gh-fullscreen',
-      'gh-dashboard',
-      'gh-paperclip',
-      'gh-heart-empty',
-      'gh-link',
-      'gh-phone',
-      'gh-pushpin',
-      'gh-euro',
-      'gh-usd',
-      'gh-gbp',
-      'gh-sort',
-      'gh-sort-by-alphabet',
-      'gh-sort-by-alphabet-alt',
-      'gh-sort-by-order',
-      'gh-sort-by-order-alt',
-      'gh-sort-by-attributes',
-      'gh-sort-by-attributes-alt',
-      'gh-unchecked',
-      'gh-expand',
-      'gh-collapse',
-      'gh-collapse-top',
-      'gh-log_in',
-      'gh-flash',
-      'gh-log_out',
-      'gh-new_window',
-      'gh-record',
-      'gh-save',
-      'gh-open',
-      'gh-saved',
-      'gh-import',
-      'gh-export',
-      'gh-send',
-      'gh-floppy_disk',
-      'gh-floppy_saved',
-      'gh-floppy_remove',
-      'gh-floppy_save',
-      'gh-floppy_open',
-      'gh-credit_card',
-      'gh-transfer',
-      'gh-cutlery',
-      'gh-header',
-      'gh-compressed',
-      'gh-earphone',
-      'gh-phone_alt',
-      'gh-tower',
-      'gh-stats',
-      'gh-sd_video',
-      'gh-hd_video',
-      'gh-subtitles',
-      'gh-sound_stereo',
-      'gh-sound_dolby',
-      'gh-sound_5_1',
-      'gh-sound_6_1',
-      'gh-sound_7_1',
-      'gh-copyright_mark',
-      'gh-registration_mark',
-      'gh-cloud',
-      'gh-cloud_download',
-      'gh-cloud_upload',
-      'gh-tree_conifer',
-      'gh-tree_deciduous',
-    );
-  }
-
   private function listFontAwesome() {
     return array(
       'fa-glass',
@@ -622,22 +417,14 @@ final class PHUIIconExample extends PhabricatorUIExample {
 
     $colors = $this->listColors();
     $trans = $this->listTransforms();
-    $glyphs = $this->listHalflings();
     $fas = $this->listFontAwesome();
 
-    $gicons = array();
-    foreach ($glyphs as $glyph) {
-      $gicons[] = id(new PHUIIconView())
-        ->addClass('phui-example-icon-name')
-        ->setHalfling($glyph)
-        ->setText($glyph);
-    }
     $cicons = array();
     foreach ($colors as $color) {
       $cicons[] = id(new PHUIIconView())
         ->addClass('phui-example-icon-transform')
-        ->setHalfling('gh-tag '.$color)
-        ->setText(pht('gh-tag %s', $color));
+        ->setFontAwesome('fa-tag '.$color)
+        ->setText(pht('fa-tag %s', $color));
     }
     $ficons = array();
     foreach ($fas as $fa) {
@@ -750,10 +537,6 @@ final class PHUIIconExample extends PhabricatorUIExample {
           ->addClass(PHUI::MARGIN_SMALL_RIGHT);
     }
 
-    $layout_gicons = id(new PHUIBoxView())
-      ->appendChild($gicons)
-      ->addMargin(PHUI::MARGIN_LARGE);
-
     $layout_cicons = id(new PHUIBoxView())
       ->appendChild($cicons)
       ->addMargin(PHUI::MARGIN_LARGE);
@@ -785,10 +568,6 @@ final class PHUIIconExample extends PhabricatorUIExample {
     $layout5 = id(new PHUIBoxView())
       ->appendChild($loginview)
       ->addMargin(PHUI::MARGIN_MEDIUM);
-
-    $halflings = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Glyphicon Halflings'))
-      ->appendChild($layout_gicons);
 
     $fontawesome = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Font Awesome'))
@@ -824,7 +603,6 @@ final class PHUIIconExample extends PhabricatorUIExample {
           'class' => 'phui-icon-example',
         ),
         array(
-          $halflings,
           $fontawesome,
           $transforms,
           $wrap1,
