@@ -370,6 +370,11 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
           case DifferentialAction::ACTION_CLAIM:
             return 'fa-flag';
         }
+      case PhabricatorTransactions::TYPE_EDGE:
+        switch ($this->getMetadataValue('edge:type')) {
+          case PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER:
+            return 'fa-user';
+        }
     }
 
     return parent::getIcon();
