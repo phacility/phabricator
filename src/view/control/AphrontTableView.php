@@ -296,6 +296,34 @@ final class AphrontTableView extends AphrontView {
     return phutil_tag_div('aphront-table-wrap', $html);
   }
 
+  public static function renderAuditStatus($audit_status) {
+
+    if ($audit_status == 'accepted') {
+      $color = 'green';
+    } else if ($audit_status == 'concerned') {
+      $color = 'red';
+    } else {
+      $color = 'white';
+      $audit_status = 'open';
+    }
+
+    return phutil_tag(
+      'span',
+        array(
+          'class' => 'phui-tag-view phui-tag-type-state',
+        ),
+        array(
+          phutil_tag(
+            'span',
+            array(
+              'class' => 'phui-tag-core phui-tag-color-' . $color
+            ),
+            $audit_status),
+          "\xC2\xA0",
+        )
+    );
+  }
+
   public static function renderSingleDisplayLine($line) {
 
     // TODO: Is there a cleaner way to do this? We use a relative div with
