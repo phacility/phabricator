@@ -94,59 +94,11 @@ final class ReleephBranch extends ReleephDAO
 
   public function getURI($path = null) {
     $components = array(
-      '/releeph',
-      rawurlencode($this->loadReleephProject()->getName()),
-      rawurlencode($this->getBasename()),
-      $path
+      '/releeph/branch',
+      $this->getID(),
+      $path,
     );
     return implode('/', $components);
-  }
-
-  public function loadReleephProject() {
-    return $this->loadOneRelative(
-      new ReleephProject(),
-      'id',
-      'getReleephProjectID');
-  }
-
-  private function loadReleephRequestHandles(PhabricatorUser $user, $reqs) {
-    $phids_to_phetch = array();
-    foreach ($reqs as $rr) {
-      $phids_to_phetch[] = $rr->getRequestCommitPHID();
-      $phids_to_phetch[] = $rr->getRequestUserPHID();
-      $phids_to_phetch[] = $rr->getCommitPHID();
-
-      $intents = $rr->getUserIntents();
-      if ($intents) {
-        foreach ($intents as $user_phid => $intent) {
-          $phids_to_phetch[] = $user_phid;
-        }
-      }
-
-      $request_commit = $rr->loadPhabricatorRepositoryCommit();
-      if ($request_commit) {
-        $phids_to_phetch[] = $request_commit->getAuthorPHID();
-        $phids_to_phetch[] = $rr->loadRequestCommitDiffPHID();
-      }
-    }
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($user)
-      ->withPHIDs($phids_to_phetch)
-      ->execute();
-    return $handles;
-  }
-
-  public function populateReleephRequestHandles(PhabricatorUser $user, $reqs) {
-    $handles = $this->loadReleephRequestHandles($user, $reqs);
-    foreach ($reqs as $req) {
-      $req->setHandles($handles);
-    }
-  }
-
-  public function loadReleephRequests(PhabricatorUser $user) {
-    $reqs = $this->loadRelatives(new ReleephRequest(), 'branchID');
-    $this->populateReleephRequestHandles($user, $reqs);
-    return $reqs;
   }
 
   public function isActive() {

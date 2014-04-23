@@ -193,6 +193,7 @@ final class PhabricatorProjectBoardViewController
 
     $board_box = id(new PHUIBoxView())
       ->appendChild($board)
+      ->addClass('project-board-wrapper')
       ->addMargin(PHUI::MARGIN_LARGE);
 
     return $this->buildApplicationPage(

@@ -15,7 +15,6 @@ final class PhrictionMoveController
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
     if ($this->id) {
       $document = id(new PhrictionDocument())->load($this->id);
@@ -114,9 +113,6 @@ final class PhrictionMoveController
         ->setErrors($errors);
     }
 
-    $descr_caption = $is_serious ? pht('A reason for the move.') :
-      pht('You better give a good reason for this.');
-
     $form = id(new PHUIFormLayoutView())
       ->setUser($user)
       ->appendChild(
@@ -135,8 +131,7 @@ final class PhrictionMoveController
           ->setLabel(pht('Edit Notes'))
           ->setValue($content->getDescription())
           ->setError(null)
-          ->setName('description')
-          ->setCaption($descr_caption));
+          ->setName('description'));
 
     $dialog = id(new AphrontDialogView())
       ->setUser($user)

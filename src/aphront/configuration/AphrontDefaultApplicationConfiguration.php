@@ -103,8 +103,6 @@ class AphrontDefaultApplicationConfiguration
       return $response;
     }
 
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-
     $user = $request->getUser();
     if (!$user) {
       // If we hit an exception very early, we won't have a user.
@@ -175,9 +173,9 @@ class AphrontDefaultApplicationConfiguration
         ->appendChild($content);
 
       if ($this->getRequest()->isAjax()) {
-        $dialog->addCancelButton('/', 'Close');
+        $dialog->addCancelButton('/', pht('Close'));
       } else {
-        $dialog->addCancelButton('/', $is_serious ? 'OK' : 'Away With Thee');
+        $dialog->addCancelButton('/', pht('OK'));
       }
 
       $response = new AphrontDialogResponse();

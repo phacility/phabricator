@@ -102,6 +102,8 @@ final class PhabricatorRepositoryDiscoveryEngine
         'Discovering commits in repository %s.',
         $repository->getCallsign()));
 
+    $this->fillCommitCache(array_values($branches));
+
     $refs = array();
     foreach ($branches as $name => $commit) {
       $this->log(pht('Examining branch "%s", at "%s".', $name, $commit));
@@ -354,6 +356,8 @@ final class PhabricatorRepositoryDiscoveryEngine
       ->setRepository($repository)
       ->execute();
 
+    $this->fillCommitCache(mpull($branches, 'getCommitIdentifier'));
+
     $refs = array();
     foreach ($branches as $branch) {
       // NOTE: Mercurial branches may have multiple heads, so the names may
@@ -473,23 +477,29 @@ final class PhabricatorRepositoryDiscoveryEngine
       return false;
     }
 
-    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-      'repositoryID = %d AND commitIdentifier = %s',
-      $this->getRepository()->getID(),
-      $identifier);
+    $this->fillCommitCache(array($identifier));
 
-    if (!$commit) {
-      return false;
+    return isset($this->commitCache[$identifier]);
+  }
+
+  private function fillCommitCache(array $identifiers) {
+    if (!$identifiers) {
+      return;
     }
 
-    $this->commitCache[$identifier] = true;
+    $commits = id(new PhabricatorRepositoryCommit())->loadAllWhere(
+      'repositoryID = %d AND commitIdentifier IN (%Ls)',
+      $this->getRepository()->getID(),
+      $identifiers);
+
+    foreach ($commits as $commit) {
+      $this->commitCache[$commit->getCommitIdentifier()] = true;
+    }
+
     while (count($this->commitCache) > self::MAX_COMMIT_CACHE_SIZE) {
       array_shift($this->commitCache);
     }
-
-    return true;
   }
-
 
   /**
    * Sort branches so we process closeable branches first. This makes the

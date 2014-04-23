@@ -10,7 +10,7 @@ final class ConduitAPI_releeph_request_Method
   public function defineParamTypes() {
     return array(
       'branchPHID'  => 'required string',
-      'things'      => 'required string',
+      'things'      => 'required list<string>',
       'fields'      => 'dict<string, string>',
     );
   }
@@ -28,19 +28,28 @@ final class ConduitAPI_releeph_request_Method
 
   protected function execute(ConduitAPIRequest $request) {
     $user = $request->getUser();
+
+    $viewer_handle = id(new PhabricatorHandleQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($user->getPHID()))
+      ->executeOne();
+
     $branch_phid = $request->getValue('branchPHID');
-    $releeph_branch = id(new ReleephBranch())
-      ->loadOneWhere('phid = %s', $branch_phid);
+    $releeph_branch = id(new ReleephBranchQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($branch_phid))
+      ->executeOne();
 
     if (!$releeph_branch) {
       throw id(new ConduitException("ERR_BRANCH"))->setErrorDescription(
         "No ReleephBranch found with PHID {$branch_phid}!");
     }
 
-    $releeph_project = $releeph_branch->loadReleephProject();
+    $releeph_project = $releeph_branch->getProduct();
 
     // Find the requested commit identifiers
     $requested_commits = array();
+    $requested_object_phids = array();
     $things = $request->getValue('things');
     $finder = id(new ReleephCommitFinder())
       ->setUser($user)
@@ -48,6 +57,11 @@ final class ConduitAPI_releeph_request_Method
     foreach ($things as $thing) {
       try {
         $requested_commits[$thing] = $finder->fromPartial($thing);
+        $object_phid = $finder->getRequestedObjectPHID();
+        if (!$object_phid) {
+          $object_phid = $requested_commits[$thing]->getPHID();
+        }
+        $requested_object_phids[$thing] = $object_phid;
       } catch (ReleephCommitFinderException $ex) {
         throw id(new ConduitException('ERR_NO_MATCHES'))
           ->setErrorDescription($ex->getMessage());
@@ -91,7 +105,8 @@ final class ConduitAPI_releeph_request_Method
         $releeph_request = id(new ReleephRequest())
           ->setRequestUserPHID($user->getPHID())
           ->setBranchID($releeph_branch->getID())
-          ->setInBranch(0);
+          ->setInBranch(0)
+          ->setRequestedObjectPHID($requested_object_phids[$thing]);
 
         $xactions = array();
 
@@ -131,15 +146,7 @@ final class ConduitAPI_releeph_request_Method
         $editor->applyTransactions($releeph_request, $xactions);
       }
 
-      $releeph_branch->populateReleephRequestHandles(
-        $user,
-        array($releeph_request));
-      $rq_handles = $releeph_request->getHandles();
-      $requestor_phid = $releeph_request->getRequestUserPHID();
-      $requestor = $rq_handles[$requestor_phid]->getName();
-
-      $url = PhabricatorEnv::getProductionURI('/RQ'.$releeph_request->getID());
-
+      $url = PhabricatorEnv::getProductionURI('/Y'.$releeph_request->getID());
       $results[$thing] = array(
         'thing'         => $thing,
         'branch'        => $releeph_branch->getDisplayNameWithDetail(),
@@ -147,7 +154,7 @@ final class ConduitAPI_releeph_request_Method
         'commitID'      => $commit->getCommitIdentifier(),
         'url'           => $url,
         'requestID'     => $releeph_request->getID(),
-        'requestor'     => $requestor,
+        'requestor'     => $viewer_handle->getName(),
         'requestTime'   => $releeph_request->getDateCreated(),
         'existing'      => $existing_releeph_request !== null,
       );

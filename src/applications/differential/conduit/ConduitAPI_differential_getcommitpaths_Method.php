@@ -1,10 +1,7 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_differential_getcommitpaths_Method
-  extends ConduitAPIMethod {
+  extends ConduitAPI_differential_Method {
 
   public function getMethodDescription() {
     return "Query which paths should be included when committing a ".

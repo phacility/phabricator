@@ -15,6 +15,8 @@ final class ReleephRequestActionController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
+    $request->validateCSRF();
+
     $pull = id(new ReleephRequestQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->requestID))
@@ -25,8 +27,6 @@ final class ReleephRequestActionController
 
     $branch = $pull->getBranch();
     $product = $branch->getProduct();
-
-    $branch->populateReleephRequestHandles($viewer, array($pull));
 
     $action = $this->action;
 
@@ -93,22 +93,37 @@ final class ReleephRequestActionController
 
     $editor->applyTransactions($pull, $xactions);
 
-    // If we're adding a new user to userIntents, we'll have to re-populate
-    // request handles to load that user's data.
-    //
-    // This is cheap enough to do every time.
-    $branch->populateReleephRequestHandles($viewer, array($pull));
+    if ($request->getBool('render')) {
+      $field_list = PhabricatorCustomField::getObjectFields(
+        $pull,
+        PhabricatorCustomField::ROLE_VIEW);
 
-    $list = id(new ReleephRequestHeaderListView())
-      ->setReleephProject($product)
-      ->setReleephBranch($branch)
-      ->setReleephRequests(array($pull))
-      ->setUser($viewer)
-      ->setAphrontRequest($request);
+      $field_list
+        ->setViewer($viewer)
+        ->readFieldsFromStorage($pull);
 
-    return id(new AphrontAjaxResponse())->setContent(
-      array(
-        'markup' => hsprintf('%s', $list->renderInner()),
-      ));
+      // TODO: This should be more modern and general.
+      $engine = id(new PhabricatorMarkupEngine())
+        ->setViewer($viewer);
+      foreach ($field_list->getFields() as $field) {
+        if ($field->shouldMarkup()) {
+          $field->setMarkupEngine($engine);
+        }
+      }
+      $engine->process();
+
+      $pull_box = id(new ReleephRequestView())
+        ->setUser($viewer)
+        ->setCustomFields($field_list)
+        ->setPullRequest($pull)
+        ->setIsListView(true);
+
+      return id(new AphrontAjaxResponse())->setContent(
+        array(
+          'markup' => hsprintf('%s', $pull_box),
+        ));
+    }
+
+    return id(new AphrontRedirectResponse())->setURI($origin_uri);
   }
 }

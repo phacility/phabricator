@@ -93,7 +93,21 @@ abstract class PhabricatorWorker {
     if (self::$runAllTasksInProcess) {
       // Do the work in-process.
       $worker = newv($task_class, array($data));
-      $worker->doWork();
+
+      while (true) {
+        try {
+          $worker->doWork();
+          break;
+        } catch (PhabricatorWorkerYieldException $ex) {
+          phlog(
+            pht(
+              'In-process task "%s" yielded for %s seconds, sleeping...',
+              $task_class,
+              $ex->getDuration()));
+
+          sleep($ex->getDuration());
+        }
+      }
 
       // Now, save a task row and immediately archive it so we can return an
       // object with a valid ID.

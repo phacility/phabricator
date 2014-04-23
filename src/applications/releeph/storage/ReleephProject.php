@@ -33,7 +33,7 @@ final class ReleephProject extends ReleephDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(ReleephPHIDTypeProject::TYPECONST);
+    return PhabricatorPHID::generateNewPHID(ReleephPHIDTypeProduct::TYPECONST);
   }
 
   public function getDetail($key, $default = null) {
@@ -42,7 +42,7 @@ final class ReleephProject extends ReleephDAO
 
   public function getURI($path = null) {
     $components = array(
-      '/releeph/project',
+      '/releeph/product',
       $this->getID(),
       $path
     );
@@ -93,14 +93,6 @@ final class ReleephProject extends ReleephDAO
 
   public function getRepository() {
     return $this->assertAttached($this->repository);
-  }
-
-  // TODO: Remove once everything uses ProjectQuery. Also, T603.
-  public function loadPhabricatorRepository() {
-    return $this->loadOneRelative(
-      new PhabricatorRepository(),
-      'phid',
-      'getRepositoryPHID');
   }
 
   public function getReleephFieldSelector() {

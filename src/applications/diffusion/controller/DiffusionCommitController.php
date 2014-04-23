@@ -764,7 +764,7 @@ final class DiffusionCommitController extends DiffusionController {
           ->setUser($user))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue($is_serious ? pht('Submit') : pht('Cook the Books')));
+          ->setValue(pht('Submit')));
 
     $header = new PHUIHeaderView();
     $header->setHeader(

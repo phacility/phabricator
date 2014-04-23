@@ -91,16 +91,16 @@ final class PonderQuestionTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
       case self::TYPE_CONTENT:
-        return 'edit';
+        return 'fa-pencil';
       case self::TYPE_STATUS:
         switch ($new) {
           case PonderQuestionStatus::STATUS_OPEN:
-            return 'enable';
+            return 'fa-check-circle';
           case PonderQuestionStatus::STATUS_CLOSED:
-            return 'disable';
+            return 'fa-minus-circle';
         }
       case self::TYPE_ANSWERS:
-        return 'new';
+        return 'fa-plus';
     }
 
     return parent::getIcon();

@@ -190,6 +190,22 @@ class PhabricatorApplicationTransactionView extends AphrontView {
       pht('(Show Details)'));
   }
 
+  private function buildExtraInformationLink(
+    PhabricatorApplicationTransaction $xaction) {
+
+    $link = $xaction->renderExtraInformationLink();
+    if (!$link) {
+      return null;
+    }
+
+    return phutil_tag(
+      'span',
+      array(
+        'class' => 'phui-timeline-extra-information',
+      ),
+      array(" \xC2\xB7  ", $link));
+  }
+
   protected function shouldGroupTransactions(
     PhabricatorApplicationTransaction $u,
     PhabricatorApplicationTransaction $v) {
@@ -301,6 +317,11 @@ class PhabricatorApplicationTransactionView extends AphrontView {
       ->setIcon($xaction->getIcon())
       ->setColor($xaction->getColor());
 
+    list($token, $token_removed) = $xaction->getToken();
+    if ($token) {
+      $event->setToken($token, $token_removed);
+    }
+
     if (!$this->shouldSuppressTitle($xaction, $group)) {
       $title = $xaction->getTitle();
       if ($xaction->hasChangeDetails()) {
@@ -313,6 +334,14 @@ class PhabricatorApplicationTransactionView extends AphrontView {
           );
         }
       }
+
+      if (!$this->isPreview) {
+        $more = $this->buildExtraInformationLink($xaction);
+        if ($more) {
+          $title = array($title, ' ', $more);
+        }
+      }
+
       $event->setTitle($title);
     }
 

@@ -5,53 +5,60 @@ Instructions for configuring Phabricator to send mail.
 
 = Overview =
 
-Phabricator can send outbound email via several different adapters:
+Phabricator can send outbound email via several different providers, called
+"Adapters".
 
-  - by running ##sendmail## on the local host with SMTP; or
-  - by running postfix on the local host with SMTP; or
-  - by using Amazon SES (Simple Email Service); or
-  - by using SendGrid's REST API; or
-  - via a custom adapter you write; or
-  - by dropping email into a hole and not delivering it.
+| Send Mail With | Setup | Cost | Inbound | Notes |
+|---------|-------|------|---------|-------|
+| Mailgun | Easy | Cheap | Yes | Recommended |
+| Amazon SES | Easy | Cheap | No | Recommended |
+| SendGrid | Easy | Cheap | Yes | |
+| External SMTP | Medium | Varies | No | Gmail, etc. |
+| Local SMTP | Hard | Free | No | (Default) sendmail, postfix, etc |
+| Custom | Hard | Free | No | Write an adapter for some other service. |
+| Drop in a Hole | Easy | Free | No | Drops mail in a deep, dark hole. |
 
-Of these, ##sendmail## is the default but requires some configuration. SES and
-SendGrid are easier, but cost money and have some limitations. Writing a custom
-solution requires digging into the code. See below for details on how to set up
-each method.
+Of these options, sending mail via local SMTP is the default, but usually
+requires some configuration to get working. See below for details on how to
+select and configure a delivery method.
 
-Phabricator can also send outbound email in two ways:
+Overall, Mailgun and SES are much easier to set up, and using one of them is
+recommended. In particular, Mailgun will also let you set up inbound email
+easily.
 
-  - immediately, when messages are generated (default); or
-  - in the background, via a daemon.
+If you have some internal mail service you'd like to use you can also
+write a custom adapter, but this requires digging into the code.
 
-Sending mail in the background requires that you be running the Phabricator
-daemons, but can greatly improve the performance of the application if your mail
-handler is slow. For more information on using daemons, see
+Phabricator sends mail in the background, so the daemons need to be running for
+it to be able to deliver mail. You should receive setup warnings if they are
+not. For more information on using daemons, see
 @{article:Managing Daemons with phd}.
 
 = Basics =
 
 Regardless of how outbound email is delivered, you should configure these keys
-in your configuration file:
+in your configuration:
 
   - **metamta.default-address** determines where mail is sent "From" by
-    default. If your domain is ##example.org##, set this to something like
-    "##noreply@example.org##".
-  - **metamta.domain** should be set to your domain, e.g. "##example.org##".
+    default. If your domain is `example.org`, set this to something like
+    `noreply@example.org`.
+  - **metamta.domain** should be set to your domain, e.g. `example.org`.
   - **metamta.can-send-as-user** should be left as ##false## in most cases,
-    but see the documentation in ##default.conf.php## for details.
+    but see the documentation for details.
 
 = Configuring Mail Adapters =
 
-To choose how mail will be sent, change the **metamta.mail-adapter** key in
-your configuration. Possible values are:
+To choose how mail will be sent, change the `metamta.mail-adapter` key in
+your configuration. Possible values are listed in the UI:
 
+  - ##PhabricatorMailImplementationAmazonMailgunAdapter##: use Mailgun, see
+    "Adapter: Mailgun".
+  - ##PhabricatorMailImplementationAmazonSESAdapter##: use Amazon SES, see
+    "Adapter: Amazon SES".
   - ##PhabricatorMailImplementationPHPMailerLiteAdapter##: default, uses
     "sendmail", see "Adapter: Sendmail".
   - ##PhabricatorMailImplementationPHPMailerAdapter##: uses SMTP, see
     "Adapter: SMTP".
-  - ##PhabricatorMailImplementationAmazonSESAdapter##: use Amazon SES, see
-    "Adapter: Amazon SES".
   - ##PhabricatorMailImplementationSendGridAdapter##: use SendGrid, see
     "Adapter: SendGrid".
   - ##Some Custom Class You Write##: use a custom adapter you write, see
@@ -64,8 +71,8 @@ your configuration. Possible values are:
 = Adapter: Sendmail =
 
 This is the default, and selected by choosing
-##PhabricatorMailImplementationPHPMailerLiteAdapter## as the value for
-**metamta.mail-adapter**. This requires a 'sendmail' binary to be installed on
+`PhabricatorMailImplementationPHPMailerLiteAdapter` as the value for
+**metamta.mail-adapter**. This requires a `sendmail` binary to be installed on
 the system. Most MTAs (e.g., sendmail, qmail, postfix) should do this, but your
 machine may not have one installed by default. For install instructions, consult
 the documentation for your favorite MTA.
@@ -74,25 +81,35 @@ Since you'll be sending the mail yourself, you are subject to things like SPF
 rules, blackholes, and MTA configuration which are beyond the scope of this
 document. If you can already send outbound email from the command line or know
 how to configure it, this option is straightforward. If you have no idea how to
-do any of this, consider using Amazon SES.
+do any of this, strongly consider using Mailgun or Amazon SES instead.
 
 = Adapter: SMTP =
 
-For most situations of using SMTP to send email, you could actually use
-'sendmail' or 'postfix' to do it. But some SMTP server requires authentication
-and the 'sendmail' mailer doesn't work. If you want to try with postfix, for
-install instructions, consult the documentation for postfix as MTA and you
-could configure to use SMTP then.
-
-To configure Phabricator to use SMTP, set these configuration keys:
+You can use this adapter to send mail via an external SMTP server, like Gmail.
+To do this, set these configuration keys:
 
   - **metamta.mail-adapter**: set to
-    "PhabricatorMailImplementationPHPMailerAdapter".
-  - **phpmailer.mailer**: set to "smtp".
-  - **phpmailer.smtp-host**: set to hostname of your smtp server.
-  - **phpmailer.smtp-port**: set to port of your smtp server.
+    `PhabricatorMailImplementationPHPMailerAdapter`.
+  - **phpmailer.mailer**: set to `smtp`.
+  - **phpmailer.smtp-host**: set to hostname of your SMTP server.
+  - **phpmailer.smtp-port**: set to port of your SMTP server.
   - **phpmailer.smtp-user**: set to your username used for authentication.
   - **phpmailer.smtp-password**: set to your password used for authentication.
+  - **phpmailer.smtp-protocol**: set to `tls` or `ssl` if necessary. Use
+    `ssl` for Gmail.
+
+= Adapter: Mailgun =
+
+Mailgun is an email delivery service. You can learn more at
+<http://www.mailgun.com>. Mailgun isn't free, but is very easy to configure
+and works well.
+
+To use Mailgun, sign up for an account, then set these configuration keys:
+
+  - **metamta.mail-adapter**: set to
+    `PhabricatorMailImplementationMailgunAdapter`.
+  - **mailgun.api-key**: set to your Mailgun API key.
+  - **mailgun.domain**: set to your Mailgun domain.
 
 = Adapter: Amazon SES =
 
@@ -112,10 +129,6 @@ NOTE: Amazon SES **requires you to verify your "From" address**. Configure which
 "From" address to use by setting "##metamta.default-address##" in your config,
 then follow the Amazon SES verification process to verify it. You won't be able
 to send email until you do this!
-
-NOTE: Amazon SES is slow to accept mail (often 1-2 seconds) and application
-performance will improve greatly if you configure outbound email to send in
-the background.
 
 = Adapter: SendGrid =
 
@@ -140,9 +153,9 @@ information easily by visiting <http://sendgrid.com/developer>.
 
 You can provide a custom adapter by writing a concrete subclass of
 @{class:PhabricatorMailImplementationAdapter} and setting it as the
-**metamta.mail-adapter**.
+`metamta.mail-adapter`.
 
-TODO: This needs to be better documented once extending Phabricator is better
+TODO: This should be better documented once extending Phabricator is better
 documented.
 
 = Adapter: Disable Outbound Mail =
@@ -150,7 +163,7 @@ documented.
 You can use the @{class:PhabricatorMailImplementationTestAdapter} to completely
 disable outbound mail, if you don't want to send mail or don't want to configure
 it yet. Just set **metamta.mail-adapter** to
-"PhabricatorMailImplementationTestAdapter".
+`PhabricatorMailImplementationTestAdapter`.
 
 = Testing and Debugging Outbound Email =
 

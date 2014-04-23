@@ -89,7 +89,7 @@ final class PhabricatorRepositoryTransaction
   public function getIcon() {
     switch ($this->getTransactionType()) {
       case self::TYPE_VCS:
-        return 'create';
+        return 'fa-plus';
     }
     return parent::getIcon();
   }

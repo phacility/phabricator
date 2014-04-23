@@ -155,6 +155,14 @@ abstract class PhabricatorApplicationTransactionEditor
       $types[] = PhabricatorTransactions::TYPE_CUSTOMFIELD;
     }
 
+    if ($this->object instanceof HarbormasterBuildableInterface) {
+      $types[] = PhabricatorTransactions::TYPE_BUILDABLE;
+    }
+
+    if ($this->object instanceof PhabricatorTokenReceiverInterface) {
+      $types[] = PhabricatorTransactions::TYPE_TOKEN;
+    }
+
     return $types;
   }
 
@@ -222,6 +230,8 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+      case PhabricatorTransactions::TYPE_TOKEN:
         return $xaction->getNewValue();
       case PhabricatorTransactions::TYPE_EDGE:
         return $this->getEdgeTransactionNewValue($xaction);
@@ -311,6 +321,9 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+      case PhabricatorTransactions::TYPE_TOKEN:
+        return;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
         $object->setViewPolicy($xaction->getNewValue());
         break;
@@ -321,6 +334,7 @@ abstract class PhabricatorApplicationTransactionEditor
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionInternalEffects($xaction);
     }
+
     return $this->applyCustomInternalTransaction($object, $xaction);
   }
 
@@ -328,6 +342,9 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+      case PhabricatorTransactions::TYPE_TOKEN:
+        return;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         $subeditor = id(new PhabricatorSubscriptionsEditor())
           ->setObject($object)
@@ -661,6 +678,11 @@ abstract class PhabricatorApplicationTransactionEditor
       $herald_xactions = $this->applyHeraldRules($object, $xactions);
 
       if ($herald_xactions) {
+        $xscript_id = $this->getHeraldTranscript()->getID();
+        foreach ($herald_xactions as $herald_xaction) {
+          $herald_xaction->setMetadataValue('herald:transcriptID', $xscript_id);
+        }
+
         // NOTE: We're acting as the omnipotent user because rules deal with
         // their own policy issues. We use a synthetic author PHID (the
         // Herald application) as the author of record, so that transactions
@@ -1706,6 +1728,21 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
+    // Check if any of the transactions are visible. If we don't have any
+    // visible transactions, don't send the mail.
+
+    $any_visible = false;
+    foreach ($xactions as $xaction) {
+      if (!$xaction->shouldHideForMail($xactions)) {
+        $any_visible = true;
+        break;
+      }
+    }
+
+    if (!$any_visible) {
+      return;
+    }
+
     $email_to = array_filter(array_unique($this->getMailTo($object)));
     $email_cc = array_filter(array_unique($this->getMailCC($object)));
 
@@ -1985,6 +2022,11 @@ abstract class PhabricatorApplicationTransactionEditor
     array $mailed_phids) {
 
     $xactions = mfilter($xactions, 'shouldHideForFeed', true);
+
+    if (!$xactions) {
+      return;
+    }
+
     $related_phids = $this->getFeedRelatedPHIDs($object, $xactions);
     $subscribed_phids = $this->getFeedNotifyPHIDs($object, $xactions);
 

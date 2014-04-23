@@ -11,13 +11,19 @@ final class ReleephRequestorFieldSpecification
     return 'Requestor';
   }
 
-  public function renderValueForHeaderView() {
+  public function getRequiredHandlePHIDsForPropertyView() {
+    $phids = array();
+
     $phid = $this->getReleephRequest()->getRequestUserPHID();
-    $handle = id(new PhabricatorHandleQuery())
-      ->setViewer($this->getUser())
-      ->withPHIDs(array($phid))
-      ->executeOne();
-    return $handle->renderLink();
+    if ($phid) {
+      $phids[] = $phid;
+    }
+
+    return $phids;
+  }
+
+  public function renderPropertyViewValue(array $handles) {
+    return $this->renderHandleList($handles);
   }
 
   public function shouldAppearOnCommitMessage() {

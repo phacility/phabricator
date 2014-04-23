@@ -52,9 +52,6 @@ final class DifferentialAddCommentView extends AphrontView {
   public function render() {
 
     $this->requireResource('differential-revision-add-comment-css');
-
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-
     $revision = $this->revision;
 
     $action = null;
@@ -109,7 +106,7 @@ final class DifferentialAddCommentView extends AphrontView {
           ->setUser($this->user))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue($is_serious ? pht('Submit') : pht('Clowncopterize')));
+          ->setValue(pht('Submit')));
 
     Javelin::initBehavior(
       'differential-add-reviewers-and-ccs',
@@ -157,8 +154,13 @@ final class DifferentialAddCommentView extends AphrontView {
         'inline'    => 'inline-comment-preview',
       ));
 
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+    $header_text = $is_serious
+      ? pht('Add Comment')
+      : pht('Leap Into Action');
+
     $header = id(new PHUIHeaderView())
-      ->setHeader($is_serious ? pht('Add Comment') : pht('Leap Into Action'));
+      ->setHeader($header_text);
 
     $anchor = id(new PhabricatorAnchorView())
         ->setAnchorName('comment')

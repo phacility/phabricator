@@ -8,7 +8,7 @@
   font-weight: 400;
   src: local('Source Sans Pro'),
        local('SourceSansPro-Regular'),
-       url(/rsrc/externals/font/SourceSansPro.woff)
+       url(/rsrc/externals/font/sourcesans/SourceSansPro.woff)
        format('woff');
 }
 
@@ -18,6 +18,6 @@
   font-weight: 700;
   src: local('Source Sans Pro Bold'),
        local('SourceSansPro-Bold'),
-       url(/rsrc/externals/font/SourceSansProBold.woff)
+       url(/rsrc/externals/font/sourcesans/SourceSansProBold.woff)
        format('woff');
 }

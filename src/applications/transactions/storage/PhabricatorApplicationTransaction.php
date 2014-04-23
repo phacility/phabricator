@@ -52,6 +52,8 @@ abstract class PhabricatorApplicationTransaction
 
   public function shouldGenerateOldValue() {
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+      case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         return false;
     }
@@ -234,6 +236,14 @@ abstract class PhabricatorApplicationTransaction
           $phids[] = array($new);
         }
         break;
+      case PhabricatorTransactions::TYPE_TOKEN:
+        break;
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+        $phid = $this->getMetadataValue('harbormaster:buildablePHID');
+        if ($phid) {
+          $phids[] = array($phid);
+        }
+        break;
     }
 
     return array_mergev($phids);
@@ -316,21 +326,55 @@ abstract class PhabricatorApplicationTransaction
   public function getIcon() {
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_COMMENT:
-        return 'comment';
+        return 'fa-comment';
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-        return 'message';
+        return 'fa-envelope';
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
-        return 'lock';
+        return 'fa-lock';
       case PhabricatorTransactions::TYPE_EDGE:
-        return 'link';
+        return 'fa-link';
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+        return 'fa-wrench';
+      case PhabricatorTransactions::TYPE_TOKEN:
+        if ($this->getNewValue()) {
+          return 'fa-thumbs-o-up';
+        } else {
+          return 'fa-thumbs-o-down';
+        }
     }
 
-    return 'edit';
+    return 'fa-pencil';
+  }
+
+  public function getToken() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_TOKEN:
+        $old = $this->getOldValue();
+        $new = $this->getNewValue();
+        if ($new) {
+          $icon = substr($new, 10);
+        } else {
+          $icon = substr($old, 10);
+        }
+        return array($icon, !$this->getNewValue());
+    }
+
+    return array(null, null);
   }
 
   public function getColor() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+        switch ($this->getNewValue()) {
+          case HarbormasterBuildable::STATUS_PASSED:
+            return 'green';
+          case HarbormasterBuildable::STATUS_FAILED:
+            return 'red';
+        }
+        break;
+    }
     return null;
   }
 
@@ -379,10 +423,28 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function shouldHideForMail(array $xactions) {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_TOKEN:
+        return true;
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+        switch ($this->getNewValue()) {
+          case HarbormasterBuildable::STATUS_PASSED:
+            // For now, just never send mail when builds pass. We might let
+            // you customize this later, but in most cases this is probably
+            // completely uninteresting.
+            return true;
+        }
+    }
+
     return $this->shouldHide();
   }
 
   public function shouldHideForFeed() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_TOKEN:
+        return true;
+    }
+
     return $this->shouldHide();
   }
 
@@ -537,6 +599,39 @@ abstract class PhabricatorApplicationTransaction
             $this->renderHandleLink($author_phid));
         }
 
+      case PhabricatorTransactions::TYPE_TOKEN:
+        if ($old && $new) {
+          return pht(
+            '%s updated a token.',
+            $this->renderHandleLink($author_phid));
+        } else if ($old) {
+          return pht(
+            '%s rescinded a token.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s awarded a token.',
+            $this->renderHandleLink($author_phid));
+        }
+
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+        switch ($this->getNewValue()) {
+          case HarbormasterBuildable::STATUS_PASSED:
+            return pht(
+              '%s completed building %s.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink(
+                $this->getMetadataValue('harbormaster:buildablePHID')));
+          case HarbormasterBuildable::STATUS_FAILED:
+            return pht(
+              '%s failed to build %s!',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink(
+                $this->getMetadataValue('harbormaster:buildablePHID')));
+          default:
+            return null;
+        }
+
       default:
         return pht(
           '%s edited this %s.',
@@ -596,6 +691,25 @@ abstract class PhabricatorApplicationTransaction
             $this->renderHandleLink($author_phid),
             $this->renderHandleLink($object_phid));
         }
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+        switch ($this->getNewValue()) {
+          case HarbormasterBuildable::STATUS_PASSED:
+            return pht(
+              '%s completed building %s for %s.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink(
+                $this->getMetadataValue('harbormaster:buildablePHID')),
+              $this->renderHandleLink($object_phid));
+          case HarbormasterBuildable::STATUS_FAILED:
+            return pht(
+              '%s failed to build %s for %s.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink(
+                $this->getMetadataValue('harbormaster:buildablePHID')),
+              $this->renderHandleLink($object_phid));
+          default:
+            return null;
+        }
 
     }
 
@@ -649,6 +763,15 @@ abstract class PhabricatorApplicationTransaction
         return pht('Changed Policy');
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return pht('Changed Subscribers');
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+        switch ($this->getNewValue()) {
+          case HarbormasterBuildable::STATUS_PASSED:
+            return pht('Build Passed');
+          case HarbormasterBuildable::STATUS_FAILED:
+            return pht('Build Failed');
+          default:
+            return pht('Build Status');
+        }
       default:
         return pht('Updated');
     }
@@ -755,6 +878,21 @@ abstract class PhabricatorApplicationTransaction
     }
 
     return true;
+  }
+
+  public function renderExtraInformationLink() {
+    $herald_xscript_id = $this->getMetadataValue('herald:transcriptID');
+
+    if ($herald_xscript_id) {
+      return phutil_tag(
+        'a',
+        array(
+          'href' => '/herald/transcript/'.$herald_xscript_id.'/',
+        ),
+        pht('View Herald Transcript'));
+    }
+
+    return null;
   }
 
 

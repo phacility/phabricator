@@ -5,6 +5,10 @@ final class ReleephSummaryFieldSpecification
 
   const MAX_SUMMARY_LENGTH = 60;
 
+  public function shouldAppearInPropertyView() {
+    return false;
+  }
+
   public function getFieldKey() {
     return 'summary';
   }

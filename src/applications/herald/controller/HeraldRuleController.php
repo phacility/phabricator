@@ -464,7 +464,7 @@ final class HeraldRuleController extends HeraldController {
     }
 
     $changeflag_options =
-      PhabricatorRepositoryPushLog::getHeraldChangeflagConditionOptions();
+      PhabricatorRepositoryPushLog::getHeraldChangeFlagConditionOptions();
     Javelin::initBehavior(
       'herald-rule-editor',
       array(

@@ -7,7 +7,6 @@ final class HarbormasterBuildable extends HarbormasterDAO
 
   protected $buildablePHID;
   protected $containerPHID;
-  protected $buildStatus;
   protected $buildableStatus;
   protected $isManualBuildable;
 
@@ -17,13 +16,27 @@ final class HarbormasterBuildable extends HarbormasterDAO
   private $containerHandle = self::ATTACHABLE;
   private $builds = self::ATTACHABLE;
 
-  const STATUS_WHATEVER = 'whatever';
+  const STATUS_BUILDING = 'building';
+  const STATUS_PASSED = 'passed';
+  const STATUS_FAILED = 'failed';
+
+  public static function getBuildableStatusName($status) {
+    switch ($status) {
+      case self::STATUS_BUILDING:
+        return pht('Building');
+      case self::STATUS_PASSED:
+        return pht('Passed');
+      case self::STATUS_FAILED:
+        return pht('Failed');
+      default:
+        return pht('Unknown');
+    }
+  }
 
   public static function initializeNewBuildable(PhabricatorUser $actor) {
     return id(new HarbormasterBuildable())
       ->setIsManualBuildable(0)
-      ->setBuildStatus(self::STATUS_WHATEVER)
-      ->setBuildableStatus(self::STATUS_WHATEVER);
+      ->setBuildableStatus(self::STATUS_BUILDING);
   }
 
   public function getMonogram() {

@@ -22,8 +22,11 @@ final class ConduitAPI_token_give_Method extends ConduitAPI_token_Method {
   }
 
   public function execute(ConduitAPIRequest $request) {
+    $content_source = PhabricatorContentSource::newFromConduitRequest($request);
+
     $editor = id(new PhabricatorTokenGivenEditor())
-      ->setActor($request->getUser());
+      ->setActor($request->getUser())
+      ->setContentSource($content_source);
 
     if ($request->getValue('tokenPHID')) {
       $editor->addToken(

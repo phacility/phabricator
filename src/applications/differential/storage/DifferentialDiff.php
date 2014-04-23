@@ -4,7 +4,8 @@ final class DifferentialDiff
   extends DifferentialDAO
   implements
     PhabricatorPolicyInterface,
-    HarbormasterBuildableInterface {
+    HarbormasterBuildableInterface,
+    PhabricatorApplicationTransactionInterface {
 
   protected $revisionID;
   protected $authorPHID;
@@ -347,6 +348,32 @@ final class DifferentialDiff
     }
 
     return null;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    if (!$this->getRevisionID()) {
+      return null;
+    }
+    return $this->getRevision()->getApplicationTransactionEditor();
+  }
+
+
+  public function getApplicationTransactionObject() {
+    if (!$this->getRevisionID()) {
+      return null;
+    }
+    return $this->getRevision();
+  }
+
+  public function getApplicationTransactionTemplate() {
+    if (!$this->getRevisionID()) {
+      return null;
+    }
+    return $this->getRevision()->getApplicationTransactionTemplate();
   }
 
 }

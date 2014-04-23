@@ -13,14 +13,6 @@
   font-weight: bold;
 }
 
-.phabricator-ui-example-header {
-  margin: 1em 2em 2em;
-}
-
-.phabricator-ui-example-description {
-  margin: 1em 0;
-}
-
 .jxui-example-container {
   padding: 2em;
   margin: 4em auto;
@@ -39,9 +31,21 @@
 }
 
 .jxui-blue-background {
-  background: blue;
+  background: {$blue};
 }
 
 .jxui-red-border {
-  border-color: red;
+  border-color: {$red};
+}
+
+.phui-example-icon-name {
+  display: inline-block;
+  width: 180px;
+  padding-bottom: 8px;
+  white-space: nowrap;
+}
+
+.phui-icon-view.phui-example-icon-transform {
+  display: block;
+  padding-bottom: 8px;
 }

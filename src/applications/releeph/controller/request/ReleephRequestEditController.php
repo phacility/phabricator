@@ -43,7 +43,8 @@ final class ReleephRequestEditController extends ReleephBranchController {
       $pull = id(new ReleephRequest())
         ->setRequestUserPHID($viewer->getPHID())
         ->setBranchID($branch->getID())
-        ->setInBranch(0);
+        ->setInBranch(0)
+        ->attachBranch($branch);
 
       $is_edit = false;
     }
@@ -108,13 +109,13 @@ final class ReleephRequestEditController extends ReleephBranchController {
             $errors[] = $e->getMessage();
           }
 
-          $pr_commit_data = null;
           if (!$errors) {
-            $pr_commit_data = $pr_commit->loadCommitData();
-            if (!$pr_commit_data) {
-              $e_request_identifier = 'Not parsed yet';
-              $errors[] = "The requested commit hasn't been parsed yet.";
+            $object_phid = $finder->getRequestedObjectPHID();
+            if (!$object_phid) {
+              $object_phid = $pr_commit->getPHID();
             }
+
+            $pull->setRequestedObjectPHID($object_phid);
           }
         }
 
@@ -178,8 +179,19 @@ final class ReleephRequestEditController extends ReleephBranchController {
       }
     }
 
-    $branch->populateReleephRequestHandles($viewer, array($pull));
-    $handles = $pull->getHandles();
+    $handle_phids = array(
+      $pull->getRequestUserPHID(),
+      $pull->getRequestCommitPHID(),
+    );
+    $handle_phids = array_filter($handle_phids);
+    if ($handle_phids) {
+      $handles = id(new PhabricatorHandleQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($handle_phids)
+        ->execute();
+    } else {
+      $handles = array();
+    }
 
     $age_string = '';
     if ($is_edit) {
@@ -241,7 +253,7 @@ final class ReleephRequestEditController extends ReleephBranchController {
               ->setValue($title));
       } else {
         $origin = $branch->getURI();
-        $repo = $product->loadPhabricatorRepository();
+        $repo = $product->getRepository();
         $branch_cut_point = id(new PhabricatorRepositoryCommit())
           ->loadOneWhere(
               'phid = %s',

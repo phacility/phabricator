@@ -1,6 +1,6 @@
 <?php
 
-final class ReleephPHIDTypeProject extends PhabricatorPHIDType {
+final class ReleephPHIDTypeProduct extends PhabricatorPHIDType {
 
   const TYPECONST = 'REPR';
 
@@ -9,7 +9,7 @@ final class ReleephPHIDTypeProject extends PhabricatorPHIDType {
   }
 
   public function getTypeName() {
-    return pht('Releeph Project');
+    return pht('Releeph Product');
   }
 
   public function newObject() {
@@ -20,7 +20,7 @@ final class ReleephPHIDTypeProject extends PhabricatorPHIDType {
     PhabricatorObjectQuery $query,
     array $phids) {
 
-    return id(new ReleephProjectQuery())
+    return id(new ReleephProductQuery())
       ->withPHIDs($phids);
   }
 
@@ -30,10 +30,10 @@ final class ReleephPHIDTypeProject extends PhabricatorPHIDType {
     array $objects) {
 
     foreach ($handles as $phid => $handle) {
-      $project = $objects[$phid];
+      $product = $objects[$phid];
 
-      $handle->setName($project->getName());
-      $handle->setURI($project->getURI());
+      $handle->setName($product->getName());
+      $handle->setURI($product->getURI());
     }
   }
 

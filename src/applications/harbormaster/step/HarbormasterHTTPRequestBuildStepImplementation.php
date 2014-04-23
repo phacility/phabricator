@@ -18,16 +18,27 @@ final class HarbormasterHTTPRequestBuildStepImplementation
       $domain = id(new PhutilURI($uri))->getDomain();
     }
 
-    return pht(
-      'Make an HTTP %s request to %s.',
-      $this->formatSettingForDescription('method', 'POST'),
-      $this->formatValueForDescription($domain));
+    $method = $this->formatSettingForDescription('method', 'POST');
+    $domain = $this->formatValueForDescription($domain);
+
+    if ($this->getSetting('credential')) {
+      return pht(
+        'Make an authenticated HTTP %s request to %s.',
+        $method,
+        $domain);
+    } else {
+      return pht(
+        'Make an HTTP %s request to %s.',
+        $method,
+        $domain);
+    }
   }
 
   public function execute(
     HarbormasterBuild $build,
     HarbormasterBuildTarget $build_target) {
 
+    $viewer = PhabricatorUser::getOmnipotentUser();
     $settings = $this->getSettings();
     $variables = $build_target->getVariables();
 
@@ -41,10 +52,21 @@ final class HarbormasterHTTPRequestBuildStepImplementation
 
     $method = nonempty(idx($settings, 'method'), 'POST');
 
-    list($status, $body, $headers) = id(new HTTPSFuture($uri))
+    $future = id(new HTTPSFuture($uri))
       ->setMethod($method)
-      ->setTimeout(60)
-      ->resolve();
+      ->setTimeout(60);
+
+    $credential_phid = $this->getSetting('credential');
+    if ($credential_phid) {
+      $key = PassphrasePasswordKey::loadFromPHID(
+        $credential_phid,
+        $viewer);
+      $future->setHTTPBasicAuthCredentials(
+        $key->getUsernameEnvelope()->openEnvelope(),
+        $key->getPasswordEnvelope());
+    }
+
+    list($status, $body, $headers) = $future->resolve();
 
     $log_body->append($body);
     $log_body->finalize($start);
@@ -66,7 +88,19 @@ final class HarbormasterHTTPRequestBuildStepImplementation
         'type' => 'select',
         'options' => array_fuse(array('POST', 'GET', 'PUT', 'DELETE')),
       ),
+      'credential' => array(
+        'name' => pht('Credentials'),
+        'type' => 'credential',
+        'credential.type'
+          => PassphraseCredentialTypePassword::CREDENTIAL_TYPE,
+        'credential.provides'
+          => PassphraseCredentialTypePassword::PROVIDES_TYPE,
+      ),
     );
+  }
+
+  public function supportsWaitForMessage() {
+    return true;
   }
 
 }

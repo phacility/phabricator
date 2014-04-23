@@ -1,16 +1,20 @@
 <?php
 
-/**
- * @group conduit
- */
-final class ConduitAPI_user_addstatus_Method extends ConduitAPI_user_Method {
+final class ConduitAPI_user_addstatus_Method
+  extends ConduitAPI_user_Method {
 
   public function getMethodStatus() {
-    return self::METHOD_STATUS_UNSTABLE;
+    return self::METHOD_STATUS_DEPRECATED;
   }
 
   public function getMethodDescription() {
-    return "Add status information to the logged-in user.";
+    return pht("Add status information to the logged-in user.");
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'Statuses are becoming full-fledged events as part of the '.
+      'Calendar application.');
   }
 
   public function defineParamTypes() {

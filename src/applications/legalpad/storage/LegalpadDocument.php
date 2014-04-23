@@ -145,11 +145,16 @@ final class LegalpadDocument extends LegalpadDAO
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
+
   public function getApplicationTransactionEditor() {
     return new LegalpadDocumentEditor();
   }
 
   public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
     return new LegalpadTransaction();
   }
 

@@ -179,6 +179,25 @@ final class PhabricatorProjectTransactionEditor
           $error->setIsMissingFieldError(true);
           $errors[] = $error;
         }
+
+        if (!$xactions) {
+          break;
+        }
+
+        $name = last($xactions)->getNewValue();
+        $name_used_already = id(new PhabricatorProjectQuery())
+          ->setViewer($this->getActor())
+          ->withNames(array($name))
+          ->executeOne();
+        if ($name_used_already &&
+           ($name_used_already->getPHID() != $object->getPHID())) {
+          $error = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht(''),
+            pht('Project name is already used.'),
+            nonempty(last($xactions), null));
+          $errors[] = $error;
+        }
         break;
     }
 

@@ -67,3 +67,8 @@
   width: 35px;
   margin: 0 3px;
 }
+
+.device-phone .project-board-wrapper {
+  margin-left: 0;
+  margin-right: 0;
+}

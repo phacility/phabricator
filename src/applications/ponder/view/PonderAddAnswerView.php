@@ -17,8 +17,6 @@ final class PonderAddAnswerView extends AphrontView {
   }
 
   public function render() {
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-
     $question = $this->question;
 
     $header = id(new PHUIHeaderView())
@@ -39,9 +37,7 @@ final class PonderAddAnswerView extends AphrontView {
           ->setUser($this->user))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue($is_serious ?
-            pht('Add Answer') :
-            pht('Bequeath Wisdom')));
+          ->setValue(pht('Add Answer')));
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)

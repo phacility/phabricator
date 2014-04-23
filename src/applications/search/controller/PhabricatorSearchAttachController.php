@@ -70,13 +70,15 @@ final class PhabricatorSearchAttachController
           $txn_editor = $object->getApplicationTransactionEditor()
             ->setActor($user)
             ->setContentSourceFromRequest($request);
-          $txn_template = $object->getApplicationTransactionObject()
+          $txn_template = $object->getApplicationTransactionTemplate()
             ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
             ->setMetadataValue('edge:type', $edge_type)
             ->setNewValue(array(
               '+' => array_fuse($add_phids),
               '-' => array_fuse($rem_phids)));
-          $txn_editor->applyTransactions($object, array($txn_template));
+          $txn_editor->applyTransactions(
+            $object->getApplicationTransactionObject(),
+            array($txn_template));
 
         } else {
 

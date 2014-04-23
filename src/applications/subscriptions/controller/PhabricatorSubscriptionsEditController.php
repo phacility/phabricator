@@ -74,7 +74,7 @@ final class PhabricatorSubscriptionsEditController
         );
       }
 
-      $xaction = id($object->getApplicationTransactionObject())
+      $xaction = id($object->getApplicationTransactionTemplate())
         ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
         ->setNewValue($xaction_value);
 
@@ -83,7 +83,9 @@ final class PhabricatorSubscriptionsEditController
         ->setContinueOnNoEffect(true)
         ->setContentSourceFromRequest($request);
 
-      $editor->applyTransactions($object, array($xaction));
+      $editor->applyTransactions(
+        $object->getApplicationTransactionObject(),
+        array($xaction));
     } else {
 
       // TODO: Eventually, get rid of this once everything implements

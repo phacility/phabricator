@@ -19,7 +19,7 @@ final class ReleephProductViewController extends ReleephProductController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $product = id(new ReleephProjectQuery())
+    $product = id(new ReleephProductQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->productID))
       ->executeOne();
@@ -33,7 +33,7 @@ final class ReleephProductViewController extends ReleephProductController
       ->setPreface($this->renderPreface())
       ->setSearchEngine(
         id(new ReleephBranchSearchEngine())
-          ->setProjectID($product->getID()))
+          ->setProduct($product))
       ->setNavigation($this->buildSideNavView());
 
     return $this->delegateToController($controller);
@@ -46,7 +46,7 @@ final class ReleephProductViewController extends ReleephProductController
 
     $viewer = $this->getRequest()->getUser();
 
-    $products = mpull($branches, 'getProject');
+    $products = mpull($branches, 'getProduct');
     $repo_phids = mpull($products, 'getRepositoryPHID');
 
     $repos = id(new PhabricatorRepositoryQuery())
@@ -72,7 +72,7 @@ final class ReleephProductViewController extends ReleephProductController
       ->setUser($viewer);
     foreach ($branches as $branch) {
       $diffusion_href = null;
-      $repo = idx($repos, $branch->getProject()->getRepositoryPHID());
+      $repo = idx($repos, $branch->getProduct()->getRepositoryPHID());
       if ($repo) {
         $drequest = DiffusionRequest::newFromDictionary(
           array(
@@ -135,11 +135,11 @@ final class ReleephProductViewController extends ReleephProductController
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
     if ($for_app) {
-      $nav->addFilter('project/create/', pht('Create Product'));
+      $nav->addFilter('product/create/', pht('Create Product'));
     }
 
     id(new ReleephBranchSearchEngine())
-      ->setProjectID($product->getID())
+      ->setProduct($product)
       ->setViewer($viewer)
       ->addNavigationItems($nav->getMenu());
 
@@ -190,8 +190,8 @@ final class ReleephProductViewController extends ReleephProductController
       $product,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $edit_uri = $this->getApplicationURI("project/{$id}/edit/");
-    $history_uri = $this->getApplicationURI("project/{$id}/history/");
+    $edit_uri = $this->getApplicationURI("product/{$id}/edit/");
+    $history_uri = $this->getApplicationURI("product/{$id}/history/");
 
     $actions->addAction(
       id(new PhabricatorActionView())
@@ -203,11 +203,11 @@ final class ReleephProductViewController extends ReleephProductController
 
     if ($product->getIsActive()) {
       $status_name = pht('Deactivate Product');
-      $status_href = "project/{$id}/action/deactivate/";
+      $status_href = "product/{$id}/action/deactivate/";
       $status_icon = 'delete';
     } else {
       $status_name = pht('Reactivate Product');
-      $status_href = "project/{$id}/action/activate/";
+      $status_href = "product/{$id}/action/activate/";
       $status_icon = 'new';
     }
 

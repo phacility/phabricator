@@ -133,6 +133,16 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
         PhabricatorWorkerArchiveTask::RESULT_FAILURE,
         0);
       $result->setExecutionException($ex);
+    } catch (PhabricatorWorkerYieldException $ex) {
+      $this->setExecutionException($ex);
+
+      $retry = $ex->getDuration();
+      $retry = max($retry, 5);
+
+      // NOTE: As a side effect, this saves the object.
+      $this->setLeaseDuration($retry);
+
+      $result = $this;
     } catch (Exception $ex) {
       $this->setExecutionException($ex);
       $this->setFailureCount($this->getFailureCount() + 1);

@@ -20,7 +20,7 @@ final class PhabricatorToken extends PhabricatorTokenDAO
   }
 
   public function getPolicy($capability) {
-    return PhabricatorPolicies::POLICY_USER;
+    return PhabricatorPolicies::getMostOpenPolicy();
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {

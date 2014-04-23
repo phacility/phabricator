@@ -69,6 +69,7 @@ class PhabricatorApplicationTransactionFeedStory
     $old_target = $xaction->getRenderingTarget();
     $new_target = PhabricatorApplicationTransaction::TARGET_TEXT;
     $xaction->setRenderingTarget($new_target);
+    $xaction->setHandles($this->getHandles());
     $text = $xaction->getTitleForFeed($this);
     $xaction->setRenderingTarget($old_target);
     return $text;

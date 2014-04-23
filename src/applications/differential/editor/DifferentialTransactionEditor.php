@@ -1070,7 +1070,7 @@ final class DifferentialTransactionEditor
     switch ($strongest->getTransactionType()) {
       case DifferentialTransaction::TYPE_UPDATE:
         $count = new PhutilNumber($object->getLineCount());
-        $action = pht('%s, %d line(s)', $action, $count);
+        $action = pht('%s, %s line(s)', $action, $count);
         break;
     }
 

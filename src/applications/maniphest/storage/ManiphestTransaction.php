@@ -244,17 +244,17 @@ final class ManiphestTransaction
 
     switch ($this->getTransactionType()) {
       case self::TYPE_OWNER:
-        return 'user';
+        return 'fa-user';
 
       case self::TYPE_CCS:
-        return 'meta-mta';
+        return 'fa-envelope';
 
       case self::TYPE_TITLE:
         if ($old === null) {
-          return 'create';
+          return 'fa-pencil';
         }
 
-        return 'edit';
+        return 'fa-pencil';
 
       case self::TYPE_STATUS:
         $action = ManiphestTaskStatus::getStatusIcon($new);
@@ -263,33 +263,32 @@ final class ManiphestTransaction
         }
 
         if (ManiphestTaskStatus::isClosedStatus($new)) {
-          return 'check';
+          return 'fa-check';
         } else {
-          return 'edit';
+          return 'fa-pencil';
         }
 
       case self::TYPE_DESCRIPTION:
-        return 'edit';
+        return 'fa-pencil';
 
       case self::TYPE_PROJECTS:
-        return 'project';
+        return 'fa-briefcase';
 
       case self::TYPE_PROJECT_COLUMN:
-        return 'workboard';
+        return 'fa-columns';
 
       case self::TYPE_PRIORITY:
         if ($old == ManiphestTaskPriority::getDefaultPriority()) {
-          return 'normal-priority';
-          return pht('Triaged');
+          return 'fa-arrow-right';
         } else if ($old > $new) {
-          return 'lower-priority';
+          return 'fa-arrow-down';
         } else {
-          return 'raise-priority';
+          return 'fa-arrow-up';
         }
 
       case self::TYPE_EDGE:
       case self::TYPE_ATTACH:
-        return 'attach';
+        return 'fa-thumb-tack';
 
     }
 

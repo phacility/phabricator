@@ -14,7 +14,7 @@ final class ReleephProductActionController extends ReleephProductController {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $product = id(new ReleephProjectQuery())
+    $product = id(new ReleephProductQuery())
       ->withIDs(array($this->id))
       ->requireCapabilities(
         array(

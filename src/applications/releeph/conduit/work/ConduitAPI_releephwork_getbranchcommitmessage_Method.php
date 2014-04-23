@@ -26,10 +26,14 @@ final class ConduitAPI_releephwork_getbranchcommitmessage_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $branch = id(new ReleephBranch())
-      ->loadOneWhere('phid = %s', $request->getValue('branchPHID'));
+    $viewer = $request->getUser();
 
-    $project = $branch->loadReleephProject();
+    $branch = id(new ReleephBranchQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($request->getValue('branchPHID')))
+      ->executeOne();
+
+    $project = $branch->getProduct();
 
     $creator_phid = $branch->getCreatedByUserPHID();
     $cut_phid = $branch->getCutPointCommitPHID();
@@ -51,6 +55,7 @@ final class ConduitAPI_releephwork_getbranchcommitmessage_Method
 
     // Not as customizable as a ReleephRequest's commit message.  It doesn't
     // really need to be.
+    // TODO: Yes it does, see FB-specific stuff below.
     $commit_message = array();
     $commit_message[] = $h_branch->getFullName();
     $commit_message[] = $h_branch->getURI();
@@ -80,7 +85,7 @@ final class ConduitAPI_releephwork_getbranchcommitmessage_Method
      *   @new-branch: <branch-name>
      *
      */
-    $repo = $project->loadPhabricatorRepository();
+    $repo = $project->getRepository();
     switch ($repo->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $commit_message[] = sprintf(

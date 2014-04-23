@@ -308,26 +308,8 @@ final class HarbormasterBuildViewController
     if ($build->isStopping()) {
       return pht('Stopping');
     }
-    switch ($build->getBuildStatus()) {
-      case HarbormasterBuild::STATUS_INACTIVE:
-        return pht('Inactive');
-      case HarbormasterBuild::STATUS_PENDING:
-        return pht('Pending');
-      case HarbormasterBuild::STATUS_WAITING:
-        return pht('Waiting');
-      case HarbormasterBuild::STATUS_BUILDING:
-        return pht('Building');
-      case HarbormasterBuild::STATUS_PASSED:
-        return pht('Passed');
-      case HarbormasterBuild::STATUS_FAILED:
-        return pht('Failed');
-      case HarbormasterBuild::STATUS_ERROR:
-        return pht('Unexpected Error');
-      case HarbormasterBuild::STATUS_STOPPED:
-        return pht('Stopped');
-      default:
-        return pht('Unknown');
-    }
+
+    return HarbormasterBuild::getBuildStatusName($build->getBuildStatus());
   }
 
   private function buildMessages(array $messages) {

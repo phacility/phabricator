@@ -5,7 +5,8 @@ final class ReleephBranchQuery
 
   private $ids;
   private $phids;
-  private $projectIDs;
+  private $productPHIDs;
+  private $productIDs;
 
   const STATUS_ALL = 'status-all';
   const STATUS_OPEN = 'status-open';
@@ -33,8 +34,8 @@ final class ReleephBranchQuery
     return $this;
   }
 
-  public function withProjectIDs(array $ids) {
-    $this->projectIDs = $ids;
+  public function withProductPHIDs($product_phids) {
+    $this->productPHIDs = $product_phids;
     return $this;
   }
 
@@ -53,10 +54,26 @@ final class ReleephBranchQuery
     return $table->loadAllFromArray($data);
   }
 
+  public function willExecute() {
+    if ($this->productPHIDs !== null) {
+      $products = id(new ReleephProductQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs($this->productPHIDs)
+        ->execute();
+
+      if (!$products) {
+        throw new PhabricatorEmptyQueryException();
+      }
+
+      $this->productIDs = mpull($products, 'getID');
+    }
+  }
+
+
   public function willFilterPage(array $branches) {
     $project_ids = mpull($branches, 'getReleephProjectID');
 
-    $projects = id(new ReleephProjectQuery())
+    $projects = id(new ReleephProductQuery())
       ->withIDs($project_ids)
       ->setViewer($this->getViewer())
       ->execute();
@@ -90,25 +107,25 @@ final class ReleephBranchQuery
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->projectIDs) {
+    if ($this->productIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
         'releephProjectID IN (%Ld)',
-        $this->projectIDs);
+        $this->productIDs);
     }
 
     $status = $this->status;

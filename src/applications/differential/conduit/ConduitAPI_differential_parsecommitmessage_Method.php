@@ -1,7 +1,7 @@
 <?php
 
 final class ConduitAPI_differential_parsecommitmessage_Method
-  extends ConduitAPIMethod {
+  extends ConduitAPI_differential_Method {
 
   private $errors;
 

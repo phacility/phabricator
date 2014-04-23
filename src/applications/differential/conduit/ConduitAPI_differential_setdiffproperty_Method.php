@@ -1,10 +1,7 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_differential_setdiffproperty_Method
-  extends ConduitAPIMethod {
+  extends ConduitAPI_differential_Method {
 
   public function getMethodDescription() {
     return "Attach properties to Differential diffs.";
