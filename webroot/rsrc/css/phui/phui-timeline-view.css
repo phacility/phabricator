@@ -194,15 +194,21 @@
 }
 
 .phui-icon-view.phui-timeline-icon:before {
-  position: relative;
-  top: 4px;
-  margin: 0;
+  font-size: 14px;
 }
 
 .phui-timeline-minor-event .phui-timeline-icon-fill {
   height: 26px;
   width: 26px;
   border-radius: 3px;
+}
+
+.phui-timeline-icon-fill .phui-timeline-icon {
+  margin-top: 5px;
+}
+
+.phui-timeline-minor-event .phui-timeline-icon {
+  margin-top: 6px;
 }
 
 .phui-timeline-extra,

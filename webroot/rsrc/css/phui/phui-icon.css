@@ -53,6 +53,6 @@
   background-size: 35px;
 }
 
-.phui-icon-has-text {
-  padding-left: 20px;
+.phui-icon-has-text:before {
+  margin-right: 8px;
 }

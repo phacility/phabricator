@@ -427,6 +427,7 @@ final class PHUIIconExample extends PhabricatorUIExample {
         ->setText(pht('fa-tag %s', $color));
     }
     $ficons = array();
+    sort($fas);
     foreach ($fas as $fa) {
       $ficons[] = id(new PHUIIconView())
         ->addClass('phui-example-icon-name')
@@ -568,8 +569,16 @@ final class PHUIIconExample extends PhabricatorUIExample {
       ->appendChild($loginview)
       ->addMargin(PHUI::MARGIN_MEDIUM);
 
+    $fa_link = phutil_tag(
+      'a',
+      array(
+        'href' => 'http://fontawesome.io'
+      ),
+      'http://fontawesome.io');
+    $fa_text = pht('Font Awesome by Dave Gandy - %s', $fa_link);
+
     $fontawesome = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Font Awesome'))
+      ->setHeaderText($fa_text)
       ->appendChild($layout_fa);
 
     $transforms = id(new PHUIObjectBoxView())

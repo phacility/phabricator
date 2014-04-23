@@ -2,30 +2,12 @@
  * @provides phui-font-icon-base-css
  */
 
-.phui-font-gh,
 .phui-font-fa {
   display: inline-block;
-  position: relative;
   color: {$darkgreytext};
-  text-decoration: none;
-  *display: inline;
-  *zoom: 1;
-  vertical-align: middle;
-}
-.phui-font-gh:before,
-.phui-font-fa:before {
-  position: absolute;
-  left: 0;
-  top: 0;
-  display: inline-block;
-  margin: 0 5px 0 0;
   font-style: normal;
   font-weight: normal;
-  color: {$darkgreytext};
-  *display: inline;
-  *zoom: 1;
-  vertical-align: middle;
-  text-transform: none;
+  line-height: 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
