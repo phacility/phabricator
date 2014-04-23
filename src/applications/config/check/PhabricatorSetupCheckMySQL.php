@@ -33,25 +33,26 @@ final class PhabricatorSetupCheckMySQL extends PhabricatorSetupCheck {
         "encouraged.");
 
       $message = pht(
-        "On your MySQL instance, the global sql_mode is not set to ".
-        "'STRICT_ALL_TABLES'. It is strongly encouraged that you enable this ".
-        "mode when running Phabricator.\n\n".
-        "By default, MySQL will fail silently and continue when certain ".
-        "error conditions occur. Sometimes contuining does the wrong thing. ".
-        "For example, inserting too much data into a column will cause ".
-        "silent truncation (and thus data loss) instead of failing in an ".
-        "obvious way that we can fix. These behaviors can also create ".
-        "security risks. Enabling strict mode raises an explicit error ".
-        "instead and prevents this entire class of problem from doing any ".
-        "damage.\n\n".
+        "On your MySQL instance, the global %s is not set to %s. ".
+        "It is strongly encouraged that you enable this mode when running ".
+        "Phabricator.\n\n".
+        "By default MySQL will silently ignore some types of errors, which ".
+        "can cause data loss and raise security concerns. Enabling strict ".
+        "mode makes MySQL raise an explicit error instead, and prevents this ".
+        "entire class of problems from doing any damage.\n\n".
         "You can find more information about this mode (and how to configure ".
         "it) in the MySQL manual. Usually, it is sufficient to add this to ".
-        "your 'my.cnf' file:\n\n".
+        "your %s file (in the %s section) and then restart %s:\n\n".
         "%s\n".
         "(Note that if you run other applications against the same database, ".
         "they may not work in strict mode. Be careful about enabling it in ".
         "these cases.)",
-        phutil_tag('pre', array(), 'sql-mode=STRICT_ALL_TABLES'));
+        phutil_tag('tt', array(), 'sql_mode'),
+        phutil_tag('tt', array(), 'STRICT_ALL_TABLES'),
+        phutil_tag('tt', array(), 'my.cnf'),
+        phutil_tag('tt', array(), '[mysqld]'),
+        phutil_tag('tt', array(), 'mysqld'),
+        phutil_tag('pre', array(), 'sql_mode=STRICT_ALL_TABLES'));
 
       $this->newIssue('mysql.mode')
         ->setName(pht('MySQL STRICT_ALL_TABLES Mode Not Set'))
