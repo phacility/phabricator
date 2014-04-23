@@ -17,6 +17,19 @@ final class DifferentialHunkQuery
     return $this;
   }
 
+  public function willExecute() {
+    // If we fail to load any hunks at all (for example, because all of
+    // the requested changesets are directories or empty files and have no
+    // hunks) we'll never call didFilterPage(), and thus never have an
+    // opportunity to attach hunks. Attach empty hunk lists now so that we
+    // end up with the right result.
+    if ($this->shouldAttachToChangesets) {
+      foreach ($this->changesets as $changeset) {
+        $changeset->attachHunks(array());
+      }
+    }
+  }
+
   public function loadPage() {
     $table = new DifferentialHunk();
     $conn_r = $table->establishConnection('r');
