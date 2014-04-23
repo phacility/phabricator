@@ -26,6 +26,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     // list of all the CCs and then construct a transaction for them at the
     // end if necessary.
     $added_ccs = PhabricatorMarkupEngine::extractPHIDsFromMentions(
+      $user,
       array(
         $request->getStr('comments'),
       ));

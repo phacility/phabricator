@@ -55,6 +55,7 @@ final class ConpherenceUpdateController
         case ConpherenceUpdateActions::MESSAGE:
           $message = $request->getStr('text');
           $xactions = $editor->generateTransactionsFromText(
+            $user,
             $conpherence,
             $message);
           $delete_draft = true;

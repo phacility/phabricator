@@ -90,7 +90,10 @@ final class ConduitAPI_conpherence_updatethread_Method
     if ($message) {
       $xactions = array_merge(
         $xactions,
-        $editor->generateTransactionsFromText($conpherence, $message));
+        $editor->generateTransactionsFromText(
+          $user,
+          $conpherence,
+          $message));
     }
 
     try {
