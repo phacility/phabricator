@@ -203,8 +203,8 @@
   border-radius: 3px;
 }
 
-.phui-timeline-icon-fill .phui-timeline-icon {
-  margin-top: 5px;
+span.phui-timeline-icon-fill .phui-timeline-icon {
+  margin-top: 7px;
 }
 
 .phui-timeline-minor-event .phui-timeline-icon {
