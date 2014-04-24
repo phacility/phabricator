@@ -24,8 +24,14 @@ final class ManiphestTaskSearchEngine
       'subscriberPHIDs',
       $this->readPHIDsFromRequest($request, 'subscribers'));
 
-    $saved->setParameter('statuses', $request->getArr('statuses'));
-    $saved->setParameter('priorities', $request->getArr('priorities'));
+    $saved->setParameter(
+      'statuses',
+      $this->readListFromRequest($request, 'statuses'));
+
+    $saved->setParameter(
+      'priorities',
+      $this->readListFromRequest($request, 'priorities'));
+
     $saved->setParameter('group', $request->getStr('group'));
     $saved->setParameter('order', $request->getStr('order'));
 
