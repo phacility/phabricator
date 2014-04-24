@@ -9,7 +9,7 @@ final class DifferentialPHIDTypeRevision extends PhabricatorPHIDType {
   }
 
   public function getTypeName() {
-    return pht('Differential Revision');
+    return pht('Revision');
   }
 
   public function newObject() {

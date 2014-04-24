@@ -9,7 +9,7 @@ final class PhabricatorPeoplePHIDTypeUser extends PhabricatorPHIDType {
   }
 
   public function getTypeName() {
-    return pht('Phabricator User');
+    return pht('User');
   }
 
   public function getTypeIcon() {
