@@ -128,24 +128,28 @@ final class SlowvoteEmbedView extends AphrontView {
       ),
       $quip);
 
-    $submit = phutil_tag(
-      'div',
-      array(
-        'class' => 'slowvote-footer',
-      ),
-      phutil_tag(
+    if ($poll->getIsClosed()) {
+      $submit = null;
+    } else {
+      $submit = phutil_tag(
         'div',
         array(
-          'class' => 'slowvote-footer-content',
+          'class' => 'slowvote-footer',
         ),
-        array(
-          $hint,
-          phutil_tag(
-            'button',
-            array(
-            ),
-            pht('Engage in Deliberations')),
-        )));
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'slowvote-footer-content',
+          ),
+          array(
+            $hint,
+            phutil_tag(
+              'button',
+              array(
+              ),
+              pht('Engage in Deliberations')),
+          )));
+    }
 
     $body = phabricator_form(
       $this->getUser(),
@@ -251,6 +255,8 @@ final class SlowvoteEmbedView extends AphrontView {
       PhabricatorSlowvotePoll::METHOD_APPROVAL => 'checkbox',
     );
 
+    $closed = $this->getPoll()->getIsClosed();
+
     return phutil_tag(
       'input',
       array(
@@ -258,6 +264,7 @@ final class SlowvoteEmbedView extends AphrontView {
         'name' => 'vote[]',
         'value' => $option->getID(),
         'checked' => ($selected ? 'checked' : null),
+        'disabled' => ($closed ? 'disabled' : null),
       ));
   }
 
