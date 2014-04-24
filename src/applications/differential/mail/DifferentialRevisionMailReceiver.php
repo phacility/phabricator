@@ -15,13 +15,13 @@ final class DifferentialRevisionMailReceiver
   protected function loadObject($pattern, PhabricatorUser $viewer) {
     $id = (int)trim($pattern, 'D');
 
-    $results = id(new DifferentialRevisionQuery())
+    return id(new DifferentialRevisionQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
       ->needReviewerStatus(true)
-      ->execute();
-
-    return head($results);
+      ->needReviewerAuthority(true)
+      ->needActiveDiffs(true)
+      ->executeOne();
   }
 
   protected function processReceivedObjectMail(
