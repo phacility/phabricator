@@ -89,7 +89,7 @@ final class PhabricatorSearchResultView extends AphrontView {
     $quoted_queries = $matches[1];
     $query = preg_replace($quoted_regexp, '', $query);
 
-    $query = preg_split('/\s+[+|]?/', $query);
+    $query = preg_split('/\s+[+|]?/u', $query);
     $query = array_filter($query);
     $query = array_merge($query, $quoted_queries);
     $str = phutil_escape_html($str);
