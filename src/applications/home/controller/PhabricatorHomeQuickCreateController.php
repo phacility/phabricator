@@ -29,6 +29,7 @@ final class PhabricatorHomeQuickCreateController
       ),
       array(
         'title' => pht('Quick Create'),
+        'device' => true,
       ));
   }
 
