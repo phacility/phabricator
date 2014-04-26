@@ -105,7 +105,7 @@
   left: 0;
   right: 0;
   background-color: #d8dce2;
-  height: 3em;
+  height: 38px;
   width: 100%;
 }
 
@@ -192,7 +192,7 @@
 }
 
 .conpherence-message-pane .aphront-form-control-submit {
-  margin: 3px 8px 0 0;
+  margin: 0 8px 0 0;
 }
 .conpherence-message-pane .remarkup-assist-bar {
   border-width: 1px 0 0;
@@ -212,10 +212,10 @@
 }
 
 .device .conpherence-message-pane .remarkup-assist-textarea {
-  margin: 0.5em 0em 0em 2%;
-  padding: 6px 1%;
-  width: 98%;
-  height: 2em;
+  margin: 4px 8px;
+  padding: 6px 6px;
+  width: 97%;
+  height: 28px;
   resize: none;
 }
 
@@ -231,9 +231,9 @@
   width: 76%;
 }
 .device-phone .conpherence-message-pane .aphront-form-control-textarea {
-  width: 63%;
+  width: 60%;
 }
 
 .device .conpherence-message-pane .aphront-form-control-submit button {
-  margin: 0.6em 0 0 2%;
+  margin: 7px 0 0 0;
 }
