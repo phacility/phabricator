@@ -141,8 +141,9 @@
   border-left: 3px solid {$lightbluetext};
   color: {$bluetext};
   font-style:  italic;
-  margin: 0 0 12px;
-  padding: 4px 8px;
+  margin: 4px 20px 12px 0;
+  padding: 8px 12px;
+  background-color: #F8F9FC;
 }
 
 .phabricator-remarkup blockquote em {
