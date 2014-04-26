@@ -112,6 +112,21 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
     return $phids;
   }
 
+  public function getActionStrength() {
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_ACTION:
+        return 3;
+      case self::TYPE_UPDATE:
+        return 2;
+      case self::TYPE_INLINE:
+        return 0.25;
+    }
+
+    return parent::getActionStrength();
+  }
+
+
   public function getActionName() {
     switch ($this->getTransactionType()) {
       case self::TYPE_INLINE:
