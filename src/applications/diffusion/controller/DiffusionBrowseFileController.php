@@ -538,11 +538,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
           if ($author_phid && $handles[$author_phid]) {
             $author_link = $handles[$author_phid]->renderLink();
           } else {
-            $author_link = phutil_tag(
-              'span',
-              array(
-              ),
-              $blame['author']);
+            $author_link = $blame['author'];
           }
           $display_line['author'] = $author_link;
 
