@@ -1189,8 +1189,6 @@ phutil_register_library_map(array(
     'PhabricatorAuditAddCommentController' => 'applications/audit/controller/PhabricatorAuditAddCommentController.php',
     'PhabricatorAuditComment' => 'applications/audit/storage/PhabricatorAuditComment.php',
     'PhabricatorAuditCommentEditor' => 'applications/audit/editor/PhabricatorAuditCommentEditor.php',
-    'PhabricatorAuditCommitListView' => 'applications/audit/view/PhabricatorAuditCommitListView.php',
-    'PhabricatorAuditCommitQuery' => 'applications/audit/query/PhabricatorAuditCommitQuery.php',
     'PhabricatorAuditCommitStatusConstants' => 'applications/audit/constants/PhabricatorAuditCommitStatusConstants.php',
     'PhabricatorAuditController' => 'applications/audit/controller/PhabricatorAuditController.php',
     'PhabricatorAuditDAO' => 'applications/audit/storage/PhabricatorAuditDAO.php',
@@ -1201,7 +1199,6 @@ phutil_register_library_map(array(
     'PhabricatorAuditManagementDeleteWorkflow' => 'applications/audit/management/PhabricatorAuditManagementDeleteWorkflow.php',
     'PhabricatorAuditManagementWorkflow' => 'applications/audit/management/PhabricatorAuditManagementWorkflow.php',
     'PhabricatorAuditPreviewController' => 'applications/audit/controller/PhabricatorAuditPreviewController.php',
-    'PhabricatorAuditQuery' => 'applications/audit/query/PhabricatorAuditQuery.php',
     'PhabricatorAuditReplyHandler' => 'applications/audit/mail/PhabricatorAuditReplyHandler.php',
     'PhabricatorAuditStatusConstants' => 'applications/audit/constants/PhabricatorAuditStatusConstants.php',
     'PhabricatorAuthAccountView' => 'applications/auth/view/PhabricatorAuthAccountView.php',
@@ -1312,6 +1309,7 @@ phutil_register_library_map(array(
     'PhabricatorChatLogQuery' => 'applications/chatlog/query/PhabricatorChatLogQuery.php',
     'PhabricatorCommitBranchesField' => 'applications/repository/customfield/PhabricatorCommitBranchesField.php',
     'PhabricatorCommitCustomField' => 'applications/repository/customfield/PhabricatorCommitCustomField.php',
+    'PhabricatorCommitSearchEngine' => 'applications/audit/query/PhabricatorCommitSearchEngine.php',
     'PhabricatorCommitTagsField' => 'applications/repository/customfield/PhabricatorCommitTagsField.php',
     'PhabricatorCommonPasswords' => 'applications/auth/constants/PhabricatorCommonPasswords.php',
     'PhabricatorConduitAPIController' => 'applications/conduit/controller/PhabricatorConduitAPIController.php',
@@ -3926,7 +3924,6 @@ phutil_register_library_map(array(
       1 => 'PhabricatorMarkupInterface',
     ),
     'PhabricatorAuditCommentEditor' => 'PhabricatorEditor',
-    'PhabricatorAuditCommitListView' => 'AphrontView',
     'PhabricatorAuditController' => 'PhabricatorController',
     'PhabricatorAuditDAO' => 'PhabricatorLiskDAO',
     'PhabricatorAuditInlineComment' =>
@@ -3934,7 +3931,11 @@ phutil_register_library_map(array(
       0 => 'PhabricatorAuditDAO',
       1 => 'PhabricatorInlineCommentInterface',
     ),
-    'PhabricatorAuditListController' => 'PhabricatorAuditController',
+    'PhabricatorAuditListController' =>
+    array(
+      0 => 'PhabricatorAuditController',
+      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
+    ),
     'PhabricatorAuditListView' => 'AphrontView',
     'PhabricatorAuditMailReceiver' => 'PhabricatorObjectMailReceiver',
     'PhabricatorAuditManagementDeleteWorkflow' => 'PhabricatorAuditManagementWorkflow',
@@ -4066,6 +4067,7 @@ phutil_register_library_map(array(
     'PhabricatorChatLogQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorCommitBranchesField' => 'PhabricatorCommitCustomField',
     'PhabricatorCommitCustomField' => 'PhabricatorCustomField',
+    'PhabricatorCommitSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorCommitTagsField' => 'PhabricatorCommitCustomField',
     'PhabricatorCommonPasswords' => 'Phobject',
     'PhabricatorConduitAPIController' => 'PhabricatorConduitController',
@@ -4795,7 +4797,11 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryArcanistProjectDeleteController' => 'PhabricatorRepositoryController',
     'PhabricatorRepositoryArcanistProjectEditController' => 'PhabricatorRepositoryController',
     'PhabricatorRepositoryArcanistProjectQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
-    'PhabricatorRepositoryAuditRequest' => 'PhabricatorRepositoryDAO',
+    'PhabricatorRepositoryAuditRequest' =>
+    array(
+      0 => 'PhabricatorRepositoryDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
     'PhabricatorRepositoryBranch' => 'PhabricatorRepositoryDAO',
     'PhabricatorRepositoryCommit' =>
     array(
