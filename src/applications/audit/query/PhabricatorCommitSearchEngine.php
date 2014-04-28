@@ -107,8 +107,10 @@ final class PhabricatorCommitSearchEngine
     $names = array();
 
     if ($this->requireViewer()->isLoggedIn()) {
-      $names['need_attention'] = pht('Need Attention');
+      $names['need'] = pht('Need Attention');
+      $names['problem'] = pht('Problem Commits');
     }
+
     $names['open'] = pht('Open Audits');
 
     $names['all'] = pht('All Commits');
@@ -129,7 +131,7 @@ final class PhabricatorCommitSearchEngine
           'auditStatus',
           DiffusionCommitQuery::AUDIT_STATUS_OPEN);
         return $query;
-      case 'need_attention':
+      case 'need':
         $query->setParameter('awaitingUserPHID', $viewer->getPHID());
         $query->setParameter(
           'auditStatus',
@@ -137,6 +139,12 @@ final class PhabricatorCommitSearchEngine
         $query->setParameter(
           'auditorPHIDs',
           PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($viewer));
+        return $query;
+      case 'problem':
+        $query->setParameter('commitAuthorPHIDs', array($viewer->getPHID()));
+        $query->setParameter(
+          'auditStatus',
+          DiffusionCommitQuery::AUDIT_STATUS_CONCERN);
         return $query;
     }
 

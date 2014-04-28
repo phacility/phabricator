@@ -418,6 +418,7 @@ final class PhabricatorHomeMainController
       ->withAuditorPHIDs($phids)
       ->withAuditStatus(DiffusionCommitQuery::AUDIT_STATUS_OPEN)
       ->withAuditAwaitingUser($user)
+      ->needAuditRequests(true)
       ->needCommitData(true)
       ->setLimit(10);
 
@@ -458,6 +459,7 @@ final class PhabricatorHomeMainController
       ->withAuthorPHIDs($phids)
       ->withAuditStatus(DiffusionCommitQuery::AUDIT_STATUS_CONCERN)
       ->needCommitData(true)
+      ->needAuditRequests(true)
       ->setLimit(10);
 
     $commits = $query->execute();
