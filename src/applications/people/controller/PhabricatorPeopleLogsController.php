@@ -35,64 +35,11 @@ final class PhabricatorPeopleLogsController extends PhabricatorPeopleController
     $phids = array_keys($phids);
     $handles = $this->loadViewerHandles($phids);
 
-    $action_map = PhabricatorUserLog::getActionTypeMap();
-
-    $rows = array();
-    foreach ($logs as $log) {
-
-      $ip_href = $this->getApplicationURI(
-        'logs/?ip='.$log->getRemoteAddr());
-
-      $session_href = $this->getApplicationURI(
-        'logs/?sessions='.$log->getSession());
-
-      $action = $log->getAction();
-      $action_name = idx($action_map, $action, $action);
-
-      $rows[] = array(
-        phabricator_date($log->getDateCreated(), $viewer),
-        phabricator_time($log->getDateCreated(), $viewer),
-        $action_name,
-        $log->getActorPHID()
-          ? $handles[$log->getActorPHID()]->getName()
-          : null,
-        $handles[$log->getUserPHID()]->getName(),
-        phutil_tag(
-          'a',
-          array(
-            'href' => $ip_href,
-          ),
-          $log->getRemoteAddr()),
-        phutil_tag(
-          'a',
-          array(
-            'href' => $session_href,
-          ),
-          substr($log->getSession(), 0, 6)),
-      );
-    }
-
-    $table = new AphrontTableView($rows);
-    $table->setHeaders(
-      array(
-        pht('Date'),
-        pht('Time'),
-        pht('Action'),
-        pht('Actor'),
-        pht('User'),
-        pht('IP'),
-        pht('Session'),
-      ));
-    $table->setColumnClasses(
-      array(
-        '',
-        'right',
-        'wide',
-        '',
-        '',
-        '',
-        'n',
-      ));
+    $table = id(new PhabricatorUserLogView())
+      ->setUser($viewer)
+      ->setLogs($logs)
+      ->setSearchBaseURI($this->getApplicationURI('logs/'))
+      ->setHandles($handles);
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('User Activity Logs'))

@@ -20,11 +20,8 @@ final class PhabricatorAuthDowngradeSessionController
 
     if ($request->isFormPost()) {
 
-      queryfx(
-        $session->establishConnection('w'),
-        'UPDATE %T SET highSecurityUntil = NULL WHERE id = %d',
-        $session->getTableName(),
-        $session->getID());
+      id(new PhabricatorAuthSessionEngine())
+        ->exitHighSecurity($viewer, $session);
 
       return id(new AphrontRedirectResponse())
         ->setURI($this->getApplicationURI('session/downgrade/'));

@@ -76,6 +76,7 @@ final class PhabricatorPeopleLogQuery
       $where[] = qsprintf(
         $conn_r,
         'actorPHID IN (%Ls) OR userPHID IN (%Ls)',
+        $this->relatedPHIDs,
         $this->relatedPHIDs);
     }
 

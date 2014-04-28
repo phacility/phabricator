@@ -249,6 +249,12 @@ final class PhabricatorAuthSessionEngine extends Phobject {
           $session->getTableName(),
           $until,
           $session->getID());
+
+        $log = PhabricatorUserLog::initializeNewLog(
+          $viewer,
+          $viewer->getPHID(),
+          PhabricatorUserLog::ACTION_ENTER_HISEC);
+        $log->save();
       }
     }
 
@@ -301,5 +307,22 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     return $form;
   }
 
+
+  public function exitHighSecurity(
+    PhabricatorUser $viewer,
+    PhabricatorAuthSession $session) {
+
+    queryfx(
+      $session->establishConnection('w'),
+      'UPDATE %T SET highSecurityUntil = NULL WHERE id = %d',
+      $session->getTableName(),
+      $session->getID());
+
+    $log = PhabricatorUserLog::initializeNewLog(
+      $viewer,
+      $viewer->getPHID(),
+      PhabricatorUserLog::ACTION_EXIT_HISEC);
+    $log->save();
+  }
 
 }
