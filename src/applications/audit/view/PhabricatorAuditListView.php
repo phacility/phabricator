@@ -92,7 +92,6 @@ final class PhabricatorAuditListView extends AphrontView {
     $rowc = array();
 
     $list = new PHUIObjectItemListView();
-    $authority = array_fill_keys($this->authorityPHIDs, true);
     foreach ($this->commits as $commit) {
       $commit_phid = $commit->getPHID();
       $commit_handle = $this->getHandle($commit_phid);
@@ -113,7 +112,12 @@ final class PhabricatorAuditListView extends AphrontView {
       }
       $auditors = phutil_implode_html(', ', $auditors);
 
-      $audit = idx($audits, $user->getPHID());
+      $authority_audits = array_select_keys($audits, $this->authorityPHIDs);
+      if ($authority_audits) {
+        $audit = reset($authority_audits);
+      } else {
+        $audit = reset($audits);
+      }
       if ($audit) {
         $reasons = $audit->getAuditReasons();
         $reasons = phutil_implode_html(', ', $reasons);
@@ -141,10 +145,6 @@ final class PhabricatorAuditListView extends AphrontView {
 
       if (!empty($auditors)) {
         $item->addAttribute(pht('Auditors: %s', $auditors));
-      }
-
-      if ($commit->getAuthorityAudits($user, $this->authorityPHIDs)) {
-        $item->setEffect('highlighted');
       }
 
       $list->addItem($item);
