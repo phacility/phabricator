@@ -3,6 +3,10 @@
 final class PhabricatorSettingsPanelActivity
   extends PhabricatorSettingsPanel {
 
+  public function isEditableByAdministrators() {
+    return true;
+  }
+
   public function getPanelKey() {
     return 'activity';
   }
