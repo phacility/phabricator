@@ -51,6 +51,7 @@ final class PhabricatorSlowvoteListController
         ->setObjectName('V'.$poll->getID())
         ->setHeader($poll->getQuestion())
         ->setHref('/V'.$poll->getID())
+        ->setDisabled($poll->getIsClosed())
         ->addIcon('none', $date_created);
 
       $description = $poll->getDescription();

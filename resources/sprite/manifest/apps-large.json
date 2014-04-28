@@ -21,6 +21,26 @@
       "rule" : ".apps-adventure-white-large",
       "hash" : "36df80df3c80bf991dc230294cc9c911"
     },
+    "apps-aphlict-blue-large"         : {
+      "name" : "apps-aphlict-blue-large",
+      "rule" : ".apps-aphlict-blue-large, .phabricator-crumb-view:hover .apps-aphlict-dark-large",
+      "hash" : "3d7c4b2018e7d0aa62a5a4c5cdbef44e"
+    },
+    "apps-aphlict-dark-large"         : {
+      "name" : "apps-aphlict-dark-large",
+      "rule" : ".apps-aphlict-dark-large",
+      "hash" : "400ba4634264ec84e373a79561994e52"
+    },
+    "apps-aphlict-light-large"        : {
+      "name" : "apps-aphlict-light-large",
+      "rule" : ".apps-aphlict-light-large",
+      "hash" : "c2cdc6273262351668012ee404417575"
+    },
+    "apps-aphlict-white-large"        : {
+      "name" : "apps-aphlict-white-large",
+      "rule" : ".apps-aphlict-white-large",
+      "hash" : "c5f1390fa240f3baebaf972176239e89"
+    },
     "apps-application-blue-large"     : {
       "name" : "apps-application-blue-large",
       "rule" : ".apps-application-blue-large, .phabricator-crumb-view:hover .apps-application-dark-large",
@@ -1220,6 +1240,26 @@
       "name" : "apps-uiexamples-white-large",
       "rule" : ".apps-uiexamples-white-large",
       "hash" : "2aa6749cf6f7f2ddb3b705ac1e4e3145"
+    },
+    "apps-workboard-blue-large"       : {
+      "name" : "apps-workboard-blue-large",
+      "rule" : ".apps-workboard-blue-large, .phabricator-crumb-view:hover .apps-workboard-dark-large",
+      "hash" : "97bfa3d57e50caf2e8b79282c90e58d5"
+    },
+    "apps-workboard-dark-large"       : {
+      "name" : "apps-workboard-dark-large",
+      "rule" : ".apps-workboard-dark-large",
+      "hash" : "7bb65c0c8cbcf632780768a377f5e29b"
+    },
+    "apps-workboard-light-large"      : {
+      "name" : "apps-workboard-light-large",
+      "rule" : ".apps-workboard-light-large",
+      "hash" : "161c105fa645e231aae8efa9cd12d9ed"
+    },
+    "apps-workboard-white-large"      : {
+      "name" : "apps-workboard-white-large",
+      "rule" : ".apps-workboard-white-large",
+      "hash" : "2d5e920bd4cd4c13f1938ee71d2a8c7c"
     },
     "apps-workphlow-blue-large"       : {
       "name" : "apps-workphlow-blue-large",

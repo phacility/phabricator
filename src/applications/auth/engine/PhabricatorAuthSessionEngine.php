@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @task hisec High Security Mode
+ */
 final class PhabricatorAuthSessionEngine extends Phobject {
 
   /**
@@ -78,28 +81,43 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     $session_table = new PhabricatorAuthSession();
     $user_table = new PhabricatorUser();
     $conn_r = $session_table->establishConnection('r');
+    $session_key = PhabricatorHash::digest($session_token);
 
     // NOTE: We're being clever here because this happens on every page load,
-    // and by joining we can save a query.
+    // and by joining we can save a query. This might be getting too clever
+    // for its own good, though...
 
     $info = queryfx_one(
       $conn_r,
-      'SELECT s.sessionExpires AS _sessionExpires, s.id AS _sessionID, u.*
+      'SELECT
+          s.id AS s_id,
+          s.sessionExpires AS s_sessionExpires,
+          s.sessionStart AS s_sessionStart,
+          s.highSecurityUntil AS s_highSecurityUntil,
+          u.*
         FROM %T u JOIN %T s ON u.phid = s.userPHID
         AND s.type = %s AND s.sessionKey = %s',
       $user_table->getTableName(),
       $session_table->getTableName(),
       $session_type,
-      PhabricatorHash::digest($session_token));
+      $session_key);
 
     if (!$info) {
       return null;
     }
 
-    $expires = $info['_sessionExpires'];
-    $id = $info['_sessionID'];
-    unset($info['_sessionExpires']);
-    unset($info['_sessionID']);
+    $session_dict = array(
+      'userPHID' => $info['phid'],
+      'sessionKey' => $session_key,
+      'type' => $session_type,
+    );
+    foreach ($info as $key => $value) {
+      if (strncmp($key, 's_', 2) === 0) {
+        unset($info[$key]);
+        $session_dict[substr($key, 2)] = $value;
+      }
+    }
+    $session = id(new PhabricatorAuthSession())->loadFromArray($session_dict);
 
     $ttl = PhabricatorAuthSession::getSessionTypeTTL($session_type);
 
@@ -107,19 +125,21 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     // TTL back up to the full duration. The idea here is that sessions are
     // good forever if used regularly, but get GC'd when they fall out of use.
 
-    if (time() + (0.80 * $ttl) > $expires) {
+    if (time() + (0.80 * $ttl) > $session->getSessionExpires()) {
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
         $conn_w = $session_table->establishConnection('w');
         queryfx(
           $conn_w,
           'UPDATE %T SET sessionExpires = UNIX_TIMESTAMP() + %d WHERE id = %d',
-          $session_table->getTableName(),
+          $session->getTableName(),
           $ttl,
-          $id);
+          $session->getID());
       unset($unguarded);
     }
 
-    return $user_table->loadFromArray($info);
+    $user = $user_table->loadFromArray($info);
+    $user->attachSession($session);
+    return $user;
   }
 
 
@@ -180,6 +200,129 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     unset($unguarded);
 
     return $session_key;
+  }
+
+
+  /**
+   * Require high security, or prompt the user to enter high security.
+   *
+   * If the user's session is in high security, this method will return a
+   * token. Otherwise, it will throw an exception which will eventually
+   * be converted into a multi-factor authentication workflow.
+   *
+   * @param PhabricatorUser User whose session needs to be in high security.
+   * @param AphrontReqeust  Current request.
+   * @param string          URI to return the user to if they cancel.
+   * @return PhabricatorAuthHighSecurityToken Security token.
+   */
+  public function requireHighSecuritySession(
+    PhabricatorUser $viewer,
+    AphrontRequest $request,
+    $cancel_uri) {
+
+    if (!$viewer->hasSession()) {
+      throw new Exception(
+        pht('Requiring a high-security session from a user with no session!'));
+    }
+
+    $session = $viewer->getSession();
+
+    $token = $this->issueHighSecurityToken($session);
+    if ($token) {
+      return $token;
+    }
+
+    if ($request->isHTTPPost()) {
+      $request->validateCSRF();
+      if ($request->getExists(AphrontRequest::TYPE_HISEC)) {
+
+        // TODO: Actually verify that the user provided some multi-factor
+        // auth credentials here. For now, we just let you enter high
+        // security.
+
+        $until = time() + phutil_units('15 minutes in seconds');
+        $session->setHighSecurityUntil($until);
+
+        queryfx(
+          $session->establishConnection('w'),
+          'UPDATE %T SET highSecurityUntil = %d WHERE id = %d',
+          $session->getTableName(),
+          $until,
+          $session->getID());
+
+        $log = PhabricatorUserLog::initializeNewLog(
+          $viewer,
+          $viewer->getPHID(),
+          PhabricatorUserLog::ACTION_ENTER_HISEC);
+        $log->save();
+      }
+    }
+
+    $token = $this->issueHighSecurityToken($session);
+    if ($token) {
+      return $token;
+    }
+
+    throw id(new PhabricatorAuthHighSecurityRequiredException())
+      ->setCancelURI($cancel_uri);
+  }
+
+
+  /**
+   * Issue a high security token for a session, if authorized.
+   *
+   * @param PhabricatorAuthSession Session to issue a token for.
+   * @return PhabricatorAuthHighSecurityToken|null Token, if authorized.
+   */
+  private function issueHighSecurityToken(PhabricatorAuthSession $session) {
+    $until = $session->getHighSecurityUntil();
+    if ($until > time()) {
+      return new PhabricatorAuthHighSecurityToken();
+    }
+    return null;
+  }
+
+
+  /**
+   * Render a form for providing relevant multi-factor credentials.
+   *
+   * @param   PhabricatorUser Viewing user.
+   * @param   AphrontRequest  Current request.
+   * @return  AphrontFormView Renderable form.
+   */
+  public function renderHighSecurityForm(
+    PhabricatorUser $viewer,
+    AphrontRequest $request) {
+
+    // TODO: This is stubbed.
+
+    $form = id(new AphrontFormView())
+      ->setUser($viewer)
+      ->appendRemarkupInstructions('')
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel(pht('Secret Stuff')))
+      ->appendRemarkupInstructions('');
+
+    return $form;
+  }
+
+
+  public function exitHighSecurity(
+    PhabricatorUser $viewer,
+    PhabricatorAuthSession $session) {
+
+    queryfx(
+      $session->establishConnection('w'),
+      'UPDATE %T SET highSecurityUntil = NULL WHERE id = %d',
+      $session->getTableName(),
+      $session->getID());
+
+    $log = PhabricatorUserLog::initializeNewLog(
+      $viewer,
+      $viewer->getPHID(),
+      PhabricatorUserLog::ACTION_EXIT_HISEC);
+    $log->save();
   }
 
 }

@@ -216,6 +216,13 @@ final class PhabricatorSearchApplicationSearchEngine
 
     asort($results);
 
+    // Put tasks first, see T4606.
+    $results = array_select_keys(
+      $results,
+      array(
+        ManiphestPHIDTypeTask::TYPECONST,
+      )) + $results;
+
     return $results;
   }
 

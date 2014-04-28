@@ -12,7 +12,7 @@ final class PhabricatorSettingsPanelSessions
   }
 
   public function getPanelGroup() {
-    return pht('Authentication');
+    return pht('Sessions and Logs');
   }
 
   public function isEnabled() {
@@ -66,10 +66,15 @@ final class PhabricatorSettingsPanelSessions
           pht('Terminate'));
       }
 
+      $hisec = ($session->getHighSecurityUntil() - time());
+
       $rows[] = array(
         $handles[$session->getUserPHID()]->renderLink(),
         substr($session->getSessionKey(), 0, 6),
         $session->getType(),
+        ($hisec > 0)
+          ? phabricator_format_relative_time($hisec)
+          : null,
         phabricator_datetime($session->getSessionStart(), $viewer),
         phabricator_date($session->getSessionExpires(), $viewer),
         $button,
@@ -84,6 +89,7 @@ final class PhabricatorSettingsPanelSessions
         pht('Identity'),
         pht('Session'),
         pht('Type'),
+        pht('HiSec'),
         pht('Created'),
         pht('Expires'),
         pht(''),
@@ -93,6 +99,7 @@ final class PhabricatorSettingsPanelSessions
         'wide',
         'n',
         '',
+        'right',
         'right',
         'right',
         'action',
@@ -112,6 +119,20 @@ final class PhabricatorSettingsPanelSessions
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Active Login Sessions'))
       ->addActionLink($terminate_button);
+
+    $hisec = ($viewer->getSession()->getHighSecurityUntil() - time());
+    if ($hisec > 0) {
+      $hisec_icon = id(new PHUIIconView())
+        ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+        ->setSpriteIcon('lock');
+      $hisec_button = id(new PHUIButtonView())
+        ->setText(pht('Leave High Security'))
+        ->setHref('/auth/session/downgrade/')
+        ->setTag('a')
+        ->setWorkflow(true)
+        ->setIcon($hisec_icon);
+      $header->addActionLink($hisec_button);
+    }
 
     $panel = id(new PHUIObjectBoxView())
       ->setHeader($header)

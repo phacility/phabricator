@@ -45,6 +45,7 @@ final class HeraldRuleViewController extends HeraldController {
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb("H{$id}");
+    $crumbs->setActionList($actions);
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -148,14 +149,11 @@ final class HeraldRuleViewController extends HeraldController {
 
       $view->invokeWillRenderEvent();
 
-      $view->addSectionHeader(pht('Rule Description'));
+      $view->addSectionHeader(
+        pht('Rule Description'),
+        PHUIPropertyListView::ICON_SUMMARY);
       $view->addTextContent(
-        phutil_tag(
-          'div',
-          array(
-            'style' => 'white-space: pre-wrap;',
-          ),
-          $adapter->renderRuleAsText($rule, $this->getLoadedHandles())));
+        $adapter->renderRuleAsText($rule, $this->getLoadedHandles()));
     }
 
     return $view;

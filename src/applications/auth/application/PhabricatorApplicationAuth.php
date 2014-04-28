@@ -88,6 +88,8 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
           => 'PhabricatorAuthConfirmLinkController',
         'session/terminate/(?P<id>[^/]+)/'
           => 'PhabricatorAuthTerminateSessionController',
+        'session/downgrade/'
+          => 'PhabricatorAuthDowngradeSessionController',
       ),
 
       '/oauth/(?P<provider>\w+)/login/'

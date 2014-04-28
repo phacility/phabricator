@@ -973,7 +973,9 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     $texts = array_mergev($blocks);
-    $phids = PhabricatorMarkupEngine::extractPHIDsFromMentions($texts);
+    $phids = PhabricatorMarkupEngine::extractPHIDsFromMentions(
+      $this->getActor(),
+      $texts);
 
     $this->mentionedPHIDs = $phids;
 
@@ -2173,6 +2175,7 @@ abstract class PhabricatorApplicationTransactionEditor
     $phids = array();
     if ($blocks) {
       $phids[] = PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
+        $this->getActor(),
         $blocks);
     }
 

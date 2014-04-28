@@ -2,28 +2,18 @@
 
 abstract class PhabricatorAuditController extends PhabricatorController {
 
-  public $filter;
-
   public function buildSideNavView() {
 
+    $user = $this->getRequest()->getUser();
+
     $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI('/audit/view/'));
-    $nav->addLabel(pht('Active'));
-    $nav->addFilter('active', pht('Need Attention'));
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    $nav->addLabel(pht('Audits'));
-    $nav->addFilter('audits', pht('All'));
-    $nav->addFilter('user', pht('By User'));
-    $nav->addFilter('project', pht('By Project'));
-    $nav->addFilter('package', pht('By Package'));
-    $nav->addFilter('repository', pht('By Repository'));
+    id(new PhabricatorCommitSearchEngine())
+      ->setViewer($user)
+      ->addNavigationItems($nav->getMenu());
 
-    $nav->addLabel(pht('Commits'));
-    $nav->addFilter('commits', pht('All'));
-    $nav->addFilter('author', pht('By Author'));
-    $nav->addFilter('packagecommits', pht('By Package'));
-
-    $this->filter = $nav->selectFilter($this->filter, 'active');
+    $nav->selectFilter(null);
 
     return $nav;
   }
@@ -32,18 +22,4 @@ abstract class PhabricatorAuditController extends PhabricatorController {
     return $this->buildSideNavView()->getMenu();
   }
 
-  public function buildStandardPageResponse($view, array $data) {
-
-    $page = $this->buildStandardPageView();
-
-    $page->setApplicationName(pht('Audit'));
-    $page->setBaseURI('/audit/');
-    $page->setTitle(idx($data, 'title'));
-    $page->setGlyph("\xE2\x9C\x8D");
-    $page->appendChild($view);
-
-    $response = new AphrontWebpageResponse();
-    return $response->setContent($page->render());
-
-  }
 }

@@ -12,7 +12,7 @@ final class PhabricatorOAuthServerAuthorizationsSettingsPanel
   }
 
   public function getPanelGroup() {
-    return pht('Authentication');
+    return pht('Sessions and Logs');
   }
 
   public function isEnabled() {

@@ -46,6 +46,7 @@ final class PhabricatorApplicationSlowvote extends PhabricatorApplication {
         'edit/(?P<id>[1-9]\d*)/' => 'PhabricatorSlowvoteEditController',
         '(?P<id>[1-9]\d*)/' => 'PhabricatorSlowvoteVoteController',
         'comment/(?P<id>[1-9]\d*)/' => 'PhabricatorSlowvoteCommentController',
+        'close/(?P<id>[1-9]\d*)/' => 'PhabricatorSlowvoteCloseController',
       ),
     );
   }

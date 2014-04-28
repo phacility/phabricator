@@ -24,6 +24,7 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   protected $shuffle;
   protected $method;
   protected $viewPolicy;
+  protected $isClosed = 0;
 
   private $options = self::ATTACHABLE;
   private $choices = self::ATTACHABLE;

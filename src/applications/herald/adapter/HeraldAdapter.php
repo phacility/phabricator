@@ -957,35 +957,71 @@ abstract class HeraldAdapter {
   public function renderRuleAsText(HeraldRule $rule, array $handles) {
     assert_instances_of($handles, 'PhabricatorObjectHandle');
 
-    $out = array();
+    require_celerity_resource('herald-css');
+
+    $icon = id(new PHUIIconView())
+      ->setIconFont('fa-chevron-circle-right lightgreytext')
+      ->addClass('herald-list-icon');
 
     if ($rule->getMustMatchAll()) {
-      $out[] = pht('When all of these conditions are met:');
+      $match_text = pht('When all of these conditions are met:');
     } else {
-      $out[] = pht('When any of these conditions are met:');
+      $match_text = pht('When any of these conditions are met:');
     }
 
-    $out[] = null;
+    $match_title = phutil_tag(
+      'p',
+      array(
+        'class' => 'herald-list-description'
+      ),
+      $match_text);
+
+    $match_list = array();
     foreach ($rule->getConditions() as $condition) {
-      $out[] = $this->renderConditionAsText($condition, $handles);
+      $match_list[] = phutil_tag(
+        'div',
+        array(
+          'class' => 'herald-list-item'
+        ),
+        array(
+          $icon,
+          $this->renderConditionAsText($condition, $handles)));
     }
-    $out[] = null;
 
     $integer_code_for_every = HeraldRepetitionPolicyConfig::toInt(
       HeraldRepetitionPolicyConfig::EVERY);
 
     if ($rule->getRepetitionPolicy() == $integer_code_for_every) {
-      $out[] = pht('Take these actions every time this rule matches:');
+      $action_text =
+        pht('Take these actions every time this rule matches:');
     } else {
-      $out[] = pht('Take these actions the first time this rule matches:');
+      $action_text =
+        pht('Take these actions the first time this rule matches:');
     }
 
-    $out[] = null;
+    $action_title = phutil_tag(
+      'p',
+      array(
+        'class' => 'herald-list-description'
+      ),
+      $action_text);
+
+    $action_list = array();
     foreach ($rule->getActions() as $action) {
-      $out[] = $this->renderActionAsText($action, $handles);
-    }
+      $action_list[] = phutil_tag(
+        'div',
+        array(
+          'class' => 'herald-list-item'
+        ),
+        array(
+          $icon,
+          $this->renderActionAsText($action, $handles)));    }
 
-    return phutil_implode_html("\n", $out);
+    return array(
+      $match_title,
+      $match_list,
+      $action_title,
+      $action_list);
   }
 
   private function renderConditionAsText(

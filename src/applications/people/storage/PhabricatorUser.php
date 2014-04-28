@@ -42,6 +42,7 @@ final class PhabricatorUser
   private $customFields = self::ATTACHABLE;
 
   private $alternateCSRFString = self::ATTACHABLE;
+  private $session = self::ATTACHABLE;
 
   protected function readField($field) {
     switch ($field) {
@@ -176,6 +177,19 @@ final class PhabricatorUser
       ->queueDocumentForIndexing($this->getPHID());
 
     return $result;
+  }
+
+  public function attachSession(PhabricatorAuthSession $session) {
+    $this->session = $session;
+    return $this;
+  }
+
+  public function getSession() {
+    return $this->assertAttached($this->session);
+  }
+
+  public function hasSession() {
+    return ($this->session !== self::ATTACHABLE);
   }
 
   private function generateConduitCertificate() {

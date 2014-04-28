@@ -13,6 +13,7 @@ final class PhabricatorSlowvoteEditor
     $types[] = PhabricatorSlowvoteTransaction::TYPE_DESCRIPTION;
     $types[] = PhabricatorSlowvoteTransaction::TYPE_RESPONSES;
     $types[] = PhabricatorSlowvoteTransaction::TYPE_SHUFFLE;
+    $types[] = PhabricatorSlowvoteTransaction::TYPE_CLOSE;
 
     return $types;
   }
@@ -54,6 +55,8 @@ final class PhabricatorSlowvoteEditor
         return $object->getResponseVisibility();
       case PhabricatorSlowvoteTransaction::TYPE_SHUFFLE:
         return $object->getShuffle();
+      case PhabricatorSlowvoteTransaction::TYPE_CLOSE:
+        return $object->getIsClosed();
     }
   }
 
@@ -66,6 +69,7 @@ final class PhabricatorSlowvoteEditor
       case PhabricatorSlowvoteTransaction::TYPE_DESCRIPTION:
       case PhabricatorSlowvoteTransaction::TYPE_RESPONSES:
       case PhabricatorSlowvoteTransaction::TYPE_SHUFFLE:
+      case PhabricatorSlowvoteTransaction::TYPE_CLOSE:
         return $xaction->getNewValue();
     }
   }
@@ -86,6 +90,9 @@ final class PhabricatorSlowvoteEditor
         break;
       case PhabricatorSlowvoteTransaction::TYPE_SHUFFLE:
         $object->setShuffle($xaction->getNewValue());
+        break;
+      case PhabricatorSlowvoteTransaction::TYPE_CLOSE:
+        $object->setIsClosed((int)$xaction->getNewValue());
         break;
     }
   }

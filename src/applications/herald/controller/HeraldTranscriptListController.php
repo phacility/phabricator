@@ -62,51 +62,39 @@ final class HeraldTranscriptListController extends HeraldController
       $handles = $this->loadViewerHandles($phids);
     }
 
-    $rows = array();
+    $list = new PHUIObjectItemListView();
+    $list->setCards(true);
+    $list->setFlush(true);
     foreach ($transcripts as $xscript) {
-      $rows[] = array(
-        phabricator_date($xscript->getTime(), $viewer),
-        phabricator_time($xscript->getTime(), $viewer),
-        $handles[$xscript->getObjectPHID()]->renderLink(),
-        $xscript->getDryRun() ? pht('Yes') : '',
-        number_format((int)(1000 * $xscript->getDuration())).' ms',
-        phutil_tag(
-          'a',
-          array(
-            'href' => '/herald/transcript/'.$xscript->getID().'/',
-            'class' => 'button small grey',
-          ),
-          pht('View Transcript')),
-      );
+      $view_href = phutil_tag(
+        'a',
+        array(
+          'href' => '/herald/transcript/'.$xscript->getID().'/',
+        ),
+        pht('View Full Transcript'));
+
+      $item = new PHUIObjectItemView();
+      $item->setObjectName($xscript->getID());
+      $item->setHeader($view_href);
+      if ($xscript->getDryRun()) {
+        $item->addAttribute(pht('Dry Run'));
+      }
+      $item->addAttribute($handles[$xscript->getObjectPHID()]->renderLink());
+      $item->addAttribute(
+        number_format((int)(1000 * $xscript->getDuration())).' ms');
+      $item->addIcon(
+        'none',
+        phabricator_datetime($xscript->getTime(), $viewer));
+
+      $list->addItem($item);
     }
 
-    $table = new AphrontTableView($rows);
-    $table->setHeaders(
-      array(
-        pht('Date'),
-        pht('Time'),
-        pht('Object'),
-        pht('Dry Run'),
-        pht('Duration'),
-        pht('View'),
-      ));
-    $table->setColumnClasses(
-      array(
-        '',
-        'right',
-        'wide wrap',
-        '',
-        '',
-        'action',
-      ));
-
     // Render the whole page.
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Herald Transcripts'));
-    $panel->appendChild($table);
-    $panel->setNoBackground();
+    $box = new PHUIObjectBoxView();
+    $box->setHeaderText(pht('Herald Transcripts'));
+    $box->appendChild($list);
 
-    return $panel;
+    return $box;
 
   }
 

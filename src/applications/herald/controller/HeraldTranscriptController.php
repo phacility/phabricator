@@ -362,12 +362,11 @@ final class HeraldTranscriptController extends HeraldController {
         'wide',
       ));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Actions Taken'));
-    $panel->appendChild($table);
-    $panel->setNoBackground();
+    $box = new PHUIObjectBoxView();
+    $box->setHeaderText(pht('Actions Taken'));
+    $box->appendChild($table);
 
-    return $panel;
+    return $box;
   }
 
   private function buildActionTranscriptPanel($xscript) {
@@ -450,17 +449,16 @@ final class HeraldTranscriptController extends HeraldController {
           )));
     }
 
-    $panel = '';
+    $box = null;
     if ($rule_markup) {
-      $panel = new AphrontPanelView();
-      $panel->setHeader(pht('Rule Details'));
-      $panel->setNoBackground();
-      $panel->appendChild(phutil_tag(
+      $box = new PHUIObjectBoxView();
+      $box->setHeaderText(pht('Rule Details'));
+      $box->appendChild(phutil_tag(
         'ul',
         array('class' => 'herald-explain-list'),
         $rule_markup));
     }
-    return $panel;
+    return $box;
   }
 
   private function buildObjectTranscriptPanel($xscript) {
@@ -512,19 +510,16 @@ final class HeraldTranscriptController extends HeraldController {
       $rows[] = array($name, $value);
     }
 
-    $table = new AphrontTableView($rows);
-    $table->setColumnClasses(
-      array(
-        'header',
-        'wide',
-      ));
+    $property_list = new PHUIPropertyListView();
+    foreach ($rows as $row) {
+      $property_list->addProperty($row[0], $row[1]);
+    }
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Object Transcript'));
-    $panel->setNoBackground();
-    $panel->appendChild($table);
+    $box = new PHUIObjectBoxView();
+    $box->setHeaderText(pht('Object Transcript'));
+    $box->appendChild($property_list);
 
-    return $panel;
+    return $box;
   }
 
 

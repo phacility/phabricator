@@ -35,3 +35,18 @@
 .herald-action-table td.target {
   width: 100%;
 }
+
+.herald-list-description {
+  color: {$darkgreytext};
+  padding: 8px 0;
+}
+
+.herald-list-icon {
+  margin-left: 12px;
+  margin-right: 2px;
+}
+
+.herald-list-item {
+  padding-bottom: 4px;
+  color: {$greytext};
+}
