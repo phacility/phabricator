@@ -10,6 +10,29 @@ abstract class PhabricatorAuthFactor extends Phobject {
     AphrontRequest $request,
     PhabricatorUser $user);
 
+  abstract public function renderValidateFactorForm(
+    PhabricatorAuthFactorConfig $config,
+    AphrontFormView $form,
+    PhabricatorUser $viewer,
+    $validation_result);
+
+  abstract public function processValidateFactorForm(
+    PhabricatorAuthFactorConfig $config,
+    PhabricatorUser $viewer,
+    AphrontRequest $request);
+
+  public function isFactorValid(
+    PhabricatorAuthFactorConfig $config,
+    $validation_result) {
+    return (idx($validation_result, 'valid') === true);
+  }
+
+  public function getParameterName(
+    PhabricatorAuthFactorConfig $config,
+    $name) {
+    return 'authfactor.'.$config->getID().'.'.$name;
+  }
+
   public static function getAllFactors() {
     static $factors;
 

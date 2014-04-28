@@ -26,4 +26,17 @@ final class PhabricatorAuthFactorConfig extends PhabricatorAuthDAO {
     return idx(PhabricatorAuthFactor::getAllFactors(), $this->getFactorKey());
   }
 
+  public function requireImplementation() {
+    $impl = $this->getImplementation();
+    if (!$impl) {
+      throw new Exception(
+        pht(
+          'Attempting to operate on multi-factor auth which has no '.
+          'corresponding implementation (factor key is "%s").',
+          $this->getFactorKey()));
+    }
+
+    return $impl;
+  }
+
 }

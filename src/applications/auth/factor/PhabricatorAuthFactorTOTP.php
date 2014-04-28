@@ -97,6 +97,49 @@ final class PhabricatorAuthFactorTOTP extends PhabricatorAuthFactor {
 
   }
 
+  public function renderValidateFactorForm(
+    PhabricatorAuthFactorConfig $config,
+    AphrontFormView $form,
+    PhabricatorUser $viewer,
+    $validation_result) {
+
+    if (!$validation_result) {
+      $validation_result = array();
+    }
+
+    $form->appendChild(
+      id(new AphrontFormTextControl())
+        ->setName($this->getParameterName($config, 'totpcode'))
+        ->setLabel(pht('App Code'))
+        ->setCaption(pht('Factor Name: %s', $config->getFactorName()))
+        ->setValue(idx($validation_result, 'value'))
+        ->setError(idx($validation_result, 'error', true)));
+  }
+
+  public function processValidateFactorForm(
+    PhabricatorAuthFactorConfig $config,
+    PhabricatorUser $viewer,
+    AphrontRequest $request) {
+
+    $code = $request->getStr($this->getParameterName($config, 'totpcode'));
+    $key = new PhutilOpaqueEnvelope($config->getFactorSecret());
+
+    if (self::verifyTOTPCode($viewer, $key, $code)) {
+      return array(
+        'error' => null,
+        'value' => $code,
+        'valid' => true,
+      );
+    } else {
+      return array(
+        'error' => strlen($code) ? pht('Invalid') : pht('Required'),
+        'value' => $code,
+        'valid' => false,
+      );
+    }
+  }
+
+
   public static function generateNewTOTPKey() {
     return strtoupper(Filesystem::readRandomCharacters(16));
   }

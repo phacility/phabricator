@@ -38,17 +38,10 @@ final class PhabricatorSettingsPanelSSHKeys
       return $this->renderKeyListView($request);
     }
 
-    /*
-
-    NOTE: Uncomment this to test hisec.
-    TOOD: Implement this fully once hisec does something useful.
-
     $token = id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
       $viewer,
       $request,
-      '/settings/panel/ssh/');
-
-    */
+      $this->getPanelURI());
 
     $id = nonempty($edit, $delete);
 
