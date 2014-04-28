@@ -1816,6 +1816,8 @@ phutil_register_library_map(array(
     'PhabricatorPeopleHovercardEventListener' => 'applications/people/event/PhabricatorPeopleHovercardEventListener.php',
     'PhabricatorPeopleLdapController' => 'applications/people/controller/PhabricatorPeopleLdapController.php',
     'PhabricatorPeopleListController' => 'applications/people/controller/PhabricatorPeopleListController.php',
+    'PhabricatorPeopleLogQuery' => 'applications/people/query/PhabricatorPeopleLogQuery.php',
+    'PhabricatorPeopleLogSearchEngine' => 'applications/people/query/PhabricatorPeopleLogSearchEngine.php',
     'PhabricatorPeopleLogsController' => 'applications/people/controller/PhabricatorPeopleLogsController.php',
     'PhabricatorPeopleNewController' => 'applications/people/controller/PhabricatorPeopleNewController.php',
     'PhabricatorPeoplePHIDTypeExternal' => 'applications/people/phid/PhabricatorPeoplePHIDTypeExternal.php',
@@ -4651,7 +4653,13 @@ phutil_register_library_map(array(
       0 => 'PhabricatorPeopleController',
       1 => 'PhabricatorApplicationSearchResultsControllerInterface',
     ),
-    'PhabricatorPeopleLogsController' => 'PhabricatorPeopleController',
+    'PhabricatorPeopleLogQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'PhabricatorPeopleLogSearchEngine' => 'PhabricatorApplicationSearchEngine',
+    'PhabricatorPeopleLogsController' =>
+    array(
+      0 => 'PhabricatorPeopleController',
+      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
+    ),
     'PhabricatorPeopleNewController' => 'PhabricatorPeopleController',
     'PhabricatorPeoplePHIDTypeExternal' => 'PhabricatorPHIDType',
     'PhabricatorPeoplePHIDTypeUser' => 'PhabricatorPHIDType',
@@ -5118,7 +5126,11 @@ phutil_register_library_map(array(
     'PhabricatorUserEditorTestCase' => 'PhabricatorTestCase',
     'PhabricatorUserEmail' => 'PhabricatorUserDAO',
     'PhabricatorUserEmailTestCase' => 'PhabricatorTestCase',
-    'PhabricatorUserLog' => 'PhabricatorUserDAO',
+    'PhabricatorUserLog' =>
+    array(
+      0 => 'PhabricatorUserDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
     'PhabricatorUserPreferences' => 'PhabricatorUserDAO',
     'PhabricatorUserProfile' => 'PhabricatorUserDAO',
     'PhabricatorUserProfileEditor' => 'PhabricatorApplicationTransactionEditor',
