@@ -8,6 +8,7 @@ final class PHUIPropertyListView extends AphrontView {
   private $invokedWillRenderEvent;
   private $actionList;
   private $classes = array();
+  private $stacked;
 
   const ICON_SUMMARY = 'pl-summary';
   const ICON_TESTPLAN = 'pl-testplan';
@@ -23,6 +24,11 @@ final class PHUIPropertyListView extends AphrontView {
 
   public function setActionList(PhabricatorActionListView $list) {
     $this->actionList = $list;
+    return $this;
+  }
+
+  public function setStacked($stacked) {
+    $this->stacked = $stacked;
     return $this;
   }
 
@@ -158,10 +164,15 @@ final class PHUIPropertyListView extends AphrontView {
         array($value, ' '));
     }
 
+    $stacked = '';
+    if ($this->stacked) {
+      $stacked = 'phui-property-list-stacked';
+    }
+
     $list = phutil_tag(
       'dl',
       array(
-        'class' => 'phui-property-list-properties',
+        'class' => 'phui-property-list-properties '.$stacked,
       ),
       $items);
 

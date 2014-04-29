@@ -55,8 +55,13 @@
   margin-bottom: 4px;
 }
 
-.device .phui-property-list-key {
-  padding-left: 8px;
+.device .phui-property-list-key,
+.phui-property-list-properties.phui-property-list-stacked
+  .phui-property-list-key {
+  padding-left: 12px;
+  text-align: left;
+  margin-left: 0;
+  width: 100%;
 }
 
 .phui-property-list-value {
@@ -71,9 +76,12 @@
   margin-bottom: 4px;
 }
 
-.device .phui-property-list-value {
+.device .phui-property-list-value,
+.phui-property-list-properties.phui-property-list-stacked
+  .phui-property-list-value {
   padding-left: 16px;
   margin-bottom: 8px;
+  width: 100%;
 }
 
 .phui-property-list-section-header {

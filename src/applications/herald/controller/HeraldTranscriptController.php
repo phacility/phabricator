@@ -511,6 +511,7 @@ final class HeraldTranscriptController extends HeraldController {
     }
 
     $property_list = new PHUIPropertyListView();
+    $property_list->setStacked(true);
     foreach ($rows as $row) {
       $property_list->addProperty($row[0], $row[1]);
     }
