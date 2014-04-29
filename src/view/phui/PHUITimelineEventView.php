@@ -234,14 +234,16 @@ final class PHUITimelineEventView extends AphrontView {
       }
     }
 
+    $image_uri = $this->userHandle->getImageURI();
+
     $wedge = phutil_tag(
       'div',
       array(
         'class' => 'phui-timeline-wedge phui-timeline-border',
+        'style' => (nonempty($image_uri)) ? '' : 'display: none;',
       ),
       '');
 
-    $image_uri = $this->userHandle->getImageURI();
     $image = phutil_tag(
       'div',
       array(
