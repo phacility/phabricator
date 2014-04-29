@@ -27,10 +27,15 @@ final class PhabricatorApplicationTransactionValueController
     // to show the details of custom policies. If / when this pathway
     // supports more transaction types, rendering coding should be moved
     // into PhabricatorTransactions e.g. feed rendering code.
+
+    // TODO: This should be some kind of "hey do you support this?" thing on
+    // the transactions themselves.
+
     switch ($xaction->getTransactionType()) {
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
+      case PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY:
         break;
       default:
         return new Aphront404Response();

@@ -311,7 +311,7 @@ abstract class PhabricatorApplicationTransaction
     }
   }
 
-  private function renderPolicyName($phid, $state = 'old') {
+  protected function renderPolicyName($phid, $state = 'old') {
     $policy = PhabricatorPolicy::newFromPolicyAndHandle(
       $phid,
       $this->getHandleIfExists($phid));
