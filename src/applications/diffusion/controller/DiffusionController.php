@@ -4,6 +4,18 @@ abstract class DiffusionController extends PhabricatorController {
 
   protected $diffusionRequest;
 
+  public function setDiffusionRequest(DiffusionRequest $request) {
+    $this->diffusionRequest = $request;
+    return $this;
+  }
+
+  protected function getDiffusionRequest() {
+    if (!$this->diffusionRequest) {
+      throw new Exception("No Diffusion request object!");
+    }
+    return $this->diffusionRequest;
+  }
+
   public function willBeginExecution() {
     $request = $this->getRequest();
 
@@ -24,20 +36,26 @@ abstract class DiffusionController extends PhabricatorController {
       $drequest = DiffusionRequest::newFromAphrontRequestDictionary(
         $data,
         $this->getRequest());
-      $this->diffusionRequest = $drequest;
+      $this->setDiffusionRequest($drequest);
     }
   }
 
-  public function setDiffusionRequest(DiffusionRequest $request) {
-    $this->diffusionRequest = $request;
-    return $this;
-  }
+  public function buildApplicationPage($view, array $options) {
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
+    $error_view = $this->buildRepositoryWarning($repository);
 
-  protected function getDiffusionRequest() {
-    if (!$this->diffusionRequest) {
-      throw new Exception("No Diffusion request object!");
+    $views = array();
+    $not_inserted = true;
+    foreach ($view as $view_object_or_array) {
+      $views[] = $view_object_or_array;
+      if ($not_inserted &&
+          $view_object_or_array instanceof PhabricatorCrumbsView) {
+        $views[] = $error_view;
+        $not_inserted = false;
+      }
     }
-    return $this->diffusionRequest;
+    return parent::buildApplicationPage($views, $options);
   }
 
   public function buildCrumbs(array $spec = array()) {
@@ -235,4 +253,22 @@ abstract class DiffusionController extends PhabricatorController {
       ->appendChild($body);
   }
 
+  private function buildRepositoryWarning(PhabricatorRepository $repository) {
+    $error_view = null;
+    if ($repository->isImporting()) {
+      $title = pht('This repository is still importing.');
+      $body = pht('Things may not work properly until the import finishes.');
+    } else if (!$repository->isTracked()) {
+      $title = pht('This repository is not tracked.');
+      $body = pht(
+        'Things may not work properly until tracking is enabled and '.
+        'importing finishes.');
+    }
+
+    if ($title) {
+      $error_view = $this->renderStatusMessage($title, $body);
+    }
+
+    return $error_view;
+  }
 }

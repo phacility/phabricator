@@ -83,6 +83,9 @@ final class HeraldTranscriptController extends HeraldController {
         $nav->appendChild($notice);
       }
 
+      $warning_panel = $this->buildWarningPanel($xscript);
+      $nav->appendChild($warning_panel);
+
       $apply_xscript_panel = $this->buildApplyTranscriptPanel(
         $xscript);
       $nav->appendChild($apply_xscript_panel);
@@ -287,7 +290,47 @@ final class HeraldTranscriptController extends HeraldController {
         $keep_rule_xscripts));
   }
 
-  private function buildApplyTranscriptPanel($xscript) {
+  private function buildWarningPanel(HeraldTranscript $xscript) {
+    $request = $this->getRequest();
+    $panel = null;
+    if ($xscript->getObjectTranscript()) {
+      $handles = $this->handles;
+      $object_xscript = $xscript->getObjectTranscript();
+      $handle = $handles[$object_xscript->getPHID()];
+      if ($handle->getType() ==
+          PhabricatorRepositoryPHIDTypeCommit::TYPECONST) {
+        $commit = id(new DiffusionCommitQuery())
+          ->setViewer($request->getUser())
+          ->withPHIDs(array($handle->getPHID()))
+          ->executeOne();
+        if ($commit) {
+          $repository = $commit->getRepository();
+          if ($repository->isImporting()) {
+            $title = pht(
+              'The %s repository is still importing.',
+              $repository->getMonogram());
+            $body = pht(
+              'Herald rules will not trigger until import completes.');
+          } else if (!$repository->isTracked()) {
+            $title = pht(
+              'The %s repository is not tracked.',
+              $repository->getMonogram());
+            $body = pht(
+              'Herald rules will not trigger until tracking is enabled.');
+          } else {
+            return $panel;
+          }
+          $panel = id(new AphrontErrorView())
+            ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+            ->setTitle($title)
+            ->appendChild($body);
+        }
+      }
+    }
+    return $panel;
+  }
+
+  private function buildApplyTranscriptPanel(HeraldTranscript $xscript) {
     $handles = $this->handles;
     $adapter = $this->getAdapter();
 
@@ -350,7 +393,7 @@ final class HeraldTranscriptController extends HeraldController {
     return $box;
   }
 
-  private function buildActionTranscriptPanel($xscript) {
+  private function buildActionTranscriptPanel(HeraldTranscript $xscript) {
     $action_xscript = mgroup($xscript->getApplyTranscripts(), 'getRuleID');
 
     $adapter = $this->getAdapter();
@@ -442,7 +485,7 @@ final class HeraldTranscriptController extends HeraldController {
     return $box;
   }
 
-  private function buildObjectTranscriptPanel($xscript) {
+  private function buildObjectTranscriptPanel(HeraldTranscript $xscript) {
 
     $adapter = $this->getAdapter();
     $field_names = $adapter->getFieldNameMap();
@@ -452,7 +495,7 @@ final class HeraldTranscriptController extends HeraldController {
     $data = array();
     if ($object_xscript) {
       $phid = $object_xscript->getPHID();
-      $handles = $this->loadViewerHandles(array($phid));
+      $handles = $this->handles;
 
       $data += array(
         pht('Object Name') => $object_xscript->getName(),
