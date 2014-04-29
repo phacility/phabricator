@@ -12,6 +12,10 @@ final class DifferentialPHIDTypeRevision extends PhabricatorPHIDType {
     return pht('Revision');
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorApplicationDifferential';
+  }
+
   public function newObject() {
     return new DifferentialRevision();
   }
