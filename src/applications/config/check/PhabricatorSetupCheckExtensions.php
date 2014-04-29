@@ -16,6 +16,7 @@ final class PhabricatorSetupCheckExtensions extends PhabricatorSetupCheck {
       'openssl',
       'mbstring',
       'iconv',
+      'ctype',
 
       // There is a chance we might not need this, but some configurations (like
       // OAuth or Amazon SES) will require it. Just mark it 'required' since
