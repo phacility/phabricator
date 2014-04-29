@@ -451,6 +451,15 @@ abstract class PhabricatorApplicationTransaction
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_TOKEN:
         return true;
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+        switch ($this->getNewValue()) {
+          case HarbormasterBuildable::STATUS_PASSED:
+            // For now, don't notify on build passes either. These are pretty
+            // high volume and annoying, with very little present value. We
+            // might want to turn them back on in the specific case of
+            // build successes on the current document?
+            return true;
+        }
     }
 
     return $this->shouldHide();
