@@ -98,6 +98,7 @@ final class PhabricatorRemarkupRuleEmbedFile
             'width' => $file->getImageWidth(),
             'height' => $file->getImageHeight(),
           );
+          $image_class = 'phabricator-remarkup-embed-image-full';
           break;
         case 'thumb':
         default:
