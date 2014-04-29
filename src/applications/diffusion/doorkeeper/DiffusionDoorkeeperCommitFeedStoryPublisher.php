@@ -47,6 +47,7 @@ final class DiffusionDoorkeeperCommitFeedStoryPublisher
 
   public function willPublishStory($commit) {
     $requests = id(new DiffusionCommitQuery())
+      ->setViewer($this->getViewer())
       ->withPHIDs(array($commit->getPHID()))
       ->needAuditRequests(true)
       ->executeOne()
