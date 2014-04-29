@@ -569,13 +569,21 @@ final class ManiphestTaskEditController extends ManiphestController {
           ->setValue($task->getTitle()));
 
     if ($can_edit_status) {
+      // See T4819.
+      $status_map = ManiphestTaskStatus::getTaskStatusMap();
+      $dup_status = ManiphestTaskStatus::getDuplicateStatus();
+
+      if ($task->getStatus() != $dup_status) {
+        unset($status_map[$dup_status]);
+      }
+
       $form
         ->appendChild(
           id(new AphrontFormSelectControl())
             ->setLabel(pht('Status'))
             ->setName('status')
             ->setValue($task->getStatus())
-            ->setOptions(ManiphestTaskStatus::getTaskStatusMap()));
+            ->setOptions($status_map));
     }
 
     $policies = id(new PhabricatorPolicyQuery())
