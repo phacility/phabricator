@@ -598,3 +598,41 @@
 .phui-object-item-with-image .phui-object-item-content-box {
   margin-left: 54px;
 }
+
+/* - State ---------------------------------------------------------------------
+
+  Provides a list of object status or states, success or fail, etc
+
+*/
+
+.phui-object-item-ficon {
+  width: 26px;
+  height: 26px;
+  margin: 7px 9px 7px 0;
+  position: absolute;
+}
+
+.phui-object-item-with-ficon .phui-object-item-content-box {
+  margin-left: 24px;
+}
+
+.phui-object-box .phui-object-list-states {
+  padding: 8px 12px 0 12px;
+}
+
+.phui-object-box .phui-object-list-states li:last-child .phui-object-item-frame {
+  border: none;
+}
+
+.phui-object-list-states .phui-object-item-frame {
+  border: none;
+  border-bottom: 1px solid {$thinblueborder};
+}
+
+.phui-object-list-states .phui-object-item {
+  border: none;
+}
+
+.phui-object-list-states .phui-object-item-frame {
+  min-height: 44px;
+}

@@ -294,13 +294,15 @@ final class HeraldTranscriptController extends HeraldController {
     $rule_type_global = HeraldRuleTypeConfig::RULE_TYPE_GLOBAL;
     $action_names = $adapter->getActionNameMap($rule_type_global);
 
-    $rows = array();
+    $list = new PHUIObjectItemListView();
+    $list->setStates(true);
+    $list->setNoDataString(pht('No actions were taken.'));
     foreach ($xscript->getApplyTranscripts() as $apply_xscript) {
 
       $target = $apply_xscript->getTarget();
       switch ($apply_xscript->getAction()) {
         case HeraldAdapter::ACTION_NOTHING:
-          $target = '';
+          $target = null;
           break;
         case HeraldAdapter::ACTION_FLAG:
           $target = PhabricatorFlagColor::getColorName($target);
@@ -316,55 +318,34 @@ final class HeraldTranscriptController extends HeraldController {
                 $target[$k] = $handles[$phid]->getName();
               }
             }
-            $target = implode("\n", $target);
+            $target = implode(", ", $target);
           } else {
             $target = '<empty>';
           }
           break;
       }
 
+      $item = new PHUIObjectItemView();
+
       if ($apply_xscript->getApplied()) {
-        $outcome = phutil_tag(
-          'span',
-          array('class' => 'outcome-success'),
-          pht('SUCCESS'));
+        $item->setState(PHUIObjectItemView::STATE_SUCCESS);
       } else {
-        $outcome = phutil_tag(
-          'span',
-          array('class' => 'outcome-failure'),
-          pht('FAILURE'));
+        $item->setState(PHUIObjectItemView::STATE_FAIL);
       }
 
-      $rows[] = array(
-        idx($action_names, $apply_xscript->getAction(), pht('Unknown')),
-        $target,
-        hsprintf(
-          '<strong>Taken because:</strong> %s<br />'.
-            '<strong>Outcome:</strong> %s %s',
-          $apply_xscript->getReason(),
-          $outcome,
-          $apply_xscript->getAppliedReason()),
-      );
-    }
+      $rule = idx($action_names, $apply_xscript->getAction(), pht('Unknown'));
 
-    $table = new AphrontTableView($rows);
-    $table->setNoDataString(pht('No actions were taken.'));
-    $table->setHeaders(
-      array(
-        pht('Action'),
-        pht('Target'),
-        pht('Details'),
-      ));
-    $table->setColumnClasses(
-      array(
-        '',
-        '',
-        'wide',
-      ));
+      $item->setHeader(pht('%s: %s', $rule, $target));
+      $item->addAttribute($apply_xscript->getReason());
+      $item->addAttribute(
+        pht('Outcome: %s', $apply_xscript->getAppliedReason()));
+
+      $list->addItem($item);
+    }
 
     $box = new PHUIObjectBoxView();
     $box->setHeaderText(pht('Actions Taken'));
-    $box->appendChild($table);
+    $box->appendChild($list);
 
     return $box;
   }

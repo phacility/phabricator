@@ -19,10 +19,17 @@ final class PHUIObjectItemView extends AphrontTagView {
   private $headIcons = array();
   private $disabled;
   private $imageURI;
+  private $state;
+  private $fontIcon;
 
   const AGE_FRESH = 'fresh';
   const AGE_STALE = 'stale';
   const AGE_OLD   = 'old';
+
+  const STATE_SUCCESS = 'green';
+  const STATE_FAIL = 'red';
+  const STATE_WARN = 'yellow';
+  const STATE_NOTE = 'blue';
 
   public function setDisabled($disabled) {
     $this->disabled = $disabled;
@@ -105,6 +112,27 @@ final class PHUIObjectItemView extends AphrontTagView {
 
   public function getImageURI() {
     return $this->imageURI;
+  }
+
+  public function setState($state) {
+    $this->state = $state;
+    switch ($state) {
+      case self::STATE_SUCCESS:
+        $fi = 'fa-check-circle green';
+      break;
+      case self::STATE_FAIL:
+        $fi = 'fa-times-circle red';
+      break;
+      case self::STATE_WARN:
+        $fi = 'fa-exclamation-circle yellow';
+      break;
+      case self::STATE_NOTE:
+        $fi = 'fa-info-circle blue';
+      break;
+    }
+    $this->fontIcon = id(new PHUIIconView())
+      ->setIconFont($fi.' fa-2x');
+    return $this;
   }
 
   public function setEpoch($epoch, $age = self::AGE_FRESH) {
@@ -234,6 +262,10 @@ final class PHUIObjectItemView extends AphrontTagView {
       $item_classes[] = 'phui-object-item-disabled';
     }
 
+    if ($this->state) {
+      $item_classes[] = 'phui-object-item-state-'.$this->state;
+    }
+
     switch ($this->effect) {
       case 'highlighted':
         $item_classes[] = 'phui-object-item-highlighted';
@@ -251,8 +283,12 @@ final class PHUIObjectItemView extends AphrontTagView {
       $item_classes[] = 'phui-object-item-grippable';
     }
 
-    if ($this->getImageuRI()) {
+    if ($this->getImageURI()) {
       $item_classes[] = 'phui-object-item-with-image';
+    }
+
+    if ($this->fontIcon) {
+      $item_classes[] = 'phui-object-item-with-ficon';
     }
 
     return array(
@@ -492,6 +528,16 @@ final class PHUIObjectItemView extends AphrontTagView {
           'style' => 'background-image: url('.$this->getImageURI().')',
         ),
         '');
+    }
+
+    $ficon = null;
+    if ($this->fontIcon) {
+      $image = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-object-item-ficon',
+        ),
+        $this->fontIcon);
     }
 
     $box = phutil_tag(
