@@ -30,6 +30,7 @@ final class PHUIObjectItemView extends AphrontTagView {
   const STATE_FAIL = 'red';
   const STATE_WARN = 'yellow';
   const STATE_NOTE = 'blue';
+  const STATE_BUILD = 'sky';
 
   public function setDisabled($disabled) {
     $this->disabled = $disabled;
@@ -128,6 +129,9 @@ final class PHUIObjectItemView extends AphrontTagView {
       break;
       case self::STATE_NOTE:
         $fi = 'fa-info-circle blue';
+      break;
+      case self::STATE_BUILD:
+        $fi = 'fa-refresh ph-spin sky';
       break;
     }
     $this->fontIcon = id(new PHUIIconView())
