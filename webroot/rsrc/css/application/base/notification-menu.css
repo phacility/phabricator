@@ -74,6 +74,15 @@
   border-bottom: 1px solid #e9e9e9;
 }
 
+.phabricator-notification-header a {
+  color: {$darkgreytext};
+}
+
+.phabricator-notification-header .phabricator-notification-clear-all {
+  color: #18559D;
+  float: right;
+}
+
 .phabricator-notification-view-all {
   text-align: center;
   font-weight: bold;
