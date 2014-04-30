@@ -255,6 +255,7 @@ abstract class DiffusionController extends PhabricatorController {
 
   private function buildRepositoryWarning(PhabricatorRepository $repository) {
     $error_view = null;
+    $title = null;
     if ($repository->isImporting()) {
       $title = pht('This repository is still importing.');
       $body = pht('Things may not work properly until the import finishes.');
