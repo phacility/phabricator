@@ -1440,7 +1440,9 @@ phutil_register_library_map(array(
     'PhabricatorDashboardPHIDTypeDashboard' => 'applications/dashboard/phid/PhabricatorDashboardPHIDTypeDashboard.php',
     'PhabricatorDashboardPHIDTypePanel' => 'applications/dashboard/phid/PhabricatorDashboardPHIDTypePanel.php',
     'PhabricatorDashboardPanel' => 'applications/dashboard/storage/PhabricatorDashboardPanel.php',
+    'PhabricatorDashboardPanelCoreCustomField' => 'applications/dashboard/customfield/PhabricatorDashboardPanelCoreCustomField.php',
     'PhabricatorDashboardPanelCreateController' => 'applications/dashboard/controller/PhabricatorDashboardPanelCreateController.php',
+    'PhabricatorDashboardPanelCustomField' => 'applications/dashboard/customfield/PhabricatorDashboardPanelCustomField.php',
     'PhabricatorDashboardPanelEditController' => 'applications/dashboard/controller/PhabricatorDashboardPanelEditController.php',
     'PhabricatorDashboardPanelListController' => 'applications/dashboard/controller/PhabricatorDashboardPanelListController.php',
     'PhabricatorDashboardPanelQuery' => 'applications/dashboard/query/PhabricatorDashboardPanelQuery.php',
@@ -4249,8 +4251,15 @@ phutil_register_library_map(array(
     array(
       0 => 'PhabricatorDashboardDAO',
       1 => 'PhabricatorPolicyInterface',
+      2 => 'PhabricatorCustomFieldInterface',
+    ),
+    'PhabricatorDashboardPanelCoreCustomField' =>
+    array(
+      0 => 'PhabricatorDashboardPanelCustomField',
+      1 => 'PhabricatorStandardCustomFieldInterface',
     ),
     'PhabricatorDashboardPanelCreateController' => 'PhabricatorDashboardController',
+    'PhabricatorDashboardPanelCustomField' => 'PhabricatorCustomField',
     'PhabricatorDashboardPanelEditController' => 'PhabricatorDashboardController',
     'PhabricatorDashboardPanelListController' =>
     array(

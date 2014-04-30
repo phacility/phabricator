@@ -5,13 +5,17 @@
  */
 final class PhabricatorDashboardPanel
   extends PhabricatorDashboardDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorCustomFieldInterface {
 
   protected $name;
   protected $panelType;
   protected $viewPolicy;
   protected $editPolicy;
   protected $properties = array();
+
+  private $customFields = self::ATTACHABLE;
 
   public static function initializeNewPanel(PhabricatorUser $actor) {
     return id(new PhabricatorDashboardPanel())
@@ -92,6 +96,27 @@ final class PhabricatorDashboardPanel
 
   public function describeAutomaticCapability($capability) {
     return null;
+  }
+
+
+/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+
+
+  public function getCustomFieldSpecificationForRole($role) {
+    return array();
+  }
+
+  public function getCustomFieldBaseClass() {
+    return 'PhabricatorDashboardPanelCustomField';
+  }
+
+  public function getCustomFields() {
+    return $this->assertAttached($this->customFields);
+  }
+
+  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
+    $this->customFields = $fields;
+    return $this;
   }
 
 }

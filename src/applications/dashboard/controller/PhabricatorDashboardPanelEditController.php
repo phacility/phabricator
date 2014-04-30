@@ -58,6 +58,13 @@ final class PhabricatorDashboardPanelEditController
     $v_name = $panel->getName();
     $e_name = true;
 
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $panel,
+      PhabricatorCustomField::ROLE_EDIT);
+    $field_list
+      ->setViewer($viewer)
+      ->readFieldsFromStorage($panel);
+
     $validation_exception = null;
     if ($request->isFormPost()) {
       $v_name = $request->getStr('name');
@@ -65,10 +72,14 @@ final class PhabricatorDashboardPanelEditController
       $xactions = array();
 
       $type_name = PhabricatorDashboardPanelTransaction::TYPE_NAME;
-
       $xactions[] = id(new PhabricatorDashboardPanelTransaction())
         ->setTransactionType($type_name)
         ->setNewValue($v_name);
+
+      $field_xactions = $field_list->buildFieldTransactionsFromRequest(
+        new PhabricatorDashboardPanelTransaction(),
+        $request);
+      $xactions = array_merge($xactions, $field_xactions);
 
       try {
         $editor = id(new PhabricatorDashboardPanelTransactionEditor())
@@ -93,7 +104,11 @@ final class PhabricatorDashboardPanelEditController
           ->setLabel(pht('Name'))
           ->setName('name')
           ->setValue($v_name)
-          ->setError($e_name))
+          ->setError($e_name));
+
+    $field_list->appendFieldsToForm($form);
+
+    $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($button)

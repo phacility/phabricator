@@ -5,6 +5,7 @@ abstract class PhabricatorDashboardPanelType extends Phobject {
   abstract public function getPanelTypeKey();
   abstract public function getPanelTypeName();
   abstract public function getPanelTypeDescription();
+  abstract public function getFieldSpecifications();
 
   public static function getAllPanelTypes() {
     static $types;
@@ -43,9 +44,17 @@ abstract class PhabricatorDashboardPanelType extends Phobject {
     PhabricatorUser $viewer,
     PhabricatorDashboardPanel $panel) {
 
+    $content = $this->renderPanelContent($viewer, $panel);
+
     return id(new PHUIObjectBoxView())
       ->setHeaderText($panel->getName())
-      ->appendChild(pht('TODO: Panel content goes here.'));
+      ->appendChild($content);
+  }
+
+  protected function renderPanelContent(
+    PhabricatorUser $viewer,
+    PhabricatorDashboardPanel $panel) {
+    return pht('TODO: Panel content goes here.');
   }
 
   public function shouldRenderAsync() {
