@@ -48,4 +48,10 @@ abstract class PhabricatorDashboardPanelType extends Phobject {
       ->appendChild(pht('TODO: Panel content goes here.'));
   }
 
+  public function shouldRenderAsync() {
+    // TODO: For now, just make these things random so we can catch anything
+    // that breaks.
+    return (mt_rand(0, 1) == 1);
+  }
+
 }

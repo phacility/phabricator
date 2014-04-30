@@ -4,6 +4,15 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
 
   private $panel;
   private $viewer;
+  private $enableAsyncRendering;
+
+  /**
+   * Allow the engine to render the panel via Ajax.
+   */
+  public function setEnableAsyncRendering($enable) {
+    $this->enableAsyncRendering = $enable;
+    return $this;
+  }
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -35,6 +44,13 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
           $panel->getPanelType()));
     }
 
+    if ($this->enableAsyncRendering) {
+      if ($panel_type->shouldRenderAsync()) {
+        return $this->renderAsyncPanel($panel);
+      }
+    }
+
+
     return $panel_type->renderPanel($viewer, $panel);
   }
 
@@ -42,6 +58,22 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
     return id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setFormErrors(array($body));
+  }
+
+  private function renderAsyncPanel(PhabricatorDashboardPanel $panel) {
+    $panel_id = celerity_generate_unique_node_id();
+
+    Javelin::initBehavior(
+      'dashboard-async-panel',
+      array(
+        'panelID' => $panel_id,
+        'uri' => '/dashboard/panel/render/'.$panel->getID().'/',
+      ));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText($panel->getName())
+      ->setID($panel_id)
+      ->appendChild(pht('Loading...'));
   }
 
 }

@@ -36,11 +36,17 @@ final class PhabricatorDashboardViewController
       ->setHeader($header)
       ->addPropertyList($properties);
 
+    $rendered_dashboard = id(new PhabricatorDashboardRenderingEngine())
+      ->setViewer($viewer)
+      ->setDashboard($dashboard)
+      ->renderDashboard();
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $box,
         $timeline,
+        $rendered_dashboard,
       ),
       array(
         'title' => $title,
