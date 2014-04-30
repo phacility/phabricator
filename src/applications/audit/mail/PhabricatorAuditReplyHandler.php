@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group audit
- */
 final class PhabricatorAuditReplyHandler extends PhabricatorMailReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
@@ -27,7 +24,7 @@ final class PhabricatorAuditReplyHandler extends PhabricatorMailReplyHandler {
 
   public function getReplyHandlerInstructions() {
     if ($this->supportsReplies()) {
-      return "Reply to comment.";
+      return pht("Reply to comment.");
     } else {
       return null;
     }

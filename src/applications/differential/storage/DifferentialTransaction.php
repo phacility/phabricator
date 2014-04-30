@@ -81,7 +81,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
         return ($this !== head($xactions));
     }
 
-    return $this->shouldHide();
+    return parent::shouldHideForMail($xactions);
   }
 
   public function getBodyForMail() {
@@ -111,6 +111,21 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
 
     return $phids;
   }
+
+  public function getActionStrength() {
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_ACTION:
+        return 3;
+      case self::TYPE_UPDATE:
+        return 2;
+      case self::TYPE_INLINE:
+        return 0.25;
+    }
+
+    return parent::getActionStrength();
+  }
+
 
   public function getActionName() {
     switch ($this->getTransactionType()) {
@@ -335,39 +350,45 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
   public function getIcon() {
     switch ($this->getTransactionType()) {
       case self::TYPE_INLINE:
-        return 'comment';
+        return 'fa-comment';
       case self::TYPE_UPDATE:
-        return 'refresh';
+        return 'fa-refresh';
       case self::TYPE_STATUS:
         switch ($this->getNewValue()) {
           case ArcanistDifferentialRevisionStatus::ACCEPTED:
-            return 'enable';
+            return 'fa-check';
           case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
-            return 'delete';
+            return 'fa-times';
           case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
-            return 'refresh';
+            return 'fa-undo';
         }
         break;
       case self::TYPE_ACTION:
         switch ($this->getNewValue()) {
           case DifferentialAction::ACTION_CLOSE:
-            return 'ok';
+            return 'fa-check';
           case DifferentialAction::ACTION_ACCEPT:
-            return 'enable';
+            return 'fa-check-circle-o';
           case DifferentialAction::ACTION_REJECT:
+            return 'fa-times-circle-o';
           case DifferentialAction::ACTION_ABANDON:
-            return 'delete';
+            return 'fa-plane';
           case DifferentialAction::ACTION_RETHINK:
-            return 'disable';
+            return 'fa-headphones';
           case DifferentialAction::ACTION_REQUEST:
-            return 'refresh';
+            return 'fa-refresh';
           case DifferentialAction::ACTION_RECLAIM:
           case DifferentialAction::ACTION_REOPEN:
-            return 'new';
+            return 'fa-bullhorn';
           case DifferentialAction::ACTION_RESIGN:
-            return 'undo';
+            return 'fa-flag';
           case DifferentialAction::ACTION_CLAIM:
-            return 'user';
+            return 'fa-flag';
+        }
+      case PhabricatorTransactions::TYPE_EDGE:
+        switch ($this->getMetadataValue('edge:type')) {
+          case PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER:
+            return 'fa-user';
         }
     }
 

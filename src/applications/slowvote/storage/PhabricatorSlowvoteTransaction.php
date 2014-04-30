@@ -7,6 +7,7 @@ final class PhabricatorSlowvoteTransaction
   const TYPE_DESCRIPTION  = 'vote:description';
   const TYPE_RESPONSES    = 'vote:responses';
   const TYPE_SHUFFLE      = 'vote:shuffle';
+  const TYPE_CLOSE        = 'vote:close';
 
   public function getApplicationName() {
     return 'slowvote';
@@ -28,6 +29,7 @@ final class PhabricatorSlowvoteTransaction
       case PhabricatorSlowvoteTransaction::TYPE_DESCRIPTION:
       case PhabricatorSlowvoteTransaction::TYPE_RESPONSES:
       case PhabricatorSlowvoteTransaction::TYPE_SHUFFLE:
+      case PhabricatorSlowvoteTransaction::TYPE_CLOSE:
         return ($old === null);
     }
 
@@ -74,6 +76,18 @@ final class PhabricatorSlowvoteTransaction
             $this->renderHandleLink($author_phid));
         }
         break;
+      case PhabricatorSlowvoteTransaction::TYPE_CLOSE:
+        if ($new) {
+          return pht(
+            '%s closed this poll.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s reopened this poll.',
+            $this->renderHandleLink($author_phid));
+        }
+
+        break;
     }
 
     return parent::getTitle();
@@ -85,10 +99,22 @@ final class PhabricatorSlowvoteTransaction
 
     switch ($this->getTransactionType()) {
       case PhabricatorSlowvoteTransaction::TYPE_QUESTION:
+        if ($old === null) {
+          return 'fa-plus';
+        } else {
+          return 'fa-pencil';
+        }
       case PhabricatorSlowvoteTransaction::TYPE_DESCRIPTION:
       case PhabricatorSlowvoteTransaction::TYPE_RESPONSES:
+        return 'fa-pencil';
       case PhabricatorSlowvoteTransaction::TYPE_SHUFFLE:
-        return 'edit';
+        return 'fa-refresh';
+      case PhabricatorSlowvoteTransaction::TYPE_CLOSE:
+        if ($new) {
+          return 'fa-ban';
+        } else {
+          return 'fa-pencil';
+        }
     }
 
     return parent::getIcon();
@@ -104,6 +130,7 @@ final class PhabricatorSlowvoteTransaction
       case PhabricatorSlowvoteTransaction::TYPE_DESCRIPTION:
       case PhabricatorSlowvoteTransaction::TYPE_RESPONSES:
       case PhabricatorSlowvoteTransaction::TYPE_SHUFFLE:
+      case PhabricatorSlowvoteTransaction::TYPE_CLOSE:
         return PhabricatorTransactions::COLOR_BLUE;
     }
 

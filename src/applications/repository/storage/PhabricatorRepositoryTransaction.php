@@ -89,7 +89,7 @@ final class PhabricatorRepositoryTransaction
   public function getIcon() {
     switch ($this->getTransactionType()) {
       case self::TYPE_VCS:
-        return 'create';
+        return 'fa-plus';
     }
     return parent::getIcon();
   }
@@ -338,8 +338,8 @@ final class PhabricatorRepositoryTransaction
         return pht(
           '%s changed the push policy of this repository from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
-          $this->renderPolicyName($old),
-          $this->renderPolicyName($new));
+          $this->renderPolicyName($old, 'old'),
+          $this->renderPolicyName($new, 'new'));
       case self::TYPE_DANGEROUS:
         if ($new) {
           return pht(

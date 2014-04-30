@@ -1,13 +1,13 @@
 <?php
 
 final class PhabricatorAuthProviderOAuthGoogle
-  extends PhabricatorAuthProviderOAuth {
+  extends PhabricatorAuthProviderOAuth2 {
 
   public function getProviderName() {
     return pht('Google');
   }
 
-  public function getConfigurationHelp() {
+  protected function getProviderConfigurationHelp() {
     $login_uri = PhabricatorEnv::getURI($this->getLoginURI());
 
     return pht(
@@ -19,6 +19,8 @@ final class PhabricatorAuthProviderOAuthGoogle
       "\n\n".
       "  - Under **APIs & auth > APIs**, scroll down the list and enable ".
       "    the **Google+ API**.\n".
+      "     - You will need to consent to the **Google+ API** terms if you ".
+      " have not before.\n".
       "  - Under **APIs & auth > Credentials**, click **Create New Client".
       "    ID** in the **OAuth** section. Then use these settings:\n".
       "     - **Application Type**: Web Application\n".

@@ -2,6 +2,8 @@
 
 final class PHUITimelineEventView extends AphrontView {
 
+  const DELIMITER = " \xC2\xB7 ";
+
   private $userHandle;
   private $title;
   private $icon;
@@ -146,12 +148,13 @@ final class PHUITimelineEventView extends AphrontView {
       }
       $extra = array_reverse($extra);
       $extra = array_mergev($extra);
-      $extra = phutil_tag(
+      $extra = javelin_tag(
         'span',
         array(
+          'sigil' => 'timeline-extra',
           'class' => 'phui-timeline-extra',
         ),
-        phutil_implode_html(" \xC2\xB7 ", $extra));
+        phutil_implode_html(self::DELIMITER, $extra));
     } else {
       $extra = null;
     }
@@ -172,18 +175,16 @@ final class PHUITimelineEventView extends AphrontView {
           $fill_classes[] = 'phui-timeline-icon-fill-'.$this->color;
         }
 
+        $icon = id(new PHUIIconView())
+          ->setIconFont($this->icon.' white')
+          ->addClass('phui-timeline-icon');
+
         $icon = phutil_tag(
           'span',
           array(
             'class' => implode(' ', $fill_classes),
           ),
-          phutil_tag(
-            'span',
-            array(
-              'class' => 'phui-timeline-icon sprite-icons '.
-                         'icons-'.$this->icon.'-white',
-            ),
-            ''));
+          $icon);
       }
 
       $token = null;
@@ -233,14 +234,16 @@ final class PHUITimelineEventView extends AphrontView {
       }
     }
 
+    $image_uri = $this->userHandle->getImageURI();
+
     $wedge = phutil_tag(
       'div',
       array(
         'class' => 'phui-timeline-wedge phui-timeline-border',
+        'style' => (nonempty($image_uri)) ? '' : 'display: none;',
       ),
       '');
 
-    $image_uri = $this->userHandle->getImageURI();
     $image = phutil_tag(
       'div',
       array(
@@ -342,7 +345,7 @@ final class PHUITimelineEventView extends AphrontView {
           'a',
           array(
             'href'  => '/transactions/history/'.$xaction_phid.'/',
-            'sigil' => 'workflow',
+            'sigil' => 'workflow transaction-edit-history',
           ),
           pht('Edited'));
       }

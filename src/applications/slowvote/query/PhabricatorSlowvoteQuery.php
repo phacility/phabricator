@@ -10,6 +10,7 @@ final class PhabricatorSlowvoteQuery
   private $phids;
   private $authorPHIDs;
   private $withVotesByViewer;
+  private $isClosed;
 
   private $needOptions;
   private $needChoices;
@@ -32,6 +33,11 @@ final class PhabricatorSlowvoteQuery
 
   public function withVotesByViewer($with_vote) {
     $this->withVotesByViewer = $with_vote;
+    return $this;
+  }
+
+  public function withIsClosed($with_closed) {
+    $this->isClosed = $with_closed;
     return $this;
   }
 
@@ -144,6 +150,13 @@ final class PhabricatorSlowvoteQuery
         $conn_r,
         'p.authorPHID IN (%Ls)',
         $this->authorPHIDs);
+    }
+
+    if ($this->isClosed !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'p.isClosed = %d',
+        (int)$this->isClosed);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

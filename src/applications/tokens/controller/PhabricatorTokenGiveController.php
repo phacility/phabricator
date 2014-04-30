@@ -36,15 +36,16 @@ final class PhabricatorTokenGiveController extends PhabricatorTokenController {
 
     $done_uri = $handle->getURI();
     if ($request->isDialogFormPost()) {
+      $content_source = PhabricatorContentSource::newFromRequest($request);
+
+      $editor = id(new PhabricatorTokenGivenEditor())
+        ->setActor($user)
+        ->setContentSource($content_source);
       if ($is_give) {
         $token_phid = $request->getStr('tokenPHID');
-        $editor = id(new PhabricatorTokenGivenEditor())
-          ->setActor($user)
-          ->addToken($handle->getPHID(), $token_phid);
+        $editor->addToken($handle->getPHID(), $token_phid);
       } else {
-        $editor = id(new PhabricatorTokenGivenEditor())
-          ->setActor($user)
-          ->deleteToken($handle->getPHID());
+        $editor->deleteToken($handle->getPHID());
       }
 
       return id(new AphrontReloadResponse())->setURI($done_uri);

@@ -41,6 +41,11 @@ final class PhabricatorMainMenuView extends AphrontView {
       $menus = array_merge($menus, $dropdowns);
       $app_button = $this->renderApplicationMenuButton($header_id);
       $search_button = $this->renderSearchMenuButton($header_id);
+    } else {
+      $app_button = $this->renderApplicationMenuButton($header_id);
+      if (PhabricatorEnv::getEnvConfig('policy.allow-public')) {
+        $search_button = $this->renderSearchMenuButton($header_id);
+      }
     }
 
     $search_menu = $this->renderPhabricatorSearchMenu();

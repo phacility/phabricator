@@ -59,7 +59,7 @@ final class PhabricatorConfigTransaction
   public function getIcon() {
     switch ($this->getTransactionType()) {
       case self::TYPE_EDIT:
-        return 'edit';
+        return 'fa-pencil';
     }
 
     return parent::getIcon();

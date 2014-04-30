@@ -1,0 +1,89 @@
+@title CSS Coding Standards
+@group standards
+
+This document describes CSS features and coding standards for Phabricator.
+
+= Overview =
+
+This document describes technical and style guidelines for writing CSS in
+Phabricator.
+
+Phabricator has a limited CSS preprocessor. This document describes the features
+it makes available.
+
+= Z-Indexes =
+
+You should put all `z-index` rules in `z-index.css`, and keep them sorted. The
+goal is to make indexes relatively manageable and reduce the escalation of the
+Great Z-Index War where all indexes grow without bound in an endless arms race.
+
+= Color Variables =
+
+Phabricator's preprocessor provides some standard color variables. You can
+reference these with `{$color}`. For example:
+
+  span.critical {
+    color: {$red};
+  }
+
+You can find a list of all available colors in the **UIExamples** application.
+
+= Printable Rules =
+
+If you preface a rule with `!print`, it will be transformed into a print rule
+and activated when the user is printing the page or viewing a printable version
+of the page:
+
+  lang=css
+  !print div.menu {
+    display: none;
+  }
+
+Specifically, this directive causes two copies of the rule to be written out.
+The output will look something like this:
+
+  lang=css
+  .printable div.menu {
+    display: none;
+  }
+
+  @media print {
+    div.menu {
+      display: none;
+    }
+  }
+
+The former will activate when users look at the printable versions of pages,
+by adding `__print__` to the URI. The latter will be activated in print contexts
+by the media query.
+
+= Device Rules =
+
+Phabricator's environment defines several device classes which can be used
+to adjust behavior responsively. In particular:
+
+  lang=css
+  .device-phone {
+    /* Smallest breakpoint, usually for phones. */
+  }
+
+  .device-tablet {
+    /* Middle breakpoint, usually for tablets. */
+  }
+
+  .device-desktop {
+    /* Largest breakpoint, usually for desktops. */
+  }
+
+Since many rules are specific to handheld devices, the `.device` class selects
+either tablets or phones:
+
+  .device {
+    /* Phone or tablet (not desktop). */
+  }
+
+= Image Inlining =
+
+Phabricator's CSS preprocessor automatically inlines images which are less than
+32KB using `data:` URIs. This is primarily useful for gradients or textures
+which are small and difficult to sprite.

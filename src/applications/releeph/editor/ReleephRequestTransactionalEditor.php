@@ -204,8 +204,8 @@ final class ReleephRequestTransactionalEditor
   protected function getMailTo(PhabricatorLiskDAO $object) {
     $to_phids = array();
 
-    $releeph_project = $object->loadReleephProject();
-    foreach ($releeph_project->getPushers() as $phid) {
+    $product = $object->getBranch()->getProduct();
+    foreach ($product->getPushers() as $phid) {
       $to_phids[] = $phid;
     }
 
@@ -227,8 +227,8 @@ final class ReleephRequestTransactionalEditor
     $body = parent::buildMailBody($object, $xactions);
 
     $rq = $object;
-    $releeph_branch = $rq->loadReleephBranch();
-    $releeph_project = $releeph_branch->loadReleephProject();
+    $releeph_branch = $rq->getBranch();
+    $releeph_project = $releeph_branch->getProduct();
 
     /**
      * If any of the events we are emailing about were about a pick failure

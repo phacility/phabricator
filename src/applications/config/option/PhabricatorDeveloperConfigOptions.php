@@ -97,7 +97,7 @@ final class PhabricatorDeveloperConfigOptions
               "This option enables verbose error reporting (stack traces, ".
               "error callouts) and forces disk reads of static assets on ".
               "every reload.")),
-      $this->newOption('celerity.minify', 'bool', false)
+      $this->newOption('celerity.minify', 'bool', true)
         ->setBoolOptions(
           array(
             pht('Minify static resources.'),

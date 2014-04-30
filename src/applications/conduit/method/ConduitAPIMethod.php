@@ -216,7 +216,7 @@ abstract class ConduitAPIMethod
     $results['cursor'] = array(
       'limit' => $pager->getPageSize(),
       'after' => $pager->getNextPageID(),
-      'before' =>$pager->getPrevPageID(),
+      'before' => $pager->getPrevPageID(),
     );
 
     return $results;

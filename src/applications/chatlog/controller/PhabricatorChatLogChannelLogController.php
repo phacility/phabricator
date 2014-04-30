@@ -5,6 +5,10 @@ final class PhabricatorChatLogChannelLogController
 
   private $channelID;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->channelID = $data['channelID'];
   }

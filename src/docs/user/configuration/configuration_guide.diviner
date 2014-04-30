@@ -197,6 +197,9 @@ Continue by:
     @{article:Configuring Accounts and Registration}; or
   - understanding advanced configuration topics with
     @{article:Configuration User Guide: Advanced Configuration}; or
+  - configuring a preamble script to set up the environment properly behind a
+    load balancer, or adjust rate limiting with
+    @{article:Configuring a Preamble Script}; or
   - configuring where uploaded files and attachments will be stored with
     @{article:Configuring File Storage}; or
   - configuring Phabricator so it can send mail with

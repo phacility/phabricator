@@ -87,10 +87,6 @@ final class PhabricatorMacroViewController
       ? pht('Add Comment')
       : pht('Grovel in Awe');
 
-    $submit_button_name = $is_serious
-      ? pht('Add Comment')
-      : pht('Lavish Praise');
-
     $draft = PhabricatorDraft::newFromUserAndKey($user, $macro->getPHID());
 
     $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
@@ -99,7 +95,7 @@ final class PhabricatorMacroViewController
       ->setDraft($draft)
       ->setHeaderText($comment_header)
       ->setAction($this->getApplicationURI('/comment/'.$macro->getID().'/'))
-      ->setSubmitButtonName($submit_button_name);
+      ->setSubmitButtonName(pht('Add Comment'));
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)

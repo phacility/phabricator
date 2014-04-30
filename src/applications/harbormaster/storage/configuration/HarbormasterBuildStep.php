@@ -83,7 +83,9 @@ final class HarbormasterBuildStep extends HarbormasterDAO
     return pht('A build step has the same policies as its build plan.');
   }
 
+
 /* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+
 
   public function getCustomFieldSpecificationForRole($role) {
     return array();

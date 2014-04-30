@@ -9,6 +9,7 @@ abstract class PhabricatorWorker {
 
   private $data;
   private static $runAllTasksInProcess = false;
+  private $queuedTasks = array();
 
 
 /* -(  Configuring Retries and Failures  )----------------------------------- */
@@ -17,13 +18,13 @@ abstract class PhabricatorWorker {
   /**
    * Return the number of seconds this worker needs hold a lease on the task for
    * while it performs work. For most tasks you can leave this at `null`, which
-   * will give you a short default lease (currently 60 seconds).
+   * will give you a default lease (currently 2 hours).
    *
    * For tasks which may take a very long time to complete, you should return
    * an upper bound on the amount of time the task may require.
    *
    * @return int|null  Number of seconds this task needs to remain leased for,
-   *                   or null for a default (currently 60 second) lease.
+   *                   or null for a default lease.
    *
    * @task config
    */
@@ -92,7 +93,21 @@ abstract class PhabricatorWorker {
     if (self::$runAllTasksInProcess) {
       // Do the work in-process.
       $worker = newv($task_class, array($data));
-      $worker->doWork();
+
+      while (true) {
+        try {
+          $worker->doWork();
+          break;
+        } catch (PhabricatorWorkerYieldException $ex) {
+          phlog(
+            pht(
+              'In-process task "%s" yielded for %s seconds, sleeping...',
+              $task_class,
+              $ex->getDuration()));
+
+          sleep($ex->getDuration());
+        }
+      }
 
       // Now, save a task row and immediately archive it so we can return an
       // object with a valid ID.
@@ -192,6 +207,31 @@ abstract class PhabricatorWorker {
     $argv = func_get_args();
     call_user_func_array(array($console, 'writeLog'), $argv);
     return $this;
+  }
+
+
+  /**
+   * Queue a task to be executed after this one suceeds.
+   *
+   * The followup task will be queued only if this task completes cleanly.
+   *
+   * @param string Task class to queue.
+   * @param array  Data for the followup task.
+   * @return this
+   */
+  protected function queueTask($class, array $data) {
+    $this->queuedTasks[] = array($class, $data);
+    return $this;
+  }
+
+
+  /**
+   * Get tasks queued as followups by @{method:queueTask}.
+   *
+   * @return list<pair<string, wild>> Queued task specifications.
+   */
+  public function getQueuedTasks() {
+    return $this->queuedTasks;
   }
 
 }

@@ -18,7 +18,10 @@ final class PhabricatorRemarkupRuleMention
   // username, so we'll incorrectly pick it up, but there's little to be done
   // about that. We forbid terminal periods so that we can correctly capture
   // "@joe" instead of "@joe." in "Hey, @joe.".
-  const REGEX = '/(?<!\w)@([a-zA-Z0-9._-]*[a-zA-Z0-9_-])/';
+  //
+  // We disallow "@@joe" because it creates a false positive in the common
+  // construction "l@@k", made popular by eBay.
+  const REGEX = '/(?<!\w|@)@([a-zA-Z0-9._-]*[a-zA-Z0-9_-])/';
 
   public function apply($text) {
     return preg_replace_callback(

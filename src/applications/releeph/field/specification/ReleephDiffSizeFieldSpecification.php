@@ -1,9 +1,5 @@
 <?php
 
-/**
- * While this class could take advantage of bulkLoad(), in practice
- * loadRelatives fixes all that for us.
- */
 final class ReleephDiffSizeFieldSpecification
   extends ReleephFieldSpecification {
 
@@ -19,11 +15,12 @@ final class ReleephDiffSizeFieldSpecification
     return 'Size';
   }
 
-  public function renderValueForHeaderView() {
-    $diff_rev = $this->getReleephRequest()->loadDifferentialRevision();
-    if (!$diff_rev) {
-      return '';
+  public function renderPropertyViewValue(array $handles) {
+    $requested_object = $this->getObject()->getRequestedObject();
+    if (!($requested_object instanceof DifferentialRevision)) {
+      return null;
     }
+    $diff_rev = $requested_object;
 
     $diffs = $diff_rev->loadRelatives(
       new DifferentialDiff(),

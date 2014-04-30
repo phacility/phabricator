@@ -4,13 +4,12 @@ final class ReleephRequestQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $requestedCommitPHIDs;
-  private $commitToRevMap;
   private $ids;
   private $phids;
   private $severities;
   private $requestorPHIDs;
   private $branchIDs;
-  private $revisionPHIDs;
+  private $requestedObjectPHIDs;
 
   const STATUS_ALL          = 'status-all';
   const STATUS_OPEN         = 'status-open';
@@ -39,14 +38,6 @@ final class ReleephRequestQuery
     return $this;
   }
 
-  public function getRevisionPHID($commit_phid) {
-    if ($this->commitToRevMap) {
-      return idx($this->commitToRevMap, $commit_phid, null);
-    }
-
-    return null;
-  }
-
   public function withStatus($status) {
     $this->status = $status;
     return $this;
@@ -67,8 +58,8 @@ final class ReleephRequestQuery
     return $this;
   }
 
-  public function withRevisionPHIDs(array $revision_phids) {
-    $this->revisionPHIDs = $revision_phids;
+  public function withRequestedObjectPHIDs(array $phids) {
+    $this->requestedObjectPHIDs = $phids;
     return $this;
   }
 
@@ -89,16 +80,23 @@ final class ReleephRequestQuery
 
   public function willFilterPage(array $requests) {
 
-    // TODO: These should be serviced by the query, but are not currently
-    // denormalized anywhere. For now, filter them here instead.
+    // Load requested objects: you must be able to see an object to see
+    // requests for it.
+    $object_phids = mpull($requests, 'getRequestedObjectPHID');
+    $objects = id(new PhabricatorObjectQuery())
+      ->setViewer($this->getViewer())
+      ->setParentQuery($this)
+      ->withPHIDs($object_phids)
+      ->execute();
 
-    $keep_status = array_fuse($this->getKeepStatusConstants());
-    if ($keep_status) {
-      foreach ($requests as $key => $request) {
-        if (empty($keep_status[$request->getStatus()])) {
-          unset($requests[$key]);
-        }
+    foreach ($requests as $key => $request) {
+      $object_phid = $request->getRequestedObjectPHID();
+      $object = idx($objects, $object_phid);
+      if (!$object) {
+        unset($requests[$key]);
+        continue;
       }
+      $request->attachRequestedObject($object);
     }
 
     if ($this->severities) {
@@ -118,70 +116,81 @@ final class ReleephRequestQuery
       }
     }
 
+    $branch_ids = array_unique(mpull($requests, 'getBranchID'));
+    $branches = id(new ReleephBranchQuery())
+      ->withIDs($branch_ids)
+      ->setViewer($this->getViewer())
+      ->execute();
+    $branches = mpull($branches, null, 'getID');
+    foreach ($requests as $key => $request) {
+      $branch = idx($branches, $request->getBranchID());
+      if (!$branch) {
+        unset($requests[$key]);
+        continue;
+      }
+      $request->attachBranch($branch);
+    }
+
+    // TODO: These should be serviced by the query, but are not currently
+    // denormalized anywhere. For now, filter them here instead. Note that
+    // we must perform this filtering *after* querying and attaching branches,
+    // because request status depends on the product.
+
+    $keep_status = array_fuse($this->getKeepStatusConstants());
+    if ($keep_status) {
+      foreach ($requests as $key => $request) {
+        if (empty($keep_status[$request->getStatus()])) {
+          unset($requests[$key]);
+        }
+      }
+    }
+
     return $requests;
   }
 
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->branchIDs) {
+    if ($this->branchIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
         'branchID IN (%Ld)',
         $this->branchIDs);
     }
 
-    if ($this->requestedCommitPHIDs) {
+    if ($this->requestedCommitPHIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
         'requestCommitPHID IN (%Ls)',
         $this->requestedCommitPHIDs);
     }
 
-    if ($this->requestorPHIDs) {
+    if ($this->requestorPHIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
         'requestUserPHID IN (%Ls)',
         $this->requestorPHIDs);
     }
 
-    if ($this->revisionPHIDs) {
-      $type = PhabricatorEdgeConfig::TYPE_DREV_HAS_COMMIT;
-
-      $edges = id(new PhabricatorEdgeQuery())
-        ->withSourcePHIDs($this->revisionPHIDs)
-        ->withEdgeTypes(array($type))
-        ->execute();
-
-      $this->commitToRevMap = array();
-      foreach ($edges as $revision_phid => $edge) {
-        foreach ($edge[$type] as $commitPHID => $item) {
-          $this->commitToRevMap[$commitPHID] = $revision_phid;
-        }
-      }
-
-      if (!$this->commitToRevMap) {
-        throw new PhabricatorEmptyQueryException("Malformed Revision Phids");
-      }
-
+    if ($this->requestedObjectPHIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'requestCommitPHID IN (%Ls)',
-        array_keys($this->commitToRevMap));
+        'requestedObjectPHID IN (%Ls)',
+        $this->requestedObjectPHIDs);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

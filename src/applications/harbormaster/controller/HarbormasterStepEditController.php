@@ -81,6 +81,13 @@ final class HarbormasterStepEditController
         // if we create plans elsewhere.
         $steps = $plan->loadOrderedBuildSteps();
         $step->setSequence(count($steps) + 1);
+
+        // When creating a new step, make sure we have a create transaction
+        // so we'll apply the transactions even if the step has no
+        // configurable options.
+        $create_xaction = id(new HarbormasterBuildStepTransaction())
+          ->setTransactionType(HarbormasterBuildStepTransaction::TYPE_CREATE);
+        array_unshift($xactions, $create_xaction);
       }
 
       try {

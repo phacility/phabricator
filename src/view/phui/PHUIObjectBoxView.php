@@ -11,9 +11,21 @@ final class PHUIObjectBoxView extends AphrontView {
   private $header;
   private $flush;
   private $id;
+  private $sigils = array();
+  private $metadata;
 
   private $tabs = array();
   private $propertyLists = array();
+
+  public function addSigil($sigil) {
+    $this->sigils[] = $sigil;
+    return $this;
+  }
+
+  public function setMetadata(array $metadata) {
+    $this->metadata = $metadata;
+    return $this;
+  }
 
   public function addPropertyList(
     PHUIPropertyListView $property_list,
@@ -244,6 +256,14 @@ final class PHUIObjectBoxView extends AphrontView {
 
     if ($this->flush) {
       $content->addClass('phui-object-box-flush');
+    }
+
+    foreach ($this->sigils as $sigil) {
+      $content->addSigil($sigil);
+    }
+
+    if ($this->metadata !== null) {
+      $content->setMetadata($this->metadata);
     }
 
     return $content;

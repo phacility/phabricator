@@ -69,6 +69,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_OBJECT_HAS_COLUMN          = 43;
   const TYPE_COLUMN_HAS_OBJECT          = 44;
 
+  const TYPE_DASHBOARD_HAS_PANEL        = 45;
+  const TYPE_PANEL_HAS_DASHBOARD        = 46;
+
   const TYPE_TEST_NO_CYCLE              = 9000;
 
   const TYPE_PHOB_HAS_ASANATASK         = 80001;
@@ -153,6 +156,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
       self::TYPE_OBJECT_HAS_COLUMN => self::TYPE_COLUMN_HAS_OBJECT,
       self::TYPE_COLUMN_HAS_OBJECT => self::TYPE_OBJECT_HAS_COLUMN,
+
+      self::TYPE_PANEL_HAS_DASHBOARD => self::TYPE_DASHBOARD_HAS_PANEL,
+      self::TYPE_DASHBOARD_HAS_PANEL => self::TYPE_PANEL_HAS_DASHBOARD,
     );
 
     return idx($map, $edge_type);
@@ -259,6 +265,10 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s edited reviewer(s), added %d: %s; removed %d: %s.';
       case self::TYPE_TASK_HAS_MOCK:
         return '%s edited mock(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_DASHBOARD_HAS_PANEL:
+        return '%s edited panel(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_PANEL_HAS_DASHBOARD:
+        return '%s edited dashboard(s), added %d: %s; removed %d: %s.';
       case self::TYPE_SUBSCRIBED_TO_OBJECT:
       case self::TYPE_UNSUBSCRIBED_FROM_OBJECT:
       case self::TYPE_FILE_HAS_OBJECT:
@@ -329,6 +339,10 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s added %d reviewer(s): %s.';
       case self::TYPE_TASK_HAS_MOCK:
         return '%s added %d mock(s): %s.';
+      case self::TYPE_DASHBOARD_HAS_PANEL:
+        return '%s added %d panel(s): %s.';
+      case self::TYPE_PANEL_HAS_DASHBOARD:
+        return '%s added %d dashboard(s): %s.';
       case self::TYPE_SUBSCRIBED_TO_OBJECT:
       case self::TYPE_UNSUBSCRIBED_FROM_OBJECT:
       case self::TYPE_FILE_HAS_OBJECT:
@@ -400,6 +414,10 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s removed %d reviewer(s): %s.';
       case self::TYPE_TASK_HAS_MOCK:
         return '%s removed %d mock(s): %s.';
+      case self::TYPE_DASHBOARD_HAS_PANEL:
+        return '%s removed %d panel(s): %s.';
+      case self::TYPE_PANEL_HAS_DASHBOARD:
+        return '%s removed %d dashboard(s): %s.';
       case self::TYPE_SUBSCRIBED_TO_OBJECT:
       case self::TYPE_UNSUBSCRIBED_FROM_OBJECT:
       case self::TYPE_FILE_HAS_OBJECT:
@@ -469,6 +487,10 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s updated reviewers of %s.';
       case self::TYPE_TASK_HAS_MOCK:
         return '%s updated mocks of %s.';
+      case self::TYPE_PANEL_HAS_DASHBOARD:
+        return '%s updated panels for %s.';
+      case self::TYPE_PANEL_HAS_DASHBOARD:
+        return '%s updated dashboards for %s.';
       case self::TYPE_SUBSCRIBED_TO_OBJECT:
       case self::TYPE_UNSUBSCRIBED_FROM_OBJECT:
       case self::TYPE_FILE_HAS_OBJECT:

@@ -16,7 +16,6 @@ final class ManiphestTransactionEditor
     $types[] = ManiphestTransaction::TYPE_OWNER;
     $types[] = ManiphestTransaction::TYPE_CCS;
     $types[] = ManiphestTransaction::TYPE_PROJECTS;
-    $types[] = ManiphestTransaction::TYPE_ATTACH;
     $types[] = ManiphestTransaction::TYPE_EDGE;
     $types[] = ManiphestTransaction::TYPE_SUBPRIORITY;
     $types[] = ManiphestTransaction::TYPE_PROJECT_COLUMN;
@@ -57,8 +56,6 @@ final class ManiphestTransactionEditor
         return array_values(array_unique($object->getCCPHIDs()));
       case ManiphestTransaction::TYPE_PROJECTS:
         return array_values(array_unique($object->getProjectPHIDs()));
-      case ManiphestTransaction::TYPE_ATTACH:
-        return $object->getAttached();
       case ManiphestTransaction::TYPE_EDGE:
       case ManiphestTransaction::TYPE_PROJECT_COLUMN:
         // These are pre-populated.
@@ -84,7 +81,6 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_STATUS:
       case ManiphestTransaction::TYPE_TITLE:
       case ManiphestTransaction::TYPE_DESCRIPTION:
-      case ManiphestTransaction::TYPE_ATTACH:
       case ManiphestTransaction::TYPE_EDGE:
       case ManiphestTransaction::TYPE_SUBPRIORITY:
       case ManiphestTransaction::TYPE_PROJECT_COLUMN:
@@ -155,8 +151,6 @@ final class ManiphestTransactionEditor
         return $object->setCCPHIDs($xaction->getNewValue());
       case ManiphestTransaction::TYPE_PROJECTS:
         return $object->setProjectPHIDs($xaction->getNewValue());
-      case ManiphestTransaction::TYPE_ATTACH:
-        return $object->setAttached($xaction->getNewValue());
       case ManiphestTransaction::TYPE_EDGE:
         // These are a weird, funky mess and are already being applied by the
         // time we reach this.

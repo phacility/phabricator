@@ -46,14 +46,17 @@ final class DiffusionDoorkeeperCommitFeedStoryPublisher
   }
 
   public function willPublishStory($commit) {
-    $requests = id(new PhabricatorAuditQuery())
-      ->withCommitPHIDs(array($commit->getPHID()))
-      ->execute();
+    $requests = id(new DiffusionCommitQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs(array($commit->getPHID()))
+      ->needAuditRequests(true)
+      ->executeOne()
+      ->getAudits();
 
     // TODO: This is messy and should be generalized, but we don't have a good
     // query for it yet. Since we run in the daemons, just do the easiest thing
     // we can for the moment. Figure out who all of the "active" (need to
-    // audit) and "passive" (no action necessary) user are.
+    // audit) and "passive" (no action necessary) users are.
 
     $auditor_phids = mpull($requests, 'getAuditorPHID');
     $objects = id(new PhabricatorObjectQuery())
@@ -105,7 +108,6 @@ final class DiffusionDoorkeeperCommitFeedStoryPublisher
           break;
       }
     }
-
 
 
     // Remove "Active" users from the "Passive" list.

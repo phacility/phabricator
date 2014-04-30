@@ -25,6 +25,9 @@ final class PhabricatorSlowvoteVoteController
     if (!$poll) {
       return new Aphront404Response();
     }
+    if ($poll->getIsClosed()) {
+      return new Aphront400Response();
+    }
 
     $options = $poll->getOptions();
     $user_choices = $poll->getViewerChoices($user);

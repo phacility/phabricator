@@ -158,4 +158,18 @@ abstract class PhabricatorStandardCustomFieldPHIDs
     }
   }
 
+  public function shouldAppearInHerald() {
+    return true;
+  }
+
+  public function getHeraldFieldConditions() {
+    return array(
+      HeraldAdapter::CONDITION_INCLUDE_ALL,
+      HeraldAdapter::CONDITION_INCLUDE_ANY,
+      HeraldAdapter::CONDITION_INCLUDE_NONE,
+      HeraldAdapter::CONDITION_EXISTS,
+      HeraldAdapter::CONDITION_NOT_EXISTS,
+    );
+  }
+
 }

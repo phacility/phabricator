@@ -15,9 +15,9 @@ JX.behavior('aphront-form-disable-on-submit', function(config) {
   });
 
 
-  JX.Stratcom.listen('keypress', ['tag:form', 'tag:textarea'], function(e) {
+  JX.Stratcom.listen('keydown', ['tag:form', 'tag:textarea'], function(e) {
     var raw = e.getRawEvent();
-    if (e.getSpecialKey() != 'return' || !raw.ctrlKey) {
+    if (!(e.getSpecialKey() === 'return' && (raw.ctrlKey || raw.metaKey))) {
       return;
     }
 

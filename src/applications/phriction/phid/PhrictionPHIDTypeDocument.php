@@ -12,6 +12,10 @@ final class PhrictionPHIDTypeDocument extends PhabricatorPHIDType {
     return pht('Wiki Document');
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorApplicationPhriction';
+  }
+
   public function newObject() {
     return new PhrictionDocument();
   }

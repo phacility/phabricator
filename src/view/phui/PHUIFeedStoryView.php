@@ -30,6 +30,10 @@ final class PHUIFeedStoryView extends AphrontView {
     return $this;
   }
 
+  public function getTitle() {
+    return $this->title;
+  }
+
   public function setEpoch($epoch) {
     $this->epoch = $epoch;
     return $this;

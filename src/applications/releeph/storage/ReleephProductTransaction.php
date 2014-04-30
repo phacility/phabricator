@@ -10,7 +10,7 @@ final class ReleephProductTransaction
   }
 
   public function getApplicationTransactionType() {
-    return ReleephPHIDTypeProject::TYPECONST;
+    return ReleephPHIDTypeProduct::TYPECONST;
   }
 
   public function getColor() {
@@ -37,9 +37,9 @@ final class ReleephProductTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_ACTIVE:
         if ($new) {
-          return 'edit';
+          return 'fa-pencil';
         } else {
-          return 'delete';
+          return 'fa-times';
         }
         break;
     }

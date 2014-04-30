@@ -123,6 +123,11 @@ final class DifferentialLandingToHostedGit
       return;
     }
 
+    // TODO: This temporarily disables this action, because it doesn't work
+    // and is confusing to users. If you want to use it, comment out this line
+    // for now and we'll provide real support eventually.
+    return;
+
     return $this->createActionView(
       $revision,
       pht('Land to Hosted Repository'));

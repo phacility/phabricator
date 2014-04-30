@@ -597,6 +597,7 @@ final class DifferentialTransactionEditor
 
     $object->attachReviewerStatus($new_revision->getReviewerStatus());
     $object->attachActiveDiff($new_revision->getActiveDiff());
+    $object->attachRepository($new_revision->getRepository());
 
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
@@ -1069,7 +1070,7 @@ final class DifferentialTransactionEditor
     switch ($strongest->getTransactionType()) {
       case DifferentialTransaction::TYPE_UPDATE:
         $count = new PhutilNumber($object->getLineCount());
-        $action = pht('%s, %d line(s)', $action, $count);
+        $action = pht('%s, %s line(s)', $action, $count);
         break;
     }
 
@@ -1519,20 +1520,9 @@ final class DifferentialTransactionEditor
     DifferentialRevision $revision,
     DifferentialDiff $diff) {
 
-    $changesets = $diff->getChangesets();
-
-    // TODO: This all needs to be modernized.
-
-    $project = $diff->loadArcanistProject();
-    if (!$project) {
-      // Probably an old revision from before projects.
-      return;
-    }
-
-    $repository = $project->loadRepository();
+    $repository = $revision->getRepository();
     if (!$repository) {
-      // Probably no project <-> repository link, or the repository where the
-      // project lives is untracked.
+      // The repository where the code lives is untracked.
       return;
     }
 
@@ -1560,6 +1550,7 @@ final class DifferentialTransactionEditor
       }
     }
 
+    $changesets = $diff->getChangesets();
     $paths = array();
     foreach ($changesets as $changeset) {
       $paths[] = $path_prefix.'/'.$changeset->getFilename();

@@ -12,6 +12,10 @@ final class PhabricatorRepositoryPHIDTypeCommit extends PhabricatorPHIDType {
     return pht('Commit');
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorApplicationDiffusion';
+  }
+
   public function newObject() {
     return new PhabricatorRepositoryCommit();
   }

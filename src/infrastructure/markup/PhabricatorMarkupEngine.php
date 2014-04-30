@@ -494,11 +494,14 @@ final class PhabricatorMarkupEngine {
     return $engine;
   }
 
-  public static function extractPHIDsFromMentions(array $content_blocks) {
+  public static function extractPHIDsFromMentions(
+    PhabricatorUser $viewer,
+    array $content_blocks) {
+
     $mentions = array();
 
     $engine = self::newDifferentialMarkupEngine();
-    $engine->setConfig('viewer', PhabricatorUser::getOmnipotentUser());
+    $engine->setConfig('viewer', $viewer);
 
     foreach ($content_blocks as $content_block) {
       $engine->markupText($content_block);
@@ -512,11 +515,12 @@ final class PhabricatorMarkupEngine {
   }
 
   public static function extractFilePHIDsFromEmbeddedFiles(
+    PhabricatorUser $viewer,
     array $content_blocks) {
     $files = array();
 
     $engine = self::newDifferentialMarkupEngine();
-    $engine->setConfig('viewer', PhabricatorUser::getOmnipotentUser());
+    $engine->setConfig('viewer', $viewer);
 
     foreach ($content_blocks as $content_block) {
       $engine->markupText($content_block);

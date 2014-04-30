@@ -13,6 +13,23 @@ abstract class ReleephFieldSpecification
     return $this;
   }
 
+  public function shouldAppearInPropertyView() {
+    return true;
+  }
+
+  public function renderPropertyViewLabel() {
+    return $this->getName();
+  }
+
+  public function renderPropertyViewValue(array $handles) {
+    $key = $this->getRequiredStorageKey();
+    $value = $this->getReleephRequest()->getDetail($key);
+    if ($value === '') {
+      return null;
+    }
+    return $value;
+  }
+
   abstract public function getName();
 
 /* -(  Storage  )------------------------------------------------------------ */
@@ -78,22 +95,6 @@ abstract class ReleephFieldSpecification
   }
 
 
-/* -(  Header View  )-------------------------------------------------------- */
-
-  /**
-   * Return a label for use in rendering the fields table.  If you return null,
-   * the renderLabelForHeaderView data will span both columns.
-   */
-  public function renderLabelForHeaderView() {
-    return $this->getName();
-  }
-
-  public function renderValueForHeaderView() {
-    $key = $this->getRequiredStorageKey();
-    return $this->getReleephRequest()->getDetail($key);
-  }
-
-
 /* -(  Conduit  )------------------------------------------------------------ */
 
   public function getKeyForConduit() {
@@ -148,25 +149,31 @@ abstract class ReleephFieldSpecification
   }
 
   final public function getReleephProject() {
+    if (!$this->releephProject) {
+      return $this->getReleephBranch()->getProduct();
+    }
     return $this->releephProject;
   }
 
   final public function getReleephBranch() {
+    if (!$this->releephBranch) {
+      return $this->getReleephRequest()->getBranch();
+    }
     return $this->releephBranch;
   }
 
   final public function getReleephRequest() {
+    if (!$this->releephRequest) {
+      return $this->getObject();
+    }
     return $this->releephRequest;
   }
 
   final public function getUser() {
+    if (!$this->user) {
+      return $this->getViewer();
+    }
     return $this->user;
-  }
-
-
-/* -(  Bulk loading  )------------------------------------------------------- */
-
-  public function bulkLoad(array $releeph_requests) {
   }
 
 /* -(  Commit Messages  )---------------------------------------------------- */

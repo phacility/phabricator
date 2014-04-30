@@ -102,7 +102,7 @@ final class PhabricatorManiphestConfigOptions
       'duplicate' => array(
         'name' => pht('Duplicate'),
         'name.full' => pht('Closed, Duplicate'),
-        'transaction.icon' => 'delete',
+        'transaction.icon' => 'fa-times',
         'special' => ManiphestTaskStatus::SPECIAL_DUPLICATE,
         'closed' => true,
       ),
@@ -110,7 +110,7 @@ final class PhabricatorManiphestConfigOptions
         'name' => pht('Spite'),
         'name.full' => pht('Closed, Spite'),
         'name.action' => pht('Spited'),
-        'transaction.icon' => 'dislike',
+        'transaction.icon' => 'fa-thumbs-o-down',
         'silly' => true,
         'closed' => true,
         'prefixes' => array(
@@ -157,7 +157,7 @@ The keys you can provide in a specification are:
       and it must be a closed status.
   - `transaction.icon` //Optional string.// Allows you to choose a different
     icon to use for this status when showing status changes in the transaction
-    log.
+    log. Please see UIExamples, Icons and Images for a list.
   - `transaction.color` //Optional string.// Allows you to choose a different
     color to use for this status when showing status changes in the transaction
     log.

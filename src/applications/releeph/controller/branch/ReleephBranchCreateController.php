@@ -1,23 +1,42 @@
 <?php
 
-final class ReleephBranchCreateController extends ReleephProjectController {
+final class ReleephBranchCreateController extends ReleephProductController {
+
+  private $productID;
+
+  public function willProcessRequest(array $data) {
+    $this->productID = $data['projectID'];
+  }
 
   public function processRequest() {
-    $releeph_project = $this->getReleephProject();
-
     $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $product = id(new ReleephProductQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->productID))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
+    if (!$product) {
+      return new Aphront404Response();
+    }
+    $this->setProduct($product);
+
 
     $cut_point = $request->getStr('cutPoint');
     $symbolic_name = $request->getStr('symbolicName');
 
     if (!$cut_point) {
-      $repository = $releeph_project->loadPhabricatorRepository();
+      $repository = $product->getRepository();
       switch ($repository->getVersionControlSystem()) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
           break;
-
         case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-          $cut_point = $releeph_project->getTrunkBranch();
+          $cut_point = $product->getTrunkBranch();
           break;
       }
     }
@@ -42,7 +61,7 @@ final class ReleephBranchCreateController extends ReleephProjectController {
         try {
           $finder = id(new ReleephCommitFinder())
             ->setUser($request->getUser())
-            ->setReleephProject($releeph_project);
+            ->setReleephProject($product);
           $cut_commit = $finder->fromPartial($cut_point);
         } catch (Exception $e) {
           $e_cut = pht('Invalid');
@@ -52,26 +71,21 @@ final class ReleephBranchCreateController extends ReleephProjectController {
 
       if (!$errors) {
         $branch = id(new ReleephBranchEditor())
-          ->setReleephProject($releeph_project)
+          ->setReleephProject($product)
           ->setActor($request->getUser())
           ->newBranchFromCommit(
             $cut_commit,
             $branch_date,
             $symbolic_name);
 
+        $branch_uri = $this->getApplicationURI('branch/'.$branch->getID());
+
         return id(new AphrontRedirectResponse())
-          ->setURI($branch->getURI());
+          ->setURI($branch_uri);
       }
     }
 
-    $error_view = array();
-    if ($errors) {
-      $error_view = new AphrontErrorView();
-      $error_view->setErrors($errors);
-    }
-
-    $project_id = $releeph_project->getID();
-    $project_uri = $this->getApplicationURI("project/{$project_id}/");
+    $product_uri = $this->getProductViewURI($product);
 
     $form = id(new AphrontFormView())
       ->setUser($request->getUser())
@@ -95,7 +109,12 @@ final class ReleephBranchCreateController extends ReleephProjectController {
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Cut Branch'))
-          ->addCancelButton($project_uri));
+          ->addCancelButton($product_uri));
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('New Branch'))
+      ->setFormErrors($errors)
+      ->appendChild($form);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('New Branch'));
@@ -103,8 +122,7 @@ final class ReleephBranchCreateController extends ReleephProjectController {
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $error_view,
-        $form,
+        $box,
       ),
       array(
         'title' => pht('New Branch'),

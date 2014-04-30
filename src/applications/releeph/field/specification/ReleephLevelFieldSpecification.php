@@ -23,7 +23,7 @@ abstract class ReleephLevelFieldSpecification
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
 
-  public function renderValueForHeaderView() {
+  public function renderPropertyViewValue(array $handles) {
     return $this->getNameForLevel($this->getValue());
   }
 

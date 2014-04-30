@@ -32,6 +32,7 @@ final class HarbormasterBuildableListController
     $viewer = $this->getRequest()->getUser();
 
     $list = new PHUIObjectItemListView();
+    $list->setStates(true);
     foreach ($buildables as $buildable) {
       $id = $buildable->getID();
 
@@ -52,34 +53,30 @@ final class HarbormasterBuildableListController
         $item->addIcon('wrench-grey', pht('Manual'));
       }
 
+      switch ($buildable->getBuildableStatus()) {
+        case HarbormasterBuildable::STATUS_PASSED:
+          $item->setState(PHUIObjectItemView::STATE_SUCCESS);
+          break;
+        case HarbormasterBuildable::STATUS_FAILED:
+          $item->setState(PHUIObjectItemView::STATE_FAIL);
+          break;
+        case HarbormasterBuildable::STATUS_BUILDING:
+          $item->setState(PHUIObjectItemView::STATE_BUILD);
+          break;
+        default:
+          $item->setState(PHUIObjectItemView::STATE_WARN);
+          break;
+      }
+
       $list->addItem($item);
 
-
-
-      // TODO: This is proof-of-concept for getting meaningful status
-      // information into this list, and should get an improvement pass
-      // once we're a little farther along.
-
-      $all_pass = true;
-      $any_fail = false;
-      foreach ($buildable->getBuilds() as $build) {
-        if ($build->getBuildStatus() != HarbormasterBuild::STATUS_PASSED) {
-          $all_pass = false;
-        }
-        if ($build->getBuildStatus() == HarbormasterBuild::STATUS_FAILED ||
-            $build->getBuildStatus() == HarbormasterBuild::STATUS_ERROR) {
-          $any_fail = true;
-        }
-      }
-
-      if ($any_fail) {
-        $item->setBarColor('red');
-      } else if ($all_pass) {
-        $item->setBarColor('green');
-      }
     }
 
-    return $list;
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Buildables'))
+      ->appendChild($list);
+
+    return $box;
   }
 
   public function buildSideNavView($for_app = false) {

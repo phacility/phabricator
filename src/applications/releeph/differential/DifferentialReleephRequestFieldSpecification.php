@@ -195,7 +195,7 @@ final class DifferentialReleephRequestFieldSpecification {
       $rqs_seen = array();
       $groups = array();
       foreach ($releeph_requests as $releeph_request) {
-        $releeph_branch = $releeph_request->loadReleephBranch();
+        $releeph_branch = $releeph_request->getBranch();
         $branch_name = $releeph_branch->getName();
         $rq_id = 'RQ'.$releeph_request->getID();
 
@@ -252,7 +252,7 @@ final class DifferentialReleephRequestFieldSpecification {
       return;
     }
 
-    $releeph_branch = head($releeph_requests)->loadReleephBranch();
+    $releeph_branch = head($releeph_requests)->getBranch();
     if (!$this->isCommitOnBranch($repo, $commit, $releeph_branch)) {
       return;
     }
@@ -297,10 +297,12 @@ final class DifferentialReleephRequestFieldSpecification {
   private function loadReleephRequests() {
     if (!$this->releephPHIDs) {
       return array();
-    } else {
-      return id(new ReleephRequest())
-        ->loadAllWhere('phid IN (%Ls)', $this->releephPHIDs);
     }
+
+    return id(new ReleephRequestQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs($this->releephPHIDs)
+      ->execute();
   }
 
   private function isCommitOnBranch(PhabricatorRepository $repo,

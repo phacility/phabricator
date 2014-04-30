@@ -360,6 +360,50 @@ final class PHUIObjectItemListExample extends PhabricatorUIExample {
 
     $out[] = array($head, $list);
 
+    $head = id(new PHUIHeaderView())
+      ->setHeader(pht('States'));
+
+    $list = id(new PHUIObjectItemListView())
+      ->setStates(true);
+
+    $list->addItem(
+      id(new PHUIObjectItemView())
+        ->setObjectName('X1200')
+        ->setHeader(pht('Action Passed'))
+        ->addAttribute(pht('That went swimmingly, go you'))
+        ->setHref('#')
+        ->setState(PHUIObjectItemView::STATE_SUCCESS));
+
+    $list->addItem(
+      id(new PHUIObjectItemView())
+        ->setObjectName('X1201')
+        ->setHeader(pht('Action Failed'))
+        ->addAttribute(pht('Whoopsies, might want to fix that'))
+        ->setHref('#')
+        ->setState(PHUIObjectItemView::STATE_FAIL));
+
+    $list->addItem(
+      id(new PHUIObjectItemView())
+        ->setObjectName('X1202')
+        ->setHeader(pht('Action Warning'))
+        ->addAttribute(pht('We need to talk about things'))
+        ->setHref('#')
+        ->setState(PHUIObjectItemView::STATE_WARN));
+
+    $list->addItem(
+      id(new PHUIObjectItemView())
+        ->setObjectName('X1203')
+        ->setHeader(pht('Action Noted'))
+        ->addAttribute(pht('The weather seems nice today'))
+        ->setHref('#')
+        ->setState(PHUIObjectItemView::STATE_NOTE));
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText('Test Things')
+      ->appendChild($list);
+
+    $out[] = array($head, $box);
+
     return $out;
   }
 }

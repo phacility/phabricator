@@ -83,7 +83,7 @@ final class HarbormasterBuildMessageQuery
       $where[] = qsprintf(
         $conn_r,
         'isConsumed = %d',
-        (int)$this->isConsumed);
+        (int)$this->consumed);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

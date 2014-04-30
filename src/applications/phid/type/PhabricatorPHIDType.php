@@ -13,6 +13,20 @@ abstract class PhabricatorPHIDType {
     return null;
   }
 
+
+  /**
+   * Get the class name for the application this type belongs to.
+   *
+   * @return string|null Class name of the corresponding application, or null
+   *   if the type is not bound to an application.
+   */
+  public function getPHIDTypeApplicationClass() {
+    // TODO: Some day this should probably be abstract, but for now it only
+    // affects global search and there's no real burning need to go classify
+    // every PHID type.
+    return null;
+  }
+
   /**
    * Build a @{class:PhabricatorPolicyAwareQuery} to load objects of this type
    * by PHID.
@@ -103,6 +117,15 @@ abstract class PhabricatorPHIDType {
     throw new Exception("Not implemented!");
   }
 
+
+  /**
+   * Get all known PHID types.
+   *
+   * To get PHID types a given user has access to, see
+   * @{method:getAllInstalledTypes}.
+   *
+   * @return dict<string, PhabricatorPHIDType> Map of type constants to types.
+   */
   public static function getAllTypes() {
     static $types;
     if ($types === null) {
@@ -131,6 +154,50 @@ abstract class PhabricatorPHIDType {
     }
 
     return $types;
+  }
+
+
+  /**
+   * Get all PHID types of applications installed for a given viewer.
+   *
+   * @param PhabricatorUser Viewing user.
+   * @return dict<string, PhabricatorPHIDType> Map of constants to installed
+   *  types.
+   */
+  public static function getAllInstalledTypes(PhabricatorUser $viewer) {
+    $all_types = self::getAllTypes();
+
+    $installed_types = array();
+
+    $app_classes = array();
+    foreach ($all_types as $key => $type) {
+      $app_class = $type->getPHIDTypeApplicationClass();
+
+      if ($app_class === null) {
+        // If the PHID type isn't bound to an application, include it as
+        // installed.
+        $installed_types[$key] = $type;
+        continue;
+      }
+
+      // Otherwise, we need to check if this application is installed before
+      // including the PHID type.
+      $app_classes[$app_class][$key] = $type;
+    }
+
+    if ($app_classes) {
+      $apps = id(new PhabricatorApplicationQuery())
+        ->setViewer($viewer)
+        ->withInstalled(true)
+        ->withClasses(array_keys($app_classes))
+        ->execute();
+
+      foreach ($apps as $app_class => $app) {
+        $installed_types += $app_classes[$app_class];
+      }
+    }
+
+    return $installed_types;
   }
 
 }

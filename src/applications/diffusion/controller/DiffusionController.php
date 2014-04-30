@@ -4,6 +4,18 @@ abstract class DiffusionController extends PhabricatorController {
 
   protected $diffusionRequest;
 
+  public function setDiffusionRequest(DiffusionRequest $request) {
+    $this->diffusionRequest = $request;
+    return $this;
+  }
+
+  protected function getDiffusionRequest() {
+    if (!$this->diffusionRequest) {
+      throw new Exception("No Diffusion request object!");
+    }
+    return $this->diffusionRequest;
+  }
+
   public function willBeginExecution() {
     $request = $this->getRequest();
 
@@ -24,20 +36,8 @@ abstract class DiffusionController extends PhabricatorController {
       $drequest = DiffusionRequest::newFromAphrontRequestDictionary(
         $data,
         $this->getRequest());
-      $this->diffusionRequest = $drequest;
+      $this->setDiffusionRequest($drequest);
     }
-  }
-
-  public function setDiffusionRequest(DiffusionRequest $request) {
-    $this->diffusionRequest = $request;
-    return $this;
-  }
-
-  protected function getDiffusionRequest() {
-    if (!$this->diffusionRequest) {
-      throw new Exception("No Diffusion request object!");
-    }
-    return $this->diffusionRequest;
   }
 
   public function buildCrumbs(array $spec = array()) {

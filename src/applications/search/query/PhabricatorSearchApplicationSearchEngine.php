@@ -96,7 +96,7 @@ final class PhabricatorSearchApplicationSearchEngine
     $type_values = $saved->getParameter('types', array());
     $type_values = array_fuse($type_values);
 
-    $types = self::getIndexableDocumentTypes();
+    $types = self::getIndexableDocumentTypes($this->requireViewer());
 
     $types_control = id(new AphrontFormCheckboxControl())
       ->setLabel(pht('Document Types'));
@@ -190,18 +190,21 @@ final class PhabricatorSearchApplicationSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-  public static function getIndexableDocumentTypes() {
+  public static function getIndexableDocumentTypes(
+    PhabricatorUser $viewer = null) {
+
     // TODO: This is inelegant and not very efficient, but gets us reasonable
     // results. It would be nice to do this more elegantly.
-
-    // TODO: We should hide types associated with applications the user can
-    // not access. There's no reasonable way to do this right now.
 
     $indexers = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhabricatorSearchDocumentIndexer')
       ->loadObjects();
 
-    $types = PhabricatorPHIDType::getAllTypes();
+    if ($viewer) {
+      $types = PhabricatorPHIDType::getAllInstalledTypes($viewer);
+    } else {
+      $types = PhabricatorPHIDType::getAllTypes();
+    }
 
     $results = array();
     foreach ($types as $type) {
@@ -215,6 +218,13 @@ final class PhabricatorSearchApplicationSearchEngine
     }
 
     asort($results);
+
+    // Put tasks first, see T4606.
+    $results = array_select_keys(
+      $results,
+      array(
+        ManiphestPHIDTypeTask::TYPECONST,
+      )) + $results;
 
     return $results;
   }

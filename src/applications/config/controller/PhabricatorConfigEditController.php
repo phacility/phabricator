@@ -94,7 +94,14 @@ final class PhabricatorConfigEditController
         }
       }
     } else {
-      $display_value = $this->getDisplayValue($option, $config_entry);
+      if ($config_entry->getIsDeleted()) {
+        $display_value = null;
+      } else {
+        $display_value = $this->getDisplayValue(
+          $option,
+          $config_entry,
+          $config_entry->getValue());
+      }
     }
 
     $form = new AphrontFormView();
@@ -186,7 +193,7 @@ final class PhabricatorConfigEditController
       $form->appendChild(
         id(new AphrontFormMarkupControl())
           ->setLabel(pht('Default'))
-          ->setValue($this->renderDefaults($option)));
+          ->setValue($this->renderDefaults($option, $config_entry)));
     }
 
     $title = pht('Edit %s', $this->key);
@@ -348,17 +355,16 @@ final class PhabricatorConfigEditController
 
   private function getDisplayValue(
     PhabricatorConfigOption $option,
-    PhabricatorConfigEntry $entry) {
-
-    if ($entry->getIsDeleted()) {
-      return null;
-    }
+    PhabricatorConfigEntry $entry,
+    $value) {
 
     if ($option->isCustomType()) {
-      return $option->getCustomObject()->getDisplayValue($option, $entry);
+      return $option->getCustomObject()->getDisplayValue(
+        $option,
+        $entry,
+        $value);
     } else {
       $type = $option->getType();
-      $value = $entry->getValue();
       switch ($type) {
         case 'int':
         case 'string':
@@ -497,7 +503,10 @@ final class PhabricatorConfigEditController
       $table);
   }
 
-  private function renderDefaults(PhabricatorConfigOption $option) {
+  private function renderDefaults(
+    PhabricatorConfigOption $option,
+    PhabricatorConfigEntry $entry) {
+
     $stack = PhabricatorEnv::getConfigSourceStack();
     $stack = $stack->getStack();
 
@@ -515,7 +524,9 @@ final class PhabricatorConfigEditController
       if (!array_key_exists($option->getKey(), $value)) {
         $value = phutil_tag('em', array(), pht('(empty)'));
       } else {
-        $value = PhabricatorConfigJSON::prettyPrintJSON(
+        $value = $this->getDisplayValue(
+          $option,
+          $entry,
           $value[$option->getKey()]);
       }
 

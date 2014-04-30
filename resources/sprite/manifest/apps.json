@@ -11,6 +11,16 @@
       "rule" : ".apps-adventure-white, .phui-list-item-href:hover .apps-adventure-dark",
       "hash" : "bd4dd76bc727638a757f392c8b1ffdeb"
     },
+    "apps-aphlict-dark"         : {
+      "name" : "apps-aphlict-dark",
+      "rule" : ".apps-aphlict-dark",
+      "hash" : "27cf37803ec9fb9a9023aacf64a77f0f"
+    },
+    "apps-aphlict-white"        : {
+      "name" : "apps-aphlict-white",
+      "rule" : ".apps-aphlict-white, .phui-list-item-href:hover .apps-aphlict-dark",
+      "hash" : "57e0a424c83643e4ed40974fb8c97d7f"
+    },
     "apps-application-dark"     : {
       "name" : "apps-application-dark",
       "rule" : ".apps-application-dark",
@@ -610,6 +620,16 @@
       "name" : "apps-uiexamples-white",
       "rule" : ".apps-uiexamples-white, .phui-list-item-href:hover .apps-uiexamples-dark",
       "hash" : "d1a649462c5fd374059011bb7f705d5b"
+    },
+    "apps-workboard-dark"       : {
+      "name" : "apps-workboard-dark",
+      "rule" : ".apps-workboard-dark",
+      "hash" : "3ed2347b810f4209224c776aa8b0fd51"
+    },
+    "apps-workboard-white"      : {
+      "name" : "apps-workboard-white",
+      "rule" : ".apps-workboard-white, .phui-list-item-href:hover .apps-workboard-dark",
+      "hash" : "0fd62c5999e0c0d982270c90107e4f9e"
     },
     "apps-workphlow-dark"       : {
       "name" : "apps-workphlow-dark",

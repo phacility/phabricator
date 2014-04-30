@@ -1,10 +1,7 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_differential_querydiffs_Method
-  extends ConduitAPIMethod {
+  extends ConduitAPI_differential_Method {
 
   public function getMethodDescription() {
     return pht('Query differential diffs which match certain criteria.');

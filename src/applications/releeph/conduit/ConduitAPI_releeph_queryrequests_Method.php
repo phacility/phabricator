@@ -37,7 +37,7 @@ final class ConduitAPI_releeph_queryrequests_Method
     $query->setViewer($conduit_request->getUser());
 
     if ($revision_phids) {
-      $query->withRevisionPHIDs($revision_phids);
+      $query->withRequestedObjectPHIDs($revision_phids);
     } else if ($requested_commit_phids) {
       $query->withRequestedCommitPHIDs($requested_commit_phids);
     }
@@ -45,13 +45,17 @@ final class ConduitAPI_releeph_queryrequests_Method
     $releephRequests = $query->execute();
 
     foreach ($releephRequests as $releephRequest) {
-      $branch = $releephRequest->loadReleephBranch();
-      if (!$branch) {
-        continue;
-      }
+      $branch = $releephRequest->getBranch();
+
       $request_commit_phid = $releephRequest->getRequestCommitPHID();
-      $revisionPHID =
-        $query->getRevisionPHID($request_commit_phid);
+
+      $object = $releephRequest->getRequestedObject();
+      if ($object instanceof DifferentialRevision) {
+        $object_phid = $object->getPHID();
+      }  else {
+        $object_phid = null;
+      }
+
       $status = $releephRequest->getStatus();
       $statusName = ReleephRequestStatus::getStatusDescriptionFor($status);
       $url = PhabricatorEnv::getProductionURI('/RQ'.$releephRequest->getID());
@@ -60,7 +64,7 @@ final class ConduitAPI_releeph_queryrequests_Method
         'branchBasename' => $branch->getBasename(),
         'branchSymbolic' => $branch->getSymbolicName(),
         'requestID'      => $releephRequest->getID(),
-        'revisionPHID'   => $revisionPHID,
+        'revisionPHID'   => $object_phid,
         'status'         => $status,
         'statusName'     => $statusName,
         'url'            => $url,

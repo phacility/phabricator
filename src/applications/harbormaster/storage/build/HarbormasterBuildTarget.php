@@ -11,6 +11,8 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
   protected $targetStatus;
 
   const STATUS_PENDING = 'target/pending';
+  const STATUS_BUILDING = 'target/building';
+  const STATUS_WAITING = 'target/waiting';
   const STATUS_PASSED = 'target/passed';
   const STATUS_FAILED = 'target/failed';
 
@@ -121,6 +123,26 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
   public function isFailed() {
     switch ($this->getTargetStatus()) {
       case self::STATUS_FAILED:
+        return true;
+    }
+
+    return false;
+  }
+
+
+  public function isWaiting() {
+    switch ($this->getTargetStatus()) {
+      case self::STATUS_WAITING:
+        return true;
+    }
+
+    return false;
+  }
+
+  public function isUnderway() {
+    switch ($this->getTargetStatus()) {
+      case self::STATUS_PENDING:
+      case self::STATUS_BUILDING:
         return true;
     }
 

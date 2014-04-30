@@ -196,4 +196,16 @@ abstract class HarbormasterBuildStepImplementation {
     }
   }
 
+  public function supportsWaitForMessage() {
+    return false;
+  }
+
+  public function shouldWaitForMessage(HarbormasterBuildTarget $target) {
+    if (!$this->supportsWaitForMessage()) {
+      return false;
+    }
+
+    return (bool)$target->getDetail('builtin.wait-for-message');
+  }
+
 }

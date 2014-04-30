@@ -11,6 +11,7 @@ final class PhabricatorPolicy
   private $shortName;
   private $type;
   private $href;
+  private $workflow;
   private $icon;
 
   protected $rules = array();
@@ -132,6 +133,15 @@ final class PhabricatorPolicy
     return $this->href;
   }
 
+  public function setWorkflow($workflow) {
+    $this->workflow = $workflow;
+    return $this;
+  }
+
+  public function getWorkflow() {
+    return $this->workflow;
+  }
+
   public function getIcon() {
     switch ($this->getType()) {
       case PhabricatorPolicyType::TYPE_GLOBAL:
@@ -234,11 +244,12 @@ final class PhabricatorPolicy
     }
 
     if ($this->getHref()) {
-      $desc = phutil_tag(
+      $desc = javelin_tag(
         'a',
         array(
           'href' => $this->getHref(),
           'class' => 'policy-link',
+          'sigil' => $this->getWorkflow() ? 'workflow' : null,
         ),
         array(
           $img,
@@ -256,7 +267,7 @@ final class PhabricatorPolicy
       case PhabricatorPolicyType::TYPE_PROJECT:
         return pht('%s (Project)', $desc);
       case PhabricatorPolicyType::TYPE_CUSTOM:
-        return pht('Custom Policy');
+        return $desc;
       case PhabricatorPolicyType::TYPE_MASKED:
         return pht(
           '%s (You do not have permission to view policy details.)',

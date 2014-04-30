@@ -129,7 +129,12 @@ final class PhabricatorNotificationBuilder {
     $null_view = new AphrontNullView();
 
     foreach ($stories as $story) {
-      $view = $story->renderView();
+      try {
+        $view = $story->renderView();
+      } catch (Exception $ex) {
+        // TODO: Render a nice debuggable notice instead?
+        continue;
+      }
       $null_view->appendChild($view->renderNotification($this->user));
     }
 

@@ -126,8 +126,16 @@ final class PhabricatorMailManagementSendTestWorkflow
       $mail->setFrom($from->getPHID());
     }
 
+    foreach ($attach as $attachment) {
+      $data = Filesystem::readFile($attachment);
+      $name = basename($attachment);
+      $mime = Filesystem::getMimeType($attachment);
+      $file = new PhabricatorMetaMTAAttachment($data, $name, $mime);
+      $mail->addAttachment($file);
+    }
+
+    PhabricatorWorker::setRunAllTasksInProcess(true);
     $mail->save();
-    $mail->sendNow();
 
     $console->writeErr(
       "%s\n\n    phabricator/ $ ./bin/mail show-outbound --id %d\n\n",

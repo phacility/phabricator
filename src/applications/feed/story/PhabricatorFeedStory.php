@@ -14,6 +14,7 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
   private $hasViewed;
   private $framed;
   private $hovercard = false;
+  private $renderingTarget = PhabricatorApplicationTransaction::TARGET_HTML;
 
   private $handles  = array();
   private $objects  = array();
@@ -124,6 +125,27 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
     return $this;
   }
 
+  public function setRenderingTarget($target) {
+    $this->validateRenderingTarget($target);
+    $this->renderingTarget = $target;
+    return $this;
+  }
+
+  public function getRenderingTarget() {
+    return $this->renderingTarget;
+  }
+
+  private function validateRenderingTarget($target) {
+    switch ($target) {
+      case PhabricatorApplicationTransaction::TARGET_HTML:
+      case PhabricatorApplicationTransaction::TARGET_TEXT:
+        break;
+      default:
+        throw new Exception('Unknown rendering target: '.$target);
+        break;
+    }
+  }
+
   public function setObjects(array $objects) {
     $this->objects = $objects;
     return $this;
@@ -227,15 +249,29 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
   }
 
   final protected function renderHandleList(array $phids) {
-    $list = array();
+    $items = array();
     foreach ($phids as $phid) {
-      $list[] = $this->linkTo($phid);
+      $items[] = $this->linkTo($phid);
     }
-    return phutil_implode_html(', ', $list);
+    $list = null;
+    switch ($this->getRenderingTarget()) {
+      case PhabricatorApplicationTransaction::TARGET_TEXT:
+        $list = implode(', ', $items);
+        break;
+      case PhabricatorApplicationTransaction::TARGET_HTML:
+        $list = phutil_implode_html(', ', $items);
+        break;
+    }
+    return $list;
   }
 
   final protected function linkTo($phid) {
     $handle = $this->getHandle($phid);
+
+    switch ($this->getRenderingTarget()) {
+      case PhabricatorApplicationTransaction::TARGET_TEXT:
+        return $handle->getLinkName();
+    }
 
     // NOTE: We render our own link here to customize the styling and add
     // the '_top' target for framed feeds.
@@ -258,14 +294,23 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
   }
 
   final protected function renderString($str) {
-    return phutil_tag('strong', array(), $str);
+    switch ($this->getRenderingTarget()) {
+      case PhabricatorApplicationTransaction::TARGET_TEXT:
+        return $str;
+      case PhabricatorApplicationTransaction::TARGET_HTML:
+        return phutil_tag('strong', array(), $str);
+    }
   }
 
   final protected function renderSummary($text, $len = 128) {
     if ($len) {
       $text = phutil_utf8_shorten($text, $len);
     }
-    $text = phutil_escape_html_newlines($text);
+    switch ($this->getRenderingTarget()) {
+      case PhabricatorApplicationTransaction::TARGET_HTML:
+        $text = phutil_escape_html_newlines($text);
+        break;
+    }
     return $text;
   }
 

@@ -7,6 +7,24 @@ final class PhabricatorRepositoryCommitOwnersWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
+    $this->triggerOwnerAudits($repository, $commit);
+
+    $commit->writeImportStatusFlag(
+      PhabricatorRepositoryCommit::IMPORTED_OWNERS);
+
+    if ($this->shouldQueueFollowupTasks()) {
+      $this->queueTask(
+        'PhabricatorRepositoryCommitHeraldWorker',
+        array(
+          'commitID' => $commit->getID(),
+        ));
+    }
+  }
+
+  private function triggerOwnerAudits(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit) {
+
     if ($repository->getDetail('herald-disabled')) {
       return;
     }
@@ -60,17 +78,6 @@ final class PhabricatorRepositoryCommitOwnersWorker
 
       $commit->updateAuditStatus($requests);
       $commit->save();
-    }
-
-    $commit->writeImportStatusFlag(
-      PhabricatorRepositoryCommit::IMPORTED_OWNERS);
-
-    if ($this->shouldQueueFollowupTasks()) {
-      PhabricatorWorker::scheduleTask(
-        'PhabricatorRepositoryCommitHeraldWorker',
-        array(
-          'commitID' => $commit->getID(),
-        ));
     }
   }
 

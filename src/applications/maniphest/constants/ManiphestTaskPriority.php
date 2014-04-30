@@ -64,6 +64,17 @@ final class ManiphestTaskPriority extends ManiphestConstants {
     return idx(self::getTaskPriorityMap(), $priority, $priority);
   }
 
+  /**
+   * Retrieve the color of the priority level given
+   *
+   * @param   int     A priority level.
+   * @return  string  The color of the priority if the level is valid,
+   *                  or black if it is not.
+   */
+  public static function getTaskPriorityColor($priority) {
+    return idx(self::getColorMap(), $priority, 'black');
+  }
+
 
   private static function getConfig() {
     $config = PhabricatorEnv::getEnvConfig('maniphest.priorities');

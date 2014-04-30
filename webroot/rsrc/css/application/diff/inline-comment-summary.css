@@ -3,10 +3,17 @@
  */
 
 .phabricator-inline-summary {
-  margin: .75em 0 .5em;
-  font-size: 11px;
-  border-bottom: 1px solid #dddddd;
-  color: {$greytext};
+  font-size: 12px;
+  text-transform: uppercase;
+  font-weight: bold;
+  color: {$bluetext};
+  padding-top: 12px;
+  margin-top: 12px;
+  border-top: 1px solid {$thinblueborder};
+}
+
+.phabricator-remarkup + .phabricator-inline-summary {
+  padding-top: 16px;
 }
 
 .phabricator-inline-summary-table {
@@ -15,17 +22,19 @@
 
 .phabricator-inline-summary-table th {
   padding: 6px 0px;
-  color: {$darkgreytext};
+  color: {$lightgreytext};
 }
 
 .phabricator-inline-summary-table td  {
   padding: 0px 4px 6px;
   white-space: nowrap;
+  color: {$darkbluetext};
 }
 
 .phabricator-inline-summary-table td.inline-line-number {
   padding-left: 0px;
   width: 100px;
+  white-space: nowrap;
 }
 
 .phabricator-inline-summary-table td.inline-which-diff {
@@ -43,13 +52,21 @@
    target (by highlighting the entire cell). */
 
 .phabricator-inline-summary-table td.inline-line-number a.num {
-  padding-left: 16px;
+  padding-left: 4px;
   display: block;
   font-weight: bold;
+  color: {$blue};
 }
 
 .phabricator-inline-summary-table td.inline-line-number a.num:hover {
-  background: #3b5998;
+  background: {$blue};
+  border-radius: 3px;
   color: white;
   text-decoration: none;
+}
+
+.phui-timeline-core-content .phabricator-inline-summary:first-child {
+  border: none;
+  margin-top: 0;
+  padding-top: 0;
 }

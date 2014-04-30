@@ -4,6 +4,10 @@ final class PhabricatorUIExampleRenderController extends PhabricatorController {
 
   private $class;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->class = idx($data, 'class');
   }
@@ -12,14 +16,7 @@ final class PhabricatorUIExampleRenderController extends PhabricatorController {
 
     $classes = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhabricatorUIExample')
-      ->setConcreteOnly(true)
-      ->selectAndLoadSymbols();
-    $classes = ipull($classes, 'name', 'name');
-
-    foreach ($classes as $class => $ignored) {
-      $classes[$class] = newv($class, array());
-    }
-
+      ->loadObjects();
     $classes = msort($classes, 'getName');
 
     $nav = new AphrontSideNavFilterView();
@@ -43,21 +40,26 @@ final class PhabricatorUIExampleRenderController extends PhabricatorController {
 
     require_celerity_resource('phabricator-ui-example-css');
 
-    $nav->appendChild(hsprintf(
-      '<div class="phabricator-ui-example-header">'.
-        '<h1 class="phabricator-ui-example-name">%s (%s)</h1>'.
-        '<p class="phabricator-ui-example-description">%s</p>'.
-      '</div>',
-      $example->getName(),
-      get_class($example),
-      $example->getDescription()));
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb($example->getName());
 
-    $nav->appendChild($result);
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('%s (%s)', $example->getName(), get_class($example)))
+      ->setSubheader($example->getDescription())
+      ->setNoBackground(true);
+
+    $nav->appendChild(
+      array(
+        $crumbs,
+        $header,
+        phutil_tag('br'),
+        $result,
+      ));
 
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title'   => 'UI Example',
+        'title'   => $example->getName(),
         'device'  => true,
       ));
   }

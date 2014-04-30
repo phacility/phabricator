@@ -23,11 +23,6 @@ final class HarbormasterBuild extends HarbormasterDAO
   const STATUS_PENDING = 'pending';
 
   /**
-   * Waiting for a resource to be allocated (not yet relevant).
-   */
-  const STATUS_WAITING = 'waiting';
-
-  /**
    * Current building the buildable.
    */
   const STATUS_BUILDING = 'building';
@@ -51,6 +46,34 @@ final class HarbormasterBuild extends HarbormasterDAO
    * The build has been stopped.
    */
   const STATUS_STOPPED = 'stopped';
+
+
+  /**
+   * Get a human readable name for a build status constant.
+   *
+   * @param  const  Build status constant.
+   * @return string Human-readable name.
+   */
+  public static function getBuildStatusName($status) {
+    switch ($status) {
+      case self::STATUS_INACTIVE:
+        return pht('Inactive');
+      case self::STATUS_PENDING:
+        return pht('Pending');
+      case self::STATUS_BUILDING:
+        return pht('Building');
+      case self::STATUS_PASSED:
+        return pht('Passed');
+      case self::STATUS_FAILED:
+        return pht('Failed');
+      case self::STATUS_ERROR:
+        return pht('Unexpected Error');
+      case self::STATUS_STOPPED:
+        return pht('Stopped');
+      default:
+        return pht('Unknown');
+    }
+  }
 
   public static function initializeNewBuild(PhabricatorUser $actor) {
     return id(new HarbormasterBuild())
@@ -114,7 +137,6 @@ final class HarbormasterBuild extends HarbormasterDAO
 
   public function isBuilding() {
     return $this->getBuildStatus() === self::STATUS_PENDING ||
-      $this->getBuildStatus() === self::STATUS_WAITING ||
       $this->getBuildStatus() === self::STATUS_BUILDING;
   }
 

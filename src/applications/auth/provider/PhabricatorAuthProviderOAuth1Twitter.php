@@ -7,7 +7,7 @@ final class PhabricatorAuthProviderOAuth1Twitter
     return pht('Twitter');
   }
 
-  public function getConfigurationHelp() {
+  protected function getProviderConfigurationHelp() {
     $login_uri = PhabricatorEnv::getURI($this->getLoginURI());
 
     return pht(

@@ -1,0 +1,19 @@
+/**
+ * @provides policy-transaction-detail-css
+ */
+
+.policy-transaction-detail-intro {
+  margin-bottom: 12px;
+}
+
+.policy-transaction-detail-row {
+  margin: 4px 0px 4px 8px;
+}
+
+.policy-transaction-detail-row .phui-icon-view {
+  padding-right: 4px;
+}
+
+.policy-transaction-detail-end {
+  margin-top: 12px;
+}

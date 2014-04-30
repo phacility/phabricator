@@ -63,16 +63,16 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
   public function getIcon() {
     switch ($this->getTransactionType()) {
       case PholioTransactionType::TYPE_INLINE:
-        return 'comment';
+        return 'fa-comment';
       case PholioTransactionType::TYPE_NAME:
       case PholioTransactionType::TYPE_DESCRIPTION:
       case PholioTransactionType::TYPE_IMAGE_NAME:
       case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
       case PholioTransactionType::TYPE_IMAGE_SEQUENCE:
-        return 'edit';
+        return 'fa-pencil';
       case PholioTransactionType::TYPE_IMAGE_FILE:
       case PholioTransactionType::TYPE_IMAGE_REPLACE:
-        return 'attach';
+        return 'fa-picture-o';
     }
 
     return parent::getIcon();

@@ -22,14 +22,11 @@ final class PhabricatorMetaMTAWorker
       return;
     }
 
-    $id = $message->getID();
-    $message->sendNow();
-
-    // task failed if the message is still queued
-    // (instead of sent, void, or failed)
-    if ($message->getStatus() == PhabricatorMetaMTAMail::STATUS_QUEUE) {
-      throw new Exception(
-        pht('Failed to send message.'));
+    try {
+      $message->sendNow();
+    } catch (PhabricatorMetaMTAPermanentFailureException $ex) {
+      // If the mailer fails permanently, fail this task permanently.
+      throw new PhabricatorWorkerPermanentFailureException($ex->getMessage());
     }
   }
 

@@ -16,16 +16,15 @@ final class ReleephDiffChurnFieldSpecification
     return 'Churn';
   }
 
-  public function renderValueForHeaderView() {
-    $diff_rev = $this->getReleephRequest()->loadDifferentialRevision();
-    if (!$diff_rev) {
+  public function renderPropertyViewValue(array $handles) {
+    $requested_object = $this->getObject()->getRequestedObject();
+    if (!($requested_object instanceof DifferentialRevision)) {
       return null;
     }
-
-    $diff_rev = $this->getReleephRequest()->loadDifferentialRevision();
+    $diff_rev = $requested_object;
 
     $xactions = id(new DifferentialTransactionQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($this->getViewer())
       ->withObjectPHIDs(array($diff_rev->getPHID()))
       ->execute();
 

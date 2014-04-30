@@ -124,7 +124,7 @@ final class PhabricatorDifferentialConfigOptions
             pht("Accepts are reset by updates"),
           ))
         ->setSummary(
-          pht("Should updating an accepted revision require re-review?"))
+          pht('Should "Accepted" revisions remain "Accepted" after updates?'))
         ->setDescription(
           pht(
             'Normally, when revisions that have been "Accepted" are updated, '.

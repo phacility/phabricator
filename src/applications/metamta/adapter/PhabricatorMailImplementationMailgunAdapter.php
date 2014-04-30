@@ -7,6 +7,7 @@ final class PhabricatorMailImplementationMailgunAdapter
   extends PhabricatorMailImplementationAdapter {
 
   private $params = array();
+  private $attachments = array();
 
   public function setFrom($email, $name = '') {
     $this->params['from'] = $email;
@@ -37,9 +38,13 @@ final class PhabricatorMailImplementationMailgunAdapter
   }
 
   public function addAttachment($data, $filename, $mimetype) {
-    // TODO: implement attachments. Requires changes in HTTPSFuture
-    throw new Exception(
-      "Mailgun adapter does not currently support attachments.");
+    $this->attachments[] = array(
+      'data' => $data,
+      'name' => $filename,
+      'type' => $mimetype,
+    );
+
+    return $this;
   }
 
   public function addHeader($header_name, $header_value) {
@@ -71,7 +76,7 @@ final class PhabricatorMailImplementationMailgunAdapter
     $domain = PhabricatorEnv::getEnvConfig('mailgun.domain');
     $params = array();
 
-    $params['to'] = idx($this->params, 'tos', array());
+    $params['to'] = implode(', ', idx($this->params, 'tos', array()));
     $params['subject'] = idx($this->params, 'subject');
 
     if (idx($this->params, 'is-html')) {
@@ -93,7 +98,7 @@ final class PhabricatorMailImplementationMailgunAdapter
     }
 
     if (idx($this->params, 'ccs')) {
-      $params['cc'] = $this->params['ccs'];
+      $params['cc'] = implode(', ', $this->params['ccs']);
     }
 
     foreach (idx($this->params, 'headers', array()) as $header) {
@@ -105,6 +110,14 @@ final class PhabricatorMailImplementationMailgunAdapter
       "https://api:{$key}@api.mailgun.net/v2/{$domain}/messages",
       $params);
     $future->setMethod('POST');
+
+    foreach ($this->attachments as $attachment) {
+      $future->attachFileData(
+        'attachment',
+        $attachment['data'],
+        $attachment['name'],
+        $attachment['type']);
+    }
 
     list($body) = $future->resolvex();
 

@@ -11,11 +11,64 @@ final class ReleephIntentFieldSpecification
     return 'Intent';
   }
 
-  public function renderValueForHeaderView() {
-    return id(new ReleephRequestIntentsView())
-      ->setReleephRequest($this->getReleephRequest())
-      ->setReleephProject($this->getReleephProject())
-      ->render();
+  public function getRequiredHandlePHIDsForPropertyView() {
+    $pull = $this->getReleephRequest();
+    $intents = $pull->getUserIntents();
+    return array_keys($intents);
+  }
+
+  public function renderPropertyViewValue(array $handles) {
+    $pull = $this->getReleephRequest();
+
+    $intents = $pull->getUserIntents();
+    $product = $this->getReleephProject();
+
+    if (!$intents) {
+      return null;
+    }
+
+    $pushers = array();
+    $others = array();
+
+    foreach ($intents as $phid => $intent) {
+      if ($product->isAuthoritativePHID($phid)) {
+        $pushers[$phid] = $intent;
+      } else {
+        $others[$phid] = $intent;
+      }
+    }
+
+    $intents = $pushers + $others;
+
+    $view = id(new PHUIStatusListView());
+    foreach ($intents as $phid => $intent) {
+      switch ($intent) {
+        case ReleephRequest::INTENT_WANT:
+          $icon = 'accept-green';
+          $label = pht('Want');
+          break;
+        case ReleephRequest::INTENT_PASS:
+          $icon = 'reject-red';
+          $label = pht('Pass');
+          break;
+        default:
+          $icon = 'question';
+          $label = pht('Unknown Intent (%s)', $intent);
+          break;
+      }
+
+      $target = $handles[$phid]->renderLink();
+      if ($product->isAuthoritativePHID($phid)) {
+        $target = phutil_tag('strong', array(), $target);
+      }
+
+      $view->addItem(
+        id(new PHUIStatusItemView())
+          ->setIcon($icon, $label)
+          ->setTarget($target));
+    }
+
+    return $view;
   }
 
   public function shouldAppearOnCommitMessage() {

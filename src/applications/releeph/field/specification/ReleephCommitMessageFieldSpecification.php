@@ -11,6 +11,10 @@ final class ReleephCommitMessageFieldSpecification
     return '__only_for_commit_message!';
   }
 
+  public function shouldAppearInPropertyView() {
+    return false;
+  }
+
   public function shouldAppearOnCommitMessage() {
     return true;
   }

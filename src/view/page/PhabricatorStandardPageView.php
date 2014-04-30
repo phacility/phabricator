@@ -168,6 +168,22 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     Javelin::initBehavior('device');
 
+    if ($user->hasSession()) {
+      $hisec = ($user->getSession()->getHighSecurityUntil() - time());
+      if ($hisec > 0) {
+        $remaining_time = phabricator_format_relative_time($hisec);
+        Javelin::initBehavior(
+          'high-security-warning',
+          array(
+            'uri' => '/auth/session/downgrade/',
+            'message' => pht(
+              'Your session is in high security mode. When you '.
+              'finish using it, click here to leave.',
+              $remaining_time),
+          ));
+      }
+    }
+
     if ($console) {
       require_celerity_resource('aphront-dark-console-css');
 

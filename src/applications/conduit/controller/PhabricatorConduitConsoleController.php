@@ -1,12 +1,13 @@
 <?php
 
-/**
- * @group conduit
- */
 final class PhabricatorConduitConsoleController
   extends PhabricatorConduitController {
 
   private $method;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
 
   public function willProcessRequest(array $data) {
     $this->method = $data['method'];
@@ -26,28 +27,25 @@ final class PhabricatorConduitConsoleController
       return new Aphront404Response();
     }
 
+    $can_call_method = false;
+
     $status = $method->getMethodStatus();
     $reason = $method->getMethodStatusDescription();
+    $errors = array();
 
-    $status_view = null;
-    if ($status != ConduitAPIMethod::METHOD_STATUS_STABLE) {
-      $status_view = new AphrontErrorView();
-      switch ($status) {
-        case ConduitAPIMethod::METHOD_STATUS_DEPRECATED:
-          $status_view->setTitle('Deprecated Method');
-          $status_view->appendChild(
-            nonempty($reason, "This method is deprecated."));
-          break;
-        case ConduitAPIMethod::METHOD_STATUS_UNSTABLE:
-          $status_view->setSeverity(AphrontErrorView::SEVERITY_WARNING);
-          $status_view->setTitle('Unstable Method');
-          $status_view->appendChild(
-            nonempty(
-              $reason,
-              "This method is new and unstable. Its interface is subject ".
-              "to change."));
-          break;
-      }
+    switch ($status) {
+      case ConduitAPIMethod::METHOD_STATUS_DEPRECATED:
+        $reason = nonempty($reason, pht('This method is deprecated.'));
+        $errors[] = pht('Deprecated Method: %s', $reason);
+        break;
+      case ConduitAPIMethod::METHOD_STATUS_UNSTABLE:
+        $reason = nonempty(
+          $reason,
+          pht(
+            'This method is new and unstable. Its interface is subject '.
+            'to change.'));
+        $errors[] = pht('Unstable Method: %s', $reason);
+        break;
     }
 
     $error_types = $method->defineErrorTypes();
@@ -61,7 +59,8 @@ final class PhabricatorConduitConsoleController
       }
       $error_description = phutil_tag('ul', array(), $error_description);
     } else {
-      $error_description = "This method does not raise any specific errors.";
+      $error_description = pht(
+        'This method does not raise any specific errors.');
     }
 
     $form = new AphrontFormView();
@@ -95,28 +94,37 @@ final class PhabricatorConduitConsoleController
           ->setCaption($desc));
     }
 
-    $form
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel('Output Format')
-          ->setName('output')
-          ->setOptions(
-            array(
-              'human' => 'Human Readable',
-              'json'  => 'JSON',
-            )))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->addCancelButton($this->getApplicationURI())
-          ->setValue('Call Method'));
+    $must_login = !$viewer->isLoggedIn() &&
+                  $method->shouldRequireAuthentication();
+    if ($must_login) {
+      $errors[] = pht(
+        'Login Required: This method requires authentication. You must '.
+        'log in before you can make calls to it.');
+    } else {
+      $form
+        ->appendChild(
+          id(new AphrontFormSelectControl())
+            ->setLabel('Output Format')
+            ->setName('output')
+            ->setOptions(
+              array(
+                'human' => 'Human Readable',
+                'json'  => 'JSON',
+              )))
+        ->appendChild(
+          id(new AphrontFormSubmitControl())
+            ->addCancelButton($this->getApplicationURI())
+            ->setValue(pht('Call Method')));
+    }
+
+    $header = id(new PHUIHeaderView())
+      ->setUser($viewer)
+      ->setHeader($method->getAPIMethodName());
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($method->getAPIMethodName())
+      ->setHeader($header)
+      ->setFormErrors($errors)
       ->setForm($form);
-
-    if ($status_view) {
-      $form_box->setErrorView($status_view);
-    }
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($method->getAPIMethodName());

@@ -6,6 +6,8 @@ final class PhabricatorDashboardQuery
   private $ids;
   private $phids;
 
+  private $needPanels;
+
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -13,6 +15,11 @@ final class PhabricatorDashboardQuery
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  public function needPanels($need_panels) {
+    $this->needPanels = $need_panels;
     return $this;
   }
 
@@ -29,6 +36,41 @@ final class PhabricatorDashboardQuery
       $this->buildLimitClause($conn_r));
 
     return $table->loadAllFromArray($data);
+  }
+
+  protected function didFilterPage(array $dashboards) {
+    if ($this->needPanels) {
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(mpull($dashboards, 'getPHID'))
+        ->withEdgeTypes(
+          array(
+            PhabricatorEdgeConfig::TYPE_DASHBOARD_HAS_PANEL,
+          ));
+      $edge_query->execute();
+
+      $panel_phids = $edge_query->getDestinationPHIDs();
+      if ($panel_phids) {
+        $panels = id(new PhabricatorDashboardPanelQuery())
+          ->setParentQuery($this)
+          ->setViewer($this->getViewer())
+          ->withPHIDs($panel_phids)
+          ->execute();
+        $panels = mpull($panels, null, 'getPHID');
+      } else {
+        $panels = array();
+      }
+
+      foreach ($dashboards as $dashboard) {
+        $dashboard_phids = $edge_query->getDestinationPHIDs(
+          array($dashboard->getPHID()));
+        $dashboard_panels = array_select_keys($panels, $dashboard_phids);
+
+        $dashboard->attachPanelPHIDs($dashboard_phids);
+        $dashboard->attachPanels($dashboard_panels);
+      }
+    }
+
+    return $dashboards;
   }
 
   protected function buildWhereClause($conn_r) {

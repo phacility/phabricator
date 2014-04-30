@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_differential_createrawdiff_Method
   extends ConduitAPI_differential_Method {
 

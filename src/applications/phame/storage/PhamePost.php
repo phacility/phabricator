@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhamePost extends PhameDAO
   implements
     PhabricatorPolicyInterface,
@@ -57,6 +54,10 @@ final class PhamePost extends PhameDAO
     }
     $uri = '/phame/post/view/'.$this->getID().'/';
     return PhabricatorEnv::getProductionURI($uri);
+  }
+
+  public function getEditURI() {
+    return '/phame/post/edit/'.$this->getID().'/';
   }
 
   public function isDraft() {

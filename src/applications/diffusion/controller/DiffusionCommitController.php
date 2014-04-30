@@ -28,11 +28,18 @@ final class DiffusionCommitController extends DiffusionController {
       return $this->buildRawDiffResponse($drequest);
     }
 
-    $callsign = $drequest->getRepository()->getCallsign();
+    $repository = $drequest->getRepository();
+    $callsign = $repository->getCallsign();
 
     $content = array();
-    $repository = $drequest->getRepository();
-    $commit = $drequest->loadCommit();
+
+    $commit = id(new DiffusionCommitQuery())
+      ->setViewer($request->getUser())
+      ->withRepository($repository)
+      ->withIdentifiers(array($drequest->getCommit()))
+      ->needCommitData(true)
+      ->needAuditRequests(true)
+      ->executeOne();
 
     $crumbs = $this->buildCrumbs(array(
       'commit' => true,
@@ -63,19 +70,16 @@ final class DiffusionCommitController extends DiffusionController {
         ));
     }
 
-    $commit_data = $drequest->loadCommitData();
-    $commit->attachCommitData($commit_data);
 
     $top_anchor = id(new PhabricatorAnchorView())
       ->setAnchorName('top')
       ->setNavigationMarker(true);
 
-    $audit_requests = id(new PhabricatorAuditQuery())
-      ->withCommitPHIDs(array($commit->getPHID()))
-      ->execute();
+    $audit_requests = $commit->getAudits();
     $this->auditAuthorityPHIDs =
       PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($user);
 
+    $commit_data = $commit->getCommitData();
     $is_foreign = $commit_data->getCommitDetail('foreign-svn-stub');
     $changesets = null;
     if ($is_foreign) {
@@ -179,15 +183,9 @@ final class DiffusionCommitController extends DiffusionController {
 
     $content[] = $this->buildMergesTable($commit);
 
-    // TODO: This is silly, but the logic to figure out which audits are
-    // highlighted currently lives in PhabricatorAuditListView. Refactor this
-    // to be less goofy.
-    $highlighted_audits = id(new PhabricatorAuditListView())
-      ->setAudits($audit_requests)
-      ->setAuthorityPHIDs($this->auditAuthorityPHIDs)
-      ->setUser($user)
-      ->setCommits(array($commit->getPHID() => $commit))
-      ->getHighlightedAudits();
+    $highlighted_audits = $commit->getAuthorityAudits(
+      $user,
+      $this->auditAuthorityPHIDs);
 
     $owners_paths = array();
     if ($highlighted_audits) {
@@ -764,7 +762,7 @@ final class DiffusionCommitController extends DiffusionController {
           ->setUser($user))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue($is_serious ? pht('Submit') : pht('Cook the Books')));
+          ->setValue(pht('Submit')));
 
     $header = new PHUIHeaderView();
     $header->setHeader(
@@ -778,9 +776,9 @@ final class DiffusionCommitController extends DiffusionController {
         'dynamic' => array(
           'add-auditors-tokenizer' => array(
             'actions' => array('add_auditors' => 1),
-            'src' => '/typeahead/common/users/',
+            'src' => '/typeahead/common/usersprojectsorpackages/',
             'row' => 'add-auditors',
-            'placeholder' => pht('Type a user name...'),
+            'placeholder' => pht('Type a user, project, or package name...'),
           ),
           'add-ccs-tokenizer' => array(
             'actions' => array('add_ccs' => 1),

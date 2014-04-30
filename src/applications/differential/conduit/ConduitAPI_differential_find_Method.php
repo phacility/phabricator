@@ -1,9 +1,7 @@
 <?php
 
-/**
- * @group conduit
- */
-final class ConduitAPI_differential_find_Method extends ConduitAPIMethod {
+final class ConduitAPI_differential_find_Method
+  extends ConduitAPI_differential_Method {
 
   public function getMethodStatus() {
     return self::METHOD_STATUS_DEPRECATED;

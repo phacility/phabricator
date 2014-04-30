@@ -157,6 +157,19 @@ final class PhabricatorPasteEditor
       ->addHeader('Thread-Topic', "P{$id}");
   }
 
+  protected function buildMailBody(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $body = parent::buildMailBody($object, $xactions);
+
+    $body->addTextSection(
+      pht('PASTE DETAIL'),
+      PhabricatorEnv::getProductionURI('/P'.$object->getID()));
+
+    return $body;
+  }
+
   protected function shouldPublishFeedStory(
     PhabricatorLiskDAO $object,
     array $xactions) {

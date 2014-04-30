@@ -51,7 +51,6 @@ table.phui-calendar-view td.phui-calendar-month-weekstart {
   text-align: center;
   top: 0;
   right: 0;
-  z-index: 10;
 }
 
 .phui-calendar-not-work-day {

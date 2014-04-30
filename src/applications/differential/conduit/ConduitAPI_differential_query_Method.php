@@ -218,6 +218,7 @@ final class ConduitAPI_differential_query_Method
         'summary'             => $revision->getSummary(),
         'testPlan'            => $revision->getTestPlan(),
         'lineCount'           => $revision->getLineCount(),
+        'activeDiffPHID'      => $diff->getPHID(),
         'diffs'               => $revision->getDiffIDs(),
         'commits'             => $revision->getCommitPHIDs(),
         'reviewers'           => array_values($revision->getReviewers()),

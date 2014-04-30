@@ -97,10 +97,10 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
 
       $repository = $this->getRequest()->getRepository();
 
-      $commits = id(new PhabricatorAuditCommitQuery())
-        ->withIdentifiers(
-          $repository->getID(),
-          array_unique($line_rev_dict))
+      $commits = id(new DiffusionCommitQuery())
+        ->setViewer($this->getViewer())
+        ->withDefaultRepository($repository)
+        ->withIdentifiers(array_unique($line_rev_dict))
         ->execute();
 
       foreach ($commits as $commit) {
@@ -143,6 +143,10 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
   public function setViewer(PhabricatorUser $user) {
     $this->viewer = $user;
     return $this;
+  }
+
+  public function getViewer() {
+    return $this->viewer;
   }
 
   protected function processRevList(array $rev_list) {

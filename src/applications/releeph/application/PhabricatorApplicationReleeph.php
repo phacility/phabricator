@@ -31,10 +31,16 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
 
   public function getRoutes() {
     return array(
+      '/Y(?P<requestID>[1-9]\d*)' => 'ReleephRequestViewController',
+
+      // TODO: Remove these older routes eventually.
       '/RQ(?P<requestID>[1-9]\d*)' => 'ReleephRequestViewController',
+      '/releeph/request/(?P<requestID>[1-9]\d*)/'
+        => 'ReleephRequestViewController',
+
       '/releeph/' => array(
         '' => 'ReleephProductListController',
-        'project/' => array(
+        '(?:product|project)/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'ReleephProductListController',
           'create/' => 'ReleephProductCreateController',
           '(?P<projectID>[1-9]\d*)/' => array(
@@ -45,19 +51,22 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
             'history/' => 'ReleephProductHistoryController',
           ),
         ),
+
         'branch/' => array(
           'edit/(?P<branchID>[1-9]\d*)/' =>
             'ReleephBranchEditController',
           '(?P<action>close|re-open)/(?P<branchID>[1-9]\d*)/' =>
             'ReleephBranchAccessController',
           'preview/' => 'ReleephBranchNamePreviewController',
-          '(?P<branchID>[^/]+)/' => array(
+          '(?P<branchID>[1-9]\d*)/' => array(
             'history/' => 'ReleephBranchHistoryController',
             '(?:query/(?P<queryKey>[^/]+)/)?' => 'ReleephBranchViewController',
           ),
+          'pull/(?P<branchID>[1-9]\d*)/' =>
+            'ReleephRequestEditController',
         ),
+
         'request/' => array(
-          '(?P<requestID>[1-9]\d*)/' => 'ReleephRequestViewController',
           'create/' => 'ReleephRequestEditController',
           'differentialcreate/' => array(
             'D(?P<diffRevID>[1-9]\d*)' =>
@@ -71,14 +80,6 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
             'ReleephRequestTypeaheadController',
           'comment/(?P<requestID>[1-9]\d*)/' =>
             'ReleephRequestCommentController',
-        ),
-
-        // Branch navigation made pretty, as it's the most common:
-        '(?P<projectName>[^/]+)/(?P<branchName>[^/]+)/' => array(
-          '(?:query/(?P<queryKey>[^/]+)/)?' => 'ReleephBranchViewController',
-          'edit/'         => 'ReleephBranchEditController',
-          'request/'      => 'ReleephRequestEditController',
-          '(?P<action>close|re-open)/' => 'ReleephBranchAccessController',
         ),
       )
     );

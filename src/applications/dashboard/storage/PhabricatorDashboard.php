@@ -10,6 +10,9 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
   protected $viewPolicy;
   protected $editPolicy;
 
+  private $panelPHIDs = self::ATTACHABLE;
+  private $panels = self::ATTACHABLE;
+
   public static function initializeNewDashboard(PhabricatorUser $actor) {
     return id(new PhabricatorDashboard())
       ->setName('')
@@ -26,6 +29,25 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorDashboardPHIDTypeDashboard::TYPECONST);
+  }
+
+  public function attachPanelPHIDs(array $phids) {
+    $this->panelPHIDs = $phids;
+    return $this;
+  }
+
+  public function getPanelPHIDs() {
+    return $this->assertAttached($this->panelPHIDs);
+  }
+
+  public function attachPanels(array $panels) {
+    assert_instances_of($panels, 'PhabricatorDashboardPanel');
+    $this->panels = $panels;
+    return $this;
+  }
+
+  public function getPanels() {
+    return $this->assertAttached($this->panels);
   }
 
 

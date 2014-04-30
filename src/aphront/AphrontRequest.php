@@ -18,6 +18,7 @@ final class AphrontRequest {
   const TYPE_WORKFLOW = '__wflow__';
   const TYPE_CONTINUE = '__continue__';
   const TYPE_PREVIEW = '__preview__';
+  const TYPE_HISEC = '__hisec__';
 
   private $host;
   private $path;
@@ -263,6 +264,7 @@ final class AphrontRequest {
 
   final public function isFormPost() {
     $post = $this->getExists(self::TYPE_FORM) &&
+            !$this->getExists(self::TYPE_HISEC) &&
             $this->isHTTPPost();
 
     if (!$post) {

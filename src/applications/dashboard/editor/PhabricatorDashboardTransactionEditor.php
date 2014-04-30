@@ -8,6 +8,7 @@ final class PhabricatorDashboardTransactionEditor
 
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
+    $types[] = PhabricatorTransactions::TYPE_EDGE;
 
     $types[] = PhabricatorDashboardTransaction::TYPE_NAME;
 
@@ -51,6 +52,8 @@ final class PhabricatorDashboardTransactionEditor
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         $object->setEditPolicy($xaction->getNewValue());
         return;
+      case PhabricatorTransactions::TYPE_EDGE:
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -62,6 +65,8 @@ final class PhabricatorDashboardTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorDashboardTransaction::TYPE_NAME:
+        return;
+      case PhabricatorTransactions::TYPE_EDGE:
         return;
     }
 

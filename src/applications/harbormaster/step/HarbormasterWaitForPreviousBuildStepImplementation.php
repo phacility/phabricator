@@ -28,24 +28,17 @@ final class HarbormasterWaitForPreviousBuildStepImplementation
     // finished.
     $plan = $build->getBuildPlan();
 
-    $log = null;
-    $log_start = null;
+    $log = $build->createLog($build_target, "waiting", "blockers");
+    $log_start = $log->start();
+
     $blockers = $this->getBlockers($object, $plan, $build);
-    while (count($blockers) > 0) {
-      if ($log === null) {
-        $log = $build->createLog($build_target, "waiting", "blockers");
-        $log_start = $log->start();
-      }
-
+    if ($blockers) {
       $log->append("Blocked by: ".implode(",", $blockers)."\n");
-
-      // TODO: This should fail temporarily instead after setting the target to
-      // waiting, and thereby push the build into a waiting status.
-      sleep(1);
-      $blockers = $this->getBlockers($object, $plan, $build);
     }
-    if ($log !== null) {
-      $log->finalize($log_start);
+    $log->finalize($log_start);
+
+    if ($blockers) {
+      throw new PhabricatorWorkerYieldException(15);
     }
   }
 
@@ -87,6 +80,10 @@ final class HarbormasterWaitForPreviousBuildStepImplementation
       ->execute();
     $buildable_phids = mpull($buildables, 'getPHID');
 
+    if (!$buildable_phids) {
+      return array();
+    }
+
     $builds = id(new HarbormasterBuildQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withBuildablePHIDs($buildable_phids)
@@ -101,4 +98,5 @@ final class HarbormasterWaitForPreviousBuildStepImplementation
 
     return $blockers;
   }
+
 }

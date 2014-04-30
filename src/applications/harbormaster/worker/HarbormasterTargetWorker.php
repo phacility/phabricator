@@ -8,7 +8,7 @@ final class HarbormasterTargetWorker extends HarbormasterWorker {
   public function getRequiredLeaseTime() {
     // This worker performs actual build work, which may involve a long wait
     // on external systems.
-    return 60 * 60 * 24;
+    return phutil_units('24 hours in seconds');
   }
 
   private function loadBuildTarget() {
@@ -36,10 +36,26 @@ final class HarbormasterTargetWorker extends HarbormasterWorker {
     $viewer = $this->getViewer();
 
     try {
+      $status_pending = HarbormasterBuildTarget::STATUS_PENDING;
+      if ($target->getTargetStatus() == $status_pending) {
+        $target->setTargetStatus(HarbormasterBuildTarget::STATUS_BUILDING);
+        $target->save();
+      }
+
       $implementation = $target->getImplementation();
       $implementation->execute($build, $target);
-      $target->setTargetStatus(HarbormasterBuildTarget::STATUS_PASSED);
+
+      $next_status = HarbormasterBuildTarget::STATUS_PASSED;
+      if ($implementation->shouldWaitForMessage($target)) {
+        $next_status = HarbormasterBuildTarget::STATUS_WAITING;
+      }
+
+      $target->setTargetStatus($next_status);
       $target->save();
+    } catch (PhabricatorWorkerYieldException $ex) {
+      // If the target wants to yield, let that escape without further
+      // processing. We'll resume after the task retries.
+      throw $ex;
     } catch (Exception $ex) {
       phlog($ex);
 

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conpherence
- */
 final class ConpherenceReplyHandler extends PhabricatorMailReplyHandler {
 
   private $mailAddedParticipantPHIDs;
@@ -85,6 +82,7 @@ final class ConpherenceReplyHandler extends PhabricatorMailReplyHandler {
     $xactions = array_merge(
       $xactions,
       $editor->generateTransactionsFromText(
+        $user,
         $conpherence,
         $body));
 

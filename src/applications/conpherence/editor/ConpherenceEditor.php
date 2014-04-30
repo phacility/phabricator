@@ -34,9 +34,9 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
       $errors[] = self::ERROR_EMPTY_MESSAGE;
     }
 
-    $file_phids =
-      PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
-        array($message));
+    $file_phids = PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
+      $creator,
+      array($message));
     if ($file_phids) {
       $files = id(new PhabricatorFileQuery())
         ->setViewer($creator)
@@ -78,13 +78,14 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
   }
 
   public function generateTransactionsFromText(
+    PhabricatorUser $viewer,
     ConpherenceThread $conpherence,
     $text) {
 
     $files = array();
-    $file_phids =
-      PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
-        array($text));
+    $file_phids = PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
+      $viewer,
+      array($text));
     // Since these are extracted from text, we might be re-including the
     // same file -- e.g. a mock under discussion. Filter files we
     // already have.

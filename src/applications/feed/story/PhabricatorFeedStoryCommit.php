@@ -90,10 +90,16 @@ final class PhabricatorFeedStoryCommit extends PhabricatorFeedStory {
     }
 
     if ($author) {
-      $text = "{$committer} (authored by {$author})".
-              "committed {$commit_name} {$commit_uri}";
+      $text = pht(
+        '%s committed %s (authored by %s).',
+        $committer,
+        $commit_name,
+        $author);
     } else {
-      $text = "{$committer} committed {$commit_name} {$commit_uri}";
+      $text = pht(
+        '%s committed %s.',
+        $committer,
+        $commit_name);
     }
 
     return $text;

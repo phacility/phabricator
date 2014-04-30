@@ -89,14 +89,22 @@ class PhabricatorBarePageView extends AphrontPageView {
         'content' => 'black-translucent'
       ));
 
+    $referrer_tag = phutil_tag(
+      'meta',
+      array(
+        'name' => 'referrer',
+        'content' => 'never',
+      ));
+
     $response = CelerityAPI::getStaticResourceResponse();
 
     $developer = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
     return hsprintf(
-      '%s%s%s%s%s',
+      '%s%s%s%s%s%s',
       $viewport_tag,
       $icon_tag,
       $apple_tag,
+      $referrer_tag,
       CelerityStaticResourceResponse::renderInlineScript(
         $framebust.jsprintf('window.__DEV__=%d;', ($developer ? 1 : 0))),
       $response->renderResourcesOfType('css'));

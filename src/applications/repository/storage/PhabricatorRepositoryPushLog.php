@@ -52,6 +52,18 @@ final class PhabricatorRepositoryPushLog
       ->setPusherPHID($viewer->getPHID());
   }
 
+  public static function getHeraldChangeFlagConditionOptions() {
+    return array(
+      PhabricatorRepositoryPushLog::CHANGEFLAG_ADD =>
+        pht('change creates ref'),
+      PhabricatorRepositoryPushLog::CHANGEFLAG_DELETE =>
+        pht('change deletes ref'),
+      PhabricatorRepositoryPushLog::CHANGEFLAG_REWRITE =>
+        pht('change rewrites ref'),
+      PhabricatorRepositoryPushLog::CHANGEFLAG_DANGEROUS =>
+        pht('dangerous change'));
+  }
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,

@@ -28,7 +28,7 @@ final class PhabricatorRepositoryCommit
   const IMPORTED_CLOSEABLE = 1024;
 
   private $commitData = self::ATTACHABLE;
-  private $audits;
+  private $audits = self::ATTACHABLE;
   private $repository = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
 
@@ -91,13 +91,39 @@ final class PhabricatorRepositoryCommit
   }
 
   public function attachAudits(array $audits) {
-    assert_instances_of($audits, 'PhabricatorAuditComment');
+    assert_instances_of($audits, 'PhabricatorRepositoryAuditRequest');
     $this->audits = $audits;
     return $this;
   }
 
   public function getAudits() {
-    return $this->audits;
+    return $this->assertAttached($this->audits);
+  }
+
+  public function getAuthorityAudits(
+    PhabricatorUser $user,
+    array $authority_phids) {
+
+    $authority = array_fill_keys($authority_phids, true);
+    $audits = $this->getAudits();
+    $authority_audits = array();
+    foreach ($audits as $audit) {
+      $has_authority = !empty($authority[$audit->getAuditorPHID()]);
+      if ($has_authority) {
+        $commit_author = $this->getAuthorPHID();
+
+        // You don't have authority over package and project audits on your
+        // own commits.
+
+        $auditor_is_user = ($audit->getAuditorPHID() == $user->getPHID());
+        $user_is_author = ($commit_author == $user->getPHID());
+
+        if ($auditor_is_user || !$user_is_author) {
+          $authority_audits[$audit->getID()] = $audit;
+        }
+      }
+    }
+    return $authority_audits;
   }
 
   public function save() {

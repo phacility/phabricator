@@ -47,6 +47,11 @@
   border: 1px solid {$red};
 }
 
+.jx-notification-security {
+  background: {$lightviolet};
+  border: 1px solid {$violet};
+}
+
 .jx-notification-container .phabricator-notification {
   padding: 0;
 }

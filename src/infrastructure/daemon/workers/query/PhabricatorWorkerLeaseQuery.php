@@ -10,10 +10,16 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
   const PHASE_UNLEASED = 'unleased';
   const PHASE_EXPIRED  = 'expired';
 
-  const DEFAULT_LEASE_DURATION = 60; // Seconds
-
   private $ids;
   private $limit;
+
+  public static function getDefaultWaitBeforeRetry() {
+    return phutil_units('5 minutes in seconds');
+  }
+
+  public static function getDefaultLeaseDuration() {
+    return phutil_units('2 hours in seconds');
+  }
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -78,7 +84,7 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
             %Q',
           $task_table->getTableName(),
           $lease_ownership_name,
-          self::DEFAULT_LEASE_DURATION,
+          self::getDefaultLeaseDuration(),
           $this->buildUpdateWhereClause($conn_w, $phase, $rows));
 
         $leased += $conn_w->getAffectedRows();

@@ -264,6 +264,13 @@
   width: 120px;
 }
 
+.device-phone .phui-object-icon-pane {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #fff;
+}
+
 .device-desktop .phui-object-item-with-icons
   .phui-object-item-content,
 .device-desktop .phui-object-item-with-handle-icons
@@ -289,7 +296,7 @@
 .phui-object-item-icon {
   vertical-align: middle;
   position: relative;
-  font-size: 11px;
+  font-size: 12px;
   color: {$greytext};
   text-align: right;
   white-space: nowrap;
@@ -489,12 +496,19 @@
   float: right;
   clear: right;
   padding: 0 10px;
-  margin: 5px 0;
-  font-size: 11px;
+  margin: 4px 0;
+  font-size: 12px;
   color: {$greytext};
   white-space: nowrap;
   overflow: hidden;
   text-align: right;
+}
+
+.device-phone .phui-object-item-bylines {
+  float: none;
+  text-align: left;
+  padding: 0 8px;
+  font-size: 13px;
 }
 
 /* - Card List -----------------------------------------------------------------
@@ -583,4 +597,42 @@
 
 .phui-object-item-with-image .phui-object-item-content-box {
   margin-left: 54px;
+}
+
+/* - State ---------------------------------------------------------------------
+
+  Provides a list of object status or states, success or fail, etc
+
+*/
+
+.phui-object-item-ficon {
+  width: 26px;
+  height: 26px;
+  margin: 7px 9px 7px 0;
+  position: absolute;
+}
+
+.phui-object-item-with-ficon .phui-object-item-content-box {
+  margin-left: 24px;
+}
+
+.phui-object-box .phui-object-list-states {
+  padding: 8px 12px 0 12px;
+}
+
+.phui-object-box .phui-object-list-states li:last-child .phui-object-item-frame {
+  border: none;
+}
+
+.phui-object-list-states .phui-object-item-frame {
+  border: none;
+  border-bottom: 1px solid {$thinblueborder};
+}
+
+.phui-object-list-states .phui-object-item {
+  border: none;
+}
+
+.phui-object-list-states .phui-object-item-frame {
+  min-height: 44px;
 }

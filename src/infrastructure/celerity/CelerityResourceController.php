@@ -93,6 +93,8 @@ abstract class CelerityResourceController extends PhabricatorController {
       'jpg' => 'image/jpeg',
       'swf' => 'application/x-shockwave-flash',
       'woff' => 'font/woff',
+      'eot' => 'font/eot',
+      'ttf' => 'font/ttf',
     );
   }
 

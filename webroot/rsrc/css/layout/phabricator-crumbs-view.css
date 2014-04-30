@@ -78,6 +78,7 @@
 
 .phabricator-crumbs-actions {
   float: right;
+  white-space: nowrap;
 }
 
 .phabricator-crumbs-action {

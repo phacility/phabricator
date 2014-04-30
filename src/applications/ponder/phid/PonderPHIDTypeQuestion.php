@@ -12,6 +12,10 @@ final class PonderPHIDTypeQuestion extends PhabricatorPHIDType {
     return pht('Question');
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorApplicationPonder';
+  }
+
   public function newObject() {
     return new PonderQuestion();
   }

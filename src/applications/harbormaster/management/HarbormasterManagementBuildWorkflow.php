@@ -28,7 +28,7 @@ final class HarbormasterManagementBuildWorkflow
     $names = $args->getArg('buildable');
     if (count($names) != 1) {
       throw new PhutilArgumentUsageException(
-        pht('Specify exactly one buildable, by object name.'));
+        pht('Specify exactly one buildable object, by object name.'));
     }
 
     $name = head($names);

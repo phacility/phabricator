@@ -25,7 +25,7 @@ final class HarbormasterBuildPlanTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_NAME:
         if ($old === null) {
-          return 'create';
+          return 'fa-plus';
         }
         break;
     }

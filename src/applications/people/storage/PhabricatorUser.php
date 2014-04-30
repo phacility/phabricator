@@ -32,6 +32,8 @@ final class PhabricatorUser
   protected $isEmailVerified = 0;
   protected $isApproved = 0;
 
+  protected $accountSecret;
+
   private $profileImage = self::ATTACHABLE;
   private $profile = null;
   private $status = self::ATTACHABLE;
@@ -40,6 +42,7 @@ final class PhabricatorUser
   private $customFields = self::ATTACHABLE;
 
   private $alternateCSRFString = self::ATTACHABLE;
+  private $session = self::ATTACHABLE;
 
   protected function readField($field) {
     switch ($field) {
@@ -88,6 +91,18 @@ final class PhabricatorUser
     }
 
     return true;
+  }
+
+  /**
+   * Returns `true` if this is a standard user who is logged in. Returns `false`
+   * for logged out, anonymous, or external users.
+   *
+   * @return bool `true` if the user is a standard user who is logged in with
+   *              a normal session.
+   */
+  public function getIsStandardUser() {
+    $type_user = PhabricatorPeoplePHIDTypeUser::TYPECONST;
+    return $this->getPHID() && (phid_get_type($this->getPHID()) == $type_user);
   }
 
   public function getConfiguration() {
@@ -145,6 +160,11 @@ final class PhabricatorUser
     if (!$this->getConduitCertificate()) {
       $this->setConduitCertificate($this->generateConduitCertificate());
     }
+
+    if (!strlen($this->getAccountSecret())) {
+      $this->setAccountSecret(Filesystem::readRandomCharacters(64));
+    }
+
     $result = parent::save();
 
     if ($this->profile) {
@@ -157,6 +177,19 @@ final class PhabricatorUser
       ->queueDocumentForIndexing($this->getPHID());
 
     return $result;
+  }
+
+  public function attachSession(PhabricatorAuthSession $session) {
+    $this->session = $session;
+    return $this;
+  }
+
+  public function getSession() {
+    return $this->assertAttached($this->session);
+  }
+
+  public function hasSession() {
+    return ($this->session !== self::ATTACHABLE);
   }
 
   private function generateConduitCertificate() {
@@ -293,7 +326,7 @@ final class PhabricatorUser
 
   private function generateToken($epoch, $frequency, $key, $len) {
     if ($this->getPHID()) {
-      $vec = $this->getPHID().$this->getPasswordHash();
+      $vec = $this->getPHID().$this->getAccountSecret();
     } else {
       $vec = $this->getAlternateCSRFString();
     }

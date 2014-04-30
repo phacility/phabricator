@@ -27,7 +27,7 @@ final class LegalpadReplyHandler extends PhabricatorMailReplyHandler {
 
   public function getReplyHandlerInstructions() {
     if ($this->supportsReplies()) {
-      return 'Reply to comment or !unsubscribe.';
+      return pht('Reply to comment or !unsubscribe.');
     } else {
       return null;
     }

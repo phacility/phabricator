@@ -335,6 +335,7 @@
   font-size: 15px;
   min-height: 30px;
   line-height: 28px;
+  background: #000;
 }
 
 .device .phui-list-item-type-link

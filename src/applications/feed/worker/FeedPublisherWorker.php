@@ -7,7 +7,7 @@ final class FeedPublisherWorker extends FeedPushWorker {
 
     $uris = PhabricatorEnv::getEnvConfig('feed.http-hooks');
     foreach ($uris as $uri) {
-      PhabricatorWorker::scheduleTask(
+      $this->queueTask(
         'FeedPublisherHTTPWorker',
         array(
           'key' => $story->getChronologicalKey(),
@@ -27,7 +27,7 @@ final class FeedPublisherWorker extends FeedPushWorker {
       if (!$worker->isEnabled()) {
         continue;
       }
-      PhabricatorWorker::scheduleTask(
+      $this->queueTask(
         get_class($worker),
         array(
           'key' => $story->getChronologicalKey(),

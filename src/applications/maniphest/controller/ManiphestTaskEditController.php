@@ -25,7 +25,6 @@ final class ManiphestTaskEditController extends ManiphestController {
     $can_edit_status = $this->hasApplicationCapability(
       ManiphestCapabilityEditStatus::CAPABILITY);
 
-    $files = array();
     $parent_task = null;
     $template_id = null;
 
@@ -57,33 +56,29 @@ final class ManiphestTaskEditController extends ManiphestController {
         if ($can_edit_projects) {
           $projects = $request->getStr('projects');
           if ($projects) {
-            $tokens = explode(';', $projects);
+            $tokens = $request->getStrList('projects');
 
-            $slug_map = id(new PhabricatorProjectQuery())
-              ->setViewer($user)
-              ->withPhrictionSlugs($tokens)
-              ->execute();
+            $type_project = PhabricatorProjectPHIDTypeProject::TYPECONST;
+            foreach ($tokens as $key => $token) {
+              if (phid_get_type($token) == $type_project) {
+                // If this is formatted like a PHID, leave it as-is.
+                continue;
+              }
 
-            $name_map = id(new PhabricatorProjectQuery())
+              if (preg_match('/^#/', $token)) {
+                // If this already has a "#", leave it as-is.
+                continue;
+              }
+
+              // Add a "#" prefix.
+              $tokens[$key] = '#'.$token;
+            }
+
+            $default_projects = id(new PhabricatorObjectQuery())
               ->setViewer($user)
               ->withNames($tokens)
               ->execute();
-
-            $phid_map = id(new PhabricatorProjectQuery())
-              ->setViewer($user)
-              ->withPHIDs($tokens)
-              ->execute();
-
-            $all_map = mpull($slug_map, null, 'getPhrictionSlug') +
-              mpull($name_map, null, 'getName') +
-              mpull($phid_map, null, 'getPHID');
-
-            $default_projects = array();
-            foreach ($tokens as $token) {
-              if (isset($all_map[$token])) {
-                $default_projects[] = $all_map[$token]->getPHID();
-              }
-            }
+            $default_projects = mpull($default_projects, 'getPHID');
 
             if ($default_projects) {
               $task->setProjectPHIDs($default_projects);
@@ -122,24 +117,6 @@ final class ManiphestTaskEditController extends ManiphestController {
             }
           }
         }
-      }
-
-      $file_phids = $request->getArr('files', array());
-      if (!$file_phids) {
-        // Allow a single 'file' key instead, mostly since Mac OS X urlencodes
-        // square brackets in URLs when passed to 'open', so you can't 'open'
-        // a URL like '?files[]=xyz' and have PHP interpret it correctly.
-        $phid = $request->getStr('file');
-        if ($phid) {
-          $file_phids = array($phid);
-        }
-      }
-
-      if ($file_phids) {
-        $files = id(new PhabricatorFileQuery())
-          ->setViewer($user)
-          ->withPHIDs($file_phids)
-          ->execute();
       }
 
       $template_id = $request->getInt('template');
@@ -281,14 +258,6 @@ final class ManiphestTaskEditController extends ManiphestController {
             $request->getStr('viewPolicy');
           $changes[PhabricatorTransactions::TYPE_EDIT_POLICY] =
             $request->getStr('editPolicy');
-        }
-
-        if ($files) {
-          $file_map = mpull($files, 'getPHID');
-          $file_map = array_fill_keys($file_map, array());
-          $changes[ManiphestTransaction::TYPE_ATTACH] = array(
-            PhabricatorFilePHIDTypeFile::TYPECONST => $file_map,
-          );
         }
 
         $template = new ManiphestTransaction();
@@ -600,13 +569,21 @@ final class ManiphestTaskEditController extends ManiphestController {
           ->setValue($task->getTitle()));
 
     if ($can_edit_status) {
+      // See T4819.
+      $status_map = ManiphestTaskStatus::getTaskStatusMap();
+      $dup_status = ManiphestTaskStatus::getDuplicateStatus();
+
+      if ($task->getStatus() != $dup_status) {
+        unset($status_map[$dup_status]);
+      }
+
       $form
         ->appendChild(
           id(new AphrontFormSelectControl())
             ->setLabel(pht('Status'))
             ->setName('status')
             ->setValue($task->getStatus())
-            ->setOptions(ManiphestTaskStatus::getTaskStatusMap()));
+            ->setOptions($status_map));
     }
 
     $policies = id(new PhabricatorPolicyQuery())
@@ -689,21 +666,6 @@ final class ManiphestTaskEditController extends ManiphestController {
     Javelin::initBehavior('project-create', array(
       'tokenizerID' => $project_tokenizer_id,
     ));
-
-    if ($files) {
-      $file_display = mpull($files, 'getName');
-      $file_display = phutil_implode_html(phutil_tag('br'), $file_display);
-
-      $form->appendChild(
-        id(new AphrontFormMarkupControl())
-          ->setLabel(pht('Files'))
-          ->setValue($file_display));
-
-      foreach ($files as $ii => $file) {
-        $form->addHiddenInput('files['.$ii.']', $file->getPHID());
-      }
-    }
-
 
     $description_control = new PhabricatorRemarkupControl();
     // "Upsell" creating tasks via email in create flows if the instance is

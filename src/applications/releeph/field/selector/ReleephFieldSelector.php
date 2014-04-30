@@ -1,9 +1,5 @@
 <?php
 
-/**
- * Control the rendering of ReleephRequestHeaderView, and the layout of the
- * ReleephRequest search dialog (in ReleephBranchViewController.)
- */
 abstract class ReleephFieldSelector {
 
   final public function __construct() {
@@ -11,10 +7,6 @@ abstract class ReleephFieldSelector {
   }
 
   abstract public function getFieldSpecifications();
-
-  abstract public function arrangeFieldsForHeaderView(array $fields);
-
-  abstract public function arrangeFieldsForSelectForm(array $fields);
 
   public function sortFieldsForCommitMessage(array $fields) {
     assert_instances_of($fields, 'ReleephFieldSpecification');
