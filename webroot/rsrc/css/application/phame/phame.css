@@ -25,6 +25,14 @@
   max-width: 600px;
 }
 
+.phame-post-list .aphront-error-view {
+  margin: 0;
+}
+
+.phame-post-list .phui-icon-view:hover {
+  text-decoration: none;
+}
+
 .blog-post-list {
   clear: left;
   float: left;

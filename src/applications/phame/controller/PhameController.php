@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 abstract class PhameController extends PhabricatorController {
 
   protected function renderSideNavFilterView() {
@@ -32,7 +29,7 @@ abstract class PhameController extends PhabricatorController {
 
   protected function renderPostList(
     array $posts,
-    PhabricatorUser $user,
+    PhabricatorUser $viewer,
     $nodata) {
     assert_instances_of($posts, 'PhamePost');
 
@@ -77,13 +74,31 @@ abstract class PhameController extends PhabricatorController {
         ->setImage($bloggerImage)
         ->setImageHref($bloggerURI)
         ->setAppIcon('phame-dark')
-        ->setUser($user)
+        ->setUser($viewer)
         ->setPontification($phame_post, $phame_title);
+
+      if (PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $post,
+        PhabricatorPolicyCapability::CAN_EDIT)) {
+
+        $story->addAction(id(new PHUIIconView())
+          ->setHref($this->getApplicationURI('post/edit/'.$post->getID().'/'))
+          ->setText(pht('Edit'))
+          ->setIconFont('fa-pencil'));
+      }
 
       if ($post->getDatePublished()) {
         $story->setEpoch($post->getDatePublished());
       }
+
       $stories[] = $story;
+    }
+
+    if (empty($stories)) {
+      return id(new AphrontErrorView())
+        ->setSeverity(AphrontErrorView::SEVERITY_NODATA)
+        ->appendChild($nodata);
     }
 
     return $stories;
