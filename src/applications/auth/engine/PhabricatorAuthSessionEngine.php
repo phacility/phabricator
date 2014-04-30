@@ -247,10 +247,23 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       return $this->issueHighSecurityToken($session, true);
     }
 
+    // Check for a rate limit without awarding points, so the user doesn't
+    // get partway through the workflow only to get blocked.
+    PhabricatorSystemActionEngine::willTakeAction(
+      array($viewer->getPHID()),
+      new PhabricatorAuthTryFactorAction(),
+      0);
+
     $validation_results = array();
     if ($request->isHTTPPost()) {
       $request->validateCSRF();
       if ($request->getExists(AphrontRequest::TYPE_HISEC)) {
+
+        // Limit factor verification rates to prevent brute force attacks.
+        PhabricatorSystemActionEngine::willTakeAction(
+          array($viewer->getPHID()),
+          new PhabricatorAuthTryFactorAction(),
+          1);
 
         $ok = true;
         foreach ($factors as $factor) {
@@ -268,6 +281,12 @@ final class PhabricatorAuthSessionEngine extends Phobject {
         }
 
         if ($ok) {
+          // Give the user a credit back for a successful factor verification.
+          PhabricatorSystemActionEngine::willTakeAction(
+            array($viewer->getPHID()),
+            new PhabricatorAuthTryFactorAction(),
+            -1);
+
           $until = time() + phutil_units('15 minutes in seconds');
           $session->setHighSecurityUntil($until);
 
@@ -284,6 +303,9 @@ final class PhabricatorAuthSessionEngine extends Phobject {
             PhabricatorUserLog::ACTION_ENTER_HISEC);
           $log->save();
         } else {
+
+
+
           $log = PhabricatorUserLog::initializeNewLog(
             $viewer,
             $viewer->getPHID(),
