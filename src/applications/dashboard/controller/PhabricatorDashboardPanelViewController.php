@@ -38,11 +38,17 @@ final class PhabricatorDashboardPanelViewController
       ->setHeader($header)
       ->addPropertyList($properties);
 
+    $rendered_panel = id(new PhabricatorDashboardPanelRenderingEngine())
+      ->setViewer($viewer)
+      ->setPanel($panel)
+      ->renderPanel();
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $box,
         $timeline,
+        $rendered_panel,
       ),
       array(
         'title' => $title,
@@ -79,6 +85,12 @@ final class PhabricatorDashboardPanelViewController
         ->setHref($this->getApplicationURI("panel/edit/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('View Standalone'))
+        ->setIcon('preview')
+        ->setHref($this->getApplicationURI("panel/render/{$id}/")));
 
     return $actions;
   }
