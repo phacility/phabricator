@@ -1439,6 +1439,7 @@ phutil_register_library_map(array(
     'PhabricatorDashboardPHIDTypeDashboard' => 'applications/dashboard/phid/PhabricatorDashboardPHIDTypeDashboard.php',
     'PhabricatorDashboardPHIDTypePanel' => 'applications/dashboard/phid/PhabricatorDashboardPHIDTypePanel.php',
     'PhabricatorDashboardPanel' => 'applications/dashboard/storage/PhabricatorDashboardPanel.php',
+    'PhabricatorDashboardPanelCreateController' => 'applications/dashboard/controller/PhabricatorDashboardPanelCreateController.php',
     'PhabricatorDashboardPanelEditController' => 'applications/dashboard/controller/PhabricatorDashboardPanelEditController.php',
     'PhabricatorDashboardPanelListController' => 'applications/dashboard/controller/PhabricatorDashboardPanelListController.php',
     'PhabricatorDashboardPanelQuery' => 'applications/dashboard/query/PhabricatorDashboardPanelQuery.php',
@@ -1446,6 +1447,8 @@ phutil_register_library_map(array(
     'PhabricatorDashboardPanelTransaction' => 'applications/dashboard/storage/PhabricatorDashboardPanelTransaction.php',
     'PhabricatorDashboardPanelTransactionEditor' => 'applications/dashboard/editor/PhabricatorDashboardPanelTransactionEditor.php',
     'PhabricatorDashboardPanelTransactionQuery' => 'applications/dashboard/query/PhabricatorDashboardPanelTransactionQuery.php',
+    'PhabricatorDashboardPanelType' => 'applications/dashboard/paneltype/PhabricatorDashboardPanelType.php',
+    'PhabricatorDashboardPanelTypeText' => 'applications/dashboard/paneltype/PhabricatorDashboardPanelTypeText.php',
     'PhabricatorDashboardPanelViewController' => 'applications/dashboard/controller/PhabricatorDashboardPanelViewController.php',
     'PhabricatorDashboardQuery' => 'applications/dashboard/query/PhabricatorDashboardQuery.php',
     'PhabricatorDashboardSearchEngine' => 'applications/dashboard/query/PhabricatorDashboardSearchEngine.php',
@@ -4242,6 +4245,7 @@ phutil_register_library_map(array(
       0 => 'PhabricatorDashboardDAO',
       1 => 'PhabricatorPolicyInterface',
     ),
+    'PhabricatorDashboardPanelCreateController' => 'PhabricatorDashboardController',
     'PhabricatorDashboardPanelEditController' => 'PhabricatorDashboardController',
     'PhabricatorDashboardPanelListController' =>
     array(
@@ -4253,6 +4257,8 @@ phutil_register_library_map(array(
     'PhabricatorDashboardPanelTransaction' => 'PhabricatorApplicationTransaction',
     'PhabricatorDashboardPanelTransactionEditor' => 'PhabricatorApplicationTransactionEditor',
     'PhabricatorDashboardPanelTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
+    'PhabricatorDashboardPanelType' => 'Phobject',
+    'PhabricatorDashboardPanelTypeText' => 'PhabricatorDashboardPanelType',
     'PhabricatorDashboardPanelViewController' => 'PhabricatorDashboardController',
     'PhabricatorDashboardQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorDashboardSearchEngine' => 'PhabricatorApplicationSearchEngine',

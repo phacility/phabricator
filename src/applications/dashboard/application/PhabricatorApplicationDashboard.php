@@ -27,7 +27,7 @@ final class PhabricatorApplicationDashboard extends PhabricatorApplication {
         'panel/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?'
             => 'PhabricatorDashboardPanelListController',
-          'create/' => 'PhabricatorDashboardPanelEditController',
+          'create/' => 'PhabricatorDashboardPanelCreateController',
           'edit/(?:(?P<id>\d+)/)?' => 'PhabricatorDashboardPanelEditController',
         ),
       ),

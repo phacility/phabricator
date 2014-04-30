@@ -33,6 +33,14 @@ final class PhabricatorDashboardPanelEditController
       $is_create = true;
 
       $panel = PhabricatorDashboardPanel::initializeNewPanel($viewer);
+
+      $types = PhabricatorDashboardPanelType::getAllPanelTypes();
+      $type = $request->getStr('type');
+      if (empty($types[$type])) {
+        return new Aphront404Response();
+      }
+
+      $panel->setPanelType($type);
     }
 
     if ($is_create) {
@@ -97,6 +105,7 @@ final class PhabricatorDashboardPanelEditController
       $this->getApplicationURI('panel/'));
     if ($is_create) {
       $crumbs->addTextCrumb(pht('New Panel'));
+      $form->addHiddenInput('type', $panel->getPanelType());
     } else {
       $crumbs->addTextCrumb(
         $panel->getMonogram(),

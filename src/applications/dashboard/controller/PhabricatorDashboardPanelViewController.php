@@ -94,6 +94,20 @@ final class PhabricatorDashboardPanelViewController
       $viewer,
       $panel);
 
+    $panel_type = $panel->getImplementation();
+    if ($panel_type) {
+      $type_name = $panel_type->getPanelTypeName();
+    } else {
+      $type_name = phutil_tag(
+        'em',
+        array(),
+        nonempty($panel->getPanelType(), pht('null')));
+    }
+
+    $properties->addProperty(
+      pht('Panel Type'),
+      $type_name);
+
     $properties->addProperty(
       pht('Editable By'),
       $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);

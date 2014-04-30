@@ -8,6 +8,7 @@ final class PhabricatorDashboardPanel
   implements PhabricatorPolicyInterface {
 
   protected $name;
+  protected $panelType;
   protected $viewPolicy;
   protected $editPolicy;
   protected $properties = array();
@@ -44,6 +45,25 @@ final class PhabricatorDashboardPanel
 
   public function getMonogram() {
     return 'W'.$this->getID();
+  }
+
+  public function getImplementation() {
+    return idx(
+      PhabricatorDashboardPanelType::getAllPanelTypes(),
+      $this->getPanelType());
+  }
+
+  public function requireImplementation() {
+    $impl = $this->getImplementation();
+    if (!$impl) {
+      throw new Exception(
+        pht(
+          'Attempting to use a panel in a way that requires an '.
+          'implementation, but the panel implementation ("%s") is unknown to '.
+          'Phabricator.',
+          $this->getPanelType()));
+    }
+    return $impl;
   }
 
 
