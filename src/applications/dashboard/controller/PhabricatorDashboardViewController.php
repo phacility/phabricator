@@ -16,6 +16,7 @@ final class PhabricatorDashboardViewController
     $dashboard = id(new PhabricatorDashboardQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->id))
+      ->needPanels(true)
       ->executeOne();
     if (!$dashboard) {
       return new Aphront404Response();
@@ -77,6 +78,14 @@ final class PhabricatorDashboardViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Add Panel'))
+        ->setIcon('new')
+        ->setHref($this->getApplicationURI("addpanel/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true));
+
     return $actions;
   }
 
@@ -94,6 +103,13 @@ final class PhabricatorDashboardViewController
     $properties->addProperty(
       pht('Editable By'),
       $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
+
+    $panel_phids = $dashboard->getPanelPHIDs();
+    $this->loadHandles($panel_phids);
+
+    $properties->addProperty(
+      pht('Panels'),
+      $this->renderHandlesForPHIDs($panel_phids));
 
     return $properties;
   }

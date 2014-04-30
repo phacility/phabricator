@@ -124,6 +124,15 @@ final class PhabricatorDashboardPanelViewController
       pht('Editable By'),
       $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
 
+    $dashboard_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $panel->getPHID(),
+      PhabricatorEdgeConfig::TYPE_PANEL_HAS_DASHBOARD);
+    $this->loadHandles($dashboard_phids);
+
+    $properties->addProperty(
+      pht('Appears On'),
+      $this->renderHandlesForPHIDs($dashboard_phids));
+
     return $properties;
   }
 
