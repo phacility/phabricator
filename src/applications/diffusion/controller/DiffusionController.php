@@ -41,20 +41,25 @@ abstract class DiffusionController extends PhabricatorController {
   }
 
   public function buildApplicationPage($view, array $options) {
-    $drequest = $this->getDiffusionRequest();
-    $repository = $drequest->getRepository();
-    $error_view = $this->buildRepositoryWarning($repository);
+    if ($this->diffusionRequest) {
+      $drequest = $this->getDiffusionRequest();
+      $repository = $drequest->getRepository();
+      $error_view = $this->buildRepositoryWarning($repository);
 
-    $views = array();
-    $not_inserted = true;
-    foreach ($view as $view_object_or_array) {
-      $views[] = $view_object_or_array;
-      if ($not_inserted &&
-          $view_object_or_array instanceof PhabricatorCrumbsView) {
-        $views[] = $error_view;
-        $not_inserted = false;
+      $views = array();
+      $not_inserted = true;
+      foreach ($view as $view_object_or_array) {
+        $views[] = $view_object_or_array;
+        if ($not_inserted &&
+            $view_object_or_array instanceof PhabricatorCrumbsView) {
+          $views[] = $error_view;
+          $not_inserted = false;
+        }
       }
+    } else {
+      $views = $view;
     }
+
     return parent::buildApplicationPage($views, $options);
   }
 
