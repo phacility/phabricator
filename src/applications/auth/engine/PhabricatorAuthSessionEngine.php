@@ -227,34 +227,69 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
     $session = $viewer->getSession();
 
+    // Check if the session is already in high security mode.
     $token = $this->issueHighSecurityToken($session);
     if ($token) {
       return $token;
     }
 
+    // Load the multi-factor auth sources attached to this account.
+    $factors = id(new PhabricatorAuthFactorConfig())->loadAllWhere(
+      'userPHID = %s',
+      $viewer->getPHID());
+
+    // If the account has no associated multi-factor auth, just issue a token
+    // without putting the session into high security mode. This is generally
+    // easier for users. A minor but desirable side effect is that when a user
+    // adds an auth factor, existing sessions won't get a free pass into hisec,
+    // since they never actually got marked as hisec.
+    if (!$factors) {
+      return $this->issueHighSecurityToken($session, true);
+    }
+
+    $validation_results = array();
     if ($request->isHTTPPost()) {
       $request->validateCSRF();
       if ($request->getExists(AphrontRequest::TYPE_HISEC)) {
 
-        // TODO: Actually verify that the user provided some multi-factor
-        // auth credentials here. For now, we just let you enter high
-        // security.
+        $ok = true;
+        foreach ($factors as $factor) {
+          $id = $factor->getID();
+          $impl = $factor->requireImplementation();
 
-        $until = time() + phutil_units('15 minutes in seconds');
-        $session->setHighSecurityUntil($until);
+          $validation_results[$id] = $impl->processValidateFactorForm(
+            $factor,
+            $viewer,
+            $request);
 
-        queryfx(
-          $session->establishConnection('w'),
-          'UPDATE %T SET highSecurityUntil = %d WHERE id = %d',
-          $session->getTableName(),
-          $until,
-          $session->getID());
+          if (!$impl->isFactorValid($factor, $validation_results[$id])) {
+            $ok = false;
+          }
+        }
 
-        $log = PhabricatorUserLog::initializeNewLog(
-          $viewer,
-          $viewer->getPHID(),
-          PhabricatorUserLog::ACTION_ENTER_HISEC);
-        $log->save();
+        if ($ok) {
+          $until = time() + phutil_units('15 minutes in seconds');
+          $session->setHighSecurityUntil($until);
+
+          queryfx(
+            $session->establishConnection('w'),
+            'UPDATE %T SET highSecurityUntil = %d WHERE id = %d',
+            $session->getTableName(),
+            $until,
+            $session->getID());
+
+          $log = PhabricatorUserLog::initializeNewLog(
+            $viewer,
+            $viewer->getPHID(),
+            PhabricatorUserLog::ACTION_ENTER_HISEC);
+          $log->save();
+        } else {
+          $log = PhabricatorUserLog::initializeNewLog(
+            $viewer,
+            $viewer->getPHID(),
+            PhabricatorUserLog::ACTION_FAIL_HISEC);
+          $log->save();
+        }
       }
     }
 
@@ -264,7 +299,9 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     }
 
     throw id(new PhabricatorAuthHighSecurityRequiredException())
-      ->setCancelURI($cancel_uri);
+      ->setCancelURI($cancel_uri)
+      ->setFactors($factors)
+      ->setFactorValidationResults($validation_results);
   }
 
 
@@ -291,18 +328,24 @@ final class PhabricatorAuthSessionEngine extends Phobject {
    * @return  AphrontFormView Renderable form.
    */
   public function renderHighSecurityForm(
+    array $factors,
+    array $validation_results,
     PhabricatorUser $viewer,
     AphrontRequest $request) {
 
-    // TODO: This is stubbed.
-
     $form = id(new AphrontFormView())
       ->setUser($viewer)
-      ->appendRemarkupInstructions('')
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('Secret Stuff')))
       ->appendRemarkupInstructions('');
+
+    foreach ($factors as $factor) {
+      $factor->requireImplementation()->renderValidateFactorForm(
+        $factor,
+        $form,
+        $viewer,
+        idx($validation_results, $factor->getID()));
+    }
+
+    $form->appendRemarkupInstructions('');
 
     return $form;
   }

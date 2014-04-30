@@ -126,6 +126,8 @@ class AphrontDefaultApplicationConfiguration
     if ($ex instanceof PhabricatorAuthHighSecurityRequiredException) {
 
       $form = id(new PhabricatorAuthSessionEngine())->renderHighSecurityForm(
+        $ex->getFactors(),
+        $ex->getFactorValidationResults(),
         $user,
         $request);
 

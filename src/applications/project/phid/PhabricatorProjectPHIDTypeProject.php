@@ -12,6 +12,10 @@ final class PhabricatorProjectPHIDTypeProject extends PhabricatorPHIDType {
     return pht('Project');
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorApplicationProject';
+  }
+
   public function getTypeIcon() {
     return 'policy-project';
   }

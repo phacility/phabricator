@@ -311,11 +311,19 @@ abstract class PhabricatorApplicationTransaction
     }
   }
 
-  public function renderPolicyName($phid) {
+  protected function renderPolicyName($phid, $state = 'old') {
     $policy = PhabricatorPolicy::newFromPolicyAndHandle(
       $phid,
       $this->getHandleIfExists($phid));
     if ($this->renderingTarget == self::TARGET_HTML) {
+      switch ($policy->getType()) {
+        case PhabricatorPolicyType::TYPE_CUSTOM:
+          $policy->setHref('/transactions/'.$state.'/'.$this->getPHID().'/');
+          $policy->setWorkflow(true);
+          break;
+        default:
+          break;
+      }
       $output = $policy->renderDescription();
     } else {
       $output = hsprintf('%s', $policy->getFullName());
@@ -443,6 +451,15 @@ abstract class PhabricatorApplicationTransaction
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_TOKEN:
         return true;
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+        switch ($this->getNewValue()) {
+          case HarbormasterBuildable::STATUS_PASSED:
+            // For now, don't notify on build passes either. These are pretty
+            // high volume and annoying, with very little present value. We
+            // might want to turn them back on in the specific case of
+            // build successes on the current document?
+            return true;
+        }
     }
 
     return $this->shouldHide();
@@ -504,22 +521,22 @@ abstract class PhabricatorApplicationTransaction
           '%s changed the visibility of this %s from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
           $this->getApplicationObjectTypeName(),
-          $this->renderPolicyName($old),
-          $this->renderPolicyName($new));
+          $this->renderPolicyName($old, 'old'),
+          $this->renderPolicyName($new, 'new'));
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return pht(
           '%s changed the edit policy of this %s from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
           $this->getApplicationObjectTypeName(),
-          $this->renderPolicyName($old),
-          $this->renderPolicyName($new));
+          $this->renderPolicyName($old, 'old'),
+          $this->renderPolicyName($new, 'new'));
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
         return pht(
           '%s changed the join policy of this %s from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
           $this->getApplicationObjectTypeName(),
-          $this->renderPolicyName($old),
-          $this->renderPolicyName($new));
+          $this->renderPolicyName($old, 'old'),
+          $this->renderPolicyName($new, 'new'));
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);

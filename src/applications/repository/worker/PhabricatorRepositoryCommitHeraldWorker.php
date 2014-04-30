@@ -138,8 +138,14 @@ final class PhabricatorRepositoryCommitHeraldWorker
       ? PhabricatorEnv::getProductionURI('/D'.$revision->getID())
       : 'No revision.';
 
+    $limit = 1000;
     $files = $adapter->loadAffectedPaths();
     sort($files);
+    if (count($files) > $limit) {
+      array_splice($files, $limit);
+      $files[] = '(This commit affected more than 1000 files. '.
+        'Only 1000 are shown here and additional ones are truncated.)';
+    }
     $files = implode("\n", $files);
 
     $xscript_id = $xscript->getID();

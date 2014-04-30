@@ -26,10 +26,23 @@ final class PhabricatorNotificationPanelController
     }
 
     $content = hsprintf(
-      '<div class="phabricator-notification-header">%s</div>'.
+      '<div class="phabricator-notification-header">%s %s</div>'.
       '%s'.
       '<div class="phabricator-notification-view-all">%s</div>',
-      pht('Notifications'),
+      phutil_tag(
+        'a',
+        array(
+          'href' => '/notification/',
+        ),
+        pht('Notifications')),
+      javelin_tag(
+        'a',
+        array(
+          'sigil' => 'workflow',
+          'href' => '/notification/clear/',
+          'class' => 'phabricator-notification-clear-all'
+        ),
+        pht('Clear All Notifications')),
       $content,
       phutil_tag(
         'a',

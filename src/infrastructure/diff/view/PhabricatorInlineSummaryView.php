@@ -19,7 +19,15 @@ final class PhabricatorInlineSummaryView extends AphrontView {
   }
 
   private function renderHeader() {
-    return phutil_tag_div('phabricator-inline-summary', pht('Inline Comments'));
+    $icon = id(new PHUIIconView())
+      ->setIconFont('fa-comment bluegrey msr');
+
+    $header = phutil_tag_div(
+      'phabricator-inline-summary',
+      array(
+        $icon,
+        pht('Inline Comments')));
+    return $header;
   }
 
   private function renderTable() {
@@ -59,6 +67,9 @@ final class PhabricatorInlineSummaryView extends AphrontView {
         }
 
         if ($href) {
+          $icon = id(new PHUIIconView())
+            ->setIconFont('fa-share white msr');
+
           $lines = phutil_tag(
             'a',
             array(
@@ -67,6 +78,7 @@ final class PhabricatorInlineSummaryView extends AphrontView {
               'class'   => 'num',
             ),
             array(
+              $icon,
               $lines,
               $tail,
             ));

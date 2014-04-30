@@ -45,7 +45,8 @@ final class PhabricatorUIExampleRenderController extends PhabricatorController {
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('%s (%s)', $example->getName(), get_class($example)))
-      ->setSubheader($example->getDescription());
+      ->setSubheader($example->getDescription())
+      ->setNoBackground(true);
 
     $nav->appendChild(
       array(

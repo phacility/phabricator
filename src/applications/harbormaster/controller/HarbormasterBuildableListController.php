@@ -32,6 +32,7 @@ final class HarbormasterBuildableListController
     $viewer = $this->getRequest()->getUser();
 
     $list = new PHUIObjectItemListView();
+    $list->setStates(true);
     foreach ($buildables as $buildable) {
       $id = $buildable->getID();
 
@@ -52,19 +53,30 @@ final class HarbormasterBuildableListController
         $item->addIcon('wrench-grey', pht('Manual'));
       }
 
-      $list->addItem($item);
-
       switch ($buildable->getBuildableStatus()) {
         case HarbormasterBuildable::STATUS_PASSED:
-          $item->setBarColor('green');
+          $item->setState(PHUIObjectItemView::STATE_SUCCESS);
           break;
         case HarbormasterBuildable::STATUS_FAILED:
-          $item->setBarColor('red');
+          $item->setState(PHUIObjectItemView::STATE_FAIL);
+          break;
+        case HarbormasterBuildable::STATUS_BUILDING:
+          $item->setState(PHUIObjectItemView::STATE_BUILD);
+          break;
+        default:
+          $item->setState(PHUIObjectItemView::STATE_WARN);
           break;
       }
+
+      $list->addItem($item);
+
     }
 
-    return $list;
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Buildables'))
+      ->appendChild($list);
+
+    return $box;
   }
 
   public function buildSideNavView($for_app = false) {

@@ -29,6 +29,7 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
 
   const ACTION_ENTER_HISEC = 'hisec-enter';
   const ACTION_EXIT_HISEC = 'hisec-exit';
+  const ACTION_FAIL_HISEC = 'hisec-fail';
 
   const ACTION_MULTI_ADD = 'multi-add';
   const ACTION_MULTI_REMOVE = 'multi-remove';
@@ -66,6 +67,7 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
       self::ACTION_CHANGE_USERNAME => pht('Change Username'),
       self::ACTION_ENTER_HISEC => pht('Hisec: Enter'),
       self::ACTION_EXIT_HISEC => pht('Hisec: Exit'),
+      self::ACTION_FAIL_HISEC => pht('Hisec: Failed Attempt'),
       self::ACTION_MULTI_ADD => pht('Multi-Factor: Add Factor'),
       self::ACTION_MULTI_REMOVE => pht('Multi-Factor: Remove Factor'),
     );

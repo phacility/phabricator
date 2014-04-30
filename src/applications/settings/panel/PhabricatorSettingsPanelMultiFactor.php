@@ -15,11 +15,6 @@ final class PhabricatorSettingsPanelMultiFactor
     return pht('Authentication');
   }
 
-  public function isEnabled() {
-    // TODO: Enable this panel once more pieces work correctly.
-    return false;
-  }
-
   public function processRequest(AphrontRequest $request) {
     if ($request->getExists('new')) {
       return $this->processNew($request);
