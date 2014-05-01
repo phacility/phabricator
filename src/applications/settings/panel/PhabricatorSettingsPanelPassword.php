@@ -35,6 +35,11 @@ final class PhabricatorSettingsPanelPassword
   public function processRequest(AphrontRequest $request) {
     $user = $request->getUser();
 
+    $token = id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
+      $user,
+      $request,
+      '/settings/');
+
     $min_len = PhabricatorEnv::getEnvConfig('account.minimum-password-length');
     $min_len = (int)$min_len;
 

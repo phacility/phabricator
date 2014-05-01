@@ -330,6 +330,11 @@ final class PhabricatorSettingsPanelEmailAddresses
 
     $user = $request->getUser();
 
+    $token = id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
+      $user,
+      $request,
+      $this->getPanelURI());
+
     // NOTE: You can only make your own verified addresses primary.
     $email = id(new PhabricatorUserEmail())->loadOneWhere(
       'id = %d AND userPHID = %s AND isVerified = 1 AND isPrimary = 0',

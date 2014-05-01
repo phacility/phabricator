@@ -83,6 +83,11 @@ final class PhabricatorAuthLinkController
 
     switch ($this->action) {
       case 'link':
+        id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
+          $viewer,
+          $request,
+          $panel_uri);
+
         $form = $provider->buildLinkForm($this);
         break;
       case 'refresh':

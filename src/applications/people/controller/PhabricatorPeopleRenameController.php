@@ -23,6 +23,11 @@ final class PhabricatorPeopleRenameController
 
     $profile_uri = '/p/'.$user->getUsername().'/';
 
+    id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
+      $admin,
+      $request,
+      $profile_uri);
+
     $errors = array();
 
     $v_username = $user->getUsername();

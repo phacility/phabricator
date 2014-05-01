@@ -7,8 +7,12 @@ final class PhabricatorConduitTokenController
   extends PhabricatorConduitController {
 
   public function processRequest() {
-
     $user = $this->getRequest()->getUser();
+
+    id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
+      $user,
+      $this->getRequest(),
+      '/');
 
     // Ideally we'd like to verify this, but it's fine to leave it unguarded
     // for now and verifying it would need some Ajax junk or for the user to
