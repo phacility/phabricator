@@ -39,9 +39,10 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
         $application->getName());
 
       if ($application->isBeta()) {
-        $content[] = phutil_tag(
+        $content[] = javelin_tag(
           'span',
           array(
+            'aural' => false,
             'class' => 'phabricator-application-beta',
           ),
           "\xCE\xB2");

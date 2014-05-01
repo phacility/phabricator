@@ -430,6 +430,10 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $classes[] = 'printable';
     }
 
+    if ($this->getRequest()->getStr('__aural__')) {
+      $classes[] = 'audible';
+    }
+
     return implode(' ', $classes);
   }
 

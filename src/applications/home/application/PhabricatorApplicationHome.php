@@ -60,6 +60,7 @@ final class PhabricatorApplicationHome extends PhabricatorApplication {
         ->setHref('/home/create/')
         ->addSigil('quick-create-menu')
         ->setID($create_id)
+        ->setAural(pht('Quick Create'))
         ->setOrder(300);
       $items[] = $item;
     }

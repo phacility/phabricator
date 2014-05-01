@@ -148,3 +148,7 @@ div.jx-typeahead-results {
 .jx-tooltip-container {
   z-index: 51;
 }
+
+.audible .aural-only {
+  z-index: 100;
+}

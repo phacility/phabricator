@@ -36,6 +36,20 @@ function javelin_tag(
     }
   }
 
+  if (isset($attributes['aural'])) {
+    if ($attributes['aural']) {
+      $class = idx($attributes, 'class', '');
+      $class = rtrim('aural-only '.$class);
+      $attributes['class'] = $class;
+    } else {
+      $class = idx($attributes, 'class', '');
+      $class = rtrim('visual-only '.$class);
+      $attributes['class'] = $class;
+      $attributes['aria-hidden'] = 'true';
+    }
+    unset($attributes['aural']);
+  }
+
   return phutil_tag($tag, $attributes, $content);
 }
 

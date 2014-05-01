@@ -167,7 +167,7 @@ abstract class PhabricatorHomeController extends PhabricatorController {
       }
     }
 
-  $nav->addFilter(
+    $nav->addFilter(
       '',
       pht('Customize Applications...'),
       '/settings/panel/home/');

@@ -133,12 +133,21 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
         $target = '_blank';
       }
 
+      $content = null;
+
       $tip = idx($spec, 'tip');
       if ($tip) {
         $meta['tip'] = $tip;
+        $content = phutil_tag(
+          'span',
+          array(
+            'class' => 'aural-only',
+          ),
+          $tip);
       }
 
       require_celerity_resource('sprite-icons-css');
+
 
       $buttons[] = javelin_tag(
         'a',
@@ -156,7 +165,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
           array(
             'class' => 'remarkup-assist sprite-icons remarkup-assist-'.$action,
           ),
-          ''));
+          $content));
     }
 
     $buttons = phutil_tag(
