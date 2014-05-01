@@ -79,6 +79,7 @@ final class PhabricatorAuditListView extends AphrontView {
 
   public function render() {
     $list = $this->buildList();
+    $list->setFlush(true);
     return $list->render();
   }
 
