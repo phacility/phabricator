@@ -393,6 +393,7 @@ abstract class PhabricatorController extends AphrontController {
 
       $crumbs[] = id(new PhabricatorCrumbView())
         ->setHref($this->getApplicationURI())
+        ->setAural($application->getName())
         ->setIcon($sprite);
     }
 
