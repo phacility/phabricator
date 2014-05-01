@@ -205,10 +205,10 @@ final class PHUIListItemView extends AphrontTagView {
 
     $aural = null;
     if ($this->aural !== null) {
-      $aural = phutil_tag(
+      $aural = javelin_tag(
         'span',
         array(
-          'class' => 'aural-only',
+          'aural' => true,
         ),
         $this->aural);
     }

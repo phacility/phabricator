@@ -138,10 +138,10 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       $tip = idx($spec, 'tip');
       if ($tip) {
         $meta['tip'] = $tip;
-        $content = phutil_tag(
+        $content = javelin_tag(
           'span',
           array(
-            'class' => 'aural-only',
+            'aural' => true,
           ),
           $tip);
       }

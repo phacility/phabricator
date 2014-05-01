@@ -1,0 +1,76 @@
+@title Assistive Technologies
+@group developer
+
+Information about making Phabricator accessible to assistive technologies.
+
+Overview
+========
+
+Assistive technologies help people with disabilities use the web. For example,
+screen readers can assist people with limited or no eyesight by reading the
+contents of pages aloud.
+
+Phabricator has some support for assistive technologies, and we'd like to have
+more support. This document describes how to use the currently available
+features to improve the accessibility of Phabricator.
+
+
+Aural-Only Elements
+===================
+
+The most common issue assistive technologies encounter is buttons, links, or
+other elements which only convey information visually (usually through an icon
+or image).
+
+These elements can be made more accessible by providing an aural-only label.
+This label will not be displayed by visual browsers, but will be read by screen
+readers.
+
+To add an aural-only label to an element, use `javelin_tag()` with the
+`aural` attribute:
+
+  javelin_tag(
+    'span',
+    array(
+      'aural' => true,
+    ),
+    pht('Aural Label Here'));
+
+This label should be placed inside the button or link that you are labeling.
+
+You can also use `aural` on a container to provide an entirely different
+replacement element, but should be cautious about doing this.
+
+NOTE: You must use `javelin_tag()`, not `phutil_tag()`, to get support for
+this attribute.
+
+
+Visual-Only Elements
+====================
+
+Occasionally, a visual element should be hidden from screen readers. This should
+be rare, but some textual elements convey very little information or are
+otherwise disruptive for aural users.
+
+This technique can also be used to offer a visual alternative of an element
+and a different aural alternative element. However, this should be rare: it is
+usually better to adapt a single element to work well for both visual and aural
+users.
+
+You can mark an element as visual-only by using `javelin_tag()` with the
+`aural` attribute:
+
+  javelin_tag(
+    'span',
+    array(
+      'aural' => false,
+    ),
+    $ascii_art);
+
+
+Previewing Aural Pages
+======================
+
+To verify aural markup, you can add `?__aural__=1` to any page URI. This will
+make Phabricator render the page with styles that reveal aural-only elements and
+mute visual-only elements.
