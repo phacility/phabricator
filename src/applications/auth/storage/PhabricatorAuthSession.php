@@ -12,6 +12,7 @@ final class PhabricatorAuthSession extends PhabricatorAuthDAO
   protected $sessionStart;
   protected $sessionExpires;
   protected $highSecurityUntil;
+  protected $isPartial;
 
   private $identityObject = self::ATTACHABLE;
 

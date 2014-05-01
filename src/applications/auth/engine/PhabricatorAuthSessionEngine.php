@@ -94,6 +94,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
           s.sessionExpires AS s_sessionExpires,
           s.sessionStart AS s_sessionStart,
           s.highSecurityUntil AS s_highSecurityUntil,
+          s.isPartial AS s_isPartial,
           u.*
         FROM %T u JOIN %T s ON u.phid = s.userPHID
         AND s.type = %s AND s.sessionKey = %s',
@@ -159,9 +160,10 @@ final class PhabricatorAuthSessionEngine extends Phobject {
    *                    @{class:PhabricatorAuthSession}).
    * @param   phid|null Identity to establish a session for, usually a user
    *                    PHID. With `null`, generates an anonymous session.
+   * @param   bool      True to issue a partial session.
    * @return  string    Newly generated session key.
    */
-  public function establishSession($session_type, $identity_phid) {
+  public function establishSession($session_type, $identity_phid, $partial) {
     // Consume entropy to generate a new session key, forestalling the eventual
     // heat death of the universe.
     $session_key = Filesystem::readRandomCharacters(40);
@@ -176,26 +178,32 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     // This has a side effect of validating the session type.
     $session_ttl = PhabricatorAuthSession::getSessionTypeTTL($session_type);
 
+    $digest_key = PhabricatorHash::digest($session_key);
+
     // Logging-in users don't have CSRF stuff yet, so we have to unguard this
     // write.
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
       id(new PhabricatorAuthSession())
         ->setUserPHID($identity_phid)
         ->setType($session_type)
-        ->setSessionKey(PhabricatorHash::digest($session_key))
+        ->setSessionKey($digest_key)
         ->setSessionStart(time())
         ->setSessionExpires(time() + $session_ttl)
+        ->setIsPartial($partial ? 1 : 0)
         ->save();
 
       $log = PhabricatorUserLog::initializeNewLog(
         null,
         $identity_phid,
-        PhabricatorUserLog::ACTION_LOGIN);
+        ($partial
+          ? PhabricatorUserLog::ACTION_LOGIN_PARTIAL
+          : PhabricatorUserLog::ACTION_LOGIN));
+
       $log->setDetails(
         array(
           'session_type' => $session_type,
         ));
-      $log->setSession($session_key);
+      $log->setSession($digest_key);
       $log->save();
     unset($unguarded);
 
@@ -287,6 +295,12 @@ final class PhabricatorAuthSessionEngine extends Phobject {
             new PhabricatorAuthTryFactorAction(),
             -1);
 
+          if ($session->getIsPartial()) {
+            // If we have a partial session, just issue a token without
+            // putting it in high security mode.
+            return $this->issueHighSecurityToken($session, true);
+          }
+
           $until = time() + phutil_units('15 minutes in seconds');
           $session->setHighSecurityUntil($until);
 
@@ -303,9 +317,6 @@ final class PhabricatorAuthSessionEngine extends Phobject {
             PhabricatorUserLog::ACTION_ENTER_HISEC);
           $log->save();
         } else {
-
-
-
           $log = PhabricatorUserLog::initializeNewLog(
             $viewer,
             $viewer->getPHID(),
@@ -331,11 +342,15 @@ final class PhabricatorAuthSessionEngine extends Phobject {
    * Issue a high security token for a session, if authorized.
    *
    * @param PhabricatorAuthSession Session to issue a token for.
+   * @param bool Force token issue.
    * @return PhabricatorAuthHighSecurityToken|null Token, if authorized.
    */
-  private function issueHighSecurityToken(PhabricatorAuthSession $session) {
+  private function issueHighSecurityToken(
+    PhabricatorAuthSession $session,
+    $force = false) {
+
     $until = $session->getHighSecurityUntil();
-    if ($until > time()) {
+    if ($until > time() || $force) {
       return new PhabricatorAuthHighSecurityToken();
     }
     return null;
@@ -388,6 +403,44 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       $viewer->getPHID(),
       PhabricatorUserLog::ACTION_EXIT_HISEC);
     $log->save();
+  }
+
+
+  /**
+   * Upgrade a partial session to a full session.
+   *
+   * @param PhabricatorAuthSession Session to upgrade.
+   * @return void
+   */
+  public function upgradePartialSession(PhabricatorUser $viewer) {
+    if (!$viewer->hasSession()) {
+      throw new Exception(
+        pht('Upgrading partial session of user with no session!'));
+    }
+
+    $session = $viewer->getSession();
+
+    if (!$session->getIsPartial()) {
+      throw new Exception(pht('Session is not partial!'));
+    }
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $session->setIsPartial(0);
+
+      queryfx(
+        $session->establishConnection('w'),
+        'UPDATE %T SET isPartial = %d WHERE id = %d',
+        $session->getTableName(),
+        0,
+        $session->getID());
+
+      $log = PhabricatorUserLog::initializeNewLog(
+        $viewer,
+        $viewer->getPHID(),
+        PhabricatorUserLog::ACTION_LOGIN_FULL);
+      $log->save();
+    unset($unguarded);
+
   }
 
 }
