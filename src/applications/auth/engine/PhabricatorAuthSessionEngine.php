@@ -1,7 +1,11 @@
 <?php
 
 /**
- * @task hisec High Security Mode
+ *
+ * @task use      Using Sessions
+ * @task new      Creating Sessions
+ * @task hisec    High Security
+ * @task partial  Partial Sessions
  */
 final class PhabricatorAuthSessionEngine extends Phobject {
 
@@ -60,6 +64,23 @@ final class PhabricatorAuthSessionEngine extends Phobject {
   }
 
 
+  /**
+   * Load the user identity associated with a session of a given type,
+   * identified by token.
+   *
+   * When the user presents a session token to an API, this method verifies
+   * it is of the correct type and loads the corresponding identity if the
+   * session exists and is valid.
+   *
+   * NOTE: `$session_type` is the type of session that is required by the
+   * loading context. This prevents use of a Conduit sesssion as a Web
+   * session, for example.
+   *
+   * @param const The type of session to load.
+   * @param string The session token.
+   * @return PhabricatorUser|null
+   * @task use
+   */
   public function loadUserForSession($session_type, $session_token) {
     $session_kind = self::getSessionKindFromToken($session_token);
     switch ($session_kind) {
@@ -211,6 +232,9 @@ final class PhabricatorAuthSessionEngine extends Phobject {
   }
 
 
+/* -(  High Security  )------------------------------------------------------ */
+
+
   /**
    * Require high security, or prompt the user to enter high security.
    *
@@ -222,6 +246,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
    * @param AphrontReqeust  Current request.
    * @param string          URI to return the user to if they cancel.
    * @return PhabricatorAuthHighSecurityToken Security token.
+   * @task hisec
    */
   public function requireHighSecuritySession(
     PhabricatorUser $viewer,
@@ -344,6 +369,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
    * @param PhabricatorAuthSession Session to issue a token for.
    * @param bool Force token issue.
    * @return PhabricatorAuthHighSecurityToken|null Token, if authorized.
+   * @task hisec
    */
   private function issueHighSecurityToken(
     PhabricatorAuthSession $session,
@@ -353,6 +379,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     if ($until > time() || $force) {
       return new PhabricatorAuthHighSecurityToken();
     }
+
     return null;
   }
 
@@ -360,9 +387,10 @@ final class PhabricatorAuthSessionEngine extends Phobject {
   /**
    * Render a form for providing relevant multi-factor credentials.
    *
-   * @param   PhabricatorUser Viewing user.
-   * @param   AphrontRequest  Current request.
-   * @return  AphrontFormView Renderable form.
+   * @param PhabricatorUser Viewing user.
+   * @param AphrontRequest Current request.
+   * @return AphrontFormView Renderable form.
+   * @task hisec
    */
   public function renderHighSecurityForm(
     array $factors,
@@ -388,9 +416,23 @@ final class PhabricatorAuthSessionEngine extends Phobject {
   }
 
 
+  /**
+   * Strip the high security flag from a session.
+   *
+   * Kicks a session out of high security and logs the exit.
+   *
+   * @param PhabricatorUser Acting user.
+   * @param PhabricatorAuthSession Session to return to normal security.
+   * @return void
+   * @task hisec
+   */
   public function exitHighSecurity(
     PhabricatorUser $viewer,
     PhabricatorAuthSession $session) {
+
+    if (!$session->getHighSecurityUntil()) {
+      return;
+    }
 
     queryfx(
       $session->establishConnection('w'),
@@ -406,11 +448,15 @@ final class PhabricatorAuthSessionEngine extends Phobject {
   }
 
 
+/* -(  Partial Sessions  )--------------------------------------------------- */
+
+
   /**
    * Upgrade a partial session to a full session.
    *
    * @param PhabricatorAuthSession Session to upgrade.
    * @return void
+   * @task partial
    */
   public function upgradePartialSession(PhabricatorUser $viewer) {
     if (!$viewer->hasSession()) {
