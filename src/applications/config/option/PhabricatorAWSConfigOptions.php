@@ -14,16 +14,19 @@ final class PhabricatorAWSConfigOptions
   public function getOptions() {
     return array(
       $this->newOption('amazon-ses.access-key', 'string', null)
+        ->setLocked(true)
         ->setDescription(pht('Access key for Amazon SES.')),
       $this->newOption('amazon-ses.secret-key', 'string', null)
         ->setMasked(true)
         ->setDescription(pht('Secret key for Amazon SES.')),
       $this->newOption('amazon-s3.access-key', 'string', null)
+        ->setLocked(true)
         ->setDescription(pht('Access key for Amazon S3.')),
       $this->newOption('amazon-s3.secret-key', 'string', null)
         ->setMasked(true)
         ->setDescription(pht('Secret key for Amazon S3.')),
       $this->newOption('amazon-s3.endpoint', 'string', null)
+        ->setLocked(true)
         ->setDescription(
           pht(
             'Explicit S3 endpoint to use. Leave empty to have Phabricator '.
@@ -31,6 +34,7 @@ final class PhabricatorAWSConfigOptions
         ->addExample(null, 'Use default endpoint')
         ->addExample('s3.amazon.com', 'Use specific endpoint'),
       $this->newOption('amazon-ec2.access-key', 'string', null)
+        ->setLocked(true)
         ->setDescription(pht('Access key for Amazon EC2.')),
       $this->newOption('amazon-ec2.secret-key', 'string', null)
         ->setMasked(true)

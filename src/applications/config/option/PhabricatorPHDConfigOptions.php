@@ -42,6 +42,7 @@ final class PhabricatorPHDConfigOptions
             "mode with 'phd debug' are always launched in verbose mode. See ".
             "also 'phd.trace'.")),
       $this->newOption('phd.user', 'string', null)
+        ->setLocked(true)
         ->setSummary(pht("System user to run daemons as."))
         ->setDescription(
           pht(

@@ -14,6 +14,7 @@ final class PhabricatorSendGridConfigOptions
   public function getOptions() {
     return array(
       $this->newOption('sendgrid.api-user', 'string', null)
+        ->setLocked(true)
         ->setDescription(pht('SendGrid API username.')),
       $this->newOption('sendgrid.api-key', 'string', null)
         ->setMasked(true)

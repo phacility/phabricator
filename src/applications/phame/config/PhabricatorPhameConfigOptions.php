@@ -19,6 +19,7 @@ final class PhabricatorPhameConfigOptions
         array(
           'externals/skins/',
         ))
+        ->setLocked(true)
         ->setDescription(
           pht('List of directories where Phame will look for skins.')),
     );

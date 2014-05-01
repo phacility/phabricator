@@ -16,6 +16,7 @@ final class PhabricatorSecurityConfigOptions
 
     return array(
       $this->newOption('security.alternate-file-domain', 'string', null)
+        ->setLocked(true)
         ->setSummary(pht("Alternate domain to serve files from."))
         ->setDescription(
           pht(
@@ -43,6 +44,7 @@ final class PhabricatorSecurityConfigOptions
         'string',
         '[D\t~Y7eNmnQGJ;rnH6aF;m2!vJ8@v8C=Cs:aQS\.Qw')
         ->setMasked(true)
+        ->setLocked(true)
         ->setSummary(
           pht("Key for HMAC digests."))
         ->setDescription(
@@ -85,6 +87,7 @@ final class PhabricatorSecurityConfigOptions
         'string',
         '0b7ec0592e0a2829d8b71df2fa269b2c6172eca3')
         ->setMasked(true)
+        ->setLocked(true)
         ->setSummary(
           pht("Hashed with other inputs to generate CSRF tokens."))
         ->setDescription(
@@ -100,6 +103,7 @@ final class PhabricatorSecurityConfigOptions
          'string',
          '5ce3e7e8787f6e40dfae861da315a5cdf1018f12')
         ->setMasked(true)
+        ->setLocked(true)
         ->setSummary(
           pht("Hashed with other inputs to generate mail tokens."))
         ->setDescription(
@@ -191,17 +195,18 @@ final class PhabricatorSecurityConfigOptions
             "referrers to YouTube) and is pretty silly (but sort of ".
             "awesome).")),
         $this->newOption('security.allow-outbound-http', 'bool', true)
-        ->setBoolOptions(
-          array(
-            pht("Allow"),
-            pht("Disallow"),
-          ))
-        ->setSummary(
-          pht("Allow outbound HTTP requests"))
-        ->setDescription(
-          pht(
-            "If you enable this, you are allowing Phabricator to potentially ".
-            "make requests to external servers.")),
+          ->setBoolOptions(
+            array(
+              pht("Allow"),
+              pht("Disallow"),
+            ))
+          ->setLocked(true)
+          ->setSummary(
+            pht("Allow outbound HTTP requests"))
+          ->setDescription(
+            pht(
+              "If you enable this, you are allowing Phabricator to ".
+              "potentially make requests to external servers.")),
     );
   }
 

@@ -61,6 +61,7 @@ final class PhabricatorPhortuneConfigOptions
         ->setHidden(true)
         ->setDescription(pht('WePay access token.')),
       $this->newOption('phortune.wepay.account-id', 'string', null)
+        ->setLocked(true)
         ->setHidden(true)
         ->setDescription(pht('WePay account ID.')),
     );
