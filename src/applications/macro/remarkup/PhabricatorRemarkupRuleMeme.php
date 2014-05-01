@@ -36,10 +36,17 @@ final class PhabricatorRemarkupRuleMeme
         $options['src'].' <'.PhabricatorEnv::getProductionURI($uri).'>'.
         ($options['below'] != '' ? "\n\"{$options['below']}\"" : '');
     } else {
+      $alt_text = pht(
+        'Macro %s: %s %s',
+        $options['src'],
+        $options['above'],
+        $options['below']);
+
       $img = phutil_tag(
         'img',
         array(
           'src' => (string)$uri,
+          'alt' => $alt_text,
         ));
     }
 
