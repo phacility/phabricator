@@ -22,7 +22,6 @@ final class PhabricatorAuthFactorTOTP extends PhabricatorAuthFactor {
     AphrontRequest $request,
     PhabricatorUser $user) {
 
-
     $key = $request->getStr('totpkey');
     if (!strlen($key)) {
       // TODO: When the user submits a key, we should require that it be
@@ -69,8 +68,21 @@ final class PhabricatorAuthFactorTOTP extends PhabricatorAuthFactor {
     $form->appendInstructions(
       pht(
         'Launch the application on your phone, and add a new entry for '.
-        'this Phabricator install. When prompted, enter the key shown '.
-        'below into the application.'));
+        'this Phabricator install. When prompted, scan the QR code or '.
+        'manually enter the key shown below into the application.'));
+
+    $prod_uri = new PhutilURI(PhabricatorEnv::getProductionURI('/'));
+    $issuer = $prod_uri->getDomain();
+
+    $uri = urisprintf(
+      'otpauth://totp/%s:%s?secret=%s&issuer=%s',
+      $issuer,
+      $user->getUsername(),
+      $key,
+      $issuer);
+
+    $qrcode = $this->renderQRCode($uri);
+    $form->appendChild($qrcode);
 
     $form->appendChild(
       id(new AphrontFormStaticControl())
@@ -217,6 +229,49 @@ final class PhabricatorAuthFactorTOTP extends PhabricatorAuthFactor {
     $code = str_pad($code, 6, '0', STR_PAD_LEFT);
 
     return $code;
+  }
+
+
+  /**
+   * @phutil-external-symbol class QRcode
+   */
+  private function renderQRCode($uri) {
+    $root = dirname(phutil_get_library_root('phabricator'));
+    require_once $root.'/externals/phpqrcode/phpqrcode.php';
+
+    $lines = QRcode::text($uri);
+
+    $total_width = 240;
+    $cell_size = floor($total_width / count($lines));
+
+    $rows = array();
+    foreach ($lines as $line) {
+      $cells = array();
+      for ($ii = 0; $ii < strlen($line); $ii++) {
+        if ($line[$ii] == '1') {
+          $color = '#000';
+        } else {
+          $color = '#fff';
+        }
+
+        $cells[] = phutil_tag(
+          'td',
+          array(
+            'width' => $cell_size,
+            'height' => $cell_size,
+            'style' => 'background: '.$color,
+          ),
+          '');
+      }
+      $rows[] = phutil_tag('tr', array(), $cells);
+    }
+
+    return phutil_tag(
+      'table',
+      array(
+        'style' => 'margin: 24px auto;',
+      ),
+      $rows);
   }
 
 }
