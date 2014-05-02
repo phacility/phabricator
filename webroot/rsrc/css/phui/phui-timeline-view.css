@@ -280,8 +280,9 @@
 }
 
 .phui-timeline-shell.anchor-target {
-  background: rgba(255, 255, 0, 0.50);
-  box-shadow: 0 0 3px 6px rgba(255, 255, 0, 0.50);
+  background: {$lightyellow};
+  padding: 4px;
+  margin: -4px;
 }
 
 .phui-timeline-preview-header {
