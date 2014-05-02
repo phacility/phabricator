@@ -2,7 +2,9 @@
 
 abstract class PhabricatorApplicationTransaction
   extends PhabricatorLiskDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructableInterface {
 
   const TARGET_TEXT = 'text';
   const TARGET_HTML = 'html';
@@ -939,6 +941,34 @@ abstract class PhabricatorApplicationTransaction
   public function describeAutomaticCapability($capability) {
     // TODO: (T603) Exact policies are unclear here.
     return null;
+  }
+
+
+/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $comment_template = null;
+      try {
+        $comment_template = $this->getApplicationTransactionCommentObject();
+      } catch (Exception $ex) {
+        // Continue; no comments for these transactions.
+      }
+
+      if ($comment_template) {
+        $comments = $comment_template->loadAllWhere(
+          'transactionPHID = %s',
+          $this->getPHID());
+        foreach ($comments as $comment) {
+          $engine->destroyObject($comment);
+        }
+      }
+
+      $this->delete();
+    $this->saveTransaction();
   }
 
 

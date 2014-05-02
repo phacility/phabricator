@@ -5,7 +5,8 @@ final class DifferentialDiff
   implements
     PhabricatorPolicyInterface,
     HarbormasterBuildableInterface,
-    PhabricatorApplicationTransactionInterface {
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorDestructableInterface {
 
   protected $revisionID;
   protected $authorPHID;
@@ -103,24 +104,6 @@ final class DifferentialDiff
         $changeset->setDiffID($this->getID());
         $changeset->save();
       }
-    $this->saveTransaction();
-    return $ret;
-  }
-
-  public function delete() {
-    $this->openTransaction();
-      foreach ($this->loadChangesets() as $changeset) {
-        $changeset->delete();
-      }
-
-      $properties = id(new DifferentialDiffProperty())->loadAllWhere(
-        'diffID = %d',
-        $this->getID());
-      foreach ($properties as $prop) {
-        $prop->delete();
-      }
-
-      $ret = parent::delete();
     $this->saveTransaction();
     return $ret;
   }
@@ -374,6 +357,30 @@ final class DifferentialDiff
       return null;
     }
     return $this->getRevision()->getApplicationTransactionTemplate();
+  }
+
+
+/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $this->delete();
+
+      foreach ($this->loadChangesets() as $changeset) {
+        $changeset->delete();
+      }
+
+      $properties = id(new DifferentialDiffProperty())->loadAllWhere(
+        'diffID = %d',
+        $this->getID());
+      foreach ($properties as $prop) {
+        $prop->delete();
+      }
+
+    $this->saveTransaction();
   }
 
 }

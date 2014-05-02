@@ -41,20 +41,48 @@ final class PhabricatorDestructionEngine extends Phobject {
 
     if ($object_phid) {
       $this->destroyEdges($object_phid);
+
+      if ($object instanceof PhabricatorApplicationTransactionInterface) {
+        $template = $object->getApplicationTransactionTemplate();
+        $this->destroyTransactions($template, $object_phid);
+      }
     }
+
+    // TODO: PhabricatorFlaggableInterface
+    // TODO: PhabricatorTokenReceiverInterface
   }
 
   private function destroyEdges($src_phid) {
-    $edges = id(new PhabricatorEdgeQuery())
-      ->withSourcePHIDs(array($src_phid))
-      ->execute();
+    try {
+      $edges = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(array($src_phid))
+        ->execute();
+    } catch (Exception $ex) {
+      // This is (presumably) a "no edges for this PHID type" exception.
+      return;
+    }
 
     $editor = id(new PhabricatorEdgeEditor())
       ->setSuppressEvents(true);
-    foreach ($edges as $edge) {
-      $editor->removeEdge($edge['src'], $edge['type'], $edge['dst']);
+    foreach ($edges as $type => $type_edges) {
+      foreach ($type_edges as $src => $src_edges) {
+        foreach ($src_edges as $dst => $edge) {
+          $editor->removeEdge($edge['src'], $edge['type'], $edge['dst']);
+        }
+      }
     }
     $editor->save();
+  }
+
+  private function destroyTransactions(
+    PhabricatorApplicationTransaction $template,
+    $object_phid) {
+
+    $xactions = $template->loadAllWhere('objectPHID = %s', $object_phid);
+    foreach ($xactions as $xaction) {
+      $this->destroyObject($xaction);
+    }
+
   }
 
 }

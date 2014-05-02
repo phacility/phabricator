@@ -2982,6 +2982,7 @@ phutil_register_library_map(array(
       1 => 'PhabricatorPolicyInterface',
       2 => 'HarbormasterBuildableInterface',
       3 => 'PhabricatorApplicationTransactionInterface',
+      4 => 'PhabricatorDestructableInterface',
     ),
     'DifferentialDiffCreateController' => 'DifferentialController',
     'DifferentialDiffProperty' => 'DifferentialDAO',
@@ -3047,6 +3048,7 @@ phutil_register_library_map(array(
       6 => 'PhabricatorSubscribableInterface',
       7 => 'PhabricatorCustomFieldInterface',
       8 => 'PhabricatorApplicationTransactionInterface',
+      9 => 'PhabricatorDestructableInterface',
     ),
     'DifferentialRevisionDetailView' => 'AphrontView',
     'DifferentialRevisionEditController' => 'DifferentialController',
@@ -3915,12 +3917,14 @@ phutil_register_library_map(array(
     array(
       0 => 'PhabricatorLiskDAO',
       1 => 'PhabricatorPolicyInterface',
+      2 => 'PhabricatorDestructableInterface',
     ),
     'PhabricatorApplicationTransactionComment' =>
     array(
       0 => 'PhabricatorLiskDAO',
       1 => 'PhabricatorMarkupInterface',
       2 => 'PhabricatorPolicyInterface',
+      3 => 'PhabricatorDestructableInterface',
     ),
     'PhabricatorApplicationTransactionCommentEditController' => 'PhabricatorApplicationTransactionController',
     'PhabricatorApplicationTransactionCommentEditor' => 'PhabricatorEditor',
