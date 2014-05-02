@@ -7,7 +7,7 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => '94fe8187',
+    'core.pkg.css' => 'f6bd0a00',
     'core.pkg.js' => '417722ff',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => '4b8686e3',
@@ -23,7 +23,7 @@ return array(
     'rsrc/css/aphront/dialog-view.css' => 'c01d24b4',
     'rsrc/css/aphront/error-view.css' => '9f1d5518',
     'rsrc/css/aphront/lightbox-attachment.css' => '7acac05d',
-    'rsrc/css/aphront/list-filter-view.css' => 'ef989c67',
+    'rsrc/css/aphront/list-filter-view.css' => '2ae43867',
     'rsrc/css/aphront/multi-column.css' => '12f65921',
     'rsrc/css/aphront/notification.css' => 'ef2c9b34',
     'rsrc/css/aphront/pager-view.css' => '2e3539af',
@@ -490,7 +490,7 @@ return array(
     'aphront-dark-console-css' => '6378ef3d',
     'aphront-dialog-view-css' => 'c01d24b4',
     'aphront-error-view-css' => '9f1d5518',
-    'aphront-list-filter-view-css' => 'ef989c67',
+    'aphront-list-filter-view-css' => '2ae43867',
     'aphront-multi-column-view-css' => '12f65921',
     'aphront-pager-view-css' => '2e3539af',
     'aphront-panel-view-css' => '5846dfa2',

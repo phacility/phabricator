@@ -15,7 +15,7 @@
 }
 
 .device-phone .aphront-list-filter-wrap {
-  margin: 0 -2px;
+  margin: 0 8px;
 }
 
 .aphront-list-filter-view-content .phui-form-view {
@@ -62,9 +62,9 @@
 }
 
 .device .aphront-list-filter-reveal {
-  width: 98%;
+  width: auto;
   margin: auto;
-  padding: 8px;
+  padding: 4px 8px;
 }
 
 .aphront-list-filter-reveal a {
