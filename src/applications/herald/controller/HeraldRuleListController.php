@@ -47,6 +47,7 @@ final class HeraldRuleListController extends HeraldController
         ->setHref($this->getApplicationURI("rule/{$id}/"));
 
       if ($rule->isPersonalRule()) {
+        $item->addIcon('user', pht('Personal Rule'));
         $item->addByline(
           pht(
             'Authored by %s',
