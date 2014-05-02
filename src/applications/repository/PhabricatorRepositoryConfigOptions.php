@@ -17,6 +17,7 @@ final class PhabricatorRepositoryConfigOptions
   public function getOptions() {
     return array(
       $this->newOption('repository.default-local-path', 'string', '/var/repo/')
+        ->setLocked(true)
         ->setSummary(
           pht("Default location to store local copies of repositories."))
         ->setDescription(

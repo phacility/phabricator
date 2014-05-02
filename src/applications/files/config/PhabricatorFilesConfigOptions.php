@@ -118,6 +118,7 @@ final class PhabricatorFilesConfigOptions
             'Configure the largest file which will be put into the MySQL '.
             'storage engine.')),
       $this->newOption('storage.local-disk.path', 'string', null)
+        ->setLocked(true)
         ->setSummary(pht('Local storage disk path.'))
         ->setDescription(
           pht(
@@ -190,7 +191,7 @@ final class PhabricatorFilesConfigOptions
            pht('Disable')
          ))->setDescription(
              pht("This option will enable animated gif images".
-                  "to be set as profile pictures. The \'convert\' binary ".
+                  "to be set as profile pictures. The 'convert' binary ".
                   "should be available to the webserver for this to work")),
 
     );

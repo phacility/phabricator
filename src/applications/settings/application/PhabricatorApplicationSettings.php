@@ -46,6 +46,7 @@ final class PhabricatorApplicationSettings extends PhabricatorApplication {
         ->addClass('core-menu-item')
         ->setSelected($selected)
         ->setHref('/settings/')
+        ->setAural(pht('Settings'))
         ->setOrder(400);
       $items[] = $item;
     }

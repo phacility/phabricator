@@ -71,6 +71,19 @@
   margin: 12px 0 12px 30px;
 }
 
+.phabricator-remarkup .remarkup-list-with-checkmarks {
+  list-style: none;
+  margin-left: 18px;
+}
+
+.phabricator-remarkup .remarkup-list-with-checkmarks input {
+  margin-right: 2px;
+}
+
+.phabricator-remarkup .remarkup-list-with-checkmarks .remarkup-checked-item {
+  color: {$greytext};
+}
+
 .phabricator-remarkup ul ol,
 .phabricator-remarkup ul ul,
 .phabricator-remarkup ol ol,

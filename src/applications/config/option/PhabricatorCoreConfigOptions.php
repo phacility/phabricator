@@ -92,6 +92,9 @@ final class PhabricatorCoreConfigOptions
             pht('Install Beta Applications'),
             pht('Uninstall Beta Applications')
           ))
+        ->setSummary(
+          pht(
+            'Install applications which are still under development.'))
         ->setDescription(
           pht(
             "Phabricator includes 'Beta' applications which are in an early ".
@@ -109,7 +112,7 @@ final class PhabricatorCoreConfigOptions
             pht('Shenanigans'), // That should be interesting to translate. :P
           ))
         ->setSummary(
-          pht("Should Phabricator be serious?"))
+          pht("Allows you to remove levity and jokes from the UI."))
         ->setDescription(
           pht(
             'By default, Phabricator includes some flavor text in the UI, '.
@@ -135,6 +138,7 @@ final class PhabricatorCoreConfigOptions
             "The current value of PATH after configuration is applied is:\n\n".
             "  lang=text\n".
             "  %s", $path))
+        ->setLocked(true)
         ->addExample('/usr/local/bin', pht('Add One Path'))
         ->addExample("/usr/bin\n/usr/local/bin", pht('Add Multiple Paths')),
       $this->newOption('config.lock', 'set', array())

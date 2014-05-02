@@ -26,6 +26,11 @@ final class DiffusionSetPasswordPanel extends PhabricatorSettingsPanel {
     $viewer = $request->getUser();
     $user = $this->getUser();
 
+    $token = id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
+      $viewer,
+      $request,
+      '/settings/');
+
     $vcspassword = id(new PhabricatorRepositoryVCSPassword())
       ->loadOneWhere(
         'userPHID = %s',

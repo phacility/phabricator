@@ -332,69 +332,6 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     return $this;
   }
 
-  /**
-   * @task role
-   */
-  public function deleteUser(PhabricatorUser $user, $disable) {
-    $actor = $this->requireActor();
-
-    if (!$user->getID()) {
-      throw new Exception("User has not been created yet!");
-    }
-
-    if ($actor->getPHID() == $user->getPHID()) {
-      throw new Exception("You can not delete yourself!");
-    }
-
-    $user->openTransaction();
-      $externals = id(new PhabricatorExternalAccount())->loadAllWhere(
-        'userPHID = %s',
-        $user->getPHID());
-      foreach ($externals as $external) {
-        $external->delete();
-      }
-
-      $prefs = id(new PhabricatorUserPreferences())->loadAllWhere(
-        'userPHID = %s',
-        $user->getPHID());
-      foreach ($prefs as $pref) {
-        $pref->delete();
-      }
-
-      $profiles = id(new PhabricatorUserProfile())->loadAllWhere(
-        'userPHID = %s',
-        $user->getPHID());
-      foreach ($profiles as $profile) {
-        $profile->delete();
-      }
-
-      $keys = id(new PhabricatorUserSSHKey())->loadAllWhere(
-        'userPHID = %s',
-        $user->getPHID());
-      foreach ($keys as $key) {
-        $key->delete();
-      }
-
-      $emails = id(new PhabricatorUserEmail())->loadAllWhere(
-        'userPHID = %s',
-        $user->getPHID());
-      foreach ($emails as $email) {
-        $email->delete();
-      }
-
-      $log = PhabricatorUserLog::initializeNewLog(
-        $actor,
-        $user->getPHID(),
-        PhabricatorUserLog::ACTION_DELETE);
-      $log->save();
-
-      $user->delete();
-
-    $user->saveTransaction();
-
-    return $this;
-  }
-
 
 /* -(  Adding, Removing and Changing Email  )-------------------------------- */
 

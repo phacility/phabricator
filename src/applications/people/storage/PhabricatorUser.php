@@ -5,7 +5,8 @@ final class PhabricatorUser
   implements
     PhutilPerson,
     PhabricatorPolicyInterface,
-    PhabricatorCustomFieldInterface {
+    PhabricatorCustomFieldInterface,
+    PhabricatorDestructableInterface {
 
   const SESSION_TABLE = 'phabricator_session';
   const NAMETOKEN_TABLE = 'user_nametoken';
@@ -137,6 +138,10 @@ final class PhabricatorUser
   // To satisfy PhutilPerson.
   public function getSex() {
     return $this->sex;
+  }
+
+  public function getMonogram() {
+    return '@'.$this->getUsername();
   }
 
   public function getTranslation() {
@@ -813,5 +818,68 @@ EOBODY;
     $this->customFields = $fields;
     return $this;
   }
+
+
+/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $this->delete();
+
+      $externals = id(new PhabricatorExternalAccount())->loadAllWhere(
+        'userPHID = %s',
+        $this->getPHID());
+      foreach ($externals as $external) {
+        $external->delete();
+      }
+
+      $prefs = id(new PhabricatorUserPreferences())->loadAllWhere(
+        'userPHID = %s',
+        $this->getPHID());
+      foreach ($prefs as $pref) {
+        $pref->delete();
+      }
+
+      $profiles = id(new PhabricatorUserProfile())->loadAllWhere(
+        'userPHID = %s',
+        $this->getPHID());
+      foreach ($profiles as $profile) {
+        $profile->delete();
+      }
+
+      $keys = id(new PhabricatorUserSSHKey())->loadAllWhere(
+        'userPHID = %s',
+        $this->getPHID());
+      foreach ($keys as $key) {
+        $key->delete();
+      }
+
+      $emails = id(new PhabricatorUserEmail())->loadAllWhere(
+        'userPHID = %s',
+        $this->getPHID());
+      foreach ($emails as $email) {
+        $email->delete();
+      }
+
+      $sessions = id(new PhabricatorAuthSession())->loadAllWhere(
+        'userPHID = %s',
+        $this->getPHID());
+      foreach ($sessions as $session) {
+        $session->delete();
+      }
+
+      $factors = id(new PhabricatorAuthFactorConfig())->loadAllWhere(
+        'userPHID = %s',
+        $this->getPHID());
+      foreach ($factors as $factor) {
+        $factor->delete();
+      }
+
+    $this->saveTransaction();
+  }
+
 
 }

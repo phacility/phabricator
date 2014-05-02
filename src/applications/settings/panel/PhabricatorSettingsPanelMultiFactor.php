@@ -104,6 +104,18 @@ final class PhabricatorSettingsPanelMultiFactor
     $panel = new PHUIObjectBoxView();
     $header = new PHUIHeaderView();
 
+    $help_uri = PhabricatorEnv::getDoclink(
+      'User Guide: Multi-Factor Authentication');
+
+    $help_icon = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+      ->setSpriteIcon('lint-info');
+    $help_button = id(new PHUIButtonView())
+      ->setText(pht('Help'))
+      ->setHref($help_uri)
+      ->setTag('a')
+      ->setIcon($help_icon);
+
     $create_icon = id(new PHUIIconView())
       ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
       ->setSpriteIcon('new');
@@ -115,6 +127,7 @@ final class PhabricatorSettingsPanelMultiFactor
       ->setIcon($create_icon);
 
     $header->setHeader(pht('Authentication Factors'));
+    $header->addActionLink($help_button);
     $header->addActionLink($create_button);
 
     $panel->setHeader($header);
@@ -162,11 +175,12 @@ final class PhabricatorSettingsPanelMultiFactor
 
       $dialog->appendParagraph(
         pht(
-          'Adding an additional authentication factor increases the security '.
-          'of your account.'));
+          'Adding an additional authentication factor improves the security '.
+          'of your account. Choose the type of factor to add:'));
 
       $form
         ->appendChild($choice_control);
+
     } else {
       $dialog->addHiddenInput('type', $type);
 

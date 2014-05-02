@@ -60,6 +60,8 @@ final class PhabricatorApplicationTransactionCommentEditController
 
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
+      ->setSubmitURI(
+        $this->getApplicationURI('/transactions/edit/'.$xaction->getPHID().'/'))
       ->setTitle(pht('Edit Comment'));
 
     $dialog

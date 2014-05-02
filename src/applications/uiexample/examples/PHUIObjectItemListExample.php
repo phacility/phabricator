@@ -398,6 +398,14 @@ final class PHUIObjectItemListExample extends PhabricatorUIExample {
         ->setHref('#')
         ->setState(PHUIObjectItemView::STATE_NOTE));
 
+    $list->addItem(
+      id(new PHUIObjectItemView())
+        ->setObjectName('X1203')
+        ->setHeader(pht('Action In Progress'))
+        ->addAttribute(pht('Outlook fuzzy, try again later'))
+        ->setHref('#')
+        ->setState(PHUIObjectItemView::STATE_BUILD));
+
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText('Test Things')
       ->appendChild($list);

@@ -276,6 +276,12 @@ final class PhabricatorSettingsPanelSSHKeys
     $user = $this->getUser();
     $viewer = $request->getUser();
 
+    $token = id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
+      $viewer,
+      $request,
+      $this->getPanelURI());
+
+
     $is_self = ($user->getPHID() == $viewer->getPHID());
 
     if ($request->isFormPost()) {

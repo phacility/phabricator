@@ -82,7 +82,7 @@ abstract class PhabricatorAuthController extends PhabricatorController {
     $should_login = $event->getValue('shouldLogin');
     if ($should_login) {
       $session_key = id(new PhabricatorAuthSessionEngine())
-        ->establishSession($session_type, $user->getPHID());
+        ->establishSession($session_type, $user->getPHID(), $partial = true);
 
       // NOTE: We allow disabled users to login and roadblock them later, so
       // there's no check for users being disabled here.

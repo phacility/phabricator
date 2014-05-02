@@ -38,11 +38,17 @@ final class PhabricatorDashboardPanelViewController
       ->setHeader($header)
       ->addPropertyList($properties);
 
+    $rendered_panel = id(new PhabricatorDashboardPanelRenderingEngine())
+      ->setViewer($viewer)
+      ->setPanel($panel)
+      ->renderPanel();
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $box,
         $timeline,
+        $rendered_panel,
       ),
       array(
         'title' => $title,
@@ -80,6 +86,12 @@ final class PhabricatorDashboardPanelViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('View Standalone'))
+        ->setIcon('preview')
+        ->setHref($this->getApplicationURI("panel/render/{$id}/")));
+
     return $actions;
   }
 
@@ -94,9 +106,32 @@ final class PhabricatorDashboardPanelViewController
       $viewer,
       $panel);
 
+    $panel_type = $panel->getImplementation();
+    if ($panel_type) {
+      $type_name = $panel_type->getPanelTypeName();
+    } else {
+      $type_name = phutil_tag(
+        'em',
+        array(),
+        nonempty($panel->getPanelType(), pht('null')));
+    }
+
+    $properties->addProperty(
+      pht('Panel Type'),
+      $type_name);
+
     $properties->addProperty(
       pht('Editable By'),
       $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
+
+    $dashboard_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $panel->getPHID(),
+      PhabricatorEdgeConfig::TYPE_PANEL_HAS_DASHBOARD);
+    $this->loadHandles($dashboard_phids);
+
+    $properties->addProperty(
+      pht('Appears On'),
+      $this->renderHandlesForPHIDs($dashboard_phids));
 
     return $properties;
   }

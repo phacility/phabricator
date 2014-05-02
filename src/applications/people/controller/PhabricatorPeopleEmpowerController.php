@@ -23,6 +23,11 @@ final class PhabricatorPeopleEmpowerController
 
     $profile_uri = '/p/'.$user->getUsername().'/';
 
+    id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
+      $admin,
+      $request,
+      $profile_uri);
+
     if ($user->getPHID() == $admin->getPHID()) {
       return $this->newDialog()
         ->setTitle(pht('Your Way is Blocked'))

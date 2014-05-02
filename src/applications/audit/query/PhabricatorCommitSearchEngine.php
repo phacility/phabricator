@@ -12,7 +12,7 @@ final class PhabricatorCommitSearchEngine
 
     $saved->setParameter(
       'commitAuthorPHIDs',
-      $this->readUsersFromRequest($request, 'commitAuthorPHIDs'));
+      $this->readUsersFromRequest($request, 'authors'));
 
     $saved->setParameter(
       'auditStatus',
@@ -88,7 +88,7 @@ final class PhabricatorCommitSearchEngine
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/users/')
-          ->setName('commitAuthorPHIDs')
+          ->setName('authors')
           ->setLabel(pht('Commit Authors'))
           ->setValue(array_select_keys($handles, $commit_author_phids)))
        ->appendChild(

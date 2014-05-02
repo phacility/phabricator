@@ -20,6 +20,10 @@ abstract class PhabricatorController extends AphrontController {
     return false;
   }
 
+  public function shouldAllowPartialSessions() {
+    return false;
+  }
+
   public function shouldRequireEmailVerification() {
     return PhabricatorUserEmail::isEmailVerificationRequired();
   }
@@ -53,7 +57,8 @@ abstract class PhabricatorController extends AphrontController {
         // session. This is used to provide CSRF protection to logged-out users.
         $phsid = $session_engine->establishSession(
           PhabricatorAuthSession::TYPE_WEB,
-          null);
+          null,
+          $partial = false);
 
         // This may be a resource request, in which case we just don't set
         // the cookie.
@@ -133,13 +138,23 @@ abstract class PhabricatorController extends AphrontController {
       return $this->delegateToController($checker_controller);
     }
 
+    $auth_class = 'PhabricatorApplicationAuth';
+    $auth_application = PhabricatorApplication::getByClass($auth_class);
+
+    // Require partial sessions to finish login before doing anything.
+    if (!$this->shouldAllowPartialSessions()) {
+      if ($user->hasSession() &&
+          $user->getSession()->getIsPartial()) {
+        $login_controller = new PhabricatorAuthFinishController($request);
+        $this->setCurrentApplication($auth_application);
+        return $this->delegateToController($login_controller);
+      }
+    }
+
     if ($this->shouldRequireLogin()) {
       // This actually means we need either:
       //   - a valid user, or a public controller; and
       //   - permission to see the application.
-
-      $auth_class = 'PhabricatorApplicationAuth';
-      $auth_application = PhabricatorApplication::getByClass($auth_class);
 
       $allow_public = $this->shouldAllowPublic() &&
                       PhabricatorEnv::getEnvConfig('policy.allow-public');
@@ -393,6 +408,7 @@ abstract class PhabricatorController extends AphrontController {
 
       $crumbs[] = id(new PhabricatorCrumbView())
         ->setHref($this->getApplicationURI())
+        ->setAural($application->getName())
         ->setIcon($sprite);
     }
 

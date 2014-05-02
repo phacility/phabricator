@@ -31,10 +31,13 @@ final class PhabricatorApplicationHelp extends PhabricatorApplication {
     }
 
     if ($application && $application->getHelpURI()) {
+      $help_name = pht('%s Help', $application->getName());
+
       $item = id(new PHUIListItemView())
-        ->setName(pht('%s Help', $application->getName()))
+        ->setName($help_name)
         ->addClass('core-menu-item')
         ->setIcon('info-sm')
+        ->setAural($help_name)
         ->setOrder(200)
         ->setHref($application->getHelpURI());
       $items[] = $item;

@@ -5,12 +5,17 @@
  */
 final class PhabricatorDashboardPanel
   extends PhabricatorDashboardDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorCustomFieldInterface {
 
   protected $name;
+  protected $panelType;
   protected $viewPolicy;
   protected $editPolicy;
   protected $properties = array();
+
+  private $customFields = self::ATTACHABLE;
 
   public static function initializeNewPanel(PhabricatorUser $actor) {
     return id(new PhabricatorDashboardPanel())
@@ -46,6 +51,25 @@ final class PhabricatorDashboardPanel
     return 'W'.$this->getID();
   }
 
+  public function getImplementation() {
+    return idx(
+      PhabricatorDashboardPanelType::getAllPanelTypes(),
+      $this->getPanelType());
+  }
+
+  public function requireImplementation() {
+    $impl = $this->getImplementation();
+    if (!$impl) {
+      throw new Exception(
+        pht(
+          'Attempting to use a panel in a way that requires an '.
+          'implementation, but the panel implementation ("%s") is unknown to '.
+          'Phabricator.',
+          $this->getPanelType()));
+    }
+    return $impl;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -72,6 +96,27 @@ final class PhabricatorDashboardPanel
 
   public function describeAutomaticCapability($capability) {
     return null;
+  }
+
+
+/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+
+
+  public function getCustomFieldSpecificationForRole($role) {
+    return array();
+  }
+
+  public function getCustomFieldBaseClass() {
+    return 'PhabricatorDashboardPanelCustomField';
+  }
+
+  public function getCustomFields() {
+    return $this->assertAttached($this->customFields);
+  }
+
+  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
+    $this->customFields = $fields;
+    return $this;
   }
 
 }

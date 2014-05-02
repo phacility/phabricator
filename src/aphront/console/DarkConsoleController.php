@@ -16,6 +16,10 @@ final class DarkConsoleController extends PhabricatorController {
     return !PhabricatorEnv::getEnvConfig('darkconsole.always-on');
   }
 
+  public function shouldAllowPartialSessions() {
+    return true;
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();

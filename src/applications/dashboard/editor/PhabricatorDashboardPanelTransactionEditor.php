@@ -8,6 +8,7 @@ final class PhabricatorDashboardPanelTransactionEditor
 
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
+    $types[] = PhabricatorTransactions::TYPE_EDGE;
 
     $types[] = PhabricatorDashboardPanelTransaction::TYPE_NAME;
 

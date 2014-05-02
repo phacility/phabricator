@@ -34,9 +34,10 @@ final class PhabricatorMainMenuView extends AphrontView {
     $alerts = array();
     $search_button = '';
     $app_button = '';
+    $aural = null;
 
     if ($user->isLoggedIn() && $user->isUserActivated()) {
-      list($menu, $dropdowns) = $this->renderNotificationMenu();
+      list($menu, $dropdowns, $aural) = $this->renderNotificationMenu();
       $alerts[] = $menu;
       $menus = array_merge($menus, $dropdowns);
       $app_button = $this->renderApplicationMenuButton($header_id);
@@ -51,12 +52,22 @@ final class PhabricatorMainMenuView extends AphrontView {
     $search_menu = $this->renderPhabricatorSearchMenu();
 
     if ($alerts) {
-      $alerts = phutil_tag(
+      $alerts = javelin_tag(
         'div',
         array(
           'class' => 'phabricator-main-menu-alerts',
+          'aural' => false,
         ),
         $alerts);
+    }
+
+    if ($aural) {
+      $aural = javelin_tag(
+        'span',
+        array(
+          'aural' => true,
+        ),
+        phutil_implode_html(' ', $aural));
     }
 
     $application_menu = $this->renderApplicationMenu();
@@ -76,6 +87,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         $search_button,
         $this->renderPhabricatorLogo(),
         $alerts,
+        $aural,
         $application_menu,
         $search_menu,
         $menus,
@@ -236,12 +248,20 @@ final class PhabricatorMainMenuView extends AphrontView {
         'class' => 'phabricator-main-menu-logo',
         'href'  => '/',
       ),
-      phutil_tag(
-        'span',
-        array(
-          'class' => 'sprite-menu menu-logo-image '.$class,
-        ),
-        ''));
+      array(
+        javelin_tag(
+          'span',
+          array(
+            'aural' => true,
+          ),
+          pht('Home')),
+        phutil_tag(
+          'span',
+          array(
+            'class' => 'sprite-menu menu-logo-image '.$class,
+          ),
+          ''),
+      ));
   }
 
   private function renderNotificationMenu() {
@@ -255,6 +275,8 @@ final class PhabricatorMainMenuView extends AphrontView {
       'sprite-menu',
       'alert-notifications',
     );
+
+    $aural = array();
 
     $message_tag = '';
     $message_notification_dropdown = '';
@@ -270,6 +292,20 @@ final class PhabricatorMainMenuView extends AphrontView {
         ->withParticipationStatus($unread_status)
         ->execute();
       $message_count_number = idx($unread, $user->getPHID(), 0);
+
+      if ($message_count_number) {
+        $aural[] = phutil_tag(
+          'a',
+          array(
+            'href' => '/conpherence/',
+          ),
+          pht(
+            '%s unread messages.',
+            new PhutilNumber($message_count_number)));
+      } else {
+        $aural[] = pht('No messages.');
+      }
+
       if ($message_count_number > 999) {
         $message_count_number = "\xE2\x88\x9E";
       }
@@ -332,6 +368,19 @@ final class PhabricatorMainMenuView extends AphrontView {
 
     $count_number = id(new PhabricatorFeedStoryNotification())
       ->countUnread($user);
+
+    if ($count_number) {
+      $aural[] = phutil_tag(
+        'a',
+        array(
+          'href' => '/notification/',
+        ),
+        pht(
+          '%s unread notifications.',
+          new PhutilNumber($count_number)));
+    } else {
+      $aural[] = pht('No notifications.');
+    }
 
     if ($count_number > 999) {
       $count_number = "\xE2\x88\x9E";
@@ -397,8 +446,12 @@ final class PhabricatorMainMenuView extends AphrontView {
     }
 
     return array(
-      hsprintf('%s%s', $bubble_tag, $message_tag),
-      $dropdowns
+      array(
+        $bubble_tag,
+        $message_tag,
+      ),
+      $dropdowns,
+      $aural,
     );
   }
 

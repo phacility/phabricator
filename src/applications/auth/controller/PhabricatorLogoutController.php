@@ -17,6 +17,10 @@ final class PhabricatorLogoutController
     return false;
   }
 
+  public function shouldAllowPartialSessions() {
+    return true;
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();

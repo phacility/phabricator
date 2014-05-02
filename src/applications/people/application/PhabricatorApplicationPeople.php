@@ -120,6 +120,7 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
         ->setName($user->getUsername())
         ->setHref('/p/'.$user->getUsername().'/')
         ->addClass('core-menu-item')
+        ->setAural(pht('Profile'))
         ->setOrder(100);
 
       $classes = array(

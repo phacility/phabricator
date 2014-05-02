@@ -9,7 +9,8 @@ final class DifferentialRevision extends DifferentialDAO
     HarbormasterBuildableInterface,
     PhabricatorSubscribableInterface,
     PhabricatorCustomFieldInterface,
-    PhabricatorApplicationTransactionInterface {
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorDestructableInterface {
 
   protected $title = '';
   protected $originalTitle;
@@ -172,45 +173,6 @@ final class DifferentialRevision extends DifferentialDAO
       $this->mailKey = Filesystem::readRandomCharacters(40);
     }
     return parent::save();
-  }
-
-  public function delete() {
-    $this->openTransaction();
-    $diffs = id(new DifferentialDiffQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withRevisionIDs(array($this->getID()))
-      ->execute();
-      foreach ($diffs as $diff) {
-        $diff->delete();
-      }
-
-      $conn_w = $this->establishConnection('w');
-
-      queryfx(
-        $conn_w,
-        'DELETE FROM %T WHERE revisionID = %d',
-        self::TABLE_COMMIT,
-        $this->getID());
-
-      $inlines = id(new DifferentialInlineCommentQuery())
-        ->withRevisionIDs(array($this->getID()))
-        ->execute();
-      foreach ($inlines as $inline) {
-        $inline->delete();
-      }
-
-      // we have to do paths a little differentally as they do not have
-      // an id or phid column for delete() to act on
-      $dummy_path = new DifferentialAffectedPath();
-      queryfx(
-        $conn_w,
-        'DELETE FROM %T WHERE revisionID = %d',
-        $dummy_path->getTableName(),
-        $this->getID());
-
-      $result = parent::delete();
-    $this->saveTransaction();
-    return $result;
   }
 
   public function loadRelationships() {
@@ -475,6 +437,55 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function getApplicationTransactionTemplate() {
     return new DifferentialTransaction();
+  }
+
+
+/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $diffs = id(new DifferentialDiffQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withRevisionIDs(array($this->getID()))
+        ->execute();
+      foreach ($diffs as $diff) {
+        $engine->destroyObject($diff);
+      }
+
+      $conn_w = $this->establishConnection('w');
+
+      queryfx(
+        $conn_w,
+        'DELETE FROM %T WHERE revisionID = %d',
+        self::TABLE_COMMIT,
+        $this->getID());
+
+      try {
+        $inlines = id(new DifferentialInlineCommentQuery())
+          ->withRevisionIDs(array($this->getID()))
+          ->execute();
+        foreach ($inlines as $inline) {
+          $inline->delete();
+        }
+      } catch (PhabricatorEmptyQueryException $ex) {
+        // TODO: There's still some funky legacy wrapping going on here, and
+        // we might catch a raw query exception.
+      }
+
+      // we have to do paths a little differentally as they do not have
+      // an id or phid column for delete() to act on
+      $dummy_path = new DifferentialAffectedPath();
+      queryfx(
+        $conn_w,
+        'DELETE FROM %T WHERE revisionID = %d',
+        $dummy_path->getTableName(),
+        $this->getID());
+
+      $this->delete();
+    $this->saveTransaction();
   }
 
 }

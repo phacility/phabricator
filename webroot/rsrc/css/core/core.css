@@ -123,3 +123,29 @@ hr {
   background: #bbbbbb;
   border: none;
 }
+
+.aural-only {
+  position: absolute !important;
+  clip: rect(1px, 1px, 1px, 1px);
+}
+
+.visual-only {
+  /* These elements are hidden by the 'aria-hidden' attribute. */
+}
+
+.audible .aural-only {
+  clip: auto;
+  background: #006699;
+  color: #ffffff;
+}
+
+.audible .aural-only a {
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.audible .visual-only {
+  position: absolute !important;
+  background: #990066;
+  opacity: 0.25;
+}

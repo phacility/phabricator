@@ -79,7 +79,6 @@ final class PhabricatorAuditListView extends AphrontView {
 
   public function render() {
     $list = $this->buildList();
-    $list->setCards(true);
     $list->setFlush(true);
     return $list->render();
   }
@@ -92,6 +91,7 @@ final class PhabricatorAuditListView extends AphrontView {
     $rowc = array();
 
     $list = new PHUIObjectItemListView();
+    $list->setCards(true);
     foreach ($this->commits as $commit) {
       $commit_phid = $commit->getPHID();
       $commit_handle = $this->getHandle($commit_phid);

@@ -7,6 +7,16 @@ final class PhabricatorCrumbView extends AphrontView {
   private $icon;
   private $isLastCrumb;
   private $workflow;
+  private $aural;
+
+  public function setAural($aural) {
+    $this->aural = $aural;
+    return $this;
+  }
+
+  public function getAural() {
+    return $this->aural;
+  }
 
   public function setWorkflow($workflow) {
     $this->workflow = $workflow;
@@ -46,6 +56,16 @@ final class PhabricatorCrumbView extends AphrontView {
       'phabricator-crumb-view',
     );
 
+    $aural = null;
+    if ($this->aural !== null) {
+      $aural = javelin_tag(
+        'span',
+        array(
+          'aural' => true,
+        ),
+        $this->aural);
+    }
+
     $icon = null;
     if ($this->icon) {
       $classes[] = 'phabricator-crumb-has-icon';
@@ -84,6 +104,6 @@ final class PhabricatorCrumbView extends AphrontView {
           'href'  => $this->href,
           'class' => implode(' ', $classes),
         ),
-        array($icon, $name, $divider));
+        array($aural, $icon, $name, $divider));
   }
 }

@@ -23,6 +23,11 @@ final class PhabricatorSettingsPanelConduit
     $user = $this->getUser();
     $viewer = $request->getUser();
 
+    id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
+      $viewer,
+      $request,
+      '/settings/');
+
     if ($request->isFormPost()) {
       if (!$request->isDialogFormPost()) {
         $dialog = new AphrontDialogView();

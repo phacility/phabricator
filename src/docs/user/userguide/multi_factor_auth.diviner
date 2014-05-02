@@ -1,0 +1,134 @@
+@title User Guide: Multi-Factor Authentication
+@group userguide
+
+Explains how multi-factor authentication works in Phabricator.
+
+Overview
+========
+
+Multi-factor authentication allows you to add additional credentials to your
+account to make it more secure.
+
+This sounds complicated, but in most cases it just means that Phabricator will
+make sure you have your mobile phone (by sending you a text message or having
+you enter a code from a mobile application) before allowing you to log in or
+take certain "high security" actions (like changing your password).
+
+Requiring you to prove you're really you by asking for something you know (your
+password) //and// something you have (your mobile phone) makes it much harder
+for attackers to access your account. The phone is an additional "factor" which
+protects your account from attacks.
+
+Requiring re-authentication before performing high security actions further
+limits the damage an attacker can do even if they manage to compromise a
+login session.
+
+
+How Multi-Factor Authentication Works
+=====================================
+
+If you've configured multi-factor authentication and try to log in to your
+account or take certain high security actions (like changing your password),
+you'll be stopped and asked to enter additional credentials.
+
+Usually, this means you'll receive an SMS with a security code on your phone, or
+you'll open an app on your phone which will show you a security code.
+In both cases, you'll enter the security code into Phabricator.
+
+If you're logging in, Phabricator will log you in after you enter the code.
+
+If you're taking a high security action, Phabricator will put your account in
+"high security" mode for a few minutes. In this mode, you can take high security
+actions like changing passwords or SSH keys freely without entering any more
+credentials. You can explicitly leave high security once you're done performing
+account management, or your account will naturally return to normal security
+after a short period of time.
+
+While your account is in high security, you'll see a notification on screen
+with instructions for returning to normal security.
+
+
+Configuring Multi-Factor Authentication
+=======================================
+
+To manage authentication factors for your account, go to
+Settings > Multi-Factor Auth. You can use this control panel to add or remove
+authentication factors from your account.
+
+You can also rename a factor by clicking the name. This can help you identify
+factors if you have several similar factors attached to your account.
+
+For a description of the available factors, see the next few sections.
+
+
+Factor: Mobile Phone App (TOTP)
+===============================
+
+TOTP stands for "Time-based One-Time Password". This factor operates by having
+you enter security codes from your mobile phone into Phabricator. The codes
+change every 30 seconds, so you will need to have your phone with you in order
+to enter them.
+
+To use this factor, you'll download an application onto your smartphone which
+can compute these codes. Two applications which work well are **Authy** and
+**Google Authenticator**. These applications are free, and you can find and
+download them from the appropriate store on your device.
+
+Your company may have a preferred application, or may use some other
+application, so check any in-house documentation for details. In general, any
+TOTP application should work properly.
+
+After you've downloaded the application onto your phone, use the Phabricator
+settings panel to add a factor to your account. You'll be prompted to enter a
+master key into your phone, and then read a security code from your phone and
+type it into Phabricator.
+
+Later, when you need to authenticate, you'll follow this same process: launch
+the application, read the security code, and type it into Phabricator. This will
+prove you have your phone.
+
+Don't lose your phone! You'll need it to log into Phabricator in the future.
+
+
+Recovering from Lost Factors
+============================
+
+If you've lost a factor associated with your account (for example, your phone
+has been lost or damaged), an administrator can strip the factor off your
+account so that you can log in without it.
+
+IMPORTANT: Before stripping factors from a user account, be absolutely certain
+that the user is who they claim to be!
+
+It is important to verify the user is who they claim they are before stripping
+factors because an attacker might pretend to be a user who has lost their phone
+in order to bypass multi-factor authentication. It is much easier for a typical
+attacker to spoof an email with a sad story in it than it is for a typical
+attacker to gain access to a mobile phone.
+
+A good way to verify user identity is to meet them in person and have them
+solemnly swear an oath that they lost their phone and are very sorry and
+definitely won't do it again. You can also work out a secret handshake in
+advance and require them to perform it. But no matter what you do, be certain
+the user (not an attacker //pretending// to be the user) is really the one
+making the request before stripping factors.
+
+After verifying identity, administrators can strip authentication factors from
+user accounts using the `bin/auth strip` command. For example, to strip all
+factors from the account of a user who has lost their phone, run this command:
+
+```lang=console
+# Strip all factors from a given user account.
+phabricator/ $ ./bin/auth strip --user <username> --all-types
+```
+
+You can run `bin/auth help strip` for more detail and all available flags and
+arguments.
+
+This command can selectively strip types of factors. You can use
+`bin/auth list-factors` for a list of available factor types.
+
+```lang=console
+# Show supported factor types.
+phabricator/ $ ./bin/auth list-factors
+```

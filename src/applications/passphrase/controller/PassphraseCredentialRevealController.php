@@ -29,6 +29,11 @@ final class PassphraseCredentialRevealController
 
     $view_uri = '/K'.$credential->getID();
 
+    $token = id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
+      $viewer,
+      $request,
+      $view_uri);
+
     if ($request->isFormPost()) {
       if ($credential->getSecret()) {
         $body = id(new PHUIFormLayoutView())

@@ -32,6 +32,7 @@ final class PhabricatorExtendingPhabricatorConfigOptions
          'aphront.default-application-configuration-class',
          'class',
          'AphrontDefaultApplicationConfiguration')
+        ->setLocked(true)
         ->setBaseClass('AphrontApplicationConfiguration')
         // TODO: This could probably use some better documentation.
         ->setDescription(pht("Application configuration class.")),

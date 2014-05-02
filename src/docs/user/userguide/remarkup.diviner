@@ -158,6 +158,19 @@ As expected, this produces:
 -- Branch
 --- Twig
 
+You can add checkboxes to items by prefacing them with `[ ]` or `[X]`, like
+this:
+
+```
+  - [X] Preheat oven to 450 degrees.
+  - [ ] Zest 35 lemons.
+```
+
+When rendered, this produces:
+
+  - [X] Preheat oven to 450 degrees.
+  - [ ] Zest 35 lemons.
+
 Make **code blocks** by indenting two spaces:
 
   f(x, y);
@@ -347,7 +360,7 @@ from clipboard into the text area.
 
 You can set file display options like this:
 
-  {F123, layout=left, float, size=full}
+  {F123, layout=left, float, size=full, alt="a duckling"}
 
 Valid options are:
 
@@ -360,6 +373,7 @@ Valid options are:
     text
   - **width** Scale image to a specific width.
   - **height** Scale image to a specific height.
+  - **alt** Provide alternate text for assistive technologies.
 
 == Embedding Countdowns
 
