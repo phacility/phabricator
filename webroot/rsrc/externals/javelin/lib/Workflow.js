@@ -107,26 +107,39 @@ JX.install('Workflow', {
         JX.Workflow._pop();
       } else {
         var form = event.getNode('jx-dialog');
+        JX.Workflow._dosubmit(form, t);
+      }
+    },
+    _onsyntheticsubmit : function(e) {
+      if (JX.Stratcom.pass()) {
+        return;
+      }
+      if (JX.Workflow._disabled) {
+        return;
+      }
+      e.prevent();
+      var form = e.getNode('jx-dialog');
+      var button = JX.DOM.find(form, 'button', '__default__');
+      JX.Workflow._dosubmit(form, button);
+    },
+    _dosubmit : function(form, button) {
+      // Issue a DOM event first, so form-oriented handlers can act.
+      var dom_event = JX.DOM.invoke(form, 'didWorkflowSubmit');
+      if (dom_event.getPrevented()) {
+        return;
+      }
 
-        // Issue a DOM event first, so form-oriented handlers can act.
-        var dom_event = JX.DOM.invoke(form, 'didWorkflowSubmit');
-        if (dom_event.getPrevented()) {
-          return;
-        }
+      var data = JX.DOM.convertFormToListOfPairs(form);
+      data.push([button.name, button.value || true]);
 
-        var data = JX.DOM.convertFormToListOfPairs(form);
-
-        data.push([t.name, t.value || true]);
-
-        var active = JX.Workflow._getActiveWorkflow();
-        var e = active.invoke('submit', {form: form, data: data});
-        if (!e.getStopped()) {
-          active._destroy();
-          active
-            .setURI(form.getAttribute('action') || active.getURI())
-            .setDataWithListOfPairs(data)
-            .start();
-        }
+      var active = JX.Workflow._getActiveWorkflow();
+      var e = active.invoke('submit', {form: form, data: data});
+      if (!e.getStopped()) {
+        active._destroy();
+        active
+          .setURI(form.getAttribute('action') || active.getURI())
+          .setDataWithListOfPairs(data)
+          .start();
       }
     },
     _getActiveWorkflow : function() {
@@ -155,6 +168,11 @@ JX.install('Workflow', {
           'click',
           [['jx-workflow-button'], ['tag:button']],
           JX.Workflow._onbutton);
+        JX.DOM.listen(
+          this._root,
+          'didSyntheticSubmit',
+          [],
+          JX.Workflow._onsyntheticsubmit);
         document.body.appendChild(this._root);
         var d = JX.Vector.getDim(this._root);
         var v = JX.Vector.getViewport();
