@@ -14,8 +14,9 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
   public function render() {
     $user = $this->user;
 
-    $target_id  = celerity_generate_unique_node_id();
+    $target_id = celerity_generate_unique_node_id();
     $search_id = $this->getID();
+    $button_id = celerity_generate_unique_node_id();
 
     $input = phutil_tag(
       'input',
@@ -39,6 +40,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
       array(
         'id'          => $target_id,
         'input'       => $search_id,
+        'button'      => $button_id,
         'src'         => '/typeahead/common/mainsearch/',
         'limit'       => 10,
         'placeholder' => pht('Search'),
@@ -60,7 +62,10 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
       ),
       phutil_tag_div('phabricator-main-menu-search-container', array(
         $input,
-        phutil_tag('button', array(), pht('Search')),
+        phutil_tag(
+          'button',
+          array('id' => $button_id),
+          pht('Search')),
         $primary_input,
         $target,
       )));

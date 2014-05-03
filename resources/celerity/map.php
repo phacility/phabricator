@@ -8,7 +8,7 @@ return array(
   'names' =>
   array(
     'core.pkg.css' => 'afe6e16d',
-    'core.pkg.js' => '417722ff',
+    'core.pkg.js' => 'c415c382',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => '4b8686e3',
     'differential.pkg.js' => '11a5b750',
@@ -472,7 +472,7 @@ return array(
     'rsrc/js/core/behavior-refresh-csrf.js' => 'c4b31646',
     'rsrc/js/core/behavior-remarkup-preview.js' => 'f7379f45',
     'rsrc/js/core/behavior-reveal-content.js' => '8f24abfc',
-    'rsrc/js/core/behavior-search-typeahead.js' => 'f6b56f7a',
+    'rsrc/js/core/behavior-search-typeahead.js' => 'd8469741',
     'rsrc/js/core/behavior-select-on-click.js' => '0e34ca02',
     'rsrc/js/core/behavior-toggle-class.js' => 'a82a7769',
     'rsrc/js/core/behavior-tokenizer.js' => 'b3a4b884',
@@ -605,7 +605,7 @@ return array(
     'javelin-behavior-phabricator-oncopy' => 'c3e218fe',
     'javelin-behavior-phabricator-remarkup-assist' => 'c021950a',
     'javelin-behavior-phabricator-reveal-content' => '8f24abfc',
-    'javelin-behavior-phabricator-search-typeahead' => 'f6b56f7a',
+    'javelin-behavior-phabricator-search-typeahead' => 'd8469741',
     'javelin-behavior-phabricator-show-all-transactions' => '7c273581',
     'javelin-behavior-phabricator-tooltips' => '48db4145',
     'javelin-behavior-phabricator-transaction-comment-form' => '9084a36f',
@@ -1768,6 +1768,16 @@ return array(
       3 => 'javelin-dom',
       4 => 'phabricator-keyboard-shortcut',
     ),
+    'd8469741' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-typeahead-ondemand-source',
+      2 => 'javelin-typeahead',
+      3 => 'javelin-dom',
+      4 => 'javelin-uri',
+      5 => 'javelin-util',
+      6 => 'javelin-stratcom',
+    ),
     'd8e135db' =>
     array(
       0 => 'javelin-behavior',
@@ -1897,16 +1907,6 @@ return array(
       1 => 'javelin-reactornode',
       2 => 'javelin-util',
       3 => 'javelin-reactor',
-    ),
-    'f6b56f7a' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-typeahead-ondemand-source',
-      2 => 'javelin-typeahead',
-      3 => 'javelin-dom',
-      4 => 'javelin-uri',
-      5 => 'javelin-util',
-      6 => 'javelin-stratcom',
     ),
     'f7379f45' =>
     array(
