@@ -41,6 +41,7 @@ final class PhabricatorApplicationPassphrase extends PhabricatorApplication {
         'destroy/(?P<id>\d+)/' => 'PassphraseCredentialDestroyController',
         'reveal/(?P<id>\d+)/' => 'PassphraseCredentialRevealController',
         'public/(?P<id>\d+)/' => 'PassphraseCredentialPublicController',
+        'lock/(?P<id>\d+)/' => 'PassphraseCredentialLockController',
       ));
   }
 

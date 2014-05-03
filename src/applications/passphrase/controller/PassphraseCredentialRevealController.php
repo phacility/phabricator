@@ -33,6 +33,17 @@ final class PassphraseCredentialRevealController
       $viewer,
       $request,
       $view_uri);
+    $is_locked = $credential->getIsLocked();
+
+    if ($is_locked) {
+      return $this->newDialog()
+        ->setUser($viewer)
+        ->setTitle(pht('Credential is locked'))
+        ->appendChild(
+          pht(
+            'This credential can not be shown, because it is locked.'))
+        ->addCancelButton($view_uri);
+    }
 
     if ($request->isFormPost()) {
       if ($credential->getSecret()) {
@@ -73,6 +84,7 @@ final class PassphraseCredentialRevealController
     }
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+
     if ($is_serious) {
       $body = pht(
         'The secret associated with this credential will be shown in plain '.
@@ -80,19 +92,16 @@ final class PassphraseCredentialRevealController
     } else {
       $body = pht(
         'The secret associated with this credential will be shown in plain '.
-        'text on your screen. Before continuing, wrap your arms around your '.
-        'monitor to create a human shield, keeping it safe from prying eyes. '.
-        'Protect company secrets!');
+        'text on your screen. Before continuing, wrap your arms around '.
+        'your monitor to create a human shield, keeping it safe from '.
+        'prying eyes. Protect company secrets!');
     }
-
-    $dialog = id(new AphrontDialogView())
+    return $this->newDialog()
       ->setUser($viewer)
       ->setTitle(pht('Really show secret?'))
       ->appendChild($body)
       ->addSubmitButton(pht('Show Secret'))
       ->addCancelButton($view_uri);
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
 }

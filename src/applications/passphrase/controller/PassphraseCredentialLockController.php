@@ -1,6 +1,6 @@
 <?php
 
-final class PassphraseCredentialDestroyController
+final class PassphraseCredentialLockController
   extends PassphraseController {
 
   private $id;
@@ -34,11 +34,21 @@ final class PassphraseCredentialDestroyController
 
     $view_uri = '/K'.$credential->getID();
 
-    if ($request->isFormPost()) {
+    if ($credential->getIsLocked()) {
+      return $this->newDialog()
+        ->setTitle(pht('Credential Already Locked'))
+        ->appendChild(
+          pht(
+            'This credential has been locked and the secret is '.
+            'hidden forever. Anything relying on this credential will '.
+            'still function. This operation can not be undone.'))
+        ->addCancelButton($view_uri, pht('Close'));
+    }
 
+    if ($request->isFormPost()) {
       $xactions = array();
       $xactions[] = id(new PassphraseCredentialTransaction())
-        ->setTransactionType(PassphraseCredentialTransaction::TYPE_DESTROY)
+        ->setTransactionType(PassphraseCredentialTransaction::TYPE_LOCK)
         ->setNewValue(1);
 
       $editor = id(new PassphraseCredentialTransactionEditor())
@@ -51,14 +61,13 @@ final class PassphraseCredentialDestroyController
     }
 
     return $this->newDialog()
-      ->setUser($viewer)
-      ->setTitle(pht('Really destroy credential?'))
+      ->setTitle(pht('Really lock credential?'))
       ->appendChild(
         pht(
-          'This credential will be deactivated and the secret will be '.
-          'unrecoverably destroyed. Anything relying on this credential '.
-          'will cease to function. This operation can not be undone.'))
-      ->addSubmitButton(pht('Destroy Credential'))
+          'This credential will be locked and the secret will be '.
+          'hidden forever. Anything relying on this credential will '.
+          'still function. This operation can not be undone.'))
+      ->addSubmitButton(pht('Lock Credential'))
       ->addCancelButton($view_uri);
   }
 

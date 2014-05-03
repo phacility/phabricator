@@ -15,6 +15,7 @@ final class PassphraseCredentialTransactionEditor
     $types[] = PassphraseCredentialTransaction::TYPE_SECRET_ID;
     $types[] = PassphraseCredentialTransaction::TYPE_DESTROY;
     $types[] = PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET;
+    $types[] = PassphraseCredentialTransaction::TYPE_LOCK;
 
     return $types;
   }
@@ -35,7 +36,9 @@ final class PassphraseCredentialTransactionEditor
       case PassphraseCredentialTransaction::TYPE_SECRET_ID:
         return $object->getSecretID();
       case PassphraseCredentialTransaction::TYPE_DESTROY:
-        return $object->getIsDestroyed();
+        return (int)$object->getIsDestroyed();
+      case PassphraseCredentialTransaction::TYPE_LOCK:
+        return (int)$object->getIsLocked();
       case PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET:
         return null;
     }
@@ -51,9 +54,11 @@ final class PassphraseCredentialTransactionEditor
       case PassphraseCredentialTransaction::TYPE_DESCRIPTION:
       case PassphraseCredentialTransaction::TYPE_USERNAME:
       case PassphraseCredentialTransaction::TYPE_SECRET_ID:
-      case PassphraseCredentialTransaction::TYPE_DESTROY:
       case PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET:
         return $xaction->getNewValue();
+      case PassphraseCredentialTransaction::TYPE_DESTROY:
+      case PassphraseCredentialTransaction::TYPE_LOCK:
+        return (int)$xaction->getNewValue();
     }
     return parent::getCustomTransactionNewValue($object, $xaction);
   }
@@ -98,6 +103,9 @@ final class PassphraseCredentialTransactionEditor
         return;
       case PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET:
         return;
+      case PassphraseCredentialTransaction::TYPE_LOCK:
+        $object->setIsLocked((int)$xaction->getNewValue());
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -114,6 +122,7 @@ final class PassphraseCredentialTransactionEditor
       case PassphraseCredentialTransaction::TYPE_SECRET_ID:
       case PassphraseCredentialTransaction::TYPE_DESTROY:
       case PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET:
+      case PassphraseCredentialTransaction::TYPE_LOCK:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return;

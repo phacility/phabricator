@@ -85,6 +85,15 @@ final class PassphraseCredentialViewController extends PassphraseController {
 
     $id = $credential->getID();
 
+    $is_locked = $credential->getIsLocked();
+    if ($is_locked) {
+      $credential_lock_text = pht('Locked Permanently');
+      $credential_lock_icon = 'lock';
+    } else {
+      $credential_lock_text = pht('Lock Permanently');
+      $credential_lock_icon = 'unlock';
+    }
+
     $actions = id(new PhabricatorActionListView())
       ->setObjectURI('/K'.$id)
       ->setUser($viewer);
@@ -116,7 +125,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
           ->setName(pht('Show Secret'))
           ->setIcon('preview')
           ->setHref($this->getApplicationURI("reveal/{$id}/"))
-          ->setDisabled(!$can_edit)
+          ->setDisabled(!$can_edit || $is_locked)
           ->setWorkflow(true));
 
       if ($type->hasPublicKey()) {
@@ -125,8 +134,17 @@ final class PassphraseCredentialViewController extends PassphraseController {
             ->setName(pht('Show Public Key'))
             ->setIcon('download-alt')
             ->setHref($this->getApplicationURI("public/{$id}/"))
-            ->setWorkflow(true));
+            ->setWorkflow(true)
+            ->setDisabled($is_locked));
       }
+
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName($credential_lock_text)
+          ->setIcon($credential_lock_icon)
+          ->setHref($this->getApplicationURI("lock/{$id}/"))
+          ->setDisabled($is_locked)
+          ->setWorkflow(true));
     }
 
 
