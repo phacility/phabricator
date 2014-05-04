@@ -630,14 +630,6 @@ return array(
   // be enabled in production.
   'phabricator.developer-mode' => false,
 
-  // When users write comments which have URIs, they'll be automatically linked
-  // if the protocol appears in this set. This whitelist is primarily to prevent
-  // security issues like javascript:// URIs.
-  'uri.allowed-protocols' => array(
-    'http'  => true,
-    'https' => true,
-  ),
-
   // Should Phabricator show beta applications on the homepage
   'phabricator.show-beta-applications' => false,
 

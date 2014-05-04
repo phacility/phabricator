@@ -119,6 +119,7 @@ final class PhabricatorSecurityConfigOptions
         array(
           'http' => true,
           'https' => true,
+          'mailto' => true,
         ))
         ->setSummary(
           pht("Determines which URI protocols are auto-linked."))
