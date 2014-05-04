@@ -69,6 +69,8 @@ final class PassphraseCredentialEditController extends PassphraseController {
     $v_username = $credential->getUsername();
     $e_username = true;
 
+    $v_is_locked = false;
+
     $bullet = "\xE2\x80\xA2";
 
     $v_secret = $credential->getSecretID() ? str_repeat($bullet, 32) : null;
