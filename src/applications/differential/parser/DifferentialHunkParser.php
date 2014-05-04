@@ -423,16 +423,41 @@ final class DifferentialHunkParser {
       $lines = phutil_split_lines($lines);
 
       $line_type_map = array();
+      $line_text = array();
       foreach ($lines as $line_index => $line) {
         if (isset($line[0])) {
           $char = $line[0];
-          if ($char == ' ') {
-            $line_type_map[$line_index] = null;
-          } else {
-            $line_type_map[$line_index] = $char;
+          switch ($char) {
+            case " ":
+              $line_type_map[$line_index] = null;
+              $line_text[$line_index] = substr($line, 1);
+              break;
+            case "\r":
+            case "\n":
+              // NOTE: Normally, the first character is a space, plus, minus or
+              // backslash, but it may be a newline if it used to be a space and
+              // trailing whitespace has been stripped via email transmission or
+              // some similar mechanism. In these cases, we essentially pretend
+              // the missing space is still there.
+              $line_type_map[$line_index] = null;
+              $line_text[$line_index] = $line;
+              break;
+            case "+":
+            case "-":
+            case "\\":
+              $line_type_map[$line_index] = $char;
+              $line_text[$line_index] = substr($line, 1);
+              break;
+            default:
+              throw new Exception(
+                pht(
+                  'Unexpected leading character "%s" at line index %s!',
+                  $char,
+                  $line_index));
           }
         } else {
           $line_type_map[$line_index] = null;
+          $line_text[$line_index] = '';
         }
       }
 
@@ -444,7 +469,7 @@ final class DifferentialHunkParser {
         $type = $line_type_map[$cursor];
         $data = array(
           'type'  => $type,
-          'text'  => (string)substr($lines[$cursor], 1),
+          'text'  => $line_text[$cursor],
           'line'  => $new_line,
         );
         if ($type == '\\') {
