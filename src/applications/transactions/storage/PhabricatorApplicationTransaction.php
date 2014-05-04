@@ -822,7 +822,10 @@ abstract class PhabricatorApplicationTransaction
         break;
     }
 
-    return $this->renderTextCorpusChangeDetails();
+    return $this->renderTextCorpusChangeDetails(
+      $viewer,
+      $this->getOldValue(),
+      $this->getNewValue());
   }
 
   public function renderTextCorpusChangeDetails(

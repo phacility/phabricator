@@ -51,7 +51,7 @@ final class ConduitAPI_paste_create_Method extends ConduitAPI_paste_Method {
     $xactions = array();
 
     $xactions[] = id(new PhabricatorPasteTransaction())
-      ->setTransactionType(PhabricatorPasteTransaction::TYPE_CREATE)
+      ->setTransactionType(PhabricatorPasteTransaction::TYPE_CONTENT)
       ->setNewValue($file->getPHID());
 
     $xactions[] = id(new PhabricatorPasteTransaction())

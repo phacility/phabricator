@@ -44,7 +44,7 @@ final class PasteCreateMailReceiver
     $xactions = array();
 
     $xactions[] = id(new PhabricatorPasteTransaction())
-      ->setTransactionType(PhabricatorPasteTransaction::TYPE_CREATE)
+      ->setTransactionType(PhabricatorPasteTransaction::TYPE_CONTENT)
       ->setNewValue($file->getPHID());
 
     $xactions[] = id(new PhabricatorPasteTransaction())

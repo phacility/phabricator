@@ -157,7 +157,13 @@ final class PhabricatorPasteQuery
   }
 
   private function getContentCacheKey(PhabricatorPaste $paste) {
-    return 'P'.$paste->getID().':content/'.$paste->getLanguage();
+    return implode(
+      ':',
+      array(
+        'P'.$paste->getID(),
+        $paste->getFilePHID(),
+        $paste->getLanguage(),
+      ));
   }
 
   private function loadRawContent(array $pastes) {

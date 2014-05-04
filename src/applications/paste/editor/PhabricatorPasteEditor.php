@@ -23,7 +23,7 @@ final class PhabricatorPasteEditor
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
-    $types[] = PhabricatorPasteTransaction::TYPE_CREATE;
+    $types[] = PhabricatorPasteTransaction::TYPE_CONTENT;
     $types[] = PhabricatorPasteTransaction::TYPE_TITLE;
     $types[] = PhabricatorPasteTransaction::TYPE_LANGUAGE;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
@@ -37,8 +37,8 @@ final class PhabricatorPasteEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorPasteTransaction::TYPE_CREATE:
-        return null;
+      case PhabricatorPasteTransaction::TYPE_CONTENT:
+        return $object->getFilePHID();
       case PhabricatorPasteTransaction::TYPE_TITLE:
         return $object->getTitle();
       case PhabricatorPasteTransaction::TYPE_LANGUAGE:
@@ -51,7 +51,7 @@ final class PhabricatorPasteEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorPasteTransaction::TYPE_CREATE:
+      case PhabricatorPasteTransaction::TYPE_CONTENT:
       case PhabricatorPasteTransaction::TYPE_TITLE:
       case PhabricatorPasteTransaction::TYPE_LANGUAGE:
         return $xaction->getNewValue();
@@ -63,7 +63,7 @@ final class PhabricatorPasteEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorPasteTransaction::TYPE_CREATE:
+      case PhabricatorPasteTransaction::TYPE_CONTENT:
         $object->setFilePHID($xaction->getNewValue());
         return;
       case PhabricatorPasteTransaction::TYPE_TITLE:
@@ -71,6 +71,9 @@ final class PhabricatorPasteEditor
         return;
       case PhabricatorPasteTransaction::TYPE_LANGUAGE:
         $object->setLanguage($xaction->getNewValue());
+        return;
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        $object->setViewPolicy($xaction->getNewValue());
         return;
     }
 
@@ -82,9 +85,10 @@ final class PhabricatorPasteEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorPasteTransaction::TYPE_CREATE:
+      case PhabricatorPasteTransaction::TYPE_CONTENT:
       case PhabricatorPasteTransaction::TYPE_TITLE:
       case PhabricatorPasteTransaction::TYPE_LANGUAGE:
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
         return;
     }
 
@@ -96,7 +100,7 @@ final class PhabricatorPasteEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorPasteTransaction::TYPE_CREATE:
+      case PhabricatorPasteTransaction::TYPE_CONTENT:
         return array($xaction->getNewValue());
     }
 
@@ -108,7 +112,7 @@ final class PhabricatorPasteEditor
     array $xactions) {
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case PhabricatorPasteTransaction::TYPE_CREATE:
+        case PhabricatorPasteTransaction::TYPE_CONTENT:
           return false;
         default:
           break;

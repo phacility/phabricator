@@ -30,7 +30,7 @@ foreach ($rows as $row) {
     $row['phid'],
     'public',
     $row['authorPHID'],
-    PhabricatorPasteTransaction::TYPE_CREATE,
+    PhabricatorPasteTransaction::TYPE_CONTENT,
     'null',
     $row['filePHID'],
     PhabricatorContentSource::newForSource(
