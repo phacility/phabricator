@@ -95,12 +95,16 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
 
       if (!$errors) {
         if ($is_create) {
+          $file = PhabricatorPasteEditor::initializeFileForPaste(
+            $user,
+            $v_title,
+            $v_text);
+
           $xactions[] = id(new PhabricatorPasteTransaction())
             ->setTransactionType(PhabricatorPasteTransaction::TYPE_CREATE)
-            ->setNewValue(array(
-              'title' => $v_title,
-              'text' => $v_text));
+            ->setNewValue($file->getPHID());
         }
+
         $xactions[] = id(new PhabricatorPasteTransaction())
           ->setTransactionType(PhabricatorPasteTransaction::TYPE_TITLE)
           ->setNewValue($v_title);
