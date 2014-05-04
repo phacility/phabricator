@@ -33,7 +33,7 @@ foreach ($rows as $row) {
   $xaction_type = $row['transactionType'];
   $xaction_old = $row['oldValue'];
   $xaction_new = $row['newValue'];
-  $xaction_source = $row['contentSource'];
+  $xaction_source = idx($row, 'contentSource', '');
   $xaction_meta = $row['metadata'];
 
   // Convert "aux" (auxiliary field) transactions to proper CustomField
