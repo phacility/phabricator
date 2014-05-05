@@ -34,6 +34,7 @@ final class PhabricatorApplicationTransactionCommentQuoteController
     }
 
     $content = $xaction->getComment()->getContent();
+    $content = rtrim($content, "\r\n");
     $content = phutil_split_lines($content, true);
     foreach ($content as $key => $line) {
       if (strlen($line) && ($line[0] != '>')) {
