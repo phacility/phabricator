@@ -101,6 +101,7 @@ final class PHUIIconView extends AphrontTagView {
     return array(
       'href' => $this->href,
       'style' => $style,
+      'aural' => false,
       'class' => $classes,
     );
   }

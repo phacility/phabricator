@@ -154,7 +154,14 @@ final class PHUITimelineEventView extends AphrontView {
           'sigil' => 'timeline-extra',
           'class' => 'phui-timeline-extra',
         ),
-        phutil_implode_html(self::DELIMITER, $extra));
+        phutil_implode_html(
+          javelin_tag(
+            'span',
+            array(
+              'aural' => false,
+            ),
+            self::DELIMITER),
+          $extra));
     } else {
       $extra = null;
     }
