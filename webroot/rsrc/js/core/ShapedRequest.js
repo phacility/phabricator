@@ -2,6 +2,7 @@
  * @requires javelin-install
  *           javelin-util
  *           javelin-request
+ *           javelin-router
  * @provides phabricator-shaped-request
  * @javelin
  */
@@ -63,7 +64,14 @@ JX.install('PhabricatorShapedRequest', {
         }));
         this._request.setData(data);
         this._request.setTimeout(this.getRequestTimeout());
-        this._request.send();
+
+        var routable = this._request.getRoutable();
+
+        routable
+          .setType('draft')
+          .setPriority(750);
+
+        JX.Router.getInstance().queue(routable);
       } else {
         this._defer = setTimeout(
           JX.bind(this, this.trigger),

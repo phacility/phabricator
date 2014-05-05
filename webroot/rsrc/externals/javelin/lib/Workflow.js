@@ -7,6 +7,7 @@
  *           javelin-util
  *           javelin-mask
  *           javelin-uri
+ *           javelin-routable
  * @provides javelin-workflow
  * @javelin
  */
@@ -257,6 +258,18 @@ JX.install('Workflow', {
         // event instead.
       }));
       r.send();
+    },
+
+    getRoutable: function() {
+      var routable = new JX.Routable();
+      routable.listen('start', JX.bind(this, function() {
+        // Pass the event to allow other listeners to "start" to configure this
+        // workflow before it fires.
+        JX.Stratcom.pass(JX.Stratcom.context());
+        this.start();
+      }));
+      this.listen('finally', JX.bind(routable, routable.done));
+      return routable;
     },
 
     setData : function(dictionary) {
