@@ -637,9 +637,19 @@ final class DiffusionCommitHookEngine extends Phobject {
 
     foreach (Filesystem::listDirectory($directory) as $path) {
       $full_path = $directory.DIRECTORY_SEPARATOR.$path;
-      if (is_executable($full_path)) {
-        $executables[] = $full_path;
+      if (!is_executable($full_path)) {
+        // Don't include non-executable files.
+        continue;
       }
+
+      if (basename($full_path) == 'README') {
+        // Don't include README, even if it is marked as executable. It almost
+        // certainly got caught in the crossfire of a sweeping `chmod`, since
+        // users do this with some frequency.
+        continue;
+      }
+
+      $executables[] = $full_path;
     }
 
     return $executables;
