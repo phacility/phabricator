@@ -19,6 +19,8 @@ final class PhabricatorApplicationTransactions extends PhabricatorApplication {
           => 'PhabricatorApplicationTransactionCommentRemoveController',
         'history/(?<phid>[^/]+)/'
           => 'PhabricatorApplicationTransactionCommentHistoryController',
+        'quote/(?<phid>[^/]+)/'
+          => 'PhabricatorApplicationTransactionCommentQuoteController',
         'detail/(?<phid>[^/]+)/'
           => 'PhabricatorApplicationTransactionDetailController',
         '(?P<value>old|new)/(?<phid>[^/]+)/'

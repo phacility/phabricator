@@ -256,6 +256,11 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $target,
       $all_changesets);
 
+    if (!$viewer_is_anonymous) {
+      $comment_view->setQuoteRef('D'.$revision->getID());
+      $comment_view->setQuoteTargetID('comment-content');
+    }
+
     $wrap_id = celerity_generate_unique_node_id();
     $comment_view = phutil_tag(
       'div',
@@ -373,8 +378,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
         $comment_form->setErrorView($review_warnings_panel);
       }
 
-      // TODO: Restore the ability for fields to add accept warnings.
-
       $comment_form->setActions($this->getRevisionCommentActions($revision));
       $action_uri = $this->getApplicationURI(
         'comment/save/'.$revision->getID().'/');
@@ -415,6 +418,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
         $changeset_view,
       ));
     if ($comment_form) {
+
       $page_pane->appendChild($comment_form);
     } else {
       // TODO: For now, just use this to get "Login to Comment".

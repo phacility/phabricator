@@ -21,6 +21,26 @@ final class PHUITimelineEventView extends AphrontView {
   private $hideByDefault;
   private $token;
   private $tokenRemoved;
+  private $quoteTargetID;
+  private $quoteRef;
+
+  public function setQuoteRef($quote_ref) {
+    $this->quoteRef = $quote_ref;
+    return $this;
+  }
+
+  public function getQuoteRef() {
+    return $this->quoteRef;
+  }
+
+  public function setQuoteTargetID($quote_target_id) {
+    $this->quoteTargetID = $quote_target_id;
+    return $this;
+  }
+
+  public function getQuoteTargetID() {
+    return $this->quoteTargetID;
+  }
 
   public function setHideByDefault($hide_by_default) {
     $this->hideByDefault = $hide_by_default;
@@ -356,6 +376,31 @@ final class PHUITimelineEventView extends AphrontView {
       $extra[] = pht('PREVIEW');
     } else {
       $xaction_phid = $this->getTransactionPHID();
+
+      if ($this->getQuoteTargetID()) {
+
+        $ref = null;
+        if ($this->getQuoteRef()) {
+          $ref = $this->getQuoteRef();
+          if ($this->anchor) {
+            $ref = $ref.'#'.$this->anchor;
+          }
+        }
+
+        $extra[] = javelin_tag(
+          'a',
+          array(
+            'href'  => '#',
+            'sigil' => 'transaction-quote',
+            'mustcapture' => true,
+            'meta' => array(
+              'targetID' => $this->getQuoteTargetID(),
+              'uri' => '/transactions/quote/'.$xaction_phid.'/',
+              'ref' => $ref,
+            ),
+          ),
+          pht('Quote'));
+      }
 
       if ($this->getIsEdited()) {
         $extra[] = javelin_tag(

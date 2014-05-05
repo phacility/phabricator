@@ -6,6 +6,7 @@
  *           javelin-dom
  *           javelin-fx
  *           javelin-util
+ *           phabricator-textareautils
  */
 
 JX.behavior('phabricator-transaction-list', function(config) {
@@ -113,6 +114,37 @@ JX.behavior('phabricator-transaction-list', function(config) {
         .start();
 
       e.kill();
+    });
+
+  JX.DOM.listen(
+    list,
+    'click',
+    'transaction-quote',
+    function(e) {
+      e.kill();
+
+      var data = e.getNodeData('transaction-quote');
+      new JX.Workflow(data.uri)
+        .setData({ref: data.ref})
+        .setHandler(function(r) {
+          var textarea = JX.$(data.targetID);
+
+          JX.DOM.scrollTo(textarea);
+
+          var value = textarea.value;
+          if (value.length) {
+            value += "\n\n";
+          }
+          value += r.quoteText;
+          value += "\n\n";
+          textarea.value = value;
+
+          JX.TextAreaUtils.setSelectionRange(
+            textarea,
+            textarea.value.length,
+            textarea.value.length);
+        })
+        .start();
     });
 
   JX.Stratcom.listen(
