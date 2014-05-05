@@ -166,7 +166,8 @@ button.link:hover {
   text-decoration: underline;
 }
 
-.dropdown-menu-frame {
+.dropdown-menu-frame,
+.phuix-dropdown-menu {
   position: absolute;
   width: 240px;
   background: #fff;

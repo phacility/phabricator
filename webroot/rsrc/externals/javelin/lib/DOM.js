@@ -944,6 +944,7 @@ JX.install('DOM', {
       try { node.focus(); } catch (lol_ie) {}
     },
 
+
     /**
      * Scroll to the position of an element in the document.
      * @task view
