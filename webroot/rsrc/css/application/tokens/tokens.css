@@ -18,3 +18,7 @@ button.token-button {
 .token-grid {
   text-align: center;
 }
+
+.token-icon + .token-icon {
+  margin-left: 4px;
+}

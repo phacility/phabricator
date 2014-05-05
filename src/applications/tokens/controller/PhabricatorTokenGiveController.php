@@ -73,6 +73,13 @@ final class PhabricatorTokenGiveController extends PhabricatorTokenController {
     $buttons = array();
     $ii = 0;
     foreach ($tokens as $token) {
+      $aural = javelin_tag(
+        'span',
+        array(
+          'aural' => true,
+        ),
+        pht('Award "%s" Token', $token->getName()));
+
       $buttons[] = javelin_tag(
         'button',
         array(
@@ -85,7 +92,10 @@ final class PhabricatorTokenGiveController extends PhabricatorTokenController {
             'tip' => $token->getName(),
           )
         ),
-        $token->renderIcon());
+        array(
+          $aural,
+          $token->renderIcon(),
+        ));
       if ((++$ii % 4) == 0) {
         $buttons[] = phutil_tag('br');
       }

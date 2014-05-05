@@ -103,7 +103,7 @@ return array(
     'rsrc/css/application/settings/settings.css' => 'ea8f5915',
     'rsrc/css/application/slowvote/slowvote.css' => '266df6a1',
     'rsrc/css/application/subscriptions/subscribers-list.css' => '5bb30c78',
-    'rsrc/css/application/tokens/tokens.css' => '5f7bca25',
+    'rsrc/css/application/tokens/tokens.css' => '3d0f239e',
     'rsrc/css/application/uiexample/example.css' => '528b19de',
     'rsrc/css/core/core.css' => '7dff07c3',
     'rsrc/css/core/remarkup.css' => '0ec9ea61',
@@ -806,7 +806,7 @@ return array(
     'sprite-tokens-css' => '1706b943',
     'subscribers-list-css' => '5bb30c78',
     'syntax-highlighting-css' => '3c18c1cb',
-    'tokens-css' => '5f7bca25',
+    'tokens-css' => '3d0f239e',
   ),
   'requires' =>
   array(
