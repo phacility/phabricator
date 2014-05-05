@@ -6,8 +6,9 @@
  *           javelin-util
  *           phabricator-notification
  *           javelin-behavior-device
- *           phabricator-dropdown-menu
- *           phabricator-menu-item
+ *           phuix-dropdown-menu
+ *           phuix-action-list-view
+ *           phuix-action-view
  * @provides javelin-behavior-conpherence-widget-pane
  */
 
@@ -37,7 +38,7 @@ JX.behavior('conpherence-widget-pane', function(config) {
       return;
     }
     JX.DOM.show(device_header);
-    var device_menu = new JX.PhabricatorDropdownMenu(device_header);
+    var device_menu = new JX.PHUIXDropdownMenu(device_header);
     data.deviceMenu = true;
     _buildWidgetSelector(device_menu, data);
   };
@@ -51,8 +52,12 @@ JX.behavior('conpherence-widget-pane', function(config) {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
     var widget_pane = JX.DOM.find(root, 'div', 'conpherence-widget-pane');
     var widget_header = JX.DOM.find(widget_pane, 'a', 'widgets-selector');
-    var menu = new JX.PhabricatorDropdownMenu(widget_header);
-    menu.toggleAlignDropdownRight(false);
+
+    var menu = new JX.PHUIXDropdownMenu(widget_header);
+    menu
+      .setAlign('left')
+      .setOffsetY(4);
+
     data.deviceMenu = false;
     _buildWidgetSelector(menu, data);
   };
@@ -64,32 +69,40 @@ JX.behavior('conpherence-widget-pane', function(config) {
    */
   var _buildWidgetSelector = function (menu, data) {
     _loadedWidgetsID = data.threadID;
+
+    var list = new JX.PHUIXActionListView();
+    var map = {};
+
     var widgets = config.widgetRegistry;
     for (var widget in widgets) {
       var widget_data = widgets[widget];
       if (widget_data.deviceOnly && data.deviceMenu === false) {
         continue;
       }
-      menu.addItem(new JX.PhabricatorMenuItem(
-        widget_data.name,
-        JX.bind(null, toggleWidget, { widget : widget }),
-        '#'
-      ).setDisabled(widget == data.widget));
+
+      var item = new JX.PHUIXActionView()
+        .setIcon(widget_data.icon || 'none')
+        .setName(widget_data.name)
+        .setHandler(
+          JX.bind(null, function(widget, e) {
+            toggleWidget({widget: widget});
+            e.prevent();
+            menu.close();
+          }, widget));
+
+      map[widget_data.name] = item;
+      list.addItem(item);
     }
 
-    menu.listen(
-     'open',
-     JX.bind(menu, function () {
-       for (var ii = 0; ii < this._items.length; ii++) {
-         var item = this._items[ii];
-         var name = item.getName();
-         if (name == _selectedWidgetName) {
-           item.setDisabled(true);
-         } else {
-           item.setDisabled(false);
-         }
-       }
-     }));
+    menu
+      .setWidth(200)
+      .setContent(list.getNode());
+
+    menu.listen('open', function() {
+      for (var k in map) {
+        map[k].setDisabled((k == _selectedWidgetName));
+      }
+    });
   };
 
   /**

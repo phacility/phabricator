@@ -62,11 +62,6 @@
   display: none;
 }
 
-.dropdown-menu-frame {
-  width: 200px !important;
-  margin-top: 4px;
-}
-
 .conpherence-widget-pane .widgets-body {
   position: fixed;
   overflow-y: auto;

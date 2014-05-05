@@ -44,7 +44,9 @@ JX.install('PHUIXDropdownMenu', {
 
   properties: {
     width: null,
-    align: 'right'
+    align: 'right',
+    offsetX: 0,
+    offsetY: 0
   },
 
   members: {
@@ -170,6 +172,8 @@ JX.install('PHUIXDropdownMenu', {
           v = v.add(0, d.y);
           break;
       }
+
+      v = v.add(this.getOffsetX(), this.getOffsetY());
 
       v.setPos(this._menu);
     }

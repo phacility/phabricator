@@ -11,6 +11,12 @@
   display: none;
 }
 
+.device .phuix-dropdown-menu .phabricator-action-list-view {
+  /* When an action list view appears inside a dropdown menu, don't hide it
+     by default. */
+  display: block;
+}
+
 .device .phabricator-action-list-view.phabricator-action-list-toggle {
   display: block;
 }

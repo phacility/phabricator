@@ -81,11 +81,13 @@ final class ConpherenceLayoutView extends AphrontView {
         'widgetRegistry' => array(
           'conpherence-message-pane' => array(
             'name' => pht('Thread'),
+            'icon' => 'comment',
             'deviceOnly' => true,
             'hasCreate' => false
           ),
           'widgets-people' => array(
             'name' => pht('Participants'),
+            'icon' => 'user',
             'deviceOnly' => false,
             'hasCreate' => true,
             'createData' => array(
@@ -96,11 +98,13 @@ final class ConpherenceLayoutView extends AphrontView {
           ),
           'widgets-files' => array(
             'name' => pht('Files'),
+            'icon' => 'file',
             'deviceOnly' => false,
             'hasCreate' => false
           ),
           'widgets-calendar' => array(
             'name' => pht('Calendar'),
+            'icon' => 'calendar',
             'deviceOnly' => false,
             'hasCreate' => true,
             'createData' => array(
@@ -111,6 +115,7 @@ final class ConpherenceLayoutView extends AphrontView {
           ),
           'widgets-settings' => array(
             'name' => pht('Settings'),
+            'icon' => 'wrench',
             'deviceOnly' => false,
             'hasCreate' => false
           ),
