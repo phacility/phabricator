@@ -12,8 +12,10 @@ JX.install('PHUIXActionView', {
     _node: null,
     _name: null,
     _icon: 'none',
+    _iconSheet: 'icons',
     _disabled: false,
     _handler: null,
+    _selected: false,
 
     _iconNode: null,
     _nameNode: null,
@@ -30,8 +32,14 @@ JX.install('PHUIXActionView', {
       return this;
     },
 
-    getDisabled: function() {
-      return this._disabled;
+    setSelected: function(selected) {
+      this._selected = selected;
+      JX.DOM.alterClass(
+        this.getNode(),
+        'phabricator-action-view-selected',
+        selected);
+
+      return this;
     },
 
     setName: function(name) {
@@ -46,8 +54,9 @@ JX.install('PHUIXActionView', {
       return this;
     },
 
-    setIcon: function(icon) {
+    setIcon: function(icon, sheet) {
       this._icon = icon;
+      this._iconSheet = sheet || this._iconSheet;
       this._buildIconNode(true);
       return this;
     },
@@ -78,11 +87,15 @@ JX.install('PHUIXActionView', {
     _buildIconNode: function(dirty) {
       if (!this._iconNode || dirty) {
         var attr = {
-          className: 'phui-icon-view sprite-icons phabricator-action-view-icon'
+          className: [
+            'phui-icon-view',
+            'phabricator-action-view-icon',
+            'sprite-' + this._iconSheet
+          ].join(' ')
         };
         var node = JX.$N('span', attr);
 
-        var icon_class = 'icons-' + this._icon;
+        var icon_class = this._iconSheet + '-' + this._icon;
         if (this._disabled) {
           icon_class = icon_class + '-grey';
         }

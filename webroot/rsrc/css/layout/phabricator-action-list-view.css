@@ -81,6 +81,10 @@
   color: {$lightgreytext};
 }
 
+.phabricator-action-view-selected {
+  background: {$lightblue};
+}
+
 .phabricator-action-view button[disabled] {
   opacity: 1.0;
 }
