@@ -38,6 +38,8 @@ JX.install('PHUIXDropdownMenu', {
       JX.bind(this, this._adjustposition));
 
     JX.Stratcom.listen('phuix.dropdown.open', null, JX.bind(this, this.close));
+
+    JX.Stratcom.listen('keydown', null, JX.bind(this, this._onkey));
   },
 
   events: ['open'],
@@ -93,9 +95,6 @@ JX.install('PHUIXDropdownMenu', {
 
         var menu = JX.$N('div', attrs);
 
-        this._node.setAttribute('aria-haspopup', 'true');
-        this._node.setAttribute('aria-expanded', 'false');
-
         this._menu = menu;
       }
 
@@ -143,6 +142,12 @@ JX.install('PHUIXDropdownMenu', {
       JX.DOM.alterClass(this._node, 'phuix-dropdown-open', true);
 
       this._node.setAttribute('aria-expanded', 'true');
+
+      // Try to highlight the first link in the menu for assistive technologies.
+      var links = JX.DOM.scry(this._menu, 'a');
+      if (links[0]) {
+        JX.DOM.focus(links[0]);
+      }
     },
 
     _hide : function() {
@@ -176,6 +181,26 @@ JX.install('PHUIXDropdownMenu', {
       v = v.add(this.getOffsetX(), this.getOffsetY());
 
       v.setPos(this._menu);
+    },
+
+    _onkey: function(e) {
+      // When the user presses escape with a menu open, close the menu and
+      // refocus the button which activates the menu. In particular, this makes
+      // popups more usable with assistive technologies.
+
+      if (!this._open) {
+        return;
+      }
+
+      if (e.getSpecialKey() != 'esc') {
+        return;
+      }
+
+      this.close();
+      JX.DOM.focus(this._node);
+
+      e.prevent();
     }
+
   }
 });

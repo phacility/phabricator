@@ -169,9 +169,6 @@ class PhabricatorApplicationTransactionView extends AphrontView {
           'listID'          => $list_id,
           'objectPHID'      => $this->getObjectPHID(),
           'nextAnchor'      => $this->anchorOffset + count($events),
-          'historyLink'     => '/transactions/history/',
-          'historyLinkText' => pht('Edited'),
-          'linkDelimiter'   => PHUITimelineEventView::DELIMITER,
         ));
     }
 

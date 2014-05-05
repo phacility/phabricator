@@ -47,10 +47,7 @@ final class PhabricatorApplicationTransactionCommentRemoveController
         ->applyEdit($xaction, $comment);
 
       if ($request->isAjax()) {
-        return id(new PhabricatorApplicationTransactionResponse())
-          ->setViewer($viewer)
-          ->setTransactions(array($xaction))
-          ->setAnchorOffset($request->getStr('anchor'));
+        return id(new AphrontAjaxResponse())->setContent(array());
       } else {
         return id(new AphrontReloadResponse())->setURI($obj_handle->getURI());
       }

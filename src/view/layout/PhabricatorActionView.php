@@ -12,6 +12,16 @@ final class PhabricatorActionView extends AphrontView {
   private $download;
   private $objectURI;
   private $sigils = array();
+  private $metadata;
+
+  public function setMetadata($metadata) {
+    $this->metadata = $metadata;
+    return $this;
+  }
+
+  public function getMetadata() {
+    return $this->metadata;
+  }
 
   public function setObjectURI($object_uri) {
     $this->objectURI = $object_uri;
@@ -138,6 +148,7 @@ final class PhabricatorActionView extends AphrontView {
             'action'    => $this->getHref(),
             'method'    => 'POST',
             'sigil'     => $sigils,
+            'meta' => $this->metadata,
           ),
           $item);
       } else {
@@ -147,6 +158,7 @@ final class PhabricatorActionView extends AphrontView {
             'href'  => $this->getHref(),
             'class' => 'phabricator-action-view-item',
             'sigil' => $sigils,
+            'meta' => $this->metadata,
           ),
           $this->name);
       }
