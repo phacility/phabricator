@@ -74,7 +74,7 @@ final class PhameBlogEditController
           $errors[] = $error_text;
           $e_custom_domain = $error_label;
         }
-        if ($blog->getJoinPolicy() != PhabricatorPolicies::POLICY_PUBLIC) {
+        if ($blog->getViewPolicy() != PhabricatorPolicies::POLICY_PUBLIC) {
           $errors[] = pht(
             'For custom domains to work, the blog must have a view policy of '.
             'public.');
