@@ -248,6 +248,10 @@ abstract class PhabricatorApplicationTransaction
         break;
     }
 
+    if ($this->getComment()) {
+      $phids[] = array($this->getComment()->getAuthorPHID());
+    }
+
     return array_mergev($phids);
   }
 

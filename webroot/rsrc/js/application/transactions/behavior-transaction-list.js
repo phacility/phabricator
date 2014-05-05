@@ -96,20 +96,24 @@ JX.behavior('phabricator-transaction-list', function(config) {
     }
   }
 
-  JX.DOM.listen(list, 'click', 'transaction-edit', function(e) {
-    if (!e.isNormalClick()) {
-      return;
-    }
+  JX.DOM.listen(
+    list,
+    'click',
+    ['transaction-edit', 'transaction-remove'],
+    function(e) {
+      if (!e.isNormalClick()) {
+        return;
+      }
 
-    var transaction = e.getNode('transaction');
+      var transaction = e.getNode('transaction');
 
-    JX.Workflow.newFromLink(e.getTarget())
-      .setData({anchor: e.getNodeData('transaction').anchor})
-      .setHandler(JX.bind(null, edittransaction, transaction))
-      .start();
+      JX.Workflow.newFromLink(e.getTarget())
+        .setData({anchor: e.getNodeData('transaction').anchor})
+        .setHandler(JX.bind(null, edittransaction, transaction))
+        .start();
 
-    e.kill();
-  });
+      e.kill();
+    });
 
   JX.Stratcom.listen(
     ['submit', 'didSyntheticSubmit'],

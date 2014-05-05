@@ -220,7 +220,18 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     $comment = $xaction->getComment();
 
     if ($comment) {
-      if ($comment->getIsDeleted()) {
+      if ($comment->getIsRemoved()) {
+        return javelin_tag(
+          'span',
+          array(
+            'class' => 'comment-deleted',
+            'sigil' => 'transaction-comment',
+            'meta'  => array('phid' => $comment->getTransactionPHID()),
+          ),
+          pht(
+            'This comment was removed by %s.',
+            $xaction->getHandle($comment->getAuthorPHID())->renderLink()));
+      } else if ($comment->getIsDeleted()) {
         return javelin_tag(
           'span',
           array(
@@ -357,8 +368,11 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     $has_deleted_comment = $xaction->getComment() &&
       $xaction->getComment()->getIsDeleted();
 
+    $has_removed_comment = $xaction->getComment() &&
+      $xaction->getComment()->getIsRemoved();
+
     if ($this->getShowEditActions() && !$this->isPreview) {
-      if ($xaction->getCommentVersion() > 1) {
+      if ($xaction->getCommentVersion() > 1 && !$has_removed_comment) {
         $event->setIsEdited(true);
       }
 
@@ -369,8 +383,13 @@ class PhabricatorApplicationTransactionView extends AphrontView {
           $viewer,
           $xaction,
           $can_edit);
-        if ($has_edit_capability) {
+        if ($has_edit_capability && !$has_removed_comment) {
           $event->setIsEditable(true);
+        }
+        if ($has_edit_capability || $viewer->getIsAdmin()) {
+          if (!$has_removed_comment) {
+            $event->setIsRemovable(true);
+          }
         }
       }
     }

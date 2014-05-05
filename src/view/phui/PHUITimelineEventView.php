@@ -14,6 +14,7 @@ final class PHUITimelineEventView extends AphrontView {
   private $anchor;
   private $isEditable;
   private $isEdited;
+  private $isRemovable;
   private $transactionPHID;
   private $isPreview;
   private $eventGroup = array();
@@ -64,6 +65,15 @@ final class PHUITimelineEventView extends AphrontView {
 
   public function getIsEditable() {
     return $this->isEditable;
+  }
+
+  public function setIsRemovable($is_removable) {
+    $this->isRemovable = $is_removable;
+    return $this;
+  }
+
+  public function getIsRemovable() {
+    return $this->isRemovable;
   }
 
   public function setDateCreated($date_created) {
@@ -365,6 +375,16 @@ final class PHUITimelineEventView extends AphrontView {
             'sigil' => 'workflow transaction-edit',
           ),
           pht('Edit'));
+      }
+
+      if ($this->getIsRemovable()) {
+        $extra[] = javelin_tag(
+          'a',
+          array(
+            'href'  => '/transactions/remove/'.$xaction_phid.'/',
+            'sigil' => 'workflow transaction-remove',
+          ),
+          pht('Remove'));
       }
 
       if ($is_first_extra) {

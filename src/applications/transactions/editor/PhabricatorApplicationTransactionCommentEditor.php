@@ -95,10 +95,15 @@ final class PhabricatorApplicationTransactionCommentEditor
       $xaction,
       PhabricatorPolicyCapability::CAN_VIEW);
 
-    PhabricatorPolicyFilter::requireCapability(
-      $actor,
-      $xaction,
-      PhabricatorPolicyCapability::CAN_EDIT);
+    if ($comment->getIsRemoved() && $actor->getIsAdmin()) {
+      // NOTE: Administrators can remove comments by any user, and don't need
+      // to pass the edit check.
+    } else {
+      PhabricatorPolicyFilter::requireCapability(
+        $actor,
+        $xaction,
+        PhabricatorPolicyCapability::CAN_EDIT);
+    }
   }
 
 
