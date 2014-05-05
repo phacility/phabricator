@@ -470,6 +470,7 @@ final class PhabricatorMarkupEngine {
 
     $blocks = array();
     $blocks[] = new PhutilRemarkupEngineRemarkupQuotesBlockRule();
+    $blocks[] = new PhutilRemarkupEngineRemarkupReplyBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupLiteralBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupHeaderBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupHorizontalRuleBlockRule();

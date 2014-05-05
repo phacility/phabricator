@@ -163,6 +163,10 @@
   font-style: normal;
 }
 
+.phabricator-remarkup blockquote div.remarkup-reply-head {
+  font-weight: bold;
+}
+
 .phabricator-remarkup img.remarkup-proxy-image {
   max-width: 640px;
   max-height: 640px;
