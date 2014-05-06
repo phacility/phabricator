@@ -7,6 +7,7 @@
  *           javelin-uri
  *           javelin-dom
  *           javelin-json
+ *           javelin-router
  *           phabricator-notification
  */
 
@@ -24,9 +25,15 @@ JX.behavior('aphlict-listen', function(config) {
   // a request to Phabricator to get notification details.
   function onaphlictmessage(type, message) {
     if (type == 'receive') {
-      var request = new JX.Request('/notification/individual/', onnotification)
+      var routable = new JX.Request('/notification/individual/', onnotification)
         .addData({key: message.key})
-        .send();
+        .getRoutable();
+
+      routable
+        .setType('notification')
+        .setPriority(250);
+
+      JX.Router.getInstance().queue(routable);
     } else if (__DEV__) {
       if (config.debug) {
         var details = message ? JX.JSON.stringify(message) : '';

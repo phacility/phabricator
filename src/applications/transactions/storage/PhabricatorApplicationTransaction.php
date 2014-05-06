@@ -248,6 +248,10 @@ abstract class PhabricatorApplicationTransaction
         break;
     }
 
+    if ($this->getComment()) {
+      $phids[] = array($this->getComment()->getAuthorPHID());
+    }
+
     return array_mergev($phids);
   }
 
@@ -336,6 +340,10 @@ abstract class PhabricatorApplicationTransaction
   public function getIcon() {
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_COMMENT:
+        $comment = $this->getComment();
+        if ($comment && $comment->getIsRemoved()) {
+          return 'fa-eraser';
+        }
         return 'fa-comment';
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return 'fa-envelope';
@@ -376,6 +384,12 @@ abstract class PhabricatorApplicationTransaction
 
   public function getColor() {
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT;
+        $comment = $this->getComment();
+        if ($comment && $comment->getIsRemoved()) {
+          return 'black';
+        }
+        break;
       case PhabricatorTransactions::TYPE_BUILDABLE:
         switch ($this->getNewValue()) {
           case HarbormasterBuildable::STATUS_PASSED:
@@ -822,7 +836,10 @@ abstract class PhabricatorApplicationTransaction
         break;
     }
 
-    return $this->renderTextCorpusChangeDetails();
+    return $this->renderTextCorpusChangeDetails(
+      $viewer,
+      $this->getOldValue(),
+      $this->getNewValue());
   }
 
   public function renderTextCorpusChangeDetails(

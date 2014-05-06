@@ -263,7 +263,7 @@
     },
     "status-policy-admin-white"   : {
       "name" : "status-policy-admin-white",
-      "rule" : ".status-policy-admin-white, .dropdown-menu-item:hover .status-policy-admin",
+      "rule" : ".status-policy-admin-white, .phuix-dropdown-menu .phabricator-action-view:hover .status-policy-admin",
       "hash" : "4b16ec5170bc30fb688f7e086e61a7f1"
     },
     "status-policy-all"           : {
@@ -273,7 +273,7 @@
     },
     "status-policy-all-white"     : {
       "name" : "status-policy-all-white",
-      "rule" : ".status-policy-all-white, .dropdown-menu-item:hover .status-policy-all",
+      "rule" : ".status-policy-all-white, .phuix-dropdown-menu .phabricator-action-view:hover .status-policy-all",
       "hash" : "24ed12bf6f58c21a82be125ace2ff0d0"
     },
     "status-policy-custom"        : {
@@ -283,7 +283,7 @@
     },
     "status-policy-custom-white"  : {
       "name" : "status-policy-custom-white",
-      "rule" : ".status-policy-custom-white, .dropdown-menu-item:hover .status-policy-custom",
+      "rule" : ".status-policy-custom-white, .phuix-dropdown-menu .phabricator-action-view:hover .status-policy-custom",
       "hash" : "ff8b4cbe21f3b4254f343fffc170ef4b"
     },
     "status-policy-elist"         : {
@@ -303,7 +303,7 @@
     },
     "status-policy-noone-white"   : {
       "name" : "status-policy-noone-white",
-      "rule" : ".status-policy-noone-white, .dropdown-menu-item:hover .status-policy-noone",
+      "rule" : ".status-policy-noone-white, .phuix-dropdown-menu .phabricator-action-view:hover .status-policy-noone",
       "hash" : "80fb9b153fec4d8136242c5ddc2d8e77"
     },
     "status-policy-project"       : {
@@ -313,7 +313,7 @@
     },
     "status-policy-project-white" : {
       "name" : "status-policy-project-white",
-      "rule" : ".status-policy-project-white, .dropdown-menu-item:hover .status-policy-project",
+      "rule" : ".status-policy-project-white, .phuix-dropdown-menu .phabricator-action-view:hover .status-policy-project",
       "hash" : "ac2b6f19edb8d6c40f0bcb3fd477a067"
     },
     "status-policy-public"        : {
@@ -323,7 +323,7 @@
     },
     "status-policy-public-white"  : {
       "name" : "status-policy-public-white",
-      "rule" : ".status-policy-public-white, .dropdown-menu-item:hover .status-policy-public",
+      "rule" : ".status-policy-public-white, .phuix-dropdown-menu .phabricator-action-view:hover .status-policy-public",
       "hash" : "cf809ca49eefed5375c2ea081e721971"
     },
     "status-policy-unknown"       : {
@@ -333,7 +333,7 @@
     },
     "status-policy-unknown-white" : {
       "name" : "status-policy-unknown-white",
-      "rule" : ".status-policy-unknown-white, .dropdown-menu-item:hover .status-policy-unknown",
+      "rule" : ".status-policy-unknown-white, .phuix-dropdown-menu .phabricator-action-view:hover .status-policy-unknown",
       "hash" : "98985bfa005672c4b88feaf88cfa72bc"
     },
     "status-policy-user"          : {

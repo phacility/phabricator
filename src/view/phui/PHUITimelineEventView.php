@@ -14,12 +14,33 @@ final class PHUITimelineEventView extends AphrontView {
   private $anchor;
   private $isEditable;
   private $isEdited;
+  private $isRemovable;
   private $transactionPHID;
   private $isPreview;
   private $eventGroup = array();
   private $hideByDefault;
   private $token;
   private $tokenRemoved;
+  private $quoteTargetID;
+  private $quoteRef;
+
+  public function setQuoteRef($quote_ref) {
+    $this->quoteRef = $quote_ref;
+    return $this;
+  }
+
+  public function getQuoteRef() {
+    return $this->quoteRef;
+  }
+
+  public function setQuoteTargetID($quote_target_id) {
+    $this->quoteTargetID = $quote_target_id;
+    return $this;
+  }
+
+  public function getQuoteTargetID() {
+    return $this->quoteTargetID;
+  }
 
   public function setHideByDefault($hide_by_default) {
     $this->hideByDefault = $hide_by_default;
@@ -64,6 +85,15 @@ final class PHUITimelineEventView extends AphrontView {
 
   public function getIsEditable() {
     return $this->isEditable;
+  }
+
+  public function setIsRemovable($is_removable) {
+    $this->isRemovable = $is_removable;
+    return $this;
+  }
+
+  public function getIsRemovable() {
+    return $this->isRemovable;
   }
 
   public function setDateCreated($date_created) {
@@ -133,7 +163,7 @@ final class PHUITimelineEventView extends AphrontView {
     return $this;
   }
 
-  protected function renderEventTitle($is_first_event, $force_icon) {
+  protected function renderEventTitle($is_first_event, $force_icon, $has_menu) {
     $title = $this->title;
     if (($title === null) && !$this->hasChildren()) {
       $title = '';
@@ -151,10 +181,16 @@ final class PHUITimelineEventView extends AphrontView {
       $extra = javelin_tag(
         'span',
         array(
-          'sigil' => 'timeline-extra',
           'class' => 'phui-timeline-extra',
         ),
-        phutil_implode_html(self::DELIMITER, $extra));
+        phutil_implode_html(
+          javelin_tag(
+            'span',
+            array(
+              'aural' => false,
+            ),
+            self::DELIMITER),
+          $extra));
     } else {
       $extra = null;
     }
@@ -166,6 +202,10 @@ final class PHUITimelineEventView extends AphrontView {
       $icon = null;
       if ($this->icon || $force_icon) {
         $title_classes[] = 'phui-timeline-title-with-icon';
+      }
+
+      if ($has_menu) {
+        $title_classes[] = 'phui-timeline-title-with-menu';
       }
 
       if ($this->icon) {
@@ -223,11 +263,71 @@ final class PHUITimelineEventView extends AphrontView {
     $events = array_select_keys($events, $icon_keys) + $events;
     $force_icon = (bool)$icon_keys;
 
+    $menu = null;
+    $items = array();
+    $has_menu = false;
+    if (!$this->getIsPreview()) {
+      foreach ($this->getEventGroup() as $event) {
+        $items[] = $event->getMenuItems($this->anchor);
+        if ($event->hasChildren()) {
+          $has_menu = true;
+        }
+      }
+      $items = array_mergev($items);
+    }
+
+    if ($items || $has_menu) {
+      $icon = id(new PHUIIconView())
+        ->setIconFont('fa-cog');
+      $aural = javelin_tag(
+        'span',
+        array(
+          'aural' => true,
+        ),
+        pht('Comment Actions'));
+
+      if ($items) {
+        $sigil = 'phui-timeline-menu';
+        Javelin::initBehavior('phui-timeline-dropdown-menu');
+      } else {
+        $sigil = null;
+      }
+
+      $action_list = id(new PhabricatorActionListView())
+        ->setUser($this->getUser());
+      foreach ($items as $item) {
+        $action_list->addAction($item);
+      }
+
+      $menu = javelin_tag(
+        $items ? 'a' : 'span',
+        array(
+          'href' => '#',
+          'class' => 'phui-timeline-menu',
+          'sigil' => $sigil,
+          'aria-haspopup' => 'true',
+          'aria-expanded' => 'false',
+          'meta' => array(
+            'items' => hsprintf('%s', $action_list),
+          ),
+        ),
+        array(
+          $aural,
+          $icon,
+        ));
+
+      $has_menu = true;
+    }
+
     $group_titles = array();
+    $group_items = array();
     $group_children = array();
     $is_first_event = true;
     foreach ($events as $event) {
-      $group_titles[] = $event->renderEventTitle($is_first_event, $force_icon);
+      $group_titles[] = $event->renderEventTitle(
+        $is_first_event,
+        $force_icon,
+        $has_menu);
       $is_first_event = false;
       if ($event->hasChildren()) {
         $group_children[] = $event->renderChildren();
@@ -266,6 +366,7 @@ final class PHUITimelineEventView extends AphrontView {
         ),
         array(
           $group_titles,
+          $menu,
           phutil_tag(
             'div',
             array(
@@ -338,26 +439,9 @@ final class PHUITimelineEventView extends AphrontView {
     if ($this->getIsPreview()) {
       $extra[] = pht('PREVIEW');
     } else {
-      $xaction_phid = $this->getTransactionPHID();
 
       if ($this->getIsEdited()) {
-        $extra[] = javelin_tag(
-          'a',
-          array(
-            'href'  => '/transactions/history/'.$xaction_phid.'/',
-            'sigil' => 'workflow transaction-edit-history',
-          ),
-          pht('Edited'));
-      }
-
-      if ($this->getIsEditable()) {
-        $extra[] = javelin_tag(
-          'a',
-          array(
-            'href'  => '/transactions/edit/'.$xaction_phid.'/',
-            'sigil' => 'workflow transaction-edit',
-          ),
-          pht('Edit'));
+        $extra[] = pht('Edited');
       }
 
       if ($is_first_extra) {
@@ -404,9 +488,73 @@ final class PHUITimelineEventView extends AphrontView {
           $extra[] = $date;
         }
       }
+
     }
 
     return $extra;
+  }
+
+  private function getMenuItems($anchor) {
+    $xaction_phid = $this->getTransactionPHID();
+
+    $items = array();
+    if ($this->getQuoteTargetID()) {
+
+      $ref = null;
+      if ($this->getQuoteRef()) {
+        $ref = $this->getQuoteRef();
+        if ($anchor) {
+          $ref = $ref.'#'.$anchor;
+        }
+      }
+
+      $items[] = id(new PhabricatorActionView())
+        ->setIcon('comment')
+        ->setHref('#')
+        ->setName(pht('Quote'))
+        ->addSigil('transaction-quote')
+        ->setMetadata(
+          array(
+            'targetID' => $this->getQuoteTargetID(),
+            'uri' => '/transactions/quote/'.$xaction_phid.'/',
+            'ref' => $ref,
+          ));
+    }
+
+    if ($this->getIsEditable()) {
+      $items[] = id(new PhabricatorActionView())
+        ->setIcon('edit')
+        ->setHref('/transactions/edit/'.$xaction_phid.'/')
+        ->setName(pht('Edit Comment'))
+        ->addSigil('transaction-edit')
+        ->setMetadata(
+          array(
+            'anchor' => $anchor,
+          ));
+    }
+
+    if ($this->getIsRemovable()) {
+      $items[] = id(new PhabricatorActionView())
+        ->setIcon('delete')
+        ->setHref('/transactions/remove/'.$xaction_phid.'/')
+        ->setName(pht('Remove Comment'))
+        ->addSigil('transaction-remove')
+        ->setMetadata(
+          array(
+            'anchor' => $anchor,
+          ));
+
+    }
+
+    if ($this->getIsEdited()) {
+      $items[] = id(new PhabricatorActionView())
+        ->setIcon('transcript')
+        ->setHref('/transactions/history/'.$xaction_phid.'/')
+        ->setName(pht('View Edit History'))
+        ->setWorkflow(true);
+    }
+
+    return $items;
   }
 
 }

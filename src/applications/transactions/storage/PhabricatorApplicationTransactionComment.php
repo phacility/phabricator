@@ -59,6 +59,19 @@ abstract class PhabricatorApplicationTransactionComment
     return PhabricatorContentSource::newFromSerialized($this->contentSource);
   }
 
+  public function getIsRemoved() {
+    return ($this->getIsDeleted() == 2);
+  }
+
+  public function setIsRemoved($removed) {
+    if ($removed) {
+      $this->setIsDeleted(2);
+    } else {
+      $this->setIsDeleted(0);
+    }
+    return $this;
+  }
+
 
 /* -(  PhabricatorMarkupInterface  )----------------------------------------- */
 

@@ -7,7 +7,8 @@ final class ManiphestTask extends ManiphestDAO
     PhabricatorTokenReceiverInterface,
     PhabricatorFlaggableInterface,
     PhrequentTrackableInterface,
-    PhabricatorCustomFieldInterface {
+    PhabricatorCustomFieldInterface,
+    PhabricatorDestructableInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
 
@@ -280,6 +281,28 @@ final class ManiphestTask extends ManiphestDAO
   public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
     $this->customFields = $fields;
     return $this;
+  }
+
+
+/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+
+      // TODO: Once this implements PhabricatorTransactionInterface, this
+      // will be handled automatically and can be removed.
+      $xactions = id(new ManiphestTransaction())->loadAllWhere(
+        'objectPHID = %s',
+        $this->getPHID());
+      foreach ($xactions as $xaction) {
+        $engine->destroyObject($xaction);
+      }
+
+      $this->delete();
+    $this->saveTransaction();
   }
 
 }

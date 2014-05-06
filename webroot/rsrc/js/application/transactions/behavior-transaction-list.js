@@ -5,7 +5,8 @@
  *           javelin-workflow
  *           javelin-dom
  *           javelin-fx
- *           javelin-util
+ *           javelin-uri
+ *           phabricator-textareautils
  */
 
 JX.behavior('phabricator-transaction-list', function(config) {
@@ -63,53 +64,61 @@ JX.behavior('phabricator-transaction-list', function(config) {
     }
   }
 
-  function edittransaction(transaction, response) {
-    // NOTE: this is for 1 transaction only
-    for (var phid in response.xactions) {
-      var new_node = JX.$H(response.xactions[phid]).getFragment().firstChild;
-      var new_comment = JX.DOM.find(new_node, 'span', 'transaction-comment');
-      var old_comments = JX.DOM.scry(
-        transaction,
-        'span',
-        'transaction-comment');
-      var old_comment = old_comments[0];
-      JX.DOM.replace(old_comment, new_comment);
-      var edit_history = JX.DOM.scry(
-          transaction,
-          'a',
-          'transaction-edit-history');
-      if (!edit_history.length) {
-        var transaction_phid = JX.Stratcom.getData(new_comment).phid;
-        var history_link = JX.$N(
-          'a',
-          { sigil : 'transaction-edit-history',
-            href  : config.historyLink + transaction_phid + '/' },
-          config.historyLinkText);
-        JX.Stratcom.addSigil(history_link, 'workflow');
-        var timeline_extra = JX.DOM.find(transaction, 'span', 'timeline-extra');
-        var old_content = JX.$H(timeline_extra.innerHTML);
-        JX.DOM.setContent(
-          timeline_extra,
-          [history_link, config.linkDelimiter, old_content]);
+  JX.Stratcom.listen(
+    'click',
+    [['transaction-edit'], ['transaction-remove']],
+    function(e) {
+      if (!e.isNormalClick()) {
+        return;
       }
-      new JX.FX(transaction).setDuration(500).start({opacity: [0, 1]});
-    }
-  }
 
-  JX.DOM.listen(list, 'click', 'transaction-edit', function(e) {
-    if (!e.isNormalClick()) {
-      return;
-    }
+      e.prevent();
 
-    var transaction = e.getNode('transaction');
+      var anchor = e.getNodeData('tag:a').anchor;
+      var uri = JX.$U(window.location).setFragment(anchor);
 
-    JX.Workflow.newFromLink(e.getTarget())
-      .setData({anchor: e.getNodeData('transaction').anchor})
-      .setHandler(JX.bind(null, edittransaction, transaction))
-      .start();
+      JX.Workflow.newFromLink(e.getNode('tag:a'))
+        .setHandler(function() {
+          // In most cases, `uri` is on the same page (just at a new anchor),
+          // so we have to call reload() explicitly to get the browser to
+          // refresh the page. It would be nice to just issue a server-side
+          // redirect instead, but there isn't currently an easy way to do
+          // that without complexity and/or a semi-open redirect.
+          uri.go();
+          window.location.reload();
+        })
+        .start();
+    });
 
-    e.kill();
-  });
+  JX.Stratcom.listen(
+    'click',
+    'transaction-quote',
+    function(e) {
+      e.prevent();
+
+      var data = e.getNodeData('transaction-quote');
+      new JX.Workflow(data.uri)
+        .setData({ref: data.ref})
+        .setHandler(function(r) {
+          var textarea = JX.$(data.targetID);
+
+          JX.DOM.scrollTo(textarea);
+
+          var value = textarea.value;
+          if (value.length) {
+            value += "\n\n";
+          }
+          value += r.quoteText;
+          value += "\n\n";
+          textarea.value = value;
+
+          JX.TextAreaUtils.setSelectionRange(
+            textarea,
+            textarea.value.length,
+            textarea.value.length);
+        })
+        .start();
+    });
 
   JX.Stratcom.listen(
     ['submit', 'didSyntheticSubmit'],

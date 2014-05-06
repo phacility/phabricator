@@ -64,7 +64,6 @@ final class HeraldTranscriptListController extends HeraldController
 
     $list = new PHUIObjectItemListView();
     $list->setCards(true);
-    $list->setFlush(true);
     foreach ($transcripts as $xscript) {
       $view_href = phutil_tag(
         'a',
@@ -89,12 +88,7 @@ final class HeraldTranscriptListController extends HeraldController
       $list->addItem($item);
     }
 
-    // Render the whole page.
-    $box = new PHUIObjectBoxView();
-    $box->setHeaderText(pht('Herald Transcripts'));
-    $box->appendChild($list);
-
-    return $box;
+    return $list;
 
   }
 

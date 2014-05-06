@@ -7,6 +7,7 @@
  *           javelin-stratcom
  *           javelin-behavior-device
  *           javelin-vector
+ *           javelin-router
  *           phabricator-tooltip
  */
 
@@ -74,6 +75,25 @@ JX.behavior('differential-populate', function(config) {
   // TODO: Once 1up works better, figure out when to show it.
   renderer = '2up';
 
+  var get_key = function(id) {
+    return 'differential-populate.' + id;
+  };
+
+  var load = function(id, data) {
+    var routable = new JX.Workflow(config.uri, data)
+      .setHandler(JX.bind(null, onresponse, id))
+      .getRoutable();
+
+    routable
+      .setPriority(500)
+      .setType('content')
+      .setKey(get_key(id));
+
+    JX.Router.getInstance().queue(routable);
+
+    return routable;
+  };
+
   for (var k in config.registry) {
     var data = {
       ref : config.registry[k],
@@ -81,9 +101,7 @@ JX.behavior('differential-populate', function(config) {
       renderer: renderer
     };
 
-    new JX.Workflow(config.uri, data)
-      .setHandler(JX.bind(null, onresponse, k))
-      .start();
+    load(k, data);
   }
 
   var highlighted = null;
@@ -104,13 +122,24 @@ JX.behavior('differential-populate', function(config) {
         JX.DOM.setContent(
           diff,
           JX.$H('<div class="differential-loading">Loading...</div>'));
-        var data = {
-          ref : meta.ref,
-          whitespace : config.whitespace
-        };
-        new JX.Workflow(config.uri, data)
-          .setHandler(JX.bind(null, onresponse, meta.id))
-          .start();
+
+        // When a user explicitly clicks "Load" (or clicks a link in the table
+        // of contents) prioritize this request if it already exists. If it
+        // doesn't, make a new high-priority request.
+
+        var key = get_key(meta.id);
+        var routable = JX.Router.getInstance().getRoutableByKey(key);
+
+        if (!routable) {
+          var data = {
+            ref : meta.ref,
+            whitespace : config.whitespace
+          };
+
+          routable = load(meta.id, data);
+        }
+
+        routable.setPriority(2000);
       }
       if (meta.kill) {
         e.kill();

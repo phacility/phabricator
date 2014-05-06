@@ -7,14 +7,14 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => '94fe8187',
-    'core.pkg.js' => '417722ff',
+    'core.pkg.css' => '989eee69',
+    'core.pkg.js' => 'b2ed04a2',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => '4b8686e3',
-    'differential.pkg.js' => '11a5b750',
+    'differential.pkg.js' => '05ad02d3',
     'diffusion.pkg.css' => '3783278d',
     'diffusion.pkg.js' => '5b4010f4',
-    'javelin.pkg.js' => '0452e69d',
+    'javelin.pkg.js' => 'dbef0389',
     'maniphest.pkg.css' => 'f1887d71',
     'maniphest.pkg.js' => '2fe8af22',
     'rsrc/css/aphront/aphront-bars.css' => '231ac33c',
@@ -23,7 +23,7 @@ return array(
     'rsrc/css/aphront/dialog-view.css' => 'c01d24b4',
     'rsrc/css/aphront/error-view.css' => '9f1d5518',
     'rsrc/css/aphront/lightbox-attachment.css' => '7acac05d',
-    'rsrc/css/aphront/list-filter-view.css' => 'ef989c67',
+    'rsrc/css/aphront/list-filter-view.css' => '2ae43867',
     'rsrc/css/aphront/multi-column.css' => '12f65921',
     'rsrc/css/aphront/notification.css' => 'ef2c9b34',
     'rsrc/css/aphront/pager-view.css' => '2e3539af',
@@ -49,7 +49,7 @@ return array(
     'rsrc/css/application/conpherence/message-pane.css' => 'e46b612c',
     'rsrc/css/application/conpherence/notification.css' => '403cf598',
     'rsrc/css/application/conpherence/update.css' => '1099a660',
-    'rsrc/css/application/conpherence/widget-pane.css' => '87b12e0c',
+    'rsrc/css/application/conpherence/widget-pane.css' => 'bf275a6c',
     'rsrc/css/application/contentsource/content-source-view.css' => '4b8b05d4',
     'rsrc/css/application/countdown/timer.css' => '86b7b0a0',
     'rsrc/css/application/diff/inline-comment-summary.css' => '8cfd34e8',
@@ -103,19 +103,19 @@ return array(
     'rsrc/css/application/settings/settings.css' => 'ea8f5915',
     'rsrc/css/application/slowvote/slowvote.css' => '266df6a1',
     'rsrc/css/application/subscriptions/subscribers-list.css' => '5bb30c78',
-    'rsrc/css/application/tokens/tokens.css' => '5f7bca25',
+    'rsrc/css/application/tokens/tokens.css' => '3d0f239e',
     'rsrc/css/application/uiexample/example.css' => '528b19de',
-    'rsrc/css/core/core.css' => '7dff07c3',
-    'rsrc/css/core/remarkup.css' => '0ec9ea61',
+    'rsrc/css/core/core.css' => '40151074',
+    'rsrc/css/core/remarkup.css' => '80c3a48c',
     'rsrc/css/core/syntax.css' => '3c18c1cb',
-    'rsrc/css/core/z-index.css' => '7e4989ed',
+    'rsrc/css/core/z-index.css' => 'efb673ac',
     'rsrc/css/diviner/diviner-shared.css' => '38813222',
     'rsrc/css/font/font-awesome.css' => '62bc244d',
     'rsrc/css/font/font-glyphicons-halflings.css' => 'c4c1c6b6',
     'rsrc/css/font/font-source-sans-pro.css' => '91d53463',
     'rsrc/css/font/phui-font-icon-base.css' => 'cd92ff25',
     'rsrc/css/layout/phabricator-action-header-view.css' => 'c14dfc57',
-    'rsrc/css/layout/phabricator-action-list-view.css' => '81383e25',
+    'rsrc/css/layout/phabricator-action-list-view.css' => '6f7ef696',
     'rsrc/css/layout/phabricator-crumbs-view.css' => '0222cbe0',
     'rsrc/css/layout/phabricator-filetree-view.css' => 'a8c86ace',
     'rsrc/css/layout/phabricator-hovercard-view.css' => '46a13cf0',
@@ -126,7 +126,7 @@ return array(
     'rsrc/css/phui/calendar/phui-calendar-month.css' => 'a92e47d2',
     'rsrc/css/phui/calendar/phui-calendar.css' => '5e1ad989',
     'rsrc/css/phui/phui-box.css' => '7b3a2eed',
-    'rsrc/css/phui/phui-button.css' => '653ac588',
+    'rsrc/css/phui/phui-button.css' => '3dbdbf0d',
     'rsrc/css/phui/phui-document.css' => '3b078dc0',
     'rsrc/css/phui/phui-feed-story.css' => '3a59c2cf',
     'rsrc/css/phui/phui-fontkit.css' => 'de84aa4a',
@@ -137,15 +137,15 @@ return array(
     'rsrc/css/phui/phui-info-panel.css' => '27ea50a1',
     'rsrc/css/phui/phui-list.css' => 'ef8035b6',
     'rsrc/css/phui/phui-object-box.css' => 'ce92d8ec',
-    'rsrc/css/phui/phui-object-item-list-view.css' => '574faec3',
-    'rsrc/css/phui/phui-pinboard-view.css' => '4b346c2a',
-    'rsrc/css/phui/phui-property-list-view.css' => 'c4d44192',
+    'rsrc/css/phui/phui-object-item-list-view.css' => '24444832',
+    'rsrc/css/phui/phui-pinboard-view.css' => 'e7d3b05e',
+    'rsrc/css/phui/phui-property-list-view.css' => 'af4b381f',
     'rsrc/css/phui/phui-remarkup-preview.css' => '19ad512b',
     'rsrc/css/phui/phui-spacing.css' => '042804d6',
     'rsrc/css/phui/phui-status.css' => '2f562399',
     'rsrc/css/phui/phui-tag-view.css' => '295d81c4',
     'rsrc/css/phui/phui-text.css' => '23e9b4b7',
-    'rsrc/css/phui/phui-timeline-view.css' => '27b280ca',
+    'rsrc/css/phui/phui-timeline-view.css' => '15ff2a9f',
     'rsrc/css/phui/phui-workboard-view.css' => '84f2c272',
     'rsrc/css/phui/phui-workpanel-view.css' => '97b69459',
     'rsrc/css/sprite-actions.css' => '969ad0e5',
@@ -163,7 +163,7 @@ return array(
     'rsrc/css/sprite-minicons.css' => 'df4f76fe',
     'rsrc/css/sprite-payments.css' => 'cc085d44',
     'rsrc/css/sprite-projects.css' => '7578fa56',
-    'rsrc/css/sprite-status.css' => '8bce1c97',
+    'rsrc/css/sprite-status.css' => '25d7f92f',
     'rsrc/css/sprite-tokens.css' => '1706b943',
     'rsrc/externals/font/fontawesome/fontawesome-webfont.eot' => 'b676fe4f',
     'rsrc/externals/font/fontawesome/fontawesome-webfont.ttf' => 'af66fc5c',
@@ -200,15 +200,17 @@ return array(
     'rsrc/externals/javelin/ext/view/__tests__/ViewInterpreter.js' => '7a94d6a5',
     'rsrc/externals/javelin/ext/view/__tests__/ViewRenderer.js' => '5426001c',
     'rsrc/externals/javelin/lib/Cookie.js' => '6b3dcf44',
-    'rsrc/externals/javelin/lib/DOM.js' => '32a4d380',
+    'rsrc/externals/javelin/lib/DOM.js' => '07d99a3d',
     'rsrc/externals/javelin/lib/History.js' => 'c60f4327',
     'rsrc/externals/javelin/lib/JSON.js' => '08e56a4e',
     'rsrc/externals/javelin/lib/Mask.js' => 'b9f26029',
-    'rsrc/externals/javelin/lib/Request.js' => '23f9bb8d',
+    'rsrc/externals/javelin/lib/Request.js' => '7bad574b',
     'rsrc/externals/javelin/lib/Resource.js' => '356de121',
+    'rsrc/externals/javelin/lib/Routable.js' => 'b3e7d692',
+    'rsrc/externals/javelin/lib/Router.js' => '29274e2b',
     'rsrc/externals/javelin/lib/URI.js' => 'd9a9b862',
     'rsrc/externals/javelin/lib/Vector.js' => '039fb90d',
-    'rsrc/externals/javelin/lib/Workflow.js' => 'f28bf201',
+    'rsrc/externals/javelin/lib/Workflow.js' => '09b15cf1',
     'rsrc/externals/javelin/lib/__tests__/Cookie.js' => '5ed109e8',
     'rsrc/externals/javelin/lib/__tests__/DOM.js' => 'c984504b',
     'rsrc/externals/javelin/lib/__tests__/JSON.js' => '2295d074',
@@ -333,8 +335,8 @@ return array(
     'rsrc/image/sprite-payments.png' => 'd8576309',
     'rsrc/image/sprite-projects-X2.png' => '218fdc8b',
     'rsrc/image/sprite-projects.png' => '631ff9a7',
-    'rsrc/image/sprite-status-X2.png' => '82445ee0',
-    'rsrc/image/sprite-status.png' => '926a896a',
+    'rsrc/image/sprite-status-X2.png' => '6cb4b401',
+    'rsrc/image/sprite-status.png' => '97eb1562',
     'rsrc/image/sprite-tokens-X2.png' => 'b4776580',
     'rsrc/image/sprite-tokens.png' => '25b75533',
     'rsrc/image/texture/card-gradient.png' => '815f26e8',
@@ -349,12 +351,12 @@ return array(
     'rsrc/image/texture/table_header_tall.png' => 'd56b434f',
     'rsrc/js/application/aphlict/Aphlict.js' => '493665ee',
     'rsrc/js/application/aphlict/behavior-aphlict-dropdown.js' => '2a2dba85',
-    'rsrc/js/application/aphlict/behavior-aphlict-listen.js' => '845731b8',
+    'rsrc/js/application/aphlict/behavior-aphlict-listen.js' => '0a6c2de6',
     'rsrc/js/application/auth/behavior-persona-login.js' => '9414ff18',
     'rsrc/js/application/config/behavior-reorder-fields.js' => '938aed89',
     'rsrc/js/application/conpherence/behavior-menu.js' => '7ee23816',
     'rsrc/js/application/conpherence/behavior-pontificate.js' => '53f6f2dd',
-    'rsrc/js/application/conpherence/behavior-widget-pane.js' => 'd8ef8659',
+    'rsrc/js/application/conpherence/behavior-widget-pane.js' => '40b1ff90',
     'rsrc/js/application/countdown/timer.js' => '889c96f3',
     'rsrc/js/application/dashboard/behavior-dashboard-async-panel.js' => '4398eabb',
     'rsrc/js/application/differential/DifferentialInlineCommentEditor.js' => 'f2441746',
@@ -362,10 +364,10 @@ return array(
     'rsrc/js/application/differential/behavior-comment-jump.js' => '71755c79',
     'rsrc/js/application/differential/behavior-comment-preview.js' => '127f2018',
     'rsrc/js/application/differential/behavior-diff-radios.js' => 'e1ff79b1',
-    'rsrc/js/application/differential/behavior-dropdown-menus.js' => '5f004630',
+    'rsrc/js/application/differential/behavior-dropdown-menus.js' => '7f93ef26',
     'rsrc/js/application/differential/behavior-edit-inline-comments.js' => '00861799',
     'rsrc/js/application/differential/behavior-keyboard-nav.js' => '173ce7e7',
-    'rsrc/js/application/differential/behavior-populate.js' => 'ce0c217a',
+    'rsrc/js/application/differential/behavior-populate.js' => 'dfdf9f34',
     'rsrc/js/application/differential/behavior-show-all-comments.js' => '7c273581',
     'rsrc/js/application/differential/behavior-show-field-details.js' => '441f2137',
     'rsrc/js/application/differential/behavior-show-more.js' => 'dd7e8ef5',
@@ -402,7 +404,7 @@ return array(
     'rsrc/js/application/phortune/behavior-stripe-payment-form.js' => '1693a296',
     'rsrc/js/application/phortune/behavior-test-payment-form.js' => 'b3e5ee60',
     'rsrc/js/application/phortune/phortune-credit-card-form.js' => '2290aeef',
-    'rsrc/js/application/policy/behavior-policy-control.js' => 'c01153ea',
+    'rsrc/js/application/policy/behavior-policy-control.js' => 'bc99b0f2',
     'rsrc/js/application/policy/behavior-policy-rule-editor.js' => '263aeb8c',
     'rsrc/js/application/ponder/behavior-votebox.js' => '327dbe61',
     'rsrc/js/application/projects/behavior-project-boards.js' => 'd8e135db',
@@ -414,7 +416,7 @@ return array(
     'rsrc/js/application/search/behavior-reorder-queries.js' => '37871df4',
     'rsrc/js/application/slowvote/behavior-slowvote-embed.js' => 'a51fdb2e',
     'rsrc/js/application/transactions/behavior-transaction-comment-form.js' => '9084a36f',
-    'rsrc/js/application/transactions/behavior-transaction-list.js' => '925c9bab',
+    'rsrc/js/application/transactions/behavior-transaction-list.js' => 'cf656c84',
     'rsrc/js/application/uiexample/JavelinViewExample.js' => 'd4a14807',
     'rsrc/js/application/uiexample/ReactorButtonExample.js' => '44524435',
     'rsrc/js/application/uiexample/ReactorCheckboxExample.js' => '7ba325ee',
@@ -431,8 +433,6 @@ return array(
     'rsrc/js/core/Busy.js' => '6453c869',
     'rsrc/js/core/DragAndDropFileUpload.js' => 'ae6abfba',
     'rsrc/js/core/DraggableList.js' => '1681c4d4',
-    'rsrc/js/core/DropdownMenu.js' => 'fb342e18',
-    'rsrc/js/core/DropdownMenuItem.js' => '0f386ef4',
     'rsrc/js/core/FileUpload.js' => 'a4ae61bf',
     'rsrc/js/core/Hovercard.js' => '4f344388',
     'rsrc/js/core/KeyboardShortcut.js' => '1ae869f2',
@@ -440,7 +440,7 @@ return array(
     'rsrc/js/core/MultirowRowManager.js' => '50395a1b',
     'rsrc/js/core/Notification.js' => '0c6946e7',
     'rsrc/js/core/Prefab.js' => '0326e5d0',
-    'rsrc/js/core/ShapedRequest.js' => 'dfa181a4',
+    'rsrc/js/core/ShapedRequest.js' => '7cbe244b',
     'rsrc/js/core/TextAreaUtils.js' => 'b3ec3cfc',
     'rsrc/js/core/ToolTip.js' => '3915d490',
     'rsrc/js/core/behavior-active-nav.js' => 'c81bc98f',
@@ -469,18 +469,22 @@ return array(
     'rsrc/js/core/behavior-oncopy.js' => 'c3e218fe',
     'rsrc/js/core/behavior-phabricator-nav.js' => 'b5842a5e',
     'rsrc/js/core/behavior-phabricator-remarkup-assist.js' => 'c021950a',
-    'rsrc/js/core/behavior-refresh-csrf.js' => 'c4b31646',
+    'rsrc/js/core/behavior-refresh-csrf.js' => '7814b593',
     'rsrc/js/core/behavior-remarkup-preview.js' => 'f7379f45',
     'rsrc/js/core/behavior-reveal-content.js' => '8f24abfc',
-    'rsrc/js/core/behavior-search-typeahead.js' => 'f6b56f7a',
+    'rsrc/js/core/behavior-search-typeahead.js' => 'd8469741',
     'rsrc/js/core/behavior-select-on-click.js' => '0e34ca02',
     'rsrc/js/core/behavior-toggle-class.js' => 'a82a7769',
     'rsrc/js/core/behavior-tokenizer.js' => 'b3a4b884',
     'rsrc/js/core/behavior-tooltip.js' => '48db4145',
     'rsrc/js/core/behavior-watch-anchor.js' => '06e05112',
-    'rsrc/js/core/behavior-workflow.js' => 'fee00761',
+    'rsrc/js/core/behavior-workflow.js' => '0a3f3021',
     'rsrc/js/core/phtize.js' => 'd254d646',
     'rsrc/js/phui/behavior-phui-object-box-tabs.js' => 'a3e2244e',
+    'rsrc/js/phui/behavior-phui-timeline-dropdown-menu.js' => '4d94d9c3',
+    'rsrc/js/phuix/PHUIXActionListView.js' => 'b5c256b8',
+    'rsrc/js/phuix/PHUIXActionView.js' => '19a0b148',
+    'rsrc/js/phuix/PHUIXDropdownMenu.js' => 'bd4c8dca',
     'rsrc/swf/aphlict.swf' => 'abac967d',
   ),
   'symbols' =>
@@ -490,7 +494,7 @@ return array(
     'aphront-dark-console-css' => '6378ef3d',
     'aphront-dialog-view-css' => 'c01d24b4',
     'aphront-error-view-css' => '9f1d5518',
-    'aphront-list-filter-view-css' => 'ef989c67',
+    'aphront-list-filter-view-css' => '2ae43867',
     'aphront-multi-column-view-css' => '12f65921',
     'aphront-pager-view-css' => '2e3539af',
     'aphront-panel-view-css' => '5846dfa2',
@@ -506,7 +510,7 @@ return array(
     'conpherence-message-pane-css' => 'e46b612c',
     'conpherence-notification-css' => '403cf598',
     'conpherence-update-css' => '1099a660',
-    'conpherence-widget-pane-css' => '87b12e0c',
+    'conpherence-widget-pane-css' => 'bf275a6c',
     'differential-changeset-view-css' => '1570a1ff',
     'differential-core-view-css' => '7ac3cabc',
     'differential-inline-comment-editor' => 'f2441746',
@@ -532,7 +536,7 @@ return array(
     'javelin-aphlict' => '493665ee',
     'javelin-behavior' => '8a3ed18b',
     'javelin-behavior-aphlict-dropdown' => '2a2dba85',
-    'javelin-behavior-aphlict-listen' => '845731b8',
+    'javelin-behavior-aphlict-listen' => '0a6c2de6',
     'javelin-behavior-aphront-basic-tokenizer' => 'b3a4b884',
     'javelin-behavior-aphront-crop' => 'b98fc918',
     'javelin-behavior-aphront-drag-and-drop-textarea' => '4a11ea9c',
@@ -544,7 +548,7 @@ return array(
     'javelin-behavior-config-reorder-fields' => '938aed89',
     'javelin-behavior-conpherence-menu' => '7ee23816',
     'javelin-behavior-conpherence-pontificate' => '53f6f2dd',
-    'javelin-behavior-conpherence-widget-pane' => 'd8ef8659',
+    'javelin-behavior-conpherence-widget-pane' => '40b1ff90',
     'javelin-behavior-countdown-timer' => '889c96f3',
     'javelin-behavior-dark-console' => 'e9fdb5e5',
     'javelin-behavior-dashboard-async-panel' => '4398eabb',
@@ -552,11 +556,11 @@ return array(
     'javelin-behavior-differential-add-reviewers-and-ccs' => '533a187b',
     'javelin-behavior-differential-comment-jump' => '71755c79',
     'javelin-behavior-differential-diff-radios' => 'e1ff79b1',
-    'javelin-behavior-differential-dropdown-menus' => '5f004630',
+    'javelin-behavior-differential-dropdown-menus' => '7f93ef26',
     'javelin-behavior-differential-edit-inline-comments' => '00861799',
     'javelin-behavior-differential-feedback-preview' => '127f2018',
     'javelin-behavior-differential-keyboard-navigation' => '173ce7e7',
-    'javelin-behavior-differential-populate' => 'ce0c217a',
+    'javelin-behavior-differential-populate' => 'dfdf9f34',
     'javelin-behavior-differential-show-field-details' => '441f2137',
     'javelin-behavior-differential-show-more' => 'dd7e8ef5',
     'javelin-behavior-differential-toggle-files' => 'ca3f91eb',
@@ -605,22 +609,23 @@ return array(
     'javelin-behavior-phabricator-oncopy' => 'c3e218fe',
     'javelin-behavior-phabricator-remarkup-assist' => 'c021950a',
     'javelin-behavior-phabricator-reveal-content' => '8f24abfc',
-    'javelin-behavior-phabricator-search-typeahead' => 'f6b56f7a',
+    'javelin-behavior-phabricator-search-typeahead' => 'd8469741',
     'javelin-behavior-phabricator-show-all-transactions' => '7c273581',
     'javelin-behavior-phabricator-tooltips' => '48db4145',
     'javelin-behavior-phabricator-transaction-comment-form' => '9084a36f',
-    'javelin-behavior-phabricator-transaction-list' => '925c9bab',
+    'javelin-behavior-phabricator-transaction-list' => 'cf656c84',
     'javelin-behavior-phabricator-watch-anchor' => '06e05112',
     'javelin-behavior-phame-post-preview' => '61d927ec',
     'javelin-behavior-pholio-mock-edit' => '1e1e8bb0',
     'javelin-behavior-pholio-mock-view' => '28497740',
     'javelin-behavior-phui-object-box-tabs' => 'a3e2244e',
-    'javelin-behavior-policy-control' => 'c01153ea',
+    'javelin-behavior-phui-timeline-dropdown-menu' => '4d94d9c3',
+    'javelin-behavior-policy-control' => 'bc99b0f2',
     'javelin-behavior-policy-rule-editor' => '263aeb8c',
     'javelin-behavior-ponder-votebox' => '327dbe61',
     'javelin-behavior-project-boards' => 'd8e135db',
     'javelin-behavior-project-create' => '065227cc',
-    'javelin-behavior-refresh-csrf' => 'c4b31646',
+    'javelin-behavior-refresh-csrf' => '7814b593',
     'javelin-behavior-releeph-preview-branch' => '9eb2cedb',
     'javelin-behavior-releeph-request-state-change' => 'd259e7c9',
     'javelin-behavior-releeph-request-typeahead' => 'cd9e7094',
@@ -633,10 +638,10 @@ return array(
     'javelin-behavior-test-payment-form' => 'b3e5ee60',
     'javelin-behavior-toggle-class' => 'a82a7769',
     'javelin-behavior-view-placeholder' => '2fa810fc',
-    'javelin-behavior-workflow' => 'fee00761',
+    'javelin-behavior-workflow' => '0a3f3021',
     'javelin-color' => '7e41274a',
     'javelin-cookie' => '6b3dcf44',
-    'javelin-dom' => '32a4d380',
+    'javelin-dom' => '07d99a3d',
     'javelin-dynval' => 'f6555212',
     'javelin-event' => '79473b62',
     'javelin-fx' => '54b612ba',
@@ -649,8 +654,10 @@ return array(
     'javelin-reactor-dom' => 'b6d401d6',
     'javelin-reactor-node-calmer' => '76f4ebed',
     'javelin-reactornode' => 'b4c30592',
-    'javelin-request' => '23f9bb8d',
+    'javelin-request' => '7bad574b',
     'javelin-resource' => '356de121',
+    'javelin-routable' => 'b3e7d692',
+    'javelin-router' => '29274e2b',
     'javelin-stratcom' => 'c293f7b9',
     'javelin-tokenizer' => 'e7c21fb3',
     'javelin-typeahead' => 'c54eeefb',
@@ -668,7 +675,7 @@ return array(
     'javelin-view-interpreter' => '0c33c1a0',
     'javelin-view-renderer' => '6c2b09a2',
     'javelin-view-visitor' => 'efe49472',
-    'javelin-workflow' => 'f28bf201',
+    'javelin-workflow' => '09b15cf1',
     'lightbox-attachment-css' => '7acac05d',
     'maniphest-batch-editor' => '8f380ebc',
     'maniphest-report-css' => '6fc16517',
@@ -681,17 +688,16 @@ return array(
     'path-typeahead' => 'f7fc67ec',
     'people-profile-css' => 'ba7b2762',
     'phabricator-action-header-view-css' => 'c14dfc57',
-    'phabricator-action-list-view-css' => '81383e25',
+    'phabricator-action-list-view-css' => '6f7ef696',
     'phabricator-application-launch-view-css' => 'd290ba21',
     'phabricator-busy' => '6453c869',
     'phabricator-chatlog-css' => '852140ff',
     'phabricator-content-source-view-css' => '4b8b05d4',
-    'phabricator-core-css' => '7dff07c3',
+    'phabricator-core-css' => '40151074',
     'phabricator-countdown-css' => '86b7b0a0',
     'phabricator-crumbs-view-css' => '0222cbe0',
     'phabricator-drag-and-drop-file-upload' => 'ae6abfba',
     'phabricator-draggable-list' => '1681c4d4',
-    'phabricator-dropdown-menu' => 'fb342e18',
     'phabricator-fatal-config-template-css' => '25d446d6',
     'phabricator-feed-css' => '0d17c209',
     'phabricator-file-upload' => 'a4ae61bf',
@@ -703,7 +709,6 @@ return array(
     'phabricator-keyboard-shortcut' => '1ae869f2',
     'phabricator-keyboard-shortcut-manager' => 'ad7a69ca',
     'phabricator-main-menu-view' => '0a599177',
-    'phabricator-menu-item' => '0f386ef4',
     'phabricator-nav-view-css' => '80e60fc1',
     'phabricator-notification' => '0c6946e7',
     'phabricator-notification-css' => 'ef2c9b34',
@@ -713,10 +718,10 @@ return array(
     'phabricator-prefab' => '0326e5d0',
     'phabricator-profile-css' => '33e6f703',
     'phabricator-project-tag-css' => '095c9404',
-    'phabricator-remarkup-css' => '0ec9ea61',
+    'phabricator-remarkup-css' => '80c3a48c',
     'phabricator-search-results-css' => 'f240504c',
     'phabricator-settings-css' => 'ea8f5915',
-    'phabricator-shaped-request' => 'dfa181a4',
+    'phabricator-shaped-request' => '7cbe244b',
     'phabricator-side-menu-view-css' => '503699d0',
     'phabricator-slowvote-css' => '266df6a1',
     'phabricator-source-code-view-css' => '62a99814',
@@ -735,7 +740,7 @@ return array(
     'phabricator-uiexample-reactor-select' => '189e4fe3',
     'phabricator-uiexample-reactor-sendclass' => 'bf97561d',
     'phabricator-uiexample-reactor-sendproperties' => '551add57',
-    'phabricator-zindex-css' => '7e4989ed',
+    'phabricator-zindex-css' => 'efb673ac',
     'phame-css' => '19ecc703',
     'pholio-css' => '2fa97dbe',
     'pholio-edit-css' => 'b9e59b6d',
@@ -745,7 +750,7 @@ return array(
     'phrequent-css' => 'ffc185ad',
     'phriction-document-css' => '7d7f0071',
     'phui-box-css' => '7b3a2eed',
-    'phui-button-css' => '653ac588',
+    'phui-button-css' => '3dbdbf0d',
     'phui-calendar-css' => '5e1ad989',
     'phui-calendar-day-css' => 'de035c8a',
     'phui-calendar-list-css' => 'c1d0ca59',
@@ -761,17 +766,20 @@ return array(
     'phui-info-panel-css' => '27ea50a1',
     'phui-list-view-css' => 'ef8035b6',
     'phui-object-box-css' => 'ce92d8ec',
-    'phui-object-item-list-view-css' => '574faec3',
-    'phui-pinboard-view-css' => '4b346c2a',
-    'phui-property-list-view-css' => 'c4d44192',
+    'phui-object-item-list-view-css' => '24444832',
+    'phui-pinboard-view-css' => 'e7d3b05e',
+    'phui-property-list-view-css' => 'af4b381f',
     'phui-remarkup-preview-css' => '19ad512b',
     'phui-spacing-css' => '042804d6',
     'phui-status-list-view-css' => '2f562399',
     'phui-tag-view-css' => '295d81c4',
     'phui-text-css' => '23e9b4b7',
-    'phui-timeline-view-css' => '27b280ca',
+    'phui-timeline-view-css' => '15ff2a9f',
     'phui-workboard-view-css' => '84f2c272',
     'phui-workpanel-view-css' => '97b69459',
+    'phuix-action-list-view' => 'b5c256b8',
+    'phuix-action-view' => '19a0b148',
+    'phuix-dropdown-menu' => 'bd4c8dca',
     'policy-css' => '957ea14c',
     'policy-edit-css' => '05cca26a',
     'policy-transaction-detail-css' => '82100a43',
@@ -802,11 +810,11 @@ return array(
     'sprite-minicons-css' => 'df4f76fe',
     'sprite-payments-css' => 'cc085d44',
     'sprite-projects-css' => '7578fa56',
-    'sprite-status-css' => '8bce1c97',
+    'sprite-status-css' => '25d7f92f',
     'sprite-tokens-css' => '1706b943',
     'subscribers-list-css' => '5bb30c78',
     'syntax-highlighting-css' => '3c18c1cb',
-    'tokens-css' => '5f7bca25',
+    'tokens-css' => '3d0f239e',
   ),
   'requires' =>
   array(
@@ -863,9 +871,49 @@ return array(
       2 => 'javelin-dom',
       3 => 'javelin-vector',
     ),
+    '07d99a3d' =>
+    array(
+      0 => 'javelin-magical-init',
+      1 => 'javelin-install',
+      2 => 'javelin-util',
+      3 => 'javelin-vector',
+      4 => 'javelin-stratcom',
+    ),
     '08e56a4e' =>
     array(
       0 => 'javelin-install',
+    ),
+    '09b15cf1' =>
+    array(
+      0 => 'javelin-stratcom',
+      1 => 'javelin-request',
+      2 => 'javelin-dom',
+      3 => 'javelin-vector',
+      4 => 'javelin-install',
+      5 => 'javelin-util',
+      6 => 'javelin-mask',
+      7 => 'javelin-uri',
+      8 => 'javelin-routable',
+    ),
+    '0a3f3021' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-workflow',
+      3 => 'javelin-dom',
+      4 => 'javelin-router',
+    ),
+    '0a6c2de6' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-aphlict',
+      2 => 'javelin-stratcom',
+      3 => 'javelin-request',
+      4 => 'javelin-uri',
+      5 => 'javelin-dom',
+      6 => 'javelin-json',
+      7 => 'javelin-router',
+      8 => 'phabricator-notification',
     ),
     '0c33c1a0' =>
     array(
@@ -886,11 +934,6 @@ return array(
       0 => 'javelin-behavior',
       1 => 'javelin-stratcom',
       2 => 'javelin-dom',
-    ),
-    '0f386ef4' =>
-    array(
-      0 => 'javelin-install',
-      1 => 'javelin-dom',
     ),
     '0f764c35' =>
     array(
@@ -933,6 +976,12 @@ return array(
       0 => 'javelin-install',
       1 => 'javelin-dom',
       2 => 'javelin-reactor-dom',
+    ),
+    '19a0b148' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-dom',
+      2 => 'javelin-util',
     ),
     '1ae869f2' =>
     array(
@@ -977,16 +1026,6 @@ return array(
       5 => 'javelin-json',
       6 => 'phabricator-prefab',
     ),
-    '23f9bb8d' =>
-    array(
-      0 => 'javelin-install',
-      1 => 'javelin-stratcom',
-      2 => 'javelin-util',
-      3 => 'javelin-behavior',
-      4 => 'javelin-json',
-      5 => 'javelin-dom',
-      6 => 'javelin-resource',
-    ),
     '263aeb8c' =>
     array(
       0 => 'javelin-behavior',
@@ -998,6 +1037,11 @@ return array(
       6 => 'javelin-typeahead',
       7 => 'javelin-typeahead-preloaded-source',
       8 => 'javelin-json',
+    ),
+    '29274e2b' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
     ),
     '2a2dba85' =>
     array(
@@ -1030,14 +1074,6 @@ return array(
       2 => 'javelin-util',
       3 => 'javelin-stratcom',
       4 => 'javelin-request',
-    ),
-    '32a4d380' =>
-    array(
-      0 => 'javelin-magical-init',
-      1 => 'javelin-install',
-      2 => 'javelin-util',
-      3 => 'javelin-vector',
-      4 => 'javelin-stratcom',
     ),
     '356de121' =>
     array(
@@ -1074,6 +1110,19 @@ return array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
       2 => 'phortune-credit-card-form',
+    ),
+    '40b1ff90' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-stratcom',
+      3 => 'javelin-workflow',
+      4 => 'javelin-util',
+      5 => 'phabricator-notification',
+      6 => 'javelin-behavior-device',
+      7 => 'phuix-dropdown-menu',
+      8 => 'phuix-action-list-view',
+      9 => 'phuix-action-view',
     ),
     '4398eabb' =>
     array(
@@ -1114,6 +1163,13 @@ return array(
       1 => 'javelin-dom',
       2 => 'phabricator-drag-and-drop-file-upload',
       3 => 'phabricator-textareautils',
+    ),
+    '4d94d9c3' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-dom',
+      3 => 'phuix-dropdown-menu',
     ),
     '4e37e4de' =>
     array(
@@ -1187,16 +1243,6 @@ return array(
       3 => 'javelin-stratcom',
       4 => 'javelin-vector',
     ),
-    '5f004630' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-      2 => 'javelin-util',
-      3 => 'javelin-stratcom',
-      4 => 'phabricator-dropdown-menu',
-      5 => 'phabricator-menu-item',
-      6 => 'phabricator-phtize',
-    ),
     '5f850b5c' =>
     array(
       0 => 'javelin-install',
@@ -1207,6 +1253,18 @@ return array(
       1 => 'javelin-dom',
       2 => 'javelin-util',
       3 => 'phabricator-shaped-request',
+    ),
+    '7319e029' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+    ),
+    '62e18640' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
+      2 => 'javelin-dom',
+      3 => 'javelin-typeahead-normalizer',
     ),
     '6453c869' =>
     array(
@@ -1236,18 +1294,6 @@ return array(
       1 => 'javelin-stratcom',
       2 => 'javelin-dom',
     ),
-    '7319e029' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-    ),
-    '62e18640' =>
-    array(
-      0 => 'javelin-install',
-      1 => 'javelin-util',
-      2 => 'javelin-dom',
-      3 => 'javelin-typeahead-normalizer',
-    ),
     '75903ee1' =>
     array(
       0 => 'javelin-behavior',
@@ -1266,6 +1312,15 @@ return array(
       0 => 'javelin-install',
       1 => 'javelin-util',
     ),
+    '7814b593' =>
+    array(
+      0 => 'javelin-request',
+      1 => 'javelin-behavior',
+      2 => 'javelin-dom',
+      3 => 'javelin-router',
+      4 => 'javelin-util',
+      5 => 'phabricator-busy',
+    ),
     '79473b62' =>
     array(
       0 => 'javelin-install',
@@ -1281,11 +1336,29 @@ return array(
       1 => 'javelin-dom',
       2 => 'javelin-reactor-dom',
     ),
+    '7bad574b' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-util',
+      3 => 'javelin-behavior',
+      4 => 'javelin-json',
+      5 => 'javelin-dom',
+      6 => 'javelin-resource',
+      7 => 'javelin-routable',
+    ),
     '7c273581' =>
     array(
       0 => 'javelin-behavior',
       1 => 'javelin-stratcom',
       2 => 'javelin-dom',
+    ),
+    '7cbe244b' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
+      2 => 'javelin-request',
+      3 => 'javelin-router',
     ),
     '7e41274a' =>
     array(
@@ -1313,22 +1386,22 @@ return array(
       0 => 'javelin-behavior',
       1 => 'javelin-history',
     ),
+    '7f93ef26' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-util',
+      3 => 'javelin-stratcom',
+      4 => 'phuix-dropdown-menu',
+      5 => 'phuix-action-list-view',
+      6 => 'phuix-action-view',
+      7 => 'phabricator-phtize',
+    ),
     '82f568cd' =>
     array(
       0 => 'javelin-install',
       1 => 'javelin-dom',
       2 => 'javelin-reactor-dom',
-    ),
-    '845731b8' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-aphlict',
-      2 => 'javelin-stratcom',
-      3 => 'javelin-request',
-      4 => 'javelin-uri',
-      5 => 'javelin-dom',
-      6 => 'javelin-json',
-      7 => 'phabricator-notification',
     ),
     '84845b5b' =>
     array(
@@ -1401,15 +1474,6 @@ return array(
       3 => 'javelin-fx',
       4 => 'javelin-request',
       5 => 'phabricator-shaped-request',
-    ),
-    '925c9bab' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-stratcom',
-      2 => 'javelin-workflow',
-      3 => 'javelin-dom',
-      4 => 'javelin-fx',
-      5 => 'javelin-util',
     ),
     '938aed89' =>
     array(
@@ -1538,6 +1602,10 @@ return array(
       1 => 'javelin-dom',
       2 => 'phortune-credit-card-form',
     ),
+    'b3e7d692' =>
+    array(
+      0 => 'javelin-install',
+    ),
     'b3ec3cfc' =>
     array(
       0 => 'javelin-install',
@@ -1566,6 +1634,11 @@ return array(
       5 => 'javelin-vector',
       6 => 'javelin-request',
       7 => 'javelin-util',
+    ),
+    'b5c256b8' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-dom',
     ),
     'b657bdf8' =>
     array(
@@ -1601,6 +1674,24 @@ return array(
       2 => 'javelin-dom',
       3 => 'javelin-history',
     ),
+    'bc99b0f2' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-util',
+      3 => 'phuix-dropdown-menu',
+      4 => 'phuix-action-list-view',
+      5 => 'phuix-action-view',
+      6 => 'javelin-workflow',
+    ),
+    'bd4c8dca' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
+      2 => 'javelin-dom',
+      3 => 'javelin-vector',
+      4 => 'javelin-stratcom',
+    ),
     'bdaf4d04' =>
     array(
       0 => 'javelin-behavior',
@@ -1620,15 +1711,6 @@ return array(
       0 => 'javelin-install',
       1 => 'javelin-dom',
       2 => 'javelin-reactor-dom',
-    ),
-    'c01153ea' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-      2 => 'javelin-util',
-      3 => 'phabricator-dropdown-menu',
-      4 => 'phabricator-menu-item',
-      5 => 'javelin-workflow',
     ),
     'c021950a' =>
     array(
@@ -1651,13 +1733,6 @@ return array(
     array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
-    ),
-    'c4b31646' =>
-    array(
-      0 => 'javelin-request',
-      1 => 'javelin-behavior',
-      2 => 'javelin-dom',
-      3 => 'phabricator-busy',
     ),
     'c51a6616' =>
     array(
@@ -1713,16 +1788,15 @@ return array(
       0 => 'javelin-install',
       1 => 'javelin-typeahead-source',
     ),
-    'ce0c217a' =>
+    'cf656c84' =>
     array(
       0 => 'javelin-behavior',
-      1 => 'javelin-workflow',
-      2 => 'javelin-util',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-workflow',
       3 => 'javelin-dom',
-      4 => 'javelin-stratcom',
-      5 => 'javelin-behavior-device',
-      6 => 'javelin-vector',
-      7 => 'phabricator-tooltip',
+      4 => 'javelin-fx',
+      5 => 'javelin-uri',
+      6 => 'phabricator-textareautils',
     ),
     'cf76cfd5' =>
     array(
@@ -1768,6 +1842,16 @@ return array(
       3 => 'javelin-dom',
       4 => 'phabricator-keyboard-shortcut',
     ),
+    'd8469741' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-typeahead-ondemand-source',
+      2 => 'javelin-typeahead',
+      3 => 'javelin-dom',
+      4 => 'javelin-uri',
+      5 => 'javelin-util',
+      6 => 'javelin-stratcom',
+    ),
     'd8e135db' =>
     array(
       0 => 'javelin-behavior',
@@ -1776,18 +1860,6 @@ return array(
       3 => 'javelin-stratcom',
       4 => 'javelin-workflow',
       5 => 'phabricator-draggable-list',
-    ),
-    'd8ef8659' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-      2 => 'javelin-stratcom',
-      3 => 'javelin-workflow',
-      4 => 'javelin-util',
-      5 => 'phabricator-notification',
-      6 => 'javelin-behavior-device',
-      7 => 'phabricator-dropdown-menu',
-      8 => 'phabricator-menu-item',
     ),
     'd9a9b862' =>
     array(
@@ -1809,11 +1881,17 @@ return array(
       1 => 'javelin-dom',
       2 => 'phabricator-prefab',
     ),
-    'dfa181a4' =>
+    'dfdf9f34' =>
     array(
-      0 => 'javelin-install',
-      1 => 'javelin-util',
-      2 => 'javelin-request',
+      0 => 'javelin-behavior',
+      1 => 'javelin-workflow',
+      2 => 'javelin-util',
+      3 => 'javelin-dom',
+      4 => 'javelin-stratcom',
+      5 => 'javelin-behavior-device',
+      6 => 'javelin-vector',
+      7 => 'javelin-router',
+      8 => 'phabricator-tooltip',
     ),
     'e1ff79b1' =>
     array(
@@ -1873,17 +1951,6 @@ return array(
       4 => 'javelin-request',
       5 => 'javelin-workflow',
     ),
-    'f28bf201' =>
-    array(
-      0 => 'javelin-stratcom',
-      1 => 'javelin-request',
-      2 => 'javelin-dom',
-      3 => 'javelin-vector',
-      4 => 'javelin-install',
-      5 => 'javelin-util',
-      6 => 'javelin-mask',
-      7 => 'javelin-uri',
-    ),
     'f42bb8c6' =>
     array(
       0 => 'javelin-stratcom',
@@ -1897,16 +1964,6 @@ return array(
       1 => 'javelin-reactornode',
       2 => 'javelin-util',
       3 => 'javelin-reactor',
-    ),
-    'f6b56f7a' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-typeahead-ondemand-source',
-      2 => 'javelin-typeahead',
-      3 => 'javelin-dom',
-      4 => 'javelin-uri',
-      5 => 'javelin-util',
-      6 => 'javelin-stratcom',
     ),
     'f7379f45' =>
     array(
@@ -1946,15 +2003,6 @@ return array(
       4 => 'javelin-stratcom',
       5 => 'phabricator-shaped-request',
     ),
-    'fb342e18' =>
-    array(
-      0 => 'javelin-install',
-      1 => 'javelin-util',
-      2 => 'javelin-dom',
-      3 => 'javelin-vector',
-      4 => 'javelin-stratcom',
-      5 => 'phabricator-menu-item',
-    ),
     'fbbce3bf' =>
     array(
       0 => 'phabricator-busy',
@@ -1977,13 +2025,6 @@ return array(
       3 => 'phabricator-prefab',
       4 => 'multirow-row-manager',
       5 => 'javelin-json',
-    ),
-    'fee00761' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-stratcom',
-      2 => 'javelin-workflow',
-      3 => 'javelin-dom',
     ),
     28497740 =>
     array(
@@ -2084,36 +2125,37 @@ return array(
       6 => 'javelin-behavior-refresh-csrf',
       7 => 'javelin-behavior-phabricator-watch-anchor',
       8 => 'javelin-behavior-phabricator-autofocus',
-      9 => 'phabricator-menu-item',
-      10 => 'phabricator-dropdown-menu',
-      11 => 'phabricator-phtize',
-      12 => 'javelin-behavior-phabricator-oncopy',
-      13 => 'phabricator-tooltip',
-      14 => 'javelin-behavior-phabricator-tooltips',
-      15 => 'phabricator-prefab',
-      16 => 'javelin-behavior-device',
-      17 => 'javelin-behavior-toggle-class',
-      18 => 'javelin-behavior-lightbox-attachments',
-      19 => 'phabricator-busy',
-      20 => 'javelin-aphlict',
-      21 => 'phabricator-notification',
-      22 => 'javelin-behavior-aphlict-listen',
-      23 => 'javelin-behavior-phabricator-search-typeahead',
-      24 => 'javelin-behavior-konami',
-      25 => 'javelin-behavior-aphlict-dropdown',
-      26 => 'javelin-behavior-history-install',
-      27 => 'javelin-behavior-phabricator-gesture',
-      28 => 'javelin-behavior-phabricator-active-nav',
-      29 => 'javelin-behavior-phabricator-nav',
-      30 => 'javelin-behavior-phabricator-remarkup-assist',
-      31 => 'phabricator-textareautils',
-      32 => 'phabricator-file-upload',
-      33 => 'javelin-behavior-global-drag-and-drop',
-      34 => 'javelin-behavior-phabricator-reveal-content',
-      35 => 'phabricator-hovercard',
-      36 => 'javelin-behavior-phabricator-hovercards',
-      37 => 'javelin-color',
-      38 => 'javelin-fx',
+      9 => 'phuix-dropdown-menu',
+      10 => 'phuix-action-list-view',
+      11 => 'phuix-action-view',
+      12 => 'phabricator-phtize',
+      13 => 'javelin-behavior-phabricator-oncopy',
+      14 => 'phabricator-tooltip',
+      15 => 'javelin-behavior-phabricator-tooltips',
+      16 => 'phabricator-prefab',
+      17 => 'javelin-behavior-device',
+      18 => 'javelin-behavior-toggle-class',
+      19 => 'javelin-behavior-lightbox-attachments',
+      20 => 'phabricator-busy',
+      21 => 'javelin-aphlict',
+      22 => 'phabricator-notification',
+      23 => 'javelin-behavior-aphlict-listen',
+      24 => 'javelin-behavior-phabricator-search-typeahead',
+      25 => 'javelin-behavior-konami',
+      26 => 'javelin-behavior-aphlict-dropdown',
+      27 => 'javelin-behavior-history-install',
+      28 => 'javelin-behavior-phabricator-gesture',
+      29 => 'javelin-behavior-phabricator-active-nav',
+      30 => 'javelin-behavior-phabricator-nav',
+      31 => 'javelin-behavior-phabricator-remarkup-assist',
+      32 => 'phabricator-textareautils',
+      33 => 'phabricator-file-upload',
+      34 => 'javelin-behavior-global-drag-and-drop',
+      35 => 'javelin-behavior-phabricator-reveal-content',
+      36 => 'phabricator-hovercard',
+      37 => 'javelin-behavior-phabricator-hovercards',
+      38 => 'javelin-color',
+      39 => 'javelin-fx',
     ),
     'darkconsole.pkg.js' =>
     array(

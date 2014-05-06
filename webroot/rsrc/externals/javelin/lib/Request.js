@@ -6,6 +6,7 @@
  *           javelin-json
  *           javelin-dom
  *           javelin-resource
+ *           javelin-routable
  * @provides javelin-request
  * @javelin
  */
@@ -67,6 +68,18 @@ JX.install('Request', {
                                            this._getSameOriginTransport();
       }
       return this._transport;
+    },
+
+    getRoutable: function() {
+      var routable = new JX.Routable();
+      routable.listen('start', JX.bind(this, function() {
+        // Pass the event to allow other listeners to "start" to configure this
+        // request before it fires.
+        JX.Stratcom.pass(JX.Stratcom.context());
+        this.send();
+      }));
+      this.listen('finally', JX.bind(routable, routable.done));
+      return routable;
     },
 
     send : function() {

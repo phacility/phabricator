@@ -61,7 +61,7 @@
   padding-left: 12px;
   text-align: left;
   margin-left: 0;
-  width: 100%;
+  width: auto;
 }
 
 .phui-property-list-value {
@@ -79,9 +79,10 @@
 .device .phui-property-list-value,
 .phui-property-list-properties.phui-property-list-stacked
   .phui-property-list-value {
-  padding-left: 16px;
+  padding: 0 16px;
   margin-bottom: 8px;
-  width: 100%;
+  width: auto;
+  word-break: break-word;
 }
 
 .phui-property-list-section-header {

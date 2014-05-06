@@ -30,7 +30,10 @@ final class PhabricatorMacroQuery
 
   public static function getFlagColorsOptions() {
 
-    $options = array('-1' => pht('(No Filtering)'));
+    $options = array(
+      '-1' => pht('(No Filtering)'),
+      '-2' => pht('(Marked With Any Flag)'),
+    );
 
     foreach (PhabricatorFlagColor::getColorNameMap() as $color => $name) {
       $options[$color] = $name;
@@ -169,10 +172,15 @@ final class PhabricatorMacroQuery
     }
 
     if ($this->flagColor != '-1' && $this->flagColor !== null) {
+      if ($this->flagColor == '-2') {
+        $flag_colors = array_keys(PhabricatorFlagColor::getColorNameMap());
+      } else {
+        $flag_colors = array($this->flagColor);
+      }
       $flags = id(new PhabricatorFlagQuery())
         ->withOwnerPHIDs(array($this->getViewer()->getPHID()))
         ->withTypes(array(PhabricatorMacroPHIDTypeMacro::TYPECONST))
-        ->withColors(array($this->flagColor))
+        ->withColors($flag_colors)
         ->setViewer($this->getViewer())
         ->execute();
 

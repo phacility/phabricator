@@ -222,7 +222,7 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: 0px -75px;
 }
 
-.status-policy-admin-white, .dropdown-menu-item:hover .status-policy-admin {
+.status-policy-admin-white, .phuix-dropdown-menu .phabricator-action-view:hover .status-policy-admin {
   background-position: -15px -75px;
 }
 
@@ -230,7 +230,7 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -30px -75px;
 }
 
-.status-policy-all-white, .dropdown-menu-item:hover .status-policy-all {
+.status-policy-all-white, .phuix-dropdown-menu .phabricator-action-view:hover .status-policy-all {
   background-position: -45px -75px;
 }
 
@@ -238,7 +238,7 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -60px -75px;
 }
 
-.status-policy-custom-white, .dropdown-menu-item:hover .status-policy-custom {
+.status-policy-custom-white, .phuix-dropdown-menu .phabricator-action-view:hover .status-policy-custom {
   background-position: -75px -75px;
 }
 
@@ -254,7 +254,7 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -120px -75px;
 }
 
-.status-policy-noone-white, .dropdown-menu-item:hover .status-policy-noone {
+.status-policy-noone-white, .phuix-dropdown-menu .phabricator-action-view:hover .status-policy-noone {
   background-position: -135px -75px;
 }
 
@@ -262,7 +262,7 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: 0px -90px;
 }
 
-.status-policy-project-white, .dropdown-menu-item:hover .status-policy-project {
+.status-policy-project-white, .phuix-dropdown-menu .phabricator-action-view:hover .status-policy-project {
   background-position: -15px -90px;
 }
 
@@ -270,7 +270,7 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -30px -90px;
 }
 
-.status-policy-public-white, .dropdown-menu-item:hover .status-policy-public {
+.status-policy-public-white, .phuix-dropdown-menu .phabricator-action-view:hover .status-policy-public {
   background-position: -45px -90px;
 }
 
@@ -278,7 +278,7 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -60px -90px;
 }
 
-.status-policy-unknown-white, .dropdown-menu-item:hover .status-policy-unknown {
+.status-policy-unknown-white, .phuix-dropdown-menu .phabricator-action-view:hover .status-policy-unknown {
   background-position: -75px -90px;
 }
 

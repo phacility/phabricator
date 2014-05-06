@@ -5,10 +5,25 @@ final class PhabricatorPasteEditor
 
   private $pasteFile;
 
+  public static function initializeFileForPaste(
+    PhabricatorUser $actor,
+    $name,
+    $data) {
+
+    return PhabricatorFile::newFromFileData(
+      $data,
+      array(
+        'name' => $name,
+        'mime-type' => 'text/plain; charset=utf-8',
+        'authorPHID' => $actor->getPHID(),
+        'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
+      ));
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
-    $types[] = PhabricatorPasteTransaction::TYPE_CREATE;
+    $types[] = PhabricatorPasteTransaction::TYPE_CONTENT;
     $types[] = PhabricatorPasteTransaction::TYPE_TITLE;
     $types[] = PhabricatorPasteTransaction::TYPE_LANGUAGE;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
@@ -22,8 +37,8 @@ final class PhabricatorPasteEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorPasteTransaction::TYPE_CREATE:
-        return null;
+      case PhabricatorPasteTransaction::TYPE_CONTENT:
+        return $object->getFilePHID();
       case PhabricatorPasteTransaction::TYPE_TITLE:
         return $object->getTitle();
       case PhabricatorPasteTransaction::TYPE_LANGUAGE:
@@ -36,9 +51,7 @@ final class PhabricatorPasteEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorPasteTransaction::TYPE_CREATE:
-        // this was set via applyInitialEffects
-        return $object->getFilePHID();
+      case PhabricatorPasteTransaction::TYPE_CONTENT:
       case PhabricatorPasteTransaction::TYPE_TITLE:
       case PhabricatorPasteTransaction::TYPE_LANGUAGE:
         return $xaction->getNewValue();
@@ -50,80 +63,56 @@ final class PhabricatorPasteEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorPasteTransaction::TYPE_CONTENT:
+        $object->setFilePHID($xaction->getNewValue());
+        return;
       case PhabricatorPasteTransaction::TYPE_TITLE:
         $object->setTitle($xaction->getNewValue());
-        break;
+        return;
       case PhabricatorPasteTransaction::TYPE_LANGUAGE:
         $object->setLanguage($xaction->getNewValue());
-        break;
+        return;
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        $object->setViewPolicy($xaction->getNewValue());
+        return;
     }
+
+    return parent::applyCustomInternalTransaction($object, $xaction);
   }
 
   protected function applyCustomExternalTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
-  }
 
-
-  protected function shouldApplyInitialEffects(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-
-    foreach ($xactions as $xaction) {
-      if ($xaction->getTransactionType() ==
-          PhabricatorPasteTransaction::TYPE_CREATE) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  protected function applyInitialEffects(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-
-    foreach ($xactions as $xaction) {
-      switch ($xaction->getTransactionType()) {
-        case PhabricatorPasteTransaction::TYPE_CREATE:
-          $data = $xaction->getNewValue();
-          $paste_file = PhabricatorFile::newFromFileData(
-            $data['text'],
-            array(
-              'name' => $data['title'],
-              'mime-type' => 'text/plain; charset=utf-8',
-              'authorPHID' => $this->getActor()->getPHID(),
-            ));
-          $object->setFilePHID($paste_file->getPHID());
-
-          $this->pasteFile = $paste_file;
-          break;
-      }
-    }
-  }
-
-  protected function applyFinalEffects(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-
-    // TODO: This should use extractFilePHIDs() instead, but the way
-    // the transactions work right now makes pretty messy.
-
-    if ($this->pasteFile) {
-      $this->pasteFile->attachToObject(
-        $this->getActor(),
-        $object->getPHID());
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorPasteTransaction::TYPE_CONTENT:
+      case PhabricatorPasteTransaction::TYPE_TITLE:
+      case PhabricatorPasteTransaction::TYPE_LANGUAGE:
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        return;
     }
 
-    return $xactions;
+    return parent::applyCustomExternalTransaction($object, $xaction);
   }
 
+  protected function extractFilePHIDsFromCustomTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorPasteTransaction::TYPE_CONTENT:
+        return array($xaction->getNewValue());
+    }
+
+    return parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
+  }
 
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case PhabricatorPasteTransaction::TYPE_CREATE:
+        case PhabricatorPasteTransaction::TYPE_CONTENT:
           return false;
         default:
           break;

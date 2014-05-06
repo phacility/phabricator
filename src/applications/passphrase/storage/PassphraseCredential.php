@@ -12,6 +12,7 @@ final class PassphraseCredential extends PassphraseDAO
   protected $username;
   protected $secretID;
   protected $isDestroyed;
+  protected $isLocked = 0;
 
   private $secret = self::ATTACHABLE;
 

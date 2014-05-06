@@ -130,4 +130,9 @@ JX.behavior('phabricator-search-typeahead', function(config) {
   });
 
   typeahead.start();
+
+  JX.DOM.listen(JX.$(config.button), 'click', null, function (e) {
+    typeahead.setPlaceholder('');
+    typeahead.updatePlaceHolder();
+  });
 });

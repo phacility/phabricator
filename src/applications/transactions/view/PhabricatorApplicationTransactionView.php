@@ -12,6 +12,26 @@ class PhabricatorApplicationTransactionView extends AphrontView {
   private $isPreview;
   private $objectPHID;
   private $shouldTerminate = false;
+  private $quoteTargetID;
+  private $quoteRef;
+
+  public function setQuoteRef($quote_ref) {
+    $this->quoteRef = $quote_ref;
+    return $this;
+  }
+
+  public function getQuoteRef() {
+    return $this->quoteRef;
+  }
+
+  public function setQuoteTargetID($quote_target_id) {
+    $this->quoteTargetID = $quote_target_id;
+    return $this;
+  }
+
+  public function getQuoteTargetID() {
+    return $this->quoteTargetID;
+  }
 
   public function setObjectPHID($object_phid) {
     $this->objectPHID = $object_phid;
@@ -149,9 +169,6 @@ class PhabricatorApplicationTransactionView extends AphrontView {
           'listID'          => $list_id,
           'objectPHID'      => $this->getObjectPHID(),
           'nextAnchor'      => $this->anchorOffset + count($events),
-          'historyLink'     => '/transactions/history/',
-          'historyLinkText' => pht('Edited'),
-          'linkDelimiter'   => PHUITimelineEventView::DELIMITER,
         ));
     }
 
@@ -220,7 +237,18 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     $comment = $xaction->getComment();
 
     if ($comment) {
-      if ($comment->getIsDeleted()) {
+      if ($comment->getIsRemoved()) {
+        return javelin_tag(
+          'span',
+          array(
+            'class' => 'comment-deleted',
+            'sigil' => 'transaction-comment',
+            'meta'  => array('phid' => $comment->getTransactionPHID()),
+          ),
+          pht(
+            'This comment was removed by %s.',
+            $xaction->getHandle($comment->getAuthorPHID())->renderLink()));
+      } else if ($comment->getIsDeleted()) {
         return javelin_tag(
           'span',
           array(
@@ -357,9 +385,23 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     $has_deleted_comment = $xaction->getComment() &&
       $xaction->getComment()->getIsDeleted();
 
+    $has_removed_comment = $xaction->getComment() &&
+      $xaction->getComment()->getIsRemoved();
+
     if ($this->getShowEditActions() && !$this->isPreview) {
-      if ($xaction->getCommentVersion() > 1) {
+      if ($xaction->getCommentVersion() > 1 && !$has_removed_comment) {
         $event->setIsEdited(true);
+      }
+
+      // If we have a place for quoted text to go and this is a quotable
+      // comment, pass the quote target ID to the event view.
+      if ($this->getQuoteTargetID()) {
+        if ($xaction->hasComment()) {
+          if (!$has_removed_comment && !$has_deleted_comment) {
+            $event->setQuoteTargetID($this->getQuoteTargetID());
+            $event->setQuoteRef($this->getQuoteRef());
+          }
+        }
       }
 
       $can_edit = PhabricatorPolicyCapability::CAN_EDIT;
@@ -369,8 +411,13 @@ class PhabricatorApplicationTransactionView extends AphrontView {
           $viewer,
           $xaction,
           $can_edit);
-        if ($has_edit_capability) {
+        if ($has_edit_capability && !$has_removed_comment) {
           $event->setIsEditable(true);
+        }
+        if ($has_edit_capability || $viewer->getIsAdmin()) {
+          if (!$has_removed_comment) {
+            $event->setIsRemovable(true);
+          }
         }
       }
     }

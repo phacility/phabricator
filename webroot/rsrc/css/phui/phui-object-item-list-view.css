@@ -271,6 +271,10 @@
   background: #fff;
 }
 
+.device-phone .phui-object-item-with-1-actions .phui-object-icon-pane {
+  right: 25px;
+}
+
 .device-desktop .phui-object-item-with-icons
   .phui-object-item-content,
 .device-desktop .phui-object-item-with-handle-icons
@@ -622,6 +626,11 @@
 
 .phui-object-box .phui-object-list-states {
   padding: 0;
+}
+
+.phui-object-list-states .aphront-error-view {
+  margin: 0;
+  border: none;
 }
 
 .phui-object-box .phui-object-list-states li:last-child .phui-object-item-frame {

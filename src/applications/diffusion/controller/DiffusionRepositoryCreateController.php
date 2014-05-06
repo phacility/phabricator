@@ -603,7 +603,7 @@ final class DiffusionRepositoryCreateController
 
       $page->addRemarkupInstructions(
         pht(
-          'Choose the a username and pasword used to connect to the '.
+          'Choose the username and password used to connect to the '.
           'repository hosted at:'.
           "\n\n".
           "  lang=text\n".

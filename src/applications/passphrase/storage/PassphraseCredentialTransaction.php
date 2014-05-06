@@ -9,6 +9,7 @@ final class PassphraseCredentialTransaction
   const TYPE_SECRET_ID = 'passphrase:secretID';
   const TYPE_DESTROY = 'passphrase:destroy';
   const TYPE_LOOKEDATSECRET = 'passphrase:lookedAtSecret';
+  const TYPE_LOCK = 'passphrase:lock';
 
   public function getApplicationName() {
     return 'passphrase';
@@ -26,6 +27,8 @@ final class PassphraseCredentialTransaction
     $old = $this->getOldValue();
     switch ($this->getTransactionType()) {
       case self::TYPE_DESCRIPTION:
+        return ($old === null);
+      case self::TYPE_LOCK:
         return ($old === null);
       case self::TYPE_USERNAME:
         return !strlen($old);
@@ -83,6 +86,10 @@ final class PassphraseCredentialTransaction
       case self::TYPE_LOOKEDATSECRET:
         return pht(
           '%s examined the secret plaintext for this credential.',
+          $this->renderHandleLink($author_phid));
+      case self::TYPE_LOCK:
+        return pht(
+          '%s locked this credential.',
           $this->renderHandleLink($author_phid));
     }
 

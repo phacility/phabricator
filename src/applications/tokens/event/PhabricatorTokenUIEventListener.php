@@ -115,16 +115,29 @@ final class PhabricatorTokenUIEventListener
       }
 
       $token = $tokens[$token_given->getTokenPHID()];
+      $aural = javelin_tag(
+        'span',
+        array(
+          'aural' => true,
+        ),
+        pht(
+          '"%s" token, awarded by %s.',
+          $token->getName(),
+          $handles[$token_given->getAuthorPHID()]->getName()));
 
       $list[] = javelin_tag(
         'span',
         array(
           'sigil' => 'has-tooltip',
+          'class' => 'token-icon',
           'meta' => array(
             'tip' => $handles[$token_given->getAuthorPHID()]->getName(),
           ),
         ),
-        $token->renderIcon());
+        array(
+          $aural,
+          $token->renderIcon(),
+        ));
     }
 
     $view = $event->getValue('view');
