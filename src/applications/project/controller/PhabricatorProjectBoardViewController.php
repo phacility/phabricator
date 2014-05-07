@@ -89,7 +89,6 @@ final class PhabricatorProjectBoardViewController
 
     $board = id(new PHUIWorkboardView())
       ->setUser($viewer)
-      ->setFluidishLayout(true)
       ->setID($board_id);
 
     $this->initBehavior(
