@@ -100,7 +100,7 @@ final class PhabricatorSetupCheckPath extends PhabricatorSetupCheck {
 
         $this
           ->newIssue('config.PATH.'.$digest)
-          ->setName(pht('$PATH Compontent Unusable'))
+          ->setName(pht('$PATH Component Unusable'))
           ->setSummary(
             pht(
               "A component of the configured PATH can not be used by ".
