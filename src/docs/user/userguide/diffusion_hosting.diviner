@@ -362,4 +362,4 @@ with `sudoers` configuration.
 
 Once hosted repositories are set up:
 
-  - learn about commit hooks with @{Diffusion User Guide: Commit Hooks}.
+  - learn about commit hooks with @{article:Diffusion User Guide: Commit Hooks}.
