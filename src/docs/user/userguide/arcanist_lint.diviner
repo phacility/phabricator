@@ -39,16 +39,40 @@ write new bindings fairly easily if you have custom tools.
 
 Arcanist ships with bindings for these linters:
 
-  - [[http://www.jshint.com/ | JSHint]], a Javascript linter based on JSHint.
+  - [[http://www.jshint.com/ | JSHint]], a Javascript linter.
     See @{class@arcanist:ArcanistJSHintLinter}.
-  - [[http://pypi.python.org/pypi/pep8 | PEP8]], a Python linter.
-    See @{class@arcanist:ArcanistPEP8Linter}.
-  - [[http://pypi.python.org/pypi/pyflakes | Pyflakes]], another Python linter.
-    See @{class@arcanist:ArcanistPyFlakesLinter}.
-  - [[http://pypi.python.org/pypi/pylint | Pylint]], yet another Python linter.
-    See @{class@arcanist:ArcanistPyLintLinter}.
+  - [[http://pypi.python.org/pypi/pep8 | PEP8]],
+    [[http://pypi.python.org/pypi/pyflakes | Pyflakes]],
+    [[https://flake8.readthedocs.org/ | Flake8]], and
+    [[http://pypi.python.org/pypi/pylint | Pylint]] - various Python linters.
+    See @{class@arcanist:ArcanistPEP8Linter},
+    @{class@arcanist:ArcanistPyFlakesLinter},
+    @{class@arcanist:ArcanistFlake8Linter},
+    and @{class@arcanist:ArcanistPyLintLinter}.
   - [[http://pear.php.net/package/PHP_CodeSniffer | PHP CodeSniffer]], a
     PHP linter. See @{class@arcanist:ArcanistPhpcsLinter}.
+  - [[http://cppcheck.sourceforge.net/ | Cppcheck]] and
+    [[http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py |
+    cpplint.py]], two checkers for C++. See
+    @{class@arcanist:ArcanistCppcheckLinter} and
+    @{class@arcanist:ArcanistCpplintLinter} respectively.
+  - [[https://github.com/hach-que/cstools | cslint]], a C# linting tool based on
+    [[http://stylecop.codeplex.com/ | StyleCop]]. See
+    @{class@arcanist:ArcanistCSharpLinter}.
+  - [[http://puppet-lint.com/ | puppet-lint]], a linter for
+    [[http://puppetlabs.com/ | Puppet]] manifests. See
+    @{class@arcanist:ArcanistPuppetLintLinter}.
+  - [[http://www.ruby-lang.org | Ruby]]'s built-in checker. See
+    @{class@arcanist:ArcanistRubyLinter}.
+  - [[http://www.scala-sbt.org/ | sbt]], a built tool for Scala. See
+    @{class@arcanist:ArcanistScalaSBTLinter}.
+  - [[http://csslint.net/ | CSSLint]], for CSS:
+    @{class@arcanist:ArcanistCSSLintLinter}.
+  - [[https://github.com/less/less.js | lessc]], error detection in
+    [[http://lesscss.org/ | LESS]] code. @{class@arcanist:ArcanistLesscLinter}.
+  - [[http://php.net/simplexml | SimpleXML]] for XML files.
+    @{class@arcanist:ArcanistXMLLinter}.
+
 
 Arcanist also ships with generic bindings which can be configured to parse the
 output of a broad range of lint programs:
@@ -73,6 +97,8 @@ Additionally, Arcanist ships with some general purpose linters:
     marked unlintable.
   - @{class@arcanist:ArcanistGeneratedLinter}, which can disable lint for
     generated files.
+  - @{class@arcanist:ArcanistMergeConflictLinter}, which detects unresolved
+    merge conflicts.
 
 Finally, Arcanist has special-purpose linters:
 
@@ -88,51 +114,6 @@ You can add support for new linters in three ways:
   - write new bindings and install them alongside Arcanist; or
   - use a generic binding like @{class@arcanist:ArcanistScriptAndRegexLinter}
     and drive the integration through configuration.
-
-= Configuring Lint =
-
-Arcanist's lint integration involves two major components: linters and lint
-engines.
-
-Linters themselves are programs which detect problems in a source file. Usually
-a linter is an external script, which Arcanist runs and passes a path to, like
-`jshint` or `pep8.py`. The script emits some messages, and Arcanist parses
-the output into structured errors. A piece of glue code (like
-@{class@arcanist:ArcanistJSHintLinter} or
-@{class@arcanist:ArcanistPEP8Linter}) handles calling the external script and
-interpreting its output.
-
-Lint engines coordinate linters, and decide which linters should run on which
-files. For instance, you might want to run `jshint` on all your `.js` files,
-and `pep8.py` on all your `.py` files. And you might not want to lint anything
-in `externals/` or `third-party/`, and maybe there are other files which you
-want to exclude or apply special rules for.
-
-To configure arc for lint, you specify the name of a lint engine, and possibly
-provide some additional configuration. To name a lint engine, set `lint.engine`
-in your `.arcconfig` to the name of a class which extends
-@{class@arcanist:ArcanistLintEngine}. For more information on `.arcconfig`, see
-@{article:Arcanist User Guide: Configuring a New Project}.
-
-You can also set a default lint engine by setting `lint.engine` in your global
-user config with `arc set-config lint.engine`, or specify one explicitly with
-`arc lint --engine <engine>`.
-
-The available engines are:
-
-  - @{class@arcanist:ComprehensiveLintEngine}, which runs a wide array of
-    linters on many types of files. This is probably of limited use in any real
-    project because it is overbroad, but is a good starting point for getting
-    lint doing things.
-  - @{class@arcanist:ArcanistSingleLintEngine}, which runs a single linter on
-    every file unconditionally. This can be used with a glue linter like
-    @{class@arcanist:ArcanistScriptAndRegexLinter} to put engine logic in an
-    external script.
-  - A custom engine you write. For most projects, lint rules are sufficiently
-    specialized that this is the best option. For instructions on writing a
-    custom lint engine, see
-    @{article:Arcanist User Guide: Customizing Lint, Unit Tests and Workflows}
-    and @{class@arcanist:ExampleLintEngine}.
 
 = Using Lint to Improve Code Review =
 
@@ -186,6 +167,87 @@ lint tools at Facebook:
     the problems they detect, but Arcanist supports this and it's quite
     valuable to have the linter not only say "the convention is to put a space
     after comma in a function call" but to fix it for you.
+
+
+= Configuring Lint =
+
+Most built in linters can be setup by creating a file named `.arclint` in the
+workspace root, which is read by
+@{class@arcanist:ArcanistConfigurationDrivenLintEngine}.
+
+It's a JSON file, which should look something like:
+    {
+      "linters" : {
+        "sample" : {
+          "type" : "pep8",
+          "include" : "(\\.py$)",
+          "exclude" : "(^exclude.py)",
+          "severity" : {
+            "E401" : "warning"
+          }
+        }
+    }
+Where:
+ - The key (`sample`) is only used for reporting,
+ - `type` (`pep8`) is used to find the right linter,
+ - `include` and `exclude` specify paths to run linter on, and
+ - `severity` is specified by the linter implementation; Other linters may
+   define other configurable values.
+
+You may specify many linters in a single `.arclint` file; For an example, see
+[[https://github.com/epriestley/arclint-examples/ | the arclint-examples
+repository]].
+
+Currently available linter types are: `csharp`, `filename`, `csslint`,
+`flake8`, `jshint`, `jsonlint`, `lessc`, `pep8`, `phpcs`, `puppet-lint`,
+`pyflakes`, `ruby`, `generated`, `nolint`, `script-and-regex`,
+`spelling`, `text`, `xml`.
+
+= Legacy Setups: Using arcconfig =
+
+Integration with linters that do not (yet) fully support `.arclint` involves two
+major components: linters and lint engines.
+
+Linters themselves are programs which detect problems in a source file. Usually
+a linter is an external script, which Arcanist runs and passes a path to, like
+`jshint` or `pep8.py`. The script emits some messages, and Arcanist parses
+the output into structured errors. A piece of glue code (like
+@{class@arcanist:ArcanistJSHintLinter} or
+@{class@arcanist:ArcanistPEP8Linter}) handles calling the external script and
+interpreting its output.
+
+Lint engines coordinate linters, and decide which linters should run on which
+files. For instance, you might want to run `jshint` on all your `.js` files,
+and `pep8.py` on all your `.py` files. And you might not want to lint anything
+in `externals/` or `third-party/`, and maybe there are other files which you
+want to exclude or apply special rules for.
+
+To configure arc for lint, you specify the name of a lint engine, and possibly
+provide some additional configuration. To name a lint engine, set `lint.engine`
+in your `.arcconfig` to the name of a class which extends
+@{class@arcanist:ArcanistLintEngine}. For more information on `.arcconfig`, see
+@{article:Arcanist User Guide: Configuring a New Project}.
+
+You can also set a default lint engine by setting `lint.engine` in your global
+user config with `arc set-config lint.engine`, or specify one explicitly with
+`arc lint --engine <engine>`.
+
+The available engines are:
+
+  - @{class@arcanist:ComprehensiveLintEngine}, which runs a wide array of
+    linters on many types of files. This is probably of limited use in any real
+    project because it is overbroad, but is a good starting point for getting
+    lint doing things.
+  - @{class@arcanist:ArcanistSingleLintEngine}, which runs a single linter on
+    every file unconditionally. This can be used with a glue linter like
+    @{class@arcanist:ArcanistScriptAndRegexLinter} to put engine logic in an
+    external script.
+  - A custom engine you write. For most projects, lint rules are sufficiently
+    specialized that this is the best option. For instructions on writing a
+    custom lint engine, see
+    @{article:Arcanist User Guide: Customizing Lint, Unit Tests and Workflows}
+    and @{class@arcanist:ExampleLintEngine}.
+
 
 = Next Steps =
 
