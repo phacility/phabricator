@@ -76,6 +76,7 @@ final class PhabricatorPasteEditor
         $object->setViewPolicy($xaction->getNewValue());
         return;
       case PhabricatorTransactions::TYPE_COMMENT:
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return;
     }
 
@@ -92,6 +93,7 @@ final class PhabricatorPasteEditor
       case PhabricatorPasteTransaction::TYPE_LANGUAGE:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_COMMENT:
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return;
     }
 
