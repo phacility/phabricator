@@ -169,6 +169,14 @@ OKAY
 > On 17 Oct 2013, at 17:47, "Someone" <somebody@somewhere> wrote:
 > ...
 EOMAIL
+,
+<<<EOMAIL
+OKAY
+
+> -----Original Message-----
+>
+> ...
+EOMAIL
     );
   }
 

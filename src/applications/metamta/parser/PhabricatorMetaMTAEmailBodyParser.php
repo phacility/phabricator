@@ -76,13 +76,13 @@ final class PhabricatorMetaMTAEmailBodyParser {
 
     // Outlook english
     $body = preg_replace(
-      '/^\s*-----Original Message-----.*?/imsU',
+      '/^\s*(> )?-----Original Message-----.*?/imsU',
       '',
       $body);
 
     // Outlook danish
     $body = preg_replace(
-      '/^\s*-----Oprindelig Meddelelse-----.*?/imsU',
+      '/^\s*(> )?-----Oprindelig Meddelelse-----.*?/imsU',
       '',
       $body);
 
