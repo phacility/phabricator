@@ -50,8 +50,16 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
       }
     }
 
-
-    return $panel_type->renderPanel($viewer, $panel);
+    try {
+      return $panel_type->renderPanel($viewer, $panel);
+    } catch (Exception $ex) {
+      return $this->renderErrorPanel(
+        $panel->getName(),
+        pht(
+          '%s: %s',
+          phutil_tag('strong', array(), get_class($ex)),
+          $ex->getMessage()));
+    }
   }
 
   private function renderErrorPanel($title, $body) {

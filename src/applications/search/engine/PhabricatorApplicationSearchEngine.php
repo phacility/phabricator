@@ -4,10 +4,11 @@
  * Represents an abstract search engine for an application. It supports
  * creating and storing saved queries.
  *
- * @task builtin  Builtin Queries
- * @task uri      Query URIs
- * @task dates    Date Filters
- * @task read     Reading Utilities
+ * @task construct  Constructing Engines
+ * @task builtin    Builtin Queries
+ * @task uri        Query URIs
+ * @task dates      Date Filters
+ * @task read       Reading Utilities
  *
  * @group search
  */
@@ -171,6 +172,36 @@ abstract class PhabricatorApplicationSearchEngine {
       }
     }
     return $named_queries;
+  }
+
+
+/* -(  Constructing Engines  )----------------------------------------------- */
+
+
+  /**
+   * Load all available application search engines.
+   *
+   * @return list<PhabricatorApplicationSearchEngine> All available engines.
+   * @task construct
+   */
+  public static function getAllEngines() {
+    $engines = id(new PhutilSymbolLoader())
+      ->setAncestorClass(__CLASS__)
+      ->loadObjects();
+
+    return $engines;
+  }
+
+
+  /**
+   * Get an engine by class name, if it exists.
+   *
+   * @return PhabricatorApplicationSearchEngine|null Engine, or null if it does
+   *   not exist.
+   * @task construct
+   */
+  public static function getEngineByClassName($class_name) {
+    return idx(self::getAllEngines(), $class_name);
   }
 
 
