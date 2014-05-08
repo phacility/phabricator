@@ -159,4 +159,35 @@ final class PhabricatorCommitSearchEngine
     );
   }
 
+  protected function renderResultList(
+    array $commits,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+
+    assert_instances_of($commits, 'PhabricatorRepositoryCommit');
+
+    $viewer = $this->requireViewer();
+    $nodata = pht('No matching audits.');
+    $view = id(new PhabricatorAuditListView())
+      ->setUser($viewer)
+      ->setCommits($commits)
+      ->setAuthorityPHIDs(
+        PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($viewer))
+      ->setNoDataString($nodata);
+
+    $phids = $view->getRequiredHandlePHIDs();
+    if ($phids) {
+      $handles = id(new PhabricatorHandleQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($phids)
+        ->execute();
+    } else {
+      $handles = array();
+    }
+
+    $view->setHandles($handles);
+
+    return $view->buildList();
+  }
+
 }

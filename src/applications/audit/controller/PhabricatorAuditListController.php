@@ -1,8 +1,7 @@
 <?php
 
 final class PhabricatorAuditListController
-  extends PhabricatorAuditController
-  implements PhabricatorApplicationSearchResultsControllerInterface {
+  extends PhabricatorAuditController {
 
   private $queryKey;
   private $name;
@@ -26,23 +25,4 @@ final class PhabricatorAuditListController
     return $this->delegateToController($controller);
   }
 
-  public function renderResultsList(
-    array $commits,
-    PhabricatorSavedQuery $query) {
-    assert_instances_of($commits, 'PhabricatorRepositoryCommit');
-
-    $viewer = $this->getRequest()->getUser();
-    $nodata = pht('No matching audits.');
-    $view = id(new PhabricatorAuditListView())
-      ->setUser($viewer)
-      ->setCommits($commits)
-      ->setAuthorityPHIDs(
-        PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($viewer))
-      ->setNoDataString($nodata);
-
-    $phids = $view->getRequiredHandlePHIDs();
-    $handles = $this->loadViewerHandles($phids);
-    $view->setHandles($handles);
-    return $view->buildList();
-  }
 }

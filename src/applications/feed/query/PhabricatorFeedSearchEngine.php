@@ -124,7 +124,7 @@ final class PhabricatorFeedSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-  public function renderResultList(
+  protected function renderResultList(
     array $objects,
     PhabricatorSavedQuery $query,
     array $handles) {

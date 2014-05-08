@@ -576,13 +576,13 @@ abstract class PhabricatorApplicationSearchEngine {
     return $this->renderResultList($objects, $query, $handles);
   }
 
-  public function getRequiredHandlePHIDsForResultList(
+  protected function getRequiredHandlePHIDsForResultList(
     array $objects,
     PhabricatorSavedQuery $query) {
     return array();
   }
 
-  public function renderResultList(
+  protected function renderResultList(
     array $objects,
     PhabricatorSavedQuery $query,
     array $handles) {

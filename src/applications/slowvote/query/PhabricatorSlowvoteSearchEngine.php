@@ -121,7 +121,7 @@ final class PhabricatorSlowvoteSearchEngine
     return mpull($polls, 'getAuthorPHID');
   }
 
-  public function renderResultList(
+  protected function renderResultList(
     array $polls,
     PhabricatorSavedQuery $query,
     array $handles) {
