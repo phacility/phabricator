@@ -50,6 +50,11 @@ body .phui-header-shell.phui-bleed-header
 
 .phui-header-view .phui-header-action-links {
   position: absolute;
+  top: 24px;
+  right: 12px;
+}
+
+.phui-object-box .phui-header-view .phui-header-action-links {
   top: 5px;
   right: 0;
 }

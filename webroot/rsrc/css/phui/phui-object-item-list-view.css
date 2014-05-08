@@ -39,7 +39,6 @@
   border-color: {$lightgreyborder};
   border-width: 0 0 0 4px;
   margin: 5px 0;
-  overflow: hidden;
 }
 
 .phui-object-item .phui-icon-view {
@@ -51,7 +50,6 @@
   border-color: {$lightgreyborder};
   border-bottom-color: {$greyborder};
   border-width: 1px 1px 1px 0;
-  overflow: hidden;
   position: relative;
   min-height: 29px;
 }

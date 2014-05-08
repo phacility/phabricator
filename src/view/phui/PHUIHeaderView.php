@@ -8,6 +8,7 @@ final class PHUIHeaderView extends AphrontView {
   private $header;
   private $tags = array();
   private $image;
+  private $imageURL = null;
   private $subheader;
   private $gradient;
   private $noBackground;
@@ -39,6 +40,11 @@ final class PHUIHeaderView extends AphrontView {
 
   public function setImage($uri) {
     $this->image = $uri;
+    return $this;
+  }
+
+  public function setImageURL($url) {
+    $this->imageURL = $url;
     return $this;
   }
 
@@ -128,12 +134,13 @@ final class PHUIHeaderView extends AphrontView {
     $image = null;
     if ($this->image) {
       $image = phutil_tag(
-        'span',
+        ($this->imageURL ? 'a' : 'span'),
         array(
+          'href' => $this->imageURL,
           'class' => 'phui-header-image',
           'style' => 'background-image: url('.$this->image.')',
         ),
-        '');
+        ' ');
       $classes[] = 'phui-header-has-image';
     }
 

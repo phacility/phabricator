@@ -150,55 +150,45 @@ final class PhabricatorProjectBoardViewController
       $board->addPanel($panel);
     }
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Board'));
-
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $project,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $actions = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Add Column'))
-          ->setHref($this->getApplicationURI('board/'.$this->id.'/edit/'))
-          ->setIcon('create')
-          ->setDisabled(!$can_edit)
-          ->setWorkflow(!$can_edit));
+    $add_icon = id(new PHUIIconView())
+      ->setIconFont('fa-plus bluegrey');
 
-    $plist = id(new PHUIPropertyListView());
+    $add_button = id(new PHUIButtonView())
+      ->setText(pht('Add Column'))
+      ->setIcon($add_icon)
+      ->setTag('a')
+      ->setHref($this->getApplicationURI('board/'.$this->id.'/edit/'))
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(!$can_edit);
 
-    // TODO: Need this to get actions to render.
-    $plist->addProperty(
-      pht('Project Boards'),
-      phutil_tag(
-        'em',
-        array(),
-        pht(
-          'This feature is beta, but should mostly work.')));
-    $plist->setActionList($actions);
+    $header_link = phutil_tag(
+      'a',
+      array(
+        'href' => $this->getApplicationURI('view/'.$project->getID().'/')
+      ),
+      $project->getName());
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($project->getName())
+      ->setHeader($header_link)
       ->setUser($viewer)
+      ->setNoBackground(true)
       ->setImage($project->getProfileImageURI())
+      ->setImageURL($this->getApplicationURI('view/'.$project->getID().'/'))
+      ->addActionLink($add_button)
       ->setPolicyObject($project);
-
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($plist);
 
     $board_box = id(new PHUIBoxView())
       ->appendChild($board)
-      ->addClass('project-board-wrapper')
-      ->addMargin(PHUI::MARGIN_LARGE);
+      ->addClass('project-board-wrapper');
 
     return $this->buildApplicationPage(
       array(
-        $crumbs,
-        $box,
+        $header,
         $board_box,
       ),
       array(
