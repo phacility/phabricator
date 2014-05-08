@@ -86,6 +86,10 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: 0px -140px;
 }
 
-.login-Yahoo {
+.login-WordPressCOM {
   background-position: -35px -140px;
+}
+
+.login-Yahoo {
+  background-position: -70px -140px;
 }
