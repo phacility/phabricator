@@ -5,6 +5,7 @@
  * creating and storing saved queries.
  *
  * @task construct  Constructing Engines
+ * @task app        Applications
  * @task builtin    Builtin Queries
  * @task uri        Query URIs
  * @task dates      Date Filters
@@ -16,6 +17,7 @@
  */
 abstract class PhabricatorApplicationSearchEngine {
 
+  private $application;
   private $viewer;
   private $errors = array();
   private $customFields = false;
@@ -174,6 +176,39 @@ abstract class PhabricatorApplicationSearchEngine {
       }
     }
     return $named_queries;
+  }
+
+
+/* -(  Applications  )------------------------------------------------------- */
+
+
+  protected function getApplicationURI($path = '') {
+    return $this->getApplication()->getApplicationURI($path);
+  }
+
+  protected function getApplication() {
+    if (!$this->application) {
+      $class = $this->getApplicationClassName();
+
+      $this->application = id(new PhabricatorApplicationQuery())
+        ->setViewer($this->requireViewer())
+        ->withClasses(array($class))
+        ->withInstalled(true)
+        ->executeOne();
+
+      if (!$this->application) {
+        throw new Exception(
+          pht(
+            'Application "%s" is not installed!',
+            $class));
+      }
+    }
+
+    return $this->application;
+  }
+
+  protected function getApplicationClassName() {
+    throw new Exception(pht('Not implemented for this SearchEngine yet!'));
   }
 
 

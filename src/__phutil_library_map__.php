@@ -3983,11 +3983,7 @@ phutil_register_library_map(array(
       0 => 'PhabricatorAuditDAO',
       1 => 'PhabricatorInlineCommentInterface',
     ),
-    'PhabricatorAuditListController' =>
-    array(
-      0 => 'PhabricatorAuditController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorAuditListController' => 'PhabricatorAuditController',
     'PhabricatorAuditListView' => 'AphrontView',
     'PhabricatorAuditMailReceiver' => 'PhabricatorObjectMailReceiver',
     'PhabricatorAuditManagementDeleteWorkflow' => 'PhabricatorAuditManagementWorkflow',
@@ -4097,11 +4093,7 @@ phutil_register_library_map(array(
     'PhabricatorCalendarEventDeleteController' => 'PhabricatorCalendarController',
     'PhabricatorCalendarEventEditController' => 'PhabricatorCalendarController',
     'PhabricatorCalendarEventInvalidEpochException' => 'Exception',
-    'PhabricatorCalendarEventListController' =>
-    array(
-      0 => 'PhabricatorCalendarController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorCalendarEventListController' => 'PhabricatorCalendarController',
     'PhabricatorCalendarEventQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorCalendarEventSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorCalendarEventViewController' => 'PhabricatorCalendarController',
