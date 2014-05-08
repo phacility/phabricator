@@ -124,9 +124,10 @@ final class PhabricatorFeedSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-  public function renderResults(
+  public function renderResultList(
     array $objects,
-    PhabricatorSavedQuery $query) {
+    PhabricatorSavedQuery $query,
+    array $handles) {
 
     $builder = new PhabricatorFeedBuilder($objects);
     $builder->setShowHovercards(true);

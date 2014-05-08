@@ -5066,11 +5066,7 @@ phutil_register_library_map(array(
     'PhabricatorSlowvoteDAO' => 'PhabricatorLiskDAO',
     'PhabricatorSlowvoteEditController' => 'PhabricatorSlowvoteController',
     'PhabricatorSlowvoteEditor' => 'PhabricatorApplicationTransactionEditor',
-    'PhabricatorSlowvoteListController' =>
-    array(
-      0 => 'PhabricatorSlowvoteController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorSlowvoteListController' => 'PhabricatorSlowvoteController',
     'PhabricatorSlowvoteOption' => 'PhabricatorSlowvoteDAO',
     'PhabricatorSlowvotePHIDTypePoll' => 'PhabricatorPHIDType',
     'PhabricatorSlowvotePoll' =>

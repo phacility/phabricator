@@ -561,6 +561,31 @@ abstract class PhabricatorApplicationSearchEngine {
   public function renderResults(
     array $objects,
     PhabricatorSavedQuery $query) {
+
+    $phids = $this->getRequiredHandlePHIDsForResultList($objects, $query);
+
+    if ($phids) {
+      $handles = id(new PhabricatorHandleQuery())
+        ->setViewer($this->requireViewer())
+        ->witHPHIDs($phids)
+        ->execute();
+    } else {
+      $handles = array();
+    }
+
+    return $this->renderResultList($objects, $query, $handles);
+  }
+
+  public function getRequiredHandlePHIDsForResultList(
+    array $objects,
+    PhabricatorSavedQuery $query) {
+    return array();
+  }
+
+  public function renderResultList(
+    array $objects,
+    PhabricatorSavedQuery $query,
+    array $handles) {
     throw new Exception(pht('Not supported here yet!'));
   }
 
