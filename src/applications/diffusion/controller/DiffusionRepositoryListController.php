@@ -1,7 +1,6 @@
 <?php
 
-final class DiffusionRepositoryListController extends DiffusionController
-  implements PhabricatorApplicationSearchResultsControllerInterface {
+final class DiffusionRepositoryListController extends DiffusionController {
 
   private $queryKey;
 
@@ -21,83 +20,6 @@ final class DiffusionRepositoryListController extends DiffusionController
       ->setNavigation($this->buildSideNavView());
 
     return $this->delegateToController($controller);
-  }
-
-  public function renderResultsList(
-    array $repositories,
-    PhabricatorSavedQuery $query) {
-    assert_instances_of($repositories, 'PhabricatorRepository');
-
-    $viewer = $this->getRequest()->getUser();
-
-    $project_phids = array_fuse(
-      array_mergev(
-        mpull($repositories, 'getProjectPHIDs')));
-    $project_handles = $this->loadViewerHandles($project_phids);
-
-    $list = new PHUIObjectItemListView();
-    $list->setCards(true);
-    foreach ($repositories as $repository) {
-      $id = $repository->getID();
-
-      $item = id(new PHUIObjectItemView())
-        ->setUser($viewer)
-        ->setHeader($repository->getName())
-        ->setObjectName('r'.$repository->getCallsign())
-        ->setHref($this->getApplicationURI($repository->getCallsign().'/'));
-
-      $commit = $repository->getMostRecentCommit();
-      if ($commit) {
-        $commit_link = DiffusionView::linkCommit(
-            $repository,
-            $commit->getCommitIdentifier(),
-            $commit->getSummary());
-        $item->setSubhead($commit_link);
-        $item->setEpoch($commit->getEpoch());
-      }
-
-      $item->addIcon(
-        'none',
-        PhabricatorRepositoryType::getNameForRepositoryType(
-          $repository->getVersionControlSystem()));
-
-      $size = $repository->getCommitCount();
-      if ($size) {
-        $history_uri = DiffusionRequest::generateDiffusionURI(
-          array(
-            'callsign' => $repository->getCallsign(),
-            'action' => 'history',
-          ));
-
-        $item->addAttribute(
-          phutil_tag(
-            'a',
-            array(
-              'href' => $history_uri,
-            ),
-            pht('%s Commit(s)', new PhutilNumber($size))));
-      } else {
-        $item->addAttribute(pht('No Commits'));
-      }
-
-      $handles = array_select_keys(
-        $project_handles,
-        $repository->getProjectPHIDs());
-      if ($handles) {
-        $item->addAttribute(
-          id(new ManiphestTaskProjectsView())
-            ->setHandles($handles));
-      }
-
-      if (!$repository->isTracked()) {
-        $item->setDisabled(true);
-        $item->addIcon('disable-grey', pht('Inactive'));
-      }
-
-      $list->addItem($item);
-    }
-
-    return $list;
   }
 
   public function buildSideNavView($for_app = false) {

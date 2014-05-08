@@ -3061,11 +3061,7 @@ phutil_register_library_map(array(
     'DifferentialRevisionEditController' => 'DifferentialController',
     'DifferentialRevisionIDField' => 'DifferentialCustomField',
     'DifferentialRevisionLandController' => 'DifferentialController',
-    'DifferentialRevisionListController' =>
-    array(
-      0 => 'DifferentialController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'DifferentialRevisionListController' => 'DifferentialController',
     'DifferentialRevisionListView' => 'AphrontView',
     'DifferentialRevisionMailReceiver' => 'PhabricatorObjectMailReceiver',
     'DifferentialRevisionQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
@@ -3150,11 +3146,7 @@ phutil_register_library_map(array(
     'DiffusionPathValidateController' => 'DiffusionController',
     'DiffusionPushEventViewController' => 'DiffusionPushLogController',
     'DiffusionPushLogController' => 'DiffusionController',
-    'DiffusionPushLogListController' =>
-    array(
-      0 => 'DiffusionPushLogController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'DiffusionPushLogListController' => 'DiffusionPushLogController',
     'DiffusionQuery' => 'PhabricatorQuery',
     'DiffusionRawDiffQuery' => 'DiffusionQuery',
     'DiffusionRepositoryController' => 'DiffusionController',
@@ -3172,11 +3164,7 @@ phutil_register_library_map(array(
     'DiffusionRepositoryEditLocalController' => 'DiffusionRepositoryEditController',
     'DiffusionRepositoryEditMainController' => 'DiffusionRepositoryEditController',
     'DiffusionRepositoryEditSubversionController' => 'DiffusionRepositoryEditController',
-    'DiffusionRepositoryListController' =>
-    array(
-      0 => 'DiffusionController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'DiffusionRepositoryListController' => 'DiffusionController',
     'DiffusionRepositoryNewController' => 'DiffusionController',
     'DiffusionRepositoryRef' => 'Phobject',
     'DiffusionRepositoryRemarkupRule' => 'PhabricatorRemarkupRuleObject',
@@ -3208,11 +3196,7 @@ phutil_register_library_map(array(
     'DivinerArticleAtomizer' => 'DivinerAtomizer',
     'DivinerAtomCache' => 'DivinerDiskCache',
     'DivinerAtomController' => 'DivinerController',
-    'DivinerAtomListController' =>
-    array(
-      0 => 'DivinerController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'DivinerAtomListController' => 'DivinerController',
     'DivinerAtomQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'DivinerAtomSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'DivinerAtomizeWorkflow' => 'DivinerWorkflow',
@@ -3281,11 +3265,7 @@ phutil_register_library_map(array(
     'DrydockBlueprintCreateController' => 'DrydockBlueprintController',
     'DrydockBlueprintEditController' => 'DrydockBlueprintController',
     'DrydockBlueprintEditor' => 'PhabricatorApplicationTransactionEditor',
-    'DrydockBlueprintListController' =>
-    array(
-      0 => 'DrydockBlueprintController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'DrydockBlueprintListController' => 'DrydockBlueprintController',
     'DrydockBlueprintQuery' => 'DrydockQuery',
     'DrydockBlueprintSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'DrydockBlueprintTransaction' => 'PhabricatorApplicationTransaction',
@@ -3438,11 +3418,7 @@ phutil_register_library_map(array(
       2 => 'HarbormasterBuildableInterface',
     ),
     'HarbormasterBuildableActionController' => 'HarbormasterController',
-    'HarbormasterBuildableListController' =>
-    array(
-      0 => 'HarbormasterController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'HarbormasterBuildableListController' => 'HarbormasterController',
     'HarbormasterBuildableQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'HarbormasterBuildableSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'HarbormasterBuildableViewController' => 'HarbormasterController',
@@ -3466,11 +3442,7 @@ phutil_register_library_map(array(
     'HarbormasterPlanController' => 'HarbormasterController',
     'HarbormasterPlanDisableController' => 'HarbormasterPlanController',
     'HarbormasterPlanEditController' => 'HarbormasterPlanController',
-    'HarbormasterPlanListController' =>
-    array(
-      0 => 'HarbormasterPlanController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'HarbormasterPlanListController' => 'HarbormasterPlanController',
     'HarbormasterPlanOrderController' => 'HarbormasterController',
     'HarbormasterPlanRunController' => 'HarbormasterController',
     'HarbormasterPlanViewController' => 'HarbormasterPlanController',
@@ -3520,11 +3492,7 @@ phutil_register_library_map(array(
     'HeraldRuleEditHistoryController' => 'HeraldController',
     'HeraldRuleEditHistoryView' => 'AphrontView',
     'HeraldRuleEditor' => 'PhabricatorApplicationTransactionEditor',
-    'HeraldRuleListController' =>
-    array(
-      0 => 'HeraldController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'HeraldRuleListController' => 'HeraldController',
     'HeraldRuleQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'HeraldRuleSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'HeraldRuleTransaction' => 'PhabricatorApplicationTransaction',
@@ -4133,11 +4101,7 @@ phutil_register_library_map(array(
     'PhabricatorConduitConsoleController' => 'PhabricatorConduitController',
     'PhabricatorConduitController' => 'PhabricatorController',
     'PhabricatorConduitDAO' => 'PhabricatorLiskDAO',
-    'PhabricatorConduitListController' =>
-    array(
-      0 => 'PhabricatorConduitController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorConduitListController' => 'PhabricatorConduitController',
     'PhabricatorConduitLogController' => 'PhabricatorConduitController',
     'PhabricatorConduitLogQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorConduitMethodCallLog' =>
@@ -4202,11 +4166,7 @@ phutil_register_library_map(array(
     'PhabricatorCountdownDAO' => 'PhabricatorLiskDAO',
     'PhabricatorCountdownDeleteController' => 'PhabricatorCountdownController',
     'PhabricatorCountdownEditController' => 'PhabricatorCountdownController',
-    'PhabricatorCountdownListController' =>
-    array(
-      0 => 'PhabricatorCountdownController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorCountdownListController' => 'PhabricatorCountdownController',
     'PhabricatorCountdownPHIDTypeCountdown' => 'PhabricatorPHIDType',
     'PhabricatorCountdownQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorCountdownRemarkupRule' => 'PhabricatorRemarkupRuleObject',
@@ -4265,11 +4225,7 @@ phutil_register_library_map(array(
     'PhabricatorDashboardController' => 'PhabricatorController',
     'PhabricatorDashboardDAO' => 'PhabricatorLiskDAO',
     'PhabricatorDashboardEditController' => 'PhabricatorDashboardController',
-    'PhabricatorDashboardListController' =>
-    array(
-      0 => 'PhabricatorDashboardController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorDashboardListController' => 'PhabricatorDashboardController',
     'PhabricatorDashboardPHIDTypeDashboard' => 'PhabricatorPHIDType',
     'PhabricatorDashboardPHIDTypePanel' => 'PhabricatorPHIDType',
     'PhabricatorDashboardPanel' =>
@@ -4286,11 +4242,7 @@ phutil_register_library_map(array(
     'PhabricatorDashboardPanelCreateController' => 'PhabricatorDashboardController',
     'PhabricatorDashboardPanelCustomField' => 'PhabricatorCustomField',
     'PhabricatorDashboardPanelEditController' => 'PhabricatorDashboardController',
-    'PhabricatorDashboardPanelListController' =>
-    array(
-      0 => 'PhabricatorDashboardController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorDashboardPanelListController' => 'PhabricatorDashboardController',
     'PhabricatorDashboardPanelQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorDashboardPanelRenderController' => 'PhabricatorDashboardController',
     'PhabricatorDashboardPanelRenderingEngine' => 'Phobject',
@@ -4415,11 +4367,7 @@ phutil_register_library_map(array(
     'PhabricatorFileInfoController' => 'PhabricatorFileController',
     'PhabricatorFileLinkListView' => 'AphrontView',
     'PhabricatorFileLinkView' => 'AphrontView',
-    'PhabricatorFileListController' =>
-    array(
-      0 => 'PhabricatorFileController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorFileListController' => 'PhabricatorFileController',
     'PhabricatorFilePHIDTypeFile' => 'PhabricatorPHIDType',
     'PhabricatorFileQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorFileSearchEngine' => 'PhabricatorApplicationSearchEngine',
@@ -4452,11 +4400,7 @@ phutil_register_library_map(array(
     'PhabricatorFlagDAO' => 'PhabricatorLiskDAO',
     'PhabricatorFlagDeleteController' => 'PhabricatorFlagController',
     'PhabricatorFlagEditController' => 'PhabricatorFlagController',
-    'PhabricatorFlagListController' =>
-    array(
-      0 => 'PhabricatorFlagController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorFlagListController' => 'PhabricatorFlagController',
     'PhabricatorFlagQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorFlagSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorFlagSelectControl' => 'AphrontFormControl',

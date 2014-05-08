@@ -21,6 +21,7 @@ abstract class PhabricatorApplicationSearchEngine {
   private $viewer;
   private $errors = array();
   private $customFields = false;
+  private $request;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -592,6 +593,15 @@ abstract class PhabricatorApplicationSearchEngine {
 
 /* -(  Rendering  )---------------------------------------------------------- */
 
+
+  public function setRequest(AphrontRequest $request) {
+    $this->request = $request;
+    return $this;
+  }
+
+  public function getRequest() {
+    return $this->request;
+  }
 
   public function renderResults(
     array $objects,

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group file
- */
 final class PhabricatorApplicationFiles extends PhabricatorApplication {
 
   public function getBaseURI() {

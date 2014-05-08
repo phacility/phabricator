@@ -3,6 +3,10 @@
 final class PhabricatorFlagSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getApplicationClassName() {
+    return 'PhabricatorApplicationFlags';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
     $saved->setParameter('colors', $request->getArr('colors'));
@@ -114,5 +118,59 @@ final class PhabricatorFlagSearchEngine
 
     return $options;
   }
+
+  protected function renderResultList(
+    array $flags,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    assert_instances_of($flags, 'PhabricatorFlag');
+
+    $viewer = $this->requireViewer();
+
+    $list = id(new PHUIObjectItemListView())
+      ->setUser($viewer);
+    foreach ($flags as $flag) {
+      $id = $flag->getID();
+      $phid = $flag->getObjectPHID();
+
+      $class = PhabricatorFlagColor::getCSSClass($flag->getColor());
+
+      $flag_icon = phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-flag-icon '.$class,
+        ),
+        '');
+
+      $item = id(new PHUIObjectItemView())
+        ->addHeadIcon($flag_icon)
+        ->setHeader($flag->getHandle()->renderLink());
+
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setIcon('edit')
+          ->setHref($this->getApplicationURI("edit/{$phid}/"))
+          ->setWorkflow(true));
+
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setIcon('delete')
+          ->setHref($this->getApplicationURI("delete/{$id}/"))
+          ->setWorkflow(true));
+
+      if ($flag->getNote()) {
+        $item->addAttribute($flag->getNote());
+      }
+
+      $item->addIcon(
+        'none',
+        phabricator_datetime($flag->getDateCreated(), $viewer));
+
+      $list->addItem($item);
+    }
+
+    return $list;
+  }
+
 
 }

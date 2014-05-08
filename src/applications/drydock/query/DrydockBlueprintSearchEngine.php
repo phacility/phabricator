@@ -3,6 +3,10 @@
 final class DrydockBlueprintSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getApplicationClassName() {
+    return 'PhabricatorApplicationDrydock';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -43,6 +47,33 @@ final class DrydockBlueprintSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  public function renderResultList(
+    array $blueprints,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    assert_instances_of($blueprints, 'DrydockBlueprint');
+
+    $viewer = $this->requireViewer();
+    $view = new PHUIObjectItemListView();
+
+    foreach ($blueprints as $blueprint) {
+      $item = id(new PHUIObjectItemView())
+        ->setHeader($blueprint->getBlueprintName())
+        ->setHref($this->getApplicationURI('/blueprint/'.$blueprint->getID()))
+        ->setObjectName(pht('Blueprint %d', $blueprint->getID()));
+
+      if (!$blueprint->getImplementation()->isEnabled()) {
+        $item->setDisabled(true);
+      }
+
+      $item->addAttribute($blueprint->getImplementation()->getBlueprintName());
+
+      $view->addItem($item);
+    }
+
+    return $view;
   }
 
 }

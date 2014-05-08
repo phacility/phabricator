@@ -220,6 +220,8 @@ final class PhabricatorApplicationSearchController
       if ($parent instanceof $interface) {
         $list = $parent->renderResultsList($objects, $saved_query);
       } else {
+        $engine->setRequest($request);
+
         $list = $engine->renderResults(
           $objects,
           $saved_query);

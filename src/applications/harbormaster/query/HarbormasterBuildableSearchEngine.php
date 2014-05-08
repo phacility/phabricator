@@ -3,6 +3,10 @@
 final class HarbormasterBuildableSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getApplicationClassName() {
+    return 'PhabricatorApplicationHarbormaster';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -172,4 +176,56 @@ final class HarbormasterBuildableSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
+  protected function renderResultList(
+    array $buildables,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    assert_instances_of($buildables, 'HarbormasterBuildable');
+
+    $viewer = $this->requireViewer();
+
+    $list = new PHUIObjectItemListView();
+    $list->setCards(true);
+    foreach ($buildables as $buildable) {
+      $id = $buildable->getID();
+
+      $item = id(new PHUIObjectItemView())
+        ->setHeader(pht('Buildable %d', $buildable->getID()));
+      if ($buildable->getContainerHandle() !== null) {
+        $item->addAttribute($buildable->getContainerHandle()->getName());
+      }
+      if ($buildable->getBuildableHandle() !== null) {
+        $item->addAttribute($buildable->getBuildableHandle()->getFullName());
+      }
+
+      if ($id) {
+        $item->setHref("/B{$id}");
+      }
+
+      if ($buildable->getIsManualBuildable()) {
+        $item->addIcon('wrench-grey', pht('Manual'));
+      }
+
+      switch ($buildable->getBuildableStatus()) {
+        case HarbormasterBuildable::STATUS_PASSED:
+          $item->setBarColor('green');
+          $item->addByline(pht('Build Passed'));
+          break;
+        case HarbormasterBuildable::STATUS_FAILED:
+          $item->setBarColor('red');
+          $item->addByline(pht('Build Failed'));
+          break;
+        case HarbormasterBuildable::STATUS_BUILDING:
+          $item->setBarColor('red');
+          $item->addByline(pht('Building'));
+          break;
+
+      }
+
+      $list->addItem($item);
+
+    }
+
+    return $list;
+  }
 }
