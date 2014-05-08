@@ -229,5 +229,9 @@ final class PhabricatorSearchApplicationSearchEngine
     return $results;
   }
 
+  public function shouldUseOffsetPaging() {
+    return true;
+  }
+
 
 }

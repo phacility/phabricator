@@ -9,6 +9,8 @@
  * @task uri        Query URIs
  * @task dates      Date Filters
  * @task read       Reading Utilities
+ * @task exec       Paging and Executing Queries
+ * @task render     Rendering Results
  *
  * @group search
  */
@@ -502,11 +504,64 @@ abstract class PhabricatorApplicationSearchEngine {
   }
 
 
-/* -(  Pagination  )--------------------------------------------------------- */
+/* -(  Paging and Executing Queries  )--------------------------------------- */
 
 
   public function getPageSize(PhabricatorSavedQuery $saved) {
     return $saved->getParameter('limit', 100);
+  }
+
+
+  public function shouldUseOffsetPaging() {
+    return false;
+  }
+
+
+  public function newPagerForSavedQuery(PhabricatorSavedQuery $saved) {
+    if ($this->shouldUseOffsetPaging()) {
+      $pager = new AphrontPagerView();
+    } else {
+      $pager = new AphrontCursorPagerView();
+    }
+
+    $page_size = $this->getPageSize($saved);
+    if (is_finite($page_size)) {
+      $pager->setPageSize($page_size);
+    } else {
+      // Consider an INF pagesize to mean a large finite pagesize.
+
+      // TODO: It would be nice to handle this more gracefully, but math
+      // with INF seems to vary across PHP versions, systems, and runtimes.
+      $pager->setPageSize(0xFFFF);
+    }
+
+    return $pager;
+  }
+
+
+  public function executeQuery(
+    PhabricatorPolicyAwareQuery $query,
+    AphrontView $pager) {
+
+    $query->setViewer($this->requireViewer());
+
+    if ($this->shouldUseOffsetPaging()) {
+      $objects = $query->executeWithOffsetPager($pager);
+    } else {
+      $objects = $query->executeWithCursorPager($pager);
+    }
+
+    return $objects;
+  }
+
+
+/* -(  Rendering  )---------------------------------------------------------- */
+
+
+  public function renderResults(
+    array $objects,
+    PhabricatorSavedQuery $query) {
+    throw new Exception(pht('Not supported here yet!'));
   }
 
 

@@ -66,17 +66,10 @@ final class PhabricatorDashboardPanelTypeQuery
     }
 
     $query = $engine->buildQueryFromSavedQuery($saved);
+    $pager = $engine->newPagerForSavedQuery($saved);
+    $results = $engine->executeQuery($query, $pager);
 
-    $results = $query
-      ->setViewer($viewer)
-      ->execute();
-
-    $out = array();
-    foreach ($results as $result) {
-      $out[] = phutil_tag('div', array(), $result->getPHID());
-    }
-
-    return $out;
+    return $engine->renderResults($results, $saved);
   }
 
 }

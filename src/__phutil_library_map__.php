@@ -4377,11 +4377,7 @@ phutil_register_library_map(array(
     'PhabricatorFeedController' => 'PhabricatorController',
     'PhabricatorFeedDAO' => 'PhabricatorLiskDAO',
     'PhabricatorFeedDetailController' => 'PhabricatorFeedController',
-    'PhabricatorFeedListController' =>
-    array(
-      0 => 'PhabricatorFeedController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorFeedListController' => 'PhabricatorFeedController',
     'PhabricatorFeedManagementRepublishWorkflow' => 'PhabricatorFeedManagementWorkflow',
     'PhabricatorFeedManagementWorkflow' => 'PhabricatorManagementWorkflow',
     'PhabricatorFeedPublicStreamController' => 'PhabricatorFeedController',

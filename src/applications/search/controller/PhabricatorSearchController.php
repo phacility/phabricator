@@ -76,7 +76,6 @@ final class PhabricatorSearchController
     $controller = id(new PhabricatorApplicationSearchController($request))
       ->setQueryKey($this->queryKey)
       ->setSearchEngine($engine)
-      ->setUseOffsetPaging(true)
       ->setNavigation($this->buildSideNavView());
 
     return $this->delegateToController($controller);
