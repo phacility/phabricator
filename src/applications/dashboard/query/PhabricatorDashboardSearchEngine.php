@@ -3,6 +3,10 @@
 final class PhabricatorDashboardSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getApplicationClassName() {
+    return 'PhabricatorApplicationDashboard';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -44,6 +48,31 @@ final class PhabricatorDashboardSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+
+  protected function renderResultList(
+    array $dashboards,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+
+    $viewer = $this->requireViewer();
+
+    $list = new PHUIObjectItemListView();
+    $list->setUser($viewer);
+    foreach ($dashboards as $dashboard) {
+      $id = $dashboard->getID();
+
+      $item = id(new PHUIObjectItemView())
+        ->setObjectName(pht('Dashboard %d', $id))
+        ->setHeader($dashboard->getName())
+        ->setHref($this->getApplicationURI("view/{$id}/"))
+        ->setObject($dashboard);
+
+      $list->addItem($item);
+    }
+
+    return $list;
   }
 
 }
