@@ -97,6 +97,10 @@ abstract class PhabricatorWorker {
       while (true) {
         try {
           $worker->doWork();
+          foreach ($worker->getQueuedTasks() as $queued_task) {
+            list($queued_class, $queued_data) = $queued_task;
+            self::scheduleTask($queued_class, $queued_data);
+          }
           break;
         } catch (PhabricatorWorkerYieldException $ex) {
           phlog(
