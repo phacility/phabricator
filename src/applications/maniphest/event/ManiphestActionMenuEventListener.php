@@ -33,7 +33,7 @@ final class ManiphestActionMenuEventListener extends PhabricatorEventListener {
     $user = $event->getValue('object');
     $phid = $user->getPHID();
     $view_uri = sprintf(
-      '/maniphest/?statuses[]=%s&assigned=%s#R',
+      '/maniphest/?statuses=%s&assigned=%s#R',
       implode(',', ManiphestTaskStatus::getOpenStatusConstants()),
       $phid);
 
