@@ -12,8 +12,8 @@ final class PhabricatorAuthProviderOAuthWordPress
     $callback_uri = PhabricatorEnv::getURI($this->getLoginURI());
 
     return pht(
-      "To configure WordPress.com OAuth, create a new WordPress.com Application here:".
-      "\n\n".
+      "To configure WordPress.com OAuth, create a new WordPress.com ".
+      "Application here:\n\n".
       "https://developer.wordpress.com/apps/new/.".
       "\n\n".
       "You should use these settings in your application:".
