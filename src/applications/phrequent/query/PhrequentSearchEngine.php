@@ -3,6 +3,10 @@
 final class PhrequentSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getApplicationClassName() {
+    return 'PhabricatorApplicationPhrequent';
+  }
+
   public function getPageSize(PhabricatorSavedQuery $saved) {
     return $saved->getParameter('limit', 1000);
   }
@@ -110,4 +114,89 @@ final class PhrequentSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
+  protected function getRequiredHandlePHIDsForResultList(
+    array $usertimes,
+    PhabricatorSavedQuery $query) {
+    return array_mergev(
+      array(
+        mpull($usertimes, 'getUserPHID'),
+        mpull($usertimes, 'getObjectPHID'),
+      ));
+  }
+
+  protected function renderResultList(
+    array $usertimes,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    assert_instances_of($usertimes, 'PhrequentUserTime');
+    $viewer = $this->requireViewer();
+
+    $view = id(new PHUIObjectItemListView())
+      ->setUser($viewer);
+
+    foreach ($usertimes as $usertime) {
+      $item = new PHUIObjectItemView();
+
+      if ($usertime->getObjectPHID() === null) {
+        $item->setHeader($usertime->getNote());
+      } else {
+        $obj = $handles[$usertime->getObjectPHID()];
+        $item->setHeader($obj->getLinkName());
+        $item->setHref($obj->getURI());
+      }
+      $item->setObject($usertime);
+
+      $item->addByline(
+        pht(
+          'Tracked: %s',
+          $handles[$usertime->getUserPHID()]->renderLink()));
+
+      $started_date = phabricator_date($usertime->getDateStarted(), $viewer);
+      $item->addIcon('none', $started_date);
+
+      if ($usertime->getDateEnded() !== null) {
+        $time_spent = $usertime->getDateEnded() - $usertime->getDateStarted();
+        $time_ended = phabricator_datetime($usertime->getDateEnded(), $viewer);
+      } else {
+        $time_spent = time() - $usertime->getDateStarted();
+      }
+
+      $time_spent = $time_spent == 0 ? 'none' :
+        phabricator_format_relative_time_detailed($time_spent);
+
+      if ($usertime->getDateEnded() !== null) {
+        $item->addAttribute(
+          pht(
+            'Tracked %s',
+            $time_spent));
+        $item->addAttribute(
+          pht(
+            'Ended on %s',
+            $time_ended));
+      } else {
+        $item->addAttribute(
+          pht(
+            'Tracked %s so far',
+            $time_spent));
+        if ($usertime->getObjectPHID() !== null &&
+            $usertime->getUserPHID() === $viewer->getPHID()) {
+          $item->addAction(
+            id(new PHUIListItemView())
+              ->setIcon('history')
+              ->addSigil('phrequent-stop-tracking')
+              ->setWorkflow(true)
+              ->setRenderNameAsTooltip(true)
+              ->setName(pht("Stop"))
+              ->setHref(
+                '/phrequent/track/stop/'.
+                $usertime->getObjectPHID().'/'));
+        }
+        $item->setBarColor('green');
+      }
+
+      $view->addItem($item);
+    }
+
+    return $view;
+  }
 }

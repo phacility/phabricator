@@ -3,6 +3,10 @@
 final class PhabricatorOAuthServerClientSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getApplicationClassName() {
+    return 'PhabricatorApplicationOAuthServer';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -74,6 +78,39 @@ final class PhabricatorOAuthServerClientSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+
+  protected function getRequiredHandlePHIDsForResultList(
+    array $clients,
+    PhabricatorSavedQuery $query) {
+    return mpull($clients, 'getCreatorPHID');
+  }
+
+  protected function renderResultList(
+    array $clients,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    assert_instances_of($clients, 'PhabricatorOauthServerClient');
+
+    $viewer = $this->requireViewer();
+
+    $list = id(new PHUIObjectItemListView())
+      ->setUser($viewer);
+    foreach ($clients as $client) {
+      $creator = $handles[$client->getCreatorPHID()];
+
+      $item = id(new PHUIObjectItemView())
+        ->setObjectName(pht('Application %d', $client->getID()))
+        ->setHeader($client->getName())
+        ->setHref($client->getViewURI())
+        ->setObject($client)
+        ->addByline(pht('Creator: %s', $creator->renderLink()));
+
+      $list->addItem($item);
+    }
+
+    return $list;
   }
 
 }

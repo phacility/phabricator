@@ -3507,11 +3507,7 @@ phutil_register_library_map(array(
     ),
     'HeraldTranscriptController' => 'HeraldController',
     'HeraldTranscriptGarbageCollector' => 'PhabricatorGarbageCollector',
-    'HeraldTranscriptListController' =>
-    array(
-      0 => 'HeraldController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'HeraldTranscriptListController' => 'HeraldController',
     'HeraldTranscriptQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'HeraldTranscriptSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'HeraldTranscriptTestCase' => 'PhabricatorTestCase',
@@ -3538,11 +3534,7 @@ phutil_register_library_map(array(
     'LegalpadDocumentCommentController' => 'LegalpadController',
     'LegalpadDocumentEditController' => 'LegalpadController',
     'LegalpadDocumentEditor' => 'PhabricatorApplicationTransactionEditor',
-    'LegalpadDocumentListController' =>
-    array(
-      0 => 'LegalpadController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'LegalpadDocumentListController' => 'LegalpadController',
     'LegalpadDocumentQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'LegalpadDocumentRemarkupRule' => 'PhabricatorRemarkupRuleObject',
     'LegalpadDocumentSearchEngine' => 'PhabricatorApplicationSearchEngine',
@@ -3777,11 +3769,7 @@ phutil_register_library_map(array(
     'PassphraseCredentialCreateController' => 'PassphraseController',
     'PassphraseCredentialDestroyController' => 'PassphraseController',
     'PassphraseCredentialEditController' => 'PassphraseController',
-    'PassphraseCredentialListController' =>
-    array(
-      0 => 'PassphraseController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PassphraseCredentialListController' => 'PassphraseController',
     'PassphraseCredentialLockController' => 'PassphraseController',
     'PassphraseCredentialPublicController' => 'PassphraseController',
     'PassphraseCredentialQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
@@ -3931,11 +3919,7 @@ phutil_register_library_map(array(
     'PhabricatorApplicationUninstallController' => 'PhabricatorApplicationsController',
     'PhabricatorApplicationXHProf' => 'PhabricatorApplication',
     'PhabricatorApplicationsController' => 'PhabricatorController',
-    'PhabricatorApplicationsListController' =>
-    array(
-      0 => 'PhabricatorApplicationsController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorApplicationsListController' => 'PhabricatorApplicationsController',
     'PhabricatorAsanaConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorAuditAddCommentController' => 'PhabricatorAuditController',
     'PhabricatorAuditComment' =>
@@ -4456,11 +4440,7 @@ phutil_register_library_map(array(
     'PhabricatorMacroDisableController' => 'PhabricatorMacroController',
     'PhabricatorMacroEditController' => 'PhabricatorMacroController',
     'PhabricatorMacroEditor' => 'PhabricatorApplicationTransactionEditor',
-    'PhabricatorMacroListController' =>
-    array(
-      0 => 'PhabricatorMacroController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorMacroListController' => 'PhabricatorMacroController',
     'PhabricatorMacroMailReceiver' => 'PhabricatorObjectMailReceiver',
     'PhabricatorMacroMemeController' => 'PhabricatorMacroController',
     'PhabricatorMacroMemeDialogController' => 'PhabricatorMacroController',
@@ -4493,11 +4473,7 @@ phutil_register_library_map(array(
     'PhabricatorMailingListSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorMailingListsController' => 'PhabricatorController',
     'PhabricatorMailingListsEditController' => 'PhabricatorMailingListsController',
-    'PhabricatorMailingListsListController' =>
-    array(
-      0 => 'PhabricatorMailingListsController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorMailingListsListController' => 'PhabricatorMailingListsController',
     'PhabricatorMainMenuGroupView' => 'AphrontView',
     'PhabricatorMainMenuIconView' => 'AphrontView',
     'PhabricatorMainMenuSearchView' => 'AphrontView',
@@ -4560,11 +4536,7 @@ phutil_register_library_map(array(
     'PhabricatorOAuthClientBaseController' => 'PhabricatorOAuthServerController',
     'PhabricatorOAuthClientDeleteController' => 'PhabricatorOAuthClientBaseController',
     'PhabricatorOAuthClientEditController' => 'PhabricatorOAuthClientBaseController',
-    'PhabricatorOAuthClientListController' =>
-    array(
-      0 => 'PhabricatorOAuthClientBaseController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorOAuthClientListController' => 'PhabricatorOAuthClientBaseController',
     'PhabricatorOAuthClientViewController' => 'PhabricatorOAuthClientBaseController',
     'PhabricatorOAuthResponse' => 'AphrontResponse',
     'PhabricatorOAuthServerAccessToken' => 'PhabricatorOAuthServerDAO',
@@ -4758,11 +4730,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectEditMainController' => 'PhabricatorProjectController',
     'PhabricatorProjectEditPictureController' => 'PhabricatorProjectController',
     'PhabricatorProjectEditorTestCase' => 'PhabricatorTestCase',
-    'PhabricatorProjectListController' =>
-    array(
-      0 => 'PhabricatorProjectController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorProjectListController' => 'PhabricatorProjectController',
     'PhabricatorProjectMembersEditController' => 'PhabricatorProjectController',
     'PhabricatorProjectMembersRemoveController' => 'PhabricatorProjectController',
     'PhabricatorProjectMoveController' => 'PhabricatorProjectController',
@@ -5278,11 +5246,7 @@ phutil_register_library_map(array(
     'PholioMockEditor' => 'PhabricatorApplicationTransactionEditor',
     'PholioMockEmbedView' => 'AphrontView',
     'PholioMockImagesView' => 'AphrontView',
-    'PholioMockListController' =>
-    array(
-      0 => 'PholioController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PholioMockListController' => 'PholioController',
     'PholioMockMailReceiver' => 'PhabricatorObjectMailReceiver',
     'PholioMockQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PholioMockSearchEngine' => 'PhabricatorApplicationSearchEngine',
@@ -5396,11 +5360,7 @@ phutil_register_library_map(array(
     'PhragmentZIPController' => 'PhragmentController',
     'PhrequentController' => 'PhabricatorController',
     'PhrequentDAO' => 'PhabricatorLiskDAO',
-    'PhrequentListController' =>
-    array(
-      0 => 'PhrequentController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhrequentListController' => 'PhrequentController',
     'PhrequentSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhrequentTimeBlock' => 'Phobject',
     'PhrequentTimeBlockTestCase' => 'PhabricatorTestCase',
@@ -5440,11 +5400,7 @@ phutil_register_library_map(array(
     'PhrictionDocumentTestCase' => 'PhabricatorTestCase',
     'PhrictionEditController' => 'PhrictionController',
     'PhrictionHistoryController' => 'PhrictionController',
-    'PhrictionListController' =>
-    array(
-      0 => 'PhrictionController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhrictionListController' => 'PhrictionController',
     'PhrictionMoveController' => 'PhrictionController',
     'PhrictionNewController' => 'PhrictionController',
     'PhrictionPHIDTypeDocument' => 'PhabricatorPHIDType',
@@ -5496,11 +5452,7 @@ phutil_register_library_map(array(
     'PonderQuestionEditController' => 'PonderController',
     'PonderQuestionEditor' => 'PonderEditor',
     'PonderQuestionHistoryController' => 'PonderController',
-    'PonderQuestionListController' =>
-    array(
-      0 => 'PonderController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PonderQuestionListController' => 'PonderController',
     'PonderQuestionMailReceiver' => 'PhabricatorObjectMailReceiver',
     'PonderQuestionQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PonderQuestionReplyHandler' => 'PhabricatorMailReplyHandler',

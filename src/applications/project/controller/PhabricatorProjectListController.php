@@ -1,8 +1,7 @@
 <?php
 
 final class PhabricatorProjectListController
-  extends PhabricatorProjectController
-  implements PhabricatorApplicationSearchResultsControllerInterface {
+  extends PhabricatorProjectController {
 
   private $queryKey;
 
@@ -22,33 +21,6 @@ final class PhabricatorProjectListController
       ->setNavigation($this->buildSideNavView());
 
     return $this->delegateToController($controller);
-  }
-
-  public function renderResultsList(
-    array $projects,
-    PhabricatorSavedQuery $query) {
-    assert_instances_of($projects, 'PhabricatorProject');
-    $viewer = $this->getRequest()->getUser();
-
-    $list = new PHUIObjectItemListView();
-    $list->setUser($viewer);
-    foreach ($projects as $project) {
-      $id = $project->getID();
-
-      $item = id(new PHUIObjectItemView())
-        ->setHeader($project->getName())
-        ->setHref($this->getApplicationURI("view/{$id}/"))
-        ->setImageURI($project->getProfileImageURI());
-
-      if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ARCHIVED) {
-        $item->addIcon('delete-grey', pht('Archived'));
-        $item->setDisabled(true);
-      }
-
-      $list->addItem($item);
-    }
-
-    return $list;
   }
 
   public function buildApplicationCrumbs() {

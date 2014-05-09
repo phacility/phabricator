@@ -1,10 +1,11 @@
 <?php
 
-/**
- * @group legalpad
- */
 final class LegalpadDocumentSearchEngine
   extends PhabricatorApplicationSearchEngine {
+
+  public function getApplicationClassName() {
+    return 'PhabricatorApplicationLegalpad';
+  }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
@@ -101,6 +102,44 @@ final class LegalpadDocumentSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function getRequiredHandlePHIDsForResultList(
+    array $documents,
+    PhabricatorSavedQuery $query) {
+    return array_mergev(mpull($documents, 'getRecentContributorPHIDs'));
+  }
+
+  protected function renderResultList(
+    array $documents,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    assert_instances_of($documents, 'LegalpadDocument');
+
+    $viewer = $this->requireViewer();
+
+    $list = new PHUIObjectItemListView();
+    $list->setUser($viewer);
+    foreach ($documents as $document) {
+      $last_updated = phabricator_date($document->getDateModified(), $viewer);
+      $recent_contributors = $document->getRecentContributorPHIDs();
+      $updater = $handles[reset($recent_contributors)]->renderLink();
+
+      $title = $document->getTitle();
+
+      $item = id(new PHUIObjectItemView())
+        ->setObjectName('L'.$document->getID())
+        ->setHeader($title)
+        ->setHref($this->getApplicationURI('view/'.$document->getID()))
+        ->setObject($document)
+        ->addIcon('none', pht('Last updated: %s', $last_updated))
+        ->addByline(pht('Updated by: %s', $updater))
+        ->addAttribute(pht('Versions: %d', $document->getVersions()));
+
+      $list->addItem($item);
+    }
+
+    return $list;
   }
 
 }

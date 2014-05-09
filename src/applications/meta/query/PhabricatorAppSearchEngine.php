@@ -3,6 +3,10 @@
 final class PhabricatorAppSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getApplicationClassName() {
+    return 'PhabricatorApplicationApplications';
+  }
+
   public function getPageSize(PhabricatorSavedQuery $saved) {
     return INF;
   }
@@ -122,6 +126,36 @@ final class PhabricatorAppSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function renderResultList(
+    array $applications,
+    PhabricatorSavedQuery $query,
+    array $handle) {
+    assert_instances_of($applications, 'PhabricatorApplication');
+
+    $list = new PHUIObjectItemListView();
+
+    $applications = msort($applications, 'getName');
+
+    foreach ($applications as $application) {
+      $item = id(new PHUIObjectItemView())
+        ->setHeader($application->getName())
+        ->setHref('/applications/view/'.get_class($application).'/')
+        ->addAttribute($application->getShortDescription());
+
+      if (!$application->isInstalled()) {
+        $item->addIcon('delete', pht('Uninstalled'));
+      }
+
+      if ($application->isBeta()) {
+        $item->addIcon('lint-warning', pht('Beta'));
+      }
+
+      $list->addItem($item);
+    }
+
+    return $list;
   }
 
 }

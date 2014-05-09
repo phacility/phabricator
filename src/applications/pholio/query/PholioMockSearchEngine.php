@@ -3,6 +3,10 @@
 final class PholioMockSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getApplicationClassName() {
+    return 'PhabricatorApplicationPholio';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
     $saved->setParameter(
@@ -72,6 +76,43 @@ final class PholioMockSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function getRequiredHandlePHIDsForResultList(
+    array $mocks,
+    PhabricatorSavedQuery $query) {
+    return mpull($mocks, 'getAuthorPHID');
+  }
+
+  protected function renderResultList(
+    array $mocks,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    assert_instances_of($mocks, 'PholioMock');
+
+    $viewer = $this->requireViewer();
+
+    $board = new PHUIPinboardView();
+    foreach ($mocks as $mock) {
+      $item = id(new PHUIPinboardItemView())
+        ->setHeader('M'.$mock->getID().' '.$mock->getName())
+        ->setURI('/M'.$mock->getID())
+        ->setImageURI($mock->getCoverFile()->getThumb280x210URI())
+        ->setImageSize(280, 210)
+        ->addIconCount('image', count($mock->getImages()))
+        ->addIconCount('like', $mock->getTokenCount());
+
+      if ($mock->getAuthorPHID()) {
+        $author_handle = $handles[$mock->getAuthorPHID()];
+        $datetime = phabricator_date($mock->getDateCreated(), $viewer);
+        $item->appendChild(
+          pht('By %s on %s', $author_handle->renderLink(), $datetime));
+      }
+
+      $board->addItem($item);
+    }
+
+    return $board;
   }
 
 }

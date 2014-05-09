@@ -3,6 +3,10 @@
 final class HeraldTranscriptSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getApplicationClassName() {
+    return 'PhabricatorApplicationHerald';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -87,6 +91,49 @@ final class HeraldTranscriptSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function getRequiredHandlePHIDsForResultList(
+    array $transcripts,
+    PhabricatorSavedQuery $query) {
+    return mpull($transcripts, 'getObjectPHID');
+  }
+
+  protected function renderResultList(
+    array $transcripts,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    assert_instances_of($transcripts, 'HeraldTranscript');
+
+    $viewer = $this->requireViewer();
+
+    $list = new PHUIObjectItemListView();
+    $list->setCards(true);
+    foreach ($transcripts as $xscript) {
+      $view_href = phutil_tag(
+        'a',
+        array(
+          'href' => '/herald/transcript/'.$xscript->getID().'/',
+        ),
+        pht('View Full Transcript'));
+
+      $item = new PHUIObjectItemView();
+      $item->setObjectName($xscript->getID());
+      $item->setHeader($view_href);
+      if ($xscript->getDryRun()) {
+        $item->addAttribute(pht('Dry Run'));
+      }
+      $item->addAttribute($handles[$xscript->getObjectPHID()]->renderLink());
+      $item->addAttribute(
+        number_format((int)(1000 * $xscript->getDuration())).' ms');
+      $item->addIcon(
+        'none',
+        phabricator_datetime($xscript->getTime(), $viewer));
+
+      $list->addItem($item);
+    }
+
+    return $list;
   }
 
 }

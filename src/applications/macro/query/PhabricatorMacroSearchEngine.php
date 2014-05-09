@@ -3,6 +3,10 @@
 final class PhabricatorMacroSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getApplicationClassName() {
+    return 'PhabricatorApplicationMacro';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
     $saved->setParameter(
@@ -151,6 +155,67 @@ final class PhabricatorMacroSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function getRequiredHandlePHIDsForResultList(
+    array $macros,
+    PhabricatorSavedQuery $query) {
+    return mpull($macros, 'getAuthorPHID');
+  }
+
+  protected function renderResultList(
+    array $macros,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+
+    assert_instances_of($macros, 'PhabricatorFileImageMacro');
+    $viewer = $this->requireViewer();
+
+    $pinboard = new PHUIPinboardView();
+    foreach ($macros as $macro) {
+      $file = $macro->getFile();
+
+      $item = new PHUIPinboardItemView();
+      if ($file) {
+        $item->setImageURI($file->getThumb280x210URI());
+        $item->setImageSize(280, 210);
+      }
+
+      if ($macro->getDateCreated()) {
+        $datetime = phabricator_date($macro->getDateCreated(), $viewer);
+        $item->appendChild(
+          phutil_tag(
+            'div',
+            array(),
+            pht('Created on %s', $datetime)));
+      } else {
+        // Very old macros don't have a creation date. Rendering something
+        // keeps all the pins at the same height and avoids flow issues.
+        $item->appendChild(
+          phutil_tag(
+            'div',
+            array(),
+            pht('Created in ages long past')));
+      }
+
+      if ($macro->getAuthorPHID()) {
+        $author_handle = $handles[$macro->getAuthorPHID()];
+        $item->appendChild(
+          pht('Created by %s', $author_handle->renderLink()));
+      }
+
+      $item->setURI($this->getApplicationURI('/view/'.$macro->getID().'/'));
+
+      $name = $macro->getName();
+      if ($macro->getIsDisabled()) {
+        $name = pht('%s (Disabled)', $name);
+      }
+      $item->setHeader($name);
+
+      $pinboard->addItem($item);
+    }
+
+    return $pinboard;
   }
 
 }
