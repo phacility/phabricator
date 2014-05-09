@@ -1,6 +1,7 @@
 <?php
 
-final class DiffusionPushLogListController extends DiffusionPushLogController {
+final class DiffusionPushLogListController extends DiffusionPushLogController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
 
   private $queryKey;
 

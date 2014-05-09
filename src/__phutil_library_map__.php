@@ -4895,11 +4895,7 @@ phutil_register_library_map(array(
     'PhabricatorSearchAttachController' => 'PhabricatorSearchBaseController',
     'PhabricatorSearchBaseController' => 'PhabricatorController',
     'PhabricatorSearchConfigOptions' => 'PhabricatorApplicationConfigOptions',
-    'PhabricatorSearchController' =>
-    array(
-      0 => 'PhabricatorSearchBaseController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorSearchController' => 'PhabricatorSearchBaseController',
     'PhabricatorSearchDAO' => 'PhabricatorLiskDAO',
     'PhabricatorSearchDeleteController' => 'PhabricatorSearchBaseController',
     'PhabricatorSearchDocument' => 'PhabricatorSearchDAO',
@@ -5524,11 +5520,7 @@ phutil_register_library_map(array(
     'ReleephProductEditController' => 'ReleephProductController',
     'ReleephProductEditor' => 'PhabricatorApplicationTransactionEditor',
     'ReleephProductHistoryController' => 'ReleephProductController',
-    'ReleephProductListController' =>
-    array(
-      0 => 'ReleephController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'ReleephProductListController' => 'ReleephController',
     'ReleephProductQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'ReleephProductSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'ReleephProductTransaction' => 'PhabricatorApplicationTransaction',
