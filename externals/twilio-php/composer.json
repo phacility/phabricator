@@ -1,0 +1,30 @@
+{
+    "name": "twilio/sdk",
+    "type": "library",
+    "description": "A PHP wrapper for Twilio's API",
+    "keywords": ["twilio", "sms", "api"],
+    "homepage": "http://github.com/twilio/twilio-php",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kevin Burke",
+            "email": "kevin@twilio.com"
+        },
+        {
+            "name": "Kyle Conroy",
+            "email": "kyle+pear@twilio.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.2.1"
+    },
+    "require-dev": {
+        "mockery/mockery": ">=0.7.2",
+        "phpunit/phpunit": "3.7.*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Services_Twilio": ""
+        }
+    }
+}
