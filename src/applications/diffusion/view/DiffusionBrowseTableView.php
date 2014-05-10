@@ -87,28 +87,24 @@ final class DiffusionBrowseTableView extends DiffusionView {
   }
 
   private static function loadLintMessagesCount(DiffusionRequest $drequest) {
+    $path = $drequest->getPath();
     $branch = $drequest->loadBranch();
     if (!$branch) {
       return null;
     }
 
-    $conn = $drequest->getRepository()->establishConnection('r');
+    $query = id(new DiffusionLintCountQuery())
+      ->withBranchIDs(array($branch->getID()))
+      ->withPaths(array($path));
 
-    $path = '/'.$drequest->getPath();
-    $where = (substr($path, -1) == '/'
-      ? qsprintf($conn, 'AND path LIKE %>', $path)
-      : qsprintf($conn, 'AND path = %s', $path));
-
-    if ($drequest->getLint()) {
-      $where .= qsprintf($conn, ' AND code = %s', $drequest->getLint());
+    $code = $drequest->getLint();
+    if ($code) {
+      $query->withCodes(array($code));
     }
 
-    return head(queryfx_one(
-      $conn,
-      'SELECT COUNT(*) FROM %T WHERE branchID = %d %Q',
-      PhabricatorRepository::TABLE_LINTMESSAGE,
-      $branch->getID(),
-      $where));
+    $result = $query->execute();
+
+    return idx($result, $path);
   }
 
   public function render() {
