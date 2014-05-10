@@ -9,6 +9,7 @@ final class DiffusionLastModifiedController extends DiffusionController {
   public function processRequest() {
     $drequest = $this->getDiffusionRequest();
     $request = $this->getRequest();
+    $viewer = $request->getUser();
 
     $paths = $request->getStr('paths');
     $paths = json_decode($paths, true);
@@ -16,44 +17,46 @@ final class DiffusionLastModifiedController extends DiffusionController {
       return new Aphront400Response();
     }
 
-    $commits = array();
-    foreach ($paths as $path) {
-      $prequest = clone $drequest;
-      $prequest->setPath($path);
+    $modified_map = $this->callConduitWithDiffusionRequest(
+      'diffusion.lastmodifiedquery',
+      array(
+        'paths' => array_fill_keys($paths, $drequest->getCommit()),
+      ));
 
-      $conduit_result = $this->callConduitWithDiffusionRequest(
-        'diffusion.lastmodifiedquery',
-        array(
-          'commit' => $prequest->getCommit(),
-          'path' => $prequest->getPath(),
-        ));
-
-      $commit = PhabricatorRepositoryCommit::newFromDictionary(
-        $conduit_result['commit']);
-
-      $commit_data = PhabricatorRepositoryCommitData::newFromDictionary(
-        $conduit_result['commitData']);
-
-      $commit->attachCommitData($commit_data);
-
-      $phids = array();
-      if ($commit_data) {
-        if ($commit_data->getCommitDetail('authorPHID')) {
-          $phids[$commit_data->getCommitDetail('authorPHID')] = true;
-        }
-        if ($commit_data->getCommitDetail('committerPHID')) {
-          $phids[$commit_data->getCommitDetail('committerPHID')] = true;
-        }
-      }
-
-      $commits[$path] = $commit;
+    if ($modified_map) {
+      $commit_map = id(new DiffusionCommitQuery())
+        ->setViewer($viewer)
+        ->withRepository($drequest->getRepository())
+        ->withIdentifiers(array_values($modified_map))
+        ->needCommitData(true)
+        ->execute();
+      $commit_map = mpull($commit_map, null, 'getCommitIdentifier');
+    } else {
+      $commit_map = array();
     }
 
-    $phids = array_keys($phids);
+    $commits = array();
+    foreach ($paths as $path) {
+      $modified_at = idx($modified_map, $path);
+      if ($modified_at) {
+        $commit = idx($commit_map, $modified_at);
+        if ($commit) {
+          $commits[$path] = $commit;
+        }
+      }
+    }
+
+    $phids = array();
+    foreach ($commits as $commit) {
+      $data = $commit->getCommitData();
+      $phids[] = $data->getCommitDetail('authorPHID');
+      $phids[] = $data->getCommitDetail('committerPHID');
+    }
+    $phids = array_filter($phids);
     $handles = $this->loadViewerHandles($phids);
 
     $branch = $drequest->loadBranch();
-    if ($branch) {
+    if ($branch && $commits) {
       $lint_query = id(new DiffusionLintCountQuery())
         ->withBranchIDs(array($branch->getID()))
         ->withPaths(array_keys($commits));
