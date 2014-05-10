@@ -116,12 +116,20 @@ final class PhabricatorRepositoryManagementParentsWorkflow
       }
 
       $sql = array();
-      foreach ($parents as $parent) {
+      if (!$parents) {
+        // Write an explicit 0 to indicate "no parents" instead of "no data".
         $sql[] = qsprintf(
           $conn_w,
-          '(%d, %d)',
-          $map[$child],
-          $map[$parent]);
+          '(%d, 0)',
+          $map[$child]);
+      } else {
+        foreach ($parents as $parent) {
+          $sql[] = qsprintf(
+            $conn_w,
+            '(%d, %d)',
+            $map[$child],
+            $map[$parent]);
+        }
       }
 
       $commit_table->openTransaction();

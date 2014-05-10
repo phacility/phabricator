@@ -575,6 +575,12 @@ final class PhabricatorRepositoryDiscoveryEngine
           }
           $parent_ids[] = $parent_map[$parent];
         }
+      } else {
+        // Write an explicit 0 so we can distinguish between "really no
+        // parents" and "data not available".
+        if (!$repository->isSVN()) {
+          $parent_ids = array(0);
+        }
       }
 
       $commit->openTransaction();
