@@ -17,96 +17,6 @@ final class DiffusionBrowseTableView extends DiffusionView {
     return $this;
   }
 
-  public function renderLastModifiedColumns(
-    DiffusionRequest $drequest,
-    array $handles,
-    PhabricatorRepositoryCommit $commit = null,
-    PhabricatorRepositoryCommitData $data = null) {
-    assert_instances_of($handles, 'PhabricatorObjectHandle');
-
-    if ($commit) {
-      $epoch = $commit->getEpoch();
-      $modified = DiffusionView::linkCommit(
-        $drequest->getRepository(),
-        $commit->getCommitIdentifier());
-      $date = phabricator_date($epoch, $this->user);
-      $time = phabricator_time($epoch, $this->user);
-    } else {
-      $modified = '';
-      $date = '';
-      $time = '';
-    }
-
-    if ($data) {
-      $author_phid = $data->getCommitDetail('authorPHID');
-      if ($author_phid && isset($handles[$author_phid])) {
-        $author = $handles[$author_phid]->renderLink();
-      } else {
-        $author = self::renderName($data->getAuthorName());
-      }
-
-      $committer = $data->getCommitDetail('committer');
-      if ($committer) {
-        $committer_phid = $data->getCommitDetail('committerPHID');
-        if ($committer_phid && isset($handles[$committer_phid])) {
-          $committer = $handles[$committer_phid]->renderLink();
-        } else {
-          $committer = self::renderName($committer);
-        }
-        if ($author != $committer) {
-          $author = hsprintf('%s/%s', $author, $committer);
-        }
-      }
-
-      $details = AphrontTableView::renderSingleDisplayLine($data->getSummary());
-    } else {
-      $author = '';
-      $details = '';
-    }
-
-    $return = array(
-      'commit'    => $modified,
-      'date'      => $date,
-      'time'      => $time,
-      'author'    => $author,
-      'details'   => $details,
-    );
-
-    $lint = self::loadLintMessagesCount($drequest);
-    if ($lint !== null) {
-      $return['lint'] = phutil_tag(
-        'a',
-        array('href' => $drequest->generateURI(array(
-          'action' => 'lint',
-          'lint' => null,
-        ))),
-        number_format($lint));
-    }
-
-    return $return;
-  }
-
-  private static function loadLintMessagesCount(DiffusionRequest $drequest) {
-    $path = $drequest->getPath();
-    $branch = $drequest->loadBranch();
-    if (!$branch) {
-      return null;
-    }
-
-    $query = id(new DiffusionLintCountQuery())
-      ->withBranchIDs(array($branch->getID()))
-      ->withPaths(array($path));
-
-    $code = $drequest->getLint();
-    if ($code) {
-      $query->withCodes(array($code));
-    }
-
-    $result = $query->execute();
-
-    return idx($result, $path);
-  }
-
   public function render() {
     $request = $this->getDiffusionRequest();
     $repository = $request->getRepository();
@@ -152,29 +62,18 @@ final class DiffusionBrowseTableView extends DiffusionView {
           ));
       }
 
-      $commit = $path->getLastModifiedCommit();
-      if ($commit) {
-        $drequest = clone $request;
-        $drequest->setPath($request->getPath().$path->getPath().$dir_slash);
-        $dict = $this->renderLastModifiedColumns(
-          $drequest,
-          $this->handles,
-          $commit,
-          $path->getLastCommitData());
-      } else {
-        $dict = array(
-          'lint'      => celerity_generate_unique_node_id(),
-          'commit'    => celerity_generate_unique_node_id(),
-          'date'      => celerity_generate_unique_node_id(),
-          'time'      => celerity_generate_unique_node_id(),
-          'author'    => celerity_generate_unique_node_id(),
-          'details'   => celerity_generate_unique_node_id(),
-        );
+      $dict = array(
+        'lint'      => celerity_generate_unique_node_id(),
+        'commit'    => celerity_generate_unique_node_id(),
+        'date'      => celerity_generate_unique_node_id(),
+        'time'      => celerity_generate_unique_node_id(),
+        'author'    => celerity_generate_unique_node_id(),
+        'details'   => celerity_generate_unique_node_id(),
+      );
 
-        $need_pull[$base_path.$path->getPath().$dir_slash] = $dict;
-        foreach ($dict as $k => $uniq) {
-          $dict[$k] = phutil_tag('span', array('id' => $uniq), '');
-        }
+      $need_pull[$base_path.$path->getPath().$dir_slash] = $dict;
+      foreach ($dict as $k => $uniq) {
+        $dict[$k] = phutil_tag('span', array('id' => $uniq), '');
       }
 
       $editor_button = '';

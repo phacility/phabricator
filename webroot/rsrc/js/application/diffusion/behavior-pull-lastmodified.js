@@ -13,6 +13,9 @@ JX.behavior('diffusion-pull-lastmodified', function(config) {
     .setHandler(function(r) {
       for (var k in r) {
         for (var l in r[k]) {
+          if (!config.map[k][l]) {
+            continue;
+          }
           JX.DOM.setContent(JX.$(config.map[k][l]), JX.$H(r[k][l]));
         }
       }
