@@ -4,12 +4,13 @@ final class ConduitAPI_differential_createrawdiff_Method
   extends ConduitAPI_differential_Method {
 
   public function getMethodDescription() {
-    return "Create a new Differential diff from a raw diff source.";
+    return pht("Create a new Differential diff from a raw diff source.");
   }
 
   public function defineParamTypes() {
     return array(
       'diff' => 'required string',
+      'repositoryPHID' => 'optional string',
     );
   }
 
@@ -23,7 +24,22 @@ final class ConduitAPI_differential_createrawdiff_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
+    $viewer = $request->getUser();
     $raw_diff = $request->getValue('diff');
+
+    $repository_phid = $request->getValue('repositoryPHID');
+    if ($repository_phid) {
+      $repository = id(new PhabricatorRepositoryQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($repository_phid))
+        ->executeOne();
+      if (!$repository) {
+        throw new Exception(
+          pht('No such repository "%s"!', $repository_phid));
+      }
+    } else {
+      $repository = null;
+    }
 
     $parser = new ArcanistDiffParser();
     $changes = $parser->parseDiff($raw_diff);
@@ -32,8 +48,13 @@ final class ConduitAPI_differential_createrawdiff_Method
     $diff->setLintStatus(DifferentialLintStatus::LINT_SKIP);
     $diff->setUnitStatus(DifferentialUnitStatus::UNIT_SKIP);
 
-    $diff->setAuthorPHID($request->getUser()->getPHID());
+    $diff->setAuthorPHID($viewer->getPHID());
     $diff->setCreationMethod('web');
+
+    if ($repository) {
+      $diff->setRepositoryPHID($repository->getPHID());
+    }
+
     $diff->save();
 
     return $this->buildDiffInfoDictionary($diff);
