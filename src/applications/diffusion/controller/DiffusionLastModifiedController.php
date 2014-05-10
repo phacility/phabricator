@@ -9,47 +9,50 @@ final class DiffusionLastModifiedController extends DiffusionController {
   public function processRequest() {
     $drequest = $this->getDiffusionRequest();
     $request = $this->getRequest();
-    $commit = null;
-    $commit_data = null;
 
-    $conduit_result = $this->callConduitWithDiffusionRequest(
-      'diffusion.lastmodifiedquery',
-      array(
-        'commit' => $drequest->getCommit(),
-        'path' => $drequest->getPath()
-      ));
-    $c_dict = $conduit_result['commit'];
-    if ($c_dict) {
-      $commit = PhabricatorRepositoryCommit::newFromDictionary($c_dict);
-    }
-    $c_d_dict = $conduit_result['commitData'];
-    if ($c_d_dict) {
-      $commit_data =
-        PhabricatorRepositoryCommitData::newFromDictionary($c_d_dict);
-    }
+    $paths = $request->getStr('paths');
+    $paths = json_decode($paths, true);
 
-    $phids = array();
-    if ($commit_data) {
-      if ($commit_data->getCommitDetail('authorPHID')) {
-        $phids[$commit_data->getCommitDetail('authorPHID')] = true;
+    $output = array();
+    foreach ($paths as $path) {
+      $prequest = clone $drequest;
+      $prequest->setPath($path);
+
+      $conduit_result = $this->callConduitWithDiffusionRequest(
+        'diffusion.lastmodifiedquery',
+        array(
+          'commit' => $prequest->getCommit(),
+          'path' => $prequest->getPath(),
+        ));
+
+      $commit = PhabricatorRepositoryCommit::newFromDictionary(
+        $conduit_result['commit']);
+
+      $commit_data = PhabricatorRepositoryCommitData::newFromDictionary(
+        $conduit_result['commitData']);
+
+      $phids = array();
+      if ($commit_data) {
+        if ($commit_data->getCommitDetail('authorPHID')) {
+          $phids[$commit_data->getCommitDetail('authorPHID')] = true;
+        }
+        if ($commit_data->getCommitDetail('committerPHID')) {
+          $phids[$commit_data->getCommitDetail('committerPHID')] = true;
+        }
       }
-      if ($commit_data->getCommitDetail('committerPHID')) {
-        $phids[$commit_data->getCommitDetail('committerPHID')] = true;
-      }
+
+      $phids = array_keys($phids);
+      $handles = $this->loadViewerHandles($phids);
+
+      $view = new DiffusionBrowseTableView();
+      $view->setUser($request->getUser());
+      $output[$path] = $view->renderLastModifiedColumns(
+        $prequest,
+        $handles,
+        $commit,
+        $commit_data);
     }
 
-    $phids = array_keys($phids);
-    $handles = $this->loadViewerHandles($phids);
-
-    $view = new DiffusionBrowseTableView();
-    $view->setUser($request->getUser());
-    $output = $view->renderLastModifiedColumns(
-      $drequest,
-      $handles,
-      $commit,
-      $commit_data);
-
-    return id(new AphrontAjaxResponse())
-      ->setContent($output);
+    return id(new AphrontAjaxResponse())->setContent($output);
   }
 }

@@ -171,13 +171,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
           'details'   => celerity_generate_unique_node_id(),
         );
 
-        $uri = (string)$request->generateURI(
-          array(
-            'action' => 'lastmodified',
-            'path'   => $base_path.$path->getPath().$dir_slash,
-          ));
-
-        $need_pull[$uri] = $dict;
+        $need_pull[$base_path.$path->getPath().$dir_slash] = $dict;
         foreach ($dict as $k => $uniq) {
           $dict[$k] = phutil_tag('span', array('id' => $uniq), '');
         }
@@ -214,7 +208,15 @@ final class DiffusionBrowseTableView extends DiffusionView {
     }
 
     if ($need_pull) {
-      Javelin::initBehavior('diffusion-pull-lastmodified', $need_pull);
+      Javelin::initBehavior(
+        'diffusion-pull-lastmodified',
+        array(
+          'uri'   => (string)$request->generateURI(
+            array(
+              'action' => 'lastmodified',
+            )),
+          'map' => $need_pull,
+        ));
     }
 
     $branch = $this->getDiffusionRequest()->loadBranch();
