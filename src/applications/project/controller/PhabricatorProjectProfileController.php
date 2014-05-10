@@ -148,7 +148,7 @@ final class PhabricatorProjectProfileController
 
     $phid = $project->getPHID();
     $view_uri = urisprintf(
-      '/maniphest/?statuses=%s&allProjects[]=%s#R',
+      '/maniphest/?statuses=%s&allProjects=%s#R',
       implode(',', ManiphestTaskStatus::getOpenStatusConstants()),
       $phid);
     $create_uri = '/maniphest/task/create/?projects='.$phid;

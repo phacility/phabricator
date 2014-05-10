@@ -3159,7 +3159,11 @@ phutil_register_library_map(array(
     'DiffusionPathValidateController' => 'DiffusionController',
     'DiffusionPushEventViewController' => 'DiffusionPushLogController',
     'DiffusionPushLogController' => 'DiffusionController',
-    'DiffusionPushLogListController' => 'DiffusionPushLogController',
+    'DiffusionPushLogListController' =>
+    array(
+      0 => 'DiffusionPushLogController',
+      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
+    ),
     'DiffusionQuery' => 'PhabricatorQuery',
     'DiffusionRawDiffQuery' => 'DiffusionQuery',
     'DiffusionRepositoryController' => 'DiffusionController',
