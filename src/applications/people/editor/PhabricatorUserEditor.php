@@ -243,7 +243,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
         $log->setOldValue($user->getIsSystemAgent());
         $log->setNewValue($system_agent);
 
-        $user->setIsSystemAgent($system_agent);
+        $user->setIsSystemAgent((int)$system_agent);
         $user->save();
 
         $log->save();
