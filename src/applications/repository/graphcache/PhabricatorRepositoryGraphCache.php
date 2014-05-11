@@ -355,10 +355,17 @@ final class PhabricatorRepositoryGraphCache {
     // Build the actual data for the cache.
     foreach ($commit_ids as $commit_id) {
       $parent_ids = array();
-      if (isset($parents[$commit_id])) {
+      if (!empty($parents[$commit_id])) {
         foreach ($parents[$commit_id] as $row) {
           $parent_ids[] = (int)$row['parentCommitID'];
         }
+      } else {
+        // We expect all rows to have parents (commits with no parents get
+        // an explicit "0" placeholder). If we're in an older repository, the
+        // parent information might not have been populated yet. Decline to fill
+        // the cache if we don't have the parent information, since the fill
+        // will be incorrect.
+        continue;
       }
 
       if (isset($path_changes[$commit_id])) {
