@@ -200,7 +200,7 @@ final class PhabricatorRepositoryGraphCache {
     if ($prefix === null) {
       $self = get_class($this);
       $size = $this->getBucketSize();
-      $prefix = "{$self}:{$size}:1:";
+      $prefix = "{$self}:{$size}:2:";
     }
 
     return $prefix.$bucket_key;

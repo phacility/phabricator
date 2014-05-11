@@ -113,6 +113,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
           'uri'   => (string)$request->generateURI(
             array(
               'action' => 'lastmodified',
+              'stable' => true,
             )),
           'map' => $need_pull,
         ));
