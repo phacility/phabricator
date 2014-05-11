@@ -55,6 +55,8 @@
  */
 final class PhabricatorRepositoryGraphCache {
 
+  private $rebuiltKeys = array();
+
 
 /* -(  Querying the Graph Cache  )------------------------------------------- */
 
@@ -282,6 +284,20 @@ final class PhabricatorRepositoryGraphCache {
    * @task cache
    */
   private function rebuildBucket($bucket_key, array $current_data) {
+
+    // First, check if we've already rebuilt this bucket. In some cases (like
+    // browsing a repository at some commit) it's common to issue many lookups
+    // against one commit. If that commit has been discovered but not yet
+    // fully imported, we'll repeatedly attempt to rebuild the bucket. If the
+    // first rebuild did not work, subsequent rebuilds are very unlikely to
+    // have any effect. We can just skip the rebuild in these cases.
+
+    if (isset($this->rebuiltKeys[$bucket_key])) {
+      return $current_data;
+    } else {
+      $this->rebuiltKeys[$bucket_key] = true;
+    }
+
     $bucket_min = ($bucket_key * $this->getBucketSize());
     $bucket_max = ($bucket_min + $this->getBucketSize()) - 1;
 
