@@ -144,8 +144,10 @@ final class PhabricatorAuthRegisterController
 
     $errors = array();
 
+    $require_real_name = PhabricatorEnv::getEnvConfig('user.require-real-name');
+
     $e_username = strlen($value_username) ? null : true;
-    $e_realname = strlen($value_realname) ? null : true;
+    $e_realname = $require_real_name ? true : null;
     $e_email = strlen($value_email) ? null : true;
     $e_password = true;
     $e_captcha = true;
@@ -224,7 +226,7 @@ final class PhabricatorAuthRegisterController
 
       if ($can_edit_realname) {
         $value_realname = $request->getStr('realName');
-        if (!strlen($value_realname)) {
+        if (!strlen($value_realname) && $require_real_name) {
           $e_realname = pht('Required');
           $errors[] = pht('Real name is required.');
         } else {

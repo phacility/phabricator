@@ -13,7 +13,7 @@ final class PhabricatorUserSearchIndexer
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($user->getPHID());
     $doc->setDocumentType(PhabricatorPeoplePHIDTypeUser::TYPECONST);
-    $doc->setDocumentTitle($user->getUserName().' ('.$user->getRealName().')');
+    $doc->setDocumentTitle($user->getFullName());
     $doc->setDocumentCreated($user->getDateCreated());
     $doc->setDocumentModified($user->getDateModified());
 
