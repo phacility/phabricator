@@ -1,10 +1,10 @@
 <?php
 
 final class PhabricatorDashboardListController
-  extends PhabricatorDashboardController
-  implements PhabricatorApplicationSearchResultsControllerInterface {
+  extends PhabricatorDashboardController {
 
   private $queryKey;
+
   public function willProcessRequest(array $data) {
     $this->queryKey = idx($data, 'queryKey');
   }
@@ -46,28 +46,6 @@ final class PhabricatorDashboardListController
         ->setHref($this->getApplicationURI().'create/'));
 
     return $crumbs;
-  }
-
-  public function renderResultsList(
-    array $dashboards,
-    PhabricatorSavedQuery $query) {
-    $viewer = $this->getRequest()->getUser();
-
-    $list = new PHUIObjectItemListView();
-    $list->setUser($viewer);
-    foreach ($dashboards as $dashboard) {
-      $id = $dashboard->getID();
-
-      $item = id(new PHUIObjectItemView())
-        ->setObjectName(pht('Dashboard %d', $id))
-        ->setHeader($dashboard->getName())
-        ->setHref($this->getApplicationURI("view/{$id}/"))
-        ->setObject($dashboard);
-
-      $list->addItem($item);
-    }
-
-    return $list;
   }
 
 }

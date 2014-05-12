@@ -3,6 +3,10 @@
 final class PhabricatorDashboardPanelSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getApplicationClassName() {
+    return 'PhabricatorApplicationDashboard';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -44,6 +48,28 @@ final class PhabricatorDashboardPanelSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function renderResultList(
+    array $panels,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+
+    $viewer = $this->requireViewer();
+
+    $list = new PHUIObjectItemListView();
+    $list->setUser($viewer);
+    foreach ($panels as $panel) {
+      $item = id(new PHUIObjectItemView())
+        ->setObjectName($panel->getMonogram())
+        ->setHeader($panel->getName())
+        ->setHref('/'.$panel->getMonogram())
+        ->setObject($panel);
+
+      $list->addItem($item);
+    }
+
+    return $list;
   }
 
 }

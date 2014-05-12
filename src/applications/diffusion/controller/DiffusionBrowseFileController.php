@@ -800,10 +800,13 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
         ),
         $blame);
 
-      $rows = array_merge($rows, $this->renderInlines(
+      $cur_inlines = $this->renderInlines(
         idx($inlines, $line['line'], array()),
         ($show_blame),
-        $engine));
+        $engine);
+      foreach ($cur_inlines as $cur_inline) {
+        $rows[] = $cur_inline;
+      }
     }
 
     return $rows;

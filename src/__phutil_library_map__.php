@@ -1254,6 +1254,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthProviderOAuthGitHub' => 'applications/auth/provider/PhabricatorAuthProviderOAuthGitHub.php',
     'PhabricatorAuthProviderOAuthGoogle' => 'applications/auth/provider/PhabricatorAuthProviderOAuthGoogle.php',
     'PhabricatorAuthProviderOAuthTwitch' => 'applications/auth/provider/PhabricatorAuthProviderOAuthTwitch.php',
+    'PhabricatorAuthProviderOAuthWordPress' => 'applications/auth/provider/PhabricatorAuthProviderOAuthWordPress.php',
     'PhabricatorAuthProviderPassword' => 'applications/auth/provider/PhabricatorAuthProviderPassword.php',
     'PhabricatorAuthProviderPersona' => 'applications/auth/provider/PhabricatorAuthProviderPersona.php',
     'PhabricatorAuthRegisterController' => 'applications/auth/controller/PhabricatorAuthRegisterController.php',
@@ -1462,6 +1463,7 @@ phutil_register_library_map(array(
     'PhabricatorDashboardPanelTransactionEditor' => 'applications/dashboard/editor/PhabricatorDashboardPanelTransactionEditor.php',
     'PhabricatorDashboardPanelTransactionQuery' => 'applications/dashboard/query/PhabricatorDashboardPanelTransactionQuery.php',
     'PhabricatorDashboardPanelType' => 'applications/dashboard/paneltype/PhabricatorDashboardPanelType.php',
+    'PhabricatorDashboardPanelTypeQuery' => 'applications/dashboard/paneltype/PhabricatorDashboardPanelTypeQuery.php',
     'PhabricatorDashboardPanelTypeText' => 'applications/dashboard/paneltype/PhabricatorDashboardPanelTypeText.php',
     'PhabricatorDashboardPanelViewController' => 'applications/dashboard/controller/PhabricatorDashboardPanelViewController.php',
     'PhabricatorDashboardQuery' => 'applications/dashboard/query/PhabricatorDashboardQuery.php',
@@ -1646,7 +1648,6 @@ phutil_register_library_map(array(
     'PhabricatorKeyValueDatabaseCache' => 'applications/cache/PhabricatorKeyValueDatabaseCache.php',
     'PhabricatorLegalpadConfigOptions' => 'applications/legalpad/config/PhabricatorLegalpadConfigOptions.php',
     'PhabricatorLegalpadPHIDTypeDocument' => 'applications/legalpad/phid/PhabricatorLegalpadPHIDTypeDocument.php',
-    'PhabricatorLintEngine' => 'infrastructure/lint/PhabricatorLintEngine.php',
     'PhabricatorLipsumArtist' => 'applications/lipsum/image/PhabricatorLipsumArtist.php',
     'PhabricatorLipsumGenerateWorkflow' => 'applications/lipsum/management/PhabricatorLipsumGenerateWorkflow.php',
     'PhabricatorLipsumManagementWorkflow' => 'applications/lipsum/management/PhabricatorLipsumManagementWorkflow.php',
@@ -2037,6 +2038,19 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryVCSPassword' => 'applications/repository/storage/PhabricatorRepositoryVCSPassword.php',
     'PhabricatorRobotsController' => 'applications/system/controller/PhabricatorRobotsController.php',
     'PhabricatorS3FileStorageEngine' => 'applications/files/engine/PhabricatorS3FileStorageEngine.php',
+    'PhabricatorSMS' => 'infrastructure/sms/storage/PhabricatorSMS.php',
+    'PhabricatorSMSConfigOptions' => 'applications/config/option/PhabricatorSMSConfigOptions.php',
+    'PhabricatorSMSDAO' => 'infrastructure/sms/storage/PhabricatorSMSDAO.php',
+    'PhabricatorSMSDemultiplexWorker' => 'infrastructure/sms/worker/PhabricatorSMSDemultiplexWorker.php',
+    'PhabricatorSMSImplementationAdapter' => 'infrastructure/sms/adapter/PhabricatorSMSImplementationAdapter.php',
+    'PhabricatorSMSImplementationTestBlackholeAdapter' => 'infrastructure/sms/adapter/PhabricatorSMSImplementationTestBlackholeAdapter.php',
+    'PhabricatorSMSImplementationTwilioAdapter' => 'infrastructure/sms/adapter/PhabricatorSMSImplementationTwilioAdapter.php',
+    'PhabricatorSMSManagementListOutboundWorkflow' => 'infrastructure/sms/management/PhabricatorSMSManagementListOutboundWorkflow.php',
+    'PhabricatorSMSManagementSendTestWorkflow' => 'infrastructure/sms/management/PhabricatorSMSManagementSendTestWorkflow.php',
+    'PhabricatorSMSManagementShowOutboundWorkflow' => 'infrastructure/sms/management/PhabricatorSMSManagementShowOutboundWorkflow.php',
+    'PhabricatorSMSManagementWorkflow' => 'infrastructure/sms/management/PhabricatorSMSManagementWorkflow.php',
+    'PhabricatorSMSSendWorker' => 'infrastructure/sms/worker/PhabricatorSMSSendWorker.php',
+    'PhabricatorSMSWorker' => 'infrastructure/sms/worker/PhabricatorSMSWorker.php',
     'PhabricatorSQLPatchList' => 'infrastructure/storage/patch/PhabricatorSQLPatchList.php',
     'PhabricatorSSHKeyGenerator' => 'infrastructure/util/PhabricatorSSHKeyGenerator.php',
     'PhabricatorSSHLog' => 'infrastructure/log/PhabricatorSSHLog.php',
@@ -3059,11 +3073,7 @@ phutil_register_library_map(array(
     'DifferentialRevisionEditController' => 'DifferentialController',
     'DifferentialRevisionIDField' => 'DifferentialCustomField',
     'DifferentialRevisionLandController' => 'DifferentialController',
-    'DifferentialRevisionListController' =>
-    array(
-      0 => 'DifferentialController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'DifferentialRevisionListController' => 'DifferentialController',
     'DifferentialRevisionListView' => 'AphrontView',
     'DifferentialRevisionMailReceiver' => 'PhabricatorObjectMailReceiver',
     'DifferentialRevisionQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
@@ -3170,11 +3180,7 @@ phutil_register_library_map(array(
     'DiffusionRepositoryEditLocalController' => 'DiffusionRepositoryEditController',
     'DiffusionRepositoryEditMainController' => 'DiffusionRepositoryEditController',
     'DiffusionRepositoryEditSubversionController' => 'DiffusionRepositoryEditController',
-    'DiffusionRepositoryListController' =>
-    array(
-      0 => 'DiffusionController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'DiffusionRepositoryListController' => 'DiffusionController',
     'DiffusionRepositoryNewController' => 'DiffusionController',
     'DiffusionRepositoryRef' => 'Phobject',
     'DiffusionRepositoryRemarkupRule' => 'PhabricatorRemarkupRuleObject',
@@ -3206,11 +3212,7 @@ phutil_register_library_map(array(
     'DivinerArticleAtomizer' => 'DivinerAtomizer',
     'DivinerAtomCache' => 'DivinerDiskCache',
     'DivinerAtomController' => 'DivinerController',
-    'DivinerAtomListController' =>
-    array(
-      0 => 'DivinerController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'DivinerAtomListController' => 'DivinerController',
     'DivinerAtomQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'DivinerAtomSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'DivinerAtomizeWorkflow' => 'DivinerWorkflow',
@@ -3279,11 +3281,7 @@ phutil_register_library_map(array(
     'DrydockBlueprintCreateController' => 'DrydockBlueprintController',
     'DrydockBlueprintEditController' => 'DrydockBlueprintController',
     'DrydockBlueprintEditor' => 'PhabricatorApplicationTransactionEditor',
-    'DrydockBlueprintListController' =>
-    array(
-      0 => 'DrydockBlueprintController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'DrydockBlueprintListController' => 'DrydockBlueprintController',
     'DrydockBlueprintQuery' => 'DrydockQuery',
     'DrydockBlueprintSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'DrydockBlueprintTransaction' => 'PhabricatorApplicationTransaction',
@@ -3436,11 +3434,7 @@ phutil_register_library_map(array(
       2 => 'HarbormasterBuildableInterface',
     ),
     'HarbormasterBuildableActionController' => 'HarbormasterController',
-    'HarbormasterBuildableListController' =>
-    array(
-      0 => 'HarbormasterController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'HarbormasterBuildableListController' => 'HarbormasterController',
     'HarbormasterBuildableQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'HarbormasterBuildableSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'HarbormasterBuildableViewController' => 'HarbormasterController',
@@ -3464,11 +3458,7 @@ phutil_register_library_map(array(
     'HarbormasterPlanController' => 'HarbormasterController',
     'HarbormasterPlanDisableController' => 'HarbormasterPlanController',
     'HarbormasterPlanEditController' => 'HarbormasterPlanController',
-    'HarbormasterPlanListController' =>
-    array(
-      0 => 'HarbormasterPlanController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'HarbormasterPlanListController' => 'HarbormasterPlanController',
     'HarbormasterPlanOrderController' => 'HarbormasterController',
     'HarbormasterPlanRunController' => 'HarbormasterController',
     'HarbormasterPlanViewController' => 'HarbormasterPlanController',
@@ -3518,11 +3508,7 @@ phutil_register_library_map(array(
     'HeraldRuleEditHistoryController' => 'HeraldController',
     'HeraldRuleEditHistoryView' => 'AphrontView',
     'HeraldRuleEditor' => 'PhabricatorApplicationTransactionEditor',
-    'HeraldRuleListController' =>
-    array(
-      0 => 'HeraldController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'HeraldRuleListController' => 'HeraldController',
     'HeraldRuleQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'HeraldRuleSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'HeraldRuleTransaction' => 'PhabricatorApplicationTransaction',
@@ -3537,11 +3523,7 @@ phutil_register_library_map(array(
     ),
     'HeraldTranscriptController' => 'HeraldController',
     'HeraldTranscriptGarbageCollector' => 'PhabricatorGarbageCollector',
-    'HeraldTranscriptListController' =>
-    array(
-      0 => 'HeraldController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'HeraldTranscriptListController' => 'HeraldController',
     'HeraldTranscriptQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'HeraldTranscriptSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'HeraldTranscriptTestCase' => 'PhabricatorTestCase',
@@ -3568,11 +3550,7 @@ phutil_register_library_map(array(
     'LegalpadDocumentCommentController' => 'LegalpadController',
     'LegalpadDocumentEditController' => 'LegalpadController',
     'LegalpadDocumentEditor' => 'PhabricatorApplicationTransactionEditor',
-    'LegalpadDocumentListController' =>
-    array(
-      0 => 'LegalpadController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'LegalpadDocumentListController' => 'LegalpadController',
     'LegalpadDocumentQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'LegalpadDocumentRemarkupRule' => 'PhabricatorRemarkupRuleObject',
     'LegalpadDocumentSearchEngine' => 'PhabricatorApplicationSearchEngine',
@@ -3807,11 +3785,7 @@ phutil_register_library_map(array(
     'PassphraseCredentialCreateController' => 'PassphraseController',
     'PassphraseCredentialDestroyController' => 'PassphraseController',
     'PassphraseCredentialEditController' => 'PassphraseController',
-    'PassphraseCredentialListController' =>
-    array(
-      0 => 'PassphraseController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PassphraseCredentialListController' => 'PassphraseController',
     'PassphraseCredentialLockController' => 'PassphraseController',
     'PassphraseCredentialPublicController' => 'PassphraseController',
     'PassphraseCredentialQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
@@ -3961,11 +3935,7 @@ phutil_register_library_map(array(
     'PhabricatorApplicationUninstallController' => 'PhabricatorApplicationsController',
     'PhabricatorApplicationXHProf' => 'PhabricatorApplication',
     'PhabricatorApplicationsController' => 'PhabricatorController',
-    'PhabricatorApplicationsListController' =>
-    array(
-      0 => 'PhabricatorApplicationsController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorApplicationsListController' => 'PhabricatorApplicationsController',
     'PhabricatorAsanaConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorAuditAddCommentController' => 'PhabricatorAuditController',
     'PhabricatorAuditComment' =>
@@ -3981,11 +3951,7 @@ phutil_register_library_map(array(
       0 => 'PhabricatorAuditDAO',
       1 => 'PhabricatorInlineCommentInterface',
     ),
-    'PhabricatorAuditListController' =>
-    array(
-      0 => 'PhabricatorAuditController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorAuditListController' => 'PhabricatorAuditController',
     'PhabricatorAuditListView' => 'AphrontView',
     'PhabricatorAuditMailReceiver' => 'PhabricatorObjectMailReceiver',
     'PhabricatorAuditManagementDeleteWorkflow' => 'PhabricatorAuditManagementWorkflow',
@@ -4041,6 +4007,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthProviderOAuthGitHub' => 'PhabricatorAuthProviderOAuth2',
     'PhabricatorAuthProviderOAuthGoogle' => 'PhabricatorAuthProviderOAuth2',
     'PhabricatorAuthProviderOAuthTwitch' => 'PhabricatorAuthProviderOAuth2',
+    'PhabricatorAuthProviderOAuthWordPress' => 'PhabricatorAuthProviderOAuth2',
     'PhabricatorAuthProviderPassword' => 'PhabricatorAuthProvider',
     'PhabricatorAuthProviderPersona' => 'PhabricatorAuthProvider',
     'PhabricatorAuthRegisterController' => 'PhabricatorAuthController',
@@ -4094,11 +4061,7 @@ phutil_register_library_map(array(
     'PhabricatorCalendarEventDeleteController' => 'PhabricatorCalendarController',
     'PhabricatorCalendarEventEditController' => 'PhabricatorCalendarController',
     'PhabricatorCalendarEventInvalidEpochException' => 'Exception',
-    'PhabricatorCalendarEventListController' =>
-    array(
-      0 => 'PhabricatorCalendarController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorCalendarEventListController' => 'PhabricatorCalendarController',
     'PhabricatorCalendarEventQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorCalendarEventSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorCalendarEventViewController' => 'PhabricatorCalendarController',
@@ -4138,11 +4101,7 @@ phutil_register_library_map(array(
     'PhabricatorConduitConsoleController' => 'PhabricatorConduitController',
     'PhabricatorConduitController' => 'PhabricatorController',
     'PhabricatorConduitDAO' => 'PhabricatorLiskDAO',
-    'PhabricatorConduitListController' =>
-    array(
-      0 => 'PhabricatorConduitController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorConduitListController' => 'PhabricatorConduitController',
     'PhabricatorConduitLogController' => 'PhabricatorConduitController',
     'PhabricatorConduitLogQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorConduitMethodCallLog' =>
@@ -4207,11 +4166,7 @@ phutil_register_library_map(array(
     'PhabricatorCountdownDAO' => 'PhabricatorLiskDAO',
     'PhabricatorCountdownDeleteController' => 'PhabricatorCountdownController',
     'PhabricatorCountdownEditController' => 'PhabricatorCountdownController',
-    'PhabricatorCountdownListController' =>
-    array(
-      0 => 'PhabricatorCountdownController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorCountdownListController' => 'PhabricatorCountdownController',
     'PhabricatorCountdownPHIDTypeCountdown' => 'PhabricatorPHIDType',
     'PhabricatorCountdownQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorCountdownRemarkupRule' => 'PhabricatorRemarkupRuleObject',
@@ -4270,11 +4225,7 @@ phutil_register_library_map(array(
     'PhabricatorDashboardController' => 'PhabricatorController',
     'PhabricatorDashboardDAO' => 'PhabricatorLiskDAO',
     'PhabricatorDashboardEditController' => 'PhabricatorDashboardController',
-    'PhabricatorDashboardListController' =>
-    array(
-      0 => 'PhabricatorDashboardController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorDashboardListController' => 'PhabricatorDashboardController',
     'PhabricatorDashboardPHIDTypeDashboard' => 'PhabricatorPHIDType',
     'PhabricatorDashboardPHIDTypePanel' => 'PhabricatorPHIDType',
     'PhabricatorDashboardPanel' =>
@@ -4291,11 +4242,7 @@ phutil_register_library_map(array(
     'PhabricatorDashboardPanelCreateController' => 'PhabricatorDashboardController',
     'PhabricatorDashboardPanelCustomField' => 'PhabricatorCustomField',
     'PhabricatorDashboardPanelEditController' => 'PhabricatorDashboardController',
-    'PhabricatorDashboardPanelListController' =>
-    array(
-      0 => 'PhabricatorDashboardController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorDashboardPanelListController' => 'PhabricatorDashboardController',
     'PhabricatorDashboardPanelQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorDashboardPanelRenderController' => 'PhabricatorDashboardController',
     'PhabricatorDashboardPanelRenderingEngine' => 'Phobject',
@@ -4304,6 +4251,7 @@ phutil_register_library_map(array(
     'PhabricatorDashboardPanelTransactionEditor' => 'PhabricatorApplicationTransactionEditor',
     'PhabricatorDashboardPanelTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'PhabricatorDashboardPanelType' => 'Phobject',
+    'PhabricatorDashboardPanelTypeQuery' => 'PhabricatorDashboardPanelType',
     'PhabricatorDashboardPanelTypeText' => 'PhabricatorDashboardPanelType',
     'PhabricatorDashboardPanelViewController' => 'PhabricatorDashboardController',
     'PhabricatorDashboardQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
@@ -4373,11 +4321,7 @@ phutil_register_library_map(array(
     'PhabricatorFeedController' => 'PhabricatorController',
     'PhabricatorFeedDAO' => 'PhabricatorLiskDAO',
     'PhabricatorFeedDetailController' => 'PhabricatorFeedController',
-    'PhabricatorFeedListController' =>
-    array(
-      0 => 'PhabricatorFeedController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorFeedListController' => 'PhabricatorFeedController',
     'PhabricatorFeedManagementRepublishWorkflow' => 'PhabricatorFeedManagementWorkflow',
     'PhabricatorFeedManagementWorkflow' => 'PhabricatorManagementWorkflow',
     'PhabricatorFeedPublicStreamController' => 'PhabricatorFeedController',
@@ -4423,11 +4367,7 @@ phutil_register_library_map(array(
     'PhabricatorFileInfoController' => 'PhabricatorFileController',
     'PhabricatorFileLinkListView' => 'AphrontView',
     'PhabricatorFileLinkView' => 'AphrontView',
-    'PhabricatorFileListController' =>
-    array(
-      0 => 'PhabricatorFileController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorFileListController' => 'PhabricatorFileController',
     'PhabricatorFilePHIDTypeFile' => 'PhabricatorPHIDType',
     'PhabricatorFileQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorFileSearchEngine' => 'PhabricatorApplicationSearchEngine',
@@ -4460,11 +4400,7 @@ phutil_register_library_map(array(
     'PhabricatorFlagDAO' => 'PhabricatorLiskDAO',
     'PhabricatorFlagDeleteController' => 'PhabricatorFlagController',
     'PhabricatorFlagEditController' => 'PhabricatorFlagController',
-    'PhabricatorFlagListController' =>
-    array(
-      0 => 'PhabricatorFlagController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorFlagListController' => 'PhabricatorFlagController',
     'PhabricatorFlagQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorFlagSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorFlagSelectControl' => 'AphrontFormControl',
@@ -4504,7 +4440,6 @@ phutil_register_library_map(array(
     'PhabricatorKeyValueDatabaseCache' => 'PhutilKeyValueCache',
     'PhabricatorLegalpadConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorLegalpadPHIDTypeDocument' => 'PhabricatorPHIDType',
-    'PhabricatorLintEngine' => 'PhutilLintEngine',
     'PhabricatorLipsumGenerateWorkflow' => 'PhabricatorLipsumManagementWorkflow',
     'PhabricatorLipsumManagementWorkflow' => 'PhabricatorManagementWorkflow',
     'PhabricatorLipsumMondrianArtist' => 'PhabricatorLipsumArtist',
@@ -4520,11 +4455,7 @@ phutil_register_library_map(array(
     'PhabricatorMacroDisableController' => 'PhabricatorMacroController',
     'PhabricatorMacroEditController' => 'PhabricatorMacroController',
     'PhabricatorMacroEditor' => 'PhabricatorApplicationTransactionEditor',
-    'PhabricatorMacroListController' =>
-    array(
-      0 => 'PhabricatorMacroController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorMacroListController' => 'PhabricatorMacroController',
     'PhabricatorMacroMailReceiver' => 'PhabricatorObjectMailReceiver',
     'PhabricatorMacroMemeController' => 'PhabricatorMacroController',
     'PhabricatorMacroMemeDialogController' => 'PhabricatorMacroController',
@@ -4557,11 +4488,7 @@ phutil_register_library_map(array(
     'PhabricatorMailingListSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorMailingListsController' => 'PhabricatorController',
     'PhabricatorMailingListsEditController' => 'PhabricatorMailingListsController',
-    'PhabricatorMailingListsListController' =>
-    array(
-      0 => 'PhabricatorMailingListsController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorMailingListsListController' => 'PhabricatorMailingListsController',
     'PhabricatorMainMenuGroupView' => 'AphrontView',
     'PhabricatorMainMenuIconView' => 'AphrontView',
     'PhabricatorMainMenuSearchView' => 'AphrontView',
@@ -4624,11 +4551,7 @@ phutil_register_library_map(array(
     'PhabricatorOAuthClientBaseController' => 'PhabricatorOAuthServerController',
     'PhabricatorOAuthClientDeleteController' => 'PhabricatorOAuthClientBaseController',
     'PhabricatorOAuthClientEditController' => 'PhabricatorOAuthClientBaseController',
-    'PhabricatorOAuthClientListController' =>
-    array(
-      0 => 'PhabricatorOAuthClientBaseController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorOAuthClientListController' => 'PhabricatorOAuthClientBaseController',
     'PhabricatorOAuthClientViewController' => 'PhabricatorOAuthClientBaseController',
     'PhabricatorOAuthResponse' => 'AphrontResponse',
     'PhabricatorOAuthServerAccessToken' => 'PhabricatorOAuthServerDAO',
@@ -4822,11 +4745,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectEditMainController' => 'PhabricatorProjectController',
     'PhabricatorProjectEditPictureController' => 'PhabricatorProjectController',
     'PhabricatorProjectEditorTestCase' => 'PhabricatorTestCase',
-    'PhabricatorProjectListController' =>
-    array(
-      0 => 'PhabricatorProjectController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorProjectListController' => 'PhabricatorProjectController',
     'PhabricatorProjectMembersEditController' => 'PhabricatorProjectController',
     'PhabricatorProjectMembersRemoveController' => 'PhabricatorProjectController',
     'PhabricatorProjectMoveController' => 'PhabricatorProjectController',
@@ -4977,6 +4896,18 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryVCSPassword' => 'PhabricatorRepositoryDAO',
     'PhabricatorRobotsController' => 'PhabricatorController',
     'PhabricatorS3FileStorageEngine' => 'PhabricatorFileStorageEngine',
+    'PhabricatorSMS' => 'PhabricatorSMSDAO',
+    'PhabricatorSMSConfigOptions' => 'PhabricatorApplicationConfigOptions',
+    'PhabricatorSMSDAO' => 'PhabricatorLiskDAO',
+    'PhabricatorSMSDemultiplexWorker' => 'PhabricatorSMSWorker',
+    'PhabricatorSMSImplementationTestBlackholeAdapter' => 'PhabricatorSMSImplementationAdapter',
+    'PhabricatorSMSImplementationTwilioAdapter' => 'PhabricatorSMSImplementationAdapter',
+    'PhabricatorSMSManagementListOutboundWorkflow' => 'PhabricatorSMSManagementWorkflow',
+    'PhabricatorSMSManagementSendTestWorkflow' => 'PhabricatorSMSManagementWorkflow',
+    'PhabricatorSMSManagementShowOutboundWorkflow' => 'PhabricatorSMSManagementWorkflow',
+    'PhabricatorSMSManagementWorkflow' => 'PhabricatorManagementWorkflow',
+    'PhabricatorSMSSendWorker' => 'PhabricatorSMSWorker',
+    'PhabricatorSMSWorker' => 'PhabricatorWorker',
     'PhabricatorSSHKeyGenerator' => 'Phobject',
     'PhabricatorSSHLog' => 'Phobject',
     'PhabricatorSSHPassthruCommand' => 'Phobject',
@@ -4991,11 +4922,7 @@ phutil_register_library_map(array(
     'PhabricatorSearchAttachController' => 'PhabricatorSearchBaseController',
     'PhabricatorSearchBaseController' => 'PhabricatorController',
     'PhabricatorSearchConfigOptions' => 'PhabricatorApplicationConfigOptions',
-    'PhabricatorSearchController' =>
-    array(
-      0 => 'PhabricatorSearchBaseController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorSearchController' => 'PhabricatorSearchBaseController',
     'PhabricatorSearchDAO' => 'PhabricatorLiskDAO',
     'PhabricatorSearchDeleteController' => 'PhabricatorSearchBaseController',
     'PhabricatorSearchDocument' => 'PhabricatorSearchDAO',
@@ -5066,11 +4993,7 @@ phutil_register_library_map(array(
     'PhabricatorSlowvoteDAO' => 'PhabricatorLiskDAO',
     'PhabricatorSlowvoteEditController' => 'PhabricatorSlowvoteController',
     'PhabricatorSlowvoteEditor' => 'PhabricatorApplicationTransactionEditor',
-    'PhabricatorSlowvoteListController' =>
-    array(
-      0 => 'PhabricatorSlowvoteController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorSlowvoteListController' => 'PhabricatorSlowvoteController',
     'PhabricatorSlowvoteOption' => 'PhabricatorSlowvoteDAO',
     'PhabricatorSlowvotePHIDTypePoll' => 'PhabricatorPHIDType',
     'PhabricatorSlowvotePoll' =>
@@ -5346,11 +5269,7 @@ phutil_register_library_map(array(
     'PholioMockEditor' => 'PhabricatorApplicationTransactionEditor',
     'PholioMockEmbedView' => 'AphrontView',
     'PholioMockImagesView' => 'AphrontView',
-    'PholioMockListController' =>
-    array(
-      0 => 'PholioController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PholioMockListController' => 'PholioController',
     'PholioMockMailReceiver' => 'PhabricatorObjectMailReceiver',
     'PholioMockQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PholioMockSearchEngine' => 'PhabricatorApplicationSearchEngine',
@@ -5464,11 +5383,7 @@ phutil_register_library_map(array(
     'PhragmentZIPController' => 'PhragmentController',
     'PhrequentController' => 'PhabricatorController',
     'PhrequentDAO' => 'PhabricatorLiskDAO',
-    'PhrequentListController' =>
-    array(
-      0 => 'PhrequentController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhrequentListController' => 'PhrequentController',
     'PhrequentSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhrequentTimeBlock' => 'Phobject',
     'PhrequentTimeBlockTestCase' => 'PhabricatorTestCase',
@@ -5508,11 +5423,7 @@ phutil_register_library_map(array(
     'PhrictionDocumentTestCase' => 'PhabricatorTestCase',
     'PhrictionEditController' => 'PhrictionController',
     'PhrictionHistoryController' => 'PhrictionController',
-    'PhrictionListController' =>
-    array(
-      0 => 'PhrictionController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhrictionListController' => 'PhrictionController',
     'PhrictionMoveController' => 'PhrictionController',
     'PhrictionNewController' => 'PhrictionController',
     'PhrictionPHIDTypeDocument' => 'PhabricatorPHIDType',
@@ -5564,11 +5475,7 @@ phutil_register_library_map(array(
     'PonderQuestionEditController' => 'PonderController',
     'PonderQuestionEditor' => 'PonderEditor',
     'PonderQuestionHistoryController' => 'PonderController',
-    'PonderQuestionListController' =>
-    array(
-      0 => 'PonderController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PonderQuestionListController' => 'PonderController',
     'PonderQuestionMailReceiver' => 'PhabricatorObjectMailReceiver',
     'PonderQuestionQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PonderQuestionReplyHandler' => 'PhabricatorMailReplyHandler',
@@ -5640,11 +5547,7 @@ phutil_register_library_map(array(
     'ReleephProductEditController' => 'ReleephProductController',
     'ReleephProductEditor' => 'PhabricatorApplicationTransactionEditor',
     'ReleephProductHistoryController' => 'ReleephProductController',
-    'ReleephProductListController' =>
-    array(
-      0 => 'ReleephController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'ReleephProductListController' => 'ReleephController',
     'ReleephProductQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'ReleephProductSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'ReleephProductTransaction' => 'PhabricatorApplicationTransaction',

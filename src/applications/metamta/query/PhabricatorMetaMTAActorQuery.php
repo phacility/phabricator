@@ -177,7 +177,8 @@ final class PhabricatorMetaMTAActorQuery extends PhabricatorQuery {
         $name = $user->getUserName();
         break;
       case 'real':
-        $name = $user->getRealName();
+        $name = strlen($user->getRealName()) ?
+          $user->getRealName() : $user->getUserName();
         break;
       case 'full':
       default:

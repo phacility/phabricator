@@ -124,4 +124,17 @@ final class PhabricatorFeedSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
+  protected function renderResultList(
+    array $objects,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+
+    $builder = new PhabricatorFeedBuilder($objects);
+    $builder->setShowHovercards(true);
+    $builder->setUser($this->requireViewer());
+    $view = $builder->buildView();
+
+    return phutil_tag_div('phabricator-feed-frame', $view);
+  }
+
 }

@@ -3,6 +3,10 @@
 final class PhabricatorMailingListSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getApplicationClassName() {
+    return 'PhabricatorApplicationMailingLists';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -49,6 +53,31 @@ final class PhabricatorMailingListSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function renderResultList(
+    array $lists,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    assert_instances_of($lists, 'PhabricatorMetaMTAMailingList');
+
+    $view = id(new PHUIObjectItemListView());
+
+    foreach ($lists as $list) {
+      $item = new PHUIObjectItemView();
+
+      $item->setHeader($list->getName());
+      $item->setHref($list->getURI());
+      $item->addAttribute($list->getEmail());
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setIcon('edit')
+          ->setHref($this->getApplicationURI('/edit/'.$list->getID().'/')));
+
+      $view->addItem($item);
+    }
+
+    return $view;
   }
 
 }

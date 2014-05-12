@@ -1,7 +1,6 @@
 <?php
 
-final class HeraldTranscriptListController extends HeraldController
-  implements PhabricatorApplicationSearchResultsControllerInterface {
+final class HeraldTranscriptListController extends HeraldController {
 
   private $queryKey;
 
@@ -45,51 +44,6 @@ final class HeraldTranscriptListController extends HeraldController
       ->setNavigation($this->buildSideNavView());
 
     return $this->delegateToController($controller);
-  }
-
-
-  public function renderResultsList(
-    array $transcripts,
-    PhabricatorSavedQuery $query) {
-    assert_instances_of($transcripts, 'HeraldTranscript');
-
-    $viewer = $this->getRequest()->getUser();
-
-    // Render the table.
-    $handles = array();
-    if ($transcripts) {
-      $phids = mpull($transcripts, 'getObjectPHID', 'getObjectPHID');
-      $handles = $this->loadViewerHandles($phids);
-    }
-
-    $list = new PHUIObjectItemListView();
-    $list->setCards(true);
-    foreach ($transcripts as $xscript) {
-      $view_href = phutil_tag(
-        'a',
-        array(
-          'href' => '/herald/transcript/'.$xscript->getID().'/',
-        ),
-        pht('View Full Transcript'));
-
-      $item = new PHUIObjectItemView();
-      $item->setObjectName($xscript->getID());
-      $item->setHeader($view_href);
-      if ($xscript->getDryRun()) {
-        $item->addAttribute(pht('Dry Run'));
-      }
-      $item->addAttribute($handles[$xscript->getObjectPHID()]->renderLink());
-      $item->addAttribute(
-        number_format((int)(1000 * $xscript->getDuration())).' ms');
-      $item->addIcon(
-        'none',
-        phabricator_datetime($xscript->getTime(), $viewer));
-
-      $list->addItem($item);
-    }
-
-    return $list;
-
   }
 
 }

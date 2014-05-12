@@ -3,6 +3,10 @@
 final class PonderQuestionSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getApplicationClassName() {
+    return 'PhabricatorApplicationPonder';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -122,6 +126,49 @@ final class PonderQuestionSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function getRequiredHandlePHIDsForResultList(
+    array $questions,
+    PhabricatorSavedQuery $query) {
+    return mpull($questions, 'getAuthorPHID');
+  }
+
+  protected function renderResultList(
+    array $questions,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    assert_instances_of($questions, 'PonderQuestion');
+
+    $viewer = $this->requireViewer();
+
+    $view = id(new PHUIObjectItemListView())
+      ->setUser($viewer);
+
+    foreach ($questions as $question) {
+      $item = new PHUIObjectItemView();
+      $item->setObjectName('Q'.$question->getID());
+      $item->setHeader($question->getTitle());
+      $item->setHref('/Q'.$question->getID());
+      $item->setObject($question);
+      $item->setBarColor(
+        PonderQuestionStatus::getQuestionStatusTagColor(
+          $question->getStatus()));
+
+      $created_date = phabricator_date($question->getDateCreated(), $viewer);
+      $item->addIcon('none', $created_date);
+      $item->addByline(
+        pht(
+          'Asked by %s',
+          $handles[$question->getAuthorPHID()]->renderLink()));
+
+      $item->addAttribute(
+        pht('%d Answer(s)', $question->getAnswerCount()));
+
+      $view->addItem($item);
+    }
+
+    return $view;
   }
 
 }

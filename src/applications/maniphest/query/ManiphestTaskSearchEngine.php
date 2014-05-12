@@ -50,7 +50,7 @@ final class ManiphestTaskSearchEngine
 
     $saved->setParameter(
       'allProjectPHIDs',
-      $request->getArr('allProjects'));
+      $this->readPHIDsFromRequest($request, 'allProjects'));
 
     $saved->setParameter(
       'withNoProject',
@@ -58,11 +58,11 @@ final class ManiphestTaskSearchEngine
 
     $saved->setParameter(
       'anyProjectPHIDs',
-      $request->getArr('anyProjects'));
+      $this->readPHIDsFromRequest($request, 'anyProjects'));
 
     $saved->setParameter(
       'excludeProjectPHIDs',
-      $request->getArr('excludeProjects'));
+      $this->readPHIDsFromRequest($request, 'excludeProjects'));
 
     $saved->setParameter(
       'userProjectPHIDs',

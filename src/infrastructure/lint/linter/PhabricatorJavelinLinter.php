@@ -13,6 +13,17 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
   const LINT_UNKNOWN_DEPENDENCY = 4;
   const LINT_MISSING_BINARY = 5;
 
+  public function getInfoName() {
+    return 'Javelin Linter';
+  }
+
+  public function getInfoDescription() {
+    return pht(
+      'This linter is intended for use with the Javelin JS library and '.
+      'extensions. Use `javelinsymbols` to run Javelin rules on Javascript '.
+      'source files.');
+  }
+
   private function getBinaryPath() {
     if ($this->symbolsBinary === null) {
       list($err, $stdout) = exec_manual('which javelinsymbols');
@@ -46,6 +57,10 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
 
   public function getLinterName() {
     return 'JAVELIN';
+  }
+
+  public function getLinterConfigurationName() {
+    return 'javelin';
   }
 
   public function getLintSeverityMap() {

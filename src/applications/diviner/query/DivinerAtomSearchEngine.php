@@ -3,6 +3,10 @@
 final class DivinerAtomSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getApplicationClassName() {
+    return 'PhabricatorApplicationDiviner';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -86,6 +90,34 @@ final class DivinerAtomSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function renderResultList(
+    array $symbols,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+
+    assert_instances_of($symbols, 'DivinerLiveSymbol');
+
+    $viewer = $this->requireViewer();
+
+    $list = id(new PHUIObjectItemListView())
+      ->setUser($viewer);
+
+    foreach ($symbols as $symbol) {
+      $type = $symbol->getType();
+      $type_name = DivinerAtom::getAtomTypeNameString($type);
+
+      $item = id(new PHUIObjectItemView())
+        ->setHeader($symbol->getTitle())
+        ->setHref($symbol->getURI())
+        ->addAttribute($symbol->getSummary())
+        ->addIcon('none', $type_name);
+
+      $list->addItem($item);
+    }
+
+    return $list;
   }
 
 }

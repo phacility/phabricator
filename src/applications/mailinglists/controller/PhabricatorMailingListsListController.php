@@ -1,8 +1,7 @@
 <?php
 
 final class PhabricatorMailingListsListController
-  extends PhabricatorMailingListsController
-  implements PhabricatorApplicationSearchResultsControllerInterface {
+  extends PhabricatorMailingListsController {
 
   private $queryKey;
 
@@ -22,30 +21,6 @@ final class PhabricatorMailingListsListController
       ->setNavigation($this->buildSideNavView());
 
     return $this->delegateToController($controller);
-  }
-
-  public function renderResultsList(
-    array $lists,
-    PhabricatorSavedQuery $query) {
-    assert_instances_of($lists, 'PhabricatorMetaMTAMailingList');
-
-    $view = id(new PHUIObjectItemListView());
-
-    foreach ($lists as $list) {
-      $item = new PHUIObjectItemView();
-
-      $item->setHeader($list->getName());
-      $item->setHref($list->getURI());
-      $item->addAttribute($list->getEmail());
-      $item->addAction(
-        id(new PHUIListItemView())
-          ->setIcon('edit')
-          ->setHref($this->getApplicationURI('/edit/'.$list->getID().'/')));
-
-      $view->addItem($item);
-    }
-
-    return $view;
   }
 
 }

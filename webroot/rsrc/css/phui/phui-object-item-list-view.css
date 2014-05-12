@@ -51,9 +51,9 @@
   border-color: {$lightgreyborder};
   border-bottom-color: {$greyborder};
   border-width: 1px 1px 1px 0;
-  overflow: hidden;
   position: relative;
   min-height: 29px;
+  overflow: hidden;
 }
 
 .phui-object-list-cards .phui-object-item-frame {

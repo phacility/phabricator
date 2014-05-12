@@ -6,18 +6,23 @@
   width: 100%;
 }
 
-.phui-workboard-view-shadow {
+.device-desktop .phui-workboard-view-shadow {
   overflow-x: auto;
-  padding-bottom: 8px;
+  position: absolute;
+  top: 120px;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
 .phui-workboard-view-shadow::-webkit-scrollbar {
   height: 12px;
+  width: 12px;
+  background: rgba(200,200,200,.6);
 }
 
 .phui-workboard-view-shadow::-webkit-scrollbar-thumb {
   background: {$lightbluetext};
-  border-radius: 10px;
 }
 
 .phui-workboard-action-list {
@@ -68,7 +73,7 @@
   margin: 0 3px;
 }
 
-.device-phone .project-board-wrapper {
-  margin-left: 0;
-  margin-right: 0;
+.device-tablet .project-board-wrapper {
+  margin-left: 8px;
+  margin-right: 8px;
 }

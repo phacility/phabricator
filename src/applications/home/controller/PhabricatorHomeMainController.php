@@ -148,8 +148,8 @@ final class PhabricatorHomeMainController
         'Nothing appears to be critically broken right now.');
     }
 
-    $href = sprintf(
-      '/maniphest/?statuses[]=%s&priorities[]=%s#R',
+    $href = urisprintf(
+      '/maniphest/?statuses=%s&priorities=%s#R',
       implode(',', ManiphestTaskStatus::getOpenStatusConstants()),
       $unbreak_now);
     $title = pht('Unbreak Now!');
@@ -196,8 +196,8 @@ final class PhabricatorHomeMainController
     }
 
     $title = pht('Needs Triage');
-    $href = sprintf(
-      '/maniphest/?statuses[]=%s&priorities[]=%s&userProjects[]=%s#R',
+    $href = urisprintf(
+      '/maniphest/?statuses=%s&priorities=%s&userProjects=%s#R',
       implode(',', ManiphestTaskStatus::getOpenStatusConstants()),
       $needs_triage,
       $user->getPHID());

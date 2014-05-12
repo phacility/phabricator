@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PhabricatorApplicationPholio extends PhabricatorApplication {
 
   public function getBaseURI() {

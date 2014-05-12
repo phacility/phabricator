@@ -3,6 +3,10 @@
 final class HarbormasterBuildPlanSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getApplicationClassName() {
+    return 'PhabricatorApplicationHarbormaster';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -77,6 +81,34 @@ final class HarbormasterBuildPlanSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function renderResultList(
+    array $plans,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    assert_instances_of($plans, 'HarbormasterBuildPlan');
+
+    $viewer = $this->requireViewer();
+
+    $list = new PHUIObjectItemListView();
+    foreach ($plans as $plan) {
+      $id = $plan->getID();
+
+      $item = id(new PHUIObjectItemView())
+        ->setObjectName(pht('Plan %d', $plan->getID()))
+        ->setHeader($plan->getName());
+
+      if ($plan->isDisabled()) {
+        $item->setDisabled(true);
+      }
+
+      $item->setHref($this->getApplicationURI("plan/{$id}/"));
+
+      $list->addItem($item);
+    }
+
+    return $list;
   }
 
 }

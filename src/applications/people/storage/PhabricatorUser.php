@@ -711,7 +711,11 @@ EOBODY;
   }
 
   public function getFullName() {
-    return $this->getUsername().' ('.$this->getRealName().')';
+    if (strlen($this->getRealName())) {
+      return $this->getUsername().' ('.$this->getRealName().')';
+    } else {
+      return $this->getUsername();
+    }
   }
 
   public function __toString() {

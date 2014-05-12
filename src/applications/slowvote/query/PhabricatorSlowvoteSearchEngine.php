@@ -115,4 +115,53 @@ final class PhabricatorSlowvoteSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
+  public function getRequiredHandlePHIDsForResultList(
+    array $polls,
+    PhabricatorSavedQuery $query) {
+    return mpull($polls, 'getAuthorPHID');
+  }
+
+  protected function renderResultList(
+    array $polls,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+
+    assert_instances_of($polls, 'PhabricatorSlowvotePoll');
+    $viewer = $this->requireViewer();
+
+    $list = id(new PHUIObjectItemListView())
+      ->setUser($viewer);
+
+    $phids = mpull($polls, 'getAuthorPHID');
+
+    foreach ($polls as $poll) {
+      $date_created = phabricator_datetime($poll->getDateCreated(), $viewer);
+      if ($poll->getAuthorPHID()) {
+        $author = $handles[$poll->getAuthorPHID()]->renderLink();
+      } else {
+        $author = null;
+      }
+
+      $item = id(new PHUIObjectItemView())
+        ->setObjectName('V'.$poll->getID())
+        ->setHeader($poll->getQuestion())
+        ->setHref('/V'.$poll->getID())
+        ->setDisabled($poll->getIsClosed())
+        ->addIcon('none', $date_created);
+
+      $description = $poll->getDescription();
+      if (strlen($description)) {
+        $item->addAttribute(phutil_utf8_shorten($poll->getDescription(), 120));
+      }
+
+      if ($author) {
+        $item->addByline(pht('Author: %s', $author));
+      }
+
+      $list->addItem($item);
+    }
+
+    return $list;
+  }
+
 }

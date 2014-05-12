@@ -45,8 +45,11 @@ final class AphrontMultiColumnView extends AphrontView {
     $classes[] = 'aphront-multi-column-inner';
     $classes[] = 'grouped';
 
-    if (count($this->columns) > 7) {
-      throw new Exception("No more than 7 columns per view.");
+    if ($this->fluidishLayout || $this->fluidLayout) {
+      // we only support seven columns for now for fluid views; see T4054
+      if (count($this->columns) > 7) {
+        throw new Exception("No more than 7 columns per view.");
+      }
     }
 
     $classes[] = 'aphront-multi-column-'.count($this->columns).'-up';

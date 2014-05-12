@@ -34,10 +34,9 @@ final class DifferentialActionMenuEventListener
     }
 
     $person = $event->getValue('object');
-    $href = '/differential/?authorPHIDs[]='.$person->getPHID();
+    $href = '/differential/?authors='.$person->getUsername();
 
     return id(new PhabricatorActionView())
-      ->setRenderAsForm(true)
       ->setIcon('differential-dark')
       ->setIconSheet(PHUIIconView::SPRITE_APPS)
       ->setName(pht('View Revisions'))

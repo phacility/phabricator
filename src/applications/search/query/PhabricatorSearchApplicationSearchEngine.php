@@ -3,6 +3,10 @@
 final class PhabricatorSearchApplicationSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getApplicationClassName() {
+    return 'PhabricatorApplicationSearch';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -229,5 +233,50 @@ final class PhabricatorSearchApplicationSearchEngine
     return $results;
   }
 
+  public function shouldUseOffsetPaging() {
+    return true;
+  }
+
+  protected function renderResultList(
+    array $results,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+
+    $viewer = $this->requireViewer();
+
+    if ($results) {
+      $objects = id(new PhabricatorObjectQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(mpull($results, 'getPHID'))
+        ->execute();
+
+      $output = array();
+      foreach ($results as $phid => $handle) {
+        $view = id(new PhabricatorSearchResultView())
+          ->setHandle($handle)
+          ->setQuery($query)
+          ->setObject(idx($objects, $phid));
+        $output[] = $view->render();
+      }
+
+      $results = phutil_tag_div(
+        'phabricator-search-result-list',
+        $output);
+    } else {
+      $results = phutil_tag_div(
+        'phabricator-search-result-list',
+        phutil_tag(
+          'p',
+          array('class' => 'phabricator-search-no-results'),
+          pht('No search results.')));
+    }
+
+    return id(new PHUIBoxView())
+      ->addMargin(PHUI::MARGIN_LARGE)
+      ->addPadding(PHUI::PADDING_LARGE)
+      ->setBorder(true)
+      ->appendChild($results)
+      ->addClass('phabricator-search-result-box');
+  }
 
 }

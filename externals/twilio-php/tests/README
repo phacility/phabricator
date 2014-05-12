@@ -1,0 +1,3 @@
+# To run the tests, navigate to the twilio-php home directory, then run:
+
+make test

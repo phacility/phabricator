@@ -17,6 +17,11 @@
   margin: 0;
 }
 
+.device-desktop .phui-workboard-view-shadow .aphront-multi-column-inner
+  .aphront-multi-column-column-last {
+  margin-right: 8px;
+}
+
 .device .aphront-multi-column-outer
   div.aphront-multi-column-column-outer {
   width: auto;
@@ -101,6 +106,10 @@
 .aphront-multi-column-inner {
   display: table;
   width: 100%;
+}
+
+.device-desktop .aphront-multi-column-fixed .aphront-multi-column-inner {
+  margin: 0 0 12px 12px;
 }
 
 /* magic sauce */

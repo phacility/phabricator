@@ -109,4 +109,75 @@ final class PhrictionSearchEngine
     );
   }
 
+  protected function getRequiredHandlePHIDsForResultList(
+    array $documents,
+    PhabricatorSavedQuery $query) {
+
+    $phids = array();
+    foreach ($documents as $document) {
+      $content = $document->getContent();
+      if ($document->hasProject()) {
+        $phids[] = $document->getProject()->getPHID();
+      }
+      $phids[] = $content->getAuthorPHID();
+    }
+
+    return $phids;
+  }
+
+
+  protected function renderResultList(
+    array $documents,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    assert_instances_of($documents, 'PhrictionDocument');
+
+    $viewer = $this->requireViewer();
+
+    $list = new PHUIObjectItemListView();
+    $list->setUser($viewer);
+    foreach ($documents as $document) {
+      $content = $document->getContent();
+      $slug = $document->getSlug();
+      $author_phid = $content->getAuthorPHID();
+      $slug_uri = PhrictionDocument::getSlugURI($slug);
+
+      $byline = pht(
+        'Edited by %s',
+        $handles[$author_phid]->renderLink());
+
+      $updated = phabricator_datetime(
+        $content->getDateCreated(),
+        $viewer);
+
+      $item = id(new PHUIObjectItemView())
+        ->setHeader($content->getTitle())
+        ->setHref($slug_uri)
+        ->addByline($byline)
+        ->addIcon('none', $updated);
+
+      if ($document->hasProject()) {
+        $item->addAttribute(
+          $handles[$document->getProject()->getPHID()]->renderLink());
+      }
+
+      $item->addAttribute($slug_uri);
+
+      switch ($document->getStatus()) {
+        case PhrictionDocumentStatus::STATUS_DELETED:
+          $item->setDisabled(true);
+          $item->addIcon('delete', pht('Deleted'));
+          break;
+        case PhrictionDocumentStatus::STATUS_MOVED:
+          $item->setDisabled(true);
+          $item->addIcon('arrow-right', pht('Moved Away'));
+          break;
+      }
+
+      $list->addItem($item);
+    }
+
+    return $list;
+  }
+
 }

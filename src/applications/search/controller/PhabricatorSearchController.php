@@ -1,8 +1,7 @@
 <?php
 
 final class PhabricatorSearchController
-  extends PhabricatorSearchBaseController
-  implements PhabricatorApplicationSearchResultsControllerInterface {
+  extends PhabricatorSearchBaseController {
 
   private $queryKey;
 
@@ -76,7 +75,6 @@ final class PhabricatorSearchController
     $controller = id(new PhabricatorApplicationSearchController($request))
       ->setQueryKey($this->queryKey)
       ->setSearchEngine($engine)
-      ->setUseOffsetPaging(true)
       ->setNavigation($this->buildSideNavView());
 
     return $this->delegateToController($controller);
@@ -95,47 +93,6 @@ final class PhabricatorSearchController
     $nav->selectFilter(null);
 
     return $nav;
-  }
-
-  public function renderResultsList(
-    array $results,
-    PhabricatorSavedQuery $query) {
-
-    $viewer = $this->getRequest()->getUser();
-
-    if ($results) {
-      $objects = id(new PhabricatorObjectQuery())
-        ->setViewer($viewer)
-        ->withPHIDs(mpull($results, 'getPHID'))
-        ->execute();
-
-      $output = array();
-      foreach ($results as $phid => $handle) {
-        $view = id(new PhabricatorSearchResultView())
-          ->setHandle($handle)
-          ->setQuery($query)
-          ->setObject(idx($objects, $phid));
-        $output[] = $view->render();
-      }
-
-      $results = phutil_tag_div(
-        'phabricator-search-result-list',
-        $output);
-    } else {
-      $results = phutil_tag_div(
-        'phabricator-search-result-list',
-        phutil_tag(
-          'p',
-          array('class' => 'phabricator-search-no-results'),
-          pht('No search results.')));
-    }
-
-    return id(new PHUIBoxView())
-      ->addMargin(PHUI::MARGIN_LARGE)
-      ->addPadding(PHUI::PADDING_LARGE)
-      ->setBorder(true)
-      ->appendChild($results)
-      ->addClass('phabricator-search-result-box');
   }
 
 }

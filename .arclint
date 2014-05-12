@@ -1,0 +1,79 @@
+{
+  "exclude": [
+    "(^externals/)",
+    "(\\.lint-test$)"
+  ],
+  "linters": {
+    "filename": {
+      "type": "filename"
+    },
+    "javelin": {
+      "type": "javelin",
+      "include": "(\\.js$)",
+      "exclude": [
+        "(^externals/JsShrink/)",
+        "(^support/aphlict/)",
+        "(^webroot/rsrc/externals/raphael/)"
+      ]
+    },
+    "jshint": {
+      "type": "jshint",
+      "include": "(\\.js$)",
+      "exclude": [
+        "(^externals/JsShrink/)",
+        "(^webroot/rsrc/externals/raphael/)"
+      ],
+      "flags": ["--config=support/jshint/jshintconfig"]
+    },
+    "generated": {
+      "type": "generated"
+    },
+    "merge-conflict": {
+      "type": "merge-conflict"
+    },
+    "nolint": {
+      "type": "nolint"
+    },
+    "phutil-xhpast": {
+      "type": "phutil-xhpast",
+      "include": "(\\.php$)",
+      "phutil-xhpast.deprecated.functions": {
+        "phutil_escape_html": "The phutil_escape_html() function is deprecated. Raw strings passed to phutil_tag() or hsprintf() are escaped automatically."
+      }
+    },
+    "phutil-library": {
+      "type": "phutil-library",
+      "include": "(\\.php$)"
+    },
+    "text": {
+      "type": "text",
+      "exclude": [
+        "(^\\.arclint)"
+      ]
+    },
+    "text-without-length": {
+      "type": "text",
+      "severity": {
+        "3": "disabled"
+      },
+      "include": [
+        "(^\\.arclint)"
+      ]
+    },
+    "spelling": {
+      "type": "spelling"
+    },
+    "xhpast": {
+      "type": "xhpast",
+      "include": "(\\.php$)",
+      "severity": {
+        "16": "advice",
+        "29": "warning",
+        "31": "error",
+        "34": "error",
+        "35": "error"
+      },
+      "xhpast.naminghook": "PhabricatorSymbolNameLinter"
+    }
+  }
+}

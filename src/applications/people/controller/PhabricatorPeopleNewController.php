@@ -25,9 +25,10 @@ final class PhabricatorPeopleNewController
     }
 
     $user = new PhabricatorUser();
+    $require_real_name = PhabricatorEnv::getEnvConfig('user.require-real-name');
 
     $e_username = true;
-    $e_realname = true;
+    $e_realname = $require_real_name ? true : null;
     $e_email    = true;
     $errors = array();
 
@@ -64,7 +65,7 @@ final class PhabricatorPeopleNewController
         $e_username = null;
       }
 
-      if (!strlen($user->getRealName())) {
+      if (!strlen($user->getRealName()) && $require_real_name) {
         $errors[] = pht('Real name is required.');
         $e_realname = pht('Required');
       } else {
