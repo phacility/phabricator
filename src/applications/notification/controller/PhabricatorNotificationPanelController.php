@@ -42,7 +42,7 @@ final class PhabricatorNotificationPanelController
           'href' => '/notification/clear/',
           'class' => 'phabricator-notification-clear-all'
         ),
-        pht('Clear All Notifications')),
+        pht('Mark All Read')),
       $content,
       phutil_tag(
         'a',
