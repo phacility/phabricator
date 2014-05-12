@@ -32,6 +32,10 @@ final class PhabricatorCaches {
   private static function buildRepositoryGraphL1Caches() {
     $caches = array();
 
+    $request = new PhutilKeyValueCacheInRequest();
+    $request->setLimit(32);
+    $caches[] = $request;
+
     $apc = new PhutilKeyValueCacheAPC();
     if ($apc->isAvailable()) {
       $caches[] = $apc;
