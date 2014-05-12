@@ -83,17 +83,17 @@ final class HeraldRuleViewController extends HeraldController {
       id(new PhabricatorActionView())
         ->setName(pht('Edit Rule'))
         ->setHref($this->getApplicationURI("edit/{$id}/"))
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
     if ($rule->getIsDisabled()) {
       $disable_uri = "disable/{$id}/enable/";
-      $disable_icon = 'enable';
+      $disable_icon = 'fa-check-circle-o';
       $disable_name = pht('Enable Rule');
     } else {
       $disable_uri = "disable/{$id}/disable/";
-      $disable_icon = 'disable';
+      $disable_icon = 'fa-ban';
       $disable_name = pht('Disable Rule');
     }
 

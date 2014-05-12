@@ -38,7 +38,7 @@ abstract class ManiphestController extends PhabricatorController {
       id(new PHUIListItemView())
         ->setName(pht('Create Task'))
         ->setHref($this->getApplicationURI('task/create/'))
-        ->setIcon('create'));
+        ->setIcon('fa-plus-square'));
 
     return $crumbs;
   }

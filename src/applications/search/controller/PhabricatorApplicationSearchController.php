@@ -300,9 +300,9 @@ final class PhabricatorApplicationSearchController
         ->setHref($engine->getQueryResultsPageURI($key));
 
       if ($named_query->getIsBuiltin() && $named_query->getIsDisabled()) {
-        $icon = 'new';
+        $icon = 'fa-plus';
       } else {
-        $icon = 'delete';
+        $icon = 'fa-times';
       }
 
       $item->addAction(
@@ -313,15 +313,15 @@ final class PhabricatorApplicationSearchController
 
       if ($named_query->getIsBuiltin()) {
         if ($named_query->getIsDisabled()) {
-          $item->addIcon('delete-grey', pht('Disabled'));
+          $item->addIcon('fa-times lightgreytext', pht('Disabled'));
           $item->setDisabled(true);
         } else {
-          $item->addIcon('lock-grey', pht('Builtin'));
+          $item->addIcon('fa-lock lightgreytext', pht('Builtin'));
         }
       } else {
         $item->addAction(
           id(new PHUIListItemView())
-            ->setIcon('edit')
+            ->setIcon('fa-pencil')
             ->setHref('/search/edit/'.$key.'/'));
       }
 

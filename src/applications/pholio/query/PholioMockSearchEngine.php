@@ -99,8 +99,8 @@ final class PholioMockSearchEngine
         ->setURI('/M'.$mock->getID())
         ->setImageURI($mock->getCoverFile()->getThumb280x210URI())
         ->setImageSize(280, 210)
-        ->addIconCount('image', count($mock->getImages()))
-        ->addIconCount('like', $mock->getTokenCount());
+        ->addIconCount('fa-picture-o', count($mock->getImages()))
+        ->addIconCount('fa-trophy', $mock->getTokenCount());
 
       if ($mock->getAuthorPHID()) {
         $author_handle = $handles[$mock->getAuthorPHID()];

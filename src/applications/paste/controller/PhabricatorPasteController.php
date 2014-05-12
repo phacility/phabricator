@@ -35,7 +35,7 @@ abstract class PhabricatorPasteController extends PhabricatorController {
       id(new PHUIListItemView())
         ->setName(pht('Create Paste'))
         ->setHref($this->getApplicationURI('create/'))
-        ->setIcon('create'));
+        ->setIcon('fa-plus-square'));
 
     return $crumbs;
   }

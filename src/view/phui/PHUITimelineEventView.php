@@ -508,8 +508,20 @@ final class PHUITimelineEventView extends AphrontView {
         }
       }
 
+      if ($this->getIsEditable()) {
+        $items[] = id(new PhabricatorActionView())
+          ->setIcon('fa-pencil')
+          ->setHref('/transactions/edit/'.$xaction_phid.'/')
+          ->setName(pht('Edit Comment'))
+          ->addSigil('transaction-edit')
+          ->setMetadata(
+            array(
+              'anchor' => $anchor,
+            ));
+      }
+
       $items[] = id(new PhabricatorActionView())
-        ->setIcon('comment')
+        ->setIcon('fa-quote-left')
         ->setHref('#')
         ->setName(pht('Quote'))
         ->addSigil('transaction-quote')
@@ -521,21 +533,9 @@ final class PHUITimelineEventView extends AphrontView {
           ));
     }
 
-    if ($this->getIsEditable()) {
-      $items[] = id(new PhabricatorActionView())
-        ->setIcon('edit')
-        ->setHref('/transactions/edit/'.$xaction_phid.'/')
-        ->setName(pht('Edit Comment'))
-        ->addSigil('transaction-edit')
-        ->setMetadata(
-          array(
-            'anchor' => $anchor,
-          ));
-    }
-
     if ($this->getIsRemovable()) {
       $items[] = id(new PhabricatorActionView())
-        ->setIcon('delete')
+        ->setIcon('fa-times')
         ->setHref('/transactions/remove/'.$xaction_phid.'/')
         ->setName(pht('Remove Comment'))
         ->addSigil('transaction-remove')
@@ -548,7 +548,7 @@ final class PHUITimelineEventView extends AphrontView {
 
     if ($this->getIsEdited()) {
       $items[] = id(new PhabricatorActionView())
-        ->setIcon('transcript')
+        ->setIcon('fa-list')
         ->setHref('/transactions/history/'.$xaction_phid.'/')
         ->setName(pht('View Edit History'))
         ->setWorkflow(true);

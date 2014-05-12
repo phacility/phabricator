@@ -94,7 +94,7 @@ abstract class DiffusionBrowseController extends DiffusionController {
       id(new PhabricatorActionView())
         ->setName(pht('View History'))
         ->setHref($history_uri)
-        ->setIcon('history'));
+        ->setIcon('fa-list'));
 
     $behind_head = $drequest->getRawCommit();
     $head_uri = $drequest->generateURI(
@@ -106,7 +106,7 @@ abstract class DiffusionBrowseController extends DiffusionController {
       id(new PhabricatorActionView())
         ->setName(pht('Jump to HEAD'))
         ->setHref($head_uri)
-        ->setIcon('home')
+        ->setIcon('fa-home')
         ->setDisabled(!$behind_head));
 
     // TODO: Ideally, this should live in Owners and be event-triggered, but
@@ -125,7 +125,7 @@ abstract class DiffusionBrowseController extends DiffusionController {
         id(new PhabricatorActionView())
           ->setName(pht('Find Owners'))
           ->setHref((string)$owners_uri)
-          ->setIcon('preview'));
+          ->setIcon('fa-users'));
     }
 
     return $view;

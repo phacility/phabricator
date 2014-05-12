@@ -70,7 +70,7 @@ final class PhabricatorOAuthClientViewController
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Application'))
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setWorkflow(!$can_edit)
         ->setDisabled(!$can_edit)
         ->setHref($client->getEditURI()));
@@ -78,7 +78,7 @@ final class PhabricatorOAuthClientViewController
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Delete Application'))
-        ->setIcon('delete')
+        ->setIcon('fa-times')
         ->setWorkflow(true)
         ->setDisabled(!$can_edit)
         ->setHref($client->getDeleteURI()));
@@ -86,7 +86,7 @@ final class PhabricatorOAuthClientViewController
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Create Test Authorization'))
-        ->setIcon('wrench')
+        ->setIcon('fa-wrench')
         ->setWorkflow(true)
         ->setDisabled($is_authorized)
         ->setHref($this->getApplicationURI('test/'.$client->getID().'/')));

@@ -36,7 +36,7 @@ abstract class PhabricatorSlowvoteController extends PhabricatorController {
       id(new PHUIListItemView())
         ->setName(pht('Create Poll'))
         ->setHref($this->getApplicationURI('create/'))
-        ->setIcon('create'));
+        ->setIcon('fa-plus-square'));
 
     return $crumbs;
   }

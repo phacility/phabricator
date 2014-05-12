@@ -35,7 +35,7 @@ abstract class PhabricatorCountdownController extends PhabricatorController {
       id(new PHUIListItemView())
         ->setName(pht('Create Countdown'))
         ->setHref($this->getApplicationURI('edit/'))
-        ->setIcon('create'));
+        ->setIcon('fa-plus-square'));
 
     return $crumbs;
   }

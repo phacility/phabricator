@@ -53,15 +53,12 @@ final class PhabricatorCrumbsView extends AphrontView {
         if ($action->getIcon()) {
           $icon_name = $action->getIcon();
           if ($action->getDisabled()) {
-            $icon_name .= '-grey';
+            $icon_name .= ' lightgreytext';
           }
 
-          $icon = phutil_tag(
-            'span',
-            array(
-              'class' => 'sprite-icons icons-'.$icon_name,
-            ),
-            '');
+          $icon = id(new PHUIIconView())
+            ->setIconFont($icon_name);
+
         }
         $name = phutil_tag(
           'span',
@@ -97,12 +94,8 @@ final class PhabricatorCrumbsView extends AphrontView {
 
       if ($this->actionListID) {
         $icon_id = celerity_generate_unique_node_id();
-        $icon = phutil_tag(
-          'span',
-            array(
-              'class' => 'sprite-icons action-action-menu'
-            ),
-            '');
+        $icon = id(new PHUIIconView())
+          ->setIconFont('fa-bars');
         $name = phutil_tag(
           'span',
             array(

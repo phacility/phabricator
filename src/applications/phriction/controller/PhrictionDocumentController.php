@@ -278,28 +278,28 @@ final class PhrictionDocumentController
       return $action_view->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Create This Document'))
-          ->setIcon('create')
+          ->setIcon('fa-plus-square')
           ->setHref('/phriction/edit/?slug='.$slug));
     }
 
     $action_view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Document'))
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setHref('/phriction/edit/'.$document->getID().'/'));
 
     if ($document->getStatus() == PhrictionDocumentStatus::STATUS_EXISTS) {
       $action_view->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Move Document'))
-          ->setIcon('move')
+          ->setIcon('fa-arrows')
           ->setHref('/phriction/move/'.$document->getID().'/')
           ->setWorkflow(true));
 
       $action_view->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Delete Document'))
-          ->setIcon('delete')
+          ->setIcon('fa-times')
           ->setHref('/phriction/delete/'.$document->getID().'/')
           ->setWorkflow(true));
     }
@@ -308,7 +308,7 @@ final class PhrictionDocumentController
       $action_view->addAction(
         id(new PhabricatorActionView())
         ->setName(pht('View History'))
-        ->setIcon('history')
+        ->setIcon('fa-list')
         ->setHref(PhrictionDocument::getSlugURI($slug, 'history')));
   }
 

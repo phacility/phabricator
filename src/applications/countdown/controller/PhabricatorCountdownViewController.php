@@ -80,7 +80,7 @@ final class PhabricatorCountdownViewController
 
     $view->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setName(pht('Edit Countdown'))
         ->setHref($this->getApplicationURI("edit/{$id}/"))
         ->setDisabled(!$can_edit)
@@ -88,7 +88,7 @@ final class PhabricatorCountdownViewController
 
     $view->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('delete')
+        ->setIcon('fa-times')
         ->setName(pht('Delete Countdown'))
         ->setHref($this->getApplicationURI("delete/{$id}/"))
         ->setDisabled(!$can_edit)

@@ -88,10 +88,10 @@ final class PassphraseCredentialViewController extends PassphraseController {
     $is_locked = $credential->getIsLocked();
     if ($is_locked) {
       $credential_lock_text = pht('Locked Permanently');
-      $credential_lock_icon = 'lock';
+      $credential_lock_icon = 'fa-lock';
     } else {
       $credential_lock_text = pht('Lock Permanently');
-      $credential_lock_icon = 'unlock';
+      $credential_lock_icon = 'fa-unlock';
     }
 
     $actions = id(new PhabricatorActionListView())
@@ -106,7 +106,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Credential'))
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI("edit/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
@@ -115,7 +115,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
       $actions->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Destroy Credential'))
-          ->setIcon('delete')
+          ->setIcon('fa-times')
           ->setHref($this->getApplicationURI("destroy/{$id}/"))
           ->setDisabled(!$can_edit)
           ->setWorkflow(true));
@@ -123,7 +123,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
       $actions->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Show Secret'))
-          ->setIcon('preview')
+          ->setIcon('fa-eye')
           ->setHref($this->getApplicationURI("reveal/{$id}/"))
           ->setDisabled(!$can_edit || $is_locked)
           ->setWorkflow(true));
@@ -132,7 +132,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
         $actions->addAction(
           id(new PhabricatorActionView())
             ->setName(pht('Show Public Key'))
-            ->setIcon('download-alt')
+            ->setIcon('fa-download')
             ->setHref($this->getApplicationURI("public/{$id}/"))
             ->setWorkflow(true)
             ->setDisabled($is_locked));

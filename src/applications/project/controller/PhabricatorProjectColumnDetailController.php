@@ -115,7 +115,7 @@ final class PhabricatorProjectColumnDetailController
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit column'))
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI($base_uri.'edit/'.$id.'/'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
@@ -124,7 +124,7 @@ final class PhabricatorProjectColumnDetailController
       $actions->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Delete column'))
-          ->setIcon('delete')
+          ->setIcon('fa-times')
           ->setHref($this->getApplicationURI($base_uri.'delete/'.$id.'/'))
           ->setDisabled(!$can_edit)
           ->setWorkflow(true));
@@ -132,7 +132,7 @@ final class PhabricatorProjectColumnDetailController
       $actions->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Activate column'))
-          ->setIcon('enable')
+          ->setIcon('fa-play-circle-o')
           ->setHref($this->getApplicationURI($base_uri.'delete/'.$id.'/'))
           ->setDisabled(!$can_edit)
           ->setWorkflow(true));

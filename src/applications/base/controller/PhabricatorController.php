@@ -442,15 +442,14 @@ abstract class PhabricatorController extends AphrontController {
     $can_act = $this->hasApplicationCapability($capability);
     if ($can_act) {
       $message = $positive_message;
-      $icon_name = 'enable-grey';
+      $icon_name = 'fa-play-circle-o lightgreytext';
     } else {
       $message = $negative_message;
-      $icon_name = 'lock';
+      $icon_name = 'fa-lock';
     }
 
     $icon = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-      ->setSpriteIcon($icon_name);
+      ->setIconFont($icon_name);
 
     require_celerity_resource('policy-css');
 

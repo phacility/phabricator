@@ -30,7 +30,7 @@ final class PhabricatorOAuthClientListController
       id(new PHUIListItemView())
         ->setHref($this->getApplicationURI('client/create/'))
         ->setName(pht('Create Application'))
-        ->setIcon('create'));
+        ->setIcon('fa-plus-square'));
 
     return $crumbs;
   }

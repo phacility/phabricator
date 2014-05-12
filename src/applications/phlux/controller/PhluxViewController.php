@@ -44,7 +44,7 @@ final class PhluxViewController extends PhluxController {
 
     $actions->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setName(pht('Edit Variable'))
         ->setHref($this->getApplicationURI('/edit/'.$var->getVariableKey().'/'))
         ->setDisabled(!$can_edit)

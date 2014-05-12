@@ -125,31 +125,31 @@ final class PHUITagExample extends PhabricatorUIExample {
     $icons[] = id(new PHUITagView())
       ->setType(PHUITagView::TYPE_STATE)
       ->setBackgroundColor(PHUITagView::COLOR_GREEN)
-      ->setIcon('ok-white')
+      ->setIcon('fa-check white')
       ->setName('Passed');
     $icons[] = hsprintf('<br /><br />');
     $icons[] = id(new PHUITagView())
       ->setType(PHUITagView::TYPE_STATE)
       ->setBackgroundColor(PHUITagView::COLOR_RED)
-      ->setIcon('delete-white')
+      ->setIcon('fa-times white')
       ->setName('Failed');
     $icons[] = hsprintf('<br /><br />');
     $icons[] = id(new PHUITagView())
       ->setType(PHUITagView::TYPE_STATE)
       ->setBackgroundColor(PHUITagView::COLOR_BLUE)
-      ->setIcon('play-white')
+      ->setIcon('fa-refresh white')
       ->setName('Running');
     $icons[] = hsprintf('<br /><br />');
     $icons[] = id(new PHUITagView())
       ->setType(PHUITagView::TYPE_STATE)
       ->setBackgroundColor(PHUITagView::COLOR_GREY)
-      ->setIcon('pause-white')
+      ->setIcon('fa-pause white')
       ->setName('Paused');
     $icons[] = hsprintf('<br /><br />');
     $icons[] = id(new PHUITagView())
       ->setType(PHUITagView::TYPE_STATE)
       ->setBackgroundColor(PHUITagView::COLOR_BLACK)
-      ->setIcon('stop-white')
+      ->setIcon('fa-stop white')
       ->setName('Stopped');
 
     $content3 = id(new PHUIBoxView())

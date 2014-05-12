@@ -35,13 +35,13 @@ final class PhortuneAccountViewController extends PhortuneController {
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Edit Account'))
-          ->setIcon('edit')
+          ->setIcon('fa-pencil')
           ->setHref('#')
           ->setDisabled(true))
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Edit Members'))
-          ->setIcon('transcript')
+          ->setIcon('fa-users')
           ->setHref('#')
           ->setDisabled(true));
 
@@ -92,7 +92,7 @@ final class PhortuneAccountViewController extends PhortuneController {
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Add Payment Method'))
-          ->setIcon('new')
+          ->setIcon('fa-plus')
           ->setHref($add_uri));
 
     $list = id(new PHUIObjectItemListView())

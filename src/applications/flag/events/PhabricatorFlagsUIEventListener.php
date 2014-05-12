@@ -36,17 +36,18 @@ final class PhabricatorFlagsUIEventListener extends PhabricatorEventListener {
 
     if ($flag) {
       $color = PhabricatorFlagColor::getColorName($flag->getColor());
+      $flag_icon = PhabricatorFlagColor::getIcon($flag->getColor());
       $flag_action = id(new PhabricatorActionView())
         ->setWorkflow(true)
         ->setHref('/flag/delete/'.$flag->getID().'/')
         ->setName(pht('Remove %s Flag', $color))
-        ->setIcon('flag-'.$flag->getColor());
+        ->setIcon($flag_icon);
     } else {
       $flag_action = id(new PhabricatorActionView())
         ->setWorkflow(true)
         ->setHref('/flag/edit/'.$object->getPHID().'/')
         ->setName(pht('Flag For Later'))
-        ->setIcon('flag');
+        ->setIcon('fa-flag');
 
       if (!$user->isLoggedIn()) {
         $flag_action->setDisabled(true);

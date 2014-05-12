@@ -103,14 +103,13 @@ final class PHUIButtonExample extends PhabricatorUIExample {
 
     $column = array();
     $icons = array(
-      'Comment' => 'comment',
-      'Give Token' => 'like',
-      'Reverse Time' => 'history',
-      'Implode Earth' => 'warning');
+      'Comment' => 'fa-comment',
+      'Give Token' => 'fa-trophy',
+      'Reverse Time' => 'fa-clock-o',
+      'Implode Earth' => 'fa-exclamation-triangle red');
     foreach ($icons as $text => $icon) {
       $image = id(new PHUIIconView())
-          ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-          ->setSpriteIcon($icon);
+          ->setIconFont($icon);
       $column[] = id(new PHUIButtonView())
         ->setTag('a')
         ->setColor(PHUIButtonView::GREY)
@@ -121,12 +120,11 @@ final class PHUIButtonExample extends PhabricatorUIExample {
 
     $column2 = array();
     $icons = array(
-      'Subscribe' => 'meta-mta',
-      'Edit' => 'edit');
+      'Subscribe' => 'fa-check-circle bluegrey',
+      'Edit' => 'fa-pencil bluegrey');
     foreach ($icons as $text => $icon) {
       $image = id(new PHUIIconView())
-          ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-          ->setSpriteIcon($icon);
+          ->setIconFont($icon);
       $column2[] = id(new PHUIButtonView())
         ->setTag('a')
         ->setColor(PHUIButtonView::SIMPLE)

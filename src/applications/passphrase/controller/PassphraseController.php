@@ -32,7 +32,7 @@ abstract class PassphraseController extends PhabricatorController {
       id(new PHUIListItemView())
         ->setName(pht('Create Credential'))
         ->setHref($this->getApplicationURI('create/'))
-        ->setIcon('create'));
+        ->setIcon('fa-plus-square'));
 
     return $crumbs;
   }

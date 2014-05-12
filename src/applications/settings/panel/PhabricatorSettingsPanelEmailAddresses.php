@@ -136,8 +136,7 @@ final class PhabricatorSettingsPanelEmailAddresses
 
     if ($editable) {
       $icon = id(new PHUIIconView())
-        ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-        ->setSpriteIcon('new');
+        ->setIconFont('fa-plus');
 
       $button = new PHUIButtonView();
       $button->setText(pht('Add New Address'));

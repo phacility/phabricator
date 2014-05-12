@@ -216,13 +216,12 @@ final class PHUIListItemView extends AphrontTagView {
     if ($this->icon) {
       $icon_name = $this->icon;
       if ($this->getDisabled()) {
-        $icon_name .= '-grey';
+        $icon_name .= ' grey';
       }
 
       $icon = id(new PHUIIconView())
         ->addClass('phui-list-item-icon')
-        ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-        ->setSpriteIcon($icon_name);
+        ->setIconFont($icon_name);
     }
 
     if ($this->appIcon) {

@@ -27,7 +27,7 @@ abstract class HeraldController extends PhabricatorController {
       id(new PHUIListItemView())
         ->setName(pht('Create Herald Rule'))
         ->setHref($this->getApplicationURI('new/'))
-        ->setIcon('create'));
+        ->setIcon('fa-plus-square'));
 
     return $crumbs;
   }

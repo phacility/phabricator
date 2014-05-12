@@ -9,7 +9,7 @@ abstract class DifferentialController extends PhabricatorController {
       id(new PHUIListItemView())
         ->setHref($this->getApplicationURI('/diff/create/'))
         ->setName(pht('Create Diff'))
-        ->setIcon('create'));
+        ->setIcon('fa-plus-square'));
 
     return $crumbs;
   }

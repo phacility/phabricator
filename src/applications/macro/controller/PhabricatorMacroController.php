@@ -35,7 +35,7 @@ abstract class PhabricatorMacroController
       id(new PHUIListItemView())
         ->setName(pht('Create Macro'))
         ->setHref($this->getApplicationURI('/create/'))
-        ->setIcon('create')
+        ->setIcon('fa-plus-square')
         ->setDisabled(!$can_manage)
         ->setWorkflow(!$can_manage));
 

@@ -128,8 +128,7 @@ final class DifferentialRevisionListView extends AphrontView {
 
       if (isset($icons['draft'])) {
         $draft = id(new PHUIIconView())
-          ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-          ->setSpriteIcon('file-grey')
+          ->setIconFont('fa-comment-o lightgreytext')
           ->addSigil('has-tooltip')
           ->setMetadata(
             array(

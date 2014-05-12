@@ -68,12 +68,17 @@
   position: absolute;
   top: 5px;
   left: 9px;
+  font-size: 13px;
 }
 
 .device-desktop .phabricator-action-view:hover .phabricator-action-view-item {
   text-decoration: none;
   background-color: {$blue};
-  color: #ffffff;
+  color: #fff;
+}
+
+.device-desktop .phabricator-action-view:hover .phabricator-action-view-icon {
+  color: #fff;
 }
 
 .phabricator-action-view-disabled .phabricator-action-view-item,
@@ -92,7 +97,11 @@
 .device-desktop .phabricator-action-view-disabled:hover
   .phabricator-action-view-item,
 .device-desktop .phabricator-action-view-disabled:hover
-  button.phabricator-action-view-item {
-  background-color: #dfdfdf;
+  button.phabricator-action-view-item,
+.device-desktop .phabricator-action-view-disabled:hover
+  .phabricator-action-view-icon,
+.device-desktop .phabricator-action-view-disabled:hover
+  button.phabricator-action-view-icon {
+  background-color: {$greybackground};
   color: {$lightgreytext};
 }

@@ -32,4 +32,18 @@ final class PhabricatorFlagColor extends PhabricatorFlagConstants {
     return 'phabricator-flag-color-'.(int)$color;
   }
 
+  public static function getIcon($color) {
+    $map = array(
+      self::COLOR_RED       => 'fa-flag red',
+      self::COLOR_ORANGE    => 'fa-flag orange',
+      self::COLOR_YELLOW    => 'fa-flag yellow',
+      self::COLOR_GREEN     => 'fa-flag green',
+      self::COLOR_BLUE      => 'fa-flag blue',
+      self::COLOR_PINK      => 'fa-flag indigo', // whhaaaa
+      self::COLOR_PURPLE    => 'fa-flag purple',
+      self::COLOR_CHECKERED => 'fa-flag-checkered',
+    );
+    return idx($map, $color);
+  }
+
 }

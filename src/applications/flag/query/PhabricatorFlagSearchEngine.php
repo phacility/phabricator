@@ -148,13 +148,13 @@ final class PhabricatorFlagSearchEngine
 
       $item->addAction(
         id(new PHUIListItemView())
-          ->setIcon('edit')
+          ->setIcon('fa-pencil')
           ->setHref($this->getApplicationURI("edit/{$phid}/"))
           ->setWorkflow(true));
 
       $item->addAction(
         id(new PHUIListItemView())
-          ->setIcon('delete')
+          ->setIcon('fa-times')
           ->setHref($this->getApplicationURI("delete/{$id}/"))
           ->setWorkflow(true));
 

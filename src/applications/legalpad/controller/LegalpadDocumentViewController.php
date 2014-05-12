@@ -137,7 +137,7 @@ final class LegalpadDocumentViewController extends LegalpadController {
 
     $actions->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setName(pht('Edit Document'))
         ->setHref($this->getApplicationURI('/edit/'.$doc_id.'/'))
         ->setDisabled(!$can_edit)
@@ -145,13 +145,13 @@ final class LegalpadDocumentViewController extends LegalpadController {
 
     $actions->addAction(
       id(new PhabricatorActionView())
-      ->setIcon('like')
+      ->setIcon('fa-pencil-square')
       ->setName(pht('Sign Document'))
       ->setHref('/'.$document->getMonogram()));
 
     $actions->addAction(
       id(new PhabricatorActionView())
-      ->setIcon('transcript')
+      ->setIcon('fa-terminal')
       ->setName(pht('View Signatures'))
       ->setHref($this->getApplicationURI('/signatures/'.$doc_id.'/')));
 

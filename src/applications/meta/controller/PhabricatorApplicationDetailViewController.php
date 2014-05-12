@@ -104,7 +104,7 @@ final class PhabricatorApplicationDetailViewController
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Policies'))
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit)
         ->setHref($edit_uri));
@@ -114,7 +114,7 @@ final class PhabricatorApplicationDetailViewController
         $view->addAction(
           id(new PhabricatorActionView())
             ->setName(pht('Uninstall'))
-            ->setIcon('delete')
+            ->setIcon('fa-times')
             ->setDisabled(!$can_edit)
             ->setWorkflow(true)
             ->setHref(
@@ -122,7 +122,7 @@ final class PhabricatorApplicationDetailViewController
       } else {
         $action = id(new PhabricatorActionView())
           ->setName(pht('Install'))
-          ->setIcon('new')
+          ->setIcon('fa-plus')
           ->setDisabled(!$can_edit)
           ->setWorkflow(true)
           ->setHref(
@@ -140,7 +140,7 @@ final class PhabricatorApplicationDetailViewController
       $view->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Uninstall'))
-          ->setIcon('delete')
+          ->setIcon('fa-times')
           ->setWorkflow(true)
           ->setDisabled(true)
           ->setHref(

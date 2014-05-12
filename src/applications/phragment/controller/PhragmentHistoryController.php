@@ -31,7 +31,7 @@ final class PhragmentHistoryController extends PhragmentController {
         id(new PHUIListItemView())
           ->setName(pht('Create Fragment'))
           ->setHref($this->getApplicationURI('/create/'.$path))
-          ->setIcon('create'));
+          ->setIcon('fa-plus-square'));
     }
 
     $current_box = $this->createCurrentFragmentView($current, true);

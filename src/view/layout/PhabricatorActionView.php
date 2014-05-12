@@ -4,7 +4,6 @@ final class PhabricatorActionView extends AphrontView {
 
   private $name;
   private $icon;
-  private $iconSheet;
   private $href;
   private $disabled;
   private $workflow;
@@ -71,11 +70,6 @@ final class PhabricatorActionView extends AphrontView {
     return $this;
   }
 
-  public function setIconSheet($sheet) {
-    $this->iconSheet = $sheet;
-    return $this;
-  }
-
   public function setName($name) {
     $this->name = $name;
     return $this;
@@ -100,17 +94,13 @@ final class PhabricatorActionView extends AphrontView {
 
     $icon = null;
     if ($this->icon) {
-      $sheet = nonempty($this->iconSheet, PHUIIconView::SPRITE_ICONS);
-
-      $suffix = '';
+      $color = '';
       if ($this->disabled) {
-        $suffix = '-grey';
+        $color = ' grey';
       }
-
       $icon = id(new PHUIIconView())
         ->addClass('phabricator-action-view-icon')
-        ->setSpriteIcon($this->icon.$suffix)
-        ->setSpriteSheet($sheet);
+        ->setIconFont($this->icon.$color);
     }
 
     if ($this->href) {
@@ -183,24 +173,6 @@ final class PhabricatorActionView extends AphrontView {
         'class' => implode(' ', $classes),
       ),
       array($icon, $item));
-  }
-
-  public static function getAvailableIcons() {
-    $manifest = PHUIIconView::getSheetManifest(PHUIIconView::SPRITE_ICONS);
-
-    $results = array();
-    $prefix = 'icons-';
-    foreach ($manifest as $sprite) {
-      $name = $sprite['name'];
-      if (preg_match('/-(white|grey)$/', $name)) {
-        continue;
-      }
-      if (!strncmp($name, $prefix, strlen($prefix))) {
-        $results[] = substr($name, strlen($prefix));
-      }
-    }
-
-    return $results;
   }
 
 }

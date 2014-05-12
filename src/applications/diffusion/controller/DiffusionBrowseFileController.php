@@ -334,15 +334,15 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
             array(
               'action' => 'change',
             )))
-        ->setIcon('new'));
+        ->setIcon('fa-backward'));
 
     if ($show_blame) {
       $blame_text = pht('Disable Blame');
-      $blame_icon = 'blame-grey';
+      $blame_icon = 'fa-exclamation-circle lightgreytext';
       $blame_value = 0;
     } else {
       $blame_text = pht('Enable Blame');
-      $blame_icon = 'blame';
+      $blame_icon = 'fa-exclamation-circle';
       $blame_value = 1;
     }
 
@@ -356,11 +356,11 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     if ($show_color) {
       $highlight_text = pht('Disable Highlighting');
-      $highlight_icon = 'highlight-grey';
+      $highlight_icon = 'fa-star-o grey';
       $highlight_value = 0;
     } else {
       $highlight_text = pht('Enable Highlighting');
-      $highlight_icon = 'highlight';
+      $highlight_icon = 'fa-star';
       $highlight_value = 1;
     }
 
@@ -393,7 +393,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       id(new PhabricatorActionView())
         ->setName($lint_text)
         ->setHref($href)
-        ->setIcon('warning')
+        ->setIcon('fa-exclamation-triangle')
         ->setDisabled(!$href));
 
     return $view;
@@ -413,8 +413,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
     $editor_link = $user->loadEditorLink($path, $line, $callsign);
 
     $icon_edit = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-      ->setSpriteIcon('edit');
+      ->setIconFont('fa-pencil');
     $button = id(new PHUIButtonView())
       ->setTag('a')
       ->setText(pht('Open in Editor'))
@@ -432,16 +431,15 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
     if ($file_uri) {
       $text = pht('Download Raw File');
       $href = $file_uri;
-      $icon = 'download';
+      $icon = 'fa-download';
     } else {
       $text = pht('View Raw File');
       $href = $base_uri->alter('view', 'raw');
-      $icon = 'file';
+      $icon = 'fa-file-text';
     }
 
     $iconview = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-      ->setSpriteIcon($icon);
+      ->setIconFont($icon);
     $button = id(new PHUIButtonView())
       ->setTag('a')
       ->setText($text)

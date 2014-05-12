@@ -229,8 +229,7 @@ final class PhabricatorObjectHandle
     $icon = null;
     if ($this->getPolicyFiltered()) {
       $icon = id(new PHUIIconView())
-        ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-        ->setSpriteIcon('lock-grey');
+        ->setIconFont('fa-lock lightgreytext');
     }
 
     return phutil_tag(

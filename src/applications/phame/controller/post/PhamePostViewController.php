@@ -102,7 +102,7 @@ final class PhamePostViewController extends PhameController {
 
     $actions->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI('post/edit/'.$id.'/'))
         ->setName(pht('Edit Post'))
         ->setDisabled(!$can_edit)
@@ -110,7 +110,7 @@ final class PhamePostViewController extends PhameController {
 
     $actions->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('move')
+        ->setIcon('fa-arrows')
         ->setHref($this->getApplicationURI('post/move/'.$id.'/'))
         ->setName(pht('Move Post'))
         ->setDisabled(!$can_edit)

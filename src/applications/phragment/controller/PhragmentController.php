@@ -105,13 +105,13 @@ abstract class PhragmentController extends PhabricatorController {
         ->setName(pht('Download Fragment'))
         ->setHref($this->isCorrectlyConfigured() ? $file_uri : null)
         ->setDisabled($file === null || !$this->isCorrectlyConfigured())
-        ->setIcon('download'));
+        ->setIcon('fa-download'));
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Download Contents as ZIP'))
         ->setHref($this->isCorrectlyConfigured() ? $zip_uri : null)
         ->setDisabled(!$this->isCorrectlyConfigured())
-        ->setIcon('zip'));
+        ->setIcon('fa-floppy-o'));
     if (!$fragment->isDirectory()) {
       $actions->addAction(
         id(new PhabricatorActionView())
@@ -119,7 +119,7 @@ abstract class PhragmentController extends PhabricatorController {
           ->setHref($this->getApplicationURI("update/".$fragment->getPath()))
           ->setDisabled(!$can_edit)
           ->setWorkflow(!$can_edit)
-          ->setIcon('edit'));
+          ->setIcon('fa-refresh'));
     } else {
       $actions->addAction(
         id(new PhabricatorActionView())
@@ -127,7 +127,7 @@ abstract class PhragmentController extends PhabricatorController {
           ->setHref($this->getApplicationURI("update/".$fragment->getPath()))
           ->setDisabled(!$can_edit)
           ->setWorkflow(!$can_edit)
-          ->setIcon('edit'));
+          ->setIcon('fa-file-o'));
     }
     $actions->addAction(
       id(new PhabricatorActionView())
@@ -135,19 +135,19 @@ abstract class PhragmentController extends PhabricatorController {
         ->setHref($this->getApplicationURI("policy/".$fragment->getPath()))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit)
-        ->setIcon('edit'));
+        ->setIcon('fa-asterisk'));
     if ($is_history_view) {
       $actions->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('View Child Fragments'))
           ->setHref($this->getApplicationURI("browse/".$fragment->getPath()))
-          ->setIcon('browse'));
+          ->setIcon('fa-search-plus'));
     } else {
       $actions->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('View History'))
           ->setHref($this->getApplicationURI("history/".$fragment->getPath()))
-          ->setIcon('history'));
+          ->setIcon('fa-list'));
     }
     $actions->addAction(
       id(new PhabricatorActionView())
@@ -156,7 +156,7 @@ abstract class PhragmentController extends PhabricatorController {
           "snapshot/create/".$fragment->getPath()))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit)
-        ->setIcon('snapshot'));
+        ->setIcon('fa-files-o'));
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Promote Snapshot to Here'))
@@ -164,7 +164,7 @@ abstract class PhragmentController extends PhabricatorController {
           "snapshot/promote/latest/".$fragment->getPath()))
         ->setWorkflow(true)
         ->setDisabled(!$can_edit)
-        ->setIcon('promote'));
+        ->setIcon('fa-arrow-circle-up'));
 
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer)

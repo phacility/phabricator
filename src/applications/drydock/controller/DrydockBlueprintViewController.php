@@ -101,7 +101,7 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
       id(new PhabricatorActionView())
         ->setHref($uri)
         ->setName(pht('Edit Blueprint'))
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setWorkflow(!$can_edit)
         ->setDisabled(!$can_edit));
 

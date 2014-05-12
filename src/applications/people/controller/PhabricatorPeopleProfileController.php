@@ -49,7 +49,7 @@ final class PhabricatorPeopleProfileController
 
     $actions->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setName(pht('Edit Profile'))
         ->setHref($this->getApplicationURI('editprofile/'.$user->getID().'/'))
         ->setDisabled(!$can_edit)
@@ -57,7 +57,7 @@ final class PhabricatorPeopleProfileController
 
     $actions->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('image')
+        ->setIcon('fa-picture-o')
         ->setName(pht('Edit Profile Picture'))
         ->setHref($this->getApplicationURI('picture/'.$user->getID().'/'))
         ->setDisabled(!$can_edit)
@@ -66,17 +66,17 @@ final class PhabricatorPeopleProfileController
     if ($viewer->getIsAdmin()) {
       $actions->addAction(
         id(new PhabricatorActionView())
-          ->setIcon('wrench')
+          ->setIcon('fa-wrench')
           ->setName(pht('Edit Settings'))
           ->setDisabled(!$can_edit)
           ->setWorkflow(!$can_edit)
           ->setHref('/settings/'.$user->getID().'/'));
 
       if ($user->getIsAdmin()) {
-        $empower_icon = 'lower-priority';
+        $empower_icon = 'fa-arrow-circle-o-down';
         $empower_name = pht('Remove Administrator');
       } else {
-        $empower_icon = 'raise-priority';
+        $empower_icon = 'fa-arrow-circle-o-up';
         $empower_name = pht('Make Administrator');
       }
 
@@ -90,16 +90,16 @@ final class PhabricatorPeopleProfileController
 
       $actions->addAction(
         id(new PhabricatorActionView())
-          ->setIcon('tag')
+          ->setIcon('fa-tag')
           ->setName(pht('Change Username'))
           ->setWorkflow(true)
           ->setHref($this->getApplicationURI('rename/'.$user->getID().'/')));
 
       if ($user->getIsDisabled()) {
-        $disable_icon = 'enable';
+        $disable_icon = 'fa-check-circle-o';
         $disable_name = pht('Enable User');
       } else {
-        $disable_icon = 'disable';
+        $disable_icon = 'fa-ban';
         $disable_name = pht('Disable User');
       }
 
@@ -113,7 +113,7 @@ final class PhabricatorPeopleProfileController
 
       $actions->addAction(
         id(new PhabricatorActionView())
-          ->setIcon('delete')
+          ->setIcon('fa-times')
           ->setName(pht('Delete User'))
           ->setDisabled(($user->getPHID() == $viewer->getPHID()))
           ->setWorkflow(true)
@@ -121,7 +121,7 @@ final class PhabricatorPeopleProfileController
 
       $actions->addAction(
         id(new PhabricatorActionView())
-          ->setIcon('message')
+          ->setIcon('fa-envelope')
           ->setName(pht('Send Welcome Email'))
           ->setWorkflow(true)
           ->setHref($this->getApplicationURI('welcome/'.$user->getID().'/')));

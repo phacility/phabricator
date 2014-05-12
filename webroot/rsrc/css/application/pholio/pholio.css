@@ -172,9 +172,7 @@
 .pholio-mock-embed-icon {
   height: 14px;
   width: 14px;
-  float: left;
-  padding-left: 2px;
-  margin-right: 2px;
+  padding: 2px 4px 0 0;
 }
 
 .pholio-mock-embed-head a {

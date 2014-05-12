@@ -48,7 +48,7 @@ final class DiffusionRepositoryListController extends DiffusionController {
         ->setName(pht('New Repository'))
         ->setHref($this->getApplicationURI('new/'))
         ->setDisabled(!$can_create)
-        ->setIcon('create'));
+        ->setIcon('fa-plus-square'));
 
     return $crumbs;
   }

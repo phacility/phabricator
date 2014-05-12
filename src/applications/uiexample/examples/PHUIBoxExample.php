@@ -59,8 +59,7 @@ final class PHUIBoxExample extends PhabricatorUIExample {
           ->addMargin(PHUI::MARGIN_LARGE_BOTTOM));
 
     $image = id(new PHUIIconView())
-          ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-          ->setSpriteIcon('love');
+          ->setIconFont('fa-heart');
     $button = id(new PHUIButtonView())
         ->setTag('a')
         ->setColor(PHUIButtonView::SIMPLE)

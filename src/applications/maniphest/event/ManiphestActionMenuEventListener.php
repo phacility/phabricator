@@ -38,8 +38,7 @@ final class ManiphestActionMenuEventListener extends PhabricatorEventListener {
       $phid);
 
     return id(new PhabricatorActionView())
-      ->setIcon('maniphest-dark')
-      ->setIconSheet(PHUIIconView::SPRITE_APPS)
+      ->setIcon('fa-anchor')
       ->setName(pht('View Tasks'))
       ->setHref($view_uri);
   }

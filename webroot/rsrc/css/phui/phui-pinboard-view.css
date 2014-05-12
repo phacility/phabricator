@@ -74,8 +74,5 @@
 }
 
 .phui-pinboard-icon {
-  height: 14px;
-  width: 14px;
-  float: left;
-  padding-left: 2px;
+  margin-right: 4px;
 }
