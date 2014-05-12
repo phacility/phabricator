@@ -1,7 +1,6 @@
 {
   "project.name" : "phabricator",
   "phabricator.uri" : "https://secure.phabricator.com/",
-  "lint.engine" : "PhabricatorLintEngine",
   "unit.engine" : "PhutilUnitTestEngine",
   "load" : ["src/"],
   "lint.xhpast.naminghook" : "PhabricatorSymbolNameLinter",

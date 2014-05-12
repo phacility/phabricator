@@ -48,6 +48,10 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
     return 'JAVELIN';
   }
 
+  public function getLinterConfigurationName() {
+    return 'javelin';
+  }
+
   public function getLintSeverityMap() {
     return array(
       self::LINT_MISSING_BINARY => ArcanistLintSeverity::SEVERITY_WARNING,
