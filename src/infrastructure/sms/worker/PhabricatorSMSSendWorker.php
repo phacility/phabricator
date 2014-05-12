@@ -7,7 +7,7 @@ final class PhabricatorSMSSendWorker
     return PhabricatorSMS::MAXIMUM_SEND_TRIES;
   }
 
-  public function getWaitBeforeRetry() {
+  public function getWaitBeforeRetry(PhabricatorWorkerTask $task) {
     return phutil_units('1 minute in seconds');
   }
 
