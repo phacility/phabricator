@@ -142,9 +142,8 @@ JX.install('Event', {
      * @task info
      */
     isNormalMouseEvent : function() {
-      var supportedEvents = ['click', 'mouseup', 'mousedown'];
-
-      if (supportedEvents.indexOf(this.getType()) == -1) {
+      var supportedEvents = {'click': 1, 'mouseup': 1, 'mousedown': 1};
+      if (!(this.getType() in supportedEvents)) {
         return false;
       }
 

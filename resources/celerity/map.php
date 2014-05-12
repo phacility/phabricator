@@ -14,7 +14,7 @@ return array(
     'differential.pkg.js' => '36bec171',
     'diffusion.pkg.css' => '3783278d',
     'diffusion.pkg.js' => '077e3ad0',
-    'javelin.pkg.js' => 'dbef0389',
+    'javelin.pkg.js' => 'f5308946',
     'maniphest.pkg.css' => 'f1887d71',
     'maniphest.pkg.js' => '2fe8af22',
     'rsrc/css/aphront/aphront-bars.css' => '231ac33c',
@@ -169,7 +169,7 @@ return array(
     'rsrc/externals/font/fontawesome/fontawesome-webfont.woff' => 'c713570f',
     'rsrc/externals/font/sourcesans/SourceSansPro.woff' => '3614608c',
     'rsrc/externals/font/sourcesans/SourceSansProBold.woff' => 'cbf46566',
-    'rsrc/externals/javelin/core/Event.js' => '79473b62',
+    'rsrc/externals/javelin/core/Event.js' => '49a59508',
     'rsrc/externals/javelin/core/Stratcom.js' => 'c293f7b9',
     'rsrc/externals/javelin/core/__tests__/event-stop-and-kill.js' => '717554e4',
     'rsrc/externals/javelin/core/__tests__/install.js' => 'c432ee85',
@@ -641,7 +641,7 @@ return array(
     'javelin-cookie' => '6b3dcf44',
     'javelin-dom' => '07d99a3d',
     'javelin-dynval' => 'f6555212',
-    'javelin-event' => '79473b62',
+    'javelin-event' => '49a59508',
     'javelin-fx' => '54b612ba',
     'javelin-history' => 'c60f4327',
     'javelin-install' => '52a92793',
@@ -1163,6 +1163,10 @@ return array(
       0 => 'javelin-install',
       1 => 'javelin-util',
     ),
+    '49a59508' =>
+    array(
+      0 => 'javelin-install',
+    ),
     '4a11ea9c' =>
     array(
       0 => 'javelin-behavior',
@@ -1319,10 +1323,6 @@ return array(
       3 => 'javelin-router',
       4 => 'javelin-util',
       5 => 'phabricator-busy',
-    ),
-    '79473b62' =>
-    array(
-      0 => 'javelin-install',
     ),
     '7a68dda3' =>
     array(
