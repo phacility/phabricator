@@ -91,7 +91,7 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
 
     $item = id(new PHUIListItemView())
       ->setName(pht('Maniphest Task'))
-      ->setAppIcon('maniphest-dark')
+      ->setIcon('fa-anchor')
       ->setHref($this->getBaseURI().'task/create/');
     $items[] = $item;
 

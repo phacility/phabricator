@@ -654,7 +654,6 @@ final class CeleritySpriteGenerator {
 
       $colors = array(
         'dark'  => 'dark',
-        'white' => 'white',
       );
     } else if ($variant == 2) {
       $scales = array(
@@ -670,7 +669,6 @@ final class CeleritySpriteGenerator {
         'light' => 'lb',
         'dark'  => 'dark',
         'blue'  => 'blue',
-        'white' => 'white',
       );
     } else {
       $scales = array(
@@ -683,13 +681,6 @@ final class CeleritySpriteGenerator {
 
       $colors = array(
         'dark'  => 'dark',
-        /*
-
-        TODO: These are available but not currently used.
-
-        'blue'  => 'blue',
-        'light' => 'lb',
-        */
       );
     }
 
@@ -706,10 +697,6 @@ final class CeleritySpriteGenerator {
         $css = '.apps-'.$app.'-'.$color.$variant_short;
         if ($color == 'blue' && $variant_name == 'apps-large') {
           $css .= ', .phabricator-crumb-view:hover .apps-'.$app.'-dark-large';
-        }
-
-        if ($color == 'white' && $variant == 1) {
-          $css .= ', .phui-list-item-href:hover .apps-'.$app.'-dark';
         }
 
         $sprite = id(clone $template)
