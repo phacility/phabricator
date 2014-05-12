@@ -13,7 +13,7 @@ return array(
     'differential.pkg.css' => '4b8686e3',
     'differential.pkg.js' => '36bec171',
     'diffusion.pkg.css' => '3783278d',
-    'diffusion.pkg.js' => '5b4010f4',
+    'diffusion.pkg.js' => '077e3ad0',
     'javelin.pkg.js' => 'dbef0389',
     'maniphest.pkg.css' => 'f1887d71',
     'maniphest.pkg.js' => '2fe8af22',
@@ -377,7 +377,7 @@ return array(
     'rsrc/js/application/diffusion/behavior-commit-graph.js' => 'f7f1289f',
     'rsrc/js/application/diffusion/behavior-jump-to.js' => '9db3d160',
     'rsrc/js/application/diffusion/behavior-load-blame.js' => '42126667',
-    'rsrc/js/application/diffusion/behavior-pull-lastmodified.js' => '75903ee1',
+    'rsrc/js/application/diffusion/behavior-pull-lastmodified.js' => '2b228192',
     'rsrc/js/application/doorkeeper/behavior-doorkeeper-tag.js' => 'e5822781',
     'rsrc/js/application/files/behavior-icon-composer.js' => '8ef9ab58',
     'rsrc/js/application/files/behavior-launch-icon-composer.js' => '48086888',
@@ -566,7 +566,7 @@ return array(
     'javelin-behavior-diffusion-commit-branches' => 'bdaf4d04',
     'javelin-behavior-diffusion-commit-graph' => 'f7f1289f',
     'javelin-behavior-diffusion-jump-to' => '9db3d160',
-    'javelin-behavior-diffusion-pull-lastmodified' => '75903ee1',
+    'javelin-behavior-diffusion-pull-lastmodified' => '2b228192',
     'javelin-behavior-doorkeeper-tag' => 'e5822781',
     'javelin-behavior-error-log' => 'a5d7cf86',
     'javelin-behavior-fancy-datepicker' => '5d584426',
@@ -1051,6 +1051,14 @@ return array(
       5 => 'javelin-uri',
       6 => 'javelin-behavior-device',
     ),
+    '2b228192' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-util',
+      3 => 'javelin-workflow',
+      4 => 'javelin-json',
+    ),
     '2f2e18aa' =>
     array(
       0 => 'javelin-behavior',
@@ -1252,11 +1260,6 @@ return array(
       2 => 'javelin-util',
       3 => 'phabricator-shaped-request',
     ),
-    '7319e029' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-    ),
     '62e18640' =>
     array(
       0 => 'javelin-install',
@@ -1292,12 +1295,10 @@ return array(
       1 => 'javelin-stratcom',
       2 => 'javelin-dom',
     ),
-    '75903ee1' =>
+    '7319e029' =>
     array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
-      2 => 'javelin-util',
-      3 => 'javelin-request',
     ),
     '76f4ebed' =>
     array(
