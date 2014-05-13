@@ -157,7 +157,7 @@ abstract class DiffusionBrowseController extends DiffusionController {
         ),
         $drequest->getRepository()->formatCommitName($stable_commit)));
 
-    if ($drequest->getCommitType() == 'tag') {
+    if ($drequest->getSymbolicType() == 'tag') {
       $symbolic = $drequest->getSymbolicCommit();
       $view->addProperty(pht('Tag'), $symbolic);
 

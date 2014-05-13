@@ -16,11 +16,11 @@ abstract class DiffusionRequest {
   protected $path;
   protected $line;
   protected $commit;
-  protected $commitType = 'commit';
   protected $branch;
   protected $lint;
 
   protected $symbolicCommit;
+  protected $symbolicType;
   protected $stableCommit;
 
   protected $repository;
@@ -242,6 +242,10 @@ abstract class DiffusionRequest {
 
   public function getSymbolicCommit() {
     return $this->symbolicCommit;
+  }
+
+  public function getSymbolicType() {
+    return $this->symbolicType;
   }
 
   public function getBranch() {
@@ -630,11 +634,7 @@ abstract class DiffusionRequest {
     $match = head($matches);
 
     $this->commit = $match['identifier'];
-    $this->commitType = $match['type'];
-  }
-
-  public function getCommitType() {
-    return $this->commitType;
+    $this->symbolicType = $match['type'];
   }
 
   private function queryStableCommit() {
