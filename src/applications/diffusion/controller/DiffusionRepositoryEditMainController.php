@@ -1098,7 +1098,7 @@ final class DiffusionRepositoryEditMainController
 
       $item->addAction(
         id(new PHUIListItemView())
-          ->setIcon('delete')
+          ->setIcon('fa-times')
           ->setHref($delete_uri)
           ->setWorkflow(true));
 

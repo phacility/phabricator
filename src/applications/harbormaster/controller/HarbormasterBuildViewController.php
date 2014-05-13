@@ -246,7 +246,7 @@ final class HarbormasterBuildViewController
     $list->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Restart Build'))
-        ->setIcon('backward')
+        ->setIcon('fa-backward')
         ->setHref($this->getApplicationURI('/build/restart/'.$id.'/'))
         ->setDisabled(!$can_restart)
         ->setWorkflow(true));
@@ -254,7 +254,7 @@ final class HarbormasterBuildViewController
     $list->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Stop Build'))
-        ->setIcon('stop')
+        ->setIcon('fa-stop')
         ->setHref($this->getApplicationURI('/build/stop/'.$id.'/'))
         ->setDisabled(!$can_stop)
         ->setWorkflow(true));
@@ -262,7 +262,7 @@ final class HarbormasterBuildViewController
     $list->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Resume Build'))
-        ->setIcon('play')
+        ->setIcon('fa-play')
         ->setHref($this->getApplicationURI('/build/resume/'.$id.'/'))
         ->setDisabled(!$can_resume)
         ->setWorkflow(true));

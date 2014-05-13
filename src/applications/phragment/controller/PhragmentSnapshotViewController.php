@@ -117,7 +117,7 @@ final class PhragmentSnapshotViewController extends PhragmentController {
         ->setName(pht('Download Snapshot as ZIP'))
         ->setHref($this->isCorrectlyConfigured() ? $zip_uri : null)
         ->setDisabled(!$this->isCorrectlyConfigured())
-        ->setIcon('zip'));
+        ->setIcon('fa-floppy-o'));
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Delete Snapshot'))
@@ -125,7 +125,7 @@ final class PhragmentSnapshotViewController extends PhragmentController {
           "snapshot/delete/".$snapshot->getID()."/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(true)
-        ->setIcon('delete'));
+        ->setIcon('fa-times'));
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Promote Another Snapshot to Here'))
@@ -133,7 +133,7 @@ final class PhragmentSnapshotViewController extends PhragmentController {
           "snapshot/promote/".$snapshot->getID()."/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(true)
-        ->setIcon('promote'));
+        ->setIcon('fa-arrow-up'));
 
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer)

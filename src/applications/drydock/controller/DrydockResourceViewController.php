@@ -87,7 +87,7 @@ final class DrydockResourceViewController extends DrydockResourceController {
       id(new PhabricatorActionView())
         ->setHref($uri)
         ->setName(pht('Close Resource'))
-        ->setIcon('delete')
+        ->setIcon('fa-times')
         ->setWorkflow(true)
         ->setDisabled(!$can_close));
 

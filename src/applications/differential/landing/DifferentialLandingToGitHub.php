@@ -70,7 +70,7 @@ final class DifferentialLandingToGitHub
     }
 
     return $this->createActionView($revision, pht('Land to GitHub'))
-      ->setIcon('octocat');
+      ->setIcon('fa-cloud-upload');
   }
 
   public function pushWorkspaceRepository(

@@ -58,7 +58,7 @@ final class PhabricatorConfigIssueListController
         $item->setBarColor('yellow');
         $item->addAction(
           id(new PHUIListItemView())
-            ->setIcon('unpublish')
+            ->setIcon('fa-eye-slash')
             ->setWorkflow(true)
             ->setName(pht('Ignore'))
             ->setHref('/config/ignore/'.$issue->getIssueKey().'/'));
@@ -68,7 +68,7 @@ final class PhabricatorConfigIssueListController
         $item->setDisabled(true);
         $item->addAction(
           id(new PHUIListItemView())
-            ->setIcon('preview')
+            ->setIcon('fa-eye')
             ->setWorkflow(true)
             ->setName(pht('Unignore'))
             ->setHref('/config/unignore/'.$issue->getIssueKey().'/'));
