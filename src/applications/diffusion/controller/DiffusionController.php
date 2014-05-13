@@ -98,17 +98,17 @@ abstract class DiffusionController extends PhabricatorController {
         )));
     $crumb_list[] = $crumb;
 
-    $raw_commit = $drequest->getRawCommit();
+    $stable_commit = $drequest->getStableCommit();
 
     if ($spec['tags']) {
       $crumb = new PhabricatorCrumbView();
       if ($spec['commit']) {
         $crumb->setName(
-          pht("Tags for %s", 'r'.$callsign.$raw_commit));
+          pht("Tags for %s", 'r'.$callsign.$stable_commit));
         $crumb->setHref($drequest->generateURI(
           array(
             'action' => 'commit',
-            'commit' => $raw_commit,
+            'commit' => $drequest->getStableCommit(),
           )));
       } else {
         $crumb->setName(pht('Tags'));
@@ -126,8 +126,8 @@ abstract class DiffusionController extends PhabricatorController {
 
     if ($spec['commit']) {
       $crumb = id(new PhabricatorCrumbView())
-        ->setName("r{$callsign}{$raw_commit}")
-        ->setHref("r{$callsign}{$raw_commit}");
+        ->setName("r{$callsign}{$stable_commit}")
+        ->setHref("r{$callsign}{$stable_commit}");
       $crumb_list[] = $crumb;
       return $crumb_list;
     }

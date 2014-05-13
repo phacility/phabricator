@@ -29,7 +29,11 @@ abstract class DiffusionRequest {
   private $user;
 
   abstract protected function getSupportsBranches();
-  abstract protected function didInitialize();
+  abstract protected function isStableCommit($symbol);
+
+  protected function didInitialize() {
+    return null;
+  }
 
 
 /* -(  Creating Requests  )-------------------------------------------------- */
@@ -130,6 +134,7 @@ abstract class DiffusionRequest {
       ->setViewer($viewer)
       ->withCallsigns(array($callsign))
       ->executeOne();
+
     if (!$repository) {
       throw new Exception("No such repository '{$callsign}'.");
     }
@@ -179,11 +184,10 @@ abstract class DiffusionRequest {
    */
   final private function initializeFromDictionary(array $data) {
     $this->path            = idx($data, 'path');
-    $this->symbolicCommit  = idx($data, 'commit');
-    $this->commit          = idx($data, 'commit');
     $this->line            = idx($data, 'line');
     $this->initFromConduit = idx($data, 'initFromConduit', true);
 
+    $this->symbolicCommit = idx($data, 'commit');
     if ($this->getSupportsBranches()) {
       $this->branch = idx($data, 'branch');
     }
@@ -234,16 +238,84 @@ abstract class DiffusionRequest {
   }
 
   public function getCommit() {
-    return $this->commit;
+
+    // TODO: Probably remove all of this.
+
+    // Required for sketchy sins that `diffusion.diffquery` commits.
+    if ($this->commit) {
+      return $this->commit;
+    }
+
+    if ($this->getSymbolicCommit() !== null) {
+      return $this->getSymbolicCommit();
+    }
+
+    return $this->getStableCommit();
   }
 
+  /**
+   * Get the symbolic commit associated with this request.
+   *
+   * A symbolic commit may be a commit hash, an abbreviated commit hash, a
+   * branch name, a tag name, or an expression like "HEAD^^^". The symbolic
+   * commit may also be absent.
+   *
+   * This method always returns the symbol present in the original request,
+   * in unmodified form.
+   *
+   * See also @{method:getStableCommit}.
+   *
+   * @return string|null  Symbolic commit, if one was present in the request.
+   */
   public function getSymbolicCommit() {
     return $this->symbolicCommit;
   }
 
+
+  /**
+   * Get the ref type (`commit` or `tag`) of the location associated with this
+   * request.
+   *
+   * If a symbolic commit is present in the request, this method identifies
+   * the type of the symbol. Otherwise, it identifies the type of symbol of
+   * the location the request is implicitly associated with. This will probably
+   * always be `commit`.
+   *
+   * @return string   Symbolic commit type (`commit` or `tag`).
+   */
   public function getSymbolicType() {
+    if ($this->symbolicType === null) {
+      // As a side effect, this resolves the symbolic type.
+      $this->getStableCommit();
+    }
     return $this->symbolicType;
   }
+
+
+  /**
+   * Retrieve the stable, permanent commit name identifying the repository
+   * location associated with this request.
+   *
+   * This returns a non-symbolic identifier for the current commit: in Git and
+   * Mercurial, a 40-character SHA1; in SVN, a revision number.
+   *
+   * See also @{method:getSymbolicCommit}.
+   *
+   * @return string Stable commit name, like a git hash or SVN revision. Not
+   *                a symbolic commit reference.
+   */
+  public function getStableCommit() {
+    if (!$this->stableCommit) {
+      if ($this->isStableCommit($this->symbolicCommit)) {
+        $this->stableCommit = $this->symbolicCommit;
+        $this->symbolicType = 'commit';
+      } else {
+        $this->queryStableCommit();
+      }
+    }
+    return $this->stableCommit;
+  }
+
 
   public function getBranch() {
     return $this->branch;
@@ -308,26 +380,6 @@ abstract class DiffusionRequest {
     return $this->repositoryCommitData;
   }
 
-  /**
-   * Retrieve a stable, permanent commit name. This returns a non-symbolic
-   * identifier for the current commit: e.g., a specific commit hash in git
-   * (NOT a symbolic name like "origin/master") or a specific revision number
-   * in SVN (NOT a symbolic name like "HEAD").
-   *
-   * @return string Stable commit name, like a git hash or SVN revision. Not
-   *                a symbolic commit reference.
-   */
-  public function getStableCommit() {
-    if (!$this->stableCommit) {
-      $this->queryStableCommit();
-    }
-    return $this->stableCommit;
-  }
-
-  final public function getRawCommit() {
-    return $this->commit;
-  }
-
   public function setCommit($commit) {
     $this->commit = $commit;
     return $this;
@@ -347,7 +399,7 @@ abstract class DiffusionRequest {
    */
   public function generateURI(array $params) {
     if (empty($params['stable'])) {
-      $default_commit = $this->getRawCommit();
+      $default_commit = $this->getSymbolicCommit();
     } else {
       $default_commit = $this->getStableCommit();
     }
@@ -620,30 +672,15 @@ abstract class DiffusionRequest {
       "Guide' in the documentation for help setting up repositories.");
   }
 
-  final protected function expandCommitName() {
-    $results = $this->resolveRefs(array($this->commit));
-    $matches = idx($results, $this->commit, array());
-    if (count($results) !== 1) {
-      throw new Exception(
-        pht('Ref "%s" is ambiguous or does not exist.', $this->commit));
-    }
-
-    $match = head($matches);
-
-    $this->commit = $match['identifier'];
-    $this->symbolicType = $match['type'];
-  }
-
   private function queryStableCommit() {
-    if ($this->commit) {
-      $this->stableCommit = $this->commit;
-      return $this->stableCommit;
-    }
-
-    if ($this->getSupportsBranches()) {
-      $ref = $this->getResolvableBranchName($this->getBranch());
+    if ($this->symbolicCommit) {
+      $ref = $this->symbolicCommit;
     } else {
-      $ref = 'HEAD';
+      if ($this->getSupportsBranches()) {
+        $ref = $this->getResolvableBranchName($this->getBranch());
+      } else {
+        $ref = 'HEAD';
+      }
     }
 
     $results = $this->resolveRefs(array($ref));
@@ -655,8 +692,10 @@ abstract class DiffusionRequest {
         ->setRef($ref);
     }
 
-    $this->stableCommit = idx(head($matches), 'identifier');
-    return $this->stableCommit;
+    $match = head($matches);
+
+    $this->stableCommit = $match['identifier'];
+    $this->symbolicType = $match['type'];
   }
 
   protected function getResolvableBranchName($branch) {

@@ -96,7 +96,7 @@ abstract class DiffusionBrowseController extends DiffusionController {
         ->setHref($history_uri)
         ->setIcon('fa-list'));
 
-    $behind_head = $drequest->getRawCommit();
+    $behind_head = $drequest->getSymbolicCommit();
     $head_uri = $drequest->generateURI(
       array(
         'commit' => '',

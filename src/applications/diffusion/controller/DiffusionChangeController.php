@@ -31,7 +31,7 @@ final class DiffusionChangeController extends DiffusionController {
 
     $repository = $drequest->getRepository();
     $callsign = $repository->getCallsign();
-    $commit = $drequest->getRawCommit();
+    $commit = $drequest->getSymbolicCommit();
     $changesets = array(
       0 => $changeset,
     );
@@ -53,7 +53,7 @@ final class DiffusionChangeController extends DiffusionController {
     );
 
     $right_uri = $drequest->generateURI($raw_params);
-    $raw_params['params']['before'] = $drequest->getRawCommit();
+    $raw_params['params']['before'] = $drequest->getStableCommit();
     $left_uri = $drequest->generateURI($raw_params);
     $changeset_view->setRawFileURIs($left_uri, $right_uri);
 

@@ -20,9 +20,10 @@ final class DiffusionTagListController extends DiffusionController {
     $params = array(
       'limit' => $pager->getPageSize() + 1,
       'offset' => $pager->getOffset());
-    if ($drequest->getRawCommit()) {
+
+    if ($drequest->getSymbolicCommit()) {
       $is_commit = true;
-      $params['commit'] = $drequest->getRawCommit();
+      $params['commit'] = $drequest->getSymbolicCommit();
     } else {
       $is_commit = false;
     }
@@ -76,7 +77,7 @@ final class DiffusionTagListController extends DiffusionController {
     $crumbs = $this->buildCrumbs(
       array(
         'tags' => true,
-        'commit' => $drequest->getRawCommit(),
+        'commit' => $drequest->getSymbolicCommit(),
       ));
 
     return $this->buildApplicationPage(

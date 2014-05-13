@@ -152,7 +152,7 @@ final class DiffusionHistoryController extends DiffusionController {
       ->setUser($viewer)
       ->setActionList($actions);
 
-    $stable_commit = $drequest->getStableCommit();
+    $stable_commit = $drequest->getStableCommitName();
     $callsign = $drequest->getRepository()->getCallsign();
 
     $view->addProperty(
