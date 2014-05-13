@@ -27,7 +27,7 @@ final class DiffusionSvnRequest extends DiffusionRequest {
       return $this->commit;
     }
 
-    return $this->getStableCommitName();
+    return $this->getStableCommit();
   }
 
 }

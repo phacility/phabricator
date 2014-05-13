@@ -15,16 +15,17 @@ abstract class DiffusionRequest {
   protected $callsign;
   protected $path;
   protected $line;
-  protected $symbolicCommit;
   protected $commit;
   protected $commitType = 'commit';
   protected $branch;
   protected $lint;
 
+  protected $symbolicCommit;
+  protected $stableCommit;
+
   protected $repository;
   protected $repositoryCommit;
   protected $repositoryCommitData;
-  protected $stableCommitName;
   protected $arcanistProjects;
 
   private $initFromConduit = true;
@@ -315,11 +316,11 @@ abstract class DiffusionRequest {
    * @return string Stable commit name, like a git hash or SVN revision. Not
    *                a symbolic commit reference.
    */
-  public function getStableCommitName() {
-    if (!$this->stableCommitName) {
-      $this->queryStableCommitName();
+  public function getStableCommit() {
+    if (!$this->stableCommit) {
+      $this->queryStableCommit();
     }
-    return $this->stableCommitName;
+    return $this->stableCommit;
   }
 
   final public function getRawCommit() {
@@ -347,7 +348,7 @@ abstract class DiffusionRequest {
     if (empty($params['stable'])) {
       $default_commit = $this->getRawCommit();
     } else {
-      $default_commit = $this->getStableCommitName();
+      $default_commit = $this->getStableCommit();
     }
 
     $defaults = array(
@@ -636,10 +637,10 @@ abstract class DiffusionRequest {
     return $this->commitType;
   }
 
-  private function queryStableCommitName() {
+  private function queryStableCommit() {
     if ($this->commit) {
-      $this->stableCommitName = $this->commit;
-      return $this->stableCommitName;
+      $this->stableCommit = $this->commit;
+      return $this->stableCommit;
     }
 
     if ($this->getSupportsBranches()) {
@@ -656,8 +657,8 @@ abstract class DiffusionRequest {
         pht('Ref "%s" is ambiguous or does not exist.', $branch));
     }
 
-    $this->stableCommitName = idx(head($matches), 'identifier');
-    return $this->stableCommitName;
+    $this->stableCommit = idx(head($matches), 'identifier');
+    return $this->stableCommit;
   }
 
   protected function getResolvableBranchName($branch) {

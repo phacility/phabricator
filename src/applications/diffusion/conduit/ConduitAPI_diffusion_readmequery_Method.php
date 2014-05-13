@@ -55,7 +55,7 @@ final class ConduitAPI_diffusion_readmequery_Method
       array(
         'user' => $request->getUser(),
         'repository' => $drequest->getRepository(),
-        'commit' => $drequest->getStableCommitName(),
+        'commit' => $drequest->getStableCommit(),
         'path' => $readme->getFullPath(),
       ));
 
@@ -65,7 +65,7 @@ final class ConduitAPI_diffusion_readmequery_Method
         $readme_request,
         'diffusion.filecontentquery',
         array(
-          'commit' => $drequest->getStableCommitName(),
+          'commit' => $drequest->getStableCommit(),
           'path' => $readme->getFullPath(),
           'needsBlame' => false,
         )));
