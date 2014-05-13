@@ -1,0 +1,153 @@
+@title Arcanist User Guide: Script and Regex Linter
+@group userguide
+
+Explains how to use the Script and Regex linter to invoke an existing
+lint engine that is not integrated with Arcanist.
+
+The Script and Regex linter is a simple glue linter which runs some
+script on each path, and then uses a regex to parse lint messages from
+the script's output. (This linter uses a script and a regex to
+interpret the results of some real linter, it does not itself lint
+both scripts and regexes).
+
+Configure this linter by setting these keys in your configuration:
+
+  - `script-and-regex.script` Script command to run. This can be
+    the path to a linter script, but may also include flags or use shell
+    features (see below for examples).
+  - `script-and-regex.regex` The regex to process output with. This
+    regex uses named capturing groups (detailed below) to interpret output.
+
+The script will be invoked from the project root, so you can specify a
+relative path like `scripts/lint.sh` or an absolute path like
+`/opt/lint/lint.sh`.
+
+This linter is necessarily more limited in its capabilities than a normal
+linter which can perform custom processing, but may be somewhat simpler to
+configure.
+
+== Script... ==
+
+The script will be invoked once for each file that is to be linted, with
+the file passed as the first argument. The file may begin with a "-"; ensure
+your script will not interpret such files as flags (perhaps by ending your
+script configuration with "--", if its argument parser supports that).
+
+Note that when run via `arc diff`, the list of files to be linted includes
+deleted files and files that were moved away by the change. The linter should
+not assume the path it is given exists, and it is not an error for the
+linter to be invoked with paths which are no longer there. (Every affected
+path is subject to lint because some linters may raise errors in other files
+when a file is removed, or raise an error about its removal.)
+
+The script should emit lint messages to stdout, which will be parsed with
+the provided regex.
+
+For example, you might use a configuration like this:
+
+  "script-and-regex.script": "/opt/lint/lint.sh --flag value --other-flag --"
+
+stderr is ignored. If you have a script which writes messages to stderr,
+you can redirect stderr to stdout by using a configuration like this:
+
+  "script-and-regex.script": "sh -c '/opt/lint/lint.sh \"$0\" 2>&1'"
+
+The return code of the script must be 0, or an exception will be raised
+reporting that the linter failed. If you have a script which exits nonzero
+under normal circumstances, you can force it to always exit 0 by using a
+configuration like this:
+
+  "script-and-regex.script": "sh -c '/opt/lint/lint.sh \"$0\" || true'"
+
+Multiple instances of the script will be run in parallel if there are
+multiple files to be linted, so they should not use any unique resources.
+For instance, this configuration would not work properly, because several
+processes may attempt to write to the file at the same time:
+
+  COUNTEREXAMPLE
+  "script-and-regex.script": "sh -c '/opt/lint/lint.sh --output /tmp/lint.out \"$0\" && cat /tmp/lint.out'"
+
+There are necessary limits to how gracefully this linter can deal with
+edge cases, because it is just a script and a regex. If you need to do
+things that this linter can't handle, you can write a phutil linter and move
+the logic to handle those cases into PHP. PHP is a better general-purpose
+programming language than regular expressions are, if only by a small margin.
+
+== ...and Regex ==
+
+The regex must be a valid PHP PCRE regex, including delimiters and flags.
+
+The regex will be matched against the entire output of the script, so it
+should generally be in this form if messages are one-per-line:
+
+  /^...$/m
+
+The regex should capture these named patterns with `(?P<name>...)`:
+
+  - `message` (required) Text describing the lint message. For example,
+    "This is a syntax error.".
+  - `name` (optional) Text summarizing the lint message. For example,
+    "Syntax Error".
+  - `severity` (optional) The word "error", "warning", "autofix", "advice",
+    or "disabled", in any combination of upper and lower case. Instead, you
+    may match groups called `error`, `warning`, `advice`, `autofix`, or
+    `disabled`. These allow you to match output formats like "E123" and
+    "W123" to indicate errors and warnings, even though the word "error" is
+    not present in the output. If no severity capturing group is present,
+    messages are raised with "error" severity. If multiple severity capturing
+    groups are present, messages are raised with the highest captured
+    serverity. Capturing groups like `error` supersede the `severity`
+    capturing group.
+  - `error` (optional) Match some nonempty substring to indicate that this
+    message has "error" severity.
+  - `warning` (optional) Match some nonempty substring to indicate that this
+    message has "warning" severity.
+  - `advice` (optional) Match some nonempty substring to indicate that this
+    message has "advice" severity.
+  - `autofix` (optional) Match some nonempty substring to indicate that this
+    message has "autofix" severity.
+  - `disabled` (optional) Match some nonempty substring to indicate that this
+    message has "disabled" severity.
+  - `file` (optional) The name of the file to raise the lint message in. If
+    not specified, defaults to the linted file. It is generally not necessary
+    to capture this unless the linter can raise messages in files other than
+    the one it is linting.
+  - `line` (optional) The line number of the message.
+  - `char` (optional) The character offset of the message.
+  - `offset` (optional) The byte offset of the message. If captured, this
+    supersedes `line` and `char`.
+  - `original` (optional) The text the message affects.
+  - `replacement` (optional) The text that the range captured by `original`
+    should be automatically replaced by to resolve the message.
+  - `code` (optional) A short error type identifier which can be used
+    elsewhere to configure handling of specific types of messages. For
+    example, "EXAMPLE1", "EXAMPLE2", etc., where each code identifies a
+    class of message like "syntax error", "missing whitespace", etc. This
+    allows configuration to later change the severity of all whitespace
+    messages, for example.
+  - `ignore` (optional) Match some nonempty substring to ignore the match.
+    You can use this if your linter sometimes emits text like "No lint
+    errors".
+  - `stop` (optional) Match some nonempty substring to stop processing input.
+    Remaining matches for this file will be discarded, but linting will
+    continue with other linters and other files.
+  - `halt` (optional) Match some nonempty substring to halt all linting of
+    this file by any linter. Linting will continue with other files.
+  - `throw` (optional) Match some nonempty substring to throw an error, which
+    will stop `arc` completely. You can use this to fail abruptly if you
+    encounter unexpected output. All processing will abort.
+
+Numbered capturing groups are ignored.
+
+For example, if your lint script's output looks like this:
+
+  error:13 Too many goats!
+  warning:22 Not enough boats.
+
+...you could use this regex to parse it:
+
+  /^(?P<severity>warning|error):(?P<line>\d+) (?P<message>.*)$/m
+
+The simplest valid regex for line-oriented output is something like this:
+
+  /^(?P<message>.*)$/m
