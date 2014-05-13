@@ -7,14 +7,14 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => '283dd8ce',
+    'core.pkg.css' => '7c4a7aa4',
     'core.pkg.js' => 'b2ed04a2',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => '4b8686e3',
     'differential.pkg.js' => '36bec171',
     'diffusion.pkg.css' => '3783278d',
     'diffusion.pkg.js' => '077e3ad0',
-    'javelin.pkg.js' => 'f5308946',
+    'javelin.pkg.js' => 'd4d2c5ae',
     'maniphest.pkg.css' => 'f1887d71',
     'maniphest.pkg.js' => '2fe8af22',
     'rsrc/css/aphront/aphront-bars.css' => '231ac33c',
@@ -30,12 +30,12 @@ return array(
     'rsrc/css/aphront/panel-view.css' => '5846dfa2',
     'rsrc/css/aphront/phabricator-nav-view.css' => '80e60fc1',
     'rsrc/css/aphront/request-failure-view.css' => 'da14df31',
-    'rsrc/css/aphront/table-view.css' => '52becc92',
+    'rsrc/css/aphront/table-view.css' => '88e80148',
     'rsrc/css/aphront/tokenizer.css' => '36903077',
     'rsrc/css/aphront/tooltip.css' => '9c90229d',
     'rsrc/css/aphront/transaction.css' => 'ce491938',
     'rsrc/css/aphront/two-column.css' => '16ab3ad2',
-    'rsrc/css/aphront/typeahead.css' => '271456a1',
+    'rsrc/css/aphront/typeahead.css' => '466ac215',
     'rsrc/css/application/auth/auth.css' => '1e655982',
     'rsrc/css/application/base/main-menu-view.css' => '0207239c',
     'rsrc/css/application/base/notification-menu.css' => '99ffef72',
@@ -221,7 +221,7 @@ return array(
     'rsrc/externals/javelin/lib/control/typeahead/normalizer/TypeaheadNormalizer.js' => '5f850b5c',
     'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadCompositeSource.js' => '84f34ab1',
     'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadOnDemandSource.js' => 'a79b75a4',
-    'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadPreloadedSource.js' => 'f778a573',
+    'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadPreloadedSource.js' => '66815d9c',
     'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadSource.js' => '62e18640',
     'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadStaticSource.js' => 'cdde23f1',
     'rsrc/externals/raphael/g.raphael.js' => '40dde778',
@@ -372,11 +372,13 @@ return array(
     'rsrc/js/application/differential/behavior-show-more.js' => 'dd7e8ef5',
     'rsrc/js/application/differential/behavior-toggle-files.js' => 'ca3f91eb',
     'rsrc/js/application/differential/behavior-user-select.js' => 'a8d8459d',
+    'rsrc/js/application/diffusion/DiffusionLocateFileSource.js' => '5afdb2f8',
     'rsrc/js/application/diffusion/behavior-audit-preview.js' => 'be81801d',
     'rsrc/js/application/diffusion/behavior-commit-branches.js' => 'bdaf4d04',
     'rsrc/js/application/diffusion/behavior-commit-graph.js' => 'f7f1289f',
     'rsrc/js/application/diffusion/behavior-jump-to.js' => '9db3d160',
     'rsrc/js/application/diffusion/behavior-load-blame.js' => '42126667',
+    'rsrc/js/application/diffusion/behavior-locate-file.js' => '6d3e1947',
     'rsrc/js/application/diffusion/behavior-pull-lastmodified.js' => '2b228192',
     'rsrc/js/application/doorkeeper/behavior-doorkeeper-tag.js' => 'e5822781',
     'rsrc/js/application/files/behavior-icon-composer.js' => '8ef9ab58',
@@ -498,11 +500,11 @@ return array(
     'aphront-pager-view-css' => '2e3539af',
     'aphront-panel-view-css' => '5846dfa2',
     'aphront-request-failure-view-css' => 'da14df31',
-    'aphront-table-view-css' => '52becc92',
+    'aphront-table-view-css' => '88e80148',
     'aphront-tokenizer-control-css' => '36903077',
     'aphront-tooltip-css' => '9c90229d',
     'aphront-two-column-view-css' => '16ab3ad2',
-    'aphront-typeahead-control-css' => '271456a1',
+    'aphront-typeahead-control-css' => '466ac215',
     'auth-css' => '1e655982',
     'config-options-css' => '7fedf08b',
     'conpherence-menu-css' => '561348ac',
@@ -566,6 +568,7 @@ return array(
     'javelin-behavior-diffusion-commit-branches' => 'bdaf4d04',
     'javelin-behavior-diffusion-commit-graph' => 'f7f1289f',
     'javelin-behavior-diffusion-jump-to' => '9db3d160',
+    'javelin-behavior-diffusion-locate-file' => '6d3e1947',
     'javelin-behavior-diffusion-pull-lastmodified' => '2b228192',
     'javelin-behavior-doorkeeper-tag' => 'e5822781',
     'javelin-behavior-error-log' => 'a5d7cf86',
@@ -639,6 +642,7 @@ return array(
     'javelin-behavior-workflow' => '0a3f3021',
     'javelin-color' => '7e41274a',
     'javelin-cookie' => '6b3dcf44',
+    'javelin-diffusion-locate-file-source' => '5afdb2f8',
     'javelin-dom' => '07d99a3d',
     'javelin-dynval' => 'f6555212',
     'javelin-event' => '49a59508',
@@ -662,7 +666,7 @@ return array(
     'javelin-typeahead-composite-source' => '84f34ab1',
     'javelin-typeahead-normalizer' => '5f850b5c',
     'javelin-typeahead-ondemand-source' => 'a79b75a4',
-    'javelin-typeahead-preloaded-source' => 'f778a573',
+    'javelin-typeahead-preloaded-source' => '66815d9c',
     'javelin-typeahead-source' => '62e18640',
     'javelin-typeahead-static-source' => 'cdde23f1',
     'javelin-uri' => 'd9a9b862',
@@ -1240,6 +1244,13 @@ return array(
       2 => 'javelin-vector',
       3 => 'javelin-dom',
     ),
+    '5afdb2f8' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-dom',
+      2 => 'javelin-typeahead-preloaded-source',
+      3 => 'javelin-util',
+    ),
     '5bc2cb21' =>
     array(
       0 => 'javelin-behavior',
@@ -1264,6 +1275,11 @@ return array(
       2 => 'javelin-util',
       3 => 'phabricator-shaped-request',
     ),
+    '7319e029' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+    ),
     '62e18640' =>
     array(
       0 => 'javelin-install',
@@ -1283,6 +1299,13 @@ return array(
       1 => 'javelin-dom',
       2 => 'javelin-vector',
     ),
+    '66815d9c' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
+      2 => 'javelin-request',
+      3 => 'javelin-typeahead-source',
+    ),
     '6b3dcf44' =>
     array(
       0 => 'javelin-install',
@@ -1293,16 +1316,19 @@ return array(
       0 => 'javelin-install',
       1 => 'javelin-util',
     ),
+    '6d3e1947' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-diffusion-locate-file-source',
+      2 => 'javelin-dom',
+      3 => 'javelin-typeahead',
+      4 => 'javelin-uri',
+    ),
     '71755c79' =>
     array(
       0 => 'javelin-behavior',
       1 => 'javelin-stratcom',
       2 => 'javelin-dom',
-    ),
-    '7319e029' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
     ),
     '76f4ebed' =>
     array(
@@ -1970,13 +1996,6 @@ return array(
       1 => 'javelin-dom',
       2 => 'javelin-util',
       3 => 'phabricator-shaped-request',
-    ),
-    'f778a573' =>
-    array(
-      0 => 'javelin-install',
-      1 => 'javelin-util',
-      2 => 'javelin-request',
-      3 => 'javelin-typeahead-source',
     ),
     'f7f1289f' =>
     array(
