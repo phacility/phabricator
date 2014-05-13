@@ -6,7 +6,7 @@ final class DiffusionSvnRawDiffQuery extends DiffusionRawDiffQuery {
     $drequest = $this->getRequest();
     $repository = $drequest->getRepository();
 
-    $commit = $drequest->getCommit();
+    $commit = $this->getAnchorCommit();
     $arc_root = phutil_get_library_root('arcanist');
 
     $against = $this->getAgainstCommit();

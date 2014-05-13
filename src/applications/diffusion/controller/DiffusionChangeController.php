@@ -18,7 +18,9 @@ final class DiffusionChangeController extends DiffusionController {
         'commit' => $drequest->getCommit(),
         'path' => $drequest->getPath(),
       ));
-    $drequest->setCommit($data['effectiveCommit']);
+
+    $drequest->updateSymbolicCommit($data['effectiveCommit']);
+
     $raw_changes = ArcanistDiffChange::newFromConduit($data['changes']);
     $diff = DifferentialDiff::newFromRawChanges($raw_changes);
     $changesets = $diff->getChangesets();
@@ -31,7 +33,6 @@ final class DiffusionChangeController extends DiffusionController {
 
     $repository = $drequest->getRepository();
     $callsign = $repository->getCallsign();
-    $commit = $drequest->getSymbolicCommit();
     $changesets = array(
       0 => $changeset,
     );

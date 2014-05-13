@@ -12,7 +12,6 @@ abstract class DiffusionRequest {
   protected $callsign;
   protected $path;
   protected $line;
-  protected $commit;
   protected $branch;
   protected $lint;
 
@@ -241,11 +240,6 @@ abstract class DiffusionRequest {
 
     // TODO: Probably remove all of this.
 
-    // Required for sketchy sins that `diffusion.diffquery` commits.
-    if ($this->commit) {
-      return $this->commit;
-    }
-
     if ($this->getSymbolicCommit() !== null) {
       return $this->getSymbolicCommit();
     }
@@ -269,6 +263,20 @@ abstract class DiffusionRequest {
    */
   public function getSymbolicCommit() {
     return $this->symbolicCommit;
+  }
+
+
+  /**
+   * Modify the request to move the symbolic commit elsewhere.
+   *
+   * @param string New symbolic commit.
+   * @return this
+   */
+  public function updateSymbolicCommit($symbol) {
+    $this->symbolicCommit = $symbol;
+    $this->symbolicType = null;
+    $this->stableCommit = null;
+    return $this;
   }
 
 
@@ -378,11 +386,6 @@ abstract class DiffusionRequest {
       $this->repositoryCommitData = $data;
     }
     return $this->repositoryCommitData;
-  }
-
-  public function setCommit($commit) {
-    $this->commit = $commit;
-    return $this;
   }
 
 /* -(  Managing Diffusion URIs  )-------------------------------------------- */
