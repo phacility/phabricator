@@ -352,6 +352,10 @@
   display: none;
 }
 
+.phabricator-application-menu .phui-list-item-icon {
+  display: none;
+}
+
 .device-desktop .phabricator-application-menu .phui-list-item-view.core-menu-item {
   display: block;
 }
