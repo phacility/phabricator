@@ -116,7 +116,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
     $add_comment_header = $is_serious
       ? pht('Add Comment')
-      : pht('Debate Paste Accuracy');
+      : pht('Eat Paste');
 
     $draft = PhabricatorDraft::newFromUserAndKey($user, $paste->getPHID());
 
