@@ -76,33 +76,14 @@ final class DiffusionBrowseTableView extends DiffusionView {
         $dict[$k] = phutil_tag('span', array('id' => $uniq), '');
       }
 
-      $editor_button = '';
-      if ($this->user) {
-        $editor_link = $this->user->loadEditorLink(
-          $base_path.$path->getPath(),
-          1,
-          $request->getRepository()->getCallsign());
-        if ($editor_link) {
-          $show_edit = true;
-          $editor_button = phutil_tag(
-            'a',
-            array(
-              'href' => $editor_link,
-            ),
-            pht('Edit'));
-        }
-      }
-
       $rows[] = array(
-        $this->linkHistory($base_path.$path->getPath().$dir_slash),
-        $editor_button,
         $browse_link,
         idx($dict, 'lint'),
         $dict['commit'],
-        $dict['date'],
-        $dict['time'],
         $dict['author'],
         $dict['details'],
+        $dict['date'],
+        $dict['time'],
       );
     }
 
@@ -126,32 +107,26 @@ final class DiffusionBrowseTableView extends DiffusionView {
     $view = new AphrontTableView($rows);
     $view->setHeaders(
       array(
-        pht('History'),
-        pht('Edit'),
         pht('Path'),
         ($lint ? $lint : pht('Lint')),
         pht('Modified'),
-        pht('Date'),
-        pht('Time'),
         pht('Author/Committer'),
         pht('Details'),
+        pht('Date'),
+        pht('Time'),
       ));
     $view->setColumnClasses(
       array(
         '',
-        '',
-        '',
+        'n',
         'n',
         '',
+        'wide',
         '',
         'right',
-        '',
-        'wide',
       ));
     $view->setColumnVisibility(
       array(
-        true,
-        $show_edit,
         true,
         $show_lint,
         true,
@@ -160,6 +135,19 @@ final class DiffusionBrowseTableView extends DiffusionView {
         true,
         true,
       ));
+
+    $view->setDeviceVisibility(
+      array(
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false,
+      ));
+
+
     return $view->render();
   }
 

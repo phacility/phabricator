@@ -118,21 +118,13 @@ final class DiffusionHistoryTableView extends DiffusionView {
 
       $commit = $history->getCommit();
       if ($commit && $commit->isPartiallyImported($partial_import) && $data) {
-        $change = $this->linkChange(
-          $history->getChangeType(),
-          $history->getFileType(),
-          $path = null,
-          $history->getCommitIdentifier());
+        $summary = AphrontTableView::renderSingleDisplayLine(
+          $history->getSummary());
       } else {
-        $change = phutil_tag('em', array(), "Importing\xE2\x80\xA6");
+        $summary = phutil_tag('em', array(), "Importing\xE2\x80\xA6");
       }
 
       $rows[] = array(
-        $this->linkBrowse(
-          $drequest->getPath(),
-          array(
-            'commit' => $history->getCommitIdentifier(),
-          )),
         $graph ? $graph[$ii++] : null,
         self::linkCommit(
           $drequest->getRepository(),
@@ -140,44 +132,47 @@ final class DiffusionHistoryTableView extends DiffusionView {
         ($commit ?
           self::linkRevision(idx($this->revisions, $commit->getPHID())) :
           null),
-        $change,
+        $author,
+        $summary,
         $date,
         $time,
-        $author,
-        AphrontTableView::renderSingleDisplayLine($history->getSummary()),
-        // TODO: etc etc
       );
     }
 
     $view = new AphrontTableView($rows);
     $view->setHeaders(
       array(
-        pht('Browse'),
         '',
         pht('Commit'),
         pht('Revision'),
-        pht('Change'),
-        pht('Date'),
-        pht('Time'),
         pht('Author/Committer'),
         pht('Details'),
+        pht('Date'),
+        pht('Time'),
       ));
     $view->setColumnClasses(
       array(
-        '',
         'threads',
         'n',
         'n',
         '',
+        'wide',
         '',
         'right',
-        '',
-        'wide',
       ));
     $view->setColumnVisibility(
       array(
-        true,
         $graph ? true : false,
+      ));
+    $view->setDeviceVisibility(
+      array(
+        $graph ? true : false,
+        true,
+        true,
+        false,
+        true,
+        false,
+        false,
       ));
     return $view->render();
   }

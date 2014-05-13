@@ -89,16 +89,16 @@ final class DiffusionRepositoryController extends DiffusionController {
       $readme = null;
     }
 
-    $content[] = $this->buildHistoryTable(
-      $history_results,
-      $history,
-      $history_exception,
-      $handles);
-
     $content[] = $this->buildBrowseTable(
       $browse_results,
       $browse_paths,
       $browse_exception,
+      $handles);
+
+    $content[] = $this->buildHistoryTable(
+      $history_results,
+      $history,
+      $history_exception,
       $handles);
 
     try {
@@ -161,7 +161,6 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $view = id(new PHUIPropertyListView())
       ->setUser($user);
-    $view->addProperty(pht('Callsign'), $repository->getCallsign());
 
     $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $repository->getPHID(),
