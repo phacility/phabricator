@@ -366,9 +366,9 @@ final class DiffusionRepositoryController extends DiffusionController {
     $button->setTag('a');
     $button->setIcon($icon);
     $button->setHref($drequest->generateURI(
-            array(
-              'action' => 'tags',
-            )));
+      array(
+        'action' => 'tags',
+      )));
 
     $header->addActionLink($button);
 
@@ -529,6 +529,33 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $header->addActionLink($button);
     $browse_panel->setHeader($header);
+
+    if ($repository->canUsePathTree()) {
+      Javelin::initBehavior(
+        'diffusion-locate-file',
+        array(
+          'controlID' => 'locate-control',
+          'inputID' => 'locate-input',
+          'browseBaseURI' => (string)$drequest->generateURI(
+            array(
+              'action' => 'browse',
+            )),
+          'uri' => (string)$drequest->generateURI(
+            array(
+              'action' => 'pathtree',
+            )),
+        ));
+
+      $form = id(new AphrontFormView())
+        ->setUser($viewer)
+        ->appendChild(
+          id(new AphrontFormTypeaheadControl())
+            ->setHardpointID('locate-control')
+            ->setID('locate-input')
+            ->setLabel(pht('Locate File')));
+      $browse_panel->appendChild($form->buildLayoutView());
+    }
+
     $browse_panel->appendChild($browse_table);
 
     return $browse_panel;

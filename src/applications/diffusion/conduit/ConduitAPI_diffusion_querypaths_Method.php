@@ -15,7 +15,7 @@ final class ConduitAPI_diffusion_querypaths_Method
     return array(
       'path' => 'required string',
       'commit' => 'required string',
-      'pattern' => 'required string',
+      'pattern' => 'optional string',
       'limit' => 'optional int',
       'offset' => 'optional int',
     );
@@ -39,6 +39,7 @@ final class ConduitAPI_diffusion_querypaths_Method
       'ls-tree --name-only -r -z %s -- %s',
       $commit,
       $path);
+
 
     $lines = id(new LinesOfALargeExecFuture($future))->setDelimiter("\0");
     return $this->filterResults($lines, $request);
@@ -65,23 +66,35 @@ final class ConduitAPI_diffusion_querypaths_Method
         $lines[] = $path;
       }
     }
+
     return $this->filterResults($lines, $request);
   }
 
   protected function filterResults($lines, ConduitAPIRequest $request) {
     $pattern = $request->getValue('pattern');
-    $limit = $request->getValue('limit');
-    $offset = $request->getValue('offset');
+    $limit = (int)$request->getValue('limit');
+    $offset = (int)$request->getValue('offset');
+
+    if (strlen($pattern)) {
+      $pattern = '/'.preg_quote($pattern, '/').'/';
+    }
 
     $results = array();
+    $count = 0;
     foreach ($lines as $line) {
-      if (preg_match('#'.str_replace('#', '\#', $pattern).'#', $line)) {
-        $results[] = $line;
-        if (count($results) >= $offset + $limit) {
+      if (!$pattern || preg_match($pattern, $line)) {
+        if ($count >= $offset) {
+          $results[] = $line;
+        }
+
+        $count++;
+
+        if ($limit && ($count >= ($offset + $limit))) {
           break;
         }
       }
     }
+
     return $results;
   }
 }

@@ -520,6 +520,7 @@ abstract class DiffusionRequest {
       case 'tags':
       case 'branches':
       case 'lint':
+      case 'pathtree':
         $uri = "/diffusion/{$callsign}{$action}/{$path}{$commit}{$line}";
         break;
       case 'branch':

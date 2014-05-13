@@ -53,6 +53,10 @@ JX.install('TypeaheadPreloadedSource', {
         this.matchResults(this.lastValue);
       }
       this.ready = true;
+    },
+
+    setReady: function(ready) {
+      this.ready = ready;
     }
   }
 });

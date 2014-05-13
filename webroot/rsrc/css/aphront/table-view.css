@@ -268,5 +268,13 @@ span.single-display-line-content {
 }
 
 .phui-object-box .aphront-table-view {
+  border-style: solid;
+  border-width: 1px 0 0 0;
+  border-color: {$lightblueborder};
+}
+
+/* When a table immediately follows a header, remove the top border. */
+.phui-object-box .phui-header-shell +
+  .aphront-table-wrap .aphront-table-view {
   border: none;
 }
