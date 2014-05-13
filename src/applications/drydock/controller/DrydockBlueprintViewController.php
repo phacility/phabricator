@@ -38,7 +38,10 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
       ->setViewer($viewer)
       ->execute();
 
-    $resource_list = $this->buildResourceListView($resources);
+    $resource_list = id(new DrydockResourceListView())
+      ->setUser($viewer)
+      ->setResources($resources)
+      ->render();
     $resource_list->setNoDataString(pht('This blueprint has no resources.'));
 
     $pager = new AphrontPagerView();

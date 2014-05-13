@@ -36,7 +36,10 @@ final class DrydockResourceViewController extends DrydockResourceController {
       ->withResourceIDs(array($resource->getID()))
       ->execute();
 
-    $lease_list = $this->buildLeaseListView($leases);
+    $lease_list = id(new DrydockLeaseListView())
+      ->setUser($viewer)
+      ->setLeases($leases)
+      ->render();
     $lease_list->setNoDataString(pht('This resource has no leases.'));
 
     $pager = new AphrontPagerView();
@@ -48,7 +51,10 @@ final class DrydockResourceViewController extends DrydockResourceController {
       ->withResourceIDs(array($resource->getID()))
       ->executeWithOffsetPager($pager);
 
-    $log_table = $this->buildLogTableView($logs);
+    $log_table = id(new DrydockLogListView())
+      ->setUser($viewer)
+      ->setLogs($logs)
+      ->render();
     $log_table->appendChild($pager);
 
     $crumbs = $this->buildApplicationCrumbs();
