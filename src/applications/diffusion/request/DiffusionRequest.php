@@ -4,11 +4,8 @@
  * Contains logic to parse Diffusion requests, which have a complicated URI
  * structure.
  *
- *
  * @task new Creating Requests
  * @task uri Managing Diffusion URIs
- *
- * @group diffusion
  */
 abstract class DiffusionRequest {
 
@@ -644,17 +641,18 @@ abstract class DiffusionRequest {
     }
 
     if ($this->getSupportsBranches()) {
-      $branch = $this->getResolvableBranchName($this->getBranch());
+      $ref = $this->getResolvableBranchName($this->getBranch());
     } else {
-      $branch = 'HEAD';
+      $ref = 'HEAD';
     }
 
-    $results = $this->resolveRefs(array($branch));
+    $results = $this->resolveRefs(array($ref));
 
-    $matches = idx($results, $branch, array());
+    $matches = idx($results, $ref, array());
     if (count($matches) !== 1) {
-      throw new Exception(
-        pht('Ref "%s" is ambiguous or does not exist.', $branch));
+      $message = pht('Ref "%s" is ambiguous or does not exist.', $ref);
+      throw id(new DiffusionRefNotFoundException($message))
+        ->setRef($ref);
     }
 
     $this->stableCommit = idx(head($matches), 'identifier');
