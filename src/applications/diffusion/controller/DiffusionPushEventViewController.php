@@ -52,7 +52,12 @@ final class DiffusionPushEventViewController
       ->setHeaderText(pht('Pushed Commits'))
       ->appendChild($commits_table);
 
-    $updates_table = $this->renderPushLogTable($event->getLogs());
+    $logs = $event->getLogs();
+
+    $updates_table = id(new DiffusionPushLogListView())
+      ->setUser($viewer)
+      ->setLogs($logs)
+      ->setHandles($this->loadViewerHandles(mpull($logs, 'getPusherPHID')));
 
     $update_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('All Pushed Updates'))

@@ -528,6 +528,7 @@ phutil_register_library_map(array(
     'DiffusionPushEventViewController' => 'applications/diffusion/controller/DiffusionPushEventViewController.php',
     'DiffusionPushLogController' => 'applications/diffusion/controller/DiffusionPushLogController.php',
     'DiffusionPushLogListController' => 'applications/diffusion/controller/DiffusionPushLogListController.php',
+    'DiffusionPushLogListView' => 'applications/diffusion/view/DiffusionPushLogListView.php',
     'DiffusionQuery' => 'applications/diffusion/query/DiffusionQuery.php',
     'DiffusionRawDiffQuery' => 'applications/diffusion/query/rawdiff/DiffusionRawDiffQuery.php',
     'DiffusionRefNotFoundException' => 'applications/diffusion/exception/DiffusionRefNotFoundException.php',
@@ -3166,11 +3167,8 @@ phutil_register_library_map(array(
     'DiffusionPathValidateController' => 'DiffusionController',
     'DiffusionPushEventViewController' => 'DiffusionPushLogController',
     'DiffusionPushLogController' => 'DiffusionController',
-    'DiffusionPushLogListController' =>
-    array(
-      0 => 'DiffusionPushLogController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'DiffusionPushLogListController' => 'DiffusionPushLogController',
+    'DiffusionPushLogListView' => 'AphrontView',
     'DiffusionQuery' => 'PhabricatorQuery',
     'DiffusionRawDiffQuery' => 'DiffusionQuery',
     'DiffusionRefNotFoundException' => 'Exception',

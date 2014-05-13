@@ -107,4 +107,27 @@ final class PhabricatorRepositoryPushLogSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
+  protected function getRequiredHandlePHIDsForResultList(
+    array $logs,
+    PhabricatorSavedQuery $query) {
+    return mpull($logs, 'getPusherPHID');
+  }
+
+  protected function renderResultList(
+    array $logs,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+
+    $table = id(new DiffusionPushLogListView())
+      ->setUser($this->requireViewer())
+      ->setHandles($handles)
+      ->setLogs($logs);
+
+    $box = id(new PHUIBoxView())
+      ->addMargin(PHUI::MARGIN_LARGE)
+      ->appendChild($table);
+
+    return $box;
+  }
+
 }
