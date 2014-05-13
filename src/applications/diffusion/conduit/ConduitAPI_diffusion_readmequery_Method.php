@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_diffusion_readmequery_Method
   extends ConduitAPI_diffusion_abstractquery_Method {
 
@@ -19,6 +16,7 @@ final class ConduitAPI_diffusion_readmequery_Method
   protected function defineCustomParamTypes() {
     return array(
       'paths' => 'required array <string>',
+      'commit' => 'optional string',
     );
   }
 

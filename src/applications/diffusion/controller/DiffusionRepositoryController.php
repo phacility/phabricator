@@ -83,7 +83,8 @@ final class DiffusionRepositoryController extends DiffusionController {
       $readme = $this->callConduitWithDiffusionRequest(
         'diffusion.readmequery',
         array(
-         'paths' => $browse_results->getPathDicts()
+         'paths' => $browse_results->getPathDicts(),
+         'commit' => $drequest->getStableCommit(),
         ));
     } else {
       $readme = null;
