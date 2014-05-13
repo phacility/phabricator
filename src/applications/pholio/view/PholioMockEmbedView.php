@@ -82,18 +82,15 @@ final class PholioMockEmbedView extends AphrontView {
       $thumbnails);
 
     $icons_data = array(
-      'image' => count($this->mock->getImages()),
-      'like' => $this->mock->getTokenCount());
+      'fa-picture-o' => count($this->mock->getImages()),
+      'fa-trophy' => $this->mock->getTokenCount());
 
     $icon_list = array();
     foreach ($icons_data as $icon_name => $icon_value) {
-      $icon = phutil_tag(
-        'span',
-         array(
-           'class' =>
-             'pholio-mock-embed-icon sprite-icons icons-'.$icon_name.'-white',
-         ),
-         ' ');
+      $icon = id(new PHUIIconView())
+        ->setIconFont($icon_name.' white')
+        ->addClass('pholio-mock-embed-icon');
+
       $count = phutil_tag('span', array(), $icon_value);
 
       $icon_list[] = phutil_tag(

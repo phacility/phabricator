@@ -60,7 +60,7 @@ final class ProjectBoardTaskCard {
       ->addAction(
         id(new PHUIListItemView())
         ->setName(pht('Edit'))
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->addSigil('edit-project-card')
         ->setHref('/maniphest/task/edit/'.$task->getID().'/'))
       ->setBarColor($bar_color);

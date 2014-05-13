@@ -57,8 +57,7 @@ final class PhabricatorNotificationListController
       ->appendChild($view);
 
     $image = id(new PHUIIconView())
-        ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-        ->setSpriteIcon('preview');
+        ->setIconFont('fa-eye-slash');
     $button = id(new PHUIButtonView())
         ->setTag('a')
         ->setColor(PHUIButtonView::SIMPLE)

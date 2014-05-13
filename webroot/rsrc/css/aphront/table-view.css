@@ -220,7 +220,7 @@ span.single-display-line-content {
 .aphront-table-view td.threads {
   font-family: monospace;
   white-space: pre;
-  padding: 0;
+  padding: 0 0 0 8px;
 }
 
 .aphront-table-view td.threads canvas {

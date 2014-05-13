@@ -113,6 +113,10 @@ final class PhabricatorCommitSearchEngine
 
     $names['open'] = pht('Open Audits');
 
+    if ($this->requireViewer()->isLoggedIn()) {
+      $names['authored'] = pht('Authored Commits');
+    }
+
     $names['all'] = pht('All Commits');
 
     return $names;
@@ -139,6 +143,9 @@ final class PhabricatorCommitSearchEngine
         $query->setParameter(
           'auditorPHIDs',
           PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($viewer));
+        return $query;
+      case 'authored':
+        $query->setParameter('commitAuthorPHIDs', array($viewer->getPHID()));
         return $query;
       case 'problem':
         $query->setParameter('commitAuthorPHIDs', array($viewer->getPHID()));

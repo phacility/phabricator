@@ -182,7 +182,7 @@ final class PhrequentSearchEngine
             $usertime->getUserPHID() === $viewer->getPHID()) {
           $item->addAction(
             id(new PHUIListItemView())
-              ->setIcon('history')
+              ->setIcon('fa-time-o')
               ->addSigil('phrequent-stop-tracking')
               ->setWorkflow(true)
               ->setRenderNameAsTooltip(true)

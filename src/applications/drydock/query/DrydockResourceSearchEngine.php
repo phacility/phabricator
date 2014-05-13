@@ -3,6 +3,10 @@
 final class DrydockResourceSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getApplicationClassName() {
+    return 'PhabricatorApplicationDrydock';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -75,6 +79,17 @@ final class DrydockResourceSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function renderResultList(
+    array $resources,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+
+    return id(new DrydockResourceListView())
+      ->setUser($this->requireViewer())
+      ->setResources($resources)
+      ->render();
   }
 
 }

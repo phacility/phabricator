@@ -85,8 +85,7 @@ final class PHUITagView extends AphrontView {
 
   public function setIcon($icon) {
     $icon_view = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-      ->setSpriteIcon($icon);
+      ->setIconFont($icon);
     $this->icon = $icon_view;
     return $this;
   }

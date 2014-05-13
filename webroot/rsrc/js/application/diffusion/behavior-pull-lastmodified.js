@@ -3,19 +3,23 @@
  * @requires javelin-behavior
  *           javelin-dom
  *           javelin-util
- *           javelin-request
+ *           javelin-workflow
+ *           javelin-json
  */
 
 JX.behavior('diffusion-pull-lastmodified', function(config) {
 
-  for (var uri in config) {
-    new JX.Request(uri, JX.bind(config[uri], function(r) {
+  new JX.Workflow(config.uri, {paths: JX.JSON.stringify(JX.keys(config.map))})
+    .setHandler(function(r) {
       for (var k in r) {
-        if (this[k]) {
-          JX.DOM.setContent(JX.$(this[k]), JX.$H(r[k]));
+        for (var l in r[k]) {
+          if (!config.map[k][l]) {
+            continue;
+          }
+          JX.DOM.setContent(JX.$(config.map[k][l]), JX.$H(r[k][l]));
         }
       }
-    })).send();
-  }
+    })
+    .start();
 
 });

@@ -83,21 +83,21 @@ final class PhabricatorCustomFieldConfigOptionType
         id(new PHUIListItemView())
           ->setHref('#')
           ->addSigil('field-spec-toggle')
-          ->setIcon('new'));
+          ->setIcon('fa-plus'));
 
       $enabled_item->setBarColor('green');
 
       if (!$field->canDisableField()) {
         $enabled_item->addAction(
           id(new PHUIListItemView())
-            ->setIcon('lock-grey'));
+            ->setIcon('fa-lock grey'));
         $enabled_item->addIcon('none', pht('Permanent Field'));
       } else {
         $enabled_item->addAction(
           id(new PHUIListItemView())
             ->setHref('#')
             ->addSigil('field-spec-toggle')
-            ->setIcon('delete'));
+            ->setIcon('fa-times'));
       }
 
       $fields[$key] = array(

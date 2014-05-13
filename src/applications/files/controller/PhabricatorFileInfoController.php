@@ -129,7 +129,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       $view->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('View File'))
-          ->setIcon('preview')
+          ->setIcon('fa-file-o')
           ->setHref($file->getViewURI()));
     } else {
       $view->addAction(
@@ -138,14 +138,14 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
           ->setRenderAsForm(true)
           ->setDownload(true)
           ->setName(pht('Download File'))
-          ->setIcon('download')
+          ->setIcon('fa-download')
           ->setHref($file->getViewURI()));
     }
 
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Delete File'))
-        ->setIcon('delete')
+        ->setIcon('fa-times')
         ->setHref($this->getApplicationURI("/delete/{$id}/"))
         ->setWorkflow(true));
 

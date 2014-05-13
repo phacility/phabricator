@@ -40,7 +40,7 @@ final class PhabricatorDashboardPanelListController
 
     $crumbs->addAction(
       id(new PHUIListItemView())
-        ->setIcon('create')
+        ->setIcon('fa-plus-square')
         ->setName(pht('Create Panel'))
         ->setHref($this->getApplicationURI().'panel/create/'));
 

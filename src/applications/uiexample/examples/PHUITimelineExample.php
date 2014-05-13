@@ -29,57 +29,57 @@ final class PHUITimelineExample extends PhabricatorUIExample {
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
-      ->setIcon('love')
+      ->setIcon('fa-heart')
       ->setTitle('A minor event.');
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
-      ->setIcon('comment')
+      ->setIcon('fa-comment')
       ->appendChild('A major event with no title.');
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
-      ->setIcon('dislike')
+      ->setIcon('fa-star')
       ->setTitle('Another minor event.');
 
     $events[] = id(new PHUITimelineEventView())
-      ->setIcon('like')
+      ->setIcon('fa-trophy')
       ->setToken('medal-1')
       ->setUserHandle($handle);
 
     $events[] = id(new PHUITimelineEventView())
-      ->setIcon('dislike')
+      ->setIcon('fa-quote-left')
       ->setToken('medal-1', true)
       ->setUserHandle($handle);
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
       ->setTitle('Major Red Event')
-      ->setIcon('love')
+      ->setIcon('fa-heart-o')
       ->appendChild('This event is red!')
       ->setColor(PhabricatorTransactions::COLOR_RED);
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
-      ->setIcon('love')
+      ->setIcon('fa-female')
       ->setTitle('Minor Red Event')
       ->setColor(PhabricatorTransactions::COLOR_RED);
 
     $events[] = id(new PHUITimelineEventView())
-      ->setIcon('like')
+      ->setIcon('fa-refresh')
       ->setUserHandle($handle)
       ->setTitle('Minor Not-Red Event')
       ->setColor(PhabricatorTransactions::COLOR_GREEN);
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
-      ->setIcon('love')
+      ->setIcon('fa-calendar-o')
       ->setTitle('Minor Red Event')
       ->setColor(PhabricatorTransactions::COLOR_RED);
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
-      ->setIcon('dislike')
+      ->setIcon('fa-random')
       ->setTitle('Minor Not-Red Event')
       ->setColor(PhabricatorTransactions::COLOR_BLACK);
 

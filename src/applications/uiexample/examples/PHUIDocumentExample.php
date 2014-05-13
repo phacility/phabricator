@@ -21,31 +21,31 @@ final class PHUIDocumentExample extends PhabricatorUIExample {
     $action1 = id(new PHUIListItemView())
       ->setName('Edit Document')
       ->setHref('#')
-      ->setIcon('edit')
+      ->setIcon('fa-edit')
       ->setType(PHUIListItemView::TYPE_LINK);
 
     $action2 = id(new PHUIListItemView())
       ->setName('Move Document')
       ->setHref('#')
-      ->setIcon('move')
+      ->setIcon('fa-arrows')
       ->setType(PHUIListItemView::TYPE_LINK);
 
     $action3 = id(new PHUIListItemView())
       ->setName('Delete Document')
       ->setHref('#')
-      ->setIcon('delete')
+      ->setIcon('fa-times')
       ->setType(PHUIListItemView::TYPE_LINK);
 
     $action4 = id(new PHUIListItemView())
       ->setName('View History')
       ->setHref('#')
-      ->setIcon('history')
+      ->setIcon('fa-list')
       ->setType(PHUIListItemView::TYPE_LINK);
 
     $action5 = id(new PHUIListItemView())
       ->setName('Subscribe')
       ->setHref('#')
-      ->setIcon('check')
+      ->setIcon('fa-plus-circle')
       ->setType(PHUIListItemView::TYPE_LINK);
 
     $divider = id(new PHUIListItemView)

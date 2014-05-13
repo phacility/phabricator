@@ -85,19 +85,30 @@ final class ConduitAPI_diffusion_readmequery_Method
       require_celerity_resource('syntax-highlighting-css');
       $class = 'remarkup-code';
     } else {
-      // Markup extensionless files as remarkup so we get links and such.
-      $engine = PhabricatorMarkupEngine::newDiffusionMarkupEngine();
-      $engine->setConfig('viewer', $request->getUser());
-      $readme_content = $engine->markupText($readme_content);
+      // TODO: This is sketchy, but make sure we hit the markup cache.
+      $markup_object = id(new PhabricatorMarkupOneOff())
+        ->setEngineRuleset('diffusion-readme')
+        ->setContent($readme_content);
+      $markup_field = 'default';
+
+      $readme_content = id(new PhabricatorMarkupEngine())
+        ->setViewer($request->getUser())
+        ->addObject($markup_object, $markup_field)
+        ->process()
+        ->getOutput($markup_object, $markup_field);
+
+      $engine = $markup_object->newMarkupEngine($markup_field);
       $toc = PhutilRemarkupEngineRemarkupHeaderBlockRule::renderTableOfContents(
         $engine);
       if ($toc) {
-        $toc = phutil_tag_div('phabricator-remarkup-toc', array(
-          phutil_tag_div(
-            'phabricator-remarkup-toc-header',
-            pht('Table of Contents')),
-          $toc,
-        ));
+        $toc = phutil_tag_div(
+          'phabricator-remarkup-toc',
+          array(
+            phutil_tag_div(
+              'phabricator-remarkup-toc-header',
+              pht('Table of Contents')),
+            $toc,
+          ));
         $readme_content = array($toc, $readme_content);
       }
 

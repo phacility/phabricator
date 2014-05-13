@@ -102,7 +102,7 @@ final class PhamePostViewController extends PhameController {
 
     $actions->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI('post/edit/'.$id.'/'))
         ->setName(pht('Edit Post'))
         ->setDisabled(!$can_edit)
@@ -110,7 +110,7 @@ final class PhamePostViewController extends PhameController {
 
     $actions->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('move')
+        ->setIcon('fa-arrows')
         ->setHref($this->getApplicationURI('post/move/'.$id.'/'))
         ->setName(pht('Move Post'))
         ->setDisabled(!$can_edit)
@@ -119,13 +119,13 @@ final class PhamePostViewController extends PhameController {
     if ($post->isDraft()) {
       $actions->addAction(
         id(new PhabricatorActionView())
-          ->setIcon('preview')
+          ->setIcon('fa-eye')
           ->setHref($this->getApplicationURI('post/publish/'.$id.'/'))
           ->setName(pht('Preview / Publish')));
     } else {
       $actions->addAction(
         id(new PhabricatorActionView())
-          ->setIcon('unpublish')
+          ->setIcon('fa-eye-slash')
           ->setHref($this->getApplicationURI('post/unpublish/'.$id.'/'))
           ->setName(pht('Unpublish'))
           ->setWorkflow(true));
@@ -133,7 +133,7 @@ final class PhamePostViewController extends PhameController {
 
     $actions->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('delete')
+        ->setIcon('fa-times')
         ->setHref($this->getApplicationURI('post/delete/'.$id.'/'))
         ->setName(pht('Delete Post'))
         ->setDisabled(!$can_edit)
@@ -152,7 +152,7 @@ final class PhamePostViewController extends PhameController {
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setUser($user)
-        ->setIcon('world')
+        ->setIcon('fa-globe')
         ->setHref($live_uri)
         ->setName(pht('View Live'))
         ->setDisabled(!$can_view_live)

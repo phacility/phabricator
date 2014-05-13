@@ -118,7 +118,7 @@ final class HarbormasterPlanViewController
             $step->getClassName()))
           ->addAction(
             id(new PHUIListItemView())
-              ->setIcon('delete')
+              ->setIcon('fa-times')
               ->addSigil('harbormaster-build-step-delete')
               ->setWorkflow(true)
               ->setRenderNameAsTooltip(true)
@@ -152,7 +152,7 @@ final class HarbormasterPlanViewController
         ->setHref($edit_uri)
         ->addAction(
           id(new PHUIListItemView())
-            ->setIcon('delete')
+            ->setIcon('fa-times')
             ->addSigil('harbormaster-build-step-delete')
             ->setWorkflow(true)
             ->setDisabled(!$can_edit)
@@ -224,7 +224,7 @@ final class HarbormasterPlanViewController
         ->setHref($this->getApplicationURI("plan/edit/{$id}/"))
         ->setWorkflow(!$can_edit)
         ->setDisabled(!$can_edit)
-        ->setIcon('edit'));
+        ->setIcon('fa-pencil'));
 
     if ($plan->isDisabled()) {
       $list->addAction(
@@ -233,7 +233,7 @@ final class HarbormasterPlanViewController
           ->setHref($this->getApplicationURI("plan/disable/{$id}/"))
           ->setWorkflow(true)
           ->setDisabled(!$can_edit)
-          ->setIcon('enable'));
+          ->setIcon('fa-check'));
     } else {
       $list->addAction(
         id(new PhabricatorActionView())
@@ -241,7 +241,7 @@ final class HarbormasterPlanViewController
           ->setHref($this->getApplicationURI("plan/disable/{$id}/"))
           ->setWorkflow(true)
           ->setDisabled(!$can_edit)
-          ->setIcon('disable'));
+          ->setIcon('fa-ban'));
     }
 
     $list->addAction(
@@ -250,7 +250,7 @@ final class HarbormasterPlanViewController
         ->setHref($this->getApplicationURI("step/add/{$id}/"))
         ->setWorkflow(true)
         ->setDisabled(!$can_edit)
-        ->setIcon('new'));
+        ->setIcon('fa-plus'));
 
     $list->addAction(
       id(new PhabricatorActionView())
@@ -258,7 +258,7 @@ final class HarbormasterPlanViewController
         ->setHref($this->getApplicationURI("plan/run/{$id}/"))
         ->setWorkflow(true)
         ->setDisabled(!$can_edit)
-        ->setIcon('start-sandcastle'));
+        ->setIcon('fa-play-circle'));
 
     return $list;
   }

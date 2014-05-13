@@ -42,7 +42,7 @@ abstract class PhabricatorPeopleController extends PhabricatorController {
         id(new PHUIListItemView())
           ->setName(pht('Create New User'))
           ->setHref($this->getApplicationURI('create/'))
-          ->setIcon('create'));
+          ->setIcon('fa-plus-square'));
     }
 
     return $crumbs;

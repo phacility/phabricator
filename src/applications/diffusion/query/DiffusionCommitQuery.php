@@ -250,6 +250,9 @@ final class DiffusionCommitQuery
       $data = mpull($data, null, 'getCommitID');
       foreach ($commits as $commit) {
         $commit_data = idx($data, $commit->getID());
+        if (!$commit_data) {
+          $commit_data = new PhabricatorRepositoryCommitData();
+        }
         $commit->attachCommitData($commit_data);
       }
     }

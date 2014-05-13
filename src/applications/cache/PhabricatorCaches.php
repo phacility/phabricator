@@ -9,6 +9,57 @@ final class PhabricatorCaches {
     return PhabricatorEnv::getEnvConfig('phabricator.cache-namespace');
   }
 
+  private static function newStackFromCaches(array $caches) {
+    $caches = self::addNamespaceToCaches($caches);
+    $caches = self::addProfilerToCaches($caches);
+    return id(new PhutilKeyValueCacheStack())
+      ->setCaches($caches);
+  }
+
+
+/* -(  Repository Graph Cache  )--------------------------------------------- */
+
+
+  public static function getRepositoryGraphL1Cache() {
+    static $cache;
+    if (!$cache) {
+      $caches = self::buildRepositoryGraphL1Caches();
+      $cache = self::newStackFromCaches($caches);
+    }
+    return $cache;
+  }
+
+  private static function buildRepositoryGraphL1Caches() {
+    $caches = array();
+
+    $request = new PhutilKeyValueCacheInRequest();
+    $request->setLimit(32);
+    $caches[] = $request;
+
+    $apc = new PhutilKeyValueCacheAPC();
+    if ($apc->isAvailable()) {
+      $caches[] = $apc;
+    }
+
+    return $caches;
+  }
+
+  public static function getRepositoryGraphL2Cache() {
+    static $cache;
+    if (!$cache) {
+      $caches = self::buildRepositoryGraphL2Caches();
+      $cache = self::newStackFromCaches($caches);
+    }
+    return $cache;
+  }
+
+  private static function buildRepositoryGraphL2Caches() {
+    $caches = array();
+    $caches[] = new PhabricatorKeyValueDatabaseCache();
+    return $caches;
+  }
+
+
 /* -(  Setup Cache  )-------------------------------------------------------- */
 
 
@@ -30,10 +81,7 @@ final class PhabricatorCaches {
     static $cache;
     if (!$cache) {
       $caches = self::buildSetupCaches();
-      $caches = self::addNamespaceToCaches($caches);
-      $caches = self::addProfilerToCaches($caches);
-      $cache = id(new PhutilKeyValueCacheStack())
-        ->setCaches($caches);
+      $cache = self::newStackFromCaches($caches);
     }
     return $cache;
   }

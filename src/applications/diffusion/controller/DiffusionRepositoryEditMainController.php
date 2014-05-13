@@ -203,7 +203,7 @@ final class DiffusionRepositoryEditMainController
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
-      ->setIcon('edit')
+      ->setIcon('fa-pencil')
       ->setName(pht('Edit Basic Information'))
       ->setHref($this->getRepositoryControllerURI($repository, 'edit/basic/'));
     $view->addAction($edit);
@@ -215,11 +215,11 @@ final class DiffusionRepositoryEditMainController
 
     if ($repository->isTracked()) {
       $activate
-        ->setIcon('disable')
+        ->setIcon('fa-pause')
         ->setName(pht('Deactivate Repository'));
     } else {
       $activate
-        ->setIcon('enable')
+        ->setIcon('fa-play')
         ->setName(pht('Activate Repository'));
     }
 
@@ -228,7 +228,7 @@ final class DiffusionRepositoryEditMainController
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Delete Repository'))
-        ->setIcon('delete')
+        ->setIcon('fa-times')
         ->setHref(
           $this->getRepositoryControllerURI($repository, 'edit/delete/'))
         ->setDisabled(true)
@@ -304,7 +304,7 @@ final class DiffusionRepositoryEditMainController
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
-      ->setIcon('edit')
+      ->setIcon('fa-pencil')
       ->setName(pht('Edit Text Encoding'))
       ->setHref(
         $this->getRepositoryControllerURI($repository, 'edit/encoding/'));
@@ -341,7 +341,7 @@ final class DiffusionRepositoryEditMainController
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
-      ->setIcon('edit')
+      ->setIcon('fa-pencil')
       ->setName(pht('Edit Policies'))
       ->setHref(
         $this->getRepositoryControllerURI($repository, 'edit/policy/'));
@@ -388,7 +388,7 @@ final class DiffusionRepositoryEditMainController
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
-      ->setIcon('edit')
+      ->setIcon('fa-pencil')
       ->setName(pht('Edit Branches'))
       ->setHref(
         $this->getRepositoryControllerURI($repository, 'edit/branches/'));
@@ -438,7 +438,7 @@ final class DiffusionRepositoryEditMainController
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
-      ->setIcon('edit')
+      ->setIcon('fa-pencil')
       ->setName(pht('Edit Subversion Info'))
       ->setHref(
         $this->getRepositoryControllerURI($repository, 'edit/subversion/'));
@@ -478,7 +478,7 @@ final class DiffusionRepositoryEditMainController
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
-      ->setIcon('edit')
+      ->setIcon('fa-pencil')
       ->setName(pht('Edit Actions'))
       ->setHref(
         $this->getRepositoryControllerURI($repository, 'edit/actions/'));
@@ -520,7 +520,7 @@ final class DiffusionRepositoryEditMainController
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
-      ->setIcon('edit')
+      ->setIcon('fa-pencil')
       ->setName(pht('Edit Remote'))
       ->setHref(
         $this->getRepositoryControllerURI($repository, 'edit/remote/'));
@@ -562,7 +562,7 @@ final class DiffusionRepositoryEditMainController
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
-      ->setIcon('edit')
+      ->setIcon('fa-pencil')
       ->setName(pht('Edit Local'))
       ->setHref(
         $this->getRepositoryControllerURI($repository, 'edit/local/'));
@@ -596,7 +596,7 @@ final class DiffusionRepositoryEditMainController
       ->setUser($user);
 
     $edit = id(new PhabricatorActionView())
-      ->setIcon('edit')
+      ->setIcon('fa-pencil')
       ->setName(pht('Edit Hosting'))
       ->setHref(
         $this->getRepositoryControllerURI($repository, 'edit/hosting/'));
@@ -605,14 +605,14 @@ final class DiffusionRepositoryEditMainController
     if ($repository->canAllowDangerousChanges()) {
       if ($repository->shouldAllowDangerousChanges()) {
         $changes = id(new PhabricatorActionView())
-          ->setIcon('blame')
+          ->setIcon('fa-shield')
           ->setName(pht('Prevent Dangerous Changes'))
           ->setHref(
             $this->getRepositoryControllerURI($repository, 'edit/dangerous/'))
           ->setWorkflow(true);
       } else {
         $changes = id(new PhabricatorActionView())
-          ->setIcon('warning')
+          ->setIcon('fa-bullseye')
           ->setName(pht('Allow Dangerous Changes'))
           ->setHref(
             $this->getRepositoryControllerURI($repository, 'edit/dangerous/'))
@@ -1043,7 +1043,7 @@ final class DiffusionRepositoryEditMainController
     $mirror_actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Add Mirror'))
-        ->setIcon('new')
+        ->setIcon('fa-plus')
         ->setHref($new_mirror_uri)
         ->setWorkflow(true));
 
@@ -1092,13 +1092,13 @@ final class DiffusionRepositoryEditMainController
 
       $item->addAction(
         id(new PHUIListItemView())
-          ->setIcon('edit')
+          ->setIcon('fa-pencil')
           ->setHref($edit_uri)
           ->setWorkflow(true));
 
       $item->addAction(
         id(new PHUIListItemView())
-          ->setIcon('delete')
+          ->setIcon('fa-times')
           ->setHref($delete_uri)
           ->setWorkflow(true));
 

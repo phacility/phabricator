@@ -252,8 +252,7 @@ final class DiffusionCommitController extends DiffusionController {
       if ($count > self::CHANGES_LIMIT && !$show_all_details) {
 
         $icon = id(new PHUIIconView())
-          ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-          ->setSpriteIcon('transcript');
+          ->setIconFont('fa-files-o');
 
         $button = id(new PHUIButtonView())
           ->setText(pht('Show All Changes'))
@@ -987,7 +986,7 @@ final class DiffusionCommitController extends DiffusionController {
     $action = id(new PhabricatorActionView())
       ->setName(pht('Edit Commit'))
       ->setHref($uri)
-      ->setIcon('edit')
+      ->setIcon('fa-pencil')
       ->setDisabled(!$can_edit)
       ->setWorkflow(!$can_edit);
     $actions->addAction($action);
@@ -999,7 +998,7 @@ final class DiffusionCommitController extends DiffusionController {
     if (PhabricatorApplication::isClassInstalled($maniphest)) {
       $action = id(new PhabricatorActionView())
         ->setName(pht('Edit Maniphest Tasks'))
-        ->setIcon('attach')
+        ->setIcon('fa-anchor')
         ->setHref('/search/attach/'.$commit->getPHID().'/TASK/edge/')
         ->setWorkflow(true)
         ->setDisabled(!$can_edit);
@@ -1009,7 +1008,7 @@ final class DiffusionCommitController extends DiffusionController {
     $action = id(new PhabricatorActionView())
       ->setName(pht('Download Raw Diff'))
       ->setHref($request->getRequestURI()->alter('diff', true))
-      ->setIcon('download');
+      ->setIcon('fa-download');
     $actions->addAction($action);
 
     return $actions;

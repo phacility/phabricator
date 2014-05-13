@@ -37,7 +37,7 @@ abstract class PhrictionController extends PhabricatorController {
         id(new PHUIListItemView())
           ->setName(pht('Index'))
           ->setHref('/phriction/')
-          ->setIcon('transcript'));
+          ->setIcon('fa-home'));
     }
 
     $crumbs->addAction(
@@ -45,7 +45,7 @@ abstract class PhrictionController extends PhabricatorController {
         ->setName(pht('New Document'))
         ->setHref('/phriction/new/?slug='.$this->getDocumentSlug())
         ->setWorkflow(true)
-        ->setIcon('create'));
+        ->setIcon('fa-plus-square'));
 
     return $crumbs;
   }

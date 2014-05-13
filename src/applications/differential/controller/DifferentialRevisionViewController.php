@@ -488,7 +488,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $actions = array();
 
     $actions[] = id(new PhabricatorActionView())
-      ->setIcon('edit')
+      ->setIcon('fa-pencil')
       ->setHref("/differential/revision/edit/{$revision_id}/")
       ->setName(pht('Edit Revision'))
       ->setDisabled(!$can_edit)
@@ -498,7 +498,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $this->requireResource('javelin-behavior-phabricator-object-selector');
 
     $actions[] = id(new PhabricatorActionView())
-      ->setIcon('link')
+      ->setIcon('fa-link')
       ->setName(pht('Edit Dependencies'))
       ->setHref("/search/attach/{$revision_phid}/DREV/dependencies/")
       ->setWorkflow(true)
@@ -507,7 +507,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $maniphest = 'PhabricatorApplicationManiphest';
     if (PhabricatorApplication::isClassInstalled($maniphest)) {
       $actions[] = id(new PhabricatorActionView())
-        ->setIcon('attach')
+        ->setIcon('fa-anchor')
         ->setName(pht('Edit Maniphest Tasks'))
         ->setHref("/search/attach/{$revision_phid}/TASK/")
         ->setWorkflow(true)
@@ -516,7 +516,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $request_uri = $this->getRequest()->getRequestURI();
     $actions[] = id(new PhabricatorActionView())
-      ->setIcon('download')
+      ->setIcon('fa-download')
       ->setName(pht('Download Raw Diff'))
       ->setHref($request_uri->alter('download', 'true'));
 

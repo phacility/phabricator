@@ -32,7 +32,7 @@ abstract class PhabricatorMailingListsController extends PhabricatorController {
       id(new PHUIListItemView())
         ->setName(pht('Create List'))
         ->setHref($this->getApplicationURI('edit/'))
-        ->setIcon('create'));
+        ->setIcon('fa-plus-square'));
 
     return $crumbs;
   }

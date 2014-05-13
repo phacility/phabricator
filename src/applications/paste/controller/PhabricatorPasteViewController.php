@@ -116,7 +116,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
     $add_comment_header = $is_serious
       ? pht('Add Comment')
-      : pht('Debate Paste Accuracy');
+      : pht('Eat Paste');
 
     $draft = PhabricatorDraft::newFromUserAndKey($user, $paste->getPHID());
 
@@ -174,21 +174,21 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Edit Paste'))
-          ->setIcon('edit')
+          ->setIcon('fa-pencil')
           ->setDisabled(!$can_edit)
           ->setWorkflow(!$can_edit)
           ->setHref($this->getApplicationURI('/edit/'.$paste->getID().'/')))
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Fork This Paste'))
-          ->setIcon('fork')
+          ->setIcon('fa-code-fork')
           ->setDisabled(!$can_fork)
           ->setWorkflow(!$can_fork)
           ->setHref($fork_uri))
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('View Raw File'))
-          ->setIcon('file')
+          ->setIcon('fa-file-text-o')
           ->setHref($file->getBestURI()));
   }
 

@@ -81,7 +81,7 @@ final class PhabricatorDashboardPanelViewController
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Panel'))
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI("panel/edit/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
@@ -89,7 +89,7 @@ final class PhabricatorDashboardPanelViewController
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('View Standalone'))
-        ->setIcon('preview')
+        ->setIcon('fa-eye')
         ->setHref($this->getApplicationURI("panel/render/{$id}/")));
 
     return $actions;

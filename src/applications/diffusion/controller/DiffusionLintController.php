@@ -279,7 +279,7 @@ final class DiffusionLintController extends DiffusionController {
       id(new PhabricatorActionView())
         ->setName(pht('View As List'))
         ->setHref($list_uri)
-        ->setIcon('transcript'));
+        ->setIcon('fa-list'));
 
     $history_uri = $drequest->generateURI(
       array(
@@ -290,7 +290,7 @@ final class DiffusionLintController extends DiffusionController {
       id(new PhabricatorActionView())
         ->setName(pht('View History'))
         ->setHref($history_uri)
-        ->setIcon('history'));
+        ->setIcon('fa-clock-o'));
 
     $browse_uri = $drequest->generateURI(
       array(
@@ -301,7 +301,7 @@ final class DiffusionLintController extends DiffusionController {
       id(new PhabricatorActionView())
         ->setName(pht('Browse Content'))
         ->setHref($browse_uri)
-        ->setIcon('file'));
+        ->setIcon('fa-files-o'));
 
     return $view;
   }

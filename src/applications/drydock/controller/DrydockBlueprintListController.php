@@ -33,7 +33,7 @@ final class DrydockBlueprintListController extends DrydockBlueprintController {
         ->setHref($this->getApplicationURI('/blueprint/create/'))
         ->setDisabled(!$can_create)
         ->setWorkflow(!$can_create)
-        ->setIcon('create'));
+        ->setIcon('fa-plus-square'));
     return $crumbs;
   }
 

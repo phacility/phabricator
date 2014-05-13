@@ -7,7 +7,7 @@ abstract class PhabricatorFileController extends PhabricatorController {
     $crumbs->addAction(
       id(new PHUIListItemView())
         ->setName(pht('Upload File'))
-        ->setIcon('create') // TODO: Get @chad to build an "upload" icon.
+        ->setIcon('fa-upload')
         ->setHref($this->getApplicationURI('/upload/')));
 
     return $crumbs;

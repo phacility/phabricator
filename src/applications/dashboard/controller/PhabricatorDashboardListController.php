@@ -41,7 +41,7 @@ final class PhabricatorDashboardListController
 
     $crumbs->addAction(
       id(new PHUIListItemView())
-        ->setIcon('create')
+        ->setIcon('fa-plus-square')
         ->setName(pht('Create Dashboard'))
         ->setHref($this->getApplicationURI().'create/'));
 

@@ -356,11 +356,7 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_BUILDABLE:
         return 'fa-wrench';
       case PhabricatorTransactions::TYPE_TOKEN:
-        if ($this->getNewValue()) {
-          return 'fa-thumbs-o-up';
-        } else {
-          return 'fa-thumbs-o-down';
-        }
+        return 'fa-trophy';
     }
 
     return 'fa-pencil';

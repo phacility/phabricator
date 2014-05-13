@@ -33,7 +33,7 @@ final class PhabricatorProjectListController
       id(new PHUIListItemView())
         ->setName(pht('Create Project'))
         ->setHref($this->getApplicationURI('create/'))
-        ->setIcon('create')
+        ->setIcon('fa-plus-square')
         ->setWorkflow(!$can_create)
         ->setDisabled(!$can_create));
 

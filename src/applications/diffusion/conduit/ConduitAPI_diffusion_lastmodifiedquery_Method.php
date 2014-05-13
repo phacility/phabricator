@@ -1,115 +1,152 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_diffusion_lastmodifiedquery_Method
   extends ConduitAPI_diffusion_abstractquery_Method {
 
   public function getMethodDescription() {
-    return
-      'Get last modified information from a repository for a specific commit '.
-      'at a specific path.';
+    return pht('Get the commits at which paths were last modified.');
   }
 
   public function defineReturnType() {
-    return 'array';
+    return 'map<string, string>';
   }
 
   protected function defineCustomParamTypes() {
     return array(
-      'commit' => 'required string',
-      'path' => 'required string',
+      'paths' => 'required map<string, string>',
     );
-  }
-
-  protected function getResult(ConduitAPIRequest $request) {
-    list($commit, $commit_data) = parent::getResult($request);
-    if ($commit) {
-      $commit = $commit->toDictionary();
-    }
-    if ($commit_data) {
-      $commit_data = $commit_data->toDictionary();
-    }
-    return array(
-      'commit' => $commit,
-      'commitData' => $commit_data);
   }
 
   protected function getGitResult(ConduitAPIRequest $request) {
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    list($hash) = $repository->execxLocalCommand(
-      'log -n1 --format=%%H %s -- %s',
-      $drequest->getCommit(),
-      $drequest->getPath());
-    $hash = trim($hash);
+    $paths = $request->getValue('paths');
+    $results = $this->loadCommitsFromCache($paths);
 
-    return $this->loadDataFromHash($hash);
+    foreach ($paths as $path => $commit) {
+      if (array_key_exists($path, $results)) {
+        continue;
+      }
+      list($hash) = $repository->execxLocalCommand(
+        'log -n1 --format=%%H %s -- %s',
+        $commit,
+        $path);
+      $results[$path] = trim($hash);
+    }
+
+    return $results;
   }
 
   protected function getSVNResult(ConduitAPIRequest $request) {
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    $path = $drequest->getPath();
+    $results = array();
+    foreach ($request->getValue('paths') as $path => $commit) {
+      $history_result = DiffusionQuery::callConduitWithDiffusionRequest(
+        $request->getUser(),
+        $drequest,
+        'diffusion.historyquery',
+        array(
+          'commit' => $commit,
+          'path' => $path,
+          'limit' => 1,
+          'offset' => 0,
+          'needDirectChanges' => true,
+          'needChildChanges' => true,
+        ));
 
-    $history_result = DiffusionQuery::callConduitWithDiffusionRequest(
-      $request->getUser(),
-      $drequest,
-      'diffusion.historyquery',
-      array(
-        'commit' => $drequest->getCommit(),
-        'path' => $path,
-        'limit' => 1,
-        'offset' => 0,
-        'needDirectChanges' => true,
-        'needChildChanges' => true));
-    $history_array = DiffusionPathChange::newFromConduit(
-      $history_result['pathChanges']);
-
-    if (!$history_array) {
-      return array(array(), array());
+      $history_array = DiffusionPathChange::newFromConduit(
+        $history_result['pathChanges']);
+      if ($history_array) {
+        $results[$path] = head($history_array)
+          ->getCommit()
+          ->getCommitIdentifier();
+      }
     }
 
-    $history = reset($history_array);
-
-    return array($history->getCommit(), $history->getCommitData());
+    return $results;
   }
 
   protected function getMercurialResult(ConduitAPIRequest $request) {
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    $path = $drequest->getPath();
+    $paths = $request->getValue('paths');
+    $results = $this->loadCommitsFromCache($paths);
 
-    list($hash) = $repository->execxLocalCommand(
-      'log --template %s --limit 1 --removed --rev %s -- %s',
-      '{node}',
-      hgsprintf('reverse(ancestors(%s))',  $drequest->getCommit()),
-      nonempty(ltrim($path, '/'), '.'));
+    foreach ($paths as $path => $commit) {
+      if (array_key_exists($path, $results)) {
+        continue;
+      }
 
-    return $this->loadDataFromHash($hash);
+      list($hash) = $repository->execxLocalCommand(
+        'log --template %s --limit 1 --removed --rev %s -- %s',
+        '{node}',
+        hgsprintf('reverse(ancestors(%s))',  $commit),
+        nonempty(ltrim($path, '/'), '.'));
+      $results[$path] = trim($hash);
+    }
+
+    return $results;
   }
 
-  private function loadDataFromHash($hash) {
+  private function loadCommitsFromCache(array $map) {
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-      'repositoryID = %d AND commitIdentifier = %s',
-      $repository->getID(),
-      $hash);
+    $path_map = id(new DiffusionPathIDQuery(array_keys($map)))
+      ->loadPathIDs();
 
-    if ($commit) {
-      $commit_data = $commit->loadCommitData();
-    } else {
-      $commit = array();
-      $commit_data = array();
+    $commit_query = id(new DiffusionCommitQuery())
+      ->setViewer($drequest->getUser())
+      ->withRepository($repository)
+      ->withIdentifiers(array_values($map));
+    $commit_query->execute();
+
+    $commit_map = $commit_query->getIdentifierMap();
+    $commit_map = mpull($commit_map, 'getID');
+
+    $graph_cache = new PhabricatorRepositoryGraphCache();
+
+    $results = array();
+    foreach ($map as $path => $commit) {
+      $path_id = idx($path_map, $path);
+      if (!$path_id) {
+        continue;
+      }
+      $commit_id = idx($commit_map, $commit);
+      if (!$commit_id) {
+        continue;
+      }
+
+      $cache_result = $graph_cache->loadLastModifiedCommitID(
+        $commit_id,
+        $path_id);
+
+      if ($cache_result !== false) {
+        $results[$path] = $cache_result;
+      }
     }
 
-    return array($commit, $commit_data);
+    if ($results) {
+      $commits = id(new DiffusionCommitQuery())
+        ->setViewer($drequest->getUser())
+        ->withRepository($repository)
+        ->withIDs($results)
+        ->execute();
+      foreach ($results as $path => $id) {
+        $commit = idx($commits, $id);
+        if ($commit) {
+          $results[$path] = $commit->getCommitIdentifier();
+        } else {
+          unset($results[$path]);
+        }
+      }
+    }
+
+    return $results;
   }
 
 }

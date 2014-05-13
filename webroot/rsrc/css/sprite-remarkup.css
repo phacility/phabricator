@@ -1,0 +1,83 @@
+/**
+ * @provides sprite-remarkup-css
+ * @generated
+ */
+
+.sprite-remarkup {
+  background-image: url(/rsrc/image/sprite-remarkup.png);
+  background-repeat: no-repeat;
+}
+
+@media
+only screen and (min-device-pixel-ratio: 1.5),
+only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+  .sprite-remarkup {
+    background-image: url(/rsrc/image/sprite-remarkup-X2.png);
+    background-size: 60px 60px;
+  }
+}
+
+
+.remarkup-assist- {
+  background-position: 0px 0px;
+}
+
+.remarkup-assist-b {
+  background-position: -15px 0px;
+}
+
+.remarkup-assist-code {
+  background-position: -30px 0px;
+}
+
+.remarkup-assist-fullscreen {
+  background-position: -45px 0px;
+}
+
+.remarkup-control-fullscreen-mode .remarkup-assist-fullscreen {
+  background-position: 0px -15px;
+}
+
+.remarkup-assist-help {
+  background-position: -15px -15px;
+}
+
+.remarkup-assist-i {
+  background-position: -30px -15px;
+}
+
+.remarkup-assist-image {
+  background-position: -45px -15px;
+}
+
+.remarkup-assist-larger {
+  background-position: 0px -30px;
+}
+
+.remarkup-assist-link {
+  background-position: -15px -30px;
+}
+
+.remarkup-assist-meme {
+  background-position: -30px -30px;
+}
+
+.remarkup-assist-ol {
+  background-position: -45px -30px;
+}
+
+.remarkup-assist-table {
+  background-position: 0px -45px;
+}
+
+.remarkup-assist-tag {
+  background-position: -15px -45px;
+}
+
+.remarkup-assist-tt {
+  background-position: -30px -45px;
+}
+
+.remarkup-assist-ul {
+  background-position: -45px -45px;
+}

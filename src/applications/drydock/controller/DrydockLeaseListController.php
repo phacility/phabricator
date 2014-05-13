@@ -1,7 +1,6 @@
 <?php
 
-final class DrydockLeaseListController extends DrydockLeaseController
-  implements PhabricatorApplicationSearchResultsControllerInterface {
+final class DrydockLeaseListController extends DrydockLeaseController {
 
   private $queryKey;
 
@@ -21,14 +20,6 @@ final class DrydockLeaseListController extends DrydockLeaseController
       ->setNavigation($this->buildSideNavView());
 
     return $this->delegateToController($controller);
-  }
-
-  public function renderResultsList(
-    array $leases,
-    PhabricatorSavedQuery $query) {
-    assert_instances_of($leases, 'DrydockLease');
-
-    return $this->buildLeaseListView($leases);
   }
 
 }

@@ -97,12 +97,12 @@ final class PhabricatorSlowvotePollController
 
     $is_closed = $poll->getIsClosed();
     $close_poll_text = $is_closed ? pht('Reopen Poll') : pht('Close Poll');
-    $close_poll_icon = $is_closed ? 'enable' : 'disable';
+    $close_poll_icon = $is_closed ? 'fa-play-circle-o' : 'fa-ban';
 
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Poll'))
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI('edit/'.$poll->getID().'/'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));

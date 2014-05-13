@@ -89,7 +89,7 @@
 }
 
 .device-phone a.phabricator-crumbs-action {
-  padding: 13px 20px 4px 10px;
+  padding: 7px;
   border-left: 1px solid #ccc;
 }
 
@@ -97,16 +97,12 @@
   display: none;
 }
 
-.device-phone a.phabricator-crumbs-action .sprite-icons {
-  margin-left: 5px;
+a.phabricator-crumbs-action .phui-icon-view {
+  margin-right: 5px;
 }
 
-.phabricator-crumbs-action .sprite-icons {
-  width: 14px;
-  height: 14px;
-  left: 4px;
-  top: 9px;
-  position: absolute;
+.device-phone a.phabricator-crumbs-action .phui-icon-view {
+  margin-left: 5px;
 }
 
 .phabricator-crumb-divider {

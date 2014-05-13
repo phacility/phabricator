@@ -60,8 +60,7 @@ final class PhabricatorNotificationStatusController
       ));
 
     $test_icon = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-      ->setSpriteIcon('warning');
+      ->setIconFont('fa-exclamation-triangle');
 
     $test_button = id(new PHUIButtonView())
         ->setTag('a')

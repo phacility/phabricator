@@ -51,43 +51,43 @@ final class DifferentialChangesetDetailView extends AphrontView {
     switch ($extension) {
       case 'psd':
       case 'ai':
-        $icon = 'preview';
+        $icon = 'fa-eye';
         break;
       case 'conf':
-        $icon = 'wrench';
+        $icon = 'fa-wrench';
         break;
       case 'wav':
       case 'mp3':
       case 'aiff':
-        $icon = 'music';
+        $icon = 'fa-music';
         break;
       case 'm4v':
       case 'mov':
-        $icon = 'film';
+        $icon = 'fa-film';
         break;
       case 'sql';
       case 'db':
       case 'csv':
-        $icon = 'data';
+        $icon = 'fa-table';
         break;
       case 'ics':
-        $icon = 'calendar';
+        $icon = 'fa-calendar';
         break;
       case 'zip':
       case 'tar':
       case 'bz':
       case 'tgz':
       case 'gz':
-        $icon = 'zip';
+        $icon = 'fa-archive';
         break;
       case 'png':
       case 'jpg':
       case 'bmp':
       case 'gif':
-        $icon = 'image';
+        $icon = 'fa-picture-o';
         break;
       default:
-        $icon = 'file';
+        $icon = 'fa-file';
         break;
     }
     return $icon;
@@ -128,8 +128,7 @@ final class DifferentialChangesetDetailView extends AphrontView {
     $display_filename = $changeset->getDisplayFilename();
     $display_icon = $this->getFileIcon($display_filename);
     $icon = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-      ->setSpriteIcon($display_icon);
+      ->setIconFont($display_icon);
 
     return javelin_tag(
       'div',

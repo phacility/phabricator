@@ -71,7 +71,7 @@ final class PhabricatorMailingListSearchEngine
       $item->addAttribute($list->getEmail());
       $item->addAction(
         id(new PHUIListItemView())
-          ->setIcon('edit')
+          ->setIcon('fa-pencil')
           ->setHref($this->getApplicationURI('/edit/'.$list->getID().'/')));
 
       $view->addItem($item);

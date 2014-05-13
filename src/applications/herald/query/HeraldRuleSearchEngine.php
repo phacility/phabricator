@@ -184,24 +184,24 @@ final class HeraldRuleSearchEngine
         ->setHref($this->getApplicationURI("rule/{$id}/"));
 
       if ($rule->isPersonalRule()) {
-        $item->addIcon('user', pht('Personal Rule'));
+        $item->addIcon('fa-user', pht('Personal Rule'));
         $item->addByline(
           pht(
             'Authored by %s',
             $handles[$rule->getAuthorPHID()]->renderLink()));
       } else {
-        $item->addIcon('world', pht('Global Rule'));
+        $item->addIcon('fa-globe', pht('Global Rule'));
       }
 
       if ($rule->getIsDisabled()) {
         $item->setDisabled(true);
-        $item->addIcon('disable-grey', pht('Disabled'));
+        $item->addIcon('fa-lock grey', pht('Disabled'));
       }
 
       $item->addAction(
         id(new PHUIListItemView())
           ->setHref($this->getApplicationURI("history/{$id}/"))
-          ->setIcon('transcript')
+          ->setIcon('fa-file-text-o')
           ->setName(pht('Edit Log')));
 
       $content_type_name = idx($content_type_map, $rule->getContentType());

@@ -31,7 +31,7 @@ abstract class PholioController extends PhabricatorController {
       id(new PHUIListItemView())
         ->setName(pht('Create Mock'))
         ->setHref($this->getApplicationURI('new/'))
-        ->setIcon('create'));
+        ->setIcon('fa-plus-square'));
 
     return $crumbs;
   }

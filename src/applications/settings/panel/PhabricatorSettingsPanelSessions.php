@@ -107,8 +107,7 @@ final class PhabricatorSettingsPanelSessions
 
 
     $terminate_icon = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-      ->setSpriteIcon('warning');
+      ->setIconFont('fa-exclamation-triangle');
     $terminate_button = id(new PHUIButtonView())
       ->setText(pht('Terminate All Sessions'))
       ->setHref('/auth/session/terminate/all/')
@@ -123,8 +122,7 @@ final class PhabricatorSettingsPanelSessions
     $hisec = ($viewer->getSession()->getHighSecurityUntil() - time());
     if ($hisec > 0) {
       $hisec_icon = id(new PHUIIconView())
-        ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-        ->setSpriteIcon('lock');
+        ->setIconFont('fa-lock');
       $hisec_button = id(new PHUIButtonView())
         ->setText(pht('Leave High Security'))
         ->setHref('/auth/session/downgrade/')

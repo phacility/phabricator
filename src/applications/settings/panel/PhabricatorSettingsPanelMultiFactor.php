@@ -108,8 +108,7 @@ final class PhabricatorSettingsPanelMultiFactor
       'User Guide: Multi-Factor Authentication');
 
     $help_icon = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-      ->setSpriteIcon('lint-info');
+      ->setIconFont('fa-info-circle');
     $help_button = id(new PHUIButtonView())
       ->setText(pht('Help'))
       ->setHref($help_uri)
@@ -117,8 +116,7 @@ final class PhabricatorSettingsPanelMultiFactor
       ->setIcon($help_icon);
 
     $create_icon = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-      ->setSpriteIcon('new');
+      ->setIconFont('fa-plus');
     $create_button = id(new PHUIButtonView())
       ->setText(pht('Add Authentication Factor'))
       ->setHref($this->getPanelURI('?new=true'))

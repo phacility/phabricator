@@ -144,7 +144,7 @@ abstract class DiffusionView extends AphrontView {
       "D{$id}");
   }
 
-  final protected static function renderName($name) {
+  final public static function renderName($name) {
     $email = new PhutilEmailAddress($name);
     if ($email->getDisplayName() && $email->getDomainName()) {
       Javelin::initBehavior('phabricator-tooltips', array());

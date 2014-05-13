@@ -174,7 +174,7 @@ final class PholioMockViewController extends PholioController {
 
     $actions->addAction(
       id(new PhabricatorActionView())
-      ->setIcon('edit')
+      ->setIcon('fa-pencil')
       ->setName(pht('Edit Mock'))
       ->setHref($this->getApplicationURI('/edit/'.$mock->getID().'/'))
       ->setDisabled(!$can_edit)
@@ -182,7 +182,7 @@ final class PholioMockViewController extends PholioController {
 
     $actions->addAction(
       id(new PhabricatorActionView())
-      ->setIcon('attach')
+      ->setIcon('fa-anchor')
       ->setName(pht('Edit Maniphest Tasks'))
       ->setHref("/search/attach/{$mock->getPHID()}/TASK/edge/")
       ->setDisabled(!$user->isLoggedIn())

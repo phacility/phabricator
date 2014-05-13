@@ -53,15 +53,15 @@ final class PhabricatorAuthListController
         $item->setBarColor('green');
         $item->addAction(
           id(new PHUIListItemView())
-            ->setIcon('delete')
+            ->setIcon('fa-times')
             ->setHref($disable_uri)
             ->addSigil('workflow'));
       } else {
         $item->setBarColor('grey');
-        $item->addIcon('delete-grey', pht('Disabled'));
+        $item->addIcon('fa-times grey', pht('Disabled'));
         $item->addAction(
           id(new PHUIListItemView())
-            ->setIcon('new')
+            ->setIcon('fa-plus')
             ->setHref($enable_uri)
             ->addSigil('workflow'));
       }

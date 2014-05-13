@@ -134,7 +134,7 @@ final class PhabricatorProjectMembersEditController
 
       $item->addAction(
         id(new PHUIListItemView())
-          ->setIcon('delete')
+          ->setIcon('fa-times')
           ->setName(pht('Remove'))
           ->setHref($remove_uri)
           ->setWorkflow(true));

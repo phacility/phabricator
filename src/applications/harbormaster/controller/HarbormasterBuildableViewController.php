@@ -101,7 +101,7 @@ final class HarbormasterBuildableViewController
 
     $list->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('backward')
+        ->setIcon('fa-backward')
         ->setName(pht('Restart All Builds'))
         ->setHref($this->getApplicationURI($restart_uri))
         ->setWorkflow(true)
@@ -109,7 +109,7 @@ final class HarbormasterBuildableViewController
 
     $list->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('stop')
+        ->setIcon('fa-stop')
         ->setName(pht('Stop All Builds'))
         ->setHref($this->getApplicationURI($stop_uri))
         ->setWorkflow(true)
@@ -117,7 +117,7 @@ final class HarbormasterBuildableViewController
 
     $list->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('play')
+        ->setIcon('fa-play')
         ->setName(pht('Resume All Builds'))
         ->setHref($this->getApplicationURI($resume_uri))
         ->setWorkflow(true)
@@ -197,11 +197,11 @@ final class HarbormasterBuildableViewController
       $item->addAttribute(HarbormasterBuild::getBuildStatusName($status));
 
       if ($build->isRestarting()) {
-        $item->addIcon('backward', pht('Restarting'));
+        $item->addIcon('fa-backward', pht('Restarting'));
       } else if ($build->isStopping()) {
-        $item->addIcon('stop', pht('Stopping'));
+        $item->addIcon('fa-stop', pht('Stopping'));
       } else if ($build->isResuming()) {
-        $item->addIcon('play', pht('Resuming'));
+        $item->addIcon('fa-play', pht('Resuming'));
       }
 
       $build_id = $build->getID();
@@ -212,7 +212,7 @@ final class HarbormasterBuildableViewController
 
       $item->addAction(
         id(new PHUIListItemView())
-          ->setIcon('backward')
+          ->setIcon('fa-backward')
           ->setName(pht('Restart'))
           ->setHref($this->getApplicationURI($restart_uri))
           ->setWorkflow(true)
@@ -221,14 +221,14 @@ final class HarbormasterBuildableViewController
       if ($build->canResumeBuild()) {
         $item->addAction(
           id(new PHUIListItemView())
-            ->setIcon('play')
+            ->setIcon('fa-play')
             ->setName(pht('Resume'))
             ->setHref($this->getApplicationURI($resume_uri))
             ->setWorkflow(true));
       } else {
         $item->addAction(
           id(new PHUIListItemView())
-            ->setIcon('stop')
+            ->setIcon('fa-stop')
             ->setName(pht('Stop'))
             ->setHref($this->getApplicationURI($stop_uri))
             ->setWorkflow(true)

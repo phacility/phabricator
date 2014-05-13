@@ -34,7 +34,7 @@
 }
 
 .phui-object-item {
-  background: #ffffff;
+  background: #fff;
   border-style: solid;
   border-color: {$lightgreyborder};
   border-width: 0 0 0 4px;
@@ -155,7 +155,7 @@
   display: block;
   top: 50%;
   margin-top: -7px;
-  left: 5px;
+  left: 3px;
 }
 
 .phui-object-item-actions .phui-list-item-name {
@@ -332,6 +332,7 @@
   top: 2px;
   width: 14px;
   height: 14px;
+  font-size: 13px;
 }
 
 
@@ -450,18 +451,16 @@
   color: #ffffff;
   font-weight: bold;
   margin-right: 3px;
-  padding: 1px 4px 0 22px;
-  height: 19px;
+  padding: 3px 6px 0;
+  height: 17px;
   vertical-align: middle;
   position: relative;
+  font-size: 12px;
+  -webkit-font-smoothing: antialiased;
 }
 
-.phui-object-item-foot-icon .sprite-icons {
-  width: 14px;
-  height: 14px;
-  position: absolute;
-  left: 4px;
-  top: 3px;
+.phui-object-item-foot-icon .phui-icon-view {
+  margin-right: 4px;
 }
 
 

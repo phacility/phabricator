@@ -92,7 +92,7 @@ final class PhabricatorWorkerTaskDetailController
         id(new PhabricatorActionView())
           ->setName(pht('Retry Task'))
           ->setHref($this->getApplicationURI('/task/'.$id.'/retry/'))
-          ->setIcon('undo')
+          ->setIcon('fa-refresh')
           ->setWorkflow(true)
           ->setDisabled(!$can_retry));
     } else {
@@ -100,7 +100,7 @@ final class PhabricatorWorkerTaskDetailController
         id(new PhabricatorActionView())
           ->setName(pht('Cancel Task'))
           ->setHref($this->getApplicationURI('/task/'.$id.'/cancel/'))
-          ->setIcon('delete')
+          ->setIcon('fa-times')
           ->setWorkflow(true));
     }
 
@@ -111,7 +111,7 @@ final class PhabricatorWorkerTaskDetailController
       id(new PhabricatorActionView())
         ->setName(pht('Free Lease'))
         ->setHref($this->getApplicationURI('/task/'.$id.'/release/'))
-        ->setIcon('unlock')
+        ->setIcon('fa-unlock')
         ->setWorkflow(true)
         ->setDisabled(!$can_release));
 

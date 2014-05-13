@@ -31,7 +31,7 @@ abstract class PhabricatorAuthProviderConfigController
       id(new PHUIListItemView())
         ->setName(pht('Add Authentication Provider'))
         ->setHref($this->getApplicationURI('/config/new/'))
-        ->setIcon('create'));
+        ->setIcon('fa-plus-square'));
 
     return $crumbs;
   }
