@@ -293,7 +293,11 @@ final class PassphraseCredentialEditController extends PassphraseController {
           ->addCheckbox(
             'lock',
             1,
-            pht('Lock Permanently'),
+            array(
+              phutil_tag('strong', array(), pht('Lock Permanently:')),
+              ' ',
+              pht('Prevent the secret from being revealed or changed.'),
+            ),
             $v_is_locked)
           ->setDisabled($credential_is_locked));
     }
