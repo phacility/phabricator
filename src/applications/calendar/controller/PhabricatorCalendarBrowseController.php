@@ -3,6 +3,10 @@
 final class PhabricatorCalendarBrowseController
   extends PhabricatorCalendarController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function processRequest() {
     $now     = time();
     $request = $this->getRequest();
