@@ -8,6 +8,8 @@ final class PhabricatorIRCProtocolAdapter
   private $writeBuffer;
   private $readBuffer;
 
+  private $nickIncrement = 0;
+
   public function getServiceType() {
     return 'IRC';
   }
@@ -183,6 +185,12 @@ final class PhabricatorIRCProtocolAdapter
   private function handleIRCProtocol(array $matches) {
     $data = $matches['data'];
     switch ($matches['command']) {
+      case '433': // Nickname already in use
+        // If we receive this error, try appending "-1", "-2", etc. to the nick
+        $this->nickIncrement++;
+        $nick = $this->getConfig('nick', 'phabot').'-'.$this->nickIncrement;
+        $this->write("NICK {$nick}");
+        return true;
       case '422': // Error - no MOTD
       case '376': // End of MOTD
         $nickpass = $this->getConfig('nickpass');
