@@ -168,7 +168,7 @@ final class ConduitAPI_diffusion_diffquery_Method
         $drequest,
         'diffusion.lastmodifiedquery',
         array(
-          'paths' => array($path => $drequest->getCommit()),
+          'paths' => array($path => $drequest->getStableCommit()),
         ));
 
       $this->effectiveCommit = idx($result, $path);
@@ -199,10 +199,10 @@ final class ConduitAPI_diffusion_diffquery_Method
     if (!$effective_commit) {
       return $this->getEmptyResult(1);
     }
-    // TODO: This side effect is kind of sketchy.
-    $drequest->setCommit($effective_commit);
 
-    $raw_query = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest);
+    $raw_query = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest)
+      ->setAnchorCommit($effective_commit);
+
     $raw_diff = $raw_query->loadRawDiff();
     if (!$raw_diff) {
       return $this->getEmptyResult(2);

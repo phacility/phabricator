@@ -70,6 +70,7 @@ final class DiffusionBrowseDirectoryController
       'diffusion.readmequery',
       array(
         'paths' => $results->getPathDicts(),
+        'commit' => $drequest->getStableCommit(),
       ));
     if ($readme) {
       $box = new PHUIBoxView();

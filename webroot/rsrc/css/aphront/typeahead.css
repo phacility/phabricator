@@ -18,6 +18,12 @@ div.jx-typeahead-results {
   margin: -1px 1% 0;
 }
 
+.aphront-form-control-typeahead div.jx-typeahead-results {
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+}
+
 div.jx-typeahead-results a.jx-result {
   color: #333;
   display: block;
@@ -50,4 +56,17 @@ input.jx-typeahead-placeholder {
 
 div.jx-tokenizer-container-focused.jx-typeahead-waiting {
   border-color: {$lightblueborder};
+}
+
+div.jx-typeahead-results a.diffusion-locate-file {
+ padding: 4px 8px;
+ color: {$darkgreytext}
+}
+
+.diffusion-locate-file strong {
+  color: {$blue};
+}
+
+.diffusion-locate-file .phui-icon-view {
+  padding-right: 8px;
 }

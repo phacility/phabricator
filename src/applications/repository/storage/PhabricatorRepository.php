@@ -1191,6 +1191,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return Filesystem::isDescendant($this->getLocalPath(), $default_path);
   }
 
+  public function canUsePathTree() {
+    return !$this->isSVN();
+  }
+
   public function canMirror() {
     if ($this->isGit() || $this->isHg()) {
       return true;

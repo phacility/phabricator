@@ -24,7 +24,7 @@ final class ConduitAPI_diffusion_tagsquery_Method
   protected function getGitResult(ConduitAPIRequest $request) {
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
-    $commit = $drequest->getRawCommit();
+    $commit = $drequest->getSymbolicCommit();
 
     $commit_filter = null;
     if ($commit) {

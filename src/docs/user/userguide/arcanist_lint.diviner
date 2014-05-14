@@ -413,5 +413,7 @@ Continue by:
 
   - integrating and customizing built-in linters and lint bindings with
     @{article:Arcanist User Guide: Customizing Existing Linters}; or
+  - use a linter that hasn't been integrated into Arcanist with
+    @{article:Arcanist User Guide: Script and Regex Linter}; or
   - learning how to add new linters and lint engines with
     @{article:Arcanist User Guide: Customizing Lint, Unit Tests and Workflows}.

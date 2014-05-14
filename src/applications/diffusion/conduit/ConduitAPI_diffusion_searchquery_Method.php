@@ -17,7 +17,7 @@ final class ConduitAPI_diffusion_searchquery_Method
   protected function defineCustomParamTypes() {
     return array(
       'path' => 'required string',
-      'stableCommitName' => 'required string',
+      'commit' => 'optional string',
       'grep' => 'required string',
       'limit' => 'optional int',
       'offset' => 'optional int',
@@ -46,7 +46,6 @@ final class ConduitAPI_diffusion_searchquery_Method
   protected function getGitResult(ConduitAPIRequest $request) {
     $drequest = $this->getDiffusionRequest();
     $path = $drequest->getPath();
-    $stable_commit_name = $request->getValue('stableCommitName');
     $grep = $request->getValue('grep');
     $repository = $drequest->getRepository();
     $limit = $request->getValue('limit');
@@ -57,7 +56,7 @@ final class ConduitAPI_diffusion_searchquery_Method
       // NOTE: --perl-regexp is available only with libpcre compiled in.
       'grep --extended-regexp --null -n --no-color -e %s %s -- %s',
       $grep,
-      $stable_commit_name,
+      $drequest->getStableCommit(),
       $path);
 
     $binary_pattern = '/Binary file [^:]*:(.+) matches/';
@@ -84,7 +83,6 @@ final class ConduitAPI_diffusion_searchquery_Method
   protected function getMercurialResult(ConduitAPIRequest $request) {
     $drequest = $this->getDiffusionRequest();
     $path = $drequest->getPath();
-    $stable_commit_name = $request->getValue('stableCommitName');
     $grep = $request->getValue('grep');
     $repository = $drequest->getRepository();
     $limit = $request->getValue('limit');
@@ -93,7 +91,7 @@ final class ConduitAPI_diffusion_searchquery_Method
     $results = array();
     $future = $repository->getLocalCommandFuture(
       'grep --rev %s --print0 --line-number %s %s',
-      hgsprintf('ancestors(%s)', $stable_commit_name),
+      hgsprintf('ancestors(%s)', $drequest->getStableCommit()),
       $grep,
       $path);
 

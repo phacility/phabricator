@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_diffusion_readmequery_Method
   extends ConduitAPI_diffusion_abstractquery_Method {
 
@@ -19,6 +16,7 @@ final class ConduitAPI_diffusion_readmequery_Method
   protected function defineCustomParamTypes() {
     return array(
       'paths' => 'required array <string>',
+      'commit' => 'optional string',
     );
   }
 
@@ -55,7 +53,7 @@ final class ConduitAPI_diffusion_readmequery_Method
       array(
         'user' => $request->getUser(),
         'repository' => $drequest->getRepository(),
-        'commit' => $drequest->getStableCommitName(),
+        'commit' => $drequest->getStableCommit(),
         'path' => $readme->getFullPath(),
       ));
 
@@ -65,7 +63,7 @@ final class ConduitAPI_diffusion_readmequery_Method
         $readme_request,
         'diffusion.filecontentquery',
         array(
-          'commit' => $drequest->getStableCommitName(),
+          'commit' => $drequest->getStableCommit(),
           'path' => $readme->getFullPath(),
           'needsBlame' => false,
         )));

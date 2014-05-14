@@ -96,7 +96,7 @@ abstract class DiffusionBrowseController extends DiffusionController {
         ->setHref($history_uri)
         ->setIcon('fa-list'));
 
-    $behind_head = $drequest->getRawCommit();
+    $behind_head = $drequest->getSymbolicCommit();
     $head_uri = $drequest->generateURI(
       array(
         'commit' => '',
@@ -141,7 +141,7 @@ abstract class DiffusionBrowseController extends DiffusionController {
       ->setUser($viewer)
       ->setActionList($actions);
 
-    $stable_commit = $drequest->getStableCommitName();
+    $stable_commit = $drequest->getStableCommit();
     $callsign = $drequest->getRepository()->getCallsign();
 
     $view->addProperty(
@@ -157,7 +157,7 @@ abstract class DiffusionBrowseController extends DiffusionController {
         ),
         $drequest->getRepository()->formatCommitName($stable_commit)));
 
-    if ($drequest->getCommitType() == 'tag') {
+    if ($drequest->getSymbolicType() == 'tag') {
       $symbolic = $drequest->getSymbolicCommit();
       $view->addProperty(pht('Tag'), $symbolic);
 

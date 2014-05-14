@@ -1,12 +1,13 @@
 <?php
 
-/**
- * @group diffusion
- */
 final class DiffusionSvnRequest extends DiffusionRequest {
 
   protected function getSupportsBranches() {
     return false;
+  }
+
+  protected function isStableCommit($symbol) {
+    return preg_match('/^[1-9]\d*\z/', $symbol);
   }
 
   protected function didInitialize() {
@@ -20,14 +21,6 @@ final class DiffusionSvnRequest extends DiffusionRequest {
 
   protected function getArcanistBranch() {
     return 'svn';
-  }
-
-  public function getCommit() {
-    if ($this->commit) {
-      return $this->commit;
-    }
-
-    return $this->getStableCommitName();
   }
 
 }

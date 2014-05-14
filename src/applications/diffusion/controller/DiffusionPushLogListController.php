@@ -1,7 +1,6 @@
 <?php
 
-final class DiffusionPushLogListController extends DiffusionPushLogController
-  implements PhabricatorApplicationSearchResultsControllerInterface {
+final class DiffusionPushLogListController extends DiffusionPushLogController {
 
   private $queryKey;
 
@@ -21,19 +20,6 @@ final class DiffusionPushLogListController extends DiffusionPushLogController
       ->setNavigation($this->buildSideNavView());
 
     return $this->delegateToController($controller);
-  }
-
-  public function renderResultsList(
-    array $logs,
-    PhabricatorSavedQuery $query) {
-
-    $table = $this->renderPushLogTable($logs);
-
-    $box = id(new PHUIBoxView())
-      ->addMargin(PHUI::MARGIN_LARGE)
-      ->appendChild($table);
-
-    return $box;
   }
 
   public function buildSideNavView($for_app = false) {

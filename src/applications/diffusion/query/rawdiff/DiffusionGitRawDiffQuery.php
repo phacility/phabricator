@@ -6,7 +6,7 @@ final class DiffusionGitRawDiffQuery extends DiffusionRawDiffQuery {
     $drequest = $this->getRequest();
     $repository = $drequest->getRepository();
 
-    $commit = $drequest->getCommit();
+    $commit = $this->getAnchorCommit();
 
     $options = array(
       '-M',

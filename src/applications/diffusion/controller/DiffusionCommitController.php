@@ -21,6 +21,7 @@ final class DiffusionCommitController extends DiffusionController {
 
   public function processRequest() {
     $drequest = $this->getDiffusionRequest();
+
     $request = $this->getRequest();
     $user = $request->getUser();
 
@@ -32,7 +33,6 @@ final class DiffusionCommitController extends DiffusionController {
     $callsign = $repository->getCallsign();
 
     $content = array();
-
     $commit = id(new DiffusionCommitQuery())
       ->setViewer($request->getUser())
       ->withRepository($repository)

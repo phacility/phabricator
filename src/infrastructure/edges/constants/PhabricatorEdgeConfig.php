@@ -286,6 +286,7 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_DREV_HAS_COMMIT:
         return '%s added %d commit(s): %s.';
       case self::TYPE_TASK_DEPENDS_ON_TASK:
+      case self::TYPE_DREV_DEPENDS_ON_DREV:
         return '%s added %d dependencie(s): %s.';
       case self::TYPE_TASK_DEPENDED_ON_BY_TASK:
         return '%s added %d dependent task(s): %s.';
@@ -293,7 +294,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_DREV_HAS_RELATED_TASK:
       case self::TYPE_MOCK_HAS_TASK:
         return '%s added %d task(s): %s.';
-      case self::TYPE_DREV_DEPENDS_ON_DREV:
       case self::TYPE_DREV_DEPENDED_ON_BY_DREV:
       case self::TYPE_TASK_HAS_RELATED_DREV:
       case self::TYPE_COMMIT_HAS_DREV:
