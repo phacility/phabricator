@@ -737,19 +737,23 @@ final class DiffusionCommitHookEngine extends Phobject {
 
       if (!$new_heads) {
         if ($old_heads) {
+          // TODO: This comment is wrong, and branches can be deleted with
+          // --close-branch. Fix it soon: see T5050.
           // It looks like this push deletes a branch, but that isn't possible
           // in Mercurial, so something is going wrong here. Bail out.
           throw new Exception(
             pht(
               'Mercurial repository has no new head for branch "%s" after '.
-              'push. This is unexpected; rejecting change.'));
+              'push. This is unexpected; rejecting change.',
+              $ref));
         } else {
           // Obviously, this should never be possible either, as it makes
           // no sense. Explode.
           throw new Exception(
             pht(
               'Mercurial repository has no new or old heads for branch "%s" '.
-              'after push. This makes no sense; rejecting change.'));
+              'after push. This makes no sense; rejecting change.',
+              $ref));
         }
       }
 
