@@ -56,6 +56,10 @@ return array(
   // Docs say this is "pretty silly (but sort of awesome)". Good enough for me.
   'remarkup.enable-embedded-youtube' => true,
 
+  // This enables beta applications on the application dashboard and also
+  // Pholio, a tool for critiquing & discussing lolcats and other pixels.
+  'phabricator.show-beta-applications' => true,
+
   // This apparently avoids some cookie-based attacks.
   'security.alternate-file-domain'  => 'http://phabricator-files.khanacademy.org/',
 
