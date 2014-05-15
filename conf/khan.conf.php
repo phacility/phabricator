@@ -1,5 +1,13 @@
 <?php
 
+// Sure, i mean, you *could* update this file, but wouldn't you rather update
+// a db via a shiny web interface instead? Who's to say what's right or wrong
+// anymore? Does this file even do anything anymore? Does anybody even read
+// these comments? Are you still there? Where is everyone? It's getting so
+// cold here... Won't you join me by the fire? Hello? hello? daisy... daisyyy
+//
+// http://phabricator.khanacademy.org/config/
+
 return array(
 
   // This will be the base domain for your install, and must be configured.
