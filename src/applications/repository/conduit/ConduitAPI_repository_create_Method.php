@@ -19,9 +19,11 @@ final class ConduitAPI_repository_create_Method
   }
 
   public function defineParamTypes() {
+    $vcs_const = $this->formatStringConstants(array('git', 'hg', 'svn'));
+
     return array(
       'name'                => 'required string',
-      'vcs'                 => 'required enum<git, hg, svn>',
+      'vcs'                 => 'required '.$vcs_const,
       'callsign'            => 'required string',
       'description'         => 'optional string',
       'encoding'            => 'optional string',

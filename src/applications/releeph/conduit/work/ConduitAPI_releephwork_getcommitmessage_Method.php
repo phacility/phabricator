@@ -14,9 +14,11 @@ final class ConduitAPI_releephwork_getcommitmessage_Method
   }
 
   public function defineParamTypes() {
+    $action_const = $this->formatStringConstants(array('pick', 'revert'));
+
     return array(
       'requestPHID' => 'required string',
-      'action'      => 'required enum<"pick", "revert">',
+      'action'      => 'required '.$action_const,
     );
   }
 

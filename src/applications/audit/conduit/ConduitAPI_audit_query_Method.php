@@ -10,11 +10,16 @@ final class ConduitAPI_audit_query_Method extends ConduitAPI_audit_Method {
   }
 
   public function defineParamTypes() {
+    $statuses = array(
+      'status-any',
+      'status-open',
+    );
+    $status_const = $this->formatStringConstants($statuses);
+
     return array(
       'auditorPHIDs'  => 'optional list<phid>',
       'commitPHIDs'   => 'optional list<phid>',
-      'status'        => 'optional enum<"status-any", "status-open"> '.
-                         '(default = "status-any")',
+      'status'        => 'optional '.$status_const.' (default = "status-any")',
       'offset'        => 'optional int',
       'limit'         => 'optional int (default = 100)',
     );

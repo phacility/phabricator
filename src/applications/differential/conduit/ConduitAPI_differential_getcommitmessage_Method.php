@@ -8,10 +8,12 @@ final class ConduitAPI_differential_getcommitmessage_Method
   }
 
   public function defineParamTypes() {
+    $edit_types = array('edit', 'create');
+
     return array(
       'revision_id' => 'optional revision_id',
       'fields' => 'optional dict<string, wild>',
-      'edit' => 'optional enum<"edit", "create">',
+      'edit' => 'optional '.$this->formatStringConstants($edit_types),
     );
   }
 

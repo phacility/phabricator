@@ -8,21 +8,37 @@ final class ConduitAPI_differential_creatediff_Method
   }
 
   public function defineParamTypes() {
+
+    $vcs_const = $this->formatStringConstants(
+      array(
+        'svn',
+        'git',
+        'hg',
+      ));
+
+    $status_const = $this->formatStringConstants(
+      array(
+        'none',
+        'skip',
+        'okay',
+        'warn',
+        'fail',
+        'postponed',
+      ));
+
     return array(
       'changes'                   => 'required list<dict>',
       'sourceMachine'             => 'required string',
       'sourcePath'                => 'required string',
       'branch'                    => 'required string',
       'bookmark'                  => 'optional string',
-      'sourceControlSystem'       => 'required enum<svn, git, hg>',
+      'sourceControlSystem'       => 'required '.$vcs_const,
       'sourceControlPath'         => 'required string',
       'sourceControlBaseRevision' => 'required string',
       'creationMethod'            => 'optional string',
       'arcanistProject'           => 'optional string',
-      'lintStatus'                =>
-        'required enum<none, skip, okay, warn, fail, postponed>',
-      'unitStatus'                =>
-        'required enum<none, skip, okay, warn, fail, postponed>',
+      'lintStatus'                => 'required '.$status_const,
+      'unitStatus'                => 'required '.$status_const,
       'repositoryPHID'            => 'optional phid',
 
       'parentRevisionID'          => 'deprecated',

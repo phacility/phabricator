@@ -23,10 +23,8 @@ final class ConduitAPI_differential_find_Method
       'phids',
     );
 
-    $types = implode(', ', $types);
-
     return array(
-      'query' => 'required enum<'.$types.'>',
+      'query' => 'required '.$this->formatStringConstants($types),
       'guids' => 'required nonempty list<guids>',
     );
   }
