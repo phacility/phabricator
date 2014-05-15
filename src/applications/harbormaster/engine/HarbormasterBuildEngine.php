@@ -408,8 +408,10 @@ final class HarbormasterBuildEngine extends Phobject {
     // can look at the results themselves, and other users generally don't
     // care about the outcome.
 
-    if ($did_update && !$buildable->getIsManualBuildable()) {
-
+    $should_publish = $did_update &&
+                      $new_status != HarbormasterBuildable::STATUS_BUILDING &&
+                      !$buildable->getIsManualBuildable();
+    if ($should_publish) {
       $object = id(new PhabricatorObjectQuery())
         ->setViewer($viewer)
         ->withPHIDs(array($buildable->getBuildablePHID()))

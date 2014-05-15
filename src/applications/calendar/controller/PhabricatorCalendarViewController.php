@@ -3,6 +3,10 @@
 final class PhabricatorCalendarViewController
   extends PhabricatorCalendarController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function processRequest() {
     $user = $this->getRequest()->getUser();
 
@@ -89,6 +93,19 @@ final class PhabricatorCalendarViewController
       $view = id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
         ->setTitle(pht('Successfully deleted your status.'));
+    } else if (!$request->getUser()->isLoggedIn()) {
+      $login_uri = id(new PhutilURI('/auth/start/'))
+        ->setQueryParam('next', '/calendar/');
+      $view = id(new AphrontErrorView())
+        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+        ->setTitle(
+          pht(
+            'You are not logged in. %s to see your calendar events.',
+            phutil_tag(
+              'a',
+              array(
+                'href' => $login_uri),
+              pht('Log in'))));
     }
 
     return $view;

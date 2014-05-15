@@ -5,6 +5,10 @@ final class PhabricatorCalendarEventListController
 
   private $queryKey;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->queryKey = idx($data, 'queryKey');
   }

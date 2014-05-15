@@ -46,6 +46,15 @@ final class HarbormasterBuildableViewController
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header);
 
+    $xactions = id(new HarbormasterBuildableTransactionQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($buildable->getPHID()))
+      ->execute();
+    $timeline = id(new PhabricatorApplicationTransactionView())
+      ->setUser($viewer)
+      ->setObjectPHID($buildable->getPHID())
+      ->setTransactions($xactions);
+
     $actions = $this->buildActionList($buildable);
     $this->buildPropertyLists($box, $buildable, $actions);
 
@@ -57,6 +66,7 @@ final class HarbormasterBuildableViewController
         $crumbs,
         $box,
         $build_list,
+        $timeline,
       ),
       array(
         'title' => $title,

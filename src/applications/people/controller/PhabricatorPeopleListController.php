@@ -89,13 +89,13 @@ final class PhabricatorPeopleListController extends PhabricatorPeopleController
         if ($is_approval) {
           $item->addAction(
             id(new PHUIListItemView())
-              ->setIcon('disable')
+              ->setIcon('fa-ban')
               ->setName(pht('Disable'))
               ->setWorkflow(true)
               ->setHref($this->getApplicationURI('disapprove/'.$user_id.'/')));
           $item->addAction(
             id(new PHUIListItemView())
-              ->setIcon('like')
+              ->setIcon('fa-thumbs-o-up')
               ->setName(pht('Approve'))
               ->setWorkflow(true)
               ->setHref($this->getApplicationURI('approve/'.$user_id.'/')));

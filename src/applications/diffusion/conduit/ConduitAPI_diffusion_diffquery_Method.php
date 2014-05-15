@@ -56,7 +56,7 @@ final class ConduitAPI_diffusion_diffquery_Method
     }
 
     $drequest = clone $drequest;
-    $drequest->setCommit($effective_commit);
+    $drequest->updateSymbolicCommit($effective_commit);
 
     $path_change_query = DiffusionPathChangeQuery::newFromDiffusionRequest(
       $drequest);

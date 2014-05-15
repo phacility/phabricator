@@ -10,9 +10,11 @@ final class ConduitAPI_harbormaster_sendmessage_Method
   }
 
   public function defineParamTypes() {
+    $type_const = $this->formatStringConstants(array('pass', 'fail'));
+
     return array(
-      'buildTargetPHID' => 'phid',
-      'type'            => 'enum<pass, fail>',
+      'buildTargetPHID' => 'required phid',
+      'type'            => 'required '.$type_const,
     );
   }
 

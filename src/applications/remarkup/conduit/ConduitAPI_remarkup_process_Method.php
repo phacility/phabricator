@@ -23,10 +23,10 @@ final class ConduitAPI_remarkup_process_Method extends ConduitAPIMethod {
 
   public function defineParamTypes() {
     $available_contexts = array_keys($this->getEngineContexts());
-    $available_contexts = implode(', ', $available_contexts);
+    $available_const = $this->formatStringConstants($available_contexts);
 
     return array(
-      'context' => 'required enum<'.$available_contexts.'>',
+      'context' => 'required '.$available_const,
       'contents' => 'required list<string>',
     );
   }

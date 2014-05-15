@@ -19,10 +19,12 @@ final class ConduitAPI_project_query_Method extends ConduitAPI_project_Method {
       PhabricatorProjectQuery::STATUS_ARCHIVED,
     );
 
+    $status_const = $this->formatStringConstants($statuses);
+
     return array(
       'ids'               => 'optional list<int>',
       'phids'             => 'optional list<phid>',
-      'status'            => 'optional enum<'.implode(', ', $statuses).'>',
+      'status'            => 'optional '.$status_const,
 
       'members'           => 'optional list<phid>',
 

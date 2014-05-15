@@ -165,6 +165,14 @@ abstract class ConduitAPIMethod
     }
   }
 
+  protected function formatStringConstants($constants) {
+    foreach ($constants as $key => $value) {
+      $constants[$key] = '"'.$value.'"';
+    }
+    $constants = implode(', ', $constants);
+    return 'string-constant<'.$constants.'>';
+  }
+
 
 /* -(  Paging Results  )----------------------------------------------------- */
 
@@ -260,5 +268,6 @@ abstract class ConduitAPIMethod
   public function describeAutomaticCapability($capability) {
     return null;
   }
+
 
 }

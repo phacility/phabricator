@@ -9,7 +9,7 @@ final class ConduitAPI_differential_query_Method
 
   public function defineParamTypes() {
     $hash_types = ArcanistDifferentialRevisionHash::getTypes();
-    $hash_types = implode(', ', $hash_types);
+    $hash_const = $this->formatStringConstants($hash_types);
 
     $status_types = array(
       DifferentialRevisionQuery::STATUS_ANY,
@@ -17,23 +17,22 @@ final class ConduitAPI_differential_query_Method
       DifferentialRevisionQuery::STATUS_ACCEPTED,
       DifferentialRevisionQuery::STATUS_CLOSED,
     );
-    $status_types = implode(', ', $status_types);
+    $status_const = $this->formatStringConstants($status_types);
 
     $order_types = array(
       DifferentialRevisionQuery::ORDER_MODIFIED,
       DifferentialRevisionQuery::ORDER_CREATED,
     );
-    $order_types = implode(', ', $order_types);
+    $order_const = $this->formatStringConstants($order_types);
 
     return array(
       'authors'           => 'optional list<phid>',
       'ccs'               => 'optional list<phid>',
       'reviewers'         => 'optional list<phid>',
       'paths'             => 'optional list<pair<callsign, path>>',
-      'commitHashes'      => 'optional list<pair<enum<'.
-                             $hash_types.'>, string>>',
-      'status'            => 'optional enum<'.$status_types.'>',
-      'order'             => 'optional enum<'.$order_types.'>',
+      'commitHashes'      => 'optional list<pair<'.$hash_const.', string>>',
+      'status'            => 'optional '.$status_const,
+      'order'             => 'optional '.$order_const,
       'limit'             => 'optional uint',
       'offset'            => 'optional uint',
       'ids'               => 'optional list<uint>',

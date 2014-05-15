@@ -103,11 +103,21 @@ final class HarbormasterBuildViewController
       $targets[] = $this->buildLog($build, $build_target);
     }
 
+    $xactions = id(new HarbormasterBuildTransactionQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($build->getPHID()))
+      ->execute();
+    $timeline = id(new PhabricatorApplicationTransactionView())
+      ->setUser($viewer)
+      ->setObjectPHID($build->getPHID())
+      ->setTransactions($xactions);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $box,
-        $targets
+        $targets,
+        $timeline,
       ),
       array(
         'title' => $title,

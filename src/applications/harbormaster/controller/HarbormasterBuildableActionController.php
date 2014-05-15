@@ -56,18 +56,29 @@ final class HarbormasterBuildableActionController
 
     $return_uri = $buildable->getMonogram();
     if ($request->isDialogFormPost() && $issuable) {
-      foreach ($issuable as $build) {
-        id(new HarbormasterBuildCommand())
-          ->setAuthorPHID($viewer->getPHID())
-          ->setTargetPHID($build->getPHID())
-          ->setCommand($command)
-          ->save();
+      $editor = id(new HarbormasterBuildableTransactionEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true);
 
-        PhabricatorWorker::scheduleTask(
-          'HarbormasterBuildWorker',
-          array(
-            'buildID' => $build->getID()
-          ));
+      $xaction = id(new HarbormasterBuildableTransaction())
+        ->setTransactionType(HarbormasterBuildableTransaction::TYPE_COMMAND)
+        ->setNewValue($command);
+
+      $editor->applyTransactions($buildable, array($xaction));
+
+      $build_editor = id(new HarbormasterBuildTransactionEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true);
+
+      foreach ($issuable as $build) {
+        $xaction = id(new HarbormasterBuildTransaction())
+          ->setTransactionType(HarbormasterBuildTransaction::TYPE_COMMAND)
+          ->setNewValue($command);
+        $build_editor->applyTransactions($build, array($xaction));
       }
 
       return id(new AphrontRedirectResponse())->setURI($return_uri);

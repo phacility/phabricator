@@ -27,14 +27,14 @@ class ConduitAPI_maniphest_query_Method
       ManiphestTaskQuery::STATUS_SPITE,
       ManiphestTaskQuery::STATUS_DUPLICATE,
     );
-    $statuses = implode(', ', $statuses);
+    $status_const = $this->formatStringConstants($statuses);
 
     $orders = array(
       ManiphestTaskQuery::ORDER_PRIORITY,
       ManiphestTaskQuery::ORDER_CREATED,
       ManiphestTaskQuery::ORDER_MODIFIED,
     );
-    $orders = implode(', ', $orders);
+    $order_const = $this->formatStringConstants($orders);
 
     return array(
       'ids'               => 'optional list<uint>',
@@ -45,8 +45,8 @@ class ConduitAPI_maniphest_query_Method
       'ccPHIDs'           => 'optional list<phid>',
       'fullText'          => 'optional string',
 
-      'status'            => 'optional enum<'.$statuses.'>',
-      'order'             => 'optional enum<'.$orders.'>',
+      'status'            => 'optional '.$status_const,
+      'order'             => 'optional '.$order_const,
 
       'limit'             => 'optional int',
       'offset'            => 'optional int',

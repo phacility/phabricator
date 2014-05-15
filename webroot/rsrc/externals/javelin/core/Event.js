@@ -158,7 +158,12 @@ JX.install('Event', {
       }
 
       if (('button' in r) && r.button) {
-        return false;
+        if ('which' in r) {
+          return false;
+        // IE won't have which and has left click == 1 here
+        } else if (r.button != 1) {
+          return false;
+        }
       }
 
       return true;

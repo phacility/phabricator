@@ -38,7 +38,9 @@ final class PhabricatorMainMenuView extends AphrontView {
 
     if ($user->isLoggedIn() && $user->isUserActivated()) {
       list($menu, $dropdowns, $aural) = $this->renderNotificationMenu();
-      $alerts[] = $menu;
+      if (array_filter($menu)) {
+        $alerts[] = $menu;
+      }
       $menus = array_merge($menus, $dropdowns);
       $app_button = $this->renderApplicationMenuButton($header_id);
       $search_button = $this->renderSearchMenuButton($header_id);
@@ -281,7 +283,9 @@ final class PhabricatorMainMenuView extends AphrontView {
     $message_tag = '';
     $message_notification_dropdown = '';
     $conpherence = 'PhabricatorApplicationConpherence';
-    if (PhabricatorApplication::isClassInstalled($conpherence)) {
+    if (PhabricatorApplication::isClassInstalledForViewer(
+      $conpherence,
+      $user)) {
       $message_id = celerity_generate_unique_node_id();
       $message_count_id = celerity_generate_unique_node_id();
       $message_dropdown_id = celerity_generate_unique_node_id();
@@ -362,77 +366,84 @@ final class PhabricatorMainMenuView extends AphrontView {
         '');
     }
 
-    $count_id = celerity_generate_unique_node_id();
-    $dropdown_id = celerity_generate_unique_node_id();
-    $bubble_id = celerity_generate_unique_node_id();
+    $bubble_tag = '';
+    $notification_dropdown = '';
+    $notification_app = 'PhabricatorApplicationNotifications';
+    if (PhabricatorApplication::isClassInstalledForViewer(
+      $notification_app,
+      $user)) {
+      $count_id = celerity_generate_unique_node_id();
+      $dropdown_id = celerity_generate_unique_node_id();
+      $bubble_id = celerity_generate_unique_node_id();
 
-    $count_number = id(new PhabricatorFeedStoryNotification())
-      ->countUnread($user);
+      $count_number = id(new PhabricatorFeedStoryNotification())
+        ->countUnread($user);
 
-    if ($count_number) {
-      $aural[] = phutil_tag(
+      if ($count_number) {
+        $aural[] = phutil_tag(
+          'a',
+          array(
+            'href' => '/notification/',
+          ),
+          pht(
+            '%s unread notifications.',
+            new PhutilNumber($count_number)));
+      } else {
+        $aural[] = pht('No notifications.');
+      }
+
+      if ($count_number > 999) {
+        $count_number = "\xE2\x88\x9E";
+      }
+
+      $count_tag = phutil_tag(
+        'span',
+        array(
+          'id'    => $count_id,
+          'class' => 'phabricator-main-menu-alert-count'
+        ),
+        $count_number);
+
+      $icon_tag = phutil_tag(
+        'span',
+        array(
+          'class' => 'sprite-menu phabricator-main-menu-alert-icon',
+        ),
+        '');
+
+      if ($count_number) {
+        $container_classes[] = 'alert-unread';
+      }
+
+      $bubble_tag = phutil_tag(
         'a',
         array(
-          'href' => '/notification/',
+          'href'  => '/notification/',
+          'class' => implode(' ', $container_classes),
+          'id'    => $bubble_id,
         ),
-        pht(
-          '%s unread notifications.',
-          new PhutilNumber($count_number)));
-    } else {
-      $aural[] = pht('No notifications.');
+        array($icon_tag, $count_tag));
+
+      Javelin::initBehavior(
+        'aphlict-dropdown',
+        array(
+          'bubbleID'    => $bubble_id,
+          'countID'     => $count_id,
+          'dropdownID'  => $dropdown_id,
+          'loadingText' => pht('Loading...'),
+          'uri'         => '/notification/panel/',
+        ));
+
+      $notification_dropdown = javelin_tag(
+        'div',
+        array(
+          'id'    => $dropdown_id,
+          'class' => 'phabricator-notification-menu',
+          'sigil' => 'phabricator-notification-menu',
+          'style' => 'display: none;',
+        ),
+        '');
     }
-
-    if ($count_number > 999) {
-      $count_number = "\xE2\x88\x9E";
-    }
-
-    $count_tag = phutil_tag(
-      'span',
-      array(
-        'id'    => $count_id,
-        'class' => 'phabricator-main-menu-alert-count'
-      ),
-      $count_number);
-
-    $icon_tag = phutil_tag(
-      'span',
-      array(
-        'class' => 'sprite-menu phabricator-main-menu-alert-icon',
-      ),
-      '');
-
-    if ($count_number) {
-      $container_classes[] = 'alert-unread';
-    }
-
-    $bubble_tag = phutil_tag(
-      'a',
-      array(
-        'href'  => '/notification/',
-        'class' => implode(' ', $container_classes),
-        'id'    => $bubble_id,
-      ),
-      array($icon_tag, $count_tag));
-
-    Javelin::initBehavior(
-      'aphlict-dropdown',
-      array(
-        'bubbleID'    => $bubble_id,
-        'countID'     => $count_id,
-        'dropdownID'  => $dropdown_id,
-        'loadingText' => pht('Loading...'),
-        'uri'         => '/notification/panel/',
-      ));
-
-    $notification_dropdown = javelin_tag(
-      'div',
-      array(
-        'id'    => $dropdown_id,
-        'class' => 'phabricator-notification-menu',
-        'sigil' => 'phabricator-notification-menu',
-        'style' => 'display: none;',
-      ),
-      '');
 
     $dropdowns = array(
       $notification_dropdown,
