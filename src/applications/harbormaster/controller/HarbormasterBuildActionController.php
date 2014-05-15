@@ -55,22 +55,17 @@ final class HarbormasterBuildActionController
     }
 
     if ($request->isDialogFormPost() && $can_issue) {
+      $editor = id(new HarbormasterBuildTransactionEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true);
 
-      // Issue the new build command.
-      id(new HarbormasterBuildCommand())
-        ->setAuthorPHID($viewer->getPHID())
-        ->setTargetPHID($build->getPHID())
-        ->setCommand($command)
-        ->save();
+      $xaction = id(new HarbormasterBuildTransaction())
+        ->setTransactionType(HarbormasterBuildTransaction::TYPE_COMMAND)
+        ->setNewValue($command);
 
-      // Schedule a build update. We may already have stuff in queue (in which
-      // case this will just no-op), but we might also be dealing with a
-      // stopped build, which won't restart unless we deal with this.
-      PhabricatorWorker::scheduleTask(
-        'HarbormasterBuildWorker',
-        array(
-          'buildID' => $build->getID()
-        ));
+      $editor->applyTransactions($build, array($xaction));
 
       return id(new AphrontRedirectResponse())->setURI($return_uri);
     }
