@@ -12,6 +12,7 @@ final class PhabricatorAuthProviderConfig extends PhabricatorAuthDAO
   protected $shouldAllowRegistration  = 0;
   protected $shouldAllowLink          = 0;
   protected $shouldAllowUnlink        = 0;
+  protected $shouldTrustEmails        = 0;
 
   protected $properties = array();
 

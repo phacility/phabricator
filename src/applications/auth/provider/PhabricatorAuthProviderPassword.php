@@ -350,4 +350,7 @@ final class PhabricatorAuthProviderPassword
     return false;
   }
 
+  public function shouldAllowEmailTrustConfiguration() {
+    return false;
+  }
 }

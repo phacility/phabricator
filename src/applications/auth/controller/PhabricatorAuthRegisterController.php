@@ -249,6 +249,11 @@ final class PhabricatorAuthRegisterController
               ($value_email === $default_email);
           }
 
+          if ($provider->shouldTrustEmails() &&
+              $value_email === $default_email) {
+            $verify_email = true;
+          }
+
           $email_obj = id(new PhabricatorUserEmail())
             ->setAddress($value_email)
             ->setIsVerified((int)$verify_email);
