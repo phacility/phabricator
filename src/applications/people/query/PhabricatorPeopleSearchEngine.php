@@ -3,6 +3,10 @@
 final class PhabricatorPeopleSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getApplicationClassName() {
+    return 'PhabricatorApplicationPeople';
+  }
+
   public function getCustomFieldObject() {
     return new PhabricatorUser();
   }
@@ -28,6 +32,20 @@ final class PhabricatorPeopleSearchEngine
     $query = id(new PhabricatorPeopleQuery())
       ->needPrimaryEmail(true)
       ->needProfileImage(true);
+
+    $viewer = $this->requireViewer();
+
+    // If the viewer can't browse the user directory, restrict the query to
+    // just the user's own profile. This is a little bit silly, but serves to
+    // restrict users from creating a dashboard panel which essentially just
+    // contains a user directory anyway.
+    $can_browse = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $this->getApplication(),
+      PeopleCapabilityBrowseUserDirectory::CAPABILITY);
+    if (!$can_browse) {
+      $query->withPHIDs(array($viewer->getPHID()));
+    }
 
     $usernames = $saved->getParameter('usernames', array());
     if ($usernames) {
@@ -168,6 +186,81 @@ final class PhabricatorPeopleSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function renderResultList(
+    array $users,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+
+    assert_instances_of($users, 'PhabricatorUser');
+
+    $request = $this->getRequest();
+    $viewer = $this->requireViewer();
+
+    $list = new PHUIObjectItemListView();
+
+    $is_approval = ($query->getQueryKey() == 'approval');
+
+    foreach ($users as $user) {
+      $primary_email = $user->loadPrimaryEmail();
+      if ($primary_email && $primary_email->getIsVerified()) {
+        $email = pht('Verified');
+      } else {
+        $email = pht('Unverified');
+      }
+
+      $item = new PHUIObjectItemView();
+      $item->setHeader($user->getFullName())
+        ->setHref('/p/'.$user->getUsername().'/')
+        ->addAttribute(phabricator_datetime($user->getDateCreated(), $viewer))
+        ->addAttribute($email)
+        ->setImageURI($user->getProfileImageURI());
+
+      if ($is_approval && $primary_email) {
+        $item->addAttribute($primary_email->getAddress());
+      }
+
+      if ($user->getIsDisabled()) {
+        $item->addIcon('fa-ban', pht('Disabled'));
+      }
+
+      if (!$is_approval) {
+        if (!$user->getIsApproved()) {
+          $item->addIcon('fa-clock-o', pht('Needs Approval'));
+        }
+      }
+
+      if ($user->getIsAdmin()) {
+        $item->addIcon('fa-star', pht('Admin'));
+      }
+
+      if ($user->getIsSystemAgent()) {
+        $item->addIcon('fa-desktop', pht('Bot/Script'));
+      }
+
+      if ($viewer->getIsAdmin()) {
+        $user_id = $user->getID();
+        if ($is_approval) {
+          $item->addAction(
+            id(new PHUIListItemView())
+              ->setIcon('fa-ban')
+              ->setName(pht('Disable'))
+              ->setWorkflow(true)
+              ->setHref($this->getApplicationURI('disapprove/'.$user_id.'/')));
+          $item->addAction(
+            id(new PHUIListItemView())
+              ->setIcon('fa-thumbs-o-up')
+              ->setName(pht('Approve'))
+              ->setWorkflow(true)
+              ->setHref($this->getApplicationURI('approve/'.$user_id.'/')));
+        }
+      }
+
+      $list->addItem($item);
+    }
+
+    return $list;
   }
 
 }
