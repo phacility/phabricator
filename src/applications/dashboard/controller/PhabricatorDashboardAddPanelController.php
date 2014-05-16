@@ -26,7 +26,14 @@ final class PhabricatorDashboardAddPanelController
       return new Aphront404Response();
     }
 
-    $dashboard_uri = $this->getApplicationURI('view/'.$dashboard->getID().'/');
+    if ($request->getStr('src', 'edit') == 'edit') {
+      $redirect_uri = $this->getApplicationURI(
+        'view/'.$dashboard->getID().'/');
+    } else {
+      $redirect_uri = $this->getApplicationURI(
+        'arrange/'.$dashboard->getID().'/');
+    }
+    $layout_config = $dashboard->getLayoutConfigObject();
 
     $v_panel = $request->getStr('panel');
     $e_panel = true;
@@ -61,6 +68,13 @@ final class PhabricatorDashboardAddPanelController
               ),
             ));
 
+        if ($layout_config->isMultiColumnLayout()) {
+          $layout_config->setPanelLocation(
+            $request->getInt('column'),
+            $panel->getPHID());
+          $dashboard->setLayoutConfigFromObject($layout_config);
+        }
+
         $editor = id(new PhabricatorDashboardTransactionEditor())
           ->setActor($viewer)
           ->setContentSourceFromRequest($request)
@@ -68,12 +82,13 @@ final class PhabricatorDashboardAddPanelController
           ->setContinueOnNoEffect(true)
           ->applyTransactions($dashboard, $xactions);
 
-        return id(new AphrontRedirectResponse())->setURI($dashboard_uri);
+        return id(new AphrontRedirectResponse())->setURI($redirect_uri);
       }
     }
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
+      ->addHiddenInput('src', $request->getStr('src', 'edit'))
       ->appendRemarkupInstructions(
         pht('Enter a panel monogram like `W123`.'))
       ->appendChild(
@@ -83,11 +98,23 @@ final class PhabricatorDashboardAddPanelController
           ->setValue($v_panel)
           ->setError($e_panel));
 
+    if ($layout_config->isMultiColumnLayout()) {
+      $form
+        ->appendRemarkupInstructions(
+          pht('Choose which column the panel should reside in.'))
+        ->appendChild(
+          id(new AphrontFormSelectControl())
+          ->setName('column')
+          ->setLabel(pht('Column'))
+          ->setOptions($layout_config->getColumnSelectOptions())
+          ->setValue($request->getInt('column')));
+    }
+
     return $this->newDialog()
       ->setTitle(pht('Add Panel'))
       ->setErrors($errors)
       ->appendChild($form->buildLayoutView())
-      ->addCancelButton($dashboard_uri)
+      ->addCancelButton($redirect_uri)
       ->addSubmitButton(pht('Add Panel'));
   }
 

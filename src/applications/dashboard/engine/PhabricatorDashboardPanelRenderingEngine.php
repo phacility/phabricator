@@ -79,6 +79,9 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
       ));
 
     return id(new PHUIObjectBoxView())
+      ->addSigil('dashboard-panel')
+      ->setMetadata(array(
+        'objectPHID' => $panel->getPHID()))
       ->setHeaderText($panel->getName())
       ->setID($panel_id)
       ->appendChild(pht('Loading...'));

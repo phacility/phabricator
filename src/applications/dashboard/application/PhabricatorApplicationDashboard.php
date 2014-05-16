@@ -21,10 +21,11 @@ final class PhabricatorApplicationDashboard extends PhabricatorApplication {
         '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'PhabricatorDashboardListController',
         'view/(?P<id>\d+)/' => 'PhabricatorDashboardViewController',
+        'arrange/(?P<id>\d+)/' => 'PhabricatorDashboardArrangeController',
         'create/' => 'PhabricatorDashboardEditController',
         'edit/(?:(?P<id>\d+)/)?' => 'PhabricatorDashboardEditController',
         'addpanel/(?P<id>\d+)/' => 'PhabricatorDashboardAddPanelController',
-
+        'movepanel/(?P<id>\d+)/' => 'PhabricatorDashboardMovePanelController',
         'panel/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?'
             => 'PhabricatorDashboardPanelListController',

@@ -47,6 +47,9 @@ abstract class PhabricatorDashboardPanelType extends Phobject {
     $content = $this->renderPanelContent($viewer, $panel);
 
     return id(new PHUIObjectBoxView())
+      ->addSigil('dashboard-panel')
+      ->setMetadata(array(
+        'objectPHID' => $panel->getPHID()))
       ->setHeaderText($panel->getName())
       ->appendChild($content);
   }

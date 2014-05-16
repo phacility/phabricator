@@ -17,6 +17,7 @@ final class PhabricatorDashboardEditController
       $dashboard = id(new PhabricatorDashboardQuery())
         ->setViewer($viewer)
         ->withIDs(array($this->id))
+        ->needPanels(true)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -56,19 +57,25 @@ final class PhabricatorDashboardEditController
     }
 
     $v_name = $dashboard->getName();
+    $v_layout_mode = $dashboard->getLayoutConfigObject()->getLayoutMode();
     $e_name = true;
 
     $validation_exception = null;
     if ($request->isFormPost()) {
       $v_name = $request->getStr('name');
+      $v_layout_mode = $request->getStr('layout_mode');
 
       $xactions = array();
 
       $type_name = PhabricatorDashboardTransaction::TYPE_NAME;
+      $type_layout_mode = PhabricatorDashboardTransaction::TYPE_LAYOUT_MODE;
 
       $xactions[] = id(new PhabricatorDashboardTransaction())
         ->setTransactionType($type_name)
         ->setNewValue($v_name);
+      $xactions[] = id(new PhabricatorDashboardTransaction())
+        ->setTransactionType($type_layout_mode)
+        ->setNewValue($v_layout_mode);
 
       try {
         $editor = id(new PhabricatorDashboardTransactionEditor())
@@ -77,8 +84,12 @@ final class PhabricatorDashboardEditController
           ->setContentSourceFromRequest($request)
           ->applyTransactions($dashboard, $xactions);
 
-        return id(new AphrontRedirectResponse())
-          ->setURI($this->getApplicationURI('view/'.$dashboard->getID().'/'));
+        if ($is_new) {
+          $uri = $this->getApplicationURI('arrange/'.$dashboard->getID().'/');
+        } else {
+          $uri = $this->getApplicationURI('view/'.$dashboard->getID().'/');
+        }
+        return id(new AphrontRedirectResponse())->setURI($uri);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
 
@@ -86,6 +97,8 @@ final class PhabricatorDashboardEditController
       }
     }
 
+    $layout_mode_options =
+      PhabricatorDashboardLayoutConfig::getLayoutModeSelectOptions();
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->appendChild(
@@ -95,10 +108,15 @@ final class PhabricatorDashboardEditController
           ->setValue($v_name)
           ->setError($e_name))
       ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Layout Mode'))
+          ->setName('layout_mode')
+          ->setValue($v_layout_mode)
+          ->setOptions($layout_mode_options))
+      ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($button)
           ->addCancelButton($cancel_uri));
-
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($header)
