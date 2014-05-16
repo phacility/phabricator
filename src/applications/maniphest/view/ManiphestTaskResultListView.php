@@ -170,7 +170,12 @@ final class ManiphestTaskResultListView extends ManiphestView {
         if ($label_key) {
           return $handles[$label_key]->getFullName();
         } else {
-          return pht('(No Project)');
+          // This may mean "No Projects", or it may mean the query has project
+          // constraints but the task is only in constrained projects (in this
+          // case, we don't show the group because it would always have all
+          // of the tasks). Since distinguishing between these two cases is
+          // messy and the UI is reasonably clear, label generically.
+          return pht('(Ungrouped)');
         }
       default:
         return pht('Tasks');

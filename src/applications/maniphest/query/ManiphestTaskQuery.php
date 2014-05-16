@@ -304,6 +304,12 @@ final class ManiphestTaskQuery
       $projects = mpull($projects, null, 'getPHID');
 
       foreach ($tasks as $key => $task) {
+        if (!$task->getGroupByProjectPHID()) {
+          // This task is either not in any projects, or only in projects
+          // which we're ignoring because they're being queried for explicitly.
+          continue;
+        }
+
         if (empty($projects[$task->getGroupByProjectPHID()])) {
           unset($tasks[$key]);
         }
