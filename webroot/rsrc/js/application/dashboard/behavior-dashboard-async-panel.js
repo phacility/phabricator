@@ -9,8 +9,13 @@ JX.behavior('dashboard-async-panel', function(config) {
   var panel = JX.$(config.panelID);
   panel.style.opacity = '0.5';
 
+  var data = {
+    parentPanelPHIDs: config.parentPanelPHIDs.join(','),
+    headerless: config.headerless ? 1 : 0
+  };
+
   new JX.Workflow(config.uri)
-    .setData({parentPanelPHIDs: config.parentPanelPHIDs.join(',')})
+    .setData(data)
     .setHandler(function(r) {
       JX.DOM.replace(panel, JX.$H(r.panelMarkup));
     })

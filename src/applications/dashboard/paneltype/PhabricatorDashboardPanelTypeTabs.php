@@ -91,9 +91,10 @@ final class PhabricatorDashboardPanelTypeTabs
           ->setEnableAsyncRendering(true)
           ->setParentPanelPHIDs($parent_phids)
           ->setPanel($panel)
+          ->setHeaderless(true)
           ->renderPanel();
       } else {
-        $panel_content = 'nope';
+        $panel_content = pht('(Invalid Panel)');
       }
 
       $content[] = phutil_tag(

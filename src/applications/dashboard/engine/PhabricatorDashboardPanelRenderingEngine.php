@@ -6,6 +6,16 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
   private $viewer;
   private $enableAsyncRendering;
   private $parentPanelPHIDs;
+  private $headerless;
+
+  public function setHeaderless($headerless) {
+    $this->headerless = $headerless;
+    return $this;
+  }
+
+  public function getHeaderless() {
+    return $this->headerless;
+  }
 
   /**
    * Allow the engine to render the panel via Ajax.
@@ -75,9 +85,14 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
   }
 
   private function renderErrorPanel($title, $body) {
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
-      ->setFormErrors(array($body));
+    if ($this->getHeaderless()) {
+      return id(new AphrontErrorView())
+        ->setErrors(array($body));
+    } else {
+      return id(new PHUIObjectBoxView())
+        ->setHeaderText($title)
+        ->setFormErrors(array($body));
+    }
   }
 
   private function renderAsyncPanel(PhabricatorDashboardPanel $panel) {
@@ -88,16 +103,28 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
       array(
         'panelID' => $panel_id,
         'parentPanelPHIDs' => $this->getParentPanelPHIDs(),
+        'headerless' => $this->getHeaderless(),
         'uri' => '/dashboard/panel/render/'.$panel->getID().'/',
       ));
 
-    return id(new PHUIObjectBoxView())
-      ->addSigil('dashboard-panel')
-      ->setMetadata(array(
-        'objectPHID' => $panel->getPHID()))
-      ->setHeaderText($panel->getName())
-      ->setID($panel_id)
-      ->appendChild(pht('Loading...'));
+    $content = pht('Loading...');
+
+    if ($this->headerless) {
+      return phutil_tag(
+        'div',
+        array(
+          'id' => $panel_id,
+        ),
+        $content);
+    } else {
+      return id(new PHUIObjectBoxView())
+        ->addSigil('dashboard-panel')
+        ->setMetadata(array(
+          'objectPHID' => $panel->getPHID()))
+        ->setHeaderText($panel->getName())
+        ->setID($panel_id)
+        ->appendChild($content);
+    }
   }
 
   /**

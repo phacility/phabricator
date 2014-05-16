@@ -358,7 +358,7 @@ return array(
     'rsrc/js/application/conpherence/behavior-pontificate.js' => '53f6f2dd',
     'rsrc/js/application/conpherence/behavior-widget-pane.js' => '40b1ff90',
     'rsrc/js/application/countdown/timer.js' => '889c96f3',
-    'rsrc/js/application/dashboard/behavior-dashboard-async-panel.js' => 'fd965b41',
+    'rsrc/js/application/dashboard/behavior-dashboard-async-panel.js' => 'f1375ea5',
     'rsrc/js/application/dashboard/behavior-dashboard-move-panels.js' => 'fa187a68',
     'rsrc/js/application/differential/DifferentialInlineCommentEditor.js' => 'f2441746',
     'rsrc/js/application/differential/behavior-add-reviewers-and-ccs.js' => '533a187b',
@@ -553,7 +553,7 @@ return array(
     'javelin-behavior-conpherence-widget-pane' => '40b1ff90',
     'javelin-behavior-countdown-timer' => '889c96f3',
     'javelin-behavior-dark-console' => 'e9fdb5e5',
-    'javelin-behavior-dashboard-async-panel' => 'fd965b41',
+    'javelin-behavior-dashboard-async-panel' => 'f1375ea5',
     'javelin-behavior-dashboard-move-panels' => 'fa187a68',
     'javelin-behavior-device' => '03d6ed07',
     'javelin-behavior-differential-add-reviewers-and-ccs' => '533a187b',
@@ -1965,6 +1965,12 @@ return array(
       0 => 'javelin-install',
       1 => 'javelin-util',
     ),
+    'f1375ea5' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-workflow',
+    ),
     'f2441746' =>
     array(
       0 => 'javelin-dom',
@@ -2032,12 +2038,6 @@ return array(
     array(
       0 => 'phabricator-busy',
       1 => 'javelin-behavior',
-    ),
-    'fd965b41' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-      2 => 'javelin-workflow',
     ),
     'fe2e0ba4' =>
     array(

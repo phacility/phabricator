@@ -37,13 +37,14 @@ final class PhabricatorDashboardPanelRenderController
       ->setViewer($viewer)
       ->setPanel($panel)
       ->setParentPanelPHIDs($parent_phids)
+      ->setHeaderless($request->getBool('headerless'))
       ->renderPanel();
 
     if ($request->isAjax()) {
       return id(new AphrontAjaxResponse())
         ->setContent(
           array(
-            'panelMarkup' => $rendered_panel,
+            'panelMarkup' => hsprintf('%s', $rendered_panel),
           ));
     }
 
