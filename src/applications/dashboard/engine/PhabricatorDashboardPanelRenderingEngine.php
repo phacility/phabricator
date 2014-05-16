@@ -20,6 +20,10 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
     return $this;
   }
 
+  public function getParentPanelPHIDs() {
+    return $this->parentPanelPHIDs;
+  }
+
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
     return $this;
@@ -59,7 +63,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
         }
       }
 
-      return $panel_type->renderPanel($viewer, $panel);
+      return $panel_type->renderPanel($viewer, $panel, $this);
     } catch (Exception $ex) {
       return $this->renderErrorPanel(
         $panel->getName(),
@@ -83,7 +87,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
       'dashboard-async-panel',
       array(
         'panelID' => $panel_id,
-        'parentPanelPHIDs' => $this->parentPanelPHIDs,
+        'parentPanelPHIDs' => $this->getParentPanelPHIDs(),
         'uri' => '/dashboard/panel/render/'.$panel->getID().'/',
       ));
 

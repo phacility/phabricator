@@ -42,9 +42,10 @@ abstract class PhabricatorDashboardPanelType extends Phobject {
 
   public function renderPanel(
     PhabricatorUser $viewer,
-    PhabricatorDashboardPanel $panel) {
+    PhabricatorDashboardPanel $panel,
+    PhabricatorDashboardPanelRenderingEngine $engine) {
 
-    $content = $this->renderPanelContent($viewer, $panel);
+    $content = $this->renderPanelContent($viewer, $panel, $engine);
 
     return id(new PHUIObjectBoxView())
       ->addSigil('dashboard-panel')
@@ -56,7 +57,8 @@ abstract class PhabricatorDashboardPanelType extends Phobject {
 
   protected function renderPanelContent(
     PhabricatorUser $viewer,
-    PhabricatorDashboardPanel $panel) {
+    PhabricatorDashboardPanel $panel,
+    PhabricatorDashboardPanelRenderingEngine $engine) {
     return pht('TODO: Panel content goes here.');
   }
 
