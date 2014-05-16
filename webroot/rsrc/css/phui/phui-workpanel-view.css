@@ -13,8 +13,14 @@
   margin: 0 8px;
 }
 
-.phui-workpanel-view .phui-object-item-objname {
-  display: none;
+.phui-workboard-view .phui-object-item-link {
+  white-space: normal;
+  display: inline;
+  -webkit-font-smoothing: antialiased;
+}
+
+.phui-workboard-view .phui-object-item-objname {
+  vertical-align: top;
 }
 
 .phui-workpanel-view .phui-workpanel-header-action {
