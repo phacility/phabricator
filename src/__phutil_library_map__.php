@@ -932,6 +932,7 @@ phutil_register_library_map(array(
     'ManiphestTaskProject' => 'applications/maniphest/storage/ManiphestTaskProject.php',
     'ManiphestTaskProjectsView' => 'applications/maniphest/view/ManiphestTaskProjectsView.php',
     'ManiphestTaskQuery' => 'applications/maniphest/query/ManiphestTaskQuery.php',
+    'ManiphestTaskResultListView' => 'applications/maniphest/view/ManiphestTaskResultListView.php',
     'ManiphestTaskSearchEngine' => 'applications/maniphest/query/ManiphestTaskSearchEngine.php',
     'ManiphestTaskStatus' => 'applications/maniphest/constants/ManiphestTaskStatus.php',
     'ManiphestTaskStatusTestCase' => 'applications/maniphest/constants/__tests__/ManiphestTaskStatusTestCase.php',
@@ -3649,11 +3650,7 @@ phutil_register_library_map(array(
     'ManiphestTaskDescriptionPreviewController' => 'ManiphestController',
     'ManiphestTaskDetailController' => 'ManiphestController',
     'ManiphestTaskEditController' => 'ManiphestController',
-    'ManiphestTaskListController' =>
-    array(
-      0 => 'ManiphestController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'ManiphestTaskListController' => 'ManiphestController',
     'ManiphestTaskListView' => 'ManiphestView',
     'ManiphestTaskMailReceiver' => 'PhabricatorObjectMailReceiver',
     'ManiphestTaskOwner' => 'ManiphestConstants',
@@ -3661,6 +3658,7 @@ phutil_register_library_map(array(
     'ManiphestTaskProject' => 'ManiphestDAO',
     'ManiphestTaskProjectsView' => 'ManiphestView',
     'ManiphestTaskQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'ManiphestTaskResultListView' => 'ManiphestView',
     'ManiphestTaskSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'ManiphestTaskStatus' => 'ManiphestConstants',
     'ManiphestTaskStatusTestCase' => 'PhabricatorTestCase',
@@ -4635,11 +4633,7 @@ phutil_register_library_map(array(
     'PhabricatorPasteDAO' => 'PhabricatorLiskDAO',
     'PhabricatorPasteEditController' => 'PhabricatorPasteController',
     'PhabricatorPasteEditor' => 'PhabricatorApplicationTransactionEditor',
-    'PhabricatorPasteListController' =>
-    array(
-      0 => 'PhabricatorPasteController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorPasteListController' => 'PhabricatorPasteController',
     'PhabricatorPastePHIDTypePaste' => 'PhabricatorPHIDType',
     'PhabricatorPasteQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorPasteRemarkupRule' => 'PhabricatorRemarkupRuleObject',
@@ -4658,18 +4652,10 @@ phutil_register_library_map(array(
     'PhabricatorPeopleEmpowerController' => 'PhabricatorPeopleController',
     'PhabricatorPeopleHovercardEventListener' => 'PhabricatorEventListener',
     'PhabricatorPeopleLdapController' => 'PhabricatorPeopleController',
-    'PhabricatorPeopleListController' =>
-    array(
-      0 => 'PhabricatorPeopleController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorPeopleListController' => 'PhabricatorPeopleController',
     'PhabricatorPeopleLogQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorPeopleLogSearchEngine' => 'PhabricatorApplicationSearchEngine',
-    'PhabricatorPeopleLogsController' =>
-    array(
-      0 => 'PhabricatorPeopleController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorPeopleLogsController' => 'PhabricatorPeopleController',
     'PhabricatorPeopleNewController' => 'PhabricatorPeopleController',
     'PhabricatorPeoplePHIDTypeExternal' => 'PhabricatorPHIDType',
     'PhabricatorPeoplePHIDTypeUser' => 'PhabricatorPHIDType',
