@@ -21,9 +21,22 @@ final class PhabricatorDashboardPanelRenderController
       return new Aphront404Response();
     }
 
+    if ($request->isAjax()) {
+      $parent_phids = $request->getStrList('parentPanelPHIDs', null);
+      if ($parent_phids === null) {
+        throw new Exception(
+          pht(
+            'Required parameter `parentPanelPHIDs` is not present in '.
+            'request.'));
+      }
+    } else {
+      $parent_phids = array();
+    }
+
     $rendered_panel = id(new PhabricatorDashboardPanelRenderingEngine())
       ->setViewer($viewer)
       ->setPanel($panel)
+      ->setParentPanelPHIDs($parent_phids)
       ->renderPanel();
 
     if ($request->isAjax()) {

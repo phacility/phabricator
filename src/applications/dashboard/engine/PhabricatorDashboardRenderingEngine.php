@@ -43,6 +43,7 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
           ->setViewer($viewer)
           ->setPanel($panel)
           ->setEnableAsyncRendering(true)
+          ->setParentPanelPHIDs(array())
           ->renderPanel();
       }
       $column_class = $layout_config->getColumnClass(

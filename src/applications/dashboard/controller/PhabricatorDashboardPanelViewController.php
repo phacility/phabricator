@@ -41,6 +41,7 @@ final class PhabricatorDashboardPanelViewController
     $rendered_panel = id(new PhabricatorDashboardPanelRenderingEngine())
       ->setViewer($viewer)
       ->setPanel($panel)
+      ->setParentPanelPHIDs(array())
       ->renderPanel();
 
     return $this->buildApplicationPage(

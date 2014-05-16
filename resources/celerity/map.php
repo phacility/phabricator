@@ -52,7 +52,7 @@ return array(
     'rsrc/css/application/conpherence/widget-pane.css' => 'bf275a6c',
     'rsrc/css/application/contentsource/content-source-view.css' => '4b8b05d4',
     'rsrc/css/application/countdown/timer.css' => '86b7b0a0',
-    'rsrc/css/application/dashboard/dashboard.css' => '5b532b7b',
+    'rsrc/css/application/dashboard/dashboard.css' => '2b41640b',
     'rsrc/css/application/diff/inline-comment-summary.css' => '8cfd34e8',
     'rsrc/css/application/differential/add-comment.css' => 'c478bcaa',
     'rsrc/css/application/differential/changeset-view.css' => '1570a1ff',
@@ -358,8 +358,8 @@ return array(
     'rsrc/js/application/conpherence/behavior-pontificate.js' => '53f6f2dd',
     'rsrc/js/application/conpherence/behavior-widget-pane.js' => '40b1ff90',
     'rsrc/js/application/countdown/timer.js' => '889c96f3',
-    'rsrc/js/application/dashboard/behavior-dashboard-async-panel.js' => '4398eabb',
-    'rsrc/js/application/dashboard/behavior-dashboard-move-panels.js' => 'aa3f313b',
+    'rsrc/js/application/dashboard/behavior-dashboard-async-panel.js' => 'fd965b41',
+    'rsrc/js/application/dashboard/behavior-dashboard-move-panels.js' => 'fa187a68',
     'rsrc/js/application/differential/DifferentialInlineCommentEditor.js' => 'f2441746',
     'rsrc/js/application/differential/behavior-add-reviewers-and-ccs.js' => '533a187b',
     'rsrc/js/application/differential/behavior-comment-jump.js' => '71755c79',
@@ -553,8 +553,8 @@ return array(
     'javelin-behavior-conpherence-widget-pane' => '40b1ff90',
     'javelin-behavior-countdown-timer' => '889c96f3',
     'javelin-behavior-dark-console' => 'e9fdb5e5',
-    'javelin-behavior-dashboard-async-panel' => '4398eabb',
-    'javelin-behavior-dashboard-move-panels' => 'aa3f313b',
+    'javelin-behavior-dashboard-async-panel' => 'fd965b41',
+    'javelin-behavior-dashboard-move-panels' => 'fa187a68',
     'javelin-behavior-device' => '03d6ed07',
     'javelin-behavior-differential-add-reviewers-and-ccs' => '533a187b',
     'javelin-behavior-differential-comment-jump' => '71755c79',
@@ -701,7 +701,7 @@ return array(
     'phabricator-core-css' => '40151074',
     'phabricator-countdown-css' => '86b7b0a0',
     'phabricator-crumbs-view-css' => '6a23399c',
-    'phabricator-dashboard-css' => '5b532b7b',
+    'phabricator-dashboard-css' => '2b41640b',
     'phabricator-drag-and-drop-file-upload' => 'ae6abfba',
     'phabricator-draggable-list' => '1681c4d4',
     'phabricator-fatal-config-template-css' => '25d446d6',
@@ -1133,12 +1133,6 @@ return array(
       8 => 'phuix-action-list-view',
       9 => 'phuix-action-view',
     ),
-    '4398eabb' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-      2 => 'javelin-workflow',
-    ),
     '441f2137' =>
     array(
       0 => 'javelin-behavior',
@@ -1270,11 +1264,6 @@ return array(
       2 => 'javelin-util',
       3 => 'phabricator-shaped-request',
     ),
-    '7319e029' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-    ),
     '62e18640' =>
     array(
       0 => 'javelin-install',
@@ -1328,6 +1317,11 @@ return array(
       0 => 'javelin-behavior',
       1 => 'javelin-stratcom',
       2 => 'javelin-dom',
+    ),
+    '7319e029' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
     ),
     '76f4ebed' =>
     array(
@@ -1597,15 +1591,6 @@ return array(
       0 => 'javelin-behavior',
       1 => 'javelin-stratcom',
       2 => 'javelin-dom',
-    ),
-    'aa3f313b' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-      2 => 'javelin-util',
-      3 => 'javelin-stratcom',
-      4 => 'javelin-workflow',
-      5 => 'phabricator-draggable-list',
     ),
     'ad7a69ca' =>
     array(
@@ -2034,10 +2019,25 @@ return array(
       4 => 'javelin-stratcom',
       5 => 'phabricator-shaped-request',
     ),
+    'fa187a68' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-util',
+      3 => 'javelin-stratcom',
+      4 => 'javelin-workflow',
+      5 => 'phabricator-draggable-list',
+    ),
     'fbbce3bf' =>
     array(
       0 => 'phabricator-busy',
       1 => 'javelin-behavior',
+    ),
+    'fd965b41' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-workflow',
     ),
     'fe2e0ba4' =>
     array(

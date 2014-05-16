@@ -10,6 +10,7 @@ JX.behavior('dashboard-async-panel', function(config) {
   panel.style.opacity = '0.5';
 
   new JX.Workflow(config.uri)
+    .setData({parentPanelPHIDs: config.parentPanelPHIDs.join(',')})
     .setHandler(function(r) {
       JX.DOM.replace(panel, JX.$H(r.panelMarkup));
     })
