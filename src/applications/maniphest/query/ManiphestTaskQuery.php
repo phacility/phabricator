@@ -445,7 +445,7 @@ final class ManiphestTaskQuery
     // In doing a fulltext search, we first find all the PHIDs that match the
     // fulltext search, and then use that to limit the rest of the search
     $fulltext_query = id(new PhabricatorSavedQuery())
-      ->setEngineClassName('PhabricatorSearchApplicaionSearchEngine')
+      ->setEngineClassName('PhabricatorSearchApplicationSearchEngine')
       ->setParameter('query', $this->fullTextSearch);
 
     // NOTE: Setting this to something larger than 2^53 will raise errors in
