@@ -3,6 +3,17 @@
 final class ManiphestTaskSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  private $showBatchControls;
+
+  public function setShowBatchControls($show_batch_controls) {
+    $this->showBatchControls = $show_batch_controls;
+    return $this;
+  }
+
+  public function getApplicationClassName() {
+    return 'PhabricatorApplicationManiphest';
+  }
+
   public function getCustomFieldObject() {
     return new ManiphestTask();
   }
@@ -471,6 +482,32 @@ final class ManiphestTaskSearchEngine
       'project' => ManiphestTaskQuery::GROUP_PROJECT,
       'none' => ManiphestTaskQuery::GROUP_NONE,
     );
+  }
+
+  protected function renderResultList(
+    array $tasks,
+    PhabricatorSavedQuery $saved,
+    array $handles) {
+
+    $viewer = $this->requireViewer();
+
+    $can_edit_priority = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $this->getApplication(),
+      ManiphestCapabilityEditPriority::CAPABILITY);
+
+    $can_bulk_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $this->getApplication(),
+      ManiphestCapabilityBulkEdit::CAPABILITY);
+
+    return id(new ManiphestTaskResultListView())
+      ->setUser($viewer)
+      ->setTasks($tasks)
+      ->setSavedQuery($saved)
+      ->setCanEditPriority($can_edit_priority)
+      ->setCanBatchEdit($can_bulk_edit)
+      ->setShowBatchControls($this->showBatchControls);
   }
 
 }

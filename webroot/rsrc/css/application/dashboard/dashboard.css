@@ -1,0 +1,59 @@
+/**
+ * @provides phabricator-dashboard-css
+ */
+
+.aphront-multi-column-fluid .aphront-multi-column-2-up
+.aphront-multi-column-column-outer.half {
+  width: 50%;
+}
+
+.aphront-multi-column-fluid .aphront-multi-column-2-up
+.aphront-multi-column-column-outer.third {
+  width: 33.34%;
+}
+
+.aphront-multi-column-fluid .aphront-multi-column-2-up
+.aphront-multi-column-column-outer.thirds {
+  width: 66.66%;
+}
+
+.aphront-multi-column-fluid
+.aphront-multi-column-column-outer.grippable
+.aphront-multi-column-column .phui-object-box {
+  cursor: move;
+}
+
+.aphront-multi-column-fluid
+.aphront-multi-column-column .drag-ghost {
+  list-style-type: none;
+  margin: 16px;
+}
+
+.aphront-multi-column-fluid
+.aphront-multi-column-column
+.dashboard-panel-placeholder {
+  display: none;
+}
+
+.aphront-multi-column-fluid
+.aphront-multi-column-column.dashboard-column-empty
+.dashboard-panel-placeholder {
+  color: {$greytext};
+  display: block;
+  padding: 24px;
+  margin: 16px 16px 0px 16px;
+}
+
+.aphront-multi-column-fluid
+.aphront-multi-column-column.dashboard-column-empty
+.dashboard-panel-placeholder:hover {
+  text-decoration: none;
+  border: 1px {$greyborder} dashed;
+  color: {$darkgreytext};
+}
+
+.aphront-multi-column-fluid
+.aphront-multi-column-column.drag-target-list
+.dashboard-panel-placeholder {
+  display: none;
+}

@@ -26,6 +26,7 @@ abstract class DiffusionRequest {
 
   private $initFromConduit = true;
   private $user;
+  private $branchObject = false;
 
   abstract protected function getSupportsBranches();
   abstract protected function isStableCommit($symbol);
@@ -338,11 +339,42 @@ abstract class DiffusionRequest {
   }
 
   public function loadBranch() {
-    return id(new PhabricatorRepositoryBranch())->loadOneWhere(
-      'repositoryID = %d AND name = %s',
-      $this->getRepository()->getID(),
-      $this->getArcanistBranch());
+    // TODO: Get rid of this and do real Queries on real objects.
+
+    if ($this->branchObject === false) {
+      $this->branchObject = PhabricatorRepositoryBranch::loadBranch(
+        $this->getRepository()->getID(),
+        $this->getArcanistBranch());
+    }
+
+    return $this->branchObject;
   }
+
+  public function loadCoverage() {
+    // TODO: This should also die.
+    $branch = $this->loadBranch();
+    if (!$branch) {
+      return;
+    }
+
+    $path = $this->getPath();
+    $path_map = id(new DiffusionPathIDQuery(array($path)))->loadPathIDs();
+
+    $coverage_row = queryfx_one(
+      id(new PhabricatorRepository())->establishConnection('r'),
+      'SELECT * FROM %T WHERE branchID = %d AND pathID = %d
+        ORDER BY commitID DESC LIMIT 1',
+      'repository_coverage',
+      $branch->getID(),
+      $path_map[$path]);
+
+    if (!$coverage_row) {
+      return null;
+    }
+
+    return idx($coverage_row, 'coverage');
+  }
+
 
   public function loadCommit() {
     if (empty($this->repositoryCommit)) {

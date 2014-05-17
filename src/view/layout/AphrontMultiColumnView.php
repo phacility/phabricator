@@ -6,14 +6,32 @@ final class AphrontMultiColumnView extends AphrontView {
   const GUTTER_MEDIUM = 'mmr';
   const GUTTER_LARGE = 'mlr';
 
+  private $id;
   private $columns = array();
   private $fluidLayout = false;
   private $fluidishLayout = false;
   private $gutter;
   private $border;
 
-  public function addColumn($column) {
-    $this->columns[] = $column;
+  public function setID($id) {
+    $this->id = $id;
+    return $this;
+  }
+
+  public function getID() {
+    return $this->id;
+  }
+
+  public function addColumn(
+    $column,
+    $class = null,
+    $sigil = null,
+    $metadata = null) {
+    $this->columns[] = array(
+      'column' => $column,
+      'class' => $class,
+      'sigil' => $sigil,
+      'metadata' => $metadata);
     return $this;
   }
 
@@ -55,30 +73,34 @@ final class AphrontMultiColumnView extends AphrontView {
     $classes[] = 'aphront-multi-column-'.count($this->columns).'-up';
 
     $columns = array();
-    $column_class = array();
-    $column_class[] = 'aphront-multi-column-column';
-    $outer_class = array();
-    $outer_class[] = 'aphront-multi-column-column-outer';
-    if ($this->gutter) {
-      $column_class[] = $this->gutter;
-    }
     $i = 0;
-    foreach ($this->columns as $column) {
+    foreach ($this->columns as $column_data) {
+      $column_class = array('aphront-multi-column-column');
+      if ($this->gutter) {
+        $column_class[] = $this->gutter;
+      }
+      $outer_class = array('aphront-multi-column-column-outer');
       if (++$i === count($this->columns)) {
         $column_class[] = 'aphront-multi-column-column-last';
         $outer_class[] = 'aphront-multi-colum-column-outer-last';
       }
-      $column_inner = phutil_tag(
+      $column = $column_data['column'];
+      if ($column_data['class']) {
+        $outer_class[] = $column_data['class'];
+      }
+      $column_sigil = idx($column_data, 'sigil');
+      $column_metadata = idx($column_data, 'metadata');
+      $column_inner = javelin_tag(
         'div',
-          array(
-          'class' => implode(' ', $column_class)
-          ),
+        array(
+          'class' => implode(' ', $column_class),
+          'sigil' => $column_sigil,
+          'meta'  => $column_metadata),
         $column);
       $columns[] = phutil_tag(
         'div',
-          array(
-          'class' => implode(' ', $outer_class)
-          ),
+        array(
+          'class' => implode(' ', $outer_class)),
         $column_inner);
     }
 
@@ -120,7 +142,8 @@ final class AphrontMultiColumnView extends AphrontView {
     return phutil_tag(
       'div',
         array(
-          'class' => 'aphront-multi-column-view'
+          'class' => 'aphront-multi-column-view',
+          'id' => $this->getID(),
         ),
         $board);
   }

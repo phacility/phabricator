@@ -252,27 +252,33 @@ final class HarbormasterBuildableViewController
         foreach ($targets as $target) {
           switch ($target->getTargetStatus()) {
             case HarbormasterBuildTarget::STATUS_PENDING:
-              $icon = 'time-green';
+              $icon = PHUIStatusItemView::ICON_CLOCK;
+              $color = 'green';
               $status_name = pht('Pending');
               break;
             case HarbormasterBuildTarget::STATUS_BUILDING:
-              $icon = 'right-green';
+              $icon = PHUIStatusItemView::ICON_RIGHT;
+              $color = 'green';
               $status_name = pht('Building');
               break;
             case HarbormasterBuildTarget::STATUS_WAITING:
-              $icon = 'time-orange';
+              $icon = PHUIStatusItemView::ICON_CLOCK;
+              $color = 'orange';
               $status_name = pht('Waiting');
               break;
             case HarbormasterBuildTarget::STATUS_PASSED:
-              $icon = 'accept-green';
+              $icon = PHUIStatusItemView::ICON_ACCEPT;
+              $color = 'green';
               $status_name = pht('Passed');
               break;
             case HarbormasterBuildTarget::STATUS_FAILED:
-              $icon = 'reject-red';
+              $icon = PHUIStatusItemView::ICON_REJECT;
+              $color = 'red';
               $status_name = pht('Failed');
               break;
             default:
-              $icon = 'question';
+              $icon = PHUIStatusItemView::ICON_QUESTION;
+              $color = 'bluegrey';
               $status_name = pht('Unknown');
               break;
           }
@@ -286,7 +292,7 @@ final class HarbormasterBuildableViewController
 
           $target_list->addItem(
             id(new PHUIStatusItemView())
-              ->setIcon($icon, $status_name)
+              ->setIcon($icon, $color, $status_name)
               ->setTarget(pht('Target %d', $target->getID()))
               ->setNote($name));
         }

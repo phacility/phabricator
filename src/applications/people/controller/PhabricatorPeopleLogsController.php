@@ -1,7 +1,7 @@
 <?php
 
-final class PhabricatorPeopleLogsController extends PhabricatorPeopleController
-  implements PhabricatorApplicationSearchResultsControllerInterface {
+final class PhabricatorPeopleLogsController
+  extends PhabricatorPeopleController {
 
   private $queryKey;
 
@@ -18,34 +18,6 @@ final class PhabricatorPeopleLogsController extends PhabricatorPeopleController
 
     return $this->delegateToController($controller);
   }
-
-  public function renderResultsList(
-    array $logs,
-    PhabricatorSavedQuery $query) {
-    assert_instances_of($logs, 'PhabricatorUserLog');
-
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    $phids = array();
-    foreach ($logs as $log) {
-      $phids[$log->getActorPHID()] = true;
-      $phids[$log->getUserPHID()] = true;
-    }
-    $phids = array_keys($phids);
-    $handles = $this->loadViewerHandles($phids);
-
-    $table = id(new PhabricatorUserLogView())
-      ->setUser($viewer)
-      ->setLogs($logs)
-      ->setSearchBaseURI($this->getApplicationURI('logs/'))
-      ->setHandles($handles);
-
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('User Activity Logs'))
-      ->appendChild($table);
-  }
-
 
   public function buildSideNavView() {
     $nav = new AphrontSideNavFilterView();

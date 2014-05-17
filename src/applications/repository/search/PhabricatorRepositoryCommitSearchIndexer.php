@@ -77,6 +77,17 @@ final class PhabricatorRepositoryCommitSearchIndexer
       }
     }
 
+    $inlines = id(new PhabricatorAuditInlineComment())->loadAllWhere(
+      'commitPHID = %s AND (auditCommentID IS NOT NULL)',
+      $commit->getPHID());
+    foreach ($inlines as $inline) {
+      if (strlen($inline->getContent())) {
+        $doc->addField(
+          PhabricatorSearchField::FIELD_COMMENT,
+          $inline->getContent());
+      }
+    }
+
     return $doc;
   }
 }

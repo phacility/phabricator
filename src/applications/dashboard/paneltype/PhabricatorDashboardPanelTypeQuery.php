@@ -32,7 +32,8 @@ final class PhabricatorDashboardPanelTypeQuery
 
   protected function renderPanelContent(
     PhabricatorUser $viewer,
-    PhabricatorDashboardPanel $panel) {
+    PhabricatorDashboardPanel $panel,
+    PhabricatorDashboardPanelRenderingEngine $engine) {
 
     $class = $panel->getProperty('class');
 

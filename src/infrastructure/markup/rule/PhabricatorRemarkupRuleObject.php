@@ -65,6 +65,7 @@ abstract class PhabricatorRemarkupRuleObject
   protected function renderObjectEmbed($object, $handle, $options) {
     $name = $handle->getFullName();
     $href = $handle->getURI();
+    $status_closed = PhabricatorObjectHandleStatus::STATUS_CLOSED;
 
     if ($this->getEngine()->isTextMode()) {
       return $name.' <'.PhabricatorEnv::getProductionURI($href).'>';
@@ -72,6 +73,7 @@ abstract class PhabricatorRemarkupRuleObject
 
     $attr = array(
       'phid' => $handle->getPHID(),
+      'closed'  => ($handle->getStatus() == $status_closed),
     );
 
     return $this->renderHovertag($name, $href, $attr);

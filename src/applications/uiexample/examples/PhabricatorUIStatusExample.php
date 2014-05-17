@@ -19,26 +19,26 @@ final class PhabricatorUIStatusExample extends PhabricatorUIExample {
 
     $view->addItem(
       id(new PHUIStatusItemView())
-        ->setIcon('accept-green', pht('Yum'))
+        ->setIcon(PHUIStatusItemView::ICON_ACCEPT, 'green', pht('Yum'))
         ->setTarget(pht('Apple'))
         ->setNote(pht('You can eat them.')));
 
     $view->addItem(
       id(new PHUIStatusItemView())
-        ->setIcon('add-blue', pht('Has Peel'))
+        ->setIcon(PHUIStatusItemView::ICON_ADD, 'blue', pht('Has Peel'))
         ->setTarget(pht('Banana'))
         ->setNote(pht('Comes in bunches.'))
         ->setHighlighted(true));
 
     $view->addItem(
       id(new PHUIStatusItemView())
-        ->setIcon('warning-dark', pht('Caution'))
+        ->setIcon(PHUIStatusItemView::ICON_WARNING, 'dark', pht('Caution'))
         ->setTarget(pht('Pomegranite'))
         ->setNote(pht('Lots of seeds. Watch out.')));
 
     $view->addItem(
       id(new PHUIStatusItemView())
-        ->setIcon('reject-red', pht('Bleh!'))
+        ->setIcon(PHUIStatusItemView::ICON_REJECT, 'red', pht('Bleh!'))
         ->setTarget(pht('Zucchini'))
         ->setNote(pht('Slimy and gross. Yuck!')));
 
@@ -54,15 +54,28 @@ final class PhabricatorUIStatusExample extends PhabricatorUIExample {
 
     $view = new PHUIStatusListView();
 
-    $manifest = PHUIIconView::getSheetManifest(PHUIIconView::SPRITE_STATUS);
+    $manifest = array(
+      PHUIStatusItemView::ICON_ACCEPT => 'PHUIStatusItemView::ICON_ACCEPT',
+      PHUIStatusItemView::ICON_REJECT => 'PHUIStatusItemView::ICON_REJECT',
+      PHUIStatusItemView::ICON_LEFT => 'PHUIStatusItemView::ICON_LEFT',
+      PHUIStatusItemView::ICON_RIGHT => 'PHUIStatusItemView::ICON_RIGHT',
+      PHUIStatusItemView::ICON_UP => 'PHUIStatusItemView::ICON_UP',
+      PHUIStatusItemView::ICON_DOWN => 'PHUIStatusItemView::ICON_DOWN',
+      PHUIStatusItemView::ICON_QUESTION => 'PHUIStatusItemView::ICON_QUESTION',
+      PHUIStatusItemView::ICON_WARNING => 'PHUIStatusItemView::ICON_WARNING',
+      PHUIStatusItemView::ICON_INFO => 'PHUIStatusItemView::ICON_INFO',
+      PHUIStatusItemView::ICON_ADD => 'PHUIStatusItemView::ICON_ADD',
+      PHUIStatusItemView::ICON_MINUS => 'PHUIStatusItemView::ICON_MINUS',
+      PHUIStatusItemView::ICON_OPEN => 'PHUIStatusItemView::ICON_OPEN',
+      PHUIStatusItemView::ICON_CLOCK => 'PHUIStatusItemView::ICON_CLOCK',
+    );
 
-    foreach ($manifest as $sprite) {
-      $name = substr($sprite['name'], strlen('status-'));
+    foreach ($manifest as $icon => $label) {
 
       $view->addItem(
         id(new PHUIStatusItemView())
-          ->setIcon($name)
-          ->setTarget($name));
+          ->setIcon($icon, 'indigo')
+          ->setTarget($label));
     }
 
     $out[] = id(new PHUIHeaderView())

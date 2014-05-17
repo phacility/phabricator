@@ -44,15 +44,18 @@ final class ReleephIntentFieldSpecification
     foreach ($intents as $phid => $intent) {
       switch ($intent) {
         case ReleephRequest::INTENT_WANT:
-          $icon = 'accept-green';
+          $icon = PHUIStatusItemView::ICON_ACCEPT;
+          $color = 'green';
           $label = pht('Want');
           break;
         case ReleephRequest::INTENT_PASS:
-          $icon = 'reject-red';
+          $icon = PHUIStatusItemView::ICON_REJECT;
+          $color = 'red';
           $label = pht('Pass');
           break;
         default:
-          $icon = 'question';
+          $icon = PHUIStatusItemView::ICON_QUESTION;
+          $color = 'bluegrey';
           $label = pht('Unknown Intent (%s)', $intent);
           break;
       }
@@ -64,7 +67,7 @@ final class ReleephIntentFieldSpecification
 
       $view->addItem(
         id(new PHUIStatusItemView())
-          ->setIcon($icon, $label)
+          ->setIcon($icon, $color, $label)
           ->setTarget($target));
     }
 

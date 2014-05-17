@@ -68,6 +68,11 @@ final class DiffusionDiffController extends DiffusionController {
       array(
         'action' => 'rendering-ref')));
 
+    $coverage = $drequest->loadCoverage();
+    if ($coverage) {
+      $parser->setCoverage($coverage);
+    }
+
     $pquery = new DiffusionPathIDQuery(array($changeset->getFilename()));
     $ids = $pquery->loadPathIDs();
     $path_id = $ids[$changeset->getFilename()];

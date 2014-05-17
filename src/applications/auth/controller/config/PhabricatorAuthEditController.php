@@ -85,6 +85,7 @@ final class PhabricatorAuthEditController
     $v_registration = $config->getShouldAllowRegistration();
     $v_link = $config->getShouldAllowLink();
     $v_unlink = $config->getShouldAllowUnlink();
+    $v_trust_email = $config->getShouldTrustEmails();
 
     if ($request->isFormPost()) {
 
@@ -119,6 +120,11 @@ final class PhabricatorAuthEditController
           ->setTransactionType(
             PhabricatorAuthProviderConfigTransaction::TYPE_UNLINK)
           ->setNewValue($request->getInt('allowUnlink', 0));
+
+        $xactions[] = id(new PhabricatorAuthProviderConfigTransaction())
+          ->setTransactionType(
+            PhabricatorAuthProviderConfigTransaction::TYPE_TRUST_EMAILS)
+          ->setNewValue($request->getInt('trustEmails', 0));
 
         foreach ($properties as $key => $value) {
           $xactions[] = id(new PhabricatorAuthProviderConfigTransaction())
@@ -212,6 +218,13 @@ final class PhabricatorAuthEditController
         'existing Phabricator accounts. If you disable this, Phabricator '.
         'accounts will be permanently bound to provider accounts.'));
 
+    $str_trusted_email = hsprintf(
+      '<strong>%s:</strong> %s',
+      pht('Trust Email Addresses'),
+      pht(
+        'Phabricator will skip email verification for accounts registered '.
+        'through this provider.'));
+
     $status_tag = id(new PHUITagView())
       ->setType(PHUITagView::TYPE_STATE);
     if ($is_new) {
@@ -261,6 +274,16 @@ final class PhabricatorAuthEditController
             1,
             $str_unlink,
             $v_unlink));
+
+    if ($provider->shouldAllowEmailTrustConfiguration()) {
+      $form->appendChild(
+        id(new AphrontFormCheckboxControl())
+          ->addCheckbox(
+            'trustEmails',
+            1,
+            $str_trusted_email,
+            $v_trust_email));
+    }
 
     $provider->extendEditForm($request, $form, $properties, $issues);
 

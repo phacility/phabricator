@@ -86,6 +86,14 @@ final class PhabricatorDashboardViewController
 
     $actions->addAction(
       id(new PhabricatorActionView())
+        ->setName(pht('Arrange Dashboard'))
+        ->setIcon('fa-arrows')
+        ->setHref($this->getApplicationURI("arrange/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
         ->setName(pht('Add Panel'))
         ->setIcon('fa-plus')
         ->setHref($this->getApplicationURI("addpanel/{$id}/"))

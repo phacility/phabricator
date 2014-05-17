@@ -3,6 +3,10 @@
 final class PhabricatorPeopleLogSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getApplicationClassName() {
+    return 'PhabricatorApplicationPeople';
+  }
+
   public function getPageSize(PhabricatorSavedQuery $saved) {
     return 500;
   }
@@ -35,6 +39,16 @@ final class PhabricatorPeopleLogSearchEngine
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new PhabricatorPeopleLogQuery());
+
+    // NOTE: If the viewer isn't an administrator, always restrict the query to
+    // related records. This echoes the policy logic of these logs. This is
+    // mostly a performance optimization, to prevent us from having to pull
+    // large numbers of logs that the user will not be able to see and filter
+    // them in-process.
+    $viewer = $this->requireViewer();
+    if (!$viewer->getIsAdmin()) {
+      $query->withRelatedPHIDs(array($viewer->getPHID()));
+    }
 
     $actor_phids = $saved->getParameter('actorPHIDs', array());
     if ($actor_phids) {
@@ -154,4 +168,38 @@ final class PhabricatorPeopleLogSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
+  protected function getRequiredHandlePHIDsForResultList(
+    array $logs,
+    PhabricatorSavedQuery $query) {
+
+    $phids = array();
+    foreach ($logs as $log) {
+      $phids[$log->getActorPHID()] = true;
+      $phids[$log->getUserPHID()] = true;
+    }
+
+    return array_keys($phids);
+  }
+
+  protected function renderResultList(
+    array $logs,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    assert_instances_of($logs, 'PhabricatorUserLog');
+
+    $viewer = $this->requireViewer();
+
+    $table = id(new PhabricatorUserLogView())
+      ->setUser($viewer)
+      ->setLogs($logs)
+      ->setHandles($handles);
+
+    if ($viewer->getIsAdmin()) {
+      $table->setSearchBaseURI($this->getApplicationURI('logs/'));
+    }
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('User Activity Logs'))
+      ->appendChild($table);
+  }
 }

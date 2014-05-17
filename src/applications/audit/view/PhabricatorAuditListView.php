@@ -66,15 +66,27 @@ final class PhabricatorAuditListView extends AphrontView {
 
   private function getCommitDescription($phid) {
     if ($this->commits === null) {
-      return null;
+      return pht('(Unknown Commit)');
     }
 
     $commit = idx($this->commits, $phid);
     if (!$commit) {
-      return null;
+      return pht('(Unknown Commit)');
     }
 
-    return $commit->getCommitData()->getSummary();
+    $summary = $commit->getCommitData()->getSummary();
+    if (strlen($summary)) {
+      return $summary;
+    }
+
+    // No summary, so either this is still impoting or just has an empty
+    // commit message.
+
+    if (!$commit->isImported()) {
+      return pht('(Importing Commit...)');
+    } else {
+      return pht('(Untitled Commit)');
+    }
   }
 
   public function render() {
@@ -134,14 +146,14 @@ final class PhabricatorAuditListView extends AphrontView {
       $author_name = $commit->getCommitData()->getAuthorName();
 
       $item = id(new PHUIObjectItemView())
-          ->setObjectName($commit_name)
-          ->setHeader($commit_desc)
-          ->setHref($commit_link)
-          ->setBarColor($status_color)
-          ->addAttribute($status_text)
-          ->addAttribute($reasons)
-          ->addIcon('none', $committed)
-          ->addByline(pht('Author: %s', $author_name));
+        ->setObjectName($commit_name)
+        ->setHeader($commit_desc)
+        ->setHref($commit_link)
+        ->setBarColor($status_color)
+        ->addAttribute($status_text)
+        ->addAttribute($reasons)
+        ->addIcon('none', $committed)
+        ->addByline(pht('Author: %s', $author_name));
 
       if (!empty($auditors)) {
         $item->addAttribute(pht('Auditors: %s', $auditors));

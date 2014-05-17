@@ -1073,32 +1073,57 @@ final class DiffusionCommitController extends DiffusionController {
 
       switch ($request->getAuditStatus()) {
         case PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED:
-          $item->setIcon('open-blue', pht('Commented'));
+          $item->setIcon(
+            PHUIStatusItemView::ICON_OPEN,
+            'blue',
+            pht('Commented'));
           break;
         case PhabricatorAuditStatusConstants::AUDIT_REQUIRED:
-          $item->setIcon('warning-blue', pht('Audit Required'));
+          $item->setIcon(
+            PHUIStatusItemView::ICON_WARNING,
+            'blue',
+            pht('Audit Required'));
           break;
         case PhabricatorAuditStatusConstants::CONCERNED:
-          $item->setIcon('reject-red', pht('Concern Raised'));
+          $item->setIcon(
+            PHUIStatusItemView::ICON_REJECT,
+            'red',
+            pht('Concern Raised'));
           break;
         case PhabricatorAuditStatusConstants::ACCEPTED:
-          $item->setIcon('accept-green', pht('Accepted'));
+          $item->setIcon(
+            PHUIStatusItemView::ICON_ACCEPT,
+            'green',
+            pht('Accepted'));
           break;
         case PhabricatorAuditStatusConstants::AUDIT_REQUESTED:
-          $item->setIcon('warning-dark', pht('Audit Requested'));
+          $item->setIcon(
+            PHUIStatusItemView::ICON_WARNING,
+            'dark',
+            pht('Audit Requested'));
           break;
         case PhabricatorAuditStatusConstants::RESIGNED:
-          $item->setIcon('open-dark', pht('Resigned'));
+          $item->setIcon(
+            PHUIStatusItemView::ICON_OPEN,
+            'dark',
+            pht('Resigned'));
           break;
         case PhabricatorAuditStatusConstants::CLOSED:
-          $item->setIcon('accept-blue', pht('Closed'));
+          $item->setIcon(
+            PHUIStatusItemView::ICON_ACCEPT,
+            'blue',
+            pht('Closed'));
           break;
         case PhabricatorAuditStatusConstants::CC:
-          $item->setIcon('info-dark', pht('Subscribed'));
+          $item->setIcon(
+            PHUIStatusItemView::ICON_INFO,
+            'dark',
+            pht('Subscribed'));
           break;
         default:
           $item->setIcon(
-            'question-dark',
+            PHUIStatusItemView::ICON_QUESTION,
+            'dark',
             pht('%s?', $request->getAuditStatus()));
           break;
       }

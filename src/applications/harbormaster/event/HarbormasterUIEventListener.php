@@ -77,32 +77,40 @@ final class HarbormasterUIEventListener
 
       switch ($status) {
         case HarbormasterBuild::STATUS_INACTIVE:
-          $icon = 'open-dark';
+          $icon = PHUIStatusItemView::ICON_OPEN;
+          $color = 'dark';
           break;
         case HarbormasterBuild::STATUS_PENDING:
-          $icon = 'open-blue';
+          $icon = PHUIStatusItemView::ICON_OPEN;
+          $color = 'blue';
           break;
         case HarbormasterBuild::STATUS_BUILDING:
-          $icon = 'right-blue';
+          $icon = PHUIStatusItemView::ICON_RIGHT;
+          $color = 'blue';
           break;
         case HarbormasterBuild::STATUS_PASSED:
-          $icon = 'accept-green';
+          $icon = PHUIStatusItemView::ICON_ACCEPT;
+          $color = 'green';
           break;
         case HarbormasterBuild::STATUS_FAILED:
-          $icon = 'reject-red';
+          $icon = PHUIStatusItemView::ICON_REJECT;
+          $color = 'red';
           break;
         case HarbormasterBuild::STATUS_ERROR:
-          $icon = 'minus-red';
+          $icon = PHUIStatusItemView::ICON_MINUS;
+          $color = 'red';
           break;
         case HarbormasterBuild::STATUS_STOPPED:
-          $icon = 'minus-dark';
+          $icon = PHUIStatusItemView::ICON_MINUS;
+          $color = 'dark';
           break;
         default:
-          $icon = 'question';
+          $icon = PHUIStatusItemView::ICON_QUESTION;
+          $color = 'bluegrey';
           break;
       }
 
-      $item->setIcon($icon, $status_name);
+      $item->setIcon($icon, $color, $status_name);
 
 
       $status_view->addItem($item);

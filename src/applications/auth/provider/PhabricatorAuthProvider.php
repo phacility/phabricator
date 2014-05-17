@@ -141,6 +141,20 @@ abstract class PhabricatorAuthProvider {
     return $this->getProviderConfig()->getShouldAllowUnlink();
   }
 
+  public function shouldTrustEmails() {
+    return $this->shouldAllowEmailTrustConfiguration() &&
+           $this->getProviderConfig()->getShouldTrustEmails();
+  }
+
+  /**
+   * Should we allow the adapter to be marked as "trusted"
+   * This is true for all adapters except those that allow the user to type in
+   * emails (@see PhabricatorAuthProviderPassword)
+   */
+  public function shouldAllowEmailTrustConfiguration() {
+    return true;
+  }
+
   public function buildLoginForm(
     PhabricatorAuthStartController $controller) {
     return $this->renderLoginForm($controller->getRequest(), $mode = 'start');

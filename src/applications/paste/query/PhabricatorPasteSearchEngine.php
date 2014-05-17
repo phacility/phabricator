@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group paste
- */
 final class PhabricatorPasteSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
@@ -26,7 +23,7 @@ final class PhabricatorPasteSearchEngine
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new PhabricatorPasteQuery())
-      ->needContent(true)
+      ->needRawContent(true)
       ->withAuthorPHIDs($saved->getParameter('authorPHIDs', array()))
       ->withLanguages($saved->getParameter('languages', array()));
 
@@ -126,4 +123,67 @@ final class PhabricatorPasteSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
+  protected function getRequiredHandlePHIDsForResultList(
+    array $pastes,
+    PhabricatorSavedQuery $query) {
+    return mpull($pastes, 'getAuthorPHID');
+  }
+
+  protected function renderResultList(
+    array $pastes,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    assert_instances_of($pastes, 'PhabricatorPaste');
+
+    $viewer = $this->requireViewer();
+
+    $lang_map = PhabricatorEnv::getEnvConfig('pygments.dropdown-choices');
+
+    $list = new PHUIObjectItemListView();
+    $list->setUser($viewer);
+    foreach ($pastes as $paste) {
+      $created = phabricator_date($paste->getDateCreated(), $viewer);
+      $author = $handles[$paste->getAuthorPHID()]->renderLink();
+
+      $lines = phutil_split_lines($paste->getRawContent());
+
+      $preview = id(new PhabricatorSourceCodeView())
+        ->setLimit(5)
+        ->setLines($lines)
+        ->setURI(new PhutilURI($paste->getURI()));
+
+      $source_code = phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-source-code-summary',
+        ),
+        $preview);
+
+      $line_count = count($lines);
+      $line_count = pht(
+        '%s Line(s)',
+        new PhutilNumber($line_count));
+
+      $title = nonempty($paste->getTitle(), pht('(An Untitled Masterwork)'));
+
+      $item = id(new PHUIObjectItemView())
+        ->setObjectName('P'.$paste->getID())
+        ->setHeader($title)
+        ->setHref('/P'.$paste->getID())
+        ->setObject($paste)
+        ->addByline(pht('Author: %s', $author))
+        ->addIcon('none', $line_count)
+        ->appendChild($source_code);
+
+      $lang_name = $paste->getLanguage();
+      if ($lang_name) {
+        $lang_name = idx($lang_map, $lang_name, $lang_name);
+        $item->addIcon('none', $lang_name);
+      }
+
+      $list->addItem($item);
+    }
+
+    return $list;
+  }
 }

@@ -7,10 +7,10 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => '7c4a7aa4',
+    'core.pkg.css' => '59ea1706',
     'core.pkg.js' => 'b2ed04a2',
     'darkconsole.pkg.js' => 'ca8671ce',
-    'differential.pkg.css' => '4b8686e3',
+    'differential.pkg.css' => '382ca868',
     'differential.pkg.js' => '36bec171',
     'diffusion.pkg.css' => '3783278d',
     'diffusion.pkg.js' => '077e3ad0',
@@ -52,9 +52,10 @@ return array(
     'rsrc/css/application/conpherence/widget-pane.css' => 'bf275a6c',
     'rsrc/css/application/contentsource/content-source-view.css' => '4b8b05d4',
     'rsrc/css/application/countdown/timer.css' => '86b7b0a0',
+    'rsrc/css/application/dashboard/dashboard.css' => '2b41640b',
     'rsrc/css/application/diff/inline-comment-summary.css' => '8cfd34e8',
     'rsrc/css/application/differential/add-comment.css' => 'c478bcaa',
-    'rsrc/css/application/differential/changeset-view.css' => '1570a1ff',
+    'rsrc/css/application/differential/changeset-view.css' => 'c45747f0',
     'rsrc/css/application/differential/core.css' => '7ac3cabc',
     'rsrc/css/application/differential/results-table.css' => '239924f9',
     'rsrc/css/application/differential/revision-comment.css' => '48186045',
@@ -110,9 +111,9 @@ return array(
     'rsrc/css/core/syntax.css' => '3c18c1cb',
     'rsrc/css/core/z-index.css' => 'efb673ac',
     'rsrc/css/diviner/diviner-shared.css' => '38813222',
-    'rsrc/css/font/font-awesome.css' => '4c160eb7',
+    'rsrc/css/font/font-awesome.css' => '73d075c3',
     'rsrc/css/font/font-source-sans-pro.css' => '91d53463',
-    'rsrc/css/font/phui-font-icon-base.css' => '104caddd',
+    'rsrc/css/font/phui-font-icon-base.css' => '74cfb6a9',
     'rsrc/css/layout/phabricator-action-header-view.css' => 'c14dfc57',
     'rsrc/css/layout/phabricator-action-list-view.css' => 'dcd9875f',
     'rsrc/css/layout/phabricator-crumbs-view.css' => '6a23399c',
@@ -142,11 +143,11 @@ return array(
     'rsrc/css/phui/phui-remarkup-preview.css' => '19ad512b',
     'rsrc/css/phui/phui-spacing.css' => '042804d6',
     'rsrc/css/phui/phui-status.css' => '2f562399',
-    'rsrc/css/phui/phui-tag-view.css' => '295d81c4',
+    'rsrc/css/phui/phui-tag-view.css' => '5d09d99e',
     'rsrc/css/phui/phui-text.css' => '23e9b4b7',
     'rsrc/css/phui/phui-timeline-view.css' => '15ff2a9f',
     'rsrc/css/phui/phui-workboard-view.css' => '2bf82d00',
-    'rsrc/css/phui/phui-workpanel-view.css' => '1169f879',
+    'rsrc/css/phui/phui-workpanel-view.css' => 'fddd97bf',
     'rsrc/css/sprite-actions.css' => '969ad0e5',
     'rsrc/css/sprite-apps-large.css' => 'd7ef733e',
     'rsrc/css/sprite-apps-xlarge.css' => 'db66c878',
@@ -357,7 +358,8 @@ return array(
     'rsrc/js/application/conpherence/behavior-pontificate.js' => '53f6f2dd',
     'rsrc/js/application/conpherence/behavior-widget-pane.js' => '40b1ff90',
     'rsrc/js/application/countdown/timer.js' => '889c96f3',
-    'rsrc/js/application/dashboard/behavior-dashboard-async-panel.js' => '4398eabb',
+    'rsrc/js/application/dashboard/behavior-dashboard-async-panel.js' => 'f1375ea5',
+    'rsrc/js/application/dashboard/behavior-dashboard-move-panels.js' => 'fa187a68',
     'rsrc/js/application/differential/DifferentialInlineCommentEditor.js' => 'f2441746',
     'rsrc/js/application/differential/behavior-add-reviewers-and-ccs.js' => '533a187b',
     'rsrc/js/application/differential/behavior-comment-jump.js' => '71755c79',
@@ -512,7 +514,7 @@ return array(
     'conpherence-notification-css' => '403cf598',
     'conpherence-update-css' => '1099a660',
     'conpherence-widget-pane-css' => 'bf275a6c',
-    'differential-changeset-view-css' => '1570a1ff',
+    'differential-changeset-view-css' => 'c45747f0',
     'differential-core-view-css' => '7ac3cabc',
     'differential-inline-comment-editor' => 'f2441746',
     'differential-results-table-css' => '239924f9',
@@ -525,7 +527,7 @@ return array(
     'diffusion-icons-css' => '384a0f7d',
     'diffusion-source-css' => '66fdf661',
     'diviner-shared-css' => '38813222',
-    'font-fontawesome' => '4c160eb7',
+    'font-fontawesome' => '73d075c3',
     'font-source-sans-pro' => '91d53463',
     'global-drag-and-drop-css' => '697324ad',
     'harbormaster-css' => 'cec833b7',
@@ -551,7 +553,8 @@ return array(
     'javelin-behavior-conpherence-widget-pane' => '40b1ff90',
     'javelin-behavior-countdown-timer' => '889c96f3',
     'javelin-behavior-dark-console' => 'e9fdb5e5',
-    'javelin-behavior-dashboard-async-panel' => '4398eabb',
+    'javelin-behavior-dashboard-async-panel' => 'f1375ea5',
+    'javelin-behavior-dashboard-move-panels' => 'fa187a68',
     'javelin-behavior-device' => '03d6ed07',
     'javelin-behavior-differential-add-reviewers-and-ccs' => '533a187b',
     'javelin-behavior-differential-comment-jump' => '71755c79',
@@ -698,6 +701,7 @@ return array(
     'phabricator-core-css' => '40151074',
     'phabricator-countdown-css' => '86b7b0a0',
     'phabricator-crumbs-view-css' => '6a23399c',
+    'phabricator-dashboard-css' => '2b41640b',
     'phabricator-drag-and-drop-file-upload' => 'ae6abfba',
     'phabricator-draggable-list' => '1681c4d4',
     'phabricator-fatal-config-template-css' => '25d446d6',
@@ -759,7 +763,7 @@ return array(
     'phui-calendar-month-css' => 'a92e47d2',
     'phui-document-view-css' => '3b078dc0',
     'phui-feed-story-css' => '3a59c2cf',
-    'phui-font-icon-base-css' => '104caddd',
+    'phui-font-icon-base-css' => '74cfb6a9',
     'phui-fontkit-css' => 'de84aa4a',
     'phui-form-css' => 'b78ec020',
     'phui-form-view-css' => '867463b4',
@@ -774,11 +778,11 @@ return array(
     'phui-remarkup-preview-css' => '19ad512b',
     'phui-spacing-css' => '042804d6',
     'phui-status-list-view-css' => '2f562399',
-    'phui-tag-view-css' => '295d81c4',
+    'phui-tag-view-css' => '5d09d99e',
     'phui-text-css' => '23e9b4b7',
     'phui-timeline-view-css' => '15ff2a9f',
     'phui-workboard-view-css' => '2bf82d00',
-    'phui-workpanel-view-css' => '1169f879',
+    'phui-workpanel-view-css' => 'fddd97bf',
     'phuix-action-list-view' => 'b5c256b8',
     'phuix-action-view' => '19a0b148',
     'phuix-dropdown-menu' => 'bd4c8dca',
@@ -1129,12 +1133,6 @@ return array(
       8 => 'phuix-action-list-view',
       9 => 'phuix-action-view',
     ),
-    '4398eabb' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-      2 => 'javelin-workflow',
-    ),
     '441f2137' =>
     array(
       0 => 'javelin-behavior',
@@ -1266,6 +1264,13 @@ return array(
       2 => 'javelin-util',
       3 => 'phabricator-shaped-request',
     ),
+    '62e18640' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
+      2 => 'javelin-dom',
+      3 => 'javelin-typeahead-normalizer',
+    ),
     '6453c869' =>
     array(
       0 => 'javelin-install',
@@ -1317,13 +1322,6 @@ return array(
     array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
-    ),
-    '62e18640' =>
-    array(
-      0 => 'javelin-install',
-      1 => 'javelin-util',
-      2 => 'javelin-dom',
-      3 => 'javelin-typeahead-normalizer',
     ),
     '76f4ebed' =>
     array(
@@ -1967,6 +1965,12 @@ return array(
       0 => 'javelin-install',
       1 => 'javelin-util',
     ),
+    'f1375ea5' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-workflow',
+    ),
     'f2441746' =>
     array(
       0 => 'javelin-dom',
@@ -2020,6 +2024,15 @@ return array(
       3 => 'javelin-json',
       4 => 'javelin-stratcom',
       5 => 'phabricator-shaped-request',
+    ),
+    'fa187a68' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-util',
+      3 => 'javelin-stratcom',
+      4 => 'javelin-workflow',
+      5 => 'phabricator-draggable-list',
     ),
     'fbbce3bf' =>
     array(
