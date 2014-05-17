@@ -66,20 +66,14 @@ final class DiffusionLintSaveRunner {
     }
 
     $branch_name = $api->getBranchName();
-    $this->branch = new PhabricatorRepositoryBranch();
-    $this->conn = $this->branch->establishConnection('w');
-    $this->branch = $this->branch->loadOneWhere(
-      'repositoryID = %d AND name = %s',
+
+    $this->branch = PhabricatorRepositoryBranch::loadOrCreateBranch(
       $project->getRepositoryID(),
       $branch_name);
+    $this->conn = $this->branch->establishConnection('w');
 
     $this->lintCommit = null;
-    if (!$this->branch) {
-      $this->branch = id(new PhabricatorRepositoryBranch())
-        ->setRepositoryID($project->getRepositoryID())
-        ->setName($branch_name)
-        ->save();
-    } else if (!$this->all) {
+    if (!$this->all) {
       $this->lintCommit = $this->branch->getLintCommit();
     }
 
@@ -94,6 +88,7 @@ final class DiffusionLintSaveRunner {
         $this->lintCommit = null;
       }
     }
+
 
     if (!$this->lintCommit) {
       $where = ($this->svnRoot

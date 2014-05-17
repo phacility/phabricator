@@ -136,6 +136,10 @@
   padding: 0;
 }
 
+.diffusion-source td.cov {
+  padding: 0 8px;
+}
+
 td.cov-U {
   background: #dd8866;
 }
@@ -150,6 +154,10 @@ td.cov-N {
 
 td.cov-X {
   background: #aa00aa;
+}
+
+td.cov-I {
+  background: {$lightgreybackground};
 }
 
 .differential-diff td.source-cov-C,
