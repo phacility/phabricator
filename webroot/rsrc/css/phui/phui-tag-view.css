@@ -13,8 +13,13 @@ a.phui-tag-view:hover {
   text-decoration: none;
 }
 
-.phui-tag-state-closed .phui-tag-core {
+.phui-tag-core-closed {
   text-decoration: line-through;
+  color: rgba(0,0,0,0.5);
+}
+
+.phui-tag-core-closed:hover {
+  text-decoration: none;
 }
 
 .phui-tag-core {
@@ -57,7 +62,8 @@ a.phui-tag-view:hover {
 
 .phui-tag-type-object,
 a.phui-tag-type-object,
-a.phui-tag-type-object:link {
+a.phui-tag-type-object:link,
+.phui-tag-core-closed .phui-tag-color-object {
   color: #000000;
 }
 

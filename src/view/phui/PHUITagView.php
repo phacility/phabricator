@@ -101,10 +101,6 @@ final class PHUITagView extends AphrontView {
       'phui-tag-type-'.$this->type,
     );
 
-    if ($this->closed) {
-      $classes[] = 'phui-tag-state-closed';
-    }
-
     $color = null;
     if ($this->backgroundColor) {
       $color = 'phui-tag-color-'.$this->backgroundColor;
@@ -135,6 +131,15 @@ final class PHUITagView extends AphrontView {
         'class' => 'phui-tag-core '.$color,
       ),
       array($dot, $this->name));
+
+    if ($this->closed) {
+      $content = phutil_tag(
+        'span',
+        array(
+          'class' => 'phui-tag-core-closed',
+        ),
+        $content);
+    }
 
     if ($this->phid) {
       Javelin::initBehavior('phabricator-hovercards');
