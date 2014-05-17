@@ -352,22 +352,19 @@ final class DifferentialChangesetParser {
       return;
     }
 
-    try {
-      $changeset = new DifferentialChangeset();
-      $conn_w = $changeset->establishConnection('w');
+    $changeset = new DifferentialChangeset();
+    $conn_w = $changeset->establishConnection('w');
 
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
       queryfx(
         $conn_w,
-        'INSERT INTO %T (id, cache, dateCreated) VALUES (%d, %s, %d)
+        'INSERT INTO %T (id, cache, dateCreated) VALUES (%d, %B, %d)
           ON DUPLICATE KEY UPDATE cache = VALUES(cache)',
         DifferentialChangeset::TABLE_CACHE,
         $render_cache_key,
         $cache,
         time());
-    } catch (AphrontQueryException $ex) {
-      // TODO: uhoh
-    }
+    unset($unguarded);
   }
 
   private function markGenerated($new_corpus_block = '') {
