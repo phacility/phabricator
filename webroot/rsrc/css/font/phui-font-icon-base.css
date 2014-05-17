@@ -104,6 +104,9 @@
   }
 }
 
+.phui-icon-view.dark {
+  color: {$darkgreytext};
+}
 .phui-icon-view.bluegrey {
   color: #7787a6;
 }
