@@ -1,17 +1,17 @@
 <?php
 
-/**
- * @group countdown
- */
 final class PhabricatorCountdownViewController
   extends PhabricatorCountdownController {
 
   private $id;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
   }
-
 
   public function processRequest() {
 
