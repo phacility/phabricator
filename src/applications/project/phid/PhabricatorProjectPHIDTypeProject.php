@@ -17,7 +17,7 @@ final class PhabricatorProjectPHIDTypeProject extends PhabricatorPHIDType {
   }
 
   public function getTypeIcon() {
-    return 'policy-project';
+    return 'fa-briefcase bluegrey';
   }
 
   public function newObject() {

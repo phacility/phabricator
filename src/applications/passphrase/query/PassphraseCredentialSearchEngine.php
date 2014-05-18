@@ -96,14 +96,14 @@ final class PassphraseCredentialSearchEngine
         pht('Login: %s', $credential->getUsername()));
 
       if ($credential->getIsDestroyed()) {
-        $item->addIcon('disable', pht('Destroyed'));
+        $item->addIcon('fa-ban', pht('Destroyed'));
         $item->setDisabled(true);
       }
 
       $type = PassphraseCredentialType::getTypeByConstant(
         $credential->getCredentialType());
       if ($type) {
-        $item->addIcon('wrench', $type->getCredentialTypeName());
+        $item->addIcon('fa-wrench', $type->getCredentialTypeName());
       }
 
       $list->addItem($item);

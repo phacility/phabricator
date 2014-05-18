@@ -28,13 +28,13 @@ final class HeraldRuleViewController extends HeraldController {
 
     if ($rule->getIsDisabled()) {
       $header->setStatus(
-        'oh-open',
-        'red',
+        'fa-ban',
+        'dark',
         pht('Disabled'));
     } else {
       $header->setStatus(
-        'oh-open',
-        null,
+        'fa-check',
+        'bluegrey',
         pht('Active'));
     }
 

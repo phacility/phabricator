@@ -72,7 +72,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
       ->setPolicyObject($credential);
 
     if ($credential->getIsDestroyed()) {
-      $header->setStatus('reject', 'red', pht('Destroyed'));
+      $header->setStatus('fa-ban', 'red', pht('Destroyed'));
     }
 
     return $header;

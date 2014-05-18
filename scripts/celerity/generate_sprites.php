@@ -41,7 +41,6 @@ $sheets = array(
   'gradient' => $generator->buildGradientSheet(),
   'main-header' => $generator->buildMainHeaderSheet(),
   'login' => $generator->buildLoginSheet(),
-  'status' => $generator->buildStatusSheet(),
   'projects' => $generator->buildProjectsSheet(),
 );
 

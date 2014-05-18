@@ -16,6 +16,10 @@ final class PhabricatorProjectPHIDTypeColumn extends PhabricatorPHIDType {
     return new PhabricatorProjectColumn();
   }
 
+  public function getTypeIcon() {
+    return 'fa-columns bluegrey';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

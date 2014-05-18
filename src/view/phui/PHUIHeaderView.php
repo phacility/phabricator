@@ -87,13 +87,12 @@ final class PHUIHeaderView extends AphrontView {
     $header_class = 'phui-header-status';
 
     if ($color) {
-      $icon = $icon.'-'.$color;
+      $icon = $icon.' '.$color;
       $header_class = $header_class.'-'.$color;
     }
 
     $img = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_STATUS)
-      ->setSpriteIcon($icon);
+      ->setIconFont($icon);
 
     $tag = phutil_tag(
       'span',
@@ -258,8 +257,7 @@ final class PHUIHeaderView extends AphrontView {
     $phid = $object->getPHID();
 
     $icon = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_STATUS)
-      ->setSpriteIcon($policy->getIcon());
+      ->setIconFont($policy->getIcon().' bluegrey');
 
     $link = javelin_tag(
       'a',

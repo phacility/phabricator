@@ -36,23 +36,23 @@ final class DifferentialRevisionStatus {
   }
 
   public static function getRevisionStatusIcon($status) {
-    $default = 'oh-open';
+    $default = 'fa-square-o bluegrey';
 
     $map = array(
       ArcanistDifferentialRevisionStatus::NEEDS_REVIEW   =>
-        'oh-open',
+        'fa-square-o bluegrey',
       ArcanistDifferentialRevisionStatus::NEEDS_REVISION =>
-        'oh-open-red',
+        'fa-square-o red',
       ArcanistDifferentialRevisionStatus::CHANGES_PLANNED =>
-        'oh-open-red',
+        'fa-square-o red',
       ArcanistDifferentialRevisionStatus::ACCEPTED       =>
-        'oh-open-green',
+        'fa-square-o green',
       ArcanistDifferentialRevisionStatus::CLOSED         =>
-        'oh-closed-dark',
+        'fa-check-square-o',
       ArcanistDifferentialRevisionStatus::ABANDONED      =>
-        'oh-closed-dark',
+        'fa-check-square-o',
       ArcanistDifferentialRevisionStatus::IN_PREPARATION =>
-        'question-blue',
+        'fa-question-circle blue',
     );
     return idx($map, $status, $default);
   }
@@ -63,8 +63,7 @@ final class DifferentialRevisionStatus {
       ArcanistDifferentialRevisionStatus::getNameForRevisionStatus($status);
 
     $img = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_STATUS)
-      ->setSpriteIcon(self::getRevisionStatusIcon($status));
+      ->setIconFont(self::getRevisionStatusIcon($status));
 
     $tag = phutil_tag(
       'span',

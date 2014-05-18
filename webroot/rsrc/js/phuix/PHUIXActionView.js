@@ -12,7 +12,6 @@ JX.install('PHUIXActionView', {
     _node: null,
     _name: null,
     _icon: 'none',
-    _iconSheet: 'icons',
     _disabled: false,
     _handler: null,
     _selected: false,
@@ -54,9 +53,8 @@ JX.install('PHUIXActionView', {
       return this;
     },
 
-    setIcon: function(icon, sheet) {
+    setIcon: function(icon) {
       this._icon = icon;
-      this._iconSheet = sheet || this._iconSheet;
       this._buildIconNode(true);
       return this;
     },
@@ -90,14 +88,14 @@ JX.install('PHUIXActionView', {
           className: [
             'phui-icon-view',
             'phabricator-action-view-icon',
-            'sprite-' + this._iconSheet
+            'phui-font-fa'
           ].join(' ')
         };
         var node = JX.$N('span', attr);
 
-        var icon_class = this._iconSheet + '-' + this._icon;
+        var icon_class = this._icon;
         if (this._disabled) {
-          icon_class = icon_class + '-grey';
+          icon_class = icon_class + ' grey';
         }
 
         JX.DOM.alterClass(node, icon_class, true);

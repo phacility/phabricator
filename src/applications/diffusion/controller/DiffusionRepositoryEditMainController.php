@@ -39,9 +39,9 @@ final class DiffusionRepositoryEditMainController
     $header = id(new PHUIHeaderView())
       ->setHeader($title);
     if ($repository->isTracked()) {
-      $header->setStatus('oh-ok', '', pht('Active'));
+      $header->setStatus('fa-check', 'bluegrey', pht('Active'));
     } else {
-      $header->setStatus('policy-noone', '', pht('Inactive'));
+      $header->setStatus('fa-ban', 'dark', pht('Inactive'));
     }
 
     $basic_actions = $this->buildBasicActions($repository);

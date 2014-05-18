@@ -150,11 +150,11 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setPolicyObject($repository);
 
     if (!$repository->isTracked()) {
-      $header->setStatus('policy-noone', '', pht('Inactive'));
+      $header->setStatus('fa-ban', 'dark', pht('Inactive'));
     } else if ($repository->isImporting()) {
-      $header->setStatus('time', 'red', pht('Importing...'));
+      $header->setStatus('fa-clock-o', 'indigo', pht('Importing...'));
     } else {
-      $header->setStatus('oh-ok', '', pht('Active'));
+      $header->setStatus('fa-check', 'bluegrey', pht('Active'));
     }
 
 

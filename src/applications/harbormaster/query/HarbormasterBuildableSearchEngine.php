@@ -203,7 +203,7 @@ final class HarbormasterBuildableSearchEngine
       }
 
       if ($buildable->getIsManualBuildable()) {
-        $item->addIcon('wrench-grey', pht('Manual'));
+        $item->addIcon('fa-wrench grey', pht('Manual'));
       }
 
       switch ($buildable->getBuildableStatus()) {

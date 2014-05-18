@@ -32,9 +32,9 @@ final class PhabricatorApplicationDetailViewController
       ->setPolicyObject($selected);
 
     if ($selected->isInstalled()) {
-      $header->setStatus('oh-ok', null, pht('Installed'));
+      $header->setStatus('fa-check', 'bluegrey', pht('Installed'));
     } else {
-      $header->setStatus('policy-noone', null, pht('Uninstalled'));
+      $header->setStatus('fa-ban', 'dark', pht('Uninstalled'));
     }
 
     $actions = $this->buildActionView($user, $selected);

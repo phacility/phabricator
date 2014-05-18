@@ -42,7 +42,7 @@ final class AphrontTokenizerTemplateView extends AphrontView {
       $tokens[] = $this->renderToken(
         $value->getPHID(),
         $value->getFullName(),
-        $value->getTypeIcon());
+        $value->getType());
     }
 
     $input = javelin_tag(
@@ -81,7 +81,7 @@ final class AphrontTokenizerTemplateView extends AphrontView {
         phutil_tag(
           'span',
           array(
-            'class' => 'phui-icon-view sprite-status status-'.$icon,
+            'class' => 'phui-icon-view phui-font-fa bluegrey '.$icon,
           )),
         $value);
     }

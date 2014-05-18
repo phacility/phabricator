@@ -31,11 +31,11 @@ final class HarbormasterBuildViewController
       ->setPolicyObject($build);
 
     if ($build->isRestarting()) {
-      $header->setStatus('warning', 'red', pht('Restarting'));
+      $header->setStatus('fa-exclamation-triangle', 'red', pht('Restarting'));
     } else if ($build->isStopping()) {
-      $header->setStatus('warning', 'red', pht('Stopping'));
+      $header->setStatus('fa-exclamation-triangle', 'red', pht('Stopping'));
     } else if ($build->isResuming()) {
-      $header->setStatus('warning', 'red', pht('Resuming'));
+      $header->setStatus('fa-exclamation-triangle', 'red', pht('Resuming'));
     }
 
     $box = id(new PHUIObjectBoxView())

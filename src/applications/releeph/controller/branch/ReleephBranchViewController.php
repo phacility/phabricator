@@ -132,9 +132,9 @@ final class ReleephBranchViewController extends ReleephBranchController
       ->setPolicyObject($branch);
 
     if ($branch->getIsActive()) {
-      $header->setStatus('oh-ok', '', pht('Active'));
+      $header->setStatus('fa-check', 'bluegrey', pht('Active'));
     } else {
-      $header->setStatus('policy-noone', '', pht('Closed'));
+      $header->setStatus('fa-ban', 'dark', pht('Closed'));
     }
 
     $actions = id(new PhabricatorActionListView())

@@ -81,7 +81,7 @@ JX.behavior('differential-dropdown-menus', function(config) {
     };
 
     var reveal_item = new JX.PHUIXActionView()
-      .setIcon('preview');
+      .setIcon('fa-eye');
     list.addItem(reveal_item);
 
     var visible_item = new JX.PHUIXActionView()
@@ -97,12 +97,12 @@ JX.behavior('differential-dropdown-menus', function(config) {
       });
     list.addItem(visible_item);
 
-    add_link('file', pht('Browse in Diffusion'), data.diffusionURI);
-    add_link('transcript', pht('View Standalone'), data.standaloneURI);
-    add_link('arrow_left', pht('Show Raw File (Left)'), data.leftURI);
-    add_link('arrow_right', pht('Show Raw File (Right)'), data.rightURI);
-    add_link('edit', pht('Open in Editor'), data.editor, true);
-    add_link('wrench', pht('Configure Editor'), data.editorConfigure);
+    add_link('fa-files', pht('Browse in Diffusion'), data.diffusionURI);
+    add_link('fa-file-o', pht('View Standalone'), data.standaloneURI);
+    add_link('fa-arrow-left', pht('Show Raw File (Left)'), data.leftURI);
+    add_link('fa-arrow-right', pht('Show Raw File (Right)'), data.rightURI);
+    add_link('fa-pencil', pht('Open in Editor'), data.editor, true);
+    add_link('fa-wrench', pht('Configure Editor'), data.editorConfigure);
 
 
     menu.setContent(list.getNode());
@@ -118,6 +118,7 @@ JX.behavior('differential-dropdown-menus', function(config) {
         reveal_item
           .setDisabled(false)
           .setName(pht('Show Entire File'))
+          .setIcon('fa-file-o')
           .setHandler(function(e) {
             show_more(JX.$(data.containerID));
             e.prevent();
@@ -126,6 +127,7 @@ JX.behavior('differential-dropdown-menus', function(config) {
       } else {
         reveal_item
           .setDisabled(true)
+          .setIcon('fa-file')
           .setName(pht('Entire File Shown'))
           .setHandler(function(e) { e.prevent(); });
       }
@@ -147,11 +149,11 @@ JX.behavior('differential-dropdown-menus', function(config) {
         if (JX.Stratcom.getData(diff).hidden) {
           visible_item
             .setName(pht('Expand File'))
-            .setIcon('unmerge');
+            .setIcon('fa-expand');
         } else {
           visible_item
             .setName(pht('Collapse File'))
-            .setIcon('merge');
+            .setIcon('fa-compress');
         }
       } else {
         // Do nothing when there is no diff shown in the table. For example,

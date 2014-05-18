@@ -4,7 +4,7 @@
 
 div.jx-typeahead-hardpoint {
   position: relative;
-  _zoom: 1; /* Some kind of IE6 fix? */ /* yes */
+  _zoom: 1; /* Some kind of IE6 fix? */ /* yes */ /* why? */
 }
 
 div.jx-typeahead-results {
@@ -35,10 +35,14 @@ div.jx-typeahead-results a.jx-result {
 div.jx-typeahead-results a.jx-result:hover,
 div.jx-typeahead-results a.focused {
   display: block;
-  background: #dde6f9;
-  border-top: 1px solid #dde6f9;
-  border-bottom: 1px solid #d0dbf3;
+  background: {$lightblue};
+  border-top: 1px solid {$thinblueborder};
+  border-bottom: 1px solid {$thinblueborder};
   text-decoration: none;
+}
+
+div.jx-typeahead-results .phui-icon-view {
+  margin-top: 2px;
 }
 
 table.jx-typeahead button {

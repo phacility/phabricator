@@ -17,7 +17,7 @@ final class PhabricatorPeoplePHIDTypeUser extends PhabricatorPHIDType {
   }
 
   public function getTypeIcon() {
-    return 'policy-all';
+    return 'fa-user bluegrey';
   }
 
   public function newObject() {
