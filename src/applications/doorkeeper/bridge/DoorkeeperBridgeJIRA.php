@@ -110,10 +110,34 @@ final class DoorkeeperBridgeJIRA extends DoorkeeperBridge {
     // Convert the "self" URI, which points at the REST endpoint, into a
     // browse URI.
     $self = idx($result, 'self');
-    $uri = new PhutilURI($self);
-    $uri->setPath('browse/'.$obj->getObjectID());
+    $object_id = $obj->getObjectID();
 
-    $obj->setObjectURI((string)$uri);
+    $uri = self::getJIRAIssueBrowseURIFromJIRARestURI($self, $object_id);
+    if ($uri !== null) {
+      $obj->setObjectURI($uri);
+    }
+  }
+
+  public static function getJIRAIssueBrowseURIFromJIRARestURI(
+    $uri,
+    $object_id) {
+
+    $uri = new PhutilURI($uri);
+
+    // The JIRA install might not be at the domain root, so we may need to
+    // keep an initial part of the path, like "/jira/". Find the API specific
+    // part of the URI, strip it off, then replace it with the web version.
+    $path = $uri->getPath();
+    $pos = strrpos($path, 'rest/api/2/issue/');
+    if ($pos === false) {
+      return null;
+    }
+
+    $path = substr($path, 0, $pos);
+    $path = $path.'browse/'.$object_id;
+    $uri->setPath($path);
+
+    return (string)$uri;
   }
 
 }
