@@ -19,6 +19,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   protected $joinPolicy;
 
   private $memberPHIDs = self::ATTACHABLE;
+  private $watcherPHIDs = self::ATTACHABLE;
+  private $sparseWatchers = self::ATTACHABLE;
   private $sparseMembers = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
   private $profileImageFile = self::ATTACHABLE;
@@ -159,6 +161,32 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   }
 
 
+  public function isUserWatcher($user_phid) {
+    if ($this->watcherPHIDs !== self::ATTACHABLE) {
+      return in_array($user_phid, $this->watcherPHIDs);
+    }
+    return $this->assertAttachedKey($this->sparseWatchers, $user_phid);
+  }
+
+  public function setIsUserWatcher($user_phid, $is_watcher) {
+    if ($this->sparseWatchers === self::ATTACHABLE) {
+      $this->sparseWatchers = array();
+    }
+    $this->sparseWatchers[$user_phid] = $is_watcher;
+    return $this;
+  }
+
+  public function attachWatcherPHIDs(array $phids) {
+    $this->watcherPHIDs = $phids;
+    return $this;
+  }
+
+  public function getWatcherPHIDs() {
+    return $this->assertAttached($this->watcherPHIDs);
+  }
+
+
+
 /* -(  PhabricatorSubscribableInterface  )----------------------------------- */
 
 
@@ -171,7 +199,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   }
 
   public function shouldAllowSubscription($phid) {
-    return $this->isUserMember($phid);
+    return $this->isUserMember($phid) &&
+           !$this->isUserWatcher($phid);
   }
 
 

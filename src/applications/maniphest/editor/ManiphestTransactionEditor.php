@@ -333,6 +333,10 @@ final class ManiphestTransactionEditor
       $phids[] = $phid;
     }
 
+    foreach (parent::getMailCC($object) as $phid) {
+      $phids[] = $phid;
+    }
+
     foreach ($this->heraldEmailPHIDs as $phid) {
       $phids[] = $phid;
     }
