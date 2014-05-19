@@ -335,7 +335,7 @@ file and uses it to decide which linters should be run on which paths. If no
 You can write a custom lint engine instead, which can make a more powerful set
 of decisions about which linters to run on which paths. For instructions on
 writing a custom lint engine, see @{article:Arcanist User Guide: Customizing
-Lint, Unit Tests and Workflows} and @{class@arcanist:ExampleLintEngine}.
+Lint, Unit Tests and Workflows}.
 
 To name an alternate lint engine, set `lint.engine` in your `.arcconfig` to the
 name of a class which extends @{class@arcanist:ArcanistLintEngine}. For more
