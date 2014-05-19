@@ -93,6 +93,36 @@ final class PhrictionEditController
     $errors = array();
 
     if ($request->isFormPost()) {
+
+      $overwrite = $request->getBool('overwrite');
+      if (!$overwrite) {
+        $edit_version = $request->getStr('contentVersion');
+        $current_version = $content->getVersion();
+        if ($edit_version != $current_version) {
+          $dialog = $this->newDialog()
+            ->setTitle(pht('Edit Conflict!'))
+            ->appendParagraph(
+              pht(
+                'Another user made changes to this document after you began '.
+                'editing it. Do you want to overwrite their changes?'))
+            ->appendParagraph(
+              pht(
+                'If you choose to overwrite their changes, you should review '.
+                'the document edit history to see what you overwrote, and '.
+                'then make another edit to merge the changes if necessary.'))
+            ->addSubmitButton(pht('Overwrite Changes'))
+            ->addCancelButton($request->getRequestURI());
+
+          $dialog->addHiddenInput('overwrite', 'true');
+          foreach ($request->getPassthroughRequestData() as $key => $value) {
+            $dialog->addHiddenInput($key, $value);
+          }
+
+          return $dialog;
+        }
+      }
+
+
       $title = $request->getStr('title');
       $notes = $request->getStr('description');
 
@@ -192,6 +222,7 @@ final class PhrictionEditController
       ->setAction($request->getRequestURI()->getPath())
       ->addHiddenInput('slug', $document->getSlug())
       ->addHiddenInput('nodraft', $request->getBool('nodraft'))
+      ->addHiddenInput('contentVersion', $content->getVersion())
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Title'))
