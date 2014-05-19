@@ -27,6 +27,7 @@ a.phui-tag-view:hover {
   border: 1px solid transparent;
   border-radius: 3px;
   padding: 0 4px;
+  white-space: nowrap;
 }
 
 .phui-tag-type-state .phui-tag-core {
