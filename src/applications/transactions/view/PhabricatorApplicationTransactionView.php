@@ -382,13 +382,22 @@ class PhabricatorApplicationTransactionView extends AphrontView {
         ->setAnchor($anchor);
     }
 
-    $has_deleted_comment = $xaction->getComment() &&
-      $xaction->getComment()->getIsDeleted();
+    $transaction_type = $xaction->getTransactionType();
+    $comment_type = PhabricatorTransactions::TYPE_COMMENT;
+    $is_normal_comment = ($transaction_type == $comment_type);
 
-    $has_removed_comment = $xaction->getComment() &&
-      $xaction->getComment()->getIsRemoved();
+    if ($this->getShowEditActions() &&
+        !$this->isPreview &&
+        $is_normal_comment) {
 
-    if ($this->getShowEditActions() && !$this->isPreview) {
+      $has_deleted_comment =
+        $xaction->getComment() &&
+        $xaction->getComment()->getIsDeleted();
+
+      $has_removed_comment =
+        $xaction->getComment() &&
+        $xaction->getComment()->getIsRemoved();
+
       if ($xaction->getCommentVersion() > 1 && !$has_removed_comment) {
         $event->setIsEdited(true);
       }
