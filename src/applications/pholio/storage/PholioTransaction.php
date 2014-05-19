@@ -66,6 +66,7 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
         return 'fa-comment';
       case PholioTransactionType::TYPE_NAME:
       case PholioTransactionType::TYPE_DESCRIPTION:
+      case PholioTransactionType::TYPE_STATUS:
       case PholioTransactionType::TYPE_IMAGE_NAME:
       case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
       case PholioTransactionType::TYPE_IMAGE_SEQUENCE:
@@ -103,6 +104,11 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
       case PholioTransactionType::TYPE_DESCRIPTION:
         return pht(
           "%s updated the mock's description.",
+          $this->renderHandleLink($author_phid));
+        break;
+      case PholioTransactionType::TYPE_STATUS:
+        return pht(
+          "%s updated the mock's status.",
           $this->renderHandleLink($author_phid));
         break;
       case PholioTransactionType::TYPE_INLINE:
@@ -207,6 +213,12 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
+      case PholioTransactionType::TYPE_STATUS:
+        return pht(
+          '%s updated the status for %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+        break;
       case PholioTransactionType::TYPE_INLINE:
         return pht(
           '%s added an inline comment to %s.',
@@ -299,6 +311,7 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
           return PhabricatorTransactions::COLOR_GREEN;
         }
       case PholioTransactionType::TYPE_DESCRIPTION:
+      case PholioTransactionType::TYPE_STATUS:
       case PholioTransactionType::TYPE_IMAGE_NAME:
       case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
       case PholioTransactionType::TYPE_IMAGE_SEQUENCE:

@@ -19,6 +19,7 @@ final class PholioMock extends PholioDAO
   protected $description;
   protected $coverPHID;
   protected $mailKey;
+  protected $status;
 
   private $images = self::ATTACHABLE;
   private $allImages = self::ATTACHABLE;
@@ -127,6 +128,17 @@ final class PholioMock extends PholioDAO
     }
 
     return $history;
+  }
+
+  public function getStatuses() {
+    $options = array();
+    $options['closed'] = 'Closed';
+    $options['open'] = 'Open';
+    return $options;
+  }
+
+  public function isClosed() {
+    return ($this->getStatus() == 'closed');
   }
 
 

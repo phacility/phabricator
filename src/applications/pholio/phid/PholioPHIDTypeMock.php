@@ -42,6 +42,10 @@ final class PholioPHIDTypeMock extends PhabricatorPHIDType {
       $handle->setURI("/M{$id}");
       $handle->setName("M{$id}");
       $handle->setFullName("M{$id}: {$name}");
+
+      if ($mock->isClosed()) {
+        $handle->setStatus(PhabricatorObjectHandleStatus::STATUS_CLOSED);
+      }
     }
   }
 

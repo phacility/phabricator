@@ -67,9 +67,18 @@ final class PholioMockViewController extends PholioController {
 
     $title = $mock->getName();
 
+    if ($mock->isClosed()) {
+      $header_icon = 'oh-closed';
+      $header_name = pht('Closed');
+    } else {
+      $header_icon = 'open';
+      $header_name = pht('Open');
+    }
+
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
       ->setUser($user)
+      ->setStatus($header_icon, '', $header_name)
       ->setPolicyObject($mock);
 
     $actions = $this->buildActionView($mock);
