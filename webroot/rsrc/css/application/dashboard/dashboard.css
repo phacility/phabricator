@@ -18,8 +18,14 @@
 }
 
 .aphront-multi-column-fluid
+.aphront-multi-column-column-outer
+.aphront-multi-column-column .dashboard-panel {
+  margin: 16px 16px 0px 16px;
+}
+
+.aphront-multi-column-fluid
 .aphront-multi-column-column-outer.grippable
-.aphront-multi-column-column .phui-object-box {
+.aphront-multi-column-column .dashboard-panel {
   cursor: move;
 }
 
@@ -56,4 +62,10 @@
 .aphront-multi-column-column.drag-target-list
 .dashboard-panel-placeholder {
   display: none;
+}
+
+.aphront-multi-column-fluid
+.aphront-multi-column-column-outer
+.aphront-multi-column-column .aphront-error-view {
+  margin: 0;
 }

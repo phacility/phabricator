@@ -52,7 +52,7 @@ final class PhabricatorDashboardPanelEditController
       $title = pht('Edit %s', $panel->getMonogram());
       $header = pht('Edit %s %s', $panel->getMonogram(), $panel->getName());
       $button = pht('Save Panel');
-      $cancel_uri = '/'.$panel->getMonogram();
+      $cancel_uri = $this->getPanelRedirectURI($panel);
     }
 
     $v_name = $panel->getName();
@@ -89,7 +89,7 @@ final class PhabricatorDashboardPanelEditController
           ->applyTransactions($panel, $xactions);
 
         return id(new AphrontRedirectResponse())
-          ->setURI('/'.$panel->getMonogram());
+          ->setURI($this->getPanelRedirectURI($panel));
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
 
@@ -142,6 +142,18 @@ final class PhabricatorDashboardPanelEditController
         'title' => $title,
         'device' => true,
       ));
+  }
+
+  private function getPanelRedirectURI(PhabricatorDashboardPanel $panel) {
+    $request = $this->getRequest();
+    $dashboard_id = $request->getInt('dashboardID');
+    if ($dashboard_id) {
+      $uri = $this->getApplicationURI('arrange/'.$dashboard_id.'/');
+    } else {
+      $uri = '/'.$panel->getMonogram();
+    }
+
+    return $uri;
   }
 
 }

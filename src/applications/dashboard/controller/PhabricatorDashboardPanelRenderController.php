@@ -37,7 +37,8 @@ final class PhabricatorDashboardPanelRenderController
       ->setViewer($viewer)
       ->setPanel($panel)
       ->setParentPanelPHIDs($parent_phids)
-      ->setHeaderless($request->getBool('headerless'))
+      ->setHeaderMode($request->getStr('headerMode'))
+      ->setDashboardID($request->getInt('dashboardID'))
       ->renderPanel();
 
     if ($request->isAjax()) {

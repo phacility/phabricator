@@ -68,12 +68,10 @@ final class PhabricatorDashboardAddPanelController
               ),
             ));
 
-        if ($layout_config->isMultiColumnLayout()) {
-          $layout_config->setPanelLocation(
-            $request->getInt('column'),
-            $panel->getPHID());
-          $dashboard->setLayoutConfigFromObject($layout_config);
-        }
+        $layout_config->setPanelLocation(
+          $request->getInt('column', 0),
+          $panel->getPHID());
+        $dashboard->setLayoutConfigFromObject($layout_config);
 
         $editor = id(new PhabricatorDashboardTransactionEditor())
           ->setActor($viewer)

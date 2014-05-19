@@ -30,7 +30,7 @@ final class PhabricatorDashboardPanelTypeQuery
     );
   }
 
-  protected function renderPanelContent(
+  public function renderPanelContent(
     PhabricatorUser $viewer,
     PhabricatorDashboardPanel $panel,
     PhabricatorDashboardPanelRenderingEngine $engine) {

@@ -2,19 +2,33 @@
 
 final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
 
+  const HEADER_MODE_NORMAL = 'normal';
+  const HEADER_MODE_NONE   = 'none';
+  const HEADER_MODE_EDIT   = 'edit';
+
   private $panel;
   private $viewer;
   private $enableAsyncRendering;
   private $parentPanelPHIDs;
-  private $headerless;
+  private $headerMode = self::HEADER_MODE_NORMAL;
+  private $dashboardID;
 
-  public function setHeaderless($headerless) {
-    $this->headerless = $headerless;
+  public function setDashboardID($id) {
+    $this->dashboardID = $id;
     return $this;
   }
 
-  public function getHeaderless() {
-    return $this->headerless;
+  public function getDashboardID() {
+    return $this->dashboardID;
+  }
+
+  public function setHeaderMode($header_mode) {
+    $this->headerMode = $header_mode;
+    return $this;
+  }
+
+  public function getHeaderMode() {
+    return $this->headerMode;
   }
 
   /**
@@ -39,14 +53,22 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
     return $this;
   }
 
+  public function getViewer() {
+    return $this->viewer;
+  }
+
   public function setPanel(PhabricatorDashboardPanel $panel) {
     $this->panel = $panel;
     return $this;
   }
 
+  public function getPanel() {
+    return $this->panel;
+  }
+
   public function renderPanel() {
-    $panel = $this->panel;
-    $viewer = $this->viewer;
+    $panel = $this->getPanel();
+    $viewer = $this->getViewer();
 
     if (!$panel) {
       return $this->renderErrorPanel(
@@ -69,11 +91,11 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
 
       if ($this->enableAsyncRendering) {
         if ($panel_type->shouldRenderAsync()) {
-          return $this->renderAsyncPanel($panel);
+          return $this->renderAsyncPanel();
         }
       }
 
-      return $panel_type->renderPanel($viewer, $panel, $this);
+      return $this->renderNormalPanel($viewer, $panel, $this);
     } catch (Exception $ex) {
       return $this->renderErrorPanel(
         $panel->getName(),
@@ -84,47 +106,146 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
     }
   }
 
-  private function renderErrorPanel($title, $body) {
-    if ($this->getHeaderless()) {
-      return id(new AphrontErrorView())
-        ->setErrors(array($body));
-    } else {
-      return id(new PHUIObjectBoxView())
-        ->setHeaderText($title)
-        ->setFormErrors(array($body));
-    }
+  private function renderNormalPanel() {
+    $panel = $this->getPanel();
+    $panel_type = $panel->getImplementation();
+
+    $content = $panel_type->renderPanelContent(
+      $this->getViewer(),
+      $panel,
+      $this);
+    $header = $this->renderPanelHeader();
+
+    return $this->renderPanelDiv(
+      $content,
+      $header);
   }
 
-  private function renderAsyncPanel(PhabricatorDashboardPanel $panel) {
+
+  private function renderAsyncPanel() {
+    $panel = $this->getPanel();
+
     $panel_id = celerity_generate_unique_node_id();
+    $dashboard_id = $this->getDashboardID();
 
     Javelin::initBehavior(
       'dashboard-async-panel',
       array(
         'panelID' => $panel_id,
         'parentPanelPHIDs' => $this->getParentPanelPHIDs(),
-        'headerless' => $this->getHeaderless(),
+        'headerMode' => $this->getHeaderMode(),
+        'dashboardID' => $dashboard_id,
         'uri' => '/dashboard/panel/render/'.$panel->getID().'/',
       ));
 
-    $content = pht('Loading...');
+    $header = $this->renderPanelHeader();
+    $content = id(new PHUIPropertyListView())
+      ->addTextContent(pht('Loading...'));
 
-    if ($this->headerless) {
-      return phutil_tag(
-        'div',
-        array(
-          'id' => $panel_id,
-        ),
-        $content);
-    } else {
-      return id(new PHUIObjectBoxView())
-        ->addSigil('dashboard-panel')
-        ->setMetadata(array(
-          'objectPHID' => $panel->getPHID()))
-        ->setHeaderText($panel->getName())
-        ->setID($panel_id)
-        ->appendChild($content);
+    return $this->renderPanelDiv(
+      $content,
+      $header,
+      $panel_id);
+  }
+
+  private function renderErrorPanel($title, $body) {
+    switch ($this->getHeaderMode()) {
+      case self::HEADER_MODE_NONE:
+        $header = null;
+        break;
+      case self::HEADER_MODE_EDIT:
+        $header = id(new PhabricatorActionHeaderView())
+          ->setHeaderTitle($title)
+          ->setHeaderColor(PhabricatorActionHeaderView::HEADER_RED);
+        $header = $this->addPanelHeaderActions($header);
+        break;
+      case self::HEADER_MODE_NORMAL:
+      default:
+        $header = id(new PhabricatorActionHeaderView())
+          ->setHeaderTitle($title)
+          ->setHeaderColor(PhabricatorActionHeaderView::HEADER_RED);
+        break;
     }
+    return $this->renderPanelDiv(
+      id(new AphrontErrorView())
+      ->appendChild($body),
+      $header);
+  }
+
+  private function renderPanelDiv(
+    $content,
+    $header = null,
+    $id = null) {
+
+    $panel = $this->getPanel();
+    if (!$id) {
+      $id = celerity_generate_unique_node_id();
+    }
+    return javelin_tag(
+      'div',
+      array(
+        'id' => $id,
+        'sigil' => 'dashboard-panel',
+        'meta' => array(
+          'objectPHID' => $panel->getPHID()),
+        'class' => 'dashboard-panel'),
+      array(
+        $header,
+        $content));
+  }
+
+
+  private function renderPanelHeader() {
+
+    $panel = $this->getPanel();
+    switch ($this->getHeaderMode()) {
+      case self::HEADER_MODE_NONE:
+        $header = null;
+        break;
+      case self::HEADER_MODE_EDIT:
+        $header = id(new PhabricatorActionHeaderView())
+          ->setHeaderTitle($panel->getName())
+          ->setHeaderColor(PhabricatorActionHeaderView::HEADER_GREY);
+        $header = $this->addPanelHeaderActions($header);
+        break;
+      case self::HEADER_MODE_NORMAL:
+      default:
+        $header = id(new PhabricatorActionHeaderView())
+          ->setHeaderTitle($panel->getName())
+          ->setHeaderColor(PhabricatorActionHeaderView::HEADER_GREY);
+        break;
+    }
+    return $header;
+  }
+
+  private function addPanelHeaderActions(
+    PhabricatorActionHeaderView $header) {
+    $panel = $this->getPanel();
+
+    $dashboard_id = $this->getDashboardID();
+    $edit_uri = id(new PhutilURI(
+      '/dashboard/panel/edit/'.$panel->getID().'/'));
+    if ($dashboard_id) {
+      $edit_uri->setQueryParam('dashboardID', $dashboard_id);
+    }
+    $action_edit = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS)
+      ->setSpriteIcon('settings-grey')
+      ->setHref((string) $edit_uri);
+    $header->addAction($action_edit);
+
+    if ($dashboard_id) {
+      $uri = id(new PhutilURI(
+        '/dashboard/removepanel/'.$dashboard_id.'/'))
+        ->setQueryParam('panelPHID', $panel->getPHID());
+      $action_remove = id(new PHUIIconView())
+        ->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS)
+        ->setSpriteIcon('close-grey')
+        ->setHref((string) $uri)
+        ->setWorkflow(true);
+      $header->addAction($action_remove);
+    }
+    return $header;
   }
 
   /**

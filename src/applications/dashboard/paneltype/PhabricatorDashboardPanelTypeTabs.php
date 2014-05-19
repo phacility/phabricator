@@ -25,7 +25,7 @@ final class PhabricatorDashboardPanelTypeTabs
     );
   }
 
-  protected function renderPanelContent(
+  public function renderPanelContent(
     PhabricatorUser $viewer,
     PhabricatorDashboardPanel $panel,
     PhabricatorDashboardPanelRenderingEngine $engine) {
@@ -81,6 +81,7 @@ final class PhabricatorDashboardPanelTypeTabs
     $parent_phids[] = $panel->getPHID();
 
     $content = array();
+    $no_headers = PhabricatorDashboardPanelRenderingEngine::HEADER_MODE_NONE;
     foreach ($config as $idx => $tab_spec) {
       $panel_id = idx($tab_spec, 'panelID');
       $panel = idx($panels, $panel_id);
@@ -91,7 +92,7 @@ final class PhabricatorDashboardPanelTypeTabs
           ->setEnableAsyncRendering(true)
           ->setParentPanelPHIDs($parent_phids)
           ->setPanel($panel)
-          ->setHeaderless(true)
+          ->setHeaderMode($no_headers)
           ->renderPanel();
       } else {
         $panel_content = pht('(Invalid Panel)');
