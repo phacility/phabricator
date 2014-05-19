@@ -80,8 +80,14 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
     $panel->setHeader('Count of '.$spec->getName());
     $panel->appendChild($chart);
 
-    return $this->buildStandardPageResponse(
-      $panel,
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Chart'));
+
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $panel,
+      ),
       array(
         'title' => 'Chart',
       ));

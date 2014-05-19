@@ -6,6 +6,10 @@ final class PhabricatorApplicationFact extends PhabricatorApplication {
     return 'Analyze Data';
   }
 
+  public function getName() {
+    return pht('Facts');
+  }
+
   public function getBaseURI() {
     return '/fact/';
   }
