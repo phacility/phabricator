@@ -4,6 +4,9 @@
     "(\\.lint-test$)"
   ],
   "linters": {
+    "chmod": {
+      "type": "chmod"
+    },
     "filename": {
       "type": "filename"
     },
