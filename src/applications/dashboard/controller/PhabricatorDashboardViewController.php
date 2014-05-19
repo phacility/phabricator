@@ -92,6 +92,26 @@ final class PhabricatorDashboardViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
+    $installed_dashboard = id(new PhabricatorDashboardInstall())
+      ->loadOneWhere(
+        'objectPHID = %s AND applicationClass = %s',
+        $viewer->getPHID(),
+        'PhabricatorApplicationHome');
+    if ($installed_dashboard &&
+        $installed_dashboard->getDashboardPHID() == $dashboard->getPHID()) {
+      $title_install = pht('Uninstall Dashboard');
+      $href_install = "uninstall/{$id}/";
+    } else {
+      $title_install = pht('Install Dashboard');
+      $href_install = "install/{$id}/";
+    }
+    $actions->addAction(
+      id(new PhabricatorActionView())
+      ->setName($title_install)
+      ->setIcon('fa-wrench')
+      ->setHref($this->getApplicationURI($href_install))
+      ->setWorkflow(true));
+
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Add Panel'))

@@ -20,15 +20,36 @@ final class PhabricatorHomeMainController
     if ($this->filter == 'jump') {
       return $this->buildJumpResponse();
     }
-
     $nav = $this->buildNav();
 
-    $project_query = new PhabricatorProjectQuery();
-    $project_query->setViewer($user);
-    $project_query->withMemberPHIDs(array($user->getPHID()));
-    $projects = $project_query->execute();
+    $dashboard = PhabricatorDashboardInstall::getDashboard(
+      $user,
+      $user->getPHID(),
+      get_class($this->getCurrentApplication()));
+    if ($dashboard) {
+      $rendered_dashboard = id(new PhabricatorDashboardRenderingEngine())
+        ->setViewer($user)
+        ->setDashboard($dashboard)
+        ->renderDashboard();
+      $nav->appendChild($rendered_dashboard);
+    } else {
+      $project_query = new PhabricatorProjectQuery();
+      $project_query->setViewer($user);
+      $project_query->withMemberPHIDs(array($user->getPHID()));
+      $projects = $project_query->execute();
 
-    return $this->buildMainResponse($nav, $projects);
+      $nav = $this->buildMainResponse($nav, $projects);
+    }
+
+    $nav->appendChild(id(new PhabricatorGlobalUploadTargetView())
+      ->setUser($user));
+
+    return $this->buildApplicationPage(
+      $nav,
+      array(
+        'title' => 'Phabricator',
+        'device' => true,
+      ));
   }
 
   private function buildMainResponse($nav, array $projects) {
@@ -91,17 +112,10 @@ final class PhabricatorHomeMainController
       $this->minipanels,
     );
 
-    $user = $this->getRequest()->getUser();
     $nav->appendChild($content);
-    $nav->appendChild(id(new PhabricatorGlobalUploadTargetView())
-      ->setUser($user));
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => 'Phabricator',
-        'device' => true,
-      ));
+    return $nav;
+
   }
 
   private function buildJumpResponse() {
