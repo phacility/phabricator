@@ -134,8 +134,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
             ->setName(pht('Show Public Key'))
             ->setIcon('fa-download')
             ->setHref($this->getApplicationURI("public/{$id}/"))
-            ->setWorkflow(true)
-            ->setDisabled($is_locked));
+            ->setWorkflow(true));
       }
 
       $actions->addAction(
