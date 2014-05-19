@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phriction
- */
 final class PhrictionDocumentController
   extends PhrictionController {
 
@@ -118,7 +115,7 @@ final class PhrictionDocumentController
         $new_doc = id(new PhrictionDocumentQuery())
           ->setViewer($user)
           ->withIDs(array($new_doc_id))
-          ->exectueOne();
+          ->executeOne();
 
         $slug_uri = PhrictionDocument::getSlugURI($new_doc->getSlug());
 

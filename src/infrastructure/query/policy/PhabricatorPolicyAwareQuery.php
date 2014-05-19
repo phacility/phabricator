@@ -302,17 +302,30 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
   private function getPolicyFilter() {
     $filter = new PhabricatorPolicyFilter();
     $filter->setViewer($this->viewer);
-    if (!$this->capabilities) {
-      $capabilities = array(
-        PhabricatorPolicyCapability::CAN_VIEW,
-      );
-    } else {
-      $capabilities = $this->capabilities;
-    }
+    $capabilities = $this->getRequiredCapabilities();
     $filter->requireCapabilities($capabilities);
     $filter->raisePolicyExceptions($this->shouldRaisePolicyExceptions());
 
     return $filter;
+  }
+
+  protected function getRequiredCapabilities() {
+    if ($this->capabilities) {
+      return $this->capabilities;
+    }
+
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  protected function applyPolicyFilter(array $objects, array $capabilities) {
+    if ($this->shouldDisablePolicyFiltering()) {
+      return $objects;
+    }
+    $filter = $this->getPolicyFilter();
+    $filter->requireCapabilities($capabilities);
+    return $filter->apply($objects);
   }
 
   protected function didRejectResult(PhabricatorPolicyInterface $object) {
