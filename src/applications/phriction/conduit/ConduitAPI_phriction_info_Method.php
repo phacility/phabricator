@@ -1,13 +1,10 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_phriction_info_Method
   extends ConduitAPI_phriction_Method {
 
   public function getMethodDescription() {
-    return "Retrieve information about a Phriction document.";
+    return pht('Retrieve information about a Phriction document.');
   }
 
   public function defineParamTypes() {
@@ -29,18 +26,18 @@ final class ConduitAPI_phriction_info_Method
   protected function execute(ConduitAPIRequest $request) {
     $slug = $request->getValue('slug');
 
-    $doc = id(new PhrictionDocument())->loadOneWhere(
-      'slug = %s',
-      PhabricatorSlug::normalize($slug));
-
-    if (!$doc) {
+    $document = id(new PhrictionDocumentQuery())
+      ->setViewer($request->getUser())
+      ->withSlugs(array(PhabricatorSlug::normalize($slug)))
+      ->needContent(true)
+      ->executeOne();
+    if (!$document) {
       throw new ConduitException('ERR-BAD-DOCUMENT');
     }
 
-    $content = id(new PhrictionContent())->load($doc->getContentID());
-    $doc->attachContent($content);
-
-    return $this->buildDocumentInfoDictionary($doc);
+    return $this->buildDocumentInfoDictionary(
+      $document,
+      $document->getContent());
   }
 
 }

@@ -1,14 +1,13 @@
 <?php
 
-/**
- * @group phriction
- */
 final class PhrictionDocumentQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
   private $phids;
   private $slugs;
+
+  private $needContent;
 
   private $status       = 'status-any';
   const STATUS_ANY      = 'status-any';
@@ -39,6 +38,11 @@ final class PhrictionDocumentQuery
     return $this;
   }
 
+  public function needContent($need_content) {
+    $this->needContent = $need_content;
+    return $this;
+  }
+
   public function setOrder($order) {
     $this->order = $order;
     return $this;
@@ -60,17 +64,19 @@ final class PhrictionDocumentQuery
   }
 
   protected function willFilterPage(array $documents) {
-    $contents = id(new PhrictionContent())->loadAllWhere(
-      'id IN (%Ld)',
-      mpull($documents, 'getContentID'));
+    if ($this->needContent) {
+      $contents = id(new PhrictionContent())->loadAllWhere(
+        'id IN (%Ld)',
+        mpull($documents, 'getContentID'));
 
-    foreach ($documents as $key => $document) {
-      $content_id = $document->getContentID();
-      if (empty($contents[$content_id])) {
-        unset($documents[$key]);
-        continue;
+      foreach ($documents as $key => $document) {
+        $content_id = $document->getContentID();
+        if (empty($contents[$content_id])) {
+          unset($documents[$key]);
+          continue;
+        }
+        $document->attachContent($contents[$content_id]);
       }
-      $document->attachContent($contents[$content_id]);
     }
 
     foreach ($documents as $document) {

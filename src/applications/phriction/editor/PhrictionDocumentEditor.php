@@ -23,6 +23,8 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
 
   public static function newForSlug($slug) {
     $slug = PhabricatorSlug::normalize($slug);
+
+    // TODO: Get rid of this.
     $document = id(new PhrictionDocument())->loadOneWhere(
       'slug = %s',
       $slug);

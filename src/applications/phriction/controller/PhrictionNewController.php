@@ -1,20 +1,17 @@
 <?php
 
-/**
- * @group phriction
- */
 final class PhrictionNewController extends PhrictionController {
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $user    = $request->getUser();
     $slug    = PhabricatorSlug::normalize($request->getStr('slug'));
 
     if ($request->isFormPost()) {
-      $document = id(new PhrictionDocument())->loadOneWhere(
-        'slug = %s',
-        $slug);
+      $document = id(new PhrictionDocumentQuery())
+        ->setViewer($user)
+        ->withSlugs(array($slug))
+        ->executeOne();
       $prompt = $request->getStr('prompt', 'no');
       $document_exists = $document && $document->getStatus() ==
         PhrictionDocumentStatus::STATUS_EXISTS;

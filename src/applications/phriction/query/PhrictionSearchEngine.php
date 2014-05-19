@@ -14,6 +14,7 @@ final class PhrictionSearchEngine
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new PhrictionDocumentQuery())
+      ->needContent(true)
       ->withStatus(PhrictionDocumentQuery::STATUS_NONSTUB);
 
     $status = $saved->getParameter('status');

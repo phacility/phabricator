@@ -56,9 +56,10 @@ abstract class PhrictionController extends PhabricatorController {
     $ancestral_slugs[] = $slug;
     if ($ancestral_slugs) {
       $empty_slugs = array_fill_keys($ancestral_slugs, null);
-      $ancestors = id(new PhrictionDocument())->loadAllWhere(
-        'slug IN (%Ls)',
-        $ancestral_slugs);
+      $ancestors = id(new PhrictionDocumentQuery())
+        ->setViewer($this->getRequest()->getUser())
+        ->withSlugs($ancestral_slugs)
+        ->execute();
       $ancestors = mpull($ancestors, null, 'getSlug');
 
       $ancestor_phids = mpull($ancestors, 'getPHID');

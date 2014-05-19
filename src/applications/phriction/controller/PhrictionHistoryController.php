@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phriction
- */
 final class PhrictionHistoryController
   extends PhrictionController {
 
@@ -17,15 +14,16 @@ final class PhrictionHistoryController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $document = id(new PhrictionDocument())->loadOneWhere(
-      'slug = %s',
-      PhabricatorSlug::normalize($this->slug));
-
+    $document = id(new PhrictionDocumentQuery())
+      ->setViewer($user)
+      ->withSlugs(array(PhabricatorSlug::normalize($this->slug)))
+      ->needContent(true)
+      ->executeOne();
     if (!$document) {
       return new Aphront404Response();
     }
 
-    $current = id(new PhrictionContent())->load($document->getContentID());
+    $current = $document->getContent();
 
     $pager = new AphrontPagerView();
     $pager->setOffset($request->getInt('page'));

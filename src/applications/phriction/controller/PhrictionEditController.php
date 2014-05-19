@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phriction
- */
 final class PhrictionEditController
   extends PhrictionController {
 
@@ -18,7 +15,15 @@ final class PhrictionEditController
     $user = $request->getUser();
 
     if ($this->id) {
-      $document = id(new PhrictionDocument())->load($this->id);
+      $document = id(new PhrictionDocumentQuery())
+        ->setViewer($user)
+        ->withIDs(array($this->id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
       if (!$document) {
         return new Aphront404Response();
       }
@@ -43,12 +48,14 @@ final class PhrictionEditController
         return new Aphront404Response();
       }
 
-      $document = id(new PhrictionDocument())->loadOneWhere(
-        'slug = %s',
-        $slug);
+      $document = id(new PhrictionDocumentQuery())
+        ->setViewer($user)
+        ->withSlugs(array($slug))
+        ->needContent(true)
+        ->executeOne();
 
       if ($document) {
-        $content = id(new PhrictionContent())->load($document->getContentID());
+        $content = $document->getContent();
       } else {
         if (PhrictionDocument::isProjectSlug($slug)) {
           $project = id(new PhabricatorProjectQuery())
