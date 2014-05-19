@@ -161,8 +161,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
     $icons = array();
     foreach (igroup($flat_options, 'icon') as $icon => $ignored) {
       $icons[$icon] = id(new PHUIIconView())
-        ->setSpriteSheet(PHUIIconView::SPRITE_STATUS)
-        ->setSpriteIcon($icon);
+        ->setIconFont($icon);
     }
 
 

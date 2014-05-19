@@ -29,9 +29,9 @@ final class PhabricatorProjectEditMainController
       ->setImage($project->getProfileImageURI());
 
     if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ACTIVE) {
-      $header->setStatus('oh-ok', '', pht('Active'));
+      $header->setStatus('fa-check', 'bluegrey', pht('Active'));
     } else {
-      $header->setStatus('policy-noone', '', pht('Archived'));
+      $header->setStatus('fa-ban', 'dark', pht('Archived'));
     }
 
     $actions = $this->buildActionListView($project);
@@ -106,7 +106,7 @@ final class PhabricatorProjectEditMainController
       $view->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Unarchive Project'))
-          ->setIcon('fa-circle-check')
+          ->setIcon('fa-check')
           ->setHref($this->getApplicationURI("archive/{$id}/"))
           ->setDisabled(!$can_edit)
           ->setWorkflow(true));

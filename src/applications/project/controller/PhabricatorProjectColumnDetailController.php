@@ -90,7 +90,7 @@ final class PhabricatorProjectColumnDetailController
       ->setPolicyObject($column);
 
     if ($column->isDeleted()) {
-      $header->setStatus('reject', 'red', pht('Deleted'));
+      $header->setStatus('fa-ban', 'dark', pht('Deleted'));
     }
 
     return $header;

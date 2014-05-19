@@ -623,6 +623,7 @@ phutil_register_library_map(array(
     'DoorkeeperBridge' => 'applications/doorkeeper/bridge/DoorkeeperBridge.php',
     'DoorkeeperBridgeAsana' => 'applications/doorkeeper/bridge/DoorkeeperBridgeAsana.php',
     'DoorkeeperBridgeJIRA' => 'applications/doorkeeper/bridge/DoorkeeperBridgeJIRA.php',
+    'DoorkeeperBridgeJIRATestCase' => 'applications/doorkeeper/bridge/__tests__/DoorkeeperBridgeJIRATestCase.php',
     'DoorkeeperDAO' => 'applications/doorkeeper/storage/DoorkeeperDAO.php',
     'DoorkeeperExternalObject' => 'applications/doorkeeper/storage/DoorkeeperExternalObject.php',
     'DoorkeeperExternalObjectQuery' => 'applications/doorkeeper/query/DoorkeeperExternalObjectQuery.php',
@@ -3276,6 +3277,7 @@ phutil_register_library_map(array(
     'DoorkeeperBridge' => 'Phobject',
     'DoorkeeperBridgeAsana' => 'DoorkeeperBridge',
     'DoorkeeperBridgeJIRA' => 'DoorkeeperBridge',
+    'DoorkeeperBridgeJIRATestCase' => 'PhabricatorTestCase',
     'DoorkeeperDAO' => 'PhabricatorLiskDAO',
     'DoorkeeperExternalObject' =>
     array(

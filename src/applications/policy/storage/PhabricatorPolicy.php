@@ -146,21 +146,21 @@ final class PhabricatorPolicy
     switch ($this->getType()) {
       case PhabricatorPolicyType::TYPE_GLOBAL:
         static $map = array(
-          PhabricatorPolicies::POLICY_PUBLIC  => 'policy-public',
-          PhabricatorPolicies::POLICY_USER    => 'policy-all',
-          PhabricatorPolicies::POLICY_ADMIN   => 'policy-admin',
-          PhabricatorPolicies::POLICY_NOONE   => 'policy-noone',
+          PhabricatorPolicies::POLICY_PUBLIC  => 'fa-globe',
+          PhabricatorPolicies::POLICY_USER    => 'fa-users',
+          PhabricatorPolicies::POLICY_ADMIN   => 'fa-eye',
+          PhabricatorPolicies::POLICY_NOONE   => 'fa-ban',
         );
-        return idx($map, $this->getPHID(), 'policy-unknown');
+        return idx($map, $this->getPHID(), 'fa-question-circle');
       case PhabricatorPolicyType::TYPE_USER:
-        return 'policy-user';
+        return 'fa-user';
       case PhabricatorPolicyType::TYPE_PROJECT:
-        return 'policy-project';
+        return 'fa-briefcase';
       case PhabricatorPolicyType::TYPE_CUSTOM:
       case PhabricatorPolicyType::TYPE_MASKED:
-        return 'policy-custom';
+        return 'fa-certificate';
       default:
-        return 'policy-unknown';
+        return 'fa-question-circle';
     }
   }
 
@@ -239,8 +239,7 @@ final class PhabricatorPolicy
     $img = null;
     if ($icon) {
       $img = id(new PHUIIconView())
-        ->setSpriteSheet(PHUIIconView::SPRITE_STATUS)
-        ->setSpriteIcon($this->getIcon());
+        ->setIconFont($this->getIcon());
     }
 
     if ($this->getHref()) {

@@ -106,7 +106,7 @@ body.device-phone .phui-header-view {
   margin-top: 4px;
 }
 
-.phui-header-subheader .sprite-status {
+.phui-header-subheader .phui-icon-view {
   display: inline-block;
   margin: -2px 4px -2px 0;
 }

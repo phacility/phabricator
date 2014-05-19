@@ -93,7 +93,6 @@ return array(
     'sprite-gradient-css',
     'sprite-menu-css',
     'sprite-apps-large-css',
-    'sprite-status-css',
 
     'phabricator-main-menu-view',
     'phabricator-notification-css',

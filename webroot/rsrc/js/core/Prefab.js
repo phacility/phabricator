@@ -145,7 +145,7 @@ JX.install('Prefab', {
       var render_icon = function(icon) {
         return JX.$N(
           'span',
-          {className: 'phui-icon-view sprite-status status-' + icon});
+          {className: 'phui-icon-view phui-font-fa ' + icon});
       };
 
       datasource.setSortHandler(JX.bind(datasource, sort_handler));

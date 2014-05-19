@@ -198,7 +198,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
           ->setURI('/p/'.$user->getUsername())
           ->setPHID($user->getPHID())
           ->setPriorityString($user->getUsername())
-          ->setIcon('policy-all')
+          ->setIcon('fa-user bluegrey')
           ->setPriorityType('user')
           ->setClosed($closed);
 
@@ -288,7 +288,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
           ->setDisplayType("Project")
           ->setURI('/project/view/'.$proj->getID().'/')
           ->setPHID($proj->getPHID())
-          ->setIcon('policy-project')
+          ->setIcon('fa-briefcase bluegrey')
           ->setClosed($closed);
 
         $proj_result->setImageURI($proj->getProfileImageURI());

@@ -103,7 +103,7 @@
   padding-left: 8px;
 }
 
-.phui-property-list-section-header-icon .sprite-status {
+.phui-property-list-section-header-icon .phui-icon-view {
   display: inline-block;
   margin: -2px 4px -2px 0;
 }

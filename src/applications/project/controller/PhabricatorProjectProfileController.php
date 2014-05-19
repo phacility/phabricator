@@ -64,9 +64,9 @@ final class PhabricatorProjectProfileController
       ->addActionLink($board_btn);
 
     if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ACTIVE) {
-      $header->setStatus('oh-ok', '', pht('Active'));
+      $header->setStatus('fa-check', 'bluegrey', pht('Active'));
     } else {
-      $header->setStatus('policy-noone', '', pht('Archived'));
+      $header->setStatus('fa-ban', 'dark', pht('Archived'));
     }
 
     $actions = $this->buildActionListView($project);
