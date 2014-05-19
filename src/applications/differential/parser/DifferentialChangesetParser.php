@@ -1176,6 +1176,16 @@ final class DifferentialChangesetParser {
         $added = array_map('trim', $hunk->getAddedLines());
         for (reset($added); list($line, $code) = each($added); ) {
           if (isset($map[$code])) { // We found a long matching line.
+
+            if (count($map[$code]) > 16) {
+              // If there are a large number of identical lines in this diff,
+              // don't try to figure out where this block came from: the
+              // analysis is O(N^2), since we need to compare every line
+              // against every other line. Even if we arrive at a result, it
+              // is unlikely to be meaningful. See T5041.
+              continue 2;
+            }
+
             $best_length = 0;
             foreach ($map[$code] as $val) { // Explore all candidates.
               list($file, $orig_line) = $val;
