@@ -51,3 +51,37 @@
 .phabricator-public-feed-frame .phui-feed-wrap {
   border: none;
 }
+
+/** Dashboards **/
+
+.dashboard-panel .phabricator-feed-frame {
+  background: #fff;
+  margin: 0;
+  border-left: 1px solid {$lightgreyborder};
+  border-right: 1px solid {$lightgreyborder};
+  border-bottom: 1px solid {$greyborder};
+}
+
+.dashboard-panel .phabricator-feed-frame .phabricator-action-header {
+  background: #f7f7f7;
+}
+
+.dashboard-panel .phabricator-feed-frame .phabricator-action-header-title {
+  font-size: 13px;
+  margin-left: 8px;
+  margin-bottom: 0;
+}
+
+.dashboard-panel .phabricator-feed-frame .phui-feed-story {
+  border: none;
+  border-bottom: 1px solid {$thinblueborder};
+  margin-bottom: 0;
+}
+
+.dashboard-panel .phabricator-feed-frame .phui-feed-story-foot {
+  background: #fff;
+}
+
+.dashboard-panel .phabricator-feed-frame .phabricator-feed-story-date-separator {
+  margin-top: 0;
+}
