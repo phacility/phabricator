@@ -41,6 +41,12 @@ final class PhabricatorApplicationDashboard extends PhabricatorApplication {
     );
   }
 
+  public function getRemarkupRules() {
+    return array(
+      new PhabricatorDashboardRemarkupRule(),
+    );
+  }
+
   public function shouldAppearInLaunchView() {
     return false;
   }
