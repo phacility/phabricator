@@ -12,6 +12,16 @@ final class PhabricatorActionView extends AphrontView {
   private $objectURI;
   private $sigils = array();
   private $metadata;
+  private $selected;
+
+  public function setSelected($selected) {
+    $this->selected = $selected;
+    return $this;
+  }
+
+  public function getSelected() {
+    return $this->selected;
+  }
 
   public function setMetadata($metadata) {
     $this->metadata = $metadata;
@@ -165,6 +175,10 @@ final class PhabricatorActionView extends AphrontView {
     $classes[] = 'phabricator-action-view';
     if ($this->disabled) {
       $classes[] = 'phabricator-action-view-disabled';
+    }
+
+    if ($this->selected) {
+      $classes[] = 'phabricator-action-view-selected';
     }
 
     return phutil_tag(

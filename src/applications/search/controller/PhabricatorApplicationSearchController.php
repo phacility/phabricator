@@ -90,7 +90,7 @@ final class PhabricatorApplicationSearchController
 
     if ($request->isFormPost()) {
       $saved_query = $engine->buildSavedQueryFromRequest($request);
-      $this->saveQuery($saved_query);
+      $engine->saveQuery($saved_query);
       return id(new AphrontRedirectResponse())->setURI(
         $engine->getQueryResultsPageURI($saved_query->getQueryKey()).'#R');
     }
@@ -145,7 +145,7 @@ final class PhabricatorApplicationSearchController
 
       // Save the query to generate a query key, so "Save Custom Query..." and
       // other features like Maniphest's "Export..." work correctly.
-      $this->saveQuery($saved_query);
+      $engine->saveQuery($saved_query);
     }
 
     $nav->selectFilter(
@@ -351,18 +351,6 @@ final class PhabricatorApplicationSearchController
         'title' => pht("Saved Queries"),
         'device' => true,
       ));
-  }
-
-  private function saveQuery(PhabricatorSavedQuery $query) {
-    $query->setEngineClassName(get_class($this->getSearchEngine()));
-
-    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-    try {
-      $query->save();
-    } catch (AphrontQueryDuplicateKeyException $ex) {
-      // Ignore, this is just a repeated search.
-    }
-    unset($unguarded);
   }
 
   protected function buildApplicationMenu() {

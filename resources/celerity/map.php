@@ -407,6 +407,7 @@ return array(
     'rsrc/js/application/policy/behavior-policy-control.js' => '71b4cbcc',
     'rsrc/js/application/policy/behavior-policy-rule-editor.js' => '263aeb8c',
     'rsrc/js/application/ponder/behavior-votebox.js' => '327dbe61',
+    'rsrc/js/application/projects/behavior-boards-filter.js' => '22f113af',
     'rsrc/js/application/projects/behavior-project-boards.js' => 'd8e135db',
     'rsrc/js/application/projects/behavior-project-create.js' => '065227cc',
     'rsrc/js/application/releeph/releeph-preview-branch.js' => '9eb2cedb',
@@ -544,6 +545,7 @@ return array(
     'javelin-behavior-audio-source' => '59b251eb',
     'javelin-behavior-audit-preview' => 'be81801d',
     'javelin-behavior-balanced-payment-form' => '3b3e1664',
+    'javelin-behavior-boards-filter' => '22f113af',
     'javelin-behavior-config-reorder-fields' => '938aed89',
     'javelin-behavior-conpherence-menu' => '7ee23816',
     'javelin-behavior-conpherence-pontificate' => '53f6f2dd',
@@ -1003,6 +1005,13 @@ return array(
       4 => 'javelin-stratcom',
       5 => 'javelin-json',
       6 => 'phabricator-prefab',
+    ),
+    '22f113af' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-stratcom',
+      3 => 'phuix-dropdown-menu',
     ),
     '263aeb8c' =>
     array(

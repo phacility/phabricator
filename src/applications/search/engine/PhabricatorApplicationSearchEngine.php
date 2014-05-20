@@ -35,6 +35,18 @@ abstract class PhabricatorApplicationSearchEngine {
     return $this->viewer;
   }
 
+  public function saveQuery(PhabricatorSavedQuery $query) {
+    $query->setEngineClassName(get_class($this));
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+    try {
+      $query->save();
+    } catch (AphrontQueryDuplicateKeyException $ex) {
+      // Ignore, this is just a repeated search.
+    }
+    unset($unguarded);
+  }
+
   /**
    * Create a saved query object from the request.
    *
