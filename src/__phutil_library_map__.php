@@ -1279,6 +1279,9 @@ phutil_register_library_map(array(
     'PhabricatorAuthSessionGarbageCollector' => 'applications/auth/garbagecollector/PhabricatorAuthSessionGarbageCollector.php',
     'PhabricatorAuthSessionQuery' => 'applications/auth/query/PhabricatorAuthSessionQuery.php',
     'PhabricatorAuthStartController' => 'applications/auth/controller/PhabricatorAuthStartController.php',
+    'PhabricatorAuthTemporaryToken' => 'applications/auth/storage/PhabricatorAuthTemporaryToken.php',
+    'PhabricatorAuthTemporaryTokenGarbageCollector' => 'applications/auth/garbagecollector/PhabricatorAuthTemporaryTokenGarbageCollector.php',
+    'PhabricatorAuthTemporaryTokenQuery' => 'applications/auth/query/PhabricatorAuthTemporaryTokenQuery.php',
     'PhabricatorAuthTerminateSessionController' => 'applications/auth/controller/PhabricatorAuthTerminateSessionController.php',
     'PhabricatorAuthTryFactorAction' => 'applications/auth/action/PhabricatorAuthTryFactorAction.php',
     'PhabricatorAuthUnlinkController' => 'applications/auth/controller/PhabricatorAuthUnlinkController.php',
@@ -4045,6 +4048,13 @@ phutil_register_library_map(array(
     'PhabricatorAuthSessionGarbageCollector' => 'PhabricatorGarbageCollector',
     'PhabricatorAuthSessionQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorAuthStartController' => 'PhabricatorAuthController',
+    'PhabricatorAuthTemporaryToken' =>
+    array(
+      0 => 'PhabricatorAuthDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
+    'PhabricatorAuthTemporaryTokenGarbageCollector' => 'PhabricatorGarbageCollector',
+    'PhabricatorAuthTemporaryTokenQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorAuthTerminateSessionController' => 'PhabricatorAuthController',
     'PhabricatorAuthTryFactorAction' => 'PhabricatorSystemAction',
     'PhabricatorAuthUnlinkController' => 'PhabricatorAuthController',
