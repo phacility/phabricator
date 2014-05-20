@@ -1922,22 +1922,23 @@ abstract class PhabricatorApplicationTransactionEditor
         $query->execute();
 
         $watcher_phids = $query->getDestinationPHIDs();
+        if ($watcher_phids) {
+          // We need to do a visibility check for all the watchers, as
+          // watching a project is not a guarantee that you can see objects
+          // associated with it.
+          $users = id(new PhabricatorPeopleQuery())
+            ->setViewer($this->requireActor())
+            ->withPHIDs($watcher_phids)
+            ->execute();
 
-        // We need to do a visibility check for all the watchers, as
-        // watching a project is not a guarantee that you can see objects
-        // associated with it.
-        $users = id(new PhabricatorPeopleQuery())
-          ->setViewer($this->requireActor())
-          ->withPHIDs($watcher_phids)
-          ->execute();
-
-        foreach ($users as $user) {
-          $can_see = PhabricatorPolicyFilter::hasCapability(
-            $user,
-            $object,
-            PhabricatorPolicyCapability::CAN_VIEW);
-          if ($can_see) {
-            $phids[] = $user->getPHID();
+          foreach ($users as $user) {
+            $can_see = PhabricatorPolicyFilter::hasCapability(
+              $user,
+              $object,
+              PhabricatorPolicyCapability::CAN_VIEW);
+            if ($can_see) {
+              $phids[] = $user->getPHID();
+            }
           }
         }
       }
