@@ -20,7 +20,13 @@
 .aphront-multi-column-fluid
 .aphront-multi-column-column-outer
 .aphront-multi-column-column .dashboard-panel {
-  margin: 16px 16px 0px 16px;
+  margin: 16px 0 0 16px;
+}
+
+.aphront-multi-column-fluid
+.aphront-multi-colum-column-outer-last
+.aphront-multi-column-column .dashboard-panel {
+  margin: 16px 16px 0 16px;
 }
 
 .aphront-multi-column-fluid

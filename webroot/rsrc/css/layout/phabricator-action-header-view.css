@@ -18,6 +18,10 @@
   white-space: nowrap;
 }
 
+.gradient-lightblue-header .phabricator-action-header-title {
+  color: {$bluetext};
+}
+
 .phabricator-action-header-icon-list {
   float: right;
   padding-top: 4px;
@@ -65,9 +69,8 @@
 
 /* - Dashboards ------------------------------------------------------------ */
 
-.dashboard-panel .phabricator-action-header.gradient-grey-header {
+.dashboard-panel .phabricator-action-header.gradient-grey-header,
+.dashboard-panel .phabricator-action-header.gradient-lightblue-header {
   border: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$thinblueborder};
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
 }
