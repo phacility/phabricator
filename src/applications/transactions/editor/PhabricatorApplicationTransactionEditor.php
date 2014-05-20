@@ -1931,15 +1931,17 @@ abstract class PhabricatorApplicationTransactionEditor
             ->withPHIDs($watcher_phids)
             ->execute();
 
+          $watchers = array();
           foreach ($users as $user) {
             $can_see = PhabricatorPolicyFilter::hasCapability(
               $user,
               $object,
               PhabricatorPolicyCapability::CAN_VIEW);
             if ($can_see) {
-              $phids[] = $user->getPHID();
+              $watchers[] = $user->getPHID();
             }
           }
+          $phids[] = $watchers;
         }
       }
 
