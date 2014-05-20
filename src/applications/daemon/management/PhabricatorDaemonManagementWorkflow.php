@@ -99,15 +99,32 @@ abstract class PhabricatorDaemonManagementWorkflow
     $console = PhutilConsole::getConsole();
 
     if ($debug) {
-      $console->writeOut(
-        pht(
-          'Launching daemon "%s" in debug mode (not daemonized).',
-          $daemon)."\n");
+      if ($argv) {
+        $console->writeOut(
+          pht(
+            "Launching daemon \"%s\" in debug mode (not daemonized) ".
+            "with arguments %s.\n",
+            $daemon,
+            csprintf('%LR', $argv)));
+      } else {
+        $console->writeOut(
+          pht(
+            "Launching daemon \"%s\" in debug mode (not daemonized).\n",
+            $daemon));
+      }
     } else {
-      $console->writeOut(
-        pht(
-          'Launching daemon "%s".',
-          $daemon)."\n");
+      if ($argv) {
+        $console->writeOut(
+          pht(
+            "Launching daemon \"%s\" with arguments %s.\n",
+            $daemon,
+            csprintf('%LR', $argv)));
+      } else {
+        $console->writeOut(
+          pht(
+            "Launching daemon \"%s\".\n",
+            $daemon));
+      }
     }
 
     foreach ($argv as $key => $arg) {
