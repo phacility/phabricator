@@ -2,8 +2,8 @@
  * @provides maniphest-task-summary-css
  */
 
-.maniphest-task-group {
-  padding-bottom: 24px;
+.maniphest-task-group + .maniphest-task-group {
+  padding-top: 24px;
 }
 
 .maniphest-batch-selected td {
@@ -45,6 +45,10 @@
   display: none;
 }
 
+.maniphest-batch-editor {
+  padding-top: 24px;
+}
+
 .maniphest-batch-editor-layout {
   width: 100%;
   border: 1px solid #e7e7e7;
@@ -84,4 +88,31 @@
 
 .maniphest-board-link {
   color: {$bluetext};
+}
+
+/* - Dashboards ------------------------------------------------------------ */
+
+.dashboard-panel .maniphest-list-container {
+  background: {$backdrop};
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
+}
+
+.dashboard-panel .maniphest-list-container {
+  padding: 4px 4px 0 4px;
+}
+
+.dashboard-panel .maniphest-task-group-header {
+  font-size: 12px;
+  font-weight: normal;
+  color: {$bluetext};
+  padding: 4px 8px;
+  background: rgba(255,255,255,.5);
+  margin: 0 0 4px 0;
+  border-radius: 3px;
+}
+
+.dashboard-panel .maniphest-task-group + .maniphest-task-group {
+  padding-top: 0;
 }
