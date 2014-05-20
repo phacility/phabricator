@@ -182,3 +182,11 @@
 .device-desktop .phui-property-list-image-content img:hover {
   background: url('/rsrc/image/checker_dark.png');
 }
+
+/* - Dashboards ------------------------------------------------------------ */
+
+.dashboard-panel .phui-property-list-section {
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
+}
