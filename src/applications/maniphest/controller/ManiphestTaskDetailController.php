@@ -205,20 +205,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $draft_text = null;
     }
 
-    $submit_control = id(new PHUIFormMultiSubmitControl());
-    if (!$task->isClosed()) {
-      $close_image = id(new PHUIIconView())
-          ->setIconFont('fa-check-square-o');
-      $submit_control->addButtonView(
-        id(new PHUIButtonView())
-          ->setColor(PHUIButtonView::GREY)
-          ->setIcon($close_image)
-          ->setText(pht('Close Task'))
-          ->setName('scuttle')
-          ->addSigil('alternate-submit-button'));
-    }
-    $submit_control->addSubmitButton(pht('Submit'));
-
     $comment_form = new AphrontFormView();
     $comment_form
       ->setUser($user)
@@ -284,7 +270,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setValue($draft_text)
           ->setID('transaction-comments')
           ->setUser($user))
-      ->appendChild($submit_control);
+      ->appendChild(
+        id(new AphrontFormSubmitControl())
+          ->setValue(pht('Submit')));
 
     $control_map = array(
       ManiphestTransaction::TYPE_STATUS   => 'resolution',
