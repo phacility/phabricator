@@ -41,17 +41,6 @@
 }
 
 .differential-diff td {
-  /*
-    Disable ligatures in Firefox. Firefox 3 has fancypants ligature support, but
-    it gets applied to monospaced fonts, which sucks because it means that the
-    "fi" ligature only takes up one character, e.g. It's probably the font's
-    fault that it even specifies ligatures (seriously, what the hell?) but
-    that's hard to fix and this is "easy" to "fix": custom letter spacing
-    disables ligatures, as long as it's at least 0.008333-repeating pixels of
-    custom letter spacing. I have no idea where this number comes from, but note
-    that .83333.. = 5/6. -epriestley
-  */
-  letter-spacing:     0.0083334px;
   vertical-align:     top;
   white-space:        pre-wrap;
   word-wrap:          break-word;
