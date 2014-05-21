@@ -2,19 +2,31 @@
  * @provides phabricator-dashboard-css
  */
 
-.aphront-multi-column-fluid .aphront-multi-column-2-up
+.device-desktop .aphront-multi-column-fluid .aphront-multi-column-2-up
 .aphront-multi-column-column-outer.half {
   width: 50%;
 }
 
-.aphront-multi-column-fluid .aphront-multi-column-2-up
+.device-desktop .aphront-multi-column-fluid .aphront-multi-column-2-up
 .aphront-multi-column-column-outer.third {
   width: 33.34%;
 }
 
-.aphront-multi-column-fluid .aphront-multi-column-2-up
+.device-desktop .aphront-multi-column-fluid .aphront-multi-column-2-up
 .aphront-multi-column-column-outer.thirds {
   width: 66.66%;
+}
+
+.device-phone .aphront-multi-column-fluid
+.aphront-multi-column-column-outer
+.aphront-multi-column-column .dashboard-panel {
+  margin: 16px 8px;
+}
+
+.device-tablet .aphront-multi-column-fluid
+.aphront-multi-column-column-outer
+.aphront-multi-column-column .dashboard-panel {
+  margin: 16px 16px 0;
 }
 
 .aphront-multi-column-fluid
