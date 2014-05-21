@@ -89,6 +89,8 @@ final class PhabricatorDashboardTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorDashboardTransaction::TYPE_NAME:
       case PhabricatorDashboardTransaction::TYPE_LAYOUT_MODE:
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return;
       case PhabricatorTransactions::TYPE_EDGE:
         return;
