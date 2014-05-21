@@ -54,10 +54,14 @@ final class PhabricatorDashboardPanelRenderController
       ->addTextCrumb($panel->getMonogram(), '/'.$panel->getMonogram())
       ->addTextCrumb(pht('Standalone View'));
 
+    $view = id(new PHUIBoxView())
+      ->addMargin(PHUI::MARGIN_LARGE)
+      ->appendChild($rendered_panel);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $rendered_panel,
+        $view,
       ),
       array(
         'title' => array(pht('Panel'), $panel->getName()),

@@ -44,12 +44,17 @@ final class PhabricatorDashboardPanelViewController
       ->setParentPanelPHIDs(array())
       ->renderPanel();
 
+    $view = id(new PHUIBoxView())
+      ->addMargin(PHUI::MARGIN_LARGE_LEFT)
+      ->addMargin(PHUI::MARGIN_LARGE_RIGHT)
+      ->appendChild($rendered_panel);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $box,
         $timeline,
-        $rendered_panel,
+        $view,
       ),
       array(
         'title' => $title,
