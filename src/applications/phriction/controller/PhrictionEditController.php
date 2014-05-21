@@ -14,10 +14,12 @@ final class PhrictionEditController
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    $current_version = null;
     if ($this->id) {
       $document = id(new PhrictionDocumentQuery())
         ->setViewer($user)
         ->withIDs(array($this->id))
+        ->needContent(true)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -27,6 +29,8 @@ final class PhrictionEditController
       if (!$document) {
         return new Aphront404Response();
       }
+
+      $current_version = $document->getContent()->getVersion();
 
       $revert = $request->getInt('revert');
       if ($revert) {
@@ -38,7 +42,7 @@ final class PhrictionEditController
           return new Aphront404Response();
         }
       } else {
-        $content = id(new PhrictionContent())->load($document->getContentID());
+        $content = $document->getContent();
       }
 
     } else {
@@ -56,6 +60,7 @@ final class PhrictionEditController
 
       if ($document) {
         $content = $document->getContent();
+        $current_version = $content->getVersion();
       } else {
         if (PhrictionDocument::isProjectSlug($slug)) {
           $project = id(new PhabricatorProjectQuery())
@@ -104,7 +109,6 @@ final class PhrictionEditController
       $overwrite = $request->getBool('overwrite');
       if (!$overwrite) {
         $edit_version = $request->getStr('contentVersion');
-        $current_version = $content->getVersion();
         if ($edit_version != $current_version) {
           $dialog = $this->newDialog()
             ->setTitle(pht('Edit Conflict!'))
@@ -229,7 +233,7 @@ final class PhrictionEditController
       ->setAction($request->getRequestURI()->getPath())
       ->addHiddenInput('slug', $document->getSlug())
       ->addHiddenInput('nodraft', $request->getBool('nodraft'))
-      ->addHiddenInput('contentVersion', $content->getVersion())
+      ->addHiddenInput('contentVersion', $current_version)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Title'))

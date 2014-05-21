@@ -108,25 +108,27 @@ final class PhrictionHistoryController
 
       if ($vs_previous) {
         $item->addIcon(
-          'arrow_left',
+          'fa-reply',
           pht('Show Change'),
           array(
             'href' => $vs_previous,
           ));
       } else {
-        $item->addIcon('arrow_left-grey',
+        $item->addIcon(
+          'fa-reply grey',
           phutil_tag('em', array(), pht('No previous change')));
       }
 
       if ($vs_head) {
         $item->addIcon(
-          'merge',
+          'fa-reply-all',
           pht('Show Later Changes'),
           array(
             'href' => $vs_head,
           ));
       } else {
-        $item->addIcon('merge-grey',
+        $item->addIcon(
+          'fa-reply-all grey',
           phutil_tag('em', array(), pht('No later changes')));
       }
 
