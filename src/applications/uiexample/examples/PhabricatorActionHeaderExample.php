@@ -106,33 +106,27 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
       ->setHeader(pht('With Action Icons'));
 
     $action1 = new PHUIIconView();
-    $action1->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS);
-    $action1->setSpriteIcon('settings-grey');
+    $action1->setIconFont('fa-cog');
     $action1->setHref('#');
 
     $action2 = new PHUIIconView();
-    $action2->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS);
-    $action2->setSpriteIcon('heart-white');
+    $action1->setIconFont('fa-heart');
     $action2->setHref('#');
 
     $action3 = new PHUIIconView();
-    $action3->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS);
-    $action3->setSpriteIcon('tag-white');
+    $action1->setIconFont('fa-tag');
     $action3->setHref('#');
 
     $action4 = new PHUIIconView();
-    $action4->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS);
-    $action4->setSpriteIcon('new-white');
+    $action4->setIconFont('fa-plus');
     $action4->setHref('#');
 
     $action5 = new PHUIIconView();
-    $action5->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS);
-    $action5->setSpriteIcon('search-white');
+    $action5->setIconFont('fa-search');
     $action5->setHref('#');
 
     $action6 = new PHUIIconView();
-    $action6->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS);
-    $action6->setSpriteIcon('move-white');
+    $action6->setIconFont('fa-arrows');
     $action6->setHref('#');
 
     $header1 = id(new PhabricatorActionHeaderView())
@@ -200,8 +194,7 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
       ->setName('Closed');
 
     $action1 = new PHUIIconView();
-    $action1->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS);
-    $action1->setSpriteIcon('flag-grey');
+    $action1->setIconFont('fa-flag');
     $action1->setHref('#');
 
     $header1 = id(new PhabricatorActionHeaderView())

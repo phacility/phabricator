@@ -229,8 +229,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
       $edit_uri->setQueryParam('dashboardID', $dashboard_id);
     }
     $action_edit = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS)
-      ->setSpriteIcon('settings-grey')
+      ->setIconFont('fa-pencil')
       ->setHref((string) $edit_uri);
     $header->addAction($action_edit);
 
@@ -239,8 +238,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
         '/dashboard/removepanel/'.$dashboard_id.'/'))
         ->setQueryParam('panelPHID', $panel->getPHID());
       $action_remove = id(new PHUIIconView())
-        ->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS)
-        ->setSpriteIcon('close-grey')
+        ->setIconFont('fa-trash-o')
         ->setHref((string) $uri)
         ->setWorkflow(true);
       $header->addAction($action_remove);

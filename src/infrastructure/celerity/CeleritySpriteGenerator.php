@@ -46,66 +46,7 @@ final class CeleritySpriteGenerator {
     return $sheet;
   }
 
-  public function buildActionsSheet() {
-    $icons = $this->getDirectoryList('actions_white_1x');
-
-    $colors = array(
-      'dark',
-      'grey',
-      'white',
-    );
-
-    $scales = array(
-      '1x'  => 1,
-      '2x'  => 2,
-    );
-
-    $template = id(new PhutilSprite())
-      ->setSourceSize(24, 24);
-
-    $sprites = array();
-    foreach ($colors as $color) {
-      foreach ($icons as $icon) {
-        $prefix = 'actions_';
-        if (strlen($color)) {
-          $prefix .= $color.'_';
-        }
-
-        $suffix = '';
-        if (strlen($color)) {
-          $suffix = '-'.$color;
-        }
-
-        $sprite = id(clone $template)
-          ->setName('actions-'.$icon.$suffix);
-
-        $tcss = array();
-        $tcss[] = '.actions-'.$icon.$suffix;
-        if ($color == 'dark') {
-          $tcss[] = '.device-desktop '.
-            '.actions-'.$icon.'-grey.phui-icon-view:hover';
-        }
-
-        $sprite->setTargetCSS(implode(', ', $tcss));
-
-        foreach ($scales as $scale_key => $scale) {
-          $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
-          $sprite->setSourceFile($path, $scale);
-        }
-        $sprites[] = $sprite;
-      }
-    }
-
-    $sheet = $this->buildSheet('actions', true);
-    $sheet->setScales($scales);
-    foreach ($sprites as $sprite) {
-      $sheet->addSprite($sprite);
-    }
-
-    return $sheet;
-  }
-
-    public function buildMiniconsSheet() {
+  public function buildMiniconsSheet() {
     $icons = $this->getDirectoryList('minicons_white_1x');
 
     $colors = array(

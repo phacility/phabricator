@@ -2,9 +2,6 @@
 
 final class PhabricatorActionHeaderView extends AphrontView {
 
-  const ICON_GREY = 'grey';
-  const ICON_WHITE = 'white';
-
   const HEADER_GREY = 'grey';
   const HEADER_DARK_GREY = 'dark-grey';
   const HEADER_BLUE = 'blue';
@@ -18,8 +15,8 @@ final class PhabricatorActionHeaderView extends AphrontView {
   private $headerIcon;
   private $headerSigils = array();
   private $actions = array();
-  private $iconColor = PhabricatorActionHeaderView::ICON_GREY;
   private $headerColor;
+  private $tag = null;
   private $dropdown;
 
   public function setDropdown($dropdown) {
@@ -33,7 +30,7 @@ final class PhabricatorActionHeaderView extends AphrontView {
   }
 
   public function setTag(PHUITagView $tag) {
-    $this->actions[] = $tag;
+    $this->tag = $tag;
     return $this;
   }
 
@@ -57,14 +54,28 @@ final class PhabricatorActionHeaderView extends AphrontView {
     return $this;
   }
 
-  public function setIconColor($color) {
-    $this->iconColor = $color;
-    return $this;
-  }
-
   public function setHeaderColor($color) {
     $this->headerColor = $color;
     return $this;
+  }
+
+  private function getIconColor() {
+    switch ($this->headerColor) {
+      case self::HEADER_GREY:
+        return 'lightgreytext';
+      case self::HEADER_DARK_GREY:
+        return 'lightgreytext';
+      case self::HEADER_BLUE:
+        return 'white';
+      case self::HEADER_GREEN:
+        return 'white';
+      case self::HEADER_RED:
+        return 'white';
+      case self::HEADER_YELLOW:
+        return 'white';
+      case self::HEADER_LIGHTBLUE:
+        return 'bluegrey';
+    }
   }
 
   public function render() {
@@ -84,16 +95,28 @@ final class PhabricatorActionHeaderView extends AphrontView {
     }
 
     $action_list = array();
-    foreach ($this->actions as $action) {
+    if (nonempty($this->actions)) {
+      foreach ($this->actions as $action) {
+        $action->addClass($this->getIconColor());
+        $action_list[] = phutil_tag(
+          'li',
+            array(
+            'class' => 'phabricator-action-header-icon-item'
+          ),
+          $action);
+      }
+    }
+
+    if ($this->tag) {
       $action_list[] = phutil_tag(
         'li',
           array(
           'class' => 'phabricator-action-header-icon-item'
         ),
-        $action);
+        $this->tag);
     }
 
-    $header_icon = '';
+    $header_icon = null;
     if ($this->headerIcon) {
       require_celerity_resource('sprite-minicons-css');
       $header_icon = phutil_tag(
@@ -126,8 +149,7 @@ final class PhabricatorActionHeaderView extends AphrontView {
         $header_title));
 
     $icons = '';
-    if (!empty($action_list)) {
-      $classes[] = 'phabricator-action-header-icon-'.$this->iconColor;
+    if (nonempty($action_list)) {
       $icons = phutil_tag(
         'ul',
           array(

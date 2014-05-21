@@ -165,8 +165,7 @@ final class PhabricatorProjectBoardViewController
         $panel->setEditURI('column/'.$column->getID().'/');
       }
       $panel->setHeaderAction(id(new PHUIIconView())
-        ->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS)
-        ->setSpriteIcon('new-grey')
+        ->setIconFont('fa-plus')
         ->setHref('/maniphest/task/create/')
         ->addSigil('column-add-task')
         ->setMetadata(

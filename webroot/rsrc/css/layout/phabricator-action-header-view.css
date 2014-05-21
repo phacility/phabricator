@@ -14,8 +14,8 @@
   font-weight: bold;
   line-height: 15px;
   padding: 8px 0;
-  text-shadow: 0 1px 1px #fff;
   white-space: nowrap;
+  -webkit-font-smoothing: antialiased;
 }
 
 .gradient-lightblue-header .phabricator-action-header-title {
@@ -29,11 +29,15 @@
 
 .phabricator-action-header-icon-item {
   float: right;
-  padding-left: 2px;
+  padding-left: 4px;
 }
 
 .phabricator-action-header-icon-item .phui-icon-view {
   display: inline-block;
+  font-size: 18px;
+  margin: 4px 0;
+  height: 18px;
+  width: 18px;
 }
 
 .phabricator-action-header-icon-item .phui-tag-view {
@@ -53,7 +57,6 @@
 .gradient-blue-header .phabricator-action-header-link,
 .gradient-yellow-header .phabricator-action-header-link {
   color: #fff;
-  text-shadow: 0 -1px 1px rgba(0,0,0,.7);
 }
 
 .phabricator-action-header-icon-list .phui-tag-view {

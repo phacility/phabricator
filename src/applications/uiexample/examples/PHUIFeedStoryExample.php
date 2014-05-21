@@ -66,8 +66,7 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
     $text = hsprintf('<strong><a>harding (Tom Harding)</a></strong> awarded '.
       '<a>M10: Workboards</a> a token.');
     $action1 = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS)
-      ->setSpriteIcon('token-grey')
+      ->setIconFont('fa-trophy bluegrey')
       ->setHref('#');
     $token =
         id(new PHUIIconView())
@@ -87,12 +86,10 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
     $text = hsprintf('<strong><a>wgharding (Warren Harding)</a></strong> '.
       'asked a new question.');
     $action1 = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS)
-      ->setSpriteIcon('up-grey')
+      ->setIconFont('fa-chevron-up bluegrey')
       ->setHref('#');
     $action2 = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS)
-      ->setSpriteIcon('down-grey')
+      ->setIconFont('fa-chevron-down bluegrey')
       ->setHref('#');
     $story4 = id(new PHUIFeedStoryView())
       ->setTitle($text)
