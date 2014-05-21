@@ -27,6 +27,11 @@ final class PhabricatorDashboardPanelTypeQuery
         'name' => pht('ApplicationSearch Key'),
         'type' => 'text',
       ),
+      'limit' => array(
+        'name' => pht('Maximum Number of Items'),
+        'caption' => pht('Leave this blank for the default number of items'),
+        'type' => 'text',
+      ),
     );
   }
 
@@ -68,6 +73,14 @@ final class PhabricatorDashboardPanelTypeQuery
 
     $query = $engine->buildQueryFromSavedQuery($saved);
     $pager = $engine->newPagerForSavedQuery($saved);
+
+    if ($panel->getProperty('limit')) {
+      $limit = (int)$panel->getProperty('limit');
+      if ($pager->getPageSize() !== 0xFFFF) {
+        $pager->setPageSize($limit);
+      }
+    }
+
     $results = $engine->executeQuery($query, $pager);
 
     return $engine->renderResults($results, $saved);
