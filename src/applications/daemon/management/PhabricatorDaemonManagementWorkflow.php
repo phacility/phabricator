@@ -224,7 +224,7 @@ abstract class PhabricatorDaemonManagementWorkflow
 /* -(  Commands  )----------------------------------------------------------- */
 
 
-  protected function executeStartCommand() {
+  protected function executeStartCommand($keep_leases = false) {
     $console = PhutilConsole::getConsole();
 
     $running = $this->loadRunningDaemons();
@@ -244,6 +244,16 @@ abstract class PhabricatorDaemonManagementWorkflow
         $console->writeErr("%s\n", $message);
         exit(1);
       }
+    }
+
+    if ($keep_leases) {
+      $console->writeErr("%s\n", pht('Not touching active task queue leases.'));
+    } else {
+      $console->writeErr("%s\n", pht('Freeing active task leases...'));
+      $count = $this->freeActiveLeases();
+      $console->writeErr(
+        "%s\n",
+        pht('Freed %s task lease(s).', new PhutilNumber($count)));
     }
 
     $daemons = array(
@@ -350,6 +360,17 @@ abstract class PhabricatorDaemonManagementWorkflow
     }
 
     return 0;
+  }
+
+  private function freeActiveLeases() {
+    $task_table = id(new PhabricatorWorkerActiveTask());
+    $conn_w = $task_table->establishConnection('w');
+    queryfx(
+      $conn_w,
+      'UPDATE %T SET leaseExpires = UNIX_TIMESTAMP()
+        WHERE leaseExpires > UNIX_TIMESTAMP()',
+      $task_table->getTableName());
+    return $conn_w->getAffectedRows();
   }
 
 }
