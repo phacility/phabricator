@@ -47,17 +47,17 @@ final class PhabricatorSettingsPanelPassword
     // either by providing the old password or by carrying a token to
     // the workflow from a password reset email.
 
-    $token = $request->getStr('token');
-
-    $valid_token = false;
-    if ($token) {
-      $email_address = $request->getStr('email');
-      $email = id(new PhabricatorUserEmail())->loadOneWhere(
-        'address = %s',
-        $email_address);
-      if ($email) {
-        $valid_token = $user->validateEmailToken($email, $token);
-      }
+    $key = $request->getStr('key');
+    $token = null;
+    if ($key) {
+      $token = id(new PhabricatorAuthTemporaryTokenQuery())
+        ->setViewer($user)
+        ->withObjectPHIDs(array($user->getPHID()))
+        ->withTokenTypes(
+          array(PhabricatorAuthSessionEngine::PASSWORD_TEMPORARY_TOKEN_TYPE))
+        ->withTokenCodes(array(PhabricatorHash::digest($key)))
+        ->withExpired(false)
+        ->executeOne();
     }
 
     $e_old = true;
@@ -66,7 +66,7 @@ final class PhabricatorSettingsPanelPassword
 
     $errors = array();
     if ($request->isFormPost()) {
-      if (!$valid_token) {
+      if (!$token) {
         $envelope = new PhutilOpaqueEnvelope($request->getStr('old_pw'));
         if (!$user->comparePassword($envelope)) {
           $errors[] = pht('The old password you entered is incorrect.');
@@ -105,7 +105,10 @@ final class PhabricatorSettingsPanelPassword
 
         unset($unguarded);
 
-        if ($valid_token) {
+        if ($token) {
+          // Destroy the token.
+          $token->delete();
+
           // If this is a password set/reset, kick the user to the home page
           // after we update their account.
           $next = '/';
@@ -135,9 +138,9 @@ final class PhabricatorSettingsPanelPassword
     $form = new AphrontFormView();
     $form
       ->setUser($user)
-      ->addHiddenInput('token', $token);
+      ->addHiddenInput('key', $key);
 
-    if (!$valid_token) {
+    if (!$token) {
       $form->appendChild(
         id(new AphrontFormPasswordControl())
           ->setLabel(pht('Old Password'))

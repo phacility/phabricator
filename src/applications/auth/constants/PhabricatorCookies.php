@@ -49,6 +49,14 @@ final class PhabricatorCookies extends Phobject {
   const COOKIE_NEXTURI        = 'next_uri';
 
 
+  /**
+   * Stores a hint that the user should be moved directly into high security
+   * after upgrading a partial login session. This is used during password
+   * recovery to avoid a double-prompt.
+   */
+  const COOKIE_HISEC          = 'jump_to_hisec';
+
+
 /* -(  Client ID Cookie  )--------------------------------------------------- */
 
 
@@ -125,7 +133,7 @@ final class PhabricatorCookies extends Phobject {
    */
   public static function getNextURICookie(AphrontRequest $request) {
     $cookie_value = $request->getCookie(self::COOKIE_NEXTURI);
-    list($set_at, $next_uri) = self::parseNExtURICookie($cookie_value);
+    list($set_at, $next_uri) = self::parseNextURICookie($cookie_value);
 
     return $next_uri;
   }

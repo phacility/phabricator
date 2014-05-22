@@ -1249,6 +1249,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthNeedsApprovalController' => 'applications/auth/controller/PhabricatorAuthNeedsApprovalController.php',
     'PhabricatorAuthNewController' => 'applications/auth/controller/config/PhabricatorAuthNewController.php',
     'PhabricatorAuthOldOAuthRedirectController' => 'applications/auth/controller/PhabricatorAuthOldOAuthRedirectController.php',
+    'PhabricatorAuthOneTimeLoginController' => 'applications/auth/controller/PhabricatorAuthOneTimeLoginController.php',
     'PhabricatorAuthPHIDTypeAuthFactor' => 'applications/auth/phid/PhabricatorAuthPHIDTypeAuthFactor.php',
     'PhabricatorAuthProvider' => 'applications/auth/provider/PhabricatorAuthProvider.php',
     'PhabricatorAuthProviderConfig' => 'applications/auth/storage/PhabricatorAuthProviderConfig.php',
@@ -1525,7 +1526,6 @@ phutil_register_library_map(array(
     'PhabricatorEdgeTestCase' => 'infrastructure/edges/__tests__/PhabricatorEdgeTestCase.php',
     'PhabricatorEditor' => 'infrastructure/PhabricatorEditor.php',
     'PhabricatorEmailLoginController' => 'applications/auth/controller/PhabricatorEmailLoginController.php',
-    'PhabricatorEmailTokenController' => 'applications/auth/controller/PhabricatorEmailTokenController.php',
     'PhabricatorEmailVerificationController' => 'applications/auth/controller/PhabricatorEmailVerificationController.php',
     'PhabricatorEmptyQueryException' => 'infrastructure/query/PhabricatorEmptyQueryException.php',
     'PhabricatorEnglishTranslation' => 'infrastructure/internationalization/translation/PhabricatorEnglishTranslation.php',
@@ -4011,6 +4011,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthNeedsApprovalController' => 'PhabricatorAuthController',
     'PhabricatorAuthNewController' => 'PhabricatorAuthProviderConfigController',
     'PhabricatorAuthOldOAuthRedirectController' => 'PhabricatorAuthController',
+    'PhabricatorAuthOneTimeLoginController' => 'PhabricatorAuthController',
     'PhabricatorAuthPHIDTypeAuthFactor' => 'PhabricatorPHIDType',
     'PhabricatorAuthProviderConfig' =>
     array(
@@ -4325,7 +4326,6 @@ phutil_register_library_map(array(
     'PhabricatorEdgeTestCase' => 'PhabricatorTestCase',
     'PhabricatorEditor' => 'Phobject',
     'PhabricatorEmailLoginController' => 'PhabricatorAuthController',
-    'PhabricatorEmailTokenController' => 'PhabricatorAuthController',
     'PhabricatorEmailVerificationController' => 'PhabricatorAuthController',
     'PhabricatorEmptyQueryException' => 'Exception',
     'PhabricatorEnglishTranslation' => 'PhabricatorBaseEnglishTranslation',

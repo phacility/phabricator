@@ -69,6 +69,12 @@ final class PhabricatorAuthManagementRecoverWorkflow
           $can_recover));
     }
 
+    $engine = new PhabricatorAuthSessionEngine();
+    $onetime_uri = $engine->getOneTimeLoginURI(
+      $user,
+      null,
+      PhabricatorAuthSessionEngine::ONETIME_RECOVER);
+
     $console = PhutilConsole::getConsole();
     $console->writeOut(
       pht(
@@ -76,7 +82,7 @@ final class PhabricatorAuthManagementRecoverWorkflow
         'interface:',
         $username));
     $console->writeOut("\n\n");
-    $console->writeOut("    %s", $user->getEmailLoginURI());
+    $console->writeOut('    %s', $onetime_uri);
     $console->writeOut("\n\n");
     $console->writeOut(
       pht(

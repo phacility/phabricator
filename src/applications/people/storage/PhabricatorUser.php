@@ -342,60 +342,6 @@ final class PhabricatorUser
     return substr(PhabricatorHash::digest($vec), 0, $len);
   }
 
-  private function generateEmailToken(
-    PhabricatorUserEmail $email,
-    $offset = 0) {
-
-    $key = implode(
-      '-',
-      array(
-        PhabricatorEnv::getEnvConfig('phabricator.csrf-key'),
-        $this->getPHID(),
-        $email->getVerificationCode(),
-      ));
-
-    return $this->generateToken(
-      time() + ($offset * self::EMAIL_CYCLE_FREQUENCY),
-      self::EMAIL_CYCLE_FREQUENCY,
-      $key,
-      self::EMAIL_TOKEN_LENGTH);
-  }
-
-  public function validateEmailToken(
-    PhabricatorUserEmail $email,
-    $token) {
-    for ($ii = -1; $ii <= 1; $ii++) {
-      $valid = $this->generateEmailToken($email, $ii);
-      if ($token == $valid) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public function getEmailLoginURI(PhabricatorUserEmail $email = null) {
-    if (!$email) {
-      $email = $this->loadPrimaryEmail();
-      if (!$email) {
-        throw new Exception("User has no primary email!");
-      }
-    }
-    $token = $this->generateEmailToken($email);
-
-    $uri = '/login/etoken/'.$token.'/';
-    try {
-      $uri = PhabricatorEnv::getProductionURI($uri);
-    } catch (Exception $ex) {
-      // If a user runs `bin/auth recover` before configuring the base URI,
-      // just show the path. We don't have any way to figure out the domain.
-      // See T4132.
-    }
-
-    $uri = new PhutilURI($uri);
-
-    return $uri->alter('email', $email->getAddress());
-  }
-
   public function attachUserProfile(PhabricatorUserProfile $profile) {
     $this->profile = $profile;
     return $this;
@@ -567,7 +513,12 @@ final class PhabricatorUser
 
     $base_uri = PhabricatorEnv::getProductionURI('/');
 
-    $uri = $this->getEmailLoginURI();
+    $engine = new PhabricatorAuthSessionEngine();
+    $uri = $engine->getOneTimeLoginURI(
+      $this,
+      $this->loadPrimaryEmail(),
+      PhabricatorAuthSessionEngine::ONETIME_WELCOME);
+
     $body = <<<EOBODY
 Welcome to Phabricator!
 
@@ -611,7 +562,11 @@ EOBODY;
 
     $password_instructions = null;
     if (PhabricatorAuthProviderPassword::getPasswordProvider()) {
-      $uri = $this->getEmailLoginURI();
+      $engine = new PhabricatorAuthSessionEngine();
+      $uri = $engine->getOneTimeLoginURI(
+        $this,
+        null,
+        PhabricatorAuthSessionEngine::ONETIME_USERNAME);
       $password_instructions = <<<EOTXT
 If you use a password to login, you'll need to reset it before you can login
 again. You can reset your password by following this link:

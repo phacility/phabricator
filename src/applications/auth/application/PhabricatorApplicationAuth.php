@@ -101,7 +101,11 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
       '/login/' => array(
         '' => 'PhabricatorAuthStartController',
         'email/' => 'PhabricatorEmailLoginController',
-        'etoken/(?P<token>\w+)/' => 'PhabricatorEmailTokenController',
+        'once/'.
+          '(?P<type>[^/]+)/'.
+          '(?P<id>\d+)/'.
+          '(?P<key>[^/]+)/'.
+          '(?:(?P<emailID>\d+)/)?' => 'PhabricatorAuthOneTimeLoginController',
         'refresh/' => 'PhabricatorRefreshCSRFController',
         'mustverify/' => 'PhabricatorMustVerifyEmailController',
       ),
