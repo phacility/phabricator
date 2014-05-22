@@ -79,14 +79,17 @@ final class PhabricatorProjectPHIDTypeProject extends PhabricatorPHIDType {
 
     $projects = id(new PhabricatorProjectQuery())
       ->setViewer($query->getViewer())
-      ->withPhrictionSlugs(array_keys($map))
+      ->withSlugs(array_keys($map))
+      ->needSlugs(true)
       ->execute();
 
     $result = array();
     foreach ($projects as $project) {
-      $slugs = array($project->getPhrictionSlug());
-      foreach ($slugs as $slug) {
-        foreach ($map[$slug] as $original) {
+      $slugs = $project->getSlugs();
+      $slug_strs = mpull($slugs, 'getSlug');
+      foreach ($slug_strs as $slug) {
+        $slug_map = idx($map, $slug, array());
+        foreach ($slug_map as $original) {
           $result[$original] = $project;
         }
       }
@@ -102,7 +105,7 @@ final class PhabricatorProjectPHIDTypeProject extends PhabricatorPHIDType {
     // should not. normalize() strips out most punctuation and leads to
     // excessively aggressive matches.
 
-    return phutil_utf8_strtolower($slug).'/';
+    return phutil_utf8_strtolower($slug);
   }
 
 

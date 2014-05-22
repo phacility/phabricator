@@ -835,6 +835,28 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
+      '%d project hashtag(s) are already used: %s' => array(
+          'Project hashtag %2$s is already used.',
+          '%d project hashtags are already used: %2$s',
+      ),
+
+      '%s changed project hashtag(s), added %d: %s; removed %d: %s' =>
+        '%s changed project hashtags, added %3$s; removed %5$s',
+
+      '%s added %d project hashtag(s): %s' => array(
+        array(
+          '%s added a hashtag: %3$s',
+          '%s added hashtags: %3$s',
+        ),
+      ),
+
+      '%s removed %d project hashtag(s): %s' => array(
+        array(
+          '%s removed a hashtag: %3$s',
+          '%s removed hashtags: %3$s',
+        ),
+      ),
+
       '%d User(s) Need Approval' => array(
         '%d User Needs Approval',
         '%d Users Need Approval',

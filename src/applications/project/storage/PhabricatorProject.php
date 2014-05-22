@@ -24,6 +24,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   private $sparseMembers = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
   private $profileImageFile = self::ATTACHABLE;
+  private $slugs = self::ATTACHABLE;
 
   public static function initializeNewProject(PhabricatorUser $actor) {
     return id(new PhabricatorProject())
@@ -143,6 +144,14 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return 'projects/'.$slug;
   }
 
+  // TODO - once we sever project => phriction automagicalness,
+  // migrate getPhrictionSlug to have no trailing slash and be called
+  // getPrimarySlug
+  public function getPrimarySlug() {
+    $slug = $this->getPhrictionSlug();
+    return rtrim($slug, '/');
+  }
+
   public function isArchived() {
     return ($this->getStatus() == PhabricatorProjectStatus::STATUS_ARCHIVED);
   }
@@ -183,6 +192,15 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   public function getWatcherPHIDs() {
     return $this->assertAttached($this->watcherPHIDs);
+  }
+
+  public function attachSlugs(array $slugs) {
+    $this->slugs = $slugs;
+    return $this;
+  }
+
+  public function getSlugs() {
+    return $this->assertAttached($this->slugs);
   }
 
 
