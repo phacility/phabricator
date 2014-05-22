@@ -182,7 +182,7 @@ final class PhabricatorDashboardPanelEditController
     $request = $this->getRequest();
     $dashboard_id = $request->getInt('dashboardID');
     if ($dashboard_id) {
-      $uri = $this->getApplicationURI('arrange/'.$dashboard_id.'/');
+      $uri = $this->getApplicationURI('manage/'.$dashboard_id.'/');
     } else {
       $uri = '/'.$panel->getMonogram();
     }

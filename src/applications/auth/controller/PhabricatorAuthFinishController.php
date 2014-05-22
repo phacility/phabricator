@@ -24,11 +24,19 @@ final class PhabricatorAuthFinishController
 
     $engine = new PhabricatorAuthSessionEngine();
 
+    // If this cookie is set, the user is headed into a high security area
+    // after login (normally because of a password reset) so if they are
+    // able to pass the checkpoint we just want to put their account directly
+    // into high security mode, rather than prompt them again for the same
+    // set of credentials.
+    $jump_into_hisec = $request->getCookie(PhabricatorCookies::COOKIE_HISEC);
+
     try {
       $token = $engine->requireHighSecuritySession(
         $viewer,
         $request,
-        '/logout/');
+        '/logout/',
+        $jump_into_hisec);
     } catch (PhabricatorAuthHighSecurityRequiredException $ex) {
       $form = id(new PhabricatorAuthSessionEngine())->renderHighSecurityForm(
         $ex->getFactors(),
@@ -60,6 +68,7 @@ final class PhabricatorAuthFinishController
 
     $next = PhabricatorCookies::getNextURICookie($request);
     $request->clearCookie(PhabricatorCookies::COOKIE_NEXTURI);
+    $request->clearCookie(PhabricatorCookies::COOKIE_HISEC);
 
     if (!PhabricatorEnv::isValidLocalWebResource($next)) {
       $next = '/';

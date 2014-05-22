@@ -59,7 +59,12 @@ final class PhabricatorEmailLoginController
         }
 
         if (!$errors) {
-          $uri = $target_user->getEmailLoginURI($target_email);
+          $engine = new PhabricatorAuthSessionEngine();
+          $uri = $engine->getOneTimeLoginURI(
+            $target_user,
+            null,
+            PhabricatorAuthSessionEngine::ONETIME_RESET);
+
           if ($is_serious) {
             $body = <<<EOBODY
 You can use this link to reset your Phabricator password:
@@ -87,24 +92,18 @@ EOBODY;
           // mail if they have the "don't send me email about my own actions"
           // preference set.
 
-          $mail = new PhabricatorMetaMTAMail();
-          $mail->setSubject('[Phabricator] Password Reset');
-          $mail->addTos(
-            array(
-              $target_user->getPHID(),
-            ));
-          $mail->setBody($body);
-          $mail->saveAndSend();
+          $mail = id(new PhabricatorMetaMTAMail())
+            ->setSubject(pht('[Phabricator] Password Reset'))
+            ->addRawTos(array($target_email->getAddress()))
+            ->setBody($body)
+            ->saveAndSend();
 
-          $view = new AphrontRequestFailureView();
-          $view->setHeader(pht('Check Your Email'));
-          $view->appendChild(phutil_tag('p', array(), pht(
-              'An email has been sent with a link you can use to login.')));
-          return $this->buildStandardPageResponse(
-            $view,
-            array(
-              'title' => pht('Email Sent'),
-            ));
+          return $this->newDialog()
+            ->setTitle(pht('Check Your Email'))
+            ->setShortTitle(pht('Email Sent'))
+            ->appendParagraph(
+              pht('An email has been sent with a link you can use to login.'))
+            ->addCancelButton('/', pht('Done'));
         }
       }
 

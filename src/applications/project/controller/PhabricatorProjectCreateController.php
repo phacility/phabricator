@@ -15,13 +15,16 @@ final class PhabricatorProjectCreateController
     $project = PhabricatorProject::initializeNewProject($user);
 
     $e_name = true;
-    $errors = array();
+    $type_name = PhabricatorProjectTransaction::TYPE_NAME;
+    $v_name = $project->getName();
+    $validation_exception = null;
     if ($request->isFormPost()) {
       $xactions = array();
+      $v_name = $request->getStr('name');
 
       $xactions[] = id(new PhabricatorProjectTransaction())
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME)
-        ->setNewValue($request->getStr('name'));
+        ->setTransactionType($type_name)
+        ->setNewValue($v_name);
 
       $xactions[] = id(new PhabricatorProjectTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
@@ -34,14 +37,9 @@ final class PhabricatorProjectCreateController
       $editor = id(new PhabricatorProjectTransactionEditor())
         ->setActor($user)
         ->setContinueOnNoEffect(true)
-        ->setContentSourceFromRequest($request)
-        ->applyTransactions($project, $xactions);
-
-      // TODO: Deal with name collision exceptions more gracefully.
-
-      if (!$errors) {
-        $project->save();
-
+        ->setContentSourceFromRequest($request);
+      try {
+        $editor->applyTransactions($project, $xactions);
         if ($request->isAjax()) {
           return id(new AphrontAjaxResponse())
             ->setContent(array(
@@ -52,13 +50,10 @@ final class PhabricatorProjectCreateController
           return id(new AphrontRedirectResponse())
             ->setURI('/project/view/'.$project->getID().'/');
         }
+      } catch (PhabricatorApplicationTransactionValidationException $ex) {
+        $validation_exception = $ex;
+        $e_name = $ex->getShortMessage($type_name);
       }
-    }
-
-    $error_view = null;
-    if ($errors) {
-      $error_view = new AphrontErrorView();
-      $error_view->setErrors($errors);
     }
 
     if ($request->isAjax()) {
@@ -73,15 +68,19 @@ final class PhabricatorProjectCreateController
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name'))
           ->setName('name')
-          ->setValue($project->getName())
+          ->setValue($v_name)
           ->setError($e_name));
 
     if ($request->isAjax()) {
+      $errors = array();
+      if ($validation_exception) {
+        $errors = mpull($ex->getErrors(), 'getMessage');
+      }
       $dialog = id(new AphrontDialogView())
         ->setUser($user)
         ->setWidth(AphrontDialogView::WIDTH_FORM)
         ->setTitle(pht('Create a New Project'))
-        ->appendChild($error_view)
+        ->setErrors($errors)
         ->appendChild($form)
         ->addSubmitButton(pht('Create Project'))
         ->addCancelButton('/project/');
@@ -101,7 +100,7 @@ final class PhabricatorProjectCreateController
 
       $form_box = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('Create New Project'))
-        ->setFormErrors($errors)
+        ->setValidationException($validation_exception)
         ->setForm($form);
 
       return $this->buildApplicationPage(

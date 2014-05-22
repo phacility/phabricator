@@ -1,7 +1,8 @@
 <?php
 
 /**
- * @task setup  Setup Cache
+ * @task immutable  Immutable Cache
+ * @task setup      Setup Cache
  */
 final class PhabricatorCaches {
 
@@ -14,6 +15,52 @@ final class PhabricatorCaches {
     $caches = self::addProfilerToCaches($caches);
     return id(new PhutilKeyValueCacheStack())
       ->setCaches($caches);
+  }
+
+
+/* -(  Local Cache  )-------------------------------------------------------- */
+
+
+  /**
+   * Gets an immutable cache stack.
+   *
+   * This stack trades mutability away for improved performance. Normally, it is
+   * APC + DB.
+   *
+   * In the general case with multiple web frontends, this stack can not be
+   * cleared, so it is only appropriate for use if the value of a given key is
+   * permanent and immutable.
+   *
+   * @return PhutilKeyValueCacheStack Best immutable stack available.
+   * @task immutable
+   */
+  public static function getImmutableCache() {
+    static $cache;
+    if (!$cache) {
+      $caches = self::buildImmutableCaches();
+      $cache = self::newStackFromCaches($caches);
+    }
+    return $cache;
+  }
+
+
+  /**
+   * Build the immutable cache stack.
+   *
+   * @return list<PhutilKeyValueCache> List of caches.
+   * @task immutable
+   */
+  private static function buildImmutableCaches() {
+    $caches = array();
+
+    $apc = new PhutilKeyValueCacheAPC();
+    if ($apc->isAvailable()) {
+      $caches[] = $apc;
+    }
+
+    $caches[] = new PhabricatorKeyValueDatabaseCache();
+
+    return $caches;
   }
 
 

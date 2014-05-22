@@ -16,6 +16,7 @@ final class PhabricatorProjectEditDetailsController
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->id))
+      ->needSlugs(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -37,16 +38,24 @@ final class PhabricatorProjectEditDetailsController
     $edit_uri = $this->getApplicationURI('edit/'.$project->getID().'/');
 
     $e_name = true;
+    $e_slugs = false;
     $e_edit = null;
 
     $v_name = $project->getName();
+    $project_slugs = $project->getSlugs();
+    $project_slugs = mpull($project_slugs, 'getSlug', 'getSlug');
+    $v_primary_slug = $project->getPrimarySlug();
+    unset($project_slugs[$v_primary_slug]);
+    $v_slugs = $project_slugs;
 
     $validation_exception = null;
 
     if ($request->isFormPost()) {
       $e_name = null;
+      $e_slugs = null;
 
       $v_name = $request->getStr('name');
+      $v_slugs = $request->getStrList('slugs');
       $v_view = $request->getStr('can_view');
       $v_edit = $request->getStr('can_edit');
       $v_join = $request->getStr('can_join');
@@ -56,11 +65,16 @@ final class PhabricatorProjectEditDetailsController
         $request);
 
       $type_name = PhabricatorProjectTransaction::TYPE_NAME;
+      $type_slugs = PhabricatorProjectTransaction::TYPE_SLUGS;
       $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
       $xactions[] = id(new PhabricatorProjectTransaction())
         ->setTransactionType($type_name)
-        ->setNewValue($request->getStr('name'));
+        ->setNewValue($v_name);
+
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType($type_slugs)
+        ->setNewValue($v_slugs);
 
       $xactions[] = id(new PhabricatorProjectTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
@@ -87,6 +101,7 @@ final class PhabricatorProjectEditDetailsController
         $validation_exception = $ex;
 
         $e_name = $ex->getShortMessage($type_name);
+        $e_slugs = $ex->getShortMessage($type_slugs);
         $e_edit = $ex->getShortMessage($type_edit);
 
         $project->setViewPolicy($v_view);
@@ -102,6 +117,7 @@ final class PhabricatorProjectEditDetailsController
       ->setViewer($viewer)
       ->setObject($project)
       ->execute();
+    $v_slugs = implode(', ', $v_slugs);
 
     $form = new AphrontFormView();
     $form
@@ -112,10 +128,22 @@ final class PhabricatorProjectEditDetailsController
           ->setName('name')
           ->setValue($v_name)
           ->setError($e_name));
-
     $field_list->appendFieldsToForm($form);
 
     $form
+      ->appendChild(
+        id(new AphrontFormStaticControl())
+        ->setLabel(pht('Primary Hashtag'))
+        ->setCaption(pht('The primary hashtag is derived from the name.'))
+        ->setValue($v_primary_slug))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel(pht('Additional Hashtags'))
+          ->setCaption(pht(
+            'Specify a comma-separated list of additional hashtags.'))
+          ->setName('slugs')
+          ->setValue($v_slugs)
+          ->setError($e_slugs))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setUser($viewer)

@@ -385,7 +385,7 @@ abstract class DiffusionRequest {
       $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
         'repositoryID = %d AND commitIdentifier = %s',
         $repository->getID(),
-        $this->getCommit());
+        $this->getStableCommit());
       if ($commit) {
         $commit->attachRepository($repository);
       }

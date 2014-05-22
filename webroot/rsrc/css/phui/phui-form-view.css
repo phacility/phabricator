@@ -49,6 +49,20 @@
   width: 100%;
 }
 
+.aphront-form-input *::-webkit-input-placeholder {
+  color:{$greytext} !important;
+}
+
+.aphront-form-input *::-moz-placeholder {
+  color:{$greytext} !important;
+  opacity: 1; /* Firefox nudges the opacity to 0.4 */
+}
+
+.aphront-form-input *:-ms-input-placeholder  {
+  color:{$greytext} !important;
+}
+
+
 .aphront-form-error {
   width: 18%;
   float: right;
