@@ -10,6 +10,7 @@ JX.behavior('phabricator-line-linker', function() {
   var origin = null;
   var target = null;
   var root = null;
+  var editor_link = JX.$('editor_link');
 
   function getRowNumber(tr) {
     var th = JX.DOM.find(tr, 'th', 'phabricator-source-line');
@@ -79,6 +80,10 @@ JX.behavior('phabricator-line-linker', function() {
       target = null;
       e.kill();
       JX.History.replace(uri);
+      if (editor_link.href) {
+        editdata = JX.Stratcom.getData(editor_link);
+        editor_link.href = editdata.link_template.replace('%25l', o);
+      }
     });
 
 });

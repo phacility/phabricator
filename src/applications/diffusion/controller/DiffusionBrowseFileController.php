@@ -413,6 +413,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     $callsign = $repository->getCallsign();
     $editor_link = $user->loadEditorLink($path, $line, $callsign);
+    $template = $user->loadEditorLink($path, '%l', $callsign);
 
     $icon_edit = id(new PHUIIconView())
       ->setIconFont('fa-pencil');
@@ -421,6 +422,8 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       ->setText(pht('Open in Editor'))
       ->setHref($editor_link)
       ->setIcon($icon_edit)
+      ->setID('editor_link')
+      ->setMetadata(array('link_template' => $template))
       ->setDisabled(!$editor_link);
 
     return $button;
