@@ -67,6 +67,10 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
         'history/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectHistoryController',
         '(?P<action>watch|unwatch)/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectWatchController',
+
+      ),
+      '/tag/' => array(
+        '(?P<slug>[^/]+)/' => 'PhabricatorProjectProfileController',
       ),
     );
   }
