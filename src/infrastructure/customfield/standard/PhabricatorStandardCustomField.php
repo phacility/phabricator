@@ -215,13 +215,18 @@ abstract class PhabricatorStandardCustomField
     return $this->getFieldConfigValue('instructions');
   }
 
+  public function getPlaceholder() {
+    return $this->getFieldConfigValue('placeholder', null);
+  }
+
   public function renderEditControl(array $handles) {
     return id(new AphrontFormTextControl())
       ->setName($this->getFieldKey())
       ->setCaption($this->getCaption())
       ->setValue($this->getFieldValue())
       ->setError($this->getFieldError())
-      ->setLabel($this->getFieldName());
+      ->setLabel($this->getFieldName())
+      ->setPlaceholder($this->getPlaceholder());
   }
 
   public function newStorageObject() {
