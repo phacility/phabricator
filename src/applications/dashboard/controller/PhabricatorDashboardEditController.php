@@ -46,7 +46,7 @@ final class PhabricatorDashboardEditController
       $crumbs->addTextCrumb('Create Dashboard');
     } else {
       $id = $dashboard->getID();
-      $cancel_uri = $this->getApplicationURI('view/'.$id.'/');
+      $cancel_uri = $this->getApplicationURI('manage/'.$id.'/');
 
       $title = pht('Edit Dashboard %d', $dashboard->getID());
       $header = pht('Edit Dashboard "%s"', $dashboard->getName());
@@ -94,11 +94,8 @@ final class PhabricatorDashboardEditController
           ->setContentSourceFromRequest($request)
           ->applyTransactions($dashboard, $xactions);
 
-        if ($is_new) {
-          $uri = $this->getApplicationURI('arrange/'.$dashboard->getID().'/');
-        } else {
-          $uri = $this->getApplicationURI('view/'.$dashboard->getID().'/');
-        }
+        $uri = $this->getApplicationURI('manage/'.$dashboard->getID().'/');
+
         return id(new AphrontRedirectResponse())->setURI($uri);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
