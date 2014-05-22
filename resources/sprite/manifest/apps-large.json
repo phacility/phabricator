@@ -901,6 +901,21 @@
       "rule" : ".apps-slowvote-light-large",
       "hash" : "b908c23ed5b1a5af8d2645c3704e1db0"
     },
+    "apps-spaces-blue-large"          : {
+      "name" : "apps-spaces-blue-large",
+      "rule" : ".apps-spaces-blue-large, .phabricator-crumb-view:hover .apps-spaces-dark-large",
+      "hash" : "908db62ffd020162977b753dc089e37f"
+    },
+    "apps-spaces-dark-large"          : {
+      "name" : "apps-spaces-dark-large",
+      "rule" : ".apps-spaces-dark-large",
+      "hash" : "1a94ecd63967890c6fd2f7669decdf10"
+    },
+    "apps-spaces-light-large"         : {
+      "name" : "apps-spaces-light-large",
+      "rule" : ".apps-spaces-light-large",
+      "hash" : "90d6bac1336aed13783c545a5462f976"
+    },
     "apps-token-blue-large"           : {
       "name" : "apps-token-blue-large",
       "rule" : ".apps-token-blue-large, .phabricator-crumb-view:hover .apps-token-dark-large",

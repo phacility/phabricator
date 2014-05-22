@@ -1891,10 +1891,68 @@ abstract class PhabricatorApplicationTransactionEditor
    * @task mail
    */
   protected function getMailCC(PhabricatorLiskDAO $object) {
+    $phids = array();
+    $has_support = false;
+
     if ($object instanceof PhabricatorSubscribableInterface) {
-      return $this->subscribers;
+      $phids[] = $this->subscribers;
+      $has_support = true;
     }
-    throw new Exception("Capability not supported.");
+
+    // TODO: This should be some interface which specifies that the object
+    // has project associations.
+    if ($object instanceof ManiphestTask) {
+
+      // TODO: This is what normal objects would do, but Maniphest is still
+      // behind the times.
+      if (false) {
+        $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+          $object->getPHID(),
+          PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT);
+      } else {
+        $project_phids = $object->getProjectPHIDs();
+      }
+
+      if ($project_phids) {
+        $watcher_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_WATCHER;
+
+        $query = id(new PhabricatorEdgeQuery())
+          ->withSourcePHIDs($project_phids)
+          ->withEdgeTypes(array($watcher_type));
+        $query->execute();
+
+        $watcher_phids = $query->getDestinationPHIDs();
+        if ($watcher_phids) {
+          // We need to do a visibility check for all the watchers, as
+          // watching a project is not a guarantee that you can see objects
+          // associated with it.
+          $users = id(new PhabricatorPeopleQuery())
+            ->setViewer($this->requireActor())
+            ->withPHIDs($watcher_phids)
+            ->execute();
+
+          $watchers = array();
+          foreach ($users as $user) {
+            $can_see = PhabricatorPolicyFilter::hasCapability(
+              $user,
+              $object,
+              PhabricatorPolicyCapability::CAN_VIEW);
+            if ($can_see) {
+              $watchers[] = $user->getPHID();
+            }
+          }
+          $phids[] = $watchers;
+        }
+      }
+
+      $has_support = true;
+    }
+
+    if (!$has_support) {
+      throw new Exception('Capability not supported.');
+    }
+
+    return array_mergev($phids);
   }
 
 

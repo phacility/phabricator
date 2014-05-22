@@ -66,8 +66,7 @@ final class ConpherenceWidgetController extends
 
     $widgets = array();
     $new_icon = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS)
-      ->setSpriteIcon('new-grey')
+      ->setIconFont('fa-plus')
       ->setHref($this->getWidgetURI())
       ->setMetadata(array('widget' => null))
       ->addSigil('conpherence-widget-adder');

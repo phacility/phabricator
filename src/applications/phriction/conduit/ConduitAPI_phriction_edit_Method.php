@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_phriction_edit_Method
   extends ConduitAPI_phriction_Method {
 
@@ -30,6 +27,19 @@ final class ConduitAPI_phriction_edit_Method
 
   protected function execute(ConduitAPIRequest $request) {
     $slug = $request->getValue('slug');
+
+    $doc = id(new PhrictionDocumentQuery())
+      ->setViewer($request->getUser())
+      ->withSlugs(array(PhabricatorSlug::normalize($slug)))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
+    if (!$doc) {
+      throw new Exception(pht('No such document.'));
+    }
 
     $editor = id(PhrictionDocumentEditor::newForSlug($slug))
       ->setActor($request->getUser())

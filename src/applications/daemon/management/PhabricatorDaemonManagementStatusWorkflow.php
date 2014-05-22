@@ -23,10 +23,11 @@ final class PhabricatorDaemonManagementStatusWorkflow
 
     $status = 0;
     printf(
-      "%-5s\t%-24s\t%s\n",
-      "PID",
-      "Started",
-      "Daemon");
+      "%-5s\t%-24s\t%-50s%s\n",
+      'PID',
+      'Started',
+      'Daemon',
+      'Arguments');
     foreach ($daemons as $daemon) {
       $name = $daemon->getName();
       if (!$daemon->isRunning()) {
@@ -35,12 +36,13 @@ final class PhabricatorDaemonManagementStatusWorkflow
         $name = '<DEAD> '.$name;
       }
       printf(
-        "%5s\t%-24s\t%s\n",
+        "%5s\t%-24s\t%-50s%s\n",
         $daemon->getPID(),
         $daemon->getEpochStarted()
           ? date('M j Y, g:i:s A', $daemon->getEpochStarted())
           : null,
-        $name);
+        $name,
+        csprintf('%LR', $daemon->getArgv()));
     }
 
     return $status;

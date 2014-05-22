@@ -32,6 +32,24 @@ final class PhabricatorDashboardLayoutConfig {
     return $this->panelLocations;
   }
 
+  public function removePanel($panel_phid) {
+    $panel_location_grid = $this->getPanelLocations();
+    foreach ($panel_location_grid as $column => $panel_columns) {
+      $found_old_column = array_search($panel_phid, $panel_columns);
+      if ($found_old_column !== false) {
+        $new_panel_columns = $panel_columns;
+        array_splice(
+          $new_panel_columns,
+          $found_old_column,
+          1,
+          array());
+        $panel_location_grid[$column] = $new_panel_columns;
+        break;
+      }
+    }
+    $this->setPanelLocations($panel_location_grid);
+  }
+
   public function getDefaultPanelLocations() {
     switch ($this->getLayoutMode()) {
       case self::MODE_HALF_AND_HALF:

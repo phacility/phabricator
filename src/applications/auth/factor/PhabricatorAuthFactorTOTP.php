@@ -2,6 +2,8 @@
 
 final class PhabricatorAuthFactorTOTP extends PhabricatorAuthFactor {
 
+  const TEMPORARY_TOKEN_TYPE = 'mfa:totp:key';
+
   public function getFactorKey() {
     return 'totp';
   }
@@ -23,13 +25,42 @@ final class PhabricatorAuthFactorTOTP extends PhabricatorAuthFactor {
     PhabricatorUser $user) {
 
     $key = $request->getStr('totpkey');
+    if (strlen($key)) {
+      // If the user is providing a key, make sure it's a key we generated.
+      // This raises the barrier to theoretical attacks where an attacker might
+      // provide a known key (such attacks are already prevented by CSRF, but
+      // this is a second barrier to overcome).
+
+      // (We store and verify the hash of the key, not the key itself, to limit
+      // how useful the data in the table is to an attacker.)
+
+      $temporary_token = id(new PhabricatorAuthTemporaryTokenQuery())
+        ->setViewer($user)
+        ->withObjectPHIDs(array($user->getPHID()))
+        ->withTokenTypes(array(self::TEMPORARY_TOKEN_TYPE))
+        ->withExpired(false)
+        ->withTokenCodes(array(PhabricatorHash::digest($key)))
+        ->executeOne();
+      if (!$temporary_token) {
+        // If we don't have a matching token, regenerate the key below.
+        $key = null;
+      }
+    }
+
     if (!strlen($key)) {
-      // TODO: When the user submits a key, we should require that it be
-      // one we generated for them, so there's no way an attacker can ever
-      // force a key they control onto an account. However, it's clumsy to
-      // do this right now. Once we have one-time tokens for SMS and email,
-      // we should be able to put it on that infrastructure.
       $key = self::generateNewTOTPKey();
+
+      // Mark this key as one we generated, so the user is allowed to submit
+      // a response for it.
+
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        id(new PhabricatorAuthTemporaryToken())
+          ->setObjectPHID($user->getPHID())
+          ->setTokenType(self::TEMPORARY_TOKEN_TYPE)
+          ->setTokenExpires(time() + phutil_units('1 hour in seconds'))
+          ->setTokenCode(PhabricatorHash::digest($key))
+          ->save();
+      unset($unguarded);
     }
 
     $code = $request->getStr('totpcode');

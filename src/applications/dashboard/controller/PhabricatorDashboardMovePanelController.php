@@ -38,21 +38,9 @@ final class PhabricatorDashboardMovePanelController
     }
 
     $layout_config = $dashboard->getLayoutConfigObject();
+    $layout_config->removePanel($panel_phid);
     $panel_location_grid = $layout_config->getPanelLocations();
 
-    foreach ($panel_location_grid as $column => $panel_columns) {
-      $found_old_column = array_search($panel_phid, $panel_columns);
-      if ($found_old_column !== false) {
-        $new_panel_columns = $panel_columns;
-        array_splice(
-          $new_panel_columns,
-          $found_old_column,
-          1,
-          array());
-        $panel_location_grid[$column] = $new_panel_columns;
-        break;
-      }
-    }
     $panel_columns = idx($panel_location_grid, $column_id, array());
     if ($panel_columns) {
       $insert_at = 0;

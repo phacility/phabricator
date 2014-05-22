@@ -95,6 +95,22 @@ final class ManiphestTaskQuery
     return $this;
   }
 
+  /**
+   * Add an additional "all projects" constraint to existing filters.
+   *
+   * This is used by boards to supplement queries.
+   *
+   * @param list<phid> List of project PHIDs to add to any existing constriant.
+   * @return this
+   */
+  public function addWithAllProjects(array $projects) {
+    if ($this->projectPHIDs === null) {
+      $this->projectPHIDs = array();
+    }
+
+    return $this->withAllProjects(array_merge($this->projectPHIDs, $projects));
+  }
+
   public function withoutProjects(array $projects) {
     $this->xprojectPHIDs = $projects;
     return $this;

@@ -25,7 +25,8 @@ final class PhrictionPHIDTypeDocument extends PhabricatorPHIDType {
     array $phids) {
 
     return id(new PhrictionDocumentQuery())
-      ->withPHIDs($phids);
+      ->withPHIDs($phids)
+      ->needContent(true);
   }
 
   public function loadHandles(

@@ -8,6 +8,7 @@ final class PholioTransactionType extends PholioConstants {
   /* edits to the high level mock */
   const TYPE_NAME         = 'name';
   const TYPE_DESCRIPTION  = 'description';
+  const TYPE_STATUS       = 'status';
 
   /* edits to images within the mock */
   const TYPE_IMAGE_FILE = 'image-file';

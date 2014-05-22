@@ -62,8 +62,7 @@ final class PHUIWorkpanelView extends AphrontTagView {
     $header_edit = null;
     if ($this->editURI) {
       $header_edit = id(new PHUIIconView())
-        ->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS)
-        ->setSpriteIcon('settings-grey')
+        ->setIconFont('fa-pencil')
         ->setHref($this->editURI);
     }
     $header = id(new PhabricatorActionHeaderView())

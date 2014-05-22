@@ -12,11 +12,6 @@
   width: 16px;
 }
 
-.phui-icon-view.sprite-actions {
-  height: 24px;
-  width: 24px;
-}
-
 .phui-icon-view.sprite-apps,
 .phui-icon-view.sprite-buttonbar {
   height: 14px;
@@ -53,4 +48,8 @@
 
 .phui-icon-has-text:before {
   margin-right: 8px;
+}
+
+a.phui-icon-view:hover {
+  text-decoration: none;
 }

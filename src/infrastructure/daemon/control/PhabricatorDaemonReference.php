@@ -3,6 +3,7 @@
 final class PhabricatorDaemonReference {
 
   private $name;
+  private $argv;
   private $pid;
   private $start;
   private $pidFile;
@@ -13,6 +14,7 @@ final class PhabricatorDaemonReference {
     $ref = new PhabricatorDaemonReference();
 
     $ref->name  = idx($dict, 'name', 'Unknown');
+    $ref->argv  = idx($dict, 'argv', array());
     $ref->pid   = idx($dict, 'pid');
     $ref->start = idx($dict, 'start');
 
@@ -54,6 +56,10 @@ final class PhabricatorDaemonReference {
 
   public function getName() {
     return $this->name;
+  }
+
+  public function getArgv() {
+    return $this->argv;
   }
 
   public function getEpochStarted() {

@@ -12,6 +12,9 @@ final class PholioMockSearchEngine
     $saved->setParameter(
       'authorPHIDs',
       $this->readUsersFromRequest($request, 'authors'));
+    $saved->setParameter(
+      'statuses',
+      $request->getStrList('status'));
 
     return $saved;
   }
@@ -21,7 +24,8 @@ final class PholioMockSearchEngine
       ->needCoverFiles(true)
       ->needImages(true)
       ->needTokenCounts(true)
-      ->withAuthorPHIDs($saved->getParameter('authorPHIDs', array()));
+      ->withAuthorPHIDs($saved->getParameter('authorPHIDs', array()))
+      ->withStatuses($saved->getParameter('statuses', array()));
 
     return $query;
   }
@@ -36,13 +40,27 @@ final class PholioMockSearchEngine
       ->withPHIDs($phids)
       ->execute();
 
+    $statuses = array(
+      ''=>pht('Any Status'),
+      'closed'=>pht('Closed'),
+      'open'=>pht('Open'));
+
+    $status = $saved_query->getParameter('statuses', array());
+    $status = head($status);
+
     $form
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/users/')
           ->setName('authors')
           ->setLabel(pht('Authors'))
-          ->setValue($author_handles));
+          ->setValue($author_handles))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Status'))
+          ->setName('status')
+          ->setOptions($statuses)
+          ->setValue($status));
   }
 
   protected function getURI($path) {
@@ -51,6 +69,7 @@ final class PholioMockSearchEngine
 
   public function getBuiltinQueryNames() {
     $names = array(
+      'open' => pht('Open Mocks'),
       'all' => pht('All Mocks'),
     );
 
@@ -67,6 +86,10 @@ final class PholioMockSearchEngine
     $query->setQueryKey($query_key);
 
     switch ($query_key) {
+      case 'open':
+        return $query->setParameter(
+          'statuses',
+          array('open'));
       case 'all':
         return $query;
       case 'authored':
@@ -94,8 +117,14 @@ final class PholioMockSearchEngine
 
     $board = new PHUIPinboardView();
     foreach ($mocks as $mock) {
+
+      $header = 'M'.$mock->getID().' '.$mock->getName();
+      if ($mock->isClosed()) {
+        $header = pht('%s (Closed)', $header);
+      }
+
       $item = id(new PHUIPinboardItemView())
-        ->setHeader('M'.$mock->getID().' '.$mock->getName())
+        ->setHeader($header)
         ->setURI('/M'.$mock->getID())
         ->setImageURI($mock->getCoverFile()->getThumb280x210URI())
         ->setImageSize(280, 210)

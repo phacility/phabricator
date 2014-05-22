@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phriction
- */
 final class PhrictionDeleteController extends PhrictionController {
 
   private $id;
@@ -12,11 +9,18 @@ final class PhrictionDeleteController extends PhrictionController {
   }
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $document = id(new PhrictionDocument())->load($this->id);
+    $document = id(new PhrictionDocumentQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_EDIT,
+          PhabricatorPolicyCapability::CAN_VIEW,
+        ))
+      ->executeOne();
     if (!$document) {
       return new Aphront404Response();
     }

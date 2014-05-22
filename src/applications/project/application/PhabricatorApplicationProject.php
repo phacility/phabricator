@@ -51,7 +51,10 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
         'picture/(?P<id>[1-9]\d*)/' =>
           'PhabricatorProjectEditPictureController',
         'create/' => 'PhabricatorProjectCreateController',
-        'board/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectBoardViewController',
+        'board/(?P<id>[1-9]\d*)/'.
+          '(?P<filter>filter/)?'.
+          '(?:query/(?P<queryKey>[^/]+)/)?' =>
+          'PhabricatorProjectBoardViewController',
         'move/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectMoveController',
         'board/(?P<projectID>[1-9]\d*)/edit/(?:(?P<id>\d+)/)?'
           => 'PhabricatorProjectBoardEditController',
@@ -62,6 +65,8 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
         'update/(?P<id>[1-9]\d*)/(?P<action>[^/]+)/'
           => 'PhabricatorProjectUpdateController',
         'history/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectHistoryController',
+        '(?P<action>watch|unwatch)/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorProjectWatchController',
       ),
     );
   }

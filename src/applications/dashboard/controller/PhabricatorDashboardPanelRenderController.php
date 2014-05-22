@@ -37,7 +37,8 @@ final class PhabricatorDashboardPanelRenderController
       ->setViewer($viewer)
       ->setPanel($panel)
       ->setParentPanelPHIDs($parent_phids)
-      ->setHeaderless($request->getBool('headerless'))
+      ->setHeaderMode($request->getStr('headerMode'))
+      ->setDashboardID($request->getInt('dashboardID'))
       ->renderPanel();
 
     if ($request->isAjax()) {
@@ -53,10 +54,14 @@ final class PhabricatorDashboardPanelRenderController
       ->addTextCrumb($panel->getMonogram(), '/'.$panel->getMonogram())
       ->addTextCrumb(pht('Standalone View'));
 
+    $view = id(new PHUIBoxView())
+      ->addMargin(PHUI::MARGIN_LARGE)
+      ->appendChild($rendered_panel);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $rendered_panel,
+        $view,
       ),
       array(
         'title' => array(pht('Panel'), $panel->getName()),

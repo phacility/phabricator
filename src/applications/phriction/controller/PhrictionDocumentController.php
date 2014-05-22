@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phriction
- */
 final class PhrictionDocumentController
   extends PhrictionController {
 
@@ -115,8 +112,10 @@ final class PhrictionDocumentController
         $core_content = $notice->render();
       } else if ($current_status == PhrictionChangeType::CHANGE_MOVE_AWAY) {
         $new_doc_id = $content->getChangeRef();
-        $new_doc = new PhrictionDocument();
-        $new_doc->load($new_doc_id);
+        $new_doc = id(new PhrictionDocumentQuery())
+          ->setViewer($user)
+          ->withIDs(array($new_doc_id))
+          ->executeOne();
 
         $slug_uri = PhrictionDocument::getSlugURI($new_doc->getSlug());
 
@@ -135,7 +134,10 @@ final class PhrictionDocumentController
       $move_notice = null;
       if ($current_status == PhrictionChangeType::CHANGE_MOVE_HERE) {
         $from_doc_id = $content->getChangeRef();
-        $from_doc = id(new PhrictionDocument())->load($from_doc_id);
+        $from_doc = id(new PhrictionDocumentQuery())
+          ->setViewer($user)
+          ->withIDs(array($from_doc_id))
+          ->executeOne();
         $slug_uri = PhrictionDocument::getSlugURI($from_doc->getSlug());
 
         $move_notice = id(new AphrontErrorView())

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phriction
- */
 final class PhrictionEditController
   extends PhrictionController {
 
@@ -17,11 +14,23 @@ final class PhrictionEditController
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    $current_version = null;
     if ($this->id) {
-      $document = id(new PhrictionDocument())->load($this->id);
+      $document = id(new PhrictionDocumentQuery())
+        ->setViewer($user)
+        ->withIDs(array($this->id))
+        ->needContent(true)
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
       if (!$document) {
         return new Aphront404Response();
       }
+
+      $current_version = $document->getContent()->getVersion();
 
       $revert = $request->getInt('revert');
       if ($revert) {
@@ -33,7 +42,7 @@ final class PhrictionEditController
           return new Aphront404Response();
         }
       } else {
-        $content = id(new PhrictionContent())->load($document->getContentID());
+        $content = $document->getContent();
       }
 
     } else {
@@ -43,12 +52,15 @@ final class PhrictionEditController
         return new Aphront404Response();
       }
 
-      $document = id(new PhrictionDocument())->loadOneWhere(
-        'slug = %s',
-        $slug);
+      $document = id(new PhrictionDocumentQuery())
+        ->setViewer($user)
+        ->withSlugs(array($slug))
+        ->needContent(true)
+        ->executeOne();
 
       if ($document) {
-        $content = id(new PhrictionContent())->load($document->getContentID());
+        $content = $document->getContent();
+        $current_version = $content->getVersion();
       } else {
         if (PhrictionDocument::isProjectSlug($slug)) {
           $project = id(new PhabricatorProjectQuery())
@@ -93,6 +105,35 @@ final class PhrictionEditController
     $errors = array();
 
     if ($request->isFormPost()) {
+
+      $overwrite = $request->getBool('overwrite');
+      if (!$overwrite) {
+        $edit_version = $request->getStr('contentVersion');
+        if ($edit_version != $current_version) {
+          $dialog = $this->newDialog()
+            ->setTitle(pht('Edit Conflict!'))
+            ->appendParagraph(
+              pht(
+                'Another user made changes to this document after you began '.
+                'editing it. Do you want to overwrite their changes?'))
+            ->appendParagraph(
+              pht(
+                'If you choose to overwrite their changes, you should review '.
+                'the document edit history to see what you overwrote, and '.
+                'then make another edit to merge the changes if necessary.'))
+            ->addSubmitButton(pht('Overwrite Changes'))
+            ->addCancelButton($request->getRequestURI());
+
+          $dialog->addHiddenInput('overwrite', 'true');
+          foreach ($request->getPassthroughRequestData() as $key => $value) {
+            $dialog->addHiddenInput($key, $value);
+          }
+
+          return $dialog;
+        }
+      }
+
+
       $title = $request->getStr('title');
       $notes = $request->getStr('description');
 
@@ -192,6 +233,7 @@ final class PhrictionEditController
       ->setAction($request->getRequestURI()->getPath())
       ->addHiddenInput('slug', $document->getSlug())
       ->addHiddenInput('nodraft', $request->getBool('nodraft'))
+      ->addHiddenInput('contentVersion', $current_version)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Title'))

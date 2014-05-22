@@ -17,6 +17,7 @@ final class PhabricatorProjectQuery
   const STATUS_ARCHIVED = 'status-archived';
 
   private $needMembers;
+  private $needWatchers;
   private $needImages;
 
   public function withIDs(array $ids) {
@@ -51,6 +52,11 @@ final class PhabricatorProjectQuery
 
   public function needMembers($need_members) {
     $this->needMembers = $need_members;
+    return $this;
+  }
+
+  public function needWatchers($need_watchers) {
+    $this->needWatchers = $need_watchers;
     return $this;
   }
 
@@ -100,24 +106,52 @@ final class PhabricatorProjectQuery
 
     if ($projects) {
       $viewer_phid = $this->getViewer()->getPHID();
+      $project_phids = mpull($projects, 'getPHID');
+
+      $member_type = PhabricatorEdgeConfig::TYPE_PROJ_MEMBER;
+      $watcher_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_WATCHER;
+
+      $need_edge_types = array();
       if ($this->needMembers) {
-        $etype = PhabricatorEdgeConfig::TYPE_PROJ_MEMBER;
-        $members = id(new PhabricatorEdgeQuery())
-          ->withSourcePHIDs(mpull($projects, 'getPHID'))
-          ->withEdgeTypes(array($etype))
-          ->execute();
-        foreach ($projects as $project) {
-          $phid = $project->getPHID();
-          $project->attachMemberPHIDs(array_keys($members[$phid][$etype]));
-          $project->setIsUserMember(
-            $viewer_phid,
-            isset($members[$phid][$etype][$viewer_phid]));
-        }
+        $need_edge_types[] = $member_type;
       } else {
         foreach ($data as $row) {
           $projects[$row['id']]->setIsUserMember(
             $viewer_phid,
             ($row['viewerIsMember'] !== null));
+        }
+      }
+
+      if ($this->needWatchers) {
+        $need_edge_types[] = $watcher_type;
+      }
+
+      if ($need_edge_types) {
+        $edges = id(new PhabricatorEdgeQuery())
+          ->withSourcePHIDs($project_phids)
+          ->withEdgeTypes($need_edge_types)
+          ->execute();
+
+        if ($this->needMembers) {
+          foreach ($projects as $project) {
+            $phid = $project->getPHID();
+            $project->attachMemberPHIDs(
+              array_keys($edges[$phid][$member_type]));
+            $project->setIsUserMember(
+              $viewer_phid,
+              isset($edges[$phid][$member_type][$viewer_phid]));
+          }
+        }
+
+        if ($this->needWatchers) {
+          foreach ($projects as $project) {
+            $phid = $project->getPHID();
+            $project->attachWatcherPHIDs(
+              array_keys($edges[$phid][$watcher_type]));
+            $project->setIsUserWatcher(
+              $viewer_phid,
+              isset($edges[$phid][$watcher_type][$viewer_phid]));
+          }
         }
       }
     }

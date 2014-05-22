@@ -578,21 +578,6 @@ final class PHUIIconExample extends PhabricatorUIExample {
       ->setSpriteSheet(PHUIIconView::SPRITE_PAYMENTS)
       ->setSpriteIcon('googlecheckout');
 
-    $actions = array(
-      'settings-grey',
-      'heart-grey',
-      'tag-grey',
-      'new-grey',
-      'search-grey',
-      'move-grey');
-    $actionview = array();
-    foreach ($actions as $action) {
-      $actionview[] = id(new PHUIIconView())
-        ->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS)
-        ->setSpriteIcon($action)
-        ->setHref('#');
-    }
-
     $tokens = array(
       'like-1',
       'like-2',
@@ -627,10 +612,6 @@ final class PHUIIconExample extends PhabricatorUIExample {
     $layout_fa = id(new PHUIBoxView())
       ->appendChild($ficons)
       ->addMargin(PHUI::MARGIN_LARGE);
-
-    $layout1 = id(new PHUIBoxView())
-      ->appendChild($actionview)
-      ->addMargin(PHUI::MARGIN_MEDIUM);
 
     $layout2 = id(new PHUIBoxView())
       ->appendChild(array($person1, $person2, $person3))
@@ -668,10 +649,6 @@ final class PHUIIconExample extends PhabricatorUIExample {
       ->setHeaderText(pht('Colors and Transforms'))
       ->appendChild($layout_cicons);
 
-    $wrap1 = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Action Icons!'))
-      ->appendChild($layout1);
-
     $wrap2 = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('People!'))
       ->appendChild(array($layout2, $layout2a));
@@ -696,7 +673,6 @@ final class PHUIIconExample extends PhabricatorUIExample {
         array(
           $fontawesome,
           $transforms,
-          $wrap1,
           $wrap2,
           $wrap3,
           $wrap4,

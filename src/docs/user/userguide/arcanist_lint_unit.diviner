@@ -87,7 +87,5 @@ This is mostly useful for debugging and testing.
 
 = Next Steps =
 
-  - Browse the source for an example lint engine at
-    @{class@arcanist:ExampleLintEngine}; or
-  - learn how to reuse existing linters by reading
+  - Learn how to reuse existing linters by reading
     @{article:Arcanist User Guide: Customizing Existing Linters}.

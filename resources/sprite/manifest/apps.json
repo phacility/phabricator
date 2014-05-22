@@ -301,6 +301,11 @@
       "rule" : ".apps-slowvote-dark",
       "hash" : "e5aeb00a1f7b70e20a41f7a494e2aad3"
     },
+    "apps-spaces-dark"         : {
+      "name" : "apps-spaces-dark",
+      "rule" : ".apps-spaces-dark",
+      "hash" : "cc68791869a850980e2ff86bd302bebe"
+    },
     "apps-token-dark"          : {
       "name" : "apps-token-dark",
       "rule" : ".apps-token-dark",

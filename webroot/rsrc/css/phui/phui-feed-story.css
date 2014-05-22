@@ -84,6 +84,9 @@
 .phui-feed-story-action-item {
   float: right;
   padding-left: 2px;
+  height: 18px;
+  width: 18px;
+  font-size: 18px;
 }
 
 .phui-feed-story-action-list .phui-icon-view {
@@ -101,7 +104,7 @@
 .phui-feed-story-oneline-foot,
 .phui-feed-story-oneline-foot a {
   font-size: 11px;
-  color: {$greytext};
+  color: {$lightgreytext};
   margin-top: 2px;
   line-height: 14px;
   font-weight: normal;

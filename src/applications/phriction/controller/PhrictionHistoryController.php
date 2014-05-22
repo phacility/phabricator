@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phriction
- */
 final class PhrictionHistoryController
   extends PhrictionController {
 
@@ -17,15 +14,16 @@ final class PhrictionHistoryController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $document = id(new PhrictionDocument())->loadOneWhere(
-      'slug = %s',
-      PhabricatorSlug::normalize($this->slug));
-
+    $document = id(new PhrictionDocumentQuery())
+      ->setViewer($user)
+      ->withSlugs(array(PhabricatorSlug::normalize($this->slug)))
+      ->needContent(true)
+      ->executeOne();
     if (!$document) {
       return new Aphront404Response();
     }
 
-    $current = id(new PhrictionContent())->load($document->getContentID());
+    $current = $document->getContent();
 
     $pager = new AphrontPagerView();
     $pager->setOffset($request->getInt('page'));
@@ -110,25 +108,27 @@ final class PhrictionHistoryController
 
       if ($vs_previous) {
         $item->addIcon(
-          'arrow_left',
+          'fa-reply',
           pht('Show Change'),
           array(
             'href' => $vs_previous,
           ));
       } else {
-        $item->addIcon('arrow_left-grey',
+        $item->addIcon(
+          'fa-reply grey',
           phutil_tag('em', array(), pht('No previous change')));
       }
 
       if ($vs_head) {
         $item->addIcon(
-          'merge',
+          'fa-reply-all',
           pht('Show Later Changes'),
           array(
             'href' => $vs_head,
           ));
       } else {
-        $item->addIcon('merge-grey',
+        $item->addIcon(
+          'fa-reply-all grey',
           phutil_tag('em', array(), pht('No later changes')));
       }
 

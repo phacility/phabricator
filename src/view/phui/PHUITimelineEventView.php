@@ -163,88 +163,65 @@ final class PHUITimelineEventView extends AphrontView {
     return $this;
   }
 
-  protected function renderEventTitle($is_first_event, $force_icon, $has_menu) {
-    $title = $this->title;
-    if (($title === null) && !$this->hasChildren()) {
-      $title = '';
+  protected function shouldRenderEventTitle() {
+    if ($this->title === null) {
+      return false;
     }
 
-    if ($is_first_event) {
-      $extra = array();
-      $is_first_extra = true;
-      foreach ($this->getEventGroup() as $event) {
-        $extra[] = $event->renderExtra($is_first_extra);
-        $is_first_extra = false;
+    return true;
+  }
+
+  protected function renderEventTitle($force_icon, $has_menu, $extra) {
+    $title = $this->title;
+
+    $title_classes = array();
+    $title_classes[] = 'phui-timeline-title';
+
+    $icon = null;
+    if ($this->icon || $force_icon) {
+      $title_classes[] = 'phui-timeline-title-with-icon';
+    }
+
+    if ($has_menu) {
+      $title_classes[] = 'phui-timeline-title-with-menu';
+    }
+
+    if ($this->icon) {
+      $fill_classes = array();
+      $fill_classes[] = 'phui-timeline-icon-fill';
+      if ($this->color) {
+        $fill_classes[] = 'phui-timeline-icon-fill-'.$this->color;
       }
-      $extra = array_reverse($extra);
-      $extra = array_mergev($extra);
-      $extra = javelin_tag(
+
+      $icon = id(new PHUIIconView())
+        ->setIconFont($this->icon.' white')
+        ->addClass('phui-timeline-icon');
+
+      $icon = phutil_tag(
         'span',
         array(
-          'class' => 'phui-timeline-extra',
+          'class' => implode(' ', $fill_classes),
         ),
-        phutil_implode_html(
-          javelin_tag(
-            'span',
-            array(
-              'aural' => false,
-            ),
-            self::DELIMITER),
-          $extra));
-    } else {
-      $extra = null;
+        $icon);
     }
 
-    if ($title !== null || $extra) {
-      $title_classes = array();
-      $title_classes[] = 'phui-timeline-title';
-
-      $icon = null;
-      if ($this->icon || $force_icon) {
-        $title_classes[] = 'phui-timeline-title-with-icon';
+    $token = null;
+    if ($this->token) {
+      $token = id(new PHUIIconView())
+        ->addClass('phui-timeline-token')
+        ->setSpriteSheet(PHUIIconView::SPRITE_TOKENS)
+        ->setSpriteIcon($this->token);
+      if ($this->tokenRemoved) {
+        $token->addClass('strikethrough');
       }
-
-      if ($has_menu) {
-        $title_classes[] = 'phui-timeline-title-with-menu';
-      }
-
-      if ($this->icon) {
-        $fill_classes = array();
-        $fill_classes[] = 'phui-timeline-icon-fill';
-        if ($this->color) {
-          $fill_classes[] = 'phui-timeline-icon-fill-'.$this->color;
-        }
-
-        $icon = id(new PHUIIconView())
-          ->setIconFont($this->icon.' white')
-          ->addClass('phui-timeline-icon');
-
-        $icon = phutil_tag(
-          'span',
-          array(
-            'class' => implode(' ', $fill_classes),
-          ),
-          $icon);
-      }
-
-      $token = null;
-      if ($this->token) {
-        $token = id(new PHUIIconView())
-          ->addClass('phui-timeline-token')
-          ->setSpriteSheet(PHUIIconView::SPRITE_TOKENS)
-          ->setSpriteIcon($this->token);
-        if ($this->tokenRemoved) {
-          $token->addClass('strikethrough');
-        }
-      }
-
-      $title = phutil_tag(
-        'div',
-        array(
-          'class' => implode(' ', $title_classes),
-        ),
-        array($icon, $token, $title, $extra));
     }
+
+    $title = phutil_tag(
+      'div',
+      array(
+        'class' => implode(' ', $title_classes),
+      ),
+      array($icon, $token, $title, $extra));
 
     return $title;
   }
@@ -319,16 +296,23 @@ final class PHUITimelineEventView extends AphrontView {
       $has_menu = true;
     }
 
+    // Render "extra" information (timestamp, etc).
+    $extra = $this->renderExtra($events);
+
     $group_titles = array();
     $group_items = array();
     $group_children = array();
-    $is_first_event = true;
     foreach ($events as $event) {
-      $group_titles[] = $event->renderEventTitle(
-        $is_first_event,
-        $force_icon,
-        $has_menu);
-      $is_first_event = false;
+      if ($event->shouldRenderEventTitle()) {
+        $group_titles[] = $event->renderEventTitle(
+          $force_icon,
+          $has_menu,
+          $extra);
+
+        // Don't render this information more than once.
+        $extra = null;
+      }
+
       if ($event->hasChildren()) {
         $group_children[] = $event->renderChildren();
       }
@@ -433,63 +417,76 @@ final class PHUITimelineEventView extends AphrontView {
         $content));
   }
 
-  private function renderExtra($is_first_extra) {
+  private function renderExtra(array $events) {
     $extra = array();
 
     if ($this->getIsPreview()) {
       $extra[] = pht('PREVIEW');
     } else {
-
-      if ($this->getIsEdited()) {
-        $extra[] = pht('Edited');
+      foreach ($events as $event) {
+        if ($event->getIsEdited()) {
+          $extra[] = pht('Edited');
+          break;
+        }
       }
 
-      if ($is_first_extra) {
-        $source = $this->getContentSource();
-        if ($source) {
-          $extra[] = id(new PhabricatorContentSourceView())
-            ->setContentSource($source)
-            ->setUser($this->getUser())
+      $source = $this->getContentSource();
+      if ($source) {
+        $extra[] = id(new PhabricatorContentSourceView())
+          ->setContentSource($source)
+          ->setUser($this->getUser())
+          ->render();
+      }
+
+      $date_created = null;
+      foreach ($events as $event) {
+        if ($event->getDateCreated()) {
+          if ($date_created === null) {
+            $date_created = $event->getDateCreated();
+          } else {
+            $date_created = min($event->getDateCreated(), $date_created);
+          }
+        }
+      }
+
+      if ($date_created) {
+        $date = phabricator_datetime(
+          $date_created,
+          $this->getUser());
+        if ($this->anchor) {
+          Javelin::initBehavior('phabricator-watch-anchor');
+
+          $anchor = id(new PhabricatorAnchorView())
+            ->setAnchorName($this->anchor)
             ->render();
+
+          $date = array(
+            $anchor,
+            phutil_tag(
+              'a',
+              array(
+                'href' => '#'.$this->anchor,
+              ),
+              $date),
+          );
         }
-
-        $date_created = null;
-        foreach ($this->getEventGroup() as $event) {
-          if ($event->getDateCreated()) {
-            if ($date_created === null) {
-              $date_created = $event->getDateCreated();
-            } else {
-              $date_created = min($event->getDateCreated(), $date_created);
-            }
-          }
-        }
-
-        if ($date_created) {
-          $date = phabricator_datetime(
-            $this->getDateCreated(),
-            $this->getUser());
-          if ($this->anchor) {
-            Javelin::initBehavior('phabricator-watch-anchor');
-
-            $anchor = id(new PhabricatorAnchorView())
-              ->setAnchorName($this->anchor)
-              ->render();
-
-            $date = array(
-              $anchor,
-              phutil_tag(
-                'a',
-                array(
-                  'href' => '#'.$this->anchor,
-                ),
-                $date),
-            );
-          }
-          $extra[] = $date;
-        }
+        $extra[] = $date;
       }
-
     }
+
+    $extra = javelin_tag(
+      'span',
+      array(
+        'class' => 'phui-timeline-extra',
+      ),
+      phutil_implode_html(
+        javelin_tag(
+          'span',
+          array(
+            'aural' => false,
+          ),
+          self::DELIMITER),
+        $extra));
 
     return $extra;
   }

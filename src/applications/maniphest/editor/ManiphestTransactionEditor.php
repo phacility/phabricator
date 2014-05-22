@@ -19,6 +19,7 @@ final class ManiphestTransactionEditor
     $types[] = ManiphestTransaction::TYPE_EDGE;
     $types[] = ManiphestTransaction::TYPE_SUBPRIORITY;
     $types[] = ManiphestTransaction::TYPE_PROJECT_COLUMN;
+    $types[] = ManiphestTransaction::TYPE_UNBLOCK;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -84,6 +85,7 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_EDGE:
       case ManiphestTransaction::TYPE_SUBPRIORITY:
       case ManiphestTransaction::TYPE_PROJECT_COLUMN:
+      case ManiphestTransaction::TYPE_UNBLOCK:
         return $xaction->getNewValue();
     }
   }
@@ -244,6 +246,63 @@ final class ManiphestTransactionEditor
     }
   }
 
+  protected function applyFinalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    // When we change the status of a task, update tasks this tasks blocks
+    // with a message to the effect of "alincoln resolved blocking task Txxx."
+    $unblock_xaction = null;
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case ManiphestTransaction::TYPE_STATUS:
+          $unblock_xaction = $xaction;
+          break;
+      }
+    }
+
+    if ($unblock_xaction !== null) {
+      $blocked_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $object->getPHID(),
+        PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK);
+      if ($blocked_phids) {
+        // In theory we could apply these through policies, but that seems a
+        // little bit surprising. For now, use the actor's vision.
+        $blocked_tasks = id(new ManiphestTaskQuery())
+          ->setViewer($this->getActor())
+          ->withPHIDs($blocked_phids)
+          ->execute();
+
+        $old = $unblock_xaction->getOldValue();
+        $new = $unblock_xaction->getNewValue();
+
+        foreach ($blocked_tasks as $blocked_task) {
+          $xactions = array();
+
+          $xactions[] = id(new ManiphestTransaction())
+            ->setTransactionType(ManiphestTransaction::TYPE_UNBLOCK)
+            ->setOldValue(array($object->getPHID() => $old))
+            ->setNewValue(array($object->getPHID() => $new));
+
+          // TODO: We should avoid notifiying users about these indirect
+          // changes if they are getting a notification about the current
+          // change, so you don't get a pile of extra notifications if you are
+          // subscribed to this task.
+
+          id(new ManiphestTransactionEditor())
+            ->setActor($this->getActor())
+            ->setContentSource($this->getContentSource())
+            ->setContinueOnNoEffect(true)
+            ->setContinueOnMissingFields(true)
+            ->applyTransactions($blocked_task, $xactions);
+        }
+      }
+    }
+
+    return $xactions;
+  }
+
+
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -271,6 +330,10 @@ final class ManiphestTransactionEditor
     $phids = array();
 
     foreach ($object->getCCPHIDs() as $phid) {
+      $phids[] = $phid;
+    }
+
+    foreach (parent::getMailCC($object) as $phid) {
       $phids[] = $phid;
     }
 

@@ -200,35 +200,35 @@ final class PhabricatorPeopleQuery
   private function buildWhereClause($conn_r) {
     $where = array();
 
-    if ($this->usernames) {
+    if ($this->usernames !== null) {
       $where[] = qsprintf(
         $conn_r,
         'user.userName IN (%Ls)',
         $this->usernames);
     }
 
-    if ($this->emails) {
+    if ($this->emails !== null) {
       $where[] = qsprintf(
         $conn_r,
         'email.address IN (%Ls)',
         $this->emails);
     }
 
-    if ($this->realnames) {
+    if ($this->realnames !== null) {
       $where[] = qsprintf(
         $conn_r,
         'user.realName IN (%Ls)',
         $this->realnames);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'user.phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'user.id IN (%Ld)',

@@ -52,7 +52,7 @@ final class PhabricatorDashboardPanelEditController
       $title = pht('Edit %s', $panel->getMonogram());
       $header = pht('Edit %s %s', $panel->getMonogram(), $panel->getName());
       $button = pht('Save Panel');
-      $cancel_uri = '/'.$panel->getMonogram();
+      $cancel_uri = $this->getPanelRedirectURI($panel);
     }
 
     $v_name = $panel->getName();
@@ -66,15 +66,29 @@ final class PhabricatorDashboardPanelEditController
       ->readFieldsFromStorage($panel);
 
     $validation_exception = null;
+
     if ($request->isFormPost()) {
       $v_name = $request->getStr('name');
+      $v_view_policy = $request->getStr('viewPolicy');
+      $v_edit_policy = $request->getStr('editPolicy');
+
+      $type_name = PhabricatorDashboardPanelTransaction::TYPE_NAME;
+      $type_view_policy = PhabricatorTransactions::TYPE_VIEW_POLICY;
+      $type_edit_policy = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
       $xactions = array();
 
-      $type_name = PhabricatorDashboardPanelTransaction::TYPE_NAME;
       $xactions[] = id(new PhabricatorDashboardPanelTransaction())
         ->setTransactionType($type_name)
         ->setNewValue($v_name);
+
+      $xactions[] = id(new PhabricatorDashboardPanelTransaction())
+        ->setTransactionType($type_view_policy)
+        ->setNewValue($v_view_policy);
+
+      $xactions[] = id(new PhabricatorDashboardPanelTransaction())
+        ->setTransactionType($type_edit_policy)
+        ->setNewValue($v_edit_policy);
 
       $field_xactions = $field_list->buildFieldTransactionsFromRequest(
         new PhabricatorDashboardPanelTransaction(),
@@ -89,13 +103,21 @@ final class PhabricatorDashboardPanelEditController
           ->applyTransactions($panel, $xactions);
 
         return id(new AphrontRedirectResponse())
-          ->setURI('/'.$panel->getMonogram());
+          ->setURI($this->getPanelRedirectURI($panel));
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
 
         $e_name = $validation_exception->getShortMessage($type_name);
+
+        $panel->setViewPolicy($v_view_policy);
+        $panel->setEditPolicy($v_edit_policy);
       }
     }
+
+    $policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($viewer)
+      ->setObject($panel)
+      ->execute();
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
@@ -104,7 +126,19 @@ final class PhabricatorDashboardPanelEditController
           ->setLabel(pht('Name'))
           ->setName('name')
           ->setValue($v_name)
-          ->setError($e_name));
+          ->setError($e_name))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setName('viewPolicy')
+          ->setPolicyObject($panel)
+          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
+          ->setPolicies($policies))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setName('editPolicy')
+          ->setPolicyObject($panel)
+          ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
+          ->setPolicies($policies));
 
     $field_list->appendFieldsToForm($form);
 
@@ -142,6 +176,18 @@ final class PhabricatorDashboardPanelEditController
         'title' => $title,
         'device' => true,
       ));
+  }
+
+  private function getPanelRedirectURI(PhabricatorDashboardPanel $panel) {
+    $request = $this->getRequest();
+    $dashboard_id = $request->getInt('dashboardID');
+    if ($dashboard_id) {
+      $uri = $this->getApplicationURI('arrange/'.$dashboard_id.'/');
+    } else {
+      $uri = '/'.$panel->getMonogram();
+    }
+
+    return $uri;
   }
 
 }

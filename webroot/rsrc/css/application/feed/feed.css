@@ -51,3 +51,50 @@
 .phabricator-public-feed-frame .phui-feed-wrap {
   border: none;
 }
+
+/* - Dashboards ------------------------------------------------------------ */
+
+.dashboard-panel div.phabricator-feed-frame {
+  background: #fff;
+  margin: 0;
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
+  max-width: none;
+}
+
+.dashboard-panel .phabricator-feed-frame .phabricator-action-header {
+  background: #f7f7f7;
+  margin-top: -1px;
+  border-top: 1px solid {$thinblueborder};
+}
+
+.dashboard-panel .phabricator-feed-frame .phabricator-action-header-title {
+  font-size: 13px;
+  margin-left: 8px;
+  margin-bottom: 0;
+  color: {$bluetext};
+}
+
+.dashboard-panel .phabricator-feed-frame .phui-feed-story {
+  border: none;
+  border-bottom: 1px solid {$thinblueborder};
+  margin: 0 8px;
+}
+
+.dashboard-panel .phabricator-feed-frame .phui-feed-story-head {
+  padding: 8px 0;
+}
+
+.dashboard-panel .phabricator-feed-frame .phui-feed-story-body {
+  padding: 8px 0;
+}
+
+.dashboard-panel .phabricator-feed-frame .phui-feed-story-foot {
+  background: #fff;
+  padding: 8px 0;
+}
+
+.dashboard-panel .phabricator-feed-frame .phabricator-feed-story-date-separator {
+  margin-top: 0;
+}

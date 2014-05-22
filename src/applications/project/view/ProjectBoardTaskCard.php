@@ -53,6 +53,7 @@ final class ProjectBoardTaskCard {
       ->setGrippable($can_edit)
       ->setHref('/T'.$task->getID())
       ->addSigil('project-card')
+      ->setDisabled($task->isClosed())
       ->setMetadata(
         array(
           'objectPHID' => $task->getPHID(),

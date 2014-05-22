@@ -24,8 +24,12 @@ final class PhabricatorApplicationDashboard extends PhabricatorApplication {
         'arrange/(?P<id>\d+)/' => 'PhabricatorDashboardArrangeController',
         'create/' => 'PhabricatorDashboardEditController',
         'edit/(?:(?P<id>\d+)/)?' => 'PhabricatorDashboardEditController',
+        'install/(?P<id>\d+)/' => 'PhabricatorDashboardInstallController',
+        'uninstall/(?P<id>\d+)/' => 'PhabricatorDashboardUninstallController',
         'addpanel/(?P<id>\d+)/' => 'PhabricatorDashboardAddPanelController',
         'movepanel/(?P<id>\d+)/' => 'PhabricatorDashboardMovePanelController',
+        'removepanel/(?P<id>\d+)/'
+          => 'PhabricatorDashboardRemovePanelController',
         'panel/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?'
             => 'PhabricatorDashboardPanelListController',
@@ -34,6 +38,12 @@ final class PhabricatorApplicationDashboard extends PhabricatorApplication {
           'render/(?P<id>\d+)/' => 'PhabricatorDashboardPanelRenderController',
         ),
       ),
+    );
+  }
+
+  public function getRemarkupRules() {
+    return array(
+      new PhabricatorDashboardRemarkupRule(),
     );
   }
 

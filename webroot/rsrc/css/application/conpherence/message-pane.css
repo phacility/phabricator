@@ -50,7 +50,7 @@
   left: 280px;
   right: 241px;
   top: 76px;
-  bottom: 190px;
+  bottom: 185px;
   overflow-y: auto;
   box-shadow: inset 1px 4px 5px rgba(0,0,0,0.1);
   -webkit-overflow-scrolling: touch;
@@ -77,7 +77,7 @@
 .conpherence-message-pane .phui-form-view {
   border-width: 0;
   background-color: {$lightgreybackground};
-  height: 190px;
+  height: 185px;
   padding: 0;
   position: fixed;
   bottom: 0;

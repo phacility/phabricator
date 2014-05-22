@@ -144,3 +144,14 @@
 .phui-icon-view.grey {
   color: {$lightgreytext};
 }
+
+/* Hovers */
+
+.device-desktop a.phui-icon-view.lightgreytext:hover,
+.device-desktop a.phui-icon-view.grey:hover {
+  color: {$darkgreytext};
+}
+
+.device-desktop a.phui-icon-view.bluegrey:hover {
+  color: {$darkbluetext};
+}

@@ -166,3 +166,11 @@
 .phui-list-item-fail.phui-list-item-selected .phui-list-item-href:hover {
   background: #f5d3d0;
 }
+
+/* - Dashboards ------------------------------------------------------------ */
+
+.dashboard-panel .phui-list-view.phui-list-navbar {
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
+}

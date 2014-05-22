@@ -14,6 +14,8 @@ final class ManiphestTransaction
   const TYPE_SUBPRIORITY = 'subpriority';
   const TYPE_PROJECT_COLUMN = 'projectcolumn';
 
+  const TYPE_UNBLOCK = 'unblock';
+
   // NOTE: this type is deprecated. Keep it around for legacy installs
   // so any transactions render correctly.
   const TYPE_ATTACH = 'attach';
@@ -34,6 +36,7 @@ final class ManiphestTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_PROJECT_COLUMN:
       case self::TYPE_EDGE:
+      case self::TYPE_UNBLOCK:
         return false;
     }
 
@@ -87,7 +90,11 @@ final class ManiphestTransaction
             array_keys(idx($old, 'FILE', array())),
           ));
         break;
-
+      case self::TYPE_UNBLOCK:
+        foreach (array_keys($new) as $phid) {
+          $phids[] = $phid;
+        }
+        break;
     }
 
     return $phids;
@@ -233,6 +240,22 @@ final class ManiphestTransaction
       case self::TYPE_EDGE:
       case self::TYPE_ATTACH:
         return pht('Attached');
+
+      case self::TYPE_UNBLOCK:
+        $old_status = head($old);
+        $new_status = head($new);
+
+        $old_closed = ManiphestTaskStatus::isClosedStatus($old_status);
+        $new_closed = ManiphestTaskStatus::isClosedStatus($new_status);
+
+        if ($old_closed && !$new_closed) {
+          return pht('Block');
+        } else if (!$old_closed && $new_closed) {
+          return pht('Unblock');
+        } else {
+          return pht('Blocker');
+        }
+
     }
 
     return parent::getActionName();
@@ -289,6 +312,9 @@ final class ManiphestTransaction
       case self::TYPE_EDGE:
       case self::TYPE_ATTACH:
         return 'fa-thumb-tack';
+
+      case self::TYPE_UNBLOCK:
+        return 'fa-shield';
 
     }
 
@@ -348,6 +374,38 @@ final class ManiphestTransaction
           return pht(
             '%s changed the task status from "%s" to "%s".',
             $this->renderHandleLink($author_phid),
+            $old_name,
+            $new_name);
+        }
+
+      case self::TYPE_UNBLOCK:
+        $blocker_phid = key($new);
+        $old_status = head($old);
+        $new_status = head($new);
+
+        $old_closed = ManiphestTaskStatus::isClosedStatus($old_status);
+        $new_closed = ManiphestTaskStatus::isClosedStatus($new_status);
+
+        $old_name = ManiphestTaskStatus::getTaskStatusName($old_status);
+        $new_name = ManiphestTaskStatus::getTaskStatusName($new_status);
+
+        if ($old_closed && !$new_closed) {
+          return pht(
+            '%s reopened blocking task %s as "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($blocker_phid),
+            $new_name);
+        } else if (!$old_closed && $new_closed) {
+          return pht(
+            '%s closed blocking task %s as "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($blocker_phid),
+            $new_name);
+        } else {
+          return pht(
+            '%s changed the status of blocking task %s from "%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($blocker_phid),
             $old_name,
             $new_name);
         }
@@ -550,6 +608,16 @@ final class ManiphestTransaction
             $old_name,
             $new_name);
         }
+
+      case self::TYPE_UNBLOCK:
+
+        // TODO: We should probably not show these in feed; they're highly
+        // redundant. For now, just use the normal titles. Right now, we can't
+        // publish something to noficiations without also publishing it to feed.
+        // Fix that, then stop these from rendering in feed only.
+
+        break;
+
 
       case self::TYPE_OWNER:
         if ($author_phid == $new) {

@@ -13,7 +13,7 @@ only screen and (min-device-pixel-ratio: 1.5),
 only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   .sprite-apps-large {
     background-image: url(/rsrc/image/sprite-apps-large-X2.png);
-    background-size: 406px 406px;
+    background-size: 406px 435px;
   }
 }
 
@@ -738,62 +738,74 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -319px -348px;
 }
 
-.apps-token-light-large {
+.apps-spaces-light-large {
   background-position: -348px -348px;
 }
 
-.apps-token-dark-large {
+.apps-spaces-dark-large {
   background-position: -377px -348px;
 }
 
-.apps-token-blue-large, .phabricator-crumb-view:hover .apps-token-dark-large {
+.apps-spaces-blue-large, .phabricator-crumb-view:hover .apps-spaces-dark-large {
   background-position: 0px -377px;
 }
 
-.apps-uiexamples-light-large {
+.apps-token-light-large {
   background-position: -29px -377px;
 }
 
-.apps-uiexamples-dark-large {
+.apps-token-dark-large {
   background-position: -58px -377px;
 }
 
-.apps-uiexamples-blue-large, .phabricator-crumb-view:hover .apps-uiexamples-dark-large {
+.apps-token-blue-large, .phabricator-crumb-view:hover .apps-token-dark-large {
   background-position: -87px -377px;
 }
 
-.apps-workboard-light-large {
+.apps-uiexamples-light-large {
   background-position: -116px -377px;
 }
 
-.apps-workboard-dark-large {
+.apps-uiexamples-dark-large {
   background-position: -145px -377px;
 }
 
-.apps-workboard-blue-large, .phabricator-crumb-view:hover .apps-workboard-dark-large {
+.apps-uiexamples-blue-large, .phabricator-crumb-view:hover .apps-uiexamples-dark-large {
   background-position: -174px -377px;
 }
 
-.apps-workphlow-light-large {
+.apps-workboard-light-large {
   background-position: -203px -377px;
 }
 
-.apps-workphlow-dark-large {
+.apps-workboard-dark-large {
   background-position: -232px -377px;
 }
 
-.apps-workphlow-blue-large, .phabricator-crumb-view:hover .apps-workphlow-dark-large {
+.apps-workboard-blue-large, .phabricator-crumb-view:hover .apps-workboard-dark-large {
   background-position: -261px -377px;
 }
 
-.apps-xhprof-light-large {
+.apps-workphlow-light-large {
   background-position: -290px -377px;
 }
 
-.apps-xhprof-dark-large {
+.apps-workphlow-dark-large {
   background-position: -319px -377px;
 }
 
-.apps-xhprof-blue-large, .phabricator-crumb-view:hover .apps-xhprof-dark-large {
+.apps-workphlow-blue-large, .phabricator-crumb-view:hover .apps-workphlow-dark-large {
   background-position: -348px -377px;
+}
+
+.apps-xhprof-light-large {
+  background-position: -377px -377px;
+}
+
+.apps-xhprof-dark-large {
+  background-position: 0px -406px;
+}
+
+.apps-xhprof-blue-large, .phabricator-crumb-view:hover .apps-xhprof-dark-large {
+  background-position: -29px -406px;
 }

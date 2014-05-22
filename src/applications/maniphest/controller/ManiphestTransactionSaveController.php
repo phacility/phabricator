@@ -78,17 +78,6 @@ final class ManiphestTransactionSaveController extends ManiphestController {
       $transactions[] = $transaction;
     }
 
-    $resolution = $request->getStr('resolution');
-    $did_scuttle = false;
-    if ($action !== ManiphestTransaction::TYPE_STATUS) {
-      if ($request->getStr('scuttle')) {
-        $transactions[] = id(new ManiphestTransaction())
-          ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
-          ->setNewValue(ManiphestTaskStatus::getDefaultClosedStatus());
-        $did_scuttle = true;
-        $resolution = ManiphestTaskStatus::getDefaultClosedStatus();
-      }
-    }
 
     // When you interact with a task, we add you to the CC list so you get
     // further updates, and possibly assign the task to you if you took an
@@ -106,7 +95,8 @@ final class ManiphestTransactionSaveController extends ManiphestController {
       }
     }
 
-    if ($did_scuttle || ($action == ManiphestTransaction::TYPE_STATUS)) {
+    if ($action == ManiphestTransaction::TYPE_STATUS) {
+      $resolution = $request->getStr('resolution');
       if (!$task->getOwnerPHID() &&
           ManiphestTaskStatus::isClosedStatus($resolution)) {
         // Closing an unassigned task. Assign the user as the owner of

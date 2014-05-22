@@ -64,11 +64,15 @@ final class PhabricatorDashboardEditController
     if ($request->isFormPost()) {
       $v_name = $request->getStr('name');
       $v_layout_mode = $request->getStr('layout_mode');
+      $v_view_policy = $request->getStr('viewPolicy');
+      $v_edit_policy = $request->getStr('editPolicy');
 
       $xactions = array();
 
       $type_name = PhabricatorDashboardTransaction::TYPE_NAME;
       $type_layout_mode = PhabricatorDashboardTransaction::TYPE_LAYOUT_MODE;
+      $type_view_policy = PhabricatorTransactions::TYPE_VIEW_POLICY;
+      $type_edit_policy = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
       $xactions[] = id(new PhabricatorDashboardTransaction())
         ->setTransactionType($type_name)
@@ -76,6 +80,12 @@ final class PhabricatorDashboardEditController
       $xactions[] = id(new PhabricatorDashboardTransaction())
         ->setTransactionType($type_layout_mode)
         ->setNewValue($v_layout_mode);
+      $xactions[] = id(new PhabricatorDashboardTransaction())
+        ->setTransactionType($type_view_policy)
+        ->setNewValue($v_view_policy);
+      $xactions[] = id(new PhabricatorDashboardTransaction())
+        ->setTransactionType($type_edit_policy)
+        ->setNewValue($v_edit_policy);
 
       try {
         $editor = id(new PhabricatorDashboardTransactionEditor())
@@ -94,8 +104,16 @@ final class PhabricatorDashboardEditController
         $validation_exception = $ex;
 
         $e_name = $validation_exception->getShortMessage($type_name);
+
+        $dashboard->setViewPolicy($v_view_policy);
+        $dashboard->setEditPolicy($v_edit_policy);
       }
     }
+
+    $policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($viewer)
+      ->setObject($dashboard)
+      ->execute();
 
     $layout_mode_options =
       PhabricatorDashboardLayoutConfig::getLayoutModeSelectOptions();
@@ -107,6 +125,18 @@ final class PhabricatorDashboardEditController
           ->setName('name')
           ->setValue($v_name)
           ->setError($e_name))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setName('viewPolicy')
+          ->setPolicyObject($dashboard)
+          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
+          ->setPolicies($policies))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setName('editPolicy')
+          ->setPolicyObject($dashboard)
+          ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
+          ->setPolicies($policies))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Layout Mode'))

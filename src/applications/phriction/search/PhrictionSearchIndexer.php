@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phriction
- */
 final class PhrictionSearchIndexer
   extends PhabricatorSearchDocumentIndexer {
 
