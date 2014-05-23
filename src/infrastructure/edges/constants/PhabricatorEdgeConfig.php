@@ -292,10 +292,11 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_DREV_HAS_COMMIT:
         return '%s added %d commit(s): %s.';
       case self::TYPE_TASK_DEPENDS_ON_TASK:
+        return '%s added %d blocking task(s): %s.';
       case self::TYPE_DREV_DEPENDS_ON_DREV:
         return '%s added %d dependencie(s): %s.';
       case self::TYPE_TASK_DEPENDED_ON_BY_TASK:
-        return '%s added %d dependent task(s): %s.';
+        return '%s added %d blocked task(s): %s.';
       case self::TYPE_COMMIT_HAS_TASK:
       case self::TYPE_DREV_HAS_RELATED_TASK:
       case self::TYPE_MOCK_HAS_TASK:
@@ -369,9 +370,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_DREV_HAS_COMMIT:
         return '%s removed %d commit(s): %s.';
       case self::TYPE_TASK_DEPENDS_ON_TASK:
-        return '%s removed %d dependencie(s): %s.';
+        return '%s removed %d blocking task(s): %s.';
       case self::TYPE_TASK_DEPENDED_ON_BY_TASK:
-        return '%s removed %d dependent task(s): %s.';
+        return '%s removed %d blocked task(s): %s.';
       case self::TYPE_COMMIT_HAS_TASK:
       case self::TYPE_DREV_HAS_RELATED_TASK:
       case self::TYPE_MOCK_HAS_TASK:
