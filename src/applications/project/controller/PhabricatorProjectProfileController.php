@@ -4,28 +4,40 @@ final class PhabricatorProjectProfileController
   extends PhabricatorProjectController {
 
   private $id;
+  private $slug;
 
   public function shouldAllowPublic() {
     return true;
   }
 
   public function willProcessRequest(array $data) {
+    // via /project/view/$id/
     $this->id = idx($data, 'id');
+    // via /tag/$slug/
+    $this->slug = idx($data, 'slug');
   }
 
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $project = id(new PhabricatorProjectQuery())
+    $query = id(new PhabricatorProjectQuery())
       ->setViewer($user)
-      ->withIDs(array($this->id))
       ->needMembers(true)
       ->needWatchers(true)
-      ->needImages(true)
-      ->executeOne();
+      ->needImages(true);
+    if ($this->slug) {
+      $query->withSlugs(array($this->slug));
+    } else {
+      $query->withIDs(array($this->id));
+    }
+    $project = $query->executeOne();
     if (!$project) {
       return new Aphront404Response();
+    }
+    if ($this->slug && $this->slug != $project->getPrimarySlug()) {
+      return id(new AphrontRedirectResponse())
+        ->setURI('/tag/'.$project->getPrimarySlug().'/');
     }
 
     $picture = $project->getProfileImageURI();
@@ -48,7 +60,7 @@ final class PhabricatorProjectProfileController
       'phabricator-project-layout',
       array($tasks, $feed));
 
-    $id = $this->id;
+    $id = $project->getID();
     $icon = id(new PHUIIconView())
           ->setIconFont('fa-columns');
     $board_btn = id(new PHUIButtonView())

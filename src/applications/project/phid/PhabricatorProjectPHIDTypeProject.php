@@ -43,11 +43,13 @@ final class PhabricatorProjectPHIDTypeProject extends PhabricatorPHIDType {
 
       $name = $project->getName();
       $id = $project->getID();
+      $slug = $project->getPrimarySlug();
 
       $handle->setName($name);
-      $handle->setObjectName('#'.rtrim($project->getPhrictionSlug(), '/'));
-      $handle->setURI("/project/view/{$id}/");
+      $handle->setObjectName('#'.$slug);
+      $handle->setURI("/tag/{$slug}/");
       $handle->setImageURI($project->getProfileImageURI());
+      $handle->setIcon($project->getIcon());
 
       if ($project->isArchived()) {
         $handle->setStatus(PhabricatorObjectHandleStatus::STATUS_CLOSED);

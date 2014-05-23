@@ -27,6 +27,12 @@
   line-height: 22px;
   padding-bottom: 4px;
   border-bottom: 1px solid {$thinblueborder};
+  padding-left: 30px;
+}
+
+.device .phui-property-list-actions .phabricator-action-view .phui-icon-view {
+  font-size: 14px;
+  line-height: 18px;
 }
 
 .phabricator-action-view {

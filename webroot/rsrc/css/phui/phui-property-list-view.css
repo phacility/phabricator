@@ -171,6 +171,7 @@
   float: none;
   width: auto;
   margin: -12px 0 12px 0;
+  border: none;
 }
 
 .phui-property-list-image-content img {

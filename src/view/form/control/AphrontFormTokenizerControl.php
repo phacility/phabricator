@@ -62,7 +62,7 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
         'id'          => $id,
         'src'         => $this->datasource,
         'value'       => mpull($values, 'getFullName', 'getPHID'),
-        'icons'       => mpull($values, 'getTypeIcon', 'getPHID'),
+        'icons'       => mpull($values, 'getIcon', 'getPHID'),
         'limit'       => $this->limit,
         'username'    => $username,
         'placeholder' => $this->placeholder,

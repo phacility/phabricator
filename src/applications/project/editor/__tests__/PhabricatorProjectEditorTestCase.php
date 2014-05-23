@@ -15,9 +15,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $user2 = $this->createUser();
     $user2->save();
 
-    $proj = $this->createProject();
-    $proj->setAuthorPHID($user->getPHID());
-    $proj->save();
+    $proj = $this->createProject($user);
 
     $proj = $this->refreshProject($proj, $user, true);
 
@@ -48,9 +46,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $user2 = $this->createUser();
     $user2->save();
 
-    $proj = $this->createProject();
-    $proj->setAuthorPHID($user->getPHID());
-    $proj->save();
+    $proj = $this->createProject($user);
 
 
     // When edit and view policies are set to "user", anyone can edit.
@@ -100,7 +96,6 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $user->save();
 
     $proj = $this->createProjectWithNewAuthor();
-    $proj->save();
 
     $proj = $this->refreshProject($proj, $user, true);
     $this->assertTrue(
@@ -228,9 +223,10 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     }
   }
 
-  private function createProject() {
-    $project = new PhabricatorProject();
+  private function createProject(PhabricatorUser $user) {
+    $project = PhabricatorProject::initializeNewProject($user);
     $project->setName('Test Project '.mt_rand());
+    $project->save();
 
     return $project;
   }
@@ -239,8 +235,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $author = $this->createUser();
     $author->save();
 
-    $project = $this->createProject();
-    $project->setAuthorPHID($author->getPHID());
+    $project = $this->createProject($author);
 
     return $project;
   }

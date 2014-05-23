@@ -13,6 +13,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   protected $subprojectPHIDs = array();
   protected $phrictionSlug;
   protected $profileImagePHID;
+  protected $icon;
 
   protected $viewPolicy;
   protected $editPolicy;
@@ -26,10 +27,13 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   private $profileImageFile = self::ATTACHABLE;
   private $slugs = self::ATTACHABLE;
 
+  const DEFAULT_ICON = 'fa-briefcase';
+
   public static function initializeNewProject(PhabricatorUser $actor) {
     return id(new PhabricatorProject())
       ->setName('')
       ->setAuthorPHID($actor->getPHID())
+      ->setIcon(self::DEFAULT_ICON)
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
       ->setEditPolicy(PhabricatorPolicies::POLICY_USER)
       ->setJoinPolicy(PhabricatorPolicies::POLICY_USER)

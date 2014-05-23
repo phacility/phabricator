@@ -89,7 +89,15 @@ final class PhabricatorUserEmail extends PhabricatorUserDAO {
       return false;
     }
 
-    return in_array($domain, $allowed_domains);
+    $lower_domain = phutil_utf8_strtolower($domain);
+    foreach ($allowed_domains as $allowed_domain) {
+      $lower_allowed = phutil_utf8_strtolower($allowed_domain);
+      if ($lower_allowed === $lower_domain) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
 
