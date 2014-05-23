@@ -32,7 +32,8 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
     $dashboard_id = celerity_generate_unique_node_id();
     $result = id(new AphrontMultiColumnView())
       ->setID($dashboard_id)
-      ->setFluidlayout(true);
+      ->setFluidlayout(true)
+      ->setGutter(AphrontMultiColumnView::GUTTER_LARGE);
 
     if ($this->arrangeMode) {
       $h_mode = PhabricatorDashboardPanelRenderingEngine::HEADER_MODE_EDIT;
@@ -76,7 +77,11 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
         ));
     }
 
-    return $result;
+    $view = id(new PHUIBoxView())
+      ->addClass('dashboard-view')
+      ->appendChild($result);
+
+    return $view;
   }
 
   private function renderAddPanelPlaceHolder($column) {

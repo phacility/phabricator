@@ -55,7 +55,7 @@ final class PhabricatorDashboardPanelRenderController
       ->addTextCrumb(pht('Standalone View'));
 
     $view = id(new PHUIBoxView())
-      ->addMargin(PHUI::MARGIN_LARGE)
+      ->addClass('dashboard-view')
       ->appendChild($rendered_panel);
 
     return $this->buildApplicationPage(
