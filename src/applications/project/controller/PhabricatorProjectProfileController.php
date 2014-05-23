@@ -60,7 +60,7 @@ final class PhabricatorProjectProfileController
       'phabricator-project-layout',
       array($tasks, $feed));
 
-    $id = $this->id;
+    $id = $project->getID();
     $icon = id(new PHUIIconView())
           ->setIconFont('fa-columns');
     $board_btn = id(new PHUIButtonView())
