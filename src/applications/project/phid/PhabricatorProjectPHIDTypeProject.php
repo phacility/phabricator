@@ -49,6 +49,7 @@ final class PhabricatorProjectPHIDTypeProject extends PhabricatorPHIDType {
       $handle->setObjectName('#'.$slug);
       $handle->setURI("/tag/{$slug}/");
       $handle->setImageURI($project->getProfileImageURI());
+      $handle->setIcon($project->getIcon());
 
       if ($project->isArchived()) {
         $handle->setStatus(PhabricatorObjectHandleStatus::STATUS_CLOSED);

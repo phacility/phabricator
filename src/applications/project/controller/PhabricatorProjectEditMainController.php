@@ -96,6 +96,14 @@ final class PhabricatorProjectEditMainController
 
     $view->addAction(
       id(new PhabricatorActionView())
+        ->setName(pht('Edit Icon'))
+        ->setIcon($project->getIcon())
+        ->setHref($this->getApplicationURI("icon/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
         ->setName(pht('Edit Picture'))
         ->setIcon('fa-picture-o')
         ->setHref($this->getApplicationURI("picture/{$id}/"))
