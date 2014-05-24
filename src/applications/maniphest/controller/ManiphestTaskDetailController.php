@@ -593,7 +593,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $edge_types = array(
       PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK
-      => pht('Blocking Tasks'),
+      => pht('Blocks'),
       PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK
       => pht('Blocked By'),
       PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV
