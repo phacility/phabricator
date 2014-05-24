@@ -388,7 +388,7 @@ final class ManiphestTaskSearchEngine
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('fulltext')
-          ->setLabel(pht('Contains Text'))
+          ->setLabel(pht('Contains Words'))
           ->setValue($saved->getParameter('fulltext')))
       ->appendChild(
         id(new AphrontFormTextControl())
