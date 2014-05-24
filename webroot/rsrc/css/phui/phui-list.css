@@ -172,5 +172,5 @@
 .dashboard-panel .phui-list-view.phui-list-navbar {
   border-left: 1px solid {$lightblueborder};
   border-right: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
+  border-bottom: 1px solid {$thinblueborder};
 }

@@ -19,7 +19,7 @@
 }
 
 .gradient-lightblue-header .phabricator-action-header-title {
-  color: {$bluetext};
+  color: {$darkbluetext};
 }
 
 .phabricator-action-header-icon-list {

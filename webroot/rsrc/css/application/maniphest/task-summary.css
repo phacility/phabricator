@@ -93,21 +93,13 @@
 /* - Dashboards ------------------------------------------------------------ */
 
 .dashboard-panel .maniphest-list-container {
-  background: {$backdrop};
-}
-
-.dashboard-panel .maniphest-list-container {
   padding: 0;
-}
-
-.dashboard-panel .maniphest-task-group-header {
-  font-size: 12px;
-  font-weight: normal;
-  color: {$darkbluetext};
-  padding: 8px 8px 2px;
-  margin: 0;
 }
 
 .dashboard-panel .maniphest-task-group + .maniphest-task-group {
   padding-top: 0;
+}
+
+.dashboard-panel .maniphest-task-group-header {
+  display: none;
 }
