@@ -453,9 +453,7 @@ final class CeleritySpriteGenerator {
     $template = new PhutilSprite();
 
     $unusual_heights = array(
-      'dark-menu-label' => 25,
       'breadcrumbs'     => 31,
-      'menu-label'      => 24,
       'red-header'      => 70,
       'blue-header'     => 70,
       'green-header'    => 70,
@@ -465,20 +463,13 @@ final class CeleritySpriteGenerator {
       'lightblue-header' => 240,
     );
 
-    $extra_css = array(
-      'dark-menu-label' =>
-        ', .phabricator-dark-menu .phui-list-item-type-label',
-      'menu-label' =>
-        ', .phabricator-side-menu .phui-list-item-type-label',
-    );
-
     $sprites = array();
     foreach ($gradients as $gradient) {
       $path = $this->getPath('gradients/'.$gradient.'.png');
       $sprite = id(clone $template)
         ->setName('gradient-'.$gradient)
         ->setSourceFile($path)
-        ->setTargetCSS('.gradient-'.$gradient.idx($extra_css, $gradient));
+        ->setTargetCSS('.gradient-'.$gradient);
 
       $sprite->setSourceSize(4, idx($unusual_heights, $gradient, 26));
 
@@ -488,9 +479,7 @@ final class CeleritySpriteGenerator {
     $sheet = $this->buildSheet(
       'gradient',
       false,
-      PhutilSpriteSheet::TYPE_REPEAT_X,
-      ', .phabricator-dark-menu .phui-list-item-type-label, '.
-      '.phabricator-side-menu .phui-list-item-type-label');
+      PhutilSpriteSheet::TYPE_REPEAT_X);
     foreach ($sprites as $sprite) {
       $sheet->addSprite($sprite);
     }

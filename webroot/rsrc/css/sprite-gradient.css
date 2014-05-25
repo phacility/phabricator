@@ -3,7 +3,7 @@
  * @generated
  */
 
-.sprite-gradient, .phabricator-dark-menu .phui-list-item-type-label, .phabricator-side-menu .phui-list-item-type-label {
+.sprite-gradient {
   background-image: url(/rsrc/image/sprite-gradient.png);
   background-repeat: repeat-x;
 }
@@ -12,41 +12,33 @@
 
 
 .gradient-blue-header {
-  background-position: 0px -83px;
+  background-position: 0px -32px;
 }
 
 .gradient-breadcrumbs {
-  background-position: 0px -51px;
-}
-
-.gradient-dark-grey-header {
-  background-position: 0px -154px;
-}
-
-.gradient-dark-menu-label, .phabricator-dark-menu .phui-list-item-type-label {
-  background-position: 0px -25px;
-}
-
-.gradient-green-header {
-  background-position: 0px -225px;
-}
-
-.gradient-grey-header {
-  background-position: 0px -296px;
-}
-
-.gradient-lightblue-header {
-  background-position: 0px -509px;
-}
-
-.gradient-menu-label, .phabricator-side-menu .phui-list-item-type-label {
   background-position: 0px 0px;
 }
 
+.gradient-dark-grey-header {
+  background-position: 0px -103px;
+}
+
+.gradient-green-header {
+  background-position: 0px -174px;
+}
+
+.gradient-grey-header {
+  background-position: 0px -245px;
+}
+
+.gradient-lightblue-header {
+  background-position: 0px -458px;
+}
+
 .gradient-red-header {
-  background-position: 0px -367px;
+  background-position: 0px -316px;
 }
 
 .gradient-yellow-header {
-  background-position: 0px -438px;
+  background-position: 0px -387px;
 }

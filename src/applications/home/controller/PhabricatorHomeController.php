@@ -111,10 +111,6 @@ abstract class PhabricatorHomeController extends PhabricatorController {
               idx($status, get_class($application), array()))
             ->setUser($user);
 
-          if ($tile_display == PhabricatorApplication::TILE_FULL) {
-            $tile->setFullWidth(true);
-          }
-
           $tiles[] = $tile;
         }
 
