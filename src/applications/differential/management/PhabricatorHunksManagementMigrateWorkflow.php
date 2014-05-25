@@ -36,6 +36,20 @@ final class PhabricatorHunksManagementMigrateWorkflow
         $new_hunk->save();
         $hunk->delete();
       $hunk->saveTransaction();
+
+      $old_len = strlen($hunk->getChanges());
+      $new_len = strlen($new_hunk->getData());
+      if ($old_len) {
+        $diff_len = ($old_len - $new_len);
+        $console->writeOut(
+          "%s\n",
+          pht(
+            'Saved %s bytes (%s).',
+            new PhutilNumber($diff_len),
+            sprintf('%.1f%%', 100 * ($diff_len / $old_len))));
+      }
+
+      break;
     }
 
     if ($saw_any_rows) {

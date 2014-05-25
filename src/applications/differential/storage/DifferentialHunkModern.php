@@ -6,12 +6,14 @@ final class DifferentialHunkModern extends DifferentialHunk {
   const DATATYPE_FILE       = 'file';
 
   const DATAFORMAT_RAW      = 'byte';
-  const DATAFORMAT_DEFLATE  = 'gzde';
+  const DATAFORMAT_DEFLATED = 'gzde';
 
   protected $dataType;
   protected $dataEncoding;
   protected $dataFormat;
   protected $data;
+
+  private $rawData;
 
   public function getTableName() {
     return 'differential_hunk_modern';
@@ -26,6 +28,8 @@ final class DifferentialHunkModern extends DifferentialHunk {
   }
 
   public function setChanges($text) {
+    $this->rawData = $text;
+
     $this->dataEncoding = $this->detectEncodingForStorage($text);
     $this->dataType = self::DATATYPE_TEXT;
     $this->dataFormat = self::DATAFORMAT_RAW;
@@ -40,34 +44,60 @@ final class DifferentialHunkModern extends DifferentialHunk {
       $this->getDataEncoding());
   }
 
-  private function getRawData() {
+  public function save() {
+
     $type = $this->getDataType();
-    $data = $this->getData();
-
-    switch ($type) {
-      case self::DATATYPE_TEXT:
-        // In this storage type, the changes are stored on the object.
-        $data = $data;
-        break;
-      case self::DATATYPE_FILE:
-      default:
-        throw new Exception(
-          pht('Hunk has unsupported data type "%s"!', $type));
-    }
-
     $format = $this->getDataFormat();
-    switch ($format) {
-      case self::DATAFORMAT_RAW:
-        // In this format, the changes are stored as-is.
-        $data = $data;
-        break;
-      case self::DATAFORMAT_DEFLATE:
-      default:
-        throw new Exception(
-          pht('Hunk has unsupported data encoding "%s"!', $type));
+
+    // Before saving the data, attempt to compress it.
+    if ($type == self::DATATYPE_TEXT) {
+      if ($format == self::DATAFORMAT_RAW) {
+        $data = $this->getData();
+        $deflated = PhabricatorCaches::maybeDeflateData($data);
+        if ($deflated !== null) {
+          $this->data = $deflated;
+          $this->dataFormat = self::DATAFORMAT_DEFLATED;
+        }
+      }
     }
 
-    return $data;
+    return parent::save();
+  }
+
+  private function getRawData() {
+    if ($this->rawData === null) {
+      $type = $this->getDataType();
+      $data = $this->getData();
+
+      switch ($type) {
+        case self::DATATYPE_TEXT:
+          // In this storage type, the changes are stored on the object.
+          $data = $data;
+          break;
+        case self::DATATYPE_FILE:
+        default:
+          throw new Exception(
+            pht('Hunk has unsupported data type "%s"!', $type));
+      }
+
+      $format = $this->getDataFormat();
+      switch ($format) {
+        case self::DATAFORMAT_RAW:
+          // In this format, the changes are stored as-is.
+          $data = $data;
+          break;
+        case self::DATAFORMAT_DEFLATED:
+          $data = PhabricatorCaches::inflateData($data);
+          break;
+        default:
+          throw new Exception(
+            pht('Hunk has unsupported data encoding "%s"!', $type));
+      }
+
+      $this->rawData = $data;
+    }
+
+    return $this->rawData;
   }
 
 }

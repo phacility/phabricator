@@ -145,18 +145,10 @@ final class PhabricatorKeyValueDatabaseCache
                      PhabricatorEnv::getEnvConfig('cache.enable-deflate');
     }
 
-    // If the value is larger than 1KB, we have gzdeflate(), we successfully
-    // can deflate it, and it benefits from deflation, store it deflated.
     if ($can_deflate) {
-      $len = strlen($value);
-      if ($len > 1024) {
-        $deflated = gzdeflate($value);
-        if ($deflated !== false) {
-          $deflated_len = strlen($deflated);
-          if ($deflated_len < ($len / 2)) {
-            return array(self::CACHE_FORMAT_DEFLATE, $deflated);
-          }
-        }
+      $deflated = PhabricatorCaches::maybeDeflateData($value);
+      if ($deflated !== null) {
+        return array(self::CACHE_FORMAT_DEFLATE, $deflated);
       }
     }
 
@@ -168,14 +160,7 @@ final class PhabricatorKeyValueDatabaseCache
       case self::CACHE_FORMAT_RAW:
         return $value;
       case self::CACHE_FORMAT_DEFLATE:
-        if (!function_exists('gzinflate')) {
-          throw new Exception("No gzinflate() to read deflated cache.");
-        }
-        $value = gzinflate($value);
-        if ($value === false) {
-          throw new Exception("Failed to deflate cache.");
-        }
-        return $value;
+        return PhabricatorCaches::inflateData($value);
       default:
         throw new Exception("Unknown cache format.");
     }
