@@ -44,6 +44,11 @@
   display: block;
 }
 
+.device-desktop .phabricator-side-menu-home .phabricator-nav-content,
+.device-tablet .phabricator-side-menu-home .phabricator-nav-content {
+  margin-left: 205px;
+}
+
 .phabricator-nav-local {
   width: 205px;
   position: absolute;

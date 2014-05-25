@@ -114,25 +114,6 @@ abstract class PhabricatorHomeController extends PhabricatorController {
           $tiles[] = $tile;
         }
 
-        if ($is_small_tiles) {
-          while (count($tiles) % 3) {
-            $tiles[] = id(new PhabricatorApplicationLaunchView());
-          }
-          $label = id(new PHUIListItemView())
-            ->setType(PHUIListItemView::TYPE_LABEL)
-            ->setName($groups[$group]);
-
-          if ($is_hide) {
-            $label_id = celerity_generate_unique_node_id();
-            $attrs = array();
-            $label->setStyle('display: none;');
-            $label->setID($label_id);
-            $tile_ids[] = $label_id;
-          }
-
-          $nav->addMenuItem($label);
-        }
-
         $group_id = celerity_generate_unique_node_id();
         $tile_ids[] = $group_id;
         $nav->addCustomBlock(

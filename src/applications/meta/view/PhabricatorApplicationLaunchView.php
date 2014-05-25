@@ -23,7 +23,6 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
 
     $content = array();
     $icon = null;
-    $create_button = null;
     if ($application) {
       $content[] = phutil_tag(
         'span',
@@ -127,7 +126,6 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
 
     $classes = array();
     $classes[] = 'phabricator-application-launch-container';
-    $classes[] = 'application-tile-full';
 
     $app_button = phutil_tag(
       $application ? 'a' : 'div',
@@ -140,6 +138,6 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
         $content,
       ));
 
-    return array($app_button, $create_button);
+    return $app_button;
   }
 }
