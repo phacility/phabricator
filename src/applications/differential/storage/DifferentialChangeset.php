@@ -1,6 +1,7 @@
 <?php
 
-final class DifferentialChangeset extends DifferentialDAO {
+final class DifferentialChangeset extends DifferentialDAO
+  implements PhabricatorPolicyInterface {
 
   protected $diffID;
   protected $oldFile;
@@ -16,6 +17,7 @@ final class DifferentialChangeset extends DifferentialDAO {
 
   private $unsavedHunks = array();
   private $hunks = self::ATTACHABLE;
+  private $diff = self::ATTACHABLE;
 
   const TABLE_CACHE = 'differential_changeset_parse_cache';
 
@@ -170,6 +172,30 @@ final class DifferentialChangeset extends DifferentialDAO {
     }
 
     return false;
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    // TODO: For now, these are never queried directly through the policy
+    // framework. Fix that up.
+    return PhabricatorPolicies::getMostOpenPolicy();
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
   }
 
 }

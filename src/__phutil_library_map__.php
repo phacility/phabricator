@@ -3007,7 +3007,11 @@ phutil_register_library_map(array(
     'DifferentialBranchField' => 'DifferentialCustomField',
     'DifferentialCapabilityDefaultView' => 'PhabricatorPolicyCapability',
     'DifferentialChangesSinceLastUpdateField' => 'DifferentialCustomField',
-    'DifferentialChangeset' => 'DifferentialDAO',
+    'DifferentialChangeset' =>
+    array(
+      0 => 'DifferentialDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
     'DifferentialChangesetDetailView' => 'AphrontView',
     'DifferentialChangesetHTMLRenderer' => 'DifferentialChangesetRenderer',
     'DifferentialChangesetListView' => 'AphrontView',

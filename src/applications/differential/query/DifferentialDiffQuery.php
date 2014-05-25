@@ -76,26 +76,39 @@ final class DifferentialDiffQuery
     }
 
 
-    if ($this->needChangesets) {
-      $this->loadChangesets($diffs);
+    if ($diffs && $this->needChangesets) {
+      $diffs = $this->loadChangesets($diffs);
     }
 
-    if ($this->needArcanistProjects) {
-      $this->loadArcanistProjects($diffs);
+    if ($diffs && $this->needArcanistProjects) {
+      $diffs = $this->loadArcanistProjects($diffs);
     }
 
     return $diffs;
   }
 
   private function loadChangesets(array $diffs) {
-    foreach ($diffs as $diff) {
-      $diff->attachChangesets(
-        $diff->loadRelatives(new DifferentialChangeset(), 'diffID'));
-      foreach ($diff->getChangesets() as $changeset) {
-        $changeset->attachHunks(
-          $changeset->loadRelatives(new DifferentialHunk(), 'changesetID'));
-      }
+    $diff_ids = mpull($diffs, 'getID');
+
+    $changesets = id(new DifferentialChangeset())->loadAllWhere(
+      'diffID IN (%Ld)',
+      $diff_ids);
+
+    if ($changesets) {
+      id(new DifferentialHunkQuery())
+        ->setViewer($this->getViewer())
+        ->setParentQuery($this)
+        ->withChangesets($changesets)
+        ->needAttachToChangesets(true)
+        ->execute();
     }
+
+    $changeset_groups = mgroup($changesets, 'getDiffID');
+    foreach ($diffs as $diff) {
+      $diff_changesets = idx($changeset_groups, $diff->getID(), array());
+      $diff->attachChangesets($diff_changesets);
+    }
+
     return $diffs;
   }
 
