@@ -62,15 +62,6 @@ final class DifferentialChangeset extends DifferentialDAO
     return $this;
   }
 
-  public function loadHunks() {
-    if (!$this->getID()) {
-      return array();
-    }
-    return id(new DifferentialHunk())->loadAllWhere(
-      'changesetID = %d',
-      $this->getID());
-  }
-
   public function save() {
     $this->openTransaction();
       $ret = parent::save();
@@ -84,9 +75,14 @@ final class DifferentialChangeset extends DifferentialDAO
 
   public function delete() {
     $this->openTransaction();
-      foreach ($this->loadHunks() as $hunk) {
+
+      $hunks = id(new DifferentialHunk())->loadAllWhere(
+        'changesetID = %d',
+        $this->getID());
+      foreach ($hunks as $hunk) {
         $hunk->delete();
       }
+
       $this->unsavedHunks = array();
 
       queryfx(
@@ -174,6 +170,15 @@ final class DifferentialChangeset extends DifferentialDAO
     return false;
   }
 
+  public function attachDiff(DifferentialDiff $diff) {
+    $this->diff = $diff;
+    return $this;
+  }
+
+  public function getDiff() {
+    return $this->assertAttached($this->diff);
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -185,13 +190,11 @@ final class DifferentialChangeset extends DifferentialDAO
   }
 
   public function getPolicy($capability) {
-    // TODO: For now, these are never queried directly through the policy
-    // framework. Fix that up.
-    return PhabricatorPolicies::getMostOpenPolicy();
+    return $this->getDiff()->getPolicy($capability);
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return false;
+    return $this->getDiff()->hasAutomaticCapability($capability, $viewer);
   }
 
   public function describeAutomaticCapability($capability) {

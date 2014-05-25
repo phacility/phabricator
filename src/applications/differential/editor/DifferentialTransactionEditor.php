@@ -1284,15 +1284,13 @@ final class DifferentialTransactionEditor
       $changeset_ids[$id] = $id;
     }
 
-    // TODO: We should write a proper Query class for this eventually.
-    $changesets = id(new DifferentialChangeset())->loadAllWhere(
-      'id IN (%Ld)',
-      $changeset_ids);
     if ($show_context) {
       $hunk_parser = new DifferentialHunkParser();
-      foreach ($changesets as $changeset) {
-        $changeset->attachHunks($changeset->loadHunks());
-      }
+      $changesets = id(new DifferentialChangesetQuery())
+        ->setViewer($this->getActor())
+        ->withIDs($changeset_ids)
+        ->needHunks(true)
+        ->execute();
     }
 
     $inline_groups = DifferentialTransactionComment::sortAndGroupInlines(

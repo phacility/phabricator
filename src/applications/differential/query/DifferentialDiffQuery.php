@@ -88,26 +88,13 @@ final class DifferentialDiffQuery
   }
 
   private function loadChangesets(array $diffs) {
-    $diff_ids = mpull($diffs, 'getID');
-
-    $changesets = id(new DifferentialChangeset())->loadAllWhere(
-      'diffID IN (%Ld)',
-      $diff_ids);
-
-    if ($changesets) {
-      id(new DifferentialHunkQuery())
-        ->setViewer($this->getViewer())
-        ->setParentQuery($this)
-        ->withChangesets($changesets)
-        ->needAttachToChangesets(true)
-        ->execute();
-    }
-
-    $changeset_groups = mgroup($changesets, 'getDiffID');
-    foreach ($diffs as $diff) {
-      $diff_changesets = idx($changeset_groups, $diff->getID(), array());
-      $diff->attachChangesets($diff_changesets);
-    }
+    id(new DifferentialChangesetQuery())
+      ->setViewer($this->getViewer())
+      ->setParentQuery($this)
+      ->withDiffs($diffs)
+      ->needAttachToDiffs(true)
+      ->needHunks(true)
+      ->execute();
 
     return $diffs;
   }
