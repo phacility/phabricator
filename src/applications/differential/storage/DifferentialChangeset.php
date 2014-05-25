@@ -76,11 +76,18 @@ final class DifferentialChangeset extends DifferentialDAO
   public function delete() {
     $this->openTransaction();
 
-      $hunks = id(new DifferentialHunkLegacy())->loadAllWhere(
+      $legacy_hunks = id(new DifferentialHunkLegacy())->loadAllWhere(
         'changesetID = %d',
         $this->getID());
-      foreach ($hunks as $hunk) {
-        $hunk->delete();
+      foreach ($legacy_hunks as $legacy_hunk) {
+        $legacy_hunk->delete();
+      }
+
+      $modern_hunks = id(new DifferentialHunkModern())->loadAllWhere(
+        'changesetID = %d',
+        $this->getID());
+      foreach ($modern_hunks as $modern_hunk) {
+        $modern_hunk->delete();
       }
 
       $this->unsavedHunks = array();
