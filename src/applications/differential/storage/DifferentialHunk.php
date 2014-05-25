@@ -1,10 +1,9 @@
 <?php
 
-final class DifferentialHunk extends DifferentialDAO
+abstract class DifferentialHunk extends DifferentialDAO
   implements PhabricatorPolicyInterface {
 
   protected $changesetID;
-  protected $changes;
   protected $oldOffset;
   protected $oldLen;
   protected $newOffset;
