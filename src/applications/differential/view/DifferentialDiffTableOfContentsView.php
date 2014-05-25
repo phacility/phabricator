@@ -312,11 +312,10 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
       'a',
       array(
         'href' => '#'.$changeset->getAnchorName(),
+        'sigil' => 'differential-load',
         'meta' => array(
           'id' => 'diff-'.$changeset->getAnchorName(),
-          'ref' => $ref,
         ),
-        'sigil' => 'differential-load',
       ),
       $display_file);
   }

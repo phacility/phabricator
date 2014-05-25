@@ -8,6 +8,46 @@ final class DifferentialChangesetDetailView extends AphrontView {
   private $symbolIndex;
   private $id;
   private $vsChangesetID;
+  private $renderURI;
+  private $whitespace;
+  private $renderingRef;
+  private $autoload;
+
+  public function setAutoload($autoload) {
+    $this->autoload = $autoload;
+    return $this;
+  }
+
+  public function getAutoload() {
+    return $this->autoload;
+  }
+
+  public function setRenderingRef($rendering_ref) {
+    $this->renderingRef = $rendering_ref;
+    return $this;
+  }
+
+  public function getRenderingRef() {
+    return $this->renderingRef;
+  }
+
+  public function setWhitespace($whitespace) {
+    $this->whitespace = $whitespace;
+    return $this;
+  }
+
+  public function getWhitespace() {
+    return $this->whitespace;
+  }
+
+  public function setRenderURI($render_uri) {
+    $this->renderURI = $render_uri;
+    return $this;
+  }
+
+  public function getRenderURI() {
+    return $this->renderURI;
+  }
 
   public function setChangeset($changeset) {
     $this->changeset = $changeset;
@@ -34,6 +74,11 @@ final class DifferentialChangesetDetailView extends AphrontView {
       $this->id = celerity_generate_unique_node_id();
     }
     return $this->id;
+  }
+
+  public function setID($id) {
+    $this->id = $id;
+    return $this;
   }
 
   public function setVsChangesetID($vs_changeset_id) {
@@ -139,6 +184,12 @@ final class DifferentialChangesetDetailView extends AphrontView {
             $this->getVsChangesetID(),
             $this->changeset->getID()),
           'right' => $this->changeset->getID(),
+          'renderURI' => $this->getRenderURI(),
+          'whitespace' => $this->getWhitespace(),
+          'highlight' => null,
+          'renderer' => null,
+          'ref' => $this->getRenderingRef(),
+          'autoload' => $this->getAutoload(),
         ),
         'class' => $class,
         'id'    => $id,
@@ -154,9 +205,15 @@ final class DifferentialChangesetDetailView extends AphrontView {
             'class' => 'differential-file-icon-header'),
           array(
             $icon,
-            $display_filename)),
-        phutil_tag('div', array('style' => 'clear: both'), ''),
-        $this->renderChildren(),
+            $display_filename,
+          )),
+        javelin_tag(
+          'div',
+          array(
+            'class' => 'changeset-view-content',
+            'sigil' => 'changeset-view-content',
+          ),
+          $this->renderChildren()),
       ));
   }
 

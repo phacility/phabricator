@@ -8,6 +8,7 @@
  *           phuix-action-list-view
  *           phuix-action-view
  *           phabricator-phtize
+ *           changeset-view-manager
  */
 
 JX.behavior('differential-dropdown-menus', function(config) {
@@ -97,8 +98,24 @@ JX.behavior('differential-dropdown-menus', function(config) {
       });
     list.addItem(visible_item);
 
-    add_link('fa-files-o', pht('Browse in Diffusion'), data.diffusionURI);
+    add_link('fa-file-text', pht('Browse in Diffusion'), data.diffusionURI);
     add_link('fa-file-o', pht('View Standalone'), data.standaloneURI);
+
+    var up_item = new JX.PHUIXActionView()
+      .setHandler(function(e) {
+        var changeset = JX.DOM.findAbove(
+          button,
+          'div',
+          'differential-changeset');
+
+        var view = JX.ChangesetViewManager.getForNode(changeset);
+        view.reload();
+
+        e.prevent();
+        menu.close();
+      });
+    list.addItem(up_item);
+
     add_link('fa-arrow-left', pht('Show Raw File (Left)'), data.leftURI);
     add_link('fa-arrow-right', pht('Show Raw File (Right)'), data.rightURI);
     add_link('fa-pencil', pht('Open in Editor'), data.editor, true);
@@ -108,6 +125,12 @@ JX.behavior('differential-dropdown-menus', function(config) {
     menu.setContent(list.getNode());
 
     menu.listen('open', function() {
+      var changeset = JX.DOM.findAbove(
+        button,
+        'div',
+        'differential-changeset');
+
+      var view = JX.ChangesetViewManager.getForNode(changeset);
 
       // When the user opens the menu, check if there are any "Show More"
       // links in the changeset body. If there aren't, disable the "Show
@@ -132,8 +155,22 @@ JX.behavior('differential-dropdown-menus', function(config) {
           .setHandler(function(e) { e.prevent(); });
       }
 
-      visible_item.setDisabled(true);
-      visible_item.setName(pht("Can't Toggle Unloaded File"));
+      // TODO: This is temporary and just makes testing easier. It will do
+      // some mojo soon.
+      if (view.isLoaded()) {
+        up_item
+          .setIcon('fa-refresh')
+          .setName('Reload');
+      } else {
+        up_item
+          .setIcon('fa-refresh')
+          .setName('Load');
+      }
+
+      visible_item
+        .setDisabled(true)
+        .setIcon('fa-expand')
+        .setName(pht("Can't Toggle Unloaded File"));
       var diffs = JX.DOM.scry(
         JX.$(data.containerID),
         'table',

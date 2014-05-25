@@ -131,8 +131,9 @@ final class DifferentialChangesetListView extends AphrontView {
       ));
 
     $output = array();
-    $mapping = array();
+    $ids = array();
     foreach ($changesets as $key => $changeset) {
+
       $file = $changeset->getFilename();
       $class = 'differential-changeset';
       if (!$this->inlineURI) {
@@ -142,6 +143,9 @@ final class DifferentialChangesetListView extends AphrontView {
       $ref = $this->references[$key];
 
       $detail = new DifferentialChangesetDetailView();
+
+      $uniq_id = 'diff-'.$changeset->getAnchorName();
+      $detail->setID($uniq_id);
 
       $view_options = $this->renderViewOptionsDropdown(
         $detail,
@@ -153,22 +157,24 @@ final class DifferentialChangesetListView extends AphrontView {
       $detail->setSymbolIndex(idx($this->symbolIndexes, $key));
       $detail->setVsChangesetID(idx($this->vsMap, $changeset->getID()));
       $detail->setEditable(true);
+      $detail->setRenderingRef($ref);
+      $detail->setAutoload(isset($this->visibleChangesets[$key]));
 
-      $uniq_id = 'diff-'.$changeset->getAnchorName();
+      $detail->setRenderURI($this->renderURI);
+      $detail->setWhitespace($this->whitespace);
+
       if (isset($this->visibleChangesets[$key])) {
         $load = 'Loading...';
-        $mapping[$uniq_id] = $ref;
       } else {
         $load = javelin_tag(
           'a',
           array(
             'href' => '#'.$uniq_id,
+            'sigil' => 'differential-load',
             'meta' => array(
-              'id' => $uniq_id,
-              'ref' => $ref,
+              'id' => $detail->getID(),
               'kill' => true,
             ),
-            'sigil' => 'differential-load',
             'mustcapture' => true,
           ),
           pht('Load'));
@@ -181,14 +187,14 @@ final class DifferentialChangesetListView extends AphrontView {
           ),
           phutil_tag('div', array('class' => 'differential-loading'), $load)));
       $output[] = $detail->render();
+
+      $ids[] = $detail->getID();
     }
 
     $this->requireResource('aphront-tooltip-css');
 
     $this->initBehavior('differential-populate', array(
-      'registry'    => $mapping,
-      'whitespace'  => $this->whitespace,
-      'uri'         => $this->renderURI,
+      'changesetViewIDs' => $ids,
     ));
 
     $this->initBehavior('differential-show-more', array(
