@@ -57,7 +57,7 @@ abstract class DifferentialHunk extends DifferentialDAO
 
   final private function makeContent($include) {
     $results = array();
-    $lines = explode("\n", $this->changes);
+    $lines = explode("\n", $this->getChanges());
 
     // NOTE: To determine whether the recomposed file should have a trailing
     // newline, we look for a "\ No newline at end of file" line which appears
