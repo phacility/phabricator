@@ -51,6 +51,10 @@ div.phabricator-application-launch-container {
   text-decoration: none;
 }
 
+.device-phone .phabricator-application-launch-container {
+  border-bottom: 1px solid {$hovergrey};
+}
+
 .phabricator-application-launch-name {
   display: block;
   font-weight: bold;

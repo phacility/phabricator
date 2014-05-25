@@ -23,8 +23,8 @@
      element extend off the bottom of the screen to prevent this. */
   bottom: -480px;
   width: 204px;
-  background: rgba(205, 207, 211, 0.5);
-  border-right: 1px solid rgba(205, 207, 211, 1);
+  background: #dbdde0;
+  border-right: 1px solid {$hovergrey};
 }
 
 .phabricator-nav-column-background,
