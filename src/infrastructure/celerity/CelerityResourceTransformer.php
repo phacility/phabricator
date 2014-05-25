@@ -193,6 +193,7 @@ final class CelerityResourceTransformer {
       'lightviolet'   => '#ecdff1',
       'charcoal'      => '#4b4d51',
       'backdrop'      => '#c4cde0',
+      'hovergrey'     => '#c5cbcf',
 
       // Base Greys
       'lightgreyborder'     => '#C7CCD9',

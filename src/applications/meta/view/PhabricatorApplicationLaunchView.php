@@ -84,6 +84,11 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
           ),
           $counts[$warning]);
         }
+        if (nonempty($count1)) {
+          $numbers = array($count1, ' / ', $count2);
+        } else {
+          $numbers = array($count1, $count2);
+        }
 
         Javelin::initBehavior('phabricator-tooltips');
         $content[] = javelin_tag(
@@ -96,7 +101,7 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
             ),
             'class' => 'phabricator-application-launch-attention',
           ),
-          array($count1, $count2));
+          $numbers);
       }
 
       $classes = array();

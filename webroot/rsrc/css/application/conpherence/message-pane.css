@@ -7,7 +7,7 @@
 .loading .messages-loading-icon,
 .conpherence-layout .conpherence-no-threads {
   position: fixed;
-  left: 280px;
+  left: 240px;
   right: 241px;
   top: 76px;
   bottom: 0px;
@@ -47,12 +47,11 @@
 
 .conpherence-message-pane .conpherence-messages {
   position: fixed;
-  left: 280px;
+  left: 240px;
   right: 241px;
   top: 76px;
   bottom: 185px;
   overflow-y: auto;
-  box-shadow: inset 1px 4px 5px rgba(0,0,0,0.1);
   -webkit-overflow-scrolling: touch;
 }
 
@@ -81,7 +80,7 @@
   padding: 0;
   position: fixed;
   bottom: 0;
-  left: 280px;
+  left: 240px;
   right: 241px;
 }
 
@@ -196,7 +195,7 @@
 }
 .conpherence-message-pane .remarkup-assist-bar {
   border-width: 1px 0 0;
-  border-color: #CCC;
+  border-color: {$hovergrey};
   border-bottom: transparent;
 }
 

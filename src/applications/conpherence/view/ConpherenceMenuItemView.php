@@ -102,15 +102,6 @@ final class ConpherenceMenuItemView extends AphrontTagView {
         ),
         $this->subtitle);
     }
-    $epoch = null;
-    if ($this->epoch) {
-      $epoch = phutil_tag(
-        'span',
-        array(
-          'class' => 'conpherence-menu-item-date',
-        ),
-        phabricator_relative_date($this->epoch, $this->user));
-    }
     $unread_count = null;
     if ($this->unreadCount) {
       $unread_count = phutil_tag(
@@ -125,7 +116,6 @@ final class ConpherenceMenuItemView extends AphrontTagView {
       $image,
       $title,
       $subtitle,
-      $epoch,
       $unread_count,
     );
   }
