@@ -162,7 +162,7 @@ several sources:
 
 The first place where the setting is defined wins.
 
-Existing settings can be printed with `arc set-config --show`.
+Existing settings can be printed with `arc get-config`.
 
 == Next Steps ==
 
