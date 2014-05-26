@@ -554,7 +554,6 @@ final class CeleritySpriteGenerator {
       $colors = array(
         'light' => 'lb',
         'dark'  => 'dark',
-        'blue'  => 'blue',
       );
     } else {
       $scales = array(
@@ -570,7 +569,6 @@ final class CeleritySpriteGenerator {
       );
     }
 
-
     $apps = $this->getDirectoryList('apps_dark_1x');
 
     $template = id(new PhutilSprite())
@@ -581,10 +579,6 @@ final class CeleritySpriteGenerator {
       foreach ($colors as $color => $color_path) {
 
         $css = '.apps-'.$app.'-'.$color.$variant_short;
-        if ($color == 'blue' && $variant_name == 'apps-large') {
-          $css .= ', .phabricator-crumb-view:hover .apps-'.$app.'-dark-large';
-        }
-
         $sprite = id(clone $template)
           ->setName('apps-'.$app.'-'.$color.$variant_short)
           ->setTargetCSS($css);

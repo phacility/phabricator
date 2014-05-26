@@ -191,7 +191,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         $icon = $action->getIcon();
         if ($icon) {
           if ($action->getSelected()) {
-            $action->appendChild($this->renderMenuIcon($icon.'-blue-large'));
+            $action->appendChild($this->renderMenuIcon($icon.'-light-large'));
           } else {
             $action->appendChild($this->renderMenuIcon($icon.'-light-large'));
           }

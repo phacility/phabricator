@@ -83,7 +83,7 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
           ),
           $counts[$warning]);
         }
-        if (nonempty($count1)) {
+        if (nonempty($count1) && nonempty($count2)) {
           $numbers = array($count1, ' / ', $count2);
         } else {
           $numbers = array($count1, $count2);
