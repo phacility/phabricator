@@ -197,25 +197,25 @@
   background: #ffffff;
   word-wrap: break-word;
   overflow-y: auto;
-  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.5);
-  border: 2px solid #33393d;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  border: {$blueborder};
   border-radius: 3px;
   margin-left: 40px;
 }
 
 .phabricator-main-search-typeahead-result {
   display: block;
-  padding: 6px 12px 6px 46px;
-  background-position: 12px 9px;
-  background-size: 25px 25px;
+  padding: 6px 8px 8px 44px;
+  background-position: 8px;
+  background-size: 30px 30px;
   background-repeat: no-repeat;
 }
 
 .phabricator-main-search-typeahead-result .result-name {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: bold;
-  color: #333;
+  color: {$darkgreytext};
 }
 
 .phabricator-main-search-typeahead-result .result-type {
