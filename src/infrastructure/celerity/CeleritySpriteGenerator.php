@@ -145,6 +145,26 @@ final class CeleritySpriteGenerator {
         'y' => 24,
         'css' => '.menu-icon-new-blue',
       ),
+      'info-sm' => array(
+        'x' => 28,
+        'y' => 28,
+        'css' => '.menu-icon-info-sm',
+      ),
+      'logout-sm' => array(
+        'x' => 28,
+        'y' => 28,
+        'css' => '.menu-icon-logout-sm',
+      ),
+      'new-sm' => array(
+        'x' => 28,
+        'y' => 28,
+        'css' => '.menu-icon-new-sm',
+      ),
+      'settings-sm' => array(
+        'x' => 28,
+        'y' => 28,
+        'css' => '.menu-icon-settings-sm',
+      ),
       'app' => array(
         'x' => 24,
         'y' => 24,
@@ -532,6 +552,7 @@ final class CeleritySpriteGenerator {
       $scales = array(
         '1x' => 1,
         '2x' => 2,
+        '4x' => 4,
       );
       $variant_name = 'apps';
       $variant_short = '';
@@ -552,7 +573,6 @@ final class CeleritySpriteGenerator {
       $size_y = 28;
 
       $colors = array(
-        'light' => 'lb',
         'dark'  => 'dark',
       );
     } else {

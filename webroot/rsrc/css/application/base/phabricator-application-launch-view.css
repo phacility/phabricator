@@ -28,9 +28,9 @@ div.phabricator-application-launch-container {
   overflow: hidden;
   position: relative;
   text-decoration: none;
-  -webkit-font-smoothing: antialiased;
   width: 100%;
-  height: 46px;
+  height: 44px;
+  border-bottom: 1px solid {$hovergrey};
 }
 
 .device-phone div.phabricator-application-launch-container {
@@ -51,22 +51,18 @@ div.phabricator-application-launch-container {
   text-decoration: none;
 }
 
-.device-phone .phabricator-application-launch-container {
-  border-bottom: 1px solid {$hovergrey};
-}
-
 .phabricator-application-launch-name {
   display: block;
   font-weight: bold;
   color: {$darkbluetext};
   font-size: 13px;
-  margin-top: 7px;
+  margin-top: 6px;
   margin-left: 44px;
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.9);
 }
 
 .phabricator-application-launch-description {
-  color: {$darkbluetext};
+  color: {$bluetext};
   font-size: 11px;
   margin-top: 24px;
   margin-left: 44px;
@@ -83,7 +79,7 @@ div.phabricator-application-launch-container {
 
 .phabricator-application-launch-attention {
   position: absolute;
-  top: 17px;
+  top: 15px;
   right: 8px;
   color: {$darkbluetext};
   font-weight: bold;
