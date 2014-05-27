@@ -35,7 +35,6 @@ final class PhabricatorDashboardManageController
     $header = $this->buildHeaderView($dashboard);
     $actions = $this->buildActionView($dashboard);
     $properties = $this->buildPropertyView($dashboard);
-    $timeline = $this->buildTransactions($dashboard);
 
     $properties->setActionList($actions);
     $box = id(new PHUIObjectBoxView())
@@ -52,7 +51,6 @@ final class PhabricatorDashboardManageController
       array(
         $crumbs,
         $box,
-        $timeline,
         $rendered_dashboard,
       ),
       array(
@@ -111,6 +109,12 @@ final class PhabricatorDashboardManageController
       ->setHref($this->getApplicationURI($href_install))
       ->setWorkflow(true));
 
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('View History'))
+        ->setIcon('fa-history')
+        ->setHref($this->getApplicationURI("history/{$id}/")));
+
     return $actions;
   }
 
@@ -138,24 +142,4 @@ final class PhabricatorDashboardManageController
 
     return $properties;
   }
-
-  private function buildTransactions(PhabricatorDashboard $dashboard) {
-    $viewer = $this->getRequest()->getUser();
-
-    $xactions = id(new PhabricatorDashboardTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($dashboard->getPHID()))
-      ->execute();
-
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer);
-
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($dashboard->getPHID())
-      ->setTransactions($xactions);
-
-    return $timeline;
-  }
-
 }

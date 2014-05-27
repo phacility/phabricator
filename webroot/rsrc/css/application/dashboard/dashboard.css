@@ -2,6 +2,18 @@
  * @provides phabricator-dashboard-css
  */
 
+.dashboard-view {
+  margin: 16px;
+}
+
+.device-phone .dashboard-view {
+  margin: 8px;
+}
+
+.dashboard-panel + .dashboard-panel {
+  margin-top: 16px;
+}
+
 .device-desktop .aphront-multi-column-fluid .aphront-multi-column-2-up
 .aphront-multi-column-column-outer.half {
   width: 50%;
@@ -15,30 +27,6 @@
 .device-desktop .aphront-multi-column-fluid .aphront-multi-column-2-up
 .aphront-multi-column-column-outer.thirds {
   width: 66.66%;
-}
-
-.device-phone .aphront-multi-column-fluid
-.aphront-multi-column-column-outer
-.aphront-multi-column-column .dashboard-panel {
-  margin: 16px 8px;
-}
-
-.device-tablet .aphront-multi-column-fluid
-.aphront-multi-column-column-outer
-.aphront-multi-column-column .dashboard-panel {
-  margin: 16px 16px 0;
-}
-
-.aphront-multi-column-fluid
-.aphront-multi-column-column-outer
-.aphront-multi-column-column .dashboard-panel {
-  margin: 16px 0 0 16px;
-}
-
-.aphront-multi-column-fluid
-.aphront-multi-colum-column-outer-last
-.aphront-multi-column-column .dashboard-panel {
-  margin: 16px 16px 0 16px;
 }
 
 .aphront-multi-column-fluid

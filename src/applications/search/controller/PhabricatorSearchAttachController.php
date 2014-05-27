@@ -13,6 +13,7 @@ final class PhabricatorSearchAttachController
   const ACTION_ATTACH       = 'attach';
   const ACTION_MERGE        = 'merge';
   const ACTION_DEPENDENCIES = 'dependencies';
+  const ACTION_BLOCKS       = 'blocks';
   const ACTION_EDGE         = 'edge';
 
   public function willProcessRequest(array $data) {
@@ -47,6 +48,7 @@ final class PhabricatorSearchAttachController
     switch ($this->action) {
       case self::ACTION_EDGE:
       case self::ACTION_DEPENDENCIES:
+      case self::ACTION_BLOCKS:
       case self::ACTION_ATTACH:
         $edge_type = $this->getEdgeType($object_type, $attach_type);
         break;
@@ -258,6 +260,12 @@ final class PhabricatorSearchAttachController
         $dialog_title = "Edit Dependencies";
         $header_text = "Current Dependencies";
         $button_text = "Save Dependencies";
+        $instructions = null;
+        break;
+      case self::ACTION_BLOCKS:
+        $dialog_title = pht('Edit Blocking Tasks');
+        $header_text = pht('Current Blocking Tasks');
+        $button_text = pht('Save Blocking Tasks');
         $instructions = null;
         break;
     }

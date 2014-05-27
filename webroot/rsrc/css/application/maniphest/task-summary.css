@@ -93,26 +93,13 @@
 /* - Dashboards ------------------------------------------------------------ */
 
 .dashboard-panel .maniphest-list-container {
-  background: {$backdrop};
-  border-left: 1px solid {$lightblueborder};
-  border-right: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
-}
-
-.dashboard-panel .maniphest-list-container {
-  padding: 4px 4px 0 4px;
-}
-
-.dashboard-panel .maniphest-task-group-header {
-  font-size: 12px;
-  font-weight: normal;
-  color: {$bluetext};
-  padding: 4px 8px;
-  background: rgba(255,255,255,.5);
-  margin: 0 0 4px 0;
-  border-radius: 3px;
+  padding: 0;
 }
 
 .dashboard-panel .maniphest-task-group + .maniphest-task-group {
   padding-top: 0;
+}
+
+.dashboard-panel .maniphest-task-group-header {
+  display: none;
 }

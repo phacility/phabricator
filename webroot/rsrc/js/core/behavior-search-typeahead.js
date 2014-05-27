@@ -53,8 +53,9 @@ JX.behavior('phabricator-search-typeahead', function(config) {
     var type_priority = {
       'jump' : 1,
       'apps' : 2,
-      'user' : 3,
-      'symb' : 4
+      'proj' : 3,
+      'user' : 4,
+      'symb' : 5
     };
 
     var tokens = this.tokenize(value);

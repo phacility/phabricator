@@ -354,12 +354,40 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
+      '%s added %d blocking task(s): %s.' => array(
+        array(
+          '%s added a blocking task: %3$s.',
+          '%s added blocking tasks: %3$s.'
+        ),
+      ),
+
+      '%s added %d blocked task(s): %s.' => array(
+        array(
+          '%s added a blocked task: %3$s.',
+          '%s added blocked tasks: %3$s.'
+        )
+      ),
+
+      '%s removed %d blocking task(s): %s.' => array(
+        array(
+          '%s removed a blocking task: %3$s.',
+          '%s removed blocking tasks: %3$s.'
+        ),
+      ),
+
+      '%s removed %d blocked task(s): %s.' => array(
+        array(
+          '%s removed a blocked task: %3$s.',
+          '%s removed blocked tasks: %3$s.'
+        )
+      ),
+
       '%s edited answer(s), added %d: %s; removed %d: %s.' =>
         '%s edited answers, added: %3$s; removed: %5$s',
 
       '%s added %d answer(s): %s.' => array(
         array(
-          '%s added a answer: %3$s.',
+          '%s added an answer: %3$s.',
           '%s added answers: %3$s.',
         ),
       ),

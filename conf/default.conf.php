@@ -1035,6 +1035,7 @@ return array(
     // '@\\.([^.]+)\\.bak$@' => 1,
 
     '@\.arcconfig$@' => 'js',
+    '@\.arclint$@' => 'js',
     '@\.divinerconfig$@' => 'js',
   ),
 

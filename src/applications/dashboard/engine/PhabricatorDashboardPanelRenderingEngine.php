@@ -176,6 +176,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
     $content,
     $header = null,
     $id = null) {
+    require_celerity_resource('phabricator-dashboard-css');
 
     $panel = $this->getPanel();
     if (!$id) {
