@@ -77,6 +77,7 @@ final class PhabricatorSyntaxHighlightingConfigOptions
         'wild',
         array(
           '@\.arcconfig$@' => 'js',
+          '@\.arclint$@' => 'js',
           '@\.divinerconfig$@' => 'js',
         ))
         ->setSummary(
