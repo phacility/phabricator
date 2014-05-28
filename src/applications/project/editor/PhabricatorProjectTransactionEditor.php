@@ -305,8 +305,15 @@ final class PhabricatorProjectTransactionEditor
 
         $slug_xaction = last($xactions);
         $new = $slug_xaction->getNewValue();
-        $slugs_used_already = id(new PhabricatorProjectSlug())
-          ->loadAllWhere('slug IN (%Ls)', $new);
+
+        if ($new) {
+          $slugs_used_already = id(new PhabricatorProjectSlug())
+            ->loadAllWhere('slug IN (%Ls)', $new);
+        } else {
+          // The project doesn't have any extra slugs.
+          $slugs_used_already = array();
+        }
+
         $slugs_used_already = mgroup($slugs_used_already, 'getProjectPHID');
         foreach ($slugs_used_already as $project_phid => $used_slugs) {
           $used_slug_strs = mpull($used_slugs, 'getSlug');
