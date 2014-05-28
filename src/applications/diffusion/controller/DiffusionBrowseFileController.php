@@ -9,6 +9,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
   public function processRequest() {
     $request = $this->getRequest();
     $drequest = $this->getDiffusionRequest();
+    $viewer = $request->getUser();
 
     $before = $request->getStr('before');
     if ($before) {
@@ -17,7 +18,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     $path = $drequest->getPath();
 
-    $preferences = $request->getUser()->loadPreferences();
+    $preferences = $viewer->loadPreferences();
 
     $show_blame = $request->getBool(
       'blame',
@@ -31,7 +32,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
         true));
 
     $view = $request->getStr('view');
-    if ($request->isFormPost() && $view != 'raw') {
+    if ($request->isFormPost() && $view != 'raw' && $viewer->isLoggedIn()) {
       $preferences->setPreference(
         PhabricatorUserPreferences::PREFERENCE_DIFFUSION_BLAME,
         $show_blame);
@@ -354,7 +355,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
         ->setHref($base_uri->alter('blame', $blame_value))
         ->setIcon($blame_icon)
         ->setUser($viewer)
-        ->setRenderAsForm(true));
+        ->setRenderAsForm($viewer->isLoggedIn()));
 
     if ($show_color) {
       $highlight_text = pht('Disable Highlighting');
@@ -372,7 +373,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
         ->setHref($base_uri->alter('color', $highlight_value))
         ->setIcon($highlight_icon)
         ->setUser($viewer)
-        ->setRenderAsForm(true));
+        ->setRenderAsForm($viewer->isLoggedIn()));
 
     $href = null;
     if ($this->getRequest()->getStr('lint') !== null) {
