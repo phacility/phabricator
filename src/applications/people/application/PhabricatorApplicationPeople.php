@@ -22,10 +22,6 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
     return pht('Sort of a social utility.');
   }
 
-  public function getApplicationGroup() {
-    return self::GROUP_ORGANIZATION;
-  }
-
   public function canUninstall() {
     return false;
   }

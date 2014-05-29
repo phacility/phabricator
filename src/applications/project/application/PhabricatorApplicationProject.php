@@ -22,10 +22,6 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
     return pht('Group stuff into big piles.');
   }
 
-  public function getApplicationGroup() {
-    return self::GROUP_ORGANIZATION;
-  }
-
   public function getRemarkupRules() {
     return array(
       new ProjectRemarkupRule(),

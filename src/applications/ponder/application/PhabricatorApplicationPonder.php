@@ -37,10 +37,6 @@ final class PhabricatorApplicationPonder extends PhabricatorApplication {
     );
   }
 
-  public function getApplicationGroup() {
-    return self::GROUP_COMMUNICATION;
-  }
-
   public function isBeta() {
     return true;
   }

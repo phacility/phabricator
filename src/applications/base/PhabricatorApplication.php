@@ -12,12 +12,9 @@ abstract class PhabricatorApplication
   implements PhabricatorPolicyInterface {
 
   const GROUP_CORE            = 'core';
-  const GROUP_COMMUNICATION   = 'communication';
-  const GROUP_ORGANIZATION    = 'organization';
   const GROUP_UTILITIES       = 'util';
   const GROUP_ADMIN           = 'admin';
   const GROUP_DEVELOPER       = 'developer';
-  const GROUP_MISC            = 'misc';
 
   const TILE_INVISIBLE        = 'invisible';
   const TILE_HIDE             = 'hide';
@@ -27,12 +24,9 @@ abstract class PhabricatorApplication
   public static function getApplicationGroups() {
     return array(
       self::GROUP_CORE          => pht('Core Applications'),
-      self::GROUP_COMMUNICATION => pht('Communication'),
-      self::GROUP_ORGANIZATION  => pht('Organization'),
       self::GROUP_UTILITIES     => pht('Utilities'),
       self::GROUP_ADMIN         => pht('Administration'),
       self::GROUP_DEVELOPER     => pht('Developer Tools'),
-      self::GROUP_MISC          => pht('Miscellaneous Applications'),
     );
   }
 
@@ -147,7 +141,7 @@ abstract class PhabricatorApplication
   }
 
   public function getApplicationGroup() {
-    return self::GROUP_MISC;
+    return self::GROUP_CORE;
   }
 
   public function getTitleGlyph() {

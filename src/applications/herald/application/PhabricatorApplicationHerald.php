@@ -27,7 +27,7 @@ final class PhabricatorApplicationHerald extends PhabricatorApplication {
   }
 
   public function getApplicationGroup() {
-    return self::GROUP_ORGANIZATION;
+    return self::GROUP_UTILITIES;
   }
 
   public function getRemarkupRules() {

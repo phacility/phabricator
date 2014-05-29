@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conpherence
- */
 final class PhabricatorApplicationConpherence extends PhabricatorApplication {
 
   public function getBaseURI() {
@@ -19,10 +16,6 @@ final class PhabricatorApplicationConpherence extends PhabricatorApplication {
 
   public function getTitleGlyph() {
     return "\xE2\x9C\x86";
-  }
-
-  public function getApplicationGroup() {
-    return self::GROUP_COMMUNICATION;
   }
 
   public function getEventListeners() {

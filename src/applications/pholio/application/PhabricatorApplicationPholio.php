@@ -22,11 +22,6 @@ final class PhabricatorApplicationPholio extends PhabricatorApplication {
     return pht('Things before they were cool.');
   }
 
-  public function getApplicationGroup() {
-    // TODO: Move to CORE, this just keeps it out of the side menu.
-    return self::GROUP_COMMUNICATION;
-  }
-
   public function isBeta() {
     return true;
   }
