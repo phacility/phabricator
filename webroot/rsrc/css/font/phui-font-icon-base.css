@@ -108,7 +108,7 @@
   color: {$darkgreytext};
 }
 .phui-icon-view.bluegrey {
-  color: #7787a6;
+  color: {$bluetext};
 }
 .phui-icon-view.white {
   color: #fff;

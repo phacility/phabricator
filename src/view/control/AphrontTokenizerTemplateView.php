@@ -81,7 +81,7 @@ final class AphrontTokenizerTemplateView extends AphrontView {
         phutil_tag(
           'span',
           array(
-            'class' => 'phui-icon-view phui-font-fa bluegrey '.$icon,
+            'class' => 'phui-icon-view phui-font-fa bluetext '.$icon,
           )),
         $value);
     }

@@ -20,7 +20,7 @@
 .device-desktop .phui-side-menu
  .phui-list-item-selected.phui-list-item-href:hover {
   background-color: {$hovergrey};
-  border-left: 4px solid {$blue};
+  border-left: 4px solid {$sky};
 }
 
 .phabricator-side-menu .phui-list-item-selected .phui-list-item-href {
