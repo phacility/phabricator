@@ -26,10 +26,14 @@ final class PhabricatorDashboardViewController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Dashboard %d', $dashboard->getID()));
 
-    $rendered_dashboard = id(new PhabricatorDashboardRenderingEngine())
-      ->setViewer($viewer)
-      ->setDashboard($dashboard)
-      ->renderDashboard();
+    if ($dashboard->getPanelPHIDs()) {
+      $rendered_dashboard = id(new PhabricatorDashboardRenderingEngine())
+        ->setViewer($viewer)
+        ->setDashboard($dashboard)
+        ->renderDashboard();
+    } else {
+      $rendered_dashboard = $this->buildEmptyView();
+    }
 
     return $this->buildApplicationPage(
       array(
@@ -50,9 +54,24 @@ final class PhabricatorDashboardViewController
       id(new PHUIListItemView())
         ->setIcon('fa-th')
         ->setName(pht('Manage Dashboard'))
-        ->setHref($this->getApplicationURI()."manage/{$id}/"));
+        ->setHref($this->getApplicationURI("manage/{$id}/")));
 
     return $crumbs;
+  }
+
+  public function buildEmptyView() {
+    $id = $this->id;
+    $manage_uri = $this->getApplicationURI("manage/{$id}/");
+
+    return id(new AphrontErrorView())
+      ->setSeverity(AphrontErrorView::SEVERITY_NODATA)
+      ->appendChild(
+        pht('This dashboard has no panels '.
+          'yet. Use %s to add panels.',
+          phutil_tag(
+            'a',
+            array('href'=>$manage_uri),
+            pht('Manage Dashboard'))));
   }
 
 }

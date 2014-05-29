@@ -18,6 +18,10 @@ final class PhabricatorApplicationPaste extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
+  public function getShortDescription() {
+    return pht('Share Text Snippets');
+  }
+
   public function getRemarkupRules() {
     return array(
       new PhabricatorPasteRemarkupRule(),

@@ -14,7 +14,7 @@ final class PhabricatorApplicationRepositories extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return 'Track Repositories';
+    return pht('(Deprecated)');
   }
 
   public function getTitleGlyph() {

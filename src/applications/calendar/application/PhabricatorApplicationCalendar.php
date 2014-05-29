@@ -3,7 +3,7 @@
 final class PhabricatorApplicationCalendar extends PhabricatorApplication {
 
   public function getShortDescription() {
-    return pht('Dates and Stuff');
+    return pht('Upcoming Events');
   }
 
   public function getFlavorText() {

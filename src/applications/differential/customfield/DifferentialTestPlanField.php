@@ -44,7 +44,7 @@ final class DifferentialTestPlanField
   protected function getCoreFieldRequiredErrorString() {
     return pht(
       'You must provide a test plan. Describe the actions you performed '.
-      'to verify the behvaior of this change.');
+      'to verify the behavior of this change.');
   }
 
   public function readValueFromRequest(AphrontRequest $request) {

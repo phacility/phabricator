@@ -74,7 +74,7 @@ These options are supported, but their use is discouraged:
     solution to certificate validity problems, and is discouraged. Instead,
     use valid certificates.
 
-For a complete list of options, run `arc set-config --show`. Although all
+For a complete list of options, run `arc get-config`. Although all
 options can be set in `.arcconfig`, some options (like `editor`) usually do not
 make sense to set here because they're likely to vary from user to user.
 

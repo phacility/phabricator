@@ -42,6 +42,7 @@ final class PhabricatorSyntaxHighlightingConfigOptions
           'bash' => 'Bash Scripting',
           'brainfuck' => 'Brainf*ck',
           'c' => 'C',
+          'coffee-script' => 'CoffeeScript',
           'cpp' => 'C++',
           'css' => 'CSS',
           'd' => 'D',
@@ -49,15 +50,19 @@ final class PhabricatorSyntaxHighlightingConfigOptions
           'django' => 'Django Templating',
           'erb' => 'Embedded Ruby/ERB',
           'erlang' => 'Erlang',
+          'go' => 'Golang',
+          'groovy' => 'Groovy',
           'haskell' => 'Haskell',
           'html' => 'HTML',
           'invisible' => 'Invisible',
           'java' => 'Java',
           'js' => 'Javascript',
+          'json' => 'JSON',
           'mysql' => 'MySQL',
           'objc' => 'Objective-C',
           'perl' => 'Perl',
           'php' => 'PHP',
+          'puppet' => 'Puppet',
           'rest' => 'reStructuredText',
           'text' => 'Plain Text',
           'python' => 'Python',
@@ -65,6 +70,7 @@ final class PhabricatorSyntaxHighlightingConfigOptions
           'remarkup' => 'Remarkup',
           'ruby' => 'Ruby',
           'xml' => 'XML',
+          'yaml' => 'YAML',
         ))
         ->setSummary(
           pht("Set the language list which appears in dropdowns."))
@@ -77,6 +83,7 @@ final class PhabricatorSyntaxHighlightingConfigOptions
         'wild',
         array(
           '@\.arcconfig$@' => 'js',
+          '@\.arclint$@' => 'js',
           '@\.divinerconfig$@' => 'js',
         ))
         ->setSummary(

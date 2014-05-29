@@ -2,16 +2,16 @@
 
 final class PhabricatorApplicationAudit extends PhabricatorApplication {
 
-  public function getShortDescription() {
-    return pht('Audit Code');
-  }
-
   public function getBaseURI() {
     return '/audit/';
   }
 
   public function getIconName() {
     return 'audit';
+  }
+
+  public function getShortDescription() {
+    return pht('Browse and Audit Commits');
   }
 
   public function getHelpURI() {

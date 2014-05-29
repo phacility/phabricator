@@ -83,8 +83,6 @@ return array(
     'aphront-typeahead-control-css',
     'aphront-list-filter-view-css',
 
-    'phabricator-jump-nav',
-
     'phabricator-remarkup-css',
     'syntax-highlighting-css',
     'aphront-pager-view-css',

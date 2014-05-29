@@ -671,3 +671,54 @@
   border: none;
   border-bottom: 1px solid {$thinblueborder};
 }
+
+
+/* - Launcher List ---------------------------------------------------------- */
+
+.launcher-header {
+  margin: 8px 16px -4px;
+  clear: both;
+  color: {$darkbluetext};
+}
+
+.launcher-header:nth-of-type(1) {
+  margin-top: 24px;
+}
+
+.phui-object-item-launcher-list {
+  overflow: hidden;
+}
+
+.device-desktop .phui-object-item-launcher-list .phui-object-item {
+  width: 32.333%;
+  float: left;
+  margin-right: 1%;
+  box-sizing: border-box;
+}
+
+.phui-object-item-image-icon {
+  background: none;
+}
+
+.phui-object-item-image-icon {
+  width: 30px;
+  height: 30px;
+  margin: 4px 4px 4px 4px;
+  position: absolute;
+}
+
+.phui-object-item-image-icon .phui-icon-view {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  left: 6px;
+  top: 6px;
+}
+
+.phui-object-item-with-image-icon .phui-object-item-frame {
+  min-height: 48px;
+}
+
+.phui-object-item-with-image-icon .phui-object-item-content-box {
+  margin-left: 44px;
+}

@@ -992,6 +992,7 @@ return array(
     'bash' => 'Bash Scripting',
     'brainfuck' => 'Brainf*ck',
     'c' => 'C',
+    'coffee-script' => 'CoffeeScript',
     'cpp' => 'C++',
     'css' => 'CSS',
     'd' => 'D',
@@ -999,14 +1000,18 @@ return array(
     'django' => 'Django Templating',
     'erb' => 'Embedded Ruby/ERB',
     'erlang' => 'Erlang',
+    'go' => 'Golang',
+    'groovy' => 'Groovy',
     'haskell' => 'Haskell',
     'html' => 'HTML',
     'java' => 'Java',
     'js' => 'Javascript',
+    'json' => 'JSON',
     'mysql' => 'MySQL',
     'objc' => 'Objective-C',
     'perl' => 'Perl',
     'php' => 'PHP',
+    'puppet' => 'Puppet',
     'rest' => 'reStructuredText',
     'text' => 'Plain Text',
     'python' => 'Python',
@@ -1014,6 +1019,7 @@ return array(
     'remarkup' => 'Remarkup',
     'ruby' => 'Ruby',
     'xml' => 'XML',
+    'yaml' => 'YAML',
   ),
 
   // This is an override list of regular expressions which allows you to choose
@@ -1035,6 +1041,7 @@ return array(
     // '@\\.([^.]+)\\.bak$@' => 1,
 
     '@\.arcconfig$@' => 'js',
+    '@\.arclint$@' => 'js',
     '@\.divinerconfig$@' => 'js',
   ),
 

@@ -10,7 +10,7 @@ final class PhabricatorApplicationConpherence extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Messaging');
+    return pht('Send Messages');
   }
 
   public function getIconName() {
