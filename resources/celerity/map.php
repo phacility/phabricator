@@ -100,7 +100,6 @@ return array(
     'rsrc/css/application/releeph/releeph-request-differential-create-dialog.css' => '8d8b92cd',
     'rsrc/css/application/releeph/releeph-request-typeahead.css' => '667a48ae',
     'rsrc/css/application/search/search-results.css' => 'f240504c',
-    'rsrc/css/application/settings/settings.css' => 'ea8f5915',
     'rsrc/css/application/slowvote/slowvote.css' => '266df6a1',
     'rsrc/css/application/subscriptions/subscribers-list.css' => '5bb30c78',
     'rsrc/css/application/tokens/tokens.css' => '3d0f239e',
@@ -468,6 +467,7 @@ return array(
     'rsrc/js/core/behavior-phabricator-remarkup-assist.js' => 'c021950a',
     'rsrc/js/core/behavior-refresh-csrf.js' => '7814b593',
     'rsrc/js/core/behavior-remarkup-preview.js' => 'f7379f45',
+    'rsrc/js/core/behavior-reorder-applications.js' => 'a8e3795d',
     'rsrc/js/core/behavior-reveal-content.js' => '8f24abfc',
     'rsrc/js/core/behavior-search-typeahead.js' => '86549ee3',
     'rsrc/js/core/behavior-select-on-click.js' => '0e34ca02',
@@ -629,6 +629,7 @@ return array(
     'javelin-behavior-releeph-request-state-change' => 'd259e7c9',
     'javelin-behavior-releeph-request-typeahead' => 'cd9e7094',
     'javelin-behavior-remarkup-preview' => 'f7379f45',
+    'javelin-behavior-reorder-applications' => 'a8e3795d',
     'javelin-behavior-repository-crossreference' => '8ab282be',
     'javelin-behavior-search-reorder-queries' => '37871df4',
     'javelin-behavior-select-on-click' => '0e34ca02',
@@ -720,7 +721,6 @@ return array(
     'phabricator-project-tag-css' => '095c9404',
     'phabricator-remarkup-css' => '80c3a48c',
     'phabricator-search-results-css' => 'f240504c',
-    'phabricator-settings-css' => 'ea8f5915',
     'phabricator-shaped-request' => '7cbe244b',
     'phabricator-side-menu-view-css' => 'c1986b85',
     'phabricator-slowvote-css' => '266df6a1',
@@ -1611,6 +1611,14 @@ return array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
       2 => 'javelin-stratcom',
+    ),
+    'a8e3795d' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-workflow',
+      3 => 'javelin-dom',
+      4 => 'phabricator-draggable-list',
     ),
     'a9aaba0c' =>
     array(

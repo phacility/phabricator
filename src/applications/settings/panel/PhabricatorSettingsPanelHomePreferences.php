@@ -19,194 +19,179 @@ final class PhabricatorSettingsPanelHomePreferences
     $user = $request->getUser();
     $preferences = $user->loadPreferences();
 
-    require_celerity_resource('phabricator-settings-css');
-
     $apps = id(new PhabricatorApplicationQuery())
       ->setViewer($user)
       ->withInstalled(true)
       ->withUnlisted(false)
+      ->withLaunchable(true)
       ->execute();
 
-    $pref_tiles = PhabricatorUserPreferences::PREFERENCE_APP_TILES;
-    $tiles = $preferences->getPreference($pref_tiles, array());
+    $pinned = $preferences->getPinnedApplications($apps, $user);
 
-    if ($request->isFormPost()) {
-      $values = $request->getArr('tile');
+    $app_list = array();
+    foreach ($pinned as $app) {
+      if (isset($apps[$app])) {
+        $app_list[$app] = $apps[$app];
+      }
+    }
+
+    if ($request->getBool('add')) {
+      $options = array();
       foreach ($apps as $app) {
-        $key = get_class($app);
-        $value = idx($values, $key);
-        switch ($value) {
-          case PhabricatorApplication::TILE_FULL:
-          case PhabricatorApplication::TILE_SHOW:
-          case PhabricatorApplication::TILE_HIDE:
-            $tiles[$key] = $value;
-            break;
-          default:
-            unset($tiles[$key]);
-            break;
+        $options[get_class($app)] = $app->getName();
+      }
+      asort($options);
+
+      unset($options['PhabricatorApplicationApplications']);
+
+      if ($request->isFormPost()) {
+        $pin = $request->getStr('pin');
+        if (isset($options[$pin]) && !in_array($pin, $pinned)) {
+          $pinned[] = $pin;
+          $preferences->setPreference(
+            PhabricatorUserPreferences::PREFERENCE_APP_PINNED,
+            $pinned);
+          $preferences->save();
+
+          return id(new AphrontRedirectResponse())
+            ->setURI($this->getPanelURI());
         }
       }
-      $preferences->setPreference($pref_tiles, $tiles);
+
+      $options_control = id(new AphrontFormSelectControl())
+        ->setName('pin')
+        ->setLabel(pht('Application'))
+        ->setOptions($options)
+        ->setDisabledOptions(array_keys($app_list));
+
+      $form = id(new AphrontFormView())
+        ->setUser($user)
+        ->addHiddenInput('add', 'true')
+        ->appendRemarkupInstructions(
+          pht('Choose an application to pin to your home page.'))
+        ->appendChild($options_control);
+
+      $dialog = id(new AphrontDialogView())
+        ->setUser($user)
+        ->setWidth(AphrontDialogView::WIDTH_FORM)
+        ->setTitle(pht('Pin Application'))
+        ->appendChild($form->buildLayoutView())
+        ->addSubmitButton(pht('Pin Application'))
+        ->addCancelButton($this->getPanelURI());
+
+      return id(new AphrontDialogResponse())->setDialog($dialog);
+    }
+
+    $unpin = $request->getStr('unpin');
+    if ($unpin) {
+      $app = idx($apps, $unpin);
+      if ($app) {
+        if ($request->isFormPost()) {
+          $pinned = array_diff($pinned, array($unpin));
+          $preferences->setPreference(
+            PhabricatorUserPreferences::PREFERENCE_APP_PINNED,
+            $pinned);
+          $preferences->save();
+
+          return id(new AphrontRedirectResponse())
+            ->setURI($this->getPanelURI());
+        }
+
+        $dialog = id(new AphrontDialogView())
+          ->setUser($user)
+          ->setTitle(pht('Unpin Application'))
+          ->appendParagraph(
+            pht(
+              'Unpin the %s application from your home page?',
+              phutil_tag('strong', array(), $app->getName())))
+          ->addSubmitButton(pht('Unpin Application'))
+          ->addCanceLButton($this->getPanelURI());
+
+        return id(new AphrontDialogResponse())->setDialog($dialog);
+      }
+    }
+
+    $order = $request->getStrList('order');
+    if ($order && $request->validateCSRF()) {
+      $preferences->setPreference(
+        PhabricatorUserPreferences::PREFERENCE_APP_PINNED,
+        $order);
       $preferences->save();
 
       return id(new AphrontRedirectResponse())
-        ->setURI($this->getPanelURI('?saved=true'));
+        ->setURI($this->getPanelURI());
     }
 
-    $form = id(new AphrontFormView())
-      ->setUser($user);
+    $list_id = celerity_generate_unique_node_id();
 
-    $group_map = PhabricatorApplication::getApplicationGroups();
+    $list = id(new PHUIObjectItemListView())
+      ->setUser($user)
+      ->setID($list_id)
+      ->setFlush(true);
 
-    $output = array();
+    Javelin::initBehavior(
+      'reorder-applications',
+      array(
+        'listID' => $list_id,
+        'panelURI' => $this->getPanelURI(),
+      ));
 
-    $app_groups = mgroup($apps, 'getApplicationGroup');
-    $app_groups = array_select_keys($app_groups, array_keys($group_map));
-
-    foreach ($app_groups as $group => $apps) {
-      $group_name = $group_map[$group];
-      $rows = array();
-
-      foreach ($apps as $app) {
-        if (!$app->shouldAppearInLaunchView()) {
-          continue;
-        }
-
-        $default = $app->getDefaultTileDisplay($user);
-        if ($default == PhabricatorApplication::TILE_INVISIBLE) {
-          continue;
-        }
-
-        $default_name = PhabricatorApplication::getTileDisplayName($default);
-
-        $hide = PhabricatorApplication::TILE_HIDE;
-        $show = PhabricatorApplication::TILE_SHOW;
-        $full = PhabricatorApplication::TILE_FULL;
-
-        $key = get_class($app);
-
-        $default_radio_button_status =
-          (idx($tiles, $key, 'default') == 'default') ? 'checked' : null;
-
-        $hide_radio_button_status =
-          (idx($tiles, $key, 'default') == $hide) ? 'checked' : null;
-
-        $show_radio_button_status =
-          (idx($tiles, $key, 'default') == $show) ? 'checked' : null;
-
-        $full_radio_button_status =
-          (idx($tiles, $key, 'default') == $full) ? 'checked' : null;
-
-
-        $default_radio_button = phutil_tag(
-          'input',
-          array(
-            'type' => 'radio',
-            'name' => 'tile['.$key.']',
-            'value' => 'default',
-            'checked' => $default_radio_button_status,
-          ));
-
-        $hide_radio_button = phutil_tag(
-          'input',
-          array(
-            'type' => 'radio',
-            'name' => 'tile['.$key.']',
-            'value' => $hide,
-            'checked' => $hide_radio_button_status,
-          ));
-
-        $show_radio_button = phutil_tag(
-          'input',
-          array(
-            'type' => 'radio',
-            'name' => 'tile['.$key.']',
-            'value' => $show,
-            'checked' => $show_radio_button_status,
-          ));
-
-        $full_radio_button = phutil_tag(
-          'input',
-          array(
-            'type' => 'radio',
-            'name' => 'tile['.$key.']',
-            'value' => $full,
-            'checked' => $full_radio_button_status,
-          ));
-
-        $desc = $app->getShortDescription();
-        $app_column = hsprintf(
-                        "<strong>%s</strong><br/ >%s, <em>Default: %s</em>",
-                        $app->getName(), $desc, $default_name);
-
-        $rows[] = array(
-          $app_column,
-          $default_radio_button,
-          $hide_radio_button,
-          $show_radio_button,
-          $full_radio_button,
-          );
-      }
-
-      if (empty($rows)) {
+    foreach ($app_list as $key => $application) {
+      if ($key == 'PhabricatorApplicationApplications') {
         continue;
       }
 
-      $table = new AphrontTableView($rows);
+      $icon = $application->getIconName();
+      if (!$icon) {
+        $icon = 'application';
+      }
 
-      $table
-        ->setClassName('phabricator-settings-homepagetable')
-        ->setHeaders(
-          array(
-            pht('Applications'),
-            pht('Default'),
-            pht('Hidden'),
-            pht('Small'),
-            pht('Large'),
-            ))
-        ->setColumnClasses(
-          array(
-            '',
-            'fixed',
-            'fixed',
-            'fixed',
-            'fixed',
-          ));
+      $icon_view = javelin_tag(
+        'span',
+        array(
+          'class' => 'phui-icon-view '.
+                     'sprite-apps-large apps-'.$icon.'-dark-large',
+          'aural' => false,
+        ),
+        '');
 
+      $item = id(new PHUIObjectItemView())
+        ->setHeader($application->getName())
+        ->setImageIcon($icon_view)
+        ->addAttribute($application->getShortDescription())
+        ->setGrippable(true);
 
-      $panel = id(new PHUIObjectBoxView())
-        ->setHeaderText($group_name)
-        ->appendChild($table);
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setIcon('fa-times')
+          ->setHref($this->getPanelURI().'?unpin='.$key)
+          ->setWorkflow(true));
 
-      $output[] = $panel;
-    }
+      $item->addSigil('pinned-application');
+      $item->setMetadata(
+        array(
+          'applicationClass' => $key,
+        ));
 
-    $save_button =
-      id(new AphrontFormSubmitControl())
-        ->setValue(pht('Save Preferences'));
-
-    $output[] = id(new PHUIBoxView())
-      ->addPadding(PHUI::PADDING_LARGE)
-      ->addClass('phabricator-settings-homepagetable-button')
-      ->appendChild($save_button);
-
-    $form->appendChild($output);
-
-    $error_view = null;
-    if ($request->getStr('saved') === 'true') {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Preferences Saved'))
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setErrors(array(pht('Your preferences have been saved.')));
+      $list->addItem($item);
     }
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Home Page Preferences'));
+      ->setHeader(pht('Pinned Applications'))
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setText(pht('Pin Application'))
+          ->setHref($this->getPanelURI().'?add=true')
+          ->setWorkflow(true)
+          ->setIcon(
+            id(new PHUIIconView())
+              ->setIconFont('fa-thumb-tack')));
 
-    $form = id(new PHUIBoxView())
-      ->addClass('phabricator-settings-homepagetable-wrap')
-      ->appendChild($form);
+    $box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($list);
 
-    return array($header, $error_view, $form);
+    return $box;
   }
 }
