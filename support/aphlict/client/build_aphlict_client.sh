@@ -15,7 +15,6 @@ $MXMLC \
   -default-background-color=0x444444 \
   -default-size=500,500 \
   -warnings=true \
-  -debug=true \
   -source-path=$ROOT/externals/vegas/src \
   -static-link-runtime-shared-libraries=true \
   $BASEDIR/src/AphlictClient.as
