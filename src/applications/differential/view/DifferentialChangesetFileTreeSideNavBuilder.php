@@ -90,19 +90,14 @@ final class DifferentialChangesetFileTreeSideNavBuilder {
       if ($data) {
         $href = '#'.$data->getAnchorName();
         $title = $name;
-        $icon = 'phabricator-filetree-icon-file';
+        $icon = id(new PHUIIconView())
+          ->setIconFont('fa-file-text-o bluetext');
       } else {
         $name .= '/';
         $title = $path->getFullPath().'/';
-        $icon = 'phabricator-filetree-icon-dir';
+        $icon = id(new PHUIIconView())
+          ->setIconFont('fa-folder-open blue');
       }
-
-      $icon = phutil_tag(
-        'span',
-        array(
-          'class' => 'phabricator-filetree-icon '.$icon,
-        ),
-        '');
 
       $name_element = phutil_tag(
         'span',

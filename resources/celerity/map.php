@@ -7,7 +7,7 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => 'c94a698c',
+    'core.pkg.css' => 'c6ff1a89',
     'core.pkg.js' => '7db41c19',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => 'fbf57382',
@@ -115,7 +115,7 @@ return array(
     'rsrc/css/layout/phabricator-action-header-view.css' => '33a4590a',
     'rsrc/css/layout/phabricator-action-list-view.css' => 'dcbfc854',
     'rsrc/css/layout/phabricator-crumbs-view.css' => '989a48b6',
-    'rsrc/css/layout/phabricator-filetree-view.css' => 'a8c86ace',
+    'rsrc/css/layout/phabricator-filetree-view.css' => 'fccf9f82',
     'rsrc/css/layout/phabricator-hovercard-view.css' => '46a13cf0',
     'rsrc/css/layout/phabricator-side-menu-view.css' => 'c1986b85',
     'rsrc/css/layout/phabricator-source-code-view.css' => '62a99814',
@@ -703,7 +703,7 @@ return array(
     'phabricator-fatal-config-template-css' => '25d446d6',
     'phabricator-feed-css' => 'dd43ce00',
     'phabricator-file-upload' => 'a4ae61bf',
-    'phabricator-filetree-view-css' => 'a8c86ace',
+    'phabricator-filetree-view-css' => 'fccf9f82',
     'phabricator-flag-css' => '5337623f',
     'phabricator-hovercard' => '4f344388',
     'phabricator-hovercard-view-css' => '46a13cf0',
