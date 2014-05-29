@@ -11,7 +11,7 @@ final class PhabricatorApplicationCountdown extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Countdown Timers');
+    return pht('Countdown to Events');
   }
 
   public function getTitleGlyph() {

@@ -36,7 +36,7 @@ final class PhabricatorApplicationDiviner extends PhabricatorApplication {
   }
 
   public function getApplicationGroup() {
-    return self::GROUP_COMMUNICATION;
+    return self::GROUP_UTILITIES;
   }
 
   public function getRemarkupRules() {

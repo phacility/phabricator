@@ -2,12 +2,12 @@
 
 final class PhabricatorApplicationMetaMTA extends PhabricatorApplication {
 
-  public function getBaseURI() {
-    return '/mail/';
-  }
-
   public function getIconName() {
     return 'metamta';
+  }
+
+  public function getShortDescription() {
+    return pht('Delivers Mail');
   }
 
   public function getFlavorText() {

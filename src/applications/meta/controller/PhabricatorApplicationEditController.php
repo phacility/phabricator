@@ -1,9 +1,13 @@
 <?php
 
 final class PhabricatorApplicationEditController
-  extends PhabricatorApplicationsController{
+  extends PhabricatorApplicationsController {
 
   private $application;
+
+  public function shouldRequireAdmin() {
+    return true;
+  }
 
   public function willProcessRequest(array $data) {
     $this->application = $data['application'];

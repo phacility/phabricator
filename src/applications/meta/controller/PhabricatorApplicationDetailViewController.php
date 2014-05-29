@@ -1,9 +1,13 @@
 <?php
 
 final class PhabricatorApplicationDetailViewController
-  extends PhabricatorApplicationsController{
+  extends PhabricatorApplicationsController {
 
   private $application;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
 
   public function willProcessRequest(array $data) {
     $this->application = $data['application'];
@@ -61,14 +65,35 @@ final class PhabricatorApplicationDetailViewController
 
     $viewer = $this->getRequest()->getUser();
 
-    $properties = id(new PHUIPropertyListView())
-      ->addProperty(pht('Description'), $application->getShortDescription());
+    $properties = id(new PHUIPropertyListView());
     $properties->setActionList($actions);
+
+    $properties->addProperty(
+      pht('Description'),
+      $application->getShortDescription());
+
+    if ($application->getFlavorText()) {
+      $properties->addProperty(
+        null,
+        phutil_tag('em', array(), $application->getFlavorText()));
+    }
 
     if ($application->isBeta()) {
       $properties->addProperty(
         pht('Release'),
         pht('Beta'));
+    }
+
+    $overview = $application->getOverview();
+    if ($overview) {
+      $properties->addSectionHeader(
+        pht('Overview'),
+        PHUIPropertyListView::ICON_SUMMARY);
+      $properties->addTextContent(
+        PhabricatorMarkupEngine::renderOneObject(
+          id(new PhabricatorMarkupOneOff())->setContent($overview),
+          'default',
+          $viewer));
     }
 
     $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
@@ -93,6 +118,14 @@ final class PhabricatorApplicationDetailViewController
     $view = id(new PhabricatorActionListView())
       ->setUser($user)
       ->setObjectURI($this->getRequest()->getRequestURI());
+
+    if ($selected->getHelpURI()) {
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Help / Documentation'))
+          ->setIcon('fa-life-ring')
+          ->setHref($selected->getHelpURI()));
+    }
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $user,

@@ -3,7 +3,7 @@
 final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
 
   public function getShortDescription() {
-    return pht('Repository Browser');
+    return pht('Host and Browse Repositories');
   }
 
   public function getBaseURI() {

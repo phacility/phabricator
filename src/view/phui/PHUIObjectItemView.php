@@ -21,6 +21,7 @@ final class PHUIObjectItemView extends AphrontTagView {
   private $imageURI;
   private $state;
   private $fontIcon;
+  private $imageIcon;
 
   const AGE_FRESH = 'fresh';
   const AGE_STALE = 'stale';
@@ -113,6 +114,15 @@ final class PHUIObjectItemView extends AphrontTagView {
 
   public function getImageURI() {
     return $this->imageURI;
+  }
+
+  public function setImageIcon($image_icon) {
+    $this->imageIcon = $image_icon;
+    return $this;
+  }
+
+  public function getImageIcon() {
+    return $this->imageIcon;
   }
 
   public function setState($state) {
@@ -286,6 +296,10 @@ final class PHUIObjectItemView extends AphrontTagView {
 
     if ($this->getImageURI()) {
       $item_classes[] = 'phui-object-item-with-image';
+    }
+
+    if ($this->getImageIcon()) {
+      $item_classes[] = 'phui-object-item-with-image-icon';
     }
 
     if ($this->fontIcon) {
@@ -520,6 +534,22 @@ final class PHUIObjectItemView extends AphrontTagView {
           'style' => 'background-image: url('.$this->getImageURI().')',
         ),
         '');
+    } else if ($this->getImageIcon()) {
+      $image = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-object-item-image-icon',
+        ),
+        $this->getImageIcon());
+    }
+
+    if ($image && $this->href) {
+      $image = phutil_tag(
+        'a',
+        array(
+          'href' => $this->href,
+        ),
+        $image);
     }
 
     $ficon = null;

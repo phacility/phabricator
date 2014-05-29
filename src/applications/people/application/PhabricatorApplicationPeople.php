@@ -3,7 +3,7 @@
 final class PhabricatorApplicationPeople extends PhabricatorApplication {
 
   public function getShortDescription() {
-    return pht('User Accounts');
+    return pht('User Accounts and Profiles');
   }
 
   public function getBaseURI() {

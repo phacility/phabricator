@@ -3,7 +3,7 @@
 final class PhabricatorApplicationPhrequent extends PhabricatorApplication {
 
   public function getShortDescription() {
-    return pht('Track Time');
+    return pht('Track Time Spent');
   }
 
   public function getBaseURI() {
@@ -19,7 +19,7 @@ final class PhabricatorApplicationPhrequent extends PhabricatorApplication {
   }
 
   public function getApplicationGroup() {
-    return self::GROUP_ORGANIZATION;
+    return self::GROUP_UTILITIES;
   }
 
   public function getApplicationOrder() {

@@ -2,10 +2,6 @@
 
 abstract class PhabricatorApplicationsController extends PhabricatorController {
 
-  public function shouldRequireAdmin() {
-    return true;
-  }
-
   public function buildSideNavView($for_app = false) {
     $user = $this->getRequest()->getUser();
 

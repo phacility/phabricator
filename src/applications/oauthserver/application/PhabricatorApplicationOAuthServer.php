@@ -7,7 +7,7 @@ final class PhabricatorApplicationOAuthServer extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('OAuth Provider');
+    return pht('OAuth Login Provider');
   }
 
   public function getIconName() {
@@ -23,11 +23,15 @@ final class PhabricatorApplicationOAuthServer extends PhabricatorApplication {
   }
 
   public function getApplicationGroup() {
-    return self::GROUP_UTILITIES;
+    return self::GROUP_ADMIN;
   }
 
   public function isBeta() {
     return true;
+  }
+
+  public function getHelpURI() {
+    return PhabricatorEnv::getDoclink('Using the Phabricator OAuth Server');
   }
 
   public function getRoutes() {

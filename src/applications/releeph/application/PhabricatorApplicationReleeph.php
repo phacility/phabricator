@@ -7,7 +7,7 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Release Branches');
+    return pht('Pull Requests');
   }
 
   public function getBaseURI() {

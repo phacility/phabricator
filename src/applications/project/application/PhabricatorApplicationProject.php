@@ -7,7 +7,7 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Organize Work');
+    return pht('Create Groups, Tags, and Projects');
   }
 
   public function getBaseURI() {

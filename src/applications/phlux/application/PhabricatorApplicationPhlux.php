@@ -7,7 +7,7 @@ final class PhabricatorApplicationPhlux extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Configuration Store');
+    return pht('Key/Value Configuration Store');
   }
 
   public function getIconName() {

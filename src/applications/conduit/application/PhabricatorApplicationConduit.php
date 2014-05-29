@@ -19,7 +19,7 @@ final class PhabricatorApplicationConduit extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return 'Conduit API Console';
+    return pht('Phabricator Developer API Console');
   }
 
   public function getTitleGlyph() {

@@ -7,7 +7,7 @@ final class PhabricatorApplicationDashboard extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Such Data');
+    return pht('Create Custom Pages');
   }
 
   public function getIconName() {

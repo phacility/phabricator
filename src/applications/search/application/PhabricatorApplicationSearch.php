@@ -11,7 +11,7 @@ final class PhabricatorApplicationSearch extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Search & Find');
+    return pht('Full-Text Search');
   }
 
   public function getFlavorText() {
