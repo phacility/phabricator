@@ -12,8 +12,6 @@ set -e
 
 $MXMLC \
   -output=$ROOT/webroot/rsrc/swf/aphlict.swf \
-  -default-background-color=0x444444 \
-  -default-size=500,500 \
   -warnings=true \
   -source-path=$ROOT/externals/vegas/src \
   -static-link-runtime-shared-libraries=true \
