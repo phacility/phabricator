@@ -63,6 +63,10 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 }
 
 .menu-icon-settings-sm {
+  background-position: -87px -90px;
+}
+
+.menu-icon-power {
   background-position: -60px -119px;
 }
 

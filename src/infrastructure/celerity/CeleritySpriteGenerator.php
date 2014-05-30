@@ -165,6 +165,11 @@ final class CeleritySpriteGenerator {
         'y' => 28,
         'css' => '.menu-icon-settings-sm',
       ),
+      'power' => array(
+        'x' => 28,
+        'y' => 28,
+        'css' => '.menu-icon-power',
+      ),
       'app' => array(
         'x' => 24,
         'y' => 24,
