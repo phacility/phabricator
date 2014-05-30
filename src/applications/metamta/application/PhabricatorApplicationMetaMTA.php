@@ -32,7 +32,7 @@ final class PhabricatorApplicationMetaMTA extends PhabricatorApplication {
 
   public function getRoutes() {
     return array(
-      $this->getBaseURI() => array(
+      '/mail/' => array(
         'sendgrid/' => 'PhabricatorMetaMTASendGridReceiveController',
         'mailgun/' => 'PhabricatorMetaMTAMailgunReceiveController',
       ),
