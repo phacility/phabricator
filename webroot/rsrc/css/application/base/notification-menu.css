@@ -52,6 +52,11 @@
   background: {$hoverblue};
 }
 
+.device-desktop .phabricator-notification-menu
+ .phabricator-notification-unread.phabricator-notification:hover {
+  background: {$hoverselectedblue};
+}
+
 .phabricator-notification + .phabricator-notification {
   border-top: 1px solid {$hoverborder};
 }

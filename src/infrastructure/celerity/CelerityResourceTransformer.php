@@ -196,6 +196,8 @@ final class CelerityResourceTransformer {
       'hovergrey'     => '#c5cbcf',
       'hoverblue'     => '#eceff5',
       'hoverborder'   => '#dfe1e9',
+      'hoverselectedgrey' => '#bbc4ca',
+      'hoverselectedblue' => '#e6e9ee',
 
       // Base Greys
       'lightgreyborder'     => '#C7CCD9',

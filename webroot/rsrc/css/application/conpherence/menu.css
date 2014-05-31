@@ -102,6 +102,11 @@
   border-left: 4px solid {$sky};
 }
 
+.device-desktop .conpherence-menu
+ .conpherence-selected.conpherence-menu-item-view:hover {
+  background-color: {$hoverselectedgrey};
+}
+
 .conpherence-menu .loading {
   font-style: italic;
 }
