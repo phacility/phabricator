@@ -48,6 +48,22 @@
   color: {$darkgreytext};
 }
 
+.phabricator-action-header.gradient-green-header {
+  background: {$green};
+}
+
+.phabricator-action-header.gradient-blue-header {
+  background: {$blue};
+}
+
+.phabricator-action-header.gradient-yellow-header {
+  background: {$yellow};
+}
+
+.phabricator-action-header.gradient-red-header {
+  background: {$red};
+}
+
 .gradient-green-header .phabricator-action-header-title,
 .gradient-red-header .phabricator-action-header-title,
 .gradient-blue-header .phabricator-action-header-title,
@@ -57,6 +73,7 @@
 .gradient-blue-header .phabricator-action-header-link,
 .gradient-yellow-header .phabricator-action-header-link {
   color: #fff;
+  -webkit-font-smoothing: antialiased;
 }
 
 .phabricator-action-header-icon-list .phui-tag-view {

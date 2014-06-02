@@ -8,10 +8,7 @@
 
 .phabricator-hovercard-wrapper {
   float: left;
-  border-radius: 5px;
   width: 400px;
-  padding: 6px;
-  background-color: rgba(0,0,0,.2);
 }
 
 .device-phone .phabricator-hovercard-wrapper {
@@ -22,7 +19,10 @@
 .phabricator-hovercard-container {
   float: left;
   width: 100%;
-  border: 1px solid {$greytext};
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  border: 1px solid {$blueborder};
+  border-radius: 3px;
+  background-color: #fff;
 }
 
 .phabricator-hovercard-tags {
@@ -33,19 +33,20 @@
 .phabricator-hovercard-body {
   float: left;
   width: 100%;
-  padding: 8px 0px 8px 0px;
-  background-color: white;
+  padding: 12px 0;
   color: {$darkgreytext};
+  border-bottom-right-radius: 3px;
+  border-bottom-left-radius: 3px;
 }
 
 .phabricator-hovercard-body-header,
 .phabricator-hovercard-body-item {
-  margin: 0px 0px 0px 8px;
+  margin: 0 0 0 8px;
 }
 
 .phabricator-hovercard-body-header {
-  font-size: 13px;
-  padding-bottom: 2px;
+  font-size: 14px;
+  padding-bottom: 4px;
   color: {$darkgreytext};
 }
 

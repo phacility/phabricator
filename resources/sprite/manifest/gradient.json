@@ -1,25 +1,10 @@
 {
   "version" : 1,
   "sprites" : {
-    "gradient-blue-header"      : {
-      "name" : "gradient-blue-header",
-      "rule" : ".gradient-blue-header",
-      "hash" : "bcfc1d3e93ea8585af5b5ca52b08e944"
-    },
-    "gradient-breadcrumbs"      : {
-      "name" : "gradient-breadcrumbs",
-      "rule" : ".gradient-breadcrumbs",
-      "hash" : "ed46fe9544216513a3958900c688a808"
-    },
     "gradient-dark-grey-header" : {
       "name" : "gradient-dark-grey-header",
       "rule" : ".gradient-dark-grey-header",
       "hash" : "e8762dd2849410a7e4fba8f972f946ff"
-    },
-    "gradient-green-header"     : {
-      "name" : "gradient-green-header",
-      "rule" : ".gradient-green-header",
-      "hash" : "848b563e846e187b688e899a9d838e40"
     },
     "gradient-grey-header"      : {
       "name" : "gradient-grey-header",
@@ -30,16 +15,6 @@
       "name" : "gradient-lightblue-header",
       "rule" : ".gradient-lightblue-header",
       "hash" : "e7753a6ce63c6822a559266eef9e255b"
-    },
-    "gradient-red-header"       : {
-      "name" : "gradient-red-header",
-      "rule" : ".gradient-red-header",
-      "hash" : "070a2e01f611bfaf5207be25eebdd6f2"
-    },
-    "gradient-yellow-header"    : {
-      "name" : "gradient-yellow-header",
-      "rule" : ".gradient-yellow-header",
-      "hash" : "166ee67c5201416cfa598c1eb86bf92a"
     }
   },
   "scales"  : [

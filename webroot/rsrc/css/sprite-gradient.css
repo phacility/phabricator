@@ -11,34 +11,14 @@
 
 
 
-.gradient-blue-header {
-  background-position: 0px -32px;
-}
-
-.gradient-breadcrumbs {
+.gradient-dark-grey-header {
   background-position: 0px 0px;
 }
 
-.gradient-dark-grey-header {
-  background-position: 0px -103px;
-}
-
-.gradient-green-header {
-  background-position: 0px -174px;
-}
-
 .gradient-grey-header {
-  background-position: 0px -245px;
+  background-position: 0px -71px;
 }
 
 .gradient-lightblue-header {
-  background-position: 0px -458px;
-}
-
-.gradient-red-header {
-  background-position: 0px -316px;
-}
-
-.gradient-yellow-header {
-  background-position: 0px -387px;
+  background-position: 0px -142px;
 }
