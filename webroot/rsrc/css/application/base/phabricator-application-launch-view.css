@@ -64,9 +64,13 @@ div.phabricator-application-launch-container {
 .phabricator-application-launch-description {
   color: {$bluetext};
   font-size: 11px;
-  margin-top: 24px;
   margin-left: 44px;
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.9);
+  text-overflow: ellipsis;
+  width: 150px;
+  overflow: hidden;
+  white-space: nowrap;
+  display: inline-block;
 }
 
 .phabricator-application-beta {
