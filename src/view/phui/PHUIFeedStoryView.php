@@ -142,7 +142,6 @@ final class PHUIFeedStoryView extends AphrontView {
 
     require_celerity_resource('phui-feed-story-css');
     Javelin::initBehavior('phabricator-hovercards');
-    $oneline = !$this->hasChildren();
 
     $body = null;
     $foot = null;
@@ -186,18 +185,6 @@ final class PHUIFeedStoryView extends AphrontView {
       $icon->setSpriteSheet(PHUIIconView::SPRITE_APPS);
     }
 
-    $ol_foot = null;
-    if ($oneline) {
-      $ol_foot = phutil_tag(
-        'div',
-          array(
-            'class' => 'phui-feed-story-oneline-foot'
-          ),
-          array(
-            $icon,
-            $foot));
-    }
-
     $action_list = array();
     $icons = null;
     foreach ($this->actions as $action) {
@@ -223,10 +210,9 @@ final class PHUIFeedStoryView extends AphrontView {
         'class' => 'phui-feed-story-head',
       ),
       array(
-        (!$oneline ? $actor : null),
+        $actor,
         nonempty($this->title, pht('Untitled Story')),
         $icons,
-        $ol_foot
       ));
 
     if (!empty($this->tokenBar)) {
@@ -249,23 +235,16 @@ final class PHUIFeedStoryView extends AphrontView {
         $body_content);
     }
 
-    if ($oneline) {
-      $foot = null;
-    } else {
-      $foot = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-feed-story-foot',
-        ),
-        array(
-          $icon,
-          $foot));
-    }
+    $foot = phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-feed-story-foot',
+      ),
+      array(
+        $icon,
+        $foot));
 
     $classes = array('phui-feed-story');
-    if ($oneline) {
-      $classes[] = 'phui-feed-story-oneline';
-    }
 
     return id(new PHUIBoxView())
       ->addClass(implode(' ', $classes))
@@ -281,6 +260,15 @@ final class PHUIFeedStoryView extends AphrontView {
         break;
       case PhabricatorMacroPHIDTypeMacro::TYPECONST:
         $this->setAppIcon("macro-dark");
+        break;
+      case ManiphestPHIDTypeTask::TYPECONST:
+        $this->setAppIcon('maniphest-dark');
+        break;
+      case DifferentialPHIDTypeRevision::TYPECONST:
+        $this->setAppIcon('differential-dark');
+        break;
+      case PhabricatorCalendarPHIDTypeEvent::TYPECONST:
+        $this->setAppIcon('calendar-dark');
         break;
     }
   }

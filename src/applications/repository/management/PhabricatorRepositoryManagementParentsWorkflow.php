@@ -58,6 +58,10 @@ final class PhabricatorRepositoryManagementParentsWorkflow
 
     $graph = array();
     foreach ($refs as $ref) {
+      if (!$repo->shouldTrackBranch($ref->getRefName())) {
+        continue;
+      }
+
       $console->writeOut(
         "%s\n",
         pht('Rebuilding branch "%s"...', $ref->getRefName()));

@@ -22,6 +22,10 @@ final class PhabricatorApplicationConfig extends PhabricatorApplication {
     return false;
   }
 
+  public function getShortDescription() {
+    return pht('Configure Phabricator');
+  }
+
   public function getRoutes() {
     return array(
       '/config/' => array(

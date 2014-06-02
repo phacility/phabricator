@@ -23,6 +23,11 @@ final class PhrequentTimeBlock extends Phobject {
   public function getObjectTimeRanges($now) {
     $ranges = array();
 
+    $range_start = time();
+    foreach ($this->events as $event) {
+      $range_start = min($range_start, $event->getDateStarted());
+    }
+
     $object_ranges = array();
     foreach ($this->events as $event) {
 

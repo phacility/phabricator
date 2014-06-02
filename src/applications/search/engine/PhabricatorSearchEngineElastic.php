@@ -97,7 +97,7 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
 
     if (strlen($query->getParameter('query'))) {
       $spec[] = array(
-        'field' => array(
+        'term' => array(
           'field.corpus' => $query->getParameter('query'),
         ),
       );

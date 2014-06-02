@@ -14,6 +14,10 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
     return 'authentication';
   }
 
+  public function getShortDescription() {
+    return pht('Configure Login and Registration');
+  }
+
   public function getHelpURI() {
     // NOTE: Although reasonable help exists for this in "Configuring Accounts
     // and Registration", specifying a help URI here means we get the menu

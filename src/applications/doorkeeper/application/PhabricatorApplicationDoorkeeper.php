@@ -6,12 +6,12 @@ final class PhabricatorApplicationDoorkeeper extends PhabricatorApplication {
     return false;
   }
 
-  public function getBaseURI() {
-    return '/doorkeeper/';
-  }
-
   public function shouldAppearInLaunchView() {
     return false;
+  }
+
+  public function getShortDescription() {
+    return pht('Connect to Other Software');
   }
 
   public function getRemarkupRules() {

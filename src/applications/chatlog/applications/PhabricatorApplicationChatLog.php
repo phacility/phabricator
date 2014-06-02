@@ -7,7 +7,7 @@ final class PhabricatorApplicationChatLog extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Chat Log');
+    return pht('IRC Logs');
   }
 
   public function getIconName() {

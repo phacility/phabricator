@@ -155,12 +155,10 @@ abstract class PhabricatorApplication
   }
 
   public function getHelpURI() {
-    // TODO: When these applications get created, link to their docs:
-    //
-    //  - Drydock
-    //  - OAuth Server
+    return null;
+  }
 
-
+  public function getOverview() {
     return null;
   }
 

@@ -36,6 +36,14 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
     );
   }
 
+  public function getOverview() {
+    return pht(<<<EOTEXT
+Differential is a **code review application** which allows engineers to review,
+discuss and approve changes to software.
+EOTEXT
+);
+  }
+
   public function getRoutes() {
     return array(
       '/D(?P<id>[1-9]\d*)' => 'DifferentialRevisionViewController',

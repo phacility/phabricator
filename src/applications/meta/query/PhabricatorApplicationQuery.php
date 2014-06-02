@@ -9,6 +9,7 @@ final class PhabricatorApplicationQuery
   private $nameContains;
   private $unlisted;
   private $classes;
+  private $launchable;
   private $phids;
 
   const ORDER_APPLICATION = 'order:application';
@@ -38,6 +39,11 @@ final class PhabricatorApplicationQuery
 
   public function withUnlisted($unlisted) {
     $this->unlisted = $unlisted;
+    return $this;
+  }
+
+  public function withLaunchable($launchable) {
+    $this->launchable = $launchable;
     return $this;
   }
 
@@ -116,6 +122,15 @@ final class PhabricatorApplicationQuery
         }
       }
     }
+
+    if ($this->launchable !== null) {
+      foreach ($apps as $key => $app) {
+        if ($app->shouldAppearInLaunchView() != $this->launchable) {
+          unset($apps[$key]);
+        }
+      }
+    }
+
 
     switch ($this->order) {
       case self::ORDER_NAME:

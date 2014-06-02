@@ -3,7 +3,7 @@
 final class PhabricatorApplicationFlags extends PhabricatorApplication {
 
   public function getShortDescription() {
-    return pht('Reminders');
+    return pht('Personal Bookmarks and Reminders');
   }
 
   public function getBaseURI() {
@@ -25,7 +25,7 @@ final class PhabricatorApplicationFlags extends PhabricatorApplication {
   }
 
   public function getApplicationGroup() {
-    return self::GROUP_ORGANIZATION;
+    return self::GROUP_UTILITIES;
   }
 
   public function loadStatus(PhabricatorUser $user) {

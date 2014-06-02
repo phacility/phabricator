@@ -11,7 +11,7 @@ final class PhabricatorApplicationApplications extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return 'Installed Applications';
+    return pht('Explore More Applications');
   }
 
   public function getIconName() {
@@ -26,7 +26,7 @@ final class PhabricatorApplicationApplications extends PhabricatorApplication {
     return self::GROUP_ADMIN;
   }
 
- public function getRoutes() {
+  public function getRoutes() {
     return array(
       '/applications/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?' =>
@@ -38,7 +38,6 @@ final class PhabricatorApplicationApplications extends PhabricatorApplication {
         '(?P<application>\w+)/(?P<action>install|uninstall)/' =>
           'PhabricatorApplicationUninstallController',
         ),
-
     );
   }
 

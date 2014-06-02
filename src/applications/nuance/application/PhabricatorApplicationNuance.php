@@ -27,6 +27,10 @@ final class PhabricatorApplicationNuance extends PhabricatorApplication {
     return '/nuance/';
   }
 
+  public function getShortDescription() {
+    return pht('High-Volume Task Queues');
+  }
+
   public function getRoutes() {
     return array(
       '/nuance/' => array(

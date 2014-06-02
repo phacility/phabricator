@@ -7,7 +7,7 @@ final class PhabricatorApplicationLegalpad extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Legal Documents');
+    return pht('Agreements and Signatures');
   }
 
   public function getIconName() {

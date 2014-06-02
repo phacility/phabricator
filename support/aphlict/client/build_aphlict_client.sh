@@ -9,20 +9,10 @@ if [ -z "$MXMLC" ]; then
 fi;
 
 set -e
-set -x
 
-# cp -R $ROOT/externals/vegas/src $BASEDIR/src/vegas
-
-(cd $BASEDIR && $MXMLC \
-  -output aphlict.swf \
-  -default-background-color=0x444444 \
-  -default-size=500,500 \
+$MXMLC \
+  -output=$ROOT/webroot/rsrc/swf/aphlict.swf \
   -warnings=true \
-  -debug=true \
   -source-path=$ROOT/externals/vegas/src \
   -static-link-runtime-shared-libraries=true \
-  src/Aphlict.as)
-
-mv $BASEDIR/aphlict.swf $ROOT/webroot/rsrc/swf/aphlict.swf
-
-#  -target-player=10.2.0 \
+  $BASEDIR/src/AphlictClient.as
