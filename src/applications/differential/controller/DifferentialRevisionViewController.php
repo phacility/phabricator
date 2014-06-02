@@ -553,6 +553,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $allow_self_accept = PhabricatorEnv::getEnvConfig(
       'differential.allow-self-accept');
+    $always_allow_abandon = PhabricatorEnv::getEnvConfig(
+      'differential.always-allow-abandon');
     $always_allow_close = PhabricatorEnv::getEnvConfig(
       'differential.always-allow-close');
     $allow_reopen = PhabricatorEnv::getEnvConfig(
@@ -586,17 +588,20 @@ final class DifferentialRevisionViewController extends DifferentialController {
     } else {
       switch ($status) {
         case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
+          $actions[DifferentialAction::ACTION_ABANDON] = $always_allow_abandon;
           $actions[DifferentialAction::ACTION_ACCEPT] = true;
           $actions[DifferentialAction::ACTION_REJECT] = true;
           $actions[DifferentialAction::ACTION_RESIGN] = $viewer_is_reviewer;
           break;
         case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
         case ArcanistDifferentialRevisionStatus::CHANGES_PLANNED:
+          $actions[DifferentialAction::ACTION_ABANDON] = $always_allow_abandon;
           $actions[DifferentialAction::ACTION_ACCEPT] = true;
           $actions[DifferentialAction::ACTION_REJECT] = !$viewer_has_rejected;
           $actions[DifferentialAction::ACTION_RESIGN] = $viewer_is_reviewer;
           break;
         case ArcanistDifferentialRevisionStatus::ACCEPTED:
+          $actions[DifferentialAction::ACTION_ABANDON] = $always_allow_abandon;
           $actions[DifferentialAction::ACTION_ACCEPT] = !$viewer_has_accepted;
           $actions[DifferentialAction::ACTION_REJECT] = true;
           $actions[DifferentialAction::ACTION_RESIGN] = $viewer_is_reviewer;

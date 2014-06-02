@@ -789,6 +789,9 @@ final class DifferentialTransactionEditor
     $actor_phid = $this->getActor()->getPHID();
     $actor_is_author = ($author_phid == $actor_phid);
 
+    $config_abandon_key = 'differential.always-allow-abandon';
+    $always_allow_abandon = PhabricatorEnv::getEnvConfig($config_abandon_key);
+
     $config_close_key = 'differential.always-allow-close';
     $always_allow_close = PhabricatorEnv::getEnvConfig($config_close_key);
 
@@ -860,7 +863,7 @@ final class DifferentialTransactionEditor
         break;
 
       case DifferentialAction::ACTION_ABANDON:
-        if (!$actor_is_author) {
+        if (!$actor_is_author && !$always_allow_abandon) {
           return pht(
             "You can not abandon this revision because you do not own it. ".
             "You can only abandon revisions you own.");
