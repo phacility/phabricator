@@ -32,6 +32,27 @@ abstract class PhabricatorController extends AphrontController {
     return false;
   }
 
+  public function shouldRequireMultiFactorEnrollment() {
+    if (!$this->shouldRequireLogin()) {
+      return false;
+    }
+
+    if (!$this->shouldRequireEnabledUser()) {
+      return false;
+    }
+
+    if ($this->shouldAllowPartialSessions()) {
+      return false;
+    }
+
+    $user = $this->getRequest()->getUser();
+    if (!$user->getIsStandardUser()) {
+      return false;
+    }
+
+    return PhabricatorEnv::getEnvConfig('security.require-multi-factor-auth');
+  }
+
   public function willBeginExecution() {
     $request = $this->getRequest();
 
@@ -148,6 +169,21 @@ abstract class PhabricatorController extends AphrontController {
         $login_controller = new PhabricatorAuthFinishController($request);
         $this->setCurrentApplication($auth_application);
         return $this->delegateToController($login_controller);
+      }
+    }
+
+    // Check if the user needs to configure MFA.
+    $need_mfa = $this->shouldRequireMultiFactorEnrollment();
+    $have_mfa = $user->getIsEnrolledInMultiFactor();
+    if ($need_mfa && !$have_mfa) {
+      // Check if the cache is just out of date. Otherwise, roadblock the user
+      // and require MFA enrollment.
+      $user->updateMultiFactorEnrollment();
+      if (!$user->getIsEnrolledInMultiFactor()) {
+        $mfa_controller = new PhabricatorAuthNeedsMultiFactorController(
+          $request);
+        $this->setCurrentApplication($auth_application);
+        return $this->delegateToController($mfa_controller);
       }
     }
 

@@ -196,6 +196,8 @@ final class PhabricatorSettingsPanelMultiFactor
           PhabricatorUserLog::ACTION_MULTI_ADD);
         $log->save();
 
+        $user->updateMultiFactorEnrollment();
+
         return id(new AphrontRedirectResponse())
           ->setURI($this->getPanelURI('?id='.$config->getID()));
       }
@@ -237,6 +239,8 @@ final class PhabricatorSettingsPanelMultiFactor
       if (!$errors) {
         $factor->setFactorName($name);
         $factor->save();
+
+        $user->updateMultiFactorEnrollment();
 
         return id(new AphrontRedirectResponse())
           ->setURI($this->getPanelURI('?id='.$factor->getID()));
@@ -292,6 +296,8 @@ final class PhabricatorSettingsPanelMultiFactor
         $user->getPHID(),
         PhabricatorUserLog::ACTION_MULTI_REMOVE);
       $log->save();
+
+      $user->updateMultiFactorEnrollment();
 
       return id(new AphrontRedirectResponse())
         ->setURI($this->getPanelURI());
