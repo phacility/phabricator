@@ -14,8 +14,8 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     return 'maniphest';
   }
 
-  public function getApplicationGroup() {
-    return self::GROUP_CORE;
+  public function isPinnedByDefault(PhabricatorUser $viewer) {
+    return true;
   }
 
   public function getApplicationOrder() {

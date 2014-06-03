@@ -24,10 +24,6 @@ final class PhabricatorApplicationCalendar extends PhabricatorApplication {
     return "\xE2\x8C\xA8";
   }
 
-  public function getApplicationGroup() {
-    return self::GROUP_COMMUNICATION;
-  }
-
   public function isBeta() {
     return true;
   }

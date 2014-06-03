@@ -3,17 +3,16 @@
  */
 
 .phabricator-crumbs-view {
-  background-color: #d8dce2;
+  background-color: #ebecee;
+  background-image: none !important;
   height: 31px;
   overflow: hidden;
   vertical-align: top;
-  border-bottom: 1px solid #aaa;
-
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-
+  border-bottom: 1px solid rgba(205, 207, 211, 1);
   /* TODO: Position this over the slider for Differential's file tree view.
      Remove this once that gets sorted out. */
   position: relative;
+  -webkit-font-smoothing: antialiased;
 }
 
 .phabricator-crumbs-view,
@@ -22,7 +21,7 @@
   color: {$darkgreytext};
   font-weight: bold;
   text-decoration: none;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.9);
 }
 
 .phabricator-crumbs-view a.phabricator-crumbs-action-disabled {
@@ -45,7 +44,7 @@
   border-top: none;
 }
 
-.phabricator-crumbs-view a:hover {
+.device-desktop .phabricator-crumbs-view a:hover {
   text-decoration: underline;
 }
 
@@ -68,7 +67,7 @@
   display: inline-block;
   width: 28px;
   height: 28px;
-  margin: 2px 2px 0 13px;
+  margin: 2px 2px 2px 13px;
   vertical-align: top;
 }
 
@@ -84,13 +83,18 @@
 .phabricator-crumbs-action {
   display: inline-block;
   height: 17px;
-  padding: 8px 14px 8px 24px;
+  padding: 8px 12px;
   position: relative;
 }
 
 .device-phone a.phabricator-crumbs-action {
   padding: 7px;
-  border-left: 1px solid #ccc;
+  border-left: 1px solid {$hovergrey};
+}
+
+.device-desktop a.phabricator-crumbs-action:hover {
+  background: rgba(205, 207, 211, .5);
+  text-decoration: none;
 }
 
 .device-phone .phabricator-crumbs-action-name {

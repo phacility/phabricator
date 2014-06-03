@@ -22,9 +22,9 @@
      then draw with the texture after the action completes. Just make the
      element extend off the bottom of the screen to prevent this. */
   bottom: -480px;
-  width: 205px;
-  background: #303539;
-  box-shadow: inset -3px 0 3px rgba(0, 0, 0, 0.5);
+  width: 204px;
+  background: #dbdde0;
+  border-right: 1px solid {$hovergrey};
 }
 
 .phabricator-nav-column-background,
@@ -44,12 +44,16 @@
   display: block;
 }
 
+.device-desktop .phabricator-side-menu-home .phabricator-nav-content,
+.device-tablet .phabricator-side-menu-home .phabricator-nav-content {
+  margin-left: 205px;
+}
+
 .phabricator-nav-local {
   width: 205px;
   position: absolute;
   left: 0;
   white-space: nowrap;
-
   overflow-x: hidden;
   overflow-y: auto;
 }
@@ -80,16 +84,6 @@
 
 .device-desktop .has-local-nav .phabricator-nav-content {
   margin-left: 205px;
-}
-
-.phabricator-side-menu-home .phabricator-nav-column-background,
-.phabricator-side-menu-home .phabricator-nav-local {
-  width: 240px;
-}
-
-.device-desktop .phabricator-side-menu-home .phabricator-nav-content,
-.device-tablet .phabricator-side-menu-home .phabricator-nav-content {
-  margin-left: 240px;
 }
 
 .device-phone .phabricator-side-menu-home .phabricator-nav-content {

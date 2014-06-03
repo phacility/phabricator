@@ -6,7 +6,7 @@ final class PhabricatorApplicationDoorkeeper extends PhabricatorApplication {
     return false;
   }
 
-  public function shouldAppearInLaunchView() {
+  public function isLaunchable() {
     return false;
   }
 

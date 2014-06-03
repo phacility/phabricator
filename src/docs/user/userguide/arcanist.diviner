@@ -92,8 +92,8 @@ have PHP installed, you can download it from <http://www.php.net/>.
 
 To install Arcanist, pick an install directory and clone the code from GitHub:
 
-  some_install_path/ $ git clone git://github.com/phacility/libphutil.git
-  some_install_path/ $ git clone git://github.com/phacility/arcanist.git
+  some_install_path/ $ git clone https://github.com/phacility/libphutil.git
+  some_install_path/ $ git clone https://github.com/phacility/arcanist.git
 
 This should leave you with a directory structure like this
 

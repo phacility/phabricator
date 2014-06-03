@@ -2,7 +2,7 @@
 
 final class PhabricatorApplicationTransactions extends PhabricatorApplication {
 
-  public function shouldAppearInLaunchView() {
+  public function isLaunchable() {
     return false;
   }
 

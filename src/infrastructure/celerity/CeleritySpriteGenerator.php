@@ -145,6 +145,31 @@ final class CeleritySpriteGenerator {
         'y' => 24,
         'css' => '.menu-icon-new-blue',
       ),
+      'info-sm' => array(
+        'x' => 28,
+        'y' => 28,
+        'css' => '.menu-icon-info-sm',
+      ),
+      'logout-sm' => array(
+        'x' => 28,
+        'y' => 28,
+        'css' => '.menu-icon-logout-sm',
+      ),
+      'new-sm' => array(
+        'x' => 28,
+        'y' => 28,
+        'css' => '.menu-icon-new-sm',
+      ),
+      'settings-sm' => array(
+        'x' => 28,
+        'y' => 28,
+        'css' => '.menu-icon-settings-sm',
+      ),
+      'power' => array(
+        'x' => 28,
+        'y' => 28,
+        'css' => '.menu-icon-power',
+      ),
       'app' => array(
         'x' => 24,
         'y' => 24,
@@ -453,9 +478,7 @@ final class CeleritySpriteGenerator {
     $template = new PhutilSprite();
 
     $unusual_heights = array(
-      'dark-menu-label' => 25,
       'breadcrumbs'     => 31,
-      'menu-label'      => 24,
       'red-header'      => 70,
       'blue-header'     => 70,
       'green-header'    => 70,
@@ -465,20 +488,13 @@ final class CeleritySpriteGenerator {
       'lightblue-header' => 240,
     );
 
-    $extra_css = array(
-      'dark-menu-label' =>
-        ', .phabricator-dark-menu .phui-list-item-type-label',
-      'menu-label' =>
-        ', .phabricator-side-menu .phui-list-item-type-label',
-    );
-
     $sprites = array();
     foreach ($gradients as $gradient) {
       $path = $this->getPath('gradients/'.$gradient.'.png');
       $sprite = id(clone $template)
         ->setName('gradient-'.$gradient)
         ->setSourceFile($path)
-        ->setTargetCSS('.gradient-'.$gradient.idx($extra_css, $gradient));
+        ->setTargetCSS('.gradient-'.$gradient);
 
       $sprite->setSourceSize(4, idx($unusual_heights, $gradient, 26));
 
@@ -488,9 +504,7 @@ final class CeleritySpriteGenerator {
     $sheet = $this->buildSheet(
       'gradient',
       false,
-      PhutilSpriteSheet::TYPE_REPEAT_X,
-      ', .phabricator-dark-menu .phui-list-item-type-label, '.
-      '.phabricator-side-menu .phui-list-item-type-label');
+      PhutilSpriteSheet::TYPE_REPEAT_X);
     foreach ($sprites as $sprite) {
       $sheet->addSprite($sprite);
     }
@@ -543,6 +557,7 @@ final class CeleritySpriteGenerator {
       $scales = array(
         '1x' => 1,
         '2x' => 2,
+        '4x' => 4,
       );
       $variant_name = 'apps';
       $variant_short = '';
@@ -563,9 +578,7 @@ final class CeleritySpriteGenerator {
       $size_y = 28;
 
       $colors = array(
-        'light' => 'lb',
         'dark'  => 'dark',
-        'blue'  => 'blue',
       );
     } else {
       $scales = array(
@@ -581,7 +594,6 @@ final class CeleritySpriteGenerator {
       );
     }
 
-
     $apps = $this->getDirectoryList('apps_dark_1x');
 
     $template = id(new PhutilSprite())
@@ -592,10 +604,6 @@ final class CeleritySpriteGenerator {
       foreach ($colors as $color => $color_path) {
 
         $css = '.apps-'.$app.'-'.$color.$variant_short;
-        if ($color == 'blue' && $variant_name == 'apps-large') {
-          $css .= ', .phabricator-crumb-view:hover .apps-'.$app.'-dark-large';
-        }
-
         $sprite = id(clone $template)
           ->setName('apps-'.$app.'-'.$color.$variant_short)
           ->setTargetCSS($css);

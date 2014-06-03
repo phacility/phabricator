@@ -23,7 +23,7 @@ final class PhabricatorApplicationHome extends PhabricatorApplication {
     );
   }
 
-  public function shouldAppearInLaunchView() {
+  public function isLaunchable() {
     return false;
   }
 

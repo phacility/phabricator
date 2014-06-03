@@ -24,6 +24,7 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
   const PREFERENCE_NAV_COLLAPSED        = 'nav-collapsed';
   const PREFERENCE_NAV_WIDTH            = 'nav-width';
   const PREFERENCE_APP_TILES            = 'app-tiles';
+  const PREFERENCE_APP_PINNED           = 'app-pinned';
 
   const PREFERENCE_DIFF_FILETREE        = 'diff-filetree';
 
@@ -53,6 +54,36 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
   public function unsetPreference($key) {
     unset($this->preferences[$key]);
     return $this;
+  }
+
+  public function getPinnedApplications(array $apps, PhabricatorUser $viewer) {
+    $pref_pinned = PhabricatorUserPreferences::PREFERENCE_APP_PINNED;
+    $pinned = $this->getPreference($pref_pinned);
+
+    if ($pinned) {
+      return $pinned;
+    }
+
+    $pref_tiles = PhabricatorUserPreferences::PREFERENCE_APP_TILES;
+    $tiles = $this->getPreference($pref_tiles, array());
+    $full_tile = 'full';
+
+    $large = array();
+    foreach ($apps as $app) {
+      $show = $app->isPinnedByDefault($viewer);
+
+      // TODO: This is legacy stuff, clean it up eventually. This approximately
+      // retains the old "tiles" preference.
+      if (isset($tiles[get_class($app)])) {
+        $show = ($tiles[get_class($app)] == $full_tile);
+      }
+
+      if ($show) {
+        $large[] = get_class($app);
+      }
+    }
+
+    return $large;
   }
 
 }

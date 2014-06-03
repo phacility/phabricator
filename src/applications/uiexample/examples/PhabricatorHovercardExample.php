@@ -69,9 +69,9 @@ final class PhabricatorHovercardExample extends PhabricatorUIExample {
   }
 
   private function createPanel($header) {
-    $panel = new AphrontPanelView();
-    $panel->setNoBackground();
-    $panel->setHeader($header);
+    $panel = new PHUIBoxView();
+    $panel->addClass('grouped');
+    $panel->addClass('ml');
     return $panel;
   }
 

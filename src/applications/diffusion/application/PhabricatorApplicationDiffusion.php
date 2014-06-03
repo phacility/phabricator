@@ -14,6 +14,10 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
     return 'diffusion';
   }
 
+  public function isPinnedByDefault(PhabricatorUser $viewer) {
+    return true;
+  }
+
   public function getHelpURI() {
     return PhabricatorEnv::getDoclink('Diffusion User Guide');
   }
@@ -114,10 +118,6 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
         'lint/' => 'DiffusionLintController',
       ),
     );
-  }
-
-  public function getApplicationGroup() {
-    return self::GROUP_CORE;
   }
 
   public function getApplicationOrder() {

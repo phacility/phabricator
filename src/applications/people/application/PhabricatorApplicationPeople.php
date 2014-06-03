@@ -18,12 +18,12 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
     return 'people';
   }
 
-  public function getFlavorText() {
-    return pht('Sort of a social utility.');
+  public function isPinnedByDefault(PhabricatorUser $viewer) {
+    return $viewer->getIsAdmin();
   }
 
-  public function getApplicationGroup() {
-    return self::GROUP_ORGANIZATION;
+  public function getFlavorText() {
+    return pht('Sort of a social utility.');
   }
 
   public function canUninstall() {

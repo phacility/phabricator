@@ -75,7 +75,6 @@ final class PhrictionDocumentController
           $vdate = phabricator_datetime($content->getDateCreated(), $user);
           $version_note = new AphrontErrorView();
           $version_note->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-          $version_note->setTitle('Older Version');
           $version_note->appendChild(
             pht('You are viewing an older version of this document, as it '.
             'appeared on %s.', $vdate));
@@ -126,9 +125,8 @@ final class PhrictionDocumentController
           $slug_uri = PhrictionDocument::getSlugURI($new_doc->getSlug());
         }
 
-        $notice = new AphrontErrorView();
-        $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-        $notice->setTitle(pht('Document Moved'));
+        $notice = id(new AphrontErrorView())
+          ->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
 
         if ($slug_uri) {
           $notice->appendChild(
@@ -159,22 +157,33 @@ final class PhrictionDocumentController
       $move_notice = null;
       if ($current_status == PhrictionChangeType::CHANGE_MOVE_HERE) {
         $from_doc_id = $content->getChangeRef();
-        $from_doc = id(new PhrictionDocumentQuery())
+
+        $slug_uri = null;
+
+        // If the old document exists and is visible, provide a link to it.
+        $from_docs = id(new PhrictionDocumentQuery())
           ->setViewer($user)
           ->withIDs(array($from_doc_id))
-          ->executeOne();
-        $slug_uri = PhrictionDocument::getSlugURI($from_doc->getSlug());
+          ->execute();
+        if ($from_docs) {
+          $from_doc = head($from_docs);
+          $slug_uri = PhrictionDocument::getSlugURI($from_doc->getSlug());
+        }
 
         $move_notice = id(new AphrontErrorView())
-          ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-          ->appendChild(pht('This document was moved from %s',
-            phutil_tag('a', array('href' => $slug_uri), $slug_uri)))
-          ->render();
-      }
-    }
+          ->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
 
-    if ($version_note) {
-      $version_note = $version_note->render();
+        if ($slug_uri) {
+          $move_notice->appendChild(
+            pht(
+              'This document was moved from %s.',
+              phutil_tag('a', array('href' => $slug_uri), $slug_uri)));
+        } else {
+          // Render this for consistency, even though it's a bit silly.
+          $move_notice->appendChild(
+            pht('This document was moved from elsewhere.'));
+        }
+      }
     }
 
     $children = $this->renderDocumentChildren($slug);
@@ -204,6 +213,7 @@ final class PhrictionDocumentController
         array(
           $actions,
           $prop_list,
+          $version_note,
           $move_notice,
           $core_content,
         ));

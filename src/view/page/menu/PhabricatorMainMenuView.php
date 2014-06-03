@@ -190,11 +190,7 @@ final class PhabricatorMainMenuView extends AphrontView {
       foreach ($actions as $action) {
         $icon = $action->getIcon();
         if ($icon) {
-          if ($action->getSelected()) {
-            $action->appendChild($this->renderMenuIcon($icon.'-blue-large'));
-          } else {
-            $action->appendChild($this->renderMenuIcon($icon.'-light-large'));
-          }
+          $action->appendChild($this->renderMenuIcon($icon));
         }
         $view->addMenuItem($action);
       }
@@ -471,7 +467,7 @@ final class PhabricatorMainMenuView extends AphrontView {
       'span',
       array(
         'class' => 'phabricator-core-menu-icon '.
-                   'sprite-apps-large apps-'.$name,
+                   'sprite-menu menu-icon-'.$name,
       ),
       '');
   }

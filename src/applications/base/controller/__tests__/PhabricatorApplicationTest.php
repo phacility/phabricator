@@ -8,6 +8,10 @@ final class PhabricatorApplicationTest extends PhabricatorApplication {
     return true;
   }
 
+  public function isLaunchable() {
+    return false;
+  }
+
   public function reset() {
     $this->policies = array();
   }
@@ -19,10 +23,6 @@ final class PhabricatorApplicationTest extends PhabricatorApplication {
 
   public function getPolicy($capability) {
     return idx($this->policies, $capability, parent::getPolicy($capability));
-  }
-
-  public function shouldAppearInLaunchView() {
-    return false;
   }
 
   public function canUninstall() {

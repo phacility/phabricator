@@ -24,7 +24,7 @@ final class PhabricatorApplicationNotifications extends PhabricatorApplication {
     );
   }
 
-  public function shouldAppearInLaunchView() {
+  public function isLaunchable() {
     return false;
   }
 

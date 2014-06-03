@@ -7,7 +7,11 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Create Groups, Tags, and Projects');
+    return pht('Get Organized');
+  }
+
+  public function isPinnedByDefault(PhabricatorUser $viewer) {
+    return true;
   }
 
   public function getBaseURI() {
@@ -20,10 +24,6 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
 
   public function getFlavorText() {
     return pht('Group stuff into big piles.');
-  }
-
-  public function getApplicationGroup() {
-    return self::GROUP_ORGANIZATION;
   }
 
   public function getRemarkupRules() {

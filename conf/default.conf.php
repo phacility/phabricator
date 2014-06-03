@@ -811,6 +811,10 @@ return array(
   // only the submitter can close a revision.
   'differential.always-allow-close' => false,
 
+  // If you set this to true, any user can abandon any revision. If false, only
+  // the submitter can abandon a revision.
+  'differential.always-allow-abandon' => false,
+
   // If you set this to true, any user can reopen a revision so long as it has
   // been closed.  This can be useful if a revision is accidentally closed or
   // if a developer changes his or her mind after closing a revision.  If it is

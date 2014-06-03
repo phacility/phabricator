@@ -18,10 +18,6 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
     return 'releeph';
   }
 
-  public function getApplicationGroup() {
-    return self::GROUP_ORGANIZATION;
-  }
-
   public function isInstalled() {
     if (PhabricatorEnv::getEnvConfig('releeph.installed')) {
       return parent::isInstalled();

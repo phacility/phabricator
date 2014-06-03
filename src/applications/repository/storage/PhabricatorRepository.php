@@ -7,7 +7,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   implements
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
-    PhabricatorMarkupInterface {
+    PhabricatorMarkupInterface,
+    PhabricatorDestructableInterface {
 
   /**
    * Shortest hash we'll recognize in raw "a829f32" form.
@@ -1320,6 +1321,17 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function shouldUseMarkupCache($field) {
     return true;
+  }
+
+
+/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+    $this->delete();
+    $this->saveTransaction();
   }
 
 }

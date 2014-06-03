@@ -97,7 +97,7 @@ JX.behavior('differential-dropdown-menus', function(config) {
       });
     list.addItem(visible_item);
 
-    add_link('fa-files', pht('Browse in Diffusion'), data.diffusionURI);
+    add_link('fa-files-o', pht('Browse in Diffusion'), data.diffusionURI);
     add_link('fa-file-o', pht('View Standalone'), data.standaloneURI);
     add_link('fa-arrow-left', pht('Show Raw File (Left)'), data.leftURI);
     add_link('fa-arrow-right', pht('Show Raw File (Right)'), data.rightURI);

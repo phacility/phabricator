@@ -358,10 +358,5 @@ a.phui-timeline-menu .phui-icon-view {
 }
 
 .phui-timeline-menu.phuix-dropdown-open {
-  background: {$blue};
-}
-
-.phui-timeline-menu.phuix-dropdown-open .phui-icon-view,
-.device-desktop a.phuix-dropdown-open:hover .phui-icon-view {
-  color: #ffffff;
+  background: {$hovergrey};
 }

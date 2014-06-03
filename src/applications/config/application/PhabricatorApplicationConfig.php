@@ -10,6 +10,10 @@ final class PhabricatorApplicationConfig extends PhabricatorApplication {
     return 'setup';
   }
 
+  public function isPinnedByDefault(PhabricatorUser $viewer) {
+    return $viewer->getIsAdmin();
+  }
+
   public function getTitleGlyph() {
     return "\xE2\x98\xBA";
   }

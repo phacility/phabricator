@@ -8,10 +8,7 @@
 
 .phabricator-hovercard-wrapper {
   float: left;
-  border-radius: 5px;
   width: 400px;
-  padding: 6px;
-  background-color: rgba(0,0,0,.2);
 }
 
 .device-phone .phabricator-hovercard-wrapper {
@@ -22,7 +19,24 @@
 .phabricator-hovercard-container {
   float: left;
   width: 100%;
-  border: 1px solid {$greytext};
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  border: 1px solid {$blueborder};
+  border-radius: 3px;
+  background-color: #fff;
+}
+
+.phabricator-hovercard-head {
+  border-bottom: 1px solid {$thinblueborder};
+}
+
+.phabricator-hovercard-head .phabricator-action-header {
+  border-top-right-radius: 3px;
+  border-top-left-radius: 3px;
+}
+
+.phabricator-hovercard-head .phui-tag-type-state {
+  color: {$bluetext};
+  text-shadow: none;
 }
 
 .phabricator-hovercard-tags {
@@ -33,20 +47,25 @@
 .phabricator-hovercard-body {
   float: left;
   width: 100%;
-  padding: 8px 0px 8px 0px;
-  background-color: white;
+  padding: 12px 0;
   color: {$darkgreytext};
-}
-
-.phabricator-hovercard-body-header,
-.phabricator-hovercard-body-item {
-  margin: 0px 0px 0px 8px;
+  border-bottom-right-radius: 3px;
+  border-bottom-left-radius: 3px;
 }
 
 .phabricator-hovercard-body-header {
-  font-size: 13px;
-  padding-bottom: 2px;
+  margin: 0 0 0 8px;
+}
+
+.phabricator-hovercard-body-item {
+  margin: 2px 0 0 8px;
+}
+
+.phabricator-hovercard-body-header {
+  font-size: 14px;
+  padding-bottom: 4px;
   color: {$darkgreytext};
+  line-height: 18px;
 }
 
 .phabricator-hovercard-body .phabricator-hovercard-body-image {
@@ -73,10 +92,10 @@
 .phabricator-hovercard-tail {
   width: 396px;
   float: left;
-  padding: 3px 2px;
-  background-color: #eeeeee;
-  border-bottom-left-radius: 2px;
-  border-bottom-right-radius: 2px;
+  padding: 2px;
+  border-top: 1px solid {$thinblueborder};
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
 }
 
 .phabricator-hovercard-tail button,

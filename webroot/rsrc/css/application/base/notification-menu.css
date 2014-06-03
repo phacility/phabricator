@@ -3,13 +3,12 @@
  */
 
 .phabricator-notification-menu {
-  background: #ffffff;
+  background: #fff;
   font-size: 11px;
   word-wrap: break-word;
   overflow-y: auto;
-  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.5);
-  border: 2px solid #33393d;
-  border-top-width: 0;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  border: 1px solid {$blueborder};
   border-radius: 3px;
 }
 
@@ -32,7 +31,7 @@
 }
 
 .device-phone .phabricator-notification-menu {
-  border-bottom: 1px solid #222222;
+  border-bottom: 1px solid {$thinblueborder};
   width: 94%;
   max-width: 390px;
   top: 42px !important;
@@ -42,7 +41,7 @@
 }
 
 .phabricator-notification {
-  padding: 6px;
+  padding: 6px 8px;
 }
 
 .phabricator-notification-menu .phabricator-notification {
@@ -50,11 +49,16 @@
 }
 
 .device-desktop .phabricator-notification-menu .phabricator-notification:hover {
-  background: #e6ebf5;
+  background: {$hoverblue};
+}
+
+.device-desktop .phabricator-notification-menu
+ .phabricator-notification-unread.phabricator-notification:hover {
+  background: {$hoverselectedblue};
 }
 
 .phabricator-notification + .phabricator-notification {
-  border-top: 1px solid #e9e9e9;
+  border-top: 1px solid {$hoverborder};
 }
 
 .no-notifications {
@@ -63,15 +67,14 @@
 
 .phabricator-notification-list .phabricator-notification-unread,
 .phabricator-notification-menu .phabricator-notification-unread {
-  background: #eceff5;
-  border-color: #e3e8f0;
+  background: {$hoverblue};
 }
 
 .phabricator-notification-header {
   font-weight: bold;
-  padding: 6px;
+  padding: 10px 8px;
   font-size: 12px;
-  border-bottom: 1px solid #e9e9e9;
+  border-bottom: 1px solid {$thinblueborder};
 }
 
 .phabricator-notification-header a {
@@ -81,14 +84,16 @@
 .phabricator-notification-header .phabricator-notification-clear-all {
   color: #18559D;
   float: right;
+  font-weight: normal;
 }
 
 .phabricator-notification-view-all {
   text-align: center;
   font-weight: bold;
-  background: #f7f7f7;
-  border-top: 1px solid #e9e9e9;
+  background: {$greybackground};
+  border-top: 1px solid {$thinblueborder};
   border-bottom-left-radius: 3px;
   border-bottom-right-radius: 3px;
-  padding: 6px;
+  padding: 8px;
+  font-size: 12px;
 }

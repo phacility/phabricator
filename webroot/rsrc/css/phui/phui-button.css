@@ -78,6 +78,7 @@ a.simple:visited {
   background-image: none;
   border: 1px solid transparent;
   color: {$bluetext};
+  border: 1px solid {$lightblueborder};
   text-shadow: 0 1px #fff;
 }
 
@@ -172,9 +173,11 @@ button.link:hover {
   background: #fff;
   margin-top: -1px;
   padding: 5px 0;
-  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
   border: 1px solid {$lightgreyborder};
-  border-bottom-color: {$greyborder};
+  border-bottom: 1px solid {$greyborder};
+  border-radius: 3px;
+  margin-bottom: 16px;
 }
 
 .phuix-dropdown-menu a:focus {

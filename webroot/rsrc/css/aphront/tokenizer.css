@@ -80,6 +80,7 @@ a.jx-tokenizer-token:hover {
 .jx-tokenizer-token .phui-icon-view {
   display: inline-block;
   margin: 2px 4px -3px 0;
+  color: {$bluetext};
 }
 
 .tokenizer-result {

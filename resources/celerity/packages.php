@@ -94,6 +94,7 @@ return array(
     'sprite-remarkup-css',
     'sprite-gradient-css',
     'sprite-menu-css',
+    'sprite-apps-css',
     'sprite-apps-large-css',
 
     'phabricator-main-menu-view',

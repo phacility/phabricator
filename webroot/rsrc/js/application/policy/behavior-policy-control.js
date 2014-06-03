@@ -56,7 +56,7 @@ JX.behavior('policy-control', function(config) {
         var option = config.options[phid];
         var item = new JX.PHUIXActionView()
           .setName(option.name)
-          .setIcon(option.icon + ' bluegrey')
+          .setIcon(option.icon + ' darkgreytext')
           .setHandler(JX.bind(null, function(fn, e) {
             e.prevent();
             menu.close();

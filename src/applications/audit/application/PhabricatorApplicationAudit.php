@@ -14,6 +14,10 @@ final class PhabricatorApplicationAudit extends PhabricatorApplication {
     return pht('Browse and Audit Commits');
   }
 
+  public function isPinnedByDefault(PhabricatorUser $viewer) {
+    return true;
+  }
+
   public function getHelpURI() {
     return PhabricatorEnv::getDoclink('Audit User Guide');
   }
@@ -32,10 +36,6 @@ final class PhabricatorApplicationAudit extends PhabricatorApplication {
         'preview/(?P<id>[1-9]\d*)/' => 'PhabricatorAuditPreviewController',
       ),
     );
-  }
-
-  public function getApplicationGroup() {
-    return self::GROUP_CORE;
   }
 
   public function getApplicationOrder() {

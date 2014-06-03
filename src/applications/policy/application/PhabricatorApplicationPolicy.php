@@ -2,7 +2,7 @@
 
 final class PhabricatorApplicationPolicy extends PhabricatorApplication {
 
-  public function shouldAppearInLaunchView() {
+  public function isLaunchable() {
     return false;
   }
 

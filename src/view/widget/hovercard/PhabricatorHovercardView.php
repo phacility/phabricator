@@ -17,7 +17,7 @@ final class PhabricatorHovercardView extends AphrontView {
   private $fields = array();
   private $actions = array();
 
-  private $color = 'blue';
+  private $color = 'lightblue';
   public function setObjectHandle(PhabricatorObjectHandle $handle) {
     $this->handle = $handle;
     return $this;

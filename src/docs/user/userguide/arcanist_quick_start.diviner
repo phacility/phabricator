@@ -23,8 +23,8 @@ Then install Arcanist itself:
 
   $ mkdir somewhere/
   $ cd somewhere/
-  somewhere/ $ git clone git://github.com/phacility/libphutil.git
-  somewhere/ $ git clone git://github.com/phacility/arcanist.git
+  somewhere/ $ git clone https://github.com/phacility/libphutil.git
+  somewhere/ $ git clone https://github.com/phacility/arcanist.git
 
 Add `arc` to your path:
 

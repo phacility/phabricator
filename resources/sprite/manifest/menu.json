@@ -31,20 +31,40 @@
       "rule" : ".alert-notifications.message-unread .phabricator-main-menu-message-icon",
       "hash" : "7edd6d68b36f2f46133eb3118f966c6b"
     },
+    "info-sm"          : {
+      "name" : "info-sm",
+      "rule" : ".menu-icon-info-sm",
+      "hash" : "f87b45771fa5cfd61bfe20cacd84dd24"
+    },
     "logo"             : {
       "name" : "logo",
       "rule" : ".phabricator-main-menu-logo-image",
       "hash" : "b03901ae5dff3ec840b88f8335819598"
+    },
+    "logout-sm"        : {
+      "name" : "logout-sm",
+      "rule" : ".menu-icon-logout-sm",
+      "hash" : "813cc784e18d5c4622e87210d203e067"
     },
     "new"              : {
       "name" : "new",
       "rule" : ".menu-icon-new",
       "hash" : "84cf453396e9fdb82fb965ac74cd86cc"
     },
+    "new-sm"           : {
+      "name" : "new-sm",
+      "rule" : ".menu-icon-new-sm",
+      "hash" : "795d30ee8ec68eb4d7ceb54e983c8694"
+    },
     "new_blue"         : {
       "name" : "new_blue",
       "rule" : ".menu-icon-new-blue",
       "hash" : "3cb927000c2bb3a11002377fe5fab9ec"
+    },
+    "power"            : {
+      "name" : "power",
+      "rule" : ".menu-icon-power",
+      "hash" : "f14a923a0ab7c359426defc561227e31"
     },
     "search"           : {
       "name" : "search",
@@ -65,6 +85,11 @@
       "name" : "seen_read_all",
       "rule" : ".alert-notifications .phabricator-main-menu-alert-icon",
       "hash" : "94d4fea01dbb666bb794feec56f783e5"
+    },
+    "settings-sm"      : {
+      "name" : "settings-sm",
+      "rule" : ".menu-icon-settings-sm",
+      "hash" : "c5fdf1316f114b07cc23ccc0435eb4e2"
     },
     "unseen_any"       : {
       "name" : "unseen_any",

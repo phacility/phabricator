@@ -22,10 +22,6 @@ final class PhabricatorApplicationPhame extends PhabricatorApplication {
     return PhabricatorEnv::getDoclink('Phame User Guide');
   }
 
-  public function getApplicationGroup() {
-    return self::GROUP_COMMUNICATION;
-  }
-
   public function isBeta() {
     return true;
   }

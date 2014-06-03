@@ -14,7 +14,6 @@
   background: #2d3236;
   background-repeat: repeat-x;
   position: relative;
-  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.25);
   min-height: 44px;
 }
 
@@ -166,8 +165,6 @@
   color: #333;
   border-color: #e7e7e7;
   box-shadow: none;
-  -webkit-box-shadow: none;
-  -moz-box-shadow: none;
 }
 
 .phabricator-main-menu-search input.jx-typeahead-placeholder {
@@ -198,25 +195,25 @@
   background: #ffffff;
   word-wrap: break-word;
   overflow-y: auto;
-  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.5);
-  border: 2px solid #33393d;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  border: {$blueborder};
   border-radius: 3px;
   margin-left: 40px;
 }
 
 .phabricator-main-search-typeahead-result {
   display: block;
-  padding: 6px 12px 6px 46px;
-  background-position: 12px 9px;
-  background-size: 25px 25px;
+  padding: 6px 8px 8px 44px;
+  background-position: 8px;
+  background-size: 30px 30px;
   background-repeat: no-repeat;
 }
 
 .phabricator-main-search-typeahead-result .result-name {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: bold;
-  color: #333;
+  color: {$darkgreytext};
 }
 
 .phabricator-main-search-typeahead-result .result-type {
@@ -287,13 +284,14 @@
 .device .phabricator-dark-menu,
 .device .phabricator-dark-menu a.phui-list-item-href {
   color: #fff;
+  -webkit-font-smoothing: antialiased;
 }
 
 .device .phabricator-dark-menu .phui-list-item-type-label {
   text-transform: uppercase;
-  font-size: 12px;
+  font-size: 13px;
   background-color: #151719;
-  padding: 5px 0;
+  padding: 6px 0;
   display: block;
   font-weight: bold;
 }
@@ -302,8 +300,8 @@
   border-width: 1px 0;
   border-style: solid;
   border-color: #34373b transparent #282c2d;
-  background-image: url(/rsrc/image/texture/dark-menu.png);
-  padding: 4px 0;
+  background-color: #272c2f;
+  padding: 4px 0 4px 16px;
   display: block;
 }
 
@@ -388,7 +386,7 @@
 }
 
 .device .phabricator-core-menu-icon {
-  left: 6px;
+  left: 24px;
 }
 
 .phabricator-core-menu-icon {
@@ -403,9 +401,9 @@
   background: #fff;
   top: 38px;
   padding: 2px;
-  border: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
-  box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  border: {$blueborder};
+  border-radius: 3px;
 }
 
 
