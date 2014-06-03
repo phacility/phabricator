@@ -66,16 +66,19 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
 
     $pref_tiles = PhabricatorUserPreferences::PREFERENCE_APP_TILES;
     $tiles = $this->getPreference($pref_tiles, array());
+    $full_tile = 'full';
 
     $large = array();
     foreach ($apps as $app) {
-      $tile = $app->getDefaultTileDisplay($viewer);
+      $show = $app->isPinnedByDefault($viewer);
 
+      // TODO: This is legacy stuff, clean it up eventually. This approximately
+      // retains the old "tiles" preference.
       if (isset($tiles[get_class($app)])) {
-        $tile = $tiles[get_class($app)];
+        $show = ($tiles[get_class($app)] == $full_tile);
       }
 
-      if ($tile == PhabricatorApplication::TILE_FULL) {
+      if ($show) {
         $large[] = get_class($app);
       }
     }

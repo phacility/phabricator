@@ -16,11 +16,6 @@ abstract class PhabricatorApplication
   const GROUP_ADMIN           = 'admin';
   const GROUP_DEVELOPER       = 'developer';
 
-  const TILE_INVISIBLE        = 'invisible';
-  const TILE_HIDE             = 'hide';
-  const TILE_SHOW             = 'show';
-  const TILE_FULL             = 'full';
-
   public static function getApplicationGroups() {
     return array(
       self::GROUP_CORE          => pht('Core Applications'),
@@ -30,19 +25,9 @@ abstract class PhabricatorApplication
     );
   }
 
-  public static function getTileDisplayName($constant) {
-    $names = array(
-      self::TILE_INVISIBLE => pht('Invisible'),
-      self::TILE_HIDE => pht('Hidden'),
-      self::TILE_SHOW => pht('Show Small Tile'),
-      self::TILE_FULL => pht('Show Large Tile'),
-    );
-    return idx($names, $constant);
-  }
-
-
 
 /* -(  Application Information  )-------------------------------------------- */
+
 
   public function getName() {
     return substr(get_class($this), strlen('PhabricatorApplication'));
@@ -68,20 +53,62 @@ abstract class PhabricatorApplication
     return empty($uninstalled[get_class($this)]);
   }
 
+
   public function isBeta() {
     return false;
   }
 
+
   /**
-   * Return true if this application should not appear in application lists in
-   * the UI. Primarily intended for unit test applications or other
+   * Return `true` if this application should never appear in application lists
+   * in the UI. Primarily intended for unit test applications or other
    * pseudo-applications.
+   *
+   * Few applications should be unlisted. For most applications, use
+   * @{method:isLaunchable} to hide them from main launch views instead.
    *
    * @return bool True to remove application from UI lists.
    */
   public function isUnlisted() {
     return false;
   }
+
+
+  /**
+   * Return `true` if this application is a normal application with a base
+   * URI and a web interface.
+   *
+   * Launchable applications can be pinned to the home page, and show up in the
+   * "Launcher" view of the Applications application. Making an application
+   * unlauncahble prevents pinning and hides it from this view.
+   *
+   * Usually, an application should be marked unlaunchable if:
+   *
+   *   - it is available on every page anyway (like search); or
+   *   - it does not have a web interface (like subscriptions); or
+   *   - it is still pre-release and being intentionally buried.
+   *
+   * To hide applications more completely, use @{method:isUnlisted}.
+   *
+   * @return bool True if the application is launchable.
+   */
+  public function isLaunchable() {
+    return true;
+  }
+
+
+  /**
+   * Return `true` if this application should be pinned by default.
+   *
+   * Users who have not yet set preferences see a default list of applications.
+   *
+   * @param PhabricatorUser User viewing the pinned application list.
+   * @return bool True if this application should be pinned by default.
+   */
+  public function isPinnedByDefault(PhabricatorUser $viewer) {
+    return false;
+  }
+
 
   /**
    * Returns true if an application is first-party (developed by Phacility)
@@ -113,7 +140,7 @@ abstract class PhabricatorApplication
   }
 
   public function getTypeaheadURI() {
-    return $this->getBaseURI();
+    return $this->isLaunchable() ? $this->getBaseURI() : null;
   }
 
   public function getBaseURI() {
@@ -130,10 +157,6 @@ abstract class PhabricatorApplication
 
   public function getIconName() {
     return 'application';
-  }
-
-  public function shouldAppearInLaunchView() {
-    return true;
   }
 
   public function getApplicationOrder() {
@@ -158,25 +181,6 @@ abstract class PhabricatorApplication
 
   public function getEventListeners() {
     return array();
-  }
-
-  public function getDefaultTileDisplay(PhabricatorUser $user) {
-    switch ($this->getApplicationGroup()) {
-      case self::GROUP_CORE:
-        return self::TILE_FULL;
-      case self::GROUP_UTILITIES:
-      case self::GROUP_DEVELOPER:
-        return self::TILE_HIDE;
-      case self::GROUP_ADMIN:
-        if ($user->getIsAdmin()) {
-          return self::TILE_SHOW;
-        } else {
-          return self::TILE_INVISIBLE;
-        }
-        break;
-      default:
-        return self::TILE_SHOW;
-    }
   }
 
   public function getRemarkupRules() {

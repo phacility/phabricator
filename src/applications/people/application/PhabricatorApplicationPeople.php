@@ -18,6 +18,10 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
     return 'people';
   }
 
+  public function isPinnedByDefault(PhabricatorUser $viewer) {
+    return $viewer->getIsAdmin();
+  }
+
   public function getFlavorText() {
     return pht('Sort of a social utility.');
   }

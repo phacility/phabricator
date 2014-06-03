@@ -22,7 +22,7 @@ final class PhabricatorApplicationMetaMTA extends PhabricatorApplication {
     return false;
   }
 
-  public function shouldAppearInLaunchView() {
+  public function isLaunchable() {
     return false;
   }
 

@@ -14,6 +14,10 @@ final class PhabricatorApplicationPhriction extends PhabricatorApplication {
     return 'phriction';
   }
 
+  public function isPinnedByDefault(PhabricatorUser $viewer) {
+    return true;
+  }
+
   public function getHelpURI() {
     return PhabricatorEnv::getDoclink('Phriction User Guide');
   }

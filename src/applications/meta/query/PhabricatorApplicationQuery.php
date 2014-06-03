@@ -125,7 +125,7 @@ final class PhabricatorApplicationQuery
 
     if ($this->launchable !== null) {
       foreach ($apps as $key => $app) {
-        if ($app->shouldAppearInLaunchView() != $this->launchable) {
+        if ($app->isLaunchable() != $this->launchable) {
           unset($apps[$key]);
         }
       }

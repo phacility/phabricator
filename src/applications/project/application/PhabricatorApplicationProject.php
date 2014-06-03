@@ -7,7 +7,11 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Create Groups, Tags, and Projects');
+    return pht('Get Organized');
+  }
+
+  public function isPinnedByDefault(PhabricatorUser $viewer) {
+    return true;
   }
 
   public function getBaseURI() {

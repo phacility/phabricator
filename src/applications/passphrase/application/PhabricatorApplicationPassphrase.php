@@ -7,7 +7,7 @@ final class PhabricatorApplicationPassphrase extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Store Passwords and Credentials');
+    return pht('Credential Store');
   }
 
   public function getIconName() {

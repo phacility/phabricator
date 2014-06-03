@@ -14,8 +14,12 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
     return 'authentication';
   }
 
+  public function isPinnedByDefault(PhabricatorUser $viewer) {
+    return $viewer->getIsAdmin();
+  }
+
   public function getShortDescription() {
-    return pht('Configure Login and Registration');
+    return pht('Login/Registration');
   }
 
   public function getHelpURI() {

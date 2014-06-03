@@ -7,7 +7,7 @@ final class PhabricatorApplicationUIExamples extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Phabricator Developer UI Examples');
+    return pht('Developer UI Examples');
   }
 
   public function getIconName() {

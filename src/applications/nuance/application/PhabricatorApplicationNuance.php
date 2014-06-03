@@ -14,7 +14,7 @@ final class PhabricatorApplicationNuance extends PhabricatorApplication {
     return true;
   }
 
-  public function shouldAppearInLaunchView() {
+  public function isLaunchable() {
     // try to hide this even more for now
     return false;
   }

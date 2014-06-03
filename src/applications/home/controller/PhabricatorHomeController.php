@@ -28,14 +28,6 @@ abstract class PhabricatorHomeController extends PhabricatorController {
       ->withLaunchable(true)
       ->execute();
 
-    foreach ($applications as $key => $application) {
-      $invisible = PhabricatorApplication::TILE_INVISIBLE;
-      if ($application->getDefaultTileDisplay($user) == $invisible) {
-        // Remove invisible applications (e.g., admin apps for non-admins).
-        unset($applications[$key]);
-      }
-    }
-
     $pinned = $user->loadPreferences()->getPinnedApplications(
       $applications,
       $user);

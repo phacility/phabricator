@@ -14,6 +14,10 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
     return 'differential';
   }
 
+  public function isPinnedByDefault(PhabricatorUser $viewer) {
+    return true;
+  }
+
   public function getHelpURI() {
     return PhabricatorEnv::getDoclink('Differential User Guide');
   }
@@ -72,10 +76,6 @@ EOTEXT
         'preview/' => 'PhabricatorMarkupPreviewController',
       ),
     );
-  }
-
-  public function getApplicationGroup() {
-    return self::GROUP_CORE;
   }
 
   public function getApplicationOrder() {
