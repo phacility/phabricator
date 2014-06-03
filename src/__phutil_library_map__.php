@@ -2022,7 +2022,6 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryGraphStream' => 'applications/repository/daemon/PhabricatorRepositoryGraphStream.php',
     'PhabricatorRepositoryListController' => 'applications/repository/controller/PhabricatorRepositoryListController.php',
     'PhabricatorRepositoryManagementCacheWorkflow' => 'applications/repository/management/PhabricatorRepositoryManagementCacheWorkflow.php',
-    'PhabricatorRepositoryManagementDeleteWorkflow' => 'applications/repository/management/PhabricatorRepositoryManagementDeleteWorkflow.php',
     'PhabricatorRepositoryManagementDiscoverWorkflow' => 'applications/repository/management/PhabricatorRepositoryManagementDiscoverWorkflow.php',
     'PhabricatorRepositoryManagementEditWorkflow' => 'applications/repository/management/PhabricatorRepositoryManagementEditWorkflow.php',
     'PhabricatorRepositoryManagementImportingWorkflow' => 'applications/repository/management/PhabricatorRepositoryManagementImportingWorkflow.php',
@@ -4831,6 +4830,7 @@ phutil_register_library_map(array(
       1 => 'PhabricatorPolicyInterface',
       2 => 'PhabricatorFlaggableInterface',
       3 => 'PhabricatorMarkupInterface',
+      4 => 'PhabricatorDestructableInterface',
     ),
     'PhabricatorRepositoryArcanistProject' =>
     array(
@@ -4872,7 +4872,6 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryGraphStream' => 'Phobject',
     'PhabricatorRepositoryListController' => 'PhabricatorRepositoryController',
     'PhabricatorRepositoryManagementCacheWorkflow' => 'PhabricatorRepositoryManagementWorkflow',
-    'PhabricatorRepositoryManagementDeleteWorkflow' => 'PhabricatorRepositoryManagementWorkflow',
     'PhabricatorRepositoryManagementDiscoverWorkflow' => 'PhabricatorRepositoryManagementWorkflow',
     'PhabricatorRepositoryManagementEditWorkflow' => 'PhabricatorRepositoryManagementWorkflow',
     'PhabricatorRepositoryManagementImportingWorkflow' => 'PhabricatorRepositoryManagementWorkflow',
