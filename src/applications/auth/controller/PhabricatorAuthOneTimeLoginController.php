@@ -102,18 +102,9 @@ final class PhabricatorAuthOneTimeLoginController
         $token->delete();
 
         if ($target_email) {
-          $target_user->openTransaction();
-            $target_email->setIsVerified(1);
-            $target_email->save();
-
-            // If this was the user's primary email address, also mark their
-            // account as verified.
-            $primary_email = $target_user->loadPrimaryEmail();
-            if ($primary_email->getID() == $target_email->getID()) {
-              $target_user->setIsEmailVerified(1);
-              $target_user->save();
-            }
-          $target_user->saveTransaction();
+          id(new PhabricatorUserEditor())
+            ->setActor($target_user)
+            ->verifyEmail($target_user, $target_email);
         }
       unset($unguarded);
 
