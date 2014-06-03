@@ -62,8 +62,7 @@ final class PhabricatorSearchManagementIndexWorkflow
     }
 
     if (!$phids) {
-      throw new PhutilArgumentUsageException(
-        "Nothing to index!");
+      throw new PhutilArgumentUsageException('Nothing to index!');
     }
 
     if ($args->getArg('background')) {
@@ -73,27 +72,31 @@ final class PhabricatorSearchManagementIndexWorkflow
       $is_background = false;
     }
 
+    if (!$is_background) {
+      $console->writeOut(
+        "%s\n",
+        pht(
+          'Run this workflow with "--background" to queue tasks for the '.
+          'daemon workers.'));
+    }
+
     $groups = phid_group_by_type($phids);
     foreach ($groups as $group_type => $group) {
       $console->writeOut(
         "%s\n",
-        pht(
-          "Indexing %d object(s) of type %s.",
-          count($group),
-          $group_type));
+        pht('Indexing %d object(s) of type %s.', count($group), $group_type));
     }
+
+    $bar = id(new PhutilConsoleProgressBar())
+      ->setTotal(count($phids));
 
     $indexer = new PhabricatorSearchIndexer();
     foreach ($phids as $phid) {
-      if ($is_background) {
-        $console->writeOut("%s\n", pht("Queueing '%s'...", $phid));
-      } else {
-        $console->writeOut("%s\n", pht("Indexing '%s'...", $phid));
-      }
       $indexer->queueDocumentForIndexing($phid);
+      $bar->update(1);
     }
 
-    $console->writeOut("Done.\n");
+    $bar->done();
   }
 
   private function loadPHIDsByNames(array $names) {
