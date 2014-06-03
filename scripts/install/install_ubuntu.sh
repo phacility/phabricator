@@ -64,21 +64,21 @@ fi
 
 if [ ! -e libphutil ]
 then
-  git clone git://github.com/phacility/libphutil.git
+  git clone https://github.com/phacility/libphutil.git
 else
   (cd libphutil && git pull --rebase)
 fi
 
 if [ ! -e arcanist ]
 then
-  git clone git://github.com/phacility/arcanist.git
+  git clone https://github.com/phacility/arcanist.git
 else
   (cd arcanist && git pull --rebase)
 fi
 
 if [ ! -e phabricator ]
 then
-  git clone git://github.com/phacility/phabricator.git
+  git clone https://github.com/phacility/phabricator.git
 else
   (cd phabricator && git pull --rebase)
 fi

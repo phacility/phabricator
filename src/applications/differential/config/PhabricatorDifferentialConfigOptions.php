@@ -165,6 +165,17 @@ final class PhabricatorDifferentialConfigOptions
             "where the reviewer is often the actual committer can benefit ".
             "from turning this option to true. If false, only the submitter ".
             "can close a revision.")),
+      $this->newOption('differential.always-allow-abandon', 'bool', false)
+        ->setBoolOptions(
+          array(
+            pht('Allow any user'),
+            pht('Restrict to submitter'),
+          ))
+        ->setSummary(pht('Allows any user to abandon revisions.'))
+        ->setDescription(
+          pht(
+            'If you set this to true, any user can abandon any revision. If '.
+            'false, only the submitter can abandon a revision.')),
       $this->newOption('differential.allow-reopen', 'bool', false)
         ->setBoolOptions(
           array(

@@ -41,7 +41,6 @@ JX.behavior('aphlict-listen', function(config) {
         new JX.Notification()
           .setContent('(Aphlict) [' + type + '] ' + details)
           .alterClassName('jx-notification-debug', true)
-          .setDuration(0)
           .show();
       }
     }

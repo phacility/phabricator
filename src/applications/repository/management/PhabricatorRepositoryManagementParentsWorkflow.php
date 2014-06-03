@@ -100,35 +100,50 @@ final class PhabricatorRepositoryManagementParentsWorkflow
     $bar = id(new PhutilConsoleProgressBar())
       ->setTotal(count($graph));
 
+    $need = array();
     foreach ($graph as $child => $parents) {
-      $names = $parents;
-      $names[] = $child;
+      foreach ($parents as $parent) {
+        $need[$parent] = $parent;
+      }
+      $need[$child] = $child;
+    }
 
+    $map = array();
+    foreach (array_chunk($need, 2048) as $chunk) {
       $rows = queryfx_all(
         $conn_w,
         'SELECT id, commitIdentifier FROM %T
           WHERE commitIdentifier IN (%Ls) AND repositoryID = %d',
         $commit_table_name,
-        $names,
+        $chunk,
         $repo->getID());
+      foreach ($rows as $row) {
+        $map[$row['commitIdentifier']] = $row['id'];
+      }
+    }
 
-      $map = ipull($rows, 'id', 'commitIdentifier');
+    $insert_sql = array();
+    $delete_sql = array();
+
+    foreach ($graph as $child => $parents) {
+      $names = $parents;
+      $names[] = $child;
+
       foreach ($names as $name) {
         if (empty($map[$name])) {
           throw new Exception(pht('Unknown commit "%s"!', $name));
         }
       }
 
-      $sql = array();
       if (!$parents) {
         // Write an explicit 0 to indicate "no parents" instead of "no data".
-        $sql[] = qsprintf(
+        $insert_sql[] = qsprintf(
           $conn_w,
           '(%d, 0)',
           $map[$child]);
       } else {
         foreach ($parents as $parent) {
-          $sql[] = qsprintf(
+          $insert_sql[] = qsprintf(
             $conn_w,
             '(%d, %d)',
             $map[$child],
@@ -136,24 +151,28 @@ final class PhabricatorRepositoryManagementParentsWorkflow
         }
       }
 
-      $commit_table->openTransaction();
-        queryfx(
-          $conn_w,
-          'DELETE FROM %T WHERE childCommitID = %d',
-          PhabricatorRepository::TABLE_PARENTS,
-          $map[$child]);
-
-        if ($sql) {
-          queryfx(
-            $conn_w,
-            'INSERT INTO %T (childCommitID, parentCommitID) VALUES %Q',
-            PhabricatorRepository::TABLE_PARENTS,
-            implode(', ', $sql));
-        }
-      $commit_table->saveTransaction();
+      $delete_sql[] = $map[$child];
 
       $bar->update(1);
     }
+
+    $commit_table->openTransaction();
+    foreach (PhabricatorLiskDAO::chunkSQL($delete_sql) as $chunk) {
+      queryfx(
+        $conn_w,
+        'DELETE FROM %T WHERE childCommitID IN (%Q)',
+        PhabricatorRepository::TABLE_PARENTS,
+        $chunk);
+    }
+
+    foreach (PhabricatorLiskDAO::chunkSQL($insert_sql) as $chunk) {
+      queryfx(
+        $conn_w,
+        'INSERT INTO %T (childCommitID, parentCommitID) VALUES %Q',
+        PhabricatorRepository::TABLE_PARENTS,
+        $chunk);
+    }
+    $commit_table->saveTransaction();
 
     $bar->done();
   }

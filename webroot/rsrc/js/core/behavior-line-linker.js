@@ -10,7 +10,13 @@ JX.behavior('phabricator-line-linker', function() {
   var origin = null;
   var target = null;
   var root = null;
-  var editor_link = JX.$('editor_link');
+
+  var editor_link = null;
+  try {
+    editor_link = JX.$('editor_link');
+  } catch (ex) {
+    // Ignore.
+  }
 
   function getRowNumber(tr) {
     var th = JX.DOM.find(tr, 'th', 'phabricator-source-line');

@@ -2,7 +2,8 @@
 
 final class PhabricatorProjectColumn
   extends PhabricatorProjectDAO
-  implements PhabricatorPolicyInterface {
+  implements PhabricatorPolicyInterface,
+  PhabricatorDestructableInterface {
 
   const STATUS_ACTIVE = 0;
   const STATUS_DELETED = 1;
@@ -85,6 +86,17 @@ final class PhabricatorProjectColumn
 
   public function describeAutomaticCapability($capability) {
     return pht('Users must be able to see a project to see its board.');
+  }
+
+
+/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+    $this->delete();
+    $this->saveTransaction();
   }
 
 }
