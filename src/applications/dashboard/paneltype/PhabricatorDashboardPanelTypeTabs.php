@@ -25,6 +25,11 @@ final class PhabricatorDashboardPanelTypeTabs
     );
   }
 
+  public function shouldRenderAsync() {
+    // The actual tab panel itself is cheap to render.
+    return false;
+  }
+
   public function renderPanelContent(
     PhabricatorUser $viewer,
     PhabricatorDashboardPanel $panel,
