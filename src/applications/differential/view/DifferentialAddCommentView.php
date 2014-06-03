@@ -91,7 +91,7 @@ final class DifferentialAddCommentView extends AphrontView {
           ->setDisableBehavior(true))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setLabel(pht('Add CCs'))
+          ->setLabel(pht('Add Subscribers'))
           ->setName('ccs')
           ->setControlID('add-ccs')
           ->setControlStyle($enable_ccs ? null : 'display: none')

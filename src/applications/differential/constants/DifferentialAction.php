@@ -113,7 +113,7 @@ final class DifferentialAction {
       self::ACTION_RECLAIM        => pht('Reclaim Revision'),
       self::ACTION_RESIGN         => pht('Resign as Reviewer'),
       self::ACTION_ADDREVIEWERS   => pht('Add Reviewers'),
-      self::ACTION_ADDCCS         => pht('Add CCs'),
+      self::ACTION_ADDCCS         => pht('Add Subscribers'),
       self::ACTION_CLOSE          => pht('Close Revision'),
       self::ACTION_CLAIM          => pht('Commandeer Revision'),
       self::ACTION_REOPEN         => pht('Reopen'),
