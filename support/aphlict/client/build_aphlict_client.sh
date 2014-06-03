@@ -12,6 +12,7 @@ set -e
 
 $MXMLC \
   -output=$ROOT/webroot/rsrc/swf/aphlict.swf \
+  -strict=true \
   -warnings=true \
   -source-path=$ROOT/externals/vegas/src \
   -static-link-runtime-shared-libraries=true \
