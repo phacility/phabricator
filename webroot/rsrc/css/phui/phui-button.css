@@ -78,6 +78,7 @@ a.simple:visited {
   background-image: none;
   border: 1px solid transparent;
   color: {$bluetext};
+  border: 1px solid {$lightblueborder};
   text-shadow: 0 1px #fff;
 }
 

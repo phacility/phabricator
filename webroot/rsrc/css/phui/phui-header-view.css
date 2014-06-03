@@ -56,7 +56,12 @@ body .phui-header-shell.phui-bleed-header
 
 .phui-object-box .phui-header-view .phui-header-action-links {
   top: 5px;
-  right: 0;
+  right: 3px;
+}
+
+.phui-object-box .phui-header-has-image .phui-header-view
+ .phui-header-action-links {
+  top: 15px;
 }
 
 .phui-document-view .phui-header-view .phui-header-action-links {
@@ -67,7 +72,7 @@ body .phui-header-shell.phui-bleed-header
 .device-phone .phui-header-action-link .phui-button-text {
   visibility: hidden;
   width: 0;
-  margin-left: 12px;
+  margin-left: 8px;
 }
 
 .phui-header-divider {
