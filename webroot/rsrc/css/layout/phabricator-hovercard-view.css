@@ -25,6 +25,20 @@
   background-color: #fff;
 }
 
+.phabricator-hovercard-head {
+  border-bottom: 1px solid {$thinblueborder};
+}
+
+.phabricator-hovercard-head .phabricator-action-header {
+  border-top-right-radius: 3px;
+  border-top-left-radius: 3px;
+}
+
+.phabricator-hovercard-head .phui-tag-type-state {
+  color: {$bluetext};
+  text-shadow: none;
+}
+
 .phabricator-hovercard-tags {
   float: right;
   white-space: normal;
@@ -39,15 +53,19 @@
   border-bottom-left-radius: 3px;
 }
 
-.phabricator-hovercard-body-header,
-.phabricator-hovercard-body-item {
+.phabricator-hovercard-body-header {
   margin: 0 0 0 8px;
+}
+
+.phabricator-hovercard-body-item {
+  margin: 2px 0 0 8px;
 }
 
 .phabricator-hovercard-body-header {
   font-size: 14px;
   padding-bottom: 4px;
   color: {$darkgreytext};
+  line-height: 18px;
 }
 
 .phabricator-hovercard-body .phabricator-hovercard-body-image {
@@ -74,10 +92,10 @@
 .phabricator-hovercard-tail {
   width: 396px;
   float: left;
-  padding: 3px 2px;
-  background-color: #eeeeee;
-  border-bottom-left-radius: 2px;
-  border-bottom-right-radius: 2px;
+  padding: 2px;
+  border-top: 1px solid {$thinblueborder};
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
 }
 
 .phabricator-hovercard-tail button,
