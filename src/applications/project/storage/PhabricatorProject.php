@@ -5,7 +5,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     PhabricatorFlaggableInterface,
     PhabricatorPolicyInterface,
     PhabricatorSubscribableInterface,
-    PhabricatorCustomFieldInterface {
+    PhabricatorCustomFieldInterface,
+    PhabricatorDestructableInterface {
 
   protected $name;
   protected $status = PhabricatorProjectStatus::STATUS_ACTIVE;
@@ -246,5 +247,28 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return $this;
   }
 
+
+/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $this->delete();
+
+      $columns = id(new PhabricatorProjectColumn())
+        ->loadAllWhere('projectPHID = %s', $this->getPHID());
+      foreach ($columns as $column) {
+        $engine->destroyObject($column);
+      }
+
+      $slugs = id(new PhabricatorProjectSlug())
+        ->loadAllWhere('projectPHID = %s', $this->getPHID());
+      foreach ($slugs as $slug) {
+        $slug->delete();
+      }
+
+    $this->saveTransaction();
+  }
 
 }
