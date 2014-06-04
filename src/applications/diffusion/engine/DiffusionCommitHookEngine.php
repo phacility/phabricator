@@ -695,8 +695,8 @@ final class DiffusionCommitHookEngine extends Phobject {
     $futures['old']->updateEnv('HG_PENDING', null);
 
     $futures['commits'] = $repository->getLocalCommandFuture(
-      "log --rev %s --rev tip --template %s",
-      hgsprintf('%s', $hg_node),
+      'log --rev %s --template %s',
+      hgsprintf('%s:%s', $hg_node, 'tip'),
       '{node}\1{branches}\2');
 
     // Resolve all of the futures now. We don't need the 'commits' future yet,
