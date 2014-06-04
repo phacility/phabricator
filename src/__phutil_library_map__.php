@@ -4663,6 +4663,7 @@ phutil_register_library_map(array(
       2 => 'PhabricatorTokenReceiverInterface',
       3 => 'PhabricatorFlaggableInterface',
       4 => 'PhabricatorPolicyInterface',
+      5 => 'PhabricatorProjectInterface',
     ),
     'PhabricatorPasteCommentController' => 'PhabricatorPasteController',
     'PhabricatorPasteConfigOptions' => 'PhabricatorApplicationConfigOptions',
