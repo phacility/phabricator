@@ -163,6 +163,10 @@ abstract class PhabricatorApplicationTransactionEditor
       $types[] = PhabricatorTransactions::TYPE_TOKEN;
     }
 
+    if ($this->object instanceof PhabricatorProjectInterface) {
+      $types[] = PhabricatorTransactions::TYPE_EDGE;
+    }
+
     return $types;
   }
 
@@ -1079,6 +1083,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
     // TODO: For now, this is just a placeholder.
     $engine = PhabricatorMarkupEngine::getEngine('extract');
+    $engine->setConfig('viewer', $this->requireActor());
 
     $block_xactions = $this->expandRemarkupBlockTransactions(
       $object,
@@ -1098,11 +1103,41 @@ abstract class PhabricatorApplicationTransactionEditor
     array $xactions,
     $blocks,
     PhutilMarkupEngine $engine) {
-    return $this->expandCustomRemarkupBlockTransactions(
+
+    $block_xactions = $this->expandCustomRemarkupBlockTransactions(
       $object,
       $xactions,
       $blocks,
       $engine);
+
+    if ($object instanceof PhabricatorProjectInterface) {
+      $phids = array();
+      foreach ($blocks as $key => $xaction_blocks) {
+        foreach ($xaction_blocks as $block) {
+          $engine->markupText($block);
+          $phids += $engine->getTextMetadata(
+            PhabricatorRemarkupRuleObject::KEY_MENTIONED_OBJECTS,
+            array());
+        }
+      }
+
+      $project_type = PhabricatorProjectPHIDTypeProject::TYPECONST;
+      foreach ($phids as $key => $phid) {
+        if (phid_get_type($phid) != $project_type) {
+          unset($phids[$key]);
+        }
+      }
+
+      if ($phids) {
+        $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT;
+        $block_xactions[] = newv(get_class(head($xactions)), array())
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+          ->setMetadataValue('edge:type', $edge_type)
+          ->setNewValue(array('+' => $phids));
+      }
+    }
+
+    return $block_xactions;
   }
 
   protected function expandCustomRemarkupBlockTransactions(
@@ -1899,13 +1934,12 @@ abstract class PhabricatorApplicationTransactionEditor
       $has_support = true;
     }
 
-    // TODO: This should be some interface which specifies that the object
-    // has project associations.
-    if ($object instanceof ManiphestTask) {
+    // TODO: The Maniphest legacy stuff should get cleaned up here.
 
-      // TODO: This is what normal objects would do, but Maniphest is still
-      // behind the times.
-      if (false) {
+    if (($object instanceof ManiphestTask) ||
+        ($object instanceof PhabricatorProjectInterface)) {
+
+      if ($object instanceof PhabricatorProjectInterface) {
         $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
           $object->getPHID(),
           PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT);

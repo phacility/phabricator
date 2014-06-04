@@ -32,6 +32,12 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
     );
   }
 
+  public function getEventListeners() {
+    return array(
+      new PhabricatorProjectUIEventListener(),
+    );
+  }
+
   public function getRoutes() {
     return array(
       '/project/' => array(
