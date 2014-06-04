@@ -291,6 +291,10 @@ a.toggle-fixed {
   left: 8px;
 }
 
+.phui-button-bar .button .phui-icon-view {
+  left: 11px;
+}
+
 .button.has-icon .phui-button-text {
   margin-left: 16px;
 }

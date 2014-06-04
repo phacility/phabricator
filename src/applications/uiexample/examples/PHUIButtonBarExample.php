@@ -16,15 +16,14 @@ final class PHUIButtonBarExample extends PhabricatorUIExample {
 
     // Icon Buttons
     $icons = array(
-      'Go Back' => 'chevron-left',
-      'Choose Date' => 'calendar',
-      'Edit View' => 'pencil',
-      'Go Forward' => 'chevron-right');
+      'Go Back' => 'fa-chevron-left bluegrey',
+      'Choose Date' => 'fa-calendar bluegrey',
+      'Edit View' => 'fa-pencil bluegrey',
+      'Go Forward' => 'fa-chevron-right bluegrey');
     $button_bar = new PHUIButtonBarView();
     foreach ($icons as $text => $icon) {
       $image = id(new PHUIIconView())
-          ->setSpriteSheet(PHUIIconView::SPRITE_BUTTONBAR)
-          ->setSpriteIcon($icon);
+          ->setIconFont($icon);
       $button = id(new PHUIButtonView())
         ->setTag('a')
         ->setColor(PHUIButtonView::GREY)
