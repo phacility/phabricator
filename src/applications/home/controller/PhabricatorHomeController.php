@@ -32,11 +32,12 @@ abstract class PhabricatorHomeController extends PhabricatorController {
       $applications,
       $user);
 
-    // Put "Applications" at the bottom.
+    // Force "Applications" to appear at the bottom.
     $meta_app = 'PhabricatorApplicationApplications';
     $pinned = array_fuse($pinned);
     unset($pinned[$meta_app]);
     $pinned[$meta_app] = $meta_app;
+    $applications[$meta_app] = PhabricatorApplication::getByClass($meta_app);
 
     $tiles = array();
     foreach ($pinned as $pinned_application) {
