@@ -8,7 +8,7 @@ return array(
   'names' =>
   array(
     'core.pkg.css' => 'f16eaa39',
-    'core.pkg.js' => '639b2433',
+    'core.pkg.js' => '8325407e',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => '4a93db37',
     'differential.pkg.js' => 'eca39a2c',
@@ -462,7 +462,7 @@ return array(
     'rsrc/js/core/behavior-object-selector.js' => 'e6f67523',
     'rsrc/js/core/behavior-oncopy.js' => 'c3e218fe',
     'rsrc/js/core/behavior-phabricator-nav.js' => 'b5842a5e',
-    'rsrc/js/core/behavior-phabricator-remarkup-assist.js' => 'c021950a',
+    'rsrc/js/core/behavior-phabricator-remarkup-assist.js' => 'ddee74db',
     'rsrc/js/core/behavior-refresh-csrf.js' => '7814b593',
     'rsrc/js/core/behavior-remarkup-preview.js' => 'f7379f45',
     'rsrc/js/core/behavior-reorder-applications.js' => 'a8e3795d',
@@ -605,7 +605,7 @@ return array(
     'javelin-behavior-phabricator-notification-example' => 'c51a6616',
     'javelin-behavior-phabricator-object-selector' => 'e6f67523',
     'javelin-behavior-phabricator-oncopy' => 'c3e218fe',
-    'javelin-behavior-phabricator-remarkup-assist' => 'c021950a',
+    'javelin-behavior-phabricator-remarkup-assist' => 'ddee74db',
     'javelin-behavior-phabricator-reveal-content' => '8f24abfc',
     'javelin-behavior-phabricator-search-typeahead' => '86549ee3',
     'javelin-behavior-phabricator-show-all-transactions' => '7c273581',
@@ -1745,16 +1745,6 @@ return array(
       1 => 'javelin-dom',
       2 => 'javelin-reactor-dom',
     ),
-    'c021950a' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-stratcom',
-      2 => 'javelin-dom',
-      3 => 'phabricator-phtize',
-      4 => 'phabricator-textareautils',
-      5 => 'javelin-workflow',
-      6 => 'javelin-vector',
-    ),
     'c293f7b9' =>
     array(
       0 => 'javelin-install',
@@ -1914,6 +1904,16 @@ return array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
       2 => 'phabricator-prefab',
+    ),
+    'ddee74db' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-dom',
+      3 => 'phabricator-phtize',
+      4 => 'phabricator-textareautils',
+      5 => 'javelin-workflow',
+      6 => 'javelin-vector',
     ),
     'e1ff79b1' =>
     array(
