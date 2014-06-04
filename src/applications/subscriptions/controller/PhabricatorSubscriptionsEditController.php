@@ -37,10 +37,24 @@ final class PhabricatorSubscriptionsEditController
       ->withPHIDs(array($phid))
       ->executeOne();
 
-    $object = id(new PhabricatorObjectQuery())
-      ->setViewer($user)
-      ->withPHIDs(array($phid))
-      ->executeOne();
+    if (phid_get_type($phid) == PhabricatorProjectPHIDTypeProject::TYPECONST) {
+      // TODO: This is a big hack, but a weak argument for adding some kind
+      // of "load for role" feature to ObjectQuery, and also not a really great
+      // argument for adding some kind of "load extra stuff" feature to
+      // SubscriberInterface. Do this for now and wait for the best way forward
+      // to become more clear?
+
+      $object = id(new PhabricatorProjectQuery())
+        ->setViewer($user)
+        ->withPHIDs(array($phid))
+        ->needWatchers(true)
+        ->executeOne();
+    } else {
+      $object = id(new PhabricatorObjectQuery())
+        ->setViewer($user)
+        ->withPHIDs(array($phid))
+        ->executeOne();
+    }
 
     if (!($object instanceof PhabricatorSubscribableInterface)) {
       return $this->buildErrorResponse(
