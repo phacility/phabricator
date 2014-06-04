@@ -131,9 +131,8 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
         break;
       case 'code':
         sel = sel || "foreach ($list as $item) {\n  work_miracles($item);\n}";
-        sel = sel.split("\n");
-        sel = "  " + sel.join("\n  ");
-        update(area, ((r.start === 0) ? "" : "\n\n"), sel, "\n\n");
+        var prefix = (r.start === 0) ? "" : "\n";
+        update(area, prefix + "```\n", sel, "\n```");
         break;
       case 'table':
         var prefix = (r.start === 0 ? '' : '\n\n');

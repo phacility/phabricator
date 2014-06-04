@@ -126,7 +126,7 @@ daemons launch, and split daemons across machines like this:
 
 A gratuitously wasteful install might have a dedicated daemon machine which
 runs `phd start` with a large pool of taskmasters set in the config, and then
-runs `phd launch PhabricatorRepositoryPullLocalDaemon --no-discovery` on each
+runs `phd launch PhabricatorRepositoryPullLocalDaemon -- --no-discovery` on each
 web server. This is grossly excessive in normal cases.
 
 = Next Steps =

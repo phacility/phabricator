@@ -1284,18 +1284,19 @@ final class DifferentialTransactionEditor
       $changeset_ids[$id] = $id;
     }
 
-    if ($show_context) {
-      $hunk_parser = new DifferentialHunkParser();
-      $changesets = id(new DifferentialChangesetQuery())
-        ->setViewer($this->getActor())
-        ->withIDs($changeset_ids)
-        ->needHunks(true)
-        ->execute();
-    }
+    $changesets = id(new DifferentialChangesetQuery())
+      ->setViewer($this->getActor())
+      ->withIDs($changeset_ids)
+      ->needHunks(true)
+      ->execute();
 
     $inline_groups = DifferentialTransactionComment::sortAndGroupInlines(
       $inlines,
       $changesets);
+
+    if ($show_context) {
+      $hunk_parser = new DifferentialHunkParser();
+    }
 
     $result = array();
     foreach ($inline_groups as $changeset_id => $group) {

@@ -18,6 +18,11 @@
   max-width: 800px;
 }
 
+/* Fix so that Phriction Document preview is the same width as the document */
+.device-desktop .phui-remarkup-preview .phui-document-view {
+  width: 800px;
+}
+
 .phui-document-sidenav {
   position:absolute;
   width: 200px;
