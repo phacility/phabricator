@@ -494,6 +494,65 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
   }
 
 
+  /**
+   * Verify a user's email address.
+   *
+   * This verifies an individual email address. If the address is the user's
+   * primary address and their account was not previously verified, their
+   * account is marked as email verified.
+   *
+   * @task email
+   */
+  public function verifyEmail(
+    PhabricatorUser $user,
+    PhabricatorUserEmail $email) {
+    $actor = $this->requireActor();
+
+    if (!$user->getID()) {
+      throw new Exception('User has not been created yet!');
+    }
+    if (!$email->getID()) {
+      throw new Exception('Email has not been created yet!');
+    }
+
+    $user->openTransaction();
+      $user->beginWriteLocking();
+
+        $user->reload();
+        $email->reload();
+
+        if ($email->getUserPHID() != $user->getPHID()) {
+          throw new Exception(pht('User does not own email!'));
+        }
+
+        if (!$email->getIsVerified()) {
+          $email->setIsVerified(1);
+          $email->save();
+
+          $log = PhabricatorUserLog::initializeNewLog(
+            $actor,
+            $user->getPHID(),
+            PhabricatorUserLog::ACTION_EMAIL_VERIFY);
+          $log->setNewValue($email->getAddress());
+          $log->save();
+        }
+
+        if (!$user->getIsEmailVerified()) {
+          // If the user just verified their primary email address, mark their
+          // account as email verified.
+          $user_primary = $user->loadPrimaryEmail();
+          if ($user_primary->getID() == $email->getID()) {
+            $user->setIsEmailVerified(1);
+            $user->save();
+          }
+        }
+
+      $user->endWriteLocking();
+    $user->saveTransaction();
+
+  }
+
+
 /* -(  Internals  )---------------------------------------------------------- */
 
 

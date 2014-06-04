@@ -7,6 +7,29 @@ abstract class PhabricatorDashboardPanelType extends Phobject {
   abstract public function getPanelTypeDescription();
   abstract public function getFieldSpecifications();
 
+  abstract public function renderPanelContent(
+    PhabricatorUser $viewer,
+    PhabricatorDashboardPanel $panel,
+    PhabricatorDashboardPanelRenderingEngine $engine);
+
+  /**
+   * Should this panel pull content in over AJAX?
+   *
+   * Normally, panels use AJAX to render their content. This makes the page
+   * interactable sooner, allows panels to render in parallel, and prevents one
+   * slow panel from slowing everything down.
+   *
+   * However, some panels are very cheap to build (i.e., no expensive service
+   * calls or complicated rendering). In these cases overall performance can be
+   * improved by disabling async rendering so the panel rendering happens in the
+   * same process.
+   *
+   * @return bool True to enable asynchronous rendering when appropriate.
+   */
+  public function shouldRenderAsync() {
+    return true;
+  }
+
   public static function getAllPanelTypes() {
     static $types;
 
@@ -38,21 +61,6 @@ abstract class PhabricatorDashboardPanelType extends Phobject {
     }
 
     return $types;
-  }
-
-
-
-  public function renderPanelContent(
-    PhabricatorUser $viewer,
-    PhabricatorDashboardPanel $panel,
-    PhabricatorDashboardPanelRenderingEngine $engine) {
-    return pht('TODO: Panel content goes here.');
-  }
-
-  public function shouldRenderAsync() {
-    // TODO: For now, just make these things random so we can catch anything
-    // that breaks.
-    return (mt_rand(0, 1) == 1);
   }
 
 }

@@ -1,22 +1,29 @@
 <?php
 
 final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
+
   private function createComment() {
     $comment = new DifferentialInlineComment();
     return $comment;
   }
 
+  private function createHunk(
+    $old_offset,
+    $old_len,
+    $new_offset,
+    $new_len,
+    $changes) {
 
+    $hunk = id(new DifferentialHunkModern())
+      ->setOldOffset($old_offset)
+      ->setOldLen($old_len)
+      ->setNewOffset($new_offset)
+      ->setNewLen($new_len)
+      ->setChanges($changes);
 
-  private function createHunk($oldOffset, $oldLen, $newOffset, $newLen, $changes) {
-    $hunk = new DifferentialHunk();
-    $hunk->setOldOffset($oldOffset);
-    $hunk->setOldLen($oldLen);
-    $hunk->setNewOffset($newOffset);
-    $hunk->setNewLen($newLen);
-    $hunk->setChanges($changes);
     return $hunk;
   }
+
   // Returns a change that consists of a single hunk, starting at line 1.
   private function createSingleChange($old_lines, $new_lines, $changes) {
     return array(

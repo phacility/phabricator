@@ -153,7 +153,16 @@ final class PhabricatorAuthManagementStripWorkflow
     $console->writeOut("%s\n", pht('Stripping authentication factors...'));
 
     foreach ($factors as $factor) {
+      $user = id(new PhabricatorPeopleQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs(array($factor->getUserPHID()))
+        ->executeOne();
+
       $factor->delete();
+
+      if ($user) {
+        $user->updateMultiFactorEnrollment();
+      }
     }
 
     $console->writeOut("%s\n", pht('Done.'));

@@ -101,6 +101,8 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
           => 'PhabricatorAuthTerminateSessionController',
         'session/downgrade/'
           => 'PhabricatorAuthDowngradeSessionController',
+        'multifactor/'
+          => 'PhabricatorAuthNeedsMultiFactorController',
       ),
 
       '/oauth/(?P<provider>\w+)/login/'

@@ -3,6 +3,7 @@
 /**
  * @task immutable  Immutable Cache
  * @task setup      Setup Cache
+ * @task compress   Compression
  */
 final class PhabricatorCaches {
 
@@ -282,5 +283,65 @@ final class PhabricatorCaches {
 
     return $caches;
   }
+
+
+  /**
+   * Deflate a value, if deflation is available and has an impact.
+   *
+   * If the value is larger than 1KB, we have `gzdeflate()`, we successfully
+   * can deflate it, and it benefits from deflation, we deflate it. Otherwise
+   * we leave it as-is.
+   *
+   * Data can later be inflated with @{method:inflateData}.
+   *
+   * @param string String to attempt to deflate.
+   * @return string|null Deflated string, or null if it was not deflated.
+   * @task compress
+   */
+  public static function maybeDeflateData($value) {
+    $len = strlen($value);
+    if ($len <= 1024) {
+      return null;
+    }
+
+    if (!function_exists('gzdeflate')) {
+      return null;
+    }
+
+    $deflated = gzdeflate($value);
+    if ($deflated === false) {
+      return null;
+    }
+
+    $deflated_len = strlen($deflated);
+    if ($deflated_len >= ($len / 2)) {
+      return null;
+    }
+
+    return $deflated;
+  }
+
+
+  /**
+   * Inflate data previously deflated by @{method:maybeDeflateData}.
+   *
+   * @param string Deflated data, from @{method:maybeDeflateData}.
+   * @return string Original, uncompressed data.
+   * @task compress
+   */
+  public static function inflateData($value) {
+    if (!function_exists('gzinflate')) {
+      throw new Exception(
+        pht('gzinflate() is not available; unable to read deflated data!'));
+    }
+
+    $value = gzinflate($value);
+    if ($value === false) {
+      throw new Exception(pht('Failed to inflate data!'));
+    }
+
+    return $value;
+  }
+
 
 }

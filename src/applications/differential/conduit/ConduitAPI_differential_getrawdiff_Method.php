@@ -31,23 +31,19 @@ final class ConduitAPI_differential_getrawdiff_Method
     $diff = id(new DifferentialDiffQuery())
       ->withIDs(array($diff_id))
       ->setViewer($viewer)
+      ->needChangesets(true)
       ->executeOne();
 
     if (!$diff) {
       throw new ConduitException('ERR_NOT_FOUND');
     }
 
-    $changesets = $diff->loadChangesets();
-    foreach ($changesets as $changeset) {
-      $changeset->attachHunks(
-        $changeset->loadHunks());
-    }
+    $renderer = id(new DifferentialRawDiffRenderer())
+      ->setChangesets($diff->getChangesets())
+      ->setViewer($viewer)
+      ->setFormat('git');
 
-    $renderer = new DifferentialRawDiffRenderer();
-    $renderer->setChangesets($changesets);
-    $renderer->setViewer($viewer);
-    $renderer->setFormat('git');
     return $renderer->buildPatch();
-
   }
+
 }

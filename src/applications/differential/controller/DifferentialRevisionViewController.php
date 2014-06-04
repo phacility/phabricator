@@ -844,9 +844,11 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $viewer = $this->getRequest()->getUser();
 
-    foreach ($changesets as $changeset) {
-      $changeset->attachHunks($changeset->loadHunks());
-    }
+    id(new DifferentialHunkQuery())
+      ->setViewer($viewer)
+      ->withChangesets($changesets)
+      ->needAttachToChangesets(true)
+      ->execute();
 
     $diff = new DifferentialDiff();
     $diff->attachChangesets($changesets);

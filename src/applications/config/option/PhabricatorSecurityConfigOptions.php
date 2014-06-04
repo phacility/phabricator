@@ -82,6 +82,22 @@ final class PhabricatorSecurityConfigOptions
             pht('Force HTTPS'),
             pht('Allow HTTP'),
           )),
+      $this->newOption('security.require-multi-factor-auth', 'bool', false)
+        ->setLocked(true)
+        ->setSummary(
+          pht('Require all users to configure multi-factor authentication.'))
+        ->setDescription(
+          pht(
+            'By default, Phabricator allows users to add multi-factor '.
+            'authentication to their accounts, but does not require it. '.
+            'By enabling this option, you can force all users to add '.
+            'at least one authentication factor before they can use their '.
+            'accounts.'))
+        ->setBoolOptions(
+          array(
+            pht('Multi-Factor Required'),
+            pht('Multi-Factor Optional'),
+          )),
       $this->newOption(
         'phabricator.csrf-key',
         'string',

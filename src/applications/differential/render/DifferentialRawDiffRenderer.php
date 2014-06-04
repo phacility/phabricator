@@ -37,10 +37,6 @@ final class DifferentialRawDiffRenderer {
   public function buildPatch() {
     $diff = new DifferentialDiff();
     $diff->attachChangesets($this->getChangesets());
-    foreach ($diff->getChangesets() as $changeset) {
-      $changeset->attachHunks(
-        $changeset->loadRelatives(new DifferentialHunk(), 'changesetID'));
-    }
 
     $raw_changes = $diff->buildChangesList();
     $changes = array();

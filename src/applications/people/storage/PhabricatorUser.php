@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @task factors  Multi-Factor Authentication
+ */
 final class PhabricatorUser
   extends PhabricatorUserDAO
   implements
@@ -32,6 +35,7 @@ final class PhabricatorUser
   protected $isDisabled = 0;
   protected $isEmailVerified = 0;
   protected $isApproved = 0;
+  protected $isEnrolledInMultiFactor = 0;
 
   protected $accountSecret;
 
@@ -687,6 +691,59 @@ EOBODY;
     return id(new PhabricatorUser())->loadOneWhere(
       'phid = %s',
       $email->getUserPHID());
+  }
+
+/* -(  Multi-Factor Authentication  )---------------------------------------- */
+
+
+  /**
+   * Update the flag storing this user's enrollment in multi-factor auth.
+   *
+   * With certain settings, we need to check if a user has MFA on every page,
+   * so we cache MFA enrollment on the user object for performance. Calling this
+   * method synchronizes the cache by examining enrollment records. After
+   * updating the cache, use @{method:getIsEnrolledInMultiFactor} to check if
+   * the user is enrolled.
+   *
+   * This method should be called after any changes are made to a given user's
+   * multi-factor configuration.
+   *
+   * @return void
+   * @task factors
+   */
+  public function updateMultiFactorEnrollment() {
+    $factors = id(new PhabricatorAuthFactorConfig())->loadAllWhere(
+      'userPHID = %s',
+      $this->getPHID());
+
+    $enrolled = count($factors) ? 1 : 0;
+    if ($enrolled !== $this->isEnrolledInMultiFactor) {
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        queryfx(
+          $this->establishConnection('w'),
+          'UPDATE %T SET isEnrolledInMultiFactor = %d WHERE id = %d',
+          $this->getTableName(),
+          $enrolled,
+          $this->getID());
+      unset($unguarded);
+
+      $this->isEnrolledInMultiFactor = $enrolled;
+    }
+  }
+
+
+  /**
+   * Check if the user is enrolled in multi-factor authentication.
+   *
+   * Enrolled users have one or more multi-factor authentication sources
+   * attached to their account. For performance, this value is cached. You
+   * can use @{method:updateMultiFactorEnrollment} to update the cache.
+   *
+   * @return bool True if the user is enrolled.
+   * @task factors
+   */
+  public function getIsEnrolledInMultiFactor() {
+    return $this->isEnrolledInMultiFactor;
   }
 
 

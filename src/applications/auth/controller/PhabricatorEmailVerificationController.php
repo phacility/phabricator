@@ -52,20 +52,10 @@ final class PhabricatorEmailVerificationController
         'This email address has already been verified.');
       $continue = pht('Continue to Phabricator');
     } else if ($request->isFormPost()) {
-      $email->openTransaction();
 
-        $email->setIsVerified(1);
-        $email->save();
-
-        // If the user just verified their primary email address, mark their
-        // account as email verified.
-        $user_primary = $user->loadPrimaryEmail();
-        if ($user_primary->getID() == $email->getID()) {
-          $user->setIsEmailVerified(1);
-          $user->save();
-        }
-
-      $email->saveTransaction();
+      id(new PhabricatorUserEditor())
+        ->setActor($user)
+        ->verifyEmail($user, $email);
 
       $title = pht('Address Verified');
       $content = pht(
