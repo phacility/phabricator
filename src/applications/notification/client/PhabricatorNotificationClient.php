@@ -2,7 +2,7 @@
 
 final class PhabricatorNotificationClient {
 
-  const EXPECT_VERSION = 3;
+  const EXPECT_VERSION = 4;
 
   public static function getServerStatus() {
     $uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
@@ -28,7 +28,7 @@ final class PhabricatorNotificationClient {
   public static function postMessage(array $data) {
     $server_uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
 
-    id(new HTTPSFuture($server_uri, $data))
+    id(new HTTPSFuture($server_uri, json_encode($data)))
       ->setMethod('POST')
       ->setTimeout(1)
       ->resolvex();
