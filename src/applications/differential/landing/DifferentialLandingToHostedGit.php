@@ -102,6 +102,7 @@ final class DifferentialLandingToHostedGit
     ArcanistRepositoryAPI $workspace,
     PhabricatorUser $user) {
 
+    putenv('PHABRICATOR_USER=' . $user->getUsername());
     $workspace->execxLocal("push origin HEAD:master");
   }
 
