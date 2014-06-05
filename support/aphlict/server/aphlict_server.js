@@ -120,9 +120,9 @@ var receive_server = http.createServer(function(request, response) {
     request.on('end', function () {
       ++messages_in;
 
-      var data = JSON.parse(body);
-      debug.log('notification: ' + JSON.stringify(data));
-      broadcast(data);
+      var msg = JSON.parse(body);
+      debug.log('notification: ' + JSON.stringify(msg));
+      broadcast(msg.data);
       response.end();
     });
   } else if (request.url == '/status/') {
@@ -139,7 +139,7 @@ var receive_server = http.createServer(function(request, response) {
         'messages.in': messages_in,
         'messages.out': messages_out,
         'log': config.log,
-        'version': 4
+        'version': 5
       };
 
       response.write(JSON.stringify(status));
