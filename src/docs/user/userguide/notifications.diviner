@@ -26,7 +26,7 @@ Phabricator implements realtime notifications using a Node.js server called
 "Aphlict". To run it:
 
   - Install node.js.
-  - Run `bin/aphlict` (this script must be run as root).
+  - Run `bin/aphlict start` (this script must be run as root).
 
 The server must be able to listen on port **843** and port **22280** for Aphlict
 to work. You can change the latter port in the `notification.client-uri` config,
@@ -67,7 +67,7 @@ NOTE: This is cumbersome. There will be better testing tools at some point.
 
 You can run `aphlict` in the foreground to get output to your console:
 
-  phabricator/ $ sudo ./bin/aphlict --foreground
+  phabricator/ $ sudo ./bin/aphlict debug
 
 You can run `support/aphlict/client/aphlict_test_client.php` to connect to the
 Aphlict server from the command line. Messages the client receives will be
