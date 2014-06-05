@@ -91,7 +91,6 @@ return array(
     'phabricator-flag-css',
     'aphront-error-view-css',
 
-    'sprite-remarkup-css',
     'sprite-gradient-css',
     'sprite-menu-css',
     'sprite-apps-css',
