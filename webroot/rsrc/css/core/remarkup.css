@@ -314,7 +314,7 @@
   border-left-color: {$blueborder};
   border-right-color: {$blueborder};
   border-bottom-color: {$blueborder};
-  border-top-color: {$lightblueborder};
+  border-top-color: {$thinblueborder};
   border-radius: 0;
 
   /* Prevent Safari and Chrome users from dragging the textarea any wider,
@@ -327,9 +327,7 @@
 }
 
 .remarkup-assist-bar {
-  height: 27px;
-  padding: 0 2px;
-
+  height: 26px;
   border-width: 1px 1px 0;
   border-style: solid;
   border-top-color: {$blueborder};
@@ -342,24 +340,20 @@
 
 .remarkup-assist-button {
   display: block;
-  padding: 3px;
-  margin: 2px 1px;
+  padding: 5px;
   float: left;
-
-  border: 1px solid transparent;
-  border-radius: 2px;
 }
 
 .remarkup-assist-button:hover {
-  background: #f7f7f7;
-  border-color: #c6c6c6;
-  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.10);
+  background-color: rgba(100,100,100,.15);
+}
+
+.remarkup-assist-button:hover .phui-icon-view.phui-font-fa {
+  color: {$darkbluetext};
 }
 
 .remarkup-assist-button:active {
   outline: none;
-  background: #f3f3f3;
-  box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.10);
 }
 
 .remarkup-assist-button:focus {
@@ -392,10 +386,11 @@
 }
 
 .remarkup-assist {
-  display: block;
   width: 14px;
   height: 14px;
   overflow: hidden;
+  text-align: center;
+  vertical-align: middle;
 }
 
 .remarkup-assist-right {
@@ -422,7 +417,7 @@
 
 .remarkup-control-fullscreen-mode textarea.remarkup-assist-textarea {
   position: absolute;
-  top: 26px;
+  top: 27px;
   left: 0;
   right: 0;
   bottom: 0;

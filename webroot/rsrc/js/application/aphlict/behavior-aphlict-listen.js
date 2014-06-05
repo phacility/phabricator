@@ -24,25 +24,39 @@ JX.behavior('aphlict-listen', function(config) {
   // Respond to a notification from the Aphlict notification server. We send
   // a request to Phabricator to get notification details.
   function onaphlictmessage(type, message) {
-    if (type == 'receive') {
-      var routable = new JX.Request('/notification/individual/', onnotification)
-        .addData({key: message.key})
-        .getRoutable();
-
-      routable
-        .setType('notification')
-        .setPriority(250);
-
-      JX.Router.getInstance().queue(routable);
-    } else if (__DEV__) {
-      if (config.debug) {
-        var details = message ? JX.JSON.stringify(message) : '';
-
+    switch (type) {
+      case 'error':
         new JX.Notification()
-          .setContent('(Aphlict) [' + type + '] ' + details)
-          .alterClassName('jx-notification-debug', true)
+          .setContent('(Aphlict) ' + message)
+          .alterClassName('jx-notification-error', true)
           .show();
-      }
+        break;
+
+      case 'receive':
+        var request = new JX.Request(
+          '/notification/individual/',
+          onnotification);
+
+        var routable = request
+          .addData({key: message.key})
+          .getRoutable();
+
+        routable
+          .setType('notification')
+          .setPriority(250);
+
+        JX.Router.getInstance().queue(routable);
+        break;
+
+      default:
+        if (__DEV__ && config.debug) {
+          var details = message ? JX.JSON.stringify(message) : '';
+
+          new JX.Notification()
+            .setContent('(Aphlict) [' + type + '] ' + details)
+            .alterClassName('jx-notification-debug', true)
+            .show();
+        }
     }
   }
 
@@ -63,8 +77,7 @@ JX.behavior('aphlict-listen', function(config) {
 
     // If the notification affected an object on this page, show a
     // permanent reload notification if we aren't already.
-    if ((response.primaryObjectPHID in config.pageObjects) &&
-        !showing_reload) {
+    if ((response.primaryObjectPHID in config.pageObjects) && !showing_reload) {
       var reload = new JX.Notification()
         .setContent('Page updated, click to reload.')
         .alterClassName('jx-notification-alert', true)

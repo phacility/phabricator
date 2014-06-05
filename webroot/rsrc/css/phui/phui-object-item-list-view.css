@@ -722,3 +722,11 @@
 .phui-object-item-with-image-icon .phui-object-item-content-box {
   margin-left: 44px;
 }
+
+.device-desktop .phui-object-item-launcher-list .phui-object-item-content {
+  margin-right: 0;
+}
+
+.device-desktop .phui-object-item-launcher-list .phui-object-icon-pane {
+  width: auto;
+}

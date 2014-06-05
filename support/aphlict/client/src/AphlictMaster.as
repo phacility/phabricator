@@ -131,34 +131,38 @@ package {
     }
 
     private function didReceiveSocket(event:Event):void {
-      var b:ByteArray = this.readBuffer;
-      this.socket.readBytes(b, b.length);
+      try {
+        var b:ByteArray = this.readBuffer;
+        this.socket.readBytes(b, b.length);
 
-      do {
-        b = this.readBuffer;
-        b.position = 0;
+        do {
+          b = this.readBuffer;
+          b.position = 0;
 
-        if (b.length <= 8) {
-          break;
-        }
-
-        var msg_len:Number = parseInt(b.readUTFBytes(8), 10);
-        if (b.length >= msg_len + 8) {
-          var bytes:String = b.readUTFBytes(msg_len);
-          var data:Object = vegas.strings.JSON.deserialize(bytes);
-          var t:ByteArray = new ByteArray();
-          t.writeBytes(b, msg_len + 8);
-          this.readBuffer = t;
-
-          // Send the message to all clients.
-          for (var client:String in this.clients) {
-            this.log('Sending message to client: ' + client);
-            this.send.send(client, 'receiveMessage', data);
+          if (b.length <= 8) {
+            break;
           }
-        } else {
-          break;
-        }
-      } while (true);
+
+          var msg_len:Number = parseInt(b.readUTFBytes(8), 10);
+          if (b.length >= msg_len + 8) {
+            var bytes:String = b.readUTFBytes(msg_len);
+            var data:Object = vegas.strings.JSON.deserialize(bytes);
+            var t:ByteArray = new ByteArray();
+            t.writeBytes(b, msg_len + 8);
+            this.readBuffer = t;
+
+            // Send the message to all clients.
+            for (var client:String in this.clients) {
+              this.log('Sending message to client: ' + client);
+              this.send.send(client, 'receiveMessage', data);
+            }
+          } else {
+            break;
+          }
+        } while (true);
+      } catch (err:Error) {
+        this.error(err);
+      }
     }
 
   }
