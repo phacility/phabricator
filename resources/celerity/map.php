@@ -8,7 +8,7 @@ return array(
   'names' =>
   array(
     'core.pkg.css' => 'd9c53a92',
-    'core.pkg.js' => 'b6689fe1',
+    'core.pkg.js' => 'd7e1141d',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => '4a93db37',
     'differential.pkg.js' => 'eca39a2c',
@@ -337,7 +337,7 @@ return array(
     'rsrc/image/texture/table_header_tall.png' => 'd56b434f',
     'rsrc/js/application/aphlict/Aphlict.js' => '493665ee',
     'rsrc/js/application/aphlict/behavior-aphlict-dropdown.js' => '2a2dba85',
-    'rsrc/js/application/aphlict/behavior-aphlict-listen.js' => 'bc75da74',
+    'rsrc/js/application/aphlict/behavior-aphlict-listen.js' => '258e4342',
     'rsrc/js/application/auth/behavior-persona-login.js' => '9414ff18',
     'rsrc/js/application/config/behavior-reorder-fields.js' => '938aed89',
     'rsrc/js/application/conpherence/behavior-menu.js' => '7ee23816',
@@ -528,7 +528,7 @@ return array(
     'javelin-aphlict' => '493665ee',
     'javelin-behavior' => '8a3ed18b',
     'javelin-behavior-aphlict-dropdown' => '2a2dba85',
-    'javelin-behavior-aphlict-listen' => 'bc75da74',
+    'javelin-behavior-aphlict-listen' => '258e4342',
     'javelin-behavior-aphront-basic-tokenizer' => 'b3a4b884',
     'javelin-behavior-aphront-crop' => 'b98fc918',
     'javelin-behavior-aphront-drag-and-drop-textarea' => '4a11ea9c',
@@ -988,6 +988,18 @@ return array(
       1 => 'javelin-dom',
       2 => 'javelin-stratcom',
       3 => 'phuix-dropdown-menu',
+    ),
+    '258e4342' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-aphlict',
+      2 => 'javelin-stratcom',
+      3 => 'javelin-request',
+      4 => 'javelin-uri',
+      5 => 'javelin-dom',
+      6 => 'javelin-json',
+      7 => 'javelin-router',
+      8 => 'phabricator-notification',
     ),
     '263aeb8c' =>
     array(
@@ -1697,18 +1709,6 @@ return array(
       4 => 'phabricator-textareautils',
       5 => 'javelin-workflow',
       6 => 'javelin-vector',
-    ),
-    'bc75da74' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-aphlict',
-      2 => 'javelin-stratcom',
-      3 => 'javelin-request',
-      4 => 'javelin-uri',
-      5 => 'javelin-dom',
-      6 => 'javelin-json',
-      7 => 'javelin-router',
-      8 => 'phabricator-notification',
     ),
     'bd0aedcd' =>
     array(

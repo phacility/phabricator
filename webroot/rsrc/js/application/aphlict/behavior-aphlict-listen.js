@@ -33,11 +33,11 @@ JX.behavior('aphlict-listen', function(config) {
         break;
 
       case 'receive':
-        var routable = new JX.Request(
+        var request = new JX.Request(
           '/notification/individual/',
           onnotification);
 
-        routable
+        var routable = request
           .addData({key: message.key})
           .getRoutable();
 
