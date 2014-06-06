@@ -6,7 +6,12 @@
 
 JX.behavior('countdown-timer', function(config) {
 
-  var container = JX.$(config.container);
+  try {
+    var container = JX.$(config.container);
+  } catch (ignored) {
+    return;
+  }
+
   calculateTimeLeft();
 
   function setComponent(which, content) {

@@ -8,7 +8,7 @@ return array(
   'names' =>
   array(
     'core.pkg.css' => 'd9c53a92',
-    'core.pkg.js' => 'd7e1141d',
+    'core.pkg.js' => '9c9c8442',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => '4a93db37',
     'differential.pkg.js' => 'eca39a2c',
@@ -198,7 +198,7 @@ return array(
     'rsrc/externals/javelin/lib/JSON.js' => '08e56a4e',
     'rsrc/externals/javelin/lib/Mask.js' => 'b9f26029',
     'rsrc/externals/javelin/lib/Request.js' => '7bad574b',
-    'rsrc/externals/javelin/lib/Resource.js' => '356de121',
+    'rsrc/externals/javelin/lib/Resource.js' => '0f81f8df',
     'rsrc/externals/javelin/lib/Routable.js' => 'b3e7d692',
     'rsrc/externals/javelin/lib/Router.js' => '29274e2b',
     'rsrc/externals/javelin/lib/URI.js' => 'd9a9b862',
@@ -343,7 +343,7 @@ return array(
     'rsrc/js/application/conpherence/behavior-menu.js' => '7ee23816',
     'rsrc/js/application/conpherence/behavior-pontificate.js' => '53f6f2dd',
     'rsrc/js/application/conpherence/behavior-widget-pane.js' => '40b1ff90',
-    'rsrc/js/application/countdown/timer.js' => '889c96f3',
+    'rsrc/js/application/countdown/timer.js' => '361e3ed3',
     'rsrc/js/application/dashboard/behavior-dashboard-async-panel.js' => '469c0d9e',
     'rsrc/js/application/dashboard/behavior-dashboard-move-panels.js' => 'fa187a68',
     'rsrc/js/application/differential/ChangesetViewManager.js' => 'db09a523',
@@ -542,7 +542,7 @@ return array(
     'javelin-behavior-conpherence-menu' => '7ee23816',
     'javelin-behavior-conpherence-pontificate' => '53f6f2dd',
     'javelin-behavior-conpherence-widget-pane' => '40b1ff90',
-    'javelin-behavior-countdown-timer' => '889c96f3',
+    'javelin-behavior-countdown-timer' => '361e3ed3',
     'javelin-behavior-dark-console' => 'e9fdb5e5',
     'javelin-behavior-dashboard-async-panel' => '469c0d9e',
     'javelin-behavior-dashboard-move-panels' => 'fa187a68',
@@ -652,7 +652,7 @@ return array(
     'javelin-reactor-node-calmer' => '76f4ebed',
     'javelin-reactornode' => 'b4c30592',
     'javelin-request' => '7bad574b',
-    'javelin-resource' => '356de121',
+    'javelin-resource' => '0f81f8df',
     'javelin-routable' => 'b3e7d692',
     'javelin-router' => '29274e2b',
     'javelin-stratcom' => 'c293f7b9',
@@ -902,6 +902,12 @@ return array(
       0 => 'javelin-install',
       1 => 'javelin-util',
     ),
+    '0f81f8df' =>
+    array(
+      0 => 'javelin-util',
+      1 => 'javelin-uri',
+      2 => 'javelin-install',
+    ),
     '127f2018' =>
     array(
       0 => 'javelin-behavior',
@@ -1058,11 +1064,10 @@ return array(
       3 => 'javelin-stratcom',
       4 => 'javelin-request',
     ),
-    '356de121' =>
+    '361e3ed3' =>
     array(
-      0 => 'javelin-util',
-      1 => 'javelin-uri',
-      2 => 'javelin-install',
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
     ),
     '37871df4' =>
     array(
@@ -1454,11 +1459,6 @@ return array(
       4 => 'javelin-uri',
       5 => 'javelin-util',
       6 => 'javelin-stratcom',
-    ),
-    '889c96f3' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
     ),
     '8a3ed18b' =>
     array(
