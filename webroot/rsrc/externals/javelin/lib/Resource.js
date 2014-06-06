@@ -135,13 +135,22 @@ JX.install('Resource', {
       delete JX.Resource._loading[uri];
       JX.Resource._loaded[uri] = true;
 
+      var errors = [];
       for (ii = 0; ii < list.length; ii++) {
         current = list[ii];
         delete current.resources[uri];
         if (!JX.Resource._hasResources(current.resources)) {
-          current.callback();
+          try {
+            current.callback();
+          } catch (error) {
+            errors.push(error);
+          }
           list.splice(ii--, 1);
         }
+      }
+
+      if (errors.length) {
+        throw errors[0];
       }
     },
 
