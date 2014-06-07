@@ -5,7 +5,7 @@ package {
   import flash.utils.Timer;
 
 
-  public class AphlictClient extends Aphlict {
+  final public class AphlictClient extends Aphlict {
 
     /**
      * The connection name for this client. This will be used for the

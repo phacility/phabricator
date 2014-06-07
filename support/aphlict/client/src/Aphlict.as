@@ -27,15 +27,18 @@ package {
       this.send = new LocalConnection();
     }
 
-    protected function externalInvoke(type:String, object:Object = null):void {
+    final protected function externalInvoke(
+      type:String,
+      object:Object = null):void {
+
       ExternalInterface.call('JX.Aphlict.didReceiveEvent', type, object);
     }
 
-    protected function error(error:Error):void {
+    final protected function error(error:Error):void {
       this.externalInvoke('error', error.toString());
     }
 
-    protected function log(message:String):void {
+    final protected function log(message:String):void {
       this.externalInvoke('log', message);
     }
 

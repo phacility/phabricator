@@ -12,7 +12,7 @@ package {
   import vegas.strings.JSON;
 
 
-  public class AphlictMaster extends Aphlict {
+  final public class AphlictMaster extends Aphlict {
 
     /**
      * The pool of connected clients.
