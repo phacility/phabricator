@@ -21,8 +21,16 @@ final class PhabricatorAphlictManagementBuildWorkflow
     $root = dirname(__FILE__).'/../../../..';
 
     if (!Filesystem::binaryExists('mxmlc')) {
-      $console->writeErr('`mxmlc` is not installed.');
-      return 1;
+      throw new PhutilArgumentUsageException(
+        pht(
+          "The `mxmlc` binary was not found in PATH. This compiler binary ".
+          "is required to rebuild the Aphlict client.\n\n".
+          "Adjust your PATH, or install the Flex SDK from:\n\n".
+          "    http://flex.apache.org\n\n".
+          "You may also be able to install it with `npm`:\n\n".
+          "    $ npm install flex-sdk\n\n".
+          "(Note: you should only need to rebuild Aphlict if you are ".
+          "developing Phabricator.)"));
     }
 
     $argv = array(
