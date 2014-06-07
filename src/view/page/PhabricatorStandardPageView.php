@@ -356,6 +356,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       parent::getTail(),
     );
 
+    $response = CelerityAPI::getStaticResourceResponse();
+
     if (PhabricatorEnv::getEnvConfig('notification.enabled')) {
       if ($user && $user->isLoggedIn()) {
 
@@ -370,6 +372,9 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
           $client_uri->setDomain($this_host->getDomain());
         }
 
+        $map = CelerityResourceMap::getNamedInstance('phabricator');
+        $swf_uri = $response->getURI($map, 'rsrc/swf/aphlict.swf');
+
         $enable_debug = PhabricatorEnv::getEnvConfig('notification.debug');
         Javelin::initBehavior(
           'aphlict-listen',
@@ -379,6 +384,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
             'server'       => $client_uri->getDomain(),
             'port'         => $client_uri->getPort(),
             'debug'        => $enable_debug,
+            'swfURI'       => $swf_uri,
             'pageObjects'  => array_fill_keys($this->pageObjects, true),
           ));
 
@@ -393,7 +399,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       }
     }
 
-    $response = CelerityAPI::getStaticResourceResponse();
     $tail[] = $response->renderHTMLFooter();
 
     return $tail;

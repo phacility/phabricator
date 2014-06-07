@@ -99,10 +99,10 @@ JX.behavior('aphlict-listen', function(config) {
   // Add Flash object to page
   JX.$(config.containerID).innerHTML =
     '<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000">' +
-      '<param name="movie" value="/rsrc/swf/aphlict.swf" />' +
+      '<param name="movie" value="' + config.swfURI + '" />' +
       '<param name="allowScriptAccess" value="always" />' +
       '<param name="wmode" value="opaque" />' +
-      '<embed src="/rsrc/swf/aphlict.swf" wmode="opaque"' +
+      '<embed src="' + config.swfURI + '" wmode="opaque"' +
         'width="0" height="0" id="' + config.id + '">' +
     '</embed></object>'; //Evan sanctioned
 });
