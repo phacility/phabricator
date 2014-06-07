@@ -22,5 +22,6 @@ $args->parseWorkflows(array(
   new PhabricatorAphlictManagementStopWorkflow(),
   new PhabricatorAphlictManagementRestartWorkflow(),
   new PhabricatorAphlictManagementDebugWorkflow(),
+  new PhabricatorAphlictManagementBuildWorkflow(),
   new PhutilHelpArgumentWorkflow(),
 ));
