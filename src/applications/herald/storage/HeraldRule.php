@@ -3,7 +3,8 @@
 final class HeraldRule extends HeraldDAO
   implements
     PhabricatorFlaggableInterface,
-    PhabricatorPolicyInterface {
+    PhabricatorPolicyInterface,
+    PhabricatorDestructableInterface {
 
   const TABLE_RULE_APPLIED = 'herald_ruleapplied';
 
@@ -248,6 +249,17 @@ final class HeraldRule extends HeraldDAO
     }
 
     return null;
+  }
+
+
+/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+    $this->delete();
+    $this->saveTransaction();
   }
 
 }
