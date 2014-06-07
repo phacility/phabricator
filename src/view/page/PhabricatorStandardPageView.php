@@ -352,50 +352,51 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $container = null;
-    if ($user && $user->isLoggedIn()) {
+    $tail = array(
+      parent::getTail(),
+    );
 
-      $aphlict_object_id = celerity_generate_unique_node_id();
-      $aphlict_container_id = celerity_generate_unique_node_id();
+    if (PhabricatorEnv::getEnvConfig('notification.enabled')) {
+      if ($user && $user->isLoggedIn()) {
 
-      $client_uri = PhabricatorEnv::getEnvConfig('notification.client-uri');
-      $client_uri = new PhutilURI($client_uri);
-      if ($client_uri->getDomain() == 'localhost') {
-        $this_host = $this->getRequest()->getHost();
-        $this_host = new PhutilURI('http://'.$this_host.'/');
-        $client_uri->setDomain($this_host->getDomain());
+        $aphlict_object_id = celerity_generate_unique_node_id();
+        $aphlict_container_id = celerity_generate_unique_node_id();
+
+        $client_uri = PhabricatorEnv::getEnvConfig('notification.client-uri');
+        $client_uri = new PhutilURI($client_uri);
+        if ($client_uri->getDomain() == 'localhost') {
+          $this_host = $this->getRequest()->getHost();
+          $this_host = new PhutilURI('http://'.$this_host.'/');
+          $client_uri->setDomain($this_host->getDomain());
+        }
+
+        $enable_debug = PhabricatorEnv::getEnvConfig('notification.debug');
+        Javelin::initBehavior(
+          'aphlict-listen',
+          array(
+            'id'           => $aphlict_object_id,
+            'containerID'  => $aphlict_container_id,
+            'server'       => $client_uri->getDomain(),
+            'port'         => $client_uri->getPort(),
+            'debug'        => $enable_debug,
+            'pageObjects'  => array_fill_keys($this->pageObjects, true),
+          ));
+
+        $tail[] = phutil_tag(
+          'div',
+          array(
+            'id' => $aphlict_container_id,
+            'style' =>
+              'position: absolute; width: 0; height: 0; overflow: hidden;',
+          ),
+          '');
       }
-
-      $enable_debug = PhabricatorEnv::getEnvConfig('notification.debug');
-      Javelin::initBehavior(
-        'aphlict-listen',
-        array(
-          'id'           => $aphlict_object_id,
-          'containerID'  => $aphlict_container_id,
-          'server'       => $client_uri->getDomain(),
-          'port'         => $client_uri->getPort(),
-          'debug'        => $enable_debug,
-          'pageObjects'  => array_fill_keys($this->pageObjects, true),
-        ));
-      $container = phutil_tag(
-        'div',
-        array(
-          'id' => $aphlict_container_id,
-          'style' =>
-            'position: absolute; width: 0; height: 0; overflow: hidden;',
-        ),
-        '');
     }
 
     $response = CelerityAPI::getStaticResourceResponse();
+    $tail[] = $response->renderHTMLFooter();
 
-    $tail = array(
-      parent::getTail(),
-      $container,
-      $response->renderHTMLFooter(),
-    );
-
-    return phutil_implode_html("\n", $tail);
+    return $tail;
   }
 
   protected function getBodyClasses() {
