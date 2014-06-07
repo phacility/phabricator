@@ -172,6 +172,7 @@ final class DifferentialLandingToGitHub
             'stronger GitHub token.'))
         ->setSubmitURI($refresh_token_uri)
         ->addCancelButton('/D'.$revision->getId())
+        ->setDisableWorkflowOnSubmit(true)
         ->addSubmitButton(pht('Refresh Account Link'));
     }
   }
