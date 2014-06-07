@@ -15,7 +15,6 @@ final class PHUIWorkboardExample extends PhabricatorUIExample {
     /* List 1 */
 
     $list = new PHUIObjectItemListView();
-    $list->setCards(true);
     $list->setFlush(true);
 
     $list->addItem(
@@ -43,7 +42,6 @@ final class PHUIWorkboardExample extends PhabricatorUIExample {
     /* List 2 */
 
     $list2 = new PHUIObjectItemListView();
-    $list2->setCards(true);
     $list2->setFlush(true);
 
     $list2->addItem(
@@ -58,7 +56,6 @@ final class PHUIWorkboardExample extends PhabricatorUIExample {
     /* List 3 */
 
     $list3 = new PHUIObjectItemListView();
-    $list3->setCards(true);
     $list3->setFlush(true);
 
     $list3->addItem(
@@ -100,7 +97,6 @@ final class PHUIWorkboardExample extends PhabricatorUIExample {
         ->setBarColor('orange'));
 
     $panel = id(new PHUIWorkpanelView())
-          ->setCards($list)
           ->setHeader('Business Stuff')
           ->setFooterAction(
             id(new PHUIListItemView())
@@ -109,11 +105,9 @@ final class PHUIWorkboardExample extends PhabricatorUIExample {
               ->setHref('/maniphest/task/create/'));
 
     $panel2 = id(new PHUIWorkpanelView())
-          ->setCards($list2)
           ->setHeader('Under Duress');
 
     $panel3 = id(new PHUIWorkpanelView())
-          ->setCards($list3)
           ->setHeader('Spicy Thai Chicken');
 
     $board = id(new PHUIWorkboardView())

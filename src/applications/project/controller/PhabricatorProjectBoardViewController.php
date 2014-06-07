@@ -173,7 +173,6 @@ final class PhabricatorProjectBoardViewController
 
       $cards = id(new PHUIObjectItemListView())
         ->setUser($viewer)
-        ->setCards(true)
         ->setFlush(true)
         ->setAllowEmptyList(true)
         ->addSigil('project-column')

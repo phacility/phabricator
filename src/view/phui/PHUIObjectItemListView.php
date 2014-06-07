@@ -6,7 +6,6 @@ final class PHUIObjectItemListView extends AphrontTagView {
   private $items;
   private $pager;
   private $stackable;
-  private $cards;
   private $noDataString;
   private $flush;
   private $plain;
@@ -58,11 +57,6 @@ final class PHUIObjectItemListView extends AphrontTagView {
     return $this;
   }
 
-  public function setCards($cards) {
-    $this->cards = $cards;
-    return $this;
-  }
-
   public function setStates($states) {
     $this->states = $states;
     return $this;
@@ -79,11 +73,9 @@ final class PHUIObjectItemListView extends AphrontTagView {
     if ($this->stackable) {
       $classes[] = 'phui-object-list-stackable';
     }
-    if ($this->cards) {
-      $classes[] = 'phui-object-list-cards';
-    }
     if ($this->states) {
       $classes[] = 'phui-object-list-states';
+      $classes[] = 'phui-object-list-stackable';
     }
     if ($this->flush) {
       $classes[] = 'phui-object-list-flush';

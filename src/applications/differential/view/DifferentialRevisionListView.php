@@ -75,7 +75,6 @@ final class DifferentialRevisionListView extends AphrontView {
     $this->requireResource('aphront-tooltip-css');
 
     $list = new PHUIObjectItemListView();
-    $list->setCards(true);
 
     foreach ($this->revisions as $revision) {
       $item = id(new PHUIObjectItemView())

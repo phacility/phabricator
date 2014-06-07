@@ -18,7 +18,6 @@ final class PhabricatorDaemonLogListView extends AphrontView {
     }
 
     $list = id(new PHUIObjectItemListView())
-      ->setCards(true)
       ->setFlush(true);
     foreach ($this->daemonLogs as $log) {
       $id = $log->getID();

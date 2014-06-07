@@ -34,12 +34,14 @@
 }
 
 .phui-object-item {
-  background: #fff;
   border-style: solid;
   border-color: {$lightgreyborder};
-  border-width: 0 0 0 4px;
   margin: 5px 0;
   overflow: hidden;
+  border-radius: 3px;
+  border-left-width: 6px;
+  background: #f0f0f0 url('/rsrc/image/texture/card-gradient.png') repeat-x;
+  margin-bottom: 4px;
 }
 
 .phui-object-item .phui-icon-view {
@@ -54,9 +56,6 @@
   position: relative;
   min-height: 29px;
   overflow: hidden;
-}
-
-.phui-object-list-cards .phui-object-item-frame {
   border-bottom-right-radius: 3px;
   border-top-right-radius: 3px;
 }
@@ -187,10 +186,16 @@
 .phui-object-item-list-view.phui-object-list-stackable
   .phui-object-item {
   margin: -1px 0 0 0;
+  border-radius: 0;
+  border-left-width: 1px;
+  background: #fff;
+}
+
+.phui-object-list-stackable .phui-object-item-frame {
+  border-radius: 0;
 }
 
 .phui-object-list-stackable .phui-object-item {
-  border-left-width: 1px;
 }
 
 .device-desktop .phui-object-list-stackable
@@ -435,14 +440,18 @@
   background: {$lightyellow};
 }
 
-.phui-object-list-cards
- .phui-object-item.phui-object-item-highlighted {
+.phui-object-item.phui-object-item-highlighted {
   background-image: linear-gradient(to bottom, rgb(253, 255, 221), rgb(243, 245, 206));
   background-image: -webkit-linear-gradient(top, rgb(253, 255, 221), rgb(243, 245, 206));
 }
 
 .phui-object-item-selected {
   background: {$lightblue};
+  border-left-color: {$blue};
+}
+
+.phui-object-item-selected .phui-object-item-frame {
+  border-color: {$blue};
 }
 
 
@@ -529,33 +538,6 @@
   text-align: left;
   padding: 0 8px;
   font-size: 13px;
-}
-
-/* - Card List -----------------------------------------------------------------
-
-  Rounded card list.
-
-*/
-
-/* Hard to sprite since we can't have other sprites appearing in tall cells */
-.phui-object-list-cards .phui-object-item {
-  border-radius: 3px;
-  border-left-width: 6px;
-  background: #f0f0f0 url('/rsrc/image/texture/card-gradient.png') repeat-x;
-  margin-bottom: 4px;
-}
-
-.phui-object-list-cards .phui-object-item-frame {
-  min-height: 50px;
-}
-
-.phui-object-list-cards .phui-object-item-selected {
-  background: #bfdcff;
-}
-
-.phui-object-list-cards .phui-object-item-selected
-  .phui-object-item-frame {
-  border-color: #99ccff;
 }
 
 

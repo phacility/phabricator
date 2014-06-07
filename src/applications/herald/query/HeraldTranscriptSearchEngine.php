@@ -108,7 +108,6 @@ final class HeraldTranscriptSearchEngine
     $viewer = $this->requireViewer();
 
     $list = new PHUIObjectItemListView();
-    $list->setCards(true);
     foreach ($transcripts as $xscript) {
       $view_href = phutil_tag(
         'a',

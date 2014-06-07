@@ -260,7 +260,6 @@ final class PhrictionDiffController
     $handles = $this->loadViewerHandles($phids);
 
     $list = new PHUIObjectItemListView();
-    $list->setCards(true);
     $list->setFlush(true);
 
     $first = true;
