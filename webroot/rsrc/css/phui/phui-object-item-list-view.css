@@ -145,7 +145,7 @@
 }
 
 .phui-object-item-actions .phui-list-item-href:hover {
-  background: #e9e9f9;
+  background: {$hoverblue};
 }
 
 .phui-object-item-actions .phui-list-item-icon {
@@ -195,8 +195,25 @@
 
 .device-desktop .phui-object-list-stackable
   .phui-object-item:hover {
-  background: #e9ecf5;
+  background: {$hoverblue};
 }
+
+.phui-object-box .phui-object-list-stackable {
+  padding: 0;
+}
+
+.phui-object-box .phui-object-list-stackable .phui-object-item {
+  border: none;
+}
+
+.phui-object-box .phui-object-list-stackable .phui-object-item-frame {
+  border-right: none;
+}
+
+.phui-object-box .phui-object-list-stackable:last-child .phui-object-item-frame {
+  border-bottom: none;
+}
+
 
 /* - Subhead -------------------------------------------------------------------
 
@@ -556,13 +573,26 @@
   border-radius: 3px;
 }
 
+.phui-object-list-stackable .drag-ghost {
+  background: {$hoverblue};
+  margin: 0;
+  border-radius: none;
+  border: none;
+  border-top: 1px solid {$lightgreyborder}
+}
+
 .drag-dragging {
   position: relative;
-  opacity: 0.9;
+  opacity: 0.85;
+}
+
+.phui-object-box .phui-object-list-stackable .drag-dragging
+ .phui-object-item-frame {
+  border-bottom: 1px solid {$lightgreyborder};
 }
 
 .drag-sending {
-  opacity: 0.75;
+  opacity: 0.5;
 }
 
 /* - Plain ---------------------------------------------------------------------

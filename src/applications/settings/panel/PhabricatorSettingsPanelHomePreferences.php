@@ -127,7 +127,7 @@ final class PhabricatorSettingsPanelHomePreferences
     $list = id(new PHUIObjectItemListView())
       ->setUser($user)
       ->setID($list_id)
-      ->setFlush(true);
+      ->setStackable(true);
 
     Javelin::initBehavior(
       'reorder-applications',
