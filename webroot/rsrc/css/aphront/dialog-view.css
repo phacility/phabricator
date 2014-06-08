@@ -33,6 +33,10 @@
   text-shadow: 0 1px 2px #fff;
 }
 
+.aphront-dialog-flush .aphront-dialog-body {
+  padding: 0;
+}
+
 .aphront-dialog-view-width-form {
   width: 600px;
 }
@@ -127,4 +131,20 @@
 
 .aphront-dialog-view-paragraph + .aphront-dialog-view-paragraph {
   margin-top: 16px;
+}
+
+.device-desktop .aphront-dialog-flush .phui-object-item-list-view {
+  margin: 0;
+  padding: 0;
+}
+
+.aphront-dialog-flush .phui-object-item-list-view.phui-object-list-stackable
+ .phui-object-item {
+  border: 0;
+}
+
+.aphront-dialog-flush .phui-object-item-list-view.phui-object-list-stackable
+ .phui-object-item-frame {
+  border: 0;
+  border-top: 1px solid {$thinblueborder};
 }

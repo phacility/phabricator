@@ -599,19 +599,20 @@
 }
 
 .phui-object-item-image {
-  width: 50px;
-  height: 50px;
-  margin: 4px 4px 4px 4px;
+  width: 40px;
+  height: 40px;
+  background-size: 40px;
+  margin: 4px;
   position: absolute;
   background-color: {$lightbluebackground};
 }
 
 .phui-object-item-with-image .phui-object-item-frame {
-  min-height: 58px;
+  min-height: 48px;
 }
 
 .phui-object-item-with-image .phui-object-item-content-box {
-  margin-left: 54px;
+  margin-left: 44px;
 }
 
 /* - State ---------------------------------------------------------------------
