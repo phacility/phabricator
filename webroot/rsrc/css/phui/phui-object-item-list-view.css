@@ -683,6 +683,7 @@
 .dashboard-panel .phui-object-item-frame {
   border: none;
   border-bottom: 1px solid {$thinblueborder};
+  border-radius: 0;
 }
 
 
