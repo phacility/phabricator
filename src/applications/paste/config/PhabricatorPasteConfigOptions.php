@@ -25,7 +25,7 @@ final class PhabricatorPasteConfigOptions
         'metamta.paste.subject-prefix',
         'string',
         '[Paste]')
-        ->setDescription(pht('Subject prefix for paste email.'))
+        ->setDescription(pht('Subject prefix for Paste email.'))
     );
   }
 

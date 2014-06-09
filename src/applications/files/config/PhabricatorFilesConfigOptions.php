@@ -183,7 +183,7 @@ final class PhabricatorFilesConfigOptions
         'metamta.files.subject-prefix',
         'string',
         '[File]')
-        ->setDescription(pht('Subject prefix for paste email.')),
+        ->setDescription(pht('Subject prefix for Files email.')),
      $this->newOption('files.enable-imagemagick', 'bool', false)
        ->setBoolOptions(
          array(
