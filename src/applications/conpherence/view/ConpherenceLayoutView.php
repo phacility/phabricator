@@ -59,7 +59,7 @@ final class ConpherenceLayoutView extends AphrontView {
     $selected_id = null;
     $selected_thread_id = null;
     if ($this->thread) {
-      $selected_id = $this->thread->getPHID() . '-nav-item';
+      $selected_id = $this->thread->getPHID().'-nav-item';
       $selected_thread_id = $this->thread->getID();
     }
     $this->initBehavior('conpherence-menu',
@@ -77,7 +77,7 @@ final class ConpherenceLayoutView extends AphrontView {
     $this->initBehavior(
       'conpherence-widget-pane',
       array(
-        'widgetBaseUpdateURI' => $this->baseURI . 'update/',
+        'widgetBaseUpdateURI' => $this->baseURI.'update/',
         'widgetRegistry' => array(
           'conpherence-message-pane' => array(
             'name' => pht('Thread'),

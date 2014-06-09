@@ -49,7 +49,7 @@ EOEMAIL;
     $bodies = $this->getEmailBodies();
     $with_commands = array();
     foreach ($bodies as $body) {
-      $with_commands[] = "!whatevs dude\n" . $body;
+      $with_commands[] = "!whatevs dude\n".$body;
     }
     return $with_commands;
   }
@@ -58,7 +58,7 @@ EOEMAIL;
     $bodies = $this->getEmailBodies();
     $with_commands = array();
     foreach ($bodies as $body) {
-      $with_commands[] = "!whatevs\n" . $body;
+      $with_commands[] = "!whatevs\n".$body;
     }
     return $with_commands;
   }

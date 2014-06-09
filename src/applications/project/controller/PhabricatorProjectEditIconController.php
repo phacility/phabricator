@@ -66,7 +66,7 @@ final class PhabricatorProjectEditIconController
 
       if ($icon == $project->getIcon()) {
         $class_extra = ' selected';
-        $tip = $label . pht(' - selected');
+        $tip = $label.pht(' - selected');
       } else {
         $class_extra = null;
         $tip = $label;

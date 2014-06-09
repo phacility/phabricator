@@ -110,7 +110,7 @@ function print_symbol($file, $line_num, $type, $token, $context, $language) {
   if ($file[0] == '.' || $file[0] == '..') {
     array_shift($file);
   }
-  $file = '/' . implode('/', $file);
+  $file = '/'.implode('/', $file);
 
   $parts = array(
     $context,

@@ -41,9 +41,9 @@ final class PholioMockSearchEngine
       ->execute();
 
     $statuses = array(
-      ''=>pht('Any Status'),
-      'closed'=>pht('Closed'),
-      'open'=>pht('Open'));
+      '' => pht('Any Status'),
+      'closed' => pht('Closed'),
+      'open' => pht('Open'));
 
     $status = $saved_query->getParameter('statuses', array());
     $status = head($status);

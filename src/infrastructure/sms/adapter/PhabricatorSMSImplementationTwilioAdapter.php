@@ -93,7 +93,7 @@ final class PhabricatorSMSImplementationTwilioAdapter
         $prepend = '+1';
         break;
     }
-    return $prepend . $number;
+    return $prepend.$number;
   }
 
 }

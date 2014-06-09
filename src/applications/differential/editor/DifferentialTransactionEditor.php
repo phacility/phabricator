@@ -1322,7 +1322,7 @@ final class DifferentialTransactionEditor
           $result[] = "{$file}:{$range} {$inline_content}";
         } else {
           $result[] = '================';
-          $result[] = 'Comment at: ' . $file . ':' . $range;
+          $result[] = 'Comment at: '.$file.':'.$range;
           $result[] = $hunk_parser->makeContextDiff(
             $changeset->getHunks(),
             $comment->getIsNewFile(),

@@ -75,7 +75,7 @@ final class DifferentialInlineCommentView extends AphrontView {
 
     $sigil = 'differential-inline-comment';
     if ($this->preview) {
-      $sigil = $sigil . ' differential-inline-comment-preview';
+      $sigil = $sigil.' differential-inline-comment-preview';
     }
 
     $content = $inline->getContent();

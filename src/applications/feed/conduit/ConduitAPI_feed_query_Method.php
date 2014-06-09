@@ -44,7 +44,7 @@ final class ConduitAPI_feed_query_Method
 
     return array(
       'ERR-UNKNOWN-TYPE' =>
-        'Unsupported view type, possibles are: ' . $view_types
+        'Unsupported view type, possibles are: '.$view_types
     );
   }
 

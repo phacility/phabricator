@@ -483,7 +483,7 @@ abstract class HeraldAdapter {
           // We add the 'S' flag because we use the regexp multiple times.
           // It shouldn't cause any troubles if the flag is already there
           // - /.*/S is evaluated same as /.*/SS.
-          $result = @preg_match($condition_value . 'S', $value);
+          $result = @preg_match($condition_value.'S', $value);
           if ($result === false) {
             throw new HeraldInvalidConditionException(
               'Regular expression is not valid!');

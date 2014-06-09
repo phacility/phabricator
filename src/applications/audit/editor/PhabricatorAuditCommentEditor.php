@@ -261,7 +261,7 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
           ->setAuditorPHID($auditor_phid)
           ->setAuditStatus($audit_requested)
           ->setAuditReasons(
-            array('Added by ' . $actor->getUsername()))
+            array('Added by '.$actor->getUsername()))
           ->save();
       }
     }
@@ -274,7 +274,7 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
           ->setAuditorPHID($cc_phid)
           ->setAuditStatus($audit_cc)
           ->setAuditReasons(
-            array('Added by ' . $actor->getUsername()))
+            array('Added by '.$actor->getUsername()))
           ->save();
       }
     }

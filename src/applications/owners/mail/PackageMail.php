@@ -44,7 +44,7 @@ abstract class PackageMail extends PhabricatorMail {
     $handles = $this->getHandles();
     $section = array();
     $section[] = '  In repository '.$handles[$repository_phid]->getName().
-      ' - '. PhabricatorEnv::getProductionURI($handles[$repository_phid]
+      ' - '.PhabricatorEnv::getProductionURI($handles[$repository_phid]
       ->getURI());
     foreach ($paths as $path => $excluded) {
       $section[] = '    '.($excluded ? 'Excluded' : 'Included').' '.$path;

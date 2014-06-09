@@ -643,7 +643,7 @@ final class HeraldRuleController extends HeraldController {
     foreach ($all_rules as $current_rule) {
       if ($current_rule->getIsDisabled()) {
         $current_rule->makeEphemeral();
-        $current_rule->setName($rule->getName(). ' '.pht('(Disabled)'));
+        $current_rule->setName($rule->getName().' '.pht('(Disabled)'));
       }
     }
 

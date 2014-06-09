@@ -70,7 +70,7 @@ final class PhabricatorDashboardViewController
           'yet. Use %s to add panels.',
           phutil_tag(
             'a',
-            array('href'=>$manage_uri),
+            array('href' => $manage_uri),
             pht('Manage Dashboard'))));
   }
 

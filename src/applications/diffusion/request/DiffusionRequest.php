@@ -691,8 +691,8 @@ abstract class DiffusionRequest {
     $host = php_uname('n');
     $callsign = $this->getRepository()->getCallsign();
     throw new DiffusionSetupException(
-      "The clone of this repository ('{$callsign}') on the local machine " .
-      "('{$host}') could not be read. Ensure that the repository is in a " .
+      "The clone of this repository ('{$callsign}') on the local machine ".
+      "('{$host}') could not be read. Ensure that the repository is in a ".
       "location where the web server has read permissions.");
   }
 
