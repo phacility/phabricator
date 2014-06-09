@@ -18,7 +18,7 @@
 .phabricator-crumbs-view,
 .phabricator-crumbs-view a.phabricator-crumb-view,
 .phabricator-crumbs-view a.phabricator-crumbs-action {
-  color: {$darkgreytext};
+  color: {$darkbluetext};
   font-weight: bold;
   text-decoration: none;
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.9);
@@ -67,7 +67,7 @@
   display: inline-block;
   width: 28px;
   height: 28px;
-  margin: 2px 2px 2px 13px;
+  margin: 2px 2px 2px 10px;
   vertical-align: top;
 }
 
@@ -103,6 +103,7 @@
 
 a.phabricator-crumbs-action .phui-icon-view {
   margin-right: 5px;
+  color: {$darkbluetext};
 }
 
 .device-phone a.phabricator-crumbs-action .phui-icon-view {
@@ -114,5 +115,5 @@ a.phabricator-crumbs-action .phui-icon-view {
   width: 9px;
   height: 31px;
   vertical-align: top;
-  margin: 0 9px;
+  margin: 0 8px 0 4px;
 }
