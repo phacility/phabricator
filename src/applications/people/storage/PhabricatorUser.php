@@ -125,8 +125,8 @@ final class PhabricatorUser
   public function setPassword(PhutilOpaqueEnvelope $envelope) {
     if (!$this->getPHID()) {
       throw new Exception(
-        "You can not set a password for an unsaved user because their PHID ".
-        "is a salt component in the password hash.");
+        'You can not set a password for an unsaved user because their PHID '.
+        'is a salt component in the password hash.');
     }
 
     if (!strlen($envelope->openEnvelope())) {
@@ -326,7 +326,7 @@ final class PhabricatorUser
           }
           break;
         default:
-          throw new Exception("Unknown CSRF token format!");
+          throw new Exception('Unknown CSRF token format!');
       }
     }
 
@@ -371,7 +371,7 @@ final class PhabricatorUser
   public function loadPrimaryEmailAddress() {
     $email = $this->loadPrimaryEmail();
     if (!$email) {
-      throw new Exception("User has no primary email address!");
+      throw new Exception('User has no primary email address!');
     }
     return $email->getAddress();
   }

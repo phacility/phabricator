@@ -16,7 +16,7 @@ final class DiffusionServeController extends DiffusionController {
       // We get this initially for `info/refs`.
       // Git also gives us a User-Agent like "git/1.8.2.3".
       $vcs = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
-    } else if (strncmp($user_agent, "git/", 4) === 0) {
+    } else if (strncmp($user_agent, 'git/', 4) === 0) {
       $vcs = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
     } else if ($content_type == 'application/x-git-upload-pack-request') {
       // We get this for `git-upload-pack`.
@@ -305,7 +305,7 @@ final class DiffusionServeController extends DiffusionController {
     // resolve the binary first.
     $bin = Filesystem::resolveBinary('git-http-backend');
     if (!$bin) {
-      throw new Exception("Unable to find `git-http-backend` in PATH!");
+      throw new Exception('Unable to find `git-http-backend` in PATH!');
     }
 
     $env = array(
@@ -448,7 +448,7 @@ final class DiffusionServeController extends DiffusionController {
 
     $bin = Filesystem::resolveBinary('hg');
     if (!$bin) {
-      throw new Exception("Unable to find `hg` in PATH!");
+      throw new Exception('Unable to find `hg` in PATH!');
     }
 
     $env = $this->getCommonEnvironment($viewer);
@@ -502,7 +502,7 @@ final class DiffusionServeController extends DiffusionController {
     // "Why would you do this?".
 
     $args_raw = array();
-    for ($ii = 1; ; $ii++) {
+    for ($ii = 1;; $ii++) {
       $header = 'HTTP_X_HGARG_'.$ii;
       if (!array_key_exists($header, $_SERVER)) {
         break;

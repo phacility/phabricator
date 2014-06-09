@@ -889,7 +889,7 @@ final class DifferentialRevisionQuery
       case self::ORDER_PATH_MODIFIED:
         if (!$this->pathIDs) {
           throw new Exception(
-            "To use ORDER_PATH_MODIFIED, you must specify withPath().");
+            'To use ORDER_PATH_MODIFIED, you must specify withPath().');
         }
         return 'p.epoch';
       default:

@@ -8,7 +8,7 @@ final class ConduitAPI_releephwork_getauthorinfo_Method
   }
 
   public function getMethodDescription() {
-    return "Return a string to use as the VCS author.";
+    return 'Return a string to use as the VCS author.';
   }
 
   public function defineParamTypes() {

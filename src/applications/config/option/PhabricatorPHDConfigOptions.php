@@ -4,11 +4,11 @@ final class PhabricatorPHDConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Daemons");
+    return pht('Daemons');
   }
 
   public function getDescription() {
-    return pht("Options relating to PHD (daemons).");
+    return pht('Options relating to PHD (daemons).');
   }
 
   public function getOptions() {
@@ -16,13 +16,13 @@ final class PhabricatorPHDConfigOptions
       $this->newOption('phd.pid-directory', 'string', '/var/tmp/phd/pid')
         ->setDescription(
           pht(
-            "Directory that phd should use to track running daemons.")),
+            'Directory that phd should use to track running daemons.')),
       $this->newOption('phd.log-directory', 'string', '/var/tmp/phd/log')
         ->setDescription(
           pht(
-            "Directory that the daemons should use to store log files.")),
+            'Directory that the daemons should use to store log files.')),
       $this->newOption('phd.start-taskmasters', 'int', 4)
-        ->setSummary(pht("Number of TaskMaster daemons to start by default."))
+        ->setSummary(pht('Number of TaskMaster daemons to start by default.'))
         ->setDescription(
           pht(
             "Number of 'TaskMaster' daemons that 'phd start' should start. ".
@@ -31,8 +31,8 @@ final class PhabricatorPHDConfigOptions
       $this->newOption('phd.verbose', 'bool', false)
         ->setBoolOptions(
           array(
-            pht("Verbose mode"),
-            pht("Normal mode"),
+            pht('Verbose mode'),
+            pht('Normal mode'),
           ))
         ->setSummary(pht("Launch daemons in 'verbose' mode by default."))
         ->setDescription(
@@ -43,18 +43,18 @@ final class PhabricatorPHDConfigOptions
             "also 'phd.trace'.")),
       $this->newOption('phd.user', 'string', null)
         ->setLocked(true)
-        ->setSummary(pht("System user to run daemons as."))
+        ->setSummary(pht('System user to run daemons as.'))
         ->setDescription(
           pht(
-            "Specify a system user to run the daemons as. Primarily, this ".
-            "user will own the working copies of any repositories that ".
-            "Phabricator imports or manages. This option is new and ".
-            "experimental.")),
+            'Specify a system user to run the daemons as. Primarily, this '.
+            'user will own the working copies of any repositories that '.
+            'Phabricator imports or manages. This option is new and '.
+            'experimental.')),
       $this->newOption('phd.trace', 'bool', false)
         ->setBoolOptions(
           array(
-            pht("Trace mode"),
-            pht("Normal mode"),
+            pht('Trace mode'),
+            pht('Normal mode'),
           ))
         ->setSummary(pht("Launch daemons in 'trace' mode by default."))
         ->setDescription(

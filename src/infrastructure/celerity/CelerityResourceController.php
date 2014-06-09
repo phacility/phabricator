@@ -31,7 +31,7 @@ abstract class CelerityResourceController extends PhabricatorController {
     $type_map = self::getSupportedResourceTypes();
 
     if (empty($type_map[$type])) {
-      throw new Exception("Only static resources may be served.");
+      throw new Exception('Only static resources may be served.');
     }
 
     $dev_mode = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
@@ -103,7 +103,7 @@ abstract class CelerityResourceController extends PhabricatorController {
       // generate a comprehensive list of valid origins (an install may have
       // arbitrarily many Phame blogs, for example), and we lose nothing by
       // allowing access from anywhere.
-      $response->addAllowOrigin("*");
+      $response->addAllowOrigin('*');
     }
 
     return $this->makeResponseCacheable($response);

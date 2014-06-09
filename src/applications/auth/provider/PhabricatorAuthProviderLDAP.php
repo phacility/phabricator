@@ -167,7 +167,7 @@ final class PhabricatorAuthProviderLDAP
             $account_id = $adapter->getAccountID();
           DarkConsoleErrorLogPluginAPI::disableDiscardMode();
         } else {
-          throw new Exception("Username and password are required!");
+          throw new Exception('Username and password are required!');
         }
       } catch (PhutilAuthCredentialException $ex) {
         $response = $controller->buildProviderPageResponse(
@@ -346,20 +346,20 @@ final class PhabricatorAuthProviderLDAP
         "All of the attribute names used here are just examples: your LDAP ".
         "server may use different attribute names."),
       self::KEY_ALWAYS_SEARCH => pht(
-        "To search for an LDAP record before authenticating, either check ".
-        "the **Always Search** checkbox or enter an anonymous ".
-        "username and password to use to perform the search."),
+        'To search for an LDAP record before authenticating, either check '.
+        'the **Always Search** checkbox or enter an anonymous '.
+        'username and password to use to perform the search.'),
       self::KEY_USERNAME_ATTRIBUTE => pht(
-        "Optionally, specify a username attribute to use to prefill usernames ".
-        "when registering a new account. This is purely cosmetic and does not ".
-        "affect the login process, but you can configure it to make sure ".
-        "users get the same default username as their LDAP username, so ".
-        "usernames remain consistent across systems."),
+        'Optionally, specify a username attribute to use to prefill usernames '.
+        'when registering a new account. This is purely cosmetic and does not '.
+        'affect the login process, but you can configure it to make sure '.
+        'users get the same default username as their LDAP username, so '.
+        'usernames remain consistent across systems.'),
       self::KEY_REALNAME_ATTRIBUTES => pht(
-        "Optionally, specify one or more comma-separated attributes to use to ".
-        "prefill the \"Real Name\" field when registering a new account. This ".
-        "is purely cosmetic and does not affect the login process, but can ".
-        "make registration a little easier."),
+        'Optionally, specify one or more comma-separated attributes to use to '.
+        'prefill the "Real Name" field when registering a new account. This '.
+        'is purely cosmetic and does not affect the login process, but can '.
+        'make registration a little easier.'),
     );
 
     foreach ($labels as $key => $label) {

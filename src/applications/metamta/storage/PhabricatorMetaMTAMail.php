@@ -332,7 +332,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
     if (!$force_send) {
       if ($this->getStatus() != self::STATUS_QUEUE) {
-        throw new Exception("Trying to send an already-sent mail!");
+        throw new Exception('Trying to send an already-sent mail!');
       }
     }
 
@@ -411,7 +411,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
               list($header_key, $header_value) = $pair;
 
               // NOTE: If we have \n in a header, SES rejects the email.
-              $header_value = str_replace("\n", " ", $header_value);
+              $header_value = str_replace("\n", ' ', $header_value);
 
               $mailer->addHeader($header_key, $header_value);
             }
@@ -554,8 +554,8 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       if (!$add_to && !$add_cc) {
         $this->setStatus(self::STATUS_VOID);
         $this->setMessage(
-          "Message has no valid recipients: all To/Cc are disabled, invalid, ".
-          "or configured not to receive this mail.");
+          'Message has no valid recipients: all To/Cc are disabled, invalid, '.
+          'or configured not to receive this mail.');
         return $this->save();
       }
 
@@ -651,10 +651,10 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
   public static function getReadableStatus($status_code) {
     static $readable = array(
-      self::STATUS_QUEUE => "Queued for Delivery",
-      self::STATUS_FAIL  => "Delivery Failed",
-      self::STATUS_SENT  => "Sent",
-      self::STATUS_VOID  => "Void",
+      self::STATUS_QUEUE => 'Queued for Delivery',
+      self::STATUS_FAIL  => 'Delivery Failed',
+      self::STATUS_SENT  => 'Sent',
+      self::STATUS_VOID  => 'Void',
     );
     $status_code = coalesce($status_code, '?');
     return idx($readable, $status_code, $status_code);

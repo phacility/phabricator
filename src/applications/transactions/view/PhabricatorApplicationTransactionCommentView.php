@@ -151,7 +151,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     }
 
     if (!$this->getObjectPHID()) {
-      throw new Exception("Call setObjectPHID() before render()!");
+      throw new Exception('Call setObjectPHID() before render()!');
     }
 
     return id(new AphrontFormView())

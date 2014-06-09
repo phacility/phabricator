@@ -5,8 +5,8 @@ final class PhabricatorPasteTestDataGenerator
 
   // Better Support for this in the future
   public $supportedLanguages = array(
-    "Java" => "java",
-    "PHP" => "php");
+    'Java' => 'java',
+    'PHP' => 'php');
 
   public function generate() {
     $authorphid = $this->loadPhabrictorUserPHID();
@@ -37,7 +37,7 @@ final class PhabricatorPasteTestDataGenerator
   private function loadPhabrictorPastePHID() {
     $random = rand(0, 1);
     if ($random == 1) {
-      $paste = id($this->loadOneRandom("PhabricatorPaste"));
+      $paste = id($this->loadOneRandom('PhabricatorPaste'));
       if ($paste) {
         return $paste->getPHID();
       }
@@ -55,15 +55,15 @@ final class PhabricatorPasteTestDataGenerator
     $title = preg_replace('/\s+/', '', $title);
     if ($language == null ||
       !in_array($language, array_keys($this->supportedLanguages))) {
-        return $title.".txt";
+        return $title.'.txt';
     } else {
-      return $title.".".$this->supportedLanguages[$language];
+      return $title.'.'.$this->supportedLanguages[$language];
     }
   }
 
   public function generateLanguage() {
     $supplemented_lang = $this->supportedLanguages;
-    $supplemented_lang["lipsum"] = "txt";
+    $supplemented_lang['lipsum'] = 'txt';
     return array_rand($supplemented_lang);
   }
 
@@ -73,7 +73,7 @@ final class PhabricatorPasteTestDataGenerator
         return id(new PhutilLipsumContextFreeGrammar())
             ->generateSeveral(rand(30, 40));
       } else {
-        $cfg_class = "Phutil".$language."CodeSnippetContextFreeGrammar";
+        $cfg_class = 'Phutil'.$language.'CodeSnippetContextFreeGrammar';
         return newv($cfg_class, array())->generate();
       }
   }

@@ -4,7 +4,7 @@ final class ConduitAPI_differential_setdiffproperty_Method
   extends ConduitAPI_differential_Method {
 
   public function getMethodDescription() {
-    return "Attach properties to Differential diffs.";
+    return 'Attach properties to Differential diffs.';
   }
 
   public function defineParamTypes() {

@@ -168,7 +168,7 @@ final class PhabricatorConduitAPIController
     $user_name) {
 
     if (!$api_request->getUser()->getIsAdmin()) {
-      throw new Exception("Only administrators can use actAsUser");
+      throw new Exception('Only administrators can use actAsUser');
     }
 
     $user = id(new PhabricatorUser())->loadOneWhere(

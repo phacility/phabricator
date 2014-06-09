@@ -19,7 +19,7 @@ final class PhabricatorSetupCheckAPC extends PhabricatorSetupCheck {
     }
 
     if (!ini_get('apc.enabled')) {
-      $summary = pht("Enabling APC will dramatically improve performance.");
+      $summary = pht('Enabling APC will dramatically improve performance.');
       $message = pht(
         "The PHP extension 'APC' is installed, but not enabled in your PHP ".
         "configuration. Enabling it will dramatically improve Phabricator ".

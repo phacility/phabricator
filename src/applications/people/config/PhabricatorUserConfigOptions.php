@@ -4,11 +4,11 @@ final class PhabricatorUserConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("User Profiles");
+    return pht('User Profiles');
   }
 
   public function getDescription() {
-    return pht("User profiles configuration.");
+    return pht('User profiles configuration.');
   }
 
   public function getOptions() {
@@ -33,11 +33,11 @@ final class PhabricatorUserConfigOptions
     return array(
       $this->newOption('user.fields', $custom_field_type, $default)
         ->setCustomData(id(new PhabricatorUser())->getCustomFieldBaseClass())
-        ->setDescription(pht("Select and reorder user profile fields.")),
+        ->setDescription(pht('Select and reorder user profile fields.')),
       $this->newOption('user.custom-field-definitions', 'map', array())
-        ->setDescription(pht("Add new simple fields to user profiles.")),
+        ->setDescription(pht('Add new simple fields to user profiles.')),
       $this->newOption('user.require-real-name', 'bool', true)
-        ->setDescription(pht("Always require real name for user profiles."))
+        ->setDescription(pht('Always require real name for user profiles.'))
         ->setBoolOptions(
           array(
             pht('Make real names required'),

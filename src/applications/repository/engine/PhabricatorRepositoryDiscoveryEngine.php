@@ -110,16 +110,16 @@ final class PhabricatorRepositoryDiscoveryEngine
       $this->log(pht('Examining branch "%s", at "%s".', $name, $commit));
 
       if (!$repository->shouldTrackBranch($name)) {
-        $this->log(pht("Skipping, branch is untracked."));
+        $this->log(pht('Skipping, branch is untracked.'));
         continue;
       }
 
       if ($this->isKnownCommit($commit)) {
-        $this->log(pht("Skipping, HEAD is known."));
+        $this->log(pht('Skipping, HEAD is known.'));
         continue;
       }
 
-      $this->log(pht("Looking for new commits."));
+      $this->log(pht('Looking for new commits.'));
 
       $branch_refs = $this->discoverStreamAncestry(
         new PhabricatorGitGraphStream($repository, $commit),
@@ -158,7 +158,7 @@ final class PhabricatorRepositoryDiscoveryEngine
     $remote_uri = $matches[1];
     $expect_remote = $repository->getRemoteURI();
 
-    if ($remote_uri == "origin") {
+    if ($remote_uri == 'origin') {
       // If a remote does not exist, git pretends it does and prints out a
       // made up remote where the URI is the same as the remote name. This is
       // definitely not correct.
@@ -368,16 +368,16 @@ final class PhabricatorRepositoryDiscoveryEngine
 
       $this->log(pht('Examining branch "%s" head "%s".', $name, $commit));
       if (!$repository->shouldTrackBranch($name)) {
-        $this->log(pht("Skipping, branch is untracked."));
+        $this->log(pht('Skipping, branch is untracked.'));
         continue;
       }
 
       if ($this->isKnownCommit($commit)) {
-        $this->log(pht("Skipping, this head is a known commit."));
+        $this->log(pht('Skipping, this head is a known commit.'));
         continue;
       }
 
-      $this->log(pht("Looking for new commits."));
+      $this->log(pht('Looking for new commits.'));
 
       $branch_refs = $this->discoverStreamAncestry(
         new PhabricatorMercurialGraphStream($repository, $commit),

@@ -12,7 +12,7 @@ final class ConduitAPI_differential_find_Method
   }
 
   public function getMethodDescription() {
-    return "Query Differential revisions which match certain criteria.";
+    return 'Query Differential revisions which match certain criteria.';
   }
 
   public function defineParamTypes() {

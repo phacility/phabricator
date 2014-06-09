@@ -4,18 +4,18 @@ final class PhabricatorConduitConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Conduit");
+    return pht('Conduit');
   }
 
   public function getDescription() {
-    return pht("Configure conduit.");
+    return pht('Configure conduit.');
   }
 
   public function getOptions() {
     return array(
-      $this->newOption("conduit.servers", "list<string>", array())
+      $this->newOption('conduit.servers', 'list<string>', array())
         ->setLocked(true)
-        ->setSummary(pht("Servers that conduit can connect to."))
+        ->setSummary(pht('Servers that conduit can connect to.'))
         ->setDescription(
             pht(
               "Set an array of servers where conduit can connect to. This is ".

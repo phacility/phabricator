@@ -187,7 +187,7 @@ abstract class PhabricatorWorker {
     foreach ($tasks as $task) {
       if ($task->getResult() != PhabricatorWorkerArchiveTask::RESULT_SUCCESS) {
         throw new Exception(
-          pht("Task %d failed!", $task->getID()));
+          pht('Task %d failed!', $task->getID()));
       }
     }
   }

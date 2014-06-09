@@ -428,7 +428,7 @@ final class DifferentialHunkParser {
         if (isset($line[0])) {
           $char = $line[0];
           switch ($char) {
-            case " ":
+            case ' ':
               $line_type_map[$line_index] = null;
               $line_text[$line_index] = substr($line, 1);
               break;
@@ -442,9 +442,9 @@ final class DifferentialHunkParser {
               $line_type_map[$line_index] = null;
               $line_text[$line_index] = $line;
               break;
-            case "+":
-            case "-":
-            case "\\":
+            case '+':
+            case '-':
+            case '\\':
               $line_type_map[$line_index] = $char;
               $line_text[$line_index] = substr($line, 1);
               break;
@@ -602,13 +602,13 @@ final class DifferentialHunkParser {
         $start = $start - $add_context;
         $end = $end + $add_context;
         $hunk_content = array();
-        $hunk_pos = array( "-" => 0, "+" => 0 );
-        $hunk_offset = array( "-" => null, "+" => null );
-        $hunk_last = array( "-" => null, "+" => null );
+        $hunk_pos = array( '-' => 0, '+' => 0 );
+        $hunk_offset = array( '-' => null, '+' => null );
+        $hunk_last = array( '-' => null, '+' => null );
         foreach (explode("\n", $hunk->getChanges()) as $line) {
-          $in_common = strncmp($line, " ", 1) === 0;
-          $in_old = strncmp($line, "-", 1) === 0 || $in_common;
-          $in_new = strncmp($line, "+", 1) === 0 || $in_common;
+          $in_common = strncmp($line, ' ', 1) === 0;
+          $in_old = strncmp($line, '-', 1) === 0 || $in_common;
+          $in_new = strncmp($line, '+', 1) === 0 || $in_common;
           $in_selected = strncmp($line, $prefix, 1) === 0;
           $skip = !$in_selected && !$in_common;
           if ($hunk_pos[$prefix] <= $end) {
@@ -616,36 +616,36 @@ final class DifferentialHunkParser {
               if (!$skip || ($hunk_pos[$prefix] != $start &&
                 $hunk_pos[$prefix] != $end)) {
                   if ($in_old) {
-                    if ($hunk_offset["-"] === null) {
-                      $hunk_offset["-"] = $hunk_pos["-"];
+                    if ($hunk_offset['-'] === null) {
+                      $hunk_offset['-'] = $hunk_pos['-'];
                     }
-                    $hunk_last["-"] = $hunk_pos["-"];
+                    $hunk_last['-'] = $hunk_pos['-'];
                   }
                   if ($in_new) {
-                    if ($hunk_offset["+"] === null) {
-                      $hunk_offset["+"] = $hunk_pos["+"];
+                    if ($hunk_offset['+'] === null) {
+                      $hunk_offset['+'] = $hunk_pos['+'];
                     }
-                    $hunk_last["+"] = $hunk_pos["+"];
+                    $hunk_last['+'] = $hunk_pos['+'];
                   }
 
                   $hunk_content[] = $line;
                 }
             }
-            if ($in_old) { ++$hunk_pos["-"]; }
-            if ($in_new) { ++$hunk_pos["+"]; }
+            if ($in_old) { ++$hunk_pos['-']; }
+            if ($in_new) { ++$hunk_pos['+']; }
           }
         }
-        if ($hunk_offset["-"] !== null || $hunk_offset["+"] !== null) {
-          $header = "@@";
-          if ($hunk_offset["-"] !== null) {
-            $header .= " -" . ($hunk->getOldOffset() + $hunk_offset["-"]) .
-              "," . ($hunk_last["-"] - $hunk_offset["-"] + 1);
+        if ($hunk_offset['-'] !== null || $hunk_offset['+'] !== null) {
+          $header = '@@';
+          if ($hunk_offset['-'] !== null) {
+            $header .= ' -' . ($hunk->getOldOffset() + $hunk_offset['-']) .
+              ',' . ($hunk_last['-'] - $hunk_offset['-'] + 1);
           }
-          if ($hunk_offset["+"] !== null) {
-            $header .= " +" . ($hunk->getNewOffset() + $hunk_offset["+"]) .
-              "," . ($hunk_last["+"] - $hunk_offset["+"] + 1);
+          if ($hunk_offset['+'] !== null) {
+            $header .= ' +' . ($hunk->getNewOffset() + $hunk_offset['+']) .
+              ',' . ($hunk_last['+'] - $hunk_offset['+'] + 1);
           }
-          $header .= " @@";
+          $header .= ' @@';
           $context[] = $header;
           $context[] = implode("\n", $hunk_content);
         }

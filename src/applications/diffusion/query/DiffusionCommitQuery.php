@@ -135,7 +135,7 @@ final class DiffusionCommitQuery
   public function getIdentifierMap() {
     if ($this->identifierMap === null) {
       throw new Exception(
-        "You must execute() the query before accessing the identifier map.");
+        'You must execute() the query before accessing the identifier map.');
     }
     return $this->identifierMap;
   }

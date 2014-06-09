@@ -4,11 +4,11 @@ final class PhabricatorNotificationConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Notifications");
+    return pht('Notifications');
   }
 
   public function getDescription() {
-    return pht("Configure real-time notifications.");
+    return pht('Configure real-time notifications.');
   }
 
   public function getOptions() {
@@ -16,8 +16,8 @@ final class PhabricatorNotificationConfigOptions
       $this->newOption('notification.enabled', 'bool', false)
         ->setBoolOptions(
           array(
-            pht("Enable Real-Time Notifications"),
-            pht("Disable Real-Time Notifications"),
+            pht('Enable Real-Time Notifications'),
+            pht('Disable Real-Time Notifications'),
           ))
         ->setSummary(pht('Enable real-time notifications.'))
         ->setDescription(
@@ -40,10 +40,10 @@ final class PhabricatorNotificationConfigOptions
         ->setSummary(pht('Drop permissions to a less-privileged user.'))
         ->setDescription(
           pht(
-            "The notifcation server must be started as root so it can bind ".
-            "to privileged ports, but if you specify a system user here it ".
-            "will drop permissions to that user after binding to the ports ".
-            "it needs.")),
+            'The notifcation server must be started as root so it can bind '.
+            'to privileged ports, but if you specify a system user here it '.
+            'will drop permissions to that user after binding to the ports '.
+            'it needs.')),
       $this->newOption('notification.log', 'string', '/var/log/aphlict.log')
         ->setDescription(pht('Location of the server log file.')),
       $this->newOption(

@@ -4,11 +4,11 @@ final class PhabricatorAWSConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Amazon Web Services");
+    return pht('Amazon Web Services');
   }
 
   public function getDescription() {
-    return pht("Configure integration with AWS (EC2, SES, S3, etc).");
+    return pht('Configure integration with AWS (EC2, SES, S3, etc).');
   }
 
   public function getOptions() {

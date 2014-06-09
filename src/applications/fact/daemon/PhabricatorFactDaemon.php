@@ -15,7 +15,7 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
       }
       $this->processAggregates();
 
-      $this->log("Zzz...");
+      $this->log('Zzz...');
       $this->sleep(60 * 5);
     }
   }
@@ -91,7 +91,7 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
   }
 
   public function processAggregates() {
-    $this->log("Processing aggregates.");
+    $this->log('Processing aggregates.');
 
     $facts = $this->computeAggregateFacts();
     $this->updateAggregateFacts($facts);

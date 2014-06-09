@@ -11,7 +11,7 @@ final class ConduitAPI_phragment_queryfragments_Method
   }
 
   public function getMethodDescription() {
-    return pht("Query fragments based on their paths.");
+    return pht('Query fragments based on their paths.');
   }
 
   public function defineParamTypes() {

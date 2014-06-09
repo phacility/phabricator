@@ -273,7 +273,7 @@ abstract class PhabricatorDaemonManagementWorkflow
       $this->launchDaemon($name, $argv, $is_debug = false);
     }
 
-    $console->writeErr(pht("Done.")."\n");
+    $console->writeErr(pht('Done.')."\n");
 
     return 0;
   }
@@ -313,7 +313,7 @@ abstract class PhabricatorDaemonManagementWorkflow
     }
 
     if (empty($running)) {
-      $console->writeErr(pht("No daemons to kill.")."\n");
+      $console->writeErr(pht('No daemons to kill.')."\n");
       return 0;
     }
 
@@ -324,7 +324,7 @@ abstract class PhabricatorDaemonManagementWorkflow
 
       $console->writeErr(pht("Stopping daemon '%s' (%s)...", $name, $pid)."\n");
       if (!$daemon->isRunning()) {
-        $console->writeErr(pht("Daemon is not running.")."\n");
+        $console->writeErr(pht('Daemon is not running.')."\n");
         unset($running[$key]);
         $daemon->updateStatus(PhabricatorDaemonLog::STATUS_EXITED);
       } else {

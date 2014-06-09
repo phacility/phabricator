@@ -4,11 +4,11 @@ final class PhabricatorPolicyConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Policy");
+    return pht('Policy');
   }
 
   public function getDescription() {
-    return pht("Options relating to object visibility.");
+    return pht('Options relating to object visibility.');
   }
 
   public function getOptions() {
@@ -18,7 +18,7 @@ final class PhabricatorPolicyConfigOptions
           array(
             pht('Allow Public Visibility'),
             pht('Require Login')))
-        ->setSummary(pht("Allow users to set object visibility to public."))
+        ->setSummary(pht('Allow users to set object visibility to public.'))
         ->setDescription(
           pht(
             "Phabricator allows you to set the visibility of objects (like ".

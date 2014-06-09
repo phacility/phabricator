@@ -242,7 +242,7 @@ abstract class HeraldAdapter {
       self::FIELD_CONTENT_SOURCE => pht('Content Source'),
       self::FIELD_ALWAYS => pht('Always'),
       self::FIELD_AUTHOR_PROJECTS => pht("Author's projects"),
-      self::FIELD_PROJECTS => pht("Projects"),
+      self::FIELD_PROJECTS => pht('Projects'),
       self::FIELD_PUSHER => pht('Pusher'),
       self::FIELD_PUSHER_PROJECTS => pht("Pusher's projects"),
       self::FIELD_DIFFERENTIAL_REVISION => pht('Differential revision'),
@@ -437,25 +437,25 @@ abstract class HeraldAdapter {
       case self::CONDITION_IS_ANY:
         if (!is_array($condition_value)) {
           throw new HeraldInvalidConditionException(
-            "Expected condition value to be an array.");
+            'Expected condition value to be an array.');
         }
         $condition_value = array_fuse($condition_value);
         return isset($condition_value[$field_value]);
       case self::CONDITION_IS_NOT_ANY:
         if (!is_array($condition_value)) {
           throw new HeraldInvalidConditionException(
-            "Expected condition value to be an array.");
+            'Expected condition value to be an array.');
         }
         $condition_value = array_fuse($condition_value);
         return !isset($condition_value[$field_value]);
       case self::CONDITION_INCLUDE_ALL:
         if (!is_array($field_value)) {
           throw new HeraldInvalidConditionException(
-            "Object produced non-array value!");
+            'Object produced non-array value!');
         }
         if (!is_array($condition_value)) {
           throw new HeraldInvalidConditionException(
-            "Expected condition value to be an array.");
+            'Expected condition value to be an array.');
         }
 
         $have = array_select_keys(array_fuse($field_value), $condition_value);
@@ -486,7 +486,7 @@ abstract class HeraldAdapter {
           $result = @preg_match($condition_value . 'S', $value);
           if ($result === false) {
             throw new HeraldInvalidConditionException(
-              "Regular expression is not valid!");
+              'Regular expression is not valid!');
           }
           if ($result) {
             return true;
@@ -501,11 +501,11 @@ abstract class HeraldAdapter {
         $regexp_pair = json_decode($condition_value, true);
         if (!is_array($regexp_pair)) {
           throw new HeraldInvalidConditionException(
-            "Regular expression pair is not valid JSON!");
+            'Regular expression pair is not valid JSON!');
         }
         if (count($regexp_pair) != 2) {
           throw new HeraldInvalidConditionException(
-            "Regular expression pair is not a pair!");
+            'Regular expression pair is not a pair!');
         }
 
         $key_regexp   = array_shift($regexp_pair);
@@ -515,13 +515,13 @@ abstract class HeraldAdapter {
           $key_matches = @preg_match($key_regexp, $key);
           if ($key_matches === false) {
             throw new HeraldInvalidConditionException(
-              "First regular expression is invalid!");
+              'First regular expression is invalid!');
           }
           if ($key_matches) {
             $value_matches = @preg_match($value_regexp, $value);
             if ($value_matches === false) {
               throw new HeraldInvalidConditionException(
-                "Second regular expression is invalid!");
+                'Second regular expression is invalid!');
             }
             if ($value_matches) {
               return true;
@@ -534,7 +534,7 @@ abstract class HeraldAdapter {
         $rule = $engine->getRule($condition_value);
         if (!$rule) {
           throw new HeraldInvalidConditionException(
-            "Condition references a rule which does not exist!");
+            'Condition references a rule which does not exist!');
         }
 
         $is_not = ($condition_type == self::CONDITION_NOT_RULE);

@@ -38,9 +38,9 @@ final class ConduitAPIRequest {
   public function getUser() {
     if (!$this->user) {
       throw new Exception(
-        "You can not access the user inside the implementation of a Conduit ".
-        "method which does not require authentication (as per ".
-        "shouldRequireAuthentication()).");
+        'You can not access the user inside the implementation of a Conduit '.
+        'method which does not require authentication (as per '.
+        'shouldRequireAuthentication()).');
     }
     return $this->user;
   }

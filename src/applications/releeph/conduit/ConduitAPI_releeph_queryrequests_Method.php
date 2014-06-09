@@ -5,7 +5,7 @@ final class ConduitAPI_releeph_queryrequests_Method
 
   public function getMethodDescription() {
     return
-      "Return information about all Releeph requests linked to the given ids.";
+      'Return information about all Releeph requests linked to the given ids.';
   }
 
   public function defineParamTypes() {

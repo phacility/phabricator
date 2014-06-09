@@ -12,7 +12,7 @@ final class PhabricatorWorkerArchiveTask extends PhabricatorWorkerTask {
   public function save() {
     if ($this->getID() === null) {
       throw new Exception(
-        "Trying to archive a task with no ID.");
+        'Trying to archive a task with no ID.');
     }
 
     $other = new PhabricatorWorkerActiveTask();

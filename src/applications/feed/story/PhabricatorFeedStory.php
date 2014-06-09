@@ -163,7 +163,7 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
   public function getPrimaryObject() {
     $phid = $this->getPrimaryObjectPHID();
     if (!$phid) {
-      throw new Exception("Story has no primary object!");
+      throw new Exception('Story has no primary object!');
     }
     return $this->getObject($phid);
   }

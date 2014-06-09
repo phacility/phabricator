@@ -5,7 +5,7 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
   private $dblob;
 
   public function willProcessRequest(array $data) {
-    $this->dblob = idx($data, "dblob", "");
+    $this->dblob = idx($data, 'dblob', '');
   }
 
   public function processRequest() {
@@ -79,7 +79,7 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
       }
     }
 
-    $fragment_sequence = "-";
+    $fragment_sequence = '-';
     if ($fragment->getLatestVersion() !== null) {
       $fragment_sequence = $fragment->getLatestVersion()->getSequence();
     }
@@ -98,7 +98,7 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
         phutil_tag('td', array(), $fragment->getPath()),
         phutil_tag('td', array(), $fragment_sequence)));
     foreach ($children as $child) {
-      $sequence = "-";
+      $sequence = '-';
       if ($child->getLatestVersion() !== null) {
         $sequence = $child->getLatestVersion()->getSequence();
       }
@@ -123,8 +123,8 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
           'p',
           array(),
           pht(
-            "The snapshot will contain the following fragments at ".
-            "the specified versions: ")),
+            'The snapshot will contain the following fragments at '.
+            'the specified versions: ')),
         $table));
 
     $form = id(new AphrontFormView())

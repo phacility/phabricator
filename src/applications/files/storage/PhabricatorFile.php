@@ -61,7 +61,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
   public static function readUploadedFileData($spec) {
     if (!$spec) {
-      throw new Exception("No file was uploaded!");
+      throw new Exception('No file was uploaded!');
     }
 
     $err = idx($spec, 'error');
@@ -72,14 +72,14 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $tmp_name = idx($spec, 'tmp_name');
     $is_valid = @is_uploaded_file($tmp_name);
     if (!$is_valid) {
-      throw new Exception("File is not an uploaded file.");
+      throw new Exception('File is not an uploaded file.');
     }
 
     $file_data = Filesystem::readFile($tmp_name);
     $file_size = idx($spec, 'size');
 
     if (strlen($file_data) != $file_size) {
-      throw new Exception("File size disagrees with uploaded size.");
+      throw new Exception('File size disagrees with uploaded size.');
     }
 
     self::validateFileSize(strlen($file_data));
@@ -214,7 +214,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     assert_instances_of($engines, 'PhabricatorFileStorageEngine');
     if (!$engines) {
-      throw new Exception("No valid storage engines are available!");
+      throw new Exception('No valid storage engines are available!');
     }
 
     $file = new PhabricatorFile();
@@ -248,7 +248,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     if (!$data_handle) {
       throw new PhutilAggregateException(
-        "All storage engines failed to write file:",
+        'All storage engines failed to write file:',
         $exceptions);
     }
 
@@ -368,7 +368,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   public static function newFromFileDownload($uri, array $params = array()) {
     // Make sure we're allowed to make a request first
     if (!PhabricatorEnv::getEnvConfig('security.allow-outbound-http')) {
-      throw new Exception("Outbound HTTP requests are disabled!");
+      throw new Exception('Outbound HTTP requests are disabled!');
     }
 
     $uri = new PhutilURI($uri);
@@ -484,7 +484,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
         $data = $data;
         break;
       default:
-        throw new Exception("Unknown storage format.");
+        throw new Exception('Unknown storage format.');
     }
 
     return $data;
@@ -493,7 +493,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   public function getViewURI() {
     if (!$this->getPHID()) {
       throw new Exception(
-        "You must save a file before you can generate a view URI.");
+        'You must save a file before you can generate a view URI.');
     }
 
     $name = phutil_escape_uri($this->getName());
@@ -694,12 +694,12 @@ final class PhabricatorFile extends PhabricatorFileDAO
   public function updateDimensions($save = true) {
     if (!$this->isViewableImage()) {
       throw new Exception(
-        "This file is not a viewable image.");
+        'This file is not a viewable image.');
     }
 
-    if (!function_exists("imagecreatefromstring")) {
+    if (!function_exists('imagecreatefromstring')) {
       throw new Exception(
-        "Cannot retrieve image information.");
+        'Cannot retrieve image information.');
     }
 
     $data = $this->loadFileData();
@@ -707,7 +707,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $img = imagecreatefromstring($data);
     if ($img === false) {
       throw new Exception(
-        "Error when decoding image.");
+        'Error when decoding image.');
     }
 
     $this->metadata[self::METADATA_IMAGE_WIDTH] = imagesx($img);

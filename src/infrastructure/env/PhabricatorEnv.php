@@ -139,7 +139,7 @@ final class PhabricatorEnv {
 
     $stack->pushSource(
       id(new PhabricatorConfigLocalSource())
-        ->setName(pht("Local Config")));
+        ->setName(pht('Local Config')));
 
     // If the install overrides the database adapter, we might need to load
     // the database adapter class before we can push on the database config.
@@ -156,7 +156,7 @@ final class PhabricatorEnv {
     try {
       $stack->pushSource(
         id(new PhabricatorConfigDatabaseSource('default'))
-          ->setName(pht("Database")));
+          ->setName(pht('Database')));
     } catch (AphrontQueryException $exception) {
       // If the database is not available, just skip this configuration
       // source. This happens during `bin/storage upgrade`, `bin/conf` before
@@ -167,7 +167,7 @@ final class PhabricatorEnv {
   public static function repairConfig($key, $value) {
     if (!self::$repairSource) {
       self::$repairSource = id(new PhabricatorConfigDictionarySource(array()))
-        ->setName(pht("Repaired Config"));
+        ->setName(pht('Repaired Config'));
       self::$sourceStack->pushSource(self::$repairSource);
     }
     self::$repairSource->setKeys(array($key => $value));
@@ -177,7 +177,7 @@ final class PhabricatorEnv {
   public static function overrideConfig($key, $value) {
     if (!self::$overrideSource) {
       self::$overrideSource = id(new PhabricatorConfigDictionarySource(array()))
-        ->setName(pht("Overridden Config"));
+        ->setName(pht('Overridden Config'));
       self::$sourceStack->pushSource(self::$overrideSource);
     }
     self::$overrideSource->setKeys(array($key => $value));
@@ -410,8 +410,8 @@ final class PhabricatorEnv {
     if ($stack_key !== $key) {
       self::$sourceStack->pushSource($source);
       throw new Exception(
-        "Scoped environments were destroyed in a diffent order than they ".
-        "were initialized.");
+        'Scoped environments were destroyed in a diffent order than they '.
+        'were initialized.');
     }
   }
 

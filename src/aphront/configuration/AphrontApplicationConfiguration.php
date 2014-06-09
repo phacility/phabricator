@@ -138,8 +138,8 @@ abstract class AphrontApplicationConfiguration {
           ->executeOne();
       } catch (PhabricatorPolicyException $ex) {
         throw new Exception(
-          "This blog is not visible to logged out users, so it can not be ".
-          "visited from a custom domain.");
+          'This blog is not visible to logged out users, so it can not be '.
+          'visited from a custom domain.');
       }
 
       if (!$blog) {

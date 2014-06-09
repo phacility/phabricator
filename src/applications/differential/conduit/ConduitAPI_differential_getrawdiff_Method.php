@@ -4,7 +4,7 @@ final class ConduitAPI_differential_getrawdiff_Method
   extends ConduitAPI_differential_Method {
 
   public function getMethodDescription() {
-    return pht("Retrieve a raw diff");
+    return pht('Retrieve a raw diff');
   }
 
   public function defineParamTypes() {

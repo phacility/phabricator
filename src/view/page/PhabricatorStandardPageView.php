@@ -101,7 +101,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     if (!$this->getRequest()) {
       throw new Exception(
         pht(
-          "You must set the Request to render a PhabricatorStandardPageView."));
+          'You must set the Request to render a PhabricatorStandardPageView.'));
     }
 
     $console = $this->getConsole();

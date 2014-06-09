@@ -62,14 +62,14 @@ final class PhabricatorHovercardView extends AphrontView {
 
   public function render() {
     if (!$this->handle) {
-      throw new Exception("Call setObjectHandle() before calling render()!");
+      throw new Exception('Call setObjectHandle() before calling render()!');
     }
 
     $handle = $this->handle;
 
-    require_celerity_resource("phabricator-hovercard-view-css");
+    require_celerity_resource('phabricator-hovercard-view-css');
 
-    $title = pht("%s: %s",
+    $title = pht('%s: %s',
       $handle->getTypeName(),
       $this->title ? $this->title : $handle->getName());
 

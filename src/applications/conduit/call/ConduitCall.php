@@ -114,7 +114,7 @@ final class ConduitCall {
       if (!$allow_public) {
         if (!$user->isLoggedIn() && !$user->isOmnipotent()) {
           // TODO: As per below, this should get centralized and cleaned up.
-          throw new ConduitException("ERR-INVALID-AUTH");
+          throw new ConduitException('ERR-INVALID-AUTH');
         }
       }
 
@@ -131,8 +131,8 @@ final class ConduitCall {
         if (!$can_view) {
           throw new ConduitException(
             pht(
-              "You do not have access to the application which provides this ".
-              "API method."));
+              'You do not have access to the application which provides this '.
+              'API method.'));
         }
       }
     }
@@ -142,7 +142,7 @@ final class ConduitCall {
       $client = new ConduitClient($server);
       $params = $this->request->getAllParameters();
 
-      $params["__conduit__"]["isProxied"] = true;
+      $params['__conduit__']['isProxied'] = true;
 
       if ($this->handler->shouldRequireAuthentication()) {
         $client->callMethodSynchronous(
@@ -152,7 +152,7 @@ final class ConduitCall {
              'clientVersion'     => '1.0',
              'user'              => $this->getUser()->getUserName(),
              'certificate'       => $this->getUser()->getConduitCertificate(),
-             '__conduit__'       => $params["__conduit__"],
+             '__conduit__'       => $params['__conduit__'],
         ));
       }
 

@@ -70,7 +70,7 @@ final class ReleephDiffSizeFieldSpecification
         ' + tests');
     }
 
-    $blurb = hsprintf("%s%s.",
+    $blurb = hsprintf('%s%s.',
       pht('%d line(s)', $mr_changes['code']['lines']).' and '.
       pht('%d path(s)', count($mr_changes['code']['paths'])).' over '.
       pht('%d diff(s)', count($diffs)),

@@ -120,7 +120,7 @@ final class PhabricatorAuthManagementStripWorkflow
 
     $console = PhutilConsole::getConsole();
 
-    $console->writeOut("%s\n\n", pht("These auth factors will be stripped:"));
+    $console->writeOut("%s\n\n", pht('These auth factors will be stripped:'));
 
     foreach ($factors as $factor) {
       $impl = $factor->getImplementation();

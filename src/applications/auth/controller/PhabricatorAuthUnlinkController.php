@@ -73,7 +73,7 @@ final class PhabricatorAuthUnlinkController
       ->setTitle(pht('No Such Account'))
       ->appendChild(
         pht(
-          "You can not unlink this account because it is not linked."))
+          'You can not unlink this account because it is not linked.'))
       ->addCancelButton($this->getDoneURI());
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
@@ -87,8 +87,8 @@ final class PhabricatorAuthUnlinkController
       ->setTitle(pht('Permanent Account Link'))
       ->appendChild(
         pht(
-          "You can not unlink this account because the administrator has ".
-          "configured Phabricator to make links to %s accounts permanent.",
+          'You can not unlink this account because the administrator has '.
+          'configured Phabricator to make links to %s accounts permanent.',
           $provider->getProviderName()))
       ->addCancelButton($this->getDoneURI());
 
@@ -101,10 +101,10 @@ final class PhabricatorAuthUnlinkController
       ->setTitle(pht('Last Valid Account'))
       ->appendChild(
         pht(
-          "You can not unlink this account because you have no other ".
-          "valid login accounts. If you removed it, you would be unable ".
-          "to login. Add another authentication method before removing ".
-          "this one."))
+          'You can not unlink this account because you have no other '.
+          'valid login accounts. If you removed it, you would be unable '.
+          'to login. Add another authentication method before removing '.
+          'this one.'))
       ->addCancelButton($this->getDoneURI());
 
     return id(new AphrontDialogResponse())->setDialog($dialog);

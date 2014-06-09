@@ -11,7 +11,7 @@ final class ConduitAPI_feed_query_Method
   }
 
   public function getMethodDescription() {
-    return "Query the feed for stories";
+    return 'Query the feed for stories';
   }
 
   private function getDefaultLimit() {

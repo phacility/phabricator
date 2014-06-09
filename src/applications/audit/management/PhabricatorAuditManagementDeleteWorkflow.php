@@ -72,7 +72,7 @@ final class PhabricatorAuditManagementDeleteWorkflow
     $max_date = $this->loadDate($args->getArg('max-commit-date'));
     if ($min_date && $max_date && ($min_date > $max_date)) {
       throw new PhutilArgumentUsageException(
-        "Specified max date must come after specified min date.");
+        'Specified max date must come after specified min date.');
     }
 
     $is_dry_run = $args->getArg('dry-run');
@@ -124,7 +124,7 @@ final class PhabricatorAuditManagementDeleteWorkflow
     $console = PhutilConsole::getConsole();
 
     if (!$audits) {
-      $console->writeErr("%s\n", pht("No audits match the query."));
+      $console->writeErr("%s\n", pht('No audits match the query.'));
       return 0;
     }
 
@@ -140,7 +140,7 @@ final class PhabricatorAuditManagementDeleteWorkflow
       $console->writeOut(
         "%s\n",
         sprintf(
-          "%10d %-16s %-16s %s: %s",
+          '%10d %-16s %-16s %s: %s',
           $audit->getID(),
           $handles[$audit->getAuditorPHID()]->getName(),
           PhabricatorAuditStatusConstants::getStatusName(
@@ -158,7 +158,7 @@ final class PhabricatorAuditManagementDeleteWorkflow
       if ($console->confirm($message)) {
         foreach ($audits as $audit) {
           $id = $audit->getID();
-          $console->writeOut("%s\n", pht("Deleting audit %d...", $id));
+          $console->writeOut("%s\n", pht('Deleting audit %d...', $id));
           $audit->delete();
         }
       }

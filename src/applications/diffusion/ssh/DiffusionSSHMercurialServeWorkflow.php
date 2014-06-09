@@ -32,11 +32,11 @@ final class DiffusionSSHMercurialServeWorkflow
     $args = $this->getArgs();
 
     if (!$args->getArg('stdio')) {
-      throw new Exception("Expected `hg ... --stdio`!");
+      throw new Exception('Expected `hg ... --stdio`!');
     }
 
     if ($args->getArg('command') !== array('serve')) {
-      throw new Exception("Expected `hg ... serve`!");
+      throw new Exception('Expected `hg ... serve`!');
     }
 
     $command = csprintf('hg -R %s serve --stdio', $repository->getLocalPath());

@@ -44,7 +44,7 @@ final class QueryFormattingTestCase extends PhabricatorTestCase {
       qsprintf($conn_r, '%B', null));
 
     $this->assertEqual(
-      "NULL",
+      'NULL',
       qsprintf($conn_r, '%nB', null));
 
     $this->assertEqual(

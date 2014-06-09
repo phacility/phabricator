@@ -14,7 +14,7 @@ final class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return "Connect a session-based client.";
+    return 'Connect a session-based client.';
   }
 
   public function defineParamTypes() {
@@ -35,22 +35,22 @@ final class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
 
   public function defineErrorTypes() {
     return array(
-      "ERR-BAD-VERSION" =>
-        "Client/server version mismatch. Upgrade your server or downgrade ".
-        "your client.",
-      "NEW-ARC-VERSION" =>
-        "Client/server version mismatch. Upgrade your client.",
-      "ERR-UNKNOWN-CLIENT" =>
-        "Client is unknown.",
-      "ERR-INVALID-USER" =>
-        "The username you are attempting to authenticate with is not valid.",
-      "ERR-INVALID-CERTIFICATE" =>
-        "Your authentication certificate for this server is invalid.",
-      "ERR-INVALID-TOKEN" =>
+      'ERR-BAD-VERSION' =>
+        'Client/server version mismatch. Upgrade your server or downgrade '.
+        'your client.',
+      'NEW-ARC-VERSION' =>
+        'Client/server version mismatch. Upgrade your client.',
+      'ERR-UNKNOWN-CLIENT' =>
+        'Client is unknown.',
+      'ERR-INVALID-USER' =>
+        'The username you are attempting to authenticate with is not valid.',
+      'ERR-INVALID-CERTIFICATE' =>
+        'Your authentication certificate for this server is invalid.',
+      'ERR-INVALID-TOKEN' =>
         "The challenge token you are authenticating with is outside of the ".
         "allowed time range. Either your system clock is out of whack or ".
         "you're executing a replay attack.",
-      "ERR-NO-CERTIFICATE" => "This server requires authentication.",
+      'ERR-NO-CERTIFICATE' => 'This server requires authentication.',
     );
   }
 
@@ -126,13 +126,13 @@ final class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
         throw id(new ConduitException('ERR-INVALID-TOKEN'))
           ->setErrorDescription(
             pht(
-              "The request you submitted is signed with a timestamp, but that ".
-              "timestamp is not within %s of the current time. The ".
-              "signed timestamp is %s (%s), and the current server time is ".
-              "%s (%s). This is a difference of %s seconds, but the ".
-              "timestamp must differ from the server time by no more than ".
-              "%s seconds. Your client or server clock may not be set ".
-              "correctly.",
+              'The request you submitted is signed with a timestamp, but that '.
+              'timestamp is not within %s of the current time. The '.
+              'signed timestamp is %s (%s), and the current server time is '.
+              '%s (%s). This is a difference of %s seconds, but the '.
+              'timestamp must differ from the server time by no more than '.
+              '%s seconds. Your client or server clock may not be set '.
+              'correctly.',
               phabricator_format_relative_time($threshold),
               $token,
               date('r', $token),

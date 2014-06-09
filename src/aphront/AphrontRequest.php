@@ -483,7 +483,7 @@ final class AphrontRequest {
     if (empty($_SERVER['HTTPS'])) {
       return false;
     }
-    if (!strcasecmp($_SERVER["HTTPS"], "off")) {
+    if (!strcasecmp($_SERVER['HTTPS'], 'off')) {
       return false;
     }
     return true;

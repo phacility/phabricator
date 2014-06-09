@@ -88,7 +88,7 @@ final class ManiphestExportController extends ManiphestController {
         ->appendChild(
           id(new AphrontFormSelectControl())
             ->setLabel(pht('Format:'))
-            ->setName("excel-format")
+            ->setName('excel-format')
             ->setOptions($export_formats));
 
       $dialog->appendChild($form);
@@ -98,7 +98,7 @@ final class ManiphestExportController extends ManiphestController {
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
-    $format = idx($formats, $request->getStr("excel-format"));
+    $format = idx($formats, $request->getStr('excel-format'));
     if ($format === null) {
       throw new Exception('Excel format object not found.');
     }

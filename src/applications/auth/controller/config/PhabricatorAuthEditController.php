@@ -177,8 +177,8 @@ final class PhabricatorAuthEditController
     $email_domains = PhabricatorEnv::getEnvConfig($config_name);
     if ($email_domains) {
       $registration_warning = pht(
-        "Users will only be able to register with a verified email address ".
-        "at one of the configured [[ %s | %s ]] domains: **%s**",
+        'Users will only be able to register with a verified email address '.
+        'at one of the configured [[ %s | %s ]] domains: **%s**',
         $config_href,
         $config_name,
         implode(', ', $email_domains));

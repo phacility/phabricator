@@ -9,7 +9,7 @@ final class PhragmentVersionController extends PhragmentController {
   }
 
   public function willProcessRequest(array $data) {
-    $this->id = idx($data, "id", 0);
+    $this->id = idx($data, 'id', 0);
   }
 
   public function processRequest() {
@@ -48,7 +48,7 @@ final class PhragmentVersionController extends PhragmentController {
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht(
-        "%s at version %d",
+        '%s at version %d',
         $version->getFragment()->getName(),
         $version->getSequence()))
       ->setPolicyObject($version)
@@ -114,7 +114,7 @@ final class PhragmentVersionController extends PhragmentController {
         'patch/'.$previous_version->getID().'/'.$version->getID());
       $item->addAction(id(new PHUIListItemView())
         ->setIcon('fa-file-o')
-        ->setName(pht("Get Patch"))
+        ->setName(pht('Get Patch'))
         ->setHref($this->isCorrectlyConfigured() ? $patch_uri : null)
         ->setDisabled(!$this->isCorrectlyConfigured()));
       $list->addItem($item);
@@ -125,7 +125,7 @@ final class PhragmentVersionController extends PhragmentController {
     $item->addAttribute('Prior to any content (empty file)');
     $item->addAction(id(new PHUIListItemView())
       ->setIcon('fa-file-o')
-      ->setName(pht("Get Patch"))
+      ->setName(pht('Get Patch'))
       ->setHref($this->getApplicationURI(
         'patch/x/'.$version->getID())));
     $list->addItem($item);

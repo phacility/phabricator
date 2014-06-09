@@ -35,7 +35,7 @@ final class ReleephRequestorFieldSpecification
   }
 
   public function renderLabelForCommitMessage() {
-    return "Requested By";
+    return 'Requested By';
   }
 
   public function renderValueForCommitMessage() {

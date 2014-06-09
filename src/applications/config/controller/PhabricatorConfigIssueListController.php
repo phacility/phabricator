@@ -15,7 +15,7 @@ final class PhabricatorConfigIssueListController
       PhabricatorSetupCheck::countUnignoredIssues($issues));
 
     $list = $this->buildIssueList($issues);
-    $list->setNoDataString(pht("There are no open setup issues."));
+    $list->setNoDataString(pht('There are no open setup issues.'));
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Open Phabricator Setup Issues'));

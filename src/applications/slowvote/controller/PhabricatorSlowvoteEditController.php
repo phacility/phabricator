@@ -152,7 +152,7 @@ final class PhabricatorSlowvoteEditController
       for ($ii = 0; $ii < 10; $ii++) {
         $n = ($ii + 1);
         $response = id(new AphrontFormTextControl())
-          ->setLabel(pht("Response %d", $n))
+          ->setLabel(pht('Response %d', $n))
           ->setName('response[]')
           ->setValue(idx($responses, $ii, ''));
 

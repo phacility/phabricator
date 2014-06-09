@@ -11,7 +11,7 @@ final class ConduitAPI_chatlog_query_Method
   }
 
   public function getMethodDescription() {
-    return "Retrieve chatter.";
+    return 'Retrieve chatter.';
   }
 
   public function defineParamTypes() {

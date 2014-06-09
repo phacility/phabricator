@@ -143,7 +143,7 @@ final class DoorkeeperFeedWorkerAsana extends DoorkeeperFeedWorker {
 
           $this->makeAsanaAPICall(
             $oauth_token,
-            "tasks/".$parent_ref->getObjectID(),
+            'tasks/'.$parent_ref->getObjectID(),
             'PUT',
             $main_data);
         } else {

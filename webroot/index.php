@@ -129,7 +129,7 @@ try {
     $access_log->write();
     if ($original_exception) {
       $ex = new PhutilAggregateException(
-        "Multiple exceptions during processing and rendering.",
+        'Multiple exceptions during processing and rendering.',
         array(
           $original_exception,
           $ex,

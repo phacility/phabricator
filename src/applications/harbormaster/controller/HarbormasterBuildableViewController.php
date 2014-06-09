@@ -36,7 +36,7 @@ final class HarbormasterBuildableViewController
 
     $build_list = $this->buildBuildList($buildable);
 
-    $title = pht("Buildable %d", $id);
+    $title = pht('Buildable %d', $id);
 
     $header = id(new PHUIHeaderView())
       ->setHeader($title)

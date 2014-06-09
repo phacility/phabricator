@@ -60,9 +60,9 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
       case self::TYPE_HOST:
         $leases = id(new DrydockLeaseQuery())
           ->setViewer($viewer)
-          ->withIDs(array($data["drydock-lease"]))
+          ->withIDs(array($data['drydock-lease']))
           ->execute();
-        $lease = $leases[$data["drydock-lease"]];
+        $lease = $leases[$data['drydock-lease']];
 
         return id(new PHUIObjectItemView())
           ->setObjectName(pht('Drydock Lease'))
@@ -76,7 +76,7 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
   public function loadDrydockLease() {
     if ($this->getArtifactType() !== self::TYPE_HOST) {
       throw new Exception(
-        "`loadDrydockLease` may only be called on host artifacts.");
+        '`loadDrydockLease` may only be called on host artifacts.');
     }
 
     $data = $this->getArtifactData();
@@ -86,12 +86,12 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
     $lease = id(new DrydockLease())->load(
       $data['drydock-lease']);
     if ($lease === null) {
-      throw new Exception("Associated Drydock lease not found!");
+      throw new Exception('Associated Drydock lease not found!');
     }
     $resource = id(new DrydockResource())->load(
       $lease->getResourceID());
     if ($resource === null) {
-      throw new Exception("Associated Drydock resource not found!");
+      throw new Exception('Associated Drydock resource not found!');
     }
     $lease->attachResource($resource);
 
@@ -101,20 +101,20 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
   public function loadPhabricatorFile() {
     if ($this->getArtifactType() !== self::TYPE_FILE) {
       throw new Exception(
-        "`loadPhabricatorFile` may only be called on file artifacts.");
+        '`loadPhabricatorFile` may only be called on file artifacts.');
     }
 
     $data = $this->getArtifactData();
 
     // The data for TYPE_FILE is an array with a single PHID in it.
-    $phid = $data["filePHID"];
+    $phid = $data['filePHID'];
 
     $file = id(new PhabricatorFileQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withPHIDs(array($phid))
       ->executeOne();
     if ($file === null) {
-      throw new Exception("Associated file not found!");
+      throw new Exception('Associated file not found!');
     }
     return $file;
   }

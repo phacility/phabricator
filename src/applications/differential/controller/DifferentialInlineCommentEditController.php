@@ -22,11 +22,11 @@ final class DifferentialInlineCommentEditController
       ->executeOne();
 
     if (!$revision) {
-      throw new Exception("Invalid revision ID!");
+      throw new Exception('Invalid revision ID!');
     }
 
     if (!id(new DifferentialChangeset())->load($changeset_id)) {
-      throw new Exception("Invalid changeset ID!");
+      throw new Exception('Invalid changeset ID!');
     }
 
     return id(new DifferentialInlineComment())
@@ -46,7 +46,7 @@ final class DifferentialInlineCommentEditController
 
     $inline = $this->loadComment($id);
     if (!$this->canEditInlineComment($user, $inline)) {
-      throw new Exception("That comment is not editable!");
+      throw new Exception('That comment is not editable!');
     }
     return $inline;
   }

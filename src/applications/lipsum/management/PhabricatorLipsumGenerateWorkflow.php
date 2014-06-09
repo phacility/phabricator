@@ -26,13 +26,13 @@ final class PhabricatorLipsumGenerateWorkflow
       echo "\t".$typetmp."\n";
     }
     echo "\n";
-    $prompt = "Are you sure you want to generate lots of test data?";
+    $prompt = 'Are you sure you want to generate lots of test data?';
     if (!phutil_console_confirm($prompt, $default_no = true)) {
       return;
     }
     $argv = $args->getArg('args');
     if (count($argv) == 0 ||
-      (count($argv) == 1 && $argv[0] == "all")) {
+      (count($argv) == 1 && $argv[0] == 'all')) {
       $this->infinitelyGenerate($supported_types);
     } else {
       $new_supported_types = array();
@@ -56,8 +56,8 @@ final class PhabricatorLipsumGenerateWorkflow
       echo "None of the input types were supported.\n";
       return;
     }
-    echo "GENERATING: ";
-    echo strtoupper(implode(" , ", array_keys($supported_types)));
+    echo 'GENERATING: ';
+    echo strtoupper(implode(' , ', array_keys($supported_types)));
     echo "\n";
     while (true) {
       $type = $supported_types[array_rand($supported_types)];

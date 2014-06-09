@@ -54,7 +54,7 @@ final class PhortuneCurrency {
 
   public static function newFromUSDCents($cents) {
     if (!is_int($cents)) {
-      throw new Exception("USDCents value is not an integer!");
+      throw new Exception('USDCents value is not an integer!');
     }
 
     $obj = new PhortuneCurrency();
@@ -75,7 +75,7 @@ final class PhortuneCurrency {
       case 'USD':
         return sprintf('%.02f', $this->value / 100);
       default:
-        throw new Exception("Unsupported currency!");
+        throw new Exception('Unsupported currency!');
 
     }
   }

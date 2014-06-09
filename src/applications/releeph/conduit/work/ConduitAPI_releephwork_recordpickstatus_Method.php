@@ -8,7 +8,7 @@ final class ConduitAPI_releephwork_recordpickstatus_Method
   }
 
   public function getMethodDescription() {
-    return "Record whether a pick or revert was successful or not.";
+    return 'Record whether a pick or revert was successful or not.';
   }
 
   public function defineParamTypes() {

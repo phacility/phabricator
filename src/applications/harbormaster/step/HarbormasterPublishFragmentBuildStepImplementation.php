@@ -47,7 +47,7 @@ final class HarbormasterPublishFragmentBuildStepImplementation
         PhabricatorPolicies::getMostOpenPolicy(),
         PhabricatorPolicies::POLICY_USER);
     } else {
-      if ($file->getMimeType() === "application/zip") {
+      if ($file->getMimeType() === 'application/zip') {
         $fragment->updateFromZIP(PhabricatorUser::getOmnipotentUser(), $file);
       } else {
         $fragment->updateFromFile(PhabricatorUser::getOmnipotentUser(), $file);

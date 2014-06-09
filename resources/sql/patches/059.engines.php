@@ -24,7 +24,7 @@ foreach ($tables as $table) {
   echo "Converting {$name}...\n";
   queryfx(
     $conn,
-    "ALTER TABLE %T.%T ENGINE=InnoDB",
+    'ALTER TABLE %T.%T ENGINE=InnoDB',
     $table['db'],
     $table['tbl']);
 }

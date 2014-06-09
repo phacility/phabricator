@@ -24,7 +24,7 @@ final class PhabricatorContentSourceView extends AphrontView {
     return phutil_tag(
       'span',
       array(
-        'class' => "phabricator-content-source-view",
+        'class' => 'phabricator-content-source-view',
       ),
       "Via {$type}");
   }

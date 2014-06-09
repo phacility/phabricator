@@ -26,7 +26,7 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
   }
 
   public function getPaymentMethodProviderDescription() {
-    return "WePay";
+    return 'WePay';
   }
 
 
@@ -38,7 +38,7 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
   protected function executeCharge(
     PhortunePaymentMethod $payment_method,
     PhortuneCharge $charge) {
-    throw new Exception("!");
+    throw new Exception('!');
   }
 
   private function getWePayClientID() {

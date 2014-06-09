@@ -163,7 +163,7 @@ final class PhabricatorAuthRegisterController
 
         $captcha_ok = AphrontFormRecaptchaControl::processCaptcha($request);
         if (!$captcha_ok) {
-          $errors[] = pht("Captcha response is incorrect, try again.");
+          $errors[] = pht('Captcha response is incorrect, try again.');
           $e_captcha = pht('Invalid');
         }
       }
@@ -479,12 +479,12 @@ final class PhabricatorAuthRegisterController
     if (!$providers) {
       $response = $this->renderError(
         pht(
-          "There are no configured default registration providers."));
+          'There are no configured default registration providers.'));
       return array($account, $provider, $response);
     } else if (count($providers) > 1) {
       $response = $this->renderError(
         pht(
-          "There are too many configured default registration providers."));
+          'There are too many configured default registration providers.'));
       return array($account, $provider, $response);
     }
 

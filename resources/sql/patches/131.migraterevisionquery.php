@@ -5,12 +5,12 @@ $table->openTransaction();
 $table->beginReadLocking();
 $conn_w = $table->establishConnection('w');
 
-echo "Migrating revisions";
+echo 'Migrating revisions';
 do {
   $revisions = $table->loadAllWhere('branchName IS NULL LIMIT 1000');
 
   foreach ($revisions as $revision) {
-    echo ".";
+    echo '.';
 
     $diff = $revision->loadActiveDiff();
     if (!$diff) {

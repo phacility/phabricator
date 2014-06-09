@@ -81,7 +81,7 @@ final class PhrequentTrackController
     $form = new PHUIFormLayoutView();
     $form
       ->appendChild(hsprintf(
-        "<p>%s</p><br />", $inner_text));
+        '<p>%s</p><br />', $inner_text));
 
     $form->appendChild($epoch_control);
 

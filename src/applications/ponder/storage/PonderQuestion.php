@@ -48,7 +48,7 @@ final class PonderQuestion extends PonderDAO
   }
 
   public function attachRelated() {
-    $this->answers = $this->loadRelatives(new PonderAnswer(), "questionID");
+    $this->answers = $this->loadRelatives(new PonderAnswer(), 'questionID');
     $qa_phids = mpull($this->answers, 'getPHID') + array($this->getPHID());
 
     if ($qa_phids) {

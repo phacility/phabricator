@@ -44,8 +44,8 @@ final class ReleephRequestDifferentialCreateController
       mpull($projects, 'getID'));
     if (!$branches) {
       throw new Exception(sprintf(
-        "D%d could be in the Releeph project(s) %s, ".
-        "but this project / none of these projects have open branches.",
+        'D%d could be in the Releeph project(s) %s, '.
+        'but this project / none of these projects have open branches.',
         $this->revision->getID(),
         implode(', ', mpull($projects, 'getName'))));
     }
@@ -69,9 +69,9 @@ final class ReleephRequestDifferentialCreateController
       ->addCancelButton('/D'.$request->getStr('D'));
 
     $dialog->appendChild(
-      pht("This differential revision changes code that is associated ".
-      "with multiple Releeph branches.  ".
-      "Please select the branch where you would like this code to be picked."));
+      pht('This differential revision changes code that is associated '.
+      'with multiple Releeph branches.  '.
+      'Please select the branch where you would like this code to be picked.'));
 
     foreach ($branch_groups as $project_id => $branches) {
       $project = idx($projects, $project_id);

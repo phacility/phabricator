@@ -128,7 +128,7 @@ final class HeraldRule extends HeraldDAO
     assert_instances_of($children, 'HeraldDAO');
 
     if (!$this->getID()) {
-      throw new Exception("Save rule before saving children.");
+      throw new Exception('Save rule before saving children.');
     }
 
     foreach ($children as $child) {
@@ -245,7 +245,7 @@ final class HeraldRule extends HeraldDAO
     if ($this->isPersonalRule()) {
       return pht("A personal rule's owner can always view and edit it.");
     } else if ($this->isObjectRule()) {
-      return pht("Object rules inherit the policies of their objects.");
+      return pht('Object rules inherit the policies of their objects.');
     }
 
     return null;

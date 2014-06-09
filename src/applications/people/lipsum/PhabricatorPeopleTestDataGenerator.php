@@ -40,9 +40,9 @@ final class PhabricatorPeopleTestDataGenerator
     $name = strtolower($random_real_name);
     $name = preg_replace('/[^a-z]/s'  , ' ', $name);
     $name = preg_replace('/\s+/', ' ', $name);
-    $words = explode(" ", $name);
+    $words = explode(' ', $name);
     $random = rand(0, 4);
-    $reduced = "";
+    $reduced = '';
     if ($random == 0) {
       foreach ($words as $w) {
          if ($w == end($words)) {
@@ -52,7 +52,7 @@ final class PhabricatorPeopleTestDataGenerator
           $reduced .= $w[0];
         }
       }
-    } elseif ($random == 1) {
+    } else if ($random == 1) {
         foreach ($words as $w) {
           if ($w == $words[0]) {
             $reduced .= $w;
@@ -61,7 +61,7 @@ final class PhabricatorPeopleTestDataGenerator
             $reduced .= $w[0];
           }
         }
-    } elseif ($random == 2) {
+    } else if ($random == 2) {
         foreach ($words as $w) {
           if ($w == $words[0] || $w == end($words)) {
             $reduced .= $w;
@@ -70,22 +70,22 @@ final class PhabricatorPeopleTestDataGenerator
             $reduced .= $w[0];
           }
         }
-    } elseif ($random == 3) {
+    } else if ($random == 3) {
         foreach ($words as $w) {
           if ($w == $words[0] || $w == end($words)) {
             $reduced .= $w;
           }
           else {
-            $reduced .= $w[0].".";
+            $reduced .= $w[0].'.';
           }
         }
-      } elseif ($random == 4) {
+      } else if ($random == 4) {
         foreach ($words as $w) {
           if ($w == $words[0] || $w == end($words)) {
             $reduced .= $w;
           }
           else {
-            $reduced .= $w[0]."_";
+            $reduced .= $w[0].'_';
           }
         }
       }
@@ -98,8 +98,8 @@ final class PhabricatorPeopleTestDataGenerator
   }
 
   protected function generateEmail($username) {
-    $default_email_domain = "example.com";
-    $email = $username."@".$default_email_domain;
+    $default_email_domain = 'example.com';
+    $email = $username.'@'.$default_email_domain;
     return $email;
   }
 }

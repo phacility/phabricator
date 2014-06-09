@@ -28,7 +28,7 @@ final class DrydockManagementLeaseWorkflow
     $resource_type = $args->getArg('type');
     if (!$resource_type) {
       throw new PhutilArgumentUsageException(
-        "Specify a resource type with `--type`.");
+        'Specify a resource type with `--type`.');
     }
 
     $attributes = $args->getArg('attributes');

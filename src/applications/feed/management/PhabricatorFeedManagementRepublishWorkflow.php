@@ -26,10 +26,10 @@ final class PhabricatorFeedManagementRepublishWorkflow
     $key = $args->getArg('key');
     if (count($key) < 1) {
       throw new PhutilArgumentUsageException(
-        pht("Specify a story key to republish."));
+        pht('Specify a story key to republish.'));
     } else if (count($key) > 1) {
       throw new PhutilArgumentUsageException(
-        pht("Specify exactly one story key to republish."));
+        pht('Specify exactly one story key to republish.'));
     }
     $key = head($key);
 
@@ -43,7 +43,7 @@ final class PhabricatorFeedManagementRepublishWorkflow
         pht('No story exists with key "%s"!', $key));
     }
 
-    $console->writeOut("%s\n", pht("Republishing story..."));
+    $console->writeOut("%s\n", pht('Republishing story...'));
 
     PhabricatorWorker::setRunAllTasksInProcess(true);
 
@@ -53,7 +53,7 @@ final class PhabricatorFeedManagementRepublishWorkflow
         'key' => $key,
       ));
 
-    $console->writeOut("%s\n", pht("Done."));
+    $console->writeOut("%s\n", pht('Done.'));
 
     return 0;
   }

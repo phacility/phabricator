@@ -69,10 +69,10 @@ final class PHUIRemarkupPreviewPanel extends AphrontTagView {
 
   protected function getTagContent() {
     if ($this->previewURI === null) {
-      throw new Exception("Call setPreviewURI() before rendering!");
+      throw new Exception('Call setPreviewURI() before rendering!');
     }
     if ($this->controlID === null) {
-      throw new Exception("Call setControlID() before rendering!");
+      throw new Exception('Call setControlID() before rendering!');
     }
 
     $preview_id = celerity_generate_unique_node_id();

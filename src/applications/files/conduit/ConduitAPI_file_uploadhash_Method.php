@@ -6,7 +6,7 @@
 final class ConduitAPI_file_uploadhash_Method extends ConduitAPI_file_Method {
 
   public function getMethodDescription() {
-    return "Upload a file to the server using content hash.";
+    return 'Upload a file to the server using content hash.';
   }
 
   public function defineParamTypes() {

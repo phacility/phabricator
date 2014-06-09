@@ -4,11 +4,11 @@ final class PhabricatorPhortuneConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Phortune");
+    return pht('Phortune');
   }
 
   public function getDescription() {
-    return pht("Configure payments and billing.");
+    return pht('Configure payments and billing.');
   }
 
   public function getOptions() {

@@ -4,11 +4,11 @@ final class PhabricatorOwnersConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Owners");
+    return pht('Owners');
   }
 
   public function getDescription() {
-    return pht("Configure Owners.");
+    return pht('Configure Owners.');
   }
 
   public function getOptions() {

@@ -201,7 +201,7 @@ final class PhabricatorRepositoryCommitHeraldWorker
     $template->setRelatedPHID($commit->getPHID());
     $template->setSubject("{$commit_name}: {$name}");
     $template->setSubjectPrefix($prefix);
-    $template->setVarySubjectPrefix("[Commit]");
+    $template->setVarySubjectPrefix('[Commit]');
     $template->setBody($body);
     $template->setThreadID($thread_id, $is_new = true);
     $template->addHeader('Thread-Topic', $thread_topic);

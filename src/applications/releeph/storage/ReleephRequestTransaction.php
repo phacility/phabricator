@@ -256,7 +256,7 @@ final class ReleephRequestTransaction
     // ReleephSummaryFieldSpecification is usually blank when an RQ is created,
     // creating a transaction change from null to "".  Hide these!
     if ($type === ReleephRequestTransaction::TYPE_EDIT_FIELD) {
-      if ($this->getOldValue() === null && $this->getNewValue() === "") {
+      if ($this->getOldValue() === null && $this->getNewValue() === '') {
         return true;
       }
     }

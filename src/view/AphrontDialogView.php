@@ -203,7 +203,7 @@ final class AphrontDialogView extends AphrontView {
 
     if (!$this->user) {
       throw new Exception(
-        pht("You must call setUser() when rendering an AphrontDialogView."));
+        pht('You must call setUser() when rendering an AphrontDialogView.'));
     }
 
     $more = $this->class;

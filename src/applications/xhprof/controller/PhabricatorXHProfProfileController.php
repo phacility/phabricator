@@ -23,7 +23,7 @@ final class PhabricatorXHProfProfileController
     $data = $file->loadFileData();
     $data = @json_decode($data, true);
     if (!$data) {
-      throw new Exception("Failed to unserialize XHProf profile!");
+      throw new Exception('Failed to unserialize XHProf profile!');
     }
 
     $symbol = $request->getStr('symbol');

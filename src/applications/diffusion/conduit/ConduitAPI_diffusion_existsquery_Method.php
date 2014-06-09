@@ -7,7 +7,7 @@ final class ConduitAPI_diffusion_existsquery_Method
   extends ConduitAPI_diffusion_abstractquery_Method {
 
   public function getMethodDescription() {
-    return "Determine if code exists in a version control system.";
+    return 'Determine if code exists in a version control system.';
   }
 
   public function defineReturnType() {

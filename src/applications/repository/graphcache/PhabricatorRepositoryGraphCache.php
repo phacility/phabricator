@@ -123,7 +123,7 @@ final class PhabricatorRepositoryGraphCache {
 
       // Walk past the parent information.
       $parent_id = null;
-      for ($ii = 0;            ; ++$ii) {
+      for ($ii = 0;; ++$ii) {
         if ($items[$ii] === null) {
           break;
         }

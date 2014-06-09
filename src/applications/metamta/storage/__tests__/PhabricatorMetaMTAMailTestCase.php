@@ -164,8 +164,8 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
       $expect_references = true;
     }
 
-    $case = "<message-id = ".($supports_message_id ? 'Y' : 'N').", ".
-            "first = ".($is_first_mail ? 'Y' : 'N').">";
+    $case = '<message-id = '.($supports_message_id ? 'Y' : 'N').', '.
+            'first = '.($is_first_mail ? 'Y' : 'N').'>';
 
     $this->assertTrue(
       isset($dict['Thread-Index']),

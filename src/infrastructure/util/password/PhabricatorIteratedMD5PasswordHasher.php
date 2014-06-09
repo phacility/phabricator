@@ -29,7 +29,7 @@ final class PhabricatorIteratedMD5PasswordHasher
   }
 
   public function getHumanReadableStrength() {
-    return pht("Okay");
+    return pht('Okay');
   }
 
   protected function getPasswordHash(PhutilOpaqueEnvelope $envelope) {

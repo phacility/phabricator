@@ -23,6 +23,6 @@ final class ConduitCallTestCase extends PhabricatorTestCase {
 
     $this->assertTrue(
       ($caught instanceof ConduitException),
-      "user.whoami should require authentication");
+      'user.whoami should require authentication');
   }
 }

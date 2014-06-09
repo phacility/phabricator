@@ -7,7 +7,7 @@ final class ConduitAPI_phid_lookup_Method
   extends ConduitAPI_phid_Method {
 
   public function getMethodDescription() {
-    return "Look up objects by name.";
+    return 'Look up objects by name.';
   }
 
   public function defineParamTypes() {

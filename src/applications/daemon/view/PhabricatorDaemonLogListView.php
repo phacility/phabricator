@@ -14,7 +14,7 @@ final class PhabricatorDaemonLogListView extends AphrontView {
     $rows = array();
 
     if (!$this->user) {
-      throw new Exception("Call setUser() before rendering!");
+      throw new Exception('Call setUser() before rendering!');
     }
 
     $list = id(new PHUIObjectItemListView())
@@ -24,7 +24,7 @@ final class PhabricatorDaemonLogListView extends AphrontView {
       $epoch = $log->getDateCreated();
 
       $item = id(new PHUIObjectItemView())
-        ->setObjectName(pht("Daemon %s", $id))
+        ->setObjectName(pht('Daemon %s', $id))
         ->setHeader($log->getDaemon())
         ->setHref("/daemon/log/{$id}/")
         ->addIcon('none', phabricator_datetime($epoch, $this->user));

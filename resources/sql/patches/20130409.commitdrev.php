@@ -22,12 +22,12 @@ foreach (new LiskMigrationIterator($commit_table) as $commit) {
   $editor->addEdge($commit->getPHID(), $commit_drev, $revision_phid);
   $edges++;
   if ($edges % 256 == 0) {
-    echo ".";
+    echo '.';
     $editor->save();
     $editor = id(new PhabricatorEdgeEditor())->setSuppressEvents(true);
   }
 }
 
-echo ".";
+echo '.';
 $editor->save();
 echo "\nDone.\n";

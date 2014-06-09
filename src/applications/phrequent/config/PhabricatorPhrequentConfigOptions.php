@@ -4,11 +4,11 @@ final class PhabricatorPhrequentConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Phrequent");
+    return pht('Phrequent');
   }
 
   public function getDescription() {
-    return pht("Configure Phrequent.");
+    return pht('Configure Phrequent.');
   }
 
   public function getOptions() {

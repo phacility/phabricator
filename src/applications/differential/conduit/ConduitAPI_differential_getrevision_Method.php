@@ -12,7 +12,7 @@ final class ConduitAPI_differential_getrevision_Method
   }
 
   public function getMethodDescription() {
-    return "Load the content of a revision from Differential.";
+    return 'Load the content of a revision from Differential.';
   }
 
   public function defineParamTypes() {

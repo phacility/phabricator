@@ -105,7 +105,7 @@ final class PhameSkinSpecification {
         $spec->addPhutilLibrary($path.DIRECTORY_SEPARATOR.'src');
         break;
       default:
-        throw new Exception("Unknown skin type!");
+        throw new Exception('Unknown skin type!');
     }
 
     $spec->setType($type);

@@ -365,7 +365,7 @@ final class PhabricatorSettingsPanelSSHKeys
         ->appendParagraph($explain)
         ->appendParagraph(
           pht(
-            "Phabricator will not retain a copy of the private key."))
+            'Phabricator will not retain a copy of the private key.'))
         ->addSubmitButton(pht('Generate Keypair'));
     } catch (Exception $ex) {
       $dialog

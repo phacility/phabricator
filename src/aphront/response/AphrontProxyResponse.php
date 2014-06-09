@@ -67,7 +67,7 @@ abstract class AphrontProxyResponse extends AphrontResponse {
 
   final public function buildResponseString() {
     throw new Exception(
-      "AphrontProxyResponse must implement reduceProxyResponse().");
+      'AphrontProxyResponse must implement reduceProxyResponse().');
   }
 
 

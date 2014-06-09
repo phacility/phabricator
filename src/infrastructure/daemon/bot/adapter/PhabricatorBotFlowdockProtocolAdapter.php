@@ -11,7 +11,7 @@ final class PhabricatorBotFlowdockProtocolAdapter
     $organization = $this->getConfig('organization');
     $ssl = $this->getConfig('ssl');
 
-    $url = ($ssl) ? "https://" : "http://";
+    $url = ($ssl) ? 'https://' : 'http://';
     $url .= "stream.flowdock.com/flows/{$organization}/{$channel}";
 
     return $url;
@@ -60,7 +60,7 @@ final class PhabricatorBotFlowdockProtocolAdapter
     $body,
     PhabricatorBotTarget $flow) {
 
-    list($organization, $room_id) = explode(":", $flow->getName());
+    list($organization, $room_id) = explode(':', $flow->getName());
 
     $this->performPost(
       "/flows/{$organization}/{$room_id}/messages",

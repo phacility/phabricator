@@ -10,8 +10,8 @@ final class PhragmentPatchController extends PhragmentController {
   }
 
   public function willProcessRequest(array $data) {
-    $this->aid = idx($data, "aid", 0);
-    $this->bid = idx($data, "bid", 0);
+    $this->aid = idx($data, 'aid', 0);
+    $this->bid = idx($data, 'bid', 0);
   }
 
   public function processRequest() {
@@ -22,7 +22,7 @@ final class PhragmentPatchController extends PhragmentController {
     // a patch of an empty file to the version specified by "bid".
 
     $ids = array($this->aid, $this->bid);
-    if ($this->aid === "x") {
+    if ($this->aid === 'x') {
       $ids = array($this->bid);
     }
 
@@ -32,7 +32,7 @@ final class PhragmentPatchController extends PhragmentController {
       ->execute();
 
     $version_a = null;
-    if ($this->aid !== "x") {
+    if ($this->aid !== 'x') {
       $version_a = idx($versions, $this->aid, null);
       if ($version_a === null) {
         return new Aphront404Response();

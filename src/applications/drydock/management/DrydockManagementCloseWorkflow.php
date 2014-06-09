@@ -22,7 +22,7 @@ final class DrydockManagementCloseWorkflow
     $ids = $args->getArg('ids');
     if (!$ids) {
       throw new PhutilArgumentUsageException(
-        "Specify one or more resource IDs to close.");
+        'Specify one or more resource IDs to close.');
     }
 
     $viewer = $this->getViewer();

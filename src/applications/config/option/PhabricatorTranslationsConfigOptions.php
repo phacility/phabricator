@@ -4,11 +4,11 @@ final class PhabricatorTranslationsConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Translations");
+    return pht('Translations');
   }
 
   public function getDescription() {
-    return pht("Options relating to translations.");
+    return pht('Options relating to translations.');
   }
 
   public function getOptions() {
@@ -18,16 +18,16 @@ final class PhabricatorTranslationsConfigOptions
         'class',
         'PhabricatorEnglishTranslation')
         ->setBaseClass('PhabricatorTranslation')
-        ->setSummary(pht("Translation class that should be used for strings."))
+        ->setSummary(pht('Translation class that should be used for strings.'))
         ->setDescription(
           pht(
-            "This allows customizing texts used in Phabricator. The class ".
-            "must extend PhabricatorTranslation."))
+            'This allows customizing texts used in Phabricator. The class '.
+            'must extend PhabricatorTranslation.'))
         ->addExample('PhabricatorEnglishTranslation', pht('Valid Setting')),
       // TODO: This should be dict<string,string> I think, but that doesn't
       // exist yet.
       $this->newOption('translation.override', 'wild', array())
-        ->setSummary(pht("Override translations."))
+        ->setSummary(pht('Override translations.'))
         ->setDescription(
           pht(
             "You can use 'translation.override' if you don't want to create ".

@@ -47,7 +47,7 @@ final class ReleephReasonFieldSpecification
       $this->error = 'Required';
       throw new ReleephFieldParseException(
         $this,
-        "You must give a reason for your request.");
+        'You must give a reason for your request.');
     }
   }
 

@@ -41,7 +41,7 @@ final class PhabricatorSetupCheckMail extends PhabricatorSetupCheck {
             'different mail adapter.');
 
           $this->newIssue('config.amazon-ses.access-key')
-            ->setName(pht("Amazon SES Access Key Not Set"))
+            ->setName(pht('Amazon SES Access Key Not Set'))
             ->setMessage($message)
             ->addRelatedPhabricatorConfig('metamta.mail-adapter')
             ->addPhabricatorConfig('amazon-ses.access-key');
@@ -54,7 +54,7 @@ final class PhabricatorSetupCheckMail extends PhabricatorSetupCheck {
             'different mail adapter.');
 
           $this->newIssue('config.amazon-ses.secret-key')
-            ->setName(pht("Amazon SES Secret Key Not Set"))
+            ->setName(pht('Amazon SES Secret Key Not Set'))
             ->setMessage($message)
             ->addRelatedPhabricatorConfig('metamta.mail-adapter')
             ->addPhabricatorConfig('amazon-ses.secret-key');
@@ -71,7 +71,7 @@ final class PhabricatorSetupCheckMail extends PhabricatorSetupCheck {
             'a "From" address, or choose a different mail adapter.');
 
           $this->newIssue('config.metamta.default-address')
-            ->setName(pht("No SES From Address Configured"))
+            ->setName(pht('No SES From Address Configured'))
             ->setMessage($message)
             ->addRelatedPhabricatorConfig('metamta.mail-adapter')
             ->addPhabricatorConfig('metamta.default-address');

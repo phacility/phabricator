@@ -78,7 +78,7 @@ final class PhabricatorMacroSearchEngine
     $status = $saved_query->getParameter('status');
     $names = implode(', ', $saved_query->getParameter('names', array()));
     $like = $saved_query->getParameter('nameLike');
-    $color = $saved_query->getParameter('flagColor', "-1");
+    $color = $saved_query->getParameter('flagColor', '-1');
 
     $form
       ->appendChild(

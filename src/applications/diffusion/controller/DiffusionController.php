@@ -11,7 +11,7 @@ abstract class DiffusionController extends PhabricatorController {
 
   protected function getDiffusionRequest() {
     if (!$this->diffusionRequest) {
-      throw new Exception("No Diffusion request object!");
+      throw new Exception('No Diffusion request object!');
     }
     return $this->diffusionRequest;
   }
@@ -104,7 +104,7 @@ abstract class DiffusionController extends PhabricatorController {
       $crumb = new PhabricatorCrumbView();
       if ($spec['commit']) {
         $crumb->setName(
-          pht("Tags for %s", 'r'.$callsign.$stable_commit));
+          pht('Tags for %s', 'r'.$callsign.$stable_commit));
         $crumb->setHref($drequest->generateURI(
           array(
             'action' => 'commit',

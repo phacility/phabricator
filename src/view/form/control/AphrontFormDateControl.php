@@ -286,7 +286,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
 
     $user = $this->getUser();
     if (!$this->getUser()) {
-      throw new Exception("Call setUser() before getTimezone()!");
+      throw new Exception('Call setUser() before getTimezone()!');
     }
 
     $user_zone = $user->getTimezoneIdentifier();

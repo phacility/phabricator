@@ -12,7 +12,7 @@ class ConduitAPI_maniphest_query_Method
 
 
   public function getMethodDescription() {
-    return "Execute complex searches for Maniphest tasks.";
+    return 'Execute complex searches for Maniphest tasks.';
   }
 
   public function defineParamTypes() {

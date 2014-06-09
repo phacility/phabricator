@@ -8,7 +8,7 @@ final class ConduitAPI_releephwork_getbranch_Method
   }
 
   public function getMethodDescription() {
-    return "Return information to help checkout / cut a Releeph branch.";
+    return 'Return information to help checkout / cut a Releeph branch.';
   }
 
   public function defineParamTypes() {

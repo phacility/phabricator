@@ -7,7 +7,7 @@ final class ConduitAPI_slowvote_info_Method
   extends ConduitAPI_slowvote_Method {
 
   public function getMethodDescription() {
-    return "Retrieve an array of information about a poll.";
+    return 'Retrieve an array of information about a poll.';
   }
 
   public function defineParamTypes() {

@@ -42,7 +42,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
 
     $commands = $issue->getCommands();
     if ($commands) {
-      $run_these = pht("Run these %d command(s):", count($commands));
+      $run_these = pht('Run these %d command(s):', count($commands));
       $description[] = phutil_tag(
         'div',
         array(
@@ -57,11 +57,11 @@ final class PhabricatorSetupIssueView extends AphrontView {
     $extensions = $issue->getPHPExtensions();
     if ($extensions) {
       $install_these = pht(
-        "Install these %d PHP extension(s):", count($extensions));
+        'Install these %d PHP extension(s):', count($extensions));
 
       $install_info = pht(
-        "You can usually install a PHP extension using %s or %s. Common ".
-        "package names are %s or %s. Try commands like these:",
+        'You can usually install a PHP extension using %s or %s. Common '.
+        'package names are %s or %s. Try commands like these:',
         phutil_tag('tt', array(), 'apt-get'),
         phutil_tag('tt', array(), 'yum'),
         hsprintf('<tt>php-<em>%s</em></tt>', pht('extname')),
@@ -82,8 +82,8 @@ final class PhabricatorSetupIssueView extends AphrontView {
         "OS X, you might want to try Homebrew.");
 
       $restart_info = pht(
-        "After installing new PHP extensions, <strong>restart your webserver ".
-        "for the changes to take effect</strong>.",
+        'After installing new PHP extensions, <strong>restart your webserver '.
+        'for the changes to take effect</strong>.',
         hsprintf(''));
 
       $description[] = phutil_tag(
@@ -152,7 +152,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       'p',
       array(),
       pht(
-        "The current Phabricator configuration has these %d value(s):",
+        'The current Phabricator configuration has these %d value(s):',
         count($configs)));
 
     $options = PhabricatorApplicationConfigOptions::loadAllOptions();
@@ -180,8 +180,8 @@ final class PhabricatorSetupIssueView extends AphrontView {
         'p',
         array(),
         pht(
-          "To update these %d value(s), run these command(s) from the command ".
-          "line:",
+          'To update these %d value(s), run these command(s) from the command '.
+          'line:',
           count($configs)));
 
       $update = array();
@@ -212,12 +212,12 @@ final class PhabricatorSetupIssueView extends AphrontView {
           $update_info = phutil_tag(
           'p',
           array(),
-          pht("You can update these %d value(s) here:", count($configs)));
+          pht('You can update these %d value(s) here:', count($configs)));
         } else {
           $update_info = phutil_tag(
           'p',
           array(),
-          pht("These %d configuration value(s) are related:", count($configs)));
+          pht('These %d configuration value(s) are related:', count($configs)));
         }
       } else {
         $update = null;
@@ -243,7 +243,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       'p',
       array(),
       pht(
-        "The current PHP configuration has these %d value(s):",
+        'The current PHP configuration has these %d value(s):',
         count($configs)));
 
     $dict = array();
@@ -284,15 +284,15 @@ final class PhabricatorSetupIssueView extends AphrontView {
         'p',
         array(),
         pht(
-          "To update these %d value(s), edit your PHP configuration file.",
+          'To update these %d value(s), edit your PHP configuration file.',
           count($configs)));
     } else {
       $info[] = phutil_tag(
         'p',
         array(),
         pht(
-          "To update these %d value(s), edit your PHP configuration file, ".
-          "located here:",
+          'To update these %d value(s), edit your PHP configuration file, '.
+          'located here:',
           count($configs)));
       $info[] = phutil_tag(
         'pre',
@@ -305,7 +305,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
         'p',
         array(),
         pht(
-          "PHP also loaded these configuration file(s):",
+          'PHP also loaded these configuration file(s):',
           count($more_loc)));
       $info[] = phutil_tag(
         'pre',
@@ -331,8 +331,8 @@ final class PhabricatorSetupIssueView extends AphrontView {
       'p',
       array(),
       pht(
-        "After editing the PHP configuration, <strong>restart your ".
-        "webserver for the changes to take effect</strong>.",
+        'After editing the PHP configuration, <strong>restart your '.
+        'webserver for the changes to take effect</strong>.',
         hsprintf('')));
 
     return phutil_tag(

@@ -31,7 +31,7 @@ final class DiffusionLowLevelResolveRefsQuery
         $result = $this->resolveSubversionRefs();
         break;
       default:
-        throw new Exception("Unsupported repository type!");
+        throw new Exception('Unsupported repository type!');
     }
 
     return $result;
@@ -46,7 +46,7 @@ final class DiffusionLowLevelResolveRefsQuery
 
     $lines = explode("\n", rtrim($stdout, "\n"));
     if (count($lines) !== count($this->refs)) {
-      throw new Exception("Unexpected line count from `git cat-file`!");
+      throw new Exception('Unexpected line count from `git cat-file`!');
     }
 
     $hits = array();

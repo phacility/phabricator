@@ -7,7 +7,7 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof ManiphestTask)) {
-      throw new Exception("Mail receiver is not a ManiphestTask!");
+      throw new Exception('Mail receiver is not a ManiphestTask!');
     }
   }
 
@@ -28,8 +28,8 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
   public function getReplyHandlerInstructions() {
     if ($this->supportsReplies()) {
       return pht(
-        "Reply to comment or attach files, or !close, !claim, ".
-        "!unsubscribe or !assign <username>.");
+        'Reply to comment or attach files, or !close, !claim, '.
+        '!unsubscribe or !assign <username>.');
     } else {
       return null;
     }

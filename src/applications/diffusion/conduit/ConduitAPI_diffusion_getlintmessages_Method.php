@@ -11,7 +11,7 @@ final class ConduitAPI_diffusion_getlintmessages_Method
   }
 
   public function getMethodDescription() {
-    return "Get lint messages for existing code.";
+    return 'Get lint messages for existing code.';
   }
 
   public function defineParamTypes() {

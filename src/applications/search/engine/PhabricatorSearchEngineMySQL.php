@@ -10,7 +10,7 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
 
     $phid = $doc->getPHID();
     if (!$phid) {
-      throw new Exception("Document has no PHID!");
+      throw new Exception('Document has no PHID!');
     }
 
     $store = new PhabricatorSearchDocument();

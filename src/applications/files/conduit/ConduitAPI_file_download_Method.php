@@ -7,7 +7,7 @@ final class ConduitAPI_file_download_Method
   extends ConduitAPI_file_Method {
 
   public function getMethodDescription() {
-    return "Download a file from the server.";
+    return 'Download a file from the server.';
   }
 
   public function defineParamTypes() {

@@ -21,7 +21,7 @@ final class PhabricatorBot extends PhabricatorDaemon {
   public function run() {
     $argv = $this->getArgv();
     if (count($argv) !== 1) {
-      throw new Exception("usage: PhabricatorBot <json_config_file>");
+      throw new Exception('usage: PhabricatorBot <json_config_file>');
     }
 
     $json_raw = Filesystem::readFile($argv[0]);
@@ -120,7 +120,7 @@ final class PhabricatorBot extends PhabricatorDaemon {
     }
 
     if ($message->getCommand() == 'LOG') {
-      $this->log("[LOG] ".$message->getBody());
+      $this->log('[LOG] '.$message->getBody());
     }
 
     foreach ($this->handlers as $handler) {

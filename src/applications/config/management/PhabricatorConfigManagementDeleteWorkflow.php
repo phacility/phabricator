@@ -23,14 +23,14 @@ final class PhabricatorConfigManagementDeleteWorkflow
     $argv = $args->getArg('args');
     if (count($argv) == 0) {
       throw new PhutilArgumentUsageException(
-        "Specify a configuration key to delete.");
+        'Specify a configuration key to delete.');
     }
 
     $key = $argv[0];
 
     if (count($argv) > 1) {
       throw new PhutilArgumentUsageException(
-        "Too many arguments: expected one key.");
+        'Too many arguments: expected one key.');
     }
 
     $config = new PhabricatorConfigLocalSource();

@@ -46,7 +46,7 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
 
   public function testOneLineOldComment() {
     $parser = new DifferentialHunkParser();
-    $hunks = $this->createSingleChange(1, 0, "-a");
+    $hunks = $this->createSingleChange(1, 0, '-a');
     $context = $parser->makeContextDiff(
       $hunks,
       0,
@@ -58,7 +58,7 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
 
   public function testOneLineNewComment() {
     $parser = new DifferentialHunkParser();
-    $hunks = $this->createSingleChange(0, 1, "+a");
+    $hunks = $this->createSingleChange(0, 1, '+a');
     $context = $parser->makeContextDiff(
       $hunks,
       1,
@@ -70,14 +70,14 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
 
   public function testCannotFindContext() {
     $parser = new DifferentialHunkParser();
-    $hunks = $this->createSingleChange(0, 1, "+a");
+    $hunks = $this->createSingleChange(0, 1, '+a');
     $context = $parser->makeContextDiff(
       $hunks,
       1,
       2,
       0,
       0);
-    $this->assertEqual("", $context);
+    $this->assertEqual('', $context);
   }
 
   public function testOverlapFromStartOfHunk() {

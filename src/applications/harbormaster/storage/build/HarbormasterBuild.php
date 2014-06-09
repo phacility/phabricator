@@ -176,7 +176,7 @@ final class HarbormasterBuild extends HarbormasterDAO
         array($name))
       ->executeOne();
     if ($artifact === null) {
-      throw new Exception("Artifact not found!");
+      throw new Exception('Artifact not found!');
     }
     return $artifact;
   }

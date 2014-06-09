@@ -94,7 +94,7 @@ final class DifferentialChangesetTwoUpRenderer
               ),
             ),
             $is_first_block
-              ? pht("Show First 20 Lines")
+              ? pht('Show First 20 Lines')
               : pht("\xE2\x96\xB2 Show 20 Lines"));
         }
 
@@ -130,7 +130,7 @@ final class DifferentialChangesetTwoUpRenderer
               ),
             ),
             $is_last_block
-              ? pht("Show Last 20 Lines")
+              ? pht('Show Last 20 Lines')
               : pht("\xE2\x96\xBC Show 20 Lines"));
         }
 

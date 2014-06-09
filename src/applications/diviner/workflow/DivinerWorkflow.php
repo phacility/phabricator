@@ -20,7 +20,7 @@ abstract class DivinerWorkflow extends PhabricatorManagementWorkflow {
   protected function readBookConfiguration($book_path) {
     if ($book_path === null) {
       throw new PhutilArgumentUsageException(
-        "Specify a Diviner book configuration file with --book.");
+        'Specify a Diviner book configuration file with --book.');
     }
 
     $book_data = Filesystem::readFile($book_path);

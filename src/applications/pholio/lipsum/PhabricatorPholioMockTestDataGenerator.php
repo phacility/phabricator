@@ -88,8 +88,8 @@ final class PhabricatorPholioMockTestDataGenerator
   }
 
   public function generateImages() {
-    $images = newv("PhabricatorFile", array())
-      ->loadAllWhere("mimeType = %s", "image/jpeg");
+    $images = newv('PhabricatorFile', array())
+      ->loadAllWhere('mimeType = %s', 'image/jpeg');
     $rand_images = array();
     $quantity = rand(2, 10);
     $quantity = min($quantity, count($images));

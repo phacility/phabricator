@@ -7,7 +7,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
 
   private static $namespaceStack = array();
 
-  const ATTACHABLE = "<attachable>";
+  const ATTACHABLE = '<attachable>';
 
 /* -(  Configuring Storage  )------------------------------------------------ */
 
@@ -41,7 +41,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       $namespace = self::getDefaultStorageNamespace();
     }
     if (!strlen($namespace)) {
-      throw new Exception("No storage namespace configured!");
+      throw new Exception('No storage namespace configured!');
     }
     return $namespace;
   }

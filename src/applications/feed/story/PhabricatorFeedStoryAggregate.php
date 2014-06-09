@@ -68,7 +68,7 @@ abstract class PhabricatorFeedStoryAggregate extends PhabricatorFeedStory {
 
   final public function getNotificationAggregations() {
     throw new Exception(
-      "You can not get aggregations for an aggregate story.");
+      'You can not get aggregations for an aggregate story.');
   }
 
 }

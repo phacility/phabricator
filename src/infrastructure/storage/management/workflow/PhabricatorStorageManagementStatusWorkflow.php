@@ -33,7 +33,7 @@ final class PhabricatorStorageManagementStatusWorkflow
       printf(
 
         "% -".($len + 2)."s ".
-        "%-".strlen("Not Applied")."s   ".
+        "%-".strlen('Not Applied')."s   ".
         "%-4s   ".
         "%s\n",
 

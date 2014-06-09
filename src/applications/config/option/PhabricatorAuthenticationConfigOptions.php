@@ -4,11 +4,11 @@ final class PhabricatorAuthenticationConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Authentication");
+    return pht('Authentication');
   }
 
   public function getDescription() {
-    return pht("Options relating to authentication.");
+    return pht('Options relating to authentication.');
   }
 
   public function getOptions() {
@@ -16,24 +16,24 @@ final class PhabricatorAuthenticationConfigOptions
       $this->newOption('auth.require-email-verification', 'bool', false)
         ->setBoolOptions(
           array(
-            pht("Require email verification"),
+            pht('Require email verification'),
             pht("Don't require email verification")
           ))
         ->setSummary(
-          pht("Require email verification before a user can log in."))
+          pht('Require email verification before a user can log in.'))
         ->setDescription(
           pht(
-            "If true, email addresses must be verified (by clicking a link ".
-            "in an email) before a user can login. By default, verification ".
-            "is optional unless {{auth.email-domains}} is nonempty.")),
+            'If true, email addresses must be verified (by clicking a link '.
+            'in an email) before a user can login. By default, verification '.
+            'is optional unless {{auth.email-domains}} is nonempty.')),
       $this->newOption('auth.require-approval', 'bool', true)
         ->setBoolOptions(
           array(
-            pht("Require Administrators to Approve Accounts"),
+            pht('Require Administrators to Approve Accounts'),
             pht("Don't Require Manual Approval"),
           ))
         ->setSummary(
-          pht("Require administrators to approve new accounts."))
+          pht('Require administrators to approve new accounts.'))
         ->setDescription(
           pht(
             "Newly registered Phabricator accounts can either be placed ".
@@ -50,7 +50,7 @@ final class PhabricatorAuthenticationConfigOptions
             "{{auth.email-domains}} is configured correctly for your ".
             "install!")),
       $this->newOption('auth.email-domains', 'list<string>', array())
-        ->setSummary(pht("Only allow registration from particular domains."))
+        ->setSummary(pht('Only allow registration from particular domains.'))
         ->setDescription(
           pht(
             "You can restrict allowed email addresses to certain domains ".
@@ -67,7 +67,7 @@ final class PhabricatorAuthenticationConfigOptions
           pht('Valid Setting')),
       $this->newOption('auth.login-message', 'string', null)
         ->setLocked(true)
-        ->setSummary(pht("A block of HTML displayed on the login screen."))
+        ->setSummary(pht('A block of HTML displayed on the login screen.'))
         ->setDescription(
           pht(
             "You can provide an arbitrary block of HTML here, which will ".
@@ -76,26 +76,26 @@ final class PhabricatorAuthenticationConfigOptions
       $this->newOption('account.editable', 'bool', true)
         ->setBoolOptions(
           array(
-            pht("Allow editing"),
-            pht("Prevent editing")
+            pht('Allow editing'),
+            pht('Prevent editing')
           ))
         ->setSummary(
           pht(
-            "Determines whether or not basic account information is ".
-            "editable."))
+            'Determines whether or not basic account information is '.
+            'editable.'))
         ->setDescription(
           pht(
-            "Is basic account information (email, real name, profile ".
-            "picture) editable? If you set up Phabricator to automatically ".
-            "synchronize account information from some other authoritative ".
-            "system, you can disable this to ensure information remains ".
-            "consistent across both systems.")),
+            'Is basic account information (email, real name, profile '.
+            'picture) editable? If you set up Phabricator to automatically '.
+            'synchronize account information from some other authoritative '.
+            'system, you can disable this to ensure information remains '.
+            'consistent across both systems.')),
       $this->newOption('account.minimum-password-length', 'int', 8)
-        ->setSummary(pht("Minimum password length."))
+        ->setSummary(pht('Minimum password length.'))
         ->setDescription(
           pht(
-            "When users set or reset a password, it must have at least this ".
-            "many characters.")),
+            'When users set or reset a password, it must have at least this '.
+            'many characters.')),
     );
   }
 

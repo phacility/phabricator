@@ -4,7 +4,7 @@ final class ConduitAPI_differential_createcomment_Method
   extends ConduitAPI_differential_Method {
 
   public function getMethodDescription() {
-    return pht("Add a comment to a Differential revision.");
+    return pht('Add a comment to a Differential revision.');
   }
 
   public function defineParamTypes() {

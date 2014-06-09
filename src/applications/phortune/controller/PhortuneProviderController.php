@@ -31,7 +31,7 @@ final class PhortuneProviderController extends PhortuneController {
 
     $provider = PhortunePaymentProvider::getProviderByDigest($this->digest);
     if (!$provider) {
-      throw new Exception("Invalid payment provider digest!");
+      throw new Exception('Invalid payment provider digest!');
     }
 
     if (!$provider->canRespondToControllerAction($this->getAction())) {

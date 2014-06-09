@@ -104,7 +104,7 @@ final class DifferentialTransactionView
           $inlines[] = $xaction;
           break;
         default:
-          throw new Exception("Unknown grouped transaction type!");
+          throw new Exception('Unknown grouped transaction type!');
       }
     }
 
@@ -149,9 +149,9 @@ final class DifferentialTransactionView
             $comment_id = $comment->getID();
 
             $item['href'] =
-              "/D".$revision_id.
-              "?id=".$changeset_diff_id.
-              "#inline-".$comment_id;
+              '/D'.$revision_id.
+              '?id='.$changeset_diff_id.
+              '#inline-'.$comment_id;
           }
 
           $items[] = $item;

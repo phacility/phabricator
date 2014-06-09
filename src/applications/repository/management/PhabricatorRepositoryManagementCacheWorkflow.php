@@ -7,7 +7,7 @@ final class PhabricatorRepositoryManagementCacheWorkflow
     $this
       ->setName('cache')
       ->setExamples(
-        "**cache** [__options__] --commit __commit__ --path __path__")
+        '**cache** [__options__] --commit __commit__ --path __path__')
       ->setSynopsis(pht('Manage the repository graph cache.'))
       ->setArguments(
         array(

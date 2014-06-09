@@ -9,7 +9,7 @@ final class PhragmentHistoryController extends PhragmentController {
   }
 
   public function willProcessRequest(array $data) {
-    $this->dblob = idx($data, "dblob", "");
+    $this->dblob = idx($data, 'dblob', '');
   }
 
   public function processRequest() {
@@ -75,9 +75,9 @@ final class PhragmentHistoryController extends PhragmentController {
           ->setIcon('fa-refresh')
           ->setRenderNameAsTooltip(true)
           ->setWorkflow(true)
-          ->setName(pht("Revert to Here"))
+          ->setName(pht('Revert to Here'))
           ->setHref($this->getApplicationURI(
-            "revert/".$version->getID()."/".$current->getPath())));
+            'revert/'.$version->getID().'/'.$current->getPath())));
       }
 
       $disabled = !isset($files[$version->getFilePHID()]);
@@ -85,7 +85,7 @@ final class PhragmentHistoryController extends PhragmentController {
         ->setIcon('fa-download')
         ->setDisabled($disabled || !$this->isCorrectlyConfigured())
         ->setRenderNameAsTooltip(true)
-        ->setName(pht("Download"));
+        ->setName(pht('Download'));
       if (!$disabled && $this->isCorrectlyConfigured()) {
         $action->setHref($files[$version->getFilePHID()]
           ->getDownloadURI($version->getURI()));

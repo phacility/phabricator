@@ -4,11 +4,11 @@ final class PhabricatorApplicationReleephConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Releeph");
+    return pht('Releeph');
   }
 
   public function getDescription() {
-    return pht("Options for configuring Releeph, the release branch tool.");
+    return pht('Options for configuring Releeph, the release branch tool.');
   }
 
   public function getOptions() {
@@ -47,15 +47,15 @@ final class PhabricatorApplicationReleephConfigOptions
         ->setSummary(pht('Enable the Releeph application.'))
         ->setDescription(
           pht(
-            "Releeph, a tool for managing release branches, will eventually ".
-            "fit in to the Phabricator suite as a general purpose tool. ".
-            "However Releeph is currently unstable in multiple ways that may ".
-            "not migrate properly for you: the code is still in alpha stage ".
-            "of design, the storage format is likely to change in unexpected ".
-            "ways, and the workflows presented are very specific to a core ".
-            "set of alpha testers at Facebook.  For the time being you are ".
-            "strongly discouraged from relying on Releeph being at all ".
-            "stable.")),
+            'Releeph, a tool for managing release branches, will eventually '.
+            'fit in to the Phabricator suite as a general purpose tool. '.
+            'However Releeph is currently unstable in multiple ways that may '.
+            'not migrate properly for you: the code is still in alpha stage '.
+            'of design, the storage format is likely to change in unexpected '.
+            'ways, and the workflows presented are very specific to a core '.
+            'set of alpha testers at Facebook.  For the time being you are '.
+            'strongly discouraged from relying on Releeph being at all '.
+            'stable.')),
       $this->newOption('releeph.fields', $custom_field_type, $default)
         ->setCustomData('ReleephFieldSpecification'),
       $this->newOption(
@@ -64,9 +64,9 @@ final class PhabricatorApplicationReleephConfigOptions
         'releases/%P/%p-%Y%m%d-%v')
         ->setDescription(
           pht(
-            "The default branch template for new branches in unconfigured ".
-            "Releeph projects.  This is also configurable on a per-project ".
-            "basis.")),
+            'The default branch template for new branches in unconfigured '.
+            'Releeph projects.  This is also configurable on a per-project '.
+            'basis.')),
     );
   }
 

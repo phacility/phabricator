@@ -6,7 +6,7 @@
 final class ConduitAPI_conduit_query_Method extends ConduitAPIMethod {
 
   public function getMethodDescription() {
-    return "Returns the parameters of the Conduit methods.";
+    return 'Returns the parameters of the Conduit methods.';
   }
 
   public function defineParamTypes() {
@@ -30,10 +30,10 @@ final class ConduitAPI_conduit_query_Method extends ConduitAPIMethod {
 
     $names_to_params = array();
     foreach ($classes as $class) {
-      $method_name = $class["name"];
+      $method_name = $class['name'];
       $obj = newv($method_name, array());
       $names_to_params[$this->getAPIMethodNameFromClassName($method_name)] =
-        array("params" => $obj->defineParamTypes());
+        array('params' => $obj->defineParamTypes());
     }
     return $names_to_params;
   }

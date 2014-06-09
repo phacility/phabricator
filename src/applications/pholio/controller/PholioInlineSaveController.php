@@ -30,7 +30,7 @@ final class PholioInlineSaveController extends PholioController {
       $new_content = $request->getStr('text');
 
       if (!strlen($new_content)) {
-        throw new Exception("Content must not be empty.");
+        throw new Exception('Content must not be empty.');
       }
 
       $draft = id(new PholioTransactionComment());

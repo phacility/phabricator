@@ -59,7 +59,7 @@ final class PholioTransactionView
           $inlines[] = $xaction;
           break;
         default:
-          throw new Exception("Unknown grouped transaction type!");
+          throw new Exception('Unknown grouped transaction type!');
       }
     }
 

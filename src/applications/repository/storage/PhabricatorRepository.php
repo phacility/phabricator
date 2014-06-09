@@ -176,7 +176,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   public function getSubversionPathURI($path = null, $commit = null) {
     $vcs = $this->getVersionControlSystem();
     if ($vcs != PhabricatorRepositoryType::REPOSITORY_TYPE_SVN) {
-      throw new Exception("Not a subversion repository!");
+      throw new Exception('Not a subversion repository!');
     }
 
     if ($this->isHosted()) {
@@ -372,7 +372,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         $env['HGPLAIN'] = 1;
         break;
       default:
-        throw new Exception("Unrecognized version control system.");
+        throw new Exception('Unrecognized version control system.');
     }
 
     return $env;
@@ -403,7 +403,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           // command-line flag instead of an environmental variable.
           break;
         default:
-          throw new Exception("Unrecognized version control system.");
+          throw new Exception('Unrecognized version control system.');
       }
     }
 
@@ -457,7 +457,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         }
         break;
       default:
-        throw new Exception("Unrecognized version control system.");
+        throw new Exception('Unrecognized version control system.');
     }
 
     array_unshift($args, $pattern);
@@ -480,7 +480,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         $pattern = "hg {$pattern}";
         break;
       default:
-        throw new Exception("Unrecognized version control system.");
+        throw new Exception('Unrecognized version control system.');
     }
 
     array_unshift($args, $pattern);
@@ -535,7 +535,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           $uri);
         break;
       default:
-        throw new Exception("Unrecognized version control system.");
+        throw new Exception('Unrecognized version control system.');
     }
 
     return $normalized_uri->getNormalizedPath();
@@ -617,7 +617,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         return true;
       default:
-        throw new Exception("Unrecognized version control system.");
+        throw new Exception('Unrecognized version control system.');
     }
 
     $closeable_flag = PhabricatorRepositoryCommit::IMPORTED_CLOSEABLE;

@@ -11,7 +11,7 @@ final class ConduitAPI_chatlog_record_Method
   }
 
   public function getMethodDescription() {
-    return "Record chatter.";
+    return 'Record chatter.';
   }
 
   public function defineParamTypes() {

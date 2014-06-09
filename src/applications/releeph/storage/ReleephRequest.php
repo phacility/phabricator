@@ -131,10 +131,10 @@ final class ReleephRequest extends ReleephDAO
         // was once in the branch.
         if ($has_been_in_branch) {
           return ReleephRequestStatus::STATUS_REVERTED;
-        } elseif ($this->getPusherIntent() === ReleephRequest::INTENT_PASS) {
+        } else if ($this->getPusherIntent() === ReleephRequest::INTENT_PASS) {
           // Otherwise, if it has never been in the branch, explicitly say why:
           return ReleephRequestStatus::STATUS_REJECTED;
-        } elseif ($this->getRequestorIntent() === ReleephRequest::INTENT_WANT) {
+        } else if ($this->getRequestorIntent() === ReleephRequest::INTENT_WANT) {
           return ReleephRequestStatus::STATUS_REQUESTED;
         } else {
           return ReleephRequestStatus::STATUS_ABANDONED;

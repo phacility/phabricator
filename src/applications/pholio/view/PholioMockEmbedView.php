@@ -20,7 +20,7 @@ final class PholioMockEmbedView extends AphrontView {
 
   public function render() {
     if (!$this->mock) {
-      throw new Exception("Call setMock() before render()!");
+      throw new Exception('Call setMock() before render()!');
     }
 
     require_celerity_resource('pholio-css');

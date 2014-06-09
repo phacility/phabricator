@@ -21,8 +21,8 @@ final class ConduitAPI_releephwork_record_Method
    * reverted.
    */
   public function getMethodDescription() {
-    return "Record whether we committed a pick or revert ".
-      "to the upstream repository.";
+    return 'Record whether we committed a pick or revert '.
+      'to the upstream repository.';
   }
 
   public function defineParamTypes() {

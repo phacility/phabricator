@@ -8,11 +8,11 @@ final class ConduitAPI_repository_query_Method
   }
 
   public function getMethodStatusDescription() {
-    return pht("Repository methods are new and subject to change.");
+    return pht('Repository methods are new and subject to change.');
   }
 
   public function getMethodDescription() {
-    return pht("Query repositories.");
+    return pht('Query repositories.');
   }
 
   public function defineParamTypes() {

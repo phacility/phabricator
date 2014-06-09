@@ -6,7 +6,7 @@
 final class ConduitAPI_file_info_Method extends ConduitAPI_file_Method {
 
   public function getMethodDescription() {
-    return "Get information about a file.";
+    return 'Get information about a file.';
   }
 
   public function defineParamTypes() {

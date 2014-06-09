@@ -17,14 +17,14 @@ final class CelerityManagementMapWorkflow
 
     $this->log(
       pht(
-        "Rebuilding %d resource source(s).",
+        'Rebuilding %d resource source(s).',
         new PhutilNumber(count($resources_map))));
 
     foreach ($resources_map as $name => $resources) {
       $this->rebuildResources($resources);
     }
 
-    $this->log(pht("Done."));
+    $this->log(pht('Done.'));
 
     return 0;
   }

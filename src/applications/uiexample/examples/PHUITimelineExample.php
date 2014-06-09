@@ -119,7 +119,7 @@ final class PHUITimelineExample extends PhabricatorUIExample {
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
-      ->setTitle("Colorless")
+      ->setTitle('Colorless')
       ->setIcon('lock');
 
     foreach ($colors as $color) {

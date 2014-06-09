@@ -31,8 +31,8 @@ final class PhabricatorConfigIgnoreController
       $title = pht('Unignore this setup issue?');
       $submit_title = pht('Unignore');
       $body = pht(
-        "This issue will no longer be suppressed, and will return to its ".
-        "rightful place as a global setup warning.");
+        'This issue will no longer be suppressed, and will return to its '.
+        'rightful place as a global setup warning.');
     } else {
       throw new Exception('Unrecognized verb: ' . $this->verb);
     }

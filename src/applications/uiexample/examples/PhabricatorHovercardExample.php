@@ -18,11 +18,11 @@ final class PhabricatorHovercardExample extends PhabricatorUIExample {
     $elements = array();
 
     $diff_handle = $this->createBasicDummyHandle(
-      "D123",
+      'D123',
       DifferentialPHIDTypeRevision::TYPECONST,
-      "Introduce cooler Differential Revisions");
+      'Introduce cooler Differential Revisions');
 
-    $panel = $this->createPanel("Differential Hovercard");
+    $panel = $this->createPanel('Differential Hovercard');
     $panel->appendChild(id(new PhabricatorHovercardView())
       ->setObjectHandle($diff_handle)
       ->addField(pht('Author'), $user->getUsername())
@@ -32,14 +32,14 @@ final class PhabricatorHovercardExample extends PhabricatorUIExample {
     $elements[] = $panel;
 
     $task_handle = $this->createBasicDummyHandle(
-      "T123",
+      'T123',
       ManiphestPHIDTypeTask::TYPECONST,
-      "Improve Mobile Experience for Phabricator");
+      'Improve Mobile Experience for Phabricator');
 
     $tag = id(new PHUITagView())
       ->setType(PHUITagView::TYPE_STATE)
       ->setName('Closed, Resolved');
-    $panel = $this->createPanel("Maniphest Hovercard");
+    $panel = $this->createPanel('Maniphest Hovercard');
     $panel->appendChild(id(new PhabricatorHovercardView())
       ->setObjectHandle($task_handle)
       ->setUser($user)
@@ -56,7 +56,7 @@ final class PhabricatorHovercardExample extends PhabricatorUIExample {
       'George Washington');
     $user_handle->setImageURI(
       celerity_get_resource_uri('/rsrc/image/people/washington.png'));
-    $panel = $this->createPanel("Whatevery Hovercard");
+    $panel = $this->createPanel('Whatevery Hovercard');
     $panel->appendChild(id(new PhabricatorHovercardView())
       ->setObjectHandle($user_handle)
       ->addField(pht('Status'), 'Available')
@@ -65,7 +65,7 @@ final class PhabricatorHovercardExample extends PhabricatorUIExample {
       ->setUser($user));
     $elements[] = $panel;
 
-    return phutil_implode_html("", $elements);
+    return phutil_implode_html('', $elements);
   }
 
   private function createPanel($header) {

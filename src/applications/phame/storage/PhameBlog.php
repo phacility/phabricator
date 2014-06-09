@@ -46,8 +46,8 @@ final class PhameBlog extends PhameDAO
 
     if (!$spec) {
       throw new Exception(
-        "This blog has an invalid skin, and the default skin failed to ".
-        "load.");
+        'This blog has an invalid skin, and the default skin failed to '.
+        'load.');
     }
 
     $skin = newv($spec->getSkinClass(), array($request));

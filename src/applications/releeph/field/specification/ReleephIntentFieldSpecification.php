@@ -83,11 +83,11 @@ final class ReleephIntentFieldSpecification
   }
 
   public function renderLabelForCommitMessage() {
-    return "Approved By";
+    return 'Approved By';
   }
 
   public function renderLabelForRevertMessage() {
-    return "Rejected By";
+    return 'Rejected By';
   }
 
   public function renderValueForCommitMessage() {

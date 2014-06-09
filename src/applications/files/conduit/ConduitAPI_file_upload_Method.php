@@ -6,7 +6,7 @@
 final class ConduitAPI_file_upload_Method extends ConduitAPI_file_Method {
 
   public function getMethodDescription() {
-    return "Upload a file to the server.";
+    return 'Upload a file to the server.';
   }
 
   public function defineParamTypes() {

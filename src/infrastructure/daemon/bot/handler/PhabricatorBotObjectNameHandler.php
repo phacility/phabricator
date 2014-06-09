@@ -126,7 +126,7 @@ final class PhabricatorBotObjectNameHandler extends PhabricatorBotHandler {
             array(
               'id' => $file_id,
             ));
-          $output[$file['phid']] = $file['objectName'].": ".$file['uri']." - ".
+          $output[$file['phid']] = $file['objectName'].': '.$file['uri'].' - '.
             $file['name'];
         }
       }

@@ -27,7 +27,7 @@ final class PhabricatorDaemonLogEventsView extends AphrontView {
     $rows = array();
 
     if (!$this->user) {
-      throw new Exception("Call setUser() before rendering!");
+      throw new Exception('Call setUser() before rendering!');
     }
 
     foreach ($this->events as $event) {
@@ -61,10 +61,10 @@ final class PhabricatorDaemonLogEventsView extends AphrontView {
 
         if ($more_chars) {
           $more = new PhutilNumber($more_chars);
-          $more = pht("Show %d more character(s)...", $more);
+          $more = pht('Show %d more character(s)...', $more);
         } else if ($more_lines) {
           $more = new PhutilNumber($more_lines);
-          $more = pht("Show %d more line(s)...", $more);
+          $more = pht('Show %d more line(s)...', $more);
         }
 
         if ($more) {

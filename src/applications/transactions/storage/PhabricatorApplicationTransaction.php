@@ -76,7 +76,7 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function getApplicationTransactionCommentObject() {
-    throw new Exception("Not implemented!");
+    throw new Exception('Not implemented!');
   }
 
   public function getApplicationTransactionViewObject() {
@@ -125,7 +125,7 @@ abstract class PhabricatorApplicationTransaction
 
   public function getComment() {
     if ($this->commentNotLoaded) {
-      throw new Exception("Comment for this transaction was not loaded.");
+      throw new Exception('Comment for this transaction was not loaded.');
     }
     return $this->comment;
   }

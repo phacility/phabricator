@@ -25,11 +25,11 @@ final class PhabricatorFeedStoryNotification extends PhabricatorFeedDAO {
 
     queryfx(
       $conn,
-      "UPDATE %T
+      'UPDATE %T
        SET hasViewed = 1
        WHERE userPHID = %s
          AND primaryObjectPHID = %s
-         AND hasViewed = 0",
+         AND hasViewed = 0',
       $notification_table->getTableName(),
       $user->getPHID(),
       $object_phid);

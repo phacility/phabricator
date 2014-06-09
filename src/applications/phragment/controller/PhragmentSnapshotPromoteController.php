@@ -80,7 +80,7 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
         id(new AphrontDialogView())
           ->setTitle(pht('No snapshots to promote'))
           ->appendParagraph(pht(
-            "There are no snapshots available to promote."))
+            'There are no snapshots available to promote.'))
           ->setUser($request->getUser())
           ->addCancelButton(pht('Cancel')));
     }
@@ -172,7 +172,7 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
     if ($this->id === null) {
       // The user is promoting a snapshot to the latest version.
       $dialog->appendParagraph(pht(
-        "Select the snapshot you want to promote to the latest version:"));
+        'Select the snapshot you want to promote to the latest version:'));
     } else {
       // The user is promoting a snapshot to another snapshot.
       $dialog->appendParagraph(pht(

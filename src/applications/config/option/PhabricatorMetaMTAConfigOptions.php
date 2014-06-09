@@ -4,11 +4,11 @@ final class PhabricatorMetaMTAConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Mail");
+    return pht('Mail');
   }
 
   public function getDescription() {
-    return pht("Configure Mail.");
+    return pht('Configure Mail.');
   }
 
   public function getOptions() {
@@ -207,8 +207,8 @@ EODOC
         true)
         ->setBoolOptions(
           array(
-            pht("Send Mail To Each Recipient"),
-            pht("Send Mail To All Recipients"),
+            pht('Send Mail To Each Recipient'),
+            pht('Send Mail To All Recipients'),
           ))
         ->setSummary(
           pht(
@@ -219,8 +219,8 @@ EODOC
       $this->newOption('metamta.can-send-as-user', 'bool', false)
         ->setBoolOptions(
           array(
-            pht("Send as User Taking Action"),
-            pht("Send as Phabricator"),
+            pht('Send as User Taking Action'),
+            pht('Send as Phabricator'),
           ))
         ->setSummary(
           pht(
@@ -236,24 +236,24 @@ EODOC
       $this->newOption('metamta.reply.show-hints', 'bool', true)
         ->setBoolOptions(
           array(
-            pht("Show Reply Handler Hints"),
-            pht("No Reply Handler Hints"),
+            pht('Show Reply Handler Hints'),
+            pht('No Reply Handler Hints'),
           ))
         ->setSummary(pht('Show hints about reply handler actions in email.'))
         ->setDescription($reply_hints_description),
       $this->newOption('metamta.herald.show-hints', 'bool', true)
         ->setBoolOptions(
           array(
-            pht("Show Herald Hints"),
-            pht("No Herald Hints"),
+            pht('Show Herald Hints'),
+            pht('No Herald Hints'),
           ))
         ->setSummary(pht('Show hints about Herald rules in email.'))
         ->setDescription($herald_hints_description),
       $this->newOption('metamta.recipients.show-hints', 'bool', true)
         ->setBoolOptions(
           array(
-            pht("Show Recipient Hints"),
-            pht("No Recipient Hints"),
+            pht('Show Recipient Hints'),
+            pht('No Recipient Hints'),
           ))
         ->setSummary(pht('Show "To:" and "Cc:" footer hints in email.'))
         ->setDescription($recipient_hints_description),

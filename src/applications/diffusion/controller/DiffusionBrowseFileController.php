@@ -125,13 +125,13 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       switch ($follow) {
         case 'first':
           $notice->appendChild(
-            pht("Unable to continue tracing the history of this file because ".
-            "this commit is the first commit in the repository."));
+            pht('Unable to continue tracing the history of this file because '.
+            'this commit is the first commit in the repository.'));
           break;
         case 'created':
           $notice->appendChild(
-            pht("Unable to continue tracing the history of this file because ".
-            "this commit created the file."));
+            pht('Unable to continue tracing the history of this file because '.
+            'this commit created the file.'));
           break;
       }
       $content[] = $notice;
@@ -210,7 +210,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     if (!$show_color) {
       $style =
-        "border: none; width: 100%; height: 80em; font-family: monospace";
+        'border: none; width: 100%; height: 80em; font-family: monospace';
       if (!$show_blame) {
         $corpus = phutil_tag(
           'textarea',
@@ -228,7 +228,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
           $rev = $rev_list[$k];
           $author = $blame_dict[$rev]['author'];
           $rows[] =
-            sprintf("%-10s %-20s %s", substr($rev, 0, 7), $author, $line);
+            sprintf('%-10s %-20s %s', substr($rev, 0, 7), $author, $line);
         }
 
         $corpus = phutil_tag(
@@ -256,7 +256,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       $corpus_table = javelin_tag(
         'table',
         array(
-          'class' => "diffusion-source remarkup-code PhabricatorMonospaced",
+          'class' => 'diffusion-source remarkup-code PhabricatorMonospaced',
           'sigil' => 'phabricator-source',
         ),
         $rows);

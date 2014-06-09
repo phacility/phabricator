@@ -35,7 +35,7 @@ final class PhabricatorRepositoryPHIDTypeMirror
 
       $handle->setName(
         pht('Mirror %d %s', $mirror->getID(), $mirror->getRemoteURI()));
-      $handle->setURI("/diffusion/mirror/".$mirror->getID()."/");
+      $handle->setURI('/diffusion/mirror/'.$mirror->getID().'/');
     }
   }
 

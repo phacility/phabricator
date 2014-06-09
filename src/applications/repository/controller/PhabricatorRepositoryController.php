@@ -13,7 +13,7 @@ abstract class PhabricatorRepositoryController extends PhabricatorController {
     $page->setApplicationName('Repositories');
     $page->setBaseURI('/repository/');
     $page->setTitle(idx($data, 'title'));
-    $page->setGlyph("rX");
+    $page->setGlyph('rX');
     $page->appendChild($view);
 
 

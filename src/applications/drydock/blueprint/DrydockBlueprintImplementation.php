@@ -45,7 +45,7 @@ abstract class DrydockBlueprintImplementation {
   protected function getInstance() {
     if (!$this->instance) {
       throw new Exception(
-        "Attach the blueprint instance to the implementation.");
+        'Attach the blueprint instance to the implementation.');
     }
 
     return $this->instance;
@@ -279,7 +279,7 @@ abstract class DrydockBlueprintImplementation {
     $lease->saveTransaction();
 
     if (!$released) {
-      throw new Exception("Unable to release lease: lease not active!");
+      throw new Exception('Unable to release lease: lease not active!');
     }
 
   }
@@ -444,7 +444,7 @@ abstract class DrydockBlueprintImplementation {
 
     if (($this->activeResource !== null) ||
         ($this->activeLease !== null)) {
-      throw new Exception("There is already an active resource or lease!");
+      throw new Exception('There is already an active resource or lease!');
     }
 
     $this->activeResource = $resource;

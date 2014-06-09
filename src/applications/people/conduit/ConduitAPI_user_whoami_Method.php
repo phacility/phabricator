@@ -7,7 +7,7 @@ final class ConduitAPI_user_whoami_Method
   extends ConduitAPI_user_Method {
 
   public function getMethodDescription() {
-    return "Retrieve information about the logged-in user.";
+    return 'Retrieve information about the logged-in user.';
   }
 
   public function defineParamTypes() {

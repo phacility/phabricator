@@ -28,7 +28,7 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
     if ($try_encoding) {
         $this->fileContent->setCorpus(
           phutil_utf8_convert(
-            $this->fileContent->getCorpus(), "UTF-8", $try_encoding));
+            $this->fileContent->getCorpus(), 'UTF-8', $try_encoding));
     }
 
     return $this->fileContent;

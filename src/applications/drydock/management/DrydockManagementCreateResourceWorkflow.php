@@ -33,13 +33,13 @@ final class DrydockManagementCreateResourceWorkflow
     $resource_name = $args->getArg('name');
     if (!$resource_name) {
       throw new PhutilArgumentUsageException(
-        "Specify a resource name with `--name`.");
+        'Specify a resource name with `--name`.');
     }
 
     $blueprint_id = $args->getArg('blueprint');
     if (!$blueprint_id) {
       throw new PhutilArgumentUsageException(
-        "Specify a blueprint ID with `--blueprint`.");
+        'Specify a blueprint ID with `--blueprint`.');
     }
 
     $attributes = $args->getArg('attributes');
@@ -57,7 +57,7 @@ final class DrydockManagementCreateResourceWorkflow
       ->executeOne();
     if (!$blueprint) {
       throw new PhutilArgumentUsageException(
-        "Specified blueprint does not exist.");
+        'Specified blueprint does not exist.');
     }
 
     $resource = id(new DrydockResource())

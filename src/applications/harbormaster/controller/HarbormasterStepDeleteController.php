@@ -23,7 +23,7 @@ final class HarbormasterStepDeleteController
       ->withIDs(array($id))
       ->executeOne();
     if ($step === null) {
-      throw new Exception("Build step not found!");
+      throw new Exception('Build step not found!');
     }
 
     $plan_id = $step->getBuildPlan()->getID();

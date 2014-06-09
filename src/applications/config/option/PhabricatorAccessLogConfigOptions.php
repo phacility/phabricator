@@ -4,57 +4,57 @@ final class PhabricatorAccessLogConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Access Logs");
+    return pht('Access Logs');
   }
 
   public function getDescription() {
-    return pht("Configure the access logs, which log HTTP/SSH requests.");
+    return pht('Configure the access logs, which log HTTP/SSH requests.');
   }
 
   public function getOptions() {
     $common_map = array(
-      'C' => pht("The controller or workflow which handled the request."),
-      'c' => pht("The HTTP response code or process exit code."),
-      'D' => pht("The request date."),
-      'e' => pht("Epoch timestamp."),
+      'C' => pht('The controller or workflow which handled the request.'),
+      'c' => pht('The HTTP response code or process exit code.'),
+      'D' => pht('The request date.'),
+      'e' => pht('Epoch timestamp.'),
       'h' => pht("The webserver's host name."),
-      'p' => pht("The PID of the server process."),
-      'r' => pht("The remote IP."),
-      'T' => pht("The request duration, in microseconds."),
-      'U' => pht("The request path, or request target."),
-      'm' => pht("For conduit, the Conduit method which was invoked."),
-      'u' => pht("The logged-in username, if one is logged in."),
-      'P' => pht("The logged-in user PHID, if one is logged in."),
-      'i' => pht("Request input, in bytes."),
-      'o' => pht("Request output, in bytes."),
+      'p' => pht('The PID of the server process.'),
+      'r' => pht('The remote IP.'),
+      'T' => pht('The request duration, in microseconds.'),
+      'U' => pht('The request path, or request target.'),
+      'm' => pht('For conduit, the Conduit method which was invoked.'),
+      'u' => pht('The logged-in username, if one is logged in.'),
+      'P' => pht('The logged-in user PHID, if one is logged in.'),
+      'i' => pht('Request input, in bytes.'),
+      'o' => pht('Request output, in bytes.'),
     );
 
     $http_map = $common_map + array(
-      'R' => pht("The HTTP referrer."),
-      'M' => pht("The HTTP method."),
+      'R' => pht('The HTTP referrer.'),
+      'M' => pht('The HTTP method.'),
     );
 
     $ssh_map = $common_map + array(
-      's' => pht("The system user."),
-      'S' => pht("The system sudo user."),
+      's' => pht('The system user.'),
+      'S' => pht('The system sudo user.'),
     );
 
     $http_desc = pht(
-      "Format for the HTTP access log. Use {{log.access.path}} to set the ".
-      "path. Available variables are:");
+      'Format for the HTTP access log. Use {{log.access.path}} to set the '.
+      'path. Available variables are:');
     $http_desc .= "\n\n";
     $http_desc .= $this->renderMapHelp($http_map);
 
     $ssh_desc = pht(
-      "Format for the SSH access log. Use {{log.ssh.path}} to set the ".
-      "path. Available variables are:");
+      'Format for the SSH access log. Use {{log.ssh.path}} to set the '.
+      'path. Available variables are:');
     $ssh_desc .= "\n\n";
     $ssh_desc .= $this->renderMapHelp($ssh_map);
 
     return array(
       $this->newOption('log.access.path', 'string', null)
         ->setLocked(true)
-        ->setSummary(pht("Access log location."))
+        ->setSummary(pht('Access log location.'))
         ->setDescription(
           pht(
             "To enable the Phabricator access log, specify a path. The ".
@@ -76,11 +76,11 @@ final class PhabricatorAccessLogConfigOptions
         'wild',
         "[%D]\t%p\t%h\t%r\t%u\t%C\t%m\t%U\t%R\t%c\t%T")
         ->setLocked(true)
-        ->setSummary(pht("Access log format."))
+        ->setSummary(pht('Access log format.'))
         ->setDescription($http_desc),
       $this->newOption('log.ssh.path', 'string', null)
         ->setLocked(true)
-        ->setSummary(pht("SSH log location."))
+        ->setSummary(pht('SSH log location.'))
         ->setDescription(
           pht(
             "To enable the Phabricator SSH log, specify a path. The ".
@@ -99,7 +99,7 @@ final class PhabricatorAccessLogConfigOptions
         'wild',
         "[%D]\t%p\t%h\t%r\t%s\t%S\t%u\t%C\t%U\t%c\t%T\t%i\t%o")
         ->setLocked(true)
-        ->setSummary(pht("SSH log format."))
+        ->setSummary(pht('SSH log format.'))
         ->setDescription($ssh_desc),
     );
   }

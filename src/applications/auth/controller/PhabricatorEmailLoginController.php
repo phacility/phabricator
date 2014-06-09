@@ -26,13 +26,13 @@ final class PhabricatorEmailLoginController
 
       $captcha_ok = AphrontFormRecaptchaControl::processCaptcha($request);
       if (!$captcha_ok) {
-        $errors[] = pht("Captcha response is incorrect, try again.");
+        $errors[] = pht('Captcha response is incorrect, try again.');
         $e_captcha = pht('Invalid');
       }
 
       $email = $request->getStr('email');
       if (!strlen($email)) {
-       $errors[] = pht("You must provide an email address.");
+       $errors[] = pht('You must provide an email address.');
        $e_email = pht('Required');
       }
 
@@ -54,8 +54,8 @@ final class PhabricatorEmailLoginController
 
         if (!$target_user) {
           $errors[] =
-            pht("There is no account associated with that email address.");
-          $e_email = pht("Invalid");
+            pht('There is no account associated with that email address.');
+          $e_email = pht('Invalid');
         }
 
         if (!$errors) {

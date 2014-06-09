@@ -22,11 +22,11 @@ final class PhabricatorRepositoryCommitSearchIndexer
       ->withIDs(array($commit->getRepositoryID()))
       ->executeOne();
     if (!$repository) {
-      throw new Exception("No such repository!");
+      throw new Exception('No such repository!');
     }
 
     $title = 'r'.$repository->getCallsign().$commit->getCommitIdentifier().
-      " ".$commit_data->getSummary();
+      ' '.$commit_data->getSummary();
 
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($commit->getPHID());

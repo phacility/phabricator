@@ -9,7 +9,7 @@ final class PhragmentBrowseController extends PhragmentController {
   }
 
   public function willProcessRequest(array $data) {
-    $this->dblob = idx($data, "dblob", "");
+    $this->dblob = idx($data, 'dblob', '');
   }
 
   public function processRequest() {

@@ -6,7 +6,7 @@
 final class ConduitAPI_flag_edit_Method extends ConduitAPI_flag_Method {
 
   public function getMethodDescription() {
-    return "Create or modify a flag.";
+    return 'Create or modify a flag.';
   }
 
   public function defineParamTypes() {

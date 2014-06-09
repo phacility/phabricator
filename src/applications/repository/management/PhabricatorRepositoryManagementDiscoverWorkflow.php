@@ -31,7 +31,7 @@ final class PhabricatorRepositoryManagementDiscoverWorkflow
 
     if (!$repos) {
       throw new PhutilArgumentUsageException(
-        "Specify one or more repositories to discover, by callsign.");
+        'Specify one or more repositories to discover, by callsign.');
     }
 
     $console = PhutilConsole::getConsole();
