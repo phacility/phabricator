@@ -16,7 +16,7 @@ $rows = queryfx_all(
   $ssh_dao->getTableName());
 
 if (!$rows) {
-  echo pht("No keys found.")."\n";
+  echo pht('No keys found.')."\n";
   exit(1);
 }
 

@@ -19,13 +19,13 @@ final class PhabricatorRepositoryConfigOptions
       $this->newOption('repository.default-local-path', 'string', '/var/repo/')
         ->setLocked(true)
         ->setSummary(
-          pht("Default location to store local copies of repositories."))
+          pht('Default location to store local copies of repositories.'))
         ->setDescription(
           pht(
-            "The default location in which to store working copies and other ".
-            "data about repositories. Phabricator will control and manage ".
-            "data here, so you should **not** choose an existing directory ".
-            "full of data you care about.")),
+            'The default location in which to store working copies and other '.
+            'data about repositories. Phabricator will control and manage '.
+            'data here, so you should **not** choose an existing directory '.
+            'full of data you care about.')),
     );
   }
 

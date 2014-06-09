@@ -49,7 +49,7 @@ final class PhabricatorTransactionView extends AphrontView {
 
   public function render() {
     if (!$this->user) {
-      throw new Exception(pht("Call setUser() before render()!"));
+      throw new Exception(pht('Call setUser() before render()!'));
     }
 
     require_celerity_resource('phabricator-transaction-view-css');

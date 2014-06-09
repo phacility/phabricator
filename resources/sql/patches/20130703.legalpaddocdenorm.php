@@ -1,6 +1,6 @@
 <?php
 
-echo "Populating Legalpad Documents with ",
+echo 'Populating Legalpad Documents with ',
  "titles, recentContributorPHIDs, and contributorCounts...\n";
 $table = new LegalpadDocument();
 $table->openTransaction();

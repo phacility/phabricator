@@ -25,12 +25,12 @@ final class PhabricatorSetupCheckMySQL extends PhabricatorSetupCheck {
         ->setMessage($message);
     }
 
-    $mode_string = queryfx_one($conn_raw, "SELECT @@sql_mode");
+    $mode_string = queryfx_one($conn_raw, 'SELECT @@sql_mode');
     $modes = explode(',', $mode_string['@@sql_mode']);
     if (!in_array('STRICT_ALL_TABLES', $modes)) {
       $summary = pht(
-        "MySQL is not in strict mode, but using strict mode is strongly ".
-        "encouraged.");
+        'MySQL is not in strict mode, but using strict mode is strongly '.
+        'encouraged.');
 
       $message = pht(
         "On your MySQL instance, the global %s is not set to %s. ".

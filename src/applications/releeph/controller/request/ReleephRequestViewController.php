@@ -73,7 +73,7 @@ final class ReleephRequestViewController
       $pull->getPHID());
 
     $title = hsprintf(
-      "%s %s",
+      '%s %s',
       $pull->getMonogram(),
       $pull->getSummaryForDisplay());
 

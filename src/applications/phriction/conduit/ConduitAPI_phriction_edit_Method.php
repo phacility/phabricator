@@ -4,7 +4,7 @@ final class ConduitAPI_phriction_edit_Method
   extends ConduitAPI_phriction_Method {
 
   public function getMethodDescription() {
-    return "Update a Phriction document.";
+    return 'Update a Phriction document.';
   }
 
   public function defineParamTypes() {

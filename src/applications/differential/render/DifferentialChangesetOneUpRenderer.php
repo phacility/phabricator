@@ -71,7 +71,7 @@ final class DifferentialChangesetOneUpRenderer
                                    $new_file = null,
                                    $id = 0,
                                    $vs = 0) {
-    throw new Exception("Not implemented!");
+    throw new Exception('Not implemented!');
   }
 
 }

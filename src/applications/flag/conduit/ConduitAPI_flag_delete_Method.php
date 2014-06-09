@@ -6,7 +6,7 @@
 final class ConduitAPI_flag_delete_Method extends ConduitAPI_flag_Method {
 
   public function getMethodDescription() {
-    return "Clear a flag.";
+    return 'Clear a flag.';
   }
 
   public function defineParamTypes() {
@@ -39,7 +39,7 @@ final class ConduitAPI_flag_delete_Method extends ConduitAPI_flag_Method {
       if ($flag->getOwnerPHID() != $request->getUser()->getPHID()) {
         throw new ConduitException('ERR_WRONG_USER');
       }
-    } elseif ($object) {
+    } else if ($object) {
       $flag = id(new PhabricatorFlag())->loadOneWhere(
         'objectPHID = %s AND ownerPHID = %s',
         $object,

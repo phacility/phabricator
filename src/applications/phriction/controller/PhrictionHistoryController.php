@@ -40,7 +40,6 @@ final class PhrictionHistoryController
     $handles = $this->loadViewerHandles($author_phids);
 
     $list = new PHUIObjectItemListView();
-    $list->setCards(true);
     $list->setFlush(true);
 
     foreach ($history as $content) {
@@ -84,7 +83,7 @@ final class PhrictionHistoryController
           $color = 'green';
           break;
         default:
-          throw new Exception("Unknown change type!");
+          throw new Exception('Unknown change type!');
           break;
       }
 

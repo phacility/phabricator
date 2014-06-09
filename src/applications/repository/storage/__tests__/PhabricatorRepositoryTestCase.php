@@ -106,7 +106,7 @@ final class PhabricatorRepositoryTestCase
 
   public function testFilterMercurialDebugOutput() {
     $map = array(
-      "" => "",
+      '' => '',
 
       "quack\n" => "quack\n",
 
@@ -143,7 +143,7 @@ final class PhabricatorRepositoryTestCase
       "ignoring untrusted configuration option x.y = z\n".
       "duckignoring untrusted configuration option x.y = z\n".
       "quack" =>
-        "duckquack",
+        'duckquack',
     );
 
     foreach ($map as $input => $expect) {

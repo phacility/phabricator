@@ -26,7 +26,7 @@ final class PhabricatorRepositoryManagementMarkImportedWorkflow
 
     if (!$repos) {
       throw new PhutilArgumentUsageException(
-        "Specify one or more repositories to mark imported, by callsign.");
+        'Specify one or more repositories to mark imported, by callsign.');
     }
 
     $new_importing_value = (bool)$args->getArg('mark-not-imported');

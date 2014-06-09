@@ -14,7 +14,7 @@ final class ConpherenceReplyHandler extends PhabricatorMailReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof ConpherenceThread)) {
-      throw new Exception("Mail receiver is not a ConpherenceThread!");
+      throw new Exception('Mail receiver is not a ConpherenceThread!');
     }
   }
 

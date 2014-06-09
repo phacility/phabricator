@@ -15,8 +15,8 @@ final class PhabricatorConfigResponse extends AphrontHTMLResponse {
       // We don't want to flood the console with html, just return a simple
       // message for now.
       return pht(
-        "This install has a fatal setup error, access the internet web ".
-        "version to view details and resolve it.");
+        'This install has a fatal setup error, access the internet web '.
+        'version to view details and resolve it.');
     }
 
     $resources = $this->buildResources();

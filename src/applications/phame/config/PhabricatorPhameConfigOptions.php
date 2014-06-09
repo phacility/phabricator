@@ -4,11 +4,11 @@ final class PhabricatorPhameConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Phame");
+    return pht('Phame');
   }
 
   public function getDescription() {
-    return pht("Configure Phame blogs.");
+    return pht('Configure Phame blogs.');
   }
 
   public function getOptions() {

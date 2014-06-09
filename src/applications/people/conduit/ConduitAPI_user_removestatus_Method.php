@@ -7,7 +7,7 @@ final class ConduitAPI_user_removestatus_Method extends ConduitAPI_user_Method {
   }
 
   public function getMethodDescription() {
-    return pht("Delete status information of the logged-in user.");
+    return pht('Delete status information of the logged-in user.');
   }
 
   public function getMethodStatusDescription() {

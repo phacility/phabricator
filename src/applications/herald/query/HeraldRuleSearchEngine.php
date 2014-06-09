@@ -173,8 +173,7 @@ final class HeraldRuleSearchEngine
     $content_type_map = HeraldAdapter::getEnabledAdapterMap($viewer);
 
     $list = id(new PHUIObjectItemListView())
-      ->setUser($viewer)
-      ->setCards(true);
+      ->setUser($viewer);
     foreach ($rules as $rule) {
       $id = $rule->getID();
 

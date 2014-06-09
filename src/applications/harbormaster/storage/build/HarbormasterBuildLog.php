@@ -53,7 +53,7 @@ final class HarbormasterBuildLog extends HarbormasterDAO
 
   public function start() {
     if ($this->getLive()) {
-      throw new Exception("Live logging has already started for this log.");
+      throw new Exception('Live logging has already started for this log.');
     }
 
     $this->setLive(1);
@@ -64,7 +64,7 @@ final class HarbormasterBuildLog extends HarbormasterDAO
 
   public function append($content) {
     if (!$this->getLive()) {
-      throw new Exception("Start logging before appending data to the log.");
+      throw new Exception('Start logging before appending data to the log.');
     }
     if (strlen($content) === 0) {
       return;
@@ -97,8 +97,8 @@ final class HarbormasterBuildLog extends HarbormasterDAO
       'LIMIT 1',
       $this->getID());
     if (count($result) === 0 ||
-      $result[0]["size"] + strlen($content) > self::CHUNK_BYTE_LIMIT ||
-      $result[0]["encoding"] !== self::ENCODING_TEXT) {
+      $result[0]['size'] + strlen($content) > self::CHUNK_BYTE_LIMIT ||
+      $result[0]['encoding'] !== self::ENCODING_TEXT) {
 
       // We must insert a new chunk because the data we are appending
       // won't fit into the existing one, or we don't have any existing
@@ -122,13 +122,13 @@ final class HarbormasterBuildLog extends HarbormasterDAO
         'WHERE id = %d',
         $content,
         $content,
-        $result[0]["id"]);
+        $result[0]['id']);
     }
   }
 
   public function finalize($start = 0) {
     if (!$this->getLive()) {
-      throw new Exception("Start logging before finalizing it.");
+      throw new Exception('Start logging before finalizing it.');
     }
 
     // TODO: Encode the log contents in a gzipped format.
@@ -157,9 +157,9 @@ final class HarbormasterBuildLog extends HarbormasterDAO
       'ORDER BY id ASC',
       $this->getID());
 
-    $content = "";
+    $content = '';
     foreach ($result as $row) {
-      $content .= $row["chunk"];
+      $content .= $row['chunk'];
     }
     return $content;
   }

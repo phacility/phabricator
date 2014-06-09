@@ -654,9 +654,9 @@ abstract class PhabricatorBaseEnglishTranslation
         '%s Lines',
       ),
 
-      "Indexing %d object(s) of type %s." => array(
-        "Indexing %d object of type %s.",
-        "Indexing %d object of type %s.",
+      'Indexing %d object(s) of type %s.' => array(
+        'Indexing %d object of type %s.',
+        'Indexing %d object of type %s.',
       ),
 
       'Run these %d command(s):' => array(

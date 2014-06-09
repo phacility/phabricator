@@ -9,7 +9,7 @@ final class PhragmentSnapshotViewController extends PhragmentController {
   }
 
   public function willProcessRequest(array $data) {
-    $this->id = idx($data, "id", "");
+    $this->id = idx($data, 'id', '');
   }
 
   public function processRequest() {
@@ -100,8 +100,8 @@ final class PhragmentSnapshotViewController extends PhragmentController {
       ->setUser($viewer);
 
     $zip_uri = $this->getApplicationURI(
-      "zip@".$snapshot->getName().
-      "/".$snapshot->getPrimaryFragment()->getPath());
+      'zip@'.$snapshot->getName().
+      '/'.$snapshot->getPrimaryFragment()->getPath());
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -122,7 +122,7 @@ final class PhragmentSnapshotViewController extends PhragmentController {
       id(new PhabricatorActionView())
         ->setName(pht('Delete Snapshot'))
         ->setHref($this->getApplicationURI(
-          "snapshot/delete/".$snapshot->getID()."/"))
+          'snapshot/delete/'.$snapshot->getID().'/'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(true)
         ->setIcon('fa-times'));
@@ -130,7 +130,7 @@ final class PhragmentSnapshotViewController extends PhragmentController {
       id(new PhabricatorActionView())
         ->setName(pht('Promote Another Snapshot to Here'))
         ->setHref($this->getApplicationURI(
-          "snapshot/promote/".$snapshot->getID()."/"))
+          'snapshot/promote/'.$snapshot->getID().'/'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(true)
         ->setIcon('fa-arrow-up'));

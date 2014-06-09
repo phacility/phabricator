@@ -110,7 +110,7 @@ final class AphrontPagerView extends AphrontView {
   public function render() {
     if (!$this->uri) {
       throw new Exception(
-        pht("You must call setURI() before you can call render()."));
+        pht('You must call setURI() before you can call render().'));
     }
 
     require_celerity_resource('aphront-pager-view-css');

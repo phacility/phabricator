@@ -49,8 +49,8 @@ final class PhabricatorAuthValidateController
     if (!$failures) {
       if (!$viewer->getPHID()) {
         $failures[] = pht(
-          "Login cookie was set correctly, but your login session is not ".
-          "valid. Try clearing cookies and logging in again.");
+          'Login cookie was set correctly, but your login session is not '.
+          'valid. Try clearing cookies and logging in again.');
       }
     }
 

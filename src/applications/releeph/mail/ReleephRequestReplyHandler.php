@@ -4,7 +4,7 @@ final class ReleephRequestReplyHandler extends PhabricatorMailReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof ReleephRequest)) {
-      throw new Exception("Mail receiver is not a ReleephRequest!");
+      throw new Exception('Mail receiver is not a ReleephRequest!');
     }
   }
 

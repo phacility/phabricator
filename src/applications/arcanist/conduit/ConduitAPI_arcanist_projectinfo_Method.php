@@ -7,7 +7,7 @@ final class ConduitAPI_arcanist_projectinfo_Method
   extends ConduitAPI_arcanist_Method {
 
   public function getMethodDescription() {
-    return "Get information about Arcanist projects.";
+    return 'Get information about Arcanist projects.';
   }
 
   public function defineParamTypes() {

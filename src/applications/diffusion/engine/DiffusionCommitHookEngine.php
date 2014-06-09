@@ -610,8 +610,8 @@ final class DiffusionCommitHookEngine extends Phobject {
         if (!$err) {
           // This hook ran OK, but echo its output in case there was something
           // informative.
-          $console->writeOut("%s", $stdout);
-          $console->writeErr("%s", $stderr);
+          $console->writeOut('%s', $stdout);
+          $console->writeErr('%s', $stderr);
           continue;
         }
 

@@ -6,7 +6,7 @@
 final class ConduitAPI_audit_query_Method extends ConduitAPI_audit_Method {
 
   public function getMethodDescription() {
-    return "Query audit requests.";
+    return 'Query audit requests.';
   }
 
   public function defineParamTypes() {

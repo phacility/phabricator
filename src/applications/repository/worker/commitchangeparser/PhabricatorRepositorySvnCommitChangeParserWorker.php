@@ -201,7 +201,7 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
 
               if ($source_file_type == DifferentialChangeType::FILE_DELETED) {
                 throw new Exception(
-                  "Something is wrong; source of a copy must exist.");
+                  'Something is wrong; source of a copy must exist.');
               }
 
               if ($source_file_type != DifferentialChangeType::FILE_DIRECTORY) {
@@ -687,7 +687,7 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
                        '(<size>(.*?)</size>)?@';
             $matches = null;
             if (!preg_match($pattern, $entry, $matches)) {
-              throw new Exception("Unable to parse entry!");
+              throw new Exception('Unable to parse entry!');
             }
             $map[html_entity_decode($matches[2])] =
               $this->getFileTypeFromSVNKind($matches[1]);
@@ -737,7 +737,7 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
       }
     }
     if (!$done) {
-      throw new Exception("Unexpected end of file.");
+      throw new Exception('Unexpected end of file.');
     }
 
     return $map;

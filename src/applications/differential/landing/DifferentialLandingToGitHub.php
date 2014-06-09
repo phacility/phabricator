@@ -88,7 +88,7 @@ final class DifferentialLandingToGitHub
       $github_repo);
 
     $workspace->execxLocal(
-      "push %P HEAD:master",
+      'push %P HEAD:master',
       new PhutilOpaqueEnvelope($remote));
   }
 
@@ -99,7 +99,7 @@ final class DifferentialLandingToGitHub
     $this->account = id(new PhabricatorExternalAccountQuery())
       ->setViewer($viewer)
       ->withUserPHIDs(array($viewer->getPHID()))
-      ->withAccountTypes(array("github"))
+      ->withAccountTypes(array('github'))
       ->withAccountDomains(array($repo_domain))
       ->executeOne();
 
@@ -172,6 +172,7 @@ final class DifferentialLandingToGitHub
             'stronger GitHub token.'))
         ->setSubmitURI($refresh_token_uri)
         ->addCancelButton('/D'.$revision->getId())
+        ->setDisableWorkflowOnSubmit(true)
         ->addSubmitButton(pht('Refresh Account Link'));
     }
   }

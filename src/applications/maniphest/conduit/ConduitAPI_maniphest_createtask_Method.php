@@ -7,7 +7,7 @@ final class ConduitAPI_maniphest_createtask_Method
   extends ConduitAPI_maniphest_Method {
 
   public function getMethodDescription() {
-    return "Create a new Maniphest task.";
+    return 'Create a new Maniphest task.';
   }
 
   public function defineParamTypes() {

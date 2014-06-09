@@ -251,7 +251,7 @@ abstract class PhabricatorController extends AphrontController {
 
   public function getApplicationURI($path = '') {
     if (!$this->getCurrentApplication()) {
-      throw new Exception("No application!");
+      throw new Exception('No application!');
     }
     return $this->getCurrentApplication()->getApplicationURI($path);
   }
@@ -324,7 +324,7 @@ abstract class PhabricatorController extends AphrontController {
       if (isset($seen[$hash])) {
         $seen[] = get_class($response);
         throw new Exception(
-          "Cycle while reducing proxy responses: ".
+          'Cycle while reducing proxy responses: '.
           implode(' -> ', $seen));
       }
       $seen[$hash] = get_class($response);

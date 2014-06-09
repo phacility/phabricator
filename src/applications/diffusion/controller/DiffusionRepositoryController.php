@@ -290,7 +290,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setIconFont('fa-fork');
 
     $button = new PHUIButtonView();
-    $button->setText(pht("Show All Branches"));
+    $button->setText(pht('Show All Branches'));
     $button->setTag('a');
     $button->setIcon($icon);
     $button->setHref($drequest->generateURI(
@@ -362,7 +362,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setIconFont('fa-tag');
 
     $button = new PHUIButtonView();
-    $button->setText(pht("Show All Tags"));
+    $button->setText(pht('Show All Tags'));
     $button->setTag('a');
     $button->setIcon($icon);
     $button->setHref($drequest->generateURI(

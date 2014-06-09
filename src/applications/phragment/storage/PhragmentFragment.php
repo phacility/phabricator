@@ -85,7 +85,7 @@ final class PhragmentFragment extends PhragmentDAO
       return $fragment;
     }
 
-    if ($file->getMimeType() === "application/zip") {
+    if ($file->getMimeType() === 'application/zip') {
       $fragment->updateFromZIP($viewer, $file);
     } else {
       $fragment->updateFromFile($viewer, $file);
@@ -130,7 +130,7 @@ final class PhragmentFragment extends PhragmentDAO
     PhabricatorUser $viewer,
     PhabricatorFile $file) {
 
-    if ($file->getMimeType() !== "application/zip") {
+    if ($file->getMimeType() !== 'application/zip') {
       throw new Exception("File must have mimetype 'application/zip'");
     }
 
@@ -149,7 +149,7 @@ final class PhragmentFragment extends PhragmentDAO
     $temp = new TempFile();
     Filesystem::writeFile($temp, $file->loadFileData());
     if (!$zip->open($temp)) {
-      throw new Exception("Unable to open ZIP");
+      throw new Exception('Unable to open ZIP');
     }
 
     // Get all of the paths and their data from the ZIP.
@@ -182,7 +182,7 @@ final class PhragmentFragment extends PhragmentDAO
         continue;
       }
       $directory = dirname($path_key);
-      while ($directory !== ".") {
+      while ($directory !== '.') {
         if (!array_key_exists($directory, $mappings)) {
           $mappings[$directory] = null;
         }

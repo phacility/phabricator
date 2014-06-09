@@ -34,12 +34,14 @@
 }
 
 .phui-object-item {
-  background: #fff;
   border-style: solid;
   border-color: {$lightgreyborder};
-  border-width: 0 0 0 4px;
   margin: 5px 0;
   overflow: hidden;
+  border-radius: 3px;
+  border-left-width: 6px;
+  background: #f0f0f0 url('/rsrc/image/texture/card-gradient.png') repeat-x;
+  margin-bottom: 4px;
 }
 
 .phui-object-item .phui-icon-view {
@@ -54,9 +56,6 @@
   position: relative;
   min-height: 29px;
   overflow: hidden;
-}
-
-.phui-object-list-cards .phui-object-item-frame {
   border-bottom-right-radius: 3px;
   border-top-right-radius: 3px;
 }
@@ -145,7 +144,7 @@
 }
 
 .phui-object-item-actions .phui-list-item-href:hover {
-  background: #e9e9f9;
+  background: {$hoverblue};
 }
 
 .phui-object-item-actions .phui-list-item-icon {
@@ -187,16 +186,39 @@
 .phui-object-item-list-view.phui-object-list-stackable
   .phui-object-item {
   margin: -1px 0 0 0;
+  border-radius: 0;
+  border-left-width: 1px;
+  background: #fff;
+}
+
+.phui-object-list-stackable .phui-object-item-frame {
+  border-radius: 0;
 }
 
 .phui-object-list-stackable .phui-object-item {
-  border-left-width: 1px;
 }
 
 .device-desktop .phui-object-list-stackable
   .phui-object-item:hover {
-  background: #e9ecf5;
+  background: {$hoverblue};
 }
+
+.phui-object-box .phui-object-list-stackable {
+  padding: 0;
+}
+
+.phui-object-box .phui-object-list-stackable .phui-object-item {
+  border: none;
+}
+
+.phui-object-box .phui-object-list-stackable .phui-object-item-frame {
+  border-right: none;
+}
+
+.phui-object-box .phui-object-list-stackable:last-child .phui-object-item-frame {
+  border-bottom: none;
+}
+
 
 /* - Subhead -------------------------------------------------------------------
 
@@ -418,14 +440,18 @@
   background: {$lightyellow};
 }
 
-.phui-object-list-cards
- .phui-object-item.phui-object-item-highlighted {
+.phui-object-item.phui-object-item-highlighted {
   background-image: linear-gradient(to bottom, rgb(253, 255, 221), rgb(243, 245, 206));
   background-image: -webkit-linear-gradient(top, rgb(253, 255, 221), rgb(243, 245, 206));
 }
 
 .phui-object-item-selected {
   background: {$lightblue};
+  border-left-color: {$blue};
+}
+
+.phui-object-item-selected .phui-object-item-frame {
+  border-color: {$blue};
 }
 
 
@@ -514,33 +540,6 @@
   font-size: 13px;
 }
 
-/* - Card List -----------------------------------------------------------------
-
-  Rounded card list.
-
-*/
-
-/* Hard to sprite since we can't have other sprites appearing in tall cells */
-.phui-object-list-cards .phui-object-item {
-  border-radius: 3px;
-  border-left-width: 6px;
-  background: #f0f0f0 url('/rsrc/image/texture/card-gradient.png') repeat-x;
-  margin-bottom: 4px;
-}
-
-.phui-object-list-cards .phui-object-item-frame {
-  min-height: 50px;
-}
-
-.phui-object-list-cards .phui-object-item-selected {
-  background: #bfdcff;
-}
-
-.phui-object-list-cards .phui-object-item-selected
-  .phui-object-item-frame {
-  border-color: #99ccff;
-}
-
 
 /* - Draggable List ------------------------------------------------------------
 
@@ -556,13 +555,26 @@
   border-radius: 3px;
 }
 
+.phui-object-list-stackable .drag-ghost {
+  background: {$hoverblue};
+  margin: 0;
+  border-radius: none;
+  border: none;
+  border-top: 1px solid {$lightgreyborder}
+}
+
 .drag-dragging {
   position: relative;
-  opacity: 0.9;
+  opacity: 0.85;
+}
+
+.phui-object-box .phui-object-list-stackable .drag-dragging
+ .phui-object-item-frame {
+  border-bottom: 1px solid {$lightgreyborder};
 }
 
 .drag-sending {
-  opacity: 0.75;
+  opacity: 0.5;
 }
 
 /* - Plain ---------------------------------------------------------------------
@@ -587,19 +599,20 @@
 }
 
 .phui-object-item-image {
-  width: 50px;
-  height: 50px;
-  margin: 4px 4px 4px 4px;
+  width: 40px;
+  height: 40px;
+  background-size: 40px;
+  margin: 4px;
   position: absolute;
   background-color: {$lightbluebackground};
 }
 
 .phui-object-item-with-image .phui-object-item-frame {
-  min-height: 58px;
+  min-height: 48px;
 }
 
 .phui-object-item-with-image .phui-object-item-content-box {
-  margin-left: 54px;
+  margin-left: 44px;
 }
 
 /* - State ---------------------------------------------------------------------
@@ -670,6 +683,7 @@
 .dashboard-panel .phui-object-item-frame {
   border: none;
   border-bottom: 1px solid {$thinblueborder};
+  border-radius: 0;
 }
 
 

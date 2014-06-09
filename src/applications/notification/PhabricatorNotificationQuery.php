@@ -47,7 +47,7 @@ final class PhabricatorNotificationQuery
 
   protected function loadPage() {
     if (!$this->userPHID) {
-      throw new Exception("Call setUser() before executing the query");
+      throw new Exception('Call setUser() before executing the query');
     }
 
     $story_table = new PhabricatorFeedStoryData();
@@ -57,11 +57,11 @@ final class PhabricatorNotificationQuery
 
     $data = queryfx_all(
       $conn,
-      "SELECT story.*, notif.hasViewed FROM %T notif
+      'SELECT story.*, notif.hasViewed FROM %T notif
          JOIN %T story ON notif.chronologicalKey = story.chronologicalKey
          %Q
          ORDER BY notif.chronologicalKey DESC
-         %Q",
+         %Q',
       $notification_table->getTableName(),
       $story_table->getTableName(),
       $this->buildWhereClause($conn),

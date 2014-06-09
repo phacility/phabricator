@@ -22,7 +22,7 @@ final class PhabricatorConfigManagementSetWorkflow
     $argv = $args->getArg('args');
     if (count($argv) == 0) {
       throw new PhutilArgumentUsageException(
-        "Specify a configuration key and a value to set it to.");
+        'Specify a configuration key and a value to set it to.');
     }
 
     $key = $argv[0];
@@ -36,7 +36,7 @@ final class PhabricatorConfigManagementSetWorkflow
 
     if (count($argv) > 2) {
       throw new PhutilArgumentUsageException(
-        "Too many arguments: expected one key and one value.");
+        'Too many arguments: expected one key and one value.');
     }
 
     $options = PhabricatorApplicationConfigOptions::loadAllOptions();

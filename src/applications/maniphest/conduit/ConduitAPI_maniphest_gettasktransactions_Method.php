@@ -7,7 +7,7 @@ final class ConduitAPI_maniphest_gettasktransactions_Method
   extends ConduitAPI_maniphest_Method {
 
   public function getMethodDescription() {
-    return "Retrieve Maniphest Task Transactions.";
+    return 'Retrieve Maniphest Task Transactions.';
   }
 
   public function defineParamTypes() {

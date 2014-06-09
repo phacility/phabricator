@@ -4,11 +4,11 @@ final class PhabricatorMacroConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Macro");
+    return pht('Macro');
   }
 
   public function getDescription() {
-    return pht("Configure Macro.");
+    return pht('Configure Macro.');
   }
 
   public function getOptions() {

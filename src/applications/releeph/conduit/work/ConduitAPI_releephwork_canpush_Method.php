@@ -8,7 +8,7 @@ final class ConduitAPI_releephwork_canpush_Method
   }
 
   public function getMethodDescription() {
-    return "Return whether the conduit user is allowed to push.";
+    return 'Return whether the conduit user is allowed to push.';
   }
 
   public function defineParamTypes() {

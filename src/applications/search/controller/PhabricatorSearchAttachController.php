@@ -249,17 +249,17 @@ final class PhabricatorSearchAttachController
         $instructions = null;
         break;
       case self::ACTION_MERGE:
-        $dialog_title = "Merge Duplicate Tasks";
-        $header_text = "Tasks To Merge";
+        $dialog_title = 'Merge Duplicate Tasks';
+        $header_text = 'Tasks To Merge';
         $button_text = "Merge {$noun}";
         $instructions =
-          "These tasks will be merged into the current task and then closed. ".
-          "The current task will grow stronger.";
+          'These tasks will be merged into the current task and then closed. '.
+          'The current task will grow stronger.';
         break;
       case self::ACTION_DEPENDENCIES:
-        $dialog_title = "Edit Dependencies";
-        $header_text = "Current Dependencies";
-        $button_text = "Save Dependencies";
+        $dialog_title = 'Edit Dependencies';
+        $header_text = 'Current Dependencies';
+        $button_text = 'Save Dependencies';
         $instructions = null;
         break;
       case self::ACTION_BLOCKS:

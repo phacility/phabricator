@@ -217,8 +217,8 @@ final class DifferentialReleephRequestFieldSpecification {
           $lists[] = implode(', ', $rq_ids).' in '.$branch_name;
         }
         throw new DifferentialFieldParseException(
-          "Commit message references multiple Releeph requests, ".
-          "but the requests are in different branches: ".
+          'Commit message references multiple Releeph requests, '.
+          'but the requests are in different branches: '.
           implode('; ', $lists));
       }
     }
@@ -353,9 +353,9 @@ final class DifferentialReleephRequestFieldSpecification {
 
         if ($in_branch && $ex_branch) {
           $error = sprintf(
-            "CONFUSION: commit %s in %s contains %d path change(s) that were ".
-            "part of a Releeph branch, but also has %d path change(s) not ".
-            "part of a Releeph branch!",
+            'CONFUSION: commit %s in %s contains %d path change(s) that were '.
+            'part of a Releeph branch, but also has %d path change(s) not '.
+            'part of a Releeph branch!',
             $commit->getCommitIdentifier(),
             $repo->getCallsign(),
             count($in_branch),

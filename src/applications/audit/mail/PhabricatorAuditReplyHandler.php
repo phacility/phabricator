@@ -4,7 +4,7 @@ final class PhabricatorAuditReplyHandler extends PhabricatorMailReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof PhabricatorRepositoryCommit)) {
-      throw new Exception("Mail receiver is not a commit!");
+      throw new Exception('Mail receiver is not a commit!');
     }
   }
 
@@ -24,7 +24,7 @@ final class PhabricatorAuditReplyHandler extends PhabricatorMailReplyHandler {
 
   public function getReplyHandlerInstructions() {
     if ($this->supportsReplies()) {
-      return pht("Reply to comment.");
+      return pht('Reply to comment.');
     } else {
       return null;
     }

@@ -45,7 +45,7 @@ final class PhabricatorFlagEditController extends PhabricatorFlagController {
     $dialog = new AphrontDialogView();
     $dialog->setUser($user);
 
-    $dialog->setTitle(pht("Flag %s", $type_name));
+    $dialog->setTitle(pht('Flag %s', $type_name));
 
     require_celerity_resource('phabricator-flag-css');
 
@@ -56,7 +56,7 @@ final class PhabricatorFlagEditController extends PhabricatorFlagController {
     if ($is_new) {
       $form
         ->appendChild(hsprintf(
-          "<p>%s</p><br />",
+          '<p>%s</p><br />',
           pht('You can flag this %s if you want to remember to look '.
             'at it later.',
             $type_name)));
@@ -85,7 +85,7 @@ final class PhabricatorFlagEditController extends PhabricatorFlagController {
 
     $dialog->addCancelButton($handle->getURI());
     $dialog->addSubmitButton(
-      $is_new ? pht("Create Flag") : pht('Save'));
+      $is_new ? pht('Create Flag') : pht('Save'));
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }

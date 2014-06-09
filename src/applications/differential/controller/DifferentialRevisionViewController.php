@@ -39,7 +39,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     if (!$diffs) {
       throw new Exception(
-        "This revision has no diffs. Something has gone quite wrong.");
+        'This revision has no diffs. Something has gone quite wrong.');
     }
 
     $revision->attachActiveDiff(last($diffs));

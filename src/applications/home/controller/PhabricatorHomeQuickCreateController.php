@@ -9,7 +9,6 @@ final class PhabricatorHomeQuickCreateController
     $items = $this->getCurrentApplication()->loadAllQuickCreateItems($viewer);
 
     $list = id(new PHUIObjectItemListView())
-      ->setCards(true)
       ->setUser($viewer);
 
     foreach ($items as $item) {

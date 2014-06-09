@@ -3,7 +3,7 @@
 final class PhabricatorAphrontBarExample extends PhabricatorUIExample {
 
   public function getName() {
-    return "Bars";
+    return 'Bars';
   }
 
   public function getDescription() {
@@ -56,13 +56,13 @@ final class PhabricatorAphrontBarExample extends PhabricatorUIExample {
     }
 
     return $this->wrap(
-      "Glyph bars in weird order",
+      'Glyph bars in weird order',
       phutil_implode_html('', $views));
   }
 
   private function renderAsciiStarBar() {
     return $this->wrap(
-      "Ascii star glyph bar",
+      'Ascii star glyph bar',
       id(new AphrontGlyphBarView())
         ->setValue(50)
         ->setMax(100)

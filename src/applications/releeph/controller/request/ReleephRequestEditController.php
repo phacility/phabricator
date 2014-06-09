@@ -93,7 +93,7 @@ final class ReleephRequestEditController extends ReleephBranchController {
         if ($request_identifier ===
           ReleephRequestTypeaheadControl::PLACEHOLDER) {
 
-          $errors[] = "No commit ID was provided.";
+          $errors[] = 'No commit ID was provided.';
           $e_request_identifier = 'Required';
         } else {
           $pr_commit = null;
@@ -206,7 +206,7 @@ final class ReleephRequestEditController extends ReleephBranchController {
       $notice_messages = array(
         'You are editing an existing pick request!',
         hsprintf(
-          "Requested %s by %s",
+          'Requested %s by %s',
           $age_string,
           $handles[$pull->getRequestUserPHID()]->renderLink())
       );

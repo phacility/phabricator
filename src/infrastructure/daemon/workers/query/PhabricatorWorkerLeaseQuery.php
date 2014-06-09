@@ -33,7 +33,7 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
 
   public function execute() {
     if (!$this->limit) {
-      throw new Exception("You must setLimit() when leasing tasks.");
+      throw new Exception('You must setLimit() when leasing tasks.');
     }
 
     $task_table = new PhabricatorWorkerActiveTask();

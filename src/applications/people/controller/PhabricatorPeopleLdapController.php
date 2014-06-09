@@ -73,13 +73,13 @@ final class PhabricatorPeopleLdapController
 
     $notice_view = new AphrontErrorView();
     $notice_view->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-    $notice_view->setTitle(pht("Import Successful"));
+    $notice_view->setTitle(pht('Import Successful'));
     $notice_view->setErrors(array(
-      pht("Successfully imported users from LDAP"),
+      pht('Successfully imported users from LDAP'),
     ));
 
     $list = new PHUIObjectItemListView();
-    $list->setNoDataString(pht("No users imported?"));
+    $list->setNoDataString(pht('No users imported?'));
 
     foreach ($usernames as $username) {
       $user = new PhabricatorUser();
@@ -133,7 +133,7 @@ final class PhabricatorPeopleLdapController
 
     $ldap_provider = PhabricatorAuthProviderLDAP::getLDAPProvider();
     if (!$ldap_provider) {
-      throw new Exception("No LDAP provider enabled!");
+      throw new Exception('No LDAP provider enabled!');
     }
 
     $ldap_adapter = $ldap_provider->getAdapter();

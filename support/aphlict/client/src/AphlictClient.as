@@ -5,7 +5,7 @@ package {
   import flash.utils.Timer;
 
 
-  public class AphlictClient extends Aphlict {
+  final public class AphlictClient extends Aphlict {
 
     /**
      * The connection name for this client. This will be used for the
@@ -80,9 +80,10 @@ package {
         this.log('Attempting to become the master...');
         this.master = new AphlictMaster(this.remoteServer, this.remotePort);
         this.log('I am the master.');
-      } catch (x:Error) {
-        // Couldn't become the master
+      } catch (err:ArgumentError) {
         this.log('Cannot become the master... probably one already exists');
+      } catch (err:Error) {
+        this.error(err);
       }
 
       this.send.send('aphlict_master', 'register', this.client);

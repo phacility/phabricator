@@ -136,7 +136,7 @@ final class DiffusionSymbolController extends DiffusionController {
         '',
       ));
     $table->setNoDataString(
-      pht("No matching symbol could be found in any indexed project."));
+      pht('No matching symbol could be found in any indexed project.'));
 
     $panel = new AphrontPanelView();
     $panel->setHeader(pht('Similar Symbols'));

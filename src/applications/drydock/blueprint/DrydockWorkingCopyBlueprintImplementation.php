@@ -53,7 +53,7 @@ final class DrydockWorkingCopyBlueprintImplementation
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         break;
       default:
-        throw new Exception("Unsupported VCS!");
+        throw new Exception('Unsupported VCS!');
     }
 
     // TODO: Policy stuff here too.

@@ -18,9 +18,9 @@ final class ConduitSSHWorkflow extends PhabricatorSSHWorkflow {
 
     $methodv = $args->getArg('method');
     if (!$methodv) {
-      throw new Exception("No Conduit method provided.");
+      throw new Exception('No Conduit method provided.');
     } else if (count($methodv) > 1) {
-      throw new Exception("Too many Conduit methods provided.");
+      throw new Exception('Too many Conduit methods provided.');
     }
 
     $method = head($methodv);
@@ -28,7 +28,7 @@ final class ConduitSSHWorkflow extends PhabricatorSSHWorkflow {
     $json = $this->readAllInput();
     $raw_params = json_decode($json, true);
     if (!is_array($raw_params)) {
-      throw new Exception("Invalid JSON input.");
+      throw new Exception('Invalid JSON input.');
     }
 
     $params = idx($raw_params, 'params', '[]');

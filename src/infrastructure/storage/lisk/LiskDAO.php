@@ -487,7 +487,7 @@ abstract class LiskDAO {
   public function loadColumnsWhere(array $columns, $pattern/* , $args... */) {
     if (!$this->getConfigOption(self::CONFIG_PARTIAL_OBJECTS)) {
       throw new BadMethodCallException(
-        "This class does not support partial objects.");
+        'This class does not support partial objects.');
     }
     $args = func_get_args();
     $data = call_user_func_array(
@@ -518,7 +518,7 @@ abstract class LiskDAO {
 
     if (count($data) > 1) {
       throw new AphrontQueryCountException(
-        "More than 1 result from loadOneWhere()!");
+        'More than 1 result from loadOneWhere()!');
     }
 
     $data = reset($data);
@@ -844,7 +844,7 @@ abstract class LiskDAO {
 
     if (count($relatives) > 1) {
       throw new AphrontQueryCountException(
-        "More than 1 result from loadOneRelative()!");
+        'More than 1 result from loadOneRelative()!');
     }
 
     return reset($relatives);
@@ -1347,8 +1347,8 @@ abstract class LiskDAO {
     $id_key = $this->getIDKey();
     if (!$id_key) {
       throw new Exception(
-        "This DAO does not have a single-part primary key. The method you ".
-        "called requires a single-part primary key.");
+        'This DAO does not have a single-part primary key. The method you '.
+        'called requires a single-part primary key.');
     }
     return $id_key;
   }
@@ -1363,8 +1363,8 @@ abstract class LiskDAO {
    */
   protected function generatePHID() {
     throw new Exception(
-      "To use CONFIG_AUX_PHID, you need to overload ".
-      "generatePHID() to perform PHID generation.");
+      'To use CONFIG_AUX_PHID, you need to overload '.
+      'generatePHID() to perform PHID generation.');
   }
 
 
@@ -1588,7 +1588,7 @@ abstract class LiskDAO {
     self::$processIsolationLevel--;
     if (self::$processIsolationLevel < 0) {
       throw new Exception(
-        "Lisk process isolation level was reduced below 0.");
+        'Lisk process isolation level was reduced below 0.');
     }
   }
 
@@ -1624,7 +1624,7 @@ abstract class LiskDAO {
     self::$transactionIsolationLevel--;
     if (self::$transactionIsolationLevel < 0) {
       throw new Exception(
-        "Lisk transaction isolation level was reduced below 0.");
+        'Lisk transaction isolation level was reduced below 0.');
     } else if (self::$transactionIsolationLevel == 0) {
       foreach (self::$connections as $key => $conn) {
         if ($conn) {

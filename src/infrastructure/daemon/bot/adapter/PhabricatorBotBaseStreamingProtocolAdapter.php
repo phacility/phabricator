@@ -23,7 +23,7 @@ abstract class PhabricatorBotBaseStreamingProtocolAdapter
 
     // First, join the room
     if (!$rooms) {
-      throw new Exception("Not configured to join any rooms!");
+      throw new Exception('Not configured to join any rooms!');
     }
 
     $this->readBuffers = array();
@@ -49,7 +49,7 @@ abstract class PhabricatorBotBaseStreamingProtocolAdapter
       curl_setopt(
         $this->readHandle[$url],
         CURLOPT_HTTPHEADER,
-        array("Content-type: application/json"));
+        array('Content-type: application/json'));
       curl_setopt(
         $this->readHandle[$url],
         CURLOPT_WRITEFUNCTION,
@@ -88,7 +88,7 @@ abstract class PhabricatorBotBaseStreamingProtocolAdapter
     // Check for errors
     if ($status != CURLM_OK) {
       throw new Exception(
-        "Phabricator Bot had a problem reading from stream.");
+        'Phabricator Bot had a problem reading from stream.');
     }
   }
 
@@ -96,7 +96,7 @@ abstract class PhabricatorBotBaseStreamingProtocolAdapter
     $messages = array();
 
     if (!$this->active) {
-      throw new Exception("Phabricator Bot stopped reading from stream.");
+      throw new Exception('Phabricator Bot stopped reading from stream.');
     }
 
     // Prod our http request

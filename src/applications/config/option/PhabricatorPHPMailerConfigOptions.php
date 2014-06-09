@@ -4,18 +4,18 @@ final class PhabricatorPHPMailerConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("PHPMailer");
+    return pht('PHPMailer');
   }
 
   public function getDescription() {
-    return pht("Configure PHPMailer.");
+    return pht('Configure PHPMailer.');
   }
 
   public function getOptions() {
     return array(
       $this->newOption('phpmailer.mailer', 'string', 'smtp')
         ->setLocked(true)
-        ->setSummary(pht("Configure mailer used by PHPMailer."))
+        ->setSummary(pht('Configure mailer used by PHPMailer.'))
         ->setDescription(
           pht(
             "If you're using PHPMailer to send email, provide the mailer and ".

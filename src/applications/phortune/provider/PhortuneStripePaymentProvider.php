@@ -52,7 +52,7 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     $stripe_charge = Stripe_Charge::create($params, $secret_key);
     $id = $stripe_charge->id;
     if (!$id) {
-      throw new Exception("Stripe charge call did not return an ID!");
+      throw new Exception('Stripe charge call did not return an ID!');
     }
 
     $charge->setMetadataValue('stripe.chargeID', $id);

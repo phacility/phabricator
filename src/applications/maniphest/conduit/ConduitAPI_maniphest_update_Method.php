@@ -7,7 +7,7 @@ final class ConduitAPI_maniphest_update_Method
   extends ConduitAPI_maniphest_Method {
 
   public function getMethodDescription() {
-    return "Update an existing Maniphest task.";
+    return 'Update an existing Maniphest task.';
   }
 
   public function defineErrorTypes() {

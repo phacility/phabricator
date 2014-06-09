@@ -28,7 +28,7 @@ final class DiffusionGitRawDiffQuery extends DiffusionRawDiffQuery {
     $path = nonempty($drequest->getPath(), '.');
 
     $future = $repository->getLocalCommandFuture(
-      "diff %C %s %s -- %s",
+      'diff %C %s %s -- %s',
       $options,
       $against,
       $commit,

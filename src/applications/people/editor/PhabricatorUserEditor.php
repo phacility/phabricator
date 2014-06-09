@@ -26,11 +26,11 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     PhabricatorUserEmail $email) {
 
     if ($user->getID()) {
-      throw new Exception("User has already been created!");
+      throw new Exception('User has already been created!');
     }
 
     if ($email->getID()) {
-      throw new Exception("Email has already been created!");
+      throw new Exception('Email has already been created!');
     }
 
     if (!PhabricatorUser::validateUsername($user->getUsername())) {
@@ -84,7 +84,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     PhabricatorUser $user,
     PhabricatorUserEmail $email = null) {
     if (!$user->getID()) {
-      throw new Exception("User has not been created yet!");
+      throw new Exception('User has not been created yet!');
     }
 
     $user->openTransaction();
@@ -113,7 +113,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     PhutilOpaqueEnvelope $envelope) {
 
     if (!$user->getID()) {
-      throw new Exception("User has not been created yet!");
+      throw new Exception('User has not been created yet!');
     }
 
     $user->openTransaction();
@@ -139,7 +139,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     $actor = $this->requireActor();
 
     if (!$user->getID()) {
-      throw new Exception("User has not been created yet!");
+      throw new Exception('User has not been created yet!');
     }
 
     if (!PhabricatorUser::validateUsername($username)) {
@@ -185,7 +185,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     $actor = $this->requireActor();
 
     if (!$user->getID()) {
-      throw new Exception("User has not been created yet!");
+      throw new Exception('User has not been created yet!');
     }
 
     $user->openTransaction();
@@ -223,7 +223,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     $actor = $this->requireActor();
 
     if (!$user->getID()) {
-      throw new Exception("User has not been created yet!");
+      throw new Exception('User has not been created yet!');
     }
 
     $user->openTransaction();
@@ -262,7 +262,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     $actor = $this->requireActor();
 
     if (!$user->getID()) {
-      throw new Exception("User has not been created yet!");
+      throw new Exception('User has not been created yet!');
     }
 
     $user->openTransaction();
@@ -301,7 +301,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     $actor = $this->requireActor();
 
     if (!$user->getID()) {
-      throw new Exception("User has not been created yet!");
+      throw new Exception('User has not been created yet!');
     }
 
     $user->openTransaction();
@@ -346,10 +346,10 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     $actor = $this->requireActor();
 
     if (!$user->getID()) {
-      throw new Exception("User has not been created yet!");
+      throw new Exception('User has not been created yet!');
     }
     if ($email->getID()) {
-      throw new Exception("Email has already been created!");
+      throw new Exception('Email has already been created!');
     }
 
     // Use changePrimaryEmail() to change primary email.
@@ -396,10 +396,10 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     $actor = $this->requireActor();
 
     if (!$user->getID()) {
-      throw new Exception("User has not been created yet!");
+      throw new Exception('User has not been created yet!');
     }
     if (!$email->getID()) {
-      throw new Exception("Email has not been created yet!");
+      throw new Exception('Email has not been created yet!');
     }
 
     $user->openTransaction();
@@ -412,7 +412,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
           throw new Exception("Can't remove primary email!");
         }
         if ($email->getUserPHID() != $user->getPHID()) {
-          throw new Exception("Email not owned by user!");
+          throw new Exception('Email not owned by user!');
         }
 
         $email->delete();
@@ -440,10 +440,10 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     $actor = $this->requireActor();
 
     if (!$user->getID()) {
-      throw new Exception("User has not been created yet!");
+      throw new Exception('User has not been created yet!');
     }
     if (!$email->getID()) {
-      throw new Exception("Email has not been created yet!");
+      throw new Exception('Email has not been created yet!');
     }
 
     $user->openTransaction();
@@ -453,15 +453,15 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
         $email->reload();
 
         if ($email->getUserPHID() != $user->getPHID()) {
-          throw new Exception("User does not own email!");
+          throw new Exception('User does not own email!');
         }
 
         if ($email->getIsPrimary()) {
-          throw new Exception("Email is already primary!");
+          throw new Exception('Email is already primary!');
         }
 
         if (!$email->getIsVerified()) {
-          throw new Exception("Email is not verified!");
+          throw new Exception('Email is not verified!');
         }
 
         $old_primary = $user->loadPrimaryEmail();

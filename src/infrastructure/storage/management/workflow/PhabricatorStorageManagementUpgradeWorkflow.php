@@ -7,7 +7,7 @@ final class PhabricatorStorageManagementUpgradeWorkflow
     $this
       ->setName('upgrade')
       ->setExamples('**upgrade** [__options__]')
-      ->setSynopsis("Upgrade database schemata.")
+      ->setSynopsis('Upgrade database schemata.')
       ->setArguments(
         array(
           array(
@@ -38,9 +38,9 @@ final class PhabricatorStorageManagementUpgradeWorkflow
 
     if (!$is_dry && !$is_force) {
       echo phutil_console_wrap(
-        "Before running storage upgrades, you should take down the ".
-        "Phabricator web interface and stop any running Phabricator ".
-        "daemons (you can disable this warning with --force).");
+        'Before running storage upgrades, you should take down the '.
+        'Phabricator web interface and stop any running Phabricator '.
+        'daemons (you can disable this warning with --force).');
 
       if (!phutil_console_confirm('Are you ready to continue?')) {
         echo "Cancelled.\n";
@@ -71,8 +71,8 @@ final class PhabricatorStorageManagementUpgradeWorkflow
 
       if ($apply_only) {
         throw new PhutilArgumentUsageException(
-          "Storage has not been initialized yet, you must initialize storage ".
-          "before selectively applying patches.");
+          'Storage has not been initialized yet, you must initialize storage '.
+          'before selectively applying patches.');
         return 1;
       }
 
@@ -178,7 +178,7 @@ final class PhabricatorStorageManagementUpgradeWorkflow
       if (!$applied_something) {
         if (count($patches)) {
           throw new Exception(
-            "Some patches could not be applied: ".
+            'Some patches could not be applied: '.
             implode(', ', array_keys($patches)));
         } else if (!$is_dry && !$apply_only) {
           echo "Storage is up to date. Use 'storage status' for details.\n";

@@ -12,7 +12,7 @@ final class ConduitAPI_differential_getrevisioncomments_Method
   }
 
   public function getMethodDescription() {
-    return "Retrieve Differential Revision Comments.";
+    return 'Retrieve Differential Revision Comments.';
   }
 
   public function defineParamTypes() {

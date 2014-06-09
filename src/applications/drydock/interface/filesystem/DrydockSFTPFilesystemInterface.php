@@ -17,7 +17,7 @@ final class DrydockSFTPFilesystemInterface extends DrydockFilesystemInterface {
 
     if ($credential->getProvidesType() !==
       PassphraseCredentialTypeSSHPrivateKey::PROVIDES_TYPE) {
-      throw new Exception("Only private key credentials are supported.");
+      throw new Exception('Only private key credentials are supported.');
     }
 
     $this->passphraseSSHKey = PassphraseSSHKey::loadFromPHID(
@@ -39,7 +39,7 @@ final class DrydockSFTPFilesystemInterface extends DrydockFilesystemInterface {
   public function readFile($path) {
     $target = new TempFile();
     $future = $this->getExecFuture($path);
-    $future->write(csprintf("get %s %s", $path, $target));
+    $future->write(csprintf('get %s %s', $path, $target));
     $future->resolvex();
     return Filesystem::readFile($target);
   }
@@ -58,7 +58,7 @@ final class DrydockSFTPFilesystemInterface extends DrydockFilesystemInterface {
     $source = new TempFile();
     Filesystem::writeFile($source, $data);
     $future = $this->getExecFuture($path);
-    $future->write(csprintf("put %s %s", $source, $path));
+    $future->write(csprintf('put %s %s', $source, $path));
     $future->resolvex();
   }
 

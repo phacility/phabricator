@@ -17,7 +17,7 @@ final class DrydockSSHCommandInterface extends DrydockCommandInterface {
 
     if ($credential->getProvidesType() !==
       PassphraseCredentialTypeSSHPrivateKey::PROVIDES_TYPE) {
-      throw new Exception("Only private key credentials are supported.");
+      throw new Exception('Only private key credentials are supported.');
     }
 
     $this->passphraseSSHKey = PassphraseSSHKey::loadFromPHID(

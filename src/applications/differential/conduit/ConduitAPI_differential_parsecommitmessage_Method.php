@@ -6,7 +6,7 @@ final class ConduitAPI_differential_parsecommitmessage_Method
   private $errors;
 
   public function getMethodDescription() {
-    return pht("Parse commit messages for Differential fields.");
+    return pht('Parse commit messages for Differential fields.');
   }
 
   public function defineParamTypes() {

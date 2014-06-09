@@ -7,7 +7,7 @@ final class ConduitAPI_user_enable_Method
   extends ConduitAPI_user_Method {
 
   public function getMethodDescription() {
-    return "Re-enable specified users (admin only).";
+    return 'Re-enable specified users (admin only).';
   }
 
   public function defineParamTypes() {

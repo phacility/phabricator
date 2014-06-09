@@ -50,7 +50,7 @@ abstract class AphrontHTTPSink {
 
       if (strpos($name, ':') !== false) {
         throw new Exception(
-          "Declining to emit response with malformed HTTP header name: ".
+          'Declining to emit response with malformed HTTP header name: '.
           $name);
       }
 

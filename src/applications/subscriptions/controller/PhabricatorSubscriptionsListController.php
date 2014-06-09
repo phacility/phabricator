@@ -38,7 +38,7 @@ final class PhabricatorSubscriptionsListController
 
     $dialog = id(new SubscriptionListDialogBuilder())
       ->setViewer($viewer)
-      ->setTitle(pht('Subscribers for %s', $object_handle->getFullName()))
+      ->setTitle(pht('Subscribers'))
       ->setObjectPHID($phid)
       ->setHandles($handles)
       ->buildDialog();

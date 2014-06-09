@@ -4,11 +4,11 @@ final class PhabricatorMailgunConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Integration with Mailgun");
+    return pht('Integration with Mailgun');
   }
 
   public function getDescription() {
-    return pht("Configure Mailgun integration.");
+    return pht('Configure Mailgun integration.');
   }
 
   public function getOptions() {

@@ -388,12 +388,12 @@ final class PhabricatorImageTransformer {
     $text_height = abs($bbox[3] - $bbox[5]);
     $text_width = abs($bbox[0] - $bbox[2]);
     return array(
-      "doesfit" => ($text_height * 1.05 <= imagesy($img) / 2
+      'doesfit' => ($text_height * 1.05 <= imagesy($img) / 2
         && $text_width * 1.05 <= imagesx($img)),
-      "txtwidth" => $text_width,
-      "txtheight" => $text_height,
-      "imgwidth" => imagesx($img),
-      "imgheight" => imagesy($img),
+      'txtwidth' => $text_width,
+      'txtheight' => $text_height,
+      'imgwidth' => imagesx($img),
+      'imgheight' => imagesy($img),
     );
   }
 

@@ -31,12 +31,12 @@ final class PhabricatorFactManagementCursorsWorkflow
           'name = %s',
           $name);
         if ($cursor) {
-          $console->writeOut("%s\n", pht("Resetting cursor %s...", $name));
+          $console->writeOut("%s\n", pht('Resetting cursor %s...', $name));
           $cursor->delete();
         } else {
           $console->writeErr(
             "%s\n",
-            pht("Cursor %s does not exist or is already reset.", $name));
+            pht('Cursor %s does not exist or is already reset.', $name));
         }
       }
       return 0;
@@ -44,7 +44,7 @@ final class PhabricatorFactManagementCursorsWorkflow
 
     $iterator_map = PhabricatorFactDaemon::getAllApplicationIterators();
     if (!$iterator_map) {
-      $console->writeErr("%s\n", pht("No cursors."));
+      $console->writeErr("%s\n", pht('No cursors.'));
       return 0;
     }
 

@@ -25,7 +25,7 @@ final class DiffusionLowLevelGitRefQuery extends DiffusionLowLevelQuery {
     $repository = $this->getRepository();
 
     if ($this->isTag && $this->isOriginBranch) {
-      throw new Exception("Specify tags or origin branches, not both!");
+      throw new Exception('Specify tags or origin branches, not both!');
     } else if ($this->isTag) {
       $prefix = 'refs/tags/';
     } else if ($this->isOriginBranch) {
@@ -36,7 +36,7 @@ final class DiffusionLowLevelGitRefQuery extends DiffusionLowLevelQuery {
         $prefix = 'refs/remotes/'.$remote.'/';
       }
     } else {
-      throw new Exception("Specify tags or origin branches!");
+      throw new Exception('Specify tags or origin branches!');
     }
 
     $order = '-creatordate';
@@ -114,7 +114,7 @@ final class DiffusionLowLevelGitRefQuery extends DiffusionLowLevelQuery {
       $fields[$key] = '%('.$field.')';
     }
 
-    return implode("%01", $fields);
+    return implode('%01', $fields);
   }
 
   /**

@@ -4,7 +4,7 @@ final class ConduitAPI_maniphest_querystatuses_Method
   extends ConduitAPI_maniphest_Method {
 
   public function getMethodDescription() {
-    return "Retrieve information about possible Maniphest Task status values.";
+    return 'Retrieve information about possible Maniphest Task status values.';
   }
 
   public function defineParamTypes() {

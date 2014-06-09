@@ -47,7 +47,7 @@ final class PhabricatorIRCProtocolAdapter
     }
     $ok = stream_set_blocking($socket, false);
     if (!$ok) {
-      throw new Exception("Failed to set stream nonblocking.");
+      throw new Exception('Failed to set stream nonblocking.');
     }
 
     $this->socket = $socket;
@@ -72,7 +72,7 @@ final class PhabricatorIRCProtocolAdapter
     $ok = @stream_select($read, $write, $except, $timeout_sec = 1);
     if ($ok === false) {
       throw new Exception(
-        "socket_select() failed: ".socket_strerror(socket_last_error()));
+        'socket_select() failed: '.socket_strerror(socket_last_error()));
     }
 
     if ($read) {
@@ -82,16 +82,16 @@ final class PhabricatorIRCProtocolAdapter
         // This indicates the connection was terminated on the other side,
         // just exit via exception and let the overseer restart us after a
         // delay so we can reconnect.
-        throw new Exception("Remote host closed connection.");
+        throw new Exception('Remote host closed connection.');
       }
       do {
         $data = fread($this->socket, 4096);
         if ($data === false) {
-          throw new Exception("fread() failed!");
+          throw new Exception('fread() failed!');
         } else {
           $messages[] = id(new PhabricatorBotMessage())
-            ->setCommand("LOG")
-            ->setBody(">>> ".$data);
+            ->setCommand('LOG')
+            ->setBody('>>> '.$data);
           $this->readBuffer .= $data;
         }
       } while (strlen($data));
@@ -101,11 +101,11 @@ final class PhabricatorIRCProtocolAdapter
       do {
         $len = fwrite($this->socket, $this->writeBuffer);
         if ($len === false) {
-          throw new Exception("fwrite() failed!");
+          throw new Exception('fwrite() failed!');
         } else {
           $messages[] = id(new PhabricatorBotMessage())
-            ->setCommand("LOG")
-            ->setBody(">>> ".substr($this->writeBuffer, 0, $len));
+            ->setCommand('LOG')
+            ->setBody('>>> '.substr($this->writeBuffer, 0, $len));
           $this->writeBuffer = substr($this->writeBuffer, $len);
         }
       } while (strlen($this->writeBuffer));
@@ -199,7 +199,7 @@ final class PhabricatorIRCProtocolAdapter
         }
         $join = $this->getConfig('join');
         if (!$join) {
-          throw new Exception("Not configured to join any channels!");
+          throw new Exception('Not configured to join any channels!');
         }
         foreach ($join as $channel) {
           $this->write("JOIN {$channel}");
@@ -251,7 +251,7 @@ final class PhabricatorIRCProtocolAdapter
   }
 
   public function __destruct() {
-    $this->write("QUIT Goodbye.");
+    $this->write('QUIT Goodbye.');
     fclose($this->socket);
   }
 }

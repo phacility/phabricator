@@ -92,7 +92,7 @@ final class PHUITagView extends AphrontView {
 
   public function render() {
     if (!$this->type) {
-      throw new Exception(pht("You must call setType() before render()!"));
+      throw new Exception(pht('You must call setType() before render()!'));
     }
 
     require_celerity_resource('phui-tag-view-css');

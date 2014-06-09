@@ -56,7 +56,7 @@ final class PholioMockImagesView extends AphrontView {
 
   public function render() {
     if (!$this->mock) {
-      throw new Exception("Call setMock() before render()!");
+      throw new Exception('Call setMock() before render()!');
     }
 
     $mock = $this->mock;

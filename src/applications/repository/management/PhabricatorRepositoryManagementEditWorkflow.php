@@ -32,7 +32,7 @@ final class PhabricatorRepositoryManagementEditWorkflow
 
     if (!$repos) {
       throw new PhutilArgumentUsageException(
-        "Specify one or more repositories to edit, by callsign.");
+        'Specify one or more repositories to edit, by callsign.');
     }
 
     $console = PhutilConsole::getConsole();
@@ -47,7 +47,7 @@ final class PhabricatorRepositoryManagementEditWorkflow
     $username = $args->getArg('as');
     if (!$username) {
       throw new PhutilArgumentUsageException(
-        pht("Specify a user to edit as with --as <username>."));
+        pht('Specify a user to edit as with --as <username>.'));
     }
 
     $actor = id(new PhabricatorPeopleQuery())
@@ -75,7 +75,7 @@ final class PhabricatorRepositoryManagementEditWorkflow
 
       if (!$xactions) {
         throw new PhutilArgumentUsageException(
-          pht("Specify one or more fields to edit!"));
+          pht('Specify one or more fields to edit!'));
       }
 
       $content_source = PhabricatorContentSource::newConsoleSource();

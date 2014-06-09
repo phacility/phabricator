@@ -4,7 +4,7 @@ final class ConduitAPI_differential_createrevision_Method
   extends ConduitAPI_differential_Method {
 
   public function getMethodDescription() {
-    return pht("Create a new Differential revision.");
+    return pht('Create a new Differential revision.');
   }
 
   public function defineParamTypes() {

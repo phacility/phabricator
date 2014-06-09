@@ -4,8 +4,8 @@ final class ConduitAPI_differential_finishpostponedlinters_Method
   extends ConduitAPI_differential_Method {
 
   public function getMethodDescription() {
-    return "Update diff with new lint messages and mark postponed ".
-           "linters as finished.";
+    return 'Update diff with new lint messages and mark postponed '.
+           'linters as finished.';
   }
 
   public function defineParamTypes() {

@@ -29,8 +29,8 @@ final class DifferentialHunkTestCase extends ArcanistPhutilTestCase {
     $hunk->setNewOffset(11);
 
     $this->assertEqual("a\n", $hunk->makeOldFile());
-    $this->assertEqual("a", $hunk->makeNewFile());
-    $this->assertEqual(array(11 => "a"), $hunk->getAddedLines());
+    $this->assertEqual('a', $hunk->makeNewFile());
+    $this->assertEqual(array(11 => 'a'), $hunk->getAddedLines());
 
   }
 

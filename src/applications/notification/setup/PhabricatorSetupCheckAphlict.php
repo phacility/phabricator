@@ -57,7 +57,7 @@ final class PhabricatorSetupCheckAphlict extends PhabricatorSetupCheck {
         ->setShortName(pht('Notification Server Version'))
         ->setName(pht('Notification Server Out of Date'))
         ->setMessage($message)
-        ->addCommand('phabricator/ $ sudo ./bin/aphlict start');
+        ->addCommand('phabricator/ $ sudo ./bin/aphlict restart');
     }
 
   }

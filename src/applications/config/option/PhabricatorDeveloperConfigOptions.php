@@ -4,11 +4,11 @@ final class PhabricatorDeveloperConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Developer / Debugging");
+    return pht('Developer / Debugging');
   }
 
   public function getDescription() {
-    return pht("Options for Phabricator developers, including debugging.");
+    return pht('Options for Phabricator developers, including debugging.');
   }
 
   public function getOptions() {
@@ -16,8 +16,8 @@ final class PhabricatorDeveloperConfigOptions
       $this->newOption('darkconsole.enabled', 'bool', false)
         ->setBoolOptions(
           array(
-            pht("Enable DarkConsole"),
-            pht("Disable DarkConsole"),
+            pht('Enable DarkConsole'),
+            pht('Disable DarkConsole'),
           ))
         ->setSummary(pht("Enable Phabricator's debugging console."))
         ->setDescription(
@@ -34,10 +34,10 @@ final class PhabricatorDeveloperConfigOptions
       $this->newOption('darkconsole.always-on', 'bool', false)
         ->setBoolOptions(
           array(
-            pht("Always Activate DarkConsole"),
-            pht("Require DarkConsole Activation"),
+            pht('Always Activate DarkConsole'),
+            pht('Require DarkConsole Activation'),
           ))
-        ->setSummary(pht("Activate DarkConsole on every page."))
+        ->setSummary(pht('Activate DarkConsole on every page.'))
         ->setDescription(
           pht(
             "This option allows you to enable DarkConsole on every page, ".
@@ -49,27 +49,27 @@ final class PhabricatorDeveloperConfigOptions
       $this->newOption('debug.stop-on-redirect', 'bool', false)
         ->setBoolOptions(
           array(
-            pht("Stop Before HTTP Redirect"),
-            pht("Use Normal HTTP Redirects"),
+            pht('Stop Before HTTP Redirect'),
+            pht('Use Normal HTTP Redirects'),
           ))
         ->setSummary(
           pht(
-            "Confirm before redirecting so DarkConsole can be examined."))
+            'Confirm before redirecting so DarkConsole can be examined.'))
         ->setDescription(
           pht(
-            "Normally, Phabricator issues HTTP redirects after a successful ".
-            "POST. This can make it difficult to debug things which happen ".
-            "while processing the POST, because service and profiling ".
-            "information are lost. By setting this configuration option, ".
-            "Phabricator will show a page instead of automatically ".
-            "redirecting, allowing you to examine service and profiling ".
-            "information. It also makes the UX awful, so you should only ".
-            "enable it when debugging.")),
+            'Normally, Phabricator issues HTTP redirects after a successful '.
+            'POST. This can make it difficult to debug things which happen '.
+            'while processing the POST, because service and profiling '.
+            'information are lost. By setting this configuration option, '.
+            'Phabricator will show a page instead of automatically '.
+            'redirecting, allowing you to examine service and profiling '.
+            'information. It also makes the UX awful, so you should only '.
+            'enable it when debugging.')),
       $this->newOption('debug.profile-rate', 'int', 0)
         ->addExample(0,     pht('No profiling'))
         ->addExample(1,     pht('Profile every request (slow)'))
         ->addExample(1000,  pht('Profile 0.1%% of all requests'))
-        ->setSummary(pht("Automatically profile some percentage of pages."))
+        ->setSummary(pht('Automatically profile some percentage of pages.'))
         ->setDescription(
           pht(
             "Normally, Phabricator profiles pages only when explicitly ".
@@ -91,37 +91,37 @@ final class PhabricatorDeveloperConfigOptions
             pht('Enable developer mode'),
             pht('Disable developer mode'),
           ))
-          ->setSummary(pht("Enable verbose error reporting and disk reads."))
+          ->setSummary(pht('Enable verbose error reporting and disk reads.'))
           ->setDescription(
             pht(
-              "This option enables verbose error reporting (stack traces, ".
-              "error callouts) and forces disk reads of static assets on ".
-              "every reload.")),
+              'This option enables verbose error reporting (stack traces, '.
+              'error callouts) and forces disk reads of static assets on '.
+              'every reload.')),
       $this->newOption('celerity.minify', 'bool', true)
         ->setBoolOptions(
           array(
             pht('Minify static resources.'),
             pht("Don't minify static resources."),
           ))
-        ->setSummary(pht("Minify static Celerity resources."))
+        ->setSummary(pht('Minify static Celerity resources.'))
         ->setDescription(
           pht(
-            "Minify static resources by removing whitespace and comments. You ".
-            "should enable this in production, but disable it in ".
-            "development.")),
+            'Minify static resources by removing whitespace and comments. You '.
+            'should enable this in production, but disable it in '.
+            'development.')),
       $this->newOption('cache.enable-deflate', 'bool', true)
         ->setBoolOptions(
           array(
-            pht("Enable deflate compression"),
-            pht("Disable deflate compression"),
+            pht('Enable deflate compression'),
+            pht('Disable deflate compression'),
           ))
         ->setSummary(
-          pht("Toggle gzdeflate()-based compression for some caches."))
+          pht('Toggle gzdeflate()-based compression for some caches.'))
         ->setDescription(
           pht(
-            "Set this to false to disable the use of gzdeflate()-based ".
-            "compression in some caches. This may give you less performant ".
-            "(but more debuggable) caching.")),
+            'Set this to false to disable the use of gzdeflate()-based '.
+            'compression in some caches. This may give you less performant '.
+            '(but more debuggable) caching.')),
     );
   }
 }

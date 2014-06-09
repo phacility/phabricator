@@ -16,7 +16,7 @@ final class PhabricatorGitGraphStream
     $this->repository = $repository;
 
     $future = $repository->getLocalCommandFuture(
-      "log --format=%s %s --",
+      'log --format=%s %s --',
       '%H%x01%P%x01%ct',
       $start_commit);
 

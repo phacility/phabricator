@@ -187,7 +187,7 @@ final class PhabricatorConfigOption
   public function getCustomObject() {
     if (!$this->customObject) {
       if (!$this->isCustomType()) {
-        throw new Exception("This option does not have a custom type!");
+        throw new Exception('This option does not have a custom type!');
       }
       $this->customObject = newv(substr($this->getType(), 7), array());
     }

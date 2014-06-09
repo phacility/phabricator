@@ -8,7 +8,7 @@ final class PhabricatorMetaMTAEmailBodyParserTestCase
     foreach ($bodies as $body) {
       $parser = new PhabricatorMetaMTAEmailBodyParser();
       $stripped = $parser->stripTextBody($body);
-      $this->assertEqual("OKAY", $stripped);
+      $this->assertEqual('OKAY', $stripped);
     }
   }
 
@@ -42,7 +42,7 @@ EOEMAIL;
 
     $parser = new PhabricatorMetaMTAEmailBodyParser();
     $stripped = $parser->stripTextBody($body);
-    $this->assertEqual("On which horse shall you ride?", $stripped);
+    $this->assertEqual('On which horse shall you ride?', $stripped);
   }
 
   private function getEmailBodiesWithFullCommands() {

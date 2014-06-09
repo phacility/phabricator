@@ -25,7 +25,7 @@ final class SlowvoteEmbedView extends AphrontView {
 
   public function render() {
     if (!$this->poll) {
-      throw new Exception("Call setPoll() before render()!");
+      throw new Exception('Call setPoll() before render()!');
     }
 
     $poll = $this->poll;

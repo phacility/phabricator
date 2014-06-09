@@ -11,7 +11,7 @@ final class ConduitAPI_phragment_getpatch_Method
   }
 
   public function getMethodDescription() {
-    return pht("Retrieve the patches to apply for a given set of files.");
+    return pht('Retrieve the patches to apply for a given set of files.');
   }
 
   public function defineParamTypes() {
@@ -137,8 +137,8 @@ final class ConduitAPI_phragment_getpatch_Method
     // of files so we can draw diffs on them.
     $hashes = array();
     foreach ($patches as $patch) {
-      if ($patch["hashOld"] !== PhragmentPatchUtil::EMPTY_HASH) {
-        $hashes[] = $patch["hashOld"];
+      if ($patch['hashOld'] !== PhragmentPatchUtil::EMPTY_HASH) {
+        $hashes[] = $patch['hashOld'];
       }
     }
     $old_files = array();
@@ -150,7 +150,7 @@ final class ConduitAPI_phragment_getpatch_Method
     }
     $old_files = mpull($old_files, null, 'getContentHash');
     foreach ($patches as $key => $patch) {
-      if ($patch["hashOld"] !== PhragmentPatchUtil::EMPTY_HASH) {
+      if ($patch['hashOld'] !== PhragmentPatchUtil::EMPTY_HASH) {
         if (array_key_exists($patch['hashOld'], $old_files)) {
           $patches[$key]['fileOld'] = $old_files[$patch['hashOld']];
         } else {

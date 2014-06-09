@@ -20,6 +20,7 @@ final class AphrontDialogView extends AphrontView {
   private $disableWorkflowOnCancel;
   private $width      = 'default';
   private $errors;
+  private $flush;
 
   const WIDTH_DEFAULT = 'default';
   const WIDTH_FORM    = 'form';
@@ -104,6 +105,11 @@ final class AphrontDialogView extends AphrontView {
 
   public function setClass($class) {
     $this->class = $class;
+    return $this;
+  }
+
+  public function setFlush($flush) {
+    $this->flush = $flush;
     return $this;
   }
 
@@ -197,10 +203,13 @@ final class AphrontDialogView extends AphrontView {
 
     if (!$this->user) {
       throw new Exception(
-        pht("You must call setUser() when rendering an AphrontDialogView."));
+        pht('You must call setUser() when rendering an AphrontDialogView.'));
     }
 
     $more = $this->class;
+    if ($this->flush) {
+      $more .= ' aphront-dialog-flush';
+    }
 
     switch ($this->width) {
       case self::WIDTH_FORM:

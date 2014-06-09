@@ -113,7 +113,6 @@ final class PHUIObjectItemListExample extends PhabricatorUIExample {
     $head = id(new PHUIHeaderView())
       ->setHeader(pht('Card List'));
     $list = new PHUIObjectItemListView();
-    $list->setCards(true);
 
     $list->addItem(
       id(new PHUIObjectItemView())
@@ -161,7 +160,6 @@ final class PHUIObjectItemListExample extends PhabricatorUIExample {
     $head = id(new PHUIHeaderView())
       ->setHeader(pht('Grippable List'));
     $list = new PHUIObjectItemListView();
-    $list->setCards(true);
 
     $list->addItem(
       id(new PHUIObjectItemView())

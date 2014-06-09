@@ -44,14 +44,14 @@ abstract class DifferentialLandingStrategy {
 
     $status = $revision->getStatus();
     if ($status != ArcanistDifferentialRevisionStatus::ACCEPTED) {
-      return pht("Only Accepted revisions can be landed.");
+      return pht('Only Accepted revisions can be landed.');
     }
 
     if (!PhabricatorPolicyFilter::hasCapability(
         $viewer,
         $repository,
         DiffusionCapabilityPush::CAPABILITY)) {
-      return pht("You do not have permissions to push to this repository.");
+      return pht('You do not have permissions to push to this repository.');
     }
 
     return false;

@@ -990,7 +990,7 @@ final class DifferentialChangesetParser {
     for ($ii = $range_end; $ii >= $range_start; $ii--) {
       // We need to expand tabs to process mixed indenting and to round
       // correctly later.
-      $line = str_replace("\t", "  ", $this->new[$ii]['text']);
+      $line = str_replace("\t", '  ', $this->new[$ii]['text']);
       $trimmed = ltrim($line);
       if ($trimmed != '') {
         // We round down to flatten "/**" and " *".
@@ -1043,7 +1043,7 @@ final class DifferentialChangesetParser {
     PhabricatorInlineCommentInterface $comment) {
 
     if (!$this->isCommentVisibleOnRenderedDiff($comment)) {
-      throw new Exception("Comment is not visible on changeset!");
+      throw new Exception('Comment is not visible on changeset!');
     }
 
     $changeset_id = $comment->getChangesetID();

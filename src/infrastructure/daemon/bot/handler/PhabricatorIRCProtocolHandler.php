@@ -9,7 +9,7 @@ final class PhabricatorIRCProtocolHandler extends PhabricatorBotHandler {
     static $warned;
     if (!$warned) {
       $warned = true;
-      phlog("The PhabricatorIRCProtocolHandler has been deprecated.");
+      phlog('The PhabricatorIRCProtocolHandler has been deprecated.');
     }
   }
 

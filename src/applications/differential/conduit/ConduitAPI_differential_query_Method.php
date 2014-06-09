@@ -4,7 +4,7 @@ final class ConduitAPI_differential_query_Method
   extends ConduitAPI_differential_Method {
 
   public function getMethodDescription() {
-    return "Query Differential revisions which match certain criteria.";
+    return 'Query Differential revisions which match certain criteria.';
   }
 
   public function defineParamTypes() {

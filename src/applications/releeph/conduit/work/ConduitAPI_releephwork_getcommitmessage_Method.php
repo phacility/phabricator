@@ -9,8 +9,8 @@ final class ConduitAPI_releephwork_getcommitmessage_Method
 
   public function getMethodDescription() {
     return
-      "Get commit message components for building ".
-      "a ReleephRequest commit message.";
+      'Get commit message components for building '.
+      'a ReleephRequest commit message.';
   }
 
   public function defineParamTypes() {

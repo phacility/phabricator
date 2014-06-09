@@ -4,7 +4,7 @@ final class ConduitAPI_differential_createinline_Method
   extends ConduitAPI_differential_Method {
 
   public function getMethodDescription() {
-    return "Add an inline comment to a Differential revision.";
+    return 'Add an inline comment to a Differential revision.';
   }
 
   public function defineParamTypes() {

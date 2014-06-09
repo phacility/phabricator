@@ -67,8 +67,8 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
 
   public function delete() {
     throw new Exception(
-      "Active tasks can not be deleted directly. ".
-      "Use archiveTask() to move tasks to the archive.");
+      'Active tasks can not be deleted directly. '.
+      'Use archiveTask() to move tasks to the archive.');
   }
 
   public function archiveTask($result, $duration) {

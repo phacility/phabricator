@@ -56,7 +56,7 @@ final class PhabricatorPeopleNewController
       $user->setRealName($request->getStr('realname'));
 
       if (!strlen($user->getUsername())) {
-        $errors[] = pht("Username is required.");
+        $errors[] = pht('Username is required.');
         $e_username = pht('Required');
       } else if (!PhabricatorUser::validateUsername($user->getUsername())) {
         $errors[] = PhabricatorUser::describeValidUsername();

@@ -79,8 +79,8 @@ final class HeraldEngine {
             ->setRuleName($rule->getName())
             ->setRuleOwner($rule->getAuthorPHID())
             ->setReason(
-              "This rule is only supposed to be repeated a single time, ".
-              "and it has already been applied.");
+              'This rule is only supposed to be repeated a single time, '.
+              'and it has already been applied.');
           $this->transcript->addRuleTranscript($xscript);
           $rule_matches = false;
         } else {
@@ -243,40 +243,40 @@ final class HeraldEngine {
     $local_version = id(new HeraldRule())->getConfigVersion();
     if ($rule->getConfigVersion() > $local_version) {
       $reason = pht(
-        "Rule could not be processed, it was created with a newer version ".
-        "of Herald.");
+        'Rule could not be processed, it was created with a newer version '.
+        'of Herald.');
       $result = false;
     } else if (!$conditions) {
       $reason = pht(
-        "Rule failed automatically because it has no conditions.");
+        'Rule failed automatically because it has no conditions.');
       $result = false;
     } else if (!$rule->hasValidAuthor()) {
       $reason = pht(
-        "Rule failed automatically because its owner is invalid ".
-        "or disabled.");
+        'Rule failed automatically because its owner is invalid '.
+        'or disabled.');
       $result = false;
     } else if (!$this->canAuthorViewObject($rule, $object)) {
       $reason = pht(
-        "Rule failed automatically because it is a personal rule and its ".
-        "owner can not see the object.");
+        'Rule failed automatically because it is a personal rule and its '.
+        'owner can not see the object.');
       $result = false;
     } else if (!$this->canRuleApplyToObject($rule, $object)) {
       $reason = pht(
-        "Rule failed automatically because it is an object rule which is ".
-        "not relevant for this object.");
+        'Rule failed automatically because it is an object rule which is '.
+        'not relevant for this object.');
       $result = false;
     } else {
       foreach ($conditions as $condition) {
         $match = $this->doesConditionMatch($rule, $condition, $object);
 
         if (!$all && $match) {
-          $reason = "Any condition matched.";
+          $reason = 'Any condition matched.';
           $result = true;
           break;
         }
 
         if ($all && !$match) {
-          $reason = "Not all conditions matched.";
+          $reason = 'Not all conditions matched.';
           $result = false;
           break;
         }
@@ -284,10 +284,10 @@ final class HeraldEngine {
 
       if ($result === null) {
         if ($all) {
-          $reason = "All conditions matched.";
+          $reason = 'All conditions matched.';
           $result = true;
         } else {
-          $reason = "No conditions matched.";
+          $reason = 'No conditions matched.';
           $result = false;
         }
       }

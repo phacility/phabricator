@@ -41,7 +41,7 @@ final class PonderQuestionViewController extends PonderController {
       $answer_add_panel
         ->setQuestion($question)
         ->setUser($user)
-        ->setActionURI("/ponder/answer/add/");
+        ->setActionURI('/ponder/answer/add/');
     }
 
     $header = id(new PHUIHeaderView())

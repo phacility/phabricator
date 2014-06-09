@@ -8,7 +8,7 @@ final class ConduitAPI_releephwork_getbranchcommitmessage_Method
   }
 
   public function getMethodDescription() {
-    return "Get a commit message for committing a Releeph branch.";
+    return 'Get a commit message for committing a Releeph branch.';
   }
 
   public function defineParamTypes() {
@@ -60,7 +60,7 @@ final class ConduitAPI_releephwork_getbranchcommitmessage_Method
     $commit_message[] = $h_branch->getFullName();
     $commit_message[] = $h_branch->getURI();
 
-    $commit_message[] = "Cut Point: ".$handles[$cut_phid]->getName();
+    $commit_message[] = 'Cut Point: '.$handles[$cut_phid]->getName();
 
     $cut_point_pr_commit = id(new PhabricatorRepositoryCommit())
       ->loadOneWhere('phid = %s', $cut_phid);
@@ -69,10 +69,10 @@ final class ConduitAPI_releephwork_getbranchcommitmessage_Method
       $cut_point_pr_commit->getEpoch());
     $commit_message[] = "Cut Point Date: {$cut_point_commit_date}";
 
-    $commit_message[] = "Created By: ".$handles[$creator_phid]->getName();
+    $commit_message[] = 'Created By: '.$handles[$creator_phid]->getName();
 
     $project_uri = $project->getURI();
-    $commit_message[] = "Project: ".$h_project->getName()." ".$project_uri;
+    $commit_message[] = 'Project: '.$h_project->getName().' '.$project_uri;
 
     /**
      * Required for 090-limit_new_branch_creations.sh in

@@ -70,7 +70,7 @@ final class PhrictionMoveController
     if (isset($disallowed_statuses[$document->getStatus()])) {
       $error_dialog = id(new AphrontDialogView())
         ->setUser($user)
-        ->setTitle("Can not move page!")
+        ->setTitle('Can not move page!')
         ->appendChild(pht('An already moved or deleted document '.
           'can not be moved again.'))
         ->addCancelButton($cancel_uri);

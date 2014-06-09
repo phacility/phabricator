@@ -293,15 +293,15 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
   private function getChangeTypeDescription($const, $title) {
     $map = array(
       PhrictionChangeType::CHANGE_EDIT =>
-        pht("Phriction Document %s was edited.", $title),
+        pht('Phriction Document %s was edited.', $title),
       PhrictionChangeType::CHANGE_DELETE =>
-        pht("Phriction Document %s was deleted.", $title),
+        pht('Phriction Document %s was deleted.', $title),
       PhrictionChangeType::CHANGE_MOVE_HERE =>
-        pht("Phriction Document %s was moved here.", $title),
+        pht('Phriction Document %s was moved here.', $title),
       PhrictionChangeType::CHANGE_MOVE_AWAY =>
-        pht("Phriction Document %s was moved away.", $title),
+        pht('Phriction Document %s was moved away.', $title),
       PhrictionChangeType::CHANGE_STUB =>
-        pht("Phriction Document %s was created through child.", $title),
+        pht('Phriction Document %s was created through child.', $title),
     );
     return idx($map, $const, pht('Something magical occurred.'));
   }

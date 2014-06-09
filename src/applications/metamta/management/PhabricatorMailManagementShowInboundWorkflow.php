@@ -8,7 +8,7 @@ final class PhabricatorMailManagementShowInboundWorkflow
       ->setName('show-inbound')
       ->setSynopsis('Show diagnostic details about inbound mail.')
       ->setExamples(
-        "**show-inbound** --id 1 --id 2")
+        '**show-inbound** --id 1 --id 2')
       ->setArguments(
         array(
           array(
@@ -38,7 +38,7 @@ final class PhabricatorMailManagementShowInboundWorkflow
       $missing = array_diff_key($ids, $messages);
       if ($missing) {
         throw new PhutilArgumentUsageException(
-          "Some specified messages do not exist: ".
+          'Some specified messages do not exist: '.
           implode(', ', array_keys($missing)));
       }
     }

@@ -4,11 +4,11 @@ final class PhabricatorCoreConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Core");
+    return pht('Core');
   }
 
   public function getDescription() {
-    return pht("Configure core options, including URIs.");
+    return pht('Configure core options, including URIs.');
   }
 
   public function getOptions() {
@@ -27,31 +27,31 @@ final class PhabricatorCoreConfigOptions
     return array(
       $this->newOption('phabricator.base-uri', 'string', null)
         ->setLocked(true)
-        ->setSummary(pht("URI where Phabricator is installed."))
+        ->setSummary(pht('URI where Phabricator is installed.'))
         ->setDescription(
           pht(
-            "Set the URI where Phabricator is installed. Setting this ".
-            "improves security by preventing cookies from being set on other ".
-            "domains, and allows daemons to send emails with links that have ".
-            "the correct domain."))
+            'Set the URI where Phabricator is installed. Setting this '.
+            'improves security by preventing cookies from being set on other '.
+            'domains, and allows daemons to send emails with links that have '.
+            'the correct domain.'))
         ->addExample('http://phabricator.example.com/', pht('Valid Setting')),
       $this->newOption('phabricator.production-uri', 'string', null)
         ->setSummary(
-          pht("Primary install URI, for multi-environment installs."))
+          pht('Primary install URI, for multi-environment installs.'))
         ->setDescription(
           pht(
-            "If you have multiple Phabricator environments (like a ".
-            "development/staging environment for working on testing ".
-            "Phabricator, and a production environment for deploying it), ".
-            "set the production environment URI here so that emails and other ".
-            "durable URIs will always generate with links pointing at the ".
-            "production environment. If unset, defaults to ".
-            "{{phabricator.base-uri}}. Most installs do not need to set ".
-            "this option."))
+            'If you have multiple Phabricator environments (like a '.
+            'development/staging environment for working on testing '.
+            'Phabricator, and a production environment for deploying it), '.
+            'set the production environment URI here so that emails and other '.
+            'durable URIs will always generate with links pointing at the '.
+            'production environment. If unset, defaults to '.
+            '{{phabricator.base-uri}}. Most installs do not need to set '.
+            'this option.'))
         ->addExample('http://phabricator.example.com/', pht('Valid Setting')),
       $this->newOption('phabricator.allowed-uris', 'list<string>', array())
         ->setLocked(true)
-        ->setSummary(pht("Alternative URIs that can access Phabricator."))
+        ->setSummary(pht('Alternative URIs that can access Phabricator.'))
         ->setDescription(
           pht(
             "These alternative URIs will be able to access 'normal' pages ".
@@ -64,7 +64,7 @@ final class PhabricatorCoreConfigOptions
           pht('Valid Setting')),
       $this->newOption('phabricator.timezone', 'string', null)
         ->setSummary(
-          pht("The timezone Phabricator should use."))
+          pht('The timezone Phabricator should use.'))
         ->setDescription(
           pht(
             "PHP requires that you set a timezone in your php.ini before ".
@@ -78,13 +78,13 @@ final class PhabricatorCoreConfigOptions
         ->addExample('America/Los_Angeles', pht('US West (PDT)')),
       $this->newOption('phabricator.cookie-prefix', 'string', null)
         ->setSummary(
-          pht("Set a string Phabricator should use to prefix ".
-              "cookie names"))
+          pht('Set a string Phabricator should use to prefix '.
+              'cookie names'))
         ->setDescription(
           pht(
-            "Cookies set for x.com are also sent for y.x.com. Assuming ".
-            "Phabricator instances are running on both domains, this will ".
-            "create a collision preventing you from logging in."))
+            'Cookies set for x.com are also sent for y.x.com. Assuming '.
+            'Phabricator instances are running on both domains, this will '.
+            'create a collision preventing you from logging in.'))
         ->addExample('dev', pht('Prefix cookie with "dev"')),
       $this->newOption('phabricator.show-beta-applications', 'bool', false)
         ->setBoolOptions(
@@ -112,7 +112,7 @@ final class PhabricatorCoreConfigOptions
             pht('Shenanigans'), // That should be interesting to translate. :P
           ))
         ->setSummary(
-          pht("Allows you to remove levity and jokes from the UI."))
+          pht('Allows you to remove levity and jokes from the UI.'))
         ->setDescription(
           pht(
             'By default, Phabricator includes some flavor text in the UI, '.
@@ -122,7 +122,7 @@ final class PhabricatorCoreConfigOptions
             'extra flavor.')),
        $this->newOption('environment.append-paths', 'list<string>', $paths)
         ->setSummary(
-          pht("These paths get appended to your \$PATH envrionment variable."))
+          pht('These paths get appended to your \$PATH envrionment variable.'))
         ->setDescription(
           pht(
             "Phabricator occasionally shells out to other binaries on the ".

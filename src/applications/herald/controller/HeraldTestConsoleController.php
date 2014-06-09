@@ -48,7 +48,7 @@ final class HeraldTestConsoleController extends HeraldController {
             $adapter = id(new HeraldPholioMockAdapter())
               ->setMock($object);
           } else {
-            throw new Exception("Can not build adapter for object!");
+            throw new Exception('Can not build adapter for object!');
           }
 
           $rules = id(new HeraldRuleQuery())

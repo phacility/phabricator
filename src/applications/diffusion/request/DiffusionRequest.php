@@ -163,7 +163,7 @@ abstract class DiffusionRequest {
     $class = idx($map, $repository->getVersionControlSystem());
 
     if (!$class) {
-      throw new Exception("Unknown version control system!");
+      throw new Exception('Unknown version control system!');
     }
 
     $object = new $class();
@@ -665,7 +665,7 @@ abstract class DiffusionRequest {
       // Prevent any hyjinx since we're ultimately shipping this to the
       // filesystem under a lot of workflows.
       if ($part == '..') {
-        throw new Exception("Invalid path URI.");
+        throw new Exception('Invalid path URI.');
       }
     }
 

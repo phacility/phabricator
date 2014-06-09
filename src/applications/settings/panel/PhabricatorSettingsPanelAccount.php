@@ -90,7 +90,7 @@ final class PhabricatorSettingsPanelAccount
           ->setName('timezone')
           ->setOptions($timezone_id_map)
           ->setValue($user->getTimezoneIdentifier()))
-      ->appendRemarkupInstructions(pht("**Choose the pronoun you prefer:**"))
+      ->appendRemarkupInstructions(pht('**Choose the pronoun you prefer:**'))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setOptions($sexes)
@@ -115,7 +115,7 @@ final class PhabricatorSettingsPanelAccount
           "| `H:i`   | 14:34    | 24-hour time. |\n".
           "\n\n".
           "You can find a [[%s | full reference in the PHP manual]].",
-          "http://www.php.net/manual/en/function.date.php"))
+          'http://www.php.net/manual/en/function.date.php'))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Time-of-Day Format'))

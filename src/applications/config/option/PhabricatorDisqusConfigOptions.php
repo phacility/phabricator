@@ -4,17 +4,17 @@ final class PhabricatorDisqusConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Integration with Disqus");
+    return pht('Integration with Disqus');
   }
 
   public function getDescription() {
-    return pht("Disqus authentication and integration options.");
+    return pht('Disqus authentication and integration options.');
   }
 
   public function getOptions() {
     return array(
       $this->newOption('disqus.shortname', 'string', null)
-        ->setSummary(pht("Shortname for Disqus comment widget."))
+        ->setSummary(pht('Shortname for Disqus comment widget.'))
         ->setDescription(
           pht(
             "Website shortname to use for Disqus comment widget in Phame. ".

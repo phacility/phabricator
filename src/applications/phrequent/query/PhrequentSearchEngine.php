@@ -186,7 +186,7 @@ final class PhrequentSearchEngine
               ->addSigil('phrequent-stop-tracking')
               ->setWorkflow(true)
               ->setRenderNameAsTooltip(true)
-              ->setName(pht("Stop"))
+              ->setName(pht('Stop'))
               ->setHref(
                 '/phrequent/track/stop/'.
                 $usertime->getObjectPHID().'/'));

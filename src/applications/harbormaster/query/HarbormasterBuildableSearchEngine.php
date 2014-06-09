@@ -185,7 +185,6 @@ final class HarbormasterBuildableSearchEngine
     $viewer = $this->requireViewer();
 
     $list = new PHUIObjectItemListView();
-    $list->setCards(true);
     foreach ($buildables as $buildable) {
       $id = $buildable->getID();
 

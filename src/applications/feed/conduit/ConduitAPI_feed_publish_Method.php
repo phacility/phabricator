@@ -11,7 +11,7 @@ final class ConduitAPI_feed_publish_Method
   }
 
   public function getMethodDescription() {
-    return "Publish a story to the feed.";
+    return 'Publish a story to the feed.';
   }
 
   public function defineParamTypes() {

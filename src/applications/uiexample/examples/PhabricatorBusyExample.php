@@ -7,7 +7,7 @@ final class PhabricatorBusyExample extends PhabricatorUIExample {
   }
 
   public function getDescription() {
-    return "Busy.";
+    return 'Busy.';
   }
 
   public function renderExample() {

@@ -68,7 +68,7 @@ final class PhabricatorAuthLoginController
 
     if (!$account) {
       throw new Exception(
-        "Auth provider failed to load an account from processLoginRequest()!");
+        'Auth provider failed to load an account from processLoginRequest()!');
     }
 
     if ($account->getUserPHID()) {
@@ -164,7 +164,7 @@ final class PhabricatorAuthLoginController
     $next_uri) {
 
     if ($account->getUserPHID()) {
-      throw new Exception("Account is already registered or linked.");
+      throw new Exception('Account is already registered or linked.');
     }
 
     // Regenerate the registration secret key, set it on the external account,

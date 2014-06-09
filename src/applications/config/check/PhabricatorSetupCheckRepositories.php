@@ -18,8 +18,8 @@ final class PhabricatorSetupCheckRepositories extends PhabricatorSetupCheck {
 
     if (!Filesystem::pathExists($repo_path)) {
       $summary = pht(
-        "The path for local repositories does not exist, or is not ".
-        "readable by the webserver.");
+        'The path for local repositories does not exist, or is not '.
+        'readable by the webserver.');
       $message = pht(
         "The directory for local repositories (%s) does not exist, or is not ".
         "readable by the webserver. Phabricator uses this directory to store ".

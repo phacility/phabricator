@@ -38,8 +38,8 @@ final class PhabricatorDiffusionConfigOptions
         false)
         ->setBoolOptions(
           array(
-            pht("Attach Patches"),
-            pht("Do Not Attach Patches"),
+            pht('Attach Patches'),
+            pht('Do Not Attach Patches'),
           ))
         ->setDescription(pht(
           'Set this to true if you want patches to be attached to commit '.
@@ -61,8 +61,8 @@ final class PhabricatorDiffusionConfigOptions
         false)
         ->setBoolOptions(
           array(
-            pht("Enable Closing Audits"),
-            pht("Disable Closing Audits"),
+            pht('Enable Closing Audits'),
+            pht('Disable Closing Audits'),
           ))
         ->setDescription(pht('Controls whether Author can Close Audits.')),
 

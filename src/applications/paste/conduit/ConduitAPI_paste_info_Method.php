@@ -14,7 +14,7 @@ final class ConduitAPI_paste_info_Method extends ConduitAPI_paste_Method {
   }
 
   public function getMethodDescription() {
-    return "Retrieve an array of information about a paste.";
+    return 'Retrieve an array of information about a paste.';
   }
 
   public function defineParamTypes() {

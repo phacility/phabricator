@@ -67,7 +67,7 @@ final class LiskFixtureTestCase extends PhabricatorTestCase {
 
       $this->assertTrue(
         ($loaded !== null),
-        "Reads inside transactions should have transaction visibility.");
+        'Reads inside transactions should have transaction visibility.');
 
       LiskDAO::beginIsolateAllLiskEffectsToTransactions();
     } catch (Exception $ex) {
@@ -88,7 +88,7 @@ final class LiskFixtureTestCase extends PhabricatorTestCase {
     $this->assertEqual(null, $load->load(9999));
     $this->assertEqual(null, $load->load(''));
     $this->assertEqual(null, $load->load('cow'));
-    $this->assertEqual(null, $load->load($id."cow"));
+    $this->assertEqual(null, $load->load($id.'cow'));
 
     $this->assertTrue((bool)$load->load((int)$id));
     $this->assertTrue((bool)$load->load((string)$id));

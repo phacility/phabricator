@@ -29,7 +29,7 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
         $short = pht('Obsolete Config');
         $name = pht('Obsolete Configuration Option "%s"', $key);
       } else {
-        $summary = pht("This option is not recognized. It may be misspelled.");
+        $summary = pht('This option is not recognized. It may be misspelled.');
         $message = pht(
           "The configuration option '%s' is not recognized. It may be ".
           "misspelled, or it might have existed in an older version of ".
@@ -65,8 +65,8 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
       }
 
       $message = $message."\n\n".pht(
-        "This configuration value is defined in these %d ".
-        "configuration source(s): %s.",
+        'This configuration value is defined in these %d '.
+        'configuration source(s): %s.',
         count($found),
         implode(', ', $found));
       $issue->setMessage($message);

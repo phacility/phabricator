@@ -203,6 +203,8 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
       case PholioTransactionType::TYPE_STATUS:
         $object->setStatus($xaction->getNewValue());
         break;
+      case PhabricatorTransactions::TYPE_EDGE:
+        return;
     }
   }
 
@@ -270,6 +272,8 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
         $image->setSequence($value);
         $image->save();
         break;
+      case PhabricatorTransactions::TYPE_EDGE:
+        return;
     }
   }
 

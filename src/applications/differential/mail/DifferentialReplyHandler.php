@@ -11,7 +11,7 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof DifferentialRevision)) {
-      throw new Exception("Receiver is not a DifferentialRevision!");
+      throw new Exception('Receiver is not a DifferentialRevision!');
     }
   }
 
@@ -71,7 +71,7 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
       $text .= implode(', ', $modified_commands);
     }
 
-    $text .= ".";
+    $text .= '.';
 
     return $text;
   }

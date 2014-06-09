@@ -27,9 +27,9 @@ final class PHUIButtonBarView extends AphrontTagView {
       if ($j > 1) {
         if ($i == 1) {
           $button->addClass('phui-button-bar-first');
-        } elseif ($i == $j) {
+        } else if ($i == $j) {
           $button->addClass('phui-button-bar-last');
-        } elseif ($j > 1) {
+        } else if ($j > 1) {
           $button->addClass('phui-button-bar-middle');
         }
       }

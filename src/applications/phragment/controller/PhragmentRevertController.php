@@ -47,7 +47,7 @@ final class PhragmentRevertController extends PhragmentController {
           ->executeOne();
         if ($file === null) {
           throw new Exception(
-            "The file associated with this version was not found.");
+            'The file associated with this version was not found.');
         }
       }
 
@@ -77,8 +77,8 @@ final class PhragmentRevertController extends PhragmentController {
       ->addSubmitButton(pht('Revert'))
       ->addCancelButton(pht('Cancel'))
       ->appendParagraph(pht(
-        "Reverting this fragment to version %d will create a new version of ".
-        "the fragment.  It will not delete any version history.",
+        'Reverting this fragment to version %d will create a new version of '.
+        'the fragment.  It will not delete any version history.',
         $version->getSequence(),
         $version->getSequence()));
     return id(new AphrontDialogResponse())->setDialog($dialog);

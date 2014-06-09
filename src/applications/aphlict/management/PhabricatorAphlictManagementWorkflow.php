@@ -55,25 +55,21 @@ abstract class PhabricatorAphlictManagementWorkflow
 
     $pid = $this->getPID();
     if ($pid) {
-      $console->writeErr(
-        "Unable to start notifications server because it is already ".
-        "running.\n");
-      exit(1);
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Unable to start notifications server because it is already '.
+          'running. Use `aphlict restart` to restart it.'));
     }
 
     if (posix_getuid() != 0) {
-      $console->writeErr(
-        "You must run this script as root; the Aphlict server needs to bind ".
-        "to privileged ports.\n");
-      exit(1);
+      throw new PhutilArgumentUsageException(
+        pht(
+          'You must run this script as root; the Aphlict server needs to bind '.
+          'to privileged ports.'));
     }
 
-    if (!Filesystem::binaryExists('node')) {
-      $console->writeErr(
-        "`node` is not in \$PATH. You must install Node.js to run the Aphlict ".
-        "server.\n");
-      exit(1);
-    }
+    // This will throw if we can't find an appropriate `node`.
+    $this->getNodeBinary();
   }
 
   final protected function launch($debug = false) {
@@ -108,7 +104,8 @@ abstract class PhabricatorAphlictManagementWorkflow
     }
 
     $command = csprintf(
-      'node %s %C',
+      '%s %s %C',
+      $this->getNodeBinary(),
       dirname(__FILE__).'/../../../../support/aphlict/server/aphlict_server.js',
       implode(' ', $server_argv));
 
@@ -199,6 +196,21 @@ abstract class PhabricatorAphlictManagementWorkflow
 
     Filesystem::remove($this->getPIDPath());
     return 0;
+  }
+
+  private function getNodeBinary() {
+    if (Filesystem::binaryExists('nodejs')) {
+      return 'nodejs';
+    }
+
+    if (Filesystem::binaryExists('node')) {
+      return 'node';
+    }
+
+    throw new PhutilArgumentUsageException(
+      pht(
+        'No `nodejs` or `node` binary was found in $PATH. You must install '.
+        'Node.js to start the Aphlict server.'));
   }
 
 }

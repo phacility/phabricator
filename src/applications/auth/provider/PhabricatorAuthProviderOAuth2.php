@@ -198,7 +198,7 @@ abstract class PhabricatorAuthProviderOAuth2
     $force_refresh = false) {
 
     if ($account->getProviderKey() !== $this->getProviderKey()) {
-      throw new Exception("Account does not match provider!");
+      throw new Exception('Account does not match provider!');
     }
 
     if (!$force_refresh) {

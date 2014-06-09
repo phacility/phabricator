@@ -119,7 +119,7 @@ final class PhabricatorFileTransformController
         $suffix = '60x45';
         break;
       default:
-        throw new Exception("Unsupported transformation type!");
+        throw new Exception('Unsupported transformation type!');
     }
 
     $path = celerity_get_resource_uri(

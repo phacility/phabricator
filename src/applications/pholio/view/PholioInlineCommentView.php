@@ -21,7 +21,7 @@ final class PholioInlineCommentView extends AphrontView {
 
   public function setInlineComment(PholioTransactionComment $inline_comment) {
     if ($inline_comment->getImageID() === null) {
-      throw new Exception("Comment provided is not inline comment");
+      throw new Exception('Comment provided is not inline comment');
     }
 
     $this->inlineComment = $inline_comment;
@@ -30,16 +30,16 @@ final class PholioInlineCommentView extends AphrontView {
 
   public function render() {
     if (!$this->inlineComment) {
-      throw new Exception("Call setInlineComment() before render()!");
+      throw new Exception('Call setInlineComment() before render()!');
     }
     if ($this->user === null) {
-      throw new Exception("Call setUser() before render()!");
+      throw new Exception('Call setUser() before render()!');
     }
     if ($this->engine === null) {
-      throw new Exception("Call setEngine() before render()!");
+      throw new Exception('Call setEngine() before render()!');
     }
     if ($this->handle === null) {
-      throw new Exception("Call setHandle() before render()!");
+      throw new Exception('Call setHandle() before render()!');
     }
 
     $actions = null;

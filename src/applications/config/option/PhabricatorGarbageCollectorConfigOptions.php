@@ -4,11 +4,11 @@ final class PhabricatorGarbageCollectorConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Garbage Collector");
+    return pht('Garbage Collector');
   }
 
   public function getDescription() {
-    return pht("Configure the GC for old logs, caches, etc.");
+    return pht('Configure the GC for old logs, caches, etc.');
   }
 
   public function getOptions() {

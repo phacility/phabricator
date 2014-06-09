@@ -190,7 +190,7 @@ final class PhabricatorMarkupEngine {
 
     if (!isset($this->objects[$key]['output'])) {
       throw new Exception(
-        "Call process() before using results.");
+        'Call process() before using results.');
     }
   }
 

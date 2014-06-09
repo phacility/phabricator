@@ -19,33 +19,33 @@ final class PhabricatorAuthManagementLDAPWorkflow
     if (!$provider) {
       $console->writeOut(
         "%s\n",
-        "The LDAP authentication provider is not enabled.");
+        'The LDAP authentication provider is not enabled.');
       exit(1);
     }
 
     if (!function_exists('ldap_connect')) {
       $console->writeOut(
         "%s\n",
-        "The LDAP extension is not enabled.");
+        'The LDAP extension is not enabled.');
       exit(1);
     }
 
     $adapter = $provider->getAdapter();
 
     $console->writeOut("%s\n", pht('Enter LDAP Credentials'));
-    $username = phutil_console_prompt("LDAP Username: ");
+    $username = phutil_console_prompt('LDAP Username: ');
     if (!strlen($username)) {
       throw new PhutilArgumentUsageException(
-        pht("You must enter an LDAP username."));
+        pht('You must enter an LDAP username.'));
     }
 
     phutil_passthru('stty -echo');
-    $password = phutil_console_prompt("LDAP Password: ");
+    $password = phutil_console_prompt('LDAP Password: ');
     phutil_passthru('stty echo');
 
     if (!strlen($password)) {
       throw new PhutilArgumentUsageException(
-        pht("You must enter an LDAP password."));
+        pht('You must enter an LDAP password.'));
     }
 
     $adapter->setLoginUsername($username);

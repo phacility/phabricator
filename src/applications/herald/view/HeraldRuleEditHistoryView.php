@@ -23,7 +23,6 @@ final class HeraldRuleEditHistoryView extends AphrontView {
   public function render() {
     $list = new PHUIObjectItemListView();
     $list->setFlush(true);
-    $list->setCards(true);
 
     foreach ($this->edits as $edit) {
       $name = nonempty($edit->getRuleName(), 'Unknown Rule');

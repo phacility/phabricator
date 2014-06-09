@@ -9,7 +9,7 @@ abstract class PhabricatorFilesManagementWorkflow
     if ($args->getArg('all')) {
       if ($names) {
         throw new PhutilArgumentUsageException(
-          "Specify either a list of files or `--all`, but not both.");
+          'Specify either a list of files or `--all`, but not both.');
       }
       return new LiskMigrationIterator(new PhabricatorFile());
     }

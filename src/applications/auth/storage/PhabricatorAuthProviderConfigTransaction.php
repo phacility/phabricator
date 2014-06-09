@@ -7,7 +7,7 @@ final class PhabricatorAuthProviderConfigTransaction
   const TYPE_REGISTRATION   = 'config:registration';
   const TYPE_LINK           = 'config:link';
   const TYPE_UNLINK         = 'config:unlink';
-  const TYPE_TRUST_EMAILS   = "config:trustEmails";
+  const TYPE_TRUST_EMAILS   = 'config:trustEmails';
   const TYPE_PROPERTY       = 'config:property';
 
   const PROPERTY_KEY        = 'auth:property';

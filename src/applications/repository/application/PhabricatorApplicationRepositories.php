@@ -18,7 +18,7 @@ final class PhabricatorApplicationRepositories extends PhabricatorApplication {
   }
 
   public function getTitleGlyph() {
-    return "rX";
+    return 'rX';
   }
 
   public function getApplicationGroup() {

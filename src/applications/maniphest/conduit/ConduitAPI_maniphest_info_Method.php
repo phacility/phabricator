@@ -8,7 +8,7 @@ final class ConduitAPI_maniphest_info_Method
 
 
   public function getMethodDescription() {
-    return "Retrieve information about a Maniphest task, given its id.";
+    return 'Retrieve information about a Maniphest task, given its id.';
   }
 
   public function defineParamTypes() {

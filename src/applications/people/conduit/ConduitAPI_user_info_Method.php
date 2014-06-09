@@ -15,7 +15,7 @@ final class ConduitAPI_user_info_Method
   }
 
   public function getMethodDescription() {
-    return "Retrieve information about a user by PHID.";
+    return 'Retrieve information about a user by PHID.';
   }
 
   public function defineParamTypes() {

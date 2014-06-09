@@ -19,7 +19,7 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
         ->executeOne();
       if (!$lease) {
         throw new PhabricatorWorkerPermanentFailureException(
-          pht("No such lease %d!", $this->getTaskData()));
+          pht('No such lease %d!', $this->getTaskData()));
       }
       $this->lease = $lease;
     }
@@ -170,7 +170,7 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
         // and then switch them to "OPEN" only after the allocating lease gets
         // its grubby mitts on the resource. This might make more sense but
         // is a bit messy.
-        throw new Exception("Lost an allocation race?");
+        throw new Exception('Lost an allocation race?');
       }
     }
 

@@ -6,7 +6,7 @@
 final class ConduitAPI_flag_query_Method extends ConduitAPI_flag_Method {
 
   public function getMethodDescription() {
-    return "Query flag markers.";
+    return 'Query flag markers.';
   }
 
   public function defineParamTypes() {

@@ -4,11 +4,11 @@ final class PhabricatorSendGridConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Integration with SendGrid");
+    return pht('Integration with SendGrid');
   }
 
   public function getDescription() {
-    return pht("Configure SendGrid integration.");
+    return pht('Configure SendGrid integration.');
   }
 
   public function getOptions() {

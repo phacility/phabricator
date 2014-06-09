@@ -182,7 +182,7 @@ final class PHUIObjectItemView extends AphrontTagView {
 
   public function addAction(PHUIListItemView $action) {
     if (count($this->actions) >= 3) {
-      throw new Exception("Limit 3 actions per item.");
+      throw new Exception('Limit 3 actions per item.');
     }
     $this->actions[] = $action;
     return $this;
@@ -287,7 +287,7 @@ final class PHUIObjectItemView extends AphrontTagView {
       case null:
         break;
       default:
-        throw new Exception(pht("Invalid effect!"));
+        throw new Exception(pht('Invalid effect!'));
     }
 
     if ($this->getGrippable()) {

@@ -25,7 +25,7 @@ final class PhortunePaypalPaymentProvider extends PhortunePaymentProvider {
   }
 
   public function getPaymentMethodProviderDescription() {
-    return "Paypal";
+    return 'Paypal';
   }
 
 
@@ -37,7 +37,7 @@ final class PhortunePaypalPaymentProvider extends PhortunePaymentProvider {
   protected function executeCharge(
     PhortunePaymentMethod $payment_method,
     PhortuneCharge $charge) {
-    throw new Exception("!");
+    throw new Exception('!');
   }
 
   private function getPaypalAPIUsername() {

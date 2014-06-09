@@ -128,9 +128,9 @@ final class DifferentialLintField
               $other_line = idx($location, 'line');
               $locations[] =
                 idx($location, 'path', $path).
-                ($other_line ? ":{$other_line}" : "");
+                ($other_line ? ":{$other_line}" : '');
             }
-            $description .= "\nOther locations: ".implode(", ", $locations);
+            $description .= "\nOther locations: ".implode(', ', $locations);
           }
 
           if (strlen($description)) {
@@ -231,7 +231,7 @@ final class DifferentialLintField
       }
     }
 
-    return "Show Full Lint Results (".implode(', ', $show).")";
+    return 'Show Full Lint Results ('.implode(', ', $show).')';
   }
 
   public function getWarningsForDetailView() {

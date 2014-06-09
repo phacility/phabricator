@@ -34,7 +34,7 @@ final class HarbormasterPlanViewController
       ->setTransactions($xactions)
       ->setShouldTerminate(true);
 
-    $title = pht("Plan %d", $id);
+    $title = pht('Plan %d', $id);
 
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
@@ -48,7 +48,7 @@ final class HarbormasterPlanViewController
     $this->buildPropertyLists($box, $plan, $actions);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht("Plan %d", $id));
+    $crumbs->addTextCrumb(pht('Plan %d', $id));
 
     list($step_list, $has_any_conflicts) = $this->buildStepList($plan);
 
@@ -122,14 +122,14 @@ final class HarbormasterPlanViewController
               ->addSigil('harbormaster-build-step-delete')
               ->setWorkflow(true)
               ->setRenderNameAsTooltip(true)
-              ->setName(pht("Delete"))
+              ->setName(pht('Delete'))
               ->setHref(
-                $this->getApplicationURI("step/delete/".$step->getID()."/")));
+                $this->getApplicationURI('step/delete/'.$step->getID().'/')));
         $step_list->addItem($item);
         continue;
       }
       $item = id(new PHUIObjectItemView())
-        ->setObjectName("Step ".$i++)
+        ->setObjectName('Step '.$i++)
         ->setHeader($implementation->getName());
 
       $item->addAttribute($implementation->getDescription());
@@ -157,7 +157,7 @@ final class HarbormasterPlanViewController
             ->setWorkflow(true)
             ->setDisabled(!$can_edit)
             ->setHref(
-              $this->getApplicationURI("step/delete/".$step->getID()."/")));
+              $this->getApplicationURI('step/delete/'.$step->getID().'/')));
 
       $inputs = $step->getStepImplementation()->getArtifactInputs();
       $outputs = $step->getStepImplementation()->getArtifactOutputs();

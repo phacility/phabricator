@@ -254,7 +254,7 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
 
     $body = json_decode($body, true);
     if (!is_array($body)) {
-      throw new Exception("elasticsearch server returned invalid JSON!");
+      throw new Exception('elasticsearch server returned invalid JSON!');
     }
 
     return $body;

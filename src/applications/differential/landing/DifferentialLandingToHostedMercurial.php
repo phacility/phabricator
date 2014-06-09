@@ -90,7 +90,7 @@ final class DifferentialLandingToHostedMercurial
     ArcanistRepositoryAPI $workspace,
     PhabricatorUser $user) {
 
-    $workspace->execxLocal("push -b default");
+    $workspace->execxLocal('push -b default');
   }
 
   public function createMenuItem(

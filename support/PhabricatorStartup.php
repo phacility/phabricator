@@ -209,7 +209,7 @@ final class PhabricatorStartup {
 
   public static function beginOutputCapture() {
     if (self::$capturingOutput) {
-      self::didFatal("Already capturing output!");
+      self::didFatal('Already capturing output!');
     }
     self::$capturingOutput = true;
     ob_start();

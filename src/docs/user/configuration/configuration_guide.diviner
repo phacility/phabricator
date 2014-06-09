@@ -85,18 +85,15 @@ For nginx, use a configuration like this:
   name=nginx.conf
   server {
     server_name phabricator.example.com;
-
-    root      /path/to/phabricator/webroot;
-    try_files $uri $uri/ /index.php;
+    root        /path/to/phabricator/webroot;
 
     location / {
-      index   index.php;
+      index index.php;
+      rewrite ^/(.*)$ /index.php?__path__=/$1 last;
+    }
 
-      if ( !-f $request_filename )
-      {
-        rewrite ^/(.*)$ /index.php?__path__=/$1 last;
-        break;
-      }
+    location = /favicon.ico {
+      try_files $uri =204;
     }
 
     location /index.php {

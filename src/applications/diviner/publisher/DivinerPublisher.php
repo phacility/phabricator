@@ -74,7 +74,7 @@ abstract class DivinerPublisher {
     $shash = $atom->getRef()->toHash();
 
     if (empty($this->symbolReverseMap[$shash])) {
-      throw new Exception("Atom has no symbol map entry!");
+      throw new Exception('Atom has no symbol map entry!');
     }
 
     $hashes = $this->symbolReverseMap[$shash];
@@ -107,7 +107,7 @@ abstract class DivinerPublisher {
       $index++;
     }
 
-    throw new Exception("Expected to find atom while disambiguating!");
+    throw new Exception('Expected to find atom while disambiguating!');
   }
 
 

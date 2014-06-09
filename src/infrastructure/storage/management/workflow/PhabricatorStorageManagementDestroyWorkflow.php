@@ -12,8 +12,8 @@ final class PhabricatorStorageManagementDestroyWorkflow
         array(
           array(
             'name'  => 'unittest-fixtures',
-            'help'  => "Restrict **destroy** operations to databases created ".
-                       "by PhabricatorTestCase test fixtures.",
+            'help'  => 'Restrict **destroy** operations to databases created '.
+                       'by PhabricatorTestCase test fixtures.',
           )));
   }
 
@@ -23,9 +23,9 @@ final class PhabricatorStorageManagementDestroyWorkflow
 
     if (!$is_dry && !$is_force) {
       echo phutil_console_wrap(
-        "Are you completely sure you really want to permanently destroy all ".
-        "storage for Phabricator data? This operation can not be undone and ".
-        "your data will not be recoverable if you proceed.");
+        'Are you completely sure you really want to permanently destroy all '.
+        'storage for Phabricator data? This operation can not be undone and '.
+        'your data will not be recoverable if you proceed.');
 
       if (!phutil_console_confirm('Permanently destroy all data?')) {
         echo "Cancelled.\n";

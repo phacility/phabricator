@@ -16,7 +16,7 @@ abstract class PhabricatorAuthProvider {
   public function getProviderConfig() {
     if ($this->providerConfig === null) {
       throw new Exception(
-        "Call attachProviderConfig() before getProviderConfig()!");
+        'Call attachProviderConfig() before getProviderConfig()!');
     }
     return $this->providerConfig;
   }
@@ -180,7 +180,7 @@ abstract class PhabricatorAuthProvider {
   protected function renderLoginForm(
     AphrontRequest $request,
     $mode) {
-    throw new Exception("Not implemented!");
+    throw new Exception('Not implemented!');
   }
 
   public function createProviders() {
@@ -198,7 +198,7 @@ abstract class PhabricatorAuthProvider {
   protected function loadOrCreateAccount($account_id) {
     if (!strlen($account_id)) {
       throw new Exception(
-        "loadOrCreateAccount(...): empty account ID!");
+        'loadOrCreateAccount(...): empty account ID!');
     }
 
     $adapter = $this->getAdapter();
@@ -295,7 +295,7 @@ abstract class PhabricatorAuthProvider {
   }
 
   public function getDefaultExternalAccount() {
-    throw new Exception("Not implemented!");
+    throw new Exception('Not implemented!');
   }
 
   public function getLoginOrder() {

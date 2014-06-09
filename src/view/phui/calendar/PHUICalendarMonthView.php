@@ -42,7 +42,7 @@ final class PHUICalendarMonthView extends AphrontView {
 
   public function render() {
     if (empty($this->user)) {
-      throw new Exception("Call setUser() before render()!");
+      throw new Exception('Call setUser() before render()!');
     }
 
     $events = msort($this->events, 'getEpochStart');

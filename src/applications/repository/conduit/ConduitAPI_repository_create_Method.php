@@ -11,11 +11,11 @@ final class ConduitAPI_repository_create_Method
   }
 
   public function getMethodStatusDescription() {
-    return "Repository methods are new and subject to change.";
+    return 'Repository methods are new and subject to change.';
   }
 
   public function getMethodDescription() {
-    return "Create a new repository (Admin Only).";
+    return 'Create a new repository (Admin Only).';
   }
 
   public function defineParamTypes() {

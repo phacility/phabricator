@@ -281,7 +281,7 @@ final class CelerityStaticResourceResponse {
     return $response;
   }
 
-  private function getURI(
+  public function getURI(
     CelerityResourceMap $map,
     $name) {
 

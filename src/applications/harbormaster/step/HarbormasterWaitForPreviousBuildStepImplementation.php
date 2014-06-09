@@ -28,12 +28,12 @@ final class HarbormasterWaitForPreviousBuildStepImplementation
     // finished.
     $plan = $build->getBuildPlan();
 
-    $log = $build->createLog($build_target, "waiting", "blockers");
+    $log = $build->createLog($build_target, 'waiting', 'blockers');
     $log_start = $log->start();
 
     $blockers = $this->getBlockers($object, $plan, $build);
     if ($blockers) {
-      $log->append("Blocked by: ".implode(",", $blockers)."\n");
+      $log->append("Blocked by: ".implode(',', $blockers)."\n");
     }
     $log->finalize($log_start);
 

@@ -8,7 +8,7 @@ final class PhabricatorMailManagementListInboundWorkflow
       ->setName('list-inbound')
       ->setSynopsis('List inbound messages received by Phabricator.')
       ->setExamples(
-        "**list-inbound**")
+        '**list-inbound**')
       ->setArguments(
         array(
           array(
@@ -29,7 +29,7 @@ final class PhabricatorMailManagementListInboundWorkflow
       $args->getArg('limit'));
 
     if (!$mails) {
-      $console->writeErr("%s\n", pht("No received mail."));
+      $console->writeErr("%s\n", pht('No received mail.'));
       return 0;
     }
 
@@ -45,7 +45,7 @@ final class PhabricatorMailManagementListInboundWorkflow
       $console->writeOut(
         "%s\n",
         sprintf(
-          "% 8d  %-16s  %-20s  %s",
+          '% 8d  %-16s  %-20s  %s',
           $mail->getID(),
           $mail->getAuthorPHID()
             ? $handles[$mail->getAuthorPHID()]->getName()

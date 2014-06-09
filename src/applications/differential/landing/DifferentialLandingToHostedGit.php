@@ -56,7 +56,7 @@ final class DifferentialLandingToHostedGit
       . "0000000000000000000000000000000000000000.."
       . "0000000000000000000000000000000000000000\n";
     if (strpos($raw_diff, $missing_binary) !== false) {
-      throw new Exception("Patch is missing content for a binary file");
+      throw new Exception('Patch is missing content for a binary file');
     }
 
     $future = $workspace->execFutureLocal('apply --index -');
@@ -102,7 +102,7 @@ final class DifferentialLandingToHostedGit
     ArcanistRepositoryAPI $workspace,
     PhabricatorUser $user) {
 
-    $workspace->execxLocal("push origin HEAD:master");
+    $workspace->execxLocal('push origin HEAD:master');
   }
 
   public function createMenuItem(

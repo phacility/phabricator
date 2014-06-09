@@ -52,19 +52,19 @@ final class PhabricatorCacheManagementPurgeWorkflow
     }
 
     if ($purge['remarkup']) {
-      $console->writeOut("Purging remarkup cache...");
+      $console->writeOut('Purging remarkup cache...');
       $this->purgeRemarkupCache();
       $console->writeOut("done.\n");
     }
 
     if ($purge['changeset']) {
-      $console->writeOut("Purging changeset cache...");
+      $console->writeOut('Purging changeset cache...');
       $this->purgeChangesetCache();
       $console->writeOut("done.\n");
     }
 
     if ($purge['general']) {
-      $console->writeOut("Purging general cache...");
+      $console->writeOut('Purging general cache...');
       $this->purgeGeneralCache();
       $console->writeOut("done.\n");
     }

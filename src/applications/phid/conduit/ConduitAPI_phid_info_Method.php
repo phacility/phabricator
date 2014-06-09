@@ -15,7 +15,7 @@ final class ConduitAPI_phid_info_Method
   }
 
   public function getMethodDescription() {
-    return "Retrieve information about an arbitrary PHID.";
+    return 'Retrieve information about an arbitrary PHID.';
   }
 
   public function defineParamTypes() {

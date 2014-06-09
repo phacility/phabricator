@@ -78,7 +78,7 @@ final class AphrontPanelView extends AphrontView {
     if ($this->buttons) {
       $buttons = phutil_tag_div(
         'aphront-panel-view-buttons',
-        phutil_implode_html(" ", $this->buttons));
+        phutil_implode_html(' ', $this->buttons));
     }
     $header_elements = phutil_tag_div(
       'aphront-panel-header',

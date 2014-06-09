@@ -8,7 +8,7 @@ final class PhabricatorMailManagementListOutboundWorkflow
       ->setName('list-outbound')
       ->setSynopsis('List outbound messages sent by Phabricator.')
       ->setExamples(
-        "**list-outbound**")
+        '**list-outbound**')
       ->setArguments(
         array(
           array(
@@ -29,7 +29,7 @@ final class PhabricatorMailManagementListOutboundWorkflow
       $args->getArg('limit'));
 
     if (!$mails) {
-      $console->writeErr("%s\n", pht("No sent mail."));
+      $console->writeErr("%s\n", pht('No sent mail.'));
       return 0;
     }
 
@@ -37,7 +37,7 @@ final class PhabricatorMailManagementListOutboundWorkflow
       $console->writeOut(
         "%s\n",
         sprintf(
-          "% 8d  %-8s  %s",
+          '% 8d  %-8s  %s',
           $mail->getID(),
           PhabricatorMetaMTAMail::getReadableStatus($mail->getStatus()),
           $mail->getSubject()));

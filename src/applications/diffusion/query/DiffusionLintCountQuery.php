@@ -23,11 +23,11 @@ final class DiffusionLintCountQuery extends PhabricatorQuery {
 
   public function execute() {
     if (!$this->paths) {
-      throw new Exception(pht("Call withPaths() before execute()!"));
+      throw new Exception(pht('Call withPaths() before execute()!'));
     }
 
     if (!$this->branchIDs) {
-      throw new Exception(pht("Call withBranchIDs() before execute()!"));
+      throw new Exception(pht('Call withBranchIDs() before execute()!'));
     }
 
     $conn_r = id(new PhabricatorRepositoryCommit())->establishConnection('r');

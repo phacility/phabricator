@@ -285,7 +285,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
 
         $proj_result = id(new PhabricatorTypeaheadResult())
           ->setName($proj->getName())
-          ->setDisplayType("Project")
+          ->setDisplayType('Project')
           ->setURI('/project/view/'.$proj->getID().'/')
           ->setPHID($proj->getPHID())
           ->setIcon($proj->getIcon().' bluegrey')

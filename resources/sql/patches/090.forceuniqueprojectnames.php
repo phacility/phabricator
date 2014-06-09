@@ -64,9 +64,9 @@ while ($update) {
   }
   if (count($update) == $size) {
     throw new Exception(
-      "Failed to make any progress while updating projects. Schema upgrade ".
-      "has failed. Go manually fix your project names to be unique (they are ".
-      "probably ridiculous?) and then try again.");
+      'Failed to make any progress while updating projects. Schema upgrade '.
+      'has failed. Go manually fix your project names to be unique (they are '.
+      'probably ridiculous?) and then try again.');
   }
 }
 

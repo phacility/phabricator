@@ -114,7 +114,7 @@ abstract class PhabricatorPHIDType {
   public function loadNamedObjects(
     PhabricatorObjectQuery $query,
     array $names) {
-    throw new Exception("Not implemented!");
+    throw new Exception('Not implemented!');
   }
 
 

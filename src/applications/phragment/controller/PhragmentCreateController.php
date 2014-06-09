@@ -5,7 +5,7 @@ final class PhragmentCreateController extends PhragmentController {
   private $dblob;
 
   public function willProcessRequest(array $data) {
-    $this->dblob = idx($data, "dblob", "");
+    $this->dblob = idx($data, 'dblob', '');
   }
 
   public function processRequest() {

@@ -152,7 +152,7 @@ final class PhabricatorChatLogChannelLogController
         array(
           'href' => $first_uri,
         ),
-        "\xC2\xAB ". pht("Newest"));
+        "\xC2\xAB ". pht('Newest'));
     }
 
     $prev_uri = $pager->getPrevPageURI();
@@ -162,7 +162,7 @@ final class PhabricatorChatLogChannelLogController
         array(
           'href' => $prev_uri,
         ),
-        "\xE2\x80\xB9 " . pht("Newer"));
+        "\xE2\x80\xB9 " . pht('Newer'));
     }
 
     $next_uri = $pager->getNextPageURI();
@@ -172,7 +172,7 @@ final class PhabricatorChatLogChannelLogController
         array(
           'href' => $next_uri,
         ),
-        pht("Older") . " \xE2\x80\xBA");
+        pht('Older') . " \xE2\x80\xBA");
     }
 
     $pager_top = phutil_tag(
@@ -224,7 +224,7 @@ final class PhabricatorChatLogChannelLogController
         array(
           'href' => '#latest'
         ),
-        pht("Jump to Bottom") . " \xE2\x96\xBE");
+        pht('Jump to Bottom') . " \xE2\x96\xBE");
 
     $jump = phutil_tag(
       'div',

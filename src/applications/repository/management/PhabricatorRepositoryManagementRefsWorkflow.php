@@ -27,8 +27,8 @@ final class PhabricatorRepositoryManagementRefsWorkflow
     if (!$repos) {
       throw new PhutilArgumentUsageException(
         pht(
-          "Specify one or more repositories to update refs for, ".
-          "by callsign."));
+          'Specify one or more repositories to update refs for, '.
+          'by callsign.'));
     }
 
     $console = PhutilConsole::getConsole();

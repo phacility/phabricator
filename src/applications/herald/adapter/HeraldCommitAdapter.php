@@ -269,7 +269,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
       );
       $requests = id(new PhabricatorRepositoryAuditRequest())
           ->loadAllWhere(
-        "commitPHID = %s AND auditStatus IN (%Ls)",
+        'commitPHID = %s AND auditStatus IN (%Ls)',
         $this->commit->getPHID(),
         $status_arr);
 

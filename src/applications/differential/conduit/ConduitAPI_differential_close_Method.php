@@ -4,7 +4,7 @@ final class ConduitAPI_differential_close_Method
   extends ConduitAPI_differential_Method {
 
   public function getMethodDescription() {
-    return pht("Close a Differential revision.");
+    return pht('Close a Differential revision.');
   }
 
   public function defineParamTypes() {

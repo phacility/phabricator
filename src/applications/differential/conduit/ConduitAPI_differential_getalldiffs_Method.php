@@ -13,7 +13,7 @@ final class ConduitAPI_differential_getalldiffs_Method
   }
 
   public function getMethodDescription() {
-    return "Load all diffs for given revisions from Differential.";
+    return 'Load all diffs for given revisions from Differential.';
   }
 
   public function defineParamTypes() {

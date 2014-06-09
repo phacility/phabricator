@@ -7,7 +7,7 @@ final class ConduitAPI_user_query_Method
   extends ConduitAPI_user_Method {
 
   public function getMethodDescription() {
-    return "Query users.";
+    return 'Query users.';
   }
 
   public function defineParamTypes() {

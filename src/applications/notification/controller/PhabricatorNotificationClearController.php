@@ -29,8 +29,8 @@ final class PhabricatorNotificationClearController
     if ($is_serious) {
       $dialog->appendChild(
         pht(
-          "All unread notifications will be marked as read. You can not ".
-          "undo this action."));
+          'All unread notifications will be marked as read. You can not '.
+          'undo this action.'));
     } else {
       $dialog->appendChild(
         pht(

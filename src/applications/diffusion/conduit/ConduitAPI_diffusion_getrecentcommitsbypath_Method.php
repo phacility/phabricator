@@ -9,7 +9,7 @@ final class ConduitAPI_diffusion_getrecentcommitsbypath_Method
   const DEFAULT_LIMIT = 10;
 
   public function getMethodDescription() {
-    return "Get commit identifiers for recent commits affecting a given path.";
+    return 'Get commit identifiers for recent commits affecting a given path.';
   }
 
   public function defineParamTypes() {

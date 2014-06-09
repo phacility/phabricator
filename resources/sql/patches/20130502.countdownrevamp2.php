@@ -1,6 +1,6 @@
 <?php
 
-echo "Giving countdowns PHIDs";
+echo 'Giving countdowns PHIDs';
 $table = new PhabricatorCountdown();
 $table->openTransaction();
 
@@ -9,7 +9,7 @@ foreach (new LiskMigrationIterator($table) as $countdown) {
     continue;
   }
 
-  echo ".";
+  echo '.';
 
   queryfx(
     $countdown->establishConnection('w'),

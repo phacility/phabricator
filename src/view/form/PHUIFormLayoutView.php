@@ -27,7 +27,7 @@ final class PHUIFormLayoutView extends AphrontView {
   public function appendRemarkupInstructions($remarkup) {
     if ($this->getUser() === null) {
       throw new Exception(
-        "Call `setUser` before appending Remarkup to PHUIFormLayoutView.");
+        'Call `setUser` before appending Remarkup to PHUIFormLayoutView.');
     }
 
     return $this->appendInstructions(

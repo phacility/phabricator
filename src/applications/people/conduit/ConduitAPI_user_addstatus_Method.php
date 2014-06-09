@@ -8,7 +8,7 @@ final class ConduitAPI_user_addstatus_Method
   }
 
   public function getMethodDescription() {
-    return pht("Add status information to the logged-in user.");
+    return pht('Add status information to the logged-in user.');
   }
 
   public function getMethodStatusDescription() {

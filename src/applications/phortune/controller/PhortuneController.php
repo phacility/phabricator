@@ -13,7 +13,7 @@ abstract class PhortuneController extends PhabricatorController {
     } else if (count($accounts) == 1) {
       return head($accounts);
     } else {
-      throw new Exception("TODO: No account selection yet.");
+      throw new Exception('TODO: No account selection yet.');
     }
   }
 

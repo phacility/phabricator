@@ -15,7 +15,7 @@ final class PhabricatorConfigIssueListController
       PhabricatorSetupCheck::countUnignoredIssues($issues));
 
     $list = $this->buildIssueList($issues);
-    $list->setNoDataString(pht("There are no open setup issues."));
+    $list->setNoDataString(pht('There are no open setup issues.'));
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Open Phabricator Setup Issues'));
@@ -45,7 +45,6 @@ final class PhabricatorConfigIssueListController
   private function buildIssueList(array $issues) {
     assert_instances_of($issues, 'PhabricatorSetupIssue');
     $list = new PHUIObjectItemListView();
-    $list->setCards(true);
     $ignored_items = array();
 
     foreach ($issues as $issue) {

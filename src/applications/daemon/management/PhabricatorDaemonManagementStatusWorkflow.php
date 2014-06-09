@@ -17,7 +17,7 @@ final class PhabricatorDaemonManagementStatusWorkflow
     if (!$daemons) {
       $console->writeErr(
         "%s\n",
-        pht("There are no running Phabricator daemons."));
+        pht('There are no running Phabricator daemons.'));
       return 1;
     }
 

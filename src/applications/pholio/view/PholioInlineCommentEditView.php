@@ -33,10 +33,10 @@ final class PholioInlineCommentEditView extends AphrontView {
 
   public function render() {
     if (!$this->uri) {
-      throw new Exception("Call setSubmitURI() before render()!");
+      throw new Exception('Call setSubmitURI() before render()!');
     }
     if (!$this->user) {
-      throw new Exception("Call setUser() before render()!");
+      throw new Exception('Call setUser() before render()!');
     }
 
     $content = phabricator_form(

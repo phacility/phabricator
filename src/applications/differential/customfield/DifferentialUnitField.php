@@ -200,7 +200,7 @@ final class DifferentialUnitField
       }
     }
 
-    return "Show Full Unit Results (".implode(', ', $show).")";
+    return 'Show Full Unit Results ('.implode(', ', $show).')';
   }
 
   public function getWarningsForDetailView() {

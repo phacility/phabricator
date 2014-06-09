@@ -6,6 +6,6 @@
 final class PhabricatorIRCBot extends PhabricatorDaemon {
   public function run() {
     throw new Exception(
-      "This daemon has been deprecated, use `PhabricatorBot` instead.");
+      'This daemon has been deprecated, use `PhabricatorBot` instead.');
   }
 }

@@ -43,8 +43,8 @@ final class DrydockLocalHostBlueprintImplementation
     $resource = $this->newResourceTemplate('Host (localhost)');
     $resource->setStatus(DrydockResourceStatus::STATUS_OPEN);
     $resource->setAttribute('path', $path);
-    $resource->setAttribute('remote', "false");
-    $resource->setAttribute('preallocated', "false");
+    $resource->setAttribute('remote', 'false');
+    $resource->setAttribute('preallocated', 'false');
     $resource->save();
 
     return $resource;
