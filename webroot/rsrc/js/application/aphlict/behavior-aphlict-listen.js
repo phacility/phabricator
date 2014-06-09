@@ -29,6 +29,7 @@ JX.behavior('aphlict-listen', function(config) {
         new JX.Notification()
           .setContent('(Aphlict) ' + message)
           .alterClassName('jx-notification-error', true)
+          .setDuration(0)
           .show();
         break;
 
