@@ -5,8 +5,8 @@
 .phui-tag-view {
   font-weight: bold;
   text-decoration: none;
-  display: inline-block;
   position: relative;
+  -webkit-font-smoothing: antialiased;
 }
 
 a.phui-tag-view:hover {
@@ -27,7 +27,6 @@ a.phui-tag-view:hover {
   border: 1px solid transparent;
   border-radius: 3px;
   padding: 0 4px;
-  white-space: nowrap;
 }
 
 .phui-tag-type-state .phui-tag-core {
@@ -65,7 +64,7 @@ a.phui-tag-view:hover {
 a.phui-tag-type-object,
 a.phui-tag-type-object:link,
 .phui-tag-core-closed .phui-tag-color-object {
-  color: #000000;
+  color: #000;
 }
 
 .phui-tag-type-person {

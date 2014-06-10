@@ -42,6 +42,7 @@
 
 .phabricator-action-header-icon-item .phui-tag-view {
   margin: 4px 2px 0;
+  display: inline-block;
 }
 
 .phabricator-action-header-link {
