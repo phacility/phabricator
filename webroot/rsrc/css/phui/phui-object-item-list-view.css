@@ -198,11 +198,6 @@
 .phui-object-list-stackable .phui-object-item {
 }
 
-.device-desktop .phui-object-list-stackable
-  .phui-object-item:hover {
-  background: {$hoverblue};
-}
-
 .phui-object-box .phui-object-list-stackable {
   padding: 0;
 }
