@@ -24,6 +24,7 @@ final class ConduitAPI_project_query_Method extends ConduitAPI_project_Method {
     return array(
       'ids'               => 'optional list<int>',
       'phids'             => 'optional list<phid>',
+      'slugs'             => 'optional list<string>',
       'status'            => 'optional '.$status_const,
 
       'members'           => 'optional list<phid>',
@@ -38,8 +39,7 @@ final class ConduitAPI_project_query_Method extends ConduitAPI_project_Method {
   }
 
   public function defineErrorTypes() {
-    return array(
-    );
+    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {
@@ -60,6 +60,11 @@ final class ConduitAPI_project_query_Method extends ConduitAPI_project_Method {
     $phids = $request->getValue('phids');
     if ($phids) {
       $query->withPHIDs($phids);
+    }
+
+    $slugs = $request->getValue('slugs');
+    if ($slugs) {
+      $query->withSlugs($slugs);
     }
 
     $members = $request->getValue('members');
