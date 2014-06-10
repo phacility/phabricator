@@ -64,6 +64,23 @@
   background: {$red};
 }
 
+.phabricator-action-header.gradient-white-header {
+  background: #fff;
+}
+
+.dashboard-panel .phabricator-action-header.gradient-white-header {
+  border: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$thinblueborder};
+  border-top-right-radius: 3px;
+  border-top-left-radius: 3px;
+}
+
+.phabricator-action-header.gradient-white-header .phabricator-action-header-title {
+  color: {$darkbluetext};
+  padding: 12px 0 12px 4px;
+}
+
+
 .gradient-green-header .phabricator-action-header-title,
 .gradient-red-header .phabricator-action-header-title,
 .gradient-blue-header .phabricator-action-header-title,
