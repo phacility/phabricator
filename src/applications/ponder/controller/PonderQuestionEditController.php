@@ -25,6 +25,10 @@ final class PonderQuestionEditController extends PonderController {
       if (!$question) {
         return new Aphront404Response();
       }
+      $v_projects = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $question->getPHID(),
+        PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT);
+      $v_projects = array_reverse($v_projects);
     } else {
       $question = id(new PonderQuestion())
         ->setStatus(PonderQuestionStatus::STATUS_OPEN)
@@ -32,6 +36,7 @@ final class PonderQuestionEditController extends PonderController {
         ->setVoteCount(0)
         ->setAnswerCount(0)
         ->setHeat(0.0);
+      $v_projects = array();
     }
 
     $v_title = $question->getTitle();
@@ -42,6 +47,7 @@ final class PonderQuestionEditController extends PonderController {
     if ($request->isFormPost()) {
       $v_title = $request->getStr('title');
       $v_content = $request->getStr('content');
+      $v_projects = $request->getArr('projects');
 
       $len = phutil_utf8_strlen($v_title);
       if ($len < 1) {
@@ -63,6 +69,12 @@ final class PonderQuestionEditController extends PonderController {
         $xactions[] = id(clone $template)
           ->setTransactionType(PonderQuestionTransaction::TYPE_CONTENT)
           ->setNewValue($v_content);
+
+        $proj_edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT;
+        $xactions[] = id(new PonderQuestionTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+          ->setMetadataValue('edge:type', $proj_edge_type)
+          ->setNewValue(array('=' => array_fuse($v_projects)));
 
         $editor = id(new PonderQuestionEditor())
           ->setActor($user)
@@ -90,11 +102,25 @@ final class PonderQuestionEditController extends PonderController {
           ->setID('content')
           ->setValue($v_content)
           ->setLabel(pht('Description'))
-          ->setUser($user))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->addCancelButton($this->getApplicationURI())
-          ->setValue(pht('Ask Away!')));
+          ->setUser($user));
+
+    if ($v_projects) {
+      $project_handles = $this->loadViewerHandles($v_projects);
+    } else {
+      $project_handles = array();
+    }
+
+    $form->appendChild(
+      id(new AphrontFormTokenizerControl())
+        ->setLabel(pht('Projects'))
+        ->setName('projects')
+        ->setValue($project_handles)
+        ->setDatasource('/typeahead/common/projects/'));
+
+    $form ->appendChild(
+      id(new AphrontFormSubmitControl())
+        ->addCancelButton($this->getApplicationURI())
+        ->setValue(pht('Ask Away!')));
 
     $preview = id(new PHUIRemarkupPreviewPanel())
       ->setHeader(pht('Question Preview'))

@@ -7,7 +7,8 @@ final class PonderQuestion extends PonderDAO
     PhabricatorSubscribableInterface,
     PhabricatorFlaggableInterface,
     PhabricatorPolicyInterface,
-    PhabricatorTokenReceiverInterface {
+    PhabricatorTokenReceiverInterface,
+    PhabricatorProjectInterface {
 
   const MARKUP_FIELD_CONTENT = 'markup:content';
 
