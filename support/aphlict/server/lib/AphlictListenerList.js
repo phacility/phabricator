@@ -31,7 +31,14 @@ JX.install('AphlictListenerList', {
     },
 
     getListeners: function() {
-      return this._listeners;
+      var keys = Object.keys(this._listeners);
+      var listeners = [];
+
+      for (var i = 0; i < keys.length; i++) {
+        listeners.push(this._listeners[keys[i]]);
+      }
+
+      return listeners;
     },
 
     getActiveListenerCount: function() {

@@ -2,6 +2,7 @@ package {
 
   import flash.events.TimerEvent;
   import flash.external.ExternalInterface;
+  import flash.utils.Dictionary;
   import flash.utils.Timer;
 
 
@@ -43,7 +44,11 @@ package {
         {});
     }
 
-    public function externalConnect(server:String, port:Number):void {
+    public function externalConnect(
+      server:String,
+      port:Number,
+      subscriptions:Array):void {
+
       this.externalInvoke('connect');
 
       this.remoteServer = server;
@@ -56,6 +61,10 @@ package {
       this.timer.addEventListener(TimerEvent.TIMER, this.keepalive);
 
       this.connectToMaster();
+
+      // Send subscriptions to master.
+      this.log('Sending subscriptions to master.');
+      this.send.send('aphlict_master', 'subscribe', this.client, subscriptions);
     }
 
     /**

@@ -16,7 +16,13 @@ JX.behavior('aphlict-listen', function(config) {
   var showing_reload = false;
 
   function onready() {
-    var client = new JX.Aphlict(config.id, config.server, config.port)
+    var client = new JX.Aphlict(
+      config.id,
+      config.server,
+      config.port,
+      config.subscriptions);
+
+    client
       .setHandler(onaphlictmessage)
       .start();
   }

@@ -83,6 +83,61 @@ var send_server = net.createServer(function(socket) {
     listener.getDescription(),
     socket.remoteAddress);
 
+  var buffer = new Buffer([]);
+  var length = 0;
+
+  socket.on('data', function(data) {
+    buffer = Buffer.concat([buffer, new Buffer(data)]);
+
+    while (buffer.length) {
+      if (!length) {
+        length = buffer.readUInt16BE(0);
+        buffer = buffer.slice(2);
+      }
+
+      if (buffer.length < length) {
+        // We need to wait for the rest of the data.
+        return;
+      }
+
+      var message;
+      try {
+        message = JSON.parse(buffer.toString('utf8', 0, length));
+      } catch (err) {
+        debug.log('<%s> Received invalid data.', listener.getDescription());
+        continue;
+      } finally {
+        buffer = buffer.slice(length);
+        length = 0;
+      }
+
+      debug.log('<%s> Received data: %s',
+        listener.getDescription(),
+        JSON.stringify(message));
+
+      switch (message.command) {
+        case 'subscribe':
+          debug.log(
+            '<%s> Subscribed to: %s',
+            listener.getDescription(),
+            JSON.stringify(message.data));
+          listener.subscribe(message.data);
+          break;
+
+        case 'unsubscribe':
+          debug.log(
+            '<%s> Unsubscribed from: %s',
+            listener.getDescription(),
+            JSON.stringify(message.data));
+          listener.unsubscribe(message.data);
+          break;
+
+        default:
+          debug.log('<s> Unrecognized command.', listener.getDescription());
+      }
+    }
+  });
+
   socket.on('close', function() {
     clients.removeListener(listener);
     debug.log('<%s> Disconnected', listener.getDescription());
@@ -122,7 +177,7 @@ var receive_server = http.createServer(function(request, response) {
 
         debug.log('notification: ' + JSON.stringify(msg));
         ++messages_in;
-        broadcast(msg);
+        transmit(msg);
 
         response.writeHead(200, {'Content-Type': 'text/plain'});
       } catch (err) {
@@ -161,12 +216,16 @@ var receive_server = http.createServer(function(request, response) {
 
 }).listen(config.admin, config.host);
 
-function broadcast(data) {
-  var listeners = clients.getListeners();
-  for (var id in listeners) {
-    var listener = listeners[id];
+function transmit(msg) {
+  var listeners = clients.getListeners().filter(function(client) {
+    return client.isSubscribedToAny(msg.subscribers);
+  });
+
+  for (var i = 0; i < listeners.length; i++) {
+    var listener = listeners[i];
+
     try {
-      listener.writeMessage(data);
+      listener.writeMessage(msg);
 
       ++messages_out;
       debug.log('<%s> Wrote Message', listener.getDescription());
