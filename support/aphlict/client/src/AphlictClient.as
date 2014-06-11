@@ -31,6 +31,7 @@ package {
 
     private var remoteServer:String;
     private var remotePort:Number;
+    private var subscriptions:Array;
 
 
     public function AphlictClient() {
@@ -51,8 +52,9 @@ package {
 
       this.externalInvoke('connect');
 
-      this.remoteServer = server;
-      this.remotePort   = port;
+      this.remoteServer  = server;
+      this.remotePort    = port;
+      this.subscriptions = subscriptions;
 
       this.client = AphlictClient.generateClientId();
       this.recv.connect(this.client);
@@ -61,10 +63,6 @@ package {
       this.timer.addEventListener(TimerEvent.TIMER, this.keepalive);
 
       this.connectToMaster();
-
-      // Send subscriptions to master.
-      this.log('Sending subscriptions to master.');
-      this.send.send('aphlict_master', 'subscribe', this.client, subscriptions);
     }
 
     /**
@@ -95,11 +93,26 @@ package {
         this.error(err);
       }
 
+      this.registerWithMaster();
+      this.timer.start();
+    }
+
+    /**
+     * Register our client ID with the @{class:AphlictMaster} and send our
+     * subscriptions.
+     */
+    private function registerWithMaster():void {
       this.send.send('aphlict_master', 'register', this.client);
       this.expiry = new Date().getTime() + (5 * AphlictClient.INTERVAL);
       this.log('Registered client ' + this.client);
 
-      this.timer.start();
+      // Send subscriptions to master.
+      this.log('Sending subscriptions to master.');
+      this.send.send(
+        'aphlict_master',
+        'subscribe',
+        this.client,
+        this.subscriptions);
     }
 
     /**
