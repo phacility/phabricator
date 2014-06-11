@@ -1,28 +1,28 @@
 var JX = require('javelin').JX;
 
 JX.install('AphlictListener', {
-  construct : function(id, socket) {
+  construct: function(id, socket) {
     this._id = id;
     this._socket = socket;
   },
 
-  members : {
-    _id : null,
-    _socket : null,
+  members: {
+    _id: null,
+    _socket: null,
 
-    getID : function() {
+    getID: function() {
       return this._id;
     },
 
-    getSocket : function() {
+    getSocket: function() {
       return this._socket;
     },
 
-    getDescription : function() {
+    getDescription: function() {
       return 'Listener/' + this.getID();
     },
 
-    writeMessage : function(message) {
+    writeMessage: function(message) {
       var serial = JSON.stringify(message);
 
       var length = Buffer.byteLength(serial, 'utf8');

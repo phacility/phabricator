@@ -176,10 +176,8 @@ final class PhabricatorFeedStoryPublisher {
 
   private function sendNotification($chrono_key) {
     $data = array(
-      'data' => array(
-        'key'  => (string)$chrono_key,
-        'type' => 'notification',
-      ),
+      'key'         => (string)$chrono_key,
+      'type'        => 'notification',
       'subscribers' => $this->subscribedPHIDs,
     );
 
