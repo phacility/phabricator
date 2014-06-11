@@ -88,6 +88,9 @@ package {
         if (new Date().getTime() - checkin > AphlictMaster.PURGE_INTERVAL) {
           this.log('Purging client: ' + client);
           delete this.clients[client];
+
+          this.log('Removing client subscriptions: ' + client);
+          this.unsubscribeAll(client);
         }
       }
     }
@@ -163,10 +166,29 @@ package {
       }
     }
 
+    private function getSubscriptions(client:String):Array {
+      var subscriptions = new Array();
+
+      for (var phid:String in this.subscriptions) {
+        var clients = this.subscriptions[phid];
+        if (clients[client]) {
+          subscriptions.push(phid);
+        }
+      }
+
+      return subscriptions;
+    }
+
+    public function unsubscribeAll(client:String):void {
+      this.unsubscribe(client, this.getSubscriptions(client));
+    }
+
     public function unsubscribe(client:String, phids:Array):void {
       var oldPHIDs = new Array();
 
-      for (var phid:String in phids) {
+      for (var i:String in phids) {
+        var phid = phids[i];
+
         if (!this.subscriptions[phid]) {
           continue;
         }

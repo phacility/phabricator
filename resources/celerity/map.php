@@ -477,7 +477,7 @@ return array(
     'rsrc/js/phuix/PHUIXActionListView.js' => 'b5c256b8',
     'rsrc/js/phuix/PHUIXActionView.js' => '6e8cefa4',
     'rsrc/js/phuix/PHUIXDropdownMenu.js' => 'bd4c8dca',
-    'rsrc/swf/aphlict.swf' => '2dea6ddc',
+    'rsrc/swf/aphlict.swf' => '14d5aa2e',
   ),
   'symbols' =>
   array(
