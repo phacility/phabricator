@@ -8,6 +8,52 @@
  */
 
 JX.behavior('conpherence-pontificate', function(config) {
+
+  JX.Stratcom.listen('aphlict-receive-message', null, function(e) {
+    var message = e.getData();
+
+    if (message.type != 'message') {
+      // Not a message event.
+      return;
+    }
+
+    // TODO: This is really, really gross.
+    var infonode = JX.DOM.find(document, 'input', 'latest-transaction-id');
+    var data = JX.Stratcom.getData(infonode);
+
+    var latest_id = infonode.value;
+    var thread_phid = data.threadPHID;
+    var thread_id = data.threadID;
+
+    if (message.threadPHID != thread_phid) {
+      // Message event for some thread other than the visible one.
+      return;
+    }
+
+    if (message.messageID <= latest_id) {
+      // Message event for something we already know about.
+      return;
+    }
+
+    var params = {
+      action: 'load',
+      latest_transaction_id: latest_id
+    };
+
+    new JX.Workflow('/conpherence/update/' + thread_id + '/')
+      .setData(params)
+      .setHandler(function(r) {
+        var messages = JX.DOM.find(document, 'div', 'conpherence-messages');
+        JX.DOM.appendContent(messages, JX.$H(r.transactions));
+        messages.scrollTop = messages.scrollHeight;
+
+        // TODO: Continued grossness from above.
+        infonode.value = r.latest_transaction_id;
+      })
+      .start();
+  });
+
+
   var onsubmit = function(e) {
     e.kill();
 

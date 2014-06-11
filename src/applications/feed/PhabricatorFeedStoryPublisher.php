@@ -112,9 +112,7 @@ final class PhabricatorFeedStoryPublisher {
     }
 
     $this->insertNotifications($chrono_key);
-    if (PhabricatorEnv::getEnvConfig('notification.enabled')) {
-      $this->sendNotification($chrono_key);
-    }
+    $this->sendNotification($chrono_key);
 
     PhabricatorWorker::scheduleTask(
       'FeedPublisherWorker',
@@ -181,11 +179,7 @@ final class PhabricatorFeedStoryPublisher {
       'subscribers' => $this->subscribedPHIDs,
     );
 
-    try {
-      PhabricatorNotificationClient::postMessage($data);
-    } catch (Exception $ex) {
-      // Ignore, these are not critical.
-    }
+    PhabricatorNotificationClient::tryToPostMessage($data);
   }
 
   /**

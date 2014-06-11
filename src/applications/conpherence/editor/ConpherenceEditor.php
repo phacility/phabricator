@@ -306,6 +306,17 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
       $participant->save();
     }
 
+    if ($xactions) {
+      $data = array(
+        'type'        => 'message',
+        'threadPHID'  => $object->getPHID(),
+        'messageID'   => last($xactions)->getID(),
+        'subscribers' => array($object->getPHID()),
+      );
+
+      PhabricatorNotificationClient::tryToPostMessage($data);
+    }
+
     return $xactions;
   }
 
