@@ -45,30 +45,18 @@ final class PhabricatorDashboardPanelTypeTabs
 
     $selected = 0;
 
-    // TODO: Instead of using reveal-content here, we should write some nice
-    // JS which loads panels on demand, manages tab selected states, and maybe
-    // saves the tab you selected.
-
     $node_ids = array();
     foreach ($config as $idx => $tab_spec) {
       $node_ids[$idx] = celerity_generate_unique_node_id();
     }
 
-    Javelin::initBehavior('phabricator-reveal-content');
-
     foreach ($config as $idx => $tab_spec) {
-      $hide_ids = $node_ids;
-      unset($hide_ids[$idx]);
-
       $list->addMenuItem(
         id(new PHUIListItemView())
           ->setHref('#')
-          ->addSigil('reveal-content')
-          ->setMetadata(
-            array(
-              'showIDs' => array(idx($node_ids, $idx)),
-              'hideIDs' => array_values($hide_ids),
-            ))
+          ->setSelected($idx == $selected)
+          ->addSigil('dashboard-tab-panel-tab')
+          ->setMetadata(array('idx' => $idx))
           ->setName(idx($tab_spec, 'name', pht('Nameless Tab'))));
     }
 
@@ -84,6 +72,12 @@ final class PhabricatorDashboardPanelTypeTabs
 
     $parent_phids = $engine->getParentPanelPHIDs();
     $parent_phids[] = $panel->getPHID();
+
+    // TODO: Currently, we'll load all the panels on page load. It would be
+    // vaguely nice to load hidden panels only when the user selects them.
+
+    // TODO: Maybe we should persist which panel the user selected, so it
+    // remains selected across page loads.
 
     $content = array();
     $no_headers = PhabricatorDashboardPanelRenderingEngine::HEADER_MODE_NONE;
@@ -112,8 +106,20 @@ final class PhabricatorDashboardPanelTypeTabs
         $panel_content);
     }
 
+    Javelin::initBehavior('dashboard-tab-panel');
 
-    return array($list, $content);
+    return javelin_tag(
+      'div',
+      array(
+        'sigil' => 'dashboard-tab-panel-container',
+        'meta' => array(
+          'panels' => $node_ids,
+        ),
+      ),
+      array(
+        $list,
+        $content,
+      ));
   }
 
 }
