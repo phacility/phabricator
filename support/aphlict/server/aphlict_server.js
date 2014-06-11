@@ -65,7 +65,8 @@ var http = require('http');
 var url = require('url');
 
 process.on('uncaughtException', function(err) {
-  debug.log("\n<<< UNCAUGHT EXCEPTION! >>>\n\n" + err);
+  debug.log("\n<<< UNCAUGHT EXCEPTION! >>>\n" + err.stack);
+
   process.exit(1);
 });
 
