@@ -203,7 +203,7 @@
   height: 124px;
   padding: 6px;
   border-width: 1px 0;
-  border-color: {$lightblueborder};
+  border-color: {$thinblueborder};
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
