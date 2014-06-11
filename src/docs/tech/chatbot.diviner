@@ -44,11 +44,16 @@ the bot. These are the default handlers available:
   - @{class:PhabricatorBotObjectNameHandler} This handler looks for users
     mentioning Phabricator objects like "T123" and "D345" in chat, looks them
     up, and says their name with a link to the object. Requires conduit.
-  - @{class:PhabricatorBotDifferentialNotificationHandler} This handler posts
+  - @{class:PhabricatorBotFeedNotificationHandler} This handler posts
     notifications about changes to revisions to the channels listed in
     ##notification.channels##.
   - @{class:PhabricatorBotLogHandler} This handler records chatlogs which can
     be browsed in the Phabricator web interface.
+  - @{class:PhabricatorBotSymbolHandler} This handler posts responses to lookups
+    for symbols in Diffusion
+  - @{class:PhabricatorBotMacroHandler} This handler looks for users mentioning
+    macros, if found will convert image to ASCII and output in chat. Configure
+    with ##macro.size## and ##macro.aspect##
 
 You can also write your own handlers, by extending
 @{class:PhabricatorBotHandler}.
