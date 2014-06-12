@@ -140,7 +140,7 @@ final class PhabricatorActionView extends AphrontView {
           array(
             'class' => 'phabricator-action-view-item',
           ),
-          $this->name);
+          array($icon, $this->name));
 
         $item = phabricator_form(
           $this->user,
@@ -160,7 +160,7 @@ final class PhabricatorActionView extends AphrontView {
             'sigil' => $sigils,
             'meta' => $this->metadata,
           ),
-          $this->name);
+          array($icon, $this->name));
       }
     } else {
       $item = phutil_tag(
@@ -168,7 +168,7 @@ final class PhabricatorActionView extends AphrontView {
         array(
           'class' => 'phabricator-action-view-item',
         ),
-        $this->name);
+        array($icon, $this->name));
     }
 
     $classes = array();
@@ -186,7 +186,7 @@ final class PhabricatorActionView extends AphrontView {
       array(
         'class' => implode(' ', $classes),
       ),
-      array($icon, $item));
+      $item);
   }
 
 }
