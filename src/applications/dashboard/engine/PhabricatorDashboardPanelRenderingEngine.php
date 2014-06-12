@@ -236,6 +236,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
     }
     $action_edit = id(new PHUIIconView())
       ->setIconFont('fa-pencil')
+      ->setWorkflow(true)
       ->setHref((string) $edit_uri);
     $header->addAction($action_edit);
 

@@ -121,6 +121,7 @@ final class PhabricatorDashboardPanelEditController
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
+      ->addHiddenInput('dashboardID', $request->getInt('dashboardID'))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name'))
@@ -142,12 +143,6 @@ final class PhabricatorDashboardPanelEditController
 
     $field_list->appendFieldsToForm($form);
 
-    $form
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue($button)
-          ->addCancelButton($cancel_uri));
-
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(
       pht('Panels'),
@@ -160,6 +155,22 @@ final class PhabricatorDashboardPanelEditController
         $panel->getMonogram(),
         '/'.$panel->getMonogram());
       $crumbs->addTextCrumb(pht('Edit'));
+    }
+
+    if ($request->isAjax()) {
+      return $this->newDialog()
+        ->setTitle($header)
+        ->setWidth(AphrontDialogView::WIDTH_FORM)
+        ->setValidationException($validation_exception)
+        ->appendChild($form->buildLayoutView())
+        ->addCancelButton($cancel_uri)
+        ->addSubmitButton($button);
+    } else {
+      $form
+        ->appendChild(
+          id(new AphrontFormSubmitControl())
+            ->setValue($button)
+            ->addCancelButton($cancel_uri));
     }
 
     $box = id(new PHUIObjectBoxView())

@@ -40,6 +40,7 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
     } else {
       $h_mode = PhabricatorDashboardPanelRenderingEngine::HEADER_MODE_NORMAL;
     }
+
     foreach ($panel_grid_locations as $column => $panel_column_locations) {
       $panel_phids = $panel_column_locations;
       $column_panels = array_select_keys($panels, $panel_phids);
