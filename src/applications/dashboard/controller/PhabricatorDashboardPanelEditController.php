@@ -38,19 +38,45 @@ final class PhabricatorDashboardPanelEditController
     if ($this->id) {
       $is_create = false;
 
+      if ($dashboard) {
+        $capabilities = array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+        );
+      } else {
+        $capabilities = array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        );
+      }
+
       $panel = id(new PhabricatorDashboardPanelQuery())
         ->setViewer($viewer)
         ->withIDs(array($this->id))
-        ->requireCapabilities(
-          array(
-            PhabricatorPolicyCapability::CAN_VIEW,
-            PhabricatorPolicyCapability::CAN_EDIT,
-          ))
+        ->requireCapabilities($capabilities)
         ->executeOne();
       if (!$panel) {
         return new Aphront404Response();
       }
 
+      if ($dashboard) {
+        $can_edit = PhabricatorPolicyFilter::hasCapability(
+          $viewer,
+          $panel,
+          PhabricatorPolicyCapability::CAN_EDIT);
+        if (!$can_edit) {
+          if ($request->isFormPost() && $request->getBool('copy')) {
+            $panel = $this->copyPanel(
+              $request,
+              $dashboard,
+              $panel);
+          } else {
+            return $this->processPanelCloneRequest(
+              $request,
+              $dashboard,
+              $panel);
+          }
+        }
+      }
     } else {
       $is_create = true;
 
@@ -161,6 +187,10 @@ final class PhabricatorDashboardPanelEditController
       }
     }
 
+    // NOTE: We're setting the submit URI explicitly because we need to edit
+    // a different panel if we just cloned the original panel.
+    $submit_uri = $this->getApplicationURI('panel/edit/'.$panel->getID().'/');
+
     $policies = id(new PhabricatorPolicyQuery())
       ->setViewer($viewer)
       ->setObject($panel)
@@ -168,6 +198,7 @@ final class PhabricatorDashboardPanelEditController
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
+      ->setAction($submit_uri)
       ->addHiddenInput('edit', true)
       ->addHiddenInput('dashboardID', $request->getInt('dashboardID'))
       ->addHiddenInput('column', $request->getInt('column'))
@@ -209,6 +240,7 @@ final class PhabricatorDashboardPanelEditController
     if ($request->isAjax()) {
       return $this->newDialog()
         ->setTitle($header)
+        ->setSubmitURI($submit_uri)
         ->setWidth(AphrontDialogView::WIDTH_FORM)
         ->setValidationException($validation_exception)
         ->appendChild($form->buildLayoutView())
@@ -316,5 +348,80 @@ final class PhabricatorDashboardPanelEditController
         'device' => true,
       ));
   }
+
+  private function processPanelCloneRequest(
+    AphrontRequest $request,
+    PhabricatorDashboard $dashboard,
+    PhabricatorDashboardPanel $panel) {
+
+    $viewer = $request->getUser();
+
+    $manage_uri = $this->getApplicationURI('manage/'.$dashboard->getID().'/');
+
+    return $this->newDialog()
+      ->setTitle(pht('Copy Panel?'))
+      ->addHiddenInput('copy', true)
+      ->addHiddenInput('dashboardID', $request->getInt('dashboardID'))
+      ->addHiddenInput('column', $request->getInt('column'))
+      ->appendParagraph(
+        pht(
+          'You do not have permission to edit this dashboard panel, but you '.
+          'can make a copy and edit that instead. If you choose to copy the '.
+          'panel, the original will be replaced with the new copy on this '.
+          'dashboard.'))
+      ->appendParagraph(
+        pht(
+          'Do you want to make a copy of this panel?'))
+      ->addCancelButton($manage_uri)
+      ->addSubmitButton(pht('Copy Panel'));
+  }
+
+  private function copyPanel(
+    AphrontRequest $request,
+    PhabricatorDashboard $dashboard,
+    PhabricatorDashboardPanel $panel) {
+
+    $viewer = $request->getUser();
+
+    $copy = PhabricatorDashboardPanel::initializeNewPanel($viewer);
+    $copy = PhabricatorDashboardPanel::copyPanel($copy, $panel);
+
+    $copy->openTransaction();
+      $copy->save();
+
+      // TODO: This should record a transaction on the panel copy, too.
+
+      $xactions = array();
+      $xactions[] = id(new PhabricatorDashboardTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue(
+          'edge:type',
+          PhabricatorEdgeConfig::TYPE_DASHBOARD_HAS_PANEL)
+        ->setNewValue(
+          array(
+            '+' => array(
+              $copy->getPHID() => $copy->getPHID(),
+            ),
+            '-' => array(
+              $panel->getPHID() => $panel->getPHID(),
+            ),
+          ));
+
+      $layout_config = $dashboard->getLayoutConfigObject();
+      $layout_config->replacePanel($panel->getPHID(), $copy->getPHID());
+      $dashboard->setLayoutConfigFromObject($layout_config);
+      $dashboard->save();
+
+      $editor = id(new PhabricatorDashboardTransactionEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnMissingFields(true)
+        ->setContinueOnNoEffect(true)
+        ->applyTransactions($dashboard, $xactions);
+    $copy->saveTransaction();
+
+    return $copy;
+  }
+
 
 }

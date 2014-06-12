@@ -15,6 +15,10 @@ final class PhabricatorDashboardManageController
     $id = $this->id;
     $dashboard_uri = $this->getApplicationURI('view/'.$id.'/');
 
+    // TODO: This UI should drop a lot of capabilities if the user can't
+    // edit the dashboard, but we should still let them in for "Install" and
+    // "View History".
+
     $dashboard = id(new PhabricatorDashboardQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->id))

@@ -151,6 +151,17 @@ JX.install('DraggableList', {
         return;
       }
 
+      if (e.getNode('tag:a')) {
+        // Never start a drag if we're somewhere inside an <a> tag. This makes
+        // links unclickable in Firefox.
+        return;
+      }
+
+      if (JX.Stratcom.pass()) {
+        // Let other handlers deal with this event before we do.
+        return;
+      }
+
       e.kill();
 
       this._dragging = e.getNode(this._sigil);

@@ -32,6 +32,18 @@ final class PhabricatorDashboardLayoutConfig {
     return $this->panelLocations;
   }
 
+  public function replacePanel($old_phid, $new_phid) {
+    $locations = $this->getPanelLocations();
+    foreach ($locations as $column => $panel_phids) {
+      foreach ($panel_phids as $key => $panel_phid) {
+        if ($panel_phid == $old_phid) {
+          $locations[$column][$key] = $new_phid;
+        }
+      }
+    }
+    return $this->setPanelLocations($locations);
+  }
+
   public function removePanel($panel_phid) {
     $panel_location_grid = $this->getPanelLocations();
     foreach ($panel_location_grid as $column => $panel_columns) {
