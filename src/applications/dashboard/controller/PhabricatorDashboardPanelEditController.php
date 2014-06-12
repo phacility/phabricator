@@ -13,6 +13,28 @@ final class PhabricatorDashboardPanelEditController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
+    // If the user is trying to create a panel directly on a dashboard, make
+    // sure they have permission to see and edit the dashboard.
+
+    $dashboard_id = $request->getInt('dashboardID');
+    $dashboard = null;
+    if ($dashboard_id) {
+      $dashboard = id(new PhabricatorDashboardQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($dashboard_id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
+      if (!$dashboard) {
+        return new Aphront404Response();
+      }
+
+      $manage_uri = $this->getApplicationURI('manage/'.$dashboard_id.'/');
+    }
+
     if ($this->id) {
       $is_create = false;
 
@@ -33,11 +55,10 @@ final class PhabricatorDashboardPanelEditController
       $is_create = true;
 
       $panel = PhabricatorDashboardPanel::initializeNewPanel($viewer);
-
       $types = PhabricatorDashboardPanelType::getAllPanelTypes();
       $type = $request->getStr('type');
       if (empty($types[$type])) {
-        return new Aphront404Response();
+        return $this->processPanelTypeRequest($request);
       }
 
       $panel->setPanelType($type);
@@ -47,12 +68,20 @@ final class PhabricatorDashboardPanelEditController
       $title = pht('New Panel');
       $header = pht('Create New Panel');
       $button = pht('Create Panel');
-      $cancel_uri = $this->getApplicationURI('panel/');
+      if ($dashboard) {
+        $cancel_uri = $manage_uri;
+      } else {
+        $cancel_uri = $this->getApplicationURI('panel/');
+      }
     } else {
       $title = pht('Edit %s', $panel->getMonogram());
       $header = pht('Edit %s %s', $panel->getMonogram(), $panel->getName());
       $button = pht('Save Panel');
-      $cancel_uri = $this->getPanelRedirectURI($panel);
+      if ($dashboard) {
+        $cancel_uri = $manage_uri;
+      } else {
+        $cancel_uri = '/'.$panel->getMonogram();
+      }
     }
 
     $v_name = $panel->getName();
@@ -67,7 +96,10 @@ final class PhabricatorDashboardPanelEditController
 
     $validation_exception = null;
 
-    if ($request->isFormPost()) {
+    // NOTE: We require 'edit' to distinguish between the "Choose a Type"
+    // and "Create a Panel" dialogs.
+
+    if ($request->isFormPost() && $request->getBool('edit')) {
       $v_name = $request->getStr('name');
       $v_view_policy = $request->getStr('viewPolicy');
       $v_edit_policy = $request->getStr('editPolicy');
@@ -102,8 +134,23 @@ final class PhabricatorDashboardPanelEditController
           ->setContentSourceFromRequest($request)
           ->applyTransactions($panel, $xactions);
 
-        return id(new AphrontRedirectResponse())
-          ->setURI($this->getPanelRedirectURI($panel));
+        // If we're creating a panel directly on a dashboard, add it now.
+        if ($dashboard) {
+          PhabricatorDashboardTransactionEditor::addPanelToDashboard(
+            $viewer,
+            PhabricatorContentSource::newFromRequest($request),
+            $panel,
+            $dashboard,
+            $request->getInt('column', 0));
+        }
+
+        if ($dashboard) {
+          $done_uri = $manage_uri;
+        } else {
+          $done_uri = '/'.$panel->getMonogram();
+        }
+
+        return id(new AphrontRedirectResponse())->setURI($done_uri);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
 
@@ -121,7 +168,9 @@ final class PhabricatorDashboardPanelEditController
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
+      ->addHiddenInput('edit', true)
       ->addHiddenInput('dashboardID', $request->getInt('dashboardID'))
+      ->addHiddenInput('column', $request->getInt('column'))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name'))
@@ -189,16 +238,83 @@ final class PhabricatorDashboardPanelEditController
       ));
   }
 
-  private function getPanelRedirectURI(PhabricatorDashboardPanel $panel) {
-    $request = $this->getRequest();
-    $dashboard_id = $request->getInt('dashboardID');
-    if ($dashboard_id) {
-      $uri = $this->getApplicationURI('manage/'.$dashboard_id.'/');
-    } else {
-      $uri = '/'.$panel->getMonogram();
+  private function processPanelTypeRequest(AphrontRequest $request) {
+    $viewer = $request->getUser();
+
+    $types = PhabricatorDashboardPanelType::getAllPanelTypes();
+
+    $v_type = null;
+    $errors = array();
+    if ($request->isFormPost()) {
+      $v_type = $request->getStr('type');
+      if (!isset($types[$v_type])) {
+        $errors[] = pht('You must select a type of panel to create.');
+      }
     }
 
-    return $uri;
+    $cancel_uri = $this->getApplicationURI('panel/');
+
+    if (!$v_type) {
+      $v_type = key($types);
+    }
+
+    $panel_types = id(new AphrontFormRadioButtonControl())
+      ->setName('type')
+      ->setValue($v_type);
+
+    foreach ($types as $key => $type) {
+      $panel_types->addButton(
+        $key,
+        $type->getPanelTypeName(),
+        $type->getPanelTypeDescription());
+    }
+
+    $form = id(new AphrontFormView())
+      ->setUser($viewer)
+      ->addHiddenInput('dashboardID', $request->getInt('dashboardID'))
+      ->addHiddenInput('column', $request->getInt('column'))
+      ->appendRemarkupInstructions(
+        pht(
+          'Choose the type of dashboard panel to create:'))
+      ->appendChild($panel_types);
+
+    if ($request->isAjax()) {
+      return $this->newDialog()
+        ->setTitle(pht('Add New Panel'))
+        ->setWidth(AphrontDialogView::WIDTH_FORM)
+        ->setErrors($errors)
+        ->appendChild($form->buildLayoutView())
+        ->addCancelbutton($cancel_uri)
+        ->addSubmitButton(pht('Continue'));
+    } else {
+      $form->appendChild(
+        id(new AphrontFormSubmitControl())
+          ->setValue(pht('Continue'))
+          ->addCancelButton($cancel_uri));
+    }
+
+    $title = pht('Create Dashboard Panel');
+
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(
+      pht('Panels'),
+      $this->getApplicationURI('panel/'));
+    $crumbs->addTextCrumb(pht('New Panel'));
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->setFormErrors($errors)
+      ->setForm($form);
+
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $box,
+      ),
+      array(
+        'title' => $title,
+        'device' => true,
+      ));
   }
 
 }
