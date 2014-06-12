@@ -156,19 +156,24 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
       case self::HEADER_MODE_EDIT:
         $header = id(new PhabricatorActionHeaderView())
           ->setHeaderTitle($title)
-          ->setHeaderColor(PhabricatorActionHeaderView::HEADER_RED);
+          ->setHeaderColor(PhabricatorActionHeaderView::HEADER_WHITE);
         $header = $this->addPanelHeaderActions($header);
         break;
       case self::HEADER_MODE_NORMAL:
       default:
         $header = id(new PhabricatorActionHeaderView())
           ->setHeaderTitle($title)
-          ->setHeaderColor(PhabricatorActionHeaderView::HEADER_RED);
+          ->setHeaderColor(PhabricatorActionHeaderView::HEADER_WHITE);
         break;
     }
+    $icon = id(new PHUIIconView())
+      ->setIconFont('fa-warning red msr');
+    $content = id(new PHUIBoxView())
+      ->addClass('dashboard-box')
+      ->appendChild($icon)
+      ->appendChild($body);
     return $this->renderPanelDiv(
-      id(new AphrontErrorView())
-      ->appendChild($body),
+      $content,
       $header);
   }
 

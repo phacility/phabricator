@@ -75,3 +75,11 @@
 .aphront-multi-column-column .aphront-error-view {
   margin: 0;
 }
+
+.dashboard-panel .dashboard-box {
+  padding: 12px;
+  background: #fff;
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
+}
