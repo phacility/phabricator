@@ -3,6 +3,10 @@
 final class PhabricatorSlowvoteSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Slowvotes');
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
     $saved->setParameter(

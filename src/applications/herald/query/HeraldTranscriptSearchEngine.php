@@ -3,6 +3,10 @@
 final class HeraldTranscriptSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Herald Transcripts');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationHerald';
   }

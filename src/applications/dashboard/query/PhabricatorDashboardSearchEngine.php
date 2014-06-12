@@ -3,6 +3,10 @@
 final class PhabricatorDashboardSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Dashboards');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationDashboard';
   }

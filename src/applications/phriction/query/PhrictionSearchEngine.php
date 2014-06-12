@@ -3,6 +3,10 @@
 final class PhrictionSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Wiki Documents');
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 

@@ -3,6 +3,10 @@
 final class PhabricatorMacroSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Macros');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationMacro';
   }

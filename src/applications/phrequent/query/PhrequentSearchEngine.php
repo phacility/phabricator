@@ -3,6 +3,10 @@
 final class PhrequentSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Phrequent Time');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationPhrequent';
   }

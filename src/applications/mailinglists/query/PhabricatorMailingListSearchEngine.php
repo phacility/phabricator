@@ -3,6 +3,10 @@
 final class PhabricatorMailingListSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Mailing Lists');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationMailingLists';
   }

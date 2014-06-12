@@ -3,6 +3,10 @@
 final class PhabricatorOAuthServerClientSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('OAuth Clients');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationOAuthServer';
   }

@@ -120,6 +120,18 @@ abstract class PhabricatorApplicationSearchEngine {
   abstract protected function getURI($path);
 
 
+  /**
+   * Return a human readable description of the type of objects this query
+   * searches for.
+   *
+   * For example, "Tasks" or "Commits".
+   *
+   * @return string Human-readable description of what this engine is used to
+   *   find.
+   */
+  abstract public function getResultTypeDescription();
+
+
   public function newSavedQuery() {
     return id(new PhabricatorSavedQuery())
       ->setEngineClassName(get_class($this));

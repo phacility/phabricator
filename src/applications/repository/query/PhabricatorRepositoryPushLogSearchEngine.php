@@ -3,6 +3,10 @@
 final class PhabricatorRepositoryPushLogSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Push Logs');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationDiffusion';
   }

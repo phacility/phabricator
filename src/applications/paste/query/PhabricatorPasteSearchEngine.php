@@ -3,6 +3,10 @@
 final class PhabricatorPasteSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Pastes');
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
     $saved->setParameter(

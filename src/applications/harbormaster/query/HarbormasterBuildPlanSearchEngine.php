@@ -3,6 +3,10 @@
 final class HarbormasterBuildPlanSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Harbormaster Build Plans');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationHarbormaster';
   }

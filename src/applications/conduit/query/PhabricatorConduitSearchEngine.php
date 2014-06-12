@@ -3,6 +3,10 @@
 final class PhabricatorConduitSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Conduit Methods');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationConduit';
   }

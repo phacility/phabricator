@@ -3,6 +3,10 @@
 final class ReleephProductSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Releeph Products');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationReleeph';
   }

@@ -3,6 +3,10 @@
 final class DrydockBlueprintSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Drydock Blueprints');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationDrydock';
   }

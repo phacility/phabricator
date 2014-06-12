@@ -3,6 +3,10 @@
 final class PonderQuestionSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Ponder Questions');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationPonder';
   }

@@ -3,6 +3,10 @@
 final class LegalpadDocumentSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Legalpad Documents');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationLegalpad';
   }

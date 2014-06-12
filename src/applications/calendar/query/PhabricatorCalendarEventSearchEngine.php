@@ -3,6 +3,10 @@
 final class PhabricatorCalendarEventSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Calendar Events');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationCalendar';
   }

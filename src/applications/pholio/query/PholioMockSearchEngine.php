@@ -3,6 +3,10 @@
 final class PholioMockSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Pholio Mocks');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationPholio';
   }

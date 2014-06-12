@@ -5,6 +5,10 @@ final class ReleephBranchSearchEngine
 
   private $product;
 
+  public function getResultTypeDescription() {
+    return pht('Releeph Branches');
+  }
+
   public function setProduct(ReleephProject $product) {
     $this->product = $product;
     return $this;
