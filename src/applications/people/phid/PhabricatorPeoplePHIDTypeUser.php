@@ -68,6 +68,7 @@ final class PhabricatorPeoplePHIDTypeUser extends PhabricatorPHIDType {
     $id_map = array();
     foreach ($names as $name) {
       $id = substr($name, 1);
+      $id = phutil_utf8_strtolower($id);
       $id_map[$id][] = $name;
     }
 
@@ -78,8 +79,9 @@ final class PhabricatorPeoplePHIDTypeUser extends PhabricatorPHIDType {
 
     $results = array();
     foreach ($objects as $id => $object) {
-      $username = $object->getUsername();
-      foreach (idx($id_map, $username, array()) as $name) {
+      $user_key = $object->getUsername();
+      $user_key = phutil_utf8_strtolower($user_key);
+      foreach (idx($id_map, $user_key, array()) as $name) {
         $results[$name] = $object;
       }
     }

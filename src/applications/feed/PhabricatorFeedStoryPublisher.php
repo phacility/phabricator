@@ -112,9 +112,7 @@ final class PhabricatorFeedStoryPublisher {
     }
 
     $this->insertNotifications($chrono_key);
-    if (PhabricatorEnv::getEnvConfig('notification.enabled')) {
-      $this->sendNotification($chrono_key);
-    }
+    $this->sendNotification($chrono_key);
 
     PhabricatorWorker::scheduleTask(
       'FeedPublisherWorker',
@@ -176,18 +174,12 @@ final class PhabricatorFeedStoryPublisher {
 
   private function sendNotification($chrono_key) {
     $data = array(
-      'data' => array(
-        'key'  => (string)$chrono_key,
-        'type' => 'notification',
-      ),
+      'key'         => (string)$chrono_key,
+      'type'        => 'notification',
       'subscribers' => $this->subscribedPHIDs,
     );
 
-    try {
-      PhabricatorNotificationClient::postMessage($data);
-    } catch (Exception $ex) {
-      // Ignore, these are not critical.
-    }
+    PhabricatorNotificationClient::tryToPostMessage($data);
   }
 
   /**

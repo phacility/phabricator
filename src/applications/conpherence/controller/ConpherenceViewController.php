@@ -97,6 +97,7 @@ final class ConpherenceViewController extends
       array(
         'title' => $title,
         'device' => true,
+        'pageObjects' => array($conpherence->getPHID()),
       ));
   }
 
@@ -156,7 +157,11 @@ final class ConpherenceViewController extends
             'type' => 'hidden',
             'name' => 'latest_transaction_id',
             'value' => $latest_transaction_id,
-            'sigil' => 'latest-transaction-id'
+            'sigil' => 'latest-transaction-id',
+            'meta' => array(
+              'threadPHID' => $conpherence->getPHID(),
+              'threadID' => $conpherence->getID(),
+            ),
           ),
           ''))
       ->render();

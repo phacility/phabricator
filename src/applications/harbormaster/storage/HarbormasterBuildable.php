@@ -123,7 +123,7 @@ final class HarbormasterBuildable extends HarbormasterDAO
         'buildID' => $build->getID()
       ));
 
-    return $this;
+    return $build;
   }
 
   public function getConfiguration() {

@@ -25,7 +25,7 @@
  */
 JX.install('Aphlict', {
 
-  construct : function(id, server, port) {
+  construct : function(id, server, port, subscriptions) {
     if (__DEV__) {
       if (JX.Aphlict._instance) {
         JX.$E('Aphlict object is sort of a singleton..!');
@@ -36,6 +36,7 @@ JX.install('Aphlict', {
 
     this._server = server;
     this._port = port;
+    this._subscriptions = subscriptions;
 
     // Flash puts its "objects" into global scope in an inconsistent way,
     // because it was written in like 1816 when globals were awesome and IE4
@@ -48,8 +49,12 @@ JX.install('Aphlict', {
   members : {
     _server : null,
     _port : null,
+    _subscriptions : null,
     start : function() {
-      this._flashContainer.connect(this._server, this._port);
+      this._flashContainer.connect(
+        this._server,
+        this._port,
+        this._subscriptions);
     }
   },
 

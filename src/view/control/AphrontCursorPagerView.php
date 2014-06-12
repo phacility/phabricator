@@ -146,7 +146,7 @@ final class AphrontCursorPagerView extends AphrontView {
         array(
           'href' => $first_uri,
         ),
-        "\xC2\xAB ". pht('First'));
+        "\xC2\xAB ".pht('First'));
     }
 
     $prev_uri = $this->getPrevPageURI();
@@ -156,7 +156,7 @@ final class AphrontCursorPagerView extends AphrontView {
         array(
           'href' => $prev_uri,
         ),
-        "\xE2\x80\xB9 " . pht('Prev'));
+        "\xE2\x80\xB9 ".pht('Prev'));
     }
 
     $next_uri = $this->getNextPageURI();
@@ -166,7 +166,7 @@ final class AphrontCursorPagerView extends AphrontView {
         array(
           'href' => $next_uri,
         ),
-        pht('Next') . " \xE2\x80\xBA");
+        pht('Next')." \xE2\x80\xBA");
     }
 
     return phutil_tag(

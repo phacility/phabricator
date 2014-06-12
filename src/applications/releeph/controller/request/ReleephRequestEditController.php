@@ -196,7 +196,7 @@ final class ReleephRequestEditController extends ReleephBranchController {
     $age_string = '';
     if ($is_edit) {
       $age_string = phabricator_format_relative_time(
-        time() - $pull->getDateCreated()) . ' ago';
+        time() - $pull->getDateCreated()).' ago';
     }
 
     // Warn the user if we've been redirected here because we tried to

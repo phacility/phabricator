@@ -9,8 +9,8 @@
     "PhabricatorBotObjectNameHandler",
     "PhabricatorBotSymbolHandler",
     "PhabricatorBotLogHandler",
+    "PhabricatorBotFeedNotificationHandler",
     "PhabricatorBotWhatsNewHandler",
-    "PhabricatorBotDifferentialNotificationHandler",
     "PhabricatorBotMacroHandler"
   ],
 

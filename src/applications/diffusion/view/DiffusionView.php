@@ -120,7 +120,7 @@ abstract class DiffusionView extends AphrontView {
     $callsign = $repository->getCallsign();
 
     if (strlen($summary)) {
-      $commit_name .= ': ' . $summary;
+      $commit_name .= ': '.$summary;
     }
 
     return phutil_tag(

@@ -17,12 +17,12 @@ JX.install('AphlictFlashPolicyServer', {
     _accessPort: null,
     _debug: null,
 
-    setDebugLog : function(log) {
+    setDebugLog: function(log) {
       this._debug = log;
       return this;
     },
 
-    setAccessPort : function(port) {
+    setAccessPort: function(port) {
       this._accessPort = port;
       return this;
     },

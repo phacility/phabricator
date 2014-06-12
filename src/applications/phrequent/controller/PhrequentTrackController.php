@@ -23,7 +23,7 @@ final class PhrequentTrackController
 
     if (!$this->isStartingTracking() &&
         !$this->isStoppingTracking()) {
-      throw new Exception('Unrecognized verb: ' . $this->verb);
+      throw new Exception('Unrecognized verb: '.$this->verb);
     }
 
     switch ($this->verb) {

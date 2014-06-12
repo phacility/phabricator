@@ -42,6 +42,7 @@
 
 .phabricator-action-header-icon-item .phui-tag-view {
   margin: 4px 2px 0;
+  display: inline-block;
 }
 
 .phabricator-action-header-link {
@@ -62,6 +63,25 @@
 
 .phabricator-action-header.gradient-red-header {
   background: {$red};
+}
+
+.phabricator-action-header.gradient-white-header {
+  background: #fff;
+}
+
+.phabricator-action-header.gradient-white-header .phabricator-action-header-title {
+  color: {$darkbluetext};
+  padding: 12px 0 12px 4px;
+}
+
+.phabricator-action-header.gradient-white-header
+ .phabricator-action-header-icon-list .phui-icon-view {
+  color: {$lightbluetext};
+}
+
+.phabricator-action-header.gradient-white-header
+ .phabricator-action-header-icon-list .phui-icon-view:hover {
+  color: {$darkbluetext};
 }
 
 .gradient-green-header .phabricator-action-header-title,
@@ -93,4 +113,17 @@
 .dashboard-panel .phabricator-action-header.gradient-lightblue-header {
   border: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$thinblueborder};
+}
+
+.dashboard-panel .phabricator-action-header.gradient-white-header {
+  border: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$thinblueborder};
+  border-top-right-radius: 3px;
+  border-top-left-radius: 3px;
+}
+
+.dashboard-panel .phabricator-action-header.gradient-white-header
+ .phabricator-action-header-icon-list {
+  padding-top: 6px;
+  padding-right: 6px;
 }

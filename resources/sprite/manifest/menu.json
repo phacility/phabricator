@@ -14,7 +14,7 @@
     "arrow-right"      : {
       "name" : "arrow-right",
       "rule" : ".phabricator-crumb-divider",
-      "hash" : "ae2d24462b09e41b62a43b11f57f17af"
+      "hash" : "87affa58adbe8da437a1cea6ffc5d8a4"
     },
     "conf-hover"       : {
       "name" : "conf-hover",

@@ -71,7 +71,7 @@ final class PhabricatorSourceCodeView extends AphrontView {
       }
 
       if ($this->canClickHighlight) {
-        $line_uri = $this->uri . '$' . $line_number;
+        $line_uri = $this->uri.'$'.$line_number;
         $line_href = (string) new PhutilURI($line_uri);
 
         $tag_number = javelin_tag(

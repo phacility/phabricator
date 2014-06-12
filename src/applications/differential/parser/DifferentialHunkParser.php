@@ -638,12 +638,12 @@ final class DifferentialHunkParser {
         if ($hunk_offset['-'] !== null || $hunk_offset['+'] !== null) {
           $header = '@@';
           if ($hunk_offset['-'] !== null) {
-            $header .= ' -' . ($hunk->getOldOffset() + $hunk_offset['-']) .
-              ',' . ($hunk_last['-'] - $hunk_offset['-'] + 1);
+            $header .= ' -'.($hunk->getOldOffset() + $hunk_offset['-']).
+              ','.($hunk_last['-'] - $hunk_offset['-'] + 1);
           }
           if ($hunk_offset['+'] !== null) {
-            $header .= ' +' . ($hunk->getNewOffset() + $hunk_offset['+']) .
-              ',' . ($hunk_last['+'] - $hunk_offset['+'] + 1);
+            $header .= ' +'.($hunk->getNewOffset() + $hunk_offset['+']).
+              ','.($hunk_last['+'] - $hunk_offset['+'] + 1);
           }
           $header .= ' @@';
           $context[] = $header;

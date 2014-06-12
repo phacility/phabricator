@@ -104,7 +104,7 @@ final class PhabricatorBotFeedNotificationHandler
       $latest = $this->getConduit()->callMethodSynchronous(
         'feed.query',
         array(
-          'limit'=>1
+          'limit' => 1,
         ));
 
       foreach ($latest as $story) {
@@ -127,9 +127,9 @@ final class PhabricatorBotFeedNotificationHandler
       $stories = $this->getConduit()->callMethodSynchronous(
         'feed.query',
         array(
-          'limit'=>$config_page_size,
-          'after'=>$chrono_key_cursor,
-          'view'=>'text'
+          'limit' => $config_page_size,
+          'after' => $chrono_key_cursor,
+          'view' => 'text',
         ));
 
       foreach ($stories as $story) {

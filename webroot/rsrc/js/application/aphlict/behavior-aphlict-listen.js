@@ -16,10 +16,39 @@ JX.behavior('aphlict-listen', function(config) {
   var showing_reload = false;
 
   function onready() {
-    var client = new JX.Aphlict(config.id, config.server, config.port)
+    var client = new JX.Aphlict(
+      config.id,
+      config.server,
+      config.port,
+      config.subscriptions);
+
+    client
       .setHandler(onaphlictmessage)
       .start();
   }
+
+  JX.Stratcom.listen('aphlict-receive-message', null, function(e) {
+    var message = e.getData();
+
+    if (message.type != 'notification') {
+      return;
+    }
+
+    var request = new JX.Request(
+      '/notification/individual/',
+      onnotification);
+
+    var routable = request
+      .addData({key: message.key})
+      .getRoutable();
+
+    routable
+      .setType('notification')
+      .setPriority(250);
+
+    JX.Router.getInstance().queue(routable);
+  });
+
 
   // Respond to a notification from the Aphlict notification server. We send
   // a request to Phabricator to get notification details.
@@ -34,19 +63,7 @@ JX.behavior('aphlict-listen', function(config) {
         break;
 
       case 'receive':
-        var request = new JX.Request(
-          '/notification/individual/',
-          onnotification);
-
-        var routable = request
-          .addData({key: message.key})
-          .getRoutable();
-
-        routable
-          .setType('notification')
-          .setPriority(250);
-
-        JX.Router.getInstance().queue(routable);
+        JX.Stratcom.invoke('aphlict-receive-message', null, message);
         break;
 
       default:

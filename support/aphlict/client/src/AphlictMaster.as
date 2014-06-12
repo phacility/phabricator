@@ -40,6 +40,11 @@ package {
      */
     private var remotePort:Number;
 
+    /**
+     * A dictionary mapping PHID to subscribed clients.
+     */
+    private var subscriptions:Dictionary;
+
     private var socket:Socket;
     private var readBuffer:ByteArray;
 
@@ -50,11 +55,12 @@ package {
       this.remoteServer = server;
       this.remotePort   = port;
 
+      this.clients = new Dictionary();
+      this.subscriptions = new Dictionary();
+
       // Connect to the Aphlict Server.
       this.recv.connect('aphlict_master');
       this.connectToServer();
-
-      this.clients = new Dictionary();
 
       // Start a timer and regularly purge dead clients.
       this.timer = new Timer(AphlictMaster.PURGE_INTERVAL);
@@ -82,6 +88,9 @@ package {
         if (new Date().getTime() - checkin > AphlictMaster.PURGE_INTERVAL) {
           this.log('Purging client: ' + client);
           delete this.clients[client];
+
+          this.log('Removing client subscriptions: ' + client);
+          this.unsubscribeAll(client);
         }
       }
     }
@@ -116,6 +125,16 @@ package {
 
     private function didConnectSocket(event:Event):void {
       this.externalInvoke('connected');
+
+      // Send subscriptions
+      var phids = new Array();
+      for (var phid:String in this.subscriptions) {
+        phids.push(phid);
+      }
+
+      if (phids.length) {
+        this.sendSubscribeCommand(phids);
+      }
     }
 
     private function didCloseSocket(event:Event):void {
@@ -128,6 +147,88 @@ package {
 
     private function didSecurityErrorSocket(event:SecurityErrorEvent):void {
       this.externalInvoke('error', event.text);
+    }
+
+    public function subscribe(client:String, phids:Array):void {
+      var newPHIDs = new Array();
+
+      for (var i:String in phids) {
+        var phid = phids[i];
+        if (!this.subscriptions[phid]) {
+          this.subscriptions[phid] = new Dictionary();
+          newPHIDs.push(phid);
+        }
+        this.subscriptions[phid][client] = true;
+      }
+
+      if (newPHIDs.length) {
+        this.sendSubscribeCommand(newPHIDs);
+      }
+    }
+
+    private function getSubscriptions(client:String):Array {
+      var subscriptions = new Array();
+
+      for (var phid:String in this.subscriptions) {
+        var clients = this.subscriptions[phid];
+        if (clients[client]) {
+          subscriptions.push(phid);
+        }
+      }
+
+      return subscriptions;
+    }
+
+    public function unsubscribeAll(client:String):void {
+      this.unsubscribe(client, this.getSubscriptions(client));
+    }
+
+    public function unsubscribe(client:String, phids:Array):void {
+      var oldPHIDs = new Array();
+
+      for (var i:String in phids) {
+        var phid = phids[i];
+
+        if (!this.subscriptions[phid]) {
+          continue;
+        }
+
+        delete this.subscriptions[phid][client];
+
+        var empty = true;
+        for (var key:String in this.subscriptions[phid]) {
+          empty = false;
+        }
+
+        if (empty) {
+          delete this.subscriptions[phid];
+          oldPHIDs.push(phid);
+        }
+      }
+
+      if (oldPHIDs.length) {
+        this.sendUnsubscribeCommand(oldPHIDs);
+      }
+    }
+
+    private function sendSubscribeCommand(phids:Array):void {
+      var msg:Dictionary = new Dictionary();
+      msg['command'] = 'subscribe';
+      msg['data'] = phids;
+
+      this.log('Sending subscribe command to server.');
+      this.socket.writeUTF(vegas.strings.JSON.serialize(msg));
+      this.socket.flush();
+    }
+
+    private function sendUnsubscribeCommand(phids:Array):void {
+      var msg:Dictionary = new Dictionary();
+      msg['command'] = 'unsubscribe';
+      msg['data'] = phids;
+
+      this.log('Sending subscribe command to server.');
+      this.socket.writeUTF(vegas.strings.JSON.serialize(msg));
+      this.socket.flush();
     }
 
     private function didReceiveSocket(event:Event):void {
@@ -153,8 +254,22 @@ package {
 
             // Send the message to all clients.
             for (var client:String in this.clients) {
-              this.log('Sending message to client: ' + client);
-              this.send.send(client, 'receiveMessage', data);
+              var subscribed = false;
+
+              for (var i:String in data.subscribers) {
+                var phid = data.subscribers[i];
+
+                if (this.subscriptions[phid] &&
+                    this.subscriptions[phid][client]) {
+                  subscribed = true;
+                  break;
+                }
+              }
+
+              if (subscribed) {
+                this.log('Sending message to client: ' + client);
+                this.send.send(client, 'receiveMessage', data);
+              }
             }
           } else {
             break;

@@ -25,10 +25,10 @@ if (config.logfile) {
 
 function parse_command_line_arguments(argv) {
   var config = {
-    port : 22280,
-    admin : 22281,
-    host : '127.0.0.1',
-    user : null,
+    port: 22280,
+    admin: 22281,
+    host: '127.0.0.1',
+    user: null,
     log: '/var/log/aphlict.log'
   };
 
@@ -36,10 +36,10 @@ function parse_command_line_arguments(argv) {
     var arg = argv[ii];
     var matches = arg.match(/^--([^=]+)=(.*)$/);
     if (!matches) {
-      throw new Error("Unknown argument '"+arg+"'!");
+      throw new Error("Unknown argument '" + arg + "'!");
     }
     if (!(matches[1] in config)) {
-      throw new Error("Unknown argument '"+matches[1]+"'!");
+      throw new Error("Unknown argument '" + matches[1] + "'!");
     }
     config[matches[1]] = matches[2];
   }
@@ -52,20 +52,21 @@ function parse_command_line_arguments(argv) {
 
 if (process.getuid() !== 0) {
   console.log(
-    "ERROR: "+
-    "This server must be run as root because it needs to bind to privileged "+
-    "port 843 to start a Flash policy server. It will downgrade to run as a "+
-    "less-privileged user after binding if you pass a user in the command "+
+    "ERROR: " +
+    "This server must be run as root because it needs to bind to privileged " +
+    "port 843 to start a Flash policy server. It will downgrade to run as a " +
+    "less-privileged user after binding if you pass a user in the command " +
     "line arguments with '--user=alincoln'.");
   process.exit(1);
 }
 
 var net = require('net');
-var http  = require('http');
+var http = require('http');
 var url = require('url');
 
-process.on('uncaughtException', function (err) {
-  debug.log("\n<<< UNCAUGHT EXCEPTION! >>>\n\n" + err);
+process.on('uncaughtException', function(err) {
+  debug.log("\n<<< UNCAUGHT EXCEPTION! >>>\n" + err.stack);
+
   process.exit(1);
 });
 
@@ -82,6 +83,61 @@ var send_server = net.createServer(function(socket) {
     listener.getDescription(),
     socket.remoteAddress);
 
+  var buffer = new Buffer([]);
+  var length = 0;
+
+  socket.on('data', function(data) {
+    buffer = Buffer.concat([buffer, new Buffer(data)]);
+
+    while (buffer.length) {
+      if (!length) {
+        length = buffer.readUInt16BE(0);
+        buffer = buffer.slice(2);
+      }
+
+      if (buffer.length < length) {
+        // We need to wait for the rest of the data.
+        return;
+      }
+
+      var message;
+      try {
+        message = JSON.parse(buffer.toString('utf8', 0, length));
+      } catch (err) {
+        debug.log('<%s> Received invalid data.', listener.getDescription());
+        continue;
+      } finally {
+        buffer = buffer.slice(length);
+        length = 0;
+      }
+
+      debug.log('<%s> Received data: %s',
+        listener.getDescription(),
+        JSON.stringify(message));
+
+      switch (message.command) {
+        case 'subscribe':
+          debug.log(
+            '<%s> Subscribed to: %s',
+            listener.getDescription(),
+            JSON.stringify(message.data));
+          listener.subscribe(message.data);
+          break;
+
+        case 'unsubscribe':
+          debug.log(
+            '<%s> Unsubscribed from: %s',
+            listener.getDescription(),
+            JSON.stringify(message.data));
+          listener.unsubscribe(message.data);
+          break;
+
+        default:
+          debug.log('<s> Unrecognized command.', listener.getDescription());
+      }
+    }
+  });
+
   socket.on('close', function() {
     clients.removeListener(listener);
     debug.log('<%s> Disconnected', listener.getDescription());
@@ -95,7 +151,7 @@ var send_server = net.createServer(function(socket) {
     debug.log('<%s> Ended Connection', listener.getDescription());
   });
 
-  socket.on('error', function (e) {
+  socket.on('error', function(e) {
     debug.log('<%s> Error: %s', listener.getDescription(), e);
   });
 
@@ -107,23 +163,29 @@ var messages_in = 0;
 var start_time = new Date().getTime();
 
 var receive_server = http.createServer(function(request, response) {
-  response.writeHead(200, {'Content-Type' : 'text/plain'});
-
   // Publishing a notification.
   if (request.method == 'POST') {
     var body = '';
 
-    request.on('data', function (data) {
+    request.on('data', function(data) {
       body += data;
     });
 
-    request.on('end', function () {
-      ++messages_in;
+    request.on('end', function() {
+      try {
+        var msg = JSON.parse(body);
 
-      var msg = JSON.parse(body);
-      debug.log('notification: ' + JSON.stringify(msg));
-      broadcast(msg.data);
-      response.end();
+        debug.log('notification: ' + JSON.stringify(msg));
+        ++messages_in;
+        transmit(msg);
+
+        response.writeHead(200, {'Content-Type': 'text/plain'});
+      } catch (err) {
+        response.statusCode = 400;
+        response.write('400 Bad Request');
+      } finally {
+        response.end();
+      }
     });
   } else if (request.url == '/status/') {
     request.on('data', function(data) {
@@ -139,9 +201,10 @@ var receive_server = http.createServer(function(request, response) {
         'messages.in': messages_in,
         'messages.out': messages_out,
         'log': config.log,
-        'version': 5
+        'version': 6
       };
 
+      response.writeHead(200, {'Content-Type': 'text/plain'});
       response.write(JSON.stringify(status));
       response.end();
     });
@@ -153,12 +216,16 @@ var receive_server = http.createServer(function(request, response) {
 
 }).listen(config.admin, config.host);
 
-function broadcast(data) {
-  var listeners = clients.getListeners();
-  for (var id in listeners) {
-    var listener = listeners[id];
+function transmit(msg) {
+  var listeners = clients.getListeners().filter(function(client) {
+    return client.isSubscribedToAny(msg.subscribers);
+  });
+
+  for (var i = 0; i < listeners.length; i++) {
+    var listener = listeners[i];
+
     try {
-      listener.writeMessage(data);
+      listener.writeMessage(msg);
 
       ++messages_out;
       debug.log('<%s> Wrote Message', listener.getDescription());

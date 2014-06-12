@@ -34,7 +34,7 @@ final class PhabricatorConfigIgnoreController
         'This issue will no longer be suppressed, and will return to its '.
         'rightful place as a global setup warning.');
     } else {
-      throw new Exception('Unrecognized verb: ' . $this->verb);
+      throw new Exception('Unrecognized verb: '.$this->verb);
     }
 
     $dialog = id(new AphrontDialogView())

@@ -53,8 +53,8 @@ final class DifferentialLandingToHostedGit
 
     $missing_binary =
       "\nindex "
-      . "0000000000000000000000000000000000000000.."
-      . "0000000000000000000000000000000000000000\n";
+      ."0000000000000000000000000000000000000000.."
+      ."0000000000000000000000000000000000000000\n";
     if (strpos($raw_diff, $missing_binary) !== false) {
       throw new Exception('Patch is missing content for a binary file');
     }
@@ -85,7 +85,7 @@ final class DifferentialLandingToHostedGit
     $author_date = $revision->getDateCreated();
 
     $workspace->execxLocal(
-      '-c user.name=%s -c user.email=%s ' .
+      '-c user.name=%s -c user.email=%s '.
       'commit --date=%s --author=%s '.
       '--message=%s',
       // -c will set the 'committer'

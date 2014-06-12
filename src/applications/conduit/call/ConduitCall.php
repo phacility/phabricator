@@ -27,8 +27,8 @@ final class ConduitCall {
       $this->handler->defineParamTypes());
     if ($invalid_params) {
       throw new ConduitException(
-        "Method '{$method}' doesn't define these parameters: '" .
-        implode("', '", array_keys($invalid_params)) . "'.");
+        "Method '{$method}' doesn't define these parameters: '".
+        implode("', '", array_keys($invalid_params))."'.");
     }
 
     if ($this->servers) {

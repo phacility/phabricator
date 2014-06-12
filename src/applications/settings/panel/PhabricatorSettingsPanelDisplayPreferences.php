@@ -113,10 +113,10 @@ EXAMPLE;
           ->setOptions(
             array(
               'glyph' =>
-              pht("In page titles, show Tool names as unicode glyphs: " .
+              pht("In page titles, show Tool names as unicode glyphs: ".
                 "\xE2\x9A\x99"),
               'text' =>
-              pht('In page titles, show Tool names as plain text: ' .
+              pht('In page titles, show Tool names as plain text: '.
                 '[Differential]'),
             )))
       ->appendChild(

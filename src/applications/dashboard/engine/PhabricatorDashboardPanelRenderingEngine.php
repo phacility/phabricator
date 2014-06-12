@@ -206,14 +206,14 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
       case self::HEADER_MODE_EDIT:
         $header = id(new PhabricatorActionHeaderView())
           ->setHeaderTitle($panel->getName())
-          ->setHeaderColor(PhabricatorActionHeaderView::HEADER_LIGHTBLUE);
+          ->setHeaderColor(PhabricatorActionHeaderView::HEADER_WHITE);
         $header = $this->addPanelHeaderActions($header);
         break;
       case self::HEADER_MODE_NORMAL:
       default:
         $header = id(new PhabricatorActionHeaderView())
           ->setHeaderTitle($panel->getName())
-          ->setHeaderColor(PhabricatorActionHeaderView::HEADER_LIGHTBLUE);
+          ->setHeaderColor(PhabricatorActionHeaderView::HEADER_WHITE);
         break;
     }
     return $header;

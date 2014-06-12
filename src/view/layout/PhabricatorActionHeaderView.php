@@ -9,6 +9,7 @@ final class PhabricatorActionHeaderView extends AphrontView {
   const HEADER_RED = 'red';
   const HEADER_YELLOW = 'yellow';
   const HEADER_LIGHTBLUE ='lightblue';
+  const HEADER_WHITE = 'white';
 
   private $headerTitle;
   private $headerHref;
