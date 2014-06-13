@@ -3,6 +3,10 @@
 final class PhabricatorCountdownSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Countdowns');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationCountdown';
   }

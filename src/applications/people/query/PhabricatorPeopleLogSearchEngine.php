@@ -3,6 +3,10 @@
 final class PhabricatorPeopleLogSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Account Activity');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationPeople';
   }

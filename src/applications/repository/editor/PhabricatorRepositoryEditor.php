@@ -318,6 +318,21 @@ final class PhabricatorRepositoryEditor
     $errors = parent::validateTransaction($object, $type, $xactions);
 
     switch ($type) {
+      case PhabricatorRepositoryTransaction::TYPE_REMOTE_URI:
+        foreach ($xactions as $xaction) {
+          $new_uri = $xaction->getNewValue();
+          try {
+            PhabricatorRepository::assertValidRemoteURI($new_uri);
+          } catch (Exception $ex) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              $ex->getMessage(),
+              $xaction);
+          }
+        }
+        break;
+
       case PhabricatorRepositoryTransaction::TYPE_CREDENTIAL:
         $ok = PassphraseCredentialControl::validateTransactions(
           $this->getActor(),

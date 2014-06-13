@@ -283,7 +283,8 @@ final class CelerityStaticResourceResponse {
 
   public function getURI(
     CelerityResourceMap $map,
-    $name) {
+    $name,
+    $use_primary_domain = false) {
 
     $uri = $map->getURIForName($name);
 
@@ -298,7 +299,11 @@ final class CelerityStaticResourceResponse {
       $uri = preg_replace('@^/res/@', '/res/'.$mtime.'T/', $uri);
     }
 
-    return PhabricatorEnv::getCDNURI($uri);
+    if ($use_primary_domain) {
+      return PhabricatorEnv::getURI($uri);
+    } else {
+      return PhabricatorEnv::getCDNURI($uri);
+    }
   }
 
 }

@@ -40,6 +40,7 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
     } else {
       $h_mode = PhabricatorDashboardPanelRenderingEngine::HEADER_MODE_NORMAL;
     }
+
     foreach ($panel_grid_locations as $column => $panel_column_locations) {
       $panel_phids = $panel_column_locations;
       $column_panels = array_select_keys($panels, $panel_phids);
@@ -85,45 +86,53 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
   }
 
   private function renderAddPanelPlaceHolder($column) {
-    $uri = $this->getAddPanelURI($column);
-
     $dashboard = $this->dashboard;
     $panels = $dashboard->getPanels();
-    $layout_config = $dashboard->getLayoutConfigObject();
-    if ($layout_config->isMultiColumnLayout() && count($panels)) {
-      $text = pht('Drag a panel here or click to add a panel.');
-    } else {
-      $text = pht('Click to add a panel.');
-    }
+
     return javelin_tag(
-      'a',
+      'span',
       array(
         'sigil' => 'workflow',
         'class' => 'drag-ghost dashboard-panel-placeholder',
-        'href' => (string) $uri),
-      $text);
+      ),
+      pht('This column does not have any panels yet.'));
   }
 
   private function renderAddPanelUI($column) {
-    $uri = $this->getAddPanelURI($column);
+    $dashboard_id = $this->dashboard->getID();
 
-    return id(new PHUIButtonView())
+    $create_uri = id(new PhutilURI('/dashboard/panel/create/'))
+      ->setQueryParam('dashboardID', $dashboard_id)
+      ->setQueryParam('column', $column);
+
+    $add_uri = id(new PhutilURI('/dashboard/addpanel/'.$dashboard_id.'/'))
+      ->setQueryParam('column', $column);
+
+    $create_button = id(new PHUIButtonView())
       ->setTag('a')
-      ->setHref((string) $uri)
+      ->setHref($create_uri)
       ->setWorkflow(true)
       ->setColor(PHUIButtonView::GREY)
-      ->setIcon(id(new PHUIIconView())
-        ->setIconFont('fa-plus'))
-      ->setText(pht('Add Panel'))
-      ->addClass(PHUI::MARGIN_LARGE);
-  }
+      ->setText(pht('Create Panel'))
+      ->addClass(PHUI::MARGIN_MEDIUM);
 
-  private function getAddPanelURI($column) {
-    $dashboard = $this->dashboard;
-    $uri = id(new PhutilURI('/dashboard/addpanel/'.$dashboard->getID().'/'))
-      ->setQueryParam('column', $column)
-      ->setQueryParam('src', 'arrange');
-    return $uri;
+    $add_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setHref($add_uri)
+      ->setWorkflow(true)
+      ->setColor(PHUIButtonView::GREY)
+      ->setText(pht('Add Existing Panel'))
+      ->addClass(PHUI::MARGIN_MEDIUM);
+
+    return phutil_tag(
+      'div',
+      array(
+        'style' => 'text-align: center;',
+      ),
+      array(
+        $create_button,
+        $add_button,
+      ));
   }
 
 }

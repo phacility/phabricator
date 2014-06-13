@@ -33,6 +33,32 @@ final class HarbormasterBuildable extends HarbormasterDAO
     }
   }
 
+  public static function getBuildableStatusIcon($status) {
+    switch ($status) {
+      case self::STATUS_BUILDING:
+        return PHUIStatusItemView::ICON_RIGHT;
+      case self::STATUS_PASSED:
+        return PHUIStatusItemView::ICON_ACCEPT;
+      case self::STATUS_FAILED:
+        return PHUIStatusItemView::ICON_REJECT;
+      default:
+        return PHUIStatusItemView::ICON_QUESTION;
+    }
+  }
+
+  public static function getBuildableStatusColor($status) {
+    switch ($status) {
+      case self::STATUS_BUILDING:
+        return 'blue';
+      case self::STATUS_PASSED:
+        return 'green';
+      case self::STATUS_FAILED:
+        return 'red';
+      default:
+        return 'bluegrey';
+    }
+  }
+  
   public static function initializeNewBuildable(PhabricatorUser $actor) {
     return id(new HarbormasterBuildable())
       ->setIsManualBuildable(0)

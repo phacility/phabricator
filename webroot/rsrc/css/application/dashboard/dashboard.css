@@ -50,18 +50,12 @@
 .aphront-multi-column-fluid
 .aphront-multi-column-column.dashboard-column-empty
 .dashboard-panel-placeholder {
-  color: {$greytext};
   display: block;
   padding: 24px;
   margin: 16px 16px 0px 16px;
-}
-
-.aphront-multi-column-fluid
-.aphront-multi-column-column.dashboard-column-empty
-.dashboard-panel-placeholder:hover {
   text-decoration: none;
   border: 1px {$greyborder} dashed;
-  color: {$darkgreytext};
+  color: {$greytext};
 }
 
 .aphront-multi-column-fluid
@@ -74,4 +68,12 @@
 .aphront-multi-column-column-outer
 .aphront-multi-column-column .aphront-error-view {
   margin: 0;
+}
+
+.dashboard-panel .dashboard-box {
+  padding: 12px;
+  background: #fff;
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
 }

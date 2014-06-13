@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorApplicationLaunchView extends AphrontView {
+final class PhabricatorApplicationLaunchView extends AphrontTagView {
 
   private $application;
   private $status;
@@ -15,7 +15,19 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
     return $this;
   }
 
-  public function render() {
+  protected function getTagName() {
+    return $this->application ? 'a' : 'div';
+  }
+
+  protected function getTagAttributes() {
+    $application = $this->application;
+    return array(
+      'class' => array('phabricator-application-launch-container'),
+      'href'  => $application ? $application->getBaseURI() : null,
+    );
+  }
+
+  protected function getTagContent() {
     $application = $this->application;
 
     require_celerity_resource('phabricator-application-launch-view-css');
@@ -124,20 +136,10 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
         '');
     }
 
-    $classes = array();
-    $classes[] = 'phabricator-application-launch-container';
-
-    $app_button = phutil_tag(
-      $application ? 'a' : 'div',
-      array(
-        'class' => implode(' ', $classes),
-        'href'  => $application ? $application->getBaseURI() : null,
-      ),
-      array(
-        $icon,
-        $content,
-      ));
-
-    return $app_button;
+    return array(
+      $icon,
+      $content,
+    );
   }
+
 }

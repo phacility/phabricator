@@ -373,7 +373,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         }
 
         $map = CelerityResourceMap::getNamedInstance('phabricator');
-        $swf_uri = $response->getURI($map, 'rsrc/swf/aphlict.swf');
+        $swf_uri = $response->getURI($map, 'rsrc/swf/aphlict.swf', true);
 
         $enable_debug = PhabricatorEnv::getEnvConfig('notification.debug');
 

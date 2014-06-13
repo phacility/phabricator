@@ -3,6 +3,10 @@
 final class PassphraseCredentialSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Passphrase Credentials');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationPassphrase';
   }

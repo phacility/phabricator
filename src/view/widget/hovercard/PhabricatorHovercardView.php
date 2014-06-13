@@ -158,7 +158,7 @@ final class PhabricatorHovercardView extends AphrontView {
       'phabricator-hovercard-container',
       array(
         phutil_tag_div('phabricator-hovercard-head', $header),
-        phutil_tag_div('phabricator-hovercard-body', $body),
+        phutil_tag_div('phabricator-hovercard-body grouped', $body),
         $tail,
       ));
 

@@ -29,8 +29,8 @@ final class DiffusionRepositoryEditDeleteController
       'If you really want to delete the repository, run this command from '.
       'the command line:');
     $command = csprintf(
-      'phabricator/ $ ./bin/remove destroy %s',
-      $repository->getCallsign());
+      'phabricator/ $ ./bin/remove destroy %R',
+      $repository->getMonogram());
     $text_2 = pht('Repositories touch many objects and as such deletes are '.
                   'prohibitively expensive to run from the web UI.');
     $body = phutil_tag(

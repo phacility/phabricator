@@ -30,6 +30,10 @@ final class ManiphestTaskSearchEngine
     return $this;
   }
 
+  public function getResultTypeDescription() {
+    return pht('Tasks');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationManiphest';
   }

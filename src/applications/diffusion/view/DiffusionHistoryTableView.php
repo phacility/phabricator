@@ -7,10 +7,12 @@ final class DiffusionHistoryTableView extends DiffusionView {
   private $handles = array();
   private $isHead;
   private $parents;
+  private $buildCache;
 
   public function setHistory(array $history) {
     assert_instances_of($history, 'DiffusionPathChange');
     $this->history = $history;
+    $this->buildCache = null;
     return $this;
   }
 
@@ -60,6 +62,28 @@ final class DiffusionHistoryTableView extends DiffusionView {
     return $this;
   }
 
+  public function loadBuildablesOnDemand() {
+    if ($this->buildCache !== null) {
+      return $this->buildCache;
+    }
+    
+    $commits_to_builds = array();
+    
+    $commits = mpull($this->history, 'getCommit');
+    
+    $commit_phids = mpull($commits, 'getPHID');
+    
+    $buildables = id(new HarbormasterBuildableQuery())
+      ->setViewer($this->getUser())
+      ->withBuildablePHIDs($commit_phids)
+      ->withManualBuildables(false)
+      ->execute();
+    
+    $this->buildCache = mpull($buildables, null, 'getBuildablePHID');
+    
+    return $this->buildCache;
+  }
+  
   public function render() {
     $drequest = $this->getDiffusionRequest();
 
@@ -70,6 +94,10 @@ final class DiffusionHistoryTableView extends DiffusionView {
       $graph = $this->renderGraph();
     }
 
+    $show_builds = PhabricatorApplication::isClassInstalledForViewer(
+      'PhabricatorApplicationHarbormaster',
+      $this->getUser());
+    
     $rows = array();
     $ii = 0;
     foreach ($this->history as $history) {
@@ -124,11 +152,47 @@ final class DiffusionHistoryTableView extends DiffusionView {
         $summary = phutil_tag('em', array(), "Importing\xE2\x80\xA6");
       }
 
+      $build = null;
+      if ($show_builds) {
+        $buildable_lookup = $this->loadBuildablesOnDemand();
+        $buildable = idx($buildable_lookup, $commit->getPHID());
+        if ($buildable !== null) {
+          $icon = HarbormasterBuildable::getBuildableStatusIcon(
+            $buildable->getBuildableStatus());
+          $color = HarbormasterBuildable::getBuildableStatusColor(
+            $buildable->getBuildableStatus());
+          $name = HarbormasterBuildable::getBuildableStatusName(
+            $buildable->getBuildableStatus());
+          
+          $icon_view = id(new PHUIIconView())
+            ->setIconFont($icon.' '.$color);
+            
+          $tooltip_view = javelin_tag(
+            'span',
+            array(
+              'sigil' => 'has-tooltip',
+              'meta' => array('tip' => $name)),
+            $icon_view);
+            
+          Javelin::initBehavior('phabricator-tooltips');
+          
+          $href_view = phutil_tag(
+            'a',
+            array('href' => '/'.$buildable->getMonogram()),
+            $tooltip_view);
+            
+          $build = $href_view;
+          
+          $has_any_build = true;
+        }
+      }
+      
       $rows[] = array(
         $graph ? $graph[$ii++] : null,
         self::linkCommit(
           $drequest->getRepository(),
           $history->getCommitIdentifier()),
+        $build,
         ($commit ?
           self::linkRevision(idx($this->revisions, $commit->getPHID())) :
           null),
@@ -138,12 +202,13 @@ final class DiffusionHistoryTableView extends DiffusionView {
         $time,
       );
     }
-
+   
     $view = new AphrontTableView($rows);
     $view->setHeaders(
       array(
         '',
         pht('Commit'),
+        '',
         pht('Revision'),
         pht('Author/Committer'),
         pht('Details'),
@@ -154,6 +219,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
       array(
         'threads',
         'n',
+        'icon',
         'n',
         '',
         'wide',
@@ -167,6 +233,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
     $view->setDeviceVisibility(
       array(
         $graph ? true : false,
+        true,
         true,
         true,
         false,

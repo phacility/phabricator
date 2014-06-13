@@ -3,6 +3,10 @@
 final class PhabricatorMacroSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Macros');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationMacro';
   }
@@ -205,12 +209,8 @@ final class PhabricatorMacroSearchEngine
       }
 
       $item->setURI($this->getApplicationURI('/view/'.$macro->getID().'/'));
-
-      $name = $macro->getName();
-      if ($macro->getIsDisabled()) {
-        $name = pht('%s (Disabled)', $name);
-      }
-      $item->setHeader($name);
+      $item->setDisabled($macro->getisDisabled());
+      $item->setHeader($macro->getName());
 
       $pinboard->addItem($item);
     }

@@ -3,6 +3,10 @@
 final class PhabricatorCommitSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Commits');
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 

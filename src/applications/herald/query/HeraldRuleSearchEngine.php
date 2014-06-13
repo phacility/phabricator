@@ -3,6 +3,10 @@
 final class HeraldRuleSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Herald Rules');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationHerald';
   }

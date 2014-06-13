@@ -40,3 +40,7 @@ input.diffusion-clone-uri {
   text-align: right;
   color: {$lightgreytext};
 }
+
+.diffusion-locate-file-view {
+  border-bottom: 1px solid {$thinblueborder};
+}

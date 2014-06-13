@@ -3,6 +3,10 @@
 final class DifferentialRevisionSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Differential Revisions');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationDifferential';
   }

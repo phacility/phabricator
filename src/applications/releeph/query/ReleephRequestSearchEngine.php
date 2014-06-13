@@ -6,6 +6,10 @@ final class ReleephRequestSearchEngine
   private $branch;
   private $baseURI;
 
+  public function getResultTypeDescription() {
+    return pht('Releeph Pull Requests');
+  }
+
   public function setBranch(ReleephBranch $branch) {
     $this->branch = $branch;
     return $this;

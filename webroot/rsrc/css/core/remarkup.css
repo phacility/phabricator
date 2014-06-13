@@ -154,7 +154,7 @@
   border-left: 3px solid {$lightbluetext};
   color: {$bluetext};
   font-style:  italic;
-  margin: 4px 20px 12px 0;
+  margin: 4px 0 12px 0;
   padding: 8px 12px;
   background-color: #F8F9FC;
 }
@@ -164,7 +164,16 @@
 }
 
 .phabricator-remarkup blockquote div.remarkup-reply-head {
-  font-weight: bold;
+  font-style: normal;
+  padding-bottom: 4px;
+}
+
+.phabricator-remarkup blockquote div.remarkup-reply-head
+  .phui-tag-core {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  color: {$darkbluetext};
 }
 
 .phabricator-remarkup img.remarkup-proxy-image {

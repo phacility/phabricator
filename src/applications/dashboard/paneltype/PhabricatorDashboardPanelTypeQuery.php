@@ -20,11 +20,11 @@ final class PhabricatorDashboardPanelTypeQuery
   public function getFieldSpecifications() {
     return array(
       'class' => array(
-        'name' => pht('ApplicationSearch Class'),
-        'type' => 'text',
+        'name' => pht('Search For'),
+        'type' => 'search.application',
       ),
       'key' => array(
-        'name' => pht('ApplicationSearch Key'),
+        'name' => pht('Query'),
         'type' => 'text',
       ),
       'limit' => array(

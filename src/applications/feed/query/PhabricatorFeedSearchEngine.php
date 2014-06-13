@@ -3,6 +3,10 @@
 final class PhabricatorFeedSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Feed Stories');
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 

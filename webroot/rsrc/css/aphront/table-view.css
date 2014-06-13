@@ -181,6 +181,11 @@ th.aphront-table-view-sortable-selected {
   width: 1px;
 }
 
+.aphront-table-view td.icon, .aphront-table-view th.icon {
+  width: 1px;
+  padding: 0px;
+}
+
 div.single-display-line-bounds {
   width: 100%;
   position: relative;
@@ -268,13 +273,5 @@ span.single-display-line-content {
 }
 
 .phui-object-box .aphront-table-view {
-  border-style: solid;
-  border-width: 1px 0 0 0;
-  border-color: {$lightblueborder};
-}
-
-/* When a table immediately follows a header, remove the top border. */
-.phui-object-box .phui-header-shell +
-  .aphront-table-wrap .aphront-table-view {
   border: none;
 }

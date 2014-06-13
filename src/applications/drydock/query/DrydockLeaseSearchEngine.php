@@ -3,6 +3,10 @@
 final class DrydockLeaseSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Drydock Leases');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationDrydock';
   }

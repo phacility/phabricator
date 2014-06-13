@@ -6,6 +6,7 @@ final class PHUIPinboardItemView extends AphrontView {
   private $uri;
   private $header;
   private $iconBlock = array();
+  private $disabled;
 
   private $imageWidth;
   private $imageHeight;
@@ -36,14 +37,24 @@ final class PHUIPinboardItemView extends AphrontView {
     return $this;
   }
 
+  public function setDisabled($disabled) {
+    $this->disabled = $disabled;
+    return $this;
+  }
+
   public function render() {
     $header = null;
     if ($this->header) {
+      if ($this->disabled) {
+        $header_color = 'gradient-lightgrey-header';
+      } else {
+        $header_color = 'gradient-lightblue-header';
+      }
       $header = phutil_tag(
         'div',
         array(
           'class' => 'phui-pinboard-item-header '.
-            'sprite-gradient gradient-lightblue-header',
+            'sprite-gradient '.$header_color,
         ),
         phutil_tag('a', array('href' => $this->uri), $this->header));
     }
@@ -96,10 +107,16 @@ final class PHUIPinboardItemView extends AphrontView {
         $content);
     }
 
+    $classes = array();
+    $classes[] = 'phui-pinboard-item-view';
+    if ($this->disabled) {
+      $classes[] = 'phui-pinboard-item-disabled';
+    }
+
     return phutil_tag(
       'div',
       array(
-        'class' => 'phui-pinboard-item-view',
+        'class' => implode(' ', $classes),
       ),
       array(
         $header,

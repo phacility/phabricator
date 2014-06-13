@@ -79,6 +79,7 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
       ),
       '/tag/' => array(
         '(?P<slug>[^/]+)/' => 'PhabricatorProjectProfileController',
+        '(?P<slug>[^/]+)/board/' => 'PhabricatorProjectBoardViewController',
       ),
     );
   }

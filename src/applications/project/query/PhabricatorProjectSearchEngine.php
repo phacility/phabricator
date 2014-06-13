@@ -3,6 +3,10 @@
 final class PhabricatorProjectSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Projects');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationProject';
   }
@@ -137,11 +141,28 @@ final class PhabricatorProjectSearchEngine
     $list->setUser($viewer);
     foreach ($projects as $project) {
       $id = $project->getID();
+      $workboards_uri = $this->getApplicationURI("board/{$id}/");
+      $members_uri = $this->getApplicationURI("members/{$id}/");
+      $workboards_url = phutil_tag(
+        'a',
+        array(
+          'href' => $workboards_uri
+        ),
+        pht('Workboards'));
+
+      $members_url = phutil_tag(
+        'a',
+        array(
+          'href' => $members_uri
+        ),
+        pht('Members'));
 
       $item = id(new PHUIObjectItemView())
         ->setHeader($project->getName())
         ->setHref($this->getApplicationURI("view/{$id}/"))
-        ->setImageURI($project->getProfileImageURI());
+        ->setImageURI($project->getProfileImageURI())
+        ->addAttribute($workboards_url)
+        ->addAttribute($members_url);
 
       if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ARCHIVED) {
         $item->addIcon('delete-grey', pht('Archived'));

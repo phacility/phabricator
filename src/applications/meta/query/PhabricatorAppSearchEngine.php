@@ -3,6 +3,10 @@
 final class PhabricatorAppSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Applications');
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorApplicationApplications';
   }
