@@ -54,6 +54,19 @@ final class PhabricatorRepositoryPushEvent
     return $this->assertAttached($this->logs);
   }
 
+  public function delete() {
+    $logs = id(new PhabricatorRepositoryPushLog())
+      ->loadAllWhere('pushEventPHID = %s', $this->getPHID());
+    $this->openTransaction();
+
+      foreach ($logs as $log) {
+        $log->delete();
+      }
+      $result = parent::delete();
+
+    $this->saveTransaction();
+    return $result;
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

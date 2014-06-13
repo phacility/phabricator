@@ -145,6 +145,15 @@ final class PhabricatorRepositoryCommit
       foreach ($audits as $audit) {
         $audit->delete();
       }
+
+      $conn_w = $this->establishConnection('w');
+
+      queryfx(
+        $conn_w,
+        'DELETE FROM %T WHERE childCommitID = %d',
+        PhabricatorRepository::TABLE_PARENTS,
+        $this->getID());
+
       $result = parent::delete();
 
     $this->saveTransaction();
