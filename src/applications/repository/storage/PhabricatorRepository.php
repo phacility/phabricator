@@ -1257,6 +1257,68 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $this;
   }
 
+  public static function getRemoteURIProtocol($raw_uri) {
+    $uri = new PhutilURI($raw_uri);
+    if ($uri->getProtocol()) {
+      return strtolower($uri->getProtocol());
+    }
+
+    $git_uri = new PhutilGitURI($raw_uri);
+    if (strlen($git_uri->getDomain()) && strlen($git_uri->getPath())) {
+      return 'ssh';
+    }
+
+    return null;
+  }
+
+  public static function assertValidRemoteURI($uri) {
+    if (trim($uri) != $uri) {
+      throw new Exception(
+        pht(
+          'The remote URI has leading or trailing whitespace.'));
+    }
+
+    $protocol = self::getRemoteURIProtocol($uri);
+
+    // Catch confusion between Git/SCP-style URIs and normal URIs. See T3619
+    // for discussion. This is usually a user adding "ssh://" to an implicit
+    // SSH Git URI.
+    if ($protocol == 'ssh') {
+      if (preg_match('(^[^:@]+://[^/:]+:[^\d])', $uri)) {
+        throw new Exception(
+          pht(
+            "The remote URI is not formatted correctly. Remote URIs ".
+            "with an explicit protocol should be in the form ".
+            "'proto://domain/path', not 'proto://domain:/path'. ".
+            "The ':/path' syntax is only valid in SCP-style URIs."));
+      }
+    }
+
+    switch ($protocol) {
+      case 'ssh':
+      case 'http':
+      case 'https':
+      case 'git':
+      case 'svn':
+      case 'svn+ssh':
+        break;
+      default:
+        // NOTE: We're explicitly rejecting 'file://' because it can be
+        // used to clone from the working copy of another repository on disk
+        // that you don't normally have permission to access.
+
+        throw new Exception(
+          pht(
+            "The URI protocol is unrecognized. It should begin ".
+            "'ssh://', 'http://', 'https://', 'git://', 'svn://', ".
+            "'svn+ssh://', or be in the form 'git@domain.com:path'."));
+    }
+
+    return true;
+  }
+
+
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
