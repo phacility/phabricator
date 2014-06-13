@@ -565,16 +565,10 @@ final class ManiphestTaskDetailController extends ManiphestController {
         $column = head(array_intersect_key($columns, $in_column_phids));
         if ($column) {
           $column_name = pht('(%s)', $column->getDisplayName());
-          // TODO: This is really hacky but there's no cleaner way to do it
-          // right now, T4022 should give us better tools for this.
-          $column_href = str_replace(
-            'project/view',
-            'project/board',
-            $handle->getURI());
           $column_link = phutil_tag(
             'a',
             array(
-              'href' => $column_href,
+              'href' => $handle->getURI().'board/',
               'class' => 'maniphest-board-link',
             ),
             $column_name);
