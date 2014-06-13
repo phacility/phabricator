@@ -75,6 +75,45 @@ final class HarbormasterBuild extends HarbormasterDAO
     }
   }
 
+  public static function getBuildStatusIcon($status) {
+    switch ($status) {
+      case self::STATUS_INACTIVE:
+      case self::STATUS_PENDING:
+        return PHUIStatusItemView::ICON_OPEN;
+      case self::STATUS_BUILDING:
+        return PHUIStatusItemView::ICON_RIGHT;
+      case self::STATUS_PASSED:
+        return PHUIStatusItemView::ICON_ACCEPT;
+      case self::STATUS_FAILED:
+        return PHUIStatusItemView::ICON_REJECT;
+      case self::STATUS_ERROR:
+        return PHUIStatusItemView::ICON_MINUS;
+      case self::STATUS_STOPPED:
+        return PHUIStatusItemView::ICON_MINUS;
+      default:
+        return PHUIStatusItemView::ICON_QUESTION;
+    }
+  }
+
+  public static function getBuildStatusColor($status) {
+    switch ($status) {
+      case self::STATUS_INACTIVE:
+        return 'dark';
+      case self::STATUS_PENDING:
+      case self::STATUS_BUILDING:
+        return 'blue';
+      case self::STATUS_PASSED:
+        return 'green';
+      case self::STATUS_FAILED:
+      case self::STATUS_ERROR:
+        return 'red';
+      case self::STATUS_STOPPED:
+        return 'dark';
+      default:
+        return 'bluegrey';
+    }
+  }
+
   public static function initializeNewBuild(PhabricatorUser $actor) {
     return id(new HarbormasterBuild())
       ->setBuildStatus(self::STATUS_INACTIVE);
