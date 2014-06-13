@@ -124,6 +124,11 @@ button.simple:hover {
   box-shadow: none;
 }
 
+a.button.simple.phuix-dropdown-open {
+  background-color: #fff;
+  box-shadow: none;
+}
+
 a.button.grey:hover,
 button.grey:hover {
   text-decoration: none;
