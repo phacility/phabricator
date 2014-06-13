@@ -93,3 +93,11 @@ div.phabricator-application-launch-container {
 .phabricator-application-attention-count {
   color: {$sky};
 }
+
+a.phabricator-application-launch-phone-only {
+  display: none;
+}
+
+.device-phone a.phabricator-application-launch-phone-only {
+  display: block;
+}

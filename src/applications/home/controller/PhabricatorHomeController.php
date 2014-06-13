@@ -40,6 +40,15 @@ abstract class PhabricatorHomeController extends PhabricatorController {
     $applications[$meta_app] = PhabricatorApplication::getByClass($meta_app);
 
     $tiles = array();
+
+    $home_app = new PhabricatorApplicationHome();
+
+    $tiles[] = id(new PhabricatorApplicationLaunchView())
+      ->setApplication($home_app)
+      ->setApplicationStatus($home_app->loadStatus($user))
+      ->addClass('phabricator-application-launch-phone-only')
+      ->setUser($user);
+
     foreach ($pinned as $pinned_application) {
       if (empty($applications[$pinned_application])) {
         continue;
