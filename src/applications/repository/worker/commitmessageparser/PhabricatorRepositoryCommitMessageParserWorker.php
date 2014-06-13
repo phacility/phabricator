@@ -10,6 +10,10 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     $committer = $ref->getCommitter();
     $hashes = $ref->getHashes();
 
+    if (!$author) {
+      $author = '';
+    }
+
     $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
       'commitID = %d',
       $commit->getID());
