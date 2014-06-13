@@ -287,7 +287,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     }
 
     $icon = id(new PHUIIconView())
-      ->setIconFont('fa-fork');
+      ->setIconFont('fa-code-fork');
 
     $button = new PHUIButtonView();
     $button->setText(pht('Show All Branches'));
@@ -486,6 +486,8 @@ final class DiffusionRepositoryController extends DiffusionController {
     $browse_exception,
     array $handles) {
 
+    require_celerity_resource('diffusion-icons-css');
+
     $request = $this->getRequest();
     $viewer = $request->getUser();
     $drequest = $this->getDiffusionRequest();
@@ -553,7 +555,10 @@ final class DiffusionRepositoryController extends DiffusionController {
             ->setHardpointID('locate-control')
             ->setID('locate-input')
             ->setLabel(pht('Locate File')));
-      $browse_panel->appendChild($form->buildLayoutView());
+      $form_box = id(new PHUIBoxView())
+        ->addClass('diffusion-locate-file-view')
+        ->appendChild($form->buildLayoutView());
+      $browse_panel->appendChild($form_box);
     }
 
     $browse_panel->appendChild($browse_table);
