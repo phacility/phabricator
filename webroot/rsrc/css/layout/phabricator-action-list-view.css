@@ -25,8 +25,9 @@
   display: block;
 }
 
-.device .phabricator-action-view button.phabricator-action-view-item,
-.device .phabricator-action-view-item {
+.device .phui-property-list-view
+  .phabricator-action-view button.phabricator-action-view-item,
+.device .phui-property-list-view .phabricator-action-view-item {
   font-size: 14px;
   line-height: 22px;
   padding-bottom: 4px;

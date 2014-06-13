@@ -7,7 +7,7 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => '595348ad',
+    'core.pkg.css' => '6b846f5e',
     'core.pkg.js' => '8335fe3f',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => '4a93db37',
@@ -112,7 +112,7 @@ return array(
     'rsrc/css/font/font-source-sans-pro.css' => '91d53463',
     'rsrc/css/font/phui-font-icon-base.css' => 'eb84f033',
     'rsrc/css/layout/phabricator-action-header-view.css' => 'f11f18b5',
-    'rsrc/css/layout/phabricator-action-list-view.css' => 'dcbfc854',
+    'rsrc/css/layout/phabricator-action-list-view.css' => '35dbd16e',
     'rsrc/css/layout/phabricator-crumbs-view.css' => '7fbf25b8',
     'rsrc/css/layout/phabricator-filetree-view.css' => 'fccf9f82',
     'rsrc/css/layout/phabricator-hovercard-view.css' => 'e010d7db',
@@ -135,7 +135,7 @@ return array(
     'rsrc/css/phui/phui-list.css' => '43ed2d93',
     'rsrc/css/phui/phui-object-box.css' => 'ce92d8ec',
     'rsrc/css/phui/phui-object-item-list-view.css' => '46e12abc',
-    'rsrc/css/phui/phui-pinboard-view.css' => '874c22f9',
+    'rsrc/css/phui/phui-pinboard-view.css' => '32e8e1a9',
     'rsrc/css/phui/phui-property-list-view.css' => '2f7199e8',
     'rsrc/css/phui/phui-remarkup-preview.css' => '19ad512b',
     'rsrc/css/phui/phui-spacing.css' => '042804d6',
@@ -686,7 +686,7 @@ return array(
     'path-typeahead' => 'f7fc67ec',
     'people-profile-css' => 'ba7b2762',
     'phabricator-action-header-view-css' => 'f11f18b5',
-    'phabricator-action-list-view-css' => 'dcbfc854',
+    'phabricator-action-list-view-css' => '35dbd16e',
     'phabricator-application-launch-view-css' => '8b7e271d',
     'phabricator-busy' => '6453c869',
     'phabricator-chatlog-css' => '852140ff',
@@ -764,7 +764,7 @@ return array(
     'phui-list-view-css' => '43ed2d93',
     'phui-object-box-css' => 'ce92d8ec',
     'phui-object-item-list-view-css' => '46e12abc',
-    'phui-pinboard-view-css' => '874c22f9',
+    'phui-pinboard-view-css' => '32e8e1a9',
     'phui-property-list-view-css' => '2f7199e8',
     'phui-remarkup-preview-css' => '19ad512b',
     'phui-spacing-css' => '042804d6',
@@ -1254,6 +1254,11 @@ return array(
       2 => 'javelin-util',
       3 => 'phabricator-shaped-request',
     ),
+    '7319e029' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+    ),
     '62e18640' =>
     array(
       0 => 'javelin-install',
@@ -1325,11 +1330,6 @@ return array(
       0 => 'javelin-behavior',
       1 => 'javelin-stratcom',
       2 => 'javelin-dom',
-    ),
-    '7319e029' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
     ),
     '76f4ebed' =>
     array(
