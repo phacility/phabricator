@@ -123,15 +123,12 @@ final class PholioMockSearchEngine
     foreach ($mocks as $mock) {
 
       $header = 'M'.$mock->getID().' '.$mock->getName();
-      if ($mock->isClosed()) {
-        $header = pht('%s (Closed)', $header);
-      }
-
       $item = id(new PHUIPinboardItemView())
         ->setHeader($header)
         ->setURI('/M'.$mock->getID())
         ->setImageURI($mock->getCoverFile()->getThumb280x210URI())
         ->setImageSize(280, 210)
+        ->setDisabled($mock->isClosed())
         ->addIconCount('fa-picture-o', count($mock->getImages()))
         ->addIconCount('fa-trophy', $mock->getTokenCount());
 

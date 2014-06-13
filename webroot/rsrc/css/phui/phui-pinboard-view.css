@@ -76,3 +76,13 @@
 .phui-pinboard-icon {
   margin-right: 4px;
 }
+
+.phui-pinboard-item-disabled .phui-pinboard-item-image-link img {
+  opacity: 0.25;
+}
+
+.phui-pinboard-item-disabled .phui-pinboard-item-header a {
+  color: {$greytext};
+  text-decoration: line-through;
+}
+
