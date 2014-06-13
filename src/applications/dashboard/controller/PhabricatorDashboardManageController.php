@@ -28,6 +28,11 @@ final class PhabricatorDashboardManageController
       return new Aphront404Response();
     }
 
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $dashboard,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
     $title = $dashboard->getName();
 
     $crumbs = $this->buildApplicationCrumbs();
@@ -45,10 +50,21 @@ final class PhabricatorDashboardManageController
       ->setHeader($header)
       ->addPropertyList($properties);
 
+    if (!$can_edit) {
+      $no_edit = pht(
+        'You do not have permission to edit this dashboard. If you want to '.
+        'make changes, make a copy first.');
+
+      $box->setErrorView(
+        id(new AphrontErrorView())
+          ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+          ->setErrors(array($no_edit)));
+    }
+
     $rendered_dashboard = id(new PhabricatorDashboardRenderingEngine())
       ->setViewer($viewer)
       ->setDashboard($dashboard)
-      ->setArrangeMode(true)
+      ->setArrangeMode($can_edit)
       ->renderDashboard();
 
     return $this->buildApplicationPage(
@@ -92,6 +108,13 @@ final class PhabricatorDashboardManageController
         ->setHref($this->getApplicationURI("edit/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Copy Dashboard'))
+        ->setIcon('fa-files-o')
+        ->setHref($this->getApplicationURI("copy/{$id}/"))
+        ->setWorkflow(true));
 
     $installed_dashboard = id(new PhabricatorDashboardInstall())
       ->loadOneWhere(

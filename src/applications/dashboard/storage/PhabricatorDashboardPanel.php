@@ -24,7 +24,10 @@ final class PhabricatorDashboardPanel
       ->setEditPolicy($actor->getPHID());
   }
 
-  public static function copyPanel($dst, $src) {
+  public static function copyPanel(
+    PhabricatorDashboardPanel $dst,
+    PhabricatorDashboardPanel $src) {
+
     $dst->name = $src->name;
     $dst->panelType = $src->panelType;
     $dst->properties = $src->properties;
