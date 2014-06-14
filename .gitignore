@@ -1,22 +1,9 @@
-.DS_Store
-._*
-.#*
-*#
-*~
-*.swp
-
-# NetBeans project files
-/nbproject/
-
-# PhpStorm project files
-.idea/
-
-# Arcanist scratch directory
-/.arc
+# NOTE: Thinking about adding files created by your operating system, IDE,
+# or text editor here? Don't! Add them to your per-user .gitignore instead.
 
 # Diviner
 /docs/
-/.divinercache
+/.divinercache/
 
 # libphutil
 /src/.phutil_module_cache
