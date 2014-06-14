@@ -265,9 +265,9 @@ WARNING: Crossing the streams can result in total protonic reversal!
 
 IMPORTANT: Don't cross the streams!
 
-You can also use "(NOTE)", "(WARNING)", or "(IMPORTANT)" to get the same
- effect but without "(NOTE"), "(WARNING)", or "(IMPORTANT)" appearing in the
- rendered result. For example
+In addition, you can use "(NOTE)", "(WARNING)", or "(IMPORTANT)" to get the
+same effect but without "(NOTE)", "(WARNING)", or "(IMPORTANT)" appearing in
+the rendered result. For example
 
 (NOTE) Dr. Egon Spengler is the best resource for additional proton pack
  questions.
