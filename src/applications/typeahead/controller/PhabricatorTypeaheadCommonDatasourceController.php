@@ -315,7 +315,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
       $packages = id(new PhabricatorOwnersPackage())->loadAll();
       foreach ($packages as $package) {
         $results[] = id(new PhabricatorTypeaheadResult())
-          ->setIcon('pl-testplan')
+          ->setIcon('fa-list-alt bluegrey')
           ->setName($package->getName())
           ->setURI('/owners/package/'.$package->getID().'/')
           ->setPHID($package->getPHID());
@@ -339,7 +339,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
           continue;
         }
         $name = $application->getName().' '.$application->getShortDescription();
-
+        $img = 'apps-'.$application->getIconName().'-dark-large';
         $results[] = id(new PhabricatorTypeaheadResult())
           ->setName($name)
           ->setURI($uri)
@@ -348,7 +348,8 @@ final class PhabricatorTypeaheadCommonDatasourceController
           ->setDisplayName($application->getName())
           ->setDisplayType($application->getShortDescription())
           ->setImageuRI($application->getIconURI())
-          ->setPriorityType('apps');
+          ->setPriorityType('apps')
+          ->setImageSprite('phabricator-search-icon sprite-apps-large '.$img);
       }
     }
 
@@ -424,6 +425,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
         'Display Type',
         'Image URI',
         'Priority Type',
+        'Sprite Class',
       ));
 
     $panel = new AphrontPanelView();
@@ -433,7 +435,8 @@ final class PhabricatorTypeaheadCommonDatasourceController
     return $this->buildStandardPageResponse(
       $panel,
       array(
-        'title' => 'Typeahead Results',
+        'title' => pht('Typeahead Results'),
+        'device' => true
       ));
   }
 

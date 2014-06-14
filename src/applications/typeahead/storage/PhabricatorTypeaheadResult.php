@@ -10,6 +10,7 @@ final class PhabricatorTypeaheadResult {
   private $displayType;
   private $imageURI;
   private $priorityType;
+  private $imageSprite;
   private $icon;
   private $closed;
 
@@ -58,6 +59,11 @@ final class PhabricatorTypeaheadResult {
     return $this;
   }
 
+  public function setImageSprite($image_sprite) {
+    $this->imageSprite = $image_sprite;
+    return $this;
+  }
+
   public function setClosed($closed) {
     $this->closed = $closed;
     return $this;
@@ -75,6 +81,7 @@ final class PhabricatorTypeaheadResult {
       $this->priorityType,
       $this->icon,
       $this->closed,
+      $this->imageSprite ? (string)$this->imageSprite : null,
     );
     while (end($data) === null) {
       array_pop($data);
