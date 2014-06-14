@@ -14,6 +14,7 @@ final class PholioRemarkupRule
     $viewer = $this->getEngine()->getConfig('viewer');
     return id(new PholioMockQuery())
       ->setViewer($viewer)
+      ->needCoverFiles(true)
       ->needImages(true)
       ->needTokenCounts(true)
       ->withIDs($ids)
