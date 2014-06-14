@@ -324,14 +324,20 @@ final class PholioMockEditController extends PholioController {
         ->setName('description')
         ->setValue($v_desc)
         ->setLabel(pht('Description'))
-        ->setUser($user))
-      ->appendChild(
+        ->setUser($user));
+
+    if ($this->id) {
+      $form->appendChild(
         id(new AphrontFormSelectControl())
         ->setLabel(pht('Status'))
         ->setName('status')
         ->setValue($mock->getStatus())
-        ->setOptions($mock->getStatuses()))
-      ->appendChild(
+        ->setOptions($mock->getStatuses()));
+    } else {
+      $form->addHiddenInput('status', 'open');
+    }
+
+    $form->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Projects'))
           ->setName('projects')
