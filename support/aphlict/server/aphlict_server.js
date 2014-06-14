@@ -231,7 +231,7 @@ function transmit(msg) {
       debug.log('<%s> Wrote Message', listener.getDescription());
     } catch (error) {
       clients.removeListener(listener);
-      debug.log('<%s> Write Error: %s', error);
+      debug.log('<%s> Write Error: %s', listener.getDescription(), error);
     }
   }
 }
