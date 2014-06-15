@@ -7,17 +7,12 @@
   text-align: center;
   vertical-align: middle;
   position: relative;
-  background: url('/rsrc/image/checker_light.png');
+  background: url('/rsrc/image/texture/pholio-background.gif');
 }
 
 .pholio-mock-carousel {
   background-color: #282828;
   text-align: center;
-  border-top: 1px solid #101010;
-}
-
-.device-desktop .pholio-mock-carousel {
-  margin-right: 300px;
 }
 
 .pholio-mock-carousel-thumb-item {
@@ -69,13 +64,8 @@
 }
 
 .pholio-mock-image-panel {
-  padding: 12px;
+  padding: 0;
   border-top: 1px solid #333;
-}
-
-.device-desktop .pholio-mock-image-panel {
-  border-right: 1px solid #333;
-  margin-right: 299px;
 }
 
 .pholio-mock-image-viewport {
@@ -99,7 +89,7 @@
 }
 
 .pholio-visible-size {
-  color: #ffffff;
+  color: #fff;
 }
 
 .pholio-image-description {
@@ -168,7 +158,14 @@
   cursor: pointer;
 }
 
-
 .device-desktop .mock-has-cursor .pholio-mock-reticle {
   display: block;
+}
+
+.pholio-mock-image-header {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  font-size: 14px;
+  color: {$lightgreytext};
 }

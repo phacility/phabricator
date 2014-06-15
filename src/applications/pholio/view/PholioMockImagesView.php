@@ -120,6 +120,14 @@ final class PholioMockImagesView extends AphrontView {
       ),
       '');
 
+    $image_header = javelin_tag(
+      'div',
+      array(
+        'id' => 'mock-image-header',
+        'class' => 'pholio-mock-image-header',
+      ),
+      '');
+
     $mock_wrapper = javelin_tag(
       'div',
       array(
@@ -127,7 +135,10 @@ final class PholioMockImagesView extends AphrontView {
         'sigil' => 'mock-panel touchable',
         'class' => 'pholio-mock-image-panel',
       ),
-      $mock_wrapper);
+      array(
+        $image_header,
+        $mock_wrapper,
+      ));
 
     $inline_comments_holder = javelin_tag(
       'div',
@@ -182,11 +193,11 @@ final class PholioMockImagesView extends AphrontView {
 
     $mockview[] = phutil_tag(
       'div',
-        array(
-          'class' => 'pholio-mock-image-container',
-          'id' => 'pholio-mock-image-container'
-        ),
-      array($mock_wrapper, $carousel_holder, $inline_comments_holder));
+      array(
+        'class' => 'pholio-mock-image-container',
+        'id' => 'pholio-mock-image-container'
+      ),
+      array($mock_wrapper, $inline_comments_holder, $carousel_holder));
 
     return $mockview;
   }

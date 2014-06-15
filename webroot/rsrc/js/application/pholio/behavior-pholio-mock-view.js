@@ -155,8 +155,9 @@ JX.behavior('pholio-mock-view', function(config) {
     // If the image is too wide or tall for the viewport, scale it down so it
     // fits.
     var w = JX.Vector.getDim(panel);
-    w.x -= 24;
-    w.y -= 24;
+    w.x -= 48;
+    w.y -= 48;
+
     var scale = 1;
     if (w.x < tag.naturalWidth) {
       scale = Math.min(scale, w.x / tag.naturalWidth);
@@ -387,6 +388,38 @@ JX.behavior('pholio-mock-view', function(config) {
     redraw_selection();
   }
 
+  function render_image_header(image) {
+    // Render image dimensions and visible size. If we have this infomation
+    // from the server we can display some of it immediately; otherwise, we need
+    // to wait for the image to load so we can read dimension information from
+    // it.
+
+    var image_x = image.width;
+    var image_y = image.height;
+    var display_x = null;
+    if (image.tag) {
+      image_x = image.tag.naturalWidth;
+      image_y = image.tag.naturalHeight;
+      display_x = image.tag.width;
+    }
+
+    var visible = [];
+    if (image_x) {
+      if (display_x) {
+        var area = Math.round(100 * (display_x / image_x));
+        visible.push(
+          JX.$N(
+            'span',
+            {className: 'pholio-visible-size'},
+            [area, '%']));
+        visible.push(' ');
+      }
+      visible.push(['(', image_x, ' \u00d7 ', image_y, ')']);
+    }
+
+    return visible;
+  }
+
   function redraw_inlines(id) {
     if (!active_image) {
       return;
@@ -399,6 +432,9 @@ JX.behavior('pholio-mock-view', function(config) {
     stage.clearStage();
     var comment_holder = JX.$('mock-inline-comments');
     JX.DOM.setContent(comment_holder, render_image_info(active_image));
+
+    var image_header = JX.$('mock-image-header');
+    JX.DOM.setContent(image_header, render_image_header(active_image));
 
     var inlines = inline_comments[active_image.id];
     if (!inlines || !inlines.length) {
@@ -552,41 +588,9 @@ JX.behavior('pholio-mock-view', function(config) {
       var embed = JX.$N(
         'div',
         {className: 'pholio-image-embedding'},
-        JX.$H('Embed this image:<br />{M' + config.mockID +
+        JX.$H('Embed this image: {M' + config.mockID +
         ', image=' + image.id + '}'));
       info.push(embed);
-    }
-
-    // Render image dimensions and visible size. If we have this infomation
-    // from the server we can display some of it immediately; otherwise, we need
-    // to wait for the image to load so we can read dimension information from
-    // it.
-
-    var image_x = image.width;
-    var image_y = image.height;
-    var display_x = null;
-    if (image.tag) {
-      image_x = image.tag.naturalWidth;
-      image_y = image.tag.naturalHeight;
-      display_x = image.tag.width;
-    }
-
-    var visible = [];
-    if (image_x) {
-      visible.push([image_x, '\u00d7', image_y, 'px']);
-      if (display_x) {
-        var area = Math.round(100 * (display_x / image_x));
-        visible.push(' ');
-        visible.push(
-          JX.$N(
-            'span',
-            {className: 'pholio-visible-size'},
-            ['(', area, '%', ')']));
-      }
-    }
-
-    if (visible.length) {
-      info.push(visible);
     }
 
     var full_link = JX.$N(

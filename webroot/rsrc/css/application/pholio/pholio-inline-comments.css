@@ -21,15 +21,6 @@
   margin-bottom: 4px;
 }
 
-.device-desktop .pholio-mock-inline-comments {
-  border-left: 1px solid #101010;
-  position: absolute;
-  width: 300px;
-  top: 0;
-  bottom: 0;
-  right: 0;
-}
-
 .pholio-inline-comment-dialog-title {
   font-weight: bold;
   color: #fff;
