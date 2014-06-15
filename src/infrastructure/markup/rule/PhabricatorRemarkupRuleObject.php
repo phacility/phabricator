@@ -40,8 +40,12 @@ abstract class PhabricatorRemarkupRuleObject
     return $result;
   }
 
+  protected function getObjectHref($object, $handle, $id) {
+    return $handle->getURI();
+  }
+
   protected function renderObjectRef($object, $handle, $anchor, $id) {
-    $href = $handle->getURI();
+    $href = $this->getObjectHref($object, $handle, $id);
     $text = $this->getObjectNamePrefix().$id;
 
     if ($anchor) {
