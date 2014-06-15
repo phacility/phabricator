@@ -1676,7 +1676,7 @@ phutil_register_library_map(array(
     'PhabricatorHunksManagementWorkflow' => 'applications/differential/management/PhabricatorHunksManagementWorkflow.php',
     'PhabricatorIRCProtocolAdapter' => 'infrastructure/daemon/bot/adapter/PhabricatorIRCProtocolAdapter.php',
     'PhabricatorImageTransformer' => 'applications/files/PhabricatorImageTransformer.php',
-    'PhabricatorInfrastructureTestCase' => 'infrastructure/__tests__/PhabricatorInfrastructureTestCase.php',
+    'PhabricatorInfrastructureTestCase' => '__tests__/PhabricatorInfrastructureTestCase.php',
     'PhabricatorInlineCommentController' => 'infrastructure/diff/PhabricatorInlineCommentController.php',
     'PhabricatorInlineCommentInterface' => 'infrastructure/diff/interface/PhabricatorInlineCommentInterface.php',
     'PhabricatorInlineCommentPreviewController' => 'infrastructure/diff/PhabricatorInlineCommentPreviewController.php',
