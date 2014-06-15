@@ -79,7 +79,7 @@ abstract class PhabricatorDaemonManagementWorkflow
     if (count($match) == 0) {
       throw new PhutilArgumentUsageException(
         pht(
-          "No daemons match '%s'! Use 'phd list' for a list of avialable ".
+          "No daemons match '%s'! Use 'phd list' for a list of available ".
           "daemons.",
           $substring));
     } else if (count($match) > 1) {
