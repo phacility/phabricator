@@ -139,31 +139,30 @@ JX.behavior('pholio-mock-view', function(config) {
   }
 
   function redraw_image() {
+    var new_y;
 
-    // Force the stage to scale as a function of the viewport size. Broadly,
-    // we take the full viewport and subtract 12px top and bottom.
-    var new_y = (JX.Vector.getViewport().y - 24) ;
-    new_y = Math.max(320, new_y);
-    panel.style.height = new_y + 'px';
-
+    // If we don't have an image yet, just scale the stage relative to the
+    // entire viewport height so the jump isn't too jumpy when the image loads.
     if (!active_image || !active_image.tag) {
+      new_y = (JX.Vector.getViewport().y * 0.80);
+      new_y = Math.max(320, new_y);
+      panel.style.height = new_y + 'px';
+
       return;
     }
 
     var tag = active_image.tag;
 
-    // If the image is too wide or tall for the viewport, scale it down so it
-    // fits.
+    // If the image is too wide for the viewport, scale it down so it fits.
+    // If it is too tall, just let the viewport scroll.
     var w = JX.Vector.getDim(panel);
+
+    // Leave 24px margins on either side of the image.
     w.x -= 48;
-    w.y -= 48;
 
     var scale = 1;
     if (w.x < tag.naturalWidth) {
       scale = Math.min(scale, w.x / tag.naturalWidth);
-    }
-    if (w.y < tag.naturalHeight) {
-      scale = Math.min(scale, w.y / tag.naturalHeight);
     }
 
     if (scale < 1) {
@@ -173,6 +172,10 @@ JX.behavior('pholio-mock-view', function(config) {
       tag.width = tag.naturalWidth;
       tag.height = tag.naturalHeight;
     }
+
+    // Scale the viewport's vertical size to the image's adjusted size.
+    new_y = Math.max(320, tag.height + 48);
+    panel.style.height = new_y + 'px';
 
     viewport.style.top = Math.floor((new_y - tag.height) / 2) + 'px';
 

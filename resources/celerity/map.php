@@ -389,7 +389,7 @@ return array(
     'rsrc/js/application/passphrase/phame-credential-control.js' => '1e1c8a59',
     'rsrc/js/application/phame/phame-post-preview.js' => '61d927ec',
     'rsrc/js/application/pholio/behavior-pholio-mock-edit.js' => '1e1e8bb0',
-    'rsrc/js/application/pholio/behavior-pholio-mock-view.js' => '0938137d',
+    'rsrc/js/application/pholio/behavior-pholio-mock-view.js' => 'efe81529',
     'rsrc/js/application/phortune/behavior-balanced-payment-form.js' => '3b3e1664',
     'rsrc/js/application/phortune/behavior-stripe-payment-form.js' => '1693a296',
     'rsrc/js/application/phortune/behavior-test-payment-form.js' => 'b3e5ee60',
@@ -613,7 +613,7 @@ return array(
     'javelin-behavior-phabricator-watch-anchor' => '06e05112',
     'javelin-behavior-phame-post-preview' => '61d927ec',
     'javelin-behavior-pholio-mock-edit' => '1e1e8bb0',
-    'javelin-behavior-pholio-mock-view' => '0938137d',
+    'javelin-behavior-pholio-mock-view' => 'efe81529',
     'javelin-behavior-phui-object-box-tabs' => 'a3e2244e',
     'javelin-behavior-phui-timeline-dropdown-menu' => '4d94d9c3',
     'javelin-behavior-policy-control' => 'f3fef818',
@@ -861,21 +861,6 @@ return array(
     '08e56a4e' =>
     array(
       0 => 'javelin-install',
-    ),
-    '0938137d' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-util',
-      2 => 'javelin-stratcom',
-      3 => 'javelin-dom',
-      4 => 'javelin-vector',
-      5 => 'javelin-magical-init',
-      6 => 'javelin-request',
-      7 => 'javelin-history',
-      8 => 'javelin-workflow',
-      9 => 'javelin-mask',
-      10 => 'javelin-behavior-device',
-      11 => 'phabricator-keyboard-shortcut',
     ),
     '09b15cf1' =>
     array(
@@ -1269,6 +1254,11 @@ return array(
       2 => 'javelin-util',
       3 => 'phabricator-shaped-request',
     ),
+    '7319e029' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+    ),
     '62e18640' =>
     array(
       0 => 'javelin-install',
@@ -1340,11 +1330,6 @@ return array(
       0 => 'javelin-behavior',
       1 => 'javelin-stratcom',
       2 => 'javelin-dom',
-    ),
-    '7319e029' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
     ),
     '76f4ebed' =>
     array(
@@ -1977,6 +1962,21 @@ return array(
     array(
       0 => 'javelin-install',
       1 => 'javelin-util',
+    ),
+    'efe81529' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-util',
+      2 => 'javelin-stratcom',
+      3 => 'javelin-dom',
+      4 => 'javelin-vector',
+      5 => 'javelin-magical-init',
+      6 => 'javelin-request',
+      7 => 'javelin-history',
+      8 => 'javelin-workflow',
+      9 => 'javelin-mask',
+      10 => 'javelin-behavior-device',
+      11 => 'phabricator-keyboard-shortcut',
     ),
     'f2441746' =>
     array(
