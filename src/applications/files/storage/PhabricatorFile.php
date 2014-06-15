@@ -538,6 +538,12 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return PhabricatorEnv::getCDNURI($path);
   }
 
+  public function getPreview100URI() {
+    $path = '/file/xform/preview-100/'.$this->getPHID().'/'
+      .$this->getSecretKey().'/';
+    return PhabricatorEnv::getCDNURI($path);
+  }
+
   public function getPreview140URI() {
     $path = '/file/xform/preview-140/'.$this->getPHID().'/'
       .$this->getSecretKey().'/';

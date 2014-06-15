@@ -53,7 +53,6 @@ final class PhabricatorApplicationPholio extends PhabricatorApplication {
         ),
         'image/' => array(
           'upload/' => 'PholioImageUploadController',
-          'history/(?P<id>\d+)/' => 'PholioImageHistoryController',
         ),
       ),
     );

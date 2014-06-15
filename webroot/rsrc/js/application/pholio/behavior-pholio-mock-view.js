@@ -110,6 +110,15 @@ JX.behavior('pholio-mock-view', function(config) {
     return null;
   }
 
+  function get_image_navindex(id) {
+    for (var ii = 0; ii < config.navsequence.length; ii++) {
+      if (config.navsequence[ii] == id) {
+        return ii;
+      }
+    }
+    return null;
+  }
+
   function get_image(id) {
     var idx = get_image_index(id);
     if (idx === null) {
@@ -133,9 +142,12 @@ JX.behavior('pholio-mock-view', function(config) {
     if (!active_image) {
       return;
     }
-    var idx = get_image_index(active_image.id);
-    idx = (idx + delta + config.images.length) % config.images.length;
-    select_image(config.images[idx].id);
+    var idx = get_image_navindex(active_image.id);
+    if (idx === null) {
+      return;
+    }
+    idx = (idx + delta + config.navsequence.length) % config.navsequence.length;
+    select_image(config.navsequence[idx]);
   }
 
   function redraw_image() {
@@ -197,7 +209,7 @@ JX.behavior('pholio-mock-view', function(config) {
     img.src = active_image.fullURI;
 
     var thumbs = JX.DOM.scry(
-      JX.$('pholio-mock-carousel'),
+      JX.$('pholio-mock-thumb-grid'),
       'a',
       'mock-thumbnail');
 
@@ -206,7 +218,7 @@ JX.behavior('pholio-mock-view', function(config) {
 
       JX.DOM.alterClass(
         thumbs[k],
-        'pholio-mock-carousel-thumb-current',
+        'pholio-mock-thumb-grid-current',
         (active_image.id == thumb_meta.imageID));
     }
 
@@ -217,7 +229,7 @@ JX.behavior('pholio-mock-view', function(config) {
   }
 
   JX.Stratcom.listen(
-    ['mousedown', 'click'],
+    'click',
     'mock-thumbnail',
     function(e) {
       if (!e.isNormalMouseEvent()) {
@@ -235,10 +247,6 @@ JX.behavior('pholio-mock-view', function(config) {
     }
 
     if (JX.Device.getDevice() != 'desktop') {
-      return;
-    }
-
-    if (config.viewMode == 'history') {
       return;
     }
 
@@ -601,15 +609,6 @@ JX.behavior('pholio-mock-view', function(config) {
       {href: image.fullURI, target: '_blank'},
       'View Full Image');
     info.push(full_link);
-
-    if (config.viewMode != 'history') {
-      var history_link = JX.$N(
-        'a',
-        { href: image.historyURI },
-        'View Image History');
-      info.push(history_link);
-    }
-
 
     for (var ii = 0; ii < info.length; ii++) {
       info[ii] = JX.$N('div', {className: 'pholio-image-info-item'}, info[ii]);
