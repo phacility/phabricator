@@ -68,19 +68,6 @@
   cursor: crosshair;
 }
 
-.pholio-mock-select-fill {
-  position: absolute;
-  box-sizing: border-box;
-  border: 2px solid {$indigo};
-  border-radius: 2px;
-}
-
-.pholio-mock-select-border {
-  position: absolute;
-  border: 1px dashed #ffffff;
-  box-sizing: border-box;
-}
-
 .pholio-mock-image-panel {
   padding: 12px;
   border-top: 1px solid #333;
@@ -150,4 +137,38 @@
   display: table-cell;
   vertical-align: middle;
   padding-left: 8px;
+}
+
+.pholio-mock-reticle {
+  position: absolute;
+  display: none;
+  background-repeat: no-repeat;
+  background-position: center center;
+  box-sizing: border-box;
+}
+
+.pholio-mock-reticle-selection {
+  background: #ffffff;
+  opacity: 0.40;
+  border: 1px dashed #000;
+}
+
+.pholio-mock-reticle-draft {
+  /* TODO: Replace with real icons. */
+  background-image: url('/rsrc/image/icon/fatcow/flag_yellow.png');
+}
+
+.pholio-mock-reticle-final {
+  /* TODO: Replace with real icons. */
+  background-image: url('/rsrc/image/icon/fatcow/flag_pink.png');
+}
+
+.pholio-mock-reticle-draft:hover,
+.pholio-mock-reticle-final:hover {
+  border: 1px solid rgba(255, 255, 255, 0.50);
+}
+
+
+.device-desktop .mock-has-cursor .pholio-mock-reticle {
+  display: block;
 }
