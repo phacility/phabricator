@@ -14,6 +14,7 @@ final class PholioMock extends PholioDAO
 
   protected $authorPHID;
   protected $viewPolicy;
+  protected $editPolicy;
 
   protected $name;
   protected $originalName;
@@ -34,11 +35,13 @@ final class PholioMock extends PholioDAO
       ->executeOne();
 
     $view_policy = $app->getPolicy(PholioCapabilityDefaultView::CAPABILITY);
+    $edit_policy = $app->getPolicy(PholioCapabilityDefaultEdit::CAPABILITY);
 
     return id(new PholioMock())
       ->setAuthorPHID($actor->getPHID())
       ->attachImages(array())
-      ->setViewPolicy($view_policy);
+      ->setViewPolicy($view_policy)
+      ->setEditPolicy($edit_policy);
   }
 
   public function getMonogram() {
@@ -178,7 +181,7 @@ final class PholioMock extends PholioDAO
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
-        return PhabricatorPolicies::POLICY_NOONE;
+        return $this->getEditPolicy();
     }
   }
 

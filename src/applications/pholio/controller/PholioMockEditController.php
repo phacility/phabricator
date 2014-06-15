@@ -65,6 +65,7 @@ final class PholioMockEditController extends PholioController {
     $v_desc = $mock->getDescription();
     $v_status = $mock->getStatus();
     $v_view = $mock->getViewPolicy();
+    $v_edit = $mock->getEditPolicy();
     $v_cc = PhabricatorSubscribersQuery::loadSubscribersForPHID(
       $mock->getPHID());
 
@@ -75,12 +76,14 @@ final class PholioMockEditController extends PholioController {
       $type_desc = PholioTransactionType::TYPE_DESCRIPTION;
       $type_status = PholioTransactionType::TYPE_STATUS;
       $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
+      $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
       $type_cc   = PhabricatorTransactions::TYPE_SUBSCRIBERS;
 
       $v_name = $request->getStr('name');
       $v_desc = $request->getStr('description');
       $v_status = $request->getStr('status');
       $v_view = $request->getStr('can_view');
+      $v_edit = $request->getStr('can_edit');
       $v_cc   = $request->getArr('cc');
       $v_projects = $request->getArr('projects');
 
@@ -89,6 +92,7 @@ final class PholioMockEditController extends PholioController {
       $mock_xactions[$type_desc] = $v_desc;
       $mock_xactions[$type_status] = $v_status;
       $mock_xactions[$type_view] = $v_view;
+      $mock_xactions[$type_edit] = $v_edit;
       $mock_xactions[$type_cc]   = array('=' => $v_cc);
 
       if (!strlen($request->getStr('name'))) {
@@ -242,6 +246,7 @@ final class PholioMockEditController extends PholioController {
 
     // NOTE: Make this show up correctly on the rendered form.
     $mock->setViewPolicy($v_view);
+    $mock->setEditPolicy($v_edit);
 
     $handles = id(new PhabricatorHandleQuery())
       ->setViewer($user)
@@ -359,6 +364,13 @@ final class PholioMockEditController extends PholioController {
         ->setPolicyObject($mock)
         ->setPolicies($policies)
         ->setName('can_view'))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+        ->setUser($user)
+        ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
+        ->setPolicyObject($mock)
+        ->setPolicies($policies)
+        ->setName('can_edit'))
       ->appendChild(
         id(new AphrontFormMarkupControl())
         ->setValue($list_control))

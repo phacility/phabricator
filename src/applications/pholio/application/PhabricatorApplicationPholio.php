@@ -72,8 +72,8 @@ final class PhabricatorApplicationPholio extends PhabricatorApplication {
 
   protected function getCustomCapabilities() {
     return array(
-      PholioCapabilityDefaultView::CAPABILITY => array(
-      ),
+      PholioCapabilityDefaultView::CAPABILITY => array(),
+      PholioCapabilityDefaultEdit::CAPABILITY => array(),
     );
   }
 
