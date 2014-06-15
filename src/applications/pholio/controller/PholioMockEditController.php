@@ -57,7 +57,7 @@ final class PholioMockEditController extends PholioController {
     }
 
     $e_name = true;
-    $e_images = true;
+    $e_images = count($mock_images) ? null : true;
     $errors = array();
     $posted_mock_images = array();
 
