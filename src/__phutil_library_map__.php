@@ -4864,6 +4864,7 @@ phutil_register_library_map(array(
     array(
       0 => 'PhabricatorRepositoryDAO',
       1 => 'PhabricatorPolicyInterface',
+      2 => 'PhabricatorDestructableInterface',
     ),
     'PhabricatorRepositoryArcanistProjectDeleteController' => 'PhabricatorRepositoryController',
     'PhabricatorRepositoryArcanistProjectEditController' => 'PhabricatorRepositoryController',
@@ -5329,6 +5330,7 @@ phutil_register_library_map(array(
       5 => 'PhabricatorFlaggableInterface',
       6 => 'PhabricatorApplicationTransactionInterface',
       7 => 'PhabricatorProjectInterface',
+      8 => 'PhabricatorDestructableInterface',
     ),
     'PholioMockCommentController' => 'PholioController',
     'PholioMockEditController' => 'PholioController',
