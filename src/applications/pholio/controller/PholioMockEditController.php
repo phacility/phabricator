@@ -135,9 +135,11 @@ final class PholioMockEditController extends PholioController {
         $replaces_image_phid = null;
         if (isset($replaces_map[$file_phid])) {
           $old_file_phid = $replaces_map[$file_phid];
-          $old_image = idx($mock_images, $old_file_phid);
-          if ($old_image) {
-            $replaces_image_phid = $old_image->getPHID();
+          if ($old_file_phid != $file_phid) {
+            $old_image = idx($mock_images, $old_file_phid);
+            if ($old_image) {
+              $replaces_image_phid = $old_image->getPHID();
+            }
           }
         }
 
@@ -158,7 +160,7 @@ final class PholioMockEditController extends PholioController {
           $xactions[] = id(new PholioTransaction())
             ->setTransactionType(
               PholioTransactionType::TYPE_IMAGE_REPLACE)
-              ->setNewValue($replace_image);
+            ->setNewValue($replace_image);
           $posted_mock_images[] = $replace_image;
         } else if (!$existing_image) { // this is an add
           $add_image = id(new PholioImage())
@@ -256,7 +258,7 @@ final class PholioMockEditController extends PholioController {
       $image_elements[] = id(new PholioUploadedImageView())
         ->setUser($user)
         ->setImage($mock_image)
-        ->setReplacesPHID($mock_image->getReplacesImagePHID());
+        ->setReplacesPHID($mock_image->getFilePHID());
     }
 
     $list_id = celerity_generate_unique_node_id();
