@@ -455,9 +455,9 @@ JX.behavior('pholio-mock-view', function(config) {
 
       var classes = [];
       if (!inline.transactionPHID) {
-        classes.push('pholio-mock-reticle-draft');
+        classes.push('pholio-mock-reticle-draft phui-font-fa fa-comment');
       } else {
-        classes.push('pholio-mock-reticle-final');
+        classes.push('pholio-mock-reticle-final phui-font-fa fa-comment');
       }
 
       var inline_selection = render_reticle(classes);

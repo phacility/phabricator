@@ -132,8 +132,6 @@
 .pholio-mock-reticle {
   position: absolute;
   display: none;
-  background-repeat: no-repeat;
-  background-position: center center;
   box-sizing: border-box;
 }
 
@@ -143,13 +141,17 @@
 }
 
 .pholio-mock-reticle-draft {
-  /* TODO: Replace with real icons. */
-  background-image: url('/rsrc/image/icon/fatcow/flag_yellow.png');
+  font-size: 2.2em;
+  color: {$yellow};
+  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  -webkit-text-stroke: 1px white;
 }
 
 .pholio-mock-reticle-final {
-  /* TODO: Replace with real icons. */
-  background-image: url('/rsrc/image/icon/fatcow/flag_pink.png');
+  font-size: 2.2em;
+  color: {$indigo};
+  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  -webkit-text-stroke: 1px white;
 }
 
 .pholio-mock-reticle-draft:hover,
