@@ -81,7 +81,7 @@ return array(
     'rsrc/css/application/phame/phame.css' => '19ecc703',
     'rsrc/css/application/pholio/pholio-edit.css' => 'b9e59b6d',
     'rsrc/css/application/pholio/pholio-inline-comments.css' => '28a2e394',
-    'rsrc/css/application/pholio/pholio.css' => 'cea40026',
+    'rsrc/css/application/pholio/pholio.css' => 'cabb65b3',
     'rsrc/css/application/phortune/phortune-credit-card-form.css' => 'b25b4beb',
     'rsrc/css/application/phrequent/phrequent.css' => 'ffc185ad',
     'rsrc/css/application/phriction/phriction-document-css.css' => '7d7f0071',
@@ -389,7 +389,7 @@ return array(
     'rsrc/js/application/passphrase/phame-credential-control.js' => '1e1c8a59',
     'rsrc/js/application/phame/phame-post-preview.js' => '61d927ec',
     'rsrc/js/application/pholio/behavior-pholio-mock-edit.js' => '1e1e8bb0',
-    'rsrc/js/application/pholio/behavior-pholio-mock-view.js' => '9cc93707',
+    'rsrc/js/application/pholio/behavior-pholio-mock-view.js' => '0c8a037a',
     'rsrc/js/application/phortune/behavior-balanced-payment-form.js' => '3b3e1664',
     'rsrc/js/application/phortune/behavior-stripe-payment-form.js' => '1693a296',
     'rsrc/js/application/phortune/behavior-test-payment-form.js' => 'b3e5ee60',
@@ -613,7 +613,7 @@ return array(
     'javelin-behavior-phabricator-watch-anchor' => '06e05112',
     'javelin-behavior-phame-post-preview' => '61d927ec',
     'javelin-behavior-pholio-mock-edit' => '1e1e8bb0',
-    'javelin-behavior-pholio-mock-view' => '9cc93707',
+    'javelin-behavior-pholio-mock-view' => '0c8a037a',
     'javelin-behavior-phui-object-box-tabs' => 'a3e2244e',
     'javelin-behavior-phui-timeline-dropdown-menu' => '4d94d9c3',
     'javelin-behavior-policy-control' => 'f3fef818',
@@ -739,7 +739,7 @@ return array(
     'phabricator-uiexample-reactor-sendproperties' => '551add57',
     'phabricator-zindex-css' => 'efb673ac',
     'phame-css' => '19ecc703',
-    'pholio-css' => 'cea40026',
+    'pholio-css' => 'cabb65b3',
     'pholio-edit-css' => 'b9e59b6d',
     'pholio-inline-comments-css' => '28a2e394',
     'phortune-credit-card-form' => '2290aeef',
@@ -895,6 +895,21 @@ return array(
       2 => 'javelin-stratcom',
       3 => 'javelin-util',
       4 => 'phabricator-notification-css',
+    ),
+    '0c8a037a' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-util',
+      2 => 'javelin-stratcom',
+      3 => 'javelin-dom',
+      4 => 'javelin-vector',
+      5 => 'javelin-magical-init',
+      6 => 'javelin-request',
+      7 => 'javelin-history',
+      8 => 'javelin-workflow',
+      9 => 'javelin-mask',
+      10 => 'javelin-behavior-device',
+      11 => 'phabricator-keyboard-shortcut',
     ),
     '0e34ca02' =>
     array(
@@ -1254,11 +1269,6 @@ return array(
       2 => 'javelin-util',
       3 => 'phabricator-shaped-request',
     ),
-    '7319e029' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-    ),
     '62e18640' =>
     array(
       0 => 'javelin-install',
@@ -1330,6 +1340,11 @@ return array(
       0 => 'javelin-behavior',
       1 => 'javelin-stratcom',
       2 => 'javelin-dom',
+    ),
+    '7319e029' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
     ),
     '76f4ebed' =>
     array(
@@ -1526,21 +1541,6 @@ return array(
       2 => 'javelin-stratcom',
       3 => 'javelin-vector',
       4 => 'phabricator-hovercard',
-    ),
-    '9cc93707' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-util',
-      2 => 'javelin-stratcom',
-      3 => 'javelin-dom',
-      4 => 'javelin-vector',
-      5 => 'javelin-magical-init',
-      6 => 'javelin-request',
-      7 => 'javelin-history',
-      8 => 'javelin-workflow',
-      9 => 'javelin-mask',
-      10 => 'javelin-behavior-device',
-      11 => 'phabricator-keyboard-shortcut',
     ),
     '9db3d160' =>
     array(

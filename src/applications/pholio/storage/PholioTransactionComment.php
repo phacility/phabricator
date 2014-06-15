@@ -21,7 +21,7 @@ final class PholioTransactionComment
     return array(
       'id' => $this->getID(),
       'phid' => $this->getPHID(),
-      'transactionphid' => $this->getTransactionPHID(),
+      'transactionPHID' => $this->getTransactionPHID(),
       'x' => $this->getX(),
       'y' => $this->getY(),
       'width' => $this->getWidth(),

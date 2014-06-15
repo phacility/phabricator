@@ -34,10 +34,7 @@ JX.behavior('pholio-mock-view', function(config) {
     var loading = false;
     var stageElement = JX.$(config.panelID);
     var viewElement = JX.$(config.viewportID);
-    var gutterElement = JX.$('mock-inline-comments');
     var reticles = [];
-    var cards = [];
-    var inline_phid_map = {};
 
     function begin_load() {
       if (loading) {
@@ -60,17 +57,9 @@ JX.behavior('pholio-mock-view', function(config) {
       JX.DOM.alterClass(stageElement, 'pholio-image-loading', loading);
     }
 
-    function add_inline_node(node, phid) {
-      inline_phid_map[phid] = (inline_phid_map[phid] || []);
-      inline_phid_map[phid].push(node);
-    }
-
-    function add_reticle(reticle, phid) {
-      mark_ref(reticle, phid);
-
+    function add_reticle(reticle, id) {
+      mark_ref(reticle, id);
       reticles.push(reticle);
-      add_inline_node(reticle, phid);
-
       viewElement.appendChild(reticle);
     }
 
@@ -79,61 +68,31 @@ JX.behavior('pholio-mock-view', function(config) {
       for (ii = 0; ii < reticles.length; ii++) {
         JX.DOM.remove(reticles[ii]);
       }
-      for (ii = 0; ii < cards.length; ii++) {
-        JX.DOM.remove(cards[ii]);
-      }
       reticles = [];
-      cards = [];
-      inline_phid_map = {};
     }
 
-    function highlight_inline(phid, show) {
-      var nodes = inline_phid_map[phid] || [];
-      var cls = 'pholio-mock-inline-comment-highlight';
-      for (var ii = 0; ii < nodes.length; ii++) {
-        JX.DOM.alterClass(nodes[ii], cls, show);
-      }
-    }
-
-    function remove_inline(phid) {
-      var nodes = inline_phid_map[phid] || [];
-      for (var ii = 0; ii < nodes.length; ii++) {
-        JX.DOM.remove(nodes[ii]);
-      }
-      delete inline_phid_map[phid];
-    }
-
-    function mark_ref(node, phid) {
+    function mark_ref(node, id) {
       JX.Stratcom.addSigil(node, 'pholio-inline-ref');
-      JX.Stratcom.addData(node, {phid: phid});
-    }
-
-    function add_card(card, phid) {
-      mark_ref(card, phid);
-
-      cards.push(card);
-      add_inline_node(card, phid);
-
-      gutterElement.appendChild(card);
+      JX.Stratcom.addData(node, {inlineID: id});
     }
 
     return {
       beginLoad: begin_load,
       endLoad: end_load,
       addReticle: add_reticle,
-      clearStage: clear_stage,
-      highlightInline: highlight_inline,
-      removeInline: remove_inline,
-      addCard: add_card
+      clearStage: clear_stage
     };
   })();
 
   JX.enableDispatch(document.body, 'mouseenter');
   JX.enableDispatch(document.body, 'mouseleave');
 
-  JX.Stratcom.listen('mouseenter', 'mock-panel', function(e) {
-    JX.DOM.alterClass(e.getNode('mock-panel'), 'mock-has-cursor', true);
-  });
+  JX.Stratcom.listen(
+    ['mouseenter', 'mouseover'],
+    'mock-panel',
+    function(e) {
+      JX.DOM.alterClass(e.getNode('mock-panel'), 'mock-has-cursor', true);
+    });
 
   JX.Stratcom.listen('mouseleave', 'mock-panel', function(e) {
     var node = e.getNode('mock-panel');
@@ -248,7 +207,6 @@ JX.behavior('pholio-mock-view', function(config) {
     }
 
     load_inline_comments();
-
     if (image_id != config.selectedID) {
       JX.History.replace(active_image.pageURI);
     }
@@ -280,7 +238,11 @@ JX.behavior('pholio-mock-view', function(config) {
       return;
     }
 
-    if (drag_begin) {
+    if (JX.Stratcom.pass()) {
+      return;
+    }
+
+    if (is_dragging) {
       return;
     }
 
@@ -304,12 +266,35 @@ JX.behavior('pholio-mock-view', function(config) {
   });
 
   JX.Stratcom.listen(
-    ['mouseover', 'mouseout'],
+    'mousedown',
     'pholio-inline-ref',
     function(e) {
-      var phid = e.getNodeData('pholio-inline-ref').phid;
-      var show = (e.getType() == 'mouseover');
-      stage.highlightInline(phid, show);
+      e.kill();
+
+      var id = e.getNodeData('pholio-inline-ref').inlineID;
+
+      var active_id = active_image.id;
+      var handler = function(r) {
+        var inlines = inline_comments[active_id];
+
+        for (var ii = 0; ii < inlines.length; ii++) {
+          if (inlines[ii].id == id) {
+            if (r.id) {
+              inlines[ii] = r;
+            } else {
+              inlines.splice(ii, 1);
+            }
+            break;
+          }
+        }
+
+        redraw_inlines(active_id);
+        JX.DOM.invoke(JX.$(config.commentFormID), 'shouldRefresh');
+      };
+
+      new JX.Workflow('/pholio/inline/' + id + '/')
+        .setHandler(handler)
+        .start();
     });
 
   JX.Stratcom.listen(
@@ -331,19 +316,28 @@ JX.behavior('pholio-mock-view', function(config) {
 
       resize_selection(16);
 
-      var data = {mockID: config.mockID};
-      var handler = function(r) {
-        var dialog = JX.$H(r).getFragment().firstChild;
-        JX.DOM.appendContent(viewport, dialog);
-
-        var x = Math.min(drag_begin.x * scale, drag_end.x * scale);
-        var y = Math.max(drag_begin.y * scale, drag_end.y * scale) + 4;
-        JX.$V(x, y).setPos(dialog);
-
-        JX.DOM.focus(JX.DOM.find(dialog, 'textarea'));
+      var data = {
+        mockID: config.mockID,
+        imageID: active_image.id,
+        startX: Math.min(drag_begin.x, drag_end.x),
+        startY: Math.min(drag_begin.y, drag_end.y),
+        endX: Math.max(drag_begin.x, drag_end.x),
+        endY: Math.max(drag_begin.y, drag_end.y)
       };
 
-      new JX.Workflow('/pholio/inline/save/', data)
+      var handler = function(r) {
+        if (!inline_comments[active_image.id]) {
+          inline_comments[active_image.id] = [];
+        }
+        inline_comments[active_image.id].push(r);
+
+        redraw_inlines(active_image.id);
+        JX.DOM.invoke(JX.$(config.commentFormID), 'shouldRefresh');
+      };
+
+      clear_selection();
+
+      new JX.Workflow('/pholio/inline/', data)
         .setHandler(handler)
         .start();
     });
@@ -413,9 +407,6 @@ JX.behavior('pholio-mock-view', function(config) {
 
     for (var ii = 0; ii < inlines.length; ii++) {
       var inline = inlines[ii];
-      var card = JX.$H(inline.contentHTML).getFragment().firstChild;
-
-      stage.addCard(card, inline.phid);
 
       if (!active_image.tag) {
         // The image itself hasn't loaded yet, so we can't draw the inline
@@ -424,14 +415,14 @@ JX.behavior('pholio-mock-view', function(config) {
       }
 
       var classes = [];
-      if (!inline.transactionphid) {
+      if (!inline.transactionPHID) {
         classes.push('pholio-mock-reticle-draft');
       } else {
         classes.push('pholio-mock-reticle-final');
       }
 
       var inline_selection = render_reticle(classes);
-      stage.addReticle(inline_selection, inline.phid);
+      stage.addReticle(inline_selection, inline.id);
       position_inline_rectangle(inline, inline_selection);
     }
   }
@@ -496,151 +487,12 @@ JX.behavior('pholio-mock-view', function(config) {
 
   function load_inline_comments() {
     var id = active_image.id;
-    var inline_comments_uri = "/pholio/inline/" + id + "/";
+    var inline_comments_uri = '/pholio/inline/list/' + id + '/';
 
     new JX.Request(inline_comments_uri, function(r) {
       inline_comments[id] = r;
       redraw_inlines(id);
     }).send();
-  }
-
-  JX.Stratcom.listen(
-    'click',
-    'inline-delete',
-    function(e) {
-      var data = e.getNodeData('inline-delete');
-      e.kill();
-      interrupt_typing();
-
-      stage.removeInline(data.phid);
-
-      var deleteURI = '/pholio/inline/delete/' + data.id + '/';
-      var del = new JX.Request(deleteURI, function(r) {
-
-        });
-      del.send();
-
-    });
-
-  JX.Stratcom.listen(
-    'click',
-    'inline-edit',
-    function(e) {
-      var data = e.getNodeData('inline-edit');
-      e.kill();
-
-      interrupt_typing();
-
-      var editURI = "/pholio/inline/edit/" + data.id + '/';
-
-      var edit_dialog = new JX.Request(editURI, function(r) {
-        var dialog = JX.$N(
-          'div',
-          {
-            className: 'pholio-edit-inline-popup'
-          },
-          JX.$H(r));
-
-        JX.DOM.setContent(JX.$(data.phid + '_comment'), dialog);
-      });
-
-      edit_dialog.send();
-    });
-
-  JX.Stratcom.listen(
-    'click',
-    'inline-edit-cancel',
-    function(e) {
-      var data = e.getNodeData('inline-edit-cancel');
-      e.kill();
-      load_inline_comment(data.id);
-  });
-
-  JX.Stratcom.listen(
-    'click',
-    'inline-edit-submit',
-    function(e) {
-      var data = e.getNodeData('inline-edit-submit');
-      var editURI = "/pholio/inline/edit/" + data.id + '/';
-      e.kill();
-
-      var edit = new JX.Request(editURI, function(r) {
-        load_inline_comment(data.id);
-        JX.DOM.invoke(JX.$(config.commentFormID), 'shouldRefresh');
-      });
-      edit.addData({
-        op: 'update',
-        content: JX.DOM.find(JX.$(data.phid + '_comment'), 'textarea').value
-      });
-      edit.send();
-  });
-
-  JX.Stratcom.listen(
-    'click',
-    'inline-save-cancel',
-    function(e) {
-      e.kill();
-      interrupt_typing();
-    }
-  );
-
-  JX.Stratcom.listen(
-    'click',
-    'inline-save-submit',
-    function(e) {
-      e.kill();
-
-      var form = JX.$('pholio-new-inline-comment-dialog');
-      var text = JX.DOM.find(form, 'textarea').value;
-      if (!text.length) {
-        interrupt_typing();
-        return;
-      }
-
-      var data = {
-        mockID: config.mockID,
-        imageID: active_image.id,
-        startX: Math.min(drag_begin.x, drag_end.x),
-        startY: Math.min(drag_begin.y, drag_end.y),
-        endX: Math.max(drag_begin.x, drag_end.x),
-        endY: Math.max(drag_begin.y, drag_end.y)
-      };
-
-      var handler = function(r) {
-        if (!inline_comments[active_image.id]) {
-          inline_comments[active_image.id] = [];
-        }
-        inline_comments[active_image.id].push(r);
-
-        interrupt_typing();
-        redraw_inlines(active_image.id);
-        JX.DOM.invoke(JX.$(config.commentFormID), 'shouldRefresh');
-      };
-
-      JX.Workflow.newFromForm(form, data)
-        .setHandler(handler)
-        .start();
-    }
-  );
-
-  function load_inline_comment(id) {
-    var viewInlineURI = '/pholio/inline/view/' + id + '/';
-    var inline_comment = new JX.Request(viewInlineURI, function(r) {
-      JX.DOM.replace(JX.$(r.phid + '_comment'), JX.$H(r.contentHTML));
-    });
-    inline_comment.send();
-  }
-
-  function interrupt_typing() {
-    clear_selection();
-
-    try {
-      JX.DOM.remove(JX.$('pholio-new-inline-comment-dialog'));
-    } catch (x) {
-      // TODO: For now, ignore this.
-    }
-
-    drag_begin = null;
   }
 
   load_inline_comments();

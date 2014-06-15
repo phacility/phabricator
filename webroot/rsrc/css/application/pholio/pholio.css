@@ -148,8 +148,7 @@
 }
 
 .pholio-mock-reticle-selection {
-  background: #ffffff;
-  opacity: 0.40;
+  background-color: rgba(255, 255, 255, 0.50);
   border: 1px dashed #000;
 }
 
@@ -165,7 +164,8 @@
 
 .pholio-mock-reticle-draft:hover,
 .pholio-mock-reticle-final:hover {
-  border: 1px solid rgba(255, 255, 255, 0.50);
+  background-color: rgba(255, 255, 255, 0.50);
+  cursor: pointer;
 }
 
 
