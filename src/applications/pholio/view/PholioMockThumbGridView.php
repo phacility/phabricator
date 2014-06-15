@@ -101,9 +101,18 @@ final class PholioMockThumbGridView extends AphrontView {
   private function renderThumbnail(PholioImage $image) {
     $thumbfile = $image->getFile();
 
-    $dimensions = PhabricatorImageTransformer::getPreviewDimensions(
-      $thumbfile,
-      100);
+    if ($image->getFile()->isViewableImage()) {
+      $dimensions = PhabricatorImageTransformer::getPreviewDimensions(
+        $thumbfile,
+        100);
+    } else {
+      // If this is a PDF or a text file or something, we'll end up using a
+      // generic thumbnail which is always sized correctly.
+      $dimensions = array(
+        'sdx' => 100,
+        'sdy' => 100,
+      );
+    }
 
     $tag = phutil_tag(
       'img',

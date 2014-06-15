@@ -11,6 +11,7 @@
   background: #fff;
   border-top: 1px solid {$thinblueborder};
   text-align: left;
+  overflow: hidden;
 }
 
 .pholio-mock-inline-comments a {

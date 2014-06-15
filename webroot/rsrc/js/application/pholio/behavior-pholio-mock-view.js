@@ -206,7 +206,7 @@ JX.behavior('pholio-mock-view', function(config) {
 
     var img = JX.$N('img', {className: 'pholio-mock-image'});
     img.onload = JX.bind(img, onload_image, active_image.id);
-    img.src = active_image.fullURI;
+    img.src = active_image.stageURI;
 
     var thumbs = JX.DOM.scry(
       JX.$('pholio-mock-thumb-grid'),
@@ -259,6 +259,12 @@ JX.behavior('pholio-mock-view', function(config) {
     }
 
     e.kill();
+
+    if (!active_image.isImage) {
+      // If this is a PDF or something like that, we eat the event but we
+      // don't let users add inlines to the thumbnail.
+      return;
+    }
 
     is_dragging = true;
     drag_begin = get_image_xy(JX.$V(e));
@@ -583,6 +589,39 @@ JX.behavior('pholio-mock-view', function(config) {
   function render_image_info(image) {
     var info = [];
 
+    var buttons = [];
+
+    buttons.push(
+      JX.$N(
+        'div',
+        {
+          className: 'pholio-image-button'
+        },
+        JX.$N(
+          image.isViewable ? 'a' : 'span',
+          {
+            href: image.fullURI,
+            target: '_blank',
+            className: 'pholio-image-button-link'
+          },
+          JX.$H(config.fullIcon))));
+
+    // TODO: This should be a form which performs the download; for now, it
+    // just takes the user to the info page.
+    buttons.push(
+      JX.$N(
+        'div',
+        {
+          className: 'pholio-image-button'
+        },
+        JX.$N(
+          'a',
+          {
+            href: image.downloadURI,
+            className: 'pholio-image-button-link'
+          },
+          JX.$H(config.downloadIcon))));
+
     var title = JX.$N(
       'div',
       {className: 'pholio-image-title'},
@@ -604,18 +643,12 @@ JX.behavior('pholio-mock-view', function(config) {
       info.push(embed);
     }
 
-    var full_link = JX.$N(
-      'a',
-      {href: image.fullURI, target: '_blank'},
-      'View Full Image');
-    info.push(full_link);
-
     for (var ii = 0; ii < info.length; ii++) {
       info[ii] = JX.$N('div', {className: 'pholio-image-info-item'}, info[ii]);
     }
     info = JX.$N('div', {className: 'pholio-image-info'}, info);
 
-    return info;
+    return [buttons, info];
   }
 
   function render_reticle(classes) {
@@ -654,7 +687,7 @@ JX.behavior('pholio-mock-view', function(config) {
     var image = JX.$N('img');
     image.onload = lightbox_loaded;
     setTimeout(function() {
-      image.src = active_image.fullURI;
+      image.src = active_image.stageURI;
     }, 1000);
     JX.DOM.setContent(lightbox, image);
     JX.DOM.alterClass(lightbox, 'pholio-device-lightbox-loading', true);
@@ -694,7 +727,7 @@ JX.behavior('pholio-mock-view', function(config) {
 
   var preload = [];
   for (var ii = 0; ii < config.images.length; ii++) {
-    preload.push(config.images[ii].fullURI);
+    preload.push(config.images[ii].stageURI);
   }
 
   function preload_next() {

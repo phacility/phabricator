@@ -62,6 +62,11 @@ final class PholioMockImagesView extends AphrontView {
       $selected_id = head_key($ids);
     }
 
+    // TODO: We could maybe do a better job with tailoring this, which is the
+    // image shown on the review stage.
+    $nonimage_uri = celerity_get_resource_uri(
+      'rsrc/image/icon/fatcow/thumbnails/default.p100.png');
+
     foreach ($mock->getAllImages() as $image) {
       $file = $image->getFile();
       $metadata = $file->getMetadata();
@@ -72,13 +77,19 @@ final class PholioMockImagesView extends AphrontView {
       $images[] = array(
         'id' => $image->getID(),
         'fullURI' => $file->getBestURI(),
+        'stageURI' => ($file->isViewableImage()
+          ? $file->getBestURI()
+          : $nonimage_uri),
         'pageURI' => $this->getImagePageURI($image, $mock),
+        'downloadURI' => $file->getInfoURI(),
         'historyURI' => $history_uri,
         'width' => $x,
         'height' => $y,
         'title' => $image->getName(),
         'desc' => $image->getDescription(),
         'isObsolete' => (bool)$image->getIsObsolete(),
+        'isImage' => $file->isViewableImage(),
+        'isViewable' => $file->isViewableInBrowser(),
       );
     }
 
@@ -99,6 +110,8 @@ final class PholioMockImagesView extends AphrontView {
       'loggedIn' => $this->getUser()->isLoggedIn(),
       'logInLink' => (string) $login_uri,
       'navsequence' => $navsequence,
+      'fullIcon' => id(new PHUIIconView())->setIconFont('fa-arrows-alt'),
+      'downloadIcon' => id(new PHUIIconView())->setIconFont('fa-download'),
     );
     Javelin::initBehavior('pholio-mock-view', $config);
 

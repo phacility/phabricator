@@ -167,3 +167,36 @@
   text-decoration: none;
   background: {$indigo};
 }
+
+.pholio-image-button {
+  float: right;
+  margin-left: 2px;
+}
+
+.pholio-image-button-link {
+  width: 56px;
+  height: 56px;
+  overflow: hidden;
+  display: block;
+  position: relative;
+  background: {$lightgreybackground};
+  text-align: center;
+  line-height: 56px;
+  font-size: 24px;
+}
+
+a.pholio-image-button-link:hover {
+  background: {$darkgreybackground};
+}
+
+span.pholio-image-button-link .phui-icon-view {
+  color: {$darkgreybackground};
+}
+
+a.pholio-image-button-link .phui-icon-view {
+  color: {$lightgreytext};
+}
+
+.device-desktop a.pholio-image-button-link:hover .phui-icon-view {
+  color: {$sky};
+}

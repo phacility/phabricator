@@ -68,9 +68,6 @@ final class PhabricatorFileTransformController
       case 'preview-100':
         $xformed_file = $this->executePreviewTransform($file, 100);
         break;
-      case 'preview-140':
-        $xformed_file = $this->executePreviewTransform($file, 140);
-        break;
       case 'preview-220':
         $xformed_file = $this->executePreviewTransform($file, 220);
         break;
@@ -115,18 +112,24 @@ final class PhabricatorFileTransformController
     }
 
     switch ($this->transform) {
+      case 'thumb-280x210':
+        $suffix = '280x210';
+        break;
       case 'thumb-160x120':
         $suffix = '160x120';
         break;
       case 'thumb-60x45':
         $suffix = '60x45';
         break;
+      case 'preview-100':
+        $suffix = '.p100';
+        break;
       default:
         throw new Exception('Unsupported transformation type!');
     }
 
     $path = celerity_get_resource_uri(
-      "/rsrc/image/icon/fatcow/thumbnails/{$prefix}{$suffix}.png");
+      "rsrc/image/icon/fatcow/thumbnails/{$prefix}{$suffix}.png");
 
     return id(new AphrontRedirectResponse())
       ->setURI($path);
