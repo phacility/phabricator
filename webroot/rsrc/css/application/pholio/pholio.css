@@ -152,3 +152,18 @@
   font-weight: bold;
   color: {$bluetext};
 }
+
+.pholio-mock-thumb-grid-comment-count {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  line-height: 20px;
+  border-radius: 10px;
+  font-weight: bold;
+  color: #fff;
+  text-decoration: none;
+  background: {$indigo};
+}

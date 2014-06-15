@@ -120,6 +120,16 @@ final class PholioMockThumbGridView extends AphrontView {
       $classes[] = 'pholio-mock-thumb-grid-item-obsolete';
     }
 
+    $inline_count = null;
+    if ($image->getInlineComments()) {
+      $inline_count[] = phutil_tag(
+        'span',
+        array(
+          'class' => 'pholio-mock-thumb-grid-comment-count',
+        ),
+        pht('%s', new PhutilNumber(count($image->getInlineComments()))));
+    }
+
     return javelin_tag(
       'a',
       array(
@@ -130,7 +140,10 @@ final class PholioMockThumbGridView extends AphrontView {
           'imageID' => $image->getID(),
         ),
       ),
-      $tag);
+      array(
+        $tag,
+        $inline_count,
+      ));
   }
 
 }
