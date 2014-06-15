@@ -2,16 +2,13 @@
  * @provides pholio-css
  */
 .pholio-mock-image-container {
-  margin-top: 8px;
-  background-color: #282828;
   text-align: center;
   vertical-align: middle;
   position: relative;
-  background: url('/rsrc/image/texture/pholio-background.gif');
+  background: url('/rsrc/image/checker_lighter.png');
 }
 
 .pholio-mock-thumb-grid-container {
-  background-color: #282828;
   padding: 12px;
   overflow-x: auto;
   overflow-y: hidden;
@@ -26,17 +23,19 @@
   cursor: pointer;
   width: 100px;
   height: 100px;
-  padding: 5px;
-  margin: 3px;
-  background: #181818;
+  padding: 4px;
+  margin: 4px;
   vertical-align: middle;
-  border: 1px solid {$greyborder};
+  border: 1px solid {$lightgreyborder};
   position: relative;
+  background: url('/rsrc/image/checker_lighter.png');
 }
 
-.device-desktop .pholio-mock-thumb-grid-item:hover,
+.device-desktop .pholio-mock-thumb-grid-item:hover {
+  border-color: {$indigo};
+}
+
 .pholio-mock-thumb-grid-current {
-  background: #383838;
   border-color: {$sky};
 }
 
@@ -52,11 +51,6 @@
 .pholio-mock-image {
   margin: auto;
   cursor: crosshair;
-}
-
-.pholio-mock-image-panel {
-  padding: 0;
-  border-top: 1px solid #333;
 }
 
 .pholio-mock-image-viewport {
@@ -76,15 +70,8 @@
 }
 
 .pholio-visible-size {
-  color: #fff;
-}
-
-.pholio-image-description {
-  color: {$greytext};
-}
-
-.pholio-image-title {
-  color: #ffffff;
+  color: {$sky};
+  font-weight: bold;
 }
 
 .pholio-device-lightbox {
@@ -153,8 +140,15 @@
 
 .pholio-mock-image-header {
   position: absolute;
-  top: 4px;
-  right: 8px;
+  top: 0;
+  right: 0;
   font-size: 14px;
-  color: {$lightgreytext};
+  padding: 4px 8px;
+  background: rgba(255,255,255,.6);
+  color: {$greytext};
+}
+
+.pholio-image-title {
+  font-weight: bold;
+  color: {$bluetext};
 }

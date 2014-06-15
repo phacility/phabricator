@@ -94,6 +94,10 @@ final class PholioMockViewController extends PholioController {
       ->setMock($mock)
       ->setImageID($this->imageID);
 
+    $output = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Image'))
+      ->appendChild($output);
+
     $xaction_view = id(new PholioTransactionView())
       ->setUser($this->getRequest()->getUser())
       ->setObjectPHID($mock->getPHID())

@@ -88,12 +88,13 @@ final class PholioMockThumbGridView extends AphrontView {
       ),
       $grid);
 
-    return phutil_tag(
-      'div',
-      array(
-        'class' => 'pholio-mock-thumb-grid-container',
-      ),
-      $grid);
+    $grid = id(new PHUIBoxView())
+      ->addClass('pholio-mock-thumb-grid-container')
+      ->appendChild($grid);
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Mock History'))
+      ->appendChild($grid);
   }
 
 
