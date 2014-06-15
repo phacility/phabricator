@@ -169,9 +169,8 @@ JX.behavior('pholio-mock-view', function(config) {
   function redraw_image() {
 
     // Force the stage to scale as a function of the viewport size. Broadly,
-    // we make the stage 95% of the height of the viewport, then scale images
-    // to fit within it.
-    var new_y = (JX.Vector.getViewport().y * 0.90) - 150;
+    // we take the full viewport and subtract 12px top and bottom.
+    var new_y = (JX.Vector.getViewport().y - 24) ;
     new_y = Math.max(320, new_y);
     panel.style.height = new_y + 'px';
 
@@ -184,8 +183,8 @@ JX.behavior('pholio-mock-view', function(config) {
     // If the image is too wide or tall for the viewport, scale it down so it
     // fits.
     var w = JX.Vector.getDim(panel);
-    w.x -= 40;
-    w.y -= 40;
+    w.x -= 24;
+    w.y -= 24;
     var scale = 1;
     if (w.x < tag.naturalWidth) {
       scale = Math.min(scale, w.x / tag.naturalWidth);

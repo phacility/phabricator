@@ -3,27 +3,28 @@
  */
 
 .pholio-inline-comment {
-  border: 1px solid #555555;
-  background: #353535;
-  margin: 0 10px 5px 10px;
-  padding: 8px 10px;
-
-  font-family: Verdana;
-  font-size: 11px;
+  margin: 0 0 4px 0;
+  padding: 8px;
+  font-size: 12px;
 }
 
 .pholio-mock-inline-comments {
   color: #cccccc;
-  border-top: 1px solid #333;
   background: #282828;
   overflow-x: auto;
   text-align: left;
 }
 
+.pholio-inline-comment-header {
+  color: #fff;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
 .device-desktop .pholio-mock-inline-comments {
   border-left: 1px solid #101010;
   position: absolute;
-  width: 320px;
+  width: 300px;
   top: 0;
   bottom: 0;
   right: 0;
@@ -43,7 +44,7 @@
 }
 
 .pholio-inline-comment-dialog {
-  padding: 10px;
+  padding: 4px;
 }
 
 .pholio-inline-comment-dialog-textarea {
@@ -79,7 +80,7 @@
 
 .pholio-mock-inline-comments a {
   font-weight: normal;
-  color: #2178db;
+  color: {$sky};
 }
 
 .device-desktop .pholio-mock-inline-comment-highlight.pholio-mock-select-fill {
