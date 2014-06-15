@@ -41,6 +41,10 @@ final class PholioMock extends PholioDAO
       ->setViewPolicy($view_policy);
   }
 
+  public function getMonogram() {
+    return 'M'.$this->getID();
+  }
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
