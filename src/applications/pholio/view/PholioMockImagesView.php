@@ -67,6 +67,13 @@ final class PholioMockImagesView extends AphrontView {
     $nonimage_uri = celerity_get_resource_uri(
       'rsrc/image/icon/fatcow/thumbnails/default.p100.png');
 
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($this->getUser());
+    foreach ($mock->getAllImages() as $image) {
+      $engine->addObject($image, 'default');
+    }
+    $engine->process();
+
     foreach ($mock->getAllImages() as $image) {
       $file = $image->getFile();
       $metadata = $file->getMetadata();
@@ -86,7 +93,7 @@ final class PholioMockImagesView extends AphrontView {
         'width' => $x,
         'height' => $y,
         'title' => $image->getName(),
-        'desc' => $image->getDescription(),
+        'descriptionMarkup' => $engine->getOutput($image, 'default'),
         'isObsolete' => (bool)$image->getIsObsolete(),
         'isImage' => $file->isViewableImage(),
         'isViewable' => $file->isViewableInBrowser(),

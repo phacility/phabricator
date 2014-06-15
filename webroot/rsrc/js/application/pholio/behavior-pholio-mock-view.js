@@ -628,12 +628,6 @@ JX.behavior('pholio-mock-view', function(config) {
       image.title);
     info.push(title);
 
-    var desc = JX.$N(
-      'div',
-      {className: 'pholio-image-description'},
-      image.desc);
-    info.push(desc);
-
     if (!image.isObsolete) {
       var embed = JX.$N(
         'div',
@@ -648,7 +642,12 @@ JX.behavior('pholio-mock-view', function(config) {
     }
     info = JX.$N('div', {className: 'pholio-image-info'}, info);
 
-    return [buttons, info];
+    var desc = JX.$N(
+      'div',
+      {className: 'pholio-image-description'},
+      JX.$H(image.descriptionMarkup));
+
+    return [buttons, info, desc];
   }
 
   function render_reticle(classes) {
