@@ -8,7 +8,8 @@ final class PholioMock extends PholioDAO
     PhabricatorTokenReceiverInterface,
     PhabricatorFlaggableInterface,
     PhabricatorApplicationTransactionInterface,
-    PhabricatorProjectInterface {
+    PhabricatorProjectInterface,
+    PhabricatorDestructableInterface {
 
   const MARKUP_FIELD_DESCRIPTION  = 'markup:description';
 
@@ -254,6 +255,25 @@ final class PholioMock extends PholioDAO
     return array(
       $this->getAuthorPHID(),
     );
+  }
+
+
+/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $images = id(new PholioImage())->loadAllWhere(
+        'mockID = %d',
+        $this->getID());
+      foreach ($images as $image) {
+        $image->delete();
+      }
+
+      $this->delete();
+    $this->saveTransaction();
   }
 
 }
