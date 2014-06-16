@@ -261,6 +261,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
         return javelin_tag(
           'span',
           array(
+            'class' => 'transaction-comment',
             'sigil' => 'transaction-comment',
             'meta'  => array('phid' => $comment->getTransactionPHID()),
           ),

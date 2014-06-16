@@ -97,7 +97,7 @@
   padding-bottom: 2px;
 }
 
-.pholio-transaction-inline-comment span {
+.pholio-transaction-inline-comment .transaction-comment {
   display: table-cell;
   vertical-align: middle;
   padding-left: 8px;
@@ -151,18 +151,25 @@
 .pholio-image-title {
   font-weight: bold;
   color: {$bluetext};
+  font-size: 15px;
+}
+
+.mock-image-description {
+  background: #fff;
+  border-top: 1px solid {$thinblueborder};
+  text-align: left;
 }
 
 .pholio-mock-thumb-grid-comment-count {
   position: absolute;
-  right: 4px;
-  bottom: 4px;
+  top: -4px;
+  right: -4px;
   width: 20px;
-  height: 20px;
-  text-align: center;
-  line-height: 20px;
-  border-radius: 10px;
+  height: 17px;
   font-weight: bold;
+  text-align: center;
+  line-height: 16px;
+  border-radius: 2px;
   color: #fff;
   text-decoration: none;
   background: {$indigo};
@@ -202,6 +209,6 @@ a.pholio-image-button-link .phui-icon-view {
 }
 
 .pholio-image-description {
-  padding: 12px;
-  border-top: 1px solid {$lightblueborder};
+  padding: 12px 8px;
+  border-top: 1px solid {$thinblueborder};
 }

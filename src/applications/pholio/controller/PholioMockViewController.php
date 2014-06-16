@@ -122,7 +122,6 @@ final class PholioMockViewController extends PholioController {
       $crumbs,
       $object_box,
       $output,
-      phutil_tag('br'),
       $thumb_grid,
       $xaction_view,
       $add_comment,

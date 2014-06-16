@@ -156,9 +156,9 @@ final class PholioMockImagesView extends AphrontView {
     $inline_comments_holder = javelin_tag(
       'div',
       array(
-        'id' => 'mock-inline-comments',
-        'sigil' => 'mock-inline-comments',
-        'class' => 'pholio-mock-inline-comments'
+        'id' => 'mock-image-description',
+        'sigil' => 'mock-image-description',
+        'class' => 'mock-image-description'
       ),
       '');
 

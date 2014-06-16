@@ -2,28 +2,4 @@
  * @provides pholio-inline-comments-css
  */
 
-.pholio-inline-comment {
-  margin: 0 0 4px 0;
-  padding: 8px;
-}
 
-.pholio-mock-inline-comments {
-  background: #fff;
-  border-top: 1px solid {$thinblueborder};
-  text-align: left;
-  overflow: hidden;
-}
-
-.pholio-mock-inline-comments a {
-  font-weight: normal;
-  color: {$sky};
-}
-
-.device-desktop .pholio-mock-inline-comment-highlight.pholio-mock-select-fill {
-  opacity: 0.5;
-}
-
-.device-desktop .pholio-mock-inline-comment-highlight.pholio-inline-comment {
-  background: #555555;
-  border-color: #aaaaaa;
-}

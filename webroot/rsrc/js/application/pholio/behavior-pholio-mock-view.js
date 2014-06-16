@@ -447,7 +447,7 @@ JX.behavior('pholio-mock-view', function(config) {
     }
 
     stage.clearStage();
-    var comment_holder = JX.$('mock-inline-comments');
+    var comment_holder = JX.$('mock-image-description');
     JX.DOM.setContent(comment_holder, render_image_info(active_image));
 
     var image_header = JX.$('mock-image-header');
