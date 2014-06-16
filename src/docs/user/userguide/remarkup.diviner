@@ -22,7 +22,9 @@ These are inline styles, and can be applied to most text:
   D123 T123 rX123           # Link to Objects
   {D123} {T123}             # Link to Objects (Full Name)
   {F123}                    # Embed Images
-  @username                 # Mention a user
+  {M123}                    # Embed Pholio Mock
+  @username                 # Mention a User
+  #project                  # Mention a Project
   [[wiki page]]             # Link to Phriction
   [[wiki page | name]]      # Named link to Phriction
   http://xyz/               # Link to web
@@ -263,9 +265,9 @@ WARNING: Crossing the streams can result in total protonic reversal!
 
 IMPORTANT: Don't cross the streams!
 
-You can also use "(NOTE)", "(WARNING)", or "(IMPORTANT)" to get the same
- effect but without "(NOTE"), "(WARNING)", or "(IMPORTANT)" appearing in the
- rendered result. For example
+In addition, you can use "(NOTE)", "(WARNING)", or "(IMPORTANT)" to get the
+same effect but without "(NOTE)", "(WARNING)", or "(IMPORTANT)" appearing in
+the rendered result. For example
 
 (NOTE) Dr. Egon Spengler is the best resource for additional proton pack
  questions.
@@ -315,6 +317,14 @@ You can also generate full-name references to some objects by using braces:
 
 These references will also show when an object changes state (for instance, a
 task or revision is closed). Some types of objects support rich embedding.
+
+== Linking to Project Tags
+
+Projects can be linked to with the use of a hashtag (#). This works by default
+using the name of the Project (lowercase, underscored). Additionally you
+can set multiple additional hashtags by editing the Project details.
+
+  #qa, #quality_assurance
 
 == Embedding Mocks (Pholio)
 

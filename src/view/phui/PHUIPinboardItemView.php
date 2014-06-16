@@ -43,6 +43,7 @@ final class PHUIPinboardItemView extends AphrontView {
   }
 
   public function render() {
+    require_celerity_resource('phui-pinboard-view-css');
     $header = null;
     if ($this->header) {
       if ($this->disabled) {
@@ -59,19 +60,22 @@ final class PHUIPinboardItemView extends AphrontView {
         phutil_tag('a', array('href' => $this->uri), $this->header));
     }
 
-    $image = phutil_tag(
-      'a',
-      array(
-        'href' => $this->uri,
-        'class' => 'phui-pinboard-item-image-link',
-      ),
-      phutil_tag(
-        'img',
+    $image = null;
+    if ($this->imageWidth) {
+      $image = phutil_tag(
+        'a',
         array(
-          'src'     => $this->imageURI,
-          'width'   => $this->imageWidth,
-          'height'  => $this->imageHeight,
-        )));
+          'href' => $this->uri,
+          'class' => 'phui-pinboard-item-image-link',
+        ),
+        phutil_tag(
+          'img',
+          array(
+            'src'     => $this->imageURI,
+            'width'   => $this->imageWidth,
+            'height'  => $this->imageHeight,
+          )));
+    }
 
     $icons = array();
     if ($this->iconBlock) {
@@ -121,8 +125,8 @@ final class PHUIPinboardItemView extends AphrontView {
       array(
         $header,
         $image,
-        $icons,
         $content,
+        $icons,
       ));
   }
 

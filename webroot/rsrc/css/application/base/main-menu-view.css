@@ -201,12 +201,22 @@
   margin-left: 40px;
 }
 
+.phabricator-main-search-typeahead-result .phabricator-search-icon {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  position: absolute;
+  top: 9px;
+  left: 9px;
+}
+
 .phabricator-main-search-typeahead-result {
   display: block;
   padding: 6px 8px 8px 44px;
   background-position: 8px;
   background-size: 30px 30px;
   background-repeat: no-repeat;
+  position: relative;
 }
 
 .phabricator-main-search-typeahead-result .result-name {

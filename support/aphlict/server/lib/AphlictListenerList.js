@@ -9,14 +9,12 @@ JX.install('AphlictListenerList', {
   members: {
     _listeners: null,
     _nextID: 0,
-    _activeListenerCount: 0,
     _totalListenerCount: 0,
 
     addListener: function(socket) {
       var listener = new JX.AphlictListener(this._generateNextID(), socket);
 
       this._listeners[listener.getID()] = listener;
-      this._activeListenerCount++;
       this._totalListenerCount++;
 
       return listener;
@@ -26,7 +24,6 @@ JX.install('AphlictListenerList', {
       var id = listener.getID();
       if (id in this._listeners) {
         delete this._listeners[id];
-        this._activeListenerCount--;
       }
     },
 
@@ -42,7 +39,7 @@ JX.install('AphlictListenerList', {
     },
 
     getActiveListenerCount: function() {
-      return this._activeListenerCount;
+      return Object.keys(this._listeners).length;
     },
 
     getTotalListenerCount: function() {

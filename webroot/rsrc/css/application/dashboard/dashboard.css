@@ -77,3 +77,7 @@
   border-right: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$blueborder};
 }
+
+.dashboard-panel .gradient-lightblue-header .phabricator-action-header-title {
+  padding: 10px 4px;
+}

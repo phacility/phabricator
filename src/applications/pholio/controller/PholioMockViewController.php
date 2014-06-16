@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioMockViewController extends PholioController {
 
   private $id;
@@ -34,7 +31,7 @@ final class PholioMockViewController extends PholioController {
       ->setViewer($user)
       ->withIDs(array($this->id))
       ->needImages(true)
-      ->needCoverFiles(true)
+      ->needInlineComments(true)
       ->executeOne();
 
     if (!$mock) {
@@ -89,8 +86,6 @@ final class PholioMockViewController extends PholioController {
     require_celerity_resource('pholio-css');
     require_celerity_resource('pholio-inline-comments-css');
 
-    $image_status = $this->getImageStatus($mock, $this->imageID);
-
     $comment_form_id = celerity_generate_unique_node_id();
     $output = id(new PholioMockImagesView())
       ->setRequestURI($request->getRequestURI())
@@ -98,6 +93,10 @@ final class PholioMockViewController extends PholioController {
       ->setUser($user)
       ->setMock($mock)
       ->setImageID($this->imageID);
+
+    $output = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Image'))
+      ->appendChild($output);
 
     $xaction_view = id(new PholioTransactionView())
       ->setUser($this->getRequest()->getUser())
@@ -115,11 +114,15 @@ final class PholioMockViewController extends PholioController {
       ->setHeader($header)
       ->addPropertyList($properties);
 
+    $thumb_grid = id(new PholioMockThumbGridView())
+      ->setUser($user)
+      ->setMock($mock);
+
     $content = array(
       $crumbs,
-      $image_status,
       $object_box,
-      $output->render(),
+      $output,
+      $thumb_grid,
       $xaction_view,
       $add_comment,
     );
@@ -131,43 +134,6 @@ final class PholioMockViewController extends PholioController {
         'device' => true,
         'pageObjects' => array($mock->getPHID()),
       ));
-  }
-
-  private function getImageStatus(PholioMock $mock, $image_id) {
-    $status = null;
-    $images = $mock->getImages();
-    foreach ($images as $image) {
-      if ($image->getID() == $image_id) {
-        return $status;
-      }
-    }
-
-    $images = $mock->getAllImages();
-    $images = mpull($images, null, 'getID');
-    $image = idx($images, $image_id);
-
-    if ($image) {
-      $history = $mock->getImageHistorySet($image_id);
-      $latest_image = last($history);
-      $href = $this->getApplicationURI(
-        'image/history/'.$latest_image->getID().'/');
-      $status = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setTitle(pht('The requested image is obsolete.'))
-        ->appendChild(phutil_tag(
-          'p',
-          array(),
-          array(
-            pht('You are viewing this mock with the latest image set.'),
-            ' ',
-            phutil_tag(
-              'a',
-              array('href' => $href),
-              pht(
-                'Click here to see the history of the now obsolete image.')))));
-    }
-
-    return $status;
   }
 
   private function buildActionView(PholioMock $mock) {

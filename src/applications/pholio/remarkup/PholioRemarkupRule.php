@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioRemarkupRule
   extends PhabricatorRemarkupRuleObject {
 
@@ -10,14 +7,49 @@ final class PholioRemarkupRule
     return 'M';
   }
 
+  protected function getObjectIDPattern() {
+    // Match "M123", "M123/456", and "M123/456/". Users can hit the latter
+    // forms when clicking comment anchors on a mock page.
+    return '[1-9]\d*(?:/[1-9]\d*/?)?';
+  }
+
+  protected function getObjectHref($object, $handle, $id) {
+    $href = $handle->getURI();
+
+    // If the ID has a `M123/456` component, link to that specific image.
+    $id = explode('/', $id);
+    if (isset($id[1])) {
+      $href = $href.'/'.$id[1].'/';
+    }
+
+    return $href;
+  }
+
   protected function loadObjects(array $ids) {
+    // Strip off any image ID components of the URI.
+    $map = array();
+    foreach ($ids as $id) {
+      $map[head(explode('/', $id))][] = $id;
+    }
+
     $viewer = $this->getEngine()->getConfig('viewer');
-    return id(new PholioMockQuery())
+    $mocks = id(new PholioMockQuery())
       ->setViewer($viewer)
+      ->needCoverFiles(true)
       ->needImages(true)
       ->needTokenCounts(true)
-      ->withIDs($ids)
+      ->withIDs(array_keys($map))
       ->execute();
+
+    $results = array();
+    foreach ($mocks as $mock) {
+      $ids = idx($map, $mock->getID(), array());
+      foreach ($ids as $id) {
+        $results[$id] = $mock;
+      }
+    }
+
+    return $results;
   }
 
   protected function renderObjectEmbed($object, $handle, $options) {

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group herald
- */
 final class HeraldPholioMockAdapter extends HeraldAdapter {
 
   private $mock;
@@ -13,8 +10,7 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
   }
 
   public function getAdapterContentDescription() {
-    return pht(
-      'React to mocks being created or updated.');
+    return pht('React to mocks being created or updated.');
   }
 
   public function getObject() {
@@ -59,6 +55,7 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
         self::FIELD_BODY,
         self::FIELD_AUTHOR,
         self::FIELD_CC,
+        self::FIELD_PROJECTS,
         self::FIELD_IS_NEW_OBJECT,
       ),
       parent::getFields());
@@ -98,7 +95,11 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
         return $this->getMock()->getAuthorPHID();
       case self::FIELD_CC:
         return PhabricatorSubscribersQuery::loadSubscribersForPHID(
-                $this->getMock()->getPHID());
+          $this->getMock()->getPHID());
+      case self::FIELD_PROJECTS:
+        return PhabricatorEdgeQuery::loadDestinationPHIDs(
+          $this->getMock()->getPHID(),
+          PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT);
     }
 
     return parent::getHeraldField($field);

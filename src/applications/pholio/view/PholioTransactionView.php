@@ -64,12 +64,14 @@ final class PholioTransactionView
     }
 
     if ($inlines) {
+      $icon = id(new PHUIIconView())
+        ->setIconFont('fa-comment bluegrey msr');
       $header = phutil_tag(
         'div',
         array(
           'class' => 'phabricator-transaction-subheader',
         ),
-        pht('Inline Comments'));
+        array($icon, pht('Inline Comments')));
 
       $out[] = $header;
       foreach ($inlines as $inline) {

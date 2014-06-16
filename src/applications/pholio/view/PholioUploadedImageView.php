@@ -34,7 +34,7 @@ final class PholioUploadedImageView extends AphrontView {
       ->setSigil('image-title')
       ->setLabel(pht('Title'));
 
-    $description = id(new AphrontFormTextAreaControl())
+    $description = id(new PhabricatorRemarkupControl())
       ->setName('description_'.$phid)
       ->setValue($image->getDescription())
       ->setSigil('image-description')
