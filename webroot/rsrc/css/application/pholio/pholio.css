@@ -192,19 +192,29 @@
   font-size: 24px;
 }
 
-a.pholio-image-button-link:hover {
-  background: {$darkgreybackground};
+button.pholio-image-button-link,
+button.pholio-image-button-link:active {
+  /* Remove button styles. */
+  box-shadow: none;
+  text-shadow: none;
+  border: none;
+  border-radius: 0;
 }
 
-span.pholio-image-button-link .phui-icon-view {
-  color: {$darkgreybackground};
-}
-
-a.pholio-image-button-link .phui-icon-view {
+.pholio-image-button-active .pholio-image-button-link .phui-icon-view {
   color: {$lightgreytext};
 }
 
-.device-desktop a.pholio-image-button-link:hover .phui-icon-view {
+.pholio-image-button-disabled .pholio-image-button-link .phui-icon-view {
+  color: {$darkgreybackground};
+}
+
+.pholio-image-button-active .pholio-image-button-link:hover {
+  background: {$darkgreybackground};
+}
+
+.device-desktop .pholio-image-button-active
+  .pholio-image-button-link:hover .phui-icon-view {
   color: {$sky};
 }
 

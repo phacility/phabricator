@@ -591,11 +591,19 @@ JX.behavior('pholio-mock-view', function(config) {
 
     var buttons = [];
 
+    var classes = ['pholio-image-button'];
+
+    if (image.isViewable) {
+      classes.push('pholio-image-button-active');
+    } else {
+      classes.push('pholio-image-button-disabled');
+    }
+
     buttons.push(
       JX.$N(
         'div',
         {
-          className: 'pholio-image-button'
+          className: classes.join(' ')
         },
         JX.$N(
           image.isViewable ? 'a' : 'span',
@@ -606,16 +614,19 @@ JX.behavior('pholio-mock-view', function(config) {
           },
           JX.$H(config.fullIcon))));
 
-    // TODO: This should be a form which performs the download; for now, it
-    // just takes the user to the info page.
+    classes = ['pholio-image-button', 'pholio-image-button-active'];
+
     buttons.push(
       JX.$N(
-        'div',
+        'form',
         {
-          className: 'pholio-image-button'
+          className: classes.join(' '),
+          action: image.downloadURI,
+          method: 'POST',
+          sigil: 'download'
         },
         JX.$N(
-          'a',
+          'button',
           {
             href: image.downloadURI,
             className: 'pholio-image-button-link'

@@ -88,7 +88,7 @@ final class PholioMockImagesView extends AphrontView {
           ? $file->getBestURI()
           : $nonimage_uri),
         'pageURI' => $this->getImagePageURI($image, $mock),
-        'downloadURI' => $file->getInfoURI(),
+        'downloadURI' => $file->getDownloadURI(),
         'historyURI' => $history_uri,
         'width' => $x,
         'height' => $y,
@@ -105,6 +105,16 @@ final class PholioMockImagesView extends AphrontView {
       $navsequence[] = $image->getID();
     }
 
+    $full_icon = array(
+      javelin_tag('span', array('aural' => true), pht('View Raw File')),
+      id(new PHUIIconView())->setIconFont('fa-file-image-o'),
+    );
+
+    $download_icon = array(
+      javelin_tag('span', array('aural' => true), pht('Download File')),
+      id(new PHUIIconView())->setIconFont('fa-download'),
+    );
+
     $login_uri = id(new PhutilURI('/login/'))
       ->setQueryParam('next', (string) $this->getRequestURI());
     $config = array(
@@ -117,8 +127,8 @@ final class PholioMockImagesView extends AphrontView {
       'loggedIn' => $this->getUser()->isLoggedIn(),
       'logInLink' => (string) $login_uri,
       'navsequence' => $navsequence,
-      'fullIcon' => id(new PHUIIconView())->setIconFont('fa-arrows-alt'),
-      'downloadIcon' => id(new PHUIIconView())->setIconFont('fa-download'),
+      'fullIcon' => hsprintf('%s', $full_icon),
+      'downloadIcon' => hsprintf('%s', $download_icon),
     );
     Javelin::initBehavior('pholio-mock-view', $config);
 
