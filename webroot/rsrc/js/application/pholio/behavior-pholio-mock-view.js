@@ -633,6 +633,9 @@ JX.behavior('pholio-mock-view', function(config) {
           },
           JX.$H(config.downloadIcon))));
 
+    if (image.title === '') {
+      image.title = 'Untitled Masterpiece';
+    }
     var title = JX.$N(
       'div',
       {className: 'pholio-image-title'},
