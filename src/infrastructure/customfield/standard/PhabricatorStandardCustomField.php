@@ -391,4 +391,9 @@ abstract class PhabricatorStandardCustomField
     return $this->getFieldValue();
   }
 
+  public function getFieldControlID($key = null) {
+    $key = coalesce($key, $this->getRawStandardFieldKey());
+    return 'std:control:'.$key;
+  }
+
 }

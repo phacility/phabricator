@@ -354,6 +354,7 @@ return array(
     'rsrc/js/application/countdown/timer.js' => '361e3ed3',
     'rsrc/js/application/dashboard/behavior-dashboard-async-panel.js' => '469c0d9e',
     'rsrc/js/application/dashboard/behavior-dashboard-move-panels.js' => 'fa187a68',
+    'rsrc/js/application/dashboard/behavior-dashboard-query-panel-select.js' => '3be3eef5',
     'rsrc/js/application/dashboard/behavior-dashboard-tab-panel.js' => 'aa077691',
     'rsrc/js/application/differential/ChangesetViewManager.js' => 'db09a523',
     'rsrc/js/application/differential/DifferentialInlineCommentEditor.js' => 'f2441746',
@@ -555,6 +556,7 @@ return array(
     'javelin-behavior-dark-console' => 'e9fdb5e5',
     'javelin-behavior-dashboard-async-panel' => '469c0d9e',
     'javelin-behavior-dashboard-move-panels' => 'fa187a68',
+    'javelin-behavior-dashboard-query-panel-select' => '3be3eef5',
     'javelin-behavior-dashboard-tab-panel' => 'aa077691',
     'javelin-behavior-device' => '03d6ed07',
     'javelin-behavior-differential-add-reviewers-and-ccs' => '533a187b',
@@ -1112,6 +1114,11 @@ return array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
       2 => 'phortune-credit-card-form',
+    ),
+    '3be3eef5' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
     ),
     '40b1ff90' =>
     array(

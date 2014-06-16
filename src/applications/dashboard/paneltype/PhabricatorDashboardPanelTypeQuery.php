@@ -25,15 +25,44 @@ final class PhabricatorDashboardPanelTypeQuery
       ),
       'key' => array(
         'name' => pht('Query'),
-        'type' => 'text',
+        'type' => 'search.query',
+        'control.application' => 'class',
       ),
       'limit' => array(
-        'name' => pht('Maximum Number of Items'),
-        'caption' => pht('Leave this blank for the default number of items'),
+        'name' => pht('Limit'),
+        'caption' => pht('Leave this blank for the default number of items.'),
         'type' => 'text',
       ),
     );
   }
+
+  public function initializeFieldsFromRequest(
+    PhabricatorDashboardPanel $panel,
+    PhabricatorCustomFieldList $field_list,
+    AphrontRequest $request) {
+
+    $map = array();
+    if (strlen($request->getStr('engine'))) {
+      $map['class'] = $request->getStr('engine');
+    }
+
+    if (strlen($request->getStr('query'))) {
+      $map['key'] = $request->getStr('query');
+    }
+
+    $full_map = array();
+    foreach ($map as $key => $value) {
+      $full_map["std:dashboard:core:{$key}"] = $value;
+    }
+
+    foreach ($field_list->getFields() as $field) {
+      $field_key = $field->getFieldKey();
+      if (isset($full_map[$field_key])) {
+        $field->setValueFromStorage($full_map[$field_key]);
+      }
+    }
+  }
+
 
   public function renderPanelContent(
     PhabricatorUser $viewer,

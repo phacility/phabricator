@@ -30,6 +30,7 @@ final class PhabricatorDashboardPanelSearchApplicationCustomField
     }
 
     return id(new AphrontFormSelectControl())
+      ->setID($this->getFieldControlID())
       ->setLabel($this->getFieldName())
       ->setCaption($this->getCaption())
       ->setName($this->getFieldKey())
