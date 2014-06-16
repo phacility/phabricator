@@ -41,29 +41,32 @@ final class PhabricatorDashboardMovePanelController
     $layout_config->removePanel($panel_phid);
     $panel_location_grid = $layout_config->getPanelLocations();
 
-    $panel_columns = idx($panel_location_grid, $column_id, array());
-    if ($panel_columns) {
+    $column_phids = idx($panel_location_grid, $column_id, array());
+    $column_phids = array_values($column_phids);
+    if ($column_phids) {
       $insert_at = 0;
-      $new_panel_columns = $panel_columns;
-      foreach ($panel_columns as $index => $curr_panel_phid) {
-        if ($curr_panel_phid === $before_phid) {
-          $insert_at = max($index - 1, 0);
-          break;
-        }
-        if ($curr_panel_phid === $after_phid) {
+      foreach ($column_phids as $index => $phid) {
+        if ($phid === $before_phid) {
           $insert_at = $index;
           break;
         }
+        if ($phid === $after_phid) {
+          $insert_at = $index + 1;
+          break;
+        }
       }
+
+      $new_column_phids = $column_phids;
       array_splice(
-        $new_panel_columns,
+        $new_column_phids,
         $insert_at,
         0,
         array($panel_phid));
     } else {
-      $new_panel_columns = array(0 => $panel_phid);
+      $new_column_phids = array(0 => $panel_phid);
     }
-    $panel_location_grid[$column_id] = $new_panel_columns;
+
+    $panel_location_grid[$column_id] = $new_column_phids;
     $layout_config->setPanelLocations($panel_location_grid);
     $dashboard->setLayoutConfigFromObject($layout_config);
     $dashboard->save();
