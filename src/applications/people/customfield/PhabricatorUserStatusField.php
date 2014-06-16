@@ -21,6 +21,11 @@ final class PhabricatorUserStatusField
     return true;
   }
 
+  public function isFieldEnabled() {
+    return PhabricatorApplication::isClassInstalled(
+      'PhabricatorApplicationCalendar');
+  }
+
   public function renderPropertyViewValue(array $handles) {
     $user = $this->getObject();
     $viewer = $this->requireViewer();
