@@ -174,6 +174,9 @@ final class PhabricatorApplicationSearchController
         pht('Save Custom Query...'));
     }
 
+    // TODO: A "Create Dashboard Panel" action goes here somewhere once
+    // we sort out T5307.
+
     $form->appendChild($submit);
     $filter_view = id(new AphrontListFilterView())->appendChild($form);
 

@@ -120,6 +120,13 @@ final class PhabricatorDashboardPanelEditController
       ->setViewer($viewer)
       ->readFieldsFromStorage($panel);
 
+    if ($is_create && !$request->isFormPost()) {
+      $panel->requireImplementation()->initializeFieldsFromRequest(
+        $panel,
+        $field_list,
+        $request);
+    }
+
     $validation_exception = null;
 
     // NOTE: We require 'edit' to distinguish between the "Choose a Type"

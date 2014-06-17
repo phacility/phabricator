@@ -633,6 +633,9 @@ JX.behavior('pholio-mock-view', function(config) {
           },
           JX.$H(config.downloadIcon))));
 
+    if (image.title === '') {
+      image.title = 'Untitled Masterpiece';
+    }
     var title = JX.$N(
       'div',
       {className: 'pholio-image-title'},
@@ -653,12 +656,15 @@ JX.behavior('pholio-mock-view', function(config) {
     }
     info = JX.$N('div', {className: 'pholio-image-info'}, info);
 
-    var desc = JX.$N(
-      'div',
-      {className: 'pholio-image-description'},
-      JX.$H(image.descriptionMarkup));
-
-    return [buttons, info, desc];
+    if (image.descriptionMarkup === '') {
+      return [buttons, info];
+    } else {
+      var desc = JX.$N(
+        'div',
+        {className: 'pholio-image-description'},
+        JX.$H(image.descriptionMarkup));
+      return [buttons, info, desc];
+    }
   }
 
   function render_reticle(classes) {
