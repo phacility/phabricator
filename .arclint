@@ -26,7 +26,7 @@
         "(^externals/JsShrink/)",
         "(^webroot/rsrc/externals/raphael/)"
       ],
-      "flags": ["--config=support/jshint/jshintconfig"]
+      "jshint.jshintrc": "support/jshint/jshintconfig"
     },
     "generated": {
       "type": "generated"
@@ -71,10 +71,7 @@
       "include": "(\\.php$)",
       "severity": {
         "16": "advice",
-        "29": "warning",
-        "31": "error",
-        "34": "error",
-        "35": "error"
+        "34": "error"
       },
       "xhpast.naminghook": "PhabricatorSymbolNameLinter"
     }
