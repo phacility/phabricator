@@ -3,7 +3,7 @@
 abstract class PhabricatorDaemonManagementWorkflow
   extends PhabricatorManagementWorkflow {
 
-  protected function loadAvailableDaemonClasses() {
+  protected final function loadAvailableDaemonClasses() {
     $loader = new PhutilSymbolLoader();
     return $loader
       ->setAncestorClass('PhutilDaemon')
@@ -11,12 +11,12 @@ abstract class PhabricatorDaemonManagementWorkflow
       ->selectSymbolsWithoutLoading();
   }
 
-  public function getPIDDirectory() {
+  protected final function getPIDDirectory() {
     $path = PhabricatorEnv::getEnvConfig('phd.pid-directory');
     return $this->getControlDirectory($path);
   }
 
-  public function getLogDirectory() {
+  protected final function getLogDirectory() {
     $path = PhabricatorEnv::getEnvConfig('phd.log-directory');
     return $this->getControlDirectory($path);
   }
@@ -35,7 +35,7 @@ abstract class PhabricatorDaemonManagementWorkflow
     return $path;
   }
 
-  public function loadRunningDaemons() {
+  protected final function loadRunningDaemons() {
     $results = array();
 
     $pid_dir = $this->getPIDDirectory();
@@ -58,6 +58,13 @@ abstract class PhabricatorDaemonManagementWorkflow
     }
 
     return $results;
+  }
+
+  protected final function loadAllRunningDaemons() {
+    return id(new PhabricatorDaemonLogQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
+      ->execute();
   }
 
   private function findDaemonClass($substring) {
@@ -93,8 +100,7 @@ abstract class PhabricatorDaemonManagementWorkflow
     return head($match);
   }
 
-
-  protected function launchDaemon($class, array $argv, $debug) {
+  protected final function launchDaemon($class, array $argv, $debug) {
     $daemon = $this->findDaemonClass($class);
     $console = PhutilConsole::getConsole();
 
@@ -212,7 +218,7 @@ abstract class PhabricatorDaemonManagementWorkflow
     }
   }
 
-  protected function willLaunchDaemons() {
+  protected final function willLaunchDaemons() {
     $console = PhutilConsole::getConsole();
     $console->writeErr(pht('Preparing to launch daemons.')."\n");
 
@@ -224,7 +230,7 @@ abstract class PhabricatorDaemonManagementWorkflow
 /* -(  Commands  )----------------------------------------------------------- */
 
 
-  protected function executeStartCommand($keep_leases = false) {
+  protected final function executeStartCommand($keep_leases = false) {
     $console = PhutilConsole::getConsole();
 
     $running = $this->loadRunningDaemons();
@@ -278,8 +284,7 @@ abstract class PhabricatorDaemonManagementWorkflow
     return 0;
   }
 
-
-  protected function executeStopCommand(array $pids) {
+  protected final function executeStopCommand(array $pids) {
     $console = PhutilConsole::getConsole();
 
     $daemons = $this->loadRunningDaemons();
