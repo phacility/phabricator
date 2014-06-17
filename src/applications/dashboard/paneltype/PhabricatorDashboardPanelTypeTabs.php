@@ -19,8 +19,8 @@ final class PhabricatorDashboardPanelTypeTabs
   public function getFieldSpecifications() {
     return array(
       'config' => array(
-        'name' => pht('JSON Config'),
-        'type' => 'remarkup',
+        'name' => pht('Tabs'),
+        'type' => 'dashboard.tabs',
       ),
     );
   }
@@ -35,9 +35,13 @@ final class PhabricatorDashboardPanelTypeTabs
     PhabricatorDashboardPanel $panel,
     PhabricatorDashboardPanelRenderingEngine $engine) {
 
-    $config = phutil_json_decode($panel->getProperty('config'), null);
-    if ($config === null) {
-      throw new Exception(pht('The configuration is not valid JSON.'));
+    $config = $panel->getProperty('config');
+    if (!is_array($config)) {
+      // NOTE: The older version of this panel stored raw JSON.
+      $config = phutil_json_decode($config, null);
+      if ($config === null) {
+        throw new Exception(pht('The configuration is not valid JSON.'));
+      }
     }
 
     $list = id(new PHUIListView())
