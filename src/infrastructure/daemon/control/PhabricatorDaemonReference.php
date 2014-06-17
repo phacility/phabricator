@@ -10,19 +10,6 @@ final class PhabricatorDaemonReference {
 
   private $daemonLog;
 
-  public static function newFromFile($path) {
-    $pid_data = Filesystem::readFile($path);
-    $dict = json_decode($pid_data, true);
-    if (!is_array($dict)) {
-      // Just return a hanging reference, since control code needs to be
-      // robust against unusual system states.
-      $dict = array();
-    }
-    $ref = self::newFromDictionary($dict);
-    $ref->pidFile = $path;
-    return $ref;
-  }
-
   public static function newFromDictionary(array $dict) {
     $ref = new PhabricatorDaemonReference();
 
@@ -30,12 +17,6 @@ final class PhabricatorDaemonReference {
     $ref->argv  = idx($dict, 'argv', array());
     $ref->pid   = idx($dict, 'pid');
     $ref->start = idx($dict, 'start');
-
-    $this->daemonLog = id(new PhabricatorDaemonLog())->loadOneWhere(
-      'daemon = %s AND pid = %d AND dateCreated = %d',
-      $this->name,
-      $this->pid,
-      $this->start);
 
     return $ref;
   }
@@ -85,12 +66,13 @@ final class PhabricatorDaemonReference {
     return $this->start;
   }
 
-  public function getPIDFile() {
-    return $this->pidFile;
+  public function setPIDFile($pid_file) {
+    $this->pidFile = $pid_file;
+    return $this;
   }
 
-  public function getDaemonLog() {
-    return $this->daemonLog;
+  public function getPIDFile() {
+    return $this->pidFile;
   }
 
   public function isRunning() {
