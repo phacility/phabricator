@@ -41,12 +41,12 @@ final class PhabricatorDaemonLogListView extends AphrontView {
             pht(
               'This daemon is lost or exited uncleanly, and is presumed '.
               'dead.'));
-          $item->addIcon('delete', pht('Dead'));
+          $item->addIcon('fa-times grey', pht('Dead'));
           break;
         case PhabricatorDaemonLog::STATUS_EXITED:
           $item->setDisabled(true);
           $item->addAttribute(pht('This daemon exited cleanly.'));
-          $item->addIcon('enable-grey', pht('Exited'));
+          $item->addIcon('fa-check grey', pht('Exited'));
           break;
         case PhabricatorDaemonLog::STATUS_WAIT:
           $item->setBarColor('blue');
@@ -54,7 +54,7 @@ final class PhabricatorDaemonLogListView extends AphrontView {
             pht(
               'This daemon encountered an error recently and is waiting a '.
               'moment to restart.'));
-          $item->addIcon('perflab-grey', pht('Waiting'));
+          $item->addIcon('fa-clock-o grey', pht('Waiting'));
           break;
         case PhabricatorDaemonLog::STATUS_UNKNOWN:
         default:
@@ -63,7 +63,7 @@ final class PhabricatorDaemonLogListView extends AphrontView {
             pht(
               'This daemon has not reported its status recently. It may '.
               'have exited uncleanly.'));
-          $item->addIcon('warning', pht('Unknown'));
+          $item->addIcon('fa-exclamation-circle', pht('Unknown'));
           break;
       }
 
