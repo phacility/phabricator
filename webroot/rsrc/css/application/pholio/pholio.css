@@ -99,19 +99,21 @@
 
 .pholio-transaction-inline-comment .transaction-comment {
   display: table-cell;
-  vertical-align: middle;
+  vertical-align: top;
   padding-left: 8px;
+  padding-top: 4px;
 }
 
 .pholio-mock-reticle {
   position: absolute;
   display: none;
   box-sizing: border-box;
+  border: 4px solid transparent;
 }
 
 .pholio-mock-reticle-selection {
-  background-color: rgba(255, 255, 255, 0.50);
-  border: 1px dashed #000;
+  border: 1px solid rgba(0,0,0,.5);
+  box-shadow: 0 0 0 4px rgba(255,255,255,.5);
 }
 
 .pholio-mock-reticle-draft {
@@ -130,8 +132,12 @@
 
 .pholio-mock-reticle-draft:hover,
 .pholio-mock-reticle-final:hover {
-  background-color: rgba(255, 255, 255, 0.50);
+  border: 1px solid rgba(0,0,0,.5);
+  box-shadow: 0 0 0 4px rgba(255,255,255,.5);
   cursor: pointer;
+  color: transparent;
+  text-shadow: none;
+  -webkit-text-stroke: 0;
 }
 
 .device-desktop .mock-has-cursor .pholio-mock-reticle {

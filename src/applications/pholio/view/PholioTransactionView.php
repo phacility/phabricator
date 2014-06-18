@@ -6,6 +6,17 @@
 final class PholioTransactionView
   extends PhabricatorApplicationTransactionView {
 
+  private $mock;
+
+  public function setMock($mock) {
+    $this->mock = $mock;
+    return $this;
+  }
+
+  public function getMock() {
+    return $this->mock;
+  }
+
   protected function shouldGroupTransactions(
     PhabricatorApplicationTransaction $u,
     PhabricatorApplicationTransaction $v) {
@@ -87,12 +98,31 @@ final class PholioTransactionView
 
   private function renderInlineContent(PholioTransaction $inline) {
     $comment = $inline->getComment();
+    $mock = $this->getMock();
+    $images = $mock->getAllImages();
+    $images = mpull($images, null, 'getID');
 
-    $thumb = phutil_tag(
-      'img',
-      array(
-        'src' => '/pholio/inline/thumb/'.$comment->getImageID(),
-        ));
+    $image = idx($images, $comment->getImageID());
+    if (!$image) {
+      throw new Exception('No image attached!');
+    }
+
+    $file = $image->getFile();
+    if (!$file->isViewableImage()) {
+      throw new Exception('File is not viewable.');
+    }
+
+    $image_uri = $file->getBestURI();
+
+    $thumb = id(new PHUIImageMaskView())
+      ->addClass('mrl')
+      ->setImage($image_uri)
+      ->setDisplayHeight(100)
+      ->setDisplayWidth(200)
+      ->withMask(true)
+      ->centerViewOnPoint(
+        $comment->getX(), $comment->getY(),
+        $comment->getHeight(), $comment->getWidth());
 
     $link = phutil_tag(
       'a',

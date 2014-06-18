@@ -114,5 +114,5 @@ final class PHUIBoxExample extends PhabricatorUIExample {
           $head4,
           $obj4,
         ));
-        }
+      }
 }
