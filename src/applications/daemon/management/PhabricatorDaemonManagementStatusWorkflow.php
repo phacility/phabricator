@@ -7,73 +7,10 @@ final class PhabricatorDaemonManagementStatusWorkflow
     $this
       ->setName('status')
       ->setSynopsis(pht('Show status of running daemons.'))
-      ->setArguments(
-        array(
-          array(
-            'name' => 'all',
-            'help' => pht('Show the status of daemons across all hosts.'),
-          ),
-        ));
+      ->setArguments(array());
   }
 
   public function execute(PhutilArgumentParser $args) {
-    if ($args->getArg('all')) {
-      return $this->executeGlobal();
-    } else {
-      return $this->executeLocal();
-    }
-  }
-
-  protected function executeLocal() {
-    $console = PhutilConsole::getConsole();
-    $daemons = $this->loadRunningDaemons();
-
-    if (!$daemons) {
-      $console->writeErr(
-        "%s\n",
-        pht('There are no running Phabricator daemons.'));
-      return 1;
-    }
-
-    $status = 0;
-    $table = id(new PhutilConsoleTable())
-      ->addColumns(array(
-        'pid' => array(
-          'title' => 'PID',
-        ),
-        'started' => array(
-          'title' => 'Started',
-        ),
-        'daemon' => array(
-          'title' => 'Daemon',
-        ),
-        'argv' => array(
-          'title' => 'Arguments',
-        ),
-      ));
-
-    foreach ($daemons as $daemon) {
-      $name = $daemon->getName();
-      if (!$daemon->isRunning()) {
-        $daemon->updateStatus(PhabricatorDaemonLog::STATUS_DEAD);
-        $status = 2;
-        $name = '<DEAD> '.$name;
-      }
-
-      $table->addRow(array(
-        'pid'     => $daemon->getPID(),
-        'started' => $daemon->getEpochStarted()
-          ? date('M j Y, g:i:s A', $daemon->getEpochStarted())
-          : null,
-        'daemon'  => $name,
-        'argv'    => csprintf('%LR', $daemon->getArgv()),
-      ));
-    }
-
-    $table->draw();
-  }
-
-  protected function executeGlobal() {
     $console = PhutilConsole::getConsole();
     $daemons = $this->loadAllRunningDaemons();
 
@@ -109,14 +46,40 @@ final class PhabricatorDaemonManagementStatusWorkflow
       ));
 
     foreach ($daemons as $daemon) {
-      $table->addRow(array(
-        'id'      => $daemon->getID(),
-        'host'    => $daemon->getHost(),
-        'pid'     => $daemon->getPID(),
-        'started' => date('M j Y, g:i:s A', $daemon->getDateCreated()),
-        'daemon'  => $daemon->getDaemon(),
-        'argv'    => csprintf('%LR', array() /* $daemon->getArgv() */),
-      ));
+      if ($daemon instanceof PhabricatorDaemonLog) {
+        $table->addRow(array(
+          'id'      => $daemon->getID(),
+          'host'    => $daemon->getHost(),
+          'pid'     => $daemon->getPID(),
+          'started' => date('M j Y, g:i:s A', $daemon->getDateCreated()),
+          'daemon'  => $daemon->getDaemon(),
+          'argv'    => csprintf('%LR', $daemon->getExplicitArgv()),
+        ));
+      } else if ($daemon instanceof PhabricatorDaemonReference) {
+        $name = $daemon->getName();
+        if (!$daemon->isRunning()) {
+          $daemon->updateStatus(PhabricatorDaemonLog::STATUS_DEAD);
+          $status = 2;
+          $name = '<DEAD> '.$name;
+        }
+
+        $daemon_log = $daemon->getDaemonLog();
+        $id = null;
+        if ($daemon_log) {
+          $id = $daemon_log->getID();
+        }
+
+        $table->addRow(array(
+          'id'      => $id,
+          'host'    => 'localhost',
+          'pid'     => $daemon->getPID(),
+          'started' => $daemon->getEpochStarted()
+            ? date('M j Y, g:i:s A', $daemon->getEpochStarted())
+            : null,
+          'daemon'  => $name,
+          'argv'    => csprintf('%LR', $daemon->getArgv()),
+        ));
+      }
     }
 
     $table->draw();
