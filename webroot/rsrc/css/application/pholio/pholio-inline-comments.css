@@ -2,4 +2,12 @@
  * @provides pholio-inline-comments-css
  */
 
+.pholio-inline-comment-head {
+  padding: 8px 0;
+  color: {$greytext};
+}
+
+.pholio-inline-comment-head a {
+  font-weight: bold;
+}
 
