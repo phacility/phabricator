@@ -8,7 +8,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
     PhabricatorMarkupInterface,
-    PhabricatorDestructableInterface {
+    PhabricatorDestructableInterface,
+    PhabricatorApplicationTransactionInterface {
 
   /**
    * Shortest hash we'll recognize in raw "a829f32" form.
@@ -1009,6 +1010,20 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         $cursor->delete();
       }
 
+      $push_events = id(new PhabricatorRepositoryPushEvent())
+        ->loadAllWhere('repositoryPHID = %s', $this->getPHID());
+      foreach ($push_events as $push_event) {
+        // note PhabricatorRepositoryPushLog
+        // are deleted here too.
+        $push_event->delete();
+      }
+
+      $status_msgs = id(new PhabricatorRepositoryStatusMessage())
+        ->loadAllWhere('repositoryID = %d', $this->getID());
+      foreach ($status_msgs as $status_msg) {
+        $status_msg->delete();
+      }
+
       $conn_w = $this->establishConnection('w');
 
       queryfx(
@@ -1394,6 +1409,20 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $this->openTransaction();
     $this->delete();
     $this->saveTransaction();
+  }
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorRepositoryEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorRepositoryTransaction();
   }
 
 }
