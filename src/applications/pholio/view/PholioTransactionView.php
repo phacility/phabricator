@@ -127,7 +127,8 @@ final class PholioTransactionView
     $link = phutil_tag(
       'a',
       array(
-        'href' => '#'
+        'href' => '#',
+        'class' => 'pholio-transaction-inline-image-anchor',
       ),
       $thumb);
 

@@ -8,12 +8,12 @@
   display: inline-block;
   border: 1px solid {$lightblueborder};
   padding: 4px;
-  position: relative;
-  overflow: hidden;
 }
 
 .phui-image-mask-image {
   background-repeat: no-repeat;
+  position: relative;
+  overflow: hidden;
 }
 
 .phui-image-mask-mask {

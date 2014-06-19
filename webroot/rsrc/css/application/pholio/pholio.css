@@ -88,6 +88,10 @@
   background: url(/rsrc/image/darkload.gif) no-repeat center;
 }
 
+.device-desktop .pholio-transaction-inline-image-anchor:hover .phui-image-mask {
+  border-color: {$indigo};
+}
+
 .pholio-transaction-inline-comment {
   display: table-row;
 }
@@ -116,14 +120,14 @@
   box-shadow: 0 0 0 4px rgba(255,255,255,.5);
 }
 
-.pholio-mock-reticle-draft {
+.pholio-mock-reticle-draft .pholio-mock-comment-icon {
   font-size: 2.2em;
   color: {$yellow};
   text-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
   -webkit-text-stroke: 1px white;
 }
 
-.pholio-mock-reticle-final {
+.pholio-mock-reticle-final .pholio-mock-comment-icon {
   font-size: 2.2em;
   color: {$indigo};
   text-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
@@ -135,9 +139,16 @@
   border: 1px solid rgba(0,0,0,.5);
   box-shadow: 0 0 0 4px rgba(255,255,255,.5);
   cursor: pointer;
-  color: transparent;
-  text-shadow: none;
-  -webkit-text-stroke: 0;
+}
+
+.device-desktop .pholio-mock-reticle-draft:hover .pholio-mock-comment-icon,
+.device-desktop .pholio-mock-reticle-final:hover .pholio-mock-comment-icon {
+  opacity: 0;
+  -webkit-transition: all .3s ease;
+  -moz-transition: all .3s ease;
+  -ms-transition: all .3s ease;
+  -o-transition: all .3s ease;
+  transition: all .3s ease;
 }
 
 .device-desktop .mock-has-cursor .pholio-mock-reticle {
@@ -215,7 +226,7 @@ button.pholio-image-button-link:active {
   color: {$darkgreybackground};
 }
 
-.pholio-image-button-active .pholio-image-button-link:hover {
+.device-desktop .pholio-image-button-active .pholio-image-button-link:hover {
   background: {$darkgreybackground};
 }
 
