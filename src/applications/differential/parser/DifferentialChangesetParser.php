@@ -41,6 +41,26 @@ final class DifferentialChangesetParser {
   private $highlightErrors;
   private $disableCache;
   private $renderer;
+  private $characterEncoding;
+  private $highlightAs;
+
+  public function setHighlightAs($highlight_as) {
+    $this->highlightAs = $highlight_as;
+    return $this;
+  }
+
+  public function getHighlightAs() {
+    return $this->highlightAs;
+  }
+
+  public function setCharacterEncoding($character_encoding) {
+    $this->characterEncoding = $character_encoding;
+    return $this;
+  }
+
+  public function getCharacterEncoding() {
+    return $this->characterEncoding;
+  }
 
   public function setRenderer($renderer) {
     $this->renderer = $renderer;
@@ -422,8 +442,15 @@ final class DifferentialChangesetParser {
   }
 
   private function getHighlightFuture($corpus) {
+    $language = $this->highlightAs;
+
+    if (!$language) {
+      $language = $this->highlightEngine->getLanguageFromFilename(
+        $this->filename);
+    }
+
     return $this->highlightEngine->getHighlightFuture(
-      $this->highlightEngine->getLanguageFromFilename($this->filename),
+      $language,
       $corpus);
   }
 
@@ -452,6 +479,14 @@ final class DifferentialChangesetParser {
 
     $skip_cache = ($whitespace_mode != self::WHITESPACE_IGNORE_ALL);
     if ($this->disableCache) {
+      $skip_cache = true;
+    }
+
+    if ($this->characterEncoding) {
+      $skip_cache = true;
+    }
+
+    if ($this->highlightAs) {
       $skip_cache = true;
     }
 
@@ -677,6 +712,25 @@ final class DifferentialChangesetParser {
     // requests.
     $this->isTopLevel = (($range_start === null) && ($range_len === null));
     $this->highlightEngine = PhabricatorSyntaxHighlighter::newEngine();
+
+    $encoding = null;
+    if ($this->characterEncoding) {
+      // We are forcing this changeset to be interpreted with a specific
+      // character encoding, so force all the hunks into that encoding and
+      // propagate it to the renderer.
+      $encoding = $this->characterEncoding;
+      foreach ($this->changeset->getHunks() as $hunk) {
+        $hunk->forceEncoding($this->characterEncoding);
+      }
+    } else {
+      // We're just using the default, so tell the renderer what that is
+      // (by reading the encoding from the first hunk).
+      foreach ($this->changeset->getHunks() as $hunk) {
+        $encoding = $hunk->getDataEncoding();
+        break;
+      }
+    }
+
     $this->tryCacheStuff();
     $render_pch = $this->shouldRenderPropertyChangeHeader($this->changeset);
 
@@ -700,7 +754,8 @@ final class DifferentialChangesetParser {
       ->setMarkupEngine($this->markupEngine)
       ->setHandles($this->handles)
       ->setOldLines($this->old)
-      ->setNewLines($this->new);
+      ->setNewLines($this->new)
+      ->setOriginalCharacterEncoding($encoding);
 
     if ($this->user) {
       $renderer->setUser($this->user);
@@ -1013,18 +1068,18 @@ final class DifferentialChangesetParser {
   private function isCommentVisibleOnRenderedDiff(
     PhabricatorInlineCommentInterface $comment) {
 
-      $changeset_id = $comment->getChangesetID();
-      $is_new = $comment->getIsNewFile();
+    $changeset_id = $comment->getChangesetID();
+    $is_new = $comment->getIsNewFile();
 
-      if ($changeset_id == $this->rightSideChangesetID &&
+    if ($changeset_id == $this->rightSideChangesetID &&
         $is_new == $this->rightSideAttachesToNewFile) {
-          return true;
-        }
+        return true;
+    }
 
-      if ($changeset_id == $this->leftSideChangesetID &&
+    if ($changeset_id == $this->leftSideChangesetID &&
         $is_new == $this->leftSideAttachesToNewFile) {
-          return true;
-        }
+        return true;
+    }
 
     return false;
   }

@@ -14,6 +14,7 @@ final class DifferentialHunkModern extends DifferentialHunk {
   protected $data;
 
   private $rawData;
+  private $forcedEncoding;
 
   public function getTableName() {
     return 'differential_hunk_modern';
@@ -41,7 +42,12 @@ final class DifferentialHunkModern extends DifferentialHunk {
   public function getChanges() {
     return $this->getUTF8StringFromStorage(
       $this->getRawData(),
-      $this->getDataEncoding());
+      nonempty($this->forcedEncoding, $this->getDataEncoding()));
+  }
+
+  public function forceEncoding($encoding) {
+    $this->forcedEncoding = $encoding;
+    return $this;
   }
 
   public function save() {
