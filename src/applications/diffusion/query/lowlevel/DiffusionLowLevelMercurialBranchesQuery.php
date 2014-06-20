@@ -6,21 +6,36 @@
 final class DiffusionLowLevelMercurialBranchesQuery
   extends DiffusionLowLevelQuery {
 
+  private $contains;
+
+  public function withContainsCommit($commit) {
+    $this->contains = $commit;
+    return $this;
+  }
+
   protected function executeQuery() {
     $repository = $this->getRepository();
 
-    // NOTE: `--debug` gives us 40-character hashes.
+    if ($this->contains !== null) {
+      $spec = hgsprintf('(descendants(%s) and head())', $this->contains);
+    } else {
+      $spec = hgsprintf('head()');
+    }
+
     list($stdout) = $repository->execxLocalCommand(
-      '--debug branches');
-    $stdout = PhabricatorRepository::filterMercurialDebugOutput($stdout);
+      'log --template %s --rev %s',
+      '{node}\1{branch}\2',
+      $spec);
 
     $branches = array();
 
-    $lines = ArcanistMercurialParser::parseMercurialBranches($stdout);
-    foreach ($lines as $name => $spec) {
+    $lines = explode("\2", $stdout);
+    $lines = array_filter($lines);
+    foreach ($lines as $line) {
+      list($node, $branch) = explode("\1", $line);
       $branches[] = id(new DiffusionRepositoryRef())
-        ->setShortName($name)
-        ->setCommitIdentifier($spec['rev']);
+        ->setShortName($branch)
+        ->setCommitIdentifier($node);
     }
 
     return $branches;
