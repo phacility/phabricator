@@ -34,16 +34,21 @@ final class PhabricatorSMSManagementListOutboundWorkflow
       return 0;
     }
 
+    $table = id(new PhutilConsoleTable())
+      ->setShowHeader(false)
+      ->addColumn('id',     array('title' => 'ID'))
+      ->addColumn('status', array('title' => 'Status'))
+      ->addColumn('recv',   array('title' => 'Recipient'));
+
     foreach (array_reverse($sms_messages) as $sms) {
-      $console->writeOut(
-        "%s\n",
-        sprintf(
-          '% 8d  %-8s  To: %s',
-          $sms->getID(),
-          $sms->getSendStatus(),
-          $sms->getToNumber()));
+      $table->addRow(array(
+        'id'     => $sms->getID(),
+        'status' => $sms->getSendStatus(),
+        'recv'   => $sms->getToNumber(),
+      ));
     }
 
+    $table->draw();
     return 0;
   }
 

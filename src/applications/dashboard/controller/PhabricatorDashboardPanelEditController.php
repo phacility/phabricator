@@ -196,7 +196,11 @@ final class PhabricatorDashboardPanelEditController
 
     // NOTE: We're setting the submit URI explicitly because we need to edit
     // a different panel if we just cloned the original panel.
-    $submit_uri = $this->getApplicationURI('panel/edit/'.$panel->getID().'/');
+    if ($is_create) {
+      $submit_uri = $this->getApplicationURI('panel/edit/');
+    } else {
+      $submit_uri = $this->getApplicationURI('panel/edit/'.$panel->getID().'/');
+    }
 
     $policies = id(new PhabricatorPolicyQuery())
       ->setViewer($viewer)

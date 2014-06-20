@@ -469,12 +469,13 @@ JX.behavior('pholio-mock-view', function(config) {
 
       var classes = [];
       if (!inline.transactionPHID) {
-        classes.push('pholio-mock-reticle-draft phui-font-fa fa-comment');
+        classes.push('pholio-mock-reticle-draft');
       } else {
-        classes.push('pholio-mock-reticle-final phui-font-fa fa-comment');
+        classes.push('pholio-mock-reticle-final');
       }
 
-      var inline_selection = render_reticle(classes);
+      var inline_selection = render_reticle(classes,
+        'pholio-mock-comment-icon phui-font-fa fa-comment');
       stage.addReticle(inline_selection, inline.id);
       position_inline_rectangle(inline, inline_selection);
     }
@@ -511,7 +512,7 @@ JX.behavior('pholio-mock-view', function(config) {
 
   function redraw_selection() {
     var classes = ['pholio-mock-reticle-selection'];
-    selection_reticle = selection_reticle || render_reticle(classes);
+    selection_reticle = selection_reticle || render_reticle(classes, '');
 
     var p = JX.$V(
       Math.min(drag_begin.x, drag_end.x),
@@ -667,10 +668,12 @@ JX.behavior('pholio-mock-view', function(config) {
     }
   }
 
-  function render_reticle(classes) {
-    return JX.$N(
+  function render_reticle(classes, inner_classes) {
+    var inner = JX.$N('div', {className: inner_classes});
+    var outer = JX.$N(
       'div',
-      {className: ['pholio-mock-reticle'].concat(classes).join(' ')});
+      {className: ['pholio-mock-reticle'].concat(classes).join(' ')}, inner);
+    return outer;
   }
 
 

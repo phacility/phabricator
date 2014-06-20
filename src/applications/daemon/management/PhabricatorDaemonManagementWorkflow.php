@@ -36,35 +36,38 @@ abstract class PhabricatorDaemonManagementWorkflow
   }
 
   protected final function loadRunningDaemons() {
-    $results = array();
+    $daemons = array();
 
     $pid_dir = $this->getPIDDirectory();
     $pid_files = Filesystem::listDirectory($pid_dir);
-    if (!$pid_files) {
-      return $results;
-    }
 
     foreach ($pid_files as $pid_file) {
-      $pid_data = Filesystem::readFile($pid_dir.'/'.$pid_file);
-      $dict = json_decode($pid_data, true);
-      if (!is_array($dict)) {
-        // Just return a hanging reference, since control code needs to be
-        // robust against unusual system states.
-        $dict = array();
-      }
-      $ref = PhabricatorDaemonReference::newFromDictionary($dict);
-      $ref->setPIDFile($pid_dir.'/'.$pid_file);
-      $results[] = $ref;
+      $daemons[] = PhabricatorDaemonReference::newFromFile(
+        $pid_dir.'/'.$pid_file);
     }
 
-    return $results;
+    return $daemons;
   }
 
   protected final function loadAllRunningDaemons() {
-    return id(new PhabricatorDaemonLogQuery())
+    $local_daemons = $this->loadRunningDaemons();
+
+    $local_ids = array();
+    foreach ($local_daemons as $daemon) {
+      $daemon_log = $daemon->getDaemonLog();
+
+      if ($daemon_log) {
+        $local_ids[] = $daemon_log->getID();
+      }
+    }
+
+    $remote_daemons = id(new PhabricatorDaemonLogQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withoutIDs($local_ids)
       ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
       ->execute();
+
+    return array_merge($local_daemons, $remote_daemons);
   }
 
   private function findDaemonClass($substring) {
@@ -280,7 +283,6 @@ abstract class PhabricatorDaemonManagementWorkflow
     }
 
     $console->writeErr(pht('Done.')."\n");
-
     return 0;
   }
 

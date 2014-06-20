@@ -37,6 +37,7 @@ final class PhabricatorDaemonEventListener extends PhabricatorEventListener {
       ->setPID(getmypid())
       ->setStatus(PhabricatorDaemonLog::STATUS_RUNNING)
       ->setArgv($event->getValue('argv'))
+      ->setExplicitArgv($event->getValue('explicitArgv'))
       ->save();
 
     $this->daemons[$id] = $daemon;

@@ -33,16 +33,23 @@ final class PhabricatorMailManagementListOutboundWorkflow
       return 0;
     }
 
+    $table = id(new PhutilConsoleTable())
+      ->setShowHeader(false)
+      ->addColumn('id',      array('title' => 'ID'))
+      ->addColumn('status',  array('title' => 'Status'))
+      ->addColumn('subject', array('title' => 'Subject'));
+
     foreach (array_reverse($mails) as $mail) {
-      $console->writeOut(
-        "%s\n",
-        sprintf(
-          '% 8d  %-8s  %s',
-          $mail->getID(),
-          PhabricatorMetaMTAMail::getReadableStatus($mail->getStatus()),
-          $mail->getSubject()));
+      $status = $mail->getStatus();
+
+      $table->addRow(array(
+        'id'      => $mail->getID(),
+        'status'  => PhabricatorMetaMTAMail::getReadableStatus($status),
+        'subject' => $mail->getSubject(),
+      ));
     }
 
+    $table->draw();
     return 0;
   }
 

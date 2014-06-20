@@ -250,5 +250,13 @@ final class HarbormasterBuildable extends HarbormasterDAO
     return $this->getContainerPHID();
   }
 
+  public function getBuildVariables() {
+    return array();
+  }
+
+  public function getAvailableBuildVariables() {
+    return array();
+  }
+
 
 }

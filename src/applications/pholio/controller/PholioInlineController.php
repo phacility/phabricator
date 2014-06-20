@@ -14,6 +14,7 @@ final class PholioInlineController extends PholioController {
 
     if ($this->id) {
       $inline = id(new PholioTransactionComment())->load($this->id);
+
       if (!$inline) {
         return new Aphront404Response();
       }
@@ -58,23 +59,55 @@ final class PholioInlineController extends PholioController {
     $mock_uri = '/';
 
     if ($mode == 'view') {
+      require_celerity_resource('pholio-inline-comments-css');
+      $image = id(new PholioImageQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($inline->getImageID()))
+        ->executeOne();
 
       $handles = $this->loadViewerHandles(array($inline->getAuthorPHID()));
       $author_handle = $handles[$inline->getAuthorPHID()];
 
-      return $this->newDialog()
-        ->setTitle(pht('Inline Comment'))
-        ->appendParagraph(
-          phutil_tag(
-            'em',
-            array(),
-            pht('%s comments:', $author_handle->getName())))
-        ->appendParagraph(
-          PhabricatorMarkupEngine::renderOneObject(
+      $file = $image->getFile();
+      if (!$file->isViewableImage()) {
+        throw new Exception('File is not viewable.');
+      }
+
+      $image_uri = $file->getBestURI();
+
+      $thumb = id(new PHUIImageMaskView())
+        ->addClass('mrl')
+        ->setImage($image_uri)
+        ->setDisplayHeight(200)
+        ->setDisplayWidth(498)
+        ->withMask(true)
+        ->centerViewOnPoint(
+          $inline->getX(), $inline->getY(),
+          $inline->getHeight(), $inline->getWidth());
+
+      $comment_head = phutil_tag(
+        'div',
+        array(
+          'class' => 'pholio-inline-comment-head',
+        ),
+        $author_handle->renderLink());
+
+      $comment_body = phutil_tag(
+        'div',
+        array(
+          'class' => 'pholio-inline-comment-body',
+        ),
+        PhabricatorMarkupEngine::renderOneObject(
             id(new PhabricatorMarkupOneOff())
               ->setContent($inline->getContent()),
             'default',
-            $viewer))
+            $viewer));
+
+      return $this->newDialog()
+        ->setTitle(pht('Inline Comment'))
+        ->appendChild($thumb)
+        ->appendChild($comment_head)
+        ->appendChild($comment_body)
         ->addCancelButton($mock_uri, pht('Close'));
     }
 

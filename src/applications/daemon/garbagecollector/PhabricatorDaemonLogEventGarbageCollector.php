@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorDaemonLogGarbageCollector
+final class PhabricatorDaemonLogEventGarbageCollector
   extends PhabricatorGarbageCollector {
 
   public function collectGarbage() {
@@ -9,15 +9,14 @@ final class PhabricatorDaemonLogGarbageCollector
       return false;
     }
 
-    $table = new PhabricatorDaemonLog();
+    $table = new PhabricatorDaemonLogEvent();
     $conn_w = $table->establishConnection('w');
 
     queryfx(
       $conn_w,
-      'DELETE FROM %T WHERE dateCreated < %d AND status != %s LIMIT 100',
+      'DELETE FROM %T WHERE epoch < %d LIMIT 100',
       $table->getTableName(),
-      time() - $ttl,
-      PhabricatorDaemonLog::STATUS_RUNNING);
+      time() - $ttl);
 
     return ($conn_w->getAffectedRows() == 100);
   }
