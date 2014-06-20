@@ -361,6 +361,14 @@ final class DifferentialRevision extends DifferentialDAO
     return $this->getPHID();
   }
 
+  public function getBuildVariables() {
+    return array();
+  }
+
+  public function getAvailableBuildVariables() {
+    return array();
+  }
+
 
 /* -(  PhabricatorSubscribableInterface  )----------------------------------- */
 

@@ -282,6 +282,31 @@ final class PhabricatorRepositoryCommit
     return $this->getRepository()->getPHID();
   }
 
+  public function getBuildVariables() {
+    $results = array();
+
+    $results['buildable.commit'] = $this->getCommitIdentifier();
+    $repo = $this->getRepository();
+
+    $results['repository.callsign'] = $repo->getCallsign();
+    $results['repository.vcs'] = $repo->getVersionControlSystem();
+    $results['repository.uri'] = $repo->getPublicCloneURI();
+
+    return $results;
+  }
+
+  public function getAvailableBuildVariables() {
+    return array(
+      'buildable.commit' => pht('The commit identifier, if applicable.'),
+      'repository.callsign' =>
+        pht('The callsign of the repository in Phabricator.'),
+      'repository.vcs' =>
+        pht('The version control system, either "svn", "hg" or "git".'),
+      'repository.uri' =>
+        pht('The URI to clone or checkout the repository from.'),
+    );
+  }
+
 
 /* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
 

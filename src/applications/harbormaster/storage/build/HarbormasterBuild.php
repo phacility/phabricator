@@ -235,22 +235,9 @@ final class HarbormasterBuild extends HarbormasterDAO
     $buildable = $this->getBuildable();
     $object = $buildable->getBuildableObject();
 
-    $repo = null;
-    if ($object instanceof DifferentialDiff) {
-      $results['buildable.diff'] = $object->getID();
-      $revision = $object->getRevision();
-      $results['buildable.revision'] = $revision->getID();
-      $repo = $revision->getRepository();
-    } else if ($object instanceof PhabricatorRepositoryCommit) {
-      $results['buildable.commit'] = $object->getCommitIdentifier();
-      $repo = $object->getRepository();
-    }
+    $object_variables = $object->getBuildVariables();
 
-    if ($repo) {
-      $results['repository.callsign'] = $repo->getCallsign();
-      $results['repository.vcs'] = $repo->getVersionControlSystem();
-      $results['repository.uri'] = $repo->getPublicCloneURI();
-    }
+    $results = $object_variables + $results;
 
     $results['step.timestamp'] = time();
     $results['build.id'] = $this->getID();
@@ -259,22 +246,23 @@ final class HarbormasterBuild extends HarbormasterDAO
   }
 
   public static function getAvailableBuildVariables() {
-    return array(
-      'buildable.diff' =>
-        pht('The differential diff ID, if applicable.'),
-      'buildable.revision' =>
-        pht('The differential revision ID, if applicable.'),
-      'buildable.commit' => pht('The commit identifier, if applicable.'),
-      'repository.callsign' =>
-        pht('The callsign of the repository in Phabricator.'),
-      'repository.vcs' =>
-        pht('The version control system, either "svn", "hg" or "git".'),
-      'repository.uri' =>
-        pht('The URI to clone or checkout the repository from.'),
+    $objects = id(new PhutilSymbolLoader())
+      ->setAncestorClass('HarbormasterBuildableInterface')
+      ->loadObjects();
+
+    $variables = array();
+    $variables[] = array(
       'step.timestamp' => pht('The current UNIX timestamp.'),
       'build.id' => pht('The ID of the current build.'),
       'target.phid' => pht('The PHID of the current build target.'),
     );
+
+    foreach ($objects as $object) {
+      $variables[] = $object->getAvailableBuildVariables();
+    }
+
+    $variables = array_mergev($variables);
+    return $variables;
   }
 
   public function isComplete() {
