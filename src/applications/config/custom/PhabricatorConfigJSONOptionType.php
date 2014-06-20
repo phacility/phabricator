@@ -13,19 +13,12 @@ abstract class PhabricatorConfigJSONOptionType
     $display_value = $request->getStr('value');
 
     if (strlen($display_value)) {
-      $storage_value = phutil_json_decode($display_value);
-      if ($storage_value === null) {
+      try {
+        $storage_value = phutil_json_decode($display_value);
+        $this->validateOption($option, $storage_value);
+      } catch (Exception $ex) {
         $e_value = pht('Invalid');
-        $errors[] = pht(
-          'Configuration value should be specified in JSON. The provided '.
-          'value is not valid JSON.');
-      } else {
-        try {
-          $this->validateOption($option, $storage_value);
-        } catch (Exception $ex) {
-          $e_value = pht('Invalid');
-          $errors[] = $ex->getMessage();
-        }
+        $errors[] = $ex->getMessage();
       }
     } else {
       $storage_value = null;

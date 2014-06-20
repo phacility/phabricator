@@ -23,16 +23,9 @@ final class DifferentialCommitMessageParserTestCase
       }
 
       list($message, $fields, $output, $errors) = $parts;
-      $fields = phutil_json_decode($fields, null);
-      $output = phutil_json_decode($output, null);
-      $errors = phutil_json_decode($errors, null);
-
-      if ($fields === null || $output === null || $errors === null) {
-        throw new Exception(
-          pht(
-            'Expected test file "%s" to contain valid JSON in its sections.',
-            $file));
-      }
+      $fields = phutil_json_decode($fields);
+      $output = phutil_json_decode($output);
+      $errors = phutil_json_decode($errors);
 
       $parser = id(new DifferentialCommitMessageParser())
         ->setLabelMap($fields)

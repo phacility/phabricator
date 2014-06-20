@@ -38,10 +38,7 @@ final class PhabricatorDashboardPanelTypeTabs
     $config = $panel->getProperty('config');
     if (!is_array($config)) {
       // NOTE: The older version of this panel stored raw JSON.
-      $config = phutil_json_decode($config, null);
-      if ($config === null) {
-        throw new Exception(pht('The configuration is not valid JSON.'));
-      }
+      $config = phutil_json_decode($config);
     }
 
     $list = id(new PHUIListView())
