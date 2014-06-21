@@ -33,8 +33,7 @@ is correctly configured.
 NOTE: The domain must contain a dot ('.'), i.e. not be just a bare name like
 'http://example/'. Some web browsers will not set cookies otherwise.
 
-Now, either create a VirtualHost entry (to put Phabricator on a subdomain)
-or edit the Directory entry for the DocumentRoot. It should look something like
+Now create a VirtualHost entry for Phabricator. It should look something like
 this:
 
   name=httpd.conf
