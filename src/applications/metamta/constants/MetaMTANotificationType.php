@@ -19,4 +19,9 @@ final class MetaMTANotificationType
   const TYPE_MANIPHEST_COMMENT        = 'maniphest-comment';
   const TYPE_MANIPHEST_OTHER          = 'maniphest-other';
 
+  const TYPE_PHOLIO_STATUS            = 'pholio-status';
+  const TYPE_PHOLIO_COMMENT           = 'pholio-comment';
+  const TYPE_PHOLIO_UPDATED           = 'pholio-updated';
+  const TYPE_PHOLIO_OTHER             = 'pholio-other';
+
 }
