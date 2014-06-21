@@ -7,12 +7,23 @@ final class PhabricatorDaemonManagementStatusWorkflow
     $this
       ->setName('status')
       ->setSynopsis(pht('Show status of running daemons.'))
-      ->setArguments(array());
+      ->setArguments(
+        array(
+          array(
+            'name' => 'local',
+            'help' => pht('Show only local daemons.'),
+          ),
+        ));
   }
 
   public function execute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
-    $daemons = $this->loadAllRunningDaemons();
+
+    if ($args->getArg('local')) {
+      $daemons = $this->loadRunningDaemons();
+    } else {
+      $daemons = $this->loadAllRunningDaemons();
+    }
 
     if (!$daemons) {
       $console->writeErr(
