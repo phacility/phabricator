@@ -11,7 +11,7 @@ return array(
     'core.pkg.js' => '07b01d4f',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => '4a93db37',
-    'differential.pkg.js' => '2b128f3a',
+    'differential.pkg.js' => '5b252007',
     'diffusion.pkg.css' => '471bc9eb',
     'diffusion.pkg.js' => '077e3ad0',
     'maniphest.pkg.css' => 'f88a8402',
@@ -434,7 +434,7 @@ return array(
     'rsrc/js/application/uiexample/gesture-example.js' => 'f42bb8c6',
     'rsrc/js/application/uiexample/notification-example.js' => 'c51a6616',
     'rsrc/js/core/Busy.js' => '6453c869',
-    'rsrc/js/core/DragAndDropFileUpload.js' => 'ae6abfba',
+    'rsrc/js/core/DragAndDropFileUpload.js' => '1d8ad5c3',
     'rsrc/js/core/DraggableList.js' => '109e2a87',
     'rsrc/js/core/FileUpload.js' => 'a4ae61bf',
     'rsrc/js/core/Hovercard.js' => '4f344388',
@@ -708,7 +708,7 @@ return array(
     'phabricator-countdown-css' => '86b7b0a0',
     'phabricator-crumbs-view-css' => '7fbf25b8',
     'phabricator-dashboard-css' => '22dfc441',
-    'phabricator-drag-and-drop-file-upload' => 'ae6abfba',
+    'phabricator-drag-and-drop-file-upload' => '1d8ad5c3',
     'phabricator-draggable-list' => '109e2a87',
     'phabricator-fatal-config-template-css' => '25d446d6',
     'phabricator-feed-css' => '5cbec787',
@@ -969,6 +969,15 @@ return array(
       0 => 'javelin-install',
       1 => 'javelin-util',
       2 => 'phabricator-keyboard-shortcut-manager',
+    ),
+    '1d8ad5c3' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
+      2 => 'javelin-request',
+      3 => 'javelin-dom',
+      4 => 'javelin-uri',
+      5 => 'phabricator-file-upload',
     ),
     '1da67f34' =>
     array(
@@ -1655,15 +1664,6 @@ return array(
       2 => 'javelin-stratcom',
       3 => 'javelin-dom',
       4 => 'javelin-vector',
-    ),
-    'ae6abfba' =>
-    array(
-      0 => 'javelin-install',
-      1 => 'javelin-util',
-      2 => 'javelin-request',
-      3 => 'javelin-dom',
-      4 => 'javelin-uri',
-      5 => 'phabricator-file-upload',
     ),
     'b3a4b884' =>
     array(
