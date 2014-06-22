@@ -67,8 +67,20 @@ final class PholioMockThumbGridView extends AphrontView {
     }
 
     $grid = array();
+    $jj = $depth;
     for ($ii = 0; $ii < $depth; $ii++) {
       $row = array();
+      if ($depth == $jj) {
+        $row[] = phutil_tag(
+          'th',
+          array(
+            'valign' => 'middle',
+            'class' => 'pholio-history-header',
+          ),
+          pht('Current Revision'));
+      } else {
+        $row[] = phutil_tag('th', array(), null);
+      }
       foreach ($cols as $col) {
         if (empty($col[$ii])) {
           $row[] = phutil_tag('td', array(), null);
@@ -78,6 +90,7 @@ final class PholioMockThumbGridView extends AphrontView {
         }
       }
       $grid[] = phutil_tag('tr', array(), $row);
+      $jj--;
     }
 
     $grid = phutil_tag(
