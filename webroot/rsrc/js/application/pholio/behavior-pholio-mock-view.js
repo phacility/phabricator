@@ -644,12 +644,18 @@ JX.behavior('pholio-mock-view', function(config) {
     info.push(title);
 
     if (!image.isObsolete) {
-      var embed = JX.$N(
+      var img_len = config.currentSetSize;
+      var rev = JX.$N(
         'div',
-        {className: 'pholio-image-embedding'},
-        JX.$H('Embed this image: {M' + config.mockID +
-        ', image=' + image.id + '}'));
-      info.push(embed);
+        {className: 'pholio-image-revision'},
+        JX.$H('Current Revision (' + img_len + ' images)'));
+      info.push(rev);
+    } else {
+      var prev = JX.$N(
+        'div',
+        {className: 'pholio-image-revision'},
+        JX.$H('(Previous Revision)'));
+      info.push(prev);
     }
 
     for (var ii = 0; ii < info.length; ii++) {

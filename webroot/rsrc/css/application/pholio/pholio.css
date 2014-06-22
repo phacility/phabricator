@@ -240,6 +240,10 @@ button.pholio-image-button-link:active {
   border-top: 1px solid {$thinblueborder};
 }
 
+.pholio-image-revision {
+  color: {$bluetext};
+}
+
 .pholio-history-header {
   vertical-align: middle;
   color: {$lightbluetext};
