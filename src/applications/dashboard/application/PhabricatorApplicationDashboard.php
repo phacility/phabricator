@@ -2,6 +2,10 @@
 
 final class PhabricatorApplicationDashboard extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('Dashboards');
+  }
+
   public function getBaseURI() {
     return '/dashboard/';
   }
@@ -51,12 +55,6 @@ final class PhabricatorApplicationDashboard extends PhabricatorApplication {
 
   public function isBeta() {
     return true;
-  }
-
-  public function isLaunchable() {
-    // TODO: This is just concealing the application from launch views for
-    // now since it's not really beta yet.
-    return false;
   }
 
   public function canUninstall() {
