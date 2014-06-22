@@ -7,7 +7,7 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => '8feeb38a',
+    'core.pkg.css' => '2400facf',
     'core.pkg.js' => 'b440d8d7',
     'darkconsole.pkg.js' => 'ca8671ce',
     'differential.pkg.css' => '4a93db37',
@@ -32,7 +32,7 @@ return array(
     'rsrc/css/aphront/table-view.css' => 'b22b7216',
     'rsrc/css/aphront/tokenizer.css' => '82ce2142',
     'rsrc/css/aphront/tooltip.css' => '9c90229d',
-    'rsrc/css/aphront/transaction.css' => '3fe49ff1',
+    'rsrc/css/aphront/transaction.css' => '5d0cae25',
     'rsrc/css/aphront/two-column.css' => '16ab3ad2',
     'rsrc/css/aphront/typeahead.css' => 'a989b5b3',
     'rsrc/css/application/auth/auth.css' => '1e655982',
@@ -738,7 +738,7 @@ return array(
     'phabricator-standard-page-view' => '517cdfb1',
     'phabricator-textareautils' => 'b3ec3cfc',
     'phabricator-tooltip' => '3915d490',
-    'phabricator-transaction-view-css' => '3fe49ff1',
+    'phabricator-transaction-view-css' => '5d0cae25',
     'phabricator-ui-example-css' => '528b19de',
     'phabricator-uiexample-javelin-view' => 'd4a14807',
     'phabricator-uiexample-reactor-button' => '44524435',
