@@ -141,8 +141,8 @@ final class PholioMock extends PholioDAO
 
   public function getStatuses() {
     $options = array();
-    $options['closed'] = 'Closed';
-    $options['open'] = 'Open';
+    $options['open'] = pht('Open');
+    $options['closed'] = pht('Closed');
     return $options;
   }
 
