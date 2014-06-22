@@ -28,6 +28,15 @@
       ],
       "jshint.jshintrc": "support/jshint/jshintconfig"
     },
+    "json": {
+      "type": "json",
+      "include": [
+        "(^support/jshint/jshintconfig$)",
+        "(^\\.arcconfig$)",
+        "(^\\.arclint$)",
+        "(\\.json$)"
+      ]
+    },
     "generated": {
       "type": "generated"
     },
