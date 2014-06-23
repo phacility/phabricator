@@ -17,7 +17,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       $data = new PhabricatorRepositoryCommitData();
     }
     $data->setCommitID($commit->getID());
-    $data->setAuthorName($author);
+    $data->setAuthorName((string)$author);
     $data->setCommitDetail(
       'authorPHID',
       $this->resolveUserPHID($commit, $author));
