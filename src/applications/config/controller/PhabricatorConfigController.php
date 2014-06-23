@@ -13,8 +13,9 @@ abstract class PhabricatorConfigController extends PhabricatorController {
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
     $nav->addLabel(pht('Site Configuration'));
     $nav->addFilter('/', pht('Option Groups'));
+    $nav->addFilter('all/', pht('All Settings'));
     $nav->addFilter('issue/', pht('Setup Issues'));
-    $nav->addFilter('all/', pht('Current Settings'));
+    $nav->addFilter('welcome/', pht('Welcome Screen'));
 
     return $nav;
   }
