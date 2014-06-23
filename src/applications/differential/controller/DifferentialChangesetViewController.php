@@ -155,6 +155,8 @@ final class DifferentialChangesetViewController extends DifferentialController {
     $parser->setRightSideCommentMapping($right_source, $right_new);
     $parser->setLeftSideCommentMapping($left_source, $left_new);
     $parser->setWhitespaceMode($request->getStr('whitespace'));
+    $parser->setCharacterEncoding($request->getStr('encoding'));
+    $parser->setHighlightAs($request->getStr('highlight'));
 
     if ($request->getStr('renderer') == '1up') {
       $parser->setRenderer(new DifferentialChangesetOneUpRenderer());

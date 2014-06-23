@@ -6,7 +6,7 @@
  * @javelin
  */
 
-JX.behavior('select-on-click', function(config) {
+JX.behavior('select-on-click', function() {
   JX.Stratcom.listen(
     'click',
     'select-on-click',

@@ -8,7 +8,7 @@
 JX.install('ReactorMouseoverExample', {
   extend: 'View',
   members: {
-    render: function(rendered_children) {
+    render: function() {
       var target = JX.$N("span", "mouseover me ");
       return [target, JX.RDOM.$DT(JX.RDOM.isMouseOver(target))];
     }

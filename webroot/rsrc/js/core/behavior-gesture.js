@@ -12,7 +12,7 @@
 /**
  * Basic gesture recognition. Unstable. Only supports swipes.
  */
-JX.behavior('phabricator-gesture', function(config) {
+JX.behavior('phabricator-gesture', function() {
 
   var target = null;
   var swiping = false;
@@ -89,7 +89,7 @@ JX.behavior('phabricator-gesture', function(config) {
   JX.Stratcom.listen(
     ['touchend', 'mouseup'],
     null,
-    function(e) {
+    function() {
       if (!target) {
         return;
       }

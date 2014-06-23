@@ -24,7 +24,7 @@ JX.behavior('project-boards', function(config) {
     JX.DOM.replace(item, JX.$H(response.task));
   }
 
-  function ondrop(list, item, after, from) {
+  function ondrop(list, item, after) {
     list.lock();
     JX.DOM.alterClass(item, 'drag-sending', true);
 

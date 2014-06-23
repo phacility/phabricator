@@ -7,7 +7,7 @@
  * @javelin
  */
 
-JX.behavior('phabricator-tooltips', function(config) {
+JX.behavior('phabricator-tooltips', function() {
 
   JX.Stratcom.listen(
     ['mouseover', 'mouseout'],
@@ -31,7 +31,7 @@ JX.behavior('phabricator-tooltips', function(config) {
         data.tip);
     });
 
-  function wipe(e) {
+  function wipe() {
     JX.Tooltip.hide();
   }
 

@@ -16,7 +16,7 @@ JX.behavior('search-reorder-queries', function(config) {
       return JX.DOM.scry(root, 'li', 'named-query');
     });
 
-  list.listen('didDrop', function(node, after) {
+  list.listen('didDrop', function(node) {
     var nodes = list.findItems();
     var order = [];
     var key;
@@ -31,7 +31,7 @@ JX.behavior('search-reorder-queries', function(config) {
     JX.DOM.alterClass(node, 'drag-sending', true);
 
     new JX.Workflow(config.orderURI, {order: order.join()})
-      .setHandler(function(e) {
+      .setHandler(function() {
         JX.DOM.alterClass(node, 'drag-sending', false);
         list.unlock();
       })

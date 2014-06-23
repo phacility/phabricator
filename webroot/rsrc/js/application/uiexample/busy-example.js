@@ -4,6 +4,6 @@
  *           javelin-behavior
  */
 
-JX.behavior('phabricator-busy-example', function(config) {
+JX.behavior('phabricator-busy-example', function() {
   JX.Busy.start();
 });

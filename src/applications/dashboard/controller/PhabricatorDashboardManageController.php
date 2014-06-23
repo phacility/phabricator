@@ -103,6 +103,12 @@ final class PhabricatorDashboardManageController
 
     $actions->addAction(
       id(new PhabricatorActionView())
+        ->setName(pht('View Dashboard'))
+        ->setIcon('fa-columns')
+        ->setHref($this->getApplicationURI("view/{$id}/")));
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
         ->setName(pht('Edit Dashboard'))
         ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI("edit/{$id}/"))

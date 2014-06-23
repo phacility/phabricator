@@ -121,13 +121,26 @@ JX.install('PhabricatorDragAndDropFileUpload', {
           'paste',
           null,
           JX.bind(this, function(e) {
-            var clipboardData = e.getRawEvent().clipboardData;
-            if (!clipboardData) {
+            var clipboard = e.getRawEvent().clipboardData;
+            if (!clipboard) {
               return;
             }
 
-            for (var ii = 0; ii < clipboardData.items.length; ii++) {
-              var item = clipboardData.items[ii];
+            // If there's any text on the clipboard, just let the event fire
+            // normally, choosing the text over any images. See T5437 / D9647.
+            var text = clipboard.getData('text/plain').toString();
+            if (text.length) {
+              return;
+            }
+
+            // Safari and Firefox have clipboardData, but no items. They
+            // don't seem to provide a way to get image data directly yet.
+            if (!clipboard.items) {
+              return;
+            }
+
+            for (var ii = 0; ii < clipboard.items.length; ii++) {
+              var item = clipboard.items[ii];
               if (!/^image\//.test(item.type)) {
                 continue;
               }

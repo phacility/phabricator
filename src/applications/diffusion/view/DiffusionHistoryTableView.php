@@ -66,24 +66,24 @@ final class DiffusionHistoryTableView extends DiffusionView {
     if ($this->buildCache !== null) {
       return $this->buildCache;
     }
-    
+
     $commits_to_builds = array();
-    
+
     $commits = mpull($this->history, 'getCommit');
-    
+
     $commit_phids = mpull($commits, 'getPHID');
-    
+
     $buildables = id(new HarbormasterBuildableQuery())
       ->setViewer($this->getUser())
       ->withBuildablePHIDs($commit_phids)
       ->withManualBuildables(false)
       ->execute();
-    
+
     $this->buildCache = mpull($buildables, null, 'getBuildablePHID');
-    
+
     return $this->buildCache;
   }
-  
+
   public function render() {
     $drequest = $this->getDiffusionRequest();
 
@@ -97,7 +97,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
     $show_builds = PhabricatorApplication::isClassInstalledForViewer(
       'PhabricatorApplicationHarbormaster',
       $this->getUser());
-    
+
     $rows = array();
     $ii = 0;
     foreach ($this->history as $history) {
@@ -163,30 +163,30 @@ final class DiffusionHistoryTableView extends DiffusionView {
             $buildable->getBuildableStatus());
           $name = HarbormasterBuildable::getBuildableStatusName(
             $buildable->getBuildableStatus());
-          
+
           $icon_view = id(new PHUIIconView())
             ->setIconFont($icon.' '.$color);
-            
+
           $tooltip_view = javelin_tag(
             'span',
             array(
               'sigil' => 'has-tooltip',
               'meta' => array('tip' => $name)),
             $icon_view);
-            
+
           Javelin::initBehavior('phabricator-tooltips');
-          
+
           $href_view = phutil_tag(
             'a',
             array('href' => '/'.$buildable->getMonogram()),
             $tooltip_view);
-            
+
           $build = $href_view;
-          
+
           $has_any_build = true;
         }
       }
-      
+
       $rows[] = array(
         $graph ? $graph[$ii++] : null,
         self::linkCommit(
@@ -202,7 +202,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
         $time,
       );
     }
-   
+
     $view = new AphrontTableView($rows);
     $view->setHeaders(
       array(

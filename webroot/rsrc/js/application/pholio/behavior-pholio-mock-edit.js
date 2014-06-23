@@ -80,11 +80,11 @@ JX.behavior('pholio-mock-edit', function(config) {
     var drop = new JX.PhabricatorDragAndDropFileUpload(node)
       .setURI(config.uploadURI);
 
-    drop.listen('didBeginDrag', function(e) {
+    drop.listen('didBeginDrag', function() {
       JX.DOM.alterClass(node, 'pholio-drop-active', true);
     });
 
-    drop.listen('didEndDrag', function(e) {
+    drop.listen('didEndDrag', function() {
       JX.DOM.alterClass(node, 'pholio-drop-active', false);
     });
 
@@ -136,7 +136,7 @@ JX.behavior('pholio-mock-edit', function(config) {
   var build_update_control = function(node) {
     var drop = build_drop_upload(node);
 
-    drop.listen('willUpload', function(file) {
+    drop.listen('willUpload', function() {
       JX.DOM.alterClass(node, 'pholio-replacing', true);
     });
 

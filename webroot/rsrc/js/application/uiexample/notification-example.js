@@ -5,7 +5,7 @@
  * @provides javelin-behavior-phabricator-notification-example
  */
 
-JX.behavior('phabricator-notification-example', function(config) {
+JX.behavior('phabricator-notification-example', function() {
 
   var sequence = 0;
 

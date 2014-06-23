@@ -5,7 +5,7 @@
  *           javelin-dom
  */
 
-JX.behavior('differential-show-field-details', function(config) {
+JX.behavior('differential-show-field-details', function() {
 
   JX.Stratcom.listen(
     'click',

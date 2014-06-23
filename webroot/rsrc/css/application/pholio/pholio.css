@@ -239,3 +239,16 @@ button.pholio-image-button-link:active {
   padding: 12px 8px;
   border-top: 1px solid {$thinblueborder};
 }
+
+.pholio-image-revision {
+  color: {$bluetext};
+}
+
+.pholio-history-header {
+  vertical-align: middle;
+  color: {$lightbluetext};
+  font-weight: bold;
+  padding-right: 8px;
+  -webkit-font-smoothing: antialiased;
+  white-space: nowrap;
+}

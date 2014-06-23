@@ -68,6 +68,9 @@ final class DiffusionDiffController extends DiffusionController {
       array(
         'action' => 'rendering-ref')));
 
+    $parser->setCharacterEncoding($request->getStr('encoding'));
+    $parser->setHighlightAs($request->getStr('highlight'));
+
     $coverage = $drequest->loadCoverage();
     if ($coverage) {
       $parser->setCoverage($coverage);

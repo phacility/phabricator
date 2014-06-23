@@ -6,7 +6,7 @@
  * @javelin
  */
 
-JX.behavior('aphront-more', function(config) {
+JX.behavior('aphront-more', function() {
   JX.Stratcom.listen(
     'click',
     'aphront-more-view-show-more',

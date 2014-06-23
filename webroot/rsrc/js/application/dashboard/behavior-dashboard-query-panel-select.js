@@ -58,7 +58,7 @@ JX.behavior('dashboard-query-panel-select', function(config) {
     query_control.value = new_value;
   }
 
-  JX.DOM.listen(app_control, 'change', null, function(e) { update(); });
+  JX.DOM.listen(app_control, 'change', null, function() { update(); });
   update();
 
 });

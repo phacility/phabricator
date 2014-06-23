@@ -13,8 +13,6 @@ JX.behavior('lightbox-attachments', function (config) {
   var lightbox     = null;
   var prev         = null;
   var next         = null;
-  var x_margin     = 40;
-  var y_margin     = 100;
   var downloadForm = JX.$H(config.downloadForm).getFragment().firstChild;
 
   function loadLightBox(e) {

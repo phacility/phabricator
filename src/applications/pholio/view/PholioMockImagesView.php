@@ -73,12 +73,17 @@ final class PholioMockImagesView extends AphrontView {
       $engine->addObject($image, 'default');
     }
     $engine->process();
-
+    $current_set = 0;
     foreach ($mock->getAllImages() as $image) {
       $file = $image->getFile();
       $metadata = $file->getMetadata();
       $x = idx($metadata, PhabricatorFile::METADATA_IMAGE_WIDTH);
       $y = idx($metadata, PhabricatorFile::METADATA_IMAGE_HEIGHT);
+
+      $is_obs = (bool)$image->getIsObsolete();
+      if (!$is_obs) {
+        $current_set++;
+      }
 
       $history_uri = '/pholio/image/history/'.$image->getID().'/';
       $images[] = array(
@@ -129,6 +134,7 @@ final class PholioMockImagesView extends AphrontView {
       'navsequence' => $navsequence,
       'fullIcon' => hsprintf('%s', $full_icon),
       'downloadIcon' => hsprintf('%s', $download_icon),
+      'currentSetSize' => $current_set,
     );
     Javelin::initBehavior('pholio-mock-view', $config);
 

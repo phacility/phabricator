@@ -95,7 +95,7 @@ JX.behavior('phabricator-nav', function(config) {
     }
   });
 
-  JX.Stratcom.listen('mouseup', null, function(e) {
+  JX.Stratcom.listen('mouseup', null, function() {
     if (!dragging) {
       return;
     }
@@ -112,7 +112,7 @@ JX.behavior('phabricator-nav', function(config) {
   }
 
   var collapsed = config.collapsed;
-  JX.Stratcom.listen('differential-filetree-toggle', null, function(e) {
+  JX.Stratcom.listen('differential-filetree-toggle', null, function() {
     collapsed = !collapsed;
     JX.DOM.alterClass(main, 'has-local-nav', !collapsed);
     JX.DOM.alterClass(main, 'has-drag-nav', !collapsed);
@@ -128,7 +128,7 @@ JX.behavior('phabricator-nav', function(config) {
   // When the user scrolls or resizes the window, anchor the menu to to the top
   // of the navigation bar.
 
-  function onresize(e) {
+  function onresize() {
     if (JX.Device.getDevice() != 'desktop') {
       return;
     }
@@ -148,7 +148,7 @@ JX.behavior('phabricator-nav', function(config) {
 
 // - Navigation Reset ----------------------------------------------------------
 
-  JX.Stratcom.listen('phabricator-device-change', null, function(event) {
+  JX.Stratcom.listen('phabricator-device-change', null, function() {
     resetdrag();
     onresize();
   });

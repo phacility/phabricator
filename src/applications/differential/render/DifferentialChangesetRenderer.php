@@ -28,6 +28,16 @@ abstract class DifferentialChangesetRenderer {
   private $gaps;
   private $mask;
   private $depths;
+  private $originalCharacterEncoding;
+
+  public function setOriginalCharacterEncoding($original_character_encoding) {
+    $this->originalCharacterEncoding = $original_character_encoding;
+    return $this;
+  }
+
+  public function getOriginalCharacterEncoding() {
+    return $this->originalCharacterEncoding;
+  }
 
   public function setDepths($depths) {
     $this->depths = $depths;

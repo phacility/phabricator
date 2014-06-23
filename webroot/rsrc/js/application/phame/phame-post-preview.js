@@ -8,13 +8,12 @@
 
 JX.behavior('phame-post-preview', function(config) {
 
-  var preview     = JX.$(config.preview);
   var body        = JX.$(config.body);
   var title       = JX.$(config.title);
   var phame_title = JX.$(config.phame_title);
   var sync_titles = true;
 
-  var titleCallback = function(e) {
+  var titleCallback = function() {
     if (!sync_titles) {
       return;
     }
@@ -22,7 +21,7 @@ JX.behavior('phame-post-preview', function(config) {
     phame_title.value = normalizeSlug(title_string);
   };
 
-  var phameTitleKeyupCallback = function (e) {
+  var phameTitleKeyupCallback = function () {
     // stop sync'ing once user edits phame_title directly
     sync_titles    = false;
     var normalized = normalizeSlug(phame_title.value, true);
@@ -40,7 +39,7 @@ JX.behavior('phame-post-preview', function(config) {
     }
   };
 
-  var phameTitleBlurCallback = function (e) {
+  var phameTitleBlurCallback = function () {
     phame_title.value = normalizeSlug(phame_title.value);
   };
 

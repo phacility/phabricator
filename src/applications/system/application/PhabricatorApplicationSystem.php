@@ -15,6 +15,10 @@ final class PhabricatorApplicationSystem extends PhabricatorApplication {
       '/status/' => 'PhabricatorStatusController',
       '/debug/' => 'PhabricatorDebugController',
       '/robots.txt' => 'PhabricatorRobotsController',
+      '/services/' => array(
+        'encoding/' => 'PhabricatorSystemSelectEncodingController',
+        'highlight/' => 'PhabricatorSystemSelectHighlightController',
+      ),
     );
   }
 

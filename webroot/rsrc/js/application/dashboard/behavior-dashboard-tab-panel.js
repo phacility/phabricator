@@ -5,7 +5,7 @@
  *           javelin-stratcom
  */
 
-JX.behavior('dashboard-tab-panel', function(config) {
+JX.behavior('dashboard-tab-panel', function() {
 
   JX.Stratcom.listen('click', 'dashboard-tab-panel-tab', function(e) {
     e.kill();

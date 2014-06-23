@@ -121,7 +121,7 @@ JX.install('MultirowRowManager', {
       this.invoke('row-removed', row_id);
     },
 
-    _oncountchanged : function(e) {
+    _oncountchanged : function() {
       var buttons = JX.DOM.scry(
         this._root,
         'a',

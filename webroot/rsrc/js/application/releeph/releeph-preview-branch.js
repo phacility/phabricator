@@ -39,7 +39,7 @@ JX.behavior('releeph-preview-branch', function(config) {
       input,
       ['keyup', 'click', 'change'],
       null,
-      function(e) {
+      function() {
         renderPreview();
       }
     );

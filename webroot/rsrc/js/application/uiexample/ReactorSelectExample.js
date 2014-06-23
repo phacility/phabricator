@@ -8,7 +8,7 @@
 JX.install('ReactorSelectExample', {
   extend: 'View',
   members: {
-    render: function(rendered_children) {
+    render: function() {
       var select = JX.$N('select', {}, [
         JX.$N('option', { value: 'goat' }, 'Goat'),
         JX.$N('option', { value: 'bat' }, 'Bat'),

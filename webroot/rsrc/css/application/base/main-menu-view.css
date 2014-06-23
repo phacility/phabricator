@@ -201,6 +201,10 @@
   margin-left: 40px;
 }
 
+.device .phabricator-main-menu-search-target div.jx-typeahead-results {
+  margin-left: 30px;
+}
+
 .phabricator-main-search-typeahead-result .phabricator-search-icon {
   display: inline-block;
   width: 28px;
@@ -237,6 +241,18 @@
   padding: 0;
 }
 
+.device-phone .phabricator-main-search-typeahead-result .result-name {
+  font-size: 15px;
+}
+
+.device-phone .phabricator-main-search-typeahead-result .result-type {
+  font-size: 13px;
+}
+
+.device .phabricator-dark-menu .phui-list-item-type-link
+  .phabricator-main-search-typeahead-result {
+  line-height: 18px;
+}
 
 /* - Alert ---------------------------------------------------------------------
 

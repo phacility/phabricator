@@ -688,7 +688,7 @@ final class DiffusionCommitHookEngine extends Phobject {
     foreach (array('old', 'new') as $key) {
       $futures[$key] = $repository->getLocalCommandFuture(
         'heads --template %s',
-        '{node}\1{branches}\2');
+        '{node}\1{branch}\2');
     }
     // Wipe HG_PENDING out of the old environment so we see the pre-commit
     // state of the repository.
@@ -697,7 +697,7 @@ final class DiffusionCommitHookEngine extends Phobject {
     $futures['commits'] = $repository->getLocalCommandFuture(
       'log --rev %s --template %s',
       hgsprintf('%s:%s', $hg_node, 'tip'),
-      '{node}\1{branches}\2');
+      '{node}\1{branch}\2');
 
     // Resolve all of the futures now. We don't need the 'commits' future yet,
     // but it simplifies the logic to just get it out of the way.
@@ -978,15 +978,8 @@ final class DiffusionCommitHookEngine extends Phobject {
     $commits_lines = array_filter($commits_lines);
     $commit_map = array();
     foreach ($commits_lines as $commit_line) {
-      list($node, $branches_raw) = explode("\1", $commit_line);
-
-      if (!strlen($branches_raw)) {
-        $branches = array('default');
-      } else {
-        $branches = explode(' ', $branches_raw);
-      }
-
-      $commit_map[$node] = $branches;
+      list($node, $branch) = explode("\1", $commit_line);
+      $commit_map[$node] = array($branch);
     }
 
     return $commit_map;
@@ -1152,6 +1145,9 @@ final class DiffusionCommitHookEngine extends Phobject {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         return idx($this->gitCommits, $identifier, array());
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        // NOTE: This will be "the branch the commit was made to", not
+        // "a list of all branch heads which descend from the commit".
+        // This is consistent with Mercurial, but possibly confusing.
         return idx($this->mercurialCommits, $identifier, array());
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         // Subversion doesn't have branches.

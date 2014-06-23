@@ -42,7 +42,7 @@ JX.behavior('phabricator-gesture-example', function(config) {
   JX.Stratcom.listen(
     'gesture.swipe.cancel',
     null,
-    function(e) {
+    function() {
       current = [];
       redraw();
     });

@@ -7,7 +7,7 @@
  *           javelin-stratcom
  */
 
-JX.behavior('conpherence-pontificate', function(config) {
+JX.behavior('conpherence-pontificate', function() {
 
   JX.Stratcom.listen('aphlict-receive-message', null, function(e) {
     var message = e.getData();
@@ -61,7 +61,6 @@ JX.behavior('conpherence-pontificate', function(config) {
 
     var root = e.getNode('conpherence-layout');
     var messages_root = JX.DOM.find(root, 'div', 'conpherence-message-pane');
-    var header_root = JX.DOM.find(root, 'div', 'conpherence-header-pane');
     var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
     var messages = JX.DOM.find(messages_root, 'div', 'conpherence-messages');
     var fileWidget = null;

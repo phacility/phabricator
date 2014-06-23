@@ -62,40 +62,15 @@ final class ConduitAPI_diffusion_branchquery_Method
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    $refs = id(new DiffusionLowLevelMercurialBranchesQuery())
-      ->setRepository($repository)
-      ->execute();
+    $query = id(new DiffusionLowLevelMercurialBranchesQuery())
+      ->setRepository($repository);
 
-    // If we have a 'contains' query, filter these branches down to just the
-    // ones which contain the commit.
     $contains = $request->getValue('contains');
     if (strlen($contains)) {
-      list($branches_raw) = $repository->execxLocalCommand(
-        'log --template %s --limit 1 --rev %s --',
-        '{branches}',
-        hgsprintf('%s', $contains));
-
-      $branches_raw = trim($branches_raw);
-      if (!strlen($branches_raw)) {
-        $containing_branches = array('default');
-      } else {
-        $containing_branches = explode(' ', $branches_raw);
-      }
-
-      $containing_branches = array_fuse($containing_branches);
-
-      // NOTE: We get this very slightly wrong: a branch may have multiple
-      // heads and we'll keep all of the heads of the branch, even if the
-      // commit is only on some of the heads. This should be rare, is probably
-      // more clear to users as is, and would potentially be expensive to get
-      // right since we'd have to do additional checks.
-
-      foreach ($refs as $key => $ref) {
-        if (empty($containing_branches[$ref->getShortName()])) {
-          unset($refs[$key]);
-        }
-      }
+      $query->withContainsCommit($contains);
     }
+
+    $refs = $query->execute();
 
     return $this->processBranchRefs($request, $refs);
   }

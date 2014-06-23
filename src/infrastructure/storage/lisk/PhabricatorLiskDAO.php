@@ -183,6 +183,29 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
     if ($encoding == 'utf8') {
       return $string;
     }
+
+    if (function_exists('mb_detect_encoding')) {
+      if (strlen($encoding)) {
+        $try_encodings = array(
+          $encoding,
+        );
+      } else {
+        // TODO: This is pretty much a guess, and probably needs to be
+        // configurable in the long run.
+        $try_encodings = array(
+          'JIS',
+          'EUC-JP',
+          'SJIS',
+          'ISO-8859-1',
+        );
+      }
+
+      $guess = mb_detect_encoding($string, $try_encodings);
+      if ($guess) {
+        return mb_convert_encoding($string, 'UTF-8', $guess);
+      }
+    }
+
     return phutil_utf8ize($string);
   }
 

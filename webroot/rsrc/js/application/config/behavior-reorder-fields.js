@@ -17,7 +17,7 @@ JX.behavior('config-reorder-fields', function(config) {
       return JX.DOM.scry(root, 'li', 'field-spec');
     });
 
-  list.listen('didDrop', function(node, after) {
+  list.listen('didDrop', function() {
     write_state_to_form();
   });
 

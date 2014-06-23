@@ -22,10 +22,6 @@ final class PhabricatorApplicationPholio extends PhabricatorApplication {
     return pht('Things before they were cool.');
   }
 
-  public function isBeta() {
-    return true;
-  }
-
   public function getEventListeners() {
     return array(
       new PholioActionMenuEventListener(),

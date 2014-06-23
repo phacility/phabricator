@@ -22,6 +22,7 @@ JX.install('ChangesetViewManager', {
     this._whitespace = data.whitespace;
     this._renderer = data.renderer;
     this._highlight = data.highlight;
+    this._encoding = data.encoding;
   },
 
   members: {
@@ -35,6 +36,7 @@ JX.install('ChangesetViewManager', {
     _whitespace: null,
     _renderer: null,
     _highlight: null,
+    _encoding: null,
 
 
     /**
@@ -116,12 +118,12 @@ JX.install('ChangesetViewManager', {
       this._loaded = true;
       this._sequence++;
 
-      var data = this._getNodeData();
-
       var params = {
         ref: this._ref,
-        whitespace: this._whitespace,
-        renderer: this._getRenderer()
+        whitespace: this._whitespace || '',
+        renderer: this.getRenderer() || '',
+        highlight: this._highlight || '',
+        encoding: this._encoding || ''
       };
 
       var workflow = new JX.Workflow(this._renderURI, params)
@@ -160,8 +162,16 @@ JX.install('ChangesetViewManager', {
       return JX.Router.getInstance().getRoutableByKey(this._getRoutableKey());
     },
 
+    setRenderer: function(renderer) {
+      this._renderer = renderer;
+      return this;
+    },
 
-    _getRenderer: function() {
+    getRenderer: function() {
+      if (this._renderer !== null) {
+        return this._renderer;
+      }
+
       // TODO: This is a big pile of TODOs.
 
       // NOTE: If you load the page at one device resolution and then resize to
@@ -176,6 +186,23 @@ JX.install('ChangesetViewManager', {
       return renderer;
     },
 
+    setEncoding: function(encoding) {
+      this._encoding = encoding;
+      return this;
+    },
+
+    getEncoding: function() {
+      return this._encoding;
+    },
+
+    setHighlight: function(highlight) {
+      this._highlight = highlight;
+      return this;
+    },
+
+    getHighlight: function() {
+      return this._highlight;
+    },
 
     _getNodeData: function() {
       return JX.Stratcom.getData(this._node);

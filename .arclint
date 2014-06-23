@@ -1,6 +1,7 @@
 {
   "exclude": [
     "(^externals/)",
+    "(^webroot/rsrc/externals/)",
     "(/__tests__/data/)"
   ],
   "linters": {
@@ -27,6 +28,15 @@
         "(^webroot/rsrc/externals/raphael/)"
       ],
       "jshint.jshintrc": "support/jshint/jshintconfig"
+    },
+    "json": {
+      "type": "json",
+      "include": [
+        "(^support/jshint/jshintconfig$)",
+        "(^\\.arcconfig$)",
+        "(^\\.arclint$)",
+        "(\\.json$)"
+      ]
     },
     "generated": {
       "type": "generated"
