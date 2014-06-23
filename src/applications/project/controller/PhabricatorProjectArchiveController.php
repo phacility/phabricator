@@ -57,7 +57,7 @@ final class PhabricatorProjectArchiveController
       $button = pht('Unarchive Project');
     } else {
       $title = pht('Really archive project?');
-      $body = pht('This project will moved to the archive.');
+      $body = pht('This project will be moved to the archive.');
       $button = pht('Archive Project');
     }
 
