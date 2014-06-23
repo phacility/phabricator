@@ -8,7 +8,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
     PhabricatorMarkupInterface,
-    PhabricatorDestructableInterface {
+    PhabricatorDestructableInterface,
+    PhabricatorProjectInterface {
 
   /**
    * Shortest hash we'll recognize in raw "a829f32" form.
