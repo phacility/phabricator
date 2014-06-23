@@ -166,7 +166,6 @@ final class ConpherenceListController
           $layout,
           array(
             'title' => $title,
-            'device' => true,
           ));
         break;
     }

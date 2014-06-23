@@ -23,7 +23,6 @@ final class PhabricatorConfigWelcomeController
       $nav,
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

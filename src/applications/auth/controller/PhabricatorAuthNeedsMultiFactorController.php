@@ -85,7 +85,6 @@ final class PhabricatorAuthNeedsMultiFactorController
       ),
       array(
         'title' => pht('Add Multi-Factor Authentication'),
-        'device' => true,
       ));
   }
 

@@ -73,7 +73,6 @@ final class DrydockConsoleController extends DrydockController {
       ),
       array(
         'title'  => pht('Drydock Console'),
-        'device' => true,
       ));
   }
 

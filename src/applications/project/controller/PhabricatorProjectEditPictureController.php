@@ -266,7 +266,6 @@ final class PhabricatorProjectEditPictureController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 }

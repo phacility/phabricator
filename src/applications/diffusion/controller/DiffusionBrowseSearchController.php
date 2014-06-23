@@ -31,7 +31,6 @@ final class DiffusionBrowseSearchController extends DiffusionBrowseController {
         $content,
       ),
       array(
-        'device' => true,
         'title' => array(
           nonempty(basename($drequest->getPath()), '/'),
           $drequest->getRepository()->getCallsign().' Repository',

@@ -77,7 +77,6 @@ final class PhabricatorProjectColumnDetailController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

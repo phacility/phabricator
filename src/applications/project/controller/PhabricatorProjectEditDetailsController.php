@@ -190,7 +190,6 @@ final class PhabricatorProjectEditDetailsController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 }

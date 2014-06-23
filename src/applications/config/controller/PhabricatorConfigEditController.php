@@ -234,7 +234,6 @@ final class PhabricatorConfigEditController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

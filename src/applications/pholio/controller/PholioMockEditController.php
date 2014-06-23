@@ -400,7 +400,6 @@ final class PholioMockEditController extends PholioController {
       $content,
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

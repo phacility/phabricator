@@ -257,7 +257,6 @@ final class PhabricatorOwnersEditController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

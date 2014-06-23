@@ -225,7 +225,6 @@ final class PhabricatorOwnersDetailController
       ),
       array(
         'title' => pht('Package %s', $package->getName()),
-        'device' => true,
       ));
   }
 

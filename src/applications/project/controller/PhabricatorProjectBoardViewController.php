@@ -330,7 +330,6 @@ final class PhabricatorProjectBoardViewController
       ),
       array(
         'title' => pht('%s Board', $project->getName()),
-        'device' => true,
       ));
   }
 

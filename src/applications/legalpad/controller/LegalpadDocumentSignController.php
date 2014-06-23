@@ -194,7 +194,6 @@ final class LegalpadDocumentSignController extends LegalpadController {
       $content,
       array(
         'title' => $title,
-        'device' => true,
         'pageObjects' => array($document->getPHID()),
       ));
   }

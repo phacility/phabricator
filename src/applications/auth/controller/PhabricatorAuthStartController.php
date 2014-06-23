@@ -152,7 +152,6 @@ final class PhabricatorAuthStartController
       ),
       array(
         'title' => pht('Login to Phabricator'),
-        'device' => true,
       ));
   }
 

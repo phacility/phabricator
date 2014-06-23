@@ -191,7 +191,6 @@ final class DiffusionRepositoryEditMainController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

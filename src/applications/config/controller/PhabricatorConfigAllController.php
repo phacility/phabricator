@@ -94,7 +94,6 @@ final class PhabricatorConfigAllController
       $nav,
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

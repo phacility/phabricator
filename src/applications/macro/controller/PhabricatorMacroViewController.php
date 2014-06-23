@@ -114,7 +114,6 @@ final class PhabricatorMacroViewController
       ),
       array(
         'title' => $title_short,
-        'device' => true,
       ));
   }
 

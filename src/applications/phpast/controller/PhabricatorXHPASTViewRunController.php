@@ -51,7 +51,6 @@ final class PhabricatorXHPASTViewRunController
       $form_box,
       array(
         'title' => pht('XHPAST View'),
-        'device' => true,
       ));
   }
 

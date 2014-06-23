@@ -60,7 +60,6 @@ final class PhabricatorUIExampleRenderController extends PhabricatorController {
       $nav,
       array(
         'title'   => $example->getName(),
-        'device'  => true,
       ));
   }
 

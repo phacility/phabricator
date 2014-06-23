@@ -90,7 +90,6 @@ final class DiffusionHistoryController extends DiffusionController {
         $content,
       ),
       array(
-        'device' => true,
         'title' => array(
           pht('History'),
           pht('%s Repository', $drequest->getRepository()->getCallsign()),

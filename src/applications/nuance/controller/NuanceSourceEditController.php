@@ -61,6 +61,6 @@ final class NuanceSourceEditController extends NuanceController {
       ),
       array(
         'title' => $definition->getEditTitle(),
-        'device' => true));
+      ));
   }
 }

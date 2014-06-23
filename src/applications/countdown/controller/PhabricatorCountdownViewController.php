@@ -60,7 +60,6 @@ final class PhabricatorCountdownViewController
       $content,
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

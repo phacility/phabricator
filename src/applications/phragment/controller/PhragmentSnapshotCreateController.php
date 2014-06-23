@@ -162,7 +162,7 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
         $box),
       array(
         'title' => pht('Create Fragment'),
-        'device' => true));
+      ));
   }
 
 }

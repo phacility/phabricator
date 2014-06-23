@@ -60,7 +60,6 @@ final class PhameBlogListController extends PhameController {
       $nav,
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

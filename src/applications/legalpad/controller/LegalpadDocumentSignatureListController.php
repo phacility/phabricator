@@ -47,7 +47,6 @@ final class LegalpadDocumentSignatureListController extends LegalpadController {
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

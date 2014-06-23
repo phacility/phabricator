@@ -233,7 +233,6 @@ final class PhabricatorAuthLoginController
       ),
       array(
         'title' => pht('Login'),
-        'device' => true,
       ));
   }
 

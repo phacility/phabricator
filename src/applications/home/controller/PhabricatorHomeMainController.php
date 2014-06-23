@@ -57,7 +57,6 @@ final class PhabricatorHomeMainController
       $content,
       array(
         'title' => 'Phabricator',
-        'device' => true,
       ));
   }
 

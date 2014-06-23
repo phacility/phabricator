@@ -171,7 +171,6 @@ final class PhabricatorDashboardEditController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

@@ -191,7 +191,6 @@ final class LegalpadDocumentEditController extends LegalpadController {
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

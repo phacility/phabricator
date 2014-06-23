@@ -149,7 +149,6 @@ final class DrydockBlueprintEditController extends DrydockBlueprintController {
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

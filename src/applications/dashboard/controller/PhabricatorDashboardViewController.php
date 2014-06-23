@@ -42,7 +42,6 @@ final class PhabricatorDashboardViewController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

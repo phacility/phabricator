@@ -86,7 +86,6 @@ final class DiffusionLintDetailsController extends DiffusionController {
         $content,
       ),
       array(
-        'device' => true,
         'title' =>
           array(
             pht('Lint'),

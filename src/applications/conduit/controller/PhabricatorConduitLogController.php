@@ -50,7 +50,6 @@ final class PhabricatorConduitLogController
       ),
       array(
         'title' => 'Conduit Logs',
-        'device' => true,
       ));
   }
 

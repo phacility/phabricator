@@ -23,7 +23,6 @@ abstract class PhabricatorAuthController extends PhabricatorController {
       $view,
       array(
         'title' => $title,
-        'device' => true,
       ));
 
   }

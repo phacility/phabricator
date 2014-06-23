@@ -67,7 +67,6 @@ final class PhabricatorProjectEditMainController
       ),
       array(
         'title' => $project->getName(),
-        'device' => true,
       ));
   }
 

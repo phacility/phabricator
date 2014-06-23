@@ -85,7 +85,6 @@ final class DivinerFindController extends DivinerController {
       $list,
       array(
         'title' => array(pht('Find'), pht('"%s"', $query_text)),
-        'device' => true,
       ));
   }
 

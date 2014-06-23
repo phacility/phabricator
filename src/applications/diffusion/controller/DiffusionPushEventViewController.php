@@ -72,7 +72,6 @@ final class DiffusionPushEventViewController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

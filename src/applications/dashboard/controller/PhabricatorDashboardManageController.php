@@ -75,7 +75,6 @@ final class PhabricatorDashboardManageController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

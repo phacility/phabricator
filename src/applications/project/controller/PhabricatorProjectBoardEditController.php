@@ -139,7 +139,6 @@ final class PhabricatorProjectBoardEditController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 }

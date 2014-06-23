@@ -92,7 +92,6 @@ final class PhortuneProductViewController extends PhortuneController {
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

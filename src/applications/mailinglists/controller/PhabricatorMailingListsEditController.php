@@ -127,7 +127,6 @@ final class PhabricatorMailingListsEditController
       ),
       array(
         'title' => $page_title,
-        'device' => true,
       ));
   }
 

@@ -71,7 +71,6 @@ final class PhabricatorWorkerTaskDetailController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

@@ -78,7 +78,6 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
         $timeline,
       ),
       array(
-        'device'  => true,
         'title'   => $title,
       ));
 

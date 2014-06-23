@@ -108,7 +108,6 @@ final class HeraldTestConsoleController extends HeraldController {
       $nav,
       array(
         'title' => pht('Test Console'),
-        'device' => true,
       ));
   }
 

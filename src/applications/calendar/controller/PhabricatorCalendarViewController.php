@@ -73,7 +73,6 @@ final class PhabricatorCalendarViewController
      $nav,
      array(
         'title' => pht('Calendar'),
-        'device' => true,
       ));
   }
 

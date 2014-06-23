@@ -208,7 +208,6 @@ final class PhrictionDiffController
       ),
       array(
         'title'     => pht('Document History'),
-        'device'    => true,
       ));
 
   }

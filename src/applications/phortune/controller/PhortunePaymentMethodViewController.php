@@ -13,7 +13,6 @@ final class PhortunePaymentMethodViewController extends PhabricatorController {
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

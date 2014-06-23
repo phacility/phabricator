@@ -105,7 +105,7 @@ final class PhragmentHistoryController extends PhragmentController {
         $list),
       array(
         'title' => pht('Fragment History'),
-        'device' => true));
+      ));
   }
 
 }

@@ -153,7 +153,6 @@ final class DiffusionRepositoryEditBranchesController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

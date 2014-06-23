@@ -185,7 +185,6 @@ final class PhamePostEditController
       $nav,
       array(
         'title' => $page_title,
-        'device' => true,
       ));
   }
 

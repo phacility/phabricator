@@ -110,7 +110,6 @@ final class ReleephBranchEditController extends ReleephBranchController {
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 }

@@ -307,7 +307,6 @@ final class ReleephRequestEditController extends ReleephBranchController {
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 }

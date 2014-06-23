@@ -63,7 +63,6 @@ final class DiffusionRepositoryEditLocalController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

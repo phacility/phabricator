@@ -102,7 +102,7 @@ final class PhragmentPolicyController extends PhragmentController {
         $box),
       array(
         'title' => pht('Edit Fragment Policies'),
-        'device' => true));
+      ));
   }
 
 }

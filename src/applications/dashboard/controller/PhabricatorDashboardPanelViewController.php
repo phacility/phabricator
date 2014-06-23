@@ -59,7 +59,6 @@ final class PhabricatorDashboardPanelViewController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

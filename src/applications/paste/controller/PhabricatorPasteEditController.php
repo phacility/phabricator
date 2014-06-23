@@ -235,7 +235,6 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

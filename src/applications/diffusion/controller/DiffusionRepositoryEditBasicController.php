@@ -147,7 +147,6 @@ final class DiffusionRepositoryEditBasicController
         $object_box),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

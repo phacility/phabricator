@@ -61,7 +61,6 @@ final class PhabricatorMustVerifyEmailController
       ),
       array(
         'title' => pht('Must Verify Email'),
-        'device' => true
       ));
   }
 

@@ -101,7 +101,6 @@ final class LegalpadDocumentViewController extends LegalpadController {
       $content,
       array(
         'title' => $title,
-        'device' => true,
         'pageObjects' => array($document->getPHID()),
       ));
   }

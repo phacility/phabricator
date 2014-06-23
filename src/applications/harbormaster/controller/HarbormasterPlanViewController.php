@@ -70,7 +70,6 @@ final class HarbormasterPlanViewController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

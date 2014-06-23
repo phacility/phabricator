@@ -56,7 +56,6 @@ final class PhabricatorTokenLeaderController
       $nav,
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

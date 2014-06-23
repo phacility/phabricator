@@ -86,7 +86,6 @@ final class DivinerMainController extends DivinerController {
       ),
       array(
         'title' => pht('Documentation Books'),
-        'device' => true,
         'fonts' => true,
       ));
   }

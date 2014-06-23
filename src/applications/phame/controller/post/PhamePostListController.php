@@ -90,7 +90,6 @@ final class PhamePostListController extends PhameController {
       $nav,
       array(
         'title'   => $title,
-        'device'  => true,
       ));
   }
 

@@ -116,7 +116,6 @@ final class DiffusionRepositoryEditSubversionController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

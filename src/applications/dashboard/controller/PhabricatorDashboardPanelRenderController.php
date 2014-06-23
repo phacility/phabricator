@@ -65,7 +65,6 @@ final class PhabricatorDashboardPanelRenderController
       ),
       array(
         'title' => array(pht('Panel'), $panel->getName()),
-        'device' => true,
       ));
   }
 

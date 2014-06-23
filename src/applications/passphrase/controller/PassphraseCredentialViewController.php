@@ -59,7 +59,6 @@ final class PassphraseCredentialViewController extends PassphraseController {
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

@@ -27,7 +27,6 @@ final class PhabricatorConfigListController
       $nav,
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

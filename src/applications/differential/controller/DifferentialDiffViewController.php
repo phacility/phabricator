@@ -142,7 +142,6 @@ final class DifferentialDiffViewController extends DifferentialController {
       ),
       array(
         'title' => pht('Diff View'),
-        'device' => true,
       ));
   }
 

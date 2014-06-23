@@ -129,7 +129,6 @@ final class PhabricatorAuthListController
       ),
       array(
         'title' => pht('Authentication Providers'),
-        'device' => true,
       ));
   }
 

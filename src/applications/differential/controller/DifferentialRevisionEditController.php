@@ -177,7 +177,6 @@ final class DifferentialRevisionEditController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

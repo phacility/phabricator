@@ -73,7 +73,6 @@ final class DrydockResourceViewController extends DrydockResourceController {
         $log_table,
       ),
       array(
-        'device'  => true,
         'title'   => $title,
       ));
 

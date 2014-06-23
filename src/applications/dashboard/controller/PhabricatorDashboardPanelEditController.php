@@ -277,7 +277,6 @@ final class PhabricatorDashboardPanelEditController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 
@@ -356,7 +355,6 @@ final class PhabricatorDashboardPanelEditController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

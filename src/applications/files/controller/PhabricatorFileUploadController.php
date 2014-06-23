@@ -81,7 +81,6 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

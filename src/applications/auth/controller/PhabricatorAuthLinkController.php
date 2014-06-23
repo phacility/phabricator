@@ -131,7 +131,6 @@ final class PhabricatorAuthLinkController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

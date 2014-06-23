@@ -44,7 +44,7 @@ final class NuanceRequestorEditController extends NuanceController {
       $crumbs,
       array(
         'title' => $title,
-        'device' => true));
+      ));
   }
 
 }
