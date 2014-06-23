@@ -2,6 +2,8 @@
 
 final class PhabricatorApplicationHome extends PhabricatorApplication {
 
+  const DASHBOARD_DEFAULT = 'dashboard:default';
+
   public function getBaseURI() {
     return '/home/';
   }

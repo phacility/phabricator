@@ -4876,6 +4876,7 @@ phutil_register_library_map(array(
       2 => 'PhabricatorFlaggableInterface',
       3 => 'PhabricatorMarkupInterface',
       4 => 'PhabricatorDestructableInterface',
+      5 => 'PhabricatorProjectInterface',
     ),
     'PhabricatorRepositoryArcanistProject' =>
     array(

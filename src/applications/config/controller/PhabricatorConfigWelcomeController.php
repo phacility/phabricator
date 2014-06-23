@@ -156,7 +156,10 @@ final class PhabricatorConfigWelcomeController
       $content);
 
     $dashboard_href = PhabricatorEnv::getURI('/dashboard/');
-    $have_dashboard = false;
+    $have_dashboard = (bool)PhabricatorDashboardInstall::getDashboard(
+      $viewer,
+      PhabricatorApplicationHome::DASHBOARD_DEFAULT,
+      'PhabricatorApplicationHome');
     if ($have_dashboard) {
       $content = pht(
         "You've installed a default dashboard to replace this welcome screen ".
