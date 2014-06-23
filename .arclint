@@ -1,6 +1,7 @@
 {
   "exclude": [
     "(^externals/)",
+    "(^webroot/rsrc/externals/)",
     "(/__tests__/data/)"
   ],
   "linters": {
