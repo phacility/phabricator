@@ -25,6 +25,7 @@ final class PhabricatorDifferentialConfigOptions
       new DifferentialSubscribersField(),
       new DifferentialRepositoryField(),
       new DifferentialLintField(),
+      new DifferentialProjectsField(),
       new DifferentialUnitField(),
       new DifferentialViewPolicyField(),
       new DifferentialEditPolicyField(),

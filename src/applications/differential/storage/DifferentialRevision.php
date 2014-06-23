@@ -10,7 +10,8 @@ final class DifferentialRevision extends DifferentialDAO
     PhabricatorSubscribableInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorApplicationTransactionInterface,
-    PhabricatorDestructableInterface {
+    PhabricatorDestructableInterface,
+    PhabricatorProjectInterface {
 
   protected $title = '';
   protected $originalTitle;
