@@ -1803,6 +1803,7 @@ phutil_register_library_map(array(
     'PhabricatorNotificationPanelController' => 'applications/notification/controller/PhabricatorNotificationPanelController.php',
     'PhabricatorNotificationQuery' => 'applications/notification/PhabricatorNotificationQuery.php',
     'PhabricatorNotificationStatusController' => 'applications/notification/controller/PhabricatorNotificationStatusController.php',
+    'PhabricatorNotificationStatusView' => 'applications/notification/view/PhabricatorNotificationStatusView.php',
     'PhabricatorNotificationTestController' => 'applications/notification/controller/PhabricatorNotificationTestController.php',
     'PhabricatorOAuthClientAuthorization' => 'applications/oauthserver/storage/PhabricatorOAuthClientAuthorization.php',
     'PhabricatorOAuthClientAuthorizationQuery' => 'applications/oauthserver/query/PhabricatorOAuthClientAuthorizationQuery.php',
@@ -4631,6 +4632,7 @@ phutil_register_library_map(array(
     'PhabricatorNotificationPanelController' => 'PhabricatorNotificationController',
     'PhabricatorNotificationQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorNotificationStatusController' => 'PhabricatorNotificationController',
+    'PhabricatorNotificationStatusView' => 'AphrontTagView',
     'PhabricatorNotificationTestController' => 'PhabricatorNotificationController',
     'PhabricatorOAuthClientAuthorization' =>
     array(

@@ -41,6 +41,7 @@ package {
         UncaughtErrorEvent.UNCAUGHT_ERROR,
         this.uncaughtErrorHandler);
 
+      ExternalInterface.marshallExceptions = true;
       ExternalInterface.addCallback('connect', this.externalConnect);
 
       this.setStatus('ready');
@@ -148,6 +149,10 @@ package {
     public function receiveMessage(msg:Object):void {
       this.log('Received message.');
       this.externalInvoke('receive', msg);
+    }
+
+    public function setStatus(status:String, code:String = null):void {
+      this.externalInvoke('status', {type: status, code: code});
     }
 
   }

@@ -28,7 +28,7 @@ JX.install('Aphlict', {
   construct: function(id, server, port, subscriptions) {
     if (__DEV__) {
       if (JX.Aphlict._instance) {
-        JX.$E('Aphlict object is a singleton!');
+        JX.$E('Aphlict object is a singleton.');
       }
     }
 
@@ -36,17 +36,24 @@ JX.install('Aphlict', {
     this._server = server;
     this._port = port;
     this._subscriptions = subscriptions;
+    this._setStatus('setup');
 
     JX.Aphlict._instance = this;
   },
+
+  events: ['didChangeStatus'],
 
   members: {
     _id: null,
     _server: null,
     _port: null,
     _subscriptions: null,
+    _status: null,
+    _statusCode: null,
 
     start: function(node, uri) {
+      this._setStatus('start');
+
       // NOTE: This is grotesque, but seems to work everywhere.
       node.innerHTML =
         '<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000">' +
@@ -72,6 +79,20 @@ JX.install('Aphlict', {
         this._server,
         this._port,
         this._subscriptions);
+    },
+
+    getStatus: function() {
+      return this._status;
+    },
+
+    getStatusCode: function() {
+      return this._statusCode;
+    },
+
+    _setStatus: function(status, code) {
+      this._status = status;
+      this._statusCode = code || null;
+      this.invoke('didChangeStatus');
     }
 
   },
@@ -98,6 +119,7 @@ JX.install('Aphlict', {
       }
 
       if (type == 'status') {
+        client._setStatus(message.type, message.code);
         switch (message.type) {
           case 'ready':
             client._didStartFlash();

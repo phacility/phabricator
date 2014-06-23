@@ -73,6 +73,12 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
         return;
       }
 
+      if (!e.getNode('notification')) {
+        // User clicked somewhere in the dead area of the menu, like the header
+        // or footer.
+        return;
+      }
+
       // If the user clicked a notification (but missed a link) and it has a
       // primary URI, go there.
       var href = e.getNodeData('notification').href;

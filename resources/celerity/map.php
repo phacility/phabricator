@@ -7,8 +7,8 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => '22e4fc33',
-    'core.pkg.js' => 'f5ba2408',
+    'core.pkg.css' => 'f9c94804',
+    'core.pkg.js' => '8c184823',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '4a93db37',
     'differential.pkg.js' => 'd1443567',
@@ -37,7 +37,7 @@ return array(
     'rsrc/css/aphront/typeahead.css' => 'a989b5b3',
     'rsrc/css/application/auth/auth.css' => '1e655982',
     'rsrc/css/application/base/main-menu-view.css' => 'aceca0e9',
-    'rsrc/css/application/base/notification-menu.css' => 'cbff1b94',
+    'rsrc/css/application/base/notification-menu.css' => '8ae4a008',
     'rsrc/css/application/base/phabricator-application-launch-view.css' => '8b7e271d',
     'rsrc/css/application/base/standard-page-view.css' => '517cdfb1',
     'rsrc/css/application/chatlog/chatlog.css' => '852140ff',
@@ -346,9 +346,10 @@ return array(
     'rsrc/image/texture/table_header.png' => '5c433037',
     'rsrc/image/texture/table_header_hover.png' => '038ec3b9',
     'rsrc/image/texture/table_header_tall.png' => 'd56b434f',
-    'rsrc/js/application/aphlict/Aphlict.js' => 'da12704d',
-    'rsrc/js/application/aphlict/behavior-aphlict-dropdown.js' => '862ea0fe',
+    'rsrc/js/application/aphlict/Aphlict.js' => '4a07e8e3',
+    'rsrc/js/application/aphlict/behavior-aphlict-dropdown.js' => 'f51afce0',
     'rsrc/js/application/aphlict/behavior-aphlict-listen.js' => 'a826c925',
+    'rsrc/js/application/aphlict/behavior-aphlict-status.js' => '58f7803f',
     'rsrc/js/application/auth/behavior-persona-login.js' => '9414ff18',
     'rsrc/js/application/config/behavior-reorder-fields.js' => '14a827de',
     'rsrc/js/application/conpherence/behavior-menu.js' => 'f0a41b9f',
@@ -490,7 +491,7 @@ return array(
     'rsrc/js/phuix/PHUIXActionListView.js' => 'b5c256b8',
     'rsrc/js/phuix/PHUIXActionView.js' => '6e8cefa4',
     'rsrc/js/phuix/PHUIXDropdownMenu.js' => 'bd4c8dca',
-    'rsrc/swf/aphlict.swf' => 'ef64606d',
+    'rsrc/swf/aphlict.swf' => 'e5a24c72',
   ),
   'symbols' =>
   array(
@@ -539,10 +540,11 @@ return array(
     'herald-rule-editor' => '6c9e6fb8',
     'herald-test-css' => '778b008e',
     'inline-comment-summary-css' => '8cfd34e8',
-    'javelin-aphlict' => 'da12704d',
+    'javelin-aphlict' => '4a07e8e3',
     'javelin-behavior' => '8a3ed18b',
-    'javelin-behavior-aphlict-dropdown' => '862ea0fe',
+    'javelin-behavior-aphlict-dropdown' => 'f51afce0',
     'javelin-behavior-aphlict-listen' => 'a826c925',
+    'javelin-behavior-aphlict-status' => '58f7803f',
     'javelin-behavior-aphront-basic-tokenizer' => 'b3a4b884',
     'javelin-behavior-aphront-crop' => 'fa0f4fc2',
     'javelin-behavior-aphront-drag-and-drop-textarea' => '92eb531d',
@@ -725,7 +727,7 @@ return array(
     'phabricator-nav-view-css' => '9283c2df',
     'phabricator-notification' => '0c6946e7',
     'phabricator-notification-css' => 'ef2c9b34',
-    'phabricator-notification-menu-css' => 'cbff1b94',
+    'phabricator-notification-menu-css' => '8ae4a008',
     'phabricator-object-selector-css' => '029a133d',
     'phabricator-phtize' => 'd254d646',
     'phabricator-prefab' => '41ed7994',
@@ -1190,6 +1192,11 @@ return array(
       1 => 'javelin-dom',
       2 => 'javelin-reactor-dom',
     ),
+    '4a07e8e3' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
+    ),
     '4d94d9c3' =>
     array(
       0 => 'javelin-behavior',
@@ -1233,6 +1240,13 @@ return array(
       0 => 'javelin-stratcom',
       1 => 'javelin-behavior',
       2 => 'javelin-vector',
+      3 => 'javelin-dom',
+    ),
+    '58f7803f' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-aphlict',
+      2 => 'phabricator-phtize',
       3 => 'javelin-dom',
     ),
     '59b251eb' =>
@@ -1476,16 +1490,6 @@ return array(
       2 => 'javelin-util',
       3 => 'javelin-workflow',
       4 => 'javelin-stratcom',
-    ),
-    '862ea0fe' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-request',
-      2 => 'javelin-stratcom',
-      3 => 'javelin-vector',
-      4 => 'javelin-dom',
-      5 => 'javelin-uri',
-      6 => 'javelin-behavior-device',
     ),
     '880fa5ac' =>
     array(
@@ -1921,11 +1925,6 @@ return array(
       1 => 'javelin-util',
       2 => 'javelin-stratcom',
     ),
-    'da12704d' =>
-    array(
-      0 => 'javelin-install',
-      1 => 'javelin-util',
-    ),
     'dd7e8ef5' =>
     array(
       0 => 'javelin-behavior',
@@ -2037,6 +2036,16 @@ return array(
       4 => 'phuix-action-list-view',
       5 => 'phuix-action-view',
       6 => 'javelin-workflow',
+    ),
+    'f51afce0' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-request',
+      2 => 'javelin-stratcom',
+      3 => 'javelin-vector',
+      4 => 'javelin-dom',
+      5 => 'javelin-uri',
+      6 => 'javelin-behavior-device',
     ),
     'f588412e' =>
     array(
