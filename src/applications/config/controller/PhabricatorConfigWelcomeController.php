@@ -133,7 +133,8 @@ final class PhabricatorConfigWelcomeController
       $content);
 
     $settings_href = PhabricatorEnv::getURI('/settings/');
-    $have_settings = !empty($viewer->loadPreferences()->getPreferences());
+    $prefs = $viewer->loadPreferences()->getPreferences();
+    $have_settings = !empty($prefs);
     if ($have_settings) {
       $content = pht(
         "You've adjusted at least one setting on your account.\n\n".
