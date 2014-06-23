@@ -37,8 +37,9 @@ make this work, you need to do three things:
 = Create a libphutil Library =
 
 If you haven't created a library for the class to live in yet, you need to do
-that first. Follow the instructions in @{article:libphutil Libraries User Guide},
-then make the library loadable by adding it to your ##.arcconfig## like this:
+that first. Follow the instructions in
+@{article:libphutil Libraries User Guide}, then make the library loadable by
+adding it to your ##.arcconfig## like this:
 
   {
     // ...

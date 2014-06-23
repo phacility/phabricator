@@ -45,9 +45,9 @@ look like this:
 
 The properties in this file are:
 
-  - `name`: Required. Short, unique name to identify the documentation book. This
-    will be used in URIs, so it should not have special characters. Good names
-    are things like `"example"` or `"libcabin"`.
+  - `name`: Required. Short, unique name to identify the documentation book.
+    This will be used in URIs, so it should not have special characters. Good
+    names are things like `"example"` or `"libcabin"`.
   - `root`: Required. The root directory (relative to the `.book` file) which
     documentation should be generated from. Often this will be a value like
     `"../../"`, to specify the project root (for example, if the `.book` file
