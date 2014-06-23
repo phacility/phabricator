@@ -7,10 +7,9 @@
  *           javelin-vector
  */
 
-JX.behavior('fancy-datepicker', function(config) {
+JX.behavior('fancy-datepicker', function() {
 
   var picker;
-  var button;
   var root;
 
   var value_y;

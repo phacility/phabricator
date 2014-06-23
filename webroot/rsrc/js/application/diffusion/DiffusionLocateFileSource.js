@@ -159,7 +159,6 @@ JX.install('DiffusionLocateFileSource', {
      */
     matchTree: function(tree, value, pos) {
       var matches = null;
-      var count = 0;
       for (var k in tree) {
         var p = pos;
 

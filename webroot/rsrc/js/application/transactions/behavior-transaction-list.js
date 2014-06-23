@@ -8,11 +8,7 @@
  *           phabricator-textareautils
  */
 
-JX.behavior('phabricator-transaction-list', function(config) {
-
-  var list = JX.$(config.listID);
-  var xaction_nodes = null;
-  var next_anchor = config.nextAnchor;
+JX.behavior('phabricator-transaction-list', function() {
 
   JX.Stratcom.listen(
     'click',

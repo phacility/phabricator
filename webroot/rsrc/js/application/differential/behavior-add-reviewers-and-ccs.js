@@ -27,7 +27,7 @@ JX.behavior('differential-add-reviewers-and-ccs', function(config) {
     JX.$(config.select),
     'change',
     null,
-    function(e) {
+    function() {
       var v = JX.$(config.select).value;
       for (var k in dynamic) {
         if (dynamic[k].actions[v]) {

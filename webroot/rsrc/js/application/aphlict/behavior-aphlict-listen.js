@@ -101,7 +101,7 @@ JX.behavior('aphlict-listen', function(config) {
         .setContent('Page updated, click to reload.')
         .alterClassName('jx-notification-alert', true)
         .setDuration(0);
-      reload.listen('activate', function(e) { JX.$U().go(); });
+      reload.listen('activate', function() { JX.$U().go(); });
       reload.show();
 
       showing_reload = true;

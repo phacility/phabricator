@@ -10,7 +10,7 @@
  * When the user clicks "show details" in a Maniphest transaction, replace the
  * summary rendering with a detailed rendering.
  */
-JX.behavior('maniphest-transaction-expand', function(config) {
+JX.behavior('maniphest-transaction-expand', function() {
 
   JX.Stratcom.listen(
     'click',

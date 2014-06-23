@@ -8,7 +8,7 @@
 JX.install('ReactorRadioExample', {
   extend: 'View',
   members: {
-    render: function(rendered_children) {
+    render: function() {
       var radio_one = JX.$N('input', {type: 'radio', name: 'n', value: 'one'});
       var radio_two = JX.$N('input', {type: 'radio', name: 'n', value: 'two'});
 

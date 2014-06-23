@@ -330,7 +330,6 @@ JX.behavior('pholio-mock-view', function(config) {
       }
 
       drag_end = get_image_xy(JX.$V(e));
-      var scale = get_image_scale();
 
       resize_selection(16);
 
@@ -729,7 +728,7 @@ JX.behavior('pholio-mock-view', function(config) {
     lightbox = null;
   }
 
-  function lightbox_resize(e) {
+  function lightbox_resize() {
     if (!lightbox) {
       return;
     }

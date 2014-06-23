@@ -16,7 +16,7 @@ JX.behavior('harbormaster-reorder-steps', function(config) {
       return JX.DOM.scry(root, 'li', 'build-step');
     });
 
-  list.listen('didDrop', function(node, after) {
+  list.listen('didDrop', function(node) {
     var nodes = list.findItems();
     var order = [];
     var key;
@@ -31,7 +31,7 @@ JX.behavior('harbormaster-reorder-steps', function(config) {
     JX.DOM.alterClass(node, 'drag-sending', true);
 
     new JX.Workflow(config.orderURI, {order: order.join()})
-      .setHandler(function(e) {
+      .setHandler(function() {
         JX.DOM.alterClass(node, 'drag-sending', false);
         list.unlock();
       })

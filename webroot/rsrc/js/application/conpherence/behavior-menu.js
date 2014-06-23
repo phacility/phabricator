@@ -288,7 +288,7 @@ JX.behavior('conpherence-menu', function(config) {
   JX.Stratcom.listen(
     'conpherence-redraw-thread',
     null,
-    function (e) {
+    function () {
       _scrollMessageWindow();
     }
   );

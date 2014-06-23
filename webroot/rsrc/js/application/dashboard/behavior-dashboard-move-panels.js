@@ -29,7 +29,7 @@ JX.behavior('dashboard-move-panels', function(config) {
     JX.DOM.alterClass(item, 'drag-sending', false);
   }
 
-  function ondrop(list, item, after, from) {
+  function ondrop(list, item, after) {
     list.lock();
     JX.DOM.alterClass(item, 'drag-sending', true);
 

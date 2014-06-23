@@ -6,7 +6,7 @@
  * @javelin
  */
 
-JX.behavior('phabricator-reveal-content', function(config) {
+JX.behavior('phabricator-reveal-content', function() {
   JX.Stratcom.listen(
     'click',
     'reveal-content',

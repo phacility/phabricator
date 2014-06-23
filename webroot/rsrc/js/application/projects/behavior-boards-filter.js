@@ -6,7 +6,7 @@
  *           phuix-dropdown-menu
  */
 
-JX.behavior('boards-filter', function(config) {
+JX.behavior('boards-filter', function() {
 
   JX.Stratcom.listen('click', 'boards-filter-menu', function(e) {
     var data = e.getNodeData('boards-filter-menu');

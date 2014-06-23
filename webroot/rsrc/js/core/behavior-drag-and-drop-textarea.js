@@ -28,10 +28,10 @@ JX.behavior('aphront-drag-and-drop-textarea', function(config) {
   if (JX.PhabricatorDragAndDropFileUpload.isSupported()) {
     var drop = new JX.PhabricatorDragAndDropFileUpload(target)
       .setURI(config.uri);
-    drop.listen('didBeginDrag', function(e) {
+    drop.listen('didBeginDrag', function() {
       JX.DOM.alterClass(target, config.activatedClass, true);
     });
-    drop.listen('didEndDrag', function(e) {
+    drop.listen('didEndDrag', function() {
       JX.DOM.alterClass(target, config.activatedClass, false);
     });
     drop.listen('didUpload', onupload);

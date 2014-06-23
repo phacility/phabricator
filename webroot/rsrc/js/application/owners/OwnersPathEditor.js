@@ -101,7 +101,7 @@ JX.install('OwnersPathEditor', {
       };
       var repo_select = JX.$N('select', attrs, options);
 
-      JX.DOM.listen(repo_select, 'change', null, JX.bind(this, function(e) {
+      JX.DOM.listen(repo_select, 'change', null, JX.bind(this, function() {
         this._lastRepositoryChoice = repo_select.value;
       }));
 

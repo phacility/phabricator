@@ -10,7 +10,7 @@
 JX.install('ReactorInputExample', {
   extend: 'View',
   members: {
-    render: function(rendered_children) {
+    render: function() {
       var html = JX.HTMLView.registerToInterpreter(new JX.ViewInterpreter());
 
       var raw_input = JX.ViewRenderer.render(

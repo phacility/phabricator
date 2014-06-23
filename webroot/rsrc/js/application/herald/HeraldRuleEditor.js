@@ -99,7 +99,7 @@ JX.install('HeraldRuleEditor', {
         this._onactionchange(row);
       }
     },
-    _onsubmit : function(e) {
+    _onsubmit : function() {
       var rule = JX.DOM.find(this._root, 'input', 'rule');
 
       var k;
@@ -108,7 +108,6 @@ JX.install('HeraldRuleEditor', {
         this._config.conditions[k][2] = this._getConditionValue(k);
       }
 
-      var acts = this._config.actions;
       for (k in this._config.actions) {
         this._config.actions[k][1] = this._getActionTarget(k);
       }
@@ -274,7 +273,7 @@ JX.install('HeraldRuleEditor', {
       return node;
     },
 
-    _newTokenizer : function(type, limit) {
+    _newTokenizer : function(type) {
       var template = JX.$N(
         'div',
         JX.$H(this._config.template.markup));

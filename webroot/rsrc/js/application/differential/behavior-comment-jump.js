@@ -5,7 +5,7 @@
  *           javelin-dom
  */
 
-JX.behavior('differential-comment-jump', function(config) {
+JX.behavior('differential-comment-jump', function() {
   function handle_jump(offset) {
     return (function(e) {
       var parent = JX.$('differential-review-stage');

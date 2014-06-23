@@ -54,7 +54,7 @@ JX.behavior('repository-crossreference', function(config) {
       });
   }
 
-  function linkAll(section) {
+  function linkAll() {
     var blocks = JX.DOM.scry(document.body, 'div', 'remarkup-code-block');
     for (var i = 0; i < blocks.length; ++i) {
       if (blocks[i].hasAttribute('data-code-lang')) {

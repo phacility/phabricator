@@ -156,7 +156,7 @@ JX.behavior('maniphest-batch-selector', function(config) {
     JX.$(config.formID),
     'submit',
     null,
-    function(e) {
+    function() {
       var inputs = [];
       for (var k in selected) {
         inputs.push(

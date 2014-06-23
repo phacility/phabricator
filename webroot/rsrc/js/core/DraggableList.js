@@ -260,7 +260,6 @@ JX.install('DraggableList', {
 
     _getCurrentTarget : function(p) {
       var ghost = this.getGhostNode();
-      var target = this._target;
       var targets = this._targets;
       var dragging = this._dragging;
 

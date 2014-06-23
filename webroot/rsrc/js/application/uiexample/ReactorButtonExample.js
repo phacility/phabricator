@@ -10,7 +10,7 @@
 JX.install('ReactorButtonExample', {
   extend: 'View',
   members: {
-    render: function(rendered_children) {
+    render: function() {
       var button = JX.$N('button', {}, "Fun");
       var clicks = JX.RDOM.clickPulses(button);
 

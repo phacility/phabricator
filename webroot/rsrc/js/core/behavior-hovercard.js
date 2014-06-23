@@ -8,7 +8,7 @@
  * @javelin
  */
 
-JX.behavior('phabricator-hovercards', function(config) {
+JX.behavior('phabricator-hovercards', function() {
 
   // We listen for mousemove instead of mouseover to handle the case when user
   // scrolls with keyboard. We don't want to display hovercard if node gets
@@ -78,7 +78,7 @@ JX.behavior('phabricator-hovercards', function(config) {
   JX.Stratcom.listen(
     ['unload', 'onresize'],
     null,
-    function(e) {
+    function() {
       JX.Hovercard.hide();
     });
 

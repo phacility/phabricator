@@ -118,8 +118,6 @@ JX.install('ChangesetViewManager', {
       this._loaded = true;
       this._sequence++;
 
-      var data = this._getNodeData();
-
       var params = {
         ref: this._ref,
         whitespace: this._whitespace || '',

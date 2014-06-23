@@ -5,7 +5,7 @@
  *           javelin-stratcom
  *           javelin-dom
  */
-JX.behavior('slowvote-embed', function(config) {
+JX.behavior('slowvote-embed', function() {
   JX.Stratcom.listen(
     ['click'],
     'slowvote-option',

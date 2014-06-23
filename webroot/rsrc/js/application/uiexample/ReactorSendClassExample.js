@@ -8,7 +8,7 @@
 JX.install('ReactorSendClassExample', {
   extend: 'View',
   members: {
-    render: function(rendered_children) {
+    render: function() {
       var input = JX.$N('input', { type: 'checkbox' });
       var span = JX.$N('a', 'Hey');
       JX.RDOM.sendClass(JX.RDOM.checkbox(input), span, 'disabled');

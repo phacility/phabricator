@@ -16,7 +16,7 @@ JX.behavior('reorder-applications', function(config) {
       return JX.DOM.scry(root, 'li', 'pinned-application');
     });
 
-  list.listen('didDrop', function(node, after) {
+  list.listen('didDrop', function(node) {
     var nodes = list.findItems();
     var order = [];
     var key;

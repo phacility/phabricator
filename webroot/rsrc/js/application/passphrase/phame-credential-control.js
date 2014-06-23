@@ -9,7 +9,7 @@
  * @javelin
  */
 
-JX.behavior('passphrase-credential-control', function(config) {
+JX.behavior('passphrase-credential-control', function() {
 
   JX.Stratcom.listen(
     'click',
