@@ -122,17 +122,17 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
       case 'fa-list-ol':
         var ch = (action == 'fa-list-ol') ? '  # ' : '  - ';
         if (sel) {
-          sel = sel.split("\n");
+          sel = sel.split('\n');
         } else {
           sel = [pht('List Item')];
         }
-        sel = sel.join("\n" + ch);
-        update(area, ((r.start === 0) ? "" : "\n\n") + ch, sel, "\n\n");
+        sel = sel.join('\n' + ch);
+        update(area, ((r.start === 0) ? '' : '\n\n') + ch, sel, '\n\n');
         break;
       case 'fa-code':
-        sel = sel || "foreach ($list as $item) {\n  work_miracles($item);\n}";
-        var prefix = (r.start === 0) ? "" : "\n";
-        update(area, prefix + "```\n", sel, "\n```");
+        sel = sel || 'foreach ($list as $item) {\n  work_miracles($item);\n}';
+        var prefix = (r.start === 0) ? '' : '\n';
+        update(area, prefix + '```\n', sel, '\n```');
         break;
       case 'fa-table':
         var prefix = (r.start === 0 ? '' : '\n\n');

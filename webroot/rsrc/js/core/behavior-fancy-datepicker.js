@@ -158,9 +158,9 @@ JX.behavior('fancy-datepicker', function() {
       'December'];
 
     var buttons = [
-      cell("\u25C0", 'm:-1', false, 'lrbutton'),
+      cell('\u25C0', 'm:-1', false, 'lrbutton'),
       cell(months[value_m - 1] + ' ' + value_y, null),
-      cell("\u25B6", 'm:1', false, 'lrbutton')];
+      cell('\u25B6', 'm:1', false, 'lrbutton')];
 
     return JX.$N(
       'table',

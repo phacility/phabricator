@@ -39,7 +39,7 @@ JX.behavior('phabricator-notification-example', function() {
           notification.listen(
             'activate',
             function() {
-              if (!confirm("Close notification?")) {
+              if (!confirm('Close notification?')) {
                 JX.Stratcom.context().kill();
               }
             });
