@@ -8,7 +8,7 @@ return array(
   'names' =>
   array(
     'core.pkg.css' => '22e4fc33',
-    'core.pkg.js' => '941224f2',
+    'core.pkg.js' => 'f5ba2408',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '4a93db37',
     'differential.pkg.js' => 'd1443567',
@@ -346,9 +346,9 @@ return array(
     'rsrc/image/texture/table_header.png' => '5c433037',
     'rsrc/image/texture/table_header_hover.png' => '038ec3b9',
     'rsrc/image/texture/table_header_tall.png' => 'd56b434f',
-    'rsrc/js/application/aphlict/Aphlict.js' => '08be8878',
+    'rsrc/js/application/aphlict/Aphlict.js' => 'da12704d',
     'rsrc/js/application/aphlict/behavior-aphlict-dropdown.js' => '862ea0fe',
-    'rsrc/js/application/aphlict/behavior-aphlict-listen.js' => 'bdb2032d',
+    'rsrc/js/application/aphlict/behavior-aphlict-listen.js' => 'a826c925',
     'rsrc/js/application/auth/behavior-persona-login.js' => '9414ff18',
     'rsrc/js/application/config/behavior-reorder-fields.js' => '14a827de',
     'rsrc/js/application/conpherence/behavior-menu.js' => 'f0a41b9f',
@@ -490,7 +490,7 @@ return array(
     'rsrc/js/phuix/PHUIXActionListView.js' => 'b5c256b8',
     'rsrc/js/phuix/PHUIXActionView.js' => '6e8cefa4',
     'rsrc/js/phuix/PHUIXDropdownMenu.js' => 'bd4c8dca',
-    'rsrc/swf/aphlict.swf' => '14d5aa2e',
+    'rsrc/swf/aphlict.swf' => 'ef64606d',
   ),
   'symbols' =>
   array(
@@ -539,10 +539,10 @@ return array(
     'herald-rule-editor' => '6c9e6fb8',
     'herald-test-css' => '778b008e',
     'inline-comment-summary-css' => '8cfd34e8',
-    'javelin-aphlict' => '08be8878',
+    'javelin-aphlict' => 'da12704d',
     'javelin-behavior' => '8a3ed18b',
     'javelin-behavior-aphlict-dropdown' => '862ea0fe',
-    'javelin-behavior-aphlict-listen' => 'bdb2032d',
+    'javelin-behavior-aphlict-listen' => 'a826c925',
     'javelin-behavior-aphront-basic-tokenizer' => 'b3a4b884',
     'javelin-behavior-aphront-crop' => 'fa0f4fc2',
     'javelin-behavior-aphront-drag-and-drop-textarea' => '92eb531d',
@@ -877,11 +877,6 @@ return array(
       2 => 'javelin-util',
       3 => 'javelin-vector',
       4 => 'javelin-stratcom',
-    ),
-    '08be8878' =>
-    array(
-      0 => 'javelin-install',
-      1 => 'javelin-util',
     ),
     '08e56a4e' =>
     array(
@@ -1279,6 +1274,13 @@ return array(
       1 => 'javelin-stratcom',
       2 => 'javelin-dom',
     ),
+    '62e18640' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
+      2 => 'javelin-dom',
+      3 => 'javelin-typeahead-normalizer',
+    ),
     '6453c869' =>
     array(
       0 => 'javelin-install',
@@ -1356,13 +1358,6 @@ return array(
     array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
-    ),
-    '62e18640' =>
-    array(
-      0 => 'javelin-install',
-      1 => 'javelin-util',
-      2 => 'javelin-dom',
-      3 => 'javelin-typeahead-normalizer',
     ),
     '76b9fc3e' =>
     array(
@@ -1642,6 +1637,19 @@ return array(
       1 => 'javelin-stratcom',
       2 => 'javelin-dom',
     ),
+    'a826c925' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-aphlict',
+      2 => 'javelin-stratcom',
+      3 => 'javelin-request',
+      4 => 'javelin-uri',
+      5 => 'javelin-dom',
+      6 => 'javelin-json',
+      7 => 'javelin-router',
+      8 => 'javelin-util',
+      9 => 'phabricator-notification',
+    ),
     'a82a7769' =>
     array(
       0 => 'javelin-behavior',
@@ -1794,18 +1802,6 @@ return array(
       2 => 'javelin-util',
       3 => 'javelin-request',
     ),
-    'bdb2032d' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-aphlict',
-      2 => 'javelin-stratcom',
-      3 => 'javelin-request',
-      4 => 'javelin-uri',
-      5 => 'javelin-dom',
-      6 => 'javelin-json',
-      7 => 'javelin-router',
-      8 => 'phabricator-notification',
-    ),
     'bdb3e4d0' =>
     array(
       0 => 'javelin-behavior',
@@ -1924,6 +1920,11 @@ return array(
       0 => 'javelin-install',
       1 => 'javelin-util',
       2 => 'javelin-stratcom',
+    ),
+    'da12704d' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
     ),
     'dd7e8ef5' =>
     array(

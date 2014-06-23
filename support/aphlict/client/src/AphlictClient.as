@@ -42,11 +42,8 @@ package {
         this.uncaughtErrorHandler);
 
       ExternalInterface.addCallback('connect', this.externalConnect);
-      ExternalInterface.call(
-        'JX.Stratcom.invoke',
-        'aphlict-component-ready',
-        null,
-        {});
+
+      this.setStatus('ready');
     }
 
     private function uncaughtErrorHandler(event:UncaughtErrorEvent):void {
@@ -57,8 +54,6 @@ package {
       server:String,
       port:Number,
       subscriptions:Array):void {
-
-      this.externalInvoke('connect');
 
       this.remoteServer  = server;
       this.remotePort    = port;

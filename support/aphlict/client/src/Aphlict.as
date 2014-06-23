@@ -42,6 +42,10 @@ package {
       this.externalInvoke('log', message);
     }
 
+    final protected function setStatus(status:String):void {
+      this.externalInvoke('status', {type: status});
+    }
+
   }
 
 }
