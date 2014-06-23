@@ -59,6 +59,7 @@ final class PhabricatorBot extends PhabricatorDaemon {
       // domain without the "/api/" part.
       $conduit_uri = new PhutilURI($conduit_uri);
       $conduit_uri->setPath('/api/');
+      $conduit_host = $conduit_uri->getDomain();
       $conduit_uri = (string)$conduit_uri;
 
       $conduit = new ConduitClient($conduit_uri);
@@ -68,6 +69,7 @@ final class PhabricatorBot extends PhabricatorDaemon {
           'client'            => 'PhabricatorBot',
           'clientVersion'     => '1.0',
           'clientDescription' => php_uname('n').':'.$nick,
+          'host'              => $conduit_host,
           'user'              => $conduit_user,
           'certificate'       => $conduit_cert,
         ));
