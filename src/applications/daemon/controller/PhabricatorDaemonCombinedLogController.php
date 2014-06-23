@@ -38,6 +38,7 @@ final class PhabricatorDaemonCombinedLogController
       $nav,
       array(
         'title' => pht('Combined Daemon Log'),
+        'device' => false,
       ));
   }
 

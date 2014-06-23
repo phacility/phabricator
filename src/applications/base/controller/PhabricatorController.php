@@ -293,7 +293,7 @@ abstract class PhabricatorController extends AphrontController {
       }
     }
 
-    if (idx($options, 'device')) {
+    if (idx($options, 'device', true)) {
       $page->setDeviceReady(true);
     }
 

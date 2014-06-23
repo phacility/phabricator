@@ -30,6 +30,7 @@ final class PhabricatorNotificationStatusController
       ),
       array(
         'title' => pht('Notification Server Status'),
+        'device' => false,
       ));
   }
 

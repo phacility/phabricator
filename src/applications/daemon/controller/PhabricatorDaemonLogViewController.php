@@ -83,6 +83,7 @@ final class PhabricatorDaemonLogViewController
       ),
       array(
         'title' => pht('Daemon Log'),
+        'device' => false,
       ));
   }
 

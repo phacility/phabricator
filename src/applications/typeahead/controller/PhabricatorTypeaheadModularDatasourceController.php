@@ -107,6 +107,7 @@ final class PhabricatorTypeaheadModularDatasourceController
       ),
       array(
         'title' => pht('Typeahead Results'),
+        'device' => false,
       ));
   }
 

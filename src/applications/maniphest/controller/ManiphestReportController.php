@@ -58,6 +58,7 @@ final class ManiphestReportController extends ManiphestController {
       $nav,
       array(
         'title' => pht('Maniphest Reports'),
+        'device' => false,
       ));
   }
 
