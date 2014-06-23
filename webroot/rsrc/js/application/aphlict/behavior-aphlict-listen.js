@@ -8,6 +8,7 @@
  *           javelin-dom
  *           javelin-json
  *           javelin-router
+ *           javelin-util
  *           phabricator-notification
  */
 
@@ -54,28 +55,17 @@ JX.behavior('aphlict-listen', function(config) {
   // a request to Phabricator to get notification details.
   function onaphlictmessage(type, message) {
     switch (type) {
-      case 'error':
-        new JX.Notification()
-          .setContent('(Aphlict) ' + message)
-          .alterClassName('jx-notification-error', true)
-          .setDuration(0)
-          .show();
-        break;
-
       case 'receive':
         JX.Stratcom.invoke('aphlict-receive-message', null, message);
         break;
 
       default:
-        if (__DEV__ && config.debug) {
+      case 'error':
+        if (config.debug) {
           var details = message ? JX.JSON.stringify(message) : '';
-
-          new JX.Notification()
-            .setContent('(Aphlict) [' + type + '] ' + details)
-            .alterClassName('jx-notification-debug', true)
-            .setDuration(3000)
-            .show();
+          JX.log('(Aphlict) [' + type + '] ' + details);
         }
+        break;
     }
   }
 

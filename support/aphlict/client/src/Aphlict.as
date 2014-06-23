@@ -34,7 +34,7 @@ package {
       ExternalInterface.call('JX.Aphlict.didReceiveEvent', type, object);
     }
 
-    final protected function error(error:Error):void {
+    final protected function error(error:Object):void {
       this.externalInvoke('error', error.toString());
     }
 
