@@ -137,16 +137,6 @@ abstract class ConduitAPIMethod
   }
 
   protected function validateHost($host) {
-    if (!$host) {
-      // If the client doesn't send a host key, don't complain. We should in
-      // the future, but this change isn't severe enough to bump the protocol
-      // version.
-
-      // TODO: Remove this once the protocol version gets bumped past 2 (i.e.,
-      // require the host key be present and valid).
-      return;
-    }
-
     // NOTE: Compare domains only so we aren't sensitive to port specification
     // or omission.
 
