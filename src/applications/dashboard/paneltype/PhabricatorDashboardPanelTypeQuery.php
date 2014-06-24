@@ -80,6 +80,7 @@ final class PhabricatorDashboardPanelTypeQuery
     }
 
     $engine->setViewer($viewer);
+    $engine->setContext(PhabricatorApplicationSearchEngine::CONTEXT_PANEL);
 
     $key = $panel->getProperty('key');
     if ($engine->isBuiltinQuery($key)) {

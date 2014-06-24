@@ -22,6 +22,10 @@ abstract class PhabricatorApplicationSearchEngine {
   private $errors = array();
   private $customFields = false;
   private $request;
+  private $context;
+
+  const CONTEXT_LIST  = 'list';
+  const CONTEXT_PANEL = 'panel';
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -33,6 +37,15 @@ abstract class PhabricatorApplicationSearchEngine {
       throw new Exception('Call setViewer() before using an engine!');
     }
     return $this->viewer;
+  }
+
+  public function setContext($context) {
+    $this->context = $context;
+    return $this;
+  }
+
+  public function isPanelContext() {
+    return ($this->context == self::CONTEXT_PANEL);
   }
 
   public function saveQuery(PhabricatorSavedQuery $query) {
