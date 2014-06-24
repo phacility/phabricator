@@ -120,6 +120,15 @@
   box-shadow: 0 0 0 4px rgba(255,255,255,.5);
 }
 
+.pholio-mock-comment-icon {
+  opacity: 1;
+  -webkit-transition: all .3s ease;
+  -moz-transition: all .3s ease;
+  -ms-transition: all .3s ease;
+  -o-transition: all .3s ease;
+  transition: all .3s ease;
+}
+
 .pholio-mock-reticle-draft .pholio-mock-comment-icon {
   font-size: 2.2em;
   color: {$yellow};
