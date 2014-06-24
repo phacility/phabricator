@@ -25,7 +25,7 @@ final class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
       'user'                => 'optional string',
       'authToken'           => 'optional int',
       'authSignature'       => 'optional string',
-      'host'                => 'required string',
+      'host'                => 'deprecated',
     );
   }
 
@@ -55,8 +55,6 @@ final class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
   }
 
   protected function execute(ConduitAPIRequest $request) {
-
-    $this->validateHost($request->getValue('host'));
 
     $client = $request->getValue('client');
     $client_version = (int)$request->getValue('clientVersion');
