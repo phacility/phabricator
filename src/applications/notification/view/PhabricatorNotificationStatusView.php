@@ -23,6 +23,8 @@ final class PhabricatorNotificationStatusView extends AphrontTagView {
           'error.flash.xdomain' => pht(
             'Unable to connect to Flash Policy Server. Check that the '.
             'notification server is running and port 843 is not firewalled.'),
+          'error.flash.disconnected' => pht(
+            'Disconnected from notification server.'),
         ),
       ));
 

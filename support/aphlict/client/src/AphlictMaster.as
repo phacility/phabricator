@@ -145,7 +145,7 @@ package {
     }
 
     private function didCloseSocket(event:Event):void {
-      this.externalInvoke('close');
+      this.setStatusOnClients('error', 'error.flash.disconnected');
     }
 
     private function didIOErrorSocket(event:IOErrorEvent):void {
