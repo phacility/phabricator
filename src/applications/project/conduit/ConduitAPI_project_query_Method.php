@@ -46,6 +46,7 @@ final class ConduitAPI_project_query_Method extends ConduitAPI_project_Method {
     $query = new PhabricatorProjectQuery();
     $query->setViewer($request->getUser());
     $query->needMembers(true);
+    $query->needSlugs(true);
 
     $ids = $request->getValue('ids');
     if ($ids) {
@@ -82,8 +83,26 @@ final class ConduitAPI_project_query_Method extends ConduitAPI_project_Method {
       $query->setOffset($offset);
     }
 
-    $results = $query->execute();
-    return $this->buildProjectInfoDictionaries($results);
+    $pager = $this->newPager($request);
+    $results = $query->executeWithCursorPager($pager);
+    $projects = $this->buildProjectInfoDictionaries($results);
+
+    // TODO: This is pretty hideous.
+    $slug_map = array();
+    foreach ($slugs as $slug) {
+      foreach ($projects as $project) {
+        if (in_array($slug, $project['slugs'])) {
+          $slug_map[$slug] = $project['phid'];
+        }
+      }
+    }
+
+    $result = array(
+      'data' => $projects,
+      'slugMap' => $slug_map,
+    );
+
+    return $this->addPagerResults($result, $pager);
   }
 
 }
