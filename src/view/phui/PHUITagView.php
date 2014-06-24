@@ -5,6 +5,7 @@ final class PHUITagView extends AphrontView {
   const TYPE_PERSON         = 'person';
   const TYPE_OBJECT         = 'object';
   const TYPE_STATE          = 'state';
+  const TYPE_SHADE          = 'shade';
 
   const COLOR_RED           = 'red';
   const COLOR_ORANGE        = 'orange';
@@ -16,6 +17,8 @@ final class PHUITagView extends AphrontView {
   const COLOR_BLACK         = 'black';
   const COLOR_GREY          = 'grey';
   const COLOR_WHITE         = 'white';
+  const COLOR_BLUEGREY      = 'bluegrey';
+  const COLOR_CHECKERED     = 'checkered';
 
   const COLOR_OBJECT        = 'object';
   const COLOR_PERSON        = 'person';
@@ -30,6 +33,7 @@ final class PHUITagView extends AphrontView {
   private $external;
   private $id;
   private $icon;
+  private $shade;
 
   public function setID($id) {
     $this->id = $id;
@@ -43,6 +47,8 @@ final class PHUITagView extends AphrontView {
   public function setType($type) {
     $this->type = $type;
     switch ($type) {
+      case self::TYPE_SHADE:
+        break;
       case self::TYPE_OBJECT:
         $this->setBackgroundColor(self::COLOR_OBJECT);
         break;
@@ -50,6 +56,11 @@ final class PHUITagView extends AphrontView {
         $this->setBackgroundColor(self::COLOR_PERSON);
         break;
     }
+    return $this;
+  }
+
+  public function setShade($shade) {
+    $this->shade = $shade;
     return $this;
   }
 
@@ -84,9 +95,7 @@ final class PHUITagView extends AphrontView {
   }
 
   public function setIcon($icon) {
-    $icon_view = id(new PHUIIconView())
-      ->setIconFont($icon);
-    $this->icon = $icon_view;
+    $this->icon = $icon;
     return $this;
   }
 
@@ -102,7 +111,10 @@ final class PHUITagView extends AphrontView {
     );
 
     $color = null;
-    if ($this->backgroundColor) {
+    if ($this->shade) {
+      $classes[] = 'phui-tag-shade';
+      $color = 'phui-tag-shade-'.$this->shade;
+    } else if ($this->backgroundColor) {
       $color = 'phui-tag-color-'.$this->backgroundColor;
     }
 
@@ -119,7 +131,8 @@ final class PHUITagView extends AphrontView {
     }
 
     if ($this->icon) {
-      $icon = $this->icon;
+      $icon = id(new PHUIIconView())
+        ->setIconFont($this->icon, $this->shade);
       $classes[] = 'phui-tag-icon-view';
     } else {
       $icon = null;
@@ -193,6 +206,22 @@ final class PHUITagView extends AphrontView {
 
       self::COLOR_OBJECT,
       self::COLOR_PERSON,
+    );
+  }
+
+  public static function getShades() {
+    return array(
+      self::COLOR_RED,
+      self::COLOR_ORANGE,
+      self::COLOR_YELLOW,
+      self::COLOR_BLUE,
+      self::COLOR_INDIGO,
+      self::COLOR_VIOLET,
+      self::COLOR_GREEN,
+      self::COLOR_BLACK,
+      self::COLOR_GREY,
+      self::COLOR_BLUEGREY,
+      self::COLOR_CHECKERED,
     );
   }
 

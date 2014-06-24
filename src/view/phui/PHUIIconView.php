@@ -20,6 +20,7 @@ final class PHUIIconView extends AphrontTagView {
   private $spriteIcon;
   private $spriteSheet;
   private $iconFont;
+  private $iconColor;
 
   public function setHref($href) {
     $this->href = $href;
@@ -51,8 +52,9 @@ final class PHUIIconView extends AphrontTagView {
     return $this;
   }
 
-  public function setIconFont($icon) {
+  public function setIconFont($icon, $color = null) {
     $this->iconFont = $icon;
+    $this->iconColor = $color;
     return $this;
   }
 
@@ -75,13 +77,14 @@ final class PHUIIconView extends AphrontTagView {
       require_celerity_resource('sprite-'.$this->spriteSheet.'-css');
       $classes[] = 'sprite-'.$this->spriteSheet;
       $classes[] = $this->spriteSheet.'-'.$this->spriteIcon;
-
     } else if ($this->iconFont) {
       require_celerity_resource('phui-font-icon-base-css');
       require_celerity_resource('font-fontawesome');
       $classes[] = 'phui-font-fa';
       $classes[] = $this->iconFont;
-
+      if ($this->iconColor) {
+        $classes[] = $this->iconColor;
+      }
     } else {
       if ($this->headSize) {
         $classes[] = $this->headSize;

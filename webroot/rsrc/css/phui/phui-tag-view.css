@@ -132,6 +132,82 @@ a.phui-tag-type-object:link,
   border-color: #f1f7ff;
 }
 
+.phui-tag-shade {
+  font-weight: normal;
+}
+
+.phui-tag-shade .phui-icon-view {
+  font-size: 12px;
+  top: 2px;
+}
+
+.phui-tag-shade-bluegrey {
+  background-color: {$lightbluebackground};
+  border-color: {$lightbluetext};
+  color: {$bluetext};
+}
+
+.phui-tag-shade-red {
+  background-color: {$lightred};
+  border-color: {$red};
+  color: {$red}
+}
+
+.phui-tag-shade-orange {
+  background-color: {$lightorange};
+  border-color: {$orange};
+  color: {$orange};
+}
+
+.phui-tag-shade-yellow {
+  background-color: {$lightyellow};
+  border-color: {$yellow};
+  color: {$yellow};
+}
+
+.phui-tag-shade-blue {
+  background-color: {$lightblue};
+  border-color: {$blue};
+  color: {$blue};
+}
+
+.phui-tag-shade-indigo {
+  background-color: {$lightindigo};
+  border-color: {$indigo};
+  color: {$indigo};
+}
+
+.phui-tag-shade-green {
+  background-color: {$lightgreen};
+  border-color: {$green};
+  color: {$green};
+}
+
+.phui-tag-shade-violet {
+  background-color: {$lightviolet};
+  border-color: {$violet};
+  color: {$violet};
+}
+
+.phui-tag-shade-black {
+  background-color: {$darkgreybackground};
+  border-color: #333333;
+}
+
+.phui-tag-shade-grey {
+  background-color: {$lightgreybackground};
+  border-color: {$lightgreytext};
+  color: {$lightgreytext};
+}
+
+.phui-tag-shade-checkered {
+  background: url(/rsrc/image/checker_light.png);
+  border-style: dashed;
+  border-color: {$greyborder};
+  color: black;
+  text-shadow: 1px 1px #fff;
+}
+
 a.phui-tag-view:hover
   .phui-tag-core.phui-tag-color-person {
   border-color: #d9ebfd;
