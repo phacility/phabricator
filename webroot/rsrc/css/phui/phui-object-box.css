@@ -31,3 +31,39 @@ div.phui-object-box.phui-object-box-flush {
 .device-phone .phui-object-box {
   margin: 8px 8px 0 8px;
 }
+
+.phui-box-border.phui-object-box-lightgreen {
+  border: 1px solid {$lightgreenborder};
+  border-bottom: 1px solid {$greenborder};
+}
+
+.phui-box-border.phui-object-box-lightgreen .phui-action-header {
+  border-bottom: 1px solid {$lightgreenborder};
+}
+
+.phui-box-border.phui-object-box-lightblue {
+  border: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
+}
+
+.phui-box-border.phui-object-box-lightblue .phui-action-header {
+  border-bottom: 1px solid {$lightblueborder};
+}
+
+.phui-box-border.phui-object-box-lightred {
+  border: 1px solid {$lightredborder};
+  border-bottom: 1px solid {$redborder};
+}
+
+.phui-box-border.phui-object-box-lightred .phui-action-header {
+  border-bottom: 1px solid {$lightredborder};
+}
+
+.phui-box-border.phui-object-box-lightviolet {
+  border: 1px solid {$lightvioletborder};
+  border-bottom: 1px solid {$violetborder};
+}
+
+.phui-box-border.phui-object-box-lightviolet .phui-action-header {
+  border-bottom: 1px solid {$lightvioletborder};
+}

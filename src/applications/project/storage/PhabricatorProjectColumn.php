@@ -58,9 +58,9 @@ final class PhabricatorProjectColumn
 
   public function getHeaderColor() {
     if ($this->isDefaultColumn()) {
-      return PhabricatorActionHeaderView::HEADER_DARK_GREY;
+      return PHUIActionHeaderView::HEADER_DARK_GREY;
     }
-    return PhabricatorActionHeaderView::HEADER_GREY;
+    return PHUIActionHeaderView::HEADER_GREY;
   }
 
 

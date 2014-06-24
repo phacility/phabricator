@@ -1,13 +1,12 @@
 <?php
 
-final class PhabricatorActionHeaderView extends AphrontView {
+final class PHUIActionHeaderView extends AphrontView {
 
   const HEADER_GREY = 'grey';
   const HEADER_DARK_GREY = 'dark-grey';
-  const HEADER_BLUE = 'blue';
-  const HEADER_GREEN = 'green';
-  const HEADER_RED = 'red';
-  const HEADER_YELLOW = 'yellow';
+  const HEADER_LIGHTGREEN = 'lightgreen';
+  const HEADER_LIGHTRED = 'lightred';
+  const HEADER_LIGHTVIOLET = 'lightviolet';
   const HEADER_LIGHTBLUE ='lightblue';
   const HEADER_WHITE = 'white';
 
@@ -66,14 +65,12 @@ final class PhabricatorActionHeaderView extends AphrontView {
         return 'lightgreytext';
       case self::HEADER_DARK_GREY:
         return 'lightgreytext';
-      case self::HEADER_BLUE:
-        return 'white';
-      case self::HEADER_GREEN:
-        return 'white';
-      case self::HEADER_RED:
-        return 'white';
-      case self::HEADER_YELLOW:
-        return 'white';
+      case self::HEADER_LIGHTGREEN:
+        return 'bluegrey';
+      case self::HEADER_LIGHTRED:
+        return 'bluegrey';
+      case self::HEADER_LIGHTVIOLET:
+        return 'bluegrey';
       case self::HEADER_LIGHTBLUE:
         return 'bluegrey';
     }
@@ -81,10 +78,10 @@ final class PhabricatorActionHeaderView extends AphrontView {
 
   public function render() {
 
-    require_celerity_resource('phabricator-action-header-view-css');
+    require_celerity_resource('phui-action-header-view-css');
 
     $classes = array();
-    $classes[] = 'phabricator-action-header';
+    $classes[] = 'phui-action-header';
 
     if ($this->headerColor) {
       $classes[] = 'sprite-gradient';
@@ -102,7 +99,7 @@ final class PhabricatorActionHeaderView extends AphrontView {
         $action_list[] = phutil_tag(
           'li',
             array(
-            'class' => 'phabricator-action-header-icon-item'
+            'class' => 'phui-action-header-icon-item'
           ),
           $action);
       }
@@ -112,7 +109,7 @@ final class PhabricatorActionHeaderView extends AphrontView {
       $action_list[] = phutil_tag(
         'li',
           array(
-          'class' => 'phabricator-action-header-icon-item'
+          'class' => 'phui-action-header-icon-item'
         ),
         $this->tag);
     }
@@ -133,7 +130,7 @@ final class PhabricatorActionHeaderView extends AphrontView {
       $header_title = javelin_tag(
         'a',
           array(
-            'class' => 'phabricator-action-header-link',
+            'class' => 'phui-action-header-link',
             'href' => $this->headerHref,
             'sigil' => implode(' ', $this->headerSigils)
           ),
@@ -143,7 +140,7 @@ final class PhabricatorActionHeaderView extends AphrontView {
     $header = phutil_tag(
       'h3',
         array(
-          'class' => 'phabricator-action-header-title'
+          'class' => 'phui-action-header-title'
         ),
       array(
         $header_icon,
@@ -154,7 +151,7 @@ final class PhabricatorActionHeaderView extends AphrontView {
       $icons = phutil_tag(
         'ul',
           array(
-            'class' => 'phabricator-action-header-icon-list'
+            'class' => 'phui-action-header-icon-list'
           ),
           $action_list);
     }

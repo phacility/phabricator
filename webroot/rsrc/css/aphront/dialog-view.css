@@ -20,14 +20,14 @@
   margin: auto;
 }
 
-.aphront-dialog-head .phabricator-action-header {
+.aphront-dialog-head .phui-action-header {
   border-bottom: 1px solid {$lightblueborder};
   padding: 4px 16px;
   white-space: nowrap;
 }
 
-.aphront-dialog-head .phabricator-action-header
-  .phabricator-action-header-title {
+.aphront-dialog-head .phui-action-header
+  .phui-action-header-title {
   font-size: 15px;
   color: {$bluetext};
   text-shadow: 0 1px 2px #fff;

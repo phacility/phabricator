@@ -73,7 +73,7 @@ final class PhabricatorHovercardView extends AphrontView {
       $handle->getTypeName(),
       $this->title ? $this->title : $handle->getName());
 
-    $header = new PhabricatorActionHeaderView();
+    $header = new PHUIActionHeaderView();
     $header->setHeaderColor($this->color);
     $header->setHeaderTitle($title);
     if ($this->tags) {

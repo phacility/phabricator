@@ -1,13 +1,13 @@
 /**
- * @provides phabricator-action-header-view-css
+ * @provides phui-action-header-view-css
  */
 
-.phabricator-action-header {
+.phui-action-header {
   padding: 0 5px 0 8px;
   overflow: hidden;
 }
 
-.phabricator-action-header-title {
+.phui-action-header-title {
   color: {$darkgreytext};
   float: left;
   font-size: 14px;
@@ -18,21 +18,21 @@
   -webkit-font-smoothing: antialiased;
 }
 
-.gradient-lightblue-header .phabricator-action-header-title {
+.gradient-lightblue-header .phui-action-header-title {
   color: {$darkbluetext};
 }
 
-.phabricator-action-header-icon-list {
+.phui-action-header-icon-list {
   float: right;
   padding-top: 4px;
 }
 
-.phabricator-action-header-icon-item {
+.phui-action-header-icon-item {
   float: right;
   padding-left: 4px;
 }
 
-.phabricator-action-header-icon-item .phui-icon-view {
+.phui-action-header-icon-item .phui-icon-view {
   display: inline-block;
   font-size: 18px;
   margin: 4px 0;
@@ -40,67 +40,39 @@
   width: 18px;
 }
 
-.phabricator-action-header-icon-item .phui-tag-view {
+.phui-action-header-icon-item .phui-tag-view {
   margin: 4px 2px 0;
   display: inline-block;
 }
 
-.phabricator-action-header-link {
+.phui-action-header-link {
   color: {$darkgreytext};
 }
 
-.phabricator-action-header.gradient-green-header {
-  background: {$green};
-}
-
-.phabricator-action-header.gradient-blue-header {
-  background: {$blue};
-}
-
-.phabricator-action-header.gradient-yellow-header {
-  background: {$yellow};
-}
-
-.phabricator-action-header.gradient-red-header {
-  background: {$red};
-}
-
-.phabricator-action-header.gradient-white-header {
+.phui-action-header.gradient-white-header {
   background: #fff;
 }
 
-.phabricator-action-header.gradient-white-header .phabricator-action-header-title {
+.phui-action-header.gradient-white-header .phui-action-header-title {
   color: {$darkbluetext};
   padding: 12px 0 12px 4px;
 }
 
-.phabricator-action-header.gradient-white-header
- .phabricator-action-header-icon-list .phui-icon-view {
+.phui-action-header.gradient-white-header
+ .phui-action-header-icon-list .phui-icon-view {
   color: {$lightbluetext};
 }
 
-.phabricator-action-header.gradient-white-header
- .phabricator-action-header-icon-list .phui-icon-view:hover {
+.phui-action-header.gradient-white-header
+ .phui-action-header-icon-list .phui-icon-view:hover {
   color: {$darkbluetext};
 }
 
-.gradient-green-header .phabricator-action-header-title,
-.gradient-red-header .phabricator-action-header-title,
-.gradient-blue-header .phabricator-action-header-title,
-.gradient-yellow-header .phabricator-action-header-title,
-.gradient-green-header .phabricator-action-header-link,
-.gradient-red-header .phabricator-action-header-link,
-.gradient-blue-header .phabricator-action-header-link,
-.gradient-yellow-header .phabricator-action-header-link {
-  color: #fff;
-  -webkit-font-smoothing: antialiased;
-}
-
-.phabricator-action-header-icon-list .phui-tag-view {
+.phui-action-header-icon-list .phui-tag-view {
   font-weight: normal;
 }
 
-.phabricator-action-header-title span {
+.phui-action-header-title span {
   float: left;
   height: 16px;
   width: 16px;
@@ -109,21 +81,21 @@
 
 /* - Dashboards ------------------------------------------------------------ */
 
-.dashboard-panel .phabricator-action-header.gradient-grey-header,
-.dashboard-panel .phabricator-action-header.gradient-lightblue-header {
+.dashboard-panel .phui-action-header.gradient-grey-header,
+.dashboard-panel .phui-action-header.gradient-lightblue-header {
   border: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$thinblueborder};
 }
 
-.dashboard-panel .phabricator-action-header.gradient-white-header {
+.dashboard-panel .phui-action-header.gradient-white-header {
   border: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$thinblueborder};
   border-top-right-radius: 3px;
   border-top-left-radius: 3px;
 }
 
-.dashboard-panel .phabricator-action-header.gradient-white-header
- .phabricator-action-header-icon-list {
+.dashboard-panel .phui-action-header.gradient-white-header
+ .phui-action-header-icon-list {
   padding-top: 6px;
   padding-right: 6px;
 }

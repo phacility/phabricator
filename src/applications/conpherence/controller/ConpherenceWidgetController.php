@@ -75,8 +75,8 @@ final class ConpherenceWidgetController extends
       array(
         'class' => 'widgets-header',
       ),
-      id(new PhabricatorActionHeaderView())
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_GREY)
+      id(new PHUIActionHeaderView())
+      ->setHeaderColor(PHUIActionHeaderView::HEADER_GREY)
       ->setHeaderTitle(pht('Participants'))
       ->setHeaderHref('#')
       ->setDropdown(true)

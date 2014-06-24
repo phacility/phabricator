@@ -7,7 +7,7 @@ final class PHUIWorkpanelView extends AphrontTagView {
   private $editURI;
   private $headerAction;
   private $footerAction;
-  private $headerColor = PhabricatorActionHeaderView::HEADER_GREY;
+  private $headerColor = PHUIActionHeaderView::HEADER_GREY;
 
   public function setHeaderAction(PHUIIconView $header_action) {
     $this->headerAction = $header_action;
@@ -65,7 +65,7 @@ final class PHUIWorkpanelView extends AphrontTagView {
         ->setIconFont('fa-pencil')
         ->setHref($this->editURI);
     }
-    $header = id(new PhabricatorActionHeaderView())
+    $header = id(new PHUIActionHeaderView())
       ->setHeaderTitle($this->header)
       ->setHeaderColor($this->headerColor);
     if ($header_edit) {

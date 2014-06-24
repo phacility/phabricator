@@ -10,7 +10,7 @@ final class PHUIHeaderView extends AphrontView {
   private $image;
   private $imageURL = null;
   private $subheader;
-  private $gradient;
+  private $headerColor;
   private $noBackground;
   private $bleedHeader;
   private $properties = array();
@@ -58,8 +58,8 @@ final class PHUIHeaderView extends AphrontView {
     return $this;
   }
 
-  public function setGradient($gradient) {
-    $this->gradient = $gradient;
+  public function setHeaderColor($color) {
+    $this->headerColor = $color;
     return $this;
   }
 
@@ -121,9 +121,9 @@ final class PHUIHeaderView extends AphrontView {
       $classes[] = 'phui-bleed-header';
     }
 
-    if ($this->gradient) {
+    if ($this->headerColor) {
       $classes[] = 'sprite-gradient';
-      $classes[] = 'gradient-'.$this->gradient.'-header';
+      $classes[] = 'gradient-'.$this->headerColor.'-header';
     }
 
     if ($this->properties || $this->policyObject || $this->subheader) {

@@ -220,6 +220,18 @@ final class CelerityResourceTransformer {
       'lightbluetext'       => '#8C98B8',
       'bluetext'            => '#6B748C',
       'darkbluetext'        => '#464C5C',
+
+      // Base Greens
+      'lightgreenborder'    => '#bfdac1',
+      'greenborder'         => '#8cb89c',
+
+      // Base Red
+      'lightredborder'      => '#f4c6c6',
+      'redborder'           => '#eb9797',
+
+      // Base Violet
+      'lightvioletborder'    => '#cfbddb',
+      'violetborder'         => '#b589ba',
     );
   }
 

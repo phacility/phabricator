@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
+final class PHUIActionHeaderExample extends PhabricatorUIExample {
 
   public function getName() {
     return 'Action Headers';
@@ -16,28 +16,28 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
     $title1 = id(new PHUIHeaderView())
       ->setHeader(pht('Header Plain'));
 
-    $header1 = id(new PhabricatorActionHeaderView())
+    $header1 = id(new PHUIActionHeaderView())
       ->setHeaderTitle('Colorless');
 
-    $header2 = id(new PhabricatorActionHeaderView())
+    $header2 = id(new PHUIActionHeaderView())
       ->setHeaderTitle('Light Grey')
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_GREY);
+      ->setHeaderColor(PHUIActionHeaderView::HEADER_GREY);
 
-    $header3 = id(new PhabricatorActionHeaderView())
-      ->setHeaderTitle('Blue')
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_BLUE);
+    $header3 = id(new PHUIActionHeaderView())
+      ->setHeaderTitle('Light Blue')
+      ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTBLUE);
 
-    $header4 = id(new PhabricatorActionHeaderView())
-      ->setHeaderTitle('Green')
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_GREEN);
+    $header4 = id(new PHUIActionHeaderView())
+      ->setHeaderTitle('Light Green')
+      ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTGREEN);
 
-    $header5 = id(new PhabricatorActionHeaderView())
-      ->setHeaderTitle('Red')
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_RED);
+    $header5 = id(new PHUIActionHeaderView())
+      ->setHeaderTitle('Light Red')
+      ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTRED);
 
-    $header6 = id(new PhabricatorActionHeaderView())
-      ->setHeaderTitle('Yellow')
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_YELLOW);
+    $header6 = id(new PHUIActionHeaderView())
+      ->setHeaderTitle('Light Violet')
+      ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTVIOLET);
 
     $layout1 = id(new AphrontMultiColumnView())
       ->addColumn($header1)
@@ -57,33 +57,33 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
     $title2 = id(new PHUIHeaderView())
       ->setHeader(pht('With Policy Icons'));
 
-    $header1 = id(new PhabricatorActionHeaderView())
+    $header1 = id(new PHUIActionHeaderView())
       ->setHeaderTitle('Company')
       ->setHeaderIcon('company-dark');
 
-    $header2 = id(new PhabricatorActionHeaderView())
+    $header2 = id(new PHUIActionHeaderView())
       ->setHeaderTitle('Public')
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_GREY)
+      ->setHeaderColor(PHUIActionHeaderView::HEADER_GREY)
       ->setHeaderIcon('public-dark');
 
-    $header3 = id(new PhabricatorActionHeaderView())
+    $header3 = id(new PHUIActionHeaderView())
       ->setHeaderTitle('Restricted')
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_BLUE)
+      ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTBLUE)
       ->setHeaderIcon('restricted-white');
 
-    $header4 = id(new PhabricatorActionHeaderView())
+    $header4 = id(new PHUIActionHeaderView())
       ->setHeaderTitle('Company')
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_GREEN)
+      ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTGREEN)
       ->setHeaderIcon('company-white');
 
-    $header5 = id(new PhabricatorActionHeaderView())
+    $header5 = id(new PHUIActionHeaderView())
       ->setHeaderTitle('Public')
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_RED)
+      ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTRED)
       ->setHeaderIcon('public-white');
 
-    $header6 = id(new PhabricatorActionHeaderView())
+    $header6 = id(new PHUIActionHeaderView())
       ->setHeaderTitle('Restricted')
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_YELLOW)
+      ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTVIOLET)
       ->setHeaderIcon('restriced-white');
 
     $layout2 = id(new AphrontMultiColumnView())
@@ -110,11 +110,11 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
     $action1->setHref('#');
 
     $action2 = new PHUIIconView();
-    $action1->setIconFont('fa-heart');
+    $action2->setIconFont('fa-heart');
     $action2->setHref('#');
 
     $action3 = new PHUIIconView();
-    $action1->setIconFont('fa-tag');
+    $action3->setIconFont('fa-tag');
     $action3->setHref('#');
 
     $action4 = new PHUIIconView();
@@ -129,40 +129,40 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
     $action6->setIconFont('fa-arrows');
     $action6->setHref('#');
 
-    $header1 = id(new PhabricatorActionHeaderView())
+    $header1 = id(new PHUIActionHeaderView())
       ->setHeaderTitle('Company')
       ->setHeaderHref('http://example.com/')
       ->addAction($action1);
 
-    $header2 = id(new PhabricatorActionHeaderView())
+    $header2 = id(new PHUIActionHeaderView())
       ->setHeaderTitle('Public')
       ->setHeaderHref('http://example.com/')
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_GREY)
+      ->setHeaderColor(PHUIActionHeaderView::HEADER_GREY)
       ->addAction($action1);
 
-    $header3 = id(new PhabricatorActionHeaderView())
+    $header3 = id(new PHUIActionHeaderView())
       ->setHeaderTitle('Restricted')
       ->setHeaderHref('http://example.com/')
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_BLUE)
+      ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTBLUE)
       ->addAction($action2);
 
-    $header4 = id(new PhabricatorActionHeaderView())
+    $header4 = id(new PHUIActionHeaderView())
       ->setHeaderTitle('Company')
       ->setHeaderHref('http://example.com/')
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_GREEN)
+      ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTGREEN)
       ->addAction($action3);
 
-    $header5 = id(new PhabricatorActionHeaderView())
+    $header5 = id(new PHUIActionHeaderView())
       ->setHeaderTitle('Public')
       ->setHeaderHref('http://example.com/')
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_RED)
+      ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTRED)
       ->addAction($action4)
       ->addAction($action5);
 
-    $header6 = id(new PhabricatorActionHeaderView())
+    $header6 = id(new PHUIActionHeaderView())
       ->setHeaderTitle('Restricted')
       ->setHeaderHref('http://example.com/')
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_YELLOW)
+      ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTVIOLET)
       ->addAction($action6);
 
     $layout3 = id(new AphrontMultiColumnView())
@@ -197,34 +197,34 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
     $action1->setIconFont('fa-flag');
     $action1->setHref('#');
 
-    $header1 = id(new PhabricatorActionHeaderView())
+    $header1 = id(new PHUIActionHeaderView())
       ->setHeaderTitle('Company')
       ->setTag($tag2);
 
-    $header2 = id(new PhabricatorActionHeaderView())
+    $header2 = id(new PHUIActionHeaderView())
       ->setHeaderTitle('Public')
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_GREY)
+      ->setHeaderColor(PHUIActionHeaderView::HEADER_GREY)
       ->addAction($action1)
       ->setTag($tag1);
 
-    $header3 = id(new PhabricatorActionHeaderView())
+    $header3 = id(new PHUIActionHeaderView())
       ->setHeaderTitle('Restricted')
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_BLUE)
+      ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTBLUE)
       ->setTag($tag2);
 
-    $header4 = id(new PhabricatorActionHeaderView())
+    $header4 = id(new PHUIActionHeaderView())
       ->setHeaderTitle('Company')
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_GREEN)
+      ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTGREEN)
       ->setTag($tag1);
 
-    $header5 = id(new PhabricatorActionHeaderView())
+    $header5 = id(new PHUIActionHeaderView())
       ->setHeaderTitle('Public')
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_RED)
+      ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTRED)
       ->setTag($tag2);
 
-    $header6 = id(new PhabricatorActionHeaderView())
+    $header6 = id(new PHUIActionHeaderView())
       ->setHeaderTitle('Restricted')
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_YELLOW)
+      ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTVIOLET)
       ->setTag($tag1);
 
     $layout4 = id(new AphrontMultiColumnView())

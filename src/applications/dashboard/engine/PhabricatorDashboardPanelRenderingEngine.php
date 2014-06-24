@@ -154,16 +154,16 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
         $header = null;
         break;
       case self::HEADER_MODE_EDIT:
-        $header = id(new PhabricatorActionHeaderView())
+        $header = id(new PHUIActionHeaderView())
           ->setHeaderTitle($title)
-          ->setHeaderColor(PhabricatorActionHeaderView::HEADER_LIGHTBLUE);
+          ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTBLUE);
         $header = $this->addPanelHeaderActions($header);
         break;
       case self::HEADER_MODE_NORMAL:
       default:
-        $header = id(new PhabricatorActionHeaderView())
+        $header = id(new PHUIActionHeaderView())
           ->setHeaderTitle($title)
-          ->setHeaderColor(PhabricatorActionHeaderView::HEADER_LIGHTBLUE);
+          ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTBLUE);
         break;
     }
     $icon = id(new PHUIIconView())
@@ -209,23 +209,23 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
         $header = null;
         break;
       case self::HEADER_MODE_EDIT:
-        $header = id(new PhabricatorActionHeaderView())
+        $header = id(new PHUIActionHeaderView())
           ->setHeaderTitle($panel->getName())
-          ->setHeaderColor(PhabricatorActionHeaderView::HEADER_LIGHTBLUE);
+          ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTBLUE);
         $header = $this->addPanelHeaderActions($header);
         break;
       case self::HEADER_MODE_NORMAL:
       default:
-        $header = id(new PhabricatorActionHeaderView())
+        $header = id(new PHUIActionHeaderView())
           ->setHeaderTitle($panel->getName())
-          ->setHeaderColor(PhabricatorActionHeaderView::HEADER_LIGHTBLUE);
+          ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTBLUE);
         break;
     }
     return $header;
   }
 
   private function addPanelHeaderActions(
-    PhabricatorActionHeaderView $header) {
+    PHUIActionHeaderView $header) {
     $panel = $this->getPanel();
 
     $dashboard_id = $this->getDashboardID();
