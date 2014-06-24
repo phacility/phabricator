@@ -80,7 +80,7 @@ And this for GitPad (you may need to adjust the path):
 And this for Sublime Text (you may need to adjust the path):
 
   name=Sublime Text
-  $ arc set-config editor "\"C:\Program Files\Sublime Text 2\sublime_text.exe\" -w"
+  $ arc set-config editor "\"C:\Program Files\Sublime Text 2\sublime_text.exe\" -w -n"
 
 = Detailed PHP Install Instructions =
 
