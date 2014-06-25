@@ -50,10 +50,16 @@ final class PhabricatorProjectColumn
   }
 
   public function getDisplayName() {
+    $name = $this->getName();
+    if (strlen($name)) {
+      return $name;
+    }
+
     if ($this->isDefaultColumn()) {
       return pht('Backlog');
     }
-    return $this->getName();
+
+    return pht('Unnamed Column');
   }
 
   public function getHeaderColor() {

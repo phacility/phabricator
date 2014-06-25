@@ -21,16 +21,27 @@ final class PhabricatorProjectColumnTransaction
 
     switch ($this->getTransactionType()) {
       case PhabricatorProjectColumnTransaction::TYPE_NAME:
-        if (!strlen($old)) {
+        if ($old === null) {
           return pht(
             '%s created this column.',
             $author_handle);
         } else {
-          return pht(
-            '%s renamed this column from "%s" to "%s".',
-            $author_handle,
-            $old,
-            $new);
+          if (!strlen($old)) {
+            return pht(
+              '%s named this column "%s".',
+              $author_handle,
+              $new);
+          } else if (strlen($new)) {
+            return pht(
+              '%s renamed this column from "%s" to "%s".',
+              $author_handle,
+              $old,
+              $new);
+          } else {
+            return pht(
+              '%s removed the custom name of this column.',
+              $author_handle);
+          }
         }
       case PhabricatorProjectColumnTransaction::TYPE_STATUS:
         switch ($new) {

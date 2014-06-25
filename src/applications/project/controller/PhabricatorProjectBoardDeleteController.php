@@ -42,9 +42,16 @@ final class PhabricatorProjectBoardDeleteController
     }
 
     $column_phid = $column->getPHID();
-
     $view_uri = $this->getApplicationURI(
       '/board/'.$this->projectID.'/column/'.$this->id.'/');
+
+    if ($column->isDefaultColumn()) {
+      return $this->newDialog()
+        ->setTitle(pht('Can Not Hide Default Column'))
+        ->appendParagraph(
+          pht('You can not hide the default/backlog column on a board.'))
+        ->addCancelButton($view_uri, pht('Okay'));
+    }
 
     if ($request->isFormPost()) {
       if ($column->isHidden()) {

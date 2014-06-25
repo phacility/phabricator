@@ -54,7 +54,7 @@ final class PhabricatorProjectColumnDetailController
       ->setObjectPHID($column->getPHID())
       ->setTransactions($xactions);
 
-    $title = pht('%s', $column->getName());
+    $title = pht('%s', $column->getDisplayName());
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(
       pht('Board'),
@@ -85,7 +85,7 @@ final class PhabricatorProjectColumnDetailController
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
-      ->setHeader($column->getName())
+      ->setHeader($column->getDisplayName())
       ->setPolicyObject($column);
 
     if ($column->isHidden()) {
@@ -119,13 +119,15 @@ final class PhabricatorProjectColumnDetailController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
+    $can_hide = ($can_edit && !$column->isDefaultColumn());
+
     if (!$column->isHidden()) {
       $actions->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Hide Column'))
           ->setIcon('fa-eye-slash')
           ->setHref($this->getApplicationURI($base_uri.'delete/'.$id.'/'))
-          ->setDisabled(!$can_edit)
+          ->setDisabled(!$can_hide)
           ->setWorkflow(true));
     } else {
       $actions->addAction(
@@ -133,7 +135,7 @@ final class PhabricatorProjectColumnDetailController
           ->setName(pht('Show Column'))
           ->setIcon('fa-eye')
           ->setHref($this->getApplicationURI($base_uri.'delete/'.$id.'/'))
-          ->setDisabled(!$can_edit)
+          ->setDisabled(!$can_hide)
           ->setWorkflow(true));
     }
 
