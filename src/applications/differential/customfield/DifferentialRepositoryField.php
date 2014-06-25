@@ -152,10 +152,6 @@ final class DifferentialRepositoryField
     PhabricatorApplicationTransactionEditor $editor,
     array $xactions) {
 
-    if (!$editor->getDiffUpdateTransaction($xactions)) {
-      return;
-    }
-
     $repository = $this->getObject()->getRepository();
     if ($repository === null) {
       return;
