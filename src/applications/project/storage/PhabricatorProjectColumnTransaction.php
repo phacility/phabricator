@@ -36,11 +36,11 @@ final class PhabricatorProjectColumnTransaction
         switch ($new) {
           case PhabricatorProjectColumn::STATUS_ACTIVE:
             return pht(
-              '%s activated this column.',
+              '%s marked this column visible.',
               $author_handle);
-          case PhabricatorProjectColumn::STATUS_DELETED:
+          case PhabricatorProjectColumn::STATUS_HIDDEN:
             return pht(
-              '%s deleted this column.',
+              '%s marked this column hidden.',
               $author_handle);
         }
         break;

@@ -88,8 +88,8 @@ final class PhabricatorProjectColumnDetailController
       ->setHeader($column->getName())
       ->setPolicyObject($column);
 
-    if ($column->isDeleted()) {
-      $header->setStatus('fa-ban', 'dark', pht('Deleted'));
+    if ($column->isHidden()) {
+      $header->setStatus('fa-ban', 'dark', pht('Hidden'));
     }
 
     return $header;
@@ -113,25 +113,25 @@ final class PhabricatorProjectColumnDetailController
 
     $actions->addAction(
       id(new PhabricatorActionView())
-        ->setName(pht('Edit column'))
+        ->setName(pht('Edit Column'))
         ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI($base_uri.'edit/'.$id.'/'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-    if (!$column->isDeleted()) {
+    if (!$column->isHidden()) {
       $actions->addAction(
         id(new PhabricatorActionView())
-          ->setName(pht('Delete column'))
-          ->setIcon('fa-times')
+          ->setName(pht('Hide Column'))
+          ->setIcon('fa-eye-slash')
           ->setHref($this->getApplicationURI($base_uri.'delete/'.$id.'/'))
           ->setDisabled(!$can_edit)
           ->setWorkflow(true));
     } else {
       $actions->addAction(
         id(new PhabricatorActionView())
-          ->setName(pht('Activate column'))
-          ->setIcon('fa-play-circle-o')
+          ->setName(pht('Show Column'))
+          ->setIcon('fa-eye')
           ->setHref($this->getApplicationURI($base_uri.'delete/'.$id.'/'))
           ->setDisabled(!$can_edit)
           ->setWorkflow(true));

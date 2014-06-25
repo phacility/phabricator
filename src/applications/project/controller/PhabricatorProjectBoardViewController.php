@@ -24,6 +24,8 @@ final class PhabricatorProjectBoardViewController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
+    $show_hidden = $request->getBool('hidden');
+
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
       ->needImages(true);
@@ -39,12 +41,16 @@ final class PhabricatorProjectBoardViewController
 
     $this->setProject($project);
 
-    $columns = id(new PhabricatorProjectColumnQuery())
+    $column_query = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
-      ->withProjectPHIDs(array($project->getPHID()))
-      ->withStatuses(array(PhabricatorProjectColumn::STATUS_ACTIVE))
-      ->execute();
+      ->withProjectPHIDs(array($project->getPHID()));
 
+    if (!$show_hidden) {
+      $column_query->withStatuses(
+        array(PhabricatorProjectColumn::STATUS_ACTIVE));
+    }
+
+    $columns = $column_query->execute();
     $columns = mpull($columns, null, 'getSequence');
 
     // If there's no default column, create one now.
@@ -168,9 +174,11 @@ final class PhabricatorProjectBoardViewController
       $panel = id(new PHUIWorkpanelView())
         ->setHeader($column->getDisplayName())
         ->setHeaderColor($column->getHeaderColor());
+
       if (!$column->isDefaultColumn()) {
         $panel->setEditURI($board_uri.'column/'.$column->getID().'/');
       }
+
       $panel->setHeaderAction(id(new PHUIIconView())
         ->setIconFont('fa-plus')
         ->setHref('/maniphest/task/create/')
@@ -187,6 +195,7 @@ final class PhabricatorProjectBoardViewController
           array(
             'columnPHID' => $column->getPHID(),
           ));
+
       $task_phids = idx($task_map, $column->getPHID(), array());
       foreach (array_select_keys($tasks, $task_phids) as $task) {
         $owner = null;
@@ -282,8 +291,6 @@ final class PhabricatorProjectBoardViewController
       ->setWorkflow(true)
       ->setName(pht('Advanced Filter...'));
 
-
-
     $filter_menu = id(new PhabricatorActionListView())
         ->setUser($viewer);
     foreach ($items as $item) {
@@ -296,7 +303,6 @@ final class PhabricatorProjectBoardViewController
       ->setTag('a')
       ->setHref('#')
       ->addSigil('boards-filter-menu')
-
       ->setMetadata(
         array(
           'items' => hsprintf('%s', $filter_menu),
@@ -309,12 +315,33 @@ final class PhabricatorProjectBoardViewController
       ),
       $project->getName());
 
+    if ($show_hidden) {
+      $hidden_uri = $request->getRequestURI()
+        ->setQueryParam('hidden', null);
+      $hidden_icon = id(new PHUIIconView())
+        ->setIconFont('fa-eye-slash bluegrey');
+      $hidden_text = pht('Hide Hidden Columns');
+    } else {
+      $hidden_uri = $request->getRequestURI()
+        ->setQueryParam('hidden', 'true');
+      $hidden_icon = id(new PHUIIconView())
+        ->setIconFont('fa-eye bluegrey');
+      $hidden_text = pht('Show Hidden Columns');
+    }
+
+    $hidden_button = id(new PHUIButtonView())
+      ->setText($hidden_text)
+      ->setIcon($hidden_icon)
+      ->setTag('a')
+      ->setHref($hidden_uri);
+
     $header = id(new PHUIHeaderView())
       ->setHeader($header_link)
       ->setUser($viewer)
       ->setNoBackground(true)
       ->setImage($project->getProfileImageURI())
       ->setImageURL($this->getApplicationURI('view/'.$project->getID().'/'))
+      ->addActionLink($hidden_button)
       ->addActionLink($filter_button)
       ->addActionLink($add_button)
       ->setPolicyObject($project);
