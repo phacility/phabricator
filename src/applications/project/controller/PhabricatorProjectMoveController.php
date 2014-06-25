@@ -23,7 +23,6 @@ final class PhabricatorProjectMoveController
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
         ))
       ->withIDs(array($this->id))
       ->executeOne();
@@ -31,13 +30,14 @@ final class PhabricatorProjectMoveController
       return new Aphront404Response();
     }
 
-    // NOTE: I'm not requiring EDIT on the object for now, since we require
-    // EDIT on the project anyway and this relationship is more owned by the
-    // project than the object. Maybe this is worth revisiting eventually.
-
     $object = id(new PhabricatorObjectQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($object_phid))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->executeOne();
 
     if (!$object) {
@@ -90,7 +90,11 @@ final class PhabricatorProjectMoveController
       $tasks = id(new ManiphestTaskQuery())
         ->setViewer($viewer)
         ->withPHIDs($task_phids)
-        ->requireCapabilities(array(PhabricatorPolicyCapability::CAN_EDIT))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
         ->execute();
       if (count($tasks) != count($task_phids)) {
         return new Aphront404Response();
