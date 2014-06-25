@@ -7,7 +7,7 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => 'd4378b92',
+    'core.pkg.css' => '47277ca5',
     'core.pkg.js' => '8c184823',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '4a93db37',
@@ -107,7 +107,7 @@ return array(
     'rsrc/css/core/core.css' => '40151074',
     'rsrc/css/core/remarkup.css' => '864d4f5e',
     'rsrc/css/core/syntax.css' => '3c18c1cb',
-    'rsrc/css/core/z-index.css' => 'efb673ac',
+    'rsrc/css/core/z-index.css' => 'd1c137f2',
     'rsrc/css/diviner/diviner-shared.css' => '38813222',
     'rsrc/css/font/font-awesome.css' => '73d075c3',
     'rsrc/css/font/font-source-sans-pro.css' => '91d53463',
@@ -753,7 +753,7 @@ return array(
     'phabricator-uiexample-reactor-select' => 'a155550f',
     'phabricator-uiexample-reactor-sendclass' => '1def2711',
     'phabricator-uiexample-reactor-sendproperties' => 'b1f0ccee',
-    'phabricator-zindex-css' => 'efb673ac',
+    'phabricator-zindex-css' => 'd1c137f2',
     'phame-css' => '19ecc703',
     'pholio-css' => '47dffb9c',
     'pholio-edit-css' => '3ad9d1ee',

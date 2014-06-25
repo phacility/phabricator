@@ -96,10 +96,6 @@
   z-index: 8;
 }
 
-div.jx-typeahead-results {
-  z-index: 8;
-}
-
 .differential-haunt-mode-1 .differential-add-comment-panel,
 .differential-haunt-mode-2 .differential-add-comment-panel {
   z-index: 8;
@@ -119,6 +115,10 @@ div.jx-typeahead-results {
 
 .lightbox-attachment {
   z-index: 12;
+}
+
+div.jx-typeahead-results {
+  z-index: 13;
 }
 
 .jx-client-dialog {

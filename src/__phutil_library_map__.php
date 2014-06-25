@@ -5093,6 +5093,7 @@ phutil_register_library_map(array(
       2 => 'PhabricatorSubscribableInterface',
       3 => 'PhabricatorFlaggableInterface',
       4 => 'PhabricatorTokenReceiverInterface',
+      5 => 'PhabricatorProjectInterface',
     ),
     'PhabricatorSlowvotePollController' => 'PhabricatorSlowvoteController',
     'PhabricatorSlowvoteQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
