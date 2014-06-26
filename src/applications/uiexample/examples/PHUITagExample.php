@@ -165,6 +165,14 @@ final class PHUITagExample extends PhabricatorUIExample {
         ->setIcon('fa-tags')
         ->setName(ucwords($shade))
         ->setHref('#');
+      $tags[] = hsprintf('&nbsp;');
+      $tags[] = id(new PHUITagView())
+        ->setType(PHUITagView::TYPE_OBJECT)
+        ->setShade($shade)
+        ->setSlimShady(true)
+        ->setIcon('fa-tags')
+        ->setName(ucwords($shade))
+        ->setHref('#');
       $tags[] = hsprintf('<br /><br />');
     }
 

@@ -158,6 +158,17 @@ a.phui-tag-view:hover
   left: 6px;
 }
 
+.phui-tag-shade-slim .phui-icon-view {
+  font-size: 11px;
+  top: 3px;
+  left: 6px;
+}
+
+.phui-tag-shade-slim.phui-tag-icon-view .phui-tag-core {
+  padding-left: 20px;
+  font-size: 12px;
+}
+
 .phui-tag-shade-red .phui-tag-core {
   background-color: {$sh-redbackground};
   border-color: {$sh-lightredborder};

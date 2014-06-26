@@ -34,6 +34,7 @@ final class PHUITagView extends AphrontTagView {
   private $external;
   private $icon;
   private $shade;
+  private $slimShady;
 
   public function setType($type) {
     $this->type = $type;
@@ -90,6 +91,11 @@ final class PHUITagView extends AphrontTagView {
     return $this;
   }
 
+  public function setSlimShady($mm) {
+    $this->slimShady = $mm;
+    return $this;
+  }
+
   protected function getTagName() {
     return strlen($this->href) ? 'a' : 'span';
   }
@@ -105,8 +111,10 @@ final class PHUITagView extends AphrontTagView {
     if ($this->shade) {
       $classes[] = 'phui-tag-shade';
       $classes[] = 'phui-tag-shade-'.$this->shade;
+      if ($this->slimShady) {
+        $classes[] = 'phui-tag-shade-slim';
+      }
     }
-
 
     if ($this->icon) {
       $classes[] = 'phui-tag-icon-view';
