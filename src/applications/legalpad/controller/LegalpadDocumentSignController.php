@@ -193,19 +193,25 @@ final class LegalpadDocumentSignController extends LegalpadController {
           ->setDisabled(!$can_edit)
           ->setWorkflow(!$can_edit));
 
-    $content = array(
-      $this->buildDocument(
-        $header,
-        $engine,
-        $document_body),
-      $this->buildSignatureForm(
-        $document_body,
-        $signature,
-        $has_signed,
-        $e_name,
-        $e_email,
-        $e_address_1,
-        $error_view));
+    $signature_form = $this->buildSignatureForm(
+      $document_body,
+      $signature,
+      $has_signed,
+      $e_name,
+      $e_email,
+      $e_address_1);
+
+    $content = $this->buildDocument(
+      $header,
+      $engine,
+      $document_body);
+
+    $content->appendChild(
+      array(
+        id(new PHUIHeaderView())->setHeader(pht('Agree and Sign Document')),
+        $error_view,
+        $signature_form,
+      ));
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($document->getMonogram());
@@ -240,8 +246,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
     $has_signed = false,
     $e_name = true,
     $e_email = true,
-    $e_address_1 = true,
-    $error_view = null) {
+    $e_address_1 = true) {
 
     $viewer = $this->getRequest()->getUser();
     if ($has_signed) {
@@ -297,16 +302,10 @@ final class LegalpadDocumentSignController extends LegalpadController {
       ->appendChild(
         id(new AphrontFormSubmitControl())
         ->setValue(pht('Sign and Agree'))
-        ->setDisabled($has_signed));
+        ->setDisabled($has_signed)
+        ->addCancelButton($this->getApplicationURI()));
 
-    $view = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Sign and Agree'))
-      ->setForm($form);
-    if ($error_view) {
-      $view->setErrorView($error_view);
-    }
-
-    return $view;
+    return $form;
   }
 
   private function getVerifiedSignatureBlurb() {
