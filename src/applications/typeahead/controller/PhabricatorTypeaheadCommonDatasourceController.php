@@ -288,7 +288,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
           ->setDisplayType('Project')
           ->setURI('/project/view/'.$proj->getID().'/')
           ->setPHID($proj->getPHID())
-          ->setIcon($proj->getIcon().' '.$proj->getColor())
+          ->setIcon($proj->getIcon())
           ->setPriorityType('proj')
           ->setClosed($closed);
 
