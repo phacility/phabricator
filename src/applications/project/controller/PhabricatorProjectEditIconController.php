@@ -30,11 +30,20 @@ final class PhabricatorProjectEditIconController
     $edit_uri = $this->getApplicationURI('edit/'.$project->getID().'/');
 
     if ($request->isFormPost()) {
+      $xactions = array();
+
       $v_icon = $request->getStr('icon');
+      $v_icon_color = $request->getStr('color');
+
       $type_icon = PhabricatorProjectTransaction::TYPE_ICON;
-      $xactions = array(id(new PhabricatorProjectTransaction())
+      $xactions[] = id(new PhabricatorProjectTransaction())
         ->setTransactionType($type_icon)
-        ->setNewValue($v_icon));
+        ->setNewValue($v_icon);
+
+      $type_icon_color = PhabricatorProjectTransaction::TYPE_COLOR;
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType($type_icon_color)
+        ->setNewValue($v_icon_color);
 
       $editor = id(new PhabricatorProjectTransactionEditor())
         ->setActor($viewer)
@@ -47,6 +56,20 @@ final class PhabricatorProjectEditIconController
       return id(new AphrontReloadResponse())->setURI($edit_uri);
     }
 
+    $shades = PHUITagView::getShadeMap();
+    $shades = array_select_keys(
+      $shades,
+      array(PhabricatorProject::DEFAULT_COLOR)) + $shades;
+    unset($shades[PHUITagView::COLOR_DISABLED]);
+
+    $color_form = id(new AphrontFormView())
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Color'))
+          ->setName('color')
+          ->setValue($project->getColor())
+          ->setOptions($shades));
+
     require_celerity_resource('project-icon-css');
     Javelin::initBehavior('phabricator-tooltips');
 
@@ -55,7 +78,7 @@ final class PhabricatorProjectEditIconController
     $buttons = array();
     foreach ($project_icons as $icon => $label) {
       $view = id(new PHUIIconView())
-        ->setIconFont($icon.' bluegrey');
+        ->setIconFont($icon);
 
       $aural = javelin_tag(
         'span',
@@ -66,10 +89,8 @@ final class PhabricatorProjectEditIconController
 
       if ($icon == $project->getIcon()) {
         $class_extra = ' selected';
-        $tip = $label.pht(' - selected');
       } else {
         $class_extra = null;
-        $tip = $label;
       }
 
       $buttons[] = javelin_tag(
@@ -81,7 +102,7 @@ final class PhabricatorProjectEditIconController
           'type' => 'submit',
           'sigil' => 'has-tooltip',
           'meta' => array(
-            'tip' => $tip,
+            'tip' => $label,
           )
         ),
         array(
@@ -100,12 +121,14 @@ final class PhabricatorProjectEditIconController
       ),
       $buttons);
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
-      ->setTitle(pht('Choose Project Icon'))
-      ->appendChild($buttons)
-      ->addCancelButton($edit_uri);
+    $color_form->appendChild(
+      id(new AphrontFormMarkupControl())
+        ->setLabel(pht('Icon'))
+        ->setValue($buttons));
 
-    return id(new AphrontDialogResponse())->setDialog($dialog);
+    return $this->newDialog()
+      ->setTitle(pht('Choose Project Icon'))
+      ->appendChild($color_form->buildLayoutView())
+      ->addCancelButton($edit_uri);
   }
 }

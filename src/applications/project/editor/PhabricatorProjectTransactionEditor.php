@@ -16,6 +16,7 @@ final class PhabricatorProjectTransactionEditor
     $types[] = PhabricatorProjectTransaction::TYPE_STATUS;
     $types[] = PhabricatorProjectTransaction::TYPE_IMAGE;
     $types[] = PhabricatorProjectTransaction::TYPE_ICON;
+    $types[] = PhabricatorProjectTransaction::TYPE_COLOR;
 
     return $types;
   }
@@ -38,6 +39,8 @@ final class PhabricatorProjectTransactionEditor
         return $object->getProfileImagePHID();
       case PhabricatorProjectTransaction::TYPE_ICON:
         return $object->getIcon();
+      case PhabricatorProjectTransaction::TYPE_COLOR:
+        return $object->getColor();
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -53,6 +56,7 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_STATUS:
       case PhabricatorProjectTransaction::TYPE_IMAGE:
       case PhabricatorProjectTransaction::TYPE_ICON:
+      case PhabricatorProjectTransaction::TYPE_COLOR:
         return $xaction->getNewValue();
     }
 
@@ -78,6 +82,9 @@ final class PhabricatorProjectTransactionEditor
         return;
       case PhabricatorProjectTransaction::TYPE_ICON:
         $object->setIcon($xaction->getNewValue());
+        return;
+      case PhabricatorProjectTransaction::TYPE_COLOR:
+        $object->setColor($xaction->getNewValue());
         return;
       case PhabricatorTransactions::TYPE_EDGE:
         return;
@@ -181,6 +188,7 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_STATUS:
       case PhabricatorProjectTransaction::TYPE_IMAGE:
       case PhabricatorProjectTransaction::TYPE_ICON:
+      case PhabricatorProjectTransaction::TYPE_COLOR:
         return;
       case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $xaction->getMetadataValue('edge:type');
@@ -358,6 +366,7 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_STATUS:
       case PhabricatorProjectTransaction::TYPE_IMAGE:
       case PhabricatorProjectTransaction::TYPE_ICON:
+      case PhabricatorProjectTransaction::TYPE_COLOR:
         PhabricatorPolicyFilter::requireCapability(
           $this->requireActor(),
           $object,

@@ -211,19 +211,28 @@ final class PHUITagView extends AphrontView {
   }
 
   public static function getShades() {
+    return array_keys(self::getShadeMap());
+  }
+
+  public static function getShadeMap() {
     return array(
-      self::COLOR_RED,
-      self::COLOR_ORANGE,
-      self::COLOR_YELLOW,
-      self::COLOR_BLUE,
-      self::COLOR_INDIGO,
-      self::COLOR_VIOLET,
-      self::COLOR_GREEN,
-      self::COLOR_GREY,
-      self::COLOR_CHECKERED,
-      self::COLOR_DISABLED,
+      self::COLOR_RED => pht('Red'),
+      self::COLOR_ORANGE => pht('Orange'),
+      self::COLOR_YELLOW => pht('Yellow'),
+      self::COLOR_BLUE => pht('Blue'),
+      self::COLOR_INDIGO => pht('Indigo'),
+      self::COLOR_VIOLET => pht('Violet'),
+      self::COLOR_GREEN => pht('Green'),
+      self::COLOR_GREY => pht('Grey'),
+      self::COLOR_CHECKERED => pht('Checkered'),
+      self::COLOR_DISABLED => pht('Disabled'),
     );
   }
+
+  public static function getShadeName($shade) {
+    return idx(self::getShadeMap(), $shade, $shade);
+  }
+
 
   public function setExternal($external) {
     $this->external = $external;

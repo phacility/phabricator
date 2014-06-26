@@ -586,5 +586,4 @@ final class PHUIIconView extends AphrontTagView {
     );
   }
 
-
 }
