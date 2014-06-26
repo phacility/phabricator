@@ -171,7 +171,7 @@ final class PhabricatorRepositoryPullEngine
       $bin,
       $callsign);
 
-    $hook = "#!/bin/sh\n{$cmd}\n";
+    $hook = "#!/bin/sh\nexport TERM=dumb\n{$cmd}\n";
 
     Filesystem::writeFile($path, $hook);
     Filesystem::changePermissions($path, 0755);
