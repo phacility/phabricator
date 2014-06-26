@@ -24,4 +24,18 @@ final class PhabricatorProjectIcon extends Phobject {
     $map = self::getIconMap();
     return $map[$key];
   }
+
+  public static function renderIconForChooser($icon) {
+    $project_icons = PhabricatorProjectIcon::getIconMap();
+
+    return phutil_tag(
+      'span',
+      array(),
+      array(
+        id(new PHUIIconView())->setIconFont($icon),
+        ' ',
+        idx($project_icons, $icon, pht('Unknown Icon')),
+      ));
+  }
+
 }

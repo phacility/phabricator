@@ -40,6 +40,11 @@ JX.behavior('phabricator-tooltips', function() {
   // example, submitting an inline comment in Differential). See T4586.
   JX.Stratcom.listen('keydown', null, wipe);
 
+
+  // Hide tips on mouseup. This removes tips on buttons in dialogs after the
+  // buttons are clicked.
+  JX.Stratcom.listen('mouseup', null, wipe);
+
   // When we leave the page, hide any visible tooltips. If we don't do this,
   // clicking a link with a tooltip and then hitting "back" will give you a
   // phantom tooltip.

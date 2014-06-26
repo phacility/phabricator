@@ -465,3 +465,13 @@ table.aphront-form-control-checkbox-layout th {
 .device-desktop .text-with-submit-control-submit {
   width: 180px;
 }
+
+
+.aphront-form-choose-table td {
+  vertical-align: middle;
+  padding: 4px 0;
+}
+
+.aphront-form-choose-table .aphront-form-choose-button-cell {
+  padding: 4px 8px;
+}

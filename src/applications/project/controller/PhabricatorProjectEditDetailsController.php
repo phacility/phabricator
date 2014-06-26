@@ -48,6 +48,7 @@ final class PhabricatorProjectEditDetailsController
     unset($project_slugs[$v_primary_slug]);
     $v_slugs = $project_slugs;
     $v_color = $project->getColor();
+    $v_icon = $project->getIcon();
 
     $validation_exception = null;
 
@@ -61,6 +62,7 @@ final class PhabricatorProjectEditDetailsController
       $v_edit = $request->getStr('can_edit');
       $v_join = $request->getStr('can_join');
       $v_color = $request->getStr('color');
+      $v_icon = $request->getStr('icon');
 
       $xactions = $field_list->buildFieldTransactionsFromRequest(
         new PhabricatorProjectTransaction(),
@@ -69,6 +71,7 @@ final class PhabricatorProjectEditDetailsController
       $type_name = PhabricatorProjectTransaction::TYPE_NAME;
       $type_slugs = PhabricatorProjectTransaction::TYPE_SLUGS;
       $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
+      $type_icon = PhabricatorProjectTransaction::TYPE_ICON;
       $type_color = PhabricatorProjectTransaction::TYPE_COLOR;
 
       $xactions[] = id(new PhabricatorProjectTransaction())
@@ -90,6 +93,10 @@ final class PhabricatorProjectEditDetailsController
       $xactions[] = id(new PhabricatorProjectTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_JOIN_POLICY)
         ->setNewValue($v_join);
+
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType($type_icon)
+        ->setNewValue($v_icon);
 
       $xactions[] = id(new PhabricatorProjectTransaction())
         ->setTransactionType($type_color)
@@ -143,7 +150,18 @@ final class PhabricatorProjectEditDetailsController
       array(PhabricatorProject::DEFAULT_COLOR)) + $shades;
     unset($shades[PHUITagView::COLOR_DISABLED]);
 
+    $icon_uri = $this->getApplicationURI('icon/'.$project->getID().'/');
+    $icon_display = PhabricatorProjectIcon::renderIconForChooser($v_icon);
+
     $form
+      ->appendChild(
+        id(new AphrontFormChooseButtonControl())
+          ->setLabel(pht('Icon'))
+          ->setName('icon')
+          ->setDisplayValue($icon_display)
+          ->setButtonText(pht('Choose Icon...'))
+          ->setChooseURI($icon_uri)
+          ->setValue($v_icon))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Color'))

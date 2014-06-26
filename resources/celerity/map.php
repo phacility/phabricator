@@ -7,8 +7,8 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => 'ead20778',
-    'core.pkg.js' => '8c184823',
+    'core.pkg.css' => 'b2a7a97c',
+    'core.pkg.js' => '834b4eda',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '4a93db37',
     'differential.pkg.js' => 'd1443567',
@@ -127,7 +127,7 @@ return array(
     'rsrc/css/phui/phui-document.css' => 'a5615198',
     'rsrc/css/phui/phui-feed-story.css' => 'e2c9bc83',
     'rsrc/css/phui/phui-fontkit.css' => 'de84aa4a',
-    'rsrc/css/phui/phui-form-view.css' => 'ed856191',
+    'rsrc/css/phui/phui-form-view.css' => 'ebac1b1d',
     'rsrc/css/phui/phui-form.css' => 'b78ec020',
     'rsrc/css/phui/phui-header-view.css' => 'a2071a67',
     'rsrc/css/phui/phui-icon.css' => 'd8526aa1',
@@ -450,6 +450,7 @@ return array(
     'rsrc/js/core/behavior-active-nav.js' => 'e379b58e',
     'rsrc/js/core/behavior-audio-source.js' => '59b251eb',
     'rsrc/js/core/behavior-autofocus.js' => '7319e029',
+    'rsrc/js/core/behavior-choose-control.js' => '6153c708',
     'rsrc/js/core/behavior-crop.js' => 'fa0f4fc2',
     'rsrc/js/core/behavior-dark-console.js' => '357b6e9b',
     'rsrc/js/core/behavior-device.js' => '03d6ed07',
@@ -481,7 +482,7 @@ return array(
     'rsrc/js/core/behavior-select-on-click.js' => '4e3e79a6',
     'rsrc/js/core/behavior-toggle-class.js' => 'a82a7769',
     'rsrc/js/core/behavior-tokenizer.js' => 'b3a4b884',
-    'rsrc/js/core/behavior-tooltip.js' => '40b3be97',
+    'rsrc/js/core/behavior-tooltip.js' => '3ee3408b',
     'rsrc/js/core/behavior-watch-anchor.js' => '06e05112',
     'rsrc/js/core/behavior-workflow.js' => '0a3f3021',
     'rsrc/js/core/phtize.js' => 'd254d646',
@@ -553,6 +554,7 @@ return array(
     'javelin-behavior-audit-preview' => 'd835b03a',
     'javelin-behavior-balanced-payment-form' => '3b3e1664',
     'javelin-behavior-boards-dropdown' => '0ec56e1d',
+    'javelin-behavior-choose-control' => '6153c708',
     'javelin-behavior-config-reorder-fields' => '14a827de',
     'javelin-behavior-conpherence-menu' => 'f0a41b9f',
     'javelin-behavior-conpherence-pontificate' => '85ab3c8e',
@@ -623,7 +625,7 @@ return array(
     'javelin-behavior-phabricator-reveal-content' => '60821bc7',
     'javelin-behavior-phabricator-search-typeahead' => '5a376f34',
     'javelin-behavior-phabricator-show-all-transactions' => '7c273581',
-    'javelin-behavior-phabricator-tooltips' => '40b3be97',
+    'javelin-behavior-phabricator-tooltips' => '3ee3408b',
     'javelin-behavior-phabricator-transaction-comment-form' => '9f7309fb',
     'javelin-behavior-phabricator-transaction-list' => '71f66c08',
     'javelin-behavior-phabricator-watch-anchor' => '06e05112',
@@ -772,7 +774,7 @@ return array(
     'phui-font-icon-base-css' => 'eb84f033',
     'phui-fontkit-css' => 'de84aa4a',
     'phui-form-css' => 'b78ec020',
-    'phui-form-view-css' => 'ed856191',
+    'phui-form-view-css' => 'ebac1b1d',
     'phui-header-view-css' => 'a2071a67',
     'phui-icon-view-css' => 'd8526aa1',
     'phui-image-mask-css' => '5a8b09c8',
@@ -1133,6 +1135,13 @@ return array(
       4 => 'javelin-util',
       5 => 'javelin-uri',
     ),
+    '3ee3408b' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-behavior-device',
+      2 => 'javelin-stratcom',
+      3 => 'phabricator-tooltip',
+    ),
     '40a6a403' =>
     array(
       0 => 'javelin-install',
@@ -1151,13 +1160,6 @@ return array(
       7 => 'phuix-dropdown-menu',
       8 => 'phuix-action-list-view',
       9 => 'phuix-action-view',
-    ),
-    '40b3be97' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-behavior-device',
-      2 => 'javelin-stratcom',
-      3 => 'phabricator-tooltip',
     ),
     '41e47dea' =>
     array(
@@ -1292,6 +1294,13 @@ return array(
       0 => 'javelin-behavior',
       1 => 'javelin-stratcom',
       2 => 'javelin-dom',
+    ),
+    '6153c708' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-dom',
+      3 => 'javelin-workflow',
     ),
     '62e18640' =>
     array(

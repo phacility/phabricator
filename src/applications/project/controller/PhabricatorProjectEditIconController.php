@@ -26,34 +26,22 @@ final class PhabricatorProjectEditIconController
       return new Aphront404Response();
     }
 
-    $view_uri = '/tag/'.$project->getPrimarySlug().'/';
     $edit_uri = $this->getApplicationURI('edit/'.$project->getID().'/');
-
-    if ($request->isFormPost()) {
-      $xactions = array();
-
-      $v_icon = $request->getStr('icon');
-
-      $type_icon = PhabricatorProjectTransaction::TYPE_ICON;
-      $xactions[] = id(new PhabricatorProjectTransaction())
-        ->setTransactionType($type_icon)
-        ->setNewValue($v_icon);
-
-      $editor = id(new PhabricatorProjectTransactionEditor())
-        ->setActor($viewer)
-        ->setContentSourceFromRequest($request)
-        ->setContinueOnMissingFields(true)
-        ->setContinueOnNoEffect(true);
-
-      $editor->applyTransactions($project, $xactions);
-
-      return id(new AphrontReloadResponse())->setURI($edit_uri);
-    }
-
     require_celerity_resource('project-icon-css');
     Javelin::initBehavior('phabricator-tooltips');
 
     $project_icons = PhabricatorProjectIcon::getIconMap();
+
+    if ($request->isFormPost()) {
+      $v_icon = $request->getStr('icon');
+
+      return id(new AphrontAjaxResponse())->setContent(
+        array(
+          'value' => $v_icon,
+          'display' => PhabricatorProjectIcon::renderIconForChooser($v_icon),
+        ));
+    }
+
     $ii = 0;
     $buttons = array();
     foreach ($project_icons as $icon => $label) {
