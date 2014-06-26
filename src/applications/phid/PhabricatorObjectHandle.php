@@ -30,6 +30,10 @@ final class PhabricatorObjectHandle
     return $this->getTypeIcon();
   }
 
+  public function getIconColor() {
+    return 'bluegrey';
+  }
+
   public function getTypeIcon() {
     if ($this->getPHIDType()) {
       return $this->getPHIDType()->getTypeIcon();
@@ -253,6 +257,14 @@ final class PhabricatorObjectHandle
         'title' => $title,
       ),
       array($icon, $name));
+  }
+
+  public function renderTag() {
+    return id(new PHUITagView())
+      ->setType(PHUITagView::TYPE_OBJECT)
+      ->setIcon($this->getIcon().' '.$this->getIconColor())
+      ->setHref($this->getURI())
+      ->setName($this->getLinkName());
   }
 
   public function getLinkName() {

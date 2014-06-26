@@ -45,9 +45,19 @@ final class PhabricatorProjectUIEventListener
     if ($handles) {
       $list = array();
       foreach ($handles as $handle) {
-        $list[] = $handle->renderLink();
+        $list[] = phutil_tag(
+          'li',
+          array(
+            'class' => 'phabricator-handle-tag-list-item',
+          ),
+          $handle->renderTag());
       }
-      $list = phutil_implode_html(phutil_tag('br'), $list);
+      $list = phutil_tag(
+        'ul',
+        array(
+          'class' => 'phabricator-handle-tag-list',
+        ),
+        $list);
     } else {
       $list = phutil_tag('em', array(), pht('None'));
     }

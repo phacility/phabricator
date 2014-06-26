@@ -300,3 +300,7 @@ a.phui-tag-view:hover.phui-tag-shade-checkered .phui-tag-core {
 a.phui-tag-view:hover.phui-tag-shade-disabled .phui-tag-core {
   border-color: {$sh-disabledborder};
 }
+
+.phabricator-handle-tag-list-item + .phabricator-handle-tag-list-item {
+  margin-top: 4px;
+}
