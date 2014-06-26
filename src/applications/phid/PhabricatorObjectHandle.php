@@ -25,6 +25,10 @@ final class PhabricatorObjectHandle
   }
 
   public function getIcon() {
+    if ($this->getPolicyFiltered()) {
+      return 'fa-lock';
+    }
+
     if ($this->icon) {
       return $this->icon;
     }
@@ -45,6 +49,10 @@ final class PhabricatorObjectHandle
   }
 
   public function getTagColor() {
+    if ($this->getPolicyFiltered()) {
+      return 'disabled';
+    }
+
     if ($this->tagColor) {
       return $this->tagColor;
     }

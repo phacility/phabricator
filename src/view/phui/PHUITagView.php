@@ -1,6 +1,6 @@
 <?php
 
-final class PHUITagView extends AphrontView {
+final class PHUITagView extends AphrontTagView {
 
   const TYPE_PERSON         = 'person';
   const TYPE_OBJECT         = 'object';
@@ -32,18 +32,8 @@ final class PHUITagView extends AphrontView {
   private $dotColor;
   private $closed;
   private $external;
-  private $id;
   private $icon;
   private $shade;
-
-  public function setID($id) {
-    $this->id = $id;
-    return $this;
-  }
-
-  public function getID() {
-    return $this->id;
-  }
 
   public function setType($type) {
     $this->type = $type;
@@ -100,22 +90,56 @@ final class PHUITagView extends AphrontView {
     return $this;
   }
 
-  public function render() {
-    if (!$this->type) {
-      throw new Exception(pht('You must call setType() before render()!'));
-    }
+  protected function getTagName() {
+    return strlen($this->href) ? 'a' : 'span';
+  }
 
+  protected function getTagAttributes() {
     require_celerity_resource('phui-tag-view-css');
+
     $classes = array(
       'phui-tag-view',
       'phui-tag-type-'.$this->type,
     );
 
-    $color = null;
     if ($this->shade) {
       $classes[] = 'phui-tag-shade';
-      $classes[] = 'phui-tag-shade-'.$this->shade;;
-    } else if ($this->backgroundColor) {
+      $classes[] = 'phui-tag-shade-'.$this->shade;
+    }
+
+
+    if ($this->icon) {
+      $classes[] = 'phui-tag-icon-view';
+    }
+
+    if ($this->phid) {
+      Javelin::initBehavior('phabricator-hovercards');
+
+      $attributes = array(
+        'href'  => $this->href,
+        'sigil' => 'hovercard',
+        'meta'  => array(
+          'hoverPHID' => $this->phid,
+        ),
+        'target' => $this->external ? '_blank' : null,
+      );
+    } else {
+      $attributes = array(
+        'href'  => $this->href,
+        'target' => $this->external ? '_blank' : null,
+      );
+    }
+
+    return $attributes + array('class' => $classes);
+  }
+
+  public function getTagContent() {
+    if (!$this->type) {
+      throw new Exception(pht('You must call setType() before render()!'));
+    }
+
+    $color = null;
+    if (!$this->shade && $this->backgroundColor) {
       $color = 'phui-tag-color-'.$this->backgroundColor;
     }
 
@@ -134,7 +158,6 @@ final class PHUITagView extends AphrontView {
     if ($this->icon) {
       $icon = id(new PHUIIconView())
         ->setIconFont($this->icon);
-      $classes[] = 'phui-tag-icon-view';
     } else {
       $icon = null;
     }
@@ -155,33 +178,7 @@ final class PHUITagView extends AphrontView {
         $content);
     }
 
-    if ($this->phid) {
-      Javelin::initBehavior('phabricator-hovercards');
-
-      return javelin_tag(
-        'a',
-        array(
-          'id' => $this->id,
-          'href'  => $this->href,
-          'class' => implode(' ', $classes),
-          'sigil' => 'hovercard',
-          'meta'  => array(
-            'hoverPHID' => $this->phid,
-          ),
-          'target' => $this->external ? '_blank' : null,
-        ),
-        array($icon, $content));
-    } else {
-      return phutil_tag(
-        $this->href ? 'a' : 'span',
-        array(
-          'id' => $this->id,
-          'href'  => $this->href,
-          'class' => implode(' ', $classes),
-          'target' => $this->external ? '_blank' : null,
-        ),
-        array($icon, $content));
-    }
+    return array($icon, $content);
   }
 
   public static function getTagTypes() {

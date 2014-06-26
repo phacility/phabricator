@@ -174,7 +174,6 @@ return array(
   ),
   'maniphest.pkg.css' => array(
     'maniphest-task-summary-css',
-    'phabricator-project-tag-css',
   ),
   'maniphest.pkg.js' => array(
     'javelin-behavior-maniphest-batch-selector',

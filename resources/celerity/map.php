@@ -7,14 +7,14 @@
 return array(
   'names' =>
   array(
-    'core.pkg.css' => '3f0f5da2',
+    'core.pkg.css' => 'ead20778',
     'core.pkg.js' => '8c184823',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '4a93db37',
     'differential.pkg.js' => 'd1443567',
     'diffusion.pkg.css' => '471bc9eb',
     'diffusion.pkg.js' => 'bfc0737b',
-    'maniphest.pkg.css' => 'f88a8402',
+    'maniphest.pkg.css' => 'f5d89daf',
     'maniphest.pkg.js' => 'df4aa49f',
     'rsrc/css/aphront/aphront-bars.css' => '231ac33c',
     'rsrc/css/aphront/context-bar.css' => '1c3b0529',
@@ -95,7 +95,6 @@ return array(
     'rsrc/css/application/ponder/vote.css' => '8ed6ed8b',
     'rsrc/css/application/profile/profile-view.css' => 'b459416e',
     'rsrc/css/application/projects/project-icon.css' => 'c2ecb7f1',
-    'rsrc/css/application/projects/project-tag.css' => '095c9404',
     'rsrc/css/application/releeph/releeph-core.css' => '9b3c5733',
     'rsrc/css/application/releeph/releeph-preview-branch.css' => 'b7a6f4a5',
     'rsrc/css/application/releeph/releeph-request-differential-create-dialog.css' => '8d8b92cd',
@@ -142,7 +141,7 @@ return array(
     'rsrc/css/phui/phui-remarkup-preview.css' => '19ad512b',
     'rsrc/css/phui/phui-spacing.css' => '042804d6',
     'rsrc/css/phui/phui-status.css' => '2f562399',
-    'rsrc/css/phui/phui-tag-view.css' => '8ac14ba8',
+    'rsrc/css/phui/phui-tag-view.css' => '4f920464',
     'rsrc/css/phui/phui-text.css' => '23e9b4b7',
     'rsrc/css/phui/phui-timeline-view.css' => 'bbd990d0',
     'rsrc/css/phui/phui-workboard-view.css' => '2bf82d00',
@@ -731,7 +730,6 @@ return array(
     'phabricator-phtize' => 'd254d646',
     'phabricator-prefab' => '41ed7994',
     'phabricator-profile-css' => 'b459416e',
-    'phabricator-project-tag-css' => '095c9404',
     'phabricator-remarkup-css' => '864d4f5e',
     'phabricator-search-results-css' => 'f240504c',
     'phabricator-shaped-request' => '7cbe244b',
@@ -787,7 +785,7 @@ return array(
     'phui-remarkup-preview-css' => '19ad512b',
     'phui-spacing-css' => '042804d6',
     'phui-status-list-view-css' => '2f562399',
-    'phui-tag-view-css' => '8ac14ba8',
+    'phui-tag-view-css' => '4f920464',
     'phui-text-css' => '23e9b4b7',
     'phui-timeline-view-css' => 'bbd990d0',
     'phui-workboard-view-css' => '2bf82d00',
@@ -2322,7 +2320,6 @@ return array(
     'maniphest.pkg.css' =>
     array(
       0 => 'maniphest-task-summary-css',
-      1 => 'phabricator-project-tag-css',
     ),
     'maniphest.pkg.js' =>
     array(

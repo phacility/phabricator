@@ -304,3 +304,32 @@ a.phui-tag-view:hover.phui-tag-shade-disabled .phui-tag-core {
 .phabricator-handle-tag-list-item + .phabricator-handle-tag-list-item {
   margin-top: 4px;
 }
+
+.phui-object-item .phui-tag-view .phui-tag-core {
+  display: inline-block;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.phui-object-item .phui-tag-icon-view .phui-tag-core {
+  padding-left: 20px;
+}
+
+.phui-object-item .phui-tag-view .phui-icon-view {
+  font-size: 11px;
+  top: 3px;
+  left: 5px;
+}
+
+.phui-object-item .phabricator-handle-tag-list {
+  display: inline-block;
+}
+
+.phui-object-item .phabricator-handle-tag-list-item {
+  display: inline-block;
+}
+
+.phui-object-item .phabricator-handle-tag-list-item +
+  .phabricator-handle-tag-list-item {
+  margin: 0 0 0 4px;
+}
