@@ -90,6 +90,12 @@
   background: rgba(255,255,255,.7);
 }
 
+.phui-workpanel-view .phui-workpanel-lightred .phui-action-header {
+  border-top: 1px solid {$redborder};
+  border-left: 1px solid {$redborder};
+  border-right: 1px solid {$redborder};
+}
+
 /* - Workpanel Cards -----------------------------------------------------------
 
   Slight display changes for how cards work in tight spaces
