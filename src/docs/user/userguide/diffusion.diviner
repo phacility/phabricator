@@ -88,50 +88,8 @@ notes in @{article:Managing Daemons with phd}.
 
 You can use the repository detail screen and the Daemon Console to monitor the
 daemons and their progress importing the repository. Small repositories should
-import quickly, while larger repositories may take some time (it takes about 10
-minutes to begin discovering commits in Facebook's 350,000-commit primary
-repository, and about 18 hours to import it all with 64 taskmasters on modern
-hardware). Commits should begin appearing in Diffusion within a few minutes for
-all but the largest repositories.
-
-== Tuning Daemons ==
-
-By default, Phabricator launches one daemon to pull and discover all of the
-tracked repositories. This works well for a small number of repositories or
-a large number of relatively inactive repositories, but might benefit from
-tuning in some cases. The daemon makes a rough effort to respect pull
-frequencies defined in repository configuration, but may not be able to import
-new commits very quickly if you have a large number of repositories (as it is
-blocked waiting on I/O from other repositories).
-
-If you want to provide lower commit import latency for some repositories, you
-can either launch **more daemons** (which will generally lower latency for all
-repositories) or launch additional **dedicated daemons** (which will give you
-very fine-grained control over import latency).
-
-=== More Daemons ===
-
-The coarse approach to reducing import latency is to simply launch more daemons,
-using `phd`:
-
-  phabricator/bin $ ./phd launch RepositoryPullLocal
-
-This will launch another copy of the daemon. The daemons acquire a global lock
-before pulling a repository, so you can launch additional daemons without
-causing contention or race conditions.
-
-=== Dedicated Daemons ===
-
-You can take a more fine-grained approach and launch dedicated daemons for
-specific repositories or groups of repositories. For example, if you want low
-latency on the repositories with callsigns `A` and `B`, but don't care about
-latency for the other repositories, you could launch two daemons like this:
-
-  phabricator/bin $ ./phd launch RepositoryPullLocal -- A B
-  phabricator/bin $ ./phd launch RepositoryPullLocal -- --not A --not B
-
-The first one will work only on `A` and `B`, and should be able to import
-commits with low latency more reliably. The second one will work on all other
+import quickly, while larger repositories may take some time. Commits should
+begin appearing in Diffusion within a few minutes for all but the largest
 repositories.
 
 = Next Steps =
