@@ -149,7 +149,7 @@ relative path like this:
 ...arc looks for it by trying these paths:
 
   - `path/to/root/examplelib/src/` First, arc looks in the project's root
-    directory (where the .arcconfig lives) to see if the library is part of
+    directory (where the `.arcconfig` lives) to see if the library is part of
     the project. This makes it easy to just put project-specific code in a
     project.
   - `path/to/root/../examplelib/src/` Next, arc looks //next to// the project's
