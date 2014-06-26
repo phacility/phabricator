@@ -47,6 +47,7 @@ final class PhabricatorProjectEditDetailsController
     $v_primary_slug = $project->getPrimarySlug();
     unset($project_slugs[$v_primary_slug]);
     $v_slugs = $project_slugs;
+    $v_color = $project->getColor();
 
     $validation_exception = null;
 
@@ -59,6 +60,7 @@ final class PhabricatorProjectEditDetailsController
       $v_view = $request->getStr('can_view');
       $v_edit = $request->getStr('can_edit');
       $v_join = $request->getStr('can_join');
+      $v_color = $request->getStr('color');
 
       $xactions = $field_list->buildFieldTransactionsFromRequest(
         new PhabricatorProjectTransaction(),
@@ -67,6 +69,7 @@ final class PhabricatorProjectEditDetailsController
       $type_name = PhabricatorProjectTransaction::TYPE_NAME;
       $type_slugs = PhabricatorProjectTransaction::TYPE_SLUGS;
       $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
+      $type_color = PhabricatorProjectTransaction::TYPE_COLOR;
 
       $xactions[] = id(new PhabricatorProjectTransaction())
         ->setTransactionType($type_name)
@@ -87,6 +90,10 @@ final class PhabricatorProjectEditDetailsController
       $xactions[] = id(new PhabricatorProjectTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_JOIN_POLICY)
         ->setNewValue($v_join);
+
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType($type_color)
+        ->setNewValue($v_color);
 
       $editor = id(new PhabricatorProjectTransactionEditor())
         ->setActor($viewer)
@@ -130,7 +137,19 @@ final class PhabricatorProjectEditDetailsController
           ->setError($e_name));
     $field_list->appendFieldsToForm($form);
 
+    $shades = PHUITagView::getShadeMap();
+    $shades = array_select_keys(
+      $shades,
+      array(PhabricatorProject::DEFAULT_COLOR)) + $shades;
+    unset($shades[PHUITagView::COLOR_DISABLED]);
+
     $form
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Color'))
+          ->setName('color')
+          ->setValue($v_color)
+          ->setOptions($shades))
       ->appendChild(
         id(new AphrontFormStaticControl())
         ->setLabel(pht('Primary Hashtag'))
