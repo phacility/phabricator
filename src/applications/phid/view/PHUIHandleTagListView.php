@@ -6,6 +6,7 @@ final class PHUIHandleTagListView extends AphrontTagView {
   private $annotations = array();
   private $limit;
   private $noDataString;
+  private $slim;
 
   public function setHandles(array $handles) {
     $this->handles = $handles;
@@ -24,6 +25,11 @@ final class PHUIHandleTagListView extends AphrontTagView {
 
   public function setNoDataString($no_data) {
     $this->noDataString = $no_data;
+    return $this;
+  }
+
+  public function setSlim($slim) {
+    $this->slim = true;
     return $this;
   }
 
@@ -55,9 +61,13 @@ final class PHUIHandleTagListView extends AphrontTagView {
 
     $list = array();
     foreach ($handles as $handle) {
+      $tag = $handle->renderTag();
+      if ($this->slim) {
+        $tag->setSlimShady(true);
+      }
       $list[] = $this->newItem(
         array(
-          $handle->renderTag(),
+          $tag,
           idx($this->annotations, $handle->getPHID(), null),
         ));
     }
@@ -94,7 +104,8 @@ final class PHUIHandleTagListView extends AphrontTagView {
   private function newPlaceholderTag() {
     return id(new PHUITagView())
       ->setType(PHUITagView::TYPE_OBJECT)
-      ->setShade(PHUITagView::COLOR_DISABLED);
+      ->setShade(PHUITagView::COLOR_DISABLED)
+      ->setSlimShady($this->slim);
   }
 
 }
