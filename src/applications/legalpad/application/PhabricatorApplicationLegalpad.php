@@ -45,7 +45,7 @@ final class PhabricatorApplicationLegalpad extends PhabricatorApplication {
         'create/' => 'LegalpadDocumentEditController',
         'edit/(?P<id>\d+)/' => 'LegalpadDocumentEditController',
         'comment/(?P<id>\d+)/' => 'LegalpadDocumentCommentController',
-        'view/(?P<id>\d+)/' => 'LegalpadDocumentViewController',
+        'view/(?P<id>\d+)/' => 'LegalpadDocumentManageController',
         'verify/(?P<code>[^/]+)/' =>
         'LegalpadDocumentSignatureVerificationController',
         'signatures/(?P<id>\d+)/' => 'LegalpadDocumentSignatureListController',

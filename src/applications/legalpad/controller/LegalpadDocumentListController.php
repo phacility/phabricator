@@ -18,4 +18,16 @@ final class LegalpadDocumentListController extends LegalpadController {
     return $this->delegateToController($controller);
   }
 
+  public function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+        ->setName(pht('Create Document'))
+        ->setHref($this->getApplicationURI('create/'))
+        ->setIcon('fa-plus-square'));
+
+    return $crumbs;
+  }
+
 }

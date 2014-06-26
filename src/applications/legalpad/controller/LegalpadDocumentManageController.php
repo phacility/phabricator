@@ -1,9 +1,6 @@
 <?php
 
-/**
- * @group legalpad
- */
-final class LegalpadDocumentViewController extends LegalpadController {
+final class LegalpadDocumentManageController extends LegalpadController {
 
   private $id;
 
@@ -15,13 +12,19 @@ final class LegalpadDocumentViewController extends LegalpadController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    // NOTE: We require CAN_EDIT to view this page.
+
     $document = id(new LegalpadDocumentQuery())
       ->setViewer($user)
       ->withIDs(array($this->id))
       ->needDocumentBodies(true)
       ->needContributors(true)
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->executeOne();
-
     if (!$document) {
       return new Aphront404Response();
     }
@@ -83,7 +86,8 @@ final class LegalpadDocumentViewController extends LegalpadController {
     $crumbs->setActionList($actions);
     $crumbs->addTextCrumb(
       $document->getMonogram(),
-      $this->getApplicationURI('view/'.$document->getID()));
+      '/'.$document->getMonogram());
+    $crumbs->addTextCrumb(pht('Manage'));
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -136,17 +140,17 @@ final class LegalpadDocumentViewController extends LegalpadController {
 
     $actions->addAction(
       id(new PhabricatorActionView())
+      ->setIcon('fa-pencil-square')
+      ->setName(pht('View/Sign Document'))
+      ->setHref('/'.$document->getMonogram()));
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
         ->setName(pht('Edit Document'))
         ->setHref($this->getApplicationURI('/edit/'.$doc_id.'/'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
-
-    $actions->addAction(
-      id(new PhabricatorActionView())
-      ->setIcon('fa-pencil-square')
-      ->setName(pht('Sign Document'))
-      ->setHref('/'.$document->getMonogram()));
 
     $actions->addAction(
       id(new PhabricatorActionView())
