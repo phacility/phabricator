@@ -222,16 +222,89 @@ final class CelerityResourceTransformer {
       'darkbluetext'        => '#464C5C',
 
       // Base Greens
-      'lightgreenborder'    => '#bfdac1',
-      'greenborder'         => '#8cb89c',
+      'lightgreenborder'      => '#bfdac1',
+      'greenborder'           => '#8cb89c',
+      'greentext'             => '#3e6d35',
+      'lightgreenbackground'  => '#e6f2e4',
 
       // Base Red
-      'lightredborder'      => '#f4c6c6',
-      'redborder'           => '#eb9797',
+      'lightredborder'        => '#f4c6c6',
+      'redborder'             => '#eb9797',
+      'redtext'               => '#802b2b',
+      'lightredbackground'    => '#f5e1e1',
 
       // Base Violet
-      'lightvioletborder'    => '#cfbddb',
-      'violetborder'         => '#b589ba',
+      'lightvioletborder'     => '#cfbddb',
+      'violetborder'          => '#b589ba',
+      'violettext'            => '#603c73',
+      'lightvioletbackground' => '#e9dfee',
+
+      // Shades are a more muted set of our base colors
+      // better suited to blending into other UIs.
+
+      // Shade Red
+      'sh-lightredborder'     => '#eac0c0',
+      'sh-redborder'          => '#d1abab',
+      'sh-redicon'            => '#c85a5a',
+      'sh-redtext'            => '#a53737',
+      'sh-redbackground'      => '#f7e6e6',
+
+      // Shade Orange
+      'sh-lightorangeborder'  => '#f6d0b1',
+      'sh-orangeborder'       => '#dbb99e',
+      'sh-orangeicon'         => '#e78331',
+      'sh-orangetext'         => '#ba6016',
+      'sh-orangebackground'   => '#fbede1',
+
+      // Shade Yellow
+      'sh-lightyellowborder'  => '#e2cfbd',
+      'sh-yellowborder'       => '#c9b8a8',
+      'sh-yellowicon'         => '#9b946e',
+      'sh-yellowtext'         => '#726f56',
+      'sh-yellowbackground'   => '#fdf3da',
+
+      // Shade Green
+      'sh-lightgreenborder'   => '#b4ddb5',
+      'sh-greenborder'        => '#a0c4a1',
+      'sh-greenicon'          => '#4ca74e',
+      'sh-greentext'          => '#326d34',
+      'sh-greenbackground'    => '#ddefdd',
+
+      // Shade Blue
+      'sh-lightblueborder'    => '#bfcfda',
+      'sh-blueborder'         => '#a7b5bf',
+      'sh-blueicon'           => '#6b748c',
+      'sh-bluetext'           => '#464c5c',
+      'sh-bluebackground'     => '#dee7f8',
+
+      // Shade Indigo
+      'sh-lightindigoborder'  => '#f3c7ea',
+      'sh-indigoborder'       => '#d5aecd',
+      'sh-indigoicon'         => '#e26fcb',
+      'sh-indigotext'         => '#da49be',
+      'sh-indigobackground'   => '#fbeaf8',
+
+      // Shade Violet
+      'sh-lightvioletborder'  => '#d5c2df',
+      'sh-violetborder'       => '#bcabc5',
+      'sh-violeticon'         => '#9260ad',
+      'sh-violettext'         => '#69427f',
+      'sh-violetbackground'   => '#efe8f3',
+
+      // Shade Grey
+      'sh-lightgreyborder'    => '#cbcbcb',
+      'sh-greyborder'         => '#b2b2b2',
+      'sh-greyicon'           => '#757575',
+      'sh-greytext'           => '#555555',
+      'sh-greybackground'     => '#e7e7e7',
+
+      // Shade Disabled
+      'sh-lightdisabledborder'  => '#e5e5e5',
+      'sh-disabledborder'       => '#cbcbcb',
+      'sh-disabledicon'         => '#bababa',
+      'sh-disabledtext'         => '#a6a6a6',
+      'sh-disabledbackground'   => '#f3f3f3',
+
     );
   }
 

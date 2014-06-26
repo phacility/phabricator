@@ -19,6 +19,7 @@ final class PHUITagView extends AphrontView {
   const COLOR_WHITE         = 'white';
   const COLOR_BLUEGREY      = 'bluegrey';
   const COLOR_CHECKERED     = 'checkered';
+  const COLOR_DISABLED      = 'disabled';
 
   const COLOR_OBJECT        = 'object';
   const COLOR_PERSON        = 'person';
@@ -113,7 +114,7 @@ final class PHUITagView extends AphrontView {
     $color = null;
     if ($this->shade) {
       $classes[] = 'phui-tag-shade';
-      $color = 'phui-tag-shade-'.$this->shade;
+      $classes[] = 'phui-tag-shade-'.$this->shade;;
     } else if ($this->backgroundColor) {
       $color = 'phui-tag-color-'.$this->backgroundColor;
     }
@@ -132,7 +133,7 @@ final class PHUITagView extends AphrontView {
 
     if ($this->icon) {
       $icon = id(new PHUIIconView())
-        ->setIconFont($this->icon, $this->shade);
+        ->setIconFont($this->icon);
       $classes[] = 'phui-tag-icon-view';
     } else {
       $icon = null;
@@ -218,10 +219,9 @@ final class PHUITagView extends AphrontView {
       self::COLOR_INDIGO,
       self::COLOR_VIOLET,
       self::COLOR_GREEN,
-      self::COLOR_BLACK,
       self::COLOR_GREY,
-      self::COLOR_BLUEGREY,
       self::COLOR_CHECKERED,
+      self::COLOR_DISABLED,
     );
   }
 
