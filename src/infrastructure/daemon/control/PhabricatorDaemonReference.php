@@ -12,7 +12,13 @@ final class PhabricatorDaemonReference {
 
   public static function newFromFile($path) {
     $pid_data = Filesystem::readFile($path);
-    $dict = phutil_json_decode($pid_data);
+
+    try {
+      $dict = phutil_json_decode($pid_data);
+    } catch (PhutilJSONParserException $ex) {
+      $dict = array();
+    }
+
     $ref = self::newFromDictionary($dict);
     $ref->pidFile = $path;
     return $ref;
