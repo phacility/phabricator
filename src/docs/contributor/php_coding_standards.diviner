@@ -1,7 +1,8 @@
 @title PHP Coding Standards
 @group standards
 
-This document describes PHP coding standards for Phabricator and related projects (like Arcanist and libphutil).
+This document describes PHP coding standards for Phabricator and related
+projects (like Arcanist and libphutil).
 
 = Overview =
 

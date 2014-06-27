@@ -48,7 +48,7 @@
   background-color: {$lightred};
 }
 
-.phabricator-remarkup tt {
+.phabricator-remarkup tt.remarkup-monospaced {
   color: #333333;
   background: #ebebeb;
   padding: 0 4px;
@@ -57,16 +57,16 @@
 
 /* NOTE: You can currently produce this with [[link | `name`]]. Restore the
    link color. */
-.phabricator-remarkup a tt {
+.phabricator-remarkup a tt.remarkup-monospaced {
   color: #18559d;
 }
 
-.phabricator-remarkup ul {
+.phabricator-remarkup ul.remarkup-list {
   list-style: disc;
   margin: 12px 0 12px 30px;
 }
 
-.phabricator-remarkup ol {
+.phabricator-remarkup ol.remarkup-list {
   list-style: decimal;
   margin: 12px 0 12px 30px;
 }
@@ -84,10 +84,10 @@
   color: {$greytext};
 }
 
-.phabricator-remarkup ul ol,
-.phabricator-remarkup ul ul,
-.phabricator-remarkup ol ol,
-.phabricator-remarkup ol ul {
+.phabricator-remarkup ul.remarkup-list ol.remarkup-list,
+.phabricator-remarkup ul.remarkup-list ul.remarkup-list,
+.phabricator-remarkup ol.remarkup-list ol.remarkup-list,
+.phabricator-remarkup ol.remarkup-list ul.remarkup-list {
   margin: 4px 0 4px 24px;
 }
 
@@ -96,55 +96,55 @@
   list-style-type: none;
 }
 
-.phabricator-remarkup h1:first-child,
-.phabricator-remarkup h2:first-child,
-.phabricator-remarkup h3:first-child,
-.phabricator-remarkup h4:first-child,
-.phabricator-remarkup h5:first-child,
-.phabricator-remarkup h6:first-child {
+.phabricator-remarkup h1.remarkup-header:first-child,
+.phabricator-remarkup h2.remarkup-header:first-child,
+.phabricator-remarkup h3.remarkup-header:first-child,
+.phabricator-remarkup h4.remarkup-header:first-child,
+.phabricator-remarkup h5.remarkup-header:first-child,
+.phabricator-remarkup h6.remarkup-header:first-child {
   margin-top: 0;
 }
 
-.phabricator-remarkup h1:last-child,
-.phabricator-remarkup h2:last-child,
-.phabricator-remarkup h3:last-child,
-.phabricator-remarkup h4:last-child,
-.phabricator-remarkup h5:last-child,
-.phabricator-remarkup h6:last-child {
+.phabricator-remarkup h1.remarkup-header:last-child,
+.phabricator-remarkup h2.remarkup-header:last-child,
+.phabricator-remarkup h3.remarkup-header:last-child,
+.phabricator-remarkup h4.remarkup-header:last-child,
+.phabricator-remarkup h5.remarkup-header:last-child,
+.phabricator-remarkup h6.remarkup-header:last-child {
   margin-bottom: 0;
 }
 
-.phabricator-remarkup h1 {
+.phabricator-remarkup h1.remarkup-header {
   font-size: 1.625em;
   line-height: 1.625em;
   margin: 8px 0;
 }
 
-.phabricator-remarkup h2 {
+.phabricator-remarkup h2.remarkup-header {
   font-size: 1.5em;
   line-height: 1.5em;
   margin: 8px 0;
 }
 
-.phabricator-remarkup h3 {
+.phabricator-remarkup h3.remarkup-header {
   font-size: 1.375em;
   line-height: 1.375em;
   margin: 8px 0;
 }
 
-.phabricator-remarkup h4 {
+.phabricator-remarkup h4.remarkup-header {
   font-size: 1.25em;
   line-height: 1.25em;
   margin: 8px 0;
 }
 
-.phabricator-remarkup h5 {
+.phabricator-remarkup h5.remarkup-header {
   font-size: 1.125em;
   line-height: 1.125em;
   margin: 4px 0;
 }
 
-.phabricator-remarkup h6 {
+.phabricator-remarkup h6.remarkup-header {
   font-size: 1em;
   line-height: 1em;
   margin: 4px 0;
@@ -299,6 +299,10 @@
 
 .phabricator-remarkup-embed-image-full {
   display: inline-block;
+}
+
+.phabricator-remarkup-embed-image-full img {
+  max-width: 100%;
 }
 
 .phabricator-remarkup table.remarkup-table {

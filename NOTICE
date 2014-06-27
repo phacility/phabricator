@@ -1,7 +1,21 @@
 Phabricator
-Copyright 2013 Facebook, Inc.
+Copyright 2014 Phacility, Inc.
 
-This product includes software developed at
-Facebook, Inc. (http://www.facebook.com/facebook).
+This software is primarily developed and maintained by Phacility, Inc.
 
-Libraries in externals/ have their own licenses and copyright holders.
+  http://www.phacility.com/
+
+Portions of this software were developed by various contributors, who retain
+copyright on their work. These works are licensed to Phacility, Inc.
+
+Phabricator is available under the Apache 2.0 license. See LICENSE for more
+information.
+
+Phabricator and Phacility are trademarks of Phacility, Inc. For additional
+information about trademarks that pertain to this software, see:
+
+  http://www.phacility.com/trademarks/
+
+This software uses other open source libraries, which are located in
+"externals/" and "webroot/rsrc/externals/". These libraries have their own
+licenses and copyright holders.

@@ -45,7 +45,6 @@ final class PhabricatorCalendarEventViewController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

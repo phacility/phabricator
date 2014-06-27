@@ -76,7 +76,7 @@ final class PhragmentUpdateController extends PhragmentController {
         $box),
       array(
         'title' => pht('Update Fragment'),
-        'device' => true));
+      ));
   }
 
 }

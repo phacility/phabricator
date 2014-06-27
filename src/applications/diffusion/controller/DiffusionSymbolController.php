@@ -148,7 +148,6 @@ final class DiffusionSymbolController extends DiffusionController {
       ),
       array(
         'title' => pht('Find Symbol'),
-        'device' => true,
       ));
   }
 

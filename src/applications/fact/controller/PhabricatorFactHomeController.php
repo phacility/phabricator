@@ -68,6 +68,7 @@ final class PhabricatorFactHomeController extends PhabricatorFactController {
       ),
       array(
         'title' => 'Facts',
+        'device' => false,
       ));
   }
 

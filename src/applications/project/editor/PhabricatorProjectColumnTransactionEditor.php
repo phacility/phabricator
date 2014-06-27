@@ -81,7 +81,10 @@ final class PhabricatorProjectColumnTransactionEditor
           $object->getName(),
           $xactions);
 
-        if ($missing) {
+        // The default "Backlog" column is allowed to be unnamed, which
+        // means we use the default name.
+
+        if ($missing && !$object->isDefaultColumn()) {
           $error = new PhabricatorApplicationTransactionValidationError(
             $type,
             pht('Required'),

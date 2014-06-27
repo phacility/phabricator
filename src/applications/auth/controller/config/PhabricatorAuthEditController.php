@@ -335,7 +335,6 @@ final class PhabricatorAuthEditController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

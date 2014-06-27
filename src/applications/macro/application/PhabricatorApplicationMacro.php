@@ -38,6 +38,12 @@ final class PhabricatorApplicationMacro extends PhabricatorApplication {
     );
   }
 
+  public function getRemarkupRules() {
+    return array(
+      new PhabricatorRemarkupRuleIcon(),
+    );
+  }
+
   protected function getCustomCapabilities() {
     return array(
       PhabricatorMacroCapabilityManage::CAPABILITY => array(

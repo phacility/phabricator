@@ -29,7 +29,7 @@
   border-bottom: 1px solid {$thinblueborder};
 }
 
-.phabricator-hovercard-head .phabricator-action-header {
+.phabricator-hovercard-head .phui-action-header {
   border-top-right-radius: 3px;
   border-top-left-radius: 3px;
 }

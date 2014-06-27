@@ -90,7 +90,7 @@ JX.behavior('dark-console', function(config, statics) {
     if (!color) {
       return null;
     }
-    return JX.$N('span', {style: {color: color}}, "\u2022");
+    return JX.$N('span', {style: {color: color}}, '\u2022');
   }
 
 

@@ -532,15 +532,20 @@ final class ManiphestTaskSearchEngine
 
     $viewer = $this->requireViewer();
 
-    $can_edit_priority = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $this->getApplication(),
-      ManiphestCapabilityEditPriority::CAPABILITY);
+    if ($this->isPanelContext()) {
+      $can_edit_priority = false;
+      $can_bulk_edit = false;
+    } else {
+      $can_edit_priority = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $this->getApplication(),
+        ManiphestCapabilityEditPriority::CAPABILITY);
 
-    $can_bulk_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $this->getApplication(),
-      ManiphestCapabilityBulkEdit::CAPABILITY);
+      $can_bulk_edit = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $this->getApplication(),
+        ManiphestCapabilityBulkEdit::CAPABILITY);
+    }
 
     return id(new ManiphestTaskResultListView())
       ->setUser($viewer)

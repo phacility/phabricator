@@ -744,7 +744,6 @@ final class ManiphestTaskEditController extends ManiphestController {
       array(
         'title' => $header_name,
         'pageObjects' => $page_objects,
-        'device' => true,
       ));
   }
 }

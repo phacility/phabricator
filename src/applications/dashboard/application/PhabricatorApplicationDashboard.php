@@ -53,10 +53,6 @@ final class PhabricatorApplicationDashboard extends PhabricatorApplication {
     );
   }
 
-  public function isBeta() {
-    return true;
-  }
-
   public function canUninstall() {
     return false;
   }

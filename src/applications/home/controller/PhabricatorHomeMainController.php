@@ -21,6 +21,14 @@ final class PhabricatorHomeMainController
       $user,
       $user->getPHID(),
       get_class($this->getCurrentApplication()));
+
+    if (!$dashboard) {
+      $dashboard = PhabricatorDashboardInstall::getDashboard(
+        $user,
+        PhabricatorApplicationHome::DASHBOARD_DEFAULT,
+        get_class($this->getCurrentApplication()));
+    }
+
     if ($dashboard) {
       $content = id(new PhabricatorDashboardRenderingEngine())
         ->setViewer($user)
@@ -49,7 +57,6 @@ final class PhabricatorHomeMainController
       $content,
       array(
         'title' => 'Phabricator',
-        'device' => true,
       ));
   }
 

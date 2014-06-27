@@ -136,7 +136,6 @@ final class PhabricatorConduitConsoleController
       ),
       array(
         'title' => $method->getAPIMethodName(),
-        'device' => true,
       ));
   }
 

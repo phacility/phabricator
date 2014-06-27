@@ -80,7 +80,6 @@ final class DiffusionRepositoryNewController
       ),
       array(
         'title' => pht('New Repository'),
-        'device' => true,
       ));
   }
 

@@ -19,7 +19,7 @@ JX.behavior('aphront-drag-and-drop-textarea', function(config) {
     // reference, append the new reference if the selected text looks like an
     // existing file reference.
     if (text.match(/^\{F/)) {
-      ref = text + "\n\n" + ref;
+      ref = text + '\n\n' + ref;
     }
 
     JX.TextAreaUtils.setSelectionText(target, ref);

@@ -379,7 +379,6 @@ final class PhabricatorConduitAPIController
       ),
       array(
         'title' => 'Method Call Result',
-        'device' => true,
       ));
   }
 

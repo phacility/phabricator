@@ -56,6 +56,7 @@ final class PhabricatorSearchHovercardController
       return $this->buildApplicationPage(
         $cards,
         array(
+          'device' => false,
         ));
     } else {
       return id(new AphrontAjaxResponse())->setContent(

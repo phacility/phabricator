@@ -74,7 +74,6 @@ final class DrydockBlueprintCreateController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

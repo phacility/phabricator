@@ -44,7 +44,6 @@ final class PhabricatorDashboardHistoryController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

@@ -25,16 +25,31 @@ final class PhabricatorNotificationPanelController
         pht('You have no notifications.'));
     }
 
+    $notifications_link = phutil_tag(
+      'a',
+      array(
+        'href' => '/notification/',
+      ),
+      pht('Notifications'));
+
+    $connection_status = new PhabricatorNotificationStatusView();
+
+    $header = phutil_tag(
+      'div',
+      array(
+        'class' => 'phabricator-notification-header',
+      ),
+      array(
+        $connection_status,
+        $notifications_link,
+      ));
+
     $content = hsprintf(
-      '<div class="phabricator-notification-header">%s %s</div>'.
       '%s'.
-      '<div class="phabricator-notification-view-all">%s</div>',
-      phutil_tag(
-        'a',
-        array(
-          'href' => '/notification/',
-        ),
-        pht('Notifications')),
+      '%s'.
+      '<div class="phabricator-notification-view-all">%s %s %s</div>',
+      $header,
+      $content,
       javelin_tag(
         'a',
         array(
@@ -43,7 +58,7 @@ final class PhabricatorNotificationPanelController
           'class' => 'phabricator-notification-clear-all'
         ),
         pht('Mark All Read')),
-      $content,
+      " \xC2\xB7 ",
       phutil_tag(
         'a',
         array(

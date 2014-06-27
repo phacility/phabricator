@@ -48,6 +48,9 @@ package {
     private var socket:Socket;
     private var readBuffer:ByteArray;
 
+    private var status:String;
+    private var statusCode:String;
+
 
     public function AphlictMaster(server:String, port:Number) {
       super();
@@ -75,6 +78,8 @@ package {
       if (!this.clients[client]) {
         this.log('Registering client: ' + client);
         this.clients[client] = new Date().getTime();
+
+        this.send.send(client, 'setStatus', this.status, this.statusCode);
       }
     }
 
@@ -106,6 +111,8 @@ package {
     }
 
     private function connectToServer():void {
+      this.setStatusOnClients('connecting');
+
       var socket:Socket = new Socket();
 
       socket.addEventListener(Event.CONNECT,              didConnectSocket);
@@ -124,7 +131,7 @@ package {
     }
 
     private function didConnectSocket(event:Event):void {
-      this.externalInvoke('connected');
+      this.setStatusOnClients('connected');
 
       // Send subscriptions
       var phids = new Array();
@@ -138,7 +145,7 @@ package {
     }
 
     private function didCloseSocket(event:Event):void {
-      this.externalInvoke('close');
+      this.setStatusOnClients('error', 'error.flash.disconnected');
     }
 
     private function didIOErrorSocket(event:IOErrorEvent):void {
@@ -146,7 +153,15 @@ package {
     }
 
     private function didSecurityErrorSocket(event:SecurityErrorEvent):void {
-      this.externalInvoke('error', event.text);
+      var text = event.text;
+
+      // This is really gross but there doesn't seem to be anything else
+      // on the object which gives us an error code.
+      if (text.match(/^Error #2048/)) {
+        this.setStatusOnClients('error', 'error.flash.xdomain');
+      }
+
+      this.error(text);
     }
 
     public function subscribe(client:String, phids:Array):void {
@@ -277,6 +292,18 @@ package {
         } while (true);
       } catch (err:Error) {
         this.error(err);
+      }
+    }
+
+    private function setStatusOnClients(
+      status:String,
+      code:String = null):void {
+
+      this.status = status;
+      this.statusCode = code;
+
+      for (var client:String in this.clients) {
+        this.send.send(client, 'setStatus', status, code);
       }
     }
 

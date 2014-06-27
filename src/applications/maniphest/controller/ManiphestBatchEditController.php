@@ -157,6 +157,7 @@ final class ManiphestBatchEditController extends ManiphestController {
       ),
       array(
         'title' => $title,
+        'device' => false,
       ));
   }
 

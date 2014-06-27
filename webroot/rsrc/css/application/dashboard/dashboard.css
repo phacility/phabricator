@@ -78,6 +78,6 @@
   border-bottom: 1px solid {$blueborder};
 }
 
-.dashboard-panel .gradient-lightblue-header .phabricator-action-header-title {
+.dashboard-panel .sprite-gradient .phui-action-header-title {
   padding: 10px 4px;
 }

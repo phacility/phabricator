@@ -33,7 +33,7 @@ JX.install('DiffusionLocateFileSource', {
     matchResults: function(value, partial) {
       // For now, just pretend spaces don't exist.
       var search = value.toLowerCase();
-      search = search.replace(" ", "");
+      search = search.replace(' ', '');
 
       var paths = this.findResults(search);
 

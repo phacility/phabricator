@@ -68,7 +68,7 @@ final class PhabricatorMailImplementationMailgunAdapter
   }
 
   public function supportsMessageIDHeader() {
-    return false;
+    return true;
   }
 
   public function send() {

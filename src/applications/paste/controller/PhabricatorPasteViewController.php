@@ -138,7 +138,6 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ),
       array(
         'title' => $paste->getFullName(),
-        'device' => true,
         'pageObjects' => array($paste->getPHID()),
       ));
   }

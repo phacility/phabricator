@@ -110,7 +110,6 @@ final class PhabricatorOAuthClientEditController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

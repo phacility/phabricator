@@ -34,7 +34,6 @@ final class PhabricatorOAuthClientViewController
       ),
       array(
         'title' => pht('OAuth Application: %s', $client->getName()),
-        'device' => true,
       ));
   }
 

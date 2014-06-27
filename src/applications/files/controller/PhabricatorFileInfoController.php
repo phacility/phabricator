@@ -66,7 +66,6 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       ),
       array(
         'title' => $file->getName(),
-        'device'  => true,
         'pageObjects' => array($file->getPHID()),
       ));
   }

@@ -188,7 +188,6 @@ final class PhameBlogEditController
       $nav,
       array(
         'title' => $page_title,
-        'device' => true,
       ));
   }
 }

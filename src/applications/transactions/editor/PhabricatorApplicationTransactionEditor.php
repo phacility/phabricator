@@ -1131,6 +1131,7 @@ abstract class PhabricatorApplicationTransactionEditor
       if ($phids) {
         $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT;
         $block_xactions[] = newv(get_class(head($xactions)), array())
+          ->setIgnoreOnNoEffect(true)
           ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
           ->setMetadataValue('edge:type', $edge_type)
           ->setNewValue(array('+' => $phids));

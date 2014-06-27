@@ -69,7 +69,8 @@ gather concrete performance data.
   - Follow language-specific conventions.
   - Name things unambiguously.
   - Choose descriptive names.
-  - Avoid nonstandard abbreviations (common abbreviations like ID, URI and HTTP are fine).
+  - Avoid nonstandard abbreviations (common abbreviations like ID, URI and HTTP
+    are fine).
   - Spell words correctly.
   - Use correct grammar.
 

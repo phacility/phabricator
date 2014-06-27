@@ -12,7 +12,7 @@
   overflow-x: auto;
 }
 
-.phabricator-feed-frame .phabricator-action-header-title {
+.phabricator-feed-frame .phui-action-header-title {
   font-size: 16px;
   margin-bottom: 5px;
 }
@@ -22,7 +22,7 @@
   margin: 16px;
 }
 
-.phabricator-feed-frame .phabricator-action-header {
+.phabricator-feed-frame .phui-action-header {
   padding: 0;
 }
 
@@ -63,13 +63,13 @@
   max-width: none;
 }
 
-.dashboard-panel .phabricator-feed-frame .phabricator-action-header {
+.dashboard-panel .phabricator-feed-frame .phui-action-header {
   background: #f7f7f7;
   margin-top: -1px;
   border-top: 1px solid {$thinblueborder};
 }
 
-.dashboard-panel .phabricator-feed-frame .phabricator-action-header-title {
+.dashboard-panel .phabricator-feed-frame .phui-action-header-title {
   font-size: 13px;
   margin-left: 12px;
   margin-bottom: 0;

@@ -51,7 +51,6 @@ final class PhortuneProviderController extends PhortuneController {
       $response,
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

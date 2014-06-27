@@ -72,7 +72,6 @@ final class PhortuneAccountViewController extends PhortuneController {
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

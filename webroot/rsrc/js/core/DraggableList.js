@@ -454,7 +454,7 @@ JX.install('DraggableList', {
     _unlock : function() {
       if (__DEV__) {
         if (!this._locked) {
-          JX.$E("JX.Draggable.unlock(): Draggable is not locked!");
+          JX.$E('JX.Draggable.unlock(): Draggable is not locked!');
         }
       }
       this._locked--;

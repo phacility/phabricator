@@ -91,7 +91,7 @@ final class PhragmentBrowseController extends PhragmentController {
         $list),
       array(
         'title' => pht('Browse Fragments'),
-        'device' => true));
+      ));
   }
 
 }

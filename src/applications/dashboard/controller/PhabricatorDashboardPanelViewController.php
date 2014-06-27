@@ -5,6 +5,10 @@ final class PhabricatorDashboardPanelViewController
 
   private $id;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
   }
@@ -59,7 +63,6 @@ final class PhabricatorDashboardPanelViewController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

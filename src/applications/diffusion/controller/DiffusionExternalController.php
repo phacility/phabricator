@@ -136,7 +136,6 @@ final class DiffusionExternalController extends DiffusionController {
       $content,
       array(
         'title' => pht('Unresolvable External'),
-        'device' => true,
       ));
   }
 

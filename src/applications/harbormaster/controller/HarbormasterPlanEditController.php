@@ -109,7 +109,6 @@ final class HarbormasterPlanEditController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

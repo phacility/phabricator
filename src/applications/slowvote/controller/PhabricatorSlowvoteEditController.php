@@ -36,6 +36,15 @@ final class PhabricatorSlowvoteEditController
       $is_new = true;
     }
 
+    if ($is_new) {
+      $v_projects = array();
+    } else {
+      $v_projects = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $poll->getPHID(),
+        PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT);
+      $v_projects = array_reverse($v_projects);
+    }
+
     $e_question = true;
     $e_response = true;
     $errors = array();
@@ -52,6 +61,7 @@ final class PhabricatorSlowvoteEditController
       $v_responses = (int)$request->getInt('responses');
       $v_shuffle = (int)$request->getBool('shuffle');
       $v_view_policy = $request->getStr('viewPolicy');
+      $v_projects = $request->getArr('projects');
 
       if ($is_new) {
         $poll->setMethod($request->getInt('method'));
@@ -98,6 +108,12 @@ final class PhabricatorSlowvoteEditController
         ->setNewValue($v_view_policy);
 
       if (empty($errors)) {
+        $proj_edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT;
+        $xactions[] = id(new PhabricatorSlowvoteTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+          ->setMetadataValue('edge:type', $proj_edge_type)
+          ->setNewValue(array('=' => array_fuse($v_projects)));
+
         $editor = id(new PhabricatorSlowvoteEditor())
           ->setActor($user)
           ->setContinueOnNoEffect(true)
@@ -132,6 +148,12 @@ final class PhabricatorSlowvoteEditController
         pht('Resolve issues and build consensus through '.
           'protracted deliberation.'));
 
+    if ($v_projects) {
+      $project_handles = $this->loadViewerHandles($v_projects);
+    } else {
+      $project_handles = array();
+    }
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->appendChild($instructions)
@@ -146,7 +168,13 @@ final class PhabricatorSlowvoteEditController
         id(new PhabricatorRemarkupControl())
           ->setLabel(pht('Description'))
           ->setName('description')
-          ->setValue($v_description));
+          ->setValue($v_description))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel(pht('Projects'))
+          ->setName('projects')
+          ->setValue($project_handles)
+          ->setDatasource('/typeahead/common/projects/'));
 
     if ($is_new) {
       for ($ii = 0; $ii < 10; $ii++) {
@@ -251,7 +279,6 @@ final class PhabricatorSlowvoteEditController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

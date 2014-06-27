@@ -90,6 +90,7 @@ final class DiffusionTagListController extends DiffusionController {
           pht('Tags'),
           $repository->getCallsign().' Repository',
         ),
+        'device' => false,
       ));
   }
 

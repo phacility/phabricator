@@ -91,7 +91,6 @@ final class DiffusionCommitEditController extends DiffusionController {
       ),
       array(
         'title' => $page_title,
-        'device' => true,
       ));
   }
 

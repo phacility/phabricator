@@ -286,7 +286,8 @@ final class PhabricatorRepositorySearchEngine
         $repository->getProjectPHIDs());
       if ($project_handles) {
         $item->addAttribute(
-          id(new ManiphestTaskProjectsView())
+          id(new PHUIHandleTagListView())
+            ->setSlim(true)
             ->setHandles($project_handles));
       }
 

@@ -116,7 +116,6 @@ final class ReleephProductCreateController extends ReleephProductController {
       ),
       array(
         'title' => pht('Create New Product'),
-        'device' => true,
       ));
   }
 

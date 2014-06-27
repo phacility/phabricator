@@ -154,7 +154,6 @@ final class HarbormasterStepEditController
       ),
       array(
         'title' => $implementation->getName(),
-        'device' => true,
       ));
   }
 

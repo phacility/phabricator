@@ -58,8 +58,9 @@ final class PhabricatorBot extends PhabricatorDaemon {
       // Normalize the path component of the URI so users can enter the
       // domain without the "/api/" part.
       $conduit_uri = new PhutilURI($conduit_uri);
-      $conduit_uri->setPath('/api/');
-      $conduit_uri = (string)$conduit_uri;
+
+      $conduit_host = (string)$conduit_uri->setPath('/');
+      $conduit_uri = (string)$conduit_uri->setPath('/api/');
 
       $conduit = new ConduitClient($conduit_uri);
       $response = $conduit->callMethodSynchronous(
@@ -68,6 +69,7 @@ final class PhabricatorBot extends PhabricatorDaemon {
           'client'            => 'PhabricatorBot',
           'clientVersion'     => '1.0',
           'clientDescription' => php_uname('n').':'.$nick,
+          'host'              => $conduit_host,
           'user'              => $conduit_user,
           'certificate'       => $conduit_cert,
         ));

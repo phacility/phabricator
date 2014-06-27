@@ -77,6 +77,12 @@ h1.aphront-error-view-head {
   background-color: #fff;
 }
 
+.legalpad .aphront-error-view {
+  margin: 0;
+  border-width: 0 0 1px 0;
+  border-bottom: 1px solid {$lightblueborder};
+}
+
 .aphront-dialog-body .aphront-error-view {
   margin: -16px -16px 16px -16px;
   border-width: 0 0 1px 0;

@@ -61,7 +61,6 @@ final class PhabricatorPeopleLdapController
       $nav,
       array(
         'title'  => pht('Import Ldap Users'),
-        'device' => true,
       ));
   }
 

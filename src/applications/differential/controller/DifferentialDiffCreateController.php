@@ -96,7 +96,6 @@ final class DifferentialDiffCreateController extends DifferentialController {
       ),
       array(
         'title' => pht('Create Diff'),
-        'device' => true,
       ));
   }
 

@@ -55,7 +55,6 @@ final class PonderQuestionHistoryController extends PonderController {
       ),
       array(
         'title' => pht('Question History'),
-        'device' => true,
       ));
   }
 

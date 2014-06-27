@@ -33,7 +33,6 @@ final class PhabricatorAuthNeedsApprovalController
       $dialog,
       array(
         'title' => pht('Wait For Approval'),
-        'device' => true,
       ));
   }
 

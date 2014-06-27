@@ -79,7 +79,7 @@ final class PhragmentSnapshotViewController extends PhragmentController {
         $list),
       array(
         'title' => pht('View Snapshot'),
-        'device' => true));
+      ));
   }
 
   protected function createSnapshotView($snapshot) {

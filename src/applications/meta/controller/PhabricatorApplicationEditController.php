@@ -167,7 +167,6 @@ final class PhabricatorApplicationEditController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

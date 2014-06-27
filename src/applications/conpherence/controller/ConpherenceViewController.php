@@ -96,7 +96,6 @@ final class ConpherenceViewController extends
       $layout,
       array(
         'title' => $title,
-        'device' => true,
         'pageObjects' => array($conpherence->getPHID()),
       ));
   }

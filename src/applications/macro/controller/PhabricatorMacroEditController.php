@@ -260,7 +260,6 @@ final class PhabricatorMacroEditController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 }

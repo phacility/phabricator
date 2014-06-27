@@ -46,7 +46,6 @@ final class ReleephBranchHistoryController extends ReleephBranchController {
       ),
       array(
         'title' => pht('Branch History'),
-        'device' => true,
       ));
   }
 

@@ -23,17 +23,26 @@ final class PhabricatorDashboardInstallController
     $dashboard_phid = $dashboard->getPHID();
 
     $object_phid = $request->getStr('objectPHID', $viewer->getPHID());
-    $object = id(new PhabricatorObjectQuery())
-      ->setViewer($viewer)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->withPHIDs(array($object_phid))
-      ->executeOne();
-    if (!$object) {
-      return new Aphront404Response();
+    switch ($object_phid) {
+      case PhabricatorApplicationHome::DASHBOARD_DEFAULT:
+        if (!$viewer->getIsAdmin()) {
+          return new Aphront404Response();
+        }
+        break;
+      default:
+        $object = id(new PhabricatorObjectQuery())
+          ->setViewer($viewer)
+          ->requireCapabilities(
+            array(
+              PhabricatorPolicyCapability::CAN_VIEW,
+              PhabricatorPolicyCapability::CAN_EDIT,
+            ))
+          ->withPHIDs(array($object_phid))
+          ->executeOne();
+        if (!$object) {
+          return new Aphront404Response();
+        }
+        break;
     }
 
     $installer_phid = $viewer->getPHID();
@@ -64,57 +73,66 @@ final class PhabricatorDashboardInstallController
         ->setURI($this->getRedirectURI($application_class, $object_phid));
     }
 
-    $body = $this->getBodyContent(
-      $application_class,
-      $object_phid,
-      $installer_phid);
-
-    $form = id(new AphrontFormView())
-      ->setUser($viewer)
-      ->appendChild($body);
-
-    return $this->newDialog()
+    $dialog = $this->newDialog()
       ->setTitle(pht('Install Dashboard'))
-      ->appendChild($form->buildLayoutView())
-      ->addCancelButton($this->getCancelURI(
-        $application_class, $object_phid))
+      ->addHiddenInput('objectPHID', $object_phid)
+      ->addCancelButton($this->getCancelURI($application_class, $object_phid))
       ->addSubmitButton(pht('Install Dashboard'));
-  }
 
-  private function getBodyContent(
-    $application_class,
-    $object_phid,
-    $installer_phid) {
-
-    $body = array();
     switch ($application_class) {
       case 'PhabricatorApplicationHome':
-        if ($installer_phid == $object_phid) {
-          $body[] = phutil_tag(
-            'p',
-            array(),
-            pht(
-              'Are you sure you want to install this dashboard as your '.
-              'home page?'));
-          $body[] = phutil_tag(
-            'p',
-            array(),
-            pht(
-              'You will be re-directed to your spiffy new home page if you '.
-              'choose to install this dashboard.'));
+        if ($viewer->getPHID() == $object_phid) {
+          if ($viewer->getIsAdmin()) {
+            $dialog->setWidth(AphrontDialogView::WIDTH_FORM);
+
+            $form = id(new AphrontFormView())
+              ->setUser($viewer)
+              ->appendRemarkupInstructions(
+                pht('Choose where to install this dashboard.'))
+              ->appendChild(
+                id(new AphrontFormRadioButtonControl())
+                  ->setName('objectPHID')
+                  ->setValue(PhabricatorApplicationHome::DASHBOARD_DEFAULT)
+                  ->addButton(
+                    PhabricatorApplicationHome::DASHBOARD_DEFAULT,
+                    pht('Default Dashboard for All Users'),
+                    pht(
+                      'Install this dashboard as the global default dashboard '.
+                      'for all users. Users can install a personal dashboard '.
+                      'to replace it. All users who have not configured '.
+                      'a personal dashboard will be affected by this change.'))
+                  ->addButton(
+                    $viewer->getPHID(),
+                    pht('Personal Home Page Dashboard'),
+                    pht(
+                      'Install this dashboard as your personal home page '.
+                      'dashboard. Only you will be affected by this change.')));
+
+            $dialog->appendChild($form->buildLayoutView());
+          } else {
+            $dialog->appendParagraph(
+              pht('Install this dashboard on your home page?'));
+          }
         } else {
-          $body[] = phutil_tag(
-            'p',
-            array(),
+          $dialog->appendParagraph(
             pht(
-              'Are you sure you want to install this dashboard as the home '.
-              'page for %s?',
-              $this->getHandle($object_phid)->getName()));
+              'Install this dashboard as the home page dashboard for %s?',
+              phutil_tag(
+                'strong',
+                array(),
+                $this->getHandle($object_phid)->getName())));
         }
         break;
+      default:
+        throw new Exception(
+          pht(
+            'Unknown dashboard application class "%s"!',
+            $application_class));
     }
-    return $body;
+
+    return $dialog;
   }
+
 
   private function getCancelURI($application_class, $object_phid) {
     $uri = null;

@@ -111,9 +111,11 @@ final class PhabricatorProjectBoardEditController
     if ($is_new) {
       $title = pht('Create Column');
       $submit = pht('Create Column');
+      $crumb_text = pht('Create Column');
     } else {
-      $title = pht('Edit %s', $column->getName());
+      $title = pht('Edit %s', $column->getDisplayName());
       $submit = pht('Save Column');
+      $crumb_text = pht('Edit');
     }
 
     $form->appendChild(
@@ -125,7 +127,14 @@ final class PhabricatorProjectBoardEditController
     $crumbs->addTextCrumb(
       pht('Board'),
       $this->getApplicationURI('board/'.$project->getID().'/'));
-    $crumbs->addTextCrumb($title);
+
+    if (!$is_new) {
+      $crumbs->addTextCrumb(
+        $column->getDisplayName(),
+        $view_uri);
+    }
+
+    $crumbs->addTextCrumb($crumb_text);
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
@@ -139,7 +148,6 @@ final class PhabricatorProjectBoardEditController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 }

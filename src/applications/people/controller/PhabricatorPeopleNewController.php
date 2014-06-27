@@ -217,7 +217,6 @@ final class PhabricatorPeopleNewController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

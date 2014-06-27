@@ -96,8 +96,6 @@ final class PhabricatorRemarkupRuleEmbedFile
         case 'full':
           $attrs += array(
             'src' => $file->getBestURI(),
-            'width' => $file->getImageWidth(),
-            'height' => $file->getImageHeight(),
           );
           $image_class = 'phabricator-remarkup-embed-image-full';
           break;

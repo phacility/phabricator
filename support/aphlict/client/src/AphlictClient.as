@@ -4,7 +4,7 @@ package {
   import flash.external.ExternalInterface;
   import flash.utils.Dictionary;
   import flash.utils.Timer;
-
+  import flash.events.UncaughtErrorEvent;
 
   final public class AphlictClient extends Aphlict {
 
@@ -37,20 +37,24 @@ package {
     public function AphlictClient() {
       super();
 
+      loaderInfo.uncaughtErrorEvents.addEventListener(
+        UncaughtErrorEvent.UNCAUGHT_ERROR,
+        this.uncaughtErrorHandler);
+
+      ExternalInterface.marshallExceptions = true;
       ExternalInterface.addCallback('connect', this.externalConnect);
-      ExternalInterface.call(
-        'JX.Stratcom.invoke',
-        'aphlict-component-ready',
-        null,
-        {});
+
+      this.setStatus('ready');
+    }
+
+    private function uncaughtErrorHandler(event:UncaughtErrorEvent):void {
+      this.error(event.error.toString());
     }
 
     public function externalConnect(
       server:String,
       port:Number,
       subscriptions:Array):void {
-
-      this.externalInvoke('connect');
 
       this.remoteServer  = server;
       this.remotePort    = port;
@@ -145,6 +149,10 @@ package {
     public function receiveMessage(msg:Object):void {
       this.log('Received message.');
       this.externalInvoke('receive', msg);
+    }
+
+    public function setStatus(status:String, code:String = null):void {
+      this.externalInvoke('status', {type: status, code: code});
     }
 
   }

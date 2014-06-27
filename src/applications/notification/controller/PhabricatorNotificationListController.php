@@ -81,7 +81,6 @@ final class PhabricatorNotificationListController
       $nav,
       array(
         'title' => pht('Notifications'),
-        'device' => true,
       ));
   }
 

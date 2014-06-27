@@ -52,10 +52,10 @@ JX.behavior('phabricator-transaction-list', function() {
 
           var value = textarea.value;
           if (value.length) {
-            value += "\n\n";
+            value += '\n\n';
           }
           value += r.quoteText;
-          value += "\n\n";
+          value += '\n\n';
           textarea.value = value;
 
           JX.TextAreaUtils.setSelectionRange(

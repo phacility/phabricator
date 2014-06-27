@@ -80,7 +80,6 @@ final class PhabricatorPeopleCreateController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

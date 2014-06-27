@@ -15,6 +15,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   protected $phrictionSlug;
   protected $profileImagePHID;
   protected $icon;
+  protected $color;
 
   protected $viewPolicy;
   protected $editPolicy;
@@ -29,12 +30,14 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   private $slugs = self::ATTACHABLE;
 
   const DEFAULT_ICON = 'fa-briefcase';
+  const DEFAULT_COLOR = 'blue';
 
   public static function initializeNewProject(PhabricatorUser $actor) {
     return id(new PhabricatorProject())
       ->setName('')
       ->setAuthorPHID($actor->getPHID())
       ->setIcon(self::DEFAULT_ICON)
+      ->setColor(self::DEFAULT_COLOR)
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
       ->setEditPolicy(PhabricatorPolicies::POLICY_USER)
       ->setJoinPolicy(PhabricatorPolicies::POLICY_USER)
@@ -206,6 +209,14 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   public function getSlugs() {
     return $this->assertAttached($this->slugs);
+  }
+
+  public function getColor() {
+    if ($this->isArchived()) {
+      return PHUITagView::COLOR_DISABLED;
+    }
+
+    return $this->color;
   }
 
 

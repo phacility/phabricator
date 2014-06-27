@@ -15,7 +15,7 @@
   padding: 12px 8px;
 }
 
-.profile-feed .phabricator-action-header-title {
+.profile-feed .phui-action-header-title {
   font-size: 16px;
   margin-bottom: 5px;
 }

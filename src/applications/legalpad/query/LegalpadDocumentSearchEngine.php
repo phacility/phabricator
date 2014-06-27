@@ -132,9 +132,9 @@ final class LegalpadDocumentSearchEngine
       $title = $document->getTitle();
 
       $item = id(new PHUIObjectItemView())
-        ->setObjectName('L'.$document->getID())
+        ->setObjectName($document->getMonogram())
         ->setHeader($title)
-        ->setHref($this->getApplicationURI('view/'.$document->getID()))
+        ->setHref('/'.$document->getMonogram())
         ->setObject($document)
         ->addIcon('none', pht('Last updated: %s', $last_updated))
         ->addByline(pht('Updated by: %s', $updater))

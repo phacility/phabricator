@@ -136,35 +136,6 @@ abstract class ConduitAPIMethod
     return str_replace('_', '.', $method_fragment);
   }
 
-  protected function validateHost($host) {
-    if (!$host) {
-      // If the client doesn't send a host key, don't complain. We should in
-      // the future, but this change isn't severe enough to bump the protocol
-      // version.
-
-      // TODO: Remove this once the protocol version gets bumped past 2 (i.e.,
-      // require the host key be present and valid).
-      return;
-    }
-
-    // NOTE: Compare domains only so we aren't sensitive to port specification
-    // or omission.
-
-    $host = new PhutilURI($host);
-    $host = $host->getDomain();
-
-    $self = new PhutilURI(PhabricatorEnv::getURI('/'));
-    $self = $self->getDomain();
-
-    if ($self !== $host) {
-      throw new Exception(
-        "Your client is connecting to this install as '{$host}', but it is ".
-        "configured as '{$self}'. The client and server must use the exact ".
-        "same URI to identify the install. Edit your .arcconfig or ".
-        "phabricator/conf so they agree on the URI for the install.");
-    }
-  }
-
   protected function formatStringConstants($constants) {
     foreach ($constants as $key => $value) {
       $constants[$key] = '"'.$value.'"';

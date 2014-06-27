@@ -13,7 +13,7 @@ final class PhabricatorDaemonLog extends PhabricatorDaemonDAO
   protected $host;
   protected $pid;
   protected $argv;
-  protected $explicitArgv;
+  protected $explicitArgv = array();
   protected $status;
 
   public function getConfiguration() {
@@ -23,6 +23,14 @@ final class PhabricatorDaemonLog extends PhabricatorDaemonDAO
         'explicitArgv' => self::SERIALIZATION_JSON,
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function getExplicitArgv() {
+    $argv = $this->explicitArgv;
+    if (!is_array($argv)) {
+      return array();
+    }
+    return $argv;
   }
 
 

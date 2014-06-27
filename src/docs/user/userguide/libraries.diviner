@@ -83,7 +83,7 @@ Phabricator. For example, you might write this file to
 ##libcustom/.arcconfig##:
 
   {
-    "project_id" : "libcustom",
+    "project.name" : "libcustom",
     "load" : [
       "phabricator/src/"
     ]

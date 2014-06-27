@@ -110,7 +110,6 @@ final class HeraldTranscriptController extends HeraldController {
       $nav,
       array(
         'title' => pht('Transcript'),
-        'device' => true,
       ));
   }
 

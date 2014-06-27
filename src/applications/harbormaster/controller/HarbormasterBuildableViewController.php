@@ -70,7 +70,6 @@ final class HarbormasterBuildableViewController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

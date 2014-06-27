@@ -55,7 +55,6 @@ final class PhabricatorApplicationDetailViewController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

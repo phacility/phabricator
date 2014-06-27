@@ -156,6 +156,30 @@ final class PHUITagExample extends PhabricatorUIExample {
       ->appendChild($icons)
       ->addPadding(PHUI::PADDING_LARGE);
 
+    $shades = PHUITagView::getShades();
+    $tags = array();
+    foreach ($shades as $shade) {
+      $tags[] = id(new PHUITagView())
+        ->setType(PHUITagView::TYPE_OBJECT)
+        ->setShade($shade)
+        ->setIcon('fa-tags')
+        ->setName(ucwords($shade))
+        ->setHref('#');
+      $tags[] = hsprintf('&nbsp;');
+      $tags[] = id(new PHUITagView())
+        ->setType(PHUITagView::TYPE_OBJECT)
+        ->setShade($shade)
+        ->setSlimShady(true)
+        ->setIcon('fa-tags')
+        ->setName(ucwords($shade))
+        ->setHref('#');
+      $tags[] = hsprintf('<br /><br />');
+    }
+
+    $content4 = id(new PHUIBoxView())
+      ->appendChild($tags)
+      ->addPadding(PHUI::PADDING_LARGE);
+
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText('Inline')
       ->appendChild($intro);
@@ -172,6 +196,10 @@ final class PHUITagExample extends PhabricatorUIExample {
       ->setHeaderText('Icons')
       ->appendChild($content3);
 
-    return array($box, $box1, $box2, $box3);
+    $box4 = id(new PHUIObjectBoxView())
+      ->setHeaderText('Shades')
+      ->appendChild($content4);
+
+    return array($box, $box1, $box2, $box3, $box4);
   }
 }

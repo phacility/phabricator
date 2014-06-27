@@ -65,7 +65,6 @@ final class NuanceSourceViewController extends NuanceController {
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
 
   }

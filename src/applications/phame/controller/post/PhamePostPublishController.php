@@ -65,7 +65,6 @@ final class PhamePostPublishController extends PhameController {
       $nav,
       array(
         'title'   => pht('Preview Post'),
-        'device'  => true,
       ));
   }
 

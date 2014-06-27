@@ -41,34 +41,23 @@ final class PhabricatorProjectBoardDeleteController
       return new Aphront404Response();
     }
 
-    $error_view = null;
     $column_phid = $column->getPHID();
-    $has_task_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $column_phid,
-      PhabricatorEdgeConfig::TYPE_COLUMN_HAS_OBJECT);
-
-    if ($has_task_phids) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Column has Tasks!'));
-      if ($column->isDeleted()) {
-        $error_view->setErrors(array(pht(
-          'A column can not be activated if it has tasks '.
-          'in it. Please remove the tasks and try again.')));
-      } else {
-        $error_view->setErrors(array(pht(
-          'A column can not be deleted if it has tasks '.
-          'in it. Please remove the tasks and try again.')));
-      }
-    }
-
     $view_uri = $this->getApplicationURI(
       '/board/'.$this->projectID.'/column/'.$this->id.'/');
 
-    if ($request->isFormPost() && !$error_view) {
-      if ($column->isDeleted()) {
+    if ($column->isDefaultColumn()) {
+      return $this->newDialog()
+        ->setTitle(pht('Can Not Hide Default Column'))
+        ->appendParagraph(
+          pht('You can not hide the default/backlog column on a board.'))
+        ->addCancelButton($view_uri, pht('Okay'));
+    }
+
+    if ($request->isFormPost()) {
+      if ($column->isHidden()) {
         $new_status = PhabricatorProjectColumn::STATUS_ACTIVE;
       } else {
-        $new_status = PhabricatorProjectColumn::STATUS_DELETED;
+        $new_status = PhabricatorProjectColumn::STATUS_HIDDEN;
       }
 
       $type_status = PhabricatorProjectColumnTransaction::TYPE_STATUS;
@@ -85,31 +74,29 @@ final class PhabricatorProjectBoardDeleteController
       return id(new AphrontRedirectResponse())->setURI($view_uri);
     }
 
-    if ($column->isDeleted()) {
-      $title = pht('Activate Column');
+    if ($column->isHidden()) {
+      $title = pht('Show Column');
     } else {
-      $title = pht('Delete Column');
-    }
-    $submit = $title;
-    if ($error_view) {
-      $body = $error_view;
-    } else if ($column->isDeleted()) {
-      $body = pht('Are you sure you want to activate this column?');
-    } else {
-      $body = pht('Are you sure you want to delete this column?');
+      $title = pht('Hide Column');
     }
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    if ($column->isHidden()) {
+      $body = pht(
+        'Are you sure you want to show this column?');
+    } else {
+      $body = pht(
+        'Are you sure you want to hide this column? It will no longer '.
+        'appear on the workboard.');
+    }
+
+    $dialog = $this->newDialog()
       ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->setTitle($title)
       ->appendChild($body)
       ->setDisableWorkflowOnCancel(true)
-      ->addSubmitButton($title)
-      ->addCancelButton($view_uri);
+      ->addCancelButton($view_uri)
+      ->addSubmitButton($title);
 
-    return id(new AphrontDialogResponse())
-      ->setDialog($dialog);
-
+    return $dialog;
   }
 }

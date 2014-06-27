@@ -224,7 +224,6 @@ final class DiffusionRepositoryCreateController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

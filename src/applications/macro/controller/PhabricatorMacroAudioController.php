@@ -155,7 +155,6 @@ final class PhabricatorMacroAudioController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 }

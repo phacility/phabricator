@@ -236,7 +236,6 @@ final class PhrictionDocumentController
       array(
         'pageObjects' => array($document->getPHID()),
         'title'   => $page_title,
-        'device'  => true,
       ));
 
   }

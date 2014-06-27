@@ -1,10 +1,11 @@
 <?php
 
-final class PHUITagView extends AphrontView {
+final class PHUITagView extends AphrontTagView {
 
   const TYPE_PERSON         = 'person';
   const TYPE_OBJECT         = 'object';
   const TYPE_STATE          = 'state';
+  const TYPE_SHADE          = 'shade';
 
   const COLOR_RED           = 'red';
   const COLOR_ORANGE        = 'orange';
@@ -16,6 +17,9 @@ final class PHUITagView extends AphrontView {
   const COLOR_BLACK         = 'black';
   const COLOR_GREY          = 'grey';
   const COLOR_WHITE         = 'white';
+  const COLOR_BLUEGREY      = 'bluegrey';
+  const COLOR_CHECKERED     = 'checkered';
+  const COLOR_DISABLED      = 'disabled';
 
   const COLOR_OBJECT        = 'object';
   const COLOR_PERSON        = 'person';
@@ -28,21 +32,15 @@ final class PHUITagView extends AphrontView {
   private $dotColor;
   private $closed;
   private $external;
-  private $id;
   private $icon;
-
-  public function setID($id) {
-    $this->id = $id;
-    return $this;
-  }
-
-  public function getID() {
-    return $this->id;
-  }
+  private $shade;
+  private $slimShady;
 
   public function setType($type) {
     $this->type = $type;
     switch ($type) {
+      case self::TYPE_SHADE:
+        break;
       case self::TYPE_OBJECT:
         $this->setBackgroundColor(self::COLOR_OBJECT);
         break;
@@ -50,6 +48,11 @@ final class PHUITagView extends AphrontView {
         $this->setBackgroundColor(self::COLOR_PERSON);
         break;
     }
+    return $this;
+  }
+
+  public function setShade($shade) {
+    $this->shade = $shade;
     return $this;
   }
 
@@ -84,25 +87,67 @@ final class PHUITagView extends AphrontView {
   }
 
   public function setIcon($icon) {
-    $icon_view = id(new PHUIIconView())
-      ->setIconFont($icon);
-    $this->icon = $icon_view;
+    $this->icon = $icon;
     return $this;
   }
 
-  public function render() {
-    if (!$this->type) {
-      throw new Exception(pht('You must call setType() before render()!'));
-    }
+  public function setSlimShady($mm) {
+    $this->slimShady = $mm;
+    return $this;
+  }
 
+  protected function getTagName() {
+    return strlen($this->href) ? 'a' : 'span';
+  }
+
+  protected function getTagAttributes() {
     require_celerity_resource('phui-tag-view-css');
+
     $classes = array(
       'phui-tag-view',
       'phui-tag-type-'.$this->type,
     );
 
+    if ($this->shade) {
+      $classes[] = 'phui-tag-shade';
+      $classes[] = 'phui-tag-shade-'.$this->shade;
+      if ($this->slimShady) {
+        $classes[] = 'phui-tag-shade-slim';
+      }
+    }
+
+    if ($this->icon) {
+      $classes[] = 'phui-tag-icon-view';
+    }
+
+    if ($this->phid) {
+      Javelin::initBehavior('phabricator-hovercards');
+
+      $attributes = array(
+        'href'  => $this->href,
+        'sigil' => 'hovercard',
+        'meta'  => array(
+          'hoverPHID' => $this->phid,
+        ),
+        'target' => $this->external ? '_blank' : null,
+      );
+    } else {
+      $attributes = array(
+        'href'  => $this->href,
+        'target' => $this->external ? '_blank' : null,
+      );
+    }
+
+    return $attributes + array('class' => $classes);
+  }
+
+  public function getTagContent() {
+    if (!$this->type) {
+      throw new Exception(pht('You must call setType() before render()!'));
+    }
+
     $color = null;
-    if ($this->backgroundColor) {
+    if (!$this->shade && $this->backgroundColor) {
       $color = 'phui-tag-color-'.$this->backgroundColor;
     }
 
@@ -119,8 +164,8 @@ final class PHUITagView extends AphrontView {
     }
 
     if ($this->icon) {
-      $icon = $this->icon;
-      $classes[] = 'phui-tag-icon-view';
+      $icon = id(new PHUIIconView())
+        ->setIconFont($this->icon);
     } else {
       $icon = null;
     }
@@ -141,33 +186,7 @@ final class PHUITagView extends AphrontView {
         $content);
     }
 
-    if ($this->phid) {
-      Javelin::initBehavior('phabricator-hovercards');
-
-      return javelin_tag(
-        'a',
-        array(
-          'id' => $this->id,
-          'href'  => $this->href,
-          'class' => implode(' ', $classes),
-          'sigil' => 'hovercard',
-          'meta'  => array(
-            'hoverPHID' => $this->phid,
-          ),
-          'target' => $this->external ? '_blank' : null,
-        ),
-        array($icon, $content));
-    } else {
-      return phutil_tag(
-        $this->href ? 'a' : 'span',
-        array(
-          'id' => $this->id,
-          'href'  => $this->href,
-          'class' => implode(' ', $classes),
-          'target' => $this->external ? '_blank' : null,
-        ),
-        array($icon, $content));
-    }
+    return array($icon, $content);
   }
 
   public static function getTagTypes() {
@@ -195,6 +214,30 @@ final class PHUITagView extends AphrontView {
       self::COLOR_PERSON,
     );
   }
+
+  public static function getShades() {
+    return array_keys(self::getShadeMap());
+  }
+
+  public static function getShadeMap() {
+    return array(
+      self::COLOR_RED => pht('Red'),
+      self::COLOR_ORANGE => pht('Orange'),
+      self::COLOR_YELLOW => pht('Yellow'),
+      self::COLOR_BLUE => pht('Blue'),
+      self::COLOR_INDIGO => pht('Indigo'),
+      self::COLOR_VIOLET => pht('Violet'),
+      self::COLOR_GREEN => pht('Green'),
+      self::COLOR_GREY => pht('Grey'),
+      self::COLOR_CHECKERED => pht('Checkered'),
+      self::COLOR_DISABLED => pht('Disabled'),
+    );
+  }
+
+  public static function getShadeName($shade) {
+    return idx(self::getShadeMap(), $shade, $shade);
+  }
+
 
   public function setExternal($external) {
     $this->external = $external;

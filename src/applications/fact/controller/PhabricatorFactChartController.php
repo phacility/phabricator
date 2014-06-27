@@ -90,6 +90,7 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
       ),
       array(
         'title' => 'Chart',
+        'device' => false,
       ));
   }
 

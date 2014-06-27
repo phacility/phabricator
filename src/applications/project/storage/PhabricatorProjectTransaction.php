@@ -8,6 +8,7 @@ final class PhabricatorProjectTransaction
   const TYPE_STATUS     = 'project:status';
   const TYPE_IMAGE      = 'project:image';
   const TYPE_ICON       = 'project:icon';
+  const TYPE_COLOR      = 'project:color';
 
   // NOTE: This is deprecated, members are just a normal edge now.
   const TYPE_MEMBERS    = 'project:members';
@@ -92,6 +93,12 @@ final class PhabricatorProjectTransaction
           '%s set this project\'s icon to %s.',
           $author_handle,
           PhabricatorProjectIcon::getLabel($new));
+
+      case PhabricatorProjectTransaction::TYPE_COLOR:
+        return pht(
+          '%s set this project\'s color to %s.',
+          $author_handle,
+          PHUITagView::getShadeName($new));
 
       case PhabricatorProjectTransaction::TYPE_SLUGS:
         $add = array_diff($new, $old);

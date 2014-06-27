@@ -67,7 +67,6 @@ final class PonderQuestionViewController extends PonderController {
         $answer_add_panel
       ),
       array(
-        'device' => true,
         'title' => 'Q'.$question->getID().' '.$question->getTitle(),
         'pageObjects' => array_merge(
           array($question->getPHID()),

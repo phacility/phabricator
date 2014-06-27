@@ -12,7 +12,7 @@ final class AphrontDialogView extends AphrontView {
   private $class;
   private $renderAsForm = true;
   private $formID;
-  private $headerColor = PhabricatorActionHeaderView::HEADER_LIGHTBLUE;
+  private $headerColor = PHUIActionHeaderView::HEADER_LIGHTBLUE;
   private $footers = array();
   private $isStandalone;
   private $method = 'POST';
@@ -291,7 +291,7 @@ final class AphrontDialogView extends AphrontView {
         $children);
     }
 
-    $header = new PhabricatorActionHeaderView();
+    $header = new PHUIActionHeaderView();
     $header->setHeaderTitle($this->title);
     $header->setHeaderColor($this->headerColor);
 

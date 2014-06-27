@@ -63,7 +63,6 @@ final class PassphraseCredentialCreateController extends PassphraseController {
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

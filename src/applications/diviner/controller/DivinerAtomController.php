@@ -248,7 +248,6 @@ final class DivinerAtomController extends DivinerController {
       ),
       array(
         'title' => $symbol->getTitle(),
-        'device' => true,
       ));
   }
 

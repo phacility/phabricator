@@ -57,7 +57,6 @@ final class PhortuneProductListController extends PhabricatorController {
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

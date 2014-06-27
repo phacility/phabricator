@@ -87,7 +87,6 @@ extends LegalpadController {
       ),
       array(
         'title' => pht('Verify Signature'),
-        'device' => true,
       ));
   }
 

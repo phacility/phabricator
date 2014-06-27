@@ -379,22 +379,29 @@ final class PhabricatorSettingsPanelSSHKeys
 
   private static function parsePublicKey($entire_key) {
     $parts = str_replace("\n", '', trim($entire_key));
-    $parts = preg_split('/\s+/', $parts);
 
-    if (count($parts) == 2) {
-      $parts[] = ''; // Add an empty comment part.
-    } else if (count($parts) == 3) {
-      // This is the expected case.
-    } else {
-      if (preg_match('/private\s*key/i', $entire_key)) {
-        // Try to give the user a better error message if it looks like
-        // they uploaded a private key.
-        throw new Exception(
-          pht('Provide your public key, not your private key!'));
-      } else {
+    // The third field (the comment) can have spaces in it, so split this
+    // into a maximum of three parts.
+    $parts = preg_split('/\s+/', $parts, 3);
+
+    if (preg_match('/private\s*key/i', $entire_key)) {
+      // Try to give the user a better error message if it looks like
+      // they uploaded a private key.
+      throw new Exception(
+        pht('Provide your public key, not your private key!'));
+    }
+
+    switch (count($parts)) {
+      case 1:
         throw new Exception(
           pht('Provided public key is not properly formatted.'));
-      }
+      case 2:
+        // Add an empty comment part.
+        $parts[] = '';
+        break;
+      case 3:
+        // This is the expected case.
+        break;
     }
 
     list($type, $body, $comment) = $parts;

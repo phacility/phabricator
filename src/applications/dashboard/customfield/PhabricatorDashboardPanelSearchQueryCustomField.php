@@ -20,6 +20,7 @@ final class PhabricatorDashboardPanelSearchQueryCustomField
     $value = $this->getFieldValue();
 
     $queries = array();
+    $seen = false;
     foreach ($engines as $engine_class => $engine) {
       $engine->setViewer($this->getViewer());
       $engine_queries = $engine->loadEnabledNamedQueries();

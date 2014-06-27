@@ -74,7 +74,6 @@ final class PhameBlogViewController extends PhameController {
     return $this->buildApplicationPage(
       $nav,
       array(
-        'device' => true,
         'title' => $blog->getName(),
       ));
   }

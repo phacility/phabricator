@@ -1,15 +1,15 @@
 /**
- * @provides javelin-behavior-boards-filter
+ * @provides javelin-behavior-boards-dropdown
  * @requires javelin-behavior
  *           javelin-dom
  *           javelin-stratcom
  *           phuix-dropdown-menu
  */
 
-JX.behavior('boards-filter', function() {
+JX.behavior('boards-dropdown', function() {
 
-  JX.Stratcom.listen('click', 'boards-filter-menu', function(e) {
-    var data = e.getNodeData('boards-filter-menu');
+  JX.Stratcom.listen('click', 'boards-dropdown-menu', function(e) {
+    var data = e.getNodeData('boards-dropdown-menu');
     if (data.menu) {
       return;
     }
@@ -18,7 +18,7 @@ JX.behavior('boards-filter', function() {
 
     var list = JX.$H(data.items).getFragment().firstChild;
 
-    var button = e.getNode('boards-filter-menu');
+    var button = e.getNode('boards-dropdown-menu');
     data.menu = new JX.PHUIXDropdownMenu(button);
     data.menu.setContent(list);
     data.menu.open();

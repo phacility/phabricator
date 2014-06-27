@@ -86,7 +86,6 @@ final class PhabricatorPeopleCalendarController
       $month_view),
      array(
         'title' => pht('Calendar'),
-        'device' => true,
       ));
   }
 }

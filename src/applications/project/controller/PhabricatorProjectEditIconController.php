@@ -26,36 +26,27 @@ final class PhabricatorProjectEditIconController
       return new Aphront404Response();
     }
 
-    $view_uri = '/tag/'.$project->getPrimarySlug().'/';
     $edit_uri = $this->getApplicationURI('edit/'.$project->getID().'/');
-
-    if ($request->isFormPost()) {
-      $v_icon = $request->getStr('icon');
-      $type_icon = PhabricatorProjectTransaction::TYPE_ICON;
-      $xactions = array(id(new PhabricatorProjectTransaction())
-        ->setTransactionType($type_icon)
-        ->setNewValue($v_icon));
-
-      $editor = id(new PhabricatorProjectTransactionEditor())
-        ->setActor($viewer)
-        ->setContentSourceFromRequest($request)
-        ->setContinueOnMissingFields(true)
-        ->setContinueOnNoEffect(true);
-
-      $editor->applyTransactions($project, $xactions);
-
-      return id(new AphrontReloadResponse())->setURI($edit_uri);
-    }
-
     require_celerity_resource('project-icon-css');
     Javelin::initBehavior('phabricator-tooltips');
 
     $project_icons = PhabricatorProjectIcon::getIconMap();
+
+    if ($request->isFormPost()) {
+      $v_icon = $request->getStr('icon');
+
+      return id(new AphrontAjaxResponse())->setContent(
+        array(
+          'value' => $v_icon,
+          'display' => PhabricatorProjectIcon::renderIconForChooser($v_icon),
+        ));
+    }
+
     $ii = 0;
     $buttons = array();
     foreach ($project_icons as $icon => $label) {
       $view = id(new PHUIIconView())
-        ->setIconFont($icon.' bluegrey');
+        ->setIconFont($icon);
 
       $aural = javelin_tag(
         'span',
@@ -66,10 +57,8 @@ final class PhabricatorProjectEditIconController
 
       if ($icon == $project->getIcon()) {
         $class_extra = ' selected';
-        $tip = $label.pht(' - selected');
       } else {
         $class_extra = null;
-        $tip = $label;
       }
 
       $buttons[] = javelin_tag(
@@ -81,7 +70,7 @@ final class PhabricatorProjectEditIconController
           'type' => 'submit',
           'sigil' => 'has-tooltip',
           'meta' => array(
-            'tip' => $tip,
+            'tip' => $label,
           )
         ),
         array(
@@ -100,12 +89,9 @@ final class PhabricatorProjectEditIconController
       ),
       $buttons);
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    return $this->newDialog()
       ->setTitle(pht('Choose Project Icon'))
       ->appendChild($buttons)
       ->addCancelButton($edit_uri);
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 }

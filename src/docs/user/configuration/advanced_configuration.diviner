@@ -25,7 +25,7 @@ to lowest priority:
     running `bin/config`.
   - **Config Files**: Values are stored in a config file in `conf/`. The file
     to use is selected by writing to `conf/local/ENVIRONMENT`, or setting the
-    PHABRICATOR_ENV configuration variable. See below for more information.
+    `PHABRICATOR_ENV` configuration variable. See below for more information.
   - **Defaults**: Defaults hard-coded in the Phabricator source, which can not
     be edited. They have the lowest priority, and all other settings override
     them.

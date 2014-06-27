@@ -80,7 +80,6 @@ final class PhamePostViewController extends PhameController {
       $nav,
       array(
         'title' => $post->getTitle(),
-        'device' => true,
       ));
   }
 

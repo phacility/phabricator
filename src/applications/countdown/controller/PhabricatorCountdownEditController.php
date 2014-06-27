@@ -125,7 +125,6 @@ final class PhabricatorCountdownEditController
       ),
       array(
         'title' => $page_title,
-        'device' => true,
       ));
   }
 }

@@ -132,7 +132,6 @@ final class PholioMockViewController extends PholioController {
       $content,
       array(
         'title' => 'M'.$mock->getID().' '.$title,
-        'device' => true,
         'pageObjects' => array($mock->getPHID()),
       ));
   }

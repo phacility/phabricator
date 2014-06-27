@@ -60,7 +60,6 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
         $log_table,
       ),
       array(
-        'device'  => true,
         'title'   => $title,
       ));
 

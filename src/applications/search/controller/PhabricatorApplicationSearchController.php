@@ -268,7 +268,6 @@ final class PhabricatorApplicationSearchController
       $nav,
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 
@@ -352,7 +351,6 @@ final class PhabricatorApplicationSearchController
       $nav,
       array(
         'title' => pht('Saved Queries'),
-        'device' => true,
       ));
   }
 

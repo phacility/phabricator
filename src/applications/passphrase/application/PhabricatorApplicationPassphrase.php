@@ -45,4 +45,10 @@ final class PhabricatorApplicationPassphrase extends PhabricatorApplication {
       ));
   }
 
+  public function getRemarkupRules() {
+    return array(
+      new PassphraseRemarkupRule(),
+    );
+  }
+
 }

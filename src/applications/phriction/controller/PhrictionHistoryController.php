@@ -162,7 +162,6 @@ final class PhrictionHistoryController
       ),
       array(
         'title'     => pht('Document History'),
-        'device'    => true,
       ));
 
   }

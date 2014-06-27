@@ -119,7 +119,6 @@ final class DiffusionRepositoryEditHostingController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 
@@ -284,7 +283,6 @@ final class DiffusionRepositoryEditHostingController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

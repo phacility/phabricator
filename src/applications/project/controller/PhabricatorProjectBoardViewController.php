@@ -24,6 +24,8 @@ final class PhabricatorProjectBoardViewController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
+    $show_hidden = $request->getBool('hidden');
+
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
       ->needImages(true);
@@ -39,12 +41,16 @@ final class PhabricatorProjectBoardViewController
 
     $this->setProject($project);
 
-    $columns = id(new PhabricatorProjectColumnQuery())
+    $column_query = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
-      ->withProjectPHIDs(array($project->getPHID()))
-      ->withStatuses(array(PhabricatorProjectColumn::STATUS_ACTIVE))
-      ->execute();
+      ->withProjectPHIDs(array($project->getPHID()));
 
+    if (!$show_hidden) {
+      $column_query->withStatuses(
+        array(PhabricatorProjectColumn::STATUS_ACTIVE));
+    }
+
+    $columns = $column_query->execute();
     $columns = mpull($columns, null, 'getSequence');
 
     // If there's no default column, create one now.
@@ -168,9 +174,9 @@ final class PhabricatorProjectBoardViewController
       $panel = id(new PHUIWorkpanelView())
         ->setHeader($column->getDisplayName())
         ->setHeaderColor($column->getHeaderColor());
-      if (!$column->isDefaultColumn()) {
-        $panel->setEditURI($board_uri.'column/'.$column->getID().'/');
-      }
+
+      $panel->setEditURI($board_uri.'column/'.$column->getID().'/');
+
       $panel->setHeaderAction(id(new PHUIIconView())
         ->setIconFont('fa-plus')
         ->setHref('/maniphest/task/create/')
@@ -187,6 +193,7 @@ final class PhabricatorProjectBoardViewController
           array(
             'columnPHID' => $column->getPHID(),
           ));
+
       $task_phids = idx($task_map, $column->getPHID(), array());
       foreach (array_select_keys($tasks, $task_phids) as $task) {
         $owner = null;
@@ -210,26 +217,54 @@ final class PhabricatorProjectBoardViewController
       $board->addPanel($panel);
     }
 
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $project,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
-    $add_icon = id(new PHUIIconView())
-      ->setIconFont('fa-plus bluegrey');
-
-    $add_button = id(new PHUIButtonView())
-      ->setText(pht('Add Column'))
-      ->setIcon($add_icon)
-      ->setTag('a')
-      ->setHref($this->getApplicationURI('board/'.$this->id.'/edit/'))
-      ->setDisabled(!$can_edit)
-      ->setWorkflow(!$can_edit);
-
     Javelin::initBehavior(
-      'boards-filter',
+      'boards-dropdown',
+      array());
+
+    $filter_menu = $this->buildFilterMenu(
+      $viewer,
+      $custom_query,
+      $engine,
+      $query_key);
+
+    $manage_menu = $this->buildManageMenu($project, $show_hidden);
+
+    $header_link = phutil_tag(
+      'a',
       array(
+        'href' => $this->getApplicationURI('view/'.$project->getID().'/')
+      ),
+      $project->getName());
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($header_link)
+      ->setUser($viewer)
+      ->setNoBackground(true)
+      ->setImage($project->getProfileImageURI())
+      ->setImageURL($this->getApplicationURI('view/'.$project->getID().'/'))
+      ->addActionLink($filter_menu)
+      ->addActionLink($manage_menu)
+      ->setPolicyObject($project);
+
+    $board_box = id(new PHUIBoxView())
+      ->appendChild($board)
+      ->addClass('project-board-wrapper');
+
+    return $this->buildApplicationPage(
+      array(
+        $header,
+        $board_box,
+      ),
+      array(
+        'title' => pht('%s Board', $project->getName()),
       ));
+  }
+
+  private function buildFilterMenu(
+    PhabricatorUser $viewer,
+    $custom_query,
+    PhabricatorApplicationSearchEngine $engine,
+    $query_key) {
 
     $filter_icon = id(new PHUIIconView())
       ->setIconFont('fa-search-plus bluegrey');
@@ -282,8 +317,6 @@ final class PhabricatorProjectBoardViewController
       ->setWorkflow(true)
       ->setName(pht('Advanced Filter...'));
 
-
-
     $filter_menu = id(new PhabricatorActionListView())
         ->setUser($viewer);
     foreach ($items as $item) {
@@ -295,43 +328,73 @@ final class PhabricatorProjectBoardViewController
       ->setIcon($filter_icon)
       ->setTag('a')
       ->setHref('#')
-      ->addSigil('boards-filter-menu')
-
+      ->addSigil('boards-dropdown-menu')
       ->setMetadata(
         array(
           'items' => hsprintf('%s', $filter_menu),
         ));
 
-    $header_link = phutil_tag(
-      'a',
-      array(
-        'href' => $this->getApplicationURI('view/'.$project->getID().'/')
-      ),
-      $project->getName());
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader($header_link)
-      ->setUser($viewer)
-      ->setNoBackground(true)
-      ->setImage($project->getProfileImageURI())
-      ->setImageURL($this->getApplicationURI('view/'.$project->getID().'/'))
-      ->addActionLink($filter_button)
-      ->addActionLink($add_button)
-      ->setPolicyObject($project);
-
-    $board_box = id(new PHUIBoxView())
-      ->appendChild($board)
-      ->addClass('project-board-wrapper');
-
-    return $this->buildApplicationPage(
-      array(
-        $header,
-        $board_box,
-      ),
-      array(
-        'title' => pht('%s Board', $project->getName()),
-        'device' => true,
-      ));
+    return $filter_button;
   }
+
+  private function buildManageMenu(
+    PhabricatorProject $project,
+    $show_hidden) {
+
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $project,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $manage_icon = id(new PHUIIconView())
+      ->setIconFont('fa-cog bluegrey');
+
+    $manage_items = array();
+
+    $manage_items[] = id(new PhabricatorActionView())
+      ->setIcon('fa-plus')
+      ->setName(pht('Add Column'))
+      ->setHref($this->getApplicationURI('board/'.$this->id.'/edit/'));
+
+    if ($show_hidden) {
+      $hidden_uri = $request->getRequestURI()
+        ->setQueryParam('hidden', null);
+      $hidden_icon = 'fa-eye-slash';
+      $hidden_text = pht('Hide Hidden Columns');
+    } else {
+      $hidden_uri = $request->getRequestURI()
+        ->setQueryParam('hidden', 'true');
+      $hidden_icon = 'fa-eye';
+      $hidden_text = pht('Show Hidden Columns');
+    }
+
+    $manage_items[] = id(new PhabricatorActionView())
+      ->setIcon($hidden_icon)
+      ->setName($hidden_text)
+      ->setHref($hidden_uri);
+
+    $manage_menu = id(new PhabricatorActionListView())
+        ->setUser($viewer);
+    foreach ($manage_items as $item) {
+      $manage_menu->addAction($item);
+    }
+
+    $manage_button = id(new PHUIButtonView())
+      ->setText(pht('Manage Board'))
+      ->setIcon($manage_icon)
+      ->setTag('a')
+      ->setHref('#')
+      ->addSigil('boards-dropdown-menu')
+      ->setMetadata(
+        array(
+          'items' => hsprintf('%s', $manage_menu),
+        ));
+
+    return $manage_button;
+  }
+
 
 }

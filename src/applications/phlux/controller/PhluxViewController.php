@@ -84,7 +84,6 @@ final class PhluxViewController extends PhluxController {
       ),
       array(
         'title'  => $title,
-        'device' => true,
       ));
   }
 

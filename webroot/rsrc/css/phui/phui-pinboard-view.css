@@ -92,3 +92,11 @@
   text-decoration: line-through;
 }
 
+.dashboard-panel .phui-pinboard-view {
+  margin: 0;
+  padding: 16px 12px 0 12px;
+  background: #fff;
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
+}

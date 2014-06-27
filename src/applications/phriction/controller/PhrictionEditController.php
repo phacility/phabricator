@@ -293,7 +293,6 @@ final class PhrictionEditController
       ),
       array(
         'title'   => pht('Edit Document'),
-        'device'  => true,
       ));
   }
 

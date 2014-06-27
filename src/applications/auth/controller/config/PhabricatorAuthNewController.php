@@ -92,7 +92,6 @@ final class PhabricatorAuthNewController
       ),
       array(
         'title' => pht('Add Authentication Provider'),
-        'device' => true,
       ));
   }
 

@@ -403,13 +403,12 @@ final class CeleritySpriteGenerator {
 
     $unusual_heights = array(
       'breadcrumbs'     => 31,
-      'red-header'      => 70,
-      'blue-header'     => 70,
-      'green-header'    => 70,
-      'yellow-header'   => 70,
       'grey-header'     => 70,
       'dark-grey-header' => 70,
       'lightblue-header' => 240,
+      'lightgreen-header' => 240,
+      'lightviolet-header' => 240,
+      'lightred-header' => 240,
     );
 
     $sprites = array();

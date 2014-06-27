@@ -3,6 +3,7 @@
 final class PHUIObjectBoxView extends AphrontView {
 
   private $headerText;
+  private $headerColor;
   private $formErrors = null;
   private $formSaved = false;
   private $errorView;
@@ -78,6 +79,11 @@ final class PHUIObjectBoxView extends AphrontView {
     return $this;
   }
 
+  public function setHeaderColor($color) {
+    $this->headerColor = $color;
+    return $this;
+  }
+
   public function setFormErrors(array $errors, $title = null) {
     if (nonempty($errors)) {
       $this->formErrors = id(new AphrontErrorView())
@@ -115,7 +121,7 @@ final class PHUIObjectBoxView extends AphrontView {
     return $this;
   }
 
-  public function setHeader(PHUIHeaderView $header) {
+  public function setHeader($header) {
     $this->header = $header;
     return $this;
   }
@@ -135,13 +141,19 @@ final class PHUIObjectBoxView extends AphrontView {
 
     require_celerity_resource('phui-object-box-css');
 
+    if ($this->headerColor) {
+      $header_color = $this->headerColor;
+    } else {
+      $header_color = PHUIActionHeaderView::HEADER_LIGHTBLUE;
+    }
+
     if ($this->header) {
       $header = $this->header;
-      $header->setGradient(PhabricatorActionHeaderView::HEADER_LIGHTBLUE);
+      $header->setHeaderColor($header_color);
     } else {
       $header = id(new PHUIHeaderView())
         ->setHeader($this->headerText)
-        ->setGradient(PhabricatorActionHeaderView::HEADER_LIGHTBLUE);
+        ->setHeaderColor($header_color);
     }
 
     $ex = $this->validationException;
@@ -257,6 +269,8 @@ final class PHUIObjectBoxView extends AphrontView {
     if ($this->flush) {
       $content->addClass('phui-object-box-flush');
     }
+
+    $content->addClass('phui-object-box-'.$header_color);
 
     foreach ($this->sigils as $sigil) {
       $content->addSigil($sigil);

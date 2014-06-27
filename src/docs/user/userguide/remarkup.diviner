@@ -442,6 +442,26 @@ In Differential and Maniphest, you can mention another user by writing:
 When you submit your comment, this will add them as a CC on the revision or task
 if they aren't already CC'd.
 
+Icons
+=====
+
+You can add icons to comments using the `{icon ...}` syntax. For example:
+
+  {icon camera}
+
+This renders: {icon camera}
+
+You can select a color for icons:
+
+  {icon camera color=blue}
+
+This renders: {icon camera color=blue}
+
+For a list of available icons and colors, check the UIExamples application.
+(The icons are sourced from
+[[ http://fortawesome.github.io/Font-Awesome/ | FontAwesome ]], so you can also
+browse the collection there.)
+
 = Phriction Documents =
 
 You can link to Phriction documents with a name or path:

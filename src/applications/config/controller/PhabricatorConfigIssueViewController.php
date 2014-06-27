@@ -48,7 +48,6 @@ final class PhabricatorConfigIssueViewController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

@@ -23,7 +23,6 @@ final class PhabricatorConfigWelcomeController
       $nav,
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 
@@ -156,7 +155,10 @@ final class PhabricatorConfigWelcomeController
       $content);
 
     $dashboard_href = PhabricatorEnv::getURI('/dashboard/');
-    $have_dashboard = false;
+    $have_dashboard = (bool)PhabricatorDashboardInstall::getDashboard(
+      $viewer,
+      PhabricatorApplicationHome::DASHBOARD_DEFAULT,
+      'PhabricatorApplicationHome');
     if ($have_dashboard) {
       $content = pht(
         "You've installed a default dashboard to replace this welcome screen ".
@@ -356,51 +358,37 @@ final class PhabricatorConfigWelcomeController
     $columns = id(new AphrontMultiColumnView())
       ->addColumn($col1)
       ->addColumn($col2)
-      ->setFluidLayout(true)
-      ->setGutter(AphrontMultiColumnView::GUTTER_SMALL);
+      ->setFluidLayout(true);
 
-    return array(
-      $header,
-      $columns,
-    );
-  }
-
-  private function newHeader($title, $done) {
-    $header = id(new PhabricatorActionHeaderView())
-      ->setHeaderTitle($title);
-
-    if ($done === true) {
-      $header
-        ->setHeaderColor(PhabricatorActionHeaderView::HEADER_GREEN)
-        ->addAction(id(new PHUIIconView())->setIconFont('fa-check'));
-    } else if ($done === false) {
-      $header
-        ->setHeaderColor(PhabricatorActionHeaderView::HEADER_BLUE)
-        ->addAction(id(new PHUIIconView())->setIconFont('fa-exclamation'));
-    } else {
-      $header
-        ->setHeaderColor(PhabricatorActionHeaderView::HEADER_LIGHTBLUE);
-    }
-
-    return $header;
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'config-welcome',
+      ),
+      array(
+        $header,
+        $columns,
+      ));
   }
 
   private function newItem(AphrontRequest $request, $title, $done, $content) {
     $viewer = $request->getUser();
 
-    $header = $this->newHeader($title, $done);
+    $box = new PHUIObjectBoxView();
+    $header = new PHUIActionHeaderView();
+    $header->setHeaderTitle($title);
+    if ($done === true) {
+      $box->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTGREEN);
+      $header->addAction(id(new PHUIIconView())->setIconFont('fa-check'));
+    } else if ($done === false) {
+      $box->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTVIOLET);
+      $header->addAction(id(new PHUIIconView())->setIconFont('fa-exclamation'));
+    }
 
     $content = PhabricatorMarkupEngine::renderOneObject(
       id(new PhabricatorMarkupOneOff())->setContent($content),
       'default',
       $viewer);
-
-    $header = phutil_tag(
-      'div',
-      array(
-        'class' => 'config-welcome-box-header',
-      ),
-      $header);
 
     $content = phutil_tag(
       'div',
@@ -409,10 +397,10 @@ final class PhabricatorConfigWelcomeController
       ),
       $content);
 
-    return id(new PHUIBoxView())
-      ->addClass('config-welcome-box')
-      ->appendChild($header)
-      ->appendChild($content);
+    $box->setHeader($header);
+    $box->appendChild($content);
+
+    return $box;
   }
 
 }
