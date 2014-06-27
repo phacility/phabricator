@@ -217,6 +217,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
     $content = id(new PHUIDocumentView())
       ->addClass('legalpad')
       ->setHeader($header)
+      ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS)
       ->appendChild(
         array(
           $signed_status,
@@ -237,9 +238,13 @@ final class LegalpadDocumentSignController extends LegalpadController {
         $e_email,
         $e_agree);
 
+      $subheader = id(new PHUIHeaderView())
+        ->setHeader(pht('Agree and Sign Document'))
+        ->setBleedHeader(true);
+
       $content->appendChild(
         array(
-          id(new PHUIHeaderView())->setHeader(pht('Agree and Sign Document')),
+          $subheader,
           $error_view,
           $signature_form,
         ));

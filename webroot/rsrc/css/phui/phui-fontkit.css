@@ -18,6 +18,11 @@
   margin: 0 0 16px;
 }
 
+.phui-font-source-sans .phabricator-remarkup ol li,
+.phui-font-source-sans .phabricator-remarkup ul li {
+  margin-bottom: 4px;
+}
+
 .phui-font-source-sans .phabricator-remarkup tt {
   font-size: 13px;
   padding: 1px 3px 2px;
@@ -35,4 +40,14 @@
 
 .phui-font-source-sans a {
   color: {$blue};
+}
+
+body .phui-font-source-sans
+  .phui-header-shell.phui-bleed-header .phui-header-view {
+  font-size: 18px;
+}
+
+.phui-font-source-sans .phui-form-view {
+  font: 13px/1.231 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: normal;
 }
