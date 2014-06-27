@@ -6,7 +6,7 @@
   background-color: #e0e3ec;
   border-width: 1px 0;
   border-style: solid;
-  border-color: #c0c5d1;
+  border-color: {$hovergrey};
   overflow: hidden;
 }
 

@@ -16,14 +16,15 @@ final class PhabricatorConfigIssueListController
 
     $list = $this->buildIssueList($issues);
     $list->setNoDataString(pht('There are no open setup issues.'));
+    $list->setStackable(true);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Open Phabricator Setup Issues'));
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Open Phabricator Setup Issues'))
+      ->appendChild($list);
 
     $nav->appendChild(
       array(
-        $header,
-        $list,
+        $box,
       ));
 
     $title = pht('Setup Issues');
