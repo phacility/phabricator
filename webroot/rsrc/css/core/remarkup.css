@@ -301,6 +301,10 @@
   display: inline-block;
 }
 
+.phabricator-remarkup-embed-image-full img {
+  max-width: 100%;
+}
+
 .phabricator-remarkup table.remarkup-table {
   border-collapse: separate;
   border-spacing: 1px;
