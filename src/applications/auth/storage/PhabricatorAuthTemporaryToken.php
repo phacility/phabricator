@@ -3,7 +3,10 @@
 final class PhabricatorAuthTemporaryToken extends PhabricatorAuthDAO
   implements PhabricatorPolicyInterface {
 
+  // TODO: OAuth1 stores a client identifier here, which is not a real PHID.
+  // At some point, we should rename this column to be a little more generic.
   protected $objectPHID;
+
   protected $tokenType;
   protected $tokenExpires;
   protected $tokenCode;

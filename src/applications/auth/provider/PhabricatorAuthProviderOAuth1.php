@@ -9,6 +9,8 @@ abstract class PhabricatorAuthProviderOAuth1
   const PROPERTY_CONSUMER_SECRET = 'oauth1:consumer:secret';
   const PROPERTY_PRIVATE_KEY = 'oauth1:private:key';
 
+  const TEMPORARY_TOKEN_TYPE = 'oauth1:request:secret';
+
   protected function getIDKey() {
     return self::PROPERTY_CONSUMER_KEY;
   }
@@ -55,6 +57,11 @@ abstract class PhabricatorAuthProviderOAuth1
       $adapter->setCallbackURI($callback_uri);
 
       $uri = $adapter->getClientRedirectURI();
+
+      $this->saveHandshakeTokenSecret(
+        $client_code,
+        $adapter->getTokenSecret());
+
       $response = id(new AphrontRedirectResponse())->setURI($uri);
       return array($account, $response);
     }
@@ -84,6 +91,10 @@ abstract class PhabricatorAuthProviderOAuth1
 
     $adapter->setToken($token);
     $adapter->setVerifier($verifier);
+
+    $client_code = $this->getAuthCSRFCode($request);
+    $token_secret = $this->loadHandshakeTokenSecret($client_code);
+    $adapter->setTokenSecret($token_secret);
 
     // NOTE: As a side effect, this will cause the OAuth adapter to request
     // an access token.
@@ -195,6 +206,70 @@ abstract class PhabricatorAuthProviderOAuth1
     $item->addAttribute(pht('OAuth1 Account'));
 
     parent::willRenderLinkedAccount($viewer, $item, $account);
+  }
+
+
+/* -(  Temporary Secrets  )-------------------------------------------------- */
+
+
+  private function saveHandshakeTokenSecret($client_code, $secret) {
+    $key = $this->getHandshakeTokenKeyFromClientCode($client_code);
+    $type = $this->getTemporaryTokenType(self::TEMPORARY_TOKEN_TYPE);
+
+    // Wipe out an existing token, if one exists.
+    $token = id(new PhabricatorAuthTemporaryTokenQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withObjectPHIDs(array($key))
+      ->withTokenTypes(array($type))
+      ->executeOne();
+    if ($token) {
+      $token->delete();
+    }
+
+    // Save the new secret.
+    id(new PhabricatorAuthTemporaryToken())
+      ->setObjectPHID($key)
+      ->setTokenType($type)
+      ->setTokenExpires(time() + phutil_units('1 hour in seconds'))
+      ->setTokenCode($secret)
+      ->save();
+  }
+
+  private function loadHandshakeTokenSecret($client_code) {
+    $key = $this->getHandshakeTokenKeyFromClientCode($client_code);
+    $type = $this->getTemporaryTokenType(self::TEMPORARY_TOKEN_TYPE);
+
+    $token = id(new PhabricatorAuthTemporaryTokenQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withObjectPHIDs(array($key))
+      ->withTokenTypes(array($type))
+      ->withExpired(false)
+      ->executeOne();
+
+    if (!$token) {
+      throw new Exception(
+        pht(
+          'Unable to load your OAuth1 token secret from storage. It may '.
+          'have expired. Try authenticating again.'));
+    }
+
+    return $token->getTokenCode();
+  }
+
+  private function getTemporaryTokenType($core_type) {
+    // Namespace the type so that multiple providers don't step on each
+    // others' toes if a user starts Mediawiki and Bitbucket auth at the
+    // same time.
+
+    return $core_type.':'.$this->getProviderConfig()->getID();
+  }
+
+  private function getHandshakeTokenKeyFromClientCode($client_code) {
+    // NOTE: This is very slightly coersive since the TemporaryToken table
+    // expects an "objectPHID" as an identifier, but nothing about the storage
+    // is bound to PHIDs.
+
+    return 'oauth1:secret/'.$client_code;
   }
 
 }
