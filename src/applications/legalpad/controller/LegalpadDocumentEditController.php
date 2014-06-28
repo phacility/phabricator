@@ -31,7 +31,6 @@ final class LegalpadDocumentEditController extends LegalpadController {
       $document = id(new LegalpadDocumentQuery())
         ->setViewer($user)
         ->needDocumentBodies(true)
-        ->needSignatures(true)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -154,14 +153,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
           $this->getApplicationURI('view/'.$document->getID()));
       $title = pht('Update Document');
       $short = pht('Update');
-      $signatures = $document->getSignatures();
-      if ($signatures) {
-        $form->appendInstructions(pht(
-          'Warning: there are %d signature(s) already for this document. '.
-          'Updating the title or text will invalidate these signatures and '.
-          'users will need to sign again. Proceed carefully.',
-          count($signatures)));
-      }
+
       $crumbs->addTextCrumb(
         $document->getMonogram(),
         $this->getApplicationURI('view/'.$document->getID()));

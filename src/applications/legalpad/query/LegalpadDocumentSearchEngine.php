@@ -21,6 +21,10 @@ final class LegalpadDocumentSearchEngine
       'contributorPHIDs',
       $this->readUsersFromRequest($request, 'contributors'));
 
+    $saved->setParameter(
+      'withViewerSignature',
+      $request->getBool('withViewerSignature'));
+
     $saved->setParameter('createdStart', $request->getStr('createdStart'));
     $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
 
@@ -29,9 +33,24 @@ final class LegalpadDocumentSearchEngine
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new LegalpadDocumentQuery())
-      ->needViewerSignatures(true)
-      ->withCreatorPHIDs($saved->getParameter('creatorPHIDs', array()))
-      ->withContributorPHIDs($saved->getParameter('contributorPHIDs', array()));
+      ->needViewerSignatures(true);
+
+    $creator_phids = $saved->getParameter('creatorPHIDs', array());
+    if ($creator_phids) {
+      $query->withCreatorPHIDs($creator_phids);
+    }
+
+    $contributor_phids = $saved->getParameter('contributorPHIDs', array());
+    if ($contributor_phids) {
+      $query->withContributorPHIDs($contributor_phids);
+    }
+
+    if ($saved->getParameter('withViewerSignature')) {
+      $viewer_phid = $this->requireViewer()->getPHID();
+      if ($viewer_phid) {
+        $query->withSignerPHIDs(array($viewer_phid));
+      }
+    }
 
     $start = $this->parseDateTime($saved->getParameter('createdStart'));
     $end = $this->parseDateTime($saved->getParameter('createdEnd'));
@@ -60,7 +79,20 @@ final class LegalpadDocumentSearchEngine
       ->withPHIDs($phids)
       ->execute();
 
+    $viewer_signature = $saved_query->getParameter('withViewerSignature');
+    if (!$this->requireViewer()->getPHID()) {
+      $viewer_signature = false;
+    }
+
     $form
+      ->appendChild(
+        id(new AphrontFormCheckboxControl())
+          ->addCheckbox(
+            'withViewerSignature',
+            1,
+            pht('Show only documents I have signed.'),
+            $viewer_signature)
+          ->setDisabled(!$this->requireViewer()->getPHID()))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/users/')
@@ -89,9 +121,13 @@ final class LegalpadDocumentSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
-      'all' => pht('All Documents'),
-    );
+    $names = array();
+
+    if ($this->requireViewer()->isLoggedIn()) {
+      $names['signed'] = pht('Signed Documents');
+    }
+
+    $names['all'] = pht('All Documents');
 
     return $names;
   }
@@ -102,6 +138,9 @@ final class LegalpadDocumentSearchEngine
     $query->setQueryKey($query_key);
 
     switch ($query_key) {
+      case 'signed':
+        return $query
+          ->setParameter('withViewerSignature', true);
       case 'all':
         return $query;
     }
