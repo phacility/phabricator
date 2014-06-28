@@ -18,7 +18,8 @@ final class LegalpadDocument extends LegalpadDAO
 
   private $documentBody = self::ATTACHABLE;
   private $contributors = self::ATTACHABLE;
-  private $signatures   = self::ATTACHABLE;
+  private $signatures = self::ATTACHABLE;
+  private $userSignatures = array();
 
   public static function initializeNewDocument(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -89,6 +90,17 @@ final class LegalpadDocument extends LegalpadDAO
 
   public function getMonogram() {
     return 'L'.$this->getID();
+  }
+
+  public function getUserSignature($phid) {
+    return $this->assertAttachedKey($this->userSignatures, $phid);
+  }
+
+  public function attachUserSignature(
+    $user_phid,
+    LegalpadDocumentSignature $signature = null) {
+    $this->userSignatures[$user_phid] = $signature;
+    return $this;
   }
 
 

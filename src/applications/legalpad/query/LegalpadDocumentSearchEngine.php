@@ -29,6 +29,7 @@ final class LegalpadDocumentSearchEngine
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new LegalpadDocumentQuery())
+      ->needViewerSignatures(true)
       ->withCreatorPHIDs($saved->getParameter('creatorPHIDs', array()))
       ->withContributorPHIDs($saved->getParameter('contributorPHIDs', array()));
 
@@ -111,7 +112,7 @@ final class LegalpadDocumentSearchEngine
   protected function getRequiredHandlePHIDsForResultList(
     array $documents,
     PhabricatorSavedQuery $query) {
-    return array_mergev(mpull($documents, 'getRecentContributorPHIDs'));
+    return array();
   }
 
   protected function renderResultList(
@@ -126,8 +127,6 @@ final class LegalpadDocumentSearchEngine
     $list->setUser($viewer);
     foreach ($documents as $document) {
       $last_updated = phabricator_date($document->getDateModified(), $viewer);
-      $recent_contributors = $document->getRecentContributorPHIDs();
-      $updater = $handles[reset($recent_contributors)]->renderLink();
 
       $title = $document->getTitle();
 
@@ -136,9 +135,32 @@ final class LegalpadDocumentSearchEngine
         ->setHeader($title)
         ->setHref('/'.$document->getMonogram())
         ->setObject($document)
-        ->addIcon('none', pht('Last updated: %s', $last_updated))
-        ->addByline(pht('Updated by: %s', $updater))
-        ->addAttribute(pht('Versions: %d', $document->getVersions()));
+        ->addIcon('none', pht('Version %d', $document->getVersions()))
+        ->addIcon('none', pht('Updated %s', $last_updated));
+
+      if ($viewer->getPHID()) {
+        $signature = $document->getUserSignature($viewer->getPHID());
+      } else {
+        $signature = null;
+      }
+
+      if ($signature) {
+        $item->addAttribute(
+          array(
+            id(new PHUIIconView())->setIconFont('fa-check-square-o', 'green'),
+            ' ',
+            pht(
+              'Signed on %s',
+              phabricator_date($signature->getDateCreated(), $viewer)),
+          ));
+      } else {
+        $item->addAttribute(
+          array(
+            id(new PHUIIconView())->setIconFont('fa-square-o', 'grey'),
+            ' ',
+            pht('Not Signed'),
+          ));
+      }
 
       $list->addItem($item);
     }

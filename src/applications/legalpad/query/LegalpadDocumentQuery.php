@@ -14,6 +14,7 @@ final class LegalpadDocumentQuery
   private $needDocumentBodies;
   private $needContributors;
   private $needSignatures;
+  private $needViewerSignatures;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -62,6 +63,11 @@ final class LegalpadDocumentQuery
 
   public function withDateCreatedAfter($date_created_after) {
     $this->dateCreatedAfter = $date_created_after;
+    return $this;
+  }
+
+  public function needViewerSignatures($need) {
+    $this->needViewerSignatures = $need;
     return $this;
   }
 
@@ -116,6 +122,29 @@ final class LegalpadDocumentQuery
 
     if ($this->needSignatures) {
       $documents = $this->loadSignatures($documents);
+    }
+
+    if ($this->needViewerSignatures) {
+      if ($documents) {
+
+        if ($this->getViewer()->getPHID()) {
+          $signatures = id(new LegalpadDocumentSignatureQuery())
+            ->setViewer($this->getViewer())
+            ->withSignerPHIDs(array($this->getViewer()->getPHID()))
+            ->withDocumentPHIDs(mpull($documents, 'getPHID'))
+            ->execute();
+          $signatures = mpull($signatures, null, 'getDocumentPHID');
+        } else {
+          $signatures = array();
+        }
+
+        foreach ($documents as $document) {
+          $signature = idx($signatures, $document->getPHID());
+          $document->attachUserSignature(
+            $this->getViewer()->getPHID(),
+            $signature);
+        }
+      }
     }
 
     return $documents;
