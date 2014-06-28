@@ -110,55 +110,98 @@ final class LegalpadDocumentSignatureSearchEngine
 
     $viewer = $this->requireViewer();
 
-    $list = new PHUIObjectItemListView();
-    $list->setUser($viewer);
+    Javelin::initBehavior('phabricator-tooltips');
 
+    $sig_good = $this->renderIcon(
+      'fa-check',
+      null,
+      pht('Verified, Current'));
+
+    $sig_old = $this->renderIcon(
+      'fa-clock-o',
+      'orange',
+      pht('Signed Older Version'));
+
+    $sig_unverified = $this->renderIcon(
+      'fa-envelope',
+      'red',
+      pht('Unverified Email'));
+
+    id(new PHUIIconView())
+      ->setIconFont('fa-envelope', 'red')
+      ->addSigil('has-tooltip')
+      ->setMetadata(array('tip' => pht('Unverified Email')));
+
+    $rows = array();
     foreach ($signatures as $signature) {
-      $created = phabricator_date($signature->getDateCreated(), $viewer);
-
       $data = $signature->getSignatureData();
-
-      $sig_data = phutil_tag(
-        'div',
-        array(),
-        array(
-          phutil_tag(
-            'div',
-            array(),
-            phutil_tag(
-              'a',
-              array(
-                'href' => 'mailto:'.$data['email'],
-              ),
-              $data['email'])),
-          ));
-
-      $item = id(new PHUIObjectItemView())
-        ->setObject($signature)
-        ->setHeader($data['name'])
-        ->setSubhead($sig_data)
-        ->addIcon('none', pht('Signed %s', $created));
-
-      $good_sig = true;
-      if (!$signature->isVerified()) {
-        $item->addFootIcon('disable', 'Unverified Email');
-        $good_sig = false;
-      }
+      $name = idx($data, 'name');
+      $email = idx($data, 'email');
 
       $document = $signature->getDocument();
-      if ($signature->getDocumentVersion() != $document->getVersions()) {
-        $item->addFootIcon('delete', 'Stale Signature');
-        $good_sig = false;
+
+      if (!$signature->isVerified()) {
+        $sig_icon = $sig_unverified;
+      } else if ($signature->getDocumentVersion() != $document->getVersions()) {
+        $sig_icon = $sig_old;
+      } else {
+        $sig_icon = $sig_good;
       }
 
-      if ($good_sig) {
-        $item->setBarColor('green');
-      }
-
-      $list->addItem($item);
+      $rows[] = array(
+        $sig_icon,
+        $handles[$signature->getSignerPHID()]->renderLink(),
+        $name,
+        phutil_tag(
+          'a',
+          array(
+            'href' => 'mailto:'.$email,
+          ),
+          $email),
+        phabricator_datetime($signature->getDateCreated(), $viewer),
+      );
     }
 
-    return $list;
+    $table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          '',
+          pht('Account'),
+          pht('Name'),
+          pht('Email'),
+          pht('Signed'),
+        ))
+      ->setColumnClasses(
+        array(
+          '',
+          '',
+          '',
+          'wide',
+          'right',
+        ));
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Signatures'))
+      ->appendChild($table);
+
+    return $box;
+  }
+
+  private function renderIcon($icon, $color, $title) {
+    Javelin::initBehavior('phabricator-tooltips');
+
+    return array(
+      id(new PHUIIconView())
+        ->setIconFont($icon, $color)
+        ->addSigil('has-tooltip')
+        ->setMetadata(array('tip' => $title)),
+      javelin_tag(
+        'span',
+        array(
+          'aural' => true,
+        ),
+        $title),
+    );
   }
 
 }
