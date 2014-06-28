@@ -37,8 +37,8 @@ final class PhabricatorLegalpadPHIDTypeDocument extends PhabricatorPHIDType {
       $document = $objects[$phid];
       $name = $document->getDocumentBody()->getTitle();
       $handle->setName($name);
-      $handle->setFullName($name);
-      $handle->setURI('/legalpad/view/'.$document->getID().'/');
+      $handle->setFullName($document->getMonogram().' '.$name);
+      $handle->setURI('/'.$document->getMonogram());
     }
   }
 

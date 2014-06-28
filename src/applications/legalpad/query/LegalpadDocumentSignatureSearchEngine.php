@@ -25,6 +25,15 @@ final class LegalpadDocumentSignatureSearchEngine
       'signerPHIDs',
       $this->readUsersFromRequest($request, 'signers'));
 
+    $saved->setParameter(
+      'documentPHIDs',
+      $this->readPHIDsFromRequest(
+        $request,
+        'documents',
+        array(
+          PhabricatorLegalpadPHIDTypeDocument::TYPECONST,
+        )));
+
     return $saved;
   }
 
@@ -38,6 +47,11 @@ final class LegalpadDocumentSignatureSearchEngine
 
     if ($this->document) {
       $query->withDocumentPHIDs(array($this->document->getPHID()));
+    } else {
+      $document_phids = $saved->getParameter('documentPHIDs', array());
+      if ($document_phids) {
+        $query->withDocumentPHIDs($document_phids);
+      }
     }
 
     return $query;
@@ -47,13 +61,24 @@ final class LegalpadDocumentSignatureSearchEngine
     AphrontFormView $form,
     PhabricatorSavedQuery $saved_query) {
 
+    $document_phids = $saved_query->getParameter('documentPHIDs', array());
     $signer_phids = $saved_query->getParameter('signerPHIDs', array());
 
-    $phids = array_merge($signer_phids);
+    $phids = array_merge($document_phids, $signer_phids);
     $handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->requireViewer())
       ->withPHIDs($phids)
       ->execute();
+
+    if (!$this->document) {
+      $form
+        ->appendChild(
+          id(new AphrontFormTokenizerControl())
+            ->setDatasource('/typeahead/common/legalpaddocuments/')
+            ->setName('documents')
+            ->setLabel(pht('Documents'))
+            ->setValue(array_select_keys($handles, $document_phids)));
+    }
 
     $form
       ->appendChild(
@@ -68,10 +93,7 @@ final class LegalpadDocumentSignatureSearchEngine
     if ($this->document) {
       return '/legalpad/signatures/'.$this->document->getID().'/'.$path;
     } else {
-      throw new Exception(
-        pht(
-          'Searching for signatures outside of a document context is not '.
-          'currently supported.'));
+      return '/legalpad/signatures/'.$path;
     }
   }
 
@@ -97,9 +119,12 @@ final class LegalpadDocumentSignatureSearchEngine
   }
 
   protected function getRequiredHandlePHIDsForResultList(
-    array $documents,
+    array $signatures,
     PhabricatorSavedQuery $query) {
-    return mpull($documents, 'getSignerPHID');
+
+    return array_merge(
+      mpull($signatures, 'getSignerPHID'),
+      mpull($signatures, 'getDocumentPHID'));
   }
 
   protected function renderResultList(
@@ -150,6 +175,7 @@ final class LegalpadDocumentSignatureSearchEngine
 
       $rows[] = array(
         $sig_icon,
+        $handles[$document->getPHID()]->renderLink(),
         $handles[$signature->getSignerPHID()]->renderLink(),
         $name,
         phutil_tag(
@@ -166,13 +192,23 @@ final class LegalpadDocumentSignatureSearchEngine
       ->setHeaders(
         array(
           '',
+          pht('Document'),
           pht('Account'),
           pht('Name'),
           pht('Email'),
           pht('Signed'),
         ))
+      ->setColumnVisibility(
+        array(
+          true,
+
+          // Only show the "Document" column if we aren't scoped to a
+          // particular document.
+          !$this->document,
+        ))
       ->setColumnClasses(
         array(
+          '',
           '',
           '',
           '',
@@ -183,6 +219,18 @@ final class LegalpadDocumentSignatureSearchEngine
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Signatures'))
       ->appendChild($table);
+
+    if (!$this->document) {
+      $policy_notice = id(new AphrontErrorView())
+        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+        ->setErrors(
+          array(
+            pht(
+              'NOTE: You can only see your own signatures and signatures on '.
+              'documents you have permission to edit.'),
+          ));
+      $box->setErrorView($policy_notice);
+    }
 
     return $box;
   }

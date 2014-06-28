@@ -7,7 +7,7 @@ final class LegalpadDocumentSignatureListController extends LegalpadController {
   private $document;
 
   public function willProcessRequest(array $data) {
-    $this->documentID = $data['id'];
+    $this->documentID = idx($data, 'id');
     $this->queryKey = idx($data, 'queryKey');
   }
 
@@ -15,23 +15,28 @@ final class LegalpadDocumentSignatureListController extends LegalpadController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $document = id(new LegalpadDocumentQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->documentID))
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->executeOne();
-    if (!$document) {
-      return new Aphront404Response();
+    if ($this->documentID) {
+      $document = id(new LegalpadDocumentQuery())
+        ->setViewer($user)
+        ->withIDs(array($this->documentID))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
+      if (!$document) {
+        return new Aphront404Response();
+      }
+
+      $this->document = $document;
     }
 
-    $this->document = $document;
+    $engine = id(new LegalpadDocumentSignatureSearchEngine());
 
-    $engine = id(new LegalpadDocumentSignatureSearchEngine())
-      ->setDocument($document);
+    if ($this->document) {
+      $engine->setDocument($this->document);
+    }
 
     $controller = id(new PhabricatorApplicationSearchController($request))
       ->setQueryKey($this->queryKey)
@@ -47,10 +52,14 @@ final class LegalpadDocumentSignatureListController extends LegalpadController {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    id(new LegalpadDocumentSignatureSearchEngine())
-      ->setViewer($user)
-      ->setDocument($this->document)
-      ->addNavigationItems($nav->getMenu());
+    $engine = id(new LegalpadDocumentSignatureSearchEngine())
+      ->setViewer($user);
+
+    if ($this->document) {
+      $engine->setDocument($this->document);
+    }
+
+    $engine->addNavigationItems($nav->getMenu());
 
     return $nav;
   }
@@ -58,9 +67,15 @@ final class LegalpadDocumentSignatureListController extends LegalpadController {
   public function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
-    $crumbs->addTextCrumb(
-      $this->document->getMonogram(),
-      '/'.$this->document->getMonogram());
+    if ($this->document) {
+      $crumbs->addTextCrumb(
+        $this->document->getMonogram(),
+        '/'.$this->document->getMonogram());
+    } else {
+      $crumbs->addTextCrumb(
+        pht('Signatures'),
+        '/legalpad/signatures/');
+    }
 
     return $crumbs;
   }
