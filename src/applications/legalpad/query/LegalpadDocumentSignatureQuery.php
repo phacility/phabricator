@@ -46,9 +46,32 @@ final class LegalpadDocumentSignatureQuery
       $this->buildOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
 
-    $documents = $table->loadAllFromArray($data);
+    $signatures = $table->loadAllFromArray($data);
 
-    return $documents;
+    return $signatures;
+  }
+
+  protected function willFilterPage(array $signatures) {
+    $document_phids = mpull($signatures, 'getDocumentPHID');
+
+    $documents = id(new LegalpadDocumentQuery())
+      ->setParentQuery($this)
+      ->setViewer($this->getViewer())
+      ->withPHIDs($document_phids)
+      ->execute();
+    $documents = mpull($documents, null, 'getPHID');
+
+    foreach ($signatures as $key => $signature) {
+      $document_phid = $signature->getDocumentPHID();
+      $document = idx($documents, $document_phid);
+      if ($document) {
+        $signature->attachDocument($document);
+      } else {
+        unset($signatures[$key]);
+      }
+    }
+
+    return $signatures;
   }
 
   protected function buildWhereClause($conn_r) {
@@ -56,35 +79,35 @@ final class LegalpadDocumentSignatureQuery
 
     $where[] = $this->buildPagingClause($conn_r);
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->documentPHIDs) {
+    if ($this->documentPHIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
         'documentPHID IN (%Ls)',
         $this->documentPHIDs);
     }
 
-    if ($this->signerPHIDs) {
+    if ($this->signerPHIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
         'signerPHID IN (%Ls)',
         $this->signerPHIDs);
     }
 
-    if ($this->documentVersions) {
+    if ($this->documentVersions !== null) {
       $where[] = qsprintf(
         $conn_r,
         'documentVersion IN (%Ld)',
         $this->documentVersions);
     }
 
-    if ($this->secretKeys) {
+    if ($this->secretKeys !== null) {
       $where[] = qsprintf(
         $conn_r,
         'secretKey IN (%Ls)',
