@@ -252,15 +252,22 @@ abstract class DifferentialChangesetHTMLRenderer
         break;
     }
 
-    $encoding = $this->getOriginalCharacterEncoding();
-    if ($encoding != 'utf8' && ($file == DifferentialChangeType::FILE_TEXT)) {
-      if ($encoding) {
-        $messages[] = pht(
-          'This file was converted from %s for display.',
-          phutil_tag('strong', array(), $encoding));
-      } else {
-        $messages[] = pht(
-          'This file uses an unknown character encoding.');
+    // If this is a text file with at least one hunk, we may have converted
+    // the text encoding. In this case, show a note.
+    $show_encoding = ($file == DifferentialChangeType::FILE_TEXT) &&
+                     ($changeset->getHunks());
+
+    if ($show_encoding) {
+      $encoding = $this->getOriginalCharacterEncoding();
+      if ($encoding != 'utf8') {
+        if ($encoding) {
+          $messages[] = pht(
+            'This file was converted from %s for display.',
+            phutil_tag('strong', array(), $encoding));
+        } else {
+          $messages[] = pht(
+            'This file uses an unknown character encoding.');
+        }
       }
     }
 
