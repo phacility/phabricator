@@ -3611,6 +3611,7 @@ phutil_register_library_map(array(
       1 => 'PhabricatorPolicyInterface',
       2 => 'PhabricatorSubscribableInterface',
       3 => 'PhabricatorApplicationTransactionInterface',
+      4 => 'PhabricatorDestructableInterface',
     ),
     'LegalpadDocumentBody' =>
     array(
