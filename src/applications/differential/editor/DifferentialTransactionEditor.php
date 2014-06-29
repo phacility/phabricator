@@ -825,6 +825,18 @@ final class DifferentialTransactionEditor
             'You can not accept this revision because it has already been '.
             'closed.');
         }
+
+        // TODO: It would be nice to make this generic at some point.
+        $signatures = DifferentialRequiredSignaturesField::loadForRevision(
+          $revision);
+        foreach ($signatures as $phid => $signed) {
+          if (!$signed) {
+            return pht(
+              'You can not accept this revision because the author has '.
+              'not signed all of the required legal documents.');
+          }
+        }
+
         break;
 
       case DifferentialAction::ACTION_REJECT:
@@ -1377,6 +1389,15 @@ final class DifferentialTransactionEditor
           if (!$this->getIsCloseByCommit()) {
             return true;
           }
+          break;
+        case DifferentialTransaction::TYPE_ACTION:
+          switch ($xaction->getNewValue()) {
+            case DifferentialAction::ACTION_CLAIM:
+              // When users commandeer revisions, we may need to trigger
+              // signatures or author-based rules.
+              return true;
+          }
+          break;
       }
     }
 
@@ -1499,6 +1520,34 @@ final class DifferentialTransactionEditor
         ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
         ->setMetadataValue('edge:type', $edge_reviewer)
         ->setNewValue($value);
+    }
+
+    // Require legalpad document signatures.
+    $legal_phids = $adapter->getRequiredSignatureDocumentPHIDs();
+    if ($legal_phids) {
+      // We only require signatures of documents which have not already
+      // been signed. In general, this reduces the amount of churn that
+      // signature rules cause.
+
+      $signatures = id(new LegalpadDocumentSignatureQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withDocumentPHIDs($legal_phids)
+        ->withSignerPHIDs(array($object->getAuthorPHID()))
+        ->execute();
+      $signed_phids = mpull($signatures, 'getDocumentPHID');
+      $legal_phids = array_diff($legal_phids, $signed_phids);
+
+      // If we still have something to trigger, add the edges.
+      if ($legal_phids) {
+        $edge_legal = PhabricatorEdgeConfig::TYPE_OBJECT_NEEDS_SIGNATURE;
+        $xactions[] = id(new DifferentialTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+          ->setMetadataValue('edge:type', $edge_legal)
+          ->setNewValue(
+            array(
+              '+' => array_fuse($legal_phids),
+            ));
+      }
     }
 
     // Save extra email PHIDs for later.

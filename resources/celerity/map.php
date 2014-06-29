@@ -386,7 +386,7 @@ return array(
     'rsrc/js/application/files/behavior-icon-composer.js' => '8ef9ab58',
     'rsrc/js/application/files/behavior-launch-icon-composer.js' => '48086888',
     'rsrc/js/application/harbormaster/behavior-reorder-steps.js' => 'b716477f',
-    'rsrc/js/application/herald/HeraldRuleEditor.js' => '6c9e6fb8',
+    'rsrc/js/application/herald/HeraldRuleEditor.js' => '58e048fc',
     'rsrc/js/application/herald/PathTypeahead.js' => 'f7fc67ec',
     'rsrc/js/application/herald/herald-rule-editor.js' => '7ebaeed3',
     'rsrc/js/application/maniphest/behavior-batch-editor.js' => 'f588412e',
@@ -537,7 +537,7 @@ return array(
     'global-drag-and-drop-css' => '697324ad',
     'harbormaster-css' => 'cec833b7',
     'herald-css' => 'c544dd1c',
-    'herald-rule-editor' => '6c9e6fb8',
+    'herald-rule-editor' => '58e048fc',
     'herald-test-css' => '778b008e',
     'inline-comment-summary-css' => '8cfd34e8',
     'javelin-aphlict' => '4a07e8e3',
@@ -1249,6 +1249,16 @@ return array(
       2 => 'javelin-vector',
       3 => 'javelin-dom',
     ),
+    '58e048fc' =>
+    array(
+      0 => 'multirow-row-manager',
+      1 => 'javelin-install',
+      2 => 'javelin-util',
+      3 => 'javelin-dom',
+      4 => 'javelin-stratcom',
+      5 => 'javelin-json',
+      6 => 'phabricator-prefab',
+    ),
     '58f7803f' =>
     array(
       0 => 'javelin-behavior',
@@ -1335,16 +1345,6 @@ return array(
     array(
       0 => 'javelin-install',
       1 => 'javelin-util',
-    ),
-    '6c9e6fb8' =>
-    array(
-      0 => 'multirow-row-manager',
-      1 => 'javelin-install',
-      2 => 'javelin-util',
-      3 => 'javelin-dom',
-      4 => 'javelin-stratcom',
-      5 => 'javelin-json',
-      6 => 'phabricator-prefab',
     ),
     '6d3e1947' =>
     array(

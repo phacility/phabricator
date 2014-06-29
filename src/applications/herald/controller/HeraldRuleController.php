@@ -595,6 +595,7 @@ final class HeraldRuleController extends HeraldController {
         'buildplan'     => '/typeahead/common/buildplans/',
         'taskpriority'  => '/typeahead/common/taskpriority/',
         'arcanistprojects' => '/typeahead/common/arcanistprojects/',
+        'legaldocuments' => '/typeahead/common/legalpaddocuments/',
       ),
       'username' => $this->getRequest()->getUser()->getUserName(),
       'icons' => mpull($handles, 'getTypeIcon', 'getPHID'),

@@ -79,6 +79,7 @@ abstract class HeraldAdapter {
   const ACTION_ADD_BLOCKING_REVIEWERS = 'addblockingreviewers';
   const ACTION_APPLY_BUILD_PLANS = 'applybuildplans';
   const ACTION_BLOCK = 'block';
+  const ACTION_REQUIRE_SIGNATURE = 'signature';
 
   const VALUE_TEXT            = 'text';
   const VALUE_NONE            = 'none';
@@ -95,6 +96,7 @@ abstract class HeraldAdapter {
   const VALUE_BUILD_PLAN      = 'buildplan';
   const VALUE_TASK_PRIORITY   = 'taskpriority';
   const VALUE_ARCANIST_PROJECT = 'arcanistprojects';
+  const VALUE_LEGAL_DOCUMENTS = 'legaldocuments';
 
   private $contentSource;
   private $isNewObject;
@@ -661,6 +663,7 @@ abstract class HeraldAdapter {
           self::ACTION_ADD_REVIEWERS => pht('Add reviewers'),
           self::ACTION_ADD_BLOCKING_REVIEWERS => pht('Add blocking reviewers'),
           self::ACTION_APPLY_BUILD_PLANS => pht('Run build plans'),
+          self::ACTION_REQUIRE_SIGNATURE => pht('Require legal signatures'),
           self::ACTION_BLOCK => pht('Block change with message'),
         );
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
@@ -852,6 +855,8 @@ abstract class HeraldAdapter {
           return self::VALUE_USER_OR_PROJECT;
         case self::ACTION_APPLY_BUILD_PLANS:
           return self::VALUE_BUILD_PLAN;
+        case self::ACTION_REQUIRE_SIGNATURE:
+          return self::VALUE_LEGAL_DOCUMENTS;
         case self::ACTION_BLOCK:
           return self::VALUE_TEXT;
         default:

@@ -15,6 +15,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
   protected $addReviewerPHIDs = array();
   protected $blockingReviewerPHIDs = array();
   protected $buildPlans = array();
+  protected $requiredSignatureDocumentPHIDs = array();
 
   protected $repository;
   protected $affectedPackages;
@@ -141,6 +142,10 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
 
   public function getBlockingReviewersAddedByHerald() {
     return $this->blockingReviewerPHIDs;
+  }
+
+  public function getRequiredSignatureDocumentPHIDs() {
+    return $this->requiredSignatureDocumentPHIDs;
   }
 
   public function getBuildPlans() {
@@ -347,6 +352,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
           self::ACTION_ADD_REVIEWERS,
           self::ACTION_ADD_BLOCKING_REVIEWERS,
           self::ACTION_APPLY_BUILD_PLANS,
+          self::ACTION_REQUIRE_SIGNATURE,
           self::ACTION_NOTHING,
         );
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
@@ -474,6 +480,15 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
             $effect,
             true,
             pht('Applied build plans.'));
+          break;
+        case self::ACTION_REQUIRE_SIGNATURE:
+          foreach ($effect->getTarget() as $phid) {
+            $this->requiredSignatureDocumentPHIDs[] = $phid;
+          }
+          $result[] = new HeraldApplyTranscript(
+            $effect,
+            true,
+            pht('Required signatures.'));
           break;
         default:
           throw new Exception("No rules to handle action '{$action}'.");

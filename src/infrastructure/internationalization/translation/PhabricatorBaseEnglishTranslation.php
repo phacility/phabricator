@@ -926,6 +926,13 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
+      '%s added %d required legal document(s): %s.' => array(
+        array(
+          '%s added a required legal document: %3$s.',
+          '%s added required legal documents: %3$s.',
+        ),
+      ),
+
       '%s updated JIRA issue(s): added %d %s; removed %d %s.' =>
         '%s updated JIRA issues: added %3$s; removed %5$s.',
 

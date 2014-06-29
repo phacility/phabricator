@@ -64,7 +64,6 @@ final class LegalpadDocumentSignController extends LegalpadController {
         ->setViewer(PhabricatorUser::getOmnipotentUser())
         ->withDocumentPHIDs(array($document->getPHID()))
         ->withSignerPHIDs(array($signer_phid))
-        ->withDocumentVersions(array($document->getVersions()))
         ->executeOne();
 
       if ($signature && !$viewer->isLoggedIn()) {
