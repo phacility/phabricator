@@ -36,6 +36,17 @@ final class PhabricatorApplicationLegalpad extends PhabricatorApplication {
     );
   }
 
+  public function getHelpURI() {
+    return PhabricatorEnv::getDoclink('Legalpad User Guide');
+  }
+
+  public function getOverview() {
+    return pht(
+      '**Legalpad** is a simple application for tracking signatures and '.
+      'legal agreements. At the moment, it is primarily intended to help '.
+      'open source projects keep track of Contributor License Agreements.');
+  }
+
   public function getRoutes() {
     return array(
       '/L(?P<id>\d+)' => 'LegalpadDocumentSignController',
