@@ -7,6 +7,7 @@ abstract class DifferentialChangesetRenderer {
   private $renderingReference;
   private $renderPropertyChangeHeader;
   private $isTopLevel;
+  private $isUndershield;
   private $hunkStartLines;
   private $oldLines;
   private $newLines;
@@ -31,6 +32,7 @@ abstract class DifferentialChangesetRenderer {
   private $originalCharacterEncoding;
   private $showEditAndReplyLinks;
   private $canMarkDone;
+  private $highlightingDisabled;
 
   private $oldFile = false;
   private $newFile = false;
@@ -41,8 +43,18 @@ abstract class DifferentialChangesetRenderer {
     $this->showEditAndReplyLinks = $bool;
     return $this;
   }
+
   public function getShowEditAndReplyLinks() {
     return $this->showEditAndReplyLinks;
+  }
+
+  public function setHighlightingDisabled($highlighting_disabled) {
+    $this->highlightingDisabled = $highlighting_disabled;
+    return $this;
+  }
+
+  public function getHighlightingDisabled() {
+    return $this->highlightingDisabled;
   }
 
   public function setOriginalCharacterEncoding($original_character_encoding) {
@@ -52,6 +64,15 @@ abstract class DifferentialChangesetRenderer {
 
   public function getOriginalCharacterEncoding() {
     return $this->originalCharacterEncoding;
+  }
+
+  public function setIsUndershield($is_undershield) {
+    $this->isUndershield = $is_undershield;
+    return $this;
+  }
+
+  public function getIsUndershield() {
+    return $this->isUndershield;
   }
 
   public function setDepths($depths) {
@@ -325,7 +346,12 @@ abstract class DifferentialChangesetRenderer {
       $notice = $this->renderChangeTypeHeader($force);
     }
 
-    $result = $notice.$props.$content;
+    $undershield = null;
+    if ($this->getIsUndershield()) {
+      $undershield = $this->renderUndershieldHeader();
+    }
+
+    $result = $notice.$props.$undershield.$content;
 
     // TODO: Let the user customize their tab width / display style.
     // TODO: We should possibly post-process "\r" as well.
@@ -347,6 +373,7 @@ abstract class DifferentialChangesetRenderer {
     $vs = 0);
 
   abstract protected function renderChangeTypeHeader($force);
+  abstract protected function renderUndershieldHeader();
 
   protected function didRenderChangesetTableContents($contents) {
     return $contents;

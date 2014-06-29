@@ -2,6 +2,8 @@
 
 final class DifferentialChangesetParser {
 
+  const HIGHLIGHT_BYTE_LIMIT = 262144;
+
   protected $visible      = array();
   protected $new          = array();
   protected $old          = array();
@@ -36,6 +38,7 @@ final class DifferentialChangesetParser {
   private $isSubparser;
 
   private $isTopLevel;
+
   private $coverage;
   private $markupEngine;
   private $highlightErrors;
@@ -43,6 +46,7 @@ final class DifferentialChangesetParser {
   private $renderer;
   private $characterEncoding;
   private $highlightAs;
+  private $highlightingDisabled;
   private $showEditAndReplyLinks = true;
   private $canMarkDone;
 
@@ -69,6 +73,7 @@ final class DifferentialChangesetParser {
     $this->showEditAndReplyLinks = $bool;
     return $this;
   }
+
   public function getShowEditAndReplyLinks() {
     return $this->showEditAndReplyLinks;
   }
@@ -416,6 +421,7 @@ final class DifferentialChangesetParser {
       'hunkStartLines',
       'cacheVersion',
       'cacheHost',
+      'highlightingDisabled',
     );
   }
 
@@ -537,6 +543,12 @@ final class DifferentialChangesetParser {
     if (!$language) {
       $language = $this->highlightEngine->getLanguageFromFilename(
         $this->filename);
+
+      if (($language != 'txt') &&
+          (strlen($corpus) > self::HIGHLIGHT_BYTE_LIMIT)) {
+        $this->highlightingDisabled = true;
+        $language = 'txt';
+      }
     }
 
     return $this->highlightEngine->getHighlightFuture(
@@ -830,7 +842,8 @@ final class DifferentialChangesetParser {
       ->setNewLines($this->new)
       ->setOriginalCharacterEncoding($encoding)
       ->setShowEditAndReplyLinks($this->getShowEditAndReplyLinks())
-      ->setCanMarkDone($this->getCanMarkDone());
+      ->setCanMarkDone($this->getCanMarkDone())
+      ->setHighlightingDisabled($this->highlightingDisabled);
 
     $shield = null;
     if ($this->isTopLevel && !$this->comments) {
@@ -893,6 +906,14 @@ final class DifferentialChangesetParser {
     if ($shield !== null) {
       return $renderer->renderChangesetTable($shield);
     }
+
+    // This request should render the "undershield" headers if it's a top-level
+    // request which made it this far (indicating the changeset has no shield)
+    // or it's a request with no mask information (indicating it's the request
+    // that removes the rendering shield). Possibly, this second class of
+    // request might need to be made more explicit.
+    $is_undershield = (empty($mask_force) || $this->isTopLevel);
+    $renderer->setIsUndershield($is_undershield);
 
     $old_comments = array();
     $new_comments = array();

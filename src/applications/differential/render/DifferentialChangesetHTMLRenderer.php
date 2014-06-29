@@ -242,6 +242,16 @@ abstract class DifferentialChangesetHTMLRenderer
         break;
     }
 
+    return $this->formatHeaderMessages($messages);
+  }
+
+  protected function renderUndershieldHeader() {
+    $messages = array();
+
+    $changeset = $this->getChangeset();
+
+    $file = $changeset->getFileType();
+
     // If this is a text file with at least one hunk, we may have converted
     // the text encoding. In this case, show a note.
     $show_encoding = ($file == DifferentialChangeType::FILE_TEXT) &&
@@ -261,6 +271,17 @@ abstract class DifferentialChangesetHTMLRenderer
       }
     }
 
+    if ($this->getHighlightingDisabled()) {
+      $messages[] = pht(
+        'This file is larger than %s, so syntax highlighting is '.
+        'disabled by default.',
+        phutil_format_bytes(DifferentialChangesetParser::HIGHLIGHT_BYTE_LIMIT));
+    }
+
+    return $this->formatHeaderMessages($messages);
+  }
+
+  private function formatHeaderMessages(array $messages) {
     if (!$messages) {
       return null;
     }
