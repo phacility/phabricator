@@ -18,16 +18,8 @@ final class PhabricatorApplicationLegalpad extends PhabricatorApplication {
     return "\xC2\xA9";
   }
 
-  public function getFlavorText() {
-    return pht('With advanced signature technology.');
-  }
-
   public function getApplicationGroup() {
     return self::GROUP_UTILITIES;
-  }
-
-  public function isBeta() {
-    return true;
   }
 
   public function getRemarkupRules() {
