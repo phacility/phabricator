@@ -71,6 +71,9 @@ final class LegalpadDocumentSignatureListController extends LegalpadController {
       $crumbs->addTextCrumb(
         $this->document->getMonogram(),
         '/'.$this->document->getMonogram());
+      $crumbs->addTextCrumb(
+        pht('Manage'),
+        $this->getApplicationURI('view/'.$this->document->getID().'/'));
     } else {
       $crumbs->addTextCrumb(
         pht('Signatures'),

@@ -18,6 +18,9 @@ final class LegalpadDocumentEditController extends LegalpadController {
     if (!$this->id) {
       $is_create = true;
 
+      $this->requireApplicationCapability(
+        LegalpadCapabilityCreateDocuments::CAPABILITY);
+
       $document = LegalpadDocument::initializeNewDocument($user);
       $body = id(new LegalpadDocumentBody())
         ->setCreatorPHID($user->getPHID());
@@ -145,14 +148,15 @@ final class LegalpadDocumentEditController extends LegalpadController {
     $submit = new AphrontFormSubmitControl();
     if ($is_create) {
       $submit->setValue(pht('Create Document'));
+      $submit->addCancelButton($this->getApplicationURI());
       $title = pht('Create Document');
       $short = pht('Create');
     } else {
-      $submit->setValue(pht('Update Document'));
+      $submit->setValue(pht('Edit Document'));
       $submit->addCancelButton(
           $this->getApplicationURI('view/'.$document->getID()));
-      $title = pht('Update Document');
-      $short = pht('Update');
+      $title = pht('Edit Document');
+      $short = pht('Edit');
 
       $crumbs->addTextCrumb(
         $document->getMonogram(),

@@ -69,6 +69,8 @@ final class PhabricatorApplicationLegalpad extends PhabricatorApplication {
 
   protected function getCustomCapabilities() {
     return array(
+      LegalpadCapabilityCreateDocuments::CAPABILITY => array(
+      ),
       LegalpadCapabilityDefaultView::CAPABILITY => array(
       ),
       LegalpadCapabilityDefaultEdit::CAPABILITY => array(
