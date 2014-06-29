@@ -274,6 +274,18 @@ final class AphrontRequest {
     return $this->validateCSRF();
   }
 
+  final public function isFormOrHisecPost() {
+    $post = $this->getExists(self::TYPE_FORM) &&
+            $this->isHTTPPost();
+
+    if (!$post) {
+      return false;
+    }
+
+    return $this->validateCSRF();
+  }
+
+
   final public function setCookiePrefix($prefix) {
     $this->cookiePrefix = $prefix;
     return $this;

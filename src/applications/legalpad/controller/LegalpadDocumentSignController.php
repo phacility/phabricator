@@ -115,7 +115,15 @@ final class LegalpadDocumentSignController extends LegalpadController {
     $e_agree = null;
 
     $errors = array();
-    if ($request->isFormPost() && !$has_signed) {
+    if ($request->isFormOrHisecPost() && !$has_signed) {
+
+      // Require two-factor auth to sign legal documents.
+      $engine = new PhabricatorAuthSessionEngine();
+      $engine->requireHighSecuritySession(
+        $viewer,
+        $request,
+        '/'.$document->getMonogram());
+
       $name = $request->getStr('name');
       $agree = $request->getExists('agree');
 
