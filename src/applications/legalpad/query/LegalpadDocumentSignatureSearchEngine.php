@@ -34,6 +34,9 @@ final class LegalpadDocumentSignatureSearchEngine
           PhabricatorLegalpadPHIDTypeDocument::TYPECONST,
         )));
 
+    $saved->setParameter('nameContains', $request->getStr('nameContains'));
+    $saved->setParameter('emailContains', $request->getStr('emailContains'));
+
     return $saved;
   }
 
@@ -52,6 +55,16 @@ final class LegalpadDocumentSignatureSearchEngine
       if ($document_phids) {
         $query->withDocumentPHIDs($document_phids);
       }
+    }
+
+    $name_contains = $saved->getParameter('nameContains');
+    if (strlen($name_contains)) {
+      $query->withNameContains($name_contains);
+    }
+
+    $email_contains = $saved->getParameter('emailContains');
+    if (strlen($email_contains)) {
+      $query->withEmailContains($email_contains);
     }
 
     return $query;
@@ -80,13 +93,26 @@ final class LegalpadDocumentSignatureSearchEngine
             ->setValue(array_select_keys($handles, $document_phids)));
     }
 
+    $name_contains = $saved_query->getParameter('nameContains', '');
+    $email_contains = $saved_query->getParameter('emailContains', '');
+
     $form
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/users/')
           ->setName('signers')
           ->setLabel(pht('Signers'))
-          ->setValue(array_select_keys($handles, $signer_phids)));
+          ->setValue(array_select_keys($handles, $signer_phids)))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel(pht('Name Contains'))
+          ->setName('nameContains')
+          ->setValue($name_contains))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel(pht('Email Contains'))
+          ->setName('emailContains')
+          ->setValue($email_contains));
   }
 
   protected function getURI($path) {
@@ -159,9 +185,8 @@ final class LegalpadDocumentSignatureSearchEngine
 
     $rows = array();
     foreach ($signatures as $signature) {
-      $data = $signature->getSignatureData();
-      $name = idx($data, 'name');
-      $email = idx($data, 'email');
+      $name = $signature->getSignerName();
+      $email = $signature->getSignerEmail();
 
       $document = $signature->getDocument();
 
@@ -189,6 +214,7 @@ final class LegalpadDocumentSignatureSearchEngine
     }
 
     $table = id(new AphrontTableView($rows))
+      ->setNoDataString(pht('No signatures match the query.'))
       ->setHeaders(
         array(
           '',

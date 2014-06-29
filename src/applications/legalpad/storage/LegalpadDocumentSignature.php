@@ -10,6 +10,8 @@ final class LegalpadDocumentSignature
   protected $documentPHID;
   protected $documentVersion;
   protected $signerPHID;
+  protected $signerName;
+  protected $signerEmail;
   protected $signatureData = array();
   protected $verified;
   protected $secretKey;

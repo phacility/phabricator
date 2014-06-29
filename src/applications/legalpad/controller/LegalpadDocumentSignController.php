@@ -82,6 +82,8 @@ final class LegalpadDocumentSignController extends LegalpadController {
         ->setSignerPHID($signer_phid)
         ->setDocumentPHID($document->getPHID())
         ->setDocumentVersion($document->getVersions())
+        ->setSignerName((string)idx($signature_data, 'name'))
+        ->setSignerEmail((string)idx($signature_data, 'email'))
         ->setSignatureData($signature_data);
 
       // If the user is logged in, show a notice that they haven't signed.
@@ -118,11 +120,13 @@ final class LegalpadDocumentSignController extends LegalpadController {
     if ($request->isFormOrHisecPost() && !$has_signed) {
 
       // Require two-factor auth to sign legal documents.
-      $engine = new PhabricatorAuthSessionEngine();
-      $engine->requireHighSecuritySession(
-        $viewer,
-        $request,
-        '/'.$document->getMonogram());
+      if ($viewer->isLoggedIn()) {
+        $engine = new PhabricatorAuthSessionEngine();
+        $engine->requireHighSecuritySession(
+          $viewer,
+          $request,
+          '/'.$document->getMonogram());
+      }
 
       $name = $request->getStr('name');
       $agree = $request->getExists('agree');
@@ -157,6 +161,8 @@ final class LegalpadDocumentSignController extends LegalpadController {
       }
       $signature_data['email'] = $email;
 
+      $signature->setSignerName((string)idx($signature_data, 'name'));
+      $signature->setSignerEmail((string)idx($signature_data, 'email'));
       $signature->setSignatureData($signature_data);
 
       if (!$agree) {

@@ -8,6 +8,8 @@ final class LegalpadDocumentSignatureQuery
   private $signerPHIDs;
   private $documentVersions;
   private $secretKeys;
+  private $nameContains;
+  private $emailContains;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -31,6 +33,16 @@ final class LegalpadDocumentSignatureQuery
 
   public function withSecretKeys(array $keys) {
     $this->secretKeys = $keys;
+    return $this;
+  }
+
+  public function withNameContains($text) {
+    $this->nameContains = $text;
+    return $this;
+  }
+
+  public function withEmailContains($text) {
+    $this->emailContains = $text;
     return $this;
   }
 
@@ -112,6 +124,20 @@ final class LegalpadDocumentSignatureQuery
         $conn_r,
         'secretKey IN (%Ls)',
         $this->secretKeys);
+    }
+
+    if ($this->nameContains !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'signerName LIKE %~',
+        $this->nameContains);
+    }
+
+    if ($this->emailContains !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'signerEmail LIKE %~',
+        $this->emailContains);
     }
 
     return $this->formatWhereClause($where);
