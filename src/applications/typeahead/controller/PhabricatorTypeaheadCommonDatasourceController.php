@@ -264,11 +264,11 @@ final class PhabricatorTypeaheadCommonDatasourceController
       $documents = id(new LegalpadDocumentQuery())
         ->setViewer($viewer)
         ->execute();
-      $documents = mpull($documents, 'getTitle', 'getPHID');
-      foreach ($documents as $phid => $title) {
+      foreach ($documents as $document) {
         $results[] = id(new PhabricatorTypeaheadResult())
-          ->setPHID($phid)
-          ->setName($title);
+          ->setPHID($document->getPHID())
+          ->setIcon('fa-file-text-o')
+          ->setName($document->getMonogram().' '.$document->getTitle());
       }
     }
 
