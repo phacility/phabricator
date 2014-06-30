@@ -62,10 +62,9 @@ if (process.getuid() !== 0) {
 
 var net = require('net');
 var http = require('http');
-var url = require('url');
 
 process.on('uncaughtException', function(err) {
-  debug.log("\n<<< UNCAUGHT EXCEPTION! >>>\n" + err.stack);
+  debug.log('\n<<< UNCAUGHT EXCEPTION! >>>\n' + err.stack);
 
   process.exit(1);
 });
@@ -188,7 +187,7 @@ var receive_server = http.createServer(function(request, response) {
       }
     });
   } else if (request.url == '/status/') {
-    request.on('data', function(data) {
+    request.on('data', function() {
       // We just ignore the request data, but newer versions of Node don't
       // get to 'end' if we don't process the data. See T2953.
     });
@@ -213,7 +212,6 @@ var receive_server = http.createServer(function(request, response) {
     response.write('400 Bad Request');
     response.end();
   }
-
 }).listen(config.admin, config.host);
 
 function transmit(msg) {
