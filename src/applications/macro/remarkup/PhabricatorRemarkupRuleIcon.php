@@ -3,9 +3,9 @@
 final class PhabricatorRemarkupRuleIcon
   extends PhutilRemarkupRule {
 
-  private $macros;
-
-  const KEY_RULE_MACRO = 'rule.macro';
+  public function getPriority() {
+    return 50.0;
+  }
 
   public function apply($text) {
     return preg_replace_callback(

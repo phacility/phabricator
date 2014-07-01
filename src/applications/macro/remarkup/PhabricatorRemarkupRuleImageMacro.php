@@ -147,7 +147,7 @@ final class PhabricatorRemarkupRuleImageMacro
           ));
       }
 
-      $result = phutil_tag(
+      $result = $this->newTag(
         'img',
         array(
           'id'    => $id,

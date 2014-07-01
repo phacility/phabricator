@@ -54,7 +54,6 @@ final class PhabricatorPasteRemarkupRule
 
     }
 
-    return $embed_paste->render();
-
+    return $embed_paste;
   }
 }

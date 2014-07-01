@@ -4,6 +4,10 @@ final class DivinerRemarkupRuleSymbol extends PhutilRemarkupRule {
 
   const KEY_RULE_ATOM_REF = 'rule.diviner.atomref';
 
+  public function getPriority() {
+    return 40.0;
+  }
+
   public function apply($text) {
     // Grammar here is:
     //
@@ -132,7 +136,7 @@ final class DivinerRemarkupRuleSymbol extends PhutilRemarkupRule {
           $link = $title;
         }
       } else if ($href) {
-        $link = phutil_tag(
+        $link = $this->newTag(
           'a',
           array(
             'class' => 'atom-ref',
@@ -140,7 +144,7 @@ final class DivinerRemarkupRuleSymbol extends PhutilRemarkupRule {
           ),
           $title);
       } else {
-        $link = phutil_tag(
+        $link = $this->newTag(
           'span',
           array(
             'class' => 'atom-ref-invalid',

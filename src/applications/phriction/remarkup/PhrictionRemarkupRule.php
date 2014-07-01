@@ -38,7 +38,7 @@ final class PhrictionRemarkupRule
     } else if ($this->getEngine()->isTextMode()) {
       return PhabricatorEnv::getProductionURI($href);
     } else {
-      $text = phutil_tag(
+      $text = $this->newTag(
         'a',
         array(
           'href'  => $href,

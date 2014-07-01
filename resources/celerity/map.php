@@ -8,10 +8,10 @@ return array(
   'names' =>
   array(
     'core.pkg.css' => 'c2c68e64',
-    'core.pkg.js' => '834b4eda',
+    'core.pkg.js' => 'f8ec7ddc',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '4a93db37',
-    'differential.pkg.js' => 'd1443567',
+    'differential.pkg.js' => '7528cfc9',
     'diffusion.pkg.css' => '471bc9eb',
     'diffusion.pkg.js' => 'bfc0737b',
     'maniphest.pkg.css' => 'f5d89daf',
@@ -362,7 +362,7 @@ return array(
     'rsrc/js/application/differential/ChangesetViewManager.js' => 'd2907473',
     'rsrc/js/application/differential/DifferentialInlineCommentEditor.js' => 'f2441746',
     'rsrc/js/application/differential/behavior-add-reviewers-and-ccs.js' => 'e10f8e18',
-    'rsrc/js/application/differential/behavior-comment-jump.js' => '2bc7a5e0',
+    'rsrc/js/application/differential/behavior-comment-jump.js' => '4fdb476d',
     'rsrc/js/application/differential/behavior-comment-preview.js' => '127f2018',
     'rsrc/js/application/differential/behavior-diff-radios.js' => 'e1ff79b1',
     'rsrc/js/application/differential/behavior-dropdown-menus.js' => '710f209e',
@@ -473,7 +473,7 @@ return array(
     'rsrc/js/core/behavior-object-selector.js' => '39841ead',
     'rsrc/js/core/behavior-oncopy.js' => '2926fff2',
     'rsrc/js/core/behavior-phabricator-nav.js' => '14d7a8b8',
-    'rsrc/js/core/behavior-phabricator-remarkup-assist.js' => 'eff6a142',
+    'rsrc/js/core/behavior-phabricator-remarkup-assist.js' => 'e32d14ab',
     'rsrc/js/core/behavior-refresh-csrf.js' => '7814b593',
     'rsrc/js/core/behavior-remarkup-preview.js' => 'f7379f45',
     'rsrc/js/core/behavior-reorder-applications.js' => '76b9fc3e',
@@ -567,7 +567,7 @@ return array(
     'javelin-behavior-dashboard-tab-panel' => 'd4eecc63',
     'javelin-behavior-device' => '03d6ed07',
     'javelin-behavior-differential-add-reviewers-and-ccs' => 'e10f8e18',
-    'javelin-behavior-differential-comment-jump' => '2bc7a5e0',
+    'javelin-behavior-differential-comment-jump' => '4fdb476d',
     'javelin-behavior-differential-diff-radios' => 'e1ff79b1',
     'javelin-behavior-differential-dropdown-menus' => '710f209e',
     'javelin-behavior-differential-edit-inline-comments' => '00861799',
@@ -621,7 +621,7 @@ return array(
     'javelin-behavior-phabricator-notification-example' => '7a9677fc',
     'javelin-behavior-phabricator-object-selector' => '39841ead',
     'javelin-behavior-phabricator-oncopy' => '2926fff2',
-    'javelin-behavior-phabricator-remarkup-assist' => 'eff6a142',
+    'javelin-behavior-phabricator-remarkup-assist' => 'e32d14ab',
     'javelin-behavior-phabricator-reveal-content' => '60821bc7',
     'javelin-behavior-phabricator-search-typeahead' => '5a376f34',
     'javelin-behavior-phabricator-show-all-transactions' => '7c273581',
@@ -1047,12 +1047,6 @@ return array(
       3 => 'javelin-workflow',
       4 => 'javelin-json',
     ),
-    '2bc7a5e0' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-stratcom',
-      2 => 'javelin-dom',
-    ),
     '2cad29d1' =>
     array(
       0 => 'javelin-install',
@@ -1224,6 +1218,12 @@ return array(
       2 => 'javelin-util',
       3 => 'javelin-stratcom',
       4 => 'javelin-request',
+    ),
+    '4fdb476d' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-dom',
     ),
     '519705ea' =>
     array(
@@ -1952,6 +1952,16 @@ return array(
       1 => 'javelin-stratcom',
       2 => 'javelin-dom',
     ),
+    'e32d14ab' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-dom',
+      3 => 'phabricator-phtize',
+      4 => 'phabricator-textareautils',
+      5 => 'javelin-workflow',
+      6 => 'javelin-vector',
+    ),
     'e379b58e' =>
     array(
       0 => 'javelin-behavior',
@@ -1994,16 +2004,6 @@ return array(
     array(
       0 => 'javelin-install',
       1 => 'javelin-util',
-    ),
-    'eff6a142' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-stratcom',
-      2 => 'javelin-dom',
-      3 => 'phabricator-phtize',
-      4 => 'phabricator-textareautils',
-      5 => 'javelin-workflow',
-      6 => 'javelin-vector',
     ),
     'f0a41b9f' =>
     array(
