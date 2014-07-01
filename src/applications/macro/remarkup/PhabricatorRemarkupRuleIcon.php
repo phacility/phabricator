@@ -4,7 +4,7 @@ final class PhabricatorRemarkupRuleIcon
   extends PhutilRemarkupRule {
 
   public function getPriority() {
-    return 50.0;
+    return 200.0;
   }
 
   public function apply($text) {
@@ -15,6 +15,10 @@ final class PhabricatorRemarkupRuleIcon
   }
 
   public function markupIcon($matches) {
+    if (!$this->isFlatText($matches[0])) {
+      return $matches[0];
+    }
+
     $extra = idx($matches, 1);
 
     // We allow various forms, like these:

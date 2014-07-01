@@ -5,7 +5,7 @@ final class DivinerRemarkupRuleSymbol extends PhutilRemarkupRule {
   const KEY_RULE_ATOM_REF = 'rule.diviner.atomref';
 
   public function getPriority() {
-    return 40.0;
+    return 200.0;
   }
 
   public function apply($text) {
@@ -34,6 +34,10 @@ final class DivinerRemarkupRuleSymbol extends PhutilRemarkupRule {
   }
 
   public function markupSymbol($matches) {
+    if ($this->isTextFlat($matches[0])) {
+      return $matches[0];
+    }
+
     $type = (string)idx($matches, 'type');
     $name = (string)$matches['name'];
     $title = (string)idx($matches, 'title');

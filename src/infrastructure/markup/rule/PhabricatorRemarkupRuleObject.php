@@ -13,7 +13,7 @@ abstract class PhabricatorRemarkupRuleObject
   abstract protected function loadObjects(array $ids);
 
   public function getPriority() {
-    return 50.0;
+    return 200.0;
   }
 
   protected function getObjectNamePrefixBeginsWithWordCharacter() {
@@ -133,6 +133,10 @@ abstract class PhabricatorRemarkupRuleObject
   }
 
   public function markupObjectEmbed($matches) {
+    if (!$this->isFlatText($matches[0])) {
+      return $matches[0];
+    }
+
     return $this->markupObject(array(
       'type' => 'embed',
       'id' => $matches[1],
@@ -142,6 +146,10 @@ abstract class PhabricatorRemarkupRuleObject
   }
 
   public function markupObjectReference($matches) {
+    if (!$this->isFlatText($matches[0])) {
+      return $matches[0];
+    }
+
     return $this->markupObject(array(
       'type' => 'ref',
       'id' => $matches[1],

@@ -9,7 +9,7 @@ final class PhabricatorRemarkupRuleMeme
   private $images;
 
   public function getPriority() {
-    return 50.0;
+    return 200.0;
   }
 
   public function apply($text) {
@@ -20,6 +20,10 @@ final class PhabricatorRemarkupRuleMeme
   }
 
   public function markupMeme($matches) {
+    if (!$this->isFlatText($matches[0])) {
+      return $matches[0];
+    }
+
     $options = array(
       'src' => null,
       'above' => null,
