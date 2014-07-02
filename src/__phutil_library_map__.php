@@ -1499,6 +1499,7 @@ phutil_register_library_map(array(
     'PhabricatorDashboardPHIDTypeDashboard' => 'applications/dashboard/phid/PhabricatorDashboardPHIDTypeDashboard.php',
     'PhabricatorDashboardPHIDTypePanel' => 'applications/dashboard/phid/PhabricatorDashboardPHIDTypePanel.php',
     'PhabricatorDashboardPanel' => 'applications/dashboard/storage/PhabricatorDashboardPanel.php',
+    'PhabricatorDashboardPanelArchiveController' => 'applications/dashboard/controller/PhabricatorDashboardPanelArchiveController.php',
     'PhabricatorDashboardPanelCoreCustomField' => 'applications/dashboard/customfield/PhabricatorDashboardPanelCoreCustomField.php',
     'PhabricatorDashboardPanelCustomField' => 'applications/dashboard/customfield/PhabricatorDashboardPanelCustomField.php',
     'PhabricatorDashboardPanelEditController' => 'applications/dashboard/controller/PhabricatorDashboardPanelEditController.php',
@@ -4334,6 +4335,7 @@ phutil_register_library_map(array(
       1 => 'PhabricatorPolicyInterface',
       2 => 'PhabricatorCustomFieldInterface',
     ),
+    'PhabricatorDashboardPanelArchiveController' => 'PhabricatorDashboardController',
     'PhabricatorDashboardPanelCoreCustomField' =>
     array(
       0 => 'PhabricatorDashboardPanelCustomField',

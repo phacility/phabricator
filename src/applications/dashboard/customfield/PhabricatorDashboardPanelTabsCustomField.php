@@ -30,6 +30,10 @@ final class PhabricatorDashboardPanelTabsCustomField
   }
 
   public function renderEditControl(array $handles) {
+    // NOTE: This includes archived panels so we don't mutate the tabs
+    // when saving a tab panel that includes archied panels. This whole UI is
+    // hopefully temporary anyway.
+
     $panels = id(new PhabricatorDashboardPanelQuery())
       ->setViewer($this->getViewer())
       ->execute();
