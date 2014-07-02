@@ -345,26 +345,30 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
   public function getActions($rule_type) {
     switch ($rule_type) {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
-        return array(
-          self::ACTION_ADD_CC,
-          self::ACTION_REMOVE_CC,
-          self::ACTION_EMAIL,
-          self::ACTION_ADD_REVIEWERS,
-          self::ACTION_ADD_BLOCKING_REVIEWERS,
-          self::ACTION_APPLY_BUILD_PLANS,
-          self::ACTION_REQUIRE_SIGNATURE,
-          self::ACTION_NOTHING,
-        );
+        return array_merge(
+          array(
+            self::ACTION_ADD_CC,
+            self::ACTION_REMOVE_CC,
+            self::ACTION_EMAIL,
+            self::ACTION_ADD_REVIEWERS,
+            self::ACTION_ADD_BLOCKING_REVIEWERS,
+            self::ACTION_APPLY_BUILD_PLANS,
+            self::ACTION_REQUIRE_SIGNATURE,
+            self::ACTION_NOTHING,
+          ),
+          parent::getActions($rule_type));
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
-        return array(
-          self::ACTION_ADD_CC,
-          self::ACTION_REMOVE_CC,
-          self::ACTION_EMAIL,
-          self::ACTION_FLAG,
-          self::ACTION_ADD_REVIEWERS,
-          self::ACTION_ADD_BLOCKING_REVIEWERS,
-          self::ACTION_NOTHING,
-        );
+        return array_merge(
+          array(
+            self::ACTION_ADD_CC,
+            self::ACTION_REMOVE_CC,
+            self::ACTION_EMAIL,
+            self::ACTION_FLAG,
+            self::ACTION_ADD_REVIEWERS,
+            self::ACTION_ADD_BLOCKING_REVIEWERS,
+            self::ACTION_NOTHING,
+          ),
+          parent::getActions($rule_type));
     }
   }
 
@@ -491,7 +495,13 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
             pht('Required signatures.'));
           break;
         default:
-          throw new Exception("No rules to handle action '{$action}'.");
+          $custom_result = parent::handleCustomHeraldEffect($effect);
+          if ($custom_result === null) {
+            throw new Exception("No rules to handle action '{$action}'.");
+          }
+
+          $result[] = $custom_result;
+          break;
       }
     }
     return $result;

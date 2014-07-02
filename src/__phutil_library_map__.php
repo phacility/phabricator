@@ -806,6 +806,7 @@ phutil_register_library_map(array(
     'HeraldCondition' => 'applications/herald/storage/HeraldCondition.php',
     'HeraldConditionTranscript' => 'applications/herald/storage/transcript/HeraldConditionTranscript.php',
     'HeraldController' => 'applications/herald/controller/HeraldController.php',
+    'HeraldCustomAction' => 'applications/herald/extension/HeraldCustomAction.php',
     'HeraldDAO' => 'applications/herald/storage/HeraldDAO.php',
     'HeraldDifferentialRevisionAdapter' => 'applications/herald/adapter/HeraldDifferentialRevisionAdapter.php',
     'HeraldDisableController' => 'applications/herald/controller/HeraldDisableController.php',

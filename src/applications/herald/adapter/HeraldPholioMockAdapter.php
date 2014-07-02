@@ -64,16 +64,20 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
   public function getActions($rule_type) {
     switch ($rule_type) {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
-        return array(
-          self::ACTION_ADD_CC,
-          self::ACTION_NOTHING,
-        );
+        return array_merge(
+          array(
+            self::ACTION_ADD_CC,
+            self::ACTION_NOTHING,
+          ),
+          parent::getActions($rule_type));
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
-        return array(
-          self::ACTION_ADD_CC,
-          self::ACTION_FLAG,
-          self::ACTION_NOTHING,
-        );
+        return array_merge(
+          array(
+            self::ACTION_ADD_CC,
+            self::ACTION_FLAG,
+            self::ACTION_NOTHING,
+          ),
+          parent::getActions($rule_type));
     }
   }
 
@@ -133,7 +137,13 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
             $this->getMock()->getPHID());
           break;
         default:
-          throw new Exception("No rules to handle action '{$action}'.");
+          $custom_result = parent::handleCustomHeraldEffect($effect);
+          if ($custom_result === null) {
+            throw new Exception("No rules to handle action '{$action}'.");
+          }
+
+          $result[] = $custom_result;
+          break;
       }
     }
     return $result;

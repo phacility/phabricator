@@ -98,21 +98,25 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
   public function getActions($rule_type) {
     switch ($rule_type) {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
-        return array(
-          self::ACTION_ADD_CC,
-          self::ACTION_EMAIL,
-          self::ACTION_ASSIGN_TASK,
-          self::ACTION_ADD_PROJECTS,
-          self::ACTION_NOTHING,
-        );
+        return array_merge(
+          array(
+            self::ACTION_ADD_CC,
+            self::ACTION_EMAIL,
+            self::ACTION_ASSIGN_TASK,
+            self::ACTION_ADD_PROJECTS,
+            self::ACTION_NOTHING,
+          ),
+          parent::getActions($rule_type));
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
-        return array(
-          self::ACTION_ADD_CC,
-          self::ACTION_EMAIL,
-          self::ACTION_FLAG,
-          self::ACTION_ASSIGN_TASK,
-          self::ACTION_NOTHING,
-        );
+        return array_merge(
+          array(
+            self::ACTION_ADD_CC,
+            self::ACTION_EMAIL,
+            self::ACTION_FLAG,
+            self::ACTION_ASSIGN_TASK,
+            self::ACTION_NOTHING,
+          ),
+          parent::getActions($rule_type));
     }
   }
 
@@ -200,7 +204,13 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
             pht('Added projects.'));
           break;
         default:
-          throw new Exception("No rules to handle action '{$action}'.");
+          $custom_result = parent::handleCustomHeraldEffect($effect);
+          if ($custom_result === null) {
+            throw new Exception("No rules to handle action '{$action}'.");
+          }
+
+          $result[] = $custom_result;
+          break;
       }
     }
     return $result;

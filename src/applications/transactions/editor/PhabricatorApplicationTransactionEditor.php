@@ -2197,7 +2197,9 @@ abstract class PhabricatorApplicationTransactionEditor
     $this->setHeraldAdapter($adapter);
     $this->setHeraldTranscript($xscript);
 
-    return $this->didApplyHeraldRules($object, $adapter, $xscript);
+    return array_merge(
+      $this->didApplyHeraldRules($object, $adapter, $xscript),
+      $adapter->getQueuedTransactions());
   }
 
   protected function didApplyHeraldRules(
