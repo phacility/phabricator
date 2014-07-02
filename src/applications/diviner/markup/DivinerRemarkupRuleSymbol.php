@@ -34,7 +34,7 @@ final class DivinerRemarkupRuleSymbol extends PhutilRemarkupRule {
   }
 
   public function markupSymbol($matches) {
-    if ($this->isFlatText($matches[0])) {
+    if (!$this->isFlatText($matches[0])) {
       return $matches[0];
     }
 
