@@ -130,5 +130,17 @@ final class DifferentialRequiredSignaturesField
     return false;
   }
 
+  public function getWarningsForRevisionHeader(array $handles) {
+    if (!$this->haveAnyUnsignedDocuments()) {
+      return array();
+    }
+
+    return array(
+      pht(
+        'This revision can not be accepted until the required legal '.
+        'agreements have been signed.'),
+    );
+  }
+
 
 }
