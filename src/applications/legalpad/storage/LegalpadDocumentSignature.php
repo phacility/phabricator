@@ -14,6 +14,8 @@ final class LegalpadDocumentSignature
   protected $signerEmail;
   protected $signatureData = array();
   protected $verified;
+  protected $isExemption = 0;
+  protected $exemptionPHID;
   protected $secretKey;
 
   private $document = self::ATTACHABLE;

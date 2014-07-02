@@ -178,6 +178,11 @@ final class LegalpadDocumentSignatureSearchEngine
       'red',
       pht('Unverified Email'));
 
+    $sig_exemption = $this->renderIcon(
+      'fa-asterisk',
+      'indigo',
+      pht('Exemption'));
+
     id(new PHUIIconView())
       ->setIconFont('fa-envelope', 'red')
       ->addSigil('has-tooltip')
@@ -190,7 +195,18 @@ final class LegalpadDocumentSignatureSearchEngine
 
       $document = $signature->getDocument();
 
-      if (!$signature->isVerified()) {
+      if ($signature->getIsExemption()) {
+        $signature_href = $this->getApplicationURI(
+          'signature/'.$signature->getID().'/');
+
+        $sig_icon = javelin_tag(
+          'a',
+          array(
+            'href' => $signature_href,
+            'sigil' => 'workflow',
+          ),
+          $sig_exemption);
+      } else if (!$signature->isVerified()) {
         $sig_icon = $sig_unverified;
       } else if ($signature->getDocumentVersion() != $document->getVersions()) {
         $sig_icon = $sig_old;
@@ -242,8 +258,23 @@ final class LegalpadDocumentSignatureSearchEngine
           'right',
         ));
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Signatures'));
+
+    if ($this->document) {
+      $document_id = $this->document->getID();
+
+      $header->addActionLink(
+        id(new PHUIButtonView())
+          ->setText(pht('Add Signature Exemption'))
+          ->setTag('a')
+          ->setHref($this->getApplicationURI('addsignature/'.$document_id.'/'))
+          ->setWorkflow(true)
+          ->setIcon(id(new PHUIIconView())->setIconFont('fa-pencil')));
+    }
+
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Signatures'))
+      ->setHeader($header)
       ->appendChild($table);
 
     if (!$this->document) {

@@ -61,6 +61,27 @@ users from seeing content until they sign the document:
 Users will now only be able to take the action (for example, view or edit the
 object) if they have signed the specified documents.
 
+
+Adding Exemptions
+=================
+
+If you have users who have signed an alternate form of a document (for example,
+you have a hard copy on file), or an equivalent document, or who are otherwise
+exempt from needing to sign a document in Legalpad, you can add a signature
+exemption for them.
+
+Other applications will treat users with a signature exemption as though they
+had signed the document, although the UI will show the signature as an exemption
+rather than a normal signature.
+
+To add an exemption, go to **Manage Document**, then **View Signatures**, then
+**Add Signature Exemption**.
+
+You can optionally add notes about why a user is exempt from signing a document.
+To review the notes later (and see who added the exemption), click the colored
+asterisk in the list view.
+
+
 Roadmap
 ========
 

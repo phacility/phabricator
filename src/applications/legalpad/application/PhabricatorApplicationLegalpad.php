@@ -54,8 +54,11 @@ final class PhabricatorApplicationLegalpad extends PhabricatorApplication {
           'LegalpadDocumentSignatureVerificationController',
         'signatures/(?:(?P<id>\d+)/)?(?:query/(?P<queryKey>[^/]+)/)?' =>
           'LegalpadDocumentSignatureListController',
+        'addsignature/(?P<id>\d+)/' => 'LegalpadDocumentSignatureAddController',
+        'signature/(?P<id>\d+)/' => 'LegalpadDocumentSignatureViewController',
         'document/' => array(
-          'preview/' => 'PhabricatorMarkupPreviewController'),
+          'preview/' => 'PhabricatorMarkupPreviewController',
+        ),
       ));
   }
 

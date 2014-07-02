@@ -101,14 +101,26 @@ final class LegalpadDocumentSignController extends LegalpadController {
 
       // In this case, we know they've signed.
       $signed_at = $signature->getDateCreated();
+
+      if ($signature->getIsExemption()) {
+        $exemption_phid = $signature->getExemptionPHID();
+        $handles = $this->loadViewerHandles(array($exemption_phid));
+        $exemption_handle = $handles[$exemption_phid];
+
+        $signed_text = pht(
+          'You do not need to sign this document. '.
+          '%s added a signature exemption for you on %s.',
+          $exemption_handle->renderLink(),
+          phabricator_datetime($signed_at, $viewer));
+      } else {
+        $signed_text = pht(
+          'You signed this document on %s.',
+          phabricator_datetime($signed_at, $viewer));
+      }
+
       $signed_status = id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setErrors(
-          array(
-            pht(
-              'You signed this document on %s.',
-              phabricator_datetime($signed_at, $viewer)),
-          ));
+        ->setErrors(array($signed_text));
     }
 
     $e_name = true;
