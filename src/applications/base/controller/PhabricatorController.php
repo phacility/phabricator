@@ -350,6 +350,7 @@ abstract class PhabricatorController extends AphrontController {
         $view = id(new PhabricatorStandardPageView())
           ->setRequest($request)
           ->setController($this)
+          ->setDeviceReady(true)
           ->setTitle($title)
           ->appendChild($page_content);
 
