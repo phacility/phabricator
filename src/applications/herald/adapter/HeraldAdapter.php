@@ -106,14 +106,27 @@ abstract class HeraldAdapter {
 
   public function getCustomActions() {
     if ($this->customActions === null) {
-      $this->customActions = id(new PhutilSymbolLoader())
+      $custom_actions = id(new PhutilSymbolLoader())
         ->setAncestorClass('HeraldCustomAction')
         ->loadObjects();
 
-      foreach ($this->customActions as $key => $object) {
+      foreach ($custom_actions as $key => $object) {
         if (!$object->appliesToAdapter($this)) {
-          unset($this->customActions[$key]);
+          unset($custom_actions[$key]);
         }
+      }
+
+      $this->customActions = array();
+      foreach ($custom_actions as $action) {
+        $key = $action->getActionKey();
+
+        if (array_key_exists($key, $this->customActions)) {
+          throw new Exception(
+            'More than one Herald custom action implementation '.
+            'handles the action key: \''.$key.'\'.');
+        }
+
+        $this->customActions[$key] = $action;
       }
     }
 
@@ -163,20 +176,16 @@ abstract class HeraldAdapter {
     }
   }
 
-  public abstract function applyHeraldEffects(array $effects);
+  abstract public function applyHeraldEffects(array $effects);
 
   protected function handleCustomHeraldEffect(HeraldEffect $effect) {
-    foreach ($this->getCustomActions() as $custom_action) {
-      if ($effect->getAction() == $custom_action->getActionKey()) {
-        $result = $custom_action->applyEffect(
-          $this,
-          $this->getObject(),
-          $effect);
+    $custom_action = idx($this->getCustomActions(), $effect->getAction());
 
-        if ($result !== null) {
-          return $result;
-        }
-      }
+    if ($custom_action !== null) {
+      return $custom_action->applyEffect(
+        $this,
+        $this->getObject(),
+        $effect);
     }
 
     return null;
@@ -688,14 +697,19 @@ abstract class HeraldAdapter {
 
 /* -(  Actions  )------------------------------------------------------------ */
 
-  public function getActions($rule_type) {
+  public function getCustomActionsForRuleType($rule_type) {
     $results = array();
     foreach ($this->getCustomActions() as $custom_action) {
       if ($custom_action->appliesToRuleType($rule_type)) {
-        $results[] = $custom_action->getActionKey();
+        $results[] = $custom_action;
       }
     }
     return $results;
+  }
+
+  public function getActions($rule_type) {
+    $custom_actions = $this->getCustomActionsForRuleType($rule_type);
+    return mpull($custom_actions, 'getActionKey');
   }
 
   public function getActionNameMap($rule_type) {
@@ -737,12 +751,8 @@ abstract class HeraldAdapter {
         throw new Exception("Unknown rule type '{$rule_type}'!");
     }
 
-    foreach ($this->getCustomActions() as $custom_action) {
-      if ($custom_action->appliesToRuleType($rule_type)) {
-        $standard[$custom_action->getActionKey()] =
-          $custom_action->getActionName();
-      }
-    }
+    $custom_actions = $this->getCustomActionsForRuleType($rule_type);
+    $standard += mpull($custom_actions, 'getActionName', 'getActionKey');
 
     return $standard;
   }
@@ -922,12 +932,9 @@ abstract class HeraldAdapter {
       }
     }
 
-    foreach ($this->getCustomActions() as $custom_action) {
-      if ($custom_action->appliesToRuleType($rule_type)) {
-        if ($action === $custom_action->getActionKey()) {
-          return $custom_action->getActionType();
-        }
-      }
+    $custom_action = idx($this->getCustomActions(), $action);
+    if ($custom_action !== null) {
+      return $custom_action->getActionType();
     }
 
     throw new Exception("Unknown or invalid action '".$action."'.");
