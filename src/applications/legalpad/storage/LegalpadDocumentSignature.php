@@ -10,9 +10,15 @@ final class LegalpadDocumentSignature
   protected $documentPHID;
   protected $documentVersion;
   protected $signerPHID;
+  protected $signerName;
+  protected $signerEmail;
   protected $signatureData = array();
   protected $verified;
+  protected $isExemption = 0;
+  protected $exemptionPHID;
   protected $secretKey;
+
+  private $document = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -30,9 +36,21 @@ final class LegalpadDocumentSignature
   }
 
   public function isVerified() {
-    return $this->getVerified() != self::UNVERIFIED;
+    return ($this->getVerified() != self::UNVERIFIED);
   }
+
+  public function getDocument() {
+    return $this->assertAttached($this->document);
+  }
+
+  public function attachDocument(LegalpadDocument $document) {
+    $this->document = $document;
+    return $this;
+  }
+
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
 
   public function getCapabilities() {
     return array(
@@ -43,12 +61,13 @@ final class LegalpadDocumentSignature
   public function getPolicy($capability) {
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
-        return PhabricatorPolicies::POLICY_USER;
+        return $this->getDocument()->getPolicy(
+          PhabricatorPolicyCapability::CAN_EDIT);
     }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return false;
+    return ($viewer->getPHID() == $this->getSignerPHID());
   }
 
   public function describeAutomaticCapability($capability) {

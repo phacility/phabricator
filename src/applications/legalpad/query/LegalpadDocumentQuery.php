@@ -14,6 +14,7 @@ final class LegalpadDocumentQuery
   private $needDocumentBodies;
   private $needContributors;
   private $needSignatures;
+  private $needViewerSignatures;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -65,16 +66,22 @@ final class LegalpadDocumentQuery
     return $this;
   }
 
+  public function needViewerSignatures($need) {
+    $this->needViewerSignatures = $need;
+    return $this;
+  }
+
   protected function loadPage() {
     $table = new LegalpadDocument();
     $conn_r = $table->establishConnection('r');
 
     $data = queryfx_all(
       $conn_r,
-      'SELECT d.* FROM %T d %Q %Q %Q %Q',
+      'SELECT d.* FROM %T d %Q %Q %Q %Q %Q',
       $table->getTableName(),
       $this->buildJoinClause($conn_r),
       $this->buildWhereClause($conn_r),
+      $this->buildGroupClause($conn_r),
       $this->buildOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
 
@@ -84,28 +91,6 @@ final class LegalpadDocumentQuery
   }
 
   protected function willFilterPage(array $documents) {
-    if ($this->signerPHIDs) {
-      $document_map = mpull($documents, null, 'getPHID');
-      $signatures = id(new LegalpadDocumentSignatureQuery())
-        ->setViewer($this->getViewer())
-        ->withDocumentPHIDs(array_keys($document_map))
-        ->withSignerPHIDs($this->signerPHIDs)
-        ->execute();
-      $signatures = mgroup($signatures, 'getDocumentPHID');
-      foreach ($document_map as $document_phid => $document) {
-        $sigs = idx($signatures, $document_phid, array());
-        foreach ($sigs as $index => $sig) {
-          if ($sig->getDocumentVersion() != $document->getVersions()) {
-            unset($sigs[$index]);
-          }
-        }
-        $signer_phids = mpull($sigs, 'getSignerPHID');
-        if (array_diff($this->signerPHIDs, $signer_phids)) {
-          unset($documents[$document->getID()]);
-        }
-      }
-    }
-
     if ($this->needDocumentBodies) {
       $documents = $this->loadDocumentBodies($documents);
     }
@@ -118,68 +103,108 @@ final class LegalpadDocumentQuery
       $documents = $this->loadSignatures($documents);
     }
 
+    if ($this->needViewerSignatures) {
+      if ($documents) {
+        if ($this->getViewer()->getPHID()) {
+          $signatures = id(new LegalpadDocumentSignatureQuery())
+            ->setViewer($this->getViewer())
+            ->withSignerPHIDs(array($this->getViewer()->getPHID()))
+            ->withDocumentPHIDs(mpull($documents, 'getPHID'))
+            ->execute();
+          $signatures = mpull($signatures, null, 'getDocumentPHID');
+        } else {
+          $signatures = array();
+        }
+
+        foreach ($documents as $document) {
+          $signature = idx($signatures, $document->getPHID());
+          $document->attachUserSignature(
+            $this->getViewer()->getPHID(),
+            $signature);
+        }
+      }
+    }
+
     return $documents;
   }
 
   private function buildJoinClause($conn_r) {
     $joins = array();
 
-    if ($this->contributorPHIDs) {
+    if ($this->contributorPHIDs !== null) {
       $joins[] = qsprintf(
         $conn_r,
-        'JOIN edge e ON e.src = d.phid');
+        'JOIN edge contributor ON contributor.src = d.phid
+          AND contributor.type = %d',
+        PhabricatorEdgeConfig::TYPE_OBJECT_HAS_CONTRIBUTOR);
+    }
+
+    if ($this->signerPHIDs !== null) {
+      $joins[] = qsprintf(
+        $conn_r,
+        'JOIN %T signer ON signer.documentPHID = d.phid
+          AND signer.signerPHID IN (%Ls)',
+        id(new LegalpadDocumentSignature())->getTableName(),
+        $this->signerPHIDs);
     }
 
     return implode(' ', $joins);
   }
 
+  private function buildGroupClause(AphrontDatabaseConnection $conn_r) {
+    if ($this->contributorPHIDs || $this->signerPHIDs) {
+      return 'GROUP BY d.id';
+    } else {
+      return '';
+    }
+  }
+
   protected function buildWhereClause($conn_r) {
     $where = array();
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'd.id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'd.phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->creatorPHIDs) {
+    if ($this->creatorPHIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
         'd.creatorPHID IN (%Ls)',
         $this->creatorPHIDs);
     }
 
-    if ($this->dateCreatedAfter) {
+    if ($this->dateCreatedAfter !== null) {
       $where[] = qsprintf(
         $conn_r,
         'd.dateCreated >= %d',
         $this->dateCreatedAfter);
     }
 
-    if ($this->dateCreatedBefore) {
+    if ($this->dateCreatedBefore !== null) {
       $where[] = qsprintf(
         $conn_r,
         'd.dateCreated <= %d',
         $this->dateCreatedBefore);
     }
 
-    if ($this->contributorPHIDs) {
+    if ($this->contributorPHIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'e.type = %s AND e.dst IN (%Ls)',
-        PhabricatorEdgeConfig::TYPE_OBJECT_HAS_CONTRIBUTOR,
+        'contributor.dst IN (%Ls)',
         $this->contributorPHIDs);
     }
+
+    $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
   }
@@ -227,11 +252,6 @@ final class LegalpadDocumentQuery
 
     foreach ($documents as $document) {
       $sigs = idx($signatures, $document->getPHID(), array());
-      foreach ($sigs as $index => $sig) {
-        if ($sig->getDocumentVersion() != $document->getVersions()) {
-          unset($sigs[$index]);
-        }
-      }
       $document->attachSignatures($sigs);
     }
 

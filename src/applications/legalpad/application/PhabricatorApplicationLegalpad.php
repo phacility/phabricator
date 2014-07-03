@@ -18,16 +18,8 @@ final class PhabricatorApplicationLegalpad extends PhabricatorApplication {
     return "\xC2\xA9";
   }
 
-  public function getFlavorText() {
-    return pht('With advanced signature technology.');
-  }
-
   public function getApplicationGroup() {
     return self::GROUP_UTILITIES;
-  }
-
-  public function isBeta() {
-    return true;
   }
 
   public function getRemarkupRules() {
@@ -36,27 +28,44 @@ final class PhabricatorApplicationLegalpad extends PhabricatorApplication {
     );
   }
 
+  public function getHelpURI() {
+    return PhabricatorEnv::getDoclink('Legalpad User Guide');
+  }
+
+  public function getOverview() {
+    return pht(
+      '**Legalpad** is a simple application for tracking signatures and '.
+      'legal agreements. At the moment, it is primarily intended to help '.
+      'open source projects keep track of Contributor License Agreements.');
+  }
+
   public function getRoutes() {
     return array(
       '/L(?P<id>\d+)' => 'LegalpadDocumentSignController',
       '/legalpad/' => array(
         '' => 'LegalpadDocumentListController',
-        '(query/(?P<queryKey>[^/]+)/)?' => 'LegalpadDocumentListController',
+        '(?:query/(?P<queryKey>[^/]+)/)?' => 'LegalpadDocumentListController',
         'create/' => 'LegalpadDocumentEditController',
         'edit/(?P<id>\d+)/' => 'LegalpadDocumentEditController',
         'comment/(?P<id>\d+)/' => 'LegalpadDocumentCommentController',
         'view/(?P<id>\d+)/' => 'LegalpadDocumentManageController',
         'done/' => 'LegalpadDocumentDoneController',
         'verify/(?P<code>[^/]+)/' =>
-        'LegalpadDocumentSignatureVerificationController',
-        'signatures/(?P<id>\d+)/' => 'LegalpadDocumentSignatureListController',
+          'LegalpadDocumentSignatureVerificationController',
+        'signatures/(?:(?P<id>\d+)/)?(?:query/(?P<queryKey>[^/]+)/)?' =>
+          'LegalpadDocumentSignatureListController',
+        'addsignature/(?P<id>\d+)/' => 'LegalpadDocumentSignatureAddController',
+        'signature/(?P<id>\d+)/' => 'LegalpadDocumentSignatureViewController',
         'document/' => array(
-          'preview/' => 'PhabricatorMarkupPreviewController'),
+          'preview/' => 'PhabricatorMarkupPreviewController',
+        ),
       ));
   }
 
   protected function getCustomCapabilities() {
     return array(
+      LegalpadCapabilityCreateDocuments::CAPABILITY => array(
+      ),
       LegalpadCapabilityDefaultView::CAPABILITY => array(
       ),
       LegalpadCapabilityDefaultEdit::CAPABILITY => array(

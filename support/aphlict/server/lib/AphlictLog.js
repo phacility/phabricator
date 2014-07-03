@@ -32,7 +32,7 @@ JX.install('AphlictLog', {
       return this;
     },
 
-    log: function(pattern) {
+    log: function() {
       var str = util.format.apply(null, arguments);
       var date = new Date().toLocaleString();
       str = '[' + date + '] ' + str;
@@ -43,7 +43,7 @@ JX.install('AphlictLog', {
       }
 
       for (ii = 0; ii < this._writeToLogs.length; ii++) {
-        this._writeToLogs[ii].write(str + "\n");
+        this._writeToLogs[ii].write(str + '\n');
       }
     }
 

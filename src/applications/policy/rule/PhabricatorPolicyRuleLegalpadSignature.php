@@ -15,6 +15,9 @@ final class PhabricatorPolicyRuleLegalpadSignature
       return;
     }
 
+    // TODO: This accepts signature of any version of the document, even an
+    // older version.
+
     $documents = id(new LegalpadDocumentQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withPHIDs($values)

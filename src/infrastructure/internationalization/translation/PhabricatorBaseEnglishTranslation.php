@@ -890,17 +890,6 @@ abstract class PhabricatorBaseEnglishTranslation
         '%d Users Need Approval',
       ),
 
-      'Warning: there are %d signature(s) already for this document. '.
-      'Updating the title or text will invalidate these signatures and users '.
-      'will need to sign again. Proceed carefully.' => array(
-        'Warning: there is %d signature already for this document. '.
-        'Updating the title or text will invalidate this signature and the '.
-        'user will need to sign again. Proceed carefully.',
-        'Warning: there are %d signatures already for this document. '.
-        'Updating the title or text will invalidate these signatures and '.
-        'users will need to sign again. Proceed carefully.',
-      ),
-
       '%s older changes(s) are hidden.' => array(
         '%d older change is hidden.',
         '%d older changes are hidden.',
@@ -934,6 +923,13 @@ abstract class PhabricatorBaseEnglishTranslation
         array(
           '%s added a JIRA issue: %3$s.',
           '%s added JIRA issues: %3$s.',
+        ),
+      ),
+
+      '%s added %d required legal document(s): %s.' => array(
+        array(
+          '%s added a required legal document: %3$s.',
+          '%s added required legal documents: %3$s.',
         ),
       ),
 

@@ -46,7 +46,7 @@ JX.install('AphlictFlashPolicyServer', {
       this._log('<FlashPolicy> Socket Error: %s', error);
     },
 
-    _log: function(pattern) {
+    _log: function() {
       this._debug && this._debug.log.apply(this._debug, arguments);
     },
 
@@ -60,7 +60,7 @@ JX.install('AphlictFlashPolicyServer', {
         '</cross-domain-policy>'
       ];
 
-      return policy.join("\n") + "\0";
+      return policy.join('\n') + '\0';
     }
 
   }

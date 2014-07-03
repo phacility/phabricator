@@ -96,6 +96,22 @@ final class PhabricatorDashboardPanelViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
+    if (!$panel->getIsArchived()) {
+      $archive_text = pht('Archive Panel');
+      $archive_icon = 'fa-times';
+    } else {
+      $archive_text = pht('Activate Panel');
+      $archive_icon = 'fa-plus';
+    }
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setName($archive_text)
+        ->setIcon($archive_icon)
+        ->setHref($this->getApplicationURI("panel/archive/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true));
+
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('View Standalone'))

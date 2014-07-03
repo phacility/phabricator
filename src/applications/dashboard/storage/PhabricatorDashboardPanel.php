@@ -13,6 +13,7 @@ final class PhabricatorDashboardPanel
   protected $panelType;
   protected $viewPolicy;
   protected $editPolicy;
+  protected $isArchived = 0;
   protected $properties = array();
 
   private $customFields = self::ATTACHABLE;

@@ -60,6 +60,7 @@ final class PhabricatorDashboardAddPanelController
 
     $panels = id(new PhabricatorDashboardPanelQuery())
       ->setViewer($viewer)
+      ->withArchived(false)
       ->execute();
 
     if (!$panels) {

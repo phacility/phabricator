@@ -243,56 +243,56 @@ final class CelerityResourceTransformer {
       // better suited to blending into other UIs.
 
       // Shade Red
-      'sh-lightredborder'     => '#eac0c0',
+      'sh-lightredborder'     => '#efcfcf',
       'sh-redborder'          => '#d1abab',
       'sh-redicon'            => '#c85a5a',
       'sh-redtext'            => '#a53737',
       'sh-redbackground'      => '#f7e6e6',
 
       // Shade Orange
-      'sh-lightorangeborder'  => '#f6d0b1',
+      'sh-lightorangeborder'  => '#f8dcc3',
       'sh-orangeborder'       => '#dbb99e',
       'sh-orangeicon'         => '#e78331',
       'sh-orangetext'         => '#ba6016',
       'sh-orangebackground'   => '#fbede1',
 
       // Shade Yellow
-      'sh-lightyellowborder'  => '#e2cfbd',
+      'sh-lightyellowborder'  => '#e9dbcd',
       'sh-yellowborder'       => '#c9b8a8',
       'sh-yellowicon'         => '#9b946e',
       'sh-yellowtext'         => '#726f56',
       'sh-yellowbackground'   => '#fdf3da',
 
       // Shade Green
-      'sh-lightgreenborder'   => '#b4ddb5',
+      'sh-lightgreenborder'   => '#c6e6c7',
       'sh-greenborder'        => '#a0c4a1',
       'sh-greenicon'          => '#4ca74e',
       'sh-greentext'          => '#326d34',
       'sh-greenbackground'    => '#ddefdd',
 
       // Shade Blue
-      'sh-lightblueborder'    => '#bfcfda',
+      'sh-lightblueborder'    => '#cfdbe3',
       'sh-blueborder'         => '#a7b5bf',
       'sh-blueicon'           => '#6b748c',
       'sh-bluetext'           => '#464c5c',
       'sh-bluebackground'     => '#dee7f8',
 
       // Shade Indigo
-      'sh-lightindigoborder'  => '#f3c7ea',
+      'sh-lightindigoborder'  => '#f6d5ef',
       'sh-indigoborder'       => '#d5aecd',
       'sh-indigoicon'         => '#e26fcb',
       'sh-indigotext'         => '#da49be',
       'sh-indigobackground'   => '#fbeaf8',
 
       // Shade Violet
-      'sh-lightvioletborder'  => '#d5c2df',
+      'sh-lightvioletborder'  => '#e0d1e7',
       'sh-violetborder'       => '#bcabc5',
       'sh-violeticon'         => '#9260ad',
       'sh-violettext'         => '#69427f',
       'sh-violetbackground'   => '#efe8f3',
 
       // Shade Grey
-      'sh-lightgreyborder'    => '#cbcbcb',
+      'sh-lightgreyborder'    => '#d8d8d8',
       'sh-greyborder'         => '#b2b2b2',
       'sh-greyicon'           => '#757575',
       'sh-greytext'           => '#555555',

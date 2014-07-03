@@ -3,9 +3,9 @@
 final class PhabricatorRemarkupRuleIcon
   extends PhutilRemarkupRule {
 
-  private $macros;
-
-  const KEY_RULE_MACRO = 'rule.macro';
+  public function getPriority() {
+    return 200.0;
+  }
 
   public function apply($text) {
     return preg_replace_callback(
@@ -15,6 +15,10 @@ final class PhabricatorRemarkupRuleIcon
   }
 
   public function markupIcon($matches) {
+    if (!$this->isFlatText($matches[0])) {
+      return $matches[0];
+    }
+
     $extra = idx($matches, 1);
 
     // We allow various forms, like these:

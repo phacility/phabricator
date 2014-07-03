@@ -8,6 +8,10 @@ final class PhabricatorRemarkupRuleMeme
 
   private $images;
 
+  public function getPriority() {
+    return 200.0;
+  }
+
   public function apply($text) {
     return preg_replace_callback(
       '@{meme,((?:[^}\\\\]+|\\\\.)+)}$@m',
@@ -16,6 +20,10 @@ final class PhabricatorRemarkupRuleMeme
   }
 
   public function markupMeme($matches) {
+    if (!$this->isFlatText($matches[0])) {
+      return $matches[0];
+    }
+
     $options = array(
       'src' => null,
       'above' => null,
@@ -42,10 +50,10 @@ final class PhabricatorRemarkupRuleMeme
         $options['above'],
         $options['below']);
 
-      $img = phutil_tag(
+      $img = $this->newTag(
         'img',
         array(
-          'src' => (string)$uri,
+          'src' => $uri,
           'alt' => $alt_text,
         ));
     }

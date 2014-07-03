@@ -64,7 +64,6 @@ final class LegalpadDocumentSignController extends LegalpadController {
         ->setViewer(PhabricatorUser::getOmnipotentUser())
         ->withDocumentPHIDs(array($document->getPHID()))
         ->withSignerPHIDs(array($signer_phid))
-        ->withDocumentVersions(array($document->getVersions()))
         ->executeOne();
 
       if ($signature && !$viewer->isLoggedIn()) {
@@ -82,6 +81,8 @@ final class LegalpadDocumentSignController extends LegalpadController {
         ->setSignerPHID($signer_phid)
         ->setDocumentPHID($document->getPHID())
         ->setDocumentVersion($document->getVersions())
+        ->setSignerName((string)idx($signature_data, 'name'))
+        ->setSignerEmail((string)idx($signature_data, 'email'))
         ->setSignatureData($signature_data);
 
       // If the user is logged in, show a notice that they haven't signed.
@@ -100,14 +101,26 @@ final class LegalpadDocumentSignController extends LegalpadController {
 
       // In this case, we know they've signed.
       $signed_at = $signature->getDateCreated();
+
+      if ($signature->getIsExemption()) {
+        $exemption_phid = $signature->getExemptionPHID();
+        $handles = $this->loadViewerHandles(array($exemption_phid));
+        $exemption_handle = $handles[$exemption_phid];
+
+        $signed_text = pht(
+          'You do not need to sign this document. '.
+          '%s added a signature exemption for you on %s.',
+          $exemption_handle->renderLink(),
+          phabricator_datetime($signed_at, $viewer));
+      } else {
+        $signed_text = pht(
+          'You signed this document on %s.',
+          phabricator_datetime($signed_at, $viewer));
+      }
+
       $signed_status = id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setErrors(
-          array(
-            pht(
-              'You signed this document on %s.',
-              phabricator_datetime($signed_at, $viewer)),
-          ));
+        ->setErrors(array($signed_text));
     }
 
     $e_name = true;
@@ -115,7 +128,17 @@ final class LegalpadDocumentSignController extends LegalpadController {
     $e_agree = null;
 
     $errors = array();
-    if ($request->isFormPost() && !$has_signed) {
+    if ($request->isFormOrHisecPost() && !$has_signed) {
+
+      // Require two-factor auth to sign legal documents.
+      if ($viewer->isLoggedIn()) {
+        $engine = new PhabricatorAuthSessionEngine();
+        $engine->requireHighSecuritySession(
+          $viewer,
+          $request,
+          '/'.$document->getMonogram());
+      }
+
       $name = $request->getStr('name');
       $agree = $request->getExists('agree');
 
@@ -149,6 +172,8 @@ final class LegalpadDocumentSignController extends LegalpadController {
       }
       $signature_data['email'] = $email;
 
+      $signature->setSignerName((string)idx($signature_data, 'name'));
+      $signature->setSignerEmail((string)idx($signature_data, 'email'));
       $signature->setSignatureData($signature_data);
 
       if (!$agree) {

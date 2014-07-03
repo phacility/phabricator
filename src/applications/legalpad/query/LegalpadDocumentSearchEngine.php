@@ -21,6 +21,10 @@ final class LegalpadDocumentSearchEngine
       'contributorPHIDs',
       $this->readUsersFromRequest($request, 'contributors'));
 
+    $saved->setParameter(
+      'withViewerSignature',
+      $request->getBool('withViewerSignature'));
+
     $saved->setParameter('createdStart', $request->getStr('createdStart'));
     $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
 
@@ -29,8 +33,24 @@ final class LegalpadDocumentSearchEngine
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new LegalpadDocumentQuery())
-      ->withCreatorPHIDs($saved->getParameter('creatorPHIDs', array()))
-      ->withContributorPHIDs($saved->getParameter('contributorPHIDs', array()));
+      ->needViewerSignatures(true);
+
+    $creator_phids = $saved->getParameter('creatorPHIDs', array());
+    if ($creator_phids) {
+      $query->withCreatorPHIDs($creator_phids);
+    }
+
+    $contributor_phids = $saved->getParameter('contributorPHIDs', array());
+    if ($contributor_phids) {
+      $query->withContributorPHIDs($contributor_phids);
+    }
+
+    if ($saved->getParameter('withViewerSignature')) {
+      $viewer_phid = $this->requireViewer()->getPHID();
+      if ($viewer_phid) {
+        $query->withSignerPHIDs(array($viewer_phid));
+      }
+    }
 
     $start = $this->parseDateTime($saved->getParameter('createdStart'));
     $end = $this->parseDateTime($saved->getParameter('createdEnd'));
@@ -59,7 +79,20 @@ final class LegalpadDocumentSearchEngine
       ->withPHIDs($phids)
       ->execute();
 
+    $viewer_signature = $saved_query->getParameter('withViewerSignature');
+    if (!$this->requireViewer()->getPHID()) {
+      $viewer_signature = false;
+    }
+
     $form
+      ->appendChild(
+        id(new AphrontFormCheckboxControl())
+          ->addCheckbox(
+            'withViewerSignature',
+            1,
+            pht('Show only documents I have signed.'),
+            $viewer_signature)
+          ->setDisabled(!$this->requireViewer()->getPHID()))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/users/')
@@ -88,9 +121,13 @@ final class LegalpadDocumentSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
-      'all' => pht('All Documents'),
-    );
+    $names = array();
+
+    if ($this->requireViewer()->isLoggedIn()) {
+      $names['signed'] = pht('Signed Documents');
+    }
+
+    $names['all'] = pht('All Documents');
 
     return $names;
   }
@@ -101,6 +138,9 @@ final class LegalpadDocumentSearchEngine
     $query->setQueryKey($query_key);
 
     switch ($query_key) {
+      case 'signed':
+        return $query
+          ->setParameter('withViewerSignature', true);
       case 'all':
         return $query;
     }
@@ -111,7 +151,7 @@ final class LegalpadDocumentSearchEngine
   protected function getRequiredHandlePHIDsForResultList(
     array $documents,
     PhabricatorSavedQuery $query) {
-    return array_mergev(mpull($documents, 'getRecentContributorPHIDs'));
+    return array();
   }
 
   protected function renderResultList(
@@ -126,8 +166,6 @@ final class LegalpadDocumentSearchEngine
     $list->setUser($viewer);
     foreach ($documents as $document) {
       $last_updated = phabricator_date($document->getDateModified(), $viewer);
-      $recent_contributors = $document->getRecentContributorPHIDs();
-      $updater = $handles[reset($recent_contributors)]->renderLink();
 
       $title = $document->getTitle();
 
@@ -136,9 +174,32 @@ final class LegalpadDocumentSearchEngine
         ->setHeader($title)
         ->setHref('/'.$document->getMonogram())
         ->setObject($document)
-        ->addIcon('none', pht('Last updated: %s', $last_updated))
-        ->addByline(pht('Updated by: %s', $updater))
-        ->addAttribute(pht('Versions: %d', $document->getVersions()));
+        ->addIcon('none', pht('Version %d', $document->getVersions()))
+        ->addIcon('none', pht('Updated %s', $last_updated));
+
+      if ($viewer->getPHID()) {
+        $signature = $document->getUserSignature($viewer->getPHID());
+      } else {
+        $signature = null;
+      }
+
+      if ($signature) {
+        $item->addAttribute(
+          array(
+            id(new PHUIIconView())->setIconFont('fa-check-square-o', 'green'),
+            ' ',
+            pht(
+              'Signed on %s',
+              phabricator_date($signature->getDateCreated(), $viewer)),
+          ));
+      } else {
+        $item->addAttribute(
+          array(
+            id(new PHUIIconView())->setIconFont('fa-square-o', 'grey'),
+            ' ',
+            pht('Not Signed'),
+          ));
+      }
 
       $list->addItem($item);
     }

@@ -397,11 +397,15 @@ final class HeraldRuleController extends HeraldController {
             $current_value = $action->getTarget();
             break;
           default:
-            $target_map = array();
-            foreach ((array)$action->getTarget() as $fbid) {
-              $target_map[$fbid] = $handles[$fbid]->getName();
+            if (is_array($action->getTarget())) {
+              $target_map = array();
+              foreach ((array)$action->getTarget() as $fbid) {
+                $target_map[$fbid] = $handles[$fbid]->getName();
+              }
+              $current_value = $target_map;
+            } else {
+              $current_value = $action->getTarget();
             }
-            $current_value = $target_map;
             break;
         }
 
@@ -595,6 +599,7 @@ final class HeraldRuleController extends HeraldController {
         'buildplan'     => '/typeahead/common/buildplans/',
         'taskpriority'  => '/typeahead/common/taskpriority/',
         'arcanistprojects' => '/typeahead/common/arcanistprojects/',
+        'legaldocuments' => '/typeahead/common/legalpaddocuments/',
       ),
       'username' => $this->getRequest()->getUser()->getUserName(),
       'icons' => mpull($handles, 'getTypeIcon', 'getPHID'),

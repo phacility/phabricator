@@ -115,6 +115,22 @@ final class DifferentialRevisionViewController extends DifferentialController {
       }
     }
 
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $revision,
+      PhabricatorCustomField::ROLE_VIEW);
+
+    $field_list->setViewer($user);
+    $field_list->readFieldsFromStorage($revision);
+
+    $warning_handle_map = array();
+    foreach ($field_list->getFields() as $key => $field) {
+      $req = $field->getRequiredHandlePHIDsForRevisionHeaderWarnings();
+      foreach ($req as $phid) {
+        $warning_handle_map[$key][] = $phid;
+        $object_phids[] = $phid;
+      }
+    }
+
     $handles = $this->loadViewerHandles($object_phids);
 
     $request_uri = $request->getRequestURI();
@@ -168,13 +184,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $warning = null;
       $visible_changesets = $changesets;
     }
-
-    $field_list = PhabricatorCustomField::getObjectFields(
-      $revision,
-      PhabricatorCustomField::ROLE_VIEW);
-
-    $field_list->setViewer($user);
-    $field_list->readFieldsFromStorage($revision);
 
 
     // TODO: This should be in a DiffQuery or similar.
@@ -245,8 +254,15 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $revision_detail_box = $revision_detail->render();
 
-    $revision_warnings = $this->buildRevisionWarnings($revision, $handles);
+    $revision_warnings = $this->buildRevisionWarnings(
+      $revision,
+      $field_list,
+      $warning_handle_map,
+      $handles);
     if ($revision_warnings) {
+      $revision_warnings = id(new AphrontErrorView())
+        ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+        ->setErrors($revision_warnings);
       $revision_detail_box->setErrorView($revision_warnings);
     }
 
@@ -935,32 +951,21 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
   private function buildRevisionWarnings(
     DifferentialRevision $revision,
+    PhabricatorCustomFieldList $field_list,
+    array $warning_handle_map,
     array $handles) {
 
-    $status_needs_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
-    if ($revision->getStatus() != $status_needs_review) {
-      return;
-    }
-
-    foreach ($revision->getReviewers() as $reviewer) {
-      if (!$handles[$reviewer]->isDisabled()) {
-        return;
+    $warnings = array();
+    foreach ($field_list->getFields() as $key => $field) {
+      $phids = idx($warning_handle_map, $key, array());
+      $field_handles = array_select_keys($handles, $phids);
+      $field_warnings = $field->getWarningsForRevisionHeader($field_handles);
+      foreach ($field_warnings as $warning) {
+        $warnings[] = $warning;
       }
     }
 
-    $warnings = array();
-    if ($revision->getReviewers()) {
-      $warnings[] = pht(
-        'This revision needs review, but all specified reviewers are '.
-        'disabled or inactive.');
-    } else {
-      $warnings[] = pht(
-        'This revision needs review, but there are no reviewers specified.');
-    }
-
-    return id(new AphrontErrorView())
-      ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
-      ->setErrors($warnings);
+    return $warnings;
   }
 
 }

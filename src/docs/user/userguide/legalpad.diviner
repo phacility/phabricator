@@ -1,0 +1,92 @@
+@title Legalpad User Guide
+@group userguide
+
+Using Legalpad to track agreements and signatures on legal documents.
+
+= Overview =
+
+Legalpad is a simple application for tracking signatures on legal agreements.
+You can add legal documents, users can sign them, and you can keep track of who
+has signed what.
+
+Right now, it is primarily useful for open source projects that have a
+Contributor License Agreement or a similar document which needs to be signed
+before changes can be accepted from contributors. In particular, it has
+integrations into Differential which can block changes from being accepted until
+the author has signed the required documents.
+
+NOTE: Legalpad is a basic application, and missing many of the features of more
+general document signing software. It may be useful to help you do things
+beyond track CLAs, but you should evaluate its capabilities carefully.
+
+Requiring a CLA
+===============
+
+Open source projects often require contributors to sign a license agreement
+before their contributions can be accepted to the project. To require a CLA or
+similar document for an open source project:
+
+  - Create a CLA document in Legalpad.
+  - Create a "Global" Herald rule which triggers "Always".
+  - The rule should take the action "Require legal signatures", specifying
+    your CLA document as the required document.
+
+After you've done this, all new reviews created in Differential by authors who
+have not signed the document will trigger a signature requirement. These reviews
+can not be accepted until the document has been signed.
+
+If the author has already signed all of the required documents, Herald will not
+take any actions. This reduces the amount of noise the CLA process generates for
+regular contributors.
+
+You can require more than one document (to require that they all be signed), if
+you have several agreements that contributors must sign.
+
+Alternatively, if you have several different sets of agreements for different
+projects, you can also choose a more narrow Herald condition than "Always" (for
+example, require a signature only if the revision is against certain
+repositories).
+
+Document-Based Policies
+=======================
+
+If you have a document like an NDA, you can write a policy rule which prevents
+users from seeing content until they sign the document:
+
+  - In any policy control ("Visible To", "Editable By"), choose "Custom Policy".
+  - Add a rule like "Allow signers of legalpad documents: X".
+  - Leave the default rule as "Deny all other users".
+  - Save the policy.
+
+Users will now only be able to take the action (for example, view or edit the
+object) if they have signed the specified documents.
+
+
+Adding Exemptions
+=================
+
+If you have users who have signed an alternate form of a document (for example,
+you have a hard copy on file), or an equivalent document, or who are otherwise
+exempt from needing to sign a document in Legalpad, you can add a signature
+exemption for them.
+
+Other applications will treat users with a signature exemption as though they
+had signed the document, although the UI will show the signature as an exemption
+rather than a normal signature.
+
+To add an exemption, go to **Manage Document**, then **View Signatures**, then
+**Add Signature Exemption**.
+
+You can optionally add notes about why a user is exempt from signing a document.
+To review the notes later (and see who added the exemption), click the colored
+asterisk in the list view.
+
+
+Roadmap
+========
+
+You can find discussion about the Legalpad roadmap here:
+
+https://secure.phabricator.com/T5505
+
+If there are features you'd like to see, let us know.

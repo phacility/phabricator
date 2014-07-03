@@ -11,6 +11,11 @@
       "rule" : ".login-Asana",
       "hash" : "30df492eab339fa64c9ae9b21bb46a18"
     },
+    "login-Bitbucket"    : {
+      "name" : "login-Bitbucket",
+      "rule" : ".login-Bitbucket",
+      "hash" : "899182cf1ca35891b64aaa5426bf623a"
+    },
     "login-Disqus"       : {
       "name" : "login-Disqus",
       "rule" : ".login-Disqus",
@@ -60,6 +65,11 @@
       "name" : "login-Linkedin",
       "rule" : ".login-Linkedin",
       "hash" : "0dd89825046fa4fd0fe402aa2cd55fd1"
+    },
+    "login-MediaWiki"    : {
+      "name" : "login-MediaWiki",
+      "rule" : ".login-MediaWiki",
+      "hash" : "6e9e75fdad545f415d78719bd2dee3ec"
     },
     "login-Openid"       : {
       "name" : "login-Openid",

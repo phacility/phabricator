@@ -4,7 +4,8 @@ final class LegalpadDocument extends LegalpadDAO
   implements
     PhabricatorPolicyInterface,
     PhabricatorSubscribableInterface,
-    PhabricatorApplicationTransactionInterface {
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorDestructableInterface {
 
   protected $title;
   protected $contributorCount;
@@ -18,7 +19,8 @@ final class LegalpadDocument extends LegalpadDAO
 
   private $documentBody = self::ATTACHABLE;
   private $contributors = self::ATTACHABLE;
-  private $signatures   = self::ATTACHABLE;
+  private $signatures = self::ATTACHABLE;
+  private $userSignatures = array();
 
   public static function initializeNewDocument(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -91,6 +93,17 @@ final class LegalpadDocument extends LegalpadDAO
     return 'L'.$this->getID();
   }
 
+  public function getUserSignature($phid) {
+    return $this->assertAttachedKey($this->userSignatures, $phid);
+  }
+
+  public function attachUserSignature(
+    $user_phid,
+    LegalpadDocumentSignature $signature = null) {
+    $this->userSignatures[$user_phid] = $signature;
+    return $this;
+  }
+
 
 /* -(  PhabricatorSubscribableInterface  )----------------------------------- */
 
@@ -156,6 +169,33 @@ final class LegalpadDocument extends LegalpadDAO
 
   public function getApplicationTransactionTemplate() {
     return new LegalpadTransaction();
+  }
+
+
+/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $this->delete();
+
+      $bodies = id(new LegalpadDocumentBody())->loadAllWhere(
+        'documentPHID = %s',
+        $this->getPHID());
+      foreach ($bodies as $body) {
+        $body->delete();
+      }
+
+      $signatures = id(new LegalpadDocumentSignature())->loadAllWhere(
+        'documentPHID = %s',
+        $this->getPHID());
+      foreach ($signatures as $signature) {
+        $signature->delete();
+      }
+
+    $this->saveTransaction();
   }
 
 }
