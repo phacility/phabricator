@@ -58,11 +58,20 @@ of the documentation) can help you get started.
 
 = Legal Stuff =
 
-Before we can accept source code contributions, you need to submit a super fine
-and fancy legal document called a Facebook Contributor License Agreement, which
-you can find here:
+Before we can accept source code contributions, you need to submit a
+[[ https://secure.phabricator.com/L28 | Contributor License Agreement ]]. Your
+changes can not be accepted until you sign the agreement.
 
-https://developers.facebook.com/opensource/cla
+If you haven't signed it by the time you send changes for review, you'll be
+reminded to sign it at that time.
+
+If you're submitting work on behalf of a company (like your employer), the
+company can sign the [[ https://secure.phabricator.com/L30 | Corporate
+Contributor License Agreement ]] instead.
+
+Both agreements are substantially similar to the Apache Foundation's CLAs. They
+protect Phacility and users of Phabricator by making sure we have permission to
+distribute your changes under an open source license.
 
 = Not Sure Where To Get Started? =
 
