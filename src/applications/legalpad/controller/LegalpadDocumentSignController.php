@@ -227,6 +227,19 @@ final class LegalpadDocumentSignController extends LegalpadController {
           ->setDisabled(!$can_edit)
           ->setWorkflow(!$can_edit));
 
+    $preamble = null;
+    if (strlen($document->getPreamble())) {
+      $preamble_text = PhabricatorMarkupEngine::renderOneObject(
+        id(new PhabricatorMarkupOneOff())->setContent(
+          $document->getPreamble()),
+        'default',
+        $viewer);
+
+      $preamble = id(new PHUIPropertyListView())
+        ->addSectionHeader(pht('Preamble'))
+        ->addTextContent($preamble_text);
+    }
+
     $content = id(new PHUIDocumentView())
       ->addClass('legalpad')
       ->setHeader($header)
@@ -234,6 +247,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
       ->appendChild(
         array(
           $signed_status,
+          $preamble,
           $document_markup,
         ));
 

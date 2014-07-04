@@ -47,6 +47,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
     $title = $document->getDocumentBody()->getTitle();
     $text = $document->getDocumentBody()->getText();
     $v_signature_type = $document->getSignatureType();
+    $v_preamble = $document->getPreamble();
 
     $errors = array();
     $can_view = null;
@@ -90,6 +91,11 @@ final class LegalpadDocumentEditController extends LegalpadController {
           ->setTransactionType(LegalpadTransactionType::TYPE_SIGNATURE_TYPE)
           ->setNewValue($v_signature_type);
       }
+
+      $v_preamble = $request->getStr('preamble');
+      $xactions[] = id(new LegalpadTransaction())
+        ->setTransactionType(LegalpadTransactionType::TYPE_PREAMBLE)
+        ->setNewValue($v_preamble);
 
       if (!$errors) {
         $editor = id(new LegalpadDocumentEditor())
@@ -137,8 +143,16 @@ final class LegalpadDocumentEditController extends LegalpadController {
     $form
       ->appendChild(
         id(new PhabricatorRemarkupControl())
+        ->setID('preamble')
+        ->setLabel(pht('Preamble'))
+        ->setValue($v_preamble)
+        ->setName('preamble')
+        ->setCaption(
+          pht('Optional help text for users signing this document.')))
+      ->appendChild(
+        id(new PhabricatorRemarkupControl())
         ->setID('document-text')
-        ->setLabel(pht('Text'))
+        ->setLabel(pht('Document Body'))
         ->setError($e_text)
         ->setValue($text)
         ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)

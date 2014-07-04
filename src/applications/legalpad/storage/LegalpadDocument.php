@@ -17,6 +17,7 @@ final class LegalpadDocument extends LegalpadDAO
   protected $editPolicy;
   protected $mailKey;
   protected $signatureType;
+  protected $preamble;
 
   const SIGNATURE_TYPE_INDIVIDUAL = 'user';
   const SIGNATURE_TYPE_CORPORATION = 'corp';
@@ -42,6 +43,7 @@ final class LegalpadDocument extends LegalpadDAO
       ->setRecentContributorPHIDs(array())
       ->attachSignatures(array())
       ->setSignatureType(self::SIGNATURE_TYPE_INDIVIDUAL)
+      ->setPreamble('')
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy);
   }

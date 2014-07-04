@@ -26,6 +26,7 @@ final class LegalpadDocumentEditor
     $types[] = LegalpadTransactionType::TYPE_TITLE;
     $types[] = LegalpadTransactionType::TYPE_TEXT;
     $types[] = LegalpadTransactionType::TYPE_SIGNATURE_TYPE;
+    $types[] = LegalpadTransactionType::TYPE_PREAMBLE;
 
     return $types;
   }
@@ -41,6 +42,8 @@ final class LegalpadDocumentEditor
         return $object->getDocumentBody()->getText();
       case LegalpadTransactionType::TYPE_SIGNATURE_TYPE:
         return $object->getSignatureType();
+      case LegalpadTransactionType::TYPE_PREAMBLE:
+        return $object->getPreamble();
     }
   }
 
@@ -52,6 +55,7 @@ final class LegalpadDocumentEditor
       case LegalpadTransactionType::TYPE_TITLE:
       case LegalpadTransactionType::TYPE_TEXT:
       case LegalpadTransactionType::TYPE_SIGNATURE_TYPE:
+      case LegalpadTransactionType::TYPE_PREAMBLE:
         return $xaction->getNewValue();
     }
   }
@@ -74,6 +78,9 @@ final class LegalpadDocumentEditor
         break;
       case LegalpadTransactionType::TYPE_SIGNATURE_TYPE:
         $object->setSignatureType($xaction->getNewValue());
+        break;
+      case LegalpadTransactionType::TYPE_PREAMBLE:
+        $object->setPreamble($xaction->getNewValue());
         break;
     }
   }
@@ -126,6 +133,7 @@ final class LegalpadDocumentEditor
       case LegalpadTransactionType::TYPE_TITLE:
       case LegalpadTransactionType::TYPE_TEXT:
       case LegalpadTransactionType::TYPE_SIGNATURE_TYPE:
+      case LegalpadTransactionType::TYPE_PREAMBLE:
         return $v;
     }
 
@@ -169,6 +177,7 @@ final class LegalpadDocumentEditor
     switch ($xaction->getTransactionType()) {
       case LegalpadTransactionType::TYPE_TEXT:
       case LegalpadTransactionType::TYPE_TITLE:
+      case LegalpadTransactionType::TYPE_PREAMBLE:
         return true;
     }
 
