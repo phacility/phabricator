@@ -129,7 +129,7 @@ final class HarbormasterPlanViewController
       }
       $item = id(new PHUIObjectItemView())
         ->setObjectName('Step '.$i++)
-        ->setHeader($implementation->getName());
+        ->setHeader($step->getName());
 
       $item->addAttribute($implementation->getDescription());
 

@@ -282,12 +282,7 @@ final class HarbormasterBuildableViewController
               break;
           }
 
-          try {
-            $impl = $target->getImplementation();
-            $name = $impl->getName();
-          } catch (Exception $ex) {
-            $name = $target->getClassName();
-          }
+          $name = $target->getName();
 
           $target_list->addItem(
             id(new PHUIStatusItemView())

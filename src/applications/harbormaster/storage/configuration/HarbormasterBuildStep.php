@@ -5,6 +5,7 @@ final class HarbormasterBuildStep extends HarbormasterDAO
     PhabricatorPolicyInterface,
     PhabricatorCustomFieldInterface {
 
+  protected $name;
   protected $buildPlanPHID;
   protected $className;
   protected $details = array();
@@ -48,6 +49,14 @@ final class HarbormasterBuildStep extends HarbormasterDAO
   public function setDetail($key, $value) {
     $this->details[$key] = $value;
     return $this;
+  }
+
+  public function getName() {
+    if (strlen($this->name)) {
+      return $this->name;
+    }
+
+    return $this->getStepImplementation()->getName();
   }
 
   public function getStepImplementation() {
