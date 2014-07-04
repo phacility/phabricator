@@ -174,6 +174,10 @@ final class LegalpadDocumentManageController extends LegalpadController {
       ->setActionList($actions);
 
     $properties->addProperty(
+      pht('Signature Type'),
+      $document->getSignatureTypeName());
+
+    $properties->addProperty(
       pht('Last Updated'),
       phabricator_datetime($document->getDateModified(), $user));
 

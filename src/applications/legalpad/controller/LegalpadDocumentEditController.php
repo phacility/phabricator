@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group legalpad
- */
 final class LegalpadDocumentEditController extends LegalpadController {
 
   private $id;
@@ -26,8 +23,6 @@ final class LegalpadDocumentEditController extends LegalpadController {
         ->setCreatorPHID($user->getPHID());
       $document->attachDocumentBody($body);
       $document->setDocumentBodyPHID(PhabricatorPHIDConstants::PHID_VOID);
-      $title = null;
-      $text = null;
     } else {
       $is_create = false;
 
@@ -44,12 +39,15 @@ final class LegalpadDocumentEditController extends LegalpadController {
       if (!$document) {
         return new Aphront404Response();
       }
-      $title = $document->getDocumentBody()->getTitle();
-      $text = $document->getDocumentBody()->getText();
     }
 
     $e_title = true;
     $e_text = true;
+
+    $title = $document->getDocumentBody()->getTitle();
+    $text = $document->getDocumentBody()->getText();
+    $v_signature_type = $document->getSignatureType();
+
     $errors = array();
     $can_view = null;
     $can_edit = null;
@@ -86,6 +84,13 @@ final class LegalpadDocumentEditController extends LegalpadController {
         ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
         ->setNewValue($can_edit);
 
+      if ($is_create) {
+        $v_signature_type = $request->getStr('signatureType');
+        $xactions[] = id(new LegalpadTransaction())
+          ->setTransactionType(LegalpadTransactionType::TYPE_SIGNATURE_TYPE)
+          ->setNewValue($v_signature_type);
+      }
+
       if (!$errors) {
         $editor = id(new LegalpadDocumentEditor())
           ->setContentSourceFromRequest($request)
@@ -113,7 +118,23 @@ final class LegalpadDocumentEditController extends LegalpadController {
         ->setLabel(pht('Title'))
         ->setError($e_title)
         ->setValue($title)
-        ->setName('title'))
+        ->setName('title'));
+
+    if ($is_create) {
+      $form->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Who Should Sign?'))
+          ->setName(pht('signatureType'))
+          ->setValue($v_signature_type)
+          ->setOptions(LegalpadDocument::getSignatureTypeMap()));
+    } else {
+      $form->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel(pht('Who Should Sign?'))
+          ->setValue($document->getSignatureTypeName()));
+    }
+
+    $form
       ->appendChild(
         id(new PhabricatorRemarkupControl())
         ->setID('document-text')

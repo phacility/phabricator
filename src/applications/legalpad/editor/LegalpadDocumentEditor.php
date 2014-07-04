@@ -11,6 +11,7 @@ final class LegalpadDocumentEditor
   private function setIsContribution($is_contribution) {
     $this->isContribution = $is_contribution;
   }
+
   private function isContribution() {
     return $this->isContribution;
   }
@@ -24,6 +25,8 @@ final class LegalpadDocumentEditor
 
     $types[] = LegalpadTransactionType::TYPE_TITLE;
     $types[] = LegalpadTransactionType::TYPE_TEXT;
+    $types[] = LegalpadTransactionType::TYPE_SIGNATURE_TYPE;
+
     return $types;
   }
 
@@ -36,6 +39,8 @@ final class LegalpadDocumentEditor
         return $object->getDocumentBody()->getTitle();
       case LegalpadTransactionType::TYPE_TEXT:
         return $object->getDocumentBody()->getText();
+      case LegalpadTransactionType::TYPE_SIGNATURE_TYPE:
+        return $object->getSignatureType();
     }
   }
 
@@ -46,6 +51,7 @@ final class LegalpadDocumentEditor
     switch ($xaction->getTransactionType()) {
       case LegalpadTransactionType::TYPE_TITLE:
       case LegalpadTransactionType::TYPE_TEXT:
+      case LegalpadTransactionType::TYPE_SIGNATURE_TYPE:
         return $xaction->getNewValue();
     }
   }
@@ -65,6 +71,9 @@ final class LegalpadDocumentEditor
         $body = $object->getDocumentBody();
         $body->setText($xaction->getNewValue());
         $this->setIsContribution(true);
+        break;
+      case LegalpadTransactionType::TYPE_SIGNATURE_TYPE:
+        $object->setSignatureType($xaction->getNewValue());
         break;
     }
   }
@@ -116,6 +125,7 @@ final class LegalpadDocumentEditor
     switch ($type) {
       case LegalpadTransactionType::TYPE_TITLE:
       case LegalpadTransactionType::TYPE_TEXT:
+      case LegalpadTransactionType::TYPE_SIGNATURE_TYPE:
         return $v;
     }
 

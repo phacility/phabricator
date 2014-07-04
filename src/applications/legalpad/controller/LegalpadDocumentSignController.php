@@ -25,107 +25,116 @@ final class LegalpadDocumentSignController extends LegalpadController {
       return new Aphront404Response();
     }
 
-    $signer_phid = null;
-    $signature_data = array();
-    if ($viewer->isLoggedIn()) {
-      $signer_phid = $viewer->getPHID();
-      $signature_data = array(
-        'name' => $viewer->getRealName(),
-        'email' => $viewer->loadPrimaryEmailAddress(),
-      );
-    } else if ($request->isFormPost()) {
-      $email = new PhutilEmailAddress($request->getStr('email'));
-      if (strlen($email->getDomainName())) {
-        $email_obj = id(new PhabricatorUserEmail())
-          ->loadOneWhere('address = %s', $email->getAddress());
-        if ($email_obj) {
-          return $this->signInResponse();
-        }
-        $external_account = id(new PhabricatorExternalAccountQuery())
-          ->setViewer($viewer)
-          ->withAccountTypes(array('email'))
-          ->withAccountDomains(array($email->getDomainName()))
-          ->withAccountIDs(array($email->getAddress()))
-          ->loadOneOrCreate();
-        if ($external_account->getUserPHID()) {
-          return $this->signInResponse();
-        }
-        $signer_phid = $external_account->getPHID();
-      }
-    }
+    list($signer_phid, $signature_data) = $this->readSignerInformation(
+      $document,
+      $request);
 
     $signature = null;
-    if ($signer_phid) {
-      // TODO: This is odd and should probably be adjusted after grey/external
-      // accounts work better, but use the omnipotent viewer to check for a
-      // signature so we can pick up anonymous/grey signatures.
 
-      $signature = id(new LegalpadDocumentSignatureQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withDocumentPHIDs(array($document->getPHID()))
-        ->withSignerPHIDs(array($signer_phid))
-        ->executeOne();
+    $type_individual = LegalpadDocument::SIGNATURE_TYPE_INDIVIDUAL;
+    $is_individual = ($document->getSignatureType() == $type_individual);
+    if ($is_individual) {
+      if ($signer_phid) {
+        // TODO: This is odd and should probably be adjusted after grey/external
+        // accounts work better, but use the omnipotent viewer to check for a
+        // signature so we can pick up anonymous/grey signatures.
 
-      if ($signature && !$viewer->isLoggedIn()) {
-        return $this->newDialog()
-          ->setTitle(pht('Already Signed'))
-          ->appendParagraph(pht('You have already signed this document!'))
-          ->addCancelButton('/'.$document->getMonogram(), pht('Okay'));
+        $signature = id(new LegalpadDocumentSignatureQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withDocumentPHIDs(array($document->getPHID()))
+          ->withSignerPHIDs(array($signer_phid))
+          ->executeOne();
+
+        if ($signature && !$viewer->isLoggedIn()) {
+          return $this->newDialog()
+            ->setTitle(pht('Already Signed'))
+            ->appendParagraph(pht('You have already signed this document!'))
+            ->addCancelButton('/'.$document->getMonogram(), pht('Okay'));
+        }
       }
-    }
 
-    $signed_status = null;
-    if (!$signature) {
-      $has_signed = false;
+      $signed_status = null;
+      if (!$signature) {
+        $has_signed = false;
+        $signature = id(new LegalpadDocumentSignature())
+          ->setSignerPHID($signer_phid)
+          ->setDocumentPHID($document->getPHID())
+          ->setDocumentVersion($document->getVersions());
+
+        // If the user is logged in, show a notice that they haven't signed.
+        // If they aren't logged in, we can't be as sure, so don't show
+        // anything.
+        if ($viewer->isLoggedIn()) {
+          $signed_status = id(new AphrontErrorView())
+            ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+            ->setErrors(
+              array(
+                pht('You have not signed this document yet.'),
+              ));
+        }
+      } else {
+        $has_signed = true;
+        $signature_data = $signature->getSignatureData();
+
+        // In this case, we know they've signed.
+        $signed_at = $signature->getDateCreated();
+
+        if ($signature->getIsExemption()) {
+          $exemption_phid = $signature->getExemptionPHID();
+          $handles = $this->loadViewerHandles(array($exemption_phid));
+          $exemption_handle = $handles[$exemption_phid];
+
+          $signed_text = pht(
+            'You do not need to sign this document. '.
+            '%s added a signature exemption for you on %s.',
+            $exemption_handle->renderLink(),
+            phabricator_datetime($signed_at, $viewer));
+        } else {
+          $signed_text = pht(
+            'You signed this document on %s.',
+            phabricator_datetime($signed_at, $viewer));
+        }
+
+        $signed_status = id(new AphrontErrorView())
+          ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+          ->setErrors(array($signed_text));
+      }
+
+      $field_errors = array(
+        'name' => true,
+        'email' => true,
+        'agree' => true,
+      );
+    } else {
       $signature = id(new LegalpadDocumentSignature())
-        ->setSignerPHID($signer_phid)
         ->setDocumentPHID($document->getPHID())
-        ->setDocumentVersion($document->getVersions())
-        ->setSignerName((string)idx($signature_data, 'name'))
-        ->setSignerEmail((string)idx($signature_data, 'email'))
-        ->setSignatureData($signature_data);
+        ->setDocumentVersion($document->getVersions());
 
-      // If the user is logged in, show a notice that they haven't signed.
-      // If they aren't logged in, we can't be as sure, so don't show anything.
       if ($viewer->isLoggedIn()) {
+        $has_signed = false;
+
+        $signed_status = null;
+      } else {
+        // This just hides the form.
+        $has_signed = true;
+
+        $login_text = pht(
+          'This document requires a corporate signatory. You must log in to '.
+          'accept this document on behalf of a company you represent.');
         $signed_status = id(new AphrontErrorView())
           ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
-          ->setErrors(
-            array(
-              pht('You have not signed this document yet.'),
-            ));
-      }
-    } else {
-      $has_signed = true;
-      $signature_data = $signature->getSignatureData();
-
-      // In this case, we know they've signed.
-      $signed_at = $signature->getDateCreated();
-
-      if ($signature->getIsExemption()) {
-        $exemption_phid = $signature->getExemptionPHID();
-        $handles = $this->loadViewerHandles(array($exemption_phid));
-        $exemption_handle = $handles[$exemption_phid];
-
-        $signed_text = pht(
-          'You do not need to sign this document. '.
-          '%s added a signature exemption for you on %s.',
-          $exemption_handle->renderLink(),
-          phabricator_datetime($signed_at, $viewer));
-      } else {
-        $signed_text = pht(
-          'You signed this document on %s.',
-          phabricator_datetime($signed_at, $viewer));
+          ->setErrors(array($login_text));
       }
 
-      $signed_status = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setErrors(array($signed_text));
+      $field_errors = array(
+        'name' => true,
+        'address' => true,
+        'contact.name' => true,
+        'email' => true,
+      );
     }
 
-    $e_name = true;
-    $e_email = true;
-    $e_agree = null;
+    $signature->setSignatureData($signature_data);
 
     $errors = array();
     if ($request->isFormOrHisecPost() && !$has_signed) {
@@ -139,50 +148,25 @@ final class LegalpadDocumentSignController extends LegalpadController {
           '/'.$document->getMonogram());
       }
 
-      $name = $request->getStr('name');
-      $agree = $request->getExists('agree');
+      list($form_data, $errors, $field_errors) = $this->readSignatureForm(
+        $document,
+        $request);
 
-      if (!strlen($name)) {
-        $e_name = pht('Required');
-        $errors[] = pht('Name field is required.');
-      } else {
-        $e_name = null;
-      }
-      $signature_data['name'] = $name;
+      $signature_data = $form_data + $signature_data;
 
-      if ($viewer->isLoggedIn()) {
-        $email = $viewer->loadPrimaryEmailAddress();
-      } else {
-        $email = $request->getStr('email');
-
-        $addr_obj = null;
-        if (!strlen($email)) {
-          $e_email = pht('Required');
-          $errors[] = pht('Email field is required.');
-        } else {
-          $addr_obj = new PhutilEmailAddress($email);
-          $domain = $addr_obj->getDomainName();
-          if (!$domain) {
-            $e_email = pht('Invalid');
-            $errors[] = pht('A valid email is required.');
-          } else {
-            $e_email = null;
-          }
-        }
-      }
-      $signature_data['email'] = $email;
-
+      $signature->setSignatureData($signature_data);
+      $signature->setSignatureType($document->getSignatureType());
       $signature->setSignerName((string)idx($signature_data, 'name'));
       $signature->setSignerEmail((string)idx($signature_data, 'email'));
-      $signature->setSignatureData($signature_data);
 
+      $agree = $request->getExists('agree');
       if (!$agree) {
         $errors[] = pht(
           'You must check "I agree to the terms laid forth above."');
-        $e_agree = pht('Required');
+        $field_errors['agree'] = pht('Required');
       }
 
-      if ($viewer->isLoggedIn()) {
+      if ($viewer->isLoggedIn() && $is_individual) {
         $verified = LegalpadDocumentSignature::VERIFIED;
       } else {
         $verified = LegalpadDocumentSignature::UNVERIFIED;
@@ -195,9 +179,13 @@ final class LegalpadDocumentSignController extends LegalpadController {
         // If the viewer is logged in, send them to the document page, which
         // will show that they have signed the document. Otherwise, send them
         // to a completion page.
-        if ($viewer->isLoggedIn()) {
+        if ($viewer->isLoggedIn() && $is_individual) {
           $next_uri = '/'.$document->getMonogram();
         } else {
+          $this->sendVerifySignatureEmail(
+            $document,
+            $signature);
+
           $next_uri = $this->getApplicationURI('done/');
         }
 
@@ -257,11 +245,9 @@ final class LegalpadDocumentSignController extends LegalpadController {
       }
 
       $signature_form = $this->buildSignatureForm(
-        $document_body,
+        $document,
         $signature,
-        $e_name,
-        $e_email,
-        $e_agree);
+        $field_errors);
 
       $subheader = id(new PHUIHeaderView())
         ->setHeader(pht('Agree and Sign Document'))
@@ -289,38 +275,96 @@ final class LegalpadDocumentSignController extends LegalpadController {
       ));
   }
 
+  private function readSignerInformation(
+    LegalpadDocument $document,
+    AphrontRequest $request) {
+
+    $viewer = $request->getUser();
+    $signer_phid = null;
+    $signature_data = array();
+
+    switch ($document->getSignatureType()) {
+      case LegalpadDocument::SIGNATURE_TYPE_INDIVIDUAL:
+        if ($viewer->isLoggedIn()) {
+          $signer_phid = $viewer->getPHID();
+          $signature_data = array(
+            'name' => $viewer->getRealName(),
+            'email' => $viewer->loadPrimaryEmailAddress(),
+          );
+        } else if ($request->isFormPost()) {
+          $email = new PhutilEmailAddress($request->getStr('email'));
+          if (strlen($email->getDomainName())) {
+            $email_obj = id(new PhabricatorUserEmail())
+              ->loadOneWhere('address = %s', $email->getAddress());
+            if ($email_obj) {
+              return $this->signInResponse();
+            }
+            $external_account = id(new PhabricatorExternalAccountQuery())
+              ->setViewer($viewer)
+              ->withAccountTypes(array('email'))
+              ->withAccountDomains(array($email->getDomainName()))
+              ->withAccountIDs(array($email->getAddress()))
+              ->loadOneOrCreate();
+            if ($external_account->getUserPHID()) {
+              return $this->signInResponse();
+            }
+            $signer_phid = $external_account->getPHID();
+          }
+        }
+        break;
+      case LegalpadDocument::SIGNATURE_TYPE_CORPORATION:
+        $signer_phid = $viewer->getPHID();
+        if ($signer_phid) {
+          $signature_data = array(
+            'contact.name' => $viewer->getRealName(),
+            'email' => $viewer->loadPrimaryEmailAddress(),
+            'actorPHID' => $viewer->getPHID(),
+          );
+        }
+        break;
+    }
+
+    return array($signer_phid, $signature_data);
+  }
+
   private function buildSignatureForm(
-    LegalpadDocumentBody $body,
+    LegalpadDocument $document,
     LegalpadDocumentSignature $signature,
-    $e_name,
-    $e_email,
-    $e_agree) {
+    array $errors) {
 
     $viewer = $this->getRequest()->getUser();
     $data = $signature->getSignatureData();
 
     $form = id(new AphrontFormView())
-      ->setUser($viewer)
-      ->appendChild(
-        id(new AphrontFormTextControl())
-        ->setLabel(pht('Name'))
-        ->setValue(idx($data, 'name', ''))
-        ->setName('name')
-        ->setError($e_name));
+      ->setUser($viewer);
 
-    if (!$viewer->isLoggedIn()) {
-      $form->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('Email'))
-          ->setValue(idx($data, 'email', ''))
-          ->setName('email')
-          ->setError($e_email));
+    $signature_type = $document->getSignatureType();
+    switch ($signature_type) {
+      case LegalpadDocument::SIGNATURE_TYPE_INDIVIDUAL:
+        $this->buildIndividualSignatureForm(
+          $form,
+          $document,
+          $signature,
+          $errors);
+        break;
+      case LegalpadDocument::SIGNATURE_TYPE_CORPORATION:
+        $this->buildCorporateSignatureForm(
+          $form,
+          $document,
+          $signature,
+          $errors);
+        break;
+      default:
+        throw new Exception(
+          pht(
+            'This document has an unknown signature type ("%s").',
+            $signature_type));
     }
 
     $form
       ->appendChild(
         id(new AphrontFormCheckboxControl())
-          ->setError($e_agree)
+          ->setError(idx($errors, 'agree', null))
           ->addCheckbox(
             'agree',
             'agree',
@@ -334,27 +378,240 @@ final class LegalpadDocumentSignController extends LegalpadController {
     return $form;
   }
 
+  private function buildIndividualSignatureForm(
+    AphrontFormView $form,
+    LegalpadDocument $document,
+    LegalpadDocumentSignature $signature,
+    array $errors) {
+
+    $data = $signature->getSignatureData();
+
+    $form
+      ->appendChild(
+        id(new AphrontFormTextControl())
+        ->setLabel(pht('Name'))
+        ->setValue(idx($data, 'name', ''))
+        ->setName('name')
+        ->setError(idx($errors, 'name', null)));
+
+    $viewer = $this->getRequest()->getUser();
+    if (!$viewer->isLoggedIn()) {
+      $form->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel(pht('Email'))
+          ->setValue(idx($data, 'email', ''))
+          ->setName('email')
+          ->setError(idx($errors, 'email', null)));
+    }
+
+    return $form;
+  }
+
+  private function buildCorporateSignatureForm(
+    AphrontFormView $form,
+    LegalpadDocument $document,
+    LegalpadDocumentSignature $signature,
+    array $errors) {
+
+    $data = $signature->getSignatureData();
+
+    $form
+      ->appendChild(
+        id(new AphrontFormTextControl())
+        ->setLabel(pht('Company Name'))
+        ->setValue(idx($data, 'name', ''))
+        ->setName('name')
+        ->setError(idx($errors, 'name', null)))
+      ->appendChild(
+        id(new AphrontFormTextAreaControl())
+        ->setLabel(pht('Company Address'))
+        ->setValue(idx($data, 'address', ''))
+        ->setName('address')
+        ->setError(idx($errors, 'address', null)))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+        ->setLabel(pht('Contact Name'))
+        ->setValue(idx($data, 'contact.name', ''))
+        ->setName('contact.name')
+        ->setError(idx($errors, 'contact.name', null)))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+        ->setLabel(pht('Contact Email'))
+        ->setValue(idx($data, 'email', ''))
+        ->setName('email')
+        ->setError(idx($errors, 'email', null)));
+
+    return $form;
+  }
+
+  private function readSignatureForm(
+    LegalpadDocument $document,
+    AphrontRequest $request) {
+
+    $signature_type = $document->getSignatureType();
+    switch ($signature_type) {
+      case LegalpadDocument::SIGNATURE_TYPE_INDIVIDUAL:
+        $result = $this->readIndividualSignatureForm(
+          $document,
+          $request);
+        break;
+      case LegalpadDocument::SIGNATURE_TYPE_CORPORATION:
+        $result = $this->readCorporateSignatureForm(
+          $document,
+          $request);
+        break;
+      default:
+        throw new Exception(
+          pht(
+            'This document has an unknown signature type ("%s").',
+            $signature_type));
+    }
+
+    return $result;
+  }
+
+  private function readIndividualSignatureForm(
+    LegalpadDocument $document,
+    AphrontRequest $request) {
+
+    $signature_data = array();
+    $errors = array();
+    $field_errors = array();
+
+
+    $name = $request->getStr('name');
+
+    if (!strlen($name)) {
+      $field_errors['name'] = pht('Required');
+      $errors[] = pht('Name field is required.');
+    } else {
+      $field_errors['name'] = null;
+    }
+    $signature_data['name'] = $name;
+
+    $viewer = $request->getUser();
+    if ($viewer->isLoggedIn()) {
+      $email = $viewer->loadPrimaryEmailAddress();
+    } else {
+      $email = $request->getStr('email');
+
+      $addr_obj = null;
+      if (!strlen($email)) {
+        $field_errors['email'] = pht('Required');
+        $errors[] = pht('Email field is required.');
+      } else {
+        $addr_obj = new PhutilEmailAddress($email);
+        $domain = $addr_obj->getDomainName();
+        if (!$domain) {
+          $field_errors['email'] = pht('Invalid');
+          $errors[] = pht('A valid email is required.');
+        } else {
+          $field_errors['email'] = null;
+        }
+      }
+    }
+    $signature_data['email'] = $email;
+
+    return array($signature_data, $errors, $field_errors);
+  }
+
+  private function readCorporateSignatureForm(
+    LegalpadDocument $document,
+    AphrontRequest $request) {
+
+    $viewer = $request->getUser();
+    if (!$viewer->isLoggedIn()) {
+      throw new Exception(
+        pht(
+          'You can not sign a document on behalf of a corporation unless '.
+          'you are logged in.'));
+    }
+
+    $signature_data = array();
+    $errors = array();
+    $field_errors = array();
+
+    $name = $request->getStr('name');
+
+    if (!strlen($name)) {
+      $field_errors['name'] = pht('Required');
+      $errors[] = pht('Company name is required.');
+    } else {
+      $field_errors['name'] = null;
+    }
+    $signature_data['name'] = $name;
+
+    $address = $request->getStr('address');
+    if (!strlen($address)) {
+      $field_errors['address'] = pht('Required');
+      $errors[] = pht('Company address is required.');
+    } else {
+      $field_errors['address'] = null;
+    }
+    $signature_data['address'] = $address;
+
+    $contact_name = $request->getStr('contact.name');
+    if (!strlen($contact_name)) {
+      $field_errors['contact.name'] = pht('Required');
+      $errors[] = pht('Contact name is required.');
+    } else {
+      $field_errors['contact.name'] = null;
+    }
+    $signature_data['contact.name'] = $contact_name;
+
+    $email = $request->getStr('email');
+    $addr_obj = null;
+    if (!strlen($email)) {
+      $field_errors['email'] = pht('Required');
+      $errors[] = pht('Contact email is required.');
+    } else {
+      $addr_obj = new PhutilEmailAddress($email);
+      $domain = $addr_obj->getDomainName();
+      if (!$domain) {
+        $field_errors['email'] = pht('Invalid');
+        $errors[] = pht('A valid email is required.');
+      } else {
+        $field_errors['email'] = null;
+      }
+    }
+    $signature_data['email'] = $email;
+
+    return array($signature_data, $errors, $field_errors);
+  }
+
   private function sendVerifySignatureEmail(
     LegalpadDocument $doc,
     LegalpadDocumentSignature $signature) {
 
     $signature_data = $signature->getSignatureData();
     $email = new PhutilEmailAddress($signature_data['email']);
-    $doc_link = PhabricatorEnv::getProductionURI($doc->getMonogram());
+    $doc_name = $doc->getTitle();
+    $doc_link = PhabricatorEnv::getProductionURI('/'.$doc->getMonogram());
     $path = $this->getApplicationURI(sprintf(
       '/verify/%s/',
       $signature->getSecretKey()));
     $link = PhabricatorEnv::getProductionURI($path);
 
-    $body = <<<EOBODY
-Hi {$signature_data['name']},
+    $name = idx($signature_data, 'name');
 
-This email address was used to sign a Legalpad document ({$doc_link}).
-Please verify you own this email address by clicking this link:
+    $body = <<<EOBODY
+{$name}:
+
+This email address was used to sign a Legalpad document in Phabricator:
+
+  {$doc_name}
+
+Please verify you own this email address and accept the agreement by clicking
+this link:
 
   {$link}
 
-Your signature is invalid until you verify you own the email.
+Your signature is not valid until you complete this verification step.
+
+You can review the document here:
+
+  {$doc_link}
+
 EOBODY;
 
     id(new PhabricatorMetaMTAMail())
