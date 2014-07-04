@@ -75,6 +75,23 @@ final class PhabricatorSetupCheckPHPConfig extends PhabricatorSetupCheck {
       }
     }
 
+    $overload_option = 'mbstring.func_overload';
+    $func_overload = ini_get($overload_option);
+    if ($func_overload) {
+      $message = pht(
+        "You have '%s' enabled in your PHP configuration.\n\n".
+        "This option is not compatible with Phabricator. Disable ".
+        "'%s' in your PHP configuration to continue.",
+        $overload_option,
+        $overload_option);
+
+      $this->newIssue('php'.$overload_option)
+        ->setIsFatal(true)
+        ->setName(pht('Disable PHP %s', $overload_option))
+        ->setMessage($message)
+        ->addPHPConfig($overload_option);
+    }
+
     $open_basedir = ini_get('open_basedir');
     if ($open_basedir) {
 
