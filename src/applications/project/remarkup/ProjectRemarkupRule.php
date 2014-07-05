@@ -7,6 +7,14 @@ final class ProjectRemarkupRule
     return '#';
   }
 
+  protected function renderObjectRef($object, $handle, $anchor, $id) {
+    if ($this->getEngine()->isTextMode()) {
+      return '#'.$id;
+    }
+
+    return $handle->renderTag();
+  }
+
   protected function getObjectIDPattern() {
     // NOTE: This explicitly does not match strings which contain only
     // digits, because digit strings like "#123" are used to reference tasks at
