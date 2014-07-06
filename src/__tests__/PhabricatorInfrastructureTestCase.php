@@ -31,7 +31,8 @@ final class PhabricatorInfrastructureTestCase extends PhabricatorTestCase {
       ->buildMap();
 
     $bootloader = PhutilBootloader::getInstance();
-    $old_library_map = $bootloader->getLibraryMap('phabricator');
+    $old_library_map = $bootloader->getLibraryMapWithoutExtensions(
+      'phabricator');
     unset($old_library_map[PhutilLibraryMapBuilder::LIBRARY_MAP_VERSION_KEY]);
 
     $this->assertEqual(
