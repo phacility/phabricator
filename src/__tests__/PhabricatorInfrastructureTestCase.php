@@ -23,7 +23,8 @@ final class PhabricatorInfrastructureTestCase extends PhabricatorTestCase {
    * that all the library map is up-to-date.
    */
   public function testLibraryMap() {
-    $root = phutil_get_library_root('phabricator');
+    $library = phutil_get_current_library_name();
+    $root = phutil_get_library_root($library);
 
     $new_library_map = id(new PhutilLibraryMapBuilder($root))
       ->setQuiet(true)
@@ -31,8 +32,7 @@ final class PhabricatorInfrastructureTestCase extends PhabricatorTestCase {
       ->buildMap();
 
     $bootloader = PhutilBootloader::getInstance();
-    $old_library_map = $bootloader->getLibraryMapWithoutExtensions(
-      'phabricator');
+    $old_library_map = $bootloader->getLibraryMapWithoutExtensions($library);
     unset($old_library_map[PhutilLibraryMapBuilder::LIBRARY_MAP_VERSION_KEY]);
 
     $this->assertEqual(
