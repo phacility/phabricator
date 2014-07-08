@@ -64,9 +64,15 @@ final class HarbormasterStepEditController
       ->setViewer($viewer)
       ->readFieldsFromStorage($step);
 
+    $e_name = true;
+    $v_name = $step->getName();
+
     $errors = array();
     $validation_exception = null;
     if ($request->isFormPost()) {
+      $e_name = null;
+      $v_name = $request->getStr('name');
+
       $xactions = $field_list->buildFieldTransactionsFromRequest(
         new HarbormasterBuildStepTransaction(),
         $request);
@@ -75,6 +81,11 @@ final class HarbormasterStepEditController
         ->setActor($viewer)
         ->setContinueOnNoEffect(true)
         ->setContentSourceFromRequest($request);
+
+      $name_xaction = id(new HarbormasterBuildStepTransaction())
+        ->setTransactionType(HarbormasterBuildStepTransaction::TYPE_NAME)
+        ->setNewValue($v_name);
+      array_unshift($xactions, $name_xaction);
 
       if ($is_new) {
         // This is okay, but a little iffy. We should move it inside the editor
@@ -99,7 +110,13 @@ final class HarbormasterStepEditController
     }
 
     $form = id(new AphrontFormView())
-      ->setUser($viewer);
+      ->setUser($viewer)
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName('name')
+          ->setLabel(pht('Name'))
+          ->setError($e_name)
+          ->setValue($v_name));
 
     $field_list->appendFieldsToForm($form);
 

@@ -168,6 +168,11 @@ final class LegalpadDocumentSignatureSearchEngine
       null,
       pht('Verified, Current'));
 
+    $sig_corp = $this->renderIcon(
+      'fa-building-o',
+      null,
+      pht('Verified, Corporate'));
+
     $sig_old = $this->renderIcon(
       'fa-clock-o',
       'orange',
@@ -188,6 +193,8 @@ final class LegalpadDocumentSignatureSearchEngine
       ->addSigil('has-tooltip')
       ->setMetadata(array('tip' => pht('Unverified Email')));
 
+    $type_corporate = LegalpadDocument::SIGNATURE_TYPE_CORPORATION;
+
     $rows = array();
     foreach ($signatures as $signature) {
       $name = $signature->getSignerName();
@@ -196,28 +203,36 @@ final class LegalpadDocumentSignatureSearchEngine
       $document = $signature->getDocument();
 
       if ($signature->getIsExemption()) {
-        $signature_href = $this->getApplicationURI(
-          'signature/'.$signature->getID().'/');
-
-        $sig_icon = javelin_tag(
-          'a',
-          array(
-            'href' => $signature_href,
-            'sigil' => 'workflow',
-          ),
-          $sig_exemption);
+        $sig_icon = $sig_exemption;
       } else if (!$signature->isVerified()) {
         $sig_icon = $sig_unverified;
       } else if ($signature->getDocumentVersion() != $document->getVersions()) {
         $sig_icon = $sig_old;
+      } else if ($signature->getSignatureType() == $type_corporate) {
+        $sig_icon = $sig_corp;
       } else {
         $sig_icon = $sig_good;
       }
 
+      $signature_href = $this->getApplicationURI(
+        'signature/'.$signature->getID().'/');
+
+      $sig_icon = javelin_tag(
+        'a',
+        array(
+          'href' => $signature_href,
+          'sigil' => 'workflow',
+        ),
+        $sig_icon);
+
+      $signer_phid = $signature->getSignerPHID();
+
       $rows[] = array(
         $sig_icon,
         $handles[$document->getPHID()]->renderLink(),
-        $handles[$signature->getSignerPHID()]->renderLink(),
+        $signer_phid
+          ? $handles[$signer_phid]->renderLink()
+          : null,
         $name,
         phutil_tag(
           'a',

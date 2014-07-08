@@ -44,22 +44,63 @@ final class LegalpadDocumentSignatureViewController extends LegalpadController {
     $document_id = $signature->getDocument()->getID();
     $next_uri = $this->getApplicationURI('signatures/'.$document_id.'/');
 
-    $exemption_phid = $signature->getExemptionPHID();
-    $handles = $this->loadViewerHandles(array($exemption_phid));
-    $exemptor_handle = $handles[$exemption_phid];
-
     $data = $signature->getSignatureData();
 
+    $exemption_phid = $signature->getExemptionPHID();
+    $actor_phid = idx($data, 'actorPHID');
+    $handles = $this->loadViewerHandles(
+      array(
+        $exemption_phid,
+        $actor_phid,
+      ));
+    $exemptor_handle = $handles[$exemption_phid];
+    $actor_handle = $handles[$actor_phid];
+
     $form = id(new AphrontFormView())
-      ->setUser($viewer)
-      ->appendChild(
-        id(new AphrontFormMarkupControl())
-          ->setLabel(pht('Exemption By'))
-          ->setValue($exemptor_handle->renderLink()))
-      ->appendChild(
-        id(new AphrontFormMarkupControl())
-          ->setLabel(pht('Notes'))
-          ->setValue(idx($data, 'notes')));
+      ->setUser($viewer);
+
+    if ($signature->getExemptionPHID()) {
+      $form
+        ->appendChild(
+          id(new AphrontFormMarkupControl())
+            ->setLabel(pht('Exemption By'))
+            ->setValue($exemptor_handle->renderLink()))
+        ->appendChild(
+          id(new AphrontFormMarkupControl())
+            ->setLabel(pht('Notes'))
+            ->setValue(idx($data, 'notes')));
+    }
+
+    $type_corporation = LegalpadDocument::SIGNATURE_TYPE_CORPORATION;
+    if ($signature->getSignatureType() == $type_corporation) {
+      $form
+        ->appendChild(
+          id(new AphrontFormMarkupControl())
+            ->setLabel(pht('Signing User'))
+            ->setValue($actor_handle->renderLink()))
+        ->appendChild(
+          id(new AphrontFormMarkupControl())
+            ->setLabel(pht('Company Name'))
+            ->setValue(idx($data, 'name')))
+        ->appendChild(
+          id(new AphrontFormMarkupControl())
+            ->setLabel(pht('Address'))
+            ->setValue(phutil_escape_html_newlines(idx($data, 'address'))))
+        ->appendChild(
+          id(new AphrontFormMarkupControl())
+            ->setLabel(pht('Contact Name'))
+            ->setValue(idx($data, 'contact.name')))
+        ->appendChild(
+          id(new AphrontFormMarkupControl())
+            ->setLabel(pht('Contact Email'))
+            ->setValue(
+              phutil_tag(
+                'a',
+                array(
+                  'href' => 'mailto:'.idx($data, 'email'),
+                ),
+                idx($data, 'email'))));
+    }
 
     return $this->newDialog()
       ->setTitle(pht('Signature Details'))

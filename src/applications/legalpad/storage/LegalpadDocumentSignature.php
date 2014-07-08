@@ -9,6 +9,7 @@ final class LegalpadDocumentSignature
 
   protected $documentPHID;
   protected $documentVersion;
+  protected $signatureType;
   protected $signerPHID;
   protected $signerName;
   protected $signerEmail;

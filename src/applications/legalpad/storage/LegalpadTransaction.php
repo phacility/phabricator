@@ -28,6 +28,8 @@ final class LegalpadTransaction extends PhabricatorApplicationTransaction {
       case LegalpadTransactionType::TYPE_TITLE:
       case LegalpadTransactionType::TYPE_TEXT:
         return ($old === null);
+      case LegalpadTransactionType::TYPE_SIGNATURE_TYPE:
+        return true;
     }
 
     return parent::shouldHide();
@@ -47,12 +49,14 @@ final class LegalpadTransaction extends PhabricatorApplicationTransaction {
           $this->renderHandleLink($author_phid),
           $old,
           $new);
-        break;
       case LegalpadTransactionType::TYPE_TEXT:
         return pht(
           "%s updated the document's text.",
           $this->renderHandleLink($author_phid));
-        break;
+      case LegalpadTransactionType::TYPE_PREAMBLE:
+        return pht(
+          '%s updated the preamble.',
+          $this->renderHandleLink($author_phid));
     }
 
     return parent::getTitle();
@@ -62,6 +66,7 @@ final class LegalpadTransaction extends PhabricatorApplicationTransaction {
     switch ($this->getTransactionType()) {
       case LegalpadTransactionType::TYPE_TITLE:
       case LegalpadTransactionType::TYPE_TEXT:
+      case LegalpadTransactionType::TYPE_PREAMBLE:
         return true;
     }
     return parent::hasChangeDetails();

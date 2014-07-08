@@ -169,13 +169,18 @@ final class LegalpadDocumentSearchEngine
 
       $title = $document->getTitle();
 
+      $type_name = $document->getSignatureTypeName();
+      $type_icon = $document->getSignatureTypeIcon();
+
       $item = id(new PHUIObjectItemView())
         ->setObjectName($document->getMonogram())
         ->setHeader($title)
         ->setHref('/'.$document->getMonogram())
         ->setObject($document)
-        ->addIcon('none', pht('Version %d', $document->getVersions()))
-        ->addIcon('none', pht('Updated %s', $last_updated));
+        ->addIcon($type_icon, $type_name)
+        ->addIcon(
+          'fa-pencil grey',
+          pht('Version %d (%s)', $document->getVersions(), $last_updated));
 
       if ($viewer->getPHID()) {
         $signature = $document->getUserSignature($viewer->getPHID());

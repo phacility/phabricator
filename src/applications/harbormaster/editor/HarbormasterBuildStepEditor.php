@@ -7,6 +7,7 @@ final class HarbormasterBuildStepEditor
     $types = parent::getTransactionTypes();
 
     $types[] = HarbormasterBuildStepTransaction::TYPE_CREATE;
+    $types[] = HarbormasterBuildStepTransaction::TYPE_NAME;
 
     return $types;
   }
@@ -18,6 +19,11 @@ final class HarbormasterBuildStepEditor
     switch ($xaction->getTransactionType()) {
       case HarbormasterBuildStepTransaction::TYPE_CREATE:
         return null;
+      case HarbormasterBuildStepTransaction::TYPE_NAME:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
+        return $object->getName();
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -30,6 +36,8 @@ final class HarbormasterBuildStepEditor
     switch ($xaction->getTransactionType()) {
       case HarbormasterBuildStepTransaction::TYPE_CREATE:
         return true;
+      case HarbormasterBuildStepTransaction::TYPE_NAME:
+        return $xaction->getNewValue();
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -42,6 +50,8 @@ final class HarbormasterBuildStepEditor
     switch ($xaction->getTransactionType()) {
       case HarbormasterBuildStepTransaction::TYPE_CREATE:
         return;
+      case HarbormasterBuildStepTransaction::TYPE_NAME:
+        return $object->setName($xaction->getNewValue());
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -53,6 +63,7 @@ final class HarbormasterBuildStepEditor
 
     switch ($xaction->getTransactionType()) {
       case HarbormasterBuildStepTransaction::TYPE_CREATE:
+      case HarbormasterBuildStepTransaction::TYPE_NAME:
         return;
     }
 

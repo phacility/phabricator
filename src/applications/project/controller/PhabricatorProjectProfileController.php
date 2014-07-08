@@ -25,7 +25,8 @@ final class PhabricatorProjectProfileController
       ->setViewer($user)
       ->needMembers(true)
       ->needWatchers(true)
-      ->needImages(true);
+      ->needImages(true)
+      ->needSlugs(true);
     if ($this->slug) {
       $query->withSlugs(array($this->slug));
     } else {
@@ -279,6 +280,15 @@ final class PhabricatorProjectProfileController
       ->setUser($viewer)
       ->setObject($project)
       ->setActionList($actions);
+
+    $hashtags = array();
+    foreach ($project->getSlugs() as $slug) {
+      $hashtags[] = id(new PHUITagView())
+        ->setType(PHUITagView::TYPE_OBJECT)
+        ->setName('#'.$slug->getSlug());
+    }
+
+    $view->addProperty(pht('Hashtags'), phutil_implode_html(' ', $hashtags));
 
     $view->addProperty(
       pht('Members'),

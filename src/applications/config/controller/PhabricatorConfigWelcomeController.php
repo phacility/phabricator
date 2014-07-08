@@ -216,7 +216,7 @@ final class PhabricatorConfigWelcomeController
     $content = pht(
       'Having trouble getting something set up? See '.
       '**[[ %s | Give Feedback! Get Support! ]]** for ways to get in touch '.
-      'to get answeres to questions, report bugs, and request features.',
+      'to get answers to questions, report bugs, and request features.',
       $support_href);
 
     $explore[] = $this->newItem(

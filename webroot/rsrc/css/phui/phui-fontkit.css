@@ -34,6 +34,11 @@
   background: {$lightgreybackground};
 }
 
+.phui-font-source-sans .phui-property-list-text-content {
+  background: {$lightgreybackground};
+  padding: 0;
+}
+
 .phui-font-source-sans .phui-property-list-container {
   padding-bottom: 6px;
 }

@@ -72,7 +72,7 @@ final class HarbormasterBuildViewController
         ->setHeader(pht(
           'Build Target %d (%s)',
           $build_target->getID(),
-          $build_target->getImplementation()->getName()))
+          $build_target->getName()))
         ->setUser($viewer);
       $properties = new PHUIPropertyListView();
 

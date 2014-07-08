@@ -3,6 +3,7 @@
 final class HarbormasterBuildTarget extends HarbormasterDAO
   implements PhabricatorPolicyInterface {
 
+  protected $name;
   protected $buildPHID;
   protected $buildStepPHID;
   protected $className;
@@ -25,6 +26,7 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
     HarbormasterBuildStep $build_step,
     array $variables) {
     return id(new HarbormasterBuildTarget())
+      ->setName($build_step->getName())
       ->setBuildPHID($build->getPHID())
       ->setBuildStepPHID($build_step->getPHID())
       ->setClassName($build_step->getClassName())
@@ -97,6 +99,18 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
     }
 
     return $this->implementation;
+  }
+
+  public function getName() {
+    if (strlen($this->name)) {
+      return $this->name;
+    }
+
+    try {
+      return $this->getImplementation()->getName();
+    } catch (Exception $e) {
+      return $this->getClassName();
+    }
   }
 
   private function getBuildTargetVariables() {

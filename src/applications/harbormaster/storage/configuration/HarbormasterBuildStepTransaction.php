@@ -4,6 +4,7 @@ final class HarbormasterBuildStepTransaction
   extends PhabricatorApplicationTransaction {
 
   const TYPE_CREATE = 'harbormaster:step:create';
+  const TYPE_NAME = 'harbormaster:step:name';
 
   public function getApplicationName() {
     return 'harbormaster';
