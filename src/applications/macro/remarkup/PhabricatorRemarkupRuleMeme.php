@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group markup
- */
-final class PhabricatorRemarkupRuleMeme
-  extends PhutilRemarkupRule {
+final class PhabricatorRemarkupRuleMeme extends PhutilRemarkupRule {
 
   private $images;
 

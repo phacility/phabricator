@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group maniphest
- */
 final class ManiphestExportController extends ManiphestController {
 
   private $key;

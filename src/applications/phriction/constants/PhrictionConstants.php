@@ -1,8 +1,3 @@
 <?php
 
-/**
- * @group phriction
- */
-abstract class PhrictionConstants {
-
-}
+abstract class PhrictionConstants {}

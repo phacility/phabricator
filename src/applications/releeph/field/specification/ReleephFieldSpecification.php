@@ -210,10 +210,10 @@ abstract class ReleephFieldSpecification
   private $engine;
 
   /**
-   * ReleephFieldSpecification implements much of PhabricatorMarkupInterface
-   * for you.  If you return true from `shouldMarkup()`, and implement
-   * `getMarkupText()` then your text will be rendered through the Phabricator
-   * markup pipeline.
+   * @{class:ReleephFieldSpecification} implements much of
+   * @{interface:PhabricatorMarkupInterface} for you. If you return true from
+   * `shouldMarkup()`, and implement `getMarkupText()` then your text will be
+   * rendered through the Phabricator markup pipeline.
    *
    * Output is retrievable with `getMarkupEngineOutput()`.
    */

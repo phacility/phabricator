@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group maniphest
- */
 final class ManiphestTransactionPreviewController extends ManiphestController {
 
   private $id;

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conpherence
- */
 final class ConpherenceTransactionView extends AphrontView {
 
   private $conpherenceTransaction;
@@ -19,6 +16,7 @@ final class ConpherenceTransactionView extends AphrontView {
     $this->handles = $handles;
     return $this;
   }
+
   public function getHandles() {
     return $this->handles;
   }
@@ -27,6 +25,7 @@ final class ConpherenceTransactionView extends AphrontView {
     $this->conpherenceTransaction = $tx;
     return $this;
   }
+
   private function getConpherenceTransaction() {
     return $this->conpherenceTransaction;
   }
@@ -99,4 +98,5 @@ final class ConpherenceTransactionView extends AphrontView {
 
     return $transaction_view->render();
   }
+
 }

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group harbormaster
- */
 final class HarbormasterBuildTransactionQuery
   extends PhabricatorApplicationTransactionQuery {
 

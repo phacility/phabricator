@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhamePostNotLiveController extends PhameController {
 
   private $id;
@@ -57,4 +54,5 @@ final class PhamePostNotLiveController extends PhameController {
     $live_uri = $post->getViewURI();
     return id(new AphrontRedirectResponse())->setURI($live_uri);
   }
+
 }

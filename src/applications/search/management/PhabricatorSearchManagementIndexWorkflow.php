@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group search
- */
 final class PhabricatorSearchManagementIndexWorkflow
   extends PhabricatorSearchManagementWorkflow {
 

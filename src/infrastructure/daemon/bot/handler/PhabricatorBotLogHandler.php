@@ -2,15 +2,12 @@
 
 /**
  * Logs chatter.
- *
- * @group irc
  */
 final class PhabricatorBotLogHandler extends PhabricatorBotHandler {
 
   private $futures = array();
 
   public function receiveMessage(PhabricatorBotMessage $message) {
-
     switch ($message->getCommand()) {
       case 'MESSAGE':
         $target = $message->getTarget();

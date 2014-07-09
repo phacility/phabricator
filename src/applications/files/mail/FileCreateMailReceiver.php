@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group files
- */
-final class FileCreateMailReceiver
-  extends PhabricatorMailReceiver {
+final class FileCreateMailReceiver extends PhabricatorMailReceiver {
 
   public function isEnabled() {
     $app_class = 'PhabricatorApplicationFiles';

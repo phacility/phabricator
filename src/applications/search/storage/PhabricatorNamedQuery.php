@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group search
- */
 final class PhabricatorNamedQuery extends PhabricatorSearchDAO
   implements PhabricatorPolicyInterface {
 
@@ -44,6 +41,5 @@ final class PhabricatorNamedQuery extends PhabricatorSearchDAO
       'The queries you have saved are private. Only you can view or edit '.
       'them.');
   }
-
 
 }

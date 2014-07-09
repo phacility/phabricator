@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_repository_create_Method
   extends ConduitAPI_repository_Method {
 
@@ -132,6 +129,5 @@ final class ConduitAPI_repository_create_Method
 
     return $repository->toDictionary();
   }
-
 
 }

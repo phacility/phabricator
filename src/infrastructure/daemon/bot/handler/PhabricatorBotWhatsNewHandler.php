@@ -2,8 +2,6 @@
 
 /**
  * Responds to "Whats new?" with some recent feed content
- *
- * @group irc
  */
 final class PhabricatorBotWhatsNewHandler extends PhabricatorBotHandler {
 

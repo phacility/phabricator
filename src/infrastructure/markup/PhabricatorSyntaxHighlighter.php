@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group markup
- */
 final class PhabricatorSyntaxHighlighter {
 
   public static function newEngine() {
@@ -30,6 +27,5 @@ final class PhabricatorSyntaxHighlighter {
     $engine = self::newEngine();
     return $engine->highlightSource($language, $source);
   }
-
 
 }

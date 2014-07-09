@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhamePostViewController extends PhameController {
 
   private $id;
@@ -203,4 +200,5 @@ final class PhamePostViewController extends PhameController {
 
     return $properties;
   }
+
 }

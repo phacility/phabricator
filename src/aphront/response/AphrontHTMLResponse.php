@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group aphront
- */
 abstract class AphrontHTMLResponse extends AphrontResponse {
 
   public function getHeaders() {

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioTransactionQuery
   extends PhabricatorApplicationTransactionQuery {
 

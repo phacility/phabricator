@@ -3,11 +3,8 @@
 /**
  * Query tasks by specific criteria. This class uses the higher-performance
  * but less-general Maniphest indexes to satisfy queries.
- *
- * @group maniphest
  */
-final class ManiphestTaskQuery
-  extends PhabricatorCursorPagedPolicyAwareQuery {
+final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $taskIDs             = array();
   private $taskPHIDs           = array();
@@ -182,7 +179,6 @@ final class ManiphestTaskQuery
   }
 
   public function loadPage() {
-
     // TODO: (T603) It is possible for a user to find the PHID of a project
     // they can't see, then query for tasks in that project and deduce the
     // identity of unknown/invisible projects. Before we allow the user to
@@ -358,7 +354,6 @@ final class ManiphestTaskQuery
   }
 
   private function buildStatusWhereClause(AphrontDatabaseConnection $conn) {
-
     static $map = array(
       self::STATUS_RESOLVED   => ManiphestTaskStatus::STATUS_CLOSED_RESOLVED,
       self::STATUS_WONTFIX    => ManiphestTaskStatus::STATUS_CLOSED_WONTFIX,
@@ -412,7 +407,6 @@ final class ManiphestTaskQuery
 
     return null;
   }
-
 
   private function buildAuthorWhereClause(AphrontDatabaseConnection $conn) {
     if (!$this->authorPHIDs) {
@@ -940,7 +934,6 @@ final class ManiphestTaskQuery
   protected function getApplicationSearchObjectPHIDColumn() {
     return 'task.phid';
   }
-
 
   public function getQueryApplicationClass() {
     return 'PhabricatorApplicationManiphest';

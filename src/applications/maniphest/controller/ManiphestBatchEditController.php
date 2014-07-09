@@ -1,12 +1,8 @@
 <?php
 
-/**
- * @group maniphest
- */
 final class ManiphestBatchEditController extends ManiphestController {
 
   public function processRequest() {
-
     $this->requireApplicationCapability(
       ManiphestCapabilityBulkEdit::CAPABILITY);
 

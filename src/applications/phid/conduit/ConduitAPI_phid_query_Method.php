@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group conduit
- */
-final class ConduitAPI_phid_query_Method
-  extends ConduitAPI_phid_Method {
+final class ConduitAPI_phid_query_Method extends ConduitAPI_phid_Method {
 
   public function getMethodDescription() {
     return 'Retrieve information about arbitrary PHIDs.';
@@ -25,7 +21,6 @@ final class ConduitAPI_phid_query_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
-
     $phids = $request->getValue('phids');
 
     $handles = id(new PhabricatorHandleQuery())

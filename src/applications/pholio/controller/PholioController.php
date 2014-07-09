@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 abstract class PholioController extends PhabricatorController {
 
   public function buildSideNavView($for_app = false) {
@@ -39,7 +36,5 @@ abstract class PholioController extends PhabricatorController {
   public function buildApplicationMenu() {
     return $this->buildSideNavView(true)->getMenu();
   }
-
-
 
 }

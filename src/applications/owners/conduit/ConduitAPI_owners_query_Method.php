@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group conduit
- */
-final class ConduitAPI_owners_query_Method
-  extends ConduitAPI_owners_Method {
+final class ConduitAPI_owners_query_Method extends ConduitAPI_owners_Method {
 
   public function getMethodDescription() {
     return 'Query for packages by one of the following: repository/path, '.
@@ -21,7 +17,6 @@ final class ConduitAPI_owners_query_Method
       'repositoryCallsign'         => 'optional string',
       'path'                       => 'optional string',
     );
-
   }
 
   public function defineReturnType() {
@@ -120,8 +115,7 @@ final class ConduitAPI_owners_query_Method
        $request->getValue('projectOwner')) ?
       1 : 0;
 
-    $is_affiliated_query = $request->getValue('userAffiliated') ?
-      1 : 0;
+    $is_affiliated_query = $request->getValue('userAffiliated') ? 1 : 0;
 
     $repo = $request->getValue('repositoryCallsign');
     $path = $request->getValue('path');
@@ -155,4 +149,5 @@ final class ConduitAPI_owners_query_Method
 
     return self::buildPackageInformationDictionaries($packages);
   }
+
 }

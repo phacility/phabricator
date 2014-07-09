@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioMockEditController extends PholioController {
 
   private $id;

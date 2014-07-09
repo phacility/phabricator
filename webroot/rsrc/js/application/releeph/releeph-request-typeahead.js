@@ -58,7 +58,7 @@ JX.behavior('releeph-request-typeahead', function(config) {
 
   /**
    * The default normalizer removes useful control characters that would help
-   * out search.  For example, I was just trying to search for a commit with
+   * out search. For example, I was just trying to search for a commit with
    * the string "a_file" in the message, which was normalized to "afile".
    */
   datasource.setNormalizer(function(query) {

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_diffusion_filecontentquery_Method
   extends ConduitAPI_diffusion_abstractquery_Method {
 
@@ -42,4 +39,5 @@ final class ConduitAPI_diffusion_filecontentquery_Method
       ->setTextList($text_list);
     return $file_content->toDictionary();
   }
+
 }

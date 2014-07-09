@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioUploadedImageView extends AphrontView {
 
   private $image;

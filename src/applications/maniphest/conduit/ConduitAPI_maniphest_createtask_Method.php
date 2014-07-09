@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_maniphest_createtask_Method
   extends ConduitAPI_maniphest_Method {
 

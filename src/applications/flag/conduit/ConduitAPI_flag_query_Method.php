@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_flag_query_Method extends ConduitAPI_flag_Method {
 
   public function getMethodDescription() {
@@ -30,7 +27,6 @@ final class ConduitAPI_flag_query_Method extends ConduitAPI_flag_Method {
   }
 
   protected function execute(ConduitAPIRequest $request) {
-
     $query = new PhabricatorFlagQuery();
     $query->setViewer($request->getUser());
 

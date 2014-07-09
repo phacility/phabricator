@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conpherence
- */
 final class PhabricatorConpherencePHIDTypeThread extends PhabricatorPHIDType {
 
   const TYPECONST = 'CONP';

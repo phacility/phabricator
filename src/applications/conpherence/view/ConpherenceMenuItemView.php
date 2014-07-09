@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conpherence
- */
 final class ConpherenceMenuItemView extends AphrontTagView {
 
   private $title;
@@ -119,4 +116,5 @@ final class ConpherenceMenuItemView extends AphrontTagView {
       $unread_count,
     );
   }
+
 }

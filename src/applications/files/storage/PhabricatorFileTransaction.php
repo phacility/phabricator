@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group file
- */
 final class PhabricatorFileTransaction
   extends PhabricatorApplicationTransaction {
 

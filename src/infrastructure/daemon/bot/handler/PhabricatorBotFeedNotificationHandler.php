@@ -1,9 +1,7 @@
 <?php
 
 /**
- * Watches the feed and puts notifications into channel(s) of choice
- *
- * @group irc
+ * Watches the feed and puts notifications into channel(s) of choice.
  */
 final class PhabricatorBotFeedNotificationHandler
   extends PhabricatorBotHandler {
@@ -33,48 +31,47 @@ final class PhabricatorBotFeedNotificationHandler
     switch ($verbosity) {
       case 2:
         $verbs[] = array(
-                     'commented',
-                     'added',
-                     'changed',
-                     'resigned',
-                     'explained',
-                     'modified',
-                     'attached',
-                     'edited',
-                     'joined',
-                     'left',
-                     'removed'
-                   );
+          'commented',
+          'added',
+          'changed',
+          'resigned',
+          'explained',
+          'modified',
+          'attached',
+          'edited',
+          'joined',
+          'left',
+          'removed',
+        );
       // fallthrough
       case 1:
         $verbs[] = array(
-                     'updated',
-                     'accepted',
-                     'requested',
-                     'planned',
-                     'claimed',
-                     'summarized',
-                     'commandeered',
-                     'assigned'
-                   );
+          'updated',
+          'accepted',
+          'requested',
+          'planned',
+          'claimed',
+          'summarized',
+          'commandeered',
+          'assigned',
+        );
       // fallthrough
       case 0:
         $verbs[] = array(
-                     'created',
-                     'closed',
-                     'raised',
-                     'committed',
-                     'abandoned',
-                     'reclaimed',
-                     'reopened',
-                     'deleted'
-                   );
-      break;
+          'created',
+          'closed',
+          'raised',
+          'committed',
+          'abandoned',
+          'reclaimed',
+          'reopened',
+          'deleted',
+        );
+        break;
 
       case 3:
       default:
         return true;
-      break;
     }
 
     $verbs = '/('.implode('|', array_mergev($verbs)).')/';
@@ -92,10 +89,10 @@ final class PhabricatorBotFeedNotificationHandler
 
   public function runBackgroundTasks() {
     if ($this->startupDelay > 0) {
-        // the event loop runs every 1s so delay enough to fully conenct
-        $this->startupDelay--;
+      // the event loop runs every 1s so delay enough to fully conenct
+      $this->startupDelay--;
 
-        return;
+      return;
     }
     if ($this->lastSeenChronoKey == 0) {
       // Since we only want to post notifications about new stories, skip

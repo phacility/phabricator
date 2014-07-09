@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group celerity
- */
 final class CelerityResourceTransformerTestCase extends PhabricatorTestCase {
 
   public function testTransformation() {

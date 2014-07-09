@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group metamta
- */
 final class PhabricatorMetaMTAMailBodyTestCase extends PhabricatorTestCase {
-
 
   public function testBodyRender() {
     $expect = <<<EOTEXT
@@ -24,7 +20,6 @@ EOTEXT;
 
     $this->assertEmail($expect, true, true);
   }
-
 
   public function testBodyRenderNoHerald() {
     $expect = <<<EOTEXT
@@ -73,6 +68,5 @@ EOTEXT;
 
     $this->assertEqual($expect, $body->render());
   }
-
 
 }

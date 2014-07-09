@@ -8,8 +8,6 @@
  * @task config   Configuring the Query
  * @task exec     Executing the Query
  * @task internal Internals
- *
- * @group diffusion
  */
 final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
 
@@ -282,6 +280,5 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
       }
     }
   }
-
 
 }

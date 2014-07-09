@@ -12,8 +12,6 @@
  * @param string Name of the celerity module to include. This is whatever you
  *               annotated as "@provides" in the file.
  * @return void
- *
- * @group celerity
  */
 function require_celerity_resource($symbol, $source_name = 'phabricator') {
   $response = CelerityAPI::getStaticResourceResponse();
@@ -29,8 +27,6 @@ function require_celerity_resource($symbol, $source_name = 'phabricator') {
  * @return string A string appropriate for use as an 'id' attribute on a DOM
  *                node. It is guaranteed to be unique for the current page, even
  *                if the current request is a subsequent Ajax request.
- *
- * @group celerity
  */
 function celerity_generate_unique_node_id() {
   static $uniq = 0;
@@ -46,8 +42,6 @@ function celerity_generate_unique_node_id() {
  *
  * @param   string  Path to the raw image.
  * @return  string  Versioned path to the image, if one is available.
- *
- * @group celerity
  */
 function celerity_get_resource_uri($resource, $source = 'phabricator') {
   $resource = ltrim($resource, '/');

@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @group conpherence
- */
 final class ConpherenceNotificationPanelController
   extends ConpherenceController {
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $user = $request->getUser();
     $conpherences = array();
@@ -108,4 +104,5 @@ final class ConpherenceNotificationPanelController
 
     return id(new AphrontAjaxResponse())->setContent($json);
   }
+
 }

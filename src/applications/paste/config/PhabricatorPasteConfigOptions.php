@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group paste
- */
 final class PhabricatorPasteConfigOptions
   extends PhabricatorApplicationConfigOptions {
 

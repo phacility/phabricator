@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group legalpad
- */
 final class LegalpadTransactionComment
   extends PhabricatorApplicationTransactionComment {
 
@@ -21,4 +18,5 @@ final class LegalpadTransactionComment
     // Only cache submitted comments.
     return ($this->getTransactionPHID() != null);
   }
+
 }

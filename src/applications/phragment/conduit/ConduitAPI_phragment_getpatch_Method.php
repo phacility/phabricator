@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_phragment_getpatch_Method
   extends ConduitAPI_phragment_Method {
 
@@ -99,7 +96,7 @@ final class ConduitAPI_phragment_getpatch_Method
       } else {
         // If $mappings[$path] does not exist, then the user has a file,
         // and we have absolutely no record of it what-so-ever (we haven't
-        // even recorded a deletion).  Assuming most applications will store
+        // even recorded a deletion). Assuming most applications will store
         // some form of data near their own files, this is probably a data
         // file relevant for the application that is not versioned, so we
         // don't tell the client to do anything with it.
@@ -115,7 +112,7 @@ final class ConduitAPI_phragment_getpatch_Method
         $file_phid = $mappings[$path]->getLatestVersion()->getFilePHID();
         if ($file_phid !== null) {
           // If the file PHID is present, then this is a new file that
-          // we know about, but the caller does not.  We need to tell
+          // we know about, but the caller does not. We need to tell
           // the caller to create the file.
           $hash_current = $files[$file_phid]->getContentHash();
           $patches[] = array(

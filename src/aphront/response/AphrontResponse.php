@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group aphront
- */
 abstract class AphrontResponse {
 
   private $request;
@@ -94,7 +91,6 @@ abstract class AphrontResponse {
   }
 
   protected function addJSONShield($json_response) {
-
     // Add a shield to prevent "JSON Hijacking" attacks where an attacker
     // requests a JSON response using a normal <script /> tag and then uses
     // Object.prototype.__defineSetter__() or similar to read response data.

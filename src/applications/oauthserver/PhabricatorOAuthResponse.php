@@ -1,8 +1,5 @@
 <?php
 
-/*
-* @group oauthserver
-*/
 final class PhabricatorOAuthResponse extends AphrontResponse {
 
   private $state;
@@ -47,6 +44,7 @@ final class PhabricatorOAuthResponse extends AphrontResponse {
   private function getError() {
     return $this->error;
   }
+
   public function setError($error) {
     // errors sometimes redirect to the client (302) but otherwise
     // the spec says all code 400
@@ -60,6 +58,7 @@ final class PhabricatorOAuthResponse extends AphrontResponse {
   private function getErrorDescription() {
     return $this->errorDescription;
   }
+
   public function setErrorDescription($error_description) {
     $this->errorDescription = $error_description;
     return $this;
@@ -104,4 +103,5 @@ final class PhabricatorOAuthResponse extends AphrontResponse {
   public function buildResponseString() {
     return $this->encodeJSONForHTTPResponse($this->buildResponseDict());
   }
+
 }

@@ -1,8 +1,6 @@
 <?php
 
 /**
- * @group conduit
- *
  * @concrete-extensible
  */
 final class ConduitAPI_maniphest_find_Method

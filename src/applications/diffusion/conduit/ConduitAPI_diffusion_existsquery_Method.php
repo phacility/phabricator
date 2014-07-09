@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_diffusion_existsquery_Method
   extends ConduitAPI_diffusion_abstractquery_Method {
 
@@ -52,4 +49,5 @@ final class ConduitAPI_diffusion_existsquery_Method
       $commit);
     return  !$err;
   }
+
 }

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group search
- */
 final class PhabricatorSearchEditController
   extends PhabricatorSearchBaseController {
 
@@ -104,6 +101,5 @@ final class PhabricatorSearchEditController
         'title' => $title,
       ));
   }
-
 
 }

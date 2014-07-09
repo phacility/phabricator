@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_phame_query_Method extends ConduitAPI_phame_Method {
 
   public function getMethodDescription() {
@@ -28,12 +25,10 @@ final class ConduitAPI_phame_query_Method extends ConduitAPI_phame_Method {
   }
 
   public function defineErrorTypes() {
-    return array(
-    );
+    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {
-
     $query = new PhameBlogQuery();
 
     $query->setViewer($request->getUser());
@@ -79,6 +74,5 @@ final class ConduitAPI_phame_query_Method extends ConduitAPI_phame_Method {
 
     return $results;
   }
-
 
 }

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conpherence
- */
 final class ConpherenceThread extends ConpherenceDAO
   implements PhabricatorPolicyInterface {
 

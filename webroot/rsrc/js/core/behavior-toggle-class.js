@@ -13,8 +13,6 @@
  *
  * Optionally, you may provide a `state` key to set the default state of the
  * element.
- *
- * @group ui
  */
 JX.behavior('toggle-class', function() {
   JX.Stratcom.listen(

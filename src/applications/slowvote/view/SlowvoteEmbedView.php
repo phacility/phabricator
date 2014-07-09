@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group slowvote
- */
 final class SlowvoteEmbedView extends AphrontView {
 
   private $poll;

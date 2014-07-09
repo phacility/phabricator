@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group conduit
- */
-final class ConduitAPI_user_enable_Method
-  extends ConduitAPI_user_Method {
+final class ConduitAPI_user_enable_Method extends ConduitAPI_user_Method {
 
   public function getMethodDescription() {
     return 'Re-enable specified users (admin only).';

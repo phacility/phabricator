@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhameResourceController extends CelerityResourceController {
 
   private $id;

@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group phriction
- */
-final class PhrictionMoveController
-  extends PhrictionController {
+final class PhrictionMoveController extends PhrictionController {
 
   private $id;
 
@@ -161,4 +157,5 @@ final class PhrictionMoveController
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
+
 }

@@ -2,7 +2,6 @@
 
 /**
  * @task  routing URI Routing
- * @group aphront
  */
 abstract class AphrontApplicationConfiguration {
 
@@ -228,4 +227,5 @@ abstract class AphrontApplicationConfiguration {
 
     return array($controller, $uri_data);
   }
+
 }

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 abstract class ConduitAPI_phid_Method extends ConduitAPIMethod {
 
   protected function buildHandleInformationDictionary(

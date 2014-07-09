@@ -1,8 +1,3 @@
 <?php
 
-/**
- * @group pholio
- */
-abstract class PholioConstants {
-
-}
+abstract class PholioConstants {}

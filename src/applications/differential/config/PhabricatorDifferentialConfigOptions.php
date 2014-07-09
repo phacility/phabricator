@@ -146,7 +146,7 @@ final class PhabricatorDifferentialConfigOptions
         ->setSummary(pht('Allows users to accept their own revisions.'))
         ->setDescription(
           pht(
-            "If you set this to true, users can accept their own revisions.  ".
+            "If you set this to true, users can accept their own revisions. ".
             "This action is disabled by default because it's most likely not ".
             "a behavior you want, but it proves useful if you are working ".
             "alone on a project and want to make use of all of ".
@@ -186,9 +186,9 @@ final class PhabricatorDifferentialConfigOptions
         ->setSummary(pht('Allows any user to reopen a closed revision.'))
         ->setDescription(
           pht('If you set this to true, any user can reopen a revision so '.
-              'long as it has been closed.  This can be useful if a revision '.
+              'long as it has been closed. This can be useful if a revision '.
               'is accidentally closed or if a developer changes his or her '.
-              'mind after closing a revision.  If it is false, reopening '.
+              'mind after closing a revision. If it is false, reopening '.
               'is not allowed.')),
       $this->newOption('differential.close-on-accept', 'bool', false)
         ->setBoolOptions(

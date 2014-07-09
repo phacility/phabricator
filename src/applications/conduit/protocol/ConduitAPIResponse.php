@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPIResponse {
 
   private $result;
@@ -13,6 +10,7 @@ final class ConduitAPIResponse {
     $this->result = $result;
     return $this;
   }
+
   public function getResult() {
     return $this->result;
   }
@@ -21,6 +19,7 @@ final class ConduitAPIResponse {
     $this->errorCode = $error_code;
     return $this;
   }
+
   public function getErrorCode() {
     return $this->errorCode;
   }
@@ -40,4 +39,5 @@ final class ConduitAPIResponse {
       'error_info' => $this->getErrorInfo(),
     );
   }
+
 }

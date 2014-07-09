@@ -5,7 +5,6 @@
  *
  * @task compose  Composition
  * @task render   Rendering
- * @group metamta
  */
 final class PhabricatorMetaMTAMailBody {
 

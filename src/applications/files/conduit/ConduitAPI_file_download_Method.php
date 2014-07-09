@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group conduit
- */
-final class ConduitAPI_file_download_Method
-  extends ConduitAPI_file_Method {
+final class ConduitAPI_file_download_Method extends ConduitAPI_file_Method {
 
   public function getMethodDescription() {
     return 'Download a file from the server.';

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group calendar
- */
 final class CalendarColors extends CalendarConstants {
 
   const COLOR_RED = 'red';

@@ -1,22 +1,17 @@
 <?php
 
 /**
- * @group conduit
- *
  * TODO: Remove maniphest.find, then make this final.
  *
  * @concrete-extensible
  */
-class ConduitAPI_maniphest_query_Method
-  extends ConduitAPI_maniphest_Method {
-
+class ConduitAPI_maniphest_query_Method extends ConduitAPI_maniphest_Method {
 
   public function getMethodDescription() {
     return 'Execute complex searches for Maniphest tasks.';
   }
 
   public function defineParamTypes() {
-
     $statuses = array(
       ManiphestTaskQuery::STATUS_ANY,
       ManiphestTaskQuery::STATUS_OPEN,
@@ -58,8 +53,7 @@ class ConduitAPI_maniphest_query_Method
   }
 
   public function defineErrorTypes() {
-    return array(
-    );
+    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

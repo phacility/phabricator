@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhamePostFramedController extends PhameController {
 
   private $id;
@@ -44,4 +41,5 @@ final class PhamePostFramedController extends PhameController {
     $response->setFrameable(true);
     return $response;
   }
+
 }

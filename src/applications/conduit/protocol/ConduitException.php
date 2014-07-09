@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitException extends Exception {
 
   private $errorDescription;

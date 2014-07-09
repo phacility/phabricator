@@ -23,7 +23,6 @@
  * @param string    Behavior name.
  * @param function  Behavior callback/definition.
  * @return void
- * @group behavior
  */
 JX.behavior = function(name, control_function) {
   if (__DEV__) {
@@ -76,7 +75,6 @@ JX.behavior = function(name, control_function) {
  *              are lists of configuration dictionaries. The behavior will be
  *              invoked once for each configuration dictionary.
  * @return void
- * @group behavior
  */
 JX.initBehaviors = function(map) {
   var missing_behaviors = [];

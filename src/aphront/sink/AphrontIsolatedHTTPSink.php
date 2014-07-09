@@ -2,8 +2,6 @@
 
 /**
  * Isolated HTTP sink for testing.
- *
- * @group aphront
  */
 final class AphrontIsolatedHTTPSink extends AphrontHTTPSink {
 

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conpherence
- */
 final class ConpherenceTransactionComment
   extends PhabricatorApplicationTransactionComment {
 

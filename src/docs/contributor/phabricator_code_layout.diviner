@@ -71,7 +71,7 @@ something like:
    complicated edits and should be used pragmatically versus Storage objects.
  - **DerpException**: exceptions used in the ##Derp## application.
  - **DerpQuery**: query one or more storage objects for pertinent ##Derp##
-   application data.  @{class:PhabricatorOffsetPagedQuery} is particularly
+   application data. @{class:PhabricatorOffsetPagedQuery} is particularly
    handy for pagination and works well with @{class:AphrontPagerView}.
  - **DerpReplyHandler**: business logic from any configured email interactions
    users can have with the ##Derp## application.

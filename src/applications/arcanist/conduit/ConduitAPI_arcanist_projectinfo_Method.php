@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_arcanist_projectinfo_Method
   extends ConduitAPI_arcanist_Method {
 

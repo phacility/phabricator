@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhameBlogListController extends PhameController {
 
   private $filter;

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phriction
- */
 final class PhrictionActionConstants extends PhrictionConstants {
 
   const ACTION_CREATE   = 'create';

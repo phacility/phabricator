@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group maniphest
- */
-final class ManiphestSearchIndexer
-  extends PhabricatorSearchDocumentIndexer {
+final class ManiphestSearchIndexer extends PhabricatorSearchDocumentIndexer {
 
   public function getIndexableObject() {
     return new ManiphestTask();
@@ -83,4 +79,5 @@ final class ManiphestSearchIndexer
 
     return $doc;
   }
+
 }

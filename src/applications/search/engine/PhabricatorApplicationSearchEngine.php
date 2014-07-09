@@ -12,8 +12,6 @@
  * @task read       Reading Utilities
  * @task exec       Paging and Executing Queries
  * @task render     Rendering Results
- *
- * @group search
  */
 abstract class PhabricatorApplicationSearchEngine {
 

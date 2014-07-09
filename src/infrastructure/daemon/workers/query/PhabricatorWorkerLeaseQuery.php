@@ -2,8 +2,6 @@
 
 /**
  * Select and lease tasks from the worker task queue.
- *
- * @group worker
  */
 final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
 

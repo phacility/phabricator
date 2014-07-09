@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 abstract class ConduitAPI_phriction_Method extends ConduitAPIMethod {
 
   public function getApplication() {

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group slowvote
- */
 abstract class PhabricatorSlowvoteController extends PhabricatorController {
 
   public function buildSideNavView($for_app = false) {

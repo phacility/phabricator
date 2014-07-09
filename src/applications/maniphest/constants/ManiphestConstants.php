@@ -1,8 +1,3 @@
 <?php
 
-/**
- * @group maniphest
- */
-abstract class ManiphestConstants {
-
-}
+abstract class ManiphestConstants {}

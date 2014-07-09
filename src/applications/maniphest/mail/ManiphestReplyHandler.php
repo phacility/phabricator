@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group maniphest
- */
 final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
@@ -36,7 +33,6 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
   }
 
   protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
-
     // NOTE: We'll drop in here on both the "reply to a task" and "create a
     // new task" workflows! Make sure you test both if you make changes!
 
@@ -134,7 +130,6 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
             ->setContent($body));
         $xactions[] = $xaction;
       }
-
     }
 
     $ccs = $mail->loadCCPHIDs();
@@ -184,7 +179,6 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
       ));
     $event->setUser($user);
     PhutilEventEngine::dispatchEvent($event);
-
   }
 
 }

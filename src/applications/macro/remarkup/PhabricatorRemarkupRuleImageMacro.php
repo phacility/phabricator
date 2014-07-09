@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group markup
- */
-final class PhabricatorRemarkupRuleImageMacro
-  extends PhutilRemarkupRule {
+final class PhabricatorRemarkupRuleImageMacro extends PhutilRemarkupRule {
 
   private $macros;
 

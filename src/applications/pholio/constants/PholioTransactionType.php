@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioTransactionType extends PholioConstants {
 
   /* edits to the high level mock */
@@ -19,4 +16,5 @@ final class PholioTransactionType extends PholioConstants {
 
   /* your witty commentary at the mock : image : x,y level */
   const TYPE_INLINE  = 'inline';
+
 }

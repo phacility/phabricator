@@ -6,8 +6,6 @@
  * efficiently queried. This table is not authoritative; the projectPHIDs field
  * of ManiphestTask is. The rows in this table are regenerated when transactions
  * are applied to tasks which affected their associated projects.
- *
- * @group maniphest
  */
 final class ManiphestTaskProject extends ManiphestDAO {
 

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group aphront
- */
 final class Aphront403Response extends AphrontHTMLResponse {
 
   private $forbiddenText;

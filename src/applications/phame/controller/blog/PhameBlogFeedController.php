@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhameBlogFeedController extends PhameController {
 
   private $id;

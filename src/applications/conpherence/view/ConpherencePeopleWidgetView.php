@@ -1,7 +1,5 @@
 <?php
-/**
- * @group conpherence
- */
+
 final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
 
   public function render() {
@@ -54,4 +52,5 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
 
     return $body;
   }
+
 }

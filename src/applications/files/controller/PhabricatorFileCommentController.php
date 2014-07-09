@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group file
- */
-final class PhabricatorFileCommentController
-  extends PhabricatorFileController {
+final class PhabricatorFileCommentController extends PhabricatorFileController {
 
   private $id;
 

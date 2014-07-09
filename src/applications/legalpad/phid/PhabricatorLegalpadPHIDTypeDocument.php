@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group legalpad
- */
 final class PhabricatorLegalpadPHIDTypeDocument extends PhabricatorPHIDType {
 
   const TYPECONST = 'LEGD';

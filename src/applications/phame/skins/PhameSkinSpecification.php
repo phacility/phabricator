@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhameSkinSpecification {
 
   const TYPE_ADVANCED   = 'advanced';
@@ -16,7 +13,6 @@ final class PhameSkinSpecification {
   private $config;
 
   public static function loadAllSkinSpecifications() {
-
     static $specs;
 
     if ($specs === null) {

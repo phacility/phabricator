@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group legalpad
- */
 final class LegalpadDocumentBody extends LegalpadDAO
   implements
     PhabricatorMarkupInterface {
@@ -68,6 +65,5 @@ final class LegalpadDocumentBody extends LegalpadDAO
   public function shouldUseMarkupCache($field) {
     return (bool)$this->getID();
   }
-
 
 }

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 abstract class ConduitAPI_diffusion_abstractquery_Method
   extends ConduitAPI_diffusion_Method {
 
@@ -47,6 +44,7 @@ abstract class ConduitAPI_diffusion_abstractquery_Method
         'ERR-UNSUPPORTED-VCS' =>
           pht('VCS is not supported for this method.'));
   }
+
   /**
    * Subclasses should override this to specify custom error types.
    */
@@ -61,6 +59,7 @@ abstract class ConduitAPI_diffusion_abstractquery_Method
         'branch' => 'optional string',
       );
   }
+
   /**
    * Subclasses should override this to specify custom param types.
    */
@@ -129,4 +128,5 @@ abstract class ConduitAPI_diffusion_abstractquery_Method
     }
     return $result;
   }
+
 }

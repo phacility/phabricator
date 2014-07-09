@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_phragment_queryfragments_Method
   extends ConduitAPI_phragment_Method {
 

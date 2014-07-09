@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_conduit_getcertificate_Method extends ConduitAPIMethod {
 
   public function shouldRequireAuthentication() {
@@ -78,8 +75,8 @@ final class ConduitAPI_conduit_getcertificate_Method extends ConduitAPIMethod {
   }
 
   private function logFailure(
-      ConduitAPIRequest $request,
-      PhabricatorConduitCertificateToken $info = null) {
+    ConduitAPIRequest $request,
+    PhabricatorConduitCertificateToken $info = null) {
 
     $log = PhabricatorUserLog::initializeNewLog(
         $request->getUser(),

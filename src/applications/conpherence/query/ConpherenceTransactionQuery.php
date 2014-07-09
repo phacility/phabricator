@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conpherence
- */
 final class ConpherenceTransactionQuery
   extends PhabricatorApplicationTransactionQuery {
 
@@ -13,6 +10,5 @@ final class ConpherenceTransactionQuery
   protected function getReversePaging() {
     return false;
   }
-
 
 }

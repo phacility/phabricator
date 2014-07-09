@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group file
- */
 final class FileReplyHandler extends PhabricatorMailReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
@@ -75,7 +72,6 @@ final class FileReplyHandler extends PhabricatorMailReplyHandler {
 
     $head_xaction = head($xactions);
     return $head_xaction->getID();
-
   }
 
 }

@@ -14,8 +14,6 @@
  * these cases, the implementation can largely ignore the `$field` parameter.
  *
  * @task markup Markup Interface
- *
- * @group markup
  */
 interface PhabricatorMarkupInterface {
 
@@ -26,7 +24,7 @@ interface PhabricatorMarkupInterface {
   /**
    * Get a key to identify this field. This should uniquely identify the block
    * of text to be rendered and be usable as a cache key. If the object has a
-   * PHID, using the PHID and the field name is likley reasonable:
+   * PHID, using the PHID and the field name is likely reasonable:
    *
    *   "{$phid}:{$field}"
    *

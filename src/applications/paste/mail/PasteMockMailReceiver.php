@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group paste
- */
 final class PasteMockMailReceiver extends PhabricatorObjectMailReceiver {
 
   public function isEnabled() {

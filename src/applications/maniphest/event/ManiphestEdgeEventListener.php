@@ -3,9 +3,7 @@
 /**
  * Listener for Maniphest Task edge events. When some workflow causes task
  * edges to be added or removed, we consider the edge edit authoritative but
- * duplicate the information into a ManiphestTansaction for display.
- *
- * @group maniphest
+ * duplicate the information into a @{class:ManiphestTansaction} for display.
  */
 final class ManiphestEdgeEventListener extends PhabricatorEventListener {
 

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_diffusion_browsequery_Method
   extends ConduitAPI_diffusion_abstractquery_Method {
 

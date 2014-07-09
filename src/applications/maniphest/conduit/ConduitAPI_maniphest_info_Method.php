@@ -1,11 +1,7 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_maniphest_info_Method
   extends ConduitAPI_maniphest_Method {
-
 
   public function getMethodDescription() {
     return 'Retrieve information about a Maniphest task, given its id.';

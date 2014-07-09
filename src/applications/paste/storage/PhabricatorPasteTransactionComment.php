@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group paste
- */
 final class PhabricatorPasteTransactionComment
   extends PhabricatorApplicationTransactionComment {
 
@@ -17,4 +14,5 @@ final class PhabricatorPasteTransactionComment
     // Only cache submitted comments.
     return ($this->getTransactionPHID() != null);
   }
+
 }

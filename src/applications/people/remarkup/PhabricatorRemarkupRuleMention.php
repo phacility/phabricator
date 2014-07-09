@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group markup
- */
-final class PhabricatorRemarkupRuleMention
-  extends PhutilRemarkupRule {
+final class PhabricatorRemarkupRuleMention extends PhutilRemarkupRule {
 
   const KEY_RULE_MENTION          = 'rule.mention';
   const KEY_RULE_MENTION_ORIGINAL = 'rule.mention.original';

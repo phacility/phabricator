@@ -2,8 +2,6 @@
 
 /**
  * @task config   Configuring Retries and Failures
- *
- * @group worker
  */
 abstract class PhabricatorWorker {
 
@@ -215,7 +213,7 @@ abstract class PhabricatorWorker {
 
 
   /**
-   * Queue a task to be executed after this one suceeds.
+   * Queue a task to be executed after this one succeeds.
    *
    * The followup task will be queued only if this task completes cleanly.
    *

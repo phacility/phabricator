@@ -598,7 +598,7 @@ final class DifferentialChangesetParser {
     if ($changetype == DifferentialChangeType::TYPE_MOVE_AWAY) {
       // sometimes we show moved files as unchanged, sometimes deleted,
       // and sometimes inconsistent with what actually happened at the
-      // destination of the move.  Rather than make a false claim,
+      // destination of the move. Rather than make a false claim,
       // omit the 'not changed' notice if this is the source of a move
       $unchanged = false;
     }

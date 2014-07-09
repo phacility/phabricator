@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class PhabricatorConduitAPIController
   extends PhabricatorConduitController {
 
@@ -467,4 +464,5 @@ final class PhabricatorConduitAPIController
 
     return $params;
   }
+
 }

@@ -2,8 +2,6 @@
 
 /**
  * Create or update Phriction documents.
- *
- * @group phriction
  */
 final class PhrictionDocumentEditor extends PhabricatorEditor {
 

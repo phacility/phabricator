@@ -1,10 +1,8 @@
 <?php
 
-/**
- * @group oauthserver
- */
 final class PhabricatorOAuthServerAccessToken
-extends PhabricatorOAuthServerDAO {
+  extends PhabricatorOAuthServerDAO {
+
   protected $id;
   protected $token;
   protected $userPHID;

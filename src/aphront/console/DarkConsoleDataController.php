@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group console
- */
 final class DarkConsoleDataController extends PhabricatorController {
 
   private $key;

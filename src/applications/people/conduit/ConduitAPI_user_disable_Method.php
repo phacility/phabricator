@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group conduit
- */
-final class ConduitAPI_user_disable_Method
-  extends ConduitAPI_user_Method {
+final class ConduitAPI_user_disable_Method extends ConduitAPI_user_Method {
 
   public function getMethodDescription() {
     return 'Permanently disable specified users (admin only).';

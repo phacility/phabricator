@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group phame
- */
-final class PhamePostEditController
-  extends PhameController {
+final class PhamePostEditController extends PhameController {
 
   private $id;
 

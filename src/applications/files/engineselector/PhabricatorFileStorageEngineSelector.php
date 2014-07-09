@@ -6,7 +6,6 @@
  * of suitable @{class:PhabricatorFileStorageEngine}s. For more information,
  * see @{article:File Storage Technical Documentation}.
  *
- * @group filestorage
  * @task  select  Selecting Storage Engines
  */
 abstract class PhabricatorFileStorageEngineSelector {

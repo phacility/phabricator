@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group file
- */
 final class PhabricatorFilesConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
@@ -15,7 +12,6 @@ final class PhabricatorFilesConfigOptions
   }
 
   public function getOptions() {
-
     $viewable_default = array(
       'image/jpeg'  => 'image/jpeg',
       'image/jpg'   => 'image/jpg',

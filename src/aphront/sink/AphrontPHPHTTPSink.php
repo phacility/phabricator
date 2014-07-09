@@ -2,8 +2,6 @@
 
 /**
  * Concrete HTTP sink which uses "echo" and "header()" to emit data.
- *
- * @group aphront
  */
 final class AphrontPHPHTTPSink extends AphrontHTTPSink {
 

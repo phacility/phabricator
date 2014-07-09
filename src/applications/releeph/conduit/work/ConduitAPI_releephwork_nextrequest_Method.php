@@ -75,7 +75,7 @@ final class ConduitAPI_releephwork_nextrequest_Method
      * discovered by Phabricator (using the `id` column to perform that
      * ordering).
      *
-     * This is easy for $needs_pick as the ordinal is stored.  It is hard for
+     * This is easy for $needs_pick as the ordinal is stored. It is hard for
      * reverts, as we have to look that information up.
      */
     $needs_pick = $this->sortPicks($needs_pick);

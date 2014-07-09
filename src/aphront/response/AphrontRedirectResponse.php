@@ -2,8 +2,6 @@
 
 /**
  * TODO: Should be final but isn't because of AphrontReloadResponse.
- *
- * @group aphront
  */
 class AphrontRedirectResponse extends AphrontResponse {
 

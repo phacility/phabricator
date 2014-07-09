@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
 
   public function getApplication() {
@@ -103,25 +100,28 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
 
     $owner_phid = $request->getValue('ownerPHID');
     if ($owner_phid !== null) {
-      $this->validatePHIDList(array($owner_phid),
-                              PhabricatorPeoplePHIDTypeUser::TYPECONST,
-                              'ownerPHID');
+      $this->validatePHIDList(
+        array($owner_phid),
+        PhabricatorPeoplePHIDTypeUser::TYPECONST,
+        'ownerPHID');
       $changes[ManiphestTransaction::TYPE_OWNER] = $owner_phid;
     }
 
     $ccs = $request->getValue('ccPHIDs');
     if ($ccs !== null) {
-      $this->validatePHIDList($ccs,
-                              PhabricatorPeoplePHIDTypeUser::TYPECONST,
-                              'ccPHIDS');
+      $this->validatePHIDList(
+        $ccs,
+        PhabricatorPeoplePHIDTypeUser::TYPECONST,
+        'ccPHIDS');
       $changes[ManiphestTransaction::TYPE_CCS] = $ccs;
     }
 
     $project_phids = $request->getValue('projectPHIDs');
     if ($project_phids !== null) {
-      $this->validatePHIDList($project_phids,
-                              PhabricatorProjectPHIDTypeProject::TYPECONST,
-                              'projectPHIDS');
+      $this->validatePHIDList(
+        $project_phids,
+        PhabricatorProjectPHIDTypeProject::TYPECONST,
+        'projectPHIDS');
       $changes[ManiphestTransaction::TYPE_PROJECTS] = $project_phids;
     }
 
@@ -207,7 +207,6 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
     $event->setUser($request->getUser());
     $event->setConduitRequest($request);
     PhutilEventEngine::dispatchEvent($event);
-
   }
 
   protected function buildTaskInfoDictionaries(array $tasks) {

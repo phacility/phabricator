@@ -27,8 +27,6 @@ use Balanced\Card;
  *     <li>$BALANCED_URL_ROOT If set applies to \Balanced\Settings::$url_root.
  *     <li>$BALANCED_API_KEY If set applies to \Balanced\Settings::$api_key.
  * </ul>
- *
- * @group suite
  */
 class SuiteTest extends \PHPUnit_Framework_TestCase
 {

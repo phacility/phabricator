@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhameBlogViewController extends PhameController {
 
   private $id;
@@ -141,7 +138,6 @@ final class PhameBlogViewController extends PhameController {
   }
 
   private function renderActions(PhameBlog $blog, PhabricatorUser $user) {
-
     $actions = id(new PhabricatorActionListView())
       ->setObject($blog)
       ->setObjectURI($this->getRequest()->getRequestURI())

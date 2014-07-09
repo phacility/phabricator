@@ -141,8 +141,8 @@ final class DifferentialReleephRequestFieldSpecification {
      *   Reviewers: user1
      *
      * Some of these fields are recognized by Differential (e.g. "Requested
-     * By").  They are folded up into the "Releeph" field, parsed by this
-     * class.  As such $value includes more than just the first-line:
+     * By"). They are folded up into the "Releeph" field, parsed by this
+     * class. As such $value includes more than just the first-line:
      *
      *   "picks RQ1\n\nRequested By: edward\n\nApproved By: edward (requestor)"
      *

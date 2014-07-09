@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_audit_query_Method extends ConduitAPI_audit_Method {
 
   public function getMethodDescription() {
@@ -75,6 +72,5 @@ final class ConduitAPI_audit_query_Method extends ConduitAPI_audit_Method {
 
     return $results;
   }
-
 
 }

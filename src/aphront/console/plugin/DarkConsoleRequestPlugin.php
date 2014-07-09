@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group console
- */
 final class DarkConsoleRequestPlugin extends DarkConsolePlugin {
 
   public function getName() {

@@ -30,8 +30,6 @@
  *
  * When the tokenizer is focused, the CSS class `jx-tokenizer-container-focused`
  * is added to the container node.
- *
- * @group control
  */
 JX.install('Tokenizer', {
   construct : function(containerNode) {
