@@ -152,7 +152,7 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
         $should = array();
         foreach ($param as $val) {
           $should[] = array(
-            'text' => array(
+            'match' => array(
               "relationship.{$field}.phid" => array(
                 'query' => $val,
                 'type' => 'phrase',
