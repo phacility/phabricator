@@ -27,8 +27,6 @@ final class PhabricatorInfrastructureTestCase extends PhabricatorTestCase {
     $root = phutil_get_library_root($library);
 
     $new_library_map = id(new PhutilLibraryMapBuilder($root))
-      ->setQuiet(true)
-      ->setDryRun(true)
       ->buildMap();
 
     $bootloader = PhutilBootloader::getInstance();
