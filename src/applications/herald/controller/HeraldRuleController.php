@@ -588,20 +588,25 @@ final class HeraldRuleController extends HeraldController {
     $template = new AphrontTokenizerTemplateView();
     $template = $template->render();
 
+    $sources = array(
+      'repository' => new DiffusionRepositoryDatasource(),
+      'legaldocuments' => new LegalpadDocumentDatasource(),
+    );
+
+    $sources = mpull($sources, 'getDatasourceURI');
+    $sources += array(
+      'email'         => '/typeahead/common/mailable/',
+      'user'          => '/typeahead/common/accounts/',
+      'package'       => '/typeahead/common/packages/',
+      'project'       => '/typeahead/common/projects/',
+      'userorproject' => '/typeahead/common/accountsorprojects/',
+      'buildplan'     => '/typeahead/common/buildplans/',
+      'taskpriority'  => '/typeahead/common/taskpriority/',
+      'arcanistprojects' => '/typeahead/common/arcanistprojects/',
+    );
+
     return array(
-      'source' => array(
-        'email'         => '/typeahead/common/mailable/',
-        'user'          => '/typeahead/common/accounts/',
-        'repository'    =>
-          id(new DiffusionRepositoryDatasource())->getDatasourceURI(),
-        'package'       => '/typeahead/common/packages/',
-        'project'       => '/typeahead/common/projects/',
-        'userorproject' => '/typeahead/common/accountsorprojects/',
-        'buildplan'     => '/typeahead/common/buildplans/',
-        'taskpriority'  => '/typeahead/common/taskpriority/',
-        'arcanistprojects' => '/typeahead/common/arcanistprojects/',
-        'legaldocuments' => '/typeahead/common/legalpaddocuments/',
-      ),
+      'source' => $sources,
       'username' => $this->getRequest()->getUser()->getUserName(),
       'icons' => mpull($handles, 'getTypeIcon', 'getPHID'),
       'markup' => $template,
