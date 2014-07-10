@@ -72,9 +72,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
         $need_projs = true;
         $need_packages = true;
         break;
-      case 'packages':
-        $need_packages = true;
-        break;
     }
 
     $results = array();

@@ -594,13 +594,13 @@ final class HeraldRuleController extends HeraldController {
       'taskpriority' => new ManiphestTaskPriorityDatasource(),
       'buildplan' => new HarbormasterBuildPlanDatasource(),
       'arcanistprojects' => new DiffusionArcanistProjectDatasource(),
+      'package' => new PhabricatorOwnersPackageDatasource(),
     );
 
     $sources = mpull($sources, 'getDatasourceURI');
     $sources += array(
       'email'         => '/typeahead/common/mailable/',
       'user'          => '/typeahead/common/accounts/',
-      'package'       => '/typeahead/common/packages/',
       'project'       => '/typeahead/common/projects/',
       'userorproject' => '/typeahead/common/accountsorprojects/',
     );
