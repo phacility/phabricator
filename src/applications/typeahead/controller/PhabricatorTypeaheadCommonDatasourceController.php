@@ -32,7 +32,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $need_noproject = false;
     $need_symbols = false;
     $need_jump_objects = false;
-    $need_build_plans = false;
     switch ($this->type) {
       case 'mainsearch':
         $need_users = true;
@@ -79,9 +78,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
         break;
       case 'arcanistprojects':
         $need_arcanist_projects = true;
-        break;
-      case 'buildplans':
-        $need_build_plans = true;
         break;
     }
 
@@ -207,17 +203,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
           ->setName($list->getName())
           ->setURI($list->getURI())
           ->setPHID($list->getPHID());
-      }
-    }
-
-    if ($need_build_plans) {
-      $plans = id(new HarbormasterBuildPlanQuery())
-        ->setViewer($viewer)
-        ->execute();
-      foreach ($plans as $plan) {
-        $results[] = id(new PhabricatorTypeaheadResult())
-          ->setName($plan->getName())
-          ->setPHID($plan->getPHID());
       }
     }
 

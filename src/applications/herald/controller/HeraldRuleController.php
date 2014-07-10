@@ -592,6 +592,7 @@ final class HeraldRuleController extends HeraldController {
       'repository' => new DiffusionRepositoryDatasource(),
       'legaldocuments' => new LegalpadDocumentDatasource(),
       'taskpriority' => new ManiphestTaskPriorityDatasource(),
+      'buildplan' => new HarbormasterBuildPlanDatasource(),
     );
 
     $sources = mpull($sources, 'getDatasourceURI');
@@ -601,7 +602,6 @@ final class HeraldRuleController extends HeraldController {
       'package'       => '/typeahead/common/packages/',
       'project'       => '/typeahead/common/projects/',
       'userorproject' => '/typeahead/common/accountsorprojects/',
-      'buildplan'     => '/typeahead/common/buildplans/',
       'arcanistprojects' => '/typeahead/common/arcanistprojects/',
     );
 
