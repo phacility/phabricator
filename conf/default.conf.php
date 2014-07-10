@@ -1004,6 +1004,7 @@ return array(
     'django' => 'Django Templating',
     'erb' => 'Embedded Ruby/ERB',
     'erlang' => 'Erlang',
+    'genshi' => 'Genshi',
     'go' => 'Golang',
     'groovy' => 'Groovy',
     'haskell' => 'Haskell',
