@@ -106,23 +106,24 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
+    $old = $xaction->getOldValue();
+    $new = $xaction->getNewValue();
+
     switch ($xaction->getTransactionType()) {
       case PhabricatorProjectTransaction::TYPE_NAME:
+        // First, remove the old and new slugs. Removing the old slug is
+        // important when changing the project's capitalization or puctuation.
+        // Removing the new slug is important when changing the project's name
+        // so that one of its secondary slugs is now the primary slug.
+        if ($old !== null) {
+          $this->removeSlug($object, $old);
+        }
+        $this->removeSlug($object, $new);
+
         $new_slug = id(new PhabricatorProjectSlug())
           ->setSlug($object->getPrimarySlug())
           ->setProjectPHID($object->getPHID())
           ->save();
-
-        if ($xaction->getOldValue() !== null) {
-          $clone_object = clone $object;
-          $clone_object->setPhrictionSlug($xaction->getOldValue());
-          $old_slug = $clone_object->getPrimarySlug();
-          $old_slug = id(new PhabricatorProjectSlug())
-            ->loadOneWhere('slug = %s', $old_slug);
-          if ($old_slug) {
-            $old_slug->delete();
-          }
-        }
 
         // TODO -- delete all of the below once we sever automagical project
         // to phriction stuff
@@ -427,6 +428,30 @@ final class PhabricatorProjectTransactionEditor
     }
 
     return parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
+  }
+
+  private function removeSlug(
+    PhabricatorLiskDAO $object,
+    $name) {
+
+    $object = (clone $object);
+    $object->setPhrictionSlug($name);
+    $slug = $object->getPrimarySlug();
+
+    $slug_object = id(new PhabricatorProjectSlug())->loadOneWhere(
+      'slug = %s',
+      $slug);
+
+    if (!$slug_object) {
+      return;
+    }
+
+    if ($slug_object->getProjectPHID() != $object->getPHID()) {
+      throw new Exception(
+        pht('Trying to remove slug owned by another project!'));
+    }
+
+    $slug_object->delete();
   }
 
 }
