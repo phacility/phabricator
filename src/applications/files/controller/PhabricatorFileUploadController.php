@@ -23,7 +23,7 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
       }
 
       if (!$errors) {
-        return id(new AphrontRedirectResponse())->setURI($file->getViewURI());
+        return id(new AphrontRedirectResponse())->setURI($file->getInfoURI());
       }
     }
 
