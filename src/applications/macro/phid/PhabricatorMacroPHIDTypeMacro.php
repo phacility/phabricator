@@ -12,6 +12,10 @@ final class PhabricatorMacroPHIDTypeMacro extends PhabricatorPHIDType {
     return pht('Image Macro');
   }
 
+  public function getTypeIcon() {
+    return 'fa-meh-o';
+  }
+
   public function newObject() {
     return new PhabricatorFileImageMacro();
   }

@@ -34,7 +34,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $need_jump_objects = false;
     $need_build_plans = false;
     $need_task_priority = false;
-    $need_macros = false;
     $need_legalpad_documents = false;
     switch ($this->type) {
       case 'mainsearch':
@@ -88,9 +87,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
         break;
       case 'taskpriority':
         $need_task_priority = true;
-        break;
-      case 'macros':
-        $need_macros = true;
         break;
       case 'legalpaddocuments':
         $need_legalpad_documents = true;
@@ -239,19 +235,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
         // NOTE: $value is not a phid but is unique. This'll work.
         $results[] = id(new PhabricatorTypeaheadResult())
           ->setPHID($value)
-          ->setName($name);
-      }
-    }
-
-    if ($need_macros) {
-      $macros = id(new PhabricatorMacroQuery())
-        ->setViewer($viewer)
-        ->withStatus(PhabricatorMacroQuery::STATUS_ACTIVE)
-        ->execute();
-      $macros = mpull($macros, 'getName', 'getPHID');
-      foreach ($macros as $phid => $name) {
-        $results[] = id(new PhabricatorTypeaheadResult())
-          ->setPHID($phid)
           ->setName($name);
       }
     }

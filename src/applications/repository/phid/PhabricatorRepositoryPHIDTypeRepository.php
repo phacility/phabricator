@@ -13,6 +13,10 @@ final class PhabricatorRepositoryPHIDTypeRepository
     return pht('Repository');
   }
 
+  public function getTypeIcon() {
+    return 'fa-database';
+  }
+
   public function newObject() {
     return new PhabricatorRepository();
   }
@@ -40,7 +44,6 @@ final class PhabricatorRepositoryPHIDTypeRepository
       $handle->setName($monogram);
       $handle->setFullName("{$monogram} {$name}");
       $handle->setURI("/diffusion/{$callsign}/");
-      $handle->setIcon('fa-database');
     }
   }
 
