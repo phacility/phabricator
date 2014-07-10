@@ -26,7 +26,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $need_applications = false;
     $need_lists = false;
     $need_projs = false;
-    $need_repos = false;
     $need_packages = false;
     $need_upforgrabs = false;
     $need_arcanist_projects = false;
@@ -77,9 +76,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
         $need_users = true;
         $need_projs = true;
         $need_packages = true;
-        break;
-      case 'repositories':
-        $need_repos = true;
         break;
       case 'packages':
         $need_packages = true;
@@ -295,19 +291,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
         $proj_result->setImageURI($proj->getProfileImageURI());
 
         $results[] = $proj_result;
-      }
-    }
-
-    if ($need_repos) {
-      $repos = id(new PhabricatorRepositoryQuery())
-        ->setViewer($viewer)
-        ->execute();
-      foreach ($repos as $repo) {
-        $results[] = id(new PhabricatorTypeaheadResult())
-          ->setName('r'.$repo->getCallsign().' ('.$repo->getName().')')
-          ->setURI('/diffusion/'.$repo->getCallsign().'/')
-          ->setPHID($repo->getPHID())
-          ->setPriorityString('r'.$repo->getCallsign());
       }
     }
 

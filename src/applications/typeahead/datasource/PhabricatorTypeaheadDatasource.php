@@ -43,6 +43,10 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
     return $this->query;
   }
 
+  public function getDatasourceURI() {
+    return '/typeahead/class/'.get_class($this).'/';
+  }
+
   abstract public function getPlaceholderText();
   abstract public function getDatasourceApplicationClass();
   abstract public function loadResults();

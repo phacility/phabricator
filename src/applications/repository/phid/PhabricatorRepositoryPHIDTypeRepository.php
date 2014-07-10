@@ -33,12 +33,14 @@ final class PhabricatorRepositoryPHIDTypeRepository
     foreach ($handles as $phid => $handle) {
       $repository = $objects[$phid];
 
+      $monogram = $repository->getMonogram();
       $callsign = $repository->getCallsign();
       $name = $repository->getName();
 
-      $handle->setName("r{$callsign}");
-      $handle->setFullName("r{$callsign} ({$name})");
+      $handle->setName($monogram);
+      $handle->setFullName("{$monogram} {$name}");
       $handle->setURI("/diffusion/{$callsign}/");
+      $handle->setIcon('fa-database');
     }
   }
 

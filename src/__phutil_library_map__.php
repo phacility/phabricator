@@ -5,7 +5,6 @@
  * @generated
  * @phutil-library-version 2
  */
-
 phutil_register_library_map(array(
   '__library_version__' => 2,
   'class' =>
@@ -544,6 +543,7 @@ phutil_register_library_map(array(
     'DiffusionRenameHistoryQuery' => 'applications/diffusion/query/DiffusionRenameHistoryQuery.php',
     'DiffusionRepositoryController' => 'applications/diffusion/controller/DiffusionRepositoryController.php',
     'DiffusionRepositoryCreateController' => 'applications/diffusion/controller/DiffusionRepositoryCreateController.php',
+    'DiffusionRepositoryDatasource' => 'applications/diffusion/typeahead/DiffusionRepositoryDatasource.php',
     'DiffusionRepositoryDefaultController' => 'applications/diffusion/controller/DiffusionRepositoryDefaultController.php',
     'DiffusionRepositoryEditActionsController' => 'applications/diffusion/controller/DiffusionRepositoryEditActionsController.php',
     'DiffusionRepositoryEditActivateController' => 'applications/diffusion/controller/DiffusionRepositoryEditActivateController.php',
@@ -3245,6 +3245,7 @@ phutil_register_library_map(array(
     'DiffusionRefNotFoundException' => 'Exception',
     'DiffusionRepositoryController' => 'DiffusionController',
     'DiffusionRepositoryCreateController' => 'DiffusionRepositoryEditController',
+    'DiffusionRepositoryDatasource' => 'PhabricatorTypeaheadDatasource',
     'DiffusionRepositoryDefaultController' => 'DiffusionController',
     'DiffusionRepositoryEditActionsController' => 'DiffusionRepositoryEditController',
     'DiffusionRepositoryEditActivateController' => 'DiffusionRepositoryEditController',

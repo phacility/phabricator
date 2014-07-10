@@ -592,7 +592,8 @@ final class HeraldRuleController extends HeraldController {
       'source' => array(
         'email'         => '/typeahead/common/mailable/',
         'user'          => '/typeahead/common/accounts/',
-        'repository'    => '/typeahead/common/repositories/',
+        'repository'    =>
+          id(new DiffusionRepositoryDatasource())->getDatasourceURI(),
         'package'       => '/typeahead/common/packages/',
         'project'       => '/typeahead/common/projects/',
         'userorproject' => '/typeahead/common/accountsorprojects/',

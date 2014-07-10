@@ -43,8 +43,10 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
       $id = celerity_generate_unique_node_id();
     }
 
-    if (!$this->placeholder) {
-      $this->placeholder = $this->getDefaultPlaceholder();
+    if (!strlen($this->placeholder)) {
+      $placeholder = $this->getDefaultPlaceholder();
+    } else {
+      $placeholder = $this->placeholder;
     }
 
     $template = new AphrontTokenizerTemplateView();
@@ -57,15 +59,21 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
       $username = $this->user->getUsername();
     }
 
+    if ($this->datasource instanceof PhabricatorTypeaheadDatasource) {
+      $datasource_uri = $this->datasource->getDatasourceURI();
+    } else {
+      $datasource_uri = $this->datasource;
+    }
+
     if (!$this->disableBehavior) {
       Javelin::initBehavior('aphront-basic-tokenizer', array(
         'id'          => $id,
-        'src'         => $this->datasource,
+        'src'         => $datasource_uri,
         'value'       => mpull($values, 'getFullName', 'getPHID'),
         'icons'       => mpull($values, 'getIcon', 'getPHID'),
         'limit'       => $this->limit,
         'username'    => $username,
-        'placeholder' => $this->placeholder,
+        'placeholder' => $placeholder,
       ));
     }
 
@@ -74,6 +82,10 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
 
   private function getDefaultPlaceholder() {
     $datasource = $this->datasource;
+
+    if ($datasource instanceof PhabricatorTypeaheadDatasource) {
+      return $datasource->getPlaceholderText();
+    }
 
     $matches = null;
     if (!preg_match('@^/typeahead/common/(.*)/$@', $datasource, $matches)) {
