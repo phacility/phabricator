@@ -28,6 +28,11 @@ final class PhabricatorSettingsPanelExternalAccounts
       ->setViewer($viewer)
       ->withUserPHIDs(array($viewer->getPHID()))
       ->needImages(true)
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->execute();
 
     $linked_head = id(new PHUIHeaderView())

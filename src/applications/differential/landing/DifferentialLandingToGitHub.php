@@ -101,6 +101,11 @@ final class DifferentialLandingToGitHub
       ->withUserPHIDs(array($viewer->getPHID()))
       ->withAccountTypes(array('github'))
       ->withAccountDomains(array($repo_domain))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->executeOne();
 
     if (!$this->account) {

@@ -84,6 +84,25 @@ final class PhabricatorExternalAccount extends PhabricatorUserDAO
     return true;
   }
 
+  public function getDisplayName() {
+    if (strlen($this->displayName)) {
+      return $this->displayName;
+    }
+
+    // TODO: Figure out how much identifying information we're going to show
+    // to users about external accounts. For now, just show a string which is
+    // clearly not an error, but don't disclose any identifying information.
+
+    $map = array(
+      'email' => pht('Email User'),
+    );
+
+    $type = $this->getAccountType();
+
+    return idx($map, $type, pht('"%s" User', $type));
+  }
+
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -91,11 +110,17 @@ final class PhabricatorExternalAccount extends PhabricatorUserDAO
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
   public function getPolicy($capability) {
-    return PhabricatorPolicies::POLICY_NOONE;
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::getMostOpenPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return PhabricatorPolicies::POLICY_NOONE;
+    }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
@@ -103,8 +128,13 @@ final class PhabricatorExternalAccount extends PhabricatorUserDAO
   }
 
   public function describeAutomaticCapability($capability) {
-    // TODO: (T603) This is complicated.
-    return null;
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return null;
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return pht(
+          'External accounts can only be edited by the account owner.');
+    }
   }
 
 }

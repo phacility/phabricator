@@ -36,7 +36,12 @@ final class PhabricatorAuthManagementRefreshWorkflow
     $viewer = $this->getViewer();
 
     $query = id(new PhabricatorExternalAccountQuery())
-      ->setViewer($viewer);
+      ->setViewer($viewer)
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ));
 
     $username = $args->getArg('user');
     if (strlen($username)) {

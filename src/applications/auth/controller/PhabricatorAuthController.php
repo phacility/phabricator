@@ -143,12 +143,19 @@ abstract class PhabricatorAuthController extends PhabricatorController {
     // be logged in yet, and because we want to tailor an error message to
     // distinguish between "not usable" and "does not exist". We do explicit
     // checks later on to make sure this account is valid for the intended
-    // operation.
+    // operation. This requires edit permission for completeness and consistency
+    // but it won't actually be meaningfully checked because we're using the
+    // ominpotent user.
 
     $account = id(new PhabricatorExternalAccountQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withAccountSecrets(array($account_key))
       ->needImages(true)
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->executeOne();
 
     if (!$account) {
