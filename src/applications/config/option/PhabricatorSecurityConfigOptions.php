@@ -219,11 +219,27 @@ final class PhabricatorSecurityConfigOptions
             ))
           ->setLocked(true)
           ->setSummary(
-            pht('Allow outbound HTTP requests'))
+            pht('Allow outbound HTTP requests.'))
           ->setDescription(
             pht(
               'If you enable this, you are allowing Phabricator to '.
               'potentially make requests to external servers.')),
+        $this->newOption('security.allow-conduit-act-as-user', 'bool', false)
+          ->setBoolOptions(
+            array(
+              pht('Allow'),
+              pht('Disallow'),
+            ))
+          ->setLocked(true)
+          ->setSummary(
+            pht('Allow administrators to use the Conduit API as other users.'))
+          ->setDescription(
+            pht(
+              'DEPRECATED - if you enable this, you are allowing '.
+              'administrators to act as any user via the Conduit API. '.
+              'Enabling this is not advised as it introduces a huge policy '.
+              'violation and has been obsoleted in functionality.')),
+
     );
   }
 

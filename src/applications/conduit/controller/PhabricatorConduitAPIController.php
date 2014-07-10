@@ -164,6 +164,11 @@ final class PhabricatorConduitAPIController
     ConduitAPIRequest $api_request,
     $user_name) {
 
+    $config_key = 'security.allow-conduit-act-as-user';
+    if (!PhabricatorEnv::getEnvConfig($config_key)) {
+      throw new Exception('security.allow-conduit-act-as-user is disabled');
+    }
+
     if (!$api_request->getUser()->getIsAdmin()) {
       throw new Exception('Only administrators can use actAsUser');
     }
