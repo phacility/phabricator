@@ -85,7 +85,9 @@ final class PhabricatorAuditManagementDeleteWorkflow
       $query->withAuditStatus($status);
     }
 
+    $id_map = array();
     if ($ids) {
+      $id_map = array_fuse($ids);
       $query->withAuditIDs($ids);
     }
 
@@ -93,8 +95,10 @@ final class PhabricatorAuditManagementDeleteWorkflow
       $query->withRepositoryIDs(mpull($repos, 'getID'));
     }
 
+    $auditor_map = array();
     if ($users) {
-      $query->withAuditorPHIDs(mpull($users, 'getPHID'));
+      $auditor_map = array_fuse(mpull($users, 'getPHID'));
+      $query->withAuditorPHIDs($auditor_map);
     }
 
     if ($commits) {
@@ -105,19 +109,29 @@ final class PhabricatorAuditManagementDeleteWorkflow
     $commits = mpull($commits, null, 'getPHID');
     $audits = array();
     foreach ($commits as $commit) {
-      $curr_audits = $commit->getAudits();
-      foreach ($audits as $key => $audit) {
+      $commit_audits = $commit->getAudits();
+      foreach ($commit_audits as $key => $audit) {
+        if ($id_map && empty($id_map[$audit->getID()])) {
+          unset($commit_audits[$key]);
+          continue;
+        }
+
+        if ($auditor_map && empty($auditor_map[$audit->getAuditorPHID()])) {
+          unset($commit_audits[$key]);
+          continue;
+        }
+
         if ($min_date && $commit->getEpoch() < $min_date) {
-          unset($audits[$key]);
+          unset($commit_audits[$key]);
           continue;
         }
 
         if ($max_date && $commit->getEpoch() > $max_date) {
-          unset($audits[$key]);
+          unset($commit_audits[$key]);
           continue;
         }
       }
-      $audits[] = $curr_audits;
+      $audits[] = $commit_audits;
     }
     $audits = array_mergev($audits);
 
