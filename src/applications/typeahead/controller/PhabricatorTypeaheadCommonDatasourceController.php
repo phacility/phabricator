@@ -28,7 +28,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $need_projs = false;
     $need_packages = false;
     $need_upforgrabs = false;
-    $need_arcanist_projects = false;
     $need_noproject = false;
     $need_symbols = false;
     $need_jump_objects = false;
@@ -75,9 +74,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
         break;
       case 'packages':
         $need_packages = true;
-        break;
-      case 'arcanistprojects':
-        $need_arcanist_projects = true;
         break;
     }
 
@@ -240,15 +236,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
           ->setName($package->getName())
           ->setURI('/owners/package/'.$package->getID().'/')
           ->setPHID($package->getPHID());
-      }
-    }
-
-    if ($need_arcanist_projects) {
-      $arcprojs = id(new PhabricatorRepositoryArcanistProject())->loadAll();
-      foreach ($arcprojs as $proj) {
-        $results[] = id(new PhabricatorTypeaheadResult())
-          ->setName($proj->getName())
-          ->setPHID($proj->getPHID());
       }
     }
 
