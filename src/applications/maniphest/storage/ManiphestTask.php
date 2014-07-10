@@ -161,6 +161,13 @@ final class ManiphestTask extends ManiphestDAO
     return ManiphestTaskStatus::isClosedStatus($this->getStatus());
   }
 
+  public function getPrioritySortVector() {
+    return array(
+      $this->getPriority(),
+      -$this->getSubpriority(),
+    );
+  }
+
 
 /* -(  Markup Interface  )--------------------------------------------------- */
 
