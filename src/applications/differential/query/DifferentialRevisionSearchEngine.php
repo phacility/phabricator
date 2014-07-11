@@ -167,7 +167,7 @@ final class DifferentialRevisionSearchEngine
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Repositories'))
           ->setName('repositories')
-          ->setDatasource('/typeahead/common/repositories/')
+          ->setDatasource(new DiffusionRepositoryDatasource())
           ->setValue(array_select_keys($handles, $repository_phids)))
       ->appendChild(
         id(new AphrontFormSelectControl())

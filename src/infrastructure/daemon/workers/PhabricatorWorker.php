@@ -2,14 +2,17 @@
 
 /**
  * @task config   Configuring Retries and Failures
- *
- * @group worker
  */
 abstract class PhabricatorWorker {
 
   private $data;
   private static $runAllTasksInProcess = false;
   private $queuedTasks = array();
+
+  const PRIORITY_ALERTS  = 4000;
+  const PRIORITY_DEFAULT = 3000;
+  const PRIORITY_BULK    = 2000;
+  const PRIORITY_IMPORT  = 1000;
 
 
 /* -(  Configuring Retries and Failures  )----------------------------------- */
@@ -34,13 +37,13 @@ abstract class PhabricatorWorker {
 
 
   /**
-   * Return the maximum number of times this task may be retried before it
-   * is considered permanently failed. By default, tasks retry indefinitely. You
+   * Return the maximum number of times this task may be retried before it is
+   * considered permanently failed. By default, tasks retry indefinitely. You
    * can throw a @{class:PhabricatorWorkerPermanentFailureException} to cause an
    * immediate permanent failure.
    *
-   * @return int|null   Number of times the task will retry before permanent
-   *                    failure. Return `null` to retry indefinitely.
+   * @return int|null  Number of times the task will retry before permanent
+   *                   failure. Return `null` to retry indefinitely.
    *
    * @task config
    */
@@ -54,15 +57,15 @@ abstract class PhabricatorWorker {
    * retrying. For most tasks you can leave this at `null`, which will give you
    * a short default retry period (currently 60 seconds).
    *
-   * @param   PhabricatorWorkerTask   The task itself. This object is probably
-   *                                  useful mostly to examine the failure
-   *                                  count if you want to implement staggered
-   *                                  retries, or to examine the execution
-   *                                  exception if you want to react to
-   *                                  different failures in different ways.
-   * @return  int|null                Number of seconds to wait between retries,
-   *                                  or null for a default retry period
-   *                                  (currently 60 seconds).
+   * @param  PhabricatorWorkerTask  The task itself. This object is probably
+   *                                useful mostly to examine the failure count
+   *                                if you want to implement staggered retries,
+   *                                or to examine the execution exception if
+   *                                you want to react to different failures in
+   *                                different ways.
+   * @return int|null               Number of seconds to wait between retries,
+   *                                or null for a default retry period
+   *                                (currently 60 seconds).
    *
    * @task config
    */
@@ -71,7 +74,6 @@ abstract class PhabricatorWorker {
   }
 
   abstract protected function doWork();
-
 
   final public function __construct($data) {
     $this->data = $data;
@@ -85,10 +87,19 @@ abstract class PhabricatorWorker {
     $this->doWork();
   }
 
-  final public static function scheduleTask($task_class, $data) {
+  final public static function scheduleTask(
+    $task_class,
+    $data,
+    $priority = null) {
+
+    if ($priority === null) {
+      $priority = self::PRIORITY_DEFAULT;
+    }
+
     $task = id(new PhabricatorWorkerActiveTask())
       ->setTaskClass($task_class)
-      ->setData($data);
+      ->setData($data)
+      ->setPriority($priority);
 
     if (self::$runAllTasksInProcess) {
       // Do the work in-process.
@@ -98,8 +109,8 @@ abstract class PhabricatorWorker {
         try {
           $worker->doWork();
           foreach ($worker->getQueuedTasks() as $queued_task) {
-            list($queued_class, $queued_data) = $queued_task;
-            self::scheduleTask($queued_class, $queued_data);
+            list($queued_class, $queued_data, $queued_priority) = $queued_task;
+            self::scheduleTask($queued_class, $queued_data, $queued_priority);
           }
           break;
         } catch (PhabricatorWorkerYieldException $ex) {
@@ -108,7 +119,6 @@ abstract class PhabricatorWorker {
               'In-process task "%s" yielded for %s seconds, sleeping...',
               $task_class,
               $ex->getDuration()));
-
           sleep($ex->getDuration());
         }
       }
@@ -186,8 +196,7 @@ abstract class PhabricatorWorker {
 
     foreach ($tasks as $task) {
       if ($task->getResult() != PhabricatorWorkerArchiveTask::RESULT_SUCCESS) {
-        throw new Exception(
-          pht('Task %d failed!', $task->getID()));
+        throw new Exception(pht('Task %d failed!', $task->getID()));
       }
     }
   }
@@ -206,7 +215,7 @@ abstract class PhabricatorWorker {
     self::$runAllTasksInProcess = $all;
   }
 
-  protected function log($pattern /* $args */) {
+  final protected function log($pattern /* , ... */) {
     $console = PhutilConsole::getConsole();
     $argv = func_get_args();
     call_user_func_array(array($console, 'writeLog'), $argv);
@@ -215,16 +224,17 @@ abstract class PhabricatorWorker {
 
 
   /**
-   * Queue a task to be executed after this one suceeds.
+   * Queue a task to be executed after this one succeeds.
    *
    * The followup task will be queued only if this task completes cleanly.
    *
-   * @param string Task class to queue.
-   * @param array  Data for the followup task.
+   * @param string    Task class to queue.
+   * @param array     Data for the followup task.
+   * @param int|null  Priority for the followup task.
    * @return this
    */
-  protected function queueTask($class, array $data) {
-    $this->queuedTasks[] = array($class, $data);
+  final protected function queueTask($class, array $data, $priority = null) {
+    $this->queuedTasks[] = array($class, $data, $priority);
     return $this;
   }
 
@@ -232,9 +242,9 @@ abstract class PhabricatorWorker {
   /**
    * Get tasks queued as followups by @{method:queueTask}.
    *
-   * @return list<pair<string, wild>> Queued task specifications.
+   * @return list<tuple<string, wild, int|null>> Queued task specifications.
    */
-  public function getQueuedTasks() {
+  final public function getQueuedTasks() {
     return $this->queuedTasks;
   }
 

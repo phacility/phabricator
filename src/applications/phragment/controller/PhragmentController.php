@@ -210,7 +210,7 @@ abstract class PhragmentController extends PhabricatorController {
         ->appendChild(phutil_tag('p', array(), pht(
           'Because Phragment generates files (such as ZIP archives and '.
           'patches) as they are requested, it requires that you configure '.
-          'the `security.alterate-file-domain` option.  This option on it\'s '.
+          'the `security.alterate-file-domain` option. This option on it\'s '.
           'own will also provide additional security when serving files '.
           'across Phabricator.')));
     }
@@ -219,7 +219,7 @@ abstract class PhragmentController extends PhabricatorController {
 
   /**
    * We use this to disable the download links if the alternate domain is
-   * not configured correctly.  Although the download links will mostly work
+   * not configured correctly. Although the download links will mostly work
    * for logged in users without an alternate domain, the behaviour is
    * reasonably non-consistent and will deny public users, even if policies
    * are configured otherwise (because the Files app does not support showing

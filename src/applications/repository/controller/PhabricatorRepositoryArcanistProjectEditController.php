@@ -95,7 +95,7 @@ final class PhabricatorRepositoryArcanistProjectEditController
         id(new AphrontFormTokenizerControl())
           ->setLabel('Uses Symbols From')
           ->setName('symbolIndexProjects')
-          ->setDatasource('/typeahead/common/arcanistprojects/')
+          ->setDatasource(new DiffusionArcanistProjectDatasource())
           ->setValue($uses))
       ->appendChild(
         id(new AphrontFormSubmitControl())

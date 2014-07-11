@@ -1,9 +1,7 @@
 <?php
 
-/**
- * @group conduit
- */
-final class PhabricatorConduitMethodCallLog extends PhabricatorConduitDAO
+final class PhabricatorConduitMethodCallLog
+  extends PhabricatorConduitDAO
   implements PhabricatorPolicyInterface {
 
   protected $callerPHID;

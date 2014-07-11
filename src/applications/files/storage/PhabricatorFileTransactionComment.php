@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group file
- */
 final class PhabricatorFileTransactionComment
   extends PhabricatorApplicationTransactionComment {
 
@@ -14,4 +11,5 @@ final class PhabricatorFileTransactionComment
     // Only cache submitted comments.
     return ($this->getTransactionPHID() != null);
   }
+
 }

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group paste
- */
 final class PhabricatorPasteEditController extends PhabricatorPasteController {
 
   private $id;
@@ -10,7 +7,6 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
   public function willProcessRequest(array $data) {
     $this->id = idx($data, 'id');
   }
-
 
   public function processRequest() {
     $request = $this->getRequest();
@@ -190,7 +186,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
         ->setLabel(pht('Projects'))
         ->setName('projects')
         ->setValue($project_handles)
-        ->setDatasource('/typeahead/common/projects/'));
+        ->setDatasource(new PhabricatorProjectDatasource()));
 
     $form
       ->appendChild(

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group slowvote
- */
 final class PhabricatorSlowvotePollController
   extends PhabricatorSlowvoteController {
 
@@ -189,7 +186,6 @@ final class PhabricatorSlowvotePollController
       ->setHeaderText($add_comment_header)
       ->setAction($this->getApplicationURI('/comment/'.$poll->getID().'/'))
       ->setSubmitButtonName(pht('Add Comment'));
-
   }
 
 }

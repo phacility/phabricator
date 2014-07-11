@@ -1,11 +1,7 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_conpherence_querytransaction_Method
   extends ConduitAPI_conpherence_Method {
-
 
   public function getMethodDescription() {
     return pht(
@@ -92,4 +88,5 @@ final class ConduitAPI_conpherence_querytransaction_Method
     }
     return $data;
   }
+
 }

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioSearchIndexer extends PhabricatorSearchDocumentIndexer {
 
   public function getIndexableObject() {
@@ -34,4 +31,5 @@ final class PholioSearchIndexer extends PhabricatorSearchDocumentIndexer {
 
     return $doc;
   }
+
 }

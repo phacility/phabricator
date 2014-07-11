@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioMockImagesView extends AphrontView {
 
   private $mock;

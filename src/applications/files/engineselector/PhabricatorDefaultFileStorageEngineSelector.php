@@ -4,8 +4,6 @@
  * Default storage engine selector. See
  * @{class:PhabricatorFileStorageEngineSelector} and @{article:File Storage
  * Technical Documentation} for more information.
- *
- * @group filestorage
  */
 final class PhabricatorDefaultFileStorageEngineSelector
   extends PhabricatorFileStorageEngineSelector {

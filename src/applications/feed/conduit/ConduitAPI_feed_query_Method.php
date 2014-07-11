@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group conduit
- */
-final class ConduitAPI_feed_query_Method
-  extends ConduitAPI_feed_Method {
+final class ConduitAPI_feed_query_Method extends ConduitAPI_feed_Method {
 
   public function getMethodStatus() {
     return self::METHOD_STATUS_UNSTABLE;
@@ -44,7 +40,7 @@ final class ConduitAPI_feed_query_Method
 
     return array(
       'ERR-UNKNOWN-TYPE' =>
-        'Unsupported view type, possibles are: '.$view_types
+        'Unsupported view type, possibles are: '.$view_types,
     );
   }
 
@@ -53,7 +49,6 @@ final class ConduitAPI_feed_query_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
-
     $results = array();
     $user = $request->getUser();
 

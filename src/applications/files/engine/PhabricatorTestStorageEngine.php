@@ -2,8 +2,6 @@
 
 /**
  * Test storage engine. Does not actually store files. Used for unit tests.
- *
- * @group filestorage
  */
 final class PhabricatorTestStorageEngine
   extends PhabricatorFileStorageEngine {

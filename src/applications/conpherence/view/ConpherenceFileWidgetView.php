@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conpherence
- */
 final class ConpherenceFileWidgetView extends ConpherenceWidgetView {
 
   public function render() {

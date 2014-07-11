@@ -21,7 +21,6 @@
  *
  * @task stop Stopping Event Behaviors
  * @task info Getting Event Information
- * @group event
  */
 JX.install('Event', {
   members : {
@@ -211,7 +210,7 @@ JX.install('Event', {
 
     /**
      * Get the metadata associated with the node that corresponds to the key
-     * in this event's node map.  This is a simple helper method that makes
+     * in this event's node map. This is a simple helper method that makes
      * the API for accessing metadata associated with specific nodes less ugly.
      *
      *  JX.Stratcom.listen('click', 'tag:a', function(event) {

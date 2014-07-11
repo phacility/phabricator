@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group aphront
- */
 final class AphrontPlainTextResponse extends AphrontResponse {
 
   public function setContent($content) {

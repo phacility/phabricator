@@ -1,8 +1,3 @@
 <?php
 
-/**
- * @group legalpad
- */
-abstract class LegalpadConstants {
-
-}
+abstract class LegalpadConstants {}

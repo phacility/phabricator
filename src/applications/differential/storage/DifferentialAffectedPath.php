@@ -3,8 +3,6 @@
 /**
  * Denormalized index table which stores relationships between revisions in
  * Differential and paths in Diffusion.
- *
- * @group differential
  */
 final class DifferentialAffectedPath extends DifferentialDAO {
 
@@ -18,4 +16,5 @@ final class DifferentialAffectedPath extends DifferentialDAO {
       self::CONFIG_TIMESTAMPS => false,
     ) + parent::getConfiguration();
   }
+
 }

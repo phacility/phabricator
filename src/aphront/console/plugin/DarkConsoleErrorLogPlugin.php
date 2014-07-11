@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group console
- */
 final class DarkConsoleErrorLogPlugin extends DarkConsolePlugin {
 
   public function getName() {
@@ -98,4 +95,5 @@ final class DarkConsoleErrorLogPlugin extends DarkConsolePlugin {
         phutil_tag('pre', array('class' => 'PhabricatorMonospaced'), $details),
       ));
   }
+
 }

@@ -1,8 +1,3 @@
 <?php
 
-/**
- * @group calendar
- */
-abstract class CalendarConstants {
-
-}
+abstract class CalendarConstants {}

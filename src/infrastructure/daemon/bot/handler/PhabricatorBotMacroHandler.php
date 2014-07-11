@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group irc
- */
 final class PhabricatorBotMacroHandler extends PhabricatorBotHandler {
 
   private $macros;

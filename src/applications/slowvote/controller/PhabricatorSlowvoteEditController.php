@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group slowvote
- */
 final class PhabricatorSlowvoteEditController
   extends PhabricatorSlowvoteController {
 
@@ -174,7 +171,7 @@ final class PhabricatorSlowvoteEditController
           ->setLabel(pht('Projects'))
           ->setName('projects')
           ->setValue($project_handles)
-          ->setDatasource('/typeahead/common/projects/'));
+          ->setDatasource(new PhabricatorProjectDatasource()));
 
     if ($is_new) {
       for ($ii = 0; $ii < 10; $ii++) {

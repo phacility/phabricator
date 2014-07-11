@@ -7,9 +7,6 @@
  * @javelin
  */
 
-/**
- * @group control
- */
 JX.install('TypeaheadSource', {
   construct : function() {
     this._raw = {};
@@ -60,7 +57,7 @@ JX.install('TypeaheadSource', {
      *    - **display**: the text or nodes to show in the DOM. Usually just the
      *      same as ##name##.
      *    - **tokenizable**: if you want to tokenize something other than the
-     *      ##name##, for the typeahead to complete on, specify it here.  A
+     *      ##name##, for the typeahead to complete on, specify it here. A
      *      selected entry from the typeahead will still insert the ##name##
      *      into the input, but the ##tokenizable## field lets you complete on
      *      non-name things.

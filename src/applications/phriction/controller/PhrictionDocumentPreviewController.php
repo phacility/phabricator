@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @group phriction
- */
 final class PhrictionDocumentPreviewController
   extends PhrictionController {
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $document = $request->getStr('document');
 
@@ -26,4 +22,5 @@ final class PhrictionDocumentPreviewController
 
     return id(new AphrontAjaxResponse())->setContent($content);
   }
+
 }

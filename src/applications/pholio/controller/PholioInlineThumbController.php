@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioInlineThumbController extends PholioController {
 
   private $imageid;

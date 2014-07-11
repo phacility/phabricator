@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhabricatorPhamePHIDTypeBlog extends PhabricatorPHIDType {
 
   const TYPECONST = 'BLOG';

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_conduit_ping_Method extends ConduitAPIMethod {
 
   public function shouldRequireAuthentication() {
@@ -28,4 +25,5 @@ final class ConduitAPI_conduit_ping_Method extends ConduitAPIMethod {
   protected function execute(ConduitAPIRequest $request) {
     return php_uname('n');
   }
+
 }

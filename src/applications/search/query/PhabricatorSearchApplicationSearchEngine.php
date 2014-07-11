@@ -161,7 +161,7 @@ final class PhabricatorSearchApplicationSearchEngine
         id(new AphrontFormTokenizerControl())
           ->setName('projectPHIDs')
           ->setLabel('In Any Project')
-          ->setDatasource('/typeahead/common/projects/')
+          ->setDatasource(new PhabricatorProjectDatasource())
           ->setValue($project_handles));
   }
 

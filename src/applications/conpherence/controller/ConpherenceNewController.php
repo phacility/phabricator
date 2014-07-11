@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conpherence
- */
 final class ConpherenceNewController extends ConpherenceController {
 
   public function processRequest() {
@@ -99,4 +96,5 @@ final class ConpherenceNewController extends ConpherenceController {
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
+
 }

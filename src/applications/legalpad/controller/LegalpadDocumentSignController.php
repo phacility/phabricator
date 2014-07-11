@@ -4,7 +4,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
 
   private $id;
 
-  public function shouldRequireLogin() {
+  public function shouldAllowPublic() {
     return false;
   }
 

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group console
- */
 abstract class DarkConsolePlugin {
 
   private $data;
@@ -13,9 +10,7 @@ abstract class DarkConsolePlugin {
   abstract public function getDescription();
   abstract public function renderPanel();
 
-  public function __construct() {
-
-  }
+  public function __construct() {}
 
   public function getColor() {
     return null;

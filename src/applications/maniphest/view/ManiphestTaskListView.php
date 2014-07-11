@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group maniphest
- */
 final class ManiphestTaskListView extends ManiphestView {
 
   private $tasks;

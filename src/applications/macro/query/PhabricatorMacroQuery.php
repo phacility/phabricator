@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phriction
- */
 final class PhabricatorMacroQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
@@ -29,7 +26,6 @@ final class PhabricatorMacroQuery
   }
 
   public static function getFlagColorsOptions() {
-
     $options = array(
       '-1' => pht('(No Filtering)'),
       '-2' => pht('(Marked With Any Flag)'),

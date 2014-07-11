@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_repository_create_Method
   extends ConduitAPI_repository_Method {
 
@@ -28,7 +25,7 @@ final class ConduitAPI_repository_create_Method
       'description'         => 'optional string',
       'encoding'            => 'optional string',
       'tracking'            => 'optional bool',
-      'uri'                 => 'optional string',
+      'uri'                 => 'required string',
       'credentialPHID'      => 'optional string',
       'svnSubpath'          => 'optional string',
       'branchFilter'        => 'optional list<string>',
@@ -85,6 +82,12 @@ final class ConduitAPI_repository_create_Method
     }
     $repository->setCallsign($callsign);
 
+    $local_path = PhabricatorEnv::getEnvConfig(
+      'repository.default-local-path');
+
+    $local_path = rtrim($local_path, '/');
+    $local_path = $local_path.'/'.$callsign.'/';
+
     $vcs = $request->getValue('vcs');
 
     $map = array(
@@ -107,6 +110,7 @@ final class ConduitAPI_repository_create_Method
       'description'       => $request->getValue('description'),
       'tracking-enabled'  => (bool)$request->getValue('tracking', true),
       'remote-uri'        => $remote_uri,
+      'local-path'        => $local_path,
       'branch-filter'     => array_fill_keys(
         $request->getValue('branchFilter', array()),
         true),
@@ -132,6 +136,5 @@ final class ConduitAPI_repository_create_Method
 
     return $repository->toDictionary();
   }
-
 
 }

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group repository
- */
 final class PhabricatorRepositoryArcanistProjectQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 

@@ -130,7 +130,7 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
               ->save();
           }
         } else {
-          // The user is promoting the snapshot to another snapshot.  We just
+          // The user is promoting the snapshot to another snapshot. We just
           // copy the other snapshot's child entries and change the snapshot
           // PHID to make it identical.
           $children = id(new PhragmentSnapshotChildQuery())

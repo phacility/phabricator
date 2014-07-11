@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioTransactionComment
   extends PhabricatorApplicationTransactionComment {
 
@@ -33,4 +30,5 @@ final class PholioTransactionComment
     // Only cache submitted comments.
     return ($this->getTransactionPHID() != null);
   }
+
 }

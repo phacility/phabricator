@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group maniphest
- */
 final class ManiphestTaskDescriptionPreviewController
   extends ManiphestController {
 
@@ -23,4 +20,5 @@ final class ManiphestTaskDescriptionPreviewController
     return id(new AphrontAjaxResponse())
       ->setContent($content);
   }
+
 }

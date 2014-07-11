@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_diffusion_getcommits_Method
   extends ConduitAPI_diffusion_Method {
 
@@ -29,12 +26,10 @@ final class ConduitAPI_diffusion_getcommits_Method
   }
 
   public function defineErrorTypes() {
-    return array(
-    );
+    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {
-
     $results = array();
 
     $commits = $request->getValue('commits');

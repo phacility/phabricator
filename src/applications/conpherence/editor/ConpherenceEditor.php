@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conpherence
- */
 final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
   const ERROR_EMPTY_PARTICIPANTS = 'error-empty-participants';
@@ -421,4 +418,5 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
   protected function supportsSearch() {
     return false;
   }
+
 }

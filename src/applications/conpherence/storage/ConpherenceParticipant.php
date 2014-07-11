@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conpherence
- */
 final class ConpherenceParticipant extends ConpherenceDAO {
 
   protected $participantPHID;

@@ -1,9 +1,7 @@
 <?php
 
-/**
- * @group conpherence
- */
 abstract class ConpherenceController extends PhabricatorController {
+
   private $conpherences;
 
   public function buildApplicationMenu() {
@@ -149,8 +147,8 @@ abstract class ConpherenceController extends PhabricatorController {
     return array(
       'transactions' => $rendered_transactions,
       'latest_transaction_id' => $latest_transaction_id,
-      'oldest_transaction_id' => $oldest_transaction_id
+      'oldest_transaction_id' => $oldest_transaction_id,
     );
-
   }
+
 }

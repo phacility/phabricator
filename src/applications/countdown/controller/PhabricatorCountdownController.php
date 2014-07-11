@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group countdown
- */
 abstract class PhabricatorCountdownController extends PhabricatorController {
 
   public function buildSideNavView($for_app = false) {
@@ -39,4 +36,5 @@ abstract class PhabricatorCountdownController extends PhabricatorController {
 
     return $crumbs;
   }
+
 }

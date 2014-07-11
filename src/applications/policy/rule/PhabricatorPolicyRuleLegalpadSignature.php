@@ -40,10 +40,12 @@ final class PhabricatorPolicyRuleLegalpadSignature
   }
 
   public function getValueControlTemplate() {
+    $datasource = new LegalpadDocumentDatasource();
+
     return array(
       'markup' => new AphrontTokenizerTemplateView(),
-      'uri' => '/typeahead/common/legalpaddocuments/',
-      'placeholder' => pht('Type a document title...'),
+      'uri' => $datasource->getDatasourceURI(),
+      'placeholder' => $datasource->getPlaceholderText(),
     );
   }
 

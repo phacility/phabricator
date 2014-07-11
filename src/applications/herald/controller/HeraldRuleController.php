@@ -588,19 +588,25 @@ final class HeraldRuleController extends HeraldController {
     $template = new AphrontTokenizerTemplateView();
     $template = $template->render();
 
+    $sources = array(
+      'repository' => new DiffusionRepositoryDatasource(),
+      'legaldocuments' => new LegalpadDocumentDatasource(),
+      'taskpriority' => new ManiphestTaskPriorityDatasource(),
+      'buildplan' => new HarbormasterBuildPlanDatasource(),
+      'arcanistprojects' => new DiffusionArcanistProjectDatasource(),
+      'package' => new PhabricatorOwnersPackageDatasource(),
+      'project' => new PhabricatorProjectDatasource(),
+    );
+
+    $sources = mpull($sources, 'getDatasourceURI');
+    $sources += array(
+      'email'         => '/typeahead/common/mailable/',
+      'user'          => '/typeahead/common/accounts/',
+      'userorproject' => '/typeahead/common/accountsorprojects/',
+    );
+
     return array(
-      'source' => array(
-        'email'         => '/typeahead/common/mailable/',
-        'user'          => '/typeahead/common/accounts/',
-        'repository'    => '/typeahead/common/repositories/',
-        'package'       => '/typeahead/common/packages/',
-        'project'       => '/typeahead/common/projects/',
-        'userorproject' => '/typeahead/common/accountsorprojects/',
-        'buildplan'     => '/typeahead/common/buildplans/',
-        'taskpriority'  => '/typeahead/common/taskpriority/',
-        'arcanistprojects' => '/typeahead/common/arcanistprojects/',
-        'legaldocuments' => '/typeahead/common/legalpaddocuments/',
-      ),
+      'source' => $sources,
       'username' => $this->getRequest()->getUser()->getUserName(),
       'icons' => mpull($handles, 'getTypeIcon', 'getPHID'),
       'markup' => $template,

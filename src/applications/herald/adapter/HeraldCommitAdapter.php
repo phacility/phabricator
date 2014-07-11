@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group herald
- */
 final class HeraldCommitAdapter extends HeraldAdapter {
 
   const FIELD_NEED_AUDIT_FOR_PACKAGE      = 'need-audit-for-package';
@@ -559,4 +556,5 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     }
     return $result;
   }
+
 }

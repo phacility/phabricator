@@ -24,6 +24,22 @@ JX.behavior('project-boards', function(config) {
     JX.DOM.replace(item, JX.$H(response.task));
   }
 
+  function colsort(u, v) {
+    var ud = JX.Stratcom.getData(u).sort || [];
+    var vd = JX.Stratcom.getData(v).sort || [];
+
+    for (var ii = 0; ii < ud.length; ii++) {
+      if (ud[ii] < vd[ii]) {
+        return 1;
+      }
+      if (ud[ii] > vd[ii]) {
+        return -1;
+      }
+    }
+
+    return 0;
+  }
+
   function ondrop(list, item, after) {
     list.lock();
     JX.DOM.alterClass(item, 'drag-sending', true);
@@ -93,30 +109,27 @@ JX.behavior('project-boards', function(config) {
   }
 
   var onedit = function(card, column, r) {
-    var new_card = JX.$H(r.tasks);
+    var new_card = JX.$H(r.tasks).getNode();
+    var new_data = JX.Stratcom.getData(new_card);
     var items = finditems(column);
-    var insert_after = r.data.insertAfterPHID;
-    if (!insert_after) {
-      JX.DOM.prependContent(column, new_card);
-      if (card) {
-        JX.DOM.remove(card);
+
+    for (var ii = 0; ii < items.length; ii++) {
+      var item = items[ii];
+
+      var data = JX.Stratcom.getData(item);
+      var phid = data.objectPHID;
+
+      if (phid == new_data.objectPHID) {
+        items[ii] = new_card;
+        data = new_data;
       }
-      return;
+
+      data.sort = r.data.sortMap[data.objectPHID] || data.sort;
     }
-    var ii;
-    var item;
-    var item_phid;
-    for (ii = 0; ii< items.length; ii++) {
-      item = items[ii];
-      item_phid = JX.Stratcom.getData(item).objectPHID;
-      if (item_phid == insert_after) {
-        JX.DOM.replace(item, [item, new_card]);
-        if (card) {
-          JX.DOM.remove(card);
-        }
-        return;
-      }
-    }
+
+    items.sort(colsort);
+
+    JX.DOM.setContent(column, items);
   };
 
   JX.Stratcom.listen(

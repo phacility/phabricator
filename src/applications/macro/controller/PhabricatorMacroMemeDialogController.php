@@ -50,7 +50,7 @@ final class PhabricatorMacroMemeDialogController
           ->setLabel(pht('Macro'))
           ->setName('macro')
           ->setLimit(1)
-          ->setDatasource('/typeahead/common/macros/')
+          ->setDatasource(new PhabricatorMacroDatasource())
           ->setError($e_macro))
       ->appendChild(
         id(new AphrontFormTextControl())

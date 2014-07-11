@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group repository
- */
 final class PhabricatorRepositoryPHIDTypeArcanistProject
   extends PhabricatorPHIDType {
 

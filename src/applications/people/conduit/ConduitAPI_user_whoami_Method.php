@@ -1,18 +1,13 @@
 <?php
 
-/**
- * @group conduit
- */
-final class ConduitAPI_user_whoami_Method
-  extends ConduitAPI_user_Method {
+final class ConduitAPI_user_whoami_Method extends ConduitAPI_user_Method {
 
   public function getMethodDescription() {
     return 'Retrieve information about the logged-in user.';
   }
 
   public function defineParamTypes() {
-    return array(
-    );
+    return array();
   }
 
   public function defineReturnType() {
@@ -20,8 +15,7 @@ final class ConduitAPI_user_whoami_Method
   }
 
   public function defineErrorTypes() {
-    return array(
-    );
+    return array();
   }
 
   public function getRequiredScope() {

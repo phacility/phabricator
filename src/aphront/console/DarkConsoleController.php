@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group console
- */
 final class DarkConsoleController extends PhabricatorController {
 
   protected $op;

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_diffusion_searchquery_Method
   extends ConduitAPI_diffusion_abstractquery_Method {
 
@@ -112,4 +109,5 @@ final class ConduitAPI_diffusion_searchquery_Method
 
     return $results;
   }
+
 }

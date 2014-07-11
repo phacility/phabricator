@@ -84,7 +84,7 @@ final class PhabricatorFeedSearchEngine
           ->setValue($user_handles))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/projects/')
+          ->setDatasource(new PhabricatorProjectDatasource())
           ->setName('projectPHIDs')
           ->setLabel(pht('Include Projects'))
           ->setValue($proj_handles))

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group slowvote
- */
 final class PhabricatorSlowvoteComment extends PhabricatorSlowvoteDAO {
 
   protected $pollID;

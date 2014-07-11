@@ -1,10 +1,7 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_diffusion_historyquery_Method
-extends ConduitAPI_diffusion_abstractquery_Method {
+  extends ConduitAPI_diffusion_abstractquery_Method {
 
   private $parents = array();
 
@@ -33,7 +30,8 @@ extends ConduitAPI_diffusion_abstractquery_Method {
 
     return array(
       'pathChanges' => mpull($path_changes, 'toDictionary'),
-      'parents' => $this->parents);
+      'parents' => $this->parents,
+    );
   }
 
   protected function getGitResult(ConduitAPIRequest $request) {

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_diffusion_getrecentcommitsbypath_Method
   extends ConduitAPI_diffusion_Method {
 
@@ -64,4 +61,5 @@ final class ConduitAPI_diffusion_getrecentcommitsbypath_Method
     }
     return $result;
   }
+
 }

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group file
- */
 final class PhabricatorFileTestCase extends PhabricatorTestCase {
 
   public function getPhabricatorTestCaseConfiguration() {
@@ -58,7 +55,6 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
 
     $this->assertTrue($first_handle != $second_handle);
   }
-
 
   public function testFileStorageUploadSameFile() {
     $engine = new PhabricatorTestStorageEngine();

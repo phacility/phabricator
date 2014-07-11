@@ -12,6 +12,10 @@ final class HarbormasterPHIDTypeBuildPlan extends PhabricatorPHIDType {
     return pht('Build Plan');
   }
 
+  public function getTypeIcon() {
+    return 'fa-cubes';
+  }
+
   public function newObject() {
     return new HarbormasterBuildPlan();
   }
@@ -31,8 +35,9 @@ final class HarbormasterPHIDTypeBuildPlan extends PhabricatorPHIDType {
 
     foreach ($handles as $phid => $handle) {
       $build_plan = $objects[$phid];
-      $handles[$phid]->setName($build_plan->getName());
-      $handles[$phid]->setURI('/harbormaster/plan/'.$build_plan->getID());
+      $id = $build_plan->getID();
+      $handles[$phid]->setName(pht('Plan %d %s', $id, $build_plan->getName()));
+      $handles[$phid]->setURI('/harbormaster/plan/'.$id.'/');
     }
   }
 

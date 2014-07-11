@@ -187,7 +187,8 @@ final class DiffusionCommitHookEngine extends Phobject {
           'eventPHID' => $event->getPHID(),
           'emailPHIDs' => array_values($this->emailPHIDs),
           'info' => $this->loadCommitInfoForWorker($all_updates),
-        ));
+        ),
+        PhabricatorWorker::PRIORITY_ALERTS);
     }
 
     return 0;
@@ -477,7 +478,12 @@ final class DiffusionCommitHookEngine extends Phobject {
       $ref_flags = 0;
       $dangerous = null;
 
-      if ($ref_old === self::EMPTY_HASH) {
+      if (($ref_old === self::EMPTY_HASH) && ($ref_new === self::EMPTY_HASH)) {
+        // This happens if you try to delete a tag or branch which does not
+        // exist by pushing directly to the ref. Git will warn about it but
+        // allow it. Just call it a delete, without flagging it as dangerous.
+        $ref_flags |= PhabricatorRepositoryPushLog::CHANGEFLAG_DELETE;
+      } else if ($ref_old === self::EMPTY_HASH) {
         $ref_flags |= PhabricatorRepositoryPushLog::CHANGEFLAG_ADD;
       } else if ($ref_new === self::EMPTY_HASH) {
         $ref_flags |= PhabricatorRepositoryPushLog::CHANGEFLAG_DELETE;

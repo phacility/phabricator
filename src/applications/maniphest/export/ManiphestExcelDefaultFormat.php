@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group maniphest
- */
 final class ManiphestExcelDefaultFormat extends ManiphestExcelFormat {
 
   public function getName() {
@@ -133,7 +130,6 @@ final class ManiphestExcelDefaultFormat extends ManiphestExcelFormat {
       }
     }
   }
-
 
   private function col($n) {
     return chr(ord('A') + $n);

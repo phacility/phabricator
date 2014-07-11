@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioImage extends PholioDAO
   implements
     PhabricatorMarkupInterface,

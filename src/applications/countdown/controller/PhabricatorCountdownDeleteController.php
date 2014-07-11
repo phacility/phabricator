@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group countdown
- */
 final class PhabricatorCountdownDeleteController
   extends PhabricatorCountdownController {
 
@@ -13,7 +10,6 @@ final class PhabricatorCountdownDeleteController
   }
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $user = $request->getUser();
 

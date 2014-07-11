@@ -65,7 +65,7 @@ final class PhabricatorApplicationReleephConfigOptions
         ->setDescription(
           pht(
             'The default branch template for new branches in unconfigured '.
-            'Releeph projects.  This is also configurable on a per-project '.
+            'Releeph projects. This is also configurable on a per-project '.
             'basis.')),
     );
   }

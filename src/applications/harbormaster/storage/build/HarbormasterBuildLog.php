@@ -71,7 +71,7 @@ final class HarbormasterBuildLog extends HarbormasterDAO
     }
 
     // If the length of the content is greater than the chunk size limit,
-    // then we can never fit the content in a single record.  We need to
+    // then we can never fit the content in a single record. We need to
     // split our content out and call append on it for as many parts as there
     // are to the content.
     if (strlen($content) > self::CHUNK_BYTE_LIMIT) {
@@ -85,7 +85,7 @@ final class HarbormasterBuildLog extends HarbormasterDAO
       return;
     }
 
-    // Retrieve the size of last chunk from the DB for this log.  If the
+    // Retrieve the size of last chunk from the DB for this log. If the
     // chunk is over 500K, then we need to create a new log entry.
     $conn = $this->establishConnection('w');
     $result = queryfx_all(
@@ -142,7 +142,7 @@ final class HarbormasterBuildLog extends HarbormasterDAO
 
   public function getLogText() {
     // TODO: This won't cope very well if we're pulling like a 700MB
-    // log file out of the DB.  We should probably implement some sort
+    // log file out of the DB. We should probably implement some sort
     // of optional limit parameter so that when we're rendering out only
     // 25 lines in the UI, we don't wastefully read in the whole log.
 

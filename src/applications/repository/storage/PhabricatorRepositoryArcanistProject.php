@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group repository
- */
 final class PhabricatorRepositoryArcanistProject
   extends PhabricatorRepositoryDAO
   implements PhabricatorPolicyInterface,

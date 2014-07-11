@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group aphront
- */
 final class AphrontFileResponse extends AphrontResponse {
 
   private $content;

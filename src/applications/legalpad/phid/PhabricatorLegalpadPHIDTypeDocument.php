@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group legalpad
- */
 final class PhabricatorLegalpadPHIDTypeDocument extends PhabricatorPHIDType {
 
   const TYPECONST = 'LEGD';
@@ -13,6 +10,10 @@ final class PhabricatorLegalpadPHIDTypeDocument extends PhabricatorPHIDType {
 
   public function getTypeName() {
     return pht('Legalpad Document');
+  }
+
+  public function getTypeIcon() {
+    return 'fa-file-text-o';
   }
 
   public function newObject() {
@@ -36,8 +37,7 @@ final class PhabricatorLegalpadPHIDTypeDocument extends PhabricatorPHIDType {
     foreach ($handles as $phid => $handle) {
       $document = $objects[$phid];
       $name = $document->getDocumentBody()->getTitle();
-      $handle->setName($name);
-      $handle->setFullName($document->getMonogram().' '.$name);
+      $handle->setName($document->getMonogram().' '.$name);
       $handle->setURI('/'.$document->getMonogram());
     }
   }

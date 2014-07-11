@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group conduit
- */
-final class ConduitAPI_macro_creatememe_Method
-  extends ConduitAPI_macro_Method {
+final class ConduitAPI_macro_creatememe_Method extends ConduitAPI_macro_Method {
 
   public function getMethodStatus() {
     return self::METHOD_STATUS_UNSTABLE;

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_conpherence_updatethread_Method
   extends ConduitAPI_conpherence_Method {
 
@@ -104,4 +101,5 @@ final class ConduitAPI_conpherence_updatethread_Method
 
     return true;
   }
+
 }

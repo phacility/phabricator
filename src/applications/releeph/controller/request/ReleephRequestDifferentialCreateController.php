@@ -70,7 +70,7 @@ final class ReleephRequestDifferentialCreateController
 
     $dialog->appendChild(
       pht('This differential revision changes code that is associated '.
-      'with multiple Releeph branches.  '.
+      'with multiple Releeph branches. '.
       'Please select the branch where you would like this code to be picked.'));
 
     foreach ($branch_groups as $project_id => $branches) {

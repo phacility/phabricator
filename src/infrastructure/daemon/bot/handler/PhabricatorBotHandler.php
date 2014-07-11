@@ -3,8 +3,6 @@
 /**
  * Responds to IRC messages. You plug a bunch of these into a
  * @{class:PhabricatorBot} to give it special behavior.
- *
- * @group irc
  */
 abstract class PhabricatorBotHandler {
 
@@ -70,4 +68,5 @@ abstract class PhabricatorBotHandler {
 
     return $this->writeMessage($reply);
   }
+
 }

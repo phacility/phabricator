@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group celerity
- */
 final class CelerityResourceTransformer {
 
   private $minify;
@@ -346,7 +343,6 @@ final class CelerityResourceTransformer {
    * @return string|null Data URI, or null if we declined to generate one.
    */
   private function generateDataURI($resource_name) {
-
     $ext = last(explode('.', $resource_name));
     switch ($ext) {
       case 'png':
@@ -379,6 +375,5 @@ final class CelerityResourceTransformer {
 
     return $uri;
   }
-
 
 }

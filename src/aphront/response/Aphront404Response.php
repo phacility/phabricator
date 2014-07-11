@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group aphront
- */
 final class Aphront404Response extends AphrontHTMLResponse {
 
   public function getHTTPResponseCode() {

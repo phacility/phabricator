@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group console
- */
 final class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
 
   protected $profileFilePHID;

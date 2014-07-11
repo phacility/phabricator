@@ -49,7 +49,7 @@ final class DifferentialRepositoryField
 
     return id(new AphrontFormTokenizerControl())
       ->setName($this->getFieldKey())
-      ->setDatasource('/typeahead/common/repositories/')
+      ->setDatasource(new DiffusionRepositoryDatasource())
       ->setValue($control_value)
       ->setError($this->getFieldError())
       ->setLabel($this->getFieldName())

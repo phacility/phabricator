@@ -107,6 +107,11 @@ abstract class PhabricatorMailReceiver {
         ->withAccountTypes(array('email'))
         ->withAccountDomains(array($from_obj->getDomainName(), 'self'))
         ->withAccountIDs(array($from_obj->getAddress()))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
         ->loadOneOrCreate();
       return $xuser->getPhabricatorUser();
     } else {

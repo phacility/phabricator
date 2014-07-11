@@ -13,8 +13,6 @@
 
 /**
  * Make basic AJAX XMLHTTPRequests.
- *
- * @group workflow
  */
 JX.install('Request', {
   construct : function(uri, handler) {

@@ -188,7 +188,7 @@ The constant for this event is
 `PhabricatorEventType::TYPE_DIFFERENTIAL_WILLMARKGENERATED`.
 
 This event is dispatched before Differential decides if a file is generated (and
-doesn't need to be reviewed) or not.  Data available on this event:
+doesn't need to be reviewed) or not. Data available on this event:
 
   - ##corpus## Body of the file.
   - ##is_generated## Boolean indicating if this file should be treated as

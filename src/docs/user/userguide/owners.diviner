@@ -24,7 +24,7 @@ be marked as "Needing Attention" if
   - no revision found for the commit,
   - the commit author is not recognized, or
   - the author or the reviewer specified in the commits don't match the ones in
-  the Differential revision
+    the Differential revision
 
 The owners of the package can accept or specify concern for such commits by
 clicking the "Audit Status" link.

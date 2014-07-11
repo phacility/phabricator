@@ -1,12 +1,8 @@
 <?php
 
-/**
- * @group maniphest
- */
 final class ManiphestBatchEditController extends ManiphestController {
 
   public function processRequest() {
-
     $this->requireApplicationCapability(
       ManiphestCapabilityBulkEdit::CAPABILITY);
 
@@ -65,6 +61,8 @@ final class ManiphestBatchEditController extends ManiphestController {
     $template = new AphrontTokenizerTemplateView();
     $template = $template->render();
 
+    $projects_source = new PhabricatorProjectDatasource();
+
     require_celerity_resource('maniphest-batch-editor');
     Javelin::initBehavior(
       'maniphest-batch-editor',
@@ -73,12 +71,13 @@ final class ManiphestBatchEditController extends ManiphestController {
         'tokenizerTemplate' => $template,
         'sources' => array(
           'project' => array(
-            'src'           => '/typeahead/common/projects/',
-            'placeholder'   => pht('Type a project name...'),
+            'src'           => $projects_source->getDatasourceURI(),
+            'placeholder'   => $projects_source->getPlaceholderText(),
           ),
           'owner' => array(
             'src'           => '/typeahead/common/searchowner/',
-            'placeholder'   => pht('Type a user name...'),
+            'placeholder'   => pht(
+              'Type a user name or "upforgrabs" to unassign...'),
             'limit'         => 1,
           ),
           'cc'    => array(

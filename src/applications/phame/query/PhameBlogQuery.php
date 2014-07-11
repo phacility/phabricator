@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhameBlogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;

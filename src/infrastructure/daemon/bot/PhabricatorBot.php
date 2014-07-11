@@ -7,8 +7,6 @@
  * script system interactions and integrate with other systems.
  *
  * NOTE: This is super janky and experimental right now.
- *
- * @group irc
  */
 final class PhabricatorBot extends PhabricatorDaemon {
 

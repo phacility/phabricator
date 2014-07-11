@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_diffusion_findsymbols_Method
   extends ConduitAPI_diffusion_Method {
 

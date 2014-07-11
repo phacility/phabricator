@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group maniphest
- */
 final class ConduitAPI_maniphest_gettasktransactions_Method
   extends ConduitAPI_maniphest_Method {
 
@@ -74,4 +71,5 @@ final class ConduitAPI_maniphest_gettasktransactions_Method
 
     return $results;
   }
+
 }

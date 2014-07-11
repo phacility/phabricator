@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group search
- */
 abstract class PhabricatorSearchDocumentIndexer {
 
   abstract public function getIndexableObject();

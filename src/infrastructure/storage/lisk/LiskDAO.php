@@ -93,7 +93,7 @@
  *
  *   $dog = id(new Dog())->load($id);
  *
- * This will load the Dog record with ID $id into $dog, or ##null## if no such
+ * This will load the Dog record with ID $id into $dog, or `null` if no such
  * record exists (@{method:load} is an instance method rather than a static
  * method because PHP does not support late static binding, at least until PHP
  * 5.3).
@@ -161,8 +161,6 @@
  * @task   util    Utilities
  * @task   xaction Managing Transactions
  * @task   isolate Isolation for Unit Testing
- *
- * @group storage
  */
 abstract class LiskDAO {
 
@@ -464,7 +462,7 @@ abstract class LiskDAO {
    *
    * @task   load
    */
-  public function loadAllWhere($pattern/* , $arg, $arg, $arg ... */) {
+  public function loadAllWhere($pattern /* , $arg, $arg, $arg ... */) {
     $args = func_get_args();
     array_unshift($args, null);
     $data = call_user_func_array(
@@ -484,7 +482,7 @@ abstract class LiskDAO {
    *
    * @task   load
    */
-  public function loadColumnsWhere(array $columns, $pattern/* , $args... */) {
+  public function loadColumnsWhere(array $columns, $pattern /* , $args... */) {
     if (!$this->getConfigOption(self::CONFIG_PARTIAL_OBJECTS)) {
       throw new BadMethodCallException(
         'This class does not support partial objects.');
@@ -499,7 +497,7 @@ abstract class LiskDAO {
 
   /**
    * Load a single object identified by a 'WHERE' clause. You provide
-   * everything  after the 'WHERE', and Lisk builds the first half of the
+   * everything after the 'WHERE', and Lisk builds the first half of the
    * query. See loadAllWhere(). This method is similar, but returns a single
    * result instead of a list.
    *
@@ -509,7 +507,7 @@ abstract class LiskDAO {
    *
    * @task   load
    */
-  public function loadOneWhere($pattern/* , $arg, $arg, $arg ... */) {
+  public function loadOneWhere($pattern /* , $arg, $arg, $arg ... */) {
     $args = func_get_args();
     array_unshift($args, null);
     $data = call_user_func_array(
@@ -530,7 +528,7 @@ abstract class LiskDAO {
   }
 
 
-  protected function loadRawDataWhere($columns, $pattern/* , $args... */) {
+  protected function loadRawDataWhere($columns, $pattern /* , $args... */) {
     $connection = $this->establishConnection('r');
 
     $lock_clause = '';
@@ -579,7 +577,6 @@ abstract class LiskDAO {
    * @task   load
    */
   public function reload() {
-
     if (!$this->getID()) {
       throw new Exception("Unable to reload object that hasn't been loaded!");
     }
@@ -601,10 +598,11 @@ abstract class LiskDAO {
    * Initialize this object's properties from a dictionary. Generally, you
    * load single objects with loadOneWhere(), but sometimes it may be more
    * convenient to pull data from elsewhere directly (e.g., a complicated
-   * join via queryData()) and then load from an array representation.
+   * join via @{method:queryData}) and then load from an array representation.
    *
    * @param  dict  Dictionary of properties, which should be equivalent to
-   *               selecting a row from the table or calling getProperties().
+   *               selecting a row from the table or calling
+   *               @{method:getProperties}.
    * @return this
    *
    * @task   load
@@ -654,9 +652,9 @@ abstract class LiskDAO {
 
   /**
    * Initialize a list of objects from a list of dictionaries. Usually you
-   * load lists of objects with loadAllWhere(), but sometimes that isn't
-   * flexible enough. One case is if you need to do joins to select the right
-   * objects:
+   * load lists of objects with @{method:loadAllWhere}, but sometimes that
+   * isn't flexible enough. One case is if you need to do joins to select the
+   * right objects:
    *
    *   function loadAllWithOwner($owner) {
    *     $data = $this->queryData(
@@ -669,7 +667,7 @@ abstract class LiskDAO {
    *     return $this->loadAllFromArray($data);
    *   }
    *
-   * This is a lot messier than loadAllWhere(), but more flexible.
+   * This is a lot messier than @{method:loadAllWhere}, but more flexible.
    *
    * @param  list  List of property dictionaries.
    * @return dict  List of constructed objects, keyed on ID.
@@ -1044,9 +1042,9 @@ abstract class LiskDAO {
 
   /**
    * Convert this object into a property dictionary. This dictionary can be
-   * restored into an object by using loadFromArray() (unless you're using
-   * legacy features with CONFIG_CONVERT_CAMELCASE, but in that case you should
-   * just go ahead and die in a fire).
+   * restored into an object by using @{method:loadFromArray} (unless you're
+   * using legacy features with CONFIG_CONVERT_CAMELCASE, but in that case you
+   * should just go ahead and die in a fire).
    *
    * @return dict  Dictionary of object properties.
    *
@@ -1370,7 +1368,7 @@ abstract class LiskDAO {
 
   /**
    * Hook to apply serialization or validation to data before it is written to
-   * the database. See also willReadData().
+   * the database. See also @{method:willReadData}.
    *
    * @task hook
    */
@@ -1411,7 +1409,7 @@ abstract class LiskDAO {
 
   /**
    * Hook to apply serialization or validation to data as it is read from the
-   * database. See also willWriteData().
+   * database. See also @{method:willWriteData}.
    *
    * @task hook
    */
@@ -1442,7 +1440,7 @@ abstract class LiskDAO {
 
   /**
    * Reads the value from a field. Override this method for custom behavior
-   * of getField() instead of overriding getField directly.
+   * of @{method:getField} instead of overriding getField directly.
    *
    * @param  string  Canonical field name
    * @return mixed   Value of the field
@@ -1706,7 +1704,6 @@ abstract class LiskDAO {
    * @task   util
    */
   public function __call($method, $args) {
-
     // NOTE: PHP has a bug that static variables defined in __call() are shared
     // across all children classes. Call a different method to work around this
     // bug.

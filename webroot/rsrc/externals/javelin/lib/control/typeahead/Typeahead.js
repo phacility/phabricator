@@ -32,7 +32,6 @@
  * @task start        Activating a Typeahead
  * @task control      Controlling Typeaheads from Javascript
  * @task internal     Internal Methods
- * @group control
  */
 JX.install('Typeahead', {
   /**

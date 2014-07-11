@@ -26,17 +26,11 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $need_applications = false;
     $need_lists = false;
     $need_projs = false;
-    $need_repos = false;
     $need_packages = false;
     $need_upforgrabs = false;
-    $need_arcanist_projects = false;
     $need_noproject = false;
     $need_symbols = false;
     $need_jump_objects = false;
-    $need_build_plans = false;
-    $need_task_priority = false;
-    $need_macros = false;
-    $need_legalpad_documents = false;
     switch ($this->type) {
       case 'mainsearch':
         $need_users = true;
@@ -65,9 +59,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
         $need_lists = true;
         $need_projs = true;
         break;
-      case 'projects':
-        $need_projs = true;
-        break;
       case 'usersorprojects':
       case 'accountsorprojects':
         $need_users = true;
@@ -77,27 +68,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
         $need_users = true;
         $need_projs = true;
         $need_packages = true;
-        break;
-      case 'repositories':
-        $need_repos = true;
-        break;
-      case 'packages':
-        $need_packages = true;
-        break;
-      case 'arcanistprojects':
-        $need_arcanist_projects = true;
-        break;
-      case 'buildplans':
-        $need_build_plans = true;
-        break;
-      case 'taskpriority':
-        $need_task_priority = true;
-        break;
-      case 'macros':
-        $need_macros = true;
-        break;
-      case 'legalpaddocuments':
-        $need_legalpad_documents = true;
         break;
     }
 
@@ -226,52 +196,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
       }
     }
 
-    if ($need_build_plans) {
-      $plans = id(new HarbormasterBuildPlanQuery())
-        ->setViewer($viewer)
-        ->execute();
-      foreach ($plans as $plan) {
-        $results[] = id(new PhabricatorTypeaheadResult())
-          ->setName($plan->getName())
-          ->setPHID($plan->getPHID());
-      }
-    }
-
-    if ($need_task_priority) {
-      $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
-      foreach ($priority_map as $value => $name) {
-        // NOTE: $value is not a phid but is unique. This'll work.
-        $results[] = id(new PhabricatorTypeaheadResult())
-          ->setPHID($value)
-          ->setName($name);
-      }
-    }
-
-    if ($need_macros) {
-      $macros = id(new PhabricatorMacroQuery())
-        ->setViewer($viewer)
-        ->withStatus(PhabricatorMacroQuery::STATUS_ACTIVE)
-        ->execute();
-      $macros = mpull($macros, 'getName', 'getPHID');
-      foreach ($macros as $phid => $name) {
-        $results[] = id(new PhabricatorTypeaheadResult())
-          ->setPHID($phid)
-          ->setName($name);
-      }
-    }
-
-    if ($need_legalpad_documents) {
-      $documents = id(new LegalpadDocumentQuery())
-        ->setViewer($viewer)
-        ->execute();
-      foreach ($documents as $document) {
-        $results[] = id(new PhabricatorTypeaheadResult())
-          ->setPHID($document->getPHID())
-          ->setIcon('fa-file-text-o')
-          ->setName($document->getMonogram().' '.$document->getTitle());
-      }
-    }
-
     if ($need_projs) {
       $projs = id(new PhabricatorProjectQuery())
         ->setViewer($viewer)
@@ -298,19 +222,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
       }
     }
 
-    if ($need_repos) {
-      $repos = id(new PhabricatorRepositoryQuery())
-        ->setViewer($viewer)
-        ->execute();
-      foreach ($repos as $repo) {
-        $results[] = id(new PhabricatorTypeaheadResult())
-          ->setName('r'.$repo->getCallsign().' ('.$repo->getName().')')
-          ->setURI('/diffusion/'.$repo->getCallsign().'/')
-          ->setPHID($repo->getPHID())
-          ->setPriorityString('r'.$repo->getCallsign());
-      }
-    }
-
     if ($need_packages) {
       $packages = id(new PhabricatorOwnersPackage())->loadAll();
       foreach ($packages as $package) {
@@ -319,15 +230,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
           ->setName($package->getName())
           ->setURI('/owners/package/'.$package->getID().'/')
           ->setPHID($package->getPHID());
-      }
-    }
-
-    if ($need_arcanist_projects) {
-      $arcprojs = id(new PhabricatorRepositoryArcanistProject())->loadAll();
-      foreach ($arcprojs as $proj) {
-        $results[] = id(new PhabricatorTypeaheadResult())
-          ->setName($proj->getName())
-          ->setPHID($proj->getPHID());
       }
     }
 

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
 
   private $newImages = array();

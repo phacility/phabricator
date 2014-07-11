@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group aphront
- */
 final class AphrontAjaxResponse extends AphrontResponse {
 
   private $content;

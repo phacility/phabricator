@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phriction
- */
 abstract class PhrictionController extends PhabricatorController {
 
   public function buildSideNavView($for_app = false) {

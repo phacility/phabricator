@@ -4,7 +4,6 @@
  * NOTE: Do not extend this!
  *
  * @concrete-extensible
- * @group aphront
  */
 class AphrontDefaultApplicationConfiguration
   extends AphrontApplicationConfiguration {

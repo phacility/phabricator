@@ -6,10 +6,8 @@
  * @task  uri   URI Routing
  * @task  fact  Fact Integration
  * @task  meta  Application Management
- * @group apps
  */
-abstract class PhabricatorApplication
-  implements PhabricatorPolicyInterface {
+abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
 
   const GROUP_CORE            = 'core';
   const GROUP_UTILITIES       = 'util';

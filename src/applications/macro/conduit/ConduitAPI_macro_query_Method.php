@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_macro_query_Method extends ConduitAPI_macro_Method {
 
   public function getMethodDescription() {

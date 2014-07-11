@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_nuance_createitem_Method
   extends ConduitAPI_nuance_Method {
 

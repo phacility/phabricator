@@ -2,10 +2,12 @@
 
 final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
   private $uri;
+  private $index;
   private $timeout;
 
-  public function __construct($uri) {
+  public function __construct($uri, $index) {
     $this->uri = $uri;
+    $this->index = $index;
   }
 
   public function setTimeout($timeout) {
@@ -51,7 +53,7 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
     }
 
     $this->executeRequest(
-      "/phabricator/{$type}/{$phid}/",
+      "/{$type}/{$phid}/",
       $spec,
       $is_write = true);
   }
@@ -59,7 +61,7 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
   public function reconstructDocument($phid) {
     $type = phid_get_type($phid);
 
-    $response = $this->executeRequest("/phabricator/{$type}/{$phid}", array());
+    $response = $this->executeRequest("/{$type}/{$phid}", array());
 
     if (empty($response['exists'])) {
       return null;
@@ -97,8 +99,11 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
 
     if (strlen($query->getParameter('query'))) {
       $spec[] = array(
-        'term' => array(
-          'field.corpus' => $query->getParameter('query'),
+        'match' => array(
+          'field.corpus' => array(
+            'operator' => 'and',
+            'query' => $query->getParameter('query'),
+          ),
         ),
       );
     }
@@ -152,7 +157,7 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
         $should = array();
         foreach ($param as $val) {
           $should[] = array(
-            'text' => array(
+            'match' => array(
               "relationship.{$field}.phid" => array(
                 'query' => $val,
                 'type' => 'phrase',
@@ -207,10 +212,10 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
         PhabricatorSearchApplicationSearchEngine::getIndexableDocumentTypes());
     }
 
-    // Don't use '/phabricator/_search' for the case that there is something
+    // Don't use '/_search' for the case that there is something
     // else in the index (for example if 'phabricator' is only an alias to
-    // some bigger index).
-    $uri = '/phabricator/'.implode(',', $types).'/_search';
+    // some bigger index). Use '/$types/_search' instead.
+    $uri = '/'.implode(',', $types).'/_search';
 
     try {
       $response = $this->executeRequest($uri, $this->buildSpec($query));
@@ -235,9 +240,9 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
 
   private function executeRequest($path, array $data, $is_write = false) {
     $uri = new PhutilURI($this->uri);
+    $uri->setPath($this->index);
+    $uri->appendPath($path);
     $data = json_encode($data);
-
-    $uri->setPath($path);
 
     $future = new HTTPSFuture($uri, $data);
     if ($is_write) {

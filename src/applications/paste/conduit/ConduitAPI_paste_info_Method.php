@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_paste_info_Method extends ConduitAPI_paste_Method {
 
   public function getMethodStatus() {

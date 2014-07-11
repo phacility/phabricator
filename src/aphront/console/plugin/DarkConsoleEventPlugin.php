@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group console
- */
 final class DarkConsoleEventPlugin extends DarkConsolePlugin {
 
   public function getName() {
@@ -14,7 +11,6 @@ final class DarkConsoleEventPlugin extends DarkConsolePlugin {
   }
 
   public function generateData() {
-
     $listeners = PhutilEventEngine::getInstance()->getAllListeners();
     foreach ($listeners as $key => $listener) {
       $listeners[$key] = array(
@@ -95,4 +91,5 @@ final class DarkConsoleEventPlugin extends DarkConsolePlugin {
 
     return phutil_implode_html("\n", $out);
   }
+
 }

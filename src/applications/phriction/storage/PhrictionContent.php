@@ -2,8 +2,6 @@
 
 /**
  * @task markup Markup Interface
- *
- * @group phriction
  */
 final class PhrictionContent extends PhrictionDAO
   implements PhabricatorMarkupInterface {

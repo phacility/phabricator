@@ -20,8 +20,6 @@
  *                            If numeric, the x-coordinate for the new vector.
  * @param number?             The y-coordinate for the new vector.
  * @return @{class:JX.Vector} New vector.
- *
- * @group dom
  */
 JX.$V = function(x, y) {
   return new JX.Vector(x, y);
@@ -75,8 +73,6 @@ JX.$V = function(x, y) {
  * @task query  Querying Positions and Dimensions
  * @task update Changing Positions and Dimensions
  * @task manip  Manipulating Vectors
- *
- * @group dom
  */
 JX.install('Vector', {
 

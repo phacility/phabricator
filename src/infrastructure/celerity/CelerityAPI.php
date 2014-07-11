@@ -3,8 +3,6 @@
 /**
  * Indirection layer which provisions for a terrifying future where we need to
  * build multiple resource responses per page.
- *
- * @group celerity
  */
 final class CelerityAPI {
 

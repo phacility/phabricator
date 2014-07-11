@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhamePostPublishController extends PhameController {
 
   private $id;
@@ -86,4 +83,5 @@ final class PhamePostPublishController extends PhameController {
         ),
         ''));
   }
+
 }

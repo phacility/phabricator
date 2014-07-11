@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_flag_edit_Method extends ConduitAPI_flag_Method {
 
   public function getMethodDescription() {

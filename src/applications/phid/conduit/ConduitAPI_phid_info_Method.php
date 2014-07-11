@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group conduit
- */
-final class ConduitAPI_phid_info_Method
-  extends ConduitAPI_phid_Method {
+final class ConduitAPI_phid_info_Method extends ConduitAPI_phid_Method {
 
   public function getMethodStatus() {
     return self::METHOD_STATUS_DEPRECATED;
@@ -35,7 +31,6 @@ final class ConduitAPI_phid_info_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
-
     $phid = $request->getValue('phid');
 
     $handle = id(new PhabricatorHandleQuery())

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group search
- */
 final class PhabricatorSearchDocumentField extends PhabricatorSearchDAO {
 
   protected $phid;

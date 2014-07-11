@@ -1,7 +1,6 @@
 <?php
 
 /**
- * @group console
  * @phutil-external-symbol function xhprof_enable
  * @phutil-external-symbol function xhprof_disable
  */

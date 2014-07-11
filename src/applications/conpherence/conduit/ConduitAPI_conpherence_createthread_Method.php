@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_conpherence_createthread_Method
   extends ConduitAPI_conpherence_Method {
 
@@ -32,7 +29,6 @@ final class ConduitAPI_conpherence_createthread_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
-
     $participant_phids = $request->getValue('participantPHIDs', array());
     $message = $request->getValue('message');
     $title = $request->getValue('title');
@@ -60,6 +56,8 @@ final class ConduitAPI_conpherence_createthread_Method
     return array(
       'conpherenceID' => $conpherence->getID(),
       'conpherencePHID' => $conpherence->getPHID(),
-      'conpherenceURI' => $this->getConpherenceURI($conpherence));
+      'conpherenceURI' => $this->getConpherenceURI($conpherence),
+    );
   }
+
 }

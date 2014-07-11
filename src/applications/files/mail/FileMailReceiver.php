@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group file
- */
 final class FileMailReceiver extends PhabricatorObjectMailReceiver {
 
   public function isEnabled() {

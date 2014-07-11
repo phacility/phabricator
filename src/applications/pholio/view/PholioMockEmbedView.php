@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioMockEmbedView extends AphrontView {
 
   private $mock;
@@ -53,4 +50,5 @@ final class PholioMockEmbedView extends AphrontView {
 
     return $item;
   }
+
 }

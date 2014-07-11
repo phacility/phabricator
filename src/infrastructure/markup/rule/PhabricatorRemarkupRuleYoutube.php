@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group markup
- */
-final class PhabricatorRemarkupRuleYoutube
-  extends PhutilRemarkupRule {
+final class PhabricatorRemarkupRuleYoutube extends PhutilRemarkupRule {
 
   public function getPriority() {
     return 350.0;

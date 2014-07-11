@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conpherence
- */
 abstract class ConpherenceWidgetView extends AphrontView {
 
   private $conpherence;
@@ -23,4 +20,5 @@ abstract class ConpherenceWidgetView extends AphrontView {
   public function getConpherence() {
     return $this->conpherence;
   }
+
 }

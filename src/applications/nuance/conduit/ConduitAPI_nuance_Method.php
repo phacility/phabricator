@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 abstract class ConduitAPI_nuance_Method extends ConduitAPIMethod {
 
   public function getApplication() {

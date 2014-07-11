@@ -53,14 +53,14 @@ The output will look something like this:
     }
   }
 
-The former will activate when users look at the printable versions of pages,
-by adding `__print__` to the URI. The latter will be activated in print contexts
+The former will activate when users look at the printable versions of pages, by
+adding `__print__` to the URI. The latter will be activated in print contexts
 by the media query.
 
 = Device Rules =
 
-Phabricator's environment defines several device classes which can be used
-to adjust behavior responsively. In particular:
+Phabricator's environment defines several device classes which can be used to
+adjust behavior responsively. In particular:
 
   lang=css
   .device-phone {

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conpherence
- */
 final class ConpherenceTransactionType extends ConpherenceConstants {
 
   const TYPE_FILES           = 'files';

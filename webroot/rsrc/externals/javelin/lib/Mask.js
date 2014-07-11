@@ -45,8 +45,6 @@
  *
  * The mask has sigil `jx-mask`, which can be used to intercept events
  * targeting it, like clicks on the mask.
- *
- * @group control
  */
 JX.install('Mask', {
   statics : {

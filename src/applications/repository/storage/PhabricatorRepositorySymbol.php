@@ -5,8 +5,6 @@
  * and functions are defined.
  *
  * Query symbols with @{class:DiffusionSymbolQuery}.
- *
- * @group diffusion
  */
 final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
 

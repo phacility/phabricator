@@ -1,11 +1,7 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_conpherence_querythread_Method
   extends ConduitAPI_conpherence_Method {
-
 
   public function getMethodDescription() {
     return pht(
@@ -82,4 +78,5 @@ final class ConduitAPI_conpherence_querythread_Method
     }
     return $data;
   }
+
 }

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
 
   private $cssResources;

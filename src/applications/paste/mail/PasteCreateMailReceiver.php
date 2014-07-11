@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group paste
- */
-final class PasteCreateMailReceiver
-  extends PhabricatorMailReceiver {
+final class PasteCreateMailReceiver extends PhabricatorMailReceiver {
 
   public function isEnabled() {
     $app_class = 'PhabricatorApplicationPaste';
@@ -87,7 +83,6 @@ final class PasteCreateMailReceiver
       ->setRelatedPHID($paste->getPHID())
       ->setBody($body->render())
       ->saveAndSend();
-
   }
 
 }

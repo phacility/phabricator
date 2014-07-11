@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group maniphest
- */
 final class ManiphestTaskSubscriber extends ManiphestDAO {
 
   protected $taskPHID;

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group legalpad
- */
 abstract class LegalpadController extends PhabricatorController {
 
   public function buildSideNav($for_app = false) {

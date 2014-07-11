@@ -3,8 +3,6 @@
 /**
  * For detailed explanations of these events, see
  * @{article:Events User Guide: Installing Event Listeners}.
- *
- * @group events
  */
 final class PhabricatorEventType extends PhutilEventType {
 

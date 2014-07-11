@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group countdown
- */
 final class PhabricatorCountdownEditController
   extends PhabricatorCountdownController {
 
@@ -127,4 +124,5 @@ final class PhabricatorCountdownEditController
         'title' => $page_title,
       ));
   }
+
 }

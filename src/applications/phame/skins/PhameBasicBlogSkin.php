@@ -3,7 +3,6 @@
 /**
  * @task  paging    Paging
  * @task  internal  Internals
- * @group phame
  */
 abstract class PhameBasicBlogSkin extends PhameBlogSkin {
 

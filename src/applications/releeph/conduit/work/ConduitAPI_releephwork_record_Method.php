@@ -16,7 +16,7 @@ final class ConduitAPI_releephwork_record_Method
    *
    * When the daemons discover this commit in the repository with
    * DifferentialReleephRequestFieldSpecification, we'll be able to record the
-   * commit's PHID as well.  That process is slow though, and we don't want to
+   * commit's PHID as well. That process is slow though, and we don't want to
    * wait a whole minute before marking something as cleanly picked or
    * reverted.
    */

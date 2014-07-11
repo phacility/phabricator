@@ -365,8 +365,6 @@ final class ManiphestTaskEditController extends ManiphestController {
                 $potential_col_tasks = id(new ManiphestTaskQuery())
                   ->setViewer($user)
                   ->withAllProjects(array($column->getProjectPHID()))
-                  ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
-                  ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
                   ->execute();
                 $potential_col_tasks = mpull(
                   $potential_col_tasks,
@@ -395,21 +393,17 @@ final class ManiphestTaskEditController extends ManiphestController {
                 $column_tasks = id(new ManiphestTaskQuery())
                   ->setViewer($user)
                   ->withPHIDs($column_task_phids)
-                  ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
-                  ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
                   ->execute();
               }
-              $column_task_phids = mpull($column_tasks, 'getPHID');
-              $task_phid = $task->getPHID();
-              $after_phid = null;
-              foreach ($column_task_phids as $phid) {
-                if ($phid == $task_phid) {
-                  break;
-                }
-                $after_phid = $phid;
-              }
+
+              $sort_map = mpull(
+                $column_tasks,
+                'getPrioritySortVector',
+                'getPHID');
+
               $data = array(
-                'insertAfterPHID' => $after_phid);
+                'sortMap' => $sort_map,
+              );
               break;
             case 'task':
             default:
@@ -656,7 +650,7 @@ final class ManiphestTaskEditController extends ManiphestController {
                   'sigil'       => 'project-create',
                 ),
                 pht('Create New Project')))
-            ->setDatasource('/typeahead/common/projects/'));
+            ->setDatasource(new PhabricatorProjectDatasource()));
     }
 
     $field_list->appendFieldsToForm($form);

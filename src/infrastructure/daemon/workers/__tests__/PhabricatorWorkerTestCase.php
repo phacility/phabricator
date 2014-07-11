@@ -9,35 +9,30 @@ final class PhabricatorWorkerTestCase extends PhabricatorTestCase {
   }
 
   public function testLeaseTask() {
-    // Leasing should work.
-
     $task = $this->scheduleTask();
-
-    $this->expectNextLease($task);
+    $this->expectNextLease($task, 'Leasing should work.');
   }
 
   public function testMultipleLease() {
-    // We should not be able to lease a task multiple times.
-
     $task = $this->scheduleTask();
 
     $this->expectNextLease($task);
-    $this->expectNextLease(null);
+    $this->expectNextLease(
+      null,
+      'We should not be able to lease a task multiple times.');
   }
 
   public function testOldestFirst() {
-    // Older tasks should lease first, all else being equal.
-
     $task1 = $this->scheduleTask();
     $task2 = $this->scheduleTask();
 
-    $this->expectNextLease($task1);
+    $this->expectNextLease(
+      $task1,
+      'Older tasks should lease first, all else being equal.');
     $this->expectNextLease($task2);
   }
 
   public function testNewBeforeLeased() {
-    // Tasks not previously leased should lease before previously leased tasks.
-
     $task1 = $this->scheduleTask();
     $task2 = $this->scheduleTask();
 
@@ -45,7 +40,10 @@ final class PhabricatorWorkerTestCase extends PhabricatorTestCase {
     $task1->setLeaseExpires(time() - 100000);
     $task1->forceSaveWithoutLease();
 
-    $this->expectNextLease($task2);
+    $this->expectNextLease(
+      $task2,
+      'Tasks not previously leased should lease before previously '.
+      'leased tasks.');
     $this->expectNextLease($task1);
   }
 
@@ -138,15 +136,13 @@ final class PhabricatorWorkerTestCase extends PhabricatorTestCase {
   public function testRequiredLeaseTime() {
     $task = $this->scheduleAndExecuteTask(
       array(
-        'getRequiredLeaseTime'    => 1000000,
+        'getRequiredLeaseTime'     => 1000000,
       ));
 
     $this->assertTrue(($task->getLeaseExpires() - time()) > 1000);
   }
 
   public function testLeasedIsOldestFirst() {
-    // Tasks which expired earlier should lease first, all else being equal.
-
     $task1 = $this->scheduleTask();
     $task2 = $this->scheduleTask();
 
@@ -158,36 +154,59 @@ final class PhabricatorWorkerTestCase extends PhabricatorTestCase {
     $task2->setLeaseExpires(time() - 200000);
     $task2->forceSaveWithoutLease();
 
-    $this->expectNextLease($task2);
+    $this->expectNextLease(
+      $task2,
+      'Tasks which expired earlier should lease first, all else being equal.');
     $this->expectNextLease($task1);
   }
 
-  private function expectNextLease($task) {
+  public function testLeasedIsHighestPriority() {
+    $task1 = $this->scheduleTask(array(), 2);
+    $task2 = $this->scheduleTask(array(), 1);
+    $task3 = $this->scheduleTask(array(), 1);
+
+    $this->expectNextLease(
+      $task1,
+      'Tasks with a higher priority should be scheduled first.');
+    $this->expectNextLease(
+      $task2,
+      'Tasks with the same priority should be FIFO.');
+    $this->expectNextLease($task3);
+  }
+
+  private function expectNextLease($task, $message = null) {
     $leased = id(new PhabricatorWorkerLeaseQuery())
       ->setLimit(1)
       ->execute();
 
     if ($task === null) {
-      $this->assertEqual(0, count($leased));
+      $this->assertEqual(0, count($leased), $message);
       return null;
     } else {
-      $this->assertEqual(1, count($leased));
+      $this->assertEqual(1, count($leased), $message);
       $this->assertEqual(
         (int)head($leased)->getID(),
-        (int)$task->getID());
+        (int)$task->getID(),
+        $message);
       return head($leased);
     }
   }
 
-  private function scheduleAndExecuteTask(array $data = array()) {
-    $task = $this->scheduleTask($data);
+  private function scheduleAndExecuteTask(
+    array $data = array(),
+    $priority = null) {
+
+    $task = $this->scheduleTask($data, $priority);
     $task = $this->expectNextLease($task);
     $task = $task->executeTask();
     return $task;
   }
 
-  private function scheduleTask(array $data = array()) {
-    return PhabricatorWorker::scheduleTask('PhabricatorTestWorker', $data);
+  private function scheduleTask(array $data = array(), $priority = null) {
+    return PhabricatorWorker::scheduleTask(
+      'PhabricatorTestWorker',
+      $data,
+      $priority);
   }
 
 }

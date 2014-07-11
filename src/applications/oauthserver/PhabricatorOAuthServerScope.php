@@ -63,7 +63,7 @@ final class PhabricatorOAuthServerScope {
 
   /**
    * A scopes list is considered valid if each scope is a known scope
-   * and each scope is seen only once.  Otherwise, the list is invalid.
+   * and each scope is seen only once. Otherwise, the list is invalid.
    */
   static public function validateScopesList($scope_list) {
     $scopes       = explode(' ', $scope_list);

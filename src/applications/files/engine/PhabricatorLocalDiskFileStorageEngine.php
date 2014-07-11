@@ -6,7 +6,6 @@
  *
  * @task impl     Implementation
  * @task internal Internals
- * @group filestorage
  */
 final class PhabricatorLocalDiskFileStorageEngine
   extends PhabricatorFileStorageEngine {
@@ -30,7 +29,6 @@ final class PhabricatorLocalDiskFileStorageEngine
    * @task impl
    */
   public function writeFile($data, array $params) {
-
     $root = $this->getLocalDiskFileStorageRoot();
 
     // Generate a random, unique file path like "ab/29/1f918a9ac39201ff". We

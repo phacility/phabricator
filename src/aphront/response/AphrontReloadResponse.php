@@ -5,8 +5,6 @@
  * if the action is javascript-driven but redirect if it isn't. This preserves
  * query parameters in the javascript case. A reload response behaves like
  * a redirect response but causes a page reload when received via workflow.
- *
- * @group aphront
  */
 final class AphrontReloadResponse extends AphrontRedirectResponse {
 

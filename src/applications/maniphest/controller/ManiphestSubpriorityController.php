@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group maniphest
- */
 final class ManiphestSubpriorityController extends ManiphestController {
 
   public function processRequest() {

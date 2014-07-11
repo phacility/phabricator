@@ -74,7 +74,7 @@ final class PhabricatorRepositoryPushLogSearchEngine
     $form
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/repositories/')
+          ->setDatasource(new DiffusionRepositoryDatasource())
           ->setName('repositories')
           ->setLabel(pht('Repositories'))
           ->setValue($repository_handles))

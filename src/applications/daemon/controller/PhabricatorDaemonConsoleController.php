@@ -136,6 +136,7 @@ final class PhabricatorDaemonConsoleController
         $task->getTaskClass(),
         $task->getLeaseOwner(),
         $task->getLeaseExpires() - time(),
+        $task->getPriority(),
         $task->getFailureCount(),
         phutil_tag(
           'a',
@@ -158,6 +159,7 @@ final class PhabricatorDaemonConsoleController
         pht('Class'),
         pht('Owner'),
         pht('Expires'),
+        pht('Priority'),
         pht('Failures'),
         '',
       ));
@@ -167,6 +169,7 @@ final class PhabricatorDaemonConsoleController
         'wide',
         '',
         '',
+        'n',
         'n',
         'action',
       ));

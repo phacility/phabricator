@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhabricatorPhamePHIDTypePost extends PhabricatorPHIDType {
 
   const TYPECONST = 'POST';

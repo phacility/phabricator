@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_file_uploadhash_Method extends ConduitAPI_file_Method {
 
   public function getMethodDescription() {
@@ -42,4 +39,5 @@ final class ConduitAPI_file_uploadhash_Method extends ConduitAPI_file_Method {
     }
     return $file;
   }
+
 }

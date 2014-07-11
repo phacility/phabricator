@@ -12,9 +12,6 @@
  * @javelin
  */
 
-/**
- * @group workflow
- */
 JX.install('Workflow', {
   construct : function(uri, data) {
     if (__DEV__) {

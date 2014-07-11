@@ -1,10 +1,7 @@
 <?php
 
-/**
- * @group oauthserver
- */
 final class PhabricatorOAuthServerAuthorizationCode
-extends PhabricatorOAuthServerDAO {
+  extends PhabricatorOAuthServerDAO {
 
   protected $id;
   protected $code;

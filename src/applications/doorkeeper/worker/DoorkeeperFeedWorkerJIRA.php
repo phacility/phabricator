@@ -63,6 +63,11 @@ final class DoorkeeperFeedWorkerJIRA extends DoorkeeperFeedWorker {
         ->withUserPHIDs($try_users)
         ->withAccountTypes(array($provider->getProviderType()))
         ->withAccountDomains(array($domain))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
         ->execute();
       // Reorder accounts in the original order.
       // TODO: This needs to be adjusted if/when we allow you to link multiple

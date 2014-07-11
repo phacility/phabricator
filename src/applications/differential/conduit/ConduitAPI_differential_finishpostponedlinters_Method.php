@@ -71,7 +71,7 @@ final class ConduitAPI_differential_finishpostponedlinters_Method
       }
     }
 
-    // Load the lint messages currenty attached to the diff.  If this
+    // Load the lint messages currenty attached to the diff. If this
     // diff property doesn't exist, create it.
     $messages_property = id(new DifferentialDiffProperty())->loadOneWhere(
       'diffID = %d AND name = %s',

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phriction
- */
 final class PhrictionDocumentTestCase extends PhabricatorTestCase {
 
   public function testProjectSlugs() {

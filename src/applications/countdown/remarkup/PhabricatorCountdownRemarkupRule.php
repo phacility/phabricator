@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group countdown
- */
 final class PhabricatorCountdownRemarkupRule
   extends PhabricatorRemarkupRuleObject {
 

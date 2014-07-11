@@ -125,7 +125,7 @@ final class DiffusionRepositoryEditBasicController
           ->setValue($v_desc))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/projects/')
+          ->setDatasource(new PhabricatorProjectDatasource())
           ->setName('projectPHIDs')
           ->setLabel(pht('Projects'))
           ->setValue($project_handles))

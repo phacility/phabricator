@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioImageUploadController extends PholioController {
 
   public function processRequest() {

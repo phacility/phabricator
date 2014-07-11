@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class ConduitAPI_slowvote_info_Method
   extends ConduitAPI_slowvote_Method {
 

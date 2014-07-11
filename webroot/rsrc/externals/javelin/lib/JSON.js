@@ -21,7 +21,6 @@
  *
  * @task json      JSON Manipulation
  * @task internal  Internal
- * @group util
  */
 JX.install('JSON', {
   statics : {

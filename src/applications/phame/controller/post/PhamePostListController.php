@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhamePostListController extends PhameController {
 
   private $bloggername;
@@ -92,6 +89,5 @@ final class PhamePostListController extends PhameController {
         'title'   => $title,
       ));
   }
-
 
 }

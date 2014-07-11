@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group phriction
- */
-final class PhrictionDiffController
-  extends PhrictionController {
+final class PhrictionDiffController extends PhrictionController {
 
   private $id;
 

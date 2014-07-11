@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PhabricatorPholioMockTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
@@ -106,6 +103,5 @@ final class PhabricatorPholioMockTestDataGenerator
     }
     return $rand_images;
   }
-
 
 }

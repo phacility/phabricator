@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conpherence
- */
 final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
 
   public function getApplicationName() {

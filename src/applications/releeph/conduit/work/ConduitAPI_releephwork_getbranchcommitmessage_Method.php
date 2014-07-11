@@ -53,7 +53,7 @@ final class ConduitAPI_releephwork_getbranchcommitmessage_Method
     $h_branch = $handles[$branch->getPHID()];
     $h_project = $handles[$project->getPHID()];
 
-    // Not as customizable as a ReleephRequest's commit message.  It doesn't
+    // Not as customizable as a ReleephRequest's commit message. It doesn't
     // really need to be.
     // TODO: Yes it does, see FB-specific stuff below.
     $commit_message = array();

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group legalpad
- */
 final class LegalpadTransaction extends PhabricatorApplicationTransaction {
 
   public function getApplicationName() {
