@@ -74,7 +74,8 @@ final class ManiphestBatchEditController extends ManiphestController {
           ),
           'owner' => array(
             'src'           => '/typeahead/common/searchowner/',
-            'placeholder'   => pht('Type a user name...'),
+            'placeholder'   => pht(
+              'Type a user name or "upforgrabs" to unassign...'),
             'limit'         => 1,
           ),
           'cc'    => array(
