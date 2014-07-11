@@ -32,6 +32,10 @@ final class PhabricatorSearchConfigOptions
         ->setLocked(true)
         ->setDescription(pht('Elastic Search host.'))
         ->addExample('http://elastic.example.com:9200/', pht('Valid Setting')),
+      $this->newOption('search.elastic.namespace', 'string', 'phabricator')
+        ->setLocked(true)
+        ->setDescription(pht('Elastic Search index.'))
+        ->addExample('phabricator2', pht('Valid Setting')),
     );
   }
 
