@@ -79,6 +79,8 @@ abstract class PhabricatorSMSImplementationAdapter {
       'PhabricatorSMSDemultiplexWorker',
       array(
         'toNumbers'  => $to_numbers,
-        'body'       => $body));
+        'body'       => $body,
+      ),
+      PhabricatorWorker::PRIORITY_ALERTS);
   }
 }

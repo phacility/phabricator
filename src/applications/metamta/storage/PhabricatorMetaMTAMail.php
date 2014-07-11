@@ -300,7 +300,8 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       // Queue a task to send this mail.
       $mailer_task = PhabricatorWorker::scheduleTask(
         'PhabricatorMetaMTAWorker',
-        $this->getID());
+        $this->getID(),
+        PhabricatorWorker::PRIORITY_ALERTS);
 
     $this->saveTransaction();
 

@@ -86,6 +86,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
       ->setLeaseExpires($this->getLeaseExpires())
       ->setFailureCount($this->getFailureCount())
       ->setDataID($this->getDataID())
+      ->setPriority($this->getPriority())
       ->setResult($result)
       ->setDuration($duration);
 
@@ -164,12 +165,11 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
     if ($did_succeed) {
       foreach ($worker->getQueuedTasks() as $task) {
         list($class, $data) = $task;
-        PhabricatorWorker::scheduleTask($class, $data);
+        PhabricatorWorker::scheduleTask($class, $data, $this->getPriority());
       }
     }
 
     return $result;
   }
-
 
 }
