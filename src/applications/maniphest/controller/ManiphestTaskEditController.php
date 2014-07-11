@@ -650,7 +650,7 @@ final class ManiphestTaskEditController extends ManiphestController {
                   'sigil'       => 'project-create',
                 ),
                 pht('Create New Project')))
-            ->setDatasource('/typeahead/common/projects/'));
+            ->setDatasource(new PhabricatorProjectDatasource()));
     }
 
     $field_list->appendFieldsToForm($form);

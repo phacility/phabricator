@@ -595,13 +595,13 @@ final class HeraldRuleController extends HeraldController {
       'buildplan' => new HarbormasterBuildPlanDatasource(),
       'arcanistprojects' => new DiffusionArcanistProjectDatasource(),
       'package' => new PhabricatorOwnersPackageDatasource(),
+      'project' => new PhabricatorProjectDatasource(),
     );
 
     $sources = mpull($sources, 'getDatasourceURI');
     $sources += array(
       'email'         => '/typeahead/common/mailable/',
       'user'          => '/typeahead/common/accounts/',
-      'project'       => '/typeahead/common/projects/',
       'userorproject' => '/typeahead/common/accountsorprojects/',
     );
 

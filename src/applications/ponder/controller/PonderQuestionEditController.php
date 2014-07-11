@@ -115,7 +115,7 @@ final class PonderQuestionEditController extends PonderController {
         ->setLabel(pht('Projects'))
         ->setName('projects')
         ->setValue($project_handles)
-        ->setDatasource('/typeahead/common/projects/'));
+        ->setDatasource(new PhabricatorProjectDatasource()));
 
     $form ->appendChild(
       id(new AphrontFormSubmitControl())

@@ -322,7 +322,7 @@ final class ManiphestTaskSearchEngine
             $with_unassigned))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/projects/')
+          ->setDatasource(new PhabricatorProjectDatasource())
           ->setName('allProjects')
           ->setLabel(pht('In All Projects'))
           ->setValue($all_project_handles));
@@ -341,13 +341,13 @@ final class ManiphestTaskSearchEngine
     $form
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/projects/')
+          ->setDatasource(new PhabricatorProjectDatasource())
           ->setName('anyProjects')
           ->setLabel(pht('In Any Project'))
           ->setValue($any_project_handles))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/projects/')
+          ->setDatasource(new PhabricatorProjectDatasource())
           ->setName('excludeProjects')
           ->setLabel(pht('Not In Projects'))
           ->setValue($exclude_project_handles))

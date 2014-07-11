@@ -186,7 +186,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
         ->setLabel(pht('Projects'))
         ->setName('projects')
         ->setValue($project_handles)
-        ->setDatasource('/typeahead/common/projects/'));
+        ->setDatasource(new PhabricatorProjectDatasource()));
 
     $form
       ->appendChild(

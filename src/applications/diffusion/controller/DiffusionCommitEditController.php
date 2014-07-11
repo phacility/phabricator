@@ -70,7 +70,7 @@ final class DiffusionCommitEditController extends DiffusionController {
               'sigil'       => 'project-create',
             ),
             pht('Create New Project')))
-        ->setDatasource('/typeahead/common/projects/'));;
+        ->setDatasource(new PhabricatorProjectDatasource()));
 
     Javelin::initBehavior('project-create', array(
       'tokenizerID' => $tokenizer_id,

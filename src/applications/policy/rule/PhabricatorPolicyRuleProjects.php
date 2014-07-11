@@ -39,10 +39,12 @@ final class PhabricatorPolicyRuleProjects
   }
 
   public function getValueControlTemplate() {
+    $projects_source = new PhabricatorProjectDatasource();
+
     return array(
       'markup' => new AphrontTokenizerTemplateView(),
-      'uri' => '/typeahead/common/projects/',
-      'placeholder' => pht('Type a project name...'),
+      'uri' => $projects_source->getDatasourceURI(),
+      'placeholder' => $projects_source->getPlaceholderText(),
     );
   }
 
