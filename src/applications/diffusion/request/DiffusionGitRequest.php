@@ -2,7 +2,7 @@
 
 final class DiffusionGitRequest extends DiffusionRequest {
 
-  protected function getSupportsBranches() {
+  public function supportsBranches() {
     return true;
   }
 

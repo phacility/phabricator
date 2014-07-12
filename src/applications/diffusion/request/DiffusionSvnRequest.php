@@ -2,7 +2,7 @@
 
 final class DiffusionSvnRequest extends DiffusionRequest {
 
-  protected function getSupportsBranches() {
+  public function supportsBranches() {
     return false;
   }
 

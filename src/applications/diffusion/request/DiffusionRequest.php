@@ -28,7 +28,7 @@ abstract class DiffusionRequest {
   private $user;
   private $branchObject = false;
 
-  abstract protected function getSupportsBranches();
+  abstract public function supportsBranches();
   abstract protected function isStableCommit($symbol);
 
   protected function didInitialize() {
@@ -98,7 +98,7 @@ abstract class DiffusionRequest {
     $callsign = phutil_unescape_uri_path_component(idx($data, 'callsign'));
     $object = self::newFromCallsign($callsign, $request->getUser());
 
-    $use_branches = $object->getSupportsBranches();
+    $use_branches = $object->supportsBranches();
     $parsed = self::parseRequestBlob(idx($data, 'dblob'), $use_branches);
 
     $object->setUser($request->getUser());
@@ -188,7 +188,7 @@ abstract class DiffusionRequest {
     $this->initFromConduit = idx($data, 'initFromConduit', true);
 
     $this->symbolicCommit = idx($data, 'commit');
-    if ($this->getSupportsBranches()) {
+    if ($this->supportsBranches()) {
       $this->branch = idx($data, 'branch');
     }
 
@@ -712,7 +712,7 @@ abstract class DiffusionRequest {
     if ($this->symbolicCommit) {
       $ref = $this->symbolicCommit;
     } else {
-      if ($this->getSupportsBranches()) {
+      if ($this->supportsBranches()) {
         $ref = $this->getResolvableBranchName($this->getBranch());
       } else {
         $ref = 'HEAD';
