@@ -276,7 +276,7 @@ final class PhabricatorRepositoryGraphCache {
 
 
   /**
-   * Rebuild a cache bucket, amending existing data if avialable.
+   * Rebuild a cache bucket, amending existing data if available.
    *
    * @param   int     Bucket key, from @{method:getBucketKey}.
    * @param   array   Existing bucket data.

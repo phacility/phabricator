@@ -416,7 +416,7 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    * searches both the current query's workspace and the workspaces of parent
    * queries.
    *
-   * @param list<phid> List of PHIDs to retreive.
+   * @param list<phid> List of PHIDs to retrieve.
    * @return this
    * @task workspace
    */

@@ -96,7 +96,7 @@ The regex should capture these named patterns with `(?P<name>...)`:
     not present in the output. If no severity capturing group is present,
     messages are raised with "error" severity. If multiple severity capturing
     groups are present, messages are raised with the highest captured
-    serverity. Capturing groups like `error` supersede the `severity`
+    severity. Capturing groups like `error` supersede the `severity`
     capturing group.
   - `error` (optional) Match some nonempty substring to indicate that this
     message has "error" severity.
