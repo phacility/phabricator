@@ -14,6 +14,7 @@ final class PhrequentTrackController
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
+    $editor = new PhrequentTrackingEditor();
 
     $phid = $this->phid;
     $handle = id(new PhabricatorHandleQuery())
@@ -61,9 +62,9 @@ final class PhrequentTrackController
 
       if (!$err) {
         if ($this->isStartingTracking()) {
-          $this->startTracking($user, $this->phid, $timestamp);
+          $editor->startTracking($user, $this->phid, $timestamp);
         } else if ($this->isStoppingTracking()) {
-          $this->stopTracking($user, $this->phid, $timestamp, $note);
+          $editor->stopTracking($user, $this->phid, $timestamp, $note);
         }
         return id(new AphrontRedirectResponse());
       }
@@ -108,39 +109,4 @@ final class PhrequentTrackController
   private function isStoppingTracking() {
     return $this->verb === 'stop';
   }
-
-  private function startTracking($user, $phid, $timestamp) {
-    $usertime = new PhrequentUserTime();
-    $usertime->setDateStarted($timestamp);
-    $usertime->setUserPHID($user->getPHID());
-    $usertime->setObjectPHID($phid);
-    $usertime->save();
-  }
-
-  private function stopTracking($user, $phid, $timestamp, $note) {
-    if (!PhrequentUserTimeQuery::isUserTrackingObject($user, $phid)) {
-      // Don't do anything, it's not being tracked.
-      return;
-    }
-
-    $usertime_dao = new PhrequentUserTime();
-    $conn = $usertime_dao->establishConnection('r');
-
-    queryfx(
-      $conn,
-      'UPDATE %T usertime '.
-      'SET usertime.dateEnded = %d, '.
-      'usertime.note = %s '.
-      'WHERE usertime.userPHID = %s '.
-      'AND usertime.objectPHID = %s '.
-      'AND usertime.dateEnded IS NULL '.
-      'ORDER BY usertime.dateStarted, usertime.id DESC '.
-      'LIMIT 1',
-      $usertime_dao->getTableName(),
-      $timestamp,
-      $note,
-      $user->getPHID(),
-      $phid);
-  }
-
 }
