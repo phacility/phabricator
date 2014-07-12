@@ -413,6 +413,7 @@ return array(
     'rsrc/js/application/projects/behavior-boards-dropdown.js' => '0ec56e1d',
     'rsrc/js/application/projects/behavior-project-boards.js' => 'c6b95cbd',
     'rsrc/js/application/projects/behavior-project-create.js' => '065227cc',
+    'rsrc/js/application/projects/behavior-reorder-columns.js' => '09eee344',
     'rsrc/js/application/releeph/releeph-preview-branch.js' => 'b2b4fbaf',
     'rsrc/js/application/releeph/releeph-request-state-change.js' => 'ab836011',
     'rsrc/js/application/releeph/releeph-request-typeahead.js' => 'de2e896f',
@@ -645,6 +646,7 @@ return array(
     'javelin-behavior-releeph-request-typeahead' => 'de2e896f',
     'javelin-behavior-remarkup-preview' => 'f7379f45',
     'javelin-behavior-reorder-applications' => '76b9fc3e',
+    'javelin-behavior-reorder-columns' => '09eee344',
     'javelin-behavior-repository-crossreference' => 'f9539603',
     'javelin-behavior-search-reorder-queries' => 'e9581f08',
     'javelin-behavior-select-on-click' => '4e3e79a6',
@@ -871,6 +873,14 @@ return array(
       3 => 'javelin-mask',
       4 => 'javelin-util',
       5 => 'phabricator-busy',
+    ),
+    '09eee344' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-workflow',
+      3 => 'javelin-dom',
+      4 => 'phabricator-draggable-list',
     ),
     '0a3f3021' =>
     array(
