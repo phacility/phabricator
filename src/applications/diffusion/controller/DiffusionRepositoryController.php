@@ -29,13 +29,14 @@ final class DiffusionRepositoryController extends DiffusionController {
     // If this VCS supports branches, check that the selected branch actually
     // exists.
     if ($drequest->supportsBranches()) {
-      $ref_cursor = id(new PhabricatorRepositoryRefCursorQuery())
+      // NOTE: Mercurial may have multiple branch heads with the same name.
+      $ref_cursors = id(new PhabricatorRepositoryRefCursorQuery())
         ->setViewer($viewer)
         ->withRepositoryPHIDs(array($repository->getPHID()))
         ->withRefTypes(array(PhabricatorRepositoryRefCursor::TYPE_BRANCH))
         ->withRefNames(array($drequest->getBranch()))
-        ->executeOne();
-      if ($ref_cursor) {
+        ->execute();
+      if ($ref_cursors) {
         // This is a valid branch, so we necessarily have some content.
         $page_has_content = true;
       } else {
