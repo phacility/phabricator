@@ -86,9 +86,9 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
 
   private function renderUploadLimit() {
     $limit = PhabricatorEnv::getEnvConfig('storage.upload-size-limit');
-    $limit = phabricator_parse_bytes($limit);
+    $limit = phutil_parse_bytes($limit);
     if ($limit) {
-      $formatted = phabricator_format_bytes($limit);
+      $formatted = phutil_format_bytes($limit);
       return 'Maximum file size: '.$formatted;
     }
 

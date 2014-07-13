@@ -179,7 +179,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
     $finfo->addProperty(
       pht('Size'),
-      phabricator_format_bytes($file->getByteSize()));
+      phutil_format_bytes($file->getByteSize()));
 
     $finfo->addProperty(
       pht('Mime Type'),

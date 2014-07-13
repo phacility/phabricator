@@ -125,7 +125,7 @@ final class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
               'timestamp must differ from the server time by no more than '.
               '%s seconds. Your client or server clock may not be set '.
               'correctly.',
-              phabricator_format_relative_time($threshold),
+              phutil_format_relative_time($threshold),
               $token,
               date('r', $token),
               $now,

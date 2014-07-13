@@ -171,7 +171,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     if ($user->hasSession()) {
       $hisec = ($user->getSession()->getHighSecurityUntil() - time());
       if ($hisec > 0) {
-        $remaining_time = phabricator_format_relative_time($hisec);
+        $remaining_time = phutil_format_relative_time($hisec);
         Javelin::initBehavior(
           'high-security-warning',
           array(

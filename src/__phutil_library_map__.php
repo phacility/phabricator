@@ -2709,7 +2709,6 @@ phutil_register_library_map(array(
   ),
   'function' =>
   array(
-    '_phabricator_date_format' => 'view/viewutils.php',
     '_phabricator_time_format' => 'view/viewutils.php',
     'celerity_generate_unique_node_id' => 'infrastructure/celerity/api.php',
     'celerity_get_resource_uri' => 'infrastructure/celerity/api.php',
@@ -2718,13 +2717,8 @@ phutil_register_library_map(array(
     'phabricator_date' => 'view/viewutils.php',
     'phabricator_datetime' => 'view/viewutils.php',
     'phabricator_form' => 'infrastructure/javelin/markup.php',
-    'phabricator_format_bytes' => 'view/viewutils.php',
     'phabricator_format_local_time' => 'view/viewutils.php',
-    'phabricator_format_relative_time' => 'view/viewutils.php',
-    'phabricator_format_relative_time_detailed' => 'view/viewutils.php',
-    'phabricator_format_units_generic' => 'view/viewutils.php',
     'phabricator_on_relative_date' => 'view/viewutils.php',
-    'phabricator_parse_bytes' => 'view/viewutils.php',
     'phabricator_relative_date' => 'view/viewutils.php',
     'phabricator_time' => 'view/viewutils.php',
     'phid_get_subtype' => 'applications/phid/utils.php',

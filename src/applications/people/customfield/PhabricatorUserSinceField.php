@@ -26,7 +26,7 @@ final class PhabricatorUserSinceField
       $this->getObject()->getDateCreated(),
       $this->getViewer());
 
-    $relative = phabricator_format_relative_time_detailed(
+    $relative = phutil_format_relative_time_detailed(
       time() - $this->getObject()->getDateCreated(),
       $levels = 2);
 

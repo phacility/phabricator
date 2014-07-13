@@ -108,7 +108,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
       return;
     }
 
-    $limit = phabricator_parse_bytes($limit);
+    $limit = phutil_parse_bytes($limit);
     if ($size > $limit) {
       throw new PhabricatorFileUploadException(-1000);
     }

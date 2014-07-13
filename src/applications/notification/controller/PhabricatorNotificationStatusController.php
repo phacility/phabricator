@@ -41,7 +41,7 @@ final class PhabricatorNotificationStatusController
       switch ($key) {
         case 'uptime':
           $value /= 1000;
-          $value = phabricator_format_relative_time_detailed($value);
+          $value = phutil_format_relative_time_detailed($value);
           break;
         case 'log':
           break;
