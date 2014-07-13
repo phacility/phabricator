@@ -1,12 +1,12 @@
 <?php
 
-class Stripe_InvoiceItem extends Stripe_ApiResource
+class Stripe_Transfer extends Stripe_ApiResource
 {
   /**
-   * @param string $id The ID of the invoice item to retrieve.
+   * @param string $id The ID of the transfer to retrieve.
    * @param string|null $apiKey
    *
-   * @return Stripe_InvoiceItem
+   * @return Stripe_Transfer
    */
   public static function retrieve($id, $apiKey=null)
   {
@@ -18,7 +18,7 @@ class Stripe_InvoiceItem extends Stripe_ApiResource
    * @param array|null $params
    * @param string|null $apiKey
    *
-   * @return array An array of Stripe_InvoiceItems.
+   * @return array An array of Stripe_Transfers.
    */
   public static function all($params=null, $apiKey=null)
   {
@@ -30,7 +30,7 @@ class Stripe_InvoiceItem extends Stripe_ApiResource
    * @param array|null $params
    * @param string|null $apiKey
    *
-   * @return Stripe_InvoiceItem The created invoice item.
+   * @return Stripe_Transfer The created transfer.
    */
   public static function create($params=null, $apiKey=null)
   {
@@ -39,7 +39,19 @@ class Stripe_InvoiceItem extends Stripe_ApiResource
   }
 
   /**
-   * @return Stripe_InvoiceItem The saved invoice item.
+   * @return Stripe_Transfer The canceled transfer.
+   */
+  public function cancel()
+  {
+    $requestor = new Stripe_ApiRequestor($this->_apiKey);
+    $url = $this->instanceUrl() . '/cancel';
+    list($response, $apiKey) = $requestor->request('post', $url);
+    $this->refreshFrom($response, $apiKey);
+    return $this;
+  }
+
+  /**
+   * @return Stripe_Transfer The saved transfer.
    */
   public function save()
   {
@@ -47,12 +59,4 @@ class Stripe_InvoiceItem extends Stripe_ApiResource
     return self::_scopedSave($class);
   }
 
-  /**
-   * @return Stripe_InvoiceItem The deleted invoice item.
-   */
-  public function delete($params=null)
-  {
-    $class = get_class();
-    return self::_scopedDelete($class, $params);
-  }
 }
