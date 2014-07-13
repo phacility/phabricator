@@ -82,11 +82,17 @@ final class PhortuneAccountBuyController
         pht('Qty.'),
         pht('Total'),
       ));
+    $table->setColumnClasses(
+      array(
+        'wide',
+        'right',
+        'right',
+        'right',
+      ));
 
-    $panel = new AphrontPanelView();
-    $panel->setNoBackground(true);
-    $panel->appendChild($table);
-
+    $cart_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Your Cart'))
+      ->appendChild($table);
 
     $title = pht('Buy Stuff');
 
@@ -167,12 +173,19 @@ final class PhortuneAccountBuyController
           ->setValue($one_time_options));
     }
 
+    $payment_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Choose Payment Method'))
+      ->appendChild($form)
+      ->appendChild($provider_form);
+
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb($title);
+
     return $this->buildApplicationPage(
       array(
-        $panel,
-        $form,
-        phutil_tag('br', array()),
-        $provider_form,
+        $crumbs,
+        $cart_box,
+        $payment_box,
       ),
       array(
         'title'   => $title,
