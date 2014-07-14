@@ -166,7 +166,7 @@ final class PhrequentSearchEngine
       }
 
       $time_spent = $time_spent == 0 ? 'none' :
-        phabricator_format_relative_time_detailed($time_spent);
+        phutil_format_relative_time_detailed($time_spent);
 
       if ($usertime->getDateEnded() !== null) {
         $item->addAttribute(
@@ -186,7 +186,7 @@ final class PhrequentSearchEngine
             $usertime->getUserPHID() === $viewer->getPHID()) {
           $item->addAction(
             id(new PHUIListItemView())
-              ->setIcon('fa-time-o')
+              ->setIcon('fa-stop')
               ->addSigil('phrequent-stop-tracking')
               ->setWorkflow(true)
               ->setRenderNameAsTooltip(true)

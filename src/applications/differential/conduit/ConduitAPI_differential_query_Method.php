@@ -224,7 +224,8 @@ final class ConduitAPI_differential_query_Method
         'ccs'                 => array_values($revision->getCCPHIDs()),
         'hashes'              => $revision->getHashes(),
         'auxiliary'           => idx($field_data, $phid, array()),
-        'arcanistProjectPHID' => $diff->getArcanistProjectPHID()
+        'arcanistProjectPHID' => $diff->getArcanistProjectPHID(),
+        'repositoryPHID'      => $diff->getRepositoryPHID(),
       );
 
       // TODO: This is a hacky way to put permissions on this field until we

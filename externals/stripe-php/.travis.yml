@@ -1,0 +1,17 @@
+language: php
+
+php:
+  - 5.2
+  - 5.3
+  - 5.4
+  - 5.5
+  - 5.6
+  - hhvm
+
+before_script:
+  - sh -c "if [ '$TRAVIS_PHP_VERSION' = '5.2' ]; then wget http://iweb.dl.sourceforge.net/project/simpletest/simpletest/simpletest_1.1/simpletest_1.1.0.tar.gz; tar xf simpletest_1.1.0.tar.gz -C test; else composer install --dev --prefer-source; fi"
+  - sh -c "if [ '$TRAVIS_PHP_VERSION' = '5.6' ]; then pear install pear/PHP_CodeSniffer; phpenv rehash; fi"
+
+script:
+  - sh -c "if [ '$TRAVIS_PHP_VERSION' = '5.6' ]; then phpcs --standard=zend --encoding=UTF-8 --ignore=vendor -p ./; fi"
+  - php test/Stripe.php

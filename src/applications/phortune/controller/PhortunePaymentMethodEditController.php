@@ -37,7 +37,20 @@ final class PhortunePaymentMethodEditController
       foreach ($providers as $provider) {
         $choices[] = $this->renderSelectProvider($provider);
       }
-      return $this->buildResponse($choices, $account_uri);
+
+      $content = phutil_tag(
+        'div',
+        array(
+          'class' => 'phortune-payment-method-list',
+        ),
+        $choices);
+
+      return $this->newDialog()
+        ->setRenderDialogAsDiv(true)
+        ->setTitle(pht('Add Payment Method'))
+        ->appendParagraph(pht('Choose a payment method to add:'))
+        ->appendChild($content)
+        ->addCancelButton($account_uri);
     }
 
     $provider = $providers[$provider_key];
@@ -111,14 +124,21 @@ final class PhortunePaymentMethodEditController
           ->setValue(pht('Add Payment Method'))
           ->addCancelButton($account_uri));
 
-    if ($errors) {
-      $errors = id(new AphrontErrorView())
-        ->setErrors($errors);
-    }
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText($provider->getPaymentMethodDescription())
+      ->setForm($form);
 
-    return $this->buildResponse(
-      array($errors, $form),
-      $account_uri);
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Add Payment Method'));
+
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $box,
+      ),
+      array(
+        'title' => $provider->getPaymentMethodDescription(),
+      ));
   }
 
   private function renderSelectProvider(
@@ -128,20 +148,21 @@ final class PhortunePaymentMethodEditController
     $user = $request->getUser();
 
     $description = $provider->getPaymentMethodDescription();
-    $icon = $provider->getPaymentMethodIcon();
+    $icon_uri = $provider->getPaymentMethodIcon();
     $details = $provider->getPaymentMethodProviderDescription();
 
-    $button = phutil_tag(
-      'button',
-      array(
-        'class' => 'grey',
-      ),
-      array(
-        $description,
-        phutil_tag('br'),
-        $icon,
-        $details,
-      ));
+    $this->requireResource('phortune-css');
+
+    $icon = id(new PHUIIconView())
+      ->setImage($icon_uri)
+      ->addClass('phortune-payment-icon');
+
+    $button = id(new PHUIButtonView())
+      ->setSize(PHUIButtonView::BIG)
+      ->setColor(PHUIButtonView::GREY)
+      ->setIcon($icon)
+      ->setText($description)
+      ->setSubtext($details);
 
     $form = id(new AphrontFormView())
       ->setUser($user)
@@ -149,28 +170,6 @@ final class PhortunePaymentMethodEditController
       ->appendChild($button);
 
     return $form;
-  }
-
-  private function buildResponse($content, $account_uri) {
-    $request = $this->getRequest();
-
-    $title = pht('Add Payment Method');
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title);
-
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Account'), $account_uri);
-    $crumbs->addTextCrumb(pht('Payment Methods'), $request->getRequestURI());
-
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $header,
-        $content,
-      ),
-      array(
-        'title' => $title,
-      ));
   }
 
   private function processClientErrors(

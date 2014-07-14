@@ -166,7 +166,7 @@ final class PhabricatorFileSearchEngine
         ->setHeader($name)
         ->setHref($file_uri)
         ->addAttribute($uploaded)
-        ->addIcon('none', phabricator_format_bytes($file->getByteSize()));
+        ->addIcon('none', phutil_format_bytes($file->getByteSize()));
 
       $ttl = $file->getTTL();
       if ($ttl !== null) {

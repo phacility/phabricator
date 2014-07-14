@@ -357,7 +357,16 @@ final class PhabricatorProjectBoardViewController
     $manage_items[] = id(new PhabricatorActionView())
       ->setIcon('fa-plus')
       ->setName(pht('Add Column'))
-      ->setHref($this->getApplicationURI('board/'.$this->id.'/edit/'));
+      ->setHref($this->getApplicationURI('board/'.$this->id.'/edit/'))
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(!$can_edit);
+
+    $manage_items[] = id(new PhabricatorActionView())
+      ->setIcon('fa-exchange')
+      ->setName(pht('Reorder Columns'))
+      ->setHref($this->getApplicationURI('board/'.$this->id.'/reorder/'))
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(true);
 
     if ($show_hidden) {
       $hidden_uri = $request->getRequestURI()

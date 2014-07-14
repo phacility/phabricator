@@ -35,7 +35,7 @@ JX.behavior('dashboard-query-panel-select', function(config) {
   }
 
   // When the user changes the selected search engine, update the query
-  // control to show avialable queries for that engine.
+  // control to show available queries for that engine.
   function update() {
     var app = app_control.value;
 

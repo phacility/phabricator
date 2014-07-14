@@ -64,12 +64,16 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
           '(?:query/(?P<queryKey>[^/]+)/)?' =>
           'PhabricatorProjectBoardViewController',
         'move/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectMoveController',
-        'board/(?P<projectID>[1-9]\d*)/edit/(?:(?P<id>\d+)/)?'
-          => 'PhabricatorProjectBoardEditController',
-        'board/(?P<projectID>[1-9]\d*)/delete/(?:(?P<id>\d+)/)?'
-          => 'PhabricatorProjectBoardDeleteController',
-        'board/(?P<projectID>[1-9]\d*)/column/(?:(?P<id>\d+)/)?'
-          => 'PhabricatorProjectColumnDetailController',
+        'board/(?P<projectID>[1-9]\d*)/' => array(
+          'edit/(?:(?P<id>\d+)/)?'
+            => 'PhabricatorProjectBoardEditController',
+          'delete/(?:(?P<id>\d+)/)?'
+            => 'PhabricatorProjectBoardDeleteController',
+          'column/(?:(?P<id>\d+)/)?'
+            => 'PhabricatorProjectColumnDetailController',
+          'reorder/'
+            => 'PhabricatorProjectBoardReorderController',
+        ),
         'update/(?P<id>[1-9]\d*)/(?P<action>[^/]+)/'
           => 'PhabricatorProjectUpdateController',
         'history/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectHistoryController',

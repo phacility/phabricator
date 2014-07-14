@@ -138,7 +138,7 @@ final class PhrequentUIEventListener
 
       $block = new PhrequentTimeBlock($event_group);
       $item->setNote(
-        phabricator_format_relative_time(
+        phutil_format_relative_time(
           $block->getTimeSpentOnObject(
             $object->getPHID(),
             time())));

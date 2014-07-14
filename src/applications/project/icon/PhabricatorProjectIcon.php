@@ -17,6 +17,10 @@ final class PhabricatorProjectIcon extends Phobject {
         'fa-truck' => pht('Release'),
         'fa-lock' => pht('Policy'),
         'fa-umbrella' => pht('An Umbrella'),
+        'fa-cloud' => pht('The Cloud'),
+        'fa-building' => pht('Company'),
+        'fa-credit-card' => pht('Accounting'),
+        'fa-flask' => pht('Experimental'),
       );
   }
 

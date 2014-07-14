@@ -7,6 +7,9 @@ final class DiffusionRepositoryController extends DiffusionController {
   }
 
   public function processRequest() {
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
@@ -16,7 +19,75 @@ final class DiffusionRepositoryController extends DiffusionController {
     $content[] = $crumbs;
 
     $content[] = $this->buildPropertiesTable($drequest->getRepository());
+
+    // Before we do any work, make sure we're looking at a some content: we're
+    // on a valid branch, and the repository is not empty.
+    $page_has_content = false;
+    $empty_title = null;
+    $empty_message = null;
+
+    // If this VCS supports branches, check that the selected branch actually
+    // exists.
+    if ($drequest->supportsBranches()) {
+      // NOTE: Mercurial may have multiple branch heads with the same name.
+      $ref_cursors = id(new PhabricatorRepositoryRefCursorQuery())
+        ->setViewer($viewer)
+        ->withRepositoryPHIDs(array($repository->getPHID()))
+        ->withRefTypes(array(PhabricatorRepositoryRefCursor::TYPE_BRANCH))
+        ->withRefNames(array($drequest->getBranch()))
+        ->execute();
+      if ($ref_cursors) {
+        // This is a valid branch, so we necessarily have some content.
+        $page_has_content = true;
+      } else {
+        $empty_title = pht('No Such Branch');
+        $empty_message = pht(
+          'There is no branch named "%s" in this repository.',
+          $drequest->getBranch());
+      }
+    }
+
+    // If we didn't find any branches, check if there are any commits at all.
+    // This can tailor the message for empty repositories.
+    if (!$page_has_content) {
+      $any_commit = id(new DiffusionCommitQuery())
+        ->setViewer($viewer)
+        ->withRepository($repository)
+        ->setLimit(1)
+        ->execute();
+      if ($any_commit) {
+        if (!$drequest->supportsBranches()) {
+          $page_has_content = true;
+        }
+      } else {
+        $empty_title = pht('Empty Repository');
+        $empty_message = pht(
+          'This repository does not have any commits yet.');
+      }
+    }
+
+    if ($page_has_content) {
+      $content[] = $this->buildNormalContent($drequest);
+    } else {
+      $content[] = id(new AphrontErrorView())
+        ->setTitle($empty_title)
+        ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+        ->setErrors(array($empty_message));
+    }
+
+    return $this->buildApplicationPage(
+      $content,
+      array(
+        'title' => $drequest->getRepository()->getName(),
+      ));
+  }
+
+
+  private function buildNormalContent(DiffusionRequest $drequest) {
+    $repository = $drequest->getRepository();
+
     $phids = array();
+    $content = array();
 
     try {
       $history_results = $this->callConduitWithDiffusionRequest(
@@ -133,11 +204,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       $content[] = $panel;
     }
 
-    return $this->buildApplicationPage(
-      $content,
-      array(
-        'title' => $drequest->getRepository()->getName(),
-      ));
+    return $content;
   }
 
   private function buildPropertiesTable(PhabricatorRepository $repository) {

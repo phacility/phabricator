@@ -37,12 +37,12 @@ final class PhrequentTimeBlock extends Phobject {
       $timeline = array();
       $timeline[] = array(
         'event' => $event,
-        'at' => $event->getDateStarted(),
+        'at' => (int)$event->getDateStarted(),
         'type' => 'start',
       );
       $timeline[] = array(
         'event' => $event,
-        'at' => nonempty($event->getDateEnded(), $now),
+        'at' => (int)nonempty($event->getDateEnded(), $now),
         'type' => 'end',
       );
 
@@ -54,12 +54,12 @@ final class PhrequentTimeBlock extends Phobject {
         $same_object = ($preempt->getObjectPHID() == $base_phid);
         $timeline[] = array(
           'event' => $preempt,
-          'at' => $preempt->getDateStarted(),
+          'at' => (int)$preempt->getDateStarted(),
           'type' => $same_object ? 'start' : 'push',
         );
         $timeline[] = array(
           'event' => $preempt,
-          'at' => nonempty($preempt->getDateEnded(), $now),
+          'at' => (int)nonempty($preempt->getDateEnded(), $now),
           'type' => $same_object ? 'end' : 'pop',
         );
       }
@@ -183,6 +183,42 @@ final class PhrequentTimeBlock extends Phobject {
     }
 
     return $object_ranges;
+  }
+
+  /**
+   * Returns the current list of work.
+   */
+  public function getCurrentWorkStack($now, $include_inactive = false) {
+    $ranges = $this->getObjectTimeRanges($now);
+
+    $results = array();
+    foreach ($ranges as $phid => $blocks) {
+      $total = 0;
+      foreach ($blocks as $block) {
+        $total += $block[1] - $block[0];
+      }
+
+      $type = 'inactive';
+      foreach ($blocks as $block) {
+        if ($block[1] === $now) {
+          if ($block[0] === $block[1]) {
+            $type = 'suspended';
+          } else {
+            $type = 'active';
+          }
+          break;
+        }
+      }
+
+      if ($include_inactive || $type !== 'inactive') {
+        $results[] = array(
+          'phid' => $phid,
+          'time' => $total,
+          'type' => $type);
+      }
+    }
+
+    return $results;
   }
 
 

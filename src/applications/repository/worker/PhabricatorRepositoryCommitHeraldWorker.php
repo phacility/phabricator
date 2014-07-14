@@ -469,8 +469,8 @@ final class PhabricatorRepositoryCommitHeraldWorker
 
     $size = strlen($raw_diff);
     if ($byte_limit && $size > $byte_limit) {
-      $pretty_size = phabricator_format_bytes($size);
-      $pretty_limit = phabricator_format_bytes($byte_limit);
+      $pretty_size = phutil_format_bytes($size);
+      $pretty_limit = phutil_format_bytes($byte_limit);
       throw new Exception(
         "Patch size of {$pretty_size} exceeds configured byte size limit of ".
         "{$pretty_limit}.");

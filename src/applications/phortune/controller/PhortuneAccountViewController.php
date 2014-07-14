@@ -79,20 +79,16 @@ final class PhortuneAccountViewController extends PhortuneController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Payment Methods'));
-
     $id = $account->getID();
-    $add_uri = $this->getApplicationURI($id.'/paymentmethod/edit/');
 
-    $actions = id(new PhabricatorActionListView())
-      ->setUser($user)
-      ->setObjectURI($request->getRequestURI())
-      ->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Add Payment Method'))
-          ->setIcon('fa-plus')
-          ->setHref($add_uri));
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Payment Methods'))
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setHref($this->getApplicationURI($id.'/paymentmethod/edit/'))
+          ->setText(pht('Add Payment Method'))
+          ->setIcon(id(new PHUIIconView())->setIconFont('fa-plus')));
 
     $list = id(new PHUIObjectItemListView())
       ->setUser($user)
@@ -129,11 +125,9 @@ final class PhortuneAccountViewController extends PhortuneController {
       $list->addItem($item);
     }
 
-    return array(
-      $header,
-      $actions,
-      $list,
-    );
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($list);
   }
 
   private function buildPurchaseHistorySection(PhortuneAccount $account) {
@@ -143,10 +137,8 @@ final class PhortuneAccountViewController extends PhortuneController {
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Purchase History'));
 
-    return array(
-      $header,
-
-    );
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header);
   }
 
   private function buildAccountHistorySection(PhortuneAccount $account) {
@@ -170,8 +162,11 @@ final class PhortuneAccountViewController extends PhortuneController {
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 
+    $box = id(new PHUIObjectBoxView())
+      ->setHeader($header);
+
     return array(
-      $header,
+      $box,
       $xaction_view,
     );
   }

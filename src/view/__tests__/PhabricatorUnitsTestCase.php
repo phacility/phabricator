@@ -19,8 +19,8 @@ final class PhabricatorUnitsTestCase extends PhabricatorTestCase {
     foreach ($tests as $input => $expect) {
       $this->assertEqual(
         $expect,
-        phabricator_format_bytes($input),
-        'phabricator_format_bytes('.$input.')');
+        phutil_format_bytes($input),
+        'phutil_format_bytes('.$input.')');
     }
   }
 
@@ -42,14 +42,14 @@ final class PhabricatorUnitsTestCase extends PhabricatorTestCase {
     foreach ($tests as $input => $expect) {
       $this->assertEqual(
         $expect,
-        phabricator_parse_bytes($input),
-        'phabricator_parse_bytes('.$input.')');
+        phutil_parse_bytes($input),
+        'phutil_parse_bytes('.$input.')');
     }
 
     $this->tryTestCases(
       array('string' => 'string'),
       array(false),
-      'phabricator_parse_bytes');
+      'phutil_parse_bytes');
   }
 
   public function testDetailedDurationFormatting() {
@@ -68,8 +68,8 @@ final class PhabricatorUnitsTestCase extends PhabricatorTestCase {
     foreach ($tests as $duration => $expect) {
       $this->assertEqual(
         $expect,
-        phabricator_format_relative_time_detailed($duration),
-        'phabricator_format_relative_time_detailed('.$duration.')');
+        phutil_format_relative_time_detailed($duration),
+        'phutil_format_relative_time_detailed('.$duration.')');
     }
 
 
@@ -113,16 +113,16 @@ final class PhabricatorUnitsTestCase extends PhabricatorTestCase {
         foreach ($sub_tests as $levels => $expect) {
           $this->assertEqual(
             $expect,
-            phabricator_format_relative_time_detailed($duration, $levels),
-            'phabricator_format_relative_time_detailed('.$duration.',
+            phutil_format_relative_time_detailed($duration, $levels),
+            'phutil_format_relative_time_detailed('.$duration.',
               '.$levels.')');
         }
       } else {
         $expect = $sub_tests;
         $this->assertEqual(
           $expect,
-          phabricator_format_relative_time_detailed($duration),
-          'phabricator_format_relative_time_detailed('.$duration.')');
+          phutil_format_relative_time_detailed($duration),
+          'phutil_format_relative_time_detailed('.$duration.')');
 
       }
     }
