@@ -239,8 +239,17 @@ abstract class PhabricatorAuthProviderOAuth2
     PHUIObjectItemView $item,
     PhabricatorExternalAccount $account) {
 
-    // Get a valid token, possibly refreshing it.
-    $oauth_token = $this->getOAuthAccessToken($account);
+    // Get a valid token, possibly refreshing it. If we're unable to refresh
+    // it, render a message to that effect. The user may be able to repair the
+    // link by manually reconnecting.
+
+    $is_invalid = false;
+    try {
+      $oauth_token = $this->getOAuthAccessToken($account);
+    } catch (Exception $ex) {
+      $oauth_token = null;
+      $is_invalid = true;
+    }
 
     $item->addAttribute(pht('OAuth2 Account'));
 
@@ -256,6 +265,8 @@ abstract class PhabricatorAuthProviderOAuth2
           pht(
             'Active OAuth Token'));
       }
+    } else if ($is_invalid) {
+      $item->addAttribute(pht('Invalid OAuth Access Token'));
     } else {
       $item->addAttribute(pht('No OAuth Access Token'));
     }
