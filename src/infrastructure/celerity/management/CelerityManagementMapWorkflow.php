@@ -351,7 +351,7 @@ final class CelerityManagementMapWorkflow
   }
 
   private function formatMapContent(array $data) {
-    $content = phutil_var_export($data, true);
+    $content = phutil_var_export($data);
 
     $generated = '@'.'generated';
     return <<<EOFILE
