@@ -32,6 +32,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   const DEFAULT_ICON = 'fa-briefcase';
   const DEFAULT_COLOR = 'blue';
 
+  const TABLE_DATASOURCE_TOKEN = 'project_datasourcetoken';
+
   public static function initializeNewProject(PhabricatorUser $actor) {
     return id(new PhabricatorProject())
       ->setName('')
@@ -219,6 +221,53 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return $this->color;
   }
 
+  public function save() {
+    $this->openTransaction();
+      $result = parent::save();
+      $this->updateDatasourceTokens();
+    $this->saveTransaction();
+
+    return $result;
+  }
+
+  public function updateDatasourceTokens() {
+    $table = self::TABLE_DATASOURCE_TOKEN;
+    $conn_w = $this->establishConnection('w');
+    $id = $this->getID();
+
+    $slugs = queryfx_all(
+      $conn_w,
+      'SELECT * FROM %T WHERE projectPHID = %s',
+      id(new PhabricatorProjectSlug())->getTableName(),
+      $this->getPHID());
+
+    $all_strings = ipull($slugs, 'slug');
+    $all_strings[] = $this->getName();
+    $all_strings = implode(' ', $all_strings);
+
+    $tokens = PhabricatorTypeaheadDatasource::tokenizeString($all_strings);
+
+    $sql = array();
+    foreach ($tokens as $token) {
+      $sql[] = qsprintf($conn_w, '(%d, %s)', $id, $token);
+    }
+
+    $this->openTransaction();
+      queryfx(
+        $conn_w,
+        'DELETE FROM %T WHERE projectID = %d',
+        $table,
+        $id);
+
+      foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
+        queryfx(
+          $conn_w,
+          'INSERT INTO %T (projectID, token) VALUES %Q',
+          $table,
+          $chunk);
+      }
+    $this->saveTransaction();
+  }
 
 
 /* -(  PhabricatorSubscribableInterface  )----------------------------------- */
