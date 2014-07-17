@@ -257,8 +257,7 @@ final class DifferentialJIRAIssuesField
       $revision_phid,
       $edge_type);
 
-    $editor = id(new PhabricatorEdgeEditor())
-      ->setActor($this->getViewer());
+    $editor = new PhabricatorEdgeEditor();
 
     foreach (array_diff($edges, $edge_dsts) as $rem_edge) {
       $editor->removeEdge($revision_phid, $edge_type, $rem_edge);

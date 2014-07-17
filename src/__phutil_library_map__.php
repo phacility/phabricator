@@ -4357,7 +4357,7 @@ phutil_register_library_map(array(
     'PhabricatorDraftDAO' => 'PhabricatorLiskDAO',
     'PhabricatorEdgeConfig' => 'PhabricatorEdgeConstants',
     'PhabricatorEdgeCycleException' => 'Exception',
-    'PhabricatorEdgeEditor' => 'PhabricatorEditor',
+    'PhabricatorEdgeEditor' => 'Phobject',
     'PhabricatorEdgeGraph' => 'AbstractDirectedGraph',
     'PhabricatorEdgeQuery' => 'PhabricatorQuery',
     'PhabricatorEdgeTestCase' => 'PhabricatorTestCase',

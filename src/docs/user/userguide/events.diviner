@@ -236,40 +236,6 @@ Data available on this event:
 
 Using @{class@libphutil:PhutilEmailAddress} may be helpful in parsing the query.
 
-== Edge: Will Edit Edges ==
-
-NOTE: Edge events are low-level events deep in the core. It is more difficult to
-correct implement listeners for these events than for higher-level events.
-
-The constant for this event is
-`PhabricatorEventType::TYPE_EDGE_WILLEDITEDGES`.
-
-This event is dispatched before @{class:PhabricatorEdgeEditor} makes an edge
-edit.
-
-  - `id` An identifier for this edit operation.
-  - `add` A list of dictionaries, each representing a new edge.
-  - `rem` A list of dictionaries, each representing a removed edge.
-
-This is similar to the next event (did edit edges) but occurs before the
-edit begins.
-
-== Edge: Did Edit Edges ==
-
-The constant for this event is
-`PhabricatorEventType::TYPE_EDGE_DIDEDITEDGES`.
-
-This event is dispatched after @{class:PhabricatorEdgeEditor} makes an edge
-edit, but before it commits the transactions. Data available on this event:
-
-  - `id` An identifier for this edit operation. This is the same ID as
-    the one included in the corresponding "will edit edges" event.
-  - `add` A list of dictionaries, each representing a new edge.
-  - `rem` A list of dictionaries, each representing a removed edge.
-
-This is similar to the previous event (will edit edges) but occurs after the
-edit completes.
-
 == Search: Did Update Index ==
 
 The constant for this event is

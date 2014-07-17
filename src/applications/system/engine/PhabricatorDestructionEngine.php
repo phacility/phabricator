@@ -62,8 +62,7 @@ final class PhabricatorDestructionEngine extends Phobject {
       return;
     }
 
-    $editor = id(new PhabricatorEdgeEditor())
-      ->setSuppressEvents(true);
+    $editor = new PhabricatorEdgeEditor();
     foreach ($edges as $type => $type_edges) {
       foreach ($type_edges as $src => $src_edges) {
         foreach ($src_edges as $dst => $edge) {

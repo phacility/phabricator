@@ -225,10 +225,7 @@ final class ManiphestTransactionEditor
           return;
         }
 
-        $editor = id(new PhabricatorEdgeEditor())
-          ->setActor($this->getActor())
-          ->setSuppressEvents(true);
-
+        $editor = new PhabricatorEdgeEditor();
         foreach ($add as $phid) {
           $editor->addEdge($src, $edge_type, $phid);
         }

@@ -235,7 +235,6 @@ final class DoorkeeperFeedWorkerAsana extends DoorkeeperFeedWorker {
     );
 
     id(new PhabricatorEdgeEditor())
-      ->setActor($viewer)
       ->addEdge($src_phid, $etype_main, $dst_phid, $edge_options)
       ->save();
 
@@ -247,8 +246,7 @@ final class DoorkeeperFeedWorkerAsana extends DoorkeeperFeedWorker {
 
     // Now, handle the subtasks.
 
-    $sub_editor = id(new PhabricatorEdgeEditor())
-      ->setActor($viewer);
+    $sub_editor = new PhabricatorEdgeEditor();
 
     // First, find all the object references in Phabricator for tasks that we
     // know about and import their objects from Asana.

@@ -330,7 +330,6 @@ final class ManiphestTaskEditController extends ManiphestController {
 
         if ($parent_task) {
           id(new PhabricatorEdgeEditor())
-            ->setActor($user)
             ->addEdge(
               $parent_task->getPHID(),
               PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK,

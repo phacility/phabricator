@@ -90,7 +90,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       if ($revision) {
         $commit_drev = PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV;
         id(new PhabricatorEdgeEditor())
-          ->setActor($user)
           ->addEdge($commit->getPHID(), $commit_drev, $revision->getPHID())
           ->save();
 
@@ -453,7 +452,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       // Maniphest edges is sorted out. Currently, Maniphest reacts to an edge
       // edit on this edge.
       id(new PhabricatorEdgeEditor())
-        ->setActor($actor)
         ->addEdge(
           $task->getPHID(),
           PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT,

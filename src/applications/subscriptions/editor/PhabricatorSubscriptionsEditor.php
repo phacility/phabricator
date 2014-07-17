@@ -83,8 +83,7 @@ final class PhabricatorSubscriptionsEditor extends PhabricatorEditor {
       $u_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_UNSUBSCRIBER;
       $s_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_SUBSCRIBER;
 
-      $editor = id(new PhabricatorEdgeEditor())
-        ->setActor($actor);
+      $editor = new PhabricatorEdgeEditor();
 
       foreach ($add as $phid => $ignored) {
         $editor->removeEdge($src, $u_type, $phid);

@@ -231,8 +231,7 @@ final class PhabricatorProjectTransactionEditor
 
             if ($rem) {
               // When removing members, also remove any watches on the project.
-              $edge_editor = id(new PhabricatorEdgeEditor())
-                ->setSuppressEvents(true);
+              $edge_editor = new PhabricatorEdgeEditor();
               foreach ($rem as $rem_phid) {
                 $edge_editor->removeEdge(
                   $object->getPHID(),

@@ -411,8 +411,7 @@ abstract class PhabricatorApplicationTransactionEditor
           $new[$dst_phid]['src'] = $src;
         }
 
-        $editor = id(new PhabricatorEdgeEditor())
-          ->setActor($this->getActor());
+        $editor = new PhabricatorEdgeEditor();
 
         foreach ($old as $dst_phid => $edge) {
           if (!empty($new[$dst_phid])) {
@@ -2345,11 +2344,6 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $editor = id(new PhabricatorEdgeEditor())
       ->setActor($this->getActor());
-
-    // TODO: Edge-based events were almost certainly a terrible idea. If we
-    // don't suppress this event, the Maniphest listener reenters and adds
-    // more transactions. Just suppress it until that can get cleaned up.
-    $editor->setSuppressEvents(true);
 
     $src = $object->getPHID();
     $type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_FILE;

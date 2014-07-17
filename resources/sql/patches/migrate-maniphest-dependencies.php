@@ -15,7 +15,6 @@ foreach (new LiskMigrationIterator($table) as $task) {
   }
 
   $editor = new PhabricatorEdgeEditor();
-  $editor->setSuppressEvents(true);
   foreach ($deps as $dep) {
     $editor->addEdge(
       $task->getPHID(),
