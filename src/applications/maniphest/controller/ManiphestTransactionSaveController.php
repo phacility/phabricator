@@ -53,7 +53,16 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         $projects = array_merge($projects, $task->getProjectPHIDs());
         $projects = array_filter($projects);
         $projects = array_unique($projects);
-        $transaction->setNewValue($projects);
+
+        // TODO: Bleh.
+        $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+        $transaction
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+          ->setMetadataValue('edge:type', $project_type)
+          ->setNewValue(
+            array(
+              '+' => array_fuse($projects),
+            ));
         break;
       case ManiphestTransaction::TYPE_CCS:
         // Accumulate the new explicit CCs into the array that we'll add in

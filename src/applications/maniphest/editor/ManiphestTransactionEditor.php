@@ -16,7 +16,6 @@ final class ManiphestTransactionEditor
     $types[] = ManiphestTransaction::TYPE_DESCRIPTION;
     $types[] = ManiphestTransaction::TYPE_OWNER;
     $types[] = ManiphestTransaction::TYPE_CCS;
-    $types[] = ManiphestTransaction::TYPE_PROJECTS;
     $types[] = ManiphestTransaction::TYPE_SUBPRIORITY;
     $types[] = ManiphestTransaction::TYPE_PROJECT_COLUMN;
     $types[] = ManiphestTransaction::TYPE_UNBLOCK;
@@ -55,8 +54,6 @@ final class ManiphestTransactionEditor
         return nonempty($object->getOwnerPHID(), null);
       case ManiphestTransaction::TYPE_CCS:
         return array_values(array_unique($object->getCCPHIDs()));
-      case ManiphestTransaction::TYPE_PROJECTS:
-        return array_values(array_unique($object->getProjectPHIDs()));
       case ManiphestTransaction::TYPE_PROJECT_COLUMN:
         // These are pre-populated.
         return $xaction->getOldValue();
@@ -74,7 +71,6 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_PRIORITY:
         return (int)$xaction->getNewValue();
       case ManiphestTransaction::TYPE_CCS:
-      case ManiphestTransaction::TYPE_PROJECTS:
         return array_values(array_unique($xaction->getNewValue()));
       case ManiphestTransaction::TYPE_OWNER:
         return nonempty($xaction->getNewValue(), null);
@@ -97,7 +93,6 @@ final class ManiphestTransactionEditor
     $new = $xaction->getNewValue();
 
     switch ($xaction->getTransactionType()) {
-      case ManiphestTransaction::TYPE_PROJECTS:
       case ManiphestTransaction::TYPE_CCS:
         sort($old);
         sort($new);
@@ -149,11 +144,6 @@ final class ManiphestTransactionEditor
         return $object->setOwnerPHID($phid);
       case ManiphestTransaction::TYPE_CCS:
         return $object->setCCPHIDs($xaction->getNewValue());
-      case ManiphestTransaction::TYPE_PROJECTS:
-        ManiphestTaskProject::updateTaskProjects(
-          $object,
-          $xaction->getNewValue());
-        return $object;
       case ManiphestTransaction::TYPE_SUBPRIORITY:
         $data = $xaction->getNewValue();
         $new_sub = $this->getNextSubpriority(
@@ -425,15 +415,14 @@ final class ManiphestTransactionEditor
 
     $project_phids = $adapter->getProjectPHIDs();
     if ($project_phids) {
-      $existing_projects = $object->getProjectPHIDs();
-      $new_projects = array_unique(
-        array_merge(
-          $project_phids,
-          $existing_projects));
-
+      $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
       $xactions[] = id(new ManiphestTransaction())
-        ->setTransactionType(ManiphestTransaction::TYPE_PROJECTS)
-        ->setNewValue($new_projects);
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $project_type)
+        ->setNewValue(
+          array(
+            '+' => array_fuse($project_phids),
+          ));
     }
 
     return $xactions;
@@ -450,8 +439,6 @@ final class ManiphestTransactionEditor
         ManiphestCapabilityEditPriority::CAPABILITY,
       ManiphestTransaction::TYPE_STATUS =>
         ManiphestCapabilityEditStatus::CAPABILITY,
-      ManiphestTransaction::TYPE_PROJECTS =>
-        ManiphestCapabilityEditProjects::CAPABILITY,
       ManiphestTransaction::TYPE_OWNER =>
         ManiphestCapabilityEditAssign::CAPABILITY,
       PhabricatorTransactions::TYPE_EDIT_POLICY =>
@@ -460,8 +447,19 @@ final class ManiphestTransactionEditor
         ManiphestCapabilityEditPolicies::CAPABILITY,
     );
 
+
     $transaction_type = $xaction->getTransactionType();
-    $app_capability = idx($app_capability_map, $transaction_type);
+
+    $app_capability = null;
+    if ($transaction_type == PhabricatorTransactions::TYPE_EDGE) {
+      switch ($xaction->getMetadataValue('edge:type')) {
+        case PhabricatorProjectObjectHasProjectEdgeType::EDGECONST:
+          $app_capability = ManiphestCapabilityEditProjects::CAPABILITY;
+          break;
+      }
+    } else {
+      $app_capability = idx($app_capability_map, $transaction_type);
+    }
 
     if ($app_capability) {
       $app = id(new PhabricatorApplicationQuery())

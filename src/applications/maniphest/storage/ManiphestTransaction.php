@@ -788,8 +788,15 @@ final class ManiphestTransaction
       case self::TYPE_CCS:
         $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_CC;
         break;
-      case self::TYPE_PROJECTS:
-        $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_PROJECTS;
+      case PhabricatorTransactions::TYPE_EDGE:
+        switch ($this->getMetadataValue('edge:type')) {
+          case PhabricatorProjectObjectHasProjectEdgeType::EDGECONST:
+            $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_PROJECTS;
+            break;
+          default:
+            $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_OTHER;
+            break;
+        }
         break;
       case self::TYPE_PRIORITY:
         $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_PRIORITY;

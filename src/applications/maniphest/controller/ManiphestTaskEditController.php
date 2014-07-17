@@ -269,6 +269,17 @@ final class ManiphestTaskEditController extends ManiphestController {
           if ($type == ManiphestTransaction::TYPE_PROJECT_COLUMN) {
             $transaction->setNewValue($value['new']);
             $transaction->setOldValue($value['old']);
+          } else if ($type == ManiphestTransaction::TYPE_PROJECTS) {
+            // TODO: Gross.
+            $project_type =
+              PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+            $transaction
+              ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+              ->setMetadataValue('edge:type', $project_type)
+              ->setNewValue(
+                array(
+                  '=' => array_fuse($value),
+                ));
           } else {
             $transaction->setNewValue($value);
           }

@@ -116,18 +116,27 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
       $changes[ManiphestTransaction::TYPE_CCS] = $ccs;
     }
 
+    $transactions = array();
+
     $project_phids = $request->getValue('projectPHIDs');
     if ($project_phids !== null) {
       $this->validatePHIDList(
         $project_phids,
         PhabricatorProjectPHIDTypeProject::TYPECONST,
         'projectPHIDS');
-      $changes[ManiphestTransaction::TYPE_PROJECTS] = $project_phids;
+
+      $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+      $transactions[] = id(new ManiphestTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $project_type)
+        ->setNewValue(
+          array(
+            '=' => array_fuse($project_phids),
+          ));
     }
 
     $template = new ManiphestTransaction();
 
-    $transactions = array();
     foreach ($changes as $type => $value) {
       $transaction = clone $template;
       $transaction->setTransactionType($type);

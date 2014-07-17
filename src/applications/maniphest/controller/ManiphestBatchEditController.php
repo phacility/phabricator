@@ -324,6 +324,18 @@ final class ManiphestBatchEditController extends ManiphestController {
             id(new ManiphestTransactionComment())
               ->setContent($value));
           break;
+        case ManiphestTransaction::TYPE_PROJECTS:
+
+          // TODO: Clean this mess up.
+          $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+          $xaction
+            ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+            ->setMetadataValue('edge:type', $project_type)
+            ->setNewValue(
+              array(
+                '=' => array_fuse($value),
+              ));
+          break;
         default:
           $xaction->setNewValue($value);
           break;
