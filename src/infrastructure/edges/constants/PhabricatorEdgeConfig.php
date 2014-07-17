@@ -57,9 +57,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_OBJECT_USES_CREDENTIAL     = 39;
   const TYPE_CREDENTIAL_USED_BY_OBJECT  = 40;
 
-  const TYPE_OBJECT_HAS_PROJECT         = 41;
-  const TYPE_PROJECT_HAS_OBJECT         = 42;
-
   const TYPE_OBJECT_HAS_COLUMN          = 43;
   const TYPE_COLUMN_HAS_OBJECT          = 44;
 
@@ -193,9 +190,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       self::TYPE_OBJECT_USES_CREDENTIAL => self::TYPE_CREDENTIAL_USED_BY_OBJECT,
       self::TYPE_CREDENTIAL_USED_BY_OBJECT => self::TYPE_OBJECT_USES_CREDENTIAL,
 
-      self::TYPE_OBJECT_HAS_PROJECT => self::TYPE_PROJECT_HAS_OBJECT,
-      self::TYPE_PROJECT_HAS_OBJECT => self::TYPE_OBJECT_HAS_PROJECT,
-
       self::TYPE_OBJECT_HAS_COLUMN => self::TYPE_COLUMN_HAS_OBJECT,
       self::TYPE_COLUMN_HAS_OBJECT => self::TYPE_OBJECT_HAS_COLUMN,
 
@@ -276,7 +270,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s edited member(s), added %d: %s; removed %d: %s.';
       case self::TYPE_MEMBER_OF_PROJ:
       case self::TYPE_COMMIT_HAS_PROJECT:
-      case self::TYPE_OBJECT_HAS_PROJECT:
         return '%s edited project(s), added %d: %s; removed %d: %s.';
       case self::TYPE_QUESTION_HAS_VOTING_USER:
       case self::TYPE_ANSWER_HAS_VOTING_USER:
@@ -291,7 +284,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_UNSUBSCRIBED_FROM_OBJECT:
       case self::TYPE_FILE_HAS_OBJECT:
       case self::TYPE_CONTRIBUTED_TO_OBJECT:
-      case self::TYPE_PROJECT_HAS_OBJECT:
         return '%s edited object(s), added %d: %s; removed %d: %s.';
       case self::TYPE_OBJECT_HAS_UNSUBSCRIBER:
         return '%s edited unsubcriber(s), added %d: %s; removed %d: %s.';
@@ -353,7 +345,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s added %d member(s): %s.';
       case self::TYPE_MEMBER_OF_PROJ:
       case self::TYPE_COMMIT_HAS_PROJECT:
-      case self::TYPE_OBJECT_HAS_PROJECT:
         return '%s added %d project(s): %s.';
       case self::TYPE_QUESTION_HAS_VOTING_USER:
       case self::TYPE_ANSWER_HAS_VOTING_USER:
@@ -394,7 +385,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_UNSUBSCRIBED_FROM_OBJECT:
       case self::TYPE_FILE_HAS_OBJECT:
       case self::TYPE_CONTRIBUTED_TO_OBJECT:
-      case self::TYPE_PROJECT_HAS_OBJECT:
       default:
         return '%s added %d object(s): %s.';
 
@@ -428,7 +418,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s removed %d member(s): %s.';
       case self::TYPE_MEMBER_OF_PROJ:
       case self::TYPE_COMMIT_HAS_PROJECT:
-      case self::TYPE_OBJECT_HAS_PROJECT:
         return '%s removed %d project(s): %s.';
       case self::TYPE_QUESTION_HAS_VOTING_USER:
       case self::TYPE_ANSWER_HAS_VOTING_USER:
@@ -467,7 +456,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_UNSUBSCRIBED_FROM_OBJECT:
       case self::TYPE_FILE_HAS_OBJECT:
       case self::TYPE_CONTRIBUTED_TO_OBJECT:
-      case self::TYPE_PROJECT_HAS_OBJECT:
       default:
         return '%s removed %d object(s): %s.';
 
@@ -499,7 +487,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s updated members of %s.';
       case self::TYPE_MEMBER_OF_PROJ:
       case self::TYPE_COMMIT_HAS_PROJECT:
-      case self::TYPE_OBJECT_HAS_PROJECT:
         return '%s updated projects of %s.';
       case self::TYPE_QUESTION_HAS_VOTING_USER:
       case self::TYPE_ANSWER_HAS_VOTING_USER:
@@ -538,7 +525,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_UNSUBSCRIBED_FROM_OBJECT:
       case self::TYPE_FILE_HAS_OBJECT:
       case self::TYPE_CONTRIBUTED_TO_OBJECT:
-      case self::TYPE_PROJECT_HAS_OBJECT:
       default:
         return '%s updated objects of %s.';
 

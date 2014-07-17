@@ -1153,7 +1153,7 @@ abstract class PhabricatorApplicationTransactionEditor
       }
 
       if ($phids) {
-        $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT;
+        $edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
         $block_xactions[] = newv(get_class(head($xactions)), array())
           ->setIgnoreOnNoEffect(true)
           ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
@@ -1967,7 +1967,7 @@ abstract class PhabricatorApplicationTransactionEditor
       if ($object instanceof PhabricatorProjectInterface) {
         $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
           $object->getPHID(),
-          PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT);
+          PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
       } else {
         $project_phids = $object->getProjectPHIDs();
       }

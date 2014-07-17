@@ -35,7 +35,7 @@ final class DifferentialProjectsField
 
     $projects = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $revision->getPHID(),
-      PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT);
+      PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
     $projects = array_reverse($projects);
 
     return $projects;
@@ -97,7 +97,9 @@ final class DifferentialProjectsField
   }
 
   public function getApplicationTransactionMetadata() {
-    return array('edge:type' => PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT);
+    return array(
+      'edge:type' => PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+    );
   }
 
   public function parseValueFromCommitMessage($value) {

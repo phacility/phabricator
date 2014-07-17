@@ -76,7 +76,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
     } else {
       $v_projects = PhabricatorEdgeQuery::loadDestinationPHIDs(
         $paste->getPHID(),
-        PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT);
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
       $v_projects = array_reverse($v_projects);
     }
 
@@ -121,7 +121,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
           ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
           ->setNewValue($v_policy);
 
-        $proj_edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT;
+        $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
         $xactions[] = id(new PhabricatorPasteTransaction())
           ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
           ->setMetadataValue('edge:type', $proj_edge_type)

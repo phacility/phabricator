@@ -27,7 +27,7 @@ final class PonderQuestionEditController extends PonderController {
       }
       $v_projects = PhabricatorEdgeQuery::loadDestinationPHIDs(
         $question->getPHID(),
-        PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT);
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
       $v_projects = array_reverse($v_projects);
     } else {
       $question = id(new PonderQuestion())
@@ -70,7 +70,7 @@ final class PonderQuestionEditController extends PonderController {
           ->setTransactionType(PonderQuestionTransaction::TYPE_CONTENT)
           ->setNewValue($v_content);
 
-        $proj_edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT;
+        $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
         $xactions[] = id(new PonderQuestionTransaction())
           ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
           ->setMetadataValue('edge:type', $proj_edge_type)

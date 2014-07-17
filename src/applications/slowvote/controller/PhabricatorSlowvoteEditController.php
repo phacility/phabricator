@@ -38,7 +38,7 @@ final class PhabricatorSlowvoteEditController
     } else {
       $v_projects = PhabricatorEdgeQuery::loadDestinationPHIDs(
         $poll->getPHID(),
-        PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT);
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
       $v_projects = array_reverse($v_projects);
     }
 
@@ -105,7 +105,7 @@ final class PhabricatorSlowvoteEditController
         ->setNewValue($v_view_policy);
 
       if (empty($errors)) {
-        $proj_edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT;
+        $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
         $xactions[] = id(new PhabricatorSlowvoteTransaction())
           ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
           ->setMetadataValue('edge:type', $proj_edge_type)
