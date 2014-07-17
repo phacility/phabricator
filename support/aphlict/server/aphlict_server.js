@@ -177,9 +177,18 @@ var receive_server = http.createServer(function(request, response) {
 
           debug.log('notification: ' + JSON.stringify(msg));
           ++messages_in;
-          transmit(msg);
 
-          response.writeHead(200, {'Content-Type': 'text/plain'});
+          try {
+            transmit(msg);
+            response.writeHead(200, {'Content-Type': 'text/plain'});
+          } catch (err) {
+            debug.log(
+              '<%s> Internal Server Error! %s',
+              request.socket.remoteAddress,
+              err);
+            response.statusCode = 500;
+            response.write('500 Internal Server Error\n');
+          }
         } catch (err) {
           debug.log(
             '<%s> Bad Request! %s',
