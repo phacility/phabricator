@@ -22,10 +22,8 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $need_rich_data = false;
 
     $need_users = false;
-    $need_agents = false;
     $need_applications = false;
     $need_projs = false;
-    $need_packages = false;
     $need_upforgrabs = false;
     $need_noproject = false;
     $need_symbols = false;
@@ -46,11 +44,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
       case 'searchproject':
         $need_projs = true;
         $need_noproject = true;
-        break;
-      case 'usersprojectsorpackages':
-        $need_users = true;
-        $need_projs = true;
-        $need_packages = true;
         break;
     }
 
@@ -190,17 +183,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
         $proj_result->setImageURI($proj->getProfileImageURI());
 
         $results[] = $proj_result;
-      }
-    }
-
-    if ($need_packages) {
-      $packages = id(new PhabricatorOwnersPackage())->loadAll();
-      foreach ($packages as $package) {
-        $results[] = id(new PhabricatorTypeaheadResult())
-          ->setIcon('fa-list-alt bluegrey')
-          ->setName($package->getName())
-          ->setURI('/owners/package/'.$package->getID().'/')
-          ->setPHID($package->getPHID());
       }
     }
 

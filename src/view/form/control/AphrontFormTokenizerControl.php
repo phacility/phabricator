@@ -97,8 +97,6 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
     $map = array(
       'searchowner'     => pht('Type a user name...'),
       'searchproject'   => pht('Type a project name...'),
-      'usersprojectsorpackages' =>
-        pht('Type a user, project, or package name...'),
     );
 
     return idx($map, $request);

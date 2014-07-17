@@ -772,6 +772,7 @@ final class DiffusionCommitController extends DiffusionController {
     require_celerity_resource('phabricator-transaction-view-css');
 
     $mailable_source = new PhabricatorMetaMTAMailableDatasource();
+    $auditor_source = new DiffusionAuditorDatasource();
 
     Javelin::initBehavior(
       'differential-add-reviewers-and-ccs',
@@ -779,9 +780,9 @@ final class DiffusionCommitController extends DiffusionController {
         'dynamic' => array(
           'add-auditors-tokenizer' => array(
             'actions' => array('add_auditors' => 1),
-            'src' => '/typeahead/common/usersprojectsorpackages/',
+            'src' => $auditor_source->getDatasourceURI(),
             'row' => 'add-auditors',
-            'placeholder' => pht('Type a user, project, or package name...'),
+            'placeholder' => $auditor_source->getPlaceholderText(),
           ),
           'add-ccs-tokenizer' => array(
             'actions' => array('add_ccs' => 1),
