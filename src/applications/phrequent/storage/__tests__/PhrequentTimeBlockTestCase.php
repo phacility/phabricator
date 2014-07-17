@@ -86,7 +86,9 @@ final class PhrequentTimeBlockTestCase extends PhabricatorTestCase {
 
     $block = new PhrequentTimeBlock(array($event));
 
-    $ranges = $block->getObjectTimeRanges(1800);
+    $ranges = $block->getObjectTimeRanges();
+    $ranges = $this->reduceRanges($ranges);
+
     $this->assertEqual(
       array(
         'T1' => array(
@@ -107,7 +109,9 @@ final class PhrequentTimeBlockTestCase extends PhabricatorTestCase {
 
     $block = new PhrequentTimeBlock(array($event));
 
-    $ranges = $block->getObjectTimeRanges(1000);
+    $ranges = $block->getObjectTimeRanges();
+    $ranges = $this->reduceRanges($ranges);
+
     $this->assertEqual(
       array(
         'T2' => array(
@@ -150,7 +154,9 @@ final class PhrequentTimeBlockTestCase extends PhabricatorTestCase {
 
     $block = new PhrequentTimeBlock(array($event));
 
-    $ranges = $block->getObjectTimeRanges(1800);
+    $ranges = $block->getObjectTimeRanges();
+    $ranges = $this->reduceRanges($ranges);
+
     $this->assertEqual(
       array(
         'T1' => array(
@@ -172,7 +178,8 @@ final class PhrequentTimeBlockTestCase extends PhabricatorTestCase {
 
     $block = new PhrequentTimeBlock(array($event));
 
-    $ranges = $block->getObjectTimeRanges(1000);
+    $ranges = $block->getObjectTimeRanges();
+    $ranges = $this->reduceRanges($ranges);
 
     $this->assertEqual(
       array(
@@ -198,7 +205,8 @@ final class PhrequentTimeBlockTestCase extends PhabricatorTestCase {
 
     $block = new PhrequentTimeBlock(array($event));
 
-    $ranges = $block->getObjectTimeRanges(1000);
+    $ranges = $block->getObjectTimeRanges();
+    $ranges = $this->reduceRanges($ranges);
 
     $this->assertEqual(
       array(
@@ -213,6 +221,67 @@ final class PhrequentTimeBlockTestCase extends PhabricatorTestCase {
       $ranges);
   }
 
+  public function testOngoing() {
+    $event = $this->newEvent('T1', 1, null);
+    $event->attachPreemptingEvents(array());
+
+    $block = new PhrequentTimeBlock(array($event));
+
+    $ranges = $block->getObjectTimeRanges();
+    $ranges = $this->reduceRanges($ranges);
+
+    $this->assertEqual(
+      array(
+        'T1' => array(
+          array(1, null),
+        ),
+      ),
+      $ranges);
+  }
+
+  public function testOngoingInterrupted() {
+    $event = $this->newEvent('T1', 1, null);
+    $event->attachPreemptingEvents(
+      array(
+        $this->newEvent('T2', 100, 900),
+      ));
+
+    $block = new PhrequentTimeBlock(array($event));
+
+    $ranges = $block->getObjectTimeRanges();
+    $ranges = $this->reduceRanges($ranges);
+
+    $this->assertEqual(
+      array(
+        'T1' => array(
+          array(1, 100),
+          array(900, null)
+        ),
+      ),
+      $ranges);
+  }
+
+  public function testOngoingPreempted() {
+    $event = $this->newEvent('T1', 1, null);
+    $event->attachPreemptingEvents(
+      array(
+        $this->newEvent('T2', 100, null),
+      ));
+
+    $block = new PhrequentTimeBlock(array($event));
+
+    $ranges = $block->getObjectTimeRanges();
+    $ranges = $this->reduceRanges($ranges);
+
+    $this->assertEqual(
+      array(
+        'T1' => array(
+          array(1, 100),
+        ),
+      ),
+      $ranges);
+  }
+
   private function newEvent($object_phid, $start_time, $end_time) {
     static $id = 0;
 
@@ -221,6 +290,16 @@ final class PhrequentTimeBlockTestCase extends PhabricatorTestCase {
       ->setObjectPHID($object_phid)
       ->setDateStarted($start_time)
       ->setDateEnded($end_time);
+  }
+
+  private function reduceRanges(array $ranges) {
+    $results = array();
+
+    foreach ($ranges as $phid => $slices) {
+      $results[$phid] = $slices->getRanges();
+    }
+
+    return $results;
   }
 
 }
