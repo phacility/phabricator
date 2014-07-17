@@ -30,7 +30,6 @@ final class ManiphestTask extends ManiphestDAO
 
   protected $attached = array();
   protected $projectPHIDs = array();
-  private $projectsNeedUpdate;
   private $subscribersNeedUpdate;
 
   protected $ownerOrdering;
@@ -92,7 +91,6 @@ final class ManiphestTask extends ManiphestDAO
 
   public function setProjectPHIDs(array $phids) {
     $this->projectPHIDs = array_values($phids);
-    $this->projectsNeedUpdate = true;
     return $this;
   }
 
@@ -139,13 +137,6 @@ final class ManiphestTask extends ManiphestDAO
     }
 
     $result = parent::save();
-
-    if ($this->projectsNeedUpdate) {
-      // If we've changed the project PHIDs for this task, update the link
-      // table.
-      ManiphestTaskProject::updateTaskProjects($this);
-      $this->projectsNeedUpdate = false;
-    }
 
     if ($this->subscribersNeedUpdate) {
       // If we've changed the subscriber PHIDs for this task, update the link

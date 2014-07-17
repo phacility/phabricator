@@ -152,7 +152,9 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_CCS:
         return $object->setCCPHIDs($xaction->getNewValue());
       case ManiphestTransaction::TYPE_PROJECTS:
-        return $object->setProjectPHIDs($xaction->getNewValue());
+        $object->setProjectPHIDs($xaction->getNewValue());
+        ManiphestTaskProject::updateTaskProjects($object);
+        return $object;
       case ManiphestTransaction::TYPE_EDGE:
         // These are a weird, funky mess and are already being applied by the
         // time we reach this.
@@ -415,19 +417,6 @@ final class ManiphestTransactionEditor
       $existing_cc = $object->getCCPHIDs();
       $new_cc = array_unique(array_merge($cc_phids, $existing_cc));
       $object->setCCPHIDs($new_cc);
-      $save_again = true;
-    }
-
-    $project_phids = $adapter->getProjectPHIDs();
-    if ($project_phids) {
-      $existing_projects = $object->getProjectPHIDs();
-      $new_projects = array_unique(
-        array_merge($project_phids, $existing_projects));
-      $object->setProjectPHIDs($new_projects);
-      $save_again = true;
-    }
-
-    if ($save_again) {
       $object->save();
     }
 
@@ -440,6 +429,19 @@ final class ManiphestTransactionEditor
       $xactions[] = id(new ManiphestTransaction())
         ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
         ->setNewValue($assign_phid);
+    }
+
+    $project_phids = $adapter->getProjectPHIDs();
+    if ($project_phids) {
+      $existing_projects = $object->getProjectPHIDs();
+      $new_projects = array_unique(
+        array_merge(
+          $project_phids,
+          $existing_projects));
+
+      $xactions[] = id(new ManiphestTransaction())
+        ->setTransactionType(ManiphestTransaction::TYPE_PROJECTS)
+        ->setNewValue($new_projects);
     }
 
     return $xactions;
