@@ -591,28 +591,25 @@ abstract class PhabricatorApplicationTransaction
         $type = $this->getMetadata('edge:type');
         $type = head($type);
 
+        $type_obj = PhabricatorEdgeType::getByConstant($type);
+
         if ($add && $rem) {
-          $string = PhabricatorEdgeConfig::getEditStringForEdgeType($type);
-          return pht(
-            $string,
+          return $type_obj->getTransactionEditString(
             $this->renderHandleLink($author_phid),
-            count($add),
+            new PhutilNumber(count($add) + count($rem)),
+            new PhutilNumber(count($add)),
             $this->renderHandleList($add),
-            count($rem),
+            new PhutilNumber(count($rem)),
             $this->renderHandleList($rem));
         } else if ($add) {
-          $string = PhabricatorEdgeConfig::getAddStringForEdgeType($type);
-          return pht(
-            $string,
+          return $type_obj->getTransactionAddString(
             $this->renderHandleLink($author_phid),
-            count($add),
+            new PhutilNumber(count($add)),
             $this->renderHandleList($add));
         } else if ($rem) {
-          $string = PhabricatorEdgeConfig::getRemoveStringForEdgeType($type);
-          return pht(
-            $string,
+          return $type_obj->getTransactionRemoveString(
             $this->renderHandleLink($author_phid),
-            count($rem),
+            new PhutilNumber(count($rem)),
             $this->renderHandleList($rem));
         } else {
           return pht(
@@ -711,13 +708,43 @@ abstract class PhabricatorApplicationTransaction
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
       case PhabricatorTransactions::TYPE_EDGE:
+        $new = ipull($new, 'dst');
+        $old = ipull($old, 'dst');
+        $add = array_diff($new, $old);
+        $rem = array_diff($old, $new);
         $type = $this->getMetadata('edge:type');
         $type = head($type);
-        $string = PhabricatorEdgeConfig::getFeedStringForEdgeType($type);
-        return pht(
-          $string,
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($object_phid));
+
+        $type_obj = PhabricatorEdgeType::getByConstant($type);
+
+        if ($add && $rem) {
+          return $type_obj->getFeedEditString(
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            new PhutilNumber(count($add) + count($rem)),
+            new PhutilNumber(count($add)),
+            $this->renderHandleList($add),
+            new PhutilNumber(count($rem)),
+            $this->renderHandleList($rem));
+        } else if ($add) {
+          return $type_obj->getFeedAddString(
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            new PhutilNumber(count($add)),
+            $this->renderHandleList($add));
+        } else if ($rem) {
+          return $type_obj->getFeedRemoveString(
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            new PhutilNumber(count($rem)),
+            $this->renderHandleList($rem));
+        } else {
+          return pht(
+            '%s edited edge metadata for %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        }
+
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getTransactionCustomField();
         if ($field) {
