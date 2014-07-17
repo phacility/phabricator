@@ -20,18 +20,12 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $raw_query = $request->getStr('raw');
 
     $need_users = false;
-    $need_projs = false;
     $need_upforgrabs = false;
-    $need_noproject = false;
     $need_rich_data = false;
     switch ($this->type) {
       case 'searchowner':
         $need_users = true;
         $need_upforgrabs = true;
-        break;
-      case 'searchproject':
-        $need_projs = true;
-        $need_noproject = true;
         break;
     }
 
@@ -42,13 +36,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
         ->setName('upforgrabs (Up For Grabs)')
         ->setPHID(ManiphestTaskOwner::OWNER_UP_FOR_GRABS);
     }
-
-    if ($need_noproject) {
-      $results[] = id(new PhabricatorTypeaheadResult())
-        ->setName('noproject (No Project)')
-        ->setPHID(ManiphestTaskOwner::PROJECT_NO_PROJECT);
-    }
-
 
     if ($need_users) {
       $columns = array(
@@ -145,32 +132,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
           $result->setImageURI($handles[$user->getPHID()]->getImageURI());
         }
         $results[] = $result;
-      }
-    }
-
-    if ($need_projs) {
-      $projs = id(new PhabricatorProjectQuery())
-        ->setViewer($viewer)
-        ->needImages(true)
-        ->execute();
-      foreach ($projs as $proj) {
-        $closed = null;
-        if ($proj->isArchived()) {
-          $closed = pht('Archived');
-        }
-
-        $proj_result = id(new PhabricatorTypeaheadResult())
-          ->setName($proj->getName())
-          ->setDisplayType('Project')
-          ->setURI('/project/view/'.$proj->getID().'/')
-          ->setPHID($proj->getPHID())
-          ->setIcon($proj->getIcon())
-          ->setPriorityType('proj')
-          ->setClosed($closed);
-
-        $proj_result->setImageURI($proj->getProfileImageURI());
-
-        $results[] = $proj_result;
       }
     }
 
