@@ -180,8 +180,9 @@ final class PhabricatorEdgeEditor extends PhabricatorEditor {
       'data'      => $data,
     );
 
-    $inverse = PhabricatorEdgeConfig::getInverse($type);
-    if ($inverse) {
+    $type_obj = PhabricatorEdgeType::getByConstant($type);
+    $inverse = $type_obj->getInverseEdgeConstant();
+    if ($inverse !== null) {
 
       // If `inverse_data` is set, overwrite the edge data. Normally, just
       // write the same data to the inverse edge.
@@ -398,7 +399,8 @@ final class PhabricatorEdgeEditor extends PhabricatorEditor {
       $edge_types[$edge['type']] = true;
     }
     foreach ($edge_types as $type => $ignored) {
-      if (!PhabricatorEdgeConfig::shouldPreventCycles($type)) {
+      $type_obj = PhabricatorEdgeType::getByConstant($type);
+      if (!$type_obj->shouldPreventCycles()) {
         unset($edge_types[$type]);
       }
     }

@@ -54,7 +54,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $e_commit = PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT;
     $e_dep_on = PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK;
     $e_dep_by = PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK;
-    $e_rev    = PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV;
+    $e_rev    = ManiphestTaskHasRevisionEdgeType::EDGECONST;
     $e_mock   = PhabricatorEdgeConfig::TYPE_TASK_HAS_MOCK;
 
     $phid = $task->getPHID();
@@ -590,13 +590,13 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $edge_types = array(
       PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK
-      => pht('Blocks'),
+        => pht('Blocks'),
       PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK
-      => pht('Blocked By'),
-      PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV
-      => pht('Differential Revisions'),
+        => pht('Blocked By'),
+      ManiphestTaskHasRevisionEdgeType::EDGECONST
+        => pht('Differential Revisions'),
       PhabricatorEdgeConfig::TYPE_TASK_HAS_MOCK
-      => pht('Pholio Mocks'),
+        => pht('Pholio Mocks'),
     );
 
     $revisions_commits = array();
@@ -616,7 +616,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
         $revision_phid = key($drev_edges[$phid][$commit_drev]);
         $revision_handle = idx($handles, $revision_phid);
         if ($revision_handle) {
-          $task_drev = PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV;
+          $task_drev = ManiphestTaskHasRevisionEdgeType::EDGECONST;
           unset($edges[$task_drev][$revision_phid]);
           $revisions_commits[$phid] = hsprintf(
             '%s / %s',

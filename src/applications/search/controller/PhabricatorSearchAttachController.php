@@ -295,12 +295,12 @@ final class PhabricatorSearchAttachController
       $t_task => array(
         $t_cmit => PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT,
         $t_task => PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK,
-        $t_drev => PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV,
+        $t_drev => ManiphestTaskHasRevisionEdgeType::EDGECONST,
         $t_mock => PhabricatorEdgeConfig::TYPE_TASK_HAS_MOCK,
       ),
       $t_drev => array(
         $t_drev => PhabricatorEdgeConfig::TYPE_DREV_DEPENDS_ON_DREV,
-        $t_task => PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK,
+        $t_task => DifferentialRevisionHasTaskEdgeType::EDGECONST,
       ),
       $t_mock => array(
         $t_task => PhabricatorEdgeConfig::TYPE_MOCK_HAS_TASK,

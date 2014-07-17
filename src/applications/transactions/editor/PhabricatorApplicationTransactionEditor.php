@@ -24,6 +24,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
   private $isPreview;
   private $isHeraldEditor;
+  private $isInverseEdgeEditor;
   private $actingAsPHID;
   private $disableEmail;
 
@@ -118,6 +119,15 @@ abstract class PhabricatorApplicationTransactionEditor
 
   public function getIsPreview() {
     return $this->isPreview;
+  }
+
+  public function setIsInverseEdgeEditor($is_inverse_edge_editor) {
+    $this->isInverseEdgeEditor = $is_inverse_edge_editor;
+    return $this;
+  }
+
+  public function getIsInverseEdgeEditor() {
+    return $this->isInverseEdgeEditor;
   }
 
   public function setIsHeraldEditor($is_herald_editor) {
@@ -377,10 +387,25 @@ abstract class PhabricatorApplicationTransactionEditor
 
         break;
       case PhabricatorTransactions::TYPE_EDGE:
+        if ($this->getIsInverseEdgeEditor()) {
+          // If we're writing an inverse edge transaction, don't actually
+          // do anything. The initiating editor on the other side of the
+          // transaction will take care of the edge writes.
+          break;
+        }
+
         $old = $xaction->getOldValue();
         $new = $xaction->getNewValue();
         $src = $object->getPHID();
-        $type = $xaction->getMetadataValue('edge:type');
+        $const = $xaction->getMetadataValue('edge:type');
+
+        $type = PhabricatorEdgeType::getByConstant($const);
+        if ($type->shouldWriteInverseTransactions()) {
+          $this->applyInverseEdgeTransactions(
+            $object,
+            $xaction,
+            $type->getInverseEdgeConstant());
+        }
 
         foreach ($new as $dst_phid => $edge) {
           $new[$dst_phid]['src'] = $src;
@@ -395,7 +420,7 @@ abstract class PhabricatorApplicationTransactionEditor
               continue;
             }
           }
-          $editor->removeEdge($src, $type, $dst_phid);
+          $editor->removeEdge($src, $const, $dst_phid);
         }
 
         foreach ($new as $dst_phid => $edge) {
@@ -409,7 +434,7 @@ abstract class PhabricatorApplicationTransactionEditor
             'data' => $edge['data'],
           );
 
-          $editor->addEdge($src, $type, $dst_phid, $data);
+          $editor->addEdge($src, $const, $dst_phid, $data);
         }
 
         $editor->save();
@@ -2333,6 +2358,61 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     $editor->save();
+  }
+
+  private function applyInverseEdgeTransactions(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction,
+    $inverse_type) {
+
+    $old = $xaction->getOldValue();
+    $new = $xaction->getNewValue();
+
+    $add = array_keys(array_diff_key($new, $old));
+    $rem = array_keys(array_diff_key($old, $new));
+
+    $add = array_fuse($add);
+    $rem = array_fuse($rem);
+    $all = $add + $rem;
+
+    $nodes = id(new PhabricatorObjectQuery())
+      ->setViewer($this->requireActor())
+      ->withPHIDs($all)
+      ->execute();
+
+    foreach ($nodes as $node) {
+      if (!($node instanceof PhabricatorApplicationTransactionInterface)) {
+        continue;
+      }
+
+      $editor = $node->getApplicationTransactionEditor();
+      $template = $node->getApplicationTransactionTemplate();
+      $target = $node->getApplicationTransactionObject();
+
+      if (isset($add[$node->getPHID()])) {
+        $edge_edit_type = '+';
+      } else {
+        $edge_edit_type = '-';
+      }
+
+      $template
+        ->setTransactionType($xaction->getTransactionType())
+        ->setMetadataValue('edge:type', $inverse_type)
+        ->setNewValue(
+          array(
+            $edge_edit_type => array($object->getPHID() => $object->getPHID()),
+          ));
+
+      $editor
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true)
+        ->setParentMessageID($this->getParentMessageID())
+        ->setIsInverseEdgeEditor(true)
+        ->setActor($this->requireActor())
+        ->setContentSource($this->getContentSource());
+
+      $editor->applyTransactions($target, array($template));
+    }
   }
 
 }

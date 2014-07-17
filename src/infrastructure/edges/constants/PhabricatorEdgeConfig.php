@@ -19,9 +19,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_BLOG_HAS_BLOGGER           = 9;
   const TYPE_BLOGGER_HAS_BLOG           = 10;
 
-  const TYPE_TASK_HAS_RELATED_DREV      = 11;
-  const TYPE_DREV_HAS_RELATED_TASK      = 12;
-
   const TYPE_PROJ_MEMBER                = 13;
   const TYPE_MEMBER_OF_PROJ             = 14;
 
@@ -137,7 +134,7 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
     return $map;
   }
 
-  public static function getInverse($edge_type) {
+  private static function getInverse($edge_type) {
     static $map = array(
       self::TYPE_TASK_HAS_COMMIT => self::TYPE_COMMIT_HAS_TASK,
       self::TYPE_COMMIT_HAS_TASK => self::TYPE_TASK_HAS_COMMIT,
@@ -152,9 +149,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       self::TYPE_POST_HAS_BLOG    => self::TYPE_BLOG_HAS_POST,
       self::TYPE_BLOG_HAS_BLOGGER => self::TYPE_BLOGGER_HAS_BLOG,
       self::TYPE_BLOGGER_HAS_BLOG => self::TYPE_BLOG_HAS_BLOGGER,
-
-      self::TYPE_TASK_HAS_RELATED_DREV => self::TYPE_DREV_HAS_RELATED_TASK,
-      self::TYPE_DREV_HAS_RELATED_TASK => self::TYPE_TASK_HAS_RELATED_DREV,
 
       self::TYPE_PROJ_MEMBER => self::TYPE_MEMBER_OF_PROJ,
       self::TYPE_MEMBER_OF_PROJ => self::TYPE_PROJ_MEMBER,
@@ -226,7 +220,7 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
     return idx($map, $edge_type);
   }
 
-  public static function shouldPreventCycles($edge_type) {
+  private static function shouldPreventCycles($edge_type) {
     static $map = array(
       self::TYPE_TEST_NO_CYCLE          => true,
       self::TYPE_TASK_DEPENDS_ON_TASK   => true,
@@ -272,12 +266,10 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_COMMIT_HAS_TASK:
       case self::TYPE_TASK_DEPENDS_ON_TASK:
       case self::TYPE_TASK_DEPENDED_ON_BY_TASK:
-      case self::TYPE_DREV_HAS_RELATED_TASK:
       case self::TYPE_MOCK_HAS_TASK:
         return '%s edited task(s), added %d: %s; removed %d: %s.';
       case self::TYPE_DREV_DEPENDS_ON_DREV:
       case self::TYPE_DREV_DEPENDED_ON_BY_DREV:
-      case self::TYPE_TASK_HAS_RELATED_DREV:
       case self::TYPE_COMMIT_HAS_DREV:
       case self::TYPE_REVIEWER_FOR_DREV:
         return '%s edited revision(s), added %d: %s; removed %d: %s.';
@@ -354,11 +346,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_TASK_DEPENDED_ON_BY_TASK:
         return '%s added %d blocked task(s): %s.';
       case self::TYPE_COMMIT_HAS_TASK:
-      case self::TYPE_DREV_HAS_RELATED_TASK:
       case self::TYPE_MOCK_HAS_TASK:
         return '%s added %d task(s): %s.';
       case self::TYPE_DREV_DEPENDED_ON_BY_DREV:
-      case self::TYPE_TASK_HAS_RELATED_DREV:
       case self::TYPE_COMMIT_HAS_DREV:
       case self::TYPE_REVIEWER_FOR_DREV:
         return '%s added %d revision(s): %s.';
@@ -432,12 +422,10 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_TASK_DEPENDED_ON_BY_TASK:
         return '%s removed %d blocked task(s): %s.';
       case self::TYPE_COMMIT_HAS_TASK:
-      case self::TYPE_DREV_HAS_RELATED_TASK:
       case self::TYPE_MOCK_HAS_TASK:
         return '%s removed %d task(s): %s.';
       case self::TYPE_DREV_DEPENDS_ON_DREV:
       case self::TYPE_DREV_DEPENDED_ON_BY_DREV:
-      case self::TYPE_TASK_HAS_RELATED_DREV:
       case self::TYPE_COMMIT_HAS_DREV:
       case self::TYPE_REVIEWER_FOR_DREV:
         return '%s removed %d revision(s): %s.';
@@ -507,12 +495,10 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_COMMIT_HAS_TASK:
       case self::TYPE_TASK_DEPENDS_ON_TASK:
       case self::TYPE_TASK_DEPENDED_ON_BY_TASK:
-      case self::TYPE_DREV_HAS_RELATED_TASK:
       case self::TYPE_MOCK_HAS_TASK:
         return '%s updated tasks of %s.';
       case self::TYPE_DREV_DEPENDS_ON_DREV:
       case self::TYPE_DREV_DEPENDED_ON_BY_DREV:
-      case self::TYPE_TASK_HAS_RELATED_DREV:
       case self::TYPE_COMMIT_HAS_DREV:
       case self::TYPE_REVIEWER_FOR_DREV:
         return '%s updated revisions of %s.';

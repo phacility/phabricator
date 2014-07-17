@@ -42,6 +42,10 @@ abstract class PhabricatorEdgeType extends Phobject {
     return false;
   }
 
+  public function shouldWriteInverseTransactions() {
+    return false;
+  }
+
   public function getTransactionAddString(
     $actor,
     $add_count,
