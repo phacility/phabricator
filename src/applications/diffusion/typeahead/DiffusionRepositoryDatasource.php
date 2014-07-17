@@ -25,8 +25,7 @@ final class DiffusionRepositoryDatasource
         ->setName($repo->getMonogram().' '.$repo->getName())
         ->setURI('/diffusion/'.$repo->getCallsign().'/')
         ->setPHID($repo->getPHID())
-        ->setPriorityString($repo->getMonogram())
-        ->setIcon('fa-database bluegrey');
+        ->setPriorityString($repo->getMonogram());
     }
 
     return $results;

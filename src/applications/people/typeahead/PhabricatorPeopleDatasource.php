@@ -104,7 +104,6 @@ final class PhabricatorPeopleDatasource
         ->setURI('/p/'.$user->getUsername())
         ->setPHID($user->getPHID())
         ->setPriorityString($user->getUsername())
-        ->setIcon('fa-user bluegrey')
         ->setPriorityType('user')
         ->setClosed($closed);
 

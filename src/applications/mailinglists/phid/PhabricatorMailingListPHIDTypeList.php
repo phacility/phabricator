@@ -12,6 +12,10 @@ final class PhabricatorMailingListPHIDTypeList extends PhabricatorPHIDType {
     return pht('Mailing List');
   }
 
+  public function getTypeIcon() {
+    return 'fa-envelope-o';
+  }
+
   public function newObject() {
     return new PhabricatorMetaMTAMailingList();
   }

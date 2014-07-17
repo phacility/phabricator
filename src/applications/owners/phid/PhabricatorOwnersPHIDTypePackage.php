@@ -12,6 +12,10 @@ final class PhabricatorOwnersPHIDTypePackage extends PhabricatorPHIDType {
     return pht('Owners Package');
   }
 
+  public function getTypeIcon() {
+    return 'fa-list-alt';
+  }
+
   public function newObject() {
     return new PhabricatorOwnersPackage();
   }
