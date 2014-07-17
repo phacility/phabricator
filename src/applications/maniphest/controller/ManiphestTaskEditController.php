@@ -602,7 +602,7 @@ final class ManiphestTaskEditController extends ManiphestController {
           ->setName('assigned_to')
           ->setValue($assigned_value)
           ->setUser($user)
-          ->setDatasource('/typeahead/common/users/')
+          ->setDatasource(new PhabricatorPeopleDatasource())
           ->setLimit(1));
     }
 

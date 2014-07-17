@@ -283,6 +283,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     );
 
     $projects_source = new PhabricatorProjectDatasource();
+    $users_source = new PhabricatorPeopleDatasource();
 
     $tokenizer_map = array(
       ManiphestTransaction::TYPE_PROJECTS => array(
@@ -292,10 +293,10 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ),
       ManiphestTransaction::TYPE_OWNER => array(
         'id'          => 'assign-tokenizer',
-        'src'         => '/typeahead/common/users/',
+        'src'         => $users_source->getDatasourceURI(),
         'value'       => $default_claim,
         'limit'       => 1,
-        'placeholder' => pht('Type a user name...'),
+        'placeholder' => $users_source->getPlaceholderText(),
       ),
       ManiphestTransaction::TYPE_CCS => array(
         'id'          => 'cc-tokenizer',

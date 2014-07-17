@@ -130,7 +130,7 @@ final class LegalpadDocumentSignatureAddController extends LegalpadController {
             ->setLabel(pht('Exempt User'))
             ->setName('users')
             ->setLimit(1)
-            ->setDatasource('/typeahead/common/users/')
+            ->setDatasource(new PhabricatorPeopleDatasource())
             ->setValue($user_handles)
             ->setError($e_user));
     } else {

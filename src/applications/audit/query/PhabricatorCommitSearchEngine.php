@@ -91,7 +91,7 @@ final class PhabricatorCommitSearchEngine
           ->setValue(array_select_keys($handles, $auditor_phids)))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/users/')
+          ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('authors')
           ->setLabel(pht('Commit Authors'))
           ->setValue(array_select_keys($handles, $commit_author_phids)))

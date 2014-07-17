@@ -21,10 +21,12 @@ final class PhabricatorPolicyRuleUsers
   }
 
   public function getValueControlTemplate() {
+    $users_datasource = new PhabricatorPeopleDatasource();
+
     return array(
       'markup' => new AphrontTokenizerTemplateView(),
-      'uri' => '/typeahead/common/accounts/',
-      'placeholder' => pht('Type a user name...'),
+      'uri' => $users_datasource->getDatasourceURI(),
+      'placeholder' => $users_datasource->getPlaceholderText(),
     );
   }
 

@@ -7,7 +7,7 @@
  *           phabricator-prefab
  *           javelin-tokenizer
  *           javelin-typeahead
- *           javelin-typeahead-preloaded-source
+ *           javelin-typeahead-ondemand-source
  *           javelin-json
  */
 JX.behavior('policy-rule-editor', function(config) {
@@ -124,7 +124,7 @@ JX.behavior('policy-rule-editor', function(config) {
         node = JX.$H(template.markup).getNode();
         node.id = '';
 
-        var datasource = new JX.TypeaheadPreloadedSource(template.uri);
+        var datasource = new JX.TypeaheadOnDemandSource(template.uri);
 
         var typeahead = new JX.Typeahead(node);
         typeahead.setDatasource(datasource);
