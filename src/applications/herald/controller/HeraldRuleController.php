@@ -601,7 +601,12 @@ final class HeraldRuleController extends HeraldController {
       'userorproject' => new PhabricatorProjectOrUserDatasource(),
     );
 
-    $sources = mpull($sources, 'getDatasourceURI');
+    foreach ($sources as $key => $source) {
+      $sources[$key] = array(
+        'uri' => $source->getDatasourceURI(),
+        'placeholder' => $source->getPlaceholderText(),
+      );
+    }
 
     return array(
       'source' => $sources,
