@@ -3,8 +3,12 @@
   "port" : 6667,
   "nick" : "phabot",
   "join" : [
-    "#phabot-test"
+    "#phabot-test",
+    "#phabot-secret"
   ],
+  "channelkeys" : {
+    "#phabot-secret": "P@ssw0rd"
+  },
   "handlers" : [
     "PhabricatorBotObjectNameHandler",
     "PhabricatorBotSymbolHandler",
