@@ -47,11 +47,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
         $need_projs = true;
         $need_noproject = true;
         break;
-      case 'usersorprojects':
-      case 'accountsorprojects':
-        $need_users = true;
-        $need_projs = true;
-        break;
       case 'usersprojectsorpackages':
         $need_users = true;
         $need_projs = true;

@@ -109,6 +109,7 @@ final class DifferentialAddCommentView extends AphrontView {
           ->setValue(pht('Submit')));
 
     $mailable_source = new PhabricatorMetaMTAMailableDatasource();
+    $reviewer_source = new PhabricatorProjectOrUserDatasource();
 
     Javelin::initBehavior(
       'differential-add-reviewers-and-ccs',
@@ -120,11 +121,11 @@ final class DifferentialAddCommentView extends AphrontView {
               'add_reviewers' => 1,
               'resign' => 1,
             ),
-            'src' => '/typeahead/common/usersorprojects/',
+            'src' => $reviewer_source->getDatasourceURI(),
             'value' => $this->reviewers,
             'row' => 'add-reviewers',
             'labels' => $add_reviewers_labels,
-            'placeholder' => pht('Type a user or project name...'),
+            'placeholder' => $reviewer_source->getPlaceholderText(),
           ),
           'add-ccs-tokenizer' => array(
             'actions' => array('add_ccs' => 1),

@@ -95,10 +95,8 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
     $request = $matches[1];
 
     $map = array(
-      'usersorprojects' => pht('Type a user or project name...'),
       'searchowner'     => pht('Type a user name...'),
       'searchproject'   => pht('Type a project name...'),
-      'accountsorprojects' => pht('Type a user or project name...'),
       'usersprojectsorpackages' =>
         pht('Type a user, project, or package name...'),
     );

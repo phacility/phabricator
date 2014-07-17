@@ -155,7 +155,7 @@ final class DifferentialRevisionSearchEngine
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Reviewers'))
           ->setName('reviewers')
-          ->setDatasource('/typeahead/common/accountsorprojects/')
+          ->setDatasource(new PhabricatorProjectOrUserDatasource())
           ->setValue(array_select_keys($handles, $reviewer_phids)))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
