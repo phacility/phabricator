@@ -78,6 +78,13 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_OBJECT_NEEDS_SIGNATURE     = 49;
   const TYPE_SIGNATURE_NEEDED_BY_OBJECT = 50;
 
+/* !!!! STOP !!!! STOP !!!! STOP !!!! STOP !!!! STOP !!!! STOP !!!! STOP !!!! */
+
+  // HEY! DO NOT ADD NEW CONSTANTS HERE!
+  // Instead, subclass PhabricatorEdgeType.
+
+/* !!!! STOP !!!! STOP !!!! STOP !!!! STOP !!!! STOP !!!! STOP !!!! STOP !!!! */
+
   const TYPE_TEST_NO_CYCLE              = 9000;
 
   const TYPE_PHOB_HAS_ASANATASK         = 80001;
@@ -88,6 +95,47 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   const TYPE_PHOB_HAS_JIRAISSUE         = 80004;
   const TYPE_JIRAISSUE_HAS_PHOB         = 80005;
+
+
+  /**
+   * Build @{class:PhabricatorLegacyEdgeType} objects for edges which have not
+   * yet been modernized. This allows code to act as though we've completed
+   * the edge type migration before we actually do all the work, by building
+   * these fake type objects.
+   *
+   * @param list<const> List of edge types that objects should not be built for.
+   *   This is used to avoid constructing duplicate objects for edge constants
+   *   which have migrated and already have a real object.
+   * @return list<PhabricatorLegacyEdgeType> Real-looking edge type objects for
+   *   unmigrated edge types.
+   */
+  public static function getLegacyTypes(array $exclude) {
+    $consts = array_merge(
+      range(1, 50),
+      array(9000),
+      range(80000, 80005));
+    $consts = array_diff($consts, $exclude);
+
+    $map = array();
+    foreach ($consts as $const) {
+      $prevent_cycles = self::shouldPreventCycles($const);
+      $inverse_constant = self::getInverse($const);
+
+      $map[$const] = id(new PhabricatorLegacyEdgeType())
+        ->setEdgeConstant($const)
+        ->setShouldPreventCycles($prevent_cycles)
+        ->setInverseEdgeConstant($inverse_constant)
+        ->setStrings(
+          array(
+            self::getAddStringForEdgeType($const),
+            self::getRemoveStringForEdgeType($const),
+            self::getEditStringForEdgeType($const),
+            self::getFeedStringForEdgeType($const),
+          ));
+    }
+
+    return $map;
+  }
 
   public static function getInverse($edge_type) {
     static $map = array(
@@ -136,7 +184,7 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       self::TYPE_DREV_HAS_COMMIT => self::TYPE_COMMIT_HAS_DREV,
       self::TYPE_COMMIT_HAS_DREV => self::TYPE_DREV_HAS_COMMIT,
 
-      self::TYPE_OBJECT_HAS_CONTRIBUTOR => self::TYPE_SUBSCRIBED_TO_OBJECT,
+      self::TYPE_OBJECT_HAS_CONTRIBUTOR => self::TYPE_CONTRIBUTED_TO_OBJECT,
       self::TYPE_CONTRIBUTED_TO_OBJECT => self::TYPE_OBJECT_HAS_CONTRIBUTOR,
 
       self::TYPE_TASK_HAS_MOCK => self::TYPE_MOCK_HAS_TASK,
